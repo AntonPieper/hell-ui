@@ -1,0 +1,34 @@
+/* Card — surface container with header / body / footer slots. */
+
+@utility hell-card {
+  @apply flex flex-col overflow-clip;
+  background: var(--hell-color-bg-elevated);
+  border: 1px solid var(--hell-color-border);
+  border-radius: var(--hell-radius-lg);
+  box-shadow: var(--hell-shadow-xs);
+
+  &[data-elevation="0"] { box-shadow: none; }
+  &[data-elevation="2"] { box-shadow: var(--hell-shadow-md); }
+  &[data-elevation="3"] { box-shadow: var(--hell-shadow-lg); }
+}
+
+@utility hell-card-header {
+  @apply flex items-center justify-between font-semibold;
+  gap: var(--hell-space-4);
+  padding: var(--hell-space-5) var(--hell-space-6);
+  border-bottom: 1px solid var(--hell-color-border);
+  font-size: 14px;
+  color: var(--hell-color-text);
+}
+
+@utility hell-card-body {
+  @apply flex-auto min-h-0;
+  padding: var(--hell-space-6);
+}
+
+@utility hell-card-footer {
+  @apply flex justify-end;
+  gap: var(--hell-space-3);
+  padding: var(--hell-space-4) var(--hell-space-6);
+  border-top: 1px solid var(--hell-color-border);
+}

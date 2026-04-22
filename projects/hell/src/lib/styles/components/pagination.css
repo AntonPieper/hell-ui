@@ -1,0 +1,15 @@
+/* Pagination — items styled as `hell-button hell-pagination-item`. */
+
+@utility hell-pagination {
+  @apply inline-flex items-center;
+  gap: 2px;
+}
+
+@utility hell-pagination-item {
+  &[data-selected],
+  &[aria-current="page"] {
+    background: var(--hell-color-primary-soft) !important;
+    color: var(--hell-color-primary) !important;
+    font-weight: 600;
+  }
+}

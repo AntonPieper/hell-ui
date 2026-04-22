@@ -1,0 +1,31 @@
+/* Checkbox — 16px box, NgpCheckbox uses [data-checked] / [data-indeterminate] / [data-disabled]. */
+
+@utility hell-checkbox {
+  @apply inline-flex items-center justify-center cursor-pointer;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--hell-color-bg-elevated);
+  border: 1px solid var(--hell-color-border-strong);
+  border-radius: var(--hell-radius-sm);
+  color: var(--hell-color-primary-fg);
+  transition:
+    background-color var(--hell-duration-fast) var(--hell-ease-out),
+    border-color var(--hell-duration-fast) var(--hell-ease-out);
+
+  & > svg { @apply w-3 h-3; }
+
+  &[data-hover] { border-color: var(--hell-color-primary); }
+  &[data-focus-visible] {
+    outline: 2px solid var(--hell-color-focus-ring);
+    outline-offset: 2px;
+  }
+  &[data-checked],
+  &[data-indeterminate] {
+    background: var(--hell-color-primary);
+    border-color: var(--hell-color-primary);
+  }
+  &[data-disabled] {
+    @apply opacity-50 cursor-not-allowed;
+  }
+}

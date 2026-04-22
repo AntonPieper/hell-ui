@@ -1,0 +1,23 @@
+/* Drop zone. NgpFileUpload sets [data-active] when dragging. */
+
+@utility hell-dropzone {
+  @apply flex flex-col items-center justify-center text-center cursor-pointer;
+  gap: var(--hell-space-3);
+  padding: var(--hell-space-7);
+  background: var(--hell-color-bg-subtle);
+  border: 1.5px dashed var(--hell-color-border-strong);
+  border-radius: var(--hell-radius-lg);
+  color: var(--hell-color-text-muted);
+  min-height: 140px;
+  transition:
+    background-color var(--hell-duration-fast) var(--hell-ease-out),
+    border-color var(--hell-duration-fast) var(--hell-ease-out);
+
+  &[data-dragover],
+  &[data-active] {
+    background: var(--hell-color-primary-soft);
+    border-color: var(--hell-color-primary);
+    color: var(--hell-color-primary);
+  }
+  &[data-disabled] { @apply opacity-60 cursor-not-allowed; }
+}

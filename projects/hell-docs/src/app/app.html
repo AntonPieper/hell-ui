@@ -1,0 +1,53 @@
+<div hellAppShell secondaryHidden>
+  <header hellAppTopbar>
+    <strong style="font-size: 1rem">hell</strong>
+    <span class="hell-tag" data-variant="info">Heinrich Element Library</span>
+    <span style="flex: 1"></span>
+    <a hellButton variant="ghost" href="https://angular.dev" target="_blank" rel="noreferrer">Angular</a>
+    <a hellButton variant="ghost" href="https://ng-primitives.dev" target="_blank" rel="noreferrer">ng-primitives</a>
+  </header>
+  <nav hellAppSidenav>
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Overview</a>
+    <a routerLink="/getting-started" routerLinkActive="active">Getting started</a>
+    <a routerLink="/theming" routerLinkActive="active">Theming</a>
+
+    <div class="hd-nav-heading">Primitives</div>
+    <a routerLink="/components/accordion" routerLinkActive="active">Accordion</a>
+    <a routerLink="/components/avatar" routerLinkActive="active">Avatar</a>
+    <a routerLink="/components/breadcrumbs" routerLinkActive="active">Breadcrumbs</a>
+    <a routerLink="/components/button" routerLinkActive="active">Button</a>
+    <a routerLink="/components/card" routerLinkActive="active">Card</a>
+    <a routerLink="/components/checkbox" routerLinkActive="active">Checkbox</a>
+    <a routerLink="/components/dialog" routerLinkActive="active">Dialog</a>
+    <a routerLink="/components/field" routerLinkActive="active">Field</a>
+    <a routerLink="/components/icon" routerLinkActive="active">Icon</a>
+    <a routerLink="/components/input" routerLinkActive="active">Input</a>
+    <a routerLink="/components/menu" routerLinkActive="active">Menu</a>
+    <a routerLink="/components/popover" routerLinkActive="active">Popover</a>
+    <a routerLink="/components/progress" routerLinkActive="active">Progress</a>
+    <a routerLink="/components/radio" routerLinkActive="active">Radio</a>
+    <a routerLink="/components/separator" routerLinkActive="active">Separator</a>
+    <a routerLink="/components/skeleton" routerLinkActive="active">Skeleton</a>
+    <a routerLink="/components/switch" routerLinkActive="active">Switch</a>
+    <a routerLink="/components/tabs" routerLinkActive="active">Tabs</a>
+    <a routerLink="/components/tag" routerLinkActive="active">Tag</a>
+    <a routerLink="/components/toggle" routerLinkActive="active">Toggle</a>
+    <a routerLink="/components/tooltip" routerLinkActive="active">Tooltip</a>
+
+    <div class="hd-nav-heading">Composites</div>
+    <a routerLink="/components/app-shell" routerLinkActive="active">App shell</a>
+    <a routerLink="/components/audio-player" routerLinkActive="active">Audio player</a>
+    <a routerLink="/components/avatar-group" routerLinkActive="active">Avatar group</a>
+    <a routerLink="/components/dialpad" routerLinkActive="active">Dialpad</a>
+    <a routerLink="/components/drop-zone" routerLinkActive="active">Drop zone</a>
+    <a routerLink="/components/resizable" routerLinkActive="active">Resizable</a>
+
+    <div class="hd-nav-heading">Features</div>
+    <a routerLink="/components/code-editor" routerLinkActive="active">Code editor</a>
+    <a routerLink="/components/data-table" routerLinkActive="active">Data table</a>
+    <a routerLink="/components/pdf-viewer" routerLinkActive="active">PDF viewer</a>
+  </nav>
+  <main hellAppContent>
+    <router-outlet />
+  </main>
+</div>

@@ -1,0 +1,20 @@
+/* Toggle / ToggleGroup — NgpToggle sets [data-selected] when pressed. */
+
+@utility hell-toggle {
+  /* Composes onto hell-button via the wrapper directive. Adds the pressed
+     state styling. */
+  &[data-selected] {
+    background: var(--hell-color-primary-soft) !important;
+    color: var(--hell-color-primary) !important;
+    border-color: var(--hell-color-primary-soft) !important;
+  }
+}
+
+@utility hell-toggle-group {
+  @apply inline-flex;
+  background: var(--hell-color-bg-subtle);
+  border: 1px solid var(--hell-color-border);
+  border-radius: var(--hell-radius-md);
+  padding: 2px;
+  gap: 2px;
+}

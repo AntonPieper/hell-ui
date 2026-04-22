@@ -1,0 +1,14 @@
+/* Tooltip — small dark surface. */
+
+@utility hell-tooltip {
+  background: #1c222a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: var(--hell-radius-sm);
+  box-shadow: var(--hell-shadow-md);
+  animation: hell-pop-in var(--hell-duration-fast) var(--hell-ease-out);
+  max-width: 240px;
+  pointer-events: none;
+}

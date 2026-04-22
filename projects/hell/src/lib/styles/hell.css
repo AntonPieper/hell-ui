@@ -1,0 +1,45 @@
+/*
+ * hell — single CSS entry-point.
+ *
+ * Consumer apps should import:
+ *   @import "tailwindcss";
+ *   @import "hell/styles";
+ *
+ * Tokens + design system base are declared in tokens.css.
+ * Component classes are split per-component under ./components/.
+ * Each component file registers Tailwind v4 `@utility` rules using `@apply`
+ * for layout/typography utilities and raw CSS only for token-bound colors
+ * and ng-primitives data-attribute selectors.
+ */
+
+@import "./tokens.css";
+
+@import "./components/button.css";
+@import "./components/card.css";
+@import "./components/separator.css";
+@import "./components/input.css";
+@import "./components/field.css";
+@import "./components/checkbox.css";
+@import "./components/radio.css";
+@import "./components/switch.css";
+@import "./components/toggle.css";
+@import "./components/tabs.css";
+@import "./components/accordion.css";
+@import "./components/dialog.css";
+@import "./components/popover.css";
+@import "./components/menu.css";
+@import "./components/tooltip.css";
+@import "./components/avatar.css";
+@import "./components/tag.css";
+@import "./components/skeleton.css";
+@import "./components/progress.css";
+@import "./components/breadcrumbs.css";
+@import "./components/pagination.css";
+@import "./components/app-shell.css";
+@import "./components/resizable.css";
+@import "./components/audio-player.css";
+@import "./components/drop-zone.css";
+@import "./components/dialpad.css";
+@import "./components/data-table.css";
+@import "./components/code-editor.css";
+@import "./components/pdf-viewer.css";

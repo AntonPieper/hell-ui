@@ -1,0 +1,8 @@
+/* Separator — horizontal or vertical divider. */
+
+@utility hell-separator {
+  @apply block flex-shrink-0;
+  background: var(--hell-color-border);
+  &[data-orientation="horizontal"] { @apply h-px w-full; }
+  &[data-orientation="vertical"]   { @apply w-px self-stretch; }
+}

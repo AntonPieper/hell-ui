@@ -1,0 +1,31 @@
+/* Switch — track + thumb. NgpSwitch sets [data-checked] when on. */
+
+@utility hell-switch {
+  @apply inline-flex items-center cursor-pointer;
+  width: 34px;
+  height: 20px;
+  padding: 2px;
+  background: var(--hell-color-border-strong);
+  border-radius: var(--hell-radius-pill);
+  border: none;
+  transition: background-color var(--hell-duration-base) var(--hell-ease-out);
+
+  &[data-checked] { background: var(--hell-color-primary); }
+  &[data-focus-visible] {
+    outline: 2px solid var(--hell-color-focus-ring);
+    outline-offset: 2px;
+  }
+  &[data-disabled] { @apply opacity-50 cursor-not-allowed; }
+}
+
+@utility hell-switch-thumb {
+  @apply block;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: var(--hell-radius-pill);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: transform var(--hell-duration-base) var(--hell-ease-out);
+
+  [data-checked] > & { transform: translateX(14px); }
+}

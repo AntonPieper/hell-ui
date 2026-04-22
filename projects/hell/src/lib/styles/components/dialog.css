@@ -1,0 +1,69 @@
+/* Dialog — overlay, surface, and slot styles. */
+
+@utility hell-dialog-overlay {
+  @apply fixed inset-0 flex items-center justify-center;
+  background: var(--hell-color-overlay);
+  backdrop-filter: blur(2px);
+  padding: var(--hell-space-6);
+  z-index: 1000;
+  animation: hell-fade-in var(--hell-duration-base) var(--hell-ease-out);
+  &[data-exit] {
+    animation: hell-fade-out var(--hell-duration-base) var(--hell-ease-out);
+  }
+}
+
+@utility hell-dialog {
+  @apply flex flex-col w-full;
+  background: var(--hell-color-bg-elevated);
+  border: 1px solid var(--hell-color-border);
+  border-radius: var(--hell-radius-lg);
+  box-shadow: var(--hell-shadow-overlay);
+  max-width: 480px;
+  max-height: 90vh;
+  outline: none;
+  animation: hell-dialog-in var(--hell-duration-base) var(--hell-ease-out);
+
+  &[data-size="sm"] { max-width: 380px; }
+  &[data-size="lg"] { max-width: 720px; }
+  &[data-size="xl"] { max-width: 960px; }
+}
+
+@utility hell-dialog-header {
+  @apply flex items-start justify-between;
+  gap: var(--hell-space-4);
+  padding: var(--hell-space-5) var(--hell-space-6);
+  border-bottom: 1px solid var(--hell-color-border);
+}
+
+@utility hell-dialog-title {
+  @apply font-semibold m-0;
+  font-size: 15px;
+  color: var(--hell-color-text);
+}
+
+@utility hell-dialog-description {
+  font-size: 13px;
+  color: var(--hell-color-text-muted);
+  margin: 4px 0 0;
+}
+
+@utility hell-dialog-body {
+  @apply overflow-auto;
+  padding: var(--hell-space-6);
+  font-size: 13px;
+  color: var(--hell-color-text);
+}
+
+@utility hell-dialog-footer {
+  @apply flex justify-end;
+  gap: var(--hell-space-3);
+  padding: var(--hell-space-4) var(--hell-space-6);
+  border-top: 1px solid var(--hell-color-border);
+}
+
+@keyframes hell-fade-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes hell-fade-out { from { opacity: 1 } to { opacity: 0 } }
+@keyframes hell-dialog-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}

@@ -1,0 +1,118 @@
+/* Button — supports variants, sizes, icon-only, block.
+   Reacts to NgpButton data-* (hover, press, focus-visible, disabled). */
+
+@utility hell-button {
+  @apply inline-flex items-center justify-center font-medium leading-none whitespace-nowrap select-none cursor-pointer;
+
+  --_hell-btn-bg: var(--hell-color-bg-elevated);
+  --_hell-btn-fg: var(--hell-color-text);
+  --_hell-btn-border: var(--hell-color-border);
+  --_hell-btn-bg-hover: var(--hell-color-bg-muted);
+  --_hell-btn-bg-press: var(--hell-color-bg-muted);
+  --_hell-btn-shadow: var(--hell-shadow-xs);
+  --_hell-btn-height: var(--hell-control-height-md);
+  --_hell-btn-px: var(--hell-space-5);
+  --_hell-btn-radius: var(--hell-radius-md);
+  --_hell-btn-font: 13px;
+
+  gap: var(--hell-space-2);
+  height: var(--_hell-btn-height);
+  padding-inline: var(--_hell-btn-px);
+  font-size: var(--_hell-btn-font);
+  font-family: inherit;
+  color: var(--_hell-btn-fg);
+  background: var(--_hell-btn-bg);
+  border: 1px solid var(--_hell-btn-border);
+  border-radius: var(--_hell-btn-radius);
+  box-shadow: var(--_hell-btn-shadow);
+  transition:
+    background-color var(--hell-duration-fast) var(--hell-ease-out),
+    border-color var(--hell-duration-fast) var(--hell-ease-out),
+    color var(--hell-duration-fast) var(--hell-ease-out),
+    box-shadow var(--hell-duration-fast) var(--hell-ease-out);
+
+  &[data-hover] { background: var(--_hell-btn-bg-hover); }
+  &[data-press] { background: var(--_hell-btn-bg-press); }
+  &[data-focus-visible] {
+    outline: 2px solid var(--hell-color-focus-ring);
+    outline-offset: 1px;
+  }
+  &[data-disabled] {
+    @apply cursor-not-allowed;
+    opacity: 0.55;
+    box-shadow: none;
+  }
+
+  /* Variants */
+  &[data-variant="primary"] {
+    --_hell-btn-bg: var(--hell-color-primary);
+    --_hell-btn-fg: var(--hell-color-primary-fg);
+    --_hell-btn-border: var(--hell-color-primary);
+    --_hell-btn-bg-hover: var(--hell-color-primary-hover);
+    --_hell-btn-bg-press: var(--hell-color-primary-active);
+  }
+  &[data-variant="soft"] {
+    --_hell-btn-bg: var(--hell-color-primary-soft);
+    --_hell-btn-fg: var(--hell-color-primary-soft-fg);
+    --_hell-btn-border: transparent;
+    --_hell-btn-bg-hover: var(--hell-color-bg-muted);
+    --_hell-btn-shadow: none;
+  }
+  &[data-variant="ghost"] {
+    --_hell-btn-bg: transparent;
+    --_hell-btn-fg: var(--hell-color-text);
+    --_hell-btn-border: transparent;
+    --_hell-btn-bg-hover: var(--hell-color-bg-muted);
+    --_hell-btn-shadow: none;
+  }
+  &[data-variant="link"] {
+    --_hell-btn-bg: transparent;
+    --_hell-btn-fg: var(--hell-color-primary);
+    --_hell-btn-border: transparent;
+    --_hell-btn-bg-hover: transparent;
+    --_hell-btn-shadow: none;
+    @apply h-auto p-0 underline;
+    text-underline-offset: 3px;
+  }
+  &[data-variant="danger"] {
+    --_hell-btn-bg: var(--hell-color-danger);
+    --_hell-btn-fg: var(--hell-color-text-inverse);
+    --_hell-btn-border: var(--hell-color-danger);
+    --_hell-btn-bg-hover: var(--hell-color-danger-600);
+    --_hell-btn-bg-press: var(--hell-color-danger-700);
+  }
+  &[data-variant="success"] {
+    --_hell-btn-bg: var(--hell-color-success);
+    --_hell-btn-fg: var(--hell-color-text-inverse);
+    --_hell-btn-border: var(--hell-color-success);
+    --_hell-btn-bg-hover: var(--hell-color-success-600);
+  }
+
+  /* Sizes */
+  &[data-size="xs"] {
+    --_hell-btn-height: var(--hell-control-height-xs);
+    --_hell-btn-px: var(--hell-space-3);
+    --_hell-btn-font: 12px;
+  }
+  &[data-size="sm"] {
+    --_hell-btn-height: var(--hell-control-height-sm);
+    --_hell-btn-px: var(--hell-space-4);
+    --_hell-btn-font: 13px;
+  }
+  &[data-size="lg"] {
+    --_hell-btn-height: var(--hell-control-height-lg);
+    --_hell-btn-px: var(--hell-space-6);
+    --_hell-btn-font: 14px;
+  }
+  &[data-size="xl"] {
+    --_hell-btn-height: var(--hell-control-height-xl);
+    --_hell-btn-px: var(--hell-space-7);
+    --_hell-btn-font: 15px;
+  }
+
+  &[data-icon-only] {
+    padding-inline: 0;
+    width: var(--_hell-btn-height);
+  }
+  &[data-block] { @apply w-full; }
+}

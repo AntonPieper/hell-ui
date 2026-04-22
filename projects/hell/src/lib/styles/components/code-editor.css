@@ -1,0 +1,42 @@
+/* Code editor / viewer (CodeMirror 6). */
+
+@utility hell-code {
+  @apply overflow-hidden;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--hell-color-text);
+  background: var(--hell-color-bg-subtle);
+  border: 1px solid var(--hell-color-border);
+  border-radius: var(--hell-radius-md);
+
+  > .cm-editor { background: transparent; height: 100%; }
+  > .cm-editor .cm-gutters {
+    background: var(--hell-color-bg-subtle);
+    border-right: 1px solid var(--hell-color-border);
+    color: var(--hell-color-text-subtle);
+  }
+  > .cm-editor .cm-activeLine { background: rgba(49, 58, 70, 0.04); }
+  > .cm-editor.cm-focused {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--hell-color-focus-ring);
+  }
+}
+
+@utility hell-code-viewer {
+  @apply overflow-hidden;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--hell-color-text);
+  background: var(--hell-color-bg-subtle);
+  border: 1px solid var(--hell-color-border);
+  border-radius: var(--hell-radius-md);
+
+  > .cm-editor { background: transparent; height: 100%; }
+  > .cm-editor .cm-gutters {
+    background: var(--hell-color-bg-subtle);
+    border-right: 1px solid var(--hell-color-border);
+    color: var(--hell-color-text-subtle);
+  }
+}

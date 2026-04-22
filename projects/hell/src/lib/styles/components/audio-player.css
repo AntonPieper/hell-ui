@@ -1,0 +1,35 @@
+/* Audio player. */
+
+@utility hell-audio {
+  @apply flex items-center w-full;
+  gap: var(--hell-space-3);
+  padding: var(--hell-space-3) var(--hell-space-4);
+  background: var(--hell-color-bg-elevated);
+  border: 1px solid var(--hell-color-border);
+  border-radius: var(--hell-radius-md);
+  font-size: 12px;
+  color: var(--hell-color-text);
+  max-width: 480px;
+}
+
+@utility hell-audio-time {
+  @apply text-center;
+  font-variant-numeric: tabular-nums;
+  color: var(--hell-color-text-muted);
+  min-width: 38px;
+}
+
+@utility hell-audio-track {
+  @apply relative flex-1 cursor-pointer;
+  height: 4px;
+  background: var(--hell-color-bg-muted);
+  border-radius: var(--hell-radius-pill);
+
+  > .hell-audio-track-fill {
+    @apply absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    background: var(--hell-color-primary);
+    border-radius: inherit;
+  }
+}

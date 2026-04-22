@@ -1,0 +1,39 @@
+/* Resizable splitter — pane / handle. */
+
+@utility hell-resizable {
+  @apply flex w-full h-full min-h-0;
+  &[data-orientation="vertical"] { @apply flex-col; }
+}
+
+@utility hell-resizable-pane {
+  @apply min-w-0 min-h-0 overflow-auto;
+  flex: var(--hell-pane-flex, 1) 1 0;
+}
+
+@utility hell-resizable-handle {
+  @apply relative select-none;
+  flex: 0 0 6px;
+  background: transparent;
+  cursor: col-resize;
+
+  &::after {
+    content: "";
+    @apply absolute inset-0 m-auto;
+    width: 1px;
+    background: var(--hell-color-border);
+    transition: background-color var(--hell-duration-fast) var(--hell-ease-out);
+  }
+  &:hover::after,
+  &[data-active="true"]::after {
+    background: var(--hell-color-primary);
+    width: 2px;
+  }
+  [data-orientation="vertical"] > & {
+    flex-basis: 6px;
+    cursor: row-resize;
+    &::after {
+      @apply w-full;
+      height: 1px;
+    }
+  }
+}

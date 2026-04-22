@@ -1,0 +1,30 @@
+/* Skeleton + Spinner — loading placeholders. */
+
+@utility hell-skeleton {
+  @apply block;
+  background: linear-gradient(
+    90deg,
+    var(--hell-color-bg-muted) 0%,
+    var(--hell-color-bg-subtle) 50%,
+    var(--hell-color-bg-muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: hell-shimmer 1.5s infinite linear;
+  border-radius: var(--hell-radius-sm);
+  min-height: 12px;
+}
+@keyframes hell-shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position: 200% 0; }
+}
+
+@utility hell-spinner {
+  @apply inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: hell-spin 0.7s linear infinite;
+}
+@keyframes hell-spin { to { transform: rotate(360deg); } }

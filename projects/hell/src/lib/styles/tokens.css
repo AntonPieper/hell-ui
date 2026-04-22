@@ -1,0 +1,189 @@
+/*
+ * hell — Heinrich Element Library — design tokens
+ *
+ * Token contract (CSS custom properties):
+ *   --hell-color-*       semantic color slots
+ *   --hell-radius-*      corner radii (small, business-oriented)
+ *   --hell-space-*       spacing scale
+ *   --hell-shadow-*      elevation
+ *   --hell-font-*        typography
+ *
+ * Consumers may override any token at any selector to retheme locally.
+ * Brand:
+ *   primary  #313A46
+ *   success  #64b22c
+ *   info     #0DCAF0
+ *   danger   #da564d
+ */
+
+@theme {
+  --color-hell-primary-50: #f3f4f6;
+  --color-hell-primary-100: #e1e3e8;
+  --color-hell-primary-200: #c2c7d1;
+  --color-hell-primary-300: #97a0b1;
+  --color-hell-primary-400: #6c7689;
+  --color-hell-primary-500: #4a5568;
+  --color-hell-primary-600: #313a46;
+  --color-hell-primary-700: #262d37;
+  --color-hell-primary-800: #1c222a;
+  --color-hell-primary-900: #12161b;
+
+  --color-hell-success-50: #f1f9ea;
+  --color-hell-success-500: #64b22c;
+  --color-hell-success-600: #559924;
+  --color-hell-success-700: #43761c;
+
+  --color-hell-info-50: #e7faff;
+  --color-hell-info-500: #0dcaf0;
+  --color-hell-info-600: #0bafd1;
+  --color-hell-info-700: #0888a3;
+
+  --color-hell-danger-50: #fdecea;
+  --color-hell-danger-500: #da564d;
+  --color-hell-danger-600: #c0473e;
+  --color-hell-danger-700: #963830;
+
+  --color-hell-warning-50: #fff7e6;
+  --color-hell-warning-500: #e5a000;
+  --color-hell-warning-600: #b87f00;
+
+  --font-sans: "Inter", "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, "Cascadia Mono",
+    "Liberation Mono", monospace;
+}
+
+:root,
+[data-hell-theme="light"] {
+  /* Surfaces */
+  --hell-color-bg: #ffffff;
+  --hell-color-bg-subtle: #f7f8fa;
+  --hell-color-bg-muted: #eef0f3;
+  --hell-color-bg-elevated: #ffffff;
+  --hell-color-overlay: rgba(20, 24, 31, 0.45);
+
+  /* Border */
+  --hell-color-border: #e3e6ec;
+  --hell-color-border-strong: #c8cdd6;
+  --hell-color-border-focus: #313a46;
+
+  /* Text */
+  --hell-color-text: #1c222a;
+  --hell-color-text-muted: #5b6370;
+  --hell-color-text-subtle: #8b94a3;
+  --hell-color-text-inverse: #ffffff;
+
+  /* Accent (primary brand) */
+  --hell-color-primary: #313a46;
+  --hell-color-primary-hover: #262d37;
+  --hell-color-primary-active: #1c222a;
+  --hell-color-primary-fg: #ffffff;
+  --hell-color-primary-soft: #eef0f3;
+  --hell-color-primary-soft-fg: #313a46;
+
+  /* Status */
+  --hell-color-success: #64b22c;
+  --hell-color-success-soft: #eef8e3;
+  --hell-color-info: #0dcaf0;
+  --hell-color-info-soft: #e0f6fa;
+  --hell-color-danger: #da564d;
+  --hell-color-danger-soft: #fbe8e6;
+  --hell-color-warning: #e5a000;
+  --hell-color-warning-soft: #fff3d9;
+
+  /* Focus */
+  --hell-color-focus-ring: rgba(49, 58, 70, 0.35);
+
+  /* Radii — small/business */
+  --hell-radius-xs: 2px;
+  --hell-radius-sm: 4px;
+  --hell-radius-md: 6px;
+  --hell-radius-lg: 8px;
+  --hell-radius-xl: 12px;
+  --hell-radius-pill: 999px;
+
+  /* Spacing scale */
+  --hell-space-1: 4px;
+  --hell-space-2: 6px;
+  --hell-space-3: 8px;
+  --hell-space-4: 12px;
+  --hell-space-5: 16px;
+  --hell-space-6: 20px;
+  --hell-space-7: 24px;
+  --hell-space-8: 32px;
+  --hell-space-9: 40px;
+  --hell-space-10: 48px;
+
+  /* Sizing */
+  --hell-control-height-xs: 22px;
+  --hell-control-height-sm: 28px;
+  --hell-control-height-md: 34px;
+  --hell-control-height-lg: 40px;
+  --hell-control-height-xl: 48px;
+
+  /* Shadow */
+  --hell-shadow-xs: 0 1px 2px rgba(20, 24, 31, 0.05);
+  --hell-shadow-sm: 0 1px 2px rgba(20, 24, 31, 0.05), 0 1px 3px rgba(20, 24, 31, 0.05);
+  --hell-shadow-md: 0 4px 10px -2px rgba(20, 24, 31, 0.07), 0 2px 6px -2px rgba(20, 24, 31, 0.05);
+  --hell-shadow-lg: 0 12px 32px -8px rgba(20, 24, 31, 0.18), 0 4px 12px -4px rgba(20, 24, 31, 0.08);
+  --hell-shadow-overlay: 0 24px 48px -12px rgba(20, 24, 31, 0.24),
+    0 8px 24px -8px rgba(20, 24, 31, 0.12);
+
+  /* Motion */
+  --hell-ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --hell-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --hell-duration-fast: 120ms;
+  --hell-duration-base: 180ms;
+  --hell-duration-slow: 260ms;
+
+  /* Layout */
+  --hell-app-topbar-height: 52px;
+  --hell-app-sidenav-width: 240px;
+  --hell-app-sidenav-collapsed-width: 60px;
+  --hell-app-secondary-width: 320px;
+
+  /* Map ng-primitives default tokens to hell */
+  --ngp-background: var(--hell-color-bg-elevated);
+  --ngp-background-active: var(--hell-color-bg-muted);
+  --ngp-text-primary: var(--hell-color-text);
+  --ngp-text-secondary: var(--hell-color-text-muted);
+  --ngp-shadow: var(--hell-shadow-overlay);
+  --ngp-focus-ring: var(--hell-color-focus-ring);
+}
+
+/* Dark theme — opt-in */
+[data-hell-theme="dark"] {
+  --hell-color-bg: #11151c;
+  --hell-color-bg-subtle: #161b23;
+  --hell-color-bg-muted: #1d242e;
+  --hell-color-bg-elevated: #1a212a;
+  --hell-color-overlay: rgba(0, 0, 0, 0.6);
+
+  --hell-color-border: #2a3340;
+  --hell-color-border-strong: #3a4555;
+  --hell-color-border-focus: #c8cdd6;
+
+  --hell-color-text: #e7eaf0;
+  --hell-color-text-muted: #9aa3b2;
+  --hell-color-text-subtle: #6b7382;
+  --hell-color-text-inverse: #11151c;
+
+  --hell-color-primary: #6c7689;
+  --hell-color-primary-hover: #97a0b1;
+  --hell-color-primary-active: #c2c7d1;
+  --hell-color-primary-fg: #11151c;
+  --hell-color-primary-soft: #1d242e;
+  --hell-color-primary-soft-fg: #c8cdd6;
+
+  --hell-color-focus-ring: rgba(255, 255, 255, 0.35);
+}
+
+html,
+body {
+  background: var(--hell-color-bg);
+  color: var(--hell-color-text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}

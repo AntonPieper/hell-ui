@@ -1,0 +1,30 @@
+/* PDF viewer — toolbar / scroll wrap / canvas. */
+
+@utility hell-pdf {
+  @apply flex flex-col overflow-hidden;
+  min-height: 360px;
+  background: var(--hell-color-bg-subtle);
+  border: 1px solid var(--hell-color-border);
+  border-radius: var(--hell-radius-md);
+}
+
+@utility hell-pdf-toolbar {
+  @apply flex items-center;
+  gap: var(--hell-space-3);
+  padding: var(--hell-space-3) var(--hell-space-4);
+  border-bottom: 1px solid var(--hell-color-border);
+  background: var(--hell-color-bg-elevated);
+  font-size: 12px;
+}
+
+@utility hell-pdf-canvas-wrap {
+  @apply flex-1 flex flex-col items-center overflow-auto;
+  padding: var(--hell-space-5);
+  gap: var(--hell-space-4);
+
+  > canvas {
+    box-shadow: var(--hell-shadow-md);
+    background: #fff;
+    max-width: 100%;
+  }
+}

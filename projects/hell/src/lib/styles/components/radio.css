@@ -1,0 +1,47 @@
+/* Radio — `hellRadio` is the clickable button (label + indicator).
+   The visual radio dot is the [ngpRadioIndicator] child element. */
+
+@utility hell-radio {
+  @apply inline-flex items-center cursor-pointer;
+  gap: var(--hell-space-3);
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  color: var(--hell-color-text);
+  font-family: inherit;
+
+  &[data-disabled] { @apply opacity-50 cursor-not-allowed; }
+  &[data-focus-visible] {
+    outline: 2px solid var(--hell-color-focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--hell-radius-sm);
+  }
+}
+
+/* Style the indicator span; ng-primitives toggles its own [data-checked]
+   when the parent radio is selected. */
+[ngpRadioIndicator] {
+  @apply inline-flex items-center justify-center flex-shrink-0;
+  width: 16px;
+  height: 16px;
+  background: var(--hell-color-bg-elevated);
+  border: 1px solid var(--hell-color-border-strong);
+  border-radius: var(--hell-radius-pill);
+  transition: border-color var(--hell-duration-fast) var(--hell-ease-out);
+}
+[ngpRadioIndicator]::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--hell-color-primary);
+  transform: scale(0);
+  transition: transform var(--hell-duration-fast) var(--hell-ease-out);
+}
+[ngpRadioIndicator][data-checked] {
+  border-color: var(--hell-color-primary);
+}
+[ngpRadioIndicator][data-checked]::after { transform: scale(1); }
+
+[hellRadio][data-hover] [ngpRadioIndicator] { border-color: var(--hell-color-primary); }

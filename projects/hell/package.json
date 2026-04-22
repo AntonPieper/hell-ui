@@ -1,0 +1,34 @@
+{
+  "name": "hell",
+  "version": "0.1.0",
+  "description": "Heinrich Element Library — opinionated Angular component set built on ng-primitives + Tailwind v4.",
+  "peerDependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "ng-primitives": "^0.117.0",
+    "@ng-icons/core": "^33.0.0",
+    "tailwindcss": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@angular/router": { "optional": true },
+    "@angular/forms": { "optional": true }
+  },
+  "optionalDependencies": {
+    "@codemirror/view": "^6.0.0",
+    "@codemirror/state": "^6.0.0",
+    "@codemirror/commands": "^6.0.0",
+    "@codemirror/language": "^6.0.0",
+    "@codemirror/lang-javascript": "^6.0.0",
+    "@codemirror/lang-html": "^6.0.0",
+    "@codemirror/lang-css": "^6.0.0",
+    "@codemirror/lang-json": "^6.0.0",
+    "pdfjs-dist": "^5.0.0",
+    "@tanstack/angular-table": "^8.21.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}

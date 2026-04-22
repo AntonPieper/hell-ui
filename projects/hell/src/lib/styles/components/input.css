@@ -1,0 +1,79 @@
+/* Input + Textarea. */
+
+@utility hell-input {
+  @apply inline-flex w-full;
+
+  --_hell-input-height: var(--hell-control-height-md);
+  --_hell-input-px: var(--hell-space-4);
+  --_hell-input-font: 13px;
+
+  height: var(--_hell-input-height);
+  padding-inline: var(--_hell-input-px);
+  font-size: var(--_hell-input-font);
+  font-family: inherit;
+  color: var(--hell-color-text);
+  background: var(--hell-color-bg-elevated);
+  border: 1px solid var(--hell-color-border);
+  border-radius: var(--hell-radius-md);
+  outline: none;
+  transition:
+    border-color var(--hell-duration-fast) var(--hell-ease-out),
+    box-shadow var(--hell-duration-fast) var(--hell-ease-out);
+
+  &::placeholder { color: var(--hell-color-text-subtle); }
+  &[data-hover]:not([data-focus]) { border-color: var(--hell-color-border-strong); }
+  &[data-focus],
+  &:focus {
+    border-color: var(--hell-color-border-focus);
+    box-shadow: 0 0 0 3px var(--hell-color-focus-ring);
+  }
+  &[data-disabled],
+  &:disabled {
+    @apply cursor-not-allowed;
+    background: var(--hell-color-bg-subtle);
+    color: var(--hell-color-text-muted);
+  }
+  &[aria-invalid="true"] { border-color: var(--hell-color-danger); }
+
+  &[data-size="sm"] {
+    --_hell-input-height: var(--hell-control-height-sm);
+    --_hell-input-px: var(--hell-space-3);
+    --_hell-input-font: 12px;
+  }
+  &[data-size="lg"] {
+    --_hell-input-height: var(--hell-control-height-lg);
+    --_hell-input-px: var(--hell-space-5);
+    --_hell-input-font: 14px;
+  }
+}
+
+@utility hell-textarea {
+  @apply w-full resize-y;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--hell-color-text);
+  background: var(--hell-color-bg-elevated);
+  border: 1px solid var(--hell-color-border);
+  border-radius: var(--hell-radius-md);
+  outline: none;
+  transition:
+    border-color var(--hell-duration-fast) var(--hell-ease-out),
+    box-shadow var(--hell-duration-fast) var(--hell-ease-out);
+  padding-inline: var(--hell-space-4);
+  padding-block: var(--hell-space-3);
+  min-height: calc(var(--hell-control-height-md) * 2);
+  line-height: 1.5;
+
+  &::placeholder { color: var(--hell-color-text-subtle); }
+  &[data-focus],
+  &:focus {
+    border-color: var(--hell-color-border-focus);
+    box-shadow: 0 0 0 3px var(--hell-color-focus-ring);
+  }
+  &[data-disabled],
+  &:disabled {
+    @apply cursor-not-allowed;
+    background: var(--hell-color-bg-subtle);
+    color: var(--hell-color-text-muted);
+  }
+}

@@ -1,0 +1,41 @@
+/* Avatar + Avatar group + overflow indicator. */
+
+@utility hell-avatar {
+  @apply inline-flex items-center justify-center overflow-hidden relative font-semibold select-none flex-shrink-0;
+  --_hell-av-size: 32px;
+  width: var(--_hell-av-size);
+  height: var(--_hell-av-size);
+  background: var(--hell-color-primary-soft);
+  color: var(--hell-color-primary-soft-fg);
+  border-radius: var(--hell-radius-pill);
+  font-size: calc(var(--_hell-av-size) * 0.4);
+  letter-spacing: 0.02em;
+  border: 2px solid var(--hell-color-bg-elevated);
+
+  & > img {
+    @apply w-full h-full object-cover;
+  }
+  &[data-size="xs"] { --_hell-av-size: 20px; }
+  &[data-size="sm"] { --_hell-av-size: 26px; }
+  &[data-size="md"] { --_hell-av-size: 32px; }
+  &[data-size="lg"] { --_hell-av-size: 40px; }
+  &[data-size="xl"] { --_hell-av-size: 56px; }
+  &[data-shape="square"] { border-radius: var(--hell-radius-md); }
+}
+
+@utility hell-avatar-group {
+  @apply inline-flex items-center;
+  & > .hell-avatar:not(:first-child) { margin-inline-start: -8px; }
+}
+
+@utility hell-avatar-overflow {
+  @apply inline-flex items-center justify-center font-semibold;
+  background: var(--hell-color-bg-muted);
+  color: var(--hell-color-text-muted);
+  border: 2px solid var(--hell-color-bg-elevated);
+  border-radius: var(--hell-radius-pill);
+  width: var(--_hell-av-size, 32px);
+  height: var(--_hell-av-size, 32px);
+  font-size: 11px;
+  margin-inline-start: -8px;
+}

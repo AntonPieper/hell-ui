@@ -1,0 +1,58 @@
+/* Tag, Badge, Kbd. */
+
+@utility hell-tag {
+  @apply inline-flex items-center font-semibold;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--hell-color-text-muted);
+  background: var(--hell-color-bg-muted);
+  border-radius: var(--hell-radius-pill);
+
+  &[data-variant="primary"] {
+    background: var(--hell-color-primary-soft);
+    color: var(--hell-color-primary);
+  }
+  &[data-variant="success"] {
+    background: var(--hell-color-success-soft);
+    color: var(--hell-color-success-700);
+  }
+  &[data-variant="info"] {
+    background: var(--hell-color-info-soft);
+    color: var(--hell-color-info-700);
+  }
+  &[data-variant="danger"] {
+    background: var(--hell-color-danger-soft);
+    color: var(--hell-color-danger-700);
+  }
+  &[data-variant="warning"] {
+    background: var(--hell-color-warning-soft);
+    color: var(--hell-color-warning-600);
+  }
+}
+
+@utility hell-badge {
+  @apply inline-flex items-center justify-center font-bold;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
+  background: var(--hell-color-danger);
+  color: #fff;
+  border-radius: var(--hell-radius-pill);
+}
+
+@utility hell-kbd {
+  @apply inline-flex items-center justify-center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--hell-color-text-muted);
+  background: var(--hell-color-bg-subtle);
+  border: 1px solid var(--hell-color-border);
+  border-bottom-width: 2px;
+  border-radius: var(--hell-radius-sm);
+}

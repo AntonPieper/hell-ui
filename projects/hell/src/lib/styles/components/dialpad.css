@@ -1,0 +1,42 @@
+/* Dialpad — 3-column grid of digit keys. */
+
+@utility hell-dialpad {
+  @apply grid w-full;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--hell-space-3);
+  max-width: 280px;
+}
+
+@utility hell-dialpad-key {
+  @apply flex flex-col items-center justify-center cursor-pointer select-none font-medium;
+  height: 56px;
+  background: var(--hell-color-bg-elevated);
+  border: 1px solid var(--hell-color-border);
+  border-radius: var(--hell-radius-md);
+  font-size: 18px;
+  color: var(--hell-color-text);
+  transition: background-color var(--hell-duration-fast) var(--hell-ease-out);
+
+  > small {
+    font-size: 9px;
+    color: var(--hell-color-text-subtle);
+    letter-spacing: 0.12em;
+    margin-top: 2px;
+  }
+  &:hover,
+  &[data-press] { background: var(--hell-color-bg-muted); }
+}
+
+@utility hell-dialpad-display {
+  @apply flex items-center justify-center overflow-hidden whitespace-nowrap;
+  grid-column: 1 / -1;
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  height: 48px;
+  padding: 0 var(--hell-space-4);
+  background: var(--hell-color-bg-subtle);
+  border-radius: var(--hell-radius-md);
+  color: var(--hell-color-text);
+  text-overflow: ellipsis;
+}

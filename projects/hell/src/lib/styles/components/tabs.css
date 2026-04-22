@@ -1,0 +1,59 @@
+/* Tabs — NgpTab sets [data-active] on the active tab. */
+
+@utility hell-tabs {
+  @apply flex flex-col min-w-0;
+}
+
+@utility hell-tab-list {
+  @apply flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--hell-color-border);
+  padding-inline: var(--hell-space-2);
+
+  &[data-orientation="vertical"] {
+    @apply flex-col items-stretch;
+    border-bottom: none;
+    border-right: 1px solid var(--hell-color-border);
+    padding-inline: 0;
+    padding-block: var(--hell-space-2);
+  }
+}
+
+@utility hell-tab {
+  @apply inline-flex items-center cursor-pointer font-medium;
+  gap: var(--hell-space-2);
+  height: 36px;
+  padding-inline: var(--hell-space-4);
+  font-size: 13px;
+  color: var(--hell-color-text-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  font-family: inherit;
+  transition: color var(--hell-duration-fast) var(--hell-ease-out);
+
+  &[data-hover] { color: var(--hell-color-text); }
+  &[data-active] {
+    color: var(--hell-color-primary);
+    border-bottom-color: var(--hell-color-primary);
+  }
+  &[data-disabled] { @apply opacity-50 cursor-not-allowed; }
+  &[data-focus-visible] {
+    outline: 2px solid var(--hell-color-focus-ring);
+    outline-offset: -2px;
+  }
+  &[data-orientation="vertical"] {
+    @apply justify-start;
+    border-bottom: none;
+    border-right: 2px solid transparent;
+    margin-bottom: 0;
+    margin-right: -1px;
+    &[data-active] { border-right-color: var(--hell-color-primary); }
+  }
+}
+
+@utility hell-tab-panel {
+  padding: var(--hell-space-6) var(--hell-space-2);
+  outline: none;
+}
