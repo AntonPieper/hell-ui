@@ -14,6 +14,7 @@ import {
   output,
   signal,
   viewChild,
+  viewChildren,
 } from '@angular/core';
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
@@ -33,6 +34,14 @@ const ZOOM_STEPS = [
   },
   template: `
     <div class="hell-pdf-toolbar">
+      <button
+        hellButton variant="ghost" size="sm" iconOnly type="button"
+        (click)="toggleOverview()" [attr.aria-pressed]="overviewOpen()"
+        aria-label="Toggle page overview"
+      ><hell-icon name="faSolidTableColumns" /></button>
+
+      <span class="hell-pdf-divider" aria-hidden="true"></span>
+
       <button
         hellButton variant="ghost" size="sm" iconOnly type="button"
         (click)="prev()" [disabled]="page() <= 1" aria-label="Previous page"
@@ -55,7 +64,7 @@ const ZOOM_STEPS = [
 
       <button
         hellButton variant="ghost" size="sm" iconOnly type="button"
-        (click)="toggleFind()" [attr.aria-pressed]="findOpen()" aria-label="Find in document"
+        (click)="openFind()" [attr.aria-pressed]="findOpen()" aria-label="Find in document (Ctrl/Cmd+F)"
       ><hell-icon name="faSolidMagnifyingGlass" /></button>
 
       <button
@@ -109,26 +118,26 @@ const ZOOM_STEPS = [
           [value]="findQuery()"
           (input)="onFindInput($any($event.target).value)"
           (keydown.enter)="findAgain($event)"
-          (keydown.escape)="closeFind()"
+          (keydown.escape)="onFindEscape($event)"
           aria-label="Find query"
         />
         <span class="hell-pdf-find-count">
           @if (findStatus() === 'pending') { Searching… }
-          @else if (findStatus() === 'not-found') { Not found }
+          @else if (findStatus() === 'not-found' && findQuery()) { Not found }
           @else if (findTotal() > 0) { {{ findCurrent() }} / {{ findTotal() }} }
           @else { &nbsp; }
         </span>
         <button
           hellButton variant="ghost" size="sm" iconOnly type="button"
-          (click)="findPrev()" aria-label="Previous match"
+          (click)="findPrev()" [disabled]="!findTotal()" aria-label="Previous match"
         ><hell-icon name="faSolidChevronUp" /></button>
         <button
           hellButton variant="ghost" size="sm" iconOnly type="button"
-          (click)="findNext()" aria-label="Next match"
+          (click)="findNext()" [disabled]="!findTotal()" aria-label="Next match"
         ><hell-icon name="faSolidChevronDown" /></button>
         <button
           hellButton variant="ghost" size="sm" iconOnly type="button"
-          (click)="closeFind()" aria-label="Close find bar"
+          (click)="closeFind()" aria-label="Close find bar (Esc)"
         ><hell-icon name="faSolidXmark" /></button>
       </div>
     }
@@ -137,9 +146,32 @@ const ZOOM_STEPS = [
       pdf.js's PDFViewer requires the container element it scrolls in to be
       absolutely positioned. We achieve that with a relative wrapper plus an
       absolutely-positioned inner #container which becomes the actual
-      PDFViewer scroll container.
+      PDFViewer scroll container. The optional thumbnail rail sits beside it.
     -->
     <div class="hell-pdf-host">
+      @if (overviewOpen()) {
+        <aside class="hell-pdf-overview" aria-label="Page overview">
+          @for (n of pageList(); track n) {
+            <button
+              type="button"
+              class="hell-pdf-thumb"
+              [attr.data-active]="page() === n ? 'true' : null"
+              (click)="goTo(n)"
+              [attr.aria-label]="'Go to page ' + n"
+              [attr.aria-current]="page() === n ? 'page' : null"
+            >
+              <span class="hell-pdf-thumb-canvas-wrap">
+                <canvas
+                  #thumbCanvas
+                  [attr.data-page]="n"
+                  width="120" height="160"
+                ></canvas>
+              </span>
+              <span class="hell-pdf-thumb-label">{{ n }}</span>
+            </button>
+          }
+        </aside>
+      }
       <div #container class="hell-pdf-scroll pdfViewerContainer">
         <div class="pdfViewer"></div>
       </div>
@@ -160,6 +192,7 @@ export class HellPdfViewer {
 
   private readonly containerRef = viewChild.required<ElementRef<HTMLDivElement>>('container');
   private readonly findInputRef = viewChild<ElementRef<HTMLInputElement>>('findInput');
+  private readonly thumbCanvases = viewChildren<ElementRef<HTMLCanvasElement>>('thumbCanvas');
 
   protected readonly page = signal(1);
   protected readonly totalPages = signal(0);
@@ -170,6 +203,10 @@ export class HellPdfViewer {
   protected readonly findStatus = signal<'idle' | 'pending' | 'found' | 'not-found' | 'wrapped'>('idle');
   protected readonly findCurrent = signal(0);
   protected readonly findTotal = signal(0);
+  protected readonly overviewOpen = signal(false);
+  protected readonly pageList = computed(() =>
+    Array.from({ length: this.totalPages() }, (_, i) => i + 1),
+  );
   protected readonly zoomOptions = [
     { value: '0.5', label: '50%' },
     { value: '0.75', label: '75%' },
@@ -191,6 +228,9 @@ export class HellPdfViewer {
   private findController: any = null;
   private eventBus: any = null;
   private doc: any = null;
+  private readonly renderedThumbs = new Set<number>();
+  private readonly bootstrapped = signal(false);
+  private loadToken = 0;
 
   constructor() {
     inject(DestroyRef).onDestroy(() => {
@@ -201,19 +241,31 @@ export class HellPdfViewer {
     afterNextRender(async () => {
       try {
         await this.bootstrap();
+        this.bootstrapped.set(true);
       } catch (e) {
         this.error.emit(e);
       }
     });
 
+    // Single source of truth for loading: re-runs whenever `src` changes
+    // OR when bootstrap finishes (whichever comes second).
     effect(async () => {
       const src = this.src();
-      if (!src || !this.pdfjs || !this.viewer) return;
+      if (!this.bootstrapped() || !src) return;
       try {
         await this.loadDocument(src);
       } catch (e) {
         this.error.emit(e);
       }
+    });
+
+    // When overview opens (or pages list changes), render visible thumbs.
+    effect(() => {
+      if (!this.overviewOpen()) return;
+      // Track canvases so this re-runs when they appear.
+      const canvases = this.thumbCanvases();
+      if (!this.doc || canvases.length === 0) return;
+      queueMicrotask(() => this.renderAllThumbs());
     });
   }
 
@@ -271,12 +323,12 @@ export class HellPdfViewer {
     this.linkService = linkService;
     this.findController = findController;
     this.eventBus = eventBus;
-
-    const src = this.src();
-    if (src) await this.loadDocument(src);
   }
 
   private async loadDocument(src: string | URL | ArrayBuffer) {
+    // Guard against overlapping loads (e.g. rapid src() changes): only the
+    // most recent token gets to commit its document to the viewer.
+    const token = ++this.loadToken;
     this.ready.set(false);
     this.viewer.setDocument(null);
     this.linkService.setDocument(null);
@@ -285,8 +337,13 @@ export class HellPdfViewer {
       try { this.doc.destroy(); } catch { /* ignore */ }
       this.doc = null;
     }
+    this.renderedThumbs.clear();
     const loadingTask = this.pdfjs.getDocument(src);
     const doc = await loadingTask.promise;
+    if (token !== this.loadToken) {
+      try { doc.destroy(); } catch { /* ignore */ }
+      return;
+    }
     this.doc = doc;
     this.totalPages.set(doc.numPages);
     this.loaded.emit({ totalPages: doc.numPages });
@@ -383,14 +440,44 @@ export class HellPdfViewer {
     }, 60_000);
   }
 
-  protected toggleFind() {
-    const opening = !this.findOpen();
-    this.findOpen.set(opening);
-    if (opening) {
-      queueMicrotask(() => this.findInputRef()?.nativeElement.focus());
-    } else {
-      this.closeFind();
+  protected toggleOverview() { this.overviewOpen.update((v) => !v); }
+
+  private async renderAllThumbs() {
+    if (!this.doc) return;
+    const canvases = this.thumbCanvases();
+    for (const ref of canvases) {
+      const canvas = ref.nativeElement;
+      const n = Number(canvas.dataset['page']);
+      if (!Number.isFinite(n) || this.renderedThumbs.has(n)) continue;
+      this.renderedThumbs.add(n);
+      try {
+        const page = await this.doc.getPage(n);
+        const baseViewport = page.getViewport({ scale: 1 });
+        const targetW = 120;
+        const scale = targetW / baseViewport.width;
+        const dpr = window.devicePixelRatio || 1;
+        const viewport = page.getViewport({ scale: scale * dpr });
+        canvas.width = Math.floor(viewport.width);
+        canvas.height = Math.floor(viewport.height);
+        canvas.style.width = `${Math.floor(viewport.width / dpr)}px`;
+        canvas.style.height = `${Math.floor(viewport.height / dpr)}px`;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) continue;
+        await page.render({ canvasContext: ctx, viewport }).promise;
+      } catch {
+        this.renderedThumbs.delete(n);
+      }
     }
+  }
+
+  protected openFind() {
+    this.findOpen.set(true);
+    // Wait two frames so Angular's CD has materialized the find input.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const input = this.findInputRef()?.nativeElement;
+      input?.focus();
+      input?.select();
+    }));
   }
   protected closeFind() {
     this.findOpen.set(false);
@@ -399,6 +486,13 @@ export class HellPdfViewer {
     this.findCurrent.set(0);
     this.findTotal.set(0);
     this.eventBus?.dispatch('findbarclose', { source: this });
+    // Return focus to the viewer so subsequent keyboard shortcuts work.
+    requestAnimationFrame(() => this.host.nativeElement.focus());
+  }
+  protected onFindEscape(e: Event) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.closeFind();
   }
   protected onFindInput(value: string) {
     this.findQuery.set(value);
@@ -435,15 +529,18 @@ export class HellPdfViewer {
     }
   }
 
+  private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
+
   @HostListener('keydown', ['$event'])
   protected onKey(e: KeyboardEvent) {
-    const target = e.target as HTMLElement;
-    const inField = target?.matches?.('input,textarea,select');
+    // Ctrl/Cmd+F always opens & focuses the find bar — never closes it.
     if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'F')) {
       e.preventDefault();
-      this.toggleFind();
+      this.openFind();
       return;
     }
+    const target = e.target as HTMLElement;
+    const inField = target?.matches?.('input,textarea,select');
     if (inField) return;
     switch (e.key) {
       case 'PageDown': this.next(); break;

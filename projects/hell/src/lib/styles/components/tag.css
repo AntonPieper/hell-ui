@@ -16,19 +16,19 @@
   }
   &[data-variant="success"] {
     background: var(--hell-color-success-soft);
-    color: var(--hell-color-success-700);
+    color: var(--hell-color-success-strong);
   }
   &[data-variant="info"] {
     background: var(--hell-color-info-soft);
-    color: var(--hell-color-info-700);
+    color: var(--hell-color-info-strong);
   }
   &[data-variant="danger"] {
     background: var(--hell-color-danger-soft);
-    color: var(--hell-color-danger-700);
+    color: var(--hell-color-danger-strong);
   }
   &[data-variant="warning"] {
     background: var(--hell-color-warning-soft);
-    color: var(--hell-color-warning-600);
+    color: var(--hell-color-warning-strong);
   }
 }
 

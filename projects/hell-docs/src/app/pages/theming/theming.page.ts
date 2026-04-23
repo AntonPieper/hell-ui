@@ -7,18 +7,22 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
     <article class="hd-prose">
       <h1>Theming</h1>
       <p>hell uses two layers of design tokens defined as CSS custom
-        properties on <code>:root</code>. The <em>palette</em> layer holds
-        brand colours; the <em>semantic</em> layer maps those onto roles like
+        properties on <code>:root</code>. The <em>palette</em> layer exposes
+        stepped brand scales via <code>--color-hell-&#60;family&#62;-&#60;weight&#62;</code>.
+        The <em>semantic</em> layer maps those onto roles like
         <code>--hell-color-bg</code>, <code>--hell-color-fg</code>,
         <code>--hell-color-primary</code>, etc.</p>
 
-      <h2>Brand palette</h2>
+      <h2>Brand anchors</h2>
       <ul>
-        <li><code>--hell-color-primary</code> — <code>#313A46</code></li>
-        <li><code>--hell-color-success</code> — <code>#64b22c</code></li>
-        <li><code>--hell-color-info</code> — <code>#0DCAF0</code></li>
-        <li><code>--hell-color-danger</code> — <code>#da564d</code></li>
+        <li><code>primary</code> — <code>--color-hell-primary-900</code> → <code>--hell-color-primary</code></li>
+        <li><code>success</code> — <code>--color-hell-success-500</code> → <code>--hell-color-success</code></li>
+        <li><code>info</code> — <code>--color-hell-info-400</code> → <code>--hell-color-info</code></li>
+        <li><code>danger</code> — <code>--color-hell-danger-500</code> → <code>--hell-color-danger</code></li>
       </ul>
+
+      <p>Components should consume semantic tokens. That keeps rendered UI
+        stable even when palette weights are reclassified or expanded.</p>
 
       <h2>Light vs dark</h2>
       <p>The library is light-mode-first. To switch themes, set

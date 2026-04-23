@@ -112,7 +112,74 @@
   flex: 1 1 auto;
   min-height: 0;
   position: relative;
+  display: flex;
   background: color-mix(in srgb, var(--hell-color-fg) 6%, var(--hell-color-bg));
+}
+
+@utility hell-pdf-overview {
+  flex: 0 0 auto;
+  width: 168px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: color-mix(in srgb, var(--hell-color-fg) 4%, var(--hell-color-bg));
+  border-right: 1px solid var(--hell-color-border);
+}
+
+@utility hell-pdf-thumb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--hell-radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--hell-font-size-xs);
+  color: var(--hell-color-muted-fg);
+  transition:
+    background var(--hell-duration-fast) var(--hell-ease-out),
+    border-color var(--hell-duration-fast) var(--hell-ease-out),
+    color var(--hell-duration-fast) var(--hell-ease-out);
+
+  &:hover {
+    background: color-mix(in srgb, var(--hell-color-fg) 5%, transparent);
+    color: var(--hell-color-fg);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--hell-color-focus-ring);
+    outline-offset: 2px;
+  }
+  &[data-active="true"] {
+    background: var(--hell-color-bg);
+    border-color: color-mix(in srgb, var(--hell-color-primary) 60%, var(--hell-color-border));
+    color: var(--hell-color-primary);
+    font-weight: 600;
+  }
+}
+
+@utility hell-pdf-thumb-canvas-wrap {
+  display: block;
+  background: white;
+  border: 1px solid var(--hell-color-border);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+  line-height: 0;
+
+  & > canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@utility hell-pdf-thumb-label {
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
 @utility hell-pdf-scroll {
@@ -120,6 +187,14 @@
   position: absolute;
   inset: 0;
   overflow: auto;
+
+  /* When the overview rail is shown, the scroll area must coexist with it
+     in the flex row, so position becomes relative inside the host. */
+  .hell-pdf-overview + & {
+    position: relative;
+    inset: auto;
+    flex: 1 1 auto;
+  }
 
   /* Pdf.js' .pdfViewer renders its pages here. Center them and add air. */
   & .pdfViewer {

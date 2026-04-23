@@ -34,7 +34,7 @@ import { HELL_TABS_DIRECTIVES } from 'hell';
 
       <h2>Vertical</h2>
       <div class="hd-example">
-        <div hellTabset value="a" orientation="vertical" class="flex gap-4">
+        <div hellTabset value="a" orientation="vertical">
           <div hellTabList>
             <button hellTab value="a">Section A</button>
             <button hellTab value="b">Section B</button>

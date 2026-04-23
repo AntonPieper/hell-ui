@@ -9,34 +9,49 @@
  *   --hell-font-*        typography
  *
  * Consumers may override any token at any selector to retheme locally.
- * Brand:
- *   primary  #313A46
- *   success  #64b22c
- *   info     #0DCAF0
- *   danger   #da564d
+ * Brand anchors:
+ *   primary  --color-hell-primary-900  #313A46
+ *   success  --color-hell-success-500  #64b22c
+ *   info     --color-hell-info-400     #0DCAF0
+ *   danger   --color-hell-danger-500   #da564d
  */
 
 @theme {
-  --color-hell-primary-50: #f3f4f6;
-  --color-hell-primary-100: #e1e3e8;
-  --color-hell-primary-200: #c2c7d1;
-  --color-hell-primary-300: #97a0b1;
-  --color-hell-primary-400: #6c7689;
-  --color-hell-primary-500: #4a5568;
-  --color-hell-primary-600: #313a46;
-  --color-hell-primary-700: #262d37;
-  --color-hell-primary-800: #1c222a;
-  --color-hell-primary-900: #12161b;
+  --color-hell-primary-50: #f6f7f9;
+  --color-hell-primary-100: #eceef2;
+  --color-hell-primary-200: #d4dbe3;
+  --color-hell-primary-300: #afbcca;
+  --color-hell-primary-400: #8398ad;
+  --color-hell-primary-500: #637b94;
+  --color-hell-primary-600: #4f637a;
+  --color-hell-primary-700: #415063;
+  --color-hell-primary-800: #384554;
+  --color-hell-primary-900: #313a46;
+  --color-hell-primary-950: #212730;
 
-  --color-hell-success-50: #f1f9ea;
+  --color-hell-success-50: #f3fbea;
+  --color-hell-success-100: #e3f6d1;
+  --color-hell-success-200: #c9eda9;
+  --color-hell-success-300: #a5e076;
+  --color-hell-success-400: #85d04b;
   --color-hell-success-500: #64b22c;
-  --color-hell-success-600: #559924;
-  --color-hell-success-700: #43761c;
+  --color-hell-success-600: #4d9020;
+  --color-hell-success-700: #3c6e1d;
+  --color-hell-success-800: #33581c;
+  --color-hell-success-900: #2d4b1c;
+  --color-hell-success-950: #14290a;
 
-  --color-hell-info-50: #e7faff;
-  --color-hell-info-500: #0dcaf0;
-  --color-hell-info-600: #0bafd1;
-  --color-hell-info-700: #0888a3;
+  --color-hell-info-50: #ecfdff;
+  --color-hell-info-100: #cef9ff;
+  --color-hell-info-200: #a3f1fe;
+  --color-hell-info-300: #64e5fc;
+  --color-hell-info-400: #0dcaf0;
+  --color-hell-info-500: #01b2d9;
+  --color-hell-info-600: #048db6;
+  --color-hell-info-700: #0b7193;
+  --color-hell-info-800: #135c77;
+  --color-hell-info-900: #144c65;
+  --color-hell-info-950: #073145;
 
   --color-hell-danger-50: #fdf4f3;
   --color-hell-danger-100: #fbe6e5;
@@ -72,7 +87,7 @@
   /* Border */
   --hell-color-border: #e3e6ec;
   --hell-color-border-strong: #c8cdd6;
-  --hell-color-border-focus: #313a46;
+  --hell-color-border-focus: var(--color-hell-primary-900);
 
   /* Text */
   --hell-color-text: #1c222a;
@@ -81,22 +96,30 @@
   --hell-color-text-inverse: #ffffff;
 
   /* Accent (primary brand) */
-  --hell-color-primary: #313a46;
+  --hell-color-primary: var(--color-hell-primary-900);
   --hell-color-primary-hover: #262d37;
   --hell-color-primary-active: #1c222a;
   --hell-color-primary-fg: #ffffff;
   --hell-color-primary-soft: #eef0f3;
-  --hell-color-primary-soft-fg: #313a46;
+  --hell-color-primary-soft-fg: var(--color-hell-primary-900);
 
   /* Status */
-  --hell-color-success: #64b22c;
+  --hell-color-success: var(--color-hell-success-500);
   --hell-color-success-soft: #eef8e3;
-  --hell-color-info: #0dcaf0;
+  --hell-color-success-hover: #559924;
+  --hell-color-success-active: #43761c;
+  --hell-color-success-strong: #43761c;
+  --hell-color-info: var(--color-hell-info-400);
   --hell-color-info-soft: #e0f6fa;
-  --hell-color-danger: #da564d;
+  --hell-color-info-strong: #0888a3;
+  --hell-color-danger: var(--color-hell-danger-500);
   --hell-color-danger-soft: #fbe8e6;
-  --hell-color-warning: #e5a000;
+  --hell-color-danger-hover: var(--color-hell-danger-600);
+  --hell-color-danger-active: var(--color-hell-danger-700);
+  --hell-color-danger-strong: var(--color-hell-danger-700);
+  --hell-color-warning: var(--color-hell-warning-500);
   --hell-color-warning-soft: #fff3d9;
+  --hell-color-warning-strong: var(--color-hell-warning-600);
 
   /* Focus */
   --hell-color-focus-ring: rgba(49, 58, 70, 0.35);

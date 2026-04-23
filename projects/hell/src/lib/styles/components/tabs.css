@@ -2,6 +2,11 @@
 
 @utility hell-tabs {
   @apply flex flex-col min-w-0;
+
+  &[data-orientation="vertical"] {
+    @apply flex-row items-start;
+    gap: var(--hell-space-4);
+  }
 }
 
 @utility hell-tab-list {
@@ -12,10 +17,13 @@
 
   &[data-orientation="vertical"] {
     @apply flex-col items-stretch;
+    gap: 4px;
     border-bottom: none;
-    border-right: 1px solid var(--hell-color-border);
-    padding-inline: 0;
-    padding-block: var(--hell-space-2);
+    border-right: none;
+    padding: var(--hell-space-2);
+    background: var(--hell-color-bg-subtle);
+    border-radius: var(--hell-radius-lg);
+    min-width: 200px;
   }
 }
 
@@ -51,22 +59,40 @@
   }
   &[data-orientation="vertical"] {
     @apply justify-start;
-    border-bottom: none;
-    border-right: none;
-    border-left: 2px solid transparent;
-    margin-bottom: 0;
-    margin-right: 0;
-    border-radius: var(--hell-radius-sm);
+    height: 38px;
+    border: none;
+    margin: 0;
+    border-radius: var(--hell-radius-md);
     padding-inline: var(--hell-space-3);
+    color: var(--hell-color-text-muted);
 
     &[data-hover]:not([data-active]) {
-      background: var(--hell-color-bg-subtle);
+      background: color-mix(in srgb, var(--hell-color-fg) 5%, transparent);
+      color: var(--hell-color-text);
     }
     &[data-active] {
-      border-left-color: var(--hell-color-primary);
-      background: var(--hell-color-primary-soft);
-      color: var(--hell-color-primary);
+      background: var(--hell-color-bg-elevated);
+      color: var(--hell-color-text);
       font-weight: 600;
+      /* Reserve room on the left so the accent bar doesn't crowd the label. */
+      padding-left: calc(var(--hell-space-3) + 8px);
+      box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.05),
+        0 0 0 1px var(--hell-color-border);
+    }
+    /* Subtle leading accent bar inside the active pill. */
+    &[data-active]::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      bottom: 8px;
+      width: 3px;
+      border-radius: 999px;
+      background: var(--hell-color-primary);
+    }
+    &[data-focus-visible] {
+      outline-offset: 2px;
     }
   }
 }

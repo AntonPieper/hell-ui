@@ -78,14 +78,15 @@
     --_hell-btn-bg: var(--hell-color-danger);
     --_hell-btn-fg: var(--hell-color-text-inverse);
     --_hell-btn-border: var(--hell-color-danger);
-    --_hell-btn-bg-hover: var(--hell-color-danger-600);
-    --_hell-btn-bg-press: var(--hell-color-danger-700);
+    --_hell-btn-bg-hover: var(--hell-color-danger-hover);
+    --_hell-btn-bg-press: var(--hell-color-danger-active);
   }
   &[data-variant="success"] {
     --_hell-btn-bg: var(--hell-color-success);
     --_hell-btn-fg: var(--hell-color-text-inverse);
     --_hell-btn-border: var(--hell-color-success);
-    --_hell-btn-bg-hover: var(--hell-color-success-600);
+    --_hell-btn-bg-hover: var(--hell-color-success-hover);
+    --_hell-btn-bg-press: var(--hell-color-success-active);
   }
 
   /* Sizes */
