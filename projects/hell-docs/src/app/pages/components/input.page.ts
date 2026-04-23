@@ -13,21 +13,21 @@ import { HellInput, HellTextarea } from 'hell';
         and <code>hellTextarea</code> to a <code>&lt;textarea&gt;</code>.</p>
 
       <h2>Sizes</h2>
-      <div class="hd-example" style="display:flex; gap:0.5rem; flex-wrap:wrap">
+      <div class="hd-example flex flex-wrap gap-2">
         <input hellInput size="sm" placeholder="Small" />
         <input hellInput size="md" placeholder="Medium (default)" />
         <input hellInput size="lg" placeholder="Large" />
       </div>
 
       <h2>States</h2>
-      <div class="hd-example" style="display:flex; gap:0.5rem; flex-wrap:wrap">
+      <div class="hd-example flex flex-wrap gap-2">
         <input hellInput placeholder="Default" />
         <input hellInput placeholder="Invalid" invalid />
         <input hellInput placeholder="Disabled" disabled />
       </div>
 
       <h2>Textarea</h2>
-      <div class="hd-example" style="display:grid; gap:0.5rem">
+      <div class="hd-example grid gap-2">
         <textarea hellTextarea rows="4" placeholder="Type a message…"></textarea>
         <textarea hellTextarea rows="3" placeholder="Invalid" invalid></textarea>
       </div>

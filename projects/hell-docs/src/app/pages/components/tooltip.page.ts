@@ -12,7 +12,7 @@ import { HellButton, HellTooltip, HellTooltipTrigger } from 'hell';
         use a <code>popover</code>.</p>
 
       <h2>Example</h2>
-      <div class="hd-example" style="display:flex; gap:1rem">
+      <div class="hd-example flex gap-4">
         <button hellButton [hellTooltipTrigger]="t1" placement="top">Top</button>
         <button hellButton [hellTooltipTrigger]="t2" placement="right">Right</button>
         <button hellButton [hellTooltipTrigger]="t3" placement="bottom">Bottom</button>

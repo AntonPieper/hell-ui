@@ -12,7 +12,7 @@ import { HellAvatar } from 'hell';
         provided <code>fallback</code> initials.</p>
 
       <h2>Sizes</h2>
-      <div class="hd-example" style="display:flex; gap:0.75rem; align-items:center">
+      <div class="hd-example flex items-center gap-3">
         <hell-avatar size="xs" fallback="XS" />
         <hell-avatar size="sm" fallback="SM" />
         <hell-avatar size="md" fallback="MD" />
@@ -21,7 +21,7 @@ import { HellAvatar } from 'hell';
       </div>
 
       <h2>With image</h2>
-      <div class="hd-example" style="display:flex; gap:0.75rem">
+      <div class="hd-example flex gap-3">
         <hell-avatar
           image="https://i.pravatar.cc/64?img=11"
           fallback="HK"
@@ -40,7 +40,7 @@ import { HellAvatar } from 'hell';
       </div>
 
       <h2>Square shape</h2>
-      <div class="hd-example" style="display:flex; gap:0.75rem">
+      <div class="hd-example flex gap-3">
         <hell-avatar shape="square" fallback="CO" />
         <hell-avatar shape="square" image="https://i.pravatar.cc/64?img=15" fallback="ID" />
       </div>

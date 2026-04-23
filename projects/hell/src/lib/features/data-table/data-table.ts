@@ -3,6 +3,7 @@ import {
   Component,
   booleanAttribute,
   computed,
+  effect,
   input,
   output,
   signal,
@@ -15,7 +16,7 @@ import {
   createAngularTable,
   getCoreRowModel,
 } from '@tanstack/angular-table';
-import { HellButton } from '../../primitives/button/button';
+import { HellPaginationStrip } from '../../primitives/pagination/pagination';
 
 export interface HellDataTableQuery {
   pageIndex: number;
@@ -32,7 +33,7 @@ export interface HellDataTableQuery {
 @Component({
   selector: 'hell-data-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FlexRenderDirective, HellButton],
+  imports: [FlexRenderDirective, HellPaginationStrip],
   host: {
     '[class.hell-table-shell]': '!unstyled()',
   },
@@ -53,7 +54,8 @@ export interface HellDataTableQuery {
           <tr>
             @for (header of group.headers; track header.id) {
               <th
-                [attr.aria-sort]="ariaSort(header.column.getIsSorted())"
+                [attr.aria-sort]="header.column.getCanSort() ? ariaSort(header.column.getIsSorted()) : null"
+                [attr.data-sortable]="header.column.getCanSort() ? 'true' : null"
                 (click)="header.column.getCanSort() && header.column.toggleSorting()"
               >
                 <ng-container
@@ -99,20 +101,24 @@ export interface HellDataTableQuery {
 
     <div class="hell-table-footer">
       <span>{{ rangeLabel() }}</span>
+      <label class="hell-table-pagesize">
+        Rows
+        <select
+          class="hell-input"
+          [value]="pageSizeSig()"
+          (change)="onPageSizeChange($any($event.target).value)"
+        >
+          @for (n of pageSizeOptions(); track n) {
+            <option [value]="n">{{ n }}</option>
+          }
+        </select>
+      </label>
       <span style="flex:1"></span>
-      <button hellButton variant="ghost" size="sm" (click)="prev()" [disabled]="pageIndex() === 0">
-        Prev
-      </button>
-      <span>Page {{ pageIndex() + 1 }} / {{ pageCount() }}</span>
-      <button
-        hellButton
-        variant="ghost"
-        size="sm"
-        (click)="next()"
-        [disabled]="pageIndex() + 1 >= pageCount()"
-      >
-        Next
-      </button>
+      <hell-pagination
+        [page]="pageIndex() + 1"
+        [pageCount]="pageCount()"
+        (pageChange)="goToPage($event)"
+      />
     </div>
   `,
 })
@@ -122,22 +128,26 @@ export class HellDataTable<T> {
   readonly columns = input<ColumnDef<T, any>[]>([]);
   readonly total = input<number>(0);
   readonly pageSize = input<number>(20);
+  readonly pageSizeOptions = input<readonly number[]>([10, 20, 50, 100]);
 
   readonly queryChange = output<HellDataTableQuery>();
 
   protected readonly pageIndex = signal(0);
   protected readonly sorting = signal<SortingState>([]);
   protected readonly filter = signal('');
+  /** Internal page size — initialized from the `pageSize` input but
+   *  can be changed by the user via the footer selector. */
+  protected readonly pageSizeSig = signal(this.pageSize());
 
   protected readonly pageCount = computed(() =>
-    Math.max(1, Math.ceil(this.total() / this.pageSize())),
+    Math.max(1, Math.ceil(this.total() / this.pageSizeSig())),
   );
 
   protected readonly visibleColumnCount = computed(() => this.columns().length || 1);
 
   protected readonly rangeLabel = computed(() => {
-    const start = this.pageIndex() * this.pageSize();
-    const end = Math.min(start + this.pageSize(), this.total());
+    const start = this.pageIndex() * this.pageSizeSig();
+    const end = Math.min(start + this.pageSizeSig(), this.total());
     return this.total() ? `${start + 1}–${end} of ${this.total()}` : '0';
   });
 
@@ -145,7 +155,7 @@ export class HellDataTable<T> {
     data: [...this.data()],
     columns: this.columns(),
     state: {
-      pagination: { pageIndex: this.pageIndex(), pageSize: this.pageSize() } as PaginationState,
+      pagination: { pageIndex: this.pageIndex(), pageSize: this.pageSizeSig() } as PaginationState,
       sorting: this.sorting(),
     },
     pageCount: this.pageCount(),
@@ -161,16 +171,26 @@ export class HellDataTable<T> {
     getCoreRowModel: getCoreRowModel(),
   }));
 
-  protected next() {
-    this.pageIndex.update((p) => Math.min(p + 1, this.pageCount() - 1));
-    this.emit();
+  constructor() {
+    // Re-sync the internal page size whenever the input changes.
+    effect(() => {
+      this.pageSizeSig.set(this.pageSize());
+    });
   }
-  protected prev() {
-    this.pageIndex.update((p) => Math.max(p - 1, 0));
+
+  protected goToPage(page1Based: number) {
+    this.pageIndex.set(Math.max(0, Math.min(this.pageCount() - 1, page1Based - 1)));
     this.emit();
   }
   protected onFilter(v: string) {
     this.filter.set(v);
+    this.pageIndex.set(0);
+    this.emit();
+  }
+  protected onPageSizeChange(v: string | number) {
+    const n = typeof v === 'string' ? Number(v) : v;
+    if (!Number.isFinite(n) || n <= 0) return;
+    this.pageSizeSig.set(n);
     this.pageIndex.set(0);
     this.emit();
   }
@@ -184,7 +204,7 @@ export class HellDataTable<T> {
   private emit() {
     this.queryChange.emit({
       pageIndex: this.pageIndex(),
-      pageSize: this.pageSize(),
+      pageSize: this.pageSizeSig(),
       sorting: this.sorting(),
       filter: this.filter(),
     });

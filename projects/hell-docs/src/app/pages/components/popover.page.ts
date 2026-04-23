@@ -19,9 +19,9 @@ import { HellButton, HellPopover, HellPopoverTrigger } from 'hell';
         </button>
 
         <ng-template #info>
-          <div hellPopover style="min-width:240px">
+          <div hellPopover class="min-w-[240px]">
             <strong>Heinrich K.</strong>
-            <p style="margin:0.5rem 0 0; color:var(--hell-color-text-muted)">
+            <p class="hd-muted mt-2">
               Senior Engineer · Berlin · last seen 2h ago
             </p>
           </div>

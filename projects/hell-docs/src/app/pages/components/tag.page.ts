@@ -11,7 +11,7 @@ import { HellTag, HellBadge, HellKbd } from 'hell';
       <p>Inline status and metadata indicators.</p>
 
       <h2>Tag variants</h2>
-      <div class="hd-example" style="display:flex; gap:0.5rem; flex-wrap:wrap">
+      <div class="hd-example flex flex-wrap gap-2">
         <span hellTag>default</span>
         <span hellTag variant="info">info</span>
         <span hellTag variant="success">success</span>
@@ -20,14 +20,14 @@ import { HellTag, HellBadge, HellKbd } from 'hell';
       </div>
 
       <h2>Badge</h2>
-      <div class="hd-example" style="display:flex; gap:0.75rem; align-items:center">
-        <span style="position:relative; padding-right:1.5rem">
+      <div class="hd-example flex items-center gap-3">
+        <span class="relative pr-6">
           Inbox
-          <span hellBadge style="position:absolute; top:-4px; right:0">3</span>
+          <span hellBadge class="absolute -top-1 right-0">3</span>
         </span>
-        <span style="position:relative; padding-right:1.5rem">
+        <span class="relative pr-6">
           Notifications
-          <span hellBadge style="position:absolute; top:-4px; right:0">99+</span>
+          <span hellBadge class="absolute -top-1 right-0">99+</span>
         </span>
       </div>
 

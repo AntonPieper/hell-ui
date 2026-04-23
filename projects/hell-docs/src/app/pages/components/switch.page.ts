@@ -13,19 +13,19 @@ import { HellSwitch } from 'hell';
         <code>checkbox</code>.</p>
 
       <h2>Example</h2>
-      <div class="hd-example" style="display:grid; gap:0.5rem">
-        <label style="display:inline-flex; align-items:center; gap:0.75rem">
+      <div class="hd-example grid gap-2">
+        <label class="inline-flex items-center gap-3">
           <hell-switch
             [checked]="notify()"
             (checkedChange)="notify.set($event)"
           />
           Email notifications
         </label>
-        <label style="display:inline-flex; align-items:center; gap:0.75rem; opacity:0.6">
+        <label class="inline-flex items-center gap-3 opacity-60">
           <hell-switch disabled />
           Disabled
         </label>
-        <label style="display:inline-flex; align-items:center; gap:0.75rem">
+        <label class="inline-flex items-center gap-3">
           <hell-switch checked disabled />
           Disabled, on
         </label>

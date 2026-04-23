@@ -15,7 +15,7 @@ import { HellDropZone } from 'hell';
       <div class="hd-example">
         <div hellDropzone (files)="onFiles($event)">
           <strong>Drop files here</strong>
-          <span style="color:var(--hell-color-text-muted)">or click to browse</span>
+          <span class="hd-muted">or click to browse</span>
         </div>
       </div>
 
@@ -32,7 +32,7 @@ import { HellDropZone } from 'hell';
       <div class="hd-example">
         <div hellDropzone [multiple]="false" accept="image/*">
           <strong>Choose an image</strong>
-          <span style="color:var(--hell-color-text-muted)">PNG / JPG / WebP</span>
+          <span class="hd-muted">PNG / JPG / WebP</span>
         </div>
       </div>
 

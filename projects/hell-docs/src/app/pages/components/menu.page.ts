@@ -26,7 +26,7 @@ import { HellButton, HELL_MENU_DIRECTIVES } from 'hell';
             <button hellMenuItem type="button" disabled>Move (disabled)</button>
             <button hellMenuItem type="button" (click)="onAction('archive')">Archive</button>
             <div hellMenuSeparator></div>
-            <button hellMenuItem type="button" style="color:var(--hell-color-danger)" (click)="onAction('delete')">
+            <button hellMenuItem type="button" class="hd-danger-text" (click)="onAction('delete')">
               Delete
             </button>
           </div>

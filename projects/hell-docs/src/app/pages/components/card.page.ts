@@ -14,7 +14,7 @@ import { HELL_CARD_DIRECTIVES, HellButton } from 'hell';
         shadow depth.</p>
 
       <h2>Examples</h2>
-      <div class="hd-example" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem">
+      <div class="hd-example grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">
         <div hellCard [elevation]="0">
           <div hellCardHeader><strong>Flat</strong></div>
           <div hellCardBody>elevation = 0</div>
@@ -35,7 +35,7 @@ import { HELL_CARD_DIRECTIVES, HellButton } from 'hell';
 
       <h2>With footer</h2>
       <div class="hd-example">
-        <div hellCard style="max-width:380px">
+        <div hellCard class="max-w-95">
           <div hellCardHeader><strong>Delete project</strong></div>
           <div hellCardBody>
             This action is permanent. All data and history will be removed.

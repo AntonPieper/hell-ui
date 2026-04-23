@@ -13,13 +13,13 @@ import { HellSeparator } from 'hell';
 
       <h2>Horizontal</h2>
       <div class="hd-example">
-        <p style="margin:0">Section A</p>
+        <p class="m-0">Section A</p>
         <div hellSeparator></div>
-        <p style="margin:0">Section B</p>
+        <p class="m-0">Section B</p>
       </div>
 
       <h2>Vertical</h2>
-      <div class="hd-example" style="display:flex; align-items:center; gap:1rem; height:60px">
+      <div class="hd-example flex h-[60px] items-center gap-4">
         <span>Left</span>
         <div hellSeparator orientation="vertical"></div>
         <span>Middle</span>

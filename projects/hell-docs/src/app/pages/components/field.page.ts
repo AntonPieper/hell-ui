@@ -14,7 +14,7 @@ import { HELL_FIELD_DIRECTIVES, HellInput } from 'hell';
         <code>id</code>/<code>for</code> matching needed.</p>
 
       <h2>Example</h2>
-      <div class="hd-example" style="display:grid; gap:1rem; max-width:380px">
+      <div class="hd-example grid max-w-95 gap-4">
         <div hellField>
           <label hellFieldLabel>Email</label>
           <input hellInput type="email" placeholder="you@company.com" />

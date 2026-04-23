@@ -2,7 +2,15 @@
 
 @utility hell-toggle {
   /* Composes onto hell-button via the wrapper directive. Adds the pressed
-     state styling. */
+     state styling with smooth transitions. */
+  transition:
+    background-color var(--hell-duration-base) var(--hell-ease-out),
+    color var(--hell-duration-base) var(--hell-ease-out),
+    border-color var(--hell-duration-base) var(--hell-ease-out),
+    transform var(--hell-duration-fast) var(--hell-ease-out) !important;
+
+  &[data-press] { transform: scale(0.97); }
+
   &[data-selected] {
     background: var(--hell-color-primary-soft) !important;
     color: var(--hell-color-primary) !important;

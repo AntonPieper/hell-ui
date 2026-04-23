@@ -1,6 +1,7 @@
 /* Popover surface. Trigger is just a button. */
 
 @utility hell-popover {
+  position: absolute;
   background: var(--hell-color-bg-elevated);
   border: 1px solid var(--hell-color-border);
   border-radius: var(--hell-radius-md);

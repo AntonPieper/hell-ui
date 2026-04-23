@@ -21,12 +21,29 @@
   background: transparent;
   border: none;
   font-family: inherit;
+  transition: background-color var(--hell-duration-fast) var(--hell-ease-out);
 
   &[data-hover] { background: var(--hell-color-bg-subtle); }
   &[data-focus-visible] {
     outline: 2px solid var(--hell-color-focus-ring);
     outline-offset: -2px;
   }
+
+  /* Auto chevron — rendered via CSS so consumers don't have to add an icon. */
+  &::after {
+    content: "";
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    background: currentColor;
+    color: var(--hell-color-text-muted);
+    -webkit-mask: var(--hell-icon-chevron-down) center / contain no-repeat;
+    mask: var(--hell-icon-chevron-down) center / contain no-repeat;
+    transition: transform var(--hell-duration-base) var(--hell-ease-out);
+  }
+  &[data-open]::after { transform: rotate(180deg); }
+
+  /* Legacy: explicit chevron span still rotates if consumers added one. */
   & > .hell-accordion-chevron {
     transition: transform var(--hell-duration-base) var(--hell-ease-out);
   }
@@ -40,9 +57,38 @@
   color: var(--hell-color-text-muted);
 }
 
+/*
+ * Animation strategy:
+ *   • Default state: height 0, overflow hidden, fully rendered (display:block).
+ *   • Open state: height = var measured by ng-primitives.
+ *   • We override `[hidden]` so the element remains rendered with height 0
+ *     (instead of display:none) — this is what makes the *expand* animation
+ *     fire: a transition from `display:none → block` is non-animatable, but
+ *     `height: 0 → 200px` on an always-rendered element is.
+ *   • `interpolate-size: allow-keywords` lets us animate even when
+ *     ng-primitives sets `height: auto` instead of a pixel value.
+ */
 @utility hell-accordion-content {
-  padding: 0 var(--hell-space-5) var(--hell-space-5);
+  display: block;
+  overflow: hidden;
+  height: 0;
   color: var(--hell-color-text-muted);
   font-size: 13px;
   line-height: 1.55;
+  interpolate-size: allow-keywords;
+  transition: height var(--hell-duration-base) var(--hell-ease-out);
+
+  /* Inner padding lives on the children so collapsed height stays exactly 0. */
+  > * { padding-inline: var(--hell-space-5); }
+  > *:last-child { padding-bottom: var(--hell-space-5); }
+
+  /* Open height is set by ng-primitives via a measured custom property. */
+  &[data-open] { height: var(--ngp-accordion-content-height, auto); }
+
+  /* Keep rendered when ng-primitives sets `hidden`/`hidden="until-found"`,
+     so the next expand has a starting height to animate from. */
+  &[hidden] {
+    display: block;
+    height: 0;
+  }
 }

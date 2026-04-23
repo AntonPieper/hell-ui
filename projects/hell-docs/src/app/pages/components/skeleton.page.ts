@@ -12,27 +12,27 @@ import { HellSkeleton, HellSpinner } from 'hell';
         wait time; spinners suit short, indeterminate operations.</p>
 
       <h2>Skeleton</h2>
-      <div class="hd-example" style="display:grid; gap:0.5rem; max-width:380px">
-        <div hellSkeleton width="60%" height="20px"></div>
-        <div hellSkeleton width="100%" height="14px"></div>
-        <div hellSkeleton width="100%" height="14px"></div>
-        <div hellSkeleton width="80%" height="14px"></div>
+      <div class="hd-example grid max-w-95 gap-2">
+        <div hellSkeleton class="h-5 w-3/5"></div>
+        <div hellSkeleton class="h-[14px] w-full"></div>
+        <div hellSkeleton class="h-[14px] w-full"></div>
+        <div hellSkeleton class="h-[14px] w-4/5"></div>
       </div>
 
       <h2>Avatar + lines</h2>
-      <div class="hd-example" style="display:flex; gap:0.75rem; align-items:center; max-width:380px">
-        <div hellSkeleton width="40px" height="40px" style="border-radius:50%"></div>
-        <div style="flex:1; display:grid; gap:0.4rem">
-          <div hellSkeleton width="50%" height="14px"></div>
-          <div hellSkeleton width="80%" height="12px"></div>
+      <div class="hd-example flex max-w-95 items-center gap-3">
+        <div hellSkeleton class="size-10 rounded-full"></div>
+        <div class="hd-fill grid gap-[0.4rem]">
+          <div hellSkeleton class="h-[14px] w-1/2"></div>
+          <div hellSkeleton class="h-3 w-4/5"></div>
         </div>
       </div>
 
       <h2>Spinner</h2>
-      <div class="hd-example" style="display:flex; gap:1rem; align-items:center">
+      <div class="hd-example flex items-center gap-4">
         <span hellSpinner></span>
-        <span hellSpinner style="font-size:24px"></span>
-        <span hellSpinner style="font-size:32px"></span>
+        <span hellSpinner class="text-[24px]"></span>
+        <span hellSpinner class="text-[32px]"></span>
       </div>
 
       <h2>API</h2>

@@ -1,6 +1,7 @@
 /* Tooltip — small dark surface. */
 
 @utility hell-tooltip {
+  position: absolute;
   background: #1c222a;
   color: #fff;
   font-size: 12px;

@@ -18,21 +18,25 @@ import { HELL_ACCORDION_DIRECTIVES } from 'hell';
           <div hellAccordionItem value="install">
             <button hellAccordionTrigger type="button">Installation</button>
             <div hellAccordionContent>
-              <p style="margin:0.5rem 0">Install via your package manager:</p>
-              <pre><code>pnpm add hell ng-primitives</code></pre>
+              <div>
+                <p class="my-2">Install via your package manager:</p>
+                <pre><code>pnpm add hell ng-primitives</code></pre>
+              </div>
             </div>
           </div>
           <div hellAccordionItem value="theming">
             <button hellAccordionTrigger type="button">Theming</button>
             <div hellAccordionContent>
-              Override CSS custom properties under <code>--hell-color-*</code>
-              to retheme the entire library.
+              <div>
+                Override CSS custom properties under <code>--hell-color-*</code>
+                to retheme the entire library.
+              </div>
             </div>
           </div>
           <div hellAccordionItem value="ssr">
             <button hellAccordionTrigger type="button">SSR</button>
             <div hellAccordionContent>
-              hell is fully SSR-safe — no direct DOM access at module load.
+              <div>hell is fully SSR-safe — no direct DOM access at module load.</div>
             </div>
           </div>
         </div>
@@ -43,11 +47,15 @@ import { HELL_ACCORDION_DIRECTIVES } from 'hell';
         <div hellAccordion type="multiple">
           <div hellAccordionItem value="a">
             <button hellAccordionTrigger type="button">First</button>
-            <div hellAccordionContent>You can open me…</div>
+            <div hellAccordionContent>
+              <div>You can open me…</div>
+            </div>
           </div>
           <div hellAccordionItem value="b">
             <button hellAccordionTrigger type="button">Second</button>
-            <div hellAccordionContent>…and me at the same time.</div>
+            <div hellAccordionContent>
+              <div>…and me at the same time.</div>
+            </div>
           </div>
         </div>
       </div>

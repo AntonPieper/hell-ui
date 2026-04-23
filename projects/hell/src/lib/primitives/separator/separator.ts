@@ -4,7 +4,7 @@ import { HellOrientation } from '../../core/types';
 
 @Directive({
   selector: '[hellSeparator]',
-  hostDirectives: [{ directive: NgpSeparator, inputs: ['ngpSeparatorOrientation'] }],
+  hostDirectives: [{ directive: NgpSeparator, inputs: ['ngpSeparatorOrientation:orientation'] }],
   host: {
     '[class.hell-separator]': '!unstyled()',
     '[attr.data-orientation]': 'orientation()',

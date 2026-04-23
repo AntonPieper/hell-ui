@@ -20,13 +20,13 @@ import { HELL_TABS_DIRECTIVES } from 'hell';
             <button hellTab value="security">Security</button>
             <button hellTab value="billing">Billing</button>
           </div>
-          <div hellTabPanel value="general" style="padding-top:1rem">
+          <div hellTabPanel value="general" class="pt-4">
             Account name, language and timezone preferences.
           </div>
-          <div hellTabPanel value="security" style="padding-top:1rem">
+          <div hellTabPanel value="security" class="pt-4">
             Password, multi-factor authentication and active sessions.
           </div>
-          <div hellTabPanel value="billing" style="padding-top:1rem">
+          <div hellTabPanel value="billing" class="pt-4">
             Plan, payment method and invoices.
           </div>
         </div>
@@ -34,13 +34,13 @@ import { HELL_TABS_DIRECTIVES } from 'hell';
 
       <h2>Vertical</h2>
       <div class="hd-example">
-        <div hellTabset value="a" orientation="vertical" style="display:flex; gap:1rem">
+        <div hellTabset value="a" orientation="vertical" class="flex gap-4">
           <div hellTabList>
             <button hellTab value="a">Section A</button>
             <button hellTab value="b">Section B</button>
             <button hellTab value="c">Section C</button>
           </div>
-          <div style="flex:1">
+          <div class="hd-fill">
             <div hellTabPanel value="a">Content A</div>
             <div hellTabPanel value="b">Content B</div>
             <div hellTabPanel value="c">Content C</div>

@@ -33,3 +33,8 @@
     border-radius: inherit;
   }
 }
+
+@utility hell-audio-volume {
+  width: 72px;
+  flex: 0 0 auto;
+}

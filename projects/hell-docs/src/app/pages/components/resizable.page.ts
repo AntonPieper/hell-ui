@@ -14,43 +14,43 @@ import { HELL_RESIZABLE_DIRECTIVES } from 'hell';
         once.</p>
 
       <h2>Horizontal split</h2>
-      <div class="hd-example" style="padding:0">
-        <div hellResizable orientation="horizontal" style="height:240px">
-          <div hellResizablePane [initialFlex]="2" style="background:var(--hell-color-bg-elevated); padding:1rem">
+      <div class="hd-example hd-example-flush">
+        <div hellResizable orientation="horizontal" class="h-[240px]">
+          <div hellResizablePane [initialFlex]="2" class="hd-surface-elevated p-4">
             Left pane
           </div>
           <div hellResizableHandle></div>
-          <div hellResizablePane [initialFlex]="3" style="background:var(--hell-color-bg-subtle); padding:1rem">
+          <div hellResizablePane [initialFlex]="3" class="hd-surface-subtle p-4">
             Right pane
           </div>
         </div>
       </div>
 
       <h2>Three panes</h2>
-      <div class="hd-example" style="padding:0">
-        <div hellResizable orientation="horizontal" style="height:200px">
-          <div hellResizablePane [initialFlex]="1" style="background:var(--hell-color-bg-elevated); padding:1rem">
+      <div class="hd-example hd-example-flush">
+        <div hellResizable orientation="horizontal" class="h-[200px]">
+          <div hellResizablePane [initialFlex]="1" class="hd-surface-elevated p-4">
             Sidebar
           </div>
           <div hellResizableHandle></div>
-          <div hellResizablePane [initialFlex]="3" style="background:var(--hell-color-bg-subtle); padding:1rem">
+          <div hellResizablePane [initialFlex]="3" class="hd-surface-subtle p-4">
             Main
           </div>
           <div hellResizableHandle></div>
-          <div hellResizablePane [initialFlex]="2" style="background:var(--hell-color-bg-elevated); padding:1rem">
+          <div hellResizablePane [initialFlex]="2" class="hd-surface-elevated p-4">
             Inspector
           </div>
         </div>
       </div>
 
       <h2>Vertical split</h2>
-      <div class="hd-example" style="padding:0">
-        <div hellResizable orientation="vertical" style="height:280px; display:flex; flex-direction:column">
-          <div hellResizablePane [initialFlex]="2" style="background:var(--hell-color-bg-elevated); padding:1rem">
+      <div class="hd-example hd-example-flush">
+        <div hellResizable orientation="vertical" class="flex h-[280px] flex-col">
+          <div hellResizablePane [initialFlex]="2" class="hd-surface-elevated p-4">
             Top pane
           </div>
           <div hellResizableHandle></div>
-          <div hellResizablePane [initialFlex]="1" style="background:var(--hell-color-bg-subtle); padding:1rem">
+          <div hellResizablePane [initialFlex]="1" class="hd-surface-subtle p-4">
             Bottom pane
           </div>
         </div>

@@ -1,42 +1,108 @@
-/* Dialpad — 3-column grid of digit keys. */
+/*
+ * Dialpad — telephony-style 3-column key pad with display + call action.
+ *
+ * Layout:
+ *   ┌─────────────────────┐
+ *   │  display    ⌫       │  ← number readout
+ *   ├─────────────────────┤
+ *   │  1    2    3        │
+ *   │  4    5    6        │  ← keypad grid
+ *   │  7    8    9        │
+ *   │  *    0    #        │
+ *   ├─────────────────────┤
+ *   │  📞 Call            │  ← optional call button
+ *   └─────────────────────┘
+ */
 
 @utility hell-dialpad {
-  @apply grid w-full;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: var(--hell-space-3);
+  width: 100%;
   max-width: 280px;
-}
+  outline: none;
 
-@utility hell-dialpad-key {
-  @apply flex flex-col items-center justify-center cursor-pointer select-none font-medium;
-  height: 56px;
-  background: var(--hell-color-bg-elevated);
-  border: 1px solid var(--hell-color-border);
-  border-radius: var(--hell-radius-md);
-  font-size: 18px;
-  color: var(--hell-color-text);
-  transition: background-color var(--hell-duration-fast) var(--hell-ease-out);
-
-  > small {
-    font-size: 9px;
-    color: var(--hell-color-text-subtle);
-    letter-spacing: 0.12em;
-    margin-top: 2px;
+  &:focus-visible {
+    outline: 2px solid var(--hell-color-focus-ring);
+    outline-offset: 4px;
+    border-radius: var(--hell-radius-md);
   }
-  &:hover,
-  &[data-press] { background: var(--hell-color-bg-muted); }
 }
 
 @utility hell-dialpad-display {
-  @apply flex items-center justify-center overflow-hidden whitespace-nowrap;
-  grid-column: 1 / -1;
-  font-size: 24px;
+  display: flex;
+  align-items: center;
+  gap: var(--hell-space-2);
+  height: 52px;
+  padding: 0 var(--hell-space-3);
+  background: var(--hell-color-bg-subtle);
+  border: 1px solid var(--hell-color-border);
+  border-radius: var(--hell-radius-md);
+}
+
+@utility hell-dialpad-number {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 22px;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.04em;
-  height: 48px;
-  padding: 0 var(--hell-space-4);
-  background: var(--hell-color-bg-subtle);
+  color: var(--hell-color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  direction: rtl; /* keep the latest digits visible when overflowing */
+  text-align: left;
+}
+
+@utility hell-dialpad-back {
+  flex: 0 0 auto;
+}
+
+@utility hell-dialpad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--hell-space-2);
+}
+
+@utility hell-dialpad-key {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+  gap: 2px;
+  padding: 0;
+  background: var(--hell-color-bg-elevated);
+  border: 1px solid var(--hell-color-border);
   border-radius: var(--hell-radius-md);
   color: var(--hell-color-text);
-  text-overflow: ellipsis;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background var(--hell-duration-fast) var(--hell-ease-out),
+    transform var(--hell-duration-fast) var(--hell-ease-out);
+
+  &:hover { background: var(--hell-color-bg-subtle); }
+  &:active { transform: scale(0.97); background: var(--hell-color-bg-muted); }
+}
+
+@utility hell-dialpad-digit {
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility hell-dialpad-letters {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--hell-color-text-subtle);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+@utility hell-dialpad-call {
+  width: 100%;
+  margin-top: var(--hell-space-2);
 }

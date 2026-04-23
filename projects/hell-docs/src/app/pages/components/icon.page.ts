@@ -13,23 +13,23 @@ import { HellIcon } from 'hell';
         they use via <code>provideIcons()</code> at bootstrap or per-component.</p>
 
       <h2>Example</h2>
-      <div class="hd-example" style="display:flex; gap:1rem; align-items:center; font-size:1rem">
-        <hell-icon name="faSolidCircleCheck" color="var(--hell-color-success)" />
-        <hell-icon name="faSolidCircleInfo" color="var(--hell-color-info)" />
-        <hell-icon name="faSolidTriangleExclamation" color="var(--hell-color-warning)" />
-        <hell-icon name="faSolidXmark" color="var(--hell-color-danger)" />
+      <div class="hd-example flex items-center gap-4 text-base">
+        <span class="text-[var(--hell-color-success)]"><hell-icon name="faSolidCircleCheck" /></span>
+        <span class="text-[var(--hell-color-info)]"><hell-icon name="faSolidCircleInfo" /></span>
+        <span class="text-[var(--hell-color-warning)]"><hell-icon name="faSolidTriangleExclamation" /></span>
+        <span class="text-[var(--hell-color-danger)]"><hell-icon name="faSolidXmark" /></span>
       </div>
 
       <h2>Sizes</h2>
-      <div class="hd-example" style="display:flex; gap:1rem; align-items:center">
-        <hell-icon name="faSolidPhone" size="14px" />
-        <hell-icon name="faSolidPhone" size="20px" />
-        <hell-icon name="faSolidPhone" size="32px" />
-        <hell-icon name="faSolidPhone" size="48px" />
+      <div class="hd-example flex items-center gap-4">
+        <span class="text-[14px]"><hell-icon name="faSolidPhone" /></span>
+        <span class="text-[20px]"><hell-icon name="faSolidPhone" /></span>
+        <span class="text-[32px]"><hell-icon name="faSolidPhone" /></span>
+        <span class="text-[48px]"><hell-icon name="faSolidPhone" /></span>
       </div>
 
       <h2>Inherits text colour and size</h2>
-      <p style="font-size:1.25rem; color:var(--hell-color-primary)">
+      <p class="text-[1.25rem] text-[var(--hell-color-primary)]">
         I am text with an icon
         <hell-icon name="faSolidArrowDown" />
         — both share the parent's font-size and colour.

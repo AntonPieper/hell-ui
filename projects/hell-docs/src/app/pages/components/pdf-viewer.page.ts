@@ -17,12 +17,12 @@ import { HellPdfViewer } from 'hell';
   loadComponent: () =&gt; import('hell').then((m) =&gt; m.HellPdfViewer) &#125;</code></pre>
 
       <h2>Live demo</h2>
-      <div class="hd-example" style="padding:0">
+      <div class="hd-example hd-example-flush">
         <hell-pdf-viewer
           src="https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf"
           [initialPage]="1"
           [initialZoom]="1"
-          style="display:block; height:480px"></hell-pdf-viewer>
+          class="h-[480px]"></hell-pdf-viewer>
       </div>
 
       <h2>API</h2>

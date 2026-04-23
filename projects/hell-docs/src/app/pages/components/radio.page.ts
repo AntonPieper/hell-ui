@@ -12,20 +12,20 @@ import { HellRadioGroup, HellRadio, HellRadioIndicator } from 'hell';
         options.</p>
 
       <h2>Example</h2>
-      <div class="hd-example" style="display:grid; gap:1rem">
+      <div class="hd-example grid gap-4">
         <div
           hellRadioGroup
           orientation="vertical"
           [value]="plan()"
           (valueChange)="plan.set($any($event))"
         >
-          <button hellRadio value="free" type="button" style="display:inline-flex; align-items:center; gap:0.5rem">
+          <button hellRadio value="free" type="button" class="inline-flex items-center gap-2">
             <span ngpRadioIndicator></span> Free
           </button>
-          <button hellRadio value="pro" type="button" style="display:inline-flex; align-items:center; gap:0.5rem">
+          <button hellRadio value="pro" type="button" class="inline-flex items-center gap-2">
             <span ngpRadioIndicator></span> Pro
           </button>
-          <button hellRadio value="enterprise" type="button" style="display:inline-flex; align-items:center; gap:0.5rem">
+          <button hellRadio value="enterprise" type="button" class="inline-flex items-center gap-2">
             <span ngpRadioIndicator></span> Enterprise
           </button>
         </div>
@@ -35,17 +35,23 @@ import { HellRadioGroup, HellRadio, HellRadioIndicator } from 'hell';
 
       <h2>Horizontal</h2>
       <div class="hd-example">
-        <div hellRadioGroup orientation="horizontal" value="md">
-          <button hellRadio value="sm" type="button" style="display:inline-flex; align-items:center; gap:0.4rem">
+        <div
+          hellRadioGroup
+          orientation="horizontal"
+          [value]="size()"
+          (valueChange)="size.set($any($event))"
+        >
+          <button hellRadio value="sm" type="button" class="inline-flex items-center gap-[0.4rem]">
             <span ngpRadioIndicator></span> Small
           </button>
-          <button hellRadio value="md" type="button" style="display:inline-flex; align-items:center; gap:0.4rem">
+          <button hellRadio value="md" type="button" class="inline-flex items-center gap-[0.4rem]">
             <span ngpRadioIndicator></span> Medium
           </button>
-          <button hellRadio value="lg" type="button" style="display:inline-flex; align-items:center; gap:0.4rem">
+          <button hellRadio value="lg" type="button" class="inline-flex items-center gap-[0.4rem]">
             <span ngpRadioIndicator></span> Large
           </button>
         </div>
+        <p class="mt-2">Selected size: <code>{{ size() }}</code></p>
       </div>
 
       <h2>API</h2>
@@ -59,4 +65,5 @@ import { HellRadioGroup, HellRadio, HellRadioIndicator } from 'hell';
 })
 export class RadioPage {
   protected readonly plan = signal<'free' | 'pro' | 'enterprise'>('free');
+  protected readonly size = signal<'sm' | 'md' | 'lg'>('md');
 }

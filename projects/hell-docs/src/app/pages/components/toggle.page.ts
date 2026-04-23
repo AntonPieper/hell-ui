@@ -14,7 +14,7 @@ import { HellToggle, HellToggleGroup, HellToggleGroupItem } from 'hell';
         choices.</p>
 
       <h2>Single toggle</h2>
-      <div class="hd-example" style="display:flex; gap:0.5rem">
+      <div class="hd-example flex gap-2">
         <button hellToggle [selected]="bold()" (selectedChange)="bold.set($event)" type="button">
           <strong>B</strong>
         </button>

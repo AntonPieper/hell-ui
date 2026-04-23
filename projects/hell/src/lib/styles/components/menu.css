@@ -2,6 +2,7 @@
 
 @utility hell-menu {
   @apply flex flex-col;
+  position: fixed;
   background: var(--hell-color-bg-elevated);
   border: 1px solid var(--hell-color-border);
   border-radius: var(--hell-radius-md);

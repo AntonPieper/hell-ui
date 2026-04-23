@@ -36,9 +36,42 @@
     background: var(--hell-color-bg-subtle);
     cursor: default;
   }
-  & th[data-sortable="true"] { @apply cursor-pointer; }
-  & th[data-sort="asc"]::after  { content: " ↑"; color: var(--hell-color-primary); }
-  & th[data-sort="desc"]::after { content: " ↓"; color: var(--hell-color-primary); }
+  & th[data-sortable="true"],
+  & th[aria-sort] { @apply cursor-pointer; }
+
+  /* Sort chevrons rendered via SVG masks so they tint with currentColor and
+     animate without an extra DOM node. */
+  & th[aria-sort]::after {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-inline-start: 6px;
+    vertical-align: -2px;
+    background: currentColor;
+    color: var(--hell-color-text-subtle);
+    -webkit-mask: var(--hell-icon-chevron-up-down) center / contain no-repeat;
+    mask: var(--hell-icon-chevron-up-down) center / contain no-repeat;
+    transition:
+      transform var(--hell-duration-base) var(--hell-ease-out),
+      color var(--hell-duration-fast) var(--hell-ease-out),
+      -webkit-mask-image var(--hell-duration-fast) var(--hell-ease-out);
+  }
+  & th[aria-sort="ascending"]::after,
+  & th[data-sort="asc"]::after {
+    color: var(--hell-color-primary);
+    -webkit-mask-image: var(--hell-icon-chevron-up);
+    mask-image: var(--hell-icon-chevron-up);
+  }
+  & th[aria-sort="descending"]::after,
+  & th[data-sort="desc"]::after {
+    color: var(--hell-color-primary);
+    -webkit-mask-image: var(--hell-icon-chevron-down);
+    mask-image: var(--hell-icon-chevron-down);
+  }
+  & tbody tr {
+    transition: background-color var(--hell-duration-fast) var(--hell-ease-out);
+  }
   & tbody tr:hover { background: var(--hell-color-bg-subtle); }
   & tbody tr[data-selected="true"] { background: var(--hell-color-primary-soft); }
 }
@@ -51,4 +84,19 @@
   font-size: 12px;
   color: var(--hell-color-text-muted);
   background: var(--hell-color-bg-subtle);
+}
+
+@utility hell-table-pagesize {
+  @apply inline-flex items-center;
+  gap: var(--hell-space-2);
+  font-size: 12px;
+  color: var(--hell-color-text-muted);
+
+  > select.hell-input {
+    width: auto;
+    height: var(--hell-control-height-sm);
+    padding-inline: 8px;
+    padding-block: 0;
+    font-size: 12px;
+  }
 }

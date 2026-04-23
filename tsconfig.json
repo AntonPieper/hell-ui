@@ -4,6 +4,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "strict": true,
+    "rootDir": ".",
     "paths": {
       "hell": ["./projects/hell/src/public-api.ts"]
     },

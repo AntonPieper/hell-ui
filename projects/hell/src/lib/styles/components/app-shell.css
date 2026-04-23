@@ -1,8 +1,20 @@
-/* App-shell layout — single CSS grid for topbar / sidenav / content / secondary. */
+/*
+ * App-shell layout — single CSS grid for topbar / sidenav / content / secondary.
+ *
+ *   ┌────────────────────────────────────────────┐
+ *   │ topbar                                      │
+ *   ├──────┬──────────────────────────┬──────────┤
+ *   │ side │  content                 │ secondary│
+ *   └──────┴──────────────────────────┴──────────┘
+ *
+ * The shell sets data attributes on its host that drive grid-template-columns
+ * transitions, so collapse/hide animations are CSS-only.
+ */
 
 @utility hell-shell {
   @apply grid w-full overflow-hidden;
   height: 100vh;
+  position: relative;
   grid-template-rows: var(--hell-app-topbar-height) 1fr;
   grid-template-columns:
     var(--hell-app-sidenav-width)
@@ -38,15 +50,15 @@
 @utility hell-topbar {
   @apply flex items-center min-w-0;
   grid-area: topbar;
-  gap: var(--hell-space-4);
-  padding: 0 var(--hell-space-5);
+  gap: var(--hell-space-3);
+  padding: 0 var(--hell-space-4);
   background: var(--hell-color-bg-elevated);
   border-bottom: 1px solid var(--hell-color-border);
   z-index: 20;
 }
 
 @utility hell-sidenav {
-  @apply flex flex-col min-h-0 min-w-0 overflow-auto;
+  @apply flex flex-col min-h-0 min-w-0 overflow-x-hidden overflow-y-auto;
   grid-area: sidenav;
   background: var(--hell-color-bg-elevated);
   border-right: 1px solid var(--hell-color-border);
@@ -54,27 +66,84 @@
   padding: var(--hell-space-3);
   transition: width var(--hell-duration-base) var(--hell-ease-out);
 
-  & a {
-    @apply flex items-center no-underline;
+  & a,
+  & .hell-nav-item {
+    @apply flex items-center no-underline cursor-pointer;
     gap: var(--hell-space-3);
     padding: 8px 12px;
     border-radius: var(--hell-radius-md);
     color: var(--hell-color-text-muted);
     font-size: 0.875rem;
     line-height: 1.25rem;
+    white-space: nowrap;
     transition:
       background var(--hell-duration-fast) var(--hell-ease-out),
       color var(--hell-duration-fast) var(--hell-ease-out);
   }
-  & a:hover {
+  & a > hell-icon,
+  & a > .hell-nav-icon,
+  & .hell-nav-item > hell-icon,
+  & .hell-nav-item > .hell-nav-icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--hell-color-text-subtle);
+    transition: color var(--hell-duration-fast) var(--hell-ease-out);
+  }
+  & a > .hd-nav-label,
+  & a > .hell-nav-label,
+  & .hell-nav-item > .hd-nav-label,
+  & .hell-nav-item > .hell-nav-label {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity var(--hell-duration-fast) var(--hell-ease-out);
+  }
+
+  & a:hover,
+  & .hell-nav-item:hover {
     background: var(--hell-color-bg-subtle);
     color: var(--hell-color-text);
   }
+  & a:hover > hell-icon,
+  & .hell-nav-item:hover > hell-icon {
+    color: var(--hell-color-text);
+  }
   & a.active,
-  & a[aria-current="page"] {
+  & a[aria-current="page"],
+  & .hell-nav-item[data-active="true"],
+  & .hell-nav-item.active {
     background: var(--hell-color-primary-soft);
     color: var(--hell-color-primary);
     font-weight: 600;
+  }
+  & a.active > hell-icon,
+  & a[aria-current="page"] > hell-icon,
+  & .hell-nav-item[data-active="true"] > hell-icon,
+  & .hell-nav-item.active > hell-icon {
+    color: var(--hell-color-primary);
+  }
+
+  &[data-collapsed="true"] {
+    & a,
+    & .hell-nav-item {
+      justify-content: center;
+      padding-inline: 0;
+    }
+    & a > .hd-nav-label,
+    & a > .hell-nav-label,
+    & .hell-nav-item > .hd-nav-label,
+    & .hell-nav-item > .hell-nav-label,
+    & .hell-nav-item > .hell-nav-trailing { @apply hidden; }
+    & .hd-nav-heading,
+    & .hell-nav-section-label {
+      text-align: center;
+      padding-inline: 0;
+      font-size: 9px;
+      letter-spacing: 0.04em;
+      overflow: hidden;
+    }
   }
 }
 
@@ -88,17 +157,24 @@
 @utility hell-secondary {
   @apply flex flex-col min-h-0 min-w-0 overflow-auto;
   grid-area: secondary;
+  position: relative;
   background: var(--hell-color-bg-elevated);
   border-left: 1px solid var(--hell-color-border);
-  transition: opacity var(--hell-duration-base) var(--hell-ease-out);
-  &[data-hidden="true"] { @apply opacity-0 pointer-events-none; }
+  transition:
+    opacity var(--hell-duration-base) var(--hell-ease-out),
+    visibility var(--hell-duration-base) var(--hell-ease-out);
+  &[data-hidden="true"] {
+    @apply opacity-0 pointer-events-none;
+    visibility: hidden;
+    border-left-color: transparent;
+  }
 }
 
+/* Reusable nav-item styling used outside sidenav (e.g. composite menus). */
 @utility hell-nav-item {
   @apply flex items-center font-medium cursor-pointer no-underline;
-  gap: var(--hell-space-4);
-  padding: 8px 14px;
-  margin: 1px 8px;
+  gap: var(--hell-space-3);
+  padding: 8px 12px;
   font-size: 13px;
   color: var(--hell-color-text-muted);
   border-radius: var(--hell-radius-md);
@@ -112,7 +188,6 @@
     background: var(--hell-color-primary-soft);
     color: var(--hell-color-primary);
   }
-
   > .hell-nav-icon {
     @apply inline-flex items-center justify-center flex-shrink-0;
     width: 16px;
@@ -121,19 +196,72 @@
     @apply flex-1 whitespace-nowrap overflow-hidden;
     text-overflow: ellipsis;
   }
-  [data-collapsed="true"] & > .hell-nav-label,
-  [data-collapsed="true"] & > .hell-nav-trailing { @apply hidden; }
 }
 
 @utility hell-nav-section-label {
-  padding: 14px 14px 4px;
+  padding: 14px 12px 4px;
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--hell-color-text-subtle);
-  [data-collapsed="true"] & {
-    @apply text-center;
-    padding-inline: 4px;
+}
+
+/*
+ * Edge toggle — small pill button that floats on the inner edge of a side
+ * panel. Use with [hellSecondaryToggle] on a button placed inside
+ * <aside hellAppSecondary> to give the user a discoverable hide/show handle:
+ *
+ *   <button hellSecondaryToggle class="hell-secondary-edge-toggle">…</button>
+ *
+ * The button stays positioned even while the secondary is hidden (its
+ * pointer events are restored so users can re-open the panel).
+ */
+@utility hell-edge-toggle {
+  position: absolute;
+  top: 16px;
+  width: 22px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--hell-color-border);
+  background: var(--hell-color-bg-elevated);
+  color: var(--hell-color-text-muted);
+  cursor: pointer;
+  z-index: 10;
+  border-radius: 0 999px 999px 0;
+  box-shadow: 1px 1px 3px -1px rgb(0 0 0 / 0.08);
+  transition:
+    background var(--hell-duration-fast) var(--hell-ease-out),
+    color var(--hell-duration-fast) var(--hell-ease-out);
+
+  & > hell-icon { line-height: 0; }
+
+  &:hover {
+    background: var(--hell-color-bg-subtle);
+    color: var(--hell-color-text);
+  }
+}
+
+@utility hell-secondary-edge-toggle {
+  @apply hell-edge-toggle;
+  /* Pinned to the LEFT edge of the secondary panel (overlaps the border).
+     Stays clickable even when the secondary aside is hidden so the user has
+     a way to re-open it. */
+  left: -11px;
+  border-radius: 999px 0 0 999px;
+  pointer-events: auto;
+
+  /* When the parent aside has data-hidden="true", the aside's opacity drops
+     to 0 — but we still want the edge toggle to be reachable. Pull it out
+     visually via a small offset and keep it visible. */
+  [data-hidden="true"] > & {
+    opacity: 1;
+    visibility: visible;
+    /* Ensure it sits just outside the (now-collapsed) panel so it can
+       be clicked even though the panel itself has 0 width. */
+    left: -22px;
   }
 }

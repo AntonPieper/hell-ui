@@ -1,0 +1,120 @@
+/*
+ * Slider — wraps NgpSlider primitives.
+ *
+ * Design:
+ *   • Track is a soft pill on the muted surface.
+ *   • Filled range uses primary, with a subtle inner shadow for depth.
+ *   • Thumb is a larger, easily grabbable disc with a soft shadow and an
+ *     animated focus ring. Scales on hover/active.
+ */
+
+@utility hell-slider {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  height: 24px;
+  touch-action: none;
+  user-select: none;
+  cursor: pointer;
+
+  &[data-disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  &[data-orientation="vertical"] {
+    width: 24px;
+    height: 160px;
+    flex-direction: column;
+  }
+  &[data-size="sm"] { height: 20px; }
+  &[data-size="lg"] { height: 28px; }
+}
+
+@utility hell-slider-track {
+  position: relative;
+  flex: 1 1 auto;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--hell-color-bg-muted);
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.05);
+
+  [data-orientation="vertical"] > & {
+    width: 6px;
+    height: 100%;
+  }
+  [data-size="sm"] > & { height: 4px; }
+  [data-size="lg"] > & { height: 8px; }
+}
+
+@utility hell-slider-range {
+  position: absolute;
+  inset-block: 0;
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--hell-color-primary) 92%, white),
+    var(--hell-color-primary)
+  );
+  box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.08);
+
+  [data-orientation="vertical"] > [ngpSliderTrack] > & {
+    inset-block: auto;
+    inset-inline: 0;
+  }
+}
+
+@utility hell-slider-thumb {
+  position: absolute;
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--hell-color-primary) 35%, var(--hell-color-border));
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.15),
+    0 0 0 0 color-mix(in srgb, var(--hell-color-primary) 25%, transparent);
+  outline: none;
+  transform: translateX(-50%);
+  cursor: grab;
+  transition:
+    transform var(--hell-duration-fast) var(--hell-ease-out),
+    box-shadow var(--hell-duration-fast) var(--hell-ease-out),
+    border-color var(--hell-duration-fast) var(--hell-ease-out);
+
+  [data-orientation="vertical"] > & {
+    transform: translateY(50%);
+  }
+  [data-size="sm"] > & { width: 14px; height: 14px; }
+  [data-size="lg"] > & { width: 22px; height: 22px; }
+
+  &[data-hover] {
+    transform: translateX(-50%) scale(1.08);
+    border-color: var(--hell-color-primary);
+    box-shadow:
+      0 2px 6px rgb(0 0 0 / 0.18),
+      0 0 0 6px color-mix(in srgb, var(--hell-color-primary) 14%, transparent);
+  }
+  [data-orientation="vertical"] > &[data-hover] {
+    transform: translateY(50%) scale(1.08);
+  }
+
+  &[data-press] {
+    cursor: grabbing;
+    transform: translateX(-50%) scale(0.96);
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.18),
+      0 0 0 8px color-mix(in srgb, var(--hell-color-primary) 18%, transparent);
+  }
+  [data-orientation="vertical"] > &[data-press] {
+    transform: translateY(50%) scale(0.96);
+  }
+
+  &[data-focus-visible] {
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.18),
+      0 0 0 4px var(--hell-color-focus-ring);
+  }
+}

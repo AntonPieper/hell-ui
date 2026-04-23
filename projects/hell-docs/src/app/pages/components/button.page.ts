@@ -1,10 +1,10 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellButton } from 'hell';
+import { HellButton, HellIcon } from 'hell';
 
 @Component({
   selector: 'hd-button',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton],
+  imports: [HellButton, HellIcon],
   template: `
     <article class="hd-prose">
       <h1>Button</h1>
@@ -13,21 +13,70 @@ import { HellButton } from 'hell';
         handling. Use the <code>variant</code> input for visual emphasis and
         <code>size</code> for density.</p>
 
-      <h2>Examples</h2>
-      <div class="hd-example" style="display:flex; gap:0.5rem; flex-wrap:wrap">
+      <h2>Variants</h2>
+      <div class="hd-example flex flex-wrap gap-2">
         <button hellButton variant="primary">Primary</button>
         <button hellButton variant="default">Default</button>
         <button hellButton variant="soft">Soft</button>
         <button hellButton variant="ghost">Ghost</button>
         <button hellButton variant="danger">Danger</button>
+        <button hellButton variant="success">Success</button>
         <button hellButton variant="primary" disabled>Disabled</button>
       </div>
 
       <h2>Sizes</h2>
-      <div class="hd-example" style="display:flex; gap:0.5rem; align-items:center">
+      <div class="hd-example flex items-center gap-2">
+        <button hellButton size="xs">XS</button>
         <button hellButton size="sm">Small</button>
         <button hellButton size="md">Medium</button>
         <button hellButton size="lg">Large</button>
+        <button hellButton size="xl">XL</button>
+      </div>
+
+      <h2>With icons</h2>
+      <div class="hd-example flex flex-wrap items-center gap-2">
+        <button hellButton variant="primary">
+          <hell-icon name="faSolidUpload" />
+          Upload
+        </button>
+        <button hellButton>
+          <hell-icon name="faSolidDownload" />
+          Download
+        </button>
+        <button hellButton variant="ghost">
+          More
+          <hell-icon name="faSolidChevronDown" />
+        </button>
+      </div>
+
+      <h2>Icon-only</h2>
+      <p>
+        Add the <code>iconOnly</code> attribute to render a square button. Always
+        provide an <code>aria-label</code> so screen readers describe the action.
+      </p>
+      <div class="hd-example flex flex-wrap items-center gap-2">
+        @for (size of ['xs', 'sm', 'md', 'lg', 'xl']; track size) {
+          <button hellButton iconOnly [size]="$any(size)" aria-label="Settings">
+            <hell-icon name="faSolidGear" />
+          </button>
+        }
+        <button hellButton iconOnly variant="primary" aria-label="Add">
+          <hell-icon name="faSolidPlus" />
+        </button>
+        <button hellButton iconOnly variant="soft" aria-label="Edit">
+          <hell-icon name="faSolidPenToSquare" />
+        </button>
+        <button hellButton iconOnly variant="ghost" aria-label="Delete">
+          <hell-icon name="faSolidXmark" />
+        </button>
+        <button hellButton iconOnly variant="danger" aria-label="Delete">
+          <hell-icon name="faSolidXmark" />
+        </button>
+      </div>
+
+      <h2>Block</h2>
+      <div class="hd-example">
+        <button hellButton variant="primary" block>Continue</button>
       </div>
 
       <h2>API</h2>
@@ -43,6 +92,7 @@ import { HellButton } from 'hell';
       <ul>
         <li>Use <code>primary</code> sparingly — one per region.</li>
         <li>Use <code>ghost</code> for low-emphasis actions in toolbars.</li>
+        <li>Always pair <code>iconOnly</code> with an <code>aria-label</code>.</li>
       </ul>
 
       <h2>Don't</h2>

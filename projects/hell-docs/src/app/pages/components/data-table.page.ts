@@ -30,7 +30,7 @@ const ALL: Row[] = Array.from({ length: 47 }, (_, i) => ({
       </p>
 
       <h2>Example</h2>
-      <div class="hd-example" style="padding:0">
+      <div class="hd-example hd-example-flush">
         <hell-data-table
           [data]="rows()"
           [columns]="columns"

@@ -13,7 +13,7 @@ import { HellButton, HellProgress, HellProgressBar } from 'hell';
         <code>max</code> (default 100).</p>
 
       <h2>Examples</h2>
-      <div class="hd-example" style="display:grid; gap:0.5rem; max-width:380px">
+      <div class="hd-example grid max-w-95 gap-2">
         <div hellProgress [value]="0"><div hellProgressBar></div></div>
         <div hellProgress [value]="33"><div hellProgressBar></div></div>
         <div hellProgress [value]="66"><div hellProgressBar></div></div>
@@ -21,12 +21,12 @@ import { HellButton, HellProgress, HellProgressBar } from 'hell';
       </div>
 
       <h2>Interactive</h2>
-      <div class="hd-example" style="display:grid; gap:0.5rem; max-width:380px">
+      <div class="hd-example grid max-w-95 gap-2">
         <div hellProgress [value]="value()"><div hellProgressBar></div></div>
-        <div style="display:flex; gap:0.5rem">
+        <div class="flex gap-2">
           <button hellButton size="sm" (click)="step(-10)">−10</button>
           <button hellButton size="sm" (click)="step(10)">+10</button>
-          <span style="margin-left:auto">{{ value() }}%</span>
+          <span class="ml-auto">{{ value() }}%</span>
         </div>
       </div>
 

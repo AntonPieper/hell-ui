@@ -23,7 +23,7 @@ import { HellAvatarGroup, HellAvatarItem } from 'hell';
       </div>
 
       <h2>Sizes</h2>
-      <div class="hd-example" style="display:grid; gap:0.75rem">
+      <div class="hd-example grid gap-3">
         <hell-avatar-group size="sm" [items]="people" [max]="4" />
         <hell-avatar-group size="md" [items]="people" [max]="4" />
         <hell-avatar-group size="lg" [items]="people" [max]="4" />

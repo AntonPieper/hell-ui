@@ -13,23 +13,23 @@ import { HellCheckbox } from 'hell';
         supported for parent/child group patterns.</p>
 
       <h2>Example</h2>
-      <div class="hd-example" style="display:grid; gap:0.5rem">
-        <label style="display:inline-flex; align-items:center; gap:0.5rem">
+      <div class="hd-example grid gap-2">
+        <label class="inline-flex items-center gap-2">
           <hell-checkbox
             [checked]="agree()"
             (checkedChange)="agree.set($event)"
           />
           I agree to the terms
         </label>
-        <label style="display:inline-flex; align-items:center; gap:0.5rem">
+        <label class="inline-flex items-center gap-2">
           <hell-checkbox indeterminate />
           Indeterminate (parent of mixed children)
         </label>
-        <label style="display:inline-flex; align-items:center; gap:0.5rem; opacity:0.6">
+        <label class="inline-flex items-center gap-2 opacity-60">
           <hell-checkbox disabled />
           Disabled
         </label>
-        <label style="display:inline-flex; align-items:center; gap:0.5rem">
+        <label class="inline-flex items-center gap-2">
           <hell-checkbox checked disabled />
           Disabled, checked
         </label>

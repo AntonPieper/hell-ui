@@ -11,6 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { HellButton } from '../../primitives/button/button';
+import { HellSlider } from '../../primitives/slider/slider';
 
 /**
  * Compact audio player with seek bar, play/pause, mute, volume slider and
@@ -18,7 +19,7 @@ import { HellButton } from '../../primitives/button/button';
  */
 @Component({
   selector: 'hell-audio-player',
-  imports: [HellButton],
+  imports: [HellButton, HellSlider],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class.hell-audio]': '!unstyled()',
@@ -80,14 +81,14 @@ import { HellButton } from '../../primitives/button/button';
       }
     </button>
 
-    <input
-      type="range"
-      min="0"
-      max="1"
-      step="0.01"
-      [value]="volume()"
-      (input)="onVolume($event)"
-      style="accent-color: var(--hell-color-primary); width: 60px;"
+    <hell-slider
+      class="hell-audio-volume"
+      size="sm"
+      [value]="volume() * 100"
+      [min]="0"
+      [max]="100"
+      [step]="1"
+      (valueChange)="onVolume($event)"
       aria-label="Volume"
     />
 
@@ -150,9 +151,10 @@ export class HellAudioPlayer {
     this.muted.update(v => !v);
   }
 
-  protected onVolume(e: Event) {
-    this.volume.set(+(e.target as HTMLInputElement).value);
-    this.muted.set(this.volume() === 0);
+  protected onVolume(v: number) {
+    const next = Math.max(0, Math.min(1, v / 100));
+    this.volume.set(next);
+    this.muted.set(next === 0);
   }
 
   protected onTime() {

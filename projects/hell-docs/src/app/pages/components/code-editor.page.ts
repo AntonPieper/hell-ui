@@ -13,22 +13,22 @@ import { HellCodeEditor } from 'hell';
         dynamically imported. Load this feature lazily.</p>
 
       <h2>Editable</h2>
-      <div class="hd-example" style="padding:0">
+      <div class="hd-example hd-example-flush">
         <hell-code-editor
           [value]="snippet()"
           language="typescript"
           (valueChange)="snippet.set($event)"
-          style="display:block; min-height:200px"></hell-code-editor>
+          class="block"></hell-code-editor>
       </div>
-      <p style="font-size:.875rem; opacity:.7">Length: {{ snippet().length }} chars</p>
+      <p class="hd-note">Length: {{ snippet().length }} chars</p>
 
       <h2>Read-only viewer</h2>
-      <div class="hd-example" style="padding:0">
+      <div class="hd-example hd-example-flush">
         <hell-code-editor
           [value]="json"
           language="json"
           readOnly
-          style="display:block; min-height:160px"></hell-code-editor>
+          class="block"></hell-code-editor>
       </div>
 
       <h2>API</h2>

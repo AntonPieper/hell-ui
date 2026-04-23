@@ -13,7 +13,7 @@ import { HellDialpad } from 'hell';
         with the running number.</p>
 
       <h2>Example</h2>
-      <div class="hd-example" style="display:flex; gap:1.5rem; align-items:flex-start; flex-wrap:wrap">
+      <div class="hd-example flex flex-wrap items-start gap-6">
         <hell-dialpad (digit)="onDigit($event)" (valueChange)="number.set($event)" />
         <div>
           <p>Last digit: <code>{{ last() || '—' }}</code></p>

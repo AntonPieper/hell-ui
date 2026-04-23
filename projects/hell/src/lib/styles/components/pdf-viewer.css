@@ -1,7 +1,143 @@
+/* PDF viewer container + toolbar styling.
+   The page rendering itself is handled by `pdfjs-dist/web/pdf_viewer.css`,
+   which consumers must import once at the application level. */
+
+@utility hell-pdf {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--hell-color-surface);
+  border: 1px solid var(--hell-color-border);
+  border-radius: var(--hell-radius-md);
+  outline: none;
+  position: relative;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--hell-color-bg), 0 0 0 4px var(--hell-color-focus-ring);
+  }
+}
+
+@utility hell-pdf-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--hell-color-border);
+  background: color-mix(in srgb, var(--hell-color-surface) 92%, var(--hell-color-fg));
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+}
+
+@utility hell-pdf-spacer {
+  flex: 1 1 auto;
+}
+
+@utility hell-pdf-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--hell-color-border);
+  margin: 0 4px;
+}
+
+@utility hell-pdf-toolbar-text {
+  font-size: var(--hell-font-size-sm);
+  color: var(--hell-color-muted-fg);
+  margin: 0 4px;
+}
+
+@utility hell-pdf-page-input {
+  width: 56px;
+  flex: 0 0 56px;
+  text-align: center;
+  padding: 4px 6px;
+  font-size: var(--hell-font-size-sm);
+  -moz-appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+@utility hell-pdf-zoom-select {
+  height: 28px;
+  padding: 0 22px 0 8px;
+  font-size: var(--hell-font-size-sm);
+  background: var(--hell-color-bg);
+  color: var(--hell-color-fg);
+  border: 1px solid var(--hell-color-border);
+  border-radius: var(--hell-radius-sm);
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--hell-color-muted-fg) 50%),
+                    linear-gradient(135deg, var(--hell-color-muted-fg) 50%, transparent 50%);
+  background-position: calc(100% - 12px) 12px, calc(100% - 8px) 12px;
+  background-size: 4px 4px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: none;
+    border-color: var(--hell-color-primary);
+    box-shadow: 0 0 0 2px var(--hell-color-focus-ring);
+  }
+}
+
+@utility hell-pdf-findbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--hell-color-border);
+  background: var(--hell-color-bg);
+  flex: 0 0 auto;
+}
+
+@utility hell-pdf-find-input {
+  flex: 1 1 auto;
+  min-width: 120px;
+  max-width: 320px;
+}
+
+@utility hell-pdf-find-count {
+  font-size: var(--hell-font-size-xs);
+  color: var(--hell-color-muted-fg);
+  min-width: 56px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility hell-pdf-host {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  background: color-mix(in srgb, var(--hell-color-fg) 6%, var(--hell-color-bg));
+}
+
+@utility hell-pdf-scroll {
+  /* pdf.js requires the scroll container to be absolutely positioned. */
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+
+  /* Pdf.js' .pdfViewer renders its pages here. Center them and add air. */
+  & .pdfViewer {
+    padding: 12px 0;
+  }
+
+  & .pdfViewer .page {
+    margin: 8px auto;
+    border: 1px solid var(--hell-color-border);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 8px 24px -12px rgb(0 0 0 / 0.18);
+    background-color: white;
+  }
+}
 /* PDF viewer — toolbar / scroll wrap / canvas. */
 
 @utility hell-pdf {
   @apply flex flex-col overflow-hidden;
+  height: 100%;
   min-height: 360px;
   background: var(--hell-color-bg-subtle);
   border: 1px solid var(--hell-color-border);
@@ -9,7 +145,7 @@
 }
 
 @utility hell-pdf-toolbar {
-  @apply flex items-center;
+  @apply flex items-center flex-shrink-0;
   gap: var(--hell-space-3);
   padding: var(--hell-space-3) var(--hell-space-4);
   border-bottom: 1px solid var(--hell-color-border);
@@ -18,13 +154,16 @@
 }
 
 @utility hell-pdf-canvas-wrap {
-  @apply flex-1 flex flex-col items-center overflow-auto;
+  @apply flex-1 flex flex-col items-center;
+  min-height: 0;
+  overflow: auto;
   padding: var(--hell-space-5);
   gap: var(--hell-space-4);
 
   > canvas {
     box-shadow: var(--hell-shadow-md);
     background: #fff;
-    max-width: 100%;
+    max-width: none;
+    flex-shrink: 0;
   }
 }

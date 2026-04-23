@@ -5,8 +5,23 @@ import {
   HellAppTopbar,
   HellAppSidenav,
   HellAppContent,
+  HellAppSecondary,
+  HellSidenavToggle,
+  HellSecondaryToggle,
   HellButton,
+  HellIcon,
 } from 'hell';
+
+interface NavItem {
+  path: string;
+  label: string;
+  icon: string;
+  exact?: boolean;
+}
+interface NavSection {
+  heading?: string;
+  items: NavItem[];
+}
 
 @Component({
   selector: 'hd-root',
@@ -19,8 +34,72 @@ import {
     HellAppTopbar,
     HellAppSidenav,
     HellAppContent,
+    HellAppSecondary,
+    HellSidenavToggle,
+    HellSecondaryToggle,
     HellButton,
+    HellIcon,
   ],
   templateUrl: './app.html',
 })
-export class App {}
+export class App {
+  protected readonly sections: NavSection[] = [
+    {
+      items: [
+        { path: '/', label: 'Overview', icon: 'faSolidHouse', exact: true },
+        { path: '/getting-started', label: 'Getting started', icon: 'faSolidRocket' },
+        { path: '/theming', label: 'Theming', icon: 'faSolidPalette' },
+      ],
+    },
+    {
+      heading: 'Primitives',
+      items: [
+        { path: '/components/accordion', label: 'Accordion', icon: 'faSolidLayerGroup' },
+        { path: '/components/avatar', label: 'Avatar', icon: 'faSolidUser' },
+        { path: '/components/breadcrumbs', label: 'Breadcrumbs', icon: 'faSolidSignsPost' },
+        { path: '/components/button', label: 'Button', icon: 'faSolidWindowMaximize' },
+        { path: '/components/card', label: 'Card', icon: 'faSolidIdCard' },
+        { path: '/components/checkbox', label: 'Checkbox', icon: 'faSolidCheck' },
+        { path: '/components/date-input', label: 'Date input', icon: 'faSolidCalendar' },
+        { path: '/components/date-picker', label: 'Date picker', icon: 'faSolidCalendar' },
+        { path: '/components/dialog', label: 'Dialog', icon: 'faSolidWindowRestore' },
+        { path: '/components/field', label: 'Field', icon: 'faSolidPenToSquare' },
+        { path: '/components/icon', label: 'Icon', icon: 'faSolidStar' },
+        { path: '/components/input', label: 'Input', icon: 'faSolidPenRuler' },
+        { path: '/components/menu', label: 'Menu', icon: 'faSolidEllipsisVertical' },
+        { path: '/components/pagination', label: 'Pagination', icon: 'faSolidTableColumns' },
+        { path: '/components/popover', label: 'Popover', icon: 'faSolidComment' },
+        { path: '/components/progress', label: 'Progress', icon: 'faSolidSliders' },
+        { path: '/components/radio', label: 'Radio', icon: 'faSolidCircleHalfStroke' },
+        { path: '/components/separator', label: 'Separator', icon: 'faSolidGripLines' },
+        { path: '/components/skeleton', label: 'Skeleton', icon: 'faSolidImage' },
+        { path: '/components/slider', label: 'Slider', icon: 'faSolidSliders' },
+        { path: '/components/switch', label: 'Switch', icon: 'faSolidToggleOn' },
+        { path: '/components/tabs', label: 'Tabs', icon: 'faSolidFolderOpen' },
+        { path: '/components/tag', label: 'Tag', icon: 'faSolidTag' },
+        { path: '/components/time-input', label: 'Time input', icon: 'faSolidClock' },
+        { path: '/components/toggle', label: 'Toggle', icon: 'faSolidToggleOn' },
+        { path: '/components/tooltip', label: 'Tooltip', icon: 'faSolidQuestion' },
+      ],
+    },
+    {
+      heading: 'Composites',
+      items: [
+        { path: '/components/app-shell', label: 'App shell', icon: 'faSolidTableColumns' },
+        { path: '/components/audio-player', label: 'Audio player', icon: 'faSolidPlay' },
+        { path: '/components/avatar-group', label: 'Avatar group', icon: 'faSolidUsers' },
+        { path: '/components/dialpad', label: 'Dialpad', icon: 'faSolidPhone' },
+        { path: '/components/drop-zone', label: 'Drop zone', icon: 'faSolidUpload' },
+        { path: '/components/resizable', label: 'Resizable', icon: 'faSolidGripVertical' },
+      ],
+    },
+    {
+      heading: 'Features',
+      items: [
+        { path: '/components/code-editor', label: 'Code editor', icon: 'faSolidCode' },
+        { path: '/components/data-table', label: 'Data table', icon: 'faSolidTable' },
+        { path: '/components/pdf-viewer', label: 'PDF viewer', icon: 'faSolidFilePdf' },
+      ],
+    },
+  ];
+}

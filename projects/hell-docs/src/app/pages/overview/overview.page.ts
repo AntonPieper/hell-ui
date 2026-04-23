@@ -31,7 +31,7 @@ import { HellButton, HELL_CARD_DIRECTIVES } from 'hell';
           shadow-DOM gymnastics.</li>
       </ul>
 
-      <div hellCard style="margin-top: 1rem">
+      <div hellCard class="mt-4">
         <div hellCardHeader><strong>Get started</strong></div>
         <div hellCardBody>
           <p>Install the library, register the icon set, and start composing.</p>

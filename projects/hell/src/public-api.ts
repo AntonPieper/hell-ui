@@ -25,9 +25,14 @@ export * from './lib/primitives/popover/popover';
 export * from './lib/primitives/tooltip/tooltip';
 export * from './lib/primitives/menu/menu';
 export * from './lib/primitives/progress/progress';
+export * from './lib/primitives/slider/slider';
 export * from './lib/primitives/skeleton/skeleton';
 export * from './lib/primitives/breadcrumbs/breadcrumbs';
 export * from './lib/primitives/icon/icon';
+export * from './lib/primitives/pagination/pagination';
+export * from './lib/primitives/date-picker/date-picker';
+export * from './lib/primitives/date-input/date-input';
+export * from './lib/primitives/time-input/time-input';
 
 // Composites
 export * from './lib/composites/avatar-group/avatar-group';
