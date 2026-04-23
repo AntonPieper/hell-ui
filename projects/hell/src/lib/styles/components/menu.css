@@ -2,85 +2,86 @@
 
 @utility hell-menu {
   @apply flex flex-col;
-  position: fixed;
-  background: var(--hell-color-bg-elevated);
-  border: 1px solid var(--hell-color-border);
-  border-radius: var(--hell-radius-md);
-  box-shadow: var(--hell-shadow-lg);
-  padding: var(--hell-space-2);
-  min-width: 200px;
-  outline: none;
-  gap: 1px;
-  animation: hell-pop-in var(--hell-duration-fast) var(--hell-ease-out);
+  @apply fixed;
+  @apply bg-(--hell-color-bg-elevated);
+  @apply border border-(--hell-color-border);
+  @apply rounded-md;
+  @apply shadow-(--hell-shadow-lg);
+  @apply p-(--hell-space-2);
+  @apply min-w-[200px];
+  @apply outline-none;
+  @apply gap-[1px];
+  @apply animate-[hell-pop-in_var(--hell-duration-fast)_var(--hell-ease-out)];
 }
 
 @utility hell-menu-item {
   @apply flex items-center text-start cursor-pointer;
-  gap: var(--hell-space-3);
-  padding: 6px 10px;
-  font-size: 13px;
-  color: var(--hell-color-text);
-  background: transparent;
-  border: none;
-  border-radius: var(--hell-radius-sm);
-  outline: none;
-  font-family: inherit;
+  @apply gap-(--hell-space-3);
+  @apply py-1.5 px-2.5;
+  @apply text-[13px];
+  @apply text-(--hell-color-text);
+  @apply bg-transparent;
+  @apply border-0;
+  @apply rounded;
+  @apply outline-none;
+  @apply font-[inherit];
 
   &[data-hover],
   &[data-focus-visible],
-  &[data-open] { background: var(--hell-color-bg-muted); }
+  &[data-open] { @apply bg-(--hell-color-bg-muted); }
   &[data-disabled] { @apply opacity-50 cursor-not-allowed; }
 
   > .hell-menu-item-icon,
   > hell-icon {
     @apply inline-flex items-center justify-center flex-shrink-0;
-    width: 16px;
-    color: var(--hell-color-text-subtle);
+    @apply w-4;
+    @apply text-(--hell-color-text-subtle);
   }
   &[data-hover] > .hell-menu-item-icon,
-  &[data-hover] > hell-icon { color: var(--hell-color-text); }
+  &[data-hover] > hell-icon { @apply text-(--hell-color-text); }
 }
 
 @utility hell-menu-item-trailing {
   @apply ms-auto inline-flex items-center;
-  gap: 4px;
-  font-size: 11px;
-  color: var(--hell-color-text-subtle);
-  font-variant-numeric: tabular-nums;
+  @apply gap-1;
+  @apply text-[11px];
+  @apply text-(--hell-color-text-subtle);
+  @apply tabular-nums;
 }
 
 /* Submenu trigger gets an automatic chevron on the trailing edge. */
 @utility hell-menu-item-submenu {
   &::after {
-    content: '';
-    margin-inline-start: auto;
-    width: 6px;
-    height: 6px;
-    border-top: 1.5px solid currentColor;
-    border-right: 1.5px solid currentColor;
-    transform: rotate(45deg);
-    color: var(--hell-color-text-subtle);
-    flex-shrink: 0;
+    @apply content-[''];
+    @apply ms-auto;
+    @apply w-1.5;
+    @apply h-1.5;
+    @apply [border-top:1.5px_solid_currentColor];
+    @apply [border-right:1.5px_solid_currentColor];
+    @apply rotate-45;
+    @apply text-(--hell-color-text-subtle);
+    @apply shrink-0;
   }
 }
 
 @utility hell-menu-separator {
-  height: 1px;
-  background: var(--hell-color-border);
-  margin: 4px 2px;
+  @apply h-px;
+  @apply bg-(--hell-color-border);
+  @apply my-1 mx-[2px];
 }
 
 @utility hell-menu-section {
   @apply flex flex-col;
-  gap: 1px;
+  @apply gap-[1px];
 
-  & + .hell-menu-section { margin-top: var(--hell-space-2); }
+  & + .hell-menu-section { @apply [margin-top:var(--hell-space-2)]; }
 }
 
 @utility hell-menu-label {
   @apply uppercase font-semibold;
-  padding: 6px 10px 2px;
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  color: var(--hell-color-text-subtle);
+  @apply pt-1.5 px-2.5 pb-[2px];
+  @apply text-[10px];
+  @apply tracking-[0.08em];
+  @apply text-(--hell-color-text-subtle);
 }
+

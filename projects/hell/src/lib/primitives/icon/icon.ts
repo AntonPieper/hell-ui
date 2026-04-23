@@ -22,13 +22,14 @@ import { NgIcon } from '@ng-icons/core';
   imports: [NgIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    style: 'display:inline-flex; line-height:0;',
+    '[class.hell-icon]': '!unstyled()',
     '[style.--ng-icon__size]': 'size()',
-    '[style.color]': 'color()',
+    '[style.--_hell-icon-color]': 'color()',
   },
   template: `<ng-icon [name]="name()" [attr.aria-hidden]="decorative() ? 'true' : null" />`,
 })
 export class HellIcon {
+  readonly unstyled = input(false, { transform: booleanAttribute });
   readonly name = input.required<string>();
   readonly size = input<string>('1em');
   readonly color = input<string | null>(null);

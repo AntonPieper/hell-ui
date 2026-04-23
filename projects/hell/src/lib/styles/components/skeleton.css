@@ -1,17 +1,10 @@
 /* Skeleton + Spinner — loading placeholders. */
 
 @utility hell-skeleton {
-  @apply block;
-  background: linear-gradient(
-    90deg,
-    var(--hell-color-bg-muted) 0%,
-    var(--hell-color-bg-subtle) 50%,
-    var(--hell-color-bg-muted) 100%
-  );
-  background-size: 200% 100%;
-  animation: hell-shimmer 1.5s infinite linear;
-  border-radius: var(--hell-radius-sm);
-  min-height: 12px;
+  @apply block min-h-3 [width:var(--_hell-skeleton-width,100%)] [height:var(--_hell-skeleton-height,14px)] rounded-sm;
+  @apply bg-[linear-gradient(_90deg,_var(--hell-color-bg-muted)_0%,_var(--hell-color-bg-subtle)_50%,_var(--hell-color-bg-muted)_100%_)];
+  @apply [background-size:200%_100%];
+  @apply animate-[hell-shimmer_1.5s_infinite_linear];
 }
 @keyframes hell-shimmer {
   from { background-position: -200% 0; }
@@ -20,11 +13,12 @@
 
 @utility hell-spinner {
   @apply inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: hell-spin 0.7s linear infinite;
+  @apply w-4;
+  @apply h-4;
+  @apply border-2 border-current;
+  @apply border-t-transparent;
+  @apply rounded-[50%];
+  @apply animate-[hell-spin_0.7s_linear_infinite];
 }
 @keyframes hell-spin { to { transform: rotate(360deg); } }
+

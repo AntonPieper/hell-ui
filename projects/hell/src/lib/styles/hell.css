@@ -8,8 +8,7 @@
  * Tokens + design system base are declared in tokens.css.
  * Component classes are split per-component under ./components/.
  * Each component file registers Tailwind v4 `@utility` rules using `@apply`
- * for layout/typography utilities and raw CSS only for token-bound colors
- * and ng-primitives data-attribute selectors.
+ * classes plus CSS variables and data-attribute selectors for headless state.
  */
 
 @import "./tokens.css";
@@ -30,6 +29,7 @@
 @import "./components/menu.css";
 @import "./components/tooltip.css";
 @import "./components/avatar.css";
+@import "./components/icon.css";
 @import "./components/tag.css";
 @import "./components/skeleton.css";
 @import "./components/progress.css";

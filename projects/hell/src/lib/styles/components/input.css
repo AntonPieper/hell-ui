@@ -3,77 +3,74 @@
 @utility hell-input {
   @apply inline-flex w-full;
 
-  --_hell-input-height: var(--hell-control-height-md);
-  --_hell-input-px: var(--hell-space-4);
-  --_hell-input-font: 13px;
+  @apply [--_hell-input-height:var(--hell-control-height-md)];
+  @apply [--_hell-input-px:var(--hell-space-4)];
+  @apply [--_hell-input-font:13px];
 
-  height: var(--_hell-input-height);
-  padding-inline: var(--_hell-input-px);
-  font-size: var(--_hell-input-font);
-  font-family: inherit;
-  color: var(--hell-color-text);
-  background: var(--hell-color-bg-elevated);
-  border: 1px solid var(--hell-color-border);
-  border-radius: var(--hell-radius-md);
-  outline: none;
-  transition:
-    border-color var(--hell-duration-fast) var(--hell-ease-out),
-    box-shadow var(--hell-duration-fast) var(--hell-ease-out);
+  @apply h-(--_hell-input-height);
+  @apply px-(--_hell-input-px);
+  @apply text-[var(--_hell-input-font)];
+  @apply font-[inherit];
+  @apply text-(--hell-color-text);
+  @apply bg-(--hell-color-bg-elevated);
+  @apply border border-(--hell-color-border);
+  @apply rounded-md;
+  @apply outline-none;
+  @apply [transition:border-color_var(--hell-duration-fast)_var(--hell-ease-out),_box-shadow_var(--hell-duration-fast)_var(--hell-ease-out)];
 
-  &::placeholder { color: var(--hell-color-text-subtle); }
-  &[data-hover]:not([data-focus]) { border-color: var(--hell-color-border-strong); }
+  &::placeholder { @apply text-(--hell-color-text-subtle); }
+  &[data-hover]:not([data-focus]) { @apply border-(--hell-color-border-strong); }
   &[data-focus],
   &:focus {
-    border-color: var(--hell-color-border-focus);
-    box-shadow: 0 0 0 3px var(--hell-color-focus-ring);
+    @apply border-(--hell-color-border-focus);
+    @apply shadow-[0_0_0_3px_var(--hell-color-focus-ring)];
   }
   &[data-disabled],
   &:disabled {
     @apply cursor-not-allowed;
-    background: var(--hell-color-bg-subtle);
-    color: var(--hell-color-text-muted);
+    @apply bg-(--hell-color-bg-subtle);
+    @apply text-(--hell-color-text-muted);
   }
-  &[aria-invalid="true"] { border-color: var(--hell-color-danger); }
+  &[aria-invalid="true"] { @apply border-(--hell-color-danger); }
 
   &[data-size="sm"] {
-    --_hell-input-height: var(--hell-control-height-sm);
-    --_hell-input-px: var(--hell-space-3);
-    --_hell-input-font: 12px;
+    @apply [--_hell-input-height:var(--hell-control-height-sm)];
+    @apply [--_hell-input-px:var(--hell-space-3)];
+    @apply [--_hell-input-font:12px];
   }
   &[data-size="lg"] {
-    --_hell-input-height: var(--hell-control-height-lg);
-    --_hell-input-px: var(--hell-space-5);
-    --_hell-input-font: 14px;
+    @apply [--_hell-input-height:var(--hell-control-height-lg)];
+    @apply [--_hell-input-px:var(--hell-space-5)];
+    @apply [--_hell-input-font:14px];
   }
 }
 
 @utility hell-textarea {
   @apply w-full resize-y;
-  font-size: 13px;
-  font-family: inherit;
-  color: var(--hell-color-text);
-  background: var(--hell-color-bg-elevated);
-  border: 1px solid var(--hell-color-border);
-  border-radius: var(--hell-radius-md);
-  outline: none;
-  transition:
-    border-color var(--hell-duration-fast) var(--hell-ease-out),
-    box-shadow var(--hell-duration-fast) var(--hell-ease-out);
-  padding-inline: var(--hell-space-4);
-  padding-block: var(--hell-space-3);
-  min-height: calc(var(--hell-control-height-md) * 2);
-  line-height: 1.5;
+  @apply text-[13px];
+  @apply font-[inherit];
+  @apply text-(--hell-color-text);
+  @apply bg-(--hell-color-bg-elevated);
+  @apply border border-(--hell-color-border);
+  @apply rounded-md;
+  @apply outline-none;
+  @apply [transition:border-color_var(--hell-duration-fast)_var(--hell-ease-out),_box-shadow_var(--hell-duration-fast)_var(--hell-ease-out)];
+  @apply px-(--hell-space-4);
+  @apply py-(--hell-space-3);
+  @apply min-h-[calc(var(--hell-control-height-md)_*_2)];
+  @apply leading-[1.5];
 
-  &::placeholder { color: var(--hell-color-text-subtle); }
+  &::placeholder { @apply text-(--hell-color-text-subtle); }
   &[data-focus],
   &:focus {
-    border-color: var(--hell-color-border-focus);
-    box-shadow: 0 0 0 3px var(--hell-color-focus-ring);
+    @apply border-(--hell-color-border-focus);
+    @apply shadow-[0_0_0_3px_var(--hell-color-focus-ring)];
   }
   &[data-disabled],
   &:disabled {
     @apply cursor-not-allowed;
-    background: var(--hell-color-bg-subtle);
-    color: var(--hell-color-text-muted);
+    @apply bg-(--hell-color-bg-subtle);
+    @apply text-(--hell-color-text-muted);
   }
 }
+

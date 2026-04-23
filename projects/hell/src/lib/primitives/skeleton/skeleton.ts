@@ -4,8 +4,8 @@ import { Directive, booleanAttribute, input } from '@angular/core';
   selector: '[hellSkeleton]',
   host: {
     '[class.hell-skeleton]': '!unstyled()',
-    '[style.width]': 'width()',
-    '[style.height]': 'height()',
+    '[style.--_hell-skeleton-width]': 'width()',
+    '[style.--_hell-skeleton-height]': 'height()',
   },
 })
 export class HellSkeleton {

@@ -1,0 +1,5 @@
+/* Icon host wrapper. */
+
+@utility hell-icon {
+  @apply inline-flex leading-none text-(--_hell-icon-color,currentColor);
+}

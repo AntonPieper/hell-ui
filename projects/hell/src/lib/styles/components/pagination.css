@@ -2,25 +2,26 @@
 
 @utility hell-pagination {
   @apply inline-flex items-center flex-wrap;
-  gap: 4px;
+  @apply gap-1;
 }
 
 @utility hell-pagination-item {
   /* Composes onto hell-button via the wrapper directives. Compact square. */
-  --_hell-btn-height: var(--hell-control-height-sm) !important;
-  --_hell-btn-px: var(--hell-space-3) !important;
-  --_hell-btn-font: 12px !important;
-  min-width: var(--hell-control-height-sm);
+  @apply [--_hell-btn-height:var(--hell-control-height-sm)];
+  @apply [--_hell-btn-px:var(--hell-space-3)];
+  @apply [--_hell-btn-font:12px];
+  @apply min-w-(--hell-control-height-sm);
 
   &[data-selected],
   &[aria-current="page"] {
-    background: var(--hell-color-primary) !important;
-    color: var(--hell-color-primary-fg) !important;
-    border-color: var(--hell-color-primary) !important;
-    font-weight: 600;
+    @apply bg-(--hell-color-primary);
+    @apply text-(--hell-color-primary-fg);
+    @apply border-(--hell-color-primary);
+    @apply font-semibold;
   }
   &[data-disabled] {
-    opacity: 0.45;
-    cursor: not-allowed;
+    @apply opacity-[0.45];
+    @apply cursor-not-allowed;
   }
 }
+

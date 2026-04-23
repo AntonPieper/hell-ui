@@ -2,39 +2,39 @@
 
 @utility hell-table-shell {
   @apply flex flex-col min-w-0 overflow-clip;
-  background: var(--hell-color-bg-elevated);
-  border: 1px solid var(--hell-color-border);
-  border-radius: var(--hell-radius-md);
+  @apply bg-(--hell-color-bg-elevated);
+  @apply border border-(--hell-color-border);
+  @apply rounded-md;
 }
 
 @utility hell-table-toolbar {
   @apply flex items-center;
-  gap: var(--hell-space-3);
-  padding: var(--hell-space-3) var(--hell-space-4);
-  border-bottom: 1px solid var(--hell-color-border);
-  background: var(--hell-color-bg-subtle);
+  @apply gap-(--hell-space-3);
+  @apply py-(--hell-space-3) px-(--hell-space-4);
+  @apply [border-bottom:1px_solid_var(--hell-color-border)];
+  @apply bg-(--hell-color-bg-subtle);
 }
 
 @utility hell-table {
   @apply w-full;
-  border-collapse: collapse;
-  font-size: 13px;
-  color: var(--hell-color-text);
+  @apply border-collapse;
+  @apply text-[13px];
+  @apply text-(--hell-color-text);
 
   & th,
   & td {
     @apply text-start align-middle;
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--hell-color-border);
+    @apply py-2 px-3;
+    @apply [border-bottom:1px_solid_var(--hell-color-border)];
   }
   & th {
     @apply sticky top-0 z-[1] font-semibold whitespace-nowrap select-none;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--hell-color-text-muted);
-    background: var(--hell-color-bg-subtle);
-    cursor: default;
+    @apply text-[11px];
+    @apply uppercase;
+    @apply tracking-[0.06em];
+    @apply text-(--hell-color-text-muted);
+    @apply bg-(--hell-color-bg-subtle);
+    @apply cursor-default;
   }
   & th[data-sortable="true"],
   & th[aria-sort] { @apply cursor-pointer; }
@@ -42,61 +42,59 @@
   /* Sort chevrons rendered via SVG masks so they tint with currentColor and
      animate without an extra DOM node. */
   & th[aria-sort]::after {
-    content: "";
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    margin-inline-start: 6px;
-    vertical-align: -2px;
-    background: currentColor;
-    color: var(--hell-color-text-subtle);
-    -webkit-mask: var(--hell-icon-chevron-up-down) center / contain no-repeat;
-    mask: var(--hell-icon-chevron-up-down) center / contain no-repeat;
-    transition:
-      transform var(--hell-duration-base) var(--hell-ease-out),
-      color var(--hell-duration-fast) var(--hell-ease-out),
-      -webkit-mask-image var(--hell-duration-fast) var(--hell-ease-out);
+    @apply content-[''];
+    @apply inline-block;
+    @apply w-3;
+    @apply h-3;
+    @apply ms-1.5;
+    @apply [vertical-align:-2px];
+    @apply bg-current;
+    @apply text-(--hell-color-text-subtle);
+    @apply [-webkit-mask:var(--hell-icon-chevron-up-down)_center_/_contain_no-repeat];
+    @apply [mask:var(--hell-icon-chevron-up-down)_center_/_contain_no-repeat];
+    @apply [transition:transform_var(--hell-duration-base)_var(--hell-ease-out),_color_var(--hell-duration-fast)_var(--hell-ease-out),_-webkit-mask-image_var(--hell-duration-fast)_var(--hell-ease-out)];
   }
   & th[aria-sort="ascending"]::after,
   & th[data-sort="asc"]::after {
-    color: var(--hell-color-primary);
-    -webkit-mask-image: var(--hell-icon-chevron-up);
-    mask-image: var(--hell-icon-chevron-up);
+    @apply text-(--hell-color-primary);
+    @apply [-webkit-mask-image:var(--hell-icon-chevron-up)];
+    @apply [mask-image:var(--hell-icon-chevron-up)];
   }
   & th[aria-sort="descending"]::after,
   & th[data-sort="desc"]::after {
-    color: var(--hell-color-primary);
-    -webkit-mask-image: var(--hell-icon-chevron-down);
-    mask-image: var(--hell-icon-chevron-down);
+    @apply text-(--hell-color-primary);
+    @apply [-webkit-mask-image:var(--hell-icon-chevron-down)];
+    @apply [mask-image:var(--hell-icon-chevron-down)];
   }
   & tbody tr {
-    transition: background-color var(--hell-duration-fast) var(--hell-ease-out);
+    @apply [transition:background-color_var(--hell-duration-fast)_var(--hell-ease-out)];
   }
-  & tbody tr:hover { background: var(--hell-color-bg-subtle); }
-  & tbody tr[data-selected="true"] { background: var(--hell-color-primary-soft); }
+  & tbody tr:hover { @apply bg-(--hell-color-bg-subtle); }
+  & tbody tr[data-selected="true"] { @apply bg-(--hell-color-primary-soft); }
 }
 
 @utility hell-table-footer {
   @apply flex items-center justify-between;
-  gap: var(--hell-space-4);
-  padding: var(--hell-space-3) var(--hell-space-4);
-  border-top: 1px solid var(--hell-color-border);
-  font-size: 12px;
-  color: var(--hell-color-text-muted);
-  background: var(--hell-color-bg-subtle);
+  @apply gap-(--hell-space-4);
+  @apply py-(--hell-space-3) px-(--hell-space-4);
+  @apply [border-top:1px_solid_var(--hell-color-border)];
+  @apply text-xs;
+  @apply text-(--hell-color-text-muted);
+  @apply bg-(--hell-color-bg-subtle);
 }
 
 @utility hell-table-pagesize {
   @apply inline-flex items-center;
-  gap: var(--hell-space-2);
-  font-size: 12px;
-  color: var(--hell-color-text-muted);
+  @apply gap-(--hell-space-2);
+  @apply text-xs;
+  @apply text-(--hell-color-text-muted);
 
   > select.hell-input {
-    width: auto;
-    height: var(--hell-control-height-sm);
-    padding-inline: 8px;
-    padding-block: 0;
-    font-size: 12px;
+    @apply w-[auto];
+    @apply h-(--hell-control-height-sm);
+    @apply px-2;
+    @apply py-0;
+    @apply text-xs;
   }
 }
+

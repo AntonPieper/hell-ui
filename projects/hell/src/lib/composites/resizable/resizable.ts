@@ -86,9 +86,9 @@ export class HellResizable implements AfterContentInit {
   selector: '[hellResizablePane]',
   host: {
     '[class.hell-resizable-pane]': '!unstyled()',
-    '[style.flex]': 'flexValue()',
-    '[style.min-width.px]': 'orientation() === "horizontal" ? minSize() : null',
-    '[style.min-height.px]': 'orientation() === "vertical" ? minSize() : null',
+    '[attr.data-orientation]': 'orientation()',
+    '[style.--_hell-resizable-pane-flex]': 'flexValue()',
+    '[style.--_hell-resizable-pane-min-size]': 'minSize() + "px"',
   },
 })
 export class HellResizablePane {

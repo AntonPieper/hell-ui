@@ -2,22 +2,21 @@
 
 @utility hell-dropzone {
   @apply flex flex-col items-center justify-center text-center cursor-pointer;
-  gap: var(--hell-space-3);
-  padding: var(--hell-space-7);
-  background: var(--hell-color-bg-subtle);
-  border: 1.5px dashed var(--hell-color-border-strong);
-  border-radius: var(--hell-radius-lg);
-  color: var(--hell-color-text-muted);
-  min-height: 140px;
-  transition:
-    background-color var(--hell-duration-fast) var(--hell-ease-out),
-    border-color var(--hell-duration-fast) var(--hell-ease-out);
+  @apply gap-(--hell-space-3);
+  @apply p-(--hell-space-7);
+  @apply bg-(--hell-color-bg-subtle);
+  @apply [border:1.5px_dashed_var(--hell-color-border-strong)];
+  @apply rounded-lg;
+  @apply text-(--hell-color-text-muted);
+  @apply min-h-[140px];
+  @apply [transition:background-color_var(--hell-duration-fast)_var(--hell-ease-out),_border-color_var(--hell-duration-fast)_var(--hell-ease-out)];
 
   &[data-dragover],
   &[data-active] {
-    background: var(--hell-color-primary-soft);
-    border-color: var(--hell-color-primary);
-    color: var(--hell-color-primary);
+    @apply bg-(--hell-color-primary-soft);
+    @apply border-(--hell-color-primary);
+    @apply text-(--hell-color-primary);
   }
   &[data-disabled] { @apply opacity-60 cursor-not-allowed; }
 }
+

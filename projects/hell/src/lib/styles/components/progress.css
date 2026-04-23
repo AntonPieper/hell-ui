@@ -2,21 +2,22 @@
 
 @utility hell-progress {
   @apply block relative w-full overflow-hidden;
-  height: 6px;
-  background: var(--hell-color-bg-muted);
-  border-radius: var(--hell-radius-pill);
+  @apply h-1.5;
+  @apply bg-(--hell-color-bg-muted);
+  @apply rounded-full;
 }
 
 @utility hell-progress-bar {
   @apply block h-full;
-  background: var(--hell-color-primary);
-  border-radius: inherit;
-  transition: width var(--hell-duration-base) var(--hell-ease-out);
+  @apply bg-(--hell-color-primary);
+  @apply rounded-[inherit];
+  @apply [transition:width_var(--hell-duration-base)_var(--hell-ease-out)];
 }
 
 @utility hell-meter {
   @apply block relative w-full overflow-hidden;
-  height: 6px;
-  background: var(--hell-color-bg-muted);
-  border-radius: var(--hell-radius-pill);
+  @apply h-1.5;
+  @apply bg-(--hell-color-bg-muted);
+  @apply rounded-full;
 }
+

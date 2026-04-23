@@ -1,20 +1,21 @@
 /* Popover surface. Trigger is just a button. */
 
 @utility hell-popover {
-  position: absolute;
-  background: var(--hell-color-bg-elevated);
-  border: 1px solid var(--hell-color-border);
-  border-radius: var(--hell-radius-md);
-  box-shadow: var(--hell-shadow-lg);
-  padding: var(--hell-space-4);
-  font-size: 13px;
-  color: var(--hell-color-text);
-  outline: none;
-  animation: hell-pop-in var(--hell-duration-fast) var(--hell-ease-out);
-  max-width: 320px;
+  @apply absolute;
+  @apply bg-(--hell-color-bg-elevated);
+  @apply border border-(--hell-color-border);
+  @apply rounded-md;
+  @apply shadow-(--hell-shadow-lg);
+  @apply p-(--hell-space-4);
+  @apply text-[13px];
+  @apply text-(--hell-color-text);
+  @apply outline-none;
+  @apply animate-[hell-pop-in_var(--hell-duration-fast)_var(--hell-ease-out)];
+  @apply max-w-[320px];
 }
 
 @keyframes hell-pop-in {
   from { opacity: 0; transform: translateY(-4px) scale(0.98); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
+

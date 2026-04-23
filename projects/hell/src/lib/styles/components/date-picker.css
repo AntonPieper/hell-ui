@@ -3,81 +3,79 @@
 
 @utility hell-date-picker {
   @apply inline-block;
-  background: var(--hell-color-bg-elevated);
-  border: 1px solid var(--hell-color-border);
-  border-radius: var(--hell-radius-md);
-  padding: var(--hell-space-4);
-  box-shadow: var(--hell-shadow-sm);
+  @apply bg-(--hell-color-bg-elevated);
+  @apply border border-(--hell-color-border);
+  @apply rounded-md;
+  @apply p-(--hell-space-4);
+  @apply shadow-(--hell-shadow-sm);
 }
 
 @utility hell-date-picker-header {
   @apply flex items-center justify-between;
-  height: 32px;
-  margin-bottom: var(--hell-space-3);
+  @apply h-8;
+  @apply [margin-bottom:var(--hell-space-3)];
 }
 
 @utility hell-date-picker-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--hell-color-text);
-  margin: 0;
+  @apply text-[13px];
+  @apply font-semibold;
+  @apply text-(--hell-color-text);
+  @apply m-0;
 }
 
 @utility hell-date-picker-grid {
-  border-collapse: collapse;
+  @apply border-collapse;
 
   & th {
-    font-size: 11px;
-    font-weight: 600;
-    width: 32px;
-    height: 28px;
-    text-align: center;
-    color: var(--hell-color-text-subtle);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    @apply text-[11px];
+    @apply font-semibold;
+    @apply w-8;
+    @apply h-7;
+    @apply text-center;
+    @apply text-(--hell-color-text-subtle);
+    @apply uppercase;
+    @apply tracking-[0.04em];
   }
 
   & [ngpDatePickerDateButton] {
-    width: 32px;
-    height: 32px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--hell-radius-sm);
-    background: transparent;
-    border: none;
-    color: var(--hell-color-text);
-    font-family: inherit;
-    font-size: 12px;
-    cursor: pointer;
-    transition:
-      background-color var(--hell-duration-fast) var(--hell-ease-out),
-      color var(--hell-duration-fast) var(--hell-ease-out);
+    @apply w-8;
+    @apply h-8;
+    @apply inline-flex;
+    @apply items-center;
+    @apply justify-center;
+    @apply rounded;
+    @apply bg-transparent;
+    @apply border-0;
+    @apply text-(--hell-color-text);
+    @apply font-[inherit];
+    @apply text-xs;
+    @apply cursor-pointer;
+    @apply [transition:background-color_var(--hell-duration-fast)_var(--hell-ease-out),_color_var(--hell-duration-fast)_var(--hell-ease-out)];
 
     &[data-today]:not([data-selected]) {
-      color: var(--hell-color-primary);
-      font-weight: 600;
-      box-shadow: inset 0 0 0 1px var(--hell-color-primary-soft);
+      @apply text-(--hell-color-primary);
+      @apply font-semibold;
+      @apply shadow-[inset_0_0_0_1px_var(--hell-color-primary-soft)];
     }
     &[data-hover]:not([data-disabled]):not([data-selected]) {
-      background: var(--hell-color-bg-subtle);
+      @apply bg-(--hell-color-bg-subtle);
     }
     &[data-focus-visible] {
-      outline: 2px solid var(--hell-color-focus-ring);
-      outline-offset: 1px;
+      @apply [outline:2px_solid_var(--hell-color-focus-ring)];
+      @apply [outline-offset:1px];
     }
     &[data-press]:not([data-disabled]):not([data-selected]) {
-      background: var(--hell-color-bg-muted);
+      @apply bg-(--hell-color-bg-muted);
     }
-    &[data-outside-month] { color: var(--hell-color-text-subtle); opacity: 0.6; }
+    &[data-outside-month] { @apply text-(--hell-color-text-subtle); @apply opacity-[0.6]; }
     &[data-selected] {
-      background: var(--hell-color-primary);
-      color: var(--hell-color-primary-fg);
+      @apply bg-(--hell-color-primary);
+      @apply text-(--hell-color-primary-fg);
     }
     &[data-disabled] {
-      cursor: not-allowed;
-      color: var(--hell-color-text-subtle);
-      opacity: 0.4;
+      @apply cursor-not-allowed;
+      @apply text-(--hell-color-text-subtle);
+      @apply opacity-[0.4];
     }
   }
 }
@@ -85,101 +83,102 @@
 /* Native date / time inputs. Calendar/clock indicator tinted, padding
    tweaked so the picker icon doesn't clip. */
 @utility hell-date-input {
-  display: inline-flex;
-  min-width: 11rem;
+  @apply inline-flex;
+  @apply min-w-[11rem];
 
   & > .hell-date-input-trigger {
     @apply justify-start w-full;
-    gap: var(--hell-space-2);
-    font-variant-numeric: tabular-nums;
+    @apply gap-(--hell-space-2);
+    @apply tabular-nums;
   }
   & .hell-date-input-icon {
-    color: var(--hell-color-text-subtle);
-    flex-shrink: 0;
+    @apply text-(--hell-color-text-subtle);
+    @apply shrink-0;
   }
   & .hell-date-input-value {
     @apply truncate text-start;
-    flex: 1 1 auto;
-    color: var(--hell-color-text);
+    @apply flex-[1_1_auto];
+    @apply text-(--hell-color-text);
   }
   &[data-invalid="true"] > .hell-date-input-trigger {
-    border-color: var(--hell-color-danger, var(--hell-color-border));
+    @apply border-(--hell-color-danger,var(--hell-color-border));
   }
-  &[data-size="sm"] > .hell-date-input-trigger { font-size: var(--hell-font-size-sm); }
-  &[data-size="lg"] > .hell-date-input-trigger { font-size: var(--hell-font-size-lg); }
+  &[data-size="sm"] > .hell-date-input-trigger { @apply text-[var(--hell-font-size-sm)]; }
+  &[data-size="lg"] > .hell-date-input-trigger { @apply text-[var(--hell-font-size-lg)]; }
 }
 
 @utility hell-time-input {
-  display: inline-flex;
-  min-width: 9rem;
+  @apply inline-flex;
+  @apply min-w-[9rem];
 
   & > .hell-time-input-trigger {
     @apply justify-start w-full;
-    gap: var(--hell-space-2);
-    font-variant-numeric: tabular-nums;
+    @apply gap-(--hell-space-2);
+    @apply tabular-nums;
   }
   & .hell-time-input-icon {
-    color: var(--hell-color-text-subtle);
-    flex-shrink: 0;
+    @apply text-(--hell-color-text-subtle);
+    @apply shrink-0;
   }
   & .hell-time-input-value {
     @apply truncate text-start;
-    flex: 1 1 auto;
-    color: var(--hell-color-text);
+    @apply flex-[1_1_auto];
+    @apply text-(--hell-color-text);
   }
   &[data-invalid="true"] > .hell-time-input-trigger {
-    border-color: var(--hell-color-danger, var(--hell-color-border));
+    @apply border-(--hell-color-danger,var(--hell-color-border));
   }
-  &[data-size="sm"] > .hell-time-input-trigger { font-size: var(--hell-font-size-sm); }
-  &[data-size="lg"] > .hell-time-input-trigger { font-size: var(--hell-font-size-lg); }
+  &[data-size="sm"] > .hell-time-input-trigger { @apply text-[var(--hell-font-size-sm)]; }
+  &[data-size="lg"] > .hell-time-input-trigger { @apply text-[var(--hell-font-size-lg)]; }
 }
 
 @utility hell-time-picker {
   @apply flex items-stretch;
-  gap: var(--hell-space-2);
-  background: var(--hell-color-bg-elevated);
-  border: 1px solid var(--hell-color-border);
-  border-radius: var(--hell-radius-md);
-  padding: var(--hell-space-2);
-  box-shadow: var(--hell-shadow-sm);
-  min-width: 200px;
+  @apply gap-(--hell-space-2);
+  @apply bg-(--hell-color-bg-elevated);
+  @apply border border-(--hell-color-border);
+  @apply rounded-md;
+  @apply p-(--hell-space-2);
+  @apply shadow-(--hell-shadow-sm);
+  @apply min-w-[200px];
 }
 
 @utility hell-time-picker-column {
   @apply flex flex-col items-center;
-  flex: 1 1 0;
-  min-width: 56px;
-  height: 200px;
-  overflow-y: auto;
-  scroll-snap-type: y mandatory;
-  scrollbar-width: thin;
-  border-radius: var(--hell-radius-sm);
-  background: var(--hell-color-bg-subtle);
+  @apply flex-[1_1_0];
+  @apply min-w-14;
+  @apply h-[200px];
+  @apply overflow-y-auto;
+  @apply snap-y snap-mandatory;
+  @apply [scrollbar-width:thin];
+  @apply rounded;
+  @apply bg-(--hell-color-bg-subtle);
 }
 
 @utility hell-time-picker-cell {
   @apply flex items-center justify-center cursor-pointer;
-  width: 100%;
-  height: 32px;
-  flex-shrink: 0;
-  scroll-snap-align: center;
-  font-size: 14px;
-  font-variant-numeric: tabular-nums;
-  color: var(--hell-color-text-muted);
-  background: transparent;
-  border: none;
-  font-family: inherit;
+  @apply w-full;
+  @apply h-8;
+  @apply shrink-0;
+  @apply [scroll-snap-align:center];
+  @apply text-sm;
+  @apply tabular-nums;
+  @apply text-(--hell-color-text-muted);
+  @apply bg-transparent;
+  @apply border-0;
+  @apply font-[inherit];
 
-  &:hover { background: var(--hell-color-bg-muted); color: var(--hell-color-text); }
+  &:hover { @apply bg-(--hell-color-bg-muted); @apply text-(--hell-color-text); }
   &[data-selected="true"] {
-    background: var(--hell-color-primary);
-    color: var(--hell-color-primary-fg);
-    font-weight: 600;
+    @apply bg-(--hell-color-primary);
+    @apply text-(--hell-color-primary-fg);
+    @apply font-semibold;
   }
 }
 
 @utility hell-time-picker-divider {
   @apply self-center;
-  font-size: 18px;
-  color: var(--hell-color-text-subtle);
+  @apply text-[18px];
+  @apply text-(--hell-color-text-subtle);
 }
+

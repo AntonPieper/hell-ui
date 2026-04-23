@@ -16,11 +16,12 @@ import { HellOrientation } from '../../core/types';
     },
   ],
   host: {
-    style: 'display:inline-flex; gap: 0.75rem; flex-direction: var(--hell-rg-dir, row);',
-    '[style.--hell-rg-dir]': 'orientation() === "vertical" ? "column" : "row"',
+    '[class.hell-radio-group]': '!unstyled()',
+    '[attr.data-orientation]': 'orientation()',
   },
 })
 export class HellRadioGroup {
+  readonly unstyled = input(false, { transform: booleanAttribute });
   readonly orientation = input<HellOrientation>('vertical');
 }
 

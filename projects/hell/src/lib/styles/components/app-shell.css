@@ -12,158 +12,141 @@
  */
 
 @utility hell-shell {
-  @apply grid w-full overflow-hidden;
-  height: 100vh;
-  position: relative;
-  grid-template-rows: var(--hell-app-topbar-height) 1fr;
-  grid-template-columns:
-    var(--hell-app-sidenav-width)
-    1fr
-    var(--hell-app-secondary-width);
-  grid-template-areas:
-    "topbar    topbar  topbar"
-    "sidenav   content secondary";
-  background: var(--hell-color-bg);
-  color: var(--hell-color-text);
-  transition: grid-template-columns var(--hell-duration-base) var(--hell-ease-out);
+  @apply grid w-full overflow-hidden
+    h-screen
+    relative
+    grid-rows-[var(--hell-app-topbar-height)_1fr]
+    grid-cols-[var(--hell-app-sidenav-width)_1fr_var(--hell-app-secondary-width)]
+    [grid-template-areas:"topbar_topbar_topbar"_"sidenav_content_secondary"]
+    bg-(--hell-color-bg)
+    text-(--hell-color-text)
+    [transition:grid-template-columns_var(--hell-duration-base)_var(--hell-ease-out)];
 
-  &[data-sidenav-collapsed="true"] {
-    grid-template-columns:
-      var(--hell-app-sidenav-collapsed-width)
-      1fr
-      var(--hell-app-secondary-width);
+  &[data-sidenav-collapsed='true'] {
+    @apply grid-cols-[var(--hell-app-sidenav-collapsed-width)_1fr_var(--hell-app-secondary-width)];
   }
-  &[data-secondary-hidden="true"] {
-    grid-template-columns:
-      var(--hell-app-sidenav-width)
-      1fr
-      var(--hell-app-secondary-collapsed-width);
+  &[data-secondary-hidden='true'] {
+    @apply grid-cols-[var(--hell-app-sidenav-width)_1fr_var(--hell-app-secondary-collapsed-width)];
   }
-  &[data-sidenav-collapsed="true"][data-secondary-hidden="true"] {
-    grid-template-columns:
-      var(--hell-app-sidenav-collapsed-width)
-      1fr
-      var(--hell-app-secondary-collapsed-width);
+  &[data-sidenav-collapsed='true'][data-secondary-hidden='true'] {
+    @apply grid-cols-[var(--hell-app-sidenav-collapsed-width)_1fr_var(--hell-app-secondary-collapsed-width)];
   }
 }
 
 @utility hell-topbar {
-  @apply flex items-center min-w-0;
-  grid-area: topbar;
-  gap: var(--hell-space-3);
-  padding: 0 var(--hell-space-4);
-  background: var(--hell-color-bg-elevated);
-  border-bottom: 1px solid var(--hell-color-border);
-  z-index: 20;
+  @apply flex items-center min-w-0
+    [grid-area:topbar]
+    gap-(--hell-space-3)
+    py-0 px-(--hell-space-4)
+    bg-(--hell-color-bg-elevated)
+    [border-bottom:1px_solid_var(--hell-color-border)]
+    z-20;
 }
 
 @utility hell-sidenav {
-  @apply flex flex-col min-h-0 min-w-0 overflow-x-hidden overflow-y-auto;
-  grid-area: sidenav;
-  background: var(--hell-color-bg-elevated);
-  border-right: 1px solid var(--hell-color-border);
-  gap: 2px;
-  padding: var(--hell-space-3);
-  transition: width var(--hell-duration-base) var(--hell-ease-out);
+  @apply flex flex-col min-h-0 min-w-0 overflow-x-hidden overflow-y-auto
+    [grid-area:sidenav]
+    bg-(--hell-color-bg-elevated)
+    [border-right:1px_solid_var(--hell-color-border)]
+    gap-0.5
+    p-(--hell-space-3)
+    [transition:width_var(--hell-duration-base)_var(--hell-ease-out)];
 
   & a,
   & .hell-nav-item {
-    @apply flex items-center no-underline cursor-pointer;
-    gap: var(--hell-space-3);
-    padding: 8px 12px;
-    border-radius: var(--hell-radius-md);
-    color: var(--hell-color-text-muted);
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    white-space: nowrap;
-    transition:
-      background var(--hell-duration-fast) var(--hell-ease-out),
-      color var(--hell-duration-fast) var(--hell-ease-out);
+    @apply flex items-center no-underline cursor-pointer
+      gap-(--hell-space-3)
+      py-2 px-3
+      rounded-md
+      text-(--hell-color-text-muted)
+      text-[0.875rem]
+      leading-5
+      whitespace-nowrap
+      [transition:background_var(--hell-duration-fast)_var(--hell-ease-out),color_var(--hell-duration-fast)_var(--hell-ease-out)];
   }
   & a > hell-icon,
   & a > .hell-nav-icon,
   & .hell-nav-item > hell-icon,
   & .hell-nav-item > .hell-nav-icon {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--hell-color-text-subtle);
-    transition: color var(--hell-duration-fast) var(--hell-ease-out);
+    @apply flex-[0_0_auto]
+      inline-flex
+      items-center
+      justify-center
+      text-(--hell-color-text-subtle)
+      [transition:color_var(--hell-duration-fast)_var(--hell-ease-out)];
   }
   & a > .hd-nav-label,
   & a > .hell-nav-label,
   & .hell-nav-item > .hd-nav-label,
   & .hell-nav-item > .hell-nav-label {
-    flex: 1 1 auto;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: opacity var(--hell-duration-fast) var(--hell-ease-out);
+    @apply flex-[1_1_auto]
+      overflow-hidden
+      text-ellipsis
+      [transition:opacity_var(--hell-duration-fast)_var(--hell-ease-out)];
   }
 
   & a:hover,
   & .hell-nav-item:hover {
-    background: var(--hell-color-bg-subtle);
-    color: var(--hell-color-text);
+    @apply bg-(--hell-color-bg-subtle) text-(--hell-color-text);
   }
   & a:hover > hell-icon,
   & .hell-nav-item:hover > hell-icon {
-    color: var(--hell-color-text);
+    @apply text-(--hell-color-text);
   }
   & a.active,
-  & a[aria-current="page"],
-  & .hell-nav-item[data-active="true"],
+  & a[aria-current='page'],
+  & .hell-nav-item[data-active='true'],
   & .hell-nav-item.active {
-    background: var(--hell-color-primary-soft);
-    color: var(--hell-color-primary);
-    font-weight: 600;
+    @apply bg-(--hell-color-primary-soft)
+      text-(--hell-color-primary)
+      font-semibold;
   }
   & a.active > hell-icon,
-  & a[aria-current="page"] > hell-icon,
-  & .hell-nav-item[data-active="true"] > hell-icon,
+  & a[aria-current='page'] > hell-icon,
+  & .hell-nav-item[data-active='true'] > hell-icon,
   & .hell-nav-item.active > hell-icon {
-    color: var(--hell-color-primary);
+    @apply text-(--hell-color-primary);
   }
 
-  &[data-collapsed="true"] {
+  &[data-collapsed='true'] {
     & a,
     & .hell-nav-item {
-      justify-content: center;
-      padding-inline: 0;
+      @apply justify-center px-0;
     }
     & a > .hd-nav-label,
     & a > .hell-nav-label,
     & .hell-nav-item > .hd-nav-label,
     & .hell-nav-item > .hell-nav-label,
-    & .hell-nav-item > .hell-nav-trailing { @apply hidden; }
+    & .hell-nav-item > .hell-nav-trailing {
+      @apply hidden;
+    }
     & .hd-nav-heading,
     & .hell-nav-section-label {
-      text-align: center;
-      padding-inline: 0;
-      font-size: 9px;
-      letter-spacing: 0.04em;
-      overflow: hidden;
+      @apply text-center
+        px-0
+        text-[9px]
+        tracking-[0.04em]
+        overflow-hidden;
     }
   }
 }
 
 @utility hell-content {
-  @apply relative flex flex-col min-w-0 min-h-0 overflow-auto;
-  grid-area: content;
-  padding: var(--hell-space-6);
-  background: var(--hell-color-bg-subtle);
+  @apply relative flex flex-col min-w-0 min-h-0 overflow-auto
+    [grid-area:content]
+    p-(--hell-space-6)
+    bg-(--hell-color-bg-subtle);
 }
 
 @utility hell-secondary {
-  @apply flex flex-col min-h-0 min-w-0;
-  grid-area: secondary;
-  position: relative;
-  background: var(--hell-color-bg-elevated);
-  border-left: 1px solid var(--hell-color-border);
+  @apply flex flex-col min-h-0 min-w-0
+    [grid-area:secondary]
+    relative
+    bg-(--hell-color-bg-elevated)
+    [border-left:1px_solid_var(--hell-color-border)]
   /* Aside itself never scrolls so the rail toggle stays anchored.
      Consumers should put scrollable content in an inner wrapper. */
-  overflow: hidden;
-  transition: background var(--hell-duration-base) var(--hell-ease-out);
+    overflow-hidden [transition:background_var(--hell-duration-base)_var(--hell-ease-out)];
 }
 
 /*
@@ -172,16 +155,14 @@
  * special-case a child class when the panel is collapsed.
  */
 @utility hell-secondary-body {
-  @apply flex flex-1 flex-col min-h-0 min-w-0;
-  overflow: hidden;
-  transition:
-    opacity var(--hell-duration-base) var(--hell-ease-out),
-    visibility var(--hell-duration-base) var(--hell-ease-out);
+  @apply flex flex-1 flex-col min-h-0 min-w-0
+    overflow-hidden
+    [transition:opacity_var(--hell-duration-base)_var(--hell-ease-out),visibility_var(--hell-duration-base)_var(--hell-ease-out)];
 
-  [data-hidden="true"] > & {
-    pointer-events: none;
-    opacity: 0;
-    visibility: hidden;
+  [data-hidden='true'] > & {
+    @apply pointer-events-none
+      opacity-[0]
+      invisible;
   }
 }
 
@@ -199,43 +180,41 @@
  *   └──────────────────────────────────────┘
  */
 @utility hell-secondary-header-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  width: 22px;
-  height: 22px;
-  padding: 0;
-  margin: 0;
-  border: none;
-  border-radius: var(--hell-radius-sm);
-  background: transparent;
-  color: var(--hell-color-text-subtle);
-  cursor: pointer;
-  font: inherit;
-  transition:
-    background var(--hell-duration-fast) var(--hell-ease-out),
-    color var(--hell-duration-fast) var(--hell-ease-out);
+  @apply inline-flex
+    items-center
+    justify-center
+    flex-[0_0_auto]
+    w-5.5
+    h-5.5
+    p-0
+    m-0
+    border-0
+    rounded
+    bg-transparent
+    text-(--hell-color-text-subtle)
+    cursor-pointer
+    [font:inherit]
+    [transition:background_var(--hell-duration-fast)_var(--hell-ease-out),color_var(--hell-duration-fast)_var(--hell-ease-out)];
 
   &::before {
-    content: "";
-    width: 12px;
-    height: 12px;
-    background: currentColor;
-    -webkit-mask: var(--hell-icon-chevron-right) center / contain no-repeat;
-            mask: var(--hell-icon-chevron-right) center / contain no-repeat;
-    transition: transform var(--hell-duration-fast) var(--hell-ease-out);
+    @apply content-['']
+      w-3
+      h-3
+      bg-current
+      [-webkit-mask:var(--hell-icon-chevron-right)_center/contain_no-repeat]
+      [mask:var(--hell-icon-chevron-right)_center/contain_no-repeat]
+      [transition:transform_var(--hell-duration-fast)_var(--hell-ease-out)];
   }
 
   &:hover {
-    background: var(--hell-color-bg-subtle);
-    color: var(--hell-color-text);
+    @apply bg-(--hell-color-bg-subtle) text-(--hell-color-text);
   }
-  &:hover::before { transform: translateX(1px); }
+  &:hover::before {
+    @apply transform-[translateX(1px)];
+  }
 
   &:focus-visible {
-    outline: 2px solid var(--hell-color-focus-ring);
-    outline-offset: 1px;
+    @apply [outline:2px_solid_var(--hell-color-focus-ring)] outline-offset-1;
   }
 }
 
@@ -253,85 +232,79 @@
 @utility hell-secondary-rail {
   /* Hidden when the panel is expanded — the rail only matters as a
      re-open affordance. */
-  display: none;
+  @apply hidden;
 
-  [data-hidden="true"] > & {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    inset: 0;
-    padding: 0;
-    margin: 0;
-    border: none;
-    background: transparent;
-    color: var(--hell-color-text-subtle);
-    cursor: pointer;
-    font: inherit;
-    z-index: 15;
-    pointer-events: auto;
-    visibility: visible;
-    opacity: 1;
-    transition:
-      background var(--hell-duration-fast) var(--hell-ease-out),
-      color var(--hell-duration-fast) var(--hell-ease-out);
+  [data-hidden='true'] > & {
+    @apply inline-flex
+      items-center
+      justify-center
+      absolute
+      inset-0
+      p-0
+      m-0
+      border-0
+      bg-transparent
+      text-(--hell-color-text-subtle)
+      cursor-pointer
+      [font:inherit]
+      z-15
+      pointer-events-auto
+      visible
+      opacity-[1]
+      [transition:background_var(--hell-duration-fast)_var(--hell-ease-out),color_var(--hell-duration-fast)_var(--hell-ease-out)];
 
     &::before {
-      content: "";
-      width: 12px;
-      height: 12px;
-      background: currentColor;
-      -webkit-mask: var(--hell-icon-chevron-left) center / contain no-repeat;
-              mask: var(--hell-icon-chevron-left) center / contain no-repeat;
-      transition: transform var(--hell-duration-fast) var(--hell-ease-out);
+      @apply content-['']
+        w-3
+        h-3
+        bg-current
+        [-webkit-mask:var(--hell-icon-chevron-left)_center/contain_no-repeat]
+        [mask:var(--hell-icon-chevron-left)_center/contain_no-repeat]
+        [transition:transform_var(--hell-duration-fast)_var(--hell-ease-out)];
     }
   }
 
-  [data-hidden="true"] > &:hover {
-    background: var(--hell-color-bg-subtle);
-    color: var(--hell-color-primary);
+  [data-hidden='true'] > &:hover {
+    @apply bg-(--hell-color-bg-subtle) text-(--hell-color-primary);
   }
-  [data-hidden="true"] > &:hover::before { transform: translateX(-1px); }
+  [data-hidden='true'] > &:hover::before {
+    @apply transform-[translateX(-1px)];
+  }
 
-  [data-hidden="true"] > &:focus-visible {
-    outline: 2px solid var(--hell-color-focus-ring);
-    outline-offset: -2px;
+  [data-hidden='true'] > &:focus-visible {
+    @apply [outline:2px_solid_var(--hell-color-focus-ring)] -outline-offset-2;
   }
 }
 
 /* Reusable nav-item styling used outside sidenav (e.g. composite menus). */
 @utility hell-nav-item {
-  @apply flex items-center font-medium cursor-pointer no-underline;
-  gap: var(--hell-space-3);
-  padding: 8px 12px;
-  font-size: 13px;
-  color: var(--hell-color-text-muted);
-  border-radius: var(--hell-radius-md);
+  @apply flex items-center font-medium cursor-pointer no-underline
+    gap-(--hell-space-3)
+    py-2 px-3
+    text-[13px]
+    text-(--hell-color-text-muted)
+    rounded-md;
 
   &:hover {
-    background: var(--hell-color-bg-subtle);
-    color: var(--hell-color-text);
+    @apply bg-(--hell-color-bg-subtle) text-(--hell-color-text);
   }
-  &[data-active="true"],
+  &[data-active='true'],
   &.active {
-    background: var(--hell-color-primary-soft);
-    color: var(--hell-color-primary);
+    @apply bg-(--hell-color-primary-soft) text-(--hell-color-primary);
   }
   > .hell-nav-icon {
-    @apply inline-flex items-center justify-center flex-shrink-0;
-    width: 16px;
+    @apply inline-flex items-center justify-center shrink-0 w-4;
   }
   > .hell-nav-label {
-    @apply flex-1 whitespace-nowrap overflow-hidden;
-    text-overflow: ellipsis;
+    @apply flex-1 whitespace-nowrap overflow-hidden text-ellipsis;
   }
 }
 
 @utility hell-nav-section-label {
-  padding: 14px 12px 4px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--hell-color-text-subtle);
+  @apply pt-3.5 px-3 pb-1
+    text-[10px]
+    font-bold
+    uppercase
+    tracking-[0.08em]
+    text-(--hell-color-text-subtle);
 }

@@ -1,15 +1,16 @@
 /* Tooltip — small dark surface. */
 
 @utility hell-tooltip {
-  position: absolute;
-  background: #1c222a;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 500;
-  padding: 4px 8px;
-  border-radius: var(--hell-radius-sm);
-  box-shadow: var(--hell-shadow-md);
-  animation: hell-pop-in var(--hell-duration-fast) var(--hell-ease-out);
-  max-width: 240px;
-  pointer-events: none;
+  @apply absolute;
+  @apply bg-[#1c222a];
+  @apply text-white;
+  @apply text-xs;
+  @apply font-medium;
+  @apply py-1 px-2;
+  @apply rounded;
+  @apply shadow-(--hell-shadow-md);
+  @apply animate-[hell-pop-in_var(--hell-duration-fast)_var(--hell-ease-out)];
+  @apply max-w-[240px];
+  @apply pointer-events-none;
 }
+

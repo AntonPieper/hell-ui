@@ -3,208 +3,205 @@
    which consumers must import once at the application level. */
 
 @utility hell-pdf {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
-  background: var(--hell-color-surface);
-  border: 1px solid var(--hell-color-border);
-  border-radius: var(--hell-radius-md);
-  outline: none;
-  position: relative;
+  @apply flex;
+  @apply flex-col;
+  @apply min-h-0;
+  @apply overflow-hidden;
+  @apply bg-(--hell-color-surface);
+  @apply border border-(--hell-color-border);
+  @apply rounded-md;
+  @apply outline-none;
+  @apply relative;
 
   &:focus-visible {
-    box-shadow: 0 0 0 2px var(--hell-color-bg), 0 0 0 4px var(--hell-color-focus-ring);
+    @apply shadow-[0_0_0_2px_var(--hell-color-bg),_0_0_0_4px_var(--hell-color-focus-ring)];
   }
 }
 
 @utility hell-pdf-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
-  border-bottom: 1px solid var(--hell-color-border);
-  background: color-mix(in srgb, var(--hell-color-surface) 92%, var(--hell-color-fg));
-  flex: 0 0 auto;
-  flex-wrap: wrap;
+  @apply flex;
+  @apply items-center;
+  @apply gap-1;
+  @apply py-1.5 px-2.5;
+  @apply [border-bottom:1px_solid_var(--hell-color-border)];
+  @apply bg-[color-mix(in_srgb,_var(--hell-color-surface)_92%,_var(--hell-color-fg))];
+  @apply flex-[0_0_auto];
+  @apply [flex-wrap:wrap];
 }
 
 @utility hell-pdf-spacer {
-  flex: 1 1 auto;
+  @apply flex-[1_1_auto];
 }
 
 @utility hell-pdf-divider {
-  width: 1px;
-  height: 20px;
-  background: var(--hell-color-border);
-  margin: 0 4px;
+  @apply w-px;
+  @apply h-5;
+  @apply bg-(--hell-color-border);
+  @apply my-0 mx-1;
 }
 
 @utility hell-pdf-toolbar-text {
-  font-size: var(--hell-font-size-sm);
-  color: var(--hell-color-muted-fg);
-  margin: 0 4px;
+  @apply text-[var(--hell-font-size-sm)];
+  @apply text-(--hell-color-muted-fg);
+  @apply my-0 mx-1;
 }
 
 @utility hell-pdf-page-input {
-  width: 56px;
-  flex: 0 0 56px;
-  text-align: center;
-  padding: 4px 6px;
-  font-size: var(--hell-font-size-sm);
-  -moz-appearance: textfield;
+  @apply w-14;
+  @apply flex-[0_0_56px];
+  @apply text-center;
+  @apply py-1 px-1.5;
+  @apply text-[var(--hell-font-size-sm)];
+  @apply [-moz-appearance:textfield];
 
   &::-webkit-outer-spin-button,
   &::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+    @apply [-webkit-appearance:none];
+    @apply m-0;
   }
 }
 
 @utility hell-pdf-zoom-select {
-  height: 28px;
-  padding: 0 22px 0 8px;
-  font-size: var(--hell-font-size-sm);
-  background: var(--hell-color-bg);
-  color: var(--hell-color-fg);
-  border: 1px solid var(--hell-color-border);
-  border-radius: var(--hell-radius-sm);
-  appearance: none;
-  background-image: linear-gradient(45deg, transparent 50%, var(--hell-color-muted-fg) 50%),
-                    linear-gradient(135deg, var(--hell-color-muted-fg) 50%, transparent 50%);
-  background-position: calc(100% - 12px) 12px, calc(100% - 8px) 12px;
-  background-size: 4px 4px;
-  background-repeat: no-repeat;
-  cursor: pointer;
+  @apply h-7;
+  @apply [padding:0_22px_0_8px];
+  @apply text-[var(--hell-font-size-sm)];
+  @apply bg-(--hell-color-bg);
+  @apply text-(--hell-color-fg);
+  @apply border border-(--hell-color-border);
+  @apply rounded;
+  @apply appearance-none;
+  @apply [background-image:linear-gradient(45deg,_transparent_50%,_var(--hell-color-muted-fg)_50%),_linear-gradient(135deg,_var(--hell-color-muted-fg)_50%,_transparent_50%)];
+  @apply [background-position:calc(100%_-_12px)_12px,_calc(100%_-_8px)_12px];
+  @apply [background-size:4px_4px];
+  @apply [background-repeat:no-repeat];
+  @apply cursor-pointer;
 
   &:focus-visible {
-    outline: none;
-    border-color: var(--hell-color-primary);
-    box-shadow: 0 0 0 2px var(--hell-color-focus-ring);
+    @apply outline-none;
+    @apply border-(--hell-color-primary);
+    @apply shadow-[0_0_0_2px_var(--hell-color-focus-ring)];
   }
 }
 
 @utility hell-pdf-findbar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  border-bottom: 1px solid var(--hell-color-border);
-  background: var(--hell-color-bg);
-  flex: 0 0 auto;
+  @apply flex;
+  @apply items-center;
+  @apply gap-1.5;
+  @apply py-1.5 px-2.5;
+  @apply [border-bottom:1px_solid_var(--hell-color-border)];
+  @apply bg-(--hell-color-bg);
+  @apply flex-[0_0_auto];
 }
 
 @utility hell-pdf-find-input {
-  flex: 1 1 auto;
-  min-width: 120px;
-  max-width: 320px;
+  @apply flex-[1_1_auto];
+  @apply min-w-[120px];
+  @apply max-w-[320px];
 }
 
 @utility hell-pdf-find-count {
-  font-size: var(--hell-font-size-xs);
-  color: var(--hell-color-muted-fg);
-  min-width: 56px;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
+  @apply text-[var(--hell-font-size-xs)];
+  @apply text-(--hell-color-muted-fg);
+  @apply min-w-14;
+  @apply text-right;
+  @apply tabular-nums;
 }
 
 @utility hell-pdf-host {
-  flex: 1 1 auto;
-  min-height: 0;
-  position: relative;
-  display: flex;
-  background: color-mix(in srgb, var(--hell-color-fg) 6%, var(--hell-color-bg));
+  @apply flex-[1_1_auto];
+  @apply min-h-0;
+  @apply relative;
+  @apply flex;
+  @apply bg-[color-mix(in_srgb,_var(--hell-color-fg)_6%,_var(--hell-color-bg))];
 }
 
 @utility hell-pdf-overview {
-  flex: 0 0 auto;
-  width: 168px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  background: color-mix(in srgb, var(--hell-color-fg) 4%, var(--hell-color-bg));
-  border-right: 1px solid var(--hell-color-border);
+  @apply flex-[0_0_auto];
+  @apply w-[168px];
+  @apply overflow-y-auto;
+  @apply overflow-x-hidden;
+  @apply p-3;
+  @apply flex;
+  @apply flex-col;
+  @apply gap-2;
+  @apply bg-[color-mix(in_srgb,_var(--hell-color-fg)_4%,_var(--hell-color-bg))];
+  @apply [border-right:1px_solid_var(--hell-color-border)];
 }
 
 @utility hell-pdf-thumb {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 6px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--hell-radius-sm);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: var(--hell-font-size-xs);
-  color: var(--hell-color-muted-fg);
-  transition:
-    background var(--hell-duration-fast) var(--hell-ease-out),
-    border-color var(--hell-duration-fast) var(--hell-ease-out),
-    color var(--hell-duration-fast) var(--hell-ease-out);
+  @apply flex;
+  @apply flex-col;
+  @apply items-center;
+  @apply gap-1;
+  @apply p-1.5;
+  @apply bg-transparent;
+  @apply border border-transparent;
+  @apply rounded;
+  @apply cursor-pointer;
+  @apply font-[inherit];
+  @apply text-[var(--hell-font-size-xs)];
+  @apply text-(--hell-color-muted-fg);
+  @apply [transition:background_var(--hell-duration-fast)_var(--hell-ease-out),_border-color_var(--hell-duration-fast)_var(--hell-ease-out),_color_var(--hell-duration-fast)_var(--hell-ease-out)];
 
   &:hover {
-    background: color-mix(in srgb, var(--hell-color-fg) 5%, transparent);
-    color: var(--hell-color-fg);
+    @apply bg-[color-mix(in_srgb,_var(--hell-color-fg)_5%,_transparent)];
+    @apply text-(--hell-color-fg);
   }
   &:focus-visible {
-    outline: 2px solid var(--hell-color-focus-ring);
-    outline-offset: 2px;
+    @apply [outline:2px_solid_var(--hell-color-focus-ring)];
+    @apply [outline-offset:2px];
   }
   &[data-active="true"] {
-    background: var(--hell-color-bg);
-    border-color: color-mix(in srgb, var(--hell-color-primary) 60%, var(--hell-color-border));
-    color: var(--hell-color-primary);
-    font-weight: 600;
+    @apply bg-(--hell-color-bg);
+    @apply border-[color-mix(in_srgb,_var(--hell-color-primary)_60%,_var(--hell-color-border))];
+    @apply text-(--hell-color-primary);
+    @apply font-semibold;
   }
 }
 
 @utility hell-pdf-thumb-canvas-wrap {
-  display: block;
-  background: white;
-  border: 1px solid var(--hell-color-border);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
-  line-height: 0;
+  @apply block;
+  @apply bg-[white];
+  @apply border border-(--hell-color-border);
+  @apply shadow-[0_1px_2px_rgb(0_0_0_/_0.06)];
+  @apply leading-none;
 
   & > canvas {
-    display: block;
-    max-width: 100%;
-    height: auto;
+    @apply block;
+    @apply max-w-full;
+    @apply h-[auto];
   }
 }
 
 @utility hell-pdf-thumb-label {
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
+  @apply tabular-nums;
+  @apply leading-[1];
 }
 
 @utility hell-pdf-scroll {
   /* pdf.js requires the scroll container to be absolutely positioned. */
-  position: absolute;
-  inset: 0;
-  overflow: auto;
+  @apply absolute;
+  @apply inset-0;
+  @apply overflow-auto;
 
   /* When the overview rail is shown, the scroll area must coexist with it
      in the flex row, so position becomes relative inside the host. */
   .hell-pdf-overview + & {
-    position: relative;
-    inset: auto;
-    flex: 1 1 auto;
+    @apply relative;
+    @apply inset-auto;
+    @apply flex-[1_1_auto];
   }
 
   /* Pdf.js' .pdfViewer renders its pages here. Center them and add air. */
   & .pdfViewer {
-    padding: 12px 0;
+    @apply py-3 px-0;
   }
 
   & .pdfViewer .page {
-    margin: 8px auto;
-    border: 1px solid var(--hell-color-border);
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 8px 24px -12px rgb(0 0 0 / 0.18);
-    background-color: white;
+    @apply my-2 mx-[auto];
+    @apply border border-(--hell-color-border);
+    @apply shadow-[0_1px_2px_rgb(0_0_0_/_0.06),_0_8px_24px_-12px_rgb(0_0_0_/_0.18)];
+    @apply [background-color:white];
   }
 }
+

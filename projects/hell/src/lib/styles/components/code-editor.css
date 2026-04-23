@@ -2,41 +2,42 @@
 
 @utility hell-code {
   @apply overflow-hidden;
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  line-height: 1.55;
-  color: var(--hell-color-text);
-  background: var(--hell-color-bg-subtle);
-  border: 1px solid var(--hell-color-border);
-  border-radius: var(--hell-radius-md);
+  @apply [font-family:var(--font-mono)];
+  @apply text-[12.5px];
+  @apply leading-[1.55];
+  @apply text-(--hell-color-text);
+  @apply bg-(--hell-color-bg-subtle);
+  @apply border border-(--hell-color-border);
+  @apply rounded-md;
 
-  > .cm-editor { background: transparent; height: 100%; }
+  > .cm-editor { @apply bg-transparent; @apply h-full; }
   > .cm-editor .cm-gutters {
-    background: var(--hell-color-bg-subtle);
-    border-right: 1px solid var(--hell-color-border);
-    color: var(--hell-color-text-subtle);
+    @apply bg-(--hell-color-bg-subtle);
+    @apply [border-right:1px_solid_var(--hell-color-border)];
+    @apply text-(--hell-color-text-subtle);
   }
-  > .cm-editor .cm-activeLine { background: rgba(49, 58, 70, 0.04); }
+  > .cm-editor .cm-activeLine { @apply bg-[rgba(49,_58,_70,_0.04)]; }
   > .cm-editor.cm-focused {
-    outline: none;
-    box-shadow: 0 0 0 3px var(--hell-color-focus-ring);
+    @apply outline-none;
+    @apply shadow-[0_0_0_3px_var(--hell-color-focus-ring)];
   }
 }
 
 @utility hell-code-viewer {
   @apply overflow-hidden;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 1.55;
-  color: var(--hell-color-text);
-  background: var(--hell-color-bg-subtle);
-  border: 1px solid var(--hell-color-border);
-  border-radius: var(--hell-radius-md);
+  @apply [font-family:var(--font-mono)];
+  @apply text-xs;
+  @apply leading-[1.55];
+  @apply text-(--hell-color-text);
+  @apply bg-(--hell-color-bg-subtle);
+  @apply border border-(--hell-color-border);
+  @apply rounded-md;
 
-  > .cm-editor { background: transparent; height: 100%; }
+  > .cm-editor { @apply bg-transparent; @apply h-full; }
   > .cm-editor .cm-gutters {
-    background: var(--hell-color-bg-subtle);
-    border-right: 1px solid var(--hell-color-border);
-    color: var(--hell-color-text-subtle);
+    @apply bg-(--hell-color-bg-subtle);
+    @apply [border-right:1px_solid_var(--hell-color-border)];
+    @apply text-(--hell-color-text-subtle);
   }
 }
+

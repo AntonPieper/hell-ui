@@ -6,34 +6,42 @@
 }
 
 @utility hell-resizable-pane {
-  @apply min-w-0 min-h-0 overflow-auto;
-  flex: var(--hell-pane-flex, 1) 1 0;
+  @apply min-w-0 min-h-0 overflow-auto flex-(--_hell-resizable-pane-flex,var(--hell-pane-flex,1)_1_0);
+
+  &[data-orientation="horizontal"] {
+    @apply min-w-(--_hell-resizable-pane-min-size,80px);
+  }
+
+  &[data-orientation="vertical"] {
+    @apply min-h-(--_hell-resizable-pane-min-size,80px);
+  }
 }
 
 @utility hell-resizable-handle {
   @apply relative select-none;
-  flex: 0 0 6px;
-  background: transparent;
-  cursor: col-resize;
+  @apply flex-[0_0_6px];
+  @apply bg-transparent;
+  @apply cursor-col-resize;
 
   &::after {
-    content: "";
+    @apply content-[''];
     @apply absolute inset-0 m-auto;
-    width: 1px;
-    background: var(--hell-color-border);
-    transition: background-color var(--hell-duration-fast) var(--hell-ease-out);
+    @apply w-px;
+    @apply bg-(--hell-color-border);
+    @apply [transition:background-color_var(--hell-duration-fast)_var(--hell-ease-out)];
   }
   &:hover::after,
   &[data-active="true"]::after {
-    background: var(--hell-color-primary);
-    width: 2px;
+    @apply bg-(--hell-color-primary);
+    @apply w-[2px];
   }
   [data-orientation="vertical"] > & {
-    flex-basis: 6px;
-    cursor: row-resize;
+    @apply basis-1.5;
+    @apply cursor-row-resize;
     &::after {
       @apply w-full;
-      height: 1px;
+      @apply h-px;
     }
   }
 }
+

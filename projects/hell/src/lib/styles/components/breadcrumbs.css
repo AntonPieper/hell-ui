@@ -1,24 +1,23 @@
 /* Breadcrumbs. */
 
 @utility hell-breadcrumbs {
-  @apply inline-flex items-center;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--hell-color-text-muted);
+  @apply inline-flex items-center gap-1 text-xs text-(--hell-color-text-muted);
+}
+
+@utility hell-breadcrumb-list {
+  @apply inline-flex items-center list-none p-0 m-0 gap-1;
 }
 
 @utility hell-breadcrumbs-item {
-  @apply inline-flex items-center no-underline;
-  gap: 4px;
-  color: inherit;
+  @apply inline-flex items-center no-underline gap-1 text-inherit;
 
-  &:hover { color: var(--hell-color-text); }
+  &:hover { @apply text-(--hell-color-text); }
   &[aria-current="page"] {
-    color: var(--hell-color-text);
-    font-weight: 600;
+    @apply font-semibold text-(--hell-color-text);
   }
 }
 
 @utility hell-breadcrumbs-separator {
-  color: var(--hell-color-text-subtle);
+  @apply text-(--hell-color-text-subtle);
 }
+

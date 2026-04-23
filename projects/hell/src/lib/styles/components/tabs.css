@@ -5,107 +5,103 @@
 
   &[data-orientation="vertical"] {
     @apply flex-row items-start;
-    gap: var(--hell-space-4);
+    @apply gap-(--hell-space-4);
   }
 }
 
 @utility hell-tab-list {
   @apply flex;
-  gap: 2px;
-  border-bottom: 1px solid var(--hell-color-border);
-  padding-inline: var(--hell-space-2);
+  @apply gap-[2px];
+  @apply [border-bottom:1px_solid_var(--hell-color-border)];
+  @apply px-(--hell-space-2);
 
   &[data-orientation="vertical"] {
     @apply flex-col items-stretch;
-    gap: 4px;
-    border-bottom: none;
-    border-right: none;
-    padding: var(--hell-space-2);
-    background: var(--hell-color-bg-subtle);
-    border-radius: var(--hell-radius-lg);
-    min-width: 200px;
+    @apply gap-1;
+    @apply border-0;
+    @apply border-0;
+    @apply p-(--hell-space-2);
+    @apply bg-(--hell-color-bg-subtle);
+    @apply rounded-lg;
+    @apply min-w-[200px];
   }
 }
 
 @utility hell-tab {
   @apply inline-flex items-center cursor-pointer font-medium relative;
-  gap: var(--hell-space-2);
-  height: 36px;
-  padding-inline: var(--hell-space-4);
-  font-size: 13px;
-  color: var(--hell-color-text-muted);
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  font-family: inherit;
-  transition:
-    color var(--hell-duration-fast) var(--hell-ease-out),
-    border-color var(--hell-duration-base) var(--hell-ease-out),
-    background-color var(--hell-duration-fast) var(--hell-ease-out);
+  @apply gap-(--hell-space-2);
+  @apply h-9;
+  @apply px-(--hell-space-4);
+  @apply text-[13px];
+  @apply text-(--hell-color-text-muted);
+  @apply bg-transparent;
+  @apply border-0;
+  @apply [border-bottom:2px_solid_transparent];
+  @apply [margin-bottom:-1px];
+  @apply font-[inherit];
+  @apply [transition:color_var(--hell-duration-fast)_var(--hell-ease-out),_border-color_var(--hell-duration-base)_var(--hell-ease-out),_background-color_var(--hell-duration-fast)_var(--hell-ease-out)];
 
   &[data-hover] {
-    color: var(--hell-color-text);
-    background: var(--hell-color-bg-subtle);
+    @apply text-(--hell-color-text);
+    @apply bg-(--hell-color-bg-subtle);
   }
   &[data-active] {
-    color: var(--hell-color-primary);
-    border-bottom-color: var(--hell-color-primary);
+    @apply text-(--hell-color-primary);
+    @apply [border-bottom-color:var(--hell-color-primary)];
   }
   &[data-disabled] { @apply opacity-50 cursor-not-allowed; }
   &[data-focus-visible] {
-    outline: 2px solid var(--hell-color-focus-ring);
-    outline-offset: -2px;
+    @apply [outline:2px_solid_var(--hell-color-focus-ring)];
+    @apply [outline-offset:-2px];
   }
   &[data-orientation="vertical"] {
     @apply justify-start;
-    height: 38px;
-    border: none;
-    margin: 0;
-    border-radius: var(--hell-radius-md);
-    padding-inline: var(--hell-space-3);
-    color: var(--hell-color-text-muted);
+    @apply h-[38px];
+    @apply border-0;
+    @apply m-0;
+    @apply rounded-md;
+    @apply px-(--hell-space-3);
+    @apply text-(--hell-color-text-muted);
 
     &[data-hover]:not([data-active]) {
-      background: color-mix(in srgb, var(--hell-color-fg) 5%, transparent);
-      color: var(--hell-color-text);
+      @apply bg-[color-mix(in_srgb,_var(--hell-color-fg)_5%,_transparent)];
+      @apply text-(--hell-color-text);
     }
     &[data-active] {
-      background: var(--hell-color-bg-elevated);
-      color: var(--hell-color-text);
-      font-weight: 600;
+      @apply bg-(--hell-color-bg-elevated);
+      @apply text-(--hell-color-text);
+      @apply font-semibold;
       /* Reserve room on the left so the accent bar doesn't crowd the label. */
-      padding-left: calc(var(--hell-space-3) + 8px);
-      box-shadow:
-        0 1px 2px rgb(0 0 0 / 0.05),
-        0 0 0 1px var(--hell-color-border);
+      @apply [padding-left:calc(var(--hell-space-3)_+_8px)];
+      @apply shadow-[0_1px_2px_rgb(0_0_0_/_0.05),_0_0_0_1px_var(--hell-color-border)];
     }
     /* Subtle leading accent bar inside the active pill. */
     &[data-active]::before {
-      content: '';
-      position: absolute;
-      left: 8px;
-      top: 8px;
-      bottom: 8px;
-      width: 3px;
-      border-radius: 999px;
-      background: var(--hell-color-primary);
+      @apply content-[''];
+      @apply absolute;
+      @apply left-2;
+      @apply top-2;
+      @apply bottom-2;
+      @apply w-[3px];
+      @apply rounded-full;
+      @apply bg-(--hell-color-primary);
     }
     &[data-focus-visible] {
-      outline-offset: 2px;
+      @apply [outline-offset:2px];
     }
   }
 }
 
 @utility hell-tab-panel {
-  padding: var(--hell-space-6) var(--hell-space-2);
-  outline: none;
-  animation: hell-tab-fade-in var(--hell-duration-base) var(--hell-ease-out);
+  @apply py-(--hell-space-6) px-(--hell-space-2);
+  @apply outline-none;
+  @apply animate-[hell-tab-fade-in_var(--hell-duration-base)_var(--hell-ease-out)];
 
-  &[aria-hidden="true"] { display: none; }
+  &[aria-hidden="true"] { @apply hidden; }
 }
 
 @keyframes hell-tab-fade-in {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: none; }
 }
+

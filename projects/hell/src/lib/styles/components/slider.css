@@ -9,145 +9,131 @@
  */
 
 @utility hell-slider {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  width: 100%;
-  height: 24px;
-  touch-action: none;
-  user-select: none;
-  cursor: pointer;
+  @apply relative;
+  @apply inline-flex;
+  @apply items-center;
+  @apply w-full;
+  @apply h-6;
+  @apply touch-none;
+  @apply select-none;
+  @apply cursor-pointer;
 
   &[data-disabled] {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
+    @apply opacity-50;
+    @apply cursor-not-allowed;
+    @apply pointer-events-none;
   }
   &[data-orientation="vertical"] {
-    width: 24px;
-    height: 160px;
-    flex-direction: column;
+    @apply w-6;
+    @apply h-[160px];
+    @apply flex-col;
   }
-  &[data-size="sm"] { height: 20px; }
-  &[data-size="lg"] { height: 28px; }
+  &[data-size="sm"] { @apply h-5; }
+  &[data-size="lg"] { @apply h-7; }
 }
 
 @utility hell-slider-track {
-  position: relative;
-  flex: 1 1 auto;
-  align-self: stretch;
+  @apply relative;
+  @apply flex-[1_1_auto];
+  @apply self-stretch;
   /* Track fills the entire host so the whole region is clickable, while the
      visible bar is rendered via ::before. */
-  background: transparent;
+  @apply bg-transparent;
 
   &::before {
-    content: '';
-    position: absolute;
-    inset-inline: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 6px;
-    border-radius: 999px;
-    background: var(--hell-color-bg-muted);
-    box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.05);
-    pointer-events: none;
+    @apply content-[''];
+    @apply absolute;
+    @apply inset-x-0;
+    @apply top-[50%];
+    @apply -translate-y-1/2;
+    @apply h-1.5;
+    @apply rounded-full;
+    @apply bg-(--hell-color-bg-muted);
+    @apply shadow-[inset_0_1px_1px_rgb(0_0_0_/_0.05)];
+    @apply pointer-events-none;
   }
 
   [data-orientation="vertical"] > & {
-    align-self: stretch;
-    width: auto;
-    flex: 1 1 auto;
+    @apply self-stretch;
+    @apply w-[auto];
+    @apply flex-[1_1_auto];
 
     &::before {
-      inset-inline: 50%;
-      top: 0;
-      bottom: 0;
-      transform: translateX(-50%);
-      width: 6px;
-      height: auto;
+      @apply inset-x-1/2;
+      @apply top-0;
+      @apply bottom-0;
+      @apply -translate-x-1/2;
+      @apply w-1.5;
+      @apply h-[auto];
     }
   }
-  [data-size="sm"] > &::before { height: 4px; }
-  [data-size="lg"] > &::before { height: 8px; }
-  [data-orientation="vertical"][data-size="sm"] > &::before { width: 4px; height: auto; }
-  [data-orientation="vertical"][data-size="lg"] > &::before { width: 8px; height: auto; }
+  [data-size="sm"] > &::before { @apply h-1; }
+  [data-size="lg"] > &::before { @apply h-2; }
+  [data-orientation="vertical"][data-size="sm"] > &::before { @apply w-1; @apply h-[auto]; }
+  [data-orientation="vertical"][data-size="lg"] > &::before { @apply w-2; @apply h-[auto]; }
 }
 
 @utility hell-slider-range {
-  position: absolute;
-  top: 50%;
-  height: 6px;
-  transform: translateY(-50%);
-  border-radius: 999px;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--hell-color-primary) 92%, white),
-    var(--hell-color-primary)
-  );
-  box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.08);
-  pointer-events: none;
+  @apply absolute;
+  @apply top-[50%];
+  @apply h-1.5;
+  @apply -translate-y-1/2;
+  @apply rounded-full;
+  @apply bg-[linear-gradient(_180deg,_color-mix(in_srgb,_var(--hell-color-primary)_92%,_white),_var(--hell-color-primary)_)];
+  @apply shadow-[inset_0_-1px_0_rgb(0_0_0_/_0.08)];
+  @apply pointer-events-none;
 
   [data-orientation="vertical"] > [ngpSliderTrack] > & {
-    inset-inline: 50%;
-    top: auto;
-    height: auto;
-    width: 6px;
-    transform: translateX(-50%);
+    @apply inset-x-1/2;
+    @apply top-[auto];
+    @apply h-[auto];
+    @apply w-1.5;
+    @apply -translate-x-1/2;
   }
-  [data-size="sm"] > [ngpSliderTrack] > & { height: 4px; }
-  [data-size="lg"] > [ngpSliderTrack] > & { height: 8px; }
+  [data-size="sm"] > [ngpSliderTrack] > & { @apply h-1; }
+  [data-size="lg"] > [ngpSliderTrack] > & { @apply h-2; }
 }
 
 @utility hell-slider-thumb {
-  position: absolute;
-  display: block;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #fff;
-  border: 1px solid color-mix(in srgb, var(--hell-color-primary) 35%, var(--hell-color-border));
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.15),
-    0 0 0 0 color-mix(in srgb, var(--hell-color-primary) 25%, transparent);
-  outline: none;
-  transform: translateX(-50%);
-  cursor: grab;
-  transition:
-    transform var(--hell-duration-fast) var(--hell-ease-out),
-    box-shadow var(--hell-duration-fast) var(--hell-ease-out),
-    border-color var(--hell-duration-fast) var(--hell-ease-out);
+  @apply absolute;
+  @apply block;
+  @apply w-[18px];
+  @apply h-[18px];
+  @apply rounded-[50%];
+  @apply bg-white;
+  @apply border border-[color-mix(in_srgb,_var(--hell-color-primary)_35%,_var(--hell-color-border))];
+  @apply shadow-[0_1px_2px_rgb(0_0_0_/_0.15),_0_0_0_0_color-mix(in_srgb,_var(--hell-color-primary)_25%,_transparent)];
+  @apply outline-none;
+  @apply -translate-x-1/2;
+  @apply cursor-grab;
+  @apply [transition:transform_var(--hell-duration-fast)_var(--hell-ease-out),_box-shadow_var(--hell-duration-fast)_var(--hell-ease-out),_border-color_var(--hell-duration-fast)_var(--hell-ease-out)];
 
   [data-orientation="vertical"] > & {
-    transform: translateY(50%);
+    @apply translate-y-1/2;
   }
-  [data-size="sm"] > & { width: 14px; height: 14px; }
-  [data-size="lg"] > & { width: 22px; height: 22px; }
+  [data-size="sm"] > & { @apply w-[14px]; @apply h-[14px]; }
+  [data-size="lg"] > & { @apply w-[22px]; @apply h-[22px]; }
 
   &[data-hover] {
-    transform: translateX(-50%) scale(1.08);
-    border-color: var(--hell-color-primary);
-    box-shadow:
-      0 2px 6px rgb(0 0 0 / 0.18),
-      0 0 0 6px color-mix(in srgb, var(--hell-color-primary) 14%, transparent);
+    @apply -translate-x-1/2 scale-[1.08];
+    @apply border-(--hell-color-primary);
+    @apply shadow-[0_2px_6px_rgb(0_0_0_/_0.18),_0_0_0_6px_color-mix(in_srgb,_var(--hell-color-primary)_14%,_transparent)];
   }
   [data-orientation="vertical"] > &[data-hover] {
-    transform: translateY(50%) scale(1.08);
+    @apply translate-y-1/2 scale-[1.08];
   }
 
   &[data-press] {
-    cursor: grabbing;
-    transform: translateX(-50%) scale(0.96);
-    box-shadow:
-      0 1px 2px rgb(0 0 0 / 0.18),
-      0 0 0 8px color-mix(in srgb, var(--hell-color-primary) 18%, transparent);
+    @apply cursor-grabbing;
+    @apply -translate-x-1/2 scale-[0.96];
+    @apply shadow-[0_1px_2px_rgb(0_0_0_/_0.18),_0_0_0_8px_color-mix(in_srgb,_var(--hell-color-primary)_18%,_transparent)];
   }
   [data-orientation="vertical"] > &[data-press] {
-    transform: translateY(50%) scale(0.96);
+    @apply translate-y-1/2 scale-[0.96];
   }
 
   &[data-focus-visible] {
-    box-shadow:
-      0 1px 2px rgb(0 0 0 / 0.18),
-      0 0 0 4px var(--hell-color-focus-ring);
+    @apply shadow-[0_1px_2px_rgb(0_0_0_/_0.18),_0_0_0_4px_var(--hell-color-focus-ring)];
   }
 }
+

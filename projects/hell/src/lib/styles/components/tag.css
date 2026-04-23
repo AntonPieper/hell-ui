@@ -2,57 +2,58 @@
 
 @utility hell-tag {
   @apply inline-flex items-center font-semibold;
-  gap: 4px;
-  padding: 2px 8px;
-  font-size: 11px;
-  letter-spacing: 0.02em;
-  color: var(--hell-color-text-muted);
-  background: var(--hell-color-bg-muted);
-  border-radius: var(--hell-radius-pill);
+  @apply gap-1;
+  @apply py-[2px] px-2;
+  @apply text-[11px];
+  @apply tracking-[0.02em];
+  @apply text-(--hell-color-text-muted);
+  @apply bg-(--hell-color-bg-muted);
+  @apply rounded-full;
 
   &[data-variant="primary"] {
-    background: var(--hell-color-primary-soft);
-    color: var(--hell-color-primary);
+    @apply bg-(--hell-color-primary-soft);
+    @apply text-(--hell-color-primary);
   }
   &[data-variant="success"] {
-    background: var(--hell-color-success-soft);
-    color: var(--hell-color-success-strong);
+    @apply bg-(--hell-color-success-soft);
+    @apply text-(--hell-color-success-strong);
   }
   &[data-variant="info"] {
-    background: var(--hell-color-info-soft);
-    color: var(--hell-color-info-strong);
+    @apply bg-(--hell-color-info-soft);
+    @apply text-(--hell-color-info-strong);
   }
   &[data-variant="danger"] {
-    background: var(--hell-color-danger-soft);
-    color: var(--hell-color-danger-strong);
+    @apply bg-(--hell-color-danger-soft);
+    @apply text-(--hell-color-danger-strong);
   }
   &[data-variant="warning"] {
-    background: var(--hell-color-warning-soft);
-    color: var(--hell-color-warning-strong);
+    @apply bg-(--hell-color-warning-soft);
+    @apply text-(--hell-color-warning-strong);
   }
 }
 
 @utility hell-badge {
   @apply inline-flex items-center justify-center font-bold;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  font-size: 10px;
-  background: var(--hell-color-danger);
-  color: #fff;
-  border-radius: var(--hell-radius-pill);
+  @apply min-w-4;
+  @apply h-4;
+  @apply py-0 px-1;
+  @apply text-[10px];
+  @apply bg-(--hell-color-danger);
+  @apply text-white;
+  @apply rounded-full;
 }
 
 @utility hell-kbd {
   @apply inline-flex items-center justify-center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--hell-color-text-muted);
-  background: var(--hell-color-bg-subtle);
-  border: 1px solid var(--hell-color-border);
-  border-bottom-width: 2px;
-  border-radius: var(--hell-radius-sm);
+  @apply min-w-[18px];
+  @apply h-[18px];
+  @apply py-0 px-[5px];
+  @apply [font-family:var(--font-mono)];
+  @apply text-[11px];
+  @apply text-(--hell-color-text-muted);
+  @apply bg-(--hell-color-bg-subtle);
+  @apply border border-(--hell-color-border);
+  @apply [border-bottom-width:2px];
+  @apply rounded;
 }
+

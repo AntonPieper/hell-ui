@@ -2,30 +2,29 @@
 
 @utility hell-checkbox {
   @apply inline-flex items-center justify-center cursor-pointer;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  background: var(--hell-color-bg-elevated);
-  border: 1px solid var(--hell-color-border-strong);
-  border-radius: var(--hell-radius-sm);
-  color: var(--hell-color-primary-fg);
-  transition:
-    background-color var(--hell-duration-fast) var(--hell-ease-out),
-    border-color var(--hell-duration-fast) var(--hell-ease-out);
+  @apply appearance-none;
+  @apply w-4;
+  @apply h-4;
+  @apply bg-(--hell-color-bg-elevated);
+  @apply border border-(--hell-color-border-strong);
+  @apply rounded;
+  @apply text-(--hell-color-primary-fg);
+  @apply [transition:background-color_var(--hell-duration-fast)_var(--hell-ease-out),_border-color_var(--hell-duration-fast)_var(--hell-ease-out)];
 
   & > svg { @apply w-3 h-3; }
 
-  &[data-hover] { border-color: var(--hell-color-primary); }
+  &[data-hover] { @apply border-(--hell-color-primary); }
   &[data-focus-visible] {
-    outline: 2px solid var(--hell-color-focus-ring);
-    outline-offset: 2px;
+    @apply [outline:2px_solid_var(--hell-color-focus-ring)];
+    @apply [outline-offset:2px];
   }
   &[data-checked],
   &[data-indeterminate] {
-    background: var(--hell-color-primary);
-    border-color: var(--hell-color-primary);
+    @apply bg-(--hell-color-primary);
+    @apply border-(--hell-color-primary);
   }
   &[data-disabled] {
     @apply opacity-50 cursor-not-allowed;
   }
 }
+

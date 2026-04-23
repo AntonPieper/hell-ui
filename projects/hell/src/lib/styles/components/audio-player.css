@@ -1,64 +1,62 @@
 /* Audio player. */
 
 @utility hell-audio {
-  @apply flex flex-col w-full;
-  gap: var(--hell-space-2);
-  padding: var(--hell-space-3) var(--hell-space-4);
-  background: var(--hell-color-bg-elevated);
-  border: 1px solid var(--hell-color-border);
-  border-radius: var(--hell-radius-md);
-  font-size: 12px;
-  color: var(--hell-color-text);
-  max-width: 480px;
+  @apply flex flex-col w-full
+    gap-(--hell-space-2)
+    py-(--hell-space-3) px-(--hell-space-4)
+    bg-(--hell-color-bg-elevated)
+    border border-(--hell-color-border)
+    rounded-md
+    text-xs
+    text-(--hell-color-text)
+    max-w-120;
 }
 
 @utility hell-audio-meta {
-  @apply flex items-baseline justify-between min-w-0;
-  gap: var(--hell-space-3);
-  font-size: 12px;
+  @apply flex items-baseline justify-between min-w-0
+    gap-(--hell-space-3)
+    text-xs;
 }
 
 @utility hell-audio-title {
-  @apply font-semibold truncate min-w-0;
-  flex: 1 1 auto;
-  color: var(--hell-color-text);
-  font-size: 13px;
+  @apply font-semibold truncate min-w-0
+    flex-[1_1_auto]
+    text-(--hell-color-text)
+    text-[13px];
 }
 
 @utility hell-audio-date {
-  @apply flex-shrink-0;
-  color: var(--hell-color-text-muted);
-  font-variant-numeric: tabular-nums;
+  @apply flex-shrink-0
+    text-(--hell-color-text-muted)
+    tabular-nums;
 }
 
 @utility hell-audio-controls {
-  @apply flex items-center w-full;
-  gap: var(--hell-space-3);
+  @apply flex items-center w-full gap-(--hell-space-3);
 }
 
 @utility hell-audio-time {
-  @apply text-center;
-  font-variant-numeric: tabular-nums;
-  color: var(--hell-color-text-muted);
-  min-width: 38px;
+  @apply text-center
+    tabular-nums
+    text-(--hell-color-text-muted)
+    min-w-9.5;
 }
 
 @utility hell-audio-track {
-  @apply relative flex-1 cursor-pointer;
-  height: 4px;
-  background: var(--hell-color-bg-muted);
-  border-radius: var(--hell-radius-pill);
+  @apply relative flex-1 cursor-pointer
+    h-1
+    bg-(--hell-color-bg-muted)
+    rounded-full;
 
   > .hell-audio-track-fill {
-    @apply absolute;
-    inset-block: 0;
-    inset-inline-start: 0;
-    background: var(--hell-color-primary);
-    border-radius: inherit;
+    @apply absolute
+      inset-y-0
+      inset-s-0
+      bg-(--hell-color-primary)
+      rounded-[inherit];
   }
 }
 
 @utility hell-audio-volume {
-  width: 72px;
-  flex: 0 0 auto;
+  @apply w-18 flex-[0_0_auto];
 }

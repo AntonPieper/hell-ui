@@ -13,9 +13,11 @@ export class HellBreadcrumbs {
 @Directive({
   selector: 'ol[hellBreadcrumbList], ul[hellBreadcrumbList]',
   hostDirectives: [NgpBreadcrumbList],
-  host: { style: 'display:inline-flex; align-items:center; gap:4px; list-style:none; padding:0; margin:0;' },
+  host: { '[class.hell-breadcrumb-list]': '!unstyled()' },
 })
-export class HellBreadcrumbList {}
+export class HellBreadcrumbList {
+  readonly unstyled = input(false, { transform: booleanAttribute });
+}
 
 @Directive({
   selector: 'a[hellBreadcrumbItem], span[hellBreadcrumbItem]',
