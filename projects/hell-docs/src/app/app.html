@@ -45,16 +45,17 @@
     <button
       hellSecondaryToggle
       type="button"
-      class="hell-secondary-edge-toggle"
-      [attr.aria-label]="shell.isSecondaryHidden() ? 'Show details' : 'Hide details'"
-    >
-      <hell-icon
-        [name]="shell.isSecondaryHidden() ? 'faSolidChevronLeft' : 'faSolidChevronRight'"
-        size="11px"
-      />
-    </button>
-    <div class="hd-secondary-inner">
-      <h3 class="hd-secondary-title">About hell</h3>
+      class="hell-secondary-rail"
+    ></button>
+    <div hellAppSecondaryBody class="hd-secondary-inner">
+      <h3 class="hd-secondary-title hd-secondary-row">
+        <button
+          hellSecondaryToggle
+          type="button"
+          class="hell-secondary-header-toggle"
+        ></button>
+        About hell
+      </h3>
       <p class="hd-secondary-body">
         A pragmatic Angular component library built on
         <a href="https://ng-primitives.dev" target="_blank" rel="noreferrer">ng-primitives</a>

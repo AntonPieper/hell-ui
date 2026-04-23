@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   Directive,
-  HostListener,
   booleanAttribute,
   inject,
   input,
@@ -25,11 +24,13 @@ import {
  *   <div hellAppShell>
  *     <header hellAppTopbar>
  *       <button hellSidenavToggle>...</button>
- *       <button hellSecondaryToggle>...</button>
  *     </header>
  *     <aside hellAppSidenav>...</aside>
  *     <main hellAppContent>...</main>
- *     <aside hellAppSecondary>...</aside>
+ *     <aside hellAppSecondary>
+ *       <button hellSecondaryToggle class="hell-secondary-rail"></button>
+ *       <div hellAppSecondaryBody>...</div>
+ *     </aside>
  *   </div>
  */
 @Component({
@@ -98,12 +99,43 @@ export class HellAppContent {
   readonly unstyled = input(false, { transform: booleanAttribute });
 }
 
+/** Click anywhere → toggles `sidenavCollapsed` on the parent shell. */
+@Directive({
+  selector: '[hellSidenavToggle]',
+  host: {
+    type: 'button',
+    '(click)': 'toggle()',
+    '[attr.aria-pressed]': 'collapsed()',
+    '[attr.aria-label]': 'collapsed() ? "Expand sidebar" : "Collapse sidebar"',
+  },
+})
+export class HellSidenavToggle {
+  private readonly shell = inject(HellAppShell);
+  protected readonly collapsed = () => this.shell.isSidenavCollapsed();
+  protected toggle() { this.shell.toggleSidenav(); }
+}
+
+/** Click anywhere → toggles `secondaryHidden` on the parent shell. */
+@Directive({
+  selector: '[hellSecondaryToggle]',
+  host: {
+    type: 'button',
+    '(click)': 'toggle()',
+    '[attr.aria-pressed]': '!hidden()',
+    '[attr.aria-label]': 'hidden() ? "Show secondary panel" : "Hide secondary panel"',
+  },
+})
+export class HellSecondaryToggle {
+  private readonly shell = inject(HellAppShell);
+  protected readonly hidden = () => this.shell.isSecondaryHidden();
+  protected toggle() { this.shell.toggleSecondary(); }
+}
+
 @Directive({
   selector: '[hellAppSecondary]',
   host: {
     '[class.hell-secondary]': '!unstyled()',
     '[attr.data-hidden]': 'isHidden() ? "true" : null',
-    '[attr.aria-hidden]': 'isHidden() ? "true" : null',
   },
 })
 export class HellAppSecondary {
@@ -112,38 +144,21 @@ export class HellAppSecondary {
     transform: (v) => (v == null ? null : booleanAttribute(v)),
   });
   private readonly shell = inject(HellAppShell, { optional: true });
-  protected readonly isHidden = () =>
+  readonly isHidden = () =>
     this.hidden() ?? this.shell?.isSecondaryHidden() ?? false;
 }
 
-/** Click anywhere → toggles `sidenavCollapsed` on the parent shell. */
 @Directive({
-  selector: '[hellSidenavToggle]',
+  selector: '[hellAppSecondaryBody]',
   host: {
-    type: 'button',
-    '[attr.aria-pressed]': 'collapsed()',
-    '[attr.aria-label]': 'collapsed() ? "Expand sidebar" : "Collapse sidebar"',
+    '[class.hell-secondary-body]': '!unstyled()',
+    '[attr.aria-hidden]': 'secondary.isHidden() ? "true" : null',
+    '[attr.inert]': 'secondary.isHidden() ? "" : null',
   },
 })
-export class HellSidenavToggle {
-  private readonly shell = inject(HellAppShell);
-  protected readonly collapsed = () => this.shell.isSidenavCollapsed();
-  @HostListener('click') protected toggle() { this.shell.toggleSidenav(); }
-}
-
-/** Click anywhere → toggles `secondaryHidden` on the parent shell. */
-@Directive({
-  selector: '[hellSecondaryToggle]',
-  host: {
-    type: 'button',
-    '[attr.aria-pressed]': '!hidden()',
-    '[attr.aria-label]': 'hidden() ? "Show secondary panel" : "Hide secondary panel"',
-  },
-})
-export class HellSecondaryToggle {
-  private readonly shell = inject(HellAppShell);
-  protected readonly hidden = () => this.shell.isSecondaryHidden();
-  @HostListener('click') protected toggle() { this.shell.toggleSecondary(); }
+export class HellAppSecondaryBody {
+  readonly unstyled = input(false, { transform: booleanAttribute });
+  readonly secondary = inject(HellAppSecondary);
 }
 
 export const HELL_APP_SHELL_DIRECTIVES = [
@@ -152,6 +167,7 @@ export const HELL_APP_SHELL_DIRECTIVES = [
   HellAppSidenav,
   HellAppContent,
   HellAppSecondary,
+  HellAppSecondaryBody,
   HellSidenavToggle,
   HellSecondaryToggle,
 ] as const;

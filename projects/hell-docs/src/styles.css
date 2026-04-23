@@ -46,6 +46,9 @@
   padding: var(--hell-space-5) var(--hell-space-4);
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
   gap: var(--hell-space-3);
 }
 
@@ -64,6 +67,12 @@
   color: var(--hell-color-text-muted);
   margin: 0;
   & a { color: var(--hell-color-primary); text-decoration: underline; }
+}
+
+@utility hd-secondary-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hell-space-2);
 }
 
 @utility hd-secondary-list {

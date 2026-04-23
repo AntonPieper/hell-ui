@@ -35,18 +35,6 @@ import { HELL_APP_SHELL_DIRECTIVES, HellButton, HellIcon } from 'hell';
               <hell-icon name="faSolidBars" size="14px" />
             </button>
             <strong>Acme Console</strong>
-            <span class="ml-auto"></span>
-            <button
-              hellSecondaryToggle
-              hellButton
-              variant="ghost"
-              size="sm"
-              iconOnly
-              type="button"
-              [attr.aria-label]="shell.isSecondaryHidden() ? 'Show details' : 'Hide details'"
-            >
-              <hell-icon name="faSolidCircleInfo" size="14px" />
-            </button>
           </header>
 
           <nav hellAppSidenav class="hd-surface-elevated">
@@ -78,8 +66,9 @@ import { HELL_APP_SHELL_DIRECTIVES, HellButton, HellIcon } from 'hell';
             <h3 class="m-0 text-base font-semibold">Welcome back</h3>
             <p class="mt-2 text-sm text-(--hell-color-text-muted)">
               Click the button on the left of the topbar to collapse the
-              sidenav, the info button on the right to hide the secondary
-              panel, or drag the chevron tab to reveal it again.
+              sidenav, the chevron next to “Activity” to hide the
+              secondary panel. When hidden, click the rail to bring it
+              back.
             </p>
             <div class="mt-4 flex gap-2">
               <button
@@ -101,16 +90,15 @@ import { HELL_APP_SHELL_DIRECTIVES, HellButton, HellIcon } from 'hell';
             <button
               hellSecondaryToggle
               type="button"
-              class="hell-secondary-edge-toggle"
-              [attr.aria-label]="shell.isSecondaryHidden() ? 'Show details' : 'Hide details'"
-            >
-              <hell-icon
-                [name]="shell.isSecondaryHidden() ? 'faSolidChevronLeft' : 'faSolidChevronRight'"
-                size="11px"
-              />
-            </button>
-            <div class="p-4">
-              <h4 class="m-0 text-xs font-bold uppercase tracking-wider text-(--hell-color-text-subtle)">
+              class="hell-secondary-rail"
+            ></button>
+            <div hellAppSecondaryBody class="p-4">
+              <h4 class="m-0 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-(--hell-color-text-subtle)">
+                <button
+                  hellSecondaryToggle
+                  type="button"
+                  class="hell-secondary-header-toggle"
+                ></button>
                 Activity
               </h4>
               <ul class="mt-3 space-y-2 text-sm text-(--hell-color-text-muted)">
@@ -128,13 +116,18 @@ import { HELL_APP_SHELL_DIRECTIVES, HellButton, HellIcon } from 'hell';
   &lt;header hellAppTopbar&gt;
     &lt;button hellSidenavToggle&gt;…&lt;/button&gt;
     …
-    &lt;button hellSecondaryToggle&gt;…&lt;/button&gt;
   &lt;/header&gt;
   &lt;nav hellAppSidenav&gt;…&lt;/nav&gt;
   &lt;main hellAppContent&gt;…&lt;/main&gt;
   &lt;aside hellAppSecondary&gt;
-    &lt;button hellSecondaryToggle class="hell-secondary-edge-toggle"&gt;…&lt;/button&gt;
-    …
+    &lt;button hellSecondaryToggle class="hell-secondary-rail"&gt;&lt;/button&gt;
+    &lt;div hellAppSecondaryBody&gt;
+      &lt;header&gt;
+        &lt;button hellSecondaryToggle class="hell-secondary-header-toggle"&gt;&lt;/button&gt;
+        Title
+      &lt;/header&gt;
+      …
+    &lt;/div&gt;
   &lt;/aside&gt;
 &lt;/div&gt;</code></pre>
 
@@ -146,11 +139,15 @@ import { HELL_APP_SHELL_DIRECTIVES, HellButton, HellIcon } from 'hell';
           <code>[sidenavCollapsed]</code> /
           <code>[secondaryHidden]</code> for controlled mode.</li>
         <li>Slots: <code>hellAppTopbar</code>, <code>hellAppSidenav</code>,
-          <code>hellAppContent</code>, <code>hellAppSecondary</code>.</li>
+          <code>hellAppContent</code>, <code>hellAppSecondary</code>,
+          <code>hellAppSecondaryBody</code>.</li>
         <li>Toggles: <code>hellSidenavToggle</code>,
           <code>hellSecondaryToggle</code> — apply to any clickable
-          element. The <code>hell-secondary-edge-toggle</code> utility
-          gives you the floating chevron tab on the secondary's left edge.</li>
+          element. The library provides two opt-in styled buttons for
+          the secondary panel: <code>hell-secondary-header-toggle</code>
+          (an inline chevron sized for a heading row) and
+          <code>hell-secondary-rail</code> (auto-fills the collapsed
+          aside; hidden when expanded).</li>
         <li>Import the bundle via
           <code>HELL_APP_SHELL_DIRECTIVES</code>.</li>
       </ul>

@@ -171,6 +171,7 @@
   --hell-app-sidenav-width: 232px;
   --hell-app-sidenav-collapsed-width: 56px;
   --hell-app-secondary-width: 220px;
+  --hell-app-secondary-collapsed-width: 24px;
 
   /* Inline SVG masks for CSS-only icons (chevrons, etc.). Kept as URL-encoded
      SVGs so they can be applied via `mask` / `-webkit-mask` and tinted via

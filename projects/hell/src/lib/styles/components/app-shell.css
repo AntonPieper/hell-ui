@@ -37,13 +37,13 @@
     grid-template-columns:
       var(--hell-app-sidenav-width)
       1fr
-      0;
+      var(--hell-app-secondary-collapsed-width);
   }
   &[data-sidenav-collapsed="true"][data-secondary-hidden="true"] {
     grid-template-columns:
       var(--hell-app-sidenav-collapsed-width)
       1fr
-      0;
+      var(--hell-app-secondary-collapsed-width);
   }
 }
 
@@ -155,114 +155,147 @@
 }
 
 @utility hell-secondary {
-  @apply flex flex-col min-h-0 min-w-0 overflow-auto;
+  @apply flex flex-col min-h-0 min-w-0;
   grid-area: secondary;
   position: relative;
   background: var(--hell-color-bg-elevated);
   border-left: 1px solid var(--hell-color-border);
+  /* Aside itself never scrolls so the rail toggle stays anchored.
+     Consumers should put scrollable content in an inner wrapper. */
+  overflow: hidden;
+  transition: background var(--hell-duration-base) var(--hell-ease-out);
+}
+
+/*
+ * Secondary body — wrap all collapsible panel content in this slot.
+ * Rail toggle stays as sibling, so parent container no longer needs to
+ * special-case a child class when the panel is collapsed.
+ */
+@utility hell-secondary-body {
+  @apply flex flex-1 flex-col min-h-0 min-w-0;
+  overflow: hidden;
   transition:
     opacity var(--hell-duration-base) var(--hell-ease-out),
     visibility var(--hell-duration-base) var(--hell-ease-out);
-  &[data-hidden="true"] {
-    /* Stop content from intercepting events; lift overflow clipping so the
-       edge toggle (which lives outside the now zero-width box) is reachable.
-       We deliberately keep the aside itself visible/opaque — opacity is
-       applied to non-toggle children below so the toggle remains painted. */
-    pointer-events: none;
-    border-left-color: transparent;
-    overflow: visible;
 
-    & > *:not(.hell-secondary-edge-toggle) {
-      opacity: 0;
-      visibility: hidden;
-      transition:
-        opacity var(--hell-duration-base) var(--hell-ease-out),
-        visibility var(--hell-duration-base) var(--hell-ease-out);
-    }
+  [data-hidden="true"] > & {
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
   }
 }
 
 /*
- * Edge toggle — a thin, refined handle floating on the inner edge of a
- * side panel. Designed to feel like a piece of the panel's border itself
- * being pinched out into a grabbable tab. Stays interactive even when the
- * panel collapses to zero width so users can always reopen it.
+ * Inline header toggle — small icon-only chevron button consumers place
+ * inside their secondary panel header row, to the left of the title.
+ * Sized to align with body text. Hidden along with the rest of panel
+ * content when the aside is collapsed (no special rules needed; it fades
+ * with its siblings).
  *
- *   ─── panel ─────┐
- *                  │ ◀
- *   ───────────────┘
- *
- * Default state is nearly weightless (small shadow, muted chevron). On
- * hover it lifts, the border picks up the primary hue, and the chevron
- * shifts a hair toward the action it implies.
+ *   ┌──────────────────────────────────────┐
+ *   │ ◂  About hell                        │
+ *   │                                      │
+ *   │ Body content...                      │
+ *   └──────────────────────────────────────┘
  */
-@utility hell-edge-toggle {
-  position: absolute;
-  top: 50%;
-  width: 18px;
-  height: 42px;
+@utility hell-secondary-header-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
   padding: 0;
   margin: 0;
-  border: 1px solid var(--hell-color-border);
-  background: var(--hell-color-bg-elevated);
+  border: none;
+  border-radius: var(--hell-radius-sm);
+  background: transparent;
   color: var(--hell-color-text-subtle);
   cursor: pointer;
   font: inherit;
-  z-index: 15;
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.06),
-    0 4px 10px -4px rgb(0 0 0 / 0.06);
   transition:
     background var(--hell-duration-fast) var(--hell-ease-out),
-    color var(--hell-duration-fast) var(--hell-ease-out),
-    border-color var(--hell-duration-fast) var(--hell-ease-out),
-    box-shadow var(--hell-duration-base) var(--hell-ease-out),
-    transform var(--hell-duration-base) var(--hell-ease-out);
+    color var(--hell-duration-fast) var(--hell-ease-out);
 
-  & > hell-icon {
-    line-height: 0;
+  &::before {
+    content: "";
+    width: 12px;
+    height: 12px;
+    background: currentColor;
+    -webkit-mask: var(--hell-icon-chevron-right) center / contain no-repeat;
+            mask: var(--hell-icon-chevron-right) center / contain no-repeat;
     transition: transform var(--hell-duration-fast) var(--hell-ease-out);
   }
 
   &:hover {
-    background: var(--hell-color-bg);
-    color: var(--hell-color-primary);
-    border-color: color-mix(in srgb, var(--hell-color-primary) 45%, var(--hell-color-border));
-    box-shadow:
-      0 2px 4px rgb(0 0 0 / 0.08),
-      0 8px 20px -6px color-mix(in srgb, var(--hell-color-primary) 25%, transparent);
+    background: var(--hell-color-bg-subtle);
+    color: var(--hell-color-text);
   }
+  &:hover::before { transform: translateX(1px); }
+
   &:focus-visible {
     outline: 2px solid var(--hell-color-focus-ring);
-    outline-offset: 2px;
+    outline-offset: 1px;
   }
 }
 
-/* Pinned to the LEFT edge of the secondary panel (overlaps the border).
-   Stays clickable even when the secondary aside is hidden so the user has
-   a way to re-open it. */
-@utility hell-secondary-edge-toggle {
-  @apply hell-edge-toggle;
-  inset-inline-start: 0;
-  transform: translate(-50%, -50%);
-  border-radius: 999px 4px 4px 999px;
+/*
+ * Rail toggle — full-aside click target shown only when the panel is
+ * collapsed. Consumers always include this button in their aside markup;
+ * CSS hides it when expanded and stretches it to fill the rail when
+ * collapsed.
+ *
+ *   Collapsed:  ┌─┐
+ *               │◂│   ← whole rail = click target
+ *               │ │
+ *               └─┘
+ */
+@utility hell-secondary-rail {
+  /* Hidden when the panel is expanded — the rail only matters as a
+     re-open affordance. */
+  display: none;
 
-  &:hover { transform: translate(calc(-50% - 1px), -50%); }
-  &:hover > hell-icon { transform: translateX(-1px); }
-
-  /* When the parent aside has data-hidden="true", the aside collapses but
-     this toggle stays reachable. */
   [data-hidden="true"] > & {
-    opacity: 1;
-    visibility: visible;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: transparent;
+    color: var(--hell-color-text-subtle);
+    cursor: pointer;
+    font: inherit;
+    z-index: 15;
     pointer-events: auto;
-    transform: translate(-100%, -50%);
+    visibility: visible;
+    opacity: 1;
+    transition:
+      background var(--hell-duration-fast) var(--hell-ease-out),
+      color var(--hell-duration-fast) var(--hell-ease-out);
 
-    &:hover { transform: translate(calc(-100% - 1px), -50%); }
-    &:hover > hell-icon { transform: translateX(1px); }
+    &::before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      background: currentColor;
+      -webkit-mask: var(--hell-icon-chevron-left) center / contain no-repeat;
+              mask: var(--hell-icon-chevron-left) center / contain no-repeat;
+      transition: transform var(--hell-duration-fast) var(--hell-ease-out);
+    }
+  }
+
+  [data-hidden="true"] > &:hover {
+    background: var(--hell-color-bg-subtle);
+    color: var(--hell-color-primary);
+  }
+  [data-hidden="true"] > &:hover::before { transform: translateX(-1px); }
+
+  [data-hidden="true"] > &:focus-visible {
+    outline: 2px solid var(--hell-color-focus-ring);
+    outline-offset: -2px;
   }
 }
 
