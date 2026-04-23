@@ -10,6 +10,17 @@
   &[data-exit] {
     animation: hell-fade-out var(--hell-duration-base) var(--hell-ease-out);
   }
+
+  /* Scoped overlay — constrained to the bounds reported by the nearest
+     [hellDialogScope] directive, leaving the rest of the app interactive. */
+  &[data-scoped="true"] {
+    position: fixed;
+    inset: auto;
+    top: var(--hell-dialog-scope-y, 0);
+    left: var(--hell-dialog-scope-x, 0);
+    width: var(--hell-dialog-scope-w, 100vw);
+    height: var(--hell-dialog-scope-h, 100vh);
+  }
 }
 
 @utility hell-dialog {

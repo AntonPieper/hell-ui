@@ -52,10 +52,22 @@
   &[data-orientation="vertical"] {
     @apply justify-start;
     border-bottom: none;
-    border-right: 2px solid transparent;
+    border-right: none;
+    border-left: 2px solid transparent;
     margin-bottom: 0;
-    margin-right: -1px;
-    &[data-active] { border-right-color: var(--hell-color-primary); }
+    margin-right: 0;
+    border-radius: var(--hell-radius-sm);
+    padding-inline: var(--hell-space-3);
+
+    &[data-hover]:not([data-active]) {
+      background: var(--hell-color-bg-subtle);
+    }
+    &[data-active] {
+      border-left-color: var(--hell-color-primary);
+      background: var(--hell-color-primary-soft);
+      color: var(--hell-color-primary);
+      font-weight: 600;
+    }
   }
 }
 

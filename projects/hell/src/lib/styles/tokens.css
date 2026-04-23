@@ -38,10 +38,17 @@
   --color-hell-info-600: #0bafd1;
   --color-hell-info-700: #0888a3;
 
-  --color-hell-danger-50: #fdecea;
+  --color-hell-danger-50: #fdf4f3;
+  --color-hell-danger-100: #fbe6e5;
+  --color-hell-danger-200: #f8d3d0;
+  --color-hell-danger-300: #f2b3af;
+  --color-hell-danger-400: #e98780;
   --color-hell-danger-500: #da564d;
-  --color-hell-danger-600: #c0473e;
-  --color-hell-danger-700: #963830;
+  --color-hell-danger-600: #c8433a;
+  --color-hell-danger-700: #a8352d;
+  --color-hell-danger-800: #8b2f29;
+  --color-hell-danger-900: #742d28;
+  --color-hell-danger-950: #3e1411;
 
   --color-hell-warning-50: #fff7e6;
   --color-hell-warning-500: #e5a000;

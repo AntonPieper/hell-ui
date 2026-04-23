@@ -47,6 +47,43 @@ import { HellButton, HELL_DIALOG_DIRECTIVES } from 'hell';
           <code>hellDialogDescription</code>, <code>hellDialogBody</code>,
           <code>hellDialogFooter</code> — semantic regions</li>
       </ul>
+
+      <h2>Scoped (non-blocking)</h2>
+      <p>
+        Apply <code>hellDialogScope</code> to a region (typically the main
+        content area) and add <code>scoped</code> on the overlay. The dialog
+        and its backdrop are then constrained to that region — the rest of
+        the page (sidebars, topbar, etc.) stays interactive.
+      </p>
+      <div class="hd-example">
+        <div hellDialogScope class="relative h-64 rounded-md border border-(--hell-color-border) p-4 flex items-start gap-3">
+          <button hellButton variant="primary" [hellDialogTrigger]="scoped">
+            Open scoped dialog
+          </button>
+          <p class="text-sm text-(--hell-color-text-muted) m-0">
+            The dialog overlay only covers this card. Try clicking outside it
+            (or anywhere else on the page) — interaction is preserved.
+          </p>
+        </div>
+
+        <ng-template #scoped let-close="close">
+          <div hellDialogOverlay scoped>
+            <div hellDialog size="sm">
+              <div hellDialogHeader>
+                <h2 hellDialogTitle>Scoped dialog</h2>
+              </div>
+              <div hellDialogBody>
+                <p hellDialogDescription>
+                  Confined to the bounds of <code>hellDialogScope</code>.
+                </p>
+              </div>
+              <div hellDialogFooter>
+                <button hellButton variant="ghost" (click)="close()">Close</button>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </div>
     </article>
   `,
 })

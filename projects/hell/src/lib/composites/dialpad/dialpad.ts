@@ -49,7 +49,8 @@ const KEYS: HellDialpadKey[] = [
   },
   template: `
     <div class="hell-dialpad-display">
-      <output class="hell-dialpad-number" aria-live="polite">{{ display() || '\u00A0' }}</output>
+      <output class="hell-dialpad-number" aria-live="polite"
+        ><span class="hell-dialpad-number-inner">{{ display() || '\u00A0' }}</span></output>
       <button
         hellButton
         variant="ghost"

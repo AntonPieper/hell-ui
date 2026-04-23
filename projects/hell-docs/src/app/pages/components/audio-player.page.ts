@@ -17,6 +17,8 @@ import { HellAudioPlayer } from 'hell';
         <hell-audio-player
           src="https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg"
           downloadName="example.ogg"
+          title="Example track"
+          [date]="exampleDate"
         />
       </div>
 
@@ -31,10 +33,14 @@ import { HellAudioPlayer } from 'hell';
       <h2>API</h2>
       <ul>
         <li><code>src</code>: required audio URL</li>
+        <li><code>title</code>: display title (defaults to filename from <code>src</code>)</li>
+        <li><code>date</code>: <code>Date | string</code> shown next to the title</li>
         <li><code>downloadName</code>: filename for the download link</li>
         <li><code>allowDownload</code>: show / hide download button (default <code>true</code>)</li>
       </ul>
     </article>
   `,
 })
-export class AudioPlayerPage {}
+export class AudioPlayerPage {
+  protected readonly exampleDate = new Date('2026-04-22');
+}

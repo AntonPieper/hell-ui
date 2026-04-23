@@ -168,6 +168,51 @@
     visibility: hidden;
     border-left-color: transparent;
   }
+
+  /* Edge toggle stays interactive even when the panel is collapsed. */
+  &[data-hidden="true"] > .hell-secondary-edge-toggle {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Floating chevron tab anchored to the secondary panel's left edge.
+   Stays visible whether the secondary is open or hidden so users can
+   always re-show a hidden panel. */
+@utility hell-secondary-edge-toggle {
+  position: absolute;
+  top: 50%;
+  inset-inline-start: 0;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hell-color-bg-elevated);
+  color: var(--hell-color-text-muted);
+  border: 1px solid var(--hell-color-border);
+  border-radius: var(--hell-radius-md);
+  box-shadow: var(--hell-shadow-sm);
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  z-index: 5;
+  transition:
+    background var(--hell-duration-fast) var(--hell-ease-out),
+    color var(--hell-duration-fast) var(--hell-ease-out),
+    border-color var(--hell-duration-fast) var(--hell-ease-out);
+
+  &:hover {
+    background: var(--hell-color-bg-subtle);
+    color: var(--hell-color-text);
+    border-color: color-mix(in srgb, var(--hell-color-primary) 35%, var(--hell-color-border));
+  }
+  &:focus-visible {
+    outline: 2px solid var(--hell-color-focus-ring);
+    outline-offset: 1px;
+  }
 }
 
 /* Reusable nav-item styling used outside sidenav (e.g. composite menus). */

@@ -20,7 +20,7 @@ import { HELL_APP_SHELL_DIRECTIVES, HellButton, HellIcon } from 'hell';
         <div
           hellAppShell
           #shell="hellAppShell"
-          class="block h-96 overflow-hidden rounded-lg border border-(--hell-color-border)"
+          class="h-96 overflow-hidden rounded-lg border border-(--hell-color-border)"
         >
           <header hellAppTopbar class="hd-surface-elevated">
             <button

@@ -34,6 +34,18 @@ import { HellSlider } from '../../primitives/slider/slider';
       (ended)="playing.set(false)"
     ></audio>
 
+    @if (resolvedTitle() || resolvedDate()) {
+      <div class="hell-audio-meta">
+        @if (resolvedTitle()) {
+          <span class="hell-audio-title" [attr.title]="resolvedTitle()">{{ resolvedTitle() }}</span>
+        }
+        @if (resolvedDate()) {
+          <span class="hell-audio-date">{{ resolvedDate() }}</span>
+        }
+      </div>
+    }
+
+    <div class="hell-audio-controls">
     <button
       hellButton
       variant="ghost"
@@ -74,10 +86,19 @@ import { HellSlider } from '../../primitives/slider/slider';
       [attr.aria-label]="muted() ? 'Unmute' : 'Mute'"
       (click)="toggleMute()"
     >
-      @if (muted()) {
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 6v4h2l3 2V4L5 6H3zm9 .3l1.4-1.4 1 1L13 7.3l1.4 1.4-1 1L12 8.3l-1.4 1.4-1-1L11 7.3 9.6 5.9l1-1z"/></svg>
-      } @else {
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 6v4h2l3 2V4L5 6H3zm8 2c0-1-.5-1.8-1.3-2.3v4.6C10.5 9.8 11 9 11 8z"/></svg>
+      @switch (volumeLevel()) {
+        @case ('mute') {
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 6v4h2l3 2V4L5 6H3zm9 .3l1.4-1.4 1 1L13 7.3l1.4 1.4-1 1L12 8.3l-1.4 1.4-1-1L11 7.3 9.6 5.9l1-1z"/></svg>
+        }
+        @case ('low') {
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 6v4h2l3 2V4L5 6H3z"/></svg>
+        }
+        @case ('mid') {
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 6v4h2l3 2V4L5 6H3zm8 2c0-1-.5-1.8-1.3-2.3v4.6C10.5 9.8 11 9 11 8z"/></svg>
+        }
+        @default {
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 6v4h2l3 2V4L5 6H3zm8 2c0-1-.5-1.8-1.3-2.3v4.6C10.5 9.8 11 9 11 8zm1.6-4.4l-.7.7C13.2 5 14 6.4 14 8s-.8 3-2.1 3.7l.7.7C14.2 11.5 15 9.8 15 8s-.8-3.5-2.4-4.4z"/></svg>
+        }
       }
     </button>
 
@@ -106,6 +127,7 @@ import { HellSlider } from '../../primitives/slider/slider';
         <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1v8.6L5.4 7l-1 1L8 11.6 11.6 8l-1-1L9 9.6V1H7zm-5 13v1h12v-1H3z"/></svg>
       </a>
     }
+    </div>
   `,
 })
 export class HellAudioPlayer {
@@ -113,6 +135,10 @@ export class HellAudioPlayer {
   readonly src = input.required<string>();
   readonly downloadName = input<string | null>(null);
   readonly allowDownload = input(true, { transform: booleanAttribute });
+  /** Display title above the controls. Falls back to the basename of `src`. */
+  readonly title = input<string | null>(null);
+  /** Display a date/timestamp next to the title. Accepts a string or Date. */
+  readonly date = input<string | Date | null>(null);
 
   protected readonly playing = signal(false);
   protected readonly currentTime = signal(0);
@@ -123,6 +149,38 @@ export class HellAudioPlayer {
   protected readonly progress = computed(() => {
     const d = this.duration();
     return d ? (this.currentTime() / d) * 100 : 0;
+  });
+
+  protected readonly volumeLevel = computed<'mute' | 'low' | 'mid' | 'high'>(() => {
+    if (this.muted() || this.volume() === 0) return 'mute';
+    const v = this.volume();
+    if (v < 0.34) return 'low';
+    if (v < 0.67) return 'mid';
+    return 'high';
+  });
+
+  protected readonly resolvedTitle = computed<string | null>(() => {
+    const explicit = this.title();
+    if (explicit !== null) return explicit;
+    const src = this.src();
+    if (!src) return null;
+    try {
+      const url = new URL(src, 'http://_');
+      const last = url.pathname.split('/').pop() ?? '';
+      return decodeURIComponent(last) || null;
+    } catch {
+      return src.split('/').pop() ?? null;
+    }
+  });
+
+  protected readonly resolvedDate = computed<string | null>(() => {
+    const d = this.date();
+    if (!d) return null;
+    const date = d instanceof Date ? d : new Date(d);
+    if (Number.isNaN(date.valueOf())) return typeof d === 'string' ? d : null;
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric',
+    });
   });
 
   private readonly audio = viewChild.required<ElementRef<HTMLAudioElement>>('audio');

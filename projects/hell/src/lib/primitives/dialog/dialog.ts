@@ -1,4 +1,13 @@
-import { Directive, booleanAttribute, input } from '@angular/core';
+import {
+  DOCUMENT,
+  Directive,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  booleanAttribute,
+  inject,
+  input,
+} from '@angular/core';
 import {
   NgpDialog,
   NgpDialogOverlay,
@@ -33,10 +42,69 @@ export class HellDialogTrigger {}
 @Directive({
   selector: '[hellDialogOverlay]',
   hostDirectives: [NgpDialogOverlay],
-  host: { '[class.hell-dialog-overlay]': '!unstyled()' },
+  host: {
+    '[class.hell-dialog-overlay]': '!unstyled()',
+    '[attr.data-scoped]': 'scoped() ? "true" : null',
+  },
 })
 export class HellDialogOverlay {
   readonly unstyled = input(false, { transform: booleanAttribute });
+  /** When true, the overlay is constrained to the bounds of the nearest
+   *  `[hellDialogScope]` ancestor (or the viewport if none is registered),
+   *  leaving the rest of the app interactive. */
+  readonly scoped = input(false, { transform: booleanAttribute });
+}
+
+/**
+ * Marks an element as the bounding region for `<div hellDialogOverlay scoped>`.
+ * Tracks its size/position via ResizeObserver and exposes it as
+ * `--hell-dialog-scope-{x,y,w,h}` CSS variables on the document root, which
+ * the scoped overlay reads instead of `inset: 0`.
+ *
+ * Pair with `hellAppContent` to keep the surrounding chrome (sidebars,
+ * topbar) interactive while a dialog is open over the main content.
+ */
+@Directive({
+  selector: '[hellDialogScope]',
+  exportAs: 'hellDialogScope',
+})
+export class HellDialogScope implements OnInit, OnDestroy {
+  private readonly el = inject(ElementRef<HTMLElement>).nativeElement;
+  private readonly doc = inject(DOCUMENT);
+  private ro: ResizeObserver | null = null;
+  private readonly handler = () => this.update();
+
+  ngOnInit(): void {
+    this.update();
+    if (typeof ResizeObserver !== 'undefined') {
+      this.ro = new ResizeObserver(this.handler);
+      this.ro.observe(this.el);
+    }
+    const win = this.doc.defaultView;
+    win?.addEventListener('scroll', this.handler, { passive: true, capture: true });
+    win?.addEventListener('resize', this.handler);
+  }
+
+  ngOnDestroy(): void {
+    this.ro?.disconnect();
+    const win = this.doc.defaultView;
+    win?.removeEventListener('scroll', this.handler, true as unknown as EventListenerOptions);
+    win?.removeEventListener('resize', this.handler);
+    const s = this.doc.documentElement.style;
+    s.removeProperty('--hell-dialog-scope-x');
+    s.removeProperty('--hell-dialog-scope-y');
+    s.removeProperty('--hell-dialog-scope-w');
+    s.removeProperty('--hell-dialog-scope-h');
+  }
+
+  private update(): void {
+    const rect = this.el.getBoundingClientRect();
+    const s = this.doc.documentElement.style;
+    s.setProperty('--hell-dialog-scope-x', `${rect.left}px`);
+    s.setProperty('--hell-dialog-scope-y', `${rect.top}px`);
+    s.setProperty('--hell-dialog-scope-w', `${rect.width}px`);
+    s.setProperty('--hell-dialog-scope-h', `${rect.height}px`);
+  }
 }
 
 @Directive({
@@ -103,4 +171,5 @@ export const HELL_DIALOG_DIRECTIVES = [
   HellDialogDescription,
   HellDialogBody,
   HellDialogFooter,
+  HellDialogScope,
 ] as const;

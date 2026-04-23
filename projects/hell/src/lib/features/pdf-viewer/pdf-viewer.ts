@@ -63,6 +63,11 @@ const ZOOM_STEPS = [
         (click)="download()" [disabled]="!ready()" aria-label="Download"
       ><hell-icon name="faSolidDownload" /></button>
 
+      <button
+        hellButton variant="ghost" size="sm" iconOnly type="button"
+        (click)="print()" [disabled]="!ready()" aria-label="Print"
+      ><hell-icon name="faSolidPrint" /></button>
+
       <span class="hell-pdf-divider" aria-hidden="true"></span>
 
       <button
@@ -340,6 +345,42 @@ export class HellPdfViewer {
     a.click();
     a.remove();
     if (revoke) setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  }
+
+  protected async print() {
+    const src = this.src();
+    let url: string;
+    let revoke = false;
+    if (typeof src === 'string') {
+      url = src;
+    } else if (src instanceof URL) {
+      url = src.toString();
+    } else {
+      const blob = new Blob([src as ArrayBuffer], { type: 'application/pdf' });
+      url = URL.createObjectURL(blob);
+      revoke = true;
+    }
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.src = url;
+    iframe.onload = () => {
+      try {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+      } catch (e) {
+        this.error.emit(e);
+      }
+    };
+    document.body.appendChild(iframe);
+    setTimeout(() => {
+      iframe.remove();
+      if (revoke) URL.revokeObjectURL(url);
+    }, 60_000);
   }
 
   protected toggleFind() {

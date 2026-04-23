@@ -85,23 +85,101 @@
 /* Native date / time inputs. Calendar/clock indicator tinted, padding
    tweaked so the picker icon doesn't clip. */
 @utility hell-date-input {
-  &::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    opacity: 0.55;
-    transition: opacity var(--hell-duration-fast) var(--hell-ease-out);
+  display: inline-flex;
+  min-width: 11rem;
+
+  & > .hell-date-input-trigger {
+    @apply justify-start w-full;
+    gap: var(--hell-space-2);
+    font-variant-numeric: tabular-nums;
   }
-  &:hover::-webkit-calendar-picker-indicator { opacity: 1; }
-  &::-webkit-datetime-edit { color: var(--hell-color-text); }
-  &::-webkit-datetime-edit-fields-wrapper { padding: 0; }
+  & .hell-date-input-icon {
+    color: var(--hell-color-text-subtle);
+    flex-shrink: 0;
+  }
+  & .hell-date-input-value {
+    @apply truncate text-start;
+    flex: 1 1 auto;
+    color: var(--hell-color-text);
+  }
+  &[data-invalid="true"] > .hell-date-input-trigger {
+    border-color: var(--hell-color-danger, var(--hell-color-border));
+  }
+  &[data-size="sm"] > .hell-date-input-trigger { font-size: var(--hell-font-size-sm); }
+  &[data-size="lg"] > .hell-date-input-trigger { font-size: var(--hell-font-size-lg); }
 }
 
 @utility hell-time-input {
-  &::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    opacity: 0.55;
-    transition: opacity var(--hell-duration-fast) var(--hell-ease-out);
+  display: inline-flex;
+  min-width: 9rem;
+
+  & > .hell-time-input-trigger {
+    @apply justify-start w-full;
+    gap: var(--hell-space-2);
+    font-variant-numeric: tabular-nums;
   }
-  &:hover::-webkit-calendar-picker-indicator { opacity: 1; }
-  &::-webkit-datetime-edit { color: var(--hell-color-text); }
-  &::-webkit-datetime-edit-fields-wrapper { padding: 0; }
+  & .hell-time-input-icon {
+    color: var(--hell-color-text-subtle);
+    flex-shrink: 0;
+  }
+  & .hell-time-input-value {
+    @apply truncate text-start;
+    flex: 1 1 auto;
+    color: var(--hell-color-text);
+  }
+  &[data-invalid="true"] > .hell-time-input-trigger {
+    border-color: var(--hell-color-danger, var(--hell-color-border));
+  }
+  &[data-size="sm"] > .hell-time-input-trigger { font-size: var(--hell-font-size-sm); }
+  &[data-size="lg"] > .hell-time-input-trigger { font-size: var(--hell-font-size-lg); }
+}
+
+@utility hell-time-picker {
+  @apply flex items-stretch;
+  gap: var(--hell-space-2);
+  background: var(--hell-color-bg-elevated);
+  border: 1px solid var(--hell-color-border);
+  border-radius: var(--hell-radius-md);
+  padding: var(--hell-space-2);
+  box-shadow: var(--hell-shadow-sm);
+  min-width: 200px;
+}
+
+@utility hell-time-picker-column {
+  @apply flex flex-col items-center;
+  flex: 1 1 0;
+  min-width: 56px;
+  height: 200px;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: thin;
+  border-radius: var(--hell-radius-sm);
+  background: var(--hell-color-bg-subtle);
+}
+
+@utility hell-time-picker-cell {
+  @apply flex items-center justify-center cursor-pointer;
+  width: 100%;
+  height: 32px;
+  flex-shrink: 0;
+  scroll-snap-align: center;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--hell-color-text-muted);
+  background: transparent;
+  border: none;
+  font-family: inherit;
+
+  &:hover { background: var(--hell-color-bg-muted); color: var(--hell-color-text); }
+  &[data-selected="true"] {
+    background: var(--hell-color-primary);
+    color: var(--hell-color-primary-fg);
+    font-weight: 600;
+  }
+}
+
+@utility hell-time-picker-divider {
+  @apply self-center;
+  font-size: 18px;
+  color: var(--hell-color-text-subtle);
 }

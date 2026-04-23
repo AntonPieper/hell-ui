@@ -1,8 +1,8 @@
 /* Audio player. */
 
 @utility hell-audio {
-  @apply flex items-center w-full;
-  gap: var(--hell-space-3);
+  @apply flex flex-col w-full;
+  gap: var(--hell-space-2);
   padding: var(--hell-space-3) var(--hell-space-4);
   background: var(--hell-color-bg-elevated);
   border: 1px solid var(--hell-color-border);
@@ -10,6 +10,30 @@
   font-size: 12px;
   color: var(--hell-color-text);
   max-width: 480px;
+}
+
+@utility hell-audio-meta {
+  @apply flex items-baseline justify-between min-w-0;
+  gap: var(--hell-space-3);
+  font-size: 12px;
+}
+
+@utility hell-audio-title {
+  @apply font-semibold truncate min-w-0;
+  flex: 1 1 auto;
+  color: var(--hell-color-text);
+  font-size: 13px;
+}
+
+@utility hell-audio-date {
+  @apply flex-shrink-0;
+  color: var(--hell-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@utility hell-audio-controls {
+  @apply flex items-center w-full;
+  gap: var(--hell-space-3);
 }
 
 @utility hell-audio-time {
