@@ -21,15 +21,14 @@ import { HellPdfViewer } from 'hell';
         <hell-pdf-viewer
           src="https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf"
           [initialPage]="1"
-          [initialZoom]="1"
-          class="h-[480px]"></hell-pdf-viewer>
+          class="h-120"></hell-pdf-viewer>
       </div>
 
       <h2>API</h2>
       <ul>
         <li><code>src</code>: <code>string | URL | ArrayBuffer</code></li>
         <li><code>initialPage</code> (default <code>1</code>)</li>
-        <li><code>initialZoom</code> (default <code>1</code>)</li>
+        <li><code>initialZoom</code> (default <code>'auto'</code>)</li>
         <li>Outputs: <code>pageChange</code>, <code>zoomChange</code>,
           <code>loaded</code>, <code>error</code></li>
       </ul>

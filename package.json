@@ -9,7 +9,7 @@
     "test": "ng test"
   },
   "private": true,
-  "packageManager": "pnpm@10.33.1",
+  "packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8",
   "dependencies": {
     "@angular/common": "^21.2.0",
     "@angular/compiler": "^21.2.0",
@@ -32,9 +32,11 @@
     "@ng-icons/core": "^33.2.2",
     "@ng-icons/font-awesome": "^33.2.2",
     "@tanstack/angular-table": "^8.21.4",
+    "class-variance-authority": "^0.7.1",
     "ng-primitives": "^0.117.1",
     "pdfjs-dist": "^5.6.205",
     "rxjs": "~7.8.0",
+    "tailwind-merge": "^3.5.0",
     "tslib": "^2.3.0"
   },
   "devDependencies": {

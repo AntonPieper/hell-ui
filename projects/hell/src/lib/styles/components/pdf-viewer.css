@@ -183,6 +183,9 @@
   @apply absolute;
   @apply inset-0;
   @apply overflow-auto;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y pinch-zoom;
+  -webkit-overflow-scrolling: touch;
 
   /* When the overview rail is shown, the scroll area must coexist with it
      in the flex row, so position becomes relative inside the host. */

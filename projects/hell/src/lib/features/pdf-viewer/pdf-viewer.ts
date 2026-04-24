@@ -3,7 +3,6 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  HostListener,
   afterNextRender,
   booleanAttribute,
   computed,
@@ -18,11 +17,19 @@ import {
 } from '@angular/core';
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
-
-const ZOOM_VALUES = ['auto', 'page-actual', 'page-fit', 'page-width'] as const;
-const ZOOM_STEPS = [
-  0.25, 0.33, 0.5, 0.67, 0.75, 0.85, 1, 1.15, 1.33, 1.5, 1.75, 2, 2.5, 3, 4,
-] as const;
+import { createHiddenPdfPrintHandle, printPdfInHiddenIframe } from './pdf-viewer.print';
+import {
+  PDF_ZOOM_OPTIONS,
+  PDF_ZOOM_VALUES,
+  clampZoomScale,
+  getCtrlWheelScaleFactor,
+  getZoomOrigin,
+  getNextZoomStep,
+  getPreviousZoomStep,
+  getZoomLabel,
+  normalizeZoomEventValue,
+  normalizeZoomValue,
+} from './pdf-viewer.utils';
 
 @Component({
   selector: 'hell-pdf-viewer',
@@ -30,153 +37,12 @@ const ZOOM_STEPS = [
   imports: [HellButton, HellIcon],
   host: {
     '[class.hell-pdf]': '!unstyled()',
+    '(keydown)': 'onKey($event)',
+    'window:keydown': 'onWindowKey($event)',
+    'window:pointerdown': 'onWindowPointerDown($event)',
     tabindex: '0',
   },
-  template: `
-    <div class="hell-pdf-toolbar">
-      <button
-        hellButton variant="ghost" size="sm" iconOnly type="button"
-        (click)="toggleOverview()" [attr.aria-pressed]="overviewOpen()"
-        aria-label="Toggle page overview"
-      ><hell-icon name="faSolidTableColumns" /></button>
-
-      <span class="hell-pdf-divider" aria-hidden="true"></span>
-
-      <button
-        hellButton variant="ghost" size="sm" iconOnly type="button"
-        (click)="prev()" [disabled]="page() <= 1" aria-label="Previous page"
-      ><hell-icon name="faSolidChevronLeft" /></button>
-
-      <input
-        class="hell-input hell-pdf-page-input"
-        type="number" min="1" [max]="totalPages() || 1" [value]="page()"
-        (change)="goTo(+$any($event.target).value)"
-        aria-label="Page"
-      />
-      <span class="hell-pdf-toolbar-text">/ {{ totalPages() || '…' }}</span>
-
-      <button
-        hellButton variant="ghost" size="sm" iconOnly type="button"
-        (click)="next()" [disabled]="page() >= totalPages()" aria-label="Next page"
-      ><hell-icon name="faSolidChevronRight" /></button>
-
-      <span class="hell-pdf-spacer"></span>
-
-      <button
-        hellButton variant="ghost" size="sm" iconOnly type="button"
-        (click)="openFind()" [attr.aria-pressed]="findOpen()" aria-label="Find in document (Ctrl/Cmd+F)"
-      ><hell-icon name="faSolidMagnifyingGlass" /></button>
-
-      <button
-        hellButton variant="ghost" size="sm" iconOnly type="button"
-        (click)="download()" [disabled]="!ready()" aria-label="Download"
-      ><hell-icon name="faSolidDownload" /></button>
-
-      <button
-        hellButton variant="ghost" size="sm" iconOnly type="button"
-        (click)="print()" [disabled]="!ready()" aria-label="Print"
-      ><hell-icon name="faSolidPrint" /></button>
-
-      <span class="hell-pdf-divider" aria-hidden="true"></span>
-
-      <button
-        hellButton variant="ghost" size="sm" iconOnly type="button"
-        (click)="zoomOut()" aria-label="Zoom out"
-      ><hell-icon name="faSolidMinus" /></button>
-
-      <select
-        class="hell-pdf-zoom-select"
-        [value]="zoomDisplay()"
-        (change)="onZoomSelect($any($event.target).value)"
-        aria-label="Zoom level"
-      >
-        <option value="auto">Automatic</option>
-        <option value="page-actual">Actual size</option>
-        <option value="page-fit">Page fit</option>
-        <option value="page-width">Page width</option>
-        @for (z of zoomOptions; track z.value) {
-          <option [value]="z.value">{{ z.label }}</option>
-        }
-        @if (showCustomZoom()) {
-          <option [value]="zoomDisplay()">{{ zoomDisplay() }}</option>
-        }
-      </select>
-
-      <button
-        hellButton variant="ghost" size="sm" iconOnly type="button"
-        (click)="zoomIn()" aria-label="Zoom in"
-      ><hell-icon name="faSolidPlus" /></button>
-    </div>
-
-    @if (findOpen()) {
-      <div class="hell-pdf-findbar">
-        <input
-          #findInput
-          class="hell-input hell-pdf-find-input"
-          type="search"
-          placeholder="Find in document…"
-          [value]="findQuery()"
-          (input)="onFindInput($any($event.target).value)"
-          (keydown.enter)="findAgain($event)"
-          (keydown.escape)="onFindEscape($event)"
-          aria-label="Find query"
-        />
-        <span class="hell-pdf-find-count">
-          @if (findStatus() === 'pending') { Searching… }
-          @else if (findStatus() === 'not-found' && findQuery()) { Not found }
-          @else if (findTotal() > 0) { {{ findCurrent() }} / {{ findTotal() }} }
-          @else { &nbsp; }
-        </span>
-        <button
-          hellButton variant="ghost" size="sm" iconOnly type="button"
-          (click)="findPrev()" [disabled]="!findTotal()" aria-label="Previous match"
-        ><hell-icon name="faSolidChevronUp" /></button>
-        <button
-          hellButton variant="ghost" size="sm" iconOnly type="button"
-          (click)="findNext()" [disabled]="!findTotal()" aria-label="Next match"
-        ><hell-icon name="faSolidChevronDown" /></button>
-        <button
-          hellButton variant="ghost" size="sm" iconOnly type="button"
-          (click)="closeFind()" aria-label="Close find bar (Esc)"
-        ><hell-icon name="faSolidXmark" /></button>
-      </div>
-    }
-
-    <!--
-      pdf.js's PDFViewer requires the container element it scrolls in to be
-      absolutely positioned. We achieve that with a relative wrapper plus an
-      absolutely-positioned inner #container which becomes the actual
-      PDFViewer scroll container. The optional thumbnail rail sits beside it.
-    -->
-    <div class="hell-pdf-host">
-      @if (overviewOpen()) {
-        <aside class="hell-pdf-overview" aria-label="Page overview">
-          @for (n of pageList(); track n) {
-            <button
-              type="button"
-              class="hell-pdf-thumb"
-              [attr.data-active]="page() === n ? 'true' : null"
-              (click)="goTo(n)"
-              [attr.aria-label]="'Go to page ' + n"
-              [attr.aria-current]="page() === n ? 'page' : null"
-            >
-              <span class="hell-pdf-thumb-canvas-wrap">
-                <canvas
-                  #thumbCanvas
-                  [attr.data-page]="n"
-                  width="120" height="160"
-                ></canvas>
-              </span>
-              <span class="hell-pdf-thumb-label">{{ n }}</span>
-            </button>
-          }
-        </aside>
-      }
-      <div #container class="hell-pdf-scroll pdfViewerContainer">
-        <div class="pdfViewer"></div>
-      </div>
-    </div>
-  `,
+  templateUrl: './pdf-viewer.html',
 })
 export class HellPdfViewer {
   readonly unstyled = input(false, { transform: booleanAttribute });
@@ -196,7 +62,7 @@ export class HellPdfViewer {
 
   protected readonly page = signal(1);
   protected readonly totalPages = signal(0);
-  protected readonly zoomDisplay = signal<string>('auto');
+  protected readonly zoomValue = signal<string | null>(null);
   protected readonly ready = signal(false);
   protected readonly findOpen = signal(false);
   protected readonly findQuery = signal('');
@@ -207,20 +73,18 @@ export class HellPdfViewer {
   protected readonly pageList = computed(() =>
     Array.from({ length: this.totalPages() }, (_, i) => i + 1),
   );
-  protected readonly zoomOptions = [
-    { value: '0.5', label: '50%' },
-    { value: '0.75', label: '75%' },
-    { value: '1', label: '100%' },
-    { value: '1.25', label: '125%' },
-    { value: '1.5', label: '150%' },
-    { value: '2', label: '200%' },
-    { value: '3', label: '300%' },
-  ];
+  protected readonly effectiveZoomValue = computed(() =>
+    this.zoomValue() ?? normalizeZoomValue(this.initialZoom()),
+  );
+  protected readonly zoomOptions = PDF_ZOOM_OPTIONS;
   protected readonly showCustomZoom = computed(() => {
-    const v = this.zoomDisplay();
-    return !ZOOM_VALUES.includes(v as never)
+    const v = this.effectiveZoomValue();
+    return !PDF_ZOOM_VALUES.includes(v as never)
       && !this.zoomOptions.some((o) => o.value === v);
   });
+  protected readonly customZoomLabel = computed(() =>
+    getZoomLabel(this.effectiveZoomValue()),
+  );
 
   private pdfjs: any = null;
   private viewer: any = null;
@@ -228,12 +92,17 @@ export class HellPdfViewer {
   private findController: any = null;
   private eventBus: any = null;
   private doc: any = null;
+  private containerEventCleanup: (() => void) | null = null;
+  private printCleanup: (() => void) | null = null;
+  private viewerActive = false;
   private readonly renderedThumbs = new Set<number>();
   private readonly bootstrapped = signal(false);
   private loadToken = 0;
 
   constructor() {
     inject(DestroyRef).onDestroy(() => {
+      this.containerEventCleanup?.();
+      this.printCleanup?.();
       this.viewer?.cleanup?.();
       this.doc?.destroy?.();
     });
@@ -270,10 +139,11 @@ export class HellPdfViewer {
   }
 
   private async bootstrap() {
-    const [pdfjs, viewerMod] = await Promise.all([
-      import('pdfjs-dist'),
-      import('pdfjs-dist/web/pdf_viewer.mjs'),
-    ]);
+    const pdfjs = await import('pdfjs-dist');
+    // pdf_viewer.mjs reads globalThis.pdfjsLib at module evaluation time.
+    // Import core first so viewer init cannot race that global assignment.
+    (globalThis as typeof globalThis & { pdfjsLib?: typeof pdfjs }).pdfjsLib = pdfjs;
+    const viewerMod = await import('pdfjs-dist/web/pdf_viewer.mjs');
     this.pdfjs = pdfjs;
     if (!pdfjs.GlobalWorkerOptions.workerSrc) {
       pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -295,15 +165,15 @@ export class HellPdfViewer {
       annotationEditorMode: -1,
     });
     linkService.setViewer(pdfViewer);
-
+    this.installContainerInteractions(container);
     eventBus.on('pagechanging', (e: any) => {
       this.page.set(e.pageNumber);
       this.pageChange.emit(e.pageNumber);
     });
     eventBus.on('scalechanging', (e: any) => {
       const n = typeof e.scale === 'number' ? e.scale : 1;
-      const display = e.presetValue ?? `${Math.round(n * 100)}%`;
-      this.zoomDisplay.set(String(display));
+      const value = normalizeZoomEventValue(e.presetValue, n);
+      this.zoomValue.set(value);
       this.zoomChange.emit(e.presetValue ?? n);
     });
     eventBus.on('pagesinit', () => {
@@ -325,11 +195,57 @@ export class HellPdfViewer {
     this.eventBus = eventBus;
   }
 
+  private installContainerInteractions(container: HTMLDivElement) {
+    this.containerEventCleanup?.();
+
+    const onWheel = (event: WheelEvent) => this.onWheelZoom(event);
+
+    container.addEventListener('wheel', onWheel, { passive: false });
+
+    this.containerEventCleanup = () => {
+      container.removeEventListener('wheel', onWheel);
+    };
+  }
+
+  private onWheelZoom(event: WheelEvent) {
+    if (!this.viewer || !event.ctrlKey) return;
+
+    const container = this.containerRef().nativeElement;
+    const scaleFactor = getCtrlWheelScaleFactor(event);
+    if (!Number.isFinite(scaleFactor) || scaleFactor <= 0 || scaleFactor === 1) return;
+
+    event.preventDefault();
+    this.setNumericZoom(
+      (this.viewer.currentScale ?? 1) * scaleFactor,
+      getZoomOrigin(container, event),
+    );
+  }
+
+  private setNumericZoom(scale: number, origin?: [number, number]) {
+    if (!this.viewer) return;
+
+    const container = this.containerRef().nativeElement;
+    const currentScale = this.viewer.currentScale ?? 1;
+    const targetScale = clampZoomScale(scale);
+    if (Math.abs(targetScale - currentScale) < 0.0001) return;
+
+    const localX = origin ? origin[0] - container.offsetLeft : container.clientWidth / 2;
+    const localY = origin ? origin[1] - container.offsetTop : container.clientHeight / 2;
+    const previousScrollLeft = container.scrollLeft;
+    const previousScrollTop = container.scrollTop;
+    const zoomRatio = targetScale / currentScale;
+
+    this.viewer.currentScale = targetScale;
+    container.scrollLeft = (previousScrollLeft + localX) * zoomRatio - localX;
+    container.scrollTop = (previousScrollTop + localY) * zoomRatio - localY;
+  }
+
   private async loadDocument(src: string | URL | ArrayBuffer) {
     // Guard against overlapping loads (e.g. rapid src() changes): only the
     // most recent token gets to commit its document to the viewer.
     const token = ++this.loadToken;
     this.ready.set(false);
+    this.zoomValue.set(null);
     this.viewer.setDocument(null);
     this.linkService.setDocument(null);
     this.findController.setDocument(null);
@@ -363,14 +279,14 @@ export class HellPdfViewer {
   protected zoomIn() {
     if (!this.viewer) return;
     const cur = this.viewer.currentScale ?? 1;
-    const next = ZOOM_STEPS.find((s) => s > cur + 0.001) ?? cur;
-    this.viewer.currentScaleValue = String(next);
+    const next = getNextZoomStep(cur);
+    this.setNumericZoom(next);
   }
   protected zoomOut() {
     if (!this.viewer) return;
     const cur = this.viewer.currentScale ?? 1;
-    const next = [...ZOOM_STEPS].reverse().find((s) => s < cur - 0.001) ?? cur;
-    this.viewer.currentScaleValue = String(next);
+    const next = getPreviousZoomStep(cur);
+    this.setNumericZoom(next);
   }
   protected onZoomSelect(value: string) {
     if (!this.viewer) return;
@@ -405,47 +321,27 @@ export class HellPdfViewer {
   }
 
   protected async print() {
-    const src = this.src();
-    let url: string;
-    let revoke = false;
-    if (typeof src === 'string') {
-      url = src;
-    } else if (src instanceof URL) {
-      url = src.toString();
-    } else {
-      const blob = new Blob([src as ArrayBuffer], { type: 'application/pdf' });
-      url = URL.createObjectURL(blob);
-      revoke = true;
+    this.printCleanup?.();
+
+    try {
+      const handle = await createHiddenPdfPrintHandle(this.src());
+      this.printCleanup = handle.cleanup;
+      await printPdfInHiddenIframe(handle);
+      window.setTimeout(handle.cleanup, 30_000);
+    } catch (e) {
+      this.printCleanup?.();
+      this.printCleanup = null;
+      this.error.emit(e);
     }
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = '0';
-    iframe.src = url;
-    iframe.onload = () => {
-      try {
-        iframe.contentWindow?.focus();
-        iframe.contentWindow?.print();
-      } catch (e) {
-        this.error.emit(e);
-      }
-    };
-    document.body.appendChild(iframe);
-    setTimeout(() => {
-      iframe.remove();
-      if (revoke) URL.revokeObjectURL(url);
-    }, 60_000);
   }
 
   protected toggleOverview() { this.overviewOpen.update((v) => !v); }
 
   private async renderAllThumbs() {
-    if (!this.doc) return;
+    if (!this.doc || !this.overviewOpen()) return;
     const canvases = this.thumbCanvases();
     for (const ref of canvases) {
+      if (!this.overviewOpen()) return;
       const canvas = ref.nativeElement;
       const n = Number(canvas.dataset['page']);
       if (!Number.isFinite(n) || this.renderedThumbs.has(n)) continue;
@@ -519,6 +415,11 @@ export class HellPdfViewer {
   }
 
   private applyFindState(e: { state: number }) {
+    const matchesCount = (e as { matchesCount?: { current?: number; total?: number } }).matchesCount;
+    if (matchesCount) {
+      this.findCurrent.set(matchesCount.current ?? 0);
+      this.findTotal.set(matchesCount.total ?? 0);
+    }
     const FindState = (this.findController?.constructor as any)?.FindState
       ?? { FOUND: 0, NOT_FOUND: 1, WRAPPED: 2, PENDING: 3 };
     switch (e.state) {
@@ -531,7 +432,59 @@ export class HellPdfViewer {
 
   private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
 
-  @HostListener('keydown', ['$event'])
+  protected onWindowPointerDown(e: PointerEvent) {
+    this.viewerActive = this.host.nativeElement.contains(e.target as Node | null);
+  }
+
+  protected onWindowKey(e: KeyboardEvent) {
+    if (!this.shouldHandleGlobalShortcut(e)) return;
+
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'F')) {
+      e.preventDefault();
+      this.openFind();
+      return;
+    }
+
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) {
+      e.preventDefault();
+      this.print();
+      return;
+    }
+
+    if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '=')) {
+      e.preventDefault();
+      this.zoomIn();
+      return;
+    }
+
+    if ((e.ctrlKey || e.metaKey) && (e.key === '-' || e.key === '_')) {
+      e.preventDefault();
+      this.zoomOut();
+      return;
+    }
+
+    if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+      e.preventDefault();
+      this.onZoomSelect('auto');
+    }
+  }
+
+  private shouldHandleGlobalShortcut(e: KeyboardEvent) {
+    const host = this.host.nativeElement;
+    const activeElement = document.activeElement;
+    const target = e.target;
+    const selection = window.getSelection();
+
+    return this.viewerActive
+      || (activeElement instanceof Node && host.contains(activeElement))
+      || (target instanceof Node && host.contains(target))
+      || !!(
+        selection
+        && ((selection.anchorNode && host.contains(selection.anchorNode))
+          || (selection.focusNode && host.contains(selection.focusNode)))
+      );
+  }
+
   protected onKey(e: KeyboardEvent) {
     // Ctrl/Cmd+F always opens & focuses the find bar — never closes it.
     if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'F')) {
@@ -549,7 +502,7 @@ export class HellPdfViewer {
       case 'End': this.goTo(this.totalPages()); break;
       case '+': case '=': this.zoomIn(); break;
       case '-': case '_': this.zoomOut(); break;
-      case '0': this.onZoomSelect('page-width'); break;
+      case '0': this.onZoomSelect('auto'); break;
       default: return;
     }
     e.preventDefault();
