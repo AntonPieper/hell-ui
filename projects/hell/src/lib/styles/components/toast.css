@@ -1,0 +1,291 @@
+/* Toaster — sonner-style stacked toast container.
+ *
+ * Each toast lives in `.hell-toast` and is positioned absolutely against
+ * `.hell-toaster-list`. Layout is driven by two CSS custom properties set
+ * inline by `<hell-toaster>`:
+ *   --hell-toast-front  : 0 = front-most (newest); larger = further back
+ *   --hell-toast-offset : sum of heights of toasts in front of this one
+ *                         (used in the expanded layout)
+ *   --hell-toast-h      : measured pixel height of this toast (so the list
+ *                         can size itself when expanded)
+ */
+
+@utility hell-toaster {
+  --hell-toaster-w: 360px;
+  --hell-toaster-gap: 12px;
+  --hell-toaster-peek: 14px;
+  --hell-toaster-scale-step: 0.06;
+
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  width: var(--hell-toaster-w);
+  max-width: calc(100vw - 32px);
+
+  &[data-position="bottom-right"]  { bottom: 24px; right:  24px; }
+  &[data-position="bottom-left"]   { bottom: 24px; left:   24px; }
+  &[data-position="bottom-center"] { bottom: 24px; left:   50%; transform: translateX(-50%); }
+  &[data-position="top-right"]     { top:    24px; right:  24px; }
+  &[data-position="top-left"]      { top:    24px; left:   24px; }
+  &[data-position="top-center"]    { top:    24px; left:   50%; transform: translateX(-50%); }
+}
+
+@utility hell-toaster-list {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  pointer-events: auto;
+
+  /* Reserve enough room for the front-most toast so the parent has bounds. */
+  min-height: 64px;
+}
+
+/* Bottom-anchored stacks pin items to the bottom; top-anchored to the top.
+ * The list grows in the OPPOSITE direction from the anchor when expanded. */
+.hell-toaster[data-position^="bottom"] .hell-toast { bottom: 0; }
+.hell-toaster[data-position^="top"]    .hell-toast { top: 0; }
+
+@utility hell-toast {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: auto;
+
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: start;
+  gap: var(--hell-space-3);
+
+  padding: var(--hell-space-4) var(--hell-space-4);
+  background: var(--hell-color-bg-elevated);
+  color: var(--hell-color-text);
+  border: 1px solid var(--hell-color-border);
+  border-radius: var(--hell-radius-lg);
+  box-shadow: var(--hell-shadow-lg);
+
+  font-size: 13px;
+  line-height: 1.4;
+
+  transform-origin: bottom center;
+  will-change: transform, opacity;
+  transition:
+    transform var(--hell-duration-base) var(--hell-ease-out),
+    opacity   var(--hell-duration-base) var(--hell-ease-out),
+    box-shadow var(--hell-duration-base) var(--hell-ease-out);
+
+  /* Variant accents — left edge bar */
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: var(--hell-radius-lg) 0 0 var(--hell-radius-lg);
+    background: var(--hell-color-border);
+  }
+
+  &[data-variant="success"] { color: var(--hell-color-text); }
+  &[data-variant="success"]::before { background: var(--hell-color-success); }
+  &[data-variant="success"] .hell-toast-glyph { color: var(--hell-color-success); }
+
+  &[data-variant="info"]::before { background: var(--hell-color-info); }
+  &[data-variant="info"] .hell-toast-glyph { color: var(--hell-color-info-strong); }
+
+  &[data-variant="warning"]::before { background: var(--hell-color-warning); }
+  &[data-variant="warning"] .hell-toast-glyph { color: var(--hell-color-warning-strong); }
+
+  &[data-variant="danger"]::before { background: var(--hell-color-danger); }
+  &[data-variant="danger"] .hell-toast-glyph { color: var(--hell-color-danger); }
+
+  &[data-variant="default"] .hell-toast-glyph { color: var(--hell-color-text-muted); }
+}
+
+/* ── Bottom-anchored: collapsed stack ────────────────────────────────────
+ * Front item (--front:0) sits at the bottom flush. Older items behind it
+ * step UP by `peek`, scale down, and fade out past `maxVisible`. */
+.hell-toaster[data-position^="bottom"] .hell-toast {
+  --hell-toast-y: calc(var(--hell-toast-front) * (var(--hell-toaster-peek) * -1));
+  --hell-toast-scale: calc(1 - var(--hell-toast-front) * var(--hell-toaster-scale-step));
+  transform: translateY(var(--hell-toast-y)) scale(var(--hell-toast-scale));
+  transform-origin: bottom center;
+}
+
+/* ── Top-anchored: collapsed stack mirrors downward ────────────────────── */
+.hell-toaster[data-position^="top"] .hell-toast {
+  --hell-toast-y: calc(var(--hell-toast-front) * var(--hell-toaster-peek));
+  --hell-toast-scale: calc(1 - var(--hell-toast-front) * var(--hell-toaster-scale-step));
+  transform: translateY(var(--hell-toast-y)) scale(var(--hell-toast-scale));
+  transform-origin: top center;
+}
+
+/* Hidden (further than maxVisible behind the front) */
+.hell-toast[data-visible="false"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Expanded (hover / focus): real column with measured offsets ──────── */
+.hell-toaster[data-expanded="true"][data-position^="bottom"] .hell-toast {
+  --hell-toast-y: calc(
+    (var(--hell-toast-offset) * -1)
+    - (var(--hell-toast-overflow, 0) * var(--hell-toaster-peek))
+  );
+  --hell-toast-scale: calc(1 - var(--hell-toast-overflow, 0) * var(--hell-toaster-scale-step));
+  opacity: 1;
+}
+.hell-toaster[data-expanded="true"][data-position^="top"] .hell-toast {
+  --hell-toast-y: calc(
+    var(--hell-toast-offset)
+    + (var(--hell-toast-overflow, 0) * var(--hell-toaster-peek))
+  );
+  --hell-toast-scale: calc(1 - var(--hell-toast-overflow, 0) * var(--hell-toaster-scale-step));
+  opacity: 1;
+}
+
+/* Re-show overflow toasts when expanded, but fade them out as they recede.
+ * Anything ≥3 positions past the cap is fully hidden. */
+.hell-toaster[data-expanded="true"] .hell-toast[data-overflow] {
+  opacity: 0.7;
+  pointer-events: auto;
+}
+.hell-toaster[data-expanded="true"] .hell-toast[data-overflow="2"] { opacity: 0.4; }
+.hell-toaster[data-expanded="true"] .hell-toast[data-overflow="3"] { opacity: 0.18; }
+.hell-toaster[data-expanded="true"] .hell-toast[data-overflow] { pointer-events: none; }
+.hell-toaster[data-expanded="true"] .hell-toast[data-overflow="1"] { pointer-events: auto; }
+/* Past 3 deep: keep fully hidden (matches collapsed behavior). */
+.hell-toaster[data-expanded="true"] .hell-toast[data-visible="false"]:not([data-overflow="1"]):not([data-overflow="2"]):not([data-overflow="3"]) {
+  opacity: 0;
+}
+
+/* Bridge the gap between expanded toasts so the cursor never leaves the
+ * hit-area when moving between cards (otherwise mouseleave fires and the
+ * stack collapses mid-traversal). */
+.hell-toaster[data-expanded="true"] .hell-toast::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+.hell-toaster[data-expanded="true"][data-position^="bottom"] .hell-toast::after {
+  bottom: 100%;
+  height: var(--hell-toaster-gap, 12px);
+}
+.hell-toaster[data-expanded="true"][data-position^="top"] .hell-toast::after {
+  top: 100%;
+  height: var(--hell-toaster-gap, 12px);
+}
+
+/* Grow the list to wrap all toasts when expanded so it has a real
+ * hit-box (otherwise hover off the front would collapse immediately).
+ * Toasts are absolutely positioned so the list itself stays compact. */
+
+/* ── Enter: slide in from outside the anchor ─────────────────────────── */
+.hell-toaster[data-position^="bottom"] .hell-toast[data-state="open"] {
+  animation: hell-toast-in-bottom var(--hell-duration-slow) var(--hell-ease-out);
+}
+.hell-toaster[data-position^="top"] .hell-toast[data-state="open"] {
+  animation: hell-toast-in-top var(--hell-duration-slow) var(--hell-ease-out);
+}
+
+/* ── Exit: keep stack position, slide out to the right + fade ─────────── */
+/* High-specificity selector so it wins over the expanded-state rules
+ * (which set opacity:1 and override the layout transform otherwise). */
+.hell-toaster .hell-toast[data-state="closed"],
+.hell-toaster[data-expanded="true"] .hell-toast[data-state="closed"] {
+  opacity: 0;
+  transform:
+    translateY(var(--hell-toast-y, 0))
+    translateX(110%)
+    scale(var(--hell-toast-scale, 1));
+  pointer-events: none;
+}
+
+@keyframes hell-toast-in-bottom {
+  from { opacity: 0; transform: translateY(120%) scale(0.96); }
+}
+@keyframes hell-toast-in-top {
+  from { opacity: 0; transform: translateY(-120%) scale(0.96); }
+}
+
+/* ── Slot styles ─────────────────────────────────────────────────────── */
+@utility hell-toast-glyph {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  flex: none;
+
+  & svg { width: 100%; height: 100%; display: block; }
+}
+
+@utility hell-toast-body {
+  min-width: 0;
+}
+
+@utility hell-toast-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--hell-color-text);
+  word-wrap: break-word;
+}
+
+@utility hell-toast-desc {
+  font-size: 12.5px;
+  color: var(--hell-color-text-muted);
+  margin-top: 2px;
+  word-wrap: break-word;
+}
+
+@utility hell-toast-action {
+  appearance: none;
+  border: 1px solid var(--hell-color-border-strong);
+  background: var(--hell-color-bg);
+  color: var(--hell-color-text);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--hell-radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--hell-duration-fast) var(--hell-ease-out);
+
+  &:hover { background: var(--hell-color-bg-muted); }
+  &:active { background: var(--hell-color-bg-subtle); }
+  &:focus-visible {
+    outline: 2px solid var(--hell-color-focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+@utility hell-toast-close {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--hell-color-text-subtle);
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--hell-radius-sm);
+  cursor: pointer;
+  margin: -2px -4px -2px 0;
+  transition: color var(--hell-duration-fast) var(--hell-ease-out),
+              background var(--hell-duration-fast) var(--hell-ease-out);
+
+  & svg { width: 12px; height: 12px; }
+
+  &:hover { color: var(--hell-color-text); background: var(--hell-color-bg-muted); }
+  &:focus-visible {
+    outline: 2px solid var(--hell-color-focus-ring);
+    outline-offset: 1px;
+  }
+}
+
+/* Reduced motion: kill animations, keep instant updates. */
+@media (prefers-reduced-motion: reduce) {
+  .hell-toast {
+    animation: none !important;
+    transition: opacity var(--hell-duration-fast) linear !important;
+  }
+}

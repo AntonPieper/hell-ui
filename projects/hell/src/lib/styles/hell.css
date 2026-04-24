@@ -42,6 +42,7 @@
 @import "./components/audio-player.css";
 @import "./components/drop-zone.css";
 @import "./components/dialpad.css";
+@import "./components/toast.css";
 @import "./components/data-table.css";
 @import "./components/code-editor.css";
 @import "./components/pdf-viewer.css";

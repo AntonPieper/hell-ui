@@ -11,6 +11,7 @@ import {
   HellSecondaryToggle,
   HellButton,
   HellIcon,
+  HellToaster,
 } from 'hell';
 
 interface NavItem {
@@ -41,6 +42,7 @@ interface NavSection {
     HellSecondaryToggle,
     HellButton,
     HellIcon,
+    HellToaster,
   ],
   templateUrl: './app.html',
 })
@@ -93,6 +95,7 @@ export class App {
         { path: '/components/dialpad', label: 'Dialpad', icon: 'faSolidPhone' },
         { path: '/components/drop-zone', label: 'Drop zone', icon: 'faSolidUpload' },
         { path: '/components/resizable', label: 'Resizable', icon: 'faSolidGripVertical' },
+        { path: '/components/toast', label: 'Toast', icon: 'faSolidBell' },
       ],
     },
     {

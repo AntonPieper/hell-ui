@@ -50,6 +50,7 @@ export const routes: Routes = [
   { path: 'components/dialpad', loadComponent: () => import('./pages/components/dialpad.page').then((m) => m.DialpadPage) },
   { path: 'components/drop-zone', loadComponent: () => import('./pages/components/drop-zone.page').then((m) => m.DropZonePage) },
   { path: 'components/resizable', loadComponent: () => import('./pages/components/resizable.page').then((m) => m.ResizablePage) },
+  { path: 'components/toast', loadComponent: () => import('./pages/components/toast.page').then((m) => m.ToastPage) },
 
   // Features
   { path: 'components/code-editor', loadComponent: () => import('./pages/components/code-editor.page').then((m) => m.CodeEditorPage) },

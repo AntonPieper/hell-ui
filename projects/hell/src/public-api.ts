@@ -41,6 +41,7 @@ export * from './lib/composites/drop-zone/drop-zone';
 export * from './lib/composites/audio-player/audio-player';
 export * from './lib/composites/resizable/resizable';
 export * from './lib/composites/app-shell/app-shell';
+export * from './lib/composites/toast/toast';
 
 // Features (lazy-loaded by consumers)
 export * from './lib/features/pdf-viewer/pdf-viewer';
