@@ -147,6 +147,7 @@ export class App {
         { path: '/components/date-picker', label: 'Date picker', icon: 'faSolidCalendar' },
         { path: '/components/dialog', label: 'Dialog', icon: 'faSolidWindowRestore' },
         { path: '/components/field', label: 'Field', icon: 'faSolidPenToSquare' },
+        { path: '/components/flyout', label: 'Flyout', icon: 'faSolidComment' },
         { path: '/components/icon', label: 'Icon', icon: 'faSolidStar' },
         { path: '/components/input', label: 'Input', icon: 'faSolidPenRuler' },
         { path: '/components/menu', label: 'Menu', icon: 'faSolidEllipsisVertical' },

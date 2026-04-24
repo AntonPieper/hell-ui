@@ -22,6 +22,7 @@ export * from './lib/primitives/tabs/tabs';
 export * from './lib/primitives/accordion/accordion';
 export * from './lib/primitives/dialog/dialog';
 export * from './lib/primitives/popover/popover';
+export * from './lib/primitives/flyout/flyout';
 export * from './lib/primitives/tooltip/tooltip';
 export * from './lib/primitives/menu/menu';
 export * from './lib/primitives/progress/progress';

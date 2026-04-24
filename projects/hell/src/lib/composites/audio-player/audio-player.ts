@@ -5,6 +5,7 @@ import {
   booleanAttribute,
   computed,
   effect,
+  inject,
   input,
   signal,
   viewChild,
@@ -20,6 +21,7 @@ import {
   faSolidVolumeXmark,
 } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../../primitives/button/button';
+import { HellFlyout, HellFlyoutTrigger } from '../../primitives/flyout/flyout';
 import { HellIcon } from '../../primitives/icon/icon';
 import { HellSlider } from '../../primitives/slider/slider';
 
@@ -76,7 +78,7 @@ const HELL_AUDIO_PLAYER_ICONS = {
  */
 @Component({
   selector: 'hell-audio-player',
-  imports: [HellButton, HellIcon, HellSlider],
+  imports: [HellButton, HellFlyout, HellFlyoutTrigger, HellIcon, HellSlider],
   providers: [provideIcons(HELL_AUDIO_PLAYER_ICONS)],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class.hell-audio]': '!unstyled()' },
@@ -159,16 +161,17 @@ const HELL_AUDIO_PLAYER_ICONS = {
       @if (speechSupported()) {
         <button
           hellButton
+          hellFlyoutTrigger
+          #ccTrigger="hellFlyoutTrigger"
           variant="ghost"
           [iconOnly]="true"
           type="button"
           class="hell-audio-cc-toggle"
           [attr.aria-pressed]="captions()"
-          [attr.aria-expanded]="captions()"
-          aria-controls="hell-audio-caption-panel"
           [attr.aria-label]="captions() ? 'Hide live captions' : 'Show live captions'"
           [attr.data-active]="captions() ? 'true' : null"
-          (click)="toggleCaptions()"
+          (click)="ccTrigger.toggle()"
+          (openChange)="captions.set($event)"
         >
           <hell-icon name="faSolidClosedCaptioning" />
         </button>
@@ -190,9 +193,10 @@ const HELL_AUDIO_PLAYER_ICONS = {
       }
     </div>
 
-    @if (captions()) {
+    @if (captions() && ccTrigger(); as ccTriggerInstance) {
       <section
-        id="hell-audio-caption-panel"
+        [hellFlyout]="ccTriggerInstance"
+        [boundary]="hostElement"
         class="hell-audio-captions"
         [attr.data-state]="transcribing() ? 'live' : 'idle'"
       >
@@ -329,6 +333,12 @@ export class HellAudioPlayer {
 
   private readonly audio = viewChild.required<ElementRef<HTMLAudioElement>>('audio');
   private readonly captionScroll = viewChild<ElementRef<HTMLElement>>('captionScroll');
+  protected readonly ccTrigger = viewChild('ccTrigger', { read: HellFlyoutTrigger });
+
+  /** Host element — passed to the captions flyout as its boundary so all
+   * player controls (seek slider, play, volume, etc.) keep the flyout
+   * open when interacted with. */
+  protected readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
   constructor() {
     // Apply audio properties from signals.
@@ -400,7 +410,8 @@ export class HellAudioPlayer {
     this.playbackRate.set(next);
   }
 
-  protected toggleCaptions() {
+  protected toggleCaptions(_trigger?: HellFlyoutTrigger) {
+    // Kept for back-compat; trigger drives state via openChange now.
     this.captions.update(v => !v);
   }
 

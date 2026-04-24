@@ -1,0 +1,138 @@
+import {
+  DestroyRef,
+  Directive,
+  ElementRef,
+  afterNextRender,
+  booleanAttribute,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
+
+let nextFlyoutId = 0;
+
+/**
+ * Trigger half of the flyout pattern. Owns the open state. Render the panel
+ * (any element with `hellFlyout`) conditionally via `@if (trigger.open())`.
+ *
+ * Flyout = anchored, non-modal, light-dismiss surface that does NOT trap
+ * focus. Use when the surrounding context (e.g. an audio player's controls)
+ * must remain interactive while the panel is open. Use `HellPopover` /
+ * `HellDialog` instead when you want a focus trap.
+ */
+@Directive({
+  selector: '[hellFlyoutTrigger]',
+  exportAs: 'hellFlyoutTrigger',
+  host: {
+    '[attr.aria-haspopup]': '"dialog"',
+    '[attr.aria-expanded]': 'open()',
+    '[attr.aria-controls]': 'open() ? panelId : null',
+    '[attr.data-state]': 'open() ? "open" : "closed"',
+  },
+})
+export class HellFlyoutTrigger {
+  /** Native element of the trigger — used as default boundary by `HellFlyout`. */
+  readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  readonly disabled = input(false, { transform: booleanAttribute });
+  readonly openChange = output<boolean>();
+
+  /** Stable id wired into trigger `aria-controls` and panel `id`. */
+  readonly panelId = `hell-flyout-${++nextFlyoutId}`;
+
+  private readonly _open = signal(false);
+  readonly open = this._open.asReadonly();
+
+  show(): void {
+    if (this.disabled() || this._open()) return;
+    this._open.set(true);
+    this.openChange.emit(true);
+  }
+
+  hide(): void {
+    if (!this._open()) return;
+    this._open.set(false);
+    this.openChange.emit(false);
+  }
+
+  toggle(): void {
+    this._open() ? this.hide() : this.show();
+  }
+}
+
+/**
+ * Panel half of the flyout pattern. Apply to the rendered surface element.
+ * Wires ARIA, light-dismiss (outside pointerdown / focusin), and Escape
+ * handling. Pass the trigger as the directive value.
+ *
+ * Provide `boundary` to widen the "inside" region beyond the trigger and
+ * panel — interactions inside the boundary keep the flyout open. Typical
+ * use: pass the parent composite's host element so its other controls
+ * remain interactive without dismissing.
+ */
+@Directive({
+  selector: '[hellFlyout]',
+  exportAs: 'hellFlyout',
+  host: {
+    role: 'dialog',
+    'aria-modal': 'false',
+    '[id]': 'trigger().panelId',
+    'data-state': 'open',
+    '[class.hell-flyout]': '!unstyled()',
+  },
+})
+export class HellFlyout {
+  readonly trigger = input.required<HellFlyoutTrigger>({ alias: 'hellFlyout' });
+  readonly boundary = input<HTMLElement | null>(null);
+  readonly closeOnEscape = input(true, { transform: booleanAttribute });
+  readonly closeOnOutsideInteraction = input(true, { transform: booleanAttribute });
+  readonly unstyled = input(false, { transform: booleanAttribute });
+
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
+
+  constructor() {
+    afterNextRender(() => {
+        const onPointer = (e: PointerEvent) => {
+          if (this.closeOnOutsideInteraction()) this.maybeDismiss(e.target);
+        };
+        const onFocus = (e: FocusEvent) => {
+          if (this.closeOnOutsideInteraction()) this.maybeDismiss(e.target);
+        };
+        const onKey = (e: KeyboardEvent) => {
+          if (e.key !== 'Escape' || !this.closeOnEscape()) return;
+          const t = e.target as Node | null;
+          // Only handle Escape originating inside the flyout system.
+          if (!this.isInside(t)) return;
+          e.stopPropagation();
+          this.trigger().hide();
+          this.trigger().element.nativeElement.focus();
+        };
+
+        document.addEventListener('pointerdown', onPointer, true);
+        document.addEventListener('focusin', onFocus, true);
+        document.addEventListener('keydown', onKey, true);
+
+        this.destroyRef.onDestroy(() => {
+          document.removeEventListener('pointerdown', onPointer, true);
+          document.removeEventListener('focusin', onFocus, true);
+          document.removeEventListener('keydown', onKey, true);
+        });
+      });
+  }
+
+  private maybeDismiss(target: EventTarget | null): void {
+    if (this.isInside(target as Node | null)) return;
+    this.trigger().hide();
+  }
+
+  private isInside(target: Node | null): boolean {
+    if (!target) return false;
+    const panel = this.element.nativeElement;
+    const trigger = this.trigger().element.nativeElement;
+    if (panel.contains(target) || trigger.contains(target)) return true;
+    const boundary = this.boundary();
+    return !!boundary && boundary.contains(target);
+  }
+}
