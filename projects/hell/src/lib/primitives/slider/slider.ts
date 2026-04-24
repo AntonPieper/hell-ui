@@ -43,6 +43,8 @@ import { HellSize } from '../../core/types';
   host: {
     '[class.hell-slider]': '!unstyled()',
     '[attr.data-size]': 'size()',
+    '[attr.data-thumb]': 'thumb()',
+    '[attr.data-grow]': 'grow() ? "true" : null',
   },
   template: `
     <div
@@ -64,6 +66,17 @@ export class HellSlider {
   readonly unstyled = input(false, { transform: booleanAttribute });
   readonly size = input<HellSize>('md');
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
+  /**
+   * Thumb visibility. `'always'` (default) keeps the thumb visible; `'hover'`
+   * hides it until the slider is hovered, focused, or pressed — useful for
+   * media seek bars and other display-leaning sliders.
+   */
+  readonly thumb = input<'always' | 'hover'>('always');
+  /**
+   * When `true`, the track expands on hover/focus/press for a more tactile,
+   * media-player feel without changing layout (the host height is reserved).
+   */
+  readonly grow = input(false, { transform: booleanAttribute });
 
   private readonly thumbRef = viewChild.required<ElementRef<HTMLElement>>('thumb');
 

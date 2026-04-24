@@ -164,4 +164,62 @@
       }
     }
 
+  /*
+   * Variants
+   * --------
+   * `data-thumb="hover"` — hide the thumb until interaction. Useful for
+   * media seek bars where the filled range is the primary visual cue.
+   * `data-grow="true"`   — expand the track on hover/focus/press without
+   * affecting layout (host height stays constant).
+   */
+  .hell-slider[data-thumb="hover"] {
+      .hell-slider-thumb {
+        scale: 0;
+        transition: scale var(--hell-duration-fast) var(--ease-hell-out),
+                    box-shadow var(--hell-duration-fast) var(--ease-hell-out),
+                    border-color var(--hell-duration-fast) var(--ease-hell-out);
+      }
+      /*
+       * Show the thumb on hover, while pressed (drag), or when keyboard-
+       * focused. We deliberately avoid `:focus-within` because the thumb
+       * retains DOM focus after a click-drag releases — that would leave
+       * the thumb stuck visible until the user clicks elsewhere.
+       */
+      &:hover .hell-slider-thumb,
+      .hell-slider-thumb[data-hover],
+      .hell-slider-thumb[data-press],
+      .hell-slider-thumb[data-focus-visible] {
+        scale: 1;
+      }
+      .hell-slider-thumb[data-press] { scale: 0.96; }
+    }
+
+  .hell-slider[data-grow="true"] {
+      --_hell-slider-track-h: calc(var(--spacing) * 1.5);
+      --_hell-slider-track-h-active: calc(var(--spacing) * 2.5);
+      .hell-slider-track::before,
+      .hell-slider-range {
+        height: var(--_hell-slider-track-h);
+        transition: height var(--hell-duration-fast) var(--ease-hell-out);
+      }
+      &:hover .hell-slider-track::before,
+      &:hover .hell-slider-range,
+      &:active .hell-slider-track::before,
+      &:active .hell-slider-range,
+      &:has(.hell-slider-thumb[data-press]) .hell-slider-track::before,
+      &:has(.hell-slider-thumb[data-press]) .hell-slider-range,
+      &:has(.hell-slider-thumb[data-focus-visible]) .hell-slider-track::before,
+      &:has(.hell-slider-thumb[data-focus-visible]) .hell-slider-range {
+        height: var(--_hell-slider-track-h-active);
+      }
+    }
+  .hell-slider[data-grow="true"][data-size="sm"] {
+      --_hell-slider-track-h: calc(var(--spacing) * 1);
+      --_hell-slider-track-h-active: calc(var(--spacing) * 2);
+    }
+  .hell-slider[data-grow="true"][data-size="lg"] {
+      --_hell-slider-track-h: calc(var(--spacing) * 2);
+      --_hell-slider-track-h-active: calc(var(--spacing) * 3);
+    }
+
 }

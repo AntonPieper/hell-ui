@@ -34,18 +34,17 @@ import { HellAudioPlayer } from 'hell';
         />
       </div>
 
-      <h2>Live captions open by default</h2>
-      <p>Use <code>defaultCaptions</code> to expand the captions panel on
-        load. Captions auto-start with playback and auto-stop on pause —
-        the dedicated speed pill (1× → 1.25× → …) lives inside the strip
-        so the main controls stay clean. Mute the audio entirely if you
-        only want the transcript. Seeking or replaying clears the live
+      <h2>Live captions</h2>
+      <p>Use the CC toggle to open the captions strip when you want it.
+        Captions auto-start with playback and auto-stop on pause — the
+        dedicated speed pill (1× → 1.25× → …) lives inside the strip so
+        the main controls stay clean. Mute the audio entirely if you only
+        want the transcript. Seeking or replaying clears the live
         transcript so captions stay aligned with current playback.</p>
       <div class="hd-example">
         <hell-audio-player
           src="https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg"
           title="Read while you listen"
-          defaultCaptions
         />
       </div>
 
@@ -58,7 +57,6 @@ import { HellAudioPlayer } from 'hell';
         <li><code>allowDownload</code>: show / hide download button (default <code>true</code>)</li>
         <li><code>lang</code>: BCP-47 hint for <code>SpeechRecognition</code>.
           Defaults to <code>&lt;html lang&gt;</code> or <code>en-US</code>.</li>
-        <li><code>defaultCaptions</code>: open the captions strip on first render.</li>
       </ul>
 
       <h2>Interactions</h2>

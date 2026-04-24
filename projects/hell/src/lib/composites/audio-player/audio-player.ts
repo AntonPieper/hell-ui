@@ -119,24 +119,18 @@ const HELL_AUDIO_PLAYER_ICONS = {
 
       <span class="hell-audio-time">{{ format(currentTime()) }}</span>
 
-      <div
-        #track
-        class="hell-audio-track"
-        role="slider"
-        tabindex="0"
+      <hell-slider
+        class="hell-audio-seek"
+        size="sm"
+        grow
+        thumb="hover"
+        [value]="currentTime()"
+        [min]="0"
+        [max]="seekMax()"
+        [step]="0.1"
+        (valueChange)="onSeek($event)"
         aria-label="Seek"
-        [attr.aria-valuemin]="0"
-        [attr.aria-valuemax]="duration()"
-        [attr.aria-valuenow]="currentTime()"
-        [attr.aria-valuetext]="format(currentTime()) + ' of ' + format(duration())"
-        [attr.data-dragging]="dragging() ? 'true' : null"
-        [style.--_hell-audio-progress.%]="progress()"
-        (pointerdown)="onSeekPointerDown($event)"
-        (keydown)="onSeekKey($event)"
-      >
-        <div class="hell-audio-track-fill"></div>
-        <div class="hell-audio-track-thumb"></div>
-      </div>
+      />
 
       <span class="hell-audio-time">{{ format(duration()) }}</span>
 
@@ -277,15 +271,12 @@ export class HellAudioPlayer {
   readonly date = input<string | Date | null>(null);
   /** BCP-47 language hint for SpeechRecognition. Defaults to `<html lang>` or `en-US`. */
   readonly lang = input<string | null>(null);
-  /** Start with the live captions panel open. */
-  readonly defaultCaptions = input(false, { transform: booleanAttribute });
 
   protected readonly playing = signal(false);
   protected readonly currentTime = signal(0);
   protected readonly duration = signal(0);
   protected readonly volume = signal(1);
   protected readonly muted = signal(false);
-  protected readonly dragging = signal(false);
   protected readonly playbackRate = signal(1);
 
   protected readonly captions = signal(false);
@@ -299,12 +290,16 @@ export class HellAudioPlayer {
   private recognition: SpeechRecognitionLike | null = null;
   private capturedStream: MediaStream | null = null;
   private copiedTimer: ReturnType<typeof setTimeout> | null = null;
+  private seekRestartTimer: ReturnType<typeof setTimeout> | null = null;
   private playbackEnded = false;
 
   protected readonly progress = computed(() => {
     const d = this.duration();
     return d ? (this.currentTime() / d) * 100 : 0;
   });
+
+  /** Slider max — fall back to 1 while metadata is still loading. */
+  protected readonly seekMax = computed(() => this.duration() || 1);
 
   protected readonly volumeLevel = computed<'mute' | 'low' | 'mid' | 'high'>(() => {
     if (this.muted() || this.volume() === 0) return 'mute';
@@ -342,13 +337,6 @@ export class HellAudioPlayer {
       a.volume = this.volume();
       a.muted = this.muted();
       a.playbackRate = this.playbackRate();
-    });
-
-    // Default-open captions on init.
-    effect(() => {
-      if (this.defaultCaptions() && this.speechSupported() && !this.captions()) {
-        this.captions.set(true);
-      }
     });
 
     // Auto start/stop recognition based on captions toggle + playback.
@@ -428,75 +416,26 @@ export class HellAudioPlayer {
     this.resetCaptionSession(this.shouldRestartRecognition());
   }
 
-  protected onSeekPointerDown(e: PointerEvent) {
-    if (e.button !== 0) return;
-    const el = e.currentTarget as HTMLElement;
+  /**
+   * Slider-driven seek. Fires for every step change while dragging; we
+   * commit immediately and debounce caption recovery so we only restart
+   * `SpeechRecognition` once the user finishes scrubbing.
+   */
+  protected onSeek(value: number) {
     const restartRecognition = this.shouldRestartRecognition();
-    let changedTime = false;
+    if (!this.setCurrentTime(value)) return;
 
-    const handleTimelineJump = () => {
-      if (changedTime) return;
-      changedTime = true;
-      this.resetTranscriptState();
-      if (restartRecognition) {
-        this.stopRecognition();
+    this.resetTranscriptState();
+    if (!restartRecognition) return;
+
+    this.stopRecognition();
+    if (this.seekRestartTimer) clearTimeout(this.seekRestartTimer);
+    this.seekRestartTimer = setTimeout(() => {
+      this.seekRestartTimer = null;
+      if (this.captions() && this.playing() && this.speechSupported() && !this.recognition) {
+        this.startRecognition();
       }
-    };
-
-    el.setPointerCapture(e.pointerId);
-    this.dragging.set(true);
-    if (this.applySeek(e, el)) {
-      handleTimelineJump();
-    }
-
-    const onMove = (ev: PointerEvent) => {
-      if (this.applySeek(ev, el)) {
-        handleTimelineJump();
-      }
-    };
-    const onUp = (ev: PointerEvent) => {
-      this.dragging.set(false);
-      el.releasePointerCapture(ev.pointerId);
-      el.removeEventListener('pointermove', onMove);
-      el.removeEventListener('pointerup', onUp);
-      el.removeEventListener('pointercancel', onUp);
-
-      if (changedTime && restartRecognition) {
-        queueMicrotask(() => {
-          if (this.captions() && this.playing() && this.speechSupported() && !this.recognition) {
-            this.startRecognition();
-          }
-        });
-      }
-    };
-    el.addEventListener('pointermove', onMove);
-    el.addEventListener('pointerup', onUp);
-    el.addEventListener('pointercancel', onUp);
-  }
-
-  private applySeek(e: PointerEvent, el: HTMLElement): boolean {
-    const rect = el.getBoundingClientRect();
-    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const next = ratio * (this.duration() || 0);
-    return this.setCurrentTime(next);
-  }
-
-  protected onSeekKey(e: KeyboardEvent) {
-    const a = this.audio().nativeElement;
-    if (e.key === 'ArrowRight') {
-      this.seekTo(Math.min(a.duration, a.currentTime + 5));
-      e.preventDefault();
-    }
-    if (e.key === 'ArrowLeft') {
-      this.seekTo(Math.max(0, a.currentTime - 5));
-      e.preventDefault();
-    }
-  }
-
-  private seekTo(nextTime: number) {
-    if (!this.setCurrentTime(nextTime)) return;
-
-    this.resetCaptionSession(this.shouldRestartRecognition());
+    }, 200);
   }
 
   private setCurrentTime(nextTime: number): boolean {

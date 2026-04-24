@@ -3,6 +3,7 @@
   /* Audio player. */
 
   .hell-audio {
+      position: relative;
       display: flex;
       width: 100%;
       max-width: calc(var(--spacing) * 120);
@@ -52,6 +53,15 @@
       width: 100%;
       align-items: center;
       gap: var(--spacing-hell-3);
+      /* Keep icon buttons + the volume/cc/download controls at their
+       * intrinsic size; the seek slider is the only element allowed to
+       * flex and absorb leftover space. */
+      > [hellButton],
+      > a[hellButton],
+      > .hell-audio-time,
+      > .hell-audio-volume {
+        flex-shrink: 0;
+      }
     }
 
   .hell-audio-time {
@@ -61,51 +71,10 @@
       font-variant-numeric: tabular-nums;
     }
 
-  .hell-audio-track {
-      position: relative;
-      height: calc(var(--spacing) * 1);
-      flex: 1;
-      cursor: pointer;
-      border-radius: calc(infinity * 1px);
-      background-color: var(--color-hell-surface-muted);
-      touch-action: none;
-      transition: height 120ms ease;
-      > .hell-audio-track-fill {
-        position: absolute;
-        inset-block: calc(var(--spacing) * 0);
-        inset-inline-start: calc(var(--spacing) * 0);
-        width: var(--_hell-audio-progress, 0%);
-        border-radius: inherit;
-        background-color: var(--color-hell-primary);
-      }
-      > .hell-audio-track-thumb {
-        position: absolute;
-        top: 50%;
-        inset-inline-start: var(--_hell-audio-progress, 0%);
-        width: calc(var(--spacing) * 3);
-        height: calc(var(--spacing) * 3);
-        margin-inline-start: calc(var(--spacing) * -1.5);
-        border-radius: 50%;
-        background-color: var(--color-hell-primary);
-        box-shadow: 0 0 0 2px var(--color-hell-surface-elevated);
-        transform: translateY(-50%) scale(0);
-        transition: transform 140ms ease;
-        pointer-events: none;
-      }
-      &:hover,
-      &:focus-visible,
-      &[data-dragging='true'] {
-        height: calc(var(--spacing) * 1.5);
-        > .hell-audio-track-thumb { transform: translateY(-50%) scale(1); }
-      }
-      &[data-dragging='true'] {
-        cursor: grabbing;
-        > .hell-audio-track-thumb { transform: translateY(-50%) scale(1.15); }
-      }
-      &:focus-visible {
-        outline: 2px solid var(--color-hell-ring);
-        outline-offset: 4px;
-      }
+  /* Seek bar — built on hell-slider with grow + thumb-on-hover variant. */
+  .hell-audio-seek {
+      flex: 1 1 auto;
+      min-width: calc(var(--spacing) * 12);
     }
 
   .hell-audio-volume {
@@ -118,15 +87,29 @@
       background-color: color-mix(in oklab, var(--color-hell-primary) 12%, transparent);
     }
 
+  /*
+   * Captions panel — overlays beneath the player without pushing siblings.
+   * The player itself is `position: relative`, so the panel anchors to its
+   * inline edges and floats above following layout content.
+   */
   .hell-audio-captions {
+      position: absolute;
+      inset-inline: calc(var(--spacing) * 0);
+      top: 100%;
+      margin-block-start: var(--spacing-hell-2);
+      z-index: 5;
       display: flex;
       flex-direction: column;
       gap: var(--spacing-hell-2);
       border-radius: var(--radius-md);
       border: 1px solid var(--color-hell-border);
-      background-color: var(--color-hell-surface-muted);
+      background-color: var(--color-hell-surface-elevated);
+      box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.04),
+        0 12px 28px -16px rgb(0 0 0 / 0.25);
       padding: var(--spacing-hell-2) var(--spacing-hell-3);
-      animation: hell-audio-captions-in 180ms ease;
+      animation: hell-audio-captions-in 200ms var(--ease-hell-out, ease);
+      transform-origin: top center;
     }
 
   @keyframes hell-audio-captions-in {
