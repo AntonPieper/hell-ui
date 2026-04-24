@@ -1,5 +1,9 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
 import { HellPdfViewer } from 'hell';
+
+const PDF_VIEWER_STYLESHEET_ID = 'hd-pdfjs-viewer-styles';
+const PDF_VIEWER_STYLESHEET_PATH = 'pdfjs/pdf_viewer.css';
 
 @Component({
   selector: 'hd-pdf-viewer',
@@ -11,6 +15,8 @@ import { HellPdfViewer } from 'hell';
       <p>Wraps <a href="https://mozilla.github.io/pdf.js/" target="_blank" rel="noreferrer">PDF.js</a>
         with a thin Angular surface. Supports paging, zoom, and a printable
         canvas mode. The component is heavy &mdash; load it lazily.</p>
+      <p>The docs page loads the pdf.js viewer stylesheet on demand, so lazy routes
+        keep it out of the docs app's initial bundle.</p>
 
       <h2>Lazy loading</h2>
       <pre><code>&#123; path: 'invoice/:id',
@@ -35,4 +41,24 @@ import { HellPdfViewer } from 'hell';
     </article>
   `,
 })
-export class PdfViewerPage {}
+export class PdfViewerPage {
+  constructor() {
+    const document = inject(DOCUMENT);
+    const destroyRef = inject(DestroyRef);
+
+    let addedLink: HTMLLinkElement | null = null;
+    const existingLink = document.getElementById(PDF_VIEWER_STYLESHEET_ID);
+
+    if (!existingLink) {
+      addedLink = document.createElement('link');
+      addedLink.id = PDF_VIEWER_STYLESHEET_ID;
+      addedLink.rel = 'stylesheet';
+      addedLink.href = new URL(PDF_VIEWER_STYLESHEET_PATH, document.baseURI).toString();
+      document.head.append(addedLink);
+    }
+
+    destroyRef.onDestroy(() => {
+      addedLink?.remove();
+    });
+  }
+}

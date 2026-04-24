@@ -1,27 +1,29 @@
-/* Pagination — items styled as `hell-button hell-pagination-item`. */
+@layer components {
 
-@utility hell-pagination {
-  @apply inline-flex items-center flex-wrap;
-  @apply gap-1;
+  /* Pagination — items styled as `hell-button hell-pagination-item`. */
+
+  .hell-pagination {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: calc(var(--spacing) * 1);
+    }
+
+  .hell-pagination-item {
+      --_hell-btn-height: var(--spacing-hell-control-sm);
+      --_hell-btn-px: var(--spacing-hell-3);
+      --_hell-btn-font: 12px;
+      min-width: var(--spacing-hell-control-sm);
+      &[data-selected], &[aria-current="page"] {
+        background-color: var(--color-hell-primary);
+        color: var(--color-hell-primary-foreground);
+        border-color: var(--color-hell-primary);
+        font-weight: var(--font-weight-semibold);
+      }
+      &[data-disabled] {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+    }
+
 }
-
-@utility hell-pagination-item {
-  /* Composes onto hell-button via the wrapper directives. Compact square. */
-  @apply [--_hell-btn-height:var(--hell-control-height-sm)];
-  @apply [--_hell-btn-px:var(--hell-space-3)];
-  @apply [--_hell-btn-font:12px];
-  @apply min-w-(--hell-control-height-sm);
-
-  &[data-selected],
-  &[aria-current="page"] {
-    @apply bg-(--hell-color-primary);
-    @apply text-(--hell-color-primary-fg);
-    @apply border-(--hell-color-primary);
-    @apply font-semibold;
-  }
-  &[data-disabled] {
-    @apply opacity-[0.45];
-    @apply cursor-not-allowed;
-  }
-}
-

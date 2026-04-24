@@ -1,107 +1,122 @@
-/* Tabs — NgpTab sets [data-active] on the active tab. */
+@layer components {
 
-@utility hell-tabs {
-  @apply flex flex-col min-w-0;
+  /* Tabs — NgpTab sets [data-active] on the active tab. */
 
-  &[data-orientation="vertical"] {
-    @apply flex-row items-start;
-    @apply gap-(--hell-space-4);
-  }
-}
-
-@utility hell-tab-list {
-  @apply flex;
-  @apply gap-[2px];
-  @apply [border-bottom:1px_solid_var(--hell-color-border)];
-  @apply px-(--hell-space-2);
-
-  &[data-orientation="vertical"] {
-    @apply flex-col items-stretch;
-    @apply gap-1;
-    @apply border-0;
-    @apply border-0;
-    @apply p-(--hell-space-2);
-    @apply bg-(--hell-color-bg-subtle);
-    @apply rounded-lg;
-    @apply min-w-[200px];
-  }
-}
-
-@utility hell-tab {
-  @apply inline-flex items-center cursor-pointer font-medium relative;
-  @apply gap-(--hell-space-2);
-  @apply h-9;
-  @apply px-(--hell-space-4);
-  @apply text-[13px];
-  @apply text-(--hell-color-text-muted);
-  @apply bg-transparent;
-  @apply border-0;
-  @apply [border-bottom:2px_solid_transparent];
-  @apply [margin-bottom:-1px];
-  @apply font-[inherit];
-  @apply [transition:color_var(--hell-duration-fast)_var(--hell-ease-out),_border-color_var(--hell-duration-base)_var(--hell-ease-out),_background-color_var(--hell-duration-fast)_var(--hell-ease-out)];
-
-  &[data-hover] {
-    @apply text-(--hell-color-text);
-    @apply bg-(--hell-color-bg-subtle);
-  }
-  &[data-active] {
-    @apply text-(--hell-color-primary);
-    @apply [border-bottom-color:var(--hell-color-primary)];
-  }
-  &[data-disabled] { @apply opacity-50 cursor-not-allowed; }
-  &[data-focus-visible] {
-    @apply [outline:2px_solid_var(--hell-color-focus-ring)];
-    @apply [outline-offset:-2px];
-  }
-  &[data-orientation="vertical"] {
-    @apply justify-start;
-    @apply h-[38px];
-    @apply border-0;
-    @apply m-0;
-    @apply rounded-md;
-    @apply px-(--hell-space-3);
-    @apply text-(--hell-color-text-muted);
-
-    &[data-hover]:not([data-active]) {
-      @apply bg-[color-mix(in_srgb,_var(--hell-color-fg)_5%,_transparent)];
-      @apply text-(--hell-color-text);
+  .hell-tabs {
+      display: flex;
+      min-width: calc(var(--spacing) * 0);
+      flex-direction: column;
+      &[data-orientation="vertical"] {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: var(--spacing-hell-4);
+      }
     }
-    &[data-active] {
-      @apply bg-(--hell-color-bg-elevated);
-      @apply text-(--hell-color-text);
-      @apply font-semibold;
-      /* Reserve room on the left so the accent bar doesn't crowd the label. */
-      @apply [padding-left:calc(var(--hell-space-3)_+_8px)];
-      @apply shadow-[0_1px_2px_rgb(0_0_0_/_0.05),_0_0_0_1px_var(--hell-color-border)];
-    }
-    /* Subtle leading accent bar inside the active pill. */
-    &[data-active]::before {
-      @apply content-[''];
-      @apply absolute;
-      @apply left-2;
-      @apply top-2;
-      @apply bottom-2;
-      @apply w-[3px];
-      @apply rounded-full;
-      @apply bg-(--hell-color-primary);
-    }
-    &[data-focus-visible] {
-      @apply [outline-offset:2px];
-    }
-  }
-}
 
-@utility hell-tab-panel {
-  @apply py-(--hell-space-6) px-(--hell-space-2);
-  @apply outline-none;
-  @apply animate-[hell-tab-fade-in_var(--hell-duration-base)_var(--hell-ease-out)];
+  .hell-tab-list {
+      display: flex;
+      gap: 2px;
+      border-bottom: 1px solid var(--color-hell-border);
+      padding-inline: var(--spacing-hell-2);
+      &[data-orientation="vertical"] {
+        flex-direction: column;
+        align-items: stretch;
+        gap: calc(var(--spacing) * 1);
+        border-style: solid;
+        border-width: 0px;
+        padding: var(--spacing-hell-2);
+        background-color: var(--color-hell-surface-subtle);
+        border-radius: var(--radius-lg);
+        min-width: 200px;
+      }
+    }
 
-  &[aria-hidden="true"] { @apply hidden; }
+  .hell-tab {
+      position: relative;
+      display: inline-flex;
+      cursor: pointer;
+      align-items: center;
+      font-weight: var(--font-weight-medium);
+      gap: var(--spacing-hell-2);
+      height: calc(var(--spacing) * 9);
+      padding-inline: var(--spacing-hell-4);
+      font-size: 13px;
+      color: var(--color-hell-foreground-muted);
+      background-color: transparent;
+      border-style: solid;
+      border-width: 0px;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      font-family: inherit;
+      transition: color var(--hell-duration-fast) var(--ease-hell-out), border-color var(--hell-duration-base) var(--ease-hell-out), background-color var(--hell-duration-fast) var(--ease-hell-out);
+      &[data-hover] {
+        color: var(--color-hell-foreground);
+        background-color: var(--color-hell-surface-subtle);
+      }
+      &[data-active] {
+        color: var(--color-hell-primary);
+        border-bottom-color: var(--color-hell-primary);
+      }
+      &[data-disabled] {
+        cursor: not-allowed;
+        opacity: 50%;
+      }
+      &[data-focus-visible] {
+        outline: 2px solid var(--color-hell-focus-ring);
+        outline-offset: -2px;
+      }
+      &[data-orientation="vertical"] {
+        justify-content: flex-start;
+        height: 38px;
+        border-style: solid;
+        border-width: 0px;
+        margin: calc(var(--spacing) * 0);
+        border-radius: var(--radius-md);
+        padding-inline: var(--spacing-hell-3);
+        color: var(--color-hell-foreground-muted);
+        &[data-hover]:not([data-active]) {
+          background-color: var(--color-hell-foreground);
+          @supports (color: color-mix(in lab, red, red)) {
+            background-color: color-mix(in srgb, var(--color-hell-foreground) 5%, transparent);
+          }
+          color: var(--color-hell-foreground);
+        }
+        &[data-active] {
+          background-color: var(--color-hell-surface-elevated);
+          color: var(--color-hell-foreground);
+          font-weight: var(--font-weight-semibold);
+          padding-left: calc(var(--spacing-hell-3) + 8px);
+          box-shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 0 0 1px var(--color-hell-border);
+        }
+        &[data-active]::before {
+          content: '';
+          position: absolute;
+          left: calc(var(--spacing) * 2);
+          top: calc(var(--spacing) * 2);
+          bottom: calc(var(--spacing) * 2);
+          width: 3px;
+          border-radius: calc(infinity * 1px);
+          background-color: var(--color-hell-primary);
+        }
+        &[data-focus-visible] {
+          outline-offset: 2px;
+        }
+      }
+    }
+
+  .hell-tab-panel {
+      padding-inline: var(--spacing-hell-2);
+      padding-block: var(--spacing-hell-6);
+      outline: none;
+      animation: hell-tab-fade-in var(--hell-duration-base) var(--ease-hell-out);
+      &[aria-hidden="true"] {
+        display: none;
+      }
+    }
+
 }
 
 @keyframes hell-tab-fade-in {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: none; }
 }
-

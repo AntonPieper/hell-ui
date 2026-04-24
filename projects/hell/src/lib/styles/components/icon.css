@@ -1,5 +1,11 @@
-/* Icon host wrapper. */
+@layer components {
 
-@utility hell-icon {
-  @apply inline-flex leading-none text-(--_hell-icon-color,currentColor);
+  /* Icon host wrapper. */
+
+  .hell-icon {
+      display: inline-flex;
+      line-height: 1;
+      color: var(--_hell-icon-color,currentColor);
+    }
+
 }

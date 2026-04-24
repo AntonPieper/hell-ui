@@ -1,184 +1,220 @@
-/* Date picker — calendar grid surface. NgpDatePickerDateButton sets
-   [data-today], [data-selected], [data-outside-month], [data-disabled]. */
+@layer components {
 
-@utility hell-date-picker {
-  @apply inline-block;
-  @apply bg-(--hell-color-bg-elevated);
-  @apply border border-(--hell-color-border);
-  @apply rounded-md;
-  @apply p-(--hell-space-4);
-  @apply shadow-(--hell-shadow-sm);
-}
+  /* Date picker — calendar grid surface. NgpDatePickerDateButton sets
+     [data-today], [data-selected], [data-outside-month], [data-disabled]. */
 
-@utility hell-date-picker-header {
-  @apply flex items-center justify-between;
-  @apply h-8;
-  @apply [margin-bottom:var(--hell-space-3)];
-}
-
-@utility hell-date-picker-label {
-  @apply text-[13px];
-  @apply font-semibold;
-  @apply text-(--hell-color-text);
-  @apply m-0;
-}
-
-@utility hell-date-picker-grid {
-  @apply border-collapse;
-
-  & th {
-    @apply text-[11px];
-    @apply font-semibold;
-    @apply w-8;
-    @apply h-7;
-    @apply text-center;
-    @apply text-(--hell-color-text-subtle);
-    @apply uppercase;
-    @apply tracking-[0.04em];
-  }
-
-  & [ngpDatePickerDateButton] {
-    @apply w-8;
-    @apply h-8;
-    @apply inline-flex;
-    @apply items-center;
-    @apply justify-center;
-    @apply rounded;
-    @apply bg-transparent;
-    @apply border-0;
-    @apply text-(--hell-color-text);
-    @apply font-[inherit];
-    @apply text-xs;
-    @apply cursor-pointer;
-    @apply [transition:background-color_var(--hell-duration-fast)_var(--hell-ease-out),_color_var(--hell-duration-fast)_var(--hell-ease-out)];
-
-    &[data-today]:not([data-selected]) {
-      @apply text-(--hell-color-primary);
-      @apply font-semibold;
-      @apply shadow-[inset_0_0_0_1px_var(--hell-color-primary-soft)];
+  .hell-date-picker {
+      display: inline-block;
+      background-color: var(--color-hell-surface-elevated);
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--color-hell-border);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-hell-4);
+      box-shadow: var(--shadow-hell-sm);
     }
-    &[data-hover]:not([data-disabled]):not([data-selected]) {
-      @apply bg-(--hell-color-bg-subtle);
+
+  .hell-date-picker-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: calc(var(--spacing) * 8);
+      margin-bottom: var(--spacing-hell-3);
     }
-    &[data-focus-visible] {
-      @apply [outline:2px_solid_var(--hell-color-focus-ring)];
-      @apply [outline-offset:1px];
+
+  .hell-date-picker-label {
+      font-size: 13px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-hell-foreground);
+      margin: calc(var(--spacing) * 0);
     }
-    &[data-press]:not([data-disabled]):not([data-selected]) {
-      @apply bg-(--hell-color-bg-muted);
+
+  .hell-date-picker-grid {
+      border-collapse: collapse;
+      & th {
+        font-size: 11px;
+        font-weight: var(--font-weight-semibold);
+        width: calc(var(--spacing) * 8);
+        height: calc(var(--spacing) * 7);
+        text-align: center;
+        color: var(--color-hell-foreground-subtle);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      & [ngpDatePickerDateButton] {
+        width: calc(var(--spacing) * 8);
+        height: calc(var(--spacing) * 8);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.25rem;
+        background-color: transparent;
+        border-style: solid;
+        border-width: 0px;
+        color: var(--color-hell-foreground);
+        font-family: inherit;
+        font-size: var(--text-xs);
+        line-height: var(--text-xs--line-height);
+        cursor: pointer;
+        transition: background-color var(--hell-duration-fast) var(--ease-hell-out), color var(--hell-duration-fast) var(--ease-hell-out);
+        &[data-today]:not([data-selected]) {
+          color: var(--color-hell-primary);
+          font-weight: var(--font-weight-semibold);
+          box-shadow: inset 0 0 0 1px var(--color-hell-primary-soft);
+        }
+        &[data-hover]:not([data-disabled]):not([data-selected]) {
+          background-color: var(--color-hell-surface-subtle);
+        }
+        &[data-focus-visible] {
+          outline: 2px solid var(--color-hell-focus-ring);
+          outline-offset: 1px;
+        }
+        &[data-press]:not([data-disabled]):not([data-selected]) {
+          background-color: var(--color-hell-surface-muted);
+        }
+        &[data-outside-month] {
+          color: var(--color-hell-foreground-subtle);
+          opacity: 0.6;
+        }
+        &[data-selected] {
+          background-color: var(--color-hell-primary);
+          color: var(--color-hell-primary-foreground);
+        }
+        &[data-disabled] {
+          cursor: not-allowed;
+          color: var(--color-hell-foreground-subtle);
+          opacity: 0.4;
+        }
+      }
     }
-    &[data-outside-month] { @apply text-(--hell-color-text-subtle); @apply opacity-[0.6]; }
-    &[data-selected] {
-      @apply bg-(--hell-color-primary);
-      @apply text-(--hell-color-primary-fg);
+
+  /* Native date / time inputs. Calendar/clock indicator tinted, padding
+     tweaked so the picker icon doesn't clip. */
+
+  .hell-date-input {
+      display: inline-flex;
+      min-width: 11rem;
+      & > .hell-date-input-trigger {
+        width: 100%;
+        justify-content: flex-start;
+        gap: var(--spacing-hell-2);
+        font-variant-numeric: tabular-nums;
+      }
+      & .hell-date-input-icon {
+        color: var(--color-hell-foreground-subtle);
+        flex-shrink: 0;
+      }
+      & .hell-date-input-value {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: start;
+        flex: 1 1 auto;
+        color: var(--color-hell-foreground);
+      }
+      &[data-invalid="true"] > .hell-date-input-trigger {
+        border-color: var(--color-hell-danger,var(--color-hell-border));
+      }
+      &[data-size="sm"] > .hell-date-input-trigger {
+        color: var(--text-sm);
+      }
+      &[data-size="lg"] > .hell-date-input-trigger {
+        color: var(--text-sm);
+      }
     }
-    &[data-disabled] {
-      @apply cursor-not-allowed;
-      @apply text-(--hell-color-text-subtle);
-      @apply opacity-[0.4];
+
+  .hell-time-input {
+      display: inline-flex;
+      min-width: 9rem;
+      & > .hell-time-input-trigger {
+        width: 100%;
+        justify-content: flex-start;
+        gap: var(--spacing-hell-2);
+        font-variant-numeric: tabular-nums;
+      }
+      & .hell-time-input-icon {
+        color: var(--color-hell-foreground-subtle);
+        flex-shrink: 0;
+      }
+      & .hell-time-input-value {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: start;
+        flex: 1 1 auto;
+        color: var(--color-hell-foreground);
+      }
+      &[data-invalid="true"] > .hell-time-input-trigger {
+        border-color: var(--color-hell-danger,var(--color-hell-border));
+      }
+      &[data-size="sm"] > .hell-time-input-trigger {
+        color: var(--text-sm);
+      }
+      &[data-size="lg"] > .hell-time-input-trigger {
+        color: var(--text-sm);
+      }
     }
-  }
+
+  .hell-time-picker {
+      display: flex;
+      align-items: stretch;
+      gap: var(--spacing-hell-2);
+      background-color: var(--color-hell-surface-elevated);
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--color-hell-border);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-hell-2);
+      box-shadow: var(--shadow-hell-sm);
+      min-width: 200px;
+    }
+
+  .hell-time-picker-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1 1 0;
+      min-width: calc(var(--spacing) * 14);
+      height: 200px;
+      overflow-y: auto;
+      scroll-snap-type: y mandatory;
+      scrollbar-width: thin;
+      border-radius: 0.25rem;
+      background-color: var(--color-hell-surface-subtle);
+    }
+
+  .hell-time-picker-cell {
+      display: flex;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: calc(var(--spacing) * 8);
+      flex-shrink: 0;
+      scroll-snap-align: center;
+      font-size: var(--text-sm);
+      line-height: var(--text-sm--line-height);
+      font-variant-numeric: tabular-nums;
+      color: var(--color-hell-foreground-muted);
+      background-color: transparent;
+      border-style: solid;
+      border-width: 0px;
+      font-family: inherit;
+      &:hover {
+        background-color: var(--color-hell-surface-muted);
+        color: var(--color-hell-foreground);
+      }
+      &[data-selected="true"] {
+        background-color: var(--color-hell-primary);
+        color: var(--color-hell-primary-foreground);
+        font-weight: var(--font-weight-semibold);
+      }
+    }
+
+  .hell-time-picker-divider {
+      align-self: center;
+      font-size: 18px;
+      color: var(--color-hell-foreground-subtle);
+    }
+
 }
-
-/* Native date / time inputs. Calendar/clock indicator tinted, padding
-   tweaked so the picker icon doesn't clip. */
-@utility hell-date-input {
-  @apply inline-flex;
-  @apply min-w-[11rem];
-
-  & > .hell-date-input-trigger {
-    @apply justify-start w-full;
-    @apply gap-(--hell-space-2);
-    @apply tabular-nums;
-  }
-  & .hell-date-input-icon {
-    @apply text-(--hell-color-text-subtle);
-    @apply shrink-0;
-  }
-  & .hell-date-input-value {
-    @apply truncate text-start;
-    @apply flex-[1_1_auto];
-    @apply text-(--hell-color-text);
-  }
-  &[data-invalid="true"] > .hell-date-input-trigger {
-    @apply border-(--hell-color-danger,var(--hell-color-border));
-  }
-  &[data-size="sm"] > .hell-date-input-trigger { @apply text-[var(--hell-font-size-sm)]; }
-  &[data-size="lg"] > .hell-date-input-trigger { @apply text-[var(--hell-font-size-lg)]; }
-}
-
-@utility hell-time-input {
-  @apply inline-flex;
-  @apply min-w-[9rem];
-
-  & > .hell-time-input-trigger {
-    @apply justify-start w-full;
-    @apply gap-(--hell-space-2);
-    @apply tabular-nums;
-  }
-  & .hell-time-input-icon {
-    @apply text-(--hell-color-text-subtle);
-    @apply shrink-0;
-  }
-  & .hell-time-input-value {
-    @apply truncate text-start;
-    @apply flex-[1_1_auto];
-    @apply text-(--hell-color-text);
-  }
-  &[data-invalid="true"] > .hell-time-input-trigger {
-    @apply border-(--hell-color-danger,var(--hell-color-border));
-  }
-  &[data-size="sm"] > .hell-time-input-trigger { @apply text-[var(--hell-font-size-sm)]; }
-  &[data-size="lg"] > .hell-time-input-trigger { @apply text-[var(--hell-font-size-lg)]; }
-}
-
-@utility hell-time-picker {
-  @apply flex items-stretch;
-  @apply gap-(--hell-space-2);
-  @apply bg-(--hell-color-bg-elevated);
-  @apply border border-(--hell-color-border);
-  @apply rounded-md;
-  @apply p-(--hell-space-2);
-  @apply shadow-(--hell-shadow-sm);
-  @apply min-w-[200px];
-}
-
-@utility hell-time-picker-column {
-  @apply flex flex-col items-center;
-  @apply flex-[1_1_0];
-  @apply min-w-14;
-  @apply h-[200px];
-  @apply overflow-y-auto;
-  @apply snap-y snap-mandatory;
-  @apply [scrollbar-width:thin];
-  @apply rounded;
-  @apply bg-(--hell-color-bg-subtle);
-}
-
-@utility hell-time-picker-cell {
-  @apply flex items-center justify-center cursor-pointer;
-  @apply w-full;
-  @apply h-8;
-  @apply shrink-0;
-  @apply [scroll-snap-align:center];
-  @apply text-sm;
-  @apply tabular-nums;
-  @apply text-(--hell-color-text-muted);
-  @apply bg-transparent;
-  @apply border-0;
-  @apply font-[inherit];
-
-  &:hover { @apply bg-(--hell-color-bg-muted); @apply text-(--hell-color-text); }
-  &[data-selected="true"] {
-    @apply bg-(--hell-color-primary);
-    @apply text-(--hell-color-primary-fg);
-    @apply font-semibold;
-  }
-}
-
-@utility hell-time-picker-divider {
-  @apply self-center;
-  @apply text-[18px];
-  @apply text-(--hell-color-text-subtle);
-}
-

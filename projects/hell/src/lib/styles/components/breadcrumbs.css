@@ -1,23 +1,42 @@
-/* Breadcrumbs. */
+@layer components {
 
-@utility hell-breadcrumbs {
-  @apply inline-flex items-center gap-1 text-xs text-(--hell-color-text-muted);
+  /* Breadcrumbs. */
+
+  .hell-breadcrumbs {
+      display: inline-flex;
+      align-items: center;
+      gap: calc(var(--spacing) * 1);
+      font-size: var(--text-xs);
+      line-height: var(--text-xs--line-height);
+      color: var(--color-hell-foreground-muted);
+    }
+
+  .hell-breadcrumb-list {
+      margin: calc(var(--spacing) * 0);
+      display: inline-flex;
+      list-style-type: none;
+      align-items: center;
+      gap: calc(var(--spacing) * 1);
+      padding: calc(var(--spacing) * 0);
+    }
+
+  .hell-breadcrumbs-item {
+      display: inline-flex;
+      align-items: center;
+      gap: calc(var(--spacing) * 1);
+      color: inherit;
+      text-decoration-line: none;
+      &:hover {
+        color: var(--color-hell-foreground);
+      }
+      &[aria-current="page"] {
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-hell-foreground);
+      }
+    }
+
+  .hell-breadcrumbs-separator {
+      color: var(--color-hell-foreground-subtle);
+    }
+
 }
-
-@utility hell-breadcrumb-list {
-  @apply inline-flex items-center list-none p-0 m-0 gap-1;
-}
-
-@utility hell-breadcrumbs-item {
-  @apply inline-flex items-center no-underline gap-1 text-inherit;
-
-  &:hover { @apply text-(--hell-color-text); }
-  &[aria-current="page"] {
-    @apply font-semibold text-(--hell-color-text);
-  }
-}
-
-@utility hell-breadcrumbs-separator {
-  @apply text-(--hell-color-text-subtle);
-}
-

@@ -1,87 +1,111 @@
-/* Menu — surface, items, sections, separators, submenu indicator. */
+@layer components {
 
-@utility hell-menu {
-  @apply flex flex-col;
-  @apply fixed;
-  @apply bg-(--hell-color-bg-elevated);
-  @apply border border-(--hell-color-border);
-  @apply rounded-md;
-  @apply shadow-(--hell-shadow-lg);
-  @apply p-(--hell-space-2);
-  @apply min-w-[200px];
-  @apply outline-none;
-  @apply gap-[1px];
-  @apply animate-[hell-pop-in_var(--hell-duration-fast)_var(--hell-ease-out)];
+  /* Menu — surface, items, sections, separators, submenu indicator. */
+
+  .hell-menu {
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      background-color: var(--color-hell-surface-elevated);
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--color-hell-border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-hell-lg);
+      padding: var(--spacing-hell-2);
+      min-width: 200px;
+      outline: none;
+      gap: 1px;
+      animation: hell-pop-in var(--hell-duration-fast) var(--ease-hell-out);
+    }
+
+  .hell-menu-item {
+      display: flex;
+      cursor: pointer;
+      align-items: center;
+      text-align: start;
+      gap: var(--spacing-hell-3);
+      padding-inline: calc(var(--spacing) * 2.5);
+      padding-block: calc(var(--spacing) * 1.5);
+      font-size: 13px;
+      color: var(--color-hell-foreground);
+      background-color: transparent;
+      border-style: solid;
+      border-width: 0px;
+      border-radius: 0.25rem;
+      outline: none;
+      font-family: inherit;
+      &[data-hover], &[data-focus-visible], &[data-open] {
+        background-color: var(--color-hell-surface-muted);
+      }
+      &[data-disabled] {
+        cursor: not-allowed;
+        opacity: 50%;
+      }
+      > .hell-menu-item-icon, > hell-icon {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        width: calc(var(--spacing) * 4);
+        color: var(--color-hell-foreground-subtle);
+      }
+      &[data-hover] > .hell-menu-item-icon, &[data-hover] > hell-icon {
+        color: var(--color-hell-foreground);
+      }
+    }
+
+  .hell-menu-item-trailing {
+      margin-inline-start: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: calc(var(--spacing) * 1);
+      font-size: 11px;
+      color: var(--color-hell-foreground-subtle);
+      font-variant-numeric: tabular-nums;
+    }
+
+  /* Submenu trigger gets an automatic chevron on the trailing edge. */
+
+  .hell-menu-item-submenu {
+      &::after {
+        content: '';
+        margin-inline-start: auto;
+        width: calc(var(--spacing) * 1.5);
+        height: calc(var(--spacing) * 1.5);
+        border-top: 1.5px solid currentColor;
+        border-right: 1.5px solid currentColor;
+        rotate: 45deg;
+        color: var(--color-hell-foreground-subtle);
+        flex-shrink: 0;
+      }
+    }
+
+  .hell-menu-separator {
+      height: 1px;
+      background-color: var(--color-hell-border);
+      margin-inline: 2px;
+      margin-block: calc(var(--spacing) * 1);
+    }
+
+  .hell-menu-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      & + .hell-menu-section {
+        margin-top: var(--spacing-hell-2);
+      }
+    }
+
+  .hell-menu-label {
+      font-weight: var(--font-weight-semibold);
+      text-transform: uppercase;
+      padding-inline: calc(var(--spacing) * 2.5);
+      padding-top: calc(var(--spacing) * 1.5);
+      padding-bottom: 2px;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--color-hell-foreground-subtle);
+    }
+
 }
-
-@utility hell-menu-item {
-  @apply flex items-center text-start cursor-pointer;
-  @apply gap-(--hell-space-3);
-  @apply py-1.5 px-2.5;
-  @apply text-[13px];
-  @apply text-(--hell-color-text);
-  @apply bg-transparent;
-  @apply border-0;
-  @apply rounded;
-  @apply outline-none;
-  @apply font-[inherit];
-
-  &[data-hover],
-  &[data-focus-visible],
-  &[data-open] { @apply bg-(--hell-color-bg-muted); }
-  &[data-disabled] { @apply opacity-50 cursor-not-allowed; }
-
-  > .hell-menu-item-icon,
-  > hell-icon {
-    @apply inline-flex items-center justify-center flex-shrink-0;
-    @apply w-4;
-    @apply text-(--hell-color-text-subtle);
-  }
-  &[data-hover] > .hell-menu-item-icon,
-  &[data-hover] > hell-icon { @apply text-(--hell-color-text); }
-}
-
-@utility hell-menu-item-trailing {
-  @apply ms-auto inline-flex items-center;
-  @apply gap-1;
-  @apply text-[11px];
-  @apply text-(--hell-color-text-subtle);
-  @apply tabular-nums;
-}
-
-/* Submenu trigger gets an automatic chevron on the trailing edge. */
-@utility hell-menu-item-submenu {
-  &::after {
-    @apply content-[''];
-    @apply ms-auto;
-    @apply w-1.5;
-    @apply h-1.5;
-    @apply [border-top:1.5px_solid_currentColor];
-    @apply [border-right:1.5px_solid_currentColor];
-    @apply rotate-45;
-    @apply text-(--hell-color-text-subtle);
-    @apply shrink-0;
-  }
-}
-
-@utility hell-menu-separator {
-  @apply h-px;
-  @apply bg-(--hell-color-border);
-  @apply my-1 mx-[2px];
-}
-
-@utility hell-menu-section {
-  @apply flex flex-col;
-  @apply gap-[1px];
-
-  & + .hell-menu-section { @apply [margin-top:var(--hell-space-2)]; }
-}
-
-@utility hell-menu-label {
-  @apply uppercase font-semibold;
-  @apply pt-1.5 px-2.5 pb-[2px];
-  @apply text-[10px];
-  @apply tracking-[0.08em];
-  @apply text-(--hell-color-text-subtle);
-}
-

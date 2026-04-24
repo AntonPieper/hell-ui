@@ -1,62 +1,211 @@
-/* Audio player. */
+@layer components {
 
-@utility hell-audio {
-  @apply flex flex-col w-full
-    gap-(--hell-space-2)
-    py-(--hell-space-3) px-(--hell-space-4)
-    bg-(--hell-color-bg-elevated)
-    border border-(--hell-color-border)
-    rounded-md
-    text-xs
-    text-(--hell-color-text)
-    max-w-120;
-}
+  /* Audio player. */
 
-@utility hell-audio-meta {
-  @apply flex items-baseline justify-between min-w-0
-    gap-(--hell-space-3)
-    text-xs;
-}
+  .hell-audio {
+      display: flex;
+      width: 100%;
+      max-width: calc(var(--spacing) * 120);
+      flex-direction: column;
+      gap: var(--spacing-hell-2);
+      border-radius: var(--radius-md);
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--color-hell-border);
+      background-color: var(--color-hell-surface-elevated);
+      padding-inline: var(--spacing-hell-4);
+      padding-block: var(--spacing-hell-3);
+      font-size: var(--text-xs);
+      line-height: var(--text-xs--line-height);
+      color: var(--color-hell-foreground);
+    }
 
-@utility hell-audio-title {
-  @apply font-semibold truncate min-w-0
-    flex-[1_1_auto]
-    text-(--hell-color-text)
-    text-[13px];
-}
+  .hell-audio-meta {
+      display: flex;
+      min-width: calc(var(--spacing) * 0);
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--spacing-hell-3);
+      font-size: var(--text-xs);
+      line-height: var(--text-xs--line-height);
+    }
 
-@utility hell-audio-date {
-  @apply flex-shrink-0
-    text-(--hell-color-text-muted)
-    tabular-nums;
-}
+  .hell-audio-title {
+      min-width: calc(var(--spacing) * 0);
+      flex: 1 1 auto;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 13px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-hell-foreground);
+    }
 
-@utility hell-audio-controls {
-  @apply flex items-center w-full gap-(--hell-space-3);
-}
+  .hell-audio-date {
+      flex-shrink: 0;
+      color: var(--color-hell-foreground-muted);
+      font-variant-numeric: tabular-nums;
+    }
 
-@utility hell-audio-time {
-  @apply text-center
-    tabular-nums
-    text-(--hell-color-text-muted)
-    min-w-9.5;
-}
+  .hell-audio-controls {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      gap: var(--spacing-hell-3);
+    }
 
-@utility hell-audio-track {
-  @apply relative flex-1 cursor-pointer
-    h-1
-    bg-(--hell-color-bg-muted)
-    rounded-full;
+  .hell-audio-time {
+      min-width: calc(var(--spacing) * 9.5);
+      text-align: center;
+      color: var(--color-hell-foreground-muted);
+      font-variant-numeric: tabular-nums;
+    }
 
-  > .hell-audio-track-fill {
-    @apply absolute
-      inset-y-0
-      inset-s-0
-      bg-(--hell-color-primary)
-      rounded-[inherit];
-  }
-}
+  .hell-audio-track {
+      position: relative;
+      height: calc(var(--spacing) * 1);
+      flex: 1;
+      cursor: pointer;
+      border-radius: calc(infinity * 1px);
+      background-color: var(--color-hell-surface-muted);
+      touch-action: none;
+      transition: height 120ms ease;
+      > .hell-audio-track-fill {
+        position: absolute;
+        inset-block: calc(var(--spacing) * 0);
+        inset-inline-start: calc(var(--spacing) * 0);
+        width: var(--_hell-audio-progress, 0%);
+        border-radius: inherit;
+        background-color: var(--color-hell-primary);
+      }
+      > .hell-audio-track-thumb {
+        position: absolute;
+        top: 50%;
+        inset-inline-start: var(--_hell-audio-progress, 0%);
+        width: calc(var(--spacing) * 3);
+        height: calc(var(--spacing) * 3);
+        margin-inline-start: calc(var(--spacing) * -1.5);
+        border-radius: 50%;
+        background-color: var(--color-hell-primary);
+        box-shadow: 0 0 0 2px var(--color-hell-surface-elevated);
+        transform: translateY(-50%) scale(0);
+        transition: transform 140ms ease;
+        pointer-events: none;
+      }
+      &:hover,
+      &:focus-visible,
+      &[data-dragging='true'] {
+        height: calc(var(--spacing) * 1.5);
+        > .hell-audio-track-thumb { transform: translateY(-50%) scale(1); }
+      }
+      &[data-dragging='true'] {
+        cursor: grabbing;
+        > .hell-audio-track-thumb { transform: translateY(-50%) scale(1.15); }
+      }
+      &:focus-visible {
+        outline: 2px solid var(--color-hell-ring);
+        outline-offset: 4px;
+      }
+    }
 
-@utility hell-audio-volume {
-  @apply w-18 flex-[0_0_auto];
+  .hell-audio-volume {
+      width: calc(var(--spacing) * 18);
+      flex: 0 0 auto;
+    }
+
+  .hell-audio-cc-toggle[data-active='true'] {
+      color: var(--color-hell-primary);
+      background-color: color-mix(in oklab, var(--color-hell-primary) 12%, transparent);
+    }
+
+  .hell-audio-captions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-hell-2);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-hell-border);
+      background-color: var(--color-hell-surface-muted);
+      padding: var(--spacing-hell-2) var(--spacing-hell-3);
+      animation: hell-audio-captions-in 180ms ease;
+    }
+
+  @keyframes hell-audio-captions-in {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+  .hell-audio-captions-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-hell-3);
+    }
+
+  .hell-audio-captions-status {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-hell-2);
+      font-size: var(--text-xs);
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--color-hell-foreground-muted);
+    }
+
+  .hell-audio-captions-dot {
+      display: inline-block;
+      width: calc(var(--spacing) * 1.5);
+      height: calc(var(--spacing) * 1.5);
+      border-radius: 50%;
+      background-color: var(--color-hell-foreground-muted);
+    }
+
+  .hell-audio-captions[data-state='live'] {
+      .hell-audio-captions-status { color: var(--color-hell-primary); }
+      .hell-audio-captions-dot {
+        background-color: var(--color-hell-primary);
+        box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-hell-primary) 60%, transparent);
+        animation: hell-audio-captions-pulse 1.6s ease-out infinite;
+      }
+    }
+
+  @keyframes hell-audio-captions-pulse {
+      0%   { box-shadow: 0 0 0 0   color-mix(in oklab, var(--color-hell-primary) 55%, transparent); }
+      100% { box-shadow: 0 0 0 8px color-mix(in oklab, var(--color-hell-primary)  0%, transparent); }
+    }
+
+  .hell-audio-captions-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-hell-1);
+    }
+
+  .hell-audio-captions-body {
+      max-height: calc(var(--spacing) * 36);
+      overflow: auto;
+      border-radius: var(--radius-sm);
+      padding: var(--spacing-hell-2) var(--spacing-hell-3);
+      background-color: var(--color-hell-surface);
+      font-size: var(--text-sm);
+      line-height: 1.55;
+      color: var(--color-hell-foreground);
+      > p { margin: 0; white-space: pre-wrap; }
+    }
+
+  .hell-audio-captions-interim {
+      color: var(--color-hell-foreground-muted);
+      font-style: italic;
+    }
+
+  .hell-audio-captions-empty {
+      color: var(--color-hell-foreground-muted);
+      font-size: var(--text-xs);
+    }
+
+  .hell-audio-captions-error {
+      margin: 0;
+      color: var(--color-hell-danger, var(--color-hell-foreground));
+      font-size: var(--text-sm);
+    }
+
 }

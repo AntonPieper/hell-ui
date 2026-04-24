@@ -1,25 +1,28 @@
-/* Toggle / ToggleGroup — NgpToggle sets [data-selected] when pressed. */
+@layer components {
 
-@utility hell-toggle {
-  /* Composes onto hell-button via the wrapper directive. Adds the pressed
-     state styling with smooth transitions. */
-  @apply [transition:background-color_var(--hell-duration-base)_var(--hell-ease-out),_color_var(--hell-duration-base)_var(--hell-ease-out),_border-color_var(--hell-duration-base)_var(--hell-ease-out),_transform_var(--hell-duration-fast)_var(--hell-ease-out)];
+  /* Toggle / ToggleGroup — NgpToggle sets [data-selected] when pressed. */
 
-  &[data-press] { @apply scale-[0.97]; }
+  .hell-toggle {
+      transition: background-color var(--hell-duration-base) var(--ease-hell-out), color var(--hell-duration-base) var(--ease-hell-out), border-color var(--hell-duration-base) var(--ease-hell-out), transform var(--hell-duration-fast) var(--ease-hell-out);
+      &[data-press] {
+        scale: 0.97;
+      }
+      &[data-selected] {
+        background-color: var(--color-hell-primary-soft);
+        color: var(--color-hell-primary);
+        border-color: var(--color-hell-primary-soft);
+      }
+    }
 
-  &[data-selected] {
-    @apply bg-(--hell-color-primary-soft);
-    @apply text-(--hell-color-primary);
-    @apply border-(--hell-color-primary-soft);
-  }
+  .hell-toggle-group {
+      display: inline-flex;
+      background-color: var(--color-hell-surface-subtle);
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--color-hell-border);
+      border-radius: var(--radius-md);
+      padding: 2px;
+      gap: 2px;
+    }
+
 }
-
-@utility hell-toggle-group {
-  @apply inline-flex;
-  @apply bg-(--hell-color-bg-subtle);
-  @apply border border-(--hell-color-border);
-  @apply rounded-md;
-  @apply p-[2px];
-  @apply gap-[2px];
-}
-

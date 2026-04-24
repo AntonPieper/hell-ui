@@ -1,9 +1,19 @@
-/* Separator — horizontal or vertical divider. */
+@layer components {
 
-@utility hell-separator {
-  @apply block flex-shrink-0;
-  @apply bg-(--hell-color-border);
-  &[data-orientation="horizontal"] { @apply h-px w-full; }
-  &[data-orientation="vertical"]   { @apply w-px self-stretch; }
+  /* Separator — horizontal or vertical divider. */
+
+  .hell-separator {
+      display: block;
+      flex-shrink: 0;
+      background-color: var(--color-hell-border);
+      &[data-orientation="horizontal"] {
+        height: 1px;
+        width: 100%;
+      }
+      &[data-orientation="vertical"] {
+        width: 1px;
+        align-self: stretch;
+      }
+    }
+
 }
-

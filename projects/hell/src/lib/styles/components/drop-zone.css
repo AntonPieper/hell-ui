@@ -1,22 +1,31 @@
-/* Drop zone. NgpFileUpload sets [data-active] when dragging. */
+@layer components {
 
-@utility hell-dropzone {
-  @apply flex flex-col items-center justify-center text-center cursor-pointer;
-  @apply gap-(--hell-space-3);
-  @apply p-(--hell-space-7);
-  @apply bg-(--hell-color-bg-subtle);
-  @apply [border:1.5px_dashed_var(--hell-color-border-strong)];
-  @apply rounded-lg;
-  @apply text-(--hell-color-text-muted);
-  @apply min-h-[140px];
-  @apply [transition:background-color_var(--hell-duration-fast)_var(--hell-ease-out),_border-color_var(--hell-duration-fast)_var(--hell-ease-out)];
+  /* Drop zone. NgpFileUpload sets [data-active] when dragging. */
 
-  &[data-dragover],
-  &[data-active] {
-    @apply bg-(--hell-color-primary-soft);
-    @apply border-(--hell-color-primary);
-    @apply text-(--hell-color-primary);
-  }
-  &[data-disabled] { @apply opacity-60 cursor-not-allowed; }
+  .hell-dropzone {
+      display: flex;
+      cursor: pointer;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: var(--spacing-hell-3);
+      padding: var(--spacing-hell-7);
+      background-color: var(--color-hell-surface-subtle);
+      border: 1.5px dashed var(--color-hell-border-strong);
+      border-radius: var(--radius-lg);
+      color: var(--color-hell-foreground-muted);
+      min-height: 140px;
+      transition: background-color var(--hell-duration-fast) var(--ease-hell-out), border-color var(--hell-duration-fast) var(--ease-hell-out);
+      &[data-dragover], &[data-active] {
+        background-color: var(--color-hell-primary-soft);
+        border-color: var(--color-hell-primary);
+        color: var(--color-hell-primary);
+      }
+      &[data-disabled] {
+        cursor: not-allowed;
+        opacity: 60%;
+      }
+    }
+
 }
-

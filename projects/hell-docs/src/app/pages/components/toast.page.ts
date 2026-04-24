@@ -72,11 +72,11 @@ import { HellButton, HellToastService } from 'hell';
 
         <ng-template #custom let-ctx>
           <div class="flex items-center gap-3">
-            <div class="size-9 rounded-full bg-(--hell-color-info-soft) grid place-items-center text-(--hell-color-info-strong) font-semibold">
+            <div class="grid size-9 place-items-center rounded-full bg-hell-info-soft font-semibold text-hell-info-strong">
               SS
             </div>
             <div class="min-w-0">
-              <div class="font-semibold text-(--hell-color-text)">Sara Severin</div>
+              <div class="font-semibold text-hell-foreground">Sara Severin</div>
               <div class="hd-muted">commented on “Q4 plan”</div>
             </div>
             <button hellButton size="sm" variant="primary" (click)="ctx.dismiss()">View</button>

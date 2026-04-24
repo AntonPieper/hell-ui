@@ -1,55 +1,76 @@
-/* Avatar + Avatar group + overflow indicator. */
+@layer components {
 
-@utility hell-avatar {
-  @apply inline-flex items-center justify-center overflow-hidden relative font-semibold select-none shrink-0
-    [--_hell-av-size:32px]
-    w-(--_hell-av-size)
-    h-(--_hell-av-size)
-    bg-(--hell-color-primary-soft)
-    text-(--hell-color-primary-soft-fg)
-    rounded-full
-    text-[calc(var(--_hell-av-size)_*_0.4)]
-    tracking-[0.02em]
-    border-2 border-(--hell-color-bg-elevated);
+  /* Avatar + Avatar group + overflow indicator. */
 
-  & > img {
-    @apply w-full h-full object-cover;
-  }
-  &[data-size='xs'] {
-    @apply [--_hell-av-size:20px];
-  }
-  &[data-size='sm'] {
-    @apply [--_hell-av-size:26px];
-  }
-  &[data-size='md'] {
-    @apply [--_hell-av-size:32px];
-  }
-  &[data-size='lg'] {
-    @apply [--_hell-av-size:40px];
-  }
-  &[data-size='xl'] {
-    @apply [--_hell-av-size:56px];
-  }
-  &[data-shape='square'] {
-    @apply rounded-md;
-  }
-}
+  .hell-avatar {
+      position: relative;
+      display: inline-flex;
+      height: var(--_hell-av-size);
+      width: var(--_hell-av-size);
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: calc(infinity * 1px);
+      border-style: solid;
+      border-width: 2px;
+      border-color: var(--color-hell-surface-elevated);
+      background-color: var(--color-hell-primary-soft);
+      font-size: calc(var(--_hell-av-size) * 0.4);
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.02em;
+      color: var(--color-hell-primary-soft-foreground);
+      -webkit-user-select: none;
+      user-select: none;
+      --_hell-av-size: 32px;
+      & > img {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+      }
+      &[data-size='xs'] {
+        --_hell-av-size: 20px;
+      }
+      &[data-size='sm'] {
+        --_hell-av-size: 26px;
+      }
+      &[data-size='md'] {
+        --_hell-av-size: 32px;
+      }
+      &[data-size='lg'] {
+        --_hell-av-size: 40px;
+      }
+      &[data-size='xl'] {
+        --_hell-av-size: 56px;
+      }
+      &[data-shape='square'] {
+        border-radius: var(--radius-md);
+      }
+    }
 
-@utility hell-avatar-group {
-  @apply inline-flex items-center;
-  & > .hell-avatar:not(:first-child) {
-    @apply -ms-2;
-  }
-}
+  .hell-avatar-group {
+      display: inline-flex;
+      align-items: center;
+      & > .hell-avatar:not(:first-child) {
+        margin-inline-start: calc(var(--spacing) * -2);
+      }
+    }
 
-@utility hell-avatar-overflow {
-  @apply inline-flex items-center justify-center font-semibold
-    bg-(--hell-color-bg-muted)
-    text-(--hell-color-text-muted)
-    border-2 border-(--hell-color-bg-elevated)
-    rounded-full
-    w-(--_hell-av-size,32px)
-    h-(--_hell-av-size,32px)
-    text-[11px]
-    -ms-2;
+  .hell-avatar-overflow {
+      margin-inline-start: calc(var(--spacing) * -2);
+      display: inline-flex;
+      height: var(--_hell-av-size,32px);
+      width: var(--_hell-av-size,32px);
+      align-items: center;
+      justify-content: center;
+      border-radius: calc(infinity * 1px);
+      border-style: solid;
+      border-width: 2px;
+      border-color: var(--color-hell-surface-elevated);
+      background-color: var(--color-hell-surface-muted);
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-hell-foreground-muted);
+    }
+
 }

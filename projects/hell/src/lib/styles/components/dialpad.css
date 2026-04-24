@@ -1,120 +1,130 @@
-/*
- * Dialpad — telephony-style 3-column key pad with display + call action.
- *
- * Layout:
- *   ┌─────────────────────┐
- *   │  display    ⌫       │  ← number readout
- *   ├─────────────────────┤
- *   │  1    2    3        │
- *   │  4    5    6        │  ← keypad grid
- *   │  7    8    9        │
- *   │  *    0    #        │
- *   ├─────────────────────┤
- *   │  📞 Call            │  ← optional call button
- *   └─────────────────────┘
- */
+@layer components {
 
-@utility hell-dialpad {
-  @apply flex;
-  @apply flex-col;
-  @apply gap-(--hell-space-3);
-  @apply w-full;
-  @apply max-w-[280px];
-  @apply outline-none;
+  /*
+   * Dialpad — telephony-style 3-column key pad with display + call action.
+   *
+   * Layout:
+   *   ┌─────────────────────┐
+   *   │  display    ⌫       │  ← number readout
+   *   ├─────────────────────┤
+   *   │  1    2    3        │
+   *   │  4    5    6        │  ← keypad grid
+   *   │  7    8    9        │
+   *   │  *    0    #        │
+   *   ├─────────────────────┤
+   *   │  📞 Call            │  ← optional call button
+   *   └─────────────────────┘
+   */
 
-  &:focus-visible {
-    @apply [outline:2px_solid_var(--hell-color-focus-ring)];
-    @apply [outline-offset:4px];
-    @apply rounded-md;
-  }
+  .hell-dialpad {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-hell-3);
+      width: 100%;
+      max-width: 280px;
+      outline: none;
+      &:focus-visible {
+        outline: 2px solid var(--color-hell-focus-ring);
+        outline-offset: 4px;
+        border-radius: var(--radius-md);
+      }
+    }
+
+  .hell-dialpad-display {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-hell-2);
+      height: calc(var(--spacing) * 14);
+      padding-inline: var(--spacing-hell-4);
+      padding-block: calc(var(--spacing) * 0);
+      background-color: var(--color-hell-surface-subtle);
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--color-hell-border);
+      border-radius: var(--radius-md);
+    }
+
+  .hell-dialpad-number {
+      flex: 1 1 auto;
+      min-width: calc(var(--spacing) * 0);
+      font-size: 26px;
+      font-weight: var(--font-weight-medium);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+      color: var(--color-hell-foreground);
+      white-space: nowrap;
+      overflow: hidden;
+      direction: rtl;
+      text-align: left;
+      > .hell-dialpad-number-inner {
+        direction: ltr;
+        unicode-bidi: bidi-override;
+        display: inline-block;
+      }
+    }
+
+  .hell-dialpad-back {
+      flex: 0 0 auto;
+    }
+
+  .hell-dialpad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-hell-2);
+    }
+
+  .hell-dialpad-key {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 64px;
+      gap: 2px;
+      padding: calc(var(--spacing) * 0);
+      background-color: var(--color-hell-surface-elevated);
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--color-hell-border);
+      border-radius: var(--radius-md);
+      color: var(--color-hell-foreground);
+      cursor: pointer;
+      -webkit-user-select: none;
+      user-select: none;
+      font-feature-settings: 'tnum' on, 'lnum' on;
+      transition: background var(--hell-duration-fast) var(--ease-hell-out), border-color var(--hell-duration-fast) var(--ease-hell-out), transform var(--hell-duration-fast) var(--ease-hell-out);
+      &:hover {
+        background-color: var(--color-hell-surface-subtle);
+        border-color: var(--color-hell-primary);
+        @supports (color: color-mix(in lab, red, red)) {
+          border-color: color-mix(in srgb, var(--color-hell-primary) 35%, var(--color-hell-border));
+        }
+      }
+      &:active {
+        scale: 0.96;
+        background-color: var(--color-hell-surface-muted);
+      }
+    }
+
+  .hell-dialpad-digit {
+      font-size: 26px;
+      font-weight: var(--font-weight-medium);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.01em;
+    }
+
+  .hell-dialpad-letters {
+      font-size: 9px;
+      font-weight: var(--font-weight-bold);
+      letter-spacing: 0.18em;
+      color: var(--color-hell-foreground-subtle);
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+  .hell-dialpad-call {
+      width: 100%;
+      margin-top: var(--spacing-hell-2);
+    }
+
 }
-
-@utility hell-dialpad-display {
-  @apply flex;
-  @apply items-center;
-  @apply gap-(--hell-space-2);
-  @apply h-14;
-  @apply py-0 px-(--hell-space-4);
-  @apply bg-(--hell-color-bg-subtle);
-  @apply border border-(--hell-color-border);
-  @apply rounded-md;
-}
-
-@utility hell-dialpad-number {
-  @apply flex-[1_1_auto];
-  @apply min-w-0;
-  @apply text-[26px];
-  @apply font-medium;
-  @apply tabular-nums;
-  @apply tracking-[0.02em];
-  @apply text-(--hell-color-text);
-  @apply whitespace-nowrap;
-  @apply overflow-hidden;
-  /* container is RTL so newest digits stay visible while overflowing on the
-     left; inner span renders LTR so that +/*\/# sit at the right end. */
-  @apply [direction:rtl];
-    @apply text-left;
-
-  > .hell-dialpad-number-inner {
-    @apply [direction:ltr];
-    @apply [unicode-bidi:bidi-override];
-    @apply inline-block;
-  }
-}
-
-@utility hell-dialpad-back {
-  @apply flex-[0_0_auto];
-}
-
-@utility hell-dialpad-grid {
-  @apply grid;
-  @apply [grid-template-columns:repeat(3,_1fr)];
-  @apply gap-(--hell-space-2);
-}
-
-@utility hell-dialpad-key {
-  @apply flex;
-  @apply flex-col;
-  @apply items-center;
-  @apply justify-center;
-  @apply h-[64px];
-  @apply gap-[2px];
-  @apply p-0;
-  @apply bg-(--hell-color-bg-elevated);
-  @apply border border-(--hell-color-border);
-  @apply rounded-md;
-  @apply text-(--hell-color-text);
-  @apply cursor-pointer;
-  @apply select-none;
-  @apply [font-feature-settings:'tnum'_on,_'lnum'_on];
-  @apply [transition:background_var(--hell-duration-fast)_var(--hell-ease-out),_border-color_var(--hell-duration-fast)_var(--hell-ease-out),_transform_var(--hell-duration-fast)_var(--hell-ease-out)];
-
-  &:hover {
-    @apply bg-(--hell-color-bg-subtle);
-    @apply border-[color-mix(in_srgb,_var(--hell-color-primary)_35%,_var(--hell-color-border))];
-  }
-  &:active { @apply scale-[0.96]; @apply bg-(--hell-color-bg-muted); }
-}
-
-@utility hell-dialpad-digit {
-  @apply text-[26px];
-  @apply font-medium;
-  @apply leading-[1];
-  @apply tabular-nums;
-  @apply tracking-[-0.01em];
-}
-
-@utility hell-dialpad-letters {
-  @apply text-[9px];
-  @apply font-bold;
-  @apply tracking-[0.18em];
-  @apply text-(--hell-color-text-subtle);
-  @apply uppercase;
-  @apply leading-[1];
-}
-
-@utility hell-dialpad-call {
-  @apply w-full;
-  @apply [margin-top:var(--hell-space-2)];
-}
-

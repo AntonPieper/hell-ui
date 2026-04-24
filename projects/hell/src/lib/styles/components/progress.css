@@ -1,23 +1,33 @@
-/* Progress + Meter. */
+@layer components {
 
-@utility hell-progress {
-  @apply block relative w-full overflow-hidden;
-  @apply h-1.5;
-  @apply bg-(--hell-color-bg-muted);
-  @apply rounded-full;
+  /* Progress + Meter. */
+
+  .hell-progress {
+      position: relative;
+      display: block;
+      width: 100%;
+      overflow: hidden;
+      height: calc(var(--spacing) * 1.5);
+      background-color: var(--color-hell-surface-muted);
+      border-radius: calc(infinity * 1px);
+    }
+
+  .hell-progress-bar {
+      display: block;
+      height: 100%;
+      background-color: var(--color-hell-primary);
+      border-radius: inherit;
+      transition: width var(--hell-duration-base) var(--ease-hell-out);
+    }
+
+  .hell-meter {
+      position: relative;
+      display: block;
+      width: 100%;
+      overflow: hidden;
+      height: calc(var(--spacing) * 1.5);
+      background-color: var(--color-hell-surface-muted);
+      border-radius: calc(infinity * 1px);
+    }
+
 }
-
-@utility hell-progress-bar {
-  @apply block h-full;
-  @apply bg-(--hell-color-primary);
-  @apply rounded-[inherit];
-  @apply [transition:width_var(--hell-duration-base)_var(--hell-ease-out)];
-}
-
-@utility hell-meter {
-  @apply block relative w-full overflow-hidden;
-  @apply h-1.5;
-  @apply bg-(--hell-color-bg-muted);
-  @apply rounded-full;
-}
-

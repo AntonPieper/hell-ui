@@ -56,11 +56,11 @@ import { HellButton, HELL_DIALOG_DIRECTIVES } from 'hell';
         the page (sidebars, topbar, etc.) stays interactive.
       </p>
       <div class="hd-example">
-        <div hellDialogScope class="relative h-64 rounded-md border border-(--hell-color-border) p-4 flex items-start gap-3">
+        <div hellDialogScope class="relative flex h-64 items-start gap-3 rounded-md border border-hell-border p-4">
           <button hellButton variant="primary" [hellDialogTrigger]="scoped">
             Open scoped dialog
           </button>
-          <p class="text-sm text-(--hell-color-text-muted) m-0">
+          <p class="m-0 text-sm text-hell-foreground-muted">
             The dialog overlay only covers this card. Try clicking outside it
             (or anywhere else on the page) — interaction is preserved.
           </p>

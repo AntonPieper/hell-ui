@@ -1,47 +1,58 @@
-/* Resizable splitter — pane / handle. */
+@layer components {
 
-@utility hell-resizable {
-  @apply flex w-full h-full min-h-0;
-  &[data-orientation="vertical"] { @apply flex-col; }
-}
+  /* Resizable splitter — pane / handle. */
 
-@utility hell-resizable-pane {
-  @apply min-w-0 min-h-0 overflow-auto flex-(--_hell-resizable-pane-flex,var(--hell-pane-flex,1)_1_0);
-
-  &[data-orientation="horizontal"] {
-    @apply min-w-(--_hell-resizable-pane-min-size,80px);
-  }
-
-  &[data-orientation="vertical"] {
-    @apply min-h-(--_hell-resizable-pane-min-size,80px);
-  }
-}
-
-@utility hell-resizable-handle {
-  @apply relative select-none;
-  @apply flex-[0_0_6px];
-  @apply bg-transparent;
-  @apply cursor-col-resize;
-
-  &::after {
-    @apply content-[''];
-    @apply absolute inset-0 m-auto;
-    @apply w-px;
-    @apply bg-(--hell-color-border);
-    @apply [transition:background-color_var(--hell-duration-fast)_var(--hell-ease-out)];
-  }
-  &:hover::after,
-  &[data-active="true"]::after {
-    @apply bg-(--hell-color-primary);
-    @apply w-[2px];
-  }
-  [data-orientation="vertical"] > & {
-    @apply basis-1.5;
-    @apply cursor-row-resize;
-    &::after {
-      @apply w-full;
-      @apply h-px;
+  .hell-resizable {
+      display: flex;
+      height: 100%;
+      min-height: calc(var(--spacing) * 0);
+      width: 100%;
+      &[data-orientation="vertical"] {
+        flex-direction: column;
+      }
     }
-  }
-}
 
+  .hell-resizable-pane {
+      min-height: calc(var(--spacing) * 0);
+      min-width: calc(var(--spacing) * 0);
+      flex: var(--_hell-resizable-pane-flex,var(--hell-pane-flex,1) 1 0);
+      overflow: auto;
+      &[data-orientation="horizontal"] {
+        min-width: var(--_hell-resizable-pane-min-size,80px);
+      }
+      &[data-orientation="vertical"] {
+        min-height: var(--_hell-resizable-pane-min-size,80px);
+      }
+    }
+
+  .hell-resizable-handle {
+      position: relative;
+      -webkit-user-select: none;
+      user-select: none;
+      flex: 0 0 6px;
+      background-color: transparent;
+      cursor: col-resize;
+      &::after {
+        content: '';
+        position: absolute;
+        inset: calc(var(--spacing) * 0);
+        margin: auto;
+        width: 1px;
+        background-color: var(--color-hell-border);
+        transition: background-color var(--hell-duration-fast) var(--ease-hell-out);
+      }
+      &:hover::after, &[data-active="true"]::after {
+        background-color: var(--color-hell-primary);
+        width: 2px;
+      }
+      [data-orientation="vertical"] > & {
+        flex-basis: calc(var(--spacing) * 1.5);
+        cursor: row-resize;
+        &::after {
+          width: 100%;
+          height: 1px;
+        }
+      }
+    }
+
+}

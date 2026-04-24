@@ -1,139 +1,167 @@
-/*
- * Slider — wraps NgpSlider primitives.
- *
- * Design:
- *   • Track is a soft pill on the muted surface.
- *   • Filled range uses primary, with a subtle inner shadow for depth.
- *   • Thumb is a larger, easily grabbable disc with a soft shadow and an
- *     animated focus ring. Scales on hover/active.
- */
+@layer components {
 
-@utility hell-slider {
-  @apply relative;
-  @apply inline-flex;
-  @apply items-center;
-  @apply w-full;
-  @apply h-6;
-  @apply touch-none;
-  @apply select-none;
-  @apply cursor-pointer;
+  /*
+   * Slider — wraps NgpSlider primitives.
+   *
+   * Design:
+   *   • Track is a soft pill on the muted surface.
+   *   • Filled range uses primary, with a subtle inner shadow for depth.
+   *   • Thumb is a larger, easily grabbable disc with a soft shadow and an
+   *     animated focus ring. Scales on hover/active.
+   */
 
-  &[data-disabled] {
-    @apply opacity-50;
-    @apply cursor-not-allowed;
-    @apply pointer-events-none;
-  }
-  &[data-orientation="vertical"] {
-    @apply w-6;
-    @apply h-[160px];
-    @apply flex-col;
-  }
-  &[data-size="sm"] { @apply h-5; }
-  &[data-size="lg"] { @apply h-7; }
-}
-
-@utility hell-slider-track {
-  @apply relative;
-  @apply flex-[1_1_auto];
-  @apply self-stretch;
-  /* Track fills the entire host so the whole region is clickable, while the
-     visible bar is rendered via ::before. */
-  @apply bg-transparent;
-
-  &::before {
-    @apply content-[''];
-    @apply absolute;
-    @apply inset-x-0;
-    @apply top-[50%];
-    @apply -translate-y-1/2;
-    @apply h-1.5;
-    @apply rounded-full;
-    @apply bg-(--hell-color-bg-muted);
-    @apply shadow-[inset_0_1px_1px_rgb(0_0_0_/_0.05)];
-    @apply pointer-events-none;
-  }
-
-  [data-orientation="vertical"] > & {
-    @apply self-stretch;
-    @apply w-[auto];
-    @apply flex-[1_1_auto];
-
-    &::before {
-      @apply inset-x-1/2;
-      @apply top-0;
-      @apply bottom-0;
-      @apply -translate-x-1/2;
-      @apply w-1.5;
-      @apply h-[auto];
+  .hell-slider {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      width: 100%;
+      height: calc(var(--spacing) * 6);
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      cursor: pointer;
+      &[data-disabled] {
+        opacity: 50%;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+      &[data-orientation="vertical"] {
+        width: calc(var(--spacing) * 6);
+        height: 160px;
+        flex-direction: column;
+      }
+      &[data-size="sm"] {
+        height: calc(var(--spacing) * 5);
+      }
+      &[data-size="lg"] {
+        height: calc(var(--spacing) * 7);
+      }
     }
-  }
-  [data-size="sm"] > &::before { @apply h-1; }
-  [data-size="lg"] > &::before { @apply h-2; }
-  [data-orientation="vertical"][data-size="sm"] > &::before { @apply w-1; @apply h-[auto]; }
-  [data-orientation="vertical"][data-size="lg"] > &::before { @apply w-2; @apply h-[auto]; }
+
+  .hell-slider-track {
+      position: relative;
+      flex: 1 1 auto;
+      align-self: stretch;
+      background-color: transparent;
+      &::before {
+        content: '';
+        position: absolute;
+        inset-inline: calc(var(--spacing) * 0);
+        top: 50%;
+        translate: 0 calc(calc(1 / 2 * 100%) * -1);
+        height: calc(var(--spacing) * 1.5);
+        border-radius: calc(infinity * 1px);
+        background-color: var(--color-hell-surface-muted);
+        box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.05);
+        pointer-events: none;
+      }
+      [data-orientation="vertical"] > & {
+        align-self: stretch;
+        width: auto;
+        flex: 1 1 auto;
+        &::before {
+          inset-inline: calc(1 / 2 * 100%);
+          top: calc(var(--spacing) * 0);
+          bottom: calc(var(--spacing) * 0);
+          translate: calc(calc(1 / 2 * 100%) * -1) 0;
+          width: calc(var(--spacing) * 1.5);
+          height: auto;
+        }
+      }
+      [data-size="sm"] > &::before {
+        height: calc(var(--spacing) * 1);
+      }
+      [data-size="lg"] > &::before {
+        height: calc(var(--spacing) * 2);
+      }
+      [data-orientation="vertical"][data-size="sm"] > &::before {
+        width: calc(var(--spacing) * 1);
+        height: auto;
+      }
+      [data-orientation="vertical"][data-size="lg"] > &::before {
+        width: calc(var(--spacing) * 2);
+        height: auto;
+      }
+    }
+
+  .hell-slider-range {
+      position: absolute;
+      top: 50%;
+      height: calc(var(--spacing) * 1.5);
+      translate: 0 calc(calc(1 / 2 * 100%) * -1);
+      border-radius: calc(infinity * 1px);
+      background-image: linear-gradient( 180deg, var(--color-hell-primary), var(--color-hell-primary) );
+      @supports (color: color-mix(in lab, red, red)) {
+        background-image: linear-gradient( 180deg, color-mix(in srgb, var(--color-hell-primary) 92%, white), var(--color-hell-primary) );
+      }
+      box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.08);
+      pointer-events: none;
+      [data-orientation="vertical"] > [ngpSliderTrack] > & {
+        inset-inline: calc(1 / 2 * 100%);
+        top: auto;
+        height: auto;
+        width: calc(var(--spacing) * 1.5);
+        translate: calc(calc(1 / 2 * 100%) * -1) 0;
+      }
+      [data-size="sm"] > [ngpSliderTrack] > & {
+        height: calc(var(--spacing) * 1);
+      }
+      [data-size="lg"] > [ngpSliderTrack] > & {
+        height: calc(var(--spacing) * 2);
+      }
+    }
+
+  .hell-slider-thumb {
+      position: absolute;
+      display: block;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background-color: var(--color-white);
+      --_hell-slider-thumb-border: var(--color-hell-primary);
+      --_hell-slider-thumb-shadow: 0 1px 2px rgb(0 0 0 / 0.15), 0 0 0 0 var(--color-hell-primary);
+      --_hell-slider-thumb-ring-hover: var(--color-hell-primary);
+      --_hell-slider-thumb-ring-press: var(--color-hell-primary);
+      --_hell-slider-thumb-x: calc(calc(1 / 2 * 100%) * -1);
+      --_hell-slider-thumb-y: 0;
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--_hell-slider-thumb-border);
+      @supports (color: color-mix(in lab, red, red)) {
+        --_hell-slider-thumb-border: color-mix(in srgb, var(--color-hell-primary) 35%, var(--color-hell-border));
+        --_hell-slider-thumb-shadow: 0 1px 2px rgb(0 0 0 / 0.15), 0 0 0 0 color-mix(in srgb, var(--color-hell-primary) 25%, transparent);
+        --_hell-slider-thumb-ring-hover: color-mix(in srgb, var(--color-hell-primary) 14%, transparent);
+        --_hell-slider-thumb-ring-press: color-mix(in srgb, var(--color-hell-primary) 18%, transparent);
+      }
+      box-shadow: var(--_hell-slider-thumb-shadow);
+      outline: none;
+      translate: var(--_hell-slider-thumb-x) var(--_hell-slider-thumb-y);
+      cursor: grab;
+      transition: scale var(--hell-duration-fast) var(--ease-hell-out), box-shadow var(--hell-duration-fast) var(--ease-hell-out), border-color var(--hell-duration-fast) var(--ease-hell-out);
+      [data-orientation="vertical"] > & {
+        --_hell-slider-thumb-y: calc(1 / 2 * 100%);
+      }
+      [data-size="sm"] > & {
+        width: 14px;
+        height: 14px;
+      }
+      [data-size="lg"] > & {
+        width: 22px;
+        height: 22px;
+      }
+      &[data-hover] {
+        scale: 1.08;
+        border-color: var(--color-hell-primary);
+        box-shadow: 0 2px 6px rgb(0 0 0 / 0.18), 0 0 0 6px var(--_hell-slider-thumb-ring-hover);
+      }
+      &[data-press] {
+        cursor: grabbing;
+        scale: 0.96;
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.18), 0 0 0 8px var(--_hell-slider-thumb-ring-press);
+      }
+      &[data-focus-visible] {
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.18), 0 0 0 4px var(--color-hell-focus-ring);
+      }
+    }
+
 }
-
-@utility hell-slider-range {
-  @apply absolute;
-  @apply top-[50%];
-  @apply h-1.5;
-  @apply -translate-y-1/2;
-  @apply rounded-full;
-  @apply bg-[linear-gradient(_180deg,_color-mix(in_srgb,_var(--hell-color-primary)_92%,_white),_var(--hell-color-primary)_)];
-  @apply shadow-[inset_0_-1px_0_rgb(0_0_0_/_0.08)];
-  @apply pointer-events-none;
-
-  [data-orientation="vertical"] > [ngpSliderTrack] > & {
-    @apply inset-x-1/2;
-    @apply top-[auto];
-    @apply h-[auto];
-    @apply w-1.5;
-    @apply -translate-x-1/2;
-  }
-  [data-size="sm"] > [ngpSliderTrack] > & { @apply h-1; }
-  [data-size="lg"] > [ngpSliderTrack] > & { @apply h-2; }
-}
-
-@utility hell-slider-thumb {
-  @apply absolute;
-  @apply block;
-  @apply w-[18px];
-  @apply h-[18px];
-  @apply rounded-[50%];
-  @apply bg-white;
-  @apply border border-[color-mix(in_srgb,_var(--hell-color-primary)_35%,_var(--hell-color-border))];
-  @apply shadow-[0_1px_2px_rgb(0_0_0_/_0.15),_0_0_0_0_color-mix(in_srgb,_var(--hell-color-primary)_25%,_transparent)];
-  @apply outline-none;
-  @apply -translate-x-1/2;
-  @apply cursor-grab;
-  @apply [transition:transform_var(--hell-duration-fast)_var(--hell-ease-out),_box-shadow_var(--hell-duration-fast)_var(--hell-ease-out),_border-color_var(--hell-duration-fast)_var(--hell-ease-out)];
-
-  [data-orientation="vertical"] > & {
-    @apply translate-y-1/2;
-  }
-  [data-size="sm"] > & { @apply w-[14px]; @apply h-[14px]; }
-  [data-size="lg"] > & { @apply w-[22px]; @apply h-[22px]; }
-
-  &[data-hover] {
-    @apply -translate-x-1/2 scale-[1.08];
-    @apply border-(--hell-color-primary);
-    @apply shadow-[0_2px_6px_rgb(0_0_0_/_0.18),_0_0_0_6px_color-mix(in_srgb,_var(--hell-color-primary)_14%,_transparent)];
-  }
-  [data-orientation="vertical"] > &[data-hover] {
-    @apply translate-y-1/2 scale-[1.08];
-  }
-
-  &[data-press] {
-    @apply cursor-grabbing;
-    @apply -translate-x-1/2 scale-[0.96];
-    @apply shadow-[0_1px_2px_rgb(0_0_0_/_0.18),_0_0_0_8px_color-mix(in_srgb,_var(--hell-color-primary)_18%,_transparent)];
-  }
-  [data-orientation="vertical"] > &[data-press] {
-    @apply translate-y-1/2 scale-[0.96];
-  }
-
-  &[data-focus-visible] {
-    @apply shadow-[0_1px_2px_rgb(0_0_0_/_0.18),_0_0_0_4px_var(--hell-color-focus-ring)];
-  }
-}
-

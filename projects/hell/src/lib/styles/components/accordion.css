@@ -1,107 +1,114 @@
-/* Accordion — NgpAccordionItem/Trigger/Content set [data-open] when expanded. */
+@layer components {
 
-@utility hell-accordion {
-  @apply flex flex-col overflow-clip;
-  @apply border border-(--hell-color-border);
-  @apply rounded-md;
-  @apply bg-(--hell-color-bg-elevated);
-}
+  /* Accordion — NgpAccordionItem/Trigger/Content set [data-open] when expanded. */
 
-@utility hell-accordion-item {
-  @apply [border-bottom:1px_solid_var(--hell-color-border)];
-  &:last-child {
-    @apply border-0;
-  }
-}
+  .hell-accordion {
+      display: flex;
+      flex-direction: column;
+      overflow: clip;
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--color-hell-border);
+      border-radius: var(--radius-md);
+      background-color: var(--color-hell-surface-elevated);
+    }
 
-@utility hell-accordion-trigger {
-  @apply flex w-full items-center justify-between text-start cursor-pointer font-semibold
-    gap-(--hell-space-4)
-    py-(--hell-space-4) px-(--hell-space-5)
-    text-[13px]
-    text-(--hell-color-text)
-    bg-transparent
-    border-0
-    font-[inherit]
-    [transition:background-color_var(--hell-duration-fast)_var(--hell-ease-out)];
+  .hell-accordion-item {
+      border-bottom: 1px solid var(--color-hell-border);
+      &:last-child {
+        border-style: solid;
+        border-width: 0px;
+      }
+    }
 
-  &[data-hover] {
-    @apply bg-(--hell-color-bg-subtle);
-  }
-  &[data-focus-visible] {
-    @apply [outline:2px_solid_var(--hell-color-focus-ring)]
-      -outline-offset-2;
-  }
+  .hell-accordion-trigger {
+      display: flex;
+      width: 100%;
+      cursor: pointer;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-hell-4);
+      border-style: solid;
+      border-width: 0px;
+      background-color: transparent;
+      padding-inline: var(--spacing-hell-5);
+      padding-block: var(--spacing-hell-4);
+      text-align: start;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-hell-foreground);
+      transition: background-color var(--hell-duration-fast) var(--ease-hell-out);
+      &[data-hover] {
+        background-color: var(--color-hell-surface-subtle);
+      }
+      &[data-focus-visible] {
+        outline: 2px solid var(--color-hell-focus-ring);
+        outline-offset: calc(2px * -1);
+      }
+      &::after {
+        height: calc(var(--spacing) * 3.5);
+        width: calc(var(--spacing) * 3.5);
+        flex: 0 0 auto;
+        background-color: currentcolor;
+        color: var(--color-hell-foreground-muted);
+        content: '';
+        -webkit-mask: var(--hell-icon-chevron-down) center/contain no-repeat;
+        mask: var(--hell-icon-chevron-down) center/contain no-repeat;
+        transition: transform var(--hell-duration-base) var(--ease-hell-out);
+      }
+      &[data-open]::after {
+        transform: rotate(180deg);
+      }
+      & > .hell-accordion-chevron {
+        transition: transform var(--hell-duration-base) var(--ease-hell-out);
+      }
+      &[data-open] > .hell-accordion-chevron {
+        transform: rotate(180deg);
+      }
+    }
 
-  /* Auto chevron — rendered via CSS so consumers don't have to add an icon. */
-  &::after {
-    @apply content-['']
-      flex-[0_0_auto]
-      w-3.5
-      h-3.5
-      bg-current
-      text-(--hell-color-text-muted)
-      [-webkit-mask:var(--hell-icon-chevron-down)_center/contain_no-repeat]
-      [mask:var(--hell-icon-chevron-down)_center/contain_no-repeat]
-      [transition:transform_var(--hell-duration-base)_var(--hell-ease-out)];
-  }
-  &[data-open]::after {
-    @apply transform-[rotate(180deg)];
-  }
+  .hell-accordion-chevron {
+      display: inline-block;
+      height: calc(var(--spacing) * 3.5);
+      width: calc(var(--spacing) * 3.5);
+      color: var(--color-hell-foreground-muted);
+    }
 
-  /* Legacy: explicit chevron span still rotates if consumers added one. */
-  & > .hell-accordion-chevron {
-    @apply [transition:transform_var(--hell-duration-base)_var(--hell-ease-out)];
-  }
-  &[data-open] > .hell-accordion-chevron {
-    @apply transform-[rotate(180deg)];
-  }
-}
+  /*
+   * Animation strategy:
+   *   • Default state: height 0, overflow hidden, fully rendered (display:block).
+   *   • Open state: height = var measured by ng-primitives.
+   *   • We override `[hidden]` so the element remains rendered with height 0
+   *     (instead of display:none) — this is what makes the *expand* animation
+   *     fire: a transition from `display:none → block` is non-animatable, but
+   *     `height: 0 → 200px` on an always-rendered element is.
+   *   • `interpolate-size: allow-keywords` lets us animate even when
+   *     ng-primitives sets `height: auto` instead of a pixel value.
+   */
 
-@utility hell-accordion-chevron {
-  @apply inline-block
-    w-3.5
-    h-3.5
-    text-(--hell-color-text-muted);
-}
+  .hell-accordion-content {
+      display: block;
+      height: calc(var(--spacing) * 0);
+      overflow: hidden;
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--color-hell-foreground-muted);
+      interpolate-size: allow-keywords;
+      transition: height var(--hell-duration-base) var(--ease-hell-out);
+      > * {
+        padding-inline: var(--spacing-hell-5);
+      }
+      > *:last-child {
+        padding-bottom: var(--spacing-hell-5);
+      }
+      &[data-open] {
+        height: var(--ngp-accordion-content-height,auto);
+      }
+      &[hidden] {
+        display: block;
+        height: calc(var(--spacing) * 0);
+      }
+    }
 
-/*
- * Animation strategy:
- *   • Default state: height 0, overflow hidden, fully rendered (display:block).
- *   • Open state: height = var measured by ng-primitives.
- *   • We override `[hidden]` so the element remains rendered with height 0
- *     (instead of display:none) — this is what makes the *expand* animation
- *     fire: a transition from `display:none → block` is non-animatable, but
- *     `height: 0 → 200px` on an always-rendered element is.
- *   • `interpolate-size: allow-keywords` lets us animate even when
- *     ng-primitives sets `height: auto` instead of a pixel value.
- */
-@utility hell-accordion-content {
-  @apply block
-     overflow-hidden
-     h-0
-     text-(--hell-color-text-muted)
-     text-[13px]
-     leading-[1.55]
-     [interpolate-size:allow-keywords]
-     [transition:height_var(--hell-duration-base)_var(--hell-ease-out)];
-
-  /* Inner padding lives on the children so collapsed height stays exactly 0. */
-  > * {
-    @apply px-(--hell-space-5);
-  }
-  > *:last-child {
-    @apply pb-(--hell-space-5);
-  }
-
-  /* Open height is set by ng-primitives via a measured custom property. */
-  &[data-open] {
-    @apply h-(--ngp-accordion-content-height,auto);
-  }
-
-  /* Keep rendered when ng-primitives sets `hidden`/`hidden="until-found"`,
-     so the next expand has a starting height to animate from. */
-  &[hidden] {
-    @apply block h-0;
-  }
 }

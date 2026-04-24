@@ -1,112 +1,129 @@
-/* Button — supports variants, sizes, icon-only, block.
-   Reacts to NgpButton data-* (hover, press, focus-visible, disabled). */
+@layer components {
 
-@utility hell-button {
-  @apply inline-flex items-center justify-center font-medium leading-none whitespace-nowrap select-none cursor-pointer
+  /* Button — supports variants, sizes, icon-only, block.
+     Reacts to NgpButton data-* (hover, press, focus-visible, disabled). */
 
-    [--_hell-btn-bg:var(--hell-color-bg-elevated)]
-    [--_hell-btn-fg:var(--hell-color-text)]
-    [--_hell-btn-border:var(--hell-color-border)]
-    [--_hell-btn-bg-hover:var(--hell-color-bg-muted)]
-    [--_hell-btn-bg-press:var(--hell-color-bg-muted)]
-    [--_hell-btn-shadow:var(--hell-shadow-xs)]
-    [--_hell-btn-height:var(--hell-control-height-md)]
-    [--_hell-btn-px:var(--hell-space-5)]
-    [--_hell-btn-radius:var(--hell-radius-md)]
-    [--_hell-btn-font:13px]
-    
-    gap-(--hell-space-2)
-    h-(--_hell-btn-height)
-    px-(--_hell-btn-px)
-    text-(length:--_hell-btn-font)
-    font-[inherit]
-    text-(--_hell-btn-fg)
-    bg-(--_hell-btn-bg)
-    border border-(--_hell-btn-border)
-    rounded-(--_hell-btn-radius)
-    shadow-(--_hell-btn-shadow)
-    [transition:background-color_var(--hell-duration-fast)_var(--hell-ease-out),border-color_var(--hell-duration-fast)_var(--hell-ease-out),color_var(--hell-duration-fast)_var(--hell-ease-out),box-shadow_var(--hell-duration-fast)_var(--hell-ease-out)];
+  .hell-button {
+      display: inline-flex;
+      height: var(--_hell-btn-height);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-hell-2);
+      border-radius: var(--_hell-btn-radius);
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--_hell-btn-border);
+      background-color: var(--_hell-btn-bg);
+      padding-inline: var(--_hell-btn-px);
+      font-family: inherit;
+      font-size: var(--_hell-btn-font);
+      line-height: 1;
+      font-weight: var(--font-weight-medium);
+      white-space: nowrap;
+      color: var(--_hell-btn-fg);
+      box-shadow: var(--_hell-btn-shadow);
+      -webkit-user-select: none;
+      user-select: none;
+      --_hell-btn-bg-hover: var(--color-hell-surface-muted);
+      --_hell-btn-bg-press: var(--color-hell-surface-muted);
+      --_hell-btn-bg: var(--color-hell-surface-elevated);
+      --_hell-btn-border: var(--color-hell-border);
+      --_hell-btn-fg: var(--color-hell-foreground);
+      --_hell-btn-font: 13px;
+      --_hell-btn-height: var(--spacing-hell-control-md);
+      --_hell-btn-px: var(--spacing-hell-5);
+      --_hell-btn-radius: var(--radius-hell-md);
+      --_hell-btn-shadow: var(--shadow-hell-xs);
+      transition: background-color var(--hell-duration-fast) var(--ease-hell-out),border-color var(--hell-duration-fast) var(--ease-hell-out),color var(--hell-duration-fast) var(--ease-hell-out),box-shadow var(--hell-duration-fast) var(--ease-hell-out);
+      &[data-hover] {
+        background-color: var(--_hell-btn-bg-hover);
+      }
+      &[data-press] {
+        background-color: var(--_hell-btn-bg-press);
+      }
+      &[data-focus-visible] {
+        outline: 2px solid var(--color-hell-focus-ring);
+        outline-offset: 1px;
+      }
+      &[data-disabled] {
+        cursor: not-allowed;
+        opacity: 0.55;
+        box-shadow: none;
+      }
+      &[data-variant="primary"] {
+        --_hell-btn-bg-hover: var(--color-hell-primary-hover);
+        --_hell-btn-bg-press: var(--color-hell-primary-active);
+        --_hell-btn-bg: var(--color-hell-primary);
+        --_hell-btn-border: var(--color-hell-primary);
+        --_hell-btn-fg: var(--color-hell-primary-foreground);
+      }
+      &[data-variant="soft"] {
+        --_hell-btn-bg-hover: var(--color-hell-surface-muted);
+        --_hell-btn-bg: var(--color-hell-primary-soft);
+        --_hell-btn-border: transparent;
+        --_hell-btn-fg: var(--color-hell-primary-soft-foreground);
+        --_hell-btn-shadow: none;
+      }
+      &[data-variant="ghost"] {
+        --_hell-btn-bg-hover: var(--color-hell-surface-muted);
+        --_hell-btn-bg: transparent;
+        --_hell-btn-border: transparent;
+        --_hell-btn-fg: var(--color-hell-foreground);
+        --_hell-btn-shadow: none;
+      }
+      &[data-variant="link"] {
+        height: auto;
+        padding: calc(var(--spacing) * 0);
+        text-decoration-line: underline;
+        text-underline-offset: 3px;
+        --_hell-btn-bg-hover: transparent;
+        --_hell-btn-bg: transparent;
+        --_hell-btn-border: transparent;
+        --_hell-btn-fg: var(--color-hell-primary);
+        --_hell-btn-shadow: none;
+      }
+      &[data-variant="danger"] {
+        --_hell-btn-bg-hover: var(--color-hell-danger-hover);
+        --_hell-btn-bg-press: var(--color-hell-danger-active);
+        --_hell-btn-bg: var(--color-hell-danger);
+        --_hell-btn-border: var(--color-hell-danger);
+        --_hell-btn-fg: var(--color-hell-foreground-inverse);
+      }
+      &[data-variant="success"] {
+        --_hell-btn-bg-hover: var(--color-hell-success-hover);
+        --_hell-btn-bg-press: var(--color-hell-success-active);
+        --_hell-btn-bg: var(--color-hell-success);
+        --_hell-btn-border: var(--color-hell-success);
+        --_hell-btn-fg: var(--color-hell-foreground-inverse);
+      }
+      &[data-size="xs"] {
+        --_hell-btn-font: 12px;
+        --_hell-btn-height: var(--spacing-hell-control-xs);
+        --_hell-btn-px: var(--spacing-hell-3);
+      }
+      &[data-size="sm"] {
+        --_hell-btn-font: 13px;
+        --_hell-btn-height: var(--spacing-hell-control-sm);
+        --_hell-btn-px: var(--spacing-hell-4);
+      }
+      &[data-size="lg"] {
+        --_hell-btn-font: 14px;
+        --_hell-btn-height: var(--spacing-hell-control-lg);
+        --_hell-btn-px: var(--spacing-hell-6);
+      }
+      &[data-size="xl"] {
+        --_hell-btn-font: 15px;
+        --_hell-btn-height: var(--spacing-hell-control-xl);
+        --_hell-btn-px: var(--spacing-hell-7);
+      }
+      &[data-icon-only] {
+        width: var(--_hell-btn-height);
+        padding-inline: calc(var(--spacing) * 0);
+      }
+      &[data-block] {
+        width: 100%;
+      }
+    }
 
-  &[data-hover] { @apply bg-(--_hell-btn-bg-hover); }
-  &[data-press] { @apply bg-(--_hell-btn-bg-press); }
-  &[data-focus-visible] {
-    @apply [outline:2px_solid_var(--hell-color-focus-ring)] outline-offset-1;
-  }
-  &[data-disabled] {
-    @apply cursor-not-allowed opacity-[0.55] shadow-none;
-  }
-
-  /* Variants */
-  &[data-variant="primary"] {
-    @apply [--_hell-btn-bg:var(--hell-color-primary)]
-      [--_hell-btn-fg:var(--hell-color-primary-fg)]
-      [--_hell-btn-border:var(--hell-color-primary)]
-      [--_hell-btn-bg-hover:var(--hell-color-primary-hover)]
-      [--_hell-btn-bg-press:var(--hell-color-primary-active)];
-  }
-  &[data-variant="soft"] {
-    @apply [--_hell-btn-bg:var(--hell-color-primary-soft)]
-      [--_hell-btn-fg:var(--hell-color-primary-soft-fg)]
-      [--_hell-btn-border:transparent]
-      [--_hell-btn-bg-hover:var(--hell-color-bg-muted)]
-      [--_hell-btn-shadow:none];
-  }
-  &[data-variant="ghost"] {
-    @apply [--_hell-btn-bg:transparent]
-      [--_hell-btn-fg:var(--hell-color-text)]
-      [--_hell-btn-border:transparent]
-      [--_hell-btn-bg-hover:var(--hell-color-bg-muted)]
-      [--_hell-btn-shadow:none];
-  }
-  &[data-variant="link"] {
-    @apply [--_hell-btn-bg:transparent]
-      [--_hell-btn-fg:var(--hell-color-primary)]
-      [--_hell-btn-border:transparent]
-      [--_hell-btn-bg-hover:transparent]
-      [--_hell-btn-shadow:none]
-      h-auto p-0 underline
-      underline-offset-[3px];
-  }
-  &[data-variant="danger"] {
-    @apply [--_hell-btn-bg:var(--hell-color-danger)]
-      [--_hell-btn-fg:var(--hell-color-text-inverse)]
-      [--_hell-btn-border:var(--hell-color-danger)]
-      [--_hell-btn-bg-hover:var(--hell-color-danger-hover)]
-      [--_hell-btn-bg-press:var(--hell-color-danger-active)];
-  }
-  &[data-variant="success"] {
-    @apply [--_hell-btn-bg:var(--hell-color-success)]
-      [--_hell-btn-fg:var(--hell-color-text-inverse)]
-      [--_hell-btn-border:var(--hell-color-success)]
-      [--_hell-btn-bg-hover:var(--hell-color-success-hover)]
-      [--_hell-btn-bg-press:var(--hell-color-success-active)];
-  }
-
-  /* Sizes */
-  &[data-size="xs"] {
-    @apply [--_hell-btn-height:var(--hell-control-height-xs)]
-      [--_hell-btn-px:var(--hell-space-3)]
-      [--_hell-btn-font:12px];
-  }
-  &[data-size="sm"] {
-    @apply [--_hell-btn-height:var(--hell-control-height-sm)]
-      [--_hell-btn-px:var(--hell-space-4)]
-      [--_hell-btn-font:13px];
-  }
-  &[data-size="lg"] {
-    @apply [--_hell-btn-height:var(--hell-control-height-lg)]
-      [--_hell-btn-px:var(--hell-space-6)]
-      [--_hell-btn-font:14px];
-  }
-  &[data-size="xl"] {
-    @apply [--_hell-btn-height:var(--hell-control-height-xl)]
-      [--_hell-btn-px:var(--hell-space-7)]
-      [--_hell-btn-font:15px];
-  }
-
-  &[data-icon-only] {
-    @apply px-0 w-(--_hell-btn-height);
-  }
-  &[data-block] { @apply w-full; }
 }
-

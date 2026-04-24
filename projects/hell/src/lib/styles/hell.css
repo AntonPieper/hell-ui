@@ -7,8 +7,8 @@
  *
  * Tokens + design system base are declared in tokens.css.
  * Component classes are split per-component under ./components/.
- * Each component file registers Tailwind v4 `@utility` rules using `@apply`
- * classes plus CSS variables and data-attribute selectors for headless state.
+ * Each component file now ships semantic selectors in `@layer components`
+ * using native CSS declarations plus Tailwind theme variables.
  */
 
 @import "./tokens.css";

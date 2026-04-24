@@ -1,34 +1,55 @@
-/* Card — surface container with header / body / footer slots. */
+@layer components {
 
-@utility hell-card {
-  @apply flex flex-col overflow-clip
-    bg-(--hell-color-bg-elevated)
-    border border-(--hell-color-border)
-    rounded-lg
-    shadow-(--hell-shadow-xs);
+  /* Card — surface container with header / body / footer slots. */
 
-  &[data-elevation="0"] { @apply shadow-none; }
-  &[data-elevation="2"] { @apply shadow-(--hell-shadow-md); }
-  &[data-elevation="3"] { @apply shadow-(--hell-shadow-lg); }
+  .hell-card {
+      display: flex;
+      flex-direction: column;
+      overflow: clip;
+      border-radius: var(--radius-lg);
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--color-hell-border);
+      background-color: var(--color-hell-surface-elevated);
+      box-shadow: var(--shadow-hell-xs);
+      &[data-elevation="0"] {
+        box-shadow: none;
+      }
+      &[data-elevation="2"] {
+        box-shadow: var(--shadow-hell-md);
+      }
+      &[data-elevation="3"] {
+        box-shadow: var(--shadow-hell-lg);
+      }
+    }
+
+  .hell-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-hell-4);
+      padding-inline: var(--spacing-hell-6);
+      padding-block: var(--spacing-hell-5);
+      font-size: var(--text-sm);
+      line-height: var(--text-sm--line-height);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-hell-foreground);
+      border-bottom: 1px solid var(--color-hell-border);
+    }
+
+  .hell-card-body {
+      min-height: calc(var(--spacing) * 0);
+      flex: auto;
+      padding: var(--spacing-hell-6);
+    }
+
+  .hell-card-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-hell-3);
+      padding-inline: var(--spacing-hell-6);
+      padding-block: var(--spacing-hell-4);
+      border-top: 1px solid var(--color-hell-border);
+    }
+
 }
-
-@utility hell-card-header {
-  @apply flex items-center justify-between font-semibold
-    gap-(--hell-space-4)
-    py-(--hell-space-5) px-(--hell-space-6)
-    [border-bottom:1px_solid_var(--hell-color-border)]
-    text-sm
-    text-(--hell-color-text);
-}
-
-@utility hell-card-body {
-  @apply flex-auto min-h-0 p-(--hell-space-6);
-}
-
-@utility hell-card-footer {
-  @apply flex justify-end
-    gap-(--hell-space-3)
-    py-(--hell-space-4) px-(--hell-space-6)
-    [border-top:1px_solid_var(--hell-color-border)];
-}
-

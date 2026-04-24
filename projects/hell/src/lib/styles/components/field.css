@@ -1,22 +1,35 @@
-/* Field — form-field shell with label, description, error. */
+@layer components {
 
-@utility hell-field {
-  @apply flex flex-col min-w-0;
-  @apply gap-(--hell-space-2);
-}
-@utility hell-field-label {
-  @apply inline-flex items-center font-semibold;
-  @apply gap-(--hell-space-2);
-  @apply text-xs;
-  @apply text-(--hell-color-text);
-  @apply tracking-[0.01em];
-}
-@utility hell-field-description {
-  @apply text-xs;
-  @apply text-(--hell-color-text-muted);
-}
-@utility hell-field-error {
-  @apply text-xs;
-  @apply text-(--hell-color-danger);
-}
+  /* Field — form-field shell with label, description, error. */
 
+  .hell-field {
+      display: flex;
+      min-width: calc(var(--spacing) * 0);
+      flex-direction: column;
+      gap: var(--spacing-hell-2);
+    }
+
+  .hell-field-label {
+      display: inline-flex;
+      align-items: center;
+      font-weight: var(--font-weight-semibold);
+      gap: var(--spacing-hell-2);
+      font-size: var(--text-xs);
+      line-height: var(--text-xs--line-height);
+      color: var(--color-hell-foreground);
+      letter-spacing: 0.01em;
+    }
+
+  .hell-field-description {
+      font-size: var(--text-xs);
+      line-height: var(--text-xs--line-height);
+      color: var(--color-hell-foreground-muted);
+    }
+
+  .hell-field-error {
+      font-size: var(--text-xs);
+      line-height: var(--text-xs--line-height);
+      color: var(--color-hell-danger);
+    }
+
+}

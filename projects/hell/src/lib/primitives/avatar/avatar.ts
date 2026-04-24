@@ -6,7 +6,7 @@ import { HellSize } from '../../core/types';
  * Styled avatar with image + initials fallback.
  *
  * Sizes: xs | sm | md | lg | xl. Shape: round | square.
- * Override `--hell-color-bg` / `--_hell-av-size` on the host to retheme.
+ * Override `--color-hell-surface` / `--_hell-av-size` on the host to retheme.
  */
 @Component({
   selector: 'hell-avatar',

@@ -1,81 +1,103 @@
-/* Dialog — overlay, surface, and slot styles. */
+@layer components {
 
-@utility hell-dialog-overlay {
-  @apply fixed inset-0 flex items-center justify-center;
-  @apply bg-(--hell-color-overlay);
-  @apply backdrop-blur-[2px];
-  @apply p-(--hell-space-6);
-  @apply z-[1000];
-  @apply animate-[hell-fade-in_var(--hell-duration-base)_var(--hell-ease-out)];
-  &[data-exit] {
-    @apply animate-[hell-fade-out_var(--hell-duration-base)_var(--hell-ease-out)];
-  }
+  /* Dialog — overlay, surface, and slot styles. */
 
-  /* Scoped overlay — constrained to the bounds reported by the nearest
-     [hellDialogScope] directive, leaving the rest of the app interactive. */
-  &[data-scoped="true"] {
-    @apply fixed;
-    @apply inset-auto;
-    @apply top-(--hell-dialog-scope-y,0);
-    @apply left-(--hell-dialog-scope-x,0);
-    @apply w-(--hell-dialog-scope-w,100vw);
-    @apply h-(--hell-dialog-scope-h,100vh);
-  }
-}
+  .hell-dialog-overlay {
+      position: fixed;
+      inset: calc(var(--spacing) * 0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--color-hell-overlay);
+      -webkit-backdrop-filter: blur(2px);
+      backdrop-filter: blur(2px);
+      padding: var(--spacing-hell-6);
+      z-index: 1000;
+      animation: hell-fade-in var(--hell-duration-base) var(--ease-hell-out);
+      &[data-exit] {
+        animation: hell-fade-out var(--hell-duration-base) var(--ease-hell-out);
+      }
+      &[data-scoped="true"] {
+        position: fixed;
+        inset: auto;
+        top: var(--hell-dialog-scope-y,0);
+        left: var(--hell-dialog-scope-x,0);
+        width: var(--hell-dialog-scope-w,100vw);
+        height: var(--hell-dialog-scope-h,100vh);
+      }
+    }
 
-@utility hell-dialog {
-  @apply flex flex-col w-full;
-  @apply bg-(--hell-color-bg-elevated);
-  @apply border border-(--hell-color-border);
-  @apply rounded-lg;
-  @apply shadow-(--hell-shadow-overlay);
-  @apply max-w-[480px];
-  @apply max-h-[90vh];
-  @apply outline-none;
-  @apply animate-[hell-dialog-in_var(--hell-duration-base)_var(--hell-ease-out)];
+  .hell-dialog {
+      display: flex;
+      width: 100%;
+      flex-direction: column;
+      background-color: var(--color-hell-surface-elevated);
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--color-hell-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-hell-overlay);
+      max-width: 480px;
+      max-height: 90vh;
+      outline: none;
+      animation: hell-dialog-in var(--hell-duration-base) var(--ease-hell-out);
+      &[data-size="sm"] {
+        max-width: 380px;
+      }
+      &[data-size="lg"] {
+        max-width: 720px;
+      }
+      &[data-size="xl"] {
+        max-width: 960px;
+      }
+    }
 
-  &[data-size="sm"] { @apply max-w-[380px]; }
-  &[data-size="lg"] { @apply max-w-[720px]; }
-  &[data-size="xl"] { @apply max-w-[960px]; }
-}
+  .hell-dialog-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--spacing-hell-4);
+      padding-inline: var(--spacing-hell-6);
+      padding-block: var(--spacing-hell-5);
+      border-bottom: 1px solid var(--color-hell-border);
+    }
 
-@utility hell-dialog-header {
-  @apply flex items-start justify-between;
-  @apply gap-(--hell-space-4);
-  @apply py-(--hell-space-5) px-(--hell-space-6);
-  @apply [border-bottom:1px_solid_var(--hell-color-border)];
-}
+  .hell-dialog-title {
+      margin: calc(var(--spacing) * 0);
+      font-weight: var(--font-weight-semibold);
+      font-size: 15px;
+      color: var(--color-hell-foreground);
+    }
 
-@utility hell-dialog-title {
-  @apply font-semibold m-0;
-  @apply text-[15px];
-  @apply text-(--hell-color-text);
-}
+  .hell-dialog-description {
+      font-size: 13px;
+      color: var(--color-hell-foreground-muted);
+      margin: 4px 0 0;
+    }
 
-@utility hell-dialog-description {
-  @apply text-[13px];
-  @apply text-(--hell-color-text-muted);
-  @apply [margin:4px_0_0];
-}
+  .hell-dialog-body {
+      overflow: auto;
+      padding: var(--spacing-hell-6);
+      font-size: 13px;
+      color: var(--color-hell-foreground);
+    }
 
-@utility hell-dialog-body {
-  @apply overflow-auto;
-  @apply p-(--hell-space-6);
-  @apply text-[13px];
-  @apply text-(--hell-color-text);
-}
+  .hell-dialog-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-hell-3);
+      padding-inline: var(--spacing-hell-6);
+      padding-block: var(--spacing-hell-4);
+      border-top: 1px solid var(--color-hell-border);
+    }
 
-@utility hell-dialog-footer {
-  @apply flex justify-end;
-  @apply gap-(--hell-space-3);
-  @apply py-(--hell-space-4) px-(--hell-space-6);
-  @apply [border-top:1px_solid_var(--hell-color-border)];
 }
 
 @keyframes hell-fade-in { from { opacity: 0 } to { opacity: 1 } }
+
 @keyframes hell-fade-out { from { opacity: 1 } to { opacity: 0 } }
+
 @keyframes hell-dialog-in {
   from { opacity: 0; transform: translateY(-8px) scale(0.98); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-

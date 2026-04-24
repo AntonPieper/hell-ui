@@ -14,10 +14,10 @@ import { HellIcon } from 'hell';
 
       <h2>Example</h2>
       <div class="hd-example flex items-center gap-4 text-base">
-        <span class="text-[var(--hell-color-success)]"><hell-icon name="faSolidCircleCheck" /></span>
-        <span class="text-[var(--hell-color-info)]"><hell-icon name="faSolidCircleInfo" /></span>
-        <span class="text-[var(--hell-color-warning)]"><hell-icon name="faSolidTriangleExclamation" /></span>
-        <span class="text-[var(--hell-color-danger)]"><hell-icon name="faSolidXmark" /></span>
+        <span class="text-hell-success"><hell-icon name="faSolidCircleCheck" /></span>
+        <span class="text-hell-info"><hell-icon name="faSolidCircleInfo" /></span>
+        <span class="text-hell-warning"><hell-icon name="faSolidTriangleExclamation" /></span>
+        <span class="text-hell-danger"><hell-icon name="faSolidXmark" /></span>
       </div>
 
       <h2>Sizes</h2>
@@ -29,7 +29,7 @@ import { HellIcon } from 'hell';
       </div>
 
       <h2>Inherits text colour and size</h2>
-      <p class="text-[1.25rem] text-[var(--hell-color-primary)]">
+      <p class="text-hell-primary text-[1.25rem]">
         I am text with an icon
         <hell-icon name="faSolidArrowDown" />
         — both share the parent's font-size and colour.

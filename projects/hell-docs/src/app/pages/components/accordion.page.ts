@@ -28,7 +28,7 @@ import { HELL_ACCORDION_DIRECTIVES } from 'hell';
             <button hellAccordionTrigger type="button">Theming</button>
             <div hellAccordionContent>
               <div>
-                Override CSS custom properties under <code>--hell-color-*</code>
+                Override CSS custom properties under <code>--color-hell-*</code>
                 to retheme the entire library.
               </div>
             </div>

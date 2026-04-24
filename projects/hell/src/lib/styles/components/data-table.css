@@ -1,100 +1,122 @@
-/* Data table — toolbar / table / footer. */
+@layer components {
 
-@utility hell-table-shell {
-  @apply flex flex-col min-w-0 overflow-clip;
-  @apply bg-(--hell-color-bg-elevated);
-  @apply border border-(--hell-color-border);
-  @apply rounded-md;
+  /* Data table — toolbar / table / footer. */
+
+  .hell-table-shell {
+      display: flex;
+      min-width: calc(var(--spacing) * 0);
+      flex-direction: column;
+      overflow: clip;
+      background-color: var(--color-hell-surface-elevated);
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--color-hell-border);
+      border-radius: var(--radius-md);
+    }
+
+  .hell-table-toolbar {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-hell-3);
+      padding-inline: var(--spacing-hell-4);
+      padding-block: var(--spacing-hell-3);
+      border-bottom: 1px solid var(--color-hell-border);
+      background-color: var(--color-hell-surface-subtle);
+    }
+
+  .hell-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      color: var(--color-hell-foreground);
+      & th, & td {
+        text-align: start;
+        vertical-align: middle;
+        padding-inline: calc(var(--spacing) * 3);
+        padding-block: calc(var(--spacing) * 2);
+        border-bottom: 1px solid var(--color-hell-border);
+      }
+      & th {
+        position: sticky;
+        top: calc(var(--spacing) * 0);
+        z-index: 1;
+        font-weight: var(--font-weight-semibold);
+        white-space: nowrap;
+        -webkit-user-select: none;
+        user-select: none;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--color-hell-foreground-muted);
+        background-color: var(--color-hell-surface-subtle);
+        cursor: default;
+      }
+      & th[data-sortable="true"], & th[aria-sort] {
+        cursor: pointer;
+      }
+      & th[aria-sort]::after {
+        content: '';
+        display: inline-block;
+        width: calc(var(--spacing) * 3);
+        height: calc(var(--spacing) * 3);
+        margin-inline-start: calc(var(--spacing) * 1.5);
+        vertical-align: -2px;
+        background-color: currentcolor;
+        color: var(--color-hell-foreground-subtle);
+        -webkit-mask: var(--hell-icon-chevron-up-down) center / contain no-repeat;
+        mask: var(--hell-icon-chevron-up-down) center / contain no-repeat;
+        transition: transform var(--hell-duration-base) var(--ease-hell-out), color var(--hell-duration-fast) var(--ease-hell-out), -webkit-mask-image var(--hell-duration-fast) var(--ease-hell-out);
+      }
+      & th[aria-sort="ascending"]::after, & th[data-sort="asc"]::after {
+        color: var(--color-hell-primary);
+        -webkit-mask-image: var(--hell-icon-chevron-up);
+        mask-image: var(--hell-icon-chevron-up);
+      }
+      & th[aria-sort="descending"]::after, & th[data-sort="desc"]::after {
+        color: var(--color-hell-primary);
+        -webkit-mask-image: var(--hell-icon-chevron-down);
+        mask-image: var(--hell-icon-chevron-down);
+      }
+      & tbody tr {
+        transition: background-color var(--hell-duration-fast) var(--ease-hell-out);
+      }
+      & tbody tr:hover {
+        background-color: var(--color-hell-surface-subtle);
+      }
+      & tbody tr[data-selected="true"] {
+        background-color: var(--color-hell-primary-soft);
+      }
+    }
+
+  .hell-table-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-hell-4);
+      padding-inline: var(--spacing-hell-4);
+      padding-block: var(--spacing-hell-3);
+      border-top: 1px solid var(--color-hell-border);
+      font-size: var(--text-xs);
+      line-height: var(--text-xs--line-height);
+      color: var(--color-hell-foreground-muted);
+      background-color: var(--color-hell-surface-subtle);
+    }
+
+  .hell-table-pagesize {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-hell-2);
+      font-size: var(--text-xs);
+      line-height: var(--text-xs--line-height);
+      color: var(--color-hell-foreground-muted);
+      > select.hell-input {
+        width: auto;
+        height: var(--spacing-hell-control-sm);
+        padding-inline: calc(var(--spacing) * 2);
+        padding-block: calc(var(--spacing) * 0);
+        font-size: var(--text-xs);
+        line-height: var(--text-xs--line-height);
+      }
+    }
+
 }
-
-@utility hell-table-toolbar {
-  @apply flex items-center;
-  @apply gap-(--hell-space-3);
-  @apply py-(--hell-space-3) px-(--hell-space-4);
-  @apply [border-bottom:1px_solid_var(--hell-color-border)];
-  @apply bg-(--hell-color-bg-subtle);
-}
-
-@utility hell-table {
-  @apply w-full;
-  @apply border-collapse;
-  @apply text-[13px];
-  @apply text-(--hell-color-text);
-
-  & th,
-  & td {
-    @apply text-start align-middle;
-    @apply py-2 px-3;
-    @apply [border-bottom:1px_solid_var(--hell-color-border)];
-  }
-  & th {
-    @apply sticky top-0 z-[1] font-semibold whitespace-nowrap select-none;
-    @apply text-[11px];
-    @apply uppercase;
-    @apply tracking-[0.06em];
-    @apply text-(--hell-color-text-muted);
-    @apply bg-(--hell-color-bg-subtle);
-    @apply cursor-default;
-  }
-  & th[data-sortable="true"],
-  & th[aria-sort] { @apply cursor-pointer; }
-
-  /* Sort chevrons rendered via SVG masks so they tint with currentColor and
-     animate without an extra DOM node. */
-  & th[aria-sort]::after {
-    @apply content-[''];
-    @apply inline-block;
-    @apply w-3;
-    @apply h-3;
-    @apply ms-1.5;
-    @apply [vertical-align:-2px];
-    @apply bg-current;
-    @apply text-(--hell-color-text-subtle);
-    @apply [-webkit-mask:var(--hell-icon-chevron-up-down)_center_/_contain_no-repeat];
-    @apply [mask:var(--hell-icon-chevron-up-down)_center_/_contain_no-repeat];
-    @apply [transition:transform_var(--hell-duration-base)_var(--hell-ease-out),_color_var(--hell-duration-fast)_var(--hell-ease-out),_-webkit-mask-image_var(--hell-duration-fast)_var(--hell-ease-out)];
-  }
-  & th[aria-sort="ascending"]::after,
-  & th[data-sort="asc"]::after {
-    @apply text-(--hell-color-primary);
-    @apply [-webkit-mask-image:var(--hell-icon-chevron-up)];
-    @apply [mask-image:var(--hell-icon-chevron-up)];
-  }
-  & th[aria-sort="descending"]::after,
-  & th[data-sort="desc"]::after {
-    @apply text-(--hell-color-primary);
-    @apply [-webkit-mask-image:var(--hell-icon-chevron-down)];
-    @apply [mask-image:var(--hell-icon-chevron-down)];
-  }
-  & tbody tr {
-    @apply [transition:background-color_var(--hell-duration-fast)_var(--hell-ease-out)];
-  }
-  & tbody tr:hover { @apply bg-(--hell-color-bg-subtle); }
-  & tbody tr[data-selected="true"] { @apply bg-(--hell-color-primary-soft); }
-}
-
-@utility hell-table-footer {
-  @apply flex items-center justify-between;
-  @apply gap-(--hell-space-4);
-  @apply py-(--hell-space-3) px-(--hell-space-4);
-  @apply [border-top:1px_solid_var(--hell-color-border)];
-  @apply text-xs;
-  @apply text-(--hell-color-text-muted);
-  @apply bg-(--hell-color-bg-subtle);
-}
-
-@utility hell-table-pagesize {
-  @apply inline-flex items-center;
-  @apply gap-(--hell-space-2);
-  @apply text-xs;
-  @apply text-(--hell-color-text-muted);
-
-  > select.hell-input {
-    @apply w-[auto];
-    @apply h-(--hell-control-height-sm);
-    @apply px-2;
-    @apply py-0;
-    @apply text-xs;
-  }
-}
-

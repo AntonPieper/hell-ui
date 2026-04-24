@@ -1,59 +1,73 @@
-/* Tag, Badge, Kbd. */
+@layer components {
 
-@utility hell-tag {
-  @apply inline-flex items-center font-semibold;
-  @apply gap-1;
-  @apply py-[2px] px-2;
-  @apply text-[11px];
-  @apply tracking-[0.02em];
-  @apply text-(--hell-color-text-muted);
-  @apply bg-(--hell-color-bg-muted);
-  @apply rounded-full;
+  /* Tag, Badge, Kbd. */
 
-  &[data-variant="primary"] {
-    @apply bg-(--hell-color-primary-soft);
-    @apply text-(--hell-color-primary);
-  }
-  &[data-variant="success"] {
-    @apply bg-(--hell-color-success-soft);
-    @apply text-(--hell-color-success-strong);
-  }
-  &[data-variant="info"] {
-    @apply bg-(--hell-color-info-soft);
-    @apply text-(--hell-color-info-strong);
-  }
-  &[data-variant="danger"] {
-    @apply bg-(--hell-color-danger-soft);
-    @apply text-(--hell-color-danger-strong);
-  }
-  &[data-variant="warning"] {
-    @apply bg-(--hell-color-warning-soft);
-    @apply text-(--hell-color-warning-strong);
-  }
+  .hell-tag {
+      display: inline-flex;
+      align-items: center;
+      font-weight: var(--font-weight-semibold);
+      gap: calc(var(--spacing) * 1);
+      padding-inline: calc(var(--spacing) * 2);
+      padding-block: 2px;
+      font-size: 11px;
+      letter-spacing: 0.02em;
+      color: var(--color-hell-foreground-muted);
+      background-color: var(--color-hell-surface-muted);
+      border-radius: calc(infinity * 1px);
+      &[data-variant="primary"] {
+        background-color: var(--color-hell-primary-soft);
+        color: var(--color-hell-primary);
+      }
+      &[data-variant="success"] {
+        background-color: var(--color-hell-success-soft);
+        color: var(--color-hell-success-strong);
+      }
+      &[data-variant="info"] {
+        background-color: var(--color-hell-info-soft);
+        color: var(--color-hell-info-strong);
+      }
+      &[data-variant="danger"] {
+        background-color: var(--color-hell-danger-soft);
+        color: var(--color-hell-danger-strong);
+      }
+      &[data-variant="warning"] {
+        background-color: var(--color-hell-warning-soft);
+        color: var(--color-hell-warning-strong);
+      }
+    }
+
+  .hell-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: var(--font-weight-bold);
+      min-width: calc(var(--spacing) * 4);
+      height: calc(var(--spacing) * 4);
+      padding-inline: calc(var(--spacing) * 1);
+      padding-block: calc(var(--spacing) * 0);
+      font-size: 10px;
+      background-color: var(--color-hell-danger);
+      color: var(--color-white);
+      border-radius: calc(infinity * 1px);
+    }
+
+  .hell-kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding-inline: 5px;
+      padding-block: calc(var(--spacing) * 0);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-hell-foreground-muted);
+      background-color: var(--color-hell-surface-subtle);
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--color-hell-border);
+      border-bottom-width: 2px;
+      border-radius: 0.25rem;
+    }
+
 }
-
-@utility hell-badge {
-  @apply inline-flex items-center justify-center font-bold;
-  @apply min-w-4;
-  @apply h-4;
-  @apply py-0 px-1;
-  @apply text-[10px];
-  @apply bg-(--hell-color-danger);
-  @apply text-white;
-  @apply rounded-full;
-}
-
-@utility hell-kbd {
-  @apply inline-flex items-center justify-center;
-  @apply min-w-[18px];
-  @apply h-[18px];
-  @apply py-0 px-[5px];
-  @apply [font-family:var(--font-mono)];
-  @apply text-[11px];
-  @apply text-(--hell-color-text-muted);
-  @apply bg-(--hell-color-bg-subtle);
-  @apply border border-(--hell-color-border);
-  @apply [border-bottom-width:2px];
-  @apply rounded;
-}
-

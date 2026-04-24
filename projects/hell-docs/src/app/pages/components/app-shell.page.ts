@@ -20,7 +20,7 @@ import { HELL_APP_SHELL_DIRECTIVES, HellButton, HellIcon } from 'hell';
         <div
           hellAppShell
           #shell="hellAppShell"
-          class="h-96 overflow-hidden rounded-lg border border-(--hell-color-border)"
+          class="h-96 overflow-hidden rounded-lg border border-hell-border"
         >
           <header hellAppTopbar class="hd-surface-elevated">
             <button
@@ -64,7 +64,7 @@ import { HELL_APP_SHELL_DIRECTIVES, HellButton, HellIcon } from 'hell';
 
           <main hellAppContent>
             <h3 class="m-0 text-base font-semibold">Welcome back</h3>
-            <p class="mt-2 text-sm text-(--hell-color-text-muted)">
+            <p class="mt-2 text-sm text-hell-foreground-muted">
               Click the button on the left of the topbar to collapse the
               sidenav, the chevron next to “Activity” to hide the
               secondary panel. When hidden, click the rail to bring it
@@ -93,7 +93,7 @@ import { HELL_APP_SHELL_DIRECTIVES, HellButton, HellIcon } from 'hell';
               class="hell-secondary-rail"
             ></button>
             <div hellAppSecondaryBody class="p-4">
-              <h4 class="m-0 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-(--hell-color-text-subtle)">
+              <h4 class="m-0 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-hell-foreground-subtle">
                 <button
                   hellSecondaryToggle
                   type="button"
@@ -101,7 +101,7 @@ import { HELL_APP_SHELL_DIRECTIVES, HellButton, HellIcon } from 'hell';
                 ></button>
                 Activity
               </h4>
-              <ul class="mt-3 space-y-2 text-sm text-(--hell-color-text-muted)">
+              <ul class="mt-3 space-y-2 text-sm text-hell-foreground-muted">
                 <li>You opened <strong>Project Atlas</strong></li>
                 <li>3 deploys today</li>
                 <li>2 unread comments</li>

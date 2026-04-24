@@ -1,76 +1,84 @@
-/* Input + Textarea. */
+@layer components {
 
-@utility hell-input {
-  @apply inline-flex w-full;
+  /* Input + Textarea. */
 
-  @apply [--_hell-input-height:var(--hell-control-height-md)];
-  @apply [--_hell-input-px:var(--hell-space-4)];
-  @apply [--_hell-input-font:13px];
+  .hell-input {
+      display: inline-flex;
+      width: 100%;
+      --_hell-input-height: var(--spacing-hell-control-md);
+      --_hell-input-px: var(--spacing-hell-4);
+      --_hell-input-font: 13px;
+      height: var(--_hell-input-height);
+      padding-inline: var(--_hell-input-px);
+      color: var(--_hell-input-font);
+      font-family: inherit;
+      color: var(--color-hell-foreground);
+      background-color: var(--color-hell-surface-elevated);
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--color-hell-border);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: border-color var(--hell-duration-fast) var(--ease-hell-out), box-shadow var(--hell-duration-fast) var(--ease-hell-out);
+      &::placeholder {
+        color: var(--color-hell-foreground-subtle);
+      }
+      &[data-hover]:not([data-focus]) {
+        border-color: var(--color-hell-border-strong);
+      }
+      &[data-focus], &:focus {
+        border-color: var(--color-hell-border-focus);
+        box-shadow: 0 0 0 3px var(--color-hell-focus-ring);
+      }
+      &[data-disabled], &:disabled {
+        cursor: not-allowed;
+        background-color: var(--color-hell-surface-subtle);
+        color: var(--color-hell-foreground-muted);
+      }
+      &[aria-invalid="true"] {
+        border-color: var(--color-hell-danger);
+      }
+      &[data-size="sm"] {
+        --_hell-input-height: var(--spacing-hell-control-sm);
+        --_hell-input-px: var(--spacing-hell-3);
+        --_hell-input-font: 12px;
+      }
+      &[data-size="lg"] {
+        --_hell-input-height: var(--spacing-hell-control-lg);
+        --_hell-input-px: var(--spacing-hell-5);
+        --_hell-input-font: 14px;
+      }
+    }
 
-  @apply h-(--_hell-input-height);
-  @apply px-(--_hell-input-px);
-  @apply text-[var(--_hell-input-font)];
-  @apply font-[inherit];
-  @apply text-(--hell-color-text);
-  @apply bg-(--hell-color-bg-elevated);
-  @apply border border-(--hell-color-border);
-  @apply rounded-md;
-  @apply outline-none;
-  @apply [transition:border-color_var(--hell-duration-fast)_var(--hell-ease-out),_box-shadow_var(--hell-duration-fast)_var(--hell-ease-out)];
+  .hell-textarea {
+      width: 100%;
+      resize: vertical;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--color-hell-foreground);
+      background-color: var(--color-hell-surface-elevated);
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--color-hell-border);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: border-color var(--hell-duration-fast) var(--ease-hell-out), box-shadow var(--hell-duration-fast) var(--ease-hell-out);
+      padding-inline: var(--spacing-hell-4);
+      padding-block: var(--spacing-hell-3);
+      min-height: calc(var(--spacing-hell-control-md) * 2);
+      line-height: 1.5;
+      &::placeholder {
+        color: var(--color-hell-foreground-subtle);
+      }
+      &[data-focus], &:focus {
+        border-color: var(--color-hell-border-focus);
+        box-shadow: 0 0 0 3px var(--color-hell-focus-ring);
+      }
+      &[data-disabled], &:disabled {
+        cursor: not-allowed;
+        background-color: var(--color-hell-surface-subtle);
+        color: var(--color-hell-foreground-muted);
+      }
+    }
 
-  &::placeholder { @apply text-(--hell-color-text-subtle); }
-  &[data-hover]:not([data-focus]) { @apply border-(--hell-color-border-strong); }
-  &[data-focus],
-  &:focus {
-    @apply border-(--hell-color-border-focus);
-    @apply shadow-[0_0_0_3px_var(--hell-color-focus-ring)];
-  }
-  &[data-disabled],
-  &:disabled {
-    @apply cursor-not-allowed;
-    @apply bg-(--hell-color-bg-subtle);
-    @apply text-(--hell-color-text-muted);
-  }
-  &[aria-invalid="true"] { @apply border-(--hell-color-danger); }
-
-  &[data-size="sm"] {
-    @apply [--_hell-input-height:var(--hell-control-height-sm)];
-    @apply [--_hell-input-px:var(--hell-space-3)];
-    @apply [--_hell-input-font:12px];
-  }
-  &[data-size="lg"] {
-    @apply [--_hell-input-height:var(--hell-control-height-lg)];
-    @apply [--_hell-input-px:var(--hell-space-5)];
-    @apply [--_hell-input-font:14px];
-  }
 }
-
-@utility hell-textarea {
-  @apply w-full resize-y;
-  @apply text-[13px];
-  @apply font-[inherit];
-  @apply text-(--hell-color-text);
-  @apply bg-(--hell-color-bg-elevated);
-  @apply border border-(--hell-color-border);
-  @apply rounded-md;
-  @apply outline-none;
-  @apply [transition:border-color_var(--hell-duration-fast)_var(--hell-ease-out),_box-shadow_var(--hell-duration-fast)_var(--hell-ease-out)];
-  @apply px-(--hell-space-4);
-  @apply py-(--hell-space-3);
-  @apply min-h-[calc(var(--hell-control-height-md)_*_2)];
-  @apply leading-[1.5];
-
-  &::placeholder { @apply text-(--hell-color-text-subtle); }
-  &[data-focus],
-  &:focus {
-    @apply border-(--hell-color-border-focus);
-    @apply shadow-[0_0_0_3px_var(--hell-color-focus-ring)];
-  }
-  &[data-disabled],
-  &:disabled {
-    @apply cursor-not-allowed;
-    @apply bg-(--hell-color-bg-subtle);
-    @apply text-(--hell-color-text-muted);
-  }
-}
-

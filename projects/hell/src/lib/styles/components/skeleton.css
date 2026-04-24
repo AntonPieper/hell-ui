@@ -1,24 +1,39 @@
-/* Skeleton + Spinner — loading placeholders. */
+@layer components {
 
-@utility hell-skeleton {
-  @apply block min-h-3 [width:var(--_hell-skeleton-width,100%)] [height:var(--_hell-skeleton-height,14px)] rounded-sm;
-  @apply bg-[linear-gradient(_90deg,_var(--hell-color-bg-muted)_0%,_var(--hell-color-bg-subtle)_50%,_var(--hell-color-bg-muted)_100%_)];
-  @apply [background-size:200%_100%];
-  @apply animate-[hell-shimmer_1.5s_infinite_linear];
+  /* Skeleton + Spinner — loading placeholders. */
+
+  .hell-skeleton {
+      display: block;
+      height: var(--_hell-skeleton-height,14px);
+      min-height: calc(var(--spacing) * 3);
+      width: var(--_hell-skeleton-width,100%);
+      border-radius: var(--radius-sm);
+      background-image: linear-gradient( 90deg, var(--color-hell-surface-muted) 0%, var(--color-hell-surface-subtle) 50%, var(--color-hell-surface-muted) 100% );
+      background-size: 200% 100%;
+      animation: hell-shimmer 1.5s infinite linear;
+    }
+
 }
+
 @keyframes hell-shimmer {
   from { background-position: -200% 0; }
   to   { background-position: 200% 0; }
 }
 
-@utility hell-spinner {
-  @apply inline-block;
-  @apply w-4;
-  @apply h-4;
-  @apply border-2 border-current;
-  @apply border-t-transparent;
-  @apply rounded-[50%];
-  @apply animate-[hell-spin_0.7s_linear_infinite];
-}
-@keyframes hell-spin { to { transform: rotate(360deg); } }
+@layer components {
 
+  .hell-spinner {
+      display: inline-block;
+      width: calc(var(--spacing) * 4);
+      height: calc(var(--spacing) * 4);
+      border-style: solid;
+      border-width: 2px;
+      border-color: currentcolor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: hell-spin 0.7s linear infinite;
+    }
+
+}
+
+@keyframes hell-spin { to { transform: rotate(360deg); } }

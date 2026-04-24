@@ -5,39 +5,78 @@ import {
   booleanAttribute,
   computed,
   effect,
-  inject,
   input,
   signal,
   viewChild,
 } from '@angular/core';
 import { HellButton } from '../../primitives/button/button';
+import { HellIcon } from '../../primitives/icon/icon';
 import { HellSlider } from '../../primitives/slider/slider';
 
+interface SpeechRecognitionLike extends EventTarget {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  maxAlternatives: number;
+  start(track?: MediaStreamTrack): void;
+  stop(): void;
+  abort(): void;
+  onresult: ((e: any) => void) | null;
+  onerror: ((e: any) => void) | null;
+  onend: (() => void) | null;
+}
+
+interface SpeechRecognitionCtor { new (): SpeechRecognitionLike; }
+
+function getSpeechRecognition(): SpeechRecognitionCtor | null {
+  if (typeof window === 'undefined') return null;
+  const w = window as unknown as {
+    SpeechRecognition?: SpeechRecognitionCtor;
+    webkitSpeechRecognition?: SpeechRecognitionCtor;
+  };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+}
+
+/** True when this browser supports `SpeechRecognition` and `captureStream()`. */
+export function hellAudioSpeechSupported(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    getSpeechRecognition() !== null &&
+    typeof (HTMLMediaElement.prototype as any).captureStream === 'function'
+  );
+}
+
+const PLAYBACK_RATES = [1, 1.25, 1.5, 2, 0.75] as const;
+
 /**
- * Compact audio player with seek bar, play/pause, mute, volume slider and
- * download button. Lightweight (uses native `<audio>` underneath).
+ * Compact audio player with seek bar, play/pause, mute, volume slider,
+ * download button and an optional inline live-captions strip backed by the
+ * Web Speech API (Chromium-only). The captions toggle is hidden when the
+ * browser lacks `SpeechRecognition` + `HTMLMediaElement.captureStream()`.
  */
 @Component({
   selector: 'hell-audio-player',
-  imports: [HellButton, HellSlider],
+  imports: [HellButton, HellIcon, HellSlider],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '[class.hell-audio]': '!unstyled()',
-  },
+  host: { '[class.hell-audio]': '!unstyled()' },
   template: `
     <audio
       #audio
       [src]="src()"
       preload="metadata"
+      crossorigin="anonymous"
       (timeupdate)="onTime()"
       (loadedmetadata)="onMeta()"
-      (ended)="playing.set(false)"
+      (play)="onPlay()"
+      (pause)="onPause()"
+      (ended)="onEnded()"
+      (seeking)="onSeeking()"
     ></audio>
 
-    @if (resolvedTitle() || resolvedDate()) {
+    @if (title() || resolvedDate()) {
       <div class="hell-audio-meta">
-        @if (resolvedTitle()) {
-          <span class="hell-audio-title" [attr.title]="resolvedTitle()">{{ resolvedTitle() }}</span>
+        @if (title(); as t) {
+          <span class="hell-audio-title" [attr.title]="t">{{ t }}</span>
         }
         @if (resolvedDate()) {
           <span class="hell-audio-date">{{ resolvedDate() }}</span>
@@ -46,88 +85,164 @@ import { HellSlider } from '../../primitives/slider/slider';
     }
 
     <div class="hell-audio-controls">
-    <button
-      hellButton
-      variant="ghost"
-      [iconOnly]="true"
-      type="button"
-      [attr.aria-label]="playing() ? 'Pause' : 'Play'"
-      (click)="toggle()"
-    >
-      @if (playing()) {
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><rect x="4" y="3" width="3" height="10" rx="1"/><rect x="9" y="3" width="3" height="10" rx="1"/></svg>
-      } @else {
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4 3l9 5-9 5z"/></svg>
-      }
-    </button>
-
-    <span class="hell-audio-time">{{ format(currentTime()) }}</span>
-
-    <div
-      class="hell-audio-track"
-      role="slider"
-      tabindex="0"
-      [attr.aria-valuemin]="0"
-      [attr.aria-valuemax]="duration()"
-      [attr.aria-valuenow]="currentTime()"
-      (click)="seek($event)"
-      (keydown)="onSeekKey($event)"
-    >
-      <div class="hell-audio-track-fill" [style.width.%]="progress()"></div>
-    </div>
-
-    <span class="hell-audio-time">{{ format(duration()) }}</span>
-
-    <button
-      hellButton
-      variant="ghost"
-      [iconOnly]="true"
-      type="button"
-      [attr.aria-label]="muted() ? 'Unmute' : 'Mute'"
-      (click)="toggleMute()"
-    >
-      @switch (volumeLevel()) {
-        @case ('mute') {
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 6v4h2l3 2V4L5 6H3zm9 .3l1.4-1.4 1 1L13 7.3l1.4 1.4-1 1L12 8.3l-1.4 1.4-1-1L11 7.3 9.6 5.9l1-1z"/></svg>
-        }
-        @case ('low') {
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 6v4h2l3 2V4L5 6H3z"/></svg>
-        }
-        @case ('mid') {
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 6v4h2l3 2V4L5 6H3zm8 2c0-1-.5-1.8-1.3-2.3v4.6C10.5 9.8 11 9 11 8z"/></svg>
-        }
-        @default {
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 6v4h2l3 2V4L5 6H3zm8 2c0-1-.5-1.8-1.3-2.3v4.6C10.5 9.8 11 9 11 8zm1.6-4.4l-.7.7C13.2 5 14 6.4 14 8s-.8 3-2.1 3.7l.7.7C14.2 11.5 15 9.8 15 8s-.8-3.5-2.4-4.4z"/></svg>
-        }
-      }
-    </button>
-
-    <hell-slider
-      class="hell-audio-volume"
-      size="sm"
-      [value]="volume() * 100"
-      [min]="0"
-      [max]="100"
-      [step]="1"
-      (valueChange)="onVolume($event)"
-      aria-label="Volume"
-    />
-
-    @if (allowDownload()) {
-      <a
+      <button
         hellButton
         variant="ghost"
         [iconOnly]="true"
-        [href]="src()"
-        [download]="downloadName()"
-        target="_blank"
-        rel="noopener"
-        aria-label="Download"
+        type="button"
+        [attr.aria-label]="playing() ? 'Pause' : 'Play'"
+        (click)="toggle()"
       >
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1v8.6L5.4 7l-1 1L8 11.6 11.6 8l-1-1L9 9.6V1H7zm-5 13v1h12v-1H3z"/></svg>
-      </a>
-    }
+        <hell-icon [name]="playing() ? 'faSolidPause' : 'faSolidPlay'" />
+      </button>
+
+      <span class="hell-audio-time">{{ format(currentTime()) }}</span>
+
+      <div
+        #track
+        class="hell-audio-track"
+        role="slider"
+        tabindex="0"
+        aria-label="Seek"
+        [attr.aria-valuemin]="0"
+        [attr.aria-valuemax]="duration()"
+        [attr.aria-valuenow]="currentTime()"
+        [attr.aria-valuetext]="format(currentTime()) + ' of ' + format(duration())"
+        [attr.data-dragging]="dragging() ? 'true' : null"
+        [style.--_hell-audio-progress.%]="progress()"
+        (pointerdown)="onSeekPointerDown($event)"
+        (keydown)="onSeekKey($event)"
+      >
+        <div class="hell-audio-track-fill"></div>
+        <div class="hell-audio-track-thumb"></div>
+      </div>
+
+      <span class="hell-audio-time">{{ format(duration()) }}</span>
+
+      <button
+        hellButton
+        variant="ghost"
+        [iconOnly]="true"
+        type="button"
+        [attr.aria-label]="muted() ? 'Unmute' : 'Mute'"
+        (click)="toggleMute()"
+      >
+        <hell-icon [name]="volumeIcon()" />
+      </button>
+
+      <hell-slider
+        class="hell-audio-volume"
+        size="sm"
+        [value]="volume() * 100"
+        [min]="0"
+        [max]="100"
+        [step]="1"
+        (valueChange)="onVolume($event)"
+        aria-label="Volume"
+      />
+
+      @if (speechSupported()) {
+        <button
+          hellButton
+          variant="ghost"
+          [iconOnly]="true"
+          type="button"
+          class="hell-audio-cc-toggle"
+          [attr.aria-pressed]="captions()"
+          [attr.aria-expanded]="captions()"
+          aria-controls="hell-audio-caption-panel"
+          [attr.aria-label]="captions() ? 'Hide live captions' : 'Show live captions'"
+          [attr.data-active]="captions() ? 'true' : null"
+          (click)="toggleCaptions()"
+        >
+          <hell-icon name="faSolidClosedCaptioning" />
+        </button>
+      }
+
+      @if (allowDownload()) {
+        <a
+          hellButton
+          variant="ghost"
+          [iconOnly]="true"
+          [href]="src()"
+          [download]="downloadName()"
+          target="_blank"
+          rel="noopener"
+          aria-label="Download"
+        >
+          <hell-icon name="faSolidDownload" />
+        </a>
+      }
     </div>
+
+    @if (captions()) {
+      <section
+        id="hell-audio-caption-panel"
+        class="hell-audio-captions"
+        [attr.data-state]="transcribing() ? 'live' : 'idle'"
+      >
+        <header class="hell-audio-captions-bar">
+          <span class="hell-audio-captions-status">
+            <span class="hell-audio-captions-dot" aria-hidden="true"></span>
+            @if (error()) { Error }
+            @else if (transcribing()) { Live } @else { Paused }
+          </span>
+
+          <div class="hell-audio-captions-actions">
+            <button
+              hellButton
+              size="sm"
+              variant="ghost"
+              type="button"
+              [attr.aria-label]="'Playback speed ' + playbackRate() + 'x'"
+              (click)="cyclePlaybackRate()"
+            >{{ playbackRate() }}×</button>
+
+            @if (transcript() || interim()) {
+              <button
+                hellButton
+                size="sm"
+                variant="ghost"
+                type="button"
+                aria-label="Copy transcript"
+                (click)="copyTranscript()"
+              >{{ copied() ? 'Copied' : 'Copy' }}</button>
+
+              <button
+                hellButton
+                size="sm"
+                variant="ghost"
+                type="button"
+                aria-label="Clear transcript"
+                (click)="clearTranscript()"
+              >Clear</button>
+            }
+          </div>
+        </header>
+
+        <div
+          #captionScroll
+          class="hell-audio-captions-body"
+          aria-live="polite"
+          aria-atomic="false"
+        >
+          @if (error(); as err) {
+            <p class="hell-audio-captions-error">{{ err }}</p>
+          } @else if (transcript() || interim()) {
+            <p>
+              <span>{{ transcript() }}</span>
+              @if (interim(); as i) {
+                <span class="hell-audio-captions-interim"> {{ i }}</span>
+              }
+            </p>
+          } @else if (transcribing()) {
+            <p class="hell-audio-captions-empty">Listening…</p>
+          } @else {
+            <p class="hell-audio-captions-empty">Press play to capture captions.</p>
+          }
+        </div>
+      </section>
+    }
   `,
 })
 export class HellAudioPlayer {
@@ -135,16 +250,35 @@ export class HellAudioPlayer {
   readonly src = input.required<string>();
   readonly downloadName = input<string | null>(null);
   readonly allowDownload = input(true, { transform: booleanAttribute });
-  /** Display title above the controls. Falls back to the basename of `src`. */
+  /** Optional display title shown above the controls. Hidden when `null`. */
   readonly title = input<string | null>(null);
   /** Display a date/timestamp next to the title. Accepts a string or Date. */
   readonly date = input<string | Date | null>(null);
+  /** BCP-47 language hint for SpeechRecognition. Defaults to `<html lang>` or `en-US`. */
+  readonly lang = input<string | null>(null);
+  /** Start with the live captions panel open. */
+  readonly defaultCaptions = input(false, { transform: booleanAttribute });
 
   protected readonly playing = signal(false);
   protected readonly currentTime = signal(0);
   protected readonly duration = signal(0);
   protected readonly volume = signal(1);
   protected readonly muted = signal(false);
+  protected readonly dragging = signal(false);
+  protected readonly playbackRate = signal(1);
+
+  protected readonly captions = signal(false);
+  protected readonly transcript = signal<string>('');
+  protected readonly interim = signal<string>('');
+  protected readonly transcribing = signal(false);
+  protected readonly error = signal<string | null>(null);
+  protected readonly copied = signal(false);
+  protected readonly speechSupported = signal(hellAudioSpeechSupported());
+
+  private recognition: SpeechRecognitionLike | null = null;
+  private capturedStream: MediaStream | null = null;
+  private copiedTimer: ReturnType<typeof setTimeout> | null = null;
+  private playbackEnded = false;
 
   protected readonly progress = computed(() => {
     const d = this.duration();
@@ -159,17 +293,11 @@ export class HellAudioPlayer {
     return 'high';
   });
 
-  protected readonly resolvedTitle = computed<string | null>(() => {
-    const explicit = this.title();
-    if (explicit !== null) return explicit;
-    const src = this.src();
-    if (!src) return null;
-    try {
-      const url = new URL(src, 'http://_');
-      const last = url.pathname.split('/').pop() ?? '';
-      return decodeURIComponent(last) || null;
-    } catch {
-      return src.split('/').pop() ?? null;
+  protected readonly volumeIcon = computed(() => {
+    switch (this.volumeLevel()) {
+      case 'mute': return 'faSolidVolumeXmark';
+      case 'low': return 'faSolidVolumeLow';
+      default: return 'faSolidVolumeHigh';
     }
   });
 
@@ -184,30 +312,68 @@ export class HellAudioPlayer {
   });
 
   private readonly audio = viewChild.required<ElementRef<HTMLAudioElement>>('audio');
-  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  private readonly captionScroll = viewChild<ElementRef<HTMLElement>>('captionScroll');
 
   constructor() {
+    // Apply audio properties from signals.
     effect(() => {
       const a = this.audio().nativeElement;
       a.volume = this.volume();
       a.muted = this.muted();
+      a.playbackRate = this.playbackRate();
+    });
+
+    // Default-open captions on init.
+    effect(() => {
+      if (this.defaultCaptions() && this.speechSupported() && !this.captions()) {
+        this.captions.set(true);
+      }
+    });
+
+    // Auto start/stop recognition based on captions toggle + playback.
+    effect(() => {
+      const wantLive = this.captions() && this.playing() && this.speechSupported();
+      if (wantLive && !this.recognition) {
+        this.startRecognition();
+      } else if (!wantLive && this.recognition) {
+        this.stopRecognition();
+      }
+    });
+
+    // Auto-scroll caption panel.
+    effect(() => {
+      this.transcript();
+      this.interim();
+      const el = this.captionScroll()?.nativeElement;
+      if (el) queueMicrotask(() => { el.scrollTop = el.scrollHeight; });
     });
   }
 
   protected toggle() {
     const a = this.audio().nativeElement;
-    if (this.playing()) {
-      a.pause();
-      this.playing.set(false);
-    } else {
-      void a.play();
-      this.playing.set(true);
-    }
+    if (this.playing()) a.pause();
+    else void a.play();
   }
 
-  protected toggleMute() {
-    this.muted.update(v => !v);
+  protected onPlay() {
+    const currentTime = this.audio().nativeElement.currentTime;
+    this.playing.set(true);
+    if (this.playbackEnded || currentTime <= 0.25) {
+      this.resetCaptionSession();
+    }
+    this.playbackEnded = false;
   }
+
+  protected onPause() {
+    this.playing.set(false);
+  }
+
+  protected onEnded() {
+    this.playing.set(false);
+    this.playbackEnded = true;
+  }
+
+  protected toggleMute() { this.muted.update(v => !v); }
 
   protected onVolume(v: number) {
     const next = Math.max(0, Math.min(1, v / 100));
@@ -215,26 +381,217 @@ export class HellAudioPlayer {
     this.muted.set(next === 0);
   }
 
-  protected onTime() {
-    this.currentTime.set(this.audio().nativeElement.currentTime);
+  protected onTime() { this.currentTime.set(this.audio().nativeElement.currentTime); }
+  protected onMeta() { this.duration.set(this.audio().nativeElement.duration || 0); }
+
+  protected cyclePlaybackRate() {
+    const cur = this.playbackRate();
+    const idx = PLAYBACK_RATES.indexOf(cur as typeof PLAYBACK_RATES[number]);
+    const next = PLAYBACK_RATES[(idx + 1 + PLAYBACK_RATES.length) % PLAYBACK_RATES.length];
+    this.playbackRate.set(next);
   }
 
-  protected onMeta() {
-    this.duration.set(this.audio().nativeElement.duration || 0);
+  protected toggleCaptions() {
+    this.captions.update(v => !v);
   }
 
-  protected seek(e: MouseEvent) {
-    const target = e.currentTarget as HTMLElement;
-    const rect = target.getBoundingClientRect();
-    const ratio = (e.clientX - rect.left) / rect.width;
-    const a = this.audio().nativeElement;
-    a.currentTime = ratio * (this.duration() || 0);
+  protected onSeeking() {
+    const next = this.audio().nativeElement.currentTime;
+    if (Math.abs(next - this.currentTime()) <= 0.01) {
+      this.currentTime.set(next);
+      return;
+    }
+
+    this.currentTime.set(next);
+    this.playbackEnded = false;
+    this.resetCaptionSession(this.shouldRestartRecognition());
+  }
+
+  protected onSeekPointerDown(e: PointerEvent) {
+    if (e.button !== 0) return;
+    const el = e.currentTarget as HTMLElement;
+    const restartRecognition = this.shouldRestartRecognition();
+    let changedTime = false;
+
+    const handleTimelineJump = () => {
+      if (changedTime) return;
+      changedTime = true;
+      this.resetTranscriptState();
+      if (restartRecognition) {
+        this.stopRecognition();
+      }
+    };
+
+    el.setPointerCapture(e.pointerId);
+    this.dragging.set(true);
+    if (this.applySeek(e, el)) {
+      handleTimelineJump();
+    }
+
+    const onMove = (ev: PointerEvent) => {
+      if (this.applySeek(ev, el)) {
+        handleTimelineJump();
+      }
+    };
+    const onUp = (ev: PointerEvent) => {
+      this.dragging.set(false);
+      el.releasePointerCapture(ev.pointerId);
+      el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerup', onUp);
+      el.removeEventListener('pointercancel', onUp);
+
+      if (changedTime && restartRecognition) {
+        queueMicrotask(() => {
+          if (this.captions() && this.playing() && this.speechSupported() && !this.recognition) {
+            this.startRecognition();
+          }
+        });
+      }
+    };
+    el.addEventListener('pointermove', onMove);
+    el.addEventListener('pointerup', onUp);
+    el.addEventListener('pointercancel', onUp);
+  }
+
+  private applySeek(e: PointerEvent, el: HTMLElement): boolean {
+    const rect = el.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const next = ratio * (this.duration() || 0);
+    return this.setCurrentTime(next);
   }
 
   protected onSeekKey(e: KeyboardEvent) {
     const a = this.audio().nativeElement;
-    if (e.key === 'ArrowRight') a.currentTime = Math.min(a.duration, a.currentTime + 5);
-    if (e.key === 'ArrowLeft') a.currentTime = Math.max(0, a.currentTime - 5);
+    if (e.key === 'ArrowRight') {
+      this.seekTo(Math.min(a.duration, a.currentTime + 5));
+      e.preventDefault();
+    }
+    if (e.key === 'ArrowLeft') {
+      this.seekTo(Math.max(0, a.currentTime - 5));
+      e.preventDefault();
+    }
+  }
+
+  private seekTo(nextTime: number) {
+    if (!this.setCurrentTime(nextTime)) return;
+
+    this.resetCaptionSession(this.shouldRestartRecognition());
+  }
+
+  private setCurrentTime(nextTime: number): boolean {
+    const a = this.audio().nativeElement;
+    const next = Math.max(0, Math.min(Number.isFinite(a.duration) ? a.duration : nextTime, nextTime));
+    if (Math.abs(next - a.currentTime) <= 0.01) return false;
+
+    a.currentTime = next;
+    this.currentTime.set(next);
+    this.playbackEnded = false;
+    return true;
+  }
+
+  private shouldRestartRecognition(): boolean {
+    return this.playing() && this.captions() && this.speechSupported() && this.recognition !== null;
+  }
+
+  private resetCaptionSession(restartRecognition = false) {
+    this.resetTranscriptState();
+    if (!restartRecognition) return;
+
+    this.stopRecognition();
+    queueMicrotask(() => {
+      if (this.captions() && this.playing() && this.speechSupported() && !this.recognition) {
+        this.startRecognition();
+      }
+    });
+  }
+
+  private startRecognition() {
+    const Ctor = getSpeechRecognition();
+    const audio = this.audio().nativeElement as HTMLAudioElement & { captureStream?(): MediaStream };
+    if (!Ctor || typeof audio.captureStream !== 'function') return;
+
+    const rec = new Ctor();
+    rec.lang = this.lang() ?? (document.documentElement.lang || 'en-US');
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+
+    rec.onresult = (e: any) => {
+      let finalAdd = '';
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const r = e.results[i];
+        if (r.isFinal) finalAdd += r[0].transcript;
+        else interim += r[0].transcript;
+      }
+      if (finalAdd) {
+        this.transcript.update(t => (t ? t + ' ' : '') + finalAdd.trim());
+      }
+      this.interim.set(interim.trim());
+    };
+    rec.onerror = (e: any) => {
+      const code = e?.error;
+      // 'no-speech' / 'aborted' are benign — service ends, we just restart on next play.
+      if (code && code !== 'no-speech' && code !== 'aborted') {
+        this.error.set(`Speech error: ${code}`);
+      }
+      this.stopRecognition();
+    };
+    rec.onend = () => {
+      this.transcribing.set(false);
+      this.interim.set('');
+      // If the recogniser ended but the user is still playing with captions
+      // on, restart it (service auto-stops after silence).
+      if (this.captions() && this.playing() && this.recognition === rec) {
+        this.recognition = null;
+        this.startRecognition();
+      }
+    };
+
+    try {
+      const stream = audio.captureStream();
+      this.capturedStream = stream;
+      const track = stream.getAudioTracks()[0];
+      this.recognition = rec;
+      this.transcribing.set(true);
+      this.error.set(null);
+      // start(track) — Chromium 138+. Falls back to mic if unsupported.
+      try { rec.start(track); } catch { rec.start(); }
+    } catch (err) {
+      this.error.set(err instanceof Error ? err.message : String(err));
+      this.transcribing.set(false);
+      this.recognition = null;
+    }
+  }
+
+  private stopRecognition() {
+    try { this.recognition?.stop(); } catch { /* noop */ }
+    this.recognition = null;
+    this.capturedStream?.getTracks().forEach(t => t.stop());
+    this.capturedStream = null;
+    this.transcribing.set(false);
+  }
+
+  protected clearTranscript() {
+    this.resetTranscriptState();
+  }
+
+  private resetTranscriptState() {
+    this.transcript.set('');
+    this.interim.set('');
+    this.error.set(null);
+    this.copied.set(false);
+  }
+
+  protected async copyTranscript() {
+    const text = (this.transcript() + ' ' + this.interim()).trim();
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      this.copied.set(true);
+      if (this.copiedTimer) clearTimeout(this.copiedTimer);
+      this.copiedTimer = setTimeout(() => this.copied.set(false), 1500);
+    } catch { /* clipboard unavailable */ }
   }
 
   protected format(s: number): string {
