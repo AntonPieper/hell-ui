@@ -9,6 +9,16 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { provideIcons } from '@ng-icons/core';
+import {
+  faSolidClosedCaptioning,
+  faSolidDownload,
+  faSolidPause,
+  faSolidPlay,
+  faSolidVolumeHigh,
+  faSolidVolumeLow,
+  faSolidVolumeXmark,
+} from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
 import { HellSlider } from '../../primitives/slider/slider';
@@ -48,6 +58,16 @@ export function hellAudioSpeechSupported(): boolean {
 
 const PLAYBACK_RATES = [1, 1.25, 1.5, 2, 0.75] as const;
 
+const HELL_AUDIO_PLAYER_ICONS = {
+  faSolidClosedCaptioning,
+  faSolidDownload,
+  faSolidPause,
+  faSolidPlay,
+  faSolidVolumeHigh,
+  faSolidVolumeLow,
+  faSolidVolumeXmark,
+};
+
 /**
  * Compact audio player with seek bar, play/pause, mute, volume slider,
  * download button and an optional inline live-captions strip backed by the
@@ -57,6 +77,7 @@ const PLAYBACK_RATES = [1, 1.25, 1.5, 2, 0.75] as const;
 @Component({
   selector: 'hell-audio-player',
   imports: [HellButton, HellIcon, HellSlider],
+  providers: [provideIcons(HELL_AUDIO_PLAYER_ICONS)],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class.hell-audio]': '!unstyled()' },
   template: `

@@ -1,9 +1,30 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { provideIcons } from '@ng-icons/core';
+import {
+  faSolidChevronDown,
+  faSolidDownload,
+  faSolidGear,
+  faSolidPenToSquare,
+  faSolidPlus,
+  faSolidUpload,
+  faSolidXmark,
+} from '@ng-icons/font-awesome/solid';
 import { HellButton, HellIcon } from 'hell';
+
+const HD_BUTTON_PAGE_ICONS = {
+  faSolidChevronDown,
+  faSolidDownload,
+  faSolidGear,
+  faSolidPenToSquare,
+  faSolidPlus,
+  faSolidUpload,
+  faSolidXmark,
+};
 
 @Component({
   selector: 'hd-button',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [provideIcons(HD_BUTTON_PAGE_ICONS)],
   imports: [HellButton, HellIcon],
   template: `
     <article class="hd-prose">

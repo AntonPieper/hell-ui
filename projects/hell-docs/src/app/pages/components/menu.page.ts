@@ -1,9 +1,26 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { provideIcons } from '@ng-icons/core';
+import {
+  faSolidClock,
+  faSolidDownload,
+  faSolidFolderOpen,
+  faSolidPenToSquare,
+  faSolidShareNodes,
+} from '@ng-icons/font-awesome/solid';
 import { HellButton, HellIcon, HELL_MENU_DIRECTIVES } from 'hell';
+
+const HD_MENU_PAGE_ICONS = {
+  faSolidClock,
+  faSolidDownload,
+  faSolidFolderOpen,
+  faSolidPenToSquare,
+  faSolidShareNodes,
+};
 
 @Component({
   selector: 'hd-menu',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [provideIcons(HD_MENU_PAGE_ICONS)],
   imports: [HellButton, HellIcon, ...HELL_MENU_DIRECTIVES],
   template: `
     <article class="hd-prose">

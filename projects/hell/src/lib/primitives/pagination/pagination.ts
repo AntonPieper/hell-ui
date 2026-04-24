@@ -6,6 +6,13 @@ import {
   computed,
   input,
 } from '@angular/core';
+import { provideIcons } from '@ng-icons/core';
+import {
+  faSolidAnglesLeft,
+  faSolidAnglesRight,
+  faSolidChevronLeft,
+  faSolidChevronRight,
+} from '@ng-icons/font-awesome/solid';
 import {
   NgpPagination,
   NgpPaginationButton,
@@ -16,6 +23,13 @@ import {
   injectPaginationState,
 } from 'ng-primitives/pagination';
 import { HellIcon } from '../icon/icon';
+
+const HELL_PAGINATION_ICONS = {
+  faSolidAnglesLeft,
+  faSolidAnglesRight,
+  faSolidChevronLeft,
+  faSolidChevronRight,
+};
 
 /**
  * Wrappers around `ng-primitives/pagination`. Two ways to use:
@@ -128,6 +142,7 @@ export class HellPaginationButton {
 @Component({
   selector: 'hell-pagination',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [provideIcons(HELL_PAGINATION_ICONS)],
   imports: [
     HellIcon,
     HellPaginationFirst,

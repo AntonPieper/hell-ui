@@ -11,12 +11,18 @@ import {
   signal,
   viewChildren,
 } from '@angular/core';
+import { provideIcons } from '@ng-icons/core';
+import { faSolidClock } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../button/button';
 import { HellIcon } from '../icon/icon';
 import { HellPopover, HellPopoverTrigger } from '../popover/popover';
 import { HellSize } from '../../core/types';
 
 interface ParsedTime { h: number; m: number; s: number; }
+
+const HELL_TIME_INPUT_ICONS = {
+  faSolidClock,
+};
 
 function parse(value: string | null | undefined): ParsedTime | null {
   if (!value) return null;
@@ -42,6 +48,7 @@ function format(t: ParsedTime, seconds: boolean) {
   selector: 'hell-time-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton, HellIcon, HellPopover, HellPopoverTrigger],
+  providers: [provideIcons(HELL_TIME_INPUT_ICONS)],
   host: {
     '[class.hell-time-input]': '!unstyled()',
     '[attr.data-size]': 'size()',

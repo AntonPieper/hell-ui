@@ -5,6 +5,8 @@ import {
   computed,
   input,
 } from '@angular/core';
+import { provideIcons } from '@ng-icons/core';
+import { faSolidChevronLeft, faSolidChevronRight } from '@ng-icons/font-awesome/solid';
 import {
   NgpDatePicker,
   NgpDatePickerCell,
@@ -20,6 +22,11 @@ import {
 import { HellButton } from '../button/button';
 import { HellIcon } from '../icon/icon';
 
+const HELL_DATE_PICKER_ICONS = {
+  faSolidChevronLeft,
+  faSolidChevronRight,
+};
+
 /**
  * Calendar-style date picker built on `ng-primitives/date-picker`. Emits via
  * `dateChange` and supports `min`, `max`, and `disabled`. Pair with a popover
@@ -28,6 +35,7 @@ import { HellIcon } from '../icon/icon';
 @Component({
   selector: 'hell-date-picker',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [provideIcons(HELL_DATE_PICKER_ICONS)],
   hostDirectives: [
     {
       directive: NgpDatePicker,

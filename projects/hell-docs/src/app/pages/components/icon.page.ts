@@ -1,16 +1,36 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { provideIcons } from '@ng-icons/core';
+import {
+  faSolidArrowDown,
+  faSolidCircleCheck,
+  faSolidCircleInfo,
+  faSolidPhone,
+  faSolidTriangleExclamation,
+  faSolidXmark,
+} from '@ng-icons/font-awesome/solid';
 import { HellIcon } from 'hell';
+
+const HD_ICON_PAGE_ICONS = {
+  faSolidArrowDown,
+  faSolidCircleCheck,
+  faSolidCircleInfo,
+  faSolidPhone,
+  faSolidTriangleExclamation,
+  faSolidXmark,
+};
 
 @Component({
   selector: 'hd-icon',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [provideIcons(HD_ICON_PAGE_ICONS)],
   imports: [HellIcon],
   template: `
     <article class="hd-prose">
       <h1>Icon</h1>
       <p>Thin wrapper around <code>&lt;ng-icon&gt;</code> from
         <code>&#64;ng-icons/core</code>. Consumer apps must register the icons
-        they use via <code>provideIcons()</code> at bootstrap or per-component.</p>
+        they use via <code>provideIcons()</code>, ideally in the component that
+        renders them.</p>
 
       <h2>Example</h2>
       <div class="hd-example flex items-center gap-4 text-base">
@@ -44,12 +64,17 @@ import { HellIcon } from 'hell';
       </ul>
 
       <h2>Registering icons</h2>
-      <pre><code>import &#123; provideIcons &#125; from '&#64;ng-icons/core';
+      <pre><code>import &#123; Component &#125; from '&#64;angular/core';
+import &#123; provideIcons &#125; from '&#64;ng-icons/core';
 import &#123; faSolidCheck &#125; from '&#64;ng-icons/font-awesome/solid';
+import &#123; HellIcon &#125; from 'hell';
 
-bootstrapApplication(AppComponent, &#123;
+&#64;Component(&#123;
+  imports: [HellIcon],
   providers: [provideIcons(&#123; faSolidCheck &#125;)],
-&#125;);</code></pre>
+  template: '&lt;hell-icon name="faSolidCheck" /&gt;',
+&#125;)
+export class ExampleComponent &#123;&#125;</code></pre>
     </article>
   `,
 })

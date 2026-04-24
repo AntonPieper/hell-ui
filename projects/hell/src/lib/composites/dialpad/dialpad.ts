@@ -8,6 +8,8 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { provideIcons } from '@ng-icons/core';
+import { faSolidDeleteLeft, faSolidPhone } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
 
@@ -31,6 +33,11 @@ const KEYS: HellDialpadKey[] = [
   { digit: '#' },
 ];
 
+const HELL_DIALPAD_ICONS = {
+  faSolidDeleteLeft,
+  faSolidPhone,
+};
+
 /**
  * Telephony dialpad. Emits `(digit)` whenever a key is pressed and maintains
  * the entered number internally. Bind `[value]` for controlled mode, listen
@@ -40,6 +47,7 @@ const KEYS: HellDialpadKey[] = [
 @Component({
   selector: 'hell-dialpad',
   imports: [HellButton, HellIcon],
+  providers: [provideIcons(HELL_DIALPAD_ICONS)],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class.hell-dialpad]': '!unstyled()',

@@ -15,6 +15,20 @@ import {
   viewChild,
   viewChildren,
 } from '@angular/core';
+import { provideIcons } from '@ng-icons/core';
+import {
+  faSolidChevronDown,
+  faSolidChevronLeft,
+  faSolidChevronRight,
+  faSolidChevronUp,
+  faSolidDownload,
+  faSolidMagnifyingGlass,
+  faSolidMinus,
+  faSolidPlus,
+  faSolidPrint,
+  faSolidTableColumns,
+  faSolidXmark,
+} from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
 import { createHiddenPdfPrintHandle, printPdfInHiddenIframe } from './pdf-viewer.print';
@@ -31,10 +45,25 @@ import {
   normalizeZoomValue,
 } from './pdf-viewer.utils';
 
+const HELL_PDF_VIEWER_ICONS = {
+  faSolidChevronDown,
+  faSolidChevronLeft,
+  faSolidChevronRight,
+  faSolidChevronUp,
+  faSolidDownload,
+  faSolidMagnifyingGlass,
+  faSolidMinus,
+  faSolidPlus,
+  faSolidPrint,
+  faSolidTableColumns,
+  faSolidXmark,
+};
+
 @Component({
   selector: 'hell-pdf-viewer',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton, HellIcon],
+  providers: [provideIcons(HELL_PDF_VIEWER_ICONS)],
   host: {
     '[class.hell-pdf]': '!unstyled()',
     '(keydown)': 'onKey($event)',

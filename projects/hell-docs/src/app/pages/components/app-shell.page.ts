@@ -1,9 +1,28 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { provideIcons } from '@ng-icons/core';
+import {
+  faSolidBars,
+  faSolidFolderOpen,
+  faSolidGauge,
+  faSolidGear,
+  faSolidKey,
+  faSolidUsers,
+} from '@ng-icons/font-awesome/solid';
 import { HELL_APP_SHELL_DIRECTIVES, HellButton, HellIcon } from 'hell';
+
+const HD_APP_SHELL_PAGE_ICONS = {
+  faSolidBars,
+  faSolidFolderOpen,
+  faSolidGauge,
+  faSolidGear,
+  faSolidKey,
+  faSolidUsers,
+};
 
 @Component({
   selector: 'hd-app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [provideIcons(HD_APP_SHELL_PAGE_ICONS)],
   imports: [...HELL_APP_SHELL_DIRECTIVES, HellButton, HellIcon],
   template: `
     <article class="hd-prose">

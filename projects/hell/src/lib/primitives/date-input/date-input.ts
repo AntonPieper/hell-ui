@@ -7,11 +7,17 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { provideIcons } from '@ng-icons/core';
+import { faSolidCalendar } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../button/button';
 import { HellIcon } from '../icon/icon';
 import { HellPopover, HellPopoverTrigger } from '../popover/popover';
 import { HellDatePicker } from '../date-picker/date-picker';
 import { HellSize } from '../../core/types';
+
+const HELL_DATE_INPUT_ICONS = {
+  faSolidCalendar,
+};
 
 /**
  * Date input — a styled trigger button paired with a calendar popover built
@@ -23,6 +29,7 @@ import { HellSize } from '../../core/types';
   selector: 'hell-date-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton, HellIcon, HellPopover, HellPopoverTrigger, HellDatePicker],
+  providers: [provideIcons(HELL_DATE_INPUT_ICONS)],
   host: {
     '[class.hell-date-input]': '!unstyled()',
     '[attr.data-size]': 'size()',
