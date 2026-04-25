@@ -18,7 +18,7 @@ import { HellButtonVariant, HellSize } from '../../core/types';
  */
 @Directive({
   selector: 'button[hellButton], a[hellButton]',
-  hostDirectives: [{ directive: NgpButton }],
+  hostDirectives: [{ directive: NgpButton, inputs: ['disabled'] }],
   host: {
     '[class.hell-button]': '!unstyled()',
     '[attr.data-variant]': 'variant()',

@@ -27,32 +27,94 @@
 
   .hell-resizable-handle {
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       -webkit-user-select: none;
       user-select: none;
-      flex: 0 0 6px;
+      flex: 0 0 8px;
       background-color: transparent;
       cursor: col-resize;
-      &::after {
-        content: '';
-        position: absolute;
-        inset: calc(var(--spacing) * 0);
-        margin: auto;
-        width: 1px;
-        background-color: var(--color-hell-border);
-        transition: background-color var(--hell-duration-fast) var(--ease-hell-out);
+      outline: none;
+      transition: background-color var(--hell-duration-fast) var(--ease-hell-out);
+      &:focus-visible {
+        background-color: color-mix(in oklab, var(--color-hell-focus-ring) 50%, transparent);
       }
-      &:hover::after, &[data-active="true"]::after {
-        background-color: var(--color-hell-primary);
-        width: 2px;
-      }
-      [data-orientation="vertical"] > & {
-        flex-basis: calc(var(--spacing) * 1.5);
-        cursor: row-resize;
-        &::after {
-          width: 100%;
-          height: 1px;
-        }
-      }
+    }
+
+  [data-orientation="vertical"] > .hell-resizable-handle {
+      cursor: row-resize;
+    }
+
+  .hell-resizable-handle-grip {
+      display: block;
+      transition:
+        background-color var(--hell-duration-fast) var(--ease-hell-out),
+        width var(--hell-duration-fast) var(--ease-hell-out),
+        height var(--hell-duration-fast) var(--ease-hell-out);
+    }
+
+  /* Default appearance — `line`: hairline that thickens on hover/drag. */
+  .hell-resizable-handle[data-appearance="line"] .hell-resizable-handle-grip {
+      width: 1px;
+      height: 100%;
+      background-color: var(--color-hell-border);
+    }
+  [data-orientation="vertical"] > .hell-resizable-handle[data-appearance="line"] .hell-resizable-handle-grip {
+      width: 100%;
+      height: 1px;
+    }
+  .hell-resizable-handle[data-appearance="line"]:hover .hell-resizable-handle-grip,
+  .hell-resizable-handle[data-appearance="line"][data-active="true"] .hell-resizable-handle-grip {
+      background-color: var(--color-hell-primary);
+      width: 2px;
+    }
+  [data-orientation="vertical"] > .hell-resizable-handle[data-appearance="line"]:hover .hell-resizable-handle-grip,
+  [data-orientation="vertical"] > .hell-resizable-handle[data-appearance="line"][data-active="true"] .hell-resizable-handle-grip {
+      width: 100%;
+      height: 2px;
+    }
+
+  /* `grip` appearance — pill with three-dot indicator. High affordance. */
+  .hell-resizable-handle[data-appearance="grip"] {
+      flex-basis: 14px;
+      background-color: var(--color-hell-surface-subtle);
+      border-inline: 1px solid var(--color-hell-border);
+    }
+  [data-orientation="vertical"] > .hell-resizable-handle[data-appearance="grip"] {
+      flex-basis: 14px;
+      border-inline: 0;
+      border-block: 1px solid var(--color-hell-border);
+    }
+  .hell-resizable-handle[data-appearance="grip"] .hell-resizable-handle-grip {
+      width: 4px;
+      height: calc(var(--spacing) * 8);
+      border-radius: var(--radius-hell-pill);
+      background-image: radial-gradient(
+        circle 1.4px at 50% 50%,
+        var(--color-hell-foreground-muted) 99%,
+        transparent
+      );
+      background-size: 100% 33.333%;
+      background-repeat: repeat-y;
+    }
+  [data-orientation="vertical"] > .hell-resizable-handle[data-appearance="grip"] .hell-resizable-handle-grip {
+      width: calc(var(--spacing) * 8);
+      height: 4px;
+      background-size: 33.333% 100%;
+      background-repeat: repeat-x;
+    }
+  .hell-resizable-handle[data-appearance="grip"]:hover,
+  .hell-resizable-handle[data-appearance="grip"][data-active="true"] {
+      background-color: var(--color-hell-surface-muted);
+    }
+  .hell-resizable-handle[data-appearance="grip"]:hover .hell-resizable-handle-grip,
+  .hell-resizable-handle[data-appearance="grip"][data-active="true"] .hell-resizable-handle-grip {
+      background-image: radial-gradient(
+        circle 1.6px at 50% 50%,
+        var(--color-hell-primary) 99%,
+        transparent
+      );
     }
 
 }

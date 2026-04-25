@@ -138,6 +138,7 @@ const KEY_DELTA = 16;
   host: {
     '[class.hell-resizable-handle]': '!unstyled()',
     '[attr.data-active]': 'dragging() ? "true" : null',
+    '[attr.data-appearance]': 'appearance()',
     '[attr.aria-orientation]': 'resizable.orientation() === "horizontal" ? "vertical" : "horizontal"',
     role: 'separator',
     tabindex: '0',
@@ -147,6 +148,13 @@ const KEY_DELTA = 16;
 })
 export class HellResizableHandle {
   readonly unstyled = input(false, { transform: booleanAttribute });
+  /**
+   * Visual treatment for the handle.
+   * - `line`  (default) — minimal hairline that thickens on hover.
+   * - `grip`  — pill-shaped grip with dotted indicator. Recommended when
+   *   the handle is the primary affordance.
+   */
+  readonly appearance = input<'line' | 'grip'>('line');
 
   protected readonly dragging = signal(false);
   protected readonly ariaValueNow = signal<number | null>(null);

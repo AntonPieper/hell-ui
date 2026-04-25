@@ -1,11 +1,12 @@
 @layer components {
 
-  /* Separator — horizontal or vertical divider. */
+  /* Separator — horizontal or vertical divider with optional spacing. */
 
   .hell-separator {
       display: block;
       flex-shrink: 0;
       background-color: var(--color-hell-border);
+      border: 0;
       &[data-orientation="horizontal"] {
         height: 1px;
         width: 100%;
@@ -14,6 +15,19 @@
         width: 1px;
         align-self: stretch;
       }
+
+      /* Spacing — applied symmetrically on the main axis. */
+      &[data-spacing="none"] { margin: 0; }
+      &[data-orientation="horizontal"][data-spacing="xs"] { margin-block: var(--spacing-hell-1); }
+      &[data-orientation="horizontal"][data-spacing="sm"] { margin-block: var(--spacing-hell-2); }
+      &[data-orientation="horizontal"][data-spacing="md"] { margin-block: var(--spacing-hell-4); }
+      &[data-orientation="horizontal"][data-spacing="lg"] { margin-block: var(--spacing-hell-6); }
+      &[data-orientation="horizontal"][data-spacing="xl"] { margin-block: var(--spacing-hell-8); }
+      &[data-orientation="vertical"][data-spacing="xs"]   { margin-inline: var(--spacing-hell-1); }
+      &[data-orientation="vertical"][data-spacing="sm"]   { margin-inline: var(--spacing-hell-2); }
+      &[data-orientation="vertical"][data-spacing="md"]   { margin-inline: var(--spacing-hell-4); }
+      &[data-orientation="vertical"][data-spacing="lg"]   { margin-inline: var(--spacing-hell-6); }
+      &[data-orientation="vertical"][data-spacing="xl"]   { margin-inline: var(--spacing-hell-8); }
     }
 
 }
