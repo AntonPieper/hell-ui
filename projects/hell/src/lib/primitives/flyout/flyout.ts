@@ -63,7 +63,7 @@ export class HellFlyoutTrigger {
 
 /**
  * Panel half of the flyout pattern. Apply to the rendered surface element.
- * Wires ARIA, light-dismiss (outside pointerdown / focusin), and Escape
+ * Wires ARIA, light-dismiss (outside click / focusin), and Escape
  * handling. Pass the trigger as the directive value.
  *
  * Provide `boundary` to widen the "inside" region beyond the trigger and
@@ -94,7 +94,7 @@ export class HellFlyout {
 
   constructor() {
     afterNextRender(() => {
-        const onPointer = (e: PointerEvent) => {
+        const onClick = (e: MouseEvent) => {
           if (this.closeOnOutsideInteraction()) this.maybeDismiss(e.target);
         };
         const onFocus = (e: FocusEvent) => {
@@ -110,12 +110,12 @@ export class HellFlyout {
           this.trigger().element.nativeElement.focus();
         };
 
-        document.addEventListener('pointerdown', onPointer, true);
+        document.addEventListener('click', onClick, true);
         document.addEventListener('focusin', onFocus, true);
         document.addEventListener('keydown', onKey, true);
 
         this.destroyRef.onDestroy(() => {
-          document.removeEventListener('pointerdown', onPointer, true);
+          document.removeEventListener('click', onClick, true);
           document.removeEventListener('focusin', onFocus, true);
           document.removeEventListener('keydown', onKey, true);
         });

@@ -22,8 +22,8 @@ import { HellButton, HellFlyout, HellFlyoutTrigger, HellInput } from 'hell';
       <ul>
         <li>Trigger drives the open state. Read it via <code>open()</code> and
           <code>(openChange)</code>.</li>
-        <li>Light dismiss on outside <code>pointerdown</code> or
-          <code>focusin</code>.</li>
+        <li>Light dismiss on outside <code>click</code> or
+          <code>focusin</code>. Touch scroll gestures do not dismiss.</li>
         <li><code>Escape</code> closes and restores focus to the trigger.</li>
         <li>Pass <code>boundary</code> to widen the “inside” region beyond
           the trigger and panel — useful for composites where surrounding
