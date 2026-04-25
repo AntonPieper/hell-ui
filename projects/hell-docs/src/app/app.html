@@ -2,15 +2,10 @@
   <header hellAppTopbar>
     <button
       hellSidenavToggle
-      hellButton
-      variant="ghost"
-      size="sm"
-      iconOnly
       type="button"
+      class="hell-shell-toggle"
       [attr.aria-label]="shell.isSidenavCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
-    >
-      <hell-icon name="faSolidBars" size="14px" />
-    </button>
+    ></button>
     <strong class="text-base">hell</strong>
     <span class="hell-tag" data-variant="info">Heinrich Element Library</span>
     <span class="hd-fill"></span>
@@ -21,18 +16,42 @@
   <nav hellAppSidenav>
     @for (section of sections; track $index) {
       @if (section.heading) {
-        <div class="hd-nav-heading">{{ section.heading }}</div>
-      }
-      @for (item of section.items; track item.path) {
-        <a
-          [routerLink]="item.path"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: !!item.exact }"
-          [attr.title]="shell.isSidenavCollapsed() ? item.label : null"
+        <div
+          class="hell-nav-section"
+          [attr.data-collapsed]="isSectionCollapsed(section.heading) ? 'true' : null"
         >
-          <hell-icon [name]="item.icon" size="14px" />
-          <span class="hd-nav-label">{{ item.label }}</span>
-        </a>
+          <button
+            type="button"
+            class="hell-nav-section-toggle"
+            (click)="toggleSection(section.heading)"
+            [attr.aria-expanded]="!isSectionCollapsed(section.heading)"
+          >{{ section.heading }}</button>
+          <div class="hell-nav-section-items">
+            @for (item of section.items; track item.path) {
+              <a
+                [routerLink]="item.path"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: !!item.exact }"
+                [attr.title]="shell.isSidenavCollapsed() ? item.label : null"
+              >
+                <hell-icon [name]="item.icon" size="14px" />
+                <span class="hd-nav-label">{{ item.label }}</span>
+              </a>
+            }
+          </div>
+        </div>
+      } @else {
+        @for (item of section.items; track item.path) {
+          <a
+            [routerLink]="item.path"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: !!item.exact }"
+            [attr.title]="shell.isSidenavCollapsed() ? item.label : null"
+          >
+            <hell-icon [name]="item.icon" size="14px" />
+            <span class="hd-nav-label">{{ item.label }}</span>
+          </a>
+        }
       }
     }
   </nav>
@@ -47,27 +66,26 @@
       type="button"
       class="hell-secondary-rail"
     ></button>
-    <div hellAppSecondaryBody class="hd-secondary-inner">
-      <h3 class="hd-secondary-title hd-secondary-row">
-        <button
-          hellSecondaryToggle
-          type="button"
-          class="hell-secondary-header-toggle"
-        ></button>
-        About hell
-      </h3>
-      <p class="hd-secondary-body">
-        A pragmatic Angular component library built on
-        <a href="https://ng-primitives.dev" target="_blank" rel="noreferrer">ng-primitives</a>
-        and Tailwind&nbsp;v4. Designed for line-of-business apps &mdash;
-        small radii, neutral palette, fast and accessible.
-      </p>
-      <h4 class="hd-secondary-title">Layers</h4>
-      <ul class="hd-secondary-list">
-        <li><strong>Primitives</strong> &mdash; building blocks</li>
-        <li><strong>Composites</strong> &mdash; common patterns</li>
-        <li><strong>Features</strong> &mdash; heavyweight, lazy</li>
-      </ul>
+    <div hellAppSecondaryBody>
+      <button
+        hellSecondaryToggle
+        type="button"
+        class="hell-secondary-header"
+      >About hell</button>
+      <div class="hd-secondary-inner">
+        <p class="hd-secondary-body">
+          A pragmatic Angular component library built on
+          <a href="https://ng-primitives.dev" target="_blank" rel="noreferrer">ng-primitives</a>
+          and Tailwind&nbsp;v4. Designed for line-of-business apps &mdash;
+          small radii, neutral palette, fast and accessible.
+        </p>
+        <h4 class="hd-secondary-title">Layers</h4>
+        <ul class="hd-secondary-list">
+          <li><strong>Primitives</strong> &mdash; building blocks</li>
+          <li><strong>Composites</strong> &mdash; common patterns</li>
+          <li><strong>Features</strong> &mdash; heavyweight, lazy</li>
+        </ul>
+      </div>
     </div>
   </aside>
 </div>

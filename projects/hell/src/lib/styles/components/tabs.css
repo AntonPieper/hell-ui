@@ -72,7 +72,10 @@
         border-width: 0px;
         margin: calc(var(--spacing) * 0);
         border-radius: var(--radius-md);
-        padding-inline: var(--spacing-hell-3);
+        /* Reserve room for the active indicator on every tab so the label
+           never shifts when activation moves between tabs. */
+        padding-left: calc(var(--spacing-hell-3) + 8px);
+        padding-right: var(--spacing-hell-3);
         color: var(--color-hell-foreground-muted);
         &[data-hover]:not([data-active]) {
           background-color: var(--color-hell-foreground);
@@ -85,7 +88,6 @@
           background-color: var(--color-hell-surface-elevated);
           color: var(--color-hell-foreground);
           font-weight: var(--font-weight-semibold);
-          padding-left: calc(var(--spacing-hell-3) + 8px);
           box-shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 0 0 1px var(--color-hell-border);
         }
         &[data-active]::before {

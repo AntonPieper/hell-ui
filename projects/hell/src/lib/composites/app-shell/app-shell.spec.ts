@@ -15,14 +15,11 @@ import { HELL_APP_SHELL_DIRECTIVES } from './app-shell';
           class="hell-secondary-rail"
         ></button>
         <div hellAppSecondaryBody>
-          <header>
-            <button
-              hellSecondaryToggle
-              type="button"
-              class="hell-secondary-header-toggle"
-            ></button>
-            Title
-          </header>
+          <button
+            hellSecondaryToggle
+            type="button"
+            class="hell-secondary-header"
+          >Title</button>
           <p>Body</p>
         </div>
       </aside>
@@ -45,7 +42,7 @@ describe('HellAppShell secondary panel', () => {
     const aside = fixture.nativeElement.querySelector('aside') as HTMLElement;
     const body = aside.querySelector('.hell-secondary-body') as HTMLElement;
     const headerToggle = aside.querySelector(
-      'button.hell-secondary-header-toggle',
+      'button.hell-secondary-header',
     ) as HTMLButtonElement;
     const rail = aside.querySelector(
       'button.hell-secondary-rail',

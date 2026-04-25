@@ -43,10 +43,69 @@
       align-items: center;
       gap: var(--spacing-hell-3);
       background-color: var(--color-hell-surface-elevated);
-      padding-inline: var(--spacing-hell-4);
+      /* Leading padding is 0: the sidenav-toggle slot owns that gutter and
+         centers the toggle inside a column the width of the collapsed
+         sidenav, so it lines up with collapsed nav items below. */
+      padding-inline: 0 var(--spacing-hell-4);
       padding-block: calc(var(--spacing) * 0);
       border-bottom: 1px solid var(--color-hell-border);
       grid-area: topbar;
+    }
+
+  /*
+   * Sidenav toggle button — opt-in styled class for `[hellSidenavToggle]`.
+   * Sits in the topbar's leading slot. Outer width matches
+   * `--hell-app-sidenav-collapsed-width` so the visible 32×32 affordance
+   * lines up dead-centre with the collapsed nav-item icons beneath it.
+   */
+
+  .hell-shell-toggle {
+      position: relative;
+      display: inline-flex;
+      flex: 0 0 var(--hell-app-sidenav-collapsed-width);
+      align-items: center;
+      justify-content: center;
+      align-self: stretch;
+      cursor: pointer;
+      border: 0;
+      background: transparent;
+      padding: calc(var(--spacing) * 0);
+      color: var(--color-hell-foreground-muted);
+      font: inherit;
+      transition: color var(--hell-duration-fast) var(--ease-hell-out);
+      /* 32×32 hover surface — same footprint as a collapsed nav-item icon */
+      &::before {
+        content: '';
+        position: absolute;
+        height: calc(var(--spacing) * 8);
+        width: calc(var(--spacing) * 8);
+        border-radius: var(--radius-hell-md);
+        background-color: transparent;
+        transition: background-color var(--hell-duration-fast) var(--ease-hell-out);
+      }
+      /* The bars glyph itself, painted via mask so it tints with currentColor */
+      &::after {
+        content: '';
+        position: relative;
+        height: 14px;
+        width: 14px;
+        background-color: currentcolor;
+        -webkit-mask: var(--hell-icon-bars) center/contain no-repeat;
+        mask: var(--hell-icon-bars) center/contain no-repeat;
+      }
+      &:hover {
+        color: var(--color-hell-foreground);
+      }
+      &:hover::before {
+        background-color: var(--color-hell-surface-muted);
+      }
+      &:focus-visible {
+        outline: none;
+      }
+      &:focus-visible::before {
+        outline: 2px solid var(--color-hell-focus-ring);
+        outline-offset: 1px;
+      }
     }
 
   .hell-sidenav {
@@ -114,12 +173,19 @@
         & a > .hd-nav-label, & a > .hell-nav-label, & .hell-nav-item > .hd-nav-label, & .hell-nav-item > .hell-nav-label, & .hell-nav-item > .hell-nav-trailing {
           display: none;
         }
-        & .hd-nav-heading, & .hell-nav-section-label {
-          overflow: hidden;
-          padding-inline: calc(var(--spacing) * 0);
-          text-align: center;
-          font-size: 9px;
-          letter-spacing: 0.04em;
+          /* Free-text headings still disappear in rail mode. Collapsible
+            section headings get replaced by a divider drawn by
+            `.hell-nav-section::before`, so we only hide the button itself. */
+          & .hell-nav-section-toggle {
+          display: none;
+        }
+        /* Auto-expand collapsed sections so all items remain reachable when
+           the rail is in icon-only mode. */
+        & .hell-nav-section[data-collapsed='true'] > .hell-nav-section-items {
+          max-height: 2000px;
+          visibility: visible;
+          opacity: 1;
+          pointer-events: auto;
         }
       }
     }
@@ -171,41 +237,40 @@
     }
 
   /*
-   * Inline header toggle — small icon-only chevron button consumers place
-   * inside their secondary panel header row, to the left of the title.
-   * Sized to align with body text. Hidden along with the rest of panel
-   * content when the aside is collapsed (no special rules needed; it fades
-   * with its siblings).
-   *
-   *   ┌──────────────────────────────────────┐
-   *   │ ◂  About hell                        │
-   *   │                                      │
-   *   │ Body content...                      │
-   *   └──────────────────────────────────────┘
+   * Header-row toggle — the full secondary-panel header row acts as the
+   * collapse affordance. Render as
+   *   <button hellSecondaryToggle class="hell-secondary-header">Title</button>
+    * The whole row is clickable; a chevron is drawn on the leading edge so it
+    * reads as a panel collapse affordance, not a nav/link affordance.
    */
 
-  .hell-secondary-header-toggle {
-      margin: calc(var(--spacing) * 0);
-      display: inline-flex;
-      height: calc(var(--spacing) * 5.5);
-      width: calc(var(--spacing) * 5.5);
-      flex: 0 0 auto;
-      cursor: pointer;
+  .hell-secondary-header {
+      display: flex;
+      width: 100%;
       align-items: center;
-      justify-content: center;
-      border-radius: 0.25rem;
-      border-style: solid;
-      border-width: 0px;
-      background-color: transparent;
-      padding: calc(var(--spacing) * 0);
+      justify-content: flex-start;
+      gap: var(--spacing-hell-2);
+      cursor: pointer;
+      border: 0;
+      background: transparent;
+      margin: 0;
+      padding-inline: var(--spacing-hell-4);
+      padding-block: var(--spacing-hell-3);
       color: var(--color-hell-foreground-subtle);
       font: inherit;
-      transition: background var(--hell-duration-fast) var(--ease-hell-out),color var(--hell-duration-fast) var(--ease-hell-out);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-align: left;
+      border-bottom: 1px solid transparent;
+      transition: background var(--hell-duration-fast) var(--ease-hell-out),color var(--hell-duration-fast) var(--ease-hell-out),border-color var(--hell-duration-fast) var(--ease-hell-out);
       &::before {
+        content: '';
+        flex: 0 0 auto;
         height: calc(var(--spacing) * 3);
         width: calc(var(--spacing) * 3);
         background-color: currentcolor;
-        content: '';
         -webkit-mask: var(--hell-icon-chevron-right) center/contain no-repeat;
         mask: var(--hell-icon-chevron-right) center/contain no-repeat;
         transition: transform var(--hell-duration-fast) var(--ease-hell-out);
@@ -213,13 +278,14 @@
       &:hover {
         background-color: var(--color-hell-surface-subtle);
         color: var(--color-hell-foreground);
+        border-bottom-color: var(--color-hell-border);
       }
       &:hover::before {
-        transform: translateX(1px);
+        transform: translateX(2px);
       }
       &:focus-visible {
         outline: 2px solid var(--color-hell-focus-ring);
-        outline-offset: 1px;
+        outline-offset: -2px;
       }
     }
 
@@ -316,15 +382,101 @@
       }
     }
 
-  .hell-nav-section-label {
+  /*
+   * Collapsible nav section. Markup:
+   *
+   *   <div class="hell-nav-section" [attr.data-collapsed]="!open()">
+   *     <button class="hell-nav-section-toggle" (click)="open.set(!open())">
+   *       Primitives
+   *     </button>
+   *     <div class="hell-nav-section-items">
+   *       …items…
+   *     </div>
+   *   </div>
+   *
+   * The toggle is a full-width button with a chevron that rotates when the
+   * section opens. When the parent sidenav is collapsed (rail mode) the
+   * toggle is hidden and items are forced visible — see the rules in
+   * `[data-collapsed='true']` above.
+   */
+
+  .hell-nav-section {
+      display: flex;
+      flex-direction: column;
+      &::before {
+        content: '';
+        display: none;
+      }
+      .hell-sidenav[data-collapsed='true'] &::before {
+        display: block;
+        height: 1px;
+        margin-block: calc(var(--spacing) * 2);
+        margin-inline: calc(var(--spacing) * 2);
+        background-color: var(--color-hell-border);
+      }
+    }
+
+  .hell-nav-section-toggle {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-hell-2);
+      cursor: pointer;
+      border: 0;
+      background: transparent;
+      margin: 0;
+      margin-top: calc(var(--spacing) * 3);
       padding-inline: calc(var(--spacing) * 3);
-      padding-top: calc(var(--spacing) * 3.5);
-      padding-bottom: calc(var(--spacing) * 1);
+      padding-block: calc(var(--spacing) * 1.5);
+      font: inherit;
       font-size: 10px;
       font-weight: var(--font-weight-bold);
       letter-spacing: 0.08em;
-      color: var(--color-hell-foreground-subtle);
       text-transform: uppercase;
+      text-align: left;
+      color: var(--color-hell-foreground-subtle);
+      border-radius: var(--radius-hell-sm);
+      transition: background var(--hell-duration-fast) var(--ease-hell-out),color var(--hell-duration-fast) var(--ease-hell-out);
+      &::after {
+        content: '';
+        flex: 0 0 auto;
+        height: 10px;
+        width: 10px;
+        background-color: currentcolor;
+        -webkit-mask: var(--hell-icon-chevron-down) center/contain no-repeat;
+        mask: var(--hell-icon-chevron-down) center/contain no-repeat;
+        transition: transform var(--hell-duration-fast) var(--ease-hell-out);
+      }
+      &:hover {
+        background-color: var(--color-hell-surface-subtle);
+        color: var(--color-hell-foreground);
+      }
+      &:focus-visible {
+        outline: 2px solid var(--color-hell-focus-ring);
+        outline-offset: 1px;
+      }
+      .hell-nav-section[data-collapsed='true'] > &::after {
+        transform: rotate(-90deg);
+      }
+    }
+
+  .hell-nav-section-items {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--spacing) * 0.5);
+      overflow: hidden;
+      max-height: 2000px;
+      visibility: visible;
+      opacity: 1;
+      pointer-events: auto;
+      transition: max-height var(--hell-duration-base) var(--ease-hell-out),opacity var(--hell-duration-fast) var(--ease-hell-out),visibility var(--hell-duration-fast) var(--ease-hell-out);
+      .hell-nav-section[data-collapsed='true'] > & {
+        max-height: 0;
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+      }
     }
 
 }

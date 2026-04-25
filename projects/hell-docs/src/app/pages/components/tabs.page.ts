@@ -33,6 +33,9 @@ import { HELL_TABS_DIRECTIVES } from 'hell';
       </div>
 
       <h2>Vertical</h2>
+      <p class="hd-note">Each vertical tab reserves space for the active
+        indicator, so labels stay still when activation moves between
+        tabs — no horizontal jitter.</p>
       <div class="hd-example">
         <div hellTabset value="a" orientation="vertical">
           <div hellTabList>

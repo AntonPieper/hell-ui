@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { provideIcons } from '@ng-icons/core';
 import {
@@ -186,4 +186,27 @@ export class App {
       ],
     },
   ];
+
+  /**
+   * Per-section collapse state for the sidenav. Defaults to expanded; users
+   * click a section heading (which is itself a button) to fold the items
+   * underneath. State is keyed by heading text so it survives re-renders.
+   * The CSS in `[data-collapsed='true']` on `.hell-nav-section` hides the
+   * items list while the chevron in `.hell-nav-section-toggle::after`
+   * rotates from down → right.
+   */
+  private readonly collapsedSections = signal<ReadonlySet<string>>(new Set());
+
+  protected isSectionCollapsed(heading: string): boolean {
+    return this.collapsedSections().has(heading);
+  }
+
+  protected toggleSection(heading: string): void {
+    this.collapsedSections.update(current => {
+      const next = new Set(current);
+      if (next.has(heading)) next.delete(heading);
+      else next.add(heading);
+      return next;
+    });
+  }
 }

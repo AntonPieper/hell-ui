@@ -1,42 +1,132 @@
 @layer components {
 
-  /* Breadcrumbs. */
+  /*
+   * Breadcrumbs.
+   *
+   *   Home  ›  Projects  ›  Settings
+   *   ────  ─  ────────  ─  ────────
+   *   link  sep  link    sep  page (current)
+   *
+   * `[hellBreadcrumbSeparator]` paints a chevron-right icon by default via
+   *  CSS mask. Provide custom content (text, icon, slash) to override.
+   * `[hellBreadcrumbEllipsis]` paints three dots so consumers can collapse
+   *  long trails without importing an icon.
+   */
 
   .hell-breadcrumbs {
       display: inline-flex;
+      max-width: 100%;
       align-items: center;
-      gap: calc(var(--spacing) * 1);
-      font-size: var(--text-xs);
-      line-height: var(--text-xs--line-height);
+      font-size: var(--text-sm);
+      line-height: var(--text-sm--line-height);
       color: var(--color-hell-foreground-muted);
     }
 
   .hell-breadcrumb-list {
       margin: calc(var(--spacing) * 0);
       display: inline-flex;
+      flex-wrap: wrap;
       list-style-type: none;
       align-items: center;
-      gap: calc(var(--spacing) * 1);
+      gap: calc(var(--spacing) * 1.5);
       padding: calc(var(--spacing) * 0);
+      min-width: 0;
     }
 
   .hell-breadcrumbs-item {
       display: inline-flex;
       align-items: center;
       gap: calc(var(--spacing) * 1);
+      min-width: 0;
+    }
+
+  .hell-breadcrumbs-link {
+      display: inline-flex;
+      align-items: center;
+      gap: calc(var(--spacing) * 1);
+      max-width: 24ch;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      font: inherit;
       color: inherit;
-      text-decoration-line: none;
-      &:hover {
+      text-decoration: none;
+      border-radius: var(--radius-hell-sm);
+      transition: color var(--hell-duration-fast) var(--ease-hell-out);
+      &:hover, &[data-hover] {
         color: var(--color-hell-foreground);
+        text-decoration: underline;
+        text-underline-offset: 3px;
       }
-      &[aria-current="page"] {
-        font-weight: var(--font-weight-semibold);
-        color: var(--color-hell-foreground);
+      &[data-focus-visible] {
+        outline: 2px solid var(--color-hell-focus-ring);
+        outline-offset: 2px;
       }
     }
 
+  .hell-breadcrumbs-page {
+      display: inline-flex;
+      align-items: center;
+      gap: calc(var(--spacing) * 1);
+      max-width: 32ch;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-hell-foreground);
+    }
+
   .hell-breadcrumbs-separator {
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
       color: var(--color-hell-foreground-subtle);
+      /* Render the chevron when no custom content provided. */
+      &:empty::before {
+        content: '';
+        display: block;
+        height: 12px;
+        width: 12px;
+        background-color: currentcolor;
+        -webkit-mask: var(--hell-icon-chevron-right) center/contain no-repeat;
+        mask: var(--hell-icon-chevron-right) center/contain no-repeat;
+      }
+    }
+
+  .hell-breadcrumbs-ellipsis {
+      display: inline-flex;
+      height: calc(var(--spacing) * 6);
+      width: calc(var(--spacing) * 6);
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      font: inherit;
+      color: var(--color-hell-foreground-subtle);
+      border-radius: var(--radius-hell-sm);
+      transition: background var(--hell-duration-fast) var(--ease-hell-out),color var(--hell-duration-fast) var(--ease-hell-out);
+      &:empty::before {
+        content: '\2026'; /* horizontal ellipsis */
+        font-size: 1.1em;
+        line-height: 1;
+        letter-spacing: 0.04em;
+      }
+      &:hover, &[data-hover] {
+        background-color: var(--color-hell-surface-subtle);
+        color: var(--color-hell-foreground);
+      }
+      &[data-focus-visible] {
+        outline: 2px solid var(--color-hell-focus-ring);
+        outline-offset: 1px;
+      }
     }
 
 }
