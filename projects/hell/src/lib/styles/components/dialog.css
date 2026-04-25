@@ -5,12 +5,15 @@
   .hell-dialog-overlay {
       position: fixed;
       inset: calc(var(--spacing) * 0);
+      box-sizing: border-box;
       display: flex;
       align-items: center;
       justify-content: center;
       background-color: var(--color-hell-overlay);
       -webkit-backdrop-filter: blur(2px);
       backdrop-filter: blur(2px);
+      overflow: auto;
+      overscroll-behavior: contain;
       padding: var(--spacing-hell-6);
       z-index: 1000;
       animation: hell-fade-in var(--hell-duration-base) var(--ease-hell-out);
@@ -18,12 +21,8 @@
         animation: hell-fade-out var(--hell-duration-base) var(--ease-hell-out);
       }
       &[data-scoped="true"] {
-        position: fixed;
-        inset: auto;
-        top: var(--hell-dialog-scope-y,0);
-        left: var(--hell-dialog-scope-x,0);
-        width: var(--hell-dialog-scope-w,100vw);
-        height: var(--hell-dialog-scope-h,100vh);
+        inset: var(--hell-dialog-scope-top,0) var(--hell-dialog-scope-right,0)
+          var(--hell-dialog-scope-bottom,0) var(--hell-dialog-scope-left,0);
       }
     }
 
@@ -31,14 +30,9 @@
       display: flex;
       width: 100%;
       flex-direction: column;
-      background-color: var(--color-hell-surface-elevated);
-      border-style: solid;
-      border-width: 1px;
-      border-color: var(--color-hell-border);
-      border-radius: var(--radius-lg);
       box-shadow: var(--shadow-hell-overlay);
       max-width: 480px;
-      max-height: 90vh;
+      max-height: min(90vh, 100%);
       outline: none;
       animation: hell-dialog-in var(--hell-duration-base) var(--ease-hell-out);
       &[data-size="sm"] {
@@ -52,14 +46,8 @@
       }
     }
 
-  .hell-dialog-header {
-      display: flex;
+  .hell-dialog .hell-card-header {
       align-items: flex-start;
-      justify-content: space-between;
-      gap: var(--spacing-hell-4);
-      padding-inline: var(--spacing-hell-6);
-      padding-block: var(--spacing-hell-5);
-      border-bottom: 1px solid var(--color-hell-border);
     }
 
   .hell-dialog-title {
@@ -75,20 +63,10 @@
       margin: 4px 0 0;
     }
 
-  .hell-dialog-body {
+  .hell-dialog .hell-card-body {
       overflow: auto;
-      padding: var(--spacing-hell-6);
       font-size: 13px;
       color: var(--color-hell-foreground);
-    }
-
-  .hell-dialog-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: var(--spacing-hell-3);
-      padding-inline: var(--spacing-hell-6);
-      padding-block: var(--spacing-hell-4);
-      border-top: 1px solid var(--color-hell-border);
     }
 
 }

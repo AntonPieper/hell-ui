@@ -1,10 +1,10 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellButton, HELL_DIALOG_DIRECTIVES } from 'hell';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { HellButton, HELL_CARD_DIRECTIVES, HELL_DIALOG_DIRECTIVES } from 'hell';
 
 @Component({
   selector: 'hd-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, ...HELL_DIALOG_DIRECTIVES],
+  imports: [HellButton, ...HELL_CARD_DIRECTIVES, ...HELL_DIALOG_DIRECTIVES],
   template: `
     <article class="hd-prose">
       <h1>Dialog</h1>
@@ -21,15 +21,15 @@ import { HellButton, HELL_DIALOG_DIRECTIVES } from 'hell';
         <ng-template #confirm let-close="close">
           <div hellDialogOverlay>
             <div hellDialog size="md">
-              <div hellDialogHeader>
+              <div hellCardHeader>
                 <h2 hellDialogTitle>Publish this article?</h2>
               </div>
-              <div hellDialogBody>
+              <div hellCardBody>
                 <p hellDialogDescription>
                   Once published, the article will be visible to everyone.
                 </p>
               </div>
-              <div hellDialogFooter>
+              <div hellCardFooter>
                 <button hellButton variant="ghost" (click)="close()">Cancel</button>
                 <button hellButton variant="primary" (click)="close()">Publish</button>
               </div>
@@ -43,47 +43,52 @@ import { HellButton, HELL_DIALOG_DIRECTIVES } from 'hell';
         <li><code>[hellDialogTrigger]</code> — the element that opens the dialog</li>
         <li><code>hellDialogOverlay</code> — the dimmed backdrop</li>
         <li><code>hellDialog</code> — the dialog box itself</li>
-        <li><code>hellDialogHeader</code>, <code>hellDialogTitle</code>,
-          <code>hellDialogDescription</code>, <code>hellDialogBody</code>,
-          <code>hellDialogFooter</code> — semantic regions</li>
+        <li><code>hellCardHeader</code>, <code>hellCardBody</code>,
+          <code>hellCardFooter</code> — shared layout slots reused inside the dialog</li>
+        <li><code>hellDialogTitle</code>, <code>hellDialogDescription</code> — dialog-specific text primitives</li>
       </ul>
 
-      <h2>Scoped (non-blocking)</h2>
+      <h2>Scoped to app-shell content</h2>
       <p>
-        Apply <code>hellDialogScope</code> to a region (typically the main
-        content area) and add <code>scoped</code> on the overlay. The dialog
-        and its backdrop are then constrained to that region — the rest of
-        the page (sidebars, topbar, etc.) stays interactive.
+        Add <code>scoped</code> to the overlay and open the dialog from inside a
+        dialog root. This docs page already renders inside the docs app's
+        <code>hellAppContent</code>, so the dialog below only blocks the main
+        content region while the real topbar and sidebars stay interactive.
       </p>
       <div class="hd-example">
-        <div hellDialogScope class="relative flex h-64 items-start gap-3 rounded-md border border-hell-border p-4">
-          <button hellButton variant="primary" [hellDialogTrigger]="scoped">
-            Open scoped dialog
-          </button>
-          <p class="m-0 text-sm text-hell-foreground-muted">
-            The dialog overlay only covers this card. Try clicking outside it
-            (or anywhere else on the page) — interaction is preserved.
-          </p>
-        </div>
+        <p class="m-0 text-sm text-hell-foreground-muted">
+          Open it, then try the docs-site topbar links or sidenav. The overlay
+          stays inside the page content area.
+        </p>
+        <button hellButton variant="primary" [hellDialogTrigger]="scopedShell">
+          Open content-scoped dialog
+        </button>
 
-        <ng-template #scoped let-close="close">
+        <ng-template #scopedShell let-close="close">
           <div hellDialogOverlay scoped>
             <div hellDialog size="sm">
-              <div hellDialogHeader>
-                <h2 hellDialogTitle>Scoped dialog</h2>
+              <div hellCardHeader>
+                <h2 hellDialogTitle>Only docs content is blocked</h2>
               </div>
-              <div hellDialogBody>
+              <div hellCardBody>
                 <p hellDialogDescription>
-                  Confined to the bounds of <code>hellDialogScope</code>.
+                  The trigger already lives inside the docs app's
+                  <code>hellAppContent</code>, so the scoped overlay follows that
+                  region automatically.
                 </p>
               </div>
-              <div hellDialogFooter>
+              <div hellCardFooter>
                 <button hellButton variant="ghost" (click)="close()">Close</button>
               </div>
             </div>
           </div>
         </ng-template>
       </div>
+
+      <p class="hd-muted">
+        Need arbitrary region instead? Mark it with <code>hellDialogScope</code>
+        and keep <code>scoped</code> on overlay.
+      </p>
     </article>
   `,
 })
