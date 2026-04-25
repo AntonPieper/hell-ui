@@ -7,6 +7,15 @@
       min-width: calc(var(--spacing) * 0);
       flex-direction: column;
       gap: var(--spacing-hell-2);
+      &[data-orientation="horizontal"] {
+        flex-direction: row;
+        align-items: center;
+        gap: var(--spacing-hell-3);
+        flex-wrap: wrap;
+        & > .hell-field-description, & > .hell-field-error {
+          flex-basis: 100%;
+        }
+      }
     }
 
   .hell-field-label {

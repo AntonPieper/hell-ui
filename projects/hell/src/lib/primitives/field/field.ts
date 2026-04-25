@@ -21,10 +21,19 @@ import {
 @Directive({
   selector: '[hellField]',
   hostDirectives: [NgpFormField],
-  host: { '[class.hell-field]': '!unstyled()' },
+  host: {
+    '[class.hell-field]': '!unstyled()',
+    '[attr.data-orientation]': 'orientation()',
+  },
 })
 export class HellField {
   readonly unstyled = input(false, { transform: booleanAttribute });
+  /**
+   * Layout direction. `vertical` (default) stacks label / control /
+   * description / error. `horizontal` lays them out in a row — handy for
+   * checkbox + label or switch + label patterns.
+   */
+  readonly orientation = input<'vertical' | 'horizontal'>('vertical');
 }
 
 @Directive({
