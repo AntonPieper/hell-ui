@@ -1,0 +1,142 @@
+@layer components {
+
+  /*
+   * Time input — text field + clock trigger. Same shell as date-input so
+   * the two read as a pair. Picker pops up a 24-hour grid and a 5-minute
+   * grid with +/- 5m nudge buttons, replacing the old scrolling-column UI.
+   */
+
+  .hell-time-input {
+      position: relative;
+      display: inline-flex;
+      align-items: stretch;
+      width: 100%;
+      max-width: 12rem;
+      min-width: 9rem;
+      background-color: var(--color-hell-surface-elevated);
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--color-hell-border);
+      border-radius: var(--radius-md);
+      transition: border-color var(--hell-duration-fast) var(--ease-hell-out),
+                  box-shadow var(--hell-duration-fast) var(--ease-hell-out),
+                  background-color var(--hell-duration-fast) var(--ease-hell-out);
+      &:hover:not([data-disabled="true"]) {
+        border-color: var(--color-hell-border-strong);
+      }
+      &:focus-within:not([data-disabled="true"]) {
+        border-color: var(--color-hell-border-focus);
+        box-shadow: 0 0 0 3px var(--color-hell-focus-ring);
+      }
+      &[data-invalid="true"] {
+        border-color: var(--color-hell-danger);
+      }
+      &[data-disabled="true"] {
+        background-color: var(--color-hell-surface-subtle);
+        border-color: var(--color-hell-border);
+        cursor: not-allowed;
+        & .hell-time-input-field { color: var(--color-hell-foreground-muted); }
+      }
+    }
+
+  .hell-time-input-field {
+      flex: 1 1 auto;
+      min-width: 0;
+      height: var(--spacing-hell-control-md);
+      padding-inline: var(--spacing-hell-3);
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--color-hell-foreground);
+      background: transparent;
+      border: 0;
+      outline: 0;
+      border-radius: var(--radius-md);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+      &::placeholder { color: var(--color-hell-foreground-subtle); }
+      &:disabled { cursor: not-allowed; color: var(--color-hell-foreground-muted); }
+      &[data-size="sm"] { height: var(--spacing-hell-control-sm); padding-inline: var(--spacing-hell-2); font-size: 12px; }
+      &[data-size="lg"] { height: var(--spacing-hell-control-lg); padding-inline: var(--spacing-hell-4); font-size: 14px; }
+    }
+
+  .hell-time-input-trigger {
+      flex: 0 0 auto;
+      align-self: center;
+      margin-inline-end: var(--spacing-hell-1);
+      color: var(--color-hell-foreground-subtle);
+      &:hover { color: var(--color-hell-foreground); }
+    }
+
+  .hell-time-input[data-disabled="true"] .hell-time-input-trigger {
+      pointer-events: none;
+      color: var(--color-hell-foreground-subtle);
+      opacity: 0.5;
+    }
+
+  /*
+   * Time picker dial — header readout + nudges, then a sectioned grid of
+   * hour/minute (and optional second) buttons.
+   */
+
+  .hell-time-picker {
+      display: grid;
+      gap: var(--spacing-hell-3);
+      min-width: 14rem;
+      padding: var(--spacing-hell-2);
+    }
+
+  .hell-time-picker-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-hell-2);
+      padding-inline: var(--spacing-hell-2);
+    }
+
+  .hell-time-picker-readout {
+      font-size: var(--text-lg);
+      line-height: 1;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-hell-foreground);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+    }
+
+  .hell-time-picker-stepper {
+      display: inline-flex;
+      gap: var(--spacing-hell-1);
+    }
+
+  .hell-time-picker-section {
+      display: grid;
+      gap: var(--spacing-hell-1);
+    }
+
+  .hell-time-picker-section-label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-hell-foreground-subtle);
+      padding-inline: var(--spacing-hell-2);
+    }
+
+  .hell-time-picker-grid {
+      display: grid;
+      gap: var(--spacing-hell-1);
+    }
+
+  .hell-time-picker-grid-hours {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+  .hell-time-picker-grid-minutes {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+  .hell-time-picker-cell {
+      min-width: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+}

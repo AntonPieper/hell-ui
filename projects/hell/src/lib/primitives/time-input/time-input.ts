@@ -1,37 +1,25 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
   booleanAttribute,
   computed,
   effect,
   input,
   output,
   signal,
-  viewChildren,
 } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidClock } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../button/button';
 import { HellIcon } from '../icon/icon';
 import { HellPopover, HellPopoverTrigger } from '../popover/popover';
-import { HellSize } from '../../core/types';
+import type { HellSize } from '../../core/types';
 
 interface ParsedTime { h: number; m: number; s: number; }
 
 const HELL_TIME_INPUT_ICONS = {
   faSolidClock,
 };
-
-function parse(value: string | null | undefined): ParsedTime | null {
-  if (!value) return null;
-  const m = /^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/.exec(value);
-  if (!m) return null;
-  const h = +m[1], mm = +m[2], s = +(m[3] ?? '0');
-  if (h > 23 || mm > 59 || s > 59) return null;
-  return { h, m: mm, s };
-}
 
 function pad(n: number) { return n.toString().padStart(2, '0'); }
 
@@ -40,9 +28,38 @@ function format(t: ParsedTime, seconds: boolean) {
 }
 
 /**
- * Time input — styled trigger button paired with a scroll-column time
- * picker popover. Bind `[value]` (`HH:mm` or `HH:mm:ss`) and listen to
- * `(valueChange)`. Pass `[seconds]="true"` to expose a seconds column.
+ * Parse `HH:mm`, `HH:mm:ss` and a couple of common 12-hour spellings
+ * (`9:00 am`, `1:30PM`). Returns `null` for empty / unparseable input so
+ * the caller can decide whether to revert.
+ */
+function tryParse(text: string): ParsedTime | null {
+  const t = text.trim().toLowerCase();
+  if (!t) return null;
+  const ampm = /^(\d{1,2})(?::(\d{1,2}))?(?::(\d{1,2}))?\s*(am|pm)$/.exec(t);
+  if (ampm) {
+    let h = +ampm[1];
+    const m = +(ampm[2] ?? '0');
+    const s = +(ampm[3] ?? '0');
+    if (h === 12) h = 0;
+    if (ampm[4] === 'pm') h += 12;
+    if (h > 23 || m > 59 || s > 59) return null;
+    return { h, m, s };
+  }
+  const m = /^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/.exec(t);
+  if (!m) return null;
+  const h = +m[1], mm = +m[2], s = +(m[3] ?? '0');
+  if (h > 23 || mm > 59 || s > 59) return null;
+  return { h, m: mm, s };
+}
+
+/**
+ * Time input — text field paired with a clock icon trigger that opens a
+ * dial-style picker. Bind `[value]` as `"HH:mm"` (or `"HH:mm:ss"` with
+ * `[seconds]="true"`) and listen to `(valueChange)`.
+ *
+ * The picker is a compact 3×3 dial: hour and minute buttons in a grid you
+ * can click directly, plus +/- 5 minute nudges, instead of the previous
+ * scroll-column UX which felt clumsy.
  */
 @Component({
   selector: 'hell-time-input',
@@ -56,63 +73,103 @@ function format(t: ParsedTime, seconds: boolean) {
     '[attr.data-disabled]': 'disabled() ? "true" : null',
   },
   template: `
+    <input
+      type="text"
+      class="hell-time-input-field"
+      inputmode="numeric"
+      autocomplete="off"
+      [attr.data-size]="size()"
+      [attr.aria-invalid]="invalid() ? 'true' : null"
+      [attr.aria-label]="ariaLabel()"
+      [disabled]="disabled()"
+      [placeholder]="seconds() ? 'HH:MM:SS' : 'HH:MM'"
+      [value]="display()"
+      (input)="onInput($any($event.target).value)"
+      (blur)="onBlur()"
+      (keydown.enter)="commit($any($event.target).value, $event)"
+    />
     <button
       hellButton
       variant="ghost"
+      size="sm"
+      iconOnly
       type="button"
-      class="hell-date-input-trigger"
+      class="hell-time-input-trigger"
       [hellPopoverTrigger]="picker"
-      placement="bottom-start"
+      placement="bottom-end"
       [disabled]="disabled()"
-      [attr.aria-label]="ariaLabel()"
+      [attr.aria-label]="ariaLabel() ?? 'Choose time'"
+      tabindex="-1"
     >
-      <hell-icon name="faSolidClock" class="hell-date-input-icon" />
-      <span class="hell-date-input-value">{{ formatted() || placeholder() }}</span>
+      <hell-icon name="faSolidClock" />
     </button>
 
     <ng-template #picker>
-      <div hellPopover>
-        <div class="hell-time-picker">
-          <div class="hell-time-picker-column" #col data-unit="h">
+      <div hellPopover class="hell-time-picker">
+        <div class="hell-time-picker-header">
+          <span class="hell-time-picker-readout">{{ format(current(), seconds()) }}</span>
+          <div class="hell-time-picker-stepper">
+            <button hellButton variant="ghost" size="sm" type="button"
+                    (click)="nudge('m', -5)" aria-label="Subtract 5 minutes">−5m</button>
+            <button hellButton variant="ghost" size="sm" type="button"
+                    (click)="nudge('m', 5)" aria-label="Add 5 minutes">+5m</button>
+          </div>
+        </div>
+
+        <div class="hell-time-picker-section">
+          <div class="hell-time-picker-section-label">Hours</div>
+          <div class="hell-time-picker-grid hell-time-picker-grid-hours">
             @for (h of hours; track h) {
               <button
+                hellButton
+                [variant]="h === current().h ? 'primary' : 'ghost'"
+                size="sm"
                 type="button"
                 class="hell-time-picker-cell"
-                [attr.data-selected]="h === current().h ? 'true' : null"
                 (click)="setUnit('h', h)"
               >{{ pad(h) }}</button>
             }
           </div>
-          <div class="hell-time-picker-divider">:</div>
-          <div class="hell-time-picker-column" #col data-unit="m">
+        </div>
+
+        <div class="hell-time-picker-section">
+          <div class="hell-time-picker-section-label">Minutes</div>
+          <div class="hell-time-picker-grid hell-time-picker-grid-minutes">
             @for (m of minutes; track m) {
               <button
+                hellButton
+                [variant]="m === current().m ? 'primary' : 'ghost'"
+                size="sm"
                 type="button"
                 class="hell-time-picker-cell"
-                [attr.data-selected]="m === current().m ? 'true' : null"
                 (click)="setUnit('m', m)"
               >{{ pad(m) }}</button>
             }
           </div>
-          @if (seconds()) {
-            <div class="hell-time-picker-divider">:</div>
-            <div class="hell-time-picker-column" #col data-unit="s">
+        </div>
+
+        @if (seconds()) {
+          <div class="hell-time-picker-section">
+            <div class="hell-time-picker-section-label">Seconds</div>
+            <div class="hell-time-picker-grid hell-time-picker-grid-minutes">
               @for (s of secondsList; track s) {
                 <button
+                  hellButton
+                  [variant]="s === current().s ? 'primary' : 'ghost'"
+                  size="sm"
                   type="button"
                   class="hell-time-picker-cell"
-                  [attr.data-selected]="s === current().s ? 'true' : null"
                   (click)="setUnit('s', s)"
                 >{{ pad(s) }}</button>
               }
             </div>
-          }
-        </div>
+          </div>
+        }
       </div>
     </ng-template>
   `,
 })
-export class HellTimeInput implements AfterViewInit {
+export class HellTimeInput {
   readonly unstyled = input(false, { transform: booleanAttribute });
   readonly size = input<HellSize>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
@@ -124,48 +181,72 @@ export class HellTimeInput implements AfterViewInit {
 
   readonly valueChange = output<string>();
 
+  // Hour grid: 24h in a 6×4. Minute/second grids: every 5 in a 4×3.
   protected readonly hours = Array.from({ length: 24 }, (_, i) => i);
-  protected readonly minutes = Array.from({ length: 60 }, (_, i) => i);
-  protected readonly secondsList = Array.from({ length: 60 }, (_, i) => i);
+  protected readonly minutes = Array.from({ length: 12 }, (_, i) => i * 5);
+  protected readonly secondsList = Array.from({ length: 12 }, (_, i) => i * 5);
   protected readonly pad = pad;
+  protected readonly format = format;
 
   private readonly local = signal<ParsedTime | null>(null);
+  /** Raw user text while typing — overrides the formatted display. */
+  private readonly typed = signal<string | null>(null);
+
   protected readonly current = computed<ParsedTime>(
-    () => parse(this.value()) ?? this.local() ?? { h: 0, m: 0, s: 0 },
+    () => tryParse(this.value() ?? '') ?? this.local() ?? { h: 0, m: 0, s: 0 },
   );
-  protected readonly formatted = computed(() => {
-    const v = parse(this.value()) ?? this.local();
+
+  protected readonly display = computed<string>(() => {
+    const t = this.typed();
+    if (t !== null) return t;
+    const v = tryParse(this.value() ?? '') ?? this.local();
     return v ? format(v, this.seconds()) : '';
   });
 
-  private readonly cols = viewChildren<ElementRef<HTMLElement>>('col');
-
   constructor() {
     effect(() => {
-      const t = this.current();
-      const list = this.cols();
-      if (!list.length) return;
-      queueMicrotask(() => this.scrollTo(list, t));
+      this.value();
+      this.typed.set(null);
     });
   }
 
-  ngAfterViewInit(): void {
-    queueMicrotask(() => this.scrollTo(this.cols(), this.current()));
+  protected onInput(value: string) {
+    this.typed.set(value);
+  }
+
+  protected onBlur() {
+    const t = this.typed();
+    if (t === null) return;
+    this.commit(t);
+  }
+
+  protected commit(text: string, event?: Event) {
+    event?.preventDefault();
+    this.typed.set(null);
+    const parsed = tryParse(text);
+    if (parsed) {
+      this.local.set(parsed);
+      this.valueChange.emit(format(parsed, this.seconds()));
+    }
   }
 
   protected setUnit(unit: 'h' | 'm' | 's', n: number) {
     const t = { ...this.current(), [unit]: n } as ParsedTime;
+    this.typed.set(null);
     this.local.set(t);
     this.valueChange.emit(format(t, this.seconds()));
   }
 
-  private scrollTo(cols: readonly ElementRef<HTMLElement>[], t: ParsedTime) {
-    for (const col of cols) {
-      const el = col.nativeElement;
-      const unit = el.dataset['unit'] as 'h' | 'm' | 's';
-      const idx = unit === 'h' ? t.h : unit === 'm' ? t.m : t.s;
-      const cell = el.children[idx] as HTMLElement | undefined;
-      if (cell) el.scrollTop = cell.offsetTop - el.clientHeight / 2 + cell.clientHeight / 2;
-    }
+  protected nudge(unit: 'h' | 'm' | 's', delta: number) {
+    const t = { ...this.current() };
+    if (unit === 'h') t.h = (t.h + delta + 24) % 24;
+    else if (unit === 'm') {
+      const totalMinutes = (t.h * 60 + t.m + delta + 24 * 60) % (24 * 60);
+      t.h = Math.floor(totalMinutes / 60);
+      t.m = totalMinutes % 60;
+    } else t.s = (t.s + delta + 60) % 60;
+    this.typed.set(null);
+    this.local.set(t);
+    this.valueChange.emit(format(t, this.seconds()));
   }
 }

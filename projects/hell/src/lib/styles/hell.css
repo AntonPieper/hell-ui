@@ -38,6 +38,8 @@
 @import "./components/breadcrumbs.css";
 @import "./components/pagination.css";
 @import "./components/date-picker.css";
+@import "./components/date-input.css";
+@import "./components/time-input.css";
 @import "./components/app-shell.css";
 @import "./components/resizable.css";
 @import "./components/audio-player.css";

@@ -15,18 +15,32 @@
     }
 
   .hell-date-picker-header {
-      display: flex;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
       align-items: center;
-      justify-content: space-between;
-      height: calc(var(--spacing) * 8);
+      justify-items: center;
+      column-gap: var(--spacing-hell-2);
+      min-height: calc(var(--spacing) * 8);
       margin-bottom: var(--spacing-hell-3);
+    }
+
+  .hell-date-picker-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-hell-1);
     }
 
   .hell-date-picker-label {
       font-size: 13px;
       font-weight: var(--font-weight-semibold);
       color: var(--color-hell-foreground);
-      margin: calc(var(--spacing) * 0);
+      margin: 0;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
     }
 
   .hell-date-picker-grid {
@@ -80,6 +94,15 @@
           background-color: var(--color-hell-primary);
           color: var(--color-hell-primary-foreground);
         }
+        &[data-range-start], &[data-range-end] {
+          background-color: var(--color-hell-primary);
+          color: var(--color-hell-primary-foreground);
+        }
+        &[data-range-between] {
+          background-color: var(--color-hell-primary-100);
+          color: var(--color-hell-foreground);
+          border-radius: 0;
+        }
         &[data-disabled] {
           cursor: not-allowed;
           color: var(--color-hell-foreground-subtle);
@@ -88,133 +111,7 @@
       }
     }
 
-  /* Native date / time inputs. Calendar/clock indicator tinted, padding
-     tweaked so the picker icon doesn't clip. */
-
-  .hell-date-input {
-      display: inline-flex;
-      min-width: 11rem;
-      & > .hell-date-input-trigger {
-        width: 100%;
-        justify-content: flex-start;
-        gap: var(--spacing-hell-2);
-        font-variant-numeric: tabular-nums;
-      }
-      & .hell-date-input-icon {
-        color: var(--color-hell-foreground-subtle);
-        flex-shrink: 0;
-      }
-      & .hell-date-input-value {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        text-align: start;
-        flex: 1 1 auto;
-        color: var(--color-hell-foreground);
-      }
-      &[data-invalid="true"] > .hell-date-input-trigger {
-        border-color: var(--color-hell-danger,var(--color-hell-border));
-      }
-      &[data-size="sm"] > .hell-date-input-trigger {
-        color: var(--text-sm);
-      }
-      &[data-size="lg"] > .hell-date-input-trigger {
-        color: var(--text-sm);
-      }
-    }
-
-  .hell-time-input {
-      display: inline-flex;
-      min-width: 9rem;
-      & > .hell-time-input-trigger {
-        width: 100%;
-        justify-content: flex-start;
-        gap: var(--spacing-hell-2);
-        font-variant-numeric: tabular-nums;
-      }
-      & .hell-time-input-icon {
-        color: var(--color-hell-foreground-subtle);
-        flex-shrink: 0;
-      }
-      & .hell-time-input-value {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        text-align: start;
-        flex: 1 1 auto;
-        color: var(--color-hell-foreground);
-      }
-      &[data-invalid="true"] > .hell-time-input-trigger {
-        border-color: var(--color-hell-danger,var(--color-hell-border));
-      }
-      &[data-size="sm"] > .hell-time-input-trigger {
-        color: var(--text-sm);
-      }
-      &[data-size="lg"] > .hell-time-input-trigger {
-        color: var(--text-sm);
-      }
-    }
-
-  .hell-time-picker {
-      display: flex;
-      align-items: stretch;
-      gap: var(--spacing-hell-2);
-      background-color: var(--color-hell-surface-elevated);
-      border-style: solid;
-      border-width: 1px;
-      border-color: var(--color-hell-border);
-      border-radius: var(--radius-md);
-      padding: var(--spacing-hell-2);
-      box-shadow: var(--shadow-hell-sm);
-      min-width: 200px;
-    }
-
-  .hell-time-picker-column {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      flex: 1 1 0;
-      min-width: calc(var(--spacing) * 14);
-      height: 200px;
-      overflow-y: auto;
-      scroll-snap-type: y mandatory;
-      scrollbar-width: thin;
-      border-radius: 0.25rem;
-      background-color: var(--color-hell-surface-subtle);
-    }
-
-  .hell-time-picker-cell {
-      display: flex;
-      cursor: pointer;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: calc(var(--spacing) * 8);
-      flex-shrink: 0;
-      scroll-snap-align: center;
-      font-size: var(--text-sm);
-      line-height: var(--text-sm--line-height);
-      font-variant-numeric: tabular-nums;
-      color: var(--color-hell-foreground-muted);
-      background-color: transparent;
-      border-style: solid;
-      border-width: 0px;
-      font-family: inherit;
-      &:hover {
-        background-color: var(--color-hell-surface-muted);
-        color: var(--color-hell-foreground);
-      }
-      &[data-selected="true"] {
-        background-color: var(--color-hell-primary);
-        color: var(--color-hell-primary-foreground);
-        font-weight: var(--font-weight-semibold);
-      }
-    }
-
-  .hell-time-picker-divider {
-      align-self: center;
-      font-size: 18px;
-      color: var(--color-hell-foreground-subtle);
-    }
+  /* Date / time input styles live in their own files now (date-input.css /
+     time-input.css) — see hell.css imports. */
 
 }

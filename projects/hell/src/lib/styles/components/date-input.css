@@ -1,0 +1,77 @@
+@layer components {
+
+  /*
+   * Date input — text field + right-aligned calendar trigger button. The
+   * field is the primary control: users type or paste freely; the icon
+   * opens an inline date picker popover. The host is the visual border
+   * (focus ring, invalid state, disabled wash) so the inner input and
+   * button can stay borderless and feel like one widget.
+   */
+
+  .hell-date-input {
+      position: relative;
+      display: inline-flex;
+      align-items: stretch;
+      width: 100%;
+      max-width: 14rem;
+      min-width: 10rem;
+      background-color: var(--color-hell-surface-elevated);
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--color-hell-border);
+      border-radius: var(--radius-md);
+      transition: border-color var(--hell-duration-fast) var(--ease-hell-out),
+                  box-shadow var(--hell-duration-fast) var(--ease-hell-out),
+                  background-color var(--hell-duration-fast) var(--ease-hell-out);
+      &:hover:not([data-disabled="true"]) {
+        border-color: var(--color-hell-border-strong);
+      }
+      &:focus-within:not([data-disabled="true"]) {
+        border-color: var(--color-hell-border-focus);
+        box-shadow: 0 0 0 3px var(--color-hell-focus-ring);
+      }
+      &[data-invalid="true"] {
+        border-color: var(--color-hell-danger);
+      }
+      &[data-disabled="true"] {
+        background-color: var(--color-hell-surface-subtle);
+        border-color: var(--color-hell-border);
+        cursor: not-allowed;
+        & .hell-date-input-field { color: var(--color-hell-foreground-muted); }
+      }
+    }
+
+  .hell-date-input-field {
+      flex: 1 1 auto;
+      min-width: 0;
+      height: var(--spacing-hell-control-md);
+      padding-inline: var(--spacing-hell-3);
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--color-hell-foreground);
+      background: transparent;
+      border: 0;
+      outline: 0;
+      border-radius: var(--radius-md);
+      font-variant-numeric: tabular-nums;
+      &::placeholder { color: var(--color-hell-foreground-subtle); }
+      &:disabled { cursor: not-allowed; color: var(--color-hell-foreground-muted); }
+      &[data-size="sm"] { height: var(--spacing-hell-control-sm); padding-inline: var(--spacing-hell-2); font-size: 12px; }
+      &[data-size="lg"] { height: var(--spacing-hell-control-lg); padding-inline: var(--spacing-hell-4); font-size: 14px; }
+    }
+
+  .hell-date-input-trigger {
+      flex: 0 0 auto;
+      align-self: center;
+      margin-inline-end: var(--spacing-hell-1);
+      color: var(--color-hell-foreground-subtle);
+      &:hover { color: var(--color-hell-foreground); }
+    }
+
+  .hell-date-input[data-disabled="true"] .hell-date-input-trigger {
+      pointer-events: none;
+      color: var(--color-hell-foreground-subtle);
+      opacity: 0.5;
+    }
+
+}

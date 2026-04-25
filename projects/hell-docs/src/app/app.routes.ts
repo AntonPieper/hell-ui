@@ -23,7 +23,7 @@ export const routes: Routes = [
   { path: 'components/card', loadComponent: () => import('./pages/components/card.page').then((m) => m.CardPage) },
   { path: 'components/checkbox', loadComponent: () => import('./pages/components/checkbox.page').then((m) => m.CheckboxPage) },
   { path: 'components/date-input', loadComponent: () => import('./pages/components/date-input.page').then((m) => m.DateInputPage) },
-  { path: 'components/date-picker', loadComponent: () => import('./pages/components/date-picker.page').then((m) => m.DatePickerPage) },
+  { path: 'components/date-picker', redirectTo: 'components/date-input' },
   { path: 'components/dialog', loadComponent: () => import('./pages/components/dialog.page').then((m) => m.DialogPage) },
   { path: 'components/field', loadComponent: () => import('./pages/components/field.page').then((m) => m.FieldPage) },
   { path: 'components/flyout', loadComponent: () => import('./pages/components/flyout.page').then((m) => m.FlyoutPage) },
