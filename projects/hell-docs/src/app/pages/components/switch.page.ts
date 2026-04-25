@@ -10,23 +10,25 @@ import { HellSwitch } from 'hell';
       <h1>Switch</h1>
       <p>Use for binary on/off settings whose effect is applied immediately.
         For deferred values that are committed on submit, prefer
-        <code>checkbox</code>.</p>
+        <code>checkbox</code>. The host is a <code>&lt;button&gt;</code>, so
+        wrapping in a <code>&lt;label&gt;</code> toggles it natively.</p>
 
-      <h2>Example</h2>
-      <div class="hd-example grid gap-2">
+      <h2>Examples</h2>
+      <div class="hd-example grid gap-2 max-w-md">
         <label class="inline-flex items-center gap-3">
-          <hell-switch
+          <button
+            hellSwitch
             [checked]="notify()"
             (checkedChange)="notify.set($event)"
-          />
+          ></button>
           Email notifications
         </label>
-        <label class="inline-flex items-center gap-3 opacity-60">
-          <hell-switch disabled />
+        <label class="inline-flex items-center gap-3">
+          <button hellSwitch disabled></button>
           Disabled
         </label>
         <label class="inline-flex items-center gap-3">
-          <hell-switch checked disabled />
+          <button hellSwitch checked disabled></button>
           Disabled, on
         </label>
       </div>

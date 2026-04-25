@@ -4,10 +4,14 @@ import { NgpCheckbox, injectCheckboxState } from 'ng-primitives/checkbox';
 /**
  * Styled checkbox built on `NgpCheckbox`. Forwards `checked`, `indeterminate`,
  * `disabled` and `required` to the host directive and emits `checkedChange`.
- * Renders a checkmark / dash glyph based on the primitive state.
+ *
+ * The host is a real `<button>` — a natively labelable element — so wrapping
+ * it in a `<label>` (directly, or via any `<label for>` mechanism such as
+ * `hellField`) makes label clicks toggle the checkbox with zero wiring on
+ * our side.
  */
 @Component({
-  selector: 'hell-checkbox',
+  selector: 'button[hellCheckbox]',
   changeDetection: ChangeDetectionStrategy.OnPush,
   hostDirectives: [
     {
@@ -25,6 +29,7 @@ import { NgpCheckbox, injectCheckboxState } from 'ng-primitives/checkbox';
     },
   ],
   host: {
+    type: 'button',
     '[class.hell-checkbox]': '!unstyled()',
   },
   template: `
