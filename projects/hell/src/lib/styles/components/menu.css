@@ -3,6 +3,7 @@
   /* Menu — surface, items, sections, separators, submenu indicator. */
 
   .hell-menu {
+      --hell-menu-inline-gutter: var(--spacing-hell-2);
       display: flex;
       flex-direction: column;
       position: fixed;
@@ -17,25 +18,47 @@
       outline: none;
       gap: 1px;
       animation: hell-pop-in var(--hell-duration-fast) var(--ease-hell-out);
+      &[data-submenu="true"] {
+        /* Compensate surface padding + row gap so the first submenu item
+           aligns with the trigger row rather than sitting a few pixels low. */
+        margin-block-start: calc(var(--spacing-hell-2) * -1 - 1px);
+        &[data-placement^="right"] {
+          margin-left: calc(var(--hell-menu-inline-gutter) * -1);
+        }
+        &[data-placement^="left"] {
+          margin-left: var(--hell-menu-inline-gutter);
+        }
+      }
     }
 
   .hell-menu-item {
       display: flex;
       cursor: pointer;
       align-items: center;
+      position: relative;
+      isolation: isolate;
       text-align: start;
       gap: var(--spacing-hell-3);
-      padding-inline: calc(var(--spacing) * 2.5);
+      margin-inline: calc(var(--hell-menu-inline-gutter) * -1 - 1px);
+      padding-inline: calc(var(--spacing) * 2.5 + var(--hell-menu-inline-gutter) + 1px);
       padding-block: calc(var(--spacing) * 1.5);
       font-size: 13px;
       color: var(--color-hell-foreground);
       background-color: transparent;
       border-style: solid;
       border-width: 0px;
-      border-radius: 0.25rem;
       outline: none;
       font-family: inherit;
-      &[data-hover], &[data-focus-visible], &[data-open] {
+      &::before {
+        content: '';
+        position: absolute;
+        inset-block: 0;
+        inset-inline: var(--hell-menu-inline-gutter);
+        border-radius: 0.25rem;
+        background-color: transparent;
+        z-index: -1;
+      }
+      &[data-hover]::before, &[data-focus-visible]::before, &[data-open]::before {
         background-color: var(--color-hell-surface-muted);
       }
       &[data-disabled] {

@@ -1,5 +1,12 @@
 import { Directive, booleanAttribute, input } from '@angular/core';
-import { NgpMenu, NgpMenuItem, NgpMenuTrigger, NgpSubmenuTrigger } from 'ng-primitives/menu';
+import type { Signal } from '@angular/core';
+import {
+  NgpMenu,
+  NgpMenuItem,
+  NgpMenuTrigger,
+  NgpSubmenuTrigger,
+  injectSubmenuTriggerState,
+} from 'ng-primitives/menu';
 
 @Directive({
   selector: '[hellMenuTrigger]',
@@ -44,10 +51,12 @@ export class HellSubmenuTrigger {
   hostDirectives: [NgpMenu],
   host: {
     '[class.hell-menu]': '!unstyled()',
+    '[attr.data-submenu]': 'submenuTrigger() ? "true" : null',
   },
 })
 export class HellMenu {
   readonly unstyled = input(false, { transform: booleanAttribute });
+  protected readonly submenuTrigger: Signal<unknown> = injectSubmenuTriggerState({ optional: true });
 }
 
 @Directive({
