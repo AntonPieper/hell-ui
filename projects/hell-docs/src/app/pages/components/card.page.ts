@@ -33,6 +33,31 @@ import { HELL_CARD_DIRECTIVES, HellButton } from 'hell';
         </div>
       </div>
 
+      <h2>Without header</h2>
+      <p>Cards are composable — drop the header (and footer) when the body
+        speaks for itself.</p>
+      <div class="hd-example grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">
+        <div hellCard>
+          <div hellCardBody>
+            A plain body. No header, no footer — just a surface that groups
+            content.
+          </div>
+        </div>
+        <div hellCard [elevation]="2">
+          <div hellCardBody class="flex flex-col gap-2">
+            <strong>Quick stat</strong>
+            <span class="text-3xl font-semibold">128</span>
+            <span class="hd-muted text-xs">Active sessions</span>
+          </div>
+        </div>
+        <div hellCard>
+          <div hellCardBody class="flex items-center justify-between gap-3">
+            <span>Enable analytics</span>
+            <button hellButton variant="primary" size="sm">Enable</button>
+          </div>
+        </div>
+      </div>
+
       <h2>With footer</h2>
       <div class="hd-example">
         <div hellCard class="max-w-95">

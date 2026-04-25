@@ -56,11 +56,44 @@ import { HELL_RESIZABLE_DIRECTIVES } from 'hell';
         </div>
       </div>
 
+      <h2>Grip handle</h2>
+      <p>Set <code>appearance="grip"</code> for a pill-shaped handle with a
+        three-dot indicator. Use this when the handle is the primary
+        affordance — e.g. user-resizable inspector panels — and the default
+        hairline reads as decorative.</p>
+      <div class="hd-example hd-example-flush">
+        <div hellResizable orientation="horizontal" class="h-[200px]">
+          <div hellResizablePane [initialFlex]="1" class="hd-surface-elevated p-4">
+            Sidebar
+          </div>
+          <div hellResizableHandle appearance="grip"></div>
+          <div hellResizablePane [initialFlex]="2" class="hd-surface-subtle p-4">
+            Main
+          </div>
+          <div hellResizableHandle appearance="grip"></div>
+          <div hellResizablePane [initialFlex]="1" class="hd-surface-elevated p-4">
+            Inspector
+          </div>
+        </div>
+      </div>
+
+      <div class="hd-example hd-example-flush mt-3">
+        <div hellResizable orientation="vertical" class="flex h-[260px] flex-col">
+          <div hellResizablePane [initialFlex]="1" class="hd-surface-elevated p-4">
+            Editor
+          </div>
+          <div hellResizableHandle appearance="grip"></div>
+          <div hellResizablePane [initialFlex]="1" class="hd-surface-subtle p-4">
+            Console
+          </div>
+        </div>
+      </div>
+
       <h2>API</h2>
       <ul>
         <li><code>hellResizable</code>: <code>orientation</code> (<code>horizontal | vertical</code>)</li>
         <li><code>hellResizablePane</code>: <code>initialFlex</code>, <code>minSize</code> (px)</li>
-        <li><code>hellResizableHandle</code>: place between two panes</li>
+        <li><code>hellResizableHandle</code>: <code>appearance</code> (<code>line | grip</code>) — place between two panes</li>
       </ul>
     </article>
   `,

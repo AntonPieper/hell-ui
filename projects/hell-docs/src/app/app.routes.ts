@@ -36,6 +36,7 @@ export const routes: Routes = [
   { path: 'components/radio', loadComponent: () => import('./pages/components/radio.page').then((m) => m.RadioPage) },
   { path: 'components/separator', loadComponent: () => import('./pages/components/separator.page').then((m) => m.SeparatorPage) },
   { path: 'components/skeleton', loadComponent: () => import('./pages/components/skeleton.page').then((m) => m.SkeletonPage) },
+  { path: 'components/spinner', loadComponent: () => import('./pages/components/spinner.page').then((m) => m.SpinnerPage) },
   { path: 'components/slider', loadComponent: () => import('./pages/components/slider.page').then((m) => m.SliderPage) },
   { path: 'components/switch', loadComponent: () => import('./pages/components/switch.page').then((m) => m.SwitchPage) },
   { path: 'components/tabs', loadComponent: () => import('./pages/components/tabs.page').then((m) => m.TabsPage) },
