@@ -64,7 +64,10 @@ const EXIT_MS = 220;
 @Injectable({ providedIn: 'root' })
 export class HellToastService {
   private nextId = 1;
-  private timers = new Map<number, { handle: ReturnType<typeof setTimeout>; remaining: number; startedAt: number }>();
+  private timers = new Map<
+    number,
+    { handle: ReturnType<typeof setTimeout>; remaining: number; startedAt: number }
+  >();
 
   /** Reactive list of currently mounted toasts (oldest → newest). */
   readonly toasts = signal<ToastInternal[]>([]);
@@ -137,7 +140,11 @@ export class HellToastService {
     for (const [id, t] of this.timers) {
       clearTimeout(t.handle);
       const elapsed = Date.now() - t.startedAt;
-      this.timers.set(id, { handle: 0 as unknown as ReturnType<typeof setTimeout>, remaining: Math.max(0, t.remaining - elapsed), startedAt: Date.now() });
+      this.timers.set(id, {
+        handle: 0 as unknown as ReturnType<typeof setTimeout>,
+        remaining: Math.max(0, t.remaining - elapsed),
+        startedAt: Date.now(),
+      });
     }
   }
 
@@ -193,90 +200,116 @@ export class HellToastTemplate {}
     '[attr.data-expanded]': 'expanded() ? "true" : null',
   },
   template: `
-    <ol
-      class="hell-toaster-list"
-      role="region"
-      aria-label="Notifications"
-      tabindex="-1"
-      (mouseenter)="onEnter()"
-      (mouseleave)="onLeave()"
-      (focusin)="onEnter()"
-      (focusout)="onLeave()"
-    >
-      @for (t of svc.toasts(); track t.id; let i = $index) {
-        <li
-          class="hell-toast"
-          [attr.data-variant]="t.variant"
-          [attr.data-state]="t.removing ? 'closed' : 'open'"
-          [attr.data-front]="frontDistance(t)"
-          [attr.data-visible]="frontDistance(t) < maxVisible() ? 'true' : 'false'"
-          [attr.data-overflow]="overflow(t) > 0 ? overflow(t) : null"
-          [style.--hell-toast-front]="frontDistance(t)"
-          [style.--hell-toast-overflow]="overflow(t)"
-          [style.--hell-toast-offset]="offsetPx(t)"
-          [style.--hell-toast-h]="heightPx(t.id)"
-          [style.zIndex]="i + 1"
-          (mouseenter)="svc.pauseAll()"
-          (mouseleave)="svc.resumeAll()"
-        >
-          <div class="hell-toast-glyph" aria-hidden="true">
-            @switch (t.variant) {
-              @case ('success') {
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6.5"/><path d="M5 8.5l2 2 4-4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    @if (hasToasts()) {
+      <ol
+        class="hell-toaster-list"
+        role="region"
+        aria-label="Notifications"
+        tabindex="-1"
+        (mouseenter)="onEnter()"
+        (mouseleave)="onLeave()"
+        (focusin)="onEnter()"
+        (focusout)="onLeave()"
+      >
+        @for (t of svc.toasts(); track t.id; let i = $index) {
+          <li
+            class="hell-toast"
+            [attr.data-variant]="t.variant"
+            [attr.data-state]="t.removing ? 'closed' : 'open'"
+            [attr.data-front]="frontDistance(t)"
+            [attr.data-visible]="frontDistance(t) < maxVisible() ? 'true' : 'false'"
+            [attr.data-overflow]="overflow(t) > 0 ? overflow(t) : null"
+            [style.--hell-toast-front]="frontDistance(t)"
+            [style.--hell-toast-overflow]="overflow(t)"
+            [style.--hell-toast-offset]="offsetPx(t)"
+            [style.--hell-toast-h]="heightPx(t.id)"
+            [style.zIndex]="i + 1"
+            (mouseenter)="svc.pauseAll()"
+            (mouseleave)="svc.resumeAll()"
+          >
+            <div class="hell-toast-glyph" aria-hidden="true">
+              @switch (t.variant) {
+                @case ('success') {
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="8" cy="8" r="6.5" />
+                    <path d="M5 8.5l2 2 4-4.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                }
+                @case ('danger') {
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="8" cy="8" r="6.5" />
+                    <path d="M5.5 5.5l5 5m0-5l-5 5" stroke-linecap="round" />
+                  </svg>
+                }
+                @case ('warning') {
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 1.5L15 14H1L8 1.5z" stroke-linejoin="round" />
+                    <path d="M8 6v3.5M8 11.8v.4" stroke-linecap="round" />
+                  </svg>
+                }
+                @case ('info') {
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="8" cy="8" r="6.5" />
+                    <path d="M8 7v4M8 4.6v.4" stroke-linecap="round" />
+                  </svg>
+                }
+                @default {
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="8" cy="8" r="6.5" />
+                  </svg>
+                }
               }
-              @case ('danger') {
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6.5"/><path d="M5.5 5.5l5 5m0-5l-5 5" stroke-linecap="round"/></svg>
+            </div>
+
+            <div class="hell-toast-body">
+              @if (t.template) {
+                <ng-container
+                  [ngTemplateOutlet]="t.template"
+                  [ngTemplateOutletContext]="{ $implicit: ctxFor(t.id) }"
+                />
+              } @else {
+                @if (t.title) {
+                  <div class="hell-toast-title">{{ t.title }}</div>
+                }
+                @if (t.description) {
+                  <div class="hell-toast-desc">{{ t.description }}</div>
+                }
               }
-              @case ('warning') {
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 1.5L15 14H1L8 1.5z" stroke-linejoin="round"/><path d="M8 6v3.5M8 11.8v.4" stroke-linecap="round"/></svg>
-              }
-              @case ('info') {
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6.5"/><path d="M8 7v4M8 4.6v.4" stroke-linecap="round"/></svg>
-              }
-              @default {
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6.5"/></svg>
-              }
+            </div>
+
+            @if (t.action) {
+              <button
+                type="button"
+                class="hell-toast-action"
+                (click)="t.action!.onClick(() => svc.dismiss(t.id))"
+              >
+                {{ t.action.label }}
+              </button>
             }
-          </div>
 
-          <div class="hell-toast-body">
-            @if (t.template) {
-              <ng-container
-                [ngTemplateOutlet]="t.template"
-                [ngTemplateOutletContext]="{ $implicit: ctxFor(t.id) }"
-              />
-            } @else {
-              @if (t.title) { <div class="hell-toast-title">{{ t.title }}</div> }
-              @if (t.description) { <div class="hell-toast-desc">{{ t.description }}</div> }
+            @if (t.dismissible) {
+              <button
+                type="button"
+                class="hell-toast-close"
+                aria-label="Dismiss"
+                (click)="svc.dismiss(t.id)"
+              >
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4l8 8m0-8l-8 8" stroke-linecap="round" />
+                </svg>
+              </button>
             }
-          </div>
-
-          @if (t.action) {
-            <button
-              type="button"
-              class="hell-toast-action"
-              (click)="t.action!.onClick(() => svc.dismiss(t.id))"
-            >{{ t.action.label }}</button>
-          }
-
-          @if (t.dismissible) {
-            <button
-              type="button"
-              class="hell-toast-close"
-              aria-label="Dismiss"
-              (click)="svc.dismiss(t.id)"
-            >
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l8 8m0-8l-8 8" stroke-linecap="round"/></svg>
-            </button>
-          }
-        </li>
-      }
-    </ol>
+          </li>
+        }
+      </ol>
+    }
   `,
 })
 export class HellToaster {
   readonly svc = inject(HellToastService);
   private readonly host: HTMLElement = inject(ElementRef).nativeElement;
+
+  protected readonly hasToasts = computed(() => this.svc.toasts().length > 0);
 
   readonly unstyled = input(false, { transform: booleanAttribute });
   readonly position = input<HellToastPosition>('bottom-right');
@@ -303,6 +336,13 @@ export class HellToaster {
       // including peers that may be exiting in parallel) so it matches what
       // the user actually sees on screen.
       const list = this.svc.toasts();
+      if (list.length === 0) {
+        if (this.collapseHandle != null) {
+          clearTimeout(this.collapseHandle);
+          this.collapseHandle = null;
+        }
+        this.expanded.set(false);
+      }
       const map = this.heights();
       const gap = 12;
       const cap = this.maxVisible();
@@ -323,7 +363,10 @@ export class HellToaster {
       }
       // Drop snapshots for ids that no longer exist.
       for (const id of [...snap.keys()]) {
-        if (!list.some((t) => t.id === id)) { snap.delete(id); changed = true; }
+        if (!list.some((t) => t.id === id)) {
+          snap.delete(id);
+          changed = true;
+        }
       }
       if (changed) this.exitSnapshot.set(snap);
       // Re-observe after the list changed.
@@ -456,7 +499,10 @@ export class HellToaster {
     const next = new Map(this.heights());
     let trimmed = false;
     for (const id of next.keys()) {
-      if (!seen.has(id)) { next.delete(id); trimmed = true; }
+      if (!seen.has(id)) {
+        next.delete(id);
+        trimmed = true;
+      }
     }
     if (trimmed) this.heights.set(next);
   }
