@@ -1,6 +1,6 @@
 @layer components {
 
-  /* Avatar + Avatar group + overflow indicator. */
+  /* Avatar. */
 
   .hell-avatar {
       position: relative;
@@ -22,6 +22,7 @@
       color: var(--color-hell-primary-soft-foreground);
       -webkit-user-select: none;
       user-select: none;
+      transition: border-color var(--hell-duration-fast) var(--ease-hell-out);
       --_hell-av-size: 32px;
       & > img {
         height: 100%;
@@ -46,31 +47,6 @@
       &[data-shape='square'] {
         border-radius: var(--radius-md);
       }
-    }
-
-  .hell-avatar-group {
-      display: inline-flex;
-      align-items: center;
-      & > .hell-avatar:not(:first-child) {
-        margin-inline-start: calc(var(--spacing) * -2);
-      }
-    }
-
-  .hell-avatar-overflow {
-      margin-inline-start: calc(var(--spacing) * -2);
-      display: inline-flex;
-      height: var(--_hell-av-size,32px);
-      width: var(--_hell-av-size,32px);
-      align-items: center;
-      justify-content: center;
-      border-radius: calc(infinity * 1px);
-      border-style: solid;
-      border-width: 2px;
-      border-color: var(--color-hell-surface-elevated);
-      background-color: var(--color-hell-surface-muted);
-      font-size: 11px;
-      font-weight: var(--font-weight-semibold);
-      color: var(--color-hell-foreground-muted);
     }
 
 }

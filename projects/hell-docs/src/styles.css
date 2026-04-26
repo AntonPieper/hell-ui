@@ -136,6 +136,57 @@
       color: var(--color-hell-danger);
     }
 
+  .hd-avatar-group-pad {
+      --_hell-avatar-group-cutout: var(--color-hell-surface);
+      padding: var(--spacing-hell-3);
+    }
+
+  .hd-avatar-group-lg {
+      --_hell-avatar-group-cutout: var(--color-hell-surface);
+    }
+
+  .hd-avatar-group-action {
+      transform: translateY(0) scale(1);
+      transition: filter var(--hell-duration-fast) var(--ease-hell-out), transform var(--hell-duration-fast) var(--ease-hell-out);
+      &:hover {
+        filter: saturate(1.08) brightness(0.96);
+      }
+    }
+
+  .hell-avatar-group-item.hd-avatar-group-action:hover {
+      transform: translateY(-1px) scale(1.03);
+    }
+
+  .hd-avatar-menu-trigger {
+      gap: 2px;
+      color: var(--color-hell-foreground);
+    }
+
+  .hd-avatar-menu {
+      min-width: 260px;
+    }
+
+  .hd-avatar-menu-label {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-hell-2);
+    }
+
+  .hd-avatar-menu-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      width: auto;
+    }
+
+  .hd-avatar-menu-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 13px;
+    }
+
   .hd-secondary-inner {
       padding: var(--spacing-hell-5) var(--spacing-hell-4);
       display: flex;

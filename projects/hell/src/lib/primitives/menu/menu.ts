@@ -56,12 +56,19 @@ export class HellSubmenuTrigger {
 })
 export class HellMenu {
   readonly unstyled = input(false, { transform: booleanAttribute });
-  protected readonly submenuTrigger: Signal<unknown> = injectSubmenuTriggerState({ optional: true });
+  protected readonly submenuTrigger: Signal<unknown> = injectSubmenuTriggerState({
+    optional: true,
+  });
 }
 
 @Directive({
-  selector: 'button[hellMenuItem], a[hellMenuItem]',
-  hostDirectives: [{ directive: NgpMenuItem, inputs: ['ngpMenuItemDisabled:disabled'] }],
+  selector: 'button[hellMenuItem], a[hellMenuItem], div[hellMenuItem]',
+  hostDirectives: [
+    {
+      directive: NgpMenuItem,
+      inputs: ['ngpMenuItemDisabled:disabled', 'ngpMenuItemCloseOnSelect:closeOnSelect'],
+    },
+  ],
   host: { '[class.hell-menu-item]': '!unstyled()' },
 })
 export class HellMenuItem {
