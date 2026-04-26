@@ -1,5 +1,4 @@
 @layer components {
-
   /*
    * Slider — wraps NgpSlider primitives.
    *
@@ -11,158 +10,185 @@
    */
 
   .hell-slider {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      width: 100%;
-      height: calc(var(--spacing) * 6);
-      touch-action: none;
-      -webkit-user-select: none;
-      user-select: none;
-      cursor: pointer;
-      &[data-disabled] {
-        opacity: 50%;
-        cursor: not-allowed;
-        pointer-events: none;
-      }
-      &[data-orientation="vertical"] {
-        width: calc(var(--spacing) * 6);
-        height: 160px;
-        flex-direction: column;
-      }
-      &[data-size="sm"] {
-        height: calc(var(--spacing) * 5);
-      }
-      &[data-size="lg"] {
-        height: calc(var(--spacing) * 7);
-      }
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+    height: calc(var(--spacing) * 6);
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    &[data-disabled] {
+      opacity: 50%;
+      cursor: not-allowed;
+      pointer-events: none;
     }
+    &[data-orientation='vertical'] {
+      width: calc(var(--spacing) * 6);
+      height: 160px;
+      flex-direction: column;
+    }
+    &[data-size='sm'] {
+      height: calc(var(--spacing) * 5);
+    }
+    &[data-size='lg'] {
+      height: calc(var(--spacing) * 7);
+    }
+  }
 
   .hell-slider-track {
-      position: relative;
-      flex: 1 1 auto;
+    position: relative;
+    flex: 1 1 auto;
+    align-self: stretch;
+    background-color: transparent;
+    &::before {
+      content: '';
+      position: absolute;
+      inset-inline: calc(var(--spacing) * 0);
+      top: 50%;
+      translate: 0 calc(calc(1 / 2 * 100%) * -1);
+      height: calc(var(--spacing) * 1.5);
+      border-radius: calc(infinity * 1px);
+      background-color: var(--color-hell-surface-muted);
+      box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.05);
+      pointer-events: none;
+    }
+    [data-orientation='vertical'] > & {
       align-self: stretch;
-      background-color: transparent;
+      width: auto;
+      flex: 1 1 auto;
       &::before {
-        content: '';
-        position: absolute;
-        inset-inline: calc(var(--spacing) * 0);
-        top: 50%;
-        translate: 0 calc(calc(1 / 2 * 100%) * -1);
-        height: calc(var(--spacing) * 1.5);
-        border-radius: calc(infinity * 1px);
-        background-color: var(--color-hell-surface-muted);
-        box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.05);
-        pointer-events: none;
-      }
-      [data-orientation="vertical"] > & {
-        align-self: stretch;
-        width: auto;
-        flex: 1 1 auto;
-        &::before {
-          inset-inline: calc(1 / 2 * 100%);
-          top: calc(var(--spacing) * 0);
-          bottom: calc(var(--spacing) * 0);
-          translate: calc(calc(1 / 2 * 100%) * -1) 0;
-          width: calc(var(--spacing) * 1.5);
-          height: auto;
-        }
-      }
-      [data-size="sm"] > &::before {
-        height: calc(var(--spacing) * 1);
-      }
-      [data-size="lg"] > &::before {
-        height: calc(var(--spacing) * 2);
-      }
-      [data-orientation="vertical"][data-size="sm"] > &::before {
-        width: calc(var(--spacing) * 1);
-        height: auto;
-      }
-      [data-orientation="vertical"][data-size="lg"] > &::before {
-        width: calc(var(--spacing) * 2);
+        inset-inline: calc(1 / 2 * 100%);
+        top: calc(var(--spacing) * 0);
+        bottom: calc(var(--spacing) * 0);
+        translate: calc(calc(1 / 2 * 100%) * -1) 0;
+        width: calc(var(--spacing) * 1.5);
         height: auto;
       }
     }
+    [data-size='sm'] > &::before {
+      height: calc(var(--spacing) * 1);
+    }
+    [data-size='lg'] > &::before {
+      height: calc(var(--spacing) * 2);
+    }
+    [data-orientation='vertical'][data-size='sm'] > &::before {
+      width: calc(var(--spacing) * 1);
+      height: auto;
+    }
+    [data-orientation='vertical'][data-size='lg'] > &::before {
+      width: calc(var(--spacing) * 2);
+      height: auto;
+    }
+  }
 
   .hell-slider-range {
-      position: absolute;
-      top: 50%;
-      height: calc(var(--spacing) * 1.5);
-      translate: 0 calc(calc(1 / 2 * 100%) * -1);
-      border-radius: calc(infinity * 1px);
-      background-image: linear-gradient( 180deg, var(--color-hell-primary), var(--color-hell-primary) );
-      @supports (color: color-mix(in lab, red, red)) {
-        background-image: linear-gradient( 180deg, color-mix(in srgb, var(--color-hell-primary) 92%, white), var(--color-hell-primary) );
-      }
-      box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.08);
-      pointer-events: none;
-      [data-orientation="vertical"] > [ngpSliderTrack] > & {
-        inset-inline: calc(1 / 2 * 100%);
-        top: auto;
-        height: auto;
-        width: calc(var(--spacing) * 1.5);
-        translate: calc(calc(1 / 2 * 100%) * -1) 0;
-      }
-      [data-size="sm"] > [ngpSliderTrack] > & {
-        height: calc(var(--spacing) * 1);
-      }
-      [data-size="lg"] > [ngpSliderTrack] > & {
-        height: calc(var(--spacing) * 2);
-      }
+    position: absolute;
+    top: 50%;
+    height: calc(var(--spacing) * 1.5);
+    translate: 0 calc(calc(1 / 2 * 100%) * -1);
+    border-radius: calc(infinity * 1px);
+    background-image: linear-gradient(180deg, var(--color-hell-primary), var(--color-hell-primary));
+    @supports (color: color-mix(in lab, red, red)) {
+      background-image: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--color-hell-primary) 92%, white),
+        var(--color-hell-primary)
+      );
     }
+    box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.08);
+    pointer-events: none;
+    [data-orientation='vertical'] > [ngpSliderTrack] > & {
+      inset-inline: calc(1 / 2 * 100%);
+      top: auto;
+      height: auto;
+      width: calc(var(--spacing) * 1.5);
+      translate: calc(calc(1 / 2 * 100%) * -1) 0;
+    }
+    [data-size='sm'] > [ngpSliderTrack] > & {
+      height: calc(var(--spacing) * 1);
+    }
+    [data-size='lg'] > [ngpSliderTrack] > & {
+      height: calc(var(--spacing) * 2);
+    }
+  }
 
   .hell-slider-thumb {
-      position: absolute;
-      display: block;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background-color: var(--color-white);
-      --_hell-slider-thumb-border: var(--color-hell-primary);
-      --_hell-slider-thumb-shadow: 0 1px 2px rgb(0 0 0 / 0.15), 0 0 0 0 var(--color-hell-primary);
-      --_hell-slider-thumb-ring-hover: var(--color-hell-primary);
-      --_hell-slider-thumb-ring-press: var(--color-hell-primary);
-      --_hell-slider-thumb-x: calc(calc(1 / 2 * 100%) * -1);
-      --_hell-slider-thumb-y: 0;
-      border-style: solid;
-      border-width: 1px;
-      border-color: var(--_hell-slider-thumb-border);
-      @supports (color: color-mix(in lab, red, red)) {
-        --_hell-slider-thumb-border: color-mix(in srgb, var(--color-hell-primary) 35%, var(--color-hell-border));
-        --_hell-slider-thumb-shadow: 0 1px 2px rgb(0 0 0 / 0.15), 0 0 0 0 color-mix(in srgb, var(--color-hell-primary) 25%, transparent);
-        --_hell-slider-thumb-ring-hover: color-mix(in srgb, var(--color-hell-primary) 14%, transparent);
-        --_hell-slider-thumb-ring-press: color-mix(in srgb, var(--color-hell-primary) 18%, transparent);
-      }
-      box-shadow: var(--_hell-slider-thumb-shadow);
-      outline: none;
-      translate: var(--_hell-slider-thumb-x) var(--_hell-slider-thumb-y);
-      cursor: grab;
-      transition: scale var(--hell-duration-fast) var(--ease-hell-out), box-shadow var(--hell-duration-fast) var(--ease-hell-out), border-color var(--hell-duration-fast) var(--ease-hell-out);
-      [data-orientation="vertical"] > & {
-        --_hell-slider-thumb-y: calc(1 / 2 * 100%);
-      }
-      [data-size="sm"] > & {
-        width: 14px;
-        height: 14px;
-      }
-      [data-size="lg"] > & {
-        width: 22px;
-        height: 22px;
-      }
-      &[data-hover] {
-        scale: 1.08;
-        border-color: var(--color-hell-primary);
-        box-shadow: 0 2px 6px rgb(0 0 0 / 0.18), 0 0 0 6px var(--_hell-slider-thumb-ring-hover);
-      }
-      &[data-press] {
-        cursor: grabbing;
-        scale: 0.96;
-        box-shadow: 0 1px 2px rgb(0 0 0 / 0.18), 0 0 0 8px var(--_hell-slider-thumb-ring-press);
-      }
-      &[data-focus-visible] {
-        box-shadow: 0 1px 2px rgb(0 0 0 / 0.18), 0 0 0 4px var(--color-hell-focus-ring);
-      }
+    position: absolute;
+    display: block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: var(--color-white);
+    --_hell-slider-thumb-border: var(--color-hell-primary);
+    --_hell-slider-thumb-shadow: 0 1px 2px rgb(0 0 0 / 0.15), 0 0 0 0 var(--color-hell-primary);
+    --_hell-slider-thumb-ring-hover: var(--color-hell-primary);
+    --_hell-slider-thumb-ring-press: var(--color-hell-primary);
+    --_hell-slider-thumb-x: calc(calc(1 / 2 * 100%) * -1);
+    --_hell-slider-thumb-y: 0;
+    border-style: solid;
+    border-width: 1px;
+    border-color: var(--_hell-slider-thumb-border);
+    @supports (color: color-mix(in lab, red, red)) {
+      --_hell-slider-thumb-border: color-mix(
+        in srgb,
+        var(--color-hell-primary) 35%,
+        var(--color-hell-border)
+      );
+      --_hell-slider-thumb-shadow:
+        0 1px 2px rgb(0 0 0 / 0.15),
+        0 0 0 0 color-mix(in srgb, var(--color-hell-primary) 25%, transparent);
+      --_hell-slider-thumb-ring-hover: color-mix(
+        in srgb,
+        var(--color-hell-primary) 14%,
+        transparent
+      );
+      --_hell-slider-thumb-ring-press: color-mix(
+        in srgb,
+        var(--color-hell-primary) 18%,
+        transparent
+      );
     }
+    box-shadow: var(--_hell-slider-thumb-shadow);
+    outline: none;
+    translate: var(--_hell-slider-thumb-x) var(--_hell-slider-thumb-y);
+    cursor: grab;
+    transition:
+      scale var(--hell-duration-fast) var(--ease-hell-out),
+      box-shadow var(--hell-duration-fast) var(--ease-hell-out),
+      border-color var(--hell-duration-fast) var(--ease-hell-out);
+    [data-orientation='vertical'] > & {
+      --_hell-slider-thumb-y: calc(1 / 2 * 100%);
+    }
+    [data-size='sm'] > & {
+      width: 14px;
+      height: 14px;
+    }
+    [data-size='lg'] > & {
+      width: 22px;
+      height: 22px;
+    }
+    &[data-hover] {
+      scale: 1.08;
+      border-color: var(--color-hell-primary);
+      box-shadow:
+        0 2px 6px rgb(0 0 0 / 0.18),
+        0 0 0 6px var(--_hell-slider-thumb-ring-hover);
+    }
+    &[data-press] {
+      cursor: grabbing;
+      scale: 0.96;
+      box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.18),
+        0 0 0 8px var(--_hell-slider-thumb-ring-press);
+    }
+    &[data-focus-visible] {
+      box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.18),
+        0 0 0 4px var(--color-hell-focus-ring);
+    }
+  }
 
   /*
    * Variants
@@ -172,54 +198,60 @@
    * `data-grow="true"`   — expand the track on hover/focus/press without
    * affecting layout (host height stays constant).
    */
-  .hell-slider[data-thumb="hover"] {
-      .hell-slider-thumb {
-        scale: 0;
-        transition: scale var(--hell-duration-fast) var(--ease-hell-out),
-                    box-shadow var(--hell-duration-fast) var(--ease-hell-out),
-                    border-color var(--hell-duration-fast) var(--ease-hell-out);
-      }
-      /*
+  .hell-slider[data-thumb='hover'] {
+    .hell-slider-thumb {
+      scale: 0;
+      transition:
+        scale var(--hell-duration-fast) var(--ease-hell-out),
+        box-shadow var(--hell-duration-fast) var(--ease-hell-out),
+        border-color var(--hell-duration-fast) var(--ease-hell-out);
+    }
+    /*
        * Show the thumb on hover, while pressed (drag), or when keyboard-
        * focused. We deliberately avoid `:focus-within` because the thumb
        * retains DOM focus after a click-drag releases — that would leave
        * the thumb stuck visible until the user clicks elsewhere.
        */
-      &:hover .hell-slider-thumb,
-      .hell-slider-thumb[data-hover],
-      .hell-slider-thumb[data-press],
-      .hell-slider-thumb[data-focus-visible] {
-        scale: 1;
-      }
-      .hell-slider-thumb[data-press] { scale: 0.96; }
+    &:hover .hell-slider-thumb,
+    &[data-active-drag='true'] .hell-slider-thumb,
+    .hell-slider-thumb[data-hover],
+    .hell-slider-thumb[data-press],
+    .hell-slider-thumb[data-focus-visible] {
+      scale: 1;
     }
+    &[data-active-drag='true'] .hell-slider-thumb,
+    .hell-slider-thumb[data-press] {
+      scale: 0.96;
+    }
+  }
 
-  .hell-slider[data-grow="true"] {
-      --_hell-slider-track-h: calc(var(--spacing) * 1.5);
-      --_hell-slider-track-h-active: calc(var(--spacing) * 2.5);
-      .hell-slider-track::before,
-      .hell-slider-range {
-        height: var(--_hell-slider-track-h);
-        transition: height var(--hell-duration-fast) var(--ease-hell-out);
-      }
-      &:hover .hell-slider-track::before,
-      &:hover .hell-slider-range,
-      &:active .hell-slider-track::before,
-      &:active .hell-slider-range,
-      &:has(.hell-slider-thumb[data-press]) .hell-slider-track::before,
-      &:has(.hell-slider-thumb[data-press]) .hell-slider-range,
-      &:has(.hell-slider-thumb[data-focus-visible]) .hell-slider-track::before,
-      &:has(.hell-slider-thumb[data-focus-visible]) .hell-slider-range {
-        height: var(--_hell-slider-track-h-active);
-      }
+  .hell-slider[data-grow='true'] {
+    --_hell-slider-track-h: calc(var(--spacing) * 1.5);
+    --_hell-slider-track-h-active: calc(var(--spacing) * 2.5);
+    .hell-slider-track::before,
+    .hell-slider-range {
+      height: var(--_hell-slider-track-h);
+      transition: height var(--hell-duration-fast) var(--ease-hell-out);
     }
-  .hell-slider[data-grow="true"][data-size="sm"] {
-      --_hell-slider-track-h: calc(var(--spacing) * 1);
-      --_hell-slider-track-h-active: calc(var(--spacing) * 2);
+    &:hover .hell-slider-track::before,
+    &:hover .hell-slider-range,
+    &:active .hell-slider-track::before,
+    &:active .hell-slider-range,
+    &[data-active-drag='true'] .hell-slider-track::before,
+    &[data-active-drag='true'] .hell-slider-range,
+    &:has(.hell-slider-thumb[data-press]) .hell-slider-track::before,
+    &:has(.hell-slider-thumb[data-press]) .hell-slider-range,
+    &:has(.hell-slider-thumb[data-focus-visible]) .hell-slider-track::before,
+    &:has(.hell-slider-thumb[data-focus-visible]) .hell-slider-range {
+      height: var(--_hell-slider-track-h-active);
     }
-  .hell-slider[data-grow="true"][data-size="lg"] {
-      --_hell-slider-track-h: calc(var(--spacing) * 2);
-      --_hell-slider-track-h-active: calc(var(--spacing) * 3);
-    }
-
+  }
+  .hell-slider[data-grow='true'][data-size='sm'] {
+    --_hell-slider-track-h: calc(var(--spacing) * 1);
+    --_hell-slider-track-h-active: calc(var(--spacing) * 2);
+  }
+  .hell-slider[data-grow='true'][data-size='lg'] {
+    --_hell-slider-track-h: calc(var(--spacing) * 2);
+    --_hell-slider-track-h-active: calc(var(--spacing) * 3);
+  }
 }

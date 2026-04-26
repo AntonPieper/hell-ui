@@ -1,11 +1,4 @@
-import {
-  DOCUMENT,
-  Directive,
-  ElementRef,
-  booleanAttribute,
-  inject,
-  input,
-} from '@angular/core';
+import { DOCUMENT, Directive, ElementRef, booleanAttribute, inject, input } from '@angular/core';
 import type { Subscription } from 'rxjs';
 import {
   NgpDialog,
@@ -97,8 +90,14 @@ export class HellDialogTrigger {
 
     const styles = this.doc.documentElement.style;
     styles.setProperty('--hell-dialog-scope-top', `${Math.max(0, rect.top)}px`);
-    styles.setProperty('--hell-dialog-scope-right', `${Math.max(0, win.innerWidth - rect.right)}px`);
-    styles.setProperty('--hell-dialog-scope-bottom', `${Math.max(0, win.innerHeight - rect.bottom)}px`);
+    styles.setProperty(
+      '--hell-dialog-scope-right',
+      `${Math.max(0, win.innerWidth - rect.right)}px`,
+    );
+    styles.setProperty(
+      '--hell-dialog-scope-bottom',
+      `${Math.max(0, win.innerHeight - rect.bottom)}px`,
+    );
     styles.setProperty('--hell-dialog-scope-left', `${Math.max(0, rect.left)}px`);
   }
 
@@ -128,6 +127,7 @@ export class HellDialogTrigger {
   hostDirectives: [NgpDialogOverlay],
   host: {
     '[class.hell-dialog-overlay]': '!unstyled()',
+    '[class.hell-backdrop]': '!unstyled()',
     '[attr.data-scoped]': 'scoped() ? "true" : null',
   },
 })

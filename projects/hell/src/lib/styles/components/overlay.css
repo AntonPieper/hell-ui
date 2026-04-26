@@ -1,0 +1,43 @@
+@layer components {
+  :root {
+    --hell-z-dialog-scoped: 1000;
+    --hell-z-app-backdrop: 1080;
+    --hell-z-app-drawer: 1090;
+    --hell-z-dialog: 1200;
+  }
+
+  /* Shared backdrop treatment for modal-ish overlays. Keep app-shell mobile
+     drawer scrims and dialog overlays visually aligned here. */
+  .hell-backdrop,
+  .hell-shell::before {
+    background-color: var(--color-hell-overlay);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+  }
+
+  .hell-backdrop {
+    animation: hell-backdrop-in var(--hell-duration-base) var(--ease-hell-out);
+  }
+
+  .hell-backdrop[data-exit] {
+    animation: hell-backdrop-out var(--hell-duration-base) var(--ease-hell-out);
+  }
+}
+
+@keyframes hell-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes hell-backdrop-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

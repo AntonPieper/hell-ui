@@ -1,18 +1,15 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   booleanAttribute,
   inject,
   input,
+  signal,
   viewChild,
 } from '@angular/core';
-import {
-  NgpSlider,
-  NgpSliderRange,
-  NgpSliderThumb,
-  NgpSliderTrack,
-} from 'ng-primitives/slider';
+import { NgpSlider, NgpSliderRange, NgpSliderThumb, NgpSliderTrack } from 'ng-primitives/slider';
 import { HellSize } from '../../core/types';
 
 /**
@@ -45,21 +42,14 @@ import { HellSize } from '../../core/types';
     '[attr.data-size]': 'size()',
     '[attr.data-thumb]': 'thumb()',
     '[attr.data-grow]': 'grow() ? "true" : null',
+    '[attr.data-active-drag]': 'activeDrag() ? "true" : null',
+    '(pointerdown)': 'markActiveDrag($event)',
   },
   template: `
-    <div
-      ngpSliderTrack
-      class="hell-slider-track"
-      (pointerdown)="continueAsDrag($event)"
-    >
+    <div ngpSliderTrack class="hell-slider-track" (pointerdown)="continueAsDrag($event)">
       <div ngpSliderRange class="hell-slider-range"></div>
     </div>
-    <div
-      #thumb
-      ngpSliderThumb
-      class="hell-slider-thumb"
-      [attr.aria-label]="ariaLabel()"
-    ></div>
+    <div #thumb ngpSliderThumb class="hell-slider-thumb" [attr.aria-label]="ariaLabel()"></div>
   `,
 })
 export class HellSlider {
@@ -78,7 +68,15 @@ export class HellSlider {
    */
   readonly grow = input(false, { transform: booleanAttribute });
 
+  protected readonly activeDrag = signal(false);
+
   private readonly thumbRef = viewChild.required<ElementRef<HTMLElement>>('thumb');
+  private readonly destroyRef = inject(DestroyRef);
+  private removeActiveDragListeners: (() => void) | null = null;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => this.removeActiveDragListeners?.());
+  }
 
   /**
    * ng-primitives' track only sets the value on click; it doesn't initiate
@@ -86,6 +84,7 @@ export class HellSlider {
    * click-and-drag from anywhere on the track in one fluid motion.
    */
   protected continueAsDrag(e: PointerEvent) {
+    e.preventDefault();
     this.thumbRef().nativeElement.dispatchEvent(
       new PointerEvent('pointerdown', {
         bubbles: true,
@@ -98,5 +97,25 @@ export class HellSlider {
         buttons: e.buttons,
       }),
     );
+  }
+
+  protected markActiveDrag(e: PointerEvent) {
+    if (e.button !== 0) return;
+    this.activeDrag.set(true);
+    this.removeActiveDragListeners?.();
+
+    const targetWindow = this.thumbRef().nativeElement.ownerDocument.defaultView ?? window;
+    const clear = () => {
+      this.activeDrag.set(false);
+      this.removeActiveDragListeners?.();
+      this.removeActiveDragListeners = null;
+    };
+
+    targetWindow.addEventListener('pointerup', clear, { once: true });
+    targetWindow.addEventListener('pointercancel', clear, { once: true });
+    this.removeActiveDragListeners = () => {
+      targetWindow.removeEventListener('pointerup', clear);
+      targetWindow.removeEventListener('pointercancel', clear);
+    };
   }
 }

@@ -9,13 +9,17 @@ import { HellSpinner, HellButton } from 'hell';
   template: `
     <article class="hd-prose">
       <h1>Spinner</h1>
-      <p>Indeterminate loading indicator. Use for short, in-flight operations
-        — submit buttons, refresh, polling. For layout-preserving placeholders
-        prefer <a routerLink="/components/skeleton">Skeleton</a>.</p>
+      <p>
+        Indeterminate loading indicator. Use for short, in-flight operations — submit buttons,
+        refresh, polling. For layout-preserving placeholders prefer
+        <a routerLink="/components/skeleton">Skeleton</a>.
+      </p>
 
       <h2>Variants</h2>
-      <p>Four built-in variants. All inherit <code>currentColor</code>, so they
-        adapt to surrounding text and themed buttons automatically.</p>
+      <p>
+        Four built-in variants. All inherit <code>currentColor</code>, so they adapt to surrounding
+        text and themed buttons automatically.
+      </p>
       <div class="hd-example flex flex-wrap items-center gap-8">
         <div class="flex flex-col items-center gap-2">
           <span hellSpinner variant="ring" size="lg"></span>
@@ -36,9 +40,11 @@ import { HellSpinner, HellButton } from 'hell';
       </div>
 
       <h2>Sizes</h2>
-      <p>Five preset sizes (<code>xs sm md lg xl</code>). Or set any
-        <code>font-size</code>: spinners are sized in <code>em</code>.</p>
-      <div class="hd-example flex items-end gap-6">
+      <p>
+        Five preset sizes (<code>xs sm md lg xl</code>). Or set any <code>font-size</code>: spinners
+        are sized in <code>em</code>.
+      </p>
+      <div class="hd-example flex flex-wrap items-end gap-6">
         <span hellSpinner size="xs"></span>
         <span hellSpinner size="sm"></span>
         <span hellSpinner size="md"></span>
@@ -49,7 +55,7 @@ import { HellSpinner, HellButton } from 'hell';
 
       <h2>Colour</h2>
       <p>Inherits <code>currentColor</code>. Wrap in any text utility.</p>
-      <div class="hd-example flex items-center gap-6">
+      <div class="hd-example flex flex-wrap items-center gap-6">
         <span hellSpinner size="lg" class="text-hell-primary"></span>
         <span hellSpinner size="lg" variant="dots" class="text-hell-success"></span>
         <span hellSpinner size="lg" variant="bars" class="text-hell-danger"></span>
@@ -80,16 +86,21 @@ import { HellSpinner, HellButton } from 'hell';
 
       <h2>Do</h2>
       <ul>
-        <li>Pair the spinner with a label when the action is non-trivial
-          (e.g. <em>Saving…</em>).</li>
-        <li>Match the spinner colour to the button it sits inside —
-          <code>currentColor</code> handles this automatically.</li>
+        <li>
+          Pair the spinner with a label when the action is non-trivial (e.g. <em>Saving…</em>).
+        </li>
+        <li>
+          Match the spinner colour to the button it sits inside — <code>currentColor</code> handles
+          this automatically.
+        </li>
       </ul>
 
       <h2>Don't</h2>
       <ul>
-        <li>Don't use a spinner where the result will arrive in &lt; 200 ms;
-          flicker is worse than no feedback.</li>
+        <li>
+          Don't use a spinner where the result will arrive in &lt; 200 ms; flicker is worse than no
+          feedback.
+        </li>
         <li>Don't use a spinner to mask a layout shift — use a Skeleton.</li>
       </ul>
     </article>

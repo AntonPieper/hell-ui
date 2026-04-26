@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   Directive,
   booleanAttribute,
   inject,
@@ -40,6 +41,10 @@ import {
     '[class.hell-shell]': '!unstyled()',
     '[attr.data-sidenav-collapsed]': 'isSidenavCollapsed() ? "true" : null',
     '[attr.data-secondary-hidden]': 'isSecondaryHidden() ? "true" : null',
+    '[attr.data-mobile-layout]': 'isMobileLayout() ? "true" : null',
+    '[attr.data-mobile-sidenav-open]': 'isMobileLayout() && !isSidenavCollapsed() ? "true" : null',
+    '[attr.data-mobile-secondary-open]': 'isMobileLayout() && !isSecondaryHidden() ? "true" : null',
+    '(pointerdown)': 'dismissMobilePanels($event)',
   },
   template: '<ng-content></ng-content>',
   exportAs: 'hellAppShell',
@@ -49,16 +54,98 @@ export class HellAppShell {
   readonly sidenavCollapsed = input(false, { transform: booleanAttribute });
   readonly secondaryHidden = input(false, { transform: booleanAttribute });
 
-  /** Internal toggles — written by the toggle directives. Combined with
-   *  the controlled inputs via OR so either path works. */
+  /** Internal desktop toggles — written by the toggle directives. Combined
+   *  with the controlled inputs via OR so either path works. */
   protected readonly _sidenavCollapsed = signal(false);
   protected readonly _secondaryHidden = signal(false);
 
-  readonly isSidenavCollapsed = () => this.sidenavCollapsed() || this._sidenavCollapsed();
-  readonly isSecondaryHidden = () => this.secondaryHidden() || this._secondaryHidden();
+  /** Mobile uses overlay panels instead of layout-shifting rails. */
+  private readonly _isMobileLayout = signal(false);
+  private readonly _mobileSidenavOpen = signal(false);
+  private readonly _mobileSecondaryOpen = signal(false);
+  private readonly destroyRef = inject(DestroyRef);
 
-  toggleSidenav() { this._sidenavCollapsed.update(v => !v); }
-  toggleSecondary() { this._secondaryHidden.update(v => !v); }
+  constructor() {
+    const media = globalThis.matchMedia?.('(max-width: 767px)');
+    if (!media) return;
+
+    const updateMobileLayout = () => {
+      const mobile = media.matches;
+      this._isMobileLayout.set(mobile);
+      if (!mobile) {
+        this._mobileSidenavOpen.set(false);
+        this._mobileSecondaryOpen.set(false);
+      }
+    };
+
+    updateMobileLayout();
+    media.addEventListener('change', updateMobileLayout);
+    this.destroyRef.onDestroy(() => media.removeEventListener('change', updateMobileLayout));
+  }
+
+  readonly isMobileLayout = () => this._isMobileLayout();
+
+  readonly isSidenavCollapsed = () =>
+    this.isMobileLayout()
+      ? this.sidenavCollapsed() || !this._mobileSidenavOpen()
+      : this.sidenavCollapsed() || this._sidenavCollapsed();
+
+  readonly isSecondaryHidden = () =>
+    this.isMobileLayout()
+      ? this.secondaryHidden() || !this._mobileSecondaryOpen()
+      : this.secondaryHidden() || this._secondaryHidden();
+
+  toggleSidenav() {
+    if (this.isMobileLayout()) {
+      this._mobileSidenavOpen.update((v) => !v);
+      if (this._mobileSidenavOpen()) this._mobileSecondaryOpen.set(false);
+      return;
+    }
+    this._sidenavCollapsed.update((v) => !v);
+  }
+
+  toggleSecondary() {
+    if (this.isMobileLayout()) {
+      this._mobileSecondaryOpen.update((v) => !v);
+      if (this._mobileSecondaryOpen()) this._mobileSidenavOpen.set(false);
+      return;
+    }
+    this._secondaryHidden.update((v) => !v);
+  }
+
+  closeMobilePanels() {
+    if (!this.isMobileLayout()) return;
+    this._mobileSidenavOpen.set(false);
+    this._mobileSecondaryOpen.set(false);
+  }
+
+  protected dismissMobilePanels(event: PointerEvent) {
+    if (!this.isMobileLayout() || (this.isSidenavCollapsed() && this.isSecondaryHidden())) {
+      return;
+    }
+
+    const path = event.composedPath();
+    const insidePanelOrToggle = this.pathContains(
+      path,
+      (element) =>
+        element.classList.contains('hell-sidenav') ||
+        element.classList.contains('hell-secondary') ||
+        element.hasAttribute('hellappsidenav') ||
+        element.hasAttribute('hellAppSidenav') ||
+        element.hasAttribute('hellappsecondary') ||
+        element.hasAttribute('hellAppSecondary') ||
+        element.hasAttribute('hellsidenavtoggle') ||
+        element.hasAttribute('hellSidenavToggle') ||
+        element.hasAttribute('hellsecondarytoggle') ||
+        element.hasAttribute('hellSecondaryToggle'),
+    );
+
+    if (!insidePanelOrToggle) this.closeMobilePanels();
+  }
+
+  private pathContains(path: EventTarget[], predicate: (element: Element) => boolean): boolean {
+    return path.some((target) => target instanceof Element && predicate(target));
+  }
 }
 
 @Directive({
@@ -74,6 +161,9 @@ export class HellAppTopbar {
   host: {
     '[class.hell-sidenav]': '!unstyled()',
     '[attr.data-collapsed]': 'isCollapsed() ? "true" : null',
+    '[attr.data-mobile-hidden]': 'isMobileHidden() ? "true" : null',
+    '[attr.aria-hidden]': 'isMobileHidden() ? "true" : null',
+    '[attr.inert]': 'isMobileHidden() ? "" : null',
   },
 })
 export class HellAppSidenav {
@@ -85,6 +175,7 @@ export class HellAppSidenav {
   private readonly shell = inject(HellAppShell, { optional: true });
   protected readonly isCollapsed = () =>
     this.collapsed() ?? this.shell?.isSidenavCollapsed() ?? false;
+  protected readonly isMobileHidden = () => !!this.shell?.isMobileLayout() && this.isCollapsed();
 }
 
 @Directive({
@@ -112,7 +203,9 @@ export class HellAppContent {
 export class HellSidenavToggle {
   private readonly shell = inject(HellAppShell);
   protected readonly collapsed = () => this.shell.isSidenavCollapsed();
-  protected toggle() { this.shell.toggleSidenav(); }
+  protected toggle() {
+    this.shell.toggleSidenav();
+  }
 }
 
 /** Click anywhere → toggles `secondaryHidden` on the parent shell. */
@@ -128,7 +221,9 @@ export class HellSidenavToggle {
 export class HellSecondaryToggle {
   private readonly shell = inject(HellAppShell);
   protected readonly hidden = () => this.shell.isSecondaryHidden();
-  protected toggle() { this.shell.toggleSecondary(); }
+  protected toggle() {
+    this.shell.toggleSecondary();
+  }
 }
 
 @Directive({
@@ -136,6 +231,7 @@ export class HellSecondaryToggle {
   host: {
     '[class.hell-secondary]': '!unstyled()',
     '[attr.data-hidden]': 'isHidden() ? "true" : null',
+    '[attr.data-mobile-hidden]': 'isMobileHidden() ? "true" : null',
   },
 })
 export class HellAppSecondary {
@@ -144,8 +240,8 @@ export class HellAppSecondary {
     transform: (v) => (v == null ? null : booleanAttribute(v)),
   });
   private readonly shell = inject(HellAppShell, { optional: true });
-  readonly isHidden = () =>
-    this.hidden() ?? this.shell?.isSecondaryHidden() ?? false;
+  readonly isHidden = () => this.hidden() ?? this.shell?.isSecondaryHidden() ?? false;
+  protected readonly isMobileHidden = () => !!this.shell?.isMobileLayout() && this.isHidden();
 }
 
 @Directive({

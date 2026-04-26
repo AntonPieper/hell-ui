@@ -1,20 +1,25 @@
 @layer components {
-
   /* Flyout: anchored, non-modal, light-dismiss surface. No focus trap. */
 
   .hell-flyout {
-      background-color: var(--color-hell-surface-elevated);
-      border: 1px solid var(--color-hell-border);
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-hell-lg);
-      color: var(--color-hell-foreground);
-      outline: none;
-      animation: hell-flyout-in var(--hell-duration-fast, 150ms) var(--ease-hell-out, ease);
-    }
-
+    z-index: 20;
+    background-color: var(--color-hell-surface-elevated);
+    border: 1px solid var(--color-hell-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-hell-lg);
+    color: var(--color-hell-foreground);
+    outline: none;
+    animation: hell-flyout-in var(--hell-duration-fast, 150ms) var(--ease-hell-out, ease);
+  }
 }
 
 @keyframes hell-flyout-in {
-  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0)    scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

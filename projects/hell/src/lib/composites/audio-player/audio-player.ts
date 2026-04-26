@@ -38,7 +38,9 @@ interface SpeechRecognitionLike extends EventTarget {
   onend: (() => void) | null;
 }
 
-interface SpeechRecognitionCtor { new (): SpeechRecognitionLike; }
+interface SpeechRecognitionCtor {
+  new (): SpeechRecognitionLike;
+}
 
 function getSpeechRecognition(): SpeechRecognitionCtor | null {
   if (typeof window === 'undefined') return null;
@@ -122,7 +124,7 @@ const HELL_AUDIO_PLAYER_ICONS = {
       <span class="hell-audio-time">{{ format(currentTime()) }}</span>
 
       <hell-slider
-        class="hell-audio-seek"
+        class="hell-audio-seek hell-audio-track"
         size="sm"
         grow
         thumb="hover"
@@ -131,6 +133,7 @@ const HELL_AUDIO_PLAYER_ICONS = {
         [max]="seekMax()"
         [step]="0.1"
         (valueChange)="onSeek($event)"
+        (keydown)="onSeekKey($event)"
         aria-label="Seek"
       />
 
@@ -203,8 +206,13 @@ const HELL_AUDIO_PLAYER_ICONS = {
         <header class="hell-audio-captions-bar">
           <span class="hell-audio-captions-status">
             <span class="hell-audio-captions-dot" aria-hidden="true"></span>
-            @if (error()) { Error }
-            @else if (transcribing()) { Live } @else { Paused }
+            @if (error()) {
+              Error
+            } @else if (transcribing()) {
+              Live
+            } @else {
+              Paused
+            }
           </span>
 
           <div class="hell-audio-captions-actions">
@@ -215,7 +223,9 @@ const HELL_AUDIO_PLAYER_ICONS = {
               type="button"
               [attr.aria-label]="'Playback speed ' + playbackRate() + 'x'"
               (click)="cyclePlaybackRate()"
-            >{{ playbackRate() }}×</button>
+            >
+              {{ playbackRate() }}×
+            </button>
 
             @if (transcript() || interim()) {
               <button
@@ -225,7 +235,9 @@ const HELL_AUDIO_PLAYER_ICONS = {
                 type="button"
                 aria-label="Copy transcript"
                 (click)="copyTranscript()"
-              >{{ copied() ? 'Copied' : 'Copy' }}</button>
+              >
+                {{ copied() ? 'Copied' : 'Copy' }}
+              </button>
 
               <button
                 hellButton
@@ -234,17 +246,14 @@ const HELL_AUDIO_PLAYER_ICONS = {
                 type="button"
                 aria-label="Clear transcript"
                 (click)="clearTranscript()"
-              >Clear</button>
+              >
+                Clear
+              </button>
             }
           </div>
         </header>
 
-        <div
-          #captionScroll
-          class="hell-audio-captions-body"
-          aria-live="polite"
-          aria-atomic="false"
-        >
+        <div #captionScroll class="hell-audio-captions-body" aria-live="polite" aria-atomic="false">
           @if (error(); as err) {
             <p class="hell-audio-captions-error">{{ err }}</p>
           } @else if (transcript() || interim()) {
@@ -315,9 +324,12 @@ export class HellAudioPlayer {
 
   protected readonly volumeIcon = computed(() => {
     switch (this.volumeLevel()) {
-      case 'mute': return 'faSolidVolumeXmark';
-      case 'low': return 'faSolidVolumeLow';
-      default: return 'faSolidVolumeHigh';
+      case 'mute':
+        return 'faSolidVolumeXmark';
+      case 'low':
+        return 'faSolidVolumeLow';
+      default:
+        return 'faSolidVolumeHigh';
     }
   });
 
@@ -327,7 +339,9 @@ export class HellAudioPlayer {
     const date = d instanceof Date ? d : new Date(d);
     if (Number.isNaN(date.valueOf())) return typeof d === 'string' ? d : null;
     return date.toLocaleDateString(undefined, {
-      year: 'numeric', month: 'short', day: 'numeric',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
   });
 
@@ -364,7 +378,10 @@ export class HellAudioPlayer {
       this.transcript();
       this.interim();
       const el = this.captionScroll()?.nativeElement;
-      if (el) queueMicrotask(() => { el.scrollTop = el.scrollHeight; });
+      if (el)
+        queueMicrotask(() => {
+          el.scrollTop = el.scrollHeight;
+        });
     });
   }
 
@@ -392,7 +409,9 @@ export class HellAudioPlayer {
     this.playbackEnded = true;
   }
 
-  protected toggleMute() { this.muted.update(v => !v); }
+  protected toggleMute() {
+    this.muted.update((v) => !v);
+  }
 
   protected onVolume(v: number) {
     const next = Math.max(0, Math.min(1, v / 100));
@@ -400,19 +419,23 @@ export class HellAudioPlayer {
     this.muted.set(next === 0);
   }
 
-  protected onTime() { this.currentTime.set(this.audio().nativeElement.currentTime); }
-  protected onMeta() { this.duration.set(this.audio().nativeElement.duration || 0); }
+  protected onTime() {
+    this.currentTime.set(this.audio().nativeElement.currentTime);
+  }
+  protected onMeta() {
+    this.duration.set(this.audio().nativeElement.duration || 0);
+  }
 
   protected cyclePlaybackRate() {
     const cur = this.playbackRate();
-    const idx = PLAYBACK_RATES.indexOf(cur as typeof PLAYBACK_RATES[number]);
+    const idx = PLAYBACK_RATES.indexOf(cur as (typeof PLAYBACK_RATES)[number]);
     const next = PLAYBACK_RATES[(idx + 1 + PLAYBACK_RATES.length) % PLAYBACK_RATES.length];
     this.playbackRate.set(next);
   }
 
   protected toggleCaptions(_trigger?: HellFlyoutTrigger) {
     // Kept for back-compat; trigger drives state via openChange now.
-    this.captions.update(v => !v);
+    this.captions.update((v) => !v);
   }
 
   protected onSeeking() {
@@ -449,9 +472,37 @@ export class HellAudioPlayer {
     }, 200);
   }
 
+  protected onSeekKey(event: KeyboardEvent) {
+    const key = event.key;
+    if (key === 'Home') {
+      event.preventDefault();
+      this.onSeek(0);
+      return;
+    }
+    if (key === 'End') {
+      event.preventDefault();
+      this.onSeek(this.seekMax());
+      return;
+    }
+
+    const delta =
+      key === 'ArrowRight' || key === 'ArrowUp'
+        ? 5
+        : key === 'ArrowLeft' || key === 'ArrowDown'
+          ? -5
+          : 0;
+    if (!delta) return;
+
+    event.preventDefault();
+    this.onSeek(this.currentTime() + delta);
+  }
+
   private setCurrentTime(nextTime: number): boolean {
     const a = this.audio().nativeElement;
-    const next = Math.max(0, Math.min(Number.isFinite(a.duration) ? a.duration : nextTime, nextTime));
+    const next = Math.max(
+      0,
+      Math.min(Number.isFinite(a.duration) ? a.duration : nextTime, nextTime),
+    );
     if (Math.abs(next - a.currentTime) <= 0.01) return false;
 
     a.currentTime = next;
@@ -478,7 +529,9 @@ export class HellAudioPlayer {
 
   private startRecognition() {
     const Ctor = getSpeechRecognition();
-    const audio = this.audio().nativeElement as HTMLAudioElement & { captureStream?(): MediaStream };
+    const audio = this.audio().nativeElement as HTMLAudioElement & {
+      captureStream?(): MediaStream;
+    };
     if (!Ctor || typeof audio.captureStream !== 'function') return;
 
     const rec = new Ctor();
@@ -496,7 +549,7 @@ export class HellAudioPlayer {
         else interim += r[0].transcript;
       }
       if (finalAdd) {
-        this.transcript.update(t => (t ? t + ' ' : '') + finalAdd.trim());
+        this.transcript.update((t) => (t ? t + ' ' : '') + finalAdd.trim());
       }
       this.interim.set(interim.trim());
     };
@@ -527,7 +580,11 @@ export class HellAudioPlayer {
       this.transcribing.set(true);
       this.error.set(null);
       // start(track) — Chromium 138+. Falls back to mic if unsupported.
-      try { rec.start(track); } catch { rec.start(); }
+      try {
+        rec.start(track);
+      } catch {
+        rec.start();
+      }
     } catch (err) {
       this.error.set(err instanceof Error ? err.message : String(err));
       this.transcribing.set(false);
@@ -536,9 +593,13 @@ export class HellAudioPlayer {
   }
 
   private stopRecognition() {
-    try { this.recognition?.stop(); } catch { /* noop */ }
+    try {
+      this.recognition?.stop();
+    } catch {
+      /* noop */
+    }
     this.recognition = null;
-    this.capturedStream?.getTracks().forEach(t => t.stop());
+    this.capturedStream?.getTracks().forEach((t) => t.stop());
     this.capturedStream = null;
     this.transcribing.set(false);
   }
@@ -562,13 +623,19 @@ export class HellAudioPlayer {
       this.copied.set(true);
       if (this.copiedTimer) clearTimeout(this.copiedTimer);
       this.copiedTimer = setTimeout(() => this.copied.set(false), 1500);
-    } catch { /* clipboard unavailable */ }
+    } catch {
+      /* clipboard unavailable */
+    }
   }
 
   protected format(s: number): string {
     if (!Number.isFinite(s)) return '--:--';
-    const m = Math.floor(s / 60).toString().padStart(2, '0');
-    const ss = Math.floor(s % 60).toString().padStart(2, '0');
+    const m = Math.floor(s / 60)
+      .toString()
+      .padStart(2, '0');
+    const ss = Math.floor(s % 60)
+      .toString()
+      .padStart(2, '0');
     return `${m}:${ss}`;
   }
 }

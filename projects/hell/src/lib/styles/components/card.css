@@ -1,55 +1,56 @@
 @layer components {
-
   /* Card — surface container with header / body / footer slots. */
 
   .hell-card {
-      display: flex;
-      flex-direction: column;
-      overflow: clip;
-      border-radius: var(--radius-lg);
-      border-style: solid;
-      border-width: 1px;
-      border-color: var(--color-hell-border);
-      background-color: var(--color-hell-surface-elevated);
-      box-shadow: var(--shadow-hell-xs);
-      &[data-elevation="0"] {
-        box-shadow: none;
-      }
-      &[data-elevation="2"] {
-        box-shadow: var(--shadow-hell-md);
-      }
-      &[data-elevation="3"] {
-        box-shadow: var(--shadow-hell-lg);
-      }
+    display: flex;
+    min-width: calc(var(--spacing) * 0);
+    max-width: 100%;
+    flex-direction: column;
+    overflow: clip;
+    border-radius: var(--radius-lg);
+    border-style: solid;
+    border-width: 1px;
+    border-color: var(--color-hell-border);
+    background-color: var(--color-hell-surface-elevated);
+    box-shadow: var(--shadow-hell-xs);
+    &[data-elevation='0'] {
+      box-shadow: none;
     }
+    &[data-elevation='2'] {
+      box-shadow: var(--shadow-hell-md);
+    }
+    &[data-elevation='3'] {
+      box-shadow: var(--shadow-hell-lg);
+    }
+  }
 
   .hell-card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--spacing-hell-4);
-      padding-inline: var(--spacing-hell-6);
-      padding-block: var(--spacing-hell-5);
-      font-size: var(--text-sm);
-      line-height: var(--text-sm--line-height);
-      font-weight: var(--font-weight-semibold);
-      color: var(--color-hell-foreground);
-      border-bottom: 1px solid var(--color-hell-border);
-    }
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-hell-4);
+    padding-inline: var(--spacing-hell-6);
+    padding-block: var(--spacing-hell-5);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-hell-foreground);
+    border-bottom: 1px solid var(--color-hell-border);
+  }
 
   .hell-card-body {
-      min-height: calc(var(--spacing) * 0);
-      flex: auto;
-      padding: var(--spacing-hell-6);
-    }
+    min-height: calc(var(--spacing) * 0);
+    min-width: calc(var(--spacing) * 0);
+    flex: auto;
+    padding: var(--spacing-hell-6);
+  }
 
   .hell-card-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: var(--spacing-hell-3);
-      padding-inline: var(--spacing-hell-6);
-      padding-block: var(--spacing-hell-4);
-      border-top: 1px solid var(--color-hell-border);
-    }
-
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-hell-3);
+    padding-inline: var(--spacing-hell-6);
+    padding-block: var(--spacing-hell-4);
+    border-top: 1px solid var(--color-hell-border);
+  }
 }

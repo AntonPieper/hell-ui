@@ -29,10 +29,11 @@ const HD_BUTTON_PAGE_ICONS = {
   template: `
     <article class="hd-prose">
       <h1>Button</h1>
-      <p>Trigger an action or navigate. Built on the
-        <code>NgpButton</code> primitive for keyboard, focus and disabled
-        handling. Use the <code>variant</code> input for visual emphasis and
-        <code>size</code> for density.</p>
+      <p>
+        Trigger an action or navigate. Built on the <code>NgpButton</code> primitive for keyboard,
+        focus and disabled handling. Use the <code>variant</code> input for visual emphasis and
+        <code>size</code> for density.
+      </p>
 
       <h2>Variants</h2>
       <div class="hd-example flex flex-wrap gap-2">
@@ -46,7 +47,7 @@ const HD_BUTTON_PAGE_ICONS = {
       </div>
 
       <h2>Sizes</h2>
-      <div class="hd-example flex items-center gap-2">
+      <div class="hd-example flex flex-wrap items-center gap-2">
         <button hellButton size="xs">XS</button>
         <button hellButton size="sm">Small</button>
         <button hellButton size="md">Medium</button>
@@ -72,8 +73,8 @@ const HD_BUTTON_PAGE_ICONS = {
 
       <h2>Icon-only</h2>
       <p>
-        Add the <code>iconOnly</code> attribute to render a square button. Always
-        provide an <code>aria-label</code> so screen readers describe the action.
+        Add the <code>iconOnly</code> attribute to render a square button. Always provide an
+        <code>aria-label</code> so screen readers describe the action.
       </p>
       <div class="hd-example flex flex-wrap items-center gap-2">
         @for (size of ['xs', 'sm', 'md', 'lg', 'xl']; track size) {
@@ -102,7 +103,10 @@ const HD_BUTTON_PAGE_ICONS = {
 
       <h2>API</h2>
       <ul>
-        <li><code>variant</code>: <code>default | primary | soft | ghost | link | danger | success</code></li>
+        <li>
+          <code>variant</code>:
+          <code>default | primary | soft | ghost | link | danger | success</code>
+        </li>
         <li><code>size</code>: <code>xs | sm | md | lg | xl</code></li>
         <li><code>iconOnly</code>: square button for a single icon</li>
         <li><code>block</code>: stretches to container width</li>

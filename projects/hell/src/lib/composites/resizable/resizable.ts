@@ -58,7 +58,9 @@ export class HellResizable implements AfterContentInit {
   }
 
   /** All panes in DOM order. */
-  getPanes(): readonly HellResizablePane[] { return this.panes; }
+  getPanes(): readonly HellResizablePane[] {
+    return this.panes;
+  }
 
   /** Find the index of a pane (or -1). */
   indexOf(p: HellResizablePane | null) {
@@ -68,9 +70,7 @@ export class HellResizable implements AfterContentInit {
   /** Total available size on the main axis, minus handles. */
   getAvailableSize(): number {
     const horizontal = this.orientation() === 'horizontal';
-    const total = horizontal
-      ? this.host.clientWidth
-      : this.host.clientHeight;
+    const total = horizontal ? this.host.clientWidth : this.host.clientHeight;
     let handlesSize = 0;
     const handles = (this.host as HTMLElement).querySelectorAll(
       ':scope > [hellResizableHandle], :scope > .hell-resizable-handle',
@@ -104,9 +104,7 @@ export class HellResizablePane {
 
   protected readonly flexValue = computed(() => {
     const px = this._size();
-    return px == null
-      ? `${this.initialFlex()} 1 0`
-      : `0 0 ${px}px`;
+    return px == null ? `${this.initialFlex()} 1 0` : `0 0 ${px}px`;
   });
 
   readonly resizable = inject(HellResizable);
@@ -121,12 +119,12 @@ export class HellResizablePane {
     this.resizable.unregisterPane(this);
   }
 
-  setSize(px: number) { this._size.set(px); }
+  setSize(px: number) {
+    this._size.set(px);
+  }
 
   measure(): number {
-    return this.orientation() === 'horizontal'
-      ? this.host.offsetWidth
-      : this.host.offsetHeight;
+    return this.orientation() === 'horizontal' ? this.host.offsetWidth : this.host.offsetHeight;
   }
 }
 
@@ -139,7 +137,8 @@ const KEY_DELTA = 16;
     '[class.hell-resizable-handle]': '!unstyled()',
     '[attr.data-active]': 'dragging() ? "true" : null',
     '[attr.data-appearance]': 'appearance()',
-    '[attr.aria-orientation]': 'resizable.orientation() === "horizontal" ? "vertical" : "horizontal"',
+    '[attr.aria-orientation]':
+      'resizable.orientation() === "horizontal" ? "vertical" : "horizontal"',
     role: 'separator',
     tabindex: '0',
     '[attr.aria-valuenow]': 'ariaValueNow()',
@@ -169,8 +168,12 @@ export class HellResizableHandle {
     let next: HellResizablePane | null = null;
     for (const p of panes) {
       const cmp = this.host.compareDocumentPosition(p.host);
-      if (cmp & Node.DOCUMENT_POSITION_PRECEDING) prev = p; // pane is before handle
-      else if (cmp & Node.DOCUMENT_POSITION_FOLLOWING && !next) { next = p; break; }
+      if (cmp & Node.DOCUMENT_POSITION_PRECEDING)
+        prev = p; // pane is before handle
+      else if (cmp & Node.DOCUMENT_POSITION_FOLLOWING && !next) {
+        next = p;
+        break;
+      }
     }
     return { prev, next };
   }
@@ -180,7 +183,7 @@ export class HellResizableHandle {
     // Only react to primary button / first touch / any pen.
     if (e.button !== 0) return;
     e.preventDefault();
-    (e.target as Element).setPointerCapture?.(e.pointerId);
+    this.host.setPointerCapture?.(e.pointerId);
     this.dragging.set(true);
     const horizontal = this.resizable.orientation() === 'horizontal';
 
@@ -190,7 +193,10 @@ export class HellResizableHandle {
     for (const p of this.resizable.getPanes()) p.setSize(p.measure());
 
     const { prev, next } = this.adjacent();
-    if (!prev || !next) return;
+    if (!prev || !next) {
+      this.dragging.set(false);
+      return;
+    }
 
     const startA = prev.measure();
     const startB = next.measure();
@@ -200,25 +206,37 @@ export class HellResizableHandle {
     const minB = next.minSize();
 
     const move = (ev: PointerEvent) => {
+      ev.preventDefault();
       const delta = (horizontal ? ev.clientX : ev.clientY) - startCoord;
       let newA = startA + delta;
       let newB = startB - delta;
-      if (newA < minA) { newA = minA; newB = sumAB - minA; }
-      if (newB < minB) { newB = minB; newA = sumAB - minB; }
+      if (newA < minA) {
+        newA = minA;
+        newB = sumAB - minA;
+      }
+      if (newB < minB) {
+        newB = minB;
+        newA = sumAB - minB;
+      }
       prev.setSize(newA);
       next.setSize(newB);
       this.ariaValueNow.set(Math.round((newA / sumAB) * 100));
     };
+    const targetWindow = this.host.ownerDocument.defaultView ?? window;
+    const listenerOptions: AddEventListenerOptions = { passive: false };
     const up = (ev: PointerEvent) => {
+      ev.preventDefault();
       this.dragging.set(false);
-      try { (e.target as Element).releasePointerCapture?.(e.pointerId); } catch {}
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-      window.removeEventListener('pointercancel', up);
+      try {
+        this.host.releasePointerCapture?.(e.pointerId);
+      } catch {}
+      targetWindow.removeEventListener('pointermove', move);
+      targetWindow.removeEventListener('pointerup', up);
+      targetWindow.removeEventListener('pointercancel', up);
     };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-    window.addEventListener('pointercancel', up);
+    targetWindow.addEventListener('pointermove', move, listenerOptions);
+    targetWindow.addEventListener('pointerup', up, listenerOptions);
+    targetWindow.addEventListener('pointercancel', up, listenerOptions);
   }
 
   @HostListener('keydown', ['$event'])
@@ -226,12 +244,8 @@ export class HellResizableHandle {
     const horizontal = this.resizable.orientation() === 'horizontal';
     const { prev, next } = this.adjacent();
     if (!prev || !next) return;
-    const decrement = horizontal
-      ? e.key === 'ArrowLeft'
-      : e.key === 'ArrowUp';
-    const increment = horizontal
-      ? e.key === 'ArrowRight'
-      : e.key === 'ArrowDown';
+    const decrement = horizontal ? e.key === 'ArrowLeft' : e.key === 'ArrowUp';
+    const increment = horizontal ? e.key === 'ArrowRight' : e.key === 'ArrowDown';
     const home = e.key === 'Home';
     const end = e.key === 'End';
     if (!decrement && !increment && !home && !end) return;

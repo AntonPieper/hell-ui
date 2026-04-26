@@ -1,5 +1,4 @@
 @layer components {
-
   /* Skeleton — loading shape placeholder. */
   .hell-skeleton {
     display: block;
@@ -18,8 +17,12 @@
     background-repeat: no-repeat;
     animation: hell-shimmer 1.6s infinite linear;
 
-    &[data-shape='circle'] { border-radius: 999px; }
-    &[data-shape='rect']   { border-radius: var(--radius-hell-md); }
+    &[data-shape='circle'] {
+      border-radius: 999px;
+    }
+    &[data-shape='rect'] {
+      border-radius: var(--radius-hell-md);
+    }
   }
 
   /* Spinner — indeterminate loader. Variants share a single host class
@@ -27,15 +30,26 @@
      so the spinner can also be sized via Tailwind text-* utilities. */
   .hell-spinner {
     display: inline-block;
+    flex: 0 0 auto;
     color: currentColor;
     line-height: 0;
     --_hell-spinner-track: color-mix(in oklab, currentColor 18%, transparent);
 
-    &[data-size='xs'] { font-size: 12px; }
-    &[data-size='sm'] { font-size: 16px; }
-    &[data-size='md'] { font-size: 20px; }
-    &[data-size='lg'] { font-size: 28px; }
-    &[data-size='xl'] { font-size: 40px; }
+    &[data-size='xs'] {
+      font-size: 12px;
+    }
+    &[data-size='sm'] {
+      font-size: 16px;
+    }
+    &[data-size='md'] {
+      font-size: 20px;
+    }
+    &[data-size='lg'] {
+      font-size: 28px;
+    }
+    &[data-size='xl'] {
+      font-size: 40px;
+    }
 
     /* Ring — default two-tone rotating border. */
     &[data-variant='ring'] {
@@ -54,9 +68,12 @@
       width: 2.4em;
       height: 0.7em;
       background:
-        radial-gradient(circle 0.18em at 0.4em 50%, currentColor 99%, transparent) 0 50% / 33.33% 100% no-repeat,
-        radial-gradient(circle 0.18em at 0.4em 50%, currentColor 99%, transparent) 50% 50% / 33.33% 100% no-repeat,
-        radial-gradient(circle 0.18em at 0.4em 50%, currentColor 99%, transparent) 100% 50% / 33.33% 100% no-repeat;
+        radial-gradient(circle 0.18em at 0.4em 50%, currentColor 99%, transparent) 0 50% / 33.33%
+          100% no-repeat,
+        radial-gradient(circle 0.18em at 0.4em 50%, currentColor 99%, transparent) 50% 50% / 33.33%
+          100% no-repeat,
+        radial-gradient(circle 0.18em at 0.4em 50%, currentColor 99%, transparent) 100% 50% / 33.33%
+          100% no-repeat;
       animation: hell-dots 0.9s infinite ease-in-out;
     }
 
@@ -84,28 +101,73 @@
 }
 
 @keyframes hell-shimmer {
-  from { background-position: 200% 0; }
-  to   { background-position: -200% 0; }
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
 }
 
 @keyframes hell-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes hell-dots {
-  0%, 80%, 100% { background-size: 33.33% 60%, 33.33% 60%, 33.33% 60%; }
-  20%           { background-size: 33.33% 100%, 33.33% 60%, 33.33% 60%; }
-  40%           { background-size: 33.33% 60%, 33.33% 100%, 33.33% 60%; }
-  60%           { background-size: 33.33% 60%, 33.33% 60%, 33.33% 100%; }
+  0%,
+  80%,
+  100% {
+    background-size:
+      33.33% 60%,
+      33.33% 60%,
+      33.33% 60%;
+  }
+  20% {
+    background-size:
+      33.33% 100%,
+      33.33% 60%,
+      33.33% 60%;
+  }
+  40% {
+    background-size:
+      33.33% 60%,
+      33.33% 100%,
+      33.33% 60%;
+  }
+  60% {
+    background-size:
+      33.33% 60%,
+      33.33% 60%,
+      33.33% 100%;
+  }
 }
 
 @keyframes hell-bars {
-  0%, 100% { background-size: var(--_hell-bar-w) 35%, var(--_hell-bar-w) 70%, var(--_hell-bar-w) 35%; }
-  50%      { background-size: var(--_hell-bar-w) 80%, var(--_hell-bar-w) 30%, var(--_hell-bar-w) 80%; }
+  0%,
+  100% {
+    background-size:
+      var(--_hell-bar-w) 35%,
+      var(--_hell-bar-w) 70%,
+      var(--_hell-bar-w) 35%;
+  }
+  50% {
+    background-size:
+      var(--_hell-bar-w) 80%,
+      var(--_hell-bar-w) 30%,
+      var(--_hell-bar-w) 80%;
+  }
 }
 
 @keyframes hell-pulse {
-  0%, 100% { transform: scale(0.6); opacity: 0.4; }
-  50%      { transform: scale(1);   opacity: 1; }
+  0%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
-
