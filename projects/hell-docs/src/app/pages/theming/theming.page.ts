@@ -1,29 +1,34 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CodeBlock } from '../../shared/code-block';
+import { ExampleTabs } from '../../shared/example-tabs';
+import { ThemedPanelDemo } from './examples/scoped-theme-demo.example';
+import scopedThemeDemoCodeRaw from './examples/scoped-theme-demo.example.ts?raw' with {
+  loader: 'text',
+};
+import themeAttributeCodeRaw from './examples/theme-attribute.example.html?raw' with {
+  loader: 'text',
+};
+import tokenOverrideCodeRaw from './examples/token-override.example.css?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-theming',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CodeBlock],
+  imports: [CodeBlock, ExampleTabs, ThemedPanelDemo],
   template: `
     <article class="hd-prose">
       <h1>Theming</h1>
       <p>
-        hell publishes its design tokens through Tailwind theme variable namespaces. The
-        <em>palette</em> layer exposes stepped brand scales via
-        <code>--color-hell-&#60;family&#62;-&#60;weight&#62;</code>. The <em>semantic</em> layer
-        maps those onto roles like <code>--color-hell-surface</code>,
-        <code>--color-hell-foreground</code>, <code>--color-hell-primary</code>, and the other
-        UI-facing color tokens.
+        hell is token-first. Components read semantic CSS variables; Tailwind utilities read the
+        same values through the <code>--color-hell-*</code>, <code>--spacing-hell-*</code>,
+        <code>--radius-hell-*</code>, and <code>--shadow-hell-*</code> namespaces.
       </p>
 
       <p>
-        Spacing, control sizing, radii, shadows, and easing follow the same model with
-        <code>--spacing-hell-*</code>, <code>--spacing-hell-control-*</code>,
-        <code>--radius-hell-*</code>, <code>--shadow-hell-*</code>, and <code>--ease-hell-*</code>.
-        Those theme variables are what components and generated utilities consume directly, so
-        <code>bg-hell-surface</code>, <code>text-hell-foreground</code>, and
-        <code>border-hell-border</code> work out of the box with no compatibility layer.
+        Treat palette scales as raw material and semantic tokens as the contract. App code should
+        prefer <code>--color-hell-primary</code> over <code>--color-hell-primary-900</code> so a
+        theme can remap intent without touching every component.
       </p>
 
       <h2>Brand anchors</h2>
@@ -53,21 +58,36 @@ import { CodeBlock } from '../../shared/code-block';
 
       <h2>Light vs dark</h2>
       <p>
-        The library is light-mode-first. To switch themes, set
-        <code>data-hell-theme="dark"</code> on a parent element (typically
-        <code>&lt;html&gt;</code> or <code>&lt;body&gt;</code>).
+        The docs app defaults to the system color scheme. To force a theme, set
+        <code>data-hell-theme</code> to <code>light</code> or <code>dark</code> on a high-level
+        element, usually <code>&lt;html&gt;</code>.
       </p>
+      <hd-code-block [code]="themeAttributeCode" />
 
       <h2>Overriding tokens</h2>
-      <p>Override any token at the scope you need it:</p>
-      <hd-code-block [code]="overrideCode" />
+      <p>
+        Override tokens at the narrowest scope that owns the visual decision. This keeps product
+        areas distinct without forking components.
+      </p>
+      <hd-code-block [code]="tokenOverrideCode" />
+
+      <h2>Scoped preview</h2>
+      <hd-example-tabs [code]="scopedThemeDemoCode" previewClass="grid max-w-md gap-3">
+        <app-themed-panel-demo />
+      </hd-example-tabs>
+
+      <h2>Rules</h2>
+      <ul>
+        <li>Use semantic tokens in component CSS and app overrides.</li>
+        <li>Keep radii small; hell uses 2px to 12px with 6px as the default control shape.</li>
+        <li>Use elevation sparingly; borders and tonal layers carry most hierarchy.</li>
+        <li>Set theme state once near the root. Do not toggle classes per component.</li>
+      </ul>
     </article>
   `,
 })
 export class ThemingPage {
-  protected readonly overrideCode = `.my-section {
-  --color-hell-primary: #4f46e5;
-  --radius-hell-md: 0.75rem;
-}
-`;
+  protected readonly themeAttributeCode = themeAttributeCodeRaw;
+  protected readonly tokenOverrideCode = tokenOverrideCodeRaw;
+  protected readonly scopedThemeDemoCode = scopedThemeDemoCodeRaw;
 }

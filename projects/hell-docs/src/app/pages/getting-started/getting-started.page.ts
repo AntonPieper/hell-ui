@@ -1,56 +1,70 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CodeBlock } from '../../shared/code-block';
+import { ExampleTabs } from '../../shared/example-tabs';
+import { GettingStartedButtonDemo } from './examples/button-demo.example';
+import buttonDemoCodeRaw from './examples/button-demo.example.ts?raw' with { loader: 'text' };
+import installCodeRaw from './examples/install.example.sh?raw' with { loader: 'text' };
+import postcssCodeRaw from './examples/postcss.example.json?raw' with { loader: 'text' };
+import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'text' };
 
 @Component({
   selector: 'hd-getting-started',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CodeBlock],
+  imports: [CodeBlock, ExampleTabs, GettingStartedButtonDemo],
   template: `
     <article class="hd-prose">
-      <h1>Installation</h1>
+      <h1>Getting started</h1>
       <p>
-        hell is built as an Angular library that depends on Angular Primitives, Tailwind v4, and
-        optional specialised libraries for feature components.
+        hell ships Angular standalone components and directives with styling in one CSS entry point.
+        Install the peer packages, add the Tailwind v4 PostCSS plugin, import the styles, then
+        compose directives where you already write markup.
       </p>
 
       <h2>1. Install peers</h2>
+      <p>
+        Core primitives need Angular, ng-primitives, ng-icons, and Tailwind. Feature components add
+        optional packages only when you import them.
+      </p>
       <hd-code-block [code]="installCode" />
 
       <h2>2. Configure Tailwind v4</h2>
-      <p>Add a <code>.postcssrc.json</code> at the root of your workspace:</p>
+      <p>
+        Tailwind v4 runs through <code>&#64;tailwindcss/postcss</code>. Add a
+        <code>.postcssrc.json</code> at the root of your workspace:
+      </p>
       <hd-code-block [code]="postcssCode" />
 
       <h2>3. Import the styles</h2>
-      <p>Add the following to your global stylesheet (typically <code>src/styles.css</code>):</p>
+      <p>
+        Import Tailwind first, then hell. The library exposes Tailwind-facing CSS variables such as
+        <code>bg-hell-surface</code>, <code>text-hell-foreground</code>, and
+        <code>border-hell-border</code>.
+      </p>
       <hd-code-block [code]="stylesCode" />
 
       <h2>4. Use a directive</h2>
-      <hd-code-block [code]="buttonCode" />
+      <p>
+        Import only the standalone building blocks your component template uses. The same file is
+        rendered below and loaded raw for the code tab.
+      </p>
+      <hd-example-tabs [code]="buttonDemoCode" previewClass="flex items-center gap-2">
+        <app-getting-started-button-demo />
+      </hd-example-tabs>
+
+      <h2>Next choices</h2>
+      <ul>
+        <li>
+          Register icons close to the component that renders them with <code>provideIcons</code>.
+        </li>
+        <li>Use <code>unstyled</code> when you need behavior without hell styling.</li>
+        <li>Keep theme changes in CSS variables rather than component-specific overrides.</li>
+      </ul>
     </article>
   `,
 })
 export class GettingStartedPage {
-  protected readonly installCode = `pnpm add ng-primitives @ng-icons/core @ng-icons/font-awesome
-pnpm add -D tailwindcss @tailwindcss/postcss postcss
-`;
-
-  protected readonly postcssCode = `{
-  "plugins": { "@tailwindcss/postcss": {} }
-}
-`;
-
-  protected readonly stylesCode = `@import 'tailwindcss';
-@import 'hell/styles';
-`;
-
-  protected readonly buttonCode = `import { Component } from '@angular/core';
-import { HellButton } from 'hell';
-
-@Component({
-  selector: 'app-demo',
-  imports: [HellButton],
-  template: \`<button hellButton variant="primary">Save</button>\`,
-})
-export class DemoComponent {}
-`;
+  protected readonly installCode = installCodeRaw;
+  protected readonly postcssCode = postcssCodeRaw;
+  protected readonly stylesCode = stylesCodeRaw;
+  protected readonly buttonDemoCode = buttonDemoCodeRaw;
 }
