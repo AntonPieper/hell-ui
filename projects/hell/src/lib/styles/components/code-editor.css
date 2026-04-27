@@ -1,56 +1,35 @@
 @layer components {
+  /* Code editor / viewer (CodeMirror 6). Host owns shell; CM theme owns internals. */
 
-  /* Code editor / viewer (CodeMirror 6). */
+  .hell-code,
+  .hell-code-viewer {
+    display: block;
+    overflow: hidden;
+    color: var(--color-hell-foreground);
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-hell-surface-subtle) 94%, white),
+      var(--color-hell-surface-subtle)
+    );
+    border: 1px solid var(--color-hell-border);
+    border-radius: var(--radius-hell-md);
+    box-shadow: var(--shadow-hell-xs);
+    transition:
+      border-color var(--hell-duration-fast) var(--ease-hell-out),
+      box-shadow var(--hell-duration-fast) var(--ease-hell-out);
 
-  .hell-code {
-      overflow: hidden;
-      font-family: var(--font-mono);
-      font-size: 12.5px;
-      line-height: 1.55;
-      color: var(--color-hell-foreground);
-      background-color: var(--color-hell-surface-subtle);
-      border-style: solid;
-      border-width: 1px;
-      border-color: var(--color-hell-border);
-      border-radius: var(--radius-md);
-      > .cm-editor {
-        background-color: transparent;
-        height: 100%;
-      }
-      > .cm-editor .cm-gutters {
-        background-color: var(--color-hell-surface-subtle);
-        border-right: 1px solid var(--color-hell-border);
-        color: var(--color-hell-foreground-subtle);
-      }
-      > .cm-editor .cm-activeLine {
-        background-color: rgba(49, 58, 70, 0.04);
-      }
-      > .cm-editor.cm-focused {
-        outline: none;
-        box-shadow: 0 0 0 3px var(--color-hell-focus-ring);
-      }
+    > .cm-editor {
+      min-height: inherit;
+      height: 100%;
+      background: transparent;
     }
+
+    > .cm-editor.cm-focused {
+      box-shadow: 0 0 0 3px var(--color-hell-focus-ring);
+    }
+  }
 
   .hell-code-viewer {
-      overflow: hidden;
-      font-family: var(--font-mono);
-      font-size: var(--text-xs);
-      line-height: 1.55;
-      color: var(--color-hell-foreground);
-      background-color: var(--color-hell-surface-subtle);
-      border-style: solid;
-      border-width: 1px;
-      border-color: var(--color-hell-border);
-      border-radius: var(--radius-md);
-      > .cm-editor {
-        background-color: transparent;
-        height: 100%;
-      }
-      > .cm-editor .cm-gutters {
-        background-color: var(--color-hell-surface-subtle);
-        border-right: 1px solid var(--color-hell-border);
-        color: var(--color-hell-foreground-subtle);
-      }
-    }
-
+    background: var(--color-hell-surface-subtle);
+  }
 }
