@@ -9,6 +9,19 @@
     <strong class="text-base">hell</strong>
     <span hellTag class="hd-brand-tag" variant="info">Heinrich Element Library</span>
     <span class="hd-fill"></span>
+    <button
+      hellButton
+      iconOnly
+      class="hd-theme-toggle"
+      variant="ghost"
+      size="sm"
+      type="button"
+      [attr.aria-label]="themeLabel()"
+      [attr.title]="themeLabel()"
+      (click)="cycleTheme()"
+    >
+      <hell-icon [name]="themeIcon()" size="14px" />
+    </button>
     <a
       hellButton
       class="hd-topbar-link"

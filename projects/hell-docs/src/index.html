@@ -1,13 +1,26 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>HellDocs</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-</head>
-<body>
-  <hd-root></hd-root>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <title>HellDocs</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      (() => {
+        try {
+          const stored = localStorage.getItem('hell-docs-theme');
+          const preference =
+            stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'system';
+          const systemDark = matchMedia('(prefers-color-scheme: dark)').matches;
+          const theme = preference === 'system' ? (systemDark ? 'dark' : 'light') : preference;
+          document.documentElement.dataset.hellTheme = theme;
+          document.documentElement.style.colorScheme = theme;
+        } catch {}
+      })();
+    </script>
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  </head>
+  <body>
+    <hd-root></hd-root>
+  </body>
 </html>
