@@ -46,7 +46,7 @@ export interface HellDataTableQuery {
         class="hell-table-filter"
         type="search"
         [value]="filter()"
-        (input)="onFilter($any($event.target).value)"
+        (input)="onFilter($event.target.value)"
         placeholder="Filter…"
         aria-label="Filter rows"
       />
@@ -58,16 +58,14 @@ export interface HellDataTableQuery {
           <tr>
             @for (header of group.headers; track header.id) {
               <th
-                [attr.aria-sort]="header.column.getCanSort() ? ariaSort(header.column.getIsSorted()) : null"
+                [attr.aria-sort]="
+                  header.column.getCanSort() ? ariaSort(header.column.getIsSorted()) : null
+                "
                 [attr.data-sortable]="header.column.getCanSort() ? 'true' : null"
                 (click)="header.column.getCanSort() && header.column.toggleSorting()"
               >
                 <ng-container
-                  *flexRender="
-                    header.column.columnDef.header;
-                    props: header.getContext();
-                    let h
-                  "
+                  *flexRender="header.column.columnDef.header; props: header.getContext(); let h"
                 >
                   {{ h }}
                 </ng-container>
@@ -82,11 +80,7 @@ export interface HellDataTableQuery {
             @for (cell of row.getVisibleCells(); track cell.id) {
               <td>
                 <ng-container
-                  *flexRender="
-                    cell.column.columnDef.cell;
-                    props: cell.getContext();
-                    let c
-                  "
+                  *flexRender="cell.column.columnDef.cell; props: cell.getContext(); let c"
                 >
                   {{ c }}
                 </ng-container>
@@ -169,8 +163,7 @@ export class HellDataTable<T> {
     manualSorting: true,
     manualFiltering: true,
     onSortingChange: (updater) => {
-      const next =
-        typeof updater === 'function' ? updater(this.sorting()) : updater;
+      const next = typeof updater === 'function' ? updater(this.sorting()) : updater;
       this.sorting.set(next);
       this.emit();
     },

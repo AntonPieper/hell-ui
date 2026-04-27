@@ -1,55 +1,112 @@
 <div class="hell-pdf-toolbar">
   <button
-    hellButton variant="ghost" size="sm" iconOnly type="button"
-    (click)="toggleOverview()" [attr.aria-pressed]="overviewOpen()"
+    hellButton
+    variant="ghost"
+    size="sm"
+    iconOnly
+    type="button"
+    (click)="toggleOverview()"
+    [attr.aria-pressed]="overviewOpen()"
     aria-label="Toggle page overview"
-  ><hell-icon name="faSolidTableColumns" /></button>
+  >
+    <hell-icon name="faSolidTableColumns" />
+  </button>
 
   <span class="hell-pdf-divider" aria-hidden="true"></span>
 
   <button
-    hellButton variant="ghost" size="sm" iconOnly type="button"
-    (click)="prev()" [disabled]="page() <= 1" aria-label="Previous page"
-  ><hell-icon name="faSolidChevronLeft" /></button>
+    hellButton
+    variant="ghost"
+    size="sm"
+    iconOnly
+    type="button"
+    (click)="prev()"
+    [disabled]="page() <= 1"
+    aria-label="Previous page"
+  >
+    <hell-icon name="faSolidChevronLeft" />
+  </button>
 
   <input
     hellInput
     size="sm"
     class="hell-pdf-page-input"
-    type="number" min="1" [max]="totalPages() || 1" [value]="page()"
-    (change)="goTo(+$any($event.target).value)"
+    type="number"
+    min="1"
+    [max]="totalPages() || 1"
+    [value]="page()"
+    (change)="goTo(+$event.target.value)"
     aria-label="Page"
   />
   <span class="hell-pdf-toolbar-text">/ {{ totalPages() || '…' }}</span>
 
   <button
-    hellButton variant="ghost" size="sm" iconOnly type="button"
-    (click)="next()" [disabled]="page() >= totalPages()" aria-label="Next page"
-  ><hell-icon name="faSolidChevronRight" /></button>
+    hellButton
+    variant="ghost"
+    size="sm"
+    iconOnly
+    type="button"
+    (click)="next()"
+    [disabled]="page() >= totalPages()"
+    aria-label="Next page"
+  >
+    <hell-icon name="faSolidChevronRight" />
+  </button>
 
   <span class="hell-pdf-spacer"></span>
 
   <button
-    hellButton variant="ghost" size="sm" iconOnly type="button"
-    (click)="openFind()" [attr.aria-pressed]="findOpen()" aria-label="Find in document (Ctrl/Cmd+F)"
-  ><hell-icon name="faSolidMagnifyingGlass" /></button>
+    hellButton
+    variant="ghost"
+    size="sm"
+    iconOnly
+    type="button"
+    (click)="openFind()"
+    [attr.aria-pressed]="findOpen()"
+    aria-label="Find in document (Ctrl/Cmd+F)"
+  >
+    <hell-icon name="faSolidMagnifyingGlass" />
+  </button>
 
   <button
-    hellButton variant="ghost" size="sm" iconOnly type="button"
-    (click)="download()" [disabled]="!ready()" aria-label="Download"
-  ><hell-icon name="faSolidDownload" /></button>
+    hellButton
+    variant="ghost"
+    size="sm"
+    iconOnly
+    type="button"
+    (click)="download()"
+    [disabled]="!ready()"
+    aria-label="Download"
+  >
+    <hell-icon name="faSolidDownload" />
+  </button>
 
   <button
-    hellButton variant="ghost" size="sm" iconOnly type="button"
-    (click)="print()" [disabled]="!ready()" aria-label="Print"
-  ><hell-icon name="faSolidPrint" /></button>
+    hellButton
+    variant="ghost"
+    size="sm"
+    iconOnly
+    type="button"
+    (click)="print()"
+    [disabled]="!ready()"
+    aria-label="Print"
+  >
+    <hell-icon name="faSolidPrint" />
+  </button>
 
   <span class="hell-pdf-divider" aria-hidden="true"></span>
 
   <button
-    hellButton variant="ghost" size="sm" iconOnly type="button"
-    (click)="zoomOut()" aria-label="Zoom out"
-  ><hell-icon name="faSolidMinus" /></button>
+    hellButton
+    variant="ghost"
+    size="sm"
+    iconOnly
+    type="button"
+    (click)="zoomOut()"
+    aria-label="Zoom out"
+  >
+    <hell-icon name="faSolidMinus" />
+  </button>
 
   <select
     hellSelect
@@ -59,9 +116,13 @@
     aria-label="Zoom level"
   >
     <option value="auto" [selected]="effectiveZoomValue() === 'auto'">Automatic</option>
-    <option value="page-actual" [selected]="effectiveZoomValue() === 'page-actual'">Actual size</option>
+    <option value="page-actual" [selected]="effectiveZoomValue() === 'page-actual'">
+      Actual size
+    </option>
     <option value="page-fit" [selected]="effectiveZoomValue() === 'page-fit'">Page fit</option>
-    <option value="page-width" [selected]="effectiveZoomValue() === 'page-width'">Page width</option>
+    <option value="page-width" [selected]="effectiveZoomValue() === 'page-width'">
+      Page width
+    </option>
     @for (z of zoomOptions; track z.value) {
       <option [value]="z.value" [selected]="effectiveZoomValue() === z.value">{{ z.label }}</option>
     }
@@ -71,9 +132,16 @@
   </select>
 
   <button
-    hellButton variant="ghost" size="sm" iconOnly type="button"
-    (click)="zoomIn()" aria-label="Zoom in"
-  ><hell-icon name="faSolidPlus" /></button>
+    hellButton
+    variant="ghost"
+    size="sm"
+    iconOnly
+    type="button"
+    (click)="zoomIn()"
+    aria-label="Zoom in"
+  >
+    <hell-icon name="faSolidPlus" />
+  </button>
 </div>
 
 @if (findOpen()) {
@@ -86,29 +154,57 @@
       type="search"
       placeholder="Find in document…"
       [value]="findQuery()"
-      (input)="onFindInput($any($event.target).value)"
+      (input)="onFindInput($event.target.value)"
       (keydown.enter)="findAgain($event)"
       (keydown.escape)="onFindEscape($event)"
       aria-label="Find query"
     />
     <span class="hell-pdf-find-count">
-      @if (findStatus() === 'pending') { Searching… }
-      @else if (findStatus() === 'not-found' && findQuery()) { Not found }
-      @else if (findTotal() > 0) { {{ findCurrent() }} / {{ findTotal() }} }
-      @else { &nbsp; }
+      @if (findStatus() === 'pending') {
+        Searching…
+      } @else if (findStatus() === 'not-found' && findQuery()) {
+        Not found
+      } @else if (findTotal() > 0) {
+        {{ findCurrent() }} / {{ findTotal() }}
+      } @else {
+        &nbsp;
+      }
     </span>
     <button
-      hellButton variant="ghost" size="sm" iconOnly type="button"
-      (click)="findPrev()" [disabled]="!findTotal()" aria-label="Previous match"
-    ><hell-icon name="faSolidChevronUp" /></button>
+      hellButton
+      variant="ghost"
+      size="sm"
+      iconOnly
+      type="button"
+      (click)="findPrev()"
+      [disabled]="!findTotal()"
+      aria-label="Previous match"
+    >
+      <hell-icon name="faSolidChevronUp" />
+    </button>
     <button
-      hellButton variant="ghost" size="sm" iconOnly type="button"
-      (click)="findNext()" [disabled]="!findTotal()" aria-label="Next match"
-    ><hell-icon name="faSolidChevronDown" /></button>
+      hellButton
+      variant="ghost"
+      size="sm"
+      iconOnly
+      type="button"
+      (click)="findNext()"
+      [disabled]="!findTotal()"
+      aria-label="Next match"
+    >
+      <hell-icon name="faSolidChevronDown" />
+    </button>
     <button
-      hellButton variant="ghost" size="sm" iconOnly type="button"
-      (click)="closeFind()" aria-label="Close find bar (Esc)"
-    ><hell-icon name="faSolidXmark" /></button>
+      hellButton
+      variant="ghost"
+      size="sm"
+      iconOnly
+      type="button"
+      (click)="closeFind()"
+      aria-label="Close find bar (Esc)"
+    >
+      <hell-icon name="faSolidXmark" />
+    </button>
   </div>
 }
 
@@ -131,11 +227,7 @@
           [attr.aria-current]="page() === n ? 'page' : null"
         >
           <span class="hell-pdf-thumb-canvas-wrap">
-            <canvas
-              #thumbCanvas
-              [attr.data-page]="n"
-              width="120" height="160"
-            ></canvas>
+            <canvas #thumbCanvas [attr.data-page]="n" width="120" height="160"></canvas>
           </span>
           <span class="hell-pdf-thumb-label">{{ n }}</span>
         </button>

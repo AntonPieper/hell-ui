@@ -16,13 +16,19 @@ import { HellInput } from '../../primitives/input/input';
 import { HellPopover, HellPopoverTrigger } from '../../primitives/popover/popover';
 import type { HellSize } from '../../core/types';
 
-interface ParsedTime { h: number; m: number; s: number; }
+interface ParsedTime {
+  h: number;
+  m: number;
+  s: number;
+}
 
 const HELL_TIME_INPUT_ICONS = {
   faSolidClock,
 };
 
-function pad(n: number) { return n.toString().padStart(2, '0'); }
+function pad(n: number) {
+  return n.toString().padStart(2, '0');
+}
 
 function format(t: ParsedTime, seconds: boolean) {
   return seconds ? `${pad(t.h)}:${pad(t.m)}:${pad(t.s)}` : `${pad(t.h)}:${pad(t.m)}`;
@@ -48,7 +54,9 @@ function tryParse(text: string): ParsedTime | null {
   }
   const m = /^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/.exec(t);
   if (!m) return null;
-  const h = +m[1], mm = +m[2], s = +(m[3] ?? '0');
+  const h = +m[1],
+    mm = +m[2],
+    s = +(m[3] ?? '0');
   if (h > 23 || mm > 59 || s > 59) return null;
   return { h, m: mm, s };
 }
@@ -88,9 +96,9 @@ function tryParse(text: string): ParsedTime | null {
       [disabled]="disabled()"
       [placeholder]="placeholder() ?? (seconds() ? 'HH:MM:SS' : 'HH:MM')"
       [value]="display()"
-      (input)="onInput($any($event.target).value)"
+      (input)="onInput($event.target.value)"
       (blur)="onBlur()"
-      (keydown.enter)="commit($any($event.target).value, $event)"
+      (keydown.enter)="commit($event.target.value, $event)"
     />
     <button
       hellButton
@@ -113,10 +121,26 @@ function tryParse(text: string): ParsedTime | null {
         <div class="hell-time-picker-header">
           <span class="hell-time-picker-readout">{{ format(current(), seconds()) }}</span>
           <div class="hell-time-picker-stepper">
-            <button hellButton variant="ghost" size="sm" type="button"
-                    (click)="nudge('m', -5)" aria-label="Subtract 5 minutes">−5m</button>
-            <button hellButton variant="ghost" size="sm" type="button"
-                    (click)="nudge('m', 5)" aria-label="Add 5 minutes">+5m</button>
+            <button
+              hellButton
+              variant="ghost"
+              size="sm"
+              type="button"
+              (click)="nudge('m', -5)"
+              aria-label="Subtract 5 minutes"
+            >
+              −5m
+            </button>
+            <button
+              hellButton
+              variant="ghost"
+              size="sm"
+              type="button"
+              (click)="nudge('m', 5)"
+              aria-label="Add 5 minutes"
+            >
+              +5m
+            </button>
           </div>
         </div>
 
@@ -131,7 +155,9 @@ function tryParse(text: string): ParsedTime | null {
                 type="button"
                 class="hell-time-picker-cell"
                 (click)="setUnit('h', h)"
-              >{{ pad(h) }}</button>
+              >
+                {{ pad(h) }}
+              </button>
             }
           </div>
         </div>
@@ -147,7 +173,9 @@ function tryParse(text: string): ParsedTime | null {
                 type="button"
                 class="hell-time-picker-cell"
                 (click)="setUnit('m', m)"
-              >{{ pad(m) }}</button>
+              >
+                {{ pad(m) }}
+              </button>
             }
           </div>
         </div>
@@ -164,7 +192,9 @@ function tryParse(text: string): ParsedTime | null {
                   type="button"
                   class="hell-time-picker-cell"
                   (click)="setUnit('s', s)"
-                >{{ pad(s) }}</button>
+                >
+                  {{ pad(s) }}
+                </button>
               }
             </div>
           </div>

@@ -44,7 +44,9 @@ function tryParse(text: string): Date | null {
 function formatDate(d: Date | null): string {
   if (!d) return '';
   return d.toLocaleDateString(undefined, {
-    year: 'numeric', month: 'short', day: 'numeric',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
 }
 
@@ -82,9 +84,9 @@ function formatDate(d: Date | null): string {
       [disabled]="disabled()"
       [placeholder]="placeholder()"
       [value]="display()"
-      (input)="onInput($any($event.target).value)"
+      (input)="onInput($event.target.value)"
       (blur)="onBlur()"
-      (keydown.enter)="commit($any($event.target).value, $event)"
+      (keydown.enter)="commit($event.target.value, $event)"
     />
     <button
       hellButton
