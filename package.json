@@ -4,9 +4,10 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build hell && ng build hell-docs",
+    "build": "ng build hell && pnpm verify:docs && ng build hell-docs",
     "build:lib": "ng build hell",
-    "build:docs": "ng build hell-docs",
+    "build:docs": "pnpm verify:docs && ng build hell-docs",
+    "verify:docs": "node scripts/verify-docs-imports.mjs",
     "watch": "ng build hell --watch --configuration development",
     "test": "ng test"
   },
