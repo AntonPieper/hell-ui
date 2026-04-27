@@ -14,18 +14,25 @@ import { HellDialpad } from 'hell';
 
       <h2>Example</h2>
       <div class="hd-example flex flex-wrap items-start gap-6">
-        <hell-dialpad (digit)="onDigit($event)" (valueChange)="number.set($event)" />
+        <hell-dialpad
+          (digit)="onDigit($event)"
+          (valueChange)="number.set($event)"
+          (call)="called.set($event)"
+        />
         <div>
           <p>Last digit: <code>{{ last() || '—' }}</code></p>
           <p>Current number: <code>{{ number() || '—' }}</code></p>
+          <p>Last call: <code>{{ called() || '—' }}</code></p>
         </div>
       </div>
 
       <h2>API</h2>
       <ul>
         <li><code>value</code>: controlled mode</li>
+        <li><code>showCallButton</code>: render the primary call action (default <code>true</code>)</li>
         <li><code>(digit)</code>: emits the pressed key</li>
         <li><code>(valueChange)</code>: emits the running number</li>
+        <li><code>(call)</code>: emits current number when the call button is pressed</li>
       </ul>
     </article>
   `,
@@ -33,6 +40,7 @@ import { HellDialpad } from 'hell';
 export class DialpadPage {
   protected readonly last = signal('');
   protected readonly number = signal('');
+  protected readonly called = signal('');
   protected onDigit(d: string) {
     this.last.set(d);
   }

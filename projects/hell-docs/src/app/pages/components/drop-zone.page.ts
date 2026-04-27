@@ -36,6 +36,14 @@ import { HellDropZone } from 'hell';
         </div>
       </div>
 
+      <h2>Disabled</h2>
+      <div class="hd-example">
+        <div hellDropzone disabled>
+          <strong>Uploads disabled</strong>
+          <span class="hd-muted">This area ignores click, keyboard and drop.</span>
+        </div>
+      </div>
+
       <h2>API</h2>
       <ul>
         <li><code>multiple</code>: allow multiple files (default <code>true</code>)</li>

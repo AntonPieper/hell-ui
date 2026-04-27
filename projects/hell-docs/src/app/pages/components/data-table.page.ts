@@ -36,15 +36,29 @@ const ALL: Row[] = Array.from({ length: 47 }, (_, i) => ({
           [columns]="columns"
           [total]="total()"
           [pageSize]="10"
+          [pageSizeOptions]="pageSizeOptions"
           (queryChange)="load($event)"
         />
       </div>
+
+      <h2>API</h2>
+      <ul>
+        <li><code>data</code>: current page rows.</li>
+        <li><code>columns</code>: TanStack <code>ColumnDef&lt;T&gt;[]</code>.</li>
+        <li><code>total</code>: total rows across all pages.</li>
+        <li><code>pageSize</code>: initial rows per page.</li>
+        <li><code>pageSizeOptions</code>: selectable page sizes.</li>
+        <li><code>(queryChange)</code>: emits <code>pageIndex</code>, <code>pageSize</code>, <code>sorting</code>, and <code>filter</code>; fetch or derive rows from this.</li>
+        <li><code>unstyled</code>: opt out of shell styling.</li>
+      </ul>
     </article>
   `,
 })
 export class DataTablePage {
   protected readonly rows = signal<Row[]>([]);
   protected readonly total = signal(0);
+
+  protected readonly pageSizeOptions = [5, 10, 25] as const;
 
   protected readonly columns: ColumnDef<Row, any>[] = [
     { accessorKey: 'id', header: 'ID' },

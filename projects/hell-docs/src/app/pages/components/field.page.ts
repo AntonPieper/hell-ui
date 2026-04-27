@@ -4,6 +4,7 @@ import {
   HellCheckbox,
   HellDateInput,
   HellInput,
+  HellSelect,
   HellSwitch,
 } from 'hell';
 
@@ -13,6 +14,7 @@ import {
   imports: [
     ...HELL_FIELD_DIRECTIVES,
     HellInput,
+    HellSelect,
     HellCheckbox,
     HellSwitch,
     HellDateInput,
@@ -40,6 +42,16 @@ import {
           <label hellFieldLabel>Password</label>
           <input hellInput type="password" invalid placeholder="••••••••" />
           <div hellFieldError>Password must be at least 8 characters.</div>
+        </div>
+
+        <div hellField>
+          <label hellFieldLabel>Role</label>
+          <select hellSelect>
+            <option>Admin</option>
+            <option>Editor</option>
+            <option>Viewer</option>
+          </select>
+          <div hellFieldDescription>Native selects use the same field wiring.</div>
         </div>
 
         <div hellField>
@@ -76,12 +88,13 @@ import {
         </div>
       </div>
 
-      <h2>Anatomy</h2>
+      <h2>API</h2>
       <ul>
-        <li><code>hellField</code> — wrapper. <code>orientation</code>: <code>vertical | horizontal</code>.</li>
-        <li><code>hellFieldLabel</code> — visible label, auto-linked to the control. Clicking it focuses (or toggles, for checkbox/switch/radio) the control.</li>
-        <li><code>hellFieldDescription</code> — neutral helper text.</li>
-        <li><code>hellFieldError</code> — error message, only shown when applicable in your form layer.</li>
+        <li><code>hellField</code>: wrapper. <code>orientation</code> is <code>vertical | horizontal</code>; <code>unstyled</code> opts out of spacing.</li>
+        <li><code>hellFieldLabel</code>: visible label, auto-linked to the control. Clicking it focuses or toggles the control.</li>
+        <li><code>hellFieldDescription</code>: neutral helper text announced by assistive tech.</li>
+        <li><code>hellFieldError</code>: error text announced by assistive tech when present.</li>
+        <li>Import the bundle via <code>HELL_FIELD_DIRECTIVES</code>.</li>
       </ul>
     </article>
   `,

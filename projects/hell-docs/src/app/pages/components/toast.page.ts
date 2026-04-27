@@ -98,6 +98,31 @@ import { HellButton, HellToastService } from 'hell';
           Dismiss all
         </button>
       </div>
+
+      <h2>API</h2>
+      <h3><code>HellToastService</code></h3>
+      <ul>
+        <li><code>show(options)</code>: render a toast; returns its numeric id.</li>
+        <li>Shortcuts: <code>message()</code>, <code>success()</code>, <code>info()</code>, <code>warning()</code>, <code>error()</code>.</li>
+        <li><code>dismiss(id)</code>, <code>dismissAll()</code>.</li>
+        <li><code>pauseAll()</code>, <code>resumeAll()</code>: used by the toaster hover/focus handling.</li>
+      </ul>
+      <h3><code>HellToastOptions</code></h3>
+      <ul>
+        <li><code>title</code>, <code>description</code>.</li>
+        <li><code>variant</code>: <code>default | success | info | warning | danger</code>.</li>
+        <li><code>duration</code>: milliseconds; <code>0</code> disables auto-dismiss.</li>
+        <li><code>action</code>: one action button with <code>label</code> and <code>onClick(dismiss)</code>.</li>
+        <li><code>dismissible</code>: show / hide the close button.</li>
+        <li><code>template</code>: custom body template with <code>{{ '{' }} id, dismiss {{ '}' }}</code>.</li>
+        <li><code>id</code>: update an existing toast in place.</li>
+      </ul>
+      <h3><code>&lt;hell-toaster&gt;</code></h3>
+      <ul>
+        <li><code>position</code>: <code>top-left | top-center | top-right | bottom-left | bottom-center | bottom-right</code>.</li>
+        <li><code>maxVisible</code>: number of cards visible before overflow collapse.</li>
+        <li><code>unstyled</code>: opt out of stack styling.</li>
+      </ul>
     </article>
   `,
 })

@@ -1,10 +1,10 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellSeparator } from 'hell';
+import { HELL_CARD_DIRECTIVES, HellSeparator } from 'hell';
 
 @Component({
   selector: 'hd-separator',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellSeparator],
+  imports: [HellSeparator, ...HELL_CARD_DIRECTIVES],
   template: `
     <article class="hd-prose">
       <h1>Separator</h1>
@@ -40,9 +40,9 @@ import { HellSeparator } from 'hell';
 
       <h2>Flush (inside a card)</h2>
       <div class="hd-example">
-        <div class="hell-card max-w-95">
-          <div class="hell-card-header"><strong>Settings</strong></div>
-          <div class="hell-card-body">
+        <div hellCard class="max-w-95">
+          <div hellCardHeader><strong>Settings</strong></div>
+          <div hellCardBody>
             <p class="m-0">General</p>
             <div hellSeparator spacing="sm"></div>
             <p class="m-0">Notifications</p>

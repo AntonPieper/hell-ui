@@ -56,6 +56,12 @@ import { HELL_FIELD_DIRECTIVES, HellSlider } from 'hell';
         </div>
       </div>
 
+      <h2>Vertical</h2>
+      <div class="hd-example flex h-40 items-center gap-6">
+        <hell-slider orientation="vertical" [value]="30" aria-label="Vertical low" />
+        <hell-slider orientation="vertical" [value]="70" aria-label="Vertical high" />
+      </div>
+
       <h2>Disabled</h2>
       <div class="hd-example max-w-md">
         <hell-slider [value]="50" disabled />

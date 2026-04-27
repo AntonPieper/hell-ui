@@ -41,6 +41,7 @@ const HD_BUTTON_PAGE_ICONS = {
         <button hellButton variant="default">Default</button>
         <button hellButton variant="soft">Soft</button>
         <button hellButton variant="ghost">Ghost</button>
+        <a hellButton variant="link" href="#" (click)="$event.preventDefault()">Link</a>
         <button hellButton variant="danger">Danger</button>
         <button hellButton variant="success">Success</button>
         <button hellButton variant="primary" disabled>Disabled</button>

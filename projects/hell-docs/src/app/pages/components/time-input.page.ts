@@ -48,6 +48,14 @@ import { HELL_FIELD_DIRECTIVES, HellTimeInput } from 'hell';
         </div>
       </div>
 
+      <h2>Placeholder and labels</h2>
+      <div class="hd-example grid gap-3 max-w-md">
+        <hell-time-input placeholder="09:00" aria-label="Start time" />
+        <p class="hd-note">
+          Use <code>aria-label</code> when no visible <code>hellFieldLabel</code> is present.
+        </p>
+      </div>
+
       <h2>Sizes</h2>
       <div class="hd-example grid gap-3 max-w-md">
         <hell-time-input size="sm" [value]="small()" (valueChange)="small.set($event)" />
@@ -63,6 +71,8 @@ import { HELL_FIELD_DIRECTIVES, HellTimeInput } from 'hell';
         <li><code>seconds</code>: include a seconds grid + readout.</li>
         <li><code>size</code>: <code>sm | md | lg</code></li>
         <li><code>invalid</code>, <code>disabled</code></li>
+        <li><code>placeholder</code>, <code>aria-label</code></li>
+        <li><code>unstyled</code></li>
       </ul>
     </article>
   `,

@@ -13,6 +13,7 @@ import { HellTag, HellBadge, HellKbd } from 'hell';
       <h2>Tag variants</h2>
       <div class="hd-example flex flex-wrap gap-2">
         <span hellTag>default</span>
+        <span hellTag variant="primary">primary</span>
         <span hellTag variant="info">info</span>
         <span hellTag variant="success">success</span>
         <span hellTag variant="warning">warning</span>
@@ -38,7 +39,7 @@ import { HellTag, HellBadge, HellKbd } from 'hell';
 
       <h2>API</h2>
       <ul>
-        <li><code>hellTag variant</code>: <code>default | info | success | warning | danger</code></li>
+        <li><code>hellTag variant</code>: <code>default | primary | info | success | warning | danger</code></li>
         <li><code>hellBadge</code>: small numeric counter</li>
         <li><code>hellKbd</code>: keyboard key indicator</li>
       </ul>

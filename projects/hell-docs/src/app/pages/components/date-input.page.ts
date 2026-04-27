@@ -1,29 +1,19 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import {
-  HELL_FIELD_DIRECTIVES,
-  HellDateInput,
-  HellDatePicker,
-  HellDateRangePicker,
-} from 'hell';
+import { RouterLink } from '@angular/router';
+import { HELL_FIELD_DIRECTIVES, HellDateInput } from 'hell';
 
 @Component({
   selector: 'hd-date-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    ...HELL_FIELD_DIRECTIVES,
-    HellDateInput,
-    HellDatePicker,
-    HellDateRangePicker,
-  ],
+  imports: [RouterLink, ...HELL_FIELD_DIRECTIVES, HellDateInput],
   template: `
     <article class="hd-prose">
-      <h1>Date input &amp; picker</h1>
+      <h1>Date input</h1>
       <p>
-        A text-first date field — type or paste a date in <code>YYYY-MM-DD</code>
-        (or any locale-friendly format <code>Date.parse</code> understands)
-        and tab on, or click the calendar icon on the right to open the
-        picker. Use the inline picker directly when you want a calendar
-        always on screen, or the range picker for two-date selections.
+        Composite date field: a text input plus calendar-trigger popover. Type or paste
+        <code>YYYY-MM-DD</code> (or any locale-friendly format <code>Date.parse</code>
+        understands), then blur or press Enter to commit. Click the calendar icon to pick
+        from <a routerLink="/components/date-picker">Date picker</a>.
       </p>
 
       <h2>Text input + calendar popover</h2>
@@ -71,56 +61,28 @@ import {
         <hell-date-input size="lg" [date]="large()" (dateChange)="large.set($event)" />
       </div>
 
-      <h2>Inline picker</h2>
-      <p>
-        Skip the input and embed the calendar directly. Useful for booking
-        flows or anywhere a date is the only thing on screen.
-      </p>
-      <div class="hd-example flex flex-wrap items-start gap-6">
-        <hell-date-picker
-          [date]="inline()"
-          (dateChange)="inline.set($event)"
+      <h2>Placeholders and labels</h2>
+      <div class="hd-example grid gap-3 max-w-md">
+        <hell-date-input
+          placeholder="Apr 22, 2026"
+          aria-label="Invoice date"
+          [date]="null"
         />
-        <p class="hd-muted">Selected: {{ inline()?.toDateString() ?? '—' }}</p>
-      </div>
-
-      <h2>Range picker</h2>
-      <p>
-        Pick a start and end date in one calendar. The selected days at each
-        end of the range are filled, and everything between gets a soft
-        highlight.
-      </p>
-      <div class="hd-example flex flex-wrap items-start gap-6">
-        <hell-date-range-picker
-          [startDate]="rangeStart()"
-          [endDate]="rangeEnd()"
-          (startDateChange)="rangeStart.set($event)"
-          (endDateChange)="rangeEnd.set($event)"
-        />
-        <p class="hd-muted">
-          {{ rangeStart()?.toDateString() ?? '—' }}
-          →
-          {{ rangeEnd()?.toDateString() ?? '—' }}
+        <p class="hd-note">
+          Use <code>aria-label</code> when no visible <code>hellFieldLabel</code> is present.
         </p>
       </div>
 
       <h2>API</h2>
-      <h3><code>hell-date-input</code></h3>
       <ul>
-        <li><code>date</code>: <code>Date</code> currently selected (two-way via <code>(dateChange)</code>).</li>
-        <li><code>min</code>, <code>max</code>: bounds.</li>
-        <li><code>size</code>: <code>sm | md | lg</code></li>
-        <li><code>invalid</code>, <code>disabled</code>, <code>placeholder</code></li>
-      </ul>
-      <h3><code>hell-date-picker</code></h3>
-      <ul>
-        <li><code>date</code>, <code>(dateChange)</code>, <code>min</code>, <code>max</code>, <code>disabled</code></li>
-      </ul>
-      <h3><code>hell-date-range-picker</code></h3>
-      <ul>
-        <li><code>startDate</code>, <code>(startDateChange)</code></li>
-        <li><code>endDate</code>, <code>(endDateChange)</code></li>
-        <li><code>min</code>, <code>max</code>, <code>disabled</code></li>
+        <li><code>date</code>: <code>Date | null</code> current value.</li>
+        <li><code>(dateChange)</code>: emits a valid <code>Date</code> after typing or picking.</li>
+        <li><code>min</code>, <code>max</code>: optional picker bounds.</li>
+        <li><code>size</code>: <code>sm | md | lg</code>.</li>
+        <li><code>invalid</code>, <code>disabled</code>: visual / interaction states.</li>
+        <li><code>placeholder</code>: text shown while empty.</li>
+        <li><code>aria-label</code>: accessible name for standalone usage.</li>
+        <li><code>unstyled</code>: opt out of host styling.</li>
       </ul>
     </article>
   `,
@@ -130,9 +92,6 @@ export class DateInputPage {
   protected readonly small = signal<Date | null>(new Date(2026, 0, 15));
   protected readonly large = signal<Date | null>(new Date(2026, 11, 31));
   protected readonly bounded = signal<Date | null>(new Date(2026, 5, 15));
-  protected readonly inline = signal<Date | undefined>(new Date());
-  protected readonly rangeStart = signal<Date | undefined>(new Date(2026, 3, 5));
-  protected readonly rangeEnd = signal<Date | undefined>(new Date(2026, 3, 12));
   protected readonly minDate = new Date(2026, 3, 1);
   protected readonly maxDate = new Date(2026, 11, 31);
 }

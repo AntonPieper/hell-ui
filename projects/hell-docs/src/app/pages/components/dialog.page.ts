@@ -89,6 +89,18 @@ import { HellButton, HELL_CARD_DIRECTIVES, HELL_DIALOG_DIRECTIVES } from 'hell';
         Need arbitrary region instead? Mark it with <code>hellDialogScope</code>
         and keep <code>scoped</code> on overlay.
       </p>
+
+      <h2>API</h2>
+      <ul>
+        <li><code>[hellDialogTrigger]</code>: bind to an <code>&lt;ng-template&gt;</code>; exposes template context <code>close()</code>.</li>
+        <li><code>closeOnEscape</code>, <code>closeOnOutsideClick</code>: trigger inputs forwarded to <code>NgpDialogTrigger</code>.</li>
+        <li><code>(closed)</code>: emits when the dialog closes.</li>
+        <li><code>hellDialogOverlay</code>: backdrop layer; <code>scoped</code> keeps it inside nearest <code>hellDialogScope</code> / <code>hellAppContent</code>.</li>
+        <li><code>hellDialog</code>: panel; <code>size</code> is <code>xs | sm | md | lg | xl</code>.</li>
+        <li><code>hellDialogTitle</code>, <code>hellDialogDescription</code>: accessible title and description wiring.</li>
+        <li><code>hellDialogScope</code>: marks a custom overlay bounding region.</li>
+        <li><code>unstyled</code>: available on overlay, panel, title and description.</li>
+      </ul>
     </article>
   `,
 })
