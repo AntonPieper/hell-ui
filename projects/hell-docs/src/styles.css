@@ -116,6 +116,12 @@
     padding: calc(var(--spacing) * 5);
   }
 
+  /* Extracted examples render through component hosts; keep preview layout
+     utilities aimed at the demo elements themselves. */
+  .hd-example > * {
+    display: contents;
+  }
+
   .hd-example-code-toolbar {
     display: flex;
     align-items: center;

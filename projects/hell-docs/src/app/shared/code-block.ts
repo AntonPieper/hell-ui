@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, computed, input, signal } from '@angular/core';
 import { angular } from '@codemirror/lang-angular';
 import { javascript } from '@codemirror/lang-javascript';
 import { type Extension } from '@codemirror/state';
@@ -27,13 +27,21 @@ const CODE_BLOCK_ICONS = { faSolidCopy, faSolidCheck };
         <hell-icon [name]="copied() ? 'faSolidCheck' : 'faSolidCopy'" />
       </button>
     </div>
-    <hell-code-editor class="hd-doc-code" readOnly [value]="code()" [extensions]="codeExtensions" />
+    <hell-code-editor
+      class="hd-doc-code"
+      readOnly
+      [value]="code()"
+      [extensions]="codeExtensions()"
+    />
   `,
 })
 export class CodeBlock {
   readonly code = input.required<string>();
 
-  protected readonly codeExtensions: Extension = [angular(), javascript({ typescript: true })];
+  protected readonly codeExtensions: Signal<Extension> = computed(() => {
+    const code = this.code().trimStart();
+    return code.startsWith('<') ? angular() : [javascript({ typescript: true })];
+  });
   protected readonly copied = signal(false);
 
   protected async copyCode(): Promise<void> {

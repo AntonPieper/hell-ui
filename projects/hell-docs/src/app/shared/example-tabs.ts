@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, booleanAttribute, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Signal,
+  booleanAttribute,
+  computed,
+  input,
+  signal,
+} from '@angular/core';
 import { NgClass } from '@angular/common';
 import { angular } from '@codemirror/lang-angular';
 import { javascript } from '@codemirror/lang-javascript';
@@ -45,7 +53,7 @@ const EXAMPLE_TABS_ICONS = { faSolidCopy, faSolidCheck };
           class="hd-example-code"
           readOnly
           [value]="code()"
-          [extensions]="codeExtensions"
+          [extensions]="codeExtensions()"
         />
       </div>
     </div>
@@ -56,7 +64,9 @@ export class ExampleTabs {
   readonly previewClass = input<string>('');
   readonly flush = input(false, { transform: booleanAttribute });
 
-  protected readonly codeExtensions: Extension = [angular(), javascript({ typescript: true })];
+  protected readonly codeExtensions: Signal<Extension> = computed(() => [
+    this.code().startsWith('<') ? angular() : javascript({ typescript: true }),
+  ]);
   protected readonly copied = signal(false);
 
   protected async copyCode(): Promise<void> {
