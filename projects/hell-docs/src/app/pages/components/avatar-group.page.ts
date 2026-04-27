@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidChevronDown, faSolidUsers } from '@ng-icons/font-awesome/solid';
+import { ExampleTabs } from '../../shared/example-tabs';
 import {
   HellAvatar,
   HellCheckbox,
@@ -20,6 +21,7 @@ interface TeamMember {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons({ faSolidChevronDown, faSolidUsers })],
   imports: [
+    ExampleTabs,
     HellAvatar,
     HellCheckbox,
     HellIcon,
@@ -35,7 +37,7 @@ interface TeamMember {
       </p>
 
       <h2>Basic</h2>
-      <div class="hd-example">
+      <hd-example-tabs [code]="exampleCodes[0]">
         <hell-avatar-group>
           @for (person of team.slice(0, 4); track person.name) {
             <hell-avatar
@@ -47,10 +49,10 @@ interface TeamMember {
           }
           <span hellAvatarGroupOverflow>+{{ team.length - 4 }}</span>
         </hell-avatar-group>
-      </div>
+      </hd-example-tabs>
 
       <h2>Interaction hooks</h2>
-      <div class="hd-example grid gap-3">
+      <hd-example-tabs [code]="exampleCodes[1]" previewClass="grid gap-3">
         <hell-avatar-group class="hd-avatar-group-pad">
           @for (person of team.slice(0, 3); track person.name) {
             <button
@@ -79,10 +81,10 @@ interface TeamMember {
           </button>
         </hell-avatar-group>
         <p class="hd-note">{{ lastAction() }}</p>
-      </div>
+      </hd-example-tabs>
 
       <h2>Overflow menu</h2>
-      <div class="hd-example">
+      <hd-example-tabs [code]="exampleCodes[2]">
         <ng-template #overflowMenu>
           <div hellMenu class="hd-avatar-menu">
             <div hellMenuLabel>
@@ -152,7 +154,7 @@ interface TeamMember {
             <hell-icon name="faSolidChevronDown" size="10px" />
           </button>
         </hell-avatar-group>
-      </div>
+      </hd-example-tabs>
 
       <h2>API</h2>
       <ul>
@@ -167,10 +169,30 @@ interface TeamMember {
           <code>hellAvatarGroupOverflow</code>: projected overflow item; <code>unstyled</code>
         </li>
       </ul>
+
+      <h2>Do</h2>
+      <ul>
+        <li>Use a small <code>max</code> and an overflow item for dense lists.</li>
+        <li>
+          Mark selected people with <code>selected</code> only when selection changes behavior.
+        </li>
+        <li>Keep avatars the same <code>size</code> within one group.</li>
+      </ul>
+
+      <h2>Don't</h2>
+      <ul>
+        <li>Don't mix unrelated users and actions in one group.</li>
+        <li>Don't use overflow as a menu unless it is keyboard reachable.</li>
+      </ul>
     </article>
   `,
 })
 export class AvatarGroupPage {
+  protected readonly exampleCodes = [
+    '<hell-avatar-group>\n  <hell-avatar hellAvatarGroupItem fallback="AK" alt="Ada King" />\n  <hell-avatar hellAvatarGroupItem fallback="BS" alt="Ben Shaw" />\n  <hell-avatar hellAvatarGroupItem fallback="CL" alt="Cara Li" />\n  <hell-avatar hellAvatarGroupItem fallback="DN" alt="Dev Novak" />\n  <span hellAvatarGroupOverflow>+3</span>\n</hell-avatar-group>\n',
+    '<hell-avatar-group class="hd-avatar-group-pad">\n  <button hellAvatarGroupItem selected type="button" class="hd-avatar-group-action">\n    <hell-avatar fallback="AK" alt="Ada King" />\n  </button>\n  <button hellAvatarGroupItem type="button" class="hd-avatar-group-action">\n    <hell-avatar fallback="BS" alt="Ben Shaw" />\n  </button>\n  <span hellAvatarGroupOverflow>+2</span>\n</hell-avatar-group>\n',
+    '<button hellButton [hellMenuTrigger]="overflowMenu" placement="bottom-start">\n  More people\n</button>\n\n<ng-template #overflowMenu>\n  <div hellMenu class="hd-avatar-menu">\n    <div hellMenuLabel>More people</div>\n    <button hellMenuItem type="button">Ada King</button>\n    <button hellMenuItem type="button">Ben Shaw</button>\n    <button hellMenuItem type="button">Cara Li</button>\n  </div>\n</ng-template>\n',
+  ] as const;
   protected readonly max = 4;
 
   protected readonly team: readonly TeamMember[] = [

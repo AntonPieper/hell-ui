@@ -1,11 +1,12 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HellSpinner, HellButton } from 'hell';
+import { ExampleTabs } from '../../shared/example-tabs';
 
 @Component({
   selector: 'hd-spinner',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellSpinner, HellButton, RouterLink],
+  imports: [ExampleTabs, HellSpinner, HellButton, RouterLink],
   template: `
     <article class="hd-prose">
       <h1>Spinner</h1>
@@ -20,7 +21,7 @@ import { HellSpinner, HellButton } from 'hell';
         Four built-in variants. All inherit <code>currentColor</code>, so they adapt to surrounding
         text and themed buttons automatically.
       </p>
-      <div class="hd-example flex flex-wrap items-center gap-8">
+      <hd-example-tabs [code]="exampleCodes[0]" previewClass="flex flex-wrap items-center gap-8">
         <div class="flex flex-col items-center gap-2">
           <span hellSpinner variant="ring" size="lg"></span>
           <code>ring</code>
@@ -37,33 +38,33 @@ import { HellSpinner, HellButton } from 'hell';
           <span hellSpinner variant="pulse" size="lg"></span>
           <code>pulse</code>
         </div>
-      </div>
+      </hd-example-tabs>
 
       <h2>Sizes</h2>
       <p>
         Five preset sizes (<code>xs sm md lg xl</code>). Or set any <code>font-size</code>: spinners
         are sized in <code>em</code>.
       </p>
-      <div class="hd-example flex flex-wrap items-end gap-6">
+      <hd-example-tabs [code]="exampleCodes[1]" previewClass="flex flex-wrap items-end gap-6">
         <span hellSpinner size="xs"></span>
         <span hellSpinner size="sm"></span>
         <span hellSpinner size="md"></span>
         <span hellSpinner size="lg"></span>
         <span hellSpinner size="xl"></span>
         <span hellSpinner class="text-[64px]"></span>
-      </div>
+      </hd-example-tabs>
 
       <h2>Colour</h2>
       <p>Inherits <code>currentColor</code>. Wrap in any text utility.</p>
-      <div class="hd-example flex flex-wrap items-center gap-6">
+      <hd-example-tabs [code]="exampleCodes[2]" previewClass="flex flex-wrap items-center gap-6">
         <span hellSpinner size="lg" class="text-hell-primary"></span>
         <span hellSpinner size="lg" variant="dots" class="text-hell-success"></span>
         <span hellSpinner size="lg" variant="bars" class="text-hell-danger"></span>
         <span hellSpinner size="lg" variant="pulse" class="text-hell-warning"></span>
-      </div>
+      </hd-example-tabs>
 
       <h2>Inside a button</h2>
-      <div class="hd-example flex flex-wrap items-center gap-3">
+      <hd-example-tabs [code]="exampleCodes[3]" previewClass="flex flex-wrap items-center gap-3">
         <button hellButton variant="primary" disabled>
           <span hellSpinner size="sm"></span>
           Saving…
@@ -75,7 +76,7 @@ import { HellSpinner, HellButton } from 'hell';
         <button hellButton variant="ghost" disabled>
           <span hellSpinner size="sm" variant="pulse"></span>
         </button>
-      </div>
+      </hd-example-tabs>
 
       <h2>API</h2>
       <ul>
@@ -106,4 +107,11 @@ import { HellSpinner, HellButton } from 'hell';
     </article>
   `,
 })
-export class SpinnerPage {}
+export class SpinnerPage {
+  protected readonly exampleCodes = [
+    '<div class="flex flex-col items-center gap-2">\n  <span hellSpinner variant="ring" size="lg"></span>\n  <code>ring</code>\n</div>\n<div class="flex flex-col items-center gap-2">\n  <span hellSpinner variant="dots" size="lg"></span>\n  <code>dots</code>\n</div>\n<div class="flex flex-col items-center gap-2">\n  <span hellSpinner variant="bars" size="lg"></span>\n  <code>bars</code>\n</div>\n<div class="flex flex-col items-center gap-2">\n  <span hellSpinner variant="pulse" size="lg"></span>\n  <code>pulse</code>\n</div>\n',
+    '<span hellSpinner size="xs"></span>\n<span hellSpinner size="sm"></span>\n<span hellSpinner size="md"></span>\n<span hellSpinner size="lg"></span>\n<span hellSpinner size="xl"></span>\n<span hellSpinner class="text-[64px]"></span>\n',
+    '<span hellSpinner size="lg" class="text-hell-primary"></span>\n<span hellSpinner size="lg" variant="dots" class="text-hell-success"></span>\n<span hellSpinner size="lg" variant="bars" class="text-hell-danger"></span>\n<span hellSpinner size="lg" variant="pulse" class="text-hell-warning"></span>\n',
+    '<button hellButton variant="primary" disabled>\n  <span hellSpinner size="sm"></span>\n  Saving\u2026\n</button>\n<button hellButton variant="default" disabled>\n  <span hellSpinner size="sm" variant="dots"></span>\n  Loading\n</button>\n<button hellButton variant="ghost" disabled>\n  <span hellSpinner size="sm" variant="pulse"></span>\n</button>\n',
+  ] as const;
+}
