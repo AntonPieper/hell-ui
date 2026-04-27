@@ -159,7 +159,7 @@
       box-shadow var(--hell-duration-fast) var(--ease-hell-out),
       border-color var(--hell-duration-fast) var(--ease-hell-out);
     [data-orientation='vertical'] > & {
-      --_hell-slider-thumb-y: calc(1 / 2 * 100%);
+      --_hell-slider-thumb-y: calc(calc(1 / 2 * 100%) * -1);
     }
     [data-size='sm'] > & {
       width: 14px;
