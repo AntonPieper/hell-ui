@@ -16,14 +16,19 @@
     display: flex;
     max-width: 100%;
     min-width: calc(var(--spacing) * 0);
+    align-items: stretch;
     gap: 2px;
+    min-height: calc(var(--spacing) * 9);
     overflow-x: auto;
+    overflow-y: hidden;
     border-bottom: 1px solid var(--color-hell-border);
     padding-inline: var(--spacing-hell-2);
     &[data-orientation='vertical'] {
       flex-direction: column;
       align-items: stretch;
       gap: calc(var(--spacing) * 1);
+      min-height: calc(var(--spacing) * 0);
+      overflow: visible;
       border-style: solid;
       border-width: 0px;
       padding: var(--spacing-hell-2);
@@ -134,7 +139,10 @@
     .hell-tabs[data-orientation='vertical'] > .hell-tab-list {
       min-width: calc(var(--spacing) * 0);
       flex-direction: row;
-      align-items: center;
+      align-items: stretch;
+      min-height: calc(var(--spacing) * 9);
+      overflow-x: auto;
+      overflow-y: hidden;
       border-bottom: 1px solid var(--color-hell-border);
       border-radius: var(--radius-lg);
     }
