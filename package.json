@@ -4,8 +4,10 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
+    "build": "ng build hell && ng build hell-docs",
+    "build:lib": "ng build hell",
+    "build:docs": "ng build hell-docs",
+    "watch": "ng build hell --watch --configuration development",
     "test": "ng test"
   },
   "private": true,
