@@ -1,0 +1,76 @@
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ExampleTabs } from '../../../shared/example-tabs';
+import { DropZoneDisabledExample } from './examples/disabled.example';
+import dropZoneDisabledExampleCodeRaw from './examples/disabled.example.ts?raw' with {
+  loader: 'text',
+};
+import { DropZoneExampleExample } from './examples/example.example';
+import dropZoneExampleExampleCodeRaw from './examples/example.example.ts?raw' with {
+  loader: 'text',
+};
+import { DropZoneSingleFileImagesOnlyExample } from './examples/single-file-images-only.example';
+import dropZoneSingleFileImagesOnlyExampleCodeRaw from './examples/single-file-images-only.example.ts?raw' with {
+  loader: 'text',
+};
+
+@Component({
+  selector: 'hd-drop-zone',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ExampleTabs,
+    DropZoneExampleExample,
+    DropZoneSingleFileImagesOnlyExample,
+    DropZoneDisabledExample,
+  ],
+  template: `
+    <article class="hd-prose">
+      <h1>Drop zone</h1>
+      <p>
+        Drag-and-drop file picker. Drop files into the area or click / keyboard-activate to open the
+        OS file picker.
+      </p>
+
+      <h2>Example</h2>
+      <hd-example-tabs [code]="dropZoneExampleExampleCode">
+        <app-drop-zone-example-example />
+      </hd-example-tabs>
+
+      <h2>Single file, images only</h2>
+      <hd-example-tabs [code]="dropZoneSingleFileImagesOnlyExampleCode">
+        <app-drop-zone-single-file-images-only-example />
+      </hd-example-tabs>
+
+      <h2>Disabled</h2>
+      <hd-example-tabs [code]="dropZoneDisabledExampleCode">
+        <app-drop-zone-disabled-example />
+      </hd-example-tabs>
+
+      <h2>API</h2>
+      <ul>
+        <li><code>multiple</code>: allow multiple files (default <code>true</code>)</li>
+        <li><code>accept</code>: native MIME filter</li>
+        <li><code>disabled</code></li>
+        <li><code>(files)</code>: emits picked or dropped files</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul>
+        <li>Keep the native file input path available through click or keyboard.</li>
+        <li>Use <code>accept</code> as a hint and validate files again after selection.</li>
+        <li>Show selected file names outside the drop zone.</li>
+      </ul>
+
+      <h2>Don't</h2>
+      <ul>
+        <li>Don't rely on drag and drop as the only upload path.</li>
+        <li>Don't trust MIME type or extension from the browser.</li>
+      </ul>
+    </article>
+  `,
+})
+export class DropZonePage {
+  protected readonly dropZoneExampleExampleCode = dropZoneExampleExampleCodeRaw;
+  protected readonly dropZoneSingleFileImagesOnlyExampleCode =
+    dropZoneSingleFileImagesOnlyExampleCodeRaw;
+  protected readonly dropZoneDisabledExampleCode = dropZoneDisabledExampleCodeRaw;
+}

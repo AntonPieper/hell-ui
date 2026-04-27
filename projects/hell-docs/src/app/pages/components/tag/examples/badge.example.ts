@@ -1,0 +1,19 @@
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { HellTag, HellBadge, HellKbd } from 'hell';
+
+@Component({
+  selector: 'app-tag-badge-example',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellBadge],
+  template: `
+    <span class="relative pr-6">
+      Inbox
+      <span hellBadge class="absolute -top-1 right-0">3</span>
+    </span>
+    <span class="relative pr-6">
+      Notifications
+      <span hellBadge class="absolute -top-1 right-0">99+</span>
+    </span>
+  `,
+})
+export class TagBadgeExample {}

@@ -1,0 +1,15 @@
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { HellSkeleton } from 'hell';
+
+@Component({
+  selector: 'app-skeleton-shapes-example',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellSkeleton],
+  template: `
+    <div hellSkeleton shape="circle" class="size-12"></div>
+    <div hellSkeleton shape="rect" class="h-12 w-24"></div>
+    <div hellSkeleton class="h-3 w-32"></div>
+  `,
+})
+export class SkeletonShapesExample {}

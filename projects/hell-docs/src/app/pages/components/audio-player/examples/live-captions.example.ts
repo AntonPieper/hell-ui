@@ -1,0 +1,17 @@
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { HellAudioPlayer } from 'hell';
+
+@Component({
+  selector: 'app-audio-player-live-captions-example',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellAudioPlayer],
+  template: `
+    <hell-audio-player
+      src="https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg"
+      title="Read while you listen"
+    />
+  `,
+})
+export class AudioPlayerLiveCaptionsExample {
+  protected readonly exampleDate = new Date('2026-04-22');
+}
