@@ -16,6 +16,7 @@ import {
   createAngularTable,
   getCoreRowModel,
 } from '@tanstack/angular-table';
+import { HellInput, HellSelect } from '../../primitives/input/input';
 import { HellPaginationStrip } from '../../primitives/pagination/pagination';
 
 export interface HellDataTableQuery {
@@ -33,18 +34,21 @@ export interface HellDataTableQuery {
 @Component({
   selector: 'hell-data-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FlexRenderDirective, HellPaginationStrip],
+  imports: [FlexRenderDirective, HellInput, HellSelect, HellPaginationStrip],
   host: {
     '[class.hell-table-shell]': '!unstyled()',
   },
   template: `
     <div class="hell-table-toolbar">
       <input
-        class="hell-input"
+        hellInput
+        size="sm"
+        class="hell-table-filter"
         type="search"
         [value]="filter()"
         (input)="onFilter($any($event.target).value)"
         placeholder="Filter…"
+        aria-label="Filter rows"
       />
     </div>
 
@@ -104,9 +108,11 @@ export interface HellDataTableQuery {
       <label class="hell-table-pagesize">
         Rows
         <select
-          class="hell-input"
+          hellSelect
+          size="sm"
           [value]="pageSizeSig()"
           (change)="onPageSizeChange($any($event.target).value)"
+          aria-label="Rows per page"
         >
           @for (n of pageSizeOptions(); track n) {
             <option [value]="n">{{ n }}</option>

@@ -24,6 +24,10 @@
       background-color: var(--color-hell-surface-subtle);
     }
 
+  .hell-table-filter {
+      max-width: 18rem;
+    }
+
   .hell-table {
       width: 100%;
       border-collapse: collapse;
@@ -109,13 +113,9 @@
       font-size: var(--text-xs);
       line-height: var(--text-xs--line-height);
       color: var(--color-hell-foreground-muted);
-      > select.hell-input {
+      > select.hell-select {
         width: auto;
-        height: var(--spacing-hell-control-sm);
-        padding-inline: calc(var(--spacing) * 2);
-        padding-block: calc(var(--spacing) * 0);
-        font-size: var(--text-xs);
-        line-height: var(--text-xs--line-height);
+        min-width: 4.5rem;
       }
     }
 

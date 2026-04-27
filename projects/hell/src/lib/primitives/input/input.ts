@@ -10,11 +10,28 @@ import { HellSize } from '../../core/types';
     '[class.hell-input]': '!unstyled()',
     '[attr.data-size]': 'size()',
     '[attr.data-invalid]': 'invalid() ? "true" : null',
+    '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
 })
 export class HellInput {
   readonly unstyled = input(false, { transform: booleanAttribute });
-  readonly size = input<HellSize>('md');
+  readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
+  readonly invalid = input(false, { transform: booleanAttribute });
+}
+
+@Directive({
+  selector: 'select[hellSelect]',
+  hostDirectives: [{ directive: NgpInput, inputs: ['disabled'] }],
+  host: {
+    '[class.hell-select]': '!unstyled()',
+    '[attr.data-size]': 'size()',
+    '[attr.data-invalid]': 'invalid() ? "true" : null',
+    '[attr.aria-invalid]': 'invalid() ? "true" : null',
+  },
+})
+export class HellSelect {
+  readonly unstyled = input(false, { transform: booleanAttribute });
+  readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
 }
 
@@ -25,10 +42,11 @@ export class HellInput {
     '[class.hell-textarea]': '!unstyled()',
     '[attr.data-size]': 'size()',
     '[attr.data-invalid]': 'invalid() ? "true" : null',
+    '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
 })
 export class HellTextarea {
   readonly unstyled = input(false, { transform: booleanAttribute });
-  readonly size = input<HellSize>('md');
+  readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
 }

@@ -12,10 +12,11 @@ import {
 } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCalendar } from '@ng-icons/font-awesome/solid';
-import { HellButton } from '../button/button';
-import { HellIcon } from '../icon/icon';
-import { HellPopover, HellPopoverTrigger } from '../popover/popover';
-import { HellDatePicker } from '../date-picker/date-picker';
+import { HellButton } from '../../primitives/button/button';
+import { HellIcon } from '../../primitives/icon/icon';
+import { HellInput } from '../../primitives/input/input';
+import { HellPopover, HellPopoverTrigger } from '../../primitives/popover/popover';
+import { HellDatePicker } from '../../primitives/date-picker/date-picker';
 import type { HellSize } from '../../core/types';
 
 const HELL_DATE_INPUT_ICONS = {
@@ -59,7 +60,7 @@ function formatDate(d: Date | null): string {
 @Component({
   selector: 'hell-date-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellIcon, HellPopover, HellPopoverTrigger, HellDatePicker],
+  imports: [HellButton, HellIcon, HellInput, HellPopover, HellPopoverTrigger, HellDatePicker],
   providers: [provideIcons(HELL_DATE_INPUT_ICONS)],
   host: {
     '[class.hell-date-input]': '!unstyled()',
@@ -70,9 +71,12 @@ function formatDate(d: Date | null): string {
   template: `
     <input
       #field
+      hellInput
+      unstyled
+      [size]="size()"
       type="text"
       class="hell-date-input-field"
-      [attr.data-size]="size()"
+      [invalid]="invalid()"
       [attr.aria-invalid]="invalid() ? 'true' : null"
       [attr.aria-label]="ariaLabel()"
       [disabled]="disabled()"
@@ -113,7 +117,7 @@ function formatDate(d: Date | null): string {
 })
 export class HellDateInput {
   readonly unstyled = input(false, { transform: booleanAttribute });
-  readonly size = input<HellSize>('md');
+  readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly date = input<Date | null>(null);

@@ -10,9 +10,10 @@ import {
 } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidClock } from '@ng-icons/font-awesome/solid';
-import { HellButton } from '../button/button';
-import { HellIcon } from '../icon/icon';
-import { HellPopover, HellPopoverTrigger } from '../popover/popover';
+import { HellButton } from '../../primitives/button/button';
+import { HellIcon } from '../../primitives/icon/icon';
+import { HellInput } from '../../primitives/input/input';
+import { HellPopover, HellPopoverTrigger } from '../../primitives/popover/popover';
 import type { HellSize } from '../../core/types';
 
 interface ParsedTime { h: number; m: number; s: number; }
@@ -64,7 +65,7 @@ function tryParse(text: string): ParsedTime | null {
 @Component({
   selector: 'hell-time-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellIcon, HellPopover, HellPopoverTrigger],
+  imports: [HellButton, HellIcon, HellInput, HellPopover, HellPopoverTrigger],
   providers: [provideIcons(HELL_TIME_INPUT_ICONS)],
   host: {
     '[class.hell-time-input]': '!unstyled()',
@@ -74,15 +75,18 @@ function tryParse(text: string): ParsedTime | null {
   },
   template: `
     <input
+      hellInput
+      unstyled
+      [size]="size()"
       type="text"
       class="hell-time-input-field"
       inputmode="numeric"
       autocomplete="off"
-      [attr.data-size]="size()"
+      [invalid]="invalid()"
       [attr.aria-invalid]="invalid() ? 'true' : null"
       [attr.aria-label]="ariaLabel()"
       [disabled]="disabled()"
-      [placeholder]="seconds() ? 'HH:MM:SS' : 'HH:MM'"
+      [placeholder]="placeholder() ?? (seconds() ? 'HH:MM:SS' : 'HH:MM')"
       [value]="display()"
       (input)="onInput($any($event.target).value)"
       (blur)="onBlur()"
@@ -171,12 +175,12 @@ function tryParse(text: string): ParsedTime | null {
 })
 export class HellTimeInput {
   readonly unstyled = input(false, { transform: booleanAttribute });
-  readonly size = input<HellSize>('md');
+  readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly value = input<string | null>(null);
   readonly seconds = input(false, { transform: booleanAttribute });
-  readonly placeholder = input<string>('Select time');
+  readonly placeholder = input<string | null>(null);
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
 
   readonly valueChange = output<string>();

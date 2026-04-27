@@ -1,6 +1,6 @@
 @layer components {
 
-  /* Input + Textarea. */
+  /* Input + Select + Textarea. */
 
   .hell-input {
       display: inline-flex;
@@ -10,7 +10,7 @@
       --_hell-input-font: 13px;
       height: var(--_hell-input-height);
       padding-inline: var(--_hell-input-px);
-      color: var(--_hell-input-font);
+      font-size: var(--_hell-input-font);
       font-family: inherit;
       color: var(--color-hell-foreground);
       background-color: var(--color-hell-surface-elevated);
@@ -37,7 +37,7 @@
         border-color: var(--color-hell-border);
         &::placeholder { color: var(--color-hell-foreground-subtle); opacity: 0.7; }
       }
-      &[aria-invalid="true"] {
+      &[data-invalid="true"], &[aria-invalid="true"] {
         border-color: var(--color-hell-danger);
       }
       &[data-size="sm"] {
@@ -49,6 +49,59 @@
         --_hell-input-height: var(--spacing-hell-control-lg);
         --_hell-input-px: var(--spacing-hell-5);
         --_hell-input-font: 14px;
+      }
+    }
+
+  .hell-select {
+      display: inline-flex;
+      width: 100%;
+      --_hell-select-height: var(--spacing-hell-control-md);
+      --_hell-select-px: var(--spacing-hell-4);
+      --_hell-select-font: 13px;
+      height: var(--_hell-select-height);
+      padding-inline: var(--_hell-select-px) calc(var(--_hell-select-px) + 1rem);
+      font-size: var(--_hell-select-font);
+      font-family: inherit;
+      color: var(--color-hell-foreground);
+      background-color: var(--color-hell-surface-elevated);
+      border-style: solid;
+      border-width: 1px;
+      border-color: var(--color-hell-border);
+      border-radius: var(--radius-md);
+      outline: none;
+      appearance: none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--color-hell-foreground-muted) 50%),
+        linear-gradient(135deg, var(--color-hell-foreground-muted) 50%, transparent 50%);
+      background-position: calc(100% - 12px) 50%, calc(100% - 8px) 50%;
+      background-size: 4px 4px;
+      background-repeat: no-repeat;
+      transition: border-color var(--hell-duration-fast) var(--ease-hell-out), box-shadow var(--hell-duration-fast) var(--ease-hell-out);
+      &[data-hover]:not([data-focus]) {
+        border-color: var(--color-hell-border-strong);
+      }
+      &[data-focus], &:focus {
+        border-color: var(--color-hell-border-focus);
+        box-shadow: 0 0 0 3px var(--color-hell-focus-ring);
+      }
+      &[data-disabled], &:disabled {
+        cursor: not-allowed;
+        background-color: var(--color-hell-surface-subtle);
+        color: var(--color-hell-foreground-muted);
+        border-color: var(--color-hell-border);
+      }
+      &[data-invalid="true"], &[aria-invalid="true"] {
+        border-color: var(--color-hell-danger);
+      }
+      &[data-size="sm"] {
+        --_hell-select-height: var(--spacing-hell-control-sm);
+        --_hell-select-px: var(--spacing-hell-3);
+        --_hell-select-font: 12px;
+      }
+      &[data-size="lg"] {
+        --_hell-select-height: var(--spacing-hell-control-lg);
+        --_hell-select-px: var(--spacing-hell-5);
+        --_hell-select-font: 14px;
       }
     }
 
@@ -80,6 +133,21 @@
         cursor: not-allowed;
         background-color: var(--color-hell-surface-subtle);
         color: var(--color-hell-foreground-muted);
+      }
+      &[data-invalid="true"], &[aria-invalid="true"] {
+        border-color: var(--color-hell-danger);
+      }
+      &[data-size="sm"] {
+        font-size: 12px;
+        padding-inline: var(--spacing-hell-3);
+        padding-block: var(--spacing-hell-2);
+        min-height: calc(var(--spacing-hell-control-sm) * 2);
+      }
+      &[data-size="lg"] {
+        font-size: 14px;
+        padding-inline: var(--spacing-hell-5);
+        padding-block: var(--spacing-hell-4);
+        min-height: calc(var(--spacing-hell-control-lg) * 2);
       }
     }
 

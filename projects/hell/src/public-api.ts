@@ -32,10 +32,10 @@ export * from './lib/primitives/breadcrumbs/breadcrumbs';
 export * from './lib/primitives/icon/icon';
 export * from './lib/primitives/pagination/pagination';
 export * from './lib/primitives/date-picker/date-picker';
-export * from './lib/primitives/date-input/date-input';
-export * from './lib/primitives/time-input/time-input';
 
 // Composites
+export * from './lib/composites/date-input/date-input';
+export * from './lib/composites/time-input/time-input';
 export * from './lib/composites/avatar-group/avatar-group';
 export * from './lib/composites/dialpad/dialpad';
 export * from './lib/composites/drop-zone/drop-zone';

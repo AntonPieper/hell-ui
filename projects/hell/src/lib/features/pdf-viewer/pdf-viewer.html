@@ -13,7 +13,9 @@
   ><hell-icon name="faSolidChevronLeft" /></button>
 
   <input
-    class="hell-input hell-pdf-page-input"
+    hellInput
+    size="sm"
+    class="hell-pdf-page-input"
     type="number" min="1" [max]="totalPages() || 1" [value]="page()"
     (change)="goTo(+$any($event.target).value)"
     aria-label="Page"
@@ -50,6 +52,8 @@
   ><hell-icon name="faSolidMinus" /></button>
 
   <select
+    hellSelect
+    size="sm"
     class="hell-pdf-zoom-select"
     (change)="onZoomSelect($any($event.target).value)"
     aria-label="Zoom level"
@@ -76,7 +80,9 @@
   <div class="hell-pdf-findbar">
     <input
       #findInput
-      class="hell-input hell-pdf-find-input"
+      hellInput
+      size="sm"
+      class="hell-pdf-find-input"
       type="search"
       placeholder="Find in document…"
       [value]="findQuery()"
