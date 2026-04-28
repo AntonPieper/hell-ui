@@ -4,14 +4,14 @@ import {
   HellCheckbox,
   HellDateInput,
   HellInput,
-  HellSelect,
+  HellNativeSelect,
   HellSwitch,
 } from 'hell';
 
 @Component({
   selector: 'app-field-vertical-default-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_FIELD_DIRECTIVES, HellInput, HellSelect, HellDateInput],
+  imports: [...HELL_FIELD_DIRECTIVES, HellInput, HellNativeSelect, HellDateInput],
   template: `
     <div hellField>
       <label hellFieldLabel>Email</label>
@@ -27,7 +27,7 @@ import {
 
     <div hellField>
       <label hellFieldLabel>Role</label>
-      <select hellSelect>
+      <select hellNativeSelect>
         <option>Admin</option>
         <option>Editor</option>
         <option>Viewer</option>

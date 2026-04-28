@@ -33,7 +33,7 @@ import inputTextareaExampleCodeRaw from './examples/textarea.example.ts?raw' wit
       <p>
         Single-line inputs, native selects and multi-line textareas. Apply the
         <code>hellInput</code> directive to a native <code>&lt;input&gt;</code>,
-        <code>hellSelect</code> to a <code>&lt;select&gt;</code>, and <code>hellTextarea</code> to a
+        <code>hellNativeSelect</code> to a <code>&lt;select&gt;</code>, and <code>hellTextarea</code> to a
         <code>&lt;textarea&gt;</code>.
       </p>
 
@@ -64,7 +64,7 @@ import inputTextareaExampleCodeRaw from './examples/textarea.example.ts?raw' wit
           <code>invalid</code>, <code>disabled</code>, <code>unstyled</code>
         </li>
         <li>
-          <code>hellSelect</code>: <code>size</code> (<code>sm | md | lg</code>),
+          <code>hellNativeSelect</code>: <code>size</code> (<code>sm | md | lg</code>),
           <code>invalid</code>, <code>disabled</code>, <code>unstyled</code>
         </li>
         <li>

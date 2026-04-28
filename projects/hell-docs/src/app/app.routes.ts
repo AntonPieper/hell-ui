@@ -43,6 +43,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/components/checkbox/checkbox.page').then((m) => m.CheckboxPage),
   },
   {
+    path: 'components/combobox',
+    loadComponent: () =>
+      import('./pages/components/combobox/combobox.page').then((m) => m.ComboboxPage),
+  },
+  {
     path: 'components/date-picker',
     loadComponent: () =>
       import('./pages/components/date-picker/date-picker.page').then((m) => m.DatePickerPage),
@@ -86,6 +91,10 @@ export const routes: Routes = [
   {
     path: 'components/radio',
     loadComponent: () => import('./pages/components/radio/radio.page').then((m) => m.RadioPage),
+  },
+  {
+    path: 'components/select',
+    loadComponent: () => import('./pages/components/select/select.page').then((m) => m.SelectPage),
   },
   {
     path: 'components/separator',

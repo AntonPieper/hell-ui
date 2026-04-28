@@ -4,7 +4,7 @@ import {
   HellCheckbox,
   HellDateInput,
   HellInput,
-  HellSelect,
+  HellNativeSelect,
   HellSwitch,
 } from 'hell';
 
