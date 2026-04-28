@@ -82,25 +82,29 @@
   --color-hell-primary-soft: #eef0f3;
   --color-hell-primary-soft-foreground: var(--color-hell-primary-900);
 
-  --color-hell-success: var(--color-hell-success-500);
-  --color-hell-success-soft: #eef8e3;
-  --color-hell-success-hover: #559924;
-  --color-hell-success-active: #43761c;
-  --color-hell-success-strong: #43761c;
+  /* Semantic accents — modern, harmonised set (Tailwind-inspired). The
+     previous palette was lifted from Bootstrap defaults; these read more
+     deliberate and align lightness across hues so a row of status tags has
+     even visual weight. */
+  --color-hell-success: #16a34a;
+  --color-hell-success-soft: #dcfce7;
+  --color-hell-success-hover: #15803d;
+  --color-hell-success-active: #166534;
+  --color-hell-success-strong: #166534;
 
-  --color-hell-info: var(--color-hell-info-400);
-  --color-hell-info-soft: #e0f6fa;
-  --color-hell-info-strong: #0888a3;
+  --color-hell-info: #0284c7;
+  --color-hell-info-soft: #e0f2fe;
+  --color-hell-info-strong: #075985;
 
-  --color-hell-danger: var(--color-hell-danger-500);
-  --color-hell-danger-soft: #fbe8e6;
-  --color-hell-danger-hover: var(--color-hell-danger-600);
-  --color-hell-danger-active: var(--color-hell-danger-700);
-  --color-hell-danger-strong: var(--color-hell-danger-700);
+  --color-hell-danger: #dc2626;
+  --color-hell-danger-soft: #fee2e2;
+  --color-hell-danger-hover: #b91c1c;
+  --color-hell-danger-active: #991b1b;
+  --color-hell-danger-strong: #991b1b;
 
-  --color-hell-warning: var(--color-hell-warning-500);
-  --color-hell-warning-soft: #fff3d9;
-  --color-hell-warning-strong: var(--color-hell-warning-600);
+  --color-hell-warning: #d97706;
+  --color-hell-warning-soft: #fef3c7;
+  --color-hell-warning-strong: #92400e;
 
   --color-hell-focus-ring: rgba(49, 58, 70, 0.35);
 
@@ -179,31 +183,458 @@
   --ngp-focus-ring: var(--color-hell-focus-ring);
 }
 
-/* Dark theme — opt-in */
+/* Dark theme — opt-in.
+ * Dark tokens follow two principles:
+ *   1. Accents are *brighter and slightly more chromatic* than their light
+ *      counterparts. A muted mid-tone primary on a dark surface reads as
+ *      disabled — luminance contrast must be carried by the accent itself.
+ *   2. Soft / strong semantic pairs are inverted: the soft tint becomes a
+ *      low-alpha tint of the base hue (so it sits on top of any surface
+ *      without becoming a bright halo) and the strong text becomes a pale
+ *      tint of the same hue. Without this, light-mode soft/strong colors
+ *      bleed through and tags look like glowing stickers on a dark page.
+ */
 [data-hell-theme="dark"] {
-  --color-hell-surface: #11151c;
-  --color-hell-surface-subtle: #161b23;
-  --color-hell-surface-muted: #1d242e;
-  --color-hell-surface-elevated: #1a212a;
+  --color-hell-surface: #0f141c;
+  --color-hell-surface-subtle: #151b25;
+  --color-hell-surface-muted: #1d2533;
+  --color-hell-surface-elevated: #181f2b;
   --color-hell-overlay: rgba(0, 0, 0, 0.6);
 
-  --color-hell-border: #2a3340;
-  --color-hell-border-strong: #3a4555;
-  --color-hell-border-focus: #c8cdd6;
+  --color-hell-border: #2a3342;
+  --color-hell-border-strong: #3d495d;
+  --color-hell-border-focus: #c8d4ea;
 
-  --color-hell-foreground: #e7eaf0;
-  --color-hell-foreground-muted: #9aa3b2;
-  --color-hell-foreground-subtle: #6b7382;
-  --color-hell-foreground-inverse: #11151c;
+  --color-hell-foreground: #e8ecf3;
+  --color-hell-foreground-muted: #9aa4b6;
+  --color-hell-foreground-subtle: #6a7385;
+  --color-hell-foreground-inverse: #0f141c;
 
-  --color-hell-primary: #6c7689;
-  --color-hell-primary-hover: #97a0b1;
-  --color-hell-primary-active: #c2c7d1;
-  --color-hell-primary-foreground: #11151c;
-  --color-hell-primary-soft: #1d242e;
-  --color-hell-primary-soft-foreground: #c8cdd6;
+  /* Primary is the default accent — bright enough to feel active and
+     readable as a button background. Foreground is dark on light primary. */
+  --color-hell-primary: #b8c4dc;
+  --color-hell-primary-hover: #d4dcef;
+  --color-hell-primary-active: #e9eef9;
+  --color-hell-primary-foreground: #0f141c;
+  --color-hell-primary-soft: color-mix(in oklab, #b8c4dc 14%, transparent);
+  --color-hell-primary-soft-foreground: #d4dcef;
 
-  --color-hell-focus-ring: rgba(255, 255, 255, 0.35);
+  /* Semantic accents — brighter, more chromatic on dark surfaces so they
+     don't disappear against deep slate backgrounds. */
+  --color-hell-success: #4ade80;
+  --color-hell-success-hover: #22c55e;
+  --color-hell-success-active: #86efac;
+  --color-hell-success-soft: color-mix(in oklab, #4ade80 16%, transparent);
+  --color-hell-success-strong: #86efac;
+
+  --color-hell-info: #38bdf8;
+  --color-hell-info-soft: color-mix(in oklab, #38bdf8 18%, transparent);
+  --color-hell-info-strong: #7dd3fc;
+
+  --color-hell-warning: #fbbf24;
+  --color-hell-warning-soft: color-mix(in oklab, #fbbf24 20%, transparent);
+  --color-hell-warning-strong: #fde68a;
+
+  --color-hell-danger: #f87171;
+  --color-hell-danger-hover: #ef4444;
+  --color-hell-danger-active: #fca5a5;
+  --color-hell-danger-soft: color-mix(in oklab, #f87171 20%, transparent);
+  --color-hell-danger-strong: #fca5a5;
+
+  --color-hell-focus-ring: rgba(184, 196, 220, 0.4);
+}
+
+/* -------------------------------------------------------------------------
+ * Palettes — opt-in via `data-hell-palette` on the same element that carries
+ * `data-hell-theme`. Each palette only retunes the primary accent + focus
+ * ring, leaving surfaces and semantic colors stable so the system stays
+ * recognisable across themes. Light and dark variants are nested below.
+ *
+ * Available palettes:
+ *   slate (default), indigo, emerald, rose, amber, violet
+ * ------------------------------------------------------------------------- */
+
+[data-hell-palette="indigo"] {
+  --color-hell-primary: #4f46e5;
+  --color-hell-primary-hover: #4338ca;
+  --color-hell-primary-active: #3730a3;
+  --color-hell-primary-foreground: #ffffff;
+  --color-hell-primary-soft: #eef2ff;
+  --color-hell-primary-soft-foreground: #3730a3;
+  --color-hell-border-focus: #4f46e5;
+  --color-hell-focus-ring: rgba(79, 70, 229, 0.32);
+}
+[data-hell-theme="dark"][data-hell-palette="indigo"] {
+  --color-hell-primary: #a5b4fc;
+  --color-hell-primary-hover: #c7d2fe;
+  --color-hell-primary-active: #e0e7ff;
+  --color-hell-primary-foreground: #1e1b4b;
+  --color-hell-primary-soft: color-mix(in oklab, #a5b4fc 16%, transparent);
+  --color-hell-primary-soft-foreground: #c7d2fe;
+  --color-hell-border-focus: #a5b4fc;
+  --color-hell-focus-ring: rgba(165, 180, 252, 0.4);
+}
+
+[data-hell-palette="emerald"] {
+  --color-hell-primary: #047857;
+  --color-hell-primary-hover: #065f46;
+  --color-hell-primary-active: #064e3b;
+  --color-hell-primary-foreground: #ffffff;
+  --color-hell-primary-soft: #ecfdf5;
+  --color-hell-primary-soft-foreground: #064e3b;
+  --color-hell-border-focus: #047857;
+  --color-hell-focus-ring: rgba(4, 120, 87, 0.32);
+}
+[data-hell-theme="dark"][data-hell-palette="emerald"] {
+  --color-hell-primary: #6ee7b7;
+  --color-hell-primary-hover: #a7f3d0;
+  --color-hell-primary-active: #d1fae5;
+  --color-hell-primary-foreground: #022c22;
+  --color-hell-primary-soft: color-mix(in oklab, #6ee7b7 16%, transparent);
+  --color-hell-primary-soft-foreground: #a7f3d0;
+  --color-hell-border-focus: #6ee7b7;
+  --color-hell-focus-ring: rgba(110, 231, 183, 0.38);
+}
+
+[data-hell-palette="rose"] {
+  --color-hell-primary: #be185d;
+  --color-hell-primary-hover: #9d174d;
+  --color-hell-primary-active: #831843;
+  --color-hell-primary-foreground: #ffffff;
+  --color-hell-primary-soft: #fff1f2;
+  --color-hell-primary-soft-foreground: #831843;
+  --color-hell-border-focus: #be185d;
+  --color-hell-focus-ring: rgba(190, 24, 93, 0.32);
+}
+[data-hell-theme="dark"][data-hell-palette="rose"] {
+  --color-hell-primary: #fda4af;
+  --color-hell-primary-hover: #fecdd3;
+  --color-hell-primary-active: #ffe4e6;
+  --color-hell-primary-foreground: #4c0519;
+  --color-hell-primary-soft: color-mix(in oklab, #fda4af 18%, transparent);
+  --color-hell-primary-soft-foreground: #fecdd3;
+  --color-hell-border-focus: #fda4af;
+  --color-hell-focus-ring: rgba(253, 164, 175, 0.4);
+}
+
+[data-hell-palette="amber"] {
+  --color-hell-primary: #b45309;
+  --color-hell-primary-hover: #92400e;
+  --color-hell-primary-active: #78350f;
+  --color-hell-primary-foreground: #ffffff;
+  --color-hell-primary-soft: #fef3c7;
+  --color-hell-primary-soft-foreground: #78350f;
+  --color-hell-border-focus: #b45309;
+  --color-hell-focus-ring: rgba(180, 83, 9, 0.32);
+}
+[data-hell-theme="dark"][data-hell-palette="amber"] {
+  --color-hell-primary: #fcd34d;
+  --color-hell-primary-hover: #fde68a;
+  --color-hell-primary-active: #fef3c7;
+  --color-hell-primary-foreground: #422006;
+  --color-hell-primary-soft: color-mix(in oklab, #fcd34d 18%, transparent);
+  --color-hell-primary-soft-foreground: #fde68a;
+  --color-hell-border-focus: #fcd34d;
+  --color-hell-focus-ring: rgba(252, 211, 77, 0.4);
+}
+
+[data-hell-palette="violet"] {
+  --color-hell-primary: #7c3aed;
+  --color-hell-primary-hover: #6d28d9;
+  --color-hell-primary-active: #5b21b6;
+  --color-hell-primary-foreground: #ffffff;
+  --color-hell-primary-soft: #f5f3ff;
+  --color-hell-primary-soft-foreground: #5b21b6;
+  --color-hell-border-focus: #7c3aed;
+  --color-hell-focus-ring: rgba(124, 58, 237, 0.32);
+}
+[data-hell-theme="dark"][data-hell-palette="violet"] {
+  --color-hell-primary: #c4b5fd;
+  --color-hell-primary-hover: #ddd6fe;
+  --color-hell-primary-active: #ede9fe;
+  --color-hell-primary-foreground: #2e1065;
+  --color-hell-primary-soft: color-mix(in oklab, #c4b5fd 16%, transparent);
+  --color-hell-primary-soft-foreground: #ddd6fe;
+  --color-hell-border-focus: #c4b5fd;
+  --color-hell-focus-ring: rgba(196, 181, 253, 0.4);
+}
+
+/* -------------------------------------------------------------------------
+ * Skins — opt-in via `data-hell-skin` on the same element that carries
+ * `data-hell-theme`. Skins are *drastic* design-wide shifts that retune
+ * radius, spacing, shadow, typography, and control density. They are
+ * orthogonal to palette: any palette can pair with any skin.
+ *
+ * Available skins: brutalist, soft, compact, mono, editorial.
+ * Default skin = no override (hell's quiet, compact look).
+ * ------------------------------------------------------------------------- */
+
+/* Brutalist — zero radius, thick borders, hard offset shadows. Pairs well
+   with strong primary palettes (slate, indigo). Inspired by Are.na, Notion's
+   block focus state, neo-brutalist UI. */
+[data-hell-skin="brutalist"] {
+  --radius-hell-xs: 0px;
+  --radius-hell-sm: 0px;
+  --radius-hell-md: 0px;
+  --radius-hell-lg: 0px;
+  --radius-hell-xl: 0px;
+  --radius-hell-pill: 0px;
+  /* Override Tailwind defaults too — components use both naming conventions. */
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+
+  --shadow-hell-xs: 1px 1px 0 var(--color-hell-foreground);
+  --shadow-hell-sm: 2px 2px 0 var(--color-hell-foreground);
+  --shadow-hell-md: 3px 3px 0 var(--color-hell-foreground);
+  --shadow-hell-lg: 4px 4px 0 var(--color-hell-foreground);
+  --shadow-hell-overlay: 5px 5px 0 var(--color-hell-foreground);
+
+  --color-hell-border: var(--color-hell-foreground);
+  --color-hell-border-strong: var(--color-hell-foreground);
+}
+
+/* Soft — generous radii, gentle multi-layer shadows, more whitespace.
+   Reads as a friendly consumer surface — Linear / Vercel / Stripe vibe. */
+[data-hell-skin="soft"] {
+  --radius-hell-xs: 6px;
+  --radius-hell-sm: 10px;
+  --radius-hell-md: 14px;
+  --radius-hell-lg: 18px;
+  --radius-hell-xl: 24px;
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+
+  --spacing-hell-1: 6px;
+  --spacing-hell-2: 8px;
+  --spacing-hell-3: 12px;
+  --spacing-hell-4: 16px;
+  --spacing-hell-5: 20px;
+  --spacing-hell-6: 28px;
+  --spacing-hell-7: 32px;
+  --spacing-hell-8: 40px;
+
+  --spacing-hell-control-xs: 26px;
+  --spacing-hell-control-sm: 32px;
+  --spacing-hell-control-md: 40px;
+  --spacing-hell-control-lg: 48px;
+  --spacing-hell-control-xl: 56px;
+
+  --shadow-hell-xs: 0 1px 3px rgba(20, 24, 31, 0.06);
+  --shadow-hell-sm: 0 2px 6px rgba(20, 24, 31, 0.07), 0 1px 2px rgba(20, 24, 31, 0.04);
+  --shadow-hell-md: 0 8px 18px -4px rgba(20, 24, 31, 0.12), 0 3px 8px -2px rgba(20, 24, 31, 0.06);
+  --shadow-hell-lg: 0 20px 48px -12px rgba(20, 24, 31, 0.22), 0 6px 16px -6px rgba(20, 24, 31, 0.10);
+  --shadow-hell-overlay: 0 32px 64px -16px rgba(20, 24, 31, 0.28),
+    0 12px 32px -8px rgba(20, 24, 31, 0.14);
+}
+
+/* Compact — ultra-dense for ops dashboards, tables-of-tables, dialer apps.
+   Smaller everything; legibility holds because line-heights stay sane. */
+[data-hell-skin="compact"] {
+  --radius-hell-xs: 1px;
+  --radius-hell-sm: 2px;
+  --radius-hell-md: 3px;
+  --radius-hell-lg: 4px;
+  --radius-hell-xl: 6px;
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+
+  --spacing-hell-1: 2px;
+  --spacing-hell-2: 4px;
+  --spacing-hell-3: 6px;
+  --spacing-hell-4: 8px;
+  --spacing-hell-5: 12px;
+  --spacing-hell-6: 14px;
+  --spacing-hell-7: 18px;
+  --spacing-hell-8: 24px;
+
+  --spacing-hell-control-xs: 18px;
+  --spacing-hell-control-sm: 22px;
+  --spacing-hell-control-md: 26px;
+  --spacing-hell-control-lg: 32px;
+  --spacing-hell-control-xl: 38px;
+}
+
+/* Mono — monospace UI font everywhere, sharp corners, terminal feel.
+   Pairs nicely with emerald or amber for a CRT vibe. */
+[data-hell-skin="mono"] {
+  --font-sans: var(--font-mono);
+
+  --radius-hell-xs: 0px;
+  --radius-hell-sm: 0px;
+  --radius-hell-md: 2px;
+  --radius-hell-lg: 2px;
+  --radius-hell-xl: 4px;
+  --radius-hell-pill: 0px;
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 4px;
+}
+
+/* Editorial — serif headings, generous spacing, taller line height. Use for
+   prose-heavy admin UIs, knowledge bases, settings pages. */
+[data-hell-skin="editorial"] {
+  --font-sans: "Iowan Old Style", "Palatino Linotype", "URW Palladio L", P052,
+    "Source Serif Pro", Charter, "Bitstream Charter", "Sitka Text", Cambria, serif;
+
+  --radius-hell-xs: 1px;
+  --radius-hell-sm: 2px;
+  --radius-hell-md: 3px;
+  --radius-hell-lg: 4px;
+  --radius-hell-xl: 8px;
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 8px;
+
+  --spacing-hell-3: 10px;
+  --spacing-hell-4: 14px;
+  --spacing-hell-5: 20px;
+  --spacing-hell-6: 26px;
+  --spacing-hell-7: 32px;
+  --spacing-hell-8: 44px;
+
+  --spacing-hell-control-md: 38px;
+  --spacing-hell-control-lg: 44px;
+}
+
+/* Glass — frosted, translucent surfaces with stronger blur and luminous
+   accents. Pairs best with vivid palettes (indigo, violet, rose). Surfaces
+   become semi-transparent so a body background gradient bleeds through. */
+[data-hell-skin="glass"] {
+  --radius-hell-xs: 6px;
+  --radius-hell-sm: 10px;
+  --radius-hell-md: 14px;
+  --radius-hell-lg: 18px;
+  --radius-hell-xl: 24px;
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+
+  --color-hell-surface-elevated: color-mix(in oklab, var(--color-hell-surface) 70%, transparent);
+  --color-hell-surface-muted: color-mix(in oklab, var(--color-hell-foreground) 8%, transparent);
+  --color-hell-surface-subtle: color-mix(in oklab, var(--color-hell-foreground) 4%, transparent);
+  --color-hell-border: color-mix(in oklab, var(--color-hell-foreground) 12%, transparent);
+  --color-hell-border-strong: color-mix(in oklab, var(--color-hell-foreground) 22%, transparent);
+
+  --shadow-hell-sm: 0 1px 0 color-mix(in oklab, white 8%, transparent) inset,
+    0 4px 16px -4px rgba(20, 24, 31, 0.18);
+  --shadow-hell-md: 0 1px 0 color-mix(in oklab, white 10%, transparent) inset,
+    0 12px 28px -8px rgba(20, 24, 31, 0.22);
+  --shadow-hell-lg: 0 1px 0 color-mix(in oklab, white 12%, transparent) inset,
+    0 24px 48px -16px rgba(20, 24, 31, 0.30);
+  --shadow-hell-overlay: 0 1px 0 color-mix(in oklab, white 14%, transparent) inset,
+    0 32px 64px -16px rgba(20, 24, 31, 0.36);
+}
+
+/* High-contrast — maximum legibility, WCAG AAA targets. Chunkier borders,
+   strong focus rings, no soft shadows. Useful for accessibility audits and
+   low-vision users. */
+[data-hell-skin="high-contrast"] {
+  --color-hell-border: var(--color-hell-foreground);
+  --color-hell-border-strong: var(--color-hell-foreground);
+  --color-hell-foreground-muted: var(--color-hell-foreground);
+  --color-hell-foreground-subtle: var(--color-hell-foreground);
+  --color-hell-focus-ring: color-mix(in oklab, var(--color-hell-primary) 60%, transparent);
+
+  --shadow-hell-xs: none;
+  --shadow-hell-sm: none;
+  --shadow-hell-md: 0 0 0 2px var(--color-hell-foreground);
+  --shadow-hell-lg: 0 0 0 2px var(--color-hell-foreground);
+  --shadow-hell-overlay: 0 0 0 3px var(--color-hell-foreground);
+}
+
+/* Playful — wide radii, bouncy shadows, larger accents. Inspired by
+   ConvertKit / early Stripe. Adds vertical rhythm via taller controls. */
+[data-hell-skin="playful"] {
+  --radius-hell-xs: 8px;
+  --radius-hell-sm: 12px;
+  --radius-hell-md: 18px;
+  --radius-hell-lg: 24px;
+  --radius-hell-xl: 32px;
+  --radius-hell-pill: 999px;
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+
+  --spacing-hell-3: 10px;
+  --spacing-hell-4: 14px;
+  --spacing-hell-5: 18px;
+
+  --spacing-hell-control-sm: 32px;
+  --spacing-hell-control-md: 42px;
+  --spacing-hell-control-lg: 52px;
+
+  --shadow-hell-sm: 0 2px 0 color-mix(in oklab, var(--color-hell-foreground) 14%, transparent),
+    0 6px 16px -6px rgba(20, 24, 31, 0.18);
+  --shadow-hell-md: 0 3px 0 color-mix(in oklab, var(--color-hell-foreground) 14%, transparent),
+    0 12px 28px -8px rgba(20, 24, 31, 0.22);
+  --shadow-hell-lg: 0 4px 0 color-mix(in oklab, var(--color-hell-foreground) 14%, transparent),
+    0 24px 48px -16px rgba(20, 24, 31, 0.28);
+}
+
+/* Newspaper — strict grid, thick rules, all-caps labels. Black-and-white
+   feeling with palette accents reserved for primary/danger. Pairs with a
+   serif palette in editorial-leaning UIs. */
+[data-hell-skin="newspaper"] {
+  --font-sans: "Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
+
+  --radius-hell-xs: 0px;
+  --radius-hell-sm: 0px;
+  --radius-hell-md: 0px;
+  --radius-hell-lg: 0px;
+  --radius-hell-xl: 2px;
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 2px;
+
+  --color-hell-border: var(--color-hell-foreground);
+  --color-hell-border-strong: var(--color-hell-foreground);
+
+  --shadow-hell-xs: none;
+  --shadow-hell-sm: none;
+  --shadow-hell-md: 2px 2px 0 var(--color-hell-foreground);
+  --shadow-hell-lg: 3px 3px 0 var(--color-hell-foreground);
+  --shadow-hell-overlay: 4px 4px 0 var(--color-hell-foreground);
+}
+
+/* Aurora — vibrant gradient surfaces, glowing accent rings. Surfaces stay
+   solid but body gains a subtle gradient via the wrapper rule below. */
+[data-hell-skin="aurora"] {
+  --radius-hell-md: 12px;
+  --radius-hell-lg: 16px;
+  --radius-hell-xl: 22px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+
+  --shadow-hell-sm: 0 0 0 1px color-mix(in oklab, var(--color-hell-primary) 20%, transparent),
+    0 4px 12px -4px color-mix(in oklab, var(--color-hell-primary) 24%, transparent);
+  --shadow-hell-md: 0 0 0 1px color-mix(in oklab, var(--color-hell-primary) 25%, transparent),
+    0 12px 28px -8px color-mix(in oklab, var(--color-hell-primary) 28%, transparent);
+  --shadow-hell-lg: 0 0 0 1px color-mix(in oklab, var(--color-hell-primary) 28%, transparent),
+    0 24px 48px -12px color-mix(in oklab, var(--color-hell-primary) 32%, transparent);
+  --shadow-hell-overlay: 0 0 0 1px color-mix(in oklab, var(--color-hell-primary) 28%, transparent),
+    0 32px 64px -16px color-mix(in oklab, var(--color-hell-primary) 36%, transparent);
+
+  --color-hell-focus-ring: color-mix(in oklab, var(--color-hell-primary) 50%, transparent);
 }
 
 html,
@@ -214,4 +645,39 @@ body {
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+[data-hell-skin="editorial"] body {
+  line-height: 1.65;
+}
+
+[data-hell-skin="glass"] body {
+  background:
+    radial-gradient(at 20% 0%, color-mix(in oklab, var(--color-hell-primary) 28%, transparent), transparent 55%),
+    radial-gradient(at 100% 80%, color-mix(in oklab, var(--color-hell-info) 22%, transparent), transparent 55%),
+    var(--color-hell-surface);
+  backdrop-filter: blur(0);
+}
+
+[data-hell-skin="glass"] .hell-card,
+[data-hell-skin="glass"] .hell-popover,
+[data-hell-skin="glass"] .hell-menu,
+[data-hell-skin="glass"] .hell-dialog,
+[data-hell-skin="glass"] .hell-combobox-dropdown,
+[data-hell-skin="glass"] .hell-select-dropdown,
+[data-hell-skin="glass"] .hell-flyout {
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
+
+[data-hell-skin="aurora"] body {
+  background:
+    radial-gradient(at 0% 0%, color-mix(in oklab, var(--color-hell-primary) 18%, transparent), transparent 50%),
+    radial-gradient(at 100% 0%, color-mix(in oklab, var(--color-hell-info) 18%, transparent), transparent 50%),
+    radial-gradient(at 50% 100%, color-mix(in oklab, var(--color-hell-success) 14%, transparent), transparent 60%),
+    var(--color-hell-surface);
+}
+
+[data-hell-skin="newspaper"] body {
+  text-rendering: optimizeLegibility;
 }
