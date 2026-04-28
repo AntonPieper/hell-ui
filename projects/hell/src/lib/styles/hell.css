@@ -29,6 +29,8 @@
 @import './components/popover.css';
 @import './components/flyout.css';
 @import './components/menu.css';
+@import './components/combobox.css';
+@import './components/select.css';
 @import './components/tooltip.css';
 @import './components/avatar.css';
 @import './components/avatar-group.css';

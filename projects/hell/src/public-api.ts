@@ -25,6 +25,8 @@ export * from './lib/primitives/popover/popover';
 export * from './lib/primitives/flyout/flyout';
 export * from './lib/primitives/tooltip/tooltip';
 export * from './lib/primitives/menu/menu';
+export * from './lib/primitives/combobox/combobox';
+export * from './lib/primitives/select/select';
 export * from './lib/primitives/progress/progress';
 export * from './lib/primitives/slider/slider';
 export * from './lib/primitives/skeleton/skeleton';
