@@ -122,6 +122,8 @@ export class HellPdfViewer {
   private findController: any = null;
   private eventBus: any = null;
   private doc: any = null;
+  private workerPort: Worker | null = null;
+  private pdfWorker: any = null;
   private containerEventCleanup: (() => void) | null = null;
   private printCleanup: (() => void) | null = null;
   private viewerActive = false;
@@ -135,6 +137,7 @@ export class HellPdfViewer {
       this.printCleanup?.();
       this.viewer?.cleanup?.();
       this.doc?.destroy?.();
+      this.cleanupWorker();
     });
 
     afterNextRender(async () => {
@@ -142,6 +145,7 @@ export class HellPdfViewer {
         await this.bootstrap();
         this.bootstrapped.set(true);
       } catch (e) {
+        this.cleanupWorker();
         this.error.emit(e);
       }
     });
@@ -173,14 +177,10 @@ export class HellPdfViewer {
     // pdf_viewer.mjs reads globalThis.pdfjsLib at module evaluation time.
     // Import core first so viewer init cannot race that global assignment.
     (globalThis as typeof globalThis & { pdfjsLib?: typeof pdfjs }).pdfjsLib = pdfjs;
+    this.workerPort = new Worker(new URL('./pdf.worker.ts', import.meta.url), { type: 'module' });
+    this.pdfWorker = new pdfjs.PDFWorker({ port: this.workerPort as any });
     const viewerMod = await import('pdfjs-dist/web/pdf_viewer.mjs');
     this.pdfjs = pdfjs;
-    if (!pdfjs.GlobalWorkerOptions.workerSrc) {
-      pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-        'pdfjs-dist/build/pdf.worker.min.mjs',
-        import.meta.url,
-      ).toString();
-    }
     const container = this.containerRef().nativeElement;
     const eventBus = new viewerMod.EventBus();
     const linkService = new viewerMod.PDFLinkService({ eventBus });
@@ -284,7 +284,11 @@ export class HellPdfViewer {
       this.doc = null;
     }
     this.renderedThumbs.clear();
-    const loadingTask = this.pdfjs.getDocument(src);
+    const loadingTask = this.pdfjs.getDocument(
+      typeof src === 'string' || src instanceof URL
+        ? { url: src.toString(), worker: this.pdfWorker }
+        : { data: src, worker: this.pdfWorker },
+    );
     const doc = await loadingTask.promise;
     if (token !== this.loadToken) {
       try { doc.destroy(); } catch { /* ignore */ }
@@ -415,6 +419,14 @@ export class HellPdfViewer {
     // Return focus to the viewer so subsequent keyboard shortcuts work.
     requestAnimationFrame(() => this.host.nativeElement.focus());
   }
+
+  private cleanupWorker() {
+    this.pdfWorker?.destroy?.();
+    this.pdfWorker = null;
+    this.workerPort?.terminate();
+    this.workerPort = null;
+  }
+
   protected onFindEscape(e: Event) {
     e.preventDefault();
     e.stopPropagation();
