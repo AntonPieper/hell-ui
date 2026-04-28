@@ -64,6 +64,7 @@ import {
   HellIcon,
   HellTag,
   HellToaster,
+  HELL_SELECT_DIRECTIVES,
 } from 'hell';
 
 interface NavItem {
@@ -121,9 +122,73 @@ const HD_APP_ICONS = {
 };
 
 type ThemePreference = 'system' | 'light' | 'dark';
+type Palette = 'slate' | 'indigo' | 'emerald' | 'rose' | 'amber' | 'violet';
+type Skin =
+  | 'default'
+  | 'brutalist'
+  | 'soft'
+  | 'compact'
+  | 'mono'
+  | 'editorial'
+  | 'glass'
+  | 'high-contrast'
+  | 'playful'
+  | 'newspaper'
+  | 'aurora';
+
+interface ThemeOption {
+  readonly id: string;
+  readonly label: string;
+  readonly tag?: string;
+  readonly palette: Palette;
+  readonly skin: Skin;
+  readonly swatchLight: string;
+  readonly swatchDark: string;
+}
 
 const HD_THEME_STORAGE_KEY = 'hell-docs-theme';
+const HD_PALETTE_STORAGE_KEY = 'hell-docs-theme-id';
 const HD_THEME_ORDER: readonly ThemePreference[] = ['system', 'light', 'dark'];
+
+/** Curated themes shown in the topbar combobox. The first six are pure
+ *  palette swaps (skin = default) so devs can compare colour systems against
+ *  a stable layout. The remaining five flip the skin axis and pair it with a
+ *  palette that flatters the aesthetic — the goal is showing how far the
+ *  token system bends without rewriting components. */
+const HD_THEMES: readonly ThemeOption[] = [
+  { id: 'slate', label: 'Slate', palette: 'slate', skin: 'default',
+    swatchLight: '#313a46', swatchDark: '#b8c4dc' },
+  { id: 'indigo', label: 'Indigo', palette: 'indigo', skin: 'default',
+    swatchLight: '#4f46e5', swatchDark: '#a5b4fc' },
+  { id: 'emerald', label: 'Emerald', palette: 'emerald', skin: 'default',
+    swatchLight: '#047857', swatchDark: '#6ee7b7' },
+  { id: 'rose', label: 'Rose', palette: 'rose', skin: 'default',
+    swatchLight: '#be185d', swatchDark: '#fda4af' },
+  { id: 'amber', label: 'Amber', palette: 'amber', skin: 'default',
+    swatchLight: '#b45309', swatchDark: '#fcd34d' },
+  { id: 'violet', label: 'Violet', palette: 'violet', skin: 'default',
+    swatchLight: '#7c3aed', swatchDark: '#c4b5fd' },
+  { id: 'brutalist', label: 'Brutalist', tag: 'skin', palette: 'slate', skin: 'brutalist',
+    swatchLight: '#0f141c', swatchDark: '#e8ecf3' },
+  { id: 'soft', label: 'Soft', tag: 'skin', palette: 'indigo', skin: 'soft',
+    swatchLight: '#4f46e5', swatchDark: '#a5b4fc' },
+  { id: 'compact', label: 'Compact', tag: 'skin', palette: 'slate', skin: 'compact',
+    swatchLight: '#313a46', swatchDark: '#b8c4dc' },
+  { id: 'mono', label: 'Mono', tag: 'skin', palette: 'emerald', skin: 'mono',
+    swatchLight: '#047857', swatchDark: '#6ee7b7' },
+  { id: 'editorial', label: 'Editorial', tag: 'skin', palette: 'violet', skin: 'editorial',
+    swatchLight: '#7c3aed', swatchDark: '#c4b5fd' },
+  { id: 'glass', label: 'Glass', tag: 'skin', palette: 'indigo', skin: 'glass',
+    swatchLight: '#4f46e5', swatchDark: '#a5b4fc' },
+  { id: 'high-contrast', label: 'High contrast', tag: 'a11y', palette: 'slate', skin: 'high-contrast',
+    swatchLight: '#0f141c', swatchDark: '#e8ecf3' },
+  { id: 'playful', label: 'Playful', tag: 'skin', palette: 'rose', skin: 'playful',
+    swatchLight: '#be185d', swatchDark: '#fda4af' },
+  { id: 'newspaper', label: 'Newspaper', tag: 'skin', palette: 'slate', skin: 'newspaper',
+    swatchLight: '#0f141c', swatchDark: '#e8ecf3' },
+  { id: 'aurora', label: 'Aurora', tag: 'skin', palette: 'violet', skin: 'aurora',
+    swatchLight: '#7c3aed', swatchDark: '#c4b5fd' },
+];
 
 @Component({
   selector: 'hd-root',
@@ -145,6 +210,7 @@ const HD_THEME_ORDER: readonly ThemePreference[] = ['system', 'light', 'dark'];
     HellIcon,
     HellTag,
     HellToaster,
+    ...HELL_SELECT_DIRECTIVES,
   ],
   templateUrl: './app.html',
 })
@@ -153,12 +219,21 @@ export class App {
   private readonly systemScheme = this.getSystemScheme();
 
   protected readonly themePreference = signal<ThemePreference>(this.readThemePreference());
+  protected readonly themeId = signal<string>(this.readThemeId());
+  protected readonly themes = HD_THEMES;
   protected readonly systemTheme = signal<'light' | 'dark'>(
     this.systemScheme?.matches ? 'dark' : 'light',
   );
   protected readonly resolvedTheme = computed<'light' | 'dark'>(() => {
     const preference = this.themePreference();
     return preference === 'system' ? this.systemTheme() : preference;
+  });
+  protected readonly currentTheme = computed<ThemeOption>(
+    () => HD_THEMES.find((t) => t.id === this.themeId()) ?? HD_THEMES[0],
+  );
+  protected readonly currentPaletteSwatch = computed(() => {
+    const option = this.currentTheme();
+    return this.resolvedTheme() === 'dark' ? option.swatchDark : option.swatchLight;
   });
   protected readonly themeIcon = computed(() => {
     const preference = this.themePreference();
@@ -188,6 +263,7 @@ export class App {
         { path: '/components/button', label: 'Button', icon: 'faSolidWindowMaximize' },
         { path: '/components/card', label: 'Card', icon: 'faSolidIdCard' },
         { path: '/components/checkbox', label: 'Checkbox', icon: 'faSolidCheck' },
+        { path: '/components/combobox', label: 'Combobox', icon: 'faSolidPenRuler' },
         { path: '/components/date-picker', label: 'Date picker', icon: 'faSolidCalendar' },
         { path: '/components/dialog', label: 'Dialog', icon: 'faSolidWindowRestore' },
         { path: '/components/field', label: 'Field', icon: 'faSolidPenToSquare' },
@@ -199,6 +275,7 @@ export class App {
         { path: '/components/popover', label: 'Popover', icon: 'faSolidComment' },
         { path: '/components/progress', label: 'Progress', icon: 'faSolidSliders' },
         { path: '/components/radio', label: 'Radio', icon: 'faSolidCircleHalfStroke' },
+        { path: '/components/select', label: 'Select', icon: 'faSolidPenRuler' },
         { path: '/components/separator', label: 'Separator', icon: 'faSolidGripLines' },
         { path: '/components/skeleton', label: 'Skeleton', icon: 'faSolidImage' },
         { path: '/components/spinner', label: 'Spinner', icon: 'faSolidSpinner' },
@@ -246,6 +323,7 @@ export class App {
 
   constructor() {
     effect(() => this.applyTheme(this.resolvedTheme()));
+    effect(() => this.applyThemeOption(this.currentTheme()));
 
     const systemScheme = this.systemScheme;
     if (!systemScheme) return;
@@ -262,6 +340,13 @@ export class App {
     const next = HD_THEME_ORDER[(HD_THEME_ORDER.indexOf(current) + 1) % HD_THEME_ORDER.length];
     this.themePreference.set(next);
     this.writeThemePreference(next);
+  }
+
+  protected onPaletteChange(value: string | null): void {
+    if (!value) return;
+    if (!HD_THEMES.some((t) => t.id === value)) return;
+    this.themeId.set(value);
+    this.writeThemeId(value);
   }
 
   protected isSectionCollapsed(heading: string): boolean {
@@ -294,9 +379,30 @@ export class App {
     localStorage.setItem(HD_THEME_STORAGE_KEY, preference);
   }
 
+  private readThemeId(): string {
+    if (typeof localStorage === 'undefined') return 'slate';
+    const stored = localStorage.getItem(HD_PALETTE_STORAGE_KEY);
+    return stored && HD_THEMES.some((t) => t.id === stored) ? stored : 'slate';
+  }
+
+  private writeThemeId(value: string): void {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(HD_PALETTE_STORAGE_KEY, value);
+  }
+
   private applyTheme(theme: 'light' | 'dark'): void {
     if (typeof document === 'undefined') return;
     document.documentElement.dataset['hellTheme'] = theme;
     document.documentElement.style.colorScheme = theme;
+  }
+
+  private applyThemeOption(option: ThemeOption): void {
+    if (typeof document === 'undefined') return;
+    document.documentElement.dataset['hellPalette'] = option.palette;
+    if (option.skin === 'default') {
+      delete document.documentElement.dataset['hellSkin'];
+    } else {
+      document.documentElement.dataset['hellSkin'] = option.skin;
+    }
   }
 }

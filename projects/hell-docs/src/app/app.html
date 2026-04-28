@@ -10,6 +10,33 @@
     <span hellTag class="hd-brand-tag" variant="info">Heinrich Element Library</span>
     <span class="hd-fill"></span>
     <button
+      hellSelect
+      type="button"
+      class="hd-palette-select"
+      [value]="themeId()"
+      (valueChange)="onPaletteChange($event)"
+      aria-label="Theme"
+    >
+      <span class="hd-palette-swatch" [style.background-color]="currentPaletteSwatch()"></span>
+      <span hellSelectValue>{{ currentTheme().label }}</span>
+      <div *hellSelectPortal hellSelectDropdown class="hd-palette-dropdown">
+        @for (option of themes; track option.id) {
+          <div hellSelectOption [value]="option.id" class="hd-palette-option">
+            <span
+              class="hd-palette-swatch"
+              [style.background-color]="resolvedTheme() === 'dark' ? option.swatchDark : option.swatchLight"
+            ></span>
+            <span class="hd-palette-option-label">
+              <span class="hd-palette-option-name">{{ option.label }}</span>
+              @if (option.tag) {
+                <span class="hd-palette-option-tag">{{ option.tag }}</span>
+              }
+            </span>
+          </div>
+        }
+      </div>
+    </button>
+    <button
       hellButton
       iconOnly
       class="hd-theme-toggle"
