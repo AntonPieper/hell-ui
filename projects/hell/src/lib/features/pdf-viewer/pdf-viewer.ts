@@ -31,7 +31,7 @@ import {
 } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
-import { HellInput, HellSelect } from '../../primitives/input/input';
+import { HellInput, HellNativeSelect } from '../../primitives/input/input';
 import { createHiddenPdfPrintHandle, printPdfInHiddenIframe } from './pdf-viewer.print';
 import {
   PDF_ZOOM_OPTIONS,
@@ -63,7 +63,7 @@ const HELL_PDF_VIEWER_ICONS = {
 @Component({
   selector: 'hell-pdf-viewer',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellIcon, HellInput, HellSelect],
+  imports: [HellButton, HellIcon, HellInput, HellNativeSelect],
   providers: [provideIcons(HELL_PDF_VIEWER_ICONS)],
   host: {
     '[class.hell-pdf]': '!unstyled()',

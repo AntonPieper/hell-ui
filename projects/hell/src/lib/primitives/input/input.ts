@@ -20,16 +20,16 @@ export class HellInput {
 }
 
 @Directive({
-  selector: 'select[hellSelect]',
+  selector: 'select[hellNativeSelect]',
   hostDirectives: [{ directive: NgpInput, inputs: ['disabled'] }],
   host: {
-    '[class.hell-select]': '!unstyled()',
+    '[class.hell-native-select]': '!unstyled()',
     '[attr.data-size]': 'size()',
     '[attr.data-invalid]': 'invalid() ? "true" : null',
     '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
 })
-export class HellSelect {
+export class HellNativeSelect {
   readonly unstyled = input(false, { transform: booleanAttribute });
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });

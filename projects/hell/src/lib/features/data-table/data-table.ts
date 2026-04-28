@@ -16,7 +16,7 @@ import {
   createAngularTable,
   getCoreRowModel,
 } from '@tanstack/angular-table';
-import { HellInput, HellSelect } from '../../primitives/input/input';
+import { HellInput, HellNativeSelect } from '../../primitives/input/input';
 import { HellPaginationStrip } from '../../primitives/pagination/pagination';
 
 export interface HellDataTableQuery {
@@ -34,7 +34,7 @@ export interface HellDataTableQuery {
 @Component({
   selector: 'hell-data-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FlexRenderDirective, HellInput, HellSelect, HellPaginationStrip],
+  imports: [FlexRenderDirective, HellInput, HellNativeSelect, HellPaginationStrip],
   host: {
     '[class.hell-table-shell]': '!unstyled()',
   },
@@ -102,7 +102,7 @@ export interface HellDataTableQuery {
       <label class="hell-table-pagesize">
         Rows
         <select
-          hellSelect
+          hellNativeSelect
           size="sm"
           [value]="pageSizeSig()"
           (change)="onPageSizeChange($any($event.target).value)"

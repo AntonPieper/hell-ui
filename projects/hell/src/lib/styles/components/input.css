@@ -52,15 +52,15 @@
       }
     }
 
-  .hell-select {
+  .hell-native-select {
       display: inline-flex;
       width: 100%;
-      --_hell-select-height: var(--spacing-hell-control-md);
-      --_hell-select-px: var(--spacing-hell-4);
-      --_hell-select-font: 13px;
-      height: var(--_hell-select-height);
-      padding-inline: var(--_hell-select-px) calc(var(--_hell-select-px) + 1rem);
-      font-size: var(--_hell-select-font);
+      --_hell-native-select-height: var(--spacing-hell-control-md);
+      --_hell-native-select-px: var(--spacing-hell-4);
+      --_hell-native-select-font: 13px;
+      height: var(--_hell-native-select-height);
+      padding-inline: var(--_hell-native-select-px) calc(var(--_hell-native-select-px) + 1rem);
+      font-size: var(--_hell-native-select-font);
       font-family: inherit;
       color: var(--color-hell-foreground);
       background-color: var(--color-hell-surface-elevated);
@@ -94,14 +94,14 @@
         border-color: var(--color-hell-danger);
       }
       &[data-size="sm"] {
-        --_hell-select-height: var(--spacing-hell-control-sm);
-        --_hell-select-px: var(--spacing-hell-3);
-        --_hell-select-font: 12px;
+        --_hell-native-select-height: var(--spacing-hell-control-sm);
+        --_hell-native-select-px: var(--spacing-hell-3);
+        --_hell-native-select-font: 12px;
       }
       &[data-size="lg"] {
-        --_hell-select-height: var(--spacing-hell-control-lg);
-        --_hell-select-px: var(--spacing-hell-5);
-        --_hell-select-font: 14px;
+        --_hell-native-select-height: var(--spacing-hell-control-lg);
+        --_hell-native-select-px: var(--spacing-hell-5);
+        --_hell-native-select-font: 14px;
       }
     }
 
