@@ -1,0 +1,122 @@
+import { Component, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+
+import { HELL_SPLIT_VIEW_DIRECTIVES } from './split-view';
+
+@Component({
+  imports: [...HELL_SPLIT_VIEW_DIRECTIVES],
+  template: `
+    <hell-split-view
+      [compactBelow]="compactBelow()"
+      [detailOpen]="detailOpen()"
+      [height]="height()"
+      (detailOpenChange)="detailEvents.push($event)"
+    >
+      <ng-template hellSplitPrimary let-compact="compact" let-detailOpen="detailOpen">
+        <section id="primary">Primary {{ compact }} {{ detailOpen }}</section>
+      </ng-template>
+      <ng-template hellSplitDetail let-compact="compact" let-detailOpen="detailOpen">
+        <section id="detail">Detail {{ compact }} {{ detailOpen }}</section>
+      </ng-template>
+    </hell-split-view>
+  `,
+})
+class SplitViewHost {
+  readonly compactBelow = signal(700);
+  readonly detailOpen = signal(false);
+  readonly height = signal<string | number | null>(null);
+  readonly detailEvents: boolean[] = [];
+}
+
+describe('HellSplitView', () => {
+  let originalResizeObserver: typeof ResizeObserver | undefined;
+
+  beforeEach(async () => {
+    originalResizeObserver = globalThis.ResizeObserver;
+    TestResizeObserver.instances = [];
+    globalThis.ResizeObserver = TestResizeObserver as unknown as typeof ResizeObserver;
+
+    await TestBed.configureTestingModule({
+      imports: [SplitViewHost],
+    }).compileComponents();
+  });
+
+  afterEach(() => {
+    globalThis.ResizeObserver = originalResizeObserver as typeof ResizeObserver;
+  });
+
+  it('switches compact/detail rendering from observed width and emits from back action', () => {
+    const fixture = TestBed.createComponent(SplitViewHost);
+    fixture.detectChanges();
+
+    observeWidth(fixture.nativeElement, 900);
+    fixture.detectChanges();
+
+    expect(text(fixture.nativeElement, '#primary')).toContain('Primary false false');
+    expect(text(fixture.nativeElement, '#detail')).toContain('Detail false false');
+
+    observeWidth(fixture.nativeElement, 500);
+    fixture.detectChanges();
+
+    expect(text(fixture.nativeElement, '#primary')).toContain('Primary true false');
+    expect(fixture.nativeElement.querySelector('#detail')).toBeNull();
+
+    fixture.componentInstance.detailOpen.set(true);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('#primary')).toBeNull();
+    expect(text(fixture.nativeElement, '#detail')).toContain('Detail true true');
+
+    const back = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    back.click();
+
+    expect(fixture.componentInstance.detailEvents).toEqual([false]);
+  });
+
+  it('normalizes numeric heights while preserving explicit CSS lengths', () => {
+    const fixture = TestBed.createComponent(SplitViewHost);
+    fixture.componentInstance.height.set(320);
+    fixture.detectChanges();
+
+    const splitView = fixture.nativeElement.querySelector('hell-split-view') as HTMLElement;
+    expect(splitView.style.getPropertyValue('--hell-split-view-height')).toBe('320px');
+
+    fixture.componentInstance.height.set('min(70vh, 42rem)');
+    fixture.detectChanges();
+
+    expect(splitView.style.getPropertyValue('--hell-split-view-height')).toBe('min(70vh, 42rem)');
+  });
+});
+
+class TestResizeObserver {
+  static instances: TestResizeObserver[] = [];
+  observed: Element | null = null;
+
+  constructor(private readonly callback: ResizeObserverCallback) {
+    TestResizeObserver.instances.push(this);
+  }
+
+  observe(element: Element): void {
+    this.observed = element;
+  }
+
+  disconnect(): void {}
+
+  trigger(width: number): void {
+    const entry = { contentRect: { width } } as ResizeObserverEntry;
+    this.callback([entry], this as unknown as ResizeObserver);
+  }
+}
+
+function observeWidth(root: HTMLElement, width: number): void {
+  const host = root.querySelector('hell-split-view');
+  const observer = TestResizeObserver.instances.find((instance) => instance.observed === host);
+  if (!observer) throw new Error('Expected ResizeObserver.');
+  observer.trigger(width);
+}
+
+function text(root: HTMLElement, selector: string): string {
+  const element = root.querySelector(selector);
+  if (!(element instanceof HTMLElement)) throw new Error(`Expected ${selector}.`);
+  return element.textContent ?? '';
+}
