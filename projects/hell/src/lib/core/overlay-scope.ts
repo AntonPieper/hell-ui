@@ -70,6 +70,8 @@ export interface HellFloatingDismissOptions {
   readonly inside?: () => readonly (Node | null | undefined)[];
   readonly scope?: HellOverlayScope | null | undefined;
   readonly ownerDocument?: () => Document | null | undefined;
+  readonly active?: () => boolean;
+  readonly shouldDismiss?: (event: HellFloatingDismissEvent) => boolean;
   readonly closeOnOutsidePointer?: () => boolean;
   readonly closeOnOutsideClick?: () => boolean;
   readonly closeOnOutsideFocus?: () => boolean;
@@ -95,31 +97,31 @@ export class HellFloatingDismissController {
     if (!doc) return;
 
     const onPointerDown = (event: PointerEvent) => {
-      if (!this.options.closeOnOutsidePointer?.()) return;
+      if (!this.isActive()) return;
       if (this.isInside(event.target)) {
         this.markPointerDownInside();
         return;
       }
-      this.options.onDismiss({ reason: 'outside-pointer', event });
+      this.dismiss({ reason: 'outside-pointer', event });
     };
 
     const onClick = (event: MouseEvent) => {
-      if (!this.options.closeOnOutsideClick?.()) return;
+      if (!this.isActive()) return;
       if (this.isInside(event.target)) return;
-      this.options.onDismiss({ reason: 'outside-click', event });
+      this.dismiss({ reason: 'outside-click', event });
     };
 
     const onFocusIn = (event: FocusEvent) => {
-      if (!this.options.closeOnOutsideFocus?.()) return;
+      if (!this.isActive()) return;
       if (this.pointerDownInside) return;
       if (this.isInside(event.target)) return;
-      this.options.onDismiss({ reason: 'outside-focus', event });
+      this.dismiss({ reason: 'outside-focus', event });
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape' || !this.options.closeOnEscape?.()) return;
+      if (event.key !== 'Escape' || !this.isActive()) return;
       if (!this.isInside(event.target)) return;
-      this.options.onDismiss({ reason: 'escape', event });
+      this.dismiss({ reason: 'escape', event });
     };
 
     doc.addEventListener('pointerdown', onPointerDown);
@@ -155,6 +157,16 @@ export class HellFloatingDismissController {
     return this.pointerDownInside;
   }
 
+  handleFocusExit(event: FocusEvent): void {
+    if (this.isInside(event.relatedTarget)) return;
+
+    queueMicrotask(() => {
+      if (this.pointerDownInside) return;
+      if (this.isInside(this.document()?.activeElement ?? null)) return;
+      this.dismiss({ reason: 'outside-focus', event });
+    });
+  }
+
   isInside(target: EventTarget | Node | null): boolean {
     const node = hellOverlayTargetNode(target);
     if (!node) return false;
@@ -167,6 +179,31 @@ export class HellFloatingDismissController {
     }
 
     return this.options.scope?.containsOverlayTarget(node) ?? false;
+  }
+
+  private dismiss(event: HellFloatingDismissEvent): void {
+    if (!this.shouldDismiss(event)) return;
+    this.options.onDismiss(event);
+  }
+
+  private shouldDismiss(event: HellFloatingDismissEvent): boolean {
+    if (!this.isActive()) return false;
+    if (this.options.shouldDismiss) return this.options.shouldDismiss(event);
+
+    switch (event.reason) {
+      case 'outside-pointer':
+        return this.options.closeOnOutsidePointer?.() ?? false;
+      case 'outside-click':
+        return this.options.closeOnOutsideClick?.() ?? false;
+      case 'outside-focus':
+        return this.options.closeOnOutsideFocus?.() ?? false;
+      case 'escape':
+        return this.options.closeOnEscape?.() ?? false;
+    }
+  }
+
+  private isActive(): boolean {
+    return this.options.active?.() ?? true;
   }
 
   private document(): Document | null {

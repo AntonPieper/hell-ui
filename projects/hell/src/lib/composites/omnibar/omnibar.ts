@@ -266,9 +266,8 @@ export class HellOmnibar extends HellStyleable implements HellOverlayScope {
     root: () => this.host.nativeElement,
     scope: this,
     ownerDocument: () => this.host.nativeElement.ownerDocument,
-    closeOnOutsidePointer: () => this.isOpen(),
-    closeOnOutsideFocus: () => this.isOpen(),
-    closeOnEscape: () => false,
+    active: () => this.isOpen(),
+    shouldDismiss: ({ reason }) => reason === 'outside-pointer' || reason === 'outside-focus',
     onDismiss: () => this.close(),
   });
 
@@ -433,17 +432,7 @@ export class HellOmnibar extends HellStyleable implements HellOverlayScope {
   }
 
   protected onBlur(event: FocusEvent): void {
-    const relatedTarget = event.relatedTarget as Node | null;
-    if (this.containsOverlayTarget(relatedTarget)) return;
-
-    // Defer so the native focus target has settled before deciding whether a
-    // child overlay/menu interaction is still inside this omnibar.
-    queueMicrotask(() => {
-      if (this.dismissController.hasRecentPointerDownInside()) return;
-      const next = document.activeElement;
-      if (this.containsOverlayTarget(next)) return;
-      this.close();
-    });
+    this.dismissController.handleFocusExit(event);
   }
 
   protected onCursorChange(): void {
@@ -584,7 +573,6 @@ export class HellOmnibar extends HellStyleable implements HellOverlayScope {
     document.addEventListener('keydown', handler);
     this.destroyRef.onDestroy(() => document.removeEventListener('keydown', handler));
   }
-
 }
 
 /* ──────────────────────────── Children ──────────────────────────── */

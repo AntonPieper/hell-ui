@@ -109,10 +109,13 @@ export class HellFlyout extends HellStyleable {
         inside: () => [this.trigger().element.nativeElement, this.boundary()],
         scope: this.overlayScope,
         ownerDocument: () => panel.ownerDocument,
-        closeOnOutsidePointer: () => false,
-        closeOnOutsideClick: () => this.closeOnOutsideInteraction(),
-        closeOnOutsideFocus: () => this.closeOnOutsideInteraction(),
-        closeOnEscape: () => this.closeOnEscape(),
+        active: () => this.trigger().open(),
+        shouldDismiss: ({ reason }) =>
+          reason === 'escape'
+            ? this.closeOnEscape()
+            : reason === 'outside-click' || reason === 'outside-focus'
+              ? this.closeOnOutsideInteraction()
+              : false,
         onDismiss: ({ reason, event }) => {
           this.trigger().hide();
           if (reason === 'escape') {

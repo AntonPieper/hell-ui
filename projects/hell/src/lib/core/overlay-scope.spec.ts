@@ -58,6 +58,52 @@ describe('Floating Scope', () => {
 
     destroy.run();
   });
+
+  it('lets one dismissal policy own outside reasons', () => {
+    const root = document.createElement('div');
+    const outside = document.createElement('button');
+    document.body.append(root, outside);
+
+    const dismissals: string[] = [];
+    const destroy = createDestroyRef();
+    const controller = new HellFloatingDismissController({
+      root: () => root,
+      ownerDocument: () => document,
+      shouldDismiss: ({ reason }) => reason === 'outside-focus',
+      onDismiss: ({ reason }) => dismissals.push(reason),
+    });
+    controller.connect(destroy.ref);
+
+    outside.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    expect(dismissals).toEqual([]);
+
+    outside.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    expect(dismissals).toEqual(['outside-focus']);
+
+    destroy.run();
+  });
+
+  it('handles deferred focus exits without exposing pointer timing to callers', async () => {
+    const root = document.createElement('div');
+    const outside = document.createElement('button');
+    document.body.append(root, outside);
+
+    const dismissals: string[] = [];
+    const controller = new HellFloatingDismissController({
+      root: () => root,
+      shouldDismiss: ({ reason }) => reason === 'outside-focus',
+      onDismiss: ({ reason }) => dismissals.push(reason),
+    });
+
+    controller.handleFocusExit(new FocusEvent('blur'));
+    await Promise.resolve();
+    expect(dismissals).toEqual(['outside-focus']);
+
+    controller.markPointerDownInside();
+    controller.handleFocusExit(new FocusEvent('blur'));
+    await Promise.resolve();
+    expect(dismissals).toEqual(['outside-focus']);
+  });
 });
 
 function createDestroyRef() {
