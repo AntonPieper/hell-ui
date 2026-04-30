@@ -1,6 +1,8 @@
 import {
+  HellResizeOperation,
   HellResizeTransaction,
   hellConstrainResizeValue,
+  hellResizeCoordinate,
   hellFitResizeSizesToTotal,
   hellResizeIntentFromKey,
   hellResizePairByDelta,
@@ -64,4 +66,54 @@ describe('Resize Behavior', () => {
     expect(hellResizeIntentFromKey('End', 'horizontal')).toBe('max');
     expect(hellResizeIntentFromKey('PageDown', 'horizontal')).toBeNull();
   });
+
+  it('runs a resize operation through layout adapters', () => {
+    const before = createResizeAdapter(100, 40);
+    const after = createResizeAdapter(80, 40);
+    const operation = new HellResizeOperation({
+      before,
+      after,
+      orientation: 'horizontal',
+      startCoordinate: 10,
+    });
+
+    expect(operation.canResize).toBe(true);
+    expect(operation.byPointer({ clientX: 60, clientY: 0 })).toEqual({
+      a: 140,
+      b: 40,
+      sum: 180,
+      ariaValueNow: 78,
+    });
+    expect(before.size).toBe(140);
+    expect(after.size).toBe(40);
+
+    operation.commit();
+    expect(before.committed).toBe(140);
+    expect(after.committed).toBe(40);
+  });
+
+  it('uses orientation when reading pointer coordinates', () => {
+    expect(hellResizeCoordinate({ clientX: 12, clientY: 34 }, 'horizontal')).toBe(12);
+    expect(hellResizeCoordinate({ clientX: 12, clientY: 34 }, 'vertical')).toBe(34);
+  });
 });
+
+function createResizeAdapter(size: number, min: number) {
+  return {
+    size,
+    committed: null as number | null,
+    measure() {
+      return this.size;
+    },
+    minSize() {
+      return min;
+    },
+    setSize(next: number) {
+      this.size = next;
+    },
+    commitSize(next: number) {
+      this.committed = next;
+      this.size = next;
+    },
+  };
+}

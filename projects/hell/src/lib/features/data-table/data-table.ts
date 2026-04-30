@@ -1,8 +1,5 @@
 import { HellStyleable } from '../../core/styleable';
-import {
-  HellResizeTransaction,
-  hellResizeIntentFromKey,
-} from '../../core/resize-behavior';
+import { HellResizeOperation, hellResizeIntentFromKey } from '../../core/resize-behavior';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -300,25 +297,31 @@ export class HellTableColumnResizer extends HellStyleable {
     const next = cell.head?.nextSibling(cell) ?? null;
     if (!next) return; // last column — no neighbor to give space to.
 
+    const min = this.minWidth();
+    const operation = new HellResizeOperation({
+      before: {
+        measure: () => cell.measure(),
+        minSize: () => min,
+        setSize: (size) => cell.setLiveWidth(size),
+        commitSize: (size) => cell.commit(size),
+      },
+      after: {
+        measure: () => next.measure(),
+        minSize: () => min,
+        setSize: (size) => next.setLiveWidth(size),
+        commitSize: (size) => next.commit(size),
+      },
+      orientation: 'horizontal',
+      startCoordinate: e.clientX,
+    });
+    if (!operation.canResize) return;
+
     this.host.setPointerCapture?.(e.pointerId);
     this.dragging.set(true);
 
-    const startX = e.clientX;
-    const startA = cell.measure();
-    const startB = next.measure();
-    const min = this.minWidth();
-    const transaction = new HellResizeTransaction({
-      startA,
-      startB,
-      minA: min,
-      minB: min,
-    });
-
     const move = (ev: PointerEvent) => {
       ev.preventDefault();
-      const result = transaction.byDelta(ev.clientX - startX);
-      cell.setLiveWidth(result.a);
-      next.setLiveWidth(result.b);
+      operation.byPointer(ev);
     };
 
     const win = this.host.ownerDocument.defaultView ?? window;
@@ -331,8 +334,7 @@ export class HellTableColumnResizer extends HellStyleable {
       win.removeEventListener('pointermove', move);
       win.removeEventListener('pointerup', up);
       win.removeEventListener('pointercancel', up);
-      cell.commit(cell.measure());
-      next.commit(next.measure());
+      operation.commit();
     };
 
     const opts: AddEventListenerOptions = { passive: false };
@@ -351,17 +353,26 @@ export class HellTableColumnResizer extends HellStyleable {
     const next = cell.head?.nextSibling(cell) ?? null;
     if (!next) return;
 
-    const a = cell.measure();
-    const b = next.measure();
     const min = this.minWidth();
-    const result = new HellResizeTransaction({
-      startA: a,
-      startB: b,
-      minA: min,
-      minB: min,
-    }).byKey(intent);
-    cell.commit(result.a);
-    next.commit(result.b);
+    const operation = new HellResizeOperation({
+      before: {
+        measure: () => cell.measure(),
+        minSize: () => min,
+        setSize: (size) => cell.setLiveWidth(size),
+        commitSize: (size) => cell.commit(size),
+      },
+      after: {
+        measure: () => next.measure(),
+        minSize: () => min,
+        setSize: (size) => next.setLiveWidth(size),
+        commitSize: (size) => next.commit(size),
+      },
+      orientation: 'horizontal',
+    });
+    if (!operation.canResize) return;
+    const result = operation.byKey(e.key);
+    if (!result) return;
+    operation.commit(result);
   }
 }
 

@@ -15,8 +15,9 @@ import {
   signal,
 } from '@angular/core';
 import {
-  HellResizeTransaction,
+  HellResizeOperation,
   hellFitResizeSizesToTotal,
+  hellResizeCoordinate,
   hellResizeIntentFromKey,
 } from '../../core/resize-behavior';
 import { HellOrientation } from '../../core/types';
@@ -239,11 +240,7 @@ export class HellResizablePane extends HellStyleable {
 
 interface ResizeDragState {
   pointerId: number;
-  horizontal: boolean;
-  prev: HellResizablePane;
-  next: HellResizablePane;
-  startCoord: number;
-  transaction: HellResizeTransaction;
+  operation: HellResizeOperation;
 }
 
 @Component({
@@ -316,10 +313,7 @@ export class HellResizableHandle extends HellStyleable {
     if (!state || e.pointerId !== state.pointerId) return;
 
     e.preventDefault();
-    const delta = (state.horizontal ? e.clientX : e.clientY) - state.startCoord;
-    const result = state.transaction.byDelta(delta);
-    state.prev.setSize(result.a);
-    state.next.setSize(result.b);
+    const result = state.operation.byPointer(e);
     this.ariaValueNow.set(result.ariaValueNow);
   }
 
@@ -349,28 +343,28 @@ export class HellResizableHandle extends HellStyleable {
     }
 
     e.preventDefault();
-    const horizontal = this.resizable.orientation() === 'horizontal';
+    const orientation = this.resizable.orientation() === 'horizontal' ? 'horizontal' : 'vertical';
     const sizes = this.lockPanes();
-    const startA = sizes.get(prev) ?? prev.measure();
-    const startB = sizes.get(next) ?? next.measure();
-    const sumAB = startA + startB;
-    if (sumAB <= 0) return;
-
-    const startCoord = horizontal ? e.clientX : e.clientY;
+    const operation = new HellResizeOperation({
+      before: {
+        measure: () => sizes.get(prev) ?? prev.measure(),
+        minSize: () => prev.currentMinSize(),
+        setSize: (size) => prev.setSize(size),
+      },
+      after: {
+        measure: () => sizes.get(next) ?? next.measure(),
+        minSize: () => next.currentMinSize(),
+        setSize: (size) => next.setSize(size),
+      },
+      orientation,
+      startCoordinate: hellResizeCoordinate(e, orientation),
+    });
+    if (!operation.canResize) return;
     this.resizable.markUserSized();
 
     this.dragState = {
       pointerId: e.pointerId,
-      horizontal,
-      prev,
-      next,
-      startCoord,
-      transaction: new HellResizeTransaction({
-        startA,
-        startB,
-        minA: prev.currentMinSize(),
-        minB: next.currentMinSize(),
-      }),
+      operation,
     };
     this.dragging.set(true);
 
@@ -402,27 +396,31 @@ export class HellResizableHandle extends HellStyleable {
     this.resizable.fitPanesToAvailableSize();
     if (this.resizable.isConstrained()) return;
 
-    const horizontal = this.resizable.orientation() === 'horizontal';
+    const orientation = this.resizable.orientation() === 'horizontal' ? 'horizontal' : 'vertical';
+    if (!hellResizeIntentFromKey(e.key, orientation)) return;
+
     const { prev, next } = this.adjacent();
     if (!prev || !next) return;
-    const intent = hellResizeIntentFromKey(e.key, horizontal ? 'horizontal' : 'vertical');
-    if (!intent) return;
-    e.preventDefault();
     const sizes = this.lockPanes();
-    const a = sizes.get(prev) ?? prev.measure();
-    const b = sizes.get(next) ?? next.measure();
-    const sum = a + b;
-    if (sum <= 0) return;
+    const operation = new HellResizeOperation({
+      before: {
+        measure: () => sizes.get(prev) ?? prev.measure(),
+        minSize: () => prev.currentMinSize(),
+        setSize: (size) => prev.setSize(size),
+      },
+      after: {
+        measure: () => sizes.get(next) ?? next.measure(),
+        minSize: () => next.currentMinSize(),
+        setSize: (size) => next.setSize(size),
+      },
+      orientation,
+    });
+    if (!operation.canResize) return;
+    const result = operation.byKey(e.key);
+    if (!result) return;
 
+    e.preventDefault();
     this.resizable.markUserSized();
-    const result = new HellResizeTransaction({
-      startA: a,
-      startB: b,
-      minA: prev.currentMinSize(),
-      minB: next.currentMinSize(),
-    }).byKey(intent);
-    prev.setSize(result.a);
-    next.setSize(result.b);
     this.ariaValueNow.set(result.ariaValueNow);
   }
 }

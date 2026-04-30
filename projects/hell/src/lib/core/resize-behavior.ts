@@ -18,6 +18,21 @@ export interface HellResizeTransactionResult {
   readonly ariaValueNow: number;
 }
 
+export interface HellResizeOperationAdapter {
+  measure(): number;
+  minSize(): number;
+  setSize(size: number): void;
+  commitSize?(size: number): void;
+}
+
+export interface HellResizeOperationOptions {
+  readonly before: HellResizeOperationAdapter;
+  readonly after: HellResizeOperationAdapter;
+  readonly orientation: HellResizeOrientation;
+  readonly startCoordinate?: number;
+  readonly keyDelta?: number;
+}
+
 export function hellConstrainResizeValue(
   value: number,
   sum: number,
@@ -131,6 +146,57 @@ export class HellResizeTransaction {
   }
 }
 
+export class HellResizeOperation {
+  private readonly transaction: HellResizeTransaction;
+  private readonly startCoordinate: number | null;
+  private lastResult: HellResizeTransactionResult;
+
+  constructor(private readonly options: HellResizeOperationOptions) {
+    this.transaction = new HellResizeTransaction({
+      startA: options.before.measure(),
+      startB: options.after.measure(),
+      minA: options.before.minSize(),
+      minB: options.after.minSize(),
+      keyDelta: options.keyDelta,
+    });
+    this.startCoordinate = options.startCoordinate ?? null;
+    this.lastResult = this.transaction.byDelta(0);
+  }
+
+  get canResize(): boolean {
+    return this.transaction.sum > 0;
+  }
+
+  byPointer(point: { clientX: number; clientY: number }): HellResizeTransactionResult {
+    const start = this.startCoordinate ?? hellResizeCoordinate(point, this.options.orientation);
+    return this.byDelta(hellResizeCoordinate(point, this.options.orientation) - start);
+  }
+
+  byDelta(delta: number): HellResizeTransactionResult {
+    return this.apply(this.transaction.byDelta(delta));
+  }
+
+  byKey(key: string): HellResizeTransactionResult | null {
+    const intent = hellResizeIntentFromKey(key, this.options.orientation);
+    return intent ? this.apply(this.transaction.byKey(intent)) : null;
+  }
+
+  commit(result: HellResizeTransactionResult = this.lastResult): void {
+    if (this.options.before.commitSize) this.options.before.commitSize(result.a);
+    else this.options.before.setSize(result.a);
+
+    if (this.options.after.commitSize) this.options.after.commitSize(result.b);
+    else this.options.after.setSize(result.b);
+  }
+
+  private apply(result: HellResizeTransactionResult): HellResizeTransactionResult {
+    this.lastResult = result;
+    this.options.before.setSize(result.a);
+    this.options.after.setSize(result.b);
+    return result;
+  }
+}
+
 export function hellResizeIntentFromKey(
   key: string,
   orientation: HellResizeOrientation,
@@ -141,4 +207,11 @@ export function hellResizeIntentFromKey(
   if (key === 'Home') return 'min';
   if (key === 'End') return 'max';
   return null;
+}
+
+export function hellResizeCoordinate(
+  point: { clientX: number; clientY: number },
+  orientation: HellResizeOrientation,
+): number {
+  return orientation === 'horizontal' ? point.clientX : point.clientY;
 }
