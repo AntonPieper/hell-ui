@@ -6,6 +6,11 @@ import {
   getZoomOrigin,
   normalizeZoomEventValue,
 } from './pdf-viewer.utils';
+import {
+  HellPdfJsRuntimeAdapter,
+  type HellPdfRuntimeAdapter,
+  type HellPdfRuntimeBundle,
+} from './pdf-viewer.adapter';
 
 export type HellPdfSource = string | URL | ArrayBuffer;
 export type HellPdfInitialZoom = number | 'auto' | 'page-actual' | 'page-fit' | 'page-width';
@@ -38,8 +43,7 @@ export class HellPdfRuntime {
   private findController: any = null;
   private eventBus: any = null;
   private doc: any = null;
-  private workerPort: Worker | null = null;
-  private pdfWorker: any = null;
+  private bundle: HellPdfRuntimeBundle | null = null;
   private container: HTMLDivElement | null = null;
   private containerEventCleanup: (() => void) | null = null;
   private readonly renderedThumbs = new Set<number>();
@@ -47,6 +51,8 @@ export class HellPdfRuntime {
   private initialZoom: HellPdfInitialZoom = 'auto';
   private initialPage = 1;
   private loadToken = 0;
+
+  constructor(private readonly adapter: HellPdfRuntimeAdapter = new HellPdfJsRuntimeAdapter()) {}
 
   get hasDocument(): boolean {
     return !!this.doc;
@@ -62,40 +68,20 @@ export class HellPdfRuntime {
     this.container = container;
     this.handlers = handlers;
 
-    const pdfjs = await import('pdfjs-dist');
-    // pdf_viewer.mjs reads globalThis.pdfjsLib at module evaluation time.
-    // Import core first so viewer init cannot race that global assignment.
-    (globalThis as typeof globalThis & { pdfjsLib?: typeof pdfjs }).pdfjsLib = pdfjs;
-    this.workerPort = new Worker(new URL('./pdf.worker.ts', import.meta.url), { type: 'module' });
-    this.pdfWorker = new pdfjs.PDFWorker({ port: this.workerPort as any });
-
-    const viewerMod = await import('pdfjs-dist/web/pdf_viewer.mjs');
-    const eventBus = new viewerMod.EventBus();
-    const linkService = new viewerMod.PDFLinkService({ eventBus });
-    const findController = new viewerMod.PDFFindController({ eventBus, linkService });
-    const pdfViewer = new viewerMod.PDFViewer({
-      container,
-      eventBus,
-      linkService,
-      findController,
-      textLayerMode: 2,
-      annotationMode: 2,
-      annotationEditorMode: -1,
-    });
-
-    linkService.setViewer(pdfViewer);
+    const bundle = await this.adapter.createViewer(container);
     this.installContainerInteractions(container);
-    this.installEventHandlers(eventBus, pdfViewer, findController);
+    this.installEventHandlers(bundle.eventBus, bundle.viewer, bundle.findController);
 
-    this.pdfjs = pdfjs;
-    this.viewer = pdfViewer;
-    this.linkService = linkService;
-    this.findController = findController;
-    this.eventBus = eventBus;
+    this.bundle = bundle;
+    this.pdfjs = bundle.pdfjs;
+    this.viewer = bundle.viewer;
+    this.linkService = bundle.linkService;
+    this.findController = bundle.findController;
+    this.eventBus = bundle.eventBus;
   }
 
   async loadDocument(src: HellPdfSource, options: HellPdfLoadOptions): Promise<void> {
-    if (!this.pdfjs || !this.viewer || !this.linkService || !this.findController) {
+    if (!this.bundle || !this.pdfjs || !this.viewer || !this.linkService || !this.findController) {
       throw new Error('PDF runtime must be bootstrapped before loading a document.');
     }
 
@@ -105,11 +91,7 @@ export class HellPdfRuntime {
     this.clearActiveDocument();
     this.renderedThumbs.clear();
 
-    const loadingTask = this.pdfjs.getDocument(
-      typeof src === 'string' || src instanceof URL
-        ? { url: src.toString(), worker: this.pdfWorker }
-        : { data: src, worker: this.pdfWorker },
-    );
+    const loadingTask = this.adapter.getDocument(this.bundle, src);
     const doc = await loadingTask.promise;
     if (token !== this.loadToken) {
       try {
@@ -140,10 +122,8 @@ export class HellPdfRuntime {
     this.pdfjs = null;
     this.handlers = null;
     this.container = null;
-    this.pdfWorker?.destroy?.();
-    this.pdfWorker = null;
-    this.workerPort?.terminate();
-    this.workerPort = null;
+    this.bundle?.destroy();
+    this.bundle = null;
   }
 
   goTo(page: number): void {
