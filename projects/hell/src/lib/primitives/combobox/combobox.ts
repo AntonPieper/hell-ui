@@ -1,4 +1,6 @@
-import { Directive, booleanAttribute, input } from '@angular/core';
+import { DestroyRef, Directive, ElementRef, inject } from '@angular/core';
+import { HellStyleable } from '../../core/styleable';
+import { HELL_OVERLAY_SCOPE } from '../../core/overlay-scope';
 import {
   NgpCombobox,
   NgpComboboxButton,
@@ -24,19 +26,14 @@ import {
         'ngpComboboxDropdownFlip:flip',
         'ngpComboboxOptions:options',
       ],
-      outputs: [
-        'ngpComboboxValueChange:valueChange',
-        'ngpComboboxOpenChange:openChange',
-      ],
+      outputs: ['ngpComboboxValueChange:valueChange', 'ngpComboboxOpenChange:openChange'],
     },
   ],
   host: {
     '[class.hell-combobox]': '!unstyled()',
   },
 })
-export class HellCombobox {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellCombobox extends HellStyleable {}
 
 @Directive({
   selector: 'input[hellComboboxInput]',
@@ -45,9 +42,7 @@ export class HellCombobox {
     '[class.hell-combobox-input]': '!unstyled()',
   },
 })
-export class HellComboboxInput {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellComboboxInput extends HellStyleable {}
 
 @Directive({
   selector: 'button[hellComboboxButton]',
@@ -56,9 +51,7 @@ export class HellComboboxInput {
     '[class.hell-combobox-button]': '!unstyled()',
   },
 })
-export class HellComboboxButton {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellComboboxButton extends HellStyleable {}
 
 @Directive({
   selector: '[hellComboboxDropdown]',
@@ -67,8 +60,15 @@ export class HellComboboxButton {
     '[class.hell-combobox-dropdown]': '!unstyled()',
   },
 })
-export class HellComboboxDropdown {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellComboboxDropdown extends HellStyleable {
+  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  private readonly overlayScope = inject(HELL_OVERLAY_SCOPE, { optional: true });
+
+  constructor() {
+    super();
+    this.overlayScope?.registerOverlayElement(this.host);
+    inject(DestroyRef).onDestroy(() => this.overlayScope?.unregisterOverlayElement(this.host));
+  }
 }
 
 /** Structural directive: renders the dropdown only while the combobox is
@@ -104,17 +104,13 @@ export class HellComboboxPortal {}
     role: 'option',
   },
 })
-export class HellComboboxOption {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellComboboxOption extends HellStyleable {}
 
 @Directive({
   selector: '[hellComboboxEmpty]',
   host: { '[class.hell-combobox-empty]': '!unstyled()' },
 })
-export class HellComboboxEmpty {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellComboboxEmpty extends HellStyleable {}
 
 export const HELL_COMBOBOX_DIRECTIVES = [
   HellCombobox,

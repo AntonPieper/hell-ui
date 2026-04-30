@@ -1,3 +1,5 @@
+import { HellStyleable } from '../../core/styleable';
+import { HELL_OVERLAY_SCOPE } from '../../core/overlay-scope';
 import {
   DestroyRef,
   Directive,
@@ -82,44 +84,48 @@ export class HellFlyoutTrigger {
     '[class.hell-flyout]': '!unstyled()',
   },
 })
-export class HellFlyout {
+export class HellFlyout extends HellStyleable {
   readonly trigger = input.required<HellFlyoutTrigger>({ alias: 'hellFlyout' });
   readonly boundary = input<HTMLElement | null>(null);
   readonly closeOnEscape = input(true, { transform: booleanAttribute });
   readonly closeOnOutsideInteraction = input(true, { transform: booleanAttribute });
-  readonly unstyled = input(false, { transform: booleanAttribute });
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly overlayScope = inject(HELL_OVERLAY_SCOPE, { optional: true });
 
   constructor() {
+    super();
     afterNextRender(() => {
-        const onClick = (e: MouseEvent) => {
-          if (this.closeOnOutsideInteraction()) this.maybeDismiss(e.target);
-        };
-        const onFocus = (e: FocusEvent) => {
-          if (this.closeOnOutsideInteraction()) this.maybeDismiss(e.target);
-        };
-        const onKey = (e: KeyboardEvent) => {
-          if (e.key !== 'Escape' || !this.closeOnEscape()) return;
-          const t = e.target as Node | null;
-          // Only handle Escape originating inside the flyout system.
-          if (!this.isInside(t)) return;
-          e.stopPropagation();
-          this.trigger().hide();
-          this.trigger().element.nativeElement.focus();
-        };
+      const panel = this.element.nativeElement;
+      this.overlayScope?.registerOverlayElement(panel);
+      const onClick = (e: MouseEvent) => {
+        if (this.closeOnOutsideInteraction()) this.maybeDismiss(e.target);
+      };
+      const onFocus = (e: FocusEvent) => {
+        if (this.closeOnOutsideInteraction()) this.maybeDismiss(e.target);
+      };
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key !== 'Escape' || !this.closeOnEscape()) return;
+        const t = e.target as Node | null;
+        // Only handle Escape originating inside the flyout system.
+        if (!this.isInside(t)) return;
+        e.stopPropagation();
+        this.trigger().hide();
+        this.trigger().element.nativeElement.focus();
+      };
 
-        document.addEventListener('click', onClick, true);
-        document.addEventListener('focusin', onFocus, true);
-        document.addEventListener('keydown', onKey, true);
+      document.addEventListener('click', onClick, true);
+      document.addEventListener('focusin', onFocus, true);
+      document.addEventListener('keydown', onKey, true);
 
-        this.destroyRef.onDestroy(() => {
-          document.removeEventListener('click', onClick, true);
-          document.removeEventListener('focusin', onFocus, true);
-          document.removeEventListener('keydown', onKey, true);
-        });
+      this.destroyRef.onDestroy(() => {
+        this.overlayScope?.unregisterOverlayElement(panel);
+        document.removeEventListener('click', onClick, true);
+        document.removeEventListener('focusin', onFocus, true);
+        document.removeEventListener('keydown', onKey, true);
       });
+    });
   }
 
   private maybeDismiss(target: EventTarget | null): void {
@@ -133,6 +139,7 @@ export class HellFlyout {
     const trigger = this.trigger().element.nativeElement;
     if (panel.contains(target) || trigger.contains(target)) return true;
     const boundary = this.boundary();
-    return !!boundary && boundary.contains(target);
+    if (boundary?.contains(target)) return true;
+    return this.overlayScope?.containsOverlayTarget(target) ?? false;
   }
 }

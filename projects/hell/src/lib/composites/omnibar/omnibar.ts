@@ -20,7 +20,11 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { HELL_OVERLAY_SCOPE, type HellOverlayScope } from '../../core/overlay-scope';
+import {
+  HELL_OVERLAY_SCOPE,
+  HellOverlayScopeRegistry,
+  type HellOverlayScope,
+} from '../../core/overlay-scope';
 import {
   type HellSearchField,
   type HellSearchResult,
@@ -31,6 +35,7 @@ import { HellListbox } from '../../primitives/listbox/listbox';
 import { HellSearch, HellSearchClear } from '../../primitives/search/search';
 import { HellSkeleton } from '../../primitives/skeleton/skeleton';
 import { HellCommandPaletteService } from './command-palette';
+import { HellStyleable } from '../../core/styleable';
 
 export interface HellOmnibarRegisteredItem {
   readonly itemId: string;
@@ -139,17 +144,9 @@ let nextOmnibarItemId = 0;
         <div data-slot="actions" [attr.data-empty]="!hasActions() ? 'true' : null">
           <ng-content select="[hellOmnibarActions]" />
         </div>
-        <div
-          data-slot="results"
-          hellListbox
-          [id]="panelId"
-        >
+        <div data-slot="results" hellListbox [id]="panelId">
           @if (loading()) {
-            <div
-              data-slot="loading"
-              role="status"
-              [attr.aria-label]="loadingMessage()"
-            >
+            <div data-slot="loading" role="status" [attr.aria-label]="loadingMessage()">
               @for (row of skeletonRows(); track row) {
                 <div data-slot="skeleton-row">
                   <div hellSkeleton shape="circle" width="18px" height="18px"></div>
@@ -177,10 +174,9 @@ let nextOmnibarItemId = 0;
   `,
   exportAs: 'hellOmnibar',
 })
-export class HellOmnibar implements HellOverlayScope {
+export class HellOmnibar extends HellStyleable implements HellOverlayScope {
   /* ── Inputs ────────────────────────────────────────────────────────── */
 
-  readonly unstyled = input(false, { transform: booleanAttribute });
   readonly size = input<'sm' | 'md' | 'lg'>('md');
   readonly disabled = input(false, { transform: booleanAttribute });
 
@@ -266,7 +262,7 @@ export class HellOmnibar implements HellOverlayScope {
   private posUpdater?: AfterRenderRef;
   private pointerDownInside = false;
   private pointerDownInsideTimer: ReturnType<typeof setTimeout> | null = null;
-  private readonly overlayElements = new Set<HTMLElement>();
+  private readonly overlayScope = new HellOverlayScopeRegistry(() => this.host.nativeElement);
 
   /* ── View refs ─────────────────────────────────────────────────────── */
 
@@ -274,6 +270,7 @@ export class HellOmnibar implements HellOverlayScope {
   @ViewChild('control', { static: true }) private controlRef?: ElementRef<HTMLElement>;
 
   constructor() {
+    super();
     effect(() => {
       // Reset active when items shift or query changes.
       this.value();
@@ -336,20 +333,15 @@ export class HellOmnibar implements HellOverlayScope {
   }
 
   registerOverlayElement(element: HTMLElement): void {
-    this.overlayElements.add(element);
+    this.overlayScope.registerOverlayElement(element);
   }
 
   unregisterOverlayElement(element: HTMLElement): void {
-    this.overlayElements.delete(element);
+    this.overlayScope.unregisterOverlayElement(element);
   }
 
   containsOverlayTarget(target: EventTarget | Node | null): boolean {
-    if (!target || typeof Node === 'undefined' || !(target instanceof Node)) return false;
-    if (this.host.nativeElement.contains(target)) return true;
-    for (const element of this.overlayElements) {
-      if (element.contains(target)) return true;
-    }
-    return false;
+    return this.overlayScope.containsOverlayTarget(target);
   }
 
   /** Open the panel. Idempotent. */
@@ -623,9 +615,7 @@ export class HellOmnibar implements HellOverlayScope {
   selector: '[hellOmnibarPanel]',
   host: { '[class.hell-omnibar-panel-content]': '!unstyled()' },
 })
-export class HellOmnibarPanel {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellOmnibarPanel extends HellStyleable {}
 
 @Directive({
   selector: '[hellOmnibarGroup]',
@@ -635,8 +625,7 @@ export class HellOmnibarPanel {
     '[attr.aria-label]': 'label() || null',
   },
 })
-export class HellOmnibarGroup {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellOmnibarGroup extends HellStyleable {
   readonly label = input<string>('');
 }
 
@@ -644,9 +633,7 @@ export class HellOmnibarGroup {
   selector: '[hellOmnibarGroupLabel]',
   host: { '[class.hell-omnibar-group-label]': '!unstyled()', role: 'presentation' },
 })
-export class HellOmnibarGroupLabel {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellOmnibarGroupLabel extends HellStyleable {}
 
 /**
  * A selectable result row. `[value]` is the payload emitted via `(select)`
@@ -666,8 +653,10 @@ export class HellOmnibarGroupLabel {
     '(mousemove)': 'onMouseMove()',
   },
 })
-export class HellOmnibarItem<T = unknown> implements HellOmnibarRegisteredItem {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellOmnibarItem<T = unknown>
+  extends HellStyleable
+  implements HellOmnibarRegisteredItem
+{
   readonly itemValue = input<T>(undefined as T, { alias: 'value' });
   readonly closeOnSelect = input(true, { transform: booleanAttribute });
 
@@ -680,6 +669,7 @@ export class HellOmnibarItem<T = unknown> implements HellOmnibarRegisteredItem {
   readonly itemId = `hell-omnibar-item-${++nextOmnibarItemId}`;
 
   constructor() {
+    super();
     this.omnibar.registerItem(this);
     inject(DestroyRef).onDestroy(() => this.omnibar.unregisterItem(this));
   }
@@ -712,41 +702,31 @@ export class HellOmnibarItem<T = unknown> implements HellOmnibarRegisteredItem {
   selector: '[hellOmnibarItemIcon]',
   host: { '[class.hell-omnibar-item-icon]': '!unstyled()', 'aria-hidden': 'true' },
 })
-export class HellOmnibarItemIcon {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellOmnibarItemIcon extends HellStyleable {}
 
 @Directive({
   selector: '[hellOmnibarItemText]',
   host: { '[class.hell-omnibar-item-text]': '!unstyled()' },
 })
-export class HellOmnibarItemText {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellOmnibarItemText extends HellStyleable {}
 
 @Directive({
   selector: '[hellOmnibarItemSubtext]',
   host: { '[class.hell-omnibar-item-subtext]': '!unstyled()' },
 })
-export class HellOmnibarItemSubtext {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellOmnibarItemSubtext extends HellStyleable {}
 
 @Directive({
   selector: '[hellOmnibarItemTrailing]',
   host: { '[class.hell-omnibar-item-trailing]': '!unstyled()' },
 })
-export class HellOmnibarItemTrailing {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellOmnibarItemTrailing extends HellStyleable {}
 
 @Directive({
   selector: '[hellOmnibarChip]',
   host: { '[class.hell-omnibar-chip]': '!unstyled()' },
 })
-export class HellOmnibarChip {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellOmnibarChip extends HellStyleable {}
 
 @Directive({
   selector: 'button[hellOmnibarChipRemove]',
@@ -755,9 +735,7 @@ export class HellOmnibarChip {
     type: 'button',
   },
 })
-export class HellOmnibarChipRemove {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellOmnibarChipRemove extends HellStyleable {}
 
 @Directive({
   selector: '[hellOmnibarActions]',
@@ -767,9 +745,7 @@ export class HellOmnibarChipRemove {
     'aria-orientation': 'horizontal',
   },
 })
-export class HellOmnibarActionsStrip {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellOmnibarActionsStrip extends HellStyleable {}
 
 /** Action button rendered in the actions strip. */
 @Directive({
@@ -780,17 +756,16 @@ export class HellOmnibarActionsStrip {
     '[attr.data-active]': 'pressed() ? "true" : null',
   },
 })
-export class HellOmnibarAction {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellOmnibarAction extends HellStyleable {
   readonly pressed = input(false, { transform: booleanAttribute });
 
   private readonly omnibar = inject(HellOmnibar);
 
   constructor() {
+    super();
     this.omnibar.registerAction(this);
     inject(DestroyRef).onDestroy(() => this.omnibar.unregisterAction(this));
   }
-
 }
 
 /* ──────────────────────────── Types ──────────────────────────── */

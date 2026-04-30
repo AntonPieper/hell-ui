@@ -1,5 +1,7 @@
-import { Directive, booleanAttribute, input } from '@angular/core';
+import { DestroyRef, Directive, ElementRef, booleanAttribute, inject, input } from '@angular/core';
 import { NgpPopover, NgpPopoverTrigger } from 'ng-primitives/popover';
+import { HellStyleable } from '../../core/styleable';
+import { HELL_OVERLAY_SCOPE } from '../../core/overlay-scope';
 
 @Directive({
   selector: '[hellPopoverTrigger]',
@@ -26,6 +28,13 @@ export class HellPopoverTrigger {}
   hostDirectives: [NgpPopover],
   host: { '[class.hell-popover]': '!unstyled()' },
 })
-export class HellPopover {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellPopover extends HellStyleable {
+  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  private readonly overlayScope = inject(HELL_OVERLAY_SCOPE, { optional: true });
+
+  constructor() {
+    super();
+    this.overlayScope?.registerOverlayElement(this.host);
+    inject(DestroyRef).onDestroy(() => this.overlayScope?.unregisterOverlayElement(this.host));
+  }
 }

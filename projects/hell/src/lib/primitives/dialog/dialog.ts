@@ -1,5 +1,12 @@
-import { DOCUMENT, Directive, ElementRef, booleanAttribute, inject, input } from '@angular/core';
-import type { Subscription } from 'rxjs';
+import {
+  DOCUMENT,
+  DestroyRef,
+  Directive,
+  ElementRef,
+  booleanAttribute,
+  inject,
+  input,
+} from '@angular/core';
 import {
   NgpDialog,
   NgpDialogOverlay,
@@ -8,16 +15,8 @@ import {
   NgpDialogTrigger,
 } from 'ng-primitives/dialog';
 import type { HellSize } from '../../core/types';
-
-interface DialogRuntimeRef {
-  afterClosed$: {
-    subscribe(next: () => void): Subscription;
-  };
-}
-
-interface DialogTriggerRuntime {
-  dialogRef: DialogRuntimeRef | null;
-}
+import { HellStyleable } from '../../core/styleable';
+import { HellDialogScopeRuntime, type HellDialogTriggerRuntime } from './dialog-scope';
 
 /**
  * Wrap your trigger element with this directive and bind to a `<ng-template>`.
@@ -46,79 +45,26 @@ interface DialogTriggerRuntime {
 export class HellDialogTrigger {
   readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
 
-  private readonly doc = inject(DOCUMENT);
   private readonly trigger = inject(NgpDialogTrigger, { self: true });
-  private activeRoot: HTMLElement | null = null;
-  private closeSubscription: Subscription | null = null;
-  private resizeObserver: ResizeObserver | null = null;
-  private readonly syncScope = () => this.updateScope();
+  private readonly scope = new HellDialogScopeRuntime(inject(DOCUMENT));
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => this.scope.clear());
+  }
 
   protected primeScope(): void {
-    const root = this.element.nativeElement.closest<HTMLElement>('[data-dialog-root="true"]');
-    if (!root || this.activeRoot === root) return;
-
-    this.activeRoot = root;
-    this.updateScope();
-
-    if (typeof ResizeObserver !== 'undefined') {
-      this.resizeObserver?.disconnect();
-      this.resizeObserver = new ResizeObserver(this.syncScope);
-      this.resizeObserver.observe(root);
-    }
-
-    const win = this.doc.defaultView;
-    win?.addEventListener('scroll', this.syncScope, { passive: true, capture: true });
-    win?.addEventListener('resize', this.syncScope);
+    this.scope.primeFromTrigger(this.element.nativeElement);
   }
 
   protected observeClose(): void {
     queueMicrotask(() => {
-      const dialogRef = (this.trigger as unknown as DialogTriggerRuntime).dialogRef;
-      if (!dialogRef) return;
-
-      this.closeSubscription?.unsubscribe();
-      this.closeSubscription = dialogRef.afterClosed$.subscribe(() => this.clearScope());
+      const dialogRef = (this.trigger as unknown as HellDialogTriggerRuntime).dialogRef;
+      this.scope.observeClose(dialogRef);
     });
   }
 
-  private updateScope(): void {
-    if (!this.activeRoot) return;
-
-    const rect = this.activeRoot.getBoundingClientRect();
-    const win = this.doc.defaultView;
-    if (!win) return;
-
-    const styles = this.doc.documentElement.style;
-    styles.setProperty('--hell-dialog-scope-top', `${Math.max(0, rect.top)}px`);
-    styles.setProperty(
-      '--hell-dialog-scope-right',
-      `${Math.max(0, win.innerWidth - rect.right)}px`,
-    );
-    styles.setProperty(
-      '--hell-dialog-scope-bottom',
-      `${Math.max(0, win.innerHeight - rect.bottom)}px`,
-    );
-    styles.setProperty('--hell-dialog-scope-left', `${Math.max(0, rect.left)}px`);
-  }
-
   private clearScope(): void {
-    this.closeSubscription?.unsubscribe();
-    this.closeSubscription = null;
-
-    this.resizeObserver?.disconnect();
-    this.resizeObserver = null;
-
-    const win = this.doc.defaultView;
-    win?.removeEventListener('scroll', this.syncScope, true);
-    win?.removeEventListener('resize', this.syncScope);
-
-    this.activeRoot = null;
-
-    const styles = this.doc.documentElement.style;
-    styles.removeProperty('--hell-dialog-scope-top');
-    styles.removeProperty('--hell-dialog-scope-right');
-    styles.removeProperty('--hell-dialog-scope-bottom');
-    styles.removeProperty('--hell-dialog-scope-left');
+    this.scope.clear();
   }
 }
 
@@ -131,8 +77,7 @@ export class HellDialogTrigger {
     '[attr.data-scoped]': 'scoped() ? "true" : null',
   },
 })
-export class HellDialogOverlay {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellDialogOverlay extends HellStyleable {
   /** When true, overlay reads bounds from nearest dialog root captured by
    *  opening trigger. If none exists, it falls back to viewport. */
   readonly scoped = input(false, { transform: booleanAttribute });
@@ -152,9 +97,7 @@ export class HellDialogOverlay {
     '[attr.data-dialog-root]': '"true"',
   },
 })
-export class HellDialogScope {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellDialogScope extends HellStyleable {}
 
 @Directive({
   selector: '[hellDialog]',
@@ -166,8 +109,7 @@ export class HellDialogScope {
     '[attr.data-size]': 'size()',
   },
 })
-export class HellDialog {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellDialog extends HellStyleable {
   readonly size = input<HellSize>('md');
 }
 
@@ -176,18 +118,14 @@ export class HellDialog {
   hostDirectives: [NgpDialogTitle],
   host: { '[class.hell-dialog-title]': '!unstyled()' },
 })
-export class HellDialogTitle {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellDialogTitle extends HellStyleable {}
 
 @Directive({
   selector: '[hellDialogDescription]',
   hostDirectives: [NgpDialogDescription],
   host: { '[class.hell-dialog-description]': '!unstyled()' },
 })
-export class HellDialogDescription {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellDialogDescription extends HellStyleable {}
 
 export const HELL_DIALOG_DIRECTIVES = [
   HellDialogTrigger,

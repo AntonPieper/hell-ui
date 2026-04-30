@@ -1,4 +1,6 @@
-import { Directive, booleanAttribute, input } from '@angular/core';
+import { DestroyRef, Directive, ElementRef, inject } from '@angular/core';
+import { HellStyleable } from '../../core/styleable';
+import { HELL_OVERLAY_SCOPE } from '../../core/overlay-scope';
 import {
   NgpSelect,
   NgpSelectDropdown,
@@ -26,43 +28,41 @@ import {
         'ngpSelectDropdownFlip:flip',
         'ngpSelectOptions:options',
       ],
-      outputs: [
-        'ngpSelectValueChange:valueChange',
-        'ngpSelectOpenChange:openChange',
-      ],
+      outputs: ['ngpSelectValueChange:valueChange', 'ngpSelectOpenChange:openChange'],
     },
   ],
   host: {
     '[class.hell-select]': '!unstyled()',
   },
 })
-export class HellSelect {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellSelect extends HellStyleable {}
 
 @Directive({
   selector: '[hellSelectValue]',
   host: { '[class.hell-select-value]': '!unstyled()' },
 })
-export class HellSelectValue {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellSelectValue extends HellStyleable {}
 
 @Directive({
   selector: '[hellSelectPlaceholder]',
   host: { '[class.hell-select-placeholder]': '!unstyled()' },
 })
-export class HellSelectPlaceholder {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellSelectPlaceholder extends HellStyleable {}
 
 @Directive({
   selector: '[hellSelectDropdown]',
   hostDirectives: [NgpSelectDropdown],
   host: { '[class.hell-select-dropdown]': '!unstyled()' },
 })
-export class HellSelectDropdown {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellSelectDropdown extends HellStyleable {
+  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  private readonly overlayScope = inject(HELL_OVERLAY_SCOPE, { optional: true });
+
+  constructor() {
+    super();
+    this.overlayScope?.registerOverlayElement(this.host);
+    inject(DestroyRef).onDestroy(() => this.overlayScope?.unregisterOverlayElement(this.host));
+  }
 }
 
 @Directive({
@@ -89,9 +89,7 @@ export class HellSelectPortal {}
     role: 'option',
   },
 })
-export class HellSelectOption {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellSelectOption extends HellStyleable {}
 
 export const HELL_SELECT_DIRECTIVES = [
   HellSelect,
