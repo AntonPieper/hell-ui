@@ -1,5 +1,9 @@
 import { HellStyleable } from '../../core/styleable';
-import { HELL_OVERLAY_SCOPE } from '../../core/overlay-scope';
+import {
+  HELL_OVERLAY_SCOPE,
+  HellFloatingDismissController,
+  hellRegisterOverlayElement,
+} from '../../core/overlay-scope';
 import {
   DestroyRef,
   Directive,
@@ -93,53 +97,31 @@ export class HellFlyout extends HellStyleable {
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly overlayScope = inject(HELL_OVERLAY_SCOPE, { optional: true });
+  private dismissController: HellFloatingDismissController | null = null;
 
   constructor() {
     super();
     afterNextRender(() => {
       const panel = this.element.nativeElement;
-      this.overlayScope?.registerOverlayElement(panel);
-      const onClick = (e: MouseEvent) => {
-        if (this.closeOnOutsideInteraction()) this.maybeDismiss(e.target);
-      };
-      const onFocus = (e: FocusEvent) => {
-        if (this.closeOnOutsideInteraction()) this.maybeDismiss(e.target);
-      };
-      const onKey = (e: KeyboardEvent) => {
-        if (e.key !== 'Escape' || !this.closeOnEscape()) return;
-        const t = e.target as Node | null;
-        // Only handle Escape originating inside the flyout system.
-        if (!this.isInside(t)) return;
-        e.stopPropagation();
-        this.trigger().hide();
-        this.trigger().element.nativeElement.focus();
-      };
-
-      document.addEventListener('click', onClick, true);
-      document.addEventListener('focusin', onFocus, true);
-      document.addEventListener('keydown', onKey, true);
-
-      this.destroyRef.onDestroy(() => {
-        this.overlayScope?.unregisterOverlayElement(panel);
-        document.removeEventListener('click', onClick, true);
-        document.removeEventListener('focusin', onFocus, true);
-        document.removeEventListener('keydown', onKey, true);
+      hellRegisterOverlayElement(this.overlayScope, panel, this.destroyRef);
+      this.dismissController = new HellFloatingDismissController({
+        root: () => panel,
+        inside: () => [this.trigger().element.nativeElement, this.boundary()],
+        scope: this.overlayScope,
+        ownerDocument: () => panel.ownerDocument,
+        closeOnOutsidePointer: () => false,
+        closeOnOutsideClick: () => this.closeOnOutsideInteraction(),
+        closeOnOutsideFocus: () => this.closeOnOutsideInteraction(),
+        closeOnEscape: () => this.closeOnEscape(),
+        onDismiss: ({ reason, event }) => {
+          this.trigger().hide();
+          if (reason === 'escape') {
+            event.stopPropagation();
+            this.trigger().element.nativeElement.focus();
+          }
+        },
       });
+      this.dismissController.connect(this.destroyRef);
     });
-  }
-
-  private maybeDismiss(target: EventTarget | null): void {
-    if (this.isInside(target as Node | null)) return;
-    this.trigger().hide();
-  }
-
-  private isInside(target: Node | null): boolean {
-    if (!target) return false;
-    const panel = this.element.nativeElement;
-    const trigger = this.trigger().element.nativeElement;
-    if (panel.contains(target) || trigger.contains(target)) return true;
-    const boundary = this.boundary();
-    if (boundary?.contains(target)) return true;
-    return this.overlayScope?.containsOverlayTarget(target) ?? false;
   }
 }

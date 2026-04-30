@@ -1,4 +1,4 @@
-import { InjectionToken } from '@angular/core';
+import { DestroyRef, InjectionToken } from '@angular/core';
 
 /** Shared ownership contract for floating content rendered outside its logical
  *  host. Components such as omnibar use it to treat registered overlays as
@@ -42,4 +42,142 @@ export class HellOverlayScopeRegistry implements HellOverlayScope {
 export function hellOverlayTargetNode(target: EventTarget | Node | null): Node | null {
   if (!target || typeof Node === 'undefined' || !(target instanceof Node)) return null;
   return target;
+}
+
+export function hellRegisterOverlayElement(
+  scope: HellOverlayScope | null | undefined,
+  element: HTMLElement,
+  destroyRef: DestroyRef,
+): void {
+  if (!scope) return;
+  scope.registerOverlayElement(element);
+  destroyRef.onDestroy(() => scope.unregisterOverlayElement(element));
+}
+
+export type HellFloatingDismissReason =
+  | 'outside-pointer'
+  | 'outside-click'
+  | 'outside-focus'
+  | 'escape';
+
+export interface HellFloatingDismissEvent {
+  readonly reason: HellFloatingDismissReason;
+  readonly event: Event;
+}
+
+export interface HellFloatingDismissOptions {
+  readonly root?: () => Node | null | undefined;
+  readonly inside?: () => readonly (Node | null | undefined)[];
+  readonly scope?: HellOverlayScope | null | undefined;
+  readonly ownerDocument?: () => Document | null | undefined;
+  readonly closeOnOutsidePointer?: () => boolean;
+  readonly closeOnOutsideClick?: () => boolean;
+  readonly closeOnOutsideFocus?: () => boolean;
+  readonly closeOnEscape?: () => boolean;
+  readonly onDismiss: (event: HellFloatingDismissEvent) => void;
+}
+
+/**
+ * Owns document-level Floating Dismissal listeners for one Floating Interaction.
+ * Callers keep control through the closeOn* predicates and the onDismiss handler;
+ * this module only centralizes the inside/outside and listener lifecycle rules.
+ */
+export class HellFloatingDismissController {
+  private cleanup: (() => void) | null = null;
+  private pointerDownInside = false;
+  private pointerDownInsideTimer: ReturnType<typeof setTimeout> | null = null;
+
+  constructor(private readonly options: HellFloatingDismissOptions) {}
+
+  connect(destroyRef: DestroyRef): void {
+    if (this.cleanup) return;
+    const doc = this.document();
+    if (!doc) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!this.options.closeOnOutsidePointer?.()) return;
+      if (this.isInside(event.target)) {
+        this.markPointerDownInside();
+        return;
+      }
+      this.options.onDismiss({ reason: 'outside-pointer', event });
+    };
+
+    const onClick = (event: MouseEvent) => {
+      if (!this.options.closeOnOutsideClick?.()) return;
+      if (this.isInside(event.target)) return;
+      this.options.onDismiss({ reason: 'outside-click', event });
+    };
+
+    const onFocusIn = (event: FocusEvent) => {
+      if (!this.options.closeOnOutsideFocus?.()) return;
+      if (this.pointerDownInside) return;
+      if (this.isInside(event.target)) return;
+      this.options.onDismiss({ reason: 'outside-focus', event });
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || !this.options.closeOnEscape?.()) return;
+      if (!this.isInside(event.target)) return;
+      this.options.onDismiss({ reason: 'escape', event });
+    };
+
+    doc.addEventListener('pointerdown', onPointerDown);
+    doc.addEventListener('click', onClick, true);
+    doc.addEventListener('focusin', onFocusIn);
+    doc.addEventListener('keydown', onKeyDown, true);
+
+    this.cleanup = () => {
+      doc.removeEventListener('pointerdown', onPointerDown);
+      doc.removeEventListener('click', onClick, true);
+      doc.removeEventListener('focusin', onFocusIn);
+      doc.removeEventListener('keydown', onKeyDown, true);
+      this.clearPointerTimer();
+    };
+    destroyRef.onDestroy(() => this.destroy());
+  }
+
+  destroy(): void {
+    this.cleanup?.();
+    this.cleanup = null;
+  }
+
+  markPointerDownInside(): void {
+    this.pointerDownInside = true;
+    this.clearPointerTimer();
+    this.pointerDownInsideTimer = setTimeout(() => {
+      this.pointerDownInside = false;
+      this.pointerDownInsideTimer = null;
+    }, 0);
+  }
+
+  hasRecentPointerDownInside(): boolean {
+    return this.pointerDownInside;
+  }
+
+  isInside(target: EventTarget | Node | null): boolean {
+    const node = hellOverlayTargetNode(target);
+    if (!node) return false;
+
+    const root = this.options.root?.();
+    if (root?.contains(node)) return true;
+
+    for (const element of this.options.inside?.() ?? []) {
+      if (element?.contains(node)) return true;
+    }
+
+    return this.options.scope?.containsOverlayTarget(node) ?? false;
+  }
+
+  private document(): Document | null {
+    const provided = this.options.ownerDocument?.();
+    if (provided) return provided;
+    return typeof document === 'undefined' ? null : document;
+  }
+
+  private clearPointerTimer(): void {
+    if (this.pointerDownInsideTimer === null) return;
+    clearTimeout(this.pointerDownInsideTimer);
+    this.pointerDownInsideTimer = null;
+  }
 }

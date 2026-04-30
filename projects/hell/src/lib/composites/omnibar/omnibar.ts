@@ -22,6 +22,7 @@ import {
 } from '@angular/core';
 import {
   HELL_OVERLAY_SCOPE,
+  HellFloatingDismissController,
   HellOverlayScopeRegistry,
   type HellOverlayScope,
 } from '../../core/overlay-scope';
@@ -260,9 +261,16 @@ export class HellOmnibar extends HellStyleable implements HellOverlayScope {
   protected readonly hasActions = computed(() => this.actionItems().length > 0);
 
   private posUpdater?: AfterRenderRef;
-  private pointerDownInside = false;
-  private pointerDownInsideTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly overlayScope = new HellOverlayScopeRegistry(() => this.host.nativeElement);
+  private readonly dismissController = new HellFloatingDismissController({
+    root: () => this.host.nativeElement,
+    scope: this,
+    ownerDocument: () => this.host.nativeElement.ownerDocument,
+    closeOnOutsidePointer: () => this.isOpen(),
+    closeOnOutsideFocus: () => this.isOpen(),
+    closeOnEscape: () => false,
+    onDismiss: () => this.close(),
+  });
 
   /* ── View refs ─────────────────────────────────────────────────────── */
 
@@ -316,7 +324,7 @@ export class HellOmnibar extends HellStyleable implements HellOverlayScope {
 
     this.installHotkey();
     this.installAnchorListeners();
-    this.installOutsidePointerListener();
+    this.dismissController.connect(this.destroyRef);
   }
 
   /* ── Public API for actions / hotkey wiring ────────────────────────── */
@@ -431,7 +439,7 @@ export class HellOmnibar extends HellStyleable implements HellOverlayScope {
     // Defer so the native focus target has settled before deciding whether a
     // child overlay/menu interaction is still inside this omnibar.
     queueMicrotask(() => {
-      if (this.pointerDownInside) return;
+      if (this.dismissController.hasRecentPointerDownInside()) return;
       const next = document.activeElement;
       if (this.containsOverlayTarget(next)) return;
       this.close();
@@ -456,7 +464,7 @@ export class HellOmnibar extends HellStyleable implements HellOverlayScope {
 
   protected onPanelPointerDown(event: PointerEvent): void {
     void event;
-    this.markPointerDownInside();
+    this.dismissController.markPointerDownInside();
   }
 
   protected onKeyDown(event: KeyboardEvent): void {
@@ -577,36 +585,6 @@ export class HellOmnibar extends HellStyleable implements HellOverlayScope {
     this.destroyRef.onDestroy(() => document.removeEventListener('keydown', handler));
   }
 
-  /* ── Outside-click ─────────────────────────────────────────────────── */
-
-  private installOutsidePointerListener(): void {
-    if (typeof document === 'undefined') return;
-    const handler = (event: PointerEvent) => this.onDocumentPointerDown(event);
-    document.addEventListener('pointerdown', handler);
-    this.destroyRef.onDestroy(() => document.removeEventListener('pointerdown', handler));
-  }
-
-  private onDocumentPointerDown(event: PointerEvent): void {
-    if (!this.isOpen()) return;
-    const target = event.target as Node | null;
-    if (!target) return;
-    if (this.containsOverlayTarget(target)) {
-      this.markPointerDownInside();
-      return;
-    }
-    // also include floating panel children (panel is in DOM under host, so the
-    // host check above already covers it)
-    this.close();
-  }
-
-  private markPointerDownInside(): void {
-    this.pointerDownInside = true;
-    if (this.pointerDownInsideTimer !== null) clearTimeout(this.pointerDownInsideTimer);
-    this.pointerDownInsideTimer = setTimeout(() => {
-      this.pointerDownInside = false;
-      this.pointerDownInsideTimer = null;
-    }, 0);
-  }
 }
 
 /* ──────────────────────────── Children ──────────────────────────── */

@@ -7,7 +7,7 @@ import {
   NgpSubmenuTrigger,
   injectSubmenuTriggerState,
 } from 'ng-primitives/menu';
-import { HELL_OVERLAY_SCOPE } from '../../core/overlay-scope';
+import { HELL_OVERLAY_SCOPE, hellRegisterOverlayElement } from '../../core/overlay-scope';
 import { HellStyleable } from '../../core/styleable';
 
 @Directive({
@@ -75,9 +75,7 @@ export class HellMenu extends HellStyleable {
     super();
     const scope = this.overlayScope;
     if (!scope) return;
-    const element = this.host.nativeElement;
-    scope.registerOverlayElement(element);
-    inject(DestroyRef).onDestroy(() => scope.unregisterOverlayElement(element));
+    hellRegisterOverlayElement(scope, this.host.nativeElement, inject(DestroyRef));
   }
 }
 

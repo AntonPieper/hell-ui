@@ -1,6 +1,6 @@
 import { DestroyRef, Directive, ElementRef, inject } from '@angular/core';
 import { HellStyleable } from '../../core/styleable';
-import { HELL_OVERLAY_SCOPE } from '../../core/overlay-scope';
+import { HELL_OVERLAY_SCOPE, hellRegisterOverlayElement } from '../../core/overlay-scope';
 import {
   NgpSelect,
   NgpSelectDropdown,
@@ -60,8 +60,7 @@ export class HellSelectDropdown extends HellStyleable {
 
   constructor() {
     super();
-    this.overlayScope?.registerOverlayElement(this.host);
-    inject(DestroyRef).onDestroy(() => this.overlayScope?.unregisterOverlayElement(this.host));
+    hellRegisterOverlayElement(this.overlayScope, this.host, inject(DestroyRef));
   }
 }
 
