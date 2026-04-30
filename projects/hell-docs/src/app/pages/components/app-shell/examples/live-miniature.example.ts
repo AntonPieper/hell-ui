@@ -32,8 +32,8 @@ const HD_APP_SHELL_PAGE_ICONS = {
       <header hellAppTopbar class="hd-surface-elevated">
         <button
           hellSidenavToggle
+          appearance="shell"
           type="button"
-          class="hell-shell-toggle"
           [attr.aria-label]="shell.isSidenavCollapsed() ? 'Expand sidenav' : 'Collapse sidenav'"
         ></button>
         <strong>Acme Console</strong>
@@ -88,9 +88,9 @@ const HD_APP_SHELL_PAGE_ICONS = {
       </main>
 
       <aside hellAppSecondary class="hd-surface-subtle">
-        <button hellSecondaryToggle type="button" class="hell-secondary-rail"></button>
+        <button hellSecondaryToggle appearance="rail" type="button"></button>
         <div hellAppSecondaryBody>
-          <button hellSecondaryToggle type="button" class="hell-secondary-header">Activity</button>
+          <button hellSecondaryToggle appearance="header" type="button">Activity</button>
           <ul class="m-0 list-none space-y-2 p-4 text-sm text-hell-foreground-muted">
             <li>You opened <strong>Project Atlas</strong></li>
             <li>3 deploys today</li>

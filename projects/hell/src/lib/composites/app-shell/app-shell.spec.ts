@@ -11,14 +11,14 @@ import { HELL_APP_SHELL_DIRECTIVES } from './app-shell';
       <aside hellAppSecondary>
         <button
           hellSecondaryToggle
+          appearance="rail"
           type="button"
-          class="hell-secondary-rail"
         ></button>
         <div hellAppSecondaryBody>
           <button
             hellSecondaryToggle
+            appearance="header"
             type="button"
-            class="hell-secondary-header"
           >Title</button>
           <p>Body</p>
         </div>
@@ -42,10 +42,10 @@ describe('HellAppShell secondary panel', () => {
     const aside = fixture.nativeElement.querySelector('aside') as HTMLElement;
     const body = aside.querySelector('.hell-secondary-body') as HTMLElement;
     const headerToggle = aside.querySelector(
-      'button.hell-secondary-header',
+      'button[data-hell-secondary-toggle="header"]',
     ) as HTMLButtonElement;
     const rail = aside.querySelector(
-      'button.hell-secondary-rail',
+      'button[data-hell-secondary-toggle="rail"]',
     ) as HTMLButtonElement;
 
     // Both toggles always present; consumer is responsible for placement.

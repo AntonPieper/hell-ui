@@ -73,25 +73,27 @@ const HD_APP_SHELL_PAGE_ICONS = {
         <li>
           Slots: <code>hellAppTopbar</code>, <code>hellAppSidenav</code>,
           <code>hellAppContent</code>, <code>hellAppSecondary</code>,
-          <code>hellAppSecondaryBody</code>.
+          <code>hellAppSecondaryBody</code>. <code>hellAppContent</code> centers direct content,
+          defaults to a wide <code>1760px</code> content cap, and accepts <code>[maxWidth]</code> as
+          a number in pixels or any CSS length.
         </li>
         <li>
           Toggles: <code>hellSidenavToggle</code>, <code>hellSecondaryToggle</code> — apply to any
           clickable element.
         </li>
         <li>
-          Styled toggle classes (opt-in):
+          Styled toggle appearances (opt-in):
           <ul>
             <li>
-              <code>hell-shell-toggle</code> — leading topbar slot whose footprint matches the
+              <code>appearance="shell"</code> — leading topbar slot whose footprint matches the
               collapsed sidenav width, so the icon lines up with collapsed nav items beneath it.
             </li>
             <li>
-              <code>hell-secondary-header</code> — full-width header row that doubles as the
+              <code>appearance="header"</code> — full-width header row that doubles as the
               collapse button (whole row clickable, with a chevron on the leading edge).
             </li>
             <li>
-              <code>hell-secondary-rail</code> — auto-fills the collapsed aside; hidden when
+              <code>appearance="rail"</code> — auto-fills the collapsed aside; hidden when
               expanded.
             </li>
           </ul>
@@ -107,11 +109,11 @@ const HD_APP_SHELL_PAGE_ICONS = {
       <h2>Do</h2>
       <ul>
         <li>
-          Use <code>hell-shell-toggle</code> as the first child of the topbar — its width matches
+          Use <code>appearance="shell"</code> as the first child of the topbar — its width matches
           the collapsed sidenav, keeping the icon centred above the rail.
         </li>
         <li>
-          Use <code>hell-secondary-header</code> instead of a separate header-toggle button so the
+          Use <code>appearance="header"</code> instead of a separate header-toggle button so the
           entire heading row is the click target.
         </li>
       </ul>

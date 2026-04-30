@@ -60,13 +60,14 @@
   }
 
   /*
-   * Sidenav toggle button — opt-in styled class for `[hellSidenavToggle]`.
+   * Sidenav toggle button — opt-in styled appearance for `[hellSidenavToggle]`.
    * Sits in the topbar's leading slot. Outer width matches
    * `--hell-app-sidenav-collapsed-width` so the visible 32×32 affordance
    * lines up dead-centre with the collapsed nav-item icons beneath it.
    */
 
-  .hell-shell-toggle {
+  .hell-shell-toggle,
+  [data-hell-sidenav-toggle='shell'] {
     position: relative;
     display: inline-flex;
     flex: 0 0 var(--hell-app-sidenav-collapsed-width);
@@ -220,15 +221,28 @@
   }
 
   .hell-content {
+    --hell-app-content-max-width: 1760px;
+
     position: relative;
     display: flex;
     min-height: calc(var(--spacing) * 0);
     min-width: calc(var(--spacing) * 0);
     flex-direction: column;
+    align-items: center;
     overflow: auto;
     background-color: var(--color-hell-surface-subtle);
     padding: var(--spacing-hell-6);
     grid-area: content;
+  }
+
+  .hell-content > router-outlet {
+    display: contents;
+  }
+
+  .hell-content > :not(router-outlet) {
+    display: block;
+    width: min(100%, var(--hell-app-content-max-width));
+    margin-inline: auto;
   }
 
   .hell-secondary {
@@ -270,12 +284,13 @@
   /*
    * Header-row toggle — the full secondary-panel header row acts as the
    * collapse affordance. Render as
-   *   <button hellSecondaryToggle class="hell-secondary-header">Title</button>
-    * The whole row is clickable; a chevron is drawn on the leading edge so it
-    * reads as a panel collapse affordance, not a nav/link affordance.
+   *   <button hellSecondaryToggle appearance="header">Title</button>
+   * The whole row is clickable; a chevron is drawn on the leading edge so it
+   * reads as a panel collapse affordance, not a nav/link affordance.
    */
 
-  .hell-secondary-header {
+  .hell-secondary-header,
+  [data-hell-secondary-toggle='header'] {
     display: flex;
     width: 100%;
     align-items: center;
@@ -335,7 +350,8 @@
    *               └─┘
    */
 
-  .hell-secondary-rail {
+  .hell-secondary-rail,
+  [data-hell-secondary-toggle='rail'] {
     display: none;
     [data-hidden='true'] > & {
       pointer-events: auto;
@@ -563,7 +579,8 @@
       padding-inline-end: var(--spacing-hell-2);
     }
 
-    .hell-shell-toggle {
+    .hell-shell-toggle,
+    [data-hell-sidenav-toggle='shell'] {
       flex-basis: var(--hell-app-topbar-height);
     }
 
@@ -613,7 +630,8 @@
         box-shadow var(--hell-duration-base) var(--ease-hell-out);
     }
 
-    .hell-secondary[data-hidden='true'] > .hell-secondary-rail {
+    .hell-secondary[data-hidden='true'] > .hell-secondary-rail,
+    .hell-secondary[data-hidden='true'] > [data-hell-secondary-toggle='rail'] {
       inset: 0;
     }
 

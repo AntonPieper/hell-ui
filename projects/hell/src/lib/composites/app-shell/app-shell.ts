@@ -4,6 +4,7 @@ import {
   DestroyRef,
   Directive,
   booleanAttribute,
+  computed,
   inject,
   input,
   signal,
@@ -29,7 +30,7 @@ import {
  *     <aside hellAppSidenav>...</aside>
  *     <main hellAppContent>...</main>
  *     <aside hellAppSecondary>
- *       <button hellSecondaryToggle class="hell-secondary-rail"></button>
+ *       <button hellSecondaryToggle appearance="rail"></button>
  *       <div hellAppSecondaryBody>...</div>
  *     </aside>
  *   </div>
@@ -182,12 +183,23 @@ export class HellAppSidenav {
   selector: '[hellAppContent]',
   host: {
     '[class.hell-content]': '!unstyled()',
+    '[style.--hell-app-content-max-width]': 'maxWidthValue()',
     /** Dialogs scoped here render only over the content area. */
     '[attr.data-dialog-root]': '"true"',
   },
 })
 export class HellAppContent {
   readonly unstyled = input(false, { transform: booleanAttribute });
+  readonly maxWidth = input<string | number | null>(null);
+
+  protected readonly maxWidthValue = computed(() => {
+    const value = this.maxWidth();
+    if (value == null || value === '') return null;
+    if (typeof value === 'number') return `${value}px`;
+
+    const trimmed = value.trim();
+    return /^\d+(\.\d+)?$/.test(trimmed) ? `${trimmed}px` : trimmed;
+  });
 }
 
 /** Click anywhere → toggles `sidenavCollapsed` on the parent shell. */
@@ -198,9 +210,11 @@ export class HellAppContent {
     '(click)': 'toggle()',
     '[attr.aria-pressed]': 'collapsed()',
     '[attr.aria-label]': 'collapsed() ? "Expand sidebar" : "Collapse sidebar"',
+    '[attr.data-hell-sidenav-toggle]': 'appearance() === "plain" ? null : appearance()',
   },
 })
 export class HellSidenavToggle {
+  readonly appearance = input<'plain' | 'shell'>('plain');
   private readonly shell = inject(HellAppShell);
   protected readonly collapsed = () => this.shell.isSidenavCollapsed();
   protected toggle() {
@@ -216,9 +230,11 @@ export class HellSidenavToggle {
     '(click)': 'toggle()',
     '[attr.aria-pressed]': '!hidden()',
     '[attr.aria-label]': 'hidden() ? "Show secondary panel" : "Hide secondary panel"',
+    '[attr.data-hell-secondary-toggle]': 'appearance() === "plain" ? null : appearance()',
   },
 })
 export class HellSecondaryToggle {
+  readonly appearance = input<'plain' | 'header' | 'rail'>('plain');
   private readonly shell = inject(HellAppShell);
   protected readonly hidden = () => this.shell.isSecondaryHidden();
   protected toggle() {
