@@ -13,7 +13,7 @@ describe('HellToaster', () => {
     const fixture = TestBed.createComponent(HellToaster);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.hell-toaster-list')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-slot="list"]')).toBeNull();
   });
 
   it('renders the toast hit area when toasts are mounted', () => {
@@ -24,8 +24,8 @@ describe('HellToaster', () => {
     svc.success('Saved', { duration: 0 });
     fixture.detectChanges();
 
-    const list = fixture.nativeElement.querySelector('.hell-toaster-list') as HTMLOListElement;
+    const list = fixture.nativeElement.querySelector('[data-slot="list"]') as HTMLOListElement;
     expect(list).not.toBeNull();
-    expect(list.querySelectorAll('.hell-toast')).toHaveLength(1);
+    expect(list.querySelectorAll('[data-slot="toast"]')).toHaveLength(1);
   });
 });

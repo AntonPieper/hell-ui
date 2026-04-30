@@ -202,7 +202,7 @@ export class HellToastTemplate {}
   template: `
     @if (hasToasts()) {
       <ol
-        class="hell-toaster-list"
+        data-slot="list"
         role="region"
         aria-label="Notifications"
         tabindex="-1"
@@ -213,7 +213,7 @@ export class HellToastTemplate {}
       >
         @for (t of svc.toasts(); track t.id; let i = $index) {
           <li
-            class="hell-toast"
+            data-slot="toast"
             [attr.data-variant]="t.variant"
             [attr.data-state]="t.removing ? 'closed' : 'open'"
             [attr.data-front]="frontDistance(t)"
@@ -223,11 +223,11 @@ export class HellToastTemplate {}
             [style.--hell-toast-overflow]="overflow(t)"
             [style.--hell-toast-offset]="offsetPx(t)"
             [style.--hell-toast-h]="heightPx(t.id)"
-            [style.zIndex]="i + 1"
+            [style.--hell-toast-z]="i + 1"
             (mouseenter)="svc.pauseAll()"
             (mouseleave)="svc.resumeAll()"
           >
-            <div class="hell-toast-glyph" aria-hidden="true">
+            <div data-slot="glyph" aria-hidden="true">
               @switch (t.variant) {
                 @case ('success') {
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
@@ -261,7 +261,7 @@ export class HellToastTemplate {}
               }
             </div>
 
-            <div class="hell-toast-body">
+            <div data-slot="body">
               @if (t.template) {
                 <ng-container
                   [ngTemplateOutlet]="t.template"
@@ -269,10 +269,10 @@ export class HellToastTemplate {}
                 />
               } @else {
                 @if (t.title) {
-                  <div class="hell-toast-title">{{ t.title }}</div>
+                  <div data-slot="title">{{ t.title }}</div>
                 }
                 @if (t.description) {
-                  <div class="hell-toast-desc">{{ t.description }}</div>
+                  <div data-slot="description">{{ t.description }}</div>
                 }
               }
             </div>
@@ -280,7 +280,7 @@ export class HellToastTemplate {}
             @if (t.action) {
               <button
                 type="button"
-                class="hell-toast-action"
+                data-slot="action"
                 (click)="t.action!.onClick(() => svc.dismiss(t.id))"
               >
                 {{ t.action.label }}
@@ -290,7 +290,7 @@ export class HellToastTemplate {}
             @if (t.dismissible) {
               <button
                 type="button"
-                class="hell-toast-close"
+                data-slot="close"
                 aria-label="Dismiss"
                 (click)="svc.dismiss(t.id)"
               >
@@ -475,7 +475,7 @@ export class HellToaster {
         if (changed) this.heights.set(next);
       });
     }
-    const items = this.host.querySelectorAll<HTMLElement>('.hell-toast');
+    const items = this.host.querySelectorAll<HTMLElement>('[data-slot="toast"]');
     const seen = new Set<number>();
     items.forEach((el, i) => {
       const id = this.svc.toasts()[i]?.id;

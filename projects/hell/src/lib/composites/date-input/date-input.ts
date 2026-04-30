@@ -77,7 +77,7 @@ function formatDate(d: Date | null): string {
       unstyled
       [size]="size()"
       type="text"
-      class="hell-date-input-field"
+      data-slot="field"
       [invalid]="invalid()"
       [attr.aria-invalid]="invalid() ? 'true' : null"
       [attr.aria-label]="ariaLabel()"
@@ -94,7 +94,7 @@ function formatDate(d: Date | null): string {
       size="sm"
       iconOnly
       type="button"
-      class="hell-date-input-trigger"
+      data-slot="trigger"
       [hellPopoverTrigger]="cal"
       placement="bottom-end"
       [disabled]="disabled()"

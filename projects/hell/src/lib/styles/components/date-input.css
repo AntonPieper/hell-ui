@@ -37,11 +37,11 @@
         background-color: var(--color-hell-surface-subtle);
         border-color: var(--color-hell-border);
         cursor: not-allowed;
-        & .hell-date-input-field { color: var(--color-hell-foreground-muted); }
+        & [data-slot='field'] { color: var(--color-hell-foreground-muted); }
       }
     }
 
-  .hell-date-input-field {
+  .hell-date-input [data-slot='field'] {
       flex: 1 1 auto;
       min-width: 0;
       height: var(--spacing-hell-control-md);
@@ -60,7 +60,7 @@
       &[data-size="lg"] { height: var(--spacing-hell-control-lg); padding-inline: var(--spacing-hell-4); font-size: 14px; }
     }
 
-  .hell-date-input-trigger {
+  .hell-date-input [data-slot='trigger'] {
       flex: 0 0 auto;
       align-self: center;
       margin-inline-end: var(--spacing-hell-1);
@@ -68,7 +68,7 @@
       &:hover { color: var(--color-hell-foreground); }
     }
 
-  .hell-date-input[data-disabled="true"] .hell-date-input-trigger {
+  .hell-date-input[data-disabled="true"] [data-slot='trigger'] {
       pointer-events: none;
       color: var(--color-hell-foreground-subtle);
       opacity: 0.5;

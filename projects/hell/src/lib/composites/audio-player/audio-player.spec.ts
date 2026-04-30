@@ -33,7 +33,7 @@ describe('HellAudioPlayer', () => {
     const playSpy = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
 
     const ccButton = fixture.nativeElement.querySelector(
-      '.hell-audio-cc-toggle',
+      '[data-slot="cc-toggle"]',
     ) as HTMLButtonElement;
 
     ccButton.click();
@@ -56,7 +56,7 @@ describe('HellAudioPlayer', () => {
     component.error.set('Speech error: network');
     fixture.detectChanges();
 
-    const track = fixture.nativeElement.querySelector('.hell-audio-track') as HTMLElement;
+    const track = fixture.nativeElement.querySelector('[data-slot="seek"]') as HTMLElement;
     track.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     fixture.detectChanges();
 

@@ -87,7 +87,7 @@ function tryParse(text: string): ParsedTime | null {
       unstyled
       [size]="size()"
       type="text"
-      class="hell-time-input-field"
+      data-slot="field"
       inputmode="numeric"
       autocomplete="off"
       [invalid]="invalid()"
@@ -106,7 +106,7 @@ function tryParse(text: string): ParsedTime | null {
       size="sm"
       iconOnly
       type="button"
-      class="hell-time-input-trigger"
+      data-slot="trigger"
       [hellPopoverTrigger]="picker"
       placement="bottom-end"
       [disabled]="disabled()"
@@ -117,10 +117,10 @@ function tryParse(text: string): ParsedTime | null {
     </button>
 
     <ng-template #picker>
-      <div hellPopover class="hell-time-picker">
-        <div class="hell-time-picker-header">
-          <span class="hell-time-picker-readout">{{ format(current(), seconds()) }}</span>
-          <div class="hell-time-picker-stepper">
+      <div hellPopover data-slot="picker">
+        <div data-slot="picker-header">
+          <span data-slot="picker-readout">{{ format(current(), seconds()) }}</span>
+          <div data-slot="picker-stepper">
             <button
               hellButton
               variant="ghost"
@@ -144,16 +144,16 @@ function tryParse(text: string): ParsedTime | null {
           </div>
         </div>
 
-        <div class="hell-time-picker-section">
-          <div class="hell-time-picker-section-label">Hours</div>
-          <div class="hell-time-picker-grid hell-time-picker-grid-hours">
+        <div data-slot="picker-section">
+          <div data-slot="picker-section-label">Hours</div>
+          <div data-slot="picker-grid" data-unit="hours">
             @for (h of hours; track h) {
               <button
                 hellButton
                 [variant]="h === current().h ? 'primary' : 'ghost'"
                 size="sm"
                 type="button"
-                class="hell-time-picker-cell"
+                data-slot="picker-cell"
                 (click)="setUnit('h', h)"
               >
                 {{ pad(h) }}
@@ -162,16 +162,16 @@ function tryParse(text: string): ParsedTime | null {
           </div>
         </div>
 
-        <div class="hell-time-picker-section">
-          <div class="hell-time-picker-section-label">Minutes</div>
-          <div class="hell-time-picker-grid hell-time-picker-grid-minutes">
+        <div data-slot="picker-section">
+          <div data-slot="picker-section-label">Minutes</div>
+          <div data-slot="picker-grid" data-unit="minutes">
             @for (m of minutes; track m) {
               <button
                 hellButton
                 [variant]="m === current().m ? 'primary' : 'ghost'"
                 size="sm"
                 type="button"
-                class="hell-time-picker-cell"
+                data-slot="picker-cell"
                 (click)="setUnit('m', m)"
               >
                 {{ pad(m) }}
@@ -181,16 +181,16 @@ function tryParse(text: string): ParsedTime | null {
         </div>
 
         @if (seconds()) {
-          <div class="hell-time-picker-section">
-            <div class="hell-time-picker-section-label">Seconds</div>
-            <div class="hell-time-picker-grid hell-time-picker-grid-minutes">
+          <div data-slot="picker-section">
+            <div data-slot="picker-section-label">Seconds</div>
+            <div data-slot="picker-grid" data-unit="minutes">
               @for (s of secondsList; track s) {
                 <button
                   hellButton
                   [variant]="s === current().s ? 'primary' : 'ghost'"
                   size="sm"
                   type="button"
-                  class="hell-time-picker-cell"
+                  data-slot="picker-cell"
                   (click)="setUnit('s', s)"
                 >
                   {{ pad(s) }}

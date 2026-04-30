@@ -99,17 +99,17 @@ const HELL_AUDIO_PLAYER_ICONS = {
     ></audio>
 
     @if (title() || resolvedDate()) {
-      <div class="hell-audio-meta">
+      <div data-slot="meta">
         @if (title(); as t) {
-          <span class="hell-audio-title" [attr.title]="t">{{ t }}</span>
+          <span data-slot="title" [attr.title]="t">{{ t }}</span>
         }
         @if (resolvedDate()) {
-          <span class="hell-audio-date">{{ resolvedDate() }}</span>
+          <span data-slot="date">{{ resolvedDate() }}</span>
         }
       </div>
     }
 
-    <div class="hell-audio-controls">
+    <div data-slot="controls">
       <button
         hellButton
         variant="ghost"
@@ -121,10 +121,10 @@ const HELL_AUDIO_PLAYER_ICONS = {
         <hell-icon [name]="playing() ? 'faSolidPause' : 'faSolidPlay'" />
       </button>
 
-      <span class="hell-audio-time">{{ format(currentTime()) }}</span>
+      <span data-slot="time">{{ format(currentTime()) }}</span>
 
       <hell-slider
-        class="hell-audio-seek hell-audio-track"
+        data-slot="seek"
         size="sm"
         grow
         thumb="hover"
@@ -137,7 +137,7 @@ const HELL_AUDIO_PLAYER_ICONS = {
         aria-label="Seek"
       />
 
-      <span class="hell-audio-time">{{ format(duration()) }}</span>
+      <span data-slot="time">{{ format(duration()) }}</span>
 
       <button
         hellButton
@@ -151,7 +151,7 @@ const HELL_AUDIO_PLAYER_ICONS = {
       </button>
 
       <hell-slider
-        class="hell-audio-volume"
+        data-slot="volume"
         size="sm"
         [value]="volume() * 100"
         [min]="0"
@@ -169,7 +169,7 @@ const HELL_AUDIO_PLAYER_ICONS = {
           variant="ghost"
           [iconOnly]="true"
           type="button"
-          class="hell-audio-cc-toggle"
+          data-slot="cc-toggle"
           [attr.aria-pressed]="captions()"
           [attr.aria-label]="captions() ? 'Hide live captions' : 'Show live captions'"
           [attr.data-active]="captions() ? 'true' : null"
@@ -200,12 +200,12 @@ const HELL_AUDIO_PLAYER_ICONS = {
       <section
         [hellFlyout]="ccTriggerInstance"
         [boundary]="hostElement"
-        class="hell-audio-captions"
+        data-slot="captions"
         [attr.data-state]="transcribing() ? 'live' : 'idle'"
       >
-        <header class="hell-audio-captions-bar">
-          <span class="hell-audio-captions-status">
-            <span class="hell-audio-captions-dot" aria-hidden="true"></span>
+        <header data-slot="captions-bar">
+          <span data-slot="captions-status">
+            <span data-slot="captions-dot" aria-hidden="true"></span>
             @if (error()) {
               Error
             } @else if (transcribing()) {
@@ -215,7 +215,7 @@ const HELL_AUDIO_PLAYER_ICONS = {
             }
           </span>
 
-          <div class="hell-audio-captions-actions">
+          <div data-slot="captions-actions">
             <button
               hellButton
               size="sm"
@@ -253,20 +253,20 @@ const HELL_AUDIO_PLAYER_ICONS = {
           </div>
         </header>
 
-        <div #captionScroll class="hell-audio-captions-body" aria-live="polite" aria-atomic="false">
+        <div #captionScroll data-slot="captions-body" aria-live="polite" aria-atomic="false">
           @if (error(); as err) {
-            <p class="hell-audio-captions-error">{{ err }}</p>
+            <p data-slot="captions-error">{{ err }}</p>
           } @else if (transcript() || interim()) {
             <p>
               <span>{{ transcript() }}</span>
               @if (interim(); as i) {
-                <span class="hell-audio-captions-interim"> {{ i }}</span>
+                <span data-slot="captions-interim"> {{ i }}</span>
               }
             </p>
           } @else if (transcribing()) {
-            <p class="hell-audio-captions-empty">Listening…</p>
+            <p data-slot="captions-empty">Listening…</p>
           } @else {
-            <p class="hell-audio-captions-empty">Press play to capture captions.</p>
+            <p data-slot="captions-empty">Press play to capture captions.</p>
           }
         </div>
       </section>

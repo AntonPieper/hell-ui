@@ -56,16 +56,16 @@ const HELL_DIALPAD_ICONS = {
     tabindex: '0',
   },
   template: `
-    <div class="hell-dialpad-display">
-      <output class="hell-dialpad-number" aria-live="polite"
-        ><span class="hell-dialpad-number-inner">{{ display() || '\u00A0' }}</span></output>
+    <div data-slot="display">
+      <output data-slot="number" aria-live="polite"
+        ><span data-slot="number-inner">{{ display() || '\u00A0' }}</span></output>
       <button
         hellButton
         variant="ghost"
         size="sm"
         iconOnly
         type="button"
-        class="hell-dialpad-back"
+        data-slot="back"
         [disabled]="!display()"
         (click)="backspace()"
         aria-label="Backspace"
@@ -74,17 +74,17 @@ const HELL_DIALPAD_ICONS = {
       </button>
     </div>
 
-    <div class="hell-dialpad-grid">
+    <div data-slot="grid">
       @for (k of keys; track k.digit) {
         <button
           hellButton
           variant="ghost"
-          class="hell-dialpad-key"
+          data-slot="key"
           type="button"
           (click)="press(k.digit)"
         >
-          <span class="hell-dialpad-digit">{{ k.digit }}</span>
-          <span class="hell-dialpad-letters">{{ k.letters || '\u00A0' }}</span>
+          <span data-slot="digit">{{ k.digit }}</span>
+          <span data-slot="letters">{{ k.letters || '\u00A0' }}</span>
         </button>
       }
     </div>
@@ -95,7 +95,7 @@ const HELL_DIALPAD_ICONS = {
         variant="primary"
         size="lg"
         type="button"
-        class="hell-dialpad-call"
+        data-slot="call"
         (click)="call.emit(display())"
         [disabled]="!display()"
       >

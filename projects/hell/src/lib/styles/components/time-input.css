@@ -35,11 +35,11 @@
         background-color: var(--color-hell-surface-subtle);
         border-color: var(--color-hell-border);
         cursor: not-allowed;
-        & .hell-time-input-field { color: var(--color-hell-foreground-muted); }
+        & [data-slot='field'] { color: var(--color-hell-foreground-muted); }
       }
     }
 
-  .hell-time-input-field {
+  .hell-time-input [data-slot='field'] {
       flex: 1 1 auto;
       min-width: 0;
       height: var(--spacing-hell-control-md);
@@ -59,7 +59,7 @@
       &[data-size="lg"] { height: var(--spacing-hell-control-lg); padding-inline: var(--spacing-hell-4); font-size: 14px; }
     }
 
-  .hell-time-input-trigger {
+  .hell-time-input [data-slot='trigger'] {
       flex: 0 0 auto;
       align-self: center;
       margin-inline-end: var(--spacing-hell-1);
@@ -67,7 +67,7 @@
       &:hover { color: var(--color-hell-foreground); }
     }
 
-  .hell-time-input[data-disabled="true"] .hell-time-input-trigger {
+  .hell-time-input[data-disabled="true"] [data-slot='trigger'] {
       pointer-events: none;
       color: var(--color-hell-foreground-subtle);
       opacity: 0.5;
@@ -78,14 +78,14 @@
    * hour/minute (and optional second) buttons.
    */
 
-  .hell-time-picker {
+  .hell-time-input [data-slot='picker'] {
       display: grid;
       gap: var(--spacing-hell-3);
       min-width: 14rem;
       padding: var(--spacing-hell-2);
     }
 
-  .hell-time-picker-header {
+  .hell-time-input [data-slot='picker-header'] {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -93,7 +93,7 @@
       padding-inline: var(--spacing-hell-2);
     }
 
-  .hell-time-picker-readout {
+  .hell-time-input [data-slot='picker-readout'] {
       font-size: var(--text-lg);
       line-height: 1;
       font-weight: var(--font-weight-semibold);
@@ -102,17 +102,17 @@
       letter-spacing: 0.02em;
     }
 
-  .hell-time-picker-stepper {
+  .hell-time-input [data-slot='picker-stepper'] {
       display: inline-flex;
       gap: var(--spacing-hell-1);
     }
 
-  .hell-time-picker-section {
+  .hell-time-input [data-slot='picker-section'] {
       display: grid;
       gap: var(--spacing-hell-1);
     }
 
-  .hell-time-picker-section-label {
+  .hell-time-input [data-slot='picker-section-label'] {
       font-size: 10px;
       font-weight: var(--font-weight-semibold);
       letter-spacing: 0.08em;
@@ -121,20 +121,20 @@
       padding-inline: var(--spacing-hell-2);
     }
 
-  .hell-time-picker-grid {
+  .hell-time-input [data-slot='picker-grid'] {
       display: grid;
       gap: var(--spacing-hell-1);
     }
 
-  .hell-time-picker-grid-hours {
+  .hell-time-input [data-slot='picker-grid'][data-unit='hours'] {
       grid-template-columns: repeat(6, minmax(0, 1fr));
     }
 
-  .hell-time-picker-grid-minutes {
+  .hell-time-input [data-slot='picker-grid'][data-unit='minutes'] {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
-  .hell-time-picker-cell {
+  .hell-time-input [data-slot='picker-cell'] {
       min-width: 0;
       font-variant-numeric: tabular-nums;
     }
