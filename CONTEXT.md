@@ -22,6 +22,9 @@ The shared Interface expected from public Hell modules: behavior directives, opt
 **Style Opt-Out**
 The shared contract that lets consumers keep a hell module's behavior and accessibility while removing its default host styling with `unstyled`.
 
+**Customization Surface**
+The consumer-facing Interface for changing a hell module's behavior, styling, and policy without forking or fighting the library. A good Customization Surface exposes the underlying settings consumers naturally want to adjust rather than mode switches or booleans that apply bundled presets.
+
 **Floating Interaction**
 Any interaction involving content rendered outside, beside, or above its logical host: menus, popovers, tooltips, dialogs, flyouts, selects, comboboxes, and omnibar child overlays.
 

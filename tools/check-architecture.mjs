@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -7,6 +7,8 @@ const failures = [];
 
 checkDocsExamples();
 checkPackageEntryPoints();
+checkStyleEntryPoints();
+checkComponentContract();
 
 if (failures.length) {
   console.error('Architecture checks failed:\n');
@@ -140,6 +142,120 @@ function checkPackageEntryPoints() {
       failures.push(`Package Entry Point is missing ${packagePath}`);
     }
   }
+
+  checkSecondaryEntryPointCompleteness('primitives');
+  checkSecondaryEntryPointCompleteness('composites');
+  checkFeatureEntryPointCompleteness();
+}
+
+function checkStyleEntryPoints() {
+  const packageJson = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
+  const exportsMap = packageJson.exports ?? {};
+  const expectedStyleExports = [
+    './styles',
+    './styles/tokens',
+    './styles/primitives',
+    './styles/composites',
+    './styles/features/code-editor',
+    './styles/features/data-table',
+    './styles/features/pdf-viewer',
+  ];
+
+  for (const exportPath of expectedStyleExports) {
+    const style = exportsMap[exportPath]?.style;
+    if (!style) {
+      failures.push(
+        `Style Package Entry Point ${exportPath} is missing from projects/hell/package.json`,
+      );
+      continue;
+    }
+
+    const sourceStylePath = style.replace(/^\.\/styles/, 'src/lib/styles');
+    if (!existsSync(join(root, 'projects/hell', sourceStylePath))) {
+      failures.push(`Style Package Entry Point ${exportPath} points at missing ${style}`);
+    }
+  }
+
+  const allStyles = readFile(join(root, 'projects/hell/src/lib/styles/hell.css'));
+  for (const feature of ['code-editor', 'data-table', 'pdf-viewer']) {
+    if (!allStyles.includes(`./features/${feature}.css`)) {
+      failures.push(`All-in style entry point is missing Feature CSS import for ${feature}`);
+    }
+  }
+
+  const featureStyleDir = join(root, 'projects/hell/src/lib/styles/features');
+  for (const file of readdirSync(featureStyleDir).filter((name) => name.endsWith('.css'))) {
+    const feature = basename(file, '.css');
+    const source = readFile(join(featureStyleDir, file));
+    if (!source.includes(`../components/${feature}.css`)) {
+      failures.push(`Feature style entry point ${file} must import ../components/${feature}.css`);
+    }
+  }
+}
+
+function checkComponentContract() {
+  const sourceRoot = join(root, 'projects/hell/src/lib');
+  const files = walk(sourceRoot).filter(
+    (file) =>
+      file.endsWith('.ts') &&
+      !file.endsWith('.spec.ts') &&
+      !file.endsWith('.d.ts') &&
+      !file.endsWith('pdf.worker.ts') &&
+      !file.includes('/core/'),
+  );
+
+  for (const file of files) {
+    const source = readFile(file);
+    if (!source.includes('extends HellStyleable')) continue;
+
+    const rel = file.slice(root.length + 1);
+    if (!source.includes('!unstyled()')) {
+      failures.push(
+        `${rel} extends HellStyleable but does not gate default styling with Style Opt-Out`,
+      );
+    }
+
+    for (const booleanInput of source.matchAll(
+      /readonly\s+([A-Za-z0-9_]+)\s*=\s*input\(\s*(true|false)\s*,\s*\{[^}]*booleanAttribute/g,
+    )) {
+      const name = booleanInput[1];
+      if (/preset/i.test(name)) {
+        failures.push(
+          `${rel} exposes boolean input "${name}" as a preset instead of a Customization Surface`,
+        );
+      }
+    }
+  }
+}
+
+function checkSecondaryEntryPointCompleteness(kind) {
+  const apiPath = join(root, `projects/hell/src/lib/public-api-${kind}.ts`);
+  const apiSource = readFile(apiPath);
+  const apiExports = new Set(exportPaths(apiSource));
+  const dir = join(root, `projects/hell/src/lib/${kind}`);
+  for (const slug of childDirectories(dir)) {
+    const expected = `./${kind}/${slug}/${slug}`;
+    if (!apiExports.has(expected)) {
+      failures.push(`Package Entry Point hell/${kind} is missing ${expected}`);
+    }
+  }
+}
+
+function checkFeatureEntryPointCompleteness() {
+  const featuresDir = join(root, 'projects/hell/src/lib/features');
+  for (const feature of childDirectories(featuresDir)) {
+    const apiPath = join(root, `projects/hell/src/lib/public-api-feature-${feature}.ts`);
+    if (!existsSync(apiPath)) {
+      failures.push(
+        `Feature Package Entry Point is missing projects/hell/src/lib/public-api-feature-${feature}.ts`,
+      );
+      continue;
+    }
+    const expected = `./features/${feature}/${feature}`;
+    if (!exportPaths(readFile(apiPath)).includes(expected)) {
+      failures.push(`Feature Package Entry Point ${feature} must export ${expected}`);
+    }
+  }
 }
 
 function pagePathForRoute(routePath) {
@@ -161,4 +277,23 @@ function parseJsonWithComments(source) {
 
 function readFile(path) {
   return readFileSync(path, 'utf8');
+}
+
+function childDirectories(path) {
+  return readdirSync(path)
+    .filter((name) => {
+      const fullPath = join(path, name);
+      return statSync(fullPath).isDirectory();
+    })
+    .sort();
+}
+
+function walk(path) {
+  const out = [];
+  for (const name of readdirSync(path)) {
+    const fullPath = join(path, name);
+    if (statSync(fullPath).isDirectory()) out.push(...walk(fullPath));
+    else out.push(fullPath);
+  }
+  return out;
 }

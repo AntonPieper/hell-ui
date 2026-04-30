@@ -571,6 +571,15 @@ export const HD_DOCS_ROUTES: Routes = [
   { path: '**', redirectTo: '' },
 ];
 
+export function hdDocsSectionForPath(path: string): string | null {
+  const normalized = path.replace(/^\//, '');
+  for (const section of HD_DOCS_CATALOG_SECTIONS) {
+    const item = section.items.find((candidate) => candidate.routePath === normalized);
+    if (item) return section.heading ?? 'Guides';
+  }
+  return null;
+}
+
 export function hdBuildDocsSearchIndex(
   sections: readonly DocsNavSection[] = HD_DOCS_SECTIONS,
 ): readonly DocsSearchItem[] {
@@ -587,26 +596,32 @@ export function hdBuildDocsSearchIndex(
       haystack: searchHaystack(item.label, item.path, sectionName),
     }));
   });
-  const exampleItems = HD_DOCS_EXAMPLES.map((item) => ({
-    id: `example:${item.detail}`,
-    kind: 'example' as const,
-    title: item.title,
-    path: item.path,
-    icon: HD_DOCS_KIND_ICON.example,
-    section: item.section,
-    detail: item.detail,
-    haystack: searchHaystack(item.title, item.path, item.section, item.detail, item.terms),
-  }));
-  const usageItems = HD_DOCS_CODE_USAGES.map((item) => ({
-    id: `usage:${item.title}`,
-    kind: 'usage' as const,
-    title: item.title,
-    path: item.path,
-    icon: HD_DOCS_KIND_ICON.usage,
-    section: item.section,
-    detail: item.detail,
-    haystack: searchHaystack(item.title, item.path, item.section, item.detail, item.terms),
-  }));
+  const exampleItems = HD_DOCS_EXAMPLES.map((item) => {
+    const section = hdDocsSectionForPath(item.path) ?? item.section;
+    return {
+      id: `example:${item.detail}`,
+      kind: 'example' as const,
+      title: item.title,
+      path: item.path,
+      icon: HD_DOCS_KIND_ICON.example,
+      section,
+      detail: item.detail,
+      haystack: searchHaystack(item.title, item.path, section, item.detail, item.terms),
+    };
+  });
+  const usageItems = HD_DOCS_CODE_USAGES.map((item) => {
+    const section = hdDocsSectionForPath(item.path) ?? item.section;
+    return {
+      id: `usage:${item.title}`,
+      kind: 'usage' as const,
+      title: item.title,
+      path: item.path,
+      icon: HD_DOCS_KIND_ICON.usage,
+      section,
+      detail: item.detail,
+      haystack: searchHaystack(item.title, item.path, section, item.detail, item.terms),
+    };
+  });
 
   return [...pageItems, ...exampleItems, ...usageItems];
 }
