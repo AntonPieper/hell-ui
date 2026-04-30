@@ -1,10 +1,9 @@
 import { ChangeDetectionStrategy, Component, Signal, computed, input, signal } from '@angular/core';
-import { angular } from '@codemirror/lang-angular';
-import { javascript } from '@codemirror/lang-javascript';
 import { type Extension } from '@codemirror/state';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCheck, faSolidCopy } from '@ng-icons/font-awesome/solid';
 import { HellButton, HellCodeEditor, HellIcon } from 'hell';
+import { hdCodeExtensions, hdCopyTextToClipboard } from './code-tools';
 
 const CODE_BLOCK_ICONS = { faSolidCopy, faSolidCheck };
 
@@ -38,27 +37,13 @@ const CODE_BLOCK_ICONS = { faSolidCopy, faSolidCheck };
 export class CodeBlock {
   readonly code = input.required<string>();
 
-  protected readonly codeExtensions: Signal<Extension> = computed(() => {
-    const code = this.code().trimStart();
-    return code.startsWith('<') ? angular() : [javascript({ typescript: true })];
-  });
+  protected readonly codeExtensions: Signal<Extension> = computed(() =>
+    hdCodeExtensions(this.code()),
+  );
   protected readonly copied = signal(false);
 
   protected async copyCode(): Promise<void> {
-    const text = this.code();
-    try {
-      if (!navigator.clipboard?.writeText) throw new Error('Clipboard API unavailable');
-      await navigator.clipboard.writeText(text);
-    } catch {
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
-      document.body.append(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      textarea.remove();
-    }
+    await hdCopyTextToClipboard(this.code());
     this.copied.set(true);
     window.setTimeout(() => this.copied.set(false), 1200);
   }

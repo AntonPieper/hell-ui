@@ -75,38 +75,15 @@ import {
   type HellSearchField,
   type HellSearchResult,
 } from 'hell';
-import { HD_DOCS_CODE_USAGES, HD_DOCS_EXAMPLES } from './docs-search';
-
-interface NavItem {
-  path: string;
-  label: string;
-  icon: string;
-  exact?: boolean;
-}
-interface NavSection {
-  heading?: string;
-  items: NavItem[];
-}
-
-type DocsSearchKind = 'page' | 'example' | 'usage';
-type DocsSearchKindFilter = DocsSearchKind | 'all';
-
-interface DocsSearchItem {
-  readonly id: string;
-  readonly kind: DocsSearchKind;
-  readonly title: string;
-  readonly path: string;
-  readonly icon: string;
-  readonly section: string;
-  readonly detail: string;
-  readonly haystack: string;
-}
-
-interface DocsSearchGroup {
-  readonly kind: DocsSearchKind;
-  readonly label: string;
-  readonly items: readonly DocsSearchItem[];
-}
+import {
+  HD_DOCS_KIND_FILTER_LABEL,
+  HD_DOCS_KIND_LABEL,
+  HD_DOCS_SECTIONS,
+  hdBuildDocsSearchIndex,
+  type DocsSearchGroup,
+  type DocsSearchItem,
+  type DocsSearchKindFilter,
+} from './docs-catalog';
 
 const HD_APP_ICONS = {
   faSolidArrowRight,
@@ -156,23 +133,6 @@ const HD_APP_ICONS = {
   faSolidWindowRestore,
 };
 
-const HD_DOCS_KIND_LABEL: Record<DocsSearchKind, string> = {
-  page: 'Pages',
-  example: 'Examples',
-  usage: 'Code usage',
-};
-
-const HD_DOCS_KIND_FILTER_LABEL: Record<DocsSearchKindFilter, string> = {
-  all: 'All types',
-  ...HD_DOCS_KIND_LABEL,
-};
-
-const HD_DOCS_KIND_ICON: Record<DocsSearchKind, string> = {
-  page: 'faSolidBookOpen',
-  example: 'faSolidFileLines',
-  usage: 'faSolidCode',
-};
-
 type ThemePreference = 'system' | 'light' | 'dark';
 type Palette = 'slate' | 'indigo' | 'emerald' | 'rose' | 'amber' | 'violet';
 type Skin =
@@ -208,38 +168,144 @@ const HD_THEME_ORDER: readonly ThemePreference[] = ['system', 'light', 'dark'];
  *  palette that flatters the aesthetic — the goal is showing how far the
  *  token system bends without rewriting components. */
 const HD_THEMES: readonly ThemeOption[] = [
-  { id: 'slate', label: 'Slate', palette: 'slate', skin: 'default',
-    swatchLight: '#313a46', swatchDark: '#b8c4dc' },
-  { id: 'indigo', label: 'Indigo', palette: 'indigo', skin: 'default',
-    swatchLight: '#4f46e5', swatchDark: '#a5b4fc' },
-  { id: 'emerald', label: 'Emerald', palette: 'emerald', skin: 'default',
-    swatchLight: '#047857', swatchDark: '#6ee7b7' },
-  { id: 'rose', label: 'Rose', palette: 'rose', skin: 'default',
-    swatchLight: '#be185d', swatchDark: '#fda4af' },
-  { id: 'amber', label: 'Amber', palette: 'amber', skin: 'default',
-    swatchLight: '#b45309', swatchDark: '#fcd34d' },
-  { id: 'violet', label: 'Violet', palette: 'violet', skin: 'default',
-    swatchLight: '#7c3aed', swatchDark: '#c4b5fd' },
-  { id: 'brutalist', label: 'Brutalist', tag: 'skin', palette: 'slate', skin: 'brutalist',
-    swatchLight: '#0f141c', swatchDark: '#e8ecf3' },
-  { id: 'soft', label: 'Soft', tag: 'skin', palette: 'indigo', skin: 'soft',
-    swatchLight: '#4f46e5', swatchDark: '#a5b4fc' },
-  { id: 'compact', label: 'Compact', tag: 'skin', palette: 'slate', skin: 'compact',
-    swatchLight: '#313a46', swatchDark: '#b8c4dc' },
-  { id: 'mono', label: 'Mono', tag: 'skin', palette: 'emerald', skin: 'mono',
-    swatchLight: '#047857', swatchDark: '#6ee7b7' },
-  { id: 'editorial', label: 'Editorial', tag: 'skin', palette: 'violet', skin: 'editorial',
-    swatchLight: '#7c3aed', swatchDark: '#c4b5fd' },
-  { id: 'glass', label: 'Glass', tag: 'skin', palette: 'indigo', skin: 'glass',
-    swatchLight: '#4f46e5', swatchDark: '#a5b4fc' },
-  { id: 'high-contrast', label: 'High contrast', tag: 'a11y', palette: 'slate', skin: 'high-contrast',
-    swatchLight: '#0f141c', swatchDark: '#e8ecf3' },
-  { id: 'playful', label: 'Playful', tag: 'skin', palette: 'rose', skin: 'playful',
-    swatchLight: '#be185d', swatchDark: '#fda4af' },
-  { id: 'newspaper', label: 'Newspaper', tag: 'skin', palette: 'slate', skin: 'newspaper',
-    swatchLight: '#0f141c', swatchDark: '#e8ecf3' },
-  { id: 'aurora', label: 'Aurora', tag: 'skin', palette: 'violet', skin: 'aurora',
-    swatchLight: '#7c3aed', swatchDark: '#c4b5fd' },
+  {
+    id: 'slate',
+    label: 'Slate',
+    palette: 'slate',
+    skin: 'default',
+    swatchLight: '#313a46',
+    swatchDark: '#b8c4dc',
+  },
+  {
+    id: 'indigo',
+    label: 'Indigo',
+    palette: 'indigo',
+    skin: 'default',
+    swatchLight: '#4f46e5',
+    swatchDark: '#a5b4fc',
+  },
+  {
+    id: 'emerald',
+    label: 'Emerald',
+    palette: 'emerald',
+    skin: 'default',
+    swatchLight: '#047857',
+    swatchDark: '#6ee7b7',
+  },
+  {
+    id: 'rose',
+    label: 'Rose',
+    palette: 'rose',
+    skin: 'default',
+    swatchLight: '#be185d',
+    swatchDark: '#fda4af',
+  },
+  {
+    id: 'amber',
+    label: 'Amber',
+    palette: 'amber',
+    skin: 'default',
+    swatchLight: '#b45309',
+    swatchDark: '#fcd34d',
+  },
+  {
+    id: 'violet',
+    label: 'Violet',
+    palette: 'violet',
+    skin: 'default',
+    swatchLight: '#7c3aed',
+    swatchDark: '#c4b5fd',
+  },
+  {
+    id: 'brutalist',
+    label: 'Brutalist',
+    tag: 'skin',
+    palette: 'slate',
+    skin: 'brutalist',
+    swatchLight: '#0f141c',
+    swatchDark: '#e8ecf3',
+  },
+  {
+    id: 'soft',
+    label: 'Soft',
+    tag: 'skin',
+    palette: 'indigo',
+    skin: 'soft',
+    swatchLight: '#4f46e5',
+    swatchDark: '#a5b4fc',
+  },
+  {
+    id: 'compact',
+    label: 'Compact',
+    tag: 'skin',
+    palette: 'slate',
+    skin: 'compact',
+    swatchLight: '#313a46',
+    swatchDark: '#b8c4dc',
+  },
+  {
+    id: 'mono',
+    label: 'Mono',
+    tag: 'skin',
+    palette: 'emerald',
+    skin: 'mono',
+    swatchLight: '#047857',
+    swatchDark: '#6ee7b7',
+  },
+  {
+    id: 'editorial',
+    label: 'Editorial',
+    tag: 'skin',
+    palette: 'violet',
+    skin: 'editorial',
+    swatchLight: '#7c3aed',
+    swatchDark: '#c4b5fd',
+  },
+  {
+    id: 'glass',
+    label: 'Glass',
+    tag: 'skin',
+    palette: 'indigo',
+    skin: 'glass',
+    swatchLight: '#4f46e5',
+    swatchDark: '#a5b4fc',
+  },
+  {
+    id: 'high-contrast',
+    label: 'High contrast',
+    tag: 'a11y',
+    palette: 'slate',
+    skin: 'high-contrast',
+    swatchLight: '#0f141c',
+    swatchDark: '#e8ecf3',
+  },
+  {
+    id: 'playful',
+    label: 'Playful',
+    tag: 'skin',
+    palette: 'rose',
+    skin: 'playful',
+    swatchLight: '#be185d',
+    swatchDark: '#fda4af',
+  },
+  {
+    id: 'newspaper',
+    label: 'Newspaper',
+    tag: 'skin',
+    palette: 'slate',
+    skin: 'newspaper',
+    swatchLight: '#0f141c',
+    swatchDark: '#e8ecf3',
+  },
+  {
+    id: 'aurora',
+    label: 'Aurora',
+    tag: 'skin',
+    palette: 'violet',
+    skin: 'aurora',
+    swatchLight: '#7c3aed',
+    swatchDark: '#c4b5fd',
+  },
 ];
 
 @Component({
@@ -301,74 +367,7 @@ export class App {
     return preference === 'system' ? `Theme: system (${resolved})` : `Theme: ${preference}`;
   });
 
-  protected readonly sections: NavSection[] = [
-    {
-      items: [
-        { path: '/', label: 'Overview', icon: 'faSolidHouse', exact: true },
-        { path: '/getting-started', label: 'Getting started', icon: 'faSolidRocket' },
-        { path: '/theming', label: 'Theming', icon: 'faSolidPalette' },
-      ],
-    },
-    {
-      heading: 'Primitives',
-      items: [
-        { path: '/components/accordion', label: 'Accordion', icon: 'faSolidLayerGroup' },
-        { path: '/components/avatar', label: 'Avatar', icon: 'faSolidUser' },
-        { path: '/components/breadcrumbs', label: 'Breadcrumbs', icon: 'faSolidSignsPost' },
-        { path: '/components/button', label: 'Button', icon: 'faSolidWindowMaximize' },
-        { path: '/components/card', label: 'Card', icon: 'faSolidIdCard' },
-        { path: '/components/checkbox', label: 'Checkbox', icon: 'faSolidCheck' },
-        { path: '/components/combobox', label: 'Combobox', icon: 'faSolidPenRuler' },
-        { path: '/components/date-picker', label: 'Date picker', icon: 'faSolidCalendar' },
-        { path: '/components/dialog', label: 'Dialog', icon: 'faSolidWindowRestore' },
-        { path: '/components/field', label: 'Field', icon: 'faSolidPenToSquare' },
-        { path: '/components/flyout', label: 'Flyout', icon: 'faSolidComment' },
-        { path: '/components/icon', label: 'Icon', icon: 'faSolidStar' },
-        { path: '/components/input', label: 'Input & select', icon: 'faSolidPenRuler' },
-        { path: '/components/listbox', label: 'Listbox', icon: 'faSolidBars' },
-        { path: '/components/menu', label: 'Menu', icon: 'faSolidEllipsisVertical' },
-        { path: '/components/pagination', label: 'Pagination', icon: 'faSolidTableColumns' },
-        { path: '/components/popover', label: 'Popover', icon: 'faSolidComment' },
-        { path: '/components/progress', label: 'Progress', icon: 'faSolidSliders' },
-        { path: '/components/radio', label: 'Radio', icon: 'faSolidCircleHalfStroke' },
-        { path: '/components/search', label: 'Search', icon: 'faSolidMagnifyingGlass' },
-        { path: '/components/select', label: 'Select', icon: 'faSolidPenRuler' },
-        { path: '/components/separator', label: 'Separator', icon: 'faSolidGripLines' },
-        { path: '/components/skeleton', label: 'Skeleton', icon: 'faSolidImage' },
-        { path: '/components/spinner', label: 'Spinner', icon: 'faSolidSpinner' },
-        { path: '/components/slider', label: 'Slider', icon: 'faSolidSliders' },
-        { path: '/components/switch', label: 'Switch', icon: 'faSolidToggleOn' },
-        { path: '/components/tabs', label: 'Tabs', icon: 'faSolidFolderOpen' },
-        { path: '/components/tag', label: 'Tag', icon: 'faSolidTag' },
-        { path: '/components/toggle', label: 'Toggle', icon: 'faSolidToggleOn' },
-        { path: '/components/tooltip', label: 'Tooltip', icon: 'faSolidQuestion' },
-      ],
-    },
-    {
-      heading: 'Composites',
-      items: [
-        { path: '/components/app-shell', label: 'App shell', icon: 'faSolidTableColumns' },
-        { path: '/components/audio-player', label: 'Audio player', icon: 'faSolidPlay' },
-        { path: '/components/avatar-group', label: 'Avatar group', icon: 'faSolidUsers' },
-        { path: '/components/date-input', label: 'Date input', icon: 'faSolidCalendar' },
-        { path: '/components/dialpad', label: 'Dialpad', icon: 'faSolidPhone' },
-        { path: '/components/drop-zone', label: 'Drop zone', icon: 'faSolidUpload' },
-        { path: '/components/omnibar', label: 'Omnibar', icon: 'faSolidMagnifyingGlass' },
-        { path: '/components/resizable', label: 'Resizable', icon: 'faSolidGripVertical' },
-        { path: '/components/split-view', label: 'Split view', icon: 'faSolidTableColumns' },
-        { path: '/components/time-input', label: 'Time input', icon: 'faSolidClock' },
-        { path: '/components/toast', label: 'Toast', icon: 'faSolidBell' },
-      ],
-    },
-    {
-      heading: 'Features',
-      items: [
-        { path: '/components/code-editor', label: 'Code editor', icon: 'faSolidCode' },
-        { path: '/components/data-table', label: 'Data table', icon: 'faSolidTable' },
-        { path: '/components/pdf-viewer', label: 'PDF viewer', icon: 'faSolidFilePdf' },
-      ],
-    },
-  ];
+  protected readonly sections = HD_DOCS_SECTIONS;
 
   protected readonly docsSearchQuery = signal('');
   protected readonly docsSearchResults = signal<readonly HellSearchResult<DocsSearchItem>[]>([]);
@@ -422,7 +421,9 @@ export class App {
   protected readonly docsSearchEmptyMessage = computed(() =>
     this.docsSearchQuery().trim() ? 'No docs match that query' : 'No docs in this filter',
   );
-  protected readonly docsKindLabel = computed(() => HD_DOCS_KIND_FILTER_LABEL[this.docsKindFilter()]);
+  protected readonly docsKindLabel = computed(
+    () => HD_DOCS_KIND_FILTER_LABEL[this.docsKindFilter()],
+  );
   protected readonly docsSectionLabel = computed(() =>
     this.docsSectionFilter() === 'all' ? 'All sections' : this.docsSectionFilter(),
   );
@@ -432,42 +433,9 @@ export class App {
       this.docsSectionFilter() !== 'all' ||
       this.docsSearchLimit() !== 20,
   );
-  protected readonly docsSearchIndex = computed<readonly DocsSearchItem[]>(() => {
-    const pageItems = this.sections.flatMap((section) => {
-      const sectionName = section.heading ?? 'Guides';
-      return section.items.map((item) => ({
-        id: `page:${item.path}`,
-        kind: 'page' as const,
-        title: item.label,
-        path: item.path,
-        icon: item.icon,
-        section: sectionName,
-        detail: `${sectionName} page`,
-        haystack: searchHaystack(item.label, item.path, sectionName),
-      }));
-    });
-    const exampleItems = HD_DOCS_EXAMPLES.map((item) => ({
-      id: `example:${item.detail}`,
-      kind: 'example' as const,
-      title: item.title,
-      path: item.path,
-      icon: HD_DOCS_KIND_ICON.example,
-      section: item.section,
-      detail: item.detail,
-      haystack: searchHaystack(item.title, item.path, item.section, item.detail, item.terms),
-    }));
-    const usageItems = HD_DOCS_CODE_USAGES.map((item) => ({
-      id: `usage:${item.title}`,
-      kind: 'usage' as const,
-      title: item.title,
-      path: item.path,
-      icon: HD_DOCS_KIND_ICON.usage,
-      section: item.section,
-      detail: item.detail,
-      haystack: searchHaystack(item.title, item.path, item.section, item.detail, item.terms),
-    }));
-    return [...pageItems, ...exampleItems, ...usageItems];
-  });
+  protected readonly docsSearchIndex = computed<readonly DocsSearchItem[]>(() =>
+    hdBuildDocsSearchIndex(this.sections),
+  );
 
   /**
    * Per-section collapse state for the sidenav. Defaults to expanded; users
@@ -591,16 +559,4 @@ export class App {
       document.documentElement.dataset['hellSkin'] = option.skin;
     }
   }
-}
-
-function searchHaystack(...parts: readonly string[]): string {
-  return parts.map(searchKey).join(' ');
-}
-
-function searchKey(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/&/g, ' and ')
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
 }
