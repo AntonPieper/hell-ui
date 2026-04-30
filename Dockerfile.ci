@@ -1,0 +1,24 @@
+# syntax=docker/dockerfile:1
+
+ARG NODE_VERSION=22
+
+FROM node:${NODE_VERSION}-bookworm-slim AS deps
+WORKDIR /workspace
+ENV CI=true
+RUN corepack enable
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml angular.json tsconfig.json ./
+COPY projects/hell/package.json projects/hell/package.json
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store pnpm ci:install
+
+FROM deps AS source
+COPY . .
+
+FROM source AS test
+RUN --mount=type=cache,id=angular-cache,target=/workspace/.angular/cache pnpm ci:test
+
+FROM source AS build
+RUN --mount=type=cache,id=angular-cache,target=/workspace/.angular/cache pnpm ci:build
+
+FROM source AS verify
+RUN --mount=type=cache,id=angular-cache,target=/workspace/.angular/cache pnpm ci:verify

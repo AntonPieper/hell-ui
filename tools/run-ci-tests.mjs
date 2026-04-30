@@ -20,6 +20,11 @@ const tasks = [
     command: 'pnpm',
     args: ['test:architecture'],
   },
+  {
+    name: 'CI contract',
+    command: 'pnpm',
+    args: ['test:ci-contract'],
+  },
 ];
 
 let failed = false;
