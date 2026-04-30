@@ -10,6 +10,7 @@ import {
   HellPdfJsRuntimeAdapter,
   type HellPdfRuntimeAdapter,
   type HellPdfRuntimeBundle,
+  type HellPdfPrintSession,
 } from './pdf-viewer.adapter';
 
 export type HellPdfSource = string | URL | ArrayBuffer;
@@ -163,6 +164,21 @@ export class HellPdfRuntime {
 
   closeFind(source: unknown): void {
     this.eventBus?.dispatch('findbarclose', { source });
+  }
+
+  download(
+    source: HellPdfSource,
+    fileName?: string | null,
+    ownerDocument?: Document,
+  ): Promise<void> {
+    return this.adapter.download(source, fileName, ownerDocument);
+  }
+
+  createPrintSession(
+    source: HellPdfSource,
+    ownerDocument?: Document,
+  ): Promise<HellPdfPrintSession> {
+    return this.adapter.createPrintSession(source, ownerDocument);
   }
 
   async renderThumbs(

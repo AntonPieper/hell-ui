@@ -33,7 +33,6 @@ import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
 import { HellInput, HellNativeSelect } from '../../primitives/input/input';
 import { HellStyleable } from '../../core/styleable';
-import { createHiddenPdfPrintHandle, printPdfInHiddenIframe } from './pdf-viewer.print';
 import { HellPdfRuntime } from './pdf-viewer.runtime';
 import {
   PDF_ZOOM_OPTIONS,
@@ -200,40 +199,21 @@ export class HellPdfViewer extends HellStyleable {
   }
 
   protected async download() {
-    const src = this.src();
-    let url: string;
-    let suggestedName: string;
-    let revoke = false;
-    if (typeof src === 'string') {
-      url = src;
-      suggestedName = this.fileName() ?? src.split('/').pop()?.split('?')[0] ?? 'document.pdf';
-    } else if (src instanceof URL) {
-      url = src.toString();
-      suggestedName = this.fileName() ?? src.pathname.split('/').pop() ?? 'document.pdf';
-    } else {
-      const blob = new Blob([src as ArrayBuffer], { type: 'application/pdf' });
-      url = URL.createObjectURL(blob);
-      suggestedName = this.fileName() ?? 'document.pdf';
-      revoke = true;
+    try {
+      await this.runtime.download(this.src(), this.fileName());
+    } catch (e) {
+      this.error.emit(e);
     }
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = suggestedName;
-    a.rel = 'noreferrer';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    if (revoke) setTimeout(() => URL.revokeObjectURL(url), 60_000);
   }
 
   protected async print() {
     this.printCleanup?.();
 
     try {
-      const handle = await createHiddenPdfPrintHandle(this.src());
-      this.printCleanup = handle.cleanup;
-      await printPdfInHiddenIframe(handle);
-      window.setTimeout(handle.cleanup, 30_000);
+      const session = await this.runtime.createPrintSession(this.src());
+      this.printCleanup = () => session.cleanup();
+      await session.print();
+      window.setTimeout(() => session.cleanup(), 30_000);
     } catch (e) {
       this.printCleanup?.();
       this.printCleanup = null;

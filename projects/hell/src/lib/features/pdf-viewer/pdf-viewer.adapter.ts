@@ -1,4 +1,9 @@
 import type { HellPdfSource } from './pdf-viewer.runtime';
+import {
+  createHiddenPdfPrintHandle,
+  printPdfInHiddenIframe,
+  type HiddenPdfPrintHandle,
+} from './pdf-viewer.print';
 
 export interface HellPdfRuntimeBundle {
   readonly pdfjs: any;
@@ -12,6 +17,17 @@ export interface HellPdfRuntimeBundle {
 export interface HellPdfRuntimeAdapter {
   createViewer(container: HTMLDivElement): Promise<HellPdfRuntimeBundle>;
   getDocument(bundle: HellPdfRuntimeBundle, source: HellPdfSource): any;
+  download(
+    source: HellPdfSource,
+    fileName?: string | null,
+    ownerDocument?: Document,
+  ): Promise<void>;
+  createPrintSession(source: HellPdfSource, ownerDocument?: Document): Promise<HellPdfPrintSession>;
+}
+
+export interface HellPdfPrintSession {
+  cleanup(): void;
+  print(): Promise<void>;
 }
 
 export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
@@ -61,4 +77,65 @@ export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
         : { data: source, worker: pdfWorker },
     );
   }
+
+  async download(
+    source: HellPdfSource,
+    fileName?: string | null,
+    ownerDocument: Document = document,
+  ): Promise<void> {
+    const handle = createDownloadHandle(source, fileName);
+    const anchor = ownerDocument.createElement('a');
+    anchor.href = handle.url;
+    anchor.download = handle.suggestedName;
+    anchor.rel = 'noreferrer';
+    ownerDocument.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    if (handle.cleanup) setTimeout(handle.cleanup, 60_000);
+  }
+
+  async createPrintSession(
+    source: HellPdfSource,
+    ownerDocument: Document = document,
+  ): Promise<HellPdfPrintSession> {
+    const handle = await createHiddenPdfPrintHandle(source, ownerDocument);
+    return new HellPdfIframePrintSession(handle);
+  }
+}
+
+class HellPdfIframePrintSession implements HellPdfPrintSession {
+  constructor(private readonly handle: HiddenPdfPrintHandle) {}
+
+  cleanup(): void {
+    this.handle.cleanup();
+  }
+
+  print(): Promise<void> {
+    return printPdfInHiddenIframe(this.handle);
+  }
+}
+
+function createDownloadHandle(source: HellPdfSource, fileName?: string | null) {
+  if (typeof source === 'string') {
+    return {
+      url: source,
+      suggestedName: fileName ?? source.split('/').pop()?.split('?')[0] ?? 'document.pdf',
+      cleanup: null,
+    };
+  }
+
+  if (source instanceof URL) {
+    return {
+      url: source.toString(),
+      suggestedName: fileName ?? source.pathname.split('/').pop() ?? 'document.pdf',
+      cleanup: null,
+    };
+  }
+
+  const url = URL.createObjectURL(new Blob([source], { type: 'application/pdf' }));
+  return {
+    url,
+    suggestedName: fileName ?? 'document.pdf',
+    cleanup: () => URL.revokeObjectURL(url),
+  };
 }
