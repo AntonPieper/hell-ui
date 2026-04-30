@@ -94,6 +94,7 @@ export class HellDialogOverlay extends HellStyleable {
   selector: '[hellDialogScope]',
   exportAs: 'hellDialogScope',
   host: {
+    '[attr.data-hell-dialog-scope-root]': '"true"',
     '[attr.data-dialog-root]': '"true"',
   },
 })

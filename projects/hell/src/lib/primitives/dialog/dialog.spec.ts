@@ -5,6 +5,7 @@ import { By } from '@angular/platform-browser';
 import { HELL_APP_SHELL_DIRECTIVES } from '../../composites/app-shell/app-shell';
 import { HELL_CARD_DIRECTIVES } from '../card/card';
 import { HELL_DIALOG_DIRECTIVES, HellDialogTrigger } from './dialog';
+import { HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE } from './dialog-scope';
 
 @Component({
   imports: [...HELL_APP_SHELL_DIRECTIVES, ...HELL_CARD_DIRECTIVES, ...HELL_DIALOG_DIRECTIVES],
@@ -42,23 +43,27 @@ describe('HellDialogTrigger scoped overlays', () => {
 
     const rootStyles = document.documentElement.style;
     const main = fixture.nativeElement.querySelector('main') as HTMLElement;
-    const trigger = fixture.debugElement.query(By.directive(HellDialogTrigger)).injector.get(
-      HellDialogTrigger,
-    ) as unknown as { primeScope(): void; clearScope(): void };
+    const trigger = fixture.debugElement
+      .query(By.directive(HellDialogTrigger))
+      .injector.get(HellDialogTrigger) as unknown as { primeScope(): void; clearScope(): void };
+
+    expect(main.getAttribute(HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE)).toBe('true');
+    expect(main.getAttribute('data-dialog-root')).toBe('true');
 
     Object.defineProperty(main, 'getBoundingClientRect', {
       configurable: true,
-      value: () => ({
-        left: 24,
-        top: 48,
-        width: 640,
-        height: 320,
-        right: 664,
-        bottom: 368,
-        x: 24,
-        y: 48,
-        toJSON: () => undefined,
-      }) as DOMRect,
+      value: () =>
+        ({
+          left: 24,
+          top: 48,
+          width: 640,
+          height: 320,
+          right: 664,
+          bottom: 368,
+          x: 24,
+          y: 48,
+          toJSON: () => undefined,
+        }) as DOMRect,
     });
 
     trigger.primeScope();

@@ -183,6 +183,7 @@ export class HellAppSidenav extends HellStyleable {
     '[class.hell-content]': '!unstyled()',
     '[style.--hell-app-content-max-width]': 'maxWidthValue()',
     /** Dialogs scoped here render only over the content area. */
+    '[attr.data-hell-dialog-scope-root]': '"true"',
     '[attr.data-dialog-root]': '"true"',
   },
 })
