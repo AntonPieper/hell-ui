@@ -30,3 +30,15 @@ A live Angular example plus its raw source code, preview options, and search met
 
 **Package Entry Point**
 A public import path exposed by the `hell` package, including the root entry point and secondary entry points such as primitives, composites, core, and feature-specific imports.
+
+**Light Root Entry Point**
+The Package Entry Point policy where the root `hell` import stays convenient for core, primitives, and composites, while heavier features stay behind feature-specific Package Entry Points.
+
+**Floating Dismissal**
+The listener-driven part of a Floating Interaction that decides when outside pointer, outside focus, or Escape should close a surface, while preserving consumer control over those rules.
+
+**Resize Transaction**
+The layout-agnostic pointer or keyboard resize operation that tracks start sizes, deltas, minimums, commits, and cancellation separately from the Adapter that reads or writes DOM layout.
+
+**PDF Adapter**
+A swappable Adapter behind the PDF Runtime seam for browser, pdf.js, worker, print, and download concerns that may change during pdf.js upgrades.
