@@ -8,6 +8,7 @@ import { HellButton, HELL_CARD_DIRECTIVES } from 'hell';
   imports: [RouterLink, HellButton, ...HELL_CARD_DIRECTIVES],
   template: `
     <article class="hd-prose">
+      <span class="hd-overview-logo" aria-hidden="true"></span>
       <h1>hell — Heinrich Element Library</h1>
       <p>
         A compact Angular component library for dense business software. hell pairs ng-primitives

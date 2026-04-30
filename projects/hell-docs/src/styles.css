@@ -167,6 +167,46 @@
     border-top-right-radius: 0;
   }
 
+  .hd-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-hell-2);
+    flex-shrink: 0;
+    color: var(--color-hell-foreground);
+    text-decoration: none;
+  }
+
+  .hd-brand:focus-visible {
+    outline: 2px solid var(--color-hell-ring);
+    outline-offset: 2px;
+  }
+
+  .hd-brand-mark {
+    display: inline-block;
+    width: 22px;
+    aspect-ratio: 202 / 240;
+    flex-shrink: 0;
+    background-color: currentColor;
+    mask: url('/assets/hell-ui-logo.svg') center / contain no-repeat;
+    -webkit-mask: url('/assets/hell-ui-logo.svg') center / contain no-repeat;
+  }
+
+  .hd-brand-name {
+    font-size: var(--text-base);
+    line-height: 1;
+    font-weight: 700;
+  }
+
+  .hd-overview-logo {
+    display: block;
+    width: 64px;
+    aspect-ratio: 202 / 240;
+    margin-block-start: var(--spacing-hell-2);
+    background-color: var(--color-hell-foreground);
+    mask: url('/assets/hell-ui-logo.svg') center / contain no-repeat;
+    -webkit-mask: url('/assets/hell-ui-logo.svg') center / contain no-repeat;
+  }
+
   @media (max-width: 640px) {
     .hd-brand-tag,
     .hd-topbar-link {

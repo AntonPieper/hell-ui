@@ -76,6 +76,11 @@
                 "input": "projects/hell-docs/public"
               },
               {
+                "glob": "**/*",
+                "input": "projects/hell/assets",
+                "output": "assets"
+              },
+              {
                 "glob": "pdf_viewer.css",
                 "input": "node_modules/pdfjs-dist/web",
                 "output": "pdfjs"

@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="projects/hell/assets/hell-ui-logo.svg" alt="Hell UI logo" width="96" />
+</p>
+
 # Hell UI
 
 Hell UI is a compact Angular component system for dense business applications.

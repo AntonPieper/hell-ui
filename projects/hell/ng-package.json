@@ -6,6 +6,11 @@
       "glob": "**/*.css",
       "input": "src/lib/styles",
       "output": "styles"
+    },
+    {
+      "glob": "**/*",
+      "input": "assets",
+      "output": "assets"
     }
   ],
   "lib": {

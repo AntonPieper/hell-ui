@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/hell-ui-logo.svg" alt="Hell logo" width="96" />
+</p>
+
 # Hell
 
 Compact Angular component system for dense business applications.
