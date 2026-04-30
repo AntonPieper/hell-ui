@@ -29,6 +29,7 @@ export function isPdfZoomPreset(value: string): value is PdfZoomPreset {
   return PDF_ZOOM_VALUES.includes(value as PdfZoomPreset);
 }
 
+/** Normalize a user-facing zoom preset or numeric scale into stable select state. */
 export function normalizeZoomValue(value: number | string) {
   if (typeof value === 'number') {
     return String(Number(value.toFixed(2)));
@@ -43,6 +44,7 @@ export function normalizeZoomValue(value: number | string) {
   return value;
 }
 
+/** Prefer pdf.js preset event values, falling back to the numeric scale. */
 export function normalizeZoomEventValue(presetValue: unknown, scale: number) {
   if (typeof presetValue === 'string' && presetValue.length > 0) {
     return normalizeZoomValue(presetValue);
@@ -80,11 +82,16 @@ function getWheelDeltaPixels(event: WheelEvent) {
   }
 }
 
+/** Convert ctrl/cmd wheel deltas into a smooth exponential zoom multiplier. */
 export function getCtrlWheelScaleFactor(event: WheelEvent) {
   const pixelDeltaY = getWheelDeltaPixels(event);
   return Math.exp(-pixelDeltaY * 0.007);
 }
 
+/**
+ * Return the PDF-space zoom origin for a pointer point, clamped inside the
+ * scroll container and offset by the container's positioned origin.
+ */
 export function getZoomOrigin(
   container: HTMLElement,
   point: { clientX: number; clientY: number },

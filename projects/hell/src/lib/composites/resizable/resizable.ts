@@ -380,6 +380,7 @@ export class HellResizableHandle extends HellStyleable {
   }
 }
 
+/** Standalone imports for the complete resizable API: group, pane, and handle. */
 export const HELL_RESIZABLE_DIRECTIVES = [
   HellResizable,
   HellResizablePane,

@@ -5,6 +5,7 @@ import {
   type HiddenPdfPrintHandle,
 } from './pdf-viewer.print';
 
+/** Browser/pdf.js objects owned together by one runtime bootstrap. */
 export interface HellPdfRuntimeBundle {
   readonly pdfjs: any;
   readonly viewer: any;
@@ -14,6 +15,10 @@ export interface HellPdfRuntimeBundle {
   destroy(): void;
 }
 
+/**
+ * Adapter seam around pdf.js, downloads, and printing. Tests and future pdf.js
+ * upgrades can replace browser-heavy work without changing `HellPdfRuntime`.
+ */
 export interface HellPdfRuntimeAdapter {
   createViewer(container: HTMLDivElement): Promise<HellPdfRuntimeBundle>;
   getDocument(bundle: HellPdfRuntimeBundle, source: HellPdfSource): any;
@@ -25,6 +30,7 @@ export interface HellPdfRuntimeAdapter {
   createPrintSession(source: HellPdfSource, ownerDocument?: Document): Promise<HellPdfPrintSession>;
 }
 
+/** Hidden print lifecycle handle; callers must cleanup after print or failure. */
 export interface HellPdfPrintSession {
   cleanup(): void;
   print(): Promise<void>;

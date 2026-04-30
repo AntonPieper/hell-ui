@@ -38,6 +38,11 @@ import { HellSkeleton } from '../../primitives/skeleton/skeleton';
 import { HellCommandPaletteService } from './command-palette';
 import { HellStyleable } from '../../core/styleable';
 
+/**
+ * Advanced contract implemented by omnibar item directives. Custom items can
+ * implement it to join keyboard navigation, active-descendant wiring, scrolling,
+ * and submit selection.
+ */
 export interface HellOmnibarRegisteredItem {
   /** Stable DOM id used for `aria-activedescendant`. */
   readonly itemId: string;
@@ -750,14 +755,23 @@ export class HellOmnibarAction extends HellStyleable {
 
 /* ──────────────────────────── Types ──────────────────────────── */
 
+/** How an omnibar item was activated, useful for analytics or branching UX. */
 export type HellOmnibarActivationSource = 'mouse' | 'keyboard' | 'api';
 
+/**
+ * Payload emitted after an item selects. `value` is the current query text,
+ * `item` is the selected payload, and `source` identifies the activation path.
+ */
 export interface HellOmnibarSubmitEvent<T = unknown> {
   readonly value: string;
   readonly item: T;
   readonly source: HellOmnibarActivationSource;
 }
 
+/**
+ * Standalone imports for the complete omnibar composition: root, panel/group
+ * parts, item slots, chips, actions strip, and action button directives.
+ */
 export const HELL_OMNIBAR_DIRECTIVES = [
   HellOmnibar,
   HellOmnibarPanel,

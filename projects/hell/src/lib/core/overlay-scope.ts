@@ -9,8 +9,16 @@ export interface HellOverlayScope {
   containsOverlayTarget(target: EventTarget | Node | null): boolean;
 }
 
+/**
+ * DI token for a logical floating-overlay scope. Provide it on composites that
+ * own portaled children so nested overlays count as inside for outside dismiss.
+ */
 export const HELL_OVERLAY_SCOPE = new InjectionToken<HellOverlayScope>('HELL_OVERLAY_SCOPE');
 
+/**
+ * Default Floating Scope registry. Treats an optional root element plus all
+ * registered overlay elements as one logical interaction region.
+ */
 export class HellOverlayScopeRegistry implements HellOverlayScope {
   private readonly elements = new Set<HTMLElement>();
 
@@ -44,6 +52,10 @@ export function hellOverlayTargetNode(target: EventTarget | Node | null): Node |
   return target;
 }
 
+/**
+ * Register an overlay element until `destroyRef` fires. Safe no-op when no
+ * scope is available, so primitives can call it unconditionally.
+ */
 export function hellRegisterOverlayElement(
   scope: HellOverlayScope | null | undefined,
   element: HTMLElement,
@@ -54,6 +66,10 @@ export function hellRegisterOverlayElement(
   destroyRef.onDestroy(() => scope.unregisterOverlayElement(element));
 }
 
+/**
+ * Dismissal cause emitted by floating controllers. Pointer and click stay
+ * separate so callers can choose early pointerdown or late captured-click close.
+ */
 export type HellFloatingDismissReason =
   | 'outside-pointer'
   | 'outside-click'

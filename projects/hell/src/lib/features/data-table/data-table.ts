@@ -363,6 +363,10 @@ export class HellTableColumnResizer extends HellStyleable {
   }
 }
 
+/**
+ * Standalone imports for the data-table feature: container, table sections,
+ * row/cell directives, sortable header cell, and column resizer.
+ */
 export const HELL_TABLE_DIRECTIVES = [
   HellTableContainer,
   HellTable,
