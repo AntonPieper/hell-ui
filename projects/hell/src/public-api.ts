@@ -7,6 +7,7 @@ export * from './lib/core/types';
 export * from './lib/core/styleable';
 export * from './lib/core/overlay-scope';
 export * from './lib/core/search';
+export * from './lib/core/resize-behavior';
 
 // Primitives
 export * from './lib/primitives/button/button';

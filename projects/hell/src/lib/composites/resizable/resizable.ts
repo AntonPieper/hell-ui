@@ -14,7 +14,13 @@ import {
   numberAttribute,
   signal,
 } from '@angular/core';
+import {
+  HELL_RESIZE_KEY_DELTA,
+  hellConstrainResizeValue,
+  hellFitResizeSizesToTotal,
+} from '../../core/resize-behavior';
 import { HellOrientation } from '../../core/types';
+import { HellStyleable } from '../../core/styleable';
 
 /**
  * Resizable group. Wrap two or more `[hellResizablePane]` elements with
@@ -32,8 +38,7 @@ import { HellOrientation } from '../../core/types';
   },
   exportAs: 'hellResizable',
 })
-export class HellResizable implements AfterContentInit {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellResizable extends HellStyleable implements AfterContentInit {
   readonly orientation = input<HellOrientation>('horizontal');
   readonly rescaleOnResize = input(true, { transform: booleanAttribute });
 
@@ -46,6 +51,7 @@ export class HellResizable implements AfterContentInit {
   private readonly panes: HellResizablePane[] = [];
 
   constructor() {
+    super();
     if (typeof ResizeObserver === 'undefined') return;
 
     const observer = new ResizeObserver(() => this.fitPanesToAvailableSize());
@@ -132,66 +138,21 @@ export class HellResizable implements AfterContentInit {
       return;
     }
 
-    const sourceSizes = panes.map((pane, index) => (pane.currentSize() ?? pane.measure()) || minSizes[index]);
+    const sourceSizes = panes.map(
+      (pane, index) => (pane.currentSize() ?? pane.measure()) || minSizes[index],
+    );
     const sourceTotal = sourceSizes.reduce((sum, value) => sum + value, 0);
     if (!isConstrained && Math.abs(sourceTotal - available) < 1) {
       for (const pane of panes) pane.setEffectiveMinSize(null);
       return;
     }
 
-    const fitted = this.fitSizesToTotal(sourceSizes, minSizes, available);
+    const fitted = hellFitResizeSizesToTotal(sourceSizes, minSizes, available);
     for (let i = 0; i < panes.length; i++) {
       const effectiveMin = isConstrained ? Math.min(minSizes[i], fitted[i]) : null;
       panes[i].setEffectiveMinSize(effectiveMin);
     }
     for (let i = 0; i < panes.length; i++) panes[i].setSize(fitted[i]);
-  }
-
-  private fitSizesToTotal(
-    sourceSizes: readonly number[],
-    minSizes: readonly number[],
-    total: number,
-  ): number[] {
-    const count = sourceSizes.length;
-    const sourceTotal = sourceSizes.reduce((sum, value) => sum + value, 0);
-    const minTotal = minSizes.reduce((sum, value) => sum + value, 0);
-    const source = sourceTotal > 0 ? sourceSizes : minSizes;
-    const baseTotal = source.reduce((sum, value) => sum + value, 0) || count;
-
-    if (minTotal > total) {
-      return source.map((value) => (total * value) / baseTotal);
-    }
-
-    const result = new Array<number>(count).fill(0);
-    const remaining = new Set(source.map((_, index) => index));
-    let remainingTotal = total;
-    let remainingSourceTotal = baseTotal;
-
-    while (remaining.size > 0) {
-      const scale = remainingSourceTotal > 0 ? remainingTotal / remainingSourceTotal : 1;
-      let clamped = false;
-
-      for (const index of Array.from(remaining)) {
-        const next = source[index] * scale;
-        if (next < minSizes[index]) {
-          result[index] = minSizes[index];
-          remaining.delete(index);
-          remainingTotal -= minSizes[index];
-          remainingSourceTotal -= source[index];
-          clamped = true;
-        }
-      }
-
-      if (!clamped) {
-        for (const index of remaining) result[index] = source[index] * scale;
-        break;
-      }
-    }
-
-    const resultTotal = result.reduce((sum, value) => sum + value, 0);
-    const delta = total - resultTotal;
-    if (Math.abs(delta) > 0.01) result[count - 1] += delta;
-    return result.map((value) => Math.max(0, value));
   }
 }
 
@@ -202,8 +163,7 @@ export class HellResizable implements AfterContentInit {
     '[attr.data-orientation]': 'orientation()',
   },
 })
-export class HellResizablePane {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellResizablePane extends HellStyleable {
   /** Initial flex grow factor — used until the user starts dragging. */
   readonly initialFlex = input(1, { transform: numberAttribute });
   /** Minimum pane size in pixels. */
@@ -225,6 +185,7 @@ export class HellResizablePane {
   protected readonly orientation = this.resizable.orientation;
 
   constructor() {
+    super();
     this.resizable.registerPane(this);
     effect(() => {
       this.writeFlexValue(this.flexValue());
@@ -276,8 +237,6 @@ export class HellResizablePane {
   }
 }
 
-const KEY_DELTA = 16;
-
 interface ResizeDragState {
   pointerId: number;
   horizontal: boolean;
@@ -306,8 +265,7 @@ interface ResizeDragState {
   },
   template: '<span data-slot="grip" aria-hidden="true"></span>',
 })
-export class HellResizableHandle {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellResizableHandle extends HellStyleable {
   /**
    * Visual treatment for the handle.
    * - `line`  (default) — minimal hairline that thickens on hover.
@@ -356,29 +314,13 @@ export class HellResizableHandle {
     return sizes;
   }
 
-  private constrain(value: number, sum: number, minA: number, minB: number): number {
-    if (sum <= 0) return 0;
-
-    const minTotal = minA + minB;
-    if (minTotal > sum) {
-      return Math.max(0, Math.min(sum, value));
-    }
-
-    return Math.max(minA, Math.min(sum - minB, value));
-  }
-
   private applyDrag(e: PointerEvent): void {
     const state = this.dragState;
     if (!state || e.pointerId !== state.pointerId) return;
 
     e.preventDefault();
     const delta = (state.horizontal ? e.clientX : e.clientY) - state.startCoord;
-    const newA = this.constrain(
-      state.startA + delta,
-      state.sum,
-      state.minA,
-      state.minB,
-    );
+    const newA = hellConstrainResizeValue(state.startA + delta, state.sum, state.minA, state.minB);
     state.prev.setSize(newA);
     state.next.setSize(state.sum - newA);
     this.ariaValueNow.set(Math.round((newA / state.sum) * 100));
@@ -480,8 +422,8 @@ export class HellResizableHandle {
     let newA = a;
     if (home) newA = prev.currentMinSize();
     else if (end) newA = sum - next.currentMinSize();
-    else newA = a + (increment ? KEY_DELTA : -KEY_DELTA);
-    newA = this.constrain(newA, sum, prev.currentMinSize(), next.currentMinSize());
+    else newA = a + (increment ? HELL_RESIZE_KEY_DELTA : -HELL_RESIZE_KEY_DELTA);
+    newA = hellConstrainResizeValue(newA, sum, prev.currentMinSize(), next.currentMinSize());
     prev.setSize(newA);
     next.setSize(sum - newA);
     this.ariaValueNow.set(Math.round((newA / sum) * 100));

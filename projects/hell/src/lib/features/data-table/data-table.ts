@@ -1,3 +1,9 @@
+import { HellStyleable } from '../../core/styleable';
+import {
+  HELL_RESIZE_KEY_DELTA,
+  hellConstrainResizeValue,
+  hellResizePairByDelta,
+} from '../../core/resize-behavior';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -25,8 +31,7 @@ import {
     '[attr.aria-busy]': 'busy() ? "true" : null',
   },
 })
-export class HellTableContainer {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellTableContainer extends HellStyleable {
   readonly busy = input(false, { transform: booleanAttribute });
 }
 
@@ -43,8 +48,7 @@ export class HellTableContainer {
     '[attr.data-content-width]': 'contentWidth() ? "true" : null',
   },
 })
-export class HellTable {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellTable extends HellStyleable {
   readonly contentWidth = input(false, { transform: booleanAttribute });
 }
 
@@ -60,9 +64,7 @@ export class HellTable {
     '[class.hell-table-head]': '!unstyled()',
   },
 })
-export class HellTableHead {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-
+export class HellTableHead extends HellStyleable {
   private readonly cells = new Set<HellTableHeaderCell>();
 
   register(c: HellTableHeaderCell) {
@@ -87,9 +89,7 @@ export class HellTableHead {
     '[class.hell-table-body]': '!unstyled()',
   },
 })
-export class HellTableBody {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellTableBody extends HellStyleable {}
 
 /**
  * Behavioral row directive. Renders nothing of its own — consumers own
@@ -115,8 +115,7 @@ export class HellTableBody {
     '(keydown.space)': 'onKey($event)',
   },
 })
-export class HellTableRow {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellTableRow extends HellStyleable {
   readonly selected = input(false, { transform: booleanAttribute });
   readonly interactive = input(false, { transform: booleanAttribute });
 
@@ -143,7 +142,7 @@ export class HellTableRow {
  *
  * Column width is applied through the `--hell-table-col-width` custom
  * property; the stylesheet maps that to the cell's `width`. Avoiding a
-   * direct width style binding keeps the surface area limited to CSS
+ * direct width style binding keeps the surface area limited to CSS
  * variables, which makes overrides composable with the rest of the
  * theme tokens.
  */
@@ -162,8 +161,7 @@ export class HellTableRow {
     '(keydown.space)': 'onKey($event)',
   },
 })
-export class HellTableHeaderCell {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellTableHeaderCell extends HellStyleable {
   readonly sort = input<'asc' | 'desc' | null>(null);
   readonly sortable = input(false, { transform: booleanAttribute });
   readonly width = input<number | null>(null);
@@ -192,6 +190,7 @@ export class HellTableHeaderCell {
   });
 
   constructor() {
+    super();
     this.head?.register(this);
   }
 
@@ -248,8 +247,7 @@ export class HellTableHeaderCell {
     '(click)': 'onClick($event)',
   },
 })
-export class HellTableCell {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellTableCell extends HellStyleable {
   readonly align = input<'start' | 'center' | 'end'>('start');
   readonly space = input<'normal' | 'empty'>('normal');
   readonly cellSelect = output<MouseEvent>();
@@ -258,8 +256,6 @@ export class HellTableCell {
     this.cellSelect.emit(e);
   }
 }
-
-const RESIZE_KEY_DELTA = 16;
 
 /**
  * Resize grip placed inside `<th hellTableHeaderCell>` at the trailing
@@ -288,8 +284,7 @@ const RESIZE_KEY_DELTA = 16;
   },
   template: '<span data-slot="grip" aria-hidden="true"></span>',
 })
-export class HellTableColumnResizer {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellTableColumnResizer extends HellStyleable {
   readonly minWidth = input(40, { transform: numberAttribute });
 
   protected readonly dragging = signal(false);
@@ -317,10 +312,9 @@ export class HellTableColumnResizer {
 
     const move = (ev: PointerEvent) => {
       ev.preventDefault();
-      let newA = startA + (ev.clientX - startX);
-      newA = Math.max(min, Math.min(sum - min, newA));
+      const [newA, newB] = hellResizePairByDelta(startA, startB, ev.clientX - startX, min, min);
       cell.setLiveWidth(newA);
-      next.setLiveWidth(sum - newA);
+      next.setLiveWidth(newB);
     };
 
     const win = this.host.ownerDocument.defaultView ?? window;
@@ -360,10 +354,10 @@ export class HellTableColumnResizer {
     const sum = a + b;
     const min = this.minWidth();
     let newA = a;
-    if (inc) newA = a + RESIZE_KEY_DELTA;
-    else if (dec) newA = a - RESIZE_KEY_DELTA;
+    if (inc) newA = a + HELL_RESIZE_KEY_DELTA;
+    else if (dec) newA = a - HELL_RESIZE_KEY_DELTA;
     else if (home) newA = min;
-    newA = Math.max(min, Math.min(sum - min, newA));
+    newA = hellConstrainResizeValue(newA, sum, min, min);
     cell.commit(newA);
     next.commit(sum - newA);
   }
