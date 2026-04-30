@@ -1,4 +1,5 @@
 import { Directive, booleanAttribute, input } from '@angular/core';
+import { HellStyleable } from '../../core/styleable';
 import {
   NgpAccordion,
   NgpAccordionItem,
@@ -23,9 +24,7 @@ import {
   ],
   host: { '[class.hell-accordion]': '!unstyled()' },
 })
-export class HellAccordion {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellAccordion extends HellStyleable {}
 
 @Directive({
   selector: '[hellAccordionItem]',
@@ -37,9 +36,7 @@ export class HellAccordion {
   ],
   host: { '[class.hell-accordion-item]': '!unstyled()' },
 })
-export class HellAccordionItem {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellAccordionItem extends HellStyleable {}
 
 @Directive({
   selector: 'button[hellAccordionTrigger]',
@@ -49,18 +46,14 @@ export class HellAccordionItem {
     type: 'button',
   },
 })
-export class HellAccordionTrigger {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellAccordionTrigger extends HellStyleable {}
 
 @Directive({
   selector: '[hellAccordionContent]',
   hostDirectives: [NgpAccordionContent],
   host: { '[class.hell-accordion-content]': '!unstyled()' },
 })
-export class HellAccordionContent {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellAccordionContent extends HellStyleable {}
 
 export const HELL_ACCORDION_DIRECTIVES = [
   HellAccordion,

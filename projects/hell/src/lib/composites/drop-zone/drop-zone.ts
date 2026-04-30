@@ -1,3 +1,4 @@
+import { HellStyleable } from '../../core/styleable';
 import {
   Directive,
   ElementRef,
@@ -27,8 +28,7 @@ import {
     tabindex: '0',
   },
 })
-export class HellDropZone {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellDropZone extends HellStyleable {
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly multiple = input(true, { transform: booleanAttribute });
   readonly accept = input<string | null>(null);

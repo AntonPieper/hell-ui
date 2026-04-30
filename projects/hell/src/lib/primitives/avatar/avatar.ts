@@ -1,6 +1,7 @@
 import { Component, booleanAttribute, input, ChangeDetectionStrategy } from '@angular/core';
 import { NgpAvatar, NgpAvatarFallback, NgpAvatarImage } from 'ng-primitives/avatar';
 import { HellSize } from '../../core/types';
+import { HellStyleable } from '../../core/styleable';
 
 /**
  * Styled avatar with image + initials fallback.
@@ -25,8 +26,7 @@ import { HellSize } from '../../core/types';
     <span ngpAvatarFallback>{{ fallback() }}</span>
   `,
 })
-export class HellAvatar {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellAvatar extends HellStyleable {
   /** Avatar image src. */
   readonly image = input<string | null>(null);
   /** Two-letter fallback (initials). */

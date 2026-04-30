@@ -1,16 +1,14 @@
 import { booleanAttribute, Directive, input } from '@angular/core';
 
 /**
- * Applied as a host directive on every styled `hell` component.
- * Exposes an `unstyled` input that consumers can use to opt out of all
- * library-provided styling for that element. The associated component is
- * expected to bind its host class as `[class.hell-xxx]="!unstyled()"`.
+ * Base contract for every styled `hell` module.
+ *
+ * Subclasses inherit the `unstyled` input and bind their own host styling
+ * class as `[class.hell-xxx]="!unstyled()"`. Behavior, accessibility wiring,
+ * and data attributes remain local to the concrete module.
  */
-@Directive({
-  selector: '[hellStyleable]',
-  exportAs: 'hellStyleable',
-})
-export class HellStyleable {
+@Directive()
+export abstract class HellStyleable {
   /**
    * When true, the component does not apply its host styling class.
    * Behavior, accessibility wiring and data attributes still apply.

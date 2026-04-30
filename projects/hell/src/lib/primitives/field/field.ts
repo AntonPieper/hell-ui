@@ -1,10 +1,6 @@
 import { Directive, booleanAttribute, input } from '@angular/core';
-import {
-  NgpFormField,
-  NgpDescription,
-  NgpError,
-  NgpLabel,
-} from 'ng-primitives/form-field';
+import { HellStyleable } from '../../core/styleable';
+import { NgpFormField, NgpDescription, NgpError, NgpLabel } from 'ng-primitives/form-field';
 
 /**
  * `hell-field` — a form field shell that wires label, description and error
@@ -26,8 +22,7 @@ import {
     '[attr.data-orientation]': 'orientation()',
   },
 })
-export class HellField {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellField extends HellStyleable {
   /**
    * Layout direction. `vertical` (default) stacks label / control /
    * description / error. `horizontal` lays them out in a row — handy for
@@ -41,27 +36,21 @@ export class HellField {
   hostDirectives: [NgpLabel],
   host: { '[class.hell-field-label]': '!unstyled()' },
 })
-export class HellFieldLabel {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellFieldLabel extends HellStyleable {}
 
 @Directive({
   selector: '[hellFieldDescription]',
   hostDirectives: [NgpDescription],
   host: { '[class.hell-field-description]': '!unstyled()' },
 })
-export class HellFieldDescription {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellFieldDescription extends HellStyleable {}
 
 @Directive({
   selector: '[hellFieldError]',
   hostDirectives: [NgpError],
   host: { '[class.hell-field-error]': '!unstyled()' },
 })
-export class HellFieldError {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellFieldError extends HellStyleable {}
 
 export const HELL_FIELD_DIRECTIVES = [
   HellField,

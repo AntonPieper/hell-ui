@@ -1,11 +1,7 @@
 import { Directive, booleanAttribute, input } from '@angular/core';
-import {
-  NgpTabset,
-  NgpTabList,
-  NgpTabButton,
-  NgpTabPanel,
-} from 'ng-primitives/tabs';
+import { NgpTabset, NgpTabList, NgpTabButton, NgpTabPanel } from 'ng-primitives/tabs';
 import { HellOrientation } from '../../core/types';
+import { HellStyleable } from '../../core/styleable';
 
 /**
  * Styled tabs system. Compose:
@@ -36,8 +32,7 @@ import { HellOrientation } from '../../core/types';
     '[attr.data-orientation]': 'orientation()',
   },
 })
-export class HellTabset {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellTabset extends HellStyleable {
   readonly orientation = input<HellOrientation>('horizontal');
 }
 
@@ -46,9 +41,7 @@ export class HellTabset {
   hostDirectives: [NgpTabList],
   host: { '[class.hell-tab-list]': '!unstyled()' },
 })
-export class HellTabList {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellTabList extends HellStyleable {}
 
 @Directive({
   selector: 'button[hellTab]',
@@ -63,22 +56,13 @@ export class HellTabList {
     type: 'button',
   },
 })
-export class HellTab {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellTab extends HellStyleable {}
 
 @Directive({
   selector: '[hellTabPanel]',
   hostDirectives: [{ directive: NgpTabPanel, inputs: ['ngpTabPanelValue:value'] }],
   host: { '[class.hell-tab-panel]': '!unstyled()' },
 })
-export class HellTabPanel {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellTabPanel extends HellStyleable {}
 
-export const HELL_TABS_DIRECTIVES = [
-  HellTabset,
-  HellTabList,
-  HellTab,
-  HellTabPanel,
-] as const;
+export const HELL_TABS_DIRECTIVES = [HellTabset, HellTabList, HellTab, HellTabPanel] as const;

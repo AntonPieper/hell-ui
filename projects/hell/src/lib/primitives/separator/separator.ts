@@ -1,6 +1,7 @@
 import { Directive, booleanAttribute, input } from '@angular/core';
 import { NgpSeparator } from 'ng-primitives/separator';
 import type { HellOrientation, HellSize } from '../../core/types';
+import { HellStyleable } from '../../core/styleable';
 
 @Directive({
   selector: '[hellSeparator]',
@@ -12,8 +13,7 @@ import type { HellOrientation, HellSize } from '../../core/types';
     '[attr.role]': '"separator"',
   },
 })
-export class HellSeparator {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellSeparator extends HellStyleable {
   readonly orientation = input<HellOrientation>('horizontal');
   /**
    * Symmetric margin around the separator on its main axis.

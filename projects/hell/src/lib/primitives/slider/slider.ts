@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { NgpSlider, NgpSliderRange, NgpSliderThumb, NgpSliderTrack } from 'ng-primitives/slider';
 import { HellSize } from '../../core/types';
+import { HellStyleable } from '../../core/styleable';
 
 /**
  * Single-value slider built on `ng-primitives/slider`. Drag the thumb,
@@ -52,8 +53,7 @@ import { HellSize } from '../../core/types';
     <div #thumb ngpSliderThumb class="hell-slider-thumb" [attr.aria-label]="ariaLabel()"></div>
   `,
 })
-export class HellSlider {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellSlider extends HellStyleable {
   readonly size = input<HellSize>('md');
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
   /**
@@ -75,6 +75,7 @@ export class HellSlider {
   private removeActiveDragListeners: (() => void) | null = null;
 
   constructor() {
+    super();
     this.destroyRef.onDestroy(() => this.removeActiveDragListeners?.());
   }
 

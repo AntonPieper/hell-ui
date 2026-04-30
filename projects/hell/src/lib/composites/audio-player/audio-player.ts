@@ -24,6 +24,7 @@ import { HellButton } from '../../primitives/button/button';
 import { HellFlyout, HellFlyoutTrigger } from '../../primitives/flyout/flyout';
 import { HellIcon } from '../../primitives/icon/icon';
 import { HellSlider } from '../../primitives/slider/slider';
+import { HellStyleable } from '../../core/styleable';
 
 interface SpeechRecognitionLike extends EventTarget {
   lang: string;
@@ -273,8 +274,7 @@ const HELL_AUDIO_PLAYER_ICONS = {
     }
   `,
 })
-export class HellAudioPlayer {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellAudioPlayer extends HellStyleable {
   readonly src = input.required<string>();
   readonly downloadName = input<string | null>(null);
   readonly allowDownload = input(true, { transform: booleanAttribute });
@@ -355,6 +355,7 @@ export class HellAudioPlayer {
   protected readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
   constructor() {
+    super();
     // Apply audio properties from signals.
     effect(() => {
       const a = this.audio().nativeElement;

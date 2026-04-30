@@ -15,6 +15,7 @@ import { HellIcon } from '../../primitives/icon/icon';
 import { HellInput } from '../../primitives/input/input';
 import { HellPopover, HellPopoverTrigger } from '../../primitives/popover/popover';
 import type { HellSize } from '../../core/types';
+import { HellStyleable } from '../../core/styleable';
 
 interface ParsedTime {
   h: number;
@@ -203,8 +204,7 @@ function tryParse(text: string): ParsedTime | null {
     </ng-template>
   `,
 })
-export class HellTimeInput {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellTimeInput extends HellStyleable {
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
@@ -238,6 +238,7 @@ export class HellTimeInput {
   });
 
   constructor() {
+    super();
     effect(() => {
       this.value();
       this.typed.set(null);

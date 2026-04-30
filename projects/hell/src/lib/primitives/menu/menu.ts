@@ -8,6 +8,7 @@ import {
   injectSubmenuTriggerState,
 } from 'ng-primitives/menu';
 import { HELL_OVERLAY_SCOPE } from '../../core/overlay-scope';
+import { HellStyleable } from '../../core/styleable';
 
 @Directive({
   selector: '[hellMenuTrigger]',
@@ -52,9 +53,7 @@ export class HellMenuTrigger {}
   ],
   host: { '[class.hell-menu-item-submenu]': '!unstyled()' },
 })
-export class HellSubmenuTrigger {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellSubmenuTrigger extends HellStyleable {}
 
 @Directive({
   selector: '[hellMenu]',
@@ -64,8 +63,7 @@ export class HellSubmenuTrigger {
     '[attr.data-submenu]': 'submenuTrigger() ? "true" : null',
   },
 })
-export class HellMenu {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellMenu extends HellStyleable {
   protected readonly submenuTrigger: Signal<unknown> = injectSubmenuTriggerState({
     optional: true,
   });
@@ -74,6 +72,7 @@ export class HellMenu {
   private readonly overlayScope = inject(HELL_OVERLAY_SCOPE, { optional: true });
 
   constructor() {
+    super();
     const scope = this.overlayScope;
     if (!scope) return;
     const element = this.host.nativeElement;
@@ -92,9 +91,7 @@ export class HellMenu {
   ],
   host: { '[class.hell-menu-item]': '!unstyled()' },
 })
-export class HellMenuItem {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellMenuItem extends HellStyleable {}
 
 @Directive({
   selector: '[hellMenuSeparator]',
@@ -103,9 +100,7 @@ export class HellMenuItem {
     role: 'separator',
   },
 })
-export class HellMenuSeparator {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellMenuSeparator extends HellStyleable {}
 
 /** Section grouping wrapper. Use with `[hellMenuLabel]` for an optional header. */
 @Directive({
@@ -115,9 +110,7 @@ export class HellMenuSeparator {
     role: 'group',
   },
 })
-export class HellMenuSection {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellMenuSection extends HellStyleable {}
 
 /** Section / group label rendered above a section's items. */
 @Directive({
@@ -127,9 +120,7 @@ export class HellMenuSection {
     role: 'presentation',
   },
 })
-export class HellMenuLabel {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellMenuLabel extends HellStyleable {}
 
 /** Optional leading-icon slot inside a `[hellMenuItem]`. */
 @Directive({
@@ -139,18 +130,14 @@ export class HellMenuLabel {
     'aria-hidden': 'true',
   },
 })
-export class HellMenuItemIcon {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellMenuItemIcon extends HellStyleable {}
 
 /** Trailing slot — kbd hint, chevron, badge, etc. */
 @Directive({
   selector: '[hellMenuItemTrailing]',
   host: { '[class.hell-menu-item-trailing]': '!unstyled()' },
 })
-export class HellMenuItemTrailing {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellMenuItemTrailing extends HellStyleable {}
 
 export const HELL_MENU_DIRECTIVES = [
   HellMenuTrigger,

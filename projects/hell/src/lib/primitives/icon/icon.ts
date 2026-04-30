@@ -1,10 +1,6 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  booleanAttribute,
-  input,
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy, booleanAttribute, input } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
+import { HellStyleable } from '../../core/styleable';
 
 /**
  * Thin styled wrapper around `<ng-icon>` from `@ng-icons/core`.
@@ -28,8 +24,7 @@ import { NgIcon } from '@ng-icons/core';
   },
   template: `<ng-icon [name]="name()" [attr.aria-hidden]="decorative() ? 'true' : null" />`,
 })
-export class HellIcon {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellIcon extends HellStyleable {
   readonly name = input.required<string>();
   readonly size = input<string>('1em');
   readonly color = input<string | null>(null);

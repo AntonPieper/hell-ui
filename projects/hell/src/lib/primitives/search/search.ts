@@ -1,5 +1,6 @@
 import { Directive, booleanAttribute, input } from '@angular/core';
 import { NgpSearch, NgpSearchClear } from 'ng-primitives/search';
+import { HellStyleable } from '../../core/styleable';
 
 @Directive({
   selector: '[hellSearch]',
@@ -8,9 +9,7 @@ import { NgpSearch, NgpSearchClear } from 'ng-primitives/search';
     '[class.hell-search]': '!unstyled()',
   },
 })
-export class HellSearch {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellSearch extends HellStyleable {}
 
 @Directive({
   selector: 'button[hellSearchClear], [hellSearchClear]',
@@ -19,8 +18,6 @@ export class HellSearch {
     '[class.hell-search-clear]': '!unstyled()',
   },
 })
-export class HellSearchClear {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellSearchClear extends HellStyleable {}
 
 export const HELL_SEARCH_DIRECTIVES = [HellSearch, HellSearchClear] as const;

@@ -29,6 +29,7 @@ import {
 } from 'ng-primitives/date-picker';
 import { HellButton } from '../button/button';
 import { HellIcon } from '../icon/icon';
+import { HellStyleable } from '../../core/styleable';
 
 const HELL_DATE_PICKER_ICONS = {
   faSolidAnglesLeft,
@@ -170,9 +171,7 @@ const PICKER_IMPORTS = [
   host: { '[class.hell-date-picker]': '!unstyled()' },
   template: PICKER_TEMPLATE,
 })
-export class HellDatePicker {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-
+export class HellDatePicker extends HellStyleable {
   private readonly state = injectDatePickerState<Date>();
 
   protected readonly label = computed(() => {
@@ -213,9 +212,7 @@ export class HellDatePicker {
   },
   template: PICKER_TEMPLATE,
 })
-export class HellDateRangePicker {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-
+export class HellDateRangePicker extends HellStyleable {
   private readonly state = injectDateRangePickerState<Date>();
 
   protected readonly label = computed(() => {

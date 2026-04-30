@@ -1,6 +1,7 @@
 import { Directive, booleanAttribute, input } from '@angular/core';
 import { NgpRadioGroup, NgpRadioItem, NgpRadioIndicator } from 'ng-primitives/radio';
 import { HellOrientation } from '../../core/types';
+import { HellStyleable } from '../../core/styleable';
 
 @Directive({
   selector: '[hellRadioGroup]',
@@ -20,8 +21,7 @@ import { HellOrientation } from '../../core/types';
     '[attr.data-orientation]': 'orientation()',
   },
 })
-export class HellRadioGroup {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellRadioGroup extends HellStyleable {
   readonly orientation = input<HellOrientation>('vertical');
 }
 
@@ -38,8 +38,6 @@ export class HellRadioGroup {
     type: 'button',
   },
 })
-export class HellRadio {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellRadio extends HellStyleable {}
 
 export { NgpRadioIndicator as HellRadioIndicator };

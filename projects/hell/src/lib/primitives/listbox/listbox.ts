@@ -1,4 +1,5 @@
 import { Directive, booleanAttribute, input } from '@angular/core';
+import { HellStyleable } from '../../core/styleable';
 import {
   NgpListbox,
   NgpListboxHeader,
@@ -26,9 +27,7 @@ import {
     '[class.hell-listbox]': '!unstyled()',
   },
 })
-export class HellListbox {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellListbox extends HellStyleable {}
 
 @Directive({
   selector: '[hellListboxTrigger]',
@@ -41,20 +40,14 @@ export class HellListboxTrigger {}
   hostDirectives: [
     {
       directive: NgpListboxOption,
-      inputs: [
-        'id',
-        'ngpListboxOptionValue:value',
-        'ngpListboxOptionDisabled:disabled',
-      ],
+      inputs: ['id', 'ngpListboxOptionValue:value', 'ngpListboxOptionDisabled:disabled'],
     },
   ],
   host: {
     '[class.hell-listbox-option]': '!unstyled()',
   },
 })
-export class HellListboxOption {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellListboxOption extends HellStyleable {}
 
 @Directive({
   selector: '[hellListboxSection]',
@@ -63,9 +56,7 @@ export class HellListboxOption {
     '[class.hell-listbox-section]': '!unstyled()',
   },
 })
-export class HellListboxSection {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellListboxSection extends HellStyleable {}
 
 @Directive({
   selector: '[hellListboxHeader]',
@@ -74,9 +65,7 @@ export class HellListboxSection {
     '[class.hell-listbox-header]': '!unstyled()',
   },
 })
-export class HellListboxHeader {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellListboxHeader extends HellStyleable {}
 
 export const HELL_LISTBOX_DIRECTIVES = [
   HellListbox,

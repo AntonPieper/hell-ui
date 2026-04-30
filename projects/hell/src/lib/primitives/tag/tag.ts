@@ -1,5 +1,6 @@
 import { Directive, booleanAttribute, input } from '@angular/core';
 import { HellTagVariant } from '../../core/types';
+import { HellStyleable } from '../../core/styleable';
 
 @Directive({
   selector: '[hellTag]',
@@ -8,8 +9,7 @@ import { HellTagVariant } from '../../core/types';
     '[attr.data-variant]': 'variant()',
   },
 })
-export class HellTag {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellTag extends HellStyleable {
   readonly variant = input<HellTagVariant>('default');
 }
 
@@ -17,14 +17,10 @@ export class HellTag {
   selector: '[hellBadge]',
   host: { '[class.hell-badge]': '!unstyled()' },
 })
-export class HellBadge {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellBadge extends HellStyleable {}
 
 @Directive({
   selector: 'kbd[hellKbd], [hellKbd]',
   host: { '[class.hell-kbd]': '!unstyled()' },
 })
-export class HellKbd {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellKbd extends HellStyleable {}

@@ -6,6 +6,7 @@ import {
   input,
 } from '@angular/core';
 import { HellSize } from '../../core/types';
+import { HellStyleable } from '../../core/styleable';
 
 /**
  * Stacked avatar container.
@@ -23,8 +24,7 @@ import { HellSize } from '../../core/types';
   },
   template: `<ng-content />`,
 })
-export class HellAvatarGroup {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellAvatarGroup extends HellStyleable {
   readonly size = input<HellSize>('md');
 }
 
@@ -35,8 +35,7 @@ export class HellAvatarGroup {
     '[attr.data-selected]': 'selected() ? "" : null',
   },
 })
-export class HellAvatarGroupItem {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellAvatarGroupItem extends HellStyleable {
   readonly selected = input(false, { transform: booleanAttribute });
 }
 
@@ -46,9 +45,7 @@ export class HellAvatarGroupItem {
     '[class.hell-avatar-group-overflow]': '!unstyled()',
   },
 })
-export class HellAvatarGroupOverflow {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellAvatarGroupOverflow extends HellStyleable {}
 
 export const HELL_AVATAR_GROUP_DIRECTIVES = [
   HellAvatarGroup,

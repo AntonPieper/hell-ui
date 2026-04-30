@@ -1,3 +1,4 @@
+import { HellStyleable } from '../../core/styleable';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -50,8 +51,7 @@ import {
   template: '<ng-content></ng-content>',
   exportAs: 'hellAppShell',
 })
-export class HellAppShell {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellAppShell extends HellStyleable {
   readonly sidenavCollapsed = input(false, { transform: booleanAttribute });
   readonly secondaryHidden = input(false, { transform: booleanAttribute });
 
@@ -67,6 +67,7 @@ export class HellAppShell {
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
+    super();
     const media = globalThis.matchMedia?.('(max-width: 767px)');
     if (!media) return;
 
@@ -153,9 +154,7 @@ export class HellAppShell {
   selector: '[hellAppTopbar]',
   host: { '[class.hell-topbar]': '!unstyled()' },
 })
-export class HellAppTopbar {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellAppTopbar extends HellStyleable {}
 
 @Directive({
   selector: '[hellAppSidenav]',
@@ -167,8 +166,7 @@ export class HellAppTopbar {
     '[attr.inert]': 'isMobileHidden() ? "" : null',
   },
 })
-export class HellAppSidenav {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellAppSidenav extends HellStyleable {
   /** Optional override; if omitted, follows the parent shell. */
   readonly collapsed = input<boolean | null, boolean | string | null | undefined>(null, {
     transform: (v) => (v == null ? null : booleanAttribute(v)),
@@ -188,8 +186,7 @@ export class HellAppSidenav {
     '[attr.data-dialog-root]': '"true"',
   },
 })
-export class HellAppContent {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellAppContent extends HellStyleable {
   readonly maxWidth = input<string | number | null>(null);
 
   protected readonly maxWidthValue = computed(() => {
@@ -250,8 +247,7 @@ export class HellSecondaryToggle {
     '[attr.data-mobile-hidden]': 'isMobileHidden() ? "true" : null',
   },
 })
-export class HellAppSecondary {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellAppSecondary extends HellStyleable {
   readonly hidden = input<boolean | null, boolean | string | null | undefined>(null, {
     transform: (v) => (v == null ? null : booleanAttribute(v)),
   });
@@ -268,8 +264,7 @@ export class HellAppSecondary {
     '[attr.inert]': 'secondary.isHidden() ? "" : null',
   },
 })
-export class HellAppSecondaryBody {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellAppSecondaryBody extends HellStyleable {
   readonly secondary = inject(HellAppSecondary);
 }
 

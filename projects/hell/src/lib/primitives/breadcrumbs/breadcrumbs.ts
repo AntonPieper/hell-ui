@@ -1,4 +1,5 @@
 import { Directive, booleanAttribute, input } from '@angular/core';
+import { HellStyleable } from '../../core/styleable';
 import {
   NgpBreadcrumbs,
   NgpBreadcrumbList,
@@ -27,27 +28,21 @@ import {
   hostDirectives: [NgpBreadcrumbs],
   host: { '[class.hell-breadcrumbs]': '!unstyled()' },
 })
-export class HellBreadcrumbs {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellBreadcrumbs extends HellStyleable {}
 
 @Directive({
   selector: 'ol[hellBreadcrumbList], ul[hellBreadcrumbList]',
   hostDirectives: [NgpBreadcrumbList],
   host: { '[class.hell-breadcrumb-list]': '!unstyled()' },
 })
-export class HellBreadcrumbList {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellBreadcrumbList extends HellStyleable {}
 
 @Directive({
   selector: 'li[hellBreadcrumbItem]',
   hostDirectives: [NgpBreadcrumbItem],
   host: { '[class.hell-breadcrumbs-item]': '!unstyled()' },
 })
-export class HellBreadcrumbItem {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellBreadcrumbItem extends HellStyleable {}
 
 /** Navigable crumb — apply to <a> or <button>. */
 @Directive({
@@ -55,9 +50,7 @@ export class HellBreadcrumbItem {
   hostDirectives: [NgpBreadcrumbLink],
   host: { '[class.hell-breadcrumbs-link]': '!unstyled()' },
 })
-export class HellBreadcrumbLink {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellBreadcrumbLink extends HellStyleable {}
 
 /** Current page — apply to <span> or similar non-link element. */
 @Directive({
@@ -68,9 +61,7 @@ export class HellBreadcrumbLink {
     'aria-current': 'page',
   },
 })
-export class HellBreadcrumbPage {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellBreadcrumbPage extends HellStyleable {}
 
 /**
  * Decorative divider rendered between items. When the host element has no
@@ -87,9 +78,7 @@ export class HellBreadcrumbPage {
     'aria-hidden': 'true',
   },
 })
-export class HellBreadcrumbSeparator {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellBreadcrumbSeparator extends HellStyleable {}
 
 /**
  * Collapsed-middle indicator. Apply to a button when interactive (e.g. opens
@@ -104,9 +93,7 @@ export class HellBreadcrumbSeparator {
     'aria-label': 'Show hidden navigation',
   },
 })
-export class HellBreadcrumbEllipsis {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellBreadcrumbEllipsis extends HellStyleable {}
 
 export const HELL_BREADCRUMBS_DIRECTIVES = [
   HellBreadcrumbs,

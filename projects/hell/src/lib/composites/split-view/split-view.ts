@@ -19,6 +19,7 @@ import { provideIcons } from '@ng-icons/core';
 import { faSolidArrowLeft } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
+import { HellStyleable } from '../../core/styleable';
 import { HELL_RESIZABLE_DIRECTIVES } from '../resizable/resizable';
 
 @Directive({
@@ -103,8 +104,7 @@ export class HellSplitDetail {
     }
   `,
 })
-export class HellSplitView {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellSplitView extends HellStyleable {
   readonly compactBelow = input(720, { transform: numberAttribute });
   readonly detailOpen = input(false, { transform: booleanAttribute });
   readonly framed = input(false, { transform: booleanAttribute });
@@ -143,6 +143,7 @@ export class HellSplitView {
   });
 
   constructor() {
+    super();
     const update = () => this.inlineSize.set(this.host.clientWidth);
     queueMicrotask(update);
 

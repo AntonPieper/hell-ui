@@ -1,6 +1,7 @@
 import { Directive, booleanAttribute, input } from '@angular/core';
 import { NgpButton } from 'ng-primitives/button';
 import { HellButtonVariant, HellSize } from '../../core/types';
+import { HellStyleable } from '../../core/styleable';
 
 /**
  * Styled button built on `NgpButton`.
@@ -27,8 +28,7 @@ import { HellButtonVariant, HellSize } from '../../core/types';
     '[attr.data-block]': 'block() ? "" : null',
   },
 })
-export class HellButton {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellButton extends HellStyleable {
   readonly variant = input<HellButtonVariant>('default');
   readonly size = input<HellSize>('md');
   readonly iconOnly = input(false, { transform: booleanAttribute });

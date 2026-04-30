@@ -14,6 +14,7 @@ import {
   signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { HellStyleable } from '../../core/styleable';
 
 export type HellToastVariant = 'default' | 'success' | 'info' | 'warning' | 'danger';
 export type HellToastPosition =
@@ -305,13 +306,12 @@ export class HellToastTemplate {}
     }
   `,
 })
-export class HellToaster {
+export class HellToaster extends HellStyleable {
   readonly svc = inject(HellToastService);
   private readonly host: HTMLElement = inject(ElementRef).nativeElement;
 
   protected readonly hasToasts = computed(() => this.svc.toasts().length > 0);
 
-  readonly unstyled = input(false, { transform: booleanAttribute });
   readonly position = input<HellToastPosition>('bottom-right');
   readonly maxVisible = input<number>(3);
 
@@ -328,6 +328,7 @@ export class HellToaster {
   private collapseHandle: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
+    super();
     afterNextRender(() => this.observeAll());
     effect(() => {
       // Snapshot the layout of any toast that just entered the removing state

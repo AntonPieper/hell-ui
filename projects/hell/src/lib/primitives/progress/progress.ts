@@ -1,5 +1,6 @@
 import { Directive, booleanAttribute, input } from '@angular/core';
 import { NgpProgress, NgpProgressIndicator } from 'ng-primitives/progress';
+import { HellStyleable } from '../../core/styleable';
 
 @Directive({
   selector: '[hellProgress]',
@@ -11,15 +12,11 @@ import { NgpProgress, NgpProgressIndicator } from 'ng-primitives/progress';
   ],
   host: { '[class.hell-progress]': '!unstyled()' },
 })
-export class HellProgress {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellProgress extends HellStyleable {}
 
 @Directive({
   selector: '[hellProgressBar]',
   hostDirectives: [NgpProgressIndicator],
   host: { '[class.hell-progress-bar]': '!unstyled()' },
 })
-export class HellProgressBar {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellProgressBar extends HellStyleable {}

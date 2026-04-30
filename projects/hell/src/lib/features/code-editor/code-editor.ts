@@ -23,6 +23,7 @@ import {
   lineNumbers,
 } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
+import { HellStyleable } from '../../core/styleable';
 
 /**
  * Base CodeMirror setup used by hell-code-editor. Language support is
@@ -206,8 +207,7 @@ export const hellCodeEditorTheme: Extension = [
   },
   template: '<div #host></div>',
 })
-export class HellCodeEditor {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellCodeEditor extends HellStyleable {
   readonly value = input<string>('');
   readonly extensions = input<Extension>([]);
   readonly readOnly = input(false, { transform: booleanAttribute });
@@ -223,6 +223,7 @@ export class HellCodeEditor {
   private applyingExternalValue = false;
 
   constructor() {
+    super();
     inject(DestroyRef).onDestroy(() => this.view?.destroy());
 
     afterNextRender(() => {

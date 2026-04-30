@@ -2,6 +2,7 @@ import { Directive, booleanAttribute, input } from '@angular/core';
 import { NgpToggle } from 'ng-primitives/toggle';
 import { NgpToggleGroup, NgpToggleGroupItem } from 'ng-primitives/toggle-group';
 import { HellSize } from '../../core/types';
+import { HellStyleable } from '../../core/styleable';
 
 /**
  * Single press-toggle button. Pairs with `hell-button`'s utility class for
@@ -9,7 +10,13 @@ import { HellSize } from '../../core/types';
  */
 @Directive({
   selector: 'button[hellToggle]',
-  hostDirectives: [{ directive: NgpToggle, inputs: ['ngpToggleSelected:selected', 'ngpToggleDisabled:disabled'], outputs: ['ngpToggleSelectedChange:selectedChange'] }],
+  hostDirectives: [
+    {
+      directive: NgpToggle,
+      inputs: ['ngpToggleSelected:selected', 'ngpToggleDisabled:disabled'],
+      outputs: ['ngpToggleSelectedChange:selectedChange'],
+    },
+  ],
   host: {
     '[class.hell-button]': '!unstyled()',
     '[class.hell-toggle]': '!unstyled()',
@@ -17,8 +24,7 @@ import { HellSize } from '../../core/types';
     '[attr.data-variant]': '"ghost"',
   },
 })
-export class HellToggle {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellToggle extends HellStyleable {
   readonly size = input<HellSize>('md');
 }
 
@@ -40,13 +46,16 @@ export class HellToggle {
     role: 'group',
   },
 })
-export class HellToggleGroup {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellToggleGroup extends HellStyleable {}
 
 @Directive({
   selector: 'button[hellToggleGroupItem]',
-  hostDirectives: [{ directive: NgpToggleGroupItem, inputs: ['ngpToggleGroupItemValue:value', 'ngpToggleGroupItemDisabled:disabled'] }],
+  hostDirectives: [
+    {
+      directive: NgpToggleGroupItem,
+      inputs: ['ngpToggleGroupItemValue:value', 'ngpToggleGroupItemDisabled:disabled'],
+    },
+  ],
   host: {
     '[class.hell-button]': '!unstyled()',
     '[class.hell-toggle]': '!unstyled()',
@@ -55,7 +64,6 @@ export class HellToggleGroup {
     type: 'button',
   },
 })
-export class HellToggleGroupItem {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellToggleGroupItem extends HellStyleable {
   readonly size = input<HellSize>('sm');
 }

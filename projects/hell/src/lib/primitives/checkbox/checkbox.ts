@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, booleanAttribute, input } from '@angular/core';
 import { NgpCheckbox, injectCheckboxState } from 'ng-primitives/checkbox';
+import { HellStyleable } from '../../core/styleable';
 
 /**
  * Styled checkbox built on `NgpCheckbox`. Forwards `checked`, `indeterminate`,
@@ -34,17 +35,28 @@ import { NgpCheckbox, injectCheckboxState } from 'ng-primitives/checkbox';
   },
   template: `
     @if (state().indeterminate()) {
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+      <svg
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.4"
+        aria-hidden="true"
+      >
         <path d="M3 8h10" />
       </svg>
     } @else if (state().checked()) {
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+      <svg
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.4"
+        aria-hidden="true"
+      >
         <path d="M3 8l3.2 3.2L13 4.5" />
       </svg>
     }
   `,
 })
-export class HellCheckbox {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellCheckbox extends HellStyleable {
   protected readonly state = injectCheckboxState();
 }

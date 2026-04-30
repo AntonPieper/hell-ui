@@ -1,5 +1,6 @@
 import { Directive, booleanAttribute, input } from '@angular/core';
 import type { HellSize } from '../../core/types';
+import { HellStyleable } from '../../core/styleable';
 
 /** Loading shape placeholder. Pure visual — no semantics. */
 @Directive({
@@ -12,8 +13,7 @@ import type { HellSize } from '../../core/types';
     'aria-hidden': 'true',
   },
 })
-export class HellSkeleton {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellSkeleton extends HellStyleable {
   readonly width = input<string>('100%');
   readonly height = input<string>('14px');
   /** Built-in shapes. `text` (default), `circle`, `rect`. */
@@ -36,8 +36,7 @@ export type HellSpinnerVariant = 'ring' | 'dots' | 'bars' | 'pulse';
     'aria-label': 'Loading',
   },
 })
-export class HellSpinner {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellSpinner extends HellStyleable {
   readonly variant = input<HellSpinnerVariant>('ring');
   readonly size = input<HellSize>('md');
 }

@@ -18,6 +18,7 @@ import { HellInput } from '../../primitives/input/input';
 import { HellPopover, HellPopoverTrigger } from '../../primitives/popover/popover';
 import { HellDatePicker } from '../../primitives/date-picker/date-picker';
 import type { HellSize } from '../../core/types';
+import { HellStyleable } from '../../core/styleable';
 
 const HELL_DATE_INPUT_ICONS = {
   faSolidCalendar,
@@ -117,8 +118,7 @@ function formatDate(d: Date | null): string {
     </ng-template>
   `,
 })
-export class HellDateInput {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellDateInput extends HellStyleable {
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
@@ -144,6 +144,7 @@ export class HellDateInput {
   private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field');
 
   constructor() {
+    super();
     // Whenever the bound date changes externally, drop any in-progress
     // user typing so the formatted value re-takes the screen.
     effect(() => {

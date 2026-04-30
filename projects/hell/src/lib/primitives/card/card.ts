@@ -1,4 +1,5 @@
 import { Directive, booleanAttribute, input } from '@angular/core';
+import { HellStyleable } from '../../core/styleable';
 
 @Directive({
   selector: '[hellCard]',
@@ -7,8 +8,7 @@ import { Directive, booleanAttribute, input } from '@angular/core';
     '[attr.data-elevation]': 'elevation()',
   },
 })
-export class HellCard {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellCard extends HellStyleable {
   readonly elevation = input<0 | 1 | 2 | 3>(1);
 }
 
@@ -16,25 +16,19 @@ export class HellCard {
   selector: '[hellCardHeader]',
   host: { '[class.hell-card-header]': '!unstyled()' },
 })
-export class HellCardHeader {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellCardHeader extends HellStyleable {}
 
 @Directive({
   selector: '[hellCardBody]',
   host: { '[class.hell-card-body]': '!unstyled()' },
 })
-export class HellCardBody {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellCardBody extends HellStyleable {}
 
 @Directive({
   selector: '[hellCardFooter]',
   host: { '[class.hell-card-footer]': '!unstyled()' },
 })
-export class HellCardFooter {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellCardFooter extends HellStyleable {}
 
 export const HELL_CARD_DIRECTIVES = [
   HellCard,

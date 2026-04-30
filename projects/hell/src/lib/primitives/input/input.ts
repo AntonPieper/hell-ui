@@ -2,6 +2,7 @@ import { Directive, booleanAttribute, input } from '@angular/core';
 import { NgpInput } from 'ng-primitives/input';
 import { NgpTextarea } from 'ng-primitives/textarea';
 import { HellSize } from '../../core/types';
+import { HellStyleable } from '../../core/styleable';
 
 @Directive({
   selector: 'input[hellInput]',
@@ -13,8 +14,7 @@ import { HellSize } from '../../core/types';
     '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
 })
-export class HellInput {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellInput extends HellStyleable {
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
 }
@@ -29,8 +29,7 @@ export class HellInput {
     '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
 })
-export class HellNativeSelect {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellNativeSelect extends HellStyleable {
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
 }
@@ -45,8 +44,7 @@ export class HellNativeSelect {
     '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
 })
-export class HellTextarea {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellTextarea extends HellStyleable {
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
 }

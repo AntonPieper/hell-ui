@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, booleanAttribute, input } from '@angular/core';
 import { NgpSwitch, NgpSwitchThumb } from 'ng-primitives/switch';
+import { HellStyleable } from '../../core/styleable';
 
 /**
  * Styled switch built on `NgpSwitch`. Use for binary on/off settings where the
@@ -26,6 +27,4 @@ import { NgpSwitch, NgpSwitchThumb } from 'ng-primitives/switch';
   },
   template: `<span ngpSwitchThumb class="hell-switch-thumb"></span>`,
 })
-export class HellSwitch {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellSwitch extends HellStyleable {}

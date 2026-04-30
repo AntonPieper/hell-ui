@@ -12,6 +12,7 @@ import { provideIcons } from '@ng-icons/core';
 import { faSolidDeleteLeft, faSolidPhone } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
+import { HellStyleable } from '../../core/styleable';
 
 interface HellDialpadKey {
   digit: string;
@@ -58,7 +59,8 @@ const HELL_DIALPAD_ICONS = {
   template: `
     <div data-slot="display">
       <output data-slot="number" aria-live="polite"
-        ><span data-slot="number-inner">{{ display() || '\u00A0' }}</span></output>
+        ><span data-slot="number-inner">{{ display() || ' ' }}</span></output
+      >
       <button
         hellButton
         variant="ghost"
@@ -76,15 +78,9 @@ const HELL_DIALPAD_ICONS = {
 
     <div data-slot="grid">
       @for (k of keys; track k.digit) {
-        <button
-          hellButton
-          variant="ghost"
-          data-slot="key"
-          type="button"
-          (click)="press(k.digit)"
-        >
+        <button hellButton variant="ghost" data-slot="key" type="button" (click)="press(k.digit)">
           <span data-slot="digit">{{ k.digit }}</span>
-          <span data-slot="letters">{{ k.letters || '\u00A0' }}</span>
+          <span data-slot="letters">{{ k.letters || ' ' }}</span>
         </button>
       }
     </div>
@@ -104,8 +100,7 @@ const HELL_DIALPAD_ICONS = {
     }
   `,
 })
-export class HellDialpad {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellDialpad extends HellStyleable {
   readonly value = input<string>('');
   /** Render a primary "Call" action button below the keys. */
   readonly showCallButton = input(true, { transform: booleanAttribute });
@@ -134,7 +129,14 @@ export class HellDialpad {
 
   @HostListener('keydown', ['$event'])
   protected onKey(e: KeyboardEvent) {
-    if (e.key === 'Backspace') { this.backspace(); e.preventDefault(); return; }
-    if (/^[0-9*#+]$/.test(e.key)) { this.press(e.key); e.preventDefault(); }
+    if (e.key === 'Backspace') {
+      this.backspace();
+      e.preventDefault();
+      return;
+    }
+    if (/^[0-9*#+]$/.test(e.key)) {
+      this.press(e.key);
+      e.preventDefault();
+    }
   }
 }

@@ -23,6 +23,7 @@ import {
   injectPaginationState,
 } from 'ng-primitives/pagination';
 import { HellIcon } from '../icon/icon';
+import { HellStyleable } from '../../core/styleable';
 
 const HELL_PAGINATION_ICONS = {
   faSolidAnglesLeft,
@@ -56,9 +57,7 @@ const HELL_PAGINATION_ICONS = {
   ],
   host: { '[class.hell-pagination]': '!unstyled()' },
 })
-export class HellPagination {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellPagination extends HellStyleable {}
 
 @Directive({
   selector: 'button[hellPaginationFirst], a[hellPaginationFirst]',
@@ -70,9 +69,7 @@ export class HellPagination {
     '[attr.data-icon-only]': '""',
   },
 })
-export class HellPaginationFirst {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellPaginationFirst extends HellStyleable {}
 
 @Directive({
   selector: 'button[hellPaginationPrev], a[hellPaginationPrev]',
@@ -84,9 +81,7 @@ export class HellPaginationFirst {
     '[attr.data-icon-only]': '""',
   },
 })
-export class HellPaginationPrev {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellPaginationPrev extends HellStyleable {}
 
 @Directive({
   selector: 'button[hellPaginationNext], a[hellPaginationNext]',
@@ -98,9 +93,7 @@ export class HellPaginationPrev {
     '[attr.data-icon-only]': '""',
   },
 })
-export class HellPaginationNext {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellPaginationNext extends HellStyleable {}
 
 @Directive({
   selector: 'button[hellPaginationLast], a[hellPaginationLast]',
@@ -112,9 +105,7 @@ export class HellPaginationNext {
     '[attr.data-icon-only]': '""',
   },
 })
-export class HellPaginationLast {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellPaginationLast extends HellStyleable {}
 
 @Directive({
   selector: 'button[hellPaginationButton], a[hellPaginationButton]',
@@ -131,9 +122,7 @@ export class HellPaginationLast {
     '[attr.data-icon-only]': '""',
   },
 })
-export class HellPaginationButton {
-  readonly unstyled = input(false, { transform: booleanAttribute });
-}
+export class HellPaginationButton extends HellStyleable {}
 
 /**
  * Ready-made pagination strip. Numbered buttons are clamped to a sliding
@@ -187,8 +176,7 @@ export class HellPaginationButton {
     </button>
   `,
 })
-export class HellPaginationStrip {
-  readonly unstyled = input(false, { transform: booleanAttribute });
+export class HellPaginationStrip extends HellStyleable {
   readonly siblingCount = input<number>(2);
 
   private readonly state = injectPaginationState();
