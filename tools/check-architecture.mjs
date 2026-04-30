@@ -27,19 +27,18 @@ function checkDocsExamples() {
     ),
   );
 
-  const examplesSource = catalog.slice(
-    catalog.indexOf('export const HD_DOCS_EXAMPLES'),
-    catalog.indexOf('export const HD_DOCS_CODE_USAGES'),
-  );
   const examples = [
-    ...examplesSource.matchAll(
-      /\{\s*title:\s*'([^']+)',\s*path:\s*'([^']+)',\s*section:\s*'[^']+',\s*detail:\s*'([^']+)'/g,
-    ),
-  ].map((match) => ({
-    title: match[1],
-    path: match[2],
-    detail: match[3],
-  }));
+    ...catalog.matchAll(/\{\s*title:\s*'([^']+)',\s*detail:\s*'([^']+)',\s*terms:\s*'[^']+'/g),
+  ]
+    .map((match) => ({
+      title: match[1],
+      detail: match[2],
+    }))
+    .filter((example) => example.detail.includes('/examples/'))
+    .map((example) => ({
+      ...example,
+      path: `/${example.detail.split('/examples/')[0]}`,
+    }));
 
   const seen = new Set();
   for (const example of examples) {
