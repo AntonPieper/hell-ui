@@ -3,10 +3,8 @@ import {
   Component,
   type ElementRef,
   booleanAttribute,
-  computed,
   input,
   output,
-  signal,
   viewChild,
 } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
@@ -18,6 +16,7 @@ import { HellPopover, HellPopoverTrigger } from '../../primitives/popover/popove
 import { HellDatePicker } from '../../primitives/date-picker/date-picker';
 import type { HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
+import { HellTypedValueInputState } from '../../core/typed-value-input';
 
 const HELL_DATE_INPUT_ICONS = {
   faSolidCalendar,
@@ -129,44 +128,35 @@ export class HellDateInput extends HellStyleable {
 
   readonly dateChange = output<Date>();
 
-  private readonly local = signal<Date | null>(null);
-  /** Raw user text while typing, valid only for the bound date it started from. */
-  private readonly typed = signal<{ base: Date | null; text: string } | null>(null);
-
-  protected readonly current = computed<Date | null>(() => this.date() ?? this.local());
-  protected readonly display = computed<string>(() => {
-    const t = this.typed();
-    if (t && t.base === this.date()) return t.text;
-    return formatDate(this.current());
+  private readonly valueState = new HellTypedValueInputState<Date, Date | null>({
+    external: () => this.date(),
+    parseExternal: (date) => date,
+    parseText: tryParse,
+    format: formatDate,
   });
+  protected readonly current = this.valueState.current;
+  protected readonly display = this.valueState.display;
 
   private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field');
 
   protected onInput(value: string) {
-    this.typed.set({ base: this.date(), text: value });
+    this.valueState.writeDraft(value);
   }
 
   protected onBlur() {
-    const t = this.typed();
-    if (t === null) return;
-    this.commit(t.text);
+    const parsed = this.valueState.commitDraft();
+    if (parsed) this.dateChange.emit(parsed);
   }
 
   protected commit(text: string, event?: Event) {
     event?.preventDefault();
-    this.typed.set(null);
-    const parsed = tryParse(text);
-    if (parsed) {
-      this.local.set(parsed);
-      this.dateChange.emit(parsed);
-    }
+    const parsed = this.valueState.commitText(text);
+    if (parsed) this.dateChange.emit(parsed);
   }
 
   protected onPick(d: Date | undefined) {
     if (!d) return;
-    this.typed.set(null);
-    this.local.set(d);
-    this.dateChange.emit(d);
+    this.dateChange.emit(this.valueState.setValue(d));
     this.field().nativeElement.focus();
   }
 }

@@ -5,7 +5,6 @@ import {
   computed,
   input,
   output,
-  signal,
 } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidClock } from '@ng-icons/font-awesome/solid';
@@ -15,6 +14,7 @@ import { HellInput } from '../../primitives/input/input';
 import { HellPopover, HellPopoverTrigger } from '../../primitives/popover/popover';
 import type { HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
+import { HellTypedValueInputState } from '../../core/typed-value-input';
 
 interface ParsedTime {
   h: number;
@@ -221,46 +221,37 @@ export class HellTimeInput extends HellStyleable {
   protected readonly pad = pad;
   protected readonly format = format;
 
-  private readonly local = signal<ParsedTime | null>(null);
-  /** Raw user text while typing, valid only for the bound value it started from. */
-  private readonly typed = signal<{ base: string | null; text: string } | null>(null);
-
-  protected readonly current = computed<ParsedTime>(
-    () => tryParse(this.value() ?? '') ?? this.local() ?? { h: 0, m: 0, s: 0 },
-  );
-
-  protected readonly display = computed<string>(() => {
-    const t = this.typed();
-    if (t && t.base === this.value()) return t.text;
-    const v = tryParse(this.value() ?? '') ?? this.local();
-    return v ? format(v, this.seconds()) : '';
+  private readonly valueState = new HellTypedValueInputState<ParsedTime, string | null, string>({
+    external: () => this.value(),
+    parseExternal: (value) => tryParse(value ?? ''),
+    parseText: tryParse,
+    format: (value) => (value ? format(value, this.seconds()) : ''),
+    toOutput: (value) => format(value, this.seconds()),
   });
 
+  protected readonly current = computed<ParsedTime>(
+    () => this.valueState.current() ?? { h: 0, m: 0, s: 0 },
+  );
+  protected readonly display = this.valueState.display;
+
   protected onInput(value: string) {
-    this.typed.set({ base: this.value(), text: value });
+    this.valueState.writeDraft(value);
   }
 
   protected onBlur() {
-    const t = this.typed();
-    if (t === null) return;
-    this.commit(t.text);
+    const next = this.valueState.commitDraft();
+    if (next) this.valueChange.emit(next);
   }
 
   protected commit(text: string, event?: Event) {
     event?.preventDefault();
-    this.typed.set(null);
-    const parsed = tryParse(text);
-    if (parsed) {
-      this.local.set(parsed);
-      this.valueChange.emit(format(parsed, this.seconds()));
-    }
+    const next = this.valueState.commitText(text);
+    if (next) this.valueChange.emit(next);
   }
 
   protected setUnit(unit: 'h' | 'm' | 's', n: number) {
     const t = { ...this.current(), [unit]: n } as ParsedTime;
-    this.typed.set(null);
-    this.local.set(t);
-    this.valueChange.emit(format(t, this.seconds()));
+    this.valueChange.emit(this.valueState.setValue(t));
   }
 
   protected nudge(unit: 'h' | 'm' | 's', delta: number) {
@@ -271,8 +262,6 @@ export class HellTimeInput extends HellStyleable {
       t.h = Math.floor(totalMinutes / 60);
       t.m = totalMinutes % 60;
     } else t.s = (t.s + delta + 60) % 60;
-    this.typed.set(null);
-    this.local.set(t);
-    this.valueChange.emit(format(t, this.seconds()));
+    this.valueChange.emit(this.valueState.setValue(t));
   }
 }
