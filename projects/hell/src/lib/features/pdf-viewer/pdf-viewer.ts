@@ -33,7 +33,7 @@ import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
 import { HellInput, HellNativeSelect } from '../../primitives/input/input';
 import { HellStyleable } from '../../core/styleable';
-import { HellPdfRuntime } from './pdf-viewer.runtime';
+import { HellPdfRuntime, HellPdfViewerInteractionScope } from './pdf-viewer.runtime';
 import {
   PDF_ZOOM_OPTIONS,
   PDF_ZOOM_VALUES,
@@ -110,14 +110,15 @@ export class HellPdfViewer extends HellStyleable {
   protected readonly customZoomLabel = computed(() => getZoomLabel(this.effectiveZoomValue()));
 
   private readonly runtime = new HellPdfRuntime();
-  private printCleanup: (() => void) | null = null;
-  private viewerActive = false;
   private readonly bootstrapped = signal(false);
+  private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
+  private readonly interactionScope = new HellPdfViewerInteractionScope(
+    () => this.host.nativeElement,
+  );
 
   constructor() {
     super();
     inject(DestroyRef).onDestroy(() => {
-      this.printCleanup?.();
       this.runtime.cleanup();
     });
 
@@ -207,16 +208,9 @@ export class HellPdfViewer extends HellStyleable {
   }
 
   protected async print() {
-    this.printCleanup?.();
-
     try {
-      const session = await this.runtime.createPrintSession(this.src());
-      this.printCleanup = () => session.cleanup();
-      await session.print();
-      window.setTimeout(() => session.cleanup(), 30_000);
+      await this.runtime.print(this.src());
     } catch (e) {
-      this.printCleanup?.();
-      this.printCleanup = null;
       this.error.emit(e);
     }
   }
@@ -283,100 +277,31 @@ export class HellPdfViewer extends HellStyleable {
     });
   }
 
-  private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
-
   protected onWindowPointerDown(e: PointerEvent) {
-    this.viewerActive = this.host.nativeElement.contains(e.target as Node | null);
+    this.interactionScope.recordPointerTarget(e.target);
   }
 
   protected onWindowKey(e: KeyboardEvent) {
-    if (!this.shouldHandleGlobalShortcut(e)) return;
-
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'F')) {
-      e.preventDefault();
-      this.openFind();
-      return;
-    }
-
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) {
-      e.preventDefault();
-      this.print();
-      return;
-    }
-
-    if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '=')) {
-      e.preventDefault();
-      this.zoomIn();
-      return;
-    }
-
-    if ((e.ctrlKey || e.metaKey) && (e.key === '-' || e.key === '_')) {
-      e.preventDefault();
-      this.zoomOut();
-      return;
-    }
-
-    if ((e.ctrlKey || e.metaKey) && e.key === '0') {
-      e.preventDefault();
-      this.onZoomSelect('auto');
-    }
-  }
-
-  private shouldHandleGlobalShortcut(e: KeyboardEvent) {
-    const host = this.host.nativeElement;
-    const activeElement = document.activeElement;
-    const target = e.target;
-    const selection = window.getSelection();
-
-    return (
-      this.viewerActive ||
-      (activeElement instanceof Node && host.contains(activeElement)) ||
-      (target instanceof Node && host.contains(target)) ||
-      !!(
-        selection &&
-        ((selection.anchorNode && host.contains(selection.anchorNode)) ||
-          (selection.focusNode && host.contains(selection.focusNode)))
-      )
-    );
+    this.interactionScope.handleGlobalShortcut(e, {
+      openFind: () => this.openFind(),
+      print: () => void this.print(),
+      zoomIn: () => this.zoomIn(),
+      zoomOut: () => this.zoomOut(),
+      resetZoom: () => this.onZoomSelect('auto'),
+    });
   }
 
   protected onKey(e: KeyboardEvent) {
-    // Ctrl/Cmd+F always opens & focuses the find bar — never closes it.
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'F')) {
-      e.preventDefault();
-      this.openFind();
-      return;
-    }
-    const target = e.target as HTMLElement;
-    const inField = target?.matches?.('input,textarea,select');
-    if (inField) return;
-    switch (e.key) {
-      case 'PageDown':
-        this.next();
-        break;
-      case 'PageUp':
-        this.prev();
-        break;
-      case 'Home':
-        this.goTo(1);
-        break;
-      case 'End':
-        this.goTo(this.totalPages());
-        break;
-      case '+':
-      case '=':
-        this.zoomIn();
-        break;
-      case '-':
-      case '_':
-        this.zoomOut();
-        break;
-      case '0':
-        this.onZoomSelect('auto');
-        break;
-      default:
-        return;
-    }
-    e.preventDefault();
+    this.interactionScope.handleViewerKey(e, {
+      openFind: () => this.openFind(),
+      print: () => void this.print(),
+      zoomIn: () => this.zoomIn(),
+      zoomOut: () => this.zoomOut(),
+      resetZoom: () => this.onZoomSelect('auto'),
+      nextPage: () => this.next(),
+      previousPage: () => this.prev(),
+      firstPage: () => this.goTo(1),
+      lastPage: () => this.goTo(this.totalPages()),
+    });
   }
 }

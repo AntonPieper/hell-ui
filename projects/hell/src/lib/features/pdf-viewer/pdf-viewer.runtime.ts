@@ -37,6 +37,133 @@ export interface HellPdfFindRequest {
   findPrevious: boolean;
 }
 
+export interface HellPdfGlobalShortcutActions {
+  openFind(): void;
+  print(): void;
+  zoomIn(): void;
+  zoomOut(): void;
+  resetZoom(): void;
+}
+
+export interface HellPdfViewerKeyActions extends HellPdfGlobalShortcutActions {
+  nextPage(): void;
+  previousPage(): void;
+  firstPage(): void;
+  lastPage(): void;
+}
+
+export class HellPdfViewerInteractionScope {
+  private viewerActive = false;
+
+  constructor(private readonly host: () => HTMLElement | null | undefined) {}
+
+  recordPointerTarget(target: EventTarget | Node | null): void {
+    const host = this.host();
+    this.viewerActive = !!host && target instanceof Node && host.contains(target);
+  }
+
+  handleGlobalShortcut(event: KeyboardEvent, actions: HellPdfGlobalShortcutActions): boolean {
+    if (!this.shouldHandleGlobalShortcut(event)) return false;
+    return this.handleCommandShortcut(event, actions);
+  }
+
+  handleViewerKey(event: KeyboardEvent, actions: HellPdfViewerKeyActions): boolean {
+    if (this.handleCommandShortcut(event, actions)) return true;
+    if (isPdfEditableTarget(event.target)) return false;
+
+    switch (event.key) {
+      case 'PageDown':
+        actions.nextPage();
+        break;
+      case 'PageUp':
+        actions.previousPage();
+        break;
+      case 'Home':
+        actions.firstPage();
+        break;
+      case 'End':
+        actions.lastPage();
+        break;
+      case '+':
+      case '=':
+        actions.zoomIn();
+        break;
+      case '-':
+      case '_':
+        actions.zoomOut();
+        break;
+      case '0':
+        actions.resetZoom();
+        break;
+      default:
+        return false;
+    }
+
+    event.preventDefault();
+    return true;
+  }
+
+  private shouldHandleGlobalShortcut(event: KeyboardEvent): boolean {
+    const host = this.host();
+    if (!host) return false;
+
+    const doc = host.ownerDocument;
+    const activeElement = doc.activeElement;
+    const target = event.target;
+    const selection = doc.defaultView?.getSelection();
+
+    return (
+      this.viewerActive ||
+      (activeElement instanceof Node && host.contains(activeElement)) ||
+      (target instanceof Node && host.contains(target)) ||
+      !!(
+        selection &&
+        ((selection.anchorNode && host.contains(selection.anchorNode)) ||
+          (selection.focusNode && host.contains(selection.focusNode)))
+      )
+    );
+  }
+
+  private handleCommandShortcut(
+    event: KeyboardEvent,
+    actions: HellPdfGlobalShortcutActions,
+  ): boolean {
+    if (!(event.ctrlKey || event.metaKey)) return false;
+
+    if (event.key === 'f' || event.key === 'F') {
+      event.preventDefault();
+      actions.openFind();
+      return true;
+    }
+
+    if (event.key === 'p' || event.key === 'P') {
+      event.preventDefault();
+      actions.print();
+      return true;
+    }
+
+    if (event.key === '+' || event.key === '=') {
+      event.preventDefault();
+      actions.zoomIn();
+      return true;
+    }
+
+    if (event.key === '-' || event.key === '_') {
+      event.preventDefault();
+      actions.zoomOut();
+      return true;
+    }
+
+    if (event.key === '0') {
+      event.preventDefault();
+      actions.resetZoom();
+      return true;
+    }
+
+    return false;
+  }
+}
+
 export class HellPdfRuntime {
   private pdfjs: any = null;
   private viewer: any = null;
@@ -52,6 +179,7 @@ export class HellPdfRuntime {
   private initialZoom: HellPdfInitialZoom = 'auto';
   private initialPage = 1;
   private loadToken = 0;
+  private printCleanup: (() => void) | null = null;
 
   constructor(private readonly adapter: HellPdfRuntimeAdapter = new HellPdfJsRuntimeAdapter()) {}
 
@@ -114,6 +242,7 @@ export class HellPdfRuntime {
     this.loadToken++;
     this.containerEventCleanup?.();
     this.containerEventCleanup = null;
+    this.clearPrintSession();
     this.clearActiveDocument();
     this.viewer?.cleanup?.();
     this.viewer = null;
@@ -179,6 +308,25 @@ export class HellPdfRuntime {
     ownerDocument?: Document,
   ): Promise<HellPdfPrintSession> {
     return this.adapter.createPrintSession(source, ownerDocument);
+  }
+
+  async print(
+    source: HellPdfSource,
+    ownerDocument?: Document,
+    cleanupDelayMs = 30_000,
+  ): Promise<void> {
+    this.clearPrintSession();
+
+    const session = await this.createPrintSession(source, ownerDocument);
+    this.printCleanup = () => session.cleanup();
+    try {
+      await session.print();
+      const win = ownerDocument?.defaultView ?? (typeof window === 'undefined' ? null : window);
+      win?.setTimeout(() => session.cleanup(), cleanupDelayMs);
+    } catch (error) {
+      this.clearPrintSession();
+      throw error;
+    }
   }
 
   async renderThumbs(
@@ -279,6 +427,11 @@ export class HellPdfRuntime {
     this.container.scrollTop = (previousScrollTop + localY) * zoomRatio - localY;
   }
 
+  private clearPrintSession(): void {
+    this.printCleanup?.();
+    this.printCleanup = null;
+  }
+
   private clearActiveDocument(): void {
     this.viewer?.setDocument?.(null);
     this.linkService?.setDocument?.(null);
@@ -325,4 +478,8 @@ export class HellPdfRuntime {
         return state;
     }
   }
+}
+
+function isPdfEditableTarget(target: EventTarget | null): boolean {
+  return target instanceof HTMLElement && target.matches('input,textarea,select');
 }
