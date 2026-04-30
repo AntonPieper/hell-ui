@@ -10,13 +10,12 @@ import { HellStyleable } from '../../core/styleable';
   host: {
     '[class.hell-input]': '!unstyled()',
     '[attr.data-size]': 'size()',
-    '[attr.data-invalid]': 'invalid() ? "true" : null',
     '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
 })
 export class HellInput extends HellStyleable {
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
-  readonly invalid = input(false, { transform: booleanAttribute });
+  readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
 }
 
 @Directive({
@@ -25,13 +24,12 @@ export class HellInput extends HellStyleable {
   host: {
     '[class.hell-native-select]': '!unstyled()',
     '[attr.data-size]': 'size()',
-    '[attr.data-invalid]': 'invalid() ? "true" : null',
     '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
 })
 export class HellNativeSelect extends HellStyleable {
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
-  readonly invalid = input(false, { transform: booleanAttribute });
+  readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
 }
 
 @Directive({
@@ -40,11 +38,10 @@ export class HellNativeSelect extends HellStyleable {
   host: {
     '[class.hell-textarea]': '!unstyled()',
     '[attr.data-size]': 'size()',
-    '[attr.data-invalid]': 'invalid() ? "true" : null',
     '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
 })
 export class HellTextarea extends HellStyleable {
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
-  readonly invalid = input(false, { transform: booleanAttribute });
+  readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
 }
