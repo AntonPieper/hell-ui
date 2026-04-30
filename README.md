@@ -1,59 +1,62 @@
-# HellUi
+# Hell UI
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.7.
+Hell UI is a compact Angular component system for dense business applications.
+It favors directive-first primitives, optional styled primitives, opinionated
+composites, and heavier features behind feature-specific entry points.
 
-## Development server
-
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Workspace
 
 ```bash
-ng generate component component-name
+pnpm install
+pnpm build:lib
+pnpm build:docs
+pnpm test
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Package Imports
+
+```ts
+import { HellButton } from 'hell';
+import { HELL_SELECT_DIRECTIVES } from 'hell/primitives';
+import { HELL_APP_SHELL_DIRECTIVES } from 'hell/composites';
+import { HELL_TABLE_DIRECTIVES } from 'hell/features/data-table';
+```
+
+## Styles
+
+```css
+@import "tailwindcss";
+@import "hell/styles";
+```
+
+Use smaller CSS tiers when the app only needs part of the library:
+
+```css
+@import "hell/styles/tokens";
+@import "hell/styles/primitives";
+@import "hell/styles/composites";
+@import "hell/styles/features/data-table";
+```
+
+## Component Contract
+
+Public modules should expose behavior through directives, optional default host
+classes, `data-*` state attributes, `data-slot` part attributes, public CSS
+variables for supported visual overrides, and `unstyled` for full Style Opt-Out.
+
+```html
+<button hellButton variant="primary">Save</button>
+<button hellButton unstyled>Custom behavior-only button</button>
+
+<button hellSelect>
+  <span hellSelectValue>Germany</span>
+</button>
+```
+
+## Docs App
 
 ```bash
-ng generate --help
+pnpm start
 ```
 
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Open `http://localhost:4200/`.

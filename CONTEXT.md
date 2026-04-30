@@ -4,6 +4,21 @@ hell is a compact Angular component system for dense business applications. It f
 
 ## Domain Terms
 
+**Behavior Primitive**
+A directive-first module whose Interface is behavior, accessibility, and state attributes while consumers own DOM structure and visual styling.
+
+**Styled Primitive**
+A Behavior Primitive plus optional Hell host classes, data attributes, and public CSS variables. Consumers can use Style Opt-Out to keep behavior while removing the default visual implementation.
+
+**Composite**
+A module that combines multiple primitives into a higher-level experience. A Composite may own some DOM structure when that structure is part of the leverage it provides, but its docs should name the owned parts and the escape hatches.
+
+**Feature**
+A heavier module with optional dependencies, runtime setup, or large styling. Features stay behind feature-specific Package Entry Points and feature-specific CSS imports.
+
+**Component Contract**
+The shared Interface expected from public Hell modules: behavior directives, optional default class, data-slot attributes for owned parts, data-state/data-size/data-variant attributes for stateful styling, public CSS variables for supported visual overrides, and Style Opt-Out for full visual opt-out.
+
 **Style Opt-Out**
 The shared contract that lets consumers keep a hell module's behavior and accessibility while removing its default host styling with `unstyled`.
 

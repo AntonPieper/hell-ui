@@ -1,64 +1,81 @@
 # Hell
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.0.
+Compact Angular component system for dense business applications.
 
-## Code scaffolding
+Hell exposes:
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- Behavior primitives: directive-first modules where callers own markup.
+- Styled primitives: the same behavior plus optional Hell classes and tokens.
+- Composites: higher-level recipes that may own useful structure.
+- Features: heavier modules behind feature-specific entry points.
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the library, run:
+## Install
 
 ```bash
-ng build hell
+pnpm add hell ng-primitives @ng-icons/core tailwindcss
 ```
 
-This command will compile your project, and the build artifacts will be placed in the `dist/` directory.
+## Angular Imports
 
-### Publishing the Library
-
-Once the project is built, you can publish your library by following these steps:
-
-1. Navigate to the `dist` directory:
-
-   ```bash
-   cd dist/hell
-   ```
-
-2. Run the `npm publish` command to publish your library to the npm registry:
-   ```bash
-   npm publish
-   ```
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
+```ts
+import { HellButton } from 'hell';
+import { HELL_SELECT_DIRECTIVES } from 'hell/primitives';
+import { HELL_APP_SHELL_DIRECTIVES } from 'hell/composites';
+import { HELL_TABLE_DIRECTIVES } from 'hell/features/data-table';
 ```
 
-## Running end-to-end tests
+## CSS Imports
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
+```css
+@import "tailwindcss";
+@import "hell/styles";
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+For progressive loading:
 
-## Additional Resources
+```css
+@import "hell/styles/tokens";
+@import "hell/styles/primitives";
+@import "hell/styles/composites";
+@import "hell/styles/features/code-editor";
+@import "hell/styles/features/data-table";
+@import "hell/styles/features/pdf-viewer";
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Style Opt-Out
+
+`unstyled` removes Hell host classes while keeping behavior, accessibility, and
+state attributes.
+
+```html
+<button hellButton variant="primary">Save</button>
+<button hellButton unstyled variant="primary">Save</button>
+```
+
+## Customization
+
+Hell uses semantic tokens and supported component variables:
+
+```css
+.danger-zone {
+  --hell-button-radius: 999px;
+  --hell-button-height: 40px;
+  --hell-select-width: auto;
+  --hell-select-indicator-display: none;
+}
+```
+
+## Headless Composition
+
+```html
+<button hellSelect [value]="country()" (valueChange)="country.set($event)">
+  <span hellSelectValue>{{ country() }}</span>
+</button>
+
+<ng-template hellSelectPortal>
+  <div hellSelectDropdown>
+    <button hellSelectOption value="DE">Germany</button>
+    <button hellSelectOption value="FR">France</button>
+  </div>
+</ng-template>
+```
