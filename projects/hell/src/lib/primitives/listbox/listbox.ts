@@ -8,6 +8,12 @@ import {
   NgpListboxTrigger,
 } from 'ng-primitives/listbox';
 
+/**
+ * Headless ARIA listbox wrapper. Use `[value]` / `(valueChange)` for the
+ * selected item, `[mode]="multiple"` for multi-select, and `[compareWith]`
+ * when values are objects. Child `hellListboxOption` directives provide the
+ * option values; sections and headers are structural grouping aids.
+ */
 @Directive({
   selector: '[hellListbox]',
   hostDirectives: [
@@ -29,12 +35,14 @@ import {
 })
 export class HellListbox extends HellStyleable {}
 
+/** Optional trigger used by composed controls that open a separate listbox. */
 @Directive({
   selector: '[hellListboxTrigger]',
   hostDirectives: [NgpListboxTrigger],
 })
 export class HellListboxTrigger {}
 
+/** Selectable listbox row. `[value]` is compared against the parent value. */
 @Directive({
   selector: '[hellListboxOption]',
   hostDirectives: [
@@ -49,6 +57,7 @@ export class HellListboxTrigger {}
 })
 export class HellListboxOption extends HellStyleable {}
 
+/** Groups related options while preserving listbox keyboard behavior. */
 @Directive({
   selector: '[hellListboxSection]',
   hostDirectives: [NgpListboxSection],
@@ -58,6 +67,7 @@ export class HellListboxOption extends HellStyleable {}
 })
 export class HellListboxSection extends HellStyleable {}
 
+/** Non-selectable label/header for a listbox section. */
 @Directive({
   selector: '[hellListboxHeader]',
   hostDirectives: [{ directive: NgpListboxHeader, inputs: ['id'] }],

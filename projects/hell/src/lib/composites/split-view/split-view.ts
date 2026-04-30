@@ -22,6 +22,7 @@ import { HellIcon } from '../../primitives/icon/icon';
 import { HellStyleable } from '../../core/styleable';
 import { HELL_RESIZABLE_DIRECTIVES } from '../resizable/resizable';
 
+/** Primary pane template for `hell-split-view`; receives `{ compact, detailOpen }`. */
 @Directive({
   selector: 'ng-template[hellSplitPrimary]',
 })
@@ -29,6 +30,7 @@ export class HellSplitPrimary {
   readonly template = inject<TemplateRef<unknown>>(TemplateRef);
 }
 
+/** Detail pane template for `hell-split-view`; receives `{ compact, detailOpen }`. */
 @Directive({
   selector: 'ng-template[hellSplitDetail]',
 })
@@ -36,6 +38,12 @@ export class HellSplitDetail {
   readonly template = inject<TemplateRef<unknown>>(TemplateRef);
 }
 
+/**
+ * Master-detail split view. Above `compactBelow`, primary/detail render side by
+ * side with a resizable handle. Below it, one pane renders at a time and
+ * `detailOpen` becomes the controlled navigation state; back emits
+ * `detailOpenChange(false)`. Numeric `height` values are normalized to pixels.
+ */
 @Component({
   selector: 'hell-split-view',
   changeDetection: ChangeDetectionStrategy.OnPush,

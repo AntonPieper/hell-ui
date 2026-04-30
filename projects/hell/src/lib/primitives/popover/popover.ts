@@ -3,6 +3,11 @@ import { NgpPopover, NgpPopoverTrigger } from 'ng-primitives/popover';
 import { HellStyleable } from '../../core/styleable';
 import { HELL_OVERLAY_SCOPE, hellRegisterOverlayElement } from '../../core/overlay-scope';
 
+/**
+ * Trigger for an `ng-template` popover. Bind `[hellPopoverTrigger]="template"`
+ * and optionally pass placement, offset, flip, disabled, and close policy
+ * inputs through to ng-primitives.
+ */
 @Directive({
   selector: '[hellPopoverTrigger]',
   hostDirectives: [
@@ -23,6 +28,11 @@ import { HELL_OVERLAY_SCOPE, hellRegisterOverlayElement } from '../../core/overl
 })
 export class HellPopoverTrigger {}
 
+/**
+ * Floating popover surface. Place inside the trigger template as
+ * `<div hellPopover>...</div>`; it registers with any active Hell overlay
+ * scope so nested menus/popovers count as inside interactions.
+ */
 @Directive({
   selector: '[hellPopover]',
   hostDirectives: [NgpPopover],

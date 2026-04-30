@@ -208,9 +208,12 @@ export const hellCodeEditorTheme: Extension = [
   template: '<div #host></div>',
 })
 export class HellCodeEditor extends HellStyleable {
+  /** External document text. Updating it reconfigures the editor without echoing `valueChange`. */
   readonly value = input<string>('');
+  /** Caller-owned CodeMirror extensions, including language support. */
   readonly extensions = input<Extension>([]);
   readonly readOnly = input(false, { transform: booleanAttribute });
+  /** Emits only user/editor document edits, not external `value` writes. */
   readonly valueChange = output<string>();
 
   private readonly hostRef = viewChild.required<ElementRef<HTMLDivElement>>('host');

@@ -66,15 +66,25 @@ export interface HellFloatingDismissEvent {
 }
 
 export interface HellFloatingDismissOptions {
+  /** Primary logical owner of the floating interaction. Checked first. */
   readonly root?: () => Node | null | undefined;
+  /** Extra inside targets, such as trigger buttons or inline anchors. */
   readonly inside?: () => readonly (Node | null | undefined)[];
+  /** Portaled descendants registered by nested Hell overlay primitives. */
   readonly scope?: HellOverlayScope | null | undefined;
+  /** Document that owns the listeners; defaults to global `document`. */
   readonly ownerDocument?: () => Document | null | undefined;
+  /** Listener gate. Inactive interactions ignore all document events. */
   readonly active?: () => boolean;
+  /** Override dismissal policy for all reasons before `onDismiss` runs. */
   readonly shouldDismiss?: (event: HellFloatingDismissEvent) => boolean;
+  /** Enable dismissal on pointerdown outside the inside set. */
   readonly closeOnOutsidePointer?: () => boolean;
+  /** Enable dismissal on captured click outside the inside set. */
   readonly closeOnOutsideClick?: () => boolean;
+  /** Enable dismissal when focus leaves the inside set. */
   readonly closeOnOutsideFocus?: () => boolean;
+  /** Enable Escape dismissal when focus/event target is inside. */
   readonly closeOnEscape?: () => boolean;
   readonly onDismiss: (event: HellFloatingDismissEvent) => void;
 }
@@ -83,11 +93,13 @@ export interface HellFloatingInteractionOptions extends Omit<
   HellFloatingDismissOptions,
   'root' | 'inside' | 'scope' | 'ownerDocument'
 > {
+  /** Rendered floating surface. Used as default root and listener document. */
   readonly surface: () => HTMLElement | null | undefined;
   readonly root?: () => Node | null | undefined;
   readonly inside?: () => readonly (Node | null | undefined)[];
   readonly scope?: HellOverlayScope | null | undefined;
   readonly ownerDocument?: () => Document | null | undefined;
+  /** Return false when caller registers the surface through another owner. */
   readonly registerSurface?: () => boolean;
 }
 

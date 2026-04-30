@@ -55,6 +55,12 @@ const HELL_PDF_VIEWER_ICONS = {
   faSolidXmark,
 };
 
+/**
+ * Full PDF viewer backed by pdf.js. `src` accepts a URL string, `URL`, or
+ * `ArrayBuffer`; loading starts after the viewer runtime bootstraps. Emits
+ * page, zoom, loaded, and error events. Keyboard shortcuts are scoped to the
+ * active viewer: Ctrl/Cmd+F, Ctrl/Cmd+P, +/-/0, PageUp/PageDown, Home, End.
+ */
 @Component({
   selector: 'hell-pdf-viewer',
   changeDetection: ChangeDetectionStrategy.OnPush,

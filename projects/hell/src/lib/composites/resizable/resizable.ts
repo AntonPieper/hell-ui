@@ -42,6 +42,7 @@ import { HellStyleable } from '../../core/styleable';
 })
 export class HellResizable extends HellStyleable implements AfterContentInit {
   readonly orientation = input<HellOrientation>('horizontal');
+  /** When false, container resizes do not rebalance panes after user sizing. */
   readonly rescaleOnResize = input(true, { transform: booleanAttribute });
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
@@ -61,10 +62,12 @@ export class HellResizable extends HellStyleable implements AfterContentInit {
     this.destroyRef.onDestroy(() => observer.disconnect());
   }
 
+  /** Child/advanced integration hook; panes register themselves on init. */
   registerPane(p: HellResizablePane) {
     if (!this.panes.includes(p)) this.panes.push(p);
     queueMicrotask(() => this.fitPanesToAvailableSize());
   }
+  /** Child/advanced integration hook; removes a pane from resize accounting. */
   unregisterPane(p: HellResizablePane) {
     const i = this.panes.indexOf(p);
     if (i >= 0) this.panes.splice(i, 1);
@@ -108,6 +111,7 @@ export class HellResizable extends HellStyleable implements AfterContentInit {
     return this.constrained();
   }
 
+  /** Marks that explicit pixel sizes should be preserved across future fits. */
   markUserSized(): void {
     this.userSized = true;
   }

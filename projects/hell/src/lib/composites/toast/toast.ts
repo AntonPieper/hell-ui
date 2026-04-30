@@ -62,6 +62,11 @@ interface ToastInternal extends Required<Omit<HellToastOptions, 'template' | 'ac
 const DEFAULT_DURATION = 4500;
 const EXIT_MS = 220;
 
+/**
+ * Global toast store. Mount one `hell-toaster` in the app shell; callers can
+ * inject this service anywhere, show toasts, update by stable id, and pause or
+ * resume timers while the stack is hovered/focused.
+ */
 @Injectable({ providedIn: 'root' })
 export class HellToastService {
   private nextId = 1;

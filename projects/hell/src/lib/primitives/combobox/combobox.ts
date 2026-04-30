@@ -10,6 +10,14 @@ import {
   NgpComboboxPortal,
 } from 'ng-primitives/combobox';
 
+/**
+ * Headless combobox shell around `NgpCombobox`. Pair with
+ * `hellComboboxInput`, `hellComboboxButton`, `hellComboboxOption`, and a
+ * dropdown rendered through `*hellComboboxPortal`. Bind `[value]` /
+ * `(valueChange)` for selection, `[options]` for the option registry, and
+ * `[compareWith]` when option identity is not reference-based. In multiple
+ * mode the value follows ng-primitives' array contract.
+ */
 @Directive({
   selector: '[hellCombobox]',
   hostDirectives: [
@@ -35,6 +43,7 @@ import {
 })
 export class HellCombobox extends HellStyleable {}
 
+/** Text input that drives combobox filtering and keyboard focus. */
 @Directive({
   selector: 'input[hellComboboxInput]',
   hostDirectives: [NgpComboboxInput],
@@ -44,6 +53,7 @@ export class HellCombobox extends HellStyleable {}
 })
 export class HellComboboxInput extends HellStyleable {}
 
+/** Toggle button for opening and closing the combobox dropdown. */
 @Directive({
   selector: 'button[hellComboboxButton]',
   hostDirectives: [NgpComboboxButton],
@@ -53,6 +63,11 @@ export class HellComboboxInput extends HellStyleable {}
 })
 export class HellComboboxButton extends HellStyleable {}
 
+/**
+ * Floating dropdown surface for combobox options. Registers with any active
+ * Hell overlay scope so parent floating controls do not treat option clicks as
+ * outside interactions.
+ */
 @Directive({
   selector: '[hellComboboxDropdown]',
   hostDirectives: [NgpComboboxDropdown],
@@ -85,6 +100,10 @@ export class HellComboboxDropdown extends HellStyleable {
 })
 export class HellComboboxPortal {}
 
+/**
+ * Selectable combobox option. `[value]` is the payload emitted by the parent
+ * combobox; `[index]` is available for virtualized or manually ordered lists.
+ */
 @Directive({
   selector: '[hellComboboxOption]',
   hostDirectives: [

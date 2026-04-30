@@ -39,11 +39,16 @@ import { HellCommandPaletteService } from './command-palette';
 import { HellStyleable } from '../../core/styleable';
 
 export interface HellOmnibarRegisteredItem {
+  /** Stable DOM id used for `aria-activedescendant`. */
   readonly itemId: string;
+  /** Whether activation should close the parent omnibar. */
   readonly closeOnSelect: () => boolean;
 
+  /** Raw item value used for active-item bookkeeping. */
   value(): unknown;
+  /** Emits the child `(select)` output and returns the selected payload. */
   selectValue(): unknown;
+  /** Keep keyboard navigation visible without exposing scroll policy upstream. */
   scrollIntoView(): void;
 }
 
@@ -186,11 +191,17 @@ export class HellOmnibar extends HellStyleable implements HellOverlayScope {
   readonly emptyMessage = input<string>('No results');
   readonly emptyTemplate = input<TemplateRef<unknown> | null>(null);
   readonly panelClass = input<string | string[] | Record<string, boolean>>('');
+  /** Local items ranked by `HellSearchService` whenever the query changes. */
   readonly searchItems = input<readonly unknown[] | null>(null);
+  /** Async/remote source. Superseded searches receive an abort signal. */
   readonly searchSource = input<HellSearchSource<unknown> | null>(null);
+  /** Weighted local fields used for `searchItems` or raw source items. */
   readonly searchFields = input<readonly HellSearchField<never>[]>([]);
+  /** Caps emitted/rendered search results after ranking or source ordering. */
   readonly searchLimit = input<number | undefined>(undefined);
+  /** Opaque caller context forwarded to `searchSource` on every request. */
   readonly searchParams = input<unknown>(undefined);
+  /** Debounce in ms before search starts; set 0 for immediate searches. */
   readonly searchDebounce = input<number>(120);
   readonly loadingMessage = input<string>('Searching');
   readonly loadingRows = input<number>(4);
@@ -214,7 +225,9 @@ export class HellOmnibar extends HellStyleable implements HellOverlayScope {
 
   readonly submit = output<HellOmnibarSubmitEvent>();
   readonly openChange = output<boolean>();
+  /** Emits ranked results so projected content can render custom rows. */
   readonly searchResultsChange = output<readonly HellSearchResult<unknown>[]>();
+  /** Emits async source failures; the component keeps the panel usable. */
   readonly searchError = output<unknown>();
 
   /* ── Internal state ────────────────────────────────────────────────── */
