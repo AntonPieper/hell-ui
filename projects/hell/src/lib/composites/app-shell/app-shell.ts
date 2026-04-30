@@ -178,6 +178,45 @@ export class HellAppSidenav extends HellStyleable {
 }
 
 @Directive({
+  selector: '[hellNavItem]',
+  host: {
+    '[class.hell-nav-item]': '!unstyled()',
+    '[attr.data-slot]': '"nav-item"',
+    '[attr.data-active]': 'active() ? "true" : null',
+  },
+})
+export class HellNavItem extends HellStyleable {
+  readonly active = input(false, { transform: booleanAttribute });
+}
+
+@Directive({
+  selector: '[hellNavItemIcon]',
+  host: {
+    '[class.hell-nav-icon]': '!unstyled()',
+    '[attr.data-slot]': '"nav-icon"',
+  },
+})
+export class HellNavItemIcon extends HellStyleable {}
+
+@Directive({
+  selector: '[hellNavItemLabel]',
+  host: {
+    '[class.hell-nav-label]': '!unstyled()',
+    '[attr.data-slot]': '"nav-label"',
+  },
+})
+export class HellNavItemLabel extends HellStyleable {}
+
+@Directive({
+  selector: '[hellNavItemTrailing]',
+  host: {
+    '[class.hell-nav-trailing]': '!unstyled()',
+    '[attr.data-slot]': '"nav-trailing"',
+  },
+})
+export class HellNavItemTrailing extends HellStyleable {}
+
+@Directive({
   selector: '[hellAppContent]',
   host: {
     '[class.hell-content]': '!unstyled()',
@@ -276,6 +315,10 @@ export const HELL_APP_SHELL_DIRECTIVES = [
   HellAppContent,
   HellAppSecondary,
   HellAppSecondaryBody,
+  HellNavItem,
+  HellNavItemIcon,
+  HellNavItemLabel,
+  HellNavItemTrailing,
   HellSidenavToggle,
   HellSecondaryToggle,
 ] as const;

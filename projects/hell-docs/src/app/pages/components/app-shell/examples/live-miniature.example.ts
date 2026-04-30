@@ -40,17 +40,17 @@ const HD_APP_SHELL_PAGE_ICONS = {
       </header>
 
       <nav hellAppSidenav class="hd-surface-elevated">
-        <a href="#" aria-current="page" (click)="$event.preventDefault()">
-          <hell-icon name="faSolidGauge" size="14px" />
-          <span class="hd-nav-label">Dashboard</span>
+        <a hellNavItem href="#" aria-current="page" (click)="$event.preventDefault()">
+          <hell-icon hellNavItemIcon name="faSolidGauge" size="14px" />
+          <span hellNavItemLabel>Dashboard</span>
         </a>
-        <a href="#" (click)="$event.preventDefault()">
-          <hell-icon name="faSolidFolderOpen" size="14px" />
-          <span class="hd-nav-label">Projects</span>
+        <a hellNavItem href="#" (click)="$event.preventDefault()">
+          <hell-icon hellNavItemIcon name="faSolidFolderOpen" size="14px" />
+          <span hellNavItemLabel>Projects</span>
         </a>
-        <a href="#" (click)="$event.preventDefault()">
-          <hell-icon name="faSolidUsers" size="14px" />
-          <span class="hd-nav-label">Team</span>
+        <a hellNavItem href="#" (click)="$event.preventDefault()">
+          <hell-icon hellNavItemIcon name="faSolidUsers" size="14px" />
+          <span hellNavItemLabel>Team</span>
         </a>
 
         <div class="hell-nav-section" [attr.data-collapsed]="settingsCollapsed() ? 'true' : null">
@@ -63,13 +63,13 @@ const HD_APP_SHELL_PAGE_ICONS = {
             Settings
           </button>
           <div class="hell-nav-section-items">
-            <a href="#" (click)="$event.preventDefault()">
-              <hell-icon name="faSolidGear" size="14px" />
-              <span class="hd-nav-label">Preferences</span>
+            <a hellNavItem href="#" (click)="$event.preventDefault()">
+              <hell-icon hellNavItemIcon name="faSolidGear" size="14px" />
+              <span hellNavItemLabel>Preferences</span>
             </a>
-            <a href="#" (click)="$event.preventDefault()">
-              <hell-icon name="faSolidKey" size="14px" />
-              <span class="hd-nav-label">API keys</span>
+            <a hellNavItem href="#" (click)="$event.preventDefault()">
+              <hell-icon hellNavItemIcon name="faSolidKey" size="14px" />
+              <span hellNavItemLabel>API keys</span>
             </a>
           </div>
         </div>

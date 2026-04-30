@@ -129,7 +129,6 @@
     border-right: 1px solid var(--color-hell-border);
     grid-area: sidenav;
     transition: width var(--hell-duration-base) var(--ease-hell-out);
-    & a,
     & .hell-nav-item {
       display: flex;
       cursor: pointer;
@@ -147,8 +146,6 @@
         background var(--hell-duration-fast) var(--ease-hell-out),
         color var(--hell-duration-fast) var(--ease-hell-out);
     }
-    & a > hell-icon,
-    & a > .hell-nav-icon,
     & .hell-nav-item > hell-icon,
     & .hell-nav-item > .hell-nav-icon {
       display: inline-flex;
@@ -158,47 +155,40 @@
       color: var(--color-hell-foreground-subtle);
       transition: color var(--hell-duration-fast) var(--ease-hell-out);
     }
-    & a > .hd-nav-label,
-    & a > .hell-nav-label,
-    & .hell-nav-item > .hd-nav-label,
     & .hell-nav-item > .hell-nav-label {
       flex: 1 1 auto;
       overflow: hidden;
       text-overflow: ellipsis;
       transition: opacity var(--hell-duration-fast) var(--ease-hell-out);
     }
-    & a:hover,
     & .hell-nav-item:hover {
       background-color: var(--color-hell-surface-subtle);
       color: var(--color-hell-foreground);
     }
-    & a:hover > hell-icon,
-    & .hell-nav-item:hover > hell-icon {
+    & .hell-nav-item:hover > hell-icon,
+    & .hell-nav-item:hover > .hell-nav-icon {
       color: var(--color-hell-foreground);
     }
-    & a.active,
-    & a[aria-current='page'],
     & .hell-nav-item[data-active='true'],
+    & .hell-nav-item[aria-current='page'],
     & .hell-nav-item.active {
       background-color: var(--color-hell-primary-soft);
       font-weight: var(--font-weight-semibold);
       color: var(--color-hell-primary);
     }
-    & a.active > hell-icon,
-    & a[aria-current='page'] > hell-icon,
     & .hell-nav-item[data-active='true'] > hell-icon,
-    & .hell-nav-item.active > hell-icon {
+    & .hell-nav-item[data-active='true'] > .hell-nav-icon,
+    & .hell-nav-item[aria-current='page'] > hell-icon,
+    & .hell-nav-item[aria-current='page'] > .hell-nav-icon,
+    & .hell-nav-item.active > hell-icon,
+    & .hell-nav-item.active > .hell-nav-icon {
       color: var(--color-hell-primary);
     }
     &[data-collapsed='true'] {
-      & a,
       & .hell-nav-item {
         justify-content: center;
         padding-inline: calc(var(--spacing) * 0);
       }
-      & a > .hd-nav-label,
-      & a > .hell-nav-label,
-      & .hell-nav-item > .hd-nav-label,
       & .hell-nav-item > .hell-nav-label,
       & .hell-nav-item > .hell-nav-trailing {
         display: none;

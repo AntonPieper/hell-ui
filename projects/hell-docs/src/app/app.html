@@ -258,14 +258,15 @@
           <div class="hell-nav-section-items">
             @for (item of section.items; track item.path) {
               <a
+                hellNavItem
                 [routerLink]="item.path"
                 routerLinkActive="active"
                 [routerLinkActiveOptions]="{ exact: !!item.exact }"
                 [attr.title]="shell.isSidenavCollapsed() ? item.label : null"
                 (click)="shell.closeMobilePanels()"
               >
-                <hell-icon [name]="item.icon" size="14px" />
-                <span class="hd-nav-label">{{ item.label }}</span>
+                <hell-icon hellNavItemIcon [name]="item.icon" size="14px" />
+                <span hellNavItemLabel>{{ item.label }}</span>
               </a>
             }
           </div>
@@ -273,14 +274,15 @@
       } @else {
         @for (item of section.items; track item.path) {
           <a
+            hellNavItem
             [routerLink]="item.path"
             routerLinkActive="active"
             [routerLinkActiveOptions]="{ exact: !!item.exact }"
             [attr.title]="shell.isSidenavCollapsed() ? item.label : null"
             (click)="shell.closeMobilePanels()"
           >
-            <hell-icon [name]="item.icon" size="14px" />
-            <span class="hd-nav-label">{{ item.label }}</span>
+            <hell-icon hellNavItemIcon [name]="item.icon" size="14px" />
+            <span hellNavItemLabel>{{ item.label }}</span>
           </a>
         }
       }

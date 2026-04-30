@@ -82,6 +82,11 @@ const HD_APP_SHELL_PAGE_ICONS = {
           clickable element.
         </li>
         <li>
+          Sidenav items: <code>hellNavItem</code>, <code>hellNavItemIcon</code>,
+          <code>hellNavItemLabel</code>, and <code>hellNavItemTrailing</code>. Use these instead of
+          relying on raw anchor styling inside the sidenav.
+        </li>
+        <li>
           Styled toggle appearances (opt-in):
           <ul>
             <li>
