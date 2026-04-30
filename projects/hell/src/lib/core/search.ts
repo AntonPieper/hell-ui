@@ -1,28 +1,34 @@
 import { Injectable } from '@angular/core';
 import { Observable, firstValueFrom, isObservable } from 'rxjs';
 
+/** Value shape that local ranking can normalize into searchable text. */
 export type HellMaybeAsync<T> = T | Promise<T> | Observable<T>;
 export type HellSearchPrimitive = string | number | boolean | null | undefined | Date;
-export type HellSearchFieldValue =
-  | HellSearchPrimitive
-  | readonly HellSearchPrimitive[];
+export type HellSearchFieldValue = HellSearchPrimitive | readonly HellSearchPrimitive[];
 
+/** Weighted field extractor for local search. Higher weights make a field win ties. */
 export interface HellSearchField<T> {
   readonly name?: string;
   readonly weight?: number;
   readonly get: (item: T) => HellSearchFieldValue;
 }
 
+/** Ranked item returned from local search or a remote source. */
 export interface HellSearchResult<T> {
   readonly item: T;
   readonly score: number;
 }
 
+/**
+ * Remote sources may return raw items for local ranking, or pre-scored results
+ * when server-side relevance/order must be preserved.
+ */
 export interface HellSearchResponse<T> {
   readonly items?: readonly T[];
   readonly results?: readonly HellSearchResult<T>[];
 }
 
+/** Context passed to a search source; `signal` aborts superseded async work. */
 export interface HellSearchSourceRequest<P = unknown> {
   readonly query: string;
   readonly limit?: number;
@@ -30,18 +36,22 @@ export interface HellSearchSourceRequest<P = unknown> {
   readonly signal?: AbortSignal;
 }
 
+/** Pluggable search source for async/remote data behind omnibar-like controls. */
 export type HellSearchSource<T, P = unknown> = (
   request: HellSearchSourceRequest<P>,
 ) => HellMaybeAsync<readonly T[] | HellSearchResponse<T>>;
 
+/** Full request accepted by `HellSearchService`: local items, remote source, or both. */
 export interface HellSearchRequest<T, P = unknown> extends HellSearchSourceRequest<P> {
   readonly items?: readonly T[];
   readonly source?: HellSearchSource<T, P> | null;
   readonly fields?: readonly HellSearchField<T>[];
 }
 
+/** Small ranking facade used by command palettes and docs search. */
 @Injectable({ providedIn: 'root' })
 export class HellSearchService {
+  /** Resolve an optional source, then either preserve source scores or rank raw items locally. */
   async search<T>(request: HellSearchRequest<T>): Promise<readonly HellSearchResult<T>[]> {
     const response = request.source
       ? await resolveMaybeAsync(request.source(request))
@@ -55,6 +65,7 @@ export class HellSearchService {
     return this.rank(response, request);
   }
 
+  /** Rank local items by normalized query words. Every query word must match somewhere. */
   rank<T>(
     items: readonly T[],
     request: Pick<HellSearchRequest<T>, 'query' | 'fields' | 'limit'>,
@@ -75,6 +86,7 @@ export class HellSearchService {
   }
 }
 
+/** Split user input into normalized words for matching. */
 export function hellSearchWords(value: string): readonly string[] {
   return hellSearchKey(value)
     .split(' ')
@@ -82,6 +94,7 @@ export function hellSearchWords(value: string): readonly string[] {
     .filter(Boolean);
 }
 
+/** Normalize text for accent-insensitive, punctuation-insensitive search keys. */
 export function hellSearchKey(value: string): string {
   return value
     .normalize('NFKD')
@@ -138,7 +151,9 @@ function fieldTexts<T>(
   );
 }
 
-function defaultTexts(value: unknown): readonly { readonly text: string; readonly weight: number }[] {
+function defaultTexts(
+  value: unknown,
+): readonly { readonly text: string; readonly weight: number }[] {
   const seen = new WeakSet<object>();
   const out: { text: string; weight: number }[] = [];
 

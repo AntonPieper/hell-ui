@@ -3,6 +3,7 @@ export const HELL_RESIZE_KEY_DELTA = 16;
 export type HellResizeOrientation = 'horizontal' | 'vertical';
 export type HellResizeKeyIntent = 'decrement' | 'increment' | 'min' | 'max';
 
+/** Start sizes and lower bounds for one two-pane resize transaction. */
 export interface HellResizeTransactionOptions {
   readonly startA: number;
   readonly startB: number;
@@ -11,6 +12,7 @@ export interface HellResizeTransactionOptions {
   readonly keyDelta?: number;
 }
 
+/** Layout-agnostic result shared by pointer, keyboard, and aria consumers. */
 export interface HellResizeTransactionResult {
   readonly a: number;
   readonly b: number;
@@ -18,6 +20,7 @@ export interface HellResizeTransactionResult {
   readonly ariaValueNow: number;
 }
 
+/** Adapter boundary between resize math and concrete DOM/layout storage. */
 export interface HellResizeOperationAdapter {
   measure(): number;
   minSize(): number;
@@ -25,6 +28,7 @@ export interface HellResizeOperationAdapter {
   commitSize?(size: number): void;
 }
 
+/** Runtime inputs for resizing the pair around one handle. */
 export interface HellResizeOperationOptions {
   readonly before: HellResizeOperationAdapter;
   readonly after: HellResizeOperationAdapter;
@@ -33,6 +37,7 @@ export interface HellResizeOperationOptions {
   readonly keyDelta?: number;
 }
 
+/** Hooks and DOM ownership for pointer/keyboard resize interaction state. */
 export interface HellResizeInteractionControllerOptions {
   readonly handle: HTMLElement;
   readonly ownerWindow?: () => Window | null | undefined;
@@ -41,6 +46,7 @@ export interface HellResizeInteractionControllerOptions {
   readonly onCommit?: (result: HellResizeTransactionResult) => void;
 }
 
+/** Clamp pane A so pane B keeps its min size when total space allows. */
 export function hellConstrainResizeValue(
   value: number,
   sum: number,
@@ -57,6 +63,10 @@ export function hellConstrainResizeValue(
   return Math.max(minA, Math.min(sum - minB, value));
 }
 
+/**
+ * Scale a pane list to a fixed total while preserving min sizes when possible.
+ * If mins cannot fit, source proportions win so callers still get a stable sum.
+ */
 export function hellFitResizeSizesToTotal(
   sourceSizes: readonly number[],
   minSizes: readonly number[],
@@ -104,6 +114,7 @@ export function hellFitResizeSizesToTotal(
   return result.map((value) => Math.max(0, value));
 }
 
+/** Resize a two-pane pair by delta while preserving total size. */
 export function hellResizePairByDelta(
   startA: number,
   startB: number,
@@ -116,6 +127,7 @@ export function hellResizePairByDelta(
   return [nextA, sum - nextA] as const;
 }
 
+/** Pure resize model for one pair; independent from DOM, pointer events, or CSS. */
 export class HellResizeTransaction {
   private readonly keyDelta: number;
   readonly sum: number;
@@ -154,6 +166,7 @@ export class HellResizeTransaction {
   }
 }
 
+/** Applies resize transaction results through caller-provided layout adapters. */
 export class HellResizeOperation {
   private readonly transaction: HellResizeTransaction;
   private readonly startCoordinate: number | null;
@@ -209,6 +222,7 @@ export class HellResizeOperation {
   }
 }
 
+/** Owns pointer capture/listeners and keyboard commit semantics for one handle. */
 export class HellResizeInteractionController {
   private pointerId: number | null = null;
   private operation: HellResizeOperation | null = null;
@@ -312,6 +326,7 @@ export class HellResizeInteractionController {
   }
 }
 
+/** Map keyboard keys to resize intent for current orientation. */
 export function hellResizeIntentFromKey(
   key: string,
   orientation: HellResizeOrientation,
@@ -324,6 +339,7 @@ export function hellResizeIntentFromKey(
   return null;
 }
 
+/** Read the coordinate that matters for the active resize orientation. */
 export function hellResizeCoordinate(
   point: { clientX: number; clientY: number },
   orientation: HellResizeOrientation,

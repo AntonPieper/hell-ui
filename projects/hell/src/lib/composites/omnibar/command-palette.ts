@@ -1,10 +1,10 @@
 import { DestroyRef, Injectable, inject, signal } from '@angular/core';
-import {
-  HellSearchRequest,
-  HellSearchResult,
-  HellSearchService,
-} from '../../core/search';
+import { HellSearchRequest, HellSearchResult, HellSearchService } from '../../core/search';
 
+/**
+ * Search state engine behind `HellOmnibar`. It owns debounce, cancellation,
+ * stale-result suppression, and error/loading signals around `HellSearchService`.
+ */
 @Injectable()
 export class HellCommandPaletteService<T = unknown> {
   private readonly searchService = inject(HellSearchService);
@@ -32,6 +32,7 @@ export class HellCommandPaletteService<T = unknown> {
     this.open.set(open);
   }
 
+  /** Debounce a search using current query; later schedules replace earlier ones. */
   scheduleSearch(
     request: Omit<HellSearchRequest<T>, 'query' | 'signal'>,
     debounceMs: number,
@@ -43,6 +44,7 @@ export class HellCommandPaletteService<T = unknown> {
     }, delay);
   }
 
+  /** Run immediately, aborting any older request and ignoring stale completions. */
   async searchNow(request: Omit<HellSearchRequest<T>, 'query' | 'signal'>): Promise<void> {
     const id = ++this.requestId;
     this.controller?.abort();
@@ -68,6 +70,7 @@ export class HellCommandPaletteService<T = unknown> {
     }
   }
 
+  /** Stop pending debounce/current fetch and mark the palette idle. */
   cancel(): void {
     this.clearTimer();
     this.controller?.abort();
@@ -76,6 +79,7 @@ export class HellCommandPaletteService<T = unknown> {
     this.loading.set(false);
   }
 
+  /** Clear visible results/errors without changing query or open state. */
   clearResults(): void {
     this.results.set([]);
     this.error.set(null);
