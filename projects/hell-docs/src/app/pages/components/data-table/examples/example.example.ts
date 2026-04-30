@@ -28,15 +28,15 @@ import {
   HELL_MENU_DIRECTIVES,
   HELL_OMNIBAR_DIRECTIVES,
   HELL_SPLIT_VIEW_DIRECTIVES,
-  HELL_TABLE_DIRECTIVES,
   HellButton,
-  HellCodeEditor,
   HellIcon,
   HellPaginationStrip,
   HellSkeleton,
   hellSearchKey,
   hellSearchWords,
 } from 'hell';
+import { HellCodeEditor } from 'hell/features/code-editor';
+import { HELL_TABLE_DIRECTIVES } from 'hell/features/data-table';
 
 type RowRole = 'Admin' | 'Editor' | 'Viewer';
 type RowAssignee = 'Ada' | 'Grace' | 'Linus' | 'Margaret';

@@ -11,7 +11,8 @@ import { NgClass } from '@angular/common';
 import { type Extension } from '@codemirror/state';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCheck, faSolidCopy } from '@ng-icons/font-awesome/solid';
-import { HellButton, HellCodeEditor, HellIcon, HELL_TABS_DIRECTIVES } from 'hell';
+import { HellButton, HellIcon, HELL_TABS_DIRECTIVES } from 'hell';
+import { HellCodeEditor } from 'hell/features/code-editor';
 import { hdCodeExtensions, hdCopyTextToClipboard } from './code-tools';
 
 const EXAMPLE_TABS_ICONS = { faSolidCopy, faSolidCheck };

@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { javascript } from '@codemirror/lang-javascript';
 import { type Extension } from '@codemirror/state';
-import { HellCodeEditor } from 'hell';
+import { HellCodeEditor } from 'hell/features/code-editor';
 
 @Component({
   selector: 'app-editor-demo',

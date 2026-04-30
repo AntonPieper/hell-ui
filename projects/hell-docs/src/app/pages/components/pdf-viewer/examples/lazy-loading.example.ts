@@ -1,6 +1,5 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
-import { HellPdfViewer } from 'hell';
 
 const PDF_VIEWER_STYLESHEET_ID = 'hd-pdfjs-viewer-styles';
 const PDF_VIEWER_STYLESHEET_PATH = 'pdfjs/pdf_viewer.css';

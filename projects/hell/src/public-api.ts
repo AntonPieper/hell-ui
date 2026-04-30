@@ -54,7 +54,7 @@ export * from './lib/composites/toast/toast';
 export * from './lib/composites/omnibar/command-palette';
 export * from './lib/composites/omnibar/omnibar';
 
-// Features (lazy-loaded by consumers)
-export * from './lib/features/pdf-viewer/pdf-viewer';
-export * from './lib/features/code-editor/code-editor';
-export * from './lib/features/data-table/data-table';
+// Heavy features live behind feature-specific Package Entry Points:
+// - hell/features/pdf-viewer
+// - hell/features/code-editor
+// - hell/features/data-table

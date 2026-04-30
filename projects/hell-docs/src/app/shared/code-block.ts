@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, Signal, computed, input, signal } f
 import { type Extension } from '@codemirror/state';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCheck, faSolidCopy } from '@ng-icons/font-awesome/solid';
-import { HellButton, HellCodeEditor, HellIcon } from 'hell';
+import { HellButton, HellIcon } from 'hell';
+import { HellCodeEditor } from 'hell/features/code-editor';
 import { hdCodeExtensions, hdCopyTextToClipboard } from './code-tools';
 
 const CODE_BLOCK_ICONS = { faSolidCopy, faSolidCheck };
