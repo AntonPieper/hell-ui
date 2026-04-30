@@ -4,7 +4,6 @@ import {
   type ElementRef,
   booleanAttribute,
   computed,
-  effect,
   input,
   output,
   signal,
@@ -131,36 +130,26 @@ export class HellDateInput extends HellStyleable {
   readonly dateChange = output<Date>();
 
   private readonly local = signal<Date | null>(null);
-  /** Raw user text while typing — overrides the formatted display. */
-  private readonly typed = signal<string | null>(null);
+  /** Raw user text while typing, valid only for the bound date it started from. */
+  private readonly typed = signal<{ base: Date | null; text: string } | null>(null);
 
   protected readonly current = computed<Date | null>(() => this.date() ?? this.local());
   protected readonly display = computed<string>(() => {
     const t = this.typed();
-    if (t !== null) return t;
+    if (t && t.base === this.date()) return t.text;
     return formatDate(this.current());
   });
 
   private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field');
 
-  constructor() {
-    super();
-    // Whenever the bound date changes externally, drop any in-progress
-    // user typing so the formatted value re-takes the screen.
-    effect(() => {
-      this.date();
-      this.typed.set(null);
-    });
-  }
-
   protected onInput(value: string) {
-    this.typed.set(value);
+    this.typed.set({ base: this.date(), text: value });
   }
 
   protected onBlur() {
     const t = this.typed();
     if (t === null) return;
-    this.commit(t);
+    this.commit(t.text);
   }
 
   protected commit(text: string, event?: Event) {

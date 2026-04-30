@@ -3,7 +3,6 @@ import {
   Component,
   booleanAttribute,
   computed,
-  effect,
   input,
   output,
   signal,
@@ -223,8 +222,8 @@ export class HellTimeInput extends HellStyleable {
   protected readonly format = format;
 
   private readonly local = signal<ParsedTime | null>(null);
-  /** Raw user text while typing — overrides the formatted display. */
-  private readonly typed = signal<string | null>(null);
+  /** Raw user text while typing, valid only for the bound value it started from. */
+  private readonly typed = signal<{ base: string | null; text: string } | null>(null);
 
   protected readonly current = computed<ParsedTime>(
     () => tryParse(this.value() ?? '') ?? this.local() ?? { h: 0, m: 0, s: 0 },
@@ -232,27 +231,19 @@ export class HellTimeInput extends HellStyleable {
 
   protected readonly display = computed<string>(() => {
     const t = this.typed();
-    if (t !== null) return t;
+    if (t && t.base === this.value()) return t.text;
     const v = tryParse(this.value() ?? '') ?? this.local();
     return v ? format(v, this.seconds()) : '';
   });
 
-  constructor() {
-    super();
-    effect(() => {
-      this.value();
-      this.typed.set(null);
-    });
-  }
-
   protected onInput(value: string) {
-    this.typed.set(value);
+    this.typed.set({ base: this.value(), text: value });
   }
 
   protected onBlur() {
     const t = this.typed();
     if (t === null) return;
-    this.commit(t);
+    this.commit(t.text);
   }
 
   protected commit(text: string, event?: Event) {
