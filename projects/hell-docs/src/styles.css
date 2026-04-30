@@ -5,6 +5,7 @@
 @layer components {
   .hd-prose {
     max-width: min(72ch, 100%);
+    margin-inline: auto;
     line-height: var(--leading-relaxed);
     & code {
       border-radius: var(--radius-sm);
@@ -96,6 +97,16 @@
     }
   }
 
+  .hd-doc-page {
+    width: 100%;
+  }
+
+  .hd-doc-wide {
+    display: block;
+    width: 100%;
+    margin-block: var(--spacing-hell-3);
+  }
+
   .hd-example-tabs {
     display: block;
     max-width: 100%;
@@ -171,6 +182,61 @@
     gap: var(--spacing-hell-2);
   }
 
+  .hd-docs-search {
+    flex: 0 1 560px;
+    min-width: 240px;
+    max-width: 560px;
+    --hell-omnibar-bg: color-mix(
+      in oklab,
+      var(--color-hell-surface-elevated) 72%,
+      var(--color-hell-surface-subtle)
+    );
+    --hell-omnibar-panel-max-height: min(70vh, 520px);
+  }
+
+  .hd-docs-search-count,
+  .hd-docs-search-kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    height: calc(var(--spacing) * 5);
+    min-width: calc(var(--spacing) * 5);
+    border-radius: var(--radius-sm);
+    font-size: 10px;
+    color: var(--color-hell-foreground-subtle);
+    background-color: var(--color-hell-surface-muted);
+  }
+
+  .hd-docs-search-kbd {
+    padding-inline: calc(var(--spacing) * 1.5);
+    font-family: var(--font-mono);
+  }
+
+  .hd-docs-search .hell-omnibar-item-trailing {
+    max-width: 128px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  @media (max-width: 960px) {
+    .hd-docs-search {
+      flex-basis: 340px;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .hd-docs-search {
+      min-width: 180px;
+      flex-basis: 240px;
+    }
+
+    .hd-docs-search-kbd {
+      display: none;
+    }
+  }
+
   .hd-palette-select .hell-select-value {
     font-weight: 500;
   }
@@ -179,6 +245,7 @@
     flex-shrink: 0;
     width: 14px;
     height: 14px;
+    background-color: var(--hd-palette-swatch-color, transparent);
     border-radius: 999px;
     border: 1px solid color-mix(in oklab, var(--color-hell-foreground) 18%, transparent);
     box-shadow: inset 0 0 0 1px color-mix(in oklab, white 16%, transparent);

@@ -1,0 +1,56 @@
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ExampleTabs } from '../../../shared/example-tabs';
+import { SplitViewMasterDetailExample } from './examples/master-detail.example';
+import splitViewMasterDetailExampleCodeRaw from './examples/master-detail.example.ts?raw' with {
+  loader: 'text',
+};
+
+@Component({
+  selector: 'hd-split-view',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ExampleTabs, SplitViewMasterDetailExample],
+  template: `
+    <article class="hd-doc-page">
+      <div class="hd-prose">
+        <h1>Split view</h1>
+        <p>
+          Responsive master/detail shell. It uses resizable panes when the container can support two
+          columns and switches to a compact screen flow with a back button below the breakpoint.
+        </p>
+
+        <h2>Master/detail</h2>
+      </div>
+
+      <hd-example-tabs class="hd-doc-wide" [code]="splitViewMasterDetailExampleCode" flush>
+        <app-split-view-master-detail-example />
+      </hd-example-tabs>
+
+      <div class="hd-prose">
+        <h2>API</h2>
+        <ul>
+          <li><code>hell-split-view</code>: host component.</li>
+          <li><code>ng-template hellSplitPrimary</code>: primary pane content.</li>
+          <li><code>ng-template hellSplitDetail</code>: detail pane content.</li>
+          <li><code>compactBelow</code>: container width below which compact mode is used.</li>
+          <li><code>detailOpen</code> / <code>detailOpenChange</code>: compact detail screen state.</li>
+          <li><code>primaryFlex</code>, <code>detailFlex</code>, <code>primaryMinSize</code>, <code>detailMinSize</code>: desktop pane sizing.</li>
+          <li><code>framed</code>, <code>height</code>, <code>backLabel</code>, <code>unstyled</code>.</li>
+        </ul>
+
+        <h2>Do</h2>
+        <ul>
+          <li>Drive selection outside the split view and pass compact detail state explicitly.</li>
+          <li>Use compact mode for small containers instead of forcing unusable resizable panes.</li>
+        </ul>
+
+        <h2>Don't</h2>
+        <ul>
+          <li>Don't assume viewport size equals available component size; split view watches its own container.</li>
+        </ul>
+      </div>
+    </article>
+  `,
+})
+export class SplitViewPage {
+  protected readonly splitViewMasterDetailExampleCode = splitViewMasterDetailExampleCodeRaw;
+}

@@ -7,11 +7,13 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { provideIcons } from '@ng-icons/core';
 import {
+  faSolidArrowRight,
   faSolidBars,
   faSolidBell,
+  faSolidBookOpen,
   faSolidCalendar,
   faSolidCheck,
   faSolidCircleHalfStroke,
@@ -20,7 +22,9 @@ import {
   faSolidComment,
   faSolidDesktop,
   faSolidEllipsisVertical,
+  faSolidFileLines,
   faSolidFilePdf,
+  faSolidFilter,
   faSolidFolderOpen,
   faSolidGripLines,
   faSolidGripVertical,
@@ -28,6 +32,7 @@ import {
   faSolidIdCard,
   faSolidImage,
   faSolidLayerGroup,
+  faSolidMagnifyingGlass,
   faSolidMoon,
   faSolidPalette,
   faSolidPenRuler,
@@ -64,8 +69,13 @@ import {
   HellIcon,
   HellTag,
   HellToaster,
+  HELL_MENU_DIRECTIVES,
+  HELL_OMNIBAR_DIRECTIVES,
   HELL_SELECT_DIRECTIVES,
+  type HellSearchField,
+  type HellSearchResult,
 } from 'hell';
+import { HD_DOCS_CODE_USAGES, HD_DOCS_EXAMPLES } from './docs-search';
 
 interface NavItem {
   path: string;
@@ -78,9 +88,31 @@ interface NavSection {
   items: NavItem[];
 }
 
+type DocsSearchKind = 'page' | 'example' | 'usage';
+type DocsSearchKindFilter = DocsSearchKind | 'all';
+
+interface DocsSearchItem {
+  readonly id: string;
+  readonly kind: DocsSearchKind;
+  readonly title: string;
+  readonly path: string;
+  readonly icon: string;
+  readonly section: string;
+  readonly detail: string;
+  readonly haystack: string;
+}
+
+interface DocsSearchGroup {
+  readonly kind: DocsSearchKind;
+  readonly label: string;
+  readonly items: readonly DocsSearchItem[];
+}
+
 const HD_APP_ICONS = {
+  faSolidArrowRight,
   faSolidBars,
   faSolidBell,
+  faSolidBookOpen,
   faSolidCalendar,
   faSolidCheck,
   faSolidCircleHalfStroke,
@@ -89,7 +121,9 @@ const HD_APP_ICONS = {
   faSolidComment,
   faSolidDesktop,
   faSolidEllipsisVertical,
+  faSolidFileLines,
   faSolidFilePdf,
+  faSolidFilter,
   faSolidFolderOpen,
   faSolidGripLines,
   faSolidGripVertical,
@@ -97,6 +131,7 @@ const HD_APP_ICONS = {
   faSolidIdCard,
   faSolidImage,
   faSolidLayerGroup,
+  faSolidMagnifyingGlass,
   faSolidMoon,
   faSolidPalette,
   faSolidPenRuler,
@@ -119,6 +154,23 @@ const HD_APP_ICONS = {
   faSolidUsers,
   faSolidWindowMaximize,
   faSolidWindowRestore,
+};
+
+const HD_DOCS_KIND_LABEL: Record<DocsSearchKind, string> = {
+  page: 'Pages',
+  example: 'Examples',
+  usage: 'Code usage',
+};
+
+const HD_DOCS_KIND_FILTER_LABEL: Record<DocsSearchKindFilter, string> = {
+  all: 'All types',
+  ...HD_DOCS_KIND_LABEL,
+};
+
+const HD_DOCS_KIND_ICON: Record<DocsSearchKind, string> = {
+  page: 'faSolidBookOpen',
+  example: 'faSolidFileLines',
+  usage: 'faSolidCode',
 };
 
 type ThemePreference = 'system' | 'light' | 'dark';
@@ -210,12 +262,15 @@ const HD_THEMES: readonly ThemeOption[] = [
     HellIcon,
     HellTag,
     HellToaster,
+    ...HELL_MENU_DIRECTIVES,
+    ...HELL_OMNIBAR_DIRECTIVES,
     ...HELL_SELECT_DIRECTIVES,
   ],
   templateUrl: './app.html',
 })
 export class App {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
   private readonly systemScheme = this.getSystemScheme();
 
   protected readonly themePreference = signal<ThemePreference>(this.readThemePreference());
@@ -270,11 +325,13 @@ export class App {
         { path: '/components/flyout', label: 'Flyout', icon: 'faSolidComment' },
         { path: '/components/icon', label: 'Icon', icon: 'faSolidStar' },
         { path: '/components/input', label: 'Input & select', icon: 'faSolidPenRuler' },
+        { path: '/components/listbox', label: 'Listbox', icon: 'faSolidBars' },
         { path: '/components/menu', label: 'Menu', icon: 'faSolidEllipsisVertical' },
         { path: '/components/pagination', label: 'Pagination', icon: 'faSolidTableColumns' },
         { path: '/components/popover', label: 'Popover', icon: 'faSolidComment' },
         { path: '/components/progress', label: 'Progress', icon: 'faSolidSliders' },
         { path: '/components/radio', label: 'Radio', icon: 'faSolidCircleHalfStroke' },
+        { path: '/components/search', label: 'Search', icon: 'faSolidMagnifyingGlass' },
         { path: '/components/select', label: 'Select', icon: 'faSolidPenRuler' },
         { path: '/components/separator', label: 'Separator', icon: 'faSolidGripLines' },
         { path: '/components/skeleton', label: 'Skeleton', icon: 'faSolidImage' },
@@ -296,7 +353,9 @@ export class App {
         { path: '/components/date-input', label: 'Date input', icon: 'faSolidCalendar' },
         { path: '/components/dialpad', label: 'Dialpad', icon: 'faSolidPhone' },
         { path: '/components/drop-zone', label: 'Drop zone', icon: 'faSolidUpload' },
+        { path: '/components/omnibar', label: 'Omnibar', icon: 'faSolidMagnifyingGlass' },
         { path: '/components/resizable', label: 'Resizable', icon: 'faSolidGripVertical' },
+        { path: '/components/split-view', label: 'Split view', icon: 'faSolidTableColumns' },
         { path: '/components/time-input', label: 'Time input', icon: 'faSolidClock' },
         { path: '/components/toast', label: 'Toast', icon: 'faSolidBell' },
       ],
@@ -310,6 +369,105 @@ export class App {
       ],
     },
   ];
+
+  protected readonly docsSearchQuery = signal('');
+  protected readonly docsSearchResults = signal<readonly HellSearchResult<DocsSearchItem>[]>([]);
+  protected readonly docsKindFilter = signal<DocsSearchKindFilter>('all');
+  protected readonly docsSectionFilter = signal<string>('all');
+  protected readonly docsSearchLimit = signal<8 | 20 | 40>(20);
+  protected readonly docsSearchLimits = [8, 20, 40] as const;
+  protected readonly docsMenuOpenTriggers: ('click' | 'enter' | 'arrowkey')[] = [
+    'click',
+    'enter',
+    'arrowkey',
+  ];
+  protected readonly docsSearchFields: readonly HellSearchField<DocsSearchItem>[] = [
+    { name: 'title', weight: 5, get: (item) => item.title },
+    { name: 'section', weight: 3, get: (item) => item.section },
+    { name: 'kind', weight: 2, get: (item) => HD_DOCS_KIND_LABEL[item.kind] },
+    { name: 'path', weight: 2, get: (item) => item.path },
+    { name: 'detail', weight: 1.5, get: (item) => item.detail },
+    { name: 'content', weight: 1, get: (item) => item.haystack },
+  ];
+  protected readonly docsSearchItems = computed<readonly DocsSearchItem[]>(() => {
+    const kind = this.docsKindFilter();
+    const section = this.docsSectionFilter();
+    return this.docsSearchIndex().filter((item) => {
+      if (kind !== 'all' && item.kind !== kind) return false;
+      if (section !== 'all' && item.section !== section) return false;
+      return true;
+    });
+  });
+  protected readonly docsSectionOptions = computed(() =>
+    [...new Set(this.docsSearchIndex().map((item) => item.section))].sort(),
+  );
+  protected readonly docsSearchGroups = computed<readonly DocsSearchGroup[]>(() => {
+    const rankedResults = this.docsSearchResults().map((result) => result.item);
+    const ranked =
+      rankedResults.length || this.docsSearchQuery().trim()
+        ? rankedResults
+        : this.docsSearchItems().slice(0, this.docsSearchLimit());
+
+    return (['page', 'example', 'usage'] as const)
+      .map((kind) => ({
+        kind,
+        label: HD_DOCS_KIND_LABEL[kind],
+        items: ranked.filter((item) => item.kind === kind).slice(0, kind === 'page' ? 8 : 6),
+      }))
+      .filter((group) => group.items.length > 0);
+  });
+  protected readonly docsSearchCount = computed(() =>
+    this.docsSearchGroups().reduce((count, group) => count + group.items.length, 0),
+  );
+  protected readonly docsSearchEmptyMessage = computed(() =>
+    this.docsSearchQuery().trim() ? 'No docs match that query' : 'No docs in this filter',
+  );
+  protected readonly docsKindLabel = computed(() => HD_DOCS_KIND_FILTER_LABEL[this.docsKindFilter()]);
+  protected readonly docsSectionLabel = computed(() =>
+    this.docsSectionFilter() === 'all' ? 'All sections' : this.docsSectionFilter(),
+  );
+  protected readonly docsSearchControlsActive = computed(
+    () =>
+      this.docsKindFilter() !== 'all' ||
+      this.docsSectionFilter() !== 'all' ||
+      this.docsSearchLimit() !== 20,
+  );
+  protected readonly docsSearchIndex = computed<readonly DocsSearchItem[]>(() => {
+    const pageItems = this.sections.flatMap((section) => {
+      const sectionName = section.heading ?? 'Guides';
+      return section.items.map((item) => ({
+        id: `page:${item.path}`,
+        kind: 'page' as const,
+        title: item.label,
+        path: item.path,
+        icon: item.icon,
+        section: sectionName,
+        detail: `${sectionName} page`,
+        haystack: searchHaystack(item.label, item.path, sectionName),
+      }));
+    });
+    const exampleItems = HD_DOCS_EXAMPLES.map((item) => ({
+      id: `example:${item.detail}`,
+      kind: 'example' as const,
+      title: item.title,
+      path: item.path,
+      icon: HD_DOCS_KIND_ICON.example,
+      section: item.section,
+      detail: item.detail,
+      haystack: searchHaystack(item.title, item.path, item.section, item.detail, item.terms),
+    }));
+    const usageItems = HD_DOCS_CODE_USAGES.map((item) => ({
+      id: `usage:${item.title}`,
+      kind: 'usage' as const,
+      title: item.title,
+      path: item.path,
+      icon: HD_DOCS_KIND_ICON.usage,
+      section: item.section,
+      detail: item.detail,
+      haystack: searchHaystack(item.title, item.path, item.section, item.detail, item.terms),
+    }));
+    return [...pageItems, ...exampleItems, ...usageItems];
+  });
 
   /**
    * Per-section collapse state for the sidenav. Defaults to expanded; users
@@ -362,6 +520,34 @@ export class App {
     });
   }
 
+  protected onDocsSearchSelect(item: DocsSearchItem, shell: HellAppShell): void {
+    void this.router.navigateByUrl(item.path);
+    shell.closeMobilePanels();
+    this.docsSearchQuery.set('');
+  }
+
+  protected onDocsSearchResults(results: readonly HellSearchResult<unknown>[]): void {
+    this.docsSearchResults.set(results as readonly HellSearchResult<DocsSearchItem>[]);
+  }
+
+  protected setDocsKindFilter(kind: DocsSearchKindFilter): void {
+    this.docsKindFilter.set(kind);
+  }
+
+  protected setDocsSectionFilter(section: string): void {
+    this.docsSectionFilter.set(section);
+  }
+
+  protected setDocsSearchLimit(limit: 8 | 20 | 40): void {
+    this.docsSearchLimit.set(limit);
+  }
+
+  protected resetDocsSearchControls(): void {
+    this.docsKindFilter.set('all');
+    this.docsSectionFilter.set('all');
+    this.docsSearchLimit.set(20);
+  }
+
   private getSystemScheme(): MediaQueryList | null {
     if (typeof window === 'undefined' || !window.matchMedia) return null;
     return window.matchMedia('(prefers-color-scheme: dark)');
@@ -405,4 +591,16 @@ export class App {
       document.documentElement.dataset['hellSkin'] = option.skin;
     }
   }
+}
+
+function searchHaystack(...parts: readonly string[]): string {
+  return parts.map(searchKey).join(' ');
+}
+
+function searchKey(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
 }

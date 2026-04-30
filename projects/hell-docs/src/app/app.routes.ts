@@ -73,6 +73,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/components/input/input.page').then((m) => m.InputPage),
   },
   {
+    path: 'components/listbox',
+    loadComponent: () =>
+      import('./pages/components/listbox/listbox.page').then((m) => m.ListboxPage),
+  },
+  {
     path: 'components/menu',
     loadComponent: () => import('./pages/components/menu/menu.page').then((m) => m.MenuPage),
   },
@@ -91,6 +96,10 @@ export const routes: Routes = [
   {
     path: 'components/radio',
     loadComponent: () => import('./pages/components/radio/radio.page').then((m) => m.RadioPage),
+  },
+  {
+    path: 'components/search',
+    loadComponent: () => import('./pages/components/search/search.page').then((m) => m.SearchPage),
   },
   {
     path: 'components/select',
@@ -162,8 +171,18 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/components/drop-zone/drop-zone.page').then((m) => m.DropZonePage),
   },
   {
+    path: 'components/omnibar',
+    loadComponent: () =>
+      import('./pages/components/omnibar/omnibar.page').then((m) => m.OmnibarPage),
+  },
+  {
     path: 'components/resizable',
     loadComponent: () => import('./pages/components/resizable/resizable.page').then((m) => m.ResizablePage),
+  },
+  {
+    path: 'components/split-view',
+    loadComponent: () =>
+      import('./pages/components/split-view/split-view.page').then((m) => m.SplitViewPage),
   },
   {
     path: 'components/time-input',

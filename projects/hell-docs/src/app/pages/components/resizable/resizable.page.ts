@@ -39,7 +39,8 @@ import resizableVerticalSplitExampleCodeRaw from './examples/vertical-split.exam
       <h1>Resizable</h1>
       <p>
         Pointer-driven resizable panes. Place <code>hellResizableHandle</code> between sibling
-        <code>hellResizablePane</code> elements; the handle drags both at once.
+        <code>hellResizablePane</code> elements; the handle drags both at once. After user sizing,
+        panes rescale with their container so one pane cannot disappear during window resize.
       </p>
 
       <h2>Horizontal split</h2>
@@ -74,7 +75,8 @@ import resizableVerticalSplitExampleCodeRaw from './examples/vertical-split.exam
       <h2>API</h2>
       <ul>
         <li>
-          <code>hellResizable</code>: <code>orientation</code> (<code>horizontal | vertical</code>)
+          <code>hellResizable</code>: <code>orientation</code> (<code>horizontal | vertical</code>),
+          <code>rescaleOnResize</code>
         </li>
         <li><code>hellResizablePane</code>: <code>initialFlex</code>, <code>minSize</code> (px)</li>
         <li>
@@ -87,6 +89,10 @@ import resizableVerticalSplitExampleCodeRaw from './examples/vertical-split.exam
       <ul>
         <li>Set practical <code>minSize</code> on every pane.</li>
         <li>Use grip handles when discoverability matters.</li>
+        <li>
+          Use <code>hell-split-view</code> for master-detail layouts that should become a compact
+          back-button screen below a container breakpoint.
+        </li>
         <li>Persist sizes only when users expect layout memory.</li>
       </ul>
 

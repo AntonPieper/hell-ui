@@ -2,12 +2,179 @@
   <header hellAppTopbar>
     <button
       hellSidenavToggle
+      appearance="shell"
       type="button"
-      class="hell-shell-toggle"
       [attr.aria-label]="shell.isSidenavCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
     ></button>
     <strong class="text-base">hell</strong>
     <span hellTag class="hd-brand-tag" variant="info">Heinrich Element Library</span>
+    <hell-omnibar
+      #docsOmnibar="hellOmnibar"
+      class="hd-docs-search"
+      size="sm"
+      placeholder="Search docs, examples, code usage"
+      ariaLabel="Search docs"
+      hotkey="mod+k"
+      [searchItems]="docsSearchItems()"
+      [searchFields]="docsSearchFields"
+      [searchLimit]="docsSearchLimit()"
+      [searchDebounce]="120"
+      [emptyMessage]="docsSearchEmptyMessage()"
+      [minPanelWidth]="520"
+      [(value)]="docsSearchQuery"
+      (searchResultsChange)="onDocsSearchResults($event)"
+    >
+      <hell-icon hellOmnibarLeading name="faSolidMagnifyingGlass" size="13px" />
+      <span hellOmnibarTrailing class="hd-docs-search-count">{{ docsSearchCount() }}</span>
+      <span hellOmnibarTrailing class="hd-docs-search-kbd">⌘K</span>
+
+      <div hellOmnibarActions aria-label="Docs search controls">
+        <button
+          hellOmnibarAction
+          type="button"
+          aria-label="Docs search controls"
+          [hellMenuTrigger]="docsControlsMenu"
+          [container]="docsOmnibar.overlayContainer()"
+          [openTriggers]="docsMenuOpenTriggers"
+          placement="bottom-start"
+          [pressed]="docsSearchControlsActive()"
+        >
+          <hell-icon name="faSolidSliders" size="12px" />
+        </button>
+        <button
+          hellOmnibarAction
+          type="button"
+          [hellMenuTrigger]="docsKindMenu"
+          [container]="docsOmnibar.overlayContainer()"
+          [openTriggers]="docsMenuOpenTriggers"
+          placement="bottom-start"
+          [pressed]="docsKindFilter() !== 'all'"
+        >
+          {{ docsKindLabel() }}
+        </button>
+        <button
+          hellOmnibarAction
+          type="button"
+          [hellMenuTrigger]="docsSectionMenu"
+          [container]="docsOmnibar.overlayContainer()"
+          [openTriggers]="docsMenuOpenTriggers"
+          placement="bottom-start"
+          [pressed]="docsSectionFilter() !== 'all'"
+        >
+          {{ docsSectionLabel() }}
+        </button>
+      </div>
+
+      <ng-template #docsControlsMenu>
+        <div hellMenu>
+          <div hellMenuSection>
+            <div hellMenuLabel>Docs search</div>
+            <button hellMenuItem type="button" [hellSubmenuTrigger]="docsKindMenu">
+              <hell-icon hellMenuItemIcon name="faSolidFilter" />
+              <span>Type</span>
+              <span hellMenuItemTrailing>{{ docsKindLabel() }}</span>
+            </button>
+            <button hellMenuItem type="button" [hellSubmenuTrigger]="docsSectionMenu">
+              <hell-icon hellMenuItemIcon name="faSolidLayerGroup" />
+              <span>Section</span>
+              <span hellMenuItemTrailing>{{ docsSectionLabel() }}</span>
+            </button>
+            <button hellMenuItem type="button" [hellSubmenuTrigger]="docsLimitMenu">
+              <hell-icon hellMenuItemIcon name="faSolidTable" />
+              <span>Results</span>
+              <span hellMenuItemTrailing>{{ docsSearchLimit() }}</span>
+            </button>
+          </div>
+          <div hellMenuSeparator></div>
+          <button
+            hellMenuItem
+            type="button"
+            [disabled]="!docsSearchControlsActive()"
+            (click)="resetDocsSearchControls()"
+          >
+            <hell-icon hellMenuItemIcon name="faSolidFilter" />
+            <span>Reset controls</span>
+          </button>
+        </div>
+      </ng-template>
+
+      <ng-template #docsKindMenu>
+        <div hellMenu>
+          @for (kind of ['all', 'page', 'example', 'usage']; track kind) {
+            <button hellMenuItem type="button" (click)="setDocsKindFilter($any(kind))">
+              @if (docsKindFilter() === kind) {
+                <hell-icon hellMenuItemIcon name="faSolidCheck" />
+              } @else {
+                <span hellMenuItemIcon></span>
+              }
+              <span>{{ kind === 'all' ? 'All types' : kind === 'page' ? 'Pages' : kind === 'example' ? 'Examples' : 'Code usage' }}</span>
+            </button>
+          }
+        </div>
+      </ng-template>
+
+      <ng-template #docsSectionMenu>
+        <div hellMenu>
+          <button hellMenuItem type="button" (click)="setDocsSectionFilter('all')">
+            @if (docsSectionFilter() === 'all') {
+              <hell-icon hellMenuItemIcon name="faSolidCheck" />
+            } @else {
+              <span hellMenuItemIcon></span>
+            }
+            <span>All sections</span>
+          </button>
+          @for (section of docsSectionOptions(); track section) {
+            <button hellMenuItem type="button" (click)="setDocsSectionFilter(section)">
+              @if (docsSectionFilter() === section) {
+                <hell-icon hellMenuItemIcon name="faSolidCheck" />
+              } @else {
+                <span hellMenuItemIcon></span>
+              }
+              <span>{{ section }}</span>
+            </button>
+          }
+        </div>
+      </ng-template>
+
+      <ng-template #docsLimitMenu>
+        <div hellMenu>
+          @for (limit of docsSearchLimits; track limit) {
+            <button hellMenuItem type="button" (click)="setDocsSearchLimit(limit)">
+              @if (docsSearchLimit() === limit) {
+                <hell-icon hellMenuItemIcon name="faSolidCheck" />
+              } @else {
+                <span hellMenuItemIcon></span>
+              }
+              <span>{{ limit }} results</span>
+            </button>
+          }
+        </div>
+      </ng-template>
+
+      @for (group of docsSearchGroups(); track group.kind) {
+        <div hellOmnibarGroup [label]="group.label">
+          <div hellOmnibarGroupLabel>{{ group.label }}</div>
+          @for (result of group.items; track result.id) {
+            <button
+              hellOmnibarItem
+              type="button"
+              [value]="result"
+              (select)="onDocsSearchSelect($any($event), shell)"
+            >
+              <hell-icon hellOmnibarItemIcon [name]="result.icon" size="13px" />
+              <span hellOmnibarItemText>
+                <span>{{ result.title }}</span>
+                <span hellOmnibarItemSubtext>{{ result.detail }}</span>
+              </span>
+              <span hellOmnibarItemTrailing>
+                {{ result.section }}
+                <hell-icon name="faSolidArrowRight" size="10px" />
+              </span>
+            </button>
+          }
+        </div>
+      }
+    </hell-omnibar>
     <span class="hd-fill"></span>
     <button
       hellSelect
@@ -17,14 +184,16 @@
       (valueChange)="onPaletteChange($event)"
       aria-label="Theme"
     >
-      <span class="hd-palette-swatch" [style.background-color]="currentPaletteSwatch()"></span>
+      <span class="hd-palette-swatch" [style.--hd-palette-swatch-color]="currentPaletteSwatch()"></span>
       <span hellSelectValue>{{ currentTheme().label }}</span>
       <div *hellSelectPortal hellSelectDropdown class="hd-palette-dropdown">
         @for (option of themes; track option.id) {
           <div hellSelectOption [value]="option.id" class="hd-palette-option">
             <span
               class="hd-palette-swatch"
-              [style.background-color]="resolvedTheme() === 'dark' ? option.swatchDark : option.swatchLight"
+              [style.--hd-palette-swatch-color]="
+                resolvedTheme() === 'dark' ? option.swatchDark : option.swatchLight
+              "
             ></span>
             <span class="hd-palette-option-label">
               <span class="hd-palette-option-name">{{ option.label }}</span>
@@ -118,14 +287,14 @@
     }
   </nav>
 
-  <main hellAppContent>
+  <main hellAppContent maxWidth="1760px">
     <router-outlet />
   </main>
 
   <aside hellAppSecondary>
-    <button hellSecondaryToggle type="button" class="hell-secondary-rail"></button>
+    <button hellSecondaryToggle appearance="rail" type="button"></button>
     <div hellAppSecondaryBody>
-      <button hellSecondaryToggle type="button" class="hell-secondary-header">About hell</button>
+      <button hellSecondaryToggle appearance="header" type="button">About hell</button>
       <div class="hd-secondary-inner">
         <p class="hd-secondary-body">
           A pragmatic Angular component library built on
