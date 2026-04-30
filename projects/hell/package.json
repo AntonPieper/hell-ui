@@ -2,6 +2,36 @@
   "name": "hell",
   "version": "0.1.0",
   "description": "Heinrich Element Library — opinionated Angular component set built on ng-primitives + Tailwind v4.",
+  "exports": {
+    "./styles": {
+      "style": "./styles/hell.css",
+      "default": "./styles/hell.css"
+    },
+    "./styles/tokens": {
+      "style": "./styles/tokens.css",
+      "default": "./styles/tokens.css"
+    },
+    "./styles/primitives": {
+      "style": "./styles/primitives.css",
+      "default": "./styles/primitives.css"
+    },
+    "./styles/composites": {
+      "style": "./styles/composites.css",
+      "default": "./styles/composites.css"
+    },
+    "./styles/features/code-editor": {
+      "style": "./styles/features/code-editor.css",
+      "default": "./styles/features/code-editor.css"
+    },
+    "./styles/features/data-table": {
+      "style": "./styles/features/data-table.css",
+      "default": "./styles/features/data-table.css"
+    },
+    "./styles/features/pdf-viewer": {
+      "style": "./styles/features/pdf-viewer.css",
+      "default": "./styles/features/pdf-viewer.css"
+    }
+  },
   "peerDependencies": {
     "@angular/common": "^21.2.0",
     "@angular/core": "^21.2.0",
@@ -31,5 +61,7 @@
   "dependencies": {
     "tslib": "^2.3.0"
   },
-  "sideEffects": false
+  "sideEffects": [
+    "**/*.css"
+  ]
 }

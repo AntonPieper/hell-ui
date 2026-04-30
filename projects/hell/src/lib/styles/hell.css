@@ -1,57 +1,22 @@
 /*
- * hell — single CSS entry-point.
+ * hell - all-in CSS entry-point.
  *
  * Consumer apps should import:
  *   @import "tailwindcss";
  *   @import "hell/styles";
  *
+ * Import smaller tiers when you do not need everything:
+ *   @import "hell/styles/tokens";
+ *   @import "hell/styles/primitives";
+ *   @import "hell/styles/composites";
+ *   @import "hell/styles/features/data-table";
+ *
  * Tokens + design system base are declared in tokens.css.
- * Component classes are split per-component under ./components/.
+ * Component classes are split per module under ./components/.
  * Each component file now ships semantic selectors in `@layer components`
  * using native CSS declarations plus Tailwind theme variables.
  */
-
-@import './tokens.css';
-
-@import './components/overlay.css';
-@import './components/button.css';
-@import './components/card.css';
-@import './components/separator.css';
-@import './components/input.css';
-@import './components/field.css';
-@import './components/checkbox.css';
-@import './components/radio.css';
-@import './components/switch.css';
-@import './components/toggle.css';
-@import './components/tabs.css';
-@import './components/accordion.css';
-@import './components/dialog.css';
-@import './components/popover.css';
-@import './components/flyout.css';
-@import './components/menu.css';
-@import './components/combobox.css';
-@import './components/select.css';
-@import './components/tooltip.css';
-@import './components/avatar.css';
-@import './components/avatar-group.css';
-@import './components/icon.css';
-@import './components/tag.css';
-@import './components/skeleton.css';
-@import './components/progress.css';
-@import './components/slider.css';
-@import './components/breadcrumbs.css';
-@import './components/pagination.css';
-@import './components/date-picker.css';
-@import './components/date-input.css';
-@import './components/time-input.css';
-@import './components/app-shell.css';
-@import './components/resizable.css';
-@import './components/split-view.css';
-@import './components/audio-player.css';
-@import './components/drop-zone.css';
-@import './components/dialpad.css';
-@import './components/toast.css';
-@import './components/omnibar.css';
-@import './components/data-table.css';
-@import './components/code-editor.css';
-@import './components/pdf-viewer.css';
+@import './composites.css';
+@import './features/data-table.css';
+@import './features/code-editor.css';
+@import './features/pdf-viewer.css';

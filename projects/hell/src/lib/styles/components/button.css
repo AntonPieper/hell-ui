@@ -25,16 +25,16 @@
       box-shadow: var(--_hell-btn-shadow);
       -webkit-user-select: none;
       user-select: none;
-      --_hell-btn-bg-hover: var(--color-hell-surface-muted);
-      --_hell-btn-bg-press: var(--color-hell-surface-muted);
-      --_hell-btn-bg: var(--color-hell-surface-elevated);
-      --_hell-btn-border: var(--color-hell-border);
-      --_hell-btn-fg: var(--color-hell-foreground);
-      --_hell-btn-font: 13px;
-      --_hell-btn-height: var(--spacing-hell-control-md);
-      --_hell-btn-px: var(--spacing-hell-5);
-      --_hell-btn-radius: var(--radius-hell-md);
-      --_hell-btn-shadow: var(--shadow-hell-xs);
+      --_hell-btn-bg-hover: var(--hell-button-background-hover, var(--color-hell-surface-muted));
+      --_hell-btn-bg-press: var(--hell-button-background-active, var(--color-hell-surface-muted));
+      --_hell-btn-bg: var(--hell-button-background, var(--color-hell-surface-elevated));
+      --_hell-btn-border: var(--hell-button-border-color, var(--color-hell-border));
+      --_hell-btn-fg: var(--hell-button-color, var(--color-hell-foreground));
+      --_hell-btn-font: var(--hell-button-font-size, 13px);
+      --_hell-btn-height: var(--hell-button-height, var(--spacing-hell-control-md));
+      --_hell-btn-px: var(--hell-button-padding-inline, var(--spacing-hell-5));
+      --_hell-btn-radius: var(--hell-button-radius, var(--radius-hell-md));
+      --_hell-btn-shadow: var(--hell-button-shadow, var(--shadow-hell-xs));
       transition: background-color var(--hell-duration-fast) var(--ease-hell-out),border-color var(--hell-duration-fast) var(--ease-hell-out),color var(--hell-duration-fast) var(--ease-hell-out),box-shadow var(--hell-duration-fast) var(--ease-hell-out);
       &[data-hover] {
         background-color: var(--_hell-btn-bg-hover);
@@ -64,70 +64,70 @@
         scale: 1;
       }
       &[data-variant="primary"] {
-        --_hell-btn-bg-hover: var(--color-hell-primary-hover);
-        --_hell-btn-bg-press: var(--color-hell-primary-active);
-        --_hell-btn-bg: var(--color-hell-primary);
-        --_hell-btn-border: var(--color-hell-primary);
-        --_hell-btn-fg: var(--color-hell-primary-foreground);
+        --_hell-btn-bg-hover: var(--hell-button-background-hover, var(--color-hell-primary-hover));
+        --_hell-btn-bg-press: var(--hell-button-background-active, var(--color-hell-primary-active));
+        --_hell-btn-bg: var(--hell-button-background, var(--color-hell-primary));
+        --_hell-btn-border: var(--hell-button-border-color, var(--color-hell-primary));
+        --_hell-btn-fg: var(--hell-button-color, var(--color-hell-primary-foreground));
       }
       &[data-variant="soft"] {
-        --_hell-btn-bg-hover: var(--color-hell-surface-muted);
-        --_hell-btn-bg: var(--color-hell-primary-soft);
-        --_hell-btn-border: transparent;
-        --_hell-btn-fg: var(--color-hell-primary-soft-foreground);
-        --_hell-btn-shadow: none;
+        --_hell-btn-bg-hover: var(--hell-button-background-hover, var(--color-hell-surface-muted));
+        --_hell-btn-bg: var(--hell-button-background, var(--color-hell-primary-soft));
+        --_hell-btn-border: var(--hell-button-border-color, transparent);
+        --_hell-btn-fg: var(--hell-button-color, var(--color-hell-primary-soft-foreground));
+        --_hell-btn-shadow: var(--hell-button-shadow, none);
       }
       &[data-variant="ghost"] {
-        --_hell-btn-bg-hover: var(--color-hell-surface-muted);
-        --_hell-btn-bg: transparent;
-        --_hell-btn-border: transparent;
-        --_hell-btn-fg: var(--color-hell-foreground);
-        --_hell-btn-shadow: none;
+        --_hell-btn-bg-hover: var(--hell-button-background-hover, var(--color-hell-surface-muted));
+        --_hell-btn-bg: var(--hell-button-background, transparent);
+        --_hell-btn-border: var(--hell-button-border-color, transparent);
+        --_hell-btn-fg: var(--hell-button-color, var(--color-hell-foreground));
+        --_hell-btn-shadow: var(--hell-button-shadow, none);
       }
       &[data-variant="link"] {
         height: auto;
         padding: calc(var(--spacing) * 0);
         text-decoration-line: underline;
         text-underline-offset: 3px;
-        --_hell-btn-bg-hover: transparent;
-        --_hell-btn-bg: transparent;
-        --_hell-btn-border: transparent;
-        --_hell-btn-fg: var(--color-hell-primary);
-        --_hell-btn-shadow: none;
+        --_hell-btn-bg-hover: var(--hell-button-background-hover, transparent);
+        --_hell-btn-bg: var(--hell-button-background, transparent);
+        --_hell-btn-border: var(--hell-button-border-color, transparent);
+        --_hell-btn-fg: var(--hell-button-color, var(--color-hell-primary));
+        --_hell-btn-shadow: var(--hell-button-shadow, none);
       }
       &[data-variant="danger"] {
-        --_hell-btn-bg-hover: var(--color-hell-danger-hover);
-        --_hell-btn-bg-press: var(--color-hell-danger-active);
-        --_hell-btn-bg: var(--color-hell-danger);
-        --_hell-btn-border: var(--color-hell-danger);
-        --_hell-btn-fg: var(--color-hell-foreground-inverse);
+        --_hell-btn-bg-hover: var(--hell-button-background-hover, var(--color-hell-danger-hover));
+        --_hell-btn-bg-press: var(--hell-button-background-active, var(--color-hell-danger-active));
+        --_hell-btn-bg: var(--hell-button-background, var(--color-hell-danger));
+        --_hell-btn-border: var(--hell-button-border-color, var(--color-hell-danger));
+        --_hell-btn-fg: var(--hell-button-color, var(--color-hell-foreground-inverse));
       }
       &[data-variant="success"] {
-        --_hell-btn-bg-hover: var(--color-hell-success-hover);
-        --_hell-btn-bg-press: var(--color-hell-success-active);
-        --_hell-btn-bg: var(--color-hell-success);
-        --_hell-btn-border: var(--color-hell-success);
-        --_hell-btn-fg: var(--color-hell-foreground-inverse);
+        --_hell-btn-bg-hover: var(--hell-button-background-hover, var(--color-hell-success-hover));
+        --_hell-btn-bg-press: var(--hell-button-background-active, var(--color-hell-success-active));
+        --_hell-btn-bg: var(--hell-button-background, var(--color-hell-success));
+        --_hell-btn-border: var(--hell-button-border-color, var(--color-hell-success));
+        --_hell-btn-fg: var(--hell-button-color, var(--color-hell-foreground-inverse));
       }
       &[data-size="xs"] {
-        --_hell-btn-font: 12px;
-        --_hell-btn-height: var(--spacing-hell-control-xs);
-        --_hell-btn-px: var(--spacing-hell-3);
+        --_hell-btn-font: var(--hell-button-font-size, 12px);
+        --_hell-btn-height: var(--hell-button-height, var(--spacing-hell-control-xs));
+        --_hell-btn-px: var(--hell-button-padding-inline, var(--spacing-hell-3));
       }
       &[data-size="sm"] {
-        --_hell-btn-font: 13px;
-        --_hell-btn-height: var(--spacing-hell-control-sm);
-        --_hell-btn-px: var(--spacing-hell-4);
+        --_hell-btn-font: var(--hell-button-font-size, 13px);
+        --_hell-btn-height: var(--hell-button-height, var(--spacing-hell-control-sm));
+        --_hell-btn-px: var(--hell-button-padding-inline, var(--spacing-hell-4));
       }
       &[data-size="lg"] {
-        --_hell-btn-font: 14px;
-        --_hell-btn-height: var(--spacing-hell-control-lg);
-        --_hell-btn-px: var(--spacing-hell-6);
+        --_hell-btn-font: var(--hell-button-font-size, 14px);
+        --_hell-btn-height: var(--hell-button-height, var(--spacing-hell-control-lg));
+        --_hell-btn-px: var(--hell-button-padding-inline, var(--spacing-hell-6));
       }
       &[data-size="xl"] {
-        --_hell-btn-font: 15px;
-        --_hell-btn-height: var(--spacing-hell-control-xl);
-        --_hell-btn-px: var(--spacing-hell-7);
+        --_hell-btn-font: var(--hell-button-font-size, 15px);
+        --_hell-btn-height: var(--hell-button-height, var(--spacing-hell-control-xl));
+        --_hell-btn-px: var(--hell-button-padding-inline, var(--spacing-hell-7));
       }
       &[data-icon-only] {
         width: var(--_hell-btn-height);

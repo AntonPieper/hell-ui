@@ -5,24 +5,24 @@
      `.hell-input` so it slots into forms beside text inputs. */
 
   .hell-select {
-      --_hell-select-height: var(--spacing-hell-control-md);
-      --_hell-select-px: var(--spacing-hell-4);
-      --_hell-select-font: 13px;
+      --_hell-select-height: var(--hell-select-height, var(--spacing-hell-control-md));
+      --_hell-select-px: var(--hell-select-padding-inline, var(--spacing-hell-4));
+      --_hell-select-font: var(--hell-select-font-size, 13px);
       display: inline-flex;
       align-items: center;
-      width: 100%;
+      width: var(--hell-select-width, 100%);
       gap: var(--spacing-hell-3);
       height: var(--_hell-select-height);
       padding-inline-start: var(--_hell-select-px);
       padding-inline-end: var(--spacing-hell-3);
       font-size: var(--_hell-select-font);
       font-family: inherit;
-      color: var(--color-hell-foreground);
-      background-color: var(--color-hell-surface-elevated);
+      color: var(--hell-select-color, var(--color-hell-foreground));
+      background-color: var(--hell-select-background, var(--color-hell-surface-elevated));
       border-style: solid;
       border-width: 1px;
-      border-color: var(--color-hell-border);
-      border-radius: var(--radius-md);
+      border-color: var(--hell-select-border-color, var(--color-hell-border));
+      border-radius: var(--hell-select-radius, var(--radius-md));
       cursor: pointer;
       outline: none;
       text-align: start;
@@ -31,13 +31,14 @@
         box-shadow var(--hell-duration-fast) var(--ease-hell-out);
       &::after {
         content: '';
+        display: var(--hell-select-indicator-display, block);
         flex-shrink: 0;
         margin-inline-start: auto;
-        width: 12px;
-        height: 12px;
-        background-color: var(--color-hell-foreground-muted);
-        mask-image: var(--hell-icon-chevron-down);
-        -webkit-mask-image: var(--hell-icon-chevron-down);
+        width: var(--hell-select-indicator-size, 12px);
+        height: var(--hell-select-indicator-size, 12px);
+        background-color: var(--hell-select-indicator-color, var(--color-hell-foreground-muted));
+        mask-image: var(--hell-select-indicator-icon, var(--hell-icon-chevron-down));
+        -webkit-mask-image: var(--hell-select-indicator-icon, var(--hell-icon-chevron-down));
         mask-size: contain;
         -webkit-mask-size: contain;
         mask-repeat: no-repeat;
@@ -48,7 +49,7 @@
       }
       &[data-open]::after {
         rotate: 180deg;
-        background-color: var(--color-hell-foreground);
+        background-color: var(--hell-select-indicator-open-color, var(--color-hell-foreground));
       }
       &[data-hover]:not([data-focus]) {
         border-color: var(--color-hell-border-strong);
@@ -88,15 +89,15 @@
       display: flex;
       flex-direction: column;
       position: fixed;
-      width: var(--ngp-select-width, 220px);
-      max-height: min(320px, var(--ngp-select-available-height, 320px));
+      width: var(--hell-select-dropdown-width, var(--ngp-select-width, 220px));
+      max-height: var(--hell-select-dropdown-max-height, min(320px, var(--ngp-select-available-height, 320px)));
       overflow-y: auto;
-      background-color: var(--color-hell-surface-elevated);
+      background-color: var(--hell-select-dropdown-background, var(--color-hell-surface-elevated));
       border-style: solid;
       border-width: 1px;
-      border-color: var(--color-hell-border);
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-hell-lg);
+      border-color: var(--hell-select-dropdown-border-color, var(--color-hell-border));
+      border-radius: var(--hell-select-dropdown-radius, var(--radius-md));
+      box-shadow: var(--hell-select-dropdown-shadow, var(--shadow-hell-lg));
       padding: var(--spacing-hell-2);
       gap: 1px;
       outline: none;

@@ -8,19 +8,19 @@
   .hell-combobox {
       display: inline-flex;
       align-items: center;
-      width: 100%;
+      width: var(--hell-combobox-width, 100%);
       gap: 0;
-      height: var(--spacing-hell-control-md);
-      padding-inline-start: var(--spacing-hell-4);
+      height: var(--hell-combobox-height, var(--spacing-hell-control-md));
+      padding-inline-start: var(--hell-combobox-padding-inline, var(--spacing-hell-4));
       padding-inline-end: 0;
-      font-size: 13px;
+      font-size: var(--hell-combobox-font-size, 13px);
       font-family: inherit;
-      color: var(--color-hell-foreground);
-      background-color: var(--color-hell-surface-elevated);
+      color: var(--hell-combobox-color, var(--color-hell-foreground));
+      background-color: var(--hell-combobox-background, var(--color-hell-surface-elevated));
       border-style: solid;
       border-width: 1px;
-      border-color: var(--color-hell-border);
-      border-radius: var(--radius-md);
+      border-color: var(--hell-combobox-border-color, var(--color-hell-border));
+      border-radius: var(--hell-combobox-radius, var(--radius-md));
       outline: none;
       cursor: text;
       transition:
@@ -77,11 +77,12 @@
       outline: none;
       &::after {
         content: '';
-        width: 10px;
-        height: 10px;
+        display: var(--hell-combobox-indicator-display, block);
+        width: var(--hell-combobox-indicator-size, 10px);
+        height: var(--hell-combobox-indicator-size, 10px);
         background-color: currentColor;
-        mask-image: var(--hell-icon-chevron-down);
-        -webkit-mask-image: var(--hell-icon-chevron-down);
+        mask-image: var(--hell-combobox-indicator-icon, var(--hell-icon-chevron-down));
+        -webkit-mask-image: var(--hell-combobox-indicator-icon, var(--hell-icon-chevron-down));
         mask-size: contain;
         -webkit-mask-size: contain;
         mask-repeat: no-repeat;
@@ -101,15 +102,15 @@
       display: flex;
       flex-direction: column;
       position: fixed;
-      width: var(--ngp-combobox-width, var(--ngp-combobox-input-width, 220px));
-      max-height: min(320px, var(--ngp-combobox-available-height, 320px));
+      width: var(--hell-combobox-dropdown-width, var(--ngp-combobox-width, var(--ngp-combobox-input-width, 220px)));
+      max-height: var(--hell-combobox-dropdown-max-height, min(320px, var(--ngp-combobox-available-height, 320px)));
       overflow-y: auto;
-      background-color: var(--color-hell-surface-elevated);
+      background-color: var(--hell-combobox-dropdown-background, var(--color-hell-surface-elevated));
       border-style: solid;
       border-width: 1px;
-      border-color: var(--color-hell-border);
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-hell-lg);
+      border-color: var(--hell-combobox-dropdown-border-color, var(--color-hell-border));
+      border-radius: var(--hell-combobox-dropdown-radius, var(--radius-md));
+      box-shadow: var(--hell-combobox-dropdown-shadow, var(--shadow-hell-lg));
       padding: var(--spacing-hell-2);
       gap: 1px;
       outline: none;

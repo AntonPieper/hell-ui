@@ -4,20 +4,20 @@
 
   .hell-input {
       display: inline-flex;
-      width: 100%;
-      --_hell-input-height: var(--spacing-hell-control-md);
-      --_hell-input-px: var(--spacing-hell-4);
-      --_hell-input-font: 13px;
+      width: var(--hell-input-width, 100%);
+      --_hell-input-height: var(--hell-input-height, var(--spacing-hell-control-md));
+      --_hell-input-px: var(--hell-input-padding-inline, var(--spacing-hell-4));
+      --_hell-input-font: var(--hell-input-font-size, 13px);
       height: var(--_hell-input-height);
       padding-inline: var(--_hell-input-px);
       font-size: var(--_hell-input-font);
       font-family: inherit;
-      color: var(--color-hell-foreground);
-      background-color: var(--color-hell-surface-elevated);
+      color: var(--hell-input-color, var(--color-hell-foreground));
+      background-color: var(--hell-input-background, var(--color-hell-surface-elevated));
       border-style: solid;
       border-width: 1px;
-      border-color: var(--color-hell-border);
-      border-radius: var(--radius-md);
+      border-color: var(--hell-input-border-color, var(--color-hell-border));
+      border-radius: var(--hell-input-radius, var(--radius-md));
       outline: none;
       transition: border-color var(--hell-duration-fast) var(--ease-hell-out), box-shadow var(--hell-duration-fast) var(--ease-hell-out);
       &::placeholder {
@@ -41,33 +41,33 @@
         border-color: var(--color-hell-danger);
       }
       &[data-size="sm"] {
-        --_hell-input-height: var(--spacing-hell-control-sm);
-        --_hell-input-px: var(--spacing-hell-3);
-        --_hell-input-font: 12px;
+        --_hell-input-height: var(--hell-input-height, var(--spacing-hell-control-sm));
+        --_hell-input-px: var(--hell-input-padding-inline, var(--spacing-hell-3));
+        --_hell-input-font: var(--hell-input-font-size, 12px);
       }
       &[data-size="lg"] {
-        --_hell-input-height: var(--spacing-hell-control-lg);
-        --_hell-input-px: var(--spacing-hell-5);
-        --_hell-input-font: 14px;
+        --_hell-input-height: var(--hell-input-height, var(--spacing-hell-control-lg));
+        --_hell-input-px: var(--hell-input-padding-inline, var(--spacing-hell-5));
+        --_hell-input-font: var(--hell-input-font-size, 14px);
       }
     }
 
   .hell-native-select {
       display: inline-flex;
-      width: 100%;
-      --_hell-native-select-height: var(--spacing-hell-control-md);
-      --_hell-native-select-px: var(--spacing-hell-4);
-      --_hell-native-select-font: 13px;
+      width: var(--hell-native-select-width, 100%);
+      --_hell-native-select-height: var(--hell-native-select-height, var(--spacing-hell-control-md));
+      --_hell-native-select-px: var(--hell-native-select-padding-inline, var(--spacing-hell-4));
+      --_hell-native-select-font: var(--hell-native-select-font-size, 13px);
       height: var(--_hell-native-select-height);
       padding-inline: var(--_hell-native-select-px) calc(var(--_hell-native-select-px) + 1rem);
       font-size: var(--_hell-native-select-font);
       font-family: inherit;
-      color: var(--color-hell-foreground);
-      background-color: var(--color-hell-surface-elevated);
+      color: var(--hell-native-select-color, var(--color-hell-foreground));
+      background-color: var(--hell-native-select-background, var(--color-hell-surface-elevated));
       border-style: solid;
       border-width: 1px;
-      border-color: var(--color-hell-border);
-      border-radius: var(--radius-md);
+      border-color: var(--hell-native-select-border-color, var(--color-hell-border));
+      border-radius: var(--hell-native-select-radius, var(--radius-md));
       outline: none;
       appearance: none;
       background-image:
@@ -94,33 +94,33 @@
         border-color: var(--color-hell-danger);
       }
       &[data-size="sm"] {
-        --_hell-native-select-height: var(--spacing-hell-control-sm);
-        --_hell-native-select-px: var(--spacing-hell-3);
-        --_hell-native-select-font: 12px;
+        --_hell-native-select-height: var(--hell-native-select-height, var(--spacing-hell-control-sm));
+        --_hell-native-select-px: var(--hell-native-select-padding-inline, var(--spacing-hell-3));
+        --_hell-native-select-font: var(--hell-native-select-font-size, 12px);
       }
       &[data-size="lg"] {
-        --_hell-native-select-height: var(--spacing-hell-control-lg);
-        --_hell-native-select-px: var(--spacing-hell-5);
-        --_hell-native-select-font: 14px;
+        --_hell-native-select-height: var(--hell-native-select-height, var(--spacing-hell-control-lg));
+        --_hell-native-select-px: var(--hell-native-select-padding-inline, var(--spacing-hell-5));
+        --_hell-native-select-font: var(--hell-native-select-font-size, 14px);
       }
     }
 
   .hell-textarea {
-      width: 100%;
+      width: var(--hell-textarea-width, 100%);
       resize: vertical;
-      font-size: 13px;
+      font-size: var(--hell-textarea-font-size, 13px);
       font-family: inherit;
-      color: var(--color-hell-foreground);
-      background-color: var(--color-hell-surface-elevated);
+      color: var(--hell-textarea-color, var(--color-hell-foreground));
+      background-color: var(--hell-textarea-background, var(--color-hell-surface-elevated));
       border-style: solid;
       border-width: 1px;
-      border-color: var(--color-hell-border);
-      border-radius: var(--radius-md);
+      border-color: var(--hell-textarea-border-color, var(--color-hell-border));
+      border-radius: var(--hell-textarea-radius, var(--radius-md));
       outline: none;
       transition: border-color var(--hell-duration-fast) var(--ease-hell-out), box-shadow var(--hell-duration-fast) var(--ease-hell-out);
-      padding-inline: var(--spacing-hell-4);
-      padding-block: var(--spacing-hell-3);
-      min-height: calc(var(--spacing-hell-control-md) * 2);
+      padding-inline: var(--hell-textarea-padding-inline, var(--spacing-hell-4));
+      padding-block: var(--hell-textarea-padding-block, var(--spacing-hell-3));
+      min-height: var(--hell-textarea-min-height, calc(var(--spacing-hell-control-md) * 2));
       line-height: 1.5;
       &::placeholder {
         color: var(--color-hell-foreground-subtle);
@@ -138,16 +138,16 @@
         border-color: var(--color-hell-danger);
       }
       &[data-size="sm"] {
-        font-size: 12px;
-        padding-inline: var(--spacing-hell-3);
-        padding-block: var(--spacing-hell-2);
-        min-height: calc(var(--spacing-hell-control-sm) * 2);
+        font-size: var(--hell-textarea-font-size, 12px);
+        padding-inline: var(--hell-textarea-padding-inline, var(--spacing-hell-3));
+        padding-block: var(--hell-textarea-padding-block, var(--spacing-hell-2));
+        min-height: var(--hell-textarea-min-height, calc(var(--spacing-hell-control-sm) * 2));
       }
       &[data-size="lg"] {
-        font-size: 14px;
-        padding-inline: var(--spacing-hell-5);
-        padding-block: var(--spacing-hell-4);
-        min-height: calc(var(--spacing-hell-control-lg) * 2);
+        font-size: var(--hell-textarea-font-size, 14px);
+        padding-inline: var(--hell-textarea-padding-inline, var(--spacing-hell-5));
+        padding-block: var(--hell-textarea-padding-block, var(--spacing-hell-4));
+        min-height: var(--hell-textarea-min-height, calc(var(--spacing-hell-control-lg) * 2));
       }
     }
 
