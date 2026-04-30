@@ -1,9 +1,5 @@
 import { HellStyleable } from '../../core/styleable';
-import {
-  HellResizeInteractionController,
-  HellResizeOperation,
-  hellResizeIntentFromKey,
-} from '../../core/resize-behavior';
+import { HellResizePairInteractionController } from '../../core/resize-behavior';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -291,71 +287,46 @@ export class HellTableColumnResizer extends HellStyleable {
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly cell = inject(HellTableHeaderCell);
-  private readonly resizeInteraction = new HellResizeInteractionController({
-    handle: this.host,
-    ownerWindow: () => this.host.ownerDocument.defaultView,
-    onActiveChange: (active) => this.dragging.set(active),
-  });
+  private readonly resizeInteraction = new HellResizePairInteractionController<HellTableHeaderCell>(
+    {
+      handle: this.host,
+      ownerWindow: () => this.host.ownerDocument.defaultView,
+      onActiveChange: (active) => this.dragging.set(active),
+      orientation: () => 'horizontal',
+      stopPropagation: true,
+      pair: () => this.adjacentPair(),
+      adapters: (pair) => {
+        const min = this.minWidth();
+        return {
+          before: {
+            measure: () => pair.before.measure(),
+            minSize: () => min,
+            setSize: (size) => pair.before.setLiveWidth(size),
+            commitSize: (size) => pair.before.commit(size),
+          },
+          after: {
+            measure: () => pair.after.measure(),
+            minSize: () => min,
+            setSize: (size) => pair.after.setLiveWidth(size),
+            commitSize: (size) => pair.after.commit(size),
+          },
+        };
+      },
+    },
+  );
 
-  protected onPointerDown(e: PointerEvent) {
-    if (e.button !== 0) return;
-    e.preventDefault();
-    e.stopPropagation();
-
+  private adjacentPair(): { before: HellTableHeaderCell; after: HellTableHeaderCell } | null {
     const cell = this.cell;
     const next = cell.head?.nextSibling(cell) ?? null;
-    if (!next) return; // last column — no neighbor to give space to.
+    return next ? { before: cell, after: next } : null;
+  }
 
-    const min = this.minWidth();
-    const operation = new HellResizeOperation({
-      before: {
-        measure: () => cell.measure(),
-        minSize: () => min,
-        setSize: (size) => cell.setLiveWidth(size),
-        commitSize: (size) => cell.commit(size),
-      },
-      after: {
-        measure: () => next.measure(),
-        minSize: () => min,
-        setSize: (size) => next.setLiveWidth(size),
-        commitSize: (size) => next.commit(size),
-      },
-      orientation: 'horizontal',
-      startCoordinate: e.clientX,
-    });
-    if (!operation.canResize) return;
-
-    this.resizeInteraction.startPointer(e, operation);
+  protected onPointerDown(e: PointerEvent) {
+    this.resizeInteraction.startPointer(e);
   }
 
   protected onKey(e: KeyboardEvent) {
-    const intent = hellResizeIntentFromKey(e.key, 'horizontal');
-    if (!intent) return;
-    e.preventDefault();
-    e.stopPropagation();
-
-    const cell = this.cell;
-    const next = cell.head?.nextSibling(cell) ?? null;
-    if (!next) return;
-
-    const min = this.minWidth();
-    const operation = new HellResizeOperation({
-      before: {
-        measure: () => cell.measure(),
-        minSize: () => min,
-        setSize: (size) => cell.setLiveWidth(size),
-        commitSize: (size) => cell.commit(size),
-      },
-      after: {
-        measure: () => next.measure(),
-        minSize: () => min,
-        setSize: (size) => next.setLiveWidth(size),
-        commitSize: (size) => next.commit(size),
-      },
-      orientation: 'horizontal',
-    });
-    if (!operation.canResize) return;
-    this.resizeInteraction.applyKey(e, operation);
+    this.resizeInteraction.applyKey(e);
   }
 
   ngOnDestroy(): void {

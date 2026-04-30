@@ -15,11 +15,8 @@ import {
   signal,
 } from '@angular/core';
 import {
-  HellResizeInteractionController,
-  HellResizeOperation,
+  HellResizePairInteractionController,
   hellFitResizeSizesToTotal,
-  hellResizeCoordinate,
-  hellResizeIntentFromKey,
 } from '../../core/resize-behavior';
 import { HellOrientation } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
@@ -273,22 +270,30 @@ export class HellResizableHandle extends HellStyleable {
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   protected readonly resizable = inject(HellResizable);
-  private readonly resizeInteraction = new HellResizeInteractionController({
+  private readonly resizeInteraction = new HellResizePairInteractionController<HellResizablePane>({
     handle: this.host,
     ownerWindow: () => this.host.ownerDocument.defaultView,
     onActiveChange: (active) => this.dragging.set(active),
     onValueChange: (result) => this.ariaValueNow.set(result.ariaValueNow),
+    orientation: () => (this.resizable.orientation() === 'horizontal' ? 'horizontal' : 'vertical'),
+    beforeStart: () => {
+      this.resizable.fitPanesToAvailableSize();
+      return !this.resizable.isConstrained();
+    },
+    afterStart: () => this.resizable.markUserSized(),
+    pair: () => this.adjacentPair(),
+    adapters: (pair) => this.adaptersFor(pair),
   });
 
   /** Lookup the panes immediately preceding and following this handle. */
-  private adjacent(): { prev: HellResizablePane | null; next: HellResizablePane | null } {
+  private adjacentPair(): { before: HellResizablePane; after: HellResizablePane } | null {
     const parent = this.host.parentElement;
-    if (!parent) return { prev: null, next: null };
+    if (!parent) return null;
 
     const panes = this.resizable.getPanes();
     const children = Array.from(parent.children) as HTMLElement[];
     const handleIndex = children.indexOf(this.host);
-    if (handleIndex < 0) return { prev: null, next: null };
+    if (handleIndex < 0) return null;
 
     const paneFor = (element: HTMLElement) => panes.find((pane) => pane.host === element) ?? null;
     const findPane = (start: number, step: 1 | -1): HellResizablePane | null => {
@@ -299,10 +304,9 @@ export class HellResizableHandle extends HellStyleable {
       return null;
     };
 
-    return {
-      prev: findPane(handleIndex - 1, -1),
-      next: findPane(handleIndex + 1, 1),
-    };
+    const before = findPane(handleIndex - 1, -1);
+    const after = findPane(handleIndex + 1, 1);
+    return before && after ? { before, after } : null;
   }
 
   private lockPanes(): Map<HellResizablePane, number> {
@@ -313,66 +317,30 @@ export class HellResizableHandle extends HellStyleable {
     return sizes;
   }
 
-  @HostListener('pointerdown', ['$event'])
-  protected onPointerDown(e: PointerEvent) {
-    // Only react to primary button / first touch / any pen.
-    if (e.button !== 0) return;
-    this.resizable.fitPanesToAvailableSize();
-    if (this.resizable.isConstrained()) return;
-
-    const { prev, next } = this.adjacent();
-    if (!prev || !next) {
-      return;
-    }
-
-    e.preventDefault();
-    const orientation = this.resizable.orientation() === 'horizontal' ? 'horizontal' : 'vertical';
+  private adaptersFor(pair: { before: HellResizablePane; after: HellResizablePane }) {
     const sizes = this.lockPanes();
-    const operation = new HellResizeOperation({
+    return {
       before: {
-        measure: () => sizes.get(prev) ?? prev.measure(),
-        minSize: () => prev.currentMinSize(),
-        setSize: (size) => prev.setSize(size),
+        measure: () => sizes.get(pair.before) ?? pair.before.measure(),
+        minSize: () => pair.before.currentMinSize(),
+        setSize: (size: number) => pair.before.setSize(size),
       },
       after: {
-        measure: () => sizes.get(next) ?? next.measure(),
-        minSize: () => next.currentMinSize(),
-        setSize: (size) => next.setSize(size),
+        measure: () => sizes.get(pair.after) ?? pair.after.measure(),
+        minSize: () => pair.after.currentMinSize(),
+        setSize: (size: number) => pair.after.setSize(size),
       },
-      orientation,
-      startCoordinate: hellResizeCoordinate(e, orientation),
-    });
-    if (!operation.canResize) return;
-    this.resizable.markUserSized();
-    this.resizeInteraction.startPointer(e, operation);
+    };
+  }
+
+  @HostListener('pointerdown', ['$event'])
+  protected onPointerDown(e: PointerEvent) {
+    this.resizeInteraction.startPointer(e);
   }
 
   @HostListener('keydown', ['$event'])
   protected onKey(e: KeyboardEvent) {
-    this.resizable.fitPanesToAvailableSize();
-    if (this.resizable.isConstrained()) return;
-
-    const orientation = this.resizable.orientation() === 'horizontal' ? 'horizontal' : 'vertical';
-    if (!hellResizeIntentFromKey(e.key, orientation)) return;
-
-    const { prev, next } = this.adjacent();
-    if (!prev || !next) return;
-    const sizes = this.lockPanes();
-    const operation = new HellResizeOperation({
-      before: {
-        measure: () => sizes.get(prev) ?? prev.measure(),
-        minSize: () => prev.currentMinSize(),
-        setSize: (size) => prev.setSize(size),
-      },
-      after: {
-        measure: () => sizes.get(next) ?? next.measure(),
-        minSize: () => next.currentMinSize(),
-        setSize: (size) => next.setSize(size),
-      },
-      orientation,
-    });
-    if (!operation.canResize) return;
-    if (this.resizeInteraction.applyKey(e, operation)) this.resizable.markUserSized();
+    this.resizeInteraction.applyKey(e);
   }
 
   ngOnDestroy(): void {

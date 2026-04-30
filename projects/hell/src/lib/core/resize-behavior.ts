@@ -46,6 +46,36 @@ export interface HellResizeInteractionControllerOptions {
   readonly onCommit?: (result: HellResizeTransactionResult) => void;
 }
 
+export interface HellResizePair<TItem> {
+  readonly before: TItem;
+  readonly after: TItem;
+}
+
+export interface HellResizePairAdapters {
+  readonly before: HellResizeOperationAdapter;
+  readonly after: HellResizeOperationAdapter;
+}
+
+export interface HellResizePairOperationOptions<TItem> {
+  readonly pair: HellResizePair<TItem>;
+  readonly orientation: HellResizeOrientation;
+  readonly adapters: (pair: HellResizePair<TItem>) => HellResizePairAdapters;
+  readonly startCoordinate?: number;
+  readonly keyDelta?: number;
+}
+
+export interface HellResizePairInteractionControllerOptions<
+  TItem,
+> extends HellResizeInteractionControllerOptions {
+  readonly orientation: () => HellResizeOrientation;
+  readonly pair: () => HellResizePair<TItem> | null;
+  readonly adapters: (pair: HellResizePair<TItem>) => HellResizePairAdapters;
+  readonly beforeStart?: () => boolean;
+  readonly afterStart?: () => void;
+  readonly stopPropagation?: boolean;
+  readonly keyDelta?: number;
+}
+
 /** Clamp pane A so pane B keeps its min size when total space allows. */
 export function hellConstrainResizeValue(
   value: number,
@@ -219,6 +249,73 @@ export class HellResizeOperation {
     this.options.before.setSize(result.a);
     this.options.after.setSize(result.b);
     return result;
+  }
+}
+
+/** Build one pair resize operation from caller-owned layout adapters. */
+export function hellCreateResizePairOperation<TItem>(
+  options: HellResizePairOperationOptions<TItem>,
+): HellResizeOperation {
+  const adapters = options.adapters(options.pair);
+  return new HellResizeOperation({
+    before: adapters.before,
+    after: adapters.after,
+    orientation: options.orientation,
+    startCoordinate: options.startCoordinate,
+    keyDelta: options.keyDelta,
+  });
+}
+
+/** Owns pointer/keyboard resize flow while callers provide pair lookup and layout adapters. */
+export class HellResizePairInteractionController<TItem> {
+  private readonly interaction: HellResizeInteractionController;
+
+  constructor(private readonly options: HellResizePairInteractionControllerOptions<TItem>) {
+    this.interaction = new HellResizeInteractionController(options);
+  }
+
+  startPointer(event: PointerEvent): boolean {
+    if (event.button !== 0) return false;
+    if (this.options.stopPropagation) event.stopPropagation();
+    const orientation = this.options.orientation();
+    const operation = this.operationFor(orientation, hellResizeCoordinate(event, orientation));
+    if (!operation) return false;
+    const started = this.interaction.startPointer(event, operation);
+    if (started) this.options.afterStart?.();
+    return started;
+  }
+
+  applyKey(event: KeyboardEvent): boolean {
+    const orientation = this.options.orientation();
+    if (!hellResizeIntentFromKey(event.key, orientation)) return false;
+    if (this.options.stopPropagation) event.stopPropagation();
+    const operation = this.operationFor(orientation);
+    if (!operation) return false;
+    const applied = this.interaction.applyKey(event, operation);
+    if (applied) this.options.afterStart?.();
+    return applied;
+  }
+
+  destroy(): void {
+    this.interaction.destroy();
+  }
+
+  private operationFor(
+    orientation: HellResizeOrientation,
+    startCoordinate?: number,
+  ): HellResizeOperation | null {
+    if (this.options.beforeStart?.() === false) return null;
+    const pair = this.options.pair();
+    if (!pair) return null;
+
+    const operation = hellCreateResizePairOperation({
+      pair,
+      orientation,
+      adapters: this.options.adapters,
+      startCoordinate,
+      keyDelta: this.options.keyDelta,
+    });
+    return operation.canResize ? operation : null;
   }
 }
 

@@ -1,6 +1,7 @@
 import {
   HellResizeInteractionController,
   HellResizeOperation,
+  HellResizePairInteractionController,
   HellResizeTransaction,
   hellConstrainResizeValue,
   hellResizeCoordinate,
@@ -159,6 +160,29 @@ describe('Resize Behavior', () => {
     expect(commits).toEqual([64]);
     expect(before.committed).toBe(116);
     expect(after.committed).toBe(64);
+  });
+
+  it('runs pair resize interaction through caller adapters', () => {
+    const handle = document.createElement('div');
+    const before = createResizeAdapter(100, 40);
+    const after = createResizeAdapter(80, 40);
+    const commits: number[] = [];
+
+    const interaction = new HellResizePairInteractionController({
+      handle,
+      orientation: () => 'horizontal',
+      pair: () => ({ before, after }),
+      adapters: (pair) => ({ before: pair.before, after: pair.after }),
+      onCommit: (result) => commits.push(result.a),
+    });
+
+    const event = new KeyboardEvent('keydown', { key: 'ArrowRight', cancelable: true });
+
+    expect(interaction.applyKey(event)).toBe(true);
+    expect(event.defaultPrevented).toBe(true);
+    expect(before.size).toBe(116);
+    expect(after.size).toBe(64);
+    expect(commits).toEqual([116]);
   });
 
   it('uses orientation when reading pointer coordinates', () => {
