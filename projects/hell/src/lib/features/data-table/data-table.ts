@@ -1,211 +1,381 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Directive,
+  ElementRef,
   booleanAttribute,
   computed,
-  effect,
+  inject,
   input,
+  numberAttribute,
   output,
   signal,
 } from '@angular/core';
-import {
-  FlexRenderDirective,
-  type ColumnDef,
-  type PaginationState,
-  type SortingState,
-  createAngularTable,
-  getCoreRowModel,
-} from '@tanstack/angular-table';
-import { HellInput, HellNativeSelect } from '../../primitives/input/input';
-import { HellPaginationStrip } from '../../primitives/pagination/pagination';
 
-export interface HellDataTableQuery {
-  pageIndex: number;
-  pageSize: number;
-  sorting: SortingState;
-  filter: string;
+/**
+ * Optional shell for a data table. Frames the table with the standard
+ * elevated surface, border, radius, and overflow clipping. Place the
+ * scroll container or the table directly inside.
+ */
+@Directive({
+  selector: '[hellTableContainer]',
+  host: {
+    '[class.hell-table-container]': '!unstyled()',
+    '[attr.data-loading]': 'busy() ? "true" : null',
+    '[attr.aria-busy]': 'busy() ? "true" : null',
+  },
+})
+export class HellTableContainer {
+  readonly unstyled = input(false, { transform: booleanAttribute });
+  readonly busy = input(false, { transform: booleanAttribute });
 }
 
 /**
- * Data table built on `@tanstack/angular-table` with server-side pagination,
- * sorting, and a single global filter input. Consumers are expected to listen
- * to `(queryChange)` and update `data` + `total` accordingly.
+ * Marks a `<table>` as a hell data table. Applies the host class with the
+ * shared dense typography and border treatment, and switches the table to
+ * a fixed layout so column widths from `[width]` on header cells are
+ * honored. Pass `unstyled` to opt out of all class-based styling.
  */
-@Component({
-  selector: 'hell-data-table',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FlexRenderDirective, HellInput, HellNativeSelect, HellPaginationStrip],
+@Directive({
+  selector: 'table[hellTable]',
   host: {
-    '[class.hell-table-shell]': '!unstyled()',
+    '[class.hell-table]': '!unstyled()',
+    '[attr.data-content-width]': 'contentWidth() ? "true" : null',
   },
-  template: `
-    <div class="hell-table-toolbar">
-      <input
-        hellInput
-        size="sm"
-        class="hell-table-filter"
-        type="search"
-        [value]="filter()"
-        (input)="onFilter($event.target.value)"
-        placeholder="Filter…"
-        aria-label="Filter rows"
-      />
-    </div>
-
-    <table class="hell-table">
-      <thead>
-        @for (group of table.getHeaderGroups(); track group.id) {
-          <tr>
-            @for (header of group.headers; track header.id) {
-              <th
-                [attr.aria-sort]="
-                  header.column.getCanSort() ? ariaSort(header.column.getIsSorted()) : null
-                "
-                [attr.data-sortable]="header.column.getCanSort() ? 'true' : null"
-                (click)="header.column.getCanSort() && header.column.toggleSorting()"
-              >
-                <ng-container
-                  *flexRender="header.column.columnDef.header; props: header.getContext(); let h"
-                >
-                  {{ h }}
-                </ng-container>
-              </th>
-            }
-          </tr>
-        }
-      </thead>
-      <tbody>
-        @for (row of table.getRowModel().rows; track row.id) {
-          <tr>
-            @for (cell of row.getVisibleCells(); track cell.id) {
-              <td>
-                <ng-container
-                  *flexRender="cell.column.columnDef.cell; props: cell.getContext(); let c"
-                >
-                  {{ c }}
-                </ng-container>
-              </td>
-            }
-          </tr>
-        } @empty {
-          <tr>
-            <td [attr.colspan]="visibleColumnCount()" style="text-align:center; padding:2rem;">
-              No results.
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-
-    <div class="hell-table-footer">
-      <span>{{ rangeLabel() }}</span>
-      <label class="hell-table-pagesize">
-        Rows
-        <select
-          hellNativeSelect
-          size="sm"
-          [value]="pageSizeSig()"
-          (change)="onPageSizeChange($any($event.target).value)"
-          aria-label="Rows per page"
-        >
-          @for (n of pageSizeOptions(); track n) {
-            <option [value]="n">{{ n }}</option>
-          }
-        </select>
-      </label>
-      <span style="flex:1"></span>
-      <hell-pagination
-        [page]="pageIndex() + 1"
-        [pageCount]="pageCount()"
-        (pageChange)="goToPage($event)"
-      />
-    </div>
-  `,
 })
-export class HellDataTable<T> {
+export class HellTable {
   readonly unstyled = input(false, { transform: booleanAttribute });
-  readonly data = input<readonly T[]>([]);
-  readonly columns = input<ColumnDef<T, any>[]>([]);
-  readonly total = input<number>(0);
-  readonly pageSize = input<number>(20);
-  readonly pageSizeOptions = input<readonly number[]>([10, 20, 50, 100]);
+  readonly contentWidth = input(false, { transform: booleanAttribute });
+}
 
-  readonly queryChange = output<HellDataTableQuery>();
+/**
+ * Header section. Tracks its child header cells so the column resizer
+ * can find the cell immediately to the right of the one being dragged
+ * and resize them as a pair (sum of the two widths is conserved).
+ */
+@Directive({
+  selector: 'thead[hellTableHead]',
+  exportAs: 'hellTableHead',
+  host: {
+    '[class.hell-table-head]': '!unstyled()',
+  },
+})
+export class HellTableHead {
+  readonly unstyled = input(false, { transform: booleanAttribute });
 
-  protected readonly pageIndex = signal(0);
-  protected readonly sorting = signal<SortingState>([]);
-  protected readonly filter = signal('');
-  /** Internal page size — initialized from the `pageSize` input but
-   *  can be changed by the user via the footer selector. */
-  protected readonly pageSizeSig = signal(this.pageSize());
+  private readonly cells = new Set<HellTableHeaderCell>();
 
-  protected readonly pageCount = computed(() =>
-    Math.max(1, Math.ceil(this.total() / this.pageSizeSig())),
-  );
+  register(c: HellTableHeaderCell) {
+    this.cells.add(c);
+  }
+  unregister(c: HellTableHeaderCell) {
+    this.cells.delete(c);
+  }
 
-  protected readonly visibleColumnCount = computed(() => this.columns().length || 1);
+  /** Find the cell immediately following `cell` within the same row. */
+  nextSibling(cell: HellTableHeaderCell): HellTableHeaderCell | null {
+    const sib = cell.host.nextElementSibling;
+    if (!sib) return null;
+    for (const c of this.cells) if (c.host === sib) return c;
+    return null;
+  }
+}
 
-  protected readonly rangeLabel = computed(() => {
-    const start = this.pageIndex() * this.pageSizeSig();
-    const end = Math.min(start + this.pageSizeSig(), this.total());
-    return this.total() ? `${start + 1}–${end} of ${this.total()}` : '0';
+@Directive({
+  selector: 'tbody[hellTableBody]',
+  host: {
+    '[class.hell-table-body]': '!unstyled()',
+  },
+})
+export class HellTableBody {
+  readonly unstyled = input(false, { transform: booleanAttribute });
+}
+
+/**
+ * Behavioral row directive. Renders nothing of its own — consumers own
+ * the `<tr>` markup and its children. Provides:
+ *
+ * - `[selected]` -> `data-selected="true"` and `aria-selected="true"`,
+ *   so consumers can highlight via CSS attribute selectors.
+ * - `[interactive]` -> `tabindex="0"` and click/Enter/Space binding
+ *   that emits `(rowSelect)`. Use this to drive selection from the row
+ *   without writing your own click handler on every cell.
+ */
+@Directive({
+  selector: 'tr[hellTableRow]',
+  exportAs: 'hellTableRow',
+  host: {
+    '[class.hell-table-row]': '!unstyled()',
+    '[attr.data-selected]': 'selected() ? "true" : null',
+    '[attr.data-interactive]': 'interactive() ? "true" : null',
+    '[attr.aria-selected]': 'interactive() ? (selected() ? "true" : "false") : null',
+    '[attr.tabindex]': 'interactive() ? "0" : null',
+    '(click)': 'onClick($event)',
+    '(keydown.enter)': 'onKey($event)',
+    '(keydown.space)': 'onKey($event)',
+  },
+})
+export class HellTableRow {
+  readonly unstyled = input(false, { transform: booleanAttribute });
+  readonly selected = input(false, { transform: booleanAttribute });
+  readonly interactive = input(false, { transform: booleanAttribute });
+
+  readonly rowSelect = output<MouseEvent | KeyboardEvent>();
+
+  protected onClick(e: MouseEvent) {
+    if (!this.interactive()) return;
+    this.rowSelect.emit(e);
+  }
+
+  protected onKey(e: Event) {
+    if (!this.interactive()) return;
+    e.preventDefault();
+    this.rowSelect.emit(e as KeyboardEvent);
+  }
+}
+
+/**
+ * Header cell directive. Owns optional sort affordance, optional column
+ * width, and acts as the parent for `hellTableColumnResizer`. The
+ * directive does not sort — it surfaces the current sort state through
+ * `data-sort` / `aria-sort` and emits `(sortToggle)` when the cell is
+ * activated. Sorting logic stays with the consumer.
+ *
+ * Column width is applied through the `--hell-table-col-width` custom
+ * property; the stylesheet maps that to the cell's `width`. Avoiding a
+   * direct width style binding keeps the surface area limited to CSS
+ * variables, which makes overrides composable with the rest of the
+ * theme tokens.
+ */
+@Directive({
+  selector: 'th[hellTableHeaderCell]',
+  exportAs: 'hellTableHeaderCell',
+  host: {
+    '[class.hell-table-header-cell]': '!unstyled()',
+    '[attr.aria-sort]': 'ariaSort()',
+    '[attr.data-sort]': 'sort()',
+    '[attr.data-sortable]': 'sortable() ? "true" : null',
+    '[attr.tabindex]': 'sortable() ? "0" : null',
+    '[style.--hell-table-col-width]': 'widthVar()',
+    '(click)': 'onClick($event)',
+    '(keydown.enter)': 'onKey($event)',
+    '(keydown.space)': 'onKey($event)',
+  },
+})
+export class HellTableHeaderCell {
+  readonly unstyled = input(false, { transform: booleanAttribute });
+  readonly sort = input<'asc' | 'desc' | null>(null);
+  readonly sortable = input(false, { transform: booleanAttribute });
+  readonly width = input<number | null>(null);
+
+  readonly sortToggle = output<MouseEvent | KeyboardEvent>();
+  readonly widthChange = output<number>();
+
+  readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  readonly head = inject(HellTableHead, { optional: true });
+
+  private readonly _liveWidth = signal<number | null>(null);
+
+  protected readonly effectiveWidth = computed(() => this._liveWidth() ?? this.width());
+
+  protected readonly widthVar = computed(() => {
+    const w = this.effectiveWidth();
+    return w == null ? null : `${w}px`;
   });
 
-  protected readonly table: any = createAngularTable(() => ({
-    data: [...this.data()],
-    columns: this.columns(),
-    state: {
-      pagination: { pageIndex: this.pageIndex(), pageSize: this.pageSizeSig() } as PaginationState,
-      sorting: this.sorting(),
-    },
-    pageCount: this.pageCount(),
-    manualPagination: true,
-    manualSorting: true,
-    manualFiltering: true,
-    onSortingChange: (updater) => {
-      const next = typeof updater === 'function' ? updater(this.sorting()) : updater;
-      this.sorting.set(next);
-      this.emit();
-    },
-    getCoreRowModel: getCoreRowModel(),
-  }));
-
-  constructor() {
-    // Re-sync the internal page size whenever the input changes.
-    effect(() => {
-      this.pageSizeSig.set(this.pageSize());
-    });
-  }
-
-  protected goToPage(page1Based: number) {
-    this.pageIndex.set(Math.max(0, Math.min(this.pageCount() - 1, page1Based - 1)));
-    this.emit();
-  }
-  protected onFilter(v: string) {
-    this.filter.set(v);
-    this.pageIndex.set(0);
-    this.emit();
-  }
-  protected onPageSizeChange(v: string | number) {
-    const n = typeof v === 'string' ? Number(v) : v;
-    if (!Number.isFinite(n) || n <= 0) return;
-    this.pageSizeSig.set(n);
-    this.pageIndex.set(0);
-    this.emit();
-  }
-
-  protected ariaSort(s: false | 'asc' | 'desc'): 'ascending' | 'descending' | 'none' {
+  protected readonly ariaSort = computed<'ascending' | 'descending' | 'none' | null>(() => {
+    if (!this.sortable()) return null;
+    const s = this.sort();
     if (s === 'asc') return 'ascending';
     if (s === 'desc') return 'descending';
     return 'none';
+  });
+
+  constructor() {
+    this.head?.register(this);
   }
 
-  private emit() {
-    this.queryChange.emit({
-      pageIndex: this.pageIndex(),
-      pageSize: this.pageSizeSig(),
-      sorting: this.sorting(),
-      filter: this.filter(),
-    });
+  ngOnDestroy() {
+    this.head?.unregister(this);
+  }
+
+  protected onClick(e: MouseEvent) {
+    if (!this.sortable()) return;
+    if ((e.target as HTMLElement).closest('[hellTableColumnResizer]')) return;
+    this.sortToggle.emit(e);
+  }
+
+  protected onKey(e: Event) {
+    if (!this.sortable()) return;
+    e.preventDefault();
+    this.sortToggle.emit(e as KeyboardEvent);
+  }
+
+  /** Called by `HellTableColumnResizer` while the user is dragging. */
+  setLiveWidth(px: number) {
+    this._liveWidth.set(px);
+    this.writeWidthVar(px);
+  }
+
+  /** Current measured width — used as the drag start anchor. */
+  measure(): number {
+    return this.host.getBoundingClientRect().width;
+  }
+
+  /** Final commit after pointerup or key step. */
+  commit(px: number) {
+    this._liveWidth.set(px);
+    this.writeWidthVar(px);
+    this.widthChange.emit(px);
+  }
+
+  private writeWidthVar(px: number): void {
+    this.host.style.setProperty('--hell-table-col-width', `${px}px`);
   }
 }
+
+/**
+ * Body cell directive. Adds the host class and emits `(cellSelect)` on
+ * click. Use the output if you need to react to a specific cell rather
+ * than the whole row.
+ */
+@Directive({
+  selector: 'td[hellTableCell]',
+  host: {
+    '[class.hell-table-cell]': '!unstyled()',
+    '[attr.data-align]': 'align()',
+    '[attr.data-space]': 'space()',
+    '(click)': 'onClick($event)',
+  },
+})
+export class HellTableCell {
+  readonly unstyled = input(false, { transform: booleanAttribute });
+  readonly align = input<'start' | 'center' | 'end'>('start');
+  readonly space = input<'normal' | 'empty'>('normal');
+  readonly cellSelect = output<MouseEvent>();
+
+  protected onClick(e: MouseEvent) {
+    this.cellSelect.emit(e);
+  }
+}
+
+const RESIZE_KEY_DELTA = 16;
+
+/**
+ * Resize grip placed inside `<th hellTableHeaderCell>` at the trailing
+ * edge. Resizes the host cell and its right-hand neighbor as a pair so
+ * the sum of their widths stays constant — the table never grows or
+ * shrinks during a drag, the space is just redistributed.
+ *
+ * Note: `HellResizable` is intentionally not reused. That composite
+ * relies on a flex container with flex children and a handle that lives
+ * as a sibling between the panes. Table cells live inside a
+ * `display: table` row, are sized by table-layout instead of flexbox,
+ * and cannot be siblings of an arbitrary handle element. The semantics
+ * line up but the layout machinery is incompatible.
+ */
+@Component({
+  selector: '[hellTableColumnResizer]',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class.hell-table-column-resizer]': '!unstyled()',
+    '[attr.data-active]': 'dragging() ? "true" : null',
+    role: 'separator',
+    'aria-orientation': 'vertical',
+    tabindex: '0',
+    '(pointerdown)': 'onPointerDown($event)',
+    '(keydown)': 'onKey($event)',
+  },
+  template: '<span data-slot="grip" aria-hidden="true"></span>',
+})
+export class HellTableColumnResizer {
+  readonly unstyled = input(false, { transform: booleanAttribute });
+  readonly minWidth = input(40, { transform: numberAttribute });
+
+  protected readonly dragging = signal(false);
+
+  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  private readonly cell = inject(HellTableHeaderCell);
+
+  protected onPointerDown(e: PointerEvent) {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const cell = this.cell;
+    const next = cell.head?.nextSibling(cell) ?? null;
+    if (!next) return; // last column — no neighbor to give space to.
+
+    this.host.setPointerCapture?.(e.pointerId);
+    this.dragging.set(true);
+
+    const startX = e.clientX;
+    const startA = cell.measure();
+    const startB = next.measure();
+    const sum = startA + startB;
+    const min = this.minWidth();
+
+    const move = (ev: PointerEvent) => {
+      ev.preventDefault();
+      let newA = startA + (ev.clientX - startX);
+      newA = Math.max(min, Math.min(sum - min, newA));
+      cell.setLiveWidth(newA);
+      next.setLiveWidth(sum - newA);
+    };
+
+    const win = this.host.ownerDocument.defaultView ?? window;
+    const up = (ev: PointerEvent) => {
+      ev.preventDefault();
+      this.dragging.set(false);
+      try {
+        this.host.releasePointerCapture?.(e.pointerId);
+      } catch {}
+      win.removeEventListener('pointermove', move);
+      win.removeEventListener('pointerup', up);
+      win.removeEventListener('pointercancel', up);
+      cell.commit(cell.measure());
+      next.commit(next.measure());
+    };
+
+    const opts: AddEventListenerOptions = { passive: false };
+    win.addEventListener('pointermove', move, opts);
+    win.addEventListener('pointerup', up, opts);
+    win.addEventListener('pointercancel', up, opts);
+  }
+
+  protected onKey(e: KeyboardEvent) {
+    const inc = e.key === 'ArrowRight';
+    const dec = e.key === 'ArrowLeft';
+    const home = e.key === 'Home';
+    if (!inc && !dec && !home) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const cell = this.cell;
+    const next = cell.head?.nextSibling(cell) ?? null;
+    if (!next) return;
+
+    const a = cell.measure();
+    const b = next.measure();
+    const sum = a + b;
+    const min = this.minWidth();
+    let newA = a;
+    if (inc) newA = a + RESIZE_KEY_DELTA;
+    else if (dec) newA = a - RESIZE_KEY_DELTA;
+    else if (home) newA = min;
+    newA = Math.max(min, Math.min(sum - min, newA));
+    cell.commit(newA);
+    next.commit(sum - newA);
+  }
+}
+
+export const HELL_TABLE_DIRECTIVES = [
+  HellTableContainer,
+  HellTable,
+  HellTableHead,
+  HellTableBody,
+  HellTableRow,
+  HellTableHeaderCell,
+  HellTableCell,
+  HellTableColumnResizer,
+] as const;
