@@ -2,6 +2,7 @@ import type { DestroyRef } from '@angular/core';
 
 import {
   HellFloatingDismissController,
+  HellFloatingInteractionController,
   HellOverlayScopeRegistry,
   hellRegisterOverlayElement,
 } from './overlay-scope';
@@ -103,6 +104,40 @@ describe('Floating Scope', () => {
     controller.handleFocusExit(new FocusEvent('blur'));
     await Promise.resolve();
     expect(dismissals).toEqual(['outside-focus']);
+  });
+
+  it('connects a Floating Interaction surface to its scope and dismissal policy', () => {
+    const root = document.createElement('div');
+    const surface = document.createElement('div');
+    const surfaceChild = document.createElement('button');
+    const outside = document.createElement('button');
+    surface.append(surfaceChild);
+    document.body.append(root, surface, outside);
+
+    const scope = new HellOverlayScopeRegistry(() => root);
+    const destroy = createDestroyRef();
+    const dismissals: string[] = [];
+    const interaction = new HellFloatingInteractionController({
+      surface: () => surface,
+      scope,
+      ownerDocument: () => document,
+      closeOnOutsideClick: () => true,
+      onDismiss: ({ reason }) => dismissals.push(reason),
+    });
+
+    interaction.connect(destroy.ref);
+
+    expect(scope.containsOverlayTarget(surfaceChild)).toBe(true);
+
+    surfaceChild.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(dismissals).toEqual([]);
+
+    outside.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(dismissals).toEqual(['outside-click']);
+
+    destroy.run();
+
+    expect(scope.containsOverlayTarget(surfaceChild)).toBe(false);
   });
 });
 

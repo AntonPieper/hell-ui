@@ -79,6 +79,18 @@ export interface HellFloatingDismissOptions {
   readonly onDismiss: (event: HellFloatingDismissEvent) => void;
 }
 
+export interface HellFloatingInteractionOptions extends Omit<
+  HellFloatingDismissOptions,
+  'root' | 'inside' | 'scope' | 'ownerDocument'
+> {
+  readonly surface: () => HTMLElement | null | undefined;
+  readonly root?: () => Node | null | undefined;
+  readonly inside?: () => readonly (Node | null | undefined)[];
+  readonly scope?: HellOverlayScope | null | undefined;
+  readonly ownerDocument?: () => Document | null | undefined;
+  readonly registerSurface?: () => boolean;
+}
+
 /**
  * Owns document-level Floating Dismissal listeners for one Floating Interaction.
  * Callers keep control through the closeOn* predicates and the onDismiss handler;
@@ -216,5 +228,56 @@ export class HellFloatingDismissController {
     if (this.pointerDownInsideTimer === null) return;
     clearTimeout(this.pointerDownInsideTimer);
     this.pointerDownInsideTimer = null;
+  }
+}
+
+/**
+ * Owns the common Floating Interaction lifecycle: register the rendered
+ * surface with a Floating Scope, connect document dismissal listeners, and
+ * expose the pointer/focus hooks that template code wires to DOM events.
+ */
+export class HellFloatingInteractionController {
+  private readonly dismissController: HellFloatingDismissController;
+
+  constructor(private readonly options: HellFloatingInteractionOptions) {
+    this.dismissController = new HellFloatingDismissController({
+      root: () => this.options.root?.() ?? this.options.surface(),
+      inside: this.options.inside,
+      scope: this.options.scope,
+      ownerDocument: () =>
+        this.options.ownerDocument?.() ?? this.options.surface()?.ownerDocument ?? null,
+      active: this.options.active,
+      shouldDismiss: this.options.shouldDismiss,
+      closeOnOutsidePointer: this.options.closeOnOutsidePointer,
+      closeOnOutsideClick: this.options.closeOnOutsideClick,
+      closeOnOutsideFocus: this.options.closeOnOutsideFocus,
+      closeOnEscape: this.options.closeOnEscape,
+      onDismiss: this.options.onDismiss,
+    });
+  }
+
+  connect(destroyRef: DestroyRef): void {
+    const surface = this.options.surface();
+    const shouldRegister = this.options.registerSurface?.() ?? true;
+    if (surface && shouldRegister) {
+      hellRegisterOverlayElement(this.options.scope, surface, destroyRef);
+    }
+    this.dismissController.connect(destroyRef);
+  }
+
+  destroy(): void {
+    this.dismissController.destroy();
+  }
+
+  markPointerDownInside(): void {
+    this.dismissController.markPointerDownInside();
+  }
+
+  handleFocusExit(event: FocusEvent): void {
+    this.dismissController.handleFocusExit(event);
+  }
+
+  isInside(target: EventTarget | Node | null): boolean {
+    return this.dismissController.isInside(target);
   }
 }

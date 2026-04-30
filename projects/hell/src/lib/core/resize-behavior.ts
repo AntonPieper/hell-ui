@@ -33,6 +33,14 @@ export interface HellResizeOperationOptions {
   readonly keyDelta?: number;
 }
 
+export interface HellResizeInteractionControllerOptions {
+  readonly handle: HTMLElement;
+  readonly ownerWindow?: () => Window | null | undefined;
+  readonly onActiveChange?: (active: boolean) => void;
+  readonly onValueChange?: (result: HellResizeTransactionResult) => void;
+  readonly onCommit?: (result: HellResizeTransactionResult) => void;
+}
+
 export function hellConstrainResizeValue(
   value: number,
   sum: number,
@@ -167,6 +175,10 @@ export class HellResizeOperation {
     return this.transaction.sum > 0;
   }
 
+  get currentResult(): HellResizeTransactionResult {
+    return this.lastResult;
+  }
+
   byPointer(point: { clientX: number; clientY: number }): HellResizeTransactionResult {
     const start = this.startCoordinate ?? hellResizeCoordinate(point, this.options.orientation);
     return this.byDelta(hellResizeCoordinate(point, this.options.orientation) - start);
@@ -194,6 +206,109 @@ export class HellResizeOperation {
     this.options.before.setSize(result.a);
     this.options.after.setSize(result.b);
     return result;
+  }
+}
+
+export class HellResizeInteractionController {
+  private pointerId: number | null = null;
+  private operation: HellResizeOperation | null = null;
+  private cleanupPointerListeners: (() => void) | null = null;
+  private active = false;
+
+  constructor(private readonly options: HellResizeInteractionControllerOptions) {}
+
+  startPointer(event: PointerEvent, operation: HellResizeOperation): boolean {
+    if (event.button !== 0 || !operation.canResize) return false;
+
+    event.preventDefault();
+    this.cancelPointer();
+    this.pointerId = event.pointerId;
+    this.operation = operation;
+    this.setActive(true);
+
+    try {
+      this.options.handle.setPointerCapture?.(event.pointerId);
+    } catch {
+      /* pointer capture is best-effort in tests and older browsers */
+    }
+
+    const win = this.window();
+    const move = (nextEvent: PointerEvent) => this.applyPointer(nextEvent);
+    const end = (nextEvent: PointerEvent) => this.finishPointer(nextEvent);
+    const opts: AddEventListenerOptions = { passive: false };
+    win?.addEventListener('pointermove', move, opts);
+    win?.addEventListener('pointerup', end, opts);
+    win?.addEventListener('pointercancel', end, opts);
+    this.cleanupPointerListeners = () => {
+      win?.removeEventListener('pointermove', move);
+      win?.removeEventListener('pointerup', end);
+      win?.removeEventListener('pointercancel', end);
+    };
+
+    return true;
+  }
+
+  applyKey(event: KeyboardEvent, operation: HellResizeOperation): boolean {
+    if (!operation.canResize) return false;
+    const result = operation.byKey(event.key);
+    if (!result) return false;
+
+    event.preventDefault();
+    operation.commit(result);
+    this.options.onValueChange?.(result);
+    this.options.onCommit?.(result);
+    return true;
+  }
+
+  destroy(): void {
+    this.cancelPointer();
+  }
+
+  private applyPointer(event: PointerEvent): void {
+    if (!this.operation || event.pointerId !== this.pointerId) return;
+
+    event.preventDefault();
+    const result = this.operation.byPointer(event);
+    this.options.onValueChange?.(result);
+  }
+
+  private finishPointer(event?: PointerEvent): void {
+    if (!this.operation) return;
+    if (event && event.pointerId !== this.pointerId) return;
+
+    event?.preventDefault();
+    const operation = this.operation;
+    operation.commit();
+    this.options.onCommit?.(operation.currentResult);
+    this.cancelPointer();
+  }
+
+  private cancelPointer(): void {
+    if (this.pointerId !== null) {
+      try {
+        this.options.handle.releasePointerCapture?.(this.pointerId);
+      } catch {
+        /* pointer capture is best-effort in tests and older browsers */
+      }
+    }
+
+    this.cleanupPointerListeners?.();
+    this.cleanupPointerListeners = null;
+    this.pointerId = null;
+    this.operation = null;
+    this.setActive(false);
+  }
+
+  private setActive(active: boolean): void {
+    if (this.active === active) return;
+    this.active = active;
+    this.options.onActiveChange?.(active);
+  }
+
+  private window(): Window | null {
+    const provided = this.options.ownerWindow?.();
+    if (provided) return provided;
+    return this.options.handle.ownerDocument.defaultView;
   }
 }
 

@@ -1,5 +1,9 @@
 import { HellStyleable } from '../../core/styleable';
-import { HellResizeOperation, hellResizeIntentFromKey } from '../../core/resize-behavior';
+import {
+  HellResizeInteractionController,
+  HellResizeOperation,
+  hellResizeIntentFromKey,
+} from '../../core/resize-behavior';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -287,6 +291,11 @@ export class HellTableColumnResizer extends HellStyleable {
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly cell = inject(HellTableHeaderCell);
+  private readonly resizeInteraction = new HellResizeInteractionController({
+    handle: this.host,
+    ownerWindow: () => this.host.ownerDocument.defaultView,
+    onActiveChange: (active) => this.dragging.set(active),
+  });
 
   protected onPointerDown(e: PointerEvent) {
     if (e.button !== 0) return;
@@ -316,31 +325,7 @@ export class HellTableColumnResizer extends HellStyleable {
     });
     if (!operation.canResize) return;
 
-    this.host.setPointerCapture?.(e.pointerId);
-    this.dragging.set(true);
-
-    const move = (ev: PointerEvent) => {
-      ev.preventDefault();
-      operation.byPointer(ev);
-    };
-
-    const win = this.host.ownerDocument.defaultView ?? window;
-    const up = (ev: PointerEvent) => {
-      ev.preventDefault();
-      this.dragging.set(false);
-      try {
-        this.host.releasePointerCapture?.(e.pointerId);
-      } catch {}
-      win.removeEventListener('pointermove', move);
-      win.removeEventListener('pointerup', up);
-      win.removeEventListener('pointercancel', up);
-      operation.commit();
-    };
-
-    const opts: AddEventListenerOptions = { passive: false };
-    win.addEventListener('pointermove', move, opts);
-    win.addEventListener('pointerup', up, opts);
-    win.addEventListener('pointercancel', up, opts);
+    this.resizeInteraction.startPointer(e, operation);
   }
 
   protected onKey(e: KeyboardEvent) {
@@ -370,9 +355,11 @@ export class HellTableColumnResizer extends HellStyleable {
       orientation: 'horizontal',
     });
     if (!operation.canResize) return;
-    const result = operation.byKey(e.key);
-    if (!result) return;
-    operation.commit(result);
+    this.resizeInteraction.applyKey(e, operation);
+  }
+
+  ngOnDestroy(): void {
+    this.resizeInteraction.destroy();
   }
 }
 

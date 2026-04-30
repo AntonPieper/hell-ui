@@ -1,9 +1,5 @@
 import { HellStyleable } from '../../core/styleable';
-import {
-  HELL_OVERLAY_SCOPE,
-  HellFloatingDismissController,
-  hellRegisterOverlayElement,
-} from '../../core/overlay-scope';
+import { HELL_OVERLAY_SCOPE, HellFloatingInteractionController } from '../../core/overlay-scope';
 import {
   DestroyRef,
   Directive,
@@ -97,18 +93,16 @@ export class HellFlyout extends HellStyleable {
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly overlayScope = inject(HELL_OVERLAY_SCOPE, { optional: true });
-  private dismissController: HellFloatingDismissController | null = null;
+  private interaction: HellFloatingInteractionController | null = null;
 
   constructor() {
     super();
     afterNextRender(() => {
       const panel = this.element.nativeElement;
-      hellRegisterOverlayElement(this.overlayScope, panel, this.destroyRef);
-      this.dismissController = new HellFloatingDismissController({
-        root: () => panel,
+      this.interaction = new HellFloatingInteractionController({
+        surface: () => panel,
         inside: () => [this.trigger().element.nativeElement, this.boundary()],
         scope: this.overlayScope,
-        ownerDocument: () => panel.ownerDocument,
         active: () => this.trigger().open(),
         shouldDismiss: ({ reason }) =>
           reason === 'escape'
@@ -124,7 +118,7 @@ export class HellFlyout extends HellStyleable {
           }
         },
       });
-      this.dismissController.connect(this.destroyRef);
+      this.interaction.connect(this.destroyRef);
     });
   }
 }

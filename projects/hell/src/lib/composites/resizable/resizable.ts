@@ -15,6 +15,7 @@ import {
   signal,
 } from '@angular/core';
 import {
+  HellResizeInteractionController,
   HellResizeOperation,
   hellFitResizeSizesToTotal,
   hellResizeCoordinate,
@@ -238,11 +239,6 @@ export class HellResizablePane extends HellStyleable {
   }
 }
 
-interface ResizeDragState {
-  pointerId: number;
-  operation: HellResizeOperation;
-}
-
 @Component({
   selector: '[hellResizableHandle]',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -273,7 +269,12 @@ export class HellResizableHandle extends HellStyleable {
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   protected readonly resizable = inject(HellResizable);
-  private dragState: ResizeDragState | null = null;
+  private readonly resizeInteraction = new HellResizeInteractionController({
+    handle: this.host,
+    ownerWindow: () => this.host.ownerDocument.defaultView,
+    onActiveChange: (active) => this.dragging.set(active),
+    onValueChange: (result) => this.ariaValueNow.set(result.ariaValueNow),
+  });
 
   /** Lookup the panes immediately preceding and following this handle. */
   private adjacent(): { prev: HellResizablePane | null; next: HellResizablePane | null } {
@@ -308,28 +309,6 @@ export class HellResizableHandle extends HellStyleable {
     return sizes;
   }
 
-  private applyDrag(e: PointerEvent): void {
-    const state = this.dragState;
-    if (!state || e.pointerId !== state.pointerId) return;
-
-    e.preventDefault();
-    const result = state.operation.byPointer(e);
-    this.ariaValueNow.set(result.ariaValueNow);
-  }
-
-  private finishDrag(e?: PointerEvent): void {
-    const state = this.dragState;
-    if (!state) return;
-
-    if (!e || e.pointerId === state.pointerId) {
-      this.dragState = null;
-      this.dragging.set(false);
-      try {
-        this.host.releasePointerCapture?.(state.pointerId);
-      } catch {}
-    }
-  }
-
   @HostListener('pointerdown', ['$event'])
   protected onPointerDown(e: PointerEvent) {
     // Only react to primary button / first touch / any pen.
@@ -361,34 +340,7 @@ export class HellResizableHandle extends HellStyleable {
     });
     if (!operation.canResize) return;
     this.resizable.markUserSized();
-
-    this.dragState = {
-      pointerId: e.pointerId,
-      operation,
-    };
-    this.dragging.set(true);
-
-    try {
-      this.host.setPointerCapture?.(e.pointerId);
-    } catch {}
-  }
-
-  @HostListener('pointermove', ['$event'])
-  protected onPointerMove(e: PointerEvent) {
-    this.applyDrag(e);
-  }
-
-  @HostListener('pointerup', ['$event'])
-  @HostListener('pointercancel', ['$event'])
-  protected onPointerEnd(e: PointerEvent) {
-    if (this.dragState?.pointerId !== e.pointerId) return;
-    e.preventDefault();
-    this.finishDrag(e);
-  }
-
-  @HostListener('lostpointercapture', ['$event'])
-  protected onLostPointerCapture(e: PointerEvent) {
-    this.finishDrag(e);
+    this.resizeInteraction.startPointer(e, operation);
   }
 
   @HostListener('keydown', ['$event'])
@@ -416,12 +368,11 @@ export class HellResizableHandle extends HellStyleable {
       orientation,
     });
     if (!operation.canResize) return;
-    const result = operation.byKey(e.key);
-    if (!result) return;
+    if (this.resizeInteraction.applyKey(e, operation)) this.resizable.markUserSized();
+  }
 
-    e.preventDefault();
-    this.resizable.markUserSized();
-    this.ariaValueNow.set(result.ariaValueNow);
+  ngOnDestroy(): void {
+    this.resizeInteraction.destroy();
   }
 }
 

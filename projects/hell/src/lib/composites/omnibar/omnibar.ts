@@ -22,7 +22,7 @@ import {
 } from '@angular/core';
 import {
   HELL_OVERLAY_SCOPE,
-  HellFloatingDismissController,
+  HellFloatingInteractionController,
   HellOverlayScopeRegistry,
   type HellOverlayScope,
 } from '../../core/overlay-scope';
@@ -262,9 +262,10 @@ export class HellOmnibar extends HellStyleable implements HellOverlayScope {
 
   private posUpdater?: AfterRenderRef;
   private readonly overlayScope = new HellOverlayScopeRegistry(() => this.host.nativeElement);
-  private readonly dismissController = new HellFloatingDismissController({
-    root: () => this.host.nativeElement,
+  private readonly floatingInteraction = new HellFloatingInteractionController({
+    surface: () => this.host.nativeElement,
     scope: this,
+    registerSurface: () => false,
     ownerDocument: () => this.host.nativeElement.ownerDocument,
     active: () => this.isOpen(),
     shouldDismiss: ({ reason }) => reason === 'outside-pointer' || reason === 'outside-focus',
@@ -323,7 +324,7 @@ export class HellOmnibar extends HellStyleable implements HellOverlayScope {
 
     this.installHotkey();
     this.installAnchorListeners();
-    this.dismissController.connect(this.destroyRef);
+    this.floatingInteraction.connect(this.destroyRef);
   }
 
   /* ── Public API for actions / hotkey wiring ────────────────────────── */
@@ -432,7 +433,7 @@ export class HellOmnibar extends HellStyleable implements HellOverlayScope {
   }
 
   protected onBlur(event: FocusEvent): void {
-    this.dismissController.handleFocusExit(event);
+    this.floatingInteraction.handleFocusExit(event);
   }
 
   protected onCursorChange(): void {
@@ -453,7 +454,7 @@ export class HellOmnibar extends HellStyleable implements HellOverlayScope {
 
   protected onPanelPointerDown(event: PointerEvent): void {
     void event;
-    this.dismissController.markPointerDownInside();
+    this.floatingInteraction.markPointerDownInside();
   }
 
   protected onKeyDown(event: KeyboardEvent): void {

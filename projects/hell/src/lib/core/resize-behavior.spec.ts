@@ -1,4 +1,5 @@
 import {
+  HellResizeInteractionController,
   HellResizeOperation,
   HellResizeTransaction,
   hellConstrainResizeValue,
@@ -90,6 +91,74 @@ describe('Resize Behavior', () => {
     operation.commit();
     expect(before.committed).toBe(140);
     expect(after.committed).toBe(40);
+  });
+
+  it('runs pointer resize interaction lifecycle through layout adapters', () => {
+    const handle = document.createElement('div');
+    document.body.append(handle);
+    const before = createResizeAdapter(100, 40);
+    const after = createResizeAdapter(80, 40);
+    const active: boolean[] = [];
+    const values: number[] = [];
+    const commits: number[] = [];
+    const operation = new HellResizeOperation({
+      before,
+      after,
+      orientation: 'horizontal',
+      startCoordinate: 10,
+    });
+    const interaction = new HellResizeInteractionController({
+      handle,
+      ownerWindow: () => window,
+      onActiveChange: (value) => active.push(value),
+      onValueChange: (result) => values.push(result.ariaValueNow),
+      onCommit: (result) => commits.push(result.ariaValueNow),
+    });
+
+    expect(
+      interaction.startPointer(
+        new PointerEvent('pointerdown', { button: 0, pointerId: 1 }),
+        operation,
+      ),
+    ).toBe(true);
+
+    window.dispatchEvent(new PointerEvent('pointermove', { pointerId: 1, clientX: 60 }));
+    window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: 60 }));
+
+    expect(active).toEqual([true, false]);
+    expect(values).toEqual([78]);
+    expect(commits).toEqual([78]);
+    expect(before.committed).toBe(140);
+    expect(after.committed).toBe(40);
+
+    interaction.destroy();
+    handle.remove();
+  });
+
+  it('runs keyboard resize interaction lifecycle through layout adapters', () => {
+    const handle = document.createElement('div');
+    const before = createResizeAdapter(100, 40);
+    const after = createResizeAdapter(80, 40);
+    const values: number[] = [];
+    const commits: number[] = [];
+    const operation = new HellResizeOperation({
+      before,
+      after,
+      orientation: 'horizontal',
+    });
+    const interaction = new HellResizeInteractionController({
+      handle,
+      onValueChange: (result) => values.push(result.ariaValueNow),
+      onCommit: (result) => commits.push(result.ariaValueNow),
+    });
+
+    const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
+
+    expect(interaction.applyKey(event, operation)).toBe(true);
+    expect(values).toEqual([64]);
+    expect(commits).toEqual([64]);
+    expect(before.committed).toBe(116);
+    expect(after.committed).toBe(64);
   });
 
   it('uses orientation when reading pointer coordinates', () => {
