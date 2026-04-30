@@ -1,8 +1,7 @@
 import { HellStyleable } from '../../core/styleable';
 import {
-  HELL_RESIZE_KEY_DELTA,
-  hellConstrainResizeValue,
-  hellResizePairByDelta,
+  HellResizeTransaction,
+  hellResizeIntentFromKey,
 } from '../../core/resize-behavior';
 import {
   ChangeDetectionStrategy,
@@ -307,14 +306,19 @@ export class HellTableColumnResizer extends HellStyleable {
     const startX = e.clientX;
     const startA = cell.measure();
     const startB = next.measure();
-    const sum = startA + startB;
     const min = this.minWidth();
+    const transaction = new HellResizeTransaction({
+      startA,
+      startB,
+      minA: min,
+      minB: min,
+    });
 
     const move = (ev: PointerEvent) => {
       ev.preventDefault();
-      const [newA, newB] = hellResizePairByDelta(startA, startB, ev.clientX - startX, min, min);
-      cell.setLiveWidth(newA);
-      next.setLiveWidth(newB);
+      const result = transaction.byDelta(ev.clientX - startX);
+      cell.setLiveWidth(result.a);
+      next.setLiveWidth(result.b);
     };
 
     const win = this.host.ownerDocument.defaultView ?? window;
@@ -338,10 +342,8 @@ export class HellTableColumnResizer extends HellStyleable {
   }
 
   protected onKey(e: KeyboardEvent) {
-    const inc = e.key === 'ArrowRight';
-    const dec = e.key === 'ArrowLeft';
-    const home = e.key === 'Home';
-    if (!inc && !dec && !home) return;
+    const intent = hellResizeIntentFromKey(e.key, 'horizontal');
+    if (!intent) return;
     e.preventDefault();
     e.stopPropagation();
 
@@ -351,15 +353,15 @@ export class HellTableColumnResizer extends HellStyleable {
 
     const a = cell.measure();
     const b = next.measure();
-    const sum = a + b;
     const min = this.minWidth();
-    let newA = a;
-    if (inc) newA = a + HELL_RESIZE_KEY_DELTA;
-    else if (dec) newA = a - HELL_RESIZE_KEY_DELTA;
-    else if (home) newA = min;
-    newA = hellConstrainResizeValue(newA, sum, min, min);
-    cell.commit(newA);
-    next.commit(sum - newA);
+    const result = new HellResizeTransaction({
+      startA: a,
+      startB: b,
+      minA: min,
+      minB: min,
+    }).byKey(intent);
+    cell.commit(result.a);
+    next.commit(result.b);
   }
 }
 

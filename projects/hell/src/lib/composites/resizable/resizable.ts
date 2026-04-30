@@ -15,9 +15,9 @@ import {
   signal,
 } from '@angular/core';
 import {
-  HELL_RESIZE_KEY_DELTA,
-  hellConstrainResizeValue,
+  HellResizeTransaction,
   hellFitResizeSizesToTotal,
+  hellResizeIntentFromKey,
 } from '../../core/resize-behavior';
 import { HellOrientation } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
@@ -242,11 +242,8 @@ interface ResizeDragState {
   horizontal: boolean;
   prev: HellResizablePane;
   next: HellResizablePane;
-  startA: number;
-  sum: number;
   startCoord: number;
-  minA: number;
-  minB: number;
+  transaction: HellResizeTransaction;
 }
 
 @Component({
@@ -320,10 +317,10 @@ export class HellResizableHandle extends HellStyleable {
 
     e.preventDefault();
     const delta = (state.horizontal ? e.clientX : e.clientY) - state.startCoord;
-    const newA = hellConstrainResizeValue(state.startA + delta, state.sum, state.minA, state.minB);
-    state.prev.setSize(newA);
-    state.next.setSize(state.sum - newA);
-    this.ariaValueNow.set(Math.round((newA / state.sum) * 100));
+    const result = state.transaction.byDelta(delta);
+    state.prev.setSize(result.a);
+    state.next.setSize(result.b);
+    this.ariaValueNow.set(result.ariaValueNow);
   }
 
   private finishDrag(e?: PointerEvent): void {
@@ -367,11 +364,13 @@ export class HellResizableHandle extends HellStyleable {
       horizontal,
       prev,
       next,
-      startA,
-      sum: sumAB,
       startCoord,
-      minA: prev.currentMinSize(),
-      minB: next.currentMinSize(),
+      transaction: new HellResizeTransaction({
+        startA,
+        startB,
+        minA: prev.currentMinSize(),
+        minB: next.currentMinSize(),
+      }),
     };
     this.dragging.set(true);
 
@@ -406,11 +405,8 @@ export class HellResizableHandle extends HellStyleable {
     const horizontal = this.resizable.orientation() === 'horizontal';
     const { prev, next } = this.adjacent();
     if (!prev || !next) return;
-    const decrement = horizontal ? e.key === 'ArrowLeft' : e.key === 'ArrowUp';
-    const increment = horizontal ? e.key === 'ArrowRight' : e.key === 'ArrowDown';
-    const home = e.key === 'Home';
-    const end = e.key === 'End';
-    if (!decrement && !increment && !home && !end) return;
+    const intent = hellResizeIntentFromKey(e.key, horizontal ? 'horizontal' : 'vertical');
+    if (!intent) return;
     e.preventDefault();
     const sizes = this.lockPanes();
     const a = sizes.get(prev) ?? prev.measure();
@@ -419,14 +415,15 @@ export class HellResizableHandle extends HellStyleable {
     if (sum <= 0) return;
 
     this.resizable.markUserSized();
-    let newA = a;
-    if (home) newA = prev.currentMinSize();
-    else if (end) newA = sum - next.currentMinSize();
-    else newA = a + (increment ? HELL_RESIZE_KEY_DELTA : -HELL_RESIZE_KEY_DELTA);
-    newA = hellConstrainResizeValue(newA, sum, prev.currentMinSize(), next.currentMinSize());
-    prev.setSize(newA);
-    next.setSize(sum - newA);
-    this.ariaValueNow.set(Math.round((newA / sum) * 100));
+    const result = new HellResizeTransaction({
+      startA: a,
+      startB: b,
+      minA: prev.currentMinSize(),
+      minB: next.currentMinSize(),
+    }).byKey(intent);
+    prev.setSize(result.a);
+    next.setSize(result.b);
+    this.ariaValueNow.set(result.ariaValueNow);
   }
 }
 

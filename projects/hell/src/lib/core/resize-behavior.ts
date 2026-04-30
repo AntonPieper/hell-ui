@@ -1,5 +1,23 @@
 export const HELL_RESIZE_KEY_DELTA = 16;
 
+export type HellResizeOrientation = 'horizontal' | 'vertical';
+export type HellResizeKeyIntent = 'decrement' | 'increment' | 'min' | 'max';
+
+export interface HellResizeTransactionOptions {
+  readonly startA: number;
+  readonly startB: number;
+  readonly minA: number;
+  readonly minB: number;
+  readonly keyDelta?: number;
+}
+
+export interface HellResizeTransactionResult {
+  readonly a: number;
+  readonly b: number;
+  readonly sum: number;
+  readonly ariaValueNow: number;
+}
+
 export function hellConstrainResizeValue(
   value: number,
   sum: number,
@@ -73,4 +91,54 @@ export function hellResizePairByDelta(
   const sum = startA + startB;
   const nextA = hellConstrainResizeValue(startA + delta, sum, minA, minB);
   return [nextA, sum - nextA] as const;
+}
+
+export class HellResizeTransaction {
+  private readonly keyDelta: number;
+  readonly sum: number;
+
+  constructor(private readonly options: HellResizeTransactionOptions) {
+    this.sum = options.startA + options.startB;
+    this.keyDelta = options.keyDelta ?? HELL_RESIZE_KEY_DELTA;
+  }
+
+  byDelta(delta: number): HellResizeTransactionResult {
+    return this.toResult(this.options.startA + delta);
+  }
+
+  byKey(intent: HellResizeKeyIntent): HellResizeTransactionResult {
+    switch (intent) {
+      case 'increment':
+        return this.toResult(this.options.startA + this.keyDelta);
+      case 'decrement':
+        return this.toResult(this.options.startA - this.keyDelta);
+      case 'min':
+        return this.toResult(this.options.minA);
+      case 'max':
+        return this.toResult(this.sum - this.options.minB);
+    }
+  }
+
+  toResult(valueA: number): HellResizeTransactionResult {
+    const a = hellConstrainResizeValue(valueA, this.sum, this.options.minA, this.options.minB);
+    const b = this.sum - a;
+    return {
+      a,
+      b,
+      sum: this.sum,
+      ariaValueNow: this.sum > 0 ? Math.round((a / this.sum) * 100) : 0,
+    };
+  }
+}
+
+export function hellResizeIntentFromKey(
+  key: string,
+  orientation: HellResizeOrientation,
+): HellResizeKeyIntent | null {
+  const horizontal = orientation === 'horizontal';
+  if (key === (horizontal ? 'ArrowLeft' : 'ArrowUp')) return 'decrement';
+  if (key === (horizontal ? 'ArrowRight' : 'ArrowDown')) return 'increment';
+  if (key === 'Home') return 'min';
+  if (key === 'End') return 'max';
+  return null;
 }
