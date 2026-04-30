@@ -17,6 +17,7 @@
       min-width: 200px;
       outline: none;
       gap: 1px;
+      z-index: var(--hell-z-popover, 60);
       animation: hell-pop-in var(--hell-duration-fast) var(--ease-hell-out);
       &[data-submenu="true"] {
         /* Compensate surface padding + row gap so the first submenu item
@@ -101,6 +102,9 @@
         rotate: 45deg;
         color: var(--color-hell-foreground-subtle);
         flex-shrink: 0;
+      }
+      &:has(> .hell-menu-item-trailing)::after {
+        margin-inline-start: calc(var(--spacing) * 1);
       }
     }
 

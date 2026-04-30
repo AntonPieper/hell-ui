@@ -1,4 +1,4 @@
-import { Directive, booleanAttribute, input } from '@angular/core';
+import { DestroyRef, Directive, ElementRef, booleanAttribute, inject, input } from '@angular/core';
 import type { Signal } from '@angular/core';
 import {
   NgpMenu,
@@ -7,6 +7,7 @@ import {
   NgpSubmenuTrigger,
   injectSubmenuTriggerState,
 } from 'ng-primitives/menu';
+import { HELL_OVERLAY_SCOPE } from '../../core/overlay-scope';
 
 @Directive({
   selector: '[hellMenuTrigger]',
@@ -18,15 +19,23 @@ import {
         'ngpMenuTriggerPlacement:placement',
         'ngpMenuTriggerOffset:offset',
         'ngpMenuTriggerDisabled:disabled',
+        'ngpMenuTriggerContainer:container',
+        'ngpMenuTriggerFlip:flip',
+        'ngpMenuTriggerShift:shift',
+        'ngpMenuTriggerScrollBehavior:scrollBehavior',
+        'ngpMenuTriggerCooldown:cooldown',
+        'ngpMenuTriggerContext:context',
+        'ngpMenuTriggerOpenTriggers:openTriggers',
+        'ngpMenuTriggerShowDelay:showDelay',
+        'ngpMenuTriggerHideDelay:hideDelay',
       ],
     },
   ],
 })
 export class HellMenuTrigger {}
 
-/** Submenu trigger — same API as `[hellMenuTrigger]` but for nested menus.
- *  Apply to a `[hellMenuItem]` whose `[hellSubmenuTrigger]` points at the
- *  child menu template. */
+/** Submenu trigger for nested menus. Apply to a `[hellMenuItem]` whose
+ *  `[hellSubmenuTrigger]` points at the child menu template. */
 @Directive({
   selector: '[hellSubmenuTrigger]',
   hostDirectives: [
@@ -37,6 +46,7 @@ export class HellMenuTrigger {}
         'ngpSubmenuTriggerPlacement:placement',
         'ngpSubmenuTriggerOffset:offset',
         'ngpSubmenuTriggerDisabled:disabled',
+        'ngpSubmenuTriggerFlip:flip',
       ],
     },
   ],
@@ -59,6 +69,17 @@ export class HellMenu {
   protected readonly submenuTrigger: Signal<unknown> = injectSubmenuTriggerState({
     optional: true,
   });
+
+  private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly overlayScope = inject(HELL_OVERLAY_SCOPE, { optional: true });
+
+  constructor() {
+    const scope = this.overlayScope;
+    if (!scope) return;
+    const element = this.host.nativeElement;
+    scope.registerOverlayElement(element);
+    inject(DestroyRef).onDestroy(() => scope.unregisterOverlayElement(element));
+  }
 }
 
 @Directive({

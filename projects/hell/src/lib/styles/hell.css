@@ -46,10 +46,12 @@
 @import './components/time-input.css';
 @import './components/app-shell.css';
 @import './components/resizable.css';
+@import './components/split-view.css';
 @import './components/audio-player.css';
 @import './components/drop-zone.css';
 @import './components/dialpad.css';
 @import './components/toast.css';
+@import './components/omnibar.css';
 @import './components/data-table.css';
 @import './components/code-editor.css';
 @import './components/pdf-viewer.css';

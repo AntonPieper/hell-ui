@@ -5,6 +5,8 @@
 // Core
 export * from './lib/core/types';
 export * from './lib/core/styleable';
+export * from './lib/core/overlay-scope';
+export * from './lib/core/search';
 
 // Primitives
 export * from './lib/primitives/button/button';
@@ -13,6 +15,8 @@ export * from './lib/primitives/separator/separator';
 export * from './lib/primitives/tag/tag';
 export * from './lib/primitives/avatar/avatar';
 export * from './lib/primitives/input/input';
+export * from './lib/primitives/search/search';
+export * from './lib/primitives/listbox/listbox';
 export * from './lib/primitives/field/field';
 export * from './lib/primitives/checkbox/checkbox';
 export * from './lib/primitives/switch/switch';
@@ -43,8 +47,11 @@ export * from './lib/composites/dialpad/dialpad';
 export * from './lib/composites/drop-zone/drop-zone';
 export * from './lib/composites/audio-player/audio-player';
 export * from './lib/composites/resizable/resizable';
+export * from './lib/composites/split-view/split-view';
 export * from './lib/composites/app-shell/app-shell';
 export * from './lib/composites/toast/toast';
+export * from './lib/composites/omnibar/command-palette';
+export * from './lib/composites/omnibar/omnibar';
 
 // Features (lazy-loaded by consumers)
 export * from './lib/features/pdf-viewer/pdf-viewer';
