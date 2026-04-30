@@ -6,7 +6,13 @@
     "strict": true,
     "rootDir": ".",
     "paths": {
-      "hell": ["./projects/hell/src/public-api.ts"]
+      "hell": ["./projects/hell/src/public-api.ts"],
+      "hell/core": ["./projects/hell/src/lib/public-api-core.ts"],
+      "hell/primitives": ["./projects/hell/src/lib/public-api-primitives.ts"],
+      "hell/composites": ["./projects/hell/src/lib/public-api-composites.ts"],
+      "hell/features/code-editor": ["./projects/hell/src/lib/public-api-feature-code-editor.ts"],
+      "hell/features/data-table": ["./projects/hell/src/lib/public-api-feature-data-table.ts"],
+      "hell/features/pdf-viewer": ["./projects/hell/src/lib/public-api-feature-pdf-viewer.ts"]
     },
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
