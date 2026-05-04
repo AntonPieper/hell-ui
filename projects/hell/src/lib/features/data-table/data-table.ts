@@ -1,6 +1,11 @@
 import { HellStyleable } from '../../core/styleable';
 import { HellResizePairInteractionController } from '../../core/resize-behavior';
 import {
+  HellTableColumnResizeRuntime,
+  type HellTableColumnResizeEvent,
+  type HellTableColumnResizePair as HellTableColumnResizeRuntimePair,
+} from './data-table-column-resize.runtime';
+import {
   ChangeDetectionStrategy,
   Component,
   Directive,
@@ -13,6 +18,11 @@ import {
   output,
   signal,
 } from '@angular/core';
+
+export type {
+  HellTableColumnResizeEvent,
+  HellTableColumnResizeSide,
+} from './data-table-column-resize.runtime';
 
 /**
  * Optional shell for a data table. Frames the table with the standard
@@ -48,55 +58,8 @@ export class HellTable extends HellStyleable {
   readonly contentWidth = input(false, { transform: booleanAttribute });
 }
 
-/** One side of a committed two-column resize transaction. */
-export interface HellTableColumnResizeSide {
-  readonly columnId: string;
-  readonly px: number;
-  /** Fraction of `totalPx` held by this column after the resize. */
-  readonly share: number;
-}
-
-/** Emitted once per committed resize for the affected adjacent columns. */
-export interface HellTableColumnResizeEvent {
-  readonly before: HellTableColumnResizeSide;
-  readonly after: HellTableColumnResizeSide;
-  readonly totalPx: number;
-}
-
-class HellTableColumnResizeRuntime {
-  private readonly widths = signal<ReadonlyMap<string, number>>(new Map());
-
-  widthFor(columnId: string | null): number | null {
-    return columnId ? (this.widths().get(columnId) ?? null) : null;
-  }
-
-  setWidth(columnId: string, px: number): void {
-    this.widths.update((current) => new Map(current).set(columnId, px));
-  }
-
-  transactionEvent(
-    pair: HellTableColumnResizePair,
-    beforePx: number,
-    afterPx: number,
-  ): HellTableColumnResizeEvent | null {
-    const beforeId = pair.before.columnKey();
-    const afterId = pair.after.columnKey();
-    if (!beforeId || !afterId) return null;
-    const totalPx = beforePx + afterPx;
-    const share = (px: number) => (totalPx > 0 ? px / totalPx : 0);
-    return {
-      before: { columnId: beforeId, px: beforePx, share: share(beforePx) },
-      after: { columnId: afterId, px: afterPx, share: share(afterPx) },
-      totalPx,
-    };
-  }
-}
-
 /** Header-cell pair adjacent to a column resizer. */
-export interface HellTableColumnResizePair {
-  readonly before: HellTableHeaderCell;
-  readonly after: HellTableHeaderCell;
-}
+export type HellTableColumnResizePair = HellTableColumnResizeRuntimePair<HellTableHeaderCell>;
 
 /**
  * Header section. Tracks its child header cells so the Table Column Resize
