@@ -49,6 +49,23 @@ describe('HellDateInput', () => {
     expect(emitted.getDate()).toBe(30);
   });
 
+  it('rejects impossible ISO dates instead of rolling them forward', () => {
+    const fixture = TestBed.createComponent(DateInputHost);
+    const host = fixture.componentInstance;
+    host.date.set(new Date(2026, 1, 15));
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    input.value = '2026-02-31';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.dates).toEqual([]);
+    expect(input.value).toBe(formatDate(host.date()));
+  });
+
   it('reverts invalid typed text without emitting', () => {
     const fixture = TestBed.createComponent(DateInputHost);
     const host = fixture.componentInstance;
@@ -83,6 +100,28 @@ describe('HellDateInput', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
+    expect(input.value).toBe(formatDate(host.date()));
+  });
+
+  it('does not emit stale typed text after the bound date changes externally', async () => {
+    const fixture = TestBed.createComponent(DateInputHost);
+    const host = fixture.componentInstance;
+    host.date.set(new Date(2026, 0, 15));
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    input.value = '2026-08-01';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+
+    host.date.set(new Date(2026, 6, 4));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.dates).toEqual([]);
     expect(input.value).toBe(formatDate(host.date()));
   });
 });

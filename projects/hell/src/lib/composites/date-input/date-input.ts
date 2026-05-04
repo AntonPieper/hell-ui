@@ -33,8 +33,12 @@ function tryParse(text: string): Date | null {
   if (!t) return null;
   const iso = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(t);
   if (iso) {
-    const d = new Date(+iso[1], +iso[2] - 1, +iso[3]);
-    return Number.isNaN(d.getTime()) ? null : d;
+    const year = +iso[1];
+    const month = +iso[2];
+    const day = +iso[3];
+    const d = new Date(year, month - 1, day);
+    if (Number.isNaN(d.getTime())) return null;
+    return d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day ? d : null;
   }
   const d = new Date(t);
   return Number.isNaN(d.getTime()) ? null : d;

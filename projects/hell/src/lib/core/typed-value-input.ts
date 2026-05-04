@@ -36,6 +36,10 @@ export class HellTypedValueInputState<TValue, TExternal, TOutput = TValue> {
   commitDraft(): TOutput | null {
     const draft = this.draft();
     if (!draft) return null;
+    if (this.externalChanged(draft.base, this.adapter.external())) {
+      this.draft.set(null);
+      return null;
+    }
     return this.commitText(draft.text);
   }
 
