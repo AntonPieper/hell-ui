@@ -32,7 +32,7 @@ Any interaction involving content rendered outside, beside, or above its logical
 The set of DOM targets that count as "inside" one floating interaction, even when a floating surface is rendered outside the logical host.
 
 **Dialog Scope**
-The content region that a scoped dialog should cover while leaving surrounding app shell chrome interactive.
+The content region that a scoped dialog should cover while leaving surrounding app shell chrome interactive. Each Dialog Scope root owns independent scoped inset state; scoped dialog overlays receive copied vars from their owning root through an overlay Adapter so simultaneous scoped dialogs do not override each other.
 
 **Resize Behavior**
 The pointer, keyboard, sizing, and minimum-size rules shared by resizable panes and table column resizing, independent of the layout adapter that renders it.
@@ -67,5 +67,14 @@ The lifetime, pause/resume, collapse, exit animation, measuring, ordering, and l
 **Code Editor Runtime**
 The editor lifecycle behind the code editor Feature: bootstrapping, value synchronization, extension updates, read-only policy, selection/history preservation, theme ownership, and cleanup.
 
+**Audio Runtime**
+The media element, playback state, seek/volume policy, best-effort browser live-caption session, transcript state, and browser speech lifecycle behind the audio player Composite. Captions are optional and browser-backed only, reset on seek/playback restart, and stay behind an internal Adapter; playback controls expose structured state/events while clipboard copy remains a small UI helper outside the runtime.
+
+**Table Column Resize Runtime**
+The table-specific column pair lookup, measurement, live width, minimum-width, total-width-preserving resize transaction, and commit policy that adapts data table header cells to Resize Behavior. Initial column sizing belongs to consumer CSS/Tailwind rather than caller-controlled pixel inputs. The runtime measures rendered columns, owns internal resize state, and exposes sizing through CSS custom properties rather than direct concrete CSS properties such as `width` or `flex-basis`. It emits one resize transaction event for both affected columns using column ids and relative resize intent rather than making pixel widths the public Customization Surface. Resize Behavior remains layout-agnostic.
+
+**Omnibar Runtime**
+The query state, open state, search orchestration, projected item registry, keyboard navigation, delegated Floating Dismissal, anchor positioning, and hotkey policy behind the omnibar Composite. Dynamic positioning is exposed to CSS through CSS custom properties written by a visual Adapter; concrete layout remains in CSS.
+
 **Typed Value Input**
-The draft, parse, format, validation, commit, external-value synchronization, and picker coordination shared by text-backed value Composites such as date input and time input.
+The draft, parse, stable business formatting, validation, invalid draft state, nullable clear commits, external-value synchronization, and picker coordination shared by text-backed value Composites such as date input and time input. Time values use a structured value inside the module instead of leaking string parsing across callers.
