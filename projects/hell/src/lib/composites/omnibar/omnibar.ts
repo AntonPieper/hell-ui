@@ -1,6 +1,5 @@
 import { NgClass, NgTemplateOutlet } from '@angular/common';
 import {
-  AfterRenderRef,
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
@@ -9,7 +8,6 @@ import {
   Injector,
   TemplateRef,
   ViewChild,
-  afterNextRender,
   booleanAttribute,
   computed,
   effect,
@@ -39,6 +37,7 @@ import { HellListbox } from '../../primitives/listbox/listbox';
 import { HellSearch, HellSearchClear } from '../../primitives/search/search';
 import { HellSkeleton } from '../../primitives/skeleton/skeleton';
 import { HellOmnibarRuntime } from './omnibar.runtime';
+import { HellOmnibarPositionAdapter } from './omnibar-position.adapter';
 import { HellStyleable } from '../../core/styleable';
 
 /**
@@ -251,9 +250,17 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   private readonly _open = signal(false);
   protected readonly isOpen = computed(() => !this.disabled() && this._open());
 
-  protected readonly anchorTop = signal(0);
-  protected readonly anchorLeft = signal(0);
-  protected readonly anchorWidth = signal(this.minPanelWidth());
+  private readonly positionAdapter = new HellOmnibarPositionAdapter({
+    host: () => this.host.nativeElement,
+    control: () => this.controlRef?.nativeElement,
+    minWidth: () => this.minPanelWidth(),
+    isOpen: () => this.isOpen(),
+    destroyRef: this.destroyRef,
+    injector: this.injector,
+  });
+  protected readonly anchorTop = this.positionAdapter.anchorTop;
+  protected readonly anchorLeft = this.positionAdapter.anchorLeft;
+  protected readonly anchorWidth = this.positionAdapter.anchorWidth;
   protected readonly cursor = signal(0);
   readonly searchResults = computed(() => this.runtime.results());
   readonly loading = computed(() => this.runtime.loading());
@@ -269,7 +276,6 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   protected readonly isEmpty = this.runtime.isEmpty;
   protected readonly hasActions = this.runtime.hasActions;
 
-  private posUpdater?: AfterRenderRef;
   private readonly floatingScope = new HellFloatingScopeRegistry(() => this.host.nativeElement);
   private readonly floatingInteraction = new HellFloatingInteractionController({
     surface: () => this.host.nativeElement,
@@ -296,7 +302,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     });
     effect(() => {
       const open = this.isOpen();
-      if (open) this.scheduleAnchorUpdate();
+      if (open) this.positionAdapter.scheduleUpdate();
     });
     effect(() => {
       const items = this.searchItems();
@@ -332,7 +338,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     });
 
     this.installHotkey();
-    this.installAnchorListeners();
+    this.positionAdapter.connect();
     this.floatingInteraction.connect(this.destroyRef);
   }
 
@@ -517,35 +523,6 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
 
   private moveActive(delta: number): void {
     this.runtime.moveActive(delta);
-  }
-
-  /* ── Anchor positioning ────────────────────────────────────────────── */
-
-  private installAnchorListeners(): void {
-    if (typeof window === 'undefined') return;
-    const onChange = () => this.scheduleAnchorUpdate();
-    const scrollOpts: AddEventListenerOptions = { passive: true, capture: true };
-    window.addEventListener('resize', onChange, { passive: true });
-    window.addEventListener('scroll', onChange, scrollOpts);
-    this.destroyRef.onDestroy(() => {
-      window.removeEventListener('resize', onChange);
-      window.removeEventListener('scroll', onChange, scrollOpts);
-    });
-  }
-
-  private scheduleAnchorUpdate(): void {
-    if (!this.isOpen()) return;
-    this.posUpdater?.destroy();
-    this.posUpdater = afterNextRender(() => this.updateAnchor(), { injector: this.injector });
-  }
-
-  private updateAnchor(): void {
-    const el = this.controlRef?.nativeElement ?? this.host.nativeElement;
-    const rect = el.getBoundingClientRect();
-    const min = this.minPanelWidth();
-    this.anchorTop.set(rect.bottom + 4);
-    this.anchorLeft.set(rect.left);
-    this.anchorWidth.set(Math.max(rect.width, min));
   }
 
   /* ── Hotkey ────────────────────────────────────────────────────────── */
