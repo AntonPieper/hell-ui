@@ -32,6 +32,12 @@ const PEOPLE: readonly Person[] = Array.from({ length: 32 }, (_, index) => {
   imports: [HellIcon, ...HELL_OMNIBAR_DIRECTIVES],
   providers: [provideIcons({ faSolidMagnifyingGlass, faSolidUser })],
   template: `
+    <ng-template #peopleLoading let-message="message">
+      <div class="p-3 text-sm text-hell-foreground-muted">
+        {{ message }} people…
+      </div>
+    </ng-template>
+
     <hell-omnibar
       #peopleSearch="hellOmnibar"
       placeholder="Search people"
@@ -40,6 +46,8 @@ const PEOPLE: readonly Person[] = Array.from({ length: 32 }, (_, index) => {
       [searchFields]="searchFields"
       [searchLimit]="6"
       [searchDebounce]="180"
+      [loadingTemplate]="peopleLoading"
+      loadingMessage="Loading"
       [(value)]="query"
       (submit)="selected.set($any($event.item))"
     >

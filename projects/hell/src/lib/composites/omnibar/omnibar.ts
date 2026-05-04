@@ -45,6 +45,13 @@ import { HellStyleable } from '../../core/styleable';
  * implement it to join keyboard navigation, active-descendant wiring, scrolling,
  * and submit selection.
  */
+export interface HellOmnibarLoadingTemplateContext {
+  /** Row count requested by `loadingRows`, useful when custom templates still render placeholders. */
+  readonly $implicit: number;
+  readonly rows: number;
+  readonly message: string;
+}
+
 export interface HellOmnibarRegisteredItem {
   /** Stable DOM id used for `aria-activedescendant`. */
   readonly itemId: string;
@@ -160,14 +167,18 @@ let nextOmnibarItemId = 0;
         <div data-slot="results" hellListbox [id]="panelId">
           @if (loading()) {
             <div data-slot="loading" role="status" [attr.aria-label]="loadingMessage()">
-              @for (row of skeletonRows(); track row) {
-                <div data-slot="skeleton-row">
-                  <div hellSkeleton shape="circle" width="18px" height="18px"></div>
-                  <div data-slot="skeleton-text">
-                    <div hellSkeleton width="70%" height="12px"></div>
-                    <div hellSkeleton width="46%" height="10px"></div>
+              @if (loadingTemplate(); as tpl) {
+                <ng-container *ngTemplateOutlet="tpl; context: loadingTemplateContext()" />
+              } @else {
+                @for (row of skeletonRows(); track row) {
+                  <div data-slot="skeleton-row">
+                    <div hellSkeleton shape="circle" width="18px" height="18px"></div>
+                    <div data-slot="skeleton-text">
+                      <div hellSkeleton width="70%" height="12px"></div>
+                      <div hellSkeleton width="46%" height="10px"></div>
+                    </div>
                   </div>
-                </div>
+                }
               }
             </div>
           } @else {
@@ -197,6 +208,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   readonly ariaLabel = input<string>('Search');
   readonly emptyMessage = input<string>('No results');
   readonly emptyTemplate = input<TemplateRef<unknown> | null>(null);
+  readonly loadingTemplate = input<TemplateRef<HellOmnibarLoadingTemplateContext> | null>(null);
   readonly panelClass = input<string | string[] | Record<string, boolean>>('');
   /** Local items ranked by `HellSearchService` whenever the query changes. */
   readonly searchItems = input<readonly unknown[] | null>(null);
@@ -268,6 +280,11 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   protected readonly skeletonRows = computed(() =>
     Array.from({ length: Math.max(1, this.loadingRows()) }, (_, i) => i),
   );
+  protected readonly loadingTemplateContext = computed<HellOmnibarLoadingTemplateContext>(() => ({
+    $implicit: Math.max(1, this.loadingRows()),
+    rows: Math.max(1, this.loadingRows()),
+    message: this.loadingMessage(),
+  }));
 
   /* ── Item registry ─────────────────────────────────────────────────── */
 

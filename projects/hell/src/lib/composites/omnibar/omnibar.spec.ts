@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
+import { type HellSearchSource } from '../../core/search';
 import { HELL_OMNIBAR_DIRECTIVES, matchHotkey, type HellOmnibarSubmitEvent } from './omnibar';
 
 @Component({
@@ -35,6 +36,25 @@ class OmnibarHost {
   readonly openEvents: boolean[] = [];
   readonly selectEvents: unknown[] = [];
   readonly submitEvents: HellOmnibarSubmitEvent[] = [];
+}
+
+@Component({
+  imports: [...HELL_OMNIBAR_DIRECTIVES],
+  template: `
+    <ng-template #loading let-rows="rows">
+      <div data-contract="custom-loading">Custom loading {{ rows }}</div>
+    </ng-template>
+
+    <hell-omnibar
+      [searchSource]="searchSource"
+      [searchDebounce]="0"
+      [loadingRows]="2"
+      [loadingTemplate]="loading"
+    />
+  `,
+})
+class OmnibarLoadingTemplateHost {
+  readonly searchSource: HellSearchSource<unknown> = () => new Promise(() => undefined);
 }
 
 describe('HellOmnibar interactions', () => {
@@ -91,6 +111,20 @@ describe('HellOmnibar interactions', () => {
     expect(host.value()).toBe('');
     expect(document.activeElement).toBe(input);
     expect(root.getAttribute('data-open')).toBe('true');
+  });
+
+  it('renders custom loading template instead of built-in skeleton rows', async () => {
+    const fixture = TestBed.createComponent(OmnibarLoadingTemplateHost);
+    fixture.detectChanges();
+
+    query<HTMLInputElement>(fixture.nativeElement, 'input').dispatchEvent(new FocusEvent('focus'));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    fixture.detectChanges();
+
+    expect(query(fixture.nativeElement, '[data-contract="custom-loading"]').textContent).toContain(
+      'Custom loading 2',
+    );
+    expect(fixture.nativeElement.querySelector('[data-slot="skeleton-row"]')).toBeNull();
   });
 
   it('moves active results with the keyboard and submits without closing when requested', () => {

@@ -28,6 +28,7 @@ import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts
         <li><code>searchSource</code>: async backend-powered function. Receives <code>query</code>, <code>limit</code>, <code>params</code>, and <code>signal</code>.</li>
         <li><code>searchFields</code>: weighted attributes used for ranking returned items.</li>
         <li><code>searchLimit</code>, <code>searchParams</code>, <code>searchDebounce</code>, <code>loadingRows</code>.</li>
+        <li><code>loadingTemplate</code>: custom loading body; receives <code>{{ '{' }} rows, message {{ '}' }}</code> while the omnibar keeps the outer status wrapper.</li>
         <li><code>value</code>: model input for the draft query.</li>
         <li><code>submit</code>, <code>openChange</code>, <code>searchResultsChange</code>, <code>searchError</code>.</li>
         <li>Slots: <code>hellOmnibarLeading</code>, <code>hellOmnibarTrailing</code>, <code>hellOmnibarActions</code>, groups, items, chips, and footer content.</li>
