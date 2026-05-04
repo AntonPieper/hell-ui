@@ -11,11 +11,13 @@ import {
 } from './pdf-viewer.print';
 import { normalizeZoomEventValue } from './pdf-viewer.utils';
 
+/** Loaded document handle owned by the active runtime adapter. */
 export interface HellPdfDocumentHandle {
   readonly numPages: number;
   destroy(): void;
 }
 
+/** Callbacks and initial state passed into an adapter-created viewer session. */
 export interface HellPdfViewerSessionHandlers {
   readonly initialPage: () => number;
   readonly initialZoom: () => HellPdfInitialZoom;
@@ -38,7 +40,11 @@ export interface HellPdfViewerSession {
   setNumericZoom(scale: number): void;
   dispatchFind(request: HellPdfFindRequest): void;
   closeFind(source: unknown): void;
-  renderThumbnail(doc: HellPdfDocumentHandle, pageNumber: number, canvas: HTMLCanvasElement): Promise<void>;
+  renderThumbnail(
+    doc: HellPdfDocumentHandle,
+    pageNumber: number,
+    canvas: HTMLCanvasElement,
+  ): Promise<void>;
   cleanup(): void;
 }
 
@@ -51,7 +57,10 @@ export interface HellPdfRuntimeAdapter {
     container: HTMLDivElement,
     handlers: HellPdfViewerSessionHandlers,
   ): Promise<HellPdfViewerSession>;
-  loadDocument(session: HellPdfViewerSession, source: HellPdfSource): Promise<HellPdfDocumentHandle>;
+  loadDocument(
+    session: HellPdfViewerSession,
+    source: HellPdfSource,
+  ): Promise<HellPdfDocumentHandle>;
   download(
     source: HellPdfSource,
     fileName?: string | null,
@@ -210,9 +219,9 @@ class HellPdfJsViewerSession implements HellPdfViewerSession {
     pageNumber: number,
     canvas: HTMLCanvasElement,
   ): Promise<void> {
-    const page = await (doc as HellPdfDocumentHandle & { getPage(n: number): Promise<any> }).getPage(
-      pageNumber,
-    );
+    const page = await (
+      doc as HellPdfDocumentHandle & { getPage(n: number): Promise<any> }
+    ).getPage(pageNumber);
     const baseViewport = page.getViewport({ scale: 1 });
     const targetW = 120;
     const scale = targetW / baseViewport.width;
@@ -257,7 +266,10 @@ class HellPdfJsViewerSession implements HellPdfViewerSession {
     });
   }
 
-  private toFindState(event: { state: number; matchesCount?: { current?: number; total?: number } }) {
+  private toFindState(event: {
+    state: number;
+    matchesCount?: { current?: number; total?: number };
+  }) {
     const state = event.matchesCount
       ? {
           current: event.matchesCount.current ?? 0,

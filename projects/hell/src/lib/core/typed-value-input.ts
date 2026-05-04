@@ -1,24 +1,36 @@
 import { computed, signal } from '@angular/core';
 
+/** Parsed text that can be committed. `null` represents an intentional clear. */
 export interface HellTypedValueValidParse<TValue> {
   readonly valid: true;
   readonly value: TValue | null;
 }
 
+/** Parsed text that should stay as a visible invalid draft. */
 export interface HellTypedValueInvalidParse {
   readonly valid: false;
 }
 
+/** Adapter parse result used by text-backed typed value inputs. */
 export type HellTypedValueParseResult<TValue> =
   | HellTypedValueValidParse<TValue>
   | HellTypedValueInvalidParse;
 
+/**
+ * Result from a commit attempt. Failed commits keep the display unchanged and
+ * include the reason the caller can use for validation or stale-value handling.
+ */
 export interface HellTypedValueCommitResult<TOutput> {
   readonly committed: boolean;
   readonly value: TOutput | null;
   readonly reason?: 'invalid' | 'stale' | 'missing-draft';
 }
 
+/**
+ * Adapter boundary for text inputs that edit a typed external value. It keeps
+ * parsing, stable formatting, external equality, and output mapping owned by
+ * the concrete date/time component while the state machine owns draft policy.
+ */
 export interface HellTypedValueInputAdapter<TValue, TExternal, TOutput = TValue | null> {
   readonly external: () => TExternal;
   readonly parseExternal: (external: TExternal) => TValue | null;
@@ -44,9 +56,10 @@ export function hellInvalidTypedValue(): HellTypedValueInvalidParse {
  * clear commits, and drop drafts when external value changes.
  */
 export class HellTypedValueInputState<TValue, TExternal, TOutput = TValue | null> {
-  private readonly local = signal<{ readonly base: TExternal; readonly value: TValue | null } | null>(
-    null,
-  );
+  private readonly local = signal<{
+    readonly base: TExternal;
+    readonly value: TValue | null;
+  } | null>(null);
   private readonly draft = signal<{ readonly base: TExternal; readonly text: string } | null>(null);
 
   readonly current = computed<TValue | null>(() => {
@@ -75,14 +88,17 @@ export class HellTypedValueInputState<TValue, TExternal, TOutput = TValue | null
 
   constructor(private readonly adapter: HellTypedValueInputAdapter<TValue, TExternal, TOutput>) {}
 
+  /** Start or replace a user draft anchored to the current external value. */
   writeDraft(text: string): void {
     this.draft.set({ base: this.adapter.external(), text });
   }
 
+  /** Drop the active draft so display returns to the current committed value. */
   clearDraft(): void {
     this.draft.set(null);
   }
 
+  /** Commit the active draft unless the external value changed underneath it. */
   commitDraft(): HellTypedValueCommitResult<TOutput> {
     const draft = this.draft();
     if (!draft) return { committed: false, value: null, reason: 'missing-draft' };
@@ -93,6 +109,7 @@ export class HellTypedValueInputState<TValue, TExternal, TOutput = TValue | null
     return this.commitText(draft.text);
   }
 
+  /** Parse and commit arbitrary text, preserving invalid text as a draft. */
   commitText(text: string): HellTypedValueCommitResult<TOutput> {
     const parsed = this.adapter.parseText(text);
     if (!parsed.valid) {
@@ -102,6 +119,7 @@ export class HellTypedValueInputState<TValue, TExternal, TOutput = TValue | null
     return this.setValue(parsed.value);
   }
 
+  /** Commit a typed value directly, bypassing text parsing and clearing drafts. */
   setValue(value: TValue | null): HellTypedValueCommitResult<TOutput> {
     this.draft.set(null);
     this.local.set({ base: this.adapter.external(), value });

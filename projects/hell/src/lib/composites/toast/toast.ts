@@ -64,16 +64,19 @@ const EXIT_MS = 220;
 const TOAST_STACK_GAP = 12;
 const TOAST_FALLBACK_HEIGHT = 64;
 
+/** Minimal stack item shape used by the exported toast layout helpers. */
 export interface HellToastStackItem {
   readonly id: number;
   readonly removing: boolean;
 }
 
+/** Frozen position data captured when an exiting toast starts animating out. */
 export interface HellToastStackSnapshot {
   readonly front: number;
   readonly offset: string;
 }
 
+/** Count visible, non-removing toasts in front of an item in the stack. */
 export function hellToastFrontDistance(
   list: readonly HellToastStackItem[],
   item: HellToastStackItem,
@@ -87,6 +90,7 @@ export function hellToastFrontDistance(
   return n;
 }
 
+/** CSS pixel offset from the stack front, preserving exit snapshots while removing. */
 export function hellToastOffsetPx(
   list: readonly HellToastStackItem[],
   item: HellToastStackItem,
@@ -99,6 +103,7 @@ export function hellToastOffsetPx(
   return hellToastLiveOffsetPx(list, item, heights, maxVisible);
 }
 
+/** Number of visible positions by which an item exceeds `maxVisible`. */
 export function hellToastOverflow(
   list: readonly HellToastStackItem[],
   item: HellToastStackItem,
@@ -108,10 +113,12 @@ export function hellToastOverflow(
   return Math.max(0, hellToastFrontDistance(list, item, exitSnapshot) - (maxVisible - 1));
 }
 
+/** Measured toast height in CSS pixels, falling back before measurement exists. */
 export function hellToastHeightPx(id: number, heights: ReadonlyMap<number, number>): string {
   return `${heights.get(id) ?? TOAST_FALLBACK_HEIGHT}px`;
 }
 
+/** Capture and retain removing-toast positions so exit animations do not jump. */
 export function hellToastSnapshotExits(
   list: readonly HellToastStackItem[],
   heights: ReadonlyMap<number, number>,

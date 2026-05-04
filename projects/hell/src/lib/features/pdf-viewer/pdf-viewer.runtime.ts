@@ -13,10 +13,13 @@ import {
   type HellPdfViewerSession,
 } from './pdf-viewer.adapter';
 
+/** Source types accepted by the PDF runtime and adapter. */
 export type HellPdfSource = string | URL | ArrayBuffer;
+/** pdf.js preset names plus numeric scale values accepted at load time. */
 export type HellPdfInitialZoom = number | 'auto' | 'page-actual' | 'page-fit' | 'page-width';
 export type HellPdfFindStatus = 'pending' | 'found' | 'not-found' | 'wrapped';
 
+/** UI callbacks emitted by the runtime from pdf.js viewer events. */
 export interface HellPdfRuntimeHandlers {
   onPageChange(page: number): void;
   onZoomChange(displayValue: string, emittedValue: number | string): void;
@@ -24,12 +27,14 @@ export interface HellPdfRuntimeHandlers {
   onFindState(state: { status?: HellPdfFindStatus; current?: number; total?: number }): void;
 }
 
+/** Per-load options; each document load owns its own initial navigation state. */
 export interface HellPdfLoadOptions {
   initialPage: number;
   initialZoom: HellPdfInitialZoom;
   onLoaded(totalPages: number): void;
 }
 
+/** Normalized request forwarded to the pdf.js find controller. */
 export interface HellPdfFindRequest {
   source: unknown;
   type: 'again' | '';
@@ -37,10 +42,13 @@ export interface HellPdfFindRequest {
   findPrevious: boolean;
 }
 
+/** Imperative PDF runtime port used by the Angular viewer component. */
 export interface HellPdfRuntimePort {
   readonly hasDocument: boolean;
   readonly currentScale: number;
+  /** Create the adapter viewer once before loading documents. */
   bootstrap(container: HTMLDivElement, handlers: HellPdfRuntimeHandlers): Promise<void>;
+  /** Replace the active document; stale loads are ignored by the runtime. */
   loadDocument(src: HellPdfSource, options: HellPdfLoadOptions): Promise<void>;
   cleanup(): void;
   goTo(page: number): void;

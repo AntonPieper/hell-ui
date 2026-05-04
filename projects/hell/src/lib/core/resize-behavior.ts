@@ -46,16 +46,19 @@ export interface HellResizeInteractionControllerOptions {
   readonly onCommit?: (result: HellResizeTransactionResult) => void;
 }
 
+/** Caller-owned pair around a resize handle. Order matters: before grows as after shrinks. */
 export interface HellResizePair<TItem> {
   readonly before: TItem;
   readonly after: TItem;
 }
 
+/** Concrete adapters resolved for the two items in a resize pair. */
 export interface HellResizePairAdapters {
   readonly before: HellResizeOperationAdapter;
   readonly after: HellResizeOperationAdapter;
 }
 
+/** Maps arbitrary caller items, such as panes or header cells, to resize operations. */
 export interface HellResizeItemAdapter<TItem> {
   measure(item: TItem): number;
   minSize(item: TItem): number;
@@ -63,6 +66,7 @@ export interface HellResizeItemAdapter<TItem> {
   commitSize?(item: TItem, size: number): void;
 }
 
+/** Build-time options for one resize operation derived from a caller-owned pair. */
 export interface HellResizePairOperationOptions<TItem> {
   readonly pair: HellResizePair<TItem>;
   readonly orientation: HellResizeOrientation;
@@ -72,6 +76,11 @@ export interface HellResizePairOperationOptions<TItem> {
   readonly keyDelta?: number;
 }
 
+/**
+ * DOM interaction controller options for dynamic resize pairs. Use `pair` to
+ * resolve the current neighbors at pointerdown/keydown time, then provide
+ * either pair-specific adapters or a generic item adapter.
+ */
 export interface HellResizePairInteractionControllerOptions<
   TItem,
 > extends HellResizeInteractionControllerOptions {

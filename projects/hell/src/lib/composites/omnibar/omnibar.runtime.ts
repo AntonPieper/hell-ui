@@ -8,11 +8,17 @@ import {
 } from '../../core/search';
 import type { HellOmnibarRegisteredItem } from './omnibar';
 
+/** Search inputs captured from the component at the moment a query runs. */
 export interface HellOmnibarSearchOptions<T> {
+  /** Local items to rank with `HellSearchService`. */
   readonly items?: readonly T[];
+  /** Optional async source; newer searches abort older source requests. */
   readonly source?: HellSearchSource<T> | null;
+  /** Weighted local fields used for local items or raw source items. */
   readonly fields?: readonly HellSearchField<T>[];
+  /** Max results after local ranking or source-provided ordering. */
   readonly limit?: number;
+  /** Opaque caller context forwarded to the source. */
   readonly params?: unknown;
 }
 
@@ -62,6 +68,7 @@ export class HellOmnibarRuntime<T = unknown> {
     this.query.set(query);
   }
 
+  /** Debounce a search request, replacing any pending scheduled search. */
   scheduleSearch(options: HellOmnibarSearchOptions<T>, debounceMs: number): void {
     this.clearTimer();
     const delay = Math.max(0, debounceMs);
@@ -70,6 +77,7 @@ export class HellOmnibarRuntime<T = unknown> {
     }, delay);
   }
 
+  /** Run a search immediately and ignore/abort any older in-flight request. */
   async searchNow(options: HellOmnibarSearchOptions<T>): Promise<void> {
     const id = ++this.requestId;
     this.controller?.abort();
@@ -100,6 +108,7 @@ export class HellOmnibarRuntime<T = unknown> {
     }
   }
 
+  /** Cancel pending timers and active source work without clearing rendered results. */
   cancel(): void {
     this.clearTimer();
     this.controller?.abort();

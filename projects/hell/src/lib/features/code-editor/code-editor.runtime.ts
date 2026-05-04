@@ -11,17 +11,24 @@ import {
 } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 
+/** Construction inputs for the CodeMirror runtime boundary. */
 export interface HellCodeEditorRuntimeOptions {
   readonly host: HTMLElement;
   readonly value: string;
+  /** Caller-owned CodeMirror extensions; language support is passed here. */
   readonly extensions: Extension;
   readonly readOnly: boolean;
+  /** Called for editor-originated document edits, not external `setValue` writes. */
   readonly onValueChange: (value: string) => void;
 }
 
+/** Imperative port used by the Angular wrapper to keep EditorView state alive. */
 export interface HellCodeEditorRuntimePort {
+  /** Replace document text without echoing through `onValueChange`. */
   setValue(next: string): void;
+  /** Reconfigure caller extensions while preserving document and history. */
   setExtensions(extensions: Extension): void;
+  /** Toggle the read-only compartment without recreating the editor. */
   setReadOnly(readOnly: boolean): void;
   destroy(): void;
 }

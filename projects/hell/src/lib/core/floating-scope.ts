@@ -83,6 +83,7 @@ export interface HellFloatingInsetVars {
   readonly left: string;
 }
 
+/** Inputs for syncing scoped overlay CSS variables from a root element. */
 export interface HellFloatingScopedInsetsOptions {
   readonly document: Document;
   readonly rootSelector: string;
@@ -181,7 +182,9 @@ export class HellFloatingScopedInsetsRuntime {
 
   private styleTargets(): readonly HTMLElement[] {
     const targets = this.options.styleTargets?.() ?? [this.options.styleTarget?.()];
-    const concrete = targets.filter((target): target is HTMLElement => target instanceof HTMLElement);
+    const concrete = targets.filter(
+      (target): target is HTMLElement => target instanceof HTMLElement,
+    );
     return concrete.length ? concrete : [this.options.document.documentElement];
   }
 }
@@ -205,11 +208,18 @@ export interface HellDismissContext {
 }
 
 export interface HellDismissDecision {
+  /** Prevent the original document event before reporting dismissal. */
   readonly preventDefault?: boolean;
+  /** Stop the original document event before reporting dismissal. */
   readonly stopPropagation?: boolean;
+  /** Focus target after dismissal. `false` explicitly disables restoration. */
   readonly restoreFocus?: false | HTMLElement | (() => HTMLElement | null | undefined);
 }
 
+/**
+ * Pure dismissal matcher. Return a decision to dismiss; return null/undefined
+ * to let the next composed rule inspect the same event.
+ */
 export type HellDismissRule = (
   context: HellDismissContext,
 ) => HellDismissDecision | null | undefined;
@@ -218,6 +228,7 @@ export interface HellFloatingDismissEvent extends HellDismissContext {
   readonly decision: HellDismissDecision;
 }
 
+/** Try rules in order and use the first non-null dismissal decision. */
 export function hellDismissOn(...rules: readonly HellDismissRule[]): HellDismissRule {
   return (context) => {
     for (const rule of rules) {
@@ -228,6 +239,7 @@ export function hellDismissOn(...rules: readonly HellDismissRule[]): HellDismiss
   };
 }
 
+/** Add fixed side effects, such as focus restoration, to a matching rule. */
 export function hellWithDismissEffect(
   rule: HellDismissRule,
   effect: HellDismissDecision,
@@ -238,6 +250,7 @@ export function hellWithDismissEffect(
   };
 }
 
+/** Allow a matching rule only when the guard approves the proposed decision. */
 export function hellGuardDismiss(
   rule: HellDismissRule,
   guard: (context: HellDismissContext, decision: HellDismissDecision) => boolean,
@@ -248,12 +261,15 @@ export function hellGuardDismiss(
   };
 }
 
+/** Dismiss on pointerdown that starts outside the logical interaction. */
 export const hellOutsidePointer: HellDismissRule = (context) =>
   context.event.type === 'pointerdown' && !context.isTargetInside() ? {} : null;
 
+/** Dismiss on click that lands outside the logical interaction. */
 export const hellOutsideClick: HellDismissRule = (context) =>
   context.event.type === 'click' && !context.isTargetInside() ? {} : null;
 
+/** Dismiss when focus moves outside, including delegated blur checks. */
 export const hellOutsideFocus: HellDismissRule = (context) =>
   (context.event.type === 'focusin' ||
     context.event.type === 'focusout' ||
@@ -262,6 +278,7 @@ export const hellOutsideFocus: HellDismissRule = (context) =>
     ? {}
     : null;
 
+/** Dismiss on Escape only while focus/event target is inside the interaction. */
 export const hellEscapeKey: HellDismissRule = (context) =>
   context.event instanceof KeyboardEvent &&
   context.event.key === 'Escape' &&

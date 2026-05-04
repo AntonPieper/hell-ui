@@ -48,12 +48,15 @@ export class HellTable extends HellStyleable {
   readonly contentWidth = input(false, { transform: booleanAttribute });
 }
 
+/** One side of a committed two-column resize transaction. */
 export interface HellTableColumnResizeSide {
   readonly columnId: string;
   readonly px: number;
+  /** Fraction of `totalPx` held by this column after the resize. */
   readonly share: number;
 }
 
+/** Emitted once per committed resize for the affected adjacent columns. */
 export interface HellTableColumnResizeEvent {
   readonly before: HellTableColumnResizeSide;
   readonly after: HellTableColumnResizeSide;
@@ -89,6 +92,7 @@ class HellTableColumnResizeRuntime {
   }
 }
 
+/** Header-cell pair adjacent to a column resizer. */
 export interface HellTableColumnResizePair {
   readonly before: HellTableHeaderCell;
   readonly after: HellTableHeaderCell;
