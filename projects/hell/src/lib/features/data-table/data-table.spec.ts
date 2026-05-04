@@ -154,6 +154,64 @@ describe('Hell data table directives', () => {
     expect(resizer.getAttribute('aria-valuenow')).toBe('68');
   });
 
+  it('resizes adjacent header cells from pointer drag and commits once on release', () => {
+    const fixture = TestBed.createComponent(DataTableHost);
+    const host = fixture.componentInstance;
+    host.minWidth.set(70);
+    fixture.detectChanges();
+
+    const name = byId<HTMLTableCellElement>(fixture.nativeElement, 'name');
+    const role = byId<HTMLTableCellElement>(fixture.nativeElement, 'role');
+    mockWidth(name, 120);
+    mockWidth(role, 80);
+
+    const resizer = byId<HTMLButtonElement>(fixture.nativeElement, 'name-resizer');
+    const pointerDown = new PointerEvent('pointerdown', {
+      button: 0,
+      pointerId: 7,
+      clientX: 10,
+      bubbles: true,
+      cancelable: true,
+    });
+    resizer.dispatchEvent(pointerDown);
+    fixture.detectChanges();
+
+    expect(pointerDown.defaultPrevented).toBe(true);
+    expect(resizer.getAttribute('data-active')).toBe('true');
+
+    window.dispatchEvent(
+      new PointerEvent('pointermove', {
+        pointerId: 7,
+        clientX: 70,
+        cancelable: true,
+      }),
+    );
+    fixture.detectChanges();
+
+    expect(host.resizeEvents).toEqual([]);
+    expect(name.style.getPropertyValue('--hell-table-col-width')).toBe('130px');
+    expect(role.style.getPropertyValue('--hell-table-col-width')).toBe('70px');
+    expect(resizer.getAttribute('aria-valuenow')).toBe('65');
+
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        pointerId: 7,
+        clientX: 70,
+        cancelable: true,
+      }),
+    );
+    fixture.detectChanges();
+
+    expect(resizer.hasAttribute('data-active')).toBe(false);
+    expect(host.resizeEvents).toEqual([
+      {
+        before: { columnId: 'name', px: 130, share: 0.65 },
+        after: { columnId: 'role', px: 70, share: 0.35 },
+        totalPx: 200,
+      },
+    ]);
+  });
+
   it('does nothing when the last header resizer has no neighbor', () => {
     const fixture = TestBed.createComponent(DataTableHost);
     const host = fixture.componentInstance;
