@@ -210,12 +210,21 @@ function checkComponentContract() {
       !file.endsWith('pdf.worker.ts') &&
       !file.includes('/core/'),
   );
+  const publicStyleableModules = new Map();
 
   for (const file of files) {
     const source = readFile(file);
-    if (!source.includes('extends HellStyleable')) continue;
+    const styleableClasses = exportedStyleableClasses(source);
+    if (!styleableClasses.length) continue;
 
     const rel = file.slice(root.length + 1);
+    for (const className of styleableClasses) {
+      if (publicStyleableModules.has(className)) {
+        failures.push(`Duplicate public HellStyleable Module ${className} in ${rel}`);
+      }
+      publicStyleableModules.set(className, rel);
+    }
+
     if (!source.includes('!unstyled()')) {
       failures.push(
         `${rel} extends HellStyleable but does not gate default styling with Style Opt-Out`,
@@ -233,6 +242,42 @@ function checkComponentContract() {
       }
     }
   }
+
+  const contractSpec = readFile(join(root, 'projects/hell/src/lib/component-contract.spec.ts'));
+  const manifestSymbols = [...contractSpec.matchAll(/symbol:\s*'([A-Za-z0-9_]+)'/g)].map(
+    (match) => match[1],
+  );
+  const manifestSet = new Set();
+  for (const symbol of manifestSymbols) {
+    if (manifestSet.has(symbol)) {
+      failures.push(`Component Contract manifest declares ${symbol} more than once`);
+    }
+    manifestSet.add(symbol);
+  }
+
+  for (const [className, rel] of publicStyleableModules) {
+    if (!manifestSet.has(className)) {
+      failures.push(
+        `${rel} exports HellStyleable Module ${className} but component-contract.spec.ts does not declare its Component Contract`,
+      );
+    }
+  }
+
+  for (const symbol of manifestSymbols) {
+    if (!publicStyleableModules.has(symbol)) {
+      failures.push(
+        `component-contract.spec.ts declares ${symbol}, but no exported HellStyleable Module was found`,
+      );
+    }
+  }
+}
+
+function exportedStyleableClasses(source) {
+  return [
+    ...source.matchAll(/export\s+(?:abstract\s+)?class\s+([A-Za-z0-9_]+)(?:<[^>{}]*>)?[\s\S]*?\{/g),
+  ]
+    .filter((match) => match[0].includes('extends HellStyleable'))
+    .map((match) => match[1]);
 }
 
 function checkSecondaryEntryPointCompleteness(kind) {
