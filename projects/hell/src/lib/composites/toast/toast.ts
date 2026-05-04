@@ -61,6 +61,115 @@ interface ToastInternal extends Required<Omit<HellToastOptions, 'template' | 'ac
 
 const DEFAULT_DURATION = 4500;
 const EXIT_MS = 220;
+const TOAST_STACK_GAP = 12;
+const TOAST_FALLBACK_HEIGHT = 64;
+
+export interface HellToastStackItem {
+  readonly id: number;
+  readonly removing: boolean;
+}
+
+export interface HellToastStackSnapshot {
+  readonly front: number;
+  readonly offset: string;
+}
+
+export function hellToastFrontDistance(
+  list: readonly HellToastStackItem[],
+  item: HellToastStackItem,
+  exitSnapshot: ReadonlyMap<number, HellToastStackSnapshot> = new Map(),
+): number {
+  if (item.removing) return exitSnapshot.get(item.id)?.front ?? 0;
+  let n = 0;
+  for (let j = list.indexOf(item) + 1; j < list.length; j++) {
+    if (!list[j].removing) n++;
+  }
+  return n;
+}
+
+export function hellToastOffsetPx(
+  list: readonly HellToastStackItem[],
+  item: HellToastStackItem,
+  heights: ReadonlyMap<number, number>,
+  maxVisible: number,
+  exitSnapshot: ReadonlyMap<number, HellToastStackSnapshot> = new Map(),
+): string {
+  if (item.removing)
+    return exitSnapshot.get(item.id)?.offset ?? hellToastHeightPx(item.id, heights);
+  return hellToastLiveOffsetPx(list, item, heights, maxVisible);
+}
+
+export function hellToastOverflow(
+  list: readonly HellToastStackItem[],
+  item: HellToastStackItem,
+  maxVisible: number,
+  exitSnapshot: ReadonlyMap<number, HellToastStackSnapshot> = new Map(),
+): number {
+  return Math.max(0, hellToastFrontDistance(list, item, exitSnapshot) - (maxVisible - 1));
+}
+
+export function hellToastHeightPx(id: number, heights: ReadonlyMap<number, number>): string {
+  return `${heights.get(id) ?? TOAST_FALLBACK_HEIGHT}px`;
+}
+
+export function hellToastSnapshotExits(
+  list: readonly HellToastStackItem[],
+  heights: ReadonlyMap<number, number>,
+  maxVisible: number,
+  current: ReadonlyMap<number, HellToastStackSnapshot>,
+): Map<number, HellToastStackSnapshot> {
+  const next = new Map(current);
+  for (let i = 0; i < list.length; i++) {
+    const item = list[i];
+    if (!item.removing || next.has(item.id)) continue;
+    next.set(item.id, {
+      front: list.length - 1 - i,
+      offset: hellToastLiveOffsetFromIndex(list, i, heights, maxVisible),
+    });
+  }
+  for (const id of [...next.keys()]) {
+    if (!list.some((item) => item.id === id)) next.delete(id);
+  }
+  return next;
+}
+
+function hellToastStackSnapshotsEqual(
+  a: ReadonlyMap<number, HellToastStackSnapshot>,
+  b: ReadonlyMap<number, HellToastStackSnapshot>,
+): boolean {
+  if (a.size !== b.size) return false;
+  for (const [id, snapshot] of a) {
+    const other = b.get(id);
+    if (!other || other.front !== snapshot.front || other.offset !== snapshot.offset) return false;
+  }
+  return true;
+}
+
+function hellToastLiveOffsetPx(
+  list: readonly HellToastStackItem[],
+  item: HellToastStackItem,
+  heights: ReadonlyMap<number, number>,
+  maxVisible: number,
+): string {
+  return hellToastLiveOffsetFromIndex(list, list.indexOf(item), heights, maxVisible);
+}
+
+function hellToastLiveOffsetFromIndex(
+  list: readonly HellToastStackItem[],
+  index: number,
+  heights: ReadonlyMap<number, number>,
+  maxVisible: number,
+): string {
+  let acc = 0;
+  let counted = 0;
+  for (let j = index + 1; j < list.length; j++) {
+    if (list[j].removing) continue;
+    if (counted >= maxVisible - 1) break;
+    acc += (heights.get(list[j].id) ?? TOAST_FALLBACK_HEIGHT) + TOAST_STACK_GAP;
+    counted++;
+  }
+  return `${acc}px`;
+}
 
 /**
  * Global toast store. Mount one `hell-toaster` in the app shell; callers can
@@ -349,32 +458,13 @@ export class HellToaster extends HellStyleable {
         }
         this.expanded.set(false);
       }
-      const map = this.heights();
-      const gap = 12;
-      const cap = this.maxVisible();
-      const snap = new Map(this.exitSnapshot());
-      let changed = false;
-      for (let i = 0; i < list.length; i++) {
-        const t = list[i];
-        if (!t.removing || snap.has(t.id)) continue;
-        let acc = 0;
-        let counted = 0;
-        for (let j = i + 1; j < list.length; j++) {
-          if (counted >= cap - 1) break;
-          acc += (map.get(list[j].id) ?? 64) + gap;
-          counted++;
-        }
-        snap.set(t.id, { front: list.length - 1 - i, offset: `${acc}px` });
-        changed = true;
-      }
-      // Drop snapshots for ids that no longer exist.
-      for (const id of [...snap.keys()]) {
-        if (!list.some((t) => t.id === id)) {
-          snap.delete(id);
-          changed = true;
-        }
-      }
-      if (changed) this.exitSnapshot.set(snap);
+      const snap = hellToastSnapshotExits(
+        list,
+        this.heights(),
+        this.maxVisible(),
+        this.exitSnapshot(),
+      );
+      if (!hellToastStackSnapshotsEqual(snap, this.exitSnapshot())) this.exitSnapshot.set(snap);
       // Re-observe after the list changed.
       queueMicrotask(() => this.observeAll());
     });
@@ -411,52 +501,29 @@ export class HellToaster extends HellStyleable {
    * not shift while a peer plays its exit animation.
    */
   protected frontDistance(t: ToastInternal): number {
-    if (t.removing) return this.exitSnapshot().get(t.id)?.front ?? 0;
-    return this.computeFront(t);
+    return hellToastFrontDistance(this.svc.toasts(), t, this.exitSnapshot());
   }
 
   /** Cumulative height of live toasts visually in front of `t` (expanded).
    *  Toasts beyond `maxVisible` clamp to the back-most visible slot so they
    *  peek behind it instead of running off-screen. */
   protected offsetPx(t: ToastInternal): string {
-    if (t.removing) return this.exitSnapshot().get(t.id)?.offset ?? this.heightPx(t.id);
-    return this.computeOffset(t);
+    return hellToastOffsetPx(
+      this.svc.toasts(),
+      t,
+      this.heights(),
+      this.maxVisible(),
+      this.exitSnapshot(),
+    );
   }
 
   /** How many positions past the visible cap this toast sits (>=0). */
   protected overflow(t: ToastInternal): number {
-    return Math.max(0, this.frontDistance(t) - (this.maxVisible() - 1));
-  }
-
-  private computeFront(t: ToastInternal): number {
-    const list = this.svc.toasts();
-    let n = 0;
-    for (let j = list.indexOf(t) + 1; j < list.length; j++) {
-      if (!list[j].removing) n++;
-    }
-    return n;
-  }
-
-  private computeOffset(t: ToastInternal): string {
-    const list = this.svc.toasts();
-    const map = this.heights();
-    const gap = 12;
-    const cap = this.maxVisible();
-    let acc = 0;
-    let counted = 0;
-    for (let j = list.indexOf(t) + 1; j < list.length; j++) {
-      if (list[j].removing) continue;
-      // Stop accumulating once we've covered the back-most visible slot;
-      // overflow toasts then visually peek behind that anchor.
-      if (counted >= cap - 1) break;
-      acc += (map.get(list[j].id) ?? 64) + gap;
-      counted++;
-    }
-    return `${acc}px`;
+    return hellToastOverflow(this.svc.toasts(), t, this.maxVisible(), this.exitSnapshot());
   }
 
   protected heightPx(id: number): string {
-    return `${this.heights().get(id) ?? 64}px`;
+    return hellToastHeightPx(id, this.heights());
   }
 
   protected ctxFor(id: number) {

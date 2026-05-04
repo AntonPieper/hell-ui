@@ -1,6 +1,38 @@
 import { TestBed } from '@angular/core/testing';
 
-import { HellToastService, HellToaster } from './toast';
+import {
+  HellToastService,
+  HellToaster,
+  hellToastFrontDistance,
+  hellToastOffsetPx,
+  hellToastOverflow,
+  hellToastSnapshotExits,
+} from './toast';
+
+describe('Toast Stack', () => {
+  it('computes front distance, offset, overflow, and exit snapshots from stack data', () => {
+    const list = [
+      { id: 1, removing: false },
+      { id: 2, removing: true },
+      { id: 3, removing: false },
+      { id: 4, removing: false },
+    ];
+    const heights = new Map([
+      [3, 80],
+      [4, 70],
+    ]);
+
+    expect(hellToastFrontDistance(list, list[0])).toBe(2);
+    expect(hellToastOffsetPx(list, list[0], heights, 3)).toBe('174px');
+    expect(hellToastOverflow(list, list[0], 2)).toBe(1);
+
+    const snapshot = hellToastSnapshotExits(list, heights, 3, new Map());
+
+    expect(snapshot.get(2)).toEqual({ front: 2, offset: '174px' });
+    expect(hellToastFrontDistance(list, list[1], snapshot)).toBe(2);
+    expect(hellToastOffsetPx(list, list[1], heights, 3, snapshot)).toBe('174px');
+  });
+});
 
 describe('HellToastService', () => {
   afterEach(() => {
