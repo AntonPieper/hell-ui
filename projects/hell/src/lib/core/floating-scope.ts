@@ -1,4 +1,4 @@
-import { DestroyRef, ElementRef, InjectionToken, inject } from '@angular/core';
+import { DestroyRef, Directive, ElementRef, InjectionToken, inject } from '@angular/core';
 
 /** Shared ownership contract for Floating Interaction content rendered outside
  *  its logical host. Composites such as omnibar use it to treat registered
@@ -74,6 +74,18 @@ export function hellRegisterFloatingHost(): void {
     inject(ElementRef<HTMLElement>).nativeElement,
     inject(DestroyRef),
   );
+}
+
+/**
+ * Opt-in Adapter for custom Floating Interaction surfaces. Apply this to any
+ * custom portaled/floating element that should count as inside the nearest
+ * `HELL_FLOATING_SCOPE` without writing a bespoke registration directive.
+ */
+@Directive({ selector: '[hellFloatingElement]' })
+export class HellFloatingElement {
+  constructor() {
+    hellRegisterFloatingHost();
+  }
 }
 
 export interface HellFloatingInsetVars {

@@ -9,6 +9,7 @@ checkDocsExamples();
 checkPackageEntryPoints();
 checkStyleEntryPoints();
 checkComponentContract();
+checkFloatingRegistrationContract();
 
 if (failures.length) {
   console.error('Architecture checks failed:\n');
@@ -366,6 +367,55 @@ function exportedStyleableClasses(source) {
   ]
     .filter((match) => match[0].includes('extends HellStyleable'))
     .map((match) => match[1]);
+}
+
+function checkFloatingRegistrationContract() {
+  const floatingSurfaces = [
+    {
+      file: 'projects/hell/src/lib/primitives/popover/popover.ts',
+      className: 'HellPopover',
+      registration: /hellRegisterFloatingHost\(\);/,
+    },
+    {
+      file: 'projects/hell/src/lib/primitives/tooltip/tooltip.ts',
+      className: 'HellTooltip',
+      registration: /hellRegisterFloatingHost\(\);/,
+    },
+    {
+      file: 'projects/hell/src/lib/primitives/menu/menu.ts',
+      className: 'HellMenu',
+      registration: /hellRegisterFloatingHost\(\);/,
+    },
+    {
+      file: 'projects/hell/src/lib/primitives/select/select.ts',
+      className: 'HellSelectDropdown',
+      registration: /hellRegisterFloatingHost\(\);/,
+    },
+    {
+      file: 'projects/hell/src/lib/primitives/combobox/combobox.ts',
+      className: 'HellComboboxDropdown',
+      registration: /hellRegisterFloatingHost\(\);/,
+    },
+    {
+      file: 'projects/hell/src/lib/primitives/flyout/flyout.ts',
+      className: 'HellFlyout',
+      registration: /new\s+HellFloatingInteractionController[\s\S]*?scope:\s*this\.floatingScope/,
+    },
+  ];
+
+  for (const surface of floatingSurfaces) {
+    const source = readFile(join(root, surface.file));
+    const classBody = source.match(
+      new RegExp(
+        `export\\s+class\\s+${surface.className}\\b[\\s\\S]*?(?=\\nexport\\s+class|\\nexport\\s+const|$)`,
+      ),
+    )?.[0];
+    if (!classBody || !surface.registration.test(classBody)) {
+      failures.push(
+        `${surface.file} ${surface.className} must register its Floating Interaction surface with the nearest Floating Scope`,
+      );
+    }
+  }
 }
 
 function checkSecondaryEntryPointCompleteness(kind) {
