@@ -26,10 +26,8 @@ import { HellFlyout, HellFlyoutTrigger } from '../../primitives/flyout/flyout';
 import { HellIcon } from '../../primitives/icon/icon';
 import { HellSlider } from '../../primitives/slider/slider';
 import { HellStyleable } from '../../core/styleable';
-import { HellAudioRuntime } from './audio-player.runtime';
+import { HellAudioRuntime, hellHtmlAudioElementAdapter } from './audio-player.runtime';
 export { hellAudioSpeechSupported } from './audio-player.runtime';
-
-const PLAYBACK_RATES = [1, 1.25, 1.5, 2, 0.75] as const;
 
 const HELL_AUDIO_PLAYER_ICONS = {
   faSolidClosedCaptioning,
@@ -253,15 +251,16 @@ export class HellAudioPlayer extends HellStyleable {
   /** BCP-47 language hint for SpeechRecognition. Defaults to `<html lang>` or `en-US`. */
   readonly lang = input<string | null>(null);
 
-  protected readonly playing = signal(false);
-  protected readonly currentTime = signal(0);
-  protected readonly duration = signal(0);
-  protected readonly volume = signal(1);
-  protected readonly muted = signal(false);
-  protected readonly playbackRate = signal(1);
-
   protected readonly captions = signal(false);
   private readonly audioRuntime = new HellAudioRuntime();
+  protected readonly playing = this.audioRuntime.playing;
+  protected readonly currentTime = this.audioRuntime.currentTime;
+  protected readonly duration = this.audioRuntime.duration;
+  protected readonly volume = this.audioRuntime.volume;
+  protected readonly muted = this.audioRuntime.muted;
+  protected readonly playbackRate = this.audioRuntime.playbackRate;
+  protected readonly seekMax = this.audioRuntime.seekMax;
+  protected readonly volumeLevel = this.audioRuntime.volumeLevel;
   protected readonly transcript = this.audioRuntime.transcript;
   protected readonly interim = this.audioRuntime.interim;
   protected readonly transcribing = this.audioRuntime.transcribing;
@@ -270,22 +269,10 @@ export class HellAudioPlayer extends HellStyleable {
   protected readonly speechSupported = this.audioRuntime.speechSupported;
 
   private seekRestartTimer: ReturnType<typeof setTimeout> | null = null;
-  private playbackEnded = false;
 
   protected readonly progress = computed(() => {
     const d = this.duration();
     return d ? (this.currentTime() / d) * 100 : 0;
-  });
-
-  /** Slider max — fall back to 1 while metadata is still loading. */
-  protected readonly seekMax = computed(() => this.duration() || 1);
-
-  protected readonly volumeLevel = computed<'mute' | 'low' | 'mid' | 'high'>(() => {
-    if (this.muted() || this.volume() === 0) return 'mute';
-    const v = this.volume();
-    if (v < 0.34) return 'low';
-    if (v < 0.67) return 'mid';
-    return 'high';
   });
 
   protected readonly volumeIcon = computed(() => {
@@ -312,6 +299,7 @@ export class HellAudioPlayer extends HellStyleable {
   });
 
   private readonly audio = viewChild.required<ElementRef<HTMLAudioElement>>('audio');
+  private readonly media = hellHtmlAudioElementAdapter(() => this.audio().nativeElement);
   private readonly captionScroll = viewChild<ElementRef<HTMLElement>>('captionScroll');
   protected readonly ccTrigger = viewChild('ccTrigger', { read: HellFlyoutTrigger });
 
@@ -322,14 +310,12 @@ export class HellAudioPlayer extends HellStyleable {
 
   constructor() {
     super();
-    inject(DestroyRef).onDestroy(() => this.audioRuntime.destroy());
-    // Apply audio properties from signals.
-    effect(() => {
-      const a = this.audio().nativeElement;
-      a.volume = this.volume();
-      a.muted = this.muted();
-      a.playbackRate = this.playbackRate();
+    inject(DestroyRef).onDestroy(() => {
+      this.audioRuntime.destroy();
+      if (this.seekRestartTimer) clearTimeout(this.seekRestartTimer);
     });
+    // Apply audio properties from runtime state.
+    effect(() => this.audioRuntime.syncMedia(this.media));
 
     // Auto start/stop recognition based on captions toggle + playback.
     effect(() => {
@@ -354,51 +340,39 @@ export class HellAudioPlayer extends HellStyleable {
   }
 
   protected toggle() {
-    const a = this.audio().nativeElement;
-    if (this.playing()) a.pause();
-    else void a.play();
+    this.audioRuntime.togglePlayback(this.media);
   }
 
   protected onPlay() {
-    const currentTime = this.audio().nativeElement.currentTime;
-    this.playing.set(true);
-    if (this.playbackEnded || currentTime <= 0.25) {
-      this.resetCaptionSession();
-    }
-    this.playbackEnded = false;
+    const result = this.audioRuntime.markPlayed(this.media);
+    if (result.resetTimeline) this.resetCaptionSession();
   }
 
   protected onPause() {
-    this.playing.set(false);
+    this.audioRuntime.markPaused();
   }
 
   protected onEnded() {
-    this.playing.set(false);
-    this.playbackEnded = true;
+    this.audioRuntime.markEnded();
   }
 
   protected toggleMute() {
-    this.muted.update((v) => !v);
+    this.audioRuntime.toggleMute();
   }
 
   protected onVolume(v: number) {
-    const next = Math.max(0, Math.min(1, v / 100));
-    this.volume.set(next);
-    this.muted.set(next === 0);
+    this.audioRuntime.setVolumePercent(v);
   }
 
   protected onTime() {
-    this.currentTime.set(this.audio().nativeElement.currentTime);
+    this.audioRuntime.updateCurrentTime(this.media);
   }
   protected onMeta() {
-    this.duration.set(this.audio().nativeElement.duration || 0);
+    this.audioRuntime.updateMetadata(this.media);
   }
 
   protected cyclePlaybackRate() {
-    const cur = this.playbackRate();
-    const idx = PLAYBACK_RATES.indexOf(cur as (typeof PLAYBACK_RATES)[number]);
-    const next = PLAYBACK_RATES[(idx + 1 + PLAYBACK_RATES.length) % PLAYBACK_RATES.length];
-    this.playbackRate.set(next);
+    this.audioRuntime.cyclePlaybackRate();
   }
 
   protected toggleCaptions(_trigger?: HellFlyoutTrigger) {
@@ -407,15 +381,8 @@ export class HellAudioPlayer extends HellStyleable {
   }
 
   protected onSeeking() {
-    const next = this.audio().nativeElement.currentTime;
-    if (Math.abs(next - this.currentTime()) <= 0.01) {
-      this.currentTime.set(next);
-      return;
-    }
-
-    this.currentTime.set(next);
-    this.playbackEnded = false;
-    this.resetCaptionSession(this.shouldRestartRecognition());
+    const result = this.audioRuntime.syncExternalSeek(this.media);
+    if (result.resetTimeline) this.resetCaptionSession(this.shouldRestartRecognition());
   }
 
   /**
@@ -424,25 +391,7 @@ export class HellAudioPlayer extends HellStyleable {
    * `SpeechRecognition` once the user finishes scrubbing.
    */
   protected onSeek(value: number) {
-    const restartRecognition = this.shouldRestartRecognition();
-    if (!this.setCurrentTime(value)) return;
-
-    this.resetTranscriptState();
-    if (!restartRecognition) return;
-
-    this.stopRecognition();
-    if (this.seekRestartTimer) clearTimeout(this.seekRestartTimer);
-    this.seekRestartTimer = setTimeout(() => {
-      this.seekRestartTimer = null;
-      if (
-        this.captions() &&
-        this.playing() &&
-        this.speechSupported() &&
-        !this.audioRuntime.isRecognizing()
-      ) {
-        this.startRecognition();
-      }
-    }, 200);
+    this.handleSeekResult(this.audioRuntime.seekTo(this.media, value));
   }
 
   protected onSeekKey(event: KeyboardEvent) {
@@ -467,21 +416,29 @@ export class HellAudioPlayer extends HellStyleable {
     if (!delta) return;
 
     event.preventDefault();
-    this.onSeek(this.currentTime() + delta);
+    this.handleSeekResult(this.audioRuntime.seekBy(this.media, delta));
   }
 
-  private setCurrentTime(nextTime: number): boolean {
-    const a = this.audio().nativeElement;
-    const next = Math.max(
-      0,
-      Math.min(Number.isFinite(a.duration) ? a.duration : nextTime, nextTime),
-    );
-    if (Math.abs(next - a.currentTime) <= 0.01) return false;
+  private handleSeekResult(result: { readonly changed: boolean }): void {
+    const restartRecognition = this.shouldRestartRecognition();
+    if (!result.changed) return;
 
-    a.currentTime = next;
-    this.currentTime.set(next);
-    this.playbackEnded = false;
-    return true;
+    this.resetTranscriptState();
+    if (!restartRecognition) return;
+
+    this.stopRecognition();
+    if (this.seekRestartTimer) clearTimeout(this.seekRestartTimer);
+    this.seekRestartTimer = setTimeout(() => {
+      this.seekRestartTimer = null;
+      if (
+        this.captions() &&
+        this.playing() &&
+        this.speechSupported() &&
+        !this.audioRuntime.isRecognizing()
+      ) {
+        this.startRecognition();
+      }
+    }, 200);
   }
 
   private shouldRestartRecognition(): boolean {

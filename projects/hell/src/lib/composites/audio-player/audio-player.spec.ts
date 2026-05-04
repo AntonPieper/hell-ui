@@ -20,6 +20,9 @@ describe('HellAudioPlayer', () => {
       interim: { (): string; set(value: string): void };
       error: { (): string | null; set(value: string | null): void };
       currentTime: { (): number; set(value: number): void };
+      onVolume(value: number): void;
+      toggleMute(): void;
+      cyclePlaybackRate(): void;
     };
     component.speechSupported.set(true);
     fixture.detectChanges();
@@ -44,6 +47,26 @@ describe('HellAudioPlayer', () => {
     expect(component.playing()).toBe(false);
 
     playSpy.mockRestore();
+  });
+
+  it('applies volume, mute, and playback-rate state to the audio element', async () => {
+    const { fixture, component, audio } = await createPlayer();
+
+    component.onVolume(50);
+    fixture.detectChanges();
+
+    expect(audio.volume).toBe(0.5);
+    expect(audio.muted).toBe(false);
+
+    component.toggleMute();
+    fixture.detectChanges();
+
+    expect(audio.muted).toBe(true);
+
+    component.cyclePlaybackRate();
+    fixture.detectChanges();
+
+    expect(audio.playbackRate).toBe(1.25);
   });
 
   it('clears transcript when seeking to a different point', async () => {
