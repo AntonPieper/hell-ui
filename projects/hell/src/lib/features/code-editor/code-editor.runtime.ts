@@ -19,6 +19,13 @@ export interface HellCodeEditorRuntimeOptions {
   readonly onValueChange: (value: string) => void;
 }
 
+export interface HellCodeEditorRuntimePort {
+  setValue(next: string): void;
+  setExtensions(extensions: Extension): void;
+  setReadOnly(readOnly: boolean): void;
+  destroy(): void;
+}
+
 /**
  * Base CodeMirror setup used by hell-code-editor. Language support is
  * intentionally excluded: pass Angular, JS, JSON, or any other CodeMirror
@@ -187,7 +194,7 @@ export const hellCodeEditorTheme: Extension = [
   ),
 ];
 
-export class HellCodeEditorRuntime {
+export class HellCodeEditorRuntime implements HellCodeEditorRuntimePort {
   readonly view: EditorView;
 
   private readonly extensionCompartment = new Compartment();

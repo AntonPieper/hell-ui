@@ -3,6 +3,7 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  InjectionToken,
   afterNextRender,
   booleanAttribute,
   effect,
@@ -13,9 +14,21 @@ import {
 } from '@angular/core';
 import { type Extension } from '@codemirror/state';
 import { HellStyleable } from '../../core/styleable';
-import { HellCodeEditorRuntime } from './code-editor.runtime';
+import {
+  HellCodeEditorRuntime,
+  type HellCodeEditorRuntimeOptions,
+  type HellCodeEditorRuntimePort,
+} from './code-editor.runtime';
 
 export { hellCodeEditorSetup, hellCodeEditorTheme } from './code-editor.runtime';
+
+export type HellCodeEditorRuntimeFactory = (
+  options: HellCodeEditorRuntimeOptions,
+) => HellCodeEditorRuntimePort;
+
+export const HELL_CODE_EDITOR_RUNTIME_FACTORY = new InjectionToken<HellCodeEditorRuntimeFactory>(
+  'HELL_CODE_EDITOR_RUNTIME_FACTORY',
+);
 
 /**
  * CodeMirror 6 wrapper. Creates one EditorView after render and reconfigures
@@ -42,14 +55,18 @@ export class HellCodeEditor extends HellStyleable {
 
   private readonly hostRef = viewChild.required<ElementRef<HTMLDivElement>>('host');
 
-  private runtime: HellCodeEditorRuntime | null = null;
+  private readonly createRuntime =
+    inject(HELL_CODE_EDITOR_RUNTIME_FACTORY, { optional: true }) ??
+    ((options: HellCodeEditorRuntimeOptions) => new HellCodeEditorRuntime(options));
+
+  private runtime: HellCodeEditorRuntimePort | null = null;
 
   constructor() {
     super();
     inject(DestroyRef).onDestroy(() => this.runtime?.destroy());
 
     afterNextRender(() => {
-      this.runtime = new HellCodeEditorRuntime({
+      this.runtime = this.createRuntime({
         host: this.hostRef().nativeElement,
         value: this.value(),
         extensions: this.extensions(),
@@ -58,8 +75,17 @@ export class HellCodeEditor extends HellStyleable {
       });
     });
 
-    effect(() => this.runtime?.setValue(this.value()));
-    effect(() => this.runtime?.setExtensions(this.extensions()));
-    effect(() => this.runtime?.setReadOnly(this.readOnly()));
+    effect(() => {
+      const value = this.value();
+      this.runtime?.setValue(value);
+    });
+    effect(() => {
+      const extensions = this.extensions();
+      this.runtime?.setExtensions(extensions);
+    });
+    effect(() => {
+      const readOnly = this.readOnly();
+      this.runtime?.setReadOnly(readOnly);
+    });
   }
 }
