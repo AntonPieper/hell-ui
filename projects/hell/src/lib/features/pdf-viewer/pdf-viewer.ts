@@ -3,6 +3,7 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  InjectionToken,
   afterNextRender,
   booleanAttribute,
   computed,
@@ -33,13 +34,23 @@ import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
 import { HellInput, HellNativeSelect } from '../../primitives/input/input';
 import { HellStyleable } from '../../core/styleable';
-import { HellPdfRuntime, HellPdfViewerInteractionScope } from './pdf-viewer.runtime';
+import {
+  HellPdfRuntime,
+  HellPdfViewerInteractionScope,
+  type HellPdfRuntimePort,
+} from './pdf-viewer.runtime';
 import {
   PDF_ZOOM_OPTIONS,
   PDF_ZOOM_VALUES,
   getZoomLabel,
   normalizeZoomValue,
 } from './pdf-viewer.utils';
+
+export type HellPdfRuntimeFactory = () => HellPdfRuntimePort;
+
+export const HELL_PDF_RUNTIME_FACTORY = new InjectionToken<HellPdfRuntimeFactory>(
+  'HELL_PDF_RUNTIME_FACTORY',
+);
 
 const HELL_PDF_VIEWER_ICONS = {
   faSolidChevronDown,
@@ -115,7 +126,9 @@ export class HellPdfViewer extends HellStyleable {
   });
   protected readonly customZoomLabel = computed(() => getZoomLabel(this.effectiveZoomValue()));
 
-  private readonly runtime = new HellPdfRuntime();
+  private readonly runtime = (
+    inject(HELL_PDF_RUNTIME_FACTORY, { optional: true }) ?? (() => new HellPdfRuntime())
+  )();
   private readonly bootstrapped = signal(false);
   private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
   private readonly interactionScope = new HellPdfViewerInteractionScope(

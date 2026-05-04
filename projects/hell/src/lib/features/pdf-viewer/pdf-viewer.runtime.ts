@@ -37,6 +37,30 @@ export interface HellPdfFindRequest {
   findPrevious: boolean;
 }
 
+export interface HellPdfRuntimePort {
+  readonly hasDocument: boolean;
+  readonly currentScale: number;
+  bootstrap(container: HTMLDivElement, handlers: HellPdfRuntimeHandlers): Promise<void>;
+  loadDocument(src: HellPdfSource, options: HellPdfLoadOptions): Promise<void>;
+  cleanup(): void;
+  goTo(page: number): void;
+  zoomIn(): void;
+  zoomOut(): void;
+  setZoomValue(value: string): void;
+  dispatchFind(request: HellPdfFindRequest): void;
+  closeFind(source: unknown): void;
+  download(
+    source: HellPdfSource,
+    fileName?: string | null,
+    ownerDocument?: Document,
+  ): Promise<void>;
+  print(source: HellPdfSource, ownerDocument?: Document, cleanupDelayMs?: number): Promise<void>;
+  renderThumbs(
+    canvases: readonly HTMLCanvasElement[],
+    shouldContinue: () => boolean,
+  ): Promise<void>;
+}
+
 export interface HellPdfGlobalShortcutActions {
   openFind(): void;
   print(): void;
@@ -164,7 +188,7 @@ export class HellPdfViewerInteractionScope {
   }
 }
 
-export class HellPdfRuntime {
+export class HellPdfRuntime implements HellPdfRuntimePort {
   private pdfjs: any = null;
   private viewer: any = null;
   private linkService: any = null;
