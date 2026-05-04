@@ -1,6 +1,6 @@
-import { DestroyRef, Directive, ElementRef, inject } from '@angular/core';
+import { Directive } from '@angular/core';
 import { HellStyleable } from '../../core/styleable';
-import { HELL_FLOATING_SCOPE, hellRegisterFloatingElement } from '../../core/overlay-scope';
+import { hellRegisterFloatingHost } from '../../core/floating-scope';
 import {
   NgpSelect,
   NgpSelectDropdown,
@@ -55,12 +55,9 @@ export class HellSelectPlaceholder extends HellStyleable {}
   host: { '[class.hell-select-dropdown]': '!unstyled()' },
 })
 export class HellSelectDropdown extends HellStyleable {
-  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
-  private readonly floatingScope = inject(HELL_FLOATING_SCOPE, { optional: true });
-
   constructor() {
     super();
-    hellRegisterFloatingElement(this.floatingScope, this.host, inject(DestroyRef));
+    hellRegisterFloatingHost();
   }
 }
 

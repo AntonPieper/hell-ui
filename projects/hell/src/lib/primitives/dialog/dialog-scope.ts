@@ -1,19 +1,9 @@
-import type { Subscription } from 'rxjs';
+import { Injectable } from '@angular/core';
 import {
   HellFloatingScopedInsetsRuntime,
   hellFindFloatingScopeRoot,
   type HellFloatingInsetVars,
-} from '../../core/overlay-scope';
-
-export interface HellDialogRuntimeRef {
-  afterClosed$: {
-    subscribe(next: () => void): Subscription;
-  };
-}
-
-export interface HellDialogTriggerRuntime {
-  dialogRef: HellDialogRuntimeRef | null;
-}
+} from '../../core/floating-scope';
 
 export const HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE = 'data-hell-dialog-scope-root';
 const HELL_DIALOG_SCOPE_LEGACY_ROOT_ATTRIBUTE = 'data-dialog-root';
@@ -25,36 +15,48 @@ const HELL_DIALOG_SCOPE_VARS: HellFloatingInsetVars = {
   left: '--hell-dialog-scope-left',
 } as const;
 
-export class HellDialogScopeRuntime {
-  private closeSubscription: Subscription | null = null;
-  private readonly insets: HellFloatingScopedInsetsRuntime;
+@Injectable({ providedIn: 'root' })
+export class HellDialogScopeCoordinator {
+  private pendingRoot: HTMLElement | null = null;
 
-  constructor(private readonly doc: Document) {
-    this.insets = new HellFloatingScopedInsetsRuntime({
+  primeFromTrigger(trigger: HTMLElement): void {
+    this.pendingRoot = hellFindDialogScopeRoot(trigger);
+  }
+
+  claimRoot(): HTMLElement | null {
+    const root = this.pendingRoot;
+    this.pendingRoot = null;
+    return root;
+  }
+}
+
+/**
+ * Adapter that copies one Dialog Scope root's insets onto the portaled overlay.
+ * Each overlay owns its own runtime, so simultaneous scoped dialogs keep
+ * independent CSS custom properties and never write shared document vars.
+ */
+export class HellDialogScopedOverlayAdapter {
+  private readonly runtime: HellFloatingScopedInsetsRuntime;
+
+  constructor(
+    private readonly root: HTMLElement,
+    private readonly overlay: HTMLElement,
+    private readonly doc: Document,
+  ) {
+    this.runtime = new HellFloatingScopedInsetsRuntime({
       document: doc,
       rootSelector: HELL_DIALOG_SCOPE_ROOT_SELECTOR,
       variables: HELL_DIALOG_SCOPE_VARS,
+      styleTargets: () => [this.root, this.overlay],
     });
   }
 
-  primeFromTrigger(trigger: HTMLElement): void {
-    this.insets.primeFromTrigger(trigger);
+  connect(): void {
+    this.runtime.primeRoot(this.root);
   }
 
-  observeClose(ref: HellDialogRuntimeRef | null): void {
-    if (!ref) return;
-    this.closeSubscription?.unsubscribe();
-    this.closeSubscription = ref.afterClosed$.subscribe(() => this.clear());
-  }
-
-  updateScope(): void {
-    this.insets.updateScope();
-  }
-
-  clear(): void {
-    this.closeSubscription?.unsubscribe();
-    this.closeSubscription = null;
-    this.insets.clear();
+  destroy(): void {
+    this.runtime.clear();
   }
 }
 

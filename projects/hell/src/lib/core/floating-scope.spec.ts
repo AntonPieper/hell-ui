@@ -3,38 +3,38 @@ import type { DestroyRef } from '@angular/core';
 import {
   HellFloatingDismissController,
   HellFloatingInteractionController,
-  HellOverlayScopeRegistry,
+  HellFloatingScopeRegistry,
   hellDismissOn,
   hellEscapeKey,
   hellOutsideClick,
   hellOutsideFocus,
   hellOutsidePointer,
-  hellRegisterOverlayElement,
+  hellRegisterFloatingElement,
   hellWithDismissEffect,
-} from './overlay-scope';
+} from './floating-scope';
 
 describe('Floating Scope', () => {
   afterEach(() => {
     document.body.replaceChildren();
   });
 
-  it('registers overlay elements for the lifetime of a DestroyRef', () => {
+  it('registers floating elements for the lifetime of a DestroyRef', () => {
     const root = document.createElement('div');
     const overlay = document.createElement('div');
     const child = document.createElement('button');
     overlay.append(child);
     document.body.append(root, overlay);
 
-    const scope = new HellOverlayScopeRegistry(() => root);
+    const scope = new HellFloatingScopeRegistry(() => root);
     const destroy = createDestroyRef();
 
-    hellRegisterOverlayElement(scope, overlay, destroy.ref);
+    hellRegisterFloatingElement(scope, overlay, destroy.ref);
 
-    expect(scope.containsOverlayTarget(child)).toBe(true);
+    expect(scope.containsFloatingTarget(child)).toBe(true);
 
     destroy.run();
 
-    expect(scope.containsOverlayTarget(child)).toBe(false);
+    expect(scope.containsFloatingTarget(child)).toBe(false);
   });
 
   it('dismisses only when a rule matches an event target outside the Floating Scope', () => {
@@ -151,7 +151,7 @@ describe('Floating Scope', () => {
     surface.append(surfaceChild);
     document.body.append(root, surface, outside);
 
-    const scope = new HellOverlayScopeRegistry(() => root);
+    const scope = new HellFloatingScopeRegistry(() => root);
     const destroy = createDestroyRef();
     const dismissals: string[] = [];
     const interaction = new HellFloatingInteractionController({
@@ -164,7 +164,7 @@ describe('Floating Scope', () => {
 
     interaction.connect(destroy.ref);
 
-    expect(scope.containsOverlayTarget(surfaceChild)).toBe(true);
+    expect(scope.containsFloatingTarget(surfaceChild)).toBe(true);
 
     surfaceChild.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     expect(dismissals).toEqual([]);
@@ -174,7 +174,7 @@ describe('Floating Scope', () => {
 
     destroy.run();
 
-    expect(scope.containsOverlayTarget(surfaceChild)).toBe(false);
+    expect(scope.containsFloatingTarget(surfaceChild)).toBe(false);
   });
 });
 

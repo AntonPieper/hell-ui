@@ -8,5 +8,4 @@ export * from './composites/resizable/resizable';
 export * from './composites/split-view/split-view';
 export * from './composites/app-shell/app-shell';
 export * from './composites/toast/toast';
-export * from './composites/omnibar/command-palette';
 export * from './composites/omnibar/omnibar';

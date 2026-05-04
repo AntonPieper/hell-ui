@@ -4,6 +4,7 @@ import {
   Directive,
   ElementRef,
   booleanAttribute,
+  effect,
   inject,
   input,
 } from '@angular/core';
@@ -16,7 +17,7 @@ import {
 } from 'ng-primitives/dialog';
 import type { HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
-import { HellDialogScopeRuntime, type HellDialogTriggerRuntime } from './dialog-scope';
+import { HellDialogScopeCoordinator, HellDialogScopedOverlayAdapter } from './dialog-scope';
 
 /**
  * Wrap your trigger element with this directive and bind to a `<ng-template>`.
@@ -39,32 +40,18 @@ import { HellDialogScopeRuntime, type HellDialogTriggerRuntime } from './dialog-
   ],
   host: {
     '(pointerdown)': 'primeScope()',
-    '(click)': 'primeScope(); observeClose()',
+    '(click)': 'primeScope()',
+    '(keydown.enter)': 'primeScope()',
+    '(keydown.space)': 'primeScope()',
   },
 })
 export class HellDialogTrigger {
   readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
 
-  private readonly trigger = inject(NgpDialogTrigger, { self: true });
-  private readonly scope = new HellDialogScopeRuntime(inject(DOCUMENT));
-
-  constructor() {
-    inject(DestroyRef).onDestroy(() => this.scope.clear());
-  }
+  private readonly scope = inject(HellDialogScopeCoordinator);
 
   protected primeScope(): void {
     this.scope.primeFromTrigger(this.element.nativeElement);
-  }
-
-  protected observeClose(): void {
-    queueMicrotask(() => {
-      const dialogRef = (this.trigger as unknown as HellDialogTriggerRuntime).dialogRef;
-      this.scope.observeClose(dialogRef);
-    });
-  }
-
-  private clearScope(): void {
-    this.scope.clear();
   }
 }
 
@@ -81,6 +68,34 @@ export class HellDialogOverlay extends HellStyleable {
   /** When true, overlay reads bounds from nearest dialog root captured by
    *  opening trigger. If none exists, it falls back to viewport. */
   readonly scoped = input(false, { transform: booleanAttribute });
+
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly coordinator = inject(HellDialogScopeCoordinator);
+  private readonly doc = inject(DOCUMENT);
+  private adapter: HellDialogScopedOverlayAdapter | null = null;
+
+  constructor() {
+    super();
+    const destroyRef = inject(DestroyRef);
+    effect(() => {
+      if (this.scoped()) this.connectScope();
+      else this.disconnectScope();
+    });
+    destroyRef.onDestroy(() => this.disconnectScope());
+  }
+
+  private connectScope(): void {
+    if (this.adapter) return;
+    const root = this.coordinator.claimRoot();
+    if (!root) return;
+    this.adapter = new HellDialogScopedOverlayAdapter(root, this.element.nativeElement, this.doc);
+    this.adapter.connect();
+  }
+
+  private disconnectScope(): void {
+    this.adapter?.destroy();
+    this.adapter = null;
+  }
 }
 
 /**

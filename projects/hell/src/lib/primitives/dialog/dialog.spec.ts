@@ -3,12 +3,15 @@ import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
 import { HELL_APP_SHELL_DIRECTIVES } from '../../composites/app-shell/app-shell';
-import { HELL_CARD_DIRECTIVES } from '../card/card';
 import { HELL_DIALOG_DIRECTIVES, HellDialogTrigger } from './dialog';
-import { HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE } from './dialog-scope';
+import {
+  HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE,
+  HellDialogScopeCoordinator,
+  HellDialogScopedOverlayAdapter,
+} from './dialog-scope';
 
 @Component({
-  imports: [...HELL_APP_SHELL_DIRECTIVES, ...HELL_CARD_DIRECTIVES, ...HELL_DIALOG_DIRECTIVES],
+  imports: [...HELL_APP_SHELL_DIRECTIVES, ...HELL_DIALOG_DIRECTIVES],
   template: `
     <div hellAppShell>
       <header hellAppTopbar>Topbar</header>
@@ -20,9 +23,7 @@ import { HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE } from './dialog-scope';
     <ng-template #dialog let-close="close">
       <div hellDialogOverlay scoped>
         <div hellDialog>
-          <div hellCardBody>
-            <button type="button" (click)="close()">Close</button>
-          </div>
+          <button type="button" (click)="close()">Close</button>
         </div>
       </div>
     </ng-template>
@@ -37,52 +38,60 @@ describe('HellDialogTrigger scoped overlays', () => {
     }).compileComponents();
   });
 
-  it('uses nearest dialog root when opening a scoped overlay', async () => {
+  it('primes the nearest Dialog Scope root without reaching into dialog internals', async () => {
     const fixture = TestBed.createComponent(ScopedDialogHost);
     await settle(fixture);
 
-    const rootStyles = document.documentElement.style;
     const main = fixture.nativeElement.querySelector('main') as HTMLElement;
     const trigger = fixture.debugElement
       .query(By.directive(HellDialogTrigger))
-      .injector.get(HellDialogTrigger) as unknown as { primeScope(): void; clearScope(): void };
+      .injector.get(HellDialogTrigger) as unknown as { primeScope(): void };
+    const coordinator = TestBed.inject(HellDialogScopeCoordinator);
 
     expect(main.getAttribute(HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE)).toBe('true');
     expect(main.getAttribute('data-dialog-root')).toBe('true');
 
-    Object.defineProperty(main, 'getBoundingClientRect', {
-      configurable: true,
-      value: () =>
-        ({
-          left: 24,
-          top: 48,
-          width: 640,
-          height: 320,
-          right: 664,
-          bottom: 368,
-          x: 24,
-          y: 48,
-          toJSON: () => undefined,
-        }) as DOMRect,
-    });
-
     trigger.primeScope();
 
-    expect(rootStyles.getPropertyValue('--hell-dialog-scope-top')).toBe('48px');
-    expect(rootStyles.getPropertyValue('--hell-dialog-scope-right')).toBe(
-      `${window.innerWidth - 664}px`,
-    );
-    expect(rootStyles.getPropertyValue('--hell-dialog-scope-bottom')).toBe(
-      `${window.innerHeight - 368}px`,
-    );
-    expect(rootStyles.getPropertyValue('--hell-dialog-scope-left')).toBe('24px');
+    expect(coordinator.claimRoot()).toBe(main);
+  });
+});
 
-    trigger.clearScope();
+describe('HellDialogScopedOverlayAdapter', () => {
+  afterEach(() => {
+    document.body.replaceChildren();
+  });
 
-    expect(rootStyles.getPropertyValue('--hell-dialog-scope-top')).toBe('');
-    expect(rootStyles.getPropertyValue('--hell-dialog-scope-right')).toBe('');
-    expect(rootStyles.getPropertyValue('--hell-dialog-scope-bottom')).toBe('');
-    expect(rootStyles.getPropertyValue('--hell-dialog-scope-left')).toBe('');
+  it('copies each Dialog Scope root vars to its own overlay without global overrides', () => {
+    const rootA = document.createElement('section');
+    const rootB = document.createElement('section');
+    const overlayA = document.createElement('div');
+    const overlayB = document.createElement('div');
+    document.body.append(rootA, rootB, overlayA, overlayB);
+
+    mockRect(rootA, { left: 10, top: 20, right: 310, bottom: 220 });
+    mockRect(rootB, { left: 40, top: 60, right: 240, bottom: 260 });
+
+    const adapterA = new HellDialogScopedOverlayAdapter(rootA, overlayA, document);
+    const adapterB = new HellDialogScopedOverlayAdapter(rootB, overlayB, document);
+
+    adapterA.connect();
+    adapterB.connect();
+
+    expectVar(rootA, '--hell-dialog-scope-left', '10px');
+    expectVar(overlayA, '--hell-dialog-scope-left', '10px');
+    expectVar(rootB, '--hell-dialog-scope-left', '40px');
+    expectVar(overlayB, '--hell-dialog-scope-left', '40px');
+    expect(document.documentElement.style.getPropertyValue('--hell-dialog-scope-left')).toBe('');
+
+    adapterA.destroy();
+
+    expectVar(rootA, '--hell-dialog-scope-left', '');
+    expectVar(overlayA, '--hell-dialog-scope-left', '');
+    expectVar(rootB, '--hell-dialog-scope-left', '40px');
+    expectVar(overlayB, '--hell-dialog-scope-left', '40px');
+
+    adapterB.destroy();
   });
 });
 
@@ -90,4 +99,26 @@ async function settle(fixture: { detectChanges(): void; whenStable(): Promise<un
   fixture.detectChanges();
   await fixture.whenStable();
   fixture.detectChanges();
+}
+
+function mockRect(
+  element: HTMLElement,
+  rect: Pick<DOMRect, 'left' | 'top' | 'right' | 'bottom'>,
+): void {
+  Object.defineProperty(element, 'getBoundingClientRect', {
+    configurable: true,
+    value: () =>
+      ({
+        ...rect,
+        width: rect.right - rect.left,
+        height: rect.bottom - rect.top,
+        x: rect.left,
+        y: rect.top,
+        toJSON: () => undefined,
+      }) as DOMRect,
+  });
+}
+
+function expectVar(element: HTMLElement, name: string, value: string): void {
+  expect(element.style.getPropertyValue(name)).toBe(value);
 }

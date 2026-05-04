@@ -8,7 +8,7 @@ import {
   hellOutsideClick,
   hellOutsideFocus,
   hellWithDismissEffect,
-} from '../../core/overlay-scope';
+} from '../../core/floating-scope';
 import {
   DestroyRef,
   Directive,

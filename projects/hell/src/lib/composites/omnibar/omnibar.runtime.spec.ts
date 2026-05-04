@@ -1,18 +1,18 @@
 import { TestBed } from '@angular/core/testing';
 
-import { HellCommandPaletteService } from './command-palette';
+import { HellOmnibarRuntime } from './omnibar.runtime';
 import type { HellSearchResponse, HellSearchSource } from '../../core/search';
 
-describe('HellCommandPaletteService', () => {
+describe('HellOmnibarRuntime', () => {
   afterEach(() => {
     vi.useRealTimers();
   });
 
   it('keeps only the latest async search result and aborts superseded work', async () => {
     await TestBed.configureTestingModule({
-      providers: [HellCommandPaletteService],
+      providers: [HellOmnibarRuntime],
     });
-    const palette = TestBed.inject(HellCommandPaletteService) as HellCommandPaletteService<{
+    const runtime = TestBed.inject(HellOmnibarRuntime) as HellOmnibarRuntime<{
       readonly id: string;
     }>;
     const first = deferred<HellSearchResponse<{ readonly id: string }>>();
@@ -28,10 +28,10 @@ describe('HellCommandPaletteService', () => {
       return second.promise;
     };
 
-    palette.setQuery('first');
-    const firstSearch = palette.searchNow({ source: firstSource });
-    palette.setQuery('second');
-    const secondSearch = palette.searchNow({ source: secondSource });
+    runtime.setQuery('first');
+    const firstSearch = runtime.searchNow({ source: firstSource });
+    runtime.setQuery('second');
+    const secondSearch = runtime.searchNow({ source: secondSource });
 
     expect(firstSignal?.aborted).toBe(true);
     expect(secondSignal?.aborted).toBe(false);
@@ -39,31 +39,31 @@ describe('HellCommandPaletteService', () => {
     second.resolve({ results: [{ item: { id: 'second' }, score: 1 }] });
     await secondSearch;
 
-    expect(palette.results().map((result) => result.item.id)).toEqual(['second']);
-    expect(palette.loading()).toBe(false);
+    expect(runtime.results().map((result) => result.item.id)).toEqual(['second']);
+    expect(runtime.loading()).toBe(false);
 
     first.resolve({ results: [{ item: { id: 'first' }, score: 99 }] });
     await firstSearch;
 
-    expect(palette.results().map((result) => result.item.id)).toEqual(['second']);
-    expect(palette.loading()).toBe(false);
+    expect(runtime.results().map((result) => result.item.id)).toEqual(['second']);
+    expect(runtime.loading()).toBe(false);
   });
 
   it('cancels scheduled searches before the debounce fires', () => {
     vi.useFakeTimers();
     TestBed.configureTestingModule({
-      providers: [HellCommandPaletteService],
+      providers: [HellOmnibarRuntime],
     });
-    const palette = TestBed.inject(HellCommandPaletteService);
+    const runtime = TestBed.inject(HellOmnibarRuntime);
     const source = vi.fn(() => ({ results: [] }));
 
-    palette.scheduleSearch({ source }, 25);
+    runtime.scheduleSearch({ source }, 25);
     vi.advanceTimersByTime(24);
-    palette.cancel();
+    runtime.cancel();
     vi.advanceTimersByTime(1);
 
     expect(source).not.toHaveBeenCalled();
-    expect(palette.loading()).toBe(false);
+    expect(runtime.loading()).toBe(false);
   });
 });
 

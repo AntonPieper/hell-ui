@@ -28,7 +28,7 @@ import {
   hellOutsideFocus,
   hellOutsidePointer,
   type HellFloatingScope,
-} from '../../core/overlay-scope';
+} from '../../core/floating-scope';
 import {
   type HellSearchField,
   type HellSearchResult,
@@ -38,7 +38,7 @@ import { HellInput } from '../../primitives/input/input';
 import { HellListbox } from '../../primitives/listbox/listbox';
 import { HellSearch, HellSearchClear } from '../../primitives/search/search';
 import { HellSkeleton } from '../../primitives/skeleton/skeleton';
-import { HellCommandPaletteService } from './command-palette';
+import { HellOmnibarRuntime } from './omnibar.runtime';
 import { HellStyleable } from '../../core/styleable';
 
 /**
@@ -93,7 +93,7 @@ let nextOmnibarItemId = 0;
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
-    HellCommandPaletteService,
+    HellOmnibarRuntime,
     { provide: HELL_FLOATING_SCOPE, useExisting: forwardRef(() => HellOmnibar) },
   ],
   host: {
@@ -246,7 +246,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
-  private readonly palette = inject(HellCommandPaletteService<unknown>);
+  private readonly runtime = inject(HellOmnibarRuntime<unknown>);
 
   private readonly _open = signal(false);
   protected readonly isOpen = computed(() => !this.disabled() && this._open());
@@ -255,31 +255,19 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   protected readonly anchorLeft = signal(0);
   protected readonly anchorWidth = signal(this.minPanelWidth());
   protected readonly cursor = signal(0);
-  readonly searchResults = computed(() => this.palette.results());
-  readonly loading = computed(() => this.palette.loading());
-  readonly error = computed(() => this.palette.error());
+  readonly searchResults = computed(() => this.runtime.results());
+  readonly loading = computed(() => this.runtime.loading());
+  readonly error = computed(() => this.runtime.error());
   protected readonly skeletonRows = computed(() =>
     Array.from({ length: Math.max(1, this.loadingRows()) }, (_, i) => i),
   );
 
   /* ── Item registry ─────────────────────────────────────────────────── */
 
-  private readonly items = signal<HellOmnibarRegisteredItem[]>([]);
-  private readonly actionItems = signal<HellOmnibarAction[]>([]);
-  private readonly _activeIndex = signal(0);
-  protected readonly activeIndex = computed(() => {
-    const items = this.items();
-    if (!items.length) return -1;
-    const i = this._activeIndex();
-    return Math.max(0, Math.min(i, items.length - 1));
-  });
-  protected readonly activeItemId = computed(() => {
-    const items = this.items();
-    const i = this.activeIndex();
-    return items[i]?.itemId ?? null;
-  });
-  protected readonly isEmpty = computed(() => !this.loading() && this.items().length === 0);
-  protected readonly hasActions = computed(() => this.actionItems().length > 0);
+  protected readonly activeIndex = this.runtime.activeIndex;
+  protected readonly activeItemId = this.runtime.activeItemId;
+  protected readonly isEmpty = this.runtime.isEmpty;
+  protected readonly hasActions = this.runtime.hasActions;
 
   private posUpdater?: AfterRenderRef;
   private readonly floatingScope = new HellFloatingScopeRegistry(() => this.host.nativeElement);
@@ -303,8 +291,8 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     effect(() => {
       // Reset active when items shift or query changes.
       this.value();
-      this.items().length;
-      this._activeIndex.set(0);
+      this.runtime.items().length;
+      this.runtime.resetActive();
     });
     effect(() => {
       const open = this.isOpen();
@@ -318,15 +306,15 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
       const params = this.searchParams();
       const debounce = this.searchDebounce();
       const query = this.value();
-      this.palette.setQuery(query);
+      this.runtime.setQuery(query);
 
       if (!source && items === null) {
-        this.palette.cancel();
-        this.palette.clearResults();
+        this.runtime.cancel();
+        this.runtime.clearResults();
         return;
       }
 
-      this.palette.scheduleSearch(
+      this.runtime.scheduleSearch(
         {
           items: items ?? undefined,
           source,
@@ -355,22 +343,22 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     this.inputRef?.nativeElement.focus();
   }
 
-  /** Container for child overlay primitives (menus, popovers) that should
+  /** Container for child Floating Interaction primitives (menus, popovers) that should
    *  behave as part of the omnibar instead of outside-click targets. */
-  overlayContainer(): HTMLElement {
+  floatingContainer(): HTMLElement {
     return this.host.nativeElement;
   }
 
-  registerOverlayElement(element: HTMLElement): void {
-    this.floatingScope.registerOverlayElement(element);
+  registerFloatingElement(element: HTMLElement): void {
+    this.floatingScope.registerFloatingElement(element);
   }
 
-  unregisterOverlayElement(element: HTMLElement): void {
-    this.floatingScope.unregisterOverlayElement(element);
+  unregisterFloatingElement(element: HTMLElement): void {
+    this.floatingScope.unregisterFloatingElement(element);
   }
 
-  containsOverlayTarget(target: EventTarget | Node | null): boolean {
-    return this.floatingScope.containsOverlayTarget(target);
+  containsFloatingTarget(target: EventTarget | Node | null): boolean {
+    return this.floatingScope.containsFloatingTarget(target);
   }
 
   /** Open the panel. Idempotent. */
@@ -404,20 +392,19 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   /* ── Item / action registration (used by child directives) ─────────── */
 
   registerItem(item: HellOmnibarRegisteredItem): void {
-    this.items.update((list) => [...list, item]);
+    this.runtime.registerItem(item);
   }
 
   unregisterItem(item: HellOmnibarRegisteredItem): void {
-    this.items.update((list) => list.filter((i) => i !== item));
+    this.runtime.unregisterItem(item);
   }
 
   setActive(item: HellOmnibarRegisteredItem): void {
-    const idx = this.items().indexOf(item);
-    if (idx >= 0) this._activeIndex.set(idx);
+    this.runtime.setActive(item);
   }
 
   isActive(item: HellOmnibarRegisteredItem): boolean {
-    return this.items()[this.activeIndex()] === item;
+    return this.runtime.isActive(item);
   }
 
   activate(item: HellOmnibarRegisteredItem, source: HellOmnibarActivationSource): void {
@@ -433,10 +420,10 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   }
 
   registerAction(action: HellOmnibarAction): void {
-    this.actionItems.update((list) => [...list, action]);
+    this.runtime.registerAction(action);
   }
   unregisterAction(action: HellOmnibarAction): void {
-    this.actionItems.update((list) => list.filter((a) => a !== action));
+    this.runtime.unregisterAction(action);
   }
 
   /* ── Event handlers (template) ─────────────────────────────────────── */
@@ -495,19 +482,19 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
         }
         break;
       case 'Home':
-        if (this.isOpen() && this.items().length) {
-          this._activeIndex.set(0);
+        if (this.isOpen() && this.runtime.items().length) {
+          this.runtime.firstActive();
           event.preventDefault();
         }
         break;
       case 'End':
-        if (this.isOpen() && this.items().length) {
-          this._activeIndex.set(this.items().length - 1);
+        if (this.isOpen() && this.runtime.items().length) {
+          this.runtime.lastActive();
           event.preventDefault();
         }
         break;
       case 'Enter': {
-        const item = this.items()[this.activeIndex()];
+        const item = this.runtime.activeItem();
         if (item && this.isOpen()) {
           this.activate(item, 'keyboard');
           event.preventDefault();
@@ -529,14 +516,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   }
 
   private moveActive(delta: number): void {
-    const len = this.items().length;
-    if (!len) return;
-    const cur = this.activeIndex();
-    let next = cur + delta;
-    if (next < 0) next = len - 1;
-    if (next >= len) next = 0;
-    this._activeIndex.set(next);
-    this.items()[next]?.scrollIntoView();
+    this.runtime.moveActive(delta);
   }
 
   /* ── Anchor positioning ────────────────────────────────────────────── */

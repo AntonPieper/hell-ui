@@ -37,7 +37,7 @@
           type="button"
           aria-label="Docs search controls"
           [hellMenuTrigger]="docsControlsMenu"
-          [container]="docsOmnibar.overlayContainer()"
+          [container]="docsOmnibar.floatingContainer()"
           [openTriggers]="docsMenuOpenTriggers"
           placement="bottom-start"
           [pressed]="docsSearchControlsActive()"
@@ -48,7 +48,7 @@
           hellOmnibarAction
           type="button"
           [hellMenuTrigger]="docsKindMenu"
-          [container]="docsOmnibar.overlayContainer()"
+          [container]="docsOmnibar.floatingContainer()"
           [openTriggers]="docsMenuOpenTriggers"
           placement="bottom-start"
           [pressed]="docsKindFilter() !== 'all'"
@@ -59,7 +59,7 @@
           hellOmnibarAction
           type="button"
           [hellMenuTrigger]="docsSectionMenu"
-          [container]="docsOmnibar.overlayContainer()"
+          [container]="docsOmnibar.floatingContainer()"
           [openTriggers]="docsMenuOpenTriggers"
           placement="bottom-start"
           [pressed]="docsSectionFilter() !== 'all'"

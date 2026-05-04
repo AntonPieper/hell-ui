@@ -1,44 +1,40 @@
-import { DestroyRef, InjectionToken } from '@angular/core';
+import { DestroyRef, ElementRef, InjectionToken, inject } from '@angular/core';
 
-/** Shared ownership contract for floating content rendered outside its logical
- *  host. Components such as omnibar use it to treat registered overlays as
- *  inside interactions even when a primitive portals content to `body`. */
-export interface HellOverlayScope {
-  registerOverlayElement(element: HTMLElement): void;
-  unregisterOverlayElement(element: HTMLElement): void;
-  containsOverlayTarget(target: EventTarget | Node | null): boolean;
+/** Shared ownership contract for Floating Interaction content rendered outside
+ *  its logical host. Composites such as omnibar use it to treat registered
+ *  floating surfaces as inside interactions even when a primitive portals
+ *  content to `body`. */
+export interface HellFloatingScope {
+  registerFloatingElement(element: HTMLElement): void;
+  unregisterFloatingElement(element: HTMLElement): void;
+  containsFloatingTarget(target: EventTarget | Node | null): boolean;
 }
 
 /**
- * DI token for a logical floating-overlay scope. Provide it on composites that
- * own portaled children so nested overlays count as inside for outside dismiss.
+ * DI token for a logical Floating Scope. Provide it on composites that own
+ * portaled children so nested floating surfaces count as inside for dismissal.
  */
-export const HELL_OVERLAY_SCOPE = new InjectionToken<HellOverlayScope>('HELL_OVERLAY_SCOPE');
-
-/** Floating Scope is the new domain name; overlay names remain as aliases while
- * primitives migrate. */
-export type HellFloatingScope = HellOverlayScope;
-export const HELL_FLOATING_SCOPE: InjectionToken<HellFloatingScope> = HELL_OVERLAY_SCOPE;
+export const HELL_FLOATING_SCOPE = new InjectionToken<HellFloatingScope>('HELL_FLOATING_SCOPE');
 
 /**
  * Default Floating Scope registry. Treats an optional root element plus all
- * registered overlay elements as one logical interaction region.
+ * registered floating elements as one logical interaction region.
  */
-export class HellOverlayScopeRegistry implements HellOverlayScope {
+export class HellFloatingScopeRegistry implements HellFloatingScope {
   private readonly elements = new Set<HTMLElement>();
 
   constructor(private readonly root?: () => HTMLElement | null | undefined) {}
 
-  registerOverlayElement(element: HTMLElement): void {
+  registerFloatingElement(element: HTMLElement): void {
     this.elements.add(element);
   }
 
-  unregisterOverlayElement(element: HTMLElement): void {
+  unregisterFloatingElement(element: HTMLElement): void {
     this.elements.delete(element);
   }
 
-  containsOverlayTarget(target: EventTarget | Node | null): boolean {
-    const node = hellOverlayTargetNode(target);
+  containsFloatingTarget(target: EventTarget | Node | null): boolean {
+    const node = hellFloatingTargetNode(target);
     if (!node) return false;
 
     const root = this.root?.();
@@ -52,28 +48,33 @@ export class HellOverlayScopeRegistry implements HellOverlayScope {
   }
 }
 
-export const HellFloatingScopeRegistry = HellOverlayScopeRegistry;
-
-export function hellOverlayTargetNode(target: EventTarget | Node | null): Node | null {
+export function hellFloatingTargetNode(target: EventTarget | Node | null): Node | null {
   if (!target || typeof Node === 'undefined' || !(target instanceof Node)) return null;
   return target;
 }
 
 /**
- * Register an overlay element until `destroyRef` fires. Safe no-op when no
+ * Register a floating element until `destroyRef` fires. Safe no-op when no
  * scope is available, so primitives can call it unconditionally.
  */
-export function hellRegisterOverlayElement(
-  scope: HellOverlayScope | null | undefined,
+export function hellRegisterFloatingElement(
+  scope: HellFloatingScope | null | undefined,
   element: HTMLElement,
   destroyRef: DestroyRef,
 ): void {
   if (!scope) return;
-  scope.registerOverlayElement(element);
-  destroyRef.onDestroy(() => scope.unregisterOverlayElement(element));
+  scope.registerFloatingElement(element);
+  destroyRef.onDestroy(() => scope.unregisterFloatingElement(element));
 }
 
-export const hellRegisterFloatingElement = hellRegisterOverlayElement;
+/** Register the current directive/component host with the nearest Floating Scope. */
+export function hellRegisterFloatingHost(): void {
+  hellRegisterFloatingElement(
+    inject(HELL_FLOATING_SCOPE, { optional: true }),
+    inject(ElementRef<HTMLElement>).nativeElement,
+    inject(DestroyRef),
+  );
+}
 
 export interface HellFloatingInsetVars {
   readonly top: string;
@@ -87,6 +88,7 @@ export interface HellFloatingScopedInsetsOptions {
   readonly rootSelector: string;
   readonly variables: HellFloatingInsetVars;
   readonly styleTarget?: () => HTMLElement | null | undefined;
+  readonly styleTargets?: () => readonly (HTMLElement | null | undefined)[];
 }
 
 /**
@@ -102,7 +104,10 @@ export class HellFloatingScopedInsetsRuntime {
   constructor(private readonly options: HellFloatingScopedInsetsOptions) {}
 
   primeFromTrigger(trigger: HTMLElement): HTMLElement | null {
-    const root = hellFindFloatingScopeRoot(trigger, this.options.rootSelector);
+    return this.primeRoot(hellFindFloatingScopeRoot(trigger, this.options.rootSelector));
+  }
+
+  primeRoot(root: HTMLElement | null): HTMLElement | null {
     if (!root) {
       this.clear();
       return null;
@@ -128,25 +133,29 @@ export class HellFloatingScopedInsetsRuntime {
     const win = this.options.document.defaultView;
     if (!win) return;
 
-    const styles = this.styleTarget().style;
-    styles.setProperty(this.options.variables.top, `${Math.max(0, rect.top)}px`);
-    styles.setProperty(
-      this.options.variables.right,
-      `${Math.max(0, win.innerWidth - rect.right)}px`,
-    );
-    styles.setProperty(
-      this.options.variables.bottom,
-      `${Math.max(0, win.innerHeight - rect.bottom)}px`,
-    );
-    styles.setProperty(this.options.variables.left, `${Math.max(0, rect.left)}px`);
+    for (const target of this.styleTargets()) {
+      const styles = target.style;
+      styles.setProperty(this.options.variables.top, `${Math.max(0, rect.top)}px`);
+      styles.setProperty(
+        this.options.variables.right,
+        `${Math.max(0, win.innerWidth - rect.right)}px`,
+      );
+      styles.setProperty(
+        this.options.variables.bottom,
+        `${Math.max(0, win.innerHeight - rect.bottom)}px`,
+      );
+      styles.setProperty(this.options.variables.left, `${Math.max(0, rect.left)}px`);
+    }
   }
 
   clear(): void {
     this.clearListeners();
     this.activeScopeRoot = null;
 
-    const styles = this.styleTarget().style;
-    for (const variable of Object.values(this.options.variables)) styles.removeProperty(variable);
+    for (const target of this.styleTargets()) {
+      const styles = target.style;
+      for (const variable of Object.values(this.options.variables)) styles.removeProperty(variable);
+    }
   }
 
   private observeScopeRoot(root: HTMLElement): void {
@@ -170,8 +179,10 @@ export class HellFloatingScopedInsetsRuntime {
     win?.removeEventListener('resize', this.syncScope);
   }
 
-  private styleTarget(): HTMLElement {
-    return this.options.styleTarget?.() ?? this.options.document.documentElement;
+  private styleTargets(): readonly HTMLElement[] {
+    const targets = this.options.styleTargets?.() ?? [this.options.styleTarget?.()];
+    const concrete = targets.filter((target): target is HTMLElement => target instanceof HTMLElement);
+    return concrete.length ? concrete : [this.options.document.documentElement];
   }
 }
 
@@ -263,8 +274,8 @@ export interface HellFloatingDismissOptions {
   readonly root?: () => Node | null | undefined;
   /** Extra inside targets, such as trigger buttons or inline anchors. */
   readonly inside?: () => readonly (Node | null | undefined)[];
-  /** Portaled descendants registered by nested Hell overlay primitives. */
-  readonly scope?: HellOverlayScope | null | undefined;
+  /** Portaled descendants registered by nested Hell floating primitives. */
+  readonly scope?: HellFloatingScope | null | undefined;
   /** Document that owns the listeners; defaults to global `document`. */
   readonly ownerDocument?: () => Document | null | undefined;
   /** Listener gate. Inactive interactions ignore all document events. */
@@ -282,7 +293,7 @@ export interface HellFloatingInteractionOptions extends Omit<
   readonly surface: () => HTMLElement | null | undefined;
   readonly root?: () => Node | null | undefined;
   readonly inside?: () => readonly (Node | null | undefined)[];
-  readonly scope?: HellOverlayScope | null | undefined;
+  readonly scope?: HellFloatingScope | null | undefined;
   readonly ownerDocument?: () => Document | null | undefined;
   /** Return false when caller registers the surface through another owner. */
   readonly registerSurface?: () => boolean;
@@ -406,7 +417,7 @@ export class HellFloatingDismissController {
     targetOverride?: EventTarget | Node | null,
   ): HellDismissContext {
     const path = hellEventPath(event);
-    const target = hellOverlayTargetNode(targetOverride ?? event.target);
+    const target = hellFloatingTargetNode(targetOverride ?? event.target);
     return {
       event,
       target,
@@ -419,7 +430,7 @@ export class HellFloatingDismissController {
   }
 
   private isInsideEvent(event: Event): boolean {
-    return this.isInsideEventPath(hellEventPath(event), hellOverlayTargetNode(event.target));
+    return this.isInsideEventPath(hellEventPath(event), hellFloatingTargetNode(event.target));
   }
 
   private isInsideEventPath(path: readonly EventTarget[], target: Node | null): boolean {
@@ -430,7 +441,7 @@ export class HellFloatingDismissController {
   }
 
   private isInsideTarget(target: EventTarget | Node | null): boolean {
-    const node = hellOverlayTargetNode(target);
+    const node = hellFloatingTargetNode(target);
     if (!node) return false;
 
     const root = this.options.root?.();
@@ -440,7 +451,7 @@ export class HellFloatingDismissController {
       if (element?.contains(node)) return true;
     }
 
-    return this.options.scope?.containsOverlayTarget(node) ?? false;
+    return this.options.scope?.containsFloatingTarget(node) ?? false;
   }
 
   private isActive(): boolean {
@@ -485,7 +496,7 @@ export class HellFloatingInteractionController {
     const surface = this.options.surface();
     const shouldRegister = this.options.registerSurface?.() ?? true;
     if (surface && shouldRegister) {
-      hellRegisterOverlayElement(this.options.scope, surface, destroyRef);
+      hellRegisterFloatingElement(this.options.scope, surface, destroyRef);
     }
     this.dismissController.connect(destroyRef);
   }

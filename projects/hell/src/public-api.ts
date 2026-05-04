@@ -5,7 +5,7 @@
 // Core
 export * from './lib/core/types';
 export * from './lib/core/styleable';
-export * from './lib/core/overlay-scope';
+export * from './lib/core/floating-scope';
 export * from './lib/core/search';
 export * from './lib/core/resize-behavior';
 
@@ -51,7 +51,6 @@ export * from './lib/composites/resizable/resizable';
 export * from './lib/composites/split-view/split-view';
 export * from './lib/composites/app-shell/app-shell';
 export * from './lib/composites/toast/toast';
-export * from './lib/composites/omnibar/command-palette';
 export * from './lib/composites/omnibar/omnibar';
 
 // Heavy features live behind feature-specific Package Entry Points:

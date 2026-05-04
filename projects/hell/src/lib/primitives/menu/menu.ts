@@ -1,4 +1,4 @@
-import { DestroyRef, Directive, ElementRef, booleanAttribute, inject, input } from '@angular/core';
+import { Directive, inject } from '@angular/core';
 import type { Signal } from '@angular/core';
 import {
   NgpMenu,
@@ -7,7 +7,7 @@ import {
   NgpSubmenuTrigger,
   injectSubmenuTriggerState,
 } from 'ng-primitives/menu';
-import { HELL_FLOATING_SCOPE, hellRegisterFloatingElement } from '../../core/overlay-scope';
+import { hellRegisterFloatingHost } from '../../core/floating-scope';
 import { HellStyleable } from '../../core/styleable';
 
 @Directive({
@@ -68,12 +68,9 @@ export class HellMenu extends HellStyleable {
     optional: true,
   });
 
-  private readonly host = inject(ElementRef<HTMLElement>);
-  private readonly floatingScope = inject(HELL_FLOATING_SCOPE, { optional: true });
-
   constructor() {
     super();
-    hellRegisterFloatingElement(this.floatingScope, this.host.nativeElement, inject(DestroyRef));
+    hellRegisterFloatingHost();
   }
 }
 
