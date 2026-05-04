@@ -282,7 +282,14 @@ export class HellResizableHandle extends HellStyleable {
     },
     afterStart: () => this.resizable.markUserSized(),
     pair: () => this.adjacentPair(),
-    adapters: (pair) => this.adaptersFor(pair),
+    itemAdapter: () => {
+      const sizes = this.lockPanes();
+      return {
+        measure: (pane) => sizes.get(pane) ?? pane.measure(),
+        minSize: (pane) => pane.currentMinSize(),
+        setSize: (pane, size) => pane.setSize(size),
+      };
+    },
   });
 
   /** Lookup the panes immediately preceding and following this handle. */
@@ -315,22 +322,6 @@ export class HellResizableHandle extends HellStyleable {
     for (const pane of panes) sizes.set(pane, pane.measure());
     for (const pane of panes) pane.setSize(sizes.get(pane) ?? pane.measure());
     return sizes;
-  }
-
-  private adaptersFor(pair: { before: HellResizablePane; after: HellResizablePane }) {
-    const sizes = this.lockPanes();
-    return {
-      before: {
-        measure: () => sizes.get(pair.before) ?? pair.before.measure(),
-        minSize: () => pair.before.currentMinSize(),
-        setSize: (size: number) => pair.before.setSize(size),
-      },
-      after: {
-        measure: () => sizes.get(pair.after) ?? pair.after.measure(),
-        minSize: () => pair.after.currentMinSize(),
-        setSize: (size: number) => pair.after.setSize(size),
-      },
-    };
   }
 
   @HostListener('pointerdown', ['$event'])

@@ -139,7 +139,9 @@ describe('Hell data table directives', () => {
       bubbles: true,
       cancelable: true,
     });
-    byId<HTMLButtonElement>(fixture.nativeElement, 'name-resizer').dispatchEvent(key);
+    const resizer = byId<HTMLButtonElement>(fixture.nativeElement, 'name-resizer');
+    resizer.dispatchEvent(key);
+    fixture.detectChanges();
 
     expect(key.defaultPrevented).toBe(true);
     expect(host.widthEvents).toEqual([
@@ -148,6 +150,7 @@ describe('Hell data table directives', () => {
     ]);
     expect(name.style.getPropertyValue('--hell-table-col-width')).toBe('136px');
     expect(role.style.getPropertyValue('--hell-table-col-width')).toBe('64px');
+    expect(resizer.getAttribute('aria-valuenow')).toBe('68');
   });
 
   it('does nothing when the last header resizer has no neighbor', () => {

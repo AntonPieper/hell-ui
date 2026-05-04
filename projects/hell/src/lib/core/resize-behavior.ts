@@ -56,10 +56,18 @@ export interface HellResizePairAdapters {
   readonly after: HellResizeOperationAdapter;
 }
 
+export interface HellResizeItemAdapter<TItem> {
+  measure(item: TItem): number;
+  minSize(item: TItem): number;
+  setSize(item: TItem, size: number): void;
+  commitSize?(item: TItem, size: number): void;
+}
+
 export interface HellResizePairOperationOptions<TItem> {
   readonly pair: HellResizePair<TItem>;
   readonly orientation: HellResizeOrientation;
-  readonly adapters: (pair: HellResizePair<TItem>) => HellResizePairAdapters;
+  readonly adapters?: (pair: HellResizePair<TItem>) => HellResizePairAdapters;
+  readonly itemAdapter?: (pair: HellResizePair<TItem>) => HellResizeItemAdapter<TItem>;
   readonly startCoordinate?: number;
   readonly keyDelta?: number;
 }
@@ -69,7 +77,8 @@ export interface HellResizePairInteractionControllerOptions<
 > extends HellResizeInteractionControllerOptions {
   readonly orientation: () => HellResizeOrientation;
   readonly pair: () => HellResizePair<TItem> | null;
-  readonly adapters: (pair: HellResizePair<TItem>) => HellResizePairAdapters;
+  readonly adapters?: (pair: HellResizePair<TItem>) => HellResizePairAdapters;
+  readonly itemAdapter?: (pair: HellResizePair<TItem>) => HellResizeItemAdapter<TItem>;
   readonly beforeStart?: () => boolean;
   readonly afterStart?: () => void;
   readonly stopPropagation?: boolean;
@@ -152,9 +161,8 @@ export function hellResizePairByDelta(
   minA: number,
   minB: number,
 ): readonly [number, number] {
-  const sum = startA + startB;
-  const nextA = hellConstrainResizeValue(startA + delta, sum, minA, minB);
-  return [nextA, sum - nextA] as const;
+  const result = new HellResizeTransaction({ startA, startB, minA, minB }).byDelta(delta);
+  return [result.a, result.b] as const;
 }
 
 /** Pure resize model for one pair; independent from DOM, pointer events, or CSS. */
@@ -252,11 +260,33 @@ export class HellResizeOperation {
   }
 }
 
+export function hellCreateResizePairAdapters<TItem>(
+  pair: HellResizePair<TItem>,
+  adapter: HellResizeItemAdapter<TItem>,
+): HellResizePairAdapters {
+  return {
+    before: {
+      measure: () => adapter.measure(pair.before),
+      minSize: () => adapter.minSize(pair.before),
+      setSize: (size) => adapter.setSize(pair.before, size),
+      commitSize: adapter.commitSize
+        ? (size) => adapter.commitSize?.(pair.before, size)
+        : undefined,
+    },
+    after: {
+      measure: () => adapter.measure(pair.after),
+      minSize: () => adapter.minSize(pair.after),
+      setSize: (size) => adapter.setSize(pair.after, size),
+      commitSize: adapter.commitSize ? (size) => adapter.commitSize?.(pair.after, size) : undefined,
+    },
+  };
+}
+
 /** Build one pair resize operation from caller-owned layout adapters. */
 export function hellCreateResizePairOperation<TItem>(
   options: HellResizePairOperationOptions<TItem>,
 ): HellResizeOperation {
-  const adapters = options.adapters(options.pair);
+  const adapters = hellResolveResizePairAdapters(options);
   return new HellResizeOperation({
     before: adapters.before,
     after: adapters.after,
@@ -264,6 +294,16 @@ export function hellCreateResizePairOperation<TItem>(
     startCoordinate: options.startCoordinate,
     keyDelta: options.keyDelta,
   });
+}
+
+function hellResolveResizePairAdapters<TItem>(
+  options: HellResizePairOperationOptions<TItem>,
+): HellResizePairAdapters {
+  if (options.adapters) return options.adapters(options.pair);
+  if (options.itemAdapter) {
+    return hellCreateResizePairAdapters(options.pair, options.itemAdapter(options.pair));
+  }
+  throw new Error('Resize pair interaction requires adapters or an itemAdapter.');
 }
 
 /** Owns pointer/keyboard resize flow while callers provide pair lookup and layout adapters. */
@@ -312,6 +352,7 @@ export class HellResizePairInteractionController<TItem> {
       pair,
       orientation,
       adapters: this.options.adapters,
+      itemAdapter: this.options.itemAdapter,
       startCoordinate,
       keyDelta: this.options.keyDelta,
     });

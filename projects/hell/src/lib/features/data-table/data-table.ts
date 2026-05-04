@@ -272,6 +272,7 @@ export class HellTableCell extends HellStyleable {
   host: {
     '[class.hell-table-column-resizer]': '!unstyled()',
     '[attr.data-active]': 'dragging() ? "true" : null',
+    '[attr.aria-valuenow]': 'ariaValueNow()',
     role: 'separator',
     'aria-orientation': 'vertical',
     tabindex: '0',
@@ -284,6 +285,7 @@ export class HellTableColumnResizer extends HellStyleable {
   readonly minWidth = input(40, { transform: numberAttribute });
 
   protected readonly dragging = signal(false);
+  protected readonly ariaValueNow = signal<number | null>(null);
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly cell = inject(HellTableHeaderCell);
@@ -292,24 +294,17 @@ export class HellTableColumnResizer extends HellStyleable {
       handle: this.host,
       ownerWindow: () => this.host.ownerDocument.defaultView,
       onActiveChange: (active) => this.dragging.set(active),
+      onValueChange: (result) => this.ariaValueNow.set(result.ariaValueNow),
       orientation: () => 'horizontal',
       stopPropagation: true,
       pair: () => this.adjacentPair(),
-      adapters: (pair) => {
+      itemAdapter: () => {
         const min = this.minWidth();
         return {
-          before: {
-            measure: () => pair.before.measure(),
-            minSize: () => min,
-            setSize: (size) => pair.before.setLiveWidth(size),
-            commitSize: (size) => pair.before.commit(size),
-          },
-          after: {
-            measure: () => pair.after.measure(),
-            minSize: () => min,
-            setSize: (size) => pair.after.setLiveWidth(size),
-            commitSize: (size) => pair.after.commit(size),
-          },
+          measure: (cell) => cell.measure(),
+          minSize: () => min,
+          setSize: (cell, size) => cell.setLiveWidth(size),
+          commitSize: (cell, size) => cell.commit(size),
         };
       },
     },

@@ -4,6 +4,7 @@ import {
   HellResizePairInteractionController,
   HellResizeTransaction,
   hellConstrainResizeValue,
+  hellCreateResizePairAdapters,
   hellResizeCoordinate,
   hellFitResizeSizesToTotal,
   hellResizeIntentFromKey,
@@ -160,6 +161,29 @@ describe('Resize Behavior', () => {
     expect(commits).toEqual([64]);
     expect(before.committed).toBe(116);
     expect(after.committed).toBe(64);
+  });
+
+  it('creates pair adapters from one item adapter', () => {
+    const before = createResizeAdapter(100, 40);
+    const after = createResizeAdapter(80, 40);
+    const adapters = hellCreateResizePairAdapters(
+      { before, after },
+      {
+        measure: (item) => item.measure(),
+        minSize: (item) => item.minSize(),
+        setSize: (item, size) => item.setSize(size),
+        commitSize: (item, size) => item.commitSize(size),
+      },
+    );
+
+    expect(adapters.before.measure()).toBe(100);
+    expect(adapters.after.minSize()).toBe(40);
+
+    adapters.before.setSize(120);
+    adapters.after.commitSize?.(60);
+
+    expect(before.size).toBe(120);
+    expect(after.committed).toBe(60);
   });
 
   it('runs pair resize interaction through caller adapters', () => {
