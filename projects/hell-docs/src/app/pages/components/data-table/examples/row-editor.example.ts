@@ -29,15 +29,15 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
           <table hellTable>
             <thead hellTableHead>
               <tr>
-                <th hellTableHeaderCell [width]="72">
+                <th hellTableHeaderCell columnId="id" class="w-18">
                   ID
                   <span hellTableColumnResizer></span>
                 </th>
-                <th hellTableHeaderCell>
+                <th hellTableHeaderCell columnId="name">
                   Name
                   <span hellTableColumnResizer></span>
                 </th>
-                <th hellTableHeaderCell>
+                <th hellTableHeaderCell columnId="email">
                   Email
                   <span hellTableColumnResizer></span>
                 </th>

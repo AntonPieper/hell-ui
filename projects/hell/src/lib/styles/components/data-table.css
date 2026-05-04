@@ -13,8 +13,8 @@
     }
 
   /*
-   * Core table — uses table-layout: fixed so [width] on header cells
-   * controls column width, and border-collapse: separate so a sticky
+   * Core table — uses table-layout: fixed so resize CSS custom properties
+   * can control column width, and border-collapse: separate so a sticky
    * header cell doesn't lose its bottom border to the next row's
    * collapsed-border edge (which is what produced the gap above the
    * sticky header). Borders are drawn on individual cells instead.

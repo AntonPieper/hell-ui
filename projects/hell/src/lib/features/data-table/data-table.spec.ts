@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_TABLE_DIRECTIVES } from './data-table';
+import { HELL_TABLE_DIRECTIVES, type HellTableColumnResizeEvent } from './data-table';
 
 @Component({
   imports: [...HELL_TABLE_DIRECTIVES],
@@ -12,23 +12,27 @@ import { HELL_TABLE_DIRECTIVES } from './data-table';
           <th
             id="name"
             hellTableHeaderCell
+            columnId="name"
             [sortable]="sortable()"
             [sort]="sort()"
-            [width]="nameWidth()"
             (sortToggle)="sortEvents.push($event)"
-            (widthChange)="recordWidth('name', $event)"
           >
             Name
-            <button id="name-resizer" hellTableColumnResizer [minWidth]="minWidth()"></button>
+            <button
+              id="name-resizer"
+              hellTableColumnResizer
+              [minWidth]="minWidth()"
+              (columnResize)="resizeEvents.push($event)"
+            ></button>
           </th>
-          <th
-            id="role"
-            hellTableHeaderCell
-            [width]="roleWidth()"
-            (widthChange)="recordWidth('role', $event)"
-          >
+          <th id="role" hellTableHeaderCell columnId="role">
             Role
-            <button id="role-resizer" hellTableColumnResizer [minWidth]="minWidth()"></button>
+            <button
+              id="role-resizer"
+              hellTableColumnResizer
+              [minWidth]="minWidth()"
+              (columnResize)="resizeEvents.push($event)"
+            ></button>
           </th>
         </tr>
       </thead>
@@ -51,18 +55,12 @@ class DataTableHost {
   readonly selected = signal(false);
   readonly sortable = signal(false);
   readonly sort = signal<'asc' | 'desc' | null>(null);
-  readonly nameWidth = signal<number | null>(120);
-  readonly roleWidth = signal<number | null>(80);
   readonly minWidth = signal(40);
 
   readonly rowEvents: Array<MouseEvent | KeyboardEvent> = [];
   readonly cellEvents: MouseEvent[] = [];
   readonly sortEvents: Array<MouseEvent | KeyboardEvent> = [];
-  readonly widthEvents: Array<{ column: string; width: number }> = [];
-
-  recordWidth(column: string, width: number): void {
-    this.widthEvents.push({ column, width });
-  }
+  readonly resizeEvents: HellTableColumnResizeEvent[] = [];
 }
 
 describe('Hell data table directives', () => {
@@ -124,7 +122,7 @@ describe('Hell data table directives', () => {
     expect(host.sortEvents).toHaveLength(2);
   });
 
-  it('resizes adjacent header cells from the keyboard', () => {
+  it('resizes adjacent header cells from the keyboard and emits one transaction', () => {
     const fixture = TestBed.createComponent(DataTableHost);
     const host = fixture.componentInstance;
     fixture.detectChanges();
@@ -144,9 +142,12 @@ describe('Hell data table directives', () => {
     fixture.detectChanges();
 
     expect(key.defaultPrevented).toBe(true);
-    expect(host.widthEvents).toEqual([
-      { column: 'name', width: 136 },
-      { column: 'role', width: 64 },
+    expect(host.resizeEvents).toEqual([
+      {
+        before: { columnId: 'name', px: 136, share: 0.68 },
+        after: { columnId: 'role', px: 64, share: 0.32 },
+        totalPx: 200,
+      },
     ]);
     expect(name.style.getPropertyValue('--hell-table-col-width')).toBe('136px');
     expect(role.style.getPropertyValue('--hell-table-col-width')).toBe('64px');
@@ -163,7 +164,7 @@ describe('Hell data table directives', () => {
       new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
     );
 
-    expect(host.widthEvents).toEqual([]);
+    expect(host.resizeEvents).toEqual([]);
   });
 });
 

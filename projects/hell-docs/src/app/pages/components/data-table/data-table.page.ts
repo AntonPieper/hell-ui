@@ -74,16 +74,17 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
           <li>
             <code>th[hellTableHeaderCell]</code>: <code>[sortable]</code>,
             <code>[sort]</code> (<code>'asc' | 'desc' | null</code>) → <code>aria-sort</code> /
-            <code>data-sort</code>; emits <code>(sortToggle)</code>. <code>[width]</code> sets
-            initial column width.
+            <code>data-sort</code>; emits <code>(sortToggle)</code>. Add <code>columnId</code> when
+            pairing with a column resizer. Initial sizing belongs to your CSS/Tailwind.
           </li>
           <li>
             <code>td[hellTableCell]</code>: emits <code>(cellSelect)</code> on click for per-cell
             handlers.
           </li>
           <li>
-            <code>[hellTableColumnResizer]</code>: place inside a header cell. Drives column width
-            via pointer drag and arrow keys; emits <code>(widthChange)</code> on the parent cell.
+            <code>[hellTableColumnResizer]</code>: place inside a header cell with
+            <code>columnId</code>. Drives resize CSS custom properties via pointer drag and arrow
+            keys; emits one <code>(columnResize)</code> transaction containing both affected columns.
           </li>
         </ul>
 

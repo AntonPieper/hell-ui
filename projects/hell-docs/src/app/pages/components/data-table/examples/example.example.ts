@@ -374,9 +374,10 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                   <tr>
                     <th
                       hellTableHeaderCell
+                      columnId="id"
+                      class="w-20"
                       sortable
                       [sort]="tableSortKey() === 'id' ? order() : null"
-                      [width]="80"
                       (sortToggle)="toggleSort('id')"
                     >
                       ID
@@ -384,9 +385,10 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                     </th>
                     <th
                       hellTableHeaderCell
+                      columnId="name"
+                      class="w-45"
                       sortable
                       [sort]="tableSortKey() === 'name' ? order() : null"
-                      [width]="180"
                       (sortToggle)="toggleSort('name')"
                     >
                       Name
@@ -394,9 +396,10 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                     </th>
                     <th
                       hellTableHeaderCell
+                      columnId="email"
+                      class="w-65"
                       sortable
                       [sort]="tableSortKey() === 'email' ? order() : null"
-                      [width]="260"
                       (sortToggle)="toggleSort('email')"
                     >
                       Email
@@ -404,9 +407,10 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                     </th>
                     <th
                       hellTableHeaderCell
+                      columnId="role"
+                      class="w-35"
                       sortable
                       [sort]="tableSortKey() === 'role' ? order() : null"
-                      [width]="140"
                       (sortToggle)="toggleSort('role')"
                     >
                       Role
@@ -414,9 +418,10 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                     </th>
                     <th
                       hellTableHeaderCell
+                      columnId="assignee"
+                      class="w-45"
                       sortable
                       [sort]="tableSortKey() === 'assignee' ? order() : null"
-                      [width]="180"
                       (sortToggle)="toggleSort('assignee')"
                     >
                       Assignee

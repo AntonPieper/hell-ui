@@ -34,8 +34,8 @@ export class HellTableContainer extends HellStyleable {
 /**
  * Marks a `<table>` as a hell data table. Applies the host class with the
  * shared dense typography and border treatment, and switches the table to
- * a fixed layout so column widths from `[width]` on header cells are
- * honored. Pass `unstyled` to opt out of all class-based styling.
+ * a fixed layout so column resize CSS custom properties can be mapped by
+ * the stylesheet. Pass `unstyled` to opt out of all class-based styling.
  */
 @Directive({
   selector: 'table[hellTable]',
@@ -48,9 +48,55 @@ export class HellTable extends HellStyleable {
   readonly contentWidth = input(false, { transform: booleanAttribute });
 }
 
+export interface HellTableColumnResizeSide {
+  readonly columnId: string;
+  readonly px: number;
+  readonly share: number;
+}
+
+export interface HellTableColumnResizeEvent {
+  readonly before: HellTableColumnResizeSide;
+  readonly after: HellTableColumnResizeSide;
+  readonly totalPx: number;
+}
+
+class HellTableColumnResizeRuntime {
+  private readonly widths = signal<ReadonlyMap<string, number>>(new Map());
+
+  widthFor(columnId: string | null): number | null {
+    return columnId ? (this.widths().get(columnId) ?? null) : null;
+  }
+
+  setWidth(columnId: string, px: number): void {
+    this.widths.update((current) => new Map(current).set(columnId, px));
+  }
+
+  transactionEvent(
+    pair: HellTableColumnResizePair,
+    beforePx: number,
+    afterPx: number,
+  ): HellTableColumnResizeEvent | null {
+    const beforeId = pair.before.columnKey();
+    const afterId = pair.after.columnKey();
+    if (!beforeId || !afterId) return null;
+    const totalPx = beforePx + afterPx;
+    const share = (px: number) => (totalPx > 0 ? px / totalPx : 0);
+    return {
+      before: { columnId: beforeId, px: beforePx, share: share(beforePx) },
+      after: { columnId: afterId, px: afterPx, share: share(afterPx) },
+      totalPx,
+    };
+  }
+}
+
+export interface HellTableColumnResizePair {
+  readonly before: HellTableHeaderCell;
+  readonly after: HellTableHeaderCell;
+}
+
 /**
- * Header section. Tracks its child header cells so the column resizer
- * can find the cell immediately to the right of the one being dragged
+ * Header section. Tracks its child header cells so the Table Column Resize
+ * Runtime can find the cell immediately to the right of the one being dragged
  * and resize them as a pair (sum of the two widths is conserved).
  */
 @Directive({
@@ -61,6 +107,8 @@ export class HellTable extends HellStyleable {
   },
 })
 export class HellTableHead extends HellStyleable {
+  private readonly resizeRuntime = new HellTableColumnResizeRuntime();
+
   private readonly cells = new Set<HellTableHeaderCell>();
 
   register(c: HellTableHeaderCell) {
@@ -68,6 +116,22 @@ export class HellTableHead extends HellStyleable {
   }
   unregister(c: HellTableHeaderCell) {
     this.cells.delete(c);
+  }
+
+  widthFor(columnId: string | null): number | null {
+    return this.resizeRuntime.widthFor(columnId);
+  }
+
+  setColumnWidth(columnId: string, px: number): void {
+    this.resizeRuntime.setWidth(columnId, px);
+  }
+
+  columnResizeEvent(
+    pair: HellTableColumnResizePair,
+    beforePx: number,
+    afterPx: number,
+  ): HellTableColumnResizeEvent | null {
+    return this.resizeRuntime.transactionEvent(pair, beforePx, afterPx);
   }
 
   /** Find the cell immediately following `cell` within the same row. */
@@ -130,17 +194,15 @@ export class HellTableRow extends HellStyleable {
 }
 
 /**
- * Header cell directive. Owns optional sort affordance, optional column
- * width, and acts as the parent for `hellTableColumnResizer`. The
- * directive does not sort — it surfaces the current sort state through
- * `data-sort` / `aria-sort` and emits `(sortToggle)` when the cell is
- * activated. Sorting logic stays with the consumer.
+ * Header cell directive. Owns optional sort affordance and acts as the parent
+ * for `hellTableColumnResizer`. The directive does not sort — it surfaces the
+ * current sort state through `data-sort` / `aria-sort` and emits
+ * `(sortToggle)` when the cell is activated. Sorting logic stays with the
+ * consumer.
  *
- * Column width is applied through the `--hell-table-col-width` custom
- * property; the stylesheet maps that to the cell's `width`. Avoiding a
- * direct width style binding keeps the surface area limited to CSS
- * variables, which makes overrides composable with the rest of the
- * theme tokens.
+ * Initial column sizing belongs to consumer CSS/Tailwind. During resize, the
+ * Table Column Resize Runtime exposes `--hell-table-col-width` as a CSS custom
+ * property; the stylesheet decides how that variable affects layout.
  */
 @Directive({
   selector: 'th[hellTableHeaderCell]',
@@ -160,20 +222,15 @@ export class HellTableRow extends HellStyleable {
 export class HellTableHeaderCell extends HellStyleable {
   readonly sort = input<'asc' | 'desc' | null>(null);
   readonly sortable = input(false, { transform: booleanAttribute });
-  readonly width = input<number | null>(null);
+  readonly columnId = input<string | null>(null);
 
   readonly sortToggle = output<MouseEvent | KeyboardEvent>();
-  readonly widthChange = output<number>();
 
   readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   readonly head = inject(HellTableHead, { optional: true });
 
-  private readonly _liveWidth = signal<number | null>(null);
-
-  protected readonly effectiveWidth = computed(() => this._liveWidth() ?? this.width());
-
   protected readonly widthVar = computed(() => {
-    const w = this.effectiveWidth();
+    const w = this.head?.widthFor(this.columnId()) ?? null;
     return w == null ? null : `${w}px`;
   });
 
@@ -206,10 +263,14 @@ export class HellTableHeaderCell extends HellStyleable {
     this.sortToggle.emit(e as KeyboardEvent);
   }
 
+  columnKey(): string | null {
+    return this.columnId();
+  }
+
   /** Called by `HellTableColumnResizer` while the user is dragging. */
   setLiveWidth(px: number) {
-    this._liveWidth.set(px);
-    this.writeWidthVar(px);
+    const id = this.columnId();
+    if (id) this.head?.setColumnWidth(id, px);
   }
 
   /** Current measured width — used as the drag start anchor. */
@@ -219,13 +280,7 @@ export class HellTableHeaderCell extends HellStyleable {
 
   /** Final commit after pointerup or key step. */
   commit(px: number) {
-    this._liveWidth.set(px);
-    this.writeWidthVar(px);
-    this.widthChange.emit(px);
-  }
-
-  private writeWidthVar(px: number): void {
-    this.host.style.setProperty('--hell-table-col-width', `${px}px`);
+    this.setLiveWidth(px);
   }
 }
 
@@ -284,6 +339,8 @@ export class HellTableCell extends HellStyleable {
 export class HellTableColumnResizer extends HellStyleable {
   readonly minWidth = input(40, { transform: numberAttribute });
 
+  readonly columnResize = output<HellTableColumnResizeEvent>();
+
   protected readonly dragging = signal(false);
   protected readonly ariaValueNow = signal<number | null>(null);
 
@@ -295,6 +352,7 @@ export class HellTableColumnResizer extends HellStyleable {
       ownerWindow: () => this.host.ownerDocument.defaultView,
       onActiveChange: (active) => this.dragging.set(active),
       onValueChange: (result) => this.ariaValueNow.set(result.ariaValueNow),
+      onCommit: (result) => this.emitResize(result.a, result.b),
       orientation: () => 'horizontal',
       stopPropagation: true,
       pair: () => this.adjacentPair(),
@@ -310,10 +368,18 @@ export class HellTableColumnResizer extends HellStyleable {
     },
   );
 
-  private adjacentPair(): { before: HellTableHeaderCell; after: HellTableHeaderCell } | null {
+  private adjacentPair(): HellTableColumnResizePair | null {
     const cell = this.cell;
     const next = cell.head?.nextSibling(cell) ?? null;
-    return next ? { before: cell, after: next } : null;
+    if (!next || !cell.columnKey() || !next.columnKey()) return null;
+    return { before: cell, after: next };
+  }
+
+  private emitResize(beforePx: number, afterPx: number): void {
+    const pair = this.adjacentPair();
+    if (!pair) return;
+    const event = this.cell.head?.columnResizeEvent(pair, beforePx, afterPx);
+    if (event) this.columnResize.emit(event);
   }
 
   protected onPointerDown(e: PointerEvent) {
