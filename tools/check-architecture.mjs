@@ -21,46 +21,44 @@ console.log('Architecture checks passed.');
 function checkDocsExamples() {
   const catalogPath = join(root, 'projects/hell-docs/src/app/docs-catalog.ts');
   const catalog = readFile(catalogPath);
-  const routePaths = new Set(
-    [...catalog.matchAll(/routePath:\s*'([^']*)'/g)].map((match) =>
-      match[1] ? `/${match[1]}` : '/',
-    ),
-  );
+  const routePaths = catalogRoutePaths(catalog);
+  const examples = catalogExampleSeeds(catalog);
+  const pagesRoot = join(root, 'projects/hell-docs/src/app/pages');
 
-  const examples = [
-    ...catalog.matchAll(/\{\s*title:\s*'([^']+)',\s*detail:\s*'([^']+)'(?:,\s*terms:\s*'[^']+')?/g),
-  ]
-    .map((match) => ({
-      title: match[1],
-      detail: match[2],
-    }))
-    .filter((example) => example.detail.includes('/examples/'))
-    .map((example) => ({
-      ...example,
-      path: `/${example.detail.split('/examples/')[0]}`,
-    }));
+  checkDocsCatalogExampleSeam(catalog);
 
   const indexedDetails = new Set(examples.map((example) => example.detail));
-  const actualExamples = walk(join(root, 'projects/hell-docs/src/app/pages'))
+  const actualExamples = walk(pagesRoot)
     .filter((file) => file.endsWith('.example.ts'))
-    .map((file) => file.slice(join(root, 'projects/hell-docs/src/app/pages').length + 1));
+    .map((file) => file.slice(pagesRoot.length + 1));
   for (const detail of actualExamples) {
     if (!indexedDetails.has(detail)) failures.push(`Docs Example file is not indexed: ${detail}`);
   }
 
-  const seen = new Set();
+  const seenOwnerDetail = new Set();
+  const seenDetail = new Set();
   for (const example of examples) {
     const key = `${example.path}:${example.detail}`;
-    if (seen.has(key)) {
-      failures.push(`Duplicate Docs Example entry: ${key}`);
+    if (seenOwnerDetail.has(key)) failures.push(`Duplicate Docs Example entry: ${key}`);
+    seenOwnerDetail.add(key);
+
+    if (seenDetail.has(example.detail)) {
+      failures.push(`Duplicate Docs Example detail: ${example.detail}`);
     }
-    seen.add(key);
+    seenDetail.add(example.detail);
+
+    const detailRoute = docsExampleRouteFromDetail(example.detail, example.title);
+    if (detailRoute && detailRoute !== example.path) {
+      failures.push(
+        `Docs Example "${example.title}" is registered on ${example.path} but detail belongs to ${detailRoute}`,
+      );
+    }
 
     if (!routePaths.has(example.path)) {
       failures.push(`Docs Example "${example.title}" points at missing route ${example.path}`);
     }
 
-    const examplePath = join(root, 'projects/hell-docs/src/app/pages', example.detail);
+    const examplePath = join(pagesRoot, example.detail);
     if (!existsSync(examplePath)) {
       failures.push(`Docs Example "${example.title}" points at missing file ${example.detail}`);
       continue;
@@ -72,23 +70,113 @@ function checkDocsExamples() {
       continue;
     }
 
-    const pageSource = readFile(pagePath);
     const exampleSource = readFile(examplePath);
-    const stem = basename(example.detail, '.ts');
-    const relativeImport = `./examples/${stem}`;
-    const selector = exampleSource.match(/selector:\s*'([^']+)'/)?.[1] ?? null;
+    const pageSource = readFile(pagePath);
+    const meta = docsExampleComponentMeta(example, exampleSource);
+    if (!meta) continue;
 
-    if (!pageSource.includes(relativeImport)) {
-      failures.push(`Docs Example "${example.title}" is indexed but not imported by its page`);
+    checkDocsExamplePageBinding(example, pageSource, meta);
+  }
+}
+
+function catalogRoutePaths(catalog) {
+  return new Set(
+    [...catalog.matchAll(/routePath:\s*'([^']*)'/g)].map((match) =>
+      match[1] ? `/${match[1]}` : '/',
+    ),
+  );
+}
+
+function catalogExampleSeeds(catalog) {
+  const routes = [...catalog.matchAll(/routePath:\s*'([^']*)'/g)];
+  const examples = [];
+  for (let i = 0; i < routes.length; i++) {
+    const routePath = routes[i][1];
+    const path = routePath ? `/${routePath}` : '/';
+    const source = catalog.slice(routes[i].index, routes[i + 1]?.index ?? catalog.length);
+    for (const match of source.matchAll(/\{\s*title:\s*'([^']+)',\s*detail:\s*'([^']+)'/g)) {
+      if (!match[2].includes('/examples/')) continue;
+      examples.push({ title: match[1], detail: match[2], path });
     }
-    if (!pageSource.includes(`${stem}.ts?raw`)) {
-      failures.push(
-        `Docs Example "${example.title}" is indexed but its raw source is not imported`,
-      );
-    }
-    if (selector && !pageSource.includes(`<${selector}`)) {
-      failures.push(`Docs Example "${example.title}" is indexed but not rendered by its page`);
-    }
+  }
+  return examples;
+}
+
+function checkDocsCatalogExampleSeam(catalog) {
+  const staticExampleImport =
+    /(?:^|\n)\s*import\s+(?:[^'"]+\s+from\s+)?['"]\.\/pages\/[^'"]*\/examples\//;
+  const dynamicExampleImport = /import\(\s*['"]\.\/pages\/[^'"]*\/examples\//;
+  if (staticExampleImport.test(catalog) || dynamicExampleImport.test(catalog)) {
+    failures.push('Docs Catalog must not eagerly import Docs Example implementations');
+  }
+}
+
+function docsExampleRouteFromDetail(detail, title) {
+  if (detail.startsWith('/') || detail.includes('..')) {
+    failures.push(`Docs Example "${title}" has unsafe detail path ${detail}`);
+    return null;
+  }
+
+  const match = /^(.+)\/examples\/[^/]+\.example\.ts$/.exec(detail);
+  if (!match) {
+    failures.push(`Docs Example "${title}" detail must point at a .example.ts file: ${detail}`);
+    return null;
+  }
+
+  return `/${match[1]}`;
+}
+
+function docsExampleComponentMeta(example, source) {
+  const selector = source.match(/selector:\s*'([^']+)'/)?.[1] ?? null;
+  if (!selector) {
+    failures.push(`Docs Example "${example.title}" has no Angular selector in ${example.detail}`);
+    return null;
+  }
+
+  const className = source.match(/export\s+class\s+([A-Za-z0-9_]+)/)?.[1] ?? null;
+  if (!className) {
+    failures.push(`Docs Example "${example.title}" has no exported class in ${example.detail}`);
+    return null;
+  }
+
+  return { selector, className, stem: basename(example.detail, '.ts') };
+}
+
+function checkDocsExamplePageBinding(example, pageSource, meta) {
+  const stemPattern = escapeRegExp(meta.stem);
+  const classImport = new RegExp(
+    `import\\s+\\{[^}]*\\b${escapeRegExp(meta.className)}\\b[^}]*\\}\\s+from\\s+['"]\\.\\/examples\\/${stemPattern}['"]`,
+  );
+  if (!classImport.test(pageSource)) {
+    failures.push(`Docs Example "${example.title}" is indexed but not imported by its page`);
+  }
+
+  const rawImport = new RegExp(
+    `import\\s+([A-Za-z0-9_]+)\\s+from\\s+['"]\\.\\/examples\\/${stemPattern}\\.ts\\?raw['"][^;]*?with\\s*\\{[^}]*?loader:\\s*['"]text['"][^}]*?\\}\\s*;`,
+  ).exec(pageSource);
+  if (!rawImport) {
+    failures.push(
+      `Docs Example "${example.title}" is indexed but its raw source is not imported with loader: 'text'`,
+    );
+    return;
+  }
+
+  const codeField = new RegExp(
+    `readonly\\s+([A-Za-z0-9_]+)\\s*=\\s*${escapeRegExp(rawImport[1])}\\s*;`,
+  ).exec(pageSource)?.[1];
+  if (!codeField) {
+    failures.push(`Docs Example "${example.title}" raw source is not exposed through a code field`);
+    return;
+  }
+
+  const exampleTabs = pageSource.match(/<hd-example-tabs\b[\s\S]*?<\/hd-example-tabs>/g) ?? [];
+  const matchingTabs = exampleTabs.filter(
+    (block) => block.includes(`[code]="${codeField}"`) && block.includes(`<${meta.selector}`),
+  );
+  if (matchingTabs.length !== 1) {
+    failures.push(
+      `Docs Example "${example.title}" must bind ${codeField} and render <${meta.selector}> in exactly one hd-example-tabs block`,
+    );
   }
 }
 
@@ -321,6 +409,10 @@ function pagePathForRoute(routePath) {
 
 function exportPaths(source) {
   return [...source.matchAll(/export\s+\*\s+from\s+['"]([^'"]+)['"]/g)].map((match) => match[1]);
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function parseJsonWithComments(source) {
