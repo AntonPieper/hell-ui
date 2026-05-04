@@ -1,13 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 
+import { HellToastService, HellToaster } from './toast';
 import {
-  HellToastService,
-  HellToaster,
   hellToastFrontDistance,
   hellToastOffsetPx,
   hellToastOverflow,
   hellToastSnapshotExits,
-} from './toast';
+} from './toast-stack.runtime';
 
 describe('Toast Stack', () => {
   it('computes front distance, offset, overflow, and exit snapshots from stack data', () => {
@@ -86,6 +85,27 @@ describe('HellToastService', () => {
 
     expect(svc.toasts()).toMatchObject([{ id, removing: false }]);
 
+    svc.resumeAll();
+    vi.advanceTimersByTime(599);
+    expect(svc.toasts()).toMatchObject([{ id, removing: false }]);
+
+    vi.advanceTimersByTime(1);
+    expect(svc.toasts()).toMatchObject([{ id, removing: true }]);
+  });
+
+  it('keeps pause and resume idempotent', () => {
+    vi.useFakeTimers();
+    const svc = TestBed.inject(HellToastService);
+
+    const id = svc.show({ title: 'Uploading', duration: 1000 });
+    vi.advanceTimersByTime(400);
+    svc.pauseAll();
+    svc.pauseAll();
+    vi.advanceTimersByTime(1000);
+
+    expect(svc.toasts()).toMatchObject([{ id, removing: false }]);
+
+    svc.resumeAll();
     svc.resumeAll();
     vi.advanceTimersByTime(599);
     expect(svc.toasts()).toMatchObject([{ id, removing: false }]);

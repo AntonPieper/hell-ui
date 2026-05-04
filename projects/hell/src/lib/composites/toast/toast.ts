@@ -15,6 +15,15 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { HellStyleable } from '../../core/styleable';
+import {
+  hellToastFrontDistance,
+  hellToastHeightPx,
+  hellToastOffsetPx,
+  hellToastOverflow,
+  hellToastSnapshotExits,
+  hellToastStackSnapshotsEqual,
+  type HellToastStackSnapshot,
+} from './toast-stack.runtime';
 
 export type HellToastVariant = 'default' | 'success' | 'info' | 'warning' | 'danger';
 export type HellToastPosition =
@@ -61,121 +70,12 @@ interface ToastInternal extends Required<Omit<HellToastOptions, 'template' | 'ac
 
 const DEFAULT_DURATION = 4500;
 const EXIT_MS = 220;
-const TOAST_STACK_GAP = 12;
-const TOAST_FALLBACK_HEIGHT = 64;
 
-/** Minimal stack item shape used by the exported toast layout helpers. */
-export interface HellToastStackItem {
-  readonly id: number;
-  readonly removing: boolean;
-}
-
-/** Frozen position data captured when an exiting toast starts animating out. */
-export interface HellToastStackSnapshot {
-  readonly front: number;
-  readonly offset: string;
-}
-
-/** Count visible, non-removing toasts in front of an item in the stack. */
-export function hellToastFrontDistance(
-  list: readonly HellToastStackItem[],
-  item: HellToastStackItem,
-  exitSnapshot: ReadonlyMap<number, HellToastStackSnapshot> = new Map(),
-): number {
-  if (item.removing) return exitSnapshot.get(item.id)?.front ?? 0;
-  let n = 0;
-  for (let j = list.indexOf(item) + 1; j < list.length; j++) {
-    if (!list[j].removing) n++;
-  }
-  return n;
-}
-
-/** CSS pixel offset from the stack front, preserving exit snapshots while removing. */
-export function hellToastOffsetPx(
-  list: readonly HellToastStackItem[],
-  item: HellToastStackItem,
-  heights: ReadonlyMap<number, number>,
-  maxVisible: number,
-  exitSnapshot: ReadonlyMap<number, HellToastStackSnapshot> = new Map(),
-): string {
-  if (item.removing)
-    return exitSnapshot.get(item.id)?.offset ?? hellToastHeightPx(item.id, heights);
-  return hellToastLiveOffsetPx(list, item, heights, maxVisible);
-}
-
-/** Number of visible positions by which an item exceeds `maxVisible`. */
-export function hellToastOverflow(
-  list: readonly HellToastStackItem[],
-  item: HellToastStackItem,
-  maxVisible: number,
-  exitSnapshot: ReadonlyMap<number, HellToastStackSnapshot> = new Map(),
-): number {
-  return Math.max(0, hellToastFrontDistance(list, item, exitSnapshot) - (maxVisible - 1));
-}
-
-/** Measured toast height in CSS pixels, falling back before measurement exists. */
-export function hellToastHeightPx(id: number, heights: ReadonlyMap<number, number>): string {
-  return `${heights.get(id) ?? TOAST_FALLBACK_HEIGHT}px`;
-}
-
-/** Capture and retain removing-toast positions so exit animations do not jump. */
-export function hellToastSnapshotExits(
-  list: readonly HellToastStackItem[],
-  heights: ReadonlyMap<number, number>,
-  maxVisible: number,
-  current: ReadonlyMap<number, HellToastStackSnapshot>,
-): Map<number, HellToastStackSnapshot> {
-  const next = new Map(current);
-  for (let i = 0; i < list.length; i++) {
-    const item = list[i];
-    if (!item.removing || next.has(item.id)) continue;
-    next.set(item.id, {
-      front: list.length - 1 - i,
-      offset: hellToastLiveOffsetFromIndex(list, i, heights, maxVisible),
-    });
-  }
-  for (const id of [...next.keys()]) {
-    if (!list.some((item) => item.id === id)) next.delete(id);
-  }
-  return next;
-}
-
-function hellToastStackSnapshotsEqual(
-  a: ReadonlyMap<number, HellToastStackSnapshot>,
-  b: ReadonlyMap<number, HellToastStackSnapshot>,
-): boolean {
-  if (a.size !== b.size) return false;
-  for (const [id, snapshot] of a) {
-    const other = b.get(id);
-    if (!other || other.front !== snapshot.front || other.offset !== snapshot.offset) return false;
-  }
-  return true;
-}
-
-function hellToastLiveOffsetPx(
-  list: readonly HellToastStackItem[],
-  item: HellToastStackItem,
-  heights: ReadonlyMap<number, number>,
-  maxVisible: number,
-): string {
-  return hellToastLiveOffsetFromIndex(list, list.indexOf(item), heights, maxVisible);
-}
-
-function hellToastLiveOffsetFromIndex(
-  list: readonly HellToastStackItem[],
-  index: number,
-  heights: ReadonlyMap<number, number>,
-  maxVisible: number,
-): string {
-  let acc = 0;
-  let counted = 0;
-  for (let j = index + 1; j < list.length; j++) {
-    if (list[j].removing) continue;
-    if (counted >= maxVisible - 1) break;
-    acc += (heights.get(list[j].id) ?? TOAST_FALLBACK_HEIGHT) + TOAST_STACK_GAP;
-    counted++;
-  }
-  return `${acc}px`;
+interface ToastTimer {
+  readonly handle: ReturnType<typeof setTimeout> | null;
+  readonly remaining: number;
+  readonly startedAt: number;
+  readonly paused: boolean;
 }
 
 /**
@@ -186,10 +86,7 @@ function hellToastLiveOffsetFromIndex(
 @Injectable({ providedIn: 'root' })
 export class HellToastService {
   private nextId = 1;
-  private timers = new Map<
-    number,
-    { handle: ReturnType<typeof setTimeout>; remaining: number; startedAt: number }
-  >();
+  private timers = new Map<number, ToastTimer>();
 
   /** Reactive list of currently mounted toasts (oldest → newest). */
   readonly toasts = signal<ToastInternal[]>([]);
@@ -260,12 +157,14 @@ export class HellToastService {
   /** Pause auto-dismiss for every toast (used while the stack is hovered). */
   pauseAll(): void {
     for (const [id, t] of this.timers) {
-      clearTimeout(t.handle);
+      if (t.paused) continue;
+      if (t.handle) clearTimeout(t.handle);
       const elapsed = Date.now() - t.startedAt;
       this.timers.set(id, {
-        handle: 0 as unknown as ReturnType<typeof setTimeout>,
+        handle: null,
         remaining: Math.max(0, t.remaining - elapsed),
         startedAt: Date.now(),
+        paused: true,
       });
     }
   }
@@ -273,9 +172,13 @@ export class HellToastService {
   /** Resume auto-dismiss for every paused toast. */
   resumeAll(): void {
     for (const [id, t] of this.timers) {
-      if (t.remaining <= 0) continue;
+      if (!t.paused) continue;
+      if (t.remaining <= 0) {
+        this.dismiss(id);
+        continue;
+      }
       const handle = setTimeout(() => this.dismiss(id), t.remaining);
-      this.timers.set(id, { handle, remaining: t.remaining, startedAt: Date.now() });
+      this.timers.set(id, { handle, remaining: t.remaining, startedAt: Date.now(), paused: false });
     }
   }
 
@@ -283,13 +186,18 @@ export class HellToastService {
     this.clearTimer(t.id);
     if (t.duration <= 0) return;
     const handle = setTimeout(() => this.dismiss(t.id), t.duration);
-    this.timers.set(t.id, { handle, remaining: t.duration, startedAt: Date.now() });
+    this.timers.set(t.id, {
+      handle,
+      remaining: t.duration,
+      startedAt: Date.now(),
+      paused: false,
+    });
   }
 
   private clearTimer(id: number): void {
     const t = this.timers.get(id);
     if (!t) return;
-    clearTimeout(t.handle);
+    if (t.handle) clearTimeout(t.handle);
     this.timers.delete(id);
   }
 }
@@ -441,7 +349,7 @@ export class HellToaster extends HellStyleable {
   private readonly heights = signal(new Map<number, number>());
   /** Frozen layout for toasts that are currently exiting, so survivors can
    *  slide into the freed slot while the dismissed toast keeps its position. */
-  private readonly exitSnapshot = signal(new Map<number, { front: number; offset: string }>());
+  private readonly exitSnapshot = signal(new Map<number, HellToastStackSnapshot>());
   private ro: ResizeObserver | null = null;
   private observed = new WeakSet<Element>();
   /** Pending collapse handle. Re-entry cancels it so transient mouseleave
