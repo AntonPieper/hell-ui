@@ -28,7 +28,7 @@ function checkDocsExamples() {
   );
 
   const examples = [
-    ...catalog.matchAll(/\{\s*title:\s*'([^']+)',\s*detail:\s*'([^']+)',\s*terms:\s*'[^']+'/g),
+    ...catalog.matchAll(/\{\s*title:\s*'([^']+)',\s*detail:\s*'([^']+)'(?:,\s*terms:\s*'[^']+')?/g),
   ]
     .map((match) => ({
       title: match[1],
@@ -39,6 +39,14 @@ function checkDocsExamples() {
       ...example,
       path: `/${example.detail.split('/examples/')[0]}`,
     }));
+
+  const indexedDetails = new Set(examples.map((example) => example.detail));
+  const actualExamples = walk(join(root, 'projects/hell-docs/src/app/pages'))
+    .filter((file) => file.endsWith('.example.ts'))
+    .map((file) => file.slice(join(root, 'projects/hell-docs/src/app/pages').length + 1));
+  for (const detail of actualExamples) {
+    if (!indexedDetails.has(detail)) failures.push(`Docs Example file is not indexed: ${detail}`);
+  }
 
   const seen = new Set();
   for (const example of examples) {

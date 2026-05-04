@@ -80,6 +80,7 @@ import {
 } from 'hell';
 import {
   HD_DOCS_KIND_FILTER_LABEL,
+  HD_DOCS_KIND_FILTER_OPTIONS,
   HD_DOCS_KIND_LABEL,
   HD_DOCS_SECTIONS,
   hdBuildDocsSearchIndex,
@@ -380,6 +381,8 @@ export class App {
   protected readonly docsKindFilter = signal<DocsSearchKindFilter>('all');
   protected readonly docsSectionFilter = signal<string>('all');
   protected readonly docsSearchLimit = signal<8 | 20 | 40>(20);
+  protected readonly docsKindFilterOptions = HD_DOCS_KIND_FILTER_OPTIONS;
+  protected readonly docsKindFilterLabels = HD_DOCS_KIND_FILTER_LABEL;
   protected readonly docsSearchLimits = [8, 20, 40] as const;
   protected readonly docsMenuOpenTriggers: ('click' | 'enter' | 'arrowkey')[] = [
     'click',
@@ -440,7 +443,7 @@ export class App {
       this.docsSearchLimit() !== 20,
   );
   protected readonly docsSearchIndex = computed<readonly DocsSearchItem[]>(() =>
-    hdBuildDocsSearchIndex(this.sections),
+    hdBuildDocsSearchIndex(),
   );
 
   /**

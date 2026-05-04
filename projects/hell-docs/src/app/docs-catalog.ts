@@ -11,7 +11,7 @@ export interface DocsSearchSeed {
 interface DocsCatalogSearchSeed {
   readonly title: string;
   readonly detail: string;
-  readonly terms: string;
+  readonly terms?: string;
 }
 
 export interface DocsNavItem {
@@ -71,6 +71,13 @@ export const HD_DOCS_KIND_FILTER_LABEL: Record<DocsSearchKindFilter, string> = {
   all: 'All types',
   ...HD_DOCS_KIND_LABEL,
 };
+
+export const HD_DOCS_KIND_FILTER_OPTIONS: readonly DocsSearchKindFilter[] = [
+  'all',
+  'page',
+  'example',
+  'usage',
+];
 
 const HD_DOCS_KIND_ICON: Record<DocsSearchKind, string> = {
   page: 'faSolidBookOpen',
@@ -1341,59 +1348,69 @@ function docsCatalogSearchSeeds(kind: 'examples' | 'usages'): readonly DocsSearc
   return HD_DOCS_CATALOG_SECTIONS.flatMap((section) => {
     const sectionName = section.heading ?? 'Guides';
     return section.items.flatMap((item) =>
-      (item[kind] ?? []).map((seed) => ({
-        ...seed,
-        path: item.routePath ? `/${item.routePath}` : '/',
-        section: sectionName,
-      })),
+      (item[kind] ?? []).map((seed) => {
+        const path = item.routePath ? `/${item.routePath}` : '/';
+        return {
+          title: seed.title,
+          detail: seed.detail,
+          terms: docsCatalogSeedTerms(seed, item, sectionName, path),
+          path,
+          section: sectionName,
+        };
+      }),
     );
   });
 }
 
-export function hdBuildDocsSearchIndex(
-  sections: readonly DocsNavSection[] = HD_DOCS_SECTIONS,
-): readonly DocsSearchItem[] {
-  const pageItems = sections.flatMap((section) => {
+export function hdBuildDocsSearchIndex(): readonly DocsSearchItem[] {
+  const pageItems = HD_DOCS_CATALOG_SECTIONS.flatMap((section) => {
     const sectionName = section.heading ?? 'Guides';
-    return section.items.map((item) => ({
-      id: `page:${item.path}`,
-      kind: 'page' as const,
-      title: item.label,
-      path: item.path,
-      icon: item.icon,
-      section: sectionName,
-      detail: `${sectionName} page`,
-      haystack: searchHaystack(item.label, item.path, sectionName),
-    }));
+    return section.items.map((item) => {
+      const path = item.routePath ? `/${item.routePath}` : '/';
+      return {
+        id: `page:${path}`,
+        kind: 'page' as const,
+        title: item.label,
+        path,
+        icon: item.icon,
+        section: sectionName,
+        detail: `${sectionName} page`,
+        haystack: searchHaystack(item.label, path, sectionName),
+      };
+    });
   });
-  const exampleItems = HD_DOCS_EXAMPLES.map((item) => {
-    const section = hdDocsSectionForPath(item.path) ?? item.section;
-    return {
-      id: `example:${item.detail}`,
-      kind: 'example' as const,
-      title: item.title,
-      path: item.path,
-      icon: HD_DOCS_KIND_ICON.example,
-      section,
-      detail: item.detail,
-      haystack: searchHaystack(item.title, item.path, section, item.detail, item.terms),
-    };
-  });
-  const usageItems = HD_DOCS_CODE_USAGES.map((item) => {
-    const section = hdDocsSectionForPath(item.path) ?? item.section;
-    return {
-      id: `usage:${item.title}`,
-      kind: 'usage' as const,
-      title: item.title,
-      path: item.path,
-      icon: HD_DOCS_KIND_ICON.usage,
-      section,
-      detail: item.detail,
-      haystack: searchHaystack(item.title, item.path, section, item.detail, item.terms),
-    };
-  });
+  const exampleItems = docsSearchItemsFor('example', HD_DOCS_EXAMPLES);
+  const usageItems = docsSearchItemsFor('usage', HD_DOCS_CODE_USAGES);
 
   return [...pageItems, ...exampleItems, ...usageItems];
+}
+
+function docsSearchItemsFor(
+  kind: 'example' | 'usage',
+  seeds: readonly DocsSearchSeed[],
+): readonly DocsSearchItem[] {
+  return seeds.map((item) => {
+    const section = hdDocsSectionForPath(item.path) ?? item.section;
+    return {
+      id: `${kind}:${kind === 'usage' ? item.title : item.detail}`,
+      kind,
+      title: item.title,
+      path: item.path,
+      icon: HD_DOCS_KIND_ICON[kind],
+      section,
+      detail: item.detail,
+      haystack: searchHaystack(item.title, item.path, section, item.detail, item.terms),
+    };
+  });
+}
+
+function docsCatalogSeedTerms(
+  seed: DocsCatalogSearchSeed,
+  item: DocsCatalogItem,
+  section: string,
+  path: string,
+): string {
+  return searchHaystack(seed.terms ?? '', seed.title, seed.detail, item.label, path, section);
 }
 
 function searchHaystack(...parts: readonly string[]): string {

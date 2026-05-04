@@ -103,14 +103,14 @@
 
       <ng-template #docsKindMenu>
         <div hellMenu>
-          @for (kind of ['all', 'page', 'example', 'usage']; track kind) {
-            <button hellMenuItem type="button" (click)="setDocsKindFilter($any(kind))">
+          @for (kind of docsKindFilterOptions; track kind) {
+            <button hellMenuItem type="button" (click)="setDocsKindFilter(kind)">
               @if (docsKindFilter() === kind) {
                 <hell-icon hellMenuItemIcon name="faSolidCheck" />
               } @else {
                 <span hellMenuItemIcon></span>
               }
-              <span>{{ kind === 'all' ? 'All types' : kind === 'page' ? 'Pages' : kind === 'example' ? 'Examples' : 'Code usage' }}</span>
+              <span>{{ docsKindFilterLabels[kind] }}</span>
             </button>
           }
         </div>
@@ -187,7 +187,10 @@
       (valueChange)="onPaletteChange($event)"
       aria-label="Theme"
     >
-      <span class="hd-palette-swatch" [style.--hd-palette-swatch-color]="currentPaletteSwatch()"></span>
+      <span
+        class="hd-palette-swatch"
+        [style.--hd-palette-swatch-color]="currentPaletteSwatch()"
+      ></span>
       <span hellSelectValue>{{ currentTheme().label }}</span>
       <div *hellSelectPortal hellSelectDropdown class="hd-palette-dropdown">
         @for (option of themes; track option.id) {
