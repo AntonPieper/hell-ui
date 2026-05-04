@@ -1,11 +1,6 @@
 <div hellAppShell #shell="hellAppShell">
   <header hellAppTopbar>
-    <button
-      hellSidenavToggle
-      appearance="shell"
-      type="button"
-      [attr.aria-label]="shell.isSidenavCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
-    ></button>
+    <button hellSidenavToggle appearance="shell" type="button"></button>
     <a class="hd-brand" routerLink="/" aria-label="Hell UI docs home">
       <span class="hd-brand-mark" aria-hidden="true"></span>
       <strong class="hd-brand-name">hell</strong>

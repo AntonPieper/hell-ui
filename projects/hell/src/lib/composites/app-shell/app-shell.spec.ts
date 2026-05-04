@@ -7,7 +7,10 @@ import { HELL_APP_SHELL_DIRECTIVES } from './app-shell';
   imports: [...HELL_APP_SHELL_DIRECTIVES],
   template: `
     <div hellAppShell #shell="hellAppShell">
-      <nav hellAppSidenav [collapsed]="sidenavCollapsed()">
+      <header hellAppTopbar>
+        <button id="sidenav-toggle" hellSidenavToggle type="button"></button>
+      </header>
+      <nav hellAppSidenav>
         <div id="nav-section" hellNavSection>
           <button id="nav-section-toggle" hellNavSectionToggle type="button">Settings</button>
           <div id="nav-section-items" hellNavSectionItems>
@@ -48,7 +51,6 @@ import { HELL_APP_SHELL_DIRECTIVES } from './app-shell';
   `,
 })
 class TestHost {
-  readonly sidenavCollapsed = signal(false);
   readonly controlledNavSectionCollapsed = signal(false);
   readonly collapsedEvents: boolean[] = [];
 }
@@ -58,6 +60,24 @@ describe('HellAppShell secondary panel', () => {
     await TestBed.configureTestingModule({
       imports: [TestHost],
     }).compileComponents();
+  });
+
+  it('owns sidenav toggle labels in the default case', () => {
+    const fixture = TestBed.createComponent(TestHost);
+    fixture.detectChanges();
+
+    const toggle = query<HTMLButtonElement>(fixture.nativeElement, '#sidenav-toggle');
+    const sidenav = query(fixture.nativeElement, 'nav');
+
+    expect(toggle.getAttribute('aria-label')).toBe('Collapse sidebar');
+    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(sidenav.getAttribute('data-collapsed')).toBe('true');
+    expect(toggle.getAttribute('aria-label')).toBe('Expand sidebar');
+    expect(toggle.getAttribute('aria-pressed')).toBe('true');
   });
 
   it('owns nav section classes and collapsed attributes', () => {
@@ -88,7 +108,7 @@ describe('HellAppShell secondary panel', () => {
     expect(items.getAttribute('aria-hidden')).toBe('true');
     expect(items.hasAttribute('inert')).toBe(true);
 
-    host.sidenavCollapsed.set(true);
+    query<HTMLButtonElement>(fixture.nativeElement, '#sidenav-toggle').click();
     fixture.detectChanges();
 
     expect(items.getAttribute('aria-hidden')).toBeNull();

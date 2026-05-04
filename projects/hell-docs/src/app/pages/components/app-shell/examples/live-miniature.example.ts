@@ -24,18 +24,9 @@ const HD_APP_SHELL_PAGE_ICONS = {
   imports: [...HELL_APP_SHELL_DIRECTIVES, HellButton, HellIcon],
   providers: [provideIcons(HD_APP_SHELL_PAGE_ICONS)],
   template: `
-    <div
-      hellAppShell
-      #shell="hellAppShell"
-      class="h-96 overflow-hidden rounded-lg border border-hell-border"
-    >
+    <div hellAppShell class="h-96 overflow-hidden rounded-lg border border-hell-border">
       <header hellAppTopbar class="hd-surface-elevated">
-        <button
-          hellSidenavToggle
-          appearance="shell"
-          type="button"
-          [attr.aria-label]="shell.isSidenavCollapsed() ? 'Expand sidenav' : 'Collapse sidenav'"
-        ></button>
+        <button hellSidenavToggle appearance="shell" type="button"></button>
         <strong>Acme Console</strong>
       </header>
 
