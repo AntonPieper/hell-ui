@@ -53,10 +53,19 @@ A public import path exposed by the `hell` package, including the root entry poi
 The Package Entry Point policy where the root `hell` import stays convenient for core, primitives, and composites, while heavier features stay behind feature-specific Package Entry Points.
 
 **Floating Dismissal**
-The listener-driven part of a Floating Interaction that decides when outside pointer, outside focus, or Escape should close a surface, while preserving consumer control over those rules.
+The listener-driven part of a Floating Interaction that decides when outside pointer, outside focus, Escape, or caller-defined events should close a surface. The low-level module has no hidden default and does not depend on a closed reason enum. Each primitive or Composite composes explicit pure matcher dismissal rules such as library-provided `hellOutsideClick` rules or caller-defined rules. A rule returns a fixed dismiss decision or no match; composition functions such as `hellDismissOn`, `hellGuardDismiss`, and `hellWithDismissEffect` return the same rule type. The core module consumes only fixed decision effects such as preventDefault, stopPropagation, or focus restoration; it does not consume generic caller-defined cause shapes.
 
 **Resize Transaction**
 The layout-agnostic pointer or keyboard resize operation that tracks start sizes, deltas, minimums, commits, and cancellation separately from the Adapter that reads or writes DOM layout.
 
 **PDF Adapter**
 A swappable Adapter behind the PDF Runtime seam for browser, pdf.js, worker, print, and download concerns that may change during pdf.js upgrades.
+
+**Toast Stack**
+The lifetime, pause/resume, collapse, exit animation, measuring, ordering, and layout policy behind rendered toasts, separate from the visual Adapter that writes DOM and CSS variables.
+
+**Code Editor Runtime**
+The editor lifecycle behind the code editor Feature: bootstrapping, value synchronization, extension updates, read-only policy, selection/history preservation, theme ownership, and cleanup.
+
+**Typed Value Input**
+The draft, parse, format, validation, commit, external-value synchronization, and picker coordination shared by text-backed value Composites such as date input and time input.
