@@ -4,13 +4,13 @@ import {
   getNextZoomStep,
   getPreviousZoomStep,
   getZoomOrigin,
-  normalizeZoomEventValue,
 } from './pdf-viewer.utils';
 import {
   HellPdfJsRuntimeAdapter,
+  type HellPdfDocumentHandle,
   type HellPdfRuntimeAdapter,
-  type HellPdfRuntimeBundle,
   type HellPdfPrintSession,
+  type HellPdfViewerSession,
 } from './pdf-viewer.adapter';
 
 export type HellPdfSource = string | URL | ArrayBuffer;
@@ -189,13 +189,8 @@ export class HellPdfViewerInteractionScope {
 }
 
 export class HellPdfRuntime implements HellPdfRuntimePort {
-  private pdfjs: any = null;
-  private viewer: any = null;
-  private linkService: any = null;
-  private findController: any = null;
-  private eventBus: any = null;
-  private doc: any = null;
-  private bundle: HellPdfRuntimeBundle | null = null;
+  private session: HellPdfViewerSession | null = null;
+  private doc: HellPdfDocumentHandle | null = null;
   private container: HTMLDivElement | null = null;
   private containerEventCleanup: (() => void) | null = null;
   private readonly renderedThumbs = new Set<number>();
@@ -212,29 +207,29 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   }
 
   get currentScale(): number {
-    return this.viewer?.currentScale ?? 1;
+    return this.session?.currentScale ?? 1;
   }
 
   async bootstrap(container: HTMLDivElement, handlers: HellPdfRuntimeHandlers): Promise<void> {
-    if (this.viewer) return;
+    if (this.session) return;
 
     this.container = container;
     this.handlers = handlers;
 
-    const bundle = await this.adapter.createViewer(container);
+    this.session = await this.adapter.createViewer(container, {
+      initialPage: () => this.initialPage,
+      initialZoom: () => this.initialZoom,
+      onPageChange: (page) => this.handlers?.onPageChange(page),
+      onZoomChange: (displayValue, emittedValue) =>
+        this.handlers?.onZoomChange(displayValue, emittedValue),
+      onPagesReady: () => this.handlers?.onPagesReady(),
+      onFindState: (state) => this.handlers?.onFindState(state),
+    });
     this.installContainerInteractions(container);
-    this.installEventHandlers(bundle.eventBus, bundle.viewer, bundle.findController);
-
-    this.bundle = bundle;
-    this.pdfjs = bundle.pdfjs;
-    this.viewer = bundle.viewer;
-    this.linkService = bundle.linkService;
-    this.findController = bundle.findController;
-    this.eventBus = bundle.eventBus;
   }
 
   async loadDocument(src: HellPdfSource, options: HellPdfLoadOptions): Promise<void> {
-    if (!this.bundle || !this.pdfjs || !this.viewer || !this.linkService || !this.findController) {
+    if (!this.session) {
       throw new Error('PDF runtime must be bootstrapped before loading a document.');
     }
 
@@ -244,8 +239,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     this.clearActiveDocument();
     this.renderedThumbs.clear();
 
-    const loadingTask = this.adapter.getDocument(this.bundle, src);
-    const doc = await loadingTask.promise;
+    const doc = await this.adapter.loadDocument(this.session, src);
     if (token !== this.loadToken) {
       try {
         doc.destroy();
@@ -257,9 +251,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
 
     this.doc = doc;
     options.onLoaded(doc.numPages);
-    this.viewer.setDocument(doc);
-    this.linkService.setDocument(doc, null);
-    this.findController.setDocument(doc);
+    this.session.setDocument(doc);
   }
 
   cleanup(): void {
@@ -268,55 +260,39 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     this.containerEventCleanup = null;
     this.clearPrintSession();
     this.clearActiveDocument();
-    this.viewer?.cleanup?.();
-    this.viewer = null;
-    this.linkService = null;
-    this.findController = null;
-    this.eventBus = null;
-    this.pdfjs = null;
+    this.session?.cleanup();
+    this.session = null;
     this.handlers = null;
     this.container = null;
-    this.bundle?.destroy();
-    this.bundle = null;
   }
 
   goTo(page: number): void {
-    if (!this.viewer) return;
+    if (!this.session) return;
 
     const totalPages = this.doc?.numPages ?? 1;
-    this.viewer.currentPageNumber = Math.min(Math.max(page, 1), totalPages);
+    this.session.setPage(page, totalPages);
   }
 
   zoomIn(): void {
-    if (!this.viewer) return;
+    if (!this.session) return;
     this.setNumericZoom(getNextZoomStep(this.currentScale));
   }
 
   zoomOut(): void {
-    if (!this.viewer) return;
+    if (!this.session) return;
     this.setNumericZoom(getPreviousZoomStep(this.currentScale));
   }
 
   setZoomValue(value: string): void {
-    if (!this.viewer) return;
-    this.viewer.currentScaleValue = value;
+    this.session?.setZoomValue(value);
   }
 
   dispatchFind(request: HellPdfFindRequest): void {
-    this.eventBus?.dispatch('find', {
-      source: request.source,
-      type: request.type,
-      query: request.query,
-      caseSensitive: false,
-      entireWord: false,
-      highlightAll: true,
-      findPrevious: request.findPrevious,
-      matchDiacritics: false,
-    });
+    this.session?.dispatchFind(request);
   }
 
   closeFind(source: unknown): void {
-    this.eventBus?.dispatch('findbarclose', { source });
+    this.session?.closeFind(source);
   }
 
   download(
@@ -357,7 +333,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     canvases: readonly HTMLCanvasElement[],
     shouldContinue: () => boolean,
   ): Promise<void> {
-    if (!this.doc || !shouldContinue()) return;
+    if (!this.doc || !this.session || !shouldContinue()) return;
 
     for (const canvas of canvases) {
       if (!shouldContinue()) return;
@@ -366,50 +342,11 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
       this.renderedThumbs.add(n);
 
       try {
-        const page = await this.doc.getPage(n);
-        const baseViewport = page.getViewport({ scale: 1 });
-        const targetW = 120;
-        const scale = targetW / baseViewport.width;
-        const dpr = window.devicePixelRatio || 1;
-        const viewport = page.getViewport({ scale: scale * dpr });
-        canvas.width = Math.floor(viewport.width);
-        canvas.height = Math.floor(viewport.height);
-        canvas.style.width = `${Math.floor(viewport.width / dpr)}px`;
-        canvas.style.height = `${Math.floor(viewport.height / dpr)}px`;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) continue;
-        await page.render({ canvasContext: ctx, viewport }).promise;
+        await this.session.renderThumbnail(this.doc, n, canvas);
       } catch {
         this.renderedThumbs.delete(n);
       }
     }
-  }
-
-  private installEventHandlers(eventBus: any, pdfViewer: any, findController: any): void {
-    eventBus.on('pagechanging', (e: any) => {
-      this.handlers?.onPageChange(e.pageNumber);
-    });
-    eventBus.on('scalechanging', (e: any) => {
-      const scale = typeof e.scale === 'number' ? e.scale : 1;
-      this.handlers?.onZoomChange(
-        normalizeZoomEventValue(e.presetValue, scale),
-        e.presetValue ?? scale,
-      );
-    });
-    eventBus.on('pagesinit', () => {
-      pdfViewer.currentScaleValue = String(this.initialZoom);
-      if (this.initialPage > 1) pdfViewer.currentPageNumber = this.initialPage;
-      this.handlers?.onPagesReady();
-    });
-    eventBus.on('updatefindcontrolstate', (e: any) => {
-      this.handlers?.onFindState(this.toFindState(e, findController));
-    });
-    eventBus.on('updatefindmatchescount', (e: any) => {
-      this.handlers?.onFindState({
-        current: e.matchesCount?.current ?? 0,
-        total: e.matchesCount?.total ?? 0,
-      });
-    });
   }
 
   private installContainerInteractions(container: HTMLDivElement): void {
@@ -424,7 +361,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   }
 
   private onWheelZoom(event: WheelEvent): void {
-    if (!this.viewer || !this.container || !event.ctrlKey) return;
+    if (!this.session || !this.container || !event.ctrlKey) return;
 
     const scaleFactor = getCtrlWheelScaleFactor(event);
     if (!Number.isFinite(scaleFactor) || scaleFactor <= 0 || scaleFactor === 1) return;
@@ -434,7 +371,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   }
 
   private setNumericZoom(scale: number, origin?: [number, number]): void {
-    if (!this.viewer || !this.container) return;
+    if (!this.session || !this.container) return;
 
     const currentScale = this.currentScale;
     const targetScale = clampZoomScale(scale);
@@ -446,7 +383,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     const previousScrollTop = this.container.scrollTop;
     const zoomRatio = targetScale / currentScale;
 
-    this.viewer.currentScale = targetScale;
+    this.session.setNumericZoom(targetScale);
     this.container.scrollLeft = (previousScrollLeft + localX) * zoomRatio - localX;
     this.container.scrollTop = (previousScrollTop + localY) * zoomRatio - localY;
   }
@@ -457,9 +394,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   }
 
   private clearActiveDocument(): void {
-    this.viewer?.setDocument?.(null);
-    this.linkService?.setDocument?.(null);
-    this.findController?.setDocument?.(null);
+    this.session?.setDocument(null);
 
     const doc = this.doc;
     this.doc = null;
@@ -469,37 +404,6 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
       doc.destroy();
     } catch {
       /* ignore */
-    }
-  }
-
-  private toFindState(
-    event: { state: number; matchesCount?: { current?: number; total?: number } },
-    findController: any,
-  ) {
-    const state = event.matchesCount
-      ? {
-          current: event.matchesCount.current ?? 0,
-          total: event.matchesCount.total ?? 0,
-        }
-      : {};
-    const FindState = (findController?.constructor as any)?.FindState ?? {
-      FOUND: 0,
-      NOT_FOUND: 1,
-      WRAPPED: 2,
-      PENDING: 3,
-    };
-
-    switch (event.state) {
-      case FindState.FOUND:
-        return { ...state, status: 'found' as const };
-      case FindState.NOT_FOUND:
-        return { ...state, status: 'not-found' as const };
-      case FindState.WRAPPED:
-        return { ...state, status: 'wrapped' as const };
-      case FindState.PENDING:
-        return { ...state, status: 'pending' as const };
-      default:
-        return state;
     }
   }
 }

@@ -1,12 +1,15 @@
 import {
   HellPdfRuntime,
   HellPdfViewerInteractionScope,
+  type HellPdfRuntimeHandlers,
   type HellPdfSource,
 } from './pdf-viewer.runtime';
 import type {
+  HellPdfDocumentHandle,
   HellPdfPrintSession,
   HellPdfRuntimeAdapter,
-  HellPdfRuntimeBundle,
+  HellPdfViewerSession,
+  HellPdfViewerSessionHandlers,
 } from './pdf-viewer.adapter';
 
 describe('PDF Runtime', () => {
@@ -15,12 +18,9 @@ describe('PDF Runtime', () => {
       cleanup: vi.fn(),
       print: vi.fn().mockResolvedValue(undefined),
     };
-    const adapter: HellPdfRuntimeAdapter = {
-      createViewer: vi.fn(async () => null as unknown as HellPdfRuntimeBundle),
-      getDocument: vi.fn(),
-      download: vi.fn(async () => undefined),
-      createPrintSession: vi.fn(async () => printSession),
-    };
+    const adapter = new FakePdfAdapter();
+    adapter.download = vi.fn(async () => undefined);
+    adapter.createPrintSession = vi.fn(async () => printSession);
     const runtime = new HellPdfRuntime(adapter);
     const source: HellPdfSource = 'document.pdf';
 
@@ -40,12 +40,8 @@ describe('PDF Runtime', () => {
       cleanup: vi.fn(),
       print: vi.fn().mockResolvedValue(undefined),
     };
-    const adapter: HellPdfRuntimeAdapter = {
-      createViewer: vi.fn(async () => null as unknown as HellPdfRuntimeBundle),
-      getDocument: vi.fn(),
-      download: vi.fn(async () => undefined),
-      createPrintSession: vi.fn(async () => printSession),
-    };
+    const adapter = new FakePdfAdapter();
+    adapter.createPrintSession = vi.fn(async () => printSession);
     const runtime = new HellPdfRuntime(adapter);
 
     await runtime.print('document.pdf');
@@ -61,17 +57,67 @@ describe('PDF Runtime', () => {
       cleanup: vi.fn(),
       print: vi.fn().mockRejectedValue(new Error('blocked')),
     };
-    const adapter: HellPdfRuntimeAdapter = {
-      createViewer: vi.fn(async () => null as unknown as HellPdfRuntimeBundle),
-      getDocument: vi.fn(),
-      download: vi.fn(async () => undefined),
-      createPrintSession: vi.fn(async () => printSession),
-    };
+    const adapter = new FakePdfAdapter();
+    adapter.createPrintSession = vi.fn(async () => printSession);
     const runtime = new HellPdfRuntime(adapter);
 
     await expect(runtime.print('document.pdf')).rejects.toThrow('blocked');
 
     expect(printSession.cleanup).toHaveBeenCalled();
+  });
+
+  it('uses an adversarial PDF Adapter to ignore stale document loads', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = document.createElement('div') as HTMLDivElement;
+    await runtime.bootstrap(container, createRuntimeHandlers());
+
+    const first = deferred<HellPdfDocumentHandle>();
+    const second = deferred<HellPdfDocumentHandle>();
+    const firstDoc = fakeDocument(1);
+    const secondDoc = fakeDocument(2);
+    adapter.loadQueue.push(first.promise, second.promise);
+
+    const firstLoad = runtime.loadDocument('first.pdf', {
+      initialPage: 1,
+      initialZoom: 'auto',
+      onLoaded: vi.fn(),
+    });
+    const onLoaded = vi.fn();
+    const secondLoad = runtime.loadDocument('second.pdf', {
+      initialPage: 2,
+      initialZoom: 'page-width',
+      onLoaded,
+    });
+
+    second.resolve(secondDoc);
+    await secondLoad;
+    first.resolve(firstDoc);
+    await firstLoad;
+
+    expect(firstDoc.destroy).toHaveBeenCalledOnce();
+    expect(secondDoc.destroy).not.toHaveBeenCalled();
+    expect(adapter.session.document).toBe(secondDoc);
+    expect(onLoaded).toHaveBeenCalledWith(2);
+  });
+
+  it('keeps thumbnails behind the PDF Adapter seam', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    await runtime.bootstrap(document.createElement('div') as HTMLDivElement, createRuntimeHandlers());
+    const doc = fakeDocument(3);
+    adapter.loadQueue.push(Promise.resolve(doc));
+    await runtime.loadDocument('thumbs.pdf', {
+      initialPage: 1,
+      initialZoom: 'auto',
+      onLoaded: vi.fn(),
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.dataset['page'] = '2';
+    await runtime.renderThumbs([canvas], () => true);
+
+    expect(adapter.session.renderThumbnail).toHaveBeenCalledWith(doc, 2, canvas);
   });
 
   it('keeps global PDF shortcuts scoped to an active viewer', () => {
@@ -117,6 +163,51 @@ describe('PDF Runtime', () => {
   });
 });
 
+class FakePdfAdapter implements HellPdfRuntimeAdapter {
+  readonly session = new FakePdfSession();
+  readonly loadQueue: Promise<HellPdfDocumentHandle>[] = [];
+
+  createViewer = vi.fn(
+    async (_container: HTMLDivElement, handlers: HellPdfViewerSessionHandlers) => {
+      this.session.handlers = handlers;
+      return this.session;
+    },
+  );
+
+  loadDocument = vi.fn(async () => {
+    const next = this.loadQueue.shift();
+    if (!next) throw new Error('No fake load queued.');
+    return await next;
+  });
+
+  download: HellPdfRuntimeAdapter['download'] = vi.fn(async () => undefined);
+  createPrintSession: HellPdfRuntimeAdapter['createPrintSession'] = vi.fn(async () => ({
+    cleanup: vi.fn(),
+    print: vi.fn(async () => undefined),
+  }));
+}
+
+class FakePdfSession implements HellPdfViewerSession {
+  currentScale = 1;
+  document: HellPdfDocumentHandle | null = null;
+  handlers: HellPdfViewerSessionHandlers | null = null;
+  renderThumbnail = vi.fn(async () => undefined);
+  cleanup = vi.fn();
+  dispatchFind = vi.fn();
+  closeFind = vi.fn();
+  setZoomValue = vi.fn();
+
+  setDocument(doc: HellPdfDocumentHandle | null): void {
+    this.document = doc;
+  }
+
+  setPage = vi.fn();
+
+  setNumericZoom(scale: number): void {
+    this.currentScale = scale;
+  }
+}
+
 function ctrlKey(key: string): KeyboardEvent {
   return new KeyboardEvent('keydown', { key, ctrlKey: true });
 }
@@ -133,4 +224,27 @@ function createShortcutActions() {
     firstPage: vi.fn(),
     lastPage: vi.fn(),
   };
+}
+
+function createRuntimeHandlers(): HellPdfRuntimeHandlers {
+  return {
+    onPageChange: vi.fn(),
+    onZoomChange: vi.fn(),
+    onPagesReady: vi.fn(),
+    onFindState: vi.fn(),
+  };
+}
+
+function fakeDocument(numPages: number): HellPdfDocumentHandle {
+  return { numPages, destroy: vi.fn() };
+}
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
 }
