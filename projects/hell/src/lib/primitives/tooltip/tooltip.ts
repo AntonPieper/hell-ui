@@ -1,7 +1,7 @@
 import { DestroyRef, Directive, ElementRef, booleanAttribute, inject, input } from '@angular/core';
 import { NgpTooltip, NgpTooltipTrigger } from 'ng-primitives/tooltip';
 import { HellStyleable } from '../../core/styleable';
-import { HELL_OVERLAY_SCOPE } from '../../core/overlay-scope';
+import { HELL_FLOATING_SCOPE, hellRegisterFloatingElement } from '../../core/overlay-scope';
 
 /**
  * Trigger for an `ng-template` tooltip. Bind `[hellTooltipTrigger]` to the
@@ -30,7 +30,7 @@ export class HellTooltipTrigger {}
 
 /**
  * Tooltip surface rendered by the trigger template. Registers with any active
- * Hell overlay scope so hoverable tooltip content counts as an inside target.
+ * Hell Floating Scope so hoverable tooltip content counts as an inside target.
  */
 @Directive({
   selector: '[hellTooltip]',
@@ -42,11 +42,10 @@ export class HellTooltipTrigger {}
 })
 export class HellTooltip extends HellStyleable {
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
-  private readonly overlayScope = inject(HELL_OVERLAY_SCOPE, { optional: true });
+  private readonly floatingScope = inject(HELL_FLOATING_SCOPE, { optional: true });
 
   constructor() {
     super();
-    this.overlayScope?.registerOverlayElement(this.host);
-    inject(DestroyRef).onDestroy(() => this.overlayScope?.unregisterOverlayElement(this.host));
+    hellRegisterFloatingElement(this.floatingScope, this.host, inject(DestroyRef));
   }
 }

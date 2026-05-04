@@ -4,7 +4,13 @@ import {
   HellFloatingDismissController,
   HellFloatingInteractionController,
   HellOverlayScopeRegistry,
+  hellDismissOn,
+  hellEscapeKey,
+  hellOutsideClick,
+  hellOutsideFocus,
+  hellOutsidePointer,
   hellRegisterOverlayElement,
+  hellWithDismissEffect,
 } from './overlay-scope';
 
 describe('Floating Scope', () => {
@@ -31,7 +37,7 @@ describe('Floating Scope', () => {
     expect(scope.containsOverlayTarget(child)).toBe(false);
   });
 
-  it('dismisses only when enabled and the event target is outside the Floating Scope', () => {
+  it('dismisses only when a rule matches an event target outside the Floating Scope', () => {
     const root = document.createElement('div');
     const outside = document.createElement('button');
     document.body.append(root, outside);
@@ -42,8 +48,8 @@ describe('Floating Scope', () => {
     const controller = new HellFloatingDismissController({
       root: () => root,
       ownerDocument: () => document,
-      closeOnOutsidePointer: () => enabled,
-      onDismiss: ({ reason }) => dismissals.push(reason),
+      dismiss: (context) => (enabled ? hellOutsidePointer(context) : null),
+      onDismiss: ({ event }) => dismissals.push(event.type),
     });
     controller.connect(destroy.ref);
 
@@ -51,16 +57,39 @@ describe('Floating Scope', () => {
     expect(dismissals).toEqual([]);
 
     outside.dispatchEvent(new Event('pointerdown', { bubbles: true }));
-    expect(dismissals).toEqual(['outside-pointer']);
+    expect(dismissals).toEqual(['pointerdown']);
 
     enabled = false;
     outside.dispatchEvent(new Event('pointerdown', { bubbles: true }));
-    expect(dismissals).toEqual(['outside-pointer']);
+    expect(dismissals).toEqual(['pointerdown']);
 
     destroy.run();
   });
 
-  it('lets one dismissal policy own outside reasons', () => {
+  it('does not dismiss without an explicit dismissal rule', () => {
+    const root = document.createElement('div');
+    const outside = document.createElement('button');
+    document.body.append(root, outside);
+
+    const dismissals: Event[] = [];
+    const destroy = createDestroyRef();
+    const controller = new HellFloatingDismissController({
+      root: () => root,
+      ownerDocument: () => document,
+      onDismiss: ({ event }) => dismissals.push(event),
+    });
+    controller.connect(destroy.ref);
+
+    outside.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    outside.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    outside.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+
+    expect(dismissals).toEqual([]);
+
+    destroy.run();
+  });
+
+  it('composes dismissal rules and fixed effects as the same rule type', () => {
     const root = document.createElement('div');
     const outside = document.createElement('button');
     document.body.append(root, outside);
@@ -70,8 +99,13 @@ describe('Floating Scope', () => {
     const controller = new HellFloatingDismissController({
       root: () => root,
       ownerDocument: () => document,
-      shouldDismiss: ({ reason }) => reason === 'outside-focus',
-      onDismiss: ({ reason }) => dismissals.push(reason),
+      dismiss: hellDismissOn(
+        hellOutsideFocus,
+        hellWithDismissEffect(hellEscapeKey, { stopPropagation: true }),
+      ),
+      onDismiss: ({ event, decision }) => {
+        dismissals.push(`${event.type}:${decision.stopPropagation ? 'stop' : 'pass'}`);
+      },
     });
     controller.connect(destroy.ref);
 
@@ -79,7 +113,10 @@ describe('Floating Scope', () => {
     expect(dismissals).toEqual([]);
 
     outside.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
-    expect(dismissals).toEqual(['outside-focus']);
+    expect(dismissals).toEqual(['focusin:pass']);
+
+    root.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(dismissals).toEqual(['focusin:pass', 'keydown:stop']);
 
     destroy.run();
   });
@@ -92,18 +129,18 @@ describe('Floating Scope', () => {
     const dismissals: string[] = [];
     const controller = new HellFloatingDismissController({
       root: () => root,
-      shouldDismiss: ({ reason }) => reason === 'outside-focus',
-      onDismiss: ({ reason }) => dismissals.push(reason),
+      dismiss: hellOutsideFocus,
+      onDismiss: ({ event }) => dismissals.push(event.type),
     });
 
     controller.handleFocusExit(new FocusEvent('blur'));
     await Promise.resolve();
-    expect(dismissals).toEqual(['outside-focus']);
+    expect(dismissals).toEqual(['blur']);
 
     controller.markPointerDownInside();
     controller.handleFocusExit(new FocusEvent('blur'));
     await Promise.resolve();
-    expect(dismissals).toEqual(['outside-focus']);
+    expect(dismissals).toEqual(['blur']);
   });
 
   it('connects a Floating Interaction surface to its scope and dismissal policy', () => {
@@ -121,8 +158,8 @@ describe('Floating Scope', () => {
       surface: () => surface,
       scope,
       ownerDocument: () => document,
-      closeOnOutsideClick: () => true,
-      onDismiss: ({ reason }) => dismissals.push(reason),
+      dismiss: hellOutsideClick,
+      onDismiss: ({ event }) => dismissals.push(event.type),
     });
 
     interaction.connect(destroy.ref);
@@ -133,7 +170,7 @@ describe('Floating Scope', () => {
     expect(dismissals).toEqual([]);
 
     outside.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    expect(dismissals).toEqual(['outside-click']);
+    expect(dismissals).toEqual(['click']);
 
     destroy.run();
 

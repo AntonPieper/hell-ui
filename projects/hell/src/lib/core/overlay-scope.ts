@@ -15,6 +15,11 @@ export interface HellOverlayScope {
  */
 export const HELL_OVERLAY_SCOPE = new InjectionToken<HellOverlayScope>('HELL_OVERLAY_SCOPE');
 
+/** Floating Scope is the new domain name; overlay names remain as aliases while
+ * primitives migrate. */
+export type HellFloatingScope = HellOverlayScope;
+export const HELL_FLOATING_SCOPE: InjectionToken<HellFloatingScope> = HELL_OVERLAY_SCOPE;
+
 /**
  * Default Floating Scope registry. Treats an optional root element plus all
  * registered overlay elements as one logical interaction region.
@@ -47,6 +52,8 @@ export class HellOverlayScopeRegistry implements HellOverlayScope {
   }
 }
 
+export const HellFloatingScopeRegistry = HellOverlayScopeRegistry;
+
 export function hellOverlayTargetNode(target: EventTarget | Node | null): Node | null {
   if (!target || typeof Node === 'undefined' || !(target instanceof Node)) return null;
   return target;
@@ -66,20 +73,190 @@ export function hellRegisterOverlayElement(
   destroyRef.onDestroy(() => scope.unregisterOverlayElement(element));
 }
 
-/**
- * Dismissal cause emitted by floating controllers. Pointer and click stay
- * separate so callers can choose early pointerdown or late captured-click close.
- */
-export type HellFloatingDismissReason =
-  | 'outside-pointer'
-  | 'outside-click'
-  | 'outside-focus'
-  | 'escape';
+export const hellRegisterFloatingElement = hellRegisterOverlayElement;
 
-export interface HellFloatingDismissEvent {
-  readonly reason: HellFloatingDismissReason;
-  readonly event: Event;
+export interface HellFloatingInsetVars {
+  readonly top: string;
+  readonly right: string;
+  readonly bottom: string;
+  readonly left: string;
 }
+
+export interface HellFloatingScopedInsetsOptions {
+  readonly document: Document;
+  readonly rootSelector: string;
+  readonly variables: HellFloatingInsetVars;
+  readonly styleTarget?: () => HTMLElement | null | undefined;
+}
+
+/**
+ * Shared geometry runtime for scoped Floating Interactions. It finds a root
+ * near the trigger, writes viewport-relative inset variables, and owns the
+ * ResizeObserver/scroll/resize cleanup.
+ */
+export class HellFloatingScopedInsetsRuntime {
+  private activeScopeRoot: HTMLElement | null = null;
+  private resizeObserver: ResizeObserver | null = null;
+  private readonly syncScope = () => this.updateScope();
+
+  constructor(private readonly options: HellFloatingScopedInsetsOptions) {}
+
+  primeFromTrigger(trigger: HTMLElement): HTMLElement | null {
+    const root = hellFindFloatingScopeRoot(trigger, this.options.rootSelector);
+    if (!root) {
+      this.clear();
+      return null;
+    }
+
+    if (this.activeScopeRoot === root) {
+      this.updateScope();
+      return root;
+    }
+
+    this.clearListeners();
+    this.activeScopeRoot = root;
+    this.updateScope();
+    this.observeScopeRoot(root);
+    this.listenForViewportChanges();
+    return root;
+  }
+
+  updateScope(): void {
+    if (!this.activeScopeRoot) return;
+
+    const rect = this.activeScopeRoot.getBoundingClientRect();
+    const win = this.options.document.defaultView;
+    if (!win) return;
+
+    const styles = this.styleTarget().style;
+    styles.setProperty(this.options.variables.top, `${Math.max(0, rect.top)}px`);
+    styles.setProperty(
+      this.options.variables.right,
+      `${Math.max(0, win.innerWidth - rect.right)}px`,
+    );
+    styles.setProperty(
+      this.options.variables.bottom,
+      `${Math.max(0, win.innerHeight - rect.bottom)}px`,
+    );
+    styles.setProperty(this.options.variables.left, `${Math.max(0, rect.left)}px`);
+  }
+
+  clear(): void {
+    this.clearListeners();
+    this.activeScopeRoot = null;
+
+    const styles = this.styleTarget().style;
+    for (const variable of Object.values(this.options.variables)) styles.removeProperty(variable);
+  }
+
+  private observeScopeRoot(root: HTMLElement): void {
+    if (typeof ResizeObserver === 'undefined') return;
+    this.resizeObserver = new ResizeObserver(this.syncScope);
+    this.resizeObserver.observe(root);
+  }
+
+  private listenForViewportChanges(): void {
+    const win = this.options.document.defaultView;
+    win?.addEventListener('scroll', this.syncScope, { passive: true, capture: true });
+    win?.addEventListener('resize', this.syncScope);
+  }
+
+  private clearListeners(): void {
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
+
+    const win = this.options.document.defaultView;
+    win?.removeEventListener('scroll', this.syncScope, true);
+    win?.removeEventListener('resize', this.syncScope);
+  }
+
+  private styleTarget(): HTMLElement {
+    return this.options.styleTarget?.() ?? this.options.document.documentElement;
+  }
+}
+
+export function hellFindFloatingScopeRoot(
+  trigger: HTMLElement,
+  selector: string,
+): HTMLElement | null {
+  return trigger.closest<HTMLElement>(selector);
+}
+
+export interface HellDismissContext {
+  readonly event: Event;
+  readonly target: Node | null;
+  readonly path: readonly EventTarget[];
+  /**
+   * True when the provided target, or the current event target when omitted,
+   * belongs to this Floating Interaction's logical inside set.
+   */
+  isTargetInside(target?: EventTarget | Node | null): boolean;
+}
+
+export interface HellDismissDecision {
+  readonly preventDefault?: boolean;
+  readonly stopPropagation?: boolean;
+  readonly restoreFocus?: false | HTMLElement | (() => HTMLElement | null | undefined);
+}
+
+export type HellDismissRule = (
+  context: HellDismissContext,
+) => HellDismissDecision | null | undefined;
+
+export interface HellFloatingDismissEvent extends HellDismissContext {
+  readonly decision: HellDismissDecision;
+}
+
+export function hellDismissOn(...rules: readonly HellDismissRule[]): HellDismissRule {
+  return (context) => {
+    for (const rule of rules) {
+      const decision = rule(context);
+      if (decision) return decision;
+    }
+    return null;
+  };
+}
+
+export function hellWithDismissEffect(
+  rule: HellDismissRule,
+  effect: HellDismissDecision,
+): HellDismissRule {
+  return (context) => {
+    const decision = rule(context);
+    return decision ? { ...decision, ...effect } : null;
+  };
+}
+
+export function hellGuardDismiss(
+  rule: HellDismissRule,
+  guard: (context: HellDismissContext, decision: HellDismissDecision) => boolean,
+): HellDismissRule {
+  return (context) => {
+    const decision = rule(context);
+    return decision && guard(context, decision) ? decision : null;
+  };
+}
+
+export const hellOutsidePointer: HellDismissRule = (context) =>
+  context.event.type === 'pointerdown' && !context.isTargetInside() ? {} : null;
+
+export const hellOutsideClick: HellDismissRule = (context) =>
+  context.event.type === 'click' && !context.isTargetInside() ? {} : null;
+
+export const hellOutsideFocus: HellDismissRule = (context) =>
+  (context.event.type === 'focusin' ||
+    context.event.type === 'focusout' ||
+    context.event.type === 'blur') &&
+  !context.isTargetInside()
+    ? {}
+    : null;
+
+export const hellEscapeKey: HellDismissRule = (context) =>
+  context.event instanceof KeyboardEvent &&
+  context.event.key === 'Escape' &&
+  context.isTargetInside()
+    ? {}
+    : null;
 
 export interface HellFloatingDismissOptions {
   /** Primary logical owner of the floating interaction. Checked first. */
@@ -92,17 +269,9 @@ export interface HellFloatingDismissOptions {
   readonly ownerDocument?: () => Document | null | undefined;
   /** Listener gate. Inactive interactions ignore all document events. */
   readonly active?: () => boolean;
-  /** Override dismissal policy for all reasons before `onDismiss` runs. */
-  readonly shouldDismiss?: (event: HellFloatingDismissEvent) => boolean;
-  /** Enable dismissal on pointerdown outside the inside set. */
-  readonly closeOnOutsidePointer?: () => boolean;
-  /** Enable dismissal on captured click outside the inside set. */
-  readonly closeOnOutsideClick?: () => boolean;
-  /** Enable dismissal when focus leaves the inside set. */
-  readonly closeOnOutsideFocus?: () => boolean;
-  /** Enable Escape dismissal when focus/event target is inside. */
-  readonly closeOnEscape?: () => boolean;
-  readonly onDismiss: (event: HellFloatingDismissEvent) => void;
+  /** Pure matcher composition deciding whether a document event dismisses. */
+  readonly dismiss?: HellDismissRule;
+  readonly onDismiss?: (event: HellFloatingDismissEvent) => void;
 }
 
 export interface HellFloatingInteractionOptions extends Omit<
@@ -121,8 +290,8 @@ export interface HellFloatingInteractionOptions extends Omit<
 
 /**
  * Owns document-level Floating Dismissal listeners for one Floating Interaction.
- * Callers keep control through the closeOn* predicates and the onDismiss handler;
- * this module only centralizes the inside/outside and listener lifecycle rules.
+ * Callers provide a composed dismiss rule; this module centralizes the
+ * inside/outside and listener lifecycle rules.
  */
 export class HellFloatingDismissController {
   private cleanup: (() => void) | null = null;
@@ -138,30 +307,29 @@ export class HellFloatingDismissController {
 
     const onPointerDown = (event: PointerEvent) => {
       if (!this.isActive()) return;
-      if (this.isInside(event.target)) {
+      if (this.isInsideEvent(event)) {
         this.markPointerDownInside();
         return;
       }
-      this.dismiss({ reason: 'outside-pointer', event });
+      this.dismiss(event);
     };
 
     const onClick = (event: MouseEvent) => {
       if (!this.isActive()) return;
-      if (this.isInside(event.target)) return;
-      this.dismiss({ reason: 'outside-click', event });
+      if (this.isInsideEvent(event)) return;
+      this.dismiss(event);
     };
 
     const onFocusIn = (event: FocusEvent) => {
       if (!this.isActive()) return;
       if (this.pointerDownInside) return;
-      if (this.isInside(event.target)) return;
-      this.dismiss({ reason: 'outside-focus', event });
+      if (this.isInsideEvent(event)) return;
+      this.dismiss(event);
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape' || !this.isActive()) return;
-      if (!this.isInside(event.target)) return;
-      this.dismiss({ reason: 'escape', event });
+      if (!this.isActive()) return;
+      this.dismiss(event);
     };
 
     doc.addEventListener('pointerdown', onPointerDown);
@@ -202,12 +370,66 @@ export class HellFloatingDismissController {
 
     queueMicrotask(() => {
       if (this.pointerDownInside) return;
-      if (this.isInside(this.document()?.activeElement ?? null)) return;
-      this.dismiss({ reason: 'outside-focus', event });
+      const activeElement = this.document()?.activeElement ?? null;
+      if (this.isInside(activeElement)) return;
+      this.dismiss(event, activeElement);
     });
   }
 
   isInside(target: EventTarget | Node | null): boolean {
+    return this.isInsideTarget(target);
+  }
+
+  private dismiss(event: Event, targetOverride?: EventTarget | Node | null): void {
+    if (!this.isActive() || !this.options.dismiss || !this.options.onDismiss) return;
+
+    const context = this.createDismissContext(event, targetOverride);
+    const decision = this.options.dismiss(context);
+    if (!decision) return;
+
+    if (decision.preventDefault) event.preventDefault();
+    if (decision.stopPropagation) event.stopPropagation();
+
+    this.options.onDismiss({ ...context, decision });
+    this.restoreFocus(decision);
+  }
+
+  private restoreFocus(decision: HellDismissDecision): void {
+    if (!decision.restoreFocus) return;
+    const target =
+      typeof decision.restoreFocus === 'function' ? decision.restoreFocus() : decision.restoreFocus;
+    target?.focus();
+  }
+
+  private createDismissContext(
+    event: Event,
+    targetOverride?: EventTarget | Node | null,
+  ): HellDismissContext {
+    const path = hellEventPath(event);
+    const target = hellOverlayTargetNode(targetOverride ?? event.target);
+    return {
+      event,
+      target,
+      path,
+      isTargetInside: (nextTarget?: EventTarget | Node | null) =>
+        nextTarget === undefined
+          ? this.isInsideEventPath(path, target)
+          : this.isInsideTarget(nextTarget),
+    };
+  }
+
+  private isInsideEvent(event: Event): boolean {
+    return this.isInsideEventPath(hellEventPath(event), hellOverlayTargetNode(event.target));
+  }
+
+  private isInsideEventPath(path: readonly EventTarget[], target: Node | null): boolean {
+    for (const entry of path) {
+      if (this.isInsideTarget(entry)) return true;
+    }
+    return this.isInsideTarget(target);
+  }
+
+  private isInsideTarget(target: EventTarget | Node | null): boolean {
     const node = hellOverlayTargetNode(target);
     if (!node) return false;
 
@@ -219,27 +441,6 @@ export class HellFloatingDismissController {
     }
 
     return this.options.scope?.containsOverlayTarget(node) ?? false;
-  }
-
-  private dismiss(event: HellFloatingDismissEvent): void {
-    if (!this.shouldDismiss(event)) return;
-    this.options.onDismiss(event);
-  }
-
-  private shouldDismiss(event: HellFloatingDismissEvent): boolean {
-    if (!this.isActive()) return false;
-    if (this.options.shouldDismiss) return this.options.shouldDismiss(event);
-
-    switch (event.reason) {
-      case 'outside-pointer':
-        return this.options.closeOnOutsidePointer?.() ?? false;
-      case 'outside-click':
-        return this.options.closeOnOutsideClick?.() ?? false;
-      case 'outside-focus':
-        return this.options.closeOnOutsideFocus?.() ?? false;
-      case 'escape':
-        return this.options.closeOnEscape?.() ?? false;
-    }
   }
 
   private isActive(): boolean {
@@ -275,11 +476,7 @@ export class HellFloatingInteractionController {
       ownerDocument: () =>
         this.options.ownerDocument?.() ?? this.options.surface()?.ownerDocument ?? null,
       active: this.options.active,
-      shouldDismiss: this.options.shouldDismiss,
-      closeOnOutsidePointer: this.options.closeOnOutsidePointer,
-      closeOnOutsideClick: this.options.closeOnOutsideClick,
-      closeOnOutsideFocus: this.options.closeOnOutsideFocus,
-      closeOnEscape: this.options.closeOnEscape,
+      dismiss: this.options.dismiss,
       onDismiss: this.options.onDismiss,
     });
   }
@@ -308,4 +505,9 @@ export class HellFloatingInteractionController {
   isInside(target: EventTarget | Node | null): boolean {
     return this.dismissController.isInside(target);
   }
+}
+
+function hellEventPath(event: Event): readonly EventTarget[] {
+  if (typeof event.composedPath === 'function') return event.composedPath();
+  return event.target ? [event.target] : [];
 }

@@ -1,6 +1,6 @@
 import { DestroyRef, Directive, ElementRef, inject } from '@angular/core';
 import { HellStyleable } from '../../core/styleable';
-import { HELL_OVERLAY_SCOPE, hellRegisterOverlayElement } from '../../core/overlay-scope';
+import { HELL_FLOATING_SCOPE, hellRegisterFloatingElement } from '../../core/overlay-scope';
 import {
   NgpSelect,
   NgpSelectDropdown,
@@ -56,11 +56,11 @@ export class HellSelectPlaceholder extends HellStyleable {}
 })
 export class HellSelectDropdown extends HellStyleable {
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
-  private readonly overlayScope = inject(HELL_OVERLAY_SCOPE, { optional: true });
+  private readonly floatingScope = inject(HELL_FLOATING_SCOPE, { optional: true });
 
   constructor() {
     super();
-    hellRegisterOverlayElement(this.overlayScope, this.host, inject(DestroyRef));
+    hellRegisterFloatingElement(this.floatingScope, this.host, inject(DestroyRef));
   }
 }
 

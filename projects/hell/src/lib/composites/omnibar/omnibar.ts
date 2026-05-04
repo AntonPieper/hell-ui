@@ -21,10 +21,13 @@ import {
   signal,
 } from '@angular/core';
 import {
-  HELL_OVERLAY_SCOPE,
+  HELL_FLOATING_SCOPE,
   HellFloatingInteractionController,
-  HellOverlayScopeRegistry,
-  type HellOverlayScope,
+  HellFloatingScopeRegistry,
+  hellDismissOn,
+  hellOutsideFocus,
+  hellOutsidePointer,
+  type HellFloatingScope,
 } from '../../core/overlay-scope';
 import {
   type HellSearchField,
@@ -91,7 +94,7 @@ let nextOmnibarItemId = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     HellCommandPaletteService,
-    { provide: HELL_OVERLAY_SCOPE, useExisting: forwardRef(() => HellOmnibar) },
+    { provide: HELL_FLOATING_SCOPE, useExisting: forwardRef(() => HellOmnibar) },
   ],
   host: {
     '[class.hell-omnibar]': '!unstyled()',
@@ -185,7 +188,7 @@ let nextOmnibarItemId = 0;
   `,
   exportAs: 'hellOmnibar',
 })
-export class HellOmnibar extends HellStyleable implements HellOverlayScope {
+export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   /* ── Inputs ────────────────────────────────────────────────────────── */
 
   readonly size = input<'sm' | 'md' | 'lg'>('md');
@@ -279,14 +282,14 @@ export class HellOmnibar extends HellStyleable implements HellOverlayScope {
   protected readonly hasActions = computed(() => this.actionItems().length > 0);
 
   private posUpdater?: AfterRenderRef;
-  private readonly overlayScope = new HellOverlayScopeRegistry(() => this.host.nativeElement);
+  private readonly floatingScope = new HellFloatingScopeRegistry(() => this.host.nativeElement);
   private readonly floatingInteraction = new HellFloatingInteractionController({
     surface: () => this.host.nativeElement,
     scope: this,
     registerSurface: () => false,
     ownerDocument: () => this.host.nativeElement.ownerDocument,
     active: () => this.isOpen(),
-    shouldDismiss: ({ reason }) => reason === 'outside-pointer' || reason === 'outside-focus',
+    dismiss: hellDismissOn(hellOutsidePointer, hellOutsideFocus),
     onDismiss: () => this.close(),
   });
 
@@ -359,15 +362,15 @@ export class HellOmnibar extends HellStyleable implements HellOverlayScope {
   }
 
   registerOverlayElement(element: HTMLElement): void {
-    this.overlayScope.registerOverlayElement(element);
+    this.floatingScope.registerOverlayElement(element);
   }
 
   unregisterOverlayElement(element: HTMLElement): void {
-    this.overlayScope.unregisterOverlayElement(element);
+    this.floatingScope.unregisterOverlayElement(element);
   }
 
   containsOverlayTarget(target: EventTarget | Node | null): boolean {
-    return this.overlayScope.containsOverlayTarget(target);
+    return this.floatingScope.containsOverlayTarget(target);
   }
 
   /** Open the panel. Idempotent. */

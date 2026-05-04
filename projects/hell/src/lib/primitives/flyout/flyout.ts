@@ -1,5 +1,14 @@
 import { HellStyleable } from '../../core/styleable';
-import { HELL_OVERLAY_SCOPE, HellFloatingInteractionController } from '../../core/overlay-scope';
+import {
+  HELL_FLOATING_SCOPE,
+  HellFloatingInteractionController,
+  hellDismissOn,
+  hellEscapeKey,
+  hellGuardDismiss,
+  hellOutsideClick,
+  hellOutsideFocus,
+  hellWithDismissEffect,
+} from '../../core/overlay-scope';
 import {
   DestroyRef,
   Directive,
@@ -92,7 +101,7 @@ export class HellFlyout extends HellStyleable {
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly overlayScope = inject(HELL_OVERLAY_SCOPE, { optional: true });
+  private readonly floatingScope = inject(HELL_FLOATING_SCOPE, { optional: true });
   private interaction: HellFloatingInteractionController | null = null;
 
   constructor() {
@@ -102,21 +111,20 @@ export class HellFlyout extends HellStyleable {
       this.interaction = new HellFloatingInteractionController({
         surface: () => panel,
         inside: () => [this.trigger().element.nativeElement, this.boundary()],
-        scope: this.overlayScope,
+        scope: this.floatingScope,
         active: () => this.trigger().open(),
-        shouldDismiss: ({ reason }) =>
-          reason === 'escape'
-            ? this.closeOnEscape()
-            : reason === 'outside-click' || reason === 'outside-focus'
-              ? this.closeOnOutsideInteraction()
-              : false,
-        onDismiss: ({ reason, event }) => {
-          this.trigger().hide();
-          if (reason === 'escape') {
-            event.stopPropagation();
-            this.trigger().element.nativeElement.focus();
-          }
-        },
+        dismiss: hellDismissOn(
+          hellGuardDismiss(hellOutsideClick, () => this.closeOnOutsideInteraction()),
+          hellGuardDismiss(hellOutsideFocus, () => this.closeOnOutsideInteraction()),
+          hellWithDismissEffect(
+            hellGuardDismiss(hellEscapeKey, () => this.closeOnEscape()),
+            {
+              stopPropagation: true,
+              restoreFocus: () => this.trigger().element.nativeElement,
+            },
+          ),
+        ),
+        onDismiss: () => this.trigger().hide(),
       });
       this.interaction.connect(this.destroyRef);
     });
