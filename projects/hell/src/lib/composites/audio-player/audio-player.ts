@@ -1,6 +1,7 @@
 import {
   Component,
   ChangeDetectionStrategy,
+  DestroyRef,
   ElementRef,
   booleanAttribute,
   computed,
@@ -25,41 +26,8 @@ import { HellFlyout, HellFlyoutTrigger } from '../../primitives/flyout/flyout';
 import { HellIcon } from '../../primitives/icon/icon';
 import { HellSlider } from '../../primitives/slider/slider';
 import { HellStyleable } from '../../core/styleable';
-
-interface SpeechRecognitionLike extends EventTarget {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  maxAlternatives: number;
-  start(track?: MediaStreamTrack): void;
-  stop(): void;
-  abort(): void;
-  onresult: ((e: any) => void) | null;
-  onerror: ((e: any) => void) | null;
-  onend: (() => void) | null;
-}
-
-interface SpeechRecognitionCtor {
-  new (): SpeechRecognitionLike;
-}
-
-function getSpeechRecognition(): SpeechRecognitionCtor | null {
-  if (typeof window === 'undefined') return null;
-  const w = window as unknown as {
-    SpeechRecognition?: SpeechRecognitionCtor;
-    webkitSpeechRecognition?: SpeechRecognitionCtor;
-  };
-  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
-}
-
-/** True when this browser supports `SpeechRecognition` and `captureStream()`. */
-export function hellAudioSpeechSupported(): boolean {
-  return (
-    typeof window !== 'undefined' &&
-    getSpeechRecognition() !== null &&
-    typeof (HTMLMediaElement.prototype as any).captureStream === 'function'
-  );
-}
+import { HellAudioRuntime } from './audio-player.runtime';
+export { hellAudioSpeechSupported } from './audio-player.runtime';
 
 const PLAYBACK_RATES = [1, 1.25, 1.5, 2, 0.75] as const;
 
@@ -293,16 +261,14 @@ export class HellAudioPlayer extends HellStyleable {
   protected readonly playbackRate = signal(1);
 
   protected readonly captions = signal(false);
-  protected readonly transcript = signal<string>('');
-  protected readonly interim = signal<string>('');
-  protected readonly transcribing = signal(false);
-  protected readonly error = signal<string | null>(null);
-  protected readonly copied = signal(false);
-  protected readonly speechSupported = signal(hellAudioSpeechSupported());
+  private readonly audioRuntime = new HellAudioRuntime();
+  protected readonly transcript = this.audioRuntime.transcript;
+  protected readonly interim = this.audioRuntime.interim;
+  protected readonly transcribing = this.audioRuntime.transcribing;
+  protected readonly error = this.audioRuntime.error;
+  protected readonly copied = this.audioRuntime.copied;
+  protected readonly speechSupported = this.audioRuntime.speechSupported;
 
-  private recognition: SpeechRecognitionLike | null = null;
-  private capturedStream: MediaStream | null = null;
-  private copiedTimer: ReturnType<typeof setTimeout> | null = null;
   private seekRestartTimer: ReturnType<typeof setTimeout> | null = null;
   private playbackEnded = false;
 
@@ -356,6 +322,7 @@ export class HellAudioPlayer extends HellStyleable {
 
   constructor() {
     super();
+    inject(DestroyRef).onDestroy(() => this.audioRuntime.destroy());
     // Apply audio properties from signals.
     effect(() => {
       const a = this.audio().nativeElement;
@@ -367,9 +334,9 @@ export class HellAudioPlayer extends HellStyleable {
     // Auto start/stop recognition based on captions toggle + playback.
     effect(() => {
       const wantLive = this.captions() && this.playing() && this.speechSupported();
-      if (wantLive && !this.recognition) {
+      if (wantLive && !this.audioRuntime.isRecognizing()) {
         this.startRecognition();
-      } else if (!wantLive && this.recognition) {
+      } else if (!wantLive && this.audioRuntime.isRecognizing()) {
         this.stopRecognition();
       }
     });
@@ -467,7 +434,12 @@ export class HellAudioPlayer extends HellStyleable {
     if (this.seekRestartTimer) clearTimeout(this.seekRestartTimer);
     this.seekRestartTimer = setTimeout(() => {
       this.seekRestartTimer = null;
-      if (this.captions() && this.playing() && this.speechSupported() && !this.recognition) {
+      if (
+        this.captions() &&
+        this.playing() &&
+        this.speechSupported() &&
+        !this.audioRuntime.isRecognizing()
+      ) {
         this.startRecognition();
       }
     }, 200);
@@ -513,7 +485,12 @@ export class HellAudioPlayer extends HellStyleable {
   }
 
   private shouldRestartRecognition(): boolean {
-    return this.playing() && this.captions() && this.speechSupported() && this.recognition !== null;
+    return (
+      this.playing() &&
+      this.captions() &&
+      this.speechSupported() &&
+      this.audioRuntime.isRecognizing()
+    );
   }
 
   private resetCaptionSession(restartRecognition = false) {
@@ -522,87 +499,27 @@ export class HellAudioPlayer extends HellStyleable {
 
     this.stopRecognition();
     queueMicrotask(() => {
-      if (this.captions() && this.playing() && this.speechSupported() && !this.recognition) {
+      if (
+        this.captions() &&
+        this.playing() &&
+        this.speechSupported() &&
+        !this.audioRuntime.isRecognizing()
+      ) {
         this.startRecognition();
       }
     });
   }
 
   private startRecognition() {
-    const Ctor = getSpeechRecognition();
-    const audio = this.audio().nativeElement as HTMLAudioElement & {
-      captureStream?(): MediaStream;
-    };
-    if (!Ctor || typeof audio.captureStream !== 'function') return;
-
-    const rec = new Ctor();
-    rec.lang = this.lang() ?? (document.documentElement.lang || 'en-US');
-    rec.continuous = true;
-    rec.interimResults = true;
-    rec.maxAlternatives = 1;
-
-    rec.onresult = (e: any) => {
-      let finalAdd = '';
-      let interim = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const r = e.results[i];
-        if (r.isFinal) finalAdd += r[0].transcript;
-        else interim += r[0].transcript;
-      }
-      if (finalAdd) {
-        this.transcript.update((t) => (t ? t + ' ' : '') + finalAdd.trim());
-      }
-      this.interim.set(interim.trim());
-    };
-    rec.onerror = (e: any) => {
-      const code = e?.error;
-      // 'no-speech' / 'aborted' are benign — service ends, we just restart on next play.
-      if (code && code !== 'no-speech' && code !== 'aborted') {
-        this.error.set(`Speech error: ${code}`);
-      }
-      this.stopRecognition();
-    };
-    rec.onend = () => {
-      this.transcribing.set(false);
-      this.interim.set('');
-      // If the recogniser ended but the user is still playing with captions
-      // on, restart it (service auto-stops after silence).
-      if (this.captions() && this.playing() && this.recognition === rec) {
-        this.recognition = null;
-        this.startRecognition();
-      }
-    };
-
-    try {
-      const stream = audio.captureStream();
-      this.capturedStream = stream;
-      const track = stream.getAudioTracks()[0];
-      this.recognition = rec;
-      this.transcribing.set(true);
-      this.error.set(null);
-      // start(track) — Chromium 138+. Falls back to mic if unsupported.
-      try {
-        rec.start(track);
-      } catch {
-        rec.start();
-      }
-    } catch (err) {
-      this.error.set(err instanceof Error ? err.message : String(err));
-      this.transcribing.set(false);
-      this.recognition = null;
-    }
+    this.audioRuntime.startRecognition(
+      this.audio().nativeElement,
+      this.lang(),
+      () => this.captions() && this.playing() && this.speechSupported(),
+    );
   }
 
   private stopRecognition() {
-    try {
-      this.recognition?.stop();
-    } catch {
-      /* noop */
-    }
-    this.recognition = null;
-    this.capturedStream?.getTracks().forEach((t) => t.stop());
-    this.capturedStream = null;
-    this.transcribing.set(false);
+    this.audioRuntime.stopRecognition();
   }
 
   protected clearTranscript() {
@@ -610,23 +527,11 @@ export class HellAudioPlayer extends HellStyleable {
   }
 
   private resetTranscriptState() {
-    this.transcript.set('');
-    this.interim.set('');
-    this.error.set(null);
-    this.copied.set(false);
+    this.audioRuntime.resetTranscriptState();
   }
 
   protected async copyTranscript() {
-    const text = (this.transcript() + ' ' + this.interim()).trim();
-    if (!text) return;
-    try {
-      await navigator.clipboard.writeText(text);
-      this.copied.set(true);
-      if (this.copiedTimer) clearTimeout(this.copiedTimer);
-      this.copiedTimer = setTimeout(() => this.copied.set(false), 1500);
-    } catch {
-      /* clipboard unavailable */
-    }
+    await this.audioRuntime.copyTranscript();
   }
 
   protected format(s: number): string {
