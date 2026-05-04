@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HELL_FIELD_DIRECTIVES, HellTimeInput } from 'hell';
+import { HELL_FIELD_DIRECTIVES, HellTimeInput, type HellTimeValue } from 'hell';
 
 @Component({
   selector: 'app-time-input-examples-example',
@@ -27,12 +27,16 @@ import { HELL_FIELD_DIRECTIVES, HellTimeInput } from 'hell';
       <label hellFieldLabel>Disabled</label>
       <hell-time-input disabled [value]="value()" />
     </div>
-    <p class="hd-muted">Selected: {{ value() || '-' }}</p>
+    <p class="hd-muted">Selected: {{ format(value()) || '-' }}</p>
   `,
 })
 export class TimeInputExamplesExample {
-  protected readonly value = signal<string | null>('14:30');
-  protected readonly small = signal<string | null>('09:00');
-  protected readonly large = signal<string | null>('17:30');
-  protected readonly precise = signal<string | null>('12:34:56');
+  protected readonly value = signal<HellTimeValue | null>({ hour: 14, minute: 30, second: 0 });
+  protected readonly precise = signal<HellTimeValue | null>({ hour: 12, minute: 34, second: 56 });
+
+  protected format(value: HellTimeValue | null): string {
+    return value
+      ? `${value.hour.toString().padStart(2, '0')}:${value.minute.toString().padStart(2, '0')}`
+      : '';
+  }
 }

@@ -7,7 +7,7 @@ import { HELL_FIELD_DIRECTIVES, HellDateInput } from 'hell';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [...HELL_FIELD_DIRECTIVES, HellDateInput],
   template: `
-    <hell-date-input placeholder="Apr 22, 2026" aria-label="Invoice date" [date]="null" />
+    <hell-date-input placeholder="2026-04-22" aria-label="Invoice date" [date]="null" />
     <p class="hd-note">
       Use <code>aria-label</code> when no visible <code>hellFieldLabel</code> is present.
     </p>

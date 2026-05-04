@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellTimeInput } from './time-input';
+import { HellTimeInput, type HellTimeValue } from './time-input';
 
 @Component({
   imports: [HellTimeInput],
@@ -16,11 +16,11 @@ import { HellTimeInput } from './time-input';
   `,
 })
 class TimeInputHost {
-  readonly value = signal<string | null>(null);
+  readonly value = signal<HellTimeValue | null>(null);
   readonly seconds = signal(false);
   placeholder: string | null = null;
   ariaLabel = 'Start time';
-  values: string[] = [];
+  values: Array<HellTimeValue | null> = [];
 }
 
 describe('HellTimeInput', () => {
@@ -30,7 +30,7 @@ describe('HellTimeInput', () => {
     }).compileComponents();
   });
 
-  it('parses common 12-hour text and emits padded 24-hour values', () => {
+  it('parses common 12-hour text and emits structured time values', () => {
     const fixture = TestBed.createComponent(TimeInputHost);
     fixture.detectChanges();
 
@@ -40,10 +40,10 @@ describe('HellTimeInput', () => {
     input.dispatchEvent(new Event('blur', { bubbles: true }));
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.values).toEqual(['21:05']);
+    expect(fixture.componentInstance.values).toEqual([{ hour: 21, minute: 5, second: 0 }]);
   });
 
-  it('includes seconds when the seconds mode is enabled', () => {
+  it('includes seconds in display when seconds mode is enabled', () => {
     const fixture = TestBed.createComponent(TimeInputHost);
     fixture.componentInstance.seconds.set(true);
     fixture.detectChanges();
@@ -54,13 +54,14 @@ describe('HellTimeInput', () => {
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.values).toEqual(['01:02:03']);
+    expect(fixture.componentInstance.values).toEqual([{ hour: 1, minute: 2, second: 3 }]);
+    expect(input.value).toBe('01:02:03');
   });
 
-  it('reverts invalid typed text without emitting', () => {
+  it('keeps invalid typed text visible without emitting', () => {
     const fixture = TestBed.createComponent(TimeInputHost);
     const host = fixture.componentInstance;
-    host.value.set('08:30');
+    host.value.set({ hour: 8, minute: 30, second: 0 });
     fixture.detectChanges();
 
     const input = textInput(fixture.nativeElement);
@@ -73,13 +74,30 @@ describe('HellTimeInput', () => {
     fixture.detectChanges();
 
     expect(host.values).toEqual([]);
-    expect(input.value).toBe('08:30');
+    expect(input.value).toBe('25:99');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('emits null when empty text is committed', () => {
+    const fixture = TestBed.createComponent(TimeInputHost);
+    const host = fixture.componentInstance;
+    host.value.set({ hour: 8, minute: 30, second: 0 });
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    input.value = '';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.values).toEqual([null]);
+    expect(input.value).toBe('');
   });
 
   it('drops in-progress typing when the bound value changes externally', async () => {
     const fixture = TestBed.createComponent(TimeInputHost);
     const host = fixture.componentInstance;
-    host.value.set('08:30');
+    host.value.set({ hour: 8, minute: 30, second: 0 });
     fixture.detectChanges();
 
     const input = textInput(fixture.nativeElement);
@@ -87,7 +105,7 @@ describe('HellTimeInput', () => {
     input.dispatchEvent(new Event('input', { bubbles: true }));
     fixture.detectChanges();
 
-    host.value.set('12:45');
+    host.value.set({ hour: 12, minute: 45, second: 0 });
     await fixture.whenStable();
     fixture.detectChanges();
 

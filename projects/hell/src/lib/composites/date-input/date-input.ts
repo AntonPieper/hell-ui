@@ -16,7 +16,11 @@ import { HellPopover, HellPopoverTrigger } from '../../primitives/popover/popove
 import { HellDatePicker } from '../../primitives/date-picker/date-picker';
 import type { HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
-import { HellTypedValueInputState } from '../../core/typed-value-input';
+import {
+  HellTypedValueInputState,
+  hellInvalidTypedValue,
+  hellTypedValue,
+} from '../../core/typed-value-input';
 
 const HELL_DATE_INPUT_ICONS = {
   faSolidCalendar,
@@ -24,33 +28,37 @@ const HELL_DATE_INPUT_ICONS = {
 
 /**
  * Try to parse a user-typed string into a `Date`. Accepts ISO `YYYY-MM-DD`
- * and the locale-formatted output we render back into the input. Returns
- * `null` for empty / unparseable input so callers can revert to the
- * previous valid value on blur.
+ * and the stable business format we render back into the input. Empty text
+ * commits a nullable clear; unparseable text stays as an invalid draft.
  */
-function tryParse(text: string): Date | null {
+function tryParse(text: string) {
   const t = text.trim();
-  if (!t) return null;
+  if (!t) return hellTypedValue<Date>(null);
   const iso = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(t);
   if (iso) {
     const year = +iso[1];
     const month = +iso[2];
     const day = +iso[3];
     const d = new Date(year, month - 1, day);
-    if (Number.isNaN(d.getTime())) return null;
-    return d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day ? d : null;
+    if (Number.isNaN(d.getTime())) return hellInvalidTypedValue();
+    return d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day
+      ? hellTypedValue(d)
+      : hellInvalidTypedValue();
   }
   const d = new Date(t);
-  return Number.isNaN(d.getTime()) ? null : d;
+  return Number.isNaN(d.getTime()) ? hellInvalidTypedValue() : hellTypedValue(d);
 }
 
 function formatDate(d: Date | null): string {
   if (!d) return '';
-  return d.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  const year = d.getFullYear().toString().padStart(4, '0');
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const day = d.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function sameDate(a: Date | null, b: Date | null): boolean {
+  return a?.getTime() !== b?.getTime();
 }
 
 /**
@@ -70,7 +78,7 @@ function formatDate(d: Date | null): string {
   host: {
     '[class.hell-date-input]': '!unstyled()',
     '[attr.data-size]': 'size()',
-    '[attr.data-invalid]': 'invalid() ? "true" : null',
+    '[attr.data-invalid]': 'isInvalid() ? "true" : null',
     '[attr.data-disabled]': 'disabled() ? "true" : null',
   },
   template: `
@@ -81,8 +89,8 @@ function formatDate(d: Date | null): string {
       [size]="size()"
       type="text"
       data-slot="field"
-      [invalid]="invalid()"
-      [attr.aria-invalid]="invalid() ? 'true' : null"
+      [invalid]="isInvalid()"
+      [attr.aria-invalid]="isInvalid() ? 'true' : null"
       [attr.aria-label]="ariaLabel()"
       [disabled]="disabled()"
       [placeholder]="placeholder()"
@@ -130,16 +138,19 @@ export class HellDateInput extends HellStyleable {
   readonly placeholder = input<string>('YYYY-MM-DD');
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
 
-  readonly dateChange = output<Date>();
+  readonly dateChange = output<Date | null>();
 
   private readonly valueState = new HellTypedValueInputState<Date, Date | null>({
     external: () => this.date(),
     parseExternal: (date) => date,
     parseText: tryParse,
     format: formatDate,
+    externalChanged: sameDate,
   });
   protected readonly current = this.valueState.current;
   protected readonly display = this.valueState.display;
+  protected readonly invalidDraft = this.valueState.invalidDraft;
+  protected readonly isInvalid = () => this.invalid() || this.invalidDraft();
 
   private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field');
 
@@ -149,18 +160,19 @@ export class HellDateInput extends HellStyleable {
 
   protected onBlur() {
     const parsed = this.valueState.commitDraft();
-    if (parsed) this.dateChange.emit(parsed);
+    if (parsed.committed) this.dateChange.emit(parsed.value);
   }
 
   protected commit(text: string, event?: Event) {
     event?.preventDefault();
     const parsed = this.valueState.commitText(text);
-    if (parsed) this.dateChange.emit(parsed);
+    if (parsed.committed) this.dateChange.emit(parsed.value);
   }
 
   protected onPick(d: Date | undefined) {
     if (!d) return;
-    this.dateChange.emit(this.valueState.setValue(d));
+    const picked = this.valueState.setValue(d);
+    if (picked.committed) this.dateChange.emit(picked.value);
     this.field().nativeElement.focus();
   }
 }

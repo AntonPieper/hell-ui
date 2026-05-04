@@ -53,8 +53,9 @@ import timeInputSizesExampleCodeRaw from './examples/sizes.example.ts?raw' with 
       <h2>API</h2>
       <ul>
         <li>
-          <code>value</code>: <code>"HH:mm"</code> or <code>"HH:mm:ss"</code> (two-way via
-          <code>(valueChange)</code>).
+          <code>value</code>: structured <code>HellTimeValue | null</code>
+          with <code>hour</code>, <code>minute</code>, and <code>second</code>
+          (two-way via <code>(valueChange)</code>).
         </li>
         <li><code>seconds</code>: include a seconds grid + readout.</li>
         <li><code>size</code>: <code>sm | md | lg</code></li>
@@ -67,7 +68,7 @@ import timeInputSizesExampleCodeRaw from './examples/sizes.example.ts?raw' with 
       <ul>
         <li>Use <code>seconds</code> only when users really need second precision.</li>
         <li>Pair with field labels and help for timezone expectations.</li>
-        <li>Keep value format stable for form submission.</li>
+        <li>Format the structured value at your form or transport seam.</li>
       </ul>
 
       <h2>Don't</h2>

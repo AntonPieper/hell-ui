@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HELL_FIELD_DIRECTIVES, HellTimeInput } from 'hell';
+import { HellTimeInput, type HellTimeValue } from 'hell';
 
 @Component({
   selector: 'app-time-input-sizes-example',
@@ -12,8 +12,7 @@ import { HELL_FIELD_DIRECTIVES, HellTimeInput } from 'hell';
   `,
 })
 export class TimeInputSizesExample {
-  protected readonly value = signal<string | null>('14:30');
-  protected readonly small = signal<string | null>('09:00');
-  protected readonly large = signal<string | null>('17:30');
-  protected readonly precise = signal<string | null>('12:34:56');
+  protected readonly value = signal<HellTimeValue | null>({ hour: 14, minute: 30, second: 0 });
+  protected readonly small = signal<HellTimeValue | null>({ hour: 9, minute: 0, second: 0 });
+  protected readonly large = signal<HellTimeValue | null>({ hour: 17, minute: 30, second: 0 });
 }

@@ -32,7 +32,7 @@ import dateInputTextInputCalendarPopoverExampleCodeRaw from './examples/text-inp
       <p>
         Composite date field: a text input plus calendar-trigger popover. Type or paste
         <code>YYYY-MM-DD</code> (or any locale-friendly format <code>Date.parse</code> understands),
-        then blur or press Enter to commit. Click the calendar icon to pick from
+        then blur or press Enter to commit. Empty text clears to <code>null</code>. Click the calendar icon to pick from
         <a routerLink="/components/date-picker">Date picker</a>.
       </p>
 
@@ -60,7 +60,7 @@ import dateInputTextInputCalendarPopoverExampleCodeRaw from './examples/text-inp
       <h2>API</h2>
       <ul>
         <li><code>date</code>: <code>Date | null</code> current value.</li>
-        <li><code>(dateChange)</code>: emits a valid <code>Date</code> after typing or picking.</li>
+        <li><code>(dateChange)</code>: emits a valid <code>Date</code> after typing or picking, or <code>null</code> when cleared.</li>
         <li><code>min</code>, <code>max</code>: optional picker bounds.</li>
         <li><code>size</code>: <code>sm | md | lg</code>.</li>
         <li><code>invalid</code>, <code>disabled</code>: visual / interaction states.</li>
