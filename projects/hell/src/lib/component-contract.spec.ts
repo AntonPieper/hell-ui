@@ -137,6 +137,9 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellNavItemIcon', area: 'composite', coverage: 'dom' },
   { symbol: 'HellNavItemLabel', area: 'composite', coverage: 'dom' },
   { symbol: 'HellNavItemTrailing', area: 'composite', coverage: 'dom' },
+  { symbol: 'HellNavSection', area: 'composite', coverage: 'dom' },
+  { symbol: 'HellNavSectionItems', area: 'composite', coverage: 'dom' },
+  { symbol: 'HellNavSectionToggle', area: 'composite', coverage: 'dom' },
   { symbol: 'HellOmnibar', area: 'composite', coverage: 'static' },
   { symbol: 'HellOmnibarAction', area: 'composite', coverage: 'static' },
   { symbol: 'HellOmnibarActionsStrip', area: 'composite', coverage: 'static' },
@@ -236,6 +239,12 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
       <a id="unstyled-nav-item" hellNavItem unstyled href="#">
         <span hellNavItemLabel unstyled>Raw</span>
       </a>
+      <div id="nav-section" hellNavSection>
+        <button id="nav-section-toggle" hellNavSectionToggle type="button">Settings</button>
+        <div id="nav-section-items" hellNavSectionItems>
+          <a hellNavItem href="#">Preferences</a>
+        </div>
+      </div>
     </nav>
 
     <div id="table-container" hellTableContainer busy>
@@ -318,6 +327,24 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
     module: 'HellNavItem',
     className: 'hell-nav-item',
     attrs: { 'data-slot': 'nav-item' },
+  },
+  {
+    id: 'nav-section',
+    module: 'HellNavSection',
+    className: 'hell-nav-section',
+    attrs: { 'data-slot': 'nav-section' },
+  },
+  {
+    id: 'nav-section-toggle',
+    module: 'HellNavSectionToggle',
+    className: 'hell-nav-section-toggle',
+    attrs: { 'data-slot': 'nav-section-toggle', 'aria-expanded': 'true' },
+  },
+  {
+    id: 'nav-section-items',
+    module: 'HellNavSectionItems',
+    className: 'hell-nav-section-items',
+    attrs: { 'data-slot': 'nav-section-items' },
   },
   {
     id: 'table-container',

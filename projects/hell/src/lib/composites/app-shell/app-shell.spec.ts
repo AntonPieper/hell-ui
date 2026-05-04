@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { HELL_APP_SHELL_DIRECTIVES } from './app-shell';
@@ -7,6 +7,27 @@ import { HELL_APP_SHELL_DIRECTIVES } from './app-shell';
   imports: [...HELL_APP_SHELL_DIRECTIVES],
   template: `
     <div hellAppShell #shell="hellAppShell">
+      <nav hellAppSidenav [collapsed]="sidenavCollapsed()">
+        <div id="nav-section" hellNavSection>
+          <button id="nav-section-toggle" hellNavSectionToggle type="button">Settings</button>
+          <div id="nav-section-items" hellNavSectionItems>
+            <a hellNavItem href="#">Preferences</a>
+          </div>
+        </div>
+        <div
+          id="controlled-nav-section"
+          hellNavSection
+          [collapsed]="controlledNavSectionCollapsed()"
+          (collapsedChange)="collapsedEvents.push($event)"
+        >
+          <button id="controlled-nav-section-toggle" hellNavSectionToggle type="button">
+            Controlled
+          </button>
+          <div hellNavSectionItems>
+            <a hellNavItem href="#">API keys</a>
+          </div>
+        </div>
+      </nav>
       <main hellAppContent>Content</main>
       <aside hellAppSecondary>
         <button
@@ -26,13 +47,56 @@ import { HELL_APP_SHELL_DIRECTIVES } from './app-shell';
     </div>
   `,
 })
-class TestHost {}
+class TestHost {
+  readonly sidenavCollapsed = signal(false);
+  readonly controlledNavSectionCollapsed = signal(false);
+  readonly collapsedEvents: boolean[] = [];
+}
 
 describe('HellAppShell secondary panel', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TestHost],
     }).compileComponents();
+  });
+
+  it('owns nav section classes and collapsed attributes', () => {
+    const fixture = TestBed.createComponent(TestHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const section = query(fixture.nativeElement, '#nav-section');
+    const toggle = query<HTMLButtonElement>(fixture.nativeElement, '#nav-section-toggle');
+    const items = query(fixture.nativeElement, '#nav-section-items');
+
+    expect(section.classList.contains('hell-nav-section')).toBe(true);
+    expect(section.getAttribute('data-slot')).toBe('nav-section');
+    expect(section.getAttribute('data-collapsed')).toBeNull();
+    expect(toggle.classList.contains('hell-nav-section-toggle')).toBe(true);
+    expect(toggle.getAttribute('data-slot')).toBe('nav-section-toggle');
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(items.classList.contains('hell-nav-section-items')).toBe(true);
+    expect(items.getAttribute('data-slot')).toBe('nav-section-items');
+    expect(items.getAttribute('aria-hidden')).toBeNull();
+    expect(items.hasAttribute('inert')).toBe(false);
+
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(section.getAttribute('data-collapsed')).toBe('true');
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(items.getAttribute('aria-hidden')).toBe('true');
+    expect(items.hasAttribute('inert')).toBe(true);
+
+    host.sidenavCollapsed.set(true);
+    fixture.detectChanges();
+
+    expect(items.getAttribute('aria-hidden')).toBeNull();
+    expect(items.hasAttribute('inert')).toBe(false);
+
+    query<HTMLButtonElement>(fixture.nativeElement, '#controlled-nav-section-toggle').click();
+    fixture.detectChanges();
+    expect(host.collapsedEvents).toEqual([true]);
   });
 
   it('roundtrips state via header toggle and rail toggle', () => {
@@ -76,3 +140,9 @@ describe('HellAppShell secondary panel', () => {
     expect(body.hasAttribute('inert')).toBe(false);
   });
 });
+
+function query<T extends HTMLElement = HTMLElement>(root: HTMLElement, selector: string): T {
+  const element = root.querySelector(selector);
+  if (!(element instanceof HTMLElement)) throw new Error(`Expected ${selector}.`);
+  return element as T;
+}

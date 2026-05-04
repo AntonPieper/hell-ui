@@ -104,9 +104,10 @@ const HD_APP_SHELL_PAGE_ICONS = {
           </ul>
         </li>
         <li>
-          Sidenav grouping: <code>hell-nav-section</code> + <code>hell-nav-section-toggle</code> +
-          <code>hell-nav-section-items</code> for collapsible sections. Collapsed rail separators
-          are automatic — each section draws its own thin rule in icon-only mode.
+          Sidenav grouping: <code>hellNavSection</code> + <code>hellNavSectionToggle</code> +
+          <code>hellNavSectionItems</code> for collapsible sections. The section owns classes,
+          collapse attributes, toggle state, and <code>aria-expanded</code>; bind
+          <code>[collapsed]</code> / <code>(collapsedChange)</code> only when parent state must persist.
         </li>
         <li>Import the bundle via <code>HELL_APP_SHELL_DIRECTIVES</code>.</li>
       </ul>

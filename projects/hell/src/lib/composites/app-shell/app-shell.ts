@@ -8,6 +8,7 @@ import {
   computed,
   inject,
   input,
+  output,
   signal,
 } from '@angular/core';
 
@@ -172,8 +173,7 @@ export class HellAppSidenav extends HellStyleable {
     transform: (v) => (v == null ? null : booleanAttribute(v)),
   });
   private readonly shell = inject(HellAppShell, { optional: true });
-  protected readonly isCollapsed = () =>
-    this.collapsed() ?? this.shell?.isSidenavCollapsed() ?? false;
+  readonly isCollapsed = () => this.collapsed() ?? this.shell?.isSidenavCollapsed() ?? false;
   protected readonly isMobileHidden = () => !!this.shell?.isMobileLayout() && this.isCollapsed();
 }
 
@@ -215,6 +215,66 @@ export class HellNavItemLabel extends HellStyleable {}
   },
 })
 export class HellNavItemTrailing extends HellStyleable {}
+
+@Directive({
+  selector: '[hellNavSection]',
+  host: {
+    '[class.hell-nav-section]': '!unstyled()',
+    '[attr.data-slot]': '"nav-section"',
+    '[attr.data-collapsed]': 'isCollapsed() ? "true" : null',
+  },
+})
+export class HellNavSection extends HellStyleable {
+  readonly collapsed = input<boolean | null, boolean | string | null | undefined>(null, {
+    transform: (v) => (v == null ? null : booleanAttribute(v)),
+  });
+  readonly collapsedChange = output<boolean>();
+
+  private readonly _collapsed = signal(false);
+
+  readonly isCollapsed = () => this.collapsed() ?? this._collapsed();
+
+  toggle() {
+    const next = !this.isCollapsed();
+    this._collapsed.set(next);
+    this.collapsedChange.emit(next);
+  }
+}
+
+@Directive({
+  selector: '[hellNavSectionToggle]',
+  host: {
+    type: 'button',
+    '[class.hell-nav-section-toggle]': '!unstyled()',
+    '[attr.data-slot]': '"nav-section-toggle"',
+    '[attr.aria-expanded]': '!section.isCollapsed()',
+    '(click)': 'toggle()',
+  },
+})
+export class HellNavSectionToggle extends HellStyleable {
+  protected readonly section = inject(HellNavSection);
+
+  protected toggle() {
+    this.section.toggle();
+  }
+}
+
+@Directive({
+  selector: '[hellNavSectionItems]',
+  host: {
+    '[class.hell-nav-section-items]': '!unstyled()',
+    '[attr.data-slot]': '"nav-section-items"',
+    '[attr.aria-hidden]': 'isHidden() ? "true" : null',
+    '[attr.inert]': 'isHidden() ? "" : null',
+  },
+})
+export class HellNavSectionItems extends HellStyleable {
+  protected readonly section = inject(HellNavSection);
+  private readonly sidenav = inject(HellAppSidenav, { optional: true });
+
+  protected readonly isHidden = () =>
+    this.section.isCollapsed() && !(this.sidenav?.isCollapsed() ?? false);
+}
 
 @Directive({
   selector: '[hellAppContent]',
@@ -319,6 +379,9 @@ export const HELL_APP_SHELL_DIRECTIVES = [
   HellNavItemIcon,
   HellNavItemLabel,
   HellNavItemTrailing,
+  HellNavSection,
+  HellNavSectionToggle,
+  HellNavSectionItems,
   HellSidenavToggle,
   HellSecondaryToggle,
 ] as const;

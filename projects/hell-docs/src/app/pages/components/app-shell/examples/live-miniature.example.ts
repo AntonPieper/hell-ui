@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import {
   faSolidBars,
@@ -53,16 +53,9 @@ const HD_APP_SHELL_PAGE_ICONS = {
           <span hellNavItemLabel>Team</span>
         </a>
 
-        <div class="hell-nav-section" [attr.data-collapsed]="settingsCollapsed() ? 'true' : null">
-          <button
-            type="button"
-            class="hell-nav-section-toggle"
-            (click)="settingsCollapsed.set(!settingsCollapsed())"
-            [attr.aria-expanded]="!settingsCollapsed()"
-          >
-            Settings
-          </button>
-          <div class="hell-nav-section-items">
+        <div hellNavSection>
+          <button type="button" hellNavSectionToggle>Settings</button>
+          <div hellNavSectionItems>
             <a hellNavItem href="#" (click)="$event.preventDefault()">
               <hell-icon hellNavItemIcon name="faSolidGear" size="14px" />
               <span hellNavItemLabel>Preferences</span>
@@ -101,7 +94,4 @@ const HD_APP_SHELL_PAGE_ICONS = {
     </div>
   `,
 })
-export class AppShellLiveMiniatureExample {
-  readonly collapsed = signal(false);
-  protected readonly settingsCollapsed = signal(false);
-}
+export class AppShellLiveMiniatureExample {}

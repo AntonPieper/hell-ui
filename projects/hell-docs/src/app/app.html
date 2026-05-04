@@ -250,18 +250,12 @@
     @for (section of sections; track $index) {
       @if (section.heading) {
         <div
-          class="hell-nav-section"
-          [attr.data-collapsed]="isSectionCollapsed(section.heading) ? 'true' : null"
+          hellNavSection
+          [collapsed]="isSectionCollapsed(section.heading)"
+          (collapsedChange)="setSectionCollapsed(section.heading, $event)"
         >
-          <button
-            type="button"
-            class="hell-nav-section-toggle"
-            (click)="toggleSection(section.heading)"
-            [attr.aria-expanded]="!isSectionCollapsed(section.heading)"
-          >
-            {{ section.heading }}
-          </button>
-          <div class="hell-nav-section-items">
+          <button type="button" hellNavSectionToggle>{{ section.heading }}</button>
+          <div hellNavSectionItems>
             @for (item of section.items; track item.path) {
               <a
                 hellNavItem

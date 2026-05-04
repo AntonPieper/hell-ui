@@ -68,6 +68,9 @@ import {
   HellNavItem,
   HellNavItemIcon,
   HellNavItemLabel,
+  HellNavSection,
+  HellNavSectionToggle,
+  HellNavSectionItems,
   HellButton,
   HellIcon,
   HellTag,
@@ -331,6 +334,9 @@ const HD_THEMES: readonly ThemeOption[] = [
     HellNavItem,
     HellNavItemIcon,
     HellNavItemLabel,
+    HellNavSection,
+    HellNavSectionToggle,
+    HellNavSectionItems,
     HellButton,
     HellIcon,
     HellTag,
@@ -446,14 +452,7 @@ export class App {
     hdBuildDocsSearchIndex(),
   );
 
-  /**
-   * Per-section collapse state for the sidenav. Defaults to expanded; users
-   * click a section heading (which is itself a button) to fold the items
-   * underneath. State is keyed by heading text so it survives re-renders.
-   * The CSS in `[data-collapsed='true']` on `.hell-nav-section` hides the
-   * items list while the chevron in `.hell-nav-section-toggle::after`
-   * rotates from down → right.
-   */
+  /** Per-section collapse state for the controlled docs sidenav. */
   private readonly collapsedSections = signal<ReadonlySet<string>>(new Set());
 
   constructor() {
@@ -488,11 +487,11 @@ export class App {
     return this.collapsedSections().has(heading);
   }
 
-  protected toggleSection(heading: string): void {
+  protected setSectionCollapsed(heading: string, collapsed: boolean): void {
     this.collapsedSections.update((current) => {
       const next = new Set(current);
-      if (next.has(heading)) next.delete(heading);
-      else next.add(heading);
+      if (collapsed) next.add(heading);
+      else next.delete(heading);
       return next;
     });
   }

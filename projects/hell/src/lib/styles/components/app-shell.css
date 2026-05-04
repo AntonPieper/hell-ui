@@ -194,7 +194,7 @@
         display: none;
       }
       /* Free-text headings still disappear in rail mode. Collapsible
-            section headings get replaced by a divider drawn by
+            section toggles get replaced by a divider drawn by
             `.hell-nav-section::before`, so we only hide the button itself. */
       & .hell-nav-section-toggle {
         display: none;
@@ -428,15 +428,12 @@
   /*
    * Collapsible nav section. Markup:
    *
-   *   <div class="hell-nav-section" [attr.data-collapsed]="!open()">
-   *     <button class="hell-nav-section-toggle" (click)="open.set(!open())">
-   *       Primitives
-   *     </button>
-   *     <div class="hell-nav-section-items">
-   *       …items…
-   *     </div>
+   *   <div hellNavSection>
+   *     <button hellNavSectionToggle>Primitives</button>
+   *     <div hellNavSectionItems>…items…</div>
    *   </div>
    *
+   * The directives own classes, collapsed attributes, and aria-expanded.
    * The toggle is a full-width button with a chevron that rotates when the
    * section opens. When the parent sidenav is collapsed (rail mode) the
    * toggle is hidden and items are forced visible — see the rules in
