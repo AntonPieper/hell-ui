@@ -10,6 +10,7 @@
     "watch": "ng build hell --watch --configuration development",
     "test": "ng test && pnpm test:architecture && pnpm test:ci-contract",
     "test:architecture": "node tools/check-architecture.mjs",
+    "test:package-consumer": "node tools/check-package-consumer.mjs",
     "test:ci-contract": "node tools/check-ci-contract.mjs",
     "ci:install": "pnpm install --frozen-lockfile",
     "ci:test": "node tools/run-ci-tests.mjs",

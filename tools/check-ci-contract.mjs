@@ -6,11 +6,13 @@ const requiredFiles = [
   'Dockerfile.ci',
   'vitest.ci.config.ts',
   'tools/run-ci-tests.mjs',
+  'tools/check-package-consumer.mjs',
   'tools/ci-summary.mjs',
 ];
 
 const requiredScripts = {
   'ci:install': 'pnpm install --frozen-lockfile',
+  'test:package-consumer': 'node tools/check-package-consumer.mjs',
   'ci:test': 'node tools/run-ci-tests.mjs',
   'ci:build': 'pnpm build',
   'ci:verify': 'pnpm ci:test && pnpm ci:build',

@@ -21,6 +21,11 @@ const tasks = [
     args: ['test:architecture'],
   },
   {
+    name: 'package consumer',
+    command: 'pnpm',
+    args: ['test:package-consumer'],
+  },
+  {
     name: 'CI contract',
     command: 'pnpm',
     args: ['test:ci-contract'],
