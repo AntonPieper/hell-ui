@@ -18,7 +18,7 @@ const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
 const deps = rootPackage.dependencies ?? {};
 const devDeps = rootPackage.devDependencies ?? {};
 
-const angularDeps = [
+const baseDeps = [
   '@angular/common',
   '@angular/compiler',
   '@angular/core',
@@ -32,31 +32,44 @@ const angularDeps = [
   'tailwindcss',
   'tslib',
 ];
-
-const featureDeps = [
-  ...angularDeps,
+const codeEditorDeps = [
+  ...baseDeps,
   '@codemirror/commands',
   '@codemirror/language',
   '@codemirror/state',
   '@codemirror/view',
   '@lezer/highlight',
-  'pdfjs-dist',
 ];
+const pdfViewerDeps = [...baseDeps, 'pdfjs-dist'];
 
 const scenarios = [
   {
     name: 'light',
     description: 'root/primitives/composites without feature peers',
-    dependencies: angularDeps,
+    dependencies: baseDeps,
     mainTs: lightConsumerMainTs(),
     stylesCss: lightConsumerStylesCss(),
   },
   {
-    name: 'features',
-    description: 'feature entry points with their optional peers',
-    dependencies: featureDeps,
-    mainTs: featureConsumerMainTs(),
-    stylesCss: featureConsumerStylesCss(),
+    name: 'code-editor',
+    description: 'code-editor feature with only CodeMirror peers',
+    dependencies: codeEditorDeps,
+    mainTs: codeEditorConsumerMainTs(),
+    stylesCss: codeEditorConsumerStylesCss(),
+  },
+  {
+    name: 'data-table',
+    description: 'data-table feature without CodeMirror/pdf peers',
+    dependencies: baseDeps,
+    mainTs: dataTableConsumerMainTs(),
+    stylesCss: dataTableConsumerStylesCss(),
+  },
+  {
+    name: 'pdf-viewer',
+    description: 'pdf-viewer feature with only pdfjs peer',
+    dependencies: pdfViewerDeps,
+    mainTs: pdfViewerConsumerMainTs(),
+    stylesCss: pdfViewerConsumerStylesCss(),
   },
 ];
 
@@ -221,38 +234,71 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
-function featureConsumerMainTs() {
+function codeEditorConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { HellCodeEditor } from 'hell/features/code-editor';
-import { HELL_TABLE_DIRECTIVES } from 'hell/features/data-table';
-import { HellPdfViewer } from 'hell/features/pdf-viewer';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [HellCodeEditor, HellPdfViewer, ...HELL_TABLE_DIRECTIVES],
+  imports: [HellCodeEditor],
+  template: \`<hell-code-editor [value]="code" readOnly />\`,
+})
+class App {
+  protected readonly code = 'console.log("hell")';
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function dataTableConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HELL_TABLE_DIRECTIVES } from 'hell/features/data-table';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [...HELL_TABLE_DIRECTIVES],
   template: \`
-    <hell-code-editor [value]="code" readOnly />
     <div hellTableContainer>
       <table hellTable>
         <thead hellTableHead>
           <tr hellTableRow>
             <th hellTableHeaderCell columnId="name">Name</th>
+            <th hellTableHeaderCell columnId="role">Role</th>
           </tr>
         </thead>
         <tbody hellTableBody>
           <tr hellTableRow selected>
             <td hellTableCell>Atlas</td>
+            <td hellTableCell>Admin</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <hell-pdf-viewer [src]="pdfSrc" />
   \`,
 })
+class App {}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function pdfViewerConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HellPdfViewer } from 'hell/features/pdf-viewer';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [HellPdfViewer],
+  template: \`<hell-pdf-viewer [src]="pdfSrc" />\`,
+})
 class App {
-  protected readonly code = 'console.log("hell")';
   protected readonly pdfSrc = '/sample.pdf';
 }
 
@@ -268,11 +314,23 @@ function lightConsumerStylesCss() {
 `;
 }
 
-function featureConsumerStylesCss() {
+function codeEditorConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "hell/styles/tokens";
 @import "hell/styles/features/code-editor";
+`;
+}
+
+function dataTableConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "hell/styles/tokens";
 @import "hell/styles/features/data-table";
+`;
+}
+
+function pdfViewerConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "hell/styles/tokens";
 @import "hell/styles/features/pdf-viewer";
 `;
 }
