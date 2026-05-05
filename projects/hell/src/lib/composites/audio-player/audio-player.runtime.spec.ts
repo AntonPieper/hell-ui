@@ -102,3 +102,129 @@ describe('HellAudioRuntime playback state', () => {
     expect(media.pause).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('HellAudioRuntime live captions', () => {
+  const nativeSpeechRecognition = (window as unknown as { SpeechRecognition?: unknown })
+    .SpeechRecognition;
+  const nativeWebkitSpeechRecognition = (
+    window as unknown as { webkitSpeechRecognition?: unknown }
+  ).webkitSpeechRecognition;
+  const nativeCaptureStream = (HTMLMediaElement.prototype as { captureStream?: unknown })
+    .captureStream;
+
+  let recognitions: FakeSpeechRecognition[];
+  let tracks: { stop: ReturnType<typeof vi.fn> }[];
+
+  beforeEach(() => {
+    recognitions = [];
+    tracks = [{ stop: vi.fn() }];
+    Object.defineProperty(window, 'SpeechRecognition', {
+      configurable: true,
+      value: class extends FakeSpeechRecognition {
+        constructor() {
+          super();
+          recognitions.push(this);
+        }
+      },
+    });
+    Object.defineProperty(window, 'webkitSpeechRecognition', {
+      configurable: true,
+      value: undefined,
+    });
+    Object.defineProperty(HTMLMediaElement.prototype, 'captureStream', {
+      configurable: true,
+      value: vi.fn(() => ({
+        getAudioTracks: () => tracks,
+        getTracks: () => tracks,
+      })),
+    });
+  });
+
+  afterEach(() => {
+    restoreWindowCtor('SpeechRecognition', nativeSpeechRecognition);
+    restoreWindowCtor('webkitSpeechRecognition', nativeWebkitSpeechRecognition);
+    if (nativeCaptureStream === undefined) {
+      delete (HTMLMediaElement.prototype as { captureStream?: unknown }).captureStream;
+    } else {
+      Object.defineProperty(HTMLMediaElement.prototype, 'captureStream', {
+        configurable: true,
+        value: nativeCaptureStream,
+      });
+    }
+  });
+
+  it('captures final and interim speech results from the browser adapter', () => {
+    const runtime = new HellAudioRuntime();
+    const audio = document.createElement('audio');
+
+    runtime.startRecognition(audio, 'de-DE');
+
+    const recognition = recognitions[0];
+    expect(recognition.lang).toBe('de-DE');
+    expect(recognition.continuous).toBe(true);
+    expect(recognition.interimResults).toBe(true);
+    expect(recognition.start).toHaveBeenCalledWith(tracks[0]);
+    expect(runtime.transcribing()).toBe(true);
+
+    recognition.onresult?.({
+      resultIndex: 0,
+      results: [
+        speechResult('ship it', true),
+        speechResult('still talking', false),
+      ],
+    });
+
+    expect(runtime.transcript()).toBe('ship it');
+    expect(runtime.interim()).toBe('still talking');
+  });
+
+  it('stops browser capture tracks when captions stop', () => {
+    const runtime = new HellAudioRuntime();
+
+    runtime.startRecognition(document.createElement('audio'), 'en-US');
+    runtime.stopRecognition();
+
+    expect(recognitions[0].stop).toHaveBeenCalled();
+    expect(tracks[0].stop).toHaveBeenCalled();
+    expect(runtime.transcribing()).toBe(false);
+  });
+
+  it('reports speech errors and tears down recognition', () => {
+    const runtime = new HellAudioRuntime();
+
+    runtime.startRecognition(document.createElement('audio'), 'en-US');
+    recognitions[0].onerror?.({ error: 'network' });
+
+    expect(runtime.error()).toBe('Speech error: network');
+    expect(runtime.isRecognizing()).toBe(false);
+    expect(runtime.transcribing()).toBe(false);
+  });
+});
+
+class FakeSpeechRecognition extends EventTarget {
+  lang = '';
+  continuous = false;
+  interimResults = false;
+  maxAlternatives = 0;
+  start = vi.fn();
+  stop = vi.fn();
+  abort = vi.fn();
+  onresult: ((e: any) => void) | null = null;
+  onerror: ((e: any) => void) | null = null;
+  onend: (() => void) | null = null;
+}
+
+function speechResult(transcript: string, isFinal: boolean) {
+  return {
+    0: { transcript },
+    isFinal,
+  };
+}
+
+function restoreWindowCtor(name: 'SpeechRecognition' | 'webkitSpeechRecognition', value: unknown) {
+  if (value === undefined) {
+    delete (window as unknown as Record<string, unknown>)[name];
+  } else {
+    Object.defineProperty(window, name, { configurable: true, value });
+  }
+}
