@@ -12,6 +12,7 @@ import {
   type HellPdfPrintSession,
   type HellPdfViewerSession,
 } from './pdf-viewer.adapter';
+import type { HellPdfPrintOptions } from './pdf-viewer.print';
 
 /** Source types accepted by the PDF runtime and adapter. */
 export type HellPdfSource = string | URL | ArrayBuffer;
@@ -62,7 +63,11 @@ export interface HellPdfRuntimePort {
     fileName?: string | null,
     ownerDocument?: Document,
   ): Promise<void>;
-  print(source: HellPdfSource, ownerDocument?: Document, cleanupDelayMs?: number): Promise<void>;
+  print(
+    source: HellPdfSource,
+    ownerDocument?: Document,
+    options?: HellPdfPrintOptions | number,
+  ): Promise<void>;
   renderThumbs(
     canvases: readonly HTMLCanvasElement[],
     shouldContinue: () => boolean,
@@ -313,18 +318,23 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   createPrintSession(
     source: HellPdfSource,
     ownerDocument?: Document,
+    options?: HellPdfPrintOptions,
   ): Promise<HellPdfPrintSession> {
-    return this.adapter.createPrintSession(source, ownerDocument);
+    return options === undefined
+      ? this.adapter.createPrintSession(source, ownerDocument)
+      : this.adapter.createPrintSession(source, ownerDocument, options);
   }
 
   async print(
     source: HellPdfSource,
     ownerDocument?: Document,
-    cleanupDelayMs = 30_000,
+    options: HellPdfPrintOptions | number = {},
   ): Promise<void> {
     this.clearPrintSession();
 
-    const session = await this.createPrintSession(source, ownerDocument);
+    const printOptions = typeof options === 'number' ? { cleanupDelayMs: options } : options;
+    const cleanupDelayMs = printOptions.cleanupDelayMs ?? 30_000;
+    const session = await this.createPrintSession(source, ownerDocument, printOptions);
     this.printCleanup = () => session.cleanup();
     try {
       await session.print();

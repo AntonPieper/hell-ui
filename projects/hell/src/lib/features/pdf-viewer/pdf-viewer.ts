@@ -91,6 +91,8 @@ export class HellPdfViewer extends HellStyleable {
   readonly initialPage = input(1, { transform: numberAttribute });
   readonly initialZoom = input<number | 'auto' | 'page-actual' | 'page-fit' | 'page-width'>('auto');
   readonly fileName = input<string | null>(null);
+  /** Fetch options used by the print path when printing URL/string sources. */
+  readonly printFetchOptions = input<RequestInit | null>(null);
 
   readonly pageChange = output<number>();
   readonly zoomChange = output<number | string>();
@@ -228,7 +230,9 @@ export class HellPdfViewer extends HellStyleable {
 
   protected async print() {
     try {
-      await this.runtime.print(this.src());
+      await this.runtime.print(this.src(), undefined, {
+        fetch: this.printFetchOptions() ?? undefined,
+      });
     } catch (e) {
       this.error.emit(e);
     }

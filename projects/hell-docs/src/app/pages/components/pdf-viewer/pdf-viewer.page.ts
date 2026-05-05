@@ -42,6 +42,11 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         <li><code>src</code>: <code>string | URL | ArrayBuffer</code></li>
         <li><code>initialPage</code> (default <code>1</code>)</li>
         <li><code>initialZoom</code> (default <code>'auto'</code>)</li>
+        <li><code>fileName</code>: suggested download filename</li>
+        <li>
+          <code>printFetchOptions</code>: optional <code>RequestInit</code> for authenticated or
+          credentialed print fetches when <code>src</code> is a URL.
+        </li>
         <li>
           Outputs: <code>pageChange</code>, <code>zoomChange</code>, <code>loaded</code>,
           <code>error</code>

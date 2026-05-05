@@ -7,6 +7,7 @@ import type {
 import {
   createHiddenPdfPrintHandle,
   printPdfInHiddenIframe,
+  type HellPdfPrintOptions,
   type HiddenPdfPrintHandle,
 } from './pdf-viewer.print';
 import { normalizeZoomEventValue } from './pdf-viewer.utils';
@@ -66,7 +67,11 @@ export interface HellPdfRuntimeAdapter {
     fileName?: string | null,
     ownerDocument?: Document,
   ): Promise<void>;
-  createPrintSession(source: HellPdfSource, ownerDocument?: Document): Promise<HellPdfPrintSession>;
+  createPrintSession(
+    source: HellPdfSource,
+    ownerDocument?: Document,
+    options?: HellPdfPrintOptions,
+  ): Promise<HellPdfPrintSession>;
 }
 
 /** Hidden print lifecycle handle; callers must cleanup after print or failure. */
@@ -144,8 +149,9 @@ export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
   async createPrintSession(
     source: HellPdfSource,
     ownerDocument: Document = document,
+    options?: HellPdfPrintOptions,
   ): Promise<HellPdfPrintSession> {
-    const handle = await createHiddenPdfPrintHandle(source, ownerDocument);
+    const handle = await createHiddenPdfPrintHandle(source, ownerDocument, options);
     return new HellPdfIframePrintSession(handle);
   }
 }

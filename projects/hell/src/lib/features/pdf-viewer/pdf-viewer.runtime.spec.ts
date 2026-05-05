@@ -47,9 +47,30 @@ describe('PDF Runtime', () => {
     await runtime.print('document.pdf');
     runtime.cleanup();
 
-    expect(adapter.createPrintSession).toHaveBeenCalledWith('document.pdf', undefined);
+    expect(adapter.createPrintSession).toHaveBeenCalledWith('document.pdf', undefined, {});
     expect(printSession.print).toHaveBeenCalled();
     expect(printSession.cleanup).toHaveBeenCalled();
+  });
+
+  it('passes print fetch options through the PDF Runtime seam', async () => {
+    const printSession: HellPdfPrintSession = {
+      cleanup: vi.fn(),
+      print: vi.fn().mockResolvedValue(undefined),
+    };
+    const adapter = new FakePdfAdapter();
+    adapter.createPrintSession = vi.fn(async () => printSession);
+    const runtime = new HellPdfRuntime(adapter);
+    const fetchOptions: RequestInit = {
+      credentials: 'include',
+      headers: { Authorization: 'Bearer test' },
+    };
+
+    await runtime.print('secure.pdf', undefined, { fetch: fetchOptions, cleanupDelayMs: 1 });
+
+    expect(adapter.createPrintSession).toHaveBeenCalledWith('secure.pdf', undefined, {
+      fetch: fetchOptions,
+      cleanupDelayMs: 1,
+    });
   });
 
   it('cleans a print session when printing fails', async () => {

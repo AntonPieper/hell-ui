@@ -4,11 +4,19 @@ export interface HiddenPdfPrintHandle {
   loaded: Promise<void>;
 }
 
+export interface HellPdfPrintOptions {
+  /** Fetch options used only when print must fetch a URL/string source. */
+  readonly fetch?: RequestInit;
+  /** Runtime-owned hidden iframe cleanup delay after print succeeds. */
+  readonly cleanupDelayMs?: number;
+}
+
 export async function createHiddenPdfPrintHandle(
   source: string | URL | ArrayBuffer,
   ownerDocument: Document = document,
+  options: HellPdfPrintOptions = {},
 ) {
-  const objectUrl = await createPrintableObjectUrl(source);
+  const objectUrl = await createPrintableObjectUrl(source, options.fetch);
   const iframe = ownerDocument.createElement('iframe');
   iframe.setAttribute('aria-hidden', 'true');
   iframe.tabIndex = -1;
@@ -54,12 +62,12 @@ export async function printPdfInHiddenIframe(handle: HiddenPdfPrintHandle) {
   frameWindow.print();
 }
 
-async function createPrintableObjectUrl(source: string | URL | ArrayBuffer) {
+async function createPrintableObjectUrl(source: string | URL | ArrayBuffer, fetchOptions?: RequestInit) {
   if (source instanceof ArrayBuffer) {
     return createObjectUrl(new Blob([source], { type: 'application/pdf' }));
   }
 
-  const response = await fetch(String(source));
+  const response = await fetch(String(source), fetchOptions);
   if (!response.ok) {
     throw new Error(`Failed to fetch printable PDF: ${response.status} ${response.statusText}`);
   }
