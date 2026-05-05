@@ -33,7 +33,7 @@ let nextFlyoutId = 0;
  * `HellDialog` instead when you want a focus trap.
  */
 @Directive({
-  selector: '[hellFlyoutTrigger]',
+  selector: 'button[hellFlyoutTrigger], a[hellFlyoutTrigger]',
   exportAs: 'hellFlyoutTrigger',
   host: {
     '[attr.aria-haspopup]': '"dialog"',

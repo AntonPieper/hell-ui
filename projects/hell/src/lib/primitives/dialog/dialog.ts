@@ -44,7 +44,7 @@ interface HellDialogTemplateContext<T = unknown, R = unknown> {
  *   <ng-template #dialog let-close="close"> … </ng-template>
  */
 @Directive({
-  selector: '[hellDialogTrigger]',
+  selector: 'button[hellDialogTrigger], a[hellDialogTrigger]',
   host: {
     '(click)': 'launch()',
   },

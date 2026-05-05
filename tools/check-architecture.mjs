@@ -13,6 +13,7 @@ checkAppShellBreakpointContract();
 checkBehaviorSentinelContract();
 checkComponentContract();
 checkNativeButtonSelectorContract();
+checkInteractiveTriggerSelectorContract();
 checkFloatingRegistrationContract();
 
 if (failures.length) {
@@ -514,6 +515,46 @@ function checkNativeButtonSelectorContract() {
       if (unsafeArms.length) {
         failures.push(
           `${rel} ${module.className} sets type=button but selector allows non-button hosts: ${unsafeArms.join(', ')}`,
+        );
+      }
+    }
+  }
+}
+
+function checkInteractiveTriggerSelectorContract() {
+  const nativeInteractiveTriggers = new Set([
+    'hellDialogTrigger',
+    'hellPopoverTrigger',
+    'hellTooltipTrigger',
+    'hellMenuTrigger',
+    'hellFlyoutTrigger',
+  ]);
+  const sourceRoot = join(root, 'projects/hell/src/lib');
+  const files = walk(sourceRoot).filter(
+    (file) =>
+      file.endsWith('.ts') &&
+      !file.endsWith('.spec.ts') &&
+      !file.endsWith('.d.ts') &&
+      !file.endsWith('pdf.worker.ts'),
+  );
+
+  for (const file of files) {
+    const source = readFile(file);
+    const rel = file.slice(root.length + 1);
+    for (const module of decoratedClassModules(source)) {
+      const selector = /selector:\s*['"]([^'"]+)['"]/.exec(module.moduleSource)?.[1];
+      if (!selector) continue;
+      const trigger = [...nativeInteractiveTriggers].find((name) => selector.includes(name));
+      if (!trigger) continue;
+
+      const unsafeArms = selector
+        .split(',')
+        .map((arm) => arm.trim())
+        .filter((arm) => !/^(?:button|a)(?:\b|\[|\.|#|:)/.test(arm));
+
+      if (unsafeArms.length) {
+        failures.push(
+          `${rel} ${module.className} exposes ${trigger} on non-native interactive hosts: ${unsafeArms.join(', ')}`,
         );
       }
     }

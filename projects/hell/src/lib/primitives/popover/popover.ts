@@ -9,7 +9,7 @@ import { hellRegisterFloatingHost } from '../../core/floating-scope';
  * inputs through to ng-primitives.
  */
 @Directive({
-  selector: '[hellPopoverTrigger]',
+  selector: 'button[hellPopoverTrigger], a[hellPopoverTrigger]',
   hostDirectives: [
     {
       directive: NgpPopoverTrigger,

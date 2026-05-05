@@ -9,7 +9,7 @@ import { hellRegisterFloatingHost } from '../../core/floating-scope';
  * options through to ng-primitives.
  */
 @Directive({
-  selector: '[hellTooltipTrigger]',
+  selector: 'button[hellTooltipTrigger], a[hellTooltipTrigger]',
   hostDirectives: [
     {
       directive: NgpTooltipTrigger,

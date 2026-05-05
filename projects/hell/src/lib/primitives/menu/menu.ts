@@ -11,7 +11,7 @@ import { hellRegisterFloatingHost } from '../../core/floating-scope';
 import { HellStyleable } from '../../core/styleable';
 
 @Directive({
-  selector: '[hellMenuTrigger]',
+  selector: 'button[hellMenuTrigger], a[hellMenuTrigger]',
   hostDirectives: [
     {
       directive: NgpMenuTrigger,
