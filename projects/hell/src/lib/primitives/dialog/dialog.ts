@@ -3,21 +3,39 @@ import {
   DestroyRef,
   Directive,
   ElementRef,
+  Injector,
+  TemplateRef,
   booleanAttribute,
   effect,
   inject,
   input,
+  output,
 } from '@angular/core';
 import {
   NgpDialog,
+  NgpDialogManager,
   NgpDialogOverlay,
   NgpDialogTitle,
   NgpDialogDescription,
-  NgpDialogTrigger,
+  type NgpDialogRef,
 } from 'ng-primitives/dialog';
+import {
+  dismissGuardAttribute,
+  type NgpDismissGuard,
+  type NgpDismissGuardInput,
+} from 'ng-primitives/portal';
 import type { HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
-import { HellDialogScopeCoordinator, HellDialogScopedOverlayAdapter } from './dialog-scope';
+import {
+  HELL_DIALOG_SCOPE_ROOT,
+  HellDialogScopedOverlayAdapter,
+  hellFindDialogScopeRoot,
+} from './dialog-scope';
+
+interface HellDialogTemplateContext<T = unknown, R = unknown> {
+  readonly $implicit: NgpDialogRef<T, R>;
+  readonly close: (result?: R) => void;
+}
 
 /**
  * Wrap your trigger element with this directive and bind to a `<ng-template>`.
@@ -27,32 +45,54 @@ import { HellDialogScopeCoordinator, HellDialogScopedOverlayAdapter } from './di
  */
 @Directive({
   selector: '[hellDialogTrigger]',
-  hostDirectives: [
-    {
-      directive: NgpDialogTrigger,
-      inputs: [
-        'ngpDialogTrigger:hellDialogTrigger',
-        'ngpDialogTriggerCloseOnEscape:closeOnEscape',
-        'ngpDialogTriggerCloseOnOutsideClick:closeOnOutsideClick',
-      ],
-      outputs: ['ngpDialogTriggerClosed:closed'],
-    },
-  ],
   host: {
-    '(pointerdown)': 'primeScope()',
-    '(click)': 'primeScope()',
-    '(keydown.enter)': 'primeScope()',
-    '(keydown.space)': 'primeScope()',
+    '(click)': 'launch()',
   },
 })
-export class HellDialogTrigger {
-  readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+export class HellDialogTrigger<T = unknown> {
+  readonly template = input.required<TemplateRef<HellDialogTemplateContext>>({
+    alias: 'hellDialogTrigger',
+  });
+  readonly closeOnEscape = input<
+    NgpDismissGuard<KeyboardEvent> | undefined,
+    NgpDismissGuardInput<KeyboardEvent> | undefined
+  >(undefined, {
+    alias: 'closeOnEscape',
+    transform: optionalDismissGuardAttribute,
+  });
+  readonly closeOnOutsideClick = input<
+    NgpDismissGuard<Element> | undefined,
+    NgpDismissGuardInput<Element> | undefined
+  >(undefined, {
+    alias: 'closeOnOutsideClick',
+    transform: optionalDismissGuardAttribute,
+  });
+  readonly closed = output<T>();
 
-  private readonly scope = inject(HellDialogScopeCoordinator);
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly dialogManager = inject(NgpDialogManager);
+  private readonly injector = inject(Injector);
 
-  protected primeScope(): void {
-    this.scope.primeFromTrigger(this.element.nativeElement);
+  protected launch(): void {
+    const root = hellFindDialogScopeRoot(this.element.nativeElement);
+    const injector = Injector.create({
+      parent: this.injector,
+      providers: [{ provide: HELL_DIALOG_SCOPE_ROOT, useValue: root }],
+    });
+    const dialogRef = this.dialogManager.open(this.template(), {
+      injector,
+      closeOnEscape: this.closeOnEscape(),
+      closeOnOutsideClick: this.closeOnOutsideClick(),
+    });
+
+    dialogRef.closed.subscribe(({ result }) => this.closed.emit(result as T));
   }
+}
+
+function optionalDismissGuardAttribute<T>(
+  value: NgpDismissGuardInput<T> | undefined,
+): NgpDismissGuard<T> | undefined {
+  return value === undefined ? undefined : dismissGuardAttribute(value);
 }
 
 @Directive({
@@ -70,7 +110,7 @@ export class HellDialogOverlay extends HellStyleable {
   readonly scoped = input(false, { transform: booleanAttribute });
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly coordinator = inject(HellDialogScopeCoordinator);
+  private readonly scopeRoot = inject(HELL_DIALOG_SCOPE_ROOT, { optional: true });
   private readonly doc = inject(DOCUMENT);
   private adapter: HellDialogScopedOverlayAdapter | null = null;
 
@@ -86,7 +126,7 @@ export class HellDialogOverlay extends HellStyleable {
 
   private connectScope(): void {
     if (this.adapter) return;
-    const root = this.coordinator.claimRoot();
+    const root = this.scopeRoot;
     if (!root) return;
     this.adapter = new HellDialogScopedOverlayAdapter(root, this.element.nativeElement, this.doc);
     this.adapter.connect();
@@ -113,7 +153,7 @@ export class HellDialogOverlay extends HellStyleable {
     '[attr.data-dialog-root]': '"true"',
   },
 })
-export class HellDialogScope extends HellStyleable {}
+export class HellDialogScope {}
 
 @Directive({
   selector: '[hellDialog]',

@@ -55,10 +55,57 @@ class TestHost {
   readonly collapsedEvents: boolean[] = [];
 }
 
+@Component({
+  imports: [...HELL_APP_SHELL_DIRECTIVES],
+  template: `
+    <div
+      hellAppShell
+      [sidenavCollapsed]="sidenavCollapsed()"
+      (sidenavCollapsedChange)="sidenavEvents.push($event)"
+      [secondaryHidden]="secondaryHidden()"
+      (secondaryHiddenChange)="secondaryEvents.push($event)"
+    >
+      <header hellAppTopbar>
+        <button id="controlled-sidenav-toggle" hellSidenavToggle type="button"></button>
+      </header>
+      <nav id="controlled-sidenav" hellAppSidenav>Navigation</nav>
+      <main hellAppContent>Content</main>
+      <aside id="controlled-secondary" hellAppSecondary>
+        <button id="controlled-secondary-toggle" hellSecondaryToggle type="button"></button>
+        <div hellAppSecondaryBody>Secondary</div>
+      </aside>
+    </div>
+  `,
+})
+class ControlledShellHost {
+  readonly sidenavCollapsed = signal(false);
+  readonly secondaryHidden = signal(false);
+  readonly sidenavEvents: boolean[] = [];
+  readonly secondaryEvents: boolean[] = [];
+}
+
+@Component({
+  imports: [...HELL_APP_SHELL_DIRECTIVES],
+  template: `
+    <div id="unstyled-shell" hellAppShell unstyled>
+      <header hellAppTopbar unstyled>
+        <button id="unstyled-sidenav-toggle" hellSidenavToggle type="button"></button>
+      </header>
+      <nav id="unstyled-sidenav" hellAppSidenav unstyled>Navigation</nav>
+      <main hellAppContent unstyled>Content</main>
+      <aside id="unstyled-secondary" hellAppSecondary unstyled>
+        <button id="unstyled-secondary-toggle" hellSecondaryToggle type="button"></button>
+        <div id="unstyled-secondary-body" hellAppSecondaryBody unstyled>Secondary</div>
+      </aside>
+    </div>
+  `,
+})
+class UnstyledShellHost {}
+
 describe('HellAppShell secondary panel', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TestHost],
+      imports: [TestHost, ControlledShellHost, UnstyledShellHost],
     }).compileComponents();
   });
 
@@ -117,6 +164,61 @@ describe('HellAppShell secondary panel', () => {
     query<HTMLButtonElement>(fixture.nativeElement, '#controlled-nav-section-toggle').click();
     fixture.detectChanges();
     expect(host.collapsedEvents).toEqual([true]);
+  });
+
+  it('treats explicit shell inputs as the source of truth', () => {
+    const fixture = TestBed.createComponent(ControlledShellHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const sidenav = query(fixture.nativeElement, '#controlled-sidenav');
+    const secondary = query(fixture.nativeElement, '#controlled-secondary');
+    const sidenavToggle = query<HTMLButtonElement>(fixture.nativeElement, '#controlled-sidenav-toggle');
+    const secondaryToggle = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      '#controlled-secondary-toggle',
+    );
+
+    expect(sidenav.getAttribute('data-collapsed')).toBeNull();
+    expect(secondary.getAttribute('data-hidden')).toBeNull();
+
+    sidenavToggle.click();
+    secondaryToggle.click();
+    fixture.detectChanges();
+
+    expect(host.sidenavEvents).toEqual([true]);
+    expect(host.secondaryEvents).toEqual([true]);
+    expect(sidenav.getAttribute('data-collapsed')).toBeNull();
+    expect(secondary.getAttribute('data-hidden')).toBeNull();
+
+    host.sidenavCollapsed.set(true);
+    host.secondaryHidden.set(true);
+    fixture.detectChanges();
+
+    expect(sidenav.getAttribute('data-collapsed')).toBe('true');
+    expect(secondary.getAttribute('data-hidden')).toBe('true');
+  });
+
+  it('keeps behavior sentinels when shell parts opt out of styling', () => {
+    const fixture = TestBed.createComponent(UnstyledShellHost);
+    fixture.detectChanges();
+
+    const shell = query(fixture.nativeElement, '#unstyled-shell');
+    const sidenav = query(fixture.nativeElement, '#unstyled-sidenav');
+    const secondary = query(fixture.nativeElement, '#unstyled-secondary');
+    const sidenavToggle = query<HTMLButtonElement>(fixture.nativeElement, '#unstyled-sidenav-toggle');
+    const secondaryToggle = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      '#unstyled-secondary-toggle',
+    );
+
+    expect(shell.classList.contains('hell-shell')).toBe(false);
+    expect(sidenav.classList.contains('hell-sidenav')).toBe(false);
+    expect(secondary.classList.contains('hell-secondary')).toBe(false);
+    expect(sidenav.getAttribute('data-hell-app-shell-panel')).toBe('sidenav');
+    expect(secondary.getAttribute('data-hell-app-shell-panel')).toBe('secondary');
+    expect(sidenavToggle.getAttribute('data-hell-app-shell-toggle')).toBe('sidenav');
+    expect(secondaryToggle.getAttribute('data-hell-app-shell-toggle')).toBe('secondary');
   });
 
   it('roundtrips state via header toggle and rail toggle', () => {

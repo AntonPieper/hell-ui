@@ -3,6 +3,7 @@ import type { DestroyRef } from '@angular/core';
 import {
   HellFloatingDismissController,
   HellFloatingInteractionController,
+  HellFloatingScopedInsetsRuntime,
   HellFloatingScopeRegistry,
   hellDismissOn,
   hellEscapeKey,
@@ -35,6 +36,38 @@ describe('Floating Scope', () => {
     destroy.run();
 
     expect(scope.containsFloatingTarget(child)).toBe(false);
+  });
+
+  it('writes scoped inset vars to foreign-realm elements without falling back globally', () => {
+    const iframe = document.createElement('iframe');
+    document.body.append(iframe);
+    const foreignDocument = iframe.contentDocument;
+    if (!foreignDocument) throw new Error('Expected iframe document.');
+
+    const root = foreignDocument.createElement('section');
+    const overlay = foreignDocument.createElement('div');
+    foreignDocument.body.append(root, overlay);
+    mockRect(root, { left: 10, top: 20, right: 310, bottom: 220 });
+
+    const runtime = new HellFloatingScopedInsetsRuntime({
+      document: foreignDocument,
+      rootSelector: '[data-scope-root]',
+      variables: {
+        top: '--hell-test-top',
+        right: '--hell-test-right',
+        bottom: '--hell-test-bottom',
+        left: '--hell-test-left',
+      },
+      styleTargets: () => [root, overlay],
+    });
+
+    runtime.primeRoot(root);
+
+    expect(root.style.getPropertyValue('--hell-test-left')).toBe('10px');
+    expect(overlay.style.getPropertyValue('--hell-test-left')).toBe('10px');
+    expect(foreignDocument.documentElement.style.getPropertyValue('--hell-test-left')).toBe('');
+
+    runtime.clear();
   });
 
   it('dismisses only when a rule matches an event target outside the Floating Scope', () => {
@@ -85,6 +118,33 @@ describe('Floating Scope', () => {
     outside.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
 
     expect(dismissals).toEqual([]);
+
+    destroy.run();
+  });
+
+  it('dismisses Escape key events from a foreign document realm', () => {
+    const iframe = document.createElement('iframe');
+    document.body.append(iframe);
+    const foreignDocument = iframe.contentDocument;
+    const foreignWindow = iframe.contentWindow as (Window & typeof globalThis) | null;
+    if (!foreignDocument || !foreignWindow) throw new Error('Expected iframe realm.');
+
+    const root = foreignDocument.createElement('div');
+    foreignDocument.body.append(root);
+
+    const dismissals: string[] = [];
+    const destroy = createDestroyRef();
+    const controller = new HellFloatingDismissController({
+      root: () => root,
+      ownerDocument: () => foreignDocument,
+      dismiss: hellEscapeKey,
+      onDismiss: ({ event }) => dismissals.push(event.type),
+    });
+    controller.connect(destroy.ref);
+
+    root.dispatchEvent(new foreignWindow.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+    expect(dismissals).toEqual(['keydown']);
 
     destroy.run();
   });
@@ -177,6 +237,24 @@ describe('Floating Scope', () => {
     expect(scope.containsFloatingTarget(surfaceChild)).toBe(false);
   });
 });
+
+function mockRect(
+  element: HTMLElement,
+  rect: Pick<DOMRect, 'left' | 'top' | 'right' | 'bottom'>,
+): void {
+  Object.defineProperty(element, 'getBoundingClientRect', {
+    configurable: true,
+    value: () =>
+      ({
+        ...rect,
+        width: rect.right - rect.left,
+        height: rect.bottom - rect.top,
+        x: rect.left,
+        y: rect.top,
+        toJSON: () => undefined,
+      }) as DOMRect,
+  });
+}
 
 function createDestroyRef() {
   const callbacks: (() => void)[] = [];

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { InjectionToken } from '@angular/core';
 import {
   HellFloatingScopedInsetsRuntime,
   hellFindFloatingScopeRoot,
@@ -15,20 +15,9 @@ const HELL_DIALOG_SCOPE_VARS: HellFloatingInsetVars = {
   left: '--hell-dialog-scope-left',
 } as const;
 
-@Injectable({ providedIn: 'root' })
-export class HellDialogScopeCoordinator {
-  private pendingRoot: HTMLElement | null = null;
-
-  primeFromTrigger(trigger: HTMLElement): void {
-    this.pendingRoot = hellFindDialogScopeRoot(trigger);
-  }
-
-  claimRoot(): HTMLElement | null {
-    const root = this.pendingRoot;
-    this.pendingRoot = null;
-    return root;
-  }
-}
+export const HELL_DIALOG_SCOPE_ROOT = new InjectionToken<HTMLElement | null>(
+  'HELL_DIALOG_SCOPE_ROOT',
+);
 
 /**
  * Adapter that copies one Dialog Scope root's insets onto the portaled overlay.

@@ -63,7 +63,6 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellDialog', area: 'primitive', coverage: 'static' },
   { symbol: 'HellDialogDescription', area: 'primitive', coverage: 'static' },
   { symbol: 'HellDialogOverlay', area: 'primitive', coverage: 'static' },
-  { symbol: 'HellDialogScope', area: 'primitive', coverage: 'static' },
   { symbol: 'HellDialogTitle', area: 'primitive', coverage: 'static' },
   { symbol: 'HellField', area: 'primitive', coverage: 'dom' },
   { symbol: 'HellFieldDescription', area: 'primitive', coverage: 'dom' },

@@ -1,35 +1,53 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
+import { NgpDialogManager } from 'ng-primitives/dialog';
 
-import { HELL_APP_SHELL_DIRECTIVES } from '../../composites/app-shell/app-shell';
-import { HELL_DIALOG_DIRECTIVES, HellDialogTrigger } from './dialog';
-import {
-  HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE,
-  HellDialogScopeCoordinator,
-  HellDialogScopedOverlayAdapter,
-} from './dialog-scope';
+import { HELL_DIALOG_DIRECTIVES } from './dialog';
+import { HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE, HellDialogScopedOverlayAdapter } from './dialog-scope';
 
 @Component({
-  imports: [...HELL_APP_SHELL_DIRECTIVES, ...HELL_DIALOG_DIRECTIVES],
+  imports: [...HELL_DIALOG_DIRECTIVES],
   template: `
-    <div hellAppShell>
-      <header hellAppTopbar>Topbar</header>
-      <main hellAppContent>
-        <button type="button" [hellDialogTrigger]="dialog">Open scoped dialog</button>
-      </main>
-    </div>
+    <section id="scope-a" hellDialogScope>
+      <button id="open-a" type="button" [hellDialogTrigger]="dialogA">Open A</button>
+    </section>
+    <section id="scope-b" hellDialogScope>
+      <button id="open-b" type="button" [hellDialogTrigger]="dialogB">Open B</button>
+    </section>
 
-    <ng-template #dialog let-close="close">
-      <div hellDialogOverlay scoped>
+    <ng-template #dialogA let-close="close">
+      <div id="overlay-a" hellDialogOverlay scoped>
         <div hellDialog>
-          <button type="button" (click)="close()">Close</button>
+          <button type="button" (click)="close()">Close A</button>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #dialogB let-close="close">
+      <div id="overlay-b" hellDialogOverlay scoped>
+        <div hellDialog>
+          <button type="button" (click)="close()">Close B</button>
         </div>
       </div>
     </ng-template>
   `,
 })
 class ScopedDialogHost {}
+
+const nativeGetAnimations = HTMLElement.prototype.getAnimations;
+
+beforeAll(() => {
+  if (!nativeGetAnimations) {
+    Object.defineProperty(HTMLElement.prototype, 'getAnimations', {
+      configurable: true,
+      value: () => [],
+    });
+  }
+});
+
+afterAll(() => {
+  if (!nativeGetAnimations) delete (HTMLElement.prototype as Partial<HTMLElement>).getAnimations;
+});
 
 describe('HellDialogTrigger scoped overlays', () => {
   beforeEach(async () => {
@@ -38,22 +56,35 @@ describe('HellDialogTrigger scoped overlays', () => {
     }).compileComponents();
   });
 
-  it('primes the nearest Dialog Scope root without reaching into dialog internals', async () => {
+  afterEach(async () => {
+    await Promise.all(TestBed.inject(NgpDialogManager).openDialogs.map((dialog) => dialog.hideImmediate()));
+    document.body.replaceChildren();
+  });
+
+  it('carries Dialog Scope roots through each open instead of singleton pending state', async () => {
     const fixture = TestBed.createComponent(ScopedDialogHost);
     await settle(fixture);
 
-    const main = fixture.nativeElement.querySelector('main') as HTMLElement;
-    const trigger = fixture.debugElement
-      .query(By.directive(HellDialogTrigger))
-      .injector.get(HellDialogTrigger) as unknown as { primeScope(): void };
-    const coordinator = TestBed.inject(HellDialogScopeCoordinator);
+    const rootA = query(fixture.nativeElement, '#scope-a');
+    const rootB = query(fixture.nativeElement, '#scope-b');
+    mockRect(rootA, { left: 10, top: 20, right: 310, bottom: 220 });
+    mockRect(rootB, { left: 40, top: 60, right: 240, bottom: 260 });
 
-    expect(main.getAttribute(HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE)).toBe('true');
-    expect(main.getAttribute('data-dialog-root')).toBe('true');
+    expect(rootA.getAttribute(HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE)).toBe('true');
+    expect(rootA.getAttribute('data-dialog-root')).toBe('true');
+    expect(rootB.getAttribute(HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE)).toBe('true');
 
-    trigger.primeScope();
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-a').click();
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-b').click();
+    await settle(fixture);
 
-    expect(coordinator.claimRoot()).toBe(main);
+    const overlayA = query(document.body, '#overlay-a');
+    const overlayB = query(document.body, '#overlay-b');
+
+    expectVar(rootA, '--hell-dialog-scope-left', '10px');
+    expectVar(overlayA, '--hell-dialog-scope-left', '10px');
+    expectVar(rootB, '--hell-dialog-scope-left', '40px');
+    expectVar(overlayB, '--hell-dialog-scope-left', '40px');
   });
 });
 
@@ -99,6 +130,12 @@ async function settle(fixture: { detectChanges(): void; whenStable(): Promise<un
   fixture.detectChanges();
   await fixture.whenStable();
   fixture.detectChanges();
+}
+
+function query<T extends HTMLElement = HTMLElement>(root: ParentNode, selector: string): T {
+  const element = root.querySelector(selector);
+  if (!(element instanceof HTMLElement)) throw new Error(`Expected ${selector}.`);
+  return element as T;
 }
 
 function mockRect(

@@ -18,11 +18,10 @@ import {
  * directives so consumers control content while we own the grid layout.
  *
  * Two ways to control state:
- *   1. Pass `[sidenavCollapsed]` / `[secondaryHidden]` from your parent
- *      component (controlled mode).
- *   2. Use the built-in toggle directives (`hellSidenavToggle`,
- *      `hellSecondaryToggle`) which mutate internal signals on the shell —
- *      no parent state required.
+ *   1. Bind `[sidenavCollapsed]` / `[secondaryHidden]` and handle the paired
+ *      `...Change` outputs from your parent component (controlled mode).
+ *   2. Leave those inputs unset and use the built-in button toggle directives
+ *      (`hellSidenavToggle`, `hellSecondaryToggle`) to mutate shell-owned state.
  *
  * Usage:
  *   <div hellAppShell>
@@ -53,11 +52,16 @@ import {
   exportAs: 'hellAppShell',
 })
 export class HellAppShell extends HellStyleable {
-  readonly sidenavCollapsed = input(false, { transform: booleanAttribute });
-  readonly secondaryHidden = input(false, { transform: booleanAttribute });
+  readonly sidenavCollapsed = input<boolean | null, boolean | string | null | undefined>(null, {
+    transform: nullableBooleanAttribute,
+  });
+  readonly sidenavCollapsedChange = output<boolean>();
+  readonly secondaryHidden = input<boolean | null, boolean | string | null | undefined>(null, {
+    transform: nullableBooleanAttribute,
+  });
+  readonly secondaryHiddenChange = output<boolean>();
 
-  /** Internal desktop toggles — written by the toggle directives. Combined
-   *  with the controlled inputs via OR so either path works. */
+  /** Internal toggles — written only while the matching input is uncontrolled. */
   protected readonly _sidenavCollapsed = signal(false);
   protected readonly _secondaryHidden = signal(false);
 
@@ -88,38 +92,54 @@ export class HellAppShell extends HellStyleable {
 
   readonly isMobileLayout = () => this._isMobileLayout();
 
-  readonly isSidenavCollapsed = () =>
-    this.isMobileLayout()
-      ? this.sidenavCollapsed() || !this._mobileSidenavOpen()
-      : this.sidenavCollapsed() || this._sidenavCollapsed();
+  readonly isSidenavCollapsed = () => {
+    const controlled = this.sidenavCollapsed();
+    if (controlled !== null) return controlled;
+    return this.isMobileLayout() ? !this._mobileSidenavOpen() : this._sidenavCollapsed();
+  };
 
-  readonly isSecondaryHidden = () =>
-    this.isMobileLayout()
-      ? this.secondaryHidden() || !this._mobileSecondaryOpen()
-      : this.secondaryHidden() || this._secondaryHidden();
+  readonly isSecondaryHidden = () => {
+    const controlled = this.secondaryHidden();
+    if (controlled !== null) return controlled;
+    return this.isMobileLayout() ? !this._mobileSecondaryOpen() : this._secondaryHidden();
+  };
 
   toggleSidenav() {
-    if (this.isMobileLayout()) {
-      this._mobileSidenavOpen.update((v) => !v);
-      if (this._mobileSidenavOpen()) this._mobileSecondaryOpen.set(false);
-      return;
+    const next = !this.isSidenavCollapsed();
+    this.setSidenavCollapsed(next);
+    if (this.isMobileLayout() && !next && !this.isSecondaryHidden()) {
+      this.setSecondaryHidden(true);
     }
-    this._sidenavCollapsed.update((v) => !v);
   }
 
   toggleSecondary() {
-    if (this.isMobileLayout()) {
-      this._mobileSecondaryOpen.update((v) => !v);
-      if (this._mobileSecondaryOpen()) this._mobileSidenavOpen.set(false);
-      return;
+    const next = !this.isSecondaryHidden();
+    this.setSecondaryHidden(next);
+    if (this.isMobileLayout() && !next && !this.isSidenavCollapsed()) {
+      this.setSidenavCollapsed(true);
     }
-    this._secondaryHidden.update((v) => !v);
   }
 
   closeMobilePanels() {
     if (!this.isMobileLayout()) return;
-    this._mobileSidenavOpen.set(false);
-    this._mobileSecondaryOpen.set(false);
+    if (!this.isSidenavCollapsed()) this.setSidenavCollapsed(true);
+    if (!this.isSecondaryHidden()) this.setSecondaryHidden(true);
+  }
+
+  private setSidenavCollapsed(next: boolean): void {
+    if (this.sidenavCollapsed() === null) {
+      if (this.isMobileLayout()) this._mobileSidenavOpen.set(!next);
+      else this._sidenavCollapsed.set(next);
+    }
+    this.sidenavCollapsedChange.emit(next);
+  }
+
+  private setSecondaryHidden(next: boolean): void {
+    if (this.secondaryHidden() === null) {
+      if (this.isMobileLayout()) this._mobileSecondaryOpen.set(!next);
+      else this._secondaryHidden.set(next);
+    }
+    this.secondaryHiddenChange.emit(next);
   }
 
   protected dismissMobilePanels(event: PointerEvent) {
@@ -131,6 +151,10 @@ export class HellAppShell extends HellStyleable {
     const insidePanelOrToggle = this.pathContains(
       path,
       (element) =>
+        element.getAttribute('data-hell-app-shell-panel') === 'sidenav' ||
+        element.getAttribute('data-hell-app-shell-panel') === 'secondary' ||
+        element.getAttribute('data-hell-app-shell-toggle') === 'sidenav' ||
+        element.getAttribute('data-hell-app-shell-toggle') === 'secondary' ||
         element.classList.contains('hell-sidenav') ||
         element.classList.contains('hell-secondary') ||
         element.hasAttribute('hellappsidenav') ||
@@ -147,7 +171,7 @@ export class HellAppShell extends HellStyleable {
   }
 
   private pathContains(path: EventTarget[], predicate: (element: Element) => boolean): boolean {
-    return path.some((target) => target instanceof Element && predicate(target));
+    return path.some((target) => isElementTarget(target) && predicate(target));
   }
 }
 
@@ -161,6 +185,7 @@ export class HellAppTopbar extends HellStyleable {}
   selector: '[hellAppSidenav]',
   host: {
     '[class.hell-sidenav]': '!unstyled()',
+    '[attr.data-hell-app-shell-panel]': '"sidenav"',
     '[attr.data-collapsed]': 'isCollapsed() ? "true" : null',
     '[attr.data-mobile-hidden]': 'isMobileHidden() ? "true" : null',
     '[attr.aria-hidden]': 'isMobileHidden() ? "true" : null',
@@ -242,7 +267,7 @@ export class HellNavSection extends HellStyleable {
 }
 
 @Directive({
-  selector: '[hellNavSectionToggle]',
+  selector: 'button[hellNavSectionToggle]',
   host: {
     type: 'button',
     '[class.hell-nav-section-toggle]': '!unstyled()',
@@ -301,12 +326,13 @@ export class HellAppContent extends HellStyleable {
 
 /** Click anywhere → toggles `sidenavCollapsed` on the parent shell. */
 @Directive({
-  selector: '[hellSidenavToggle]',
+  selector: 'button[hellSidenavToggle]',
   host: {
     type: 'button',
     '(click)': 'toggle()',
     '[attr.aria-pressed]': 'collapsed()',
     '[attr.aria-label]': 'collapsed() ? "Expand sidebar" : "Collapse sidebar"',
+    '[attr.data-hell-app-shell-toggle]': '"sidenav"',
     '[attr.data-hell-sidenav-toggle]': 'appearance() === "plain" ? null : appearance()',
   },
 })
@@ -321,12 +347,13 @@ export class HellSidenavToggle {
 
 /** Click anywhere → toggles `secondaryHidden` on the parent shell. */
 @Directive({
-  selector: '[hellSecondaryToggle]',
+  selector: 'button[hellSecondaryToggle]',
   host: {
     type: 'button',
     '(click)': 'toggle()',
     '[attr.aria-pressed]': '!hidden()',
     '[attr.aria-label]': 'hidden() ? "Show secondary panel" : "Hide secondary panel"',
+    '[attr.data-hell-app-shell-toggle]': '"secondary"',
     '[attr.data-hell-secondary-toggle]': 'appearance() === "plain" ? null : appearance()',
   },
 })
@@ -343,6 +370,7 @@ export class HellSecondaryToggle {
   selector: '[hellAppSecondary]',
   host: {
     '[class.hell-secondary]': '!unstyled()',
+    '[attr.data-hell-app-shell-panel]': '"secondary"',
     '[attr.data-hidden]': 'isHidden() ? "true" : null',
     '[attr.data-mobile-hidden]': 'isMobileHidden() ? "true" : null',
   },
@@ -366,6 +394,19 @@ export class HellAppSecondary extends HellStyleable {
 })
 export class HellAppSecondaryBody extends HellStyleable {
   readonly secondary = inject(HellAppSecondary);
+}
+
+function nullableBooleanAttribute(value: boolean | string | null | undefined): boolean | null {
+  return value == null ? null : booleanAttribute(value);
+}
+
+function isElementTarget(target: EventTarget): target is Element {
+  return (
+    typeof target === 'object' &&
+    target !== null &&
+    (target as Node).nodeType === 1 &&
+    typeof (target as Element).hasAttribute === 'function'
+  );
 }
 
 export const HELL_APP_SHELL_DIRECTIVES = [

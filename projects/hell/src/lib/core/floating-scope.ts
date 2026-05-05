@@ -49,8 +49,7 @@ export class HellFloatingScopeRegistry implements HellFloatingScope {
 }
 
 export function hellFloatingTargetNode(target: EventTarget | Node | null): Node | null {
-  if (!target || typeof Node === 'undefined' || !(target instanceof Node)) return null;
-  return target;
+  return isNodeLike(target) ? target : null;
 }
 
 /**
@@ -194,11 +193,27 @@ export class HellFloatingScopedInsetsRuntime {
 
   private styleTargets(): readonly HTMLElement[] {
     const targets = this.options.styleTargets?.() ?? [this.options.styleTarget?.()];
-    const concrete = targets.filter(
-      (target): target is HTMLElement => target instanceof HTMLElement,
-    );
+    const concrete = targets.filter(isHtmlElementLike);
     return concrete.length ? concrete : [this.options.document.documentElement];
   }
+}
+
+function isNodeLike(target: EventTarget | Node | null): target is Node {
+  return (
+    typeof target === 'object' &&
+    target !== null &&
+    typeof (target as Node).nodeType === 'number' &&
+    typeof (target as Node).contains === 'function'
+  );
+}
+
+function isHtmlElementLike(target: HTMLElement | null | undefined): target is HTMLElement {
+  return (
+    typeof target === 'object' &&
+    target !== null &&
+    (target as Node).nodeType === 1 &&
+    typeof (target as HTMLElement).style?.setProperty === 'function'
+  );
 }
 
 export function hellFindFloatingScopeRoot(
@@ -292,11 +307,15 @@ export const hellOutsideFocus: HellDismissRule = (context) =>
 
 /** Dismiss on Escape only while focus/event target is inside the interaction. */
 export const hellEscapeKey: HellDismissRule = (context) =>
-  context.event instanceof KeyboardEvent &&
-  context.event.key === 'Escape' &&
-  context.isTargetInside()
-    ? {}
-    : null;
+  isEscapeKeyEvent(context.event) && context.isTargetInside() ? {} : null;
+
+function isEscapeKeyEvent(event: Event): event is KeyboardEvent {
+  return (
+    (event.type === 'keydown' || event.type === 'keyup') &&
+    typeof (event as KeyboardEvent).key === 'string' &&
+    (event as KeyboardEvent).key === 'Escape'
+  );
+}
 
 export interface HellFloatingDismissOptions {
   /** Primary logical owner of the floating interaction. Checked first. */

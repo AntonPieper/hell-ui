@@ -68,7 +68,8 @@ const HD_APP_SHELL_PAGE_ICONS = {
         <li>
           <code>hellAppShell</code> — host directive, exposes <code>isSidenavCollapsed()</code> and
           <code>isSecondaryHidden()</code> signals; takes <code>[sidenavCollapsed]</code> /
-          <code>[secondaryHidden]</code> for controlled mode.
+          <code>(sidenavCollapsedChange)</code> and <code>[secondaryHidden]</code> /
+          <code>(secondaryHiddenChange)</code> for controlled mode.
         </li>
         <li>
           Slots: <code>hellAppTopbar</code>, <code>hellAppSidenav</code>,
@@ -78,8 +79,8 @@ const HD_APP_SHELL_PAGE_ICONS = {
           a number in pixels or any CSS length.
         </li>
         <li>
-          Toggles: <code>hellSidenavToggle</code>, <code>hellSecondaryToggle</code> — apply to any
-          clickable element.
+          Toggles: <code>hellSidenavToggle</code>, <code>hellSecondaryToggle</code> — apply to
+          native <code>button</code> elements so keyboard and disabled semantics stay native.
         </li>
         <li>
           Sidenav items: <code>hellNavItem</code>, <code>hellNavItemIcon</code>,

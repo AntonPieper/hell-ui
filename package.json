@@ -37,7 +37,6 @@
     "@lezer/highlight": "^1.2.3",
     "@ng-icons/core": "^33.2.2",
     "@ng-icons/font-awesome": "^33.2.2",
-    "@tanstack/angular-table": "^8.21.4",
     "class-variance-authority": "^0.7.1",
     "ng-primitives": "^0.117.2",
     "pdfjs-dist": "^5.6.205",

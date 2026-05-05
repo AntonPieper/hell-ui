@@ -307,17 +307,17 @@ function checkComponentContract() {
     if (!styleableClasses.length) continue;
 
     const rel = file.slice(root.length + 1);
-    for (const className of styleableClasses) {
+    for (const { className, moduleSource } of styleableClasses) {
       if (publicStyleableModules.has(className)) {
         failures.push(`Duplicate public HellStyleable Module ${className} in ${rel}`);
       }
       publicStyleableModules.set(className, rel);
-    }
 
-    if (!source.includes('!unstyled()')) {
-      failures.push(
-        `${rel} extends HellStyleable but does not gate default styling with Style Opt-Out`,
-      );
+      if (!moduleSource.includes('!unstyled()')) {
+        failures.push(
+          `${rel} ${className} extends HellStyleable but does not gate default styling with Style Opt-Out`,
+        );
+      }
     }
 
     for (const booleanInput of source.matchAll(
@@ -362,11 +362,25 @@ function checkComponentContract() {
 }
 
 function exportedStyleableClasses(source) {
-  return [
+  const matches = [
     ...source.matchAll(/export\s+(?:abstract\s+)?class\s+([A-Za-z0-9_]+)(?:<[^>{}]*>)?[\s\S]*?\{/g),
-  ]
-    .filter((match) => match[0].includes('extends HellStyleable'))
-    .map((match) => match[1]);
+  ];
+  const moduleStarts = matches.map((match, index) => {
+    const classStart = match.index;
+    const previousClassStart = index === 0 ? 0 : matches[index - 1].index;
+    const directiveStart = source.lastIndexOf('@Directive', classStart);
+    const componentStart = source.lastIndexOf('@Component', classStart);
+    const decoratorStart = Math.max(directiveStart, componentStart);
+    return decoratorStart > previousClassStart ? decoratorStart : classStart;
+  });
+
+  return matches
+    .map((match, index) => ({
+      className: match[1],
+      classSource: match[0],
+      moduleSource: source.slice(moduleStarts[index], moduleStarts[index + 1] ?? source.length),
+    }))
+    .filter((module) => module.classSource.includes('extends HellStyleable'));
 }
 
 function checkFloatingRegistrationContract() {

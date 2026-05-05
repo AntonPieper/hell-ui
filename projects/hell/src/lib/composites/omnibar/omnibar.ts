@@ -603,7 +603,7 @@ export class HellOmnibarGroupLabel extends HellStyleable {}
  * are managed by the command palette/listbox pair; consumers control rendering.
  */
 @Directive({
-  selector: '[hellOmnibarItem]',
+  selector: 'button[hellOmnibarItem]',
   host: {
     '[class.hell-omnibar-item]': '!unstyled()',
     '[id]': 'itemId',
@@ -711,7 +711,7 @@ export class HellOmnibarActionsStrip extends HellStyleable {}
 
 /** Action button rendered in the actions strip. */
 @Directive({
-  selector: 'button[hellOmnibarAction], [hellOmnibarAction]',
+  selector: 'button[hellOmnibarAction]',
   host: {
     '[class.hell-omnibar-action]': '!unstyled()',
     role: 'menuitem',
