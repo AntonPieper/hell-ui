@@ -55,6 +55,7 @@ function formatPercent(value) {
 const junit = readJunitSummary();
 const coverage = readCoverageSummary();
 const linesPct = coverage?.lines?.pct;
+const errors = validateSummary(junit, coverage);
 
 const rows = [
   ['Tests', formatNumber(junit?.tests)],
@@ -86,4 +87,33 @@ if (process.env.GITHUB_STEP_SUMMARY) {
 
 if (Number.isFinite(linesPct)) {
   console.log(`CI coverage lines: ${linesPct.toFixed(2)}%`);
+}
+
+if (errors.length) {
+  console.error('CI summary failed:');
+  for (const error of errors) console.error(`- ${error}`);
+  process.exit(1);
+}
+
+function validateSummary(junit, coverage) {
+  const errors = [];
+  if (!junit) {
+    errors.push(`Missing or malformed JUnit report at ${junitPath}`);
+  } else {
+    for (const field of ['tests', 'failures', 'errors', 'skipped', 'time']) {
+      if (!Number.isFinite(junit[field])) errors.push(`JUnit summary field ${field} is missing`);
+    }
+  }
+
+  if (!coverage) {
+    errors.push(`Missing or malformed coverage summary at ${coverageSummaryPath}`);
+  } else {
+    for (const field of ['lines', 'branches', 'functions', 'statements']) {
+      if (!Number.isFinite(coverage[field]?.pct)) {
+        errors.push(`Coverage summary field ${field}.pct is missing`);
+      }
+    }
+  }
+
+  return errors;
 }
