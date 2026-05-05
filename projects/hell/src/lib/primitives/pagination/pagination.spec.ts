@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellPaginationStrip } from './pagination';
+import { HellPagination, HellPaginationFirst, HellPaginationStrip } from './pagination';
 
 @Component({
   imports: [HellPaginationStrip],
@@ -21,10 +21,23 @@ class PaginationHost {
   readonly pageEvents: number[] = [];
 }
 
+@Component({
+  imports: [HellPagination, HellPaginationFirst],
+  template: `
+    <nav hellPagination [page]="page()" [pageCount]="pageCount()">
+      <a hellPaginationFirst href="#first">First</a>
+    </nav>
+  `,
+})
+class PaginationAnchorHost {
+  readonly page = signal(1);
+  readonly pageCount = signal(3);
+}
+
 describe('HellPaginationStrip', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PaginationHost],
+      imports: [PaginationHost, PaginationAnchorHost],
     }).compileComponents();
   });
 
@@ -43,6 +56,19 @@ describe('HellPaginationStrip', () => {
     fixture.detectChanges();
 
     expect(pageButtonLabels(fixture.nativeElement)).toEqual(['6', '7', '8', '9', '10']);
+  });
+
+  it('guards disabled anchor pagination controls', () => {
+    const fixture = TestBed.createComponent(PaginationAnchorHost);
+    fixture.detectChanges();
+
+    const first = fixture.nativeElement.querySelector('a[hellPaginationFirst]') as HTMLAnchorElement;
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+
+    expect(first.getAttribute('aria-disabled')).toBe('true');
+    expect(first.getAttribute('tabindex')).toBe('-1');
+    expect(first.dispatchEvent(click)).toBe(false);
+    expect(click.defaultPrevented).toBe(true);
   });
 
   it('emits page changes from numbered and navigation buttons', () => {

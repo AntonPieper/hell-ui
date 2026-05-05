@@ -2,8 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   Directive,
+  ElementRef,
   booleanAttribute,
   computed,
+  inject,
   input,
 } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
@@ -31,6 +33,25 @@ const HELL_PAGINATION_ICONS = {
   faSolidChevronLeft,
   faSolidChevronRight,
 };
+
+abstract class HellPaginationAnchorGuard extends HellStyleable {
+  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+
+  protected anchorAriaDisabled(disabled: boolean): 'true' | null {
+    return this.isAnchor() && disabled ? 'true' : null;
+  }
+
+  protected preventDisabledAnchor(event: Event, disabled: boolean): void {
+    if (!this.isAnchor() || !disabled) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+
+  private isAnchor(): boolean {
+    return this.host.tagName.toLowerCase() === 'a';
+  }
+}
 
 /**
  * Wrappers around `ng-primitives/pagination`. Two ways to use:
@@ -67,9 +88,14 @@ export class HellPagination extends HellStyleable {}
     '[class.hell-pagination-item]': '!unstyled()',
     '[attr.data-variant]': '"ghost"',
     '[attr.data-icon-only]': '""',
+    '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
+    '(click)': 'preventDisabledAnchor($event, disabled())',
+    '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
 })
-export class HellPaginationFirst extends HellStyleable {}
+export class HellPaginationFirst extends HellPaginationAnchorGuard {
+  protected readonly disabled = inject(NgpPaginationFirst).disabled;
+}
 
 @Directive({
   selector: 'button[hellPaginationPrev], a[hellPaginationPrev]',
@@ -79,9 +105,14 @@ export class HellPaginationFirst extends HellStyleable {}
     '[class.hell-pagination-item]': '!unstyled()',
     '[attr.data-variant]': '"ghost"',
     '[attr.data-icon-only]': '""',
+    '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
+    '(click)': 'preventDisabledAnchor($event, disabled())',
+    '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
 })
-export class HellPaginationPrev extends HellStyleable {}
+export class HellPaginationPrev extends HellPaginationAnchorGuard {
+  protected readonly disabled = inject(NgpPaginationPrevious).disabled;
+}
 
 @Directive({
   selector: 'button[hellPaginationNext], a[hellPaginationNext]',
@@ -91,9 +122,14 @@ export class HellPaginationPrev extends HellStyleable {}
     '[class.hell-pagination-item]': '!unstyled()',
     '[attr.data-variant]': '"ghost"',
     '[attr.data-icon-only]': '""',
+    '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
+    '(click)': 'preventDisabledAnchor($event, disabled())',
+    '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
 })
-export class HellPaginationNext extends HellStyleable {}
+export class HellPaginationNext extends HellPaginationAnchorGuard {
+  protected readonly disabled = inject(NgpPaginationNext).disabled;
+}
 
 @Directive({
   selector: 'button[hellPaginationLast], a[hellPaginationLast]',
@@ -103,9 +139,14 @@ export class HellPaginationNext extends HellStyleable {}
     '[class.hell-pagination-item]': '!unstyled()',
     '[attr.data-variant]': '"ghost"',
     '[attr.data-icon-only]': '""',
+    '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
+    '(click)': 'preventDisabledAnchor($event, disabled())',
+    '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
 })
-export class HellPaginationLast extends HellStyleable {}
+export class HellPaginationLast extends HellPaginationAnchorGuard {
+  protected readonly disabled = inject(NgpPaginationLast).disabled;
+}
 
 @Directive({
   selector: 'button[hellPaginationButton], a[hellPaginationButton]',
@@ -120,9 +161,14 @@ export class HellPaginationLast extends HellStyleable {}
     '[class.hell-pagination-item]': '!unstyled()',
     '[attr.data-variant]': '"ghost"',
     '[attr.data-icon-only]': '""',
+    '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
+    '(click)': 'preventDisabledAnchor($event, disabled())',
+    '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
 })
-export class HellPaginationButton extends HellStyleable {}
+export class HellPaginationButton extends HellPaginationAnchorGuard {
+  protected readonly disabled = inject(NgpPaginationButton).disabled;
+}
 
 /**
  * Ready-made pagination strip. Numbered buttons are clamped to a sliding

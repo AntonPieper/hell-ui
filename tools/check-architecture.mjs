@@ -418,9 +418,18 @@ function checkComponentContract() {
 }
 
 function exportedStyleableClasses(source) {
-  return decoratedClassModules(source).filter((module) =>
-    module.classSource.includes('extends HellStyleable'),
+  const styleableBases = new Set(
+    [...source.matchAll(/(?:abstract\s+)?class\s+([A-Za-z0-9_]+)[^{]*extends\s+HellStyleable\b/g)].map(
+      (match) => match[1],
+    ),
   );
+
+  return decoratedClassModules(source).filter((module) => {
+    if (module.classSource.includes('extends HellStyleable')) return true;
+
+    const base = /extends\s+([A-Za-z0-9_]+)/.exec(module.classSource)?.[1];
+    return !!base && styleableBases.has(base);
+  });
 }
 
 function decoratedClassModules(source) {
