@@ -295,9 +295,10 @@ export class HellTableCell extends HellStyleable {
     '[class.hell-table-column-resizer]': '!unstyled()',
     '[attr.data-active]': 'dragging() ? "true" : null',
     '[attr.aria-valuenow]': 'ariaValueNow()',
+    '[attr.aria-disabled]': 'isDisabled() ? "true" : null',
+    '[attr.tabindex]': 'isDisabled() ? -1 : 0',
     role: 'separator',
     'aria-orientation': 'vertical',
-    tabindex: '0',
     '(pointerdown)': 'onPointerDown($event)',
     '(keydown)': 'onKey($event)',
   },
@@ -349,11 +350,17 @@ export class HellTableColumnResizer extends HellStyleable {
     if (event) this.columnResize.emit(event);
   }
 
+  protected isDisabled(): boolean {
+    return this.adjacentPair() === null;
+  }
+
   protected onPointerDown(e: PointerEvent) {
+    if (this.isDisabled()) return;
     this.resizeInteraction.startPointer(e);
   }
 
   protected onKey(e: KeyboardEvent) {
+    if (this.isDisabled()) return;
     this.resizeInteraction.applyKey(e);
   }
 

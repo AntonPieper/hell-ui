@@ -212,16 +212,29 @@ describe('Hell data table directives', () => {
     ]);
   });
 
-  it('does nothing when the last header resizer has no neighbor', () => {
+  it('marks the last header resizer disabled when it has no neighbor', () => {
     const fixture = TestBed.createComponent(DataTableHost);
     const host = fixture.componentInstance;
     fixture.detectChanges();
 
-    mockWidth(byId<HTMLTableCellElement>(fixture.nativeElement, 'role'), 80);
-    byId<HTMLButtonElement>(fixture.nativeElement, 'role-resizer').dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
-    );
+    const resizer = byId<HTMLButtonElement>(fixture.nativeElement, 'role-resizer');
+    const key = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true });
+    const pointer = new PointerEvent('pointerdown', {
+      button: 0,
+      pointerId: 8,
+      clientX: 10,
+      bubbles: true,
+      cancelable: true,
+    });
 
+    mockWidth(byId<HTMLTableCellElement>(fixture.nativeElement, 'role'), 80);
+    resizer.dispatchEvent(key);
+    resizer.dispatchEvent(pointer);
+
+    expect(resizer.getAttribute('aria-disabled')).toBe('true');
+    expect(resizer.getAttribute('tabindex')).toBe('-1');
+    expect(key.defaultPrevented).toBe(false);
+    expect(pointer.defaultPrevented).toBe(false);
     expect(host.resizeEvents).toEqual([]);
   });
 });
