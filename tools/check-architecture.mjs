@@ -9,6 +9,7 @@ checkDocsExamples();
 checkPackageEntryPoints();
 checkPackageDependencyContract();
 checkStyleEntryPoints();
+checkAppShellBreakpointContract();
 checkBehaviorSentinelContract();
 checkComponentContract();
 checkNativeButtonSelectorContract();
@@ -341,6 +342,29 @@ function checkBehaviorSentinelContract() {
 
     failures.push(
       `${file.slice(root.length + 1)} uses .hell-* style classes as behavior sentinels; use data attributes or element refs`,
+    );
+  }
+}
+
+function checkAppShellBreakpointContract() {
+  const shellSource = readFile(join(root, 'projects/hell/src/lib/composites/app-shell/app-shell.ts'));
+  const shellStyles = readFile(join(root, 'projects/hell/src/lib/styles/components/app-shell.css'));
+  const desktopMin = Number(
+    /HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX\s*=\s*(\d+)/.exec(shellSource)?.[1],
+  );
+
+  if (!Number.isFinite(desktopMin)) {
+    failures.push('App Shell breakpoint contract must expose HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX');
+    return;
+  }
+
+  if (!shellSource.includes('HELL_APP_SHELL_MOBILE_MAX_WIDTH_PX = HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX - 1')) {
+    failures.push('App Shell mobile matchMedia breakpoint must derive from the desktop CSS breakpoint');
+  }
+
+  if (!shellStyles.includes(`@media (min-width: ${desktopMin}px)`)) {
+    failures.push(
+      `App Shell CSS breakpoint must match HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX (${desktopMin}px)`,
     );
   }
 }

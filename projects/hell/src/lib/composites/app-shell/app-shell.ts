@@ -1,4 +1,8 @@
 import { HellStyleable } from '../../core/styleable';
+export const HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX = 768;
+export const HELL_APP_SHELL_MOBILE_MAX_WIDTH_PX = HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX - 1;
+export const HELL_APP_SHELL_MOBILE_MEDIA = `(max-width: ${HELL_APP_SHELL_MOBILE_MAX_WIDTH_PX}px)`;
+
 import {
   ChangeDetectionStrategy,
   Component,
@@ -73,7 +77,7 @@ export class HellAppShell extends HellStyleable {
 
   constructor() {
     super();
-    const media = globalThis.matchMedia?.('(max-width: 767px)');
+    const media = globalThis.matchMedia?.(HELL_APP_SHELL_MOBILE_MEDIA);
     if (!media) return;
 
     const updateMobileLayout = () => {
