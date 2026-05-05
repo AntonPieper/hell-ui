@@ -86,13 +86,9 @@ export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
     handlers: HellPdfViewerSessionHandlers,
   ): Promise<HellPdfViewerSession> {
     const pdfjs = await import('pdfjs-dist');
-    // pdf_viewer.mjs reads globalThis.pdfjsLib at module evaluation time.
-    // Import core first so viewer init cannot race that global assignment.
-    (globalThis as typeof globalThis & { pdfjsLib?: typeof pdfjs }).pdfjsLib = pdfjs;
-
     const workerPort = new Worker(new URL('./pdf.worker.ts', import.meta.url), { type: 'module' });
     const pdfWorker = new pdfjs.PDFWorker({ port: workerPort as any });
-    const viewerMod = await import('pdfjs-dist/web/pdf_viewer.mjs');
+    const viewerMod = await hellWithPdfJsGlobal(pdfjs, () => import('pdfjs-dist/web/pdf_viewer.mjs'));
     const eventBus = new viewerMod.EventBus();
     const linkService = new viewerMod.PDFLinkService({ eventBus });
     const findController = new viewerMod.PDFFindController({ eventBus, linkService });
@@ -153,6 +149,26 @@ export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
   ): Promise<HellPdfPrintSession> {
     const handle = await createHiddenPdfPrintHandle(source, ownerDocument, options);
     return new HellPdfIframePrintSession(handle);
+  }
+}
+
+export async function hellWithPdfJsGlobal<T>(
+  pdfjsLib: unknown,
+  loadViewerModule: () => Promise<T>,
+): Promise<T> {
+  // pdf_viewer.mjs reads globalThis.pdfjsLib at module evaluation time.
+  // Keep that pdf.js quirk contained to this import window so multiple
+  // viewer instances do not leave a permanent global mutation behind.
+  const globalWithPdfJs = globalThis as typeof globalThis & { pdfjsLib?: unknown };
+  const hadPrevious = Object.hasOwn(globalWithPdfJs, 'pdfjsLib');
+  const previous = globalWithPdfJs.pdfjsLib;
+  globalWithPdfJs.pdfjsLib = pdfjsLib;
+
+  try {
+    return await loadViewerModule();
+  } finally {
+    if (hadPrevious) globalWithPdfJs.pdfjsLib = previous;
+    else delete globalWithPdfJs.pdfjsLib;
   }
 }
 
