@@ -162,6 +162,40 @@ describe('PDF Runtime', () => {
     outside.remove();
   });
 
+  it('does not leak global shortcuts across viewer scopes', () => {
+    const hostA = document.createElement('div');
+    const hostB = document.createElement('div');
+    const insideA = document.createElement('button');
+    const insideB = document.createElement('button');
+    hostA.append(insideA);
+    hostB.append(insideB);
+    document.body.append(hostA, hostB);
+
+    const scopeA = new HellPdfViewerInteractionScope(() => hostA);
+    const scopeB = new HellPdfViewerInteractionScope(() => hostB);
+    const actionsA = createShortcutActions();
+    const actionsB = createShortcutActions();
+
+    scopeA.recordPointerTarget(insideA);
+    scopeB.recordPointerTarget(insideA);
+
+    expect(scopeA.handleGlobalShortcut(ctrlKey('+'), actionsA)).toBe(true);
+    expect(scopeB.handleGlobalShortcut(ctrlKey('+'), actionsB)).toBe(false);
+    expect(actionsA.zoomIn).toHaveBeenCalledOnce();
+    expect(actionsB.zoomIn).not.toHaveBeenCalled();
+
+    scopeA.recordPointerTarget(insideB);
+    scopeB.recordPointerTarget(insideB);
+
+    expect(scopeA.handleGlobalShortcut(ctrlKey('+'), actionsA)).toBe(false);
+    expect(scopeB.handleGlobalShortcut(ctrlKey('+'), actionsB)).toBe(true);
+    expect(actionsA.zoomIn).toHaveBeenCalledOnce();
+    expect(actionsB.zoomIn).toHaveBeenCalledOnce();
+
+    hostA.remove();
+    hostB.remove();
+  });
+
   it('handles shortcuts from a foreign document realm', () => {
     const iframe = document.createElement('iframe');
     document.body.append(iframe);
