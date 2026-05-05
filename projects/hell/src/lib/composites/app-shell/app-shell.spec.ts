@@ -92,7 +92,7 @@ class ControlledShellHost {
         <button id="unstyled-sidenav-toggle" hellSidenavToggle type="button"></button>
       </header>
       <nav id="unstyled-sidenav" hellAppSidenav unstyled>Navigation</nav>
-      <main hellAppContent unstyled>Content</main>
+      <main id="unstyled-content" hellAppContent unstyled>Content</main>
       <aside id="unstyled-secondary" hellAppSecondary unstyled>
         <button id="unstyled-secondary-toggle" hellSecondaryToggle type="button"></button>
         <div id="unstyled-secondary-body" hellAppSecondaryBody unstyled>Secondary</div>
@@ -102,11 +102,21 @@ class ControlledShellHost {
 })
 class UnstyledShellHost {}
 
+const nativeMatchMedia = globalThis.matchMedia;
+
 describe('HellAppShell secondary panel', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TestHost, ControlledShellHost, UnstyledShellHost],
     }).compileComponents();
+  });
+
+  afterEach(() => {
+    Object.defineProperty(globalThis, 'matchMedia', {
+      configurable: true,
+      writable: true,
+      value: nativeMatchMedia,
+    });
   });
 
   it('owns sidenav toggle labels in the default case', () => {
@@ -221,6 +231,29 @@ describe('HellAppShell secondary panel', () => {
     expect(secondaryToggle.getAttribute('data-hell-app-shell-toggle')).toBe('secondary');
   });
 
+  it('uses behavior sentinels, not style classes, when dismissing mobile panels', () => {
+    mockMobileLayout(true);
+    const fixture = TestBed.createComponent(UnstyledShellHost);
+    fixture.detectChanges();
+
+    const shell = query(fixture.nativeElement, '#unstyled-shell');
+    const sidenav = query(fixture.nativeElement, '#unstyled-sidenav');
+    const content = query(fixture.nativeElement, '#unstyled-content');
+    const sidenavToggle = query<HTMLButtonElement>(fixture.nativeElement, '#unstyled-sidenav-toggle');
+
+    sidenavToggle.click();
+    fixture.detectChanges();
+    expect(shell.getAttribute('data-mobile-sidenav-open')).toBe('true');
+
+    pointerDown(sidenav);
+    fixture.detectChanges();
+    expect(shell.getAttribute('data-mobile-sidenav-open')).toBe('true');
+
+    pointerDown(content);
+    fixture.detectChanges();
+    expect(shell.getAttribute('data-mobile-sidenav-open')).toBeNull();
+  });
+
   it('roundtrips state via header toggle and rail toggle', () => {
     const fixture = TestBed.createComponent(TestHost);
     fixture.detectChanges();
@@ -262,6 +295,30 @@ describe('HellAppShell secondary panel', () => {
     expect(body.hasAttribute('inert')).toBe(false);
   });
 });
+
+function mockMobileLayout(matches: boolean): void {
+  Object.defineProperty(globalThis, 'matchMedia', {
+    configurable: true,
+    writable: true,
+    value: vi.fn(
+      () =>
+        ({
+          matches,
+          media: '(max-width: 767px)',
+          onchange: null,
+          addEventListener: vi.fn(),
+          removeEventListener: vi.fn(),
+          addListener: vi.fn(),
+          removeListener: vi.fn(),
+          dispatchEvent: vi.fn(),
+        }) as unknown as MediaQueryList,
+    ),
+  });
+}
+
+function pointerDown(element: HTMLElement): void {
+  element.dispatchEvent(new Event('pointerdown', { bubbles: true, composed: true }));
+}
 
 function query<T extends HTMLElement = HTMLElement>(root: HTMLElement, selector: string): T {
   const element = root.querySelector(selector);

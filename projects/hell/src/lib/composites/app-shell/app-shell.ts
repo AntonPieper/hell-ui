@@ -154,17 +154,7 @@ export class HellAppShell extends HellStyleable {
         element.getAttribute('data-hell-app-shell-panel') === 'sidenav' ||
         element.getAttribute('data-hell-app-shell-panel') === 'secondary' ||
         element.getAttribute('data-hell-app-shell-toggle') === 'sidenav' ||
-        element.getAttribute('data-hell-app-shell-toggle') === 'secondary' ||
-        element.classList.contains('hell-sidenav') ||
-        element.classList.contains('hell-secondary') ||
-        element.hasAttribute('hellappsidenav') ||
-        element.hasAttribute('hellAppSidenav') ||
-        element.hasAttribute('hellappsecondary') ||
-        element.hasAttribute('hellAppSecondary') ||
-        element.hasAttribute('hellsidenavtoggle') ||
-        element.hasAttribute('hellSidenavToggle') ||
-        element.hasAttribute('hellsecondarytoggle') ||
-        element.hasAttribute('hellSecondaryToggle'),
+        element.getAttribute('data-hell-app-shell-toggle') === 'secondary',
     );
 
     if (!insidePanelOrToggle) this.closeMobilePanels();

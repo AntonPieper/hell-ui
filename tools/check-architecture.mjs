@@ -9,6 +9,7 @@ checkDocsExamples();
 checkPackageEntryPoints();
 checkPackageDependencyContract();
 checkStyleEntryPoints();
+checkBehaviorSentinelContract();
 checkComponentContract();
 checkNativeButtonSelectorContract();
 checkFloatingRegistrationContract();
@@ -315,6 +316,32 @@ function checkStyleEntryPoints() {
     if (!source.includes(`../components/${feature}.css`)) {
       failures.push(`Feature style entry point ${file} must import ../components/${feature}.css`);
     }
+  }
+}
+
+function checkBehaviorSentinelContract() {
+  const sourceRoot = join(root, 'projects/hell/src/lib');
+  const files = walk(sourceRoot).filter(
+    (file) =>
+      file.endsWith('.ts') &&
+      !file.endsWith('.spec.ts') &&
+      !file.endsWith('.d.ts') &&
+      !file.endsWith('pdf.worker.ts'),
+  );
+  const styleSelectorPatterns = [
+    /\.classList\.contains\(\s*['"]hell-/,
+    /\.closest\(\s*['"]\.hell-/,
+    /\.matches\(\s*['"]\.hell-/,
+    /\.querySelector(?:All)?\(\s*['"]\.hell-/,
+  ];
+
+  for (const file of files) {
+    const source = readFile(file);
+    if (!styleSelectorPatterns.some((pattern) => pattern.test(source))) continue;
+
+    failures.push(
+      `${file.slice(root.length + 1)} uses .hell-* style classes as behavior sentinels; use data attributes or element refs`,
+    );
   }
 }
 
