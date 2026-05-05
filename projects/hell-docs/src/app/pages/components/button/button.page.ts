@@ -58,7 +58,8 @@ const HD_BUTTON_PAGE_ICONS = {
       <h1>Button</h1>
       <p>
         Trigger an action or navigate. Built on the <code>NgpButton</code> primitive for keyboard,
-        focus and disabled handling. Use the <code>variant</code> input for visual emphasis and
+        focus and disabled handling. Anchor buttons expose <code>aria-disabled</code> and prevent
+        activation when disabled. Use the <code>variant</code> input for visual emphasis and
         <code>size</code> for density.
       </p>
 
@@ -109,6 +110,7 @@ const HD_BUTTON_PAGE_ICONS = {
         <li><code>size</code>: <code>xs | sm | md | lg | xl</code></li>
         <li><code>iconOnly</code>: square button for a single icon</li>
         <li><code>block</code>: stretches to container width</li>
+        <li><code>disabled</code>: native <code>disabled</code> on buttons, guarded <code>aria-disabled</code> on anchors</li>
         <li><code>unstyled</code>: opt out of all styling, keep behaviour</li>
       </ul>
 

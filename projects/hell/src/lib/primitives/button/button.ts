@@ -1,5 +1,5 @@
-import { Directive, booleanAttribute, input } from '@angular/core';
-import { NgpButton } from 'ng-primitives/button';
+import { Directive, ElementRef, booleanAttribute, inject, input } from '@angular/core';
+import { NgpButton, injectButtonState } from 'ng-primitives/button';
 import { HellButtonVariant, HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
 
@@ -26,6 +26,9 @@ import { HellStyleable } from '../../core/styleable';
     '[attr.data-size]': 'size()',
     '[attr.data-icon-only]': 'iconOnly() ? "" : null',
     '[attr.data-block]': 'block() ? "" : null',
+    '[attr.aria-disabled]': 'anchorAriaDisabled()',
+    '(click)': 'preventDisabledAnchor($event)',
+    '(keydown.enter)': 'preventDisabledAnchor($event)',
   },
 })
 export class HellButton extends HellStyleable {
@@ -33,4 +36,24 @@ export class HellButton extends HellStyleable {
   readonly size = input<HellSize>('md');
   readonly iconOnly = input(false, { transform: booleanAttribute });
   readonly block = input(false, { transform: booleanAttribute });
+
+  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  private readonly buttonState = injectButtonState();
+
+  protected anchorAriaDisabled(): 'true' | null {
+    return this.isAnchor() && this.buttonState().disabled() ? 'true' : null;
+  }
+
+  protected preventDisabledAnchor(event: Event): void {
+    if (!this.isAnchor() || !this.buttonState().disabled()) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+
+  private isAnchor(): boolean {
+    return this.host.tagName.toLowerCase() === 'a';
+  }
 }
