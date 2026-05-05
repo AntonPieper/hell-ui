@@ -9,6 +9,7 @@ checkDocsExamples();
 checkPackageEntryPoints();
 checkStyleEntryPoints();
 checkComponentContract();
+checkNativeButtonSelectorContract();
 checkFloatingRegistrationContract();
 
 if (failures.length) {
@@ -362,6 +363,12 @@ function checkComponentContract() {
 }
 
 function exportedStyleableClasses(source) {
+  return decoratedClassModules(source).filter((module) =>
+    module.classSource.includes('extends HellStyleable'),
+  );
+}
+
+function decoratedClassModules(source) {
   const matches = [
     ...source.matchAll(/export\s+(?:abstract\s+)?class\s+([A-Za-z0-9_]+)(?:<[^>{}]*>)?[\s\S]*?\{/g),
   ];
@@ -374,13 +381,44 @@ function exportedStyleableClasses(source) {
     return decoratorStart > previousClassStart ? decoratorStart : classStart;
   });
 
-  return matches
-    .map((match, index) => ({
-      className: match[1],
-      classSource: match[0],
-      moduleSource: source.slice(moduleStarts[index], moduleStarts[index + 1] ?? source.length),
-    }))
-    .filter((module) => module.classSource.includes('extends HellStyleable'));
+  return matches.map((match, index) => ({
+    className: match[1],
+    classSource: match[0],
+    moduleSource: source.slice(moduleStarts[index], moduleStarts[index + 1] ?? source.length),
+  }));
+}
+
+function checkNativeButtonSelectorContract() {
+  const sourceRoot = join(root, 'projects/hell/src/lib');
+  const files = walk(sourceRoot).filter(
+    (file) =>
+      file.endsWith('.ts') &&
+      !file.endsWith('.spec.ts') &&
+      !file.endsWith('.d.ts') &&
+      !file.endsWith('pdf.worker.ts'),
+  );
+
+  for (const file of files) {
+    const source = readFile(file);
+    const rel = file.slice(root.length + 1);
+    for (const module of decoratedClassModules(source)) {
+      if (!/\btype:\s*['"]button['"]/.test(module.moduleSource)) continue;
+
+      const selector = /selector:\s*['"]([^'"]+)['"]/.exec(module.moduleSource)?.[1];
+      if (!selector) continue;
+
+      const unsafeArms = selector
+        .split(',')
+        .map((arm) => arm.trim())
+        .filter((arm) => !/^button(?:\b|\[|\.|#|:)/.test(arm));
+
+      if (unsafeArms.length) {
+        failures.push(
+          `${rel} ${module.className} sets type=button but selector allows non-button hosts: ${unsafeArms.join(', ')}`,
+        );
+      }
+    }
+  }
 }
 
 function checkFloatingRegistrationContract() {

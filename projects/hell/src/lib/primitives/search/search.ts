@@ -12,7 +12,7 @@ import { HellStyleable } from '../../core/styleable';
 export class HellSearch extends HellStyleable {}
 
 @Directive({
-  selector: 'button[hellSearchClear], [hellSearchClear]',
+  selector: 'button[hellSearchClear]',
   hostDirectives: [NgpSearchClear],
   host: {
     '[class.hell-search-clear]': '!unstyled()',
