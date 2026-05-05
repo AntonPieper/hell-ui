@@ -1,4 +1,4 @@
-import { Directive, inject } from '@angular/core';
+import { Directive, ElementRef, inject } from '@angular/core';
 import type { Signal } from '@angular/core';
 import {
   NgpMenu,
@@ -82,9 +82,33 @@ export class HellMenu extends HellStyleable {
       inputs: ['ngpMenuItemDisabled:disabled', 'ngpMenuItemCloseOnSelect:closeOnSelect'],
     },
   ],
-  host: { '[class.hell-menu-item]': '!unstyled()' },
+  host: {
+    '[class.hell-menu-item]': '!unstyled()',
+    '[attr.aria-disabled]': 'nonNativeAriaDisabled()',
+    '(click)': 'preventDisabledNonNative($event)',
+    '(keydown.enter)': 'preventDisabledNonNative($event)',
+    '(keydown.space)': 'preventDisabledNonNative($event)',
+  },
 })
-export class HellMenuItem extends HellStyleable {}
+export class HellMenuItem extends HellStyleable {
+  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  private readonly menuItem = inject(NgpMenuItem);
+
+  protected nonNativeAriaDisabled(): 'true' | null {
+    return !this.isButton() && this.menuItem.disabled() ? 'true' : null;
+  }
+
+  protected preventDisabledNonNative(event: Event): void {
+    if (this.isButton() || !this.menuItem.disabled()) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+
+  private isButton(): boolean {
+    return this.host.tagName.toLowerCase() === 'button';
+  }
+}
 
 @Directive({
   selector: '[hellMenuSeparator]',
