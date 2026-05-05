@@ -27,6 +27,7 @@ describe('HellButton', () => {
     const enabledClick = new MouseEvent('click', { bubbles: true, cancelable: true });
 
     expect(anchor.getAttribute('aria-disabled')).toBeNull();
+    expect(anchor.getAttribute('tabindex')).toBeNull();
     expect(anchor.dispatchEvent(enabledClick)).toBe(true);
     expect(enabledClick.defaultPrevented).toBe(false);
 
@@ -36,6 +37,7 @@ describe('HellButton', () => {
     const disabledClick = new MouseEvent('click', { bubbles: true, cancelable: true });
 
     expect(anchor.getAttribute('aria-disabled')).toBe('true');
+    expect(anchor.getAttribute('tabindex')).toBe('-1');
     expect(anchor.dispatchEvent(disabledClick)).toBe(false);
     expect(disabledClick.defaultPrevented).toBe(true);
   });

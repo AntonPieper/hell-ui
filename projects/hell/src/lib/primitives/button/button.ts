@@ -27,6 +27,7 @@ import { HellStyleable } from '../../core/styleable';
     '[attr.data-icon-only]': 'iconOnly() ? "" : null',
     '[attr.data-block]': 'block() ? "" : null',
     '[attr.aria-disabled]': 'anchorAriaDisabled()',
+    '[attr.tabindex]': 'disabledAnchorTabIndex()',
     '(click)': 'preventDisabledAnchor($event)',
     '(keydown.enter)': 'preventDisabledAnchor($event)',
   },
@@ -42,6 +43,10 @@ export class HellButton extends HellStyleable {
 
   protected anchorAriaDisabled(): 'true' | null {
     return this.isAnchor() && this.buttonState().disabled() ? 'true' : null;
+  }
+
+  protected disabledAnchorTabIndex(): -1 | null {
+    return this.isAnchor() && this.buttonState().disabled() ? -1 : null;
   }
 
   protected preventDisabledAnchor(event: Event): void {
