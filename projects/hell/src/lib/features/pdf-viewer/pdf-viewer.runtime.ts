@@ -439,11 +439,25 @@ function isNodeLike(target: EventTarget | Node | null | undefined): target is No
 }
 
 function isPdfEditableTarget(target: EventTarget | null): boolean {
+  if (!isElementLike(target)) return false;
+
+  const element = target as Element;
   return (
-    isElementLike(target) &&
-    typeof (target as Element).matches === 'function' &&
-    (target as Element).matches('input,textarea,select')
+    (typeof element.matches === 'function' && element.matches('input,textarea,select')) ||
+    isInsideEditableRegion(element)
   );
+}
+
+function isInsideEditableRegion(element: Element): boolean {
+  let current: Element | null = element;
+
+  while (current) {
+    const value = current.getAttribute('contenteditable');
+    if (value !== null) return value.toLowerCase() !== 'false';
+    current = current.parentElement;
+  }
+
+  return false;
 }
 
 function isElementLike(target: EventTarget | null): target is Element {

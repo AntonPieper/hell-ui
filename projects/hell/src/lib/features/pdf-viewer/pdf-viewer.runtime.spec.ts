@@ -237,6 +237,30 @@ describe('PDF Runtime', () => {
 
     host.remove();
   });
+
+  it('keeps viewer key handling out of contenteditable regions', () => {
+    const host = document.createElement('div');
+    const editor = document.createElement('div');
+    const child = document.createElement('span');
+    editor.setAttribute('contenteditable', 'true');
+    editor.append(child);
+    host.append(editor);
+    document.body.append(host);
+
+    const scope = new HellPdfViewerInteractionScope(() => host);
+    const actions = createShortcutActions();
+    let handled = true;
+    child.addEventListener('keydown', (event) => {
+      handled = scope.handleViewerKey(event, actions);
+    });
+
+    child.dispatchEvent(new KeyboardEvent('keydown', { key: 'PageDown', bubbles: true }));
+
+    expect(handled).toBe(false);
+    expect(actions.nextPage).not.toHaveBeenCalled();
+
+    host.remove();
+  });
 });
 
 class FakePdfAdapter implements HellPdfRuntimeAdapter {
