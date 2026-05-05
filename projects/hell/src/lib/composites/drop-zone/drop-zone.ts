@@ -24,8 +24,9 @@ import {
     '[class.hell-dropzone]': '!unstyled()',
     '[attr.data-active]': 'active() ? "true" : null',
     '[attr.data-disabled]': 'disabled() ? "true" : null',
+    '[attr.aria-disabled]': 'disabled() ? "true" : null',
+    '[attr.tabindex]': 'disabled() ? -1 : 0',
     role: 'button',
-    tabindex: '0',
   },
 })
 export class HellDropZone extends HellStyleable {
@@ -77,9 +78,10 @@ export class HellDropZone extends HellStyleable {
 
   private ensureInput() {
     if (this.fileInput) return;
-    const inp = document.createElement('input');
+    const inp = this.host.ownerDocument.createElement('input');
     inp.type = 'file';
-    inp.style.display = 'none';
+    inp.hidden = true;
+    inp.tabIndex = -1;
     if (this.multiple()) inp.multiple = true;
     const a = this.accept();
     if (a) inp.accept = a;

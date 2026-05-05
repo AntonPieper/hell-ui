@@ -49,6 +49,8 @@ describe('HellDropZone', () => {
     expect(input).toBeInstanceOf(HTMLInputElement);
     expect((input as HTMLInputElement).multiple).toBe(true);
     expect((input as HTMLInputElement).accept).toBe('image/*');
+    expect((input as HTMLInputElement).hidden).toBe(true);
+    expect((input as HTMLInputElement).ownerDocument).toBe(zone.ownerDocument);
     expect(click).toHaveBeenCalledOnce();
   });
 
@@ -99,6 +101,8 @@ describe('HellDropZone', () => {
     fixture.detectChanges();
 
     expect(zone.querySelector('input[type="file"]')).toBeNull();
+    expect(zone.getAttribute('aria-disabled')).toBe('true');
+    expect(zone.getAttribute('tabindex')).toBe('-1');
     expect(click).not.toHaveBeenCalled();
     expect(over.defaultPrevented).toBe(false);
     expect(zone.hasAttribute('data-active')).toBe(false);
