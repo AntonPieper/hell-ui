@@ -7,6 +7,7 @@ const failures = [];
 
 checkDocsExamples();
 checkPackageEntryPoints();
+checkPackageDependencyContract();
 checkStyleEntryPoints();
 checkComponentContract();
 checkNativeButtonSelectorContract();
@@ -243,6 +244,33 @@ function checkPackageEntryPoints() {
   checkSecondaryEntryPointCompleteness('primitives');
   checkSecondaryEntryPointCompleteness('composites');
   checkFeatureEntryPointCompleteness();
+}
+
+function checkPackageDependencyContract() {
+  const packageJson = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
+  const optionalDependencies = Object.keys(packageJson.optionalDependencies ?? {});
+  if (optionalDependencies.length) {
+    failures.push(
+      `Package dependency contract uses optionalDependencies instead of optional peer dependencies: ${optionalDependencies.join(', ')}`,
+    );
+  }
+
+  const sourceRoot = join(root, 'projects/hell/src/lib');
+  const librarySource = walk(sourceRoot)
+    .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts'))
+    .map(readFile)
+    .join('\n');
+
+  const peerDependencies = packageJson.peerDependencies ?? {};
+  for (const dependency of ['@ng-icons/font-awesome', '@codemirror/view', 'pdfjs-dist']) {
+    if (librarySource.includes(dependency) && !peerDependencies[dependency]) {
+      failures.push(`Package dependency contract is missing peer dependency ${dependency}`);
+    }
+  }
+
+  if (peerDependencies['@tanstack/angular-table'] || librarySource.includes('@tanstack/angular-table')) {
+    failures.push('Package dependency contract must not declare unused @tanstack/angular-table');
+  }
 }
 
 function checkStyleEntryPoints() {

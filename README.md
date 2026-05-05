@@ -7,6 +7,8 @@
 Hell UI is a compact Angular component system for dense business applications.
 It favors directive-first primitives, optional styled primitives, opinionated
 composites, and heavier features behind feature-specific entry points.
+Feature dependencies are optional peers; install only the feature stacks your
+app imports.
 
 ## Workspace
 
@@ -33,13 +35,17 @@ import { HELL_TABLE_DIRECTIVES } from 'hell/features/data-table';
 @import "hell/styles";
 ```
 
-Use smaller CSS tiers when the app only needs part of the library:
+`hell/styles` is the all-in stylesheet: primitives, composites, and every
+feature stylesheet. Use smaller CSS tiers when the app only needs part of the
+library:
 
 ```css
 @import "hell/styles/tokens";
 @import "hell/styles/primitives";
 @import "hell/styles/composites";
 @import "hell/styles/features/data-table";
+@import "hell/styles/features/code-editor";
+@import "hell/styles/features/pdf-viewer";
 ```
 
 ## Component Contract
