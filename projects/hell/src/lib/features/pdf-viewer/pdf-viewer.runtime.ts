@@ -91,7 +91,7 @@ export class HellPdfViewerInteractionScope {
 
   recordPointerTarget(target: EventTarget | Node | null): void {
     const host = this.host();
-    this.viewerActive = !!host && target instanceof Node && host.contains(target);
+    this.viewerActive = !!host && containsNode(host, target);
   }
 
   handleGlobalShortcut(event: KeyboardEvent, actions: HellPdfGlobalShortcutActions): boolean {
@@ -146,12 +146,11 @@ export class HellPdfViewerInteractionScope {
 
     return (
       this.viewerActive ||
-      (activeElement instanceof Node && host.contains(activeElement)) ||
-      (target instanceof Node && host.contains(target)) ||
+      containsNode(host, activeElement) ||
+      containsNode(host, target) ||
       !!(
         selection &&
-        ((selection.anchorNode && host.contains(selection.anchorNode)) ||
-          (selection.focusNode && host.contains(selection.focusNode)))
+        (containsNode(host, selection.anchorNode) || containsNode(host, selection.focusNode))
       )
     );
   }
@@ -416,6 +415,27 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   }
 }
 
+function containsNode(host: HTMLElement, target: EventTarget | Node | null | undefined): boolean {
+  return isNodeLike(target) && host.contains(target);
+}
+
+function isNodeLike(target: EventTarget | Node | null | undefined): target is Node {
+  return (
+    typeof target === 'object' &&
+    target !== null &&
+    typeof (target as Node).nodeType === 'number' &&
+    typeof (target as Node).contains === 'function'
+  );
+}
+
 function isPdfEditableTarget(target: EventTarget | null): boolean {
-  return target instanceof HTMLElement && target.matches('input,textarea,select');
+  return (
+    isElementLike(target) &&
+    typeof (target as Element).matches === 'function' &&
+    (target as Element).matches('input,textarea,select')
+  );
+}
+
+function isElementLike(target: EventTarget | null): target is Element {
+  return isNodeLike(target) && target.nodeType === 1;
 }

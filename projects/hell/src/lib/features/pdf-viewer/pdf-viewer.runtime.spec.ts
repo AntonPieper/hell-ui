@@ -141,6 +141,61 @@ describe('PDF Runtime', () => {
     outside.remove();
   });
 
+  it('handles shortcuts from a foreign document realm', () => {
+    const iframe = document.createElement('iframe');
+    document.body.append(iframe);
+    const foreignDocument = iframe.contentDocument;
+    const foreignWindow = iframe.contentWindow as (Window & typeof globalThis) | null;
+    if (!foreignDocument || !foreignWindow) throw new Error('Expected iframe realm.');
+
+    const host = foreignDocument.createElement('div');
+    const inside = foreignDocument.createElement('button');
+    host.append(inside);
+    foreignDocument.body.append(host);
+
+    const scope = new HellPdfViewerInteractionScope(() => host);
+    const actions = createShortcutActions();
+
+    scope.recordPointerTarget(inside);
+
+    expect(
+      scope.handleGlobalShortcut(
+        new foreignWindow.KeyboardEvent('keydown', { key: 'f', ctrlKey: true }),
+        actions,
+      ),
+    ).toBe(true);
+    expect(actions.openFind).toHaveBeenCalled();
+
+    iframe.remove();
+  });
+
+  it('keeps viewer key handling out of foreign-realm editable targets', () => {
+    const iframe = document.createElement('iframe');
+    document.body.append(iframe);
+    const foreignDocument = iframe.contentDocument;
+    const foreignWindow = iframe.contentWindow as (Window & typeof globalThis) | null;
+    if (!foreignDocument || !foreignWindow) throw new Error('Expected iframe realm.');
+
+    const host = foreignDocument.createElement('div');
+    const input = foreignDocument.createElement('input');
+    host.append(input);
+    foreignDocument.body.append(host);
+
+    const scope = new HellPdfViewerInteractionScope(() => host);
+    const actions = createShortcutActions();
+    let handled = true;
+    input.addEventListener('keydown', (event) => {
+      handled = scope.handleViewerKey(event, actions);
+    });
+
+    input.dispatchEvent(new foreignWindow.KeyboardEvent('keydown', { key: 'PageDown', bubbles: true }));
+
+    expect(handled).toBe(false);
+    expect(actions.nextPage).not.toHaveBeenCalled();
+
+    iframe.remove();
+  });
+
   it('keeps viewer key handling out of editable targets', () => {
     const host = document.createElement('div');
     const input = document.createElement('input');
