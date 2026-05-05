@@ -49,6 +49,19 @@ describe('HellAudioPlayer', () => {
     playSpy.mockRestore();
   });
 
+  it('hides the captions toggle when live captions are disabled', async () => {
+    const { fixture } = await createPlayer();
+
+    expect(fixture.nativeElement.querySelector('[data-slot="cc-toggle"]')).toBeInstanceOf(
+      HTMLButtonElement,
+    );
+
+    fixture.componentRef.setInput('allowLiveCaptions', false);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-slot="cc-toggle"]')).toBeNull();
+  });
+
   it('applies volume, mute, and playback-rate state to the audio element', async () => {
     const { fixture, component, audio } = await createPlayer();
 

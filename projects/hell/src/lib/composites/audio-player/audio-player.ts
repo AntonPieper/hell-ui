@@ -41,9 +41,9 @@ const HELL_AUDIO_PLAYER_ICONS = {
 
 /**
  * Compact audio player with seek bar, play/pause, mute, volume slider,
- * download button and an optional inline live-captions strip backed by the
- * Web Speech API (Chromium-only). The captions toggle is hidden when the
- * browser lacks `SpeechRecognition` + `HTMLMediaElement.captureStream()`.
+ * download button and an opt-in/out inline live-captions strip backed by the
+ * Web Speech API (Chromium-only). The captions toggle is hidden when disabled
+ * or when the browser lacks `SpeechRecognition` + `HTMLMediaElement.captureStream()`.
  */
 @Component({
   selector: 'hell-audio-player',
@@ -128,7 +128,7 @@ const HELL_AUDIO_PLAYER_ICONS = {
         aria-label="Volume"
       />
 
-      @if (speechSupported()) {
+      @if (allowLiveCaptions() && speechSupported()) {
         <button
           hellButton
           hellFlyoutTrigger
@@ -244,6 +244,8 @@ export class HellAudioPlayer extends HellStyleable {
   readonly src = input.required<string>();
   readonly downloadName = input<string | null>(null);
   readonly allowDownload = input(true, { transform: booleanAttribute });
+  /** Show / hide the Chromium-only live captions feature. */
+  readonly allowLiveCaptions = input(true, { transform: booleanAttribute });
   /** Optional display title shown above the controls. Hidden when `null`. */
   readonly title = input<string | null>(null);
   /** Display a date/timestamp next to the title. Accepts a string or Date. */
@@ -319,7 +321,8 @@ export class HellAudioPlayer extends HellStyleable {
 
     // Auto start/stop recognition based on captions toggle + playback.
     effect(() => {
-      const wantLive = this.captions() && this.playing() && this.speechSupported();
+      const wantLive =
+        this.allowLiveCaptions() && this.captions() && this.playing() && this.speechSupported();
       if (wantLive && !this.audioRuntime.isRecognizing()) {
         this.startRecognition();
       } else if (!wantLive && this.audioRuntime.isRecognizing()) {

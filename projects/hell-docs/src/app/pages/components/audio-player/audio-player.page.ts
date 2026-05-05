@@ -66,6 +66,10 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         <li><code>downloadName</code>: filename for the download link</li>
         <li><code>allowDownload</code>: show / hide download button (default <code>true</code>)</li>
         <li>
+          <code>allowLiveCaptions</code>: show / hide the Chromium-only captions feature (default
+          <code>true</code>)
+        </li>
+        <li>
           <code>lang</code>: BCP-47 hint for <code>SpeechRecognition</code>. Defaults to
           <code>&lt;html lang&gt;</code> or <code>en-US</code>.
         </li>
@@ -100,6 +104,7 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
           Provide a clear <code>title</code> and <code>date</code> for recorded calls or messages.
         </li>
         <li>Use <code>lang</code> and captions when transcript language matters.</li>
+        <li>Set <code>[allowLiveCaptions]="false"</code> when Web Speech support risk outweighs value.</li>
         <li>Disable downloads when audio is sensitive.</li>
       </ul>
 
