@@ -163,7 +163,7 @@ export class HellPaginationButton extends HellStyleable {}
     <button hellPaginationPrev type="button" aria-label="Previous page">
       <hell-icon name="faSolidChevronLeft" />
     </button>
-    @for (p of pages(); track p) {
+    @for (p of pages(); track trackPage($index, p)) {
       <button hellPaginationButton [page]="p" type="button" [attr.aria-label]="'Page ' + p">
         {{ p }}
       </button>
@@ -180,6 +180,8 @@ export class HellPaginationStrip extends HellStyleable {
   readonly siblingCount = input<number>(2);
 
   private readonly state = injectPaginationState();
+
+  protected readonly trackPage = (_: number, page: number) => page;
 
   protected readonly pages = computed(() => {
     const total = this.state().pageCount();
