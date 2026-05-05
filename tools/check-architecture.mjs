@@ -258,15 +258,26 @@ function checkPackageDependencyContract() {
   }
 
   const sourceRoot = join(root, 'projects/hell/src/lib');
-  const librarySource = walk(sourceRoot)
-    .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts'))
-    .map(readFile)
-    .join('\n');
+  const sourceFiles = walk(sourceRoot).filter(
+    (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'),
+  );
+  const librarySource = sourceFiles.map(readFile).join('\n');
 
   const peerDependencies = packageJson.peerDependencies ?? {};
-  for (const dependency of ['@ng-icons/font-awesome', '@codemirror/view', 'pdfjs-dist']) {
-    if (librarySource.includes(dependency) && !peerDependencies[dependency]) {
-      failures.push(`Package dependency contract is missing peer dependency ${dependency}`);
+  const dependencies = packageJson.dependencies ?? {};
+  const importedPackages = new Set(
+    sourceFiles.flatMap((file) => externalImportPackages(readFile(file))),
+  );
+
+  for (const dependency of importedPackages) {
+    if (!peerDependencies[dependency] && !dependencies[dependency]) {
+      failures.push(`Package dependency contract is missing dependency for imported ${dependency}`);
+    }
+  }
+
+  for (const dependency of Object.keys(packageJson.peerDependenciesMeta ?? {})) {
+    if (!peerDependencies[dependency]) {
+      failures.push(`Package dependency contract has peerDependenciesMeta for undeclared ${dependency}`);
     }
   }
 
@@ -586,6 +597,22 @@ function checkFeatureEntryPointCompleteness() {
       failures.push(`Feature Package Entry Point ${feature} must export ${expected}`);
     }
   }
+}
+
+function externalImportPackages(source) {
+  const packages = [];
+  const importRegex = /(?:import|export)\s+(?:type\s+)?(?:[\s\S]*?\s+from\s+)?['"]([^.'"/][^'"]*)['"]/g;
+  for (const match of source.matchAll(importRegex)) {
+    packages.push(packageNameFromSpecifier(match[1]));
+  }
+  return packages;
+}
+
+function packageNameFromSpecifier(specifier) {
+  if (specifier.startsWith('@')) {
+    return specifier.split('/').slice(0, 2).join('/');
+  }
+  return specifier.split('/')[0];
 }
 
 function pagePathForRoute(routePath) {
