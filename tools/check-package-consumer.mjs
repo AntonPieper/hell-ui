@@ -17,46 +17,76 @@ if (!existsSync(join(distHell, 'package.json'))) {
 const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 const deps = rootPackage.dependencies ?? {};
 const devDeps = rootPackage.devDependencies ?? {};
-const tempRoot = mkdtempSync(join(tmpdir(), 'hell-package-consumer-'));
 
-try {
-  writeConsumerWorkspace(tempRoot, rootPackage);
-  run('pnpm', ['install', '--prefer-offline', '--ignore-scripts'], tempRoot);
-  run('pnpm', ['exec', 'ng', 'build', 'consumer', '--configuration', 'production'], tempRoot);
-  console.log('[package-consumer] built temp Angular consumer against dist/hell');
-} finally {
-  if (keep) console.log(`[package-consumer] kept ${tempRoot}`);
-  else rmSync(tempRoot, { force: true, recursive: true });
+const angularDeps = [
+  '@angular/common',
+  '@angular/compiler',
+  '@angular/core',
+  '@angular/forms',
+  '@angular/platform-browser',
+  '@angular/router',
+  '@ng-icons/core',
+  '@ng-icons/font-awesome',
+  'ng-primitives',
+  'rxjs',
+  'tailwindcss',
+  'tslib',
+];
+
+const featureDeps = [
+  ...angularDeps,
+  '@codemirror/commands',
+  '@codemirror/language',
+  '@codemirror/state',
+  '@codemirror/view',
+  '@lezer/highlight',
+  'pdfjs-dist',
+];
+
+const scenarios = [
+  {
+    name: 'light',
+    description: 'root/primitives/composites without feature peers',
+    dependencies: angularDeps,
+    mainTs: lightConsumerMainTs(),
+    stylesCss: lightConsumerStylesCss(),
+  },
+  {
+    name: 'features',
+    description: 'feature entry points with their optional peers',
+    dependencies: featureDeps,
+    mainTs: featureConsumerMainTs(),
+    stylesCss: featureConsumerStylesCss(),
+  },
+];
+
+for (const scenario of scenarios) {
+  runConsumerScenario(scenario);
 }
 
-function writeConsumerWorkspace(workspace, rootPackage) {
+function runConsumerScenario(scenario) {
+  const tempRoot = mkdtempSync(join(tmpdir(), `hell-package-consumer-${scenario.name}-`));
+
+  try {
+    writeConsumerWorkspace(tempRoot, scenario);
+    run('pnpm', ['install', '--prefer-offline', '--ignore-scripts'], tempRoot);
+    run('pnpm', ['exec', 'ng', 'build', 'consumer', '--configuration', 'production'], tempRoot);
+    console.log(`[package-consumer:${scenario.name}] built ${scenario.description}`);
+  } finally {
+    if (keep) console.log(`[package-consumer:${scenario.name}] kept ${tempRoot}`);
+    else rmSync(tempRoot, { force: true, recursive: true });
+  }
+}
+
+function writeConsumerWorkspace(workspace, scenario) {
   const packageJson = {
-    name: 'hell-package-consumer',
+    name: `hell-package-consumer-${scenario.name}`,
     private: true,
     type: 'module',
     scripts: {
       build: 'ng build consumer --configuration production',
     },
-    dependencies: pickDeps(deps, [
-      '@angular/common',
-      '@angular/compiler',
-      '@angular/core',
-      '@angular/forms',
-      '@angular/platform-browser',
-      '@angular/router',
-      '@codemirror/commands',
-      '@codemirror/language',
-      '@codemirror/state',
-      '@codemirror/view',
-      '@lezer/highlight',
-      '@ng-icons/core',
-      '@ng-icons/font-awesome',
-      'ng-primitives',
-      'pdfjs-dist',
-      'rxjs',
-      'tailwindcss',
-      'tslib',
-    ]),
+    dependencies: pickDeps(deps, scenario.dependencies),
     devDependencies: pickDeps(devDeps, [
       '@angular/build',
       '@angular/cli',
@@ -135,8 +165,8 @@ function writeConsumerWorkspace(workspace, rootPackage) {
     join(workspace, 'src/index.html'),
     '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Consumer</title><base href="/"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><app-root></app-root></body></html>\n',
   );
-  writeFileSync(join(workspace, 'src/main.ts'), consumerMainTs());
-  writeFileSync(join(workspace, 'src/styles.css'), consumerStylesCss());
+  writeFileSync(join(workspace, 'src/main.ts'), scenario.mainTs);
+  writeFileSync(join(workspace, 'src/styles.css'), scenario.stylesCss);
 }
 
 function pickDeps(source, names) {
@@ -149,16 +179,13 @@ function pickDeps(source, names) {
   return picked;
 }
 
-function consumerMainTs() {
+function lightConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { HellButton } from 'hell';
 import { HellStyleable, type HellSize } from 'hell/core';
 import { HellInput } from 'hell/primitives';
 import { HELL_APP_SHELL_DIRECTIVES } from 'hell/composites';
-import { HellCodeEditor } from 'hell/features/code-editor';
-import { HELL_TABLE_DIRECTIVES } from 'hell/features/data-table';
-import { HellPdfViewer } from 'hell/features/pdf-viewer';
 
 const size: HellSize = 'md';
 void size;
@@ -167,14 +194,7 @@ void HellStyleable;
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    HellButton,
-    HellInput,
-    HellCodeEditor,
-    HellPdfViewer,
-    ...HELL_APP_SHELL_DIRECTIVES,
-    ...HELL_TABLE_DIRECTIVES,
-  ],
+  imports: [HellButton, HellInput, ...HELL_APP_SHELL_DIRECTIVES],
   template: \`
     <div hellAppShell>
       <header hellAppTopbar>
@@ -183,29 +203,52 @@ void HellStyleable;
       <nav hellAppSidenav>Navigation</nav>
       <main hellAppContent>
         <button hellButton type="button">Save</button>
+        <a hellButton href="#details" [disabled]="disabled">Details</a>
         <input hellInput aria-label="Name" />
-        <hell-code-editor [value]="code" readOnly />
-        <div hellTableContainer>
-          <table hellTable>
-            <thead hellTableHead>
-              <tr hellTableRow>
-                <th hellTableHeaderCell columnId="name">Name</th>
-              </tr>
-            </thead>
-            <tbody hellTableBody>
-              <tr hellTableRow selected>
-                <td hellTableCell>Atlas</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <hell-pdf-viewer [src]="pdfSrc" />
       </main>
       <aside hellAppSecondary>
         <button hellSecondaryToggle type="button">Details</button>
         <div hellAppSecondaryBody>Secondary</div>
       </aside>
     </div>
+  \`,
+})
+class App {
+  protected readonly disabled = true;
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function featureConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HellCodeEditor } from 'hell/features/code-editor';
+import { HELL_TABLE_DIRECTIVES } from 'hell/features/data-table';
+import { HellPdfViewer } from 'hell/features/pdf-viewer';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [HellCodeEditor, HellPdfViewer, ...HELL_TABLE_DIRECTIVES],
+  template: \`
+    <hell-code-editor [value]="code" readOnly />
+    <div hellTableContainer>
+      <table hellTable>
+        <thead hellTableHead>
+          <tr hellTableRow>
+            <th hellTableHeaderCell columnId="name">Name</th>
+          </tr>
+        </thead>
+        <tbody hellTableBody>
+          <tr hellTableRow selected>
+            <td hellTableCell>Atlas</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <hell-pdf-viewer [src]="pdfSrc" />
   \`,
 })
 class App {
@@ -217,11 +260,17 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
-function consumerStylesCss() {
+function lightConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "hell/styles/tokens";
 @import "hell/styles/primitives";
 @import "hell/styles/composites";
+`;
+}
+
+function featureConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "hell/styles/tokens";
 @import "hell/styles/features/code-editor";
 @import "hell/styles/features/data-table";
 @import "hell/styles/features/pdf-viewer";
