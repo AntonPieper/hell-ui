@@ -82,6 +82,8 @@ import datePickerSingleDateExampleCodeRaw from './examples/single-date.example.t
         <li><code>date</code>: selected <code>Date</code>.</li>
         <li><code>(dateChange)</code>: emits selected <code>Date</code>.</li>
         <li><code>min</code>, <code>max</code>: optional bounds.</li>
+        <li><code>locale</code>: BCP-47 locale for month and weekday labels.</li>
+        <li><code>firstDayOfWeek</code>: <code>1</code> Monday through <code>7</code> Sunday.</li>
         <li><code>disabled</code>: disables navigation and day selection.</li>
         <li><code>unstyled</code>: opt out of host styling.</li>
       </ul>
@@ -90,7 +92,10 @@ import datePickerSingleDateExampleCodeRaw from './examples/single-date.example.t
       <ul>
         <li><code>startDate</code>, <code>(startDateChange)</code>.</li>
         <li><code>endDate</code>, <code>(endDateChange)</code>.</li>
-        <li><code>min</code>, <code>max</code>, <code>disabled</code>, <code>unstyled</code>.</li>
+        <li>
+          <code>min</code>, <code>max</code>, <code>locale</code>, <code>firstDayOfWeek</code>,
+          <code>disabled</code>, <code>unstyled</code>.
+        </li>
       </ul>
 
       <h2>Do</h2>

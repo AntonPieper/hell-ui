@@ -110,13 +110,9 @@ const PICKER_TEMPLATE = `
   <table ngpDatePickerGrid class="hell-date-picker-grid">
     <thead>
       <tr>
-        <th scope="col" abbr="Sunday">S</th>
-        <th scope="col" abbr="Monday">M</th>
-        <th scope="col" abbr="Tuesday">T</th>
-        <th scope="col" abbr="Wednesday">W</th>
-        <th scope="col" abbr="Thursday">T</th>
-        <th scope="col" abbr="Friday">F</th>
-        <th scope="col" abbr="Saturday">S</th>
+        @for (weekday of weekdayLabels(); track weekday.abbr) {
+          <th scope="col" [attr.abbr]="weekday.abbr">{{ weekday.narrow }}</th>
+        }
       </tr>
     </thead>
     <tbody>
@@ -130,6 +126,39 @@ const PICKER_TEMPLATE = `
     </tbody>
   </table>
 `;
+
+interface HellWeekdayLabel {
+  readonly abbr: string;
+  readonly narrow: string;
+}
+
+function formatMonthLabel(date: Date, locale: string | null): string {
+  return new Intl.DateTimeFormat(locale ?? undefined, {
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
+}
+
+function formatWeekdayLabels(locale: string | null, firstDayOfWeek: number): HellWeekdayLabel[] {
+  const firstJsDay = firstDayOfWeek === 7 ? 0 : firstDayOfWeek;
+  const narrow = new Intl.DateTimeFormat(locale ?? undefined, {
+    weekday: 'narrow',
+    timeZone: 'UTC',
+  });
+  const long = new Intl.DateTimeFormat(locale ?? undefined, {
+    weekday: 'long',
+    timeZone: 'UTC',
+  });
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const jsDay = (firstJsDay + index) % 7;
+    const date = new Date(Date.UTC(2023, 0, 1 + jsDay));
+    return {
+      abbr: long.format(date),
+      narrow: narrow.format(date),
+    };
+  });
+}
 
 const PICKER_IMPORTS = [
   HellButton,
@@ -163,6 +192,7 @@ const PICKER_IMPORTS = [
         'ngpDatePickerMin:min',
         'ngpDatePickerMax:max',
         'ngpDatePickerDisabled:disabled',
+        'ngpDatePickerFirstDayOfWeek:firstDayOfWeek',
       ],
       outputs: ['ngpDatePickerDateChange:dateChange'],
     },
@@ -172,12 +202,16 @@ const PICKER_IMPORTS = [
   template: PICKER_TEMPLATE,
 })
 export class HellDatePicker extends HellStyleable {
+  readonly locale = input<string | null>(null);
+
   private readonly state = injectDatePickerState<Date>();
 
-  protected readonly label = computed(() => {
-    const focused = this.state().focusedDate();
-    return `${focused.toLocaleString('default', { month: 'long' })} ${focused.getFullYear()}`;
-  });
+  protected readonly label = computed(() =>
+    formatMonthLabel(this.state().focusedDate(), this.locale()),
+  );
+  protected readonly weekdayLabels = computed(() =>
+    formatWeekdayLabels(this.locale(), this.state().firstDayOfWeek()),
+  );
 }
 
 /**
@@ -198,6 +232,7 @@ export class HellDatePicker extends HellStyleable {
         'ngpDateRangePickerMin:min',
         'ngpDateRangePickerMax:max',
         'ngpDateRangePickerDisabled:disabled',
+        'ngpDateRangePickerFirstDayOfWeek:firstDayOfWeek',
       ],
       outputs: [
         'ngpDateRangePickerStartDateChange:startDateChange',
@@ -213,10 +248,14 @@ export class HellDatePicker extends HellStyleable {
   template: PICKER_TEMPLATE,
 })
 export class HellDateRangePicker extends HellStyleable {
+  readonly locale = input<string | null>(null);
+
   private readonly state = injectDateRangePickerState<Date>();
 
-  protected readonly label = computed(() => {
-    const focused = this.state().focusedDate();
-    return `${focused.toLocaleString('default', { month: 'long' })} ${focused.getFullYear()}`;
-  });
+  protected readonly label = computed(() =>
+    formatMonthLabel(this.state().focusedDate(), this.locale()),
+  );
+  protected readonly weekdayLabels = computed(() =>
+    formatWeekdayLabels(this.locale(), this.state().firstDayOfWeek()),
+  );
 }
