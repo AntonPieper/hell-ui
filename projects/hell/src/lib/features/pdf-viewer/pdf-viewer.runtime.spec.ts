@@ -122,6 +122,40 @@ describe('PDF Runtime', () => {
     expect(onLoaded).toHaveBeenCalledWith(2);
   });
 
+  it('installs and cleans up ctrl-wheel zoom handling', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = document.createElement('div') as HTMLDivElement;
+    await runtime.bootstrap(container, createRuntimeHandlers());
+
+    const plainWheel = new WheelEvent('wheel', { deltaY: -10, bubbles: true, cancelable: true });
+    container.dispatchEvent(plainWheel);
+
+    expect(plainWheel.defaultPrevented).toBe(false);
+    expect(adapter.session.setNumericZoom).not.toHaveBeenCalled();
+
+    const zoomWheel = new WheelEvent('wheel', {
+      ctrlKey: true,
+      deltaY: -10,
+      clientX: 4,
+      clientY: 4,
+      bubbles: true,
+      cancelable: true,
+    });
+    container.dispatchEvent(zoomWheel);
+
+    expect(zoomWheel.defaultPrevented).toBe(true);
+    expect(adapter.session.setNumericZoom).toHaveBeenCalledOnce();
+    expect(adapter.session.setNumericZoom.mock.calls[0]?.[0]).toBeGreaterThan(1);
+
+    runtime.cleanup();
+    container.dispatchEvent(
+      new WheelEvent('wheel', { ctrlKey: true, deltaY: -10, bubbles: true, cancelable: true }),
+    );
+
+    expect(adapter.session.setNumericZoom).toHaveBeenCalledOnce();
+  });
+
   it('keeps thumbnails behind the PDF Adapter seam', async () => {
     const adapter = new FakePdfAdapter();
     const runtime = new HellPdfRuntime(adapter);
@@ -337,9 +371,9 @@ class FakePdfSession implements HellPdfViewerSession {
 
   setPage = vi.fn();
 
-  setNumericZoom(scale: number): void {
+  setNumericZoom = vi.fn((scale: number): void => {
     this.currentScale = scale;
-  }
+  });
 }
 
 function ctrlKey(key: string): KeyboardEvent {

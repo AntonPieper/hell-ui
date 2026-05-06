@@ -231,6 +231,34 @@ describe('HellAppShell secondary panel', () => {
     expect(secondaryToggle.getAttribute('data-hell-app-shell-toggle')).toBe('secondary');
   });
 
+  it('clears mobile panel state when media query switches back to desktop', () => {
+    const mobile = mockMobileLayoutController(true);
+    const fixture = TestBed.createComponent(UnstyledShellHost);
+    fixture.detectChanges();
+
+    const shell = query(fixture.nativeElement, '#unstyled-shell');
+    const sidenav = query(fixture.nativeElement, '#unstyled-sidenav');
+    const sidenavToggle = query<HTMLButtonElement>(fixture.nativeElement, '#unstyled-sidenav-toggle');
+
+    sidenavToggle.click();
+    fixture.detectChanges();
+
+    expect(shell.getAttribute('data-mobile-sidenav-open')).toBe('true');
+    expect(sidenav.getAttribute('data-mobile-hidden')).toBeNull();
+
+    mobile.setMatches(false);
+    fixture.detectChanges();
+
+    expect(shell.getAttribute('data-mobile-layout')).toBeNull();
+    expect(shell.getAttribute('data-mobile-sidenav-open')).toBeNull();
+
+    mobile.setMatches(true);
+    fixture.detectChanges();
+
+    expect(shell.getAttribute('data-mobile-sidenav-open')).toBeNull();
+    expect(sidenav.getAttribute('data-mobile-hidden')).toBe('true');
+  });
+
   it('uses behavior sentinels, not style classes, when dismissing mobile panels', () => {
     mockMobileLayout(true);
     const fixture = TestBed.createComponent(UnstyledShellHost);
@@ -297,23 +325,41 @@ describe('HellAppShell secondary panel', () => {
 });
 
 function mockMobileLayout(matches: boolean): void {
+  mockMobileLayoutController(matches);
+}
+
+function mockMobileLayoutController(matches: boolean) {
+  let currentMatches = matches;
+  const listeners = new Set<() => void>();
+  const media = {
+    get matches() {
+      return currentMatches;
+    },
+    media: '(max-width: 767px)',
+    onchange: null,
+    addEventListener: vi.fn((type: string, listener: EventListenerOrEventListenerObject) => {
+      if (type === 'change' && typeof listener === 'function') listeners.add(listener as () => void);
+    }),
+    removeEventListener: vi.fn((type: string, listener: EventListenerOrEventListenerObject) => {
+      if (type === 'change' && typeof listener === 'function') listeners.delete(listener as () => void);
+    }),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  } as unknown as MediaQueryList;
+
   Object.defineProperty(globalThis, 'matchMedia', {
     configurable: true,
     writable: true,
-    value: vi.fn(
-      () =>
-        ({
-          matches,
-          media: '(max-width: 767px)',
-          onchange: null,
-          addEventListener: vi.fn(),
-          removeEventListener: vi.fn(),
-          addListener: vi.fn(),
-          removeListener: vi.fn(),
-          dispatchEvent: vi.fn(),
-        }) as unknown as MediaQueryList,
-    ),
+    value: vi.fn(() => media),
   });
+
+  return {
+    setMatches(next: boolean): void {
+      currentMatches = next;
+      for (const listener of listeners) listener();
+    },
+  };
 }
 
 function pointerDown(element: HTMLElement): void {

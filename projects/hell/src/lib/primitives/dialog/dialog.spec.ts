@@ -47,6 +47,36 @@ class ScopedDialogHost {}
 })
 class DisabledDialogTriggerHost {}
 
+@Component({
+  imports: [...HELL_DIALOG_DIRECTIVES],
+  template: `
+    <button id="open-default" type="button" [hellDialogTrigger]="defaultDialog" [closeOnOutsideClick]="true">
+      Default
+    </button>
+    <button
+      id="open-blocked"
+      type="button"
+      [hellDialogTrigger]="blockedDialog"
+      [closeOnOutsideClick]="false"
+    >
+      Blocked
+    </button>
+
+    <ng-template #defaultDialog>
+      <div id="default-overlay" hellDialogOverlay>
+        <div hellDialog>Default</div>
+      </div>
+    </ng-template>
+
+    <ng-template #blockedDialog>
+      <div id="blocked-overlay" hellDialogOverlay>
+        <div hellDialog>Blocked</div>
+      </div>
+    </ng-template>
+  `,
+})
+class ClosePolicyDialogHost {}
+
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
 
 beforeAll(() => {
@@ -65,13 +95,45 @@ afterAll(() => {
 describe('HellDialogTrigger scoped overlays', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ScopedDialogHost, DisabledDialogTriggerHost],
+      imports: [ScopedDialogHost, DisabledDialogTriggerHost, ClosePolicyDialogHost],
     }).compileComponents();
   });
 
   afterEach(async () => {
     await Promise.all(TestBed.inject(NgpDialogManager).openDialogs.map((dialog) => dialog.hideImmediate()));
     document.body.replaceChildren();
+  });
+
+  it('keeps dialogs open when closeOnOutsideClick is false', async () => {
+    const fixture = TestBed.createComponent(ClosePolicyDialogHost);
+    await settle(fixture);
+
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-blocked').click();
+    await settle(fixture);
+
+    const overlay = query(document.body, '#blocked-overlay');
+    overlay.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+    overlay.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await settle(fixture);
+
+    expect(document.body.querySelector('#blocked-overlay')).toBe(overlay);
+  });
+
+  it('closes dialogs on outside overlay clicks when closeOnOutsideClick is true', async () => {
+    const fixture = TestBed.createComponent(ClosePolicyDialogHost);
+    await settle(fixture);
+
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-default').click();
+    await settle(fixture);
+
+    const overlay = query(document.body, '#default-overlay');
+    overlay.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+    overlay.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await settle(fixture);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await settle(fixture);
+
+    expect(document.body.querySelector('#default-overlay')).toBeNull();
   });
 
   it('guards disabled anchor triggers', async () => {
