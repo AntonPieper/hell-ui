@@ -18,6 +18,7 @@ import { HELL_TABLE_DIRECTIVES, type HellTableColumnResizeEvent } from './data-t
             (sortToggle)="sortEvents.push($event)"
           >
             Name
+            <button id="header-action" type="button">Filter</button>
             <button
               id="name-resizer"
               hellTableColumnResizer
@@ -44,7 +45,12 @@ import { HELL_TABLE_DIRECTIVES, type HellTableColumnResizeEvent } from './data-t
           [interactive]="interactive()"
           (rowSelect)="rowEvents.push($event)"
         >
-          <td hellTableCell (cellSelect)="cellEvents.push($event)">Ada</td>
+          <td hellTableCell (cellSelect)="cellEvents.push($event)">
+            Ada
+            <button id="row-action" type="button">Edit</button>
+            <a id="row-link" href="/people/ada">Profile</a>
+            <input id="row-input" aria-label="Inline edit" />
+          </td>
         </tr>
       </tbody>
     </table>
@@ -101,6 +107,30 @@ describe('Hell data table directives', () => {
     expect(host.rowEvents).toHaveLength(3);
   });
 
+  it('does not select rows or cells from nested interactive controls', () => {
+    const fixture = TestBed.createComponent(DataTableHost);
+    const host = fixture.componentInstance;
+    host.interactive.set(true);
+    fixture.detectChanges();
+
+    byId<HTMLButtonElement>(fixture.nativeElement, 'row-action').click();
+    const link = byId<HTMLAnchorElement>(fixture.nativeElement, 'row-link');
+    link.addEventListener('click', (event) => event.preventDefault(), { once: true });
+    link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    byId<HTMLInputElement>(fixture.nativeElement, 'row-input').click();
+
+    const enter = new KeyboardEvent('keydown', {
+      key: 'Enter',
+      bubbles: true,
+      cancelable: true,
+    });
+    byId<HTMLButtonElement>(fixture.nativeElement, 'row-action').dispatchEvent(enter);
+
+    expect(enter.defaultPrevented).toBe(false);
+    expect(host.rowEvents).toEqual([]);
+    expect(host.cellEvents).toEqual([]);
+  });
+
   it('maps sortable header state and ignores resizer clicks', () => {
     const fixture = TestBed.createComponent(DataTableHost);
     const host = fixture.componentInstance;
@@ -120,6 +150,26 @@ describe('Hell data table directives', () => {
     header.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
 
     expect(host.sortEvents).toHaveLength(2);
+  });
+
+  it('does not sort from nested header controls', () => {
+    const fixture = TestBed.createComponent(DataTableHost);
+    const host = fixture.componentInstance;
+    host.sortable.set(true);
+    fixture.detectChanges();
+
+    const action = byId<HTMLButtonElement>(fixture.nativeElement, 'header-action');
+    action.click();
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+    action.dispatchEvent(enter);
+
+    const resizer = byId<HTMLButtonElement>(fixture.nativeElement, 'name-resizer');
+    const space = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
+    resizer.dispatchEvent(space);
+
+    expect(enter.defaultPrevented).toBe(false);
+    expect(space.defaultPrevented).toBe(false);
+    expect(host.sortEvents).toEqual([]);
   });
 
   it('resizes adjacent header cells from the keyboard and emits one transaction', () => {

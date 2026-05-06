@@ -24,6 +24,41 @@ export type {
   HellTableColumnResizeSide,
 } from './data-table-column-resize.runtime';
 
+const HELL_TABLE_INTERACTIVE_TARGET_SELECTOR = [
+  'button',
+  'a[href]',
+  'input',
+  'select',
+  'textarea',
+  'summary',
+  'label',
+  '[contenteditable]:not([contenteditable="false"])',
+  '[data-hell-row-ignore]',
+  '[data-hell-table-ignore]',
+  '[role="button"]',
+  '[role="link"]',
+  '[role="checkbox"]',
+  '[role="radio"]',
+  '[role="switch"]',
+  '[role="tab"]',
+  '[role="menuitem"]',
+  '[role="menuitemcheckbox"]',
+  '[role="menuitemradio"]',
+  '[role="option"]',
+  '[role="textbox"]',
+  '[role="combobox"]',
+  '[role="slider"]',
+  '[role="spinbutton"]',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',');
+
+function hellEventFromInteractiveTarget(event: Event, host: HTMLElement): boolean {
+  const target = event.target;
+  if (!(target instanceof Element) || target === host) return false;
+  const interactive = target.closest(HELL_TABLE_INTERACTIVE_TARGET_SELECTOR);
+  return !!interactive && interactive !== host && host.contains(interactive);
+}
+
 /**
  * Optional shell for a data table. Frames the table with the standard
  * elevated surface, border, radius, and overflow clipping. Place the
@@ -125,7 +160,9 @@ export class HellTableBody extends HellStyleable {}
  * - `[selected]` -> `data-selected="true"` and `aria-selected="true"`,
  *   so consumers can highlight via CSS attribute selectors.
  * - `[interactive]` -> `tabindex="0"` and click/Enter/Space binding
- *   that emits `(rowSelect)`. Use this to drive selection from the row
+ *   that emits `(rowSelect)`. Nested buttons, links, inputs, ARIA widgets,
+ *   `[contenteditable]`, and `[data-hell-row-ignore]` opt out so row actions
+ *   do not double-select. Use this to drive selection from the row
  *   without writing your own click handler on every cell.
  */
 @Directive({
@@ -148,13 +185,15 @@ export class HellTableRow extends HellStyleable {
 
   readonly rowSelect = output<MouseEvent | KeyboardEvent>();
 
+  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+
   protected onClick(e: MouseEvent) {
-    if (!this.interactive()) return;
+    if (!this.interactive() || hellEventFromInteractiveTarget(e, this.host)) return;
     this.rowSelect.emit(e);
   }
 
   protected onKey(e: Event) {
-    if (!this.interactive()) return;
+    if (!this.interactive() || hellEventFromInteractiveTarget(e, this.host)) return;
     e.preventDefault();
     this.rowSelect.emit(e as KeyboardEvent);
   }
@@ -219,13 +258,12 @@ export class HellTableHeaderCell extends HellStyleable {
   }
 
   protected onClick(e: MouseEvent) {
-    if (!this.sortable()) return;
-    if ((e.target as HTMLElement).closest('[hellTableColumnResizer]')) return;
+    if (!this.sortable() || hellEventFromInteractiveTarget(e, this.host)) return;
     this.sortToggle.emit(e);
   }
 
   protected onKey(e: Event) {
-    if (!this.sortable()) return;
+    if (!this.sortable() || hellEventFromInteractiveTarget(e, this.host)) return;
     e.preventDefault();
     this.sortToggle.emit(e as KeyboardEvent);
   }
@@ -270,7 +308,10 @@ export class HellTableCell extends HellStyleable {
   readonly space = input<'normal' | 'empty'>('normal');
   readonly cellSelect = output<MouseEvent>();
 
+  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+
   protected onClick(e: MouseEvent) {
+    if (hellEventFromInteractiveTarget(e, this.host)) return;
     this.cellSelect.emit(e);
   }
 }
