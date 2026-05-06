@@ -27,7 +27,7 @@ import timeInputSizesExampleCodeRaw from './examples/sizes.example.ts?raw' with 
       <h1>Time input</h1>
       <p>
         A text-first time field that accepts <code>HH:mm</code>, <code>HH:mm:ss</code> and common
-        12-hour spellings (<code>9:00 am</code>, <code>1:30PM</code>). Click the clock icon to open
+        12-hour spellings (<code>9:00 am</code>, <code>1:30PM</code>). Click or keyboard-activate the clock icon to open
         a compact dial: hour and minute grids you can click directly, with ±5 minute nudges for
         fine-tuning.
       </p>

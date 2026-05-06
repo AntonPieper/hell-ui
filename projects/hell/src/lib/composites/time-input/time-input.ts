@@ -131,8 +131,7 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
       [hellPopoverTrigger]="picker"
       placement="bottom-end"
       [disabled]="disabled()"
-      [attr.aria-label]="ariaLabel() ?? 'Choose time'"
-      tabindex="-1"
+      [attr.aria-label]="ariaLabel() ? 'Choose time for ' + ariaLabel() : 'Choose time'"
     >
       <hell-icon name="faSolidClock" />
     </button>

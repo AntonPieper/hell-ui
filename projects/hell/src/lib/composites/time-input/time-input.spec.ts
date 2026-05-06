@@ -94,6 +94,15 @@ describe('HellTimeInput', () => {
     expect(input.value).toBe('');
   });
 
+  it('keeps the clock trigger in the keyboard tab order', () => {
+    const fixture = TestBed.createComponent(TimeInputHost);
+    fixture.detectChanges();
+
+    const trigger = triggerButton(fixture.nativeElement);
+    expect(trigger.tabIndex).toBe(0);
+    expect(trigger.getAttribute('aria-label')).toBe('Choose time for Start time');
+  });
+
   it('drops in-progress typing when the bound value changes externally', async () => {
     const fixture = TestBed.createComponent(TimeInputHost);
     const host = fixture.componentInstance;
@@ -117,4 +126,10 @@ function textInput(root: HTMLElement): HTMLInputElement {
   const input = root.querySelector('input');
   if (!(input instanceof HTMLInputElement)) throw new Error('Expected time input.');
   return input;
+}
+
+function triggerButton(root: HTMLElement): HTMLButtonElement {
+  const trigger = root.querySelector('button[data-slot="trigger"]');
+  if (!(trigger instanceof HTMLButtonElement)) throw new Error('Expected time trigger.');
+  return trigger;
 }
