@@ -212,15 +212,17 @@ function checkPackageEntryPoints() {
 
   const tsconfig = parseJsonWithComments(readFile(join(root, 'tsconfig.json')));
   const paths = tsconfig.compilerOptions?.paths ?? {};
+  const features = childDirectories(join(root, 'projects/hell/src/lib/features'));
   const expectedPaths = {
     hell: './projects/hell/src/public-api.ts',
     'hell/core': './projects/hell/src/lib/public-api-core.ts',
     'hell/primitives': './projects/hell/src/lib/public-api-primitives.ts',
     'hell/composites': './projects/hell/src/lib/public-api-composites.ts',
-    'hell/features/code-editor': './projects/hell/src/lib/public-api-feature-code-editor.ts',
-    'hell/features/data-table': './projects/hell/src/lib/public-api-feature-data-table.ts',
-    'hell/features/pdf-viewer': './projects/hell/src/lib/public-api-feature-pdf-viewer.ts',
   };
+  for (const feature of features) {
+    expectedPaths[`hell/features/${feature}`] =
+      `./projects/hell/src/lib/public-api-feature-${feature}.ts`;
+  }
 
   for (const [entryPoint, expectedPath] of Object.entries(expectedPaths)) {
     const actual = paths[entryPoint]?.[0];
@@ -231,14 +233,14 @@ function checkPackageEntryPoints() {
     }
   }
 
-  for (const packagePath of [
+  const packagePaths = [
     'projects/hell/core/ng-package.json',
     'projects/hell/primitives/ng-package.json',
     'projects/hell/composites/ng-package.json',
-    'projects/hell/features/code-editor/ng-package.json',
-    'projects/hell/features/data-table/ng-package.json',
-    'projects/hell/features/pdf-viewer/ng-package.json',
-  ]) {
+    ...features.map((feature) => `projects/hell/features/${feature}/ng-package.json`),
+  ];
+
+  for (const packagePath of packagePaths) {
     if (!existsSync(join(root, packagePath))) {
       failures.push(`Package Entry Point is missing ${packagePath}`);
     }
@@ -302,14 +304,13 @@ function checkPackageDependencyContract() {
 function checkStyleEntryPoints() {
   const packageJson = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
   const exportsMap = packageJson.exports ?? {};
+  const features = childDirectories(join(root, 'projects/hell/src/lib/features'));
   const expectedStyleExports = [
     './styles',
     './styles/tokens',
     './styles/primitives',
     './styles/composites',
-    './styles/features/code-editor',
-    './styles/features/data-table',
-    './styles/features/pdf-viewer',
+    ...features.map((feature) => `./styles/features/${feature}`),
   ];
 
   for (const exportPath of expectedStyleExports) {
@@ -328,7 +329,7 @@ function checkStyleEntryPoints() {
   }
 
   const allStyles = readFile(join(root, 'projects/hell/src/lib/styles/hell.css'));
-  for (const feature of ['code-editor', 'data-table', 'pdf-viewer']) {
+  for (const feature of features) {
     if (!allStyles.includes(`./features/${feature}.css`)) {
       failures.push(`All-in style entry point is missing Feature CSS import for ${feature}`);
     }
