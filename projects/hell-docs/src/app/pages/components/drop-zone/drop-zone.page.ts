@@ -48,7 +48,7 @@ import dropZoneSingleFileImagesOnlyExampleCodeRaw from './examples/single-file-i
       <h2>API</h2>
       <ul>
         <li><code>multiple</code>: allow multiple files (default <code>true</code>)</li>
-        <li><code>accept</code>: native MIME filter</li>
+        <li><code>accept</code>: comma-separated MIME / wildcard / extension filter for picker and emitted files</li>
         <li><code>disabled</code></li>
         <li><code>(files)</code>: emits picked or dropped files</li>
       </ul>
@@ -56,7 +56,7 @@ import dropZoneSingleFileImagesOnlyExampleCodeRaw from './examples/single-file-i
       <h2>Do</h2>
       <ul>
         <li>Keep the native file input path available through click or keyboard.</li>
-        <li>Use <code>accept</code> as a hint and validate files again after selection.</li>
+        <li>Use <code>accept</code> as client-side filtering and validate files again after selection.</li>
         <li>Show selected file names outside the drop zone.</li>
       </ul>
 
