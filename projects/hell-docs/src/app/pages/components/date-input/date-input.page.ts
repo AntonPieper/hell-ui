@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HELL_FIELD_DIRECTIVES } from 'hell';
+import { HELL_FIELD_DIRECTIVES } from 'hell/primitives';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { DateInputPlaceholdersAndLabelsExample } from './examples/placeholders-and-labels.example';
 import dateInputPlaceholdersAndLabelsExampleCodeRaw from './examples/placeholders-and-labels.example.ts?raw' with {
@@ -32,7 +32,7 @@ import dateInputTextInputCalendarPopoverExampleCodeRaw from './examples/text-inp
       <p>
         Composite date field: a text input plus calendar-trigger popover. Type or paste
         <code>YYYY-MM-DD</code> (or any locale-friendly format <code>Date.parse</code> understands),
-        then blur or press Enter to commit. Empty text clears to <code>null</code>. Click the calendar icon to pick from
+        then blur or press Enter to commit. Empty text clears to <code>null</code>. Click or keyboard-activate the calendar icon to pick from
         <a routerLink="/components/date-picker">Date picker</a>.
       </p>
 
@@ -61,7 +61,7 @@ import dateInputTextInputCalendarPopoverExampleCodeRaw from './examples/text-inp
       <ul>
         <li><code>date</code>: <code>Date | null</code> current value.</li>
         <li><code>(dateChange)</code>: emits a valid <code>Date</code> after typing or picking, or <code>null</code> when cleared.</li>
-        <li><code>min</code>, <code>max</code>: optional picker bounds.</li>
+        <li><code>min</code>, <code>max</code>: optional typed-input and picker bounds.</li>
         <li><code>size</code>: <code>sm | md | lg</code>.</li>
         <li><code>invalid</code>, <code>disabled</code>: visual / interaction states.</li>
         <li><code>placeholder</code>: text shown while empty.</li>

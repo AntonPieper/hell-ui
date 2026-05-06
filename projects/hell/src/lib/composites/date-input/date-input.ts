@@ -31,7 +31,7 @@ const HELL_DATE_INPUT_ICONS = {
  * and the stable business format we render back into the input. Empty text
  * commits a nullable clear; unparseable text stays as an invalid draft.
  */
-function tryParse(text: string) {
+function tryParseDateText(text: string) {
   const t = text.trim();
   if (!t) return hellTypedValue<Date>(null);
   const iso = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(t);
@@ -57,7 +57,17 @@ function formatDate(d: Date | null): string {
   return `${year}-${month}-${day}`;
 }
 
-function sameDate(a: Date | null, b: Date | null): boolean {
+function dateDayTime(d: Date): number {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+}
+
+function isDateWithinBounds(d: Date | null, min: Date | null, max: Date | null): boolean {
+  if (!d) return true;
+  const day = dateDayTime(d);
+  return (!min || day >= dateDayTime(min)) && (!max || day <= dateDayTime(max));
+}
+
+function dateChanged(a: Date | null, b: Date | null): boolean {
   return a?.getTime() !== b?.getTime();
 }
 
@@ -109,8 +119,7 @@ function sameDate(a: Date | null, b: Date | null): boolean {
       [hellPopoverTrigger]="cal"
       placement="bottom-end"
       [disabled]="disabled()"
-      [attr.aria-label]="ariaLabel() ?? 'Choose date'"
-      tabindex="-1"
+      [attr.aria-label]="ariaLabel() ? 'Choose date for ' + ariaLabel() : 'Choose date'"
     >
       <hell-icon name="faSolidCalendar" />
     </button>
@@ -143,9 +152,9 @@ export class HellDateInput extends HellStyleable {
   private readonly valueState = new HellTypedValueInputState<Date, Date | null>({
     external: () => this.date(),
     parseExternal: (date) => date,
-    parseText: tryParse,
+    parseText: (text) => this.parseText(text),
     format: formatDate,
-    externalChanged: sameDate,
+    externalChanged: dateChanged,
   });
   protected readonly current = this.valueState.current;
   protected readonly display = this.valueState.display;
@@ -153,6 +162,14 @@ export class HellDateInput extends HellStyleable {
   protected readonly isInvalid = () => this.invalid() || this.invalidDraft();
 
   private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field');
+
+  private parseText(text: string) {
+    const parsed = tryParseDateText(text);
+    if (!parsed.valid || !parsed.value) return parsed;
+    return isDateWithinBounds(parsed.value, this.min(), this.max())
+      ? parsed
+      : hellInvalidTypedValue();
+  }
 
   protected onInput(value: string) {
     this.valueState.writeDraft(value);
@@ -170,7 +187,7 @@ export class HellDateInput extends HellStyleable {
   }
 
   protected onPick(d: Date | undefined) {
-    if (!d) return;
+    if (!d || !isDateWithinBounds(d, this.min(), this.max())) return;
     const picked = this.valueState.setValue(d);
     if (picked.committed) this.dateChange.emit(picked.value);
     this.field().nativeElement.focus();

@@ -91,6 +91,8 @@ describe('HellDateInput', () => {
     const fixture = TestBed.createComponent(DateInputHost);
     const host = fixture.componentInstance;
     host.date.set(new Date(2026, 0, 15));
+    host.min.set(new Date(2026, 3, 1));
+    host.max.set(new Date(2026, 3, 30));
     fixture.detectChanges();
 
     const input = textInput(fixture.nativeElement);
@@ -101,6 +103,60 @@ describe('HellDateInput', () => {
 
     expect(host.dates).toEqual([null]);
     expect(input.value).toBe('');
+  });
+
+  it('rejects typed dates outside min and max without clamping', () => {
+    const fixture = TestBed.createComponent(DateInputHost);
+    const host = fixture.componentInstance;
+    host.min.set(new Date(2026, 3, 1));
+    host.max.set(new Date(2026, 3, 30));
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    input.value = '2026-03-31';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    input.value = '2026-05-01';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.dates).toEqual([]);
+    expect(input.value).toBe('2026-05-01');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('accepts typed dates on min and max boundaries', () => {
+    const fixture = TestBed.createComponent(DateInputHost);
+    const host = fixture.componentInstance;
+    host.min.set(new Date(2026, 3, 1));
+    host.max.set(new Date(2026, 3, 30));
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    input.value = '2026-04-01';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    input.value = '2026-04-30';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(formatDate(host.dates[0])).toBe('2026-04-01');
+    expect(formatDate(host.dates[1])).toBe('2026-04-30');
+  });
+
+  it('keeps the calendar trigger in the keyboard tab order', () => {
+    const fixture = TestBed.createComponent(DateInputHost);
+    fixture.detectChanges();
+
+    const trigger = triggerButton(fixture.nativeElement);
+    expect(trigger.tabIndex).toBe(0);
+    expect(trigger.getAttribute('aria-label')).toBe('Choose date for Report date');
   });
 
   it('drops in-progress typing when the bound date changes externally', async () => {
@@ -148,6 +204,12 @@ function textInput(root: HTMLElement): HTMLInputElement {
   const input = root.querySelector('input');
   if (!(input instanceof HTMLInputElement)) throw new Error('Expected date input.');
   return input;
+}
+
+function triggerButton(root: HTMLElement): HTMLButtonElement {
+  const trigger = root.querySelector('button[data-slot="trigger"]');
+  if (!(trigger instanceof HTMLButtonElement)) throw new Error('Expected date trigger.');
+  return trigger;
 }
 
 function formatDate(date: Date | null): string {
