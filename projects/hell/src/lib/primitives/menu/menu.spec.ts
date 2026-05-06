@@ -22,6 +22,18 @@ class MenuHost {
   readonly trigger = viewChild.required(NgpMenuTrigger);
 }
 
+@Component({
+  imports: [...HELL_MENU_DIRECTIVES],
+  template: `
+    <ng-template #menu>
+      <div hellMenu><button hellMenuItem type="button">Item</button></div>
+    </ng-template>
+    <button id="disabled-button" type="button" [hellMenuTrigger]="menu" disabled>Button</button>
+    <a id="disabled-anchor" href="#menu" [hellMenuTrigger]="menu" disabled>Anchor</a>
+  `,
+})
+class DisabledMenuTriggerHost {}
+
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
 
 beforeAll(() => {
@@ -39,11 +51,26 @@ afterAll(() => {
 
 describe('HellMenuItem', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [MenuHost] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [MenuHost, DisabledMenuTriggerHost] }).compileComponents();
   });
 
   afterEach(() => {
     document.body.replaceChildren();
+  });
+
+  it('reflects disabled trigger semantics on buttons and anchors', async () => {
+    const fixture = TestBed.createComponent(DisabledMenuTriggerHost);
+    await settle(fixture);
+
+    const button = query<HTMLButtonElement>(fixture.nativeElement, '#disabled-button');
+    const anchor = query<HTMLAnchorElement>(fixture.nativeElement, '#disabled-anchor');
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+
+    expect(button.disabled).toBe(true);
+    expect(anchor.getAttribute('aria-disabled')).toBe('true');
+    expect(anchor.getAttribute('tabindex')).toBe('-1');
+    expect(anchor.dispatchEvent(click)).toBe(false);
+    expect(click.defaultPrevented).toBe(true);
   });
 
   it('guards disabled non-native menu items', async () => {

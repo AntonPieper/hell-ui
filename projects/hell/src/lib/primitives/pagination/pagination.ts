@@ -34,8 +34,12 @@ const HELL_PAGINATION_ICONS = {
   faSolidChevronRight,
 };
 
-abstract class HellPaginationAnchorGuard extends HellStyleable {
+abstract class HellPaginationDisabledGuard extends HellStyleable {
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+
+  protected nativeButtonDisabled(disabled: boolean): '' | null {
+    return this.isButton() && disabled ? '' : null;
+  }
 
   protected anchorAriaDisabled(disabled: boolean): 'true' | null {
     return this.isAnchor() && disabled ? 'true' : null;
@@ -46,6 +50,10 @@ abstract class HellPaginationAnchorGuard extends HellStyleable {
 
     event.preventDefault();
     event.stopImmediatePropagation();
+  }
+
+  private isButton(): boolean {
+    return this.host.tagName.toLowerCase() === 'button';
   }
 
   private isAnchor(): boolean {
@@ -82,69 +90,81 @@ export class HellPagination extends HellStyleable {}
 
 @Directive({
   selector: 'button[hellPaginationFirst], a[hellPaginationFirst]',
-  hostDirectives: [NgpPaginationFirst],
+  hostDirectives: [
+    { directive: NgpPaginationFirst, inputs: ['ngpPaginationFirstDisabled:disabled'] },
+  ],
   host: {
     '[class.hell-button]': '!unstyled()',
     '[class.hell-pagination-item]': '!unstyled()',
     '[attr.data-variant]': '"ghost"',
     '[attr.data-icon-only]': '""',
+    '[attr.disabled]': 'nativeButtonDisabled(disabled())',
     '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
     '(click)': 'preventDisabledAnchor($event, disabled())',
     '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
 })
-export class HellPaginationFirst extends HellPaginationAnchorGuard {
+export class HellPaginationFirst extends HellPaginationDisabledGuard {
   protected readonly disabled = inject(NgpPaginationFirst).disabled;
 }
 
 @Directive({
   selector: 'button[hellPaginationPrev], a[hellPaginationPrev]',
-  hostDirectives: [NgpPaginationPrevious],
+  hostDirectives: [
+    { directive: NgpPaginationPrevious, inputs: ['ngpPaginationPreviousDisabled:disabled'] },
+  ],
   host: {
     '[class.hell-button]': '!unstyled()',
     '[class.hell-pagination-item]': '!unstyled()',
     '[attr.data-variant]': '"ghost"',
     '[attr.data-icon-only]': '""',
+    '[attr.disabled]': 'nativeButtonDisabled(disabled())',
     '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
     '(click)': 'preventDisabledAnchor($event, disabled())',
     '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
 })
-export class HellPaginationPrev extends HellPaginationAnchorGuard {
+export class HellPaginationPrev extends HellPaginationDisabledGuard {
   protected readonly disabled = inject(NgpPaginationPrevious).disabled;
 }
 
 @Directive({
   selector: 'button[hellPaginationNext], a[hellPaginationNext]',
-  hostDirectives: [NgpPaginationNext],
+  hostDirectives: [
+    { directive: NgpPaginationNext, inputs: ['ngpPaginationNextDisabled:disabled'] },
+  ],
   host: {
     '[class.hell-button]': '!unstyled()',
     '[class.hell-pagination-item]': '!unstyled()',
     '[attr.data-variant]': '"ghost"',
     '[attr.data-icon-only]': '""',
+    '[attr.disabled]': 'nativeButtonDisabled(disabled())',
     '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
     '(click)': 'preventDisabledAnchor($event, disabled())',
     '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
 })
-export class HellPaginationNext extends HellPaginationAnchorGuard {
+export class HellPaginationNext extends HellPaginationDisabledGuard {
   protected readonly disabled = inject(NgpPaginationNext).disabled;
 }
 
 @Directive({
   selector: 'button[hellPaginationLast], a[hellPaginationLast]',
-  hostDirectives: [NgpPaginationLast],
+  hostDirectives: [
+    { directive: NgpPaginationLast, inputs: ['ngpPaginationLastDisabled:disabled'] },
+  ],
   host: {
     '[class.hell-button]': '!unstyled()',
     '[class.hell-pagination-item]': '!unstyled()',
     '[attr.data-variant]': '"ghost"',
     '[attr.data-icon-only]': '""',
+    '[attr.disabled]': 'nativeButtonDisabled(disabled())',
     '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
     '(click)': 'preventDisabledAnchor($event, disabled())',
     '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
 })
-export class HellPaginationLast extends HellPaginationAnchorGuard {
+export class HellPaginationLast extends HellPaginationDisabledGuard {
   protected readonly disabled = inject(NgpPaginationLast).disabled;
 }
 
@@ -161,12 +181,13 @@ export class HellPaginationLast extends HellPaginationAnchorGuard {
     '[class.hell-pagination-item]': '!unstyled()',
     '[attr.data-variant]': '"ghost"',
     '[attr.data-icon-only]': '""',
+    '[attr.disabled]': 'nativeButtonDisabled(disabled())',
     '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
     '(click)': 'preventDisabledAnchor($event, disabled())',
     '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
 })
-export class HellPaginationButton extends HellPaginationAnchorGuard {
+export class HellPaginationButton extends HellPaginationDisabledGuard {
   protected readonly disabled = inject(NgpPaginationButton).disabled;
 }
 

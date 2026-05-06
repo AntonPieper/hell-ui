@@ -1,7 +1,8 @@
-import { Directive } from '@angular/core';
+import { Directive, inject } from '@angular/core';
 import { NgpPopover, NgpPopoverTrigger } from 'ng-primitives/popover';
 import { HellStyleable } from '../../core/styleable';
 import { hellRegisterFloatingHost } from '../../core/floating-scope';
+import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactive-disabled';
 
 /**
  * Trigger for an `ng-template` popover. Bind `[hellPopoverTrigger]="template"`
@@ -25,8 +26,17 @@ import { hellRegisterFloatingHost } from '../../core/floating-scope';
       outputs: ['ngpPopoverTriggerOpenChange:openChange'],
     },
   ],
+  host: {
+    '[attr.disabled]': 'nativeButtonDisabled(trigger.disabled())',
+    '[attr.aria-disabled]': 'anchorAriaDisabled(trigger.disabled())',
+    '[attr.tabindex]': 'disabledAnchorTabIndex(trigger.disabled())',
+    '(click)': 'preventDisabledAnchor($event, trigger.disabled())',
+    '(keydown.enter)': 'preventDisabledAnchor($event, trigger.disabled())',
+  },
 })
-export class HellPopoverTrigger {}
+export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
+  protected readonly trigger = inject(NgpPopoverTrigger);
+}
 
 /**
  * Floating popover surface. Place inside the trigger template as

@@ -17,11 +17,35 @@ import { HellFlyout, HellFlyoutTrigger } from './flyout';
 })
 class FlyoutHost {}
 
+@Component({
+  imports: [HellFlyoutTrigger],
+  template: `
+    <button id="disabled-button" hellFlyoutTrigger type="button" disabled>Button</button>
+    <a id="disabled-anchor" hellFlyoutTrigger href="#flyout" disabled>Anchor</a>
+  `,
+})
+class DisabledFlyoutTriggerHost {}
+
 describe('HellFlyout outside interaction', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FlyoutHost],
+      imports: [FlyoutHost, DisabledFlyoutTriggerHost],
     }).compileComponents();
+  });
+
+  it('reflects disabled trigger semantics on buttons and anchors', async () => {
+    const fixture = TestBed.createComponent(DisabledFlyoutTriggerHost);
+    await settle(fixture);
+
+    const button = fixture.nativeElement.querySelector('#disabled-button') as HTMLButtonElement;
+    const anchor = fixture.nativeElement.querySelector('#disabled-anchor') as HTMLAnchorElement;
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+
+    expect(button.disabled).toBe(true);
+    expect(anchor.getAttribute('aria-disabled')).toBe('true');
+    expect(anchor.getAttribute('tabindex')).toBe('-1');
+    expect(anchor.dispatchEvent(click)).toBe(false);
+    expect(click.defaultPrevented).toBe(true);
   });
 
   it('keeps flyout open on outside touch pointerdown but closes on outside click', async () => {

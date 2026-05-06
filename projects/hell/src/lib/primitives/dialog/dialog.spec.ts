@@ -34,6 +34,19 @@ import { HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE, HellDialogScopedOverlayAdapter } from
 })
 class ScopedDialogHost {}
 
+@Component({
+  imports: [...HELL_DIALOG_DIRECTIVES],
+  template: `
+    <a id="disabled-dialog" href="#dialog" [hellDialogTrigger]="dialog" disabled>Open</a>
+    <ng-template #dialog>
+      <div id="disabled-dialog-overlay" hellDialogOverlay>
+        <div hellDialog>Blocked</div>
+      </div>
+    </ng-template>
+  `,
+})
+class DisabledDialogTriggerHost {}
+
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
 
 beforeAll(() => {
@@ -52,13 +65,27 @@ afterAll(() => {
 describe('HellDialogTrigger scoped overlays', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ScopedDialogHost],
+      imports: [ScopedDialogHost, DisabledDialogTriggerHost],
     }).compileComponents();
   });
 
   afterEach(async () => {
     await Promise.all(TestBed.inject(NgpDialogManager).openDialogs.map((dialog) => dialog.hideImmediate()));
     document.body.replaceChildren();
+  });
+
+  it('guards disabled anchor triggers', async () => {
+    const fixture = TestBed.createComponent(DisabledDialogTriggerHost);
+    await settle(fixture);
+
+    const trigger = query<HTMLAnchorElement>(fixture.nativeElement, '#disabled-dialog');
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+
+    expect(trigger.getAttribute('aria-disabled')).toBe('true');
+    expect(trigger.getAttribute('tabindex')).toBe('-1');
+    expect(trigger.dispatchEvent(click)).toBe(false);
+    expect(click.defaultPrevented).toBe(true);
+    expect(document.body.querySelector('#disabled-dialog-overlay')).toBeNull();
   });
 
   it('carries Dialog Scope roots through each open instead of singleton pending state', async () => {

@@ -20,6 +20,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactive-disabled';
 
 let nextFlyoutId = 0;
 
@@ -40,9 +41,14 @@ let nextFlyoutId = 0;
     '[attr.aria-expanded]': 'open()',
     '[attr.aria-controls]': 'open() ? panelId : null',
     '[attr.data-state]': 'open() ? "open" : "closed"',
+    '[attr.disabled]': 'nativeButtonDisabled(disabled())',
+    '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
+    '[attr.tabindex]': 'disabledAnchorTabIndex(disabled())',
+    '(click)': 'preventDisabledAnchor($event, disabled())',
+    '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
 })
-export class HellFlyoutTrigger {
+export class HellFlyoutTrigger extends HellNativeInteractiveDisabledGuard {
   /** Native element of the trigger — used as default boundary by `HellFlyout`. */
   readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
 

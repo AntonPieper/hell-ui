@@ -9,6 +9,7 @@ import {
 } from 'ng-primitives/menu';
 import { hellRegisterFloatingHost } from '../../core/floating-scope';
 import { HellStyleable } from '../../core/styleable';
+import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactive-disabled';
 
 @Directive({
   selector: 'button[hellMenuTrigger], a[hellMenuTrigger]',
@@ -32,8 +33,17 @@ import { HellStyleable } from '../../core/styleable';
       ],
     },
   ],
+  host: {
+    '[attr.disabled]': 'nativeButtonDisabled(trigger.disabled())',
+    '[attr.aria-disabled]': 'anchorAriaDisabled(trigger.disabled())',
+    '[attr.tabindex]': 'disabledAnchorTabIndex(trigger.disabled())',
+    '(click)': 'preventDisabledAnchor($event, trigger.disabled())',
+    '(keydown.enter)': 'preventDisabledAnchor($event, trigger.disabled())',
+  },
 })
-export class HellMenuTrigger {}
+export class HellMenuTrigger extends HellNativeInteractiveDisabledGuard {
+  protected readonly trigger = inject(NgpMenuTrigger);
+}
 
 /** Submenu trigger for nested menus. Apply to a `[hellMenuItem]` whose
  *  `[hellSubmenuTrigger]` points at the child menu template. */

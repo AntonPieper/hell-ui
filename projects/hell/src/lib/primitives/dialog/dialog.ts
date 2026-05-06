@@ -26,6 +26,7 @@ import {
 } from 'ng-primitives/portal';
 import type { HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
+import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactive-disabled';
 import {
   HELL_DIALOG_SCOPE_ROOT,
   HellDialogScopedOverlayAdapter,
@@ -46,10 +47,14 @@ interface HellDialogTemplateContext<T = unknown, R = unknown> {
 @Directive({
   selector: 'button[hellDialogTrigger], a[hellDialogTrigger]',
   host: {
-    '(click)': 'launch()',
+    '[attr.disabled]': 'nativeButtonDisabled(disabled())',
+    '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
+    '[attr.tabindex]': 'disabledAnchorTabIndex(disabled())',
+    '(click)': 'launch($event)',
+    '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
 })
-export class HellDialogTrigger<T = unknown> {
+export class HellDialogTrigger<T = unknown> extends HellNativeInteractiveDisabledGuard {
   readonly template = input.required<TemplateRef<HellDialogTemplateContext>>({
     alias: 'hellDialogTrigger',
   });
@@ -67,13 +72,19 @@ export class HellDialogTrigger<T = unknown> {
     alias: 'closeOnOutsideClick',
     transform: optionalDismissGuardAttribute,
   });
+  readonly disabled = input(false, { transform: booleanAttribute });
   readonly closed = output<T>();
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly dialogManager = inject(NgpDialogManager);
   private readonly injector = inject(Injector);
 
-  protected launch(): void {
+  protected launch(event: Event): void {
+    if (this.disabled()) {
+      this.preventDisabledAnchor(event, true);
+      return;
+    }
+
     const root = hellFindDialogScopeRoot(this.element.nativeElement);
     const injector = Injector.create({
       parent: this.injector,

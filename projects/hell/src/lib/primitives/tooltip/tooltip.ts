@@ -1,7 +1,8 @@
-import { Directive } from '@angular/core';
+import { Directive, inject } from '@angular/core';
 import { NgpTooltip, NgpTooltipTrigger } from 'ng-primitives/tooltip';
 import { HellStyleable } from '../../core/styleable';
 import { hellRegisterFloatingHost } from '../../core/floating-scope';
+import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactive-disabled';
 
 /**
  * Trigger for an `ng-template` tooltip. Bind `[hellTooltipTrigger]` to the
@@ -25,8 +26,17 @@ import { hellRegisterFloatingHost } from '../../core/floating-scope';
       ],
     },
   ],
+  host: {
+    '[attr.disabled]': 'nativeButtonDisabled(trigger.disabled())',
+    '[attr.aria-disabled]': 'anchorAriaDisabled(trigger.disabled())',
+    '[attr.tabindex]': 'disabledAnchorTabIndex(trigger.disabled())',
+    '(click)': 'preventDisabledAnchor($event, trigger.disabled())',
+    '(keydown.enter)': 'preventDisabledAnchor($event, trigger.disabled())',
+  },
 })
-export class HellTooltipTrigger {}
+export class HellTooltipTrigger extends HellNativeInteractiveDisabledGuard {
+  protected readonly trigger = inject(NgpTooltipTrigger);
+}
 
 /**
  * Tooltip surface rendered by the trigger template. Registers with any active

@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellPagination, HellPaginationFirst, HellPaginationStrip } from './pagination';
+import { HellPagination, HellPaginationFirst, HellPaginationNext, HellPaginationStrip } from './pagination';
 
 @Component({
   imports: [HellPaginationStrip],
@@ -34,10 +34,21 @@ class PaginationAnchorHost {
   readonly pageCount = signal(3);
 }
 
+@Component({
+  imports: [HellPagination, HellPaginationNext],
+  template: `
+    <nav hellPagination [page]="2" [pageCount]="3">
+      <button id="disabled-next-button" hellPaginationNext type="button" disabled>Next</button>
+      <a id="disabled-next-anchor" hellPaginationNext href="#next" disabled>Next</a>
+    </nav>
+  `,
+})
+class PaginationExplicitDisabledHost {}
+
 describe('HellPaginationStrip', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PaginationHost, PaginationAnchorHost],
+      imports: [PaginationHost, PaginationAnchorHost, PaginationExplicitDisabledHost],
     }).compileComponents();
   });
 
@@ -68,6 +79,23 @@ describe('HellPaginationStrip', () => {
     expect(first.getAttribute('aria-disabled')).toBe('true');
     expect(first.getAttribute('tabindex')).toBe('-1');
     expect(first.dispatchEvent(click)).toBe(false);
+    expect(click.defaultPrevented).toBe(true);
+  });
+
+  it('forwards explicit disabled state to navigation controls', () => {
+    const fixture = TestBed.createComponent(PaginationExplicitDisabledHost);
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector(
+      '#disabled-next-button',
+    ) as HTMLButtonElement;
+    const anchor = fixture.nativeElement.querySelector('#disabled-next-anchor') as HTMLAnchorElement;
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+
+    expect(button.disabled).toBe(true);
+    expect(anchor.getAttribute('aria-disabled')).toBe('true');
+    expect(anchor.getAttribute('tabindex')).toBe('-1');
+    expect(anchor.dispatchEvent(click)).toBe(false);
     expect(click.defaultPrevented).toBe(true);
   });
 
