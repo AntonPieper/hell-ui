@@ -18,36 +18,69 @@ const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
 const deps = rootPackage.dependencies ?? {};
 const devDeps = rootPackage.devDependencies ?? {};
 
-const baseDeps = [
+const angularAppDeps = [
   '@angular/common',
   '@angular/compiler',
   '@angular/core',
   '@angular/platform-browser',
+  'tslib',
+];
+const lightUiDeps = [
+  ...angularAppDeps,
   '@angular/router',
   '@ng-icons/core',
   '@ng-icons/font-awesome',
   'ng-primitives',
   'rxjs',
   'tailwindcss',
-  'tslib',
 ];
+const coreDeps = [...angularAppDeps, 'rxjs'];
 const codeEditorDeps = [
-  ...baseDeps,
+  ...angularAppDeps,
+  'tailwindcss',
   '@codemirror/commands',
   '@codemirror/language',
   '@codemirror/state',
   '@codemirror/view',
   '@lezer/highlight',
 ];
-const pdfViewerDeps = [...baseDeps, 'pdfjs-dist'];
+const dataTableDeps = [...angularAppDeps, 'tailwindcss'];
+const pdfViewerDeps = [
+  ...angularAppDeps,
+  'tailwindcss',
+  '@ng-icons/core',
+  '@ng-icons/font-awesome',
+  'pdfjs-dist',
+];
 
 const scenarios = [
   {
-    name: 'light',
-    description: 'root/primitives/composites without feature peers',
-    dependencies: baseDeps,
-    mainTs: lightConsumerMainTs(),
-    stylesCss: lightConsumerStylesCss(),
+    name: 'root',
+    description: 'root entry without feature peers',
+    dependencies: lightUiDeps,
+    mainTs: rootConsumerMainTs(),
+    stylesCss: rootConsumerStylesCss(),
+  },
+  {
+    name: 'core',
+    description: 'core entry without primitive/composite/feature peers',
+    dependencies: coreDeps,
+    mainTs: coreConsumerMainTs(),
+    stylesCss: '',
+  },
+  {
+    name: 'primitives',
+    description: 'primitives entry without feature peers',
+    dependencies: lightUiDeps,
+    mainTs: primitivesConsumerMainTs(),
+    stylesCss: primitivesConsumerStylesCss(),
+  },
+  {
+    name: 'composites',
+    description: 'composites entry without feature peers',
+    dependencies: lightUiDeps,
+    mainTs: compositesConsumerMainTs(),
+    stylesCss: compositesConsumerStylesCss(),
   },
   {
     name: 'code-editor',
@@ -58,8 +91,8 @@ const scenarios = [
   },
   {
     name: 'data-table',
-    description: 'data-table feature without CodeMirror/pdf peers',
-    dependencies: baseDeps,
+    description: 'data-table feature without light UI or CodeMirror/pdf peers',
+    dependencies: dataTableDeps,
     mainTs: dataTableConsumerMainTs(),
     stylesCss: dataTableConsumerStylesCss(),
   },
@@ -191,13 +224,32 @@ function pickDeps(source, names) {
   return picked;
 }
 
-function lightConsumerMainTs() {
+function rootConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { HellButton } from 'hell';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [HellButton],
+  template: \`
+    <button hellButton type="button">Save</button>
+    <a hellButton href="#details" [disabled]="disabled">Details</a>
+  \`,
+})
+class App {
+  protected readonly disabled = true;
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function coreConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
 import { HellStyleable, type HellSize } from 'hell/core';
-import { HellInput } from 'hell/primitives';
-import { HELL_APP_SHELL_DIRECTIVES } from 'hell/composites';
 
 const size: HellSize = 'md';
 void size;
@@ -206,18 +258,50 @@ void HellStyleable;
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [HellButton, HellInput, ...HELL_APP_SHELL_DIRECTIVES],
+  template: \`<p>Core contract</p>\`,
+})
+class App {}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function primitivesConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HellButton, HellInput } from 'hell/primitives';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [HellButton, HellInput],
+  template: \`
+    <button hellButton type="button">Save</button>
+    <input hellInput aria-label="Name" />
+  \`,
+})
+class App {}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function compositesConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HELL_APP_SHELL_DIRECTIVES } from 'hell/composites';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [...HELL_APP_SHELL_DIRECTIVES],
   template: \`
     <div hellAppShell>
       <header hellAppTopbar>
         <button hellSidenavToggle type="button"></button>
       </header>
       <nav hellAppSidenav>Navigation</nav>
-      <main hellAppContent>
-        <button hellButton type="button">Save</button>
-        <a hellButton href="#details" [disabled]="disabled">Details</a>
-        <input hellInput aria-label="Name" />
-      </main>
+      <main hellAppContent>Content</main>
       <aside hellAppSecondary>
         <button hellSecondaryToggle type="button">Details</button>
         <div hellAppSecondaryBody>Secondary</div>
@@ -225,9 +309,7 @@ void HellStyleable;
     </div>
   \`,
 })
-class App {
-  protected readonly disabled = true;
-}
+class App {}
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
@@ -305,10 +387,20 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
-function lightConsumerStylesCss() {
+function rootConsumerStylesCss() {
   return `@import "tailwindcss";
-@import "hell/styles/tokens";
+@import "hell/styles";
+`;
+}
+
+function primitivesConsumerStylesCss() {
+  return `@import "tailwindcss";
 @import "hell/styles/primitives";
+`;
+}
+
+function compositesConsumerStylesCss() {
+  return `@import "tailwindcss";
 @import "hell/styles/composites";
 `;
 }
