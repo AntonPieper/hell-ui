@@ -21,12 +21,24 @@ pnpm test
 
 ## Package Imports
 
+Install the light UI stack when using primitives/composites:
+
+```bash
+pnpm add hell ng-primitives @ng-icons/core @ng-icons/font-awesome tailwindcss
+```
+
+Prefer the narrowest entry point that contains the API you use:
+
 ```ts
-import { HellButton } from 'hell';
-import { HELL_SELECT_DIRECTIVES } from 'hell/primitives';
+import { HellButton, HELL_SELECT_DIRECTIVES } from 'hell/primitives';
 import { HELL_APP_SHELL_DIRECTIVES } from 'hell/composites';
 import { HELL_TABLE_DIRECTIVES } from 'hell/features/data-table';
 ```
+
+Heavy feature entry points keep extra peers local: CodeMirror packages for
+`hell/features/code-editor`, `pdfjs-dist` plus the light UI stack for
+`hell/features/pdf-viewer`, and no icon/ng-primitives stack for
+`hell/features/data-table`.
 
 ## Styles
 

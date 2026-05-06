@@ -23,7 +23,8 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         heavy &mdash; load it lazily.
       </p>
       <p>
-        The docs page loads the pdf.js viewer stylesheet on demand, so lazy routes keep it out of
+        Install <code>pdfjs-dist</code> plus the light UI peers
+        (<code>ng-primitives @ng-icons/core @ng-icons/font-awesome tailwindcss</code>). The docs page loads the pdf.js viewer stylesheet on demand, so lazy routes keep it out of
         the docs app's initial bundle.
       </p>
 

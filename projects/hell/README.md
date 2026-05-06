@@ -16,14 +16,24 @@ Hell exposes:
 ## Install
 
 ```bash
-pnpm add hell ng-primitives @ng-icons/core tailwindcss
+pnpm add hell ng-primitives @ng-icons/core @ng-icons/font-awesome tailwindcss
 ```
+
+Feature entry points add their own optional stacks only when imported:
+
+| Entry point | Install when used |
+| --- | --- |
+| `hell/primitives`, `hell/composites` | `ng-primitives @ng-icons/core @ng-icons/font-awesome tailwindcss` |
+| `hell/features/data-table` | Angular + `tailwindcss` only |
+| `hell/features/code-editor` | `@codemirror/view @codemirror/state @codemirror/commands @codemirror/language @lezer/highlight` plus any language package, e.g. `@codemirror/lang-javascript` |
+| `hell/features/pdf-viewer` | `pdfjs-dist` plus the base light UI stack (`ng-primitives @ng-icons/core @ng-icons/font-awesome tailwindcss`) |
 
 ## Angular Imports
 
+Prefer the narrowest entry point that contains the API you use:
+
 ```ts
-import { HellButton } from 'hell';
-import { HELL_SELECT_DIRECTIVES } from 'hell/primitives';
+import { HellButton, HELL_SELECT_DIRECTIVES } from 'hell/primitives';
 import { HELL_APP_SHELL_DIRECTIVES } from 'hell/composites';
 import { HELL_TABLE_DIRECTIVES } from 'hell/features/data-table';
 ```

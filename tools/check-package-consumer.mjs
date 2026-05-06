@@ -1,5 +1,13 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -13,6 +21,8 @@ run('pnpm', ['build:lib'], root);
 if (!existsSync(join(distHell, 'package.json'))) {
   fail(`Built package missing: ${distHell}`);
 }
+
+const packedHell = packBuiltPackage();
 
 const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 const deps = rootPackage.dependencies ?? {};
@@ -48,6 +58,7 @@ const dataTableDeps = [...angularAppDeps, 'tailwindcss'];
 const pdfViewerDeps = [
   ...angularAppDeps,
   'tailwindcss',
+  'ng-primitives',
   '@ng-icons/core',
   '@ng-icons/font-awesome',
   'pdfjs-dist',
@@ -98,15 +109,20 @@ const scenarios = [
   },
   {
     name: 'pdf-viewer',
-    description: 'pdf-viewer feature with only pdfjs peer',
+    description: 'pdf-viewer feature with pdfjs and light UI peers',
     dependencies: pdfViewerDeps,
     mainTs: pdfViewerConsumerMainTs(),
     stylesCss: pdfViewerConsumerStylesCss(),
   },
 ];
 
-for (const scenario of scenarios) {
-  runConsumerScenario(scenario);
+try {
+  for (const scenario of scenarios) {
+    runConsumerScenario(scenario);
+  }
+} finally {
+  if (keep) console.log(`[package-consumer] kept packed hell package ${packedHell.root}`);
+  else rmSync(packedHell.root, { force: true, recursive: true });
 }
 
 function runConsumerScenario(scenario) {
@@ -114,13 +130,21 @@ function runConsumerScenario(scenario) {
 
   try {
     writeConsumerWorkspace(tempRoot, scenario);
-    run('pnpm', ['install', '--prefer-offline', '--ignore-scripts'], tempRoot);
+    run('pnpm', ['install', '--strict-peer-dependencies', '--ignore-scripts'], tempRoot);
     run('pnpm', ['exec', 'ng', 'build', 'consumer', '--configuration', 'production'], tempRoot);
     console.log(`[package-consumer:${scenario.name}] built ${scenario.description}`);
   } finally {
     if (keep) console.log(`[package-consumer:${scenario.name}] kept ${tempRoot}`);
     else rmSync(tempRoot, { force: true, recursive: true });
   }
+}
+
+function packBuiltPackage() {
+  const packRoot = mkdtempSync(join(tmpdir(), 'hell-package-consumer-pack-'));
+  run('pnpm', ['pack', '--pack-destination', packRoot], distHell);
+  const tarball = readdirSync(packRoot).find((name) => name.endsWith('.tgz'));
+  if (!tarball) fail(`Packed package missing in ${packRoot}`);
+  return { root: packRoot, tarball: join(packRoot, tarball) };
 }
 
 function writeConsumerWorkspace(workspace, scenario) {
@@ -139,7 +163,7 @@ function writeConsumerWorkspace(workspace, scenario) {
       'typescript',
     ]),
   };
-  packageJson.dependencies.hell = pathToFileURL(distHell).href;
+  packageJson.dependencies.hell = pathToFileURL(packedHell.tarball).href;
 
   writeJson(join(workspace, 'package.json'), packageJson);
   writeJson(join(workspace, 'angular.json'), {
