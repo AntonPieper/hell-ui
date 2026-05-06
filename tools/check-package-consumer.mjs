@@ -22,7 +22,6 @@ const baseDeps = [
   '@angular/common',
   '@angular/compiler',
   '@angular/core',
-  '@angular/forms',
   '@angular/platform-browser',
   '@angular/router',
   '@ng-icons/core',

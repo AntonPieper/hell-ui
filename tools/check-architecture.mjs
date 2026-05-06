@@ -276,6 +276,18 @@ function checkPackageDependencyContract() {
     }
   }
 
+  const nonTsPeerDependencies = new Set([
+    // CSS entry points depend on Tailwind theme variables.
+    'tailwindcss',
+    // ng-primitives dialog code imported by Hell primitives imports Router internally.
+    '@angular/router',
+  ]);
+  for (const dependency of Object.keys(peerDependencies)) {
+    if (!importedPackages.has(dependency) && !nonTsPeerDependencies.has(dependency)) {
+      failures.push(`Package dependency contract declares unused peer dependency ${dependency}`);
+    }
+  }
+
   for (const dependency of Object.keys(packageJson.peerDependenciesMeta ?? {})) {
     if (!peerDependencies[dependency]) {
       failures.push(`Package dependency contract has peerDependenciesMeta for undeclared ${dependency}`);
