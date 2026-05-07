@@ -3,10 +3,13 @@ import {
   Component,
   type ElementRef,
   booleanAttribute,
+  forwardRef,
   input,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCalendar } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../../primitives/button/button';
@@ -45,8 +48,7 @@ function tryParseDateText(text: string) {
       ? hellTypedValue(d)
       : hellInvalidTypedValue();
   }
-  const d = new Date(t);
-  return Number.isNaN(d.getTime()) ? hellInvalidTypedValue() : hellTypedValue(d);
+  return hellInvalidTypedValue();
 }
 
 function formatDate(d: Date | null): string {
@@ -73,9 +75,8 @@ function dateChanged(a: Date | null, b: Date | null): boolean {
 
 /**
  * Date input — a text field paired with a calendar icon trigger that opens
- * an inline date picker popover. Users can type or paste a date directly
- * (ISO `YYYY-MM-DD` always works, plus anything `Date.parse` understands)
- * or pick from the calendar.
+ * an inline date picker popover. Users can type or paste an explicit
+ * `YYYY-MM-DD` date or pick from the calendar.
  *
  * Bind to `[date]` and listen to `(dateChange)`. Pair with `hellField` for
  * label / description / error wiring.
@@ -84,12 +85,19 @@ function dateChanged(a: Date | null, b: Date | null): boolean {
   selector: 'hell-date-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton, HellIcon, HellInput, HellPopover, HellPopoverTrigger, HellDatePicker],
-  providers: [provideIcons(HELL_DATE_INPUT_ICONS)],
+  providers: [
+    provideIcons(HELL_DATE_INPUT_ICONS),
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => HellDateInput),
+      multi: true,
+    },
+  ],
   host: {
     '[class.hell-date-input]': '!unstyled()',
     '[attr.data-size]': 'size()',
     '[attr.data-invalid]': 'isInvalid() ? "true" : null',
-    '[attr.data-disabled]': 'disabled() ? "true" : null',
+    '[attr.data-disabled]': 'isDisabled() ? "true" : null',
   },
   template: `
     <input
@@ -102,7 +110,7 @@ function dateChanged(a: Date | null, b: Date | null): boolean {
       [invalid]="isInvalid()"
       [attr.aria-invalid]="isInvalid() ? 'true' : null"
       [attr.aria-label]="ariaLabel()"
-      [disabled]="disabled()"
+      [disabled]="isDisabled()"
       [placeholder]="placeholder()"
       [value]="display()"
       (input)="onInput($event.target.value)"
@@ -118,7 +126,7 @@ function dateChanged(a: Date | null, b: Date | null): boolean {
       data-slot="trigger"
       [hellPopoverTrigger]="cal"
       placement="bottom-end"
-      [disabled]="disabled()"
+      [disabled]="isDisabled()"
       [attr.aria-label]="ariaLabel() ? 'Choose date for ' + ariaLabel() : 'Choose date'"
     >
       <hell-icon name="faSolidCalendar" />
@@ -130,14 +138,14 @@ function dateChanged(a: Date | null, b: Date | null): boolean {
           [date]="current() ?? undefined"
           [min]="min() ?? undefined"
           [max]="max() ?? undefined"
-          [disabled]="disabled()"
+          [disabled]="isDisabled()"
           (dateChange)="onPick($event)"
         />
       </div>
     </ng-template>
   `,
 })
-export class HellDateInput extends HellStyleable {
+export class HellDateInput extends HellStyleable implements ControlValueAccessor {
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
@@ -149,8 +157,14 @@ export class HellDateInput extends HellStyleable {
 
   readonly dateChange = output<Date | null>();
 
+  private readonly controlMode = signal(false);
+  private readonly controlValue = signal<Date | null>(null);
+  private readonly controlDisabled = signal(false);
+  private onControlChange: (value: Date | null) => void = () => {};
+  private onControlTouched: () => void = () => {};
+
   private readonly valueState = new HellTypedValueInputState<Date, Date | null>({
-    external: () => this.date(),
+    external: () => this.effectiveDate(),
     parseExternal: (date) => date,
     parseText: (text) => this.parseText(text),
     format: formatDate,
@@ -160,8 +174,32 @@ export class HellDateInput extends HellStyleable {
   protected readonly display = this.valueState.display;
   protected readonly invalidDraft = this.valueState.invalidDraft;
   protected readonly isInvalid = () => this.invalid() || this.invalidDraft();
+  protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
 
   private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field');
+
+  writeValue(value: Date | null): void {
+    this.controlMode.set(true);
+    this.controlValue.set(value instanceof Date && !Number.isNaN(value.valueOf()) ? value : null);
+    this.valueState.clearDraft();
+    this.valueState.clearLocal();
+  }
+
+  registerOnChange(fn: (value: Date | null) => void): void {
+    this.onControlChange = fn;
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.onControlTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.controlDisabled.set(isDisabled);
+  }
+
+  private effectiveDate(): Date | null {
+    return this.controlMode() ? this.controlValue() : this.date();
+  }
 
   private parseText(text: string) {
     const parsed = tryParseDateText(text);
@@ -176,20 +214,28 @@ export class HellDateInput extends HellStyleable {
   }
 
   protected onBlur() {
+    this.onControlTouched();
     const parsed = this.valueState.commitDraft();
-    if (parsed.committed) this.dateChange.emit(parsed.value);
+    if (parsed.committed) this.emitValue(parsed.value);
   }
 
   protected commit(text: string, event?: Event) {
     event?.preventDefault();
     const parsed = this.valueState.commitText(text);
-    if (parsed.committed) this.dateChange.emit(parsed.value);
+    if (parsed.committed) this.emitValue(parsed.value);
   }
 
   protected onPick(d: Date | undefined) {
     if (!d || !isDateWithinBounds(d, this.min(), this.max())) return;
     const picked = this.valueState.setValue(d);
-    if (picked.committed) this.dateChange.emit(picked.value);
+    if (picked.committed) this.emitValue(picked.value);
+    this.onControlTouched();
     this.field().nativeElement.focus();
+  }
+
+  private emitValue(value: Date | null): void {
+    if (this.controlMode()) this.controlValue.set(value);
+    this.dateChange.emit(value);
+    this.onControlChange(value);
   }
 }

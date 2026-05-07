@@ -30,9 +30,8 @@ import dateInputTextInputCalendarPopoverExampleCodeRaw from './examples/text-inp
     <article class="hd-prose">
       <h1>Date input</h1>
       <p>
-        Composite date field: a text input plus calendar-trigger popover. Type or paste
-        <code>YYYY-MM-DD</code> (or any locale-friendly format <code>Date.parse</code> understands),
-        then blur or press Enter to commit. Empty text clears to <code>null</code>. Click or keyboard-activate the calendar icon to pick from
+        Composite date field: a text input plus calendar-trigger popover. Type or paste an
+        explicit <code>YYYY-MM-DD</code> date, then blur or press Enter to commit. Empty text clears to <code>null</code>. Click or keyboard-activate the calendar icon to pick from
         <a routerLink="/components/date-picker">Date picker</a>.
       </p>
 

@@ -60,6 +60,19 @@ describe('HellToastService', () => {
     });
   });
 
+  it('does not let a stale exit timer remove a revived toast id', () => {
+    vi.useFakeTimers();
+    const svc = TestBed.inject(HellToastService);
+
+    const id = svc.show({ title: 'Saving', duration: 0 });
+    svc.dismiss(id);
+    vi.advanceTimersByTime(100);
+    svc.show({ id, title: 'Saved', duration: 0 });
+    vi.advanceTimersByTime(120);
+
+    expect(svc.toasts()).toMatchObject([{ id, title: 'Saved', removing: false }]);
+  });
+
   it('auto-dismisses after the configured duration and exit animation', () => {
     vi.useFakeTimers();
     const svc = TestBed.inject(HellToastService);
@@ -139,6 +152,8 @@ describe('HellToaster', () => {
 
     const list = fixture.nativeElement.querySelector('[data-slot="list"]') as HTMLOListElement;
     expect(list).not.toBeNull();
+    expect(list.getAttribute('aria-live')).toBe('polite');
+    expect(list.getAttribute('aria-atomic')).toBe('true');
     expect(list.querySelectorAll('[data-slot="toast"]')).toHaveLength(1);
   });
 });

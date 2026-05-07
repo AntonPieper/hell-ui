@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { HellTimeInput, type HellTimeValue } from './time-input';
 
@@ -23,10 +24,21 @@ class TimeInputHost {
   values: Array<HellTimeValue | null> = [];
 }
 
+@Component({
+  imports: [ReactiveFormsModule, HellTimeInput],
+  template: `
+    <hell-time-input [formControl]="control" aria-label="Form time" (valueChange)="values.push($event)" />
+  `,
+})
+class TimeInputFormHost {
+  readonly control = new FormControl<HellTimeValue | null>({ hour: 8, minute: 30, second: 0 });
+  values: Array<HellTimeValue | null> = [];
+}
+
 describe('HellTimeInput', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TimeInputHost],
+      imports: [TimeInputHost, TimeInputFormHost],
     }).compileComponents();
   });
 
@@ -119,6 +131,66 @@ describe('HellTimeInput', () => {
     fixture.detectChanges();
 
     expect(input.value).toBe('12:45');
+  });
+
+  it('integrates with reactive forms without echoing programmatic writes', async () => {
+    const fixture = TestBed.createComponent(TimeInputFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = textInput(fixture.nativeElement);
+    expect(input.value).toBe('08:30');
+
+    host.control.setValue({ hour: 9, minute: 45, second: 0 });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(input.value).toBe('09:45');
+    expect(host.values).toEqual([]);
+
+    input.value = '10:15';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.control.value).toEqual({ hour: 10, minute: 15, second: 0 });
+    expect(host.control.touched).toBe(true);
+    expect(host.values).toEqual([{ hour: 10, minute: 15, second: 0 }]);
+  });
+
+  it('does not revive stale local state after a form write returns to an old base', async () => {
+    const fixture = TestBed.createComponent(TimeInputFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = textInput(fixture.nativeElement);
+
+    host.control.setValue(null);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    input.value = '11:20';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+    expect(input.value).toBe('11:20');
+
+    host.control.setValue(null);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(input.value).toBe('');
+  });
+
+  it('uses reactive-form disabled state', () => {
+    const fixture = TestBed.createComponent(TimeInputFormHost);
+    fixture.detectChanges();
+
+    fixture.componentInstance.control.disable();
+    fixture.detectChanges();
+
+    expect(textInput(fixture.nativeElement).disabled).toBe(true);
+    expect(triggerButton(fixture.nativeElement).disabled).toBe(true);
   });
 });
 

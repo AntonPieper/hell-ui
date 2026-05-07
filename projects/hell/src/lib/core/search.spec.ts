@@ -18,6 +18,11 @@ describe('Search Core', () => {
     expect(hellSearchWords(accented)).toEqual(['creme', 'and', 'cafe', 'bar']);
   });
 
+  it('keeps non-Latin letters and Unicode numbers searchable', () => {
+    expect(hellSearchKey('Привет κόσμε 東京 ٢٥')).toBe('привет κοσμε 東京 ٢٥');
+    expect(hellSearchWords('東京 Привет')).toEqual(['東京', 'привет']);
+  });
+
   it('ranks field matches by weight while requiring every query word', () => {
     const items = [
       { id: 'owned', title: 'Alpha Center', meta: 'Ops' },

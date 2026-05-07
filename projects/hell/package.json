@@ -35,6 +35,7 @@
   "peerDependencies": {
     "@angular/common": "^21.2.0",
     "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
     "@angular/router": "^21.2.0",
     "ng-primitives": "^0.117.0",
     "@ng-icons/core": "^33.0.0",

@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   Directive,
-  ElementRef,
   booleanAttribute,
   computed,
   inject,
@@ -26,6 +25,7 @@ import {
 } from 'ng-primitives/pagination';
 import { HellIcon } from '../icon/icon';
 import { HellStyleable } from '../../core/styleable';
+import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactive-disabled';
 
 const HELL_PAGINATION_ICONS = {
   faSolidAnglesLeft,
@@ -34,32 +34,7 @@ const HELL_PAGINATION_ICONS = {
   faSolidChevronRight,
 };
 
-abstract class HellPaginationDisabledGuard extends HellStyleable {
-  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
-
-  protected nativeButtonDisabled(disabled: boolean): '' | null {
-    return this.isButton() && disabled ? '' : null;
-  }
-
-  protected anchorAriaDisabled(disabled: boolean): 'true' | null {
-    return this.isAnchor() && disabled ? 'true' : null;
-  }
-
-  protected preventDisabledAnchor(event: Event, disabled: boolean): void {
-    if (!this.isAnchor() || !disabled) return;
-
-    event.preventDefault();
-    event.stopImmediatePropagation();
-  }
-
-  private isButton(): boolean {
-    return this.host.tagName.toLowerCase() === 'button';
-  }
-
-  private isAnchor(): boolean {
-    return this.host.tagName.toLowerCase() === 'a';
-  }
-}
+abstract class HellPaginationDisabledGuard extends HellNativeInteractiveDisabledGuard {}
 
 /**
  * Wrappers around `ng-primitives/pagination`. Two ways to use:
@@ -96,10 +71,12 @@ export class HellPagination extends HellStyleable {}
   host: {
     '[class.hell-button]': '!unstyled()',
     '[class.hell-pagination-item]': '!unstyled()',
+    '[attr.type]': 'nativeButtonType()',
     '[attr.data-variant]': '"ghost"',
     '[attr.data-icon-only]': '""',
     '[attr.disabled]': 'nativeButtonDisabled(disabled())',
     '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
+    '[attr.tabindex]': 'disabledAnchorTabIndex(disabled())',
     '(click)': 'preventDisabledAnchor($event, disabled())',
     '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
@@ -116,10 +93,12 @@ export class HellPaginationFirst extends HellPaginationDisabledGuard {
   host: {
     '[class.hell-button]': '!unstyled()',
     '[class.hell-pagination-item]': '!unstyled()',
+    '[attr.type]': 'nativeButtonType()',
     '[attr.data-variant]': '"ghost"',
     '[attr.data-icon-only]': '""',
     '[attr.disabled]': 'nativeButtonDisabled(disabled())',
     '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
+    '[attr.tabindex]': 'disabledAnchorTabIndex(disabled())',
     '(click)': 'preventDisabledAnchor($event, disabled())',
     '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
@@ -136,10 +115,12 @@ export class HellPaginationPrev extends HellPaginationDisabledGuard {
   host: {
     '[class.hell-button]': '!unstyled()',
     '[class.hell-pagination-item]': '!unstyled()',
+    '[attr.type]': 'nativeButtonType()',
     '[attr.data-variant]': '"ghost"',
     '[attr.data-icon-only]': '""',
     '[attr.disabled]': 'nativeButtonDisabled(disabled())',
     '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
+    '[attr.tabindex]': 'disabledAnchorTabIndex(disabled())',
     '(click)': 'preventDisabledAnchor($event, disabled())',
     '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
@@ -156,10 +137,12 @@ export class HellPaginationNext extends HellPaginationDisabledGuard {
   host: {
     '[class.hell-button]': '!unstyled()',
     '[class.hell-pagination-item]': '!unstyled()',
+    '[attr.type]': 'nativeButtonType()',
     '[attr.data-variant]': '"ghost"',
     '[attr.data-icon-only]': '""',
     '[attr.disabled]': 'nativeButtonDisabled(disabled())',
     '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
+    '[attr.tabindex]': 'disabledAnchorTabIndex(disabled())',
     '(click)': 'preventDisabledAnchor($event, disabled())',
     '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
@@ -179,10 +162,12 @@ export class HellPaginationLast extends HellPaginationDisabledGuard {
   host: {
     '[class.hell-button]': '!unstyled()',
     '[class.hell-pagination-item]': '!unstyled()',
+    '[attr.type]': 'nativeButtonType()',
     '[attr.data-variant]': '"ghost"',
     '[attr.data-icon-only]': '""',
     '[attr.disabled]': 'nativeButtonDisabled(disabled())',
     '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
+    '[attr.tabindex]': 'disabledAnchorTabIndex(disabled())',
     '(click)': 'preventDisabledAnchor($event, disabled())',
     '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },

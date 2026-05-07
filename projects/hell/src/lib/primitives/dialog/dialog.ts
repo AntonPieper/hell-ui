@@ -47,6 +47,7 @@ interface HellDialogTemplateContext<T = unknown, R = unknown> {
 @Directive({
   selector: 'button[hellDialogTrigger], a[hellDialogTrigger]',
   host: {
+    '[attr.type]': 'nativeButtonType()',
     '[attr.disabled]': 'nativeButtonDisabled(disabled())',
     '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
     '[attr.tabindex]': 'disabledAnchorTabIndex(disabled())',

@@ -201,7 +201,35 @@ describe('Hell data table directives', () => {
     ]);
     expect(name.style.getPropertyValue('--hell-table-col-width')).toBe('136px');
     expect(role.style.getPropertyValue('--hell-table-col-width')).toBe('64px');
+    expect(resizer.getAttribute('type')).toBe('button');
+    expect(resizer.getAttribute('aria-label')).toBe('Resize column');
+    expect(resizer.getAttribute('aria-valuemin')).toBe('0');
+    expect(resizer.getAttribute('aria-valuemax')).toBe('100');
     expect(resizer.getAttribute('aria-valuenow')).toBe('68');
+  });
+
+  it('uses RTL-aware horizontal arrow semantics for column resize', () => {
+    const fixture = TestBed.createComponent(DataTableHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const name = byId<HTMLTableCellElement>(fixture.nativeElement, 'name');
+    const role = byId<HTMLTableCellElement>(fixture.nativeElement, 'role');
+    mockWidth(name, 120);
+    mockWidth(role, 80);
+
+    const resizer = byId<HTMLButtonElement>(fixture.nativeElement, 'name-resizer');
+    resizer.setAttribute('dir', 'rtl');
+    resizer.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.resizeEvents).toEqual([
+      {
+        before: { columnId: 'name', px: 104, share: 0.52 },
+        after: { columnId: 'role', px: 96, share: 0.48 },
+        totalPx: 200,
+      },
+    ]);
   });
 
   it('resizes adjacent header cells from pointer drag and commits once on release', () => {

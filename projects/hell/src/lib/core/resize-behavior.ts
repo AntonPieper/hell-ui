@@ -1,6 +1,7 @@
 export const HELL_RESIZE_KEY_DELTA = 16;
 
 export type HellResizeOrientation = 'horizontal' | 'vertical';
+export type HellResizeDirection = 'ltr' | 'rtl';
 export type HellResizeKeyIntent = 'decrement' | 'increment' | 'min' | 'max';
 
 /** Start sizes and lower bounds for one two-pane resize transaction. */
@@ -33,6 +34,7 @@ export interface HellResizeOperationOptions {
   readonly before: HellResizeOperationAdapter;
   readonly after: HellResizeOperationAdapter;
   readonly orientation: HellResizeOrientation;
+  readonly direction?: HellResizeDirection;
   readonly startCoordinate?: number;
   readonly keyDelta?: number;
 }
@@ -70,6 +72,7 @@ export interface HellResizeItemAdapter<TItem> {
 export interface HellResizePairOperationOptions<TItem> {
   readonly pair: HellResizePair<TItem>;
   readonly orientation: HellResizeOrientation;
+  readonly direction?: HellResizeDirection;
   readonly adapters?: (pair: HellResizePair<TItem>) => HellResizePairAdapters;
   readonly itemAdapter?: (pair: HellResizePair<TItem>) => HellResizeItemAdapter<TItem>;
   readonly startCoordinate?: number;
@@ -85,6 +88,7 @@ export interface HellResizePairInteractionControllerOptions<
   TItem,
 > extends HellResizeInteractionControllerOptions {
   readonly orientation: () => HellResizeOrientation;
+  readonly direction?: () => HellResizeDirection;
   readonly pair: () => HellResizePair<TItem> | null;
   readonly adapters?: (pair: HellResizePair<TItem>) => HellResizePairAdapters;
   readonly itemAdapter?: (pair: HellResizePair<TItem>) => HellResizeItemAdapter<TItem>;
@@ -241,7 +245,11 @@ export class HellResizeOperation {
 
   byPointer(point: { clientX: number; clientY: number }): HellResizeTransactionResult {
     const start = this.startCoordinate ?? hellResizeCoordinate(point, this.options.orientation);
-    return this.byDelta(hellResizeCoordinate(point, this.options.orientation) - start);
+    let delta = hellResizeCoordinate(point, this.options.orientation) - start;
+    if (this.options.orientation === 'horizontal' && this.options.direction === 'rtl') {
+      delta = -delta;
+    }
+    return this.byDelta(delta);
   }
 
   byDelta(delta: number): HellResizeTransactionResult {
@@ -249,7 +257,7 @@ export class HellResizeOperation {
   }
 
   byKey(key: string): HellResizeTransactionResult | null {
-    const intent = hellResizeIntentFromKey(key, this.options.orientation);
+    const intent = hellResizeIntentFromKey(key, this.options.orientation, this.options.direction);
     return intent ? this.apply(this.transaction.byKey(intent)) : null;
   }
 
@@ -300,6 +308,7 @@ export function hellCreateResizePairOperation<TItem>(
     before: adapters.before,
     after: adapters.after,
     orientation: options.orientation,
+    direction: options.direction,
     startCoordinate: options.startCoordinate,
     keyDelta: options.keyDelta,
   });
@@ -360,6 +369,7 @@ export class HellResizePairInteractionController<TItem> {
     const operation = hellCreateResizePairOperation({
       pair,
       orientation,
+      direction: this.options.direction?.() ?? 'ltr',
       adapters: this.options.adapters,
       itemAdapter: this.options.itemAdapter,
       startCoordinate,
@@ -477,10 +487,16 @@ export class HellResizeInteractionController {
 export function hellResizeIntentFromKey(
   key: string,
   orientation: HellResizeOrientation,
+  direction: HellResizeDirection = 'ltr',
 ): HellResizeKeyIntent | null {
   const horizontal = orientation === 'horizontal';
-  if (key === (horizontal ? 'ArrowLeft' : 'ArrowUp')) return 'decrement';
-  if (key === (horizontal ? 'ArrowRight' : 'ArrowDown')) return 'increment';
+  if (horizontal && direction === 'rtl') {
+    if (key === 'ArrowLeft') return 'increment';
+    if (key === 'ArrowRight') return 'decrement';
+  } else {
+    if (key === (horizontal ? 'ArrowLeft' : 'ArrowUp')) return 'decrement';
+    if (key === (horizontal ? 'ArrowRight' : 'ArrowDown')) return 'increment';
+  }
   if (key === 'Home') return 'min';
   if (key === 'End') return 'max';
   return null;

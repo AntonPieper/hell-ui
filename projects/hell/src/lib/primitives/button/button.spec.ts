@@ -6,7 +6,8 @@ import { HellButton } from './button';
 @Component({
   imports: [HellButton],
   template: `
-    <button hellButton type="button" [disabled]="disabled()">Native</button>
+    <button hellButton [disabled]="disabled()">Native</button>
+    <button id="submit" hellButton type="submit">Submit</button>
     <a hellButton href="#next" [disabled]="disabled()">Anchor</a>
   `,
 })
@@ -17,6 +18,16 @@ class ButtonHost {
 describe('HellButton', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({ imports: [ButtonHost] }).compileComponents();
+  });
+
+  it('defaults button hosts to non-submit without overriding explicit submit', () => {
+    const fixture = TestBed.createComponent(ButtonHost);
+    fixture.detectChanges();
+
+    expect(query<HTMLButtonElement>(fixture.nativeElement, 'button[hellButton]').type).toBe(
+      'button',
+    );
+    expect(query<HTMLButtonElement>(fixture.nativeElement, '#submit').type).toBe('submit');
   });
 
   it('keeps anchor disabled semantics explicit', () => {

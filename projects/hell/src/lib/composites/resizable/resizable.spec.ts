@@ -49,9 +49,33 @@ describe('HellResizable', () => {
     byId(fixture.nativeElement, 'handle-a').dispatchEvent(key);
 
     expect(key.defaultPrevented).toBe(true);
+    expect(byId(fixture.nativeElement, 'handle-a').getAttribute('aria-label')).toBe('Resize panels');
+    expect(byId(fixture.nativeElement, 'handle-a').getAttribute('aria-valuemin')).toBe('0');
+    expect(byId(fixture.nativeElement, 'handle-a').getAttribute('aria-valuemax')).toBe('100');
     expect(paneFlex(paneA)).toBe('0 0 116px');
     expect(paneFlex(paneB)).toBe('0 0 84px');
     expect(paneFlex(paneC)).toBe('0 0 100px');
+  });
+
+  it('uses RTL-aware horizontal arrow semantics', () => {
+    const fixture = TestBed.createComponent(ResizableHost);
+    fixture.detectChanges();
+
+    const group = byId(fixture.nativeElement, 'group');
+    const paneA = byId(fixture.nativeElement, 'pane-a');
+    const paneB = byId(fixture.nativeElement, 'pane-b');
+    const paneC = byId(fixture.nativeElement, 'pane-c');
+    const handle = byId(fixture.nativeElement, 'handle-a');
+    handle.setAttribute('dir', 'rtl');
+    mockElementSize(group, 300);
+    mockElementSize(paneA, 100);
+    mockElementSize(paneB, 100);
+    mockElementSize(paneC, 100);
+
+    handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+
+    expect(paneFlex(paneA)).toBe('0 0 84px');
+    expect(paneFlex(paneB)).toBe('0 0 116px');
   });
 
   it('marks a fully constrained group as disabled for handle interaction', () => {

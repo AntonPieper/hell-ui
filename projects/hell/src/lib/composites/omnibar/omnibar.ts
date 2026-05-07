@@ -703,7 +703,7 @@ export class HellOmnibarChipRemove extends HellStyleable {}
   selector: '[hellOmnibarActions]',
   host: {
     '[class.hell-omnibar-actions-strip]': '!unstyled()',
-    role: 'menubar',
+    role: 'toolbar',
     'aria-orientation': 'horizontal',
   },
 })
@@ -714,7 +714,7 @@ export class HellOmnibarActionsStrip extends HellStyleable {}
   selector: 'button[hellOmnibarAction]',
   host: {
     '[class.hell-omnibar-action]': '!unstyled()',
-    role: 'menuitem',
+    type: 'button',
     '[attr.data-active]': 'pressed() ? "true" : null',
   },
 })

@@ -62,6 +62,16 @@ describe('HellAudioPlayer', () => {
     expect(fixture.nativeElement.querySelector('[data-slot="cc-toggle"]')).toBeNull();
   });
 
+  it('does not Date.parse ambiguous display date strings', async () => {
+    const { fixture } = await createPlayer();
+
+    fixture.componentRef.setInput('date', '04/05/2026');
+    fixture.detectChanges();
+
+    const date = fixture.nativeElement.querySelector('[data-slot="date"]') as HTMLElement;
+    expect(date.textContent?.trim()).toBe('04/05/2026');
+  });
+
   it('applies volume, mute, and playback-rate state to the audio element', async () => {
     const { fixture, component, audio } = await createPlayer();
 

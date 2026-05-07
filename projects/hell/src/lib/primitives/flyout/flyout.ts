@@ -37,6 +37,7 @@ let nextFlyoutId = 0;
   selector: 'button[hellFlyoutTrigger], a[hellFlyoutTrigger]',
   exportAs: 'hellFlyoutTrigger',
   host: {
+    '[attr.type]': 'nativeButtonType()',
     '[attr.aria-haspopup]': '"dialog"',
     '[attr.aria-expanded]': 'open()',
     '[attr.aria-controls]': 'open() ? panelId : null',

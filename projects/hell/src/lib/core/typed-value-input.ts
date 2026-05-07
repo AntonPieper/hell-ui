@@ -98,6 +98,11 @@ export class HellTypedValueInputState<TValue, TExternal, TOutput = TValue | null
     this.draft.set(null);
   }
 
+  /** Drop local committed state after a form/programmatic write owns the value. */
+  clearLocal(): void {
+    this.local.set(null);
+  }
+
   /** Commit the active draft unless the external value changed underneath it. */
   commitDraft(): HellTypedValueCommitResult<TOutput> {
     const draft = this.draft();

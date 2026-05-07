@@ -27,6 +27,7 @@ import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactiv
     },
   ],
   host: {
+    '[attr.type]': 'nativeButtonType()',
     '[attr.disabled]': 'nativeButtonDisabled(trigger.disabled())',
     '[attr.aria-disabled]': 'anchorAriaDisabled(trigger.disabled())',
     '[attr.tabindex]': 'disabledAnchorTabIndex(trigger.disabled())',

@@ -13,5 +13,5 @@ import { HellAudioPlayer } from 'hell';
   `,
 })
 export class AudioPlayerLiveCaptionsExample {
-  protected readonly exampleDate = new Date('2026-04-22');
+  protected readonly exampleDate = new Date(2026, 3, 22);
 }

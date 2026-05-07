@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { HellDateInput } from './date-input';
 
@@ -25,10 +26,21 @@ class DateInputHost {
   dates: Array<Date | null> = [];
 }
 
+@Component({
+  imports: [ReactiveFormsModule, HellDateInput],
+  template: `
+    <hell-date-input [formControl]="control" aria-label="Form date" (dateChange)="dates.push($event)" />
+  `,
+})
+class DateInputFormHost {
+  readonly control = new FormControl<Date | null>(new Date(2026, 3, 22));
+  dates: Array<Date | null> = [];
+}
+
 describe('HellDateInput', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DateInputHost],
+      imports: [DateInputHost, DateInputFormHost],
     }).compileComponents();
   });
 
@@ -48,6 +60,24 @@ describe('HellDateInput', () => {
     expect(emitted.getFullYear()).toBe(2026);
     expect(emitted.getMonth()).toBe(3);
     expect(emitted.getDate()).toBe(30);
+  });
+
+  it('rejects ambiguous free-form dates instead of using Date.parse', () => {
+    const fixture = TestBed.createComponent(DateInputHost);
+    const host = fixture.componentInstance;
+    host.date.set(new Date(2026, 0, 15));
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    input.value = '04/05/2026';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.dates).toEqual([]);
+    expect(input.value).toBe('04/05/2026');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
   });
 
   it('rejects impossible ISO dates instead of rolling them forward', () => {
@@ -197,6 +227,66 @@ describe('HellDateInput', () => {
 
     expect(host.dates).toEqual([]);
     expect(input.value).toBe(formatDate(host.date()));
+  });
+
+  it('integrates with reactive forms without echoing programmatic writes', async () => {
+    const fixture = TestBed.createComponent(DateInputFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = textInput(fixture.nativeElement);
+    expect(input.value).toBe('2026-04-22');
+
+    host.control.setValue(new Date(2026, 4, 5));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(input.value).toBe('2026-05-05');
+    expect(host.dates).toEqual([]);
+
+    input.value = '2026-06-06';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(formatDate(host.control.value)).toBe('2026-06-06');
+    expect(host.control.touched).toBe(true);
+    expect(formatDate(host.dates[0])).toBe('2026-06-06');
+  });
+
+  it('does not revive stale local state after a form write returns to an old base', async () => {
+    const fixture = TestBed.createComponent(DateInputFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = textInput(fixture.nativeElement);
+
+    host.control.setValue(null);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    input.value = '2026-07-07';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+    expect(input.value).toBe('2026-07-07');
+
+    host.control.setValue(null);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(input.value).toBe('');
+  });
+
+  it('uses reactive-form disabled state', () => {
+    const fixture = TestBed.createComponent(DateInputFormHost);
+    fixture.detectChanges();
+
+    fixture.componentInstance.control.disable();
+    fixture.detectChanges();
+
+    expect(textInput(fixture.nativeElement).disabled).toBe(true);
+    expect(triggerButton(fixture.nativeElement).disabled).toBe(true);
   });
 });
 

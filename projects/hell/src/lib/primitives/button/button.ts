@@ -22,6 +22,7 @@ import { HellStyleable } from '../../core/styleable';
   hostDirectives: [{ directive: NgpButton, inputs: ['disabled'] }],
   host: {
     '[class.hell-button]': '!unstyled()',
+    '[attr.type]': 'nativeButtonType()',
     '[attr.data-variant]': 'variant()',
     '[attr.data-size]': 'size()',
     '[attr.data-icon-only]': 'iconOnly() ? "" : null',
@@ -56,6 +57,15 @@ export class HellButton extends HellStyleable {
 
     event.preventDefault();
     event.stopImmediatePropagation();
+  }
+
+  protected nativeButtonType(): string | null {
+    if (!this.isButton()) return null;
+    return this.host.getAttribute('type') ?? 'button';
+  }
+
+  private isButton(): boolean {
+    return this.host.tagName.toLowerCase() === 'button';
   }
 
   private isAnchor(): boolean {

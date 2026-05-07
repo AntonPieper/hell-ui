@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { hellSearchKey } from 'hell';
 
 export interface DocsSearchSeed {
   readonly title: string;
@@ -1414,13 +1415,5 @@ function docsCatalogSeedTerms(
 }
 
 function searchHaystack(...parts: readonly string[]): string {
-  return parts.map(searchKey).join(' ');
-}
-
-function searchKey(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/&/g, ' and ')
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
+  return parts.map(hellSearchKey).join(' ');
 }

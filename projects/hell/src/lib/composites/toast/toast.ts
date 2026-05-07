@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   Directive,
   ElementRef,
   Injectable,
@@ -87,6 +88,7 @@ interface ToastTimer {
 export class HellToastService {
   private nextId = 1;
   private timers = new Map<number, ToastTimer>();
+  private exitTimers = new Map<number, ReturnType<typeof setTimeout>>();
 
   /** Reactive list of currently mounted toasts (oldest → newest). */
   readonly toasts = signal<ToastInternal[]>([]);
@@ -106,6 +108,7 @@ export class HellToastService {
       removing: false,
       createdAt: Date.now(),
     };
+    this.clearExitTimer(id);
     const list = this.toasts();
     const existing = list.findIndex((t) => t.id === id);
     if (existing >= 0) {
@@ -144,9 +147,14 @@ export class HellToastService {
     const copy = [...list];
     copy[i] = { ...copy[i], removing: true };
     this.toasts.set(copy);
-    setTimeout(() => {
+    this.clearExitTimer(id);
+    const handle = setTimeout(() => {
+      this.exitTimers.delete(id);
+      const current = this.toasts().find((t) => t.id === id);
+      if (!current?.removing) return;
       this.toasts.set(this.toasts().filter((t) => t.id !== id));
     }, EXIT_MS);
+    this.exitTimers.set(id, handle);
   }
 
   /** Dismiss every toast currently mounted. */
@@ -200,6 +208,13 @@ export class HellToastService {
     if (t.handle) clearTimeout(t.handle);
     this.timers.delete(id);
   }
+
+  private clearExitTimer(id: number): void {
+    const handle = this.exitTimers.get(id);
+    if (!handle) return;
+    clearTimeout(handle);
+    this.exitTimers.delete(id);
+  }
 }
 
 /**
@@ -235,6 +250,8 @@ export class HellToastTemplate {}
         data-slot="list"
         role="region"
         aria-label="Notifications"
+        aria-live="polite"
+        aria-atomic="true"
         tabindex="-1"
         (mouseenter)="onEnter()"
         (mouseleave)="onLeave()"
@@ -352,12 +369,14 @@ export class HellToaster extends HellStyleable {
   private readonly exitSnapshot = signal(new Map<number, HellToastStackSnapshot>());
   private ro: ResizeObserver | null = null;
   private observed = new WeakSet<Element>();
+  private destroyed = false;
   /** Pending collapse handle. Re-entry cancels it so transient mouseleave
    *  events during dismiss-driven reflows don't yank the stack closed. */
   private collapseHandle: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     super();
+    inject(DestroyRef).onDestroy(() => this.cleanupObservers());
     afterNextRender(() => this.observeAll());
     effect(() => {
       // Snapshot the layout of any toast that just entered the removing state
@@ -445,8 +464,18 @@ export class HellToaster extends HellStyleable {
     return { id, dismiss: () => this.svc.dismiss(id) };
   }
 
+  private cleanupObservers(): void {
+    this.destroyed = true;
+    if (this.collapseHandle != null) {
+      clearTimeout(this.collapseHandle);
+      this.collapseHandle = null;
+    }
+    this.ro?.disconnect();
+    this.ro = null;
+  }
+
   private observeAll(): void {
-    if (typeof ResizeObserver === 'undefined') return;
+    if (this.destroyed || typeof ResizeObserver === 'undefined') return;
     if (!this.ro) {
       this.ro = new ResizeObserver((entries) => {
         let changed = false;

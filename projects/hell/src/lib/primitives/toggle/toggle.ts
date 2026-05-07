@@ -22,6 +22,7 @@ import { HellStyleable } from '../../core/styleable';
     '[class.hell-toggle]': '!unstyled()',
     '[attr.data-size]': 'size()',
     '[attr.data-variant]': '"ghost"',
+    type: 'button',
   },
 })
 export class HellToggle extends HellStyleable {

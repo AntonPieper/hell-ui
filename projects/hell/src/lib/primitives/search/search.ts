@@ -16,6 +16,7 @@ export class HellSearch extends HellStyleable {}
   hostDirectives: [NgpSearchClear],
   host: {
     '[class.hell-search-clear]': '!unstyled()',
+    type: 'button',
   },
 })
 export class HellSearchClear extends HellStyleable {}

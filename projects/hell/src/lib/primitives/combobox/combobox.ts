@@ -59,6 +59,7 @@ export class HellComboboxInput extends HellStyleable {}
   hostDirectives: [NgpComboboxButton],
   host: {
     '[class.hell-combobox-button]': '!unstyled()',
+    type: 'button',
   },
 })
 export class HellComboboxButton extends HellStyleable {}

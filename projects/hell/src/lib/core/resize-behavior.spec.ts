@@ -63,11 +63,32 @@ describe('Resize Behavior', () => {
   it('maps keyboard events to resize intents by orientation', () => {
     expect(hellResizeIntentFromKey('ArrowLeft', 'horizontal')).toBe('decrement');
     expect(hellResizeIntentFromKey('ArrowRight', 'horizontal')).toBe('increment');
+    expect(hellResizeIntentFromKey('ArrowLeft', 'horizontal', 'rtl')).toBe('increment');
+    expect(hellResizeIntentFromKey('ArrowRight', 'horizontal', 'rtl')).toBe('decrement');
     expect(hellResizeIntentFromKey('ArrowUp', 'vertical')).toBe('decrement');
     expect(hellResizeIntentFromKey('ArrowDown', 'vertical')).toBe('increment');
     expect(hellResizeIntentFromKey('Home', 'vertical')).toBe('min');
     expect(hellResizeIntentFromKey('End', 'horizontal')).toBe('max');
     expect(hellResizeIntentFromKey('PageDown', 'horizontal')).toBeNull();
+  });
+
+  it('inverts horizontal pointer deltas in RTL', () => {
+    const before = createResizeAdapter(100, 40);
+    const after = createResizeAdapter(80, 40);
+    const operation = new HellResizeOperation({
+      before,
+      after,
+      orientation: 'horizontal',
+      direction: 'rtl',
+      startCoordinate: 10,
+    });
+
+    expect(operation.byPointer({ clientX: 60, clientY: 0 })).toEqual({
+      a: 50,
+      b: 130,
+      sum: 180,
+      ariaValueNow: 28,
+    });
   });
 
   it('runs a resize operation through layout adapters', () => {

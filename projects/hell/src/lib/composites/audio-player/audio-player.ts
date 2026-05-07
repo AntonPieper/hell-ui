@@ -39,6 +39,18 @@ const HELL_AUDIO_PLAYER_ICONS = {
   faSolidVolumeXmark,
 };
 
+function parseIsoDateOnly(value: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(year, month - 1, day);
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
+    ? date
+    : null;
+}
+
 /**
  * Compact audio player with seek bar, play/pause, mute, volume slider,
  * download button and an opt-in/out inline live-captions strip backed by the
@@ -291,8 +303,8 @@ export class HellAudioPlayer extends HellStyleable {
   protected readonly resolvedDate = computed<string | null>(() => {
     const d = this.date();
     if (!d) return null;
-    const date = d instanceof Date ? d : new Date(d);
-    if (Number.isNaN(date.valueOf())) return typeof d === 'string' ? d : null;
+    const date = d instanceof Date ? d : parseIsoDateOnly(d);
+    if (!date || Number.isNaN(date.valueOf())) return typeof d === 'string' ? d : null;
     return date.toLocaleDateString(undefined, {
       year: 'numeric',
       month: 'short',

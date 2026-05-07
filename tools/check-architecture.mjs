@@ -468,7 +468,7 @@ function checkComponentContract() {
 
 function exportedStyleableClasses(source) {
   const styleableBases = new Set(
-    [...source.matchAll(/(?:abstract\s+)?class\s+([A-Za-z0-9_]+)[^{]*extends\s+HellStyleable\b/g)].map(
+    [...source.matchAll(/(?:abstract\s+)?class\s+([A-Za-z0-9_]+)[^{]*extends\s+(?:HellStyleable|HellNativeInteractiveDisabledGuard)\b/g)].map(
       (match) => match[1],
     ),
   );

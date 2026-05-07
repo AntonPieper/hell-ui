@@ -1,5 +1,8 @@
 import { HellStyleable } from '../../core/styleable';
-import { HellResizePairInteractionController } from '../../core/resize-behavior';
+import {
+  HellResizePairInteractionController,
+  type HellResizeDirection,
+} from '../../core/resize-behavior';
 import {
   HellTableColumnResizeRuntime,
   type HellTableColumnResizeEvent,
@@ -23,6 +26,12 @@ export type {
   HellTableColumnResizeEvent,
   HellTableColumnResizeSide,
 } from './data-table-column-resize.runtime';
+
+function hellElementDirection(element: HTMLElement): HellResizeDirection {
+  return element.ownerDocument.defaultView?.getComputedStyle(element).direction === 'rtl'
+    ? 'rtl'
+    : 'ltr';
+}
 
 const HELL_TABLE_INTERACTIVE_TARGET_SELECTOR = [
   'button',
@@ -335,6 +344,10 @@ export class HellTableCell extends HellStyleable {
   host: {
     '[class.hell-table-column-resizer]': '!unstyled()',
     '[attr.data-active]': 'dragging() ? "true" : null',
+    '[attr.type]': 'nativeButtonType()',
+    '[attr.aria-label]': 'ariaLabel()',
+    '[attr.aria-valuemin]': '0',
+    '[attr.aria-valuemax]': '100',
     '[attr.aria-valuenow]': 'ariaValueNow()',
     '[attr.aria-disabled]': 'isDisabled() ? "true" : null',
     '[attr.tabindex]': 'isDisabled() ? -1 : 0',
@@ -347,6 +360,7 @@ export class HellTableCell extends HellStyleable {
 })
 export class HellTableColumnResizer extends HellStyleable {
   readonly minWidth = input(40, { transform: numberAttribute });
+  readonly ariaLabel = input('Resize column', { alias: 'aria-label' });
 
   readonly columnResize = output<HellTableColumnResizeEvent>();
 
@@ -363,6 +377,7 @@ export class HellTableColumnResizer extends HellStyleable {
       onValueChange: (result) => this.ariaValueNow.set(result.ariaValueNow),
       onCommit: (result) => this.emitResize(result.a, result.b),
       orientation: () => 'horizontal',
+      direction: () => hellElementDirection(this.host),
       stopPropagation: true,
       pair: () => this.adjacentPair(),
       itemAdapter: () => {
@@ -393,6 +408,10 @@ export class HellTableColumnResizer extends HellStyleable {
 
   protected isDisabled(): boolean {
     return this.adjacentPair() === null;
+  }
+
+  protected nativeButtonType(): 'button' | null {
+    return this.host.tagName.toLowerCase() === 'button' ? 'button' : null;
   }
 
   protected onPointerDown(e: PointerEvent) {

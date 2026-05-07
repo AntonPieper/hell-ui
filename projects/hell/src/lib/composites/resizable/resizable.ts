@@ -17,9 +17,16 @@ import {
 import {
   HellResizePairInteractionController,
   hellFitResizeSizesToTotal,
+  type HellResizeDirection,
 } from '../../core/resize-behavior';
 import { HellOrientation } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
+
+function hellElementDirection(element: HTMLElement): HellResizeDirection {
+  return element.ownerDocument.defaultView?.getComputedStyle(element).direction === 'rtl'
+    ? 'rtl'
+    : 'ltr';
+}
 
 /**
  * Resizable group. Wrap two or more `[hellResizablePane]` elements with
@@ -251,7 +258,10 @@ export class HellResizablePane extends HellStyleable {
       'resizable.orientation() === "horizontal" ? "vertical" : "horizontal"',
     '[attr.aria-disabled]': 'resizable.isConstrained() ? "true" : null',
     role: 'separator',
+    '[attr.aria-label]': 'ariaLabel()',
     '[attr.tabindex]': 'resizable.isConstrained() ? "-1" : "0"',
+    '[attr.aria-valuemin]': '0',
+    '[attr.aria-valuemax]': '100',
     '[attr.aria-valuenow]': 'ariaValueNow()',
   },
   template: '<span data-slot="grip" aria-hidden="true"></span>',
@@ -264,6 +274,7 @@ export class HellResizableHandle extends HellStyleable {
    *   the handle is the primary affordance.
    */
   readonly appearance = input<'line' | 'grip'>('line');
+  readonly ariaLabel = input('Resize panels', { alias: 'aria-label' });
 
   protected readonly dragging = signal(false);
   protected readonly ariaValueNow = signal<number | null>(null);
@@ -276,6 +287,7 @@ export class HellResizableHandle extends HellStyleable {
     onActiveChange: (active) => this.dragging.set(active),
     onValueChange: (result) => this.ariaValueNow.set(result.ariaValueNow),
     orientation: () => (this.resizable.orientation() === 'horizontal' ? 'horizontal' : 'vertical'),
+    direction: () => hellElementDirection(this.host),
     beforeStart: () => {
       this.resizable.fitPanesToAvailableSize();
       return !this.resizable.isConstrained();

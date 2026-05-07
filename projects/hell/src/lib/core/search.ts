@@ -94,14 +94,14 @@ export function hellSearchWords(value: string): readonly string[] {
     .filter(Boolean);
 }
 
-/** Normalize text for accent-insensitive, punctuation-insensitive search keys. */
+/** Normalize text for accent-insensitive, punctuation-insensitive Unicode search keys. */
 export function hellSearchKey(value: string): string {
   return value
     .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
+    .replace(/\p{Mark}/gu, '')
+    .toLocaleLowerCase()
     .replace(/&/g, ' and ')
-    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/[^\p{Letter}\p{Number}]+/gu, ' ')
     .trim();
 }
 

@@ -1,4 +1,4 @@
-import { Directive, booleanAttribute, input } from '@angular/core';
+import { Directive, ElementRef, inject } from '@angular/core';
 import { HellStyleable } from '../../core/styleable';
 import {
   NgpBreadcrumbs,
@@ -48,9 +48,18 @@ export class HellBreadcrumbItem extends HellStyleable {}
 @Directive({
   selector: 'a[hellBreadcrumbLink], button[hellBreadcrumbLink]',
   hostDirectives: [NgpBreadcrumbLink],
-  host: { '[class.hell-breadcrumbs-link]': '!unstyled()' },
+  host: {
+    '[class.hell-breadcrumbs-link]': '!unstyled()',
+    '[attr.type]': 'nativeButtonType()',
+  },
 })
-export class HellBreadcrumbLink extends HellStyleable {}
+export class HellBreadcrumbLink extends HellStyleable {
+  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+
+  protected nativeButtonType(): 'button' | null {
+    return this.host.tagName.toLowerCase() === 'button' ? 'button' : null;
+  }
+}
 
 /** Current page — apply to <span> or similar non-link element. */
 @Directive({
@@ -90,10 +99,17 @@ export class HellBreadcrumbSeparator extends HellStyleable {}
   hostDirectives: [NgpBreadcrumbEllipsis],
   host: {
     '[class.hell-breadcrumbs-ellipsis]': '!unstyled()',
-    'aria-label': 'Show hidden navigation',
+    '[attr.type]': 'nativeButtonType()',
+    '[attr.aria-label]': 'nativeButtonType() ? "Show hidden navigation" : null',
   },
 })
-export class HellBreadcrumbEllipsis extends HellStyleable {}
+export class HellBreadcrumbEllipsis extends HellStyleable {
+  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+
+  protected nativeButtonType(): 'button' | null {
+    return this.host.tagName.toLowerCase() === 'button' ? 'button' : null;
+  }
+}
 
 export const HELL_BREADCRUMBS_DIRECTIVES = [
   HellBreadcrumbs,

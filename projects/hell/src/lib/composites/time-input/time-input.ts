@@ -3,9 +3,12 @@ import {
   Component,
   booleanAttribute,
   computed,
+  forwardRef,
   input,
   output,
+  signal,
 } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidClock } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../../primitives/button/button';
@@ -95,12 +98,19 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
   selector: 'hell-time-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton, HellIcon, HellInput, HellPopover, HellPopoverTrigger],
-  providers: [provideIcons(HELL_TIME_INPUT_ICONS)],
+  providers: [
+    provideIcons(HELL_TIME_INPUT_ICONS),
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => HellTimeInput),
+      multi: true,
+    },
+  ],
   host: {
     '[class.hell-time-input]': '!unstyled()',
     '[attr.data-size]': 'size()',
     '[attr.data-invalid]': 'isInvalid() ? "true" : null',
-    '[attr.data-disabled]': 'disabled() ? "true" : null',
+    '[attr.data-disabled]': 'isDisabled() ? "true" : null',
   },
   template: `
     <input
@@ -114,7 +124,7 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
       [invalid]="isInvalid()"
       [attr.aria-invalid]="isInvalid() ? 'true' : null"
       [attr.aria-label]="ariaLabel()"
-      [disabled]="disabled()"
+      [disabled]="isDisabled()"
       [placeholder]="placeholder() ?? (seconds() ? 'HH:MM:SS' : 'HH:MM')"
       [value]="display()"
       (input)="onInput($event.target.value)"
@@ -130,7 +140,7 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
       data-slot="trigger"
       [hellPopoverTrigger]="picker"
       placement="bottom-end"
-      [disabled]="disabled()"
+      [disabled]="isDisabled()"
       [attr.aria-label]="ariaLabel() ? 'Choose time for ' + ariaLabel() : 'Choose time'"
     >
       <hell-icon name="faSolidClock" />
@@ -223,7 +233,7 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
     </ng-template>
   `,
 })
-export class HellTimeInput extends HellStyleable {
+export class HellTimeInput extends HellStyleable implements ControlValueAccessor {
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
@@ -241,8 +251,14 @@ export class HellTimeInput extends HellStyleable {
   protected readonly pad = pad;
   protected readonly format = formatTime;
 
+  private readonly controlMode = signal(false);
+  private readonly controlValue = signal<HellTimeValue | null>(null);
+  private readonly controlDisabled = signal(false);
+  private onControlChange: (value: HellTimeValue | null) => void = () => {};
+  private onControlTouched: () => void = () => {};
+
   private readonly valueState = new HellTypedValueInputState<HellTimeValue, HellTimeValue | null>({
-    external: () => this.value(),
+    external: () => this.effectiveValue(),
     parseExternal: (value) => (isValidTime(value) ? value : null),
     parseText: tryParse,
     format: (value) => (value ? formatTime(value, this.seconds()) : ''),
@@ -254,25 +270,51 @@ export class HellTimeInput extends HellStyleable {
   protected readonly display = this.valueState.display;
   protected readonly invalidDraft = this.valueState.invalidDraft;
   protected readonly isInvalid = () => this.invalid() || this.invalidDraft();
+  protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
+
+  writeValue(value: HellTimeValue | null): void {
+    this.controlMode.set(true);
+    this.controlValue.set(isValidTime(value) ? value : null);
+    this.valueState.clearDraft();
+    this.valueState.clearLocal();
+  }
+
+  registerOnChange(fn: (value: HellTimeValue | null) => void): void {
+    this.onControlChange = fn;
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.onControlTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.controlDisabled.set(isDisabled);
+  }
+
+  private effectiveValue(): HellTimeValue | null {
+    return this.controlMode() ? this.controlValue() : this.value();
+  }
 
   protected onInput(value: string) {
     this.valueState.writeDraft(value);
   }
 
   protected onBlur() {
+    this.onControlTouched();
     const next = this.valueState.commitDraft();
-    if (next.committed) this.valueChange.emit(next.value);
+    if (next.committed) this.emitValue(next.value);
   }
 
   protected commit(text: string, event?: Event) {
     event?.preventDefault();
     const next = this.valueState.commitText(text);
-    if (next.committed) this.valueChange.emit(next.value);
+    if (next.committed) this.emitValue(next.value);
   }
 
   protected setUnit(unit: 'hour' | 'minute' | 'second', n: number) {
     const next = this.valueState.setValue({ ...this.current(), [unit]: n });
-    if (next.committed) this.valueChange.emit(next.value);
+    if (next.committed) this.emitValue(next.value);
+    this.onControlTouched();
   }
 
   protected nudge(unit: 'hour' | 'minute' | 'second', delta: number) {
@@ -284,6 +326,13 @@ export class HellTimeInput extends HellStyleable {
       t.minute = totalMinutes % 60;
     } else t.second = (t.second + delta + 60) % 60;
     const next = this.valueState.setValue(t);
-    if (next.committed) this.valueChange.emit(next.value);
+    if (next.committed) this.emitValue(next.value);
+    this.onControlTouched();
+  }
+
+  private emitValue(value: HellTimeValue | null): void {
+    if (this.controlMode()) this.controlValue.set(value);
+    this.valueChange.emit(value);
+    this.onControlChange(value);
   }
 }

@@ -34,6 +34,7 @@ import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactiv
     },
   ],
   host: {
+    '[attr.type]': 'nativeButtonType()',
     '[attr.disabled]': 'nativeButtonDisabled(trigger.disabled())',
     '[attr.aria-disabled]': 'anchorAriaDisabled(trigger.disabled())',
     '[attr.tabindex]': 'disabledAnchorTabIndex(trigger.disabled())',
@@ -94,6 +95,7 @@ export class HellMenu extends HellStyleable {
   ],
   host: {
     '[class.hell-menu-item]': '!unstyled()',
+    '[attr.type]': 'nativeButtonType()',
     '[attr.aria-disabled]': 'nonNativeAriaDisabled()',
     '(click)': 'preventDisabledNonNative($event)',
     '(keydown.enter)': 'preventDisabledNonNative($event)',
@@ -103,6 +105,10 @@ export class HellMenu extends HellStyleable {
 export class HellMenuItem extends HellStyleable {
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly menuItem = inject(NgpMenuItem);
+
+  protected nativeButtonType(): 'button' | null {
+    return this.isButton() ? 'button' : null;
+  }
 
   protected nonNativeAriaDisabled(): 'true' | null {
     return !this.isButton() && this.menuItem.disabled() ? 'true' : null;
