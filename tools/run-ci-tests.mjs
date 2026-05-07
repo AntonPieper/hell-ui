@@ -21,6 +21,11 @@ const tasks = [
     args: ['test:architecture'],
   },
   {
+    name: 'lint',
+    command: 'pnpm',
+    args: ['lint'],
+  },
+  {
     name: 'package consumer',
     command: 'pnpm',
     args: ['test:package-consumer'],
