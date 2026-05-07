@@ -17,6 +17,7 @@ pnpm install
 pnpm build:lib
 pnpm build:docs
 pnpm test
+pnpm ci:verify # full pre-push: unit, architecture, lint, e2e, package consumer, build
 ```
 
 ## Package Imports
