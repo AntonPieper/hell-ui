@@ -26,6 +26,11 @@ const tasks = [
     args: ['lint'],
   },
   {
+    name: 'browser e2e',
+    command: 'pnpm',
+    args: ['e2e'],
+  },
+  {
     name: 'package consumer',
     command: 'pnpm',
     args: ['test:package-consumer'],

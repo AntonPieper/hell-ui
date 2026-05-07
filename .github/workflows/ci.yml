@@ -42,6 +42,9 @@ jobs:
       - name: Install
         run: pnpm ci:install
 
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
       - name: Test
         run: pnpm ci:test
 
@@ -52,6 +55,7 @@ jobs:
           name: test-reports
           path: |
             test-results/
+            playwright-report/
             coverage/
           if-no-files-found: ignore
 

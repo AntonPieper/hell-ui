@@ -150,10 +150,12 @@ describe('HellToaster', () => {
     svc.success('Saved', { duration: 0 });
     fixture.detectChanges();
 
+    const region = fixture.nativeElement.querySelector('[data-slot="region"]') as HTMLElement;
     const list = fixture.nativeElement.querySelector('[data-slot="list"]') as HTMLOListElement;
-    expect(list).not.toBeNull();
-    expect(list.getAttribute('aria-live')).toBe('polite');
-    expect(list.getAttribute('aria-atomic')).toBe('true');
+    expect(region).not.toBeNull();
+    expect(region.getAttribute('aria-live')).toBe('polite');
+    expect(region.getAttribute('aria-atomic')).toBe('true');
+    expect(list).toBeInstanceOf(HTMLOListElement);
     expect(list.querySelectorAll('[data-slot="toast"]')).toHaveLength(1);
   });
 });

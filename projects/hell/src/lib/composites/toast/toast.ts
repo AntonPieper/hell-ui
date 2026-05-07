@@ -246,8 +246,8 @@ export class HellToastTemplate {}
   },
   template: `
     @if (hasToasts()) {
-      <ol
-        data-slot="list"
+      <section
+        data-slot="region"
         role="region"
         aria-label="Notifications"
         aria-live="polite"
@@ -258,22 +258,23 @@ export class HellToastTemplate {}
         (focusin)="onEnter()"
         (focusout)="onLeave()"
       >
-        @for (t of svc.toasts(); track t.id; let i = $index) {
-          <li
-            data-slot="toast"
-            [attr.data-variant]="t.variant"
-            [attr.data-state]="t.removing ? 'closed' : 'open'"
-            [attr.data-front]="frontDistance(t)"
-            [attr.data-visible]="frontDistance(t) < maxVisible() ? 'true' : 'false'"
-            [attr.data-overflow]="overflow(t) > 0 ? overflow(t) : null"
-            [style.--hell-toast-front]="frontDistance(t)"
-            [style.--hell-toast-overflow]="overflow(t)"
-            [style.--hell-toast-offset]="offsetPx(t)"
-            [style.--hell-toast-h]="heightPx(t.id)"
-            [style.--hell-toast-z]="i + 1"
-            (mouseenter)="svc.pauseAll()"
-            (mouseleave)="svc.resumeAll()"
-          >
+        <ol data-slot="list">
+          @for (t of svc.toasts(); track t.id; let i = $index) {
+            <li
+              data-slot="toast"
+              [attr.data-variant]="t.variant"
+              [attr.data-state]="t.removing ? 'closed' : 'open'"
+              [attr.data-front]="frontDistance(t)"
+              [attr.data-visible]="frontDistance(t) < maxVisible() ? 'true' : 'false'"
+              [attr.data-overflow]="overflow(t) > 0 ? overflow(t) : null"
+              [style.--hell-toast-front]="frontDistance(t)"
+              [style.--hell-toast-overflow]="overflow(t)"
+              [style.--hell-toast-offset]="offsetPx(t)"
+              [style.--hell-toast-h]="heightPx(t.id)"
+              [style.--hell-toast-z]="i + 1"
+              (mouseenter)="svc.pauseAll()"
+              (mouseleave)="svc.resumeAll()"
+            >
             <div data-slot="glyph" aria-hidden="true">
               @switch (t.variant) {
                 @case ('success') {
@@ -346,9 +347,10 @@ export class HellToastTemplate {}
                 </svg>
               </button>
             }
-          </li>
-        }
-      </ol>
+            </li>
+          }
+        </ol>
+      </section>
     }
   `,
 })
