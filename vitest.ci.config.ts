@@ -24,6 +24,12 @@ export default defineConfig({
       reportsDirectory: coveragePath,
       reporter: ['text', 'json-summary', 'html', 'lcov', 'cobertura'],
       reportOnFailure: true,
+      thresholds: {
+        statements: 75,
+        branches: 70,
+        functions: 70,
+        lines: 75,
+      },
     },
   },
 });
