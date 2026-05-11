@@ -1,4 +1,6 @@
-import { Directive } from '@angular/core';
+import { DestroyRef, Directive, forwardRef, inject } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
 import { HellStyleable } from '../../core/styleable';
 import { hellRegisterFloatingHost } from '../../core/floating-scope';
 import {
@@ -8,6 +10,7 @@ import {
   NgpComboboxInput,
   NgpComboboxOption,
   NgpComboboxPortal,
+  injectComboboxState,
 } from 'ng-primitives/combobox';
 
 /**
@@ -37,11 +40,52 @@ import {
       outputs: ['ngpComboboxValueChange:valueChange', 'ngpComboboxOpenChange:openChange'],
     },
   ],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => HellCombobox),
+      multi: true,
+    },
+  ],
   host: {
     '[class.hell-combobox]': '!unstyled()',
+    '(focusout)': 'markControlTouched()',
   },
 })
-export class HellCombobox extends HellStyleable {}
+export class HellCombobox<T = unknown> extends HellStyleable implements ControlValueAccessor {
+  private readonly combobox = inject(NgpCombobox);
+  private readonly comboboxState = injectComboboxState<NgpCombobox>();
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly cva = new HellControlValueAccessorBridge<T>();
+
+  constructor() {
+    super();
+    const valueSub = this.combobox.valueChange.subscribe((value) => {
+      this.cva.emitValue(value as T);
+    });
+    this.destroyRef.onDestroy(() => valueSub.unsubscribe());
+  }
+
+  writeValue(value: T): void {
+    this.comboboxState().value.set(value);
+  }
+
+  registerOnChange(fn: (value: T) => void): void {
+    this.cva.registerOnChange(fn);
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.cva.registerOnTouched(fn);
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.comboboxState().disabled.set(isDisabled);
+  }
+
+  protected markControlTouched(): void {
+    this.cva.markTouched();
+  }
+}
 
 /** Text input that drives combobox filtering and keyboard focus. */
 @Directive({
