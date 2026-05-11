@@ -17,7 +17,7 @@ import { HELL_TABLE_DIRECTIVES, type HellTableColumnResizeEvent } from './data-t
             [sort]="sort()"
             (sortToggle)="sortEvents.push($event)"
           >
-            Name
+            <button id="name-sort" hellTableSortButton type="button">Name</button>
             <button id="header-action" type="button">Filter</button>
             <button
               id="name-resizer"
@@ -131,6 +131,22 @@ describe('Hell data table directives', () => {
     expect(host.cellEvents).toEqual([]);
   });
 
+  it('disables the sort button when its header is not sortable', () => {
+    const fixture = TestBed.createComponent(DataTableHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const sortButton = byId<HTMLButtonElement>(fixture.nativeElement, 'name-sort');
+    expect(sortButton.disabled).toBe(true);
+
+    sortButton.click();
+    expect(host.sortEvents).toEqual([]);
+
+    host.sortable.set(true);
+    fixture.detectChanges();
+    expect(sortButton.disabled).toBe(false);
+  });
+
   it('maps sortable header state and ignores resizer clicks', () => {
     const fixture = TestBed.createComponent(DataTableHost);
     const host = fixture.componentInstance;
@@ -138,18 +154,21 @@ describe('Hell data table directives', () => {
     fixture.detectChanges();
 
     const header = byId<HTMLTableCellElement>(fixture.nativeElement, 'name');
+    const sortButton = byId<HTMLButtonElement>(fixture.nativeElement, 'name-sort');
     expect(header.getAttribute('aria-sort')).toBe('none');
+    expect(header.hasAttribute('tabindex')).toBe(false);
+    expect(sortButton.getAttribute('type')).toBe('button');
 
     host.sort.set('asc');
     fixture.detectChanges();
     expect(header.getAttribute('aria-sort')).toBe('ascending');
     expect(header.getAttribute('data-sort')).toBe('asc');
 
-    header.click();
+    sortButton.click();
     byId<HTMLButtonElement>(fixture.nativeElement, 'name-resizer').click();
     header.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
 
-    expect(host.sortEvents).toHaveLength(2);
+    expect(host.sortEvents).toHaveLength(1);
   });
 
   it('does not sort from nested header controls', () => {

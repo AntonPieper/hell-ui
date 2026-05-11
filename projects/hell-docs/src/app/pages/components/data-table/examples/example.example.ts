@@ -372,7 +372,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                       [sort]="tableSortKey() === 'id' ? order() : null"
                       (sortToggle)="toggleSort('id')"
                     >
-                      ID
+                      <button hellTableSortButton type="button">ID</button>
                       <span hellTableColumnResizer></span>
                     </th>
                     <th
@@ -383,7 +383,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                       [sort]="tableSortKey() === 'name' ? order() : null"
                       (sortToggle)="toggleSort('name')"
                     >
-                      Name
+                      <button hellTableSortButton type="button">Name</button>
                       <span hellTableColumnResizer></span>
                     </th>
                     <th
@@ -394,7 +394,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                       [sort]="tableSortKey() === 'email' ? order() : null"
                       (sortToggle)="toggleSort('email')"
                     >
-                      Email
+                      <button hellTableSortButton type="button">Email</button>
                       <span hellTableColumnResizer></span>
                     </th>
                     <th
@@ -405,7 +405,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                       [sort]="tableSortKey() === 'role' ? order() : null"
                       (sortToggle)="toggleSort('role')"
                     >
-                      Role
+                      <button hellTableSortButton type="button">Role</button>
                       <span hellTableColumnResizer></span>
                     </th>
                     <th
@@ -416,7 +416,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                       [sort]="tableSortKey() === 'assignee' ? order() : null"
                       (sortToggle)="toggleSort('assignee')"
                     >
-                      Assignee
+                      <button hellTableSortButton type="button">Assignee</button>
                     </th>
                   </tr>
                 </thead>

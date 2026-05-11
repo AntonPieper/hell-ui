@@ -1266,7 +1266,7 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
             title: 'Data Table: Example',
             detail: 'components/data-table/examples/example.example.ts',
             terms:
-              'data-table example components/data-table/examples/example.example components/data-table hellTable hellTableRow hellOmnibar smart search ranking role assignee',
+              'data-table example components/data-table/examples/example.example components/data-table hellTable hellTableRow hellTableSortButton hellOmnibar smart search ranking role assignee',
           },
           {
             title: 'Data Table: Row Editor',
@@ -1278,9 +1278,9 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
         usages: [
           {
             title: 'Data table directives',
-            detail: 'hellTable, hellTableRow, hellTableHeaderCell, hellTableColumnResizer',
+            detail: 'hellTable, hellTableRow, hellTableHeaderCell, hellTableSortButton, hellTableColumnResizer',
             terms:
-              'HELL_TABLE_DIRECTIVES hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableCell hellTableColumnResizer',
+              'HELL_TABLE_DIRECTIVES hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableSortButton hellTableCell hellTableColumnResizer',
           },
         ],
         loadComponent: () =>

@@ -18,8 +18,8 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
       <div class="hd-prose">
         <h1>Data table</h1>
         <p>
-          A set of low-level structural directives for building dense tables. The directives apply
-          only host classes, data attributes, and ARIA wiring; the consumer owns the
+          A set of low-level structural directives for building dense table utilities. The
+          directives apply only host classes, data attributes, and ARIA wiring; the consumer owns the
           <code>&lt;table&gt;</code>, <code>&lt;tr&gt;</code>, and cell markup, and composes search,
           filtering, sorting, and pagination from other <code>hell</code> primitives.
         </p>
@@ -50,6 +50,13 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
       </hd-example-tabs>
 
       <div class="hd-prose">
+        <h2>Migration note</h2>
+        <p>
+          Sortable headers use <code>button[hellTableSortButton]</code>. The
+          <code>&lt;th&gt;</code> keeps <code>aria-sort</code>; the button owns focus and activation.
+          Do not rely on a focusable or clickable header cell.
+        </p>
+
         <h2>API</h2>
         <h3>Structural directives</h3>
         <ul>
@@ -74,8 +81,14 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
           <li>
             <code>th[hellTableHeaderCell]</code>: <code>[sortable]</code>,
             <code>[sort]</code> (<code>'asc' | 'desc' | null</code>) → <code>aria-sort</code> /
-            <code>data-sort</code>; emits <code>(sortToggle)</code>. Add <code>columnId</code> when
-            pairing with a column resizer. Initial sizing belongs to your CSS/Tailwind.
+            <code>data-sort</code>. Add <code>columnId</code> when pairing with a column resizer.
+            Initial sizing belongs to your CSS/Tailwind.
+          </li>
+          <li>
+            <code>button[hellTableSortButton]</code>: native button trigger for a sortable header.
+            Place it inside <code>th[hellTableHeaderCell]</code>; the header keeps
+            <code>aria-sort</code> while the button owns focus and emits
+            <code>(sortToggle)</code> through the header.
           </li>
           <li>
             <code>td[hellTableCell]</code>: emits <code>(cellSelect)</code> on click for per-cell
@@ -110,6 +123,10 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
           <li>
             Drive selection from <code>(rowSelect)</code> and reflect it via
             <code>[selected]</code>.
+          </li>
+          <li>
+            Put sortable labels in <code>button[hellTableSortButton]</code> instead of making the
+            <code>&lt;th&gt;</code> itself focusable.
           </li>
           <li>
             Use <code>hellTableContainer</code> when the table is a standalone framed surface.

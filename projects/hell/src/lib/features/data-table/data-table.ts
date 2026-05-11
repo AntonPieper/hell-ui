@@ -209,11 +209,11 @@ export class HellTableRow extends HellStyleable {
 }
 
 /**
- * Header cell directive. Owns optional sort affordance and acts as the parent
+ * Header cell directive. Owns optional sort state and acts as the parent
  * for `hellTableColumnResizer`. The directive does not sort — it surfaces the
- * current sort state through `data-sort` / `aria-sort` and emits
- * `(sortToggle)` when the cell is activated. Sorting logic stays with the
- * consumer.
+ * current sort state through `data-sort` / `aria-sort` on the `<th>`, while a
+ * nested `button[hellTableSortButton]` owns keyboard focus and activation.
+ * Sorting logic stays with the consumer.
  *
  * Initial column sizing belongs to consumer CSS/Tailwind. During resize, the
  * Table Column Resize Runtime exposes `--hell-table-col-width` as a CSS custom
@@ -227,11 +227,7 @@ export class HellTableRow extends HellStyleable {
     '[attr.aria-sort]': 'ariaSort()',
     '[attr.data-sort]': 'sort()',
     '[attr.data-sortable]': 'sortable() ? "true" : null',
-    '[attr.tabindex]': 'sortable() ? "0" : null',
     '[style.--hell-table-col-width]': 'widthVar()',
-    '(click)': 'onClick($event)',
-    '(keydown.enter)': 'onKey($event)',
-    '(keydown.space)': 'onKey($event)',
   },
 })
 export class HellTableHeaderCell extends HellStyleable {
@@ -266,15 +262,9 @@ export class HellTableHeaderCell extends HellStyleable {
     this.head?.unregister(this);
   }
 
-  protected onClick(e: MouseEvent) {
-    if (!this.sortable() || hellEventFromInteractiveTarget(e, this.host)) return;
+  toggleSortFrom(e: MouseEvent | KeyboardEvent): void {
+    if (!this.sortable()) return;
     this.sortToggle.emit(e);
-  }
-
-  protected onKey(e: Event) {
-    if (!this.sortable() || hellEventFromInteractiveTarget(e, this.host)) return;
-    e.preventDefault();
-    this.sortToggle.emit(e as KeyboardEvent);
   }
 
   columnKey(): string | null {
@@ -295,6 +285,42 @@ export class HellTableHeaderCell extends HellStyleable {
   /** Final commit after pointerup or key step. */
   commit(px: number) {
     this.setLiveWidth(px);
+  }
+}
+
+/**
+ * Sort button placed inside a sortable table header cell. The header keeps
+ * `aria-sort`; the native button owns focus and activation per APG sortable
+ * table guidance.
+ */
+@Directive({
+  selector: 'button[hellTableSortButton]',
+  exportAs: 'hellTableSortButton',
+  host: {
+    '[class.hell-table-sort-button]': '!unstyled()',
+    '[attr.type]': 'nativeButtonType()',
+    '[disabled]': 'disabled()',
+    '(click)': 'onClick($event)',
+  },
+})
+export class HellTableSortButton extends HellStyleable {
+  readonly sortToggle = output<MouseEvent>();
+
+  private readonly host = inject(ElementRef<HTMLButtonElement>).nativeElement;
+  private readonly header = inject(HellTableHeaderCell, { optional: true });
+
+  protected nativeButtonType(): 'button' | null {
+    return this.host.tagName.toLowerCase() === 'button' ? 'button' : null;
+  }
+
+  protected disabled(): boolean {
+    return this.header ? !this.header.sortable() : false;
+  }
+
+  protected onClick(e: MouseEvent): void {
+    if (this.disabled()) return;
+    this.header?.toggleSortFrom(e);
+    this.sortToggle.emit(e);
   }
 }
 
@@ -440,6 +466,7 @@ export const HELL_TABLE_DIRECTIVES = [
   HellTableBody,
   HellTableRow,
   HellTableHeaderCell,
+  HellTableSortButton,
   HellTableCell,
   HellTableColumnResizer,
 ] as const;

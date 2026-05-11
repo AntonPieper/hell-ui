@@ -82,37 +82,58 @@
     }
 
   .hell-table-header-cell[data-sortable='true'] {
-      cursor: pointer;
       padding-inline-end: calc(var(--spacing) * 8);
     }
 
-  .hell-table-header-cell[data-sortable='true']::after {
+  .hell-table-sort-button {
+      display: inline-flex;
+      max-width: 100%;
+      align-items: center;
+      gap: calc(var(--spacing) * 1.5);
+      padding: 0;
+      border: 0;
+      border-radius: var(--radius-sm);
+      color: inherit;
+      font: inherit;
+      letter-spacing: inherit;
+      text-align: inherit;
+      text-transform: inherit;
+      background: transparent;
+    }
+
+  .hell-table-header-cell[data-sortable='true'] .hell-table-sort-button {
+      cursor: pointer;
+    }
+
+  .hell-table-header-cell[data-sortable='true'] .hell-table-sort-button::after {
       content: '';
-      position: absolute;
-      inset-block-start: 50%;
-      inset-inline-end: calc(var(--spacing) * 3);
       display: block;
       width: calc(var(--spacing) * 3);
       height: calc(var(--spacing) * 3);
+      flex: 0 0 auto;
       background-color: currentcolor;
       color: var(--color-hell-foreground-subtle);
       -webkit-mask: var(--hell-icon-chevron-up-down) center / contain no-repeat;
       mask: var(--hell-icon-chevron-up-down) center / contain no-repeat;
-      transform: translateY(-50%);
       transition:
         color var(--hell-duration-fast) var(--ease-hell-out);
     }
 
-  .hell-table-header-cell[data-sort='asc']::after {
+  .hell-table-header-cell[data-sortable='true'][data-sort='asc'] .hell-table-sort-button::after {
       color: var(--color-hell-primary);
       -webkit-mask-image: var(--hell-icon-chevron-up);
       mask-image: var(--hell-icon-chevron-up);
     }
 
-  .hell-table-header-cell[data-sort='desc']::after {
+  .hell-table-header-cell[data-sortable='true'][data-sort='desc'] .hell-table-sort-button::after {
       color: var(--color-hell-primary);
       -webkit-mask-image: var(--hell-icon-chevron-down);
       mask-image: var(--hell-icon-chevron-down);
+    }
+
+  .hell-table-sort-button:focus-visible {
+      outline: 2px solid var(--color-hell-focus-ring);
+      outline-offset: 2px;
     }
 
   .hell-table-row {

@@ -168,6 +168,7 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellTableHead', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableHeaderCell', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableRow', area: 'feature', coverage: 'dom' },
+  { symbol: 'HellTableSortButton', area: 'feature', coverage: 'dom' },
 ];
 
 const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
@@ -251,7 +252,7 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
         <thead id="table-head" hellTableHead>
           <tr id="table-row" hellTableRow selected interactive>
             <th id="table-header-cell" hellTableHeaderCell sortable sort="asc">
-              Name
+              <button id="table-sort-button" hellTableSortButton type="button">Name</button>
               <button id="table-resizer" hellTableColumnResizer></button>
             </th>
             <td id="table-cell" hellTableCell align="end" space="empty">Ada</td>
@@ -370,6 +371,12 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
     module: 'HellTableHeaderCell',
     className: 'hell-table-header-cell',
     attrs: { 'data-sort': 'asc', 'aria-sort': 'ascending', 'data-sortable': 'true' },
+  },
+  {
+    id: 'table-sort-button',
+    module: 'HellTableSortButton',
+    className: 'hell-table-sort-button',
+    attrs: { type: 'button' },
   },
   {
     id: 'table-cell',

@@ -15,6 +15,7 @@ checkBehaviorSentinelContract();
 checkComponentContract();
 checkNativeButtonSelectorContract();
 checkInteractiveTriggerSelectorContract();
+checkTableSortButtonContract();
 checkFloatingRegistrationContract();
 
 if (failures.length) {
@@ -594,6 +595,44 @@ function checkInteractiveTriggerSelectorContract() {
       if (unsafeArms.length) {
         failures.push(
           `${rel} ${module.className} exposes ${trigger} on non-native interactive hosts: ${unsafeArms.join(', ')}`,
+        );
+      }
+    }
+  }
+}
+
+function checkTableSortButtonContract() {
+  const tableSourcePath = join(root, 'projects/hell/src/lib/features/data-table/data-table.ts');
+  const tableSource = readFile(tableSourcePath);
+  const headerModule = decoratedClassModules(tableSource).find(
+    (module) => module.className === 'HellTableHeaderCell',
+  );
+
+  if (!headerModule) {
+    failures.push('Data table must declare HellTableHeaderCell');
+    return;
+  }
+
+  if (headerModule.moduleSource.includes('[attr.tabindex]')) {
+    failures.push('HellTableHeaderCell must not make the <th> focusable for sorting');
+  }
+
+  if (/(?:'|\")\(keydown\.|(?:'|\")\(click\)/.test(headerModule.moduleSource)) {
+    failures.push('HellTableHeaderCell must delegate sort activation to button[hellTableSortButton]');
+  }
+
+  if (!/export\s+class\s+HellTableSortButton\b/.test(tableSource)) {
+    failures.push('Data table must expose button[hellTableSortButton] for sortable headers');
+  }
+
+  const docsRoot = join(root, 'projects/hell-docs/src/app/pages/components/data-table');
+  const docsFiles = walk(docsRoot).filter((file) => file.endsWith('.ts'));
+  for (const file of docsFiles) {
+    const source = readFile(file);
+    for (const match of source.matchAll(/<th\b(?=[^>]*\bhellTableHeaderCell\b)(?=[^>]*\bsortable\b)[^>]*>[\s\S]*?<\/th>/g)) {
+      if (!match[0].includes('hellTableSortButton')) {
+        failures.push(
+          `${file.slice(root.length + 1)} has a sortable table header without button[hellTableSortButton]`,
         );
       }
     }
