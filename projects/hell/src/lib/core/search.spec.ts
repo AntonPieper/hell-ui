@@ -1,16 +1,16 @@
+import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import {
   HellSearchService,
   hellSearchKey,
   hellSearchWords,
+  provideHellSearchRanker,
   type HellSearchSource,
   type HellSearchSourceRequest,
 } from './search';
 
 describe('Search Core', () => {
-  const service = new HellSearchService();
-
   it('normalizes accents, punctuation, and ampersands into searchable words', () => {
     const accented = 'Cre\u0300me & Cafe\u0301/Bar';
 
@@ -30,6 +30,7 @@ describe('Search Core', () => {
       { id: 'partial', title: 'Alpha', meta: 'Ops' },
     ] as const;
 
+    const service = TestBed.inject(HellSearchService);
     const results = service.rank(items, {
       query: 'alpha center',
       fields: [
@@ -61,9 +62,25 @@ describe('Search Core', () => {
       target,
     ];
 
+    const service = TestBed.inject(HellSearchService);
     const results = await service.search({ query: 'admin panel', items });
 
     expect(results.map((result) => result.item.id)).toEqual(['target']);
+  });
+
+  it('can delegate local ranking to an injected ranker adapter', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHellSearchRanker((items) =>
+          items.map((item, index) => ({ item, score: 100 - index })),
+        ),
+      ],
+    });
+
+    const injected = TestBed.inject(HellSearchService);
+    const results = await injected.search({ query: 'ignored', items: ['alpha', 'beta'], limit: 1 });
+
+    expect(results).toEqual([{ item: 'alpha', score: 100 }]);
   });
 
   it('honors source-provided result order while forwarding request context', async () => {
@@ -79,6 +96,7 @@ describe('Search Core', () => {
       });
     };
 
+    const service = TestBed.inject(HellSearchService);
     const results = await service.search({
       query: 'ignored',
       limit: 1,

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, InjectionToken, inject, type Provider } from '@angular/core';
 import { Observable, firstValueFrom, isObservable } from 'rxjs';
 
 /** Value shape that local ranking can normalize into searchable text. */
@@ -41,6 +41,16 @@ export type HellSearchSource<T, P = unknown> = (
   request: HellSearchSourceRequest<P>,
 ) => HellMaybeAsync<readonly T[] | HellSearchResponse<T>>;
 
+export interface HellSearchRankRequest<T>
+  extends Pick<HellSearchSourceRequest, 'query' | 'limit'> {
+  readonly fields?: readonly HellSearchField<T>[];
+}
+
+export type HellSearchRanker = <T>(
+  items: readonly T[],
+  request: HellSearchRankRequest<T>,
+) => readonly HellSearchResult<T>[];
+
 /** Full request accepted by `HellSearchService`: local items, remote source, or both. */
 export interface HellSearchRequest<T, P = unknown> extends HellSearchSourceRequest<P> {
   readonly items?: readonly T[];
@@ -48,9 +58,19 @@ export interface HellSearchRequest<T, P = unknown> extends HellSearchSourceReque
   readonly fields?: readonly HellSearchField<T>[];
 }
 
+export const HELL_SEARCH_RANKER = new InjectionToken<HellSearchRanker>('HELL_SEARCH_RANKER', {
+  providedIn: 'root',
+  factory: () => hellRankLocalSearch,
+});
+
+export function provideHellSearchRanker(ranker: HellSearchRanker): Provider {
+  return { provide: HELL_SEARCH_RANKER, useValue: ranker };
+}
+
 /** Small ranking facade used by command palettes and docs search. */
 @Injectable({ providedIn: 'root' })
 export class HellSearchService {
+  private readonly ranker = inject(HELL_SEARCH_RANKER);
   /** Resolve an optional source, then either preserve source scores or rank raw items locally. */
   async search<T>(request: HellSearchRequest<T>): Promise<readonly HellSearchResult<T>[]> {
     const response = request.source
@@ -70,20 +90,27 @@ export class HellSearchService {
     items: readonly T[],
     request: Pick<HellSearchRequest<T>, 'query' | 'fields' | 'limit'>,
   ): readonly HellSearchResult<T>[] {
-    const words = hellSearchWords(request.query);
-    const fields = request.fields;
-
-    const ranked = items
-      .map((item, index) => {
-        const score = words.length ? scoreItem(item, fields, words) : 0;
-        return { item, score, index };
-      })
-      .filter((result) => !words.length || result.score > 0)
-      .sort((a, b) => b.score - a.score || a.index - b.index)
-      .map(({ item, score }) => ({ item, score }));
-
-    return limitResults(ranked, request.limit);
+    return limitResults(this.ranker(items, request), request.limit);
   }
+}
+
+export function hellRankLocalSearch<T>(
+  items: readonly T[],
+  request: HellSearchRankRequest<T>,
+): readonly HellSearchResult<T>[] {
+  const words = hellSearchWords(request.query);
+  const fields = request.fields;
+
+  const ranked = items
+    .map((item, index) => {
+      const score = words.length ? scoreItem(item, fields, words) : 0;
+      return { item, score, index };
+    })
+    .filter((result) => !words.length || result.score > 0)
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .map(({ item, score }) => ({ item, score }));
+
+  return limitResults(ranked, request.limit);
 }
 
 /** Split user input into normalized words for matching. */

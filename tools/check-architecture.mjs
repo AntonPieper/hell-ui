@@ -17,6 +17,7 @@ checkLabelContract();
 checkCodeEditorRuntimeContract();
 checkExperimentalFeatureContract();
 checkFormsContract();
+checkSearchContract();
 checkNativeButtonSelectorContract();
 checkInteractiveTriggerSelectorContract();
 checkTableSortButtonContract();
@@ -650,6 +651,20 @@ function checkFormsContract() {
     if (!classDecl || !source.includes('NG_VALUE_ACCESSOR')) {
       failures.push(`${file} ${className} must implement ControlValueAccessor`);
     }
+  }
+}
+
+function checkSearchContract() {
+  const source = readFile(join(root, 'projects/hell/src/lib/core/search.ts'));
+  for (const symbol of ['HELL_SEARCH_RANKER', 'provideHellSearchRanker', 'hellRankLocalSearch']) {
+    if (!source.includes(symbol)) failures.push(`Search Core is missing ${symbol}`);
+  }
+
+  const docs = readFile(
+    join(root, 'projects/hell-docs/src/app/pages/components/omnibar/omnibar.page.ts'),
+  );
+  if (!docs.includes('provideHellSearchRanker') || !docs.includes('Fuse.js')) {
+    failures.push('Omnibar docs must direct serious search through a ranker Adapter or async source');
   }
 }
 

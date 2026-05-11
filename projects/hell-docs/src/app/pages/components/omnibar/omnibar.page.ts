@@ -14,7 +14,8 @@ import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts
       <h1>Omnibar</h1>
       <p>
         Command-palette searchbox built from the command palette service, search primitive, search
-        service, and listbox wiring. It can rank local items or call any async backend function.
+        service, and listbox wiring. It can call any async backend function; local ranking is a small
+        fallback behind the <code>HELL_SEARCH_RANKER</code> adapter seam.
       </p>
 
       <h2>Async search</h2>
@@ -24,9 +25,10 @@ import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts
 
       <h2>API</h2>
       <ul>
-        <li><code>searchItems</code>: local collection ranked by <code>HellSearchService</code>.</li>
+        <li><code>searchItems</code>: small local collection ranked by <code>HellSearchService</code>.</li>
         <li><code>searchSource</code>: async backend-powered function. Receives <code>query</code>, <code>limit</code>, <code>params</code>, and <code>signal</code>.</li>
         <li><code>searchFields</code>: weighted attributes used for ranking returned items.</li>
+        <li><code>provideHellSearchRanker</code>: replace local ranking with Fuse.js, MiniSearch, FlexSearch, or your own adapter.</li>
         <li><code>searchLimit</code>, <code>searchParams</code>, <code>searchDebounce</code>, <code>loadingRows</code>.</li>
         <li><code>loadingTemplate</code>: custom loading body; receives <code>{{ '{' }} rows, message {{ '}' }}</code> while the omnibar keeps the outer status wrapper.</li>
         <li><code>value</code>: model input for the draft query.</li>
@@ -38,6 +40,7 @@ import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts
       <ul>
         <li>Debounce the search work, not opening and closing the panel.</li>
         <li>Return backend results generically; avoid coupling the component to a specific API shape.</li>
+        <li>Use <code>searchSource</code> or <code>provideHellSearchRanker</code> for serious relevance, typo tolerance, indexing, or worker-backed search.</li>
         <li>Use projected item templates so results can match the domain.</li>
       </ul>
 
