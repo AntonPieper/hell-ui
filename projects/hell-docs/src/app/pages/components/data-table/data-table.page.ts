@@ -16,12 +16,22 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
   template: `
     <article class="hd-doc-page">
       <div class="hd-prose">
-        <h1>Data table</h1>
+        <h1>Table utilities</h1>
         <p>
-          A set of low-level structural directives for building dense table utilities. The
+          A set of low-level structural directives for building dense table utilities, not a
+          batteries-included data grid. The
           directives apply only host classes, data attributes, and ARIA wiring; the consumer owns the
           <code>&lt;table&gt;</code>, <code>&lt;tr&gt;</code>, and cell markup, and composes search,
           filtering, sorting, and pagination from other <code>hell</code> primitives.
+        </p>
+
+        <h2>Scope</h2>
+        <p>
+          This feature deliberately does not own a data source, column definition model, filtering,
+          pagination, virtualization, selection model, or grid semantics. Bring Angular CDK Table,
+          TanStack Table, AG Grid, a backend API, or your own state layer when you need a real data
+          table. Use Hell's directives only for host styling, row activation, sortable header
+          affordances, and column resize handles.
         </p>
 
         <h2>Example</h2>
@@ -91,6 +101,10 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
             <code>(sortToggle)</code> through the header.
           </li>
           <li>
+            <code>HELL_TABLE_UTILITY_DIRECTIVES</code>: preferred standalone import list.
+            <code>HELL_TABLE_DIRECTIVES</code> remains as a compatibility alias.
+          </li>
+          <li>
             <code>td[hellTableCell]</code>: emits <code>(cellSelect)</code> on click for per-cell
             handlers.
           </li>
@@ -118,7 +132,7 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
         <ul>
           <li>
             Compose search and query controls from <code>hell-omnibar</code>, <code>hellMenu</code>,
-            signals, and your own backend data source.
+            Angular CDK Table, TanStack Table, signals, and your own backend data source.
           </li>
           <li>
             Drive selection from <code>(rowSelect)</code> and reflect it via
@@ -135,6 +149,7 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
 
         <h2>Don't</h2>
         <ul>
+          <li>Don't call these directives a complete data-table implementation.</li>
           <li>Don't put a filter input inside the table; compose it as a sibling.</li>
           <li>
             Don't hide the resize grip by overflowing the header cell — keep

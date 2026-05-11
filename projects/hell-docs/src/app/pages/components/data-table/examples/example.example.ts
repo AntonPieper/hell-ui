@@ -28,7 +28,7 @@ import { HELL_OMNIBAR_DIRECTIVES, HELL_SPLIT_VIEW_DIRECTIVES } from 'hell/compos
 import { hellSearchKey, hellSearchWords } from 'hell/core';
 import { HELL_MENU_DIRECTIVES, HellButton, HellIcon, HellPaginationStrip, HellSkeleton } from 'hell/primitives';
 import { HellCodeEditor } from 'hell/features/code-editor';
-import { HELL_TABLE_DIRECTIVES } from 'hell/features/data-table';
+import { HELL_TABLE_UTILITY_DIRECTIVES } from 'hell/features/data-table';
 
 type RowRole = 'Admin' | 'Editor' | 'Viewer';
 type RowAssignee = 'Ada' | 'Grace' | 'Linus' | 'Margaret';
@@ -113,7 +113,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
     ...HELL_MENU_DIRECTIVES,
     ...HELL_OMNIBAR_DIRECTIVES,
     ...HELL_SPLIT_VIEW_DIRECTIVES,
-    ...HELL_TABLE_DIRECTIVES,
+    ...HELL_TABLE_UTILITY_DIRECTIVES,
     HellButton,
     HellCodeEditor,
     HellIcon,

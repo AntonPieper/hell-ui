@@ -21,6 +21,7 @@ checkSearchContract();
 checkHotkeyContract();
 checkNativeButtonSelectorContract();
 checkInteractiveTriggerSelectorContract();
+checkTableUtilityContract();
 checkTableSortButtonContract();
 checkFloatingRegistrationContract();
 
@@ -750,6 +751,23 @@ function checkInteractiveTriggerSelectorContract() {
           `${rel} ${module.className} exposes ${trigger} on non-native interactive hosts: ${unsafeArms.join(', ')}`,
         );
       }
+    }
+  }
+}
+
+function checkTableUtilityContract() {
+  const source = readFile(join(root, 'projects/hell/src/lib/features/data-table/data-table.ts'));
+  if (!source.includes('HELL_TABLE_UTILITY_DIRECTIVES')) {
+    failures.push('Table feature must expose HELL_TABLE_UTILITY_DIRECTIVES as its preferred import');
+  }
+
+  const docs = readFile(
+    join(root, 'projects/hell-docs/src/app/pages/components/data-table/data-table.page.ts'),
+  );
+  for (const text of ['Table utilities', 'not a', 'batteries-included data grid', 'TanStack Table']) {
+    if (!docs.includes(text)) {
+      failures.push('Table docs must present the feature as table utilities, not a full data table');
+      break;
     }
   }
 }

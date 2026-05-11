@@ -1266,28 +1266,28 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
       },
       {
         routePath: 'components/data-table',
-        label: 'Data table',
+        label: 'Table utilities',
         icon: 'faSolidTable',
         examples: [
           {
-            title: 'Data Table: Example',
+            title: 'Table Utilities: Example',
             detail: 'components/data-table/examples/example.example.ts',
             terms:
-              'data-table example components/data-table/examples/example.example components/data-table hellTable hellTableRow hellTableSortButton hellOmnibar smart search ranking role assignee',
+              'table utilities data-table example components/data-table/examples/example.example components/data-table hellTable hellTableRow hellTableSortButton hellOmnibar smart search ranking role assignee',
           },
           {
-            title: 'Data Table: Row Editor',
+            title: 'Table Utilities: Row Editor',
             detail: 'components/data-table/examples/row-editor.example.ts',
             terms:
-              'data-table row-editor components/data-table/examples/row-editor.example components/data-table hellResizable hellTable hell-code-editor',
+              'table utilities data-table row-editor components/data-table/examples/row-editor.example components/data-table hellResizable hellTable hell-code-editor',
           },
         ],
         usages: [
           {
-            title: 'Data table directives',
+            title: 'Table utility directives',
             detail: 'hellTable, hellTableRow, hellTableHeaderCell, hellTableSortButton, hellTableColumnResizer',
             terms:
-              'HELL_TABLE_DIRECTIVES hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableSortButton hellTableCell hellTableColumnResizer',
+              'HELL_TABLE_UTILITY_DIRECTIVES HELL_TABLE_DIRECTIVES hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableSortButton hellTableCell hellTableColumnResizer',
           },
         ],
         loadComponent: () =>

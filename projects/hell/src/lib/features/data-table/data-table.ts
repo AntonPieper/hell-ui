@@ -459,10 +459,10 @@ export class HellTableColumnResizer extends HellStyleable implements OnDestroy {
 }
 
 /**
- * Standalone imports for the data-table feature: container, table sections,
+ * Standalone imports for the table utilities feature: container, table sections,
  * row/cell directives, sortable header cell, and column resizer.
  */
-export const HELL_TABLE_DIRECTIVES = [
+export const HELL_TABLE_UTILITY_DIRECTIVES = [
   HellTableContainer,
   HellTable,
   HellTableHead,
@@ -473,3 +473,10 @@ export const HELL_TABLE_DIRECTIVES = [
   HellTableCell,
   HellTableColumnResizer,
 ] as const;
+
+/**
+ * @deprecated Use `HELL_TABLE_UTILITY_DIRECTIVES`. The entry point remains
+ * `hell/features/data-table` for compatibility, but the module is table
+ * utilities rather than a full data grid/data-source abstraction.
+ */
+export const HELL_TABLE_DIRECTIVES = HELL_TABLE_UTILITY_DIRECTIVES;

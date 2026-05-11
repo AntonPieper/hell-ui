@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/c
 import { javascript } from '@codemirror/lang-javascript';
 import { HELL_RESIZABLE_DIRECTIVES } from 'hell/composites';
 import { HellCodeEditor } from 'hell/features/code-editor';
-import { HELL_TABLE_DIRECTIVES } from 'hell/features/data-table';
+import { HELL_TABLE_UTILITY_DIRECTIVES } from 'hell/features/data-table';
 
 interface Row {
   id: number;
@@ -21,7 +21,7 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
 @Component({
   selector: 'app-data-table-row-editor-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_RESIZABLE_DIRECTIVES, ...HELL_TABLE_DIRECTIVES, HellCodeEditor],
+  imports: [...HELL_RESIZABLE_DIRECTIVES, ...HELL_TABLE_UTILITY_DIRECTIVES, HellCodeEditor],
   template: `
     <div hellResizable orientation="horizontal" class="h-[420px]">
       <div hellResizablePane [initialFlex]="3" [minSize]="280">
