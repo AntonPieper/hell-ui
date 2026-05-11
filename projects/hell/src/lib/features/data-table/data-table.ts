@@ -1,3 +1,4 @@
+import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
 import {
   HellResizePairInteractionController,
@@ -372,7 +373,7 @@ export class HellTableCell extends HellStyleable {
     '[class.hell-table-column-resizer]': '!unstyled()',
     '[attr.data-active]': 'dragging() ? "true" : null',
     '[attr.type]': 'nativeButtonType()',
-    '[attr.aria-label]': 'ariaLabel()',
+    '[attr.aria-label]': 'ariaLabel() ?? labels.dataTable.resizeColumn',
     '[attr.aria-valuemin]': '0',
     '[attr.aria-valuemax]': '100',
     '[attr.aria-valuenow]': 'ariaValueNow()',
@@ -387,7 +388,7 @@ export class HellTableCell extends HellStyleable {
 })
 export class HellTableColumnResizer extends HellStyleable implements OnDestroy {
   readonly minWidth = input(40, { transform: numberAttribute });
-  readonly ariaLabel = input('Resize column', { alias: 'aria-label' });
+  readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
 
   readonly columnResize = output<HellTableColumnResizeEvent>();
 
@@ -396,6 +397,7 @@ export class HellTableColumnResizer extends HellStyleable implements OnDestroy {
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly cell = inject(HellTableHeaderCell);
+  protected readonly labels = inject(HELL_LABELS);
   private readonly resizeInteraction = new HellResizePairInteractionController<HellTableHeaderCell>(
     {
       handle: this.host,

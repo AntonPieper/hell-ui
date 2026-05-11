@@ -526,6 +526,29 @@ function checkLabelContract() {
       failures.push('HellPaginationStrip must read built-in labels from the Label Contract');
     }
   }
+
+  const labelConsumers = [
+    ['projects/hell/src/lib/composites/app-shell/app-shell.ts', ['Expand sidebar', 'Collapse sidebar']],
+    ['projects/hell/src/lib/composites/audio-player/audio-player.ts', ['Show live captions', 'Copy transcript', '>Live<', '>Paused<']],
+    ['projects/hell/src/lib/composites/date-input/date-input.ts', ['Choose date']],
+    ['projects/hell/src/lib/composites/time-input/time-input.ts', ['Choose time', 'Subtract 5 minutes']],
+    ['projects/hell/src/lib/composites/toast/toast.ts', ['aria-label="Notifications"', 'aria-label="Dismiss"']],
+    ['projects/hell/src/lib/features/data-table/data-table.ts', ['Resize column']],
+    ['projects/hell/src/lib/features/pdf-viewer/pdf-viewer.html', ['Find in document', 'Zoom level']],
+    ['projects/hell/src/lib/primitives/date-picker/date-picker.ts', ['Previous year', 'Previous month']],
+  ];
+
+  for (const [file, hardcodedLabels] of labelConsumers) {
+    const source = readFile(join(root, file));
+    if (!source.includes('labels.')) {
+      failures.push(`${file} must consume the Label Contract for built-in text`);
+    }
+    for (const label of hardcodedLabels) {
+      if (source.includes(label)) {
+        failures.push(`${file} hardcodes "${label}" instead of using the Label Contract`);
+      }
+    }
+  }
 }
 
 function exportedStyleableClasses(source) {

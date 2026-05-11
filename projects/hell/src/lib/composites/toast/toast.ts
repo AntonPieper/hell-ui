@@ -14,6 +14,7 @@ import {
   signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
 import {
   hellToastFrontDistance,
@@ -248,7 +249,7 @@ export class HellToastTemplate {}
       <section
         data-slot="region"
         role="region"
-        aria-label="Notifications"
+        [attr.aria-label]="labels.toast.notifications"
         aria-live="polite"
         aria-atomic="true"
         tabindex="-1"
@@ -338,7 +339,7 @@ export class HellToastTemplate {}
               <button
                 type="button"
                 data-slot="close"
-                aria-label="Dismiss"
+                [attr.aria-label]="labels.toast.dismiss"
                 (click)="svc.dismiss(t.id)"
               >
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
@@ -355,6 +356,7 @@ export class HellToastTemplate {}
 })
 export class HellToaster extends HellStyleable {
   readonly svc = inject(HellToastService);
+  protected readonly labels = inject(HELL_LABELS);
   private readonly host: HTMLElement = inject(ElementRef).nativeElement;
 
   protected readonly hasToasts = computed(() => this.svc.toasts().length > 0);

@@ -3,6 +3,7 @@ import {
   Component,
   type ElementRef,
   booleanAttribute,
+  inject,
   forwardRef,
   input,
   output,
@@ -17,6 +18,7 @@ import { HellIcon } from '../../primitives/icon/icon';
 import { HellInput } from '../../primitives/input/input';
 import { HellPopover, HellPopoverTrigger } from '../../primitives/popover/popover';
 import { HellDatePicker } from '../../primitives/date-picker/date-picker';
+import { HELL_LABELS } from '../../core/labels';
 import type { HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
 import {
@@ -113,9 +115,9 @@ function dateChanged(a: Date | null, b: Date | null): boolean {
       [disabled]="isDisabled()"
       [placeholder]="placeholder()"
       [value]="display()"
-      (input)="onInput($event.target.value)"
+      (input)="onInput(field.value)"
       (blur)="onBlur()"
-      (keydown.enter)="commit($event.target.value, $event)"
+      (keydown.enter)="commit(field.value, $event)"
     />
     <button
       hellButton
@@ -127,7 +129,7 @@ function dateChanged(a: Date | null, b: Date | null): boolean {
       [hellPopoverTrigger]="cal"
       placement="bottom-end"
       [disabled]="isDisabled()"
-      [attr.aria-label]="ariaLabel() ? 'Choose date for ' + ariaLabel() : 'Choose date'"
+      [attr.aria-label]="triggerAriaLabel()"
     >
       <hell-icon name="faSolidCalendar" />
     </button>
@@ -175,7 +177,12 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
   protected readonly invalidDraft = this.valueState.invalidDraft;
   protected readonly isInvalid = () => this.invalid() || this.invalidDraft();
   protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
+  protected readonly triggerAriaLabel = () => {
+    const label = this.ariaLabel();
+    return label ? this.labels.dateInput.chooseDateFor(label) : this.labels.dateInput.chooseDate;
+  };
 
+  private readonly labels = inject(HELL_LABELS);
   private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field');
 
   writeValue(value: Date | null): void {

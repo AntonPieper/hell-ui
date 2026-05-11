@@ -32,6 +32,7 @@ import {
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
 import { HellInput, HellNativeSelect } from '../../primitives/input/input';
+import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
 import {
   HellPdfRuntime,
@@ -129,6 +130,7 @@ export class HellPdfViewer extends HellStyleable {
     return !PDF_ZOOM_VALUES.includes(v as never) && !this.zoomOptions.some((o) => o.value === v);
   });
   protected readonly customZoomLabel = computed(() => getZoomLabel(this.effectiveZoomValue()));
+  protected readonly labels = inject(HELL_LABELS);
 
   private readonly runtime = (
     inject(HELL_PDF_RUNTIME_FACTORY, { optional: true }) ?? (() => new HellPdfRuntime())

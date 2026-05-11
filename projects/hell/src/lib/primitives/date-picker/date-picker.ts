@@ -3,6 +3,7 @@ import {
   Component,
   Directive,
   computed,
+  inject,
   input,
 } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
@@ -28,6 +29,7 @@ import {
 } from 'ng-primitives/date-picker';
 import { HellButton } from '../button/button';
 import { HellIcon } from '../icon/icon';
+import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
 
 const HELL_DATE_PICKER_ICONS = {
@@ -36,6 +38,21 @@ const HELL_DATE_PICKER_ICONS = {
   faSolidChevronLeft,
   faSolidChevronRight,
 };
+
+function hellShiftDateByMonths(date: Date, months: number): Date {
+  const targetYear = date.getFullYear();
+  const targetMonth = date.getMonth() + months;
+  const lastDay = new Date(targetYear, targetMonth + 1, 0).getDate();
+  return new Date(
+    targetYear,
+    targetMonth,
+    Math.min(date.getDate(), lastDay),
+    date.getHours(),
+    date.getMinutes(),
+    date.getSeconds(),
+    date.getMilliseconds(),
+  );
+}
 
 /**
  * Previous/next year buttons. ng-primitives ships month nav out of the box;
@@ -46,19 +63,19 @@ const HELL_DATE_PICKER_ICONS = {
   selector: 'button[hellDatePickerPreviousYear]',
   host: {
     type: 'button',
-    'aria-label': 'Previous year',
+    '[attr.aria-label]': 'labels.datePicker.previousYear',
     '(click)': 'shift(-12)',
   },
 })
 export class HellDatePickerPreviousYear {
+  protected readonly labels = inject(HELL_LABELS);
   private readonly state = injectDatePickerState<Date>({ optional: true });
   private readonly rangeState = injectDateRangePickerState<Date>({ optional: true });
   protected shift(months: number) {
     const s = this.state() ?? this.rangeState();
     if (!s) return;
     const focused = s.focusedDate();
-    const next = new Date(focused);
-    next.setMonth(next.getMonth() + months);
+    const next = hellShiftDateByMonths(focused, months);
     s.setFocusedDate(next, undefined, months > 0 ? 'forward' : 'backward');
   }
 }
@@ -67,19 +84,19 @@ export class HellDatePickerPreviousYear {
   selector: 'button[hellDatePickerNextYear]',
   host: {
     type: 'button',
-    'aria-label': 'Next year',
+    '[attr.aria-label]': 'labels.datePicker.nextYear',
     '(click)': 'shift(12)',
   },
 })
 export class HellDatePickerNextYear {
+  protected readonly labels = inject(HELL_LABELS);
   private readonly state = injectDatePickerState<Date>({ optional: true });
   private readonly rangeState = injectDateRangePickerState<Date>({ optional: true });
   protected shift(months: number) {
     const s = this.state() ?? this.rangeState();
     if (!s) return;
     const focused = s.focusedDate();
-    const next = new Date(focused);
-    next.setMonth(next.getMonth() + months);
+    const next = hellShiftDateByMonths(focused, months);
     s.setFocusedDate(next, undefined, months > 0 ? 'forward' : 'backward');
   }
 }
@@ -91,14 +108,14 @@ const PICKER_TEMPLATE = `
         <hell-icon name="faSolidAnglesLeft" />
       </button>
       <button hellButton variant="ghost" size="sm" iconOnly type="button"
-              ngpDatePickerPreviousMonth aria-label="Previous month">
+              ngpDatePickerPreviousMonth [attr.aria-label]="labels.datePicker.previousMonth">
         <hell-icon name="faSolidChevronLeft" />
       </button>
     </div>
     <h2 ngpDatePickerLabel class="hell-date-picker-label">{{ label() }}</h2>
     <div class="hell-date-picker-nav">
       <button hellButton variant="ghost" size="sm" iconOnly type="button"
-              ngpDatePickerNextMonth aria-label="Next month">
+              ngpDatePickerNextMonth [attr.aria-label]="labels.datePicker.nextMonth">
         <hell-icon name="faSolidChevronRight" />
       </button>
       <button hellButton variant="ghost" size="sm" iconOnly type="button" hellDatePickerNextYear>
@@ -203,6 +220,7 @@ const PICKER_IMPORTS = [
 export class HellDatePicker extends HellStyleable {
   readonly locale = input<string | null>(null);
 
+  protected readonly labels = inject(HELL_LABELS);
   private readonly state = injectDatePickerState<Date>();
 
   protected readonly label = computed(() =>
@@ -249,6 +267,7 @@ export class HellDatePicker extends HellStyleable {
 export class HellDateRangePicker extends HellStyleable {
   readonly locale = input<string | null>(null);
 
+  protected readonly labels = inject(HELL_LABELS);
   private readonly state = injectDateRangePickerState<Date>();
 
   protected readonly label = computed(() =>

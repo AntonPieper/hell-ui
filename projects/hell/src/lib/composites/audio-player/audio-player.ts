@@ -25,6 +25,7 @@ import { HellButton } from '../../primitives/button/button';
 import { HellFlyout, HellFlyoutTrigger } from '../../primitives/flyout/flyout';
 import { HellIcon } from '../../primitives/icon/icon';
 import { HellSlider } from '../../primitives/slider/slider';
+import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
 import { HellAudioRuntime, hellHtmlAudioElementAdapter } from './audio-player.runtime';
 export { hellAudioSpeechSupported } from './audio-player.runtime';
@@ -97,7 +98,7 @@ function parseIsoDateOnly(value: string): Date | null {
         variant="ghost"
         [iconOnly]="true"
         type="button"
-        [attr.aria-label]="playing() ? 'Pause' : 'Play'"
+        [attr.aria-label]="playing() ? labels.audioPlayer.pause : labels.audioPlayer.play"
         (click)="toggle()"
       >
         <hell-icon [name]="playing() ? 'faSolidPause' : 'faSolidPlay'" />
@@ -116,7 +117,7 @@ function parseIsoDateOnly(value: string): Date | null {
         [step]="0.1"
         (valueChange)="onSeek($event)"
         (keydown)="onSeekKey($event)"
-        aria-label="Seek"
+        [attr.aria-label]="labels.audioPlayer.seek"
       />
 
       <span data-slot="time">{{ format(duration()) }}</span>
@@ -126,7 +127,7 @@ function parseIsoDateOnly(value: string): Date | null {
         variant="ghost"
         [iconOnly]="true"
         type="button"
-        [attr.aria-label]="muted() ? 'Unmute' : 'Mute'"
+        [attr.aria-label]="muted() ? labels.audioPlayer.unmute : labels.audioPlayer.mute"
         (click)="toggleMute()"
       >
         <hell-icon [name]="volumeIcon()" />
@@ -140,7 +141,7 @@ function parseIsoDateOnly(value: string): Date | null {
         [max]="100"
         [step]="1"
         (valueChange)="onVolume($event)"
-        aria-label="Volume"
+        [attr.aria-label]="labels.audioPlayer.volume"
       />
 
       @if (allowLiveCaptions() && speechSupported()) {
@@ -153,7 +154,7 @@ function parseIsoDateOnly(value: string): Date | null {
           type="button"
           data-slot="cc-toggle"
           [attr.aria-pressed]="captions()"
-          [attr.aria-label]="captions() ? 'Hide live captions' : 'Show live captions'"
+          [attr.aria-label]="captions() ? labels.audioPlayer.hideLiveCaptions : labels.audioPlayer.showLiveCaptions"
           [attr.data-active]="captions() ? 'true' : null"
           (click)="ccTrigger.toggle()"
           (openChange)="captions.set($event)"
@@ -171,7 +172,7 @@ function parseIsoDateOnly(value: string): Date | null {
           [download]="downloadName()"
           target="_blank"
           rel="noopener"
-          aria-label="Download"
+          [attr.aria-label]="labels.audioPlayer.download"
         >
           <hell-icon name="faSolidDownload" />
         </a>
@@ -189,11 +190,11 @@ function parseIsoDateOnly(value: string): Date | null {
           <span data-slot="captions-status">
             <span data-slot="captions-dot" aria-hidden="true"></span>
             @if (error()) {
-              Error
+              {{ labels.audioPlayer.errorStatus }}
             } @else if (transcribing()) {
-              Live
+              {{ labels.audioPlayer.liveStatus }}
             } @else {
-              Paused
+              {{ labels.audioPlayer.pausedStatus }}
             }
           </span>
 
@@ -203,7 +204,7 @@ function parseIsoDateOnly(value: string): Date | null {
               size="sm"
               variant="ghost"
               type="button"
-              [attr.aria-label]="'Playback speed ' + playbackRate() + 'x'"
+              [attr.aria-label]="labels.audioPlayer.playbackSpeed(playbackRate())"
               (click)="cyclePlaybackRate()"
             >
               {{ playbackRate() }}×
@@ -215,10 +216,10 @@ function parseIsoDateOnly(value: string): Date | null {
                 size="sm"
                 variant="ghost"
                 type="button"
-                aria-label="Copy transcript"
+                [attr.aria-label]="labels.audioPlayer.copyTranscript"
                 (click)="copyTranscript()"
               >
-                {{ copied() ? 'Copied' : 'Copy' }}
+                {{ copied() ? labels.audioPlayer.copied : labels.audioPlayer.copy }}
               </button>
 
               <button
@@ -226,10 +227,10 @@ function parseIsoDateOnly(value: string): Date | null {
                 size="sm"
                 variant="ghost"
                 type="button"
-                aria-label="Clear transcript"
+                [attr.aria-label]="labels.audioPlayer.clearTranscript"
                 (click)="clearTranscript()"
               >
-                Clear
+                {{ labels.audioPlayer.clear }}
               </button>
             }
           </div>
@@ -246,9 +247,9 @@ function parseIsoDateOnly(value: string): Date | null {
               }
             </p>
           } @else if (transcribing()) {
-            <p data-slot="captions-empty">Listening…</p>
+            <p data-slot="captions-empty">{{ labels.audioPlayer.listening }}</p>
           } @else {
-            <p data-slot="captions-empty">Press play to capture captions.</p>
+            <p data-slot="captions-empty">{{ labels.audioPlayer.pressPlayForCaptions }}</p>
           }
         </div>
       </section>
@@ -284,6 +285,7 @@ export class HellAudioPlayer extends HellStyleable {
   protected readonly error = this.audioRuntime.error;
   protected readonly copied = this.audioRuntime.copied;
   protected readonly speechSupported = this.audioRuntime.speechSupported;
+  protected readonly labels = inject(HELL_LABELS);
 
   private seekRestartTimer: ReturnType<typeof setTimeout> | null = null;
 

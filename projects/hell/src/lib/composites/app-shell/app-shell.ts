@@ -1,3 +1,4 @@
+import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
 export const HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX = 768;
 export const HELL_APP_SHELL_MOBILE_MAX_WIDTH_PX = HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX - 1;
@@ -325,13 +326,14 @@ export class HellAppContent extends HellStyleable {
     type: 'button',
     '(click)': 'toggle()',
     '[attr.aria-pressed]': 'collapsed()',
-    '[attr.aria-label]': 'collapsed() ? "Expand sidebar" : "Collapse sidebar"',
+    '[attr.aria-label]': 'collapsed() ? labels.appShell.expandSidebar : labels.appShell.collapseSidebar',
     '[attr.data-hell-app-shell-toggle]': '"sidenav"',
     '[attr.data-hell-sidenav-toggle]': 'appearance() === "plain" ? null : appearance()',
   },
 })
 export class HellSidenavToggle {
   readonly appearance = input<'plain' | 'shell'>('plain');
+  protected readonly labels = inject(HELL_LABELS);
   private readonly shell = inject(HellAppShell);
   protected readonly collapsed = () => this.shell.isSidenavCollapsed();
   protected toggle() {
@@ -346,13 +348,14 @@ export class HellSidenavToggle {
     type: 'button',
     '(click)': 'toggle()',
     '[attr.aria-pressed]': '!hidden()',
-    '[attr.aria-label]': 'hidden() ? "Show secondary panel" : "Hide secondary panel"',
+    '[attr.aria-label]': 'hidden() ? labels.appShell.showSecondaryPanel : labels.appShell.hideSecondaryPanel',
     '[attr.data-hell-app-shell-toggle]': '"secondary"',
     '[attr.data-hell-secondary-toggle]': 'appearance() === "plain" ? null : appearance()',
   },
 })
 export class HellSecondaryToggle {
   readonly appearance = input<'plain' | 'header' | 'rail'>('plain');
+  protected readonly labels = inject(HELL_LABELS);
   private readonly shell = inject(HellAppShell);
   protected readonly hidden = () => this.shell.isSecondaryHidden();
   protected toggle() {

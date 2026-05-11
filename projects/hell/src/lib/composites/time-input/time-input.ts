@@ -4,6 +4,7 @@ import {
   booleanAttribute,
   computed,
   forwardRef,
+  inject,
   input,
   output,
   signal,
@@ -15,6 +16,7 @@ import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
 import { HellInput } from '../../primitives/input/input';
 import { HellPopover, HellPopoverTrigger } from '../../primitives/popover/popover';
+import { HELL_LABELS } from '../../core/labels';
 import type { HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
 import {
@@ -120,6 +122,7 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
   },
   template: `
     <input
+      #field
       hellInput
       unstyled
       [size]="size()"
@@ -133,9 +136,9 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
       [disabled]="isDisabled()"
       [placeholder]="placeholder() ?? (seconds() ? 'HH:MM:SS' : 'HH:MM')"
       [value]="display()"
-      (input)="onInput($event.target.value)"
+      (input)="onInput(field.value)"
       (blur)="onBlur()"
-      (keydown.enter)="commit($event.target.value, $event)"
+      (keydown.enter)="commit(field.value, $event)"
     />
     <button
       hellButton
@@ -147,7 +150,7 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
       [hellPopoverTrigger]="picker"
       placement="bottom-end"
       [disabled]="isDisabled()"
-      [attr.aria-label]="ariaLabel() ? 'Choose time for ' + ariaLabel() : 'Choose time'"
+      [attr.aria-label]="triggerAriaLabel()"
     >
       <hell-icon name="faSolidClock" />
     </button>
@@ -163,7 +166,7 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
               size="sm"
               type="button"
               (click)="nudge('minute', -5)"
-              aria-label="Subtract 5 minutes"
+              [attr.aria-label]="labels.timeInput.subtractFiveMinutes"
             >
               −5m
             </button>
@@ -173,7 +176,7 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
               size="sm"
               type="button"
               (click)="nudge('minute', 5)"
-              aria-label="Add 5 minutes"
+              [attr.aria-label]="labels.timeInput.addFiveMinutes"
             >
               +5m
             </button>
@@ -181,8 +184,8 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
         </div>
 
         <div data-slot="picker-section">
-          <div data-slot="picker-section-label">Hours</div>
-          <div data-slot="picker-grid" data-unit="hours" role="group" aria-label="Hours">
+          <div data-slot="picker-section-label">{{ labels.timeInput.hours }}</div>
+          <div data-slot="picker-grid" data-unit="hours" role="group" [attr.aria-label]="labels.timeInput.hours">
             @for (h of hours; track h) {
               <button
                 hellButton
@@ -200,8 +203,8 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
         </div>
 
         <div data-slot="picker-section">
-          <div data-slot="picker-section-label">Minutes</div>
-          <div data-slot="picker-grid" data-unit="minutes" role="group" aria-label="Minutes">
+          <div data-slot="picker-section-label">{{ labels.timeInput.minutes }}</div>
+          <div data-slot="picker-grid" data-unit="minutes" role="group" [attr.aria-label]="labels.timeInput.minutes">
             @for (m of minutes; track m) {
               <button
                 hellButton
@@ -220,8 +223,8 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
 
         @if (seconds()) {
           <div data-slot="picker-section">
-            <div data-slot="picker-section-label">Seconds</div>
-            <div data-slot="picker-grid" data-unit="seconds" role="group" aria-label="Seconds">
+            <div data-slot="picker-section-label">{{ labels.timeInput.seconds }}</div>
+            <div data-slot="picker-grid" data-unit="seconds" role="group" [attr.aria-label]="labels.timeInput.seconds">
               @for (s of secondsList; track s) {
                 <button
                   hellButton
@@ -280,6 +283,11 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
   protected readonly invalidDraft = this.valueState.invalidDraft;
   protected readonly isInvalid = () => this.invalid() || this.invalidDraft();
   protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
+  protected readonly labels = inject(HELL_LABELS);
+  protected readonly triggerAriaLabel = () => {
+    const label = this.ariaLabel();
+    return label ? this.labels.timeInput.chooseTimeFor(label) : this.labels.timeInput.chooseTime;
+  };
 
   writeValue(value: HellTimeValue | null): void {
     this.controlMode.set(true);
