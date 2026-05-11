@@ -48,26 +48,32 @@ function formatTime(t: HellTimeValue, seconds: boolean) {
  * (`9:00 am`, `1:30PM`). Empty text commits a nullable clear; unparseable
  * text stays as an invalid draft.
  */
-function tryParse(text: string) {
+function normalizeTime(value: HellTimeValue, seconds: boolean): HellTimeValue {
+  return seconds ? value : { ...value, second: 0 };
+}
+
+function tryParse(text: string, seconds: boolean) {
   const t = text.trim().toLowerCase();
   if (!t) return hellTypedValue<HellTimeValue>(null);
   const ampm = /^(\d{1,2})(?::(\d{1,2}))?(?::(\d{1,2}))?\s*(am|pm)$/.exec(t);
   if (ampm) {
+    if (!seconds && ampm[3] !== undefined) return hellInvalidTypedValue();
     let hour = +ampm[1];
     const minute = +(ampm[2] ?? '0');
     const second = +(ampm[3] ?? '0');
     if (hour === 12) hour = 0;
     if (ampm[4] === 'pm') hour += 12;
-    if (!isValidTime({ hour, minute, second })) return hellInvalidTypedValue();
-    return hellTypedValue({ hour, minute, second });
+    const value = { hour, minute, second };
+    if (!isValidTime(value)) return hellInvalidTypedValue();
+    return hellTypedValue(normalizeTime(value, seconds));
   }
   const m = /^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/.exec(t);
-  if (!m) return hellInvalidTypedValue();
+  if (!m || (!seconds && m[3] !== undefined)) return hellInvalidTypedValue();
   const hour = +m[1];
   const minute = +m[2];
   const second = +(m[3] ?? '0');
   const value = { hour, minute, second };
-  return isValidTime(value) ? hellTypedValue(value) : hellInvalidTypedValue();
+  return isValidTime(value) ? hellTypedValue(normalizeTime(value, seconds)) : hellInvalidTypedValue();
 }
 
 function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
@@ -119,7 +125,7 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
       [size]="size()"
       type="text"
       data-slot="field"
-      inputmode="numeric"
+      inputmode="text"
       autocomplete="off"
       [invalid]="isInvalid()"
       [attr.aria-invalid]="isInvalid() ? 'true' : null"
@@ -176,7 +182,7 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
 
         <div data-slot="picker-section">
           <div data-slot="picker-section-label">Hours</div>
-          <div data-slot="picker-grid" data-unit="hours">
+          <div data-slot="picker-grid" data-unit="hours" role="group" aria-label="Hours">
             @for (h of hours; track h) {
               <button
                 hellButton
@@ -184,6 +190,7 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
                 size="sm"
                 type="button"
                 data-slot="picker-cell"
+                [attr.aria-pressed]="h === current().hour ? 'true' : 'false'"
                 (click)="setUnit('hour', h)"
               >
                 {{ pad(h) }}
@@ -194,7 +201,7 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
 
         <div data-slot="picker-section">
           <div data-slot="picker-section-label">Minutes</div>
-          <div data-slot="picker-grid" data-unit="minutes">
+          <div data-slot="picker-grid" data-unit="minutes" role="group" aria-label="Minutes">
             @for (m of minutes; track m) {
               <button
                 hellButton
@@ -202,6 +209,7 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
                 size="sm"
                 type="button"
                 data-slot="picker-cell"
+                [attr.aria-pressed]="m === current().minute ? 'true' : 'false'"
                 (click)="setUnit('minute', m)"
               >
                 {{ pad(m) }}
@@ -213,7 +221,7 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
         @if (seconds()) {
           <div data-slot="picker-section">
             <div data-slot="picker-section-label">Seconds</div>
-            <div data-slot="picker-grid" data-unit="minutes">
+            <div data-slot="picker-grid" data-unit="seconds" role="group" aria-label="Seconds">
               @for (s of secondsList; track s) {
                 <button
                   hellButton
@@ -221,6 +229,7 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
                   size="sm"
                   type="button"
                   data-slot="picker-cell"
+                  [attr.aria-pressed]="s === current().second ? 'true' : 'false'"
                   (click)="setUnit('second', s)"
                 >
                   {{ pad(s) }}
@@ -259,8 +268,8 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
 
   private readonly valueState = new HellTypedValueInputState<HellTimeValue, HellTimeValue | null>({
     external: () => this.effectiveValue(),
-    parseExternal: (value) => (isValidTime(value) ? value : null),
-    parseText: tryParse,
+    parseExternal: (value) => (isValidTime(value) ? normalizeTime(value, this.seconds()) : null),
+    parseText: (text) => tryParse(text, this.seconds()),
     format: (value) => (value ? formatTime(value, this.seconds()) : ''),
   });
 
@@ -312,7 +321,7 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
   }
 
   protected setUnit(unit: 'hour' | 'minute' | 'second', n: number) {
-    const next = this.valueState.setValue({ ...this.current(), [unit]: n });
+    const next = this.valueState.setValue(normalizeTime({ ...this.current(), [unit]: n }, this.seconds()));
     if (next.committed) this.emitValue(next.value);
     this.onControlTouched();
   }
@@ -325,7 +334,7 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
       t.hour = Math.floor(totalMinutes / 60);
       t.minute = totalMinutes % 60;
     } else t.second = (t.second + delta + 60) % 60;
-    const next = this.valueState.setValue(t);
+    const next = this.valueState.setValue(normalizeTime(t, this.seconds()));
     if (next.committed) this.emitValue(next.value);
     this.onControlTouched();
   }

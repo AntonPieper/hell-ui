@@ -70,6 +70,23 @@ describe('HellTimeInput', () => {
     expect(input.value).toBe('01:02:03');
   });
 
+  it('rejects seconds when seconds mode is disabled', () => {
+    const fixture = TestBed.createComponent(TimeInputHost);
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    expect(input.getAttribute('inputmode')).toBe('text');
+
+    input.value = '1:02:03 am';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.values).toEqual([]);
+    expect(input.value).toBe('1:02:03 am');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+  });
+
   it('keeps invalid typed text visible without emitting', () => {
     const fixture = TestBed.createComponent(TimeInputHost);
     const host = fixture.componentInstance;
@@ -114,6 +131,7 @@ describe('HellTimeInput', () => {
     expect(trigger.tabIndex).toBe(0);
     expect(trigger.getAttribute('aria-label')).toBe('Choose time for Start time');
   });
+
 
   it('drops in-progress typing when the bound value changes externally', async () => {
     const fixture = TestBed.createComponent(TimeInputHost);

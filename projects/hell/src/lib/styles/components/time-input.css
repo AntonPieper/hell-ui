@@ -130,7 +130,8 @@
       grid-template-columns: repeat(6, minmax(0, 1fr));
     }
 
-  .hell-time-input [data-slot='picker-grid'][data-unit='minutes'] {
+  .hell-time-input [data-slot='picker-grid'][data-unit='minutes'],
+  .hell-time-input [data-slot='picker-grid'][data-unit='seconds'] {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
