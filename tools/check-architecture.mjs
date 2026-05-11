@@ -18,6 +18,7 @@ checkCodeEditorRuntimeContract();
 checkExperimentalFeatureContract();
 checkFormsContract();
 checkSearchContract();
+checkHotkeyContract();
 checkNativeButtonSelectorContract();
 checkInteractiveTriggerSelectorContract();
 checkTableSortButtonContract();
@@ -665,6 +666,18 @@ function checkSearchContract() {
   );
   if (!docs.includes('provideHellSearchRanker') || !docs.includes('Fuse.js')) {
     failures.push('Omnibar docs must direct serious search through a ranker Adapter or async source');
+  }
+}
+
+function checkHotkeyContract() {
+  const hotkeySource = readFile(join(root, 'projects/hell/src/lib/core/hotkeys.ts'));
+  if (!hotkeySource.includes('HellGlobalKeydownService')) {
+    failures.push('Core must provide a shared global keydown listener service');
+  }
+
+  const omnibarSource = readFile(join(root, 'projects/hell/src/lib/composites/omnibar/omnibar.ts'));
+  if (omnibarSource.includes('document.addEventListener')) {
+    failures.push('HellOmnibar must register global hotkeys through HellGlobalKeydownService');
   }
 }
 

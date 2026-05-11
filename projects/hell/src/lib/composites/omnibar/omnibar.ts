@@ -36,6 +36,7 @@ import { HellInput } from '../../primitives/input/input';
 import { HellListbox } from '../../primitives/listbox/listbox';
 import { HellSearch, HellSearchClear } from '../../primitives/search/search';
 import { HellSkeleton } from '../../primitives/skeleton/skeleton';
+import { HellGlobalKeydownService } from '../../core/hotkeys';
 import { HellOmnibarRuntime } from './omnibar.runtime';
 import { HellOmnibarPositionAdapter } from './omnibar-position.adapter';
 import { HellStyleable } from '../../core/styleable';
@@ -258,6 +259,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
   private readonly runtime = inject(HellOmnibarRuntime<unknown>);
+  private readonly globalKeydown = inject(HellGlobalKeydownService);
 
   private readonly _open = signal(false);
   protected readonly isOpen = computed(() => !this.disabled() && this._open());
@@ -545,13 +547,12 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   /* ── Hotkey ────────────────────────────────────────────────────────── */
 
   private installHotkey(): void {
-    if (typeof document === 'undefined') return;
     const handler = (event: KeyboardEvent) => {
       const combo = this.hotkey();
       if (!combo || this.disabled()) return;
       if (!matchHotkey(event, combo)) return;
       // Don't hijack typing in another input unless we're targeted.
-      const active = document.activeElement;
+      const active = event.view?.document.activeElement;
       if (
         active &&
         active !== this.inputRef?.nativeElement &&
@@ -566,8 +567,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
       this.focus();
       this.open();
     };
-    document.addEventListener('keydown', handler);
-    this.destroyRef.onDestroy(() => document.removeEventListener('keydown', handler));
+    this.globalKeydown.register(handler, this.destroyRef);
   }
 }
 

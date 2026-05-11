@@ -7,6 +7,7 @@ export * from './lib/core/types';
 export * from './lib/core/styleable';
 export * from './lib/core/search';
 export * from './lib/core/labels';
+export * from './lib/core/hotkeys';
 
 // Primitives
 export * from './lib/primitives/button/button';
