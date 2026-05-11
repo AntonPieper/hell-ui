@@ -1,5 +1,6 @@
-import { Directive, booleanAttribute, input } from '@angular/core';
+import { Directive, inject, input } from '@angular/core';
 import type { HellSize } from '../../core/types';
+import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
 
 /** Loading shape placeholder. Pure visual — no semantics. */
@@ -32,11 +33,14 @@ export type HellSpinnerVariant = 'ring' | 'dots' | 'bars' | 'pulse';
     '[class.hell-spinner]': '!unstyled()',
     '[attr.data-variant]': 'variant()',
     '[attr.data-size]': 'size()',
+    '[attr.aria-label]': 'ariaLabel() ?? labels.loading',
     role: 'status',
-    'aria-label': 'Loading',
   },
 })
 export class HellSpinner extends HellStyleable {
   readonly variant = input<HellSpinnerVariant>('ring');
   readonly size = input<HellSize>('md');
+  readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
+
+  protected readonly labels = inject(HELL_LABELS);
 }

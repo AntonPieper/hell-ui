@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
+import { provideHellLabels } from '../../core/labels';
 import { HellPagination, HellPaginationFirst, HellPaginationNext, HellPaginationStrip } from './pagination';
 
 @Component({
@@ -45,10 +46,30 @@ class PaginationAnchorHost {
 })
 class PaginationExplicitDisabledHost {}
 
+@Component({
+  imports: [HellPaginationStrip],
+  providers: [
+    provideHellLabels({
+      pagination: {
+        navigation: 'Seiten',
+        nextPage: 'Nächste Seite',
+        page: (page) => `Seite ${page}`,
+      },
+    }),
+  ],
+  template: `<hell-pagination [page]="1" [pageCount]="3" />`,
+})
+class LocalizedPaginationHost {}
+
 describe('HellPaginationStrip', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PaginationHost, PaginationAnchorHost, PaginationExplicitDisabledHost],
+      imports: [
+        PaginationHost,
+        PaginationAnchorHost,
+        PaginationExplicitDisabledHost,
+        LocalizedPaginationHost,
+      ],
     }).compileComponents();
   });
 
@@ -97,6 +118,17 @@ describe('HellPaginationStrip', () => {
     expect(anchor.getAttribute('tabindex')).toBe('-1');
     expect(anchor.dispatchEvent(click)).toBe(false);
     expect(click.defaultPrevented).toBe(true);
+  });
+
+  it('uses injected labels for the ready-made strip', () => {
+    const fixture = TestBed.createComponent(LocalizedPaginationHost);
+    fixture.detectChanges();
+
+    const nav = fixture.nativeElement.querySelector('hell-pagination') as HTMLElement;
+    expect(nav.getAttribute('aria-label')).toBe('Seiten');
+    expect(button(fixture.nativeElement, 'First page')).toBeInstanceOf(HTMLButtonElement);
+    expect(button(fixture.nativeElement, 'Seite 2').textContent?.trim()).toBe('2');
+    expect(button(fixture.nativeElement, 'Nächste Seite')).toBeInstanceOf(HTMLButtonElement);
   });
 
   it('emits page changes from numbered and navigation buttons', () => {

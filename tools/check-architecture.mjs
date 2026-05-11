@@ -13,6 +13,7 @@ checkStyleEntryPoints();
 checkAppShellBreakpointContract();
 checkBehaviorSentinelContract();
 checkComponentContract();
+checkLabelContract();
 checkNativeButtonSelectorContract();
 checkInteractiveTriggerSelectorContract();
 checkTableSortButtonContract();
@@ -489,6 +490,38 @@ function checkComponentContract() {
       failures.push(
         `component-contract.spec.ts declares ${symbol}, but no exported HellStyleable Module was found`,
       );
+    }
+  }
+}
+
+function checkLabelContract() {
+  const labelsSource = readFile(join(root, 'projects/hell/src/lib/core/labels.ts'));
+  for (const symbol of ['HELL_LABELS', 'HELL_DEFAULT_LABELS', 'provideHellLabels']) {
+    if (!labelsSource.includes(symbol)) failures.push(`Label Contract is missing ${symbol}`);
+  }
+
+  const rootApi = readFile(join(root, 'projects/hell/src/public-api.ts'));
+  const coreApi = readFile(join(root, 'projects/hell/src/lib/public-api-core.ts'));
+  for (const [api, source] of [
+    ['projects/hell/src/public-api.ts', rootApi],
+    ['projects/hell/src/lib/public-api-core.ts', coreApi],
+  ]) {
+    if (!source.includes('./lib/core/labels') && !source.includes('./core/labels')) {
+      failures.push(`Label Contract is not exported from ${api}`);
+    }
+  }
+
+  const spinnerSource = readFile(join(root, 'projects/hell/src/lib/primitives/skeleton/skeleton.ts'));
+  if (!spinnerSource.includes('HELL_LABELS') || spinnerSource.includes("'aria-label': 'Loading'")) {
+    failures.push('HellSpinner must read its default aria-label from the Label Contract');
+  }
+
+  const paginationSource = readFile(
+    join(root, 'projects/hell/src/lib/primitives/pagination/pagination.ts'),
+  );
+  for (const hardcoded of ['aria-label="First page"', 'aria-label="Previous page"', "'Page ' + p"]) {
+    if (paginationSource.includes(hardcoded)) {
+      failures.push('HellPaginationStrip must read built-in labels from the Label Contract');
     }
   }
 }

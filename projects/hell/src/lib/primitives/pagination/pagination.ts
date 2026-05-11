@@ -24,6 +24,7 @@ import {
   injectPaginationState,
 } from 'ng-primitives/pagination';
 import { HellIcon } from '../icon/icon';
+import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
 import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactive-disabled';
 
@@ -205,31 +206,33 @@ export class HellPaginationButton extends HellPaginationDisabledGuard {
   ],
   host: {
     '[class.hell-pagination]': '!unstyled()',
+    '[attr.aria-label]': 'labels.pagination.navigation',
     role: 'navigation',
-    'aria-label': 'Pagination',
   },
   template: `
-    <button hellPaginationFirst type="button" aria-label="First page">
+    <button hellPaginationFirst type="button" [attr.aria-label]="labels.pagination.firstPage">
       <hell-icon name="faSolidAnglesLeft" />
     </button>
-    <button hellPaginationPrev type="button" aria-label="Previous page">
+    <button hellPaginationPrev type="button" [attr.aria-label]="labels.pagination.previousPage">
       <hell-icon name="faSolidChevronLeft" />
     </button>
     @for (p of pages(); track trackPage($index, p)) {
-      <button hellPaginationButton [page]="p" type="button" [attr.aria-label]="'Page ' + p">
+      <button hellPaginationButton [page]="p" type="button" [attr.aria-label]="labels.pagination.page(p)">
         {{ p }}
       </button>
     }
-    <button hellPaginationNext type="button" aria-label="Next page">
+    <button hellPaginationNext type="button" [attr.aria-label]="labels.pagination.nextPage">
       <hell-icon name="faSolidChevronRight" />
     </button>
-    <button hellPaginationLast type="button" aria-label="Last page">
+    <button hellPaginationLast type="button" [attr.aria-label]="labels.pagination.lastPage">
       <hell-icon name="faSolidAnglesRight" />
     </button>
   `,
 })
 export class HellPaginationStrip extends HellStyleable {
   readonly siblingCount = input<number>(2);
+
+  protected readonly labels = inject(HELL_LABELS);
 
   private readonly state = injectPaginationState();
 

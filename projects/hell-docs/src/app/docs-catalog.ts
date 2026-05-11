@@ -108,6 +108,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
               'getting-started button-demo getting-started/examples/button-demo.example getting-started install styles hellButton',
           },
         ],
+        usages: [
+          {
+            title: 'Configure labels',
+            detail: 'provideHellLabels, HELL_LABELS, HELL_DEFAULT_LABELS',
+            terms: 'i18n labels localization aria-label accessibility provideHellLabels HELL_LABELS',
+          },
+        ],
         loadComponent: () =>
           import('./pages/getting-started/getting-started.page').then((m) => m.GettingStartedPage),
       },
