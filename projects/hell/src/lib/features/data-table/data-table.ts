@@ -13,6 +13,7 @@ import {
   Component,
   Directive,
   ElementRef,
+  OnDestroy,
   booleanAttribute,
   computed,
   inject,
@@ -230,7 +231,7 @@ export class HellTableRow extends HellStyleable {
     '[style.--hell-table-col-width]': 'widthVar()',
   },
 })
-export class HellTableHeaderCell extends HellStyleable {
+export class HellTableHeaderCell extends HellStyleable implements OnDestroy {
   readonly sort = input<'asc' | 'desc' | null>(null);
   readonly sortable = input(false, { transform: booleanAttribute });
   readonly columnId = input<string | null>(null);
@@ -384,7 +385,7 @@ export class HellTableCell extends HellStyleable {
   },
   template: '<span data-slot="grip" aria-hidden="true"></span>',
 })
-export class HellTableColumnResizer extends HellStyleable {
+export class HellTableColumnResizer extends HellStyleable implements OnDestroy {
   readonly minWidth = input(40, { transform: numberAttribute });
   readonly ariaLabel = input('Resize column', { alias: 'aria-label' });
 

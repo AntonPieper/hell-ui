@@ -1,4 +1,4 @@
-import { Directive, booleanAttribute, input } from '@angular/core';
+import { Directive, input } from '@angular/core';
 import { NgpToggle } from 'ng-primitives/toggle';
 import { NgpToggleGroup, NgpToggleGroupItem } from 'ng-primitives/toggle-group';
 import { HellSize } from '../../core/types';

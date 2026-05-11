@@ -19,12 +19,18 @@ export default tseslint.config(
       '@angular-eslint/directive-selector': 'off',
       '@angular-eslint/no-input-rename': 'off',
       '@angular-eslint/no-output-native': 'off',
-      '@angular-eslint/use-lifecycle-interface': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@angular-eslint/use-lifecycle-interface': 'error',
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/triple-slash-reference': 'off',
       'no-irregular-whitespace': 'off',
+    },
+  },
+  {
+    files: ['projects/hell/src/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
   },
   {

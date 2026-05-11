@@ -1,4 +1,4 @@
-import { Directive, booleanAttribute, input } from '@angular/core';
+import { Directive } from '@angular/core';
 import { HellStyleable } from '../../core/styleable';
 import {
   NgpAccordion,

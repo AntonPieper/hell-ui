@@ -7,7 +7,6 @@ import {
   Injectable,
   TemplateRef,
   afterNextRender,
-  booleanAttribute,
   computed,
   effect,
   inject,

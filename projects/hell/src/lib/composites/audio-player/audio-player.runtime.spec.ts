@@ -201,6 +201,15 @@ describe('HellAudioRuntime live captions', () => {
   });
 });
 
+interface FakeSpeechRecognitionResultEvent {
+  readonly resultIndex: number;
+  readonly results: ArrayLike<{ readonly isFinal: boolean; readonly 0: { readonly transcript: string } }>;
+}
+
+interface FakeSpeechRecognitionErrorEvent {
+  readonly error?: string;
+}
+
 class FakeSpeechRecognition extends EventTarget {
   lang = '';
   continuous = false;
@@ -209,8 +218,8 @@ class FakeSpeechRecognition extends EventTarget {
   start = vi.fn();
   stop = vi.fn();
   abort = vi.fn();
-  onresult: ((e: any) => void) | null = null;
-  onerror: ((e: any) => void) | null = null;
+  onresult: ((e: FakeSpeechRecognitionResultEvent) => void) | null = null;
+  onerror: ((e: FakeSpeechRecognitionErrorEvent) => void) | null = null;
   onend: (() => void) | null = null;
 }
 

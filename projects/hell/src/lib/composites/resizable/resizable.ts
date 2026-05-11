@@ -6,6 +6,7 @@ import {
   Directive,
   ElementRef,
   HostListener,
+  OnDestroy,
   booleanAttribute,
   computed,
   effect,
@@ -173,7 +174,7 @@ export class HellResizable extends HellStyleable implements AfterContentInit {
     '[attr.data-orientation]': 'orientation()',
   },
 })
-export class HellResizablePane extends HellStyleable {
+export class HellResizablePane extends HellStyleable implements OnDestroy {
   /** Initial flex grow factor — used until the user starts dragging. */
   readonly initialFlex = input(1, { transform: numberAttribute });
   /** Minimum pane size in pixels. */
@@ -266,7 +267,7 @@ export class HellResizablePane extends HellStyleable {
   },
   template: '<span data-slot="grip" aria-hidden="true"></span>',
 })
-export class HellResizableHandle extends HellStyleable {
+export class HellResizableHandle extends HellStyleable implements OnDestroy {
   /**
    * Visual treatment for the handle.
    * - `line`  (default) — minimal hairline that thickens on hover.

@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   Directive,
-  booleanAttribute,
   computed,
   inject,
   input,

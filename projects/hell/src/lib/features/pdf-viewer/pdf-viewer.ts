@@ -5,7 +5,6 @@ import {
   ElementRef,
   InjectionToken,
   afterNextRender,
-  booleanAttribute,
   computed,
   effect,
   inject,

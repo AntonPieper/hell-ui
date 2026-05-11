@@ -80,15 +80,123 @@ export interface HellPdfPrintSession {
   print(): Promise<void>;
 }
 
+interface HellPdfJsWorkerHandle {
+  destroy(): void | Promise<void>;
+}
+
+interface HellPdfJsLoadingTask {
+  readonly promise: Promise<HellPdfDocumentHandle>;
+}
+
+interface HellPdfJsModule {
+  readonly PDFWorker: new (options: { readonly port: Worker }) => HellPdfJsWorkerHandle;
+  getDocument(
+    source:
+      | string
+      | URL
+      | ArrayBuffer
+      | { readonly url: string; readonly worker: HellPdfJsWorkerHandle }
+      | { readonly data: ArrayBuffer; readonly worker: HellPdfJsWorkerHandle },
+  ): HellPdfJsLoadingTask;
+}
+
+interface HellPdfJsEventBus {
+  on(eventName: string, listener: (event: unknown) => void): void;
+  dispatch(eventName: string, data: Record<string, unknown>): void;
+}
+
+interface HellPdfJsLinkService {
+  setViewer(viewer: HellPdfJsViewer): void;
+  setDocument(doc: HellPdfDocumentHandle | null, baseUrl?: string | null): void;
+}
+
+interface HellPdfJsFindController {
+  setDocument(doc: HellPdfDocumentHandle | null): void;
+}
+
+interface HellPdfJsViewer {
+  currentScale: number;
+  currentScaleValue: string;
+  currentPageNumber: number;
+  setDocument(doc: HellPdfDocumentHandle | null): void;
+  cleanup?(): void;
+}
+
+interface HellPdfJsViewerModule {
+  readonly EventBus: new () => HellPdfJsEventBus;
+  readonly PDFLinkService: new (options: { readonly eventBus: HellPdfJsEventBus }) => HellPdfJsLinkService;
+  readonly PDFFindController: new (options: {
+    readonly eventBus: HellPdfJsEventBus;
+    readonly linkService: HellPdfJsLinkService;
+  }) => HellPdfJsFindController;
+  readonly PDFViewer: new (options: {
+    readonly container: HTMLDivElement;
+    readonly eventBus: HellPdfJsEventBus;
+    readonly linkService: HellPdfJsLinkService;
+    readonly findController: HellPdfJsFindController;
+    readonly textLayerMode: number;
+    readonly annotationMode: number;
+    readonly annotationEditorMode: number;
+  }) => HellPdfJsViewer;
+}
+
+interface HellPdfPageViewport {
+  readonly width: number;
+  readonly height: number;
+}
+
+interface HellPdfRenderTask {
+  readonly promise: Promise<void>;
+}
+
+interface HellPdfPageHandle {
+  getViewport(options: { readonly scale: number }): HellPdfPageViewport;
+  render(options: {
+    readonly canvasContext: CanvasRenderingContext2D;
+    readonly viewport: HellPdfPageViewport;
+  }): HellPdfRenderTask;
+}
+
+interface HellPdfThumbnailDocumentHandle extends HellPdfDocumentHandle {
+  getPage(pageNumber: number): Promise<HellPdfPageHandle>;
+}
+
+interface HellPdfPageChangingEvent {
+  readonly pageNumber?: unknown;
+}
+
+interface HellPdfScaleChangingEvent {
+  readonly scale?: unknown;
+  readonly presetValue?: unknown;
+}
+
+interface HellPdfFindEvent {
+  readonly state?: unknown;
+  readonly matchesCount?: {
+    readonly current?: unknown;
+    readonly total?: unknown;
+  };
+}
+
+const HELL_PDF_FIND_STATE = {
+  FOUND: 0,
+  NOT_FOUND: 1,
+  WRAPPED: 2,
+  PENDING: 3,
+} as const;
+
 export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
   async createViewer(
     container: HTMLDivElement,
     handlers: HellPdfViewerSessionHandlers,
   ): Promise<HellPdfViewerSession> {
-    const pdfjs = await import('pdfjs-dist');
+    const pdfjs = (await import('pdfjs-dist')) as unknown as HellPdfJsModule;
     const workerPort = new Worker(new URL('./pdf.worker.ts', import.meta.url), { type: 'module' });
-    const pdfWorker = new pdfjs.PDFWorker({ port: workerPort as any });
-    const viewerMod = await hellWithPdfJsGlobal(pdfjs, () => import('pdfjs-dist/web/pdf_viewer.mjs'));
+    const pdfWorker = new pdfjs.PDFWorker({ port: workerPort });
+    const viewerMod = await hellWithPdfJsGlobal(
+      pdfjs,
+      async () => (await import('pdfjs-dist/web/pdf_viewer.mjs')) as unknown as HellPdfJsViewerModule,
+    );
     const eventBus = new viewerMod.EventBus();
     const linkService = new viewerMod.PDFLinkService({ eventBus });
     const findController = new viewerMod.PDFFindController({ eventBus, linkService });
@@ -173,12 +281,12 @@ export async function hellWithPdfJsGlobal<T>(
 }
 
 interface HellPdfJsViewerSessionOptions {
-  readonly pdfjs: any;
-  readonly viewer: any;
-  readonly linkService: any;
-  readonly findController: any;
-  readonly eventBus: any;
-  readonly pdfWorker: any;
+  readonly pdfjs: HellPdfJsModule;
+  readonly viewer: HellPdfJsViewer;
+  readonly linkService: HellPdfJsLinkService;
+  readonly findController: HellPdfJsFindController;
+  readonly eventBus: HellPdfJsEventBus;
+  readonly pdfWorker: HellPdfJsWorkerHandle;
   readonly workerPort: Worker;
   readonly handlers: HellPdfViewerSessionHandlers;
 }
@@ -241,9 +349,7 @@ class HellPdfJsViewerSession implements HellPdfViewerSession {
     pageNumber: number,
     canvas: HTMLCanvasElement,
   ): Promise<void> {
-    const page = await (
-      doc as HellPdfDocumentHandle & { getPage(n: number): Promise<any> }
-    ).getPage(pageNumber);
+    const page = await (doc as HellPdfThumbnailDocumentHandle).getPage(pageNumber);
     const baseViewport = page.getViewport({ scale: 1 });
     const targetW = 120;
     const scale = targetW / baseViewport.width;
@@ -265,11 +371,16 @@ class HellPdfJsViewerSession implements HellPdfViewerSession {
   }
 
   private installEventHandlers(): void {
-    const { eventBus, viewer, findController, handlers } = this.options;
-    eventBus.on('pagechanging', (e: any) => handlers.onPageChange(e.pageNumber));
-    eventBus.on('scalechanging', (e: any) => {
-      const scale = typeof e.scale === 'number' ? e.scale : 1;
-      handlers.onZoomChange(normalizeZoomEventValue(e.presetValue, scale), e.presetValue ?? scale);
+    const { eventBus, viewer, handlers } = this.options;
+    eventBus.on('pagechanging', (e) => {
+      const event = e as HellPdfPageChangingEvent;
+      if (typeof event.pageNumber === 'number') handlers.onPageChange(event.pageNumber);
+    });
+    eventBus.on('scalechanging', (e) => {
+      const event = e as HellPdfScaleChangingEvent;
+      const scale = typeof event.scale === 'number' ? event.scale : 1;
+      const presetValue = typeof event.presetValue === 'string' ? event.presetValue : undefined;
+      handlers.onZoomChange(normalizeZoomEventValue(presetValue, scale), presetValue ?? scale);
     });
     eventBus.on('pagesinit', () => {
       viewer.currentScaleValue = String(handlers.initialZoom());
@@ -277,47 +388,44 @@ class HellPdfJsViewerSession implements HellPdfViewerSession {
       if (initialPage > 1) viewer.currentPageNumber = initialPage;
       handlers.onPagesReady();
     });
-    eventBus.on('updatefindcontrolstate', (e: any) => {
-      handlers.onFindState(this.toFindState(e));
+    eventBus.on('updatefindcontrolstate', (e) => {
+      handlers.onFindState(this.toFindState(e as HellPdfFindEvent));
     });
-    eventBus.on('updatefindmatchescount', (e: any) => {
+    eventBus.on('updatefindmatchescount', (e) => {
+      const event = e as HellPdfFindEvent;
       handlers.onFindState({
-        current: e.matchesCount?.current ?? 0,
-        total: e.matchesCount?.total ?? 0,
+        current: hellPdfNumber(event.matchesCount?.current),
+        total: hellPdfNumber(event.matchesCount?.total),
       });
     });
   }
 
-  private toFindState(event: {
-    state: number;
-    matchesCount?: { current?: number; total?: number };
-  }) {
+  private toFindState(event: HellPdfFindEvent) {
     const state = event.matchesCount
       ? {
-          current: event.matchesCount.current ?? 0,
-          total: event.matchesCount.total ?? 0,
+          current: hellPdfNumber(event.matchesCount.current),
+          total: hellPdfNumber(event.matchesCount.total),
         }
       : {};
-    const FindState = (this.options.findController?.constructor as any)?.FindState ?? {
-      FOUND: 0,
-      NOT_FOUND: 1,
-      WRAPPED: 2,
-      PENDING: 3,
-    };
+    const findState = HELL_PDF_FIND_STATE;
 
     switch (event.state) {
-      case FindState.FOUND:
+      case findState.FOUND:
         return { ...state, status: 'found' as const };
-      case FindState.NOT_FOUND:
+      case findState.NOT_FOUND:
         return { ...state, status: 'not-found' as const };
-      case FindState.WRAPPED:
+      case findState.WRAPPED:
         return { ...state, status: 'wrapped' as const };
-      case FindState.PENDING:
+      case findState.PENDING:
         return { ...state, status: 'pending' as const };
       default:
         return state;
     }
   }
+}
+
+function hellPdfNumber(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : 0;
 }
 
 class HellPdfIframePrintSession implements HellPdfPrintSession {

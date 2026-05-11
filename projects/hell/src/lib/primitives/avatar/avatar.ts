@@ -1,4 +1,4 @@
-import { Component, booleanAttribute, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { NgpAvatar, NgpAvatarFallback, NgpAvatarImage } from 'ng-primitives/avatar';
 import { HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';

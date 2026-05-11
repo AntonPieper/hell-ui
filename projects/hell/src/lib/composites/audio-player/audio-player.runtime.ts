@@ -1,5 +1,28 @@
 import { computed, signal } from '@angular/core';
 
+interface SpeechRecognitionAlternativeLike {
+  readonly transcript: string;
+}
+
+interface SpeechRecognitionResultLike {
+  readonly isFinal: boolean;
+  readonly 0: SpeechRecognitionAlternativeLike;
+}
+
+interface SpeechRecognitionResultListLike {
+  readonly length: number;
+  [index: number]: SpeechRecognitionResultLike;
+}
+
+interface SpeechRecognitionResultEventLike {
+  readonly resultIndex: number;
+  readonly results: SpeechRecognitionResultListLike;
+}
+
+interface SpeechRecognitionErrorEventLike {
+  readonly error?: string;
+}
+
 interface SpeechRecognitionLike extends EventTarget {
   lang: string;
   continuous: boolean;
@@ -8,8 +31,8 @@ interface SpeechRecognitionLike extends EventTarget {
   start(track?: MediaStreamTrack): void;
   stop(): void;
   abort(): void;
-  onresult: ((e: any) => void) | null;
-  onerror: ((e: any) => void) | null;
+  onresult: ((e: SpeechRecognitionResultEventLike) => void) | null;
+  onerror: ((e: SpeechRecognitionErrorEventLike) => void) | null;
   onend: (() => void) | null;
 }
 
@@ -78,7 +101,8 @@ export function hellAudioSpeechSupported(): boolean {
   return (
     typeof window !== 'undefined' &&
     getSpeechRecognition() !== null &&
-    typeof (HTMLMediaElement.prototype as any).captureStream === 'function'
+    typeof (HTMLMediaElement.prototype as HTMLMediaElement & { captureStream?: unknown })
+      .captureStream === 'function'
   );
 }
 
@@ -219,7 +243,7 @@ export class HellAudioRuntime {
     rec.interimResults = true;
     rec.maxAlternatives = 1;
 
-    rec.onresult = (e: any) => {
+    rec.onresult = (e) => {
       let finalAdd = '';
       let interim = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
@@ -230,7 +254,7 @@ export class HellAudioRuntime {
       if (finalAdd) this.transcript.update((t) => (t ? t + ' ' : '') + finalAdd.trim());
       this.interim.set(interim.trim());
     };
-    rec.onerror = (e: any) => {
+    rec.onerror = (e) => {
       const code = e?.error;
       if (code && code !== 'no-speech' && code !== 'aborted') {
         this.error.set(`Speech error: ${code}`);
