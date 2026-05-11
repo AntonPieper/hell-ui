@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidFolderOpen, faSolidGear, faSolidHouse } from '@ng-icons/font-awesome/solid';
-import { HELL_BREADCRUMBS_DIRECTIVES, HELL_MENU_DIRECTIVES } from 'hell';
+import { HELL_BREADCRUMBS_DIRECTIVES, HELL_MENU_DIRECTIVES } from 'hell/primitives';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { BreadcrumbsCustomSeparatorExample } from './examples/custom-separator.example';
 import breadcrumbsCustomSeparatorExampleCodeRaw from './examples/custom-separator.example.ts?raw' with {

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HellButton, HellFlyout, HellFlyoutTrigger, HellInput } from 'hell';
+import { HellButton, HellFlyout, HellFlyoutTrigger, HellInput } from 'hell/primitives';
 
 @Component({
   selector: 'app-flyout-example-boundary-keeps-siblings-interactive-example',

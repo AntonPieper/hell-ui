@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { HellButton, HELL_CARD_DIRECTIVES, HellTag } from 'hell';
+import { HELL_CARD_DIRECTIVES, HellButton, HellTag } from 'hell/primitives';
 
 @Component({
   selector: 'app-themed-panel-demo',

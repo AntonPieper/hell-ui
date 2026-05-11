@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_CARD_DIRECTIVES, HellSeparator } from 'hell';
+import { HELL_CARD_DIRECTIVES, HellSeparator } from 'hell/primitives';
 
 @Component({
   selector: 'app-separator-spacing-options-example',

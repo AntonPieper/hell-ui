@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HellRadioGroup, HellRadio, HellRadioIndicator } from 'hell';
+import { HellRadio, HellRadioGroup, HellRadioIndicator } from 'hell/primitives';
 
 @Component({
   selector: 'app-radio-horizontal-example',

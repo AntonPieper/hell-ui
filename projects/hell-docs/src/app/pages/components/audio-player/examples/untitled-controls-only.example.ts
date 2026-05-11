@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellAudioPlayer } from 'hell';
+import { HellAudioPlayer } from 'hell/composites';
 
 @Component({
   selector: 'app-audio-player-untitled-controls-only-example',

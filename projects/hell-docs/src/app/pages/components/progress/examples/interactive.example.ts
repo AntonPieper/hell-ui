@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HellButton, HellProgress, HellProgressBar } from 'hell';
+import { HellButton, HellProgress, HellProgressBar } from 'hell/primitives';
 
 @Component({
   selector: 'app-progress-interactive-example',

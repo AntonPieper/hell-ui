@@ -69,18 +69,19 @@ import {
   HellNavItemIcon,
   HellNavItemLabel,
   HellNavSection,
-  HellNavSectionToggle,
   HellNavSectionItems,
+  HellNavSectionToggle,
+  HellToaster,
+  HELL_OMNIBAR_DIRECTIVES,
+} from 'hell/composites';
+import {
   HellButton,
   HellIcon,
   HellTag,
-  HellToaster,
   HELL_MENU_DIRECTIVES,
-  HELL_OMNIBAR_DIRECTIVES,
   HELL_SELECT_DIRECTIVES,
-  type HellSearchField,
-  type HellSearchResult,
-} from 'hell';
+} from 'hell/primitives';
+import { type HellSearchField, type HellSearchResult } from 'hell/core';
 import {
   HD_DOCS_KIND_FILTER_LABEL,
   HD_DOCS_KIND_FILTER_OPTIONS,

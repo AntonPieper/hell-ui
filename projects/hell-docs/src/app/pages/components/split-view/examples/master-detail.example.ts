@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HellButton, HELL_SPLIT_VIEW_DIRECTIVES } from 'hell';
+import { HELL_SPLIT_VIEW_DIRECTIVES } from 'hell/composites';
+import { HellButton } from 'hell/primitives';
 
 interface Ticket {
   readonly id: string;

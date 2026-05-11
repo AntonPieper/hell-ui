@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_RESIZABLE_DIRECTIVES } from 'hell';
+import { HELL_RESIZABLE_DIRECTIVES } from 'hell/composites';
 
 @Component({
   selector: 'app-resizable-grip-handle-5-example',

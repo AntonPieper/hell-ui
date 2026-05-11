@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_ACCORDION_DIRECTIVES } from 'hell';
+import { HELL_ACCORDION_DIRECTIVES } from 'hell/primitives';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { AccordionMultipleExample } from './examples/multiple.example';
 import accordionMultipleExampleCodeRaw from './examples/multiple.example.ts?raw' with {

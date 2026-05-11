@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellTag, HellBadge, HellKbd } from 'hell';
+import { HellBadge, HellKbd, HellTag } from 'hell/primitives';
 
 @Component({
   selector: 'app-tag-tag-variants-example',

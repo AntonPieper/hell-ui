@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_SELECT_DIRECTIVES } from 'hell';
+import { HELL_SELECT_DIRECTIVES } from 'hell/primitives';
 
 const PRIORITIES = ['Lowest', 'Low', 'Medium', 'High', 'Highest'];
 
@@ -20,12 +20,14 @@ const PRIORITIES = ['Lowest', 'Low', 'Medium', 'High', 'Highest'];
       } @else {
         <span hellSelectPlaceholder>Select priority…</span>
       }
-      <div *hellSelectPortal hellSelectDropdown>
+    </button>
+    <ng-template hellSelectPortal>
+      <div hellSelectDropdown>
         @for (option of options; track option) {
           <div hellSelectOption [value]="option">{{ option }}</div>
         }
       </div>
-    </button>
+    </ng-template>
   `,
 })
 export class SelectBasicExample {

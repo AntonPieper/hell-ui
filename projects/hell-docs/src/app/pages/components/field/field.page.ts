@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_FIELD_DIRECTIVES } from 'hell';
+import { HELL_FIELD_DIRECTIVES } from 'hell/primitives';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { FieldHorizontalExample } from './examples/horizontal.example';
 import fieldHorizontalExampleCodeRaw from './examples/horizontal.example.ts?raw' with {

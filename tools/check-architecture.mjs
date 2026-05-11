@@ -6,6 +6,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
 
 checkDocsExamples();
+checkDocsRootImportContract();
 checkPackageEntryPoints();
 checkPackageDependencyContract();
 checkStyleEntryPoints();
@@ -183,6 +184,18 @@ function checkDocsExamplePageBinding(example, pageSource, meta) {
     failures.push(
       `Docs Example "${example.title}" must bind ${codeField} and render <${meta.selector}> in exactly one hd-example-tabs block`,
     );
+  }
+}
+
+function checkDocsRootImportContract() {
+  const docsRoot = join(root, 'projects/hell-docs/src/app');
+  const docsFiles = walk(docsRoot).filter((file) => file.endsWith('.ts'));
+
+  for (const file of docsFiles) {
+    const source = readFile(file);
+    if (/from\s+['"]hell['"]/i.test(source)) {
+      failures.push(`Docs app file ${file.slice(root.length + 1)} imports from root hell`);
+    }
   }
 }
 

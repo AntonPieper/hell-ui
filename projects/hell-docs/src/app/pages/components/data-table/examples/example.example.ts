@@ -24,17 +24,9 @@ import {
   faSolidUsers,
   faSolidXmark,
 } from '@ng-icons/font-awesome/solid';
-import {
-  HELL_MENU_DIRECTIVES,
-  HELL_OMNIBAR_DIRECTIVES,
-  HELL_SPLIT_VIEW_DIRECTIVES,
-  HellButton,
-  HellIcon,
-  HellPaginationStrip,
-  HellSkeleton,
-  hellSearchKey,
-  hellSearchWords,
-} from 'hell';
+import { HELL_OMNIBAR_DIRECTIVES, HELL_SPLIT_VIEW_DIRECTIVES } from 'hell/composites';
+import { hellSearchKey, hellSearchWords } from 'hell/core';
+import { HELL_MENU_DIRECTIVES, HellButton, HellIcon, HellPaginationStrip, HellSkeleton } from 'hell/primitives';
 import { HellCodeEditor } from 'hell/features/code-editor';
 import { HELL_TABLE_DIRECTIVES } from 'hell/features/data-table';
 

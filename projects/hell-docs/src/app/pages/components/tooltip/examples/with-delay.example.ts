@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellButton, HellTooltip, HellTooltipTrigger } from 'hell';
+import { HellButton, HellTooltip, HellTooltipTrigger } from 'hell/primitives';
 
 @Component({
   selector: 'app-tooltip-with-delay-example',

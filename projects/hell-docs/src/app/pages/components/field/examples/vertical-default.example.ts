@@ -2,11 +2,11 @@ import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import {
   HELL_FIELD_DIRECTIVES,
   HellCheckbox,
-  HellDateInput,
   HellInput,
   HellNativeSelect,
   HellSwitch,
-} from 'hell';
+} from 'hell/primitives';
+import { HellDateInput } from 'hell/composites';
 
 @Component({
   selector: 'app-field-vertical-default-example',

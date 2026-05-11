@@ -8,7 +8,7 @@ import {
   faSolidTriangleExclamation,
   faSolidXmark,
 } from '@ng-icons/font-awesome/solid';
-import { HellIcon } from 'hell';
+import { HellIcon } from 'hell/primitives';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { IconExampleExample } from './examples/example.example';
 import iconExampleExampleCodeRaw from './examples/example.example.ts?raw' with {

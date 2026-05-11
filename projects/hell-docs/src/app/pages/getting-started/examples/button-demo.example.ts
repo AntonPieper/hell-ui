@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { HellButton } from 'hell';
+import { HellButton } from 'hell/primitives';
 
 @Component({
   selector: 'app-getting-started-button-demo',

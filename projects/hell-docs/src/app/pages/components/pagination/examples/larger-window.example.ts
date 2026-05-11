@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HellPaginationStrip } from 'hell';
+import { HellPaginationStrip } from 'hell/primitives';
 
 @Component({
   selector: 'app-pagination-larger-window-example',

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, Signal, computed, input, signal } f
 import { type Extension } from '@codemirror/state';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCheck, faSolidCopy } from '@ng-icons/font-awesome/solid';
-import { HellButton, HellIcon } from 'hell';
+import { HellButton, HellIcon } from 'hell/primitives';
 import { HellCodeEditor } from 'hell/features/code-editor';
 import { hdCodeExtensions, hdCopyTextToClipboard } from './code-tools';
 

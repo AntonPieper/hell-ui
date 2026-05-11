@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidChevronDown, faSolidUsers } from '@ng-icons/font-awesome/solid';
-import { HELL_AVATAR_GROUP_DIRECTIVES } from 'hell';
+import { HELL_AVATAR_GROUP_DIRECTIVES } from 'hell/composites';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { AvatarGroupBasicExample } from './examples/basic.example';
 import avatarGroupBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {

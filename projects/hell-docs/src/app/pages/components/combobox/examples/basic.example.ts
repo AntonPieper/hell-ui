@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_COMBOBOX_DIRECTIVES } from 'hell';
+import { HELL_COMBOBOX_DIRECTIVES } from 'hell/primitives';
 
 const FRUITS = [
   'Apple',

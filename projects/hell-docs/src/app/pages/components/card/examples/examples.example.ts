@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_CARD_DIRECTIVES, HellButton } from 'hell';
+import { HELL_CARD_DIRECTIVES, HellButton } from 'hell/primitives';
 
 @Component({
   selector: 'app-card-examples-example',

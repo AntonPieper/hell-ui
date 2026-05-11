@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HellToggle, HellToggleGroup, HellToggleGroupItem } from 'hell';
+import { HellToggle, HellToggleGroup, HellToggleGroupItem } from 'hell/primitives';
 
 @Component({
   selector: 'app-toggle-toggle-group-multiple-example',

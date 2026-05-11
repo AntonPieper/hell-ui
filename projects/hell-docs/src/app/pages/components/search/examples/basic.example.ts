@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HellButton, HellInput, HELL_SEARCH_DIRECTIVES } from 'hell';
+import { HELL_SEARCH_DIRECTIVES, HellButton, HellInput } from 'hell/primitives';
 
 const ITEMS = ['Ada Lovelace', 'Grace Hopper', 'Katherine Johnson', 'Margaret Hamilton'];
 

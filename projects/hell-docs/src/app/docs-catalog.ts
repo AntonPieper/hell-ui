@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { hellSearchKey } from 'hell';
+import { hellSearchKey } from 'hell/core';
 
 export interface DocsSearchSeed {
   readonly title: string;

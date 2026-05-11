@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellAvatar } from 'hell';
+import { HellAvatar } from 'hell/primitives';
 
 @Component({
   selector: 'app-avatar-sizes-example',

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellButton, HellPopover, HellPopoverTrigger } from 'hell';
+import { HellButton, HellPopover, HellPopoverTrigger } from 'hell/primitives';
 
 @Component({
   selector: 'app-popover-example-example',

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_DIALOG_DIRECTIVES } from 'hell';
+import { HELL_DIALOG_DIRECTIVES } from 'hell/primitives';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { DialogExampleExample } from './examples/example.example';
 import dialogExampleExampleCodeRaw from './examples/example.example.ts?raw' with {

@@ -9,7 +9,7 @@ import {
   faSolidUpload,
   faSolidXmark,
 } from '@ng-icons/font-awesome/solid';
-import { HellButton, HellIcon } from 'hell';
+import { HellButton, HellIcon } from 'hell/primitives';
 
 const HD_BUTTON_PAGE_ICONS = {
   faSolidChevronDown,
