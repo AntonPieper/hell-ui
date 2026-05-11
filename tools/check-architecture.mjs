@@ -16,6 +16,7 @@ checkComponentContract();
 checkLabelContract();
 checkCodeEditorRuntimeContract();
 checkExperimentalFeatureContract();
+checkFormsContract();
 checkNativeButtonSelectorContract();
 checkInteractiveTriggerSelectorContract();
 checkTableSortButtonContract();
@@ -626,6 +627,29 @@ function checkExperimentalFeatureContract() {
   );
   if (!/PDF viewer is experimental/.test(pdfDocs)) {
     failures.push('PDF Viewer docs must disclose experimental status');
+  }
+}
+
+function checkFormsContract() {
+  const cvaModules = [
+    ['projects/hell/src/lib/primitives/checkbox/checkbox.ts', 'HellCheckbox'],
+    ['projects/hell/src/lib/primitives/switch/switch.ts', 'HellSwitch'],
+    ['projects/hell/src/lib/primitives/radio/radio.ts', 'HellRadioGroup'],
+    ['projects/hell/src/lib/primitives/select/select.ts', 'HellSelect'],
+    ['projects/hell/src/lib/primitives/combobox/combobox.ts', 'HellCombobox'],
+    ['projects/hell/src/lib/primitives/slider/slider.ts', 'HellSlider'],
+    ['projects/hell/src/lib/primitives/toggle/toggle.ts', 'HellToggleGroup'],
+    ['projects/hell/src/lib/composites/date-input/date-input.ts', 'HellDateInput'],
+    ['projects/hell/src/lib/composites/time-input/time-input.ts', 'HellTimeInput'],
+    ['projects/hell/src/lib/features/code-editor/code-editor.ts', 'HellCodeEditor'],
+  ];
+
+  for (const [file, className] of cvaModules) {
+    const source = readFile(join(root, file));
+    const classDecl = new RegExp(`class\\s+${className}\\b[^{]*implements[^{]*ControlValueAccessor`).test(source);
+    if (!classDecl || !source.includes('NG_VALUE_ACCESSOR')) {
+      failures.push(`${file} ${className} must implement ControlValueAccessor`);
+    }
   }
 }
 
