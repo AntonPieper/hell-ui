@@ -11,6 +11,12 @@ import {
 } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 
+const HELL_CODE_EDITOR_SVG_NS = 'http://www.w3.org/2000/svg';
+const HELL_CODE_EDITOR_FOLD_PATH =
+  'M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z';
+const HELL_CODE_EDITOR_UNFOLD_PATH =
+  'M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z';
+
 /** Construction inputs for the CodeMirror runtime boundary. */
 export interface HellCodeEditorRuntimeOptions {
   readonly host: HTMLElement;
@@ -33,6 +39,19 @@ export interface HellCodeEditorRuntimePort {
   destroy(): void;
 }
 
+function hellCodeEditorFoldMarkerIcon(open: boolean, ownerDocument: Document): SVGSVGElement {
+  const svg = ownerDocument.createElementNS(HELL_CODE_EDITOR_SVG_NS, 'svg');
+  svg.setAttribute('viewBox', open ? '0 0 512 512' : '0 0 320 512');
+  svg.setAttribute('fill', 'currentColor');
+  svg.setAttribute('width', '8');
+  svg.setAttribute('height', '8');
+
+  const path = ownerDocument.createElementNS(HELL_CODE_EDITOR_SVG_NS, 'path');
+  path.setAttribute('d', open ? HELL_CODE_EDITOR_FOLD_PATH : HELL_CODE_EDITOR_UNFOLD_PATH);
+  svg.append(path);
+  return svg;
+}
+
 /**
  * Base CodeMirror setup used by hell-code-editor. Language support is
  * intentionally excluded: pass Angular, JS, JSON, or any other CodeMirror
@@ -49,9 +68,7 @@ export const hellCodeEditorSetup: Extension = [
       el.style.justifyContent = 'center';
       el.style.width = '100%';
       el.style.height = '100%';
-      el.innerHTML = open
-        ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" width="8" height="8"><path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>'
-        : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" fill="currentColor" width="8" height="8"><path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></svg>';
+      el.append(hellCodeEditorFoldMarkerIcon(open, el.ownerDocument));
       return el;
     },
   }),

@@ -14,6 +14,7 @@ checkAppShellBreakpointContract();
 checkBehaviorSentinelContract();
 checkComponentContract();
 checkLabelContract();
+checkCodeEditorRuntimeContract();
 checkNativeButtonSelectorContract();
 checkInteractiveTriggerSelectorContract();
 checkTableSortButtonContract();
@@ -559,6 +560,20 @@ function decoratedClassModules(source) {
     classSource: match[0],
     moduleSource: source.slice(moduleStarts[index], moduleStarts[index + 1] ?? source.length),
   }));
+}
+
+function checkCodeEditorRuntimeContract() {
+  const source = readFile(
+    join(root, 'projects/hell/src/lib/features/code-editor/code-editor.runtime.ts'),
+  );
+
+  if (source.includes('innerHTML')) {
+    failures.push('Code Editor Runtime must build fold gutter markers without innerHTML');
+  }
+
+  if (!source.includes('createElementNS')) {
+    failures.push('Code Editor Runtime must create SVG fold markers through DOM APIs');
+  }
 }
 
 function checkNativeButtonSelectorContract() {
