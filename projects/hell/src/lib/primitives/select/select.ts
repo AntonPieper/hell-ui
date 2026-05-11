@@ -1,4 +1,6 @@
-import { Directive } from '@angular/core';
+import { DestroyRef, Directive, forwardRef, inject } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
 import { HellStyleable } from '../../core/styleable';
 import { hellRegisterFloatingHost } from '../../core/floating-scope';
 import {
@@ -6,6 +8,7 @@ import {
   NgpSelectDropdown,
   NgpSelectOption,
   NgpSelectPortal,
+  injectSelectState,
 } from 'ng-primitives/select';
 
 /** Rich, headless select. Trigger element is the host of `[hellSelect]`;
@@ -31,11 +34,52 @@ import {
       outputs: ['ngpSelectValueChange:valueChange', 'ngpSelectOpenChange:openChange'],
     },
   ],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => HellSelect),
+      multi: true,
+    },
+  ],
   host: {
     '[class.hell-select]': '!unstyled()',
+    '(blur)': 'markControlTouched()',
   },
 })
-export class HellSelect extends HellStyleable {}
+export class HellSelect<T = unknown> extends HellStyleable implements ControlValueAccessor {
+  private readonly select = inject(NgpSelect);
+  private readonly selectState = injectSelectState<NgpSelect>();
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly cva = new HellControlValueAccessorBridge<T>();
+
+  constructor() {
+    super();
+    const valueSub = this.select.valueChange.subscribe((value) => {
+      this.cva.emitValue(value as T);
+    });
+    this.destroyRef.onDestroy(() => valueSub.unsubscribe());
+  }
+
+  writeValue(value: T): void {
+    this.selectState().value.set(value);
+  }
+
+  registerOnChange(fn: (value: T) => void): void {
+    this.cva.registerOnChange(fn);
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.cva.registerOnTouched(fn);
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.selectState().disabled.set(isDisabled);
+  }
+
+  protected markControlTouched(): void {
+    this.cva.markTouched();
+  }
+}
 
 @Directive({
   selector: '[hellSelectValue]',
