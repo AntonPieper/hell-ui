@@ -1,15 +1,15 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
-async function expectNoSeriousA11yIssues(page: Page, include: string) {
-  const results = await new AxeBuilder({ page })
-    .include(include)
-    .disableRules([
-      // Docs examples intentionally show flexible composition patterns where
-      // labels may be projected through Hell field primitives.
-      'label',
-    ])
-    .analyze();
+async function expectNoSeriousA11yIssues(
+  page: Page,
+  include: string,
+  disabledRules: string[] = [],
+) {
+  const builder = new AxeBuilder({ page }).include(include);
+  if (disabledRules.length) builder.disableRules(disabledRules);
+
+  const results = await builder.analyze();
 
   const serious = results.violations.filter((violation) =>
     ['critical', 'serious'].includes(violation.impact ?? ''),
@@ -20,17 +20,27 @@ async function expectNoSeriousA11yIssues(page: Page, include: string) {
 test.describe('Hell UI browser behavior', () => {
   test('dialog opens, traps focus, closes with Escape, and passes axe smoke', async ({ page }) => {
     await page.goto('/components/dialog');
-    await page.getByRole('button', { name: 'Publish article' }).first().click();
+    const trigger = page.getByRole('button', { name: 'Publish article' }).first();
+    await trigger.click();
 
     const dialog = page.getByRole('dialog', { name: 'Publish this article?' });
+    const cancel = dialog.getByRole('button', { name: 'Cancel' });
+    const publish = dialog.getByRole('button', { name: 'Publish' });
     await expect(dialog).toBeVisible();
     await expect(
       dialog.getByText('Once published, the article will be visible to everyone.', { exact: true }),
     ).toBeVisible();
     await expectNoSeriousA11yIssues(page, '[role="dialog"]');
 
+    await publish.focus();
+    await page.keyboard.press('Tab');
+    await expect(cancel).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(publish).toBeFocused();
+
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden();
+    await expect(trigger).toBeFocused();
   });
 
   test('toast announces through a live notification region', async ({ page }) => {
