@@ -31,6 +31,11 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         supports <code>SpeechRecognition</code> + <code>captureStream()</code> — an unobtrusive live
         captions strip.
       </p>
+      <p>
+        Live captions are experimental browser sugar. They depend on limited Web Speech and media
+        capture APIs, are disabled by default, and are not a replacement for provided captions,
+        transcripts, or server-generated accessibility content.
+      </p>
 
       <h2>With title and date</h2>
       <hd-example-tabs [code]="audioPlayerWithTitleAndDateExampleCode">
@@ -66,8 +71,8 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         <li><code>downloadName</code>: filename for the download link</li>
         <li><code>allowDownload</code>: show / hide download button (default <code>true</code>)</li>
         <li>
-          <code>allowLiveCaptions</code>: show / hide the Chromium-only captions feature (default
-          <code>true</code>)
+          <code>allowLiveCaptions</code>: opt into the experimental Chromium-only captions feature
+          (default <code>false</code>)
         </li>
         <li>
           <code>lang</code>: BCP-47 hint for <code>SpeechRecognition</code>. Defaults to
@@ -103,14 +108,15 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         <li>
           Provide a clear <code>title</code> and <code>date</code> for recorded calls or messages.
         </li>
-        <li>Use <code>lang</code> and captions when transcript language matters.</li>
-        <li>Set <code>[allowLiveCaptions]="false"</code> when Web Speech support risk outweighs value.</li>
+        <li>Use provided captions or transcripts when accessibility must be reliable.</li>
+        <li>Set <code>[allowLiveCaptions]="true"</code> only for best-effort browser live captions.</li>
         <li>Disable downloads when audio is sensitive.</li>
       </ul>
 
       <h2>Don't</h2>
       <ul>
         <li>Don't rely on waveform or timing alone to communicate state.</li>
+        <li>Don't treat live captions as production-grade accessibility content.</li>
         <li>Don't expose download actions for private recordings.</li>
       </ul>
     </article>

@@ -53,9 +53,12 @@ function parseIsoDateOnly(value: string): Date | null {
 
 /**
  * Compact audio player with seek bar, play/pause, mute, volume slider,
- * download button and an opt-in/out inline live-captions strip backed by the
- * Web Speech API (Chromium-only). The captions toggle is hidden when disabled
- * or when the browser lacks `SpeechRecognition` + `HTMLMediaElement.captureStream()`.
+ * download button and an opt-in inline live-captions strip backed by the
+ * Web Speech API (Chromium-only). The captions toggle is hidden unless enabled
+ * and the browser exposes `SpeechRecognition` + `HTMLMediaElement.captureStream()`.
+ *
+ * @experimental Live captions are best-effort browser sugar, not a replacement
+ * for provided captions or transcripts.
  */
 @Component({
   selector: 'hell-audio-player',
@@ -256,8 +259,8 @@ export class HellAudioPlayer extends HellStyleable {
   readonly src = input.required<string>();
   readonly downloadName = input<string | null>(null);
   readonly allowDownload = input(true, { transform: booleanAttribute });
-  /** Show / hide the Chromium-only live captions feature. */
-  readonly allowLiveCaptions = input(true, { transform: booleanAttribute });
+  /** Show / hide the experimental Chromium-only live captions feature. */
+  readonly allowLiveCaptions = input(false, { transform: booleanAttribute });
   /** Optional display title shown above the controls. Hidden when `null`. */
   readonly title = input<string | null>(null);
   /** Display a date/timestamp next to the title. Accepts a string or Date. */

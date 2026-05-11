@@ -968,7 +968,7 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
             title: 'Audio Player: Live Captions',
             detail: 'components/audio-player/examples/live-captions.example.ts',
             terms:
-              'audio-player live-captions components/audio-player/examples/live-captions.example components/audio-player hell-audio-player',
+              'audio-player live-captions components/audio-player/examples/live-captions.example components/audio-player hell-audio-player SpeechRecognition captureStream experimental best-effort',
           },
           {
             title: 'Audio Player: Untitled Controls Only',
@@ -1302,13 +1302,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
             title: 'Pdf Viewer: Lazy Loading',
             detail: 'components/pdf-viewer/examples/lazy-loading.example.ts',
             terms:
-              'pdf-viewer lazy-loading components/pdf-viewer/examples/lazy-loading.example components/pdf-viewer hell-pdf-viewer pdfjs lazy',
+              'pdf-viewer lazy-loading components/pdf-viewer/examples/lazy-loading.example components/pdf-viewer hell-pdf-viewer pdfjs lazy experimental beta',
           },
           {
             title: 'Pdf Viewer: Live Demo',
             detail: 'components/pdf-viewer/examples/live-demo.example.ts',
             terms:
-              'pdf-viewer live-demo components/pdf-viewer/examples/live-demo.example components/pdf-viewer hell-pdf-viewer pdfjs',
+              'pdf-viewer live-demo components/pdf-viewer/examples/live-demo.example components/pdf-viewer hell-pdf-viewer pdfjs experimental beta',
           },
         ],
         loadComponent: () =>

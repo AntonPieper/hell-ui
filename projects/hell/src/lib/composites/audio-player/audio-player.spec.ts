@@ -10,6 +10,7 @@ describe('HellAudioPlayer', () => {
 
     const fixture = TestBed.createComponent(HellAudioPlayer);
     fixture.componentRef.setInput('src', '/test-audio.mp3');
+    fixture.componentRef.setInput('allowLiveCaptions', true);
     fixture.detectChanges();
 
     const component = fixture.componentInstance as HellAudioPlayer & {
@@ -47,6 +48,20 @@ describe('HellAudioPlayer', () => {
     expect(component.playing()).toBe(false);
 
     playSpy.mockRestore();
+  });
+
+  it('keeps the experimental captions toggle opt-in', async () => {
+    await TestBed.configureTestingModule({ imports: [HellAudioPlayer] }).compileComponents();
+    const fixture = TestBed.createComponent(HellAudioPlayer);
+    fixture.componentRef.setInput('src', '/test-audio.mp3');
+
+    const component = fixture.componentInstance as HellAudioPlayer & {
+      speechSupported: { set(value: boolean): void };
+    };
+    component.speechSupported.set(true);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-slot="cc-toggle"]')).toBeNull();
   });
 
   it('hides the captions toggle when live captions are disabled', async () => {

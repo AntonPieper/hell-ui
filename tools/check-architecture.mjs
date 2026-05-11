@@ -15,6 +15,7 @@ checkBehaviorSentinelContract();
 checkComponentContract();
 checkLabelContract();
 checkCodeEditorRuntimeContract();
+checkExperimentalFeatureContract();
 checkNativeButtonSelectorContract();
 checkInteractiveTriggerSelectorContract();
 checkTableSortButtonContract();
@@ -573,6 +574,35 @@ function checkCodeEditorRuntimeContract() {
 
   if (!source.includes('createElementNS')) {
     failures.push('Code Editor Runtime must create SVG fold markers through DOM APIs');
+  }
+}
+
+function checkExperimentalFeatureContract() {
+  const audioSource = readFile(join(root, 'projects/hell/src/lib/composites/audio-player/audio-player.ts'));
+  if (!/allowLiveCaptions\s*=\s*input\(false/.test(audioSource)) {
+    failures.push('Audio live captions must remain explicitly opt-in while experimental');
+  }
+  if (!audioSource.includes('@experimental Live captions')) {
+    failures.push('HellAudioPlayer must mark browser live captions experimental in its public JSDoc');
+  }
+
+  const audioDocs = readFile(
+    join(root, 'projects/hell-docs/src/app/pages/components/audio-player/audio-player.page.ts'),
+  );
+  if (!/Live captions are experimental/.test(audioDocs) || !/default <code>false<\/code>/.test(audioDocs)) {
+    failures.push('Audio Player docs must disclose experimental opt-in live captions');
+  }
+
+  const pdfSource = readFile(join(root, 'projects/hell/src/lib/features/pdf-viewer/pdf-viewer.ts'));
+  if (!pdfSource.includes('@experimental This feature wraps pdf.js')) {
+    failures.push('HellPdfViewer must mark the pdf.js wrapper experimental in its public JSDoc');
+  }
+
+  const pdfDocs = readFile(
+    join(root, 'projects/hell-docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts'),
+  );
+  if (!/PDF viewer is experimental/.test(pdfDocs)) {
+    failures.push('PDF Viewer docs must disclose experimental status');
   }
 }
 

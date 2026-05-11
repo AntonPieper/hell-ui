@@ -23,6 +23,11 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         heavy &mdash; load it lazily.
       </p>
       <p>
+        The PDF viewer is experimental. It wraps pdf.js viewer internals for business-app document
+        preview, not a full PDF application contract. Keep it behind a feature route, handle
+        <code>error</code>, and offer a download/open-in-new-tab fallback for critical workflows.
+      </p>
+      <p>
         Install <code>pdfjs-dist</code> plus the light UI peers
         (<code>ng-primitives @ng-icons/core @ng-icons/font-awesome tailwindcss</code>). The docs page loads the pdf.js viewer stylesheet on demand, so lazy routes keep it out of
         the docs app's initial bundle.
@@ -65,6 +70,7 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
       <ul>
         <li>Don't bundle PDF viewer into the initial shell.</li>
         <li>Don't assume every PDF allows fast text search or thumbnails.</li>
+        <li>Don't treat this experimental wrapper as a complete PDF application.</li>
       </ul>
     </article>
   `,
