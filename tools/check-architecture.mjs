@@ -201,6 +201,19 @@ function checkPackageEntryPoints() {
     );
   }
 
+  const internalCoreExports = new Set(['floating-scope', 'resize-behavior']);
+  for (const [api, source] of [
+    ['projects/hell/src/public-api.ts', rootApi],
+    ...secondaryApis.map((api) => [api, readFile(join(root, api))]),
+  ]) {
+    for (const exportPath of exportPaths(source)) {
+      const module = basename(exportPath);
+      if (internalCoreExports.has(module)) {
+        failures.push(`Package Entry Point ${api} exports internal core module ${module}`);
+      }
+    }
+  }
+
   for (const api of secondaryApis) {
     for (const exportPath of exportPaths(readFile(join(root, api)))) {
       const rootExportPath = exportPath.replace('./', './lib/');
