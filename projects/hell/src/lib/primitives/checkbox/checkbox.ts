@@ -1,40 +1,45 @@
-import { Component, ChangeDetectionStrategy, booleanAttribute, input } from '@angular/core';
-import { NgpCheckbox, injectCheckboxState } from 'ng-primitives/checkbox';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  booleanAttribute,
+  computed,
+  forwardRef,
+  input,
+  output,
+  signal,
+} from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ngpCheckbox } from 'ng-primitives/checkbox';
+import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
 import { HellStyleable } from '../../core/styleable';
 
 /**
- * Styled checkbox built on `NgpCheckbox`. Forwards `checked`, `indeterminate`,
- * `disabled` and `required` to the host directive and emits `checkedChange`.
+ * Styled checkbox built on `ngpCheckbox`. Forwards `checked`, `indeterminate`,
+ * `disabled` and `required` through Hell-owned inputs and emits
+ * `checkedChange` / `indeterminateChange`.
  *
  * The host is a real `<button>` — a natively labelable element — so wrapping
  * it in a `<label>` (directly, or via any `<label for>` mechanism such as
  * `hellField`) makes label clicks toggle the checkbox with zero wiring on
- * our side.
+ * our side. It also implements `ControlValueAccessor` for Angular Forms.
  */
 @Component({
   selector: 'button[hellCheckbox]',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: [
+  providers: [
     {
-      directive: NgpCheckbox,
-      inputs: [
-        'ngpCheckboxChecked:checked',
-        'ngpCheckboxIndeterminate:indeterminate',
-        'ngpCheckboxDisabled:disabled',
-        'ngpCheckboxRequired:required',
-      ],
-      outputs: [
-        'ngpCheckboxCheckedChange:checkedChange',
-        'ngpCheckboxIndeterminateChange:indeterminateChange',
-      ],
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => HellCheckbox),
+      multi: true,
     },
   ],
   host: {
     type: 'button',
     '[class.hell-checkbox]': '!unstyled()',
+    '(blur)': 'markControlTouched()',
   },
   template: `
-    @if (state().indeterminate()) {
+    @if (state.indeterminate()) {
       <svg
         viewBox="0 0 16 16"
         fill="none"
@@ -44,7 +49,7 @@ import { HellStyleable } from '../../core/styleable';
       >
         <path d="M3 8h10" />
       </svg>
-    } @else if (state().checked()) {
+    } @else if (state.checked()) {
       <svg
         viewBox="0 0 16 16"
         fill="none"
@@ -57,6 +62,55 @@ import { HellStyleable } from '../../core/styleable';
     }
   `,
 })
-export class HellCheckbox extends HellStyleable {
-  protected readonly state = injectCheckboxState();
+export class HellCheckbox extends HellStyleable implements ControlValueAccessor {
+  readonly checked = input(false, { transform: booleanAttribute });
+  readonly indeterminate = input(false, { transform: booleanAttribute });
+  readonly disabled = input(false, { transform: booleanAttribute });
+  readonly required = input(false, { transform: booleanAttribute });
+
+  readonly checkedChange = output<boolean>();
+  readonly indeterminateChange = output<boolean>();
+
+  private readonly controlMode = signal(false);
+  private readonly controlChecked = signal(false);
+  private readonly controlDisabled = signal(false);
+  private readonly cva = new HellControlValueAccessorBridge<boolean>();
+
+  private readonly effectiveChecked = computed(() =>
+    this.controlMode() ? this.controlChecked() : this.checked(),
+  );
+  private readonly effectiveDisabled = computed(() => this.disabled() || this.controlDisabled());
+
+  protected readonly state = ngpCheckbox({
+    checked: this.effectiveChecked,
+    indeterminate: this.indeterminate,
+    disabled: this.effectiveDisabled,
+    onCheckedChange: (checked) => {
+      if (this.controlMode()) this.controlChecked.set(checked);
+      this.checkedChange.emit(checked);
+      this.cva.emitValue(checked);
+    },
+    onIndeterminateChange: (indeterminate) => this.indeterminateChange.emit(indeterminate),
+  });
+
+  writeValue(value: boolean): void {
+    this.controlMode.set(true);
+    this.controlChecked.set(value === true);
+  }
+
+  registerOnChange(fn: (value: boolean) => void): void {
+    this.cva.registerOnChange(fn);
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.cva.registerOnTouched(fn);
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.controlDisabled.set(isDisabled);
+  }
+
+  protected markControlTouched(): void {
+    this.cva.markTouched();
+  }
 }

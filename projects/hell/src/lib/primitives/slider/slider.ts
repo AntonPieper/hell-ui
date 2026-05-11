@@ -4,13 +4,25 @@ import {
   DestroyRef,
   ElementRef,
   booleanAttribute,
+  computed,
+  forwardRef,
   inject,
   input,
+  numberAttribute,
+  output,
   signal,
   viewChild,
 } from '@angular/core';
-import { NgpSlider, NgpSliderRange, NgpSliderThumb, NgpSliderTrack } from 'ng-primitives/slider';
-import { HellSize } from '../../core/types';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+  NgpSliderRange,
+  NgpSliderThumb,
+  NgpSliderTrack,
+  ngpSlider,
+  provideSliderState,
+} from 'ng-primitives/slider';
+import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
+import { HellSize, type HellOrientation } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
 
 /**
@@ -24,18 +36,12 @@ import { HellStyleable } from '../../core/styleable';
   selector: 'hell-slider',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgpSliderTrack, NgpSliderRange, NgpSliderThumb],
-  hostDirectives: [
+  providers: [
+    provideSliderState(),
     {
-      directive: NgpSlider,
-      inputs: [
-        'ngpSliderValue:value',
-        'ngpSliderMin:min',
-        'ngpSliderMax:max',
-        'ngpSliderStep:step',
-        'ngpSliderDisabled:disabled',
-        'ngpSliderOrientation:orientation',
-      ],
-      outputs: ['ngpSliderValueChange:valueChange'],
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => HellSlider),
+      multi: true,
     },
   ],
   host: {
@@ -45,6 +51,7 @@ import { HellStyleable } from '../../core/styleable';
     '[attr.data-grow]': 'grow() ? "true" : null',
     '[attr.data-active-drag]': 'activeDrag() ? "true" : null',
     '(pointerdown)': 'markActiveDrag($event)',
+    '(focusout)': 'markControlTouched()',
   },
   template: `
     <div ngpSliderTrack class="hell-slider-track" (pointerdown)="continueAsDrag($event)">
@@ -53,7 +60,13 @@ import { HellStyleable } from '../../core/styleable';
     <div #thumb ngpSliderThumb class="hell-slider-thumb" [attr.aria-label]="ariaLabel()"></div>
   `,
 })
-export class HellSlider extends HellStyleable {
+export class HellSlider extends HellStyleable implements ControlValueAccessor {
+  readonly value = input(0, { transform: numberAttribute });
+  readonly min = input(0, { transform: numberAttribute });
+  readonly max = input(100, { transform: numberAttribute });
+  readonly step = input(1, { transform: numberAttribute });
+  readonly disabled = input(false, { transform: booleanAttribute });
+  readonly orientation = input<HellOrientation>('horizontal');
   readonly size = input<HellSize>('md');
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
   /**
@@ -68,15 +81,57 @@ export class HellSlider extends HellStyleable {
    */
   readonly grow = input(false, { transform: booleanAttribute });
 
+  readonly valueChange = output<number>();
+
   protected readonly activeDrag = signal(false);
 
   private readonly thumbRef = viewChild.required<ElementRef<HTMLElement>>('thumb');
+  private readonly controlMode = signal(false);
+  private readonly controlValue = signal(0);
+  private readonly controlDisabled = signal(false);
+  private readonly cva = new HellControlValueAccessorBridge<number>();
   private readonly destroyRef = inject(DestroyRef);
   private removeActiveDragListeners: (() => void) | null = null;
+
+  private readonly effectiveValue = computed(() =>
+    this.coerceValue(this.controlMode() ? this.controlValue() : this.value()),
+  );
+  private readonly effectiveDisabled = computed(() => this.disabled() || this.controlDisabled());
+
+  protected readonly sliderState = ngpSlider({
+    value: this.effectiveValue,
+    min: this.min,
+    max: this.max,
+    step: this.step,
+    orientation: this.orientation,
+    disabled: this.effectiveDisabled,
+    onValueChange: (value) => {
+      if (this.controlMode()) this.controlValue.set(value);
+      this.valueChange.emit(value);
+      this.cva.emitValue(value);
+    },
+  });
 
   constructor() {
     super();
     this.destroyRef.onDestroy(() => this.removeActiveDragListeners?.());
+  }
+
+  writeValue(value: number): void {
+    this.controlMode.set(true);
+    this.controlValue.set(value);
+  }
+
+  registerOnChange(fn: (value: number) => void): void {
+    this.cva.registerOnChange(fn);
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.cva.registerOnTouched(fn);
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.controlDisabled.set(isDisabled);
   }
 
   /**
@@ -103,6 +158,7 @@ export class HellSlider extends HellStyleable {
   protected markActiveDrag(e: PointerEvent) {
     if (e.button !== 0) return;
     this.activeDrag.set(true);
+    this.markControlTouched();
     this.removeActiveDragListeners?.();
 
     const targetWindow = this.thumbRef().nativeElement.ownerDocument.defaultView ?? window;
@@ -118,5 +174,21 @@ export class HellSlider extends HellStyleable {
       targetWindow.removeEventListener('pointerup', clear);
       targetWindow.removeEventListener('pointercancel', clear);
     };
+  }
+
+  protected markControlTouched(): void {
+    this.cva.markTouched();
+  }
+
+  private coerceValue(value: number): number {
+    const numeric = Number(value);
+    const min = this.min();
+    const max = this.max();
+    const step = this.step();
+    if (!Number.isFinite(numeric)) return min;
+    const clamped = Math.min(max, Math.max(min, numeric));
+    if (!Number.isFinite(step) || step <= 0) return clamped;
+    const stepped = Math.round((clamped - min) / step) * step + min;
+    return Math.min(max, Math.max(min, stepped));
   }
 }
