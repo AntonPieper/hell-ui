@@ -60,16 +60,20 @@ export class HellFlyoutTrigger extends HellNativeInteractiveDisabledGuard {
   readonly panelId = `hell-flyout-${++nextFlyoutId}`;
 
   private readonly _open = signal(false);
+  private readonly _openVersion = signal(0);
   readonly open = this._open.asReadonly();
+  readonly openVersion = this._openVersion.asReadonly();
 
   show(): void {
     if (this.disabled() || this._open()) return;
+    this._openVersion.update((version) => version + 1);
     this._open.set(true);
     this.openChange.emit(true);
   }
 
   hide(): void {
     if (!this._open()) return;
+    this._openVersion.update((version) => version + 1);
     this._open.set(false);
     this.openChange.emit(false);
   }
@@ -126,6 +130,7 @@ export class HellFlyout extends HellStyleable {
         inside: () => [this.trigger().element.nativeElement, this.boundary()],
         scope: this.floatingScope,
         active: () => this.trigger().open(),
+        activeKey: () => this.trigger().openVersion(),
         dismiss: hellDismissOn(
           hellGuardDismiss(hellOutsideClick, () => this.closeOnOutsideInteraction()),
           hellGuardDismiss(hellOutsideFocus, () => this.closeOnOutsideInteraction()),

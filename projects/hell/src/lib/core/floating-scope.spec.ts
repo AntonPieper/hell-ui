@@ -181,6 +181,102 @@ describe('Floating Scope', () => {
     destroy.run();
   });
 
+  it('restores focus to attached enabled focusable targets', () => {
+    const root = document.createElement('div');
+    const outside = document.createElement('button');
+    const target = document.createElement('button');
+    document.body.append(root, outside, target);
+
+    const focusSpy = vi.spyOn(target, 'focus');
+    const destroy = createDestroyRef();
+    let active = true;
+    const controller = new HellFloatingDismissController({
+      root: () => root,
+      active: () => active,
+      dismiss: () => ({ restoreFocus: () => target }),
+      onDismiss: () => {
+        active = false;
+      },
+    });
+    controller.connect(destroy.ref);
+
+    outside.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+
+    expect(focusSpy).toHaveBeenCalledTimes(1);
+
+    focusSpy.mockRestore();
+    destroy.run();
+  });
+
+  it('does not focus restore targets that are detached, disabled, hidden, or non-focusable', () => {
+    const root = document.createElement('div');
+    const outside = document.createElement('button');
+    const detachedTarget = document.createElement('button');
+    const disabledTarget = document.createElement('button');
+    const hiddenTarget = document.createElement('button');
+    const nonFocusableTarget = document.createElement('div');
+    disabledTarget.disabled = true;
+    hiddenTarget.hidden = true;
+    document.body.append(root, outside, detachedTarget, disabledTarget, hiddenTarget, nonFocusableTarget);
+
+    const cases: HTMLElement[] = [detachedTarget, disabledTarget, hiddenTarget, nonFocusableTarget];
+
+    for (const target of cases) {
+      const focusSpy = vi.spyOn(target, 'focus');
+      const destroy = createDestroyRef();
+      const controller = new HellFloatingDismissController({
+        root: () => root,
+        dismiss: () => ({ restoreFocus: () => target }),
+        onDismiss: () => {},
+      });
+      controller.connect(destroy.ref);
+
+      if (target === detachedTarget) document.body.removeChild(target);
+
+      expect(() => {
+        outside.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+      }).not.toThrow();
+      expect(focusSpy).not.toHaveBeenCalled();
+
+      focusSpy.mockRestore();
+      destroy.run();
+    }
+  });
+
+  it('does not process deferred focus exits from a stale blur during quick close/reopen', async () => {
+    const root = document.createElement('div');
+    const focusedChild = document.createElement('button');
+    const outside = document.createElement('button');
+    root.append(focusedChild);
+    document.body.append(root, outside);
+
+    const dismissals: string[] = [];
+    let active = true;
+    let activeKey = 1;
+    const destroy = createDestroyRef();
+    const controller = new HellFloatingDismissController({
+      root: () => root,
+      active: () => active,
+      activeKey: () => activeKey,
+      dismiss: hellOutsideFocus,
+      onDismiss: ({ event }) => dismissals.push(event.type),
+    });
+    controller.connect(destroy.ref);
+
+    const focusout = new FocusEvent('focusout', { bubbles: true, relatedTarget: outside });
+    focusedChild.addEventListener('focusout', (event) => controller.handleFocusExit(event as FocusEvent));
+    focusedChild.dispatchEvent(focusout);
+    active = false;
+    activeKey++;
+    active = true;
+    activeKey++;
+
+    await Promise.resolve();
+    expect(dismissals).toEqual([]);
+
+    destroy.run();
+  });
+
   it('handles deferred focus exits without exposing pointer timing to callers', async () => {
     const root = document.createElement('div');
     const outside = document.createElement('button');

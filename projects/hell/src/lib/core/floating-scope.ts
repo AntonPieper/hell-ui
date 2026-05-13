@@ -216,6 +216,33 @@ function isHtmlElementLike(target: HTMLElement | null | undefined): target is HT
   );
 }
 
+function hellSameNodes(
+  a: readonly (Node | null | undefined)[],
+  b: readonly (Node | null | undefined)[],
+): boolean {
+  return a.length === b.length && a.every((node, index) => node === b[index]);
+}
+
+function isSafeRestoreFocusTarget(target: HTMLElement | null | undefined): target is HTMLElement {
+  if (!target) return false;
+  if (!target.isConnected) return false;
+  if (target.matches(':disabled')) return false;
+  if ((target as HTMLInputElement).disabled) return false;
+  if (target.getAttribute('aria-disabled') === 'true') return false;
+  if (target.hasAttribute('hidden')) return false;
+
+  const style = target.ownerDocument.defaultView?.getComputedStyle(target);
+  if (style && (style.display === 'none' || style.visibility === 'hidden')) return false;
+
+  return isPotentialFocusTarget(target);
+}
+
+function isPotentialFocusTarget(target: HTMLElement): boolean {
+  return target.matches(
+    'a[href], button, input, select, textarea, iframe, object, embed, area[href], [tabindex], [contenteditable]'
+  );
+}
+
 export function hellFindFloatingScopeRoot(
   trigger: HTMLElement,
   selector: string,
@@ -328,6 +355,8 @@ export interface HellFloatingDismissOptions {
   readonly ownerDocument?: () => Document | null | undefined;
   /** Listener gate. Inactive interactions ignore all document events. */
   readonly active?: () => boolean;
+  /** Monotonic identity for open/close cycles; invalidates deferred focus exits. */
+  readonly activeKey?: () => unknown;
   /** Pure matcher composition deciding whether a document event dismisses. */
   readonly dismiss?: HellDismissRule;
   readonly onDismiss?: (event: HellFloatingDismissEvent) => void;
@@ -425,9 +454,22 @@ export class HellFloatingDismissController {
   }
 
   handleFocusExit(event: FocusEvent): void {
+    if (!this.isActive()) return;
     if (this.isInside(event.relatedTarget)) return;
 
+    const focusExitTarget = hellFloatingTargetNode(event.target);
+    const focusExitRoot = this.options.root?.() ?? null;
+    const focusExitInside = this.options.inside?.() ?? [];
+    const focusExitActiveKey = this.options.activeKey?.() ?? null;
+
+    // Ignore stale blur/focus exit callbacks when the interaction is inactive or
+    // has been torn down/reopened around a different logical inside set.
     queueMicrotask(() => {
+      if (!this.isActive()) return;
+      if ((this.options.activeKey?.() ?? null) !== focusExitActiveKey) return;
+      if ((this.options.root?.() ?? null) !== focusExitRoot) return;
+      if (!hellSameNodes(this.options.inside?.() ?? [], focusExitInside)) return;
+      if (focusExitTarget && !this.isInside(focusExitTarget)) return;
       if (this.pointerDownInside) return;
       const activeElement = this.document()?.activeElement ?? null;
       if (this.isInside(activeElement)) return;
@@ -455,9 +497,16 @@ export class HellFloatingDismissController {
 
   private restoreFocus(decision: HellDismissDecision): void {
     if (!decision.restoreFocus) return;
+
     const target =
       typeof decision.restoreFocus === 'function' ? decision.restoreFocus() : decision.restoreFocus;
-    target?.focus();
+    if (!isSafeRestoreFocusTarget(target)) return;
+
+    try {
+      target.focus();
+    } catch {
+      // ignore focus failures for detached/invalid nodes during dismissal races
+    }
   }
 
   private createDismissContext(
@@ -535,6 +584,7 @@ export class HellFloatingInteractionController {
       ownerDocument: () =>
         this.options.ownerDocument?.() ?? this.options.surface()?.ownerDocument ?? null,
       active: this.options.active,
+      activeKey: this.options.activeKey,
       dismiss: this.options.dismiss,
       onDismiss: this.options.onDismiss,
     });

@@ -262,6 +262,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   private readonly globalKeydown = inject(HellGlobalKeydownService);
 
   private readonly _open = signal(false);
+  private readonly openVersion = signal(0);
   protected readonly isOpen = computed(() => !this.disabled() && this._open());
 
   private readonly positionAdapter = new HellOmnibarPositionAdapter({
@@ -302,6 +303,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     registerSurface: () => false,
     ownerDocument: () => this.host.nativeElement.ownerDocument,
     active: () => this.isOpen(),
+    activeKey: () => this.openVersion(),
     dismiss: hellDismissOn(hellOutsidePointer, hellOutsideFocus),
     onDismiss: () => this.close(),
   });
@@ -389,6 +391,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   /** Open the panel. Idempotent. */
   open(): void {
     if (this._open()) return;
+    this.openVersion.update((version) => version + 1);
     this._open.set(true);
     this.openChange.emit(true);
   }
@@ -396,6 +399,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   /** Close the panel. Idempotent. */
   close(): void {
     if (!this._open()) return;
+    this.openVersion.update((version) => version + 1);
     this._open.set(false);
     this.openChange.emit(false);
   }
