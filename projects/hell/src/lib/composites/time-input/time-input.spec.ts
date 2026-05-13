@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { HellTimeInput, provideHellTimeInputAdapter, type HellTimeValue } from './time-input';
@@ -60,6 +61,10 @@ describe('HellTimeInput', () => {
     await TestBed.configureTestingModule({
       imports: [TimeInputHost, TimeInputFormHost, TimeInputCustomAdapterHost],
     }).compileComponents();
+  });
+
+  afterEach(() => {
+    document.body.replaceChildren();
   });
 
   it('parses common 12-hour text and emits structured time values', () => {
@@ -150,6 +155,41 @@ describe('HellTimeInput', () => {
     const trigger = triggerButton(fixture.nativeElement);
     expect(trigger.tabIndex).toBe(0);
     expect(trigger.getAttribute('aria-label')).toBe('Choose time for Start time');
+  });
+
+  it('uses a single tab stop per picker section', () => {
+    const fixture = TestBed.createComponent(TimeInputHost);
+    fixture.detectChanges();
+
+    const picker = timeInputInstance(fixture);
+
+    expect(tabStopCount(picker, 'hour', 24)).toBe(1);
+    expect(tabStopCount(picker, 'minute', 12)).toBe(1);
+  });
+
+  it('supports Arrow/Home/End navigation in picker sections', () => {
+    const fixture = TestBed.createComponent(TimeInputHost);
+    fixture.detectChanges();
+
+    const picker = timeInputInstance(fixture);
+
+    picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'ArrowRight' }), 'hour', 0);
+    expect(tabStopIndex(picker, 'hour', 24)).toBe(1);
+
+    picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'ArrowLeft' }), 'hour', 1);
+    expect(tabStopIndex(picker, 'hour', 24)).toBe(0);
+
+    picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'End' }), 'hour', 0);
+    expect(tabStopIndex(picker, 'hour', 24)).toBe(23);
+
+    picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'Home' }), 'hour', 23);
+    expect(tabStopIndex(picker, 'hour', 24)).toBe(0);
+
+    picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'ArrowDown' }), 'minute', 0);
+    expect(tabStopIndex(picker, 'minute', 12)).toBe(4);
+
+    picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'ArrowUp' }), 'minute', 4);
+    expect(tabStopIndex(picker, 'minute', 12)).toBe(0);
   });
 
 
@@ -252,6 +292,33 @@ function textInput(root: HTMLElement): HTMLInputElement {
   const input = root.querySelector('input');
   if (!(input instanceof HTMLInputElement)) throw new Error('Expected time input.');
   return input;
+}
+
+function timeInputInstance(fixture: any): { onPickerCellKeydown: (event: KeyboardEvent, unit: HellTimeUnit, index: number) => void; pickerCellTabIndex: (unit: HellTimeUnit, index: number) => string } {
+  const host = fixture.debugElement.query(By.directive(HellTimeInput));
+  if (!host) throw new Error('Expected HellTimeInput instance.');
+  return host.componentInstance as {
+    onPickerCellKeydown: (event: KeyboardEvent, unit: HellTimeUnit, index: number) => void;
+    pickerCellTabIndex: (unit: HellTimeUnit, index: number) => string;
+  };
+}
+
+type HellTimeUnit = 'hour' | 'minute' | 'second';
+
+function tabStopCount(picker: { pickerCellTabIndex: (unit: HellTimeUnit, index: number) => string }, unit: HellTimeUnit, count: number): number {
+  return Array.from({ length: count }, (_, index) => index).filter((index) =>
+    picker.pickerCellTabIndex(unit, index) === '0',
+  ).length;
+}
+
+function tabStopIndex(
+  picker: { pickerCellTabIndex: (unit: HellTimeUnit, index: number) => string },
+  unit: HellTimeUnit,
+  count: number,
+): number {
+  return Array.from({ length: count }, (_, index) => index).findIndex(
+    (index) => picker.pickerCellTabIndex(unit, index) === '0',
+  );
 }
 
 function triggerButton(root: HTMLElement): HTMLButtonElement {

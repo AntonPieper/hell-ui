@@ -3,6 +3,7 @@ import {
   Component,
   booleanAttribute,
   computed,
+  effect,
   forwardRef,
   inject,
   InjectionToken,
@@ -41,6 +42,8 @@ const HELL_TIME_INPUT_ICONS = {
 export interface HellTimeInputAdapterContext {
   readonly seconds: boolean;
 }
+
+type HellTimeUnit = 'hour' | 'minute' | 'second';
 
 export type HellTimeInputParseResult = HellTypedValueParseResult<HellTimeValue>;
 
@@ -244,14 +247,17 @@ export function hellSameTimeInputValue(
         <div data-slot="picker-section">
           <div data-slot="picker-section-label">{{ labels.timeInput.hours }}</div>
           <div data-slot="picker-grid" data-unit="hours" role="group" [attr.aria-label]="labels.timeInput.hours">
-            @for (h of hours; track h) {
+            @for (h of hours; track h; let hourIndex = $index) {
               <button
                 hellButton
                 [variant]="h === current().hour ? 'primary' : 'ghost'"
                 size="sm"
                 type="button"
                 data-slot="picker-cell"
+                [attr.tabindex]="pickerCellTabIndex('hour', hourIndex)"
                 [attr.aria-pressed]="h === current().hour ? 'true' : 'false'"
+                (focus)="onPickerCellFocus('hour', hourIndex)"
+                (keydown)="onPickerCellKeydown($event, 'hour', hourIndex)"
                 (click)="setUnit('hour', h)"
               >
                 {{ pad(h) }}
@@ -263,14 +269,17 @@ export function hellSameTimeInputValue(
         <div data-slot="picker-section">
           <div data-slot="picker-section-label">{{ labels.timeInput.minutes }}</div>
           <div data-slot="picker-grid" data-unit="minutes" role="group" [attr.aria-label]="labels.timeInput.minutes">
-            @for (m of minutes; track m) {
+            @for (m of minutes; track m; let minuteIndex = $index) {
               <button
                 hellButton
                 [variant]="m === current().minute ? 'primary' : 'ghost'"
                 size="sm"
                 type="button"
                 data-slot="picker-cell"
+                [attr.tabindex]="pickerCellTabIndex('minute', minuteIndex)"
                 [attr.aria-pressed]="m === current().minute ? 'true' : 'false'"
+                (focus)="onPickerCellFocus('minute', minuteIndex)"
+                (keydown)="onPickerCellKeydown($event, 'minute', minuteIndex)"
                 (click)="setUnit('minute', m)"
               >
                 {{ pad(m) }}
@@ -283,14 +292,17 @@ export function hellSameTimeInputValue(
           <div data-slot="picker-section">
             <div data-slot="picker-section-label">{{ labels.timeInput.seconds }}</div>
             <div data-slot="picker-grid" data-unit="seconds" role="group" [attr.aria-label]="labels.timeInput.seconds">
-              @for (s of secondsList; track s) {
+              @for (s of secondsList; track s; let secondIndex = $index) {
                 <button
                   hellButton
                   [variant]="s === current().second ? 'primary' : 'ghost'"
                   size="sm"
                   type="button"
                   data-slot="picker-cell"
+                  [attr.tabindex]="pickerCellTabIndex('second', secondIndex)"
                   [attr.aria-pressed]="s === current().second ? 'true' : 'false'"
+                  (focus)="onPickerCellFocus('second', secondIndex)"
+                  (keydown)="onPickerCellKeydown($event, 'second', secondIndex)"
                   (click)="setUnit('second', s)"
                 >
                   {{ pad(s) }}
@@ -330,6 +342,10 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
   private onControlChange: (value: HellTimeValue | null) => void = () => {};
   private onControlTouched: () => void = () => {};
 
+  private readonly focusedHourIndex = signal(0);
+  private readonly focusedMinuteIndex = signal(0);
+  private readonly focusedSecondIndex = signal(0);
+
   private readonly valueState = new HellTypedValueInputState<HellTimeValue, HellTimeValue | null>({
     external: () => this.effectiveValue(),
     parseExternal: (value) => this.normalizeValue(value),
@@ -346,6 +362,14 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
   protected readonly isInvalid = () => this.invalid() || this.invalidDraft();
   protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
   protected readonly labels = inject(HELL_LABELS);
+
+  constructor() {
+    super();
+    effect(() => {
+      this.syncPickerFocusFromValue(this.current());
+    });
+  }
+
   protected readonly triggerAriaLabel = () => {
     const label = this.ariaLabel();
     return label ? this.labels.timeInput.chooseTimeFor(label) : this.labels.timeInput.chooseTime;
@@ -390,7 +414,7 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
     if (next.committed) this.emitValue(next.value);
   }
 
-  protected setUnit(unit: 'hour' | 'minute' | 'second', n: number) {
+  protected setUnit(unit: HellTimeUnit, n: number) {
     const value = this.normalizeValue({ ...this.current(), [unit]: n });
     if (!value) return;
     const next = this.valueState.setValue(value);
@@ -398,7 +422,7 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
     this.onControlTouched();
   }
 
-  protected nudge(unit: 'hour' | 'minute' | 'second', delta: number) {
+  protected nudge(unit: HellTimeUnit, delta: number) {
     const t = { ...this.current() };
     if (unit === 'hour') t.hour = (t.hour + delta + 24) % 24;
     else if (unit === 'minute') {
@@ -411,6 +435,76 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
     const next = this.valueState.setValue(value);
     if (next.committed) this.emitValue(next.value);
     this.onControlTouched();
+  }
+
+  protected pickerCellTabIndex(unit: HellTimeUnit, index: number): string {
+    return this.focusedPickerCellIndex(unit) === index ? '0' : '-1';
+  }
+
+  protected onPickerCellFocus(unit: HellTimeUnit, index: number): void {
+    this.setFocusedPickerCellIndex(unit, index);
+  }
+
+  protected onPickerCellKeydown(event: KeyboardEvent, unit: HellTimeUnit, currentIndex: number): void {
+    const nextIndex = this.nextPickerCellIndex(unit, event.key, currentIndex);
+    if (nextIndex === null) return;
+
+    event.preventDefault();
+    this.setFocusedPickerCellIndex(unit, nextIndex);
+    this.focusPickerCell(event.currentTarget, nextIndex);
+  }
+
+  private nextPickerCellIndex(unit: HellTimeUnit, key: string, currentIndex: number): number | null {
+    const values = this.valuesForUnit(unit);
+    const count = values.length;
+    if (!count) return null;
+
+    const index = Math.min(Math.max(currentIndex, 0), count - 1);
+    const columns = unit === 'hour' ? 6 : 4;
+
+    if (key === 'ArrowLeft') return (index - 1 + count) % count;
+    if (key === 'ArrowRight') return (index + 1) % count;
+    if (key === 'ArrowUp') return (index - columns + count) % count;
+    if (key === 'ArrowDown') return (index + columns) % count;
+    if (key === 'Home') return 0;
+    if (key === 'End') return count - 1;
+
+    return null;
+  }
+
+  private focusPickerCell(target: EventTarget | null, nextIndex: number): void {
+    const button = target instanceof HTMLElement ? target : null;
+    const grid = button?.closest('[data-slot="picker-grid"]');
+    if (!(grid instanceof HTMLElement)) return;
+    const cells = grid.querySelectorAll<HTMLButtonElement>('[data-slot="picker-cell"]');
+    cells[nextIndex]?.focus();
+  }
+
+  private focusedPickerCellIndex(unit: HellTimeUnit): number {
+    if (unit === 'hour') return this.focusedHourIndex();
+    if (unit === 'minute') return this.focusedMinuteIndex();
+    return this.focusedSecondIndex();
+  }
+
+  private setFocusedPickerCellIndex(unit: HellTimeUnit, index: number): void {
+    const values = this.valuesForUnit(unit);
+    if (!values.length) return;
+    const clamped = Math.max(0, Math.min(values.length - 1, index));
+    if (unit === 'hour') this.focusedHourIndex.set(clamped);
+    else if (unit === 'minute') this.focusedMinuteIndex.set(clamped);
+    else this.focusedSecondIndex.set(clamped);
+  }
+
+  private syncPickerFocusFromValue(value: HellTimeValue): void {
+    this.setFocusedPickerCellIndex('hour', value.hour);
+    this.setFocusedPickerCellIndex('minute', this.valuesForUnit('minute').indexOf(value.minute));
+    this.setFocusedPickerCellIndex('second', this.valuesForUnit('second').indexOf(value.second));
+  }
+
+  private valuesForUnit(unit: HellTimeUnit): readonly number[] {
+    if (unit === 'hour') return this.hours;
+    if (unit === 'minute') return this.minutes;
+    return this.secondsList;
   }
 
   private normalizeValue(value: HellTimeValue | null | undefined): HellTimeValue | null {
