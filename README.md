@@ -87,7 +87,8 @@ utilities.
 
 Public modules should expose behavior through directives, optional default host
 classes, `data-*` state attributes, `data-slot` part attributes, public CSS
-variables for supported visual overrides, and `unstyled` for full Style Opt-Out.
+variables for supported visual overrides, and `unstyled` for opting out of Hell
+default host class styling.
 
 ```html
 <button hellButton variant="primary">Save</button>

@@ -10,7 +10,7 @@ import { booleanAttribute, Directive, input } from '@angular/core';
 @Directive()
 export abstract class HellStyleable {
   /**
-   * When true, the component does not apply its host styling class.
+   * When true, the component does not apply its Hell default host styling class.
    * Behavior, accessibility wiring and data attributes still apply.
    */
   readonly unstyled = input(false, {

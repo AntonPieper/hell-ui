@@ -5,6 +5,8 @@
  * unavoidable in Hell today (mainly CVA sync paths), but they should be funnelled
  * through one file so we can audit intent and adapt quickly if ng-primitives
  * changes its mutation contract.
+ *
+ * @internal
  */
 
 type SelectStateMutation = {

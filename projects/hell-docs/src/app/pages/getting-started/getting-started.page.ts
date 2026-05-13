@@ -22,8 +22,8 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
 
       <h2>1. Install peers</h2>
       <p>
-        Core primitives need Angular, ng-primitives, ng-icons, and Tailwind. Feature components add
-        optional packages only when you import them.
+        Core primitives need Angular, ng-primitives, @angular/cdk, @floating-ui/dom, ng-icons, and
+        Tailwind. Feature components add optional packages only when you import them.
       </p>
       <hd-code-block [code]="installCode" />
 

@@ -16,14 +16,14 @@ Hell exposes:
 ## Install
 
 ```bash
-pnpm add @hell-ui/angular ng-primitives @ng-icons/core @ng-icons/font-awesome tailwindcss
+pnpm add @hell-ui/angular ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome tailwindcss
 ```
 
 Feature entry points add their own optional stacks only when imported:
 
 | Entry point | Install when used |
 | --- | --- |
-| `@hell-ui/angular/primitives`, `@hell-ui/angular/composites` | `ng-primitives @ng-icons/core @ng-icons/font-awesome tailwindcss` |
+| `@hell-ui/angular/primitives`, `@hell-ui/angular/composites` | `ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome tailwindcss` |
 | `@hell-ui/angular/features/table-utilities` | Angular + `tailwindcss` only |
 | `@hell-ui/angular/features/data-table` | Legacy compatibility alias for `@hell-ui/angular/features/table-utilities` |
 | `@hell-ui/angular/features/code-editor` | `@codemirror/view @codemirror/state @codemirror/commands @codemirror/language @lezer/highlight` plus any language package, e.g. `@codemirror/lang-javascript` |

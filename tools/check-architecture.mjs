@@ -955,7 +955,12 @@ function checkSecondaryEntryPointCompleteness(kind) {
   const apiSource = readFile(apiPath);
   const apiExports = new Set(exportPaths(apiSource));
   const dir = join(root, `projects/hell/src/lib/${kind}`);
+  const internalDirectories = {
+    primitives: new Set(['adapters']),
+  };
   for (const slug of childDirectories(dir)) {
+    if (internalDirectories[kind]?.has(slug)) continue;
+
     const expected = `./${kind}/${slug}/${slug}`;
     if (!apiExports.has(expected)) {
       failures.push(`Package Entry Point @hell-ui/angular/${kind} is missing ${expected}`);
