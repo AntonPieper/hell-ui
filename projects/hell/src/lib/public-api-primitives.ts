@@ -11,6 +11,7 @@ export * from './primitives/checkbox/checkbox';
 export * from './primitives/switch/switch';
 export * from './primitives/radio/radio';
 export * from './primitives/toggle/toggle';
+export * from './primitives/adapters/adapters';
 export * from './primitives/tabs/tabs';
 export * from './primitives/accordion/accordion';
 export * from './primitives/dialog/dialog';

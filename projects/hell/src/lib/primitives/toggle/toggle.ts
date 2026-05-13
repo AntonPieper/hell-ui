@@ -6,6 +6,7 @@ import {
   NgpToggleGroupItem,
   injectToggleGroupState,
 } from 'ng-primitives/toggle-group';
+import { writeToggleGroupDisabled, writeToggleGroupValue } from '../adapters/ngp-state-adapters';
 import { containsNode } from '../../core/dom';
 import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
 import { HellSize } from '../../core/types';
@@ -80,7 +81,7 @@ export class HellToggleGroup extends HellStyleable implements ControlValueAccess
   }
 
   writeValue(value: HellToggleGroupValue): void {
-    this.groupState().setValue(this.asGroupValue(value), { emit: false });
+    writeToggleGroupValue(this.groupState(), this.asGroupValue(value), false);
   }
 
   private asGroupValue(value: HellToggleGroupValue): string[] {
@@ -106,7 +107,7 @@ export class HellToggleGroup extends HellStyleable implements ControlValueAccess
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.groupState().setDisabled(isDisabled);
+    writeToggleGroupDisabled(this.groupState(), isDisabled);
   }
 
   protected onFocusOut(event: FocusEvent): void {
