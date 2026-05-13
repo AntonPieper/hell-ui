@@ -1,5 +1,6 @@
-import { DestroyRef, Directive, forwardRef, inject } from '@angular/core';
+import { DestroyRef, Directive, ElementRef, forwardRef, inject } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { containsNode } from '../../core/dom';
 import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
 import { HellStyleable } from '../../core/styleable';
 import { hellRegisterFloatingHost } from '../../core/floating-scope';
@@ -53,14 +54,16 @@ export type HellComboboxValue<T = unknown> = HellComboboxSingleValue<T> | HellCo
   ],
   host: {
     '[class.hell-combobox]': '!unstyled()',
-    '(focusout)': 'markControlTouched()',
+    '(focusout)': 'markControlTouched($event)',
   },
 })
 export class HellCombobox<T = unknown> extends HellStyleable implements ControlValueAccessor {
   private readonly combobox = inject(NgpCombobox);
   private readonly comboboxState = injectComboboxState<NgpCombobox>();
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly cva = new HellControlValueAccessorBridge<HellComboboxValue<T>>();
+  private readonly dropdowns = new Set<HTMLElement>();
 
   constructor() {
     super();
@@ -86,8 +89,37 @@ export class HellCombobox<T = unknown> extends HellStyleable implements ControlV
     this.comboboxState().disabled.set(isDisabled);
   }
 
-  protected markControlTouched(): void {
-    this.cva.markTouched();
+  isOutsideControl(next: EventTarget | Node | null): boolean {
+    const open = this.comboboxState().open();
+    if (containsNode(this.host.nativeElement, next)) {
+      return false;
+    }
+
+    if (!open) {
+      return true;
+    }
+
+    for (const dropdown of this.dropdowns) {
+      if (containsNode(dropdown, next)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  markControlTouched(event: FocusEvent): void {
+    if (this.isOutsideControl(event.relatedTarget)) {
+      this.cva.markTouched();
+    }
+  }
+
+  registerDropdown(dropdown: HTMLElement): void {
+    this.dropdowns.add(dropdown);
+  }
+
+  unregisterDropdown(dropdown: HTMLElement): void {
+    this.dropdowns.delete(dropdown);
   }
 
   private normalizeValue(value: unknown): HellComboboxValue<T> {
@@ -145,12 +177,29 @@ export class HellComboboxButton extends HellStyleable {}
   hostDirectives: [NgpComboboxDropdown],
   host: {
     '[class.hell-combobox-dropdown]': '!unstyled()',
+    '(focusout)': 'markControlTouched($event)',
   },
 })
 export class HellComboboxDropdown extends HellStyleable {
+  private readonly dropdown = inject(NgpComboboxDropdown);
+  private readonly select = inject(HellCombobox, { optional: true });
+
   constructor() {
     super();
     hellRegisterFloatingHost();
+    if (this.select) {
+      this.select.registerDropdown(this.dropdown.elementRef.nativeElement);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.select) {
+      this.select.unregisterDropdown(this.dropdown.elementRef.nativeElement);
+    }
+  }
+
+  markControlTouched(event: FocusEvent): void {
+    this.select?.markControlTouched(event);
   }
 }
 

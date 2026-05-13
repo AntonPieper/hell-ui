@@ -12,6 +12,7 @@ import { HellCheckbox } from './checkbox';
       [checked]="checked()"
       [indeterminate]="indeterminate()"
       [disabled]="disabled()"
+      [required]="required()"
       (checkedChange)="checkedEvents.push($event)"
       (indeterminateChange)="indeterminateEvents.push($event)"
     ></button>
@@ -21,6 +22,7 @@ class CheckboxHost {
   readonly checked = signal(false);
   readonly indeterminate = signal(false);
   readonly disabled = signal(false);
+  readonly required = signal(false);
   readonly checkedEvents: boolean[] = [];
   readonly indeterminateEvents: boolean[] = [];
 }
@@ -55,18 +57,25 @@ describe('HellCheckbox', () => {
     expect(checkbox.classList.contains('hell-checkbox')).toBe(true);
     expect(checkbox.getAttribute('role')).toBe('checkbox');
     expect(checkbox.getAttribute('aria-checked')).toBe('false');
+    expect(checkbox.getAttribute('aria-required')).toBeNull();
+    expect(checkbox.getAttribute('data-required')).toBeNull();
+    expect(checkbox.hasAttribute('required')).toBe(false);
 
     checkbox.click();
     fixture.detectChanges();
 
     expect(fixture.componentInstance.checkedEvents).toEqual([true]);
 
+    fixture.componentInstance.required.set(true);
     fixture.componentInstance.indeterminate.set(true);
     fixture.componentInstance.disabled.set(true);
     fixture.detectChanges();
 
     expect(checkbox.getAttribute('aria-checked')).toBe('mixed');
     expect(checkbox.disabled).toBe(true);
+    expect(checkbox.getAttribute('required')).toBe('');
+    expect(checkbox.getAttribute('aria-required')).toBe('true');
+    expect(checkbox.getAttribute('data-required')).toBe('true');
   });
 
   it('integrates with reactive forms without echoing programmatic writes', async () => {

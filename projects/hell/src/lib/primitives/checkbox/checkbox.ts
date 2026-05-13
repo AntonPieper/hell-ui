@@ -37,6 +37,9 @@ import { HellStyleable } from '../../core/styleable';
     type: 'button',
     '[class.hell-checkbox]': '!unstyled()',
     '(blur)': 'markControlTouched()',
+    '[attr.required]': 'required() ? "" : null',
+    '[attr.aria-required]': 'required() ? "true" : null',
+    '[attr.data-required]': 'required() ? "true" : null',
   },
   template: `
     @if (state.indeterminate()) {

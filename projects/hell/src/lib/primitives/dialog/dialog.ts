@@ -25,6 +25,7 @@ import {
   type NgpDismissGuard,
   type NgpDismissGuardInput,
 } from 'ng-primitives/portal';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
 import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactive-disabled';
@@ -75,11 +76,18 @@ export class HellDialogTrigger<TData = unknown, TResult = unknown> extends HellN
     transform: optionalDismissGuardAttribute,
   });
   readonly disabled = input(false, { transform: booleanAttribute });
+  readonly dialogData = input<TData | undefined>(undefined);
+  readonly hellDialogData = input<TData | undefined>(undefined, { alias: 'hellDialogData' });
   readonly closed = output<TResult>();
 
+  private readonly destroyRef = inject(DestroyRef);
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly dialogManager = inject(NgpDialogManager);
   private readonly injector = inject(Injector);
+
+  private resolveDialogData(): TData | undefined {
+    return this.hellDialogData() ?? this.dialogData();
+  }
 
   protected launch(event: Event): void {
     if (this.disabled()) {
@@ -92,17 +100,21 @@ export class HellDialogTrigger<TData = unknown, TResult = unknown> extends HellN
       parent: this.injector,
       providers: [{ provide: HELL_DIALOG_SCOPE_ROOT, useValue: root }],
     });
-    const dialogRef = this.dialogManager.open<TData, TResult>(
-      this.template() as TemplateRef<HellDialogTemplateContext<TData, TResult>>,
-      {
-        injector,
-        closeOnEscape: this.closeOnEscape(),
-        closeOnOutsideClick: this.closeOnOutsideClick(),
-        data: undefined as unknown as TData,
-      } as unknown as NgpDialogConfig<TData> & { data: TData },
+    const config = {
+      injector,
+      closeOnEscape: this.closeOnEscape(),
+      closeOnOutsideClick: this.closeOnOutsideClick(),
+      data: this.resolveDialogData(),
+    } as NgpDialogConfig<TData | undefined> & { data: TData | undefined };
+
+    const dialogRef = this.dialogManager.open<TData | undefined, TResult>(
+      this.template() as TemplateRef<HellDialogTemplateContext<TData | undefined, TResult>>,
+      config,
     );
 
-    dialogRef.closed.subscribe(({ result }) => this.closed.emit(result as TResult));
+    dialogRef.closed
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ result }) => this.closed.emit(result as TResult));
   }
 }
 
@@ -203,8 +215,8 @@ export class HellDialogDescription extends HellStyleable {}
 export const HELL_DIALOG_DIRECTIVES = [
   HellDialogTrigger,
   HellDialogOverlay,
-  HellDialog,
   HellDialogTitle,
   HellDialogDescription,
+  HellDialog,
   HellDialogScope,
 ] as const;

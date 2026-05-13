@@ -20,6 +20,7 @@ import {
   hellFitResizeSizesToTotal,
   type HellResizeDirection,
 } from '../../core/resize-behavior';
+import { isDocumentPositionFollowing } from '../../core/dom';
 import { HellOrientation } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
 
@@ -82,8 +83,13 @@ export class HellResizable extends HellStyleable implements AfterContentInit {
   ngAfterContentInit() {
     // Sort by DOM order to be safe (initial registration order can vary).
     this.panes.sort((a, b) => {
-      const pos = a.host.compareDocumentPosition(b.host);
-      return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+      if (isDocumentPositionFollowing(a.host, b.host, a.host.ownerDocument.defaultView)) {
+        return -1;
+      }
+      if (isDocumentPositionFollowing(b.host, a.host, a.host.ownerDocument.defaultView)) {
+        return 1;
+      }
+      return 0;
     });
     this.fitPanesToAvailableSize();
   }

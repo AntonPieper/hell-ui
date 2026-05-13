@@ -101,6 +101,29 @@ class DialogClosedResultHost {
   }
 }
 
+@Component({
+  imports: [...HELL_DIALOG_DIRECTIVES],
+  template: `
+    <button
+      id="open-data"
+      type="button"
+      [hellDialogTrigger]="dataDialog"
+      [dialogData]="{ value: 'payload' }"
+    >
+      Open data
+    </button>
+
+    <ng-template #dataDialog let-ref>
+      <div id="data-overlay" hellDialogOverlay>
+        <div hellDialog>
+          <span id="data-payload">{{ ref.data.value }}</span>
+        </div>
+      </div>
+    </ng-template>
+  `,
+})
+class DialogDataHost {}
+
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
 
 beforeAll(() => {
@@ -124,6 +147,7 @@ describe('HellDialogTrigger scoped overlays', () => {
         DisabledDialogTriggerHost,
         ClosePolicyDialogHost,
         DialogClosedResultHost,
+        DialogDataHost,
       ],
     }).compileComponents();
   });
@@ -217,6 +241,17 @@ describe('HellDialogTrigger scoped overlays', () => {
     await settle(fixture);
 
     expect(fixture.componentInstance.results).toEqual(['result']);
+  });
+
+  it('passes dialog data from the trigger input to template context', async () => {
+    const fixture = TestBed.createComponent(DialogDataHost);
+    await settle(fixture);
+
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-data').click();
+    await settle(fixture);
+
+    const payload = query<HTMLElement>(document.body, '#data-payload');
+    expect(payload.textContent).toBe('payload');
   });
 });
 

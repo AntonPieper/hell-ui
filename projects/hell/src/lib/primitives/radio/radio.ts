@@ -6,6 +6,7 @@ import {
   NgpRadioIndicator,
   injectRadioGroupState,
 } from 'ng-primitives/radio';
+import { containsNode } from '../../core/dom';
 import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
 import { HellOrientation } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
@@ -72,7 +73,7 @@ export class HellRadioGroup<T = unknown> extends HellStyleable implements Contro
 
   protected onFocusOut(event: FocusEvent): void {
     const next = event.relatedTarget;
-    if (!(next instanceof Node) || !this.host.nativeElement.contains(next)) {
+    if (!containsNode(this.host.nativeElement, next)) {
       this.cva.markTouched();
     }
   }
@@ -88,15 +89,18 @@ export class HellRadioGroup<T = unknown> extends HellStyleable implements Contro
   ],
   host: {
     '[class.hell-radio]': '!unstyled()',
-    '[attr.disabled]': 'groupDisabled() ? "" : null',
-    '[attr.aria-disabled]': 'groupDisabled() ? "true" : null',
+    '[attr.disabled]': 'isDisabled() ? "" : null',
+    '[attr.aria-disabled]': 'isDisabled() ? "true" : null',
     type: 'button',
   },
 })
 export class HellRadio extends HellStyleable {
   private readonly groupState = injectRadioGroupState<unknown>();
+  private readonly radioItem = inject(NgpRadioItem<unknown>);
 
   protected readonly groupDisabled = computed(() => this.groupState().disabled());
+  protected readonly itemDisabled = computed(() => this.radioItem.disabled());
+  protected readonly isDisabled = computed(() => this.groupDisabled() || this.itemDisabled());
 }
 
 export { NgpRadioIndicator as HellRadioIndicator };

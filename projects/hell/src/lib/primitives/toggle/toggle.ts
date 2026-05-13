@@ -6,6 +6,7 @@ import {
   NgpToggleGroupItem,
   injectToggleGroupState,
 } from 'ng-primitives/toggle-group';
+import { containsNode } from '../../core/dom';
 import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
 import { HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
@@ -110,7 +111,7 @@ export class HellToggleGroup extends HellStyleable implements ControlValueAccess
 
   protected onFocusOut(event: FocusEvent): void {
     const next = event.relatedTarget;
-    if (!(next instanceof Node) || !this.host.nativeElement.contains(next)) {
+    if (!containsNode(this.host.nativeElement, next)) {
       this.cva.markTouched();
     }
   }

@@ -54,6 +54,8 @@ describe('HellCombobox', () => {
 
     const host = fixture.componentInstance;
     const combobox = query<HTMLElement>(fixture.nativeElement, '[hellCombobox]');
+    const debug = fixture.debugElement.query(By.directive(HellCombobox));
+    const comboboxInstance = debug.injector.get(HellCombobox<string>);
 
     host.control.setValue('nova');
     await fixture.whenStable();
@@ -61,10 +63,37 @@ describe('HellCombobox', () => {
 
     expect(host.values).toEqual([]);
 
-    combobox.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+    combobox.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        relatedTarget: combobox,
+      }),
+    );
+    fixture.detectChanges();
+    expect(host.control.touched).toBe(false);
+
+    const fakeDropdown = document.createElement('div');
+    comboboxInstance.registerDropdown(fakeDropdown);
+
+    combobox.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        relatedTarget: fakeDropdown,
+      }),
+    );
+    fixture.detectChanges();
+
+    combobox.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        relatedTarget: null,
+      }),
+    );
     fixture.detectChanges();
 
     expect(host.control.touched).toBe(true);
+
+    comboboxInstance.unregisterDropdown(fakeDropdown);
 
     host.control.disable();
     fixture.detectChanges();

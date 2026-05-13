@@ -64,6 +64,8 @@ describe('HellSelect', () => {
 
     const host = fixture.componentInstance;
     const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelect]');
+    const debug = fixture.debugElement.query(By.directive(HellSelect));
+    const selectInstance = debug.injector.get(HellSelect<string>);
 
     host.control.setValue('high');
     await fixture.whenStable();
@@ -71,10 +73,37 @@ describe('HellSelect', () => {
 
     expect(host.values).toEqual([]);
 
-    select.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+    select.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        relatedTarget: select,
+      }),
+    );
+    fixture.detectChanges();
+    expect(host.control.touched).toBe(false);
+
+    const fakeDropdown = document.createElement('div');
+    selectInstance.registerDropdown(fakeDropdown);
+
+    select.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        relatedTarget: fakeDropdown,
+      }),
+    );
+    fixture.detectChanges();
+
+    select.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        relatedTarget: null,
+      }),
+    );
     fixture.detectChanges();
 
     expect(host.control.touched).toBe(true);
+
+    selectInstance.unregisterDropdown(fakeDropdown);
 
     host.control.disable();
     fixture.detectChanges();
@@ -97,7 +126,7 @@ describe('HellSelect', () => {
     expect(host.values).toEqual([]);
     expect(host.control.value).toEqual(['high']);
 
-    select.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+    select.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
     fixture.detectChanges();
 
     expect(host.control.touched).toBe(true);

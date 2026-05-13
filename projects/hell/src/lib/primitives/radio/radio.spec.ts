@@ -32,9 +32,19 @@ class RadioFormHost {
   readonly events: string[] = [];
 }
 
+@Component({
+  imports: [HellRadioGroup, HellRadio],
+  template: `
+    <div hellRadioGroup orientation="horizontal">
+      <button hellRadio type="button" [disabled]="true" value="a">A</button>
+      <button hellRadio type="button" value="b">B</button>
+    </div>
+  `,
+})
+class RadioItemDisabledHost {}
 describe('HellRadio', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [RadioHost, RadioFormHost] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [RadioHost, RadioFormHost, RadioItemDisabledHost] }).compileComponents();
   });
 
   it('uses native button radio items and forwards group state', () => {
@@ -91,6 +101,19 @@ describe('HellRadio', () => {
 
     expect(items[0].disabled).toBe(true);
     expect(items[1].disabled).toBe(true);
+  });
+
+  it('applies item-level disabled state to the button host', () => {
+    const fixture = TestBed.createComponent(RadioItemDisabledHost);
+    fixture.detectChanges();
+
+    const first = query<HTMLButtonElement>(fixture.nativeElement, 'button[value="a"]');
+    const second = query<HTMLButtonElement>(fixture.nativeElement, 'button[value="b"]');
+
+    expect(first.getAttribute('disabled')).toBe('');
+    expect(first.getAttribute('aria-disabled')).toBe('true');
+    expect(second.getAttribute('aria-disabled')).toBe(null);
+    expect(second.hasAttribute('disabled')).toBe(false);
   });
 });
 
