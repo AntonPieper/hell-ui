@@ -1041,6 +1041,14 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
               'date-input text-input-calendar-popover components/date-input/examples/text-input-calendar-popover.example components/date-input hell-date-input popover',
           },
         ],
+        usages: [
+          {
+            title: 'Date input adapter',
+            detail: 'provideHellDateInputAdapter, HELL_DATE_INPUT_ADAPTER',
+            terms:
+              'date-input adapter provideHellDateInputAdapter HELL_DATE_INPUT_ADAPTER parse format locale temporal strict ISO YYYY-MM-DD',
+          },
+        ],
         loadComponent: () =>
           import('./pages/components/date-input/date-input.page').then((m) => m.DateInputPage),
       },
@@ -1201,6 +1209,14 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
             detail: 'components/time-input/examples/sizes.example.ts',
             terms:
               'time-input sizes components/time-input/examples/sizes.example components/time-input hell-time-input size',
+          },
+        ],
+        usages: [
+          {
+            title: 'Time input adapter',
+            detail: 'provideHellTimeInputAdapter, HELL_TIME_INPUT_ADAPTER',
+            terms:
+              'time-input adapter provideHellTimeInputAdapter HELL_TIME_INPUT_ADAPTER parse format locale shortcuts HellTimeValue',
           },
         ],
         loadComponent: () =>

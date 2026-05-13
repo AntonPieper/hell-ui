@@ -17,6 +17,7 @@ checkLabelContract();
 checkCodeEditorRuntimeContract();
 checkExperimentalFeatureContract();
 checkFormsContract();
+checkDateTimeAdapterContract();
 checkSearchContract();
 checkHotkeyContract();
 checkNativeButtonSelectorContract();
@@ -652,6 +653,30 @@ function checkFormsContract() {
     const classDecl = new RegExp(`class\\s+${className}\\b[^{]*implements[^{]*ControlValueAccessor`).test(source);
     if (!classDecl || !source.includes('NG_VALUE_ACCESSOR')) {
       failures.push(`${file} ${className} must implement ControlValueAccessor`);
+    }
+  }
+}
+
+function checkDateTimeAdapterContract() {
+  const checks = [
+    {
+      sourcePath: 'projects/hell/src/lib/composites/date-input/date-input.ts',
+      docsPath: 'projects/hell-docs/src/app/pages/components/date-input/date-input.page.ts',
+      tokens: ['HELL_DATE_INPUT_ADAPTER', 'provideHellDateInputAdapter', 'HellDateInputAdapter'],
+    },
+    {
+      sourcePath: 'projects/hell/src/lib/composites/time-input/time-input.ts',
+      docsPath: 'projects/hell-docs/src/app/pages/components/time-input/time-input.page.ts',
+      tokens: ['HELL_TIME_INPUT_ADAPTER', 'provideHellTimeInputAdapter', 'HellTimeInputAdapter'],
+    },
+  ];
+
+  for (const check of checks) {
+    const source = readFile(join(root, check.sourcePath));
+    const docs = readFile(join(root, check.docsPath));
+    for (const token of check.tokens) {
+      if (!source.includes(token)) failures.push(`${check.sourcePath} must expose ${token}`);
+      if (!docs.includes(token)) failures.push(`${check.docsPath} must document ${token}`);
     }
   }
 }

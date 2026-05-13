@@ -61,8 +61,14 @@ import timeInputSizesExampleCodeRaw from './examples/sizes.example.ts?raw' with 
         <li><code>size</code>: <code>sm | md | lg</code></li>
         <li><code>invalid</code>, <code>disabled</code></li>
         <li><code>placeholder</code>, <code>aria-label</code></li>
+        <li><code>provideHellTimeInputAdapter</code>: replace the default parse/format policy for locale, masking, or product-specific shortcuts.</li>
         <li><code>unstyled</code></li>
       </ul>
+
+      <h2>Adapter contract</h2>
+      <p>
+        The built-in adapter emits a structured 24-hour <code>HellTimeValue</code>. Product teams that need localized parsing, named shortcuts, or a different display policy should provide <code>HELL_TIME_INPUT_ADAPTER</code> instead of forking the component.
+      </p>
 
       <h2>Do</h2>
       <ul>

@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { HellTimeInput, type HellTimeValue } from './time-input';
+import { HellTimeInput, provideHellTimeInputAdapter, type HellTimeValue } from './time-input';
 
 @Component({
   imports: [HellTimeInput],
@@ -35,10 +35,30 @@ class TimeInputFormHost {
   values: Array<HellTimeValue | null> = [];
 }
 
+@Component({
+  imports: [HellTimeInput],
+  providers: [
+    provideHellTimeInputAdapter({
+      parseText: (text) =>
+        text.trim().toLowerCase() === 'noon'
+          ? { valid: true, value: { hour: 12, minute: 0, second: 0 } }
+          : { valid: false },
+      format: (value) => `${value.hour}h${value.minute.toString().padStart(2, '0')}`,
+      normalize: (value) => (value && value.hour >= 12 ? value : null),
+      isSameValue: (a, b) => a?.hour === b?.hour && a?.minute === b?.minute && a?.second === b?.second,
+    }),
+  ],
+  template: `<hell-time-input [value]="value()" aria-label="Custom time" (valueChange)="values.push($event)" />`,
+})
+class TimeInputCustomAdapterHost {
+  readonly value = signal<HellTimeValue | null>({ hour: 8, minute: 30, second: 0 });
+  values: Array<HellTimeValue | null> = [];
+}
+
 describe('HellTimeInput', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TimeInputHost, TimeInputFormHost],
+      imports: [TimeInputHost, TimeInputFormHost, TimeInputCustomAdapterHost],
     }).compileComponents();
   });
 
@@ -149,6 +169,22 @@ describe('HellTimeInput', () => {
     fixture.detectChanges();
 
     expect(input.value).toBe('12:45');
+  });
+
+  it('uses injected parse and format adapters', () => {
+    const fixture = TestBed.createComponent(TimeInputCustomAdapterHost);
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    expect(input.value).toBe('');
+
+    input.value = 'noon';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.values).toEqual([{ hour: 12, minute: 0, second: 0 }]);
+    expect(input.value).toBe('12h00');
   });
 
   it('integrates with reactive forms without echoing programmatic writes', async () => {

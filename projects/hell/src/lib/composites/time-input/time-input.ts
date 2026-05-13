@@ -5,9 +5,11 @@ import {
   computed,
   forwardRef,
   inject,
+  InjectionToken,
   input,
   output,
   signal,
+  type Provider,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { provideIcons } from '@ng-icons/core';
@@ -21,6 +23,7 @@ import type { HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
 import {
   HellTypedValueInputState,
+  type HellTypedValueParseResult,
   hellInvalidTypedValue,
   hellTypedValue,
 } from '../../core/typed-value-input';
@@ -35,12 +38,51 @@ const HELL_TIME_INPUT_ICONS = {
   faSolidClock,
 };
 
+export interface HellTimeInputAdapterContext {
+  readonly seconds: boolean;
+}
+
+export type HellTimeInputParseResult = HellTypedValueParseResult<HellTimeValue>;
+
+export interface HellTimeInputAdapter {
+  /** Parse visible text. Return `{ valid: true, value: null }` to commit a clear. */
+  readonly parseText: (text: string, context: HellTimeInputAdapterContext) => HellTimeInputParseResult;
+  /** Format a committed time value for the text field and picker readout. */
+  readonly format: (value: HellTimeValue, context: HellTimeInputAdapterContext) => string;
+  /** Coerce external form/input values before display; invalid values should return null. */
+  readonly normalize?: (
+    value: HellTimeValue | null | undefined,
+    context: HellTimeInputAdapterContext,
+  ) => HellTimeValue | null;
+  /** Compare structured time values semantically instead of by object identity. */
+  readonly isSameValue?: (a: HellTimeValue | null, b: HellTimeValue | null) => boolean;
+}
+
+export const HELL_DEFAULT_TIME_INPUT_ADAPTER: HellTimeInputAdapter = {
+  parseText: hellParseTimeInputText,
+  format: hellFormatTimeInputValue,
+  normalize: hellNormalizeTimeInputValue,
+  isSameValue: hellSameTimeInputValue,
+};
+
+export const HELL_TIME_INPUT_ADAPTER = new InjectionToken<HellTimeInputAdapter>(
+  'HELL_TIME_INPUT_ADAPTER',
+  { factory: () => HELL_DEFAULT_TIME_INPUT_ADAPTER },
+);
+
+export function provideHellTimeInputAdapter(adapter: HellTimeInputAdapter): Provider {
+  return { provide: HELL_TIME_INPUT_ADAPTER, useValue: adapter };
+}
+
 function pad(n: number) {
   return n.toString().padStart(2, '0');
 }
 
-function formatTime(t: HellTimeValue, seconds: boolean) {
-  return seconds
+export function hellFormatTimeInputValue(
+  t: HellTimeValue,
+  context: HellTimeInputAdapterContext,
+): string {
+  return context.seconds
     ? `${pad(t.hour)}:${pad(t.minute)}:${pad(t.second)}`
     : `${pad(t.hour)}:${pad(t.minute)}`;
 }
@@ -50,16 +92,23 @@ function formatTime(t: HellTimeValue, seconds: boolean) {
  * (`9:00 am`, `1:30PM`). Empty text commits a nullable clear; unparseable
  * text stays as an invalid draft.
  */
-function normalizeTime(value: HellTimeValue, seconds: boolean): HellTimeValue {
-  return seconds ? value : { ...value, second: 0 };
+export function hellNormalizeTimeInputValue(
+  value: HellTimeValue | null | undefined,
+  context: HellTimeInputAdapterContext,
+): HellTimeValue | null {
+  if (!isValidTime(value)) return null;
+  return context.seconds ? value : { ...value, second: 0 };
 }
 
-function tryParse(text: string, seconds: boolean) {
+export function hellParseTimeInputText(
+  text: string,
+  context: HellTimeInputAdapterContext,
+): HellTimeInputParseResult {
   const t = text.trim().toLowerCase();
   if (!t) return hellTypedValue<HellTimeValue>(null);
   const ampm = /^(\d{1,2})(?::(\d{1,2}))?(?::(\d{1,2}))?\s*(am|pm)$/.exec(t);
   if (ampm) {
-    if (!seconds && ampm[3] !== undefined) return hellInvalidTypedValue();
+    if (!context.seconds && ampm[3] !== undefined) return hellInvalidTypedValue();
     let hour = +ampm[1];
     const minute = +(ampm[2] ?? '0');
     const second = +(ampm[3] ?? '0');
@@ -67,18 +116,20 @@ function tryParse(text: string, seconds: boolean) {
     if (ampm[4] === 'pm') hour += 12;
     const value = { hour, minute, second };
     if (!isValidTime(value)) return hellInvalidTypedValue();
-    return hellTypedValue(normalizeTime(value, seconds));
+    return hellTypedValue(hellNormalizeTimeInputValue(value, context));
   }
   const m = /^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/.exec(t);
-  if (!m || (!seconds && m[3] !== undefined)) return hellInvalidTypedValue();
+  if (!m || (!context.seconds && m[3] !== undefined)) return hellInvalidTypedValue();
   const hour = +m[1];
   const minute = +m[2];
   const second = +(m[3] ?? '0');
   const value = { hour, minute, second };
-  return isValidTime(value) ? hellTypedValue(normalizeTime(value, seconds)) : hellInvalidTypedValue();
+  return isValidTime(value)
+    ? hellTypedValue(hellNormalizeTimeInputValue(value, context))
+    : hellInvalidTypedValue();
 }
 
-function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
+function isValidTime(value: HellTimeValue | null | undefined): value is HellTimeValue {
   return (
     !!value &&
     Number.isInteger(value.hour) &&
@@ -91,6 +142,13 @@ function isValidTime(value: HellTimeValue | null): value is HellTimeValue {
     value.second >= 0 &&
     value.second <= 59
   );
+}
+
+export function hellSameTimeInputValue(
+  a: HellTimeValue | null,
+  b: HellTimeValue | null,
+): boolean {
+  return a?.hour === b?.hour && a?.minute === b?.minute && a?.second === b?.second;
 }
 
 /**
@@ -261,7 +319,10 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
   protected readonly minutes = Array.from({ length: 12 }, (_, i) => i * 5);
   protected readonly secondsList = Array.from({ length: 12 }, (_, i) => i * 5);
   protected readonly pad = pad;
-  protected readonly format = formatTime;
+  protected readonly format = (value: HellTimeValue | null, seconds: boolean) =>
+    value ? this.timeAdapter.format(value, { seconds }) : '';
+
+  private readonly timeAdapter = inject(HELL_TIME_INPUT_ADAPTER);
 
   private readonly controlMode = signal(false);
   private readonly controlValue = signal<HellTimeValue | null>(null);
@@ -271,9 +332,10 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
 
   private readonly valueState = new HellTypedValueInputState<HellTimeValue, HellTimeValue | null>({
     external: () => this.effectiveValue(),
-    parseExternal: (value) => (isValidTime(value) ? normalizeTime(value, this.seconds()) : null),
-    parseText: (text) => tryParse(text, this.seconds()),
-    format: (value) => (value ? formatTime(value, this.seconds()) : ''),
+    parseExternal: (value) => this.normalizeValue(value),
+    parseText: (text) => this.timeAdapter.parseText(text, { seconds: this.seconds() }),
+    format: (value) => this.format(value, this.seconds()),
+    externalChanged: (base, current) => !this.sameValue(base, current),
   });
 
   protected readonly current = computed<HellTimeValue>(
@@ -291,7 +353,7 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
 
   writeValue(value: HellTimeValue | null): void {
     this.controlMode.set(true);
-    this.controlValue.set(isValidTime(value) ? value : null);
+    this.controlValue.set(this.normalizeValue(value));
     this.valueState.clearDraft();
     this.valueState.clearLocal();
   }
@@ -329,7 +391,9 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
   }
 
   protected setUnit(unit: 'hour' | 'minute' | 'second', n: number) {
-    const next = this.valueState.setValue(normalizeTime({ ...this.current(), [unit]: n }, this.seconds()));
+    const value = this.normalizeValue({ ...this.current(), [unit]: n });
+    if (!value) return;
+    const next = this.valueState.setValue(value);
     if (next.committed) this.emitValue(next.value);
     this.onControlTouched();
   }
@@ -342,9 +406,22 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
       t.hour = Math.floor(totalMinutes / 60);
       t.minute = totalMinutes % 60;
     } else t.second = (t.second + delta + 60) % 60;
-    const next = this.valueState.setValue(normalizeTime(t, this.seconds()));
+    const value = this.normalizeValue(t);
+    if (!value) return;
+    const next = this.valueState.setValue(value);
     if (next.committed) this.emitValue(next.value);
     this.onControlTouched();
+  }
+
+  private normalizeValue(value: HellTimeValue | null | undefined): HellTimeValue | null {
+    const context = { seconds: this.seconds() };
+    return this.timeAdapter.normalize
+      ? this.timeAdapter.normalize(value, context)
+      : hellNormalizeTimeInputValue(value, context);
+  }
+
+  private sameValue(a: HellTimeValue | null, b: HellTimeValue | null): boolean {
+    return this.timeAdapter.isSameValue?.(a, b) ?? hellSameTimeInputValue(a, b);
   }
 
   private emitValue(value: HellTimeValue | null): void {

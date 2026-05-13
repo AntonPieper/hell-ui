@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { HellDateInput } from './date-input';
+import { HellDateInput, provideHellDateInputAdapter } from './date-input';
 
 @Component({
   imports: [HellDateInput],
@@ -37,10 +37,31 @@ class DateInputFormHost {
   dates: Array<Date | null> = [];
 }
 
+@Component({
+  imports: [HellDateInput],
+  providers: [
+    provideHellDateInputAdapter({
+      parseText: (text) =>
+        text.trim().toLowerCase() === 'today'
+          ? { valid: true, value: new Date(2026, 0, 2) }
+          : { valid: false },
+      format: (value) => (value ? `custom:${value.getFullYear()}` : ''),
+      coerce: (value) =>
+        value instanceof Date && value.getFullYear() >= 2026 ? value : null,
+      isSameValue: (a, b) => a?.getTime() === b?.getTime(),
+    }),
+  ],
+  template: `<hell-date-input [date]="date()" aria-label="Custom date" (dateChange)="dates.push($event)" />`,
+})
+class DateInputCustomAdapterHost {
+  readonly date = signal<Date | null>(new Date(2025, 0, 1));
+  dates: Array<Date | null> = [];
+}
+
 describe('HellDateInput', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DateInputHost, DateInputFormHost],
+      imports: [DateInputHost, DateInputFormHost, DateInputCustomAdapterHost],
     }).compileComponents();
   });
 
@@ -227,6 +248,22 @@ describe('HellDateInput', () => {
 
     expect(host.dates).toEqual([]);
     expect(input.value).toBe(formatDate(host.date()));
+  });
+
+  it('uses injected parse and format adapters', () => {
+    const fixture = TestBed.createComponent(DateInputCustomAdapterHost);
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    expect(input.value).toBe('');
+
+    input.value = 'today';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(formatDate(fixture.componentInstance.dates[0])).toBe('2026-01-02');
+    expect(input.value).toBe('custom:2026');
   });
 
   it('integrates with reactive forms without echoing programmatic writes', async () => {

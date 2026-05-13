@@ -65,8 +65,14 @@ import dateInputTextInputCalendarPopoverExampleCodeRaw from './examples/text-inp
         <li><code>invalid</code>, <code>disabled</code>: visual / interaction states.</li>
         <li><code>placeholder</code>: text shown while empty.</li>
         <li><code>aria-label</code>: accessible name for standalone usage.</li>
+        <li><code>provideHellDateInputAdapter</code>: replace the default strict ISO parse/format policy at an application or feature boundary.</li>
         <li><code>unstyled</code>: opt out of host styling.</li>
       </ul>
+
+      <h2>Adapter contract</h2>
+      <p>
+        The built-in adapter intentionally accepts only <code>YYYY-MM-DD</code> typed input so Hell does not guess between regional formats. If your product needs locale parsing, masked input, or a Temporal-backed model, provide a <code>HELL_DATE_INPUT_ADAPTER</code> with explicit parse, format, coercion, and equality rules.
+      </p>
 
       <h2>Do</h2>
       <ul>

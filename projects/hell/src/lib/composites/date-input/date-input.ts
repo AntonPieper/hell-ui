@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   type ElementRef,
+  InjectionToken,
+  type Provider,
   booleanAttribute,
   inject,
   forwardRef,
@@ -23,6 +25,7 @@ import type { HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
 import {
   HellTypedValueInputState,
+  type HellTypedValueParseResult,
   hellInvalidTypedValue,
   hellTypedValue,
 } from '../../core/typed-value-input';
@@ -31,12 +34,44 @@ const HELL_DATE_INPUT_ICONS = {
   faSolidCalendar,
 };
 
+export type HellDateInputParseResult = HellTypedValueParseResult<Date>;
+
+export interface HellDateInputAdapter {
+  /** Parse visible text. Return `{ valid: true, value: null }` to commit a clear. */
+  readonly parseText: (text: string) => HellDateInputParseResult;
+  /** Format the committed value for the text field. */
+  readonly format: (value: Date | null) => string;
+  /** Coerce external form/input values before display; invalid dates should return null. */
+  readonly coerce?: (value: Date | null | undefined) => Date | null;
+  /** Compare external values by semantic day/value instead of object identity. */
+  readonly isSameValue?: (a: Date | null, b: Date | null) => boolean;
+  /** Enforce business bounds after parsing and before emitting typed input. */
+  readonly isWithinBounds?: (value: Date | null, min: Date | null, max: Date | null) => boolean;
+}
+
+export const HELL_DEFAULT_DATE_INPUT_ADAPTER: HellDateInputAdapter = {
+  parseText: hellParseDateInputText,
+  format: hellFormatDateInputValue,
+  coerce: hellCoerceDateInputValue,
+  isSameValue: hellSameDateInputValue,
+  isWithinBounds: hellIsDateInputValueWithinBounds,
+};
+
+export const HELL_DATE_INPUT_ADAPTER = new InjectionToken<HellDateInputAdapter>(
+  'HELL_DATE_INPUT_ADAPTER',
+  { factory: () => HELL_DEFAULT_DATE_INPUT_ADAPTER },
+);
+
+export function provideHellDateInputAdapter(adapter: HellDateInputAdapter): Provider {
+  return { provide: HELL_DATE_INPUT_ADAPTER, useValue: adapter };
+}
+
 /**
  * Try to parse a user-typed string into a `Date`. Accepts ISO `YYYY-MM-DD`
  * and the stable business format we render back into the input. Empty text
  * commits a nullable clear; unparseable text stays as an invalid draft.
  */
-function tryParseDateText(text: string) {
+export function hellParseDateInputText(text: string): HellDateInputParseResult {
   const t = text.trim();
   if (!t) return hellTypedValue<Date>(null);
   const iso = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(t);
@@ -53,7 +88,7 @@ function tryParseDateText(text: string) {
   return hellInvalidTypedValue();
 }
 
-function formatDate(d: Date | null): string {
+export function hellFormatDateInputValue(d: Date | null): string {
   if (!d) return '';
   const year = d.getFullYear().toString().padStart(4, '0');
   const month = (d.getMonth() + 1).toString().padStart(2, '0');
@@ -65,14 +100,22 @@ function dateDayTime(d: Date): number {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 }
 
-function isDateWithinBounds(d: Date | null, min: Date | null, max: Date | null): boolean {
+export function hellIsDateInputValueWithinBounds(
+  d: Date | null,
+  min: Date | null,
+  max: Date | null,
+): boolean {
   if (!d) return true;
   const day = dateDayTime(d);
   return (!min || day >= dateDayTime(min)) && (!max || day <= dateDayTime(max));
 }
 
-function dateChanged(a: Date | null, b: Date | null): boolean {
-  return a?.getTime() !== b?.getTime();
+export function hellSameDateInputValue(a: Date | null, b: Date | null): boolean {
+  return a?.getTime() === b?.getTime();
+}
+
+export function hellCoerceDateInputValue(value: Date | null | undefined): Date | null {
+  return value instanceof Date && !Number.isNaN(value.valueOf()) ? value : null;
 }
 
 /**
@@ -159,6 +202,8 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
 
   readonly dateChange = output<Date | null>();
 
+  private readonly dateAdapter = inject(HELL_DATE_INPUT_ADAPTER);
+
   private readonly controlMode = signal(false);
   private readonly controlValue = signal<Date | null>(null);
   private readonly controlDisabled = signal(false);
@@ -167,10 +212,10 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
 
   private readonly valueState = new HellTypedValueInputState<Date, Date | null>({
     external: () => this.effectiveDate(),
-    parseExternal: (date) => date,
+    parseExternal: (date) => this.coerceDate(date),
     parseText: (text) => this.parseText(text),
-    format: formatDate,
-    externalChanged: dateChanged,
+    format: (date) => this.dateAdapter.format(date),
+    externalChanged: (base, current) => !this.sameDate(base, current),
   });
   protected readonly current = this.valueState.current;
   protected readonly display = this.valueState.display;
@@ -187,7 +232,7 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
 
   writeValue(value: Date | null): void {
     this.controlMode.set(true);
-    this.controlValue.set(value instanceof Date && !Number.isNaN(value.valueOf()) ? value : null);
+    this.controlValue.set(this.coerceDate(value));
     this.valueState.clearDraft();
     this.valueState.clearLocal();
   }
@@ -209,9 +254,9 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
   }
 
   private parseText(text: string) {
-    const parsed = tryParseDateText(text);
+    const parsed = this.dateAdapter.parseText(text);
     if (!parsed.valid || !parsed.value) return parsed;
-    return isDateWithinBounds(parsed.value, this.min(), this.max())
+    return this.isWithinBounds(parsed.value)
       ? parsed
       : hellInvalidTypedValue();
   }
@@ -233,11 +278,28 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
   }
 
   protected onPick(d: Date | undefined) {
-    if (!d || !isDateWithinBounds(d, this.min(), this.max())) return;
+    if (!d || !this.isWithinBounds(d)) return;
     const picked = this.valueState.setValue(d);
     if (picked.committed) this.emitValue(picked.value);
     this.onControlTouched();
     this.field().nativeElement.focus();
+  }
+
+  private coerceDate(value: Date | null | undefined): Date | null {
+    return this.dateAdapter.coerce
+      ? this.dateAdapter.coerce(value)
+      : hellCoerceDateInputValue(value);
+  }
+
+  private sameDate(a: Date | null, b: Date | null): boolean {
+    return this.dateAdapter.isSameValue?.(a, b) ?? hellSameDateInputValue(a, b);
+  }
+
+  private isWithinBounds(value: Date | null): boolean {
+    return (
+      this.dateAdapter.isWithinBounds?.(value, this.min(), this.max()) ??
+      hellIsDateInputValueWithinBounds(value, this.min(), this.max())
+    );
   }
 
   private emitValue(value: Date | null): void {
