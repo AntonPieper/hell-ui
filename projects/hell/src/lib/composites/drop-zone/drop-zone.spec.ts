@@ -25,6 +25,76 @@ class DropZoneHost {
   readonly drops: File[][] = [];
 }
 
+@Component({
+  imports: [HellDropZone],
+  template: `
+    <input data-native-input type="file" #nativeInput />
+
+    <div
+      hellDropzone
+      [nativeInput]="nativeInput"
+      [multiple]="multiple()"
+      [accept]="accept()"
+      [disabled]="disabled()"
+      (files)="drops.push($event)"
+    >
+      <span data-child class="inner">inner</span>
+      Upload files
+    </div>
+  `,
+})
+class DropZoneHostWithNativeInput {
+  readonly multiple = signal(true);
+  readonly accept = signal<string | null>(null);
+  readonly disabled = signal(false);
+  readonly drops: File[][] = [];
+}
+
+@Component({
+  imports: [HellDropZone],
+  template: `
+    <input data-native-input type="file" id="drop-zone-native-input-id" />
+
+    <div
+      hellDropzone
+      [nativeInput]="'drop-zone-native-input-id'"
+      [multiple]="multiple()"
+      [accept]="accept()"
+      [disabled]="disabled()"
+      (files)="drops.push($event)"
+    >
+      <span data-child class="inner">inner</span>
+      Upload files
+    </div>
+  `,
+})
+class DropZoneHostWithNativeInputId {
+  readonly multiple = signal(true);
+  readonly accept = signal<string | null>(null);
+  readonly disabled = signal(false);
+  readonly drops: File[][] = [];
+}
+
+@Component({
+  imports: [HellDropZone],
+  template: `
+    <input data-native-input="a" type="file" #nativeInputA />
+    <input data-native-input="b" type="file" #nativeInputB />
+
+    <div
+      hellDropzone
+      [nativeInput]="nativeMode() === 'a' ? nativeInputA : nativeMode() === 'b' ? nativeInputB : null"
+      (files)="drops.push($event)"
+    >
+      Upload files
+    </div>
+  `,
+})
+class DropZoneHostWithDynamicNativeInput {
+  readonly nativeMode = signal<'a' | 'b' | null>('a');
+  readonly drops: File[][] = [];
+}
+
 describe('HellDropZone', () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -32,7 +102,12 @@ describe('HellDropZone', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DropZoneHost],
+      imports: [
+        DropZoneHost,
+        DropZoneHostWithNativeInput,
+        DropZoneHostWithNativeInputId,
+        DropZoneHostWithDynamicNativeInput,
+      ],
     }).compileComponents();
   });
 
@@ -65,6 +140,119 @@ describe('HellDropZone', () => {
     fileInput(zone).dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
 
     expect(click).toHaveBeenCalledOnce();
+  });
+
+  it('uses a provided native input element instead of creating one', () => {
+    const click = vi.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {});
+    const fixture = TestBed.createComponent(DropZoneHostWithNativeInput);
+    const host = fixture.componentInstance;
+    host.accept.set('image/*');
+    fixture.detectChanges();
+
+    const zone = dropZone(fixture.nativeElement);
+    zone.click();
+
+    const input = providedFileInput(fixture.nativeElement);
+    expect(input.multiple).toBe(true);
+    expect(input.accept).toBe('image/*');
+    expect(zone.querySelector('input[type="file"]')).toBeNull();
+    expect(input.hidden).toBe(false);
+    expect(click).toHaveBeenCalledOnce();
+  });
+
+  it('emits when a provided native input changes directly', () => {
+    const fixture = TestBed.createComponent(DropZoneHostWithNativeInput);
+    const host = fixture.componentInstance;
+    host.accept.set('text/plain');
+    fixture.detectChanges();
+
+    const text = new File(['a'], 'a.txt', { type: 'text/plain' });
+    const png = new File(['b'], 'b.png', { type: 'image/png' });
+    const input = providedFileInput(fixture.nativeElement);
+    Object.defineProperty(input, 'files', {
+      configurable: true,
+      value: fileList([text, png]),
+    });
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(input.accept).toBe('text/plain');
+    expect(host.drops).toEqual([[text]]);
+  });
+
+  it('unbinds stale consumer-owned inputs when nativeInput changes', () => {
+    const fixture = TestBed.createComponent(DropZoneHostWithDynamicNativeInput);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const inputA = fixture.nativeElement.querySelector('[data-native-input="a"]') as HTMLInputElement;
+    const inputB = fixture.nativeElement.querySelector('[data-native-input="b"]') as HTMLInputElement;
+    const first = new File(['a'], 'a.txt', { type: 'text/plain' });
+    const second = new File(['b'], 'b.txt', { type: 'text/plain' });
+    const stale = new File(['c'], 'c.txt', { type: 'text/plain' });
+
+    Object.defineProperty(inputA, 'files', { configurable: true, value: fileList([first]) });
+    inputA.dispatchEvent(new Event('change', { bubbles: true }));
+
+    host.nativeMode.set('b');
+    fixture.detectChanges();
+
+    Object.defineProperty(inputA, 'files', { configurable: true, value: fileList([stale]) });
+    inputA.dispatchEvent(new Event('change', { bubbles: true }));
+    Object.defineProperty(inputB, 'files', { configurable: true, value: fileList([second]) });
+    inputB.dispatchEvent(new Event('change', { bubbles: true }));
+
+    host.nativeMode.set(null);
+    fixture.detectChanges();
+
+    Object.defineProperty(inputB, 'files', { configurable: true, value: fileList([stale]) });
+    inputB.dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(host.drops).toEqual([[first], [second]]);
+  });
+
+  it('resolves a provided native input id from the host document', () => {
+    const click = vi.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {});
+    const fixture = TestBed.createComponent(DropZoneHostWithNativeInputId);
+    const host = fixture.componentInstance;
+    host.accept.set('application/pdf');
+    fixture.detectChanges();
+
+    const zone = dropZone(fixture.nativeElement);
+    zone.click();
+
+    const input = providedFileInput(fixture.nativeElement);
+    expect(zone.querySelector('input[type="file"]')).toBeNull();
+    expect(input.accept).toBe('application/pdf');
+    expect(click).toHaveBeenCalledOnce();
+  });
+
+  it('syncs picker options on every click with a provided native input', () => {
+    const click = vi.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {});
+    const fixture = TestBed.createComponent(DropZoneHostWithNativeInput);
+    const host = fixture.componentInstance;
+    host.accept.set('image/*');
+    fixture.detectChanges();
+
+    const zone = dropZone(fixture.nativeElement);
+    zone.click();
+    const input = providedFileInput(fixture.nativeElement);
+
+    host.multiple.set(false);
+    host.accept.set('application/pdf');
+    fixture.detectChanges();
+    zone.click();
+
+    expect(providedFileInput(fixture.nativeElement)).toBe(input);
+    expect(input.multiple).toBe(false);
+    expect(input.accept).toBe('application/pdf');
+    expect(click).toHaveBeenCalledTimes(2);
+
+    host.accept.set(null);
+    fixture.detectChanges();
+    zone.click();
+
+    expect(input.accept).toBe('');
+    expect(input.hasAttribute('accept')).toBe(false);
   });
 
   it('syncs picker options on every click', () => {
@@ -198,6 +386,29 @@ describe('HellDropZone', () => {
     expect(host.drops).toEqual([]);
   });
 
+  it('does not remove or keep a consumer-owned input listeners on destroy', () => {
+    const fixture = TestBed.createComponent(DropZoneHostWithNativeInput);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const zone = dropZone(fixture.nativeElement);
+    zone.click();
+    const input = providedFileInput(fixture.nativeElement);
+    const removeSpy = vi.spyOn(input, 'remove');
+
+    fixture.destroy();
+
+    expect(removeSpy).not.toHaveBeenCalled();
+
+    Object.defineProperty(input, 'files', {
+      configurable: true,
+      value: fileList([new File(['a'], 'a.txt', { type: 'text/plain' })]),
+    });
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(host.drops).toEqual([]);
+  });
+
   it('emits dropped files and honors single-file mode', () => {
     const fixture = TestBed.createComponent(DropZoneHost);
     const host = fixture.componentInstance;
@@ -284,6 +495,12 @@ function dropZone(root: HTMLElement): HTMLElement {
 function fileInput(zone: HTMLElement): HTMLInputElement {
   const input = zone.querySelector('input[type="file"]');
   if (!(input instanceof HTMLInputElement)) throw new Error('Expected hidden file input.');
+  return input;
+}
+
+function providedFileInput(root: HTMLElement): HTMLInputElement {
+  const input = root.querySelector('[data-native-input]');
+  if (!(input instanceof HTMLInputElement)) throw new Error('Expected native input binding target.');
   return input;
 }
 

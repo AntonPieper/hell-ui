@@ -1097,6 +1097,12 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
               'drop-zone example components/drop-zone/examples/example.example components/drop-zone hellDropzone upload file',
           },
           {
+            title: 'Drop Zone: Native Input Seam',
+            detail: 'components/drop-zone/examples/native-input.example.ts',
+            terms:
+              'drop-zone nativeInput components/drop-zone/examples/native-input.example.ts components/drop-zone hellDropzone HTMLInputElement',
+          },
+          {
             title: 'Drop Zone: Single File Images Only',
             detail: 'components/drop-zone/examples/single-file-images-only.example.ts',
             terms:

@@ -5,6 +5,7 @@ import {
   HostListener,
   OnDestroy,
   booleanAttribute,
+  effect,
   inject,
   input,
   output,
@@ -30,8 +31,11 @@ function hellFileMatchesAccept(file: File, accept: string | null): boolean {
 
 /**
  * Drag-and-drop file input area. Emits a `files` event when the user drops
- * files or selects them via the hidden `<input type="file">` (which the
- * directive auto-creates and triggers on click).
+ * files or selects them via a native `<input type="file">`.
+ *
+ * By default, a hidden input is auto-created and managed by the directive. For
+ * tighter control, bind `nativeInput` to a consumer-owned file input (or its
+ * ID string), while keeping the compatibility fallback when not provided.
  *
  * Bind to a `<div>` or `<label>`. Apply `multiple` and `accept` to constrain
  * emitted files. Treat `accept` as a client-side hint and validate again at
@@ -52,17 +56,20 @@ export class HellDropZone extends HellStyleable implements OnDestroy {
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly multiple = input(true, { transform: booleanAttribute });
   readonly accept = input<string | null>(null);
+  readonly nativeInput = input<HTMLInputElement | string | null>(null);
 
   readonly files = output<File[]>();
 
   protected readonly active = signal(false);
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private fileInput?: HTMLInputElement;
+  private nativeInputBound?: HTMLInputElement;
+  private fallbackInput?: HTMLInputElement;
   private dragDepth = 0;
 
   private readonly inputClickHandler = (event: MouseEvent) => event.stopPropagation();
-  private readonly inputChangeHandler = () => {
-    const input = this.fileInput;
+  private readonly inputChangeHandler = (event?: Event) => {
+    const input = event?.target instanceof HTMLInputElement ? event.target : this.fileInput;
     if (!input) return;
     if (!this.disabled() && input.files?.length) {
       const files = this.filterFiles(input.files);
@@ -70,6 +77,31 @@ export class HellDropZone extends HellStyleable implements OnDestroy {
     }
     input.value = '';
   };
+
+  constructor() {
+    super();
+    effect(() => {
+      const configuredInput = this.resolveNativeInput();
+      if (configuredInput) {
+        this.fileInput = configuredInput;
+        this.bindInput(configuredInput);
+        this.syncInput(configuredInput);
+        return;
+      }
+
+      if (this.nativeInputBound && this.nativeInputBound !== this.fallbackInput) {
+        const previousInput = this.nativeInputBound;
+        this.unbindInput(previousInput);
+        if (this.fileInput === previousInput) this.fileInput = undefined;
+      }
+
+      if (this.fallbackInput) {
+        this.fileInput = this.fallbackInput;
+        this.bindInput(this.fallbackInput);
+        this.syncInput(this.fallbackInput);
+      }
+    });
+  }
 
   @HostListener('click', ['$event'])
   protected onClick(event?: MouseEvent) {
@@ -141,21 +173,55 @@ export class HellDropZone extends HellStyleable implements OnDestroy {
   }
 
   private ensureInput(): HTMLInputElement {
-    if (this.fileInput) {
-      this.syncInput(this.fileInput);
-      return this.fileInput;
-    }
+    const configuredInput = this.resolveNativeInput();
+    const input = configuredInput ?? this.ensureFallbackInput();
+
+    this.fileInput = input;
+    this.bindInput(input);
+    this.syncInput(input);
+    return input;
+  }
+
+  private resolveNativeInput(): HTMLInputElement | null {
+    const providedInput = this.nativeInput();
+    if (!providedInput) return null;
+
+    const candidate =
+      typeof providedInput === 'string'
+        ? this.host.ownerDocument.getElementById(providedInput)
+        : providedInput;
+
+    return candidate instanceof HTMLInputElement && candidate.type === 'file'
+      ? candidate
+      : null;
+  }
+
+  private ensureFallbackInput(): HTMLInputElement {
+    if (this.fallbackInput) return this.fallbackInput;
 
     const inp = this.host.ownerDocument.createElement('input');
     inp.type = 'file';
     inp.hidden = true;
     inp.tabIndex = -1;
-    inp.addEventListener('click', this.inputClickHandler);
-    inp.addEventListener('change', this.inputChangeHandler);
     this.host.appendChild(inp);
-    this.fileInput = inp;
-    this.syncInput(inp);
+    this.fallbackInput = inp;
     return inp;
+  }
+
+  private bindInput(input: HTMLInputElement): void {
+    if (this.nativeInputBound === input) return;
+
+    if (this.nativeInputBound) this.unbindInput(this.nativeInputBound);
+
+    input.addEventListener('click', this.inputClickHandler);
+    input.addEventListener('change', this.inputChangeHandler);
+    this.nativeInputBound = input;
+  }
+
+  private unbindInput(input: HTMLInputElement): void {
+    input.removeEventListener('click', this.inputClickHandler);
+    input.removeEventListener('change', this.inputChangeHandler);
+    if (this.nativeInputBound === input) this.nativeInputBound = undefined;
   }
 
   private syncInput(input: HTMLInputElement): void {
@@ -181,12 +247,12 @@ export class HellDropZone extends HellStyleable implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (!this.fileInput) return;
+    if (this.nativeInputBound) this.unbindInput(this.nativeInputBound);
 
-    this.fileInput.removeEventListener('click', this.inputClickHandler);
-    this.fileInput.removeEventListener('change', this.inputChangeHandler);
-    this.fileInput.remove();
+    this.fallbackInput?.remove();
+    this.nativeInputBound = undefined;
     this.fileInput = undefined;
+    this.fallbackInput = undefined;
     this.resetDragState();
   }
 }

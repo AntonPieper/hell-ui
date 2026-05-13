@@ -12,13 +12,17 @@ import { DropZoneSingleFileImagesOnlyExample } from './examples/single-file-imag
 import dropZoneSingleFileImagesOnlyExampleCodeRaw from './examples/single-file-images-only.example.ts?raw' with {
   loader: 'text',
 };
-
+import { DropZoneNativeInputExample } from './examples/native-input.example';
+import dropZoneNativeInputExampleCodeRaw from './examples/native-input.example.ts?raw' with {
+  loader: 'text',
+};
 @Component({
   selector: 'hd-drop-zone',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ExampleTabs,
     DropZoneExampleExample,
+    DropZoneNativeInputExample,
     DropZoneSingleFileImagesOnlyExample,
     DropZoneDisabledExample,
   ],
@@ -40,6 +44,11 @@ import dropZoneSingleFileImagesOnlyExampleCodeRaw from './examples/single-file-i
         <app-drop-zone-single-file-images-only-example />
       </hd-example-tabs>
 
+      <h2>Native input seam</h2>
+      <hd-example-tabs [code]="dropZoneNativeInputExampleCode">
+        <app-drop-zone-native-input-example />
+      </hd-example-tabs>
+
       <h2>Disabled</h2>
       <hd-example-tabs [code]="dropZoneDisabledExampleCode">
         <app-drop-zone-disabled-example />
@@ -50,6 +59,11 @@ import dropZoneSingleFileImagesOnlyExampleCodeRaw from './examples/single-file-i
         <li><code>multiple</code>: allow multiple files (default <code>true</code>)</li>
         <li><code>accept</code>: comma-separated MIME / wildcard / extension filter for picker and emitted files</li>
         <li><code>disabled</code></li>
+        <li>
+          <code>nativeInput</code>: optional consumer-owned
+          <code>HTMLInputElement</code> or host-document
+          <code>id</code> of an input to use for file picking
+        </li>
         <li><code>(files)</code>: emits picked or dropped files</li>
       </ul>
 
@@ -72,5 +86,6 @@ export class DropZonePage {
   protected readonly dropZoneExampleExampleCode = dropZoneExampleExampleCodeRaw;
   protected readonly dropZoneSingleFileImagesOnlyExampleCode =
     dropZoneSingleFileImagesOnlyExampleCodeRaw;
+  protected readonly dropZoneNativeInputExampleCode = dropZoneNativeInputExampleCodeRaw;
   protected readonly dropZoneDisabledExampleCode = dropZoneDisabledExampleCodeRaw;
 }
