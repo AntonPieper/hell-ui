@@ -32,9 +32,10 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         captions strip.
       </p>
       <p>
-        Live captions are experimental browser sugar. They depend on limited Web Speech and media
-        capture APIs, are disabled by default, and are not a replacement for provided captions,
-        transcripts, or server-generated accessibility content.
+        Live captions rely on browser speech-recognition and media-capture APIs and are intentionally
+        best-effort only. They are not accessibility-grade captions or timed text; treat them as an
+        experimental hinting aid and never as a replacement for provided captions, transcripts,
+        or server-generated accessibility content.
       </p>
 
       <h2>With title and date</h2>
@@ -71,8 +72,8 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         <li><code>downloadName</code>: filename for the download link</li>
         <li><code>allowDownload</code>: show / hide download button (default <code>true</code>)</li>
         <li>
-          <code>allowLiveCaptions</code>: opt into the experimental Chromium-only captions feature
-          (default <code>false</code>)
+          <code>allowLiveCaptions</code>: opt into experimental browser live captions (default <code>false</code>)
+          that are best-effort only and not intended as accessibility-grade captions/timed text
         </li>
         <li>
           <code>lang</code>: BCP-47 hint for <code>SpeechRecognition</code>. Defaults to
@@ -90,8 +91,9 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         <li>Volume slider doubles as a mute toggle when dragged to 0.</li>
         <li>
           The CC button only appears in browsers that expose <code>SpeechRecognition</code> and
-          <code>HTMLMediaElement.captureStream()</code> — currently Chromium-based desktops. Audio
-          is piped via <code>start(track)</code>, so no microphone permission is needed.
+          <code>HTMLMediaElement.captureStream()</code> — currently Chromium-based desktops are
+          common. Results are best-effort only, so recognition accuracy and timing may drift.
+          Audio is piped via <code>start(track)</code>, so no microphone permission is needed.
         </li>
         <li>
           Toggling CC while paused only opens the captions panel. Captions follow the audio: pause

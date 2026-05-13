@@ -18,21 +18,26 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
       <div class="hd-prose">
         <h1>Table utilities</h1>
         <p>
-          A set of low-level structural directives for building dense table utilities, not a
-          batteries-included data grid. The
-          directives apply only host classes, data attributes, and ARIA wiring; the consumer owns the
-          <code>&lt;table&gt;</code>, <code>&lt;tr&gt;</code>, and cell markup, and composes search,
-          filtering, sorting, and pagination from other <code>hell</code> primitives.
+          Table utilities from <code>@hell-ui/angular/features/table-utilities</code> are a set of
+          low-level structural directives for building dense table utilities, not a batteries-
+          included data grid. <code>@hell-ui/angular/features/data-table</code> is a compatibility naming
+          for this package.
+        </p>
+
+        <p>
+          The directives apply only host classes, data attributes, and ARIA wiring; the consumer
+          owns the <code>&lt;table&gt;</code>, <code>&lt;tr&gt;</code>, and cell markup, and composes
+          search, filtering, sorting, and pagination from other <code>hell</code> primitives.
         </p>
 
         <h2>Scope</h2>
         <p>
           This feature deliberately does not own a data source, column definition model, filtering,
           pagination, virtualization, selection model, or grid semantics. Import it from
-          <code>@hell-ui/angular/features/table-utilities</code>; <code>@hell-ui/angular/features/data-table</code> remains
-          a legacy compatibility alias. Bring Angular CDK Table, TanStack Table, AG Grid, a backend
-          API, or your own state layer when you need a real data table. Use Hell's directives only
-          for host styling, row activation, sortable header affordances, and column resize handles.
+          <code>@hell-ui/angular/features/table-utilities</code>; <code>@hell-ui/angular/features/data-table</code>
+          remains a compatibility naming alias. Bring Angular CDK Table, TanStack Table, AG Grid, a
+          backend API, or your own state layer when you need a real data table. Use Hell's directives
+          only for host styling, row activation, sortable header affordances, and column resize handles.
         </p>
 
         <h2>Example</h2>
@@ -103,7 +108,8 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
           </li>
           <li>
             <code>HELL_TABLE_UTILITY_DIRECTIVES</code>: preferred standalone import list.
-            <code>HELL_TABLE_DIRECTIVES</code> remains as a compatibility alias.
+            <code>HELL_TABLE_DIRECTIVES</code> remains as a compatibility alias naming for older
+            imports.
           </li>
           <li>
             <code>td[hellTableCell]</code>: emits <code>(cellSelect)</code> on click for per-cell

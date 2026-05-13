@@ -19,11 +19,11 @@ Hell exposes:
 pnpm add @hell-ui/angular ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome tailwindcss
 ```
 
-Feature entry points add their own optional stacks only when imported:
+Feature entry points add their own optional stacks only when imported. npm peer metadata is package-wide, so entry-point-specific peers are marked optional in `package.json`; treat this table as required for the entry point you import.
 
 | Entry point | Install when used |
 | --- | --- |
-| `@hell-ui/angular/primitives`, `@hell-ui/angular/composites` | `ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome tailwindcss` |
+| `@hell-ui/angular/primitives`, `@hell-ui/angular/composites` | `@angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome tailwindcss` |
 | `@hell-ui/angular/features/table-utilities` | Angular + `tailwindcss` only |
 | `@hell-ui/angular/features/data-table` | Legacy compatibility alias for `@hell-ui/angular/features/table-utilities` |
 | `@hell-ui/angular/features/code-editor` | `@codemirror/view @codemirror/state @codemirror/commands @codemirror/language @lezer/highlight` plus any language package, e.g. `@codemirror/lang-javascript` |
@@ -37,8 +37,8 @@ Feature entry points add their own optional stacks only when imported:
 | Composites (`@hell-ui/angular/composites`) | Beta | Browser-first: `window`/`document` and global listeners for overlays |
 | Table utilities (`@hell-ui/angular/features/table-utilities`) | Beta | Optional peer; uses `ResizeObserver` for table sizing |
 | Code editor (`@hell-ui/angular/features/code-editor`) | Beta/optional peer | Browser-only: `window`/`document` interactions |
-| PDF viewer (`@hell-ui/angular/features/pdf-viewer`) | Experimental | Browser-only: `window`/`document`, pdf workers, and global listeners |
-| Live captions (`allowLiveCaptions`) | Experimental/browser-only | Uses `navigator` + `SpeechRecognition` |
+| PDF viewer (`@hell-ui/angular/features/pdf-viewer`) | Experimental | Browser-only app surface/recipe: `window`/`document`, pdf workers, global listeners, and app-owned pdf.js/browser compatibility decisions |
+| Live captions (`allowLiveCaptions`) | Experimental/browser-only/best-effort | Uses `navigator` + `SpeechRecognition` + `captureStream`; not accessibility-grade captions or production timed text |
 
 ## Angular Imports
 

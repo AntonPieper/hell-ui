@@ -968,7 +968,7 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
             title: 'Audio Player: Live Captions',
             detail: 'components/audio-player/examples/live-captions.example.ts',
             terms:
-              'audio-player live-captions components/audio-player/examples/live-captions.example components/audio-player hell-audio-player SpeechRecognition captureStream experimental best-effort',
+              'audio-player live-captions components/audio-player/examples/live-captions.example components/audio-player hell-audio-player SpeechRecognition captureStream experimental best-effort timed-text accessibility',
           },
           {
             title: 'Audio Player: Untitled Controls Only',
@@ -1115,7 +1115,7 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
             title: 'Omnibar: Async Search',
             detail: 'components/omnibar/examples/async-search.example.ts',
             terms:
-              'omnibar async-search components/omnibar/examples/async-search.example components/omnibar hell-omnibar HELL_OMNIBAR_DIRECTIVES command palette backend async search searchSource searchFields ranking debounce',
+              'omnibar async-search components/omnibar/examples/async-search.example components/omnibar hell-omnibar HELL_OMNIBAR_DIRECTIVES command palette backend async search searchSource searchFields ranking debounce starter hotkey adapter search scope',
           },
         ],
         usages: [
@@ -1313,13 +1313,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
             title: 'Table Utilities: Example',
             detail: 'components/data-table/examples/example.example.ts',
             terms:
-              'table utilities data-table example components/data-table/examples/example.example components/data-table hellTable hellTableRow hellTableSortButton hellOmnibar smart search ranking role assignee',
+              'table utilities data-table example components/data-table/examples/example.example components/data-table hellTable hellTableRow hellTableSortButton hellOmnibar smart search ranking role assignee data-table compatibility alias',
           },
           {
             title: 'Table Utilities: Row Editor',
             detail: 'components/data-table/examples/row-editor.example.ts',
             terms:
-              'table utilities data-table row-editor components/data-table/examples/row-editor.example components/data-table hellResizable hellTable hell-code-editor',
+              'table utilities data-table row-editor components/data-table/examples/row-editor.example components/data-table hellResizable hellTable hell-code-editor data-table compatibility alias',
           },
         ],
         usages: [
@@ -1342,13 +1342,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
             title: 'Pdf Viewer: Lazy Loading',
             detail: 'components/pdf-viewer/examples/lazy-loading.example.ts',
             terms:
-              'pdf-viewer lazy-loading components/pdf-viewer/examples/lazy-loading.example components/pdf-viewer hell-pdf-viewer pdfjs lazy loadComponent dynamic import feature route stylesheet experimental beta',
+              'pdf-viewer lazy-loading components/pdf-viewer/examples/lazy-loading.example components/pdf-viewer hell-pdf-viewer pdfjs lazy loadComponent dynamic import feature route stylesheet experimental beta app-surface recipe',
           },
           {
             title: 'Pdf Viewer: Live Demo',
             detail: 'components/pdf-viewer/examples/live-demo.example.ts',
             terms:
-              'pdf-viewer live-demo components/pdf-viewer/examples/live-demo.example components/pdf-viewer hell-pdf-viewer pdfjs experimental beta',
+              'pdf-viewer live-demo components/pdf-viewer/examples/live-demo.example components/pdf-viewer hell-pdf-viewer pdfjs experimental beta app-surface recipe',
           },
         ],
         loadComponent: () =>

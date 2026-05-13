@@ -38,6 +38,10 @@ import { HELL_TABLE_UTILITY_DIRECTIVES } from '@hell-ui/angular/features/table-u
 
 Peer dependency expectations by entry point:
 
+> npm peer metadata is package-wide, so Hell marks entry-point-specific peers
+> optional in `package.json`. Treat the table below as required for the entry
+> point you import.
+
 | Entry point | Extra peers beyond Angular core/common |
 |---|---|
 | `@hell-ui/angular/core` | `rxjs` |
@@ -57,8 +61,8 @@ Peer dependency expectations by entry point:
 | Composites | Beta | `@hell-ui/angular/composites` | Browser DOM + `document`/`window`/global listeners |
 | Table utilities | Beta | `@hell-ui/angular/features/table-utilities` | Uses `ResizeObserver`; browser-first |
 | Code editor | Beta/optional peer | `@hell-ui/angular/features/code-editor` | Needs `window` + `document` |
-| PDF viewer | Experimental | `@hell-ui/angular/features/pdf-viewer` | Browser-only; requires `window`/`document`, pdf workers, and global listeners |
-| Live captions | Experimental (feature opt-in) | `@hell-ui/angular/composites` (`allowLiveCaptions`) | Browser-only; uses `navigator` + `SpeechRecognition` |
+| PDF viewer | Experimental | `@hell-ui/angular/features/pdf-viewer` | Experimental app surface/recipe; browser-only; requires `window`/`document`, pdf workers, global listeners, and your own pdf.js/browser compatibility decisions |
+| Live captions | Experimental/best-effort (feature opt-in) | `@hell-ui/angular/composites` (`allowLiveCaptions`) | Browser-only; uses `navigator` + `SpeechRecognition` + `captureStream`; best-effort only, not accessibility-grade captions/timed text |
 
 ## Styles
 

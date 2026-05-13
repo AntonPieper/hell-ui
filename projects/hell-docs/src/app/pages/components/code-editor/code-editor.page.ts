@@ -51,6 +51,11 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
         </li>
         <li><code>readOnly</code>: disables editing and renders viewer styling.</li>
         <li><code>unstyled</code>: removes hell host classes but keeps CodeMirror setup.</li>
+        <li>
+          <code>hellCodeEditorSetupFactory(document)</code>: preferred setup export when an app
+          needs a specific document or shadow-root owner; <code>hellCodeEditorSetup</code> remains
+          as browser-global legacy compatibility.
+        </li>
       </ul>
 
       <h2>Do</h2>
@@ -58,6 +63,7 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
         <li>Install language packages in the app using the editor, not in the reusable library.</li>
         <li>Keep extension arrays stable when possible so reconfiguration is intentional.</li>
         <li>Use <code>readOnly</code> for docs, audit trails and generated-code viewers.</li>
+        <li>Use <code>hellCodeEditorSetupFactory</code> instead of module-global setup for shadow DOM, iframe, or after-hydration document contexts.</li>
       </ul>
 
       <h2>Don't</h2>
