@@ -7,13 +7,21 @@
     "rootDir": ".",
     "paths": {
       "hell": ["./projects/hell/src/public-api.ts"],
+      "@hell-ui/angular": ["./projects/hell/src/public-api.ts"],
       "hell/core": ["./projects/hell/src/lib/public-api-core.ts"],
+      "@hell-ui/angular/core": ["./projects/hell/src/lib/public-api-core.ts"],
       "hell/primitives": ["./projects/hell/src/lib/public-api-primitives.ts"],
+      "@hell-ui/angular/primitives": ["./projects/hell/src/lib/public-api-primitives.ts"],
       "hell/composites": ["./projects/hell/src/lib/public-api-composites.ts"],
+      "@hell-ui/angular/composites": ["./projects/hell/src/lib/public-api-composites.ts"],
       "hell/features/code-editor": ["./projects/hell/src/lib/public-api-feature-code-editor.ts"],
+      "@hell-ui/angular/features/code-editor": ["./projects/hell/src/lib/public-api-feature-code-editor.ts"],
       "hell/features/data-table": ["./projects/hell/src/lib/public-api-feature-data-table.ts"],
+      "@hell-ui/angular/features/data-table": ["./projects/hell/src/lib/public-api-feature-data-table.ts"],
       "hell/features/table-utilities": ["./projects/hell/src/lib/public-api-feature-table-utilities.ts"],
-      "hell/features/pdf-viewer": ["./projects/hell/src/lib/public-api-feature-pdf-viewer.ts"]
+      "@hell-ui/angular/features/table-utilities": ["./projects/hell/src/lib/public-api-feature-table-utilities.ts"],
+      "hell/features/pdf-viewer": ["./projects/hell/src/lib/public-api-feature-pdf-viewer.ts"],
+      "@hell-ui/angular/features/pdf-viewer": ["./projects/hell/src/lib/public-api-feature-pdf-viewer.ts"]
     },
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,

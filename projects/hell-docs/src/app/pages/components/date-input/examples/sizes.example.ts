@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HellDateInput } from 'hell/composites';
+import { HellDateInput } from '@hell-ui/angular/composites';
 
 @Component({
   selector: 'app-date-input-sizes-example',

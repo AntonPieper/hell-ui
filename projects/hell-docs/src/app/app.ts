@@ -73,15 +73,15 @@ import {
   HellNavSectionToggle,
   HellToaster,
   HELL_OMNIBAR_DIRECTIVES,
-} from 'hell/composites';
+} from '@hell-ui/angular/composites';
 import {
   HellButton,
   HellIcon,
   HellTag,
   HELL_MENU_DIRECTIVES,
   HELL_SELECT_DIRECTIVES,
-} from 'hell/primitives';
-import { type HellSearchField, type HellSearchResult } from 'hell/core';
+} from '@hell-ui/angular/primitives';
+import { type HellSearchField, type HellSearchResult } from '@hell-ui/angular/core';
 import {
   HD_DOCS_KIND_FILTER_LABEL,
   HD_DOCS_KIND_FILTER_OPTIONS,

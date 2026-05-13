@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HellSkeleton } from 'hell/primitives';
+import { HellSkeleton } from '@hell-ui/angular/primitives';
 
 @Component({
   selector: 'app-skeleton-shapes-example',

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_RESIZABLE_DIRECTIVES } from 'hell/composites';
+import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/composites';
 
 @Component({
   selector: 'app-resizable-vertical-split-example',

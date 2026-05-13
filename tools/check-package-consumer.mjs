@@ -372,7 +372,39 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 }
 
 function tableUtilitiesConsumerMainTs() {
-  return tableConsumerMainTs(`${packageName}/features/table-utilities`, 'HELL_TABLE_UTILITY_DIRECTIVES');
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HELL_TABLE_UTILITY_DIRECTIVES, HellTableRowIgnore } from '${packageName}/features/table-utilities';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [...HELL_TABLE_UTILITY_DIRECTIVES, HellTableRowIgnore],
+  template: \`
+    <div hellTableContainer>
+      <table hellTable>
+        <thead hellTableHead>
+          <tr hellTableRow>
+            <th hellTableHeaderCell columnId="name">Name</th>
+            <th hellTableHeaderCell columnId="role">Role</th>
+          </tr>
+        </thead>
+        <tbody hellTableBody>
+          <tr hellTableRow selected>
+            <td hellTableCell>
+              <span hellTableRowIgnore>ignore</span>
+            </td>
+            <td hellTableCell>Admin</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  \`,
+})
+class App {}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
 }
 
 function dataTableConsumerMainTs() {

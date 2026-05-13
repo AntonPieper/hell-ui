@@ -45,7 +45,7 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
       <h2>4. Configure built-in labels</h2>
       <p>
         Built-in ARIA labels default to English. Use <code>provideHellLabels</code> from
-        <code>hell/core</code> at the application or feature boundary to localize shared labels.
+        <code>@hell-ui/angular/core</code> at the application or feature boundary to localize shared labels.
       </p>
       <hd-code-block [code]="labelsCode" />
 
@@ -73,6 +73,6 @@ export class GettingStartedPage {
   protected readonly installCode = installCodeRaw;
   protected readonly postcssCode = postcssCodeRaw;
   protected readonly stylesCode = stylesCodeRaw;
-  protected readonly labelsCode = `import { ApplicationConfig } from '@angular/core';\nimport { provideHellLabels } from 'hell/core';\n\nexport const appConfig: ApplicationConfig = {\n  providers: [\n    provideHellLabels({\n      loading: 'Wird geladen',\n      pagination: {\n        navigation: 'Seitennavigation',\n        nextPage: 'Nächste Seite',\n        page: (page) => 'Seite ' + page,\n      },\n    }),\n  ],\n};\n`;
+  protected readonly labelsCode = `import { ApplicationConfig } from '@angular/core';\nimport { provideHellLabels } from '@hell-ui/angular/core';\n\nexport const appConfig: ApplicationConfig = {\n  providers: [\n    provideHellLabels({\n      loading: 'Wird geladen',\n      pagination: {\n        navigation: 'Seitennavigation',\n        nextPage: 'Nächste Seite',\n        page: (page) => 'Seite ' + page,\n      },\n    }),\n  ],\n};\n`;
   protected readonly buttonDemoCode = buttonDemoCodeRaw;
 }

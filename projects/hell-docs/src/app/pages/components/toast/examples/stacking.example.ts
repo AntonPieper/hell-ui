@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, viewChild, TemplateRef } from '@angular/core';
-import { HellToastService } from 'hell/composites';
-import { HellButton } from 'hell/primitives';
+import { HellToastService } from '@hell-ui/angular/composites';
+import { HellButton } from '@hell-ui/angular/primitives';
 
 @Component({
   selector: 'app-toast-stacking-example',

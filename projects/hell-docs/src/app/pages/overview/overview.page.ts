@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HELL_CARD_DIRECTIVES, HellButton } from 'hell/primitives';
+import { HELL_CARD_DIRECTIVES, HellButton } from '@hell-ui/angular/primitives';
 
 @Component({
   selector: 'hd-overview',

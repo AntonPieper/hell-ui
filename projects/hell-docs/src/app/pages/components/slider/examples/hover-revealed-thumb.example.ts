@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HELL_FIELD_DIRECTIVES, HellSlider } from 'hell/primitives';
+import { HELL_FIELD_DIRECTIVES, HellSlider } from '@hell-ui/angular/primitives';
 
 @Component({
   selector: 'app-slider-hover-revealed-thumb-example',

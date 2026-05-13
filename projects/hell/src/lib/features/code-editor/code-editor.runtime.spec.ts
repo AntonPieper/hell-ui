@@ -63,4 +63,26 @@ describe('HellCodeEditorRuntime', () => {
 
     runtime.destroy();
   });
+
+  it('uses ShadowRoot root when the host is slotted into one', () => {
+    const host = document.createElement('div');
+    const container = document.createElement('div');
+    const shadow = container.attachShadow({ mode: 'open' });
+    shadow.append(host);
+    document.body.append(container);
+
+    const runtime = new HellCodeEditorRuntime({
+      host,
+      value: 'alpha',
+      extensions: [],
+      readOnly: false,
+      onValueChange: () => {},
+    });
+
+    const root = (runtime.view as unknown as { root: Document | ShadowRoot }).root;
+    expect(root).toBe(shadow);
+
+    runtime.destroy();
+    container.remove();
+  });
 });

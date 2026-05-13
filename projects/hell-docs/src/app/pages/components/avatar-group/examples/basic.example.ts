@@ -6,8 +6,8 @@ import {
   HellAvatar,
   HellCheckbox,
   HellIcon,
-} from 'hell/primitives';
-import { HELL_AVATAR_GROUP_DIRECTIVES } from 'hell/composites';
+} from '@hell-ui/angular/primitives';
+import { HELL_AVATAR_GROUP_DIRECTIVES } from '@hell-ui/angular/composites';
 
 interface TeamMember {
   name: string;

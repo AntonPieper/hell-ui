@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_TABS_DIRECTIVES } from 'hell/primitives';
+import { HELL_TABS_DIRECTIVES } from '@hell-ui/angular/primitives';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { TabsExampleExample } from './examples/example.example';
 import tabsExampleExampleCodeRaw from './examples/example.example.ts?raw' with {

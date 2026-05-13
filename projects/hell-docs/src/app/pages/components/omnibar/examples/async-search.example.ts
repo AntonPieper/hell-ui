@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidMagnifyingGlass, faSolidUser } from '@ng-icons/font-awesome/solid';
-import { HELL_OMNIBAR_DIRECTIVES } from 'hell/composites';
-import { type HellSearchField, type HellSearchSource } from 'hell/core';
-import { HellIcon } from 'hell/primitives';
+import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/composites';
+import { type HellSearchField, type HellSearchSource } from '@hell-ui/angular/core';
+import { HellIcon } from '@hell-ui/angular/primitives';
 
 interface Person {
   readonly id: number;

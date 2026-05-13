@@ -3,14 +3,14 @@
  *
  * Consumer apps should import:
  *   @import "tailwindcss";
- *   @import "hell/styles";
+ *   @import "@hell-ui/angular/styles";
  *
  * Import smaller tiers when you do not need everything:
- *   @import "hell/styles/tokens";
- *   @import "hell/styles/primitives";
- *   @import "hell/styles/composites";
- *   @import "hell/styles/features/table-utilities";
- *   @import "hell/styles/features/data-table"; legacy alias
+ *   @import "@hell-ui/angular/styles/tokens";
+ *   @import "@hell-ui/angular/styles/primitives";
+ *   @import "@hell-ui/angular/styles/composites";
+ *   @import "@hell-ui/angular/styles/features/table-utilities";
+ *   @import "@hell-ui/angular/styles/features/data-table"; legacy alias
  *
  * Tokens + design system base are declared in tokens.css.
  * Component classes are split per module under ./components/.

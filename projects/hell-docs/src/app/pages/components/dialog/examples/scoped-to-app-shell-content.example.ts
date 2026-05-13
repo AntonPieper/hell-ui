@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_CARD_DIRECTIVES, HELL_DIALOG_DIRECTIVES, HellButton } from 'hell/primitives';
+import { HELL_CARD_DIRECTIVES, HELL_DIALOG_DIRECTIVES, HellButton } from '@hell-ui/angular/primitives';
 
 @Component({
   selector: 'app-dialog-scoped-to-app-shell-content-example',

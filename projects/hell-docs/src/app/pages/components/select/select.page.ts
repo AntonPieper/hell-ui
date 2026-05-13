@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_SELECT_DIRECTIVES } from 'hell/primitives';
+import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/primitives';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { SelectBasicExample } from './examples/basic.example';
 import selectBasicExampleCodeRaw from './examples/basic.example.ts?raw' with { loader: 'text' };

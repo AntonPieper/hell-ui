@@ -7,6 +7,6 @@ export * from './lib/public-api-core';
 export * from './lib/public-api-primitives';
 
 // Composites and features are available through entry points:
-// - hell/composites / @hell-ui/angular/composites
-// - hell/features/data-table (legacy), hell/features/table-utilities, hell/features/code-editor, hell/features/pdf-viewer / corresponding @hell-ui/angular/* paths
-// Table utilities are preferred; data-table is legacy compatibility.
+// - @hell-ui/angular/composites
+// - @hell-ui/angular/features/data-table (legacy), @hell-ui/angular/features/table-utilities,
+//   @hell-ui/angular/features/code-editor, @hell-ui/angular/features/pdf-viewer

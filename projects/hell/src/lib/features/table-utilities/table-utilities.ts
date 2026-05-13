@@ -7,6 +7,7 @@ export {
   HellTableHead,
   HellTableHeaderCell,
   HellTableRow,
+  HellTableRowIgnore,
   HellTableSortButton,
   HELL_TABLE_UTILITY_DIRECTIVES,
 } from '../data-table/data-table';

@@ -202,8 +202,10 @@ function checkDocsRootImportContract() {
 
   for (const file of docsFiles) {
     const source = readFile(file);
-    if (/from\s+['"]hell['"]/i.test(source)) {
-      failures.push(`Docs app file ${file.slice(root.length + 1)} imports from root hell`);
+    if (/(?:from|import\()\s*['\"]hell(?:\/|['\"])/.test(source)) {
+      failures.push(
+        `Docs app file ${file.slice(root.length + 1)} imports hell root or a hell/* subpath`,
+      );
     }
   }
 }
@@ -251,12 +253,18 @@ function checkPackageEntryPoints() {
   const features = childDirectories(join(root, 'projects/hell/src/lib/features'));
   const expectedPaths = {
     hell: './projects/hell/src/public-api.ts',
+    '@hell-ui/angular': './projects/hell/src/public-api.ts',
     'hell/core': './projects/hell/src/lib/public-api-core.ts',
+    '@hell-ui/angular/core': './projects/hell/src/lib/public-api-core.ts',
     'hell/primitives': './projects/hell/src/lib/public-api-primitives.ts',
+    '@hell-ui/angular/primitives': './projects/hell/src/lib/public-api-primitives.ts',
     'hell/composites': './projects/hell/src/lib/public-api-composites.ts',
+    '@hell-ui/angular/composites': './projects/hell/src/lib/public-api-composites.ts',
   };
   for (const feature of features) {
     expectedPaths[`hell/features/${feature}`] =
+      `./projects/hell/src/lib/public-api-feature-${feature}.ts`;
+    expectedPaths[`@hell-ui/angular/features/${feature}`] =
       `./projects/hell/src/lib/public-api-feature-${feature}.ts`;
   }
 
@@ -956,7 +964,9 @@ function pagePathForRoute(routePath) {
 }
 
 function exportPaths(source) {
-  return [...source.matchAll(/export\s+\*\s+from\s+['"]([^'"]+)['"]/g)].map((match) => match[1]);
+  return [...source.matchAll(/export\s+[^;]*?\s+from\s+['"]([^'"]+)['"]/g)].map(
+    (match) => match[1],
+  );
 }
 
 function escapeRegExp(value) {

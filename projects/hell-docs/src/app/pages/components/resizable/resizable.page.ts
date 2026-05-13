@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_RESIZABLE_DIRECTIVES } from 'hell/composites';
+import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/composites';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { ResizableGripHandle5Example } from './examples/grip-handle-5.example';
 import resizableGripHandle5ExampleCodeRaw from './examples/grip-handle-5.example.ts?raw' with {

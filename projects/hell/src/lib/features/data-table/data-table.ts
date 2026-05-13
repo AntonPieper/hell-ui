@@ -508,7 +508,7 @@ export const HELL_TABLE_UTILITY_DIRECTIVES = [
 
 /**
  * @deprecated Use `HELL_TABLE_UTILITY_DIRECTIVES`. The entry point remains
- * `hell/features/data-table` for compatibility, but the module is table
- * utilities rather than a full data grid/data-source abstraction.
+ * `@hell-ui/angular/features/data-table` for compatibility, but the module is
+ * table utilities rather than a full data grid/data-source abstraction.
  */
 export const HELL_TABLE_DIRECTIVES = HELL_TABLE_UTILITY_DIRECTIVES;

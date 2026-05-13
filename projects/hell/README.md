@@ -68,7 +68,7 @@ For progressive loading:
 @import "@hell-ui/angular/styles/features/pdf-viewer";
 ```
 
-Use `@hell-ui/angular/features/data-table` only as the legacy CSS alias for table
+Use `@hell-ui/angular/styles/features/data-table` only as the legacy CSS alias for table
 utilities.
 
 ## Style Opt-Out

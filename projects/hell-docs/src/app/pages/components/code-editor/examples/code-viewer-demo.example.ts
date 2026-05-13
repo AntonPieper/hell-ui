@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { javascript } from '@codemirror/lang-javascript';
 import { type Extension } from '@codemirror/state';
-import { HellCodeEditor } from 'hell/features/code-editor';
+import { HellCodeEditor } from '@hell-ui/angular/features/code-editor';
 
 @Component({
   selector: 'app-code-viewer-demo',

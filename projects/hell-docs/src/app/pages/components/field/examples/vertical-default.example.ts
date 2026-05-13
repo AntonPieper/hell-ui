@@ -5,8 +5,8 @@ import {
   HellInput,
   HellNativeSelect,
   HellSwitch,
-} from 'hell/primitives';
-import { HellDateInput } from 'hell/composites';
+} from '@hell-ui/angular/primitives';
+import { HellDateInput } from '@hell-ui/angular/composites';
 
 @Component({
   selector: 'app-field-vertical-default-example',

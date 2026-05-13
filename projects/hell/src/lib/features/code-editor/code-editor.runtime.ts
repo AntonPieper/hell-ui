@@ -228,8 +228,52 @@ export const hellCodeEditorTheme: Extension = [
 
 function resolveCodeEditorRoot(host: HTMLElement): Document | ShadowRoot {
   const root = host.getRootNode({ composed: false });
-  const isShadowRoot = typeof ShadowRoot !== 'undefined' && root instanceof ShadowRoot;
-  return root instanceof Document || isShadowRoot ? (root as Document | ShadowRoot) : host.ownerDocument;
+  const ownerWindow = host.ownerDocument.defaultView;
+
+  const documentCtor = ownerWindow?.Document;
+  if (isInstanceOfInWindow(root, documentCtor)) return root as Document;
+
+  const shadowRootCtor = ownerWindow?.ShadowRoot;
+  if (isInstanceOfInWindow(root, shadowRootCtor)) return root as ShadowRoot;
+
+  if (isDocumentLike(root) || isShadowRootLike(root)) return root as Document | ShadowRoot;
+
+  return host.ownerDocument;
+}
+
+function isInstanceOfInWindow(
+  value: unknown,
+  ctor: ({ new (): object } & { prototype: object }) | undefined,
+): value is object {
+  if (!ctor || typeof value !== 'object' || value === null) return false;
+
+  try {
+    return value instanceof ctor;
+  } catch {
+    return false;
+  }
+}
+
+function isDocumentLike(value: unknown): value is Document {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'nodeType' in value &&
+    (value as Node).nodeType === 9 &&
+    'createElement' in value &&
+    'defaultView' in value
+  );
+}
+
+function isShadowRootLike(value: unknown): value is ShadowRoot {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'nodeType' in value &&
+    (value as Node).nodeType === 11 &&
+    'host' in value &&
+    'mode' in value
+  );
 }
 
 export class HellCodeEditorRuntime implements HellCodeEditorRuntimePort {

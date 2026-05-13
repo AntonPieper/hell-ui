@@ -8,7 +8,7 @@ import {
   faSolidTriangleExclamation,
   faSolidXmark,
 } from '@ng-icons/font-awesome/solid';
-import { HellIcon } from 'hell/primitives';
+import { HellIcon } from '@hell-ui/angular/primitives';
 
 const HD_ICON_PAGE_ICONS = {
   faSolidArrowDown,

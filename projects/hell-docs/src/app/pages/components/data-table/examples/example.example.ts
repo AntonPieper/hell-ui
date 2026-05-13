@@ -24,11 +24,11 @@ import {
   faSolidUsers,
   faSolidXmark,
 } from '@ng-icons/font-awesome/solid';
-import { HELL_OMNIBAR_DIRECTIVES, HELL_SPLIT_VIEW_DIRECTIVES } from 'hell/composites';
-import { hellSearchKey, hellSearchWords } from 'hell/core';
-import { HELL_MENU_DIRECTIVES, HellButton, HellIcon, HellPaginationStrip, HellSkeleton } from 'hell/primitives';
-import { HellCodeEditor } from 'hell/features/code-editor';
-import { HELL_TABLE_UTILITY_DIRECTIVES } from 'hell/features/table-utilities';
+import { HELL_OMNIBAR_DIRECTIVES, HELL_SPLIT_VIEW_DIRECTIVES } from '@hell-ui/angular/composites';
+import { hellSearchKey, hellSearchWords } from '@hell-ui/angular/core';
+import { HELL_MENU_DIRECTIVES, HellButton, HellIcon, HellPaginationStrip, HellSkeleton } from '@hell-ui/angular/primitives';
+import { HellCodeEditor } from '@hell-ui/angular/features/code-editor';
+import { HELL_TABLE_UTILITY_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
 
 type RowRole = 'Admin' | 'Editor' | 'Viewer';
 type RowAssignee = 'Ada' | 'Grace' | 'Linus' | 'Margaret';

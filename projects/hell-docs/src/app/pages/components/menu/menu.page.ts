@@ -7,7 +7,7 @@ import {
   faSolidPenToSquare,
   faSolidShareNodes,
 } from '@ng-icons/font-awesome/solid';
-import { HELL_MENU_DIRECTIVES } from 'hell/primitives';
+import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/primitives';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { MenuBasicExample } from './examples/basic.example';
 import menuBasicExampleCodeRaw from './examples/basic.example.ts?raw' with { loader: 'text' };
