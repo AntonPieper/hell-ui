@@ -3,12 +3,20 @@ import {
   Component,
   booleanAttribute,
   computed,
+  effect,
   forwardRef,
   input,
   output,
   signal,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+  ControlValueAccessor,
+  NG_VALIDATORS,
+  NG_VALUE_ACCESSOR,
+  type AbstractControl,
+  type ValidationErrors,
+  type Validator,
+} from '@angular/forms';
 import { ngpCheckbox } from 'ng-primitives/checkbox';
 import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
 import { HellStyleable } from '../../core/styleable';
@@ -29,6 +37,11 @@ import { HellStyleable } from '../../core/styleable';
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => HellCheckbox),
+      multi: true,
+    },
+    {
+      provide: NG_VALIDATORS,
       useExisting: forwardRef(() => HellCheckbox),
       multi: true,
     },
@@ -65,7 +78,7 @@ import { HellStyleable } from '../../core/styleable';
     }
   `,
 })
-export class HellCheckbox extends HellStyleable implements ControlValueAccessor {
+export class HellCheckbox extends HellStyleable implements ControlValueAccessor, Validator {
   readonly checked = input(false, { transform: booleanAttribute });
   readonly indeterminate = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
@@ -78,11 +91,21 @@ export class HellCheckbox extends HellStyleable implements ControlValueAccessor 
   private readonly controlChecked = signal(false);
   private readonly controlDisabled = signal(false);
   private readonly cva = new HellControlValueAccessorBridge<boolean>();
+  private onValidatorChange: () => void = () => {};
 
   private readonly effectiveChecked = computed(() =>
     this.controlMode() ? this.controlChecked() : this.checked(),
   );
   private readonly effectiveDisabled = computed(() => this.disabled() || this.controlDisabled());
+
+  constructor() {
+    super();
+    effect(() => {
+      this.required();
+      this.effectiveDisabled();
+      this.onValidatorChange();
+    });
+  }
 
   protected readonly state = ngpCheckbox({
     checked: this.effectiveChecked,
@@ -109,11 +132,21 @@ export class HellCheckbox extends HellStyleable implements ControlValueAccessor 
     this.cva.registerOnTouched(fn);
   }
 
+  registerOnValidatorChange(fn: () => void): void {
+    this.onValidatorChange = fn;
+  }
+
   setDisabledState(isDisabled: boolean): void {
     this.controlDisabled.set(isDisabled);
   }
 
   protected markControlTouched(): void {
     this.cva.markTouched();
+  }
+
+  validate(control: AbstractControl | null): ValidationErrors | null {
+    if (!this.required() || control?.disabled || this.effectiveDisabled()) return null;
+    const checked = control ? control.value === true : this.effectiveChecked();
+    return checked ? null : { required: true };
   }
 }

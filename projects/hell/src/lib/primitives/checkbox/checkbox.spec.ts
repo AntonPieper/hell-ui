@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { HellCheckbox } from './checkbox';
@@ -42,9 +43,35 @@ class CheckboxFormHost {
   readonly checkedEvents: boolean[] = [];
 }
 
+@Component({
+  imports: [ReactiveFormsModule, HellCheckbox],
+  template: `
+    <button
+      hellCheckbox
+      [required]="true"
+      [formControl]="control"
+    ></button>
+  `,
+})
+class CheckboxRequiredFormHost {
+  readonly control = new FormControl(false);
+}
+
+@Component({
+  imports: [ReactiveFormsModule, HellCheckbox],
+  template: `
+    <button hellCheckbox [required]="true" [formControl]="control"></button>
+  `,
+})
+class CheckboxDisabledRequiredHost {
+  readonly control = new FormControl(false);
+}
+
 describe('HellCheckbox', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [CheckboxHost, CheckboxFormHost] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [CheckboxHost, CheckboxFormHost, CheckboxRequiredFormHost, CheckboxDisabledRequiredHost],
+    }).compileComponents();
   });
 
   it('uses a native button host and forwards checkbox state', () => {
@@ -104,6 +131,54 @@ describe('HellCheckbox', () => {
     fixture.detectChanges();
 
     expect(checkbox.disabled).toBe(true);
+  });
+
+  it('validates required through its Validator implementation', () => {
+    const fixture = TestBed.createComponent(CheckboxHost);
+    const host = fixture.componentInstance;
+    host.required.set(true);
+    fixture.detectChanges();
+
+    const checkbox = fixture.debugElement.query(By.directive(HellCheckbox)).componentInstance as HellCheckbox;
+
+    expect(checkbox.validate(new FormControl(false))).toEqual({ required: true });
+    expect(checkbox.validate(new FormControl(true))).toBeNull();
+
+    host.disabled.set(true);
+    fixture.detectChanges();
+
+    expect(checkbox.validate(new FormControl(false))).toBeNull();
+  });
+
+  it('validates required with reactive forms via built-in required semantics', () => {
+    const fixture = TestBed.createComponent(CheckboxRequiredFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const checkbox = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellCheckbox]');
+
+    expect(host.control.invalid).toBe(true);
+    expect(host.control.getError('required')).toBe(true);
+
+    checkbox.click();
+    fixture.detectChanges();
+
+    expect(host.control.valid).toBe(true);
+    expect(host.control.value).toBe(true);
+    expect(host.control.getError('required')).toBeNull();
+  });
+
+  it('does not report required when control is disabled', () => {
+    const fixture = TestBed.createComponent(CheckboxDisabledRequiredHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+
+    host.control.disable();
+    fixture.detectChanges();
+
+    expect(host.control.invalid).toBe(false);
+    expect(host.control.disabled).toBe(true);
   });
 });
 

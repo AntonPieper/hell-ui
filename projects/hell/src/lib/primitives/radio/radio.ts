@@ -1,5 +1,22 @@
-import { DestroyRef, Directive, ElementRef, computed, forwardRef, inject, input } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+  DestroyRef,
+  Directive,
+  ElementRef,
+  booleanAttribute,
+  computed,
+  effect,
+  forwardRef,
+  inject,
+  input,
+} from '@angular/core';
+import {
+  ControlValueAccessor,
+  NG_VALIDATORS,
+  NG_VALUE_ACCESSOR,
+  type AbstractControl,
+  type ValidationErrors,
+  type Validator,
+} from '@angular/forms';
 import {
   NgpRadioGroup,
   NgpRadioItem,
@@ -32,6 +49,11 @@ import { HellStyleable } from '../../core/styleable';
       useExisting: forwardRef(() => HellRadioGroup),
       multi: true,
     },
+    {
+      provide: NG_VALIDATORS,
+      useExisting: forwardRef(() => HellRadioGroup),
+      multi: true,
+    },
   ],
   host: {
     '[class.hell-radio-group]': '!unstyled()',
@@ -39,17 +61,26 @@ import { HellStyleable } from '../../core/styleable';
     '(focusout)': 'onFocusOut($event)',
   },
 })
-export class HellRadioGroup<T = unknown> extends HellStyleable implements ControlValueAccessor {
+export class HellRadioGroup<T = unknown> extends HellStyleable implements ControlValueAccessor, Validator {
   readonly orientation = input<HellOrientation>('vertical');
+  readonly required = input(false, { transform: booleanAttribute });
 
   private readonly group = inject(NgpRadioGroup<T>);
   private readonly groupState = injectRadioGroupState<T>();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly cva = new HellControlValueAccessorBridge<T | null>();
+  private onValidatorChange: () => void = () => {};
+  private readonly disabled = computed(() => this.groupState().disabled());
 
   constructor() {
     super();
+    effect(() => {
+      this.required();
+      this.disabled();
+      this.onValidatorChange();
+    });
+
     const valueSub = this.group.valueChange.subscribe((value) => {
       this.cva.emitValue(value);
     });
@@ -68,8 +99,23 @@ export class HellRadioGroup<T = unknown> extends HellStyleable implements Contro
     this.cva.registerOnTouched(fn);
   }
 
+  registerOnValidatorChange(fn: () => void): void {
+    this.onValidatorChange = fn;
+  }
+
   setDisabledState(isDisabled: boolean): void {
     writeRadioGroupDisabled(this.groupState(), isDisabled);
+    this.onValidatorChange();
+  }
+
+  validate(control: AbstractControl | null): ValidationErrors | null {
+    if (!this.required() || control?.disabled || this.disabled()) return null;
+    const value = control ? control.value : this.groupState().value();
+    return this.isEmptyValue(value) ? { required: true } : null;
+  }
+
+  private isEmptyValue(value: T | null): boolean {
+    return value == null || value === '';
   }
 
   protected onFocusOut(event: FocusEvent): void {
