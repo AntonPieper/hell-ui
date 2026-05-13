@@ -204,7 +204,12 @@ function checkDocsRootImportContract() {
     const source = readFile(file);
     if (/(?:from|import\()\s*['\"]hell(?:\/|['\"])/.test(source)) {
       failures.push(
-        `Docs app file ${file.slice(root.length + 1)} imports hell root or a hell/* subpath`,
+        `Docs app file ${file.slice(root.length + 1)} imports legacy hell root or a hell/* subpath`,
+      );
+    }
+    if (/(?:from|import\()\s*['\"]@hell-ui\/angular['\"]/.test(source)) {
+      failures.push(
+        `Docs app file ${file.slice(root.length + 1)} imports the root @hell-ui/angular entry point`,
       );
     }
   }

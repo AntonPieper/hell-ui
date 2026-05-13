@@ -38,6 +38,7 @@ const angularAppDeps = [
   '@angular/common',
   '@angular/compiler',
   '@angular/core',
+  '@angular/forms',
   '@angular/platform-browser',
   'tslib',
 ];
@@ -256,9 +257,17 @@ function pickDeps(source, names) {
   for (const name of names) {
     const version = source[name] ?? deps[name] ?? devDeps[name];
     if (!version) fail(`Root package.json missing dependency ${name}`);
-    picked[name] = version;
+    picked[name] = exactInstalledVersion(name) ?? version;
   }
   return picked;
+}
+
+function exactInstalledVersion(name) {
+  const packageJsonPath = join(root, 'node_modules', name, 'package.json');
+  if (!existsSync(packageJsonPath)) return null;
+
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+  return packageJson.version ? packageJson.version : null;
 }
 
 function rootConsumerMainTs() {
