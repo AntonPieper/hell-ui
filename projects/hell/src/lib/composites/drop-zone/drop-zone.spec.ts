@@ -13,6 +13,7 @@ import { HellDropZone } from './drop-zone';
       [disabled]="disabled()"
       (files)="drops.push($event)"
     >
+      <span data-child class="inner">inner</span>
       Upload files
     </div>
   `,
@@ -175,6 +176,28 @@ describe('HellDropZone', () => {
     expect(host.drops).toEqual([]);
   });
 
+  it('removes generated input and listeners on destroy', () => {
+    const fixture = TestBed.createComponent(DropZoneHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const zone = dropZone(fixture.nativeElement);
+    zone.click();
+    const input = fileInput(zone);
+    expect(input.ownerDocument.contains(input)).toBe(true);
+
+    fixture.destroy();
+    expect(input.ownerDocument.contains(input)).toBe(false);
+
+    Object.defineProperty(input, 'files', {
+      configurable: true,
+      value: fileList([new File(['a'], 'a.txt', { type: 'text/plain' })]),
+    });
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(host.drops).toEqual([]);
+  });
+
   it('emits dropped files and honors single-file mode', () => {
     const fixture = TestBed.createComponent(DropZoneHost);
     const host = fixture.componentInstance;
@@ -204,6 +227,27 @@ describe('HellDropZone', () => {
     zone.dispatchEvent(leave);
     fixture.detectChanges();
 
+    expect(zone.hasAttribute('data-active')).toBe(false);
+  });
+
+  it('keeps active during nested child dragleave events', () => {
+    const fixture = TestBed.createComponent(DropZoneHost);
+    fixture.detectChanges();
+
+    const zone = dropZone(fixture.nativeElement);
+    const inner = zone.querySelector('[data-child]');
+    if (!(inner instanceof HTMLElement)) throw new Error('Expected inner child.');
+
+    zone.dispatchEvent(dragEvent('dragenter'));
+    fixture.detectChanges();
+    expect(zone.getAttribute('data-active')).toBe('true');
+
+    inner.dispatchEvent(dragEvent('dragleave', [], zone));
+    fixture.detectChanges();
+    expect(zone.getAttribute('data-active')).toBe('true');
+
+    zone.dispatchEvent(dragEvent('dragleave', [], null));
+    fixture.detectChanges();
     expect(zone.hasAttribute('data-active')).toBe(false);
   });
 
@@ -243,11 +287,20 @@ function fileInput(zone: HTMLElement): HTMLInputElement {
   return input;
 }
 
-function dragEvent(type: string, files: File[] = []): DragEvent {
+function dragEvent(
+  type: string,
+  files: File[] = [],
+  relatedTarget: EventTarget | null = null,
+): DragEvent {
   const event = new Event(type, { bubbles: true, cancelable: true }) as DragEvent;
   Object.defineProperty(event, 'dataTransfer', {
     value: { files: fileList(files) },
   });
+  if (relatedTarget !== null) {
+    Object.defineProperty(event, 'relatedTarget', {
+      value: relatedTarget,
+    });
+  }
   return event;
 }
 
