@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
@@ -294,7 +294,7 @@ function textInput(root: HTMLElement): HTMLInputElement {
   return input;
 }
 
-function timeInputInstance(fixture: any): { onPickerCellKeydown: (event: KeyboardEvent, unit: HellTimeUnit, index: number) => void; pickerCellTabIndex: (unit: HellTimeUnit, index: number) => string } {
+function timeInputInstance(fixture: ComponentFixture<unknown>): { onPickerCellKeydown: (event: KeyboardEvent, unit: HellTimeUnit, index: number) => void; pickerCellTabIndex: (unit: HellTimeUnit, index: number) => string } {
   const host = fixture.debugElement.query(By.directive(HellTimeInput));
   if (!host) throw new Error('Expected HellTimeInput instance.');
   return host.componentInstance as {

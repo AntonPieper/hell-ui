@@ -1,4 +1,4 @@
-import { DestroyRef, Directive, ElementRef, forwardRef, inject } from '@angular/core';
+import { DestroyRef, Directive, ElementRef, OnDestroy, forwardRef, inject } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { containsNode } from '../../core/dom';
 import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
@@ -161,7 +161,7 @@ export class HellSelectPlaceholder extends HellStyleable {}
     '(focusout)': 'markControlTouched($event)',
   },
 })
-export class HellSelectDropdown extends HellStyleable {
+export class HellSelectDropdown extends HellStyleable implements OnDestroy {
   private readonly dropdown = inject(NgpSelectDropdown);
   private readonly select = inject(HellSelect, { optional: true });
 

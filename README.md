@@ -25,7 +25,7 @@ pnpm ci:verify # full pre-push: unit, architecture, lint, e2e, package consumer,
 Install the light UI stack when using primitives/composites:
 
 ```bash
-pnpm add @hell-ui/angular ng-primitives @ng-icons/core @ng-icons/font-awesome tailwindcss
+pnpm add @hell-ui/angular ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome tailwindcss
 ```
 
 Prefer the narrowest entry point that contains the API you use:
@@ -36,12 +36,17 @@ import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/composites';
 import { HELL_TABLE_UTILITY_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
 ```
 
-Heavy feature entry points keep extra peers local:
-`@hell-ui/angular/features/code-editor` and
-`@hell-ui/angular/features/pdf-viewer` still have optional stacks
-(`@codemirror/*` and `pdfjs-dist` respectively).
-`@hell-ui/angular/features/table-utilities` is preferred and has only
-`tailwindcss`/Angular peers.
+Peer dependency expectations by entry point:
+
+| Entry point | Extra peers beyond Angular core/common |
+|---|---|
+| `@hell-ui/angular/core` | `rxjs` |
+| `@hell-ui/angular/primitives` | `@angular/forms`, `@angular/router`, `ng-primitives`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `@ng-icons/font-awesome`, `rxjs`, `tailwindcss` |
+| `@hell-ui/angular/composites` | Light UI stack above |
+| `@hell-ui/angular/features/code-editor` | `@codemirror/*`, `@lezer/highlight`, `tailwindcss` |
+| `@hell-ui/angular/features/table-utilities` | `tailwindcss` |
+| `@hell-ui/angular/features/pdf-viewer` | `pdfjs-dist` plus the light UI stack |
+
 `@hell-ui/angular/features/data-table` remains a legacy alias for table utilities.
 
 ## Public API Tiers

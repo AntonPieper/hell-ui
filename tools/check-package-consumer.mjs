@@ -45,6 +45,8 @@ const angularAppDeps = [
 const lightUiDeps = [
   ...angularAppDeps,
   '@angular/router',
+  '@angular/cdk',
+  '@floating-ui/dom',
   '@ng-icons/core',
   '@ng-icons/font-awesome',
   'ng-primitives',
@@ -63,11 +65,7 @@ const codeEditorDeps = [
 ];
 const dataTableDeps = [...angularAppDeps, 'tailwindcss'];
 const pdfViewerDeps = [
-  ...angularAppDeps,
-  'tailwindcss',
-  'ng-primitives',
-  '@ng-icons/core',
-  '@ng-icons/font-awesome',
+  ...lightUiDeps,
   'pdfjs-dist',
 ];
 
@@ -144,7 +142,7 @@ function runConsumerScenario(scenario) {
 
   try {
     writeConsumerWorkspace(tempRoot, scenario);
-    run('pnpm', ['install', '--strict-peer-dependencies', '--ignore-scripts'], tempRoot);
+    run('pnpm', ['install', '--strict-peer-dependencies', '--config.auto-install-peers=false', '--ignore-scripts'], tempRoot);
     run('pnpm', ['exec', 'ng', 'build', 'consumer', '--configuration', 'production'], tempRoot);
     console.log(`[package-consumer:${scenario.name}] built ${scenario.description}`);
   } finally {
@@ -174,12 +172,15 @@ function writeConsumerWorkspace(workspace, scenario) {
       '@angular/build',
       '@angular/cli',
       '@angular/compiler-cli',
+      '@emnapi/core',
+      '@emnapi/runtime',
       'typescript',
     ]),
   };
   packageJson.dependencies[packageName] = pathToFileURL(packedHell.tarball).href;
 
   writeJson(join(workspace, 'package.json'), packageJson);
+  writeFileSync(join(workspace, '.npmrc'), 'auto-install-peers=false\nstrict-peer-dependencies=true\n');
   writeJson(join(workspace, 'angular.json'), {
     $schema: './node_modules/@angular/cli/lib/config/schema.json',
     version: 1,

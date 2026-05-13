@@ -37,11 +37,13 @@
     }
   },
   "peerDependencies": {
+    "@angular/cdk": "^21.2.0",
     "@angular/common": "^21.2.0",
     "@angular/core": "^21.2.0",
     "@angular/forms": "^21.2.0",
     "@angular/router": "^21.2.0",
     "ng-primitives": "^0.117.0",
+    "@floating-ui/dom": "^1.6.0",
     "@ng-icons/core": "^33.0.0",
     "@ng-icons/font-awesome": "^33.0.0",
     "rxjs": "^7.8.0",
@@ -54,16 +56,31 @@
     "pdfjs-dist": "^5.0.0"
   },
   "peerDependenciesMeta": {
+    "@angular/cdk": {
+      "optional": true
+    },
+    "@angular/forms": {
+      "optional": true
+    },
     "@angular/router": {
       "optional": true
     },
     "ng-primitives": {
       "optional": true
     },
+    "@floating-ui/dom": {
+      "optional": true
+    },
     "@ng-icons/core": {
       "optional": true
     },
     "@ng-icons/font-awesome": {
+      "optional": true
+    },
+    "rxjs": {
+      "optional": true
+    },
+    "tailwindcss": {
       "optional": true
     },
     "@codemirror/view": {

@@ -333,6 +333,9 @@ function checkPackageDependencyContract() {
     'tailwindcss',
     // ng-primitives dialog code imported by Hell primitives imports Router internally.
     '@angular/router',
+    // ng-primitives exposes these as strict peers consumed by primitive wrappers.
+    '@angular/cdk',
+    '@floating-ui/dom',
   ]);
   for (const dependency of Object.keys(peerDependencies)) {
     if (!importedPackages.has(dependency) && !nonTsPeerDependencies.has(dependency)) {
