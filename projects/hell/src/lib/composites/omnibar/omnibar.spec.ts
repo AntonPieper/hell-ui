@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
+import { provideHellLabels } from '../../core/labels';
 import { type HellSearchSource } from '../../core/search';
 import { HELL_OMNIBAR_DIRECTIVES, matchHotkey, type HellOmnibarSubmitEvent } from './omnibar';
 
@@ -56,6 +57,19 @@ class OmnibarHost {
 class OmnibarLoadingTemplateHost {
   readonly searchSource: HellSearchSource<unknown> = () => new Promise(() => undefined);
 }
+
+@Component({
+  imports: [...HELL_OMNIBAR_DIRECTIVES],
+  providers: [
+    provideHellLabels({
+      omnibar: {
+        clearSearch: 'Suche löschen',
+      },
+    }),
+  ],
+  template: `<hell-omnibar />`,
+})
+class OmnibarLocalizedHost {}
 
 describe('HellOmnibar interactions', () => {
   let scrollIntoViewDescriptor: PropertyDescriptor | undefined;
@@ -169,6 +183,23 @@ describe('HellOmnibar interactions', () => {
   });
 });
 
+describe('HellOmnibar labels', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [OmnibarLocalizedHost],
+    }).compileComponents();
+  });
+
+  it('uses an overridable clear-search label', () => {
+    const fixture = TestBed.createComponent(OmnibarLocalizedHost);
+    fixture.detectChanges();
+
+    expect(query<HTMLButtonElement>(fixture.nativeElement, '[data-slot="clear"]').getAttribute('aria-label')).toBe(
+      'Suche löschen',
+    );
+  });
+});
+
 describe('HellOmnibar hotkey matching', () => {
   it('matches requested modifiers and rejects extra strict modifiers', () => {
     expect(matchHotkey(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }), 'ctrl+k')).toBe(
@@ -187,6 +218,14 @@ describe('HellOmnibar hotkey matching', () => {
       true,
     );
     expect(matchHotkey(new KeyboardEvent('keydown', { key: '?' }), '?')).toBe(true);
+  });
+
+  it('rejects extra shift when combo does not request it', () => {
+    expect(
+      matchHotkey(new KeyboardEvent('keydown', { key: 'K', shiftKey: true, ctrlKey: true }),
+        'ctrl+k',
+      ),
+    ).toBe(false);
   });
 });
 

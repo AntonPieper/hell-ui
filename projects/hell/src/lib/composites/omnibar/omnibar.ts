@@ -32,6 +32,7 @@ import {
   type HellSearchResult,
   type HellSearchSource,
 } from '../../core/search';
+import { HELL_LABELS } from '../../core/labels';
 import { HellInput } from '../../primitives/input/input';
 import { HellListbox } from '../../primitives/listbox/listbox';
 import { HellSearch, HellSearchClear } from '../../primitives/search/search';
@@ -144,7 +145,7 @@ let nextOmnibarItemId = 0;
         hellSearchClear
         data-slot="clear"
         type="button"
-        aria-label="Clear search"
+        [attr.aria-label]="labels.omnibar.clearSearch"
         [attr.data-empty]="value() ? null : ''"
         (click)="onClearClick($event)"
       ></button>
@@ -200,6 +201,8 @@ let nextOmnibarItemId = 0;
   exportAs: 'hellOmnibar',
 })
 export class HellOmnibar extends HellStyleable implements HellFloatingScope {
+  protected readonly labels = inject(HELL_LABELS);
+
   /* ── Inputs ────────────────────────────────────────────────────────── */
 
   readonly size = input<'sm' | 'md' | 'lg'>('md');
@@ -812,10 +815,15 @@ export function matchHotkey(event: KeyboardEvent, combo: string): boolean {
   if (event.ctrlKey !== needCtrl) return false;
   if (event.metaKey !== needMeta) return false;
   if (event.altKey !== needAlt) return false;
-  // Shift is only enforced when explicitly requested — single-character keys
-  // like "?" require shift on most layouts, but the user types "shift+/" or
-  // just "?". Match either by comparing the produced key.
   if (needShift && !event.shiftKey) return false;
   if (!key) return false;
+
+  const isSingleCharacter = key.length === 1;
+  if (isSingleCharacter) {
+    if (!needShift && /[a-zA-Z]/.test(key) && event.shiftKey) return false;
+    return event.key.toLowerCase() === key.toLowerCase();
+  }
+
+  if (!needShift && event.shiftKey) return false;
   return event.key.toLowerCase() === key;
 }

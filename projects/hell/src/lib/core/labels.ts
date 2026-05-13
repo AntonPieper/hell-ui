@@ -30,6 +30,16 @@ export interface HellAudioPlayerLabels {
   readonly pressPlayForCaptions: string;
 }
 
+export interface HellDialpadLabels {
+  readonly dialpad: string;
+  readonly backspace: string;
+  readonly call: string;
+}
+
+export interface HellOmnibarLabels {
+  readonly clearSearch: string;
+}
+
 export interface HellDataTableLabels {
   readonly resizeColumn: string;
 }
@@ -100,9 +110,11 @@ export interface HellLabels {
   readonly loading: string;
   readonly appShell: HellAppShellLabels;
   readonly audioPlayer: HellAudioPlayerLabels;
+  readonly dialpad: HellDialpadLabels;
   readonly dataTable: HellDataTableLabels;
   readonly dateInput: HellDateInputLabels;
   readonly datePicker: HellDatePickerLabels;
+  readonly omnibar: HellOmnibarLabels;
   readonly pagination: HellPaginationLabels;
   readonly pdfViewer: HellPdfViewerLabels;
   readonly timeInput: HellTimeInputLabels;
@@ -113,9 +125,11 @@ export interface HellLabelOverrides {
   readonly loading?: string;
   readonly appShell?: Partial<HellAppShellLabels>;
   readonly audioPlayer?: Partial<HellAudioPlayerLabels>;
+  readonly dialpad?: Partial<HellDialpadLabels>;
   readonly dataTable?: Partial<HellDataTableLabels>;
   readonly dateInput?: Partial<HellDateInputLabels>;
   readonly datePicker?: Partial<HellDatePickerLabels>;
+  readonly omnibar?: Partial<HellOmnibarLabels>;
   readonly pagination?: Partial<HellPaginationLabels>;
   readonly pdfViewer?: Partial<HellPdfViewerLabels>;
   readonly timeInput?: Partial<HellTimeInputLabels>;
@@ -151,6 +165,14 @@ export const HELL_DEFAULT_LABELS: HellLabels = {
     clear: 'Clear',
     listening: 'Listening…',
     pressPlayForCaptions: 'Press play to capture captions.',
+  },
+  dialpad: {
+    dialpad: 'Dial pad',
+    backspace: 'Backspace',
+    call: 'Call',
+  },
+  omnibar: {
+    clearSearch: 'Clear search',
   },
   dataTable: {
     resizeColumn: 'Resize column',
@@ -234,9 +256,11 @@ function hellMergeLabels(base: HellLabels, overrides: HellLabelOverrides): HellL
     loading: overrides.loading ?? base.loading,
     appShell: { ...base.appShell, ...overrides.appShell },
     audioPlayer: { ...base.audioPlayer, ...overrides.audioPlayer },
+    dialpad: { ...base.dialpad, ...overrides.dialpad },
     dataTable: { ...base.dataTable, ...overrides.dataTable },
     dateInput: { ...base.dateInput, ...overrides.dateInput },
     datePicker: { ...base.datePicker, ...overrides.datePicker },
+    omnibar: { ...base.omnibar, ...overrides.omnibar },
     pagination: { ...base.pagination, ...overrides.pagination },
     pdfViewer: { ...base.pdfViewer, ...overrides.pdfViewer },
     timeInput: { ...base.timeInput, ...overrides.timeInput },

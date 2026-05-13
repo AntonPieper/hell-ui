@@ -6,7 +6,7 @@ import { HellFlyout, HellFlyoutTrigger } from './flyout';
 @Component({
   imports: [HellFlyout, HellFlyoutTrigger],
   template: `
-    <button hellFlyoutTrigger #trigger="hellFlyoutTrigger" type="button" (click)="trigger.toggle()">
+    <button hellFlyoutTrigger #trigger="hellFlyoutTrigger" type="button">
       Toggle
     </button>
 
@@ -46,6 +46,22 @@ describe('HellFlyout outside interaction', () => {
     expect(anchor.getAttribute('tabindex')).toBe('-1');
     expect(anchor.dispatchEvent(click)).toBe(false);
     expect(click.defaultPrevented).toBe(true);
+  });
+
+  it('toggles on click and closes on second click', async () => {
+    const fixture = TestBed.createComponent(FlyoutHost);
+    await settle(fixture);
+
+    const trigger = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    trigger.click();
+    await settle(fixture);
+
+    expect(fixture.nativeElement.textContent).toContain('Panel');
+
+    trigger.click();
+    await settle(fixture);
+
+    expect(fixture.nativeElement.textContent).not.toContain('Panel');
   });
 
   it('keeps flyout open on outside touch pointerdown but closes on outside click', async () => {

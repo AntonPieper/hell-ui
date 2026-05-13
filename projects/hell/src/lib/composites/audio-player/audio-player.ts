@@ -156,7 +156,6 @@ function parseIsoDateOnly(value: string): Date | null {
           [attr.aria-pressed]="captions()"
           [attr.aria-label]="captions() ? labels.audioPlayer.hideLiveCaptions : labels.audioPlayer.showLiveCaptions"
           [attr.data-active]="captions() ? 'true' : null"
-          (click)="ccTrigger.toggle()"
           (openChange)="captions.set($event)"
         >
           <hell-icon name="faSolidClosedCaptioning" />

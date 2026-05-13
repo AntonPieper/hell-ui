@@ -127,14 +127,15 @@ describe('HellAppShell secondary panel', () => {
     const sidenav = query(fixture.nativeElement, 'nav');
 
     expect(toggle.getAttribute('aria-label')).toBe('Collapse sidebar');
-    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(toggle.getAttribute('aria-controls')).toBe(sidenav.getAttribute('id'));
 
     toggle.click();
     fixture.detectChanges();
 
     expect(sidenav.getAttribute('data-collapsed')).toBe('true');
     expect(toggle.getAttribute('aria-label')).toBe('Expand sidebar');
-    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
   });
 
   it('owns nav section classes and collapsed attributes', () => {
@@ -304,6 +305,8 @@ describe('HellAppShell secondary panel', () => {
     expect(aside.getAttribute('data-hidden')).toBeNull();
     expect(aside.getAttribute('aria-hidden')).toBeNull();
     expect(body.getAttribute('aria-hidden')).toBeNull();
+    expect(headerToggle.getAttribute('aria-expanded')).toBe('true');
+    expect(headerToggle.getAttribute('aria-controls')).toBe(aside.getAttribute('id'));
     expect(headerToggle.getAttribute('aria-label')).toBe('Hide secondary panel');
 
     // Header toggle collapses the panel.
@@ -313,6 +316,8 @@ describe('HellAppShell secondary panel', () => {
     expect(aside.getAttribute('aria-hidden')).toBeNull();
     expect(body.getAttribute('aria-hidden')).toBe('true');
     expect(body.hasAttribute('inert')).toBe(true);
+    expect(rail.getAttribute('aria-expanded')).toBe('false');
+    expect(rail.getAttribute('aria-controls')).toBe(aside.getAttribute('id'));
     expect(rail.getAttribute('aria-label')).toBe('Show secondary panel');
 
     // Rail toggle re-expands.

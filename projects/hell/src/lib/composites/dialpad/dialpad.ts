@@ -4,6 +4,7 @@ import {
   HostListener,
   booleanAttribute,
   computed,
+  inject,
   input,
   output,
   signal,
@@ -12,6 +13,7 @@ import { provideIcons } from '@ng-icons/core';
 import { faSolidDeleteLeft, faSolidPhone } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
+import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
 
 interface HellDialpadKey {
@@ -53,8 +55,8 @@ const HELL_DIALPAD_ICONS = {
   host: {
     '[class.hell-dialpad]': '!unstyled()',
     role: 'group',
-    'aria-label': 'Dial pad',
     tabindex: '0',
+    '[attr.aria-label]': 'labels.dialpad.dialpad',
   },
   template: `
     <div data-slot="display">
@@ -70,7 +72,7 @@ const HELL_DIALPAD_ICONS = {
         data-slot="back"
         [disabled]="!display()"
         (click)="backspace()"
-        aria-label="Backspace"
+        [attr.aria-label]="labels.dialpad.backspace"
       >
         <hell-icon name="faSolidDeleteLeft" />
       </button>
@@ -95,12 +97,14 @@ const HELL_DIALPAD_ICONS = {
         (click)="call.emit(display())"
         [disabled]="!display()"
       >
-        <hell-icon name="faSolidPhone" /> Call
+        <hell-icon name="faSolidPhone" /> {{ labels.dialpad.call }}
       </button>
     }
   `,
 })
 export class HellDialpad extends HellStyleable {
+  protected readonly labels = inject(HELL_LABELS);
+
   readonly value = input<string>('');
   /** Render a primary "Call" action button below the keys. */
   readonly showCallButton = input(true, { transform: booleanAttribute });

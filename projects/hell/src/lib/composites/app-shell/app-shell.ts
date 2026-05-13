@@ -1,9 +1,5 @@
 import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
-export const HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX = 768;
-export const HELL_APP_SHELL_MOBILE_MAX_WIDTH_PX = HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX - 1;
-export const HELL_APP_SHELL_MOBILE_MEDIA = `(max-width: ${HELL_APP_SHELL_MOBILE_MAX_WIDTH_PX}px)`;
-
 import {
   ChangeDetectionStrategy,
   Component,
@@ -11,11 +7,17 @@ import {
   Directive,
   booleanAttribute,
   computed,
+  effect,
   inject,
   input,
   output,
   signal,
 } from '@angular/core';
+
+export const HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX = 768;
+export const HELL_APP_SHELL_MOBILE_MAX_WIDTH_PX = HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX - 1;
+export const HELL_APP_SHELL_MOBILE_MEDIA = `(max-width: ${HELL_APP_SHELL_MOBILE_MAX_WIDTH_PX}px)`;
+let nextAppShellId = 0;
 
 /**
  * Application shell — top bar + collapsible sidenav + main content + optional
@@ -69,6 +71,10 @@ export class HellAppShell extends HellStyleable {
   /** Internal toggles — written only while the matching input is uncontrolled. */
   protected readonly _sidenavCollapsed = signal(false);
   protected readonly _secondaryHidden = signal(false);
+
+  readonly shellId = ++nextAppShellId;
+  sidenavPanelId = `hell-app-shell-${this.shellId}-sidenav`;
+  secondaryPanelId = `hell-app-shell-${this.shellId}-secondary`;
 
   /** Mobile uses overlay panels instead of layout-shifting rails. */
   private readonly _isMobileLayout = signal(false);
@@ -180,6 +186,7 @@ export class HellAppTopbar extends HellStyleable {}
   selector: '[hellAppSidenav]',
   host: {
     '[class.hell-sidenav]': '!unstyled()',
+    '[attr.id]': 'shell?.sidenavPanelId',
     '[attr.data-hell-app-shell-panel]': '"sidenav"',
     '[attr.data-collapsed]': 'isCollapsed() ? "true" : null',
     '[attr.data-mobile-hidden]': 'isMobileHidden() ? "true" : null',
@@ -192,9 +199,20 @@ export class HellAppSidenav extends HellStyleable {
   readonly collapsed = input<boolean | null, boolean | string | null | undefined>(null, {
     transform: (v) => (v == null ? null : booleanAttribute(v)),
   });
-  private readonly shell = inject(HellAppShell, { optional: true });
+  readonly id = input<string | null>(null, { alias: 'id' });
+
+  protected readonly shell = inject(HellAppShell, { optional: true });
+  protected readonly panelId = computed(() => this.id() ?? this.shell?.sidenavPanelId ?? null);
   readonly isCollapsed = () => this.collapsed() ?? this.shell?.isSidenavCollapsed() ?? false;
   protected readonly isMobileHidden = () => !!this.shell?.isMobileLayout() && this.isCollapsed();
+
+  constructor() {
+    super();
+    effect(() => {
+      const id = this.panelId();
+      if (id && this.shell) this.shell.sidenavPanelId = id;
+    });
+  }
 }
 
 @Directive({
@@ -325,7 +343,8 @@ export class HellAppContent extends HellStyleable {
   host: {
     type: 'button',
     '(click)': 'toggle()',
-    '[attr.aria-pressed]': 'collapsed()',
+    '[attr.aria-expanded]': '!collapsed()',
+    '[attr.aria-controls]': 'shell.sidenavPanelId',
     '[attr.aria-label]': 'collapsed() ? labels.appShell.expandSidebar : labels.appShell.collapseSidebar',
     '[attr.data-hell-app-shell-toggle]': '"sidenav"',
     '[attr.data-hell-sidenav-toggle]': 'appearance() === "plain" ? null : appearance()',
@@ -334,7 +353,7 @@ export class HellAppContent extends HellStyleable {
 export class HellSidenavToggle {
   readonly appearance = input<'plain' | 'shell'>('plain');
   protected readonly labels = inject(HELL_LABELS);
-  private readonly shell = inject(HellAppShell);
+  protected readonly shell = inject(HellAppShell);
   protected readonly collapsed = () => this.shell.isSidenavCollapsed();
   protected toggle() {
     this.shell.toggleSidenav();
@@ -347,7 +366,8 @@ export class HellSidenavToggle {
   host: {
     type: 'button',
     '(click)': 'toggle()',
-    '[attr.aria-pressed]': '!hidden()',
+    '[attr.aria-expanded]': '!hidden()',
+    '[attr.aria-controls]': 'shell.secondaryPanelId',
     '[attr.aria-label]': 'hidden() ? labels.appShell.showSecondaryPanel : labels.appShell.hideSecondaryPanel',
     '[attr.data-hell-app-shell-toggle]': '"secondary"',
     '[attr.data-hell-secondary-toggle]': 'appearance() === "plain" ? null : appearance()',
@@ -356,7 +376,7 @@ export class HellSidenavToggle {
 export class HellSecondaryToggle {
   readonly appearance = input<'plain' | 'header' | 'rail'>('plain');
   protected readonly labels = inject(HELL_LABELS);
-  private readonly shell = inject(HellAppShell);
+  protected readonly shell = inject(HellAppShell);
   protected readonly hidden = () => this.shell.isSecondaryHidden();
   protected toggle() {
     this.shell.toggleSecondary();
@@ -367,18 +387,32 @@ export class HellSecondaryToggle {
   selector: '[hellAppSecondary]',
   host: {
     '[class.hell-secondary]': '!unstyled()',
+    '[attr.id]': 'shell?.secondaryPanelId',
     '[attr.data-hell-app-shell-panel]': '"secondary"',
     '[attr.data-hidden]': 'isHidden() ? "true" : null',
     '[attr.data-mobile-hidden]': 'isMobileHidden() ? "true" : null',
+    '[attr.aria-hidden]': 'isMobileHidden() ? "true" : null',
+    '[attr.inert]': 'isMobileHidden() ? "" : null',
   },
 })
 export class HellAppSecondary extends HellStyleable {
   readonly hidden = input<boolean | null, boolean | string | null | undefined>(null, {
     transform: (v) => (v == null ? null : booleanAttribute(v)),
   });
-  private readonly shell = inject(HellAppShell, { optional: true });
+  readonly id = input<string | null>(null, { alias: 'id' });
+
+  protected readonly shell = inject(HellAppShell, { optional: true });
+  protected readonly panelId = computed(() => this.id() ?? this.shell?.secondaryPanelId ?? null);
   readonly isHidden = () => this.hidden() ?? this.shell?.isSecondaryHidden() ?? false;
   protected readonly isMobileHidden = () => !!this.shell?.isMobileLayout() && this.isHidden();
+
+  constructor() {
+    super();
+    effect(() => {
+      const id = this.panelId();
+      if (id && this.shell) this.shell.secondaryPanelId = id;
+    });
+  }
 }
 
 @Directive({

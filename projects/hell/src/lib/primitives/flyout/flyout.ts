@@ -45,7 +45,7 @@ let nextFlyoutId = 0;
     '[attr.disabled]': 'nativeButtonDisabled(disabled())',
     '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',
     '[attr.tabindex]': 'disabledAnchorTabIndex(disabled())',
-    '(click)': 'preventDisabledAnchor($event, disabled())',
+    '(click)': 'onTriggerClick($event)',
     '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
 })
@@ -76,6 +76,12 @@ export class HellFlyoutTrigger extends HellNativeInteractiveDisabledGuard {
 
   toggle(): void {
     this._open() ? this.hide() : this.show();
+  }
+
+  protected onTriggerClick(event: Event): void {
+    this.preventDisabledAnchor(event, this.disabled());
+    if (this.disabled()) return;
+    this.toggle();
   }
 }
 

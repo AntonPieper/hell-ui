@@ -13,7 +13,6 @@ import { HellButton, HellFlyout, HellFlyoutTrigger, HellInput } from 'hell/primi
         hellFlyoutTrigger
         #t="hellFlyoutTrigger"
         variant="default"
-        (click)="t.toggle()"
         (openChange)="open.set($event)"
       >
         {{ open() ? 'Hide' : 'Show' }} flyout
