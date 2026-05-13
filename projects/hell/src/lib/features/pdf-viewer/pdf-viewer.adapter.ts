@@ -353,7 +353,7 @@ class HellPdfJsViewerSession implements HellPdfViewerSession {
     const baseViewport = page.getViewport({ scale: 1 });
     const targetW = 120;
     const scale = targetW / baseViewport.width;
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = canvas.ownerDocument.defaultView?.devicePixelRatio || 1;
     const viewport = page.getViewport({ scale: scale * dpr });
     canvas.width = Math.floor(viewport.width);
     canvas.height = Math.floor(viewport.height);

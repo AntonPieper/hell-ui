@@ -105,6 +105,37 @@ describe('HellPdfViewer', () => {
 
     expect(runtime.printedWith).toEqual(fixture.componentInstance.printFetchOptions);
   });
+
+  it('announces PDF find status updates through a live region', async () => {
+    const fixture = TestBed.createComponent(PdfViewerHost);
+    await settle(fixture);
+
+    const findButton = fixture.nativeElement.querySelector('button[aria-label="Find in document (Ctrl/Cmd+F)"]');
+    expect(findButton).toBeInstanceOf(HTMLButtonElement);
+    findButton!.click();
+    await settle(fixture);
+
+    const findInput = fixture.nativeElement.querySelector('.hell-pdf-find-input') as HTMLInputElement;
+    const status = fixture.nativeElement.querySelector('.hell-pdf-find-count') as HTMLElement;
+    expect(status?.getAttribute('role')).toBe('status');
+    expect(status?.getAttribute('aria-live')).toBe('polite');
+    expect(status?.getAttribute('aria-atomic')).toBe('true');
+
+    runtime['handlers']?.onFindState({ status: 'pending' });
+    await settle(fixture);
+    expect(status.textContent?.trim()).toBe('Searching…');
+
+    findInput.value = 'test';
+    findInput.dispatchEvent(new Event('input'));
+    await settle(fixture);
+    runtime['handlers']?.onFindState({ status: 'not-found', current: 0, total: 0 });
+    await settle(fixture);
+    expect(status.textContent?.trim()).toBe('Not found');
+
+    runtime['handlers']?.onFindState({ status: 'found', current: 2, total: 3 });
+    await settle(fixture);
+    expect(status.textContent?.trim()).toBe('2 / 3');
+  });
 });
 
 async function settle(fixture: { detectChanges(): void; whenStable(): Promise<unknown> }) {

@@ -44,4 +44,23 @@ describe('HellCodeEditorRuntime', () => {
 
     runtime.destroy();
   });
+
+  it('keeps fold-marker and event setup in the host document realm', () => {
+    const foreignDocument = document.implementation.createHTMLDocument('hell-code-editor');
+    const host = foreignDocument.createElement('div');
+
+    const runtime = new HellCodeEditorRuntime({
+      host,
+      value: 'alpha',
+      extensions: [],
+      readOnly: false,
+      onValueChange: () => {},
+    });
+
+    const root = (runtime.view as unknown as { root: Document | ShadowRoot }).root;
+    expect(runtime.view.dom.ownerDocument).toBe(foreignDocument);
+    expect(root).toBe(foreignDocument);
+
+    runtime.destroy();
+  });
 });

@@ -57,27 +57,35 @@ function hellCodeEditorFoldMarkerIcon(open: boolean, ownerDocument: Document): S
  * intentionally excluded: pass Angular, JS, JSON, or any other CodeMirror
  * language extension through the `extensions` input at the call site.
  */
-export const hellCodeEditorSetup: Extension = [
-  lineNumbers(),
-  foldGutter({
-    markerDOM(open) {
-      const el = document.createElement('span');
-      el.setAttribute('aria-hidden', 'true');
-      el.style.display = 'inline-flex';
-      el.style.alignItems = 'center';
-      el.style.justifyContent = 'center';
-      el.style.width = '100%';
-      el.style.height = '100%';
-      el.append(hellCodeEditorFoldMarkerIcon(open, el.ownerDocument));
-      return el;
-    },
-  }),
-  highlightActiveLineGutter(),
-  history(),
-  drawSelection(),
-  highlightActiveLine(),
-  keymap.of([...defaultKeymap, ...historyKeymap, ...foldKeymap]),
-];
+function hellCodeEditorSetupFactory(ownerDocument: Document): Extension {
+  return [
+    lineNumbers(),
+    foldGutter({
+      markerDOM(open) {
+        const el = ownerDocument.createElement('span');
+        el.setAttribute('aria-hidden', 'true');
+        el.style.display = 'inline-flex';
+        el.style.alignItems = 'center';
+        el.style.justifyContent = 'center';
+        el.style.width = '100%';
+        el.style.height = '100%';
+        el.append(hellCodeEditorFoldMarkerIcon(open, ownerDocument));
+        return el;
+      },
+    }),
+    highlightActiveLineGutter(),
+    history(),
+    drawSelection(),
+    highlightActiveLine(),
+    keymap.of([...defaultKeymap, ...historyKeymap, ...foldKeymap]),
+  ];
+}
+
+/**
+ * Default setup export kept for backward compatibility.
+ */
+export const hellCodeEditorSetup: Extension =
+  typeof document === 'undefined' ? [] : hellCodeEditorSetupFactory(document);
 
 /**
  * hell-flavoured CodeMirror theme. Uses CSS variables so light/dark mode and
@@ -218,6 +226,12 @@ export const hellCodeEditorTheme: Extension = [
   ),
 ];
 
+function resolveCodeEditorRoot(host: HTMLElement): Document | ShadowRoot {
+  const root = host.getRootNode({ composed: false });
+  const isShadowRoot = typeof ShadowRoot !== 'undefined' && root instanceof ShadowRoot;
+  return root instanceof Document || isShadowRoot ? (root as Document | ShadowRoot) : host.ownerDocument;
+}
+
 export class HellCodeEditorRuntime implements HellCodeEditorRuntimePort {
   readonly view: EditorView;
 
@@ -226,11 +240,14 @@ export class HellCodeEditorRuntime implements HellCodeEditorRuntimePort {
   private applyingExternalValue = false;
 
   constructor(options: HellCodeEditorRuntimeOptions) {
+    const root = resolveCodeEditorRoot(options.host);
+
     this.view = new EditorView({
       doc: options.value,
       parent: options.host,
+      root,
       extensions: [
-        hellCodeEditorSetup,
+        hellCodeEditorSetupFactory(options.host.ownerDocument),
         hellCodeEditorTheme,
         this.extensionCompartment.of(options.extensions),
         this.readOnlyCompartment.of(this.readOnlyExtensions(options.readOnly)),

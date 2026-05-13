@@ -512,12 +512,19 @@ export class HellAudioPlayer extends HellStyleable {
 
   protected format(s: number): string {
     if (!Number.isFinite(s)) return '--:--';
-    const m = Math.floor(s / 60)
+
+    const total = Math.floor(s);
+    const seconds = (total % 60).toString().padStart(2, '0');
+    const minutes = Math.floor(total / 60)
       .toString()
       .padStart(2, '0');
-    const ss = Math.floor(s % 60)
-      .toString()
-      .padStart(2, '0');
-    return `${m}:${ss}`;
+
+    const hours = Math.floor(total / 3600);
+    if (hours > 0) {
+      const mins = Math.floor((total % 3600) / 60).toString().padStart(2, '0');
+      return `${hours}:${mins}:${seconds}`;
+    }
+
+    return `${minutes}:${seconds}`;
   }
 }

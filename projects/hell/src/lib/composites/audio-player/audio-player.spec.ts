@@ -87,6 +87,20 @@ describe('HellAudioPlayer', () => {
     expect(date.textContent?.trim()).toBe('04/05/2026');
   });
 
+  it('formats timeline durations as mm:ss or h:mm:ss', async () => {
+    const { component } = await createPlayer();
+
+    const format = (value: number) =>
+      (component as unknown as { format(value: number): string }).format(value);
+
+    expect(format(0)).toBe('00:00');
+    expect(format(59)).toBe('00:59');
+    expect(format(61)).toBe('01:01');
+    expect(format(3600)).toBe('1:00:00');
+    expect(format(3661)).toBe('1:01:01');
+    expect(format(NaN)).toBe('--:--');
+  });
+
   it('applies volume, mute, and playback-rate state to the audio element', async () => {
     const { fixture, component, audio } = await createPlayer();
 
