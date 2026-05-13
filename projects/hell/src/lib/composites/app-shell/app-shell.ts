@@ -13,6 +13,8 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export const HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX = 768;
 export const HELL_APP_SHELL_MOBILE_MAX_WIDTH_PX = HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX - 1;
@@ -81,24 +83,21 @@ export class HellAppShell extends HellStyleable {
   private readonly _mobileSidenavOpen = signal(false);
   private readonly _mobileSecondaryOpen = signal(false);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly breakpointObserver = inject(BreakpointObserver);
 
   constructor() {
     super();
-    const media = globalThis.matchMedia?.(HELL_APP_SHELL_MOBILE_MEDIA);
-    if (!media) return;
-
-    const updateMobileLayout = () => {
-      const mobile = media.matches;
-      this._isMobileLayout.set(mobile);
-      if (!mobile) {
-        this._mobileSidenavOpen.set(false);
-        this._mobileSecondaryOpen.set(false);
-      }
-    };
-
-    updateMobileLayout();
-    media.addEventListener('change', updateMobileLayout);
-    this.destroyRef.onDestroy(() => media.removeEventListener('change', updateMobileLayout));
+    this.breakpointObserver
+      .observe(HELL_APP_SHELL_MOBILE_MEDIA)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((state) => {
+        const mobile = state.matches;
+        this._isMobileLayout.set(mobile);
+        if (!mobile) {
+          this._mobileSidenavOpen.set(false);
+          this._mobileSecondaryOpen.set(false);
+        }
+      });
   }
 
   readonly isMobileLayout = () => this._isMobileLayout();

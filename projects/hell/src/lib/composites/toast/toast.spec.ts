@@ -1,4 +1,6 @@
+import type { TemplateRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 import { HellToastService, HellToaster } from './toast';
 import {
@@ -7,6 +9,12 @@ import {
   hellToastOverflow,
   hellToastSnapshotExits,
 } from './toast-stack.runtime';
+
+const liveAnnounce = vi.fn();
+
+const announcementService = {
+  announce: liveAnnounce,
+};
 
 describe('Toast Stack', () => {
   it('computes front distance, offset, overflow, and exit snapshots from stack data', () => {
@@ -34,6 +42,13 @@ describe('Toast Stack', () => {
 });
 
 describe('HellToastService', () => {
+  beforeEach(() => {
+    liveAnnounce.mockClear();
+    TestBed.configureTestingModule({
+      providers: [{ provide: LiveAnnouncer, useValue: announcementService }],
+    });
+  });
+
   afterEach(() => {
     vi.useRealTimers();
   });
@@ -58,6 +73,46 @@ describe('HellToastService', () => {
       description: 'Report is ready',
       variant: 'success',
     });
+  });
+
+  it('announces new toast text via LiveAnnouncer', () => {
+    const svc = TestBed.inject(HellToastService);
+
+    svc.show({ title: 'Saved', description: 'Report generated', duration: 0 });
+
+    expect(liveAnnounce).toHaveBeenCalledWith('Saved. Report generated', 'polite');
+  });
+
+  it('uses explicit announcement text for custom-template toasts', () => {
+    const svc = TestBed.inject(HellToastService);
+
+    svc.show({
+      template: {} as TemplateRef<{ $implicit: { id: number; dismiss: () => void } }>,
+      announcement: 'Upload complete',
+      duration: 0,
+    });
+
+    expect(liveAnnounce).toHaveBeenCalledWith('Upload complete', 'polite');
+  });
+
+  it('falls back to a generic announcement for template-only toasts', () => {
+    const svc = TestBed.inject(HellToastService);
+
+    svc.show({
+      template: {} as TemplateRef<{ $implicit: { id: number; dismiss: () => void } }>,
+      duration: 0,
+    });
+
+    expect(liveAnnounce).toHaveBeenCalledWith('Notification', 'polite');
+  });
+
+  it('does not re-announce when updating by existing toast id', () => {
+    const svc = TestBed.inject(HellToastService);
+    const sharedId = svc.show({ title: 'Saving', duration: 0 });
+
+    svc.show({ id: sharedId, title: 'Saved', description: 'Done', duration: 0 });
+
+    expect(liveAnnounce).toHaveBeenCalledTimes(1);
   });
 
   it('does not let a stale exit timer remove a revived toast id', () => {
@@ -132,6 +187,7 @@ describe('HellToaster', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HellToaster],
+      providers: [{ provide: LiveAnnouncer, useValue: announcementService }],
     }).compileComponents();
   });
 
@@ -153,8 +209,8 @@ describe('HellToaster', () => {
     const region = fixture.nativeElement.querySelector('[data-slot="region"]') as HTMLElement;
     const list = fixture.nativeElement.querySelector('[data-slot="list"]') as HTMLOListElement;
     expect(region).not.toBeNull();
-    expect(region.getAttribute('aria-live')).toBe('polite');
-    expect(region.getAttribute('aria-atomic')).toBe('true');
+    expect(region.getAttribute('aria-live')).toBeNull();
+    expect(region.getAttribute('aria-atomic')).toBeNull();
     expect(list).toBeInstanceOf(HTMLOListElement);
     expect(list.querySelectorAll('[data-slot="toast"]')).toHaveLength(1);
   });

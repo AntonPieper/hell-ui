@@ -13,6 +13,7 @@ import {
   input,
   signal,
 } from '@angular/core';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { NgTemplateOutlet } from '@angular/common';
 import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
@@ -57,11 +58,13 @@ export interface HellToastOptions {
   template?: TemplateRef<{
     $implicit: { id: number; dismiss: () => void };
   }>;
+  /** Screen-reader text for custom-template toasts. Falls back to title/description. */
+  announcement?: string;
   /** Stable id; pass to update an existing toast (replace contents in place). */
   id?: number;
 }
 
-interface ToastInternal extends Required<Omit<HellToastOptions, 'template' | 'action' | 'id'>> {
+interface ToastInternal extends Required<Omit<HellToastOptions, 'template' | 'action' | 'id' | 'announcement'>> {
   id: number;
   template: HellToastOptions['template'] | null;
   action: HellToastAction | null;
@@ -86,6 +89,8 @@ interface ToastTimer {
  */
 @Injectable({ providedIn: 'root' })
 export class HellToastService {
+  private readonly announcer = inject(LiveAnnouncer);
+  private readonly labels = inject(HELL_LABELS);
   private nextId = 1;
   private timers = new Map<number, ToastTimer>();
   private exitTimers = new Map<number, ReturnType<typeof setTimeout>>();
@@ -117,6 +122,7 @@ export class HellToastService {
       this.toasts.set(copy);
     } else {
       this.toasts.set([...list, next]);
+      this.announceToast(next, opts);
     }
     this.scheduleAutoDismiss(next);
     return id;
@@ -202,6 +208,15 @@ export class HellToastService {
     });
   }
 
+  private announceToast(toast: ToastInternal, opts?: Pick<HellToastOptions, 'announcement'>): void {
+    const explicitAnnouncement = opts?.announcement?.trim();
+    const announcement = explicitAnnouncement ||
+      [toast.title, toast.description].filter((part) => part.length > 0).join('. ') ||
+      (toast.template ? this.labels.toast.notification : '');
+    if (!announcement) return;
+    this.announcer.announce(announcement, 'polite');
+  }
+
   private clearTimer(id: number): void {
     const t = this.timers.get(id);
     if (!t) return;
@@ -250,8 +265,6 @@ export class HellToastTemplate {}
         data-slot="region"
         role="region"
         [attr.aria-label]="labels.toast.notifications"
-        aria-live="polite"
-        aria-atomic="true"
         tabindex="-1"
         (mouseenter)="onEnter()"
         (mouseleave)="onLeave()"

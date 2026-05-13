@@ -1,7 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { BreakpointObserver, type BreakpointState } from '@angular/cdk/layout';
+import { ReplaySubject } from 'rxjs';
 
-import { HELL_APP_SHELL_DIRECTIVES } from './app-shell';
+import { HELL_APP_SHELL_DIRECTIVES, HELL_APP_SHELL_MOBILE_MEDIA } from './app-shell';
 
 @Component({
   imports: [...HELL_APP_SHELL_DIRECTIVES],
@@ -102,21 +104,16 @@ class ControlledShellHost {
 })
 class UnstyledShellHost {}
 
-const nativeMatchMedia = globalThis.matchMedia;
+
+let mediaController: ReturnType<typeof createMobileLayoutController>;
 
 describe('HellAppShell secondary panel', () => {
   beforeEach(async () => {
+    mediaController = createMobileLayoutController(false);
     await TestBed.configureTestingModule({
       imports: [TestHost, ControlledShellHost, UnstyledShellHost],
+      providers: [{ provide: BreakpointObserver, useValue: mediaController }],
     }).compileComponents();
-  });
-
-  afterEach(() => {
-    Object.defineProperty(globalThis, 'matchMedia', {
-      configurable: true,
-      writable: true,
-      value: nativeMatchMedia,
-    });
   });
 
   it('owns sidenav toggle labels in the default case', () => {
@@ -330,40 +327,31 @@ describe('HellAppShell secondary panel', () => {
 });
 
 function mockMobileLayout(matches: boolean): void {
-  mockMobileLayoutController(matches);
+  mediaController.setMatches(matches);
 }
 
 function mockMobileLayoutController(matches: boolean) {
-  let currentMatches = matches;
-  const listeners = new Set<() => void>();
-  const media = {
-    get matches() {
-      return currentMatches;
-    },
-    media: '(max-width: 767px)',
-    onchange: null,
-    addEventListener: vi.fn((type: string, listener: EventListenerOrEventListenerObject) => {
-      if (type === 'change' && typeof listener === 'function') listeners.add(listener as () => void);
-    }),
-    removeEventListener: vi.fn((type: string, listener: EventListenerOrEventListenerObject) => {
-      if (type === 'change' && typeof listener === 'function') listeners.delete(listener as () => void);
-    }),
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  } as unknown as MediaQueryList;
+  mediaController.setMatches(matches);
+  return mediaController;
+}
 
-  Object.defineProperty(globalThis, 'matchMedia', {
-    configurable: true,
-    writable: true,
-    value: vi.fn(() => media),
+function createMobileLayoutController(matches: boolean) {
+  const state = new ReplaySubject<BreakpointState>(1);
+
+  const toState = (value: boolean): BreakpointState => ({
+    matches: value,
+    breakpoints: {
+      [HELL_APP_SHELL_MOBILE_MEDIA]: value,
+    },
   });
 
+  const setMatches = (next: boolean): void => state.next(toState(next));
+
+  setMatches(matches);
+
   return {
-    setMatches(next: boolean): void {
-      currentMatches = next;
-      for (const listener of listeners) listener();
-    },
+    observe: vi.fn(() => state.asObservable()),
+    setMatches,
   };
 }
 
