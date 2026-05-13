@@ -14,6 +14,10 @@ import { DateInputTextInputCalendarPopoverExample } from './examples/text-input-
 import dateInputTextInputCalendarPopoverExampleCodeRaw from './examples/text-input-calendar-popover.example.ts?raw' with {
   loader: 'text',
 };
+import { DateInputReactiveFormsExample } from './examples/reactive-forms.example';
+import dateInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-date-input',
@@ -23,6 +27,7 @@ import dateInputTextInputCalendarPopoverExampleCodeRaw from './examples/text-inp
     RouterLink,
     ...HELL_FIELD_DIRECTIVES,
     DateInputTextInputCalendarPopoverExample,
+    DateInputReactiveFormsExample,
     DateInputSizesExample,
     DateInputPlaceholdersAndLabelsExample,
   ],
@@ -43,6 +48,11 @@ import dateInputTextInputCalendarPopoverExampleCodeRaw from './examples/text-inp
         <app-date-input-text-input-calendar-popover-example />
       </hd-example-tabs>
 
+      <h2>Reactive forms</h2>
+      <hd-example-tabs [code]="dateInputReactiveFormsExampleCode" previewClass="grid gap-3 max-w-md">
+        <app-date-input-reactive-forms-example />
+      </hd-example-tabs>
+
       <h2>Sizes</h2>
       <hd-example-tabs [code]="dateInputSizesExampleCode" previewClass="grid gap-3 max-w-md">
         <app-date-input-sizes-example />
@@ -60,6 +70,7 @@ import dateInputTextInputCalendarPopoverExampleCodeRaw from './examples/text-inp
       <ul>
         <li><code>date</code>: <code>Date | null</code> current value.</li>
         <li><code>(dateChange)</code>: emits a valid <code>Date</code> after typing or picking, or <code>null</code> when cleared.</li>
+        <li>Implements <code>ControlValueAccessor</code> for Angular forms. Reactive and template-driven forms read/write <code>Date | null</code>; native HTML form submission is not provided.</li>
         <li><code>min</code>, <code>max</code>: optional typed-input and picker bounds.</li>
         <li><code>size</code>: <code>sm | md | lg</code>.</li>
         <li><code>invalid</code>, <code>disabled</code>: visual / interaction states.</li>
@@ -92,6 +103,7 @@ import dateInputTextInputCalendarPopoverExampleCodeRaw from './examples/text-inp
 export class DateInputPage {
   protected readonly dateInputTextInputCalendarPopoverExampleCode =
     dateInputTextInputCalendarPopoverExampleCodeRaw;
+  protected readonly dateInputReactiveFormsExampleCode = dateInputReactiveFormsExampleCodeRaw;
   protected readonly dateInputSizesExampleCode = dateInputSizesExampleCodeRaw;
   protected readonly dateInputPlaceholdersAndLabelsExampleCode =
     dateInputPlaceholdersAndLabelsExampleCodeRaw;

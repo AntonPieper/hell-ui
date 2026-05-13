@@ -12,6 +12,10 @@ import { TimeInputSizesExample } from './examples/sizes.example';
 import timeInputSizesExampleCodeRaw from './examples/sizes.example.ts?raw' with {
   loader: 'text',
 };
+import { TimeInputReactiveFormsExample } from './examples/reactive-forms.example';
+import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-time-input',
@@ -19,6 +23,7 @@ import timeInputSizesExampleCodeRaw from './examples/sizes.example.ts?raw' with 
   imports: [
     ExampleTabs,
     TimeInputExamplesExample,
+    TimeInputReactiveFormsExample,
     TimeInputPlaceholderAndLabelsExample,
     TimeInputSizesExample,
   ],
@@ -28,13 +33,18 @@ import timeInputSizesExampleCodeRaw from './examples/sizes.example.ts?raw' with 
       <p>
         A text-first time field that accepts <code>HH:mm</code>, <code>HH:mm:ss</code> and common
         12-hour spellings (<code>9:00 am</code>, <code>1:30PM</code>). Click or keyboard-activate the clock icon to open
-        a compact dial: hour and minute grids you can click directly, with ±5 minute nudges for
+        a compact grid picker: hour and minute cells you can click directly, with roving keyboard focus and ±5 minute nudges for
         fine-tuning.
       </p>
 
       <h2>Examples</h2>
       <hd-example-tabs [code]="timeInputExamplesExampleCode" previewClass="grid gap-4 max-w-md">
         <app-time-input-examples-example />
+      </hd-example-tabs>
+
+      <h2>Reactive forms</h2>
+      <hd-example-tabs [code]="timeInputReactiveFormsExampleCode" previewClass="grid gap-3 max-w-md">
+        <app-time-input-reactive-forms-example />
       </hd-example-tabs>
 
       <h2>Placeholder and labels</h2>
@@ -57,6 +67,7 @@ import timeInputSizesExampleCodeRaw from './examples/sizes.example.ts?raw' with 
           with <code>hour</code>, <code>minute</code>, and <code>second</code>
           (two-way via <code>(valueChange)</code>).
         </li>
+        <li>Implements <code>ControlValueAccessor</code> for Angular forms. Reactive and template-driven forms read/write <code>HellTimeValue | null</code>; native HTML form submission is not provided.</li>
         <li><code>seconds</code>: include a seconds grid + readout.</li>
         <li><code>size</code>: <code>sm | md | lg</code></li>
         <li><code>invalid</code>, <code>disabled</code></li>
@@ -87,6 +98,7 @@ import timeInputSizesExampleCodeRaw from './examples/sizes.example.ts?raw' with 
 })
 export class TimeInputPage {
   protected readonly timeInputExamplesExampleCode = timeInputExamplesExampleCodeRaw;
+  protected readonly timeInputReactiveFormsExampleCode = timeInputReactiveFormsExampleCodeRaw;
   protected readonly timeInputPlaceholderAndLabelsExampleCode =
     timeInputPlaceholderAndLabelsExampleCodeRaw;
   protected readonly timeInputSizesExampleCode = timeInputSizesExampleCodeRaw;

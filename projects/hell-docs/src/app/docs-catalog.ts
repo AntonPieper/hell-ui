@@ -1029,6 +1029,12 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
               'date-input placeholders-and-labels components/date-input/examples/placeholders-and-labels.example components/date-input hell-date-input',
           },
           {
+            title: 'Date Input: Reactive Forms',
+            detail: 'components/date-input/examples/reactive-forms.example.ts',
+            terms:
+              'date-input reactive-forms components/date-input/examples/reactive-forms.example components/date-input hell-date-input formControl ReactiveFormsModule ControlValueAccessor Date null Angular Forms',
+          },
+          {
             title: 'Date Input: Sizes',
             detail: 'components/date-input/examples/sizes.example.ts',
             terms:
@@ -1047,6 +1053,12 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
             detail: 'provideHellDateInputAdapter, HELL_DATE_INPUT_ADAPTER',
             terms:
               'date-input adapter provideHellDateInputAdapter HELL_DATE_INPUT_ADAPTER parse format locale temporal strict ISO YYYY-MM-DD',
+          },
+          {
+            title: 'Date input forms value',
+            detail: 'ControlValueAccessor, formControl, Date | null',
+            terms:
+              'date-input forms ControlValueAccessor formControl ReactiveFormsModule Angular Forms Date null native form submission validation',
           },
         ],
         loadComponent: () =>
@@ -1199,6 +1211,12 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
               'time-input examples components/time-input/examples/examples.example components/time-input hell-time-input',
           },
           {
+            title: 'Time Input: Reactive Forms',
+            detail: 'components/time-input/examples/reactive-forms.example.ts',
+            terms:
+              'time-input reactive-forms components/time-input/examples/reactive-forms.example components/time-input hell-time-input formControl ReactiveFormsModule ControlValueAccessor HellTimeValue null Angular Forms',
+          },
+          {
             title: 'Time Input: Placeholder And Labels',
             detail: 'components/time-input/examples/placeholder-and-labels.example.ts',
             terms:
@@ -1217,6 +1235,12 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
             detail: 'provideHellTimeInputAdapter, HELL_TIME_INPUT_ADAPTER',
             terms:
               'time-input adapter provideHellTimeInputAdapter HELL_TIME_INPUT_ADAPTER parse format locale shortcuts HellTimeValue',
+          },
+          {
+            title: 'Time input forms value',
+            detail: 'ControlValueAccessor, formControl, HellTimeValue | null',
+            terms:
+              'time-input forms ControlValueAccessor formControl ReactiveFormsModule Angular Forms HellTimeValue null native form submission validation',
           },
         ],
         loadComponent: () =>

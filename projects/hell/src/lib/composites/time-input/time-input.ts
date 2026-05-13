@@ -156,12 +156,11 @@ export function hellSameTimeInputValue(
 
 /**
  * Time input — text field paired with a clock icon trigger that opens a
- * dial-style picker. Bind `[value]` as a structured `HellTimeValue | null`
- * and listen to `(valueChange)`.
+ * roving-focus grid picker. Bind `[value]` as a structured
+ * `HellTimeValue | null` and listen to `(valueChange)`.
  *
- * The picker is a compact 3×3 dial: hour and minute buttons in a grid you
- * can click directly, plus +/- 5 minute nudges, instead of the previous
- * scroll-column UX which felt clumsy.
+ * The picker uses hour, minute, and optional second grids with one tab stop per
+ * section, arrow/Home/End navigation, and +/- 5 minute nudges.
  */
 @Component({
   selector: 'hell-time-input',
