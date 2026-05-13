@@ -85,7 +85,8 @@ export class HellSlider extends HellStyleable implements ControlValueAccessor {
 
   protected readonly activeDrag = signal(false);
 
-  private readonly thumbRef = viewChild.required<ElementRef<HTMLElement>>('thumb');
+  private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly thumbRef = viewChild<ElementRef<HTMLElement>>('thumb');
   private readonly controlMode = signal(false);
   private readonly controlValue = signal(0);
   private readonly controlDisabled = signal(false);
@@ -140,9 +141,18 @@ export class HellSlider extends HellStyleable implements ControlValueAccessor {
    * click-and-drag from anywhere on the track in one fluid motion.
    */
   protected continueAsDrag(e: PointerEvent) {
+    if (!this.canContinueTrackDrag(e)) return;
+
+    const thumb = this.thumbRef();
+    if (!thumb) return;
+    const ownerWindow = this.host.nativeElement.ownerDocument.defaultView;
+    const { PointerEvent: PointerEventCtor } = ownerWindow ?? {};
+
+    if (typeof PointerEventCtor !== 'function') return;
+
     e.preventDefault();
-    this.thumbRef().nativeElement.dispatchEvent(
-      new PointerEvent('pointerdown', {
+    thumb.nativeElement.dispatchEvent(
+      new PointerEventCtor('pointerdown', {
         bubbles: true,
         cancelable: true,
         pointerId: e.pointerId,
@@ -151,29 +161,44 @@ export class HellSlider extends HellStyleable implements ControlValueAccessor {
         clientY: e.clientY,
         button: e.button,
         buttons: e.buttons,
+        isPrimary: e.isPrimary,
       }),
     );
   }
 
   protected markActiveDrag(e: PointerEvent) {
-    if (e.button !== 0) return;
+    if (!this.canContinueTrackDrag(e)) return;
+
+    const ownerWindow = this.host.nativeElement.ownerDocument.defaultView;
+    if (!ownerWindow) return;
+
     this.activeDrag.set(true);
     this.markControlTouched();
     this.removeActiveDragListeners?.();
 
-    const targetWindow = this.thumbRef().nativeElement.ownerDocument.defaultView ?? window;
     const clear = () => {
       this.activeDrag.set(false);
       this.removeActiveDragListeners?.();
       this.removeActiveDragListeners = null;
     };
 
-    targetWindow.addEventListener('pointerup', clear, { once: true });
-    targetWindow.addEventListener('pointercancel', clear, { once: true });
+    ownerWindow.addEventListener('pointerup', clear, { once: true });
+    ownerWindow.addEventListener('pointercancel', clear, { once: true });
     this.removeActiveDragListeners = () => {
-      targetWindow.removeEventListener('pointerup', clear);
-      targetWindow.removeEventListener('pointercancel', clear);
+      ownerWindow.removeEventListener('pointerup', clear);
+      ownerWindow.removeEventListener('pointercancel', clear);
     };
+  }
+
+  private canContinueTrackDrag(event: PointerEvent): boolean {
+    if (event.button !== 0) return false;
+    if (this.effectiveDisabled()) return false;
+
+    const thumb = this.thumbRef();
+    if (!thumb) return false;
+    if (!thumb.nativeElement.isConnected) return false;
+
+    return true;
   }
 
   protected markControlTouched(): void {
