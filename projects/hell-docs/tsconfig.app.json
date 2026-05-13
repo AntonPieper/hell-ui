@@ -7,17 +7,16 @@
     "types": [],
     "moduleResolution": "bundler",
     "paths": {
-      "@hell-ui/angular": ["../../dist/hell"],
-      "@hell-ui/angular/*": ["../../dist/hell/*"],
+      "@hell-ui/angular": ["../../dist/hell/types/hell-ui-angular.d.ts"],
       "@hell-ui/angular/styles": ["../../dist/hell/styles/hell.css"],
       "@hell-ui/angular/styles/*": ["../../dist/hell/styles/*"],
-      "@hell-ui/angular/core": ["../../dist/hell/core"],
-      "@hell-ui/angular/primitives": ["../../dist/hell/primitives"],
-      "@hell-ui/angular/composites": ["../../dist/hell/composites"],
-      "@hell-ui/angular/features/code-editor": ["../../dist/hell/features/code-editor"],
-      "@hell-ui/angular/features/data-table": ["../../dist/hell/features/data-table"],
-      "@hell-ui/angular/features/table-utilities": ["../../dist/hell/features/table-utilities"],
-      "@hell-ui/angular/features/pdf-viewer": ["../../dist/hell/features/pdf-viewer"]
+      "@hell-ui/angular/core": ["../../dist/hell/types/hell-ui-angular-core.d.ts"],
+      "@hell-ui/angular/primitives": ["../../dist/hell/types/hell-ui-angular-primitives.d.ts"],
+      "@hell-ui/angular/composites": ["../../dist/hell/types/hell-ui-angular-composites.d.ts"],
+      "@hell-ui/angular/features/code-editor": ["../../dist/hell/types/hell-ui-angular-features-code-editor.d.ts"],
+      "@hell-ui/angular/features/data-table": ["../../dist/hell/types/hell-ui-angular-features-data-table.d.ts"],
+      "@hell-ui/angular/features/table-utilities": ["../../dist/hell/types/hell-ui-angular-features-table-utilities.d.ts"],
+      "@hell-ui/angular/features/pdf-viewer": ["../../dist/hell/types/hell-ui-angular-features-pdf-viewer.d.ts"]
     }
   },
   "include": [
