@@ -33,13 +33,14 @@ Prefer the narrowest entry point that contains the API you use:
 ```ts
 import { HellButton, HELL_SELECT_DIRECTIVES } from 'hell/primitives';
 import { HELL_APP_SHELL_DIRECTIVES } from 'hell/composites';
-import { HELL_TABLE_DIRECTIVES } from 'hell/features/data-table';
+import { HELL_TABLE_UTILITY_DIRECTIVES } from 'hell/features/table-utilities';
 ```
 
 Heavy feature entry points keep extra peers local: CodeMirror packages for
 `hell/features/code-editor`, `pdfjs-dist` plus the light UI stack for
 `hell/features/pdf-viewer`, and no icon/ng-primitives stack for
-`hell/features/data-table`.
+`hell/features/table-utilities`. `hell/features/data-table` remains as a
+legacy compatibility alias for table utilities.
 
 ## Styles
 
@@ -56,7 +57,8 @@ library:
 @import "hell/styles/tokens";
 @import "hell/styles/primitives";
 @import "hell/styles/composites";
-@import "hell/styles/features/data-table";
+@import "hell/styles/features/table-utilities";
+@import "hell/styles/features/data-table"; /* legacy alias */
 @import "hell/styles/features/code-editor";
 @import "hell/styles/features/pdf-viewer";
 ```

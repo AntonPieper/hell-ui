@@ -24,7 +24,8 @@ Feature entry points add their own optional stacks only when imported:
 | Entry point | Install when used |
 | --- | --- |
 | `hell/primitives`, `hell/composites` | `ng-primitives @ng-icons/core @ng-icons/font-awesome tailwindcss` |
-| `hell/features/data-table` | Angular + `tailwindcss` only |
+| `hell/features/table-utilities` | Angular + `tailwindcss` only |
+| `hell/features/data-table` | Legacy compatibility alias for `hell/features/table-utilities` |
 | `hell/features/code-editor` | `@codemirror/view @codemirror/state @codemirror/commands @codemirror/language @lezer/highlight` plus any language package, e.g. `@codemirror/lang-javascript` |
 | `hell/features/pdf-viewer` | `pdfjs-dist` plus the base light UI stack (`ng-primitives @ng-icons/core @ng-icons/font-awesome tailwindcss`) |
 
@@ -35,7 +36,7 @@ Prefer the narrowest entry point that contains the API you use:
 ```ts
 import { HellButton, HELL_SELECT_DIRECTIVES } from 'hell/primitives';
 import { HELL_APP_SHELL_DIRECTIVES } from 'hell/composites';
-import { HELL_TABLE_DIRECTIVES } from 'hell/features/data-table';
+import { HELL_TABLE_UTILITY_DIRECTIVES } from 'hell/features/table-utilities';
 ```
 
 ## CSS Imports
@@ -52,7 +53,8 @@ For progressive loading:
 @import "hell/styles/primitives";
 @import "hell/styles/composites";
 @import "hell/styles/features/code-editor";
-@import "hell/styles/features/data-table";
+@import "hell/styles/features/table-utilities";
+@import "hell/styles/features/data-table"; /* legacy alias */
 @import "hell/styles/features/pdf-viewer";
 ```
 

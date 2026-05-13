@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/c
 import { javascript } from '@codemirror/lang-javascript';
 import { HELL_RESIZABLE_DIRECTIVES } from 'hell/composites';
 import { HellCodeEditor } from 'hell/features/code-editor';
-import { HELL_TABLE_UTILITY_DIRECTIVES } from 'hell/features/data-table';
+import { HELL_TABLE_UTILITY_DIRECTIVES } from 'hell/features/table-utilities';
 
 interface Row {
   id: number;

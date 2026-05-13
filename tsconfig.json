@@ -12,6 +12,7 @@
       "hell/composites": ["./projects/hell/src/lib/public-api-composites.ts"],
       "hell/features/code-editor": ["./projects/hell/src/lib/public-api-feature-code-editor.ts"],
       "hell/features/data-table": ["./projects/hell/src/lib/public-api-feature-data-table.ts"],
+      "hell/features/table-utilities": ["./projects/hell/src/lib/public-api-feature-table-utilities.ts"],
       "hell/features/pdf-viewer": ["./projects/hell/src/lib/public-api-feature-pdf-viewer.ts"]
     },
     "noImplicitOverride": true,

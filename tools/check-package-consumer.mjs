@@ -101,8 +101,15 @@ const scenarios = [
     stylesCss: codeEditorConsumerStylesCss(),
   },
   {
+    name: 'table-utilities',
+    description: 'preferred table utilities feature without light UI or CodeMirror/pdf peers',
+    dependencies: dataTableDeps,
+    mainTs: tableUtilitiesConsumerMainTs(),
+    stylesCss: tableUtilitiesConsumerStylesCss(),
+  },
+  {
     name: 'data-table',
-    description: 'data-table feature without light UI or CodeMirror/pdf peers',
+    description: 'legacy data-table alias without light UI or CodeMirror/pdf peers',
     dependencies: dataTableDeps,
     mainTs: dataTableConsumerMainTs(),
     stylesCss: dataTableConsumerStylesCss(),
@@ -358,15 +365,23 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
+function tableUtilitiesConsumerMainTs() {
+  return tableConsumerMainTs('hell/features/table-utilities', 'HELL_TABLE_UTILITY_DIRECTIVES');
+}
+
 function dataTableConsumerMainTs() {
+  return tableConsumerMainTs('hell/features/data-table', 'HELL_TABLE_DIRECTIVES');
+}
+
+function tableConsumerMainTs(entryPoint, directiveSymbol) {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_TABLE_DIRECTIVES } from 'hell/features/data-table';
+import { ${directiveSymbol} } from '${entryPoint}';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [...HELL_TABLE_DIRECTIVES],
+  imports: [...${directiveSymbol}],
   template: \`
     <div hellTableContainer>
       <table hellTable>
@@ -433,6 +448,13 @@ function codeEditorConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "hell/styles/tokens";
 @import "hell/styles/features/code-editor";
+`;
+}
+
+function tableUtilitiesConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "hell/styles/tokens";
+@import "hell/styles/features/table-utilities";
 `;
 }
 

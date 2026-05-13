@@ -9,7 +9,7 @@ import { HellInput, HellNativeSelect, HellTextarea } from './primitives/input/in
 import { HellBadge, HellKbd, HellTag } from './primitives/tag/tag';
 import { HELL_SELECT_DIRECTIVES } from './primitives/select/select';
 import { HELL_APP_SHELL_DIRECTIVES } from './composites/app-shell/app-shell';
-import { HELL_TABLE_DIRECTIVES } from './features/data-table/data-table';
+import { HELL_TABLE_UTILITY_DIRECTIVES } from './features/table-utilities/table-utilities';
 
 interface ContractCase {
   readonly id: string;
@@ -189,7 +189,7 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
     ...HELL_FIELD_DIRECTIVES,
     ...HELL_SELECT_DIRECTIVES,
     ...HELL_APP_SHELL_DIRECTIVES,
-    ...HELL_TABLE_DIRECTIVES,
+    ...HELL_TABLE_UTILITY_DIRECTIVES,
   ],
   template: `
     <button id="styled-button" hellButton variant="primary" size="sm" iconOnly block type="button">

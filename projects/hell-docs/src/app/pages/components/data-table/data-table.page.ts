@@ -28,10 +28,11 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
         <h2>Scope</h2>
         <p>
           This feature deliberately does not own a data source, column definition model, filtering,
-          pagination, virtualization, selection model, or grid semantics. Bring Angular CDK Table,
-          TanStack Table, AG Grid, a backend API, or your own state layer when you need a real data
-          table. Use Hell's directives only for host styling, row activation, sortable header
-          affordances, and column resize handles.
+          pagination, virtualization, selection model, or grid semantics. Import it from
+          <code>hell/features/table-utilities</code>; <code>hell/features/data-table</code> remains
+          a legacy compatibility alias. Bring Angular CDK Table, TanStack Table, AG Grid, a backend
+          API, or your own state layer when you need a real data table. Use Hell's directives only
+          for host styling, row activation, sortable header affordances, and column resize handles.
         </p>
 
         <h2>Example</h2>

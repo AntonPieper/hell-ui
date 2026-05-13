@@ -28,7 +28,7 @@ import { HELL_OMNIBAR_DIRECTIVES, HELL_SPLIT_VIEW_DIRECTIVES } from 'hell/compos
 import { hellSearchKey, hellSearchWords } from 'hell/core';
 import { HELL_MENU_DIRECTIVES, HellButton, HellIcon, HellPaginationStrip, HellSkeleton } from 'hell/primitives';
 import { HellCodeEditor } from 'hell/features/code-editor';
-import { HELL_TABLE_UTILITY_DIRECTIVES } from 'hell/features/data-table';
+import { HELL_TABLE_UTILITY_DIRECTIVES } from 'hell/features/table-utilities';
 
 type RowRole = 'Admin' | 'Editor' | 'Viewer';
 type RowAssignee = 'Ada' | 'Grace' | 'Linus' | 'Margaret';

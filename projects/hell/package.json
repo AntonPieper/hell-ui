@@ -27,6 +27,10 @@
       "style": "./styles/features/data-table.css",
       "default": "./styles/features/data-table.css"
     },
+    "./styles/features/table-utilities": {
+      "style": "./styles/features/table-utilities.css",
+      "default": "./styles/features/table-utilities.css"
+    },
     "./styles/features/pdf-viewer": {
       "style": "./styles/features/pdf-viewer.css",
       "default": "./styles/features/pdf-viewer.css"

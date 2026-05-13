@@ -1,0 +1,5 @@
+{
+  "lib": {
+    "entryFile": "../../src/lib/public-api-feature-table-utilities.ts"
+  }
+}

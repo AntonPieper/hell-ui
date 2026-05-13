@@ -9,7 +9,8 @@
  *   @import "hell/styles/tokens";
  *   @import "hell/styles/primitives";
  *   @import "hell/styles/composites";
- *   @import "hell/styles/features/data-table";
+ *   @import "hell/styles/features/table-utilities";
+ *   @import "hell/styles/features/data-table"; legacy alias
  *
  * Tokens + design system base are declared in tokens.css.
  * Component classes are split per module under ./components/.
@@ -17,6 +18,7 @@
  * using native CSS declarations plus Tailwind theme variables.
  */
 @import './composites.css';
+@import './features/table-utilities.css';
 @import './features/data-table.css';
 @import './features/code-editor.css';
 @import './features/pdf-viewer.css';
