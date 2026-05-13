@@ -53,11 +53,11 @@ function hellCodeEditorFoldMarkerIcon(open: boolean, ownerDocument: Document): S
 }
 
 /**
- * Base CodeMirror setup used by hell-code-editor. Language support is
+ * Create the base CodeMirror setup used by hell-code-editor. Language support is
  * intentionally excluded: pass Angular, JS, JSON, or any other CodeMirror
  * language extension through the `extensions` input at the call site.
  */
-function hellCodeEditorSetupFactory(ownerDocument: Document): Extension {
+export function hellCodeEditorSetupFactory(ownerDocument: Document): Extension {
   return [
     lineNumbers(),
     foldGutter({
@@ -82,7 +82,9 @@ function hellCodeEditorSetupFactory(ownerDocument: Document): Extension {
 }
 
 /**
- * Default setup export kept for backward compatibility.
+ * @deprecated Browser-global legacy setup kept for backward compatibility. Prefer
+ * `hellCodeEditorSetupFactory(ownerDocument)` so callers can create setup for
+ * the editor document realm explicitly.
  */
 export const hellCodeEditorSetup: Extension =
   typeof document === 'undefined' ? [] : hellCodeEditorSetupFactory(document);

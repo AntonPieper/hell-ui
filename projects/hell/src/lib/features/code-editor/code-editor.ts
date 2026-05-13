@@ -23,7 +23,7 @@ import {
   type HellCodeEditorRuntimePort,
 } from './code-editor.runtime';
 
-export { hellCodeEditorSetup, hellCodeEditorTheme } from './code-editor.runtime';
+export { hellCodeEditorSetup, hellCodeEditorSetupFactory, hellCodeEditorTheme } from './code-editor.runtime';
 
 export type HellCodeEditorRuntimeFactory = (
   options: HellCodeEditorRuntimeOptions,

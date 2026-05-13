@@ -1,9 +1,26 @@
 import { EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 
-import { HellCodeEditorRuntime } from './code-editor.runtime';
+import { HellCodeEditorRuntime, hellCodeEditorSetupFactory } from './code-editor.runtime';
 
 describe('HellCodeEditorRuntime', () => {
+  it('creates base setup per document via factory', () => {
+    const foreignDocument = document.implementation.createHTMLDocument('hell-code-editor');
+    const host = foreignDocument.createElement('div');
+
+    const view = new EditorView({
+      state: EditorState.create({
+        doc: '',
+        extensions: [hellCodeEditorSetupFactory(foreignDocument)],
+      }),
+      parent: host,
+    });
+
+    expect(view.dom.ownerDocument).toBe(foreignDocument);
+
+    view.destroy();
+  });
+
   it('emits user edits but not external value writes', () => {
     const host = document.createElement('div');
     const values: string[] = [];
