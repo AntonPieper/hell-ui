@@ -14,14 +14,14 @@ import { HellDateInput } from 'hell/composites';
   imports: [...HELL_FIELD_DIRECTIVES, HellCheckbox, HellSwitch],
   template: `
     <div hellField orientation="horizontal">
-      <button hellCheckbox [checked]="agree()" (checkedChange)="agree.set($event)"></button>
-      <label hellFieldLabel>I agree to the terms</label>
+      <button id="terms-checkbox" hellCheckbox [checked]="agree()" (checkedChange)="agree.set($event)"></button>
+      <label hellFieldLabel for="terms-checkbox">I agree to the terms</label>
       <div hellFieldDescription>You can revoke at any time.</div>
     </div>
 
     <div hellField orientation="horizontal">
-      <button hellSwitch [checked]="notify()" (checkedChange)="notify.set($event)"></button>
-      <label hellFieldLabel>Email notifications</label>
+      <button id="email-switch" hellSwitch [checked]="notify()" (checkedChange)="notify.set($event)"></button>
+      <label hellFieldLabel for="email-switch">Email notifications</label>
     </div>
   `,
 })

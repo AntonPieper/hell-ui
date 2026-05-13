@@ -40,6 +40,7 @@ interface TeamMember {
             hellMenuItem
             class="hd-avatar-menu-row"
             role="menuitemcheckbox"
+            tabindex="0"
             [closeOnSelect]="false"
             [attr.aria-checked]="isSelected(person)"
             (click)="toggleSelected(person)"

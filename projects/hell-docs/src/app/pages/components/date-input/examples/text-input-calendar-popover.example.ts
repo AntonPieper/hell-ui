@@ -8,14 +8,16 @@ import { HELL_FIELD_DIRECTIVES } from 'hell/primitives';
   imports: [...HELL_FIELD_DIRECTIVES, HellDateInput],
   template: `
     <div hellField>
-      <label hellFieldLabel>Departure</label>
-      <hell-date-input [date]="value()" (dateChange)="value.set($event)" />
+      <label hellFieldLabel for="departure-date">Departure</label>
+      <hell-date-input id="departure-date" aria-label="Departure" [date]="value()" (dateChange)="value.set($event)" />
       <div hellFieldDescription>Type a date or pick from the calendar — both work.</div>
     </div>
 
     <div hellField>
-      <label hellFieldLabel>Bounded</label>
+      <label hellFieldLabel for="bounded-date">Bounded</label>
       <hell-date-input
+        id="bounded-date"
+        aria-label="Bounded"
         [date]="bounded()"
         (dateChange)="bounded.set($event)"
         [min]="minDate"
@@ -27,14 +29,14 @@ import { HELL_FIELD_DIRECTIVES } from 'hell/primitives';
     </div>
 
     <div hellField>
-      <label hellFieldLabel>Invalid</label>
-      <hell-date-input invalid [date]="value()" />
+      <label hellFieldLabel for="invalid-date">Invalid</label>
+      <hell-date-input id="invalid-date" aria-label="Invalid" invalid [date]="value()" />
       <div hellFieldError>Pick a date in the future.</div>
     </div>
 
     <div hellField>
-      <label hellFieldLabel>Disabled</label>
-      <hell-date-input disabled [date]="value()" />
+      <label hellFieldLabel for="disabled-date">Disabled</label>
+      <hell-date-input id="disabled-date" aria-label="Disabled" disabled [date]="value()" />
     </div>
   `,
 })

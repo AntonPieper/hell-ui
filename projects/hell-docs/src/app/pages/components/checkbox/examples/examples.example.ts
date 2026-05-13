@@ -6,22 +6,27 @@ import { HellCheckbox } from 'hell/primitives';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellCheckbox],
   template: `
-    <label class="inline-flex items-center gap-2">
-      <button hellCheckbox [checked]="agree()" (checkedChange)="agree.set($event)"></button>
-      I agree to the terms
-    </label>
-    <label class="inline-flex items-center gap-2">
-      <button hellCheckbox indeterminate></button>
-      Indeterminate (parent of mixed children)
-    </label>
-    <label class="inline-flex items-center gap-2">
-      <button hellCheckbox disabled></button>
-      Disabled
-    </label>
-    <label class="inline-flex items-center gap-2">
-      <button hellCheckbox checked disabled></button>
-      Disabled, checked
-    </label>
+    <div class="inline-flex items-center gap-2">
+      <button
+        hellCheckbox
+        aria-label="I agree to the terms"
+        [checked]="agree()"
+        (checkedChange)="agree.set($event)"
+      ></button>
+      <span>I agree to the terms</span>
+    </div>
+    <div class="inline-flex items-center gap-2">
+      <button hellCheckbox indeterminate aria-label="Indeterminate"></button>
+      <span>Indeterminate (parent of mixed children)</span>
+    </div>
+    <div class="inline-flex items-center gap-2">
+      <button hellCheckbox disabled aria-label="Disabled"></button>
+      <span>Disabled</span>
+    </div>
+    <div class="inline-flex items-center gap-2">
+      <button hellCheckbox checked disabled aria-label="Disabled, checked"></button>
+      <span>Disabled, checked</span>
+    </div>
     <p>
       Current value: <code>{{ agree() }}</code>
     </p>

@@ -14,20 +14,20 @@ import { HellDateInput } from 'hell/composites';
   imports: [...HELL_FIELD_DIRECTIVES, HellInput, HellNativeSelect, HellDateInput],
   template: `
     <div hellField>
-      <label hellFieldLabel>Email</label>
-      <input hellInput type="email" placeholder="you@company.com" />
+      <label hellFieldLabel for="field-email">Email</label>
+      <input id="field-email" hellInput type="email" placeholder="you@company.com" />
       <div hellFieldDescription>We never share this.</div>
     </div>
 
     <div hellField>
-      <label hellFieldLabel>Password</label>
-      <input hellInput type="password" invalid placeholder="••••••••" />
+      <label hellFieldLabel for="field-password">Password</label>
+      <input id="field-password" hellInput type="password" invalid placeholder="••••••••" />
       <div hellFieldError>Password must be at least 8 characters.</div>
     </div>
 
     <div hellField>
-      <label hellFieldLabel>Role</label>
-      <select hellNativeSelect>
+      <label hellFieldLabel for="field-role">Role</label>
+      <select id="field-role" hellNativeSelect>
         <option>Admin</option>
         <option>Editor</option>
         <option>Viewer</option>
@@ -36,8 +36,8 @@ import { HellDateInput } from 'hell/composites';
     </div>
 
     <div hellField>
-      <label hellFieldLabel>Birthday</label>
-      <hell-date-input [date]="birthday()" (dateChange)="birthday.set($event)" />
+      <label hellFieldLabel for="field-birthday">Birthday</label>
+      <hell-date-input id="field-birthday" aria-label="Birthday" [date]="birthday()" (dateChange)="birthday.set($event)" />
       <div hellFieldDescription>Type or pick from the calendar.</div>
     </div>
   `,

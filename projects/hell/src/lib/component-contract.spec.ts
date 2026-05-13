@@ -220,7 +220,8 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
     <kbd id="kbd" hellKbd>K</kbd>
 
     <div id="field" hellField orientation="horizontal">
-      <label data-contract="field-label" hellFieldLabel>Name</label>
+      <label data-contract="field-label" hellFieldLabel for="field-control">Name</label>
+      <input id="field-control" />
       <div data-contract="field-description" hellFieldDescription>Human-readable name</div>
       <div data-contract="field-error" hellFieldError>Required</div>
     </div>

@@ -38,8 +38,8 @@ export default tseslint.config(
     extends: [...angular.configs.templateRecommended, ...angular.configs.templateAccessibility],
     rules: {
       '@angular-eslint/template/elements-content': 'off',
-      '@angular-eslint/template/interactive-supports-focus': 'off',
-      '@angular-eslint/template/label-has-associated-control': 'off',
+      '@angular-eslint/template/interactive-supports-focus': 'error',
+      '@angular-eslint/template/label-has-associated-control': 'error',
     },
   },
 );

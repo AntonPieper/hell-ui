@@ -7,9 +7,10 @@ import { HELL_FIELD_DIRECTIVES, HellSlider } from 'hell/primitives';
   imports: [...HELL_FIELD_DIRECTIVES, HellSlider],
   template: `
     <div hellField>
-      <label hellFieldLabel>Volume</label>
+      <label hellFieldLabel for="volume-slider">Volume</label>
       <div class="flex items-center gap-4">
         <hell-slider
+          id="volume-slider"
           [value]="vol()"
           (valueChange)="vol.set($event)"
           [min]="0"

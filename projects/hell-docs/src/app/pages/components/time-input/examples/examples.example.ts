@@ -8,25 +8,25 @@ import { HELL_FIELD_DIRECTIVES } from 'hell/primitives';
   imports: [...HELL_FIELD_DIRECTIVES, HellTimeInput],
   template: `
     <div hellField>
-      <label hellFieldLabel>Reminder time</label>
-      <hell-time-input [value]="value()" (valueChange)="value.set($event)" />
+      <label hellFieldLabel for="reminder-time">Reminder time</label>
+      <hell-time-input id="reminder-time" aria-label="Reminder time" [value]="value()" (valueChange)="value.set($event)" />
       <div hellFieldDescription>Type or pick from the dial.</div>
     </div>
 
     <div hellField>
-      <label hellFieldLabel>With seconds</label>
-      <hell-time-input [value]="precise()" (valueChange)="precise.set($event)" [seconds]="true" />
+      <label hellFieldLabel for="precise-time">With seconds</label>
+      <hell-time-input id="precise-time" aria-label="With seconds" [value]="precise()" (valueChange)="precise.set($event)" [seconds]="true" />
     </div>
 
     <div hellField>
-      <label hellFieldLabel>Invalid</label>
-      <hell-time-input invalid [value]="value()" />
+      <label hellFieldLabel for="invalid-time">Invalid</label>
+      <hell-time-input id="invalid-time" aria-label="Invalid time" invalid [value]="value()" />
       <div hellFieldError>Pick a time at least 15 minutes from now.</div>
     </div>
 
     <div hellField>
-      <label hellFieldLabel>Disabled</label>
-      <hell-time-input disabled [value]="value()" />
+      <label hellFieldLabel for="disabled-time">Disabled</label>
+      <hell-time-input id="disabled-time" aria-label="Disabled time" disabled [value]="value()" />
     </div>
     <p class="hd-muted">Selected: {{ format(value()) || '-' }}</p>
   `,
