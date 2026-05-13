@@ -23,7 +23,7 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         heavy &mdash; load it lazily.
       </p>
       <p>
-        This is an experimental PDF app-surface recipe, not a stable primitive. It wraps pdf.js viewer
+        PDF viewer is experimental: this is an app-surface recipe, not a stable primitive. It wraps pdf.js viewer
         internals for business-app document preview, while your app owns PDF.js/browser compatibility
         decisions (worker wiring, CSP, and browser support variance). Keep it behind a lazy feature
         route, handle <code>error</code>, and offer a download/open-in-new-tab fallback for critical

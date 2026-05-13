@@ -32,8 +32,8 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         captions strip.
       </p>
       <p>
-        Live captions rely on browser speech-recognition and media-capture APIs and are intentionally
-        best-effort only. They are not accessibility-grade captions or timed text; treat them as an
+        Live captions are experimental and rely on browser speech-recognition and media-capture APIs.
+        They are intentionally best-effort only, not accessibility-grade captions or timed text; treat them as an
         experimental hinting aid and never as a replacement for provided captions, transcripts,
         or server-generated accessibility content.
       </p>
