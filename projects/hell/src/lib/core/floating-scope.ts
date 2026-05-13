@@ -76,9 +76,9 @@ export function hellRegisterFloatingHost(): void {
 }
 
 /**
- * Opt-in Adapter for custom Floating Interaction surfaces. Apply this to any
- * custom portaled/floating element that should count as inside the nearest
- * `HELL_FLOATING_SCOPE` without writing a bespoke registration directive.
+ * Internal registration directive for floating surfaces.
+ *
+ * Consumers should import `HellFloatingElement` from the public `floating-element` seam.
  */
 @Directive({ selector: '[hellFloatingElement]' })
 export class HellFloatingElement {

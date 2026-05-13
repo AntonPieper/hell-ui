@@ -1,7 +1,8 @@
 import { Component, Injectable } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_FLOATING_SCOPE, HellFloatingElement, type HellFloatingScope } from './floating-scope';
+import { HELL_FLOATING_SCOPE, type HellFloatingScope } from './floating-scope';
+import { HellFloatingElement } from './floating-element';
 
 @Injectable()
 class FakeFloatingScope implements HellFloatingScope {

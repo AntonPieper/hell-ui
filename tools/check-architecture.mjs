@@ -25,6 +25,7 @@ checkInteractiveTriggerSelectorContract();
 checkTableUtilityContract();
 checkTableSortButtonContract();
 checkFloatingRegistrationContract();
+checkFloatingAdapterContract();
 
 if (failures.length) {
   console.error('Architecture checks failed:\n');
@@ -909,6 +910,14 @@ function checkFloatingRegistrationContract() {
         `${surface.file} ${surface.className} must register its Floating Interaction surface with the nearest Floating Scope`,
       );
     }
+  }
+}
+
+function checkFloatingAdapterContract() {
+  const coreApi = readFile(join(root, 'projects/hell/src/lib/public-api-core.ts'));
+
+  if (!coreApi.includes("export * from './core/floating-element'")) {
+    failures.push('Core Package Entry Point must export ./core/floating-element');
   }
 }
 
