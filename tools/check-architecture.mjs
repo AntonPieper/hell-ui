@@ -214,12 +214,15 @@ function checkPackageEntryPoints() {
   const secondaryApis = [
     'projects/hell/src/lib/public-api-core.ts',
     'projects/hell/src/lib/public-api-primitives.ts',
-    'projects/hell/src/lib/public-api-composites.ts',
   ];
 
-  if (/export\s+\*\s+from\s+['"]\.\/lib\/features\//.test(rootApi)) {
+  const disallowedRootExports = exportPaths(rootApi).filter((path) =>
+    path.includes('public-api-composites') || path.includes('public-api-feature') ||
+    path.includes('/features/') || path.includes('/composites/')
+  );
+  if (disallowedRootExports.length) {
     failures.push(
-      'Light Root Entry Point exports a heavy feature from projects/hell/src/public-api.ts',
+      `Light Root Entry Point exports composites/features from projects/hell/src/public-api.ts: ${disallowedRootExports.join(', ')}`,
     );
   }
 
@@ -236,12 +239,10 @@ function checkPackageEntryPoints() {
     }
   }
 
-  for (const api of secondaryApis) {
-    for (const exportPath of exportPaths(readFile(join(root, api)))) {
-      const rootExportPath = exportPath.replace('./', './lib/');
-      if (!rootApi.includes(`'${rootExportPath}'`) && !rootApi.includes(`"${rootExportPath}"`)) {
-        failures.push(`Root Package Entry Point is missing ${rootExportPath} from ${api}`);
-      }
+  const requiredRootApiExports = new Set(['./lib/public-api-core', './lib/public-api-primitives']);
+  for (const requiredExport of requiredRootApiExports) {
+    if (!rootApi.includes(`'${requiredExport}'`) && !rootApi.includes(`"${requiredExport}"`)) {
+      failures.push(`Root Package Entry Point is missing ${requiredExport}`);
     }
   }
 
@@ -509,11 +510,18 @@ function checkLabelContract() {
 
   const rootApi = readFile(join(root, 'projects/hell/src/public-api.ts'));
   const coreApi = readFile(join(root, 'projects/hell/src/lib/public-api-core.ts'));
+  const rootApiExportsCoreAggregate =
+    rootApi.includes('./lib/public-api-core') || rootApi.includes('./public-api-core');
+
   for (const [api, source] of [
     ['projects/hell/src/public-api.ts', rootApi],
     ['projects/hell/src/lib/public-api-core.ts', coreApi],
   ]) {
-    if (!source.includes('./lib/core/labels') && !source.includes('./core/labels')) {
+    const sourceExportsLabelContract =
+      source.includes('./lib/core/labels') ||
+      source.includes('./core/labels') ||
+      (api === 'projects/hell/src/public-api.ts' && rootApiExportsCoreAggregate);
+    if (!sourceExportsLabelContract) {
       failures.push(`Label Contract is not exported from ${api}`);
     }
   }

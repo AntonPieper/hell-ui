@@ -22,6 +22,12 @@ if (!existsSync(join(distHell, 'package.json'))) {
   fail(`Built package missing: ${distHell}`);
 }
 
+const distPackageJson = JSON.parse(readFileSync(join(distHell, 'package.json'), 'utf8'));
+const packageName = distPackageJson.name;
+if (!packageName) {
+  fail('Built package.json is missing name');
+}
+
 const packedHell = packBuiltPackage();
 
 const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
@@ -170,7 +176,7 @@ function writeConsumerWorkspace(workspace, scenario) {
       'typescript',
     ]),
   };
-  packageJson.dependencies.hell = pathToFileURL(packedHell.tarball).href;
+  packageJson.dependencies[packageName] = pathToFileURL(packedHell.tarball).href;
 
   writeJson(join(workspace, 'package.json'), packageJson);
   writeJson(join(workspace, 'angular.json'), {
@@ -258,7 +264,7 @@ function pickDeps(source, names) {
 function rootConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellButton } from 'hell';
+import { HellButton } from '${packageName}';
 
 @Component({
   selector: 'app-root',
@@ -280,7 +286,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function coreConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellStyleable, type HellSize } from 'hell/core';
+import { HellStyleable, type HellSize } from '${packageName}/core';
 
 const size: HellSize = 'md';
 void size;
@@ -300,7 +306,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function primitivesConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellButton, HellInput } from 'hell/primitives';
+import { HellButton, HellInput } from '${packageName}/primitives';
 
 @Component({
   selector: 'app-root',
@@ -320,7 +326,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function compositesConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_APP_SHELL_DIRECTIVES } from 'hell/composites';
+import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/composites';
 
 @Component({
   selector: 'app-root',
@@ -349,7 +355,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function codeEditorConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellCodeEditor } from 'hell/features/code-editor';
+import { HellCodeEditor } from '${packageName}/features/code-editor';
 
 @Component({
   selector: 'app-root',
@@ -366,11 +372,11 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 }
 
 function tableUtilitiesConsumerMainTs() {
-  return tableConsumerMainTs('hell/features/table-utilities', 'HELL_TABLE_UTILITY_DIRECTIVES');
+  return tableConsumerMainTs(`${packageName}/features/table-utilities`, 'HELL_TABLE_UTILITY_DIRECTIVES');
 }
 
 function dataTableConsumerMainTs() {
-  return tableConsumerMainTs('hell/features/data-table', 'HELL_TABLE_DIRECTIVES');
+  return tableConsumerMainTs(`${packageName}/features/data-table`, 'HELL_TABLE_DIRECTIVES');
 }
 
 function tableConsumerMainTs(entryPoint, directiveSymbol) {
@@ -410,7 +416,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function pdfViewerConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellPdfViewer } from 'hell/features/pdf-viewer';
+import { HellPdfViewer } from '${packageName}/features/pdf-viewer';
 
 @Component({
   selector: 'app-root',
@@ -428,47 +434,47 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 
 function rootConsumerStylesCss() {
   return `@import "tailwindcss";
-@import "hell/styles";
+@import "${packageName}/styles";
 `;
 }
 
 function primitivesConsumerStylesCss() {
   return `@import "tailwindcss";
-@import "hell/styles/primitives";
+@import "${packageName}/styles/primitives";
 `;
 }
 
 function compositesConsumerStylesCss() {
   return `@import "tailwindcss";
-@import "hell/styles/composites";
+@import "${packageName}/styles/composites";
 `;
 }
 
 function codeEditorConsumerStylesCss() {
   return `@import "tailwindcss";
-@import "hell/styles/tokens";
-@import "hell/styles/features/code-editor";
+@import "${packageName}/styles/tokens";
+@import "${packageName}/styles/features/code-editor";
 `;
 }
 
 function tableUtilitiesConsumerStylesCss() {
   return `@import "tailwindcss";
-@import "hell/styles/tokens";
-@import "hell/styles/features/table-utilities";
+@import "${packageName}/styles/tokens";
+@import "${packageName}/styles/features/table-utilities";
 `;
 }
 
 function dataTableConsumerStylesCss() {
   return `@import "tailwindcss";
-@import "hell/styles/tokens";
-@import "hell/styles/features/data-table";
+@import "${packageName}/styles/tokens";
+@import "${packageName}/styles/features/data-table";
 `;
 }
 
 function pdfViewerConsumerStylesCss() {
   return `@import "tailwindcss";
-@import "hell/styles/tokens";
-@import "hell/styles/features/pdf-viewer";
+@import "${packageName}/styles/tokens";
+@import "${packageName}/styles/features/pdf-viewer";
 `;
 }
 

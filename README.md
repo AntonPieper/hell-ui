@@ -25,44 +25,57 @@ pnpm ci:verify # full pre-push: unit, architecture, lint, e2e, package consumer,
 Install the light UI stack when using primitives/composites:
 
 ```bash
-pnpm add hell ng-primitives @ng-icons/core @ng-icons/font-awesome tailwindcss
+pnpm add @hell-ui/angular ng-primitives @ng-icons/core @ng-icons/font-awesome tailwindcss
 ```
 
 Prefer the narrowest entry point that contains the API you use:
 
 ```ts
-import { HellButton, HELL_SELECT_DIRECTIVES } from 'hell/primitives';
-import { HELL_APP_SHELL_DIRECTIVES } from 'hell/composites';
-import { HELL_TABLE_UTILITY_DIRECTIVES } from 'hell/features/table-utilities';
+import { HellButton, HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/primitives';
+import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/composites';
+import { HELL_TABLE_UTILITY_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
 ```
 
-Heavy feature entry points keep extra peers local: CodeMirror packages for
-`hell/features/code-editor`, `pdfjs-dist` plus the light UI stack for
-`hell/features/pdf-viewer`, and no icon/ng-primitives stack for
-`hell/features/table-utilities`. `hell/features/data-table` remains as a
-legacy compatibility alias for table utilities.
+Heavy feature entry points keep extra peers local:
+`@hell-ui/angular/features/code-editor` and
+`@hell-ui/angular/features/pdf-viewer` still have optional stacks
+(`@codemirror/*` and `pdfjs-dist` respectively).
+`@hell-ui/angular/features/table-utilities` is preferred and has only
+`tailwindcss`/Angular peers.
+`@hell-ui/angular/features/data-table` remains a legacy alias for table utilities.
+
+## Public API Tiers
+
+| Tier | Stability | Entry points | Compatibility |
+|---|---|---|---|
+| Primitives | Stable | `@hell-ui/angular/primitives` | SSR-compatible |
+| Composites | Beta | `@hell-ui/angular/composites` | Browser DOM + `document`/`window`/global listeners |
+| Table utilities | Beta | `@hell-ui/angular/features/table-utilities` | Uses `ResizeObserver`; browser-first |
+| Code editor | Beta/optional peer | `@hell-ui/angular/features/code-editor` | Needs `window` + `document` |
+| PDF viewer | Experimental | `@hell-ui/angular/features/pdf-viewer` | Browser-only; requires `window`/`document`, pdf workers, and global listeners |
+| Live captions | Experimental (feature opt-in) | `@hell-ui/angular/composites` (`allowLiveCaptions`) | Browser-only; uses `navigator` + `SpeechRecognition` |
 
 ## Styles
 
 ```css
 @import "tailwindcss";
-@import "hell/styles";
+@import "@hell-ui/angular/styles";
 ```
 
-`hell/styles` is the all-in stylesheet: primitives, composites, and every
-feature stylesheet. Use smaller CSS tiers when the app only needs part of the
-library:
+`@hell-ui/angular/styles` is the all-in stylesheet: primitives, composites, and
+every feature stylesheet. Use smaller CSS tiers when the app only needs part of
+the library:
 
 ```css
-@import "hell/styles/tokens";
-@import "hell/styles/primitives";
-@import "hell/styles/composites";
-@import "hell/styles/features/table-utilities";
-@import "hell/styles/features/code-editor";
-@import "hell/styles/features/pdf-viewer";
+@import "@hell-ui/angular/styles/tokens";
+@import "@hell-ui/angular/styles/primitives";
+@import "@hell-ui/angular/styles/composites";
+@import "@hell-ui/angular/styles/features/table-utilities";
+@import "@hell-ui/angular/styles/features/code-editor";
+@import "@hell-ui/angular/styles/features/pdf-viewer";
 ```
 
-Use `hell/styles/features/data-table` only as the legacy CSS alias for table
+Use `@hell-ui/angular/features/data-table` only as the legacy CSS alias for table
 utilities.
 
 ## Component Contract

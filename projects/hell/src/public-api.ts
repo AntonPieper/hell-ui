@@ -1,59 +1,12 @@
 /*
- * Public API Surface of hell — Heinrich Element Library
+ * Public API Surface of @hell-ui/angular — Heinrich Element Library
  */
 
-// Core
-export * from './lib/core/types';
-export * from './lib/core/styleable';
-export * from './lib/core/search';
-export * from './lib/core/labels';
-export * from './lib/core/hotkeys';
+// Core + primitives are intentionally re-exported at the package root.
+export * from './lib/public-api-core';
+export * from './lib/public-api-primitives';
 
-// Primitives
-export * from './lib/primitives/button/button';
-export * from './lib/primitives/card/card';
-export * from './lib/primitives/separator/separator';
-export * from './lib/primitives/tag/tag';
-export * from './lib/primitives/avatar/avatar';
-export * from './lib/primitives/input/input';
-export * from './lib/primitives/search/search';
-export * from './lib/primitives/listbox/listbox';
-export * from './lib/primitives/field/field';
-export * from './lib/primitives/checkbox/checkbox';
-export * from './lib/primitives/switch/switch';
-export * from './lib/primitives/radio/radio';
-export * from './lib/primitives/toggle/toggle';
-export * from './lib/primitives/tabs/tabs';
-export * from './lib/primitives/accordion/accordion';
-export * from './lib/primitives/dialog/dialog';
-export * from './lib/primitives/popover/popover';
-export * from './lib/primitives/flyout/flyout';
-export * from './lib/primitives/tooltip/tooltip';
-export * from './lib/primitives/menu/menu';
-export * from './lib/primitives/combobox/combobox';
-export * from './lib/primitives/select/select';
-export * from './lib/primitives/progress/progress';
-export * from './lib/primitives/slider/slider';
-export * from './lib/primitives/skeleton/skeleton';
-export * from './lib/primitives/breadcrumbs/breadcrumbs';
-export * from './lib/primitives/icon/icon';
-export * from './lib/primitives/pagination/pagination';
-export * from './lib/primitives/date-picker/date-picker';
-
-// Composites
-export * from './lib/composites/date-input/date-input';
-export * from './lib/composites/time-input/time-input';
-export * from './lib/composites/avatar-group/avatar-group';
-export * from './lib/composites/dialpad/dialpad';
-export * from './lib/composites/drop-zone/drop-zone';
-export * from './lib/composites/audio-player/audio-player';
-export * from './lib/composites/resizable/resizable';
-export * from './lib/composites/split-view/split-view';
-export * from './lib/composites/app-shell/app-shell';
-export * from './lib/composites/toast/toast';
-export * from './lib/composites/omnibar/omnibar';
-
-// Heavy features live behind feature-specific Package Entry Points:
-// - hell/features/pdf-viewer
-// - hell/features/code-editor
-// - hell/features/data-table
+// Composites and features are available through entry points:
+// - hell/composites / @hell-ui/angular/composites
+// - hell/features/data-table (legacy), hell/features/table-utilities, hell/features/code-editor, hell/features/pdf-viewer / corresponding @hell-ui/angular/* paths
+// Table utilities are preferred; data-table is legacy compatibility.

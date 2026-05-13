@@ -1,5 +1,5 @@
 {
-  "name": "hell",
+  "name": "@hell-ui/angular",
   "version": "0.1.0",
   "description": "Heinrich Element Library — opinionated Angular component set built on ng-primitives + Tailwind v4.",
   "exports": {
