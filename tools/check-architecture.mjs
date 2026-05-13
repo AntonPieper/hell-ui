@@ -10,6 +10,7 @@ checkDocsRootImportContract();
 checkPackageEntryPoints();
 checkPackageDependencyContract();
 checkStyleEntryPoints();
+checkNgClassCustomizationContract();
 checkAppShellBreakpointContract();
 checkBehaviorSentinelContract();
 checkComponentContract();
@@ -390,6 +391,31 @@ function checkStyleEntryPoints() {
     const source = readFile(join(featureStyleDir, file));
     if (!source.includes(`../components/${feature}.css`)) {
       failures.push(`Feature style entry point ${file} must import ../components/${feature}.css`);
+    }
+  }
+}
+
+function checkNgClassCustomizationContract() {
+  const sourceRoot = join(root, 'projects/hell/src/lib');
+  const files = walk(sourceRoot).filter(
+    (file) =>
+      file.endsWith('.ts') &&
+      !file.endsWith('.spec.ts') &&
+      !file.endsWith('.d.ts') &&
+      !file.endsWith('pdf.worker.ts'),
+  );
+
+  for (const file of files) {
+    const source = readFile(file);
+    const ngClassImportFromCommon =
+      /import\s+[^;]*@angular\/common[^;]*/.test(source) &&
+      /\bNgClass\b/.test(source.match(/import\s+[^;]*@angular\/common[^;]*/)?.[0] ?? '');
+    const ngClassTemplateBinding = /\[\s*ngClass\s*\]/.test(source);
+
+    if (ngClassImportFromCommon || ngClassTemplateBinding) {
+      failures.push(
+        `${file.slice(root.length + 1)} uses NgClass or [ngClass]; style customization must use data attrs/CSS vars`,
+      );
     }
   }
 }

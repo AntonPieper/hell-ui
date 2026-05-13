@@ -34,6 +34,13 @@ import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts
         <li><code>value</code>: model input for the draft query.</li>
         <li><code>submit</code>, <code>openChange</code>, <code>searchResultsChange</code>, <code>searchError</code>.</li>
         <li>Slots: <code>hellOmnibarLeading</code>, <code>hellOmnibarTrailing</code>, <code>hellOmnibarActions</code>, groups, items, chips, and footer content.</li>
+        <li>
+          Panel styling: use <code>data-slot="panel"</code> and theme via
+          <code>--hell-omnibar-panel-bg</code>,
+          <code>--hell-omnibar-panel-radius</code>,
+          <code>--hell-omnibar-panel-shadow</code>, and
+          <code>--hell-omnibar-panel-max-height</code>.
+        </li>
       </ul>
 
       <h2>Do</h2>

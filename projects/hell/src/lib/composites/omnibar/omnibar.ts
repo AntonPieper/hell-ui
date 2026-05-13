@@ -1,4 +1,4 @@
-import { NgClass, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -91,7 +91,6 @@ let nextOmnibarItemId = 0;
 @Component({
   selector: 'hell-omnibar',
   imports: [
-    NgClass,
     NgTemplateOutlet,
     HellInput,
     HellListbox,
@@ -160,7 +159,6 @@ let nextOmnibarItemId = 0;
         [style.--hell-omnibar-anchor-top]="anchorTop() + 'px'"
         [style.--hell-omnibar-anchor-left]="anchorLeft() + 'px'"
         [style.--hell-omnibar-anchor-width]="anchorWidth() + 'px'"
-        [ngClass]="panelClass()"
         (pointerdown)="onPanelPointerDown($event)"
       >
         <div data-slot="actions" [attr.data-empty]="!hasActions() ? 'true' : null">
@@ -213,7 +211,6 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   readonly emptyMessage = input<string>('No results');
   readonly emptyTemplate = input<TemplateRef<unknown> | null>(null);
   readonly loadingTemplate = input<TemplateRef<HellOmnibarLoadingTemplateContext> | null>(null);
-  readonly panelClass = input<string | string[] | Record<string, boolean>>('');
   /** Local items ranked by `HellSearchService` whenever the query changes. */
   readonly searchItems = input<readonly unknown[] | null>(null);
   /** Async/remote source. Superseded searches receive an abort signal. */
