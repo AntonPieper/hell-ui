@@ -50,6 +50,8 @@ import { HELL_TABLE_DIRECTIVES, type HellTableColumnResizeEvent } from './data-t
             <button id="row-action" type="button">Edit</button>
             <a id="row-link" href="/people/ada">Profile</a>
             <input id="row-input" aria-label="Inline edit" />
+            <span id="row-ignore" hellTableRowIgnore>Ignore</span>
+            <span id="row-legacy-ignore" data-hell-row-ignore>Legacy Ignore</span>
           </td>
         </tr>
       </tbody>
@@ -129,6 +131,27 @@ describe('Hell data table directives', () => {
     expect(enter.defaultPrevented).toBe(false);
     expect(host.rowEvents).toEqual([]);
     expect(host.cellEvents).toEqual([]);
+  });
+
+  it('does not select row from elements marked as table row ignore', () => {
+    const fixture = TestBed.createComponent(DataTableHost);
+    const host = fixture.componentInstance;
+    host.interactive.set(true);
+    fixture.detectChanges();
+
+    const row = byId<HTMLTableRowElement>(fixture.nativeElement, 'person-row');
+    byId<HTMLSpanElement>(fixture.nativeElement, 'row-ignore').dispatchEvent(
+      new MouseEvent('click', { bubbles: true }),
+    );
+    byId<HTMLSpanElement>(fixture.nativeElement, 'row-legacy-ignore').dispatchEvent(
+      new MouseEvent('click', { bubbles: true }),
+    );
+
+    expect(host.rowEvents).toEqual([]);
+    row.click();
+
+    expect(host.rowEvents).toHaveLength(1);
+    expect(host.rowEvents[0].type).toBe('click');
   });
 
   it('disables the sort button when its header is not sortable', () => {

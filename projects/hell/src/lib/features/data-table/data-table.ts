@@ -1,4 +1,5 @@
 import { HELL_LABELS } from '../../core/labels';
+import { hellFloatingTargetNode } from '../../core/floating-scope';
 import { HellStyleable } from '../../core/styleable';
 import {
   HellResizePairInteractionController,
@@ -64,10 +65,29 @@ const HELL_TABLE_INTERACTIVE_TARGET_SELECTOR = [
 ].join(',');
 
 function hellEventFromInteractiveTarget(event: Event, host: HTMLElement): boolean {
-  const target = event.target;
-  if (!(target instanceof Element) || target === host) return false;
+  const target = hellAsElement(hellFloatingTargetNode(event.target));
+  if (!target || target === host) return false;
+
   const interactive = target.closest(HELL_TABLE_INTERACTIVE_TARGET_SELECTOR);
-  return !!interactive && interactive !== host && host.contains(interactive);
+  return !!interactive && interactive !== host && hostContains(host, interactive);
+}
+
+function hellAsElement(target: EventTarget | Node | null): Element | null {
+  return target != null &&
+    typeof target === 'object' &&
+    (target as { nodeType?: number }).nodeType === 1 &&
+    typeof (target as Element).matches === 'function' &&
+    typeof (target as Element).closest === 'function'
+    ? (target as Element)
+    : null;
+}
+
+function hostContains(host: HTMLElement, node: Node): boolean {
+  try {
+    return host.contains(node);
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -165,6 +185,17 @@ export class HellTableHead extends HellStyleable {
 export class HellTableBody extends HellStyleable {}
 
 /**
+ * Marks nested content as exempt from row activation.
+ */
+@Directive({
+  selector: '[data-hell-row-ignore], [hellTableRowIgnore]',
+  host: {
+    '[attr.data-hell-row-ignore]': '""',
+  },
+})
+export class HellTableRowIgnore {}
+
+/**
  * Behavioral row directive. Renders nothing of its own — consumers own
  * the `<tr>` markup and its children. Provides:
  *
@@ -172,9 +203,9 @@ export class HellTableBody extends HellStyleable {}
  *   so consumers can highlight via CSS attribute selectors.
  * - `[interactive]` -> `tabindex="0"` and click/Enter/Space binding
  *   that emits `(rowSelect)`. Nested buttons, links, inputs, ARIA widgets,
- *   `[contenteditable]`, and `[data-hell-row-ignore]` opt out so row actions
- *   do not double-select. Use this to drive selection from the row
- *   without writing your own click handler on every cell.
+ *   `[contenteditable]`, and `[data-hell-row-ignore]`/`[hellTableRowIgnore]`
+ *   opt out so row actions do not double-select. Use this to drive selection
+ *   from the row without writing your own click handler on every cell.
  */
 @Directive({
   selector: 'tr[hellTableRow]',
@@ -468,6 +499,7 @@ export const HELL_TABLE_UTILITY_DIRECTIVES = [
   HellTableHead,
   HellTableBody,
   HellTableRow,
+  HellTableRowIgnore,
   HellTableHeaderCell,
   HellTableSortButton,
   HellTableCell,
