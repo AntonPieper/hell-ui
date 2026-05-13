@@ -700,10 +700,18 @@ function checkHotkeyContract() {
   if (!hotkeySource.includes('HellGlobalKeydownService')) {
     failures.push('Core must provide a shared global keydown listener service');
   }
+  if (!hotkeySource.includes('HellGlobalPointerdownService')) {
+    failures.push('Core must provide a shared global pointer listener service');
+  }
 
   const omnibarSource = readFile(join(root, 'projects/hell/src/lib/composites/omnibar/omnibar.ts'));
   if (omnibarSource.includes('document.addEventListener')) {
     failures.push('HellOmnibar must register global hotkeys through HellGlobalKeydownService');
+  }
+
+  const pdfSource = readFile(join(root, 'projects/hell/src/lib/features/pdf-viewer/pdf-viewer.ts'));
+  if (pdfSource.includes('window:keydown') || pdfSource.includes('window:pointerdown')) {
+    failures.push('HellPdfViewer must register global shortcuts through shared listener services');
   }
 }
 

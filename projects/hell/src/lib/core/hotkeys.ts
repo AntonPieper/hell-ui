@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { DestroyRef, Injectable, inject } from '@angular/core';
 
 export type HellGlobalKeydownHandler = (event: KeyboardEvent) => void;
+export type HellGlobalPointerdownHandler = (event: PointerEvent) => void;
 
 /**
  * Central owner for document-level keyboard listeners. Components still decide
@@ -18,5 +19,19 @@ export class HellGlobalKeydownService {
 
     doc.addEventListener('keydown', handler);
     destroyRef.onDestroy(() => doc.removeEventListener('keydown', handler));
+  }
+}
+
+/** Shared owner for document-level pointer activation listeners. */
+@Injectable({ providedIn: 'root' })
+export class HellGlobalPointerdownService {
+  private readonly document = inject(DOCUMENT, { optional: true });
+
+  register(handler: HellGlobalPointerdownHandler, destroyRef: DestroyRef): void {
+    const doc = this.document;
+    if (!doc?.addEventListener) return;
+
+    doc.addEventListener('pointerdown', handler);
+    destroyRef.onDestroy(() => doc.removeEventListener('pointerdown', handler));
   }
 }

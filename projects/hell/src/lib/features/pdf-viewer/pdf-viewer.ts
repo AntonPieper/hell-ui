@@ -32,6 +32,7 @@ import {
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
 import { HellInput, HellNativeSelect } from '../../primitives/input/input';
+import { HellGlobalKeydownService, HellGlobalPointerdownService } from '../../core/hotkeys';
 import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
 import {
@@ -83,8 +84,6 @@ const HELL_PDF_VIEWER_ICONS = {
   host: {
     '[class.hell-pdf]': '!unstyled()',
     '(keydown)': 'onKey($event)',
-    'window:keydown': 'onWindowKey($event)',
-    'window:pointerdown': 'onWindowPointerDown($event)',
     tabindex: '0',
   },
   templateUrl: './pdf-viewer.html',
@@ -135,6 +134,9 @@ export class HellPdfViewer extends HellStyleable {
   private readonly runtime = (
     inject(HELL_PDF_RUNTIME_FACTORY, { optional: true }) ?? (() => new HellPdfRuntime())
   )();
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly globalKeydown = inject(HellGlobalKeydownService);
+  private readonly globalPointerdown = inject(HellGlobalPointerdownService);
   private readonly bootstrapped = signal(false);
   private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
   private readonly interactionScope = new HellPdfViewerInteractionScope(
@@ -143,7 +145,9 @@ export class HellPdfViewer extends HellStyleable {
 
   constructor() {
     super();
-    inject(DestroyRef).onDestroy(() => {
+    this.globalPointerdown.register((event) => this.onGlobalPointerDown(event), this.destroyRef);
+    this.globalKeydown.register((event) => this.onGlobalKey(event), this.destroyRef);
+    this.destroyRef.onDestroy(() => {
       this.runtime.cleanup();
     });
 
@@ -304,11 +308,11 @@ export class HellPdfViewer extends HellStyleable {
     });
   }
 
-  protected onWindowPointerDown(e: PointerEvent) {
+  private onGlobalPointerDown(e: PointerEvent) {
     this.interactionScope.recordPointerTarget(e.target);
   }
 
-  protected onWindowKey(e: KeyboardEvent) {
+  private onGlobalKey(e: KeyboardEvent) {
     this.interactionScope.handleGlobalShortcut(e, {
       openFind: () => this.openFind(),
       print: () => void this.print(),
