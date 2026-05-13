@@ -204,7 +204,7 @@ function checkDocsRootImportContract() {
     const source = readFile(file);
     if (/(?:from|import\()\s*['\"]hell(?:\/|['\"])/.test(source)) {
       failures.push(
-        `Docs app file ${file.slice(root.length + 1)} imports legacy hell root or a hell/* subpath`,
+        `Docs app file ${file.slice(root.length + 1)} imports legacy unscoped hell root or hell/* subpath`,
       );
     }
     if (/(?:from|import\()\s*['\"]@hell-ui\/angular['\"]/.test(source)) {
@@ -257,18 +257,12 @@ function checkPackageEntryPoints() {
   const paths = tsconfig.compilerOptions?.paths ?? {};
   const features = childDirectories(join(root, 'projects/hell/src/lib/features'));
   const expectedPaths = {
-    hell: './projects/hell/src/public-api.ts',
     '@hell-ui/angular': './projects/hell/src/public-api.ts',
-    'hell/core': './projects/hell/src/lib/public-api-core.ts',
     '@hell-ui/angular/core': './projects/hell/src/lib/public-api-core.ts',
-    'hell/primitives': './projects/hell/src/lib/public-api-primitives.ts',
     '@hell-ui/angular/primitives': './projects/hell/src/lib/public-api-primitives.ts',
-    'hell/composites': './projects/hell/src/lib/public-api-composites.ts',
     '@hell-ui/angular/composites': './projects/hell/src/lib/public-api-composites.ts',
   };
   for (const feature of features) {
-    expectedPaths[`hell/features/${feature}`] =
-      `./projects/hell/src/lib/public-api-feature-${feature}.ts`;
     expectedPaths[`@hell-ui/angular/features/${feature}`] =
       `./projects/hell/src/lib/public-api-feature-${feature}.ts`;
   }
@@ -280,6 +274,11 @@ function checkPackageEntryPoints() {
         `Package Entry Point ${entryPoint} maps to ${actual ?? 'nothing'}, expected ${expectedPath}`,
       );
     }
+  }
+
+  const legacyPaths = Object.keys(paths).filter((entryPoint) => entryPoint.startsWith('hell'));
+  if (legacyPaths.length) {
+    failures.push(`Package Identity still exposes legacy alias paths in tsconfig.json: ${legacyPaths.join(', ')}`);
   }
 
   const packagePaths = [
@@ -921,7 +920,7 @@ function checkSecondaryEntryPointCompleteness(kind) {
   for (const slug of childDirectories(dir)) {
     const expected = `./${kind}/${slug}/${slug}`;
     if (!apiExports.has(expected)) {
-      failures.push(`Package Entry Point hell/${kind} is missing ${expected}`);
+      failures.push(`Package Entry Point @hell-ui/angular/${kind} is missing ${expected}`);
     }
   }
 }

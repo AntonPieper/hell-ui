@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-@import '../../hell/src/lib/styles/hell.css';
+@import '@hell-ui/angular/styles';
 
 @layer components {
   .hd-prose {

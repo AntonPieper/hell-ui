@@ -12,7 +12,7 @@ import { HELL_ACCORDION_DIRECTIVES } from '@hell-ui/angular/primitives';
         <div hellAccordionContent>
           <div>
             <p class="my-2">Install via your package manager:</p>
-            <pre><code>pnpm add hell ng-primitives</code></pre>
+            <pre><code>pnpm add @hell-ui/angular ng-primitives</code></pre>
           </div>
         </div>
       </div>

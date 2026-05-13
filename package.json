@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build hell && ng build hell-docs",
+    "start": "pnpm build:lib && node tools/setup-docs-hell-package-alias.mjs && ng serve",
+    "build": "pnpm build:lib && pnpm build:docs",
     "build:lib": "ng build hell",
-    "build:docs": "ng build hell-docs",
+    "build:docs": "node tools/setup-docs-hell-package-alias.mjs && ng build hell-docs",
     "watch": "ng build hell --watch --configuration development",
     "test": "ng test && pnpm test:architecture && pnpm test:ci-contract",
     "lint": "eslint .",

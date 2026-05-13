@@ -4,7 +4,21 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "../../out-tsc/app",
-    "types": []
+    "types": [],
+    "moduleResolution": "bundler",
+    "paths": {
+      "@hell-ui/angular": ["../../dist/hell"],
+      "@hell-ui/angular/*": ["../../dist/hell/*"],
+      "@hell-ui/angular/styles": ["../../dist/hell/styles/hell.css"],
+      "@hell-ui/angular/styles/*": ["../../dist/hell/styles/*"],
+      "@hell-ui/angular/core": ["../../dist/hell/core"],
+      "@hell-ui/angular/primitives": ["../../dist/hell/primitives"],
+      "@hell-ui/angular/composites": ["../../dist/hell/composites"],
+      "@hell-ui/angular/features/code-editor": ["../../dist/hell/features/code-editor"],
+      "@hell-ui/angular/features/data-table": ["../../dist/hell/features/data-table"],
+      "@hell-ui/angular/features/table-utilities": ["../../dist/hell/features/table-utilities"],
+      "@hell-ui/angular/features/pdf-viewer": ["../../dist/hell/features/pdf-viewer"]
+    }
   },
   "include": [
     "src/**/*.ts"
