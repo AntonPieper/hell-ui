@@ -12,7 +12,7 @@ import {
   signal,
   type Provider,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, NG_VALIDATORS, type AbstractControl, type ValidationErrors, type Validator, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidClock } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../../primitives/button/button';
@@ -173,6 +173,11 @@ export function hellSameTimeInputValue(
       useExisting: forwardRef(() => HellTimeInput),
       multi: true,
     },
+    {
+      provide: NG_VALIDATORS,
+      useExisting: forwardRef(() => HellTimeInput),
+      multi: true,
+    },
   ],
   host: {
     '[class.hell-time-input]': '!unstyled()',
@@ -194,7 +199,7 @@ export function hellSameTimeInputValue(
       [attr.aria-invalid]="isInvalid() ? 'true' : null"
       [attr.aria-label]="ariaLabel()"
       [disabled]="isDisabled()"
-      [placeholder]="placeholder() ?? (seconds() ? 'HH:MM:SS' : 'HH:MM')"
+      [placeholder]="placeholder() ?? (seconds() ? 'HH:mm:ss' : 'HH:mm')"
       [value]="display()"
       (input)="onInput(field.value)"
       (blur)="onBlur()"
@@ -314,7 +319,7 @@ export function hellSameTimeInputValue(
     </ng-template>
   `,
 })
-export class HellTimeInput extends HellStyleable implements ControlValueAccessor {
+export class HellTimeInput extends HellStyleable implements ControlValueAccessor, Validator {
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
@@ -325,10 +330,10 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
 
   readonly valueChange = output<HellTimeValue | null>();
 
-  // Hour grid: 24h in a 6×4. Minute/second grids: every 5 in a 4×3.
+  // Hour grid: 24h in a 6×4. Minute/second grids: 0-59 in a 4-column layout.
   protected readonly hours = Array.from({ length: 24 }, (_, i) => i);
-  protected readonly minutes = Array.from({ length: 12 }, (_, i) => i * 5);
-  protected readonly secondsList = Array.from({ length: 12 }, (_, i) => i * 5);
+  protected readonly minutes = Array.from({ length: 60 }, (_, i) => i);
+  protected readonly secondsList = Array.from({ length: 60 }, (_, i) => i);
   protected readonly pad = pad;
   protected readonly format = (value: HellTimeValue | null, seconds: boolean) =>
     value ? this.timeAdapter.format(value, { seconds }) : '';
@@ -340,6 +345,7 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
   private readonly controlDisabled = signal(false);
   private onControlChange: (value: HellTimeValue | null) => void = () => {};
   private onControlTouched: () => void = () => {};
+  private onValidatorChange: () => void = () => {};
 
   private readonly focusedHourIndex = signal(0);
   private readonly focusedMinuteIndex = signal(0);
@@ -365,7 +371,10 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
   constructor() {
     super();
     effect(() => {
+      this.invalidDraft();
+      this.current();
       this.syncPickerFocusFromValue(this.current());
+      this.onValidatorChange();
     });
   }
 
@@ -379,6 +388,7 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
     this.controlValue.set(this.normalizeValue(value));
     this.valueState.clearDraft();
     this.valueState.clearLocal();
+    this.onValidatorChange();
   }
 
   registerOnChange(fn: (value: HellTimeValue | null) => void): void {
@@ -387,6 +397,10 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
 
   registerOnTouched(fn: () => void): void {
     this.onControlTouched = fn;
+  }
+
+  registerOnValidatorChange(fn: () => void): void {
+    this.onValidatorChange = fn;
   }
 
   setDisabledState(isDisabled: boolean): void {
@@ -399,18 +413,21 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
 
   protected onInput(value: string) {
     this.valueState.writeDraft(value);
+    this.onValidatorChange();
   }
 
   protected onBlur() {
-    this.onControlTouched();
     const next = this.valueState.commitDraft();
     if (next.committed) this.emitValue(next.value);
+    this.onControlTouched();
+    this.onValidatorChange();
   }
 
   protected commit(text: string, event?: Event) {
     event?.preventDefault();
     const next = this.valueState.commitText(text);
     if (next.committed) this.emitValue(next.value);
+    this.onValidatorChange();
   }
 
   protected setUnit(unit: HellTimeUnit, n: number) {
@@ -419,6 +436,7 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
     const next = this.valueState.setValue(value);
     if (next.committed) this.emitValue(next.value);
     this.onControlTouched();
+    this.onValidatorChange();
   }
 
   protected nudge(unit: HellTimeUnit, delta: number) {
@@ -434,6 +452,7 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
     const next = this.valueState.setValue(value);
     if (next.committed) this.emitValue(next.value);
     this.onControlTouched();
+    this.onValidatorChange();
   }
 
   protected pickerCellTabIndex(unit: HellTimeUnit, index: number): string {
@@ -517,9 +536,20 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
     return this.timeAdapter.isSameValue?.(a, b) ?? hellSameTimeInputValue(a, b);
   }
 
+  validate(_control: AbstractControl | null): ValidationErrors | null {
+    const errors: ValidationErrors = {};
+
+    if (this.invalidDraft()) {
+      errors['invalidTimeInputDraft'] = true;
+    }
+
+    return Object.keys(errors).length > 0 ? errors : null;
+  }
+
   private emitValue(value: HellTimeValue | null): void {
     if (this.controlMode()) this.controlValue.set(value);
     this.valueChange.emit(value);
     this.onControlChange(value);
+    this.onValidatorChange();
   }
 }

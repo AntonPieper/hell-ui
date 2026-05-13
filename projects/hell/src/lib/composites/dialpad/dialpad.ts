@@ -105,7 +105,7 @@ const HELL_DIALPAD_ICONS = {
 export class HellDialpad extends HellStyleable {
   protected readonly labels = inject(HELL_LABELS);
 
-  readonly value = input<string>('');
+  readonly value = input<string | null | undefined>(null);
   /** Render a primary "Call" action button below the keys. */
   readonly showCallButton = input(true, { transform: booleanAttribute });
 
@@ -116,7 +116,10 @@ export class HellDialpad extends HellStyleable {
   protected readonly keys = KEYS;
   private readonly local = signal('');
 
-  protected readonly display = computed(() => this.value() || this.local());
+  protected readonly display = computed(() => {
+    const value = this.value();
+    return value === null || value === undefined ? this.local() : value;
+  });
 
   protected press(d: string) {
     const next = this.display() + d;

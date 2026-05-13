@@ -37,6 +37,18 @@ class TimeInputFormHost {
 }
 
 @Component({
+  imports: [ReactiveFormsModule, HellTimeInput],
+  template: `
+    <hell-time-input [formControl]="control" aria-label="Blur form time" />
+  `,
+})
+class TimeInputBlurFormHost {
+  readonly control = new FormControl<HellTimeValue | null>({ hour: 8, minute: 30, second: 0 }, {
+    updateOn: 'blur',
+  });
+}
+
+@Component({
   imports: [HellTimeInput],
   providers: [
     provideHellTimeInputAdapter({
@@ -56,10 +68,25 @@ class TimeInputCustomAdapterHost {
   values: Array<HellTimeValue | null> = [];
 }
 
+@Component({
+  imports: [ReactiveFormsModule, HellTimeInput],
+  template: `<hell-time-input [formControl]="control" aria-label="Validated time" (valueChange)="values.push($event)" />`,
+})
+class TimeInputValidationHost {
+  readonly control = new FormControl<HellTimeValue | null>({ hour: 9, minute: 15, second: 0 });
+  values: Array<HellTimeValue | null> = [];
+}
+
 describe('HellTimeInput', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TimeInputHost, TimeInputFormHost, TimeInputCustomAdapterHost],
+      imports: [
+        TimeInputHost,
+        TimeInputFormHost,
+        TimeInputBlurFormHost,
+        TimeInputCustomAdapterHost,
+        TimeInputValidationHost,
+      ],
     }).compileComponents();
   });
 
@@ -110,6 +137,41 @@ describe('HellTimeInput', () => {
     expect(fixture.componentInstance.values).toEqual([]);
     expect(input.value).toBe('1:02:03 am');
     expect(input.getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('uses HH:mm and HH:mm:ss placeholders by default', () => {
+    const fixture = TestBed.createComponent(TimeInputHost);
+    fixture.detectChanges();
+    expect(textInput(fixture.nativeElement).placeholder).toBe('HH:mm');
+
+    fixture.componentInstance.seconds.set(true);
+    fixture.detectChanges();
+    expect(textInput(fixture.nativeElement).placeholder).toBe('HH:mm:ss');
+  });
+
+  it('focuses picker units that match parsed minutes/seconds', () => {
+    const fixture = TestBed.createComponent(TimeInputHost);
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    input.value = '10:07';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    const picker = timeInputInstance(fixture);
+    expect(tabStopIndex(picker, 'hour', 24)).toBe(10);
+    expect(tabStopIndex(picker, 'minute', 60)).toBe(7);
+
+    fixture.componentInstance.seconds.set(true);
+    fixture.detectChanges();
+
+    input.value = '11:12:13';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(tabStopIndex(picker, 'second', 60)).toBe(13);
   });
 
   it('keeps invalid typed text visible without emitting', () => {
@@ -164,7 +226,7 @@ describe('HellTimeInput', () => {
     const picker = timeInputInstance(fixture);
 
     expect(tabStopCount(picker, 'hour', 24)).toBe(1);
-    expect(tabStopCount(picker, 'minute', 12)).toBe(1);
+    expect(tabStopCount(picker, 'minute', 60)).toBe(1);
   });
 
   it('supports Arrow/Home/End navigation in picker sections', () => {
@@ -186,10 +248,10 @@ describe('HellTimeInput', () => {
     expect(tabStopIndex(picker, 'hour', 24)).toBe(0);
 
     picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'ArrowDown' }), 'minute', 0);
-    expect(tabStopIndex(picker, 'minute', 12)).toBe(4);
+    expect(tabStopIndex(picker, 'minute', 60)).toBe(4);
 
     picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'ArrowUp' }), 'minute', 4);
-    expect(tabStopIndex(picker, 'minute', 12)).toBe(0);
+    expect(tabStopIndex(picker, 'minute', 60)).toBe(0);
   });
 
 
@@ -227,6 +289,35 @@ describe('HellTimeInput', () => {
     expect(input.value).toBe('12h00');
   });
 
+  it('exposes validator errors for invalid time drafts', () => {
+    const fixture = TestBed.createComponent(TimeInputValidationHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = textInput(fixture.nativeElement);
+    input.value = '25:99';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.control.errors).toEqual({ invalidTimeInputDraft: true });
+  });
+
+  it('clears time draft validator errors after a valid commit', () => {
+    const fixture = TestBed.createComponent(TimeInputValidationHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = textInput(fixture.nativeElement);
+    input.value = '10:15';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.control.errors).toBeNull();
+    expect(host.control.value).toEqual({ hour: 10, minute: 15, second: 0 });
+  });
+
   it('integrates with reactive forms without echoing programmatic writes', async () => {
     const fixture = TestBed.createComponent(TimeInputFormHost);
     fixture.detectChanges();
@@ -250,6 +341,25 @@ describe('HellTimeInput', () => {
     expect(host.control.value).toEqual({ hour: 10, minute: 15, second: 0 });
     expect(host.control.touched).toBe(true);
     expect(host.values).toEqual([{ hour: 10, minute: 15, second: 0 }]);
+  });
+
+  it('flushes reactive-form changes before touched state on blur', () => {
+    const fixture = TestBed.createComponent(TimeInputBlurFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = textInput(fixture.nativeElement);
+    input.value = '10:15';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.control.value).toEqual({ hour: 8, minute: 30, second: 0 });
+
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.control.value).toEqual({ hour: 10, minute: 15, second: 0 });
+    expect(host.control.touched).toBe(true);
   });
 
   it('does not revive stale local state after a form write returns to an old base', async () => {

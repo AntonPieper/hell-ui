@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   type ElementRef,
+  effect,
   InjectionToken,
   type Provider,
   booleanAttribute,
@@ -12,7 +13,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, NG_VALIDATORS, type AbstractControl, type ValidationErrors, type Validator, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCalendar } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../../primitives/button/button';
@@ -137,6 +138,11 @@ export function hellCoerceDateInputValue(value: Date | null | undefined): Date |
       useExisting: forwardRef(() => HellDateInput),
       multi: true,
     },
+    {
+      provide: NG_VALIDATORS,
+      useExisting: forwardRef(() => HellDateInput),
+      multi: true,
+    },
   ],
   host: {
     '[class.hell-date-input]': '!unstyled()',
@@ -190,7 +196,7 @@ export function hellCoerceDateInputValue(value: Date | null | undefined): Date |
     </ng-template>
   `,
 })
-export class HellDateInput extends HellStyleable implements ControlValueAccessor {
+export class HellDateInput extends HellStyleable implements ControlValueAccessor, Validator {
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
@@ -209,6 +215,7 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
   private readonly controlDisabled = signal(false);
   private onControlChange: (value: Date | null) => void = () => {};
   private onControlTouched: () => void = () => {};
+  private onValidatorChange: () => void = () => {};
 
   private readonly valueState = new HellTypedValueInputState<Date, Date | null>({
     external: () => this.effectiveDate(),
@@ -230,11 +237,23 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
   private readonly labels = inject(HELL_LABELS);
   private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field');
 
+  constructor() {
+    super();
+    effect(() => {
+      this.invalidDraft();
+      this.current();
+      this.min();
+      this.max();
+      this.onValidatorChange();
+    });
+  }
+
   writeValue(value: Date | null): void {
     this.controlMode.set(true);
     this.controlValue.set(this.coerceDate(value));
     this.valueState.clearDraft();
     this.valueState.clearLocal();
+    this.onValidatorChange();
   }
 
   registerOnChange(fn: (value: Date | null) => void): void {
@@ -243,6 +262,10 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
 
   registerOnTouched(fn: () => void): void {
     this.onControlTouched = fn;
+  }
+
+  registerOnValidatorChange(fn: () => void): void {
+    this.onValidatorChange = fn;
   }
 
   setDisabledState(isDisabled: boolean): void {
@@ -263,18 +286,21 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
 
   protected onInput(value: string) {
     this.valueState.writeDraft(value);
+    this.onValidatorChange();
   }
 
   protected onBlur() {
-    this.onControlTouched();
     const parsed = this.valueState.commitDraft();
     if (parsed.committed) this.emitValue(parsed.value);
+    this.onControlTouched();
+    this.onValidatorChange();
   }
 
   protected commit(text: string, event?: Event) {
     event?.preventDefault();
     const parsed = this.valueState.commitText(text);
     if (parsed.committed) this.emitValue(parsed.value);
+    this.onValidatorChange();
   }
 
   protected onPick(d: Date | undefined) {
@@ -283,6 +309,7 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
     if (picked.committed) this.emitValue(picked.value);
     this.onControlTouched();
     this.field().nativeElement.focus();
+    this.onValidatorChange();
   }
 
   private coerceDate(value: Date | null | undefined): Date | null {
@@ -302,9 +329,24 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
     );
   }
 
+  validate(_control: AbstractControl | null): ValidationErrors | null {
+    const errors: ValidationErrors = {};
+
+    if (this.invalidDraft()) {
+      errors['invalidDateInputDraft'] = true;
+    }
+    const current = this.current();
+    if (current && !this.isWithinBounds(current)) {
+      errors['outOfRangeDate'] = true;
+    }
+
+    return Object.keys(errors).length > 0 ? errors : null;
+  }
+
   private emitValue(value: Date | null): void {
     if (this.controlMode()) this.controlValue.set(value);
     this.dateChange.emit(value);
     this.onControlChange(value);
+    this.onValidatorChange();
   }
 }

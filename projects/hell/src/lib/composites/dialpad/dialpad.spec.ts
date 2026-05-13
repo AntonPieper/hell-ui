@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { HellDialpad } from './dialpad';
@@ -27,10 +27,20 @@ class DialpadHost {}
 })
 class LocalizedDialpadHost {}
 
+@Component({
+  selector: 'app-controlled-dialpad-host',
+  imports: [HellDialpad],
+  template: `<hell-dialpad [value]="value()" (valueChange)="values.push($event)" />`,
+})
+class ControlledDialpadHost {
+  readonly value = signal<string>('');
+  values: string[] = [];
+}
+
 describe('HellDialpad labels', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DialpadHost, LocalizedDialpadHost],
+      imports: [DialpadHost, LocalizedDialpadHost, ControlledDialpadHost],
     }).compileComponents();
   });
 
@@ -55,6 +65,49 @@ describe('HellDialpad labels', () => {
     expect(query(host, '[data-slot="back"]').getAttribute('aria-label')).toBe('Rücktaste');
     expect(query(host, '[data-slot="call"]').textContent?.trim()).toBe('Anrufen');
   });
+
+  it('updates local display when value is uncontrolled', () => {
+    const fixture = TestBed.createComponent(DialpadHost);
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement;
+    const firstDigit = [...host.querySelectorAll('[data-slot="key"]')].find(
+      (button) => button.textContent?.trim() === '1',
+    );
+    if (!(firstDigit instanceof HTMLElement)) {
+      throw new Error('Expected a dialpad digit button.');
+    }
+
+    firstDigit.click();
+    fixture.detectChanges();
+
+    expect(normalizeDisplay(query(host, '[data-slot="number-inner"]').textContent)).toBe('1');
+    expect(query(host, '[data-slot="back"]').getAttribute('disabled')).toBeNull();
+  });
+
+  it('treats an explicit empty controlled value as controlled state', () => {
+    const fixture = TestBed.createComponent(ControlledDialpadHost);
+    fixture.componentInstance.value.set('');
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement;
+    const backspace = query(host, '[data-slot="back"]');
+    const firstDigit = [...host.querySelectorAll('[data-slot="key"]')].find(
+      (button) => button.textContent?.trim() === '1',
+    );
+    if (!(firstDigit instanceof HTMLElement)) {
+      throw new Error('Expected a dialpad digit button.');
+    }
+
+    expect(backspace.getAttribute('disabled')).toBe('');
+
+    firstDigit.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.values).toEqual(['1']);
+    expect(normalizeDisplay(query(host, '[data-slot="number-inner"]').textContent)).toBe('');
+    expect(backspace.getAttribute('disabled')).toBe('');
+  });
 });
 
 function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {
@@ -63,4 +116,8 @@ function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {
     throw new Error(`Expected ${selector}.`);
   }
   return element as T;
+}
+
+function normalizeDisplay(text: string | null): string {
+  return (text ?? '').replace(/\u00A0/g, '').trim();
 }

@@ -38,6 +38,18 @@ class DateInputFormHost {
 }
 
 @Component({
+  imports: [ReactiveFormsModule, HellDateInput],
+  template: `
+    <hell-date-input [formControl]="control" aria-label="Blur form date" />
+  `,
+})
+class DateInputBlurFormHost {
+  readonly control = new FormControl<Date | null>(new Date(2026, 3, 22), {
+    updateOn: 'blur',
+  });
+}
+
+@Component({
   imports: [HellDateInput],
   providers: [
     provideHellDateInputAdapter({
@@ -58,10 +70,35 @@ class DateInputCustomAdapterHost {
   dates: Array<Date | null> = [];
 }
 
+@Component({
+  imports: [ReactiveFormsModule, HellDateInput],
+  template: `
+    <hell-date-input
+      [formControl]="control"
+      [min]="min()"
+      [max]="max()"
+      aria-label="Validated date"
+      (dateChange)="dates.push($event)"
+    />
+  `,
+})
+class DateInputValidationHost {
+  readonly control = new FormControl<Date | null>(new Date(2026, 3, 15));
+  readonly min = signal<Date | null>(new Date(2026, 3, 1));
+  readonly max = signal<Date | null>(new Date(2026, 3, 30));
+  dates: Array<Date | null> = [];
+}
+
 describe('HellDateInput', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DateInputHost, DateInputFormHost, DateInputCustomAdapterHost],
+      imports: [
+        DateInputHost,
+        DateInputFormHost,
+        DateInputBlurFormHost,
+        DateInputCustomAdapterHost,
+        DateInputValidationHost,
+      ],
     }).compileComponents();
   });
 
@@ -136,6 +173,31 @@ describe('HellDateInput', () => {
     expect(host.dates).toEqual([]);
     expect(input.value).toBe('not a date');
     expect(input.getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('surfaces invalid date drafts as Angular validator errors', () => {
+    const fixture = TestBed.createComponent(DateInputValidationHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    input.value = 'not a date';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.control.errors).toEqual({ invalidDateInputDraft: true });
+  });
+
+  it('surfaces out-of-range bound dates as Angular validator errors', () => {
+    const fixture = TestBed.createComponent(DateInputValidationHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    host.control.setValue(new Date(2026, 2, 15));
+    fixture.detectChanges();
+
+    expect(host.control.errors).toEqual({ outOfRangeDate: true });
   });
 
   it('emits null when empty text is committed', () => {
@@ -289,6 +351,25 @@ describe('HellDateInput', () => {
     expect(formatDate(host.control.value)).toBe('2026-06-06');
     expect(host.control.touched).toBe(true);
     expect(formatDate(host.dates[0])).toBe('2026-06-06');
+  });
+
+  it('flushes reactive-form changes before touched state on blur', () => {
+    const fixture = TestBed.createComponent(DateInputBlurFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = textInput(fixture.nativeElement);
+    input.value = '2026-06-06';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(formatDate(host.control.value)).toBe('2026-04-22');
+
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(formatDate(host.control.value)).toBe('2026-06-06');
+    expect(host.control.touched).toBe(true);
   });
 
   it('does not revive stale local state after a form write returns to an old base', async () => {
