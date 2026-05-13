@@ -1342,7 +1342,7 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
             title: 'Pdf Viewer: Lazy Loading',
             detail: 'components/pdf-viewer/examples/lazy-loading.example.ts',
             terms:
-              'pdf-viewer lazy-loading components/pdf-viewer/examples/lazy-loading.example components/pdf-viewer hell-pdf-viewer pdfjs lazy experimental beta',
+              'pdf-viewer lazy-loading components/pdf-viewer/examples/lazy-loading.example components/pdf-viewer hell-pdf-viewer pdfjs lazy loadComponent dynamic import feature route stylesheet experimental beta',
           },
           {
             title: 'Pdf Viewer: Live Demo',

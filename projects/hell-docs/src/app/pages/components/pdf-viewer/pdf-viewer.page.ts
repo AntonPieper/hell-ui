@@ -24,7 +24,7 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
       </p>
       <p>
         The PDF viewer is experimental. It wraps pdf.js viewer internals for business-app document
-        preview, not a full PDF application contract. Keep it behind a feature route, handle
+        preview, not a full PDF application contract. Keep it behind a lazy feature route, handle
         <code>error</code>, and offer a download/open-in-new-tab fallback for critical workflows.
       </p>
       <p>
