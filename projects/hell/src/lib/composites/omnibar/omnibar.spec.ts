@@ -71,6 +71,36 @@ class OmnibarLoadingTemplateHost {
 })
 class OmnibarLocalizedHost {}
 
+@Component({
+  imports: [...HELL_OMNIBAR_DIRECTIVES],
+  template: `
+    <hell-omnibar
+      [hotkey]="hotkey()"
+      [openOnFocus]="openOnFocus()"
+      [disabled]="disabled()"
+      (openChange)="openEvents.push($event)"
+    />
+  `,
+})
+class OmnibarHotkeyHost {
+  readonly hotkey = signal('ctrl+k');
+  readonly openOnFocus = signal(false);
+  readonly disabled = signal(false);
+
+  readonly openEvents: boolean[] = [];
+}
+
+@Component({
+  imports: [...HELL_OMNIBAR_DIRECTIVES],
+  template: `
+    <input data-slot="outside-input" />
+    <hell-omnibar [hotkey]="hotkey()" [openOnFocus]="false" />
+  `,
+})
+class OmnibarOutsideEditableHost {
+  readonly hotkey = signal('/');
+}
+
 describe('HellOmnibar interactions', () => {
   let scrollIntoViewDescriptor: PropertyDescriptor | undefined;
 
@@ -226,6 +256,83 @@ describe('HellOmnibar hotkey matching', () => {
         'ctrl+k',
       ),
     ).toBe(false);
+  });
+});
+
+describe('HellOmnibar hotkey activation', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [OmnibarHotkeyHost, OmnibarOutsideEditableHost],
+    }).compileComponents();
+  });
+
+  it('opens and focuses when a configured global hotkey matches', () => {
+    const fixture = TestBed.createComponent(OmnibarHotkeyHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const root = query<HTMLElement>(fixture.nativeElement, 'hell-omnibar');
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'k',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(event, 'view', { value: document.defaultView });
+    document.dispatchEvent(event);
+    fixture.detectChanges();
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(root.getAttribute('data-open')).toBe('true');
+    expect(document.activeElement).toBe(input);
+    expect(host.openEvents).toEqual([true]);
+  });
+
+  it('does not open when disabled', () => {
+    const fixture = TestBed.createComponent(OmnibarHotkeyHost);
+    const host = fixture.componentInstance;
+    host.disabled.set(true);
+    fixture.detectChanges();
+
+    const root = query<HTMLElement>(fixture.nativeElement, 'hell-omnibar');
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'k',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(event, 'view', { value: document.defaultView });
+    document.dispatchEvent(event);
+
+    expect(root.getAttribute('data-open')).toBeNull();
+    expect(document.activeElement).not.toBe(input);
+    expect(host.openEvents).toEqual([]);
+  });
+
+  it('does not hijack bare slash typed inside another editable field', () => {
+    const fixture = TestBed.createComponent(OmnibarOutsideEditableHost);
+    fixture.detectChanges();
+
+    const root = query<HTMLElement>(fixture.nativeElement, 'hell-omnibar');
+    const editable = query<HTMLInputElement>(fixture.nativeElement, '[data-slot="outside-input"]');
+
+    editable.focus();
+
+    const event = new KeyboardEvent('keydown', {
+      key: '/',
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(event, 'view', { value: document.defaultView });
+    editable.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(false);
+    expect(root.getAttribute('data-open')).toBeNull();
+    expect(document.activeElement).toBe(editable);
   });
 });
 

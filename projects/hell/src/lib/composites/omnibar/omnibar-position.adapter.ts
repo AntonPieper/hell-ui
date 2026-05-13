@@ -21,6 +21,9 @@ export class HellOmnibarPositionAdapter {
   readonly anchorWidth = signal(0);
 
   private posUpdater?: AfterRenderRef;
+  private resizeObserver?: ResizeObserver;
+  private observedHost: HTMLElement | null = null;
+  private observedControl: HTMLElement | null = null;
 
   constructor(private readonly options: HellOmnibarPositionAdapterOptions) {
     this.anchorWidth.set(options.minWidth());
@@ -29,6 +32,7 @@ export class HellOmnibarPositionAdapter {
   connect(): void {
     const win = this.window();
     this.options.destroyRef.onDestroy(() => this.posUpdater?.destroy());
+    this.options.destroyRef.onDestroy(() => this.resizeObserver?.disconnect());
     if (!win) return;
 
     const onChange = () => this.scheduleUpdate();
@@ -39,9 +43,17 @@ export class HellOmnibarPositionAdapter {
       win.removeEventListener('resize', onChange);
       win.removeEventListener('scroll', onChange, scrollOpts);
     });
+
+    const winWithResizeObserver =
+      win as Window & { readonly ResizeObserver?: typeof ResizeObserver };
+    if (typeof winWithResizeObserver.ResizeObserver === 'undefined') return;
+
+    this.resizeObserver = new winWithResizeObserver.ResizeObserver(() => this.scheduleUpdate());
+    this.observeResizeTargets();
   }
 
   scheduleUpdate(): void {
+    this.observeResizeTargets();
     if (!this.options.isOpen()) return;
     this.posUpdater?.destroy();
     this.posUpdater = afterNextRender(() => this.updateNow(), { injector: this.options.injector });
@@ -60,5 +72,27 @@ export class HellOmnibarPositionAdapter {
     if (this.options.ownerWindow) return this.options.ownerWindow() ?? null;
     if (typeof window === 'undefined') return null;
     return window;
+  }
+
+  private observeResizeTargets(): void {
+    const ro = this.resizeObserver;
+    if (!ro) return;
+
+    const host = this.options.host();
+    const control = this.options.control() ?? null;
+    const desired = new Set<HTMLElement>([host]);
+    if (control && control !== host) desired.add(control);
+
+    for (const target of new Set([this.observedHost, this.observedControl])) {
+      if (target && !desired.has(target)) ro.unobserve(target);
+    }
+
+    const observed = new Set([this.observedHost, this.observedControl]);
+    for (const target of desired) {
+      if (!observed.has(target)) ro.observe(target);
+    }
+
+    this.observedHost = host;
+    this.observedControl = control;
   }
 }
