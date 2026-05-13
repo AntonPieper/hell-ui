@@ -40,6 +40,17 @@ interface SpeechRecognitionCtor {
   new (): SpeechRecognitionLike;
 }
 
+/** Experimental browser speech contracts: captions follow the media track only. */
+const HELL_AUDIO_RECOGNITION_UNSUPPORTED_MESSAGE =
+  'Live captions are unavailable for this browser and media element.';
+
+function resolveCaptionLang(audio: HTMLAudioElement, lang: string | null): string {
+  if (lang) return lang;
+  const doc = audio.ownerDocument;
+  const candidate = doc?.documentElement?.getAttribute('lang') ?? doc?.documentElement?.lang;
+  return candidate?.trim() || 'en-US';
+}
+
 const HELL_AUDIO_PLAYBACK_RATES = [1, 1.25, 1.5, 2, 0.75] as const;
 export type HellAudioPlaybackRate = (typeof HELL_AUDIO_PLAYBACK_RATES)[number];
 export type HellAudioVolumeLevel = 'mute' | 'low' | 'mid' | 'high';
@@ -235,10 +246,14 @@ export class HellAudioRuntime {
   ): void {
     const Ctor = getSpeechRecognition();
     const source = audio as HTMLAudioElement & { captureStream?(): MediaStream };
-    if (!Ctor || typeof source.captureStream !== 'function') return;
+    if (!Ctor || typeof source.captureStream !== 'function') {
+      this.speechSupported.set(false);
+      this.error.set(HELL_AUDIO_RECOGNITION_UNSUPPORTED_MESSAGE);
+      return;
+    }
 
     const rec = new Ctor();
-    rec.lang = lang ?? (document.documentElement.lang || 'en-US');
+    rec.lang = resolveCaptionLang(audio, lang);
     rec.continuous = true;
     rec.interimResults = true;
     rec.maxAlternatives = 1;
@@ -270,22 +285,33 @@ export class HellAudioRuntime {
       }
     };
 
+    let stream: MediaStream;
     try {
-      const stream = source.captureStream();
-      this.capturedStream = stream;
-      const track = stream.getAudioTracks()[0];
-      this.recognition = rec;
-      this.transcribing.set(true);
-      this.error.set(null);
-      try {
-        rec.start(track);
-      } catch {
-        rec.start();
-      }
+      stream = source.captureStream();
     } catch (err) {
+      this.speechSupported.set(false);
       this.error.set(err instanceof Error ? err.message : String(err));
-      this.transcribing.set(false);
-      this.recognition = null;
+      return;
+    }
+
+    const track = stream.getAudioTracks()?.[0];
+    if (!track) {
+      this.speechSupported.set(false);
+      this.error.set(HELL_AUDIO_RECOGNITION_UNSUPPORTED_MESSAGE);
+      return;
+    }
+
+    this.capturedStream = stream;
+    this.recognition = rec;
+    this.transcribing.set(true);
+    this.error.set(null);
+
+    try {
+      rec.start(track);
+    } catch (err) {
+      this.speechSupported.set(false);
+      this.error.set(err instanceof Error ? err.message : String(err));
+      this.stopRecognition();
     }
   }
 

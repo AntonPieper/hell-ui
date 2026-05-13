@@ -114,15 +114,22 @@ describe('HellAudioRuntime live captions', () => {
 
   let recognitions: FakeSpeechRecognition[];
   let tracks: { stop: ReturnType<typeof vi.fn> }[];
+  let throwOnTrackStart = false;
 
   beforeEach(() => {
     recognitions = [];
     tracks = [{ stop: vi.fn() }];
+    throwOnTrackStart = false;
     Object.defineProperty(window, 'SpeechRecognition', {
       configurable: true,
       value: class extends FakeSpeechRecognition {
         constructor() {
           super();
+          if (throwOnTrackStart) {
+            this.start.mockImplementation(() => {
+              throw new Error('Track start unsupported in this runtime');
+            });
+          }
           recognitions.push(this);
         }
       },
@@ -151,6 +158,16 @@ describe('HellAudioRuntime live captions', () => {
         value: nativeCaptureStream,
       });
     }
+  });
+
+  it('uses ownerDocument lang as a fallback when lang is not explicitly set', () => {
+    const runtime = new HellAudioRuntime();
+    const audio = document.createElement('audio');
+    audio.ownerDocument.documentElement.lang = 'es-ES';
+
+    runtime.startRecognition(audio, null);
+
+    expect(recognitions[0].lang).toBe('es-ES');
   });
 
   it('captures final and interim speech results from the browser adapter', () => {
@@ -186,6 +203,20 @@ describe('HellAudioRuntime live captions', () => {
 
     expect(recognitions[0].stop).toHaveBeenCalled();
     expect(tracks[0].stop).toHaveBeenCalled();
+    expect(runtime.transcribing()).toBe(false);
+  });
+
+  it('fails track-based recognition without falling back to generic start()', () => {
+    throwOnTrackStart = true;
+    const runtime = new HellAudioRuntime();
+
+    runtime.startRecognition(document.createElement('audio'), 'en-US');
+
+    expect(recognitions[0].start).toHaveBeenCalledTimes(1);
+    expect(recognitions[0].start).toHaveBeenCalledWith(tracks[0]);
+    expect(runtime.speechSupported()).toBe(false);
+    expect(runtime.error()).toContain('Track start unsupported in this runtime');
+    expect(runtime.isRecognizing()).toBe(false);
     expect(runtime.transcribing()).toBe(false);
   });
 

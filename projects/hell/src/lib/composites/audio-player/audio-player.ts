@@ -265,7 +265,7 @@ export class HellAudioPlayer extends HellStyleable {
   readonly title = input<string | null>(null);
   /** Display a date/timestamp next to the title. Accepts a string or Date. */
   readonly date = input<string | Date | null>(null);
-  /** BCP-47 language hint for SpeechRecognition. Defaults to `<html lang>` or `en-US`. */
+  /** BCP-47 language hint for SpeechRecognition. Defaults to audio element document `lang` or `en-US`. */
   readonly lang = input<string | null>(null);
 
   protected readonly captions = signal(false);
