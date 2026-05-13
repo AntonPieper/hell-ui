@@ -112,7 +112,8 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
           <li>
             <code>[hellTableColumnResizer]</code>: place inside a header cell with
             <code>columnId</code>. Drives resize CSS custom properties via pointer drag and arrow
-            keys; emits one <code>(columnResize)</code> transaction containing both affected columns.
+            keys; emits one <code>(columnResize)</code> transaction containing both affected columns;
+            optional <code>aria-controls</code> for controlled DOM element IDs.
           </li>
         </ul>
 

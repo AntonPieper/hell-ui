@@ -36,6 +36,18 @@ function hellElementDirection(element: HTMLElement): HellResizeDirection {
     : 'ltr';
 }
 
+function hellAriaControlsValue(
+  value: string | readonly string[] | null | undefined,
+): string | null {
+  if (!value) return null;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed.length ? trimmed : null;
+  }
+  const ids = value.map((id) => id.trim()).filter(Boolean);
+  return ids.length ? ids.join(' ') : null;
+}
+
 const HELL_TABLE_INTERACTIVE_TARGET_SELECTOR = [
   'button',
   'a[href]',
@@ -405,6 +417,7 @@ export class HellTableCell extends HellStyleable {
     '[attr.data-active]': 'dragging() ? "true" : null',
     '[attr.type]': 'nativeButtonType()',
     '[attr.aria-label]': 'ariaLabel() ?? labels.dataTable.resizeColumn',
+    '[attr.aria-controls]': 'ariaControlsValue()',
     '[attr.aria-valuemin]': '0',
     '[attr.aria-valuemax]': '100',
     '[attr.aria-valuenow]': 'ariaValueNow()',
@@ -420,6 +433,11 @@ export class HellTableCell extends HellStyleable {
 export class HellTableColumnResizer extends HellStyleable implements OnDestroy {
   readonly minWidth = input(40, { transform: numberAttribute });
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
+  readonly ariaControls = input<string | readonly string[] | null>(null, {
+    alias: 'aria-controls',
+  });
+
+  protected readonly ariaControlsValue = computed(() => hellAriaControlsValue(this.ariaControls()));
 
   readonly columnResize = output<HellTableColumnResizeEvent>();
 

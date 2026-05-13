@@ -30,6 +30,18 @@ function hellElementDirection(element: HTMLElement): HellResizeDirection {
     : 'ltr';
 }
 
+function hellAriaControlsValue(
+  value: string | readonly string[] | null | undefined,
+): string | null {
+  if (!value) return null;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed.length ? trimmed : null;
+  }
+  const ids = value.map((id) => id.trim()).filter(Boolean);
+  return ids.length ? ids.join(' ') : null;
+}
+
 /**
  * Resizable group. Wrap two or more `[hellResizablePane]` elements with
  * explicit `[hellResizableHandle]` siblings between them inside a
@@ -266,6 +278,7 @@ export class HellResizablePane extends HellStyleable implements OnDestroy {
     '[attr.aria-disabled]': 'resizable.isConstrained() ? "true" : null',
     role: 'separator',
     '[attr.aria-label]': 'ariaLabel()',
+    '[attr.aria-controls]': 'ariaControlsValue()',
     '[attr.tabindex]': 'resizable.isConstrained() ? "-1" : "0"',
     '[attr.aria-valuemin]': '0',
     '[attr.aria-valuemax]': '100',
@@ -282,6 +295,10 @@ export class HellResizableHandle extends HellStyleable implements OnDestroy {
    */
   readonly appearance = input<'line' | 'grip'>('line');
   readonly ariaLabel = input('Resize panels', { alias: 'aria-label' });
+  readonly ariaControls = input<string | readonly string[] | null>(null, {
+    alias: 'aria-controls',
+  });
+  protected readonly ariaControlsValue = computed(() => hellAriaControlsValue(this.ariaControls()));
 
   protected readonly dragging = signal(false);
   protected readonly ariaValueNow = signal<number | null>(null);

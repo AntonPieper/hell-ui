@@ -81,7 +81,7 @@ import resizableVerticalSplitExampleCodeRaw from './examples/vertical-split.exam
         <li><code>hellResizablePane</code>: <code>initialFlex</code>, <code>minSize</code> (px)</li>
         <li>
           <code>hellResizableHandle</code>: <code>appearance</code> (<code>line | grip</code>) —
-          place between two panes
+          place between two panes; optional <code>aria-controls</code> for controlled pane IDs.
         </li>
       </ul>
 

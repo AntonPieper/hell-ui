@@ -8,7 +8,7 @@ import { HELL_RESIZABLE_DIRECTIVES } from './resizable';
   template: `
     <div id="group" hellResizable>
       <section id="pane-a" hellResizablePane [minSize]="40">A</section>
-      <div id="handle-a" hellResizableHandle></div>
+      <div id="handle-a" hellResizableHandle [aria-controls]="[' pane-a ', ' ', 'pane-b']"></div>
       <section id="pane-b" hellResizablePane [minSize]="40">B</section>
       <div id="handle-b" hellResizableHandle></div>
       <section id="pane-c" hellResizablePane [minSize]="40">C</section>
@@ -50,8 +50,10 @@ describe('HellResizable', () => {
 
     expect(key.defaultPrevented).toBe(true);
     expect(byId(fixture.nativeElement, 'handle-a').getAttribute('aria-label')).toBe('Resize panels');
+    expect(byId(fixture.nativeElement, 'handle-a').getAttribute('aria-controls')).toBe('pane-a pane-b');
     expect(byId(fixture.nativeElement, 'handle-a').getAttribute('aria-valuemin')).toBe('0');
     expect(byId(fixture.nativeElement, 'handle-a').getAttribute('aria-valuemax')).toBe('100');
+    expect(byId(fixture.nativeElement, 'handle-b').getAttribute('aria-controls')).toBe(null);
     expect(paneFlex(paneA)).toBe('0 0 116px');
     expect(paneFlex(paneB)).toBe('0 0 84px');
     expect(paneFlex(paneC)).toBe('0 0 100px');

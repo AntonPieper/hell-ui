@@ -23,6 +23,7 @@ import { HELL_TABLE_DIRECTIVES, type HellTableColumnResizeEvent } from './data-t
               id="name-resizer"
               hellTableColumnResizer
               [minWidth]="minWidth()"
+              [aria-controls]="[' name-resizer-pane ', ' ']"
               (columnResize)="resizeEvents.push($event)"
             ></button>
           </th>
@@ -245,9 +246,13 @@ describe('Hell data table directives', () => {
     expect(role.style.getPropertyValue('--hell-table-col-width')).toBe('64px');
     expect(resizer.getAttribute('type')).toBe('button');
     expect(resizer.getAttribute('aria-label')).toBe('Resize column');
+    expect(resizer.getAttribute('aria-controls')).toBe('name-resizer-pane');
     expect(resizer.getAttribute('aria-valuemin')).toBe('0');
     expect(resizer.getAttribute('aria-valuemax')).toBe('100');
     expect(resizer.getAttribute('aria-valuenow')).toBe('68');
+    expect(byId<HTMLButtonElement>(fixture.nativeElement, 'role-resizer').getAttribute('aria-controls')).toBe(
+      null,
+    );
   });
 
   it('uses RTL-aware horizontal arrow semantics for column resize', () => {
