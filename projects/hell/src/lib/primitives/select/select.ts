@@ -11,6 +11,10 @@ import {
   injectSelectState,
 } from 'ng-primitives/select';
 
+export type HellSelectSingleValue<T = unknown> = T | null;
+export type HellSelectMultipleValue<T = unknown> = readonly T[];
+export type HellSelectFormValue<T = unknown> = HellSelectSingleValue<T> | HellSelectMultipleValue<T>;
+
 /** Rich, headless select. Trigger element is the host of `[hellSelect]`;
  *  use ng-content to render the selected value (or a placeholder), pair
  *  with `[hellSelectDropdown]` inside a `*hellSelectPortal`, and emit
@@ -50,21 +54,21 @@ export class HellSelect<T = unknown> extends HellStyleable implements ControlVal
   private readonly select = inject(NgpSelect);
   private readonly selectState = injectSelectState<NgpSelect>();
   private readonly destroyRef = inject(DestroyRef);
-  private readonly cva = new HellControlValueAccessorBridge<T>();
+  private readonly cva = new HellControlValueAccessorBridge<HellSelectFormValue<T>>();
 
   constructor() {
     super();
     const valueSub = this.select.valueChange.subscribe((value) => {
-      this.cva.emitValue(value as T);
+      this.cva.emitValue(this.normalizeValue(value));
     });
     this.destroyRef.onDestroy(() => valueSub.unsubscribe());
   }
 
-  writeValue(value: T): void {
-    this.selectState().value.set(value);
+  writeValue(value: HellSelectFormValue<T>): void {
+    this.selectState().value.set(this.normalizeWriteValue(value));
   }
 
-  registerOnChange(fn: (value: T) => void): void {
+  registerOnChange(fn: (value: HellSelectFormValue<T>) => void): void {
     this.cva.registerOnChange(fn);
   }
 
@@ -78,6 +82,30 @@ export class HellSelect<T = unknown> extends HellStyleable implements ControlVal
 
   protected markControlTouched(): void {
     this.cva.markTouched();
+  }
+
+  private normalizeValue(value: unknown): HellSelectFormValue<T> {
+    if (this.select.multiple()) {
+      return this.normalizeMultipleValue(value);
+    }
+    return this.normalizeSingleValue(value);
+  }
+
+  private normalizeSingleValue(value: unknown): HellSelectSingleValue<T> {
+    if (Array.isArray(value)) return this.normalizeMultipleValue(value)[0] ?? null;
+    if (value == null) return null;
+    return value as T;
+  }
+
+  private normalizeMultipleValue(value: unknown): HellSelectMultipleValue<T> {
+    if (value == null) return [];
+    if (Array.isArray(value)) return [...value];
+    return [value as T];
+  }
+
+  private normalizeWriteValue(value: HellSelectFormValue<T>): HellSelectFormValue<T> {
+    if (this.select.multiple()) return this.normalizeMultipleValue(value);
+    return this.normalizeSingleValue(value);
   }
 }
 

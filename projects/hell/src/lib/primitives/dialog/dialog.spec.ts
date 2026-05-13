@@ -77,6 +77,30 @@ class DisabledDialogTriggerHost {}
 })
 class ClosePolicyDialogHost {}
 
+@Component({
+  imports: [...HELL_DIALOG_DIRECTIVES],
+  template: `
+    <button id="open-result" type="button" [hellDialogTrigger]="resultDialog" (closed)="onDialogClosed($any($event))">
+      Open
+    </button>
+
+    <ng-template #resultDialog let-close="close">
+      <div id="result-overlay" hellDialogOverlay>
+        <div hellDialog>
+          <button id="result-close" type="button" (click)="close('result')">Close</button>
+        </div>
+      </div>
+    </ng-template>
+  `,
+})
+class DialogClosedResultHost {
+  readonly results: Array<string> = [];
+
+  onDialogClosed(result: string): void {
+    this.results.push(result);
+  }
+}
+
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
 
 beforeAll(() => {
@@ -95,7 +119,12 @@ afterAll(() => {
 describe('HellDialogTrigger scoped overlays', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ScopedDialogHost, DisabledDialogTriggerHost, ClosePolicyDialogHost],
+      imports: [
+        ScopedDialogHost,
+        DisabledDialogTriggerHost,
+        ClosePolicyDialogHost,
+        DialogClosedResultHost,
+      ],
     }).compileComponents();
   });
 
@@ -174,6 +203,20 @@ describe('HellDialogTrigger scoped overlays', () => {
     expectVar(overlayA, '--hell-dialog-scope-left', '10px');
     expectVar(rootB, '--hell-dialog-scope-left', '40px');
     expectVar(overlayB, '--hell-dialog-scope-left', '40px');
+  });
+
+  it('emits dialog close result values that are independent from template data', async () => {
+    const fixture = TestBed.createComponent(DialogClosedResultHost);
+    await settle(fixture);
+
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-result').click();
+    await settle(fixture);
+
+    const close = query<HTMLButtonElement>(document.body, '#result-close');
+    close.click();
+    await settle(fixture);
+
+    expect(fixture.componentInstance.results).toEqual(['result']);
   });
 });
 

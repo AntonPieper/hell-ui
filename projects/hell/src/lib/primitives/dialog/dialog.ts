@@ -17,6 +17,7 @@ import {
   NgpDialogOverlay,
   NgpDialogTitle,
   NgpDialogDescription,
+  type NgpDialogConfig,
   type NgpDialogRef,
 } from 'ng-primitives/dialog';
 import {
@@ -33,9 +34,9 @@ import {
   hellFindDialogScopeRoot,
 } from './dialog-scope';
 
-interface HellDialogTemplateContext<T = unknown, R = unknown> {
-  readonly $implicit: NgpDialogRef<T, R>;
-  readonly close: (result?: R) => void;
+export interface HellDialogTemplateContext<TData = unknown, TResult = unknown> {
+  readonly $implicit: NgpDialogRef<TData, TResult>;
+  readonly close: (result?: TResult) => void;
 }
 
 /**
@@ -55,8 +56,8 @@ interface HellDialogTemplateContext<T = unknown, R = unknown> {
     '(keydown.enter)': 'preventDisabledAnchor($event, disabled())',
   },
 })
-export class HellDialogTrigger<T = unknown> extends HellNativeInteractiveDisabledGuard {
-  readonly template = input.required<TemplateRef<HellDialogTemplateContext>>({
+export class HellDialogTrigger<TData = unknown, TResult = unknown> extends HellNativeInteractiveDisabledGuard {
+  readonly template = input.required<TemplateRef<HellDialogTemplateContext<TData, TResult>>>({
     alias: 'hellDialogTrigger',
   });
   readonly closeOnEscape = input<
@@ -74,7 +75,7 @@ export class HellDialogTrigger<T = unknown> extends HellNativeInteractiveDisable
     transform: optionalDismissGuardAttribute,
   });
   readonly disabled = input(false, { transform: booleanAttribute });
-  readonly closed = output<T>();
+  readonly closed = output<TResult>();
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly dialogManager = inject(NgpDialogManager);
@@ -91,13 +92,17 @@ export class HellDialogTrigger<T = unknown> extends HellNativeInteractiveDisable
       parent: this.injector,
       providers: [{ provide: HELL_DIALOG_SCOPE_ROOT, useValue: root }],
     });
-    const dialogRef = this.dialogManager.open(this.template(), {
-      injector,
-      closeOnEscape: this.closeOnEscape(),
-      closeOnOutsideClick: this.closeOnOutsideClick(),
-    });
+    const dialogRef = this.dialogManager.open<TData, TResult>(
+      this.template() as TemplateRef<HellDialogTemplateContext<TData, TResult>>,
+      {
+        injector,
+        closeOnEscape: this.closeOnEscape(),
+        closeOnOutsideClick: this.closeOnOutsideClick(),
+        data: undefined as unknown as TData,
+      } as unknown as NgpDialogConfig<TData> & { data: TData },
+    );
 
-    dialogRef.closed.subscribe(({ result }) => this.closed.emit(result as T));
+    dialogRef.closed.subscribe(({ result }) => this.closed.emit(result as TResult));
   }
 }
 

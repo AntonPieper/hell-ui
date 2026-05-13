@@ -10,6 +10,8 @@ import { HellControlValueAccessorBridge } from '../../core/control-value-accesso
 import { HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
 
+export type HellToggleGroupValue = string | null | readonly string[];
+
 /**
  * Single press-toggle button. Pairs with `hell-button`'s utility class for
  * styling but adds the on/off `data-state` from the toggle primitive.
@@ -66,21 +68,35 @@ export class HellToggleGroup extends HellStyleable implements ControlValueAccess
   private readonly groupState = injectToggleGroupState();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly cva = new HellControlValueAccessorBridge<string[]>();
+  private readonly cva = new HellControlValueAccessorBridge<HellToggleGroupValue>();
 
   constructor() {
     super();
     const valueSub = this.group.valueChange.subscribe((value) => {
-      this.cva.emitValue(value);
+      this.cva.emitValue(this.asControlValue(value));
     });
     this.destroyRef.onDestroy(() => valueSub.unsubscribe());
   }
 
-  writeValue(value: readonly string[] | null): void {
-    this.groupState().setValue(Array.isArray(value) ? [...value] : [], { emit: false });
+  writeValue(value: HellToggleGroupValue): void {
+    this.groupState().setValue(this.asGroupValue(value), { emit: false });
   }
 
-  registerOnChange(fn: (value: string[]) => void): void {
+  private asGroupValue(value: HellToggleGroupValue): string[] {
+    if (value == null) return [];
+    if (this.group.type() === 'single') {
+      const next = Array.isArray(value) ? value[0] : value;
+      return next == null ? [] : [next];
+    }
+
+    return Array.isArray(value) ? [...value] : [value as string];
+  }
+
+  private asControlValue(value: readonly string[]): HellToggleGroupValue {
+    return this.group.type() === 'multiple' ? [...value] : value[0] ?? null;
+  }
+
+  registerOnChange(fn: (value: HellToggleGroupValue) => void): void {
     this.cva.registerOnChange(fn);
   }
 
@@ -98,6 +114,7 @@ export class HellToggleGroup extends HellStyleable implements ControlValueAccess
       this.cva.markTouched();
     }
   }
+
 }
 
 @Directive({

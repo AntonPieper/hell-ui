@@ -13,6 +13,10 @@ import {
   injectComboboxState,
 } from 'ng-primitives/combobox';
 
+export type HellComboboxSingleValue<T = unknown> = T | null;
+export type HellComboboxMultipleValue<T = unknown> = readonly T[];
+export type HellComboboxValue<T = unknown> = HellComboboxSingleValue<T> | HellComboboxMultipleValue<T>;
+
 /**
  * Headless combobox shell around `NgpCombobox`. Pair with
  * `hellComboboxInput`, `hellComboboxButton`, `hellComboboxOption`, and a
@@ -56,21 +60,21 @@ export class HellCombobox<T = unknown> extends HellStyleable implements ControlV
   private readonly combobox = inject(NgpCombobox);
   private readonly comboboxState = injectComboboxState<NgpCombobox>();
   private readonly destroyRef = inject(DestroyRef);
-  private readonly cva = new HellControlValueAccessorBridge<T>();
+  private readonly cva = new HellControlValueAccessorBridge<HellComboboxValue<T>>();
 
   constructor() {
     super();
     const valueSub = this.combobox.valueChange.subscribe((value) => {
-      this.cva.emitValue(value as T);
+      this.cva.emitValue(this.normalizeValue(value));
     });
     this.destroyRef.onDestroy(() => valueSub.unsubscribe());
   }
 
-  writeValue(value: T): void {
-    this.comboboxState().value.set(value);
+  writeValue(value: HellComboboxValue<T>): void {
+    this.comboboxState().value.set(this.normalizeWriteValue(value));
   }
 
-  registerOnChange(fn: (value: T) => void): void {
+  registerOnChange(fn: (value: HellComboboxValue<T>) => void): void {
     this.cva.registerOnChange(fn);
   }
 
@@ -84,6 +88,30 @@ export class HellCombobox<T = unknown> extends HellStyleable implements ControlV
 
   protected markControlTouched(): void {
     this.cva.markTouched();
+  }
+
+  private normalizeValue(value: unknown): HellComboboxValue<T> {
+    if (this.combobox.multiple()) {
+      return this.normalizeMultipleValue(value);
+    }
+    return this.normalizeSingleValue(value);
+  }
+
+  private normalizeSingleValue(value: unknown): HellComboboxSingleValue<T> {
+    if (Array.isArray(value)) return this.normalizeMultipleValue(value)[0] ?? null;
+    if (value == null) return null;
+    return value as T;
+  }
+
+  private normalizeMultipleValue(value: unknown): HellComboboxMultipleValue<T> {
+    if (value == null) return [];
+    if (Array.isArray(value)) return [...value];
+    return [value as T];
+  }
+
+  private normalizeWriteValue(value: HellComboboxValue<T>): HellComboboxValue<T> {
+    if (this.combobox.multiple()) return this.normalizeMultipleValue(value);
+    return this.normalizeSingleValue(value);
   }
 }
 
