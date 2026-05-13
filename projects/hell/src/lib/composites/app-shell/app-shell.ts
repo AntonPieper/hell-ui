@@ -186,7 +186,7 @@ export class HellAppTopbar extends HellStyleable {}
   selector: '[hellAppSidenav]',
   host: {
     '[class.hell-sidenav]': '!unstyled()',
-    '[attr.id]': 'shell?.sidenavPanelId',
+    '[attr.id]': 'panelId()',
     '[attr.data-hell-app-shell-panel]': '"sidenav"',
     '[attr.data-collapsed]': 'isCollapsed() ? "true" : null',
     '[attr.data-mobile-hidden]': 'isMobileHidden() ? "true" : null',
@@ -387,7 +387,7 @@ export class HellSecondaryToggle {
   selector: '[hellAppSecondary]',
   host: {
     '[class.hell-secondary]': '!unstyled()',
-    '[attr.id]': 'shell?.secondaryPanelId',
+    '[attr.id]': 'panelId()',
     '[attr.data-hell-app-shell-panel]': '"secondary"',
     '[attr.data-hidden]': 'isHidden() ? "true" : null',
     '[attr.data-mobile-hidden]': 'isMobileHidden() ? "true" : null',

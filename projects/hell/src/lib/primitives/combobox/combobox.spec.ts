@@ -1,8 +1,11 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { HellComboboxValue, HELL_COMBOBOX_DIRECTIVES } from './combobox';
+import { NgpCombobox } from 'ng-primitives/combobox';
+
+import { HellCombobox, HellComboboxValue, HELL_COMBOBOX_DIRECTIVES } from './combobox';
 
 @Component({
   imports: [ReactiveFormsModule, ...HELL_COMBOBOX_DIRECTIVES],
@@ -88,6 +91,22 @@ describe('HellCombobox', () => {
 
     expect(host.control.touched).toBe(true);
     expect(Array.isArray(host.control.value)).toBe(true);
+  });
+
+  it('preserves array-valued options in single mode', () => {
+    const fixture = TestBed.createComponent(ComboboxFormHost);
+    fixture.detectChanges();
+
+    const debug = fixture.debugElement.query(By.directive(HellCombobox));
+    const combobox = debug.injector.get(HellCombobox<readonly string[]>);
+    const ngpCombobox = debug.injector.get(NgpCombobox);
+    const arrayValue = ['north', 'south'] as const;
+    let emitted: HellComboboxValue<readonly string[]> | undefined;
+
+    combobox.registerOnChange((value) => (emitted = value));
+    ngpCombobox.valueChange.emit(arrayValue);
+
+    expect(emitted).toBe(arrayValue);
   });
 });
 

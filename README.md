@@ -58,10 +58,12 @@ library:
 @import "hell/styles/primitives";
 @import "hell/styles/composites";
 @import "hell/styles/features/table-utilities";
-@import "hell/styles/features/data-table"; /* legacy alias */
 @import "hell/styles/features/code-editor";
 @import "hell/styles/features/pdf-viewer";
 ```
+
+Use `hell/styles/features/data-table` only as the legacy CSS alias for table
+utilities.
 
 ## Component Contract
 

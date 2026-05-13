@@ -92,7 +92,6 @@ export class HellSelect<T = unknown> extends HellStyleable implements ControlVal
   }
 
   private normalizeSingleValue(value: unknown): HellSelectSingleValue<T> {
-    if (Array.isArray(value)) return this.normalizeMultipleValue(value)[0] ?? null;
     if (value == null) return null;
     return value as T;
   }

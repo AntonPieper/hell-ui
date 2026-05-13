@@ -1,1 +1,18 @@
-export * from '../data-table/data-table';
+export {
+  HellTable,
+  HellTableBody,
+  HellTableCell,
+  HellTableColumnResizer,
+  HellTableContainer,
+  HellTableHead,
+  HellTableHeaderCell,
+  HellTableRow,
+  HellTableSortButton,
+  HELL_TABLE_UTILITY_DIRECTIVES,
+} from '../data-table/data-table';
+
+export type {
+  HellTableColumnResizeEvent,
+  HellTableColumnResizePair,
+  HellTableColumnResizeSide,
+} from '../data-table/data-table';

@@ -98,7 +98,6 @@ export class HellCombobox<T = unknown> extends HellStyleable implements ControlV
   }
 
   private normalizeSingleValue(value: unknown): HellComboboxSingleValue<T> {
-    if (Array.isArray(value)) return this.normalizeMultipleValue(value)[0] ?? null;
     if (value == null) return null;
     return value as T;
   }

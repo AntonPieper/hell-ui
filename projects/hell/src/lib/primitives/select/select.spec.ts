@@ -1,8 +1,11 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { HellSelectFormValue, HELL_SELECT_DIRECTIVES } from './select';
+import { NgpSelect } from 'ng-primitives/select';
+
+import { HellSelect, HellSelectFormValue, HELL_SELECT_DIRECTIVES } from './select';
 
 @Component({
   imports: [ReactiveFormsModule, ...HELL_SELECT_DIRECTIVES],
@@ -99,6 +102,22 @@ describe('HellSelect', () => {
 
     expect(host.control.touched).toBe(true);
     expect(Array.isArray(host.control.value)).toBe(true);
+  });
+
+  it('preserves array-valued options in single mode', () => {
+    const fixture = TestBed.createComponent(SelectFormHost);
+    fixture.detectChanges();
+
+    const debug = fixture.debugElement.query(By.directive(HellSelect));
+    const select = debug.injector.get(HellSelect<readonly string[]>);
+    const ngpSelect = debug.injector.get(NgpSelect);
+    const arrayValue = ['north', 'south'] as const;
+    let emitted: HellSelectFormValue<readonly string[]> | undefined;
+
+    select.registerOnChange((value) => (emitted = value));
+    ngpSelect.valueChange.emit(arrayValue);
+
+    expect(emitted).toBe(arrayValue);
   });
 });
 

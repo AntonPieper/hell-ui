@@ -25,6 +25,7 @@ const adapterChecks = [
       'pnpm ci:install',
       'pnpm ci:test',
       'pnpm ci:build',
+      'pnpm exec playwright install --with-deps chromium firefox webkit',
       'actions/upload-artifact',
       'test-results/',
       'coverage/',
@@ -36,6 +37,7 @@ const adapterChecks = [
       'pnpm ci:install',
       'pnpm ci:test',
       'pnpm ci:build',
+      'pnpm exec playwright install --with-deps chromium firefox webkit',
       'reports:',
       'junit: test-results/vitest-junit.xml',
       'coverage_format: cobertura',
@@ -44,7 +46,13 @@ const adapterChecks = [
   },
   {
     path: 'Dockerfile.ci',
-    includes: ['pnpm ci:install', 'pnpm ci:test', 'pnpm ci:build', 'pnpm ci:verify'],
+    includes: [
+      'pnpm ci:install',
+      'pnpm exec playwright install --with-deps chromium firefox webkit',
+      'pnpm ci:test',
+      'pnpm ci:build',
+      'pnpm ci:verify',
+    ],
   },
 ];
 

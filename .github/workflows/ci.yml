@@ -43,7 +43,7 @@ jobs:
         run: pnpm ci:install
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium firefox webkit
 
       - name: Test
         run: pnpm ci:test
