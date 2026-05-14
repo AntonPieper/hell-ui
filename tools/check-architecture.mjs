@@ -332,6 +332,7 @@ function checkPackageDependencyContract() {
     // CSS entry points depend on Tailwind theme variables.
     'tailwindcss',
     // ng-primitives exposes these as strict peers consumed by primitive wrappers.
+    '@angular/router',
     '@angular/cdk',
     '@floating-ui/dom',
   ]);
