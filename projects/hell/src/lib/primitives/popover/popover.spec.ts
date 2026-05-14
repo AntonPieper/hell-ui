@@ -48,8 +48,8 @@ describe('HellPopoverTrigger', () => {
 
     expect(anchor.dispatchEvent(click)).toBe(false);
     expect(click.defaultPrevented).toBe(true);
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    fixture.detectChanges();
+
+    await waitForPopoverOverlayText(fixture, 'Popover');
 
     expect(document.body.textContent).toContain('Popover');
   });
@@ -70,6 +70,37 @@ describe('HellPopoverTrigger', () => {
     expect(document.body.textContent).not.toContain('Popover');
   });
 });
+
+async function settle(fixture: { detectChanges(): void; whenStable(): Promise<unknown> }) {
+  fixture.detectChanges();
+  await fixture.whenStable();
+  fixture.detectChanges();
+}
+
+async function waitForPopoverOverlayText(
+  fixture: { detectChanges(): void; whenStable(): Promise<unknown> },
+  text: string,
+): Promise<void> {
+  const timeout = Date.now() + 1000;
+  while (Date.now() < timeout) {
+    await settle(fixture);
+    if (document.body.textContent?.includes(text)) {
+      return;
+    }
+    await nextFrame();
+  }
+
+  throw new Error(`Expected body content to contain ${text}.`);
+}
+
+async function nextFrame(): Promise<void> {
+  if (typeof requestAnimationFrame === 'function') {
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    return;
+  }
+
+  await Promise.resolve();
+}
 
 function query<T extends HTMLElement>(root: ParentNode, selector: string): T {
   const element = root.querySelector<T>(selector);

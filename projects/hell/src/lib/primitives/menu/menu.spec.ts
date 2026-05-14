@@ -95,10 +95,8 @@ describe('HellMenuItem', () => {
 
     expect(trigger.dispatchEvent(click)).toBe(false);
     expect(click.defaultPrevented).toBe(true);
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    await settle(fixture);
 
-    const menuItem = query<HTMLButtonElement>(document.body, 'button[hellMenuItem]');
+    const menuItem = await waitForOverlayElement<HTMLButtonElement>(fixture, document.body, 'button[hellMenuItem]');
     expect(menuItem).toBeTruthy();
     expect(menuItem.textContent).toBe('Item');
   });
@@ -108,9 +106,7 @@ describe('HellMenuItem', () => {
     await settle(fixture);
 
     fixture.componentInstance.trigger().show();
-    await settle(fixture);
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    await settle(fixture);
+    await waitForOverlayElement<HTMLButtonElement>(fixture, document.body, 'button[hellMenuItem]');
 
     const button = query<HTMLButtonElement>(document.body, 'button[hellMenuItem]');
     const anchor = query<HTMLAnchorElement>(document.body, 'a[hellMenuItem]');
@@ -135,6 +131,37 @@ async function settle(fixture: { detectChanges(): void; whenStable(): Promise<un
   await fixture.whenStable();
   await Promise.resolve();
   fixture.detectChanges();
+}
+
+async function waitForOverlayElement<T extends HTMLElement>(
+  fixture: { detectChanges(): void; whenStable(): Promise<unknown> },
+  root: ParentNode,
+  selector: string,
+): Promise<T> {
+  const timeout = Date.now() + 1000;
+  while (Date.now() < timeout) {
+    await settle(fixture);
+    const element = queryOptional<T>(root, selector);
+    if (element) {
+      return element;
+    }
+    await nextFrame();
+  }
+
+  throw new Error(`Expected ${selector}.`);
+}
+
+async function nextFrame(): Promise<void> {
+  if (typeof requestAnimationFrame === 'function') {
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    return;
+  }
+
+  await Promise.resolve();
+}
+
+function queryOptional<T extends HTMLElement>(root: ParentNode, selector: string): T | null {
+  return root.querySelector<T>(selector);
 }
 
 function query<T extends HTMLElement>(root: ParentNode, selector: string): T {
