@@ -65,6 +65,7 @@ const codeEditorDeps = [
   '@lezer/highlight',
 ];
 const dataTableDeps = [...angularAppDeps, 'tailwindcss'];
+const testingDeps = [...angularAppDeps, '@angular/cdk', 'rxjs'];
 const pdfViewerDeps = [
   ...lightUiDeps,
   'pdfjs-dist',
@@ -98,6 +99,13 @@ const scenarios = [
     dependencies: lightUiDeps,
     mainTs: compositesConsumerMainTs(),
     stylesCss: compositesConsumerStylesCss(),
+  },
+  {
+    name: 'testing',
+    description: 'testing entry with harness-only public APIs',
+    dependencies: testingDeps,
+    mainTs: testingConsumerMainTs(),
+    stylesCss: '',
   },
   {
     name: 'code-editor',
@@ -358,6 +366,34 @@ import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/composites';
   \`,
 })
 class App {}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function testingConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import {
+  HellButtonHarness,
+  HellDialogHarness,
+  HellDialogOverlayHarness,
+  HellTableHarness,
+} from '${packageName}/testing';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  template: '<p>Harness compile check</p>',
+})
+class App {
+  protected readonly harnessTypes = [
+    HellButtonHarness,
+    HellDialogHarness,
+    HellDialogOverlayHarness,
+    HellTableHarness,
+  ];
+}
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;

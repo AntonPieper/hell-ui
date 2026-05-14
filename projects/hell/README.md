@@ -31,6 +31,7 @@ Feature entry points add their own optional stacks only when imported. npm peer 
 | `@hell-ui/angular/features/data-table` | Legacy compatibility alias for `@hell-ui/angular/features/table-utilities` |
 | `@hell-ui/angular/features/code-editor` | `@codemirror/view @codemirror/state @codemirror/commands @codemirror/language @lezer/highlight` plus any language package, e.g. `@codemirror/lang-javascript` |
 | `@hell-ui/angular/features/pdf-viewer` | `pdfjs-dist` plus the base light UI stack (`@angular/forms @angular/router ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss`) |
+| `@hell-ui/angular/testing` | `@angular/cdk`, `rxjs`; test-only import surface |
 
 ## API Stability
 
@@ -41,6 +42,7 @@ Feature entry points add their own optional stacks only when imported. npm peer 
 | Table utilities (`@hell-ui/angular/features/table-utilities`) | Beta | Optional peer; uses `ResizeObserver` for table sizing |
 | Code editor (`@hell-ui/angular/features/code-editor`) | Beta/optional peer | Browser-only: `window`/`document` interactions |
 | PDF viewer (`@hell-ui/angular/features/pdf-viewer`) | Experimental | Browser-only app surface/recipe: `window`/`document`, pdf workers, global listeners, and app-owned pdf.js/browser compatibility decisions |
+| Testing harnesses (`@hell-ui/angular/testing`) | Beta/test-only | CDK component harnesses for consumer and library tests |
 | Live captions (`allowLiveCaptions`) | Experimental/browser-only/best-effort | Uses `navigator` + `SpeechRecognition` + `captureStream`; not accessibility-grade captions or production timed text |
 
 ## Angular Imports
@@ -51,6 +53,7 @@ Prefer the narrowest entry point that contains the API you use:
 import { HellButton, HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/primitives';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/composites';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
+import { HellButtonHarness } from '@hell-ui/angular/testing';
 ```
 
 ## CSS Imports

@@ -49,6 +49,7 @@ export interface HellDialogTemplateContext<TData = unknown, TResult = unknown> {
 @Directive({
   selector: 'button[hellDialogTrigger], a[hellDialogTrigger]',
   host: {
+    'data-hell-dialog-trigger': '',
     '[attr.type]': 'nativeButtonType()',
     '[attr.disabled]': 'nativeButtonDisabled(disabled())',
     '[attr.aria-disabled]': 'anchorAriaDisabled(disabled())',

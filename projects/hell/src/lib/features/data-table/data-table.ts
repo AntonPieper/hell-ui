@@ -272,6 +272,7 @@ export class HellTableRow extends HellStyleable {
   host: {
     '[class.hell-table-header-cell]': '!unstyled()',
     '[attr.aria-sort]': 'ariaSort()',
+    '[attr.data-column-id]': 'columnId()',
     '[attr.data-sort]': 'sort()',
     '[attr.data-sortable]': 'sortable() ? "true" : null',
     '[style.--hell-table-col-width]': 'widthVar()',

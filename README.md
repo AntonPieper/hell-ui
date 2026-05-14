@@ -43,6 +43,7 @@ Prefer the narrowest entry point that contains the API you use:
 import { HellButton, HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/primitives';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/composites';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
+import { HellButtonHarness } from '@hell-ui/angular/testing';
 ```
 
 Peer dependency expectations by entry point:
@@ -59,6 +60,7 @@ Peer dependency expectations by entry point:
 | `@hell-ui/angular/features/code-editor` | `@codemirror/*`, `@lezer/highlight`, `tailwindcss` |
 | `@hell-ui/angular/features/table-utilities` | `tailwindcss` |
 | `@hell-ui/angular/features/pdf-viewer` | `pdfjs-dist` plus the light UI stack |
+| `@hell-ui/angular/testing` | `@angular/cdk`, `rxjs`; test-only import surface |
 
 `@hell-ui/angular/features/data-table` remains a legacy alias for table utilities.
 
@@ -71,6 +73,7 @@ Peer dependency expectations by entry point:
 | Table utilities | Beta | `@hell-ui/angular/features/table-utilities` | Uses `ResizeObserver`; browser-first |
 | Code editor | Beta/optional peer | `@hell-ui/angular/features/code-editor` | Needs `window` + `document` |
 | PDF viewer | Experimental | `@hell-ui/angular/features/pdf-viewer` | Experimental app surface/recipe; browser-only; requires `window`/`document`, pdf workers, global listeners, and your own pdf.js/browser compatibility decisions |
+| Testing harnesses | Beta/test-only | `@hell-ui/angular/testing` | CDK component harnesses for consumer and library tests |
 | Live captions | Experimental/best-effort (feature opt-in) | `@hell-ui/angular/composites` (`allowLiveCaptions`) | Browser-only; uses `navigator` + `SpeechRecognition` + `captureStream`; best-effort only, not accessibility-grade captions/timed text |
 
 ## Styles

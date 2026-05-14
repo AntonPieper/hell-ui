@@ -13,7 +13,8 @@
       "@hell-ui/angular/features/code-editor": ["./projects/hell/src/lib/public-api-feature-code-editor.ts"],
       "@hell-ui/angular/features/data-table": ["./projects/hell/src/lib/public-api-feature-data-table.ts"],
       "@hell-ui/angular/features/table-utilities": ["./projects/hell/src/lib/public-api-feature-table-utilities.ts"],
-      "@hell-ui/angular/features/pdf-viewer": ["./projects/hell/src/lib/public-api-feature-pdf-viewer.ts"]
+      "@hell-ui/angular/features/pdf-viewer": ["./projects/hell/src/lib/public-api-feature-pdf-viewer.ts"],
+      "@hell-ui/angular/testing": ["./projects/hell/src/testing/public-api.ts"]
     },
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
