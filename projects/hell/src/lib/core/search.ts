@@ -126,7 +126,7 @@ export function hellSearchKey(value: string): string {
   const normalized = value.normalize('NFKD').toLocaleLowerCase().replace(/&/g, ' and ');
   const withoutMarks = HELL_UNICODE_SEARCH_REGEX
     ? normalized.replace(HELL_UNICODE_SEARCH_REGEX.mark, '')
-    : normalized.replace(HELL_FALLBACK_COMBINING_MARKS, '');
+    : stripFallbackCombiningMarks(normalized);
   const searchKey = HELL_UNICODE_SEARCH_REGEX
     ? withoutMarks.replace(HELL_UNICODE_SEARCH_REGEX.notLetterOrNumber, ' ')
     : keepFallbackSearchCharacters(withoutMarks);
@@ -136,7 +136,6 @@ export function hellSearchKey(value: string): string {
 
 const HELL_UNICODE_PROPERTY_PREFIX = '\\' + 'p';
 const HELL_UNICODE_SEARCH_REGEX = hellUnicodeSearchRegex();
-const HELL_FALLBACK_COMBINING_MARKS = /[\u0300-\u036f\u0483-\u0489\u0591-\u05bd\u05bf\u05c1-\u05c2\u05c4-\u05c5\u05c7\u0610-\u061a\u064b-\u065f\u0670\u06d6-\u06ed\u0711\u0730-\u074a\u07a6-\u07b0\u07eb-\u07f3\u0816-\u082d\u0859-\u085b\u08d3-\u08ff\u0900-\u0903\u093a-\u093c\u0941-\u0948\u094d\u0951-\u0957\u0962-\u0963\u1ab0-\u1aff\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f]/g;
 
 function hellUnicodeSearchRegex():
   | { readonly mark: RegExp; readonly notLetterOrNumber: RegExp }
@@ -154,6 +153,17 @@ function hellUnicodeSearchRegex():
   }
 }
 
+function stripFallbackCombiningMarks(value: string): string {
+  let normalized = '';
+
+  for (const char of value) {
+    const codePoint = char.codePointAt(0);
+    if (codePoint === undefined || !isFallbackMark(codePoint)) normalized += char;
+  }
+
+  return normalized;
+}
+
 function keepFallbackSearchCharacters(value: string): string {
   let normalized = '';
 
@@ -162,6 +172,10 @@ function keepFallbackSearchCharacters(value: string): string {
   }
 
   return normalized;
+}
+
+function isFallbackMark(codePoint: number): boolean {
+  return HELL_FALLBACK_MARK_RANGES.some(([start, end]) => codePoint >= start && codePoint <= end);
 }
 
 function isFallbackSearchWord(char: string): boolean {
@@ -185,6 +199,37 @@ function isFallbackSeparatorOrSymbol(codePoint: number): boolean {
     ([start, end]) => codePoint >= start && codePoint <= end,
   );
 }
+
+const HELL_FALLBACK_MARK_RANGES: readonly (readonly [number, number])[] = [
+  [0x0300, 0x036f],
+  [0x0483, 0x0489],
+  [0x0591, 0x05bd],
+  [0x05bf, 0x05bf],
+  [0x05c1, 0x05c2],
+  [0x05c4, 0x05c5],
+  [0x05c7, 0x05c7],
+  [0x0610, 0x061a],
+  [0x064b, 0x065f],
+  [0x0670, 0x0670],
+  [0x06d6, 0x06ed],
+  [0x0711, 0x0711],
+  [0x0730, 0x074a],
+  [0x07a6, 0x07b0],
+  [0x07eb, 0x07f3],
+  [0x0816, 0x082d],
+  [0x0859, 0x085b],
+  [0x08d3, 0x08ff],
+  [0x0900, 0x0903],
+  [0x093a, 0x093c],
+  [0x0941, 0x0948],
+  [0x094d, 0x094d],
+  [0x0951, 0x0957],
+  [0x0962, 0x0963],
+  [0x1ab0, 0x1aff],
+  [0x1dc0, 0x1dff],
+  [0x20d0, 0x20ff],
+  [0xfe20, 0xfe2f],
+];
 
 const HELL_FALLBACK_SEPARATOR_RANGES: readonly (readonly [number, number])[] = [
   [0x00a0, 0x00bf],
