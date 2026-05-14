@@ -91,9 +91,9 @@ export function hellFormatTimeInputValue(
 }
 
 /**
- * Parse `HH:mm`, `HH:mm:ss` and a couple of common 12-hour spellings
- * (`9:00 am`, `1:30PM`). Empty text commits a nullable clear; unparseable
- * text stays as an invalid draft.
+ * Parse `HH:mm`, `HH:mm:ss` when `seconds` is enabled, and a couple
+ * of common 12-hour spellings (`9:00 am`, `1:30PM`). Empty text commits
+ * a nullable clear; unparseable text stays as an invalid draft.
  */
 export function hellNormalizeTimeInputValue(
   value: HellTimeValue | null | undefined,

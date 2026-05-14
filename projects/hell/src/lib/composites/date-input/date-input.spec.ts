@@ -155,6 +155,22 @@ describe('HellDateInput', () => {
     expect(input.value).toBe('2026-02-31');
   });
 
+  it('rejects one-digit month/day ISO fields', () => {
+    const fixture = TestBed.createComponent(DateInputHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    input.value = '2026-4-3';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.dates).toEqual([]);
+    expect(input.value).toBe('2026-4-3');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+  });
+
   it('keeps invalid typed text visible without emitting', () => {
     const fixture = TestBed.createComponent(DateInputHost);
     const host = fixture.componentInstance;

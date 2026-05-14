@@ -75,7 +75,7 @@ export function provideHellDateInputAdapter(adapter: HellDateInputAdapter): Prov
 export function hellParseDateInputText(text: string): HellDateInputParseResult {
   const t = text.trim();
   if (!t) return hellTypedValue<Date>(null);
-  const iso = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(t);
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
   if (iso) {
     const year = +iso[1];
     const month = +iso[2];

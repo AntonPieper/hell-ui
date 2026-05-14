@@ -82,9 +82,10 @@ import dateInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
 
       <h2>Adapter contract</h2>
       <p>
-        The built-in adapter accepts only ISO date-only <code>YYYY-MM-DD</code> typed input and treats the
-        typed value as a date (local midnight) without attempting locale parsing. If your product needs
-        locale parsing, masked input, or a Temporal-backed model, provide a
+        The built-in adapter accepts only strict ISO date-only <code>YYYY-MM-DD</code> typed input
+        (exactly four-digit year, two-digit month, two-digit day). It treats the typed value as a date
+        (local midnight) without attempting locale parsing. If your product needs locale parsing,
+        masked input, or a Temporal-backed model, provide a
         <code>HELL_DATE_INPUT_ADAPTER</code> with explicit parse, format, coercion, and equality rules.
       </p>
 
