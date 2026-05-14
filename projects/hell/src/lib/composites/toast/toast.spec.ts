@@ -86,7 +86,12 @@ describe('HellToastService', () => {
   it('lets explicit announcement override normal toast text', () => {
     const svc = TestBed.inject(HellToastService);
 
-    svc.show({ announcement: 'Upload complete', duration: 0 });
+    svc.show({
+      title: 'Upload started',
+      description: 'Preparing payload',
+      announcement: 'Upload complete',
+      duration: 0,
+    });
 
     expect(liveAnnounce).toHaveBeenCalledWith('Upload complete', 'polite');
   });

@@ -174,6 +174,12 @@ describe('Hell data table directives', () => {
   it('maps sortable header state and ignores resizer clicks', () => {
     const fixture = TestBed.createComponent(DataTableHost);
     const host = fixture.componentInstance;
+
+    const name = byId<HTMLTableCellElement>(fixture.nativeElement, 'name');
+    const role = byId<HTMLTableCellElement>(fixture.nativeElement, 'role');
+    mockWidth(name, 120);
+    mockWidth(role, 80);
+
     host.sortable.set(true);
     fixture.detectChanges();
 
@@ -184,7 +190,7 @@ describe('Hell data table directives', () => {
     expect(header.getAttribute('aria-sort')).toBe(null);
     expect(header.hasAttribute('tabindex')).toBe(false);
     expect(sortButton.getAttribute('type')).toBe('button');
-    expect(resizer.getAttribute('aria-valuenow')).toBe('50');
+    expect(resizer.getAttribute('aria-valuenow')).toBe('60');
 
     host.sort.set('asc');
     fixture.detectChanges();

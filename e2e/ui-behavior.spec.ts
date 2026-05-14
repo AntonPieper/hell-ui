@@ -64,8 +64,13 @@ test.describe('Hell UI browser behavior', () => {
     await expect(handle).toHaveAttribute('aria-valuemax', '100');
 
     await handle.focus();
+    const before = await handle.getAttribute('aria-valuenow');
+    await expect(handle).toHaveAttribute('aria-valuenow', /^\d+$/);
+    if (before === null) throw new Error('Expected initial aria-valuenow.');
+
     await page.keyboard.press('ArrowRight');
-    await expect(handle).toHaveAttribute('aria-valuenow', /\d+/);
+    await expect(handle).toHaveAttribute('aria-valuenow', /^\d+$/);
+    await expect(handle).not.toHaveAttribute('aria-valuenow', before);
   });
 
   test('drop zone keeps nested drag state stable and accepts files', async ({ page }) => {

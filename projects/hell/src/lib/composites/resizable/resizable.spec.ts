@@ -60,6 +60,21 @@ describe('HellResizable', () => {
     expect(paneFlex(paneC)).toBe('0 0 100px');
   });
 
+  it('seeds aria-valuenow from measured asymmetric pane sizes before interaction', () => {
+    const fixture = TestBed.createComponent(ResizableHost);
+    const group = byId(fixture.nativeElement, 'group');
+    const paneA = byId(fixture.nativeElement, 'pane-a');
+    const paneB = byId(fixture.nativeElement, 'pane-b');
+    mockElementSize(group, 300);
+    mockElementSize(paneA, 120);
+    mockElementSize(paneB, 80);
+    mockElementSize(byId(fixture.nativeElement, 'pane-c'), 100);
+
+    fixture.detectChanges();
+
+    expect(byId(fixture.nativeElement, 'handle-a').getAttribute('aria-valuenow')).toBe('60');
+  });
+
   it('uses RTL-aware horizontal arrow semantics', () => {
     const fixture = TestBed.createComponent(ResizableHost);
     fixture.detectChanges();
