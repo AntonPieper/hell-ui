@@ -58,7 +58,11 @@ export interface HellToastOptions {
   template?: TemplateRef<{
     $implicit: { id: number; dismiss: () => void };
   }>;
-  /** Screen-reader text for custom-template toasts. Falls back to title/description. */
+  /**
+   * Screen-reader announcement text for this toast. Sent through CDK `LiveAnnouncer`.
+   * Overrides any derived `title`/`description` text, which is useful for
+   * template-based toasts where visible content has no stable text mapping.
+   */
   announcement?: string;
   /** Stable id; pass to update an existing toast (replace contents in place). */
   id?: number;
@@ -208,6 +212,10 @@ export class HellToastService {
     });
   }
 
+  /**
+   * Announce newly added toasts through CDK LiveAnnouncer only.
+   * The visible toast list is not a live-region; it is a labeled visual container.
+   */
   private announceToast(toast: ToastInternal, opts?: Pick<HellToastOptions, 'announcement'>): void {
     const explicitAnnouncement = opts?.announcement?.trim();
     const announcement = explicitAnnouncement ||
@@ -261,6 +269,7 @@ export class HellToastTemplate {}
   },
   template: `
     @if (hasToasts()) {
+      <!-- Visual grouping only; announcements use Angular CDK LiveAnnouncer. -->
       <section
         data-slot="region"
         role="region"

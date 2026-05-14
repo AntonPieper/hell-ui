@@ -36,6 +36,11 @@ import toastVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
         <code>HellToastService</code> from anywhere. Newest toasts pile at the front; hover (or
         focus) the stack to fan it out.
       </p>
+      <p>
+        The toaster renders a labeled visual <code>region</code> for the toast stack. Screen-reader
+        announcements are sent through Angular CDK <code>LiveAnnouncer</code> instead of through a
+        dynamic <code>aria-live</code> region.
+      </p>
 
       <h2>Anatomy</h2>
       <ul>
@@ -111,6 +116,11 @@ import toastVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
           <code>template</code>: custom body template with
           <code>{{ '{' }} id, dismiss {{ '}' }}</code
           >.
+        </li>
+        <li>
+          <code>announcement</code>: explicit announcement text sent via
+          <code>LiveAnnouncer</code>; overrides default title/description fallback. Useful for
+          template toasts with non-text visuals.
         </li>
         <li><code>id</code>: update an existing toast in place.</li>
       </ul>

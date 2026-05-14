@@ -43,13 +43,15 @@ test.describe('Hell UI browser behavior', () => {
     await expect(trigger).toBeFocused();
   });
 
-  test('toast announces through a live notification region', async ({ page }) => {
+  test('toast renders in the notification region and passes axe smoke', async ({ page }) => {
     await page.goto('/components/toast');
     await page.getByRole('button', { name: 'Success' }).first().click();
 
     const notifications = page.getByRole('region', { name: 'Notifications' });
-    await expect(notifications).toHaveAttribute('aria-live', 'polite');
-    await expect(notifications).toHaveAttribute('aria-atomic', 'true');
+    await expect(notifications).toHaveAttribute('role', 'region');
+    await expect(notifications).toHaveAttribute('aria-label', 'Notifications');
+    await expect(notifications).not.toHaveAttribute('aria-live');
+    await expect(notifications).not.toHaveAttribute('aria-atomic');
     await expect(notifications.getByText('Article published', { exact: true })).toBeVisible();
     await expectNoSeriousA11yIssues(page, '[role="region"][aria-label="Notifications"]');
   });
