@@ -6,6 +6,7 @@ import {
   computed,
   input,
   signal,
+  ViewEncapsulation,
 } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { type Extension } from '@codemirror/state';
@@ -20,6 +21,8 @@ const EXAMPLE_TABS_ICONS = { faSolidCopy, faSolidCheck };
 @Component({
   selector: 'hd-example-tabs',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  styles: [`@import '@hell-ui/angular/styles/features/code-editor';`],
   providers: [provideIcons(EXAMPLE_TABS_ICONS)],
   imports: [NgClass, HellButton, HellCodeEditor, HellIcon, ...HELL_TABS_DIRECTIVES],
   template: `

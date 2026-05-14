@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, Signal, computed, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Signal,
+  ViewEncapsulation,
+  computed,
+  input,
+  signal,
+} from '@angular/core';
 import { type Extension } from '@codemirror/state';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCheck, faSolidCopy } from '@ng-icons/font-awesome/solid';
@@ -11,6 +19,8 @@ const CODE_BLOCK_ICONS = { faSolidCopy, faSolidCheck };
 @Component({
   selector: 'hd-code-block',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  styles: [`@import '@hell-ui/angular/styles/features/code-editor';`],
   providers: [provideIcons(CODE_BLOCK_ICONS)],
   imports: [HellButton, HellCodeEditor, HellIcon],
   template: `

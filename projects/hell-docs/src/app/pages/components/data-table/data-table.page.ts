@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { DataTableExampleExample } from './examples/example.example';
 import dataTableExampleExampleCodeRaw from './examples/example.example.ts?raw' with {
@@ -12,6 +12,8 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
 @Component({
   selector: 'hd-data-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  styles: [`@import '@hell-ui/angular/styles/features/table-utilities';`],
   imports: [ExampleTabs, DataTableExampleExample, DataTableRowEditorExample],
   template: `
     <article class="hd-doc-page">

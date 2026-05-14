@@ -87,7 +87,6 @@ import {
   HD_DOCS_KIND_FILTER_OPTIONS,
   HD_DOCS_KIND_LABEL,
   HD_DOCS_SECTIONS,
-  hdBuildDocsSearchIndex,
   type DocsSearchGroup,
   type DocsSearchItem,
   type DocsSearchKindFilter,
@@ -391,6 +390,7 @@ export class App {
   protected readonly docsKindFilterOptions = HD_DOCS_KIND_FILTER_OPTIONS;
   protected readonly docsKindFilterLabels = HD_DOCS_KIND_FILTER_LABEL;
   protected readonly docsSearchLimits = [8, 20, 40] as const;
+  protected readonly docsSearchIndex = signal<readonly DocsSearchItem[]>([]);
   protected readonly docsMenuOpenTriggers: ('click' | 'enter' | 'arrowkey')[] = [
     'click',
     'enter',
@@ -414,7 +414,7 @@ export class App {
     });
   });
   protected readonly docsSectionOptions = computed(() =>
-    [...new Set(this.docsSearchIndex().map((item) => item.section))].sort(),
+    [...new Set(HD_DOCS_SECTIONS.map((section) => section.heading ?? 'Guides'))].sort(),
   );
   protected readonly docsSearchGroups = computed<readonly DocsSearchGroup[]>(() => {
     const rankedResults = this.docsSearchResults().map((result) => result.item);
@@ -449,9 +449,7 @@ export class App {
       this.docsSectionFilter() !== 'all' ||
       this.docsSearchLimit() !== 20,
   );
-  protected readonly docsSearchIndex = computed<readonly DocsSearchItem[]>(() =>
-    hdBuildDocsSearchIndex(),
-  );
+  private docsSearchIndexLoad?: Promise<void>;
 
   /** Per-section collapse state for the controlled docs sidenav. */
   private readonly collapsedSections = signal<ReadonlySet<string>>(new Set());
@@ -497,6 +495,11 @@ export class App {
     });
   }
 
+  protected onDocsSearchOpenChange(open: boolean): void {
+    if (!open) return;
+    void this.loadDocsSearchIndex();
+  }
+
   protected onDocsSearchSelect(item: DocsSearchItem, shell: HellAppShell): void {
     void this.router.navigateByUrl(item.path);
     shell.closeMobilePanels();
@@ -505,6 +508,27 @@ export class App {
 
   protected onDocsSearchResults(results: readonly HellSearchResult<unknown>[]): void {
     this.docsSearchResults.set(results as readonly HellSearchResult<DocsSearchItem>[]);
+  }
+
+  private async loadDocsSearchIndex(): Promise<void> {
+    if (this.docsSearchIndex().length) return;
+    if (this.docsSearchIndexLoad) {
+      await this.docsSearchIndexLoad;
+      return;
+    }
+
+    this.docsSearchIndexLoad = import('./docs-search-index')
+      .then(({ hdBuildDocsSearchIndex }) => {
+        this.docsSearchIndex.set(hdBuildDocsSearchIndex());
+      })
+      .catch((error) => {
+        console.error('Failed to load docs search index', error);
+      })
+      .finally(() => {
+        this.docsSearchIndexLoad = undefined;
+      });
+
+    await this.docsSearchIndexLoad;
   }
 
   protected setDocsKindFilter(kind: DocsSearchKindFilter): void {

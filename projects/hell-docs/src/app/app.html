@@ -20,6 +20,7 @@
       [emptyMessage]="docsSearchEmptyMessage()"
       [minPanelWidth]="520"
       [(value)]="docsSearchQuery"
+      (openChange)="onDocsSearchOpenChange($event)"
       (searchResultsChange)="onDocsSearchResults($event)"
     >
       <hell-icon hellOmnibarLeading name="faSolidMagnifyingGlass" size="13px" />

@@ -38,9 +38,12 @@ console.log('Architecture checks passed.');
 
 function checkDocsExamples() {
   const catalogPath = join(root, 'projects/hell-docs/src/app/docs-catalog.ts');
+  const searchIndexPath = join(root, 'projects/hell-docs/src/app/docs-search-index.ts');
   const catalog = readFile(catalogPath);
+  const searchIndex = readFile(searchIndexPath);
   const routePaths = catalogRoutePaths(catalog);
-  const examples = catalogExampleSeeds(catalog);
+  const examples = docsSearchIndexSeeds(searchIndex, 'HD_DOCS_EXAMPLES');
+  const usages = docsSearchIndexSeeds(searchIndex, 'HD_DOCS_CODE_USAGES');
   const pagesRoot = join(root, 'projects/hell-docs/src/app/pages');
 
   checkDocsCatalogExampleSeam(catalog);
@@ -95,6 +98,19 @@ function checkDocsExamples() {
 
     checkDocsExamplePageBinding(example, pageSource, meta);
   }
+
+  const seenUsages = new Set();
+  for (const usage of usages) {
+    const key = `${usage.path}:${usage.title}`;
+    if (seenUsages.has(key)) {
+      failures.push(`Duplicate Docs Usage entry: ${key}`);
+    }
+    seenUsages.add(key);
+
+    if (!routePaths.has(usage.path)) {
+      failures.push(`Docs Usage "${usage.title}" points at missing route ${usage.path}`);
+    }
+  }
 }
 
 function catalogRoutePaths(catalog) {
@@ -105,19 +121,31 @@ function catalogRoutePaths(catalog) {
   );
 }
 
-function catalogExampleSeeds(catalog) {
-  const routes = [...catalog.matchAll(/routePath:\s*'([^']*)'/g)];
-  const examples = [];
-  for (let i = 0; i < routes.length; i++) {
-    const routePath = routes[i][1];
-    const path = routePath ? `/${routePath}` : '/';
-    const source = catalog.slice(routes[i].index, routes[i + 1]?.index ?? catalog.length);
-    for (const match of source.matchAll(/\{\s*title:\s*'([^']+)',\s*detail:\s*'([^']+)'/g)) {
-      if (!match[2].includes('/examples/')) continue;
-      examples.push({ title: match[1], detail: match[2], path });
-    }
+function docsSearchIndexSeeds(searchIndex, variable) {
+  const declaration = new RegExp(`const\\s+${variable}[^=]*=\\s*\\[`).exec(searchIndex);
+  if (!declaration) {
+    failures.push(`Docs Search Index missing ${variable}`);
+    return [];
   }
-  return examples;
+
+  const bodyStart = declaration.index + declaration[0].length;
+  const bodyEnd = searchIndex.indexOf('];', bodyStart);
+  if (bodyEnd < 0) {
+    failures.push(`Docs Search Index block for ${variable} is malformed`);
+    return [];
+  }
+
+  const body = searchIndex.slice(bodyStart, bodyEnd);
+  const seeds = [];
+  for (const match of body.matchAll(/\{\s*title:\s*'([^']+)'\s*,\s*path:\s*'([^']+)'\s*,\s*detail:\s*'([^']+)'/g)) {
+    seeds.push({
+      title: match[1],
+      path: match[2],
+      detail: match[3],
+    });
+  }
+
+  return seeds;
 }
 
 function checkDocsCatalogExampleSeam(catalog) {
