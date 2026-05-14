@@ -123,14 +123,129 @@ export function hellSearchWords(value: string): readonly string[] {
 
 /** Normalize text for accent-insensitive, punctuation-insensitive Unicode search keys. */
 export function hellSearchKey(value: string): string {
-  return value
-    .normalize('NFKD')
-    .replace(/\p{Mark}/gu, '')
-    .toLocaleLowerCase()
-    .replace(/&/g, ' and ')
-    .replace(/[^\p{Letter}\p{Number}]+/gu, ' ')
-    .trim();
+  const normalized = value.normalize('NFKD').toLocaleLowerCase().replace(/&/g, ' and ');
+  const withoutMarks = HELL_UNICODE_SEARCH_REGEX
+    ? normalized.replace(HELL_UNICODE_SEARCH_REGEX.mark, '')
+    : normalized.replace(HELL_FALLBACK_COMBINING_MARKS, '');
+  const searchKey = HELL_UNICODE_SEARCH_REGEX
+    ? withoutMarks.replace(HELL_UNICODE_SEARCH_REGEX.notLetterOrNumber, ' ')
+    : keepFallbackSearchCharacters(withoutMarks);
+
+  return searchKey.replace(/\s+/g, ' ').trim();
 }
+
+const HELL_UNICODE_PROPERTY_PREFIX = '\\' + 'p';
+const HELL_UNICODE_SEARCH_REGEX = hellUnicodeSearchRegex();
+const HELL_FALLBACK_COMBINING_MARKS = /[\u0300-\u036f\u0483-\u0489\u0591-\u05bd\u05bf\u05c1-\u05c2\u05c4-\u05c5\u05c7\u0610-\u061a\u064b-\u065f\u0670\u06d6-\u06ed\u0711\u0730-\u074a\u07a6-\u07b0\u07eb-\u07f3\u0816-\u082d\u0859-\u085b\u08d3-\u08ff\u0900-\u0903\u093a-\u093c\u0941-\u0948\u094d\u0951-\u0957\u0962-\u0963\u1ab0-\u1aff\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f]/g;
+
+function hellUnicodeSearchRegex():
+  | { readonly mark: RegExp; readonly notLetterOrNumber: RegExp }
+  | null {
+  try {
+    return {
+      mark: new RegExp(`${HELL_UNICODE_PROPERTY_PREFIX}{Mark}`, 'gu'),
+      notLetterOrNumber: new RegExp(
+        `[^${HELL_UNICODE_PROPERTY_PREFIX}{Letter}${HELL_UNICODE_PROPERTY_PREFIX}{Number}]+`,
+        'gu',
+      ),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function keepFallbackSearchCharacters(value: string): string {
+  let normalized = '';
+
+  for (const char of value) {
+    normalized += isFallbackSearchWord(char) ? char : ' ';
+  }
+
+  return normalized;
+}
+
+function isFallbackSearchWord(char: string): boolean {
+  const codePoint = char.codePointAt(0);
+  if (codePoint === undefined) return false;
+  if (isAsciiLetterOrDigit(codePoint)) return true;
+  if (codePoint <= 0x7f) return false;
+  return !isFallbackSeparatorOrSymbol(codePoint);
+}
+
+function isAsciiLetterOrDigit(codePoint: number): boolean {
+  return (
+    (codePoint >= 0x30 && codePoint <= 0x39) ||
+    (codePoint >= 0x61 && codePoint <= 0x7a) ||
+    (codePoint >= 0x41 && codePoint <= 0x5a)
+  );
+}
+
+function isFallbackSeparatorOrSymbol(codePoint: number): boolean {
+  return HELL_FALLBACK_SEPARATOR_RANGES.some(
+    ([start, end]) => codePoint >= start && codePoint <= end,
+  );
+}
+
+const HELL_FALLBACK_SEPARATOR_RANGES: readonly (readonly [number, number])[] = [
+  [0x00a0, 0x00bf],
+  [0x02b0, 0x036f],
+  [0x037e, 0x037e],
+  [0x0387, 0x0387],
+  [0x055a, 0x055f],
+  [0x0589, 0x058a],
+  [0x05be, 0x05be],
+  [0x05c0, 0x05c0],
+  [0x05c3, 0x05c3],
+  [0x05c6, 0x05c6],
+  [0x060c, 0x060d],
+  [0x061b, 0x061b],
+  [0x061f, 0x061f],
+  [0x066a, 0x066d],
+  [0x06d4, 0x06d4],
+  [0x0700, 0x070d],
+  [0x07f7, 0x07f9],
+  [0x0964, 0x0965],
+  [0x0970, 0x0970],
+  [0x0e3f, 0x0e3f],
+  [0x0f04, 0x0f12],
+  [0x104a, 0x104f],
+  [0x1360, 0x137c],
+  [0x16eb, 0x16ed],
+  [0x1735, 0x1736],
+  [0x17d4, 0x17d6],
+  [0x17d8, 0x17db],
+  [0x1800, 0x180a],
+  [0x1944, 0x1945],
+  [0x1a1e, 0x1a1f],
+  [0x1aa0, 0x1aa6],
+  [0x1aa8, 0x1aad],
+  [0x1b5a, 0x1b6a],
+  [0x1b74, 0x1b7c],
+  [0x1c3b, 0x1c3f],
+  [0x1c7e, 0x1c7f],
+  [0x2000, 0x206f],
+  [0x2070, 0x209f],
+  [0x20a0, 0x20cf],
+  [0x2100, 0x214f],
+  [0x2190, 0x23ff],
+  [0x2460, 0x27bf],
+  [0x2900, 0x2bff],
+  [0x2e00, 0x2e7f],
+  [0x3000, 0x303f],
+  [0xa490, 0xa4cf],
+  [0xa60d, 0xa60f],
+  [0xa6f2, 0xa6f7],
+  [0xa700, 0xa71f],
+  [0xa830, 0xa839],
+  [0xfd3e, 0xfd3f],
+  [0xfe10, 0xfe6f],
+  [0xff00, 0xff0f],
+  [0xff1a, 0xff20],
+  [0xff3b, 0xff40],
+  [0xff5b, 0xff65],
+  [0xffe0, 0xffee],
+  [0x1f000, 0x1faff],
+];
 
 async function resolveMaybeAsync<T>(value: HellMaybeAsync<T>): Promise<T> {
   if (isObservable(value)) return firstValueFrom(value);

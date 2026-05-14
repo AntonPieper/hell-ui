@@ -21,6 +21,23 @@ describe('Search Core', () => {
   it('keeps non-Latin letters and Unicode numbers searchable', () => {
     expect(hellSearchKey('Привет κόσμε 東京 ٢٥')).toBe('привет κοσμε 東京 ٢٥');
     expect(hellSearchWords('東京 Привет')).toEqual(['東京', 'привет']);
+    expect(hellSearchWords('שלום العربية 한글 हिन्दी')).toEqual([
+      'שלום',
+      'العربية',
+      '한글',
+      'हनद',
+    ]);
+  });
+
+  it('normalizes punctuation to spaces without Unicode property escapes', () => {
+    expect(hellSearchWords('alpha-beta_gamma.Δυναμική')).toEqual([
+      'alpha',
+      'beta',
+      'gamma',
+      'δυναμικη',
+    ]);
+    expect(hellSearchWords('東京・大阪')).toEqual(['東京', '大阪']);
+    expect(hellSearchKey.toString()).not.toContain('\\p{');
   });
 
   it('ranks field matches by weight while requiring every query word', () => {
