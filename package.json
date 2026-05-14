@@ -16,6 +16,7 @@
     "test:ci-contract": "node tools/check-ci-contract.mjs",
     "ci:install": "node tools/package-manager.mjs install",
     "ci:test": "node tools/run-ci-tests.mjs",
+    "ci:playwright": "node tools/package-manager.mjs exec playwright install --with-deps chromium firefox webkit",
     "ci:build": "node tools/package-manager.mjs run build",
     "ci:verify": "node tools/package-manager.mjs run ci:test && node tools/package-manager.mjs run ci:build"
   },
@@ -69,6 +70,6 @@
     "tailwindcss": "^4.2.4",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.59.2",
-    "vitest": "^4.1.5"
+    "vitest": "4.1.5"
   }
 }

@@ -15,12 +15,17 @@ imports.
 ## Workspace
 
 ```bash
-pnpm install # or: npm install
-pnpm build:lib # or: npm run build:lib
-pnpm build:docs # or: npm run build:docs
-pnpm test # or: npm test
-pnpm ci:verify # or: npm run ci:verify; full pre-push: unit, architecture, lint, e2e, package consumer, build
+pnpm install
+pnpm build:lib
+pnpm build:docs
+pnpm test
+pnpm ci:playwright
+pnpm ci:verify # full pre-push: unit, architecture, lint, e2e, package consumer, build
 ```
+
+The repository workspace is pnpm-first and CI-backed by the checked-in
+`pnpm-lock.yaml`. npm remains supported for applications consuming the published
+`@hell-ui/angular` package.
 
 ## Package Imports
 
@@ -110,7 +115,7 @@ default host class styling.
 ## Docs App
 
 ```bash
-pnpm start # or: npm start
+pnpm start
 ```
 
 Open `http://localhost:4200/`.

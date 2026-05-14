@@ -15,6 +15,7 @@ const requiredScripts = {
   'ci:install': 'node tools/package-manager.mjs install',
   'test:package-consumer': 'node tools/check-package-consumer.mjs',
   'ci:test': 'node tools/run-ci-tests.mjs',
+  'ci:playwright': 'node tools/package-manager.mjs exec playwright install --with-deps chromium firefox webkit',
   'ci:build': 'node tools/package-manager.mjs run build',
   'ci:verify': 'node tools/package-manager.mjs run ci:test && node tools/package-manager.mjs run ci:build',
 };
@@ -24,9 +25,9 @@ const adapterChecks = [
     path: '.github/workflows/ci.yml',
     includes: [
       'pnpm ci:install',
+      'pnpm ci:playwright',
       'pnpm ci:test',
       'pnpm ci:build',
-      'pnpm exec playwright install --with-deps chromium firefox webkit',
       'actions/upload-artifact',
       'test-results/',
       'coverage/',
@@ -36,9 +37,9 @@ const adapterChecks = [
     path: '.gitlab-ci.yml',
     includes: [
       'pnpm ci:install',
+      'pnpm ci:playwright',
       'pnpm ci:test',
       'pnpm ci:build',
-      'pnpm exec playwright install --with-deps chromium firefox webkit',
       'reports:',
       'junit: test-results/vitest-junit.xml',
       'coverage_format: cobertura',
@@ -50,7 +51,7 @@ const adapterChecks = [
     includes: [
       'COPY tools/package-manager.mjs tools/package-manager.mjs',
       'pnpm ci:install',
-      'pnpm exec playwright install --with-deps chromium firefox webkit',
+      'pnpm ci:playwright',
       'pnpm ci:test',
       'pnpm ci:build',
       'pnpm ci:verify',
@@ -59,7 +60,8 @@ const adapterChecks = [
 ];
 
 const adapterForbiddenPatterns = [
-  { pattern: /\bng\s+test\b/, message: 'CI adapters must call pnpm ci:test instead of ng test.' },
+  { pattern: /\bng\s+test\b/, message: 'CI adapters must call ci:test instead of ng test.' },
+  { pattern: /pnpm\s+exec\s+playwright\s+install\s+--with-deps\s+chromium\s+firefox\s+webkit/, message: 'CI adapters must call ci:playwright instead of pnpm exec playwright install.' },
   { pattern: /\bng\s+build\b/, message: 'CI adapters must call pnpm ci:build instead of ng build.' },
   { pattern: /\b(?:pnpm\s+(?:exec\s+)?vitest|npx\s+vitest|vitest\s+run)\b/, message: 'CI adapters must not inline Vitest commands.' },
   { pattern: /\btest:architecture\b/, message: 'CI adapters must not know internal check scripts.' },

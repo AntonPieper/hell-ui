@@ -25,7 +25,7 @@ default:
 test:
   stage: test
   script:
-    - pnpm exec playwright install --with-deps chromium firefox webkit
+    - pnpm ci:playwright
     - pnpm ci:test
   coverage: '/CI coverage lines: ([0-9.]+)%/'
   artifacts:

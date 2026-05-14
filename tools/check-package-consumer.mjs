@@ -143,8 +143,8 @@ function runConsumerScenario(scenario) {
 
   try {
     writeConsumerWorkspace(tempRoot, scenario);
-    run('npm', ['install', '--strict-peer-deps', '--ignore-scripts'], tempRoot);
-    run('npm', ['exec', '--', 'ng', 'build', 'consumer', '--configuration', 'production'], tempRoot);
+    runNpm(['install', '--strict-peer-deps', '--ignore-scripts'], tempRoot);
+    runNpm(['exec', '--', 'ng', 'build', 'consumer', '--configuration', 'production'], tempRoot);
     console.log(`[package-consumer:${scenario.name}] built ${scenario.description}`);
   } finally {
     if (keep) console.log(`[package-consumer:${scenario.name}] kept ${tempRoot}`);
@@ -154,7 +154,7 @@ function runConsumerScenario(scenario) {
 
 function packBuiltPackage() {
   const packRoot = mkdtempSync(join(tmpdir(), 'hell-package-consumer-pack-'));
-  run('npm', ['pack', '--pack-destination', packRoot], distHell);
+  runNpm(['pack', '--pack-destination', packRoot], distHell);
   const tarball = readdirSync(packRoot).find((name) => name.endsWith('.tgz'));
   if (!tarball) fail(`Packed package missing in ${packRoot}`);
   return { root: packRoot, tarball: join(packRoot, tarball) };
@@ -535,16 +535,40 @@ function runRootPackageManager(args, cwd) {
   if (result.status !== 0) fail(`package-manager ${args.join(' ')} failed with ${result.status}`);
 }
 
-function run(command, args, cwd) {
-  console.log(`[package-consumer] ${command} ${args.join(' ')}`);
-  const result = spawnSync(command, args, {
+function runNpm(args, cwd) {
+  console.log(`[package-consumer] npm ${args.join(' ')}`);
+  const result = spawnSync('npm', args, {
     cwd,
     shell: process.platform === 'win32',
     stdio: 'inherit',
-    env: { ...process.env, CI: 'true' },
+    env: npmCommandEnvironment(),
   });
   if (result.error) fail(result.error.message);
-  if (result.status !== 0) fail(`${command} ${args.join(' ')} failed with ${result.status}`);
+  if (result.status !== 0) fail(`npm ${args.join(' ')} failed with ${result.status}`);
+}
+
+function npmCommandEnvironment() {
+  const env = { ...process.env, CI: 'true' };
+  const deniedKeys = new Set([
+    'npm_execpath',
+    'npm_command',
+    'npm_config_argv',
+    'npm_config_node_gyp',
+    'npm_config_npm_globalconfig',
+    'npm_config_verify_deps_before_run',
+    'npm_config__jsr_registry',
+    'npm_lifecycle_event',
+    'npm_lifecycle_script',
+    'pnpm_config_npm_globalconfig',
+    'pnpm_config_verify_deps_before_run',
+    'pnpm_config__jsr_registry',
+  ]);
+
+  for (const key of Object.keys(env)) {
+    if (deniedKeys.has(key.toLowerCase())) delete env[key];
+  }
+
+  return env;
 }
 
 function fail(message) {

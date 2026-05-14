@@ -1,12 +1,14 @@
 # CI Contract
 
-CI providers are adapters over shared repo commands. Use the package manager that installed the workspace:
+CI providers are adapters over shared repo commands. The repository workspace
+is pnpm-first and CI-backed by the checked-in `pnpm-lock.yaml`:
 
 ```bash
-pnpm ci:install # or: npm run ci:install
-pnpm ci:test    # or: npm run ci:test
-pnpm ci:build   # or: npm run ci:build
-pnpm ci:verify  # or: npm run ci:verify
+pnpm ci:install
+pnpm ci:playwright
+pnpm ci:test
+pnpm ci:build
+pnpm ci:verify
 ```
 
 `ci:test` owns unit test, architecture, report, coverage, and contract checks.
@@ -19,10 +21,11 @@ Adapters publish these shared artifacts:
 
 New CI provider checklist:
 
-1. Install Node 22 and your package manager.
-2. Run `ci:install` through that package manager.
-3. Run `ci:test` and publish `test-results/` plus `coverage/`.
-4. Run `ci:build` and publish `dist/` if desired.
+1. Install Node 22 and enable pnpm through Corepack.
+2. Run `pnpm ci:install`.
+3. Run `pnpm ci:playwright` before browser tests.
+4. Run `pnpm ci:test` and publish `test-results/` plus `coverage/`.
+5. Run `pnpm ci:build` and publish `dist/` if desired.
 
 Docker path:
 
