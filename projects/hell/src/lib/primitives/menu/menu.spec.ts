@@ -28,6 +28,17 @@ class MenuHost {
     <ng-template #menu>
       <div hellMenu><button hellMenuItem type="button">Item</button></div>
     </ng-template>
+    <a id="enabled-anchor" href="#menu" [hellMenuTrigger]="menu">Anchor</a>
+  `,
+})
+class EnabledMenuAnchorTriggerHost {}
+
+@Component({
+  imports: [...HELL_MENU_DIRECTIVES],
+  template: `
+    <ng-template #menu>
+      <div hellMenu><button hellMenuItem type="button">Item</button></div>
+    </ng-template>
     <button id="disabled-button" type="button" [hellMenuTrigger]="menu" disabled>Button</button>
     <a id="disabled-anchor" href="#menu" [hellMenuTrigger]="menu" disabled>Anchor</a>
   `,
@@ -51,7 +62,9 @@ afterAll(() => {
 
 describe('HellMenuItem', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [MenuHost, DisabledMenuTriggerHost] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [MenuHost, EnabledMenuAnchorTriggerHost, DisabledMenuTriggerHost],
+    }).compileComponents();
   });
 
   afterEach(() => {
@@ -71,6 +84,23 @@ describe('HellMenuItem', () => {
     expect(anchor.getAttribute('tabindex')).toBe('-1');
     expect(anchor.dispatchEvent(click)).toBe(false);
     expect(click.defaultPrevented).toBe(true);
+  });
+
+  it('opens from enabled anchor trigger and prevents default navigation', async () => {
+    const fixture = TestBed.createComponent(EnabledMenuAnchorTriggerHost);
+    await settle(fixture);
+
+    const trigger = query<HTMLAnchorElement>(fixture.nativeElement, '#enabled-anchor');
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+
+    expect(trigger.dispatchEvent(click)).toBe(false);
+    expect(click.defaultPrevented).toBe(true);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await settle(fixture);
+
+    const menuItem = query<HTMLButtonElement>(document.body, 'button[hellMenuItem]');
+    expect(menuItem).toBeTruthy();
+    expect(menuItem.textContent).toBe('Item');
   });
 
   it('guards disabled non-native menu items', async () => {

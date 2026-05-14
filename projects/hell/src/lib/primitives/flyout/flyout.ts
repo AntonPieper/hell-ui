@@ -83,7 +83,7 @@ export class HellFlyoutTrigger extends HellNativeInteractiveDisabledGuard {
   }
 
   protected onTriggerClick(event: Event): void {
-    this.preventDisabledAnchor(event, this.disabled());
+    this.preventActionAnchorNavigation(event, this.disabled());
     if (this.disabled()) return;
     this.toggle();
   }

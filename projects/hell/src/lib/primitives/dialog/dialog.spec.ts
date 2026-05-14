@@ -50,6 +50,19 @@ class DisabledDialogTriggerHost {}
 @Component({
   imports: [...HELL_DIALOG_DIRECTIVES],
   template: `
+    <a id="enabled-dialog" href="#dialog" [hellDialogTrigger]="dialog">Open</a>
+    <ng-template #dialog>
+      <div id="enabled-dialog-overlay" hellDialogOverlay>
+        <div hellDialog>Enabled</div>
+      </div>
+    </ng-template>
+  `,
+})
+class EnabledDialogTriggerHost {}
+
+@Component({
+  imports: [...HELL_DIALOG_DIRECTIVES],
+  template: `
     <button id="open-default" type="button" [hellDialogTrigger]="defaultDialog" [closeOnOutsideClick]="true">
       Default
     </button>
@@ -145,6 +158,7 @@ describe('HellDialogTrigger scoped overlays', () => {
       imports: [
         ScopedDialogHost,
         DisabledDialogTriggerHost,
+        EnabledDialogTriggerHost,
         ClosePolicyDialogHost,
         DialogClosedResultHost,
         DialogDataHost,
@@ -201,6 +215,20 @@ describe('HellDialogTrigger scoped overlays', () => {
     expect(trigger.dispatchEvent(click)).toBe(false);
     expect(click.defaultPrevented).toBe(true);
     expect(document.body.querySelector('#disabled-dialog-overlay')).toBeNull();
+  });
+
+  it('prevents enabled anchor default navigation while opening', async () => {
+    const fixture = TestBed.createComponent(EnabledDialogTriggerHost);
+    await settle(fixture);
+
+    const trigger = query<HTMLAnchorElement>(fixture.nativeElement, '#enabled-dialog');
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+
+    expect(trigger.dispatchEvent(click)).toBe(false);
+    expect(click.defaultPrevented).toBe(true);
+    await settle(fixture);
+
+    expect(document.body.querySelector('#enabled-dialog-overlay')).toBeTruthy();
   });
 
   it('carries Dialog Scope roots through each open instead of singleton pending state', async () => {

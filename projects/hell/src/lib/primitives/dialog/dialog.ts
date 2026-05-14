@@ -90,10 +90,8 @@ export class HellDialogTrigger<TData = unknown, TResult = unknown> extends HellN
   }
 
   protected launch(event: Event): void {
-    if (this.disabled()) {
-      this.preventDisabledAnchor(event, true);
-      return;
-    }
+    this.preventActionAnchorNavigation(event, this.disabled());
+    if (this.disabled()) return;
 
     const root = hellFindDialogScopeRoot(this.element.nativeElement);
     const injector = Injector.create({

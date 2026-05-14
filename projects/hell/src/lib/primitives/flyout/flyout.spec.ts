@@ -18,6 +18,20 @@ import { HellFlyout, HellFlyoutTrigger } from './flyout';
 class FlyoutHost {}
 
 @Component({
+  imports: [HellFlyout, HellFlyoutTrigger],
+  template: `
+    <a id="enabled-anchor" #trigger="hellFlyoutTrigger" href="#flyout" hellFlyoutTrigger>
+      Enabled
+    </a>
+
+    @if (trigger.open()) {
+      <div [hellFlyout]="trigger">Panel</div>
+    }
+  `,
+})
+class EnabledFlyoutAnchorTriggerHost {}
+
+@Component({
   imports: [HellFlyoutTrigger],
   template: `
     <button id="disabled-button" hellFlyoutTrigger type="button" disabled>Button</button>
@@ -29,7 +43,7 @@ class DisabledFlyoutTriggerHost {}
 describe('HellFlyout outside interaction', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FlyoutHost, DisabledFlyoutTriggerHost],
+      imports: [FlyoutHost, EnabledFlyoutAnchorTriggerHost, DisabledFlyoutTriggerHost],
     }).compileComponents();
   });
 
@@ -46,6 +60,27 @@ describe('HellFlyout outside interaction', () => {
     expect(anchor.getAttribute('tabindex')).toBe('-1');
     expect(anchor.dispatchEvent(click)).toBe(false);
     expect(click.defaultPrevented).toBe(true);
+  });
+
+  it('prevents enabled anchor default navigation while toggling', async () => {
+    const fixture = TestBed.createComponent(EnabledFlyoutAnchorTriggerHost);
+    await settle(fixture);
+
+    const trigger = query<HTMLAnchorElement>(fixture.nativeElement, '#enabled-anchor');
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+
+    expect(trigger.dispatchEvent(click)).toBe(false);
+    expect(click.defaultPrevented).toBe(true);
+    await settle(fixture);
+
+    expect(fixture.nativeElement.textContent).toContain('Panel');
+
+    const secondClick = new MouseEvent('click', { bubbles: true, cancelable: true });
+    expect(trigger.dispatchEvent(secondClick)).toBe(false);
+    expect(secondClick.defaultPrevented).toBe(true);
+    await settle(fixture);
+
+    expect(fixture.nativeElement.textContent).not.toContain('Panel');
   });
 
   it('toggles on click and closes on second click', async () => {
@@ -90,4 +125,10 @@ async function settle(fixture: { detectChanges(): void; whenStable(): Promise<un
   fixture.detectChanges();
   await fixture.whenStable();
   fixture.detectChanges();
+}
+
+function query<T extends HTMLElement>(root: ParentNode, selector: string): T {
+  const element = root.querySelector<T>(selector);
+  if (!element) throw new Error(`Expected ${selector}.`);
+  return element;
 }

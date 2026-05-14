@@ -33,6 +33,18 @@ export abstract class HellNativeInteractiveDisabledGuard extends HellStyleable {
     event.stopImmediatePropagation();
   }
 
+  protected preventActionAnchorNavigation(event: Event, disabled: boolean): void {
+    if (!this.isAnchor()) return;
+
+    if (disabled) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
+
+    event.preventDefault();
+  }
+
   protected isButton(): boolean {
     return this.host.tagName.toLowerCase() === 'button';
   }

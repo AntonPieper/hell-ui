@@ -9,6 +9,17 @@ import { HellPopover, HellPopoverTrigger } from './popover';
     <ng-template #popover>
       <div hellPopover>Popover</div>
     </ng-template>
+    <a id="enabled-anchor" href="#popover" [hellPopoverTrigger]="popover">Anchor</a>
+  `,
+})
+class EnabledPopoverAnchorTriggerHost {}
+
+@Component({
+  imports: [HellPopover, HellPopoverTrigger],
+  template: `
+    <ng-template #popover>
+      <div hellPopover>Popover</div>
+    </ng-template>
     <button id="disabled-button" type="button" [hellPopoverTrigger]="popover" disabled>
       Button
     </button>
@@ -19,11 +30,28 @@ class DisabledPopoverTriggerHost {}
 
 describe('HellPopoverTrigger', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [DisabledPopoverTriggerHost] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [EnabledPopoverAnchorTriggerHost, DisabledPopoverTriggerHost],
+    }).compileComponents();
   });
 
   afterEach(() => {
     document.body.replaceChildren();
+  });
+
+  it('opens from enabled anchors without leaving default navigation', async () => {
+    const fixture = TestBed.createComponent(EnabledPopoverAnchorTriggerHost);
+    fixture.detectChanges();
+
+    const anchor = query<HTMLAnchorElement>(fixture.nativeElement, '#enabled-anchor');
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+
+    expect(anchor.dispatchEvent(click)).toBe(false);
+    expect(click.defaultPrevented).toBe(true);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    fixture.detectChanges();
+
+    expect(document.body.textContent).toContain('Popover');
   });
 
   it('reflects disabled semantics on buttons and anchors', () => {

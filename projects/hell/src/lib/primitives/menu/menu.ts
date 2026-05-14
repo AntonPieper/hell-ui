@@ -38,7 +38,7 @@ import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactiv
     '[attr.disabled]': 'nativeButtonDisabled(trigger.disabled())',
     '[attr.aria-disabled]': 'anchorAriaDisabled(trigger.disabled())',
     '[attr.tabindex]': 'disabledAnchorTabIndex(trigger.disabled())',
-    '(click)': 'preventDisabledAnchor($event, trigger.disabled())',
+    '(click)': 'preventActionAnchorNavigation($event, trigger.disabled())',
     '(keydown.enter)': 'preventDisabledAnchor($event, trigger.disabled())',
   },
 })
