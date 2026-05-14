@@ -11,12 +11,13 @@ import {
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { runPackageManager } from './package-manager.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const distHell = join(root, 'dist/hell');
 const keep = process.env.HELL_KEEP_PACKAGE_CONSUMER === '1';
 
-run('pnpm', ['build:lib'], root);
+runRootPackageManager(['run', 'build:lib'], root);
 
 if (!existsSync(join(distHell, 'package.json'))) {
   fail(`Built package missing: ${distHell}`);
@@ -142,8 +143,8 @@ function runConsumerScenario(scenario) {
 
   try {
     writeConsumerWorkspace(tempRoot, scenario);
-    run('pnpm', ['install', '--strict-peer-dependencies', '--config.auto-install-peers=false', '--ignore-scripts'], tempRoot);
-    run('pnpm', ['exec', 'ng', 'build', 'consumer', '--configuration', 'production'], tempRoot);
+    run('npm', ['install', '--strict-peer-deps', '--ignore-scripts'], tempRoot);
+    run('npm', ['exec', '--', 'ng', 'build', 'consumer', '--configuration', 'production'], tempRoot);
     console.log(`[package-consumer:${scenario.name}] built ${scenario.description}`);
   } finally {
     if (keep) console.log(`[package-consumer:${scenario.name}] kept ${tempRoot}`);
@@ -153,7 +154,7 @@ function runConsumerScenario(scenario) {
 
 function packBuiltPackage() {
   const packRoot = mkdtempSync(join(tmpdir(), 'hell-package-consumer-pack-'));
-  run('pnpm', ['pack', '--pack-destination', packRoot], distHell);
+  run('npm', ['pack', '--pack-destination', packRoot], distHell);
   const tarball = readdirSync(packRoot).find((name) => name.endsWith('.tgz'));
   if (!tarball) fail(`Packed package missing in ${packRoot}`);
   return { root: packRoot, tarball: join(packRoot, tarball) };
@@ -180,11 +181,11 @@ function writeConsumerWorkspace(workspace, scenario) {
   packageJson.dependencies[packageName] = pathToFileURL(packedHell.tarball).href;
 
   writeJson(join(workspace, 'package.json'), packageJson);
-  writeFileSync(join(workspace, '.npmrc'), 'auto-install-peers=false\nstrict-peer-dependencies=true\n');
+  writeFileSync(join(workspace, '.npmrc'), 'strict-peer-deps=true\nlegacy-peer-deps=false\n');
   writeJson(join(workspace, 'angular.json'), {
     $schema: './node_modules/@angular/cli/lib/config/schema.json',
     version: 1,
-    cli: { packageManager: 'pnpm', analytics: false },
+    cli: { analytics: false },
     projects: {
       consumer: {
         projectType: 'application',
@@ -522,6 +523,16 @@ function pdfViewerConsumerStylesCss() {
 
 function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function runRootPackageManager(args, cwd) {
+  console.log(`[package-consumer] package-manager ${args.join(' ')}`);
+  const result = runPackageManager(args, {
+    cwd,
+    env: { ...process.env, CI: 'true' },
+  });
+  if (result.error) fail(result.error.message);
+  if (result.status !== 0) fail(`package-manager ${args.join(' ')} failed with ${result.status}`);
 }
 
 function run(command, args, cwd) {

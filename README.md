@@ -15,11 +15,11 @@ imports.
 ## Workspace
 
 ```bash
-pnpm install
-pnpm build:lib
-pnpm build:docs
-pnpm test
-pnpm ci:verify # full pre-push: unit, architecture, lint, e2e, package consumer, build
+pnpm install # or: npm install
+pnpm build:lib # or: npm run build:lib
+pnpm build:docs # or: npm run build:docs
+pnpm test # or: npm test
+pnpm ci:verify # or: npm run ci:verify; full pre-push: unit, architecture, lint, e2e, package consumer, build
 ```
 
 ## Package Imports
@@ -28,6 +28,8 @@ Install the light UI stack when using primitives/composites:
 
 ```bash
 pnpm add @hell-ui/angular @angular/forms @angular/router ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+# or
+npm install @hell-ui/angular @angular/forms @angular/router ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
 ```
 
 Prefer the narrowest entry point that contains the API you use:
@@ -108,7 +110,7 @@ default host class styling.
 ## Docs App
 
 ```bash
-pnpm start
+pnpm start # or: npm start
 ```
 
 Open `http://localhost:4200/`.

@@ -1,5 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, rmSync } from 'node:fs';
+import { runPackageManager } from './package-manager.mjs';
 
 const reports = ['test-results', 'coverage'];
 
@@ -12,33 +13,27 @@ mkdirSync('test-results', { recursive: true });
 const tasks = [
   {
     name: 'unit tests',
-    command: 'pnpm',
-    args: ['exec', 'ng', 'test', 'hell', '--watch=false', '--runner-config', 'vitest.ci.config.ts'],
+    args: ['exec', '--', 'ng', 'test', 'hell', '--watch=false', '--runner-config', 'vitest.ci.config.ts'],
   },
   {
     name: 'architecture contract',
-    command: 'pnpm',
-    args: ['test:architecture'],
+    args: ['run', 'test:architecture'],
   },
   {
     name: 'lint',
-    command: 'pnpm',
-    args: ['lint'],
+    args: ['run', 'lint'],
   },
   {
     name: 'browser e2e',
-    command: 'pnpm',
-    args: ['e2e'],
+    args: ['run', 'e2e'],
   },
   {
     name: 'package consumer',
-    command: 'pnpm',
-    args: ['test:package-consumer'],
+    args: ['run', 'test:package-consumer'],
   },
   {
     name: 'CI contract',
-    command: 'pnpm',
-    args: ['test:ci-contract'],
+    args: ['run', 'test:ci-contract'],
   },
 ];
 
@@ -46,10 +41,7 @@ let failed = false;
 
 for (const task of tasks) {
   console.log(`\n[ci] ${task.name}`);
-  const result = spawnSync(task.command, task.args, {
-    shell: process.platform === 'win32',
-    stdio: 'inherit',
-  });
+  const result = runPackageManager(task.args);
 
   if (result.error) {
     console.error(`[ci] ${task.name} failed to start: ${result.error.message}`);

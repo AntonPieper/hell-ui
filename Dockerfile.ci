@@ -9,6 +9,7 @@ RUN corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml angular.json tsconfig.json ./
 COPY projects/hell/package.json projects/hell/package.json
+COPY tools/package-manager.mjs tools/package-manager.mjs
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store pnpm ci:install
 RUN pnpm exec playwright install --with-deps chromium firefox webkit
 

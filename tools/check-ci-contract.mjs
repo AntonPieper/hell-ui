@@ -8,14 +8,15 @@ const requiredFiles = [
   'tools/run-ci-tests.mjs',
   'tools/check-package-consumer.mjs',
   'tools/ci-summary.mjs',
+  'tools/package-manager.mjs',
 ];
 
 const requiredScripts = {
-  'ci:install': 'pnpm install --frozen-lockfile',
+  'ci:install': 'node tools/package-manager.mjs install',
   'test:package-consumer': 'node tools/check-package-consumer.mjs',
   'ci:test': 'node tools/run-ci-tests.mjs',
-  'ci:build': 'pnpm build',
-  'ci:verify': 'pnpm ci:test && pnpm ci:build',
+  'ci:build': 'node tools/package-manager.mjs run build',
+  'ci:verify': 'node tools/package-manager.mjs run ci:test && node tools/package-manager.mjs run ci:build',
 };
 
 const adapterChecks = [
@@ -47,6 +48,7 @@ const adapterChecks = [
   {
     path: 'Dockerfile.ci',
     includes: [
+      'COPY tools/package-manager.mjs tools/package-manager.mjs',
       'pnpm ci:install',
       'pnpm exec playwright install --with-deps chromium firefox webkit',
       'pnpm ci:test',
