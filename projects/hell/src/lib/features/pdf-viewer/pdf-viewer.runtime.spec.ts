@@ -175,6 +175,44 @@ describe('PDF Runtime', () => {
     expect(adapter.session.renderThumbnail).toHaveBeenCalledWith(doc, 2, canvas);
   });
 
+  it('retries thumbnails after adapter render failures', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    await runtime.bootstrap(document.createElement('div') as HTMLDivElement, createRuntimeHandlers());
+    const doc = fakeDocument(3);
+    adapter.loadQueue.push(Promise.resolve(doc));
+    await runtime.loadDocument('thumbs.pdf', {
+      initialPage: 1,
+      initialZoom: 'auto',
+      onLoaded: vi.fn(),
+    });
+    adapter.session.renderThumbnail.mockRejectedValueOnce(new Error('canvas unavailable'));
+
+    const canvas = document.createElement('canvas');
+    canvas.dataset['page'] = '2';
+    await runtime.renderThumbs([canvas], () => true);
+    await runtime.renderThumbs([canvas], () => true);
+
+    expect(adapter.session.renderThumbnail).toHaveBeenCalledTimes(2);
+  });
+
+  it('destroys the active document during cleanup', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    await runtime.bootstrap(document.createElement('div') as HTMLDivElement, createRuntimeHandlers());
+    const doc = fakeDocument(1);
+    adapter.loadQueue.push(Promise.resolve(doc));
+    await runtime.loadDocument('active.pdf', {
+      initialPage: 1,
+      initialZoom: 'auto',
+      onLoaded: vi.fn(),
+    });
+
+    runtime.cleanup();
+
+    expect(doc.destroy).toHaveBeenCalledOnce();
+  });
+
   it('keeps global PDF shortcuts scoped to an active viewer', () => {
     const host = document.createElement('div');
     const inside = document.createElement('button');
@@ -326,6 +364,29 @@ describe('PDF Runtime', () => {
 
     expect(handled).toBe(false);
     expect(actions.nextPage).not.toHaveBeenCalled();
+
+    host.remove();
+  });
+
+  it('handles viewer page keys on non-editable content', () => {
+    const host = document.createElement('div');
+    const textLayer = document.createElement('span');
+    host.append(textLayer);
+    document.body.append(host);
+
+    const scope = new HellPdfViewerInteractionScope(() => host);
+    const actions = createShortcutActions();
+    let handled = false;
+    textLayer.addEventListener('keydown', (event) => {
+      handled = scope.handleViewerKey(event, actions);
+    });
+
+    const event = new KeyboardEvent('keydown', { key: 'PageDown', bubbles: true, cancelable: true });
+    textLayer.dispatchEvent(event);
+
+    expect(handled).toBe(true);
+    expect(event.defaultPrevented).toBe(true);
+    expect(actions.nextPage).toHaveBeenCalledOnce();
 
     host.remove();
   });
