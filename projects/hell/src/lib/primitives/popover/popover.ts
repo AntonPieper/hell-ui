@@ -1,4 +1,4 @@
-import { Directive, inject } from '@angular/core';
+import { DestroyRef, Directive, effect, inject } from '@angular/core';
 import { NgpPopover, NgpPopoverTrigger } from 'ng-primitives/popover';
 import { HellStyleable } from '../../core/styleable';
 import { hellRegisterFloatingHost } from '../../core/floating-scope';
@@ -19,6 +19,7 @@ import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactiv
         'ngpPopoverTriggerPlacement:placement',
         'ngpPopoverTriggerOffset:offset',
         'ngpPopoverTriggerFlip:flip',
+        'ngpPopoverTriggerContainer:container',
         'ngpPopoverTriggerDisabled:disabled',
         'ngpPopoverTriggerCloseOnEscape:closeOnEscape',
         'ngpPopoverTriggerCloseOnOutsideClick:closeOnOutsideClick',
@@ -37,6 +38,29 @@ import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactiv
 })
 export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
   protected readonly trigger = inject(NgpPopoverTrigger);
+  private readonly destroyRef = inject(DestroyRef);
+  private destroyed = false;
+
+  constructor() {
+    super();
+
+    this.destroyRef.onDestroy(() => {
+      this.destroyed = true;
+    });
+
+    effect(() => {
+      const overlay = this.trigger.overlay();
+      if (!overlay) return;
+
+      overlay.updateConfig({
+        onClose: () => {
+          if (!this.destroyed) {
+            this.trigger.openChange.emit(false);
+          }
+        },
+      });
+    });
+  }
 }
 
 /**

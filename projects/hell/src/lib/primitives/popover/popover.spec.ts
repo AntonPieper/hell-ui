@@ -19,10 +19,21 @@ beforeAll(() => {
     <ng-template #popover>
       <div hellPopover>Popover</div>
     </ng-template>
-    <a id="enabled-anchor" href="#popover" [hellPopoverTrigger]="popover">Anchor</a>
+    <a
+      id="enabled-anchor"
+      href="#popover"
+      [hellPopoverTrigger]="popover"
+      [container]="container"
+      (openChange)="openEvents.push($event)"
+    >
+      Anchor
+    </a>
+    <div id="popover-container" #container></div>
   `,
 })
-class EnabledPopoverAnchorTriggerHost {}
+class EnabledPopoverAnchorTriggerHost {
+  readonly openEvents: boolean[] = [];
+}
 
 @Component({
   selector: 'hell-popover-disabled-anchor-trigger-host',
@@ -60,14 +71,19 @@ describe('HellPopoverTrigger', () => {
     expect(anchor.dispatchEvent(click)).toBe(false);
     expect(click.defaultPrevented).toBe(true);
 
-    await waitForPopoverOverlayText(fixture, 'Popover');
+    const container = query<HTMLElement>(fixture.nativeElement, '#popover-container');
+    await waitForPopoverOverlayText(fixture, container, 'Popover');
+    await waitForPopoverTriggerOpen(fixture, anchor);
+    await waitForPopoverOpenEvent(fixture);
 
-    expect(document.body.textContent).toContain('Popover');
+    expect(container.textContent).toContain('Popover');
 
     const closeClick = new MouseEvent('click', { bubbles: true, cancelable: true });
     anchor.dispatchEvent(closeClick);
-    await waitForPopoverOverlayTextToDisappear(fixture, 'Popover');
-    expect(document.body.textContent).not.toContain('Popover');
+    await waitForPopoverOverlayTextToDisappear(fixture, container, 'Popover');
+    await waitForPopoverTriggerClosed(fixture, anchor);
+    await waitForPopoverCloseEvent(fixture);
+    expect(container.textContent).not.toContain('Popover');
   });
 
   it('reflects disabled semantics on buttons and anchors', () => {
@@ -95,34 +111,93 @@ async function settle(fixture: { detectChanges(): void; whenStable(): Promise<un
 
 async function waitForPopoverOverlayText(
   fixture: { detectChanges(): void; whenStable(): Promise<unknown> },
+  container: HTMLElement,
   text: string,
 ): Promise<void> {
   const timeout = Date.now() + 1000;
   while (Date.now() < timeout) {
     await settle(fixture);
-    if (document.body.textContent?.includes(text)) {
+    if (container.textContent?.includes(text)) {
       return;
     }
     await nextFrame();
   }
 
-  throw new Error(`Expected body content to contain ${text}.`);
+  throw new Error(`Expected container content to contain ${text}.`);
 }
 
 async function waitForPopoverOverlayTextToDisappear(
   fixture: { detectChanges(): void; whenStable(): Promise<unknown> },
+  container: HTMLElement,
   text: string,
 ): Promise<void> {
   const timeout = Date.now() + 1000;
   while (Date.now() < timeout) {
     await settle(fixture);
-    if (!document.body.textContent?.includes(text)) {
+    if (!container.textContent?.includes(text)) {
       return;
     }
     await nextFrame();
   }
 
-  throw new Error(`Expected body content to not contain ${text}.`);
+  throw new Error(`Expected container content to not contain ${text}.`);
+}
+
+async function waitForPopoverOpenEvent(
+  fixture: { detectChanges(): void; whenStable(): Promise<unknown>; componentInstance: EnabledPopoverAnchorTriggerHost },
+): Promise<void> {
+  await waitForPopoverEvent(fixture, true);
+}
+
+async function waitForPopoverCloseEvent(
+  fixture: { detectChanges(): void; whenStable(): Promise<unknown>; componentInstance: EnabledPopoverAnchorTriggerHost },
+): Promise<void> {
+  await waitForPopoverEvent(fixture, false);
+}
+
+async function waitForPopoverEvent(
+  fixture: { detectChanges(): void; whenStable(): Promise<unknown>; componentInstance: EnabledPopoverAnchorTriggerHost },
+  open: boolean,
+): Promise<void> {
+  const timeout = Date.now() + 1000;
+  while (Date.now() < timeout) {
+    await settle(fixture);
+    if (fixture.componentInstance.openEvents.includes(open)) return;
+    await nextFrame();
+  }
+
+  throw new Error(`Expected popover openChange to emit ${open}.`);
+}
+
+async function waitForPopoverTriggerOpen(
+  fixture: { detectChanges(): void; whenStable(): Promise<unknown> },
+  trigger: HTMLElement,
+): Promise<void> {
+  await waitForPopoverTriggerState(fixture, trigger, 'true');
+}
+
+async function waitForPopoverTriggerClosed(
+  fixture: { detectChanges(): void; whenStable(): Promise<unknown> },
+  trigger: HTMLElement,
+): Promise<void> {
+  await waitForPopoverTriggerState(fixture, trigger, 'false');
+}
+
+async function waitForPopoverTriggerState(
+  fixture: { detectChanges(): void; whenStable(): Promise<unknown> },
+  trigger: HTMLElement,
+  expanded: 'true' | 'false',
+): Promise<void> {
+  const timeout = Date.now() + 1000;
+  while (Date.now() < timeout) {
+    await settle(fixture);
+    if (trigger.getAttribute('aria-expanded') === expanded) {
+      return;
+    }
+    await nextFrame();
+  }
+
+  throw new Error(`Expected popover trigger aria-expanded to be ${expanded}.`);
 }
 
 async function nextFrame(): Promise<void> {
