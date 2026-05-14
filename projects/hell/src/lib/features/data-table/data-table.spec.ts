@@ -179,9 +179,12 @@ describe('Hell data table directives', () => {
 
     const header = byId<HTMLTableCellElement>(fixture.nativeElement, 'name');
     const sortButton = byId<HTMLButtonElement>(fixture.nativeElement, 'name-sort');
-    expect(header.getAttribute('aria-sort')).toBe('none');
+    const resizer = byId<HTMLButtonElement>(fixture.nativeElement, 'name-resizer');
+
+    expect(header.getAttribute('aria-sort')).toBe(null);
     expect(header.hasAttribute('tabindex')).toBe(false);
     expect(sortButton.getAttribute('type')).toBe('button');
+    expect(resizer.getAttribute('aria-valuenow')).toBe('50');
 
     host.sort.set('asc');
     fixture.detectChanges();
@@ -189,7 +192,7 @@ describe('Hell data table directives', () => {
     expect(header.getAttribute('data-sort')).toBe('asc');
 
     sortButton.click();
-    byId<HTMLButtonElement>(fixture.nativeElement, 'name-resizer').click();
+    resizer.click();
     header.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
 
     expect(host.sortEvents).toHaveLength(1);

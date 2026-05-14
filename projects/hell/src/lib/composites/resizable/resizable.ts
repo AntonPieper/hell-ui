@@ -1,5 +1,6 @@
 import {
   AfterContentInit,
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
@@ -18,6 +19,7 @@ import {
 import {
   HellResizePairInteractionController,
   hellFitResizeSizesToTotal,
+  hellResizePairAriaValue,
   type HellResizeDirection,
 } from '../../core/resize-behavior';
 import { isDocumentPositionFollowing } from '../../core/dom';
@@ -286,7 +288,7 @@ export class HellResizablePane extends HellStyleable implements OnDestroy {
   },
   template: '<span data-slot="grip" aria-hidden="true"></span>',
 })
-export class HellResizableHandle extends HellStyleable implements OnDestroy {
+export class HellResizableHandle extends HellStyleable implements AfterViewInit, OnDestroy {
   /**
    * Visual treatment for the handle.
    * - `line`  (default) — minimal hairline that thickens on hover.
@@ -360,14 +362,39 @@ export class HellResizableHandle extends HellStyleable implements OnDestroy {
     return sizes;
   }
 
+  ngAfterViewInit(): void {
+    this.refreshAriaValueNow();
+  }
+
   @HostListener('pointerdown', ['$event'])
   protected onPointerDown(e: PointerEvent) {
+    this.refreshAriaValueNow();
     this.resizeInteraction.startPointer(e);
   }
 
   @HostListener('keydown', ['$event'])
   protected onKey(e: KeyboardEvent) {
+    this.refreshAriaValueNow();
     this.resizeInteraction.applyKey(e);
+  }
+
+  private refreshAriaValueNow(): void {
+    const pair = this.adjacentPair();
+    if (!pair) {
+      this.ariaValueNow.set(null);
+      return;
+    }
+
+    const beforePx = pair.before.currentSize() ?? pair.before.measure();
+    const afterPx = pair.after.currentSize() ?? pair.after.measure();
+    this.ariaValueNow.set(
+      hellResizePairAriaValue(
+        beforePx,
+        afterPx,
+        pair.before.currentMinSize(),
+        pair.after.currentMinSize(),
+      ),
+    );
   }
 
   ngOnDestroy(): void {

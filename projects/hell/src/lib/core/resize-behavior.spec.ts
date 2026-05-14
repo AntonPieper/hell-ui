@@ -8,6 +8,7 @@ import {
   hellResizeCoordinate,
   hellFitResizeSizesToTotal,
   hellResizeIntentFromKey,
+  hellResizePairAriaValue,
   hellResizePairByDelta,
 } from './resize-behavior';
 
@@ -58,6 +59,11 @@ describe('Resize Behavior', () => {
     expect(transaction.byKey('decrement')).toEqual({ a: 84, b: 96, sum: 180, ariaValueNow: 47 });
     expect(transaction.byKey('min')).toEqual({ a: 40, b: 140, sum: 180, ariaValueNow: 22 });
     expect(transaction.byKey('max')).toEqual({ a: 140, b: 40, sum: 180, ariaValueNow: 78 });
+  });
+
+  it('computes initial aria-value from pair measurements with min fallback', () => {
+    expect(hellResizePairAriaValue(120, 80, 40, 40)).toBe(60);
+    expect(hellResizePairAriaValue(0, 0, 40, 40)).toBe(50);
   });
 
   it('maps keyboard events to resize intents by orientation', () => {

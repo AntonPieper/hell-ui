@@ -46,6 +46,7 @@ describe('HellResizable', () => {
       bubbles: true,
       cancelable: true,
     });
+    expect(byId(fixture.nativeElement, 'handle-a').getAttribute('aria-valuenow')).toBe('50');
     byId(fixture.nativeElement, 'handle-a').dispatchEvent(key);
 
     expect(key.defaultPrevented).toBe(true);

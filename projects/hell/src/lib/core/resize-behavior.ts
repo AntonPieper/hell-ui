@@ -178,6 +178,27 @@ export function hellResizePairByDelta(
   return [result.a, result.b] as const;
 }
 
+/**
+ * Compute an initial percentage for one resize pair from measurements,
+ * with min-size fallback when a measured value is not usable.
+ */
+export function hellResizePairAriaValue(
+  beforePx: number,
+  afterPx: number,
+  minBefore: number,
+  minAfter: number,
+): number {
+  const before = beforePx > 0 ? beforePx : minBefore;
+  const after = afterPx > 0 ? afterPx : minAfter;
+  const transaction = new HellResizeTransaction({
+    startA: before,
+    startB: after,
+    minA: minBefore,
+    minB: minAfter,
+  });
+  return transaction.byDelta(0).ariaValueNow;
+}
+
 /** Pure resize model for one pair; independent from DOM, pointer events, or CSS. */
 export class HellResizeTransaction {
   private readonly keyDelta: number;

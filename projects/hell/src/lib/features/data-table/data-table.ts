@@ -3,6 +3,7 @@ import { hellFloatingTargetNode } from '../../core/floating-scope';
 import { HellStyleable } from '../../core/styleable';
 import {
   HellResizePairInteractionController,
+  hellResizePairAriaValue,
   type HellResizeDirection,
 } from '../../core/resize-behavior';
 import {
@@ -15,6 +16,7 @@ import {
   Component,
   Directive,
   ElementRef,
+  AfterViewInit,
   OnDestroy,
   booleanAttribute,
   computed,
@@ -290,12 +292,12 @@ export class HellTableHeaderCell extends HellStyleable implements OnDestroy {
     return w == null ? null : `${w}px`;
   });
 
-  protected readonly ariaSort = computed<'ascending' | 'descending' | 'none' | null>(() => {
+  protected readonly ariaSort = computed<'ascending' | 'descending' | null>(() => {
     if (!this.sortable()) return null;
     const s = this.sort();
     if (s === 'asc') return 'ascending';
     if (s === 'desc') return 'descending';
-    return 'none';
+    return null;
   });
 
   constructor() {
@@ -430,7 +432,7 @@ export class HellTableCell extends HellStyleable {
   },
   template: '<span data-slot="grip" aria-hidden="true"></span>',
 })
-export class HellTableColumnResizer extends HellStyleable implements OnDestroy {
+export class HellTableColumnResizer extends HellStyleable implements AfterViewInit, OnDestroy {
   readonly minWidth = input(40, { transform: numberAttribute });
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
   readonly ariaControls = input<string | readonly string[] | null>(null, {
@@ -492,14 +494,37 @@ export class HellTableColumnResizer extends HellStyleable implements OnDestroy {
     return this.host.tagName.toLowerCase() === 'button' ? 'button' : null;
   }
 
+  ngAfterViewInit(): void {
+    this.refreshAriaValueNow();
+  }
+
   protected onPointerDown(e: PointerEvent) {
     if (this.isDisabled()) return;
+    this.refreshAriaValueNow();
     this.resizeInteraction.startPointer(e);
   }
 
   protected onKey(e: KeyboardEvent) {
     if (this.isDisabled()) return;
+    this.refreshAriaValueNow();
     this.resizeInteraction.applyKey(e);
+  }
+
+  private refreshAriaValueNow(): void {
+    const pair = this.adjacentPair();
+    if (!pair) {
+      this.ariaValueNow.set(null);
+      return;
+    }
+
+    this.ariaValueNow.set(
+      hellResizePairAriaValue(
+        pair.before.measure(),
+        pair.after.measure(),
+        this.minWidth(),
+        this.minWidth(),
+      ),
+    );
   }
 
   ngOnDestroy(): void {
