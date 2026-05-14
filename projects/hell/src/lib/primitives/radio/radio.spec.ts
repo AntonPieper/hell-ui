@@ -6,6 +6,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { HellRadio, HellRadioGroup } from './radio';
 
 @Component({
+  selector: 'hell-radio-host',
   imports: [HellRadioGroup, HellRadio],
   template: `
     <div hellRadioGroup [value]="value()" orientation="horizontal" (valueChange)="events.push($any($event))">
@@ -20,6 +21,7 @@ class RadioHost {
 }
 
 @Component({
+  selector: 'hell-radio-form-host',
   imports: [ReactiveFormsModule, HellRadioGroup, HellRadio],
   template: `
     <div hellRadioGroup [formControl]="control" orientation="horizontal" (valueChange)="events.push($any($event))">
@@ -34,6 +36,7 @@ class RadioFormHost {
 }
 
 @Component({
+  selector: 'hell-radio-required-form-host',
   imports: [ReactiveFormsModule, HellRadioGroup, HellRadio],
   template: `
     <div hellRadioGroup [required]="true" [formControl]="control" orientation="horizontal">
@@ -47,6 +50,7 @@ class RadioRequiredFormHost {
 }
 
 @Component({
+  selector: 'hell-radio-disabled-required-host',
   imports: [ReactiveFormsModule, HellRadioGroup, HellRadio],
   template: `
     <div hellRadioGroup [required]="true" [formControl]="control" orientation="horizontal">
@@ -60,6 +64,7 @@ class RadioDisabledRequiredHost {
 }
 
 @Component({
+  selector: 'hell-radio-item-disabled-host',
   imports: [HellRadioGroup, HellRadio],
   template: `
     <div hellRadioGroup orientation="horizontal">

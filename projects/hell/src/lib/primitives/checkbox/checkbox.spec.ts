@@ -6,6 +6,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { HellCheckbox } from './checkbox';
 
 @Component({
+  selector: 'hell-checkbox-host',
   imports: [HellCheckbox],
   template: `
     <button
@@ -29,6 +30,7 @@ class CheckboxHost {
 }
 
 @Component({
+  selector: 'hell-checkbox-form-host',
   imports: [ReactiveFormsModule, HellCheckbox],
   template: `
     <button
@@ -44,6 +46,7 @@ class CheckboxFormHost {
 }
 
 @Component({
+  selector: 'hell-checkbox-required-form-host',
   imports: [ReactiveFormsModule, HellCheckbox],
   template: `
     <button
@@ -58,6 +61,7 @@ class CheckboxRequiredFormHost {
 }
 
 @Component({
+  selector: 'hell-checkbox-disabled-required-host',
   imports: [ReactiveFormsModule, HellCheckbox],
   template: `
     <button hellCheckbox [required]="true" [formControl]="control"></button>

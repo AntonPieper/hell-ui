@@ -3,7 +3,17 @@ import { TestBed } from '@angular/core/testing';
 
 import { HellPopover, HellPopoverTrigger } from './popover';
 
+beforeAll(() => {
+  const elementPrototype = Element.prototype as Element & {
+    getAnimations?: () => readonly Animation[];
+  };
+  if (typeof elementPrototype.getAnimations !== 'function') {
+    elementPrototype.getAnimations = () => [];
+  }
+});
+
 @Component({
+  selector: 'hell-popover-enabled-anchor-trigger-host',
   imports: [HellPopover, HellPopoverTrigger],
   template: `
     <ng-template #popover>
@@ -15,6 +25,7 @@ import { HellPopover, HellPopoverTrigger } from './popover';
 class EnabledPopoverAnchorTriggerHost {}
 
 @Component({
+  selector: 'hell-popover-disabled-anchor-trigger-host',
   imports: [HellPopover, HellPopoverTrigger],
   template: `
     <ng-template #popover>
@@ -52,6 +63,11 @@ describe('HellPopoverTrigger', () => {
     await waitForPopoverOverlayText(fixture, 'Popover');
 
     expect(document.body.textContent).toContain('Popover');
+
+    const closeClick = new MouseEvent('click', { bubbles: true, cancelable: true });
+    anchor.dispatchEvent(closeClick);
+    await waitForPopoverOverlayTextToDisappear(fixture, 'Popover');
+    expect(document.body.textContent).not.toContain('Popover');
   });
 
   it('reflects disabled semantics on buttons and anchors', () => {
@@ -91,6 +107,22 @@ async function waitForPopoverOverlayText(
   }
 
   throw new Error(`Expected body content to contain ${text}.`);
+}
+
+async function waitForPopoverOverlayTextToDisappear(
+  fixture: { detectChanges(): void; whenStable(): Promise<unknown> },
+  text: string,
+): Promise<void> {
+  const timeout = Date.now() + 1000;
+  while (Date.now() < timeout) {
+    await settle(fixture);
+    if (!document.body.textContent?.includes(text)) {
+      return;
+    }
+    await nextFrame();
+  }
+
+  throw new Error(`Expected body content to not contain ${text}.`);
 }
 
 async function nextFrame(): Promise<void> {
