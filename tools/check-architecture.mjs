@@ -584,7 +584,9 @@ function checkLabelContract() {
   const labelConsumers = [
     ['projects/hell/src/lib/composites/app-shell/app-shell.ts', ['Expand sidebar', 'Collapse sidebar']],
     ['projects/hell/src/lib/composites/audio-player/audio-player.ts', ['Show live captions', 'Copy transcript', '>Live<', '>Paused<']],
+    ['projects/hell/src/lib/primitives/breadcrumbs/breadcrumbs.ts', ['Show hidden navigation']],
     ['projects/hell/src/lib/composites/date-input/date-input.ts', ['Choose date']],
+    ['projects/hell/src/lib/composites/resizable/resizable.ts', ['Resize panels']],
     ['projects/hell/src/lib/composites/time-input/time-input.ts', ['Choose time', 'Subtract 5 minutes']],
     ['projects/hell/src/lib/composites/toast/toast.ts', ['aria-label="Notifications"', 'aria-label="Dismiss"']],
     ['projects/hell/src/lib/features/data-table/data-table.ts', ['Resize column']],
@@ -839,8 +841,14 @@ function checkInteractiveTriggerSelectorContract() {
 
 function checkTableUtilityContract() {
   const source = readFile(join(root, 'projects/hell/src/lib/features/data-table/data-table.ts'));
+  if (!source.includes('HELL_TABLE_UTILITIES_DIRECTIVES')) {
+    failures.push('Table feature must expose HELL_TABLE_UTILITIES_DIRECTIVES as its preferred import');
+  }
   if (!source.includes('HELL_TABLE_UTILITY_DIRECTIVES')) {
-    failures.push('Table feature must expose HELL_TABLE_UTILITY_DIRECTIVES as its preferred import');
+    failures.push('Table feature must preserve HELL_TABLE_UTILITY_DIRECTIVES compatibility alias');
+  }
+  if (!source.includes('HELL_TABLE_DIRECTIVES')) {
+    failures.push('Table feature must preserve HELL_TABLE_DIRECTIVES compatibility alias');
   }
 
   const docs = readFile(

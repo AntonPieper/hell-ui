@@ -1333,7 +1333,7 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
             title: 'Table utility directives',
             detail: 'hellTable, hellTableRow, hellTableHeaderCell, hellTableSortButton, hellTableColumnResizer',
             terms:
-              'HELL_TABLE_UTILITY_DIRECTIVES HELL_TABLE_DIRECTIVES hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableSortButton hellTableCell hellTableColumnResizer',
+              'HELL_TABLE_UTILITIES_DIRECTIVES HELL_TABLE_UTILITY_DIRECTIVES HELL_TABLE_DIRECTIVES hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableSortButton hellTableCell hellTableColumnResizer',
           },
         ],
         loadComponent: () =>

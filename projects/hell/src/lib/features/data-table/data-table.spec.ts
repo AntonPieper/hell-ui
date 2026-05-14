@@ -1,7 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_TABLE_DIRECTIVES, type HellTableColumnResizeEvent } from './data-table';
+import { provideHellLabels } from '../../core/labels';
+import {
+  HELL_TABLE_DIRECTIVES,
+  HELL_TABLE_UTILITY_DIRECTIVES,
+  HELL_TABLE_UTILITIES_DIRECTIVES,
+  type HellTableColumnResizeEvent,
+} from './data-table';
 
 @Component({
   imports: [...HELL_TABLE_DIRECTIVES],
@@ -72,14 +78,70 @@ class DataTableHost {
   readonly resizeEvents: HellTableColumnResizeEvent[] = [];
 }
 
+@Component({
+  imports: [...HELL_TABLE_DIRECTIVES],
+  template: `
+    <table hellTable>
+      <thead hellTableHead>
+        <tr>
+          <th id="override-left" hellTableHeaderCell columnId="override-left">
+            <button id="left-sort" hellTableSortButton type="button">Left</button>
+            <button
+              id="left-resizer"
+              hellTableColumnResizer
+              [minWidth]="40"
+              aria-label="Custom resize label"
+            ></button>
+          </th>
+          <th id="override-right" hellTableHeaderCell columnId="override-right">
+            Right
+            <button id="right-resizer" hellTableColumnResizer [minWidth]="40"></button>
+          </th>
+        </tr>
+      </thead>
+      <tbody hellTableBody>
+        <tr>
+          <td hellTableCell>Left</td>
+          <td hellTableCell>Right</td>
+        </tr>
+      </tbody>
+    </table>
+  `,
+})
+class DataTableResizerAriaOverrideHost {}
+
+@Component({
+  imports: [...HELL_TABLE_DIRECTIVES],
+  providers: [provideHellLabels({ tableUtilities: { resizeColumn: 'Spaltenbreite ändern' } })],
+  template: `
+    <table hellTable>
+      <thead hellTableHead>
+        <tr>
+          <th id="localized-left" hellTableHeaderCell columnId="localized-left">
+            Left
+            <button id="localized-resizer" hellTableColumnResizer [minWidth]="40"></button>
+          </th>
+          <th id="localized-right" hellTableHeaderCell columnId="localized-right">Right</th>
+        </tr>
+      </thead>
+    </table>
+  `,
+})
+class DataTableLocalizedLabelHost {}
+
 describe('Hell data table directives', () => {
+  it('preserves legacy alias exports while preferring plural import alias', () => {
+    expect(HELL_TABLE_UTILITIES_DIRECTIVES).toBe(HELL_TABLE_UTILITY_DIRECTIVES);
+    expect(HELL_TABLE_DIRECTIVES).toBe(HELL_TABLE_UTILITY_DIRECTIVES);
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DataTableHost],
+      imports: [DataTableHost, DataTableResizerAriaOverrideHost, DataTableLocalizedLabelHost],
     }).compileComponents();
   });
 
@@ -370,6 +432,22 @@ describe('Hell data table directives', () => {
     expect(key.defaultPrevented).toBe(false);
     expect(pointer.defaultPrevented).toBe(false);
     expect(host.resizeEvents).toEqual([]);
+  });
+
+  it('uses explicit aria-label override for column resizer', () => {
+    const fixture = TestBed.createComponent(DataTableResizerAriaOverrideHost);
+    fixture.detectChanges();
+
+    const resizer = byId<HTMLButtonElement>(fixture.nativeElement, 'left-resizer');
+    expect(resizer.getAttribute('aria-label')).toBe('Custom resize label');
+  });
+
+  it('uses preferred table utilities label overrides for column resizer defaults', () => {
+    const fixture = TestBed.createComponent(DataTableLocalizedLabelHost);
+    fixture.detectChanges();
+
+    const resizer = byId<HTMLButtonElement>(fixture.nativeElement, 'localized-resizer');
+    expect(resizer.getAttribute('aria-label')).toBe('Spaltenbreite ändern');
   });
 });
 

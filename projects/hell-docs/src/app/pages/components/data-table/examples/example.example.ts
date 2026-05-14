@@ -28,7 +28,7 @@ import { HELL_OMNIBAR_DIRECTIVES, HELL_SPLIT_VIEW_DIRECTIVES } from '@hell-ui/an
 import { hellSearchKey, hellSearchWords } from '@hell-ui/angular/core';
 import { HELL_MENU_DIRECTIVES, HellButton, HellIcon, HellPaginationStrip, HellSkeleton } from '@hell-ui/angular/primitives';
 import { HellCodeEditor } from '@hell-ui/angular/features/code-editor';
-import { HELL_TABLE_UTILITY_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
+import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
 
 type RowRole = 'Admin' | 'Editor' | 'Viewer';
 type RowAssignee = 'Ada' | 'Grace' | 'Linus' | 'Margaret';
@@ -113,7 +113,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
     ...HELL_MENU_DIRECTIVES,
     ...HELL_OMNIBAR_DIRECTIVES,
     ...HELL_SPLIT_VIEW_DIRECTIVES,
-    ...HELL_TABLE_UTILITY_DIRECTIVES,
+    ...HELL_TABLE_UTILITIES_DIRECTIVES,
     HellButton,
     HellCodeEditor,
     HellIcon,

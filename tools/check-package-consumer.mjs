@@ -385,12 +385,12 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function tableUtilitiesConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_TABLE_UTILITY_DIRECTIVES, HellTableRowIgnore } from '${packageName}/features/table-utilities';
+import { HELL_TABLE_UTILITIES_DIRECTIVES, HellTableRowIgnore } from '${packageName}/features/table-utilities';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [...HELL_TABLE_UTILITY_DIRECTIVES, HellTableRowIgnore],
+  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES, HellTableRowIgnore],
   template: \`
     <div hellTableContainer>
       <table hellTable>

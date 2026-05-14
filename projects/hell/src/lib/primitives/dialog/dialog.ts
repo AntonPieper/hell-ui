@@ -78,7 +78,7 @@ export class HellDialogTrigger<TData = unknown, TResult = unknown> extends HellN
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly dialogData = input<TData | undefined>(undefined);
   readonly hellDialogData = input<TData | undefined>(undefined, { alias: 'hellDialogData' });
-  readonly closed = output<TResult>();
+  readonly closed = output<TResult | undefined>();
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);

@@ -50,7 +50,7 @@ Prefer the narrowest entry point that contains the API you use:
 ```ts
 import { HellButton, HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/primitives';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/composites';
-import { HELL_TABLE_UTILITY_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
+import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
 ```
 
 ## CSS Imports

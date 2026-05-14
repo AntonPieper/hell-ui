@@ -108,9 +108,9 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
             <code>(sortToggle)</code> through the header.
           </li>
           <li>
-            <code>HELL_TABLE_UTILITY_DIRECTIVES</code>: preferred standalone import list.
-            <code>HELL_TABLE_DIRECTIVES</code> remains as a compatibility alias naming for older
-            imports.
+            <code>HELL_TABLE_UTILITIES_DIRECTIVES</code>: preferred standalone import list.
+            <code>HELL_TABLE_UTILITY_DIRECTIVES</code> and <code>HELL_TABLE_DIRECTIVES</code> remain
+            compatibility aliases for older imports.
           </li>
           <li>
             <code>td[hellTableCell]</code>: emits <code>(cellSelect)</code> on click for per-cell

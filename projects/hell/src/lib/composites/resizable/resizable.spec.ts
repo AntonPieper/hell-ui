@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
+import { provideHellLabels } from '../../core/labels';
 import { HELL_RESIZABLE_DIRECTIVES } from './resizable';
 
 @Component({
@@ -10,12 +11,25 @@ import { HELL_RESIZABLE_DIRECTIVES } from './resizable';
       <section id="pane-a" hellResizablePane [minSize]="40">A</section>
       <div id="handle-a" hellResizableHandle [aria-controls]="[' pane-a ', ' ', 'pane-b']"></div>
       <section id="pane-b" hellResizablePane [minSize]="40">B</section>
-      <div id="handle-b" hellResizableHandle></div>
+      <div id="handle-b" hellResizableHandle aria-label="Custom resize handle"></div>
       <section id="pane-c" hellResizablePane [minSize]="40">C</section>
     </div>
   `,
 })
 class ResizableHost {}
+
+@Component({
+  imports: [...HELL_RESIZABLE_DIRECTIVES],
+  providers: [provideHellLabels({ resizable: { resizePanels: 'Contract resize handle' } })],
+  template: `
+    <div id="contract-group" hellResizable>
+      <section hellResizablePane [minSize]="40">A</section>
+      <div id="contract-handle" hellResizableHandle [aria-controls]="[' id-a ', ' ', 'id-b']"></div>
+      <section hellResizablePane [minSize]="40">B</section>
+    </div>
+  `,
+})
+class ResizableLabelContractHost {}
 
 describe('HellResizable', () => {
   afterEach(() => {
@@ -24,7 +38,7 @@ describe('HellResizable', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ResizableHost],
+      imports: [ResizableHost, ResizableLabelContractHost],
     }).compileComponents();
   });
 
@@ -58,6 +72,20 @@ describe('HellResizable', () => {
     expect(paneFlex(paneA)).toBe('0 0 116px');
     expect(paneFlex(paneB)).toBe('0 0 84px');
     expect(paneFlex(paneC)).toBe('0 0 100px');
+  });
+
+  it('respects explicit aria-label override on handle', () => {
+    const fixture = TestBed.createComponent(ResizableHost);
+    fixture.detectChanges();
+
+    expect(byId(fixture.nativeElement, 'handle-b').getAttribute('aria-label')).toBe('Custom resize handle');
+  });
+
+  it('supports label contract override for resize handle text', () => {
+    const fixture = TestBed.createComponent(ResizableLabelContractHost);
+    fixture.detectChanges();
+
+    expect(byId(fixture.nativeElement, 'contract-handle').getAttribute('aria-label')).toBe('Contract resize handle');
   });
 
   it('seeds aria-valuenow from measured asymmetric pane sizes before interaction', () => {

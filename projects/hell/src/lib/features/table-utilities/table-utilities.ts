@@ -10,8 +10,8 @@ export {
   HellTableRowIgnore,
   HellTableSortButton,
   HELL_TABLE_UTILITY_DIRECTIVES,
+  HELL_TABLE_UTILITIES_DIRECTIVES,
 } from '../data-table/data-table';
-
 export type {
   HellTableColumnResizeEvent,
   HellTableColumnResizePair,

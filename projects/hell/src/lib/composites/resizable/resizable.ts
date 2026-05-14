@@ -16,6 +16,7 @@ import {
   numberAttribute,
   signal,
 } from '@angular/core';
+import { HELL_LABELS } from '../../core/labels';
 import {
   HellResizePairInteractionController,
   hellFitResizeSizesToTotal,
@@ -25,7 +26,6 @@ import {
 import { isDocumentPositionFollowing } from '../../core/dom';
 import { HellOrientation } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
-
 function hellElementDirection(element: HTMLElement): HellResizeDirection {
   return element.ownerDocument.defaultView?.getComputedStyle(element).direction === 'rtl'
     ? 'rtl'
@@ -279,7 +279,7 @@ export class HellResizablePane extends HellStyleable implements OnDestroy {
       'resizable.orientation() === "horizontal" ? "vertical" : "horizontal"',
     '[attr.aria-disabled]': 'resizable.isConstrained() ? "true" : null',
     role: 'separator',
-    '[attr.aria-label]': 'ariaLabel()',
+    '[attr.aria-label]': 'ariaLabel() ?? labels.resizable.resizePanels',
     '[attr.aria-controls]': 'ariaControlsValue()',
     '[attr.tabindex]': 'resizable.isConstrained() ? "-1" : "0"',
     '[attr.aria-valuemin]': '0',
@@ -296,7 +296,8 @@ export class HellResizableHandle extends HellStyleable implements AfterViewInit,
    *   the handle is the primary affordance.
    */
   readonly appearance = input<'line' | 'grip'>('line');
-  readonly ariaLabel = input('Resize panels', { alias: 'aria-label' });
+  readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
+  protected readonly labels = inject(HELL_LABELS);
   readonly ariaControls = input<string | readonly string[] | null>(null, {
     alias: 'aria-controls',
   });

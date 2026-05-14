@@ -101,15 +101,16 @@ class ClosePolicyDialogHost {}
       <div id="result-overlay" hellDialogOverlay>
         <div hellDialog>
           <button id="result-close" type="button" (click)="close('result')">Close</button>
+          <button id="result-close-empty" type="button" (click)="close()">Close w/o result</button>
         </div>
       </div>
     </ng-template>
   `,
 })
 class DialogClosedResultHost {
-  readonly results: Array<string> = [];
+  readonly results: Array<string | undefined> = [];
 
-  onDialogClosed(result: string): void {
+  onDialogClosed(result: string | undefined): void {
     this.results.push(result);
   }
 }
@@ -264,11 +265,19 @@ describe('HellDialogTrigger scoped overlays', () => {
     query<HTMLButtonElement>(fixture.nativeElement, '#open-result').click();
     await settle(fixture);
 
-    const close = query<HTMLButtonElement>(document.body, '#result-close');
-    close.click();
+    const closeWithResult = query<HTMLButtonElement>(document.body, '#result-close');
+    closeWithResult.click();
+    await settle(fixture);
+    expect(fixture.componentInstance.results).toEqual(['result']);
+
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-result').click();
     await settle(fixture);
 
-    expect(fixture.componentInstance.results).toEqual(['result']);
+    const closeWithoutResult = query<HTMLButtonElement>(document.body, '#result-close-empty');
+    closeWithoutResult.click();
+    await settle(fixture);
+
+    expect(fixture.componentInstance.results).toEqual(['result', undefined]);
   });
 
   it('passes dialog data from the trigger input to template context', async () => {

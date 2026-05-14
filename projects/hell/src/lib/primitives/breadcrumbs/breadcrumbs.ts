@@ -1,4 +1,5 @@
-import { Directive, ElementRef, inject } from '@angular/core';
+import { Directive, ElementRef, inject, input } from '@angular/core';
+import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
 import {
   NgpBreadcrumbs,
@@ -100,11 +101,13 @@ export class HellBreadcrumbSeparator extends HellStyleable {}
   host: {
     '[class.hell-breadcrumbs-ellipsis]': '!unstyled()',
     '[attr.type]': 'nativeButtonType()',
-    '[attr.aria-label]': 'nativeButtonType() ? "Show hidden navigation" : null',
+    '[attr.aria-label]': 'nativeButtonType() ? (ariaLabel() ?? labels.breadcrumbs.showHiddenNavigation) : null',
   },
 })
 export class HellBreadcrumbEllipsis extends HellStyleable {
+  readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  protected readonly labels = inject(HELL_LABELS);
 
   protected nativeButtonType(): 'button' | null {
     return this.host.tagName.toLowerCase() === 'button' ? 'button' : null;

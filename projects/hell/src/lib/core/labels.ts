@@ -36,11 +36,23 @@ export interface HellDialpadLabels {
   readonly call: string;
 }
 
+export interface HellBreadcrumbLabels {
+  readonly showHiddenNavigation: string;
+}
+
+export interface HellResizableLabels {
+  readonly resizePanels: string;
+}
+
 export interface HellOmnibarLabels {
   readonly clearSearch: string;
 }
 
 export interface HellDataTableLabels {
+  readonly resizeColumn: string;
+}
+
+export interface HellTableUtilitiesLabels {
   readonly resizeColumn: string;
 }
 
@@ -111,13 +123,15 @@ export interface HellLabels {
   readonly loading: string;
   readonly appShell: HellAppShellLabels;
   readonly audioPlayer: HellAudioPlayerLabels;
-  readonly dialpad: HellDialpadLabels;
+  readonly breadcrumbs: HellBreadcrumbLabels;
   readonly dataTable: HellDataTableLabels;
   readonly dateInput: HellDateInputLabels;
   readonly datePicker: HellDatePickerLabels;
+  readonly dialpad: HellDialpadLabels;
   readonly omnibar: HellOmnibarLabels;
   readonly pagination: HellPaginationLabels;
   readonly pdfViewer: HellPdfViewerLabels;
+  readonly resizable: HellResizableLabels;
   readonly timeInput: HellTimeInputLabels;
   readonly toast: HellToastLabels;
 }
@@ -126,13 +140,16 @@ export interface HellLabelOverrides {
   readonly loading?: string;
   readonly appShell?: Partial<HellAppShellLabels>;
   readonly audioPlayer?: Partial<HellAudioPlayerLabels>;
-  readonly dialpad?: Partial<HellDialpadLabels>;
+  readonly breadcrumbs?: Partial<HellBreadcrumbLabels>;
   readonly dataTable?: Partial<HellDataTableLabels>;
+  readonly tableUtilities?: Partial<HellTableUtilitiesLabels>;
   readonly dateInput?: Partial<HellDateInputLabels>;
   readonly datePicker?: Partial<HellDatePickerLabels>;
+  readonly dialpad?: Partial<HellDialpadLabels>;
   readonly omnibar?: Partial<HellOmnibarLabels>;
   readonly pagination?: Partial<HellPaginationLabels>;
   readonly pdfViewer?: Partial<HellPdfViewerLabels>;
+  readonly resizable?: Partial<HellResizableLabels>;
   readonly timeInput?: Partial<HellTimeInputLabels>;
   readonly toast?: Partial<HellToastLabels>;
 }
@@ -172,8 +189,14 @@ export const HELL_DEFAULT_LABELS: HellLabels = {
     backspace: 'Backspace',
     call: 'Call',
   },
+  breadcrumbs: {
+    showHiddenNavigation: 'Show hidden navigation',
+  },
   omnibar: {
     clearSearch: 'Clear search',
+  },
+  resizable: {
+    resizePanels: 'Resize panels',
   },
   dataTable: {
     resizeColumn: 'Resize column',
@@ -258,13 +281,15 @@ function hellMergeLabels(base: HellLabels, overrides: HellLabelOverrides): HellL
     loading: overrides.loading ?? base.loading,
     appShell: { ...base.appShell, ...overrides.appShell },
     audioPlayer: { ...base.audioPlayer, ...overrides.audioPlayer },
-    dialpad: { ...base.dialpad, ...overrides.dialpad },
-    dataTable: { ...base.dataTable, ...overrides.dataTable },
+    breadcrumbs: { ...base.breadcrumbs, ...overrides.breadcrumbs },
+    dataTable: { ...base.dataTable, ...overrides.dataTable, ...overrides.tableUtilities },
     dateInput: { ...base.dateInput, ...overrides.dateInput },
     datePicker: { ...base.datePicker, ...overrides.datePicker },
+    dialpad: { ...base.dialpad, ...overrides.dialpad },
     omnibar: { ...base.omnibar, ...overrides.omnibar },
     pagination: { ...base.pagination, ...overrides.pagination },
     pdfViewer: { ...base.pdfViewer, ...overrides.pdfViewer },
+    resizable: { ...base.resizable, ...overrides.resizable },
     timeInput: { ...base.timeInput, ...overrides.timeInput },
     toast: { ...base.toast, ...overrides.toast },
   };
