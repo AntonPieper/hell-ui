@@ -78,7 +78,11 @@ import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
 
       <h2>Adapter contract</h2>
       <p>
-        The built-in adapter emits a structured 24-hour <code>HellTimeValue</code>. Product teams that need localized parsing, named shortcuts, or a different display policy should provide <code>HELL_TIME_INPUT_ADAPTER</code> instead of forking the component.
+        The built-in parser emits a structured 24-hour <code>HellTimeValue</code>. It accepts
+        <code>HH:mm</code>, <code>HH:mm:ss</code>, and documented common 12-hour shortcuts such as
+        <code>9:00 am</code> / <code>1:30PM</code>, then normalizes output to 24-hour values.
+        Product teams that need localized parsing, named shortcuts, or a different display policy should
+        provide <code>HELL_TIME_INPUT_ADAPTER</code> instead of forking the component.
       </p>
 
       <h2>Do</h2>

@@ -7,8 +7,10 @@
 Hell UI is a compact Angular component system for dense business applications.
 It favors directive-first primitives, optional styled primitives, opinionated
 composites, and heavier features behind feature-specific entry points.
-Feature dependencies are optional peers; install only the feature stacks your
-app imports.
+The root `@hell-ui/angular` export is intentionally scoped to stable core + primitives;
+composites and features are intended for secondary entry points. Feature
+dependencies are optional peers; install only the feature stacks your app
+imports.
 
 ## Workspace
 
@@ -25,7 +27,7 @@ pnpm ci:verify # full pre-push: unit, architecture, lint, e2e, package consumer,
 Install the light UI stack when using primitives/composites:
 
 ```bash
-pnpm add @hell-ui/angular ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome tailwindcss
+pnpm add @hell-ui/angular @angular/forms @angular/router ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
 ```
 
 Prefer the narrowest entry point that contains the API you use:

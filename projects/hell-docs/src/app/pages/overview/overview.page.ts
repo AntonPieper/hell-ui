@@ -46,8 +46,8 @@ import { HELL_CARD_DIRECTIVES, HellButton } from '@hell-ui/angular/primitives';
           shell and date input.
         </li>
         <li>
-          <strong>Features</strong> wrap larger dependencies such as CodeMirror, TanStack Table, and
-          PDF.js.
+          <strong>Features</strong> sit behind optional stacks such as CodeMirror or PDF.js for heavier
+          runtime surfaces.
         </li>
       </ul>
 

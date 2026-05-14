@@ -19,9 +19,10 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
         <h1>Table utilities</h1>
         <p>
           Table utilities from <code>@hell-ui/angular/features/table-utilities</code> are a set of
-          low-level structural directives for building dense table utilities, not a
-          batteries-included data grid. <code>@hell-ui/angular/features/data-table</code> is a compatibility
-          naming alias for this package.
+          low-level structural directives for table markup, selection, sorting affordances, and column
+          resizing. They are not a batteries-included data grid and do not wrap TanStack Table.
+          <code>@hell-ui/angular/features/data-table</code> is a compatibility naming alias for this
+          package.
         </p>
 
         <p>

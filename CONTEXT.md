@@ -53,7 +53,7 @@ A live Angular example plus its raw source code, preview options, and search met
 A public import path exposed by the `hell` package, including the root entry point and secondary entry points such as primitives, composites, core, and feature-specific imports.
 
 **Light Root Entry Point**
-The Package Entry Point policy where the root `hell` import stays convenient for stable core types, style contracts, primitives, and composites, while heavier features and internal runtime plumbing stay behind implementation seams instead of becoming public API.
+The Package Entry Point policy where the root `@hell-ui/angular` export stays constrained to stable core + primitives only; composites, features, and heavier runtime surfaces stay behind secondary entry points.
 
 **Floating Dismissal**
 The listener-driven part of a Floating Interaction that decides when outside pointer, outside focus, Escape, or caller-defined events should close a surface. The low-level module has no hidden default and does not depend on a closed reason enum. Each primitive or Composite composes explicit pure matcher dismissal rules such as library-provided `hellOutsideClick` rules or caller-defined rules. A rule returns a fixed dismiss decision or no match; composition functions such as `hellDismissOn`, `hellGuardDismiss`, and `hellWithDismissEffect` return the same rule type. The core module consumes only fixed decision effects such as preventDefault, stopPropagation, or focus restoration; it does not consume generic caller-defined cause shapes.

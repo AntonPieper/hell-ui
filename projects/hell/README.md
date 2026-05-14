@@ -13,21 +13,24 @@ Hell exposes:
 - Composites: higher-level recipes that may own useful structure.
 - Features: heavier modules behind feature-specific entry points.
 
+The root package `@hell-ui/angular` export is limited to stable core + primitives.
+Composites and features remain behind scoped entry points.
+
 ## Install
 
 ```bash
-pnpm add @hell-ui/angular ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome tailwindcss
+pnpm add @hell-ui/angular @angular/forms @angular/router ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
 ```
 
 Feature entry points add their own optional stacks only when imported. npm peer metadata is package-wide, so entry-point-specific peers are marked optional in `package.json`; treat this table as required for the entry point you import.
 
 | Entry point | Install when used |
 | --- | --- |
-| `@hell-ui/angular/primitives`, `@hell-ui/angular/composites` | `@angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome tailwindcss` |
+| `@hell-ui/angular/primitives`, `@hell-ui/angular/composites` | `@angular/forms @angular/router ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss` |
 | `@hell-ui/angular/features/table-utilities` | Angular + `tailwindcss` only |
 | `@hell-ui/angular/features/data-table` | Legacy compatibility alias for `@hell-ui/angular/features/table-utilities` |
 | `@hell-ui/angular/features/code-editor` | `@codemirror/view @codemirror/state @codemirror/commands @codemirror/language @lezer/highlight` plus any language package, e.g. `@codemirror/lang-javascript` |
-| `@hell-ui/angular/features/pdf-viewer` | `pdfjs-dist` plus the base light UI stack (`ng-primitives @ng-icons/core @ng-icons/font-awesome tailwindcss`) |
+| `@hell-ui/angular/features/pdf-viewer` | `pdfjs-dist` plus the base light UI stack (`@angular/forms @angular/router ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss`) |
 
 ## API Stability
 

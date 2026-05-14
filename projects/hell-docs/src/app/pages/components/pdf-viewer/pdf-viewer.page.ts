@@ -23,6 +23,10 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         heavy &mdash; load it lazily.
       </p>
       <p>
+        Browser-only runtime: requires <code>window</code> / <code>document</code>, so this feature is
+        not SSR-safe.
+      </p>
+      <p>
         PDF viewer is experimental: this is an app-surface recipe, not a stable primitive. It wraps pdf.js viewer
         internals for business-app document preview, while your app owns PDF.js/browser compatibility
         decisions (worker wiring, CSP, and browser support variance). Keep it behind a lazy feature
@@ -30,10 +34,10 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         workflows.
       </p>
       <p>
-        Install <code>pdfjs-dist</code> plus the light UI peers
-        (<code>ng-primitives @ng-icons/core @ng-icons/font-awesome tailwindcss</code>). The docs page loads
-        the pdf.js viewer stylesheet on demand, so lazy routes keep it out of the docs app's initial
-        bundle.
+        Install <code>pdfjs-dist</code> plus the light UI stack
+        (<code>@angular/forms @angular/router ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss</code>).
+        The docs page loads the pdf.js viewer stylesheet on demand, so lazy routes keep it out of
+        the docs app's initial bundle.
       </p>
 
       <h2>Lazy loading</h2>

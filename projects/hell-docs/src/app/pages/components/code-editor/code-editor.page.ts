@@ -23,6 +23,11 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
         the caller through <code>[extensions]</code>, so apps only install the languages they use.
       </p>
 
+      <p>
+        Browser-only runtime: requires <code>window</code> / <code>document</code>. Keep this
+        component behind client-only rendering boundaries; it is not SSR-safe.
+      </p>
+
       <h2>Editable Angular template</h2>
       <hd-example-tabs [code]="editorDemoCode" flush>
         <app-editor-demo />
