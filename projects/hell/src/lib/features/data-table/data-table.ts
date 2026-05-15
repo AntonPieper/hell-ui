@@ -1,3 +1,6 @@
+/**
+ * @deprecated Use `@hell-ui/angular/features/table-utilities` instead.
+ */
 import { HELL_LABELS } from '../../core/labels';
 import { hellFloatingTargetNode } from '../../core/floating-scope';
 import { HellStyleable } from '../../core/styleable';
@@ -105,7 +108,7 @@ function hostContains(host: HTMLElement, node: Node): boolean {
 }
 
 /**
- * Optional shell for a data table. Frames the table with the standard
+ * Optional shell for table utilities. Frames the table with the standard
  * elevated surface, border, radius, and overflow clipping. Place the
  * scroll container or the table directly inside.
  */
@@ -122,7 +125,7 @@ export class HellTableContainer extends HellStyleable {
 }
 
 /**
- * Marks a `<table>` as a hell data table. Applies the host class with the
+ * Marks a `<table>` for table utilities. Applies the host class with the
  * shared dense typography and border treatment, and switches the table to
  * a fixed layout so column resize CSS custom properties can be mapped by
  * the stylesheet. Pass `unstyled` to opt out of all class-based styling.
@@ -419,7 +422,7 @@ export class HellTableCell extends HellStyleable {
     '[class.hell-table-column-resizer]': '!unstyled()',
     '[attr.data-active]': 'dragging() ? "true" : null',
     '[attr.type]': 'nativeButtonType()',
-    '[attr.aria-label]': 'ariaLabel() ?? labels.dataTable.resizeColumn',
+    '[attr.aria-label]': 'ariaLabel() ?? labels.tableUtilities?.resizeColumn ?? labels.dataTable.resizeColumn',
     '[attr.aria-controls]': 'ariaControlsValue()',
     '[attr.aria-valuemin]': '0',
     '[attr.aria-valuemax]': '100',

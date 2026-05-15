@@ -48,13 +48,12 @@ export interface HellOmnibarLabels {
   readonly clearSearch: string;
 }
 
-export interface HellDataTableLabels {
-  readonly resizeColumn: string;
-}
-
 export interface HellTableUtilitiesLabels {
   readonly resizeColumn: string;
 }
+
+/** @deprecated Use {@link HellTableUtilitiesLabels}. */
+export type HellDataTableLabels = HellTableUtilitiesLabels;
 
 export interface HellDateInputLabels {
   readonly chooseDate: string;
@@ -125,6 +124,7 @@ export interface HellLabels {
   readonly audioPlayer: HellAudioPlayerLabels;
   readonly breadcrumbs: HellBreadcrumbLabels;
   readonly dataTable: HellDataTableLabels;
+  readonly tableUtilities: HellTableUtilitiesLabels;
   readonly dateInput: HellDateInputLabels;
   readonly datePicker: HellDatePickerLabels;
   readonly dialpad: HellDialpadLabels;
@@ -199,6 +199,9 @@ export const HELL_DEFAULT_LABELS: HellLabels = {
     resizePanels: 'Resize panels',
   },
   dataTable: {
+    resizeColumn: 'Resize column',
+  },
+  tableUtilities: {
     resizeColumn: 'Resize column',
   },
   dateInput: {
@@ -283,6 +286,7 @@ function hellMergeLabels(base: HellLabels, overrides: HellLabelOverrides): HellL
     audioPlayer: { ...base.audioPlayer, ...overrides.audioPlayer },
     breadcrumbs: { ...base.breadcrumbs, ...overrides.breadcrumbs },
     dataTable: { ...base.dataTable, ...overrides.dataTable, ...overrides.tableUtilities },
+    tableUtilities: { ...base.tableUtilities, ...overrides.tableUtilities, ...overrides.dataTable },
     dateInput: { ...base.dateInput, ...overrides.dateInput },
     datePicker: { ...base.datePicker, ...overrides.datePicker },
     dialpad: { ...base.dialpad, ...overrides.dialpad },
