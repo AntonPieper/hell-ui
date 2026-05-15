@@ -19,16 +19,16 @@ Composites and features remain behind scoped entry points.
 ## Install
 
 ```bash
-pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @angular/router @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
 # or
-npm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+npm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @angular/router @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
 ```
 
 Feature peers remain optional, but npm peer metadata is package-wide: install the base light stack for any package entry point.
 
 | Entry point | Install when used |
 | --- | --- |
-| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Base light stack: `@angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss` |
+| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Base light stack: `@angular/forms ng-primitives @angular/cdk @angular/router @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss` |
 | `@hell-ui/angular/features/table-utilities` | Base light stack |
 | `@hell-ui/angular/features/data-table` | Legacy compatibility alias for `@hell-ui/angular/features/table-utilities` |
 | `@hell-ui/angular/features/code-editor` | Base light stack plus `@codemirror/view @codemirror/state @codemirror/commands @codemirror/language @lezer/highlight` and any language package, e.g. `@codemirror/lang-javascript` |

@@ -37,7 +37,7 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
       </p>
       <p>
         Install <code>pdfjs-dist</code> plus the light UI stack
-        (<code>@angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss</code>).
+        (<code>@angular/forms ng-primitives @angular/cdk @angular/router @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss</code>).
         The docs page loads the pdf.js viewer stylesheet on demand, so lazy routes keep it out of
         the docs app's initial bundle.
       </p>

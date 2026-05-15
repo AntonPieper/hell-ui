@@ -31,9 +31,9 @@ The repository workspace is pnpm-first and CI-backed by the checked-in
 Install the light UI stack when using primitives/composites:
 
 ```bash
-pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @angular/router @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
 # or
-npm install @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+npm install @hell-ui/angular @angular/forms ng-primitives @angular/cdk @angular/router @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
 ```
 
 Prefer the narrowest entry point that contains the API you use:
@@ -53,7 +53,7 @@ Peer dependency expectations by entry point:
 
 | Entry point | Required peers |
 |---|---|
-| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Light UI stack: `@angular/forms`, `ng-primitives`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `@ng-icons/font-awesome`, `rxjs`, `tailwindcss` |
+| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Light UI stack: `@angular/forms`, `ng-primitives`, `@angular/cdk`, `@angular/router`, `@floating-ui/dom`, `@ng-icons/core`, `@ng-icons/font-awesome`, `rxjs`, `tailwindcss` |
 | `@hell-ui/angular/features/table-utilities` | Light UI stack |
 | `@hell-ui/angular/features/code-editor` | Light UI stack plus `@codemirror/*`, `@lezer/highlight` |
 | `@hell-ui/angular/features/pdf-viewer` | Light UI stack plus `pdfjs-dist` |

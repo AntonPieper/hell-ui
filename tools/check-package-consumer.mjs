@@ -40,6 +40,7 @@ const angularAppDeps = [
   '@angular/compiler',
   '@angular/core',
   '@angular/forms',
+  '@angular/router',
   '@angular/platform-browser',
   'tslib',
 ];
