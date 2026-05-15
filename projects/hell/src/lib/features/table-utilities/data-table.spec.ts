@@ -7,7 +7,7 @@ import {
   HELL_TABLE_UTILITY_DIRECTIVES,
   HELL_TABLE_UTILITIES_DIRECTIVES,
   type HellTableColumnResizeEvent,
-} from './data-table';
+} from './table-utilities';
 
 @Component({
   imports: [...HELL_TABLE_DIRECTIVES],
@@ -131,7 +131,7 @@ class DataTableResizerAriaOverrideHost {}
 })
 class DataTableLocalizedLabelHost {}
 
-describe('Hell data table directives', () => {
+describe('Hell table utilities directives', () => {
   it('preserves legacy alias exports while preferring plural import alias', () => {
     expect(HELL_TABLE_UTILITIES_DIRECTIVES).toBe(HELL_TABLE_UTILITY_DIRECTIVES);
     expect(HELL_TABLE_DIRECTIVES).toBe(HELL_TABLE_UTILITY_DIRECTIVES);

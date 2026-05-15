@@ -743,7 +743,7 @@ function checkLabelContract() {
     ['projects/hell/src/lib/composites/resizable/resizable.ts', ['Resize panels']],
     ['projects/hell/src/lib/composites/time-input/time-input.ts', ['Choose time', 'Subtract 5 minutes']],
     ['projects/hell/src/lib/composites/toast/toast.ts', ['aria-label="Notifications"', 'aria-label="Dismiss"']],
-    ['projects/hell/src/lib/features/data-table/data-table.ts', ['Resize column']],
+    ['projects/hell/src/lib/features/table-utilities/table-utilities.ts', ['Resize column']],
     ['projects/hell/src/lib/features/pdf-viewer/pdf-viewer.html', ['Find in document', 'Zoom level']],
     ['projects/hell/src/lib/primitives/date-picker/date-picker.ts', ['Previous year', 'Previous month']],
   ];
@@ -997,15 +997,15 @@ function checkInteractiveTriggerSelectorContract() {
 }
 
 function checkTableUtilityContract() {
-  const source = readFile(join(root, 'projects/hell/src/lib/features/data-table/data-table.ts'));
+  const source = readFile(join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'));
   if (!source.includes('HELL_TABLE_UTILITIES_DIRECTIVES')) {
-    failures.push('Table feature must expose HELL_TABLE_UTILITIES_DIRECTIVES as its preferred import');
+    failures.push('Table utilities feature must expose HELL_TABLE_UTILITIES_DIRECTIVES as its preferred import');
   }
   if (!source.includes('HELL_TABLE_UTILITY_DIRECTIVES')) {
-    failures.push('Table feature must preserve HELL_TABLE_UTILITY_DIRECTIVES compatibility alias');
+    failures.push('Table utilities feature must preserve HELL_TABLE_UTILITY_DIRECTIVES compatibility alias');
   }
   if (!source.includes('HELL_TABLE_DIRECTIVES')) {
-    failures.push('Table feature must preserve HELL_TABLE_DIRECTIVES compatibility alias');
+    failures.push('Table utilities feature must preserve HELL_TABLE_DIRECTIVES compatibility alias');
   }
 
   const docs = readFile(
@@ -1020,14 +1020,14 @@ function checkTableUtilityContract() {
 }
 
 function checkTableSortButtonContract() {
-  const tableSourcePath = join(root, 'projects/hell/src/lib/features/data-table/data-table.ts');
+  const tableSourcePath = join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts');
   const tableSource = readFile(tableSourcePath);
   const headerModule = decoratedClassModules(tableSource).find(
     (module) => module.className === 'HellTableHeaderCell',
   );
 
   if (!headerModule) {
-    failures.push('Data table must declare HellTableHeaderCell');
+    failures.push('Table utilities must declare HellTableHeaderCell');
     return;
   }
 
@@ -1040,7 +1040,7 @@ function checkTableSortButtonContract() {
   }
 
   if (!/export\s+class\s+HellTableSortButton\b/.test(tableSource)) {
-    failures.push('Data table must expose button[hellTableSortButton] for sortable headers');
+    failures.push('Table utilities must expose button[hellTableSortButton] for sortable headers');
   }
 
   const docsRoot = join(root, 'projects/hell-docs/src/app/pages/components/data-table');

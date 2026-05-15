@@ -1,1 +1,196 @@
-@import './data-table.css';
+@layer components {
+
+  /* Optional shell — frames the table with a border and rounded corners. */
+
+  .hell-table-container {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      overflow: clip;
+      background-color: var(--color-hell-surface-elevated);
+      border: 1px solid var(--color-hell-border);
+      border-radius: var(--radius-md);
+    }
+
+  /*
+   * Core table — uses table-layout: fixed so resize CSS custom properties
+   * can control column width, and border-collapse: separate so a sticky
+   * header cell doesn't lose its bottom border to the next row's
+   * collapsed-border edge (which is what produced the gap above the
+   * sticky header). Borders are drawn on individual cells instead.
+   */
+
+  .hell-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+      font-size: 13px;
+      color: var(--color-hell-foreground);
+    }
+
+  .hell-table[data-content-width='true'] {
+      min-width: max-content;
+    }
+
+  .hell-table-head {
+      background-color: var(--color-hell-surface-subtle);
+    }
+
+  .hell-table-header-cell,
+  .hell-table-cell {
+      text-align: start;
+      vertical-align: middle;
+      padding-inline: calc(var(--spacing) * 3);
+      padding-block: calc(var(--spacing) * 2);
+      border-bottom: 1px solid var(--color-hell-border);
+    }
+
+  .hell-table-cell {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+  .hell-table-cell[data-align='center'] {
+      text-align: center;
+    }
+
+  .hell-table-cell[data-align='end'] {
+      text-align: end;
+    }
+
+  .hell-table-cell[data-space='empty'] {
+      padding-block: calc(var(--spacing) * 8);
+    }
+
+  .hell-table-header-cell {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      width: var(--hell-table-col-width, auto);
+      font-weight: var(--font-weight-semibold);
+      white-space: nowrap;
+      -webkit-user-select: none;
+      user-select: none;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-hell-foreground-muted);
+      background-color: var(--color-hell-surface-subtle);
+      cursor: default;
+    }
+
+  .hell-table-header-cell[data-sortable='true'] {
+      padding-inline-end: calc(var(--spacing) * 8);
+    }
+
+  .hell-table-sort-button {
+      display: inline-flex;
+      max-width: 100%;
+      align-items: center;
+      gap: calc(var(--spacing) * 1.5);
+      padding: 0;
+      border: 0;
+      border-radius: var(--radius-sm);
+      color: inherit;
+      font: inherit;
+      letter-spacing: inherit;
+      text-align: inherit;
+      text-transform: inherit;
+      background: transparent;
+    }
+
+  .hell-table-header-cell[data-sortable='true'] .hell-table-sort-button {
+      cursor: pointer;
+    }
+
+  .hell-table-header-cell[data-sortable='true'] .hell-table-sort-button::after {
+      content: '';
+      display: block;
+      width: calc(var(--spacing) * 3);
+      height: calc(var(--spacing) * 3);
+      flex: 0 0 auto;
+      background-color: currentcolor;
+      color: var(--color-hell-foreground-subtle);
+      -webkit-mask: var(--hell-icon-chevron-up-down) center / contain no-repeat;
+      mask: var(--hell-icon-chevron-up-down) center / contain no-repeat;
+      transition:
+        color var(--hell-duration-fast) var(--ease-hell-out);
+    }
+
+  .hell-table-header-cell[data-sortable='true'][data-sort='asc'] .hell-table-sort-button::after {
+      color: var(--color-hell-primary);
+      -webkit-mask-image: var(--hell-icon-chevron-up);
+      mask-image: var(--hell-icon-chevron-up);
+    }
+
+  .hell-table-header-cell[data-sortable='true'][data-sort='desc'] .hell-table-sort-button::after {
+      color: var(--color-hell-primary);
+      -webkit-mask-image: var(--hell-icon-chevron-down);
+      mask-image: var(--hell-icon-chevron-down);
+    }
+
+  .hell-table-sort-button:focus-visible {
+      outline: 2px solid var(--color-hell-focus-ring);
+      outline-offset: 2px;
+    }
+
+  .hell-table-row {
+      transition: background-color var(--hell-duration-fast) var(--ease-hell-out);
+    }
+
+  .hell-table-row[data-interactive='true'] {
+      cursor: pointer;
+    }
+
+  .hell-table-row[data-interactive='true']:hover {
+      background-color: var(--color-hell-surface-subtle);
+    }
+
+  .hell-table-row[data-selected='true'] {
+      background-color: var(--color-hell-primary-soft);
+    }
+
+  .hell-table-row[data-interactive='true']:focus-visible {
+      outline: 2px solid var(--color-hell-focus-ring);
+      outline-offset: -2px;
+    }
+
+  /* Column resizer — sits at the trailing edge of a header cell. */
+
+  .hell-table-column-resizer {
+      position: absolute;
+      inset-block: 0;
+      inset-inline-end: 0;
+      z-index: 2;
+      width: 8px;
+      cursor: col-resize;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: none;
+      display: inline-flex;
+      align-items: stretch;
+      justify-content: flex-end;
+    }
+
+  .hell-table-column-resizer [data-slot='grip'] {
+      width: 1px;
+      background-color: var(--color-hell-border);
+      transition:
+        background-color var(--hell-duration-fast) var(--ease-hell-out),
+        width var(--hell-duration-fast) var(--ease-hell-out);
+    }
+
+  .hell-table-column-resizer:hover [data-slot='grip'],
+  .hell-table-column-resizer[data-active='true'] [data-slot='grip'] {
+      width: 2px;
+      background-color: var(--color-hell-primary);
+    }
+
+  .hell-table-column-resizer:focus-visible {
+      outline: 2px solid var(--color-hell-focus-ring);
+      outline-offset: -2px;
+    }
+
+}
