@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { HellRadio, HellRadioGroup } from './radio';
+import { HellNativeRadio, HellNativeRadioGroup, HellRadio, HellRadioGroup } from './radio';
 
 @Component({
   selector: 'hell-radio-host',
@@ -74,6 +74,21 @@ class RadioDisabledRequiredHost {
   `,
 })
 class RadioItemDisabledHost {}
+
+@Component({
+  selector: 'hell-native-radio-form-host',
+  imports: [ReactiveFormsModule, HellNativeRadioGroup, HellNativeRadio],
+  template: `
+    <div hellNativeRadioGroup orientation="horizontal">
+      <label><input type="radio" hellNativeRadio [formControl]="control" value="a" />A</label>
+      <label><input type="radio" hellNativeRadio [formControl]="control" value="b" />B</label>
+    </div>
+  `,
+})
+class NativeRadioFormHost {
+  readonly control = new FormControl<string | null>(null);
+}
+
 describe('HellRadio', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -83,6 +98,7 @@ describe('HellRadio', () => {
         RadioRequiredFormHost,
         RadioDisabledRequiredHost,
         RadioItemDisabledHost,
+        NativeRadioFormHost,
       ],
     }).compileComponents();
   });
@@ -207,6 +223,33 @@ describe('HellRadio', () => {
     expect(first.getAttribute('aria-disabled')).toBe('true');
     expect(second.getAttribute('aria-disabled')).toBe(null);
     expect(second.hasAttribute('disabled')).toBe(false);
+  });
+
+  it('offers native radio inputs with built-in form semantics', () => {
+    const fixture = TestBed.createComponent(NativeRadioFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const group = query<HTMLElement>(fixture.nativeElement, '[hellNativeRadioGroup]');
+    const radios = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLInputElement>(
+      'input[hellNativeRadio]',
+    );
+
+    expect(group.classList.contains('hell-radio-group')).toBe(true);
+    expect(group.getAttribute('data-orientation')).toBe('horizontal');
+    expect(radios[0].type).toBe('radio');
+    expect(radios[0].classList.contains('hell-radio')).toBe(true);
+
+    host.control.setValue('b');
+    fixture.detectChanges();
+
+    expect(radios[1].checked).toBe(true);
+
+    radios[0].click();
+    fixture.detectChanges();
+
+    expect(host.control.value).toBe('a');
+    expect(radios[0].checked).toBe(true);
   });
 });
 

@@ -1,9 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Directive,
+  ElementRef,
   booleanAttribute,
   computed,
   forwardRef,
+  inject,
   input,
   output,
   signal,
@@ -86,5 +89,32 @@ export class HellSwitch extends HellStyleable implements ControlValueAccessor {
 
   protected markControlTouched(): void {
     this.cva.markTouched();
+  }
+}
+
+/**
+ * Native switch variant that uses browser checkbox semantics and Angular Forms.
+ */
+@Directive({
+  selector: 'input[type="checkbox"][hellNativeSwitch]',
+  host: {
+    '[class.hell-switch]': '!unstyled()',
+    '[attr.type]': '"checkbox"',
+    '[attr.role]': '"switch"',
+    '[attr.required]': 'required() ? "" : null',
+    '[attr.aria-required]': 'required() ? "true" : null',
+    '[attr.data-required]': 'required() ? "true" : null',
+    '(change)': 'onChange()',
+  },
+})
+export class HellNativeSwitch extends HellStyleable {
+  readonly required = input(false, { alias: 'required', transform: booleanAttribute });
+
+  readonly checkedChange = output<boolean>();
+
+  private readonly host = inject(ElementRef<HTMLInputElement>);
+
+  protected onChange(): void {
+    this.checkedChange.emit(this.host.nativeElement.checked);
   }
 }

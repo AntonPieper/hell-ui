@@ -135,6 +135,12 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     terms: 'checkbox examples components/checkbox/examples/examples.example components/checkbox hellCheckbox',
   },
   {
+    title: 'Checkbox: Native',
+    path: '/components/checkbox',
+    detail: 'components/checkbox/examples/native.example.ts',
+    terms: 'checkbox native components/checkbox/examples/native.example components/checkbox hellNativeCheckbox',
+  },
+  {
     title: 'Combobox: Basic',
     path: '/components/combobox',
     detail: 'components/combobox/examples/basic.example.ts',
@@ -145,6 +151,12 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/combobox',
     detail: 'components/combobox/examples/multiple.example.ts',
     terms: 'combobox multiple components/combobox/examples/multiple.example components/combobox hellCombobox multiple',
+  },
+  {
+    title: 'Combobox: Preset',
+    path: '/components/combobox',
+    detail: 'components/combobox/examples/basic-preset.example.ts',
+    terms: 'combobox preset components/combobox/examples/basic-preset.example components/combobox hell-combobox-basic',
   },
   {
     title: 'Date Picker: Bounded',
@@ -303,6 +315,12 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     terms: 'radio horizontal components/radio/examples/horizontal.example components/radio hellRadioGroup hellRadio',
   },
   {
+    title: 'Radio: Native',
+    path: '/components/radio',
+    detail: 'components/radio/examples/native.example.ts',
+    terms: 'radio native components/radio/examples/native.example components/radio hellNativeRadio hellNativeRadioGroup',
+  },
+  {
     title: 'Search: Basic',
     path: '/components/search',
     detail: 'components/search/examples/basic.example.ts',
@@ -313,6 +331,12 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/select',
     detail: 'components/select/examples/basic.example.ts',
     terms: 'select basic components/select/examples/basic.example components/select hellSelect hellSelectOption hellSelectDropdown',
+  },
+  {
+    title: 'Select: Preset',
+    path: '/components/select',
+    detail: 'components/select/examples/basic-preset.example.ts',
+    terms: 'select preset components/select/examples/basic-preset.example components/select hell-select-basic',
   },
   {
     title: 'Separator: Flush Inside A Card',
@@ -421,6 +445,12 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/switch',
     detail: 'components/switch/examples/examples.example.ts',
     terms: 'switch examples components/switch/examples/examples.example components/switch hellSwitch',
+  },
+  {
+    title: 'Switch: Native',
+    path: '/components/switch',
+    detail: 'components/switch/examples/native.example.ts',
+    terms: 'switch native components/switch/examples/native.example components/switch hellNativeSwitch',
   },
   {
     title: 'Tabs: Example',

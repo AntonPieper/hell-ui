@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/primitives';
+import { HELL_SELECT_BASIC_DIRECTIVES, HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/primitives';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { SelectBasicExample } from './examples/basic.example';
 import selectBasicExampleCodeRaw from './examples/basic.example.ts?raw' with { loader: 'text' };
+import { SelectBasicPresetExample } from './examples/basic-preset.example';
+import selectBasicPresetExampleCodeRaw from './examples/basic-preset.example.ts?raw' with { loader: 'text' };
 
 @Component({
   selector: 'hd-select',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, ...HELL_SELECT_DIRECTIVES, SelectBasicExample],
+  imports: [ExampleTabs, ...HELL_SELECT_DIRECTIVES, ...HELL_SELECT_BASIC_DIRECTIVES, SelectBasicExample, SelectBasicPresetExample],
   template: `
     <article class="hd-prose">
       <h1>Select</h1>
@@ -24,8 +26,17 @@ import selectBasicExampleCodeRaw from './examples/basic.example.ts?raw' with { l
         <app-select-basic-example />
       </hd-example-tabs>
 
+      <h2>Preset</h2>
+      <hd-example-tabs [code]="selectBasicPresetExampleCode">
+        <app-select-basic-preset-example />
+      </hd-example-tabs>
+
       <h2>API</h2>
       <ul>
+        <li>
+          <code>&lt;hell-select-basic&gt;</code>: compact preset composing the select pieces and a single
+          option contract for quick adoption.
+        </li>
         <li>
           <code>[hellSelect]</code>: trigger and state container. Inputs <code>value</code>,
           <code>multiple</code>, <code>disabled</code>, <code>compareWith</code>,
@@ -67,4 +78,5 @@ import selectBasicExampleCodeRaw from './examples/basic.example.ts?raw' with { l
 })
 export class SelectPage {
   protected readonly selectBasicExampleCode = selectBasicExampleCodeRaw;
+  protected readonly selectBasicPresetExampleCode = selectBasicPresetExampleCodeRaw;
 }

@@ -1,10 +1,14 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/primitives';
+import { HELL_COMBOBOX_BASIC_DIRECTIVES, HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/primitives';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { ComboboxBasicExample } from './examples/basic.example';
 import comboboxBasicExampleCodeRaw from './examples/basic.example.ts?raw' with { loader: 'text' };
 import { ComboboxMultipleExample } from './examples/multiple.example';
 import comboboxMultipleExampleCodeRaw from './examples/multiple.example.ts?raw' with {
+  loader: 'text',
+};
+import { ComboboxBasicPresetExample } from './examples/basic-preset.example';
+import comboboxBasicPresetExampleCodeRaw from './examples/basic-preset.example.ts?raw' with {
   loader: 'text',
 };
 
@@ -14,7 +18,9 @@ import comboboxMultipleExampleCodeRaw from './examples/multiple.example.ts?raw' 
   imports: [
     ExampleTabs,
     ...HELL_COMBOBOX_DIRECTIVES,
+    ...HELL_COMBOBOX_BASIC_DIRECTIVES,
     ComboboxBasicExample,
+    ComboboxBasicPresetExample,
     ComboboxMultipleExample,
   ],
   template: `
@@ -32,6 +38,11 @@ import comboboxMultipleExampleCodeRaw from './examples/multiple.example.ts?raw' 
         <app-combobox-basic-example />
       </hd-example-tabs>
 
+      <h2>Preset</h2>
+      <hd-example-tabs [code]="comboboxBasicPresetExampleCode">
+        <app-combobox-basic-preset-example />
+      </hd-example-tabs>
+
       <h2>Multiple</h2>
       <hd-example-tabs [code]="comboboxMultipleExampleCode">
         <app-combobox-multiple-example />
@@ -39,6 +50,10 @@ import comboboxMultipleExampleCodeRaw from './examples/multiple.example.ts?raw' 
 
       <h2>API</h2>
       <ul>
+        <li>
+          <code>&lt;hell-combobox-basic&gt;</code>: compact preset that composes input+button+
+          portal+options and applies common display filtering.
+        </li>
         <li>
           <code>[hellCombobox]</code>: container.
           Inputs <code>value</code>, <code>multiple</code>, <code>disabled</code>,
@@ -85,5 +100,6 @@ import comboboxMultipleExampleCodeRaw from './examples/multiple.example.ts?raw' 
 })
 export class ComboboxPage {
   protected readonly comboboxBasicExampleCode = comboboxBasicExampleCodeRaw;
+  protected readonly comboboxBasicPresetExampleCode = comboboxBasicPresetExampleCodeRaw;
   protected readonly comboboxMultipleExampleCode = comboboxMultipleExampleCodeRaw;
 }

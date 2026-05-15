@@ -4,11 +4,15 @@ import { CheckboxExamplesExample } from './examples/examples.example';
 import checkboxExamplesExampleCodeRaw from './examples/examples.example.ts?raw' with {
   loader: 'text',
 };
+import { CheckboxNativeExample } from './examples/native.example';
+import checkboxNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-checkbox',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, CheckboxExamplesExample],
+  imports: [ExampleTabs, CheckboxExamplesExample, CheckboxNativeExample],
   template: `
     <article class="hd-prose">
       <h1>Checkbox</h1>
@@ -27,6 +31,11 @@ import checkboxExamplesExampleCodeRaw from './examples/examples.example.ts?raw' 
       </p>
       <hd-example-tabs [code]="checkboxExamplesExampleCode" previewClass="grid gap-2 max-w-md">
         <app-checkbox-examples-example />
+      </hd-example-tabs>
+
+      <h2>Native path</h2>
+      <hd-example-tabs [code]="checkboxNativeExampleCode" previewClass="grid gap-2 max-w-md">
+        <app-checkbox-native-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -53,4 +62,5 @@ import checkboxExamplesExampleCodeRaw from './examples/examples.example.ts?raw' 
 })
 export class CheckboxPage {
   protected readonly checkboxExamplesExampleCode = checkboxExamplesExampleCodeRaw;
+  protected readonly checkboxNativeExampleCode = checkboxNativeExampleCodeRaw;
 }

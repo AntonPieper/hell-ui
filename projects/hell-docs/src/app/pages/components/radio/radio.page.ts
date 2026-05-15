@@ -8,11 +8,15 @@ import { RadioHorizontalExample } from './examples/horizontal.example';
 import radioHorizontalExampleCodeRaw from './examples/horizontal.example.ts?raw' with {
   loader: 'text',
 };
+import { RadioNativeExample } from './examples/native.example';
+import radioNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-radio',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, RadioExampleExample, RadioHorizontalExample],
+  imports: [ExampleTabs, RadioExampleExample, RadioHorizontalExample, RadioNativeExample],
   template: `
     <article class="hd-prose">
       <h1>Radio</h1>
@@ -26,6 +30,11 @@ import radioHorizontalExampleCodeRaw from './examples/horizontal.example.ts?raw'
       <h2>Horizontal</h2>
       <hd-example-tabs [code]="radioHorizontalExampleCode">
         <app-radio-horizontal-example />
+      </hd-example-tabs>
+
+      <h2>Native path</h2>
+      <hd-example-tabs [code]="radioNativeExampleCode">
+        <app-radio-native-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -59,4 +68,5 @@ import radioHorizontalExampleCodeRaw from './examples/horizontal.example.ts?raw'
 export class RadioPage {
   protected readonly radioExampleExampleCode = radioExampleExampleCodeRaw;
   protected readonly radioHorizontalExampleCode = radioHorizontalExampleCodeRaw;
+  protected readonly radioNativeExampleCode = radioNativeExampleCodeRaw;
 }

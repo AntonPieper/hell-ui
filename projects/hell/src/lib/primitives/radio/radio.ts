@@ -8,6 +8,7 @@ import {
   forwardRef,
   inject,
   input,
+  output,
 } from '@angular/core';
 import {
   ControlValueAccessor,
@@ -148,6 +149,40 @@ export class HellRadio extends HellStyleable {
   protected readonly groupDisabled = computed(() => this.groupState().disabled());
   protected readonly itemDisabled = computed(() => this.radioItem.disabled());
   protected readonly isDisabled = computed(() => this.groupDisabled() || this.itemDisabled());
+}
+
+@Directive({
+  selector: '[hellNativeRadioGroup]',
+  host: {
+    '[class.hell-radio-group]': '!unstyled()',
+    '[attr.data-orientation]': 'orientation()',
+    role: 'radiogroup',
+  },
+})
+export class HellNativeRadioGroup extends HellStyleable {
+  readonly orientation = input<HellOrientation>('vertical');
+}
+
+@Directive({
+  selector: 'input[type="radio"][hellNativeRadio]',
+  host: {
+    '[class.hell-radio]': '!unstyled()',
+    '[attr.type]': '"radio"',
+    '[attr.required]': 'required() ? "" : null',
+    '[attr.aria-required]': 'required() ? "true" : null',
+    '[attr.data-required]': 'required() ? "true" : null',
+    '(change)': 'onChange()',
+  },
+})
+export class HellNativeRadio extends HellStyleable {
+  readonly required = input(false, { alias: 'required', transform: booleanAttribute });
+
+  readonly checkedChange = output<boolean>();
+  private readonly host = inject(ElementRef<HTMLInputElement>);
+
+  protected onChange(): void {
+    this.checkedChange.emit(this.host.nativeElement.checked);
+  }
 }
 
 export { NgpRadioIndicator as HellRadioIndicator };

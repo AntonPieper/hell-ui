@@ -1,10 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Directive,
+  ElementRef,
   booleanAttribute,
   computed,
   effect,
   forwardRef,
+  inject,
   input,
   output,
   signal,
@@ -148,5 +151,43 @@ export class HellCheckbox extends HellStyleable implements ControlValueAccessor,
     if (!this.required() || control?.disabled || this.effectiveDisabled()) return null;
     const checked = control ? control.value === true : this.effectiveChecked();
     return checked ? null : { required: true };
+  }
+}
+
+/**
+ * Native checkbox variant that leans on browser + Angular form semantics instead of
+ * ng-primitives + custom CVA wiring.
+ */
+@Directive({
+  selector: 'input[type="checkbox"][hellNativeCheckbox]',
+  host: {
+    '[class.hell-checkbox]': '!unstyled()',
+    '[attr.type]': '"checkbox"',
+    '[attr.aria-required]': 'required() ? "true" : null',
+    '[attr.data-indeterminate]': 'indeterminate() ? "" : null',
+    '(change)': 'onChange()',
+    '[attr.data-required]': 'required() ? "true" : null',
+    '[attr.required]': 'required() ? "" : null',
+  },
+})
+export class HellNativeCheckbox extends HellStyleable {
+  readonly required = input(false, { alias: 'required', transform: booleanAttribute });
+  readonly indeterminate = input(false, { alias: 'indeterminate', transform: booleanAttribute });
+
+  readonly checkedChange = output<boolean>();
+  readonly indeterminateChange = output<boolean>();
+
+  private readonly host = inject(ElementRef<HTMLInputElement>);
+
+  constructor() {
+    super();
+    effect(() => {
+      this.host.nativeElement.indeterminate = this.indeterminate();
+    });
+  }
+
+  protected onChange(): void {
+    this.checkedChange.emit(this.host.nativeElement.checked);
+    this.indeterminateChange.emit(this.host.nativeElement.indeterminate);
   }
 }

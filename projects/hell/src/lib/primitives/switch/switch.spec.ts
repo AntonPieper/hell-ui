@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { HellSwitch } from './switch';
+import { HellNativeSwitch, HellSwitch } from './switch';
 
 @Component({
   imports: [HellSwitch],
@@ -32,9 +32,30 @@ class SwitchFormHost {
   readonly checkedEvents: boolean[] = [];
 }
 
+@Component({
+  imports: [ReactiveFormsModule, HellNativeSwitch],
+  template: `
+    <label>
+      <input
+        type="checkbox"
+        hellNativeSwitch
+        [formControl]="control"
+        (checkedChange)="checkedEvents.push($event)"
+      />
+      Native switch
+    </label>
+  `,
+})
+class NativeSwitchFormHost {
+  readonly control = new FormControl(false, { nonNullable: true });
+  readonly checkedEvents: boolean[] = [];
+}
+
 describe('HellSwitch', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [SwitchHost, SwitchFormHost] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [SwitchHost, SwitchFormHost, NativeSwitchFormHost],
+    }).compileComponents();
   });
 
   it('uses a native button host and forwards switch state', () => {
@@ -88,6 +109,30 @@ describe('HellSwitch', () => {
     fixture.detectChanges();
 
     expect(sw.disabled).toBe(true);
+  });
+
+  it('offers a native switch path with built-in checkbox form semantics', () => {
+    const fixture = TestBed.createComponent(NativeSwitchFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const sw = query<HTMLInputElement>(fixture.nativeElement, 'input[hellNativeSwitch]');
+
+    expect(sw.type).toBe('checkbox');
+    expect(sw.getAttribute('role')).toBe('switch');
+    expect(sw.classList.contains('hell-switch')).toBe(true);
+
+    host.control.setValue(true);
+    fixture.detectChanges();
+
+    expect(sw.checked).toBe(true);
+    expect(sw.checked).toBe(true);
+
+    sw.click();
+    fixture.detectChanges();
+
+    expect(host.control.value).toBe(false);
+    expect(host.checkedEvents).toEqual([false]);
   });
 });
 

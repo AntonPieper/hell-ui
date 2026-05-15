@@ -5,7 +5,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { NgpSelect } from 'ng-primitives/select';
 
-import { HellSelect, HellSelectFormValue, HELL_SELECT_DIRECTIVES } from './select';
+import { HellSelect, HellSelectBasic, HellSelectFormValue, HELL_SELECT_DIRECTIVES } from './select';
 
 @Component({
   imports: [ReactiveFormsModule, ...HELL_SELECT_DIRECTIVES],
@@ -53,9 +53,27 @@ class SelectMultipleFormHost {
   readonly values: Array<HellSelectFormValue<string>> = [];
 }
 
+@Component({
+  imports: [ReactiveFormsModule, HellSelectBasic],
+  template: `
+    <hell-select-basic
+      [options]="options"
+      [formControl]="control"
+      (valueChange)="values.push($any($event))"
+    />
+  `,
+})
+class SelectBasicFormHost {
+  readonly options = ['Low', 'High'];
+  readonly control = new FormControl<string | null>(null);
+  readonly values: Array<string | null> = [];
+}
+
 describe('HellSelect', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [SelectFormHost, SelectMultipleFormHost] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [SelectFormHost, SelectMultipleFormHost, SelectBasicFormHost],
+    }).compileComponents();
   });
 
   it('integrates with reactive forms without echoing programmatic writes', async () => {
@@ -147,6 +165,38 @@ describe('HellSelect', () => {
     ngpSelect.valueChange.emit(arrayValue);
 
     expect(emitted).toBe(arrayValue);
+  });
+
+  it('provides a basic select preset with form value display and disabled state', () => {
+    const fixture = TestBed.createComponent(SelectBasicFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const preset = query<HTMLElement>(fixture.nativeElement, 'hell-select-basic');
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, 'hell-select-basic button[hellSelect]');
+
+    expect(preset.classList.contains('hell-select-basic')).toBe(true);
+    expect(preset.classList.contains('hell-select')).toBe(false);
+    expect(trigger.textContent?.trim()).toContain('Select');
+
+    host.control.setValue('High');
+    fixture.detectChanges();
+
+    expect(trigger.textContent?.trim()).toContain('High');
+    expect(host.values).toEqual([]);
+
+    trigger.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: trigger }));
+    fixture.detectChanges();
+    expect(host.control.touched).toBe(false);
+
+    trigger.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+    fixture.detectChanges();
+    expect(host.control.touched).toBe(true);
+
+    host.control.disable();
+    fixture.detectChanges();
+
+    expect(trigger.getAttribute('data-disabled')).toBe('');
   });
 });
 

@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { HellCheckbox } from './checkbox';
+import { HellCheckbox, HellNativeCheckbox } from './checkbox';
 
 @Component({
   selector: 'hell-checkbox-host',
@@ -71,10 +71,40 @@ class CheckboxDisabledRequiredHost {
   readonly control = new FormControl(false);
 }
 
+@Component({
+  selector: 'hell-native-checkbox-form-host',
+  imports: [ReactiveFormsModule, HellNativeCheckbox],
+  template: `
+    <label>
+      <input
+        type="checkbox"
+        hellNativeCheckbox
+        [formControl]="control"
+        [required]="required()"
+        [indeterminate]="indeterminate()"
+        (checkedChange)="checkedEvents.push($event)"
+      />
+      Native checkbox
+    </label>
+  `,
+})
+class NativeCheckboxFormHost {
+  readonly control = new FormControl(false, { nonNullable: true });
+  readonly required = signal(false);
+  readonly indeterminate = signal(false);
+  readonly checkedEvents: boolean[] = [];
+}
+
 describe('HellCheckbox', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CheckboxHost, CheckboxFormHost, CheckboxRequiredFormHost, CheckboxDisabledRequiredHost],
+      imports: [
+        CheckboxHost,
+        CheckboxFormHost,
+        CheckboxRequiredFormHost,
+        CheckboxDisabledRequiredHost,
+        NativeCheckboxFormHost,
+      ],
     }).compileComponents();
   });
 
@@ -170,6 +200,35 @@ describe('HellCheckbox', () => {
     expect(host.control.valid).toBe(true);
     expect(host.control.value).toBe(true);
     expect(host.control.getError('required')).toBeNull();
+  });
+
+  it('offers a native checkbox path with built-in form semantics', () => {
+    const fixture = TestBed.createComponent(NativeCheckboxFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const checkbox = query<HTMLInputElement>(fixture.nativeElement, 'input[hellNativeCheckbox]');
+
+    expect(checkbox.type).toBe('checkbox');
+    expect(checkbox.classList.contains('hell-checkbox')).toBe(true);
+    expect(checkbox.checked).toBe(false);
+
+    host.control.setValue(true);
+    host.required.set(true);
+    host.indeterminate.set(true);
+    fixture.detectChanges();
+
+    expect(checkbox.checked).toBe(true);
+    expect(checkbox.indeterminate).toBe(true);
+    expect(checkbox.checked).toBe(true);
+    expect(checkbox.getAttribute('data-indeterminate')).toBe('');
+    expect(checkbox.getAttribute('aria-required')).toBe('true');
+
+    checkbox.click();
+    fixture.detectChanges();
+
+    expect(host.control.value).toBe(false);
+    expect(host.checkedEvents).toEqual([false]);
   });
 
   it('does not report required when control is disabled', () => {

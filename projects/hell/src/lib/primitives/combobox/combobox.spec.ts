@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { NgpCombobox } from 'ng-primitives/combobox';
 
-import { HellCombobox, HellComboboxValue, HELL_COMBOBOX_DIRECTIVES } from './combobox';
+import { HellCombobox, HellComboboxBasic, HellComboboxValue, HELL_COMBOBOX_DIRECTIVES } from './combobox';
 
 @Component({
   imports: [ReactiveFormsModule, ...HELL_COMBOBOX_DIRECTIVES],
@@ -43,9 +43,41 @@ class ComboboxMultipleFormHost {
   readonly values: Array<HellComboboxValue<string>> = [];
 }
 
+@Component({
+  imports: [ReactiveFormsModule, HellComboboxBasic],
+  template: `
+    <hell-combobox-basic
+      [options]="options"
+      [formControl]="control"
+      (valueChange)="values.push($any($event))"
+    />
+  `,
+})
+class ComboboxBasicFormHost {
+  readonly options = ['Atlas', 'Nova'];
+  readonly control = new FormControl<string | null>(null);
+  readonly values: Array<string | null> = [];
+}
+
+@Component({
+  imports: [HellComboboxBasic],
+  template: `<hell-combobox-basic [options]="options" [value]="value()" />`
+})
+class ComboboxBasicValueHost {
+  readonly options = ['Atlas', 'Nova'];
+  readonly value = signal<string | null>('Atlas');
+}
+
 describe('HellCombobox', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [ComboboxFormHost, ComboboxMultipleFormHost] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [
+        ComboboxFormHost,
+        ComboboxMultipleFormHost,
+        ComboboxBasicFormHost,
+        ComboboxBasicValueHost,
+      ],
+    }).compileComponents();
   });
 
   it('integrates with reactive forms without echoing programmatic writes', async () => {
@@ -136,6 +168,57 @@ describe('HellCombobox', () => {
     ngpCombobox.valueChange.emit(arrayValue);
 
     expect(emitted).toBe(arrayValue);
+  });
+
+  it('provides a basic combobox preset with form value display and disabled state', () => {
+    const fixture = TestBed.createComponent(ComboboxBasicFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const preset = query<HTMLElement>(fixture.nativeElement, 'hell-combobox-basic');
+    const root = query<HTMLElement>(fixture.nativeElement, 'hell-combobox-basic [hellCombobox]');
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'hell-combobox-basic input[hellComboboxInput]');
+
+    expect(preset.classList.contains('hell-combobox-basic')).toBe(true);
+    expect(preset.classList.contains('hell-combobox')).toBe(false);
+
+    expect(input.placeholder).toBe('Search');
+
+    host.control.setValue('Nova');
+    fixture.detectChanges();
+
+    expect(input.value).toBe('Nova');
+    expect(host.values).toEqual([]);
+
+    root.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: root }));
+    fixture.detectChanges();
+    expect(host.control.touched).toBe(false);
+
+    root.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+    fixture.detectChanges();
+    expect(host.control.touched).toBe(true);
+
+    host.control.disable();
+    fixture.detectChanges();
+
+    expect(root.getAttribute('data-disabled')).toBe('');
+  });
+
+  it('syncs basic combobox external value changes into the filter input', async () => {
+    const fixture = TestBed.createComponent(ComboboxBasicValueHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const host = fixture.componentInstance;
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'hell-combobox-basic input[hellComboboxInput]');
+
+    expect(input.value).toBe('Atlas');
+
+    host.value.set('Nova');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(input.value).toBe('Nova');
   });
 });
 

@@ -4,11 +4,15 @@ import { SwitchExamplesExample } from './examples/examples.example';
 import switchExamplesExampleCodeRaw from './examples/examples.example.ts?raw' with {
   loader: 'text',
 };
+import { SwitchNativeExample } from './examples/native.example';
+import switchNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-switch',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, SwitchExamplesExample],
+  imports: [ExampleTabs, SwitchExamplesExample, SwitchNativeExample],
   template: `
     <article class="hd-prose">
       <h1>Switch</h1>
@@ -22,6 +26,11 @@ import switchExamplesExampleCodeRaw from './examples/examples.example.ts?raw' wi
       <h2>Examples</h2>
       <hd-example-tabs [code]="switchExamplesExampleCode" previewClass="grid gap-2 max-w-md">
         <app-switch-examples-example />
+      </hd-example-tabs>
+
+      <h2>Native path</h2>
+      <hd-example-tabs [code]="switchNativeExampleCode" previewClass="grid gap-2 max-w-md">
+        <app-switch-native-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -46,4 +55,5 @@ import switchExamplesExampleCodeRaw from './examples/examples.example.ts?raw' wi
 })
 export class SwitchPage {
   protected readonly switchExamplesExampleCode = switchExamplesExampleCodeRaw;
+  protected readonly switchNativeExampleCode = switchNativeExampleCodeRaw;
 }
