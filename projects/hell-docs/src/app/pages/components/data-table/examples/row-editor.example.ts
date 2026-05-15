@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/c
 import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/composites';
 
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
+import { HellButton } from '@hell-ui/angular/primitives';
 
 interface Row {
   id: number;
@@ -21,7 +22,7 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
 @Component({
   selector: 'app-data-table-row-editor-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_RESIZABLE_DIRECTIVES, ...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [...HELL_RESIZABLE_DIRECTIVES, ...HELL_TABLE_UTILITIES_DIRECTIVES, HellButton],
   template: `
     <div hellResizable orientation="horizontal" class="h-[420px]">
       <div hellResizablePane [initialFlex]="3" [minSize]="280">
@@ -42,6 +43,7 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
                   <span hellTableColumnResizer></span>
                 </th>
                 <th hellTableHeaderCell>Role</th>
+                <th hellTableHeaderCell>Actions</th>
               </tr>
             </thead>
             <tbody hellTableBody>
@@ -56,6 +58,9 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
                   <td hellTableCell>{{ row.name }}</td>
                   <td hellTableCell>{{ row.email }}</td>
                   <td hellTableCell>{{ row.role }}</td>
+                  <td hellTableCell>
+                    <button hellButton type="button" variant="ghost" size="xs">Open</button>
+                  </td>
                 </tr>
               }
             </tbody>
