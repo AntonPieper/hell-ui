@@ -16,6 +16,8 @@ import { runPackageManager } from './package-manager.mjs';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const distHell = join(root, 'dist/hell');
 const keep = process.env.HELL_KEEP_PACKAGE_CONSUMER === '1';
+const selectedScenarioNames = parseScenarioSelection(process.argv.slice(2));
+const npmTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_TIMEOUT_MS, 240_000);
 
 runRootPackageManager(['run', 'build:lib'], root);
 
@@ -41,6 +43,7 @@ const angularAppDeps = [
   '@angular/core',
   '@angular/forms',
   '@angular/platform-browser',
+  '@angular/router',
   'tslib',
 ];
 const lightUiDeps = [
@@ -134,8 +137,10 @@ const scenarios = [
   },
 ];
 
+const enabledScenarios = selectScenarios(scenarios, selectedScenarioNames);
+
 try {
-  for (const scenario of scenarios) {
+  for (const scenario of enabledScenarios) {
     runConsumerScenario(scenario);
   }
 } finally {
@@ -143,12 +148,88 @@ try {
   else rmSync(packedHell.root, { force: true, recursive: true });
 }
 
+function parseScenarioSelection(args) {
+  const argSelection = parseScenarioTokens(args, false);
+  if (argSelection.length) return argSelection;
+
+  const envSelection = parseScenarioTokens(
+    [process.env.HELL_PACKAGE_CONSUMER_SCENARIOS ?? ''],
+    true,
+  );
+  return envSelection;
+}
+
+function parseScenarioTokens(values, envOnly) {
+  const raw = [];
+
+  for (let i = 0; i < values.length; i += 1) {
+    const value = values[i];
+    if (!value) continue;
+
+    if (!envOnly && (value === '--scenario' || value === '--scenarios')) {
+      const next = values[i + 1];
+      if (next && !next.startsWith('--')) {
+        raw.push(next);
+        i += 1;
+      }
+      continue;
+    }
+
+    if (!envOnly && value.startsWith('--scenario=')) {
+      raw.push(value.slice('--scenario='.length));
+      continue;
+    }
+
+    if (!envOnly && value.startsWith('--scenarios=')) {
+      raw.push(value.slice('--scenarios='.length));
+      continue;
+    }
+
+    if (envOnly || !value.startsWith('-')) raw.push(value);
+  }
+
+  return [
+    ...new Set(
+      raw
+        .flatMap((value) => value.split(',').map(normalizeScenarioName))
+        .filter(Boolean),
+    ),
+  ];
+}
+
+function normalizeScenarioName(value) {
+  return value.trim().toLowerCase();
+}
+
+function selectScenarios(allScenarios, selectedNames) {
+  if (!selectedNames.length) return allScenarios;
+
+  const byName = new Map(allScenarios.map((scenario) => [scenario.name.toLowerCase(), scenario]));
+  const selected = selectedNames.map((name) => byName.get(name)).filter(Boolean);
+  if (selected.length !== selectedNames.length) {
+    const missing = selectedNames.filter((name) => !byName.has(name));
+    fail(`Unknown package-consumer scenario(s): ${missing.join(', ')}`);
+  }
+
+  console.log(
+    `[package-consumer] selected scenarios: ${selected.map((scenario) => scenario.name).join(', ')}`,
+  );
+  return selected;
+}
+
 function runConsumerScenario(scenario) {
   const tempRoot = mkdtempSync(join(tmpdir(), `hell-package-consumer-${scenario.name}-`));
 
   try {
     writeConsumerWorkspace(tempRoot, scenario);
-    runNpm(['install', '--strict-peer-deps', '--ignore-scripts'], tempRoot);
+    runNpm([
+      'install',
+      '--strict-peer-deps',
+      '--ignore-scripts',
+      '--prefer-offline',
+      '--no-audit',
+      '--no-fund',
+    ], tempRoot);
     runNpm(['exec', '--', 'ng', 'build', 'consumer', '--configuration', 'production'], tempRoot);
     console.log(`[package-consumer:${scenario.name}] built ${scenario.description}`);
   } finally {
@@ -575,9 +656,17 @@ function runNpm(args, cwd) {
     shell: process.platform === 'win32',
     stdio: 'inherit',
     env: npmCommandEnvironment(),
+    timeout: npmTimeoutMs,
   });
-  if (result.error) fail(result.error.message);
+  if (result.error) fail(npmErrorMessage(args, result.error));
   if (result.status !== 0) fail(`npm ${args.join(' ')} failed with ${result.status}`);
+}
+
+function npmErrorMessage(args, error) {
+  if (error?.code === 'ETIMEDOUT') {
+    return `npm ${args.join(' ')} timed out after ${npmTimeoutMs}ms`;
+  }
+  return error?.message ?? String(error);
 }
 
 function npmCommandEnvironment() {
@@ -601,7 +690,16 @@ function npmCommandEnvironment() {
     if (deniedKeys.has(key.toLowerCase())) delete env[key];
   }
 
+  env.npm_config_audit = 'false';
+  env.npm_config_fund = 'false';
+  env.npm_config_update_notifier = 'false';
+
   return env;
+}
+
+function positiveNumber(raw, fallback) {
+  const value = Number(raw);
+  return Number.isFinite(value) && value > 0 ? value : fallback;
 }
 
 function fail(message) {

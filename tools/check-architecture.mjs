@@ -397,6 +397,7 @@ function checkPackageDependencyContract() {
     '@angular/common',
     '@angular/core',
     '@angular/forms',
+    '@angular/router',
     '@ng-icons/core',
     '@ng-icons/font-awesome',
     'ng-primitives',
@@ -423,6 +424,7 @@ function checkPackageDependencyContract() {
     'tailwindcss',
     // ng-primitives exposes these as strict peers consumed by primitive wrappers.
     '@angular/cdk',
+    '@angular/router',
     '@floating-ui/dom',
   ]);
   for (const dependency of Object.keys(peerDependencies)) {

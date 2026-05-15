@@ -8,7 +8,7 @@
     "build:lib": "ng build hell",
     "build:docs": "node tools/setup-docs-hell-package-alias.mjs && ng build hell-docs",
     "watch": "ng build hell --watch --configuration development",
-    "test:unit": "ng test hell --watch=false --progress=false --runner-config vitest.ci.config.ts",
+    "test:unit": "node tools/run-unit-tests.mjs",
     "test": "node tools/package-manager.mjs run test:unit && node tools/package-manager.mjs run test:architecture && node tools/package-manager.mjs run test:ci-contract",
     "lint": "eslint .",
     "e2e": "playwright test",

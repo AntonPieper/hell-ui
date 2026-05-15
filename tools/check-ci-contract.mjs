@@ -6,6 +6,7 @@ const requiredFiles = [
   'Dockerfile.ci',
   'vitest.ci.config.ts',
   'tools/run-ci-tests.mjs',
+  'tools/run-unit-tests.mjs',
   'tools/check-package-consumer.mjs',
   'tools/ci-summary.mjs',
   'tools/package-manager.mjs',
@@ -13,6 +14,7 @@ const requiredFiles = [
 
 const requiredScripts = {
   'ci:install': 'node tools/package-manager.mjs install',
+  'test:unit': 'node tools/run-unit-tests.mjs',
   'test:package-consumer': 'node tools/check-package-consumer.mjs',
   'ci:test': 'node tools/run-ci-tests.mjs',
   'ci:playwright': 'node tools/package-manager.mjs exec playwright install --with-deps chromium firefox webkit',

@@ -31,9 +31,9 @@ The repository workspace is pnpm-first and CI-backed by the checked-in
 Install the light UI stack when using primitives/composites:
 
 ```bash
-pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+pnpm add @hell-ui/angular @angular/forms @angular/router ng-primitives @angular/cdk @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
 # or
-npm install @hell-ui/angular @angular/forms ng-primitives @angular/cdk @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+npm install @hell-ui/angular @angular/forms @angular/router ng-primitives @angular/cdk @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
 ```
 
 Prefer the narrowest entry point that contains the API you use:
@@ -55,7 +55,7 @@ Peer dependency expectations by entry point:
 
 | Entry point | Required peers |
 |---|---|
-| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Light UI stack: `@angular/forms`, `ng-primitives`, `@angular/cdk`, `@ng-icons/core`, `@ng-icons/font-awesome`, `rxjs`, and style-only `tailwindcss` |
+| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Light UI stack: `@angular/forms`, `@angular/router`, `ng-primitives`, `@angular/cdk`, `@ng-icons/core`, `@ng-icons/font-awesome`, `rxjs`, and style-only `tailwindcss` |
 | `@hell-ui/angular/features/table-utilities` | Light UI stack |
 | `@hell-ui/angular/features/code-editor` | Light UI stack plus `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight` |
 | `@hell-ui/angular/features/pdf-viewer` | Light UI stack plus exact `pdfjs-dist@5.6.205` |
