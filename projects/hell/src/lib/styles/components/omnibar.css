@@ -1,21 +1,20 @@
 @layer components {
 
   /* Omnibar — command-palette searchbox with configurable actions strip
-     and grouped result panel. The host element
-     positions only the control row; the dropdown panel is a fixed-position
-     descendant anchored to the input wrap via CSS variables that are
-     written from the component (`--hell-omnibar-anchor-*`).
+     and grouped result panel. The host owns the control row; the dropdown
+     panel is rendered through Angular CDK ConnectedOverlay so it can escape
+     clipped ancestors while preserving Hell's data-slot/CSS-variable contract.
 
      CSS variables exposed for theming / overrides:
-       --hell-omnibar-bg              - control surface
-       --hell-omnibar-border          - control border
-       --hell-omnibar-radius          - corner radius
-       --hell-omnibar-height          - control height (sm/md/lg via data-size)
-       --hell-omnibar-font            - control text size
-       --hell-omnibar-padding-x       - inline padding inside control
-      --hell-omnibar-panel-bg        - dropdown surface
-       --hell-omnibar-panel-radius    - dropdown radius
-       --hell-omnibar-panel-shadow    - dropdown shadow
+       --hell-omnibar-bg               - control surface
+       --hell-omnibar-border           - control border
+       --hell-omnibar-radius           - corner radius
+       --hell-omnibar-height           - control height (sm/md/lg via data-size)
+       --hell-omnibar-font             - control text size
+       --hell-omnibar-padding-x        - inline padding inside control
+       --hell-omnibar-panel-bg         - dropdown surface
+       --hell-omnibar-panel-radius     - dropdown radius
+       --hell-omnibar-panel-shadow     - dropdown shadow
        --hell-omnibar-panel-max-height - dropdown max-height
    */
 
@@ -198,16 +197,41 @@
     background-color: var(--color-hell-surface-muted);
   }
 
-  /* Panel — fixed position anchored to the control via CSS variables
-     written from the component. Uses a portal-free strategy (panel is a DOM
-     child of the host) so document outside-click and aria-controls wiring
-     stay simple, while position: fixed escapes ancestor overflow clips. */
-
-  .hell-omnibar [data-slot='panel'] {
+  /* Minimal CDK overlay structure needed by the omnibar ConnectedOverlay.
+     Keeping it here makes the library styles self-contained for consumers. */
+  .cdk-overlay-container,
+  .cdk-global-overlay-wrapper {
+    pointer-events: none;
     position: fixed;
-    top: var(--hell-omnibar-anchor-top, 0);
-    left: var(--hell-omnibar-anchor-left, 0);
-    width: var(--hell-omnibar-anchor-width, 320px);
+    inset: 0;
+  }
+
+  .cdk-overlay-pane,
+  .cdk-overlay-connected-position-bounding-box {
+    position: absolute;
+    pointer-events: auto;
+    box-sizing: border-box;
+    max-inline-size: 100%;
+    max-block-size: 100%;
+  }
+
+  .cdk-overlay-connected-position-bounding-box {
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 1px;
+    min-block-size: 1px;
+  }
+
+  .hell-omnibar-overlay-pane {
+    z-index: var(--hell-z-popover, 60);
+  }
+
+  /* Panel — positioned by Angular CDK ConnectedOverlay. The component copies
+     root-level omnibar CSS variables onto this portaled surface so scoped
+     theming still works even though CDK renders outside the host element. */
+
+  .hell-omnibar-panel-surface {
+    width: 100%;
     max-height: var(--hell-omnibar-panel-max-height);
     display: flex;
     flex-direction: column;
@@ -216,11 +240,10 @@
     border-radius: var(--hell-omnibar-panel-radius);
     box-shadow: var(--hell-omnibar-panel-shadow);
     overflow: hidden;
-    z-index: var(--hell-z-popover, 60);
     animation: hell-pop-in var(--hell-duration-fast) var(--ease-hell-out);
   }
 
-  .hell-omnibar [data-slot='actions'] {
+  .hell-omnibar-panel-surface [data-slot='actions'] {
     display: flex;
     align-items: center;
     gap: var(--spacing-hell-1);
@@ -229,7 +252,7 @@
     background-color: var(--color-hell-surface-subtle);
   }
 
-  .hell-omnibar [data-slot='actions'][data-empty='true'] {
+  .hell-omnibar-panel-surface [data-slot='actions'][data-empty='true'] {
     display: none;
   }
 
@@ -269,7 +292,7 @@
     box-shadow: 0 0 0 2px var(--color-hell-focus-ring);
   }
 
-  .hell-omnibar [data-slot='results'] {
+  .hell-omnibar-panel-surface [data-slot='results'] {
     flex: 1 1 auto;
     overflow-y: auto;
     padding: var(--spacing-hell-2);
@@ -278,14 +301,14 @@
     gap: var(--spacing-hell-1);
   }
 
-  .hell-omnibar [data-slot='loading'] {
+  .hell-omnibar-panel-surface [data-slot='loading'] {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-hell-2);
     padding: calc(var(--spacing) * 1);
   }
 
-  .hell-omnibar [data-slot='skeleton-row'] {
+  .hell-omnibar-panel-surface [data-slot='skeleton-row'] {
     display: flex;
     align-items: center;
     gap: var(--spacing-hell-3);
@@ -293,7 +316,7 @@
     padding-block: calc(var(--spacing) * 1.5);
   }
 
-  .hell-omnibar [data-slot='skeleton-text'] {
+  .hell-omnibar-panel-surface [data-slot='skeleton-text'] {
     display: flex;
     min-width: 0;
     flex: 1 1 auto;
@@ -391,7 +414,7 @@
     color: var(--color-hell-foreground-subtle);
   }
 
-  .hell-omnibar [data-slot='empty'] {
+  .hell-omnibar-panel-surface [data-slot='empty'] {
     padding: var(--spacing-hell-4);
     text-align: center;
     font-size: 12px;

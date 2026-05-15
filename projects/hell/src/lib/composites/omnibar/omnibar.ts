@@ -1,11 +1,15 @@
 import { NgTemplateOutlet } from '@angular/common';
 import {
+  CdkConnectedOverlay,
+  CdkOverlayOrigin,
+  type ConnectedPosition,
+} from '@angular/cdk/overlay';
+import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
   Directive,
   ElementRef,
-  Injector,
   TemplateRef,
   ViewChild,
   booleanAttribute,
@@ -43,7 +47,6 @@ import {
   matchHotkey,
 } from '../../core/hotkeys';
 import { HellOmnibarRuntime } from './omnibar.runtime';
-import { HellOmnibarPositionAdapter } from './omnibar-position.adapter';
 import { HellStyleable } from '../../core/styleable';
 
 /**
@@ -77,6 +80,30 @@ export interface HellOmnibarRegisteredItem {
 let nextOmnibarId = 0;
 let nextOmnibarItemId = 0;
 
+const HELL_OMNIBAR_OVERLAY_STYLE_VARIABLES = [
+  '--hell-omnibar-panel-bg',
+  '--hell-omnibar-panel-radius',
+  '--hell-omnibar-panel-shadow',
+  '--hell-omnibar-panel-max-height',
+] as const;
+
+const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
+  {
+    originX: 'start',
+    originY: 'bottom',
+    overlayX: 'start',
+    overlayY: 'top',
+    offsetY: 4,
+  },
+  {
+    originX: 'start',
+    originY: 'top',
+    overlayX: 'start',
+    overlayY: 'bottom',
+    offsetY: -4,
+  },
+];
+
 /**
  * Composite command palette searchbox with a debounced search service,
  * configurable actions strip, grouped results, and optional global hotkey.
@@ -101,6 +128,8 @@ let nextOmnibarItemId = 0;
     HellSearch,
     HellSearchClear,
     HellSkeleton,
+    CdkConnectedOverlay,
+    CdkOverlayOrigin,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -114,7 +143,7 @@ let nextOmnibarItemId = 0;
     '[attr.data-empty]': 'isEmpty() ? "true" : null',
   },
   template: `
-    <div data-slot="control" hellSearch #control>
+    <div data-slot="control" hellSearch cdkOverlayOrigin #overlayOrigin="cdkOverlayOrigin" #control>
       <ng-content select="[hellOmnibarLeading]" />
       <div data-slot="input-wrap" #wrap>
         <input
@@ -155,14 +184,27 @@ let nextOmnibarItemId = 0;
       <ng-content select="[hellOmnibarTrailing]" />
     </div>
 
-    @if (isOpen()) {
+    <ng-template
+      cdkConnectedOverlay
+      [cdkConnectedOverlayOrigin]="overlayOrigin"
+      [cdkConnectedOverlayOpen]="isOpen()"
+      [cdkConnectedOverlayPositions]="overlayPositions"
+      [cdkConnectedOverlayMinWidth]="minPanelWidth()"
+      [cdkConnectedOverlayMatchWidth]="true"
+      [cdkConnectedOverlayHasBackdrop]="false"
+      [cdkConnectedOverlayFlexibleDimensions]="true"
+      [cdkConnectedOverlayGrowAfterOpen]="true"
+      [cdkConnectedOverlayPush]="true"
+      [cdkConnectedOverlayViewportMargin]="8"
+      [cdkConnectedOverlayPanelClass]="'hell-omnibar-overlay-pane'"
+      (detach)="onOverlayDetach()"
+      (positionChange)="onOverlayPositionChange()"
+    >
       <div
         #panel
         data-slot="panel"
         [id]="panelId + '-surface'"
-        [style.--hell-omnibar-anchor-top]="anchorTop() + 'px'"
-        [style.--hell-omnibar-anchor-left]="anchorLeft() + 'px'"
-        [style.--hell-omnibar-anchor-width]="anchorWidth() + 'px'"
+        [class.hell-omnibar-panel-surface]="!unstyled()"
         (pointerdown)="onPanelPointerDown($event)"
       >
         <div data-slot="actions" [attr.data-empty]="!hasActions() ? 'true' : null">
@@ -198,7 +240,7 @@ let nextOmnibarItemId = 0;
         </div>
         <ng-content select="[hellOmnibarFooter]" />
       </div>
-    }
+    </ng-template>
   `,
   exportAs: 'hellOmnibar',
 })
@@ -241,8 +283,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
 
   readonly value = model<string>('');
 
-  /** Width to use for the panel anchor when measuring the control fails
-   *  (e.g. SSR). Falls back to 320px. */
+  /** Minimum CDK connected-overlay panel width. The overlay still matches the control when wider. */
   readonly minPanelWidth = input<number>(320);
 
   /* ── Outputs ───────────────────────────────────────────────────────── */
@@ -261,25 +302,14 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
 
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly injector = inject(Injector);
   private readonly runtime = inject(HellOmnibarRuntime<unknown>);
   private readonly globalKeydown = inject(HellGlobalKeydownService);
 
   private readonly _open = signal(false);
   private readonly openVersion = signal(0);
   protected readonly isOpen = computed(() => !this.disabled() && this._open());
-
-  private readonly positionAdapter = new HellOmnibarPositionAdapter({
-    host: () => this.host.nativeElement,
-    control: () => this.controlRef?.nativeElement,
-    minWidth: () => this.minPanelWidth(),
-    isOpen: () => this.isOpen(),
-    destroyRef: this.destroyRef,
-    injector: this.injector,
-  });
-  protected readonly anchorTop = this.positionAdapter.anchorTop;
-  protected readonly anchorLeft = this.positionAdapter.anchorLeft;
-  protected readonly anchorWidth = this.positionAdapter.anchorWidth;
+  protected readonly overlayPositions = HELL_OMNIBAR_OVERLAY_POSITIONS;
+  private overlayPanelElement: HTMLElement | null = null;
   protected readonly cursor = signal(0);
   readonly searchResults = computed(() => this.runtime.results());
   readonly loading = computed(() => this.runtime.loading());
@@ -315,7 +345,18 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   /* ── View refs ─────────────────────────────────────────────────────── */
 
   @ViewChild('input', { static: true }) private inputRef?: ElementRef<HTMLInputElement>;
-  @ViewChild('control', { static: true }) private controlRef?: ElementRef<HTMLElement>;
+  @ViewChild('panel') private set panelRef(ref: ElementRef<HTMLElement> | undefined) {
+    const next = ref?.nativeElement ?? null;
+    if (next === this.overlayPanelElement) return;
+
+    this.unregisterOverlayPanel();
+    this.overlayPanelElement = next;
+
+    if (next) {
+      this.floatingScope.registerFloatingElement(next);
+      this.syncOverlayPanelStyles();
+    }
+  }
 
   constructor() {
     super();
@@ -327,7 +368,9 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     });
     effect(() => {
       const open = this.isOpen();
-      if (open) this.positionAdapter.scheduleUpdate();
+      const size = this.size();
+      void size;
+      if (open) queueMicrotask(() => this.syncOverlayPanelStyles());
     });
     effect(() => {
       const items = this.searchItems();
@@ -363,8 +406,8 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     });
 
     this.installHotkey();
-    this.positionAdapter.connect();
     this.floatingInteraction.connect(this.destroyRef);
+    this.destroyRef.onDestroy(() => this.unregisterOverlayPanel());
   }
 
   /* ── Public API for actions / hotkey wiring ────────────────────────── */
@@ -498,6 +541,14 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     this.floatingInteraction.markPointerDownInside();
   }
 
+  protected onOverlayDetach(): void {
+    this.unregisterOverlayPanel();
+  }
+
+  protected onOverlayPositionChange(): void {
+    this.syncOverlayPanelStyles();
+  }
+
   protected onKeyDown(event: KeyboardEvent): void {
     switch (event.key) {
       case 'ArrowDown':
@@ -550,6 +601,24 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
 
   private moveActive(delta: number): void {
     this.runtime.moveActive(delta);
+  }
+
+  private syncOverlayPanelStyles(): void {
+    const panel = this.overlayPanelElement;
+    const win = this.host.nativeElement.ownerDocument.defaultView;
+    if (!panel || !win) return;
+
+    const styles = win.getComputedStyle(this.host.nativeElement);
+    for (const variable of HELL_OMNIBAR_OVERLAY_STYLE_VARIABLES) {
+      const value = styles.getPropertyValue(variable);
+      if (value) panel.style.setProperty(variable, value.trim());
+    }
+  }
+
+  private unregisterOverlayPanel(): void {
+    if (!this.overlayPanelElement) return;
+    this.floatingScope.unregisterFloatingElement(this.overlayPanelElement);
+    this.overlayPanelElement = null;
   }
 
   /* ── Hotkey ────────────────────────────────────────────────────────── */

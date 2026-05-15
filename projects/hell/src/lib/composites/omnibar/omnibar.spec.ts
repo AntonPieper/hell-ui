@@ -1,4 +1,5 @@
 import { Component, signal } from '@angular/core';
+import { OverlayContainer } from '@angular/cdk/overlay';
 import { TestBed } from '@angular/core/testing';
 
 import { provideHellLabels } from '../../core/labels';
@@ -125,6 +126,7 @@ describe('HellOmnibar interactions', () => {
   });
 
   afterEach(() => {
+    TestBed.inject(OverlayContainer).ngOnDestroy();
     vi.restoreAllMocks();
     if (scrollIntoViewDescriptor) {
       Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', scrollIntoViewDescriptor);
@@ -170,10 +172,10 @@ describe('HellOmnibar interactions', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
     fixture.detectChanges();
 
-    expect(query(fixture.nativeElement, '[data-contract="custom-loading"]').textContent).toContain(
+    expect(query(overlayRoot(), '[data-contract="custom-loading"]').textContent).toContain(
       'Custom loading 2',
     );
-    expect(fixture.nativeElement.querySelector('[data-slot="skeleton-row"]')).toBeNull();
+    expect(overlayRoot().querySelector('[data-slot="skeleton-row"]')).toBeNull();
   });
 
   it('moves active results with the keyboard and submits without closing when requested', () => {
@@ -187,9 +189,7 @@ describe('HellOmnibar interactions', () => {
     input.dispatchEvent(new FocusEvent('focus'));
     fixture.detectChanges();
 
-    const options = Array.from(
-      fixture.nativeElement.querySelectorAll('[role="option"]'),
-    ) as HTMLElement[];
+    const options = Array.from(overlayRoot().querySelectorAll('[role="option"]')) as HTMLElement[];
     expect(options).toHaveLength(2);
     expect(input.getAttribute('aria-activedescendant')).toBe(options[0].id);
 
@@ -215,6 +215,47 @@ describe('HellOmnibar interactions', () => {
     expect(fixture.nativeElement.querySelector('hell-omnibar').getAttribute('data-open')).toBe(
       'true',
     );
+  });
+
+  it('renders its panel through CDK overlay while preserving scoped CSS variables', async () => {
+    const fixture = TestBed.createComponent(OmnibarHost);
+    fixture.detectChanges();
+
+    const root = query<HTMLElement>(fixture.nativeElement, 'hell-omnibar');
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
+    root.style.setProperty('--hell-omnibar-panel-max-height', '123px');
+
+    input.dispatchEvent(new FocusEvent('focus'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const panel = query(overlayRoot(), '[data-slot="panel"]');
+    expect(fixture.nativeElement.contains(panel)).toBe(false);
+    expect(panel.classList).toContain('hell-omnibar-panel-surface');
+    expect(panel.style.getPropertyValue('--hell-omnibar-panel-max-height')).toBe('123px');
+  });
+
+  it('treats the portaled CDK panel as inside for dismissal', async () => {
+    const fixture = TestBed.createComponent(OmnibarHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
+    input.dispatchEvent(new FocusEvent('focus'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    query<HTMLElement>(overlayRoot(), '[data-slot="panel"]').dispatchEvent(
+      new Event('pointerdown', { bubbles: true }),
+    );
+    fixture.detectChanges();
+    expect(host.openEvents).toEqual([true]);
+
+    document.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.openEvents).toEqual([true, false]);
+    expect(fixture.nativeElement.querySelector('hell-omnibar').getAttribute('data-open')).toBeNull();
   });
 });
 
@@ -348,6 +389,10 @@ describe('HellOmnibar hotkey activation', () => {
     expect(document.activeElement).toBe(editable);
   });
 });
+
+function overlayRoot(): HTMLElement {
+  return TestBed.inject(OverlayContainer).getContainerElement();
+}
 
 function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {
   const element = root.querySelector(selector);
