@@ -382,13 +382,11 @@ function checkPackageDependencyContract() {
     '@angular/common',
     '@angular/core',
     '@angular/forms',
-    '@angular/router',
     '@floating-ui/dom',
     '@ng-icons/core',
     '@ng-icons/font-awesome',
     'ng-primitives',
     'rxjs',
-    'tailwindcss',
   ]);
   const featureOnlyPeers = new Set([
     '@codemirror/commands',
@@ -398,6 +396,7 @@ function checkPackageDependencyContract() {
     '@lezer/highlight',
     'pdfjs-dist',
   ]);
+  const styleOnlyPeers = new Set(['tailwindcss']);
 
   for (const dependency of importedPackages) {
     if (!peerDependencies[dependency] && !dependencies[dependency]) {
@@ -409,7 +408,6 @@ function checkPackageDependencyContract() {
     // CSS entry points depend on Tailwind theme variables.
     'tailwindcss',
     // ng-primitives exposes these as strict peers consumed by primitive wrappers.
-    '@angular/router',
     '@angular/cdk',
     '@floating-ui/dom',
   ]);
@@ -429,15 +427,19 @@ function checkPackageDependencyContract() {
       failures.push(
         `Package dependency contract must keep ${dependency} optional for feature-only consumers`,
       );
+    } else if (styleOnlyPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional !== true) {
+      failures.push(
+        `Package dependency contract must keep ${dependency} optional for style-only consumers`,
+      );
     }
   }
 
   for (const dependency of Object.keys(peerDependenciesMeta)) {
     if (!peerDependencies[dependency]) {
       failures.push(`Package dependency contract has peerDependenciesMeta for undeclared ${dependency}`);
-    } else if (!featureOnlyPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional) {
+    } else if (!featureOnlyPeers.has(dependency) && !styleOnlyPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional) {
       failures.push(
-        `Package dependency contract marks ${dependency} optional but it is not a known feature-only peer`,
+        `Package dependency contract marks ${dependency} optional but it is not a known feature-only or style-only peer`,
       );
     }
   }
@@ -451,6 +453,12 @@ function checkPackageDependencyContract() {
   for (const dependency of featureOnlyPeers) {
     if (!peerDependencies[dependency]) {
       failures.push(`Package dependency contract is missing optional feature peer dependency ${dependency}`);
+    }
+  }
+
+  for (const dependency of styleOnlyPeers) {
+    if (!peerDependencies[dependency]) {
+      failures.push(`Package dependency contract is missing optional style peer dependency ${dependency}`);
     }
   }
 
@@ -1144,7 +1152,72 @@ function escapeRegExp(value) {
 }
 
 function parseJsonWithComments(source) {
-  return JSON.parse(source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, ''));
+  let json = '';
+  let inString = false;
+  let escaped = false;
+  let inLineComment = false;
+  let inBlockComment = false;
+
+  for (let i = 0; i < source.length; i++) {
+    const char = source[i];
+    const next = source[i + 1];
+
+    if (inLineComment) {
+      if (char === '\n') {
+        inLineComment = false;
+        json += char;
+      }
+      continue;
+    }
+
+    if (inBlockComment) {
+      if (char === '*' && next === '/') {
+        inBlockComment = false;
+        i += 1;
+      }
+      continue;
+    }
+
+    if (inString) {
+      json += char;
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+
+      if (char === '\\\\') {
+        escaped = true;
+        continue;
+      }
+
+      if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+      json += char;
+      continue;
+    }
+
+    if (char === '/' && next === '*') {
+      inBlockComment = true;
+      i += 1;
+      continue;
+    }
+
+    if (char === '/' && next === '/') {
+      inLineComment = true;
+      i += 1;
+      continue;
+    }
+
+    json += char;
+  }
+
+  return JSON.parse(json);
 }
 
 function readFile(path) {

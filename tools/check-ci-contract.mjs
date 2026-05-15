@@ -24,10 +24,10 @@ const adapterChecks = [
   {
     path: '.github/workflows/ci.yml',
     includes: [
-      'pnpm ci:install',
-      'pnpm ci:playwright',
-      'pnpm ci:test',
-      'pnpm ci:build',
+      'node tools/package-manager.mjs run ci:install',
+      'node tools/package-manager.mjs run ci:playwright',
+      'node tools/package-manager.mjs run ci:test',
+      'node tools/package-manager.mjs run ci:build',
       'actions/upload-artifact',
       'test-results/',
       'coverage/',
@@ -36,10 +36,10 @@ const adapterChecks = [
   {
     path: '.gitlab-ci.yml',
     includes: [
-      'pnpm ci:install',
-      'pnpm ci:playwright',
-      'pnpm ci:test',
-      'pnpm ci:build',
+      'node tools/package-manager.mjs run ci:install',
+      'node tools/package-manager.mjs run ci:playwright',
+      'node tools/package-manager.mjs run ci:test',
+      'node tools/package-manager.mjs run ci:build',
       'reports:',
       'junit: test-results/vitest-junit.xml',
       'coverage_format: cobertura',
@@ -50,11 +50,11 @@ const adapterChecks = [
     path: 'Dockerfile.ci',
     includes: [
       'COPY tools/package-manager.mjs tools/package-manager.mjs',
-      'pnpm ci:install',
-      'pnpm ci:playwright',
-      'pnpm ci:test',
-      'pnpm ci:build',
-      'pnpm ci:verify',
+      'node tools/package-manager.mjs run ci:install',
+      'node tools/package-manager.mjs run ci:playwright',
+      'node tools/package-manager.mjs run ci:test',
+      'node tools/package-manager.mjs run ci:build',
+      'node tools/package-manager.mjs run ci:verify',
     ],
   },
 ];

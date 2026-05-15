@@ -1,16 +1,17 @@
 /*
- * hell - all-in CSS entry-point.
+ * hell - kitchen-sink / legacy CSS entry-point.
  *
  * Consumer apps should import:
  *   @import "tailwindcss";
- *   @import "@hell-ui/angular/styles";
+ *   @import "@hell-ui/angular/styles/kitchen-sink";
  *
- * Import smaller tiers when you do not need everything:
+ * Prefer fine-grained imports when you do not need everything:
  *   @import "@hell-ui/angular/styles/tokens";
  *   @import "@hell-ui/angular/styles/primitives";
  *   @import "@hell-ui/angular/styles/composites";
  *   @import "@hell-ui/angular/styles/features/table-utilities";
  *   @import "@hell-ui/angular/styles/features/data-table"; legacy alias
+ *   @import "@hell-ui/angular/styles/components/button";
  *
  * Tokens + design system base are declared in tokens.css.
  * Component classes are split per module under ./components/.

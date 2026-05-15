@@ -31,9 +31,9 @@ The repository workspace is pnpm-first and CI-backed by the checked-in
 Install the light UI stack when using primitives/composites:
 
 ```bash
-pnpm add @hell-ui/angular @angular/forms @angular/router ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
 # or
-npm install @hell-ui/angular @angular/forms @angular/router ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+npm install @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
 ```
 
 Prefer the narrowest entry point that contains the API you use:
@@ -53,7 +53,7 @@ Peer dependency expectations by entry point:
 
 | Entry point | Required peers |
 |---|---|
-| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Light UI stack: `@angular/forms`, `@angular/router`, `ng-primitives`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `@ng-icons/font-awesome`, `rxjs`, `tailwindcss` |
+| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Light UI stack: `@angular/forms`, `ng-primitives`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `@ng-icons/font-awesome`, `rxjs`, `tailwindcss` |
 | `@hell-ui/angular/features/table-utilities` | Light UI stack |
 | `@hell-ui/angular/features/code-editor` | Light UI stack plus `@codemirror/*`, `@lezer/highlight` |
 | `@hell-ui/angular/features/pdf-viewer` | Light UI stack plus `pdfjs-dist` |
@@ -76,11 +76,10 @@ Peer dependency expectations by entry point:
 
 ```css
 @import "tailwindcss";
-@import "@hell-ui/angular/styles";
+@import "@hell-ui/angular/styles/kitchen-sink";
 ```
 
-`@hell-ui/angular/styles` is the all-in stylesheet: primitives, composites, and
-every feature stylesheet. Use smaller CSS tiers when the app only needs part of
+`@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` are kitchen-sink/legacy aliases: primitives, composites, and every feature stylesheet. Prefer fine-grained imports when the app only needs part of
 the library:
 
 ```css
@@ -90,6 +89,7 @@ the library:
 @import "@hell-ui/angular/styles/features/table-utilities";
 @import "@hell-ui/angular/styles/features/code-editor";
 @import "@hell-ui/angular/styles/features/pdf-viewer";
+@import "@hell-ui/angular/styles/components/button";
 ```
 
 Use `@hell-ui/angular/styles/features/data-table` only as the legacy CSS alias for table

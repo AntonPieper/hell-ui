@@ -14,7 +14,7 @@ default:
   before_script:
     - corepack enable
     - pnpm config set store-dir .pnpm-store
-    - pnpm ci:install
+    - node tools/package-manager.mjs run ci:install
   cache:
     key:
       files:
@@ -25,8 +25,8 @@ default:
 test:
   stage: test
   script:
-    - pnpm ci:playwright
-    - pnpm ci:test
+    - node tools/package-manager.mjs run ci:playwright
+    - node tools/package-manager.mjs run ci:test
   coverage: '/CI coverage lines: ([0-9.]+)%/'
   artifacts:
     when: always
@@ -46,7 +46,7 @@ build:
     - job: test
       artifacts: false
   script:
-    - pnpm ci:build
+    - node tools/package-manager.mjs run ci:build
   artifacts:
     expire_in: 14 days
     paths:

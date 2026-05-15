@@ -40,13 +40,13 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install
-        run: pnpm ci:install
+        run: node tools/package-manager.mjs run ci:install
 
       - name: Install Playwright browsers
-        run: pnpm ci:playwright
+        run: node tools/package-manager.mjs run ci:playwright
 
       - name: Test
-        run: pnpm ci:test
+        run: node tools/package-manager.mjs run ci:test
 
       - name: Upload test reports
         if: always()
@@ -81,10 +81,10 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install
-        run: pnpm ci:install
+        run: node tools/package-manager.mjs run ci:install
 
       - name: Build
-        run: pnpm ci:build
+        run: node tools/package-manager.mjs run ci:build
 
       - name: Upload build output
         uses: actions/upload-artifact@v4

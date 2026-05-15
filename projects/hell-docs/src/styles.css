@@ -1,8 +1,6 @@
 @import 'tailwindcss';
 
 @import '@hell-ui/angular/styles/composites';
-@import '@hell-ui/angular/styles/features/pdf-viewer';
-
 @layer components {
   .hd-prose {
     max-width: min(72ch, 100%);

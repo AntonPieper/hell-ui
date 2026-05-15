@@ -13,7 +13,7 @@ mkdirSync('test-results', { recursive: true });
 const tasks = [
   {
     name: 'unit tests',
-    args: ['exec', '--', 'ng', 'test', 'hell', '--watch=false', '--runner-config', 'vitest.ci.config.ts'],
+    args: ['run', 'test:unit'],
   },
   {
     name: 'architecture contract',

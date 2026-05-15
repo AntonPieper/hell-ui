@@ -45,7 +45,6 @@ const angularAppDeps = [
 ];
 const lightUiDeps = [
   ...angularAppDeps,
-  '@angular/router',
   '@angular/cdk',
   '@floating-ui/dom',
   '@ng-icons/core',
