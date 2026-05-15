@@ -9,8 +9,17 @@ describe('PDF print helpers', () => {
     globalThis.fetch = nativeFetch;
     URL.createObjectURL = nativeCreateObjectUrl;
     URL.revokeObjectURL = nativeRevokeObjectUrl;
+    vi.unstubAllGlobals();
     vi.restoreAllMocks();
     document.body.replaceChildren();
+  });
+
+  it('fails explicitly when printing without a document context', async () => {
+    vi.stubGlobal('document', undefined);
+
+    await expect(createHiddenPdfPrintHandle(new Uint8Array([1, 2, 3]).buffer)).rejects.toThrow(
+      'Cannot print PDF without a browser document.',
+    );
   });
 
   it('forwards caller fetch options when printing URL sources', async () => {

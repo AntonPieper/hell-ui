@@ -13,11 +13,12 @@ export interface HellPdfPrintOptions {
 
 export async function createHiddenPdfPrintHandle(
   source: string | URL | ArrayBuffer,
-  ownerDocument: Document = document,
+  ownerDocument?: Document,
   options: HellPdfPrintOptions = {},
 ) {
+  const doc = hellPdfPrintOwnerDocument(ownerDocument);
   const objectUrl = await createPrintableObjectUrl(source, options.fetch);
-  const iframe = ownerDocument.createElement('iframe');
+  const iframe = doc.createElement('iframe');
   iframe.setAttribute('aria-hidden', 'true');
   iframe.tabIndex = -1;
   iframe.style.position = 'fixed';
@@ -35,7 +36,7 @@ export async function createHiddenPdfPrintHandle(
   });
 
   iframe.src = objectUrl.url;
-  ownerDocument.body.append(iframe);
+  doc.body.append(iframe);
 
   let cleaned = false;
   const cleanup = () => {
@@ -60,6 +61,12 @@ export async function printPdfInHiddenIframe(handle: HiddenPdfPrintHandle) {
 
   frameWindow.focus();
   frameWindow.print();
+}
+
+function hellPdfPrintOwnerDocument(ownerDocument: Document | undefined): Document {
+  if (ownerDocument) return ownerDocument;
+  if (typeof document !== 'undefined') return document;
+  throw new Error('Cannot print PDF without a browser document.');
 }
 
 async function createPrintableObjectUrl(source: string | URL | ArrayBuffer, fetchOptions?: RequestInit) {

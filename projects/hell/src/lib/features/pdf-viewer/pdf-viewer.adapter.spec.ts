@@ -165,6 +165,32 @@ describe('PDF Adapter globals', () => {
 
     expect(Object.hasOwn(globalWithPdfJs, 'pdfjsLib')).toBe(false);
   });
+
+  it('serializes concurrent viewer imports that need the temporary pdf.js global', async () => {
+    const globalWithPdfJs = globalThis as typeof globalThis & { pdfjsLib?: unknown };
+    const seen: unknown[] = [];
+    let releaseFirst!: () => void;
+
+    const first = hellWithPdfJsGlobal({ version: 'first' }, async () => {
+      seen.push(globalWithPdfJs.pdfjsLib);
+      await new Promise<void>((resolve) => {
+        releaseFirst = resolve;
+      });
+      seen.push(globalWithPdfJs.pdfjsLib);
+      return 'first';
+    });
+    const second = hellWithPdfJsGlobal({ version: 'second' }, async () => {
+      seen.push(globalWithPdfJs.pdfjsLib);
+      return 'second';
+    });
+
+    await Promise.resolve();
+    releaseFirst();
+
+    await expect(Promise.all([first, second])).resolves.toEqual(['first', 'second']);
+    expect(seen).toEqual([{ version: 'first' }, { version: 'first' }, { version: 'second' }]);
+    expect(Object.hasOwn(globalWithPdfJs, 'pdfjsLib')).toBe(false);
+  });
 });
 
 describe('PDF Adapter browser seam', () => {
@@ -197,6 +223,8 @@ describe('PDF Adapter browser seam', () => {
     const pdfWorker = required(pdfJsMock.pdfWorkers[0]);
 
     expect(worker.options).toEqual({ type: 'module' });
+    expect(String(worker.url)).toContain('worker_file');
+    expect(String(worker.url)).not.toContain('pdf.worker.ts');
     expect(linkService.setViewer).toHaveBeenCalledWith(viewer);
 
     eventBus.emit('pagesinit');
@@ -310,6 +338,15 @@ describe('PDF Adapter browser seam', () => {
     expect(viewer.cleanup).toHaveBeenCalledOnce();
     expect(pdfWorker.destroy).toHaveBeenCalledOnce();
     expect(worker.terminate).toHaveBeenCalledOnce();
+  });
+
+  it('fails explicitly when downloads run without a document context', async () => {
+    const adapter = new HellPdfJsRuntimeAdapter();
+    vi.stubGlobal('document', undefined);
+
+    await expect(adapter.download('/document.pdf')).rejects.toThrow(
+      'Cannot download PDF without a browser document.',
+    );
   });
 
   it('creates hidden iframe print sessions through the print helper seam', async () => {

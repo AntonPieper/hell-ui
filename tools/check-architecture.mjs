@@ -309,7 +309,7 @@ function checkPackageEntryPoints() {
 
   const tsconfig = parseJsonWithComments(readFile(join(root, 'tsconfig.json')));
   const paths = tsconfig.compilerOptions?.paths ?? {};
-  const features = childDirectories(join(root, 'projects/hell/src/lib/features'));
+  const features = featureDirectories();
   const expectedPaths = {
     '@hell-ui/angular': './projects/hell/src/public-api.ts',
     '@hell-ui/angular/core': './projects/hell/src/lib/public-api-core.ts',
@@ -472,7 +472,7 @@ function checkPackageDependencyContract() {
 function checkStyleEntryPoints() {
   const packageJson = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
   const exportsMap = packageJson.exports ?? {};
-  const features = childDirectories(join(root, 'projects/hell/src/lib/features'));
+  const features = featureDirectories();
   const expectedStyleExports = [
     './styles',
     './styles/tokens',
@@ -1105,8 +1105,7 @@ function checkSecondaryEntryPointCompleteness(kind) {
 }
 
 function checkFeatureEntryPointCompleteness() {
-  const featuresDir = join(root, 'projects/hell/src/lib/features');
-  for (const feature of childDirectories(featuresDir)) {
+  for (const feature of featureDirectories()) {
     const apiPath = join(root, `projects/hell/src/lib/public-api-feature-${feature}.ts`);
     if (!existsSync(apiPath)) {
       failures.push(
@@ -1127,6 +1126,12 @@ function externalImportPackages(source) {
   for (const match of source.matchAll(importRegex)) {
     packages.push(packageNameFromSpecifier(match[1]));
   }
+
+  const dynamicImportRegex = /import\(\s*['"]([^.'"/][^'"]*)['"]\s*\)/g;
+  for (const match of source.matchAll(dynamicImportRegex)) {
+    packages.push(packageNameFromSpecifier(match[1]));
+  }
+
   return packages;
 }
 
@@ -1227,6 +1232,13 @@ function parseJsonWithComments(source) {
 
 function readFile(path) {
   return readFileSync(path, 'utf8');
+}
+
+function featureDirectories() {
+  const internalFeatureDirs = new Set(['assets']);
+  return childDirectories(join(root, 'projects/hell/src/lib/features')).filter(
+    (feature) => !internalFeatureDirs.has(feature),
+  );
 }
 
 function childDirectories(path) {

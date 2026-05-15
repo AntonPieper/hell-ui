@@ -191,7 +191,9 @@ export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
     handlers: HellPdfViewerSessionHandlers,
   ): Promise<HellPdfViewerSession> {
     const pdfjs = (await import('pdfjs-dist')) as unknown as HellPdfJsModule;
-    const workerPort = new Worker(new URL('./pdf.worker.ts', import.meta.url), { type: 'module' });
+    const workerPort = new Worker(new URL('../assets/pdf.worker.mjs', import.meta.url), {
+      type: 'module',
+    });
     const pdfWorker = new pdfjs.PDFWorker({ port: workerPort });
     const viewerMod = await hellWithPdfJsGlobal(
       pdfjs,
@@ -237,14 +239,15 @@ export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
   async download(
     source: HellPdfSource,
     fileName?: string | null,
-    ownerDocument: Document = document,
+    ownerDocument?: Document,
   ): Promise<void> {
+    const doc = hellPdfOwnerDocument(ownerDocument, 'download');
     const handle = createDownloadHandle(source, fileName);
-    const anchor = ownerDocument.createElement('a');
+    const anchor = doc.createElement('a');
     anchor.href = handle.url;
     anchor.download = handle.suggestedName;
     anchor.rel = 'noreferrer';
-    ownerDocument.body.appendChild(anchor);
+    doc.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
     if (handle.cleanup) setTimeout(handle.cleanup, 60_000);
@@ -252,7 +255,7 @@ export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
 
   async createPrintSession(
     source: HellPdfSource,
-    ownerDocument: Document = document,
+    ownerDocument?: Document,
     options?: HellPdfPrintOptions,
   ): Promise<HellPdfPrintSession> {
     const handle = await createHiddenPdfPrintHandle(source, ownerDocument, options);
@@ -260,24 +263,35 @@ export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
   }
 }
 
-export async function hellWithPdfJsGlobal<T>(
+let hellPdfJsGlobalQueue: Promise<void> = Promise.resolve();
+
+export function hellWithPdfJsGlobal<T>(
   pdfjsLib: unknown,
   loadViewerModule: () => Promise<T>,
 ): Promise<T> {
   // pdf_viewer.mjs reads globalThis.pdfjsLib at module evaluation time.
-  // Keep that pdf.js quirk contained to this import window so multiple
-  // viewer instances do not leave a permanent global mutation behind.
-  const globalWithPdfJs = globalThis as typeof globalThis & { pdfjsLib?: unknown };
-  const hadPrevious = Object.hasOwn(globalWithPdfJs, 'pdfjsLib');
-  const previous = globalWithPdfJs.pdfjsLib;
-  globalWithPdfJs.pdfjsLib = pdfjsLib;
+  // Keep that pdf.js quirk contained to a serialized import window so multiple
+  // viewer instances do not stomp each other's temporary global mutation.
+  const run = async () => {
+    const globalWithPdfJs = globalThis as typeof globalThis & { pdfjsLib?: unknown };
+    const hadPrevious = Object.hasOwn(globalWithPdfJs, 'pdfjsLib');
+    const previous = globalWithPdfJs.pdfjsLib;
+    globalWithPdfJs.pdfjsLib = pdfjsLib;
 
-  try {
-    return await loadViewerModule();
-  } finally {
-    if (hadPrevious) globalWithPdfJs.pdfjsLib = previous;
-    else delete globalWithPdfJs.pdfjsLib;
-  }
+    try {
+      return await loadViewerModule();
+    } finally {
+      if (hadPrevious) globalWithPdfJs.pdfjsLib = previous;
+      else delete globalWithPdfJs.pdfjsLib;
+    }
+  };
+
+  const result = hellPdfJsGlobalQueue.then(run, run);
+  hellPdfJsGlobalQueue = result.then(
+    () => undefined,
+    () => undefined,
+  );
+  return result;
 }
 
 interface HellPdfJsViewerSessionOptions {
@@ -426,6 +440,12 @@ class HellPdfJsViewerSession implements HellPdfViewerSession {
 
 function hellPdfNumber(value: unknown): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+}
+
+function hellPdfOwnerDocument(ownerDocument: Document | undefined, action: string): Document {
+  if (ownerDocument) return ownerDocument;
+  if (typeof document !== 'undefined') return document;
+  throw new Error(`Cannot ${action} PDF without a browser document.`);
 }
 
 class HellPdfIframePrintSession implements HellPdfPrintSession {

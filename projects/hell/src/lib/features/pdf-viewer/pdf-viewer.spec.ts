@@ -57,12 +57,14 @@ class FakePdfRuntime implements HellPdfRuntimePort {
   template: `
     <hell-pdf-viewer
       [src]="src"
+      [globalShortcuts]="globalShortcuts"
       [printFetchOptions]="printFetchOptions"
     />
   `,
 })
 class PdfViewerHost {
   src: HellPdfSource = 'document.pdf';
+  globalShortcuts = false;
   printFetchOptions: RequestInit | null = null;
 }
 
@@ -88,6 +90,44 @@ describe('HellPdfViewer', () => {
     fixture.destroy();
 
     expect(runtime.cleanedUp).toBe(true);
+  });
+
+  it('keeps document-level shortcuts opt-in while host shortcuts keep working', async () => {
+    const fixture = TestBed.createComponent(PdfViewerHost);
+    await settle(fixture);
+
+    const viewer = fixture.nativeElement.querySelector('hell-pdf-viewer') as HTMLElement;
+    const findInput = () =>
+      fixture.nativeElement.querySelector('.hell-pdf-find-input') as HTMLInputElement | null;
+
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, bubbles: true, cancelable: true }),
+    );
+    await settle(fixture);
+    expect(findInput()).toBeNull();
+
+    viewer.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, bubbles: true, cancelable: true }),
+    );
+    await settle(fixture);
+    expect(findInput()).toBeInstanceOf(HTMLInputElement);
+  });
+
+  it('supports opt-in document-level shortcuts after viewer interaction', async () => {
+    const fixture = TestBed.createComponent(PdfViewerHost);
+    fixture.componentInstance.globalShortcuts = true;
+    await settle(fixture);
+
+    const viewer = fixture.nativeElement.querySelector('hell-pdf-viewer') as HTMLElement;
+    viewer.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, bubbles: true, cancelable: true }),
+    );
+    await settle(fixture);
+
+    expect(fixture.nativeElement.querySelector('.hell-pdf-find-input')).toBeInstanceOf(
+      HTMLInputElement,
+    );
   });
 
   it('passes print fetch options from the Angular surface to the runtime', async () => {

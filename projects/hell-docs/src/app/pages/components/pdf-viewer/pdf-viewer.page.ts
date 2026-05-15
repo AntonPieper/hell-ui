@@ -59,6 +59,11 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         <li><code>initialZoom</code> (default <code>'auto'</code>)</li>
         <li><code>fileName</code>: suggested download filename</li>
         <li>
+          <code>globalShortcuts</code>: opt into document-level Ctrl/Cmd+F, Ctrl/Cmd+P, +/-/0
+          shortcuts while the viewer is active (default <code>false</code>). Host keyboard
+          shortcuts still work without this.
+        </li>
+        <li>
           <code>printFetchOptions</code>: optional <code>RequestInit</code> for authenticated or
           credentialed print fetches when <code>src</code> is a URL.
         </li>
@@ -73,12 +78,14 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         <li>Lazy-load the viewer route or feature area.</li>
         <li>Provide <code>fileName</code> so downloads and print jobs are recognizable.</li>
         <li>Handle <code>error</code> and offer a fallback download.</li>
+        <li>Enable <code>globalShortcuts</code> only where document-level shortcuts are wanted.</li>
       </ul>
 
       <h2>Don't</h2>
       <ul>
         <li>Don't bundle PDF viewer into the initial shell.</li>
         <li>Don't assume every PDF allows fast text search or thumbnails.</li>
+        <li>Don't enable document-level shortcuts globally without an app-level keyboard policy.</li>
         <li>Don't treat this experimental wrapper as a complete PDF application; it is a preview
         recipe surface only.</li>
       </ul>

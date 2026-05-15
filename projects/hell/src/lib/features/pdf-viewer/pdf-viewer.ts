@@ -5,6 +5,7 @@ import {
   ElementRef,
   InjectionToken,
   afterNextRender,
+  booleanAttribute,
   computed,
   effect,
   inject,
@@ -70,8 +71,9 @@ const HELL_PDF_VIEWER_ICONS = {
 /**
  * Full PDF viewer backed by pdf.js. `src` accepts a URL string, `URL`, or
  * `ArrayBuffer`; loading starts after the viewer runtime bootstraps. Emits
- * page, zoom, loaded, and error events. Keyboard shortcuts are scoped to the
- * active viewer: Ctrl/Cmd+F, Ctrl/Cmd+P, +/-/0, PageUp/PageDown, Home, End.
+ * page, zoom, loaded, and error events. Host keyboard shortcuts support
+ * Ctrl/Cmd+F, Ctrl/Cmd+P, +/-/0, PageUp/PageDown, Home, End. Document-level
+ * shortcuts are opt-in via `globalShortcuts`.
  *
  * @experimental This feature wraps pdf.js viewer internals and may change as
  * the PDF Runtime seam is hardened.
@@ -93,6 +95,11 @@ export class HellPdfViewer extends HellStyleable {
   readonly initialPage = input(1, { transform: numberAttribute });
   readonly initialZoom = input<number | 'auto' | 'page-actual' | 'page-fit' | 'page-width'>('auto');
   readonly fileName = input<string | null>(null);
+  /**
+   * Opt into document-level shortcuts while focus/pointer activity is inside this viewer.
+   * Host-level shortcuts continue to work without this global listener path.
+   */
+  readonly globalShortcuts = input(false, { transform: booleanAttribute });
   /** Fetch options used by the print path when printing URL/string sources. */
   readonly printFetchOptions = input<RequestInit | null>(null);
 
@@ -313,6 +320,7 @@ export class HellPdfViewer extends HellStyleable {
   }
 
   private onGlobalKey(e: KeyboardEvent) {
+    if (!this.globalShortcuts()) return;
     this.interactionScope.handleGlobalShortcut(e, {
       openFind: () => this.openFind(),
       print: () => void this.print(),
