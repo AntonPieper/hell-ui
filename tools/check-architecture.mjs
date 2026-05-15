@@ -357,6 +357,7 @@ function checkPackageEntryPoints() {
 
 function checkPackageDependencyContract() {
   const packageJson = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
+  const workspacePackageJson = parseJsonWithComments(readFile(join(root, 'package.json')));
   const optionalDependencies = Object.keys(packageJson.optionalDependencies ?? {});
   if (optionalDependencies.length) {
     failures.push(
@@ -466,6 +467,22 @@ function checkPackageDependencyContract() {
 
   if (peerDependencies['@tanstack/angular-table'] || librarySource.includes('@tanstack/angular-table')) {
     failures.push('Package dependency contract must not declare unused @tanstack/angular-table');
+  }
+
+  const bundledPdfWorkerVersion = readFile(join(root, 'projects/hell/assets/pdf.worker.mjs')).match(
+    /pdfjsVersion = ([^\s]+)/,
+  )?.[1];
+  if (bundledPdfWorkerVersion) {
+    if (peerDependencies['pdfjs-dist'] !== bundledPdfWorkerVersion) {
+      failures.push(
+        `Package dependency contract must pin pdfjs-dist peer to bundled worker version ${bundledPdfWorkerVersion}`,
+      );
+    }
+    if (workspacePackageJson.dependencies?.['pdfjs-dist'] !== bundledPdfWorkerVersion) {
+      failures.push(
+        `Workspace pdfjs-dist dependency must match bundled worker version ${bundledPdfWorkerVersion}`,
+      );
+    }
   }
 }
 

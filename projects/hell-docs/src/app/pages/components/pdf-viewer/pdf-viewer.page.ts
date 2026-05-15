@@ -36,10 +36,11 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         workflows.
       </p>
       <p>
-        Install <code>pdfjs-dist</code> plus the light UI stack
+        Install the exact supported <code>pdfjs-dist</code> peer version plus the light UI stack
         (<code>@angular/forms ng-primitives @angular/cdk @angular/router @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss</code>).
-        The docs page loads the pdf.js viewer stylesheet on demand, so lazy routes keep it out of
-        the docs app's initial bundle.
+        The PDF worker is packaged with Hell, so the pdf.js API peer must stay aligned with that
+        bundled worker version. The docs page loads the pdf.js viewer stylesheet on demand, so lazy
+        routes keep it out of the docs app's initial bundle.
       </p>
 
       <h2>Lazy loading</h2>
