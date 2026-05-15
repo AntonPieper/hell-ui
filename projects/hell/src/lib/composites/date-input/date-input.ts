@@ -101,6 +101,12 @@ function dateDayTime(d: Date): number {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 }
 
+function dateDayValue(value: Date | null | undefined): Date | null {
+  return value instanceof Date && !Number.isNaN(value.valueOf())
+    ? new Date(value.getFullYear(), value.getMonth(), value.getDate())
+    : null;
+}
+
 export function hellIsDateInputValueWithinBounds(
   d: Date | null,
   min: Date | null,
@@ -112,11 +118,12 @@ export function hellIsDateInputValueWithinBounds(
 }
 
 export function hellSameDateInputValue(a: Date | null, b: Date | null): boolean {
-  return a?.getTime() === b?.getTime();
+  if (!a || !b) return a === b;
+  return dateDayTime(a) === dateDayTime(b);
 }
 
 export function hellCoerceDateInputValue(value: Date | null | undefined): Date | null {
-  return value instanceof Date && !Number.isNaN(value.valueOf()) ? value : null;
+  return dateDayValue(value);
 }
 
 /**

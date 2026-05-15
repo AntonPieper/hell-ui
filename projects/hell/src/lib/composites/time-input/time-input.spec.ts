@@ -254,6 +254,18 @@ describe('HellTimeInput', () => {
     expect(tabStopIndex(picker, 'minute', 60)).toBe(0);
   });
 
+  it('keeps roving tab stop stable for non-navigation keys', () => {
+    const fixture = TestBed.createComponent(TimeInputHost);
+    fixture.detectChanges();
+
+    const picker = timeInputInstance(fixture);
+
+    picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'ArrowRight' }), 'hour', 0);
+    expect(tabStopIndex(picker, 'hour', 24)).toBe(1);
+
+    picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'PageDown' }), 'hour', 1);
+    expect(tabStopIndex(picker, 'hour', 24)).toBe(1);
+  });
 
   it('drops in-progress typing when the bound value changes externally', async () => {
     const fixture = TestBed.createComponent(TimeInputHost);

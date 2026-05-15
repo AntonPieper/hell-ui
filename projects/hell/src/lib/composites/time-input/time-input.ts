@@ -28,6 +28,10 @@ import {
   hellInvalidTypedValue,
   hellTypedValue,
 } from '../../core/typed-value-input';
+import {
+  hellTimeInputNextPickerCellIndex,
+  type HellTimeInputPickerUnit,
+} from './time-input-picker';
 
 export interface HellTimeValue {
   readonly hour: number;
@@ -43,7 +47,7 @@ export interface HellTimeInputAdapterContext {
   readonly seconds: boolean;
 }
 
-type HellTimeUnit = 'hour' | 'minute' | 'second';
+type HellTimeUnit = HellTimeInputPickerUnit;
 
 export type HellTimeInputParseResult = HellTypedValueParseResult<HellTimeValue>;
 
@@ -91,9 +95,11 @@ export function hellFormatTimeInputValue(
 }
 
 /**
- * Parse `HH:mm`, `HH:mm:ss` when `seconds` is enabled, and a couple
- * of common 12-hour spellings (`9:00 am`, `1:30PM`). Empty text commits
- * a nullable clear; unparseable text stays as an invalid draft.
+ * Parse the business-default text formats: `HH:mm`, and `HH:mm:ss` when
+ * `seconds` is enabled, plus a couple of common 12-hour spellings
+ * (`9:00 am`, `1:30PM`). Locale parsing is intentionally off by default.
+ * Empty text commits a nullable clear; unparseable text stays as an invalid
+ * draft.
  */
 export function hellNormalizeTimeInputValue(
   value: HellTimeValue | null | undefined,
@@ -464,30 +470,17 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
   }
 
   protected onPickerCellKeydown(event: KeyboardEvent, unit: HellTimeUnit, currentIndex: number): void {
-    const nextIndex = this.nextPickerCellIndex(unit, event.key, currentIndex);
+    const nextIndex = hellTimeInputNextPickerCellIndex(
+      event.key,
+      currentIndex,
+      unit,
+      this.valuesForUnit(unit).length,
+    );
     if (nextIndex === null) return;
 
     event.preventDefault();
     this.setFocusedPickerCellIndex(unit, nextIndex);
     this.focusPickerCell(event.currentTarget, nextIndex);
-  }
-
-  private nextPickerCellIndex(unit: HellTimeUnit, key: string, currentIndex: number): number | null {
-    const values = this.valuesForUnit(unit);
-    const count = values.length;
-    if (!count) return null;
-
-    const index = Math.min(Math.max(currentIndex, 0), count - 1);
-    const columns = unit === 'hour' ? 6 : 4;
-
-    if (key === 'ArrowLeft') return (index - 1 + count) % count;
-    if (key === 'ArrowRight') return (index + 1) % count;
-    if (key === 'ArrowUp') return (index - columns + count) % count;
-    if (key === 'ArrowDown') return (index + columns) % count;
-    if (key === 'Home') return 0;
-    if (key === 'End') return count - 1;
-
-    return null;
   }
 
   private focusPickerCell(target: EventTarget | null, nextIndex: number): void {
