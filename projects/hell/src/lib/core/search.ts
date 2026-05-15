@@ -102,10 +102,11 @@ export function hellRankLocalSearch<T>(
   const fields = request.fields;
 
   const ranked = items
-    .map((item, index) => {
-      const score = words.length ? scoreItem(item, fields, words) : 0;
-      return { item, score, index };
-    })
+    .map((item, index) => ({
+      item,
+      score: words.length ? scoreItem(item, fields, words) : 0,
+      index,
+    }))
     .filter((result) => !words.length || result.score > 0)
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .map(({ item, score }) => ({ item, score }));

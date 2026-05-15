@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { CodeBlock } from '../../../shared/code-block';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { OmnibarAsyncSearchExample } from './examples/async-search.example';
 import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts?raw' with {
@@ -8,7 +9,7 @@ import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts
 @Component({
   selector: 'hd-omnibar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, OmnibarAsyncSearchExample],
+  imports: [CodeBlock, ExampleTabs, OmnibarAsyncSearchExample],
   template: `
     <article class="hd-prose">
       <h1>Omnibar</h1>
@@ -45,6 +46,13 @@ import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts
         </li>
       </ul>
 
+      <h2>Ranker adapter examples</h2>
+      <p>
+        For local-only ranking, keep <code>HellSearchService</code> defaults. For richer ranking (typos,
+        stemming, fuzzy matchers, or indexes), adapt an external engine in a ranker adapter.
+      </p>
+      <hd-code-block [code]="rankerAdapterCode" />
+
       <h2>Do</h2>
       <ul>
         <li>Debounce the search work, not opening and closing the panel.</li>
@@ -62,4 +70,21 @@ import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts
 })
 export class OmnibarPage {
   protected readonly omnibarAsyncSearchExampleCode = omnibarAsyncSearchExampleCodeRaw;
+  protected readonly rankerAdapterCode = `const searchFields = fields ?? [];
+
+provideHellSearchRanker((items, request) => {
+  // Pseudocode: shape for Fuse.js / MiniSearch / FlexSearch adapters.
+  const keys = searchFields
+    .map((field) => field.name)
+    .filter((name): name is string => typeof name === 'string');
+
+  const ranked = runExternalSearchEngine({
+    items,
+    query: request.query,
+    keys,
+    limit: request.limit,
+  });
+
+  return ranked.map((result) => ({ item: result.item, score: result.score }));
+});`;
 }

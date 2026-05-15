@@ -85,22 +85,91 @@ describe('Search Core', () => {
     expect(results.map((result) => result.item.id)).toEqual(['target']);
   });
 
-  it('can delegate local ranking to an injected ranker adapter', async () => {
+  it('passes query, fields, and limit context into a custom ranker', async () => {
+    interface Item {
+      readonly title: string;
+      readonly code: string;
+    }
+
+    const fields = [
+      { name: 'title', weight: 5, get: (item: Item) => item.title },
+      { name: 'code', weight: 2, get: (item: Item) => item.code },
+    ] as const;
+
+    let capturedRequest:
+      | {
+          readonly query: string;
+          readonly fields?: unknown;
+          readonly limit?: number;
+        }
+      | undefined;
+
     TestBed.configureTestingModule({
       providers: [
-        provideHellSearchRanker((items) =>
-          items.map((item, index) => ({ item, score: 100 - index })),
-        ),
+        provideHellSearchRanker((items, request) => {
+          capturedRequest = {
+            query: request.query,
+            fields: request.fields,
+            limit: request.limit,
+          };
+          return items.map((item, index) => ({ item, score: 100 - index }));
+        }),
       ],
     });
 
-    const injected = TestBed.inject(HellSearchService);
-    const results = await injected.search({ query: 'ignored', items: ['alpha', 'beta'], limit: 1 });
+    const service = TestBed.inject(HellSearchService);
+    const results = await service.search({
+      query: 'alpha',
+      limit: 1,
+      fields,
+      items: [
+        { title: 'Alpha', code: 'A' },
+        { title: 'Beta', code: 'B' },
+      ],
+    });
 
-    expect(results).toEqual([{ item: 'alpha', score: 100 }]);
+    expect(results).toEqual([{ item: { title: 'Alpha', code: 'A' }, score: 100 }]);
+    expect(capturedRequest).toMatchObject({
+      query: 'alpha',
+      fields,
+      limit: 1,
+    });
   });
 
-  it('honors source-provided result order while forwarding request context', async () => {
+  it('passes source-returned raw items through the injected ranker', async () => {
+    let observedItems: readonly unknown[] = [];
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideHellSearchRanker((items) => {
+          observedItems = items;
+          return items.map((item, index) => ({
+            item: item as never,
+            score: 100 - index,
+          }));
+        }),
+      ],
+    });
+
+    const service = TestBed.inject(HellSearchService);
+    const source: HellSearchSource<string> = () =>
+      of({
+        items: ['remote-alpha', 'remote-beta'],
+      });
+
+    const results = await service.search({
+      query: 'ignored',
+      source,
+    });
+
+    expect(observedItems).toEqual(['remote-alpha', 'remote-beta']);
+    expect(results).toEqual([
+      { item: 'remote-alpha', score: 100 },
+      { item: 'remote-beta', score: 99 },
+    ]);
+  });
+
+  it('preserves source-provided result order and request context', async () => {
     const signal = new AbortController().signal;
     const calls: HellSearchSourceRequest[] = [];
     const source: HellSearchSource<string> = (request) => {
@@ -109,6 +178,7 @@ describe('Search Core', () => {
         results: [
           { item: 'remote-low', score: 1 },
           { item: 'remote-high', score: 99 },
+          { item: 'remote-mid', score: 50 },
         ],
       });
     };
@@ -116,16 +186,19 @@ describe('Search Core', () => {
     const service = TestBed.inject(HellSearchService);
     const results = await service.search({
       query: 'ignored',
-      limit: 1,
+      limit: 2,
       params: { tenant: 'acme' },
       signal,
       source,
     });
 
-    expect(results).toEqual([{ item: 'remote-low', score: 1 }]);
+    expect(results).toEqual([
+      { item: 'remote-low', score: 1 },
+      { item: 'remote-high', score: 99 },
+    ]);
     expect(calls[0]).toMatchObject({
       query: 'ignored',
-      limit: 1,
+      limit: 2,
       params: { tenant: 'acme' },
       signal,
     });
