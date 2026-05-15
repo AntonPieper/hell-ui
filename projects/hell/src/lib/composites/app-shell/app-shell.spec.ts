@@ -104,6 +104,50 @@ class ControlledShellHost {
 })
 class UnstyledShellHost {}
 
+@Component({
+  imports: [...HELL_APP_SHELL_DIRECTIVES],
+  template: `
+    <div id="focus-shell" hellAppShell>
+      <header hellAppTopbar>
+        <button id="focus-sidenav-toggle" hellSidenavToggle type="button"></button>
+      </header>
+      <nav id="focus-sidenav" hellAppSidenav>
+        <button id="focus-sidenav-item" type="button">Item</button>
+      </nav>
+      <main id="focus-content" hellAppContent>Content</main>
+      <aside hellAppSecondary>
+        <button id="focus-secondary-toggle" hellSecondaryToggle type="button"></button>
+        <div hellAppSecondaryBody>
+          <button>Action</button>
+        </div>
+      </aside>
+    </div>
+  `,
+})
+class FocusShellHost {}
+
+@Component({
+  imports: [...HELL_APP_SHELL_DIRECTIVES],
+  template: `
+    <div id="fallback-shell" hellAppShell>
+      <header hellAppTopbar>
+        <button id="fallback-sidenav-toggle" hellSidenavToggle type="button"></button>
+      </header>
+      <nav id="fallback-sidenav" hellAppSidenav>
+        <div>No focusable controls</div>
+      </nav>
+      <main id="fallback-content" hellAppContent>Content</main>
+      <aside hellAppSecondary>
+        <button id="fallback-secondary-toggle" hellSecondaryToggle type="button"></button>
+        <div id="fallback-secondary-body" hellAppSecondaryBody>
+          <div>Details</div>
+        </div>
+      </aside>
+    </div>
+  `,
+})
+class FallbackShellHost {}
+
 
 let mediaController: ReturnType<typeof createMobileLayoutController>;
 
@@ -111,7 +155,13 @@ describe('HellAppShell secondary panel', () => {
   beforeEach(async () => {
     mediaController = createMobileLayoutController(false);
     await TestBed.configureTestingModule({
-      imports: [TestHost, ControlledShellHost, UnstyledShellHost],
+      imports: [
+        TestHost,
+        ControlledShellHost,
+        UnstyledShellHost,
+        FocusShellHost,
+        FallbackShellHost,
+      ],
       providers: [{ provide: BreakpointObserver, useValue: mediaController }],
     }).compileComponents();
   });
@@ -280,6 +330,46 @@ describe('HellAppShell secondary panel', () => {
     expect(shell.getAttribute('data-mobile-sidenav-open')).toBeNull();
   });
 
+  it('focuses first mobile panel tabbable and restores trigger focus after close', async () => {
+    mockMobileLayout(true);
+    const fixture = TestBed.createComponent(FocusShellHost);
+    const toggle = query<HTMLButtonElement>(fixture.nativeElement, '#focus-sidenav-toggle');
+    const panelItem = query<HTMLButtonElement>(fixture.nativeElement, '#focus-sidenav-item');
+    const content = query<HTMLElement>(fixture.nativeElement, '#focus-content');
+
+    toggle.focus();
+    await settle(fixture);
+    expect(document.activeElement).toBe(toggle);
+
+    toggle.click();
+    await settle(fixture);
+    expect(document.activeElement).toBe(panelItem);
+
+    pointerDown(content);
+    await settle(fixture);
+    expect(document.activeElement).toBe(toggle);
+  });
+
+  it('falls back focus to the panel when there are no tabbables', async () => {
+    mockMobileLayout(true);
+    const fixture = TestBed.createComponent(FallbackShellHost);
+    const toggle = query<HTMLButtonElement>(fixture.nativeElement, '#fallback-sidenav-toggle');
+    const panel = query<HTMLElement>(fixture.nativeElement, '#fallback-sidenav');
+    const content = query<HTMLElement>(fixture.nativeElement, '#fallback-content');
+
+    toggle.focus();
+    await settle(fixture);
+    expect(document.activeElement).toBe(toggle);
+
+    toggle.click();
+    await settle(fixture);
+    expect(document.activeElement).toBe(panel);
+
+    pointerDown(content);
+    await settle(fixture);
+    expect(document.activeElement).toBe(toggle);
+  });
+
   it('closes mobile panels when Escape is pressed', () => {
     mockMobileLayout(true);
     const fixture = TestBed.createComponent(UnstyledShellHost);
@@ -382,6 +472,12 @@ function pointerDown(element: HTMLElement): void {
 
 function keyDownEscape(element: HTMLElement): void {
   element.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+}
+
+async function settle(fixture: { detectChanges(): void; whenStable(): Promise<unknown> }): Promise<void> {
+  fixture.detectChanges();
+  await fixture.whenStable();
+  fixture.detectChanges();
 }
 
 function query<T extends HTMLElement = HTMLElement>(root: HTMLElement, selector: string): T {

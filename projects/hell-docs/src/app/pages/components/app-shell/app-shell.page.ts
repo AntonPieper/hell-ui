@@ -47,6 +47,10 @@ const HD_APP_SHELL_PAGE_ICONS = {
         CSS grid and responds to <code>sidenavCollapsed</code> and <code>secondaryHidden</code> via
         data attributes — collapse and hide animate purely in CSS.
       </p>
+      <p>
+        On mobile, opening either drawer captures focus in the active drawer and restores it to the
+        opener when the drawer closes.
+      </p>
 
       <h2>Live miniature</h2>
       <p class="hd-note">

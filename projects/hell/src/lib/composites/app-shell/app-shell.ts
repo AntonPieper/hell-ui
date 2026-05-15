@@ -1,11 +1,15 @@
 import { HELL_LABELS } from '../../core/labels';
 import { isElementLike } from '../../core/dom';
 import { HellStyleable } from '../../core/styleable';
+import { DOCUMENT } from '@angular/common';
+import { FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
 import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
   Directive,
+  ElementRef,
+  OnDestroy,
   booleanAttribute,
   computed,
   effect,
@@ -21,6 +25,8 @@ export const HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX = 768;
 export const HELL_APP_SHELL_MOBILE_MAX_WIDTH_PX = HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX - 1;
 export const HELL_APP_SHELL_MOBILE_MEDIA = `(max-width: ${HELL_APP_SHELL_MOBILE_MAX_WIDTH_PX}px)`;
 let nextAppShellId = 0;
+
+type HellAppShellMobilePanel = 'sidenav' | 'secondary';
 
 /**
  * Application shell — top bar + collapsible sidenav + main content + optional
@@ -62,7 +68,7 @@ let nextAppShellId = 0;
   template: '<ng-content></ng-content>',
   exportAs: 'hellAppShell',
 })
-export class HellAppShell extends HellStyleable {
+export class HellAppShell extends HellStyleable implements OnDestroy {
   readonly sidenavCollapsed = input<boolean | null, boolean | string | null | undefined>(null, {
     transform: nullableBooleanAttribute,
   });
@@ -85,7 +91,15 @@ export class HellAppShell extends HellStyleable {
   private readonly _mobileSidenavOpen = signal(false);
   private readonly _mobileSecondaryOpen = signal(false);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly document = inject(DOCUMENT);
+  private readonly focusTrapFactory = inject(FocusTrapFactory);
   private readonly breakpointObserver = inject(BreakpointObserver);
+  private _activeMobilePanel: HellAppShellMobilePanel | null = null;
+  private _mobilePanelFocusTrap: FocusTrap | null = null;
+  private _fallbackTabindexValue: string | null = null;
+  private _fallbackTabindexElement: HTMLElement | null = null;
+  private _mobilePanelRestoreTarget: HTMLElement | null = null;
 
   constructor() {
     super();
@@ -100,9 +114,38 @@ export class HellAppShell extends HellStyleable {
           this._mobileSecondaryOpen.set(false);
         }
       });
+
+    effect(() => {
+      const nextPanel = this.mobileOpenPanel();
+      if (nextPanel === this._activeMobilePanel) {
+        return;
+      }
+
+      if (nextPanel === null) {
+        this.teardownMobileFocusTrap();
+        return;
+      }
+
+      if (this._activeMobilePanel !== null) {
+        this.teardownMobileFocusTrap(false);
+      }
+
+      this.enableMobileFocusTrap(nextPanel);
+    });
   }
 
   readonly isMobileLayout = () => this._isMobileLayout();
+
+  readonly mobileOpenPanel = () => {
+    if (!this._isMobileLayout()) return null;
+    if (!this.isSidenavCollapsed()) return 'sidenav';
+    if (!this.isSecondaryHidden()) return 'secondary';
+    return null;
+  };
+
+  ngOnDestroy(): void {
+    this.teardownMobileFocusTrap();
+  }
 
   readonly isSidenavCollapsed = () => {
     const controlled = this.sidenavCollapsed();
@@ -178,6 +221,104 @@ export class HellAppShell extends HellStyleable {
     }
 
     this.closeMobilePanels();
+  }
+
+  private enableMobileFocusTrap(panel: HellAppShellMobilePanel): void {
+    const panelElement = this.getMobilePanelElement(panel);
+    if (!panelElement) {
+      this._activeMobilePanel = null;
+      return;
+    }
+
+    const focusedElement = this.document.activeElement;
+    this._mobilePanelRestoreTarget = focusedElement instanceof HTMLElement ? focusedElement : null;
+
+    this._activeMobilePanel = panel;
+    this._mobilePanelFocusTrap = this.focusTrapFactory.create(panelElement);
+    if (!this.focusFirstTabbableInPanel(panelElement)) {
+      this.focusPanelFallback(panelElement);
+    }
+  }
+
+  private focusFirstTabbableInPanel(panelElement: HTMLElement): boolean {
+    const candidates = panelElement.querySelectorAll<HTMLElement>(
+      'a[href], button, input, select, textarea, [contenteditable], [tabindex]',
+    );
+
+    for (const candidate of candidates) {
+      if (!candidate.isConnected) {
+        continue;
+      }
+
+      if (isElementLike(candidate) && candidate.tabIndex >= 0 && candidate !== this._mobilePanelRestoreTarget) {
+        if (candidate instanceof HTMLInputElement && candidate.disabled) {
+          continue;
+        }
+
+        candidate.focus({ preventScroll: true });
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private focusPanelFallback(panelElement: HTMLElement): void {
+    if (!this._fallbackTabindexElement) {
+      this._fallbackTabindexValue = panelElement.getAttribute('tabindex');
+      if (!panelElement.hasAttribute('tabindex')) {
+        panelElement.setAttribute('tabindex', '-1');
+      }
+      this._fallbackTabindexElement = panelElement;
+    }
+
+    panelElement.focus({ preventScroll: true });
+  }
+
+  private restoreMobileFocusTarget(): void {
+    const target = this._mobilePanelRestoreTarget;
+    if (!target || !target.isConnected) {
+      this._mobilePanelRestoreTarget = null;
+      return;
+    }
+
+    target.focus({ preventScroll: true });
+    this._mobilePanelRestoreTarget = null;
+  }
+
+  private teardownMobileFocusTrap(restoreFocus = true): void {
+    this._mobilePanelFocusTrap?.destroy();
+    this._mobilePanelFocusTrap = null;
+    this._activeMobilePanel = null;
+
+    this.restoreMobilePanelTabindex();
+    if (restoreFocus) {
+      this.restoreMobileFocusTarget();
+    } else {
+      this._mobilePanelRestoreTarget = null;
+    }
+  }
+
+  private restoreMobilePanelTabindex(): void {
+    if (!this._fallbackTabindexElement) {
+      return;
+    }
+
+    const restoreValue = this._fallbackTabindexValue;
+    if (restoreValue === null) {
+      this._fallbackTabindexElement.removeAttribute('tabindex');
+    } else {
+      this._fallbackTabindexElement.setAttribute('tabindex', restoreValue);
+    }
+
+    this._fallbackTabindexElement = null;
+    this._fallbackTabindexValue = null;
+  }
+
+  private getMobilePanelElement(panel: HellAppShellMobilePanel): HTMLElement | null {
+    const root = this.elementRef.nativeElement;
+    const selector = `[data-hell-app-shell-panel="${panel}"]`;
+    return root.querySelector<HTMLElement>(selector);
   }
 
   private pathContains(path: EventTarget[], predicate: (element: Element) => boolean): boolean {
