@@ -125,18 +125,19 @@ export function hellSearchWords(value: string): readonly string[] {
 /** Normalize text for accent-insensitive, punctuation-insensitive Unicode search keys. */
 export function hellSearchKey(value: string): string {
   const normalized = value.normalize('NFKD').toLocaleLowerCase().replace(/&/g, ' and ');
-  const withoutMarks = HELL_UNICODE_SEARCH_REGEX
-    ? normalized.replace(HELL_UNICODE_SEARCH_REGEX.mark, '')
-    : stripFallbackCombiningMarks(normalized);
-  const searchKey = HELL_UNICODE_SEARCH_REGEX
-    ? withoutMarks.replace(HELL_UNICODE_SEARCH_REGEX.notLetterOrNumber, ' ')
-    : keepFallbackSearchCharacters(withoutMarks);
+  const searchText = HELL_UNICODE_SEARCH_REGEX
+    ? normalized.replace(HELL_UNICODE_SEARCH_REGEX.mark, '').replace(
+        HELL_UNICODE_SEARCH_REGEX.notLetterOrNumber,
+        ' ',
+      )
+    : normalized.replace(HELL_FALLBACK_SEARCH_REGEX, ' ');
 
-  return searchKey.replace(/\s+/g, ' ').trim();
+  return searchText.replace(/\s+/g, ' ').trim();
 }
 
 const HELL_UNICODE_PROPERTY_PREFIX = '\\' + 'p';
 const HELL_UNICODE_SEARCH_REGEX = hellUnicodeSearchRegex();
+const HELL_FALLBACK_SEARCH_REGEX = /[^a-zA-Z0-9\u00A0-\uFFFF]+/g;
 
 function hellUnicodeSearchRegex():
   | { readonly mark: RegExp; readonly notLetterOrNumber: RegExp }
@@ -153,145 +154,6 @@ function hellUnicodeSearchRegex():
     return null;
   }
 }
-
-function stripFallbackCombiningMarks(value: string): string {
-  let normalized = '';
-
-  for (const char of value) {
-    const codePoint = char.codePointAt(0);
-    if (codePoint === undefined || !isFallbackMark(codePoint)) normalized += char;
-  }
-
-  return normalized;
-}
-
-function keepFallbackSearchCharacters(value: string): string {
-  let normalized = '';
-
-  for (const char of value) {
-    normalized += isFallbackSearchWord(char) ? char : ' ';
-  }
-
-  return normalized;
-}
-
-function isFallbackMark(codePoint: number): boolean {
-  return HELL_FALLBACK_MARK_RANGES.some(([start, end]) => codePoint >= start && codePoint <= end);
-}
-
-function isFallbackSearchWord(char: string): boolean {
-  const codePoint = char.codePointAt(0);
-  if (codePoint === undefined) return false;
-  if (isAsciiLetterOrDigit(codePoint)) return true;
-  if (codePoint <= 0x7f) return false;
-  return !isFallbackSeparatorOrSymbol(codePoint);
-}
-
-function isAsciiLetterOrDigit(codePoint: number): boolean {
-  return (
-    (codePoint >= 0x30 && codePoint <= 0x39) ||
-    (codePoint >= 0x61 && codePoint <= 0x7a) ||
-    (codePoint >= 0x41 && codePoint <= 0x5a)
-  );
-}
-
-function isFallbackSeparatorOrSymbol(codePoint: number): boolean {
-  return HELL_FALLBACK_SEPARATOR_RANGES.some(
-    ([start, end]) => codePoint >= start && codePoint <= end,
-  );
-}
-
-const HELL_FALLBACK_MARK_RANGES: readonly (readonly [number, number])[] = [
-  [0x0300, 0x036f],
-  [0x0483, 0x0489],
-  [0x0591, 0x05bd],
-  [0x05bf, 0x05bf],
-  [0x05c1, 0x05c2],
-  [0x05c4, 0x05c5],
-  [0x05c7, 0x05c7],
-  [0x0610, 0x061a],
-  [0x064b, 0x065f],
-  [0x0670, 0x0670],
-  [0x06d6, 0x06ed],
-  [0x0711, 0x0711],
-  [0x0730, 0x074a],
-  [0x07a6, 0x07b0],
-  [0x07eb, 0x07f3],
-  [0x0816, 0x082d],
-  [0x0859, 0x085b],
-  [0x08d3, 0x08ff],
-  [0x0900, 0x0903],
-  [0x093a, 0x093c],
-  [0x0941, 0x0948],
-  [0x094d, 0x094d],
-  [0x0951, 0x0957],
-  [0x0962, 0x0963],
-  [0x1ab0, 0x1aff],
-  [0x1dc0, 0x1dff],
-  [0x20d0, 0x20ff],
-  [0xfe20, 0xfe2f],
-];
-
-const HELL_FALLBACK_SEPARATOR_RANGES: readonly (readonly [number, number])[] = [
-  [0x00a0, 0x00bf],
-  [0x02b0, 0x036f],
-  [0x037e, 0x037e],
-  [0x0387, 0x0387],
-  [0x055a, 0x055f],
-  [0x0589, 0x058a],
-  [0x05be, 0x05be],
-  [0x05c0, 0x05c0],
-  [0x05c3, 0x05c3],
-  [0x05c6, 0x05c6],
-  [0x060c, 0x060d],
-  [0x061b, 0x061b],
-  [0x061f, 0x061f],
-  [0x066a, 0x066d],
-  [0x06d4, 0x06d4],
-  [0x0700, 0x070d],
-  [0x07f7, 0x07f9],
-  [0x0964, 0x0965],
-  [0x0970, 0x0970],
-  [0x0e3f, 0x0e3f],
-  [0x0f04, 0x0f12],
-  [0x104a, 0x104f],
-  [0x1360, 0x137c],
-  [0x16eb, 0x16ed],
-  [0x1735, 0x1736],
-  [0x17d4, 0x17d6],
-  [0x17d8, 0x17db],
-  [0x1800, 0x180a],
-  [0x1944, 0x1945],
-  [0x1a1e, 0x1a1f],
-  [0x1aa0, 0x1aa6],
-  [0x1aa8, 0x1aad],
-  [0x1b5a, 0x1b6a],
-  [0x1b74, 0x1b7c],
-  [0x1c3b, 0x1c3f],
-  [0x1c7e, 0x1c7f],
-  [0x2000, 0x206f],
-  [0x2070, 0x209f],
-  [0x20a0, 0x20cf],
-  [0x2100, 0x214f],
-  [0x2190, 0x23ff],
-  [0x2460, 0x27bf],
-  [0x2900, 0x2bff],
-  [0x2e00, 0x2e7f],
-  [0x3000, 0x303f],
-  [0xa490, 0xa4cf],
-  [0xa60d, 0xa60f],
-  [0xa6f2, 0xa6f7],
-  [0xa700, 0xa71f],
-  [0xa830, 0xa839],
-  [0xfd3e, 0xfd3f],
-  [0xfe10, 0xfe6f],
-  [0xff00, 0xff0f],
-  [0xff1a, 0xff20],
-  [0xff3b, 0xff40],
-  [0xff5b, 0xff65],
-  [0xffe0, 0xffee],
-  [0x1f000, 0x1faff],
-];
 
 async function resolveMaybeAsync<T>(value: HellMaybeAsync<T>): Promise<T> {
   if (isObservable(value)) return firstValueFrom(value);
@@ -385,21 +247,11 @@ function valueTexts(value: HellSearchFieldValue): readonly string[] {
 
 function scoreText(text: string, word: string): number {
   if (!text || !word) return 0;
-  if (text === word) return 120;
-  if (text.startsWith(word)) return 90;
 
   const tokens = text.split(' ');
-  if (tokens.some((token) => token === word)) return 80;
-  if (tokens.some((token) => token.startsWith(word))) return 60;
-  if (text.includes(word)) return 35;
-  return isSubsequence(word, text) ? 10 : 0;
-}
+  if (tokens.some((token) => token === word)) return 4;
+  if (tokens.some((token) => token.startsWith(word))) return 3;
+  if (tokens.some((token) => token.includes(word))) return 2;
 
-function isSubsequence(needle: string, haystack: string): boolean {
-  let i = 0;
-  for (const char of haystack) {
-    if (char === needle[i]) i += 1;
-    if (i === needle.length) return true;
-  }
-  return false;
+  return text === word ? 4 : text.startsWith(word) ? 3 : text.includes(word) ? 2 : 0;
 }

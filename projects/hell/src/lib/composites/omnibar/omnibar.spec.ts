@@ -3,7 +3,12 @@ import { TestBed } from '@angular/core/testing';
 
 import { provideHellLabels } from '../../core/labels';
 import { type HellSearchSource } from '../../core/search';
-import { HELL_OMNIBAR_DIRECTIVES, matchHotkey, type HellOmnibarSubmitEvent } from './omnibar';
+import { matchHotkey } from '../../core/hotkeys';
+import {
+  HELL_OMNIBAR_DIRECTIVES,
+  matchHotkey as matchHotkeyFromOmnibar,
+  type HellOmnibarSubmitEvent,
+} from './omnibar';
 
 @Component({
   imports: [...HELL_OMNIBAR_DIRECTIVES],
@@ -227,6 +232,14 @@ describe('HellOmnibar labels', () => {
     expect(query<HTMLButtonElement>(fixture.nativeElement, '[data-slot="clear"]').getAttribute('aria-label')).toBe(
       'Suche löschen',
     );
+  });
+});
+
+describe('HellOmnibar hotkey compatibility', () => {
+  it('re-exports matchHotkey from the composite entry point', () => {
+    const event = new KeyboardEvent('keydown', { key: 'k', ctrlKey: true });
+
+    expect(matchHotkeyFromOmnibar(event, 'ctrl+k')).toBe(matchHotkey(event, 'ctrl+k'));
   });
 });
 

@@ -37,7 +37,11 @@ import { HellInput } from '../../primitives/input/input';
 import { HellListbox } from '../../primitives/listbox/listbox';
 import { HellSearch, HellSearchClear } from '../../primitives/search/search';
 import { HellSkeleton } from '../../primitives/skeleton/skeleton';
-import { HellGlobalKeydownService } from '../../core/hotkeys';
+import {
+  HellGlobalKeydownService,
+  hellShouldHandleGlobalHotkey,
+  matchHotkey,
+} from '../../core/hotkeys';
 import { HellOmnibarRuntime } from './omnibar.runtime';
 import { HellOmnibarPositionAdapter } from './omnibar-position.adapter';
 import { HellStyleable } from '../../core/styleable';
@@ -555,18 +559,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
       const combo = this.hotkey();
       if (!combo || this.disabled()) return;
       if (!matchHotkey(event, combo)) return;
-      // Don't hijack typing in another input unless we're targeted.
-      const active = event.view?.document.activeElement;
-      if (
-        active &&
-        active !== this.inputRef?.nativeElement &&
-        (active.tagName === 'INPUT' ||
-          active.tagName === 'TEXTAREA' ||
-          (active as HTMLElement).isContentEditable)
-      ) {
-        // Allow override only if the combo uses a modifier (mod / ctrl / meta / alt)
-        if (!/(?:^|\+)(mod|ctrl|meta|alt|shift)(?:\+|$)/i.test(combo)) return;
-      }
+      if (!hellShouldHandleGlobalHotkey(event, combo, this.inputRef?.nativeElement)) return;
       event.preventDefault();
       this.focus();
       this.open();
@@ -769,62 +762,4 @@ export const HELL_OMNIBAR_DIRECTIVES = [
   HellOmnibarAction,
 ] as const;
 
-/* ──────────────────────────── Hotkey utility ──────────────────────────── */
-
-const isMac = (() => {
-  if (typeof navigator === 'undefined') return false;
-  const platform =
-    (navigator as { userAgentData?: { platform?: string } }).userAgentData?.platform ??
-    navigator.platform ??
-    '';
-  return /mac|iphone|ipad|ipod/i.test(platform);
-})();
-
-/**
- * Match a keydown against a hotkey string. Supported tokens:
- *   `mod` (Cmd on macOS, Ctrl elsewhere), `ctrl`, `meta`, `alt`, `shift`,
- *   plus a single literal key ("k", "/", "Enter", …). Tokens are joined with
- *   `+` and case-insensitive.
- */
-export function matchHotkey(event: KeyboardEvent, combo: string): boolean {
-  const parts = combo
-    .toLowerCase()
-    .split('+')
-    .map((p) => p.trim())
-    .filter(Boolean);
-  let needCtrl = false;
-  let needMeta = false;
-  let needAlt = false;
-  let needShift = false;
-  let key = '';
-  for (const p of parts) {
-    if (p === 'mod') {
-      if (isMac) needMeta = true;
-      else needCtrl = true;
-    } else if (p === 'ctrl') {
-      needCtrl = true;
-    } else if (p === 'meta' || p === 'cmd' || p === 'super') {
-      needMeta = true;
-    } else if (p === 'alt' || p === 'option') {
-      needAlt = true;
-    } else if (p === 'shift') {
-      needShift = true;
-    } else {
-      key = p;
-    }
-  }
-  if (event.ctrlKey !== needCtrl) return false;
-  if (event.metaKey !== needMeta) return false;
-  if (event.altKey !== needAlt) return false;
-  if (needShift && !event.shiftKey) return false;
-  if (!key) return false;
-
-  const isSingleCharacter = key.length === 1;
-  if (isSingleCharacter) {
-    if (!needShift && /[a-zA-Z]/.test(key) && event.shiftKey) return false;
-    return event.key.toLowerCase() === key.toLowerCase();
-  }
-
-  if (!needShift && event.shiftKey) return false;
-  return event.key.toLowerCase() === key;
-}
+export { matchHotkey };

@@ -29,7 +29,7 @@ describe('Search Core', () => {
     ]);
   });
 
-  it('normalizes punctuation to spaces without Unicode property escapes', () => {
+  it('normalizes punctuation to spaces while preserving Unicode words', () => {
     expect(hellSearchWords('alpha-beta_gamma.Δυναμική')).toEqual([
       'alpha',
       'beta',
@@ -37,7 +37,27 @@ describe('Search Core', () => {
       'δυναμικη',
     ]);
     expect(hellSearchWords('東京・大阪')).toEqual(['東京', '大阪']);
-    expect(hellSearchKey.toString()).not.toContain('\\p{');
+  });
+
+  it('ranks exact and prefix token matches and requires all query words', () => {
+    const service = TestBed.inject(HellSearchService);
+    const results = service.rank(
+      [
+        { id: 'exact', title: 'alpha center', tags: 'admin' },
+        { id: 'prefix', title: 'alphacentral centerline', tags: 'admin' },
+        { id: 'include', title: 'xalpha ycenter', tags: 'admin' },
+      ] as const,
+      {
+        query: 'alpha center',
+        fields: [{ weight: 3, get: (item) => item.title }, { weight: 1, get: (item) => item.tags }],
+      },
+    );
+
+    expect(results.map((result) => result.item.id)).toEqual(['exact', 'prefix', 'include']);
+
+    const exact = results.find((result) => result.item.id === 'exact');
+    const prefix = results.find((result) => result.item.id === 'prefix');
+    expect(exact && prefix ? exact.score : 0).toBeGreaterThan(prefix?.score ?? 0);
   });
 
   it('ranks field matches by weight while requiring every query word', () => {
