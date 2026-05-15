@@ -784,18 +784,21 @@ function checkCodeEditorRuntimeContract() {
 
 function checkExperimentalFeatureContract() {
   const audioSource = readFile(join(root, 'projects/hell/src/lib/composites/audio-player/audio-player.ts'));
-  if (!/allowLiveCaptions\s*=\s*input\(false/.test(audioSource)) {
-    failures.push('Audio live captions must remain explicitly opt-in while experimental');
+  if (!/allowSpeechTranscript\s*=\s*input\(false/.test(audioSource)) {
+    failures.push('Audio speech transcript must remain explicitly opt-in while experimental');
   }
-  if (!audioSource.includes('@experimental Live captions')) {
-    failures.push('HellAudioPlayer must mark browser live captions experimental in its public JSDoc');
+  if (!/allowLiveCaptions\s*=\s*input\(false/.test(audioSource)) {
+    failures.push('Audio live captions compatibility alias must remain explicitly opt-in');
+  }
+  if (!audioSource.includes('@experimental Browser speech transcripts')) {
+    failures.push('HellAudioPlayer must mark browser speech transcript experimental in its public JSDoc');
   }
 
   const audioDocs = readFile(
     join(root, 'projects/hell-docs/src/app/pages/components/audio-player/audio-player.page.ts'),
   );
-  if (!/Live captions are experimental/.test(audioDocs) || !/default <code>false<\/code>/.test(audioDocs)) {
-    failures.push('Audio Player docs must disclose experimental opt-in live captions');
+  if (!/speech transcript is experimental/i.test(audioDocs) || !/default <code>false<\/code>/.test(audioDocs)) {
+    failures.push('Audio Player docs must disclose experimental opt-in speech transcript');
   }
 
   const pdfSource = readFile(join(root, 'projects/hell/src/lib/features/pdf-viewer/pdf-viewer.ts'));

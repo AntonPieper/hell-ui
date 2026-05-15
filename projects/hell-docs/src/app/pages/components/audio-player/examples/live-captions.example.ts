@@ -9,7 +9,7 @@ import { HellAudioPlayer } from '@hell-ui/angular/composites';
     <hell-audio-player
       src="https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg"
       title="Read while you listen"
-      [allowLiveCaptions]="true"
+      [allowSpeechTranscript]="true"
     />
   `,
 })

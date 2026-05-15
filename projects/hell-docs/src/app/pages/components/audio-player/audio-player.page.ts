@@ -28,14 +28,14 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
       <p>
         Compact player wrapping a native <code>&lt;audio&gt;</code> element with play/pause,
         draggable scrubber, mute, volume slider, an optional download button, and — when the browser
-        supports <code>SpeechRecognition</code> + <code>captureStream()</code> — an unobtrusive live
-        captions strip.
+        supports <code>SpeechRecognition</code> + <code>captureStream()</code> — an unobtrusive
+        speech transcript strip.
       </p>
       <p>
-        Live captions are experimental and rely on browser speech-recognition and media-capture APIs.
-        They are intentionally best-effort only, not accessibility-grade captions or timed text; treat them as an
-        experimental hinting aid and never as a replacement for provided captions, transcripts,
-        or server-generated accessibility content.
+        The speech transcript is experimental and relies on browser speech-recognition and
+        media-capture APIs. It is intentionally best-effort only, not accessibility-grade captions
+        or timed text; treat it as a convenience aid and never as a replacement for provided
+        captions, transcripts, or server-generated accessibility content.
       </p>
 
       <h2>With title and date</h2>
@@ -52,13 +52,13 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         <app-audio-player-untitled-controls-only-example />
       </hd-example-tabs>
 
-      <h2>Live captions</h2>
+      <h2>Speech transcript</h2>
       <p>
-        Use the CC toggle to open the captions strip when you want it. Captions auto-start with
-        playback and auto-stop on pause — the dedicated speed pill (1× → 1.25× → …) lives inside the
-        strip so the main controls stay clean. Mute the audio entirely if you only want the
-        transcript. Seeking or replaying clears the live transcript so captions stay aligned with
-        current playback.
+        Use the transcript toggle to open the strip when you want it. Speech recognition auto-starts
+        with playback and auto-stops on pause — the dedicated speed pill (1× → 1.25× → …) lives
+        inside the strip so the main controls stay clean. Mute the audio entirely if you only want
+        the transcript. Seeking or replaying clears the best-effort transcript so it follows current
+        playback.
       </p>
       <hd-example-tabs [code]="audioPlayerLiveCaptionsExampleCode">
         <app-audio-player-live-captions-example />
@@ -72,8 +72,10 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         <li><code>downloadName</code>: filename for the download link</li>
         <li><code>allowDownload</code>: show / hide download button (default <code>true</code>)</li>
         <li>
-          <code>allowLiveCaptions</code>: opt into experimental browser live captions (default <code>false</code>)
-          that are best-effort only and not intended as accessibility-grade captions/timed text
+          <code>allowSpeechTranscript</code>: opt into experimental browser speech transcription
+          (default <code>false</code>) that is best-effort only and not intended as
+          accessibility-grade captions/timed text. <code>allowLiveCaptions</code> remains a
+          compatibility alias.
         </li>
         <li>
           <code>lang</code>: BCP-47 hint for <code>SpeechRecognition</code>. Defaults to
@@ -90,18 +92,18 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         <li><kbd>←</kbd> / <kbd>→</kbd> on the focused seek bar jumps 5s.</li>
         <li>Volume slider doubles as a mute toggle when dragged to 0.</li>
         <li>
-          The CC button only appears in browsers that expose <code>SpeechRecognition</code> and
-          <code>HTMLMediaElement.captureStream()</code> — currently Chromium-based desktops are
+          The transcript button only appears in browsers that expose <code>SpeechRecognition</code>
+          and <code>HTMLMediaElement.captureStream()</code> — currently Chromium-based desktops are
           common. Results are best-effort only, so recognition accuracy and timing may drift.
           Audio is piped via <code>start(track)</code>, so no microphone permission is needed.
         </li>
         <li>
-          Toggling CC while paused only opens the captions panel. Captions follow the audio: pause
-          the audio and recognition pauses; press play to resume live capture.
+          Toggling the transcript while paused only opens the panel. Transcription follows the
+          audio: pause the audio and recognition pauses; press play to resume capture.
         </li>
         <li>
-          Seeking or replaying clears the current transcript before capture resumes from the new
-          playback position.
+          Seeking or replaying clears the current best-effort transcript before capture resumes from
+          the new playback position.
         </li>
       </ul>
 
@@ -111,14 +113,17 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
           Provide a clear <code>title</code> and <code>date</code> for recorded calls or messages.
         </li>
         <li>Use provided captions or transcripts when accessibility must be reliable.</li>
-        <li>Set <code>[allowLiveCaptions]="true"</code> only for best-effort browser live captions.</li>
+        <li>
+          Set <code>[allowSpeechTranscript]="true"</code> only for best-effort browser speech
+          transcripts.
+        </li>
         <li>Disable downloads when audio is sensitive.</li>
       </ul>
 
       <h2>Don't</h2>
       <ul>
         <li>Don't rely on waveform or timing alone to communicate state.</li>
-        <li>Don't treat live captions as production-grade accessibility content.</li>
+        <li>Don't treat browser speech transcripts as production-grade accessibility content.</li>
         <li>Don't expose download actions for private recordings.</li>
       </ul>
     </article>

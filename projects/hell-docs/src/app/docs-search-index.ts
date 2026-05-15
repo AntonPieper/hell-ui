@@ -501,10 +501,10 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     terms: 'app-shell markup-skeleton components/app-shell/examples/markup-skeleton.example components/app-shell hellAppShell hellAppTopbar hellAppSidenav hellAppContent',
   },
   {
-    title: 'Audio Player: Live Captions',
+    title: 'Audio Player: Speech Transcript',
     path: '/components/audio-player',
     detail: 'components/audio-player/examples/live-captions.example.ts',
-    terms: 'audio-player live-captions components/audio-player/examples/live-captions.example components/audio-player hell-audio-player SpeechRecognition captureStream experimental best-effort timed-text accessibility',
+    terms: 'audio-player speech-transcript live-captions components/audio-player/examples/live-captions.example components/audio-player hell-audio-player allowSpeechTranscript SpeechRecognition captureStream experimental best-effort timed-text accessibility',
   },
   {
     title: 'Audio Player: Untitled Controls Only',

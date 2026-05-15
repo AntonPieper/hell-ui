@@ -93,9 +93,10 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
           </li>
           <li>
             <code>tr[hellTableRow]</code>: <code>[selected]</code> →
-            <code>data-selected="true"</code>, <code>aria-selected</code>;
-            <code>[interactive]</code> enables click / Enter / Space and emits
-            <code>(rowSelect)</code>.
+            <code>data-selected="true"</code>; <code>[interactive]</code> enables click / Enter /
+            Space and emits <code>(rowSelect)</code>. <code>[selectionSemantics]</code> controls
+            whether the row exposes <code>aria-selected</code> (default <code>true</code>); set it
+            to <code>false</code> for action-only rows.
           </li>
           <li>
             <code>th[hellTableHeaderCell]</code>: <code>[sortable]</code>,
@@ -146,8 +147,9 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
             Angular CDK Table, TanStack Table, signals, and your own backend data source.
           </li>
           <li>
-            Drive selection from <code>(rowSelect)</code> and reflect it via
-            <code>[selected]</code>.
+            Drive selection from <code>(rowSelect)</code>, reflect it via <code>[selected]</code>,
+            and leave <code>[selectionSemantics]</code> enabled only when the row really belongs to
+            a selectable table/list model.
           </li>
           <li>
             Put sortable labels in <code>button[hellTableSortButton]</code> instead of making the
@@ -161,6 +163,7 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
         <h2>Don't</h2>
         <ul>
           <li>Don't call these directives a complete data-table implementation.</li>
+          <li>Don't leave <code>aria-selected</code> on action-only rows.</li>
           <li>Don't put a filter input inside the table; compose it as a sibling.</li>
           <li>
             Don't hide the resize grip by overflowing the header cell — keep

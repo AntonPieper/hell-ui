@@ -50,6 +50,7 @@ import {
           hellTableRow
           [selected]="selected()"
           [interactive]="interactive()"
+          [selectionSemantics]="selectionSemantics()"
           (rowSelect)="rowEvents.push($event)"
         >
           <td hellTableCell (cellSelect)="cellEvents.push($event)">
@@ -71,6 +72,7 @@ class DataTableHost {
   readonly sortable = signal(false);
   readonly sort = signal<'asc' | 'desc' | null>(null);
   readonly minWidth = signal(40);
+  readonly selectionSemantics = signal(true);
 
   readonly rowEvents: Array<MouseEvent | KeyboardEvent> = [];
   readonly cellEvents: MouseEvent[] = [];
@@ -154,7 +156,7 @@ describe('Hell data table directives', () => {
     row.click();
     expect(host.rowEvents).toEqual([]);
     expect(row.hasAttribute('tabindex')).toBe(false);
-    expect(row.hasAttribute('aria-selected')).toBe(false);
+    expect(row.getAttribute('aria-selected')).toBe('false');
 
     host.interactive.set(true);
     host.selected.set(true);
@@ -170,6 +172,25 @@ describe('Hell data table directives', () => {
     expect(row.getAttribute('aria-selected')).toBe('true');
     expect(space.defaultPrevented).toBe(true);
     expect(host.rowEvents).toHaveLength(3);
+  });
+
+  it('allows action-only rows to drop aria-selected semantics', () => {
+    const fixture = TestBed.createComponent(DataTableHost);
+    const host = fixture.componentInstance;
+    host.interactive.set(true);
+    host.selected.set(true);
+    fixture.detectChanges();
+
+    const row = byId<HTMLTableRowElement>(fixture.nativeElement, 'person-row');
+    expect(row.getAttribute('aria-selected')).toBe('true');
+
+    host.selectionSemantics.set(false);
+    fixture.detectChanges();
+
+    expect(row.hasAttribute('aria-selected')).toBe(false);
+    expect(row.getAttribute('data-selected')).toBe('true');
+    row.click();
+    expect(host.rowEvents).toHaveLength(1);
   });
 
   it('does not select rows or cells from nested interactive controls', () => {

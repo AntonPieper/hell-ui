@@ -40,9 +40,9 @@ interface SpeechRecognitionCtor {
   new (): SpeechRecognitionLike;
 }
 
-/** Experimental browser speech contracts: captions follow the media track only. */
+/** Experimental browser speech contracts: transcripts follow the media track only. */
 const HELL_AUDIO_RECOGNITION_UNSUPPORTED_MESSAGE =
-  'Live captions are unavailable for this browser and media element.';
+  'Speech transcript is unavailable for this browser and media element.';
 
 function resolveCaptionLang(audio: HTMLAudioElement, lang: string | null): string {
   if (lang) return lang;
@@ -107,7 +107,7 @@ function getSpeechRecognition(): SpeechRecognitionCtor | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
-/** True when this browser supports `SpeechRecognition` and `captureStream()`. */
+/** True when this browser supports media-track `SpeechRecognition` and `captureStream()`. */
 export function hellAudioSpeechSupported(): boolean {
   return (
     typeof window !== 'undefined' &&
@@ -117,7 +117,7 @@ export function hellAudioSpeechSupported(): boolean {
   );
 }
 
-/** Playback, seek, volume, and best-effort browser caption runtime behind HellAudioPlayer. */
+/** Playback, seek, volume, and best-effort browser speech-transcript runtime behind HellAudioPlayer. */
 export class HellAudioRuntime {
   readonly playing = signal(false);
   readonly currentTime = signal(0);

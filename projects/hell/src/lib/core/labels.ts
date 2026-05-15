@@ -169,8 +169,8 @@ export const HELL_DEFAULT_LABELS: HellLabels = {
     mute: 'Mute',
     unmute: 'Unmute',
     volume: 'Volume',
-    showLiveCaptions: 'Show live captions',
-    hideLiveCaptions: 'Hide live captions',
+    showLiveCaptions: 'Show speech transcript',
+    hideLiveCaptions: 'Hide speech transcript',
     download: 'Download',
     playbackSpeed: (rate) => `Playback speed ${rate}x`,
     copyTranscript: 'Copy transcript',
@@ -182,7 +182,7 @@ export const HELL_DEFAULT_LABELS: HellLabels = {
     copy: 'Copy',
     clear: 'Clear',
     listening: 'Listening…',
-    pressPlayForCaptions: 'Press play to capture captions.',
+    pressPlayForCaptions: 'Press play to capture a speech transcript.'
   },
   dialpad: {
     dialpad: 'Dial pad',

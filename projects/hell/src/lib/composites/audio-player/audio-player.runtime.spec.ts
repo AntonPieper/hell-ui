@@ -74,7 +74,7 @@ describe('HellAudioRuntime playback state', () => {
     expect(media.currentTime).toBe(60);
   });
 
-  it('resets captions when playback starts at the beginning or after ending', () => {
+  it('resets speech transcript when playback starts at the beginning or after ending', () => {
     const runtime = new HellAudioRuntime();
     const media = new FakeAudioAdapter();
 
@@ -103,7 +103,7 @@ describe('HellAudioRuntime playback state', () => {
   });
 });
 
-describe('HellAudioRuntime live captions', () => {
+describe('HellAudioRuntime speech transcript', () => {
   const nativeSpeechRecognition = (window as unknown as { SpeechRecognition?: unknown })
     .SpeechRecognition;
   const nativeWebkitSpeechRecognition = (
@@ -195,7 +195,7 @@ describe('HellAudioRuntime live captions', () => {
     expect(runtime.interim()).toBe('still talking');
   });
 
-  it('stops browser capture tracks when captions stop', () => {
+  it('stops browser capture tracks when transcription stops', () => {
     const runtime = new HellAudioRuntime();
 
     runtime.startRecognition(document.createElement('audio'), 'en-US');

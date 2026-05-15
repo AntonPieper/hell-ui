@@ -54,12 +54,12 @@ function parseIsoDateOnly(value: string): Date | null {
 
 /**
  * Compact audio player with seek bar, play/pause, mute, volume slider,
- * download button and an opt-in inline live-captions strip backed by the
- * Web Speech API (Chromium-only). The captions toggle is hidden unless enabled
+ * download button and an opt-in speech-transcript strip backed by the
+ * Web Speech API (Chromium-only). The transcript toggle is hidden unless enabled
  * and the browser exposes `SpeechRecognition` + `HTMLMediaElement.captureStream()`.
  *
- * @experimental Live captions are best-effort browser sugar, not a replacement
- * for provided captions or transcripts.
+ * @experimental Browser speech transcripts are best-effort convenience text,
+ * not accessibility captions, timed text, or a replacement for transcripts.
  */
 @Component({
   selector: 'hell-audio-player',
@@ -144,7 +144,7 @@ function parseIsoDateOnly(value: string): Date | null {
         [attr.aria-label]="labels.audioPlayer.volume"
       />
 
-      @if (allowLiveCaptions() && speechSupported()) {
+      @if (speechTranscriptEnabled() && speechSupported()) {
         <button
           hellButton
           hellFlyoutTrigger
@@ -259,7 +259,9 @@ export class HellAudioPlayer extends HellStyleable {
   readonly src = input.required<string>();
   readonly downloadName = input<string | null>(null);
   readonly allowDownload = input(true, { transform: booleanAttribute });
-  /** Show / hide the experimental Chromium-only live captions feature. */
+  /** Show / hide the experimental Chromium-only speech-transcript feature. */
+  readonly allowSpeechTranscript = input(false, { transform: booleanAttribute });
+  /** @deprecated Use `allowSpeechTranscript`; this alias remains for compatibility. */
   readonly allowLiveCaptions = input(false, { transform: booleanAttribute });
   /** Optional display title shown above the controls. Hidden when `null`. */
   readonly title = input<string | null>(null);
@@ -269,6 +271,9 @@ export class HellAudioPlayer extends HellStyleable {
   readonly lang = input<string | null>(null);
 
   protected readonly captions = signal(false);
+  protected readonly speechTranscriptEnabled = computed(
+    () => this.allowSpeechTranscript() || this.allowLiveCaptions(),
+  );
   private readonly audioRuntime = new HellAudioRuntime();
   protected readonly playing = this.audioRuntime.playing;
   protected readonly currentTime = this.audioRuntime.currentTime;
@@ -321,7 +326,7 @@ export class HellAudioPlayer extends HellStyleable {
   private readonly captionScroll = viewChild<ElementRef<HTMLElement>>('captionScroll');
   protected readonly ccTrigger = viewChild('ccTrigger', { read: HellFlyoutTrigger });
 
-  /** Host element — passed to the captions flyout as its boundary so all
+  /** Host element — passed to the transcript flyout as its boundary so all
    * player controls (seek slider, play, volume, etc.) keep the flyout
    * open when interacted with. */
   protected readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
@@ -335,10 +340,13 @@ export class HellAudioPlayer extends HellStyleable {
     // Apply audio properties from runtime state.
     effect(() => this.audioRuntime.syncMedia(this.media));
 
-    // Auto start/stop recognition based on captions toggle + playback.
+    // Auto start/stop recognition based on transcript toggle + playback.
     effect(() => {
       const wantLive =
-        this.allowLiveCaptions() && this.captions() && this.playing() && this.speechSupported();
+        this.speechTranscriptEnabled() &&
+        this.captions() &&
+        this.playing() &&
+        this.speechSupported();
       if (wantLive && !this.audioRuntime.isRecognizing()) {
         this.startRecognition();
       } else if (!wantLive && this.audioRuntime.isRecognizing()) {
@@ -346,7 +354,7 @@ export class HellAudioPlayer extends HellStyleable {
       }
     });
 
-    // Auto-scroll caption panel.
+    // Auto-scroll transcript panel.
     effect(() => {
       this.transcript();
       this.interim();
@@ -364,7 +372,7 @@ export class HellAudioPlayer extends HellStyleable {
 
   protected onPlay() {
     const result = this.audioRuntime.markPlayed(this.media);
-    if (result.resetTimeline) this.resetCaptionSession();
+    if (result.resetTimeline) this.resetTranscriptSession();
   }
 
   protected onPause() {
@@ -401,12 +409,12 @@ export class HellAudioPlayer extends HellStyleable {
 
   protected onSeeking() {
     const result = this.audioRuntime.syncExternalSeek(this.media);
-    if (result.resetTimeline) this.resetCaptionSession(this.shouldRestartRecognition());
+    if (result.resetTimeline) this.resetTranscriptSession(this.shouldRestartRecognition());
   }
 
   /**
    * Slider-driven seek. Fires for every step change while dragging; we
-   * commit immediately and debounce caption recovery so we only restart
+   * commit immediately and debounce transcript recovery so we only restart
    * `SpeechRecognition` once the user finishes scrubbing.
    */
   protected onSeek(value: number) {
@@ -469,7 +477,7 @@ export class HellAudioPlayer extends HellStyleable {
     );
   }
 
-  private resetCaptionSession(restartRecognition = false) {
+  private resetTranscriptSession(restartRecognition = false) {
     this.resetTranscriptState();
     if (!restartRecognition) return;
 

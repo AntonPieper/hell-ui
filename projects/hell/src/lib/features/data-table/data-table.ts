@@ -202,7 +202,8 @@ export class HellTableHead extends HellStyleable {
 export class HellTableBody extends HellStyleable {}
 
 /**
- * Marks nested content as exempt from row activation.
+ * Marks nested content as exempt from row activation. Use this on custom control
+ * hosts that should keep their own keyboard and click behavior.
  */
 @Directive({
   selector: '[data-hell-row-ignore], [hellTableRowIgnore]',
@@ -214,15 +215,17 @@ export class HellTableRowIgnore {}
 
 /**
  * Behavioral row directive. Renders nothing of its own — consumers own
- * the `<tr>` markup and its children. Provides:
+ * the `<tr>` markup and its children. Use as a row-action convenience,
+ * not a full data-grid selection model.
  *
- * - `[selected]` -> `data-selected="true"` and `aria-selected="true"`,
- *   so consumers can highlight via CSS attribute selectors.
+ * - `[selected]` -> `data-selected="true"` for row highlight styles.
  * - `[interactive]` -> `tabindex="0"` and click/Enter/Space binding
- *   that emits `(rowSelect)`. Nested buttons, links, inputs, ARIA widgets,
- *   `[contenteditable]`, and `[data-hell-row-ignore]`/`[hellTableRowIgnore]`
- *   opt out so row actions do not double-select. Use this to drive selection
- *   from the row without writing your own click handler on every cell.
+ *   that emits `(rowSelect)`.
+ * - `[selectionSemantics]` controls `aria-selected` when row selection state
+ *   is part of your row model. Disable it for action-only rows.
+ * - Nested buttons, links, inputs, ARIA widgets, `[contenteditable]`, and
+ *   `[data-hell-row-ignore]`/`[hellTableRowIgnore]` opt out so row actions
+ *   do not double-select.
  */
 @Directive({
   selector: 'tr[hellTableRow]',
@@ -231,7 +234,7 @@ export class HellTableRowIgnore {}
     '[class.hell-table-row]': '!unstyled()',
     '[attr.data-selected]': 'selected() ? "true" : null',
     '[attr.data-interactive]': 'interactive() ? "true" : null',
-    '[attr.aria-selected]': 'interactive() ? (selected() ? "true" : "false") : null',
+    '[attr.aria-selected]': 'selectionSemantics() ? (selected() ? "true" : "false") : null',
     '[attr.tabindex]': 'interactive() ? "0" : null',
     '(click)': 'onClick($event)',
     '(keydown.enter)': 'onKey($event)',
@@ -240,7 +243,10 @@ export class HellTableRowIgnore {}
 })
 export class HellTableRow extends HellStyleable {
   readonly selected = input(false, { transform: booleanAttribute });
+  /** Enable row action activation on click + Enter/Space. Kept separate from selection semantics. */
   readonly interactive = input(false, { transform: booleanAttribute });
+  /** Show `aria-selected` for selection state. Set false when row acts like generic actions only. */
+  readonly selectionSemantics = input(true, { transform: booleanAttribute });
 
   readonly rowSelect = output<MouseEvent | KeyboardEvent>();
 

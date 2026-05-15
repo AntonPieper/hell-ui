@@ -10,7 +10,7 @@ describe('HellAudioPlayer', () => {
 
     const fixture = TestBed.createComponent(HellAudioPlayer);
     fixture.componentRef.setInput('src', '/test-audio.mp3');
-    fixture.componentRef.setInput('allowLiveCaptions', true);
+    fixture.componentRef.setInput('allowSpeechTranscript', true);
     fixture.detectChanges();
 
     const component = fixture.componentInstance as HellAudioPlayer & {
@@ -32,15 +32,15 @@ describe('HellAudioPlayer', () => {
     return { fixture, component, audio };
   }
 
-  it('does not start playback when captions are toggled while paused', async () => {
+  it('does not start playback when the speech transcript is toggled while paused', async () => {
     const { fixture, component } = await createPlayer();
     const playSpy = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
 
-    const ccButton = fixture.nativeElement.querySelector(
+    const transcriptButton = fixture.nativeElement.querySelector(
       '[data-slot="cc-toggle"]',
     ) as HTMLButtonElement;
 
-    ccButton.click();
+    transcriptButton.click();
     fixture.detectChanges();
 
     expect(playSpy).not.toHaveBeenCalled();
@@ -50,7 +50,7 @@ describe('HellAudioPlayer', () => {
     playSpy.mockRestore();
   });
 
-  it('keeps the experimental captions toggle opt-in', async () => {
+  it('keeps the experimental speech transcript toggle opt-in', async () => {
     await TestBed.configureTestingModule({ imports: [HellAudioPlayer] }).compileComponents();
     const fixture = TestBed.createComponent(HellAudioPlayer);
     fixture.componentRef.setInput('src', '/test-audio.mp3');
@@ -64,17 +64,34 @@ describe('HellAudioPlayer', () => {
     expect(fixture.nativeElement.querySelector('[data-slot="cc-toggle"]')).toBeNull();
   });
 
-  it('hides the captions toggle when live captions are disabled', async () => {
+  it('hides the transcript toggle when speech transcripts are disabled', async () => {
     const { fixture } = await createPlayer();
 
     expect(fixture.nativeElement.querySelector('[data-slot="cc-toggle"]')).toBeInstanceOf(
       HTMLButtonElement,
     );
 
-    fixture.componentRef.setInput('allowLiveCaptions', false);
+    fixture.componentRef.setInput('allowSpeechTranscript', false);
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('[data-slot="cc-toggle"]')).toBeNull();
+  });
+
+  it('keeps allowLiveCaptions as a compatibility alias', async () => {
+    await TestBed.configureTestingModule({ imports: [HellAudioPlayer] }).compileComponents();
+    const fixture = TestBed.createComponent(HellAudioPlayer);
+    fixture.componentRef.setInput('src', '/test-audio.mp3');
+    fixture.componentRef.setInput('allowLiveCaptions', true);
+
+    const component = fixture.componentInstance as HellAudioPlayer & {
+      speechSupported: { set(value: boolean): void };
+    };
+    component.speechSupported.set(true);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-slot="cc-toggle"]')).toBeInstanceOf(
+      HTMLButtonElement,
+    );
   });
 
   it('does not Date.parse ambiguous display date strings', async () => {

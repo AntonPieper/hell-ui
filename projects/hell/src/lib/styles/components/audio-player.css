@@ -90,7 +90,8 @@
   }
 
   /*
-   * Captions panel — overlays beneath the player without pushing siblings.
+   * Speech transcript panel — overlays beneath the player without pushing siblings.
+   * Slot names stay `captions*` for compatibility with existing CSS overrides.
    * The player itself is `position: relative`, so the panel anchors to its
    * inline edges and floats above following layout content.
    */
