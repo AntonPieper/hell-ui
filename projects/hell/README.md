@@ -49,6 +49,12 @@ Feature peers remain optional, but npm peer metadata is package-wide: install th
 | Testing harnesses (`@hell-ui/angular/testing`) | Beta/test-only | CDK component harnesses for consumer and library tests |
 | Speech transcript (`allowSpeechTranscript`) | Experimental/browser-only/best-effort | Uses `navigator` + `SpeechRecognition` + `captureStream`; not accessibility-grade captions or production timed text |
 
+The PDF viewer component now exposes:
+
+- `globalShortcuts` input (default `false`) to opt into document-level keyboard listeners.
+- `worker` input to pass a URL/Worker for a custom pdf.js worker source and avoid using the internal default.
+- incremental thumbnail rendering behind `IntersectionObserver` for overview mode.
+
 ## Angular Imports
 
 Prefer the narrowest entry point that contains the API you use:

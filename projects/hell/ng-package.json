@@ -8,7 +8,12 @@
       "output": "styles"
     },
     {
-      "glob": "**/*",
+      "glob": "hell-ui-logo.svg",
+      "input": "assets",
+      "output": "assets"
+    },
+    {
+      "glob": "pdf.worker.mjs",
       "input": "assets",
       "output": "assets"
     }

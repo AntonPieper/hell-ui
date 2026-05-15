@@ -32,6 +32,27 @@ export interface HellPdfViewerSessionHandlers {
   }) => void;
 }
 
+/** Explicit worker wiring from either URL or a pre-created Worker port. */
+export type HellPdfWorkerSource =
+  | string
+  | URL
+  | Worker
+  | {
+      /** URL-like worker source that this feature imports as a browser Worker. */
+      readonly workerUrl: string | URL;
+      /** Optional Worker constructor options for URL-based workers. */
+      readonly workerOptions?: WorkerOptions;
+    }
+  | {
+      /** Pre-created Worker instance. */
+      readonly port: Worker;
+    };
+
+/** Optional bootstrap options from runtime-to-adapter. */
+export interface HellPdfAdapterBootstrapOptions {
+  readonly worker?: HellPdfWorkerSource;
+}
+
 /** Adapter-owned viewer session. Runtime commands stay pdf.js-agnostic. */
 export interface HellPdfViewerSession {
   readonly currentScale: number;
@@ -49,6 +70,12 @@ export interface HellPdfViewerSession {
   cleanup(): void;
 }
 
+/** In-flight load tasks can be destroyed to cancel pending network/parsing work. */
+export interface HellPdfDocumentLoadTask {
+  readonly promise: Promise<HellPdfDocumentHandle>;
+  destroy(): void | Promise<void>;
+}
+
 /**
  * Adapter seam around pdf.js, downloads, and printing. Tests and future pdf.js
  * upgrades can replace browser-heavy work without changing `HellPdfRuntime`.
@@ -57,11 +84,12 @@ export interface HellPdfRuntimeAdapter {
   createViewer(
     container: HTMLDivElement,
     handlers: HellPdfViewerSessionHandlers,
+    options?: HellPdfAdapterBootstrapOptions,
   ): Promise<HellPdfViewerSession>;
   loadDocument(
     session: HellPdfViewerSession,
     source: HellPdfSource,
-  ): Promise<HellPdfDocumentHandle>;
+  ): Promise<HellPdfDocumentLoadTask>;
   download(
     source: HellPdfSource,
     fileName?: string | null,
@@ -84,8 +112,15 @@ interface HellPdfJsWorkerHandle {
   destroy(): void | Promise<void>;
 }
 
+interface HellPdfJsWorkerPortBinding {
+  readonly port: Worker;
+  readonly cleanup?: () => void;
+  readonly ownsPdfWorker: boolean;
+}
+
 interface HellPdfJsLoadingTask {
-  readonly promise: Promise<HellPdfDocumentHandle>;
+  promise: Promise<HellPdfDocumentHandle>;
+  destroy(): void | Promise<void>;
 }
 
 interface HellPdfJsModule {
@@ -185,16 +220,17 @@ const HELL_PDF_FIND_STATE = {
   PENDING: 3,
 } as const;
 
+const DEFAULT_WORKER_SOURCE = new URL('../assets/pdf.worker.mjs', import.meta.url);
+
 export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
   async createViewer(
     container: HTMLDivElement,
     handlers: HellPdfViewerSessionHandlers,
+    options: HellPdfAdapterBootstrapOptions = {},
   ): Promise<HellPdfViewerSession> {
     const pdfjs = (await import('pdfjs-dist')) as unknown as HellPdfJsModule;
-    const workerPort = new Worker(new URL('../assets/pdf.worker.mjs', import.meta.url), {
-      type: 'module',
-    });
-    const pdfWorker = new pdfjs.PDFWorker({ port: workerPort });
+    const workerBinding = this.createWorkerBinding(options.worker);
+    const pdfWorker = new pdfjs.PDFWorker({ port: workerBinding.port });
     const viewerMod = await hellWithPdfJsGlobal(
       pdfjs,
       async () => (await import('pdfjs-dist/web/pdf_viewer.mjs')) as unknown as HellPdfJsViewerModule,
@@ -221,19 +257,78 @@ export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
       findController,
       eventBus,
       pdfWorker,
-      workerPort,
+      workerBinding,
       handlers,
     });
+  }
+
+  private createWorkerBinding(worker?: HellPdfWorkerSource): HellPdfJsWorkerPortBinding {
+    if (typeof worker === 'undefined' || worker === null) {
+      const port = new Worker(DEFAULT_WORKER_SOURCE, { type: 'module' });
+      return {
+        port,
+        cleanup: () => port.terminate(),
+        ownsPdfWorker: true,
+      };
+    }
+
+    if (worker instanceof Worker) {
+      return {
+        port: worker,
+        ownsPdfWorker: false,
+      };
+    }
+
+    if (typeof worker === 'string' || worker instanceof URL) {
+      const port = new Worker(worker, {
+        type: 'module',
+      });
+      return {
+        port,
+        cleanup: () => port.terminate(),
+        ownsPdfWorker: true,
+      };
+    }
+
+    if (typeof worker === 'object') {
+      const workerObject = worker as {
+        readonly workerUrl?: string | URL;
+        readonly port?: unknown;
+        readonly workerOptions?: WorkerOptions;
+      };
+
+      if (workerObject.workerUrl != null) {
+        const workerUrl = workerObject.workerUrl;
+        const port = new Worker(workerUrl, {
+          type: 'module',
+          ...workerObject.workerOptions,
+        });
+        return {
+          port,
+          cleanup: () => port.terminate(),
+          ownsPdfWorker: true,
+        };
+      }
+
+      if (workerObject.port instanceof Worker) {
+        return {
+          port: workerObject.port,
+          ownsPdfWorker: false,
+        };
+      }
+    }
+
+    throw new Error('Unrecognized PDF worker config passed to the adapter.');
   }
 
   async loadDocument(
     session: HellPdfViewerSession,
     source: HellPdfSource,
-  ): Promise<HellPdfDocumentHandle> {
+  ): Promise<HellPdfDocumentLoadTask> {
     if (!(session instanceof HellPdfJsViewerSession)) {
       throw new Error('PDF viewer session was not created by this adapter.');
     }
-    return await session.loadDocument(source);
+    return session.loadDocument(source);
   }
 
   async download(
@@ -301,7 +396,7 @@ interface HellPdfJsViewerSessionOptions {
   readonly findController: HellPdfJsFindController;
   readonly eventBus: HellPdfJsEventBus;
   readonly pdfWorker: HellPdfJsWorkerHandle;
-  readonly workerPort: Worker;
+  readonly workerBinding: HellPdfJsWorkerPortBinding;
   readonly handlers: HellPdfViewerSessionHandlers;
 }
 
@@ -314,13 +409,16 @@ class HellPdfJsViewerSession implements HellPdfViewerSession {
     return this.options.viewer?.currentScale ?? 1;
   }
 
-  loadDocument(source: HellPdfSource): Promise<HellPdfDocumentHandle> {
+  loadDocument(source: HellPdfSource): HellPdfDocumentLoadTask {
     const loadingTask = this.options.pdfjs.getDocument(
       typeof source === 'string' || source instanceof URL
         ? { url: source.toString(), worker: this.options.pdfWorker }
         : { data: source, worker: this.options.pdfWorker },
     );
-    return loadingTask.promise;
+    return {
+      promise: loadingTask.promise,
+      destroy: () => loadingTask.destroy(),
+    };
   }
 
   setDocument(doc: HellPdfDocumentHandle | null): void {
@@ -380,8 +478,14 @@ class HellPdfJsViewerSession implements HellPdfViewerSession {
 
   cleanup(): void {
     this.options.viewer?.cleanup?.();
-    this.options.pdfWorker?.destroy?.();
-    this.options.workerPort.terminate();
+
+    if (this.options.workerBinding.cleanup) {
+      this.options.workerBinding.cleanup();
+    }
+
+    if (this.options.workerBinding.ownsPdfWorker) {
+      this.options.pdfWorker?.destroy?.();
+    }
   }
 
   private installEventHandlers(): void {

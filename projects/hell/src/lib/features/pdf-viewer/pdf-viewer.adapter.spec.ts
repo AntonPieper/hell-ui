@@ -223,7 +223,7 @@ describe('PDF Adapter browser seam', () => {
     const pdfWorker = required(pdfJsMock.pdfWorkers[0]);
 
     expect(worker.options).toEqual({ type: 'module' });
-    expect(String(worker.url)).toContain('worker_file');
+    expect(String(worker.url)).toContain('pdf.worker.mjs');
     expect(String(worker.url)).not.toContain('pdf.worker.ts');
     expect(linkService.setViewer).toHaveBeenCalledWith(viewer);
 
@@ -293,9 +293,8 @@ describe('PDF Adapter browser seam', () => {
 
     const loaded = fakeDocument(4);
     pdfJsMock.getDocument.mockReturnValueOnce({ promise: Promise.resolve(loaded) });
-    await expect(adapter.loadDocument(session, new URL('https://example.test/doc.pdf'))).resolves.toBe(
-      loaded,
-    );
+    const urlLoadTask = await adapter.loadDocument(session, new URL('https://example.test/doc.pdf'));
+    await expect(urlLoadTask.promise).resolves.toBe(loaded);
     expect(pdfJsMock.getDocument).toHaveBeenLastCalledWith({
       url: 'https://example.test/doc.pdf',
       worker: pdfWorker,
@@ -303,7 +302,8 @@ describe('PDF Adapter browser seam', () => {
 
     const bytes = new Uint8Array([1, 2, 3]).buffer;
     pdfJsMock.getDocument.mockReturnValueOnce({ promise: Promise.resolve(loaded) });
-    await adapter.loadDocument(session, bytes);
+    const dataLoadTask = await adapter.loadDocument(session, bytes);
+    await dataLoadTask.promise;
     expect(pdfJsMock.getDocument).toHaveBeenLastCalledWith({ data: bytes, worker: pdfWorker });
 
     await expect(adapter.loadDocument({} as never, 'doc.pdf')).rejects.toThrow(
@@ -347,6 +347,31 @@ describe('PDF Adapter browser seam', () => {
     await expect(adapter.download('/document.pdf')).rejects.toThrow(
       'Cannot download PDF without a browser document.',
     );
+  });
+
+  it('supports explicit worker source overrides for viewer creation', async () => {
+    const adapter = new HellPdfJsRuntimeAdapter();
+    const handlers = createSessionHandlers();
+
+    const sessionWithCustomWorker = await adapter.createViewer(document.createElement('div'), handlers, {
+      worker: {
+        workerUrl: '/assets/pdf.worker.custom.js',
+        workerOptions: { name: 'worker' },
+      },
+    });
+
+    const created = FakeWorker.instances.at(-1);
+    sessionWithCustomWorker.cleanup();
+    expect(created?.url).toBe('/assets/pdf.worker.custom.js');
+    expect(created?.options).toEqual({ type: 'module', name: 'worker' });
+
+    const externalPort = new FakeWorker('external.mjs');
+    const sessionWithPort = await adapter.createViewer(document.createElement('div'), handlers, {
+      worker: { port: externalPort as unknown as Worker },
+    });
+
+    sessionWithPort.cleanup();
+    expect(externalPort.terminate).not.toHaveBeenCalled();
   });
 
   it('creates hidden iframe print sessions through the print helper seam', async () => {

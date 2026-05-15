@@ -47,12 +47,15 @@ import {
   getZoomLabel,
   normalizeZoomValue,
 } from './pdf-viewer.utils';
+import type { HellPdfWorkerSource } from './pdf-viewer.adapter';
 
 export type HellPdfRuntimeFactory = () => HellPdfRuntimePort;
 
 export const HELL_PDF_RUNTIME_FACTORY = new InjectionToken<HellPdfRuntimeFactory>(
   'HELL_PDF_RUNTIME_FACTORY',
 );
+
+const HELL_PDF_THUMBNAIL_INITIAL_BATCH = 12;
 
 const HELL_PDF_VIEWER_ICONS = {
   faSolidChevronDown,
@@ -102,6 +105,8 @@ export class HellPdfViewer extends HellStyleable {
   readonly globalShortcuts = input(false, { transform: booleanAttribute });
   /** Fetch options used by the print path when printing URL/string sources. */
   readonly printFetchOptions = input<RequestInit | null>(null);
+  /** Optional worker override for the PDF runtime. */
+  readonly worker = input<HellPdfWorkerSource | null>(null);
 
   readonly pageChange = output<number>();
   readonly zoomChange = output<number | string>();
@@ -109,8 +114,12 @@ export class HellPdfViewer extends HellStyleable {
   readonly error = output<unknown>();
 
   private readonly containerRef = viewChild.required<ElementRef<HTMLDivElement>>('container');
+  private readonly overviewRef = viewChild<ElementRef<HTMLElement>>('overview');
   private readonly findInputRef = viewChild<ElementRef<HTMLInputElement>>('findInput');
   private readonly thumbCanvases = viewChildren<ElementRef<HTMLCanvasElement>>('thumbCanvas');
+  private readonly runtime = (
+    inject(HELL_PDF_RUNTIME_FACTORY, { optional: true }) ?? (() => new HellPdfRuntime())
+  )();
 
   protected readonly page = signal(1);
   protected readonly totalPages = signal(0);
@@ -138,12 +147,10 @@ export class HellPdfViewer extends HellStyleable {
   protected readonly customZoomLabel = computed(() => getZoomLabel(this.effectiveZoomValue()));
   protected readonly labels = inject(HELL_LABELS);
 
-  private readonly runtime = (
-    inject(HELL_PDF_RUNTIME_FACTORY, { optional: true }) ?? (() => new HellPdfRuntime())
-  )();
-  private readonly destroyRef = inject(DestroyRef);
   private readonly globalKeydown = inject(HellGlobalKeydownService);
   private readonly globalPointerdown = inject(HellGlobalPointerdownService);
+  private thumbRenderObserver: IntersectionObserver | null = null;
+  private readonly destroyRef = inject(DestroyRef);
   private readonly bootstrapped = signal(false);
   private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
   private readonly interactionScope = new HellPdfViewerInteractionScope(
@@ -152,30 +159,53 @@ export class HellPdfViewer extends HellStyleable {
 
   constructor() {
     super();
-    this.globalPointerdown.register((event) => this.onGlobalPointerDown(event), this.destroyRef);
-    this.globalKeydown.register((event) => this.onGlobalKey(event), this.destroyRef);
+    effect((onCleanup) => {
+      if (!this.globalShortcuts()) return;
+
+      const unregisterPointer = this.globalPointerdown.register(
+        (event) => this.onGlobalPointerDown(event),
+        this.destroyRef,
+      );
+      const unregisterKey = this.globalKeydown.register(
+        (event) => this.onGlobalKey(event),
+        this.destroyRef,
+      );
+
+      onCleanup(() => {
+        unregisterPointer();
+        unregisterKey();
+      });
+    });
+
     this.destroyRef.onDestroy(() => {
+      this.disconnectThumbObserver();
       this.runtime.cleanup();
     });
 
     afterNextRender(async () => {
+      const worker = this.worker();
+
       try {
-        await this.runtime.bootstrap(this.containerRef().nativeElement, {
-          onPageChange: (page) => {
-            this.page.set(page);
-            this.pageChange.emit(page);
+        await this.runtime.bootstrap(
+          this.containerRef().nativeElement,
+          {
+            onPageChange: (page) => {
+              this.page.set(page);
+              this.pageChange.emit(page);
+            },
+            onZoomChange: (displayValue, emittedValue) => {
+              this.zoomValue.set(displayValue);
+              this.zoomChange.emit(emittedValue);
+            },
+            onPagesReady: () => this.ready.set(true),
+            onFindState: (state) => {
+              if (state.current != null) this.findCurrent.set(state.current);
+              if (state.total != null) this.findTotal.set(state.total);
+              if (state.status) this.findStatus.set(state.status);
+            },
           },
-          onZoomChange: (displayValue, emittedValue) => {
-            this.zoomValue.set(displayValue);
-            this.zoomChange.emit(emittedValue);
-          },
-          onPagesReady: () => this.ready.set(true),
-          onFindState: (state) => {
-            if (state.current != null) this.findCurrent.set(state.current);
-            if (state.total != null) this.findTotal.set(state.total);
-            if (state.status) this.findStatus.set(state.status);
-          },
-        });
+          worker ? { worker } : undefined,
+        );
         this.bootstrapped.set(true);
       } catch (e) {
         this.runtime.cleanup();
@@ -207,11 +237,21 @@ export class HellPdfViewer extends HellStyleable {
 
     // When overview opens (or pages list changes), render visible thumbs.
     effect(() => {
-      if (!this.overviewOpen()) return;
-      // Track canvases so this re-runs when they appear.
+      if (!this.overviewOpen()) {
+        this.disconnectThumbObserver();
+        return;
+      }
+
       const canvases = this.thumbCanvases();
-      if (!this.runtime.hasDocument || canvases.length === 0) return;
-      queueMicrotask(() => this.renderAllThumbs());
+      const overview = this.overviewRef()?.nativeElement;
+      if (!this.runtime.hasDocument || canvases.length === 0 || !overview) return;
+
+      queueMicrotask(() =>
+        this.renderThumbnailCanvases(
+          canvases.map((canvasRef) => canvasRef.nativeElement),
+          overview,
+        ),
+      );
     });
   }
 
@@ -257,13 +297,50 @@ export class HellPdfViewer extends HellStyleable {
     this.overviewOpen.update((v) => !v);
   }
 
-  private async renderAllThumbs() {
-    await this.runtime.renderThumbs(
-      this.thumbCanvases().map((ref) => ref.nativeElement),
-      () => this.overviewOpen(),
+  private renderThumbnailCanvases(canvases: readonly HTMLCanvasElement[], overview: HTMLElement): void {
+    this.disconnectThumbObserver();
+
+    const firstBatch = canvases.slice(0, HELL_PDF_THUMBNAIL_INITIAL_BATCH);
+    void this.runtime.renderThumbs(firstBatch, () => this.overviewOpen());
+
+    if (!this.runtime.hasDocument || canvases.length <= firstBatch.length) return;
+
+    if (typeof IntersectionObserver === 'undefined') {
+      queueMicrotask(() => {
+        void this.runtime.renderThumbs(canvases, () => this.overviewOpen());
+      });
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!this.overviewOpen()) return;
+
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .map((entry) => entry.target as HTMLCanvasElement);
+
+        if (visible.length > 0) {
+          void this.runtime.renderThumbs(visible, () => this.overviewOpen());
+        }
+      },
+      {
+        root: overview,
+        rootMargin: '0px 0px 256px 0px',
+        threshold: 0.1,
+      },
     );
+
+    this.thumbRenderObserver = observer;
+    for (const canvas of canvases) {
+      observer.observe(canvas);
+    }
   }
 
+  private disconnectThumbObserver(): void {
+    this.thumbRenderObserver?.disconnect();
+    this.thumbRenderObserver = null;
+  }
   protected openFind() {
     this.findOpen.set(true);
     // Wait two frames so Angular's CD has materialized the find input.

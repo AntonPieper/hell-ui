@@ -101,12 +101,14 @@ function isEditableTarget(target: EventTarget): boolean {
 export class HellGlobalKeydownService {
   private readonly document = inject(DOCUMENT, { optional: true });
 
-  register(handler: HellGlobalKeydownHandler, destroyRef: DestroyRef): void {
+  register(handler: HellGlobalKeydownHandler, destroyRef: DestroyRef): () => void {
     const doc = this.document;
-    if (!doc?.addEventListener) return;
+    if (!doc?.addEventListener) return () => undefined;
 
+    const cleanup = () => doc.removeEventListener('keydown', handler);
     doc.addEventListener('keydown', handler);
-    destroyRef.onDestroy(() => doc.removeEventListener('keydown', handler));
+    destroyRef.onDestroy(cleanup);
+    return cleanup;
   }
 }
 
@@ -115,11 +117,13 @@ export class HellGlobalKeydownService {
 export class HellGlobalPointerdownService {
   private readonly document = inject(DOCUMENT, { optional: true });
 
-  register(handler: HellGlobalPointerdownHandler, destroyRef: DestroyRef): void {
+  register(handler: HellGlobalPointerdownHandler, destroyRef: DestroyRef): () => void {
     const doc = this.document;
-    if (!doc?.addEventListener) return;
+    if (!doc?.addEventListener) return () => undefined;
 
+    const cleanup = () => doc.removeEventListener('pointerdown', handler);
     doc.addEventListener('pointerdown', handler);
-    destroyRef.onDestroy(() => doc.removeEventListener('pointerdown', handler));
+    destroyRef.onDestroy(cleanup);
+    return cleanup;
   }
 }

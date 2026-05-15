@@ -19,7 +19,11 @@ class FakePdfRuntime implements HellPdfRuntimePort {
   cleanedUp = false;
   private handlers: HellPdfRuntimeHandlers | null = null;
 
-  async bootstrap(container: HTMLDivElement, handlers: HellPdfRuntimeHandlers): Promise<void> {
+  async bootstrap(
+    container: HTMLDivElement,
+    handlers: HellPdfRuntimeHandlers,
+    _options?: { readonly worker?: unknown },
+  ): Promise<void> {
     this.bootstrappedWith = container;
     this.handlers = handlers;
     handlers.onPagesReady();

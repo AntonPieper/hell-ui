@@ -10,9 +10,12 @@ import {
   getZoomOrigin,
 } from './pdf-viewer.utils';
 import {
+  HellPdfAdapterBootstrapOptions,
   HellPdfJsRuntimeAdapter,
   type HellPdfDocumentHandle,
+  type HellPdfDocumentLoadTask,
   type HellPdfRuntimeAdapter,
+  type HellPdfWorkerSource,
   type HellPdfPrintSession,
   type HellPdfViewerSession,
 } from './pdf-viewer.adapter';
@@ -39,6 +42,10 @@ export interface HellPdfLoadOptions {
   onLoaded(totalPages: number): void;
 }
 
+/** Bootstrap options passed from the Angular viewer surface to the runtime adapter. */
+export interface HellPdfRuntimeBootstrapOptions {
+  readonly worker?: HellPdfWorkerSource;
+}
 /** Normalized request forwarded to the pdf.js find controller. */
 export interface HellPdfFindRequest {
   source: unknown;
@@ -52,7 +59,11 @@ export interface HellPdfRuntimePort {
   readonly hasDocument: boolean;
   readonly currentScale: number;
   /** Create the adapter viewer once before loading documents. */
-  bootstrap(container: HTMLDivElement, handlers: HellPdfRuntimeHandlers): Promise<void>;
+  bootstrap(
+    container: HTMLDivElement,
+    handlers: HellPdfRuntimeHandlers,
+    options?: HellPdfRuntimeBootstrapOptions,
+  ): Promise<void>;
   /** Replace the active document; stale loads are ignored by the runtime. */
   loadDocument(src: HellPdfSource, options: HellPdfLoadOptions): Promise<void>;
   cleanup(): void;
@@ -214,6 +225,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   private initialZoom: HellPdfInitialZoom = 'auto';
   private initialPage = 1;
   private loadToken = 0;
+  private loadTask: HellPdfDocumentLoadTask | null = null;
   private printCleanup: (() => void) | null = null;
 
   constructor(private readonly adapter: HellPdfRuntimeAdapter = new HellPdfJsRuntimeAdapter()) {}
@@ -226,21 +238,29 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     return this.session?.currentScale ?? 1;
   }
 
-  async bootstrap(container: HTMLDivElement, handlers: HellPdfRuntimeHandlers): Promise<void> {
+  async bootstrap(
+    container: HTMLDivElement,
+    handlers: HellPdfRuntimeHandlers,
+    options: HellPdfRuntimeBootstrapOptions = {},
+  ): Promise<void> {
     if (this.session) return;
 
     this.container = container;
     this.handlers = handlers;
 
-    this.session = await this.adapter.createViewer(container, {
-      initialPage: () => this.initialPage,
-      initialZoom: () => this.initialZoom,
-      onPageChange: (page) => this.handlers?.onPageChange(page),
-      onZoomChange: (displayValue, emittedValue) =>
-        this.handlers?.onZoomChange(displayValue, emittedValue),
-      onPagesReady: () => this.handlers?.onPagesReady(),
-      onFindState: (state) => this.handlers?.onFindState(state),
-    });
+    this.session = await this.adapter.createViewer(
+      container,
+      {
+        initialPage: () => this.initialPage,
+        initialZoom: () => this.initialZoom,
+        onPageChange: (page) => this.handlers?.onPageChange(page),
+        onZoomChange: (displayValue, emittedValue) =>
+          this.handlers?.onZoomChange(displayValue, emittedValue),
+        onPagesReady: () => this.handlers?.onPagesReady(),
+        onFindState: (state) => this.handlers?.onFindState(state),
+      },
+      this.normalizeBootstrapOptions(options),
+    );
     this.installContainerInteractions(container);
   }
 
@@ -252,19 +272,31 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     const token = ++this.loadToken;
     this.initialPage = options.initialPage;
     this.initialZoom = options.initialZoom;
-    this.clearActiveDocument();
     this.renderedThumbs.clear();
 
-    const doc = await this.adapter.loadDocument(this.session, src);
-    if (token !== this.loadToken) {
-      try {
-        doc.destroy();
-      } catch {
-        /* ignore */
+    await this.cancelActiveLoadTask();
+    this.clearActiveDocument();
+
+    const loadTask = await this.adapter.loadDocument(this.session, src);
+    this.loadTask = loadTask;
+
+    let doc: HellPdfDocumentHandle;
+    try {
+      doc = await loadTask.promise;
+    } catch (error) {
+      this.loadTask = null;
+      if (token !== this.loadToken) {
+        return;
       }
+      throw error;
+    }
+
+    if (token !== this.loadToken) {
+      this.destroyDocument(doc);
       return;
     }
 
+    this.loadTask = null;
     this.doc = doc;
     options.onLoaded(doc.numPages);
     this.session.setDocument(doc);
@@ -275,6 +307,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     this.containerEventCleanup?.();
     this.containerEventCleanup = null;
     this.clearPrintSession();
+    void this.cancelActiveLoadTask();
     this.clearActiveDocument();
     this.session?.cleanup();
     this.session = null;
@@ -370,6 +403,36 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     }
   }
 
+  private normalizeBootstrapOptions(options: HellPdfRuntimeBootstrapOptions): HellPdfAdapterBootstrapOptions {
+    if (!options.worker) {
+      return {};
+    }
+
+    return {
+      worker: options.worker,
+    };
+  }
+
+  private async cancelActiveLoadTask(): Promise<void> {
+    const loadTask = this.loadTask;
+    this.loadTask = null;
+    if (!loadTask) return;
+
+    try {
+      await loadTask.destroy();
+    } catch {
+      /* ignore */
+    }
+  }
+
+  private destroyDocument(doc: HellPdfDocumentHandle): void {
+    try {
+      void Promise.resolve(doc.destroy()).catch(() => undefined);
+    } catch {
+      /* ignore */
+    }
+  }
+
   private installContainerInteractions(container: HTMLDivElement): void {
     this.containerEventCleanup?.();
 
@@ -421,11 +484,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     this.doc = null;
     if (!doc) return;
 
-    try {
-      doc.destroy();
-    } catch {
-      /* ignore */
-    }
+    this.destroyDocument(doc);
   }
 }
 

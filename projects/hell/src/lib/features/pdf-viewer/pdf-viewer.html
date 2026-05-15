@@ -223,7 +223,7 @@
 -->
 <div class="hell-pdf-host">
   @if (overviewOpen()) {
-    <aside class="hell-pdf-overview" [attr.aria-label]="labels.pdfViewer.pageOverview">
+    <aside #overview class="hell-pdf-overview" [attr.aria-label]="labels.pdfViewer.pageOverview">
       @for (n of pageList(); track n) {
         <button
           type="button"

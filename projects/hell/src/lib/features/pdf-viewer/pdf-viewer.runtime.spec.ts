@@ -6,6 +6,7 @@ import {
 } from './pdf-viewer.runtime';
 import type {
   HellPdfDocumentHandle,
+  HellPdfDocumentLoadTask,
   HellPdfPrintSession,
   HellPdfRuntimeAdapter,
   HellPdfViewerSession,
@@ -13,6 +14,20 @@ import type {
 } from './pdf-viewer.adapter';
 
 describe('PDF Runtime', () => {
+  it('passes explicit worker override from runtime to adapter during bootstrap', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = document.createElement('div') as HTMLDivElement;
+
+    await runtime.bootstrap(container, createRuntimeHandlers(), { worker: '/assets/worker.mjs' as const });
+
+    expect(adapter.createViewer).toHaveBeenCalledWith(
+      container,
+      expect.any(Object),
+      { worker: '/assets/worker.mjs' },
+    );
+  });
+
   it('keeps download and print browser work behind the PDF Adapter seam', async () => {
     const printSession: HellPdfPrintSession = {
       cleanup: vi.fn(),
@@ -97,7 +112,7 @@ describe('PDF Runtime', () => {
     const second = deferred<HellPdfDocumentHandle>();
     const firstDoc = fakeDocument(1);
     const secondDoc = fakeDocument(2);
-    adapter.loadQueue.push(first.promise, second.promise);
+    adapter.loadQueue.push({ promise: first.promise, destroy: vi.fn() }, { promise: second.promise, destroy: vi.fn() });
 
     const firstLoad = runtime.loadDocument('first.pdf', {
       initialPage: 1,
@@ -161,7 +176,7 @@ describe('PDF Runtime', () => {
     const runtime = new HellPdfRuntime(adapter);
     await runtime.bootstrap(document.createElement('div') as HTMLDivElement, createRuntimeHandlers());
     const doc = fakeDocument(3);
-    adapter.loadQueue.push(Promise.resolve(doc));
+    adapter.loadQueue.push({ promise: Promise.resolve(doc), destroy: vi.fn() });
     await runtime.loadDocument('thumbs.pdf', {
       initialPage: 1,
       initialZoom: 'auto',
@@ -180,7 +195,7 @@ describe('PDF Runtime', () => {
     const runtime = new HellPdfRuntime(adapter);
     await runtime.bootstrap(document.createElement('div') as HTMLDivElement, createRuntimeHandlers());
     const doc = fakeDocument(3);
-    adapter.loadQueue.push(Promise.resolve(doc));
+    adapter.loadQueue.push({ promise: Promise.resolve(doc), destroy: vi.fn() });
     await runtime.loadDocument('thumbs.pdf', {
       initialPage: 1,
       initialZoom: 'auto',
@@ -201,7 +216,7 @@ describe('PDF Runtime', () => {
     const runtime = new HellPdfRuntime(adapter);
     await runtime.bootstrap(document.createElement('div') as HTMLDivElement, createRuntimeHandlers());
     const doc = fakeDocument(1);
-    adapter.loadQueue.push(Promise.resolve(doc));
+    adapter.loadQueue.push({ promise: Promise.resolve(doc), destroy: vi.fn() });
     await runtime.loadDocument('active.pdf', {
       initialPage: 1,
       initialZoom: 'auto',
@@ -394,7 +409,7 @@ describe('PDF Runtime', () => {
 
 class FakePdfAdapter implements HellPdfRuntimeAdapter {
   readonly session = new FakePdfSession();
-  readonly loadQueue: Promise<HellPdfDocumentHandle>[] = [];
+  readonly loadQueue: HellPdfDocumentLoadTask[] = [];
 
   createViewer = vi.fn(
     async (_container: HTMLDivElement, handlers: HellPdfViewerSessionHandlers) => {
@@ -406,7 +421,7 @@ class FakePdfAdapter implements HellPdfRuntimeAdapter {
   loadDocument = vi.fn(async () => {
     const next = this.loadQueue.shift();
     if (!next) throw new Error('No fake load queued.');
-    return await next;
+    return next;
   });
 
   download: HellPdfRuntimeAdapter['download'] = vi.fn(async () => undefined);
