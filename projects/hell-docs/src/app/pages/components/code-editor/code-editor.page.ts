@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, signal } from '@angular/core';
 import { javascript } from '@codemirror/lang-javascript';
 import { type Extension } from '@codemirror/state';
 import { ExampleTabs } from '../../../shared/example-tabs';
@@ -13,6 +13,8 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
 @Component({
   selector: 'hd-code-editor',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  styles: [`@import '@hell-ui/angular/styles/features/code-editor';`],
   imports: [ExampleTabs, EditorDemo, CodeBlock, CodeViewerDemo],
   template: `
     <article class="hd-prose">
