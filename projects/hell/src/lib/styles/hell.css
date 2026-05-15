@@ -19,6 +19,5 @@
  */
 @import './composites.css';
 @import './features/table-utilities.css';
-@import './features/data-table.css';
 @import './features/code-editor.css';
 @import './features/pdf-viewer.css';

@@ -7,6 +7,7 @@ const failures = [];
 
 checkDocsExamples();
 checkDocsRootImportContract();
+checkDocsCodeEditorIsolationContract();
 checkPackageEntryPoints();
 checkPackageDependencyContract();
 checkStyleEntryPoints();
@@ -245,6 +246,29 @@ function checkDocsRootImportContract() {
   }
 }
 
+function checkDocsCodeEditorIsolationContract() {
+  const checkedFiles = [
+    'projects/hell-docs/src/app/shared/code-block.ts',
+    'projects/hell-docs/src/app/shared/example-tabs.ts',
+    'projects/hell-docs/src/app/shared/code-tools.ts',
+  ];
+
+  for (const file of checkedFiles) {
+    const path = join(root, file);
+    if (!existsSync(path)) {
+      failures.push(`Docs architecture check references missing file ${file}`);
+      continue;
+    }
+
+    const source = readFile(path);
+    if (source.includes('@codemirror/') || source.includes('@hell-ui/angular/features/code-editor')) {
+      failures.push(
+        `Docs shared file ${file} must not import CodeMirror or @hell-ui/angular/features/code-editor`,
+      );
+    }
+  }
+}
+
 function checkPackageEntryPoints() {
   const rootApiPath = join(root, 'projects/hell/src/public-api.ts');
   const rootApi = readFile(rootApiPath);
@@ -291,6 +315,7 @@ function checkPackageEntryPoints() {
     '@hell-ui/angular/core': './projects/hell/src/lib/public-api-core.ts',
     '@hell-ui/angular/primitives': './projects/hell/src/lib/public-api-primitives.ts',
     '@hell-ui/angular/composites': './projects/hell/src/lib/public-api-composites.ts',
+    '@hell-ui/angular/testing': './projects/hell/src/testing/public-api.ts',
   };
   for (const feature of features) {
     expectedPaths[`@hell-ui/angular/features/${feature}`] =
@@ -315,6 +340,7 @@ function checkPackageEntryPoints() {
     'projects/hell/core/ng-package.json',
     'projects/hell/primitives/ng-package.json',
     'projects/hell/composites/ng-package.json',
+    'projects/hell/testing/ng-package.json',
     ...features.map((feature) => `projects/hell/features/${feature}/ng-package.json`),
   ];
 
@@ -409,7 +435,9 @@ function checkStyleEntryPoints() {
   }
 
   const allStyles = readFile(join(root, 'projects/hell/src/lib/styles/hell.css'));
+  const legacyStyleAliasFeatures = new Set(['data-table']);
   for (const feature of features) {
+    if (legacyStyleAliasFeatures.has(feature)) continue;
     if (!allStyles.includes(`./features/${feature}.css`)) {
       failures.push(`All-in style entry point is missing Feature CSS import for ${feature}`);
     }
@@ -419,8 +447,16 @@ function checkStyleEntryPoints() {
   for (const file of readdirSync(featureStyleDir).filter((name) => name.endsWith('.css'))) {
     const feature = basename(file, '.css');
     const source = readFile(join(featureStyleDir, file));
-    if (!source.includes(`../components/${feature}.css`)) {
-      failures.push(`Feature style entry point ${file} must import ../components/${feature}.css`);
+    const expectedImport = `../components/${feature}.css`;
+    if (feature === 'data-table') {
+      if (!source.includes(expectedImport)) {
+        failures.push(`Feature style entry point ${file} must import ${expectedImport} as legacy alias`);
+      }
+      continue;
+    }
+
+    if (!source.includes(expectedImport)) {
+      failures.push(`Feature style entry point ${file} must import ${expectedImport}`);
     }
   }
 }
