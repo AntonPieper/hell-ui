@@ -1,14 +1,16 @@
 /**
- * Audited seam for direct ng-primitives state mutation.
+ * Compatibility seam for direct ng-primitives state mutation.
  *
- * ng-primitives exposes internal writable state for some patterns. Those writes are
- * unavoidable in Hell today (mainly CVA sync paths), but they should be funnelled
- * through one file so we can audit intent and adapt quickly if ng-primitives
- * changes its mutation contract.
+ * ng-primitives exposes writable state channels for several control flows. Hell
+ * writes through this file so we can isolate and audit this high-risk bridge point
+ * from the main component/runtime code and quickly adapt if ng-primitives changes
+ * its mutation contract.
  *
  * @internal
  */
 
+// Internal writable contracts for ng-primitives state adapters.
+// Keep these narrow: these are the compatibility write APIs this seam protects.
 type SelectStateMutation = {
   value: { set: (value: unknown) => void };
   disabled: { set: (isDisabled: boolean) => void };
