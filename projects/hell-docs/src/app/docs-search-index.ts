@@ -503,8 +503,8 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
   {
     title: 'Audio Player: Speech Transcript',
     path: '/components/audio-player',
-    detail: 'components/audio-player/examples/live-captions.example.ts',
-    terms: 'audio-player speech-transcript live-captions components/audio-player/examples/live-captions.example components/audio-player hell-audio-player allowSpeechTranscript SpeechRecognition captureStream experimental best-effort timed-text accessibility',
+    detail: 'components/audio-player/examples/speech-transcript.example.ts',
+    terms: 'audio-player speech-transcript components/audio-player/examples/speech-transcript.example components/audio-player hell-audio-player allowSpeechTranscript SpeechRecognition captureStream experimental best-effort timed-text accessibility',
   },
   {
     title: 'Audio Player: Untitled Controls Only',
@@ -702,7 +702,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     title: 'Table Utilities: Row Editor',
     path: '/components/data-table',
     detail: 'components/data-table/examples/row-editor.example.ts',
-    terms: 'table utilities data-table row-editor components/data-table/examples/row-editor.example components/data-table hellResizable hellTable hell-code-editor data-table compatibility alias',
+    terms: 'table utilities data-table row-editor components/data-table/examples/row-editor.example components/data-table hellResizable hellTable data-table compatibility alias textarea',
   },
   {
     title: 'Pdf Viewer: Lazy Loading',

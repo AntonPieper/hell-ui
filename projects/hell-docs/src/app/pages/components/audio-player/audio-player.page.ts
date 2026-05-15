@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
-import { AudioPlayerLiveCaptionsExample } from './examples/live-captions.example';
-import audioPlayerLiveCaptionsExampleCodeRaw from './examples/live-captions.example.ts?raw' with {
+import { AudioPlayerSpeechTranscriptExample } from './examples/speech-transcript.example';
+import audioPlayerSpeechTranscriptExampleCodeRaw from './examples/speech-transcript.example.ts?raw' with {
   loader: 'text',
 };
 import { AudioPlayerUntitledControlsOnlyExample } from './examples/untitled-controls-only.example';
@@ -20,7 +20,7 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
     ExampleTabs,
     AudioPlayerWithTitleAndDateExample,
     AudioPlayerUntitledControlsOnlyExample,
-    AudioPlayerLiveCaptionsExample,
+    AudioPlayerSpeechTranscriptExample,
   ],
   template: `
     <article class="hd-prose">
@@ -60,8 +60,8 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         the transcript. Seeking or replaying clears the best-effort transcript so it follows current
         playback.
       </p>
-      <hd-example-tabs [code]="audioPlayerLiveCaptionsExampleCode">
-        <app-audio-player-live-captions-example />
+      <hd-example-tabs [code]="audioPlayerSpeechTranscriptExampleCode">
+        <app-audio-player-speech-transcript-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -134,5 +134,5 @@ export class AudioPlayerPage {
     audioPlayerWithTitleAndDateExampleCodeRaw;
   protected readonly audioPlayerUntitledControlsOnlyExampleCode =
     audioPlayerUntitledControlsOnlyExampleCodeRaw;
-  protected readonly audioPlayerLiveCaptionsExampleCode = audioPlayerLiveCaptionsExampleCodeRaw;
+  protected readonly audioPlayerSpeechTranscriptExampleCode = audioPlayerSpeechTranscriptExampleCodeRaw;
 }

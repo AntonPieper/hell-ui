@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { javascript } from '@codemirror/lang-javascript';
+
 import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/composites';
-import { HellCodeEditor } from '@hell-ui/angular/features/code-editor';
+
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
 
 interface Row {
@@ -21,7 +21,7 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
 @Component({
   selector: 'app-data-table-row-editor-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_RESIZABLE_DIRECTIVES, ...HELL_TABLE_UTILITIES_DIRECTIVES, HellCodeEditor],
+  imports: [...HELL_RESIZABLE_DIRECTIVES, ...HELL_TABLE_UTILITIES_DIRECTIVES],
   template: `
     <div hellResizable orientation="horizontal" class="h-[420px]">
       <div hellResizablePane [initialFlex]="3" [minSize]="280">
@@ -69,12 +69,12 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
             <strong class="text-sm">{{ r.name }}</strong>
             <span class="text-xs hd-text-muted">#{{ r.id }}</span>
           </div>
-          <hell-code-editor
-            class="grow min-h-0"
+          <textarea
+            class="grow min-h-0 min-w-0 resize-none rounded border border-hell-border bg-transparent p-3 text-sm text-hell-foreground"
+            rows="16"
             [value]="docText()"
-            [extensions]="extensions"
-            (valueChange)="onChange($event)"
-          />
+            (input)="onChange($any($event.target).value ?? '')"
+          ></textarea>
         } @else {
           <div class="flex items-center justify-center grow text-sm hd-text-muted">
             Select a row to edit.
@@ -87,7 +87,7 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
 export class DataTableRowEditorExample {
   protected readonly rows = ROWS;
   protected readonly selectedId = signal<number | null>(null);
-  protected readonly extensions = [javascript()];
+
 
   private readonly drafts = signal<ReadonlyMap<number, string>>(new Map());
 

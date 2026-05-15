@@ -31,9 +31,9 @@ The repository workspace is pnpm-first and CI-backed by the checked-in
 Install the light UI stack when using primitives/composites:
 
 ```bash
-pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @angular/router @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
 # or
-npm install @hell-ui/angular @angular/forms ng-primitives @angular/cdk @angular/router @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+npm install @hell-ui/angular @angular/forms ng-primitives @angular/cdk @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
 ```
 
 Prefer the narrowest entry point that contains the API you use:
@@ -50,13 +50,15 @@ Peer dependency expectations by entry point:
 > npm peer metadata is package-wide. Install the light UI stack for any
 > `@hell-ui/angular` package entry point; feature rows below list additional
 > optional peers required only when that feature is imported.
+>
+> `@floating-ui/dom` is required by `ng-primitives` (not by Hell directly).
 
 | Entry point | Required peers |
 |---|---|
-| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Light UI stack: `@angular/forms`, `ng-primitives`, `@angular/cdk`, `@angular/router`, `@floating-ui/dom`, `@ng-icons/core`, `@ng-icons/font-awesome`, `rxjs`, `tailwindcss` |
+| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Light UI stack: `@angular/forms`, `ng-primitives`, `@angular/cdk`, `@ng-icons/core`, `@ng-icons/font-awesome`, `rxjs`, and style-only `tailwindcss` |
 | `@hell-ui/angular/features/table-utilities` | Light UI stack |
-| `@hell-ui/angular/features/code-editor` | Light UI stack plus `@codemirror/*`, `@lezer/highlight` |
-| `@hell-ui/angular/features/pdf-viewer` | Light UI stack plus `pdfjs-dist` |
+| `@hell-ui/angular/features/code-editor` | Light UI stack plus `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight` |
+| `@hell-ui/angular/features/pdf-viewer` | Light UI stack plus exact `pdfjs-dist@5.6.205` |
 
 `@hell-ui/angular/features/data-table` remains a legacy alias for table utilities.
 
@@ -70,7 +72,7 @@ Peer dependency expectations by entry point:
 | Code editor | Beta/optional peer | `@hell-ui/angular/features/code-editor` | Needs `window` + `document` |
 | PDF viewer | Experimental | `@hell-ui/angular/features/pdf-viewer` | Experimental app surface/recipe; browser-only; requires `window`/`document`, pdf workers, global listeners, and your own pdf.js/browser compatibility decisions |
 | Testing harnesses | Beta/test-only | `@hell-ui/angular/testing` | CDK component harnesses for consumer and library tests |
-| Live captions | Experimental/best-effort (feature opt-in) | `@hell-ui/angular/composites` (`allowLiveCaptions`) | Browser-only; uses `navigator` + `SpeechRecognition` + `captureStream`; best-effort only, not accessibility-grade captions/timed text |
+| Speech transcript | Experimental/best-effort (feature opt-in) | `@hell-ui/angular/composites` (`allowSpeechTranscript`, `allowLiveCaptions` alias) | Browser-only; uses `navigator` + `SpeechRecognition` + `captureStream`; best-effort only, not accessibility-grade captions/timed text |
 
 ## Styles
 

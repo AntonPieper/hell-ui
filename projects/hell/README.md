@@ -19,20 +19,23 @@ Composites and features remain behind scoped entry points.
 ## Install
 
 ```bash
-pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @angular/router @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
 # or
-npm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @angular/router @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+npm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
 ```
 
 Feature peers remain optional, but npm peer metadata is package-wide: install the base light stack for any package entry point.
 
+`@floating-ui/dom` is required by `ng-primitives` and should already be part of your primitive stack.
+
 | Entry point | Install when used |
 | --- | --- |
-| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Base light stack: `@angular/forms ng-primitives @angular/cdk @angular/router @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss` |
+| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Base light stack: `@angular/forms ng-primitives @angular/cdk @ng-icons/core @ng-icons/font-awesome rxjs` plus style-only `tailwindcss` |
 | `@hell-ui/angular/features/table-utilities` | Base light stack |
 | `@hell-ui/angular/features/data-table` | Legacy compatibility alias for `@hell-ui/angular/features/table-utilities` |
-| `@hell-ui/angular/features/code-editor` | Base light stack plus `@codemirror/view @codemirror/state @codemirror/commands @codemirror/language @lezer/highlight` and any language package, e.g. `@codemirror/lang-javascript` |
-| `@hell-ui/angular/features/pdf-viewer` | Base light stack plus `pdfjs-dist` |
+| `@hell-ui/angular/features/code-editor` | Base light stack plus `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight` |
+| `@hell-ui/angular/features/pdf-viewer` | Base light stack plus exact `pdfjs-dist@5.6.205` |
+
 
 ## API Stability
 
@@ -44,7 +47,7 @@ Feature peers remain optional, but npm peer metadata is package-wide: install th
 | Code editor (`@hell-ui/angular/features/code-editor`) | Beta/optional peer | Browser-only: `window`/`document` interactions |
 | PDF viewer (`@hell-ui/angular/features/pdf-viewer`) | Experimental | Browser-only app surface/recipe: `window`/`document`, pdf workers, global listeners, and app-owned pdf.js/browser compatibility decisions |
 | Testing harnesses (`@hell-ui/angular/testing`) | Beta/test-only | CDK component harnesses for consumer and library tests |
-| Live captions (`allowLiveCaptions`) | Experimental/browser-only/best-effort | Uses `navigator` + `SpeechRecognition` + `captureStream`; not accessibility-grade captions or production timed text |
+| Speech transcript (`allowSpeechTranscript`) | Experimental/browser-only/best-effort | Uses `navigator` + `SpeechRecognition` + `captureStream`; not accessibility-grade captions or production timed text |
 
 ## Angular Imports
 

@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { javascript } from '@codemirror/lang-javascript';
+
 import { provideIcons } from '@ng-icons/core';
 import {
   faSolidArrowRotateLeft,
@@ -27,7 +27,7 @@ import {
 import { HELL_OMNIBAR_DIRECTIVES, HELL_SPLIT_VIEW_DIRECTIVES } from '@hell-ui/angular/composites';
 import { hellSearchKey, hellSearchWords } from '@hell-ui/angular/core';
 import { HELL_MENU_DIRECTIVES, HellButton, HellIcon, HellPaginationStrip, HellSkeleton } from '@hell-ui/angular/primitives';
-import { HellCodeEditor } from '@hell-ui/angular/features/code-editor';
+
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
 
 type RowRole = 'Admin' | 'Editor' | 'Viewer';
@@ -115,7 +115,6 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
     ...HELL_SPLIT_VIEW_DIRECTIVES,
     ...HELL_TABLE_UTILITIES_DIRECTIVES,
     HellButton,
-    HellCodeEditor,
     HellIcon,
     HellPaginationStrip,
     HellSkeleton,
@@ -495,12 +494,12 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                 <strong class="text-sm font-semibold text-hell-foreground">{{ row.name }}</strong>
                 <span class="text-xs text-hell-foreground-muted">#{{ row.id }}</span>
               </div>
-              <hell-code-editor
-                class="min-h-0 min-w-0 flex-1"
+              <textarea
+                class="min-h-0 min-w-0 flex-1 resize-none rounded border border-hell-border bg-transparent p-3 text-sm text-hell-foreground"
+                rows="12"
                 [value]="docText()"
-                [extensions]="editorExtensions"
-                (valueChange)="onEditorChange($event)"
-              />
+                (input)="onEditorChange($any($event.target).value ?? '')"
+              ></textarea>
             } @else {
               <div class="flex flex-1 items-center justify-center text-center text-sm text-hell-foreground-muted">
                 Select a row to edit.
@@ -546,7 +545,7 @@ export class DataTableExampleExample {
   protected readonly roleFilter = signal<RowFilter<RowRole>>('all');
   protected readonly assigneeFilter = signal<RowFilter<RowAssignee>>('all');
   protected readonly selectedId = signal<number | null>(null);
-  protected readonly editorExtensions = [javascript()];
+
 
   private readonly drafts = signal<ReadonlyMap<number, string>>(new Map());
 

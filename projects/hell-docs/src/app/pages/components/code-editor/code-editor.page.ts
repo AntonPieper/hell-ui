@@ -26,6 +26,12 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
       </p>
 
       <p>
+        This feature requires exact CodeMirror peers: <code>@codemirror/commands</code>,
+        <code>@codemirror/language</code>, <code>@codemirror/state</code>,
+        <code>@codemirror/view</code>, and <code>@lezer/highlight</code>.
+      </p>
+
+      <p>
         Browser-only runtime: requires <code>window</code> / <code>document</code>. Keep this
         component behind client-only rendering boundaries; it is not SSR-safe.
       </p>

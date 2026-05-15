@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { HellAudioPlayer } from '@hell-ui/angular/composites';
 
 @Component({
-  selector: 'app-audio-player-live-captions-example',
+  selector: 'app-audio-player-speech-transcript-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellAudioPlayer],
   template: `
@@ -13,6 +13,6 @@ import { HellAudioPlayer } from '@hell-ui/angular/composites';
     />
   `,
 })
-export class AudioPlayerLiveCaptionsExample {
+export class AudioPlayerSpeechTranscriptExample {
   protected readonly exampleDate = new Date(2026, 3, 22);
 }

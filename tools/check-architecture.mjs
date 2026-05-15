@@ -247,13 +247,13 @@ function checkDocsRootImportContract() {
 }
 
 function checkDocsCodeEditorIsolationContract() {
-  const checkedFiles = [
+  const sharedFiles = [
     'projects/hell-docs/src/app/shared/code-block.ts',
     'projects/hell-docs/src/app/shared/example-tabs.ts',
     'projects/hell-docs/src/app/shared/code-tools.ts',
   ];
 
-  for (const file of checkedFiles) {
+  for (const file of sharedFiles) {
     const path = join(root, file);
     if (!existsSync(path)) {
       failures.push(`Docs architecture check references missing file ${file}`);
@@ -264,6 +264,20 @@ function checkDocsCodeEditorIsolationContract() {
     if (source.includes('@codemirror/') || source.includes('@hell-ui/angular/features/code-editor')) {
       failures.push(
         `Docs shared file ${file} must not import CodeMirror or @hell-ui/angular/features/code-editor`,
+      );
+    }
+  }
+
+  const docsPagesRoot = join(root, 'projects/hell-docs/src/app/pages');
+  const docsPages = walk(docsPagesRoot).filter((file) => file.endsWith('.ts'));
+  for (const file of docsPages) {
+    if (file.includes('/components/code-editor/')) continue;
+    if (/\bcode-editor\b/i.test(file)) continue;
+
+    const source = readFile(file);
+    if (source.includes('@codemirror/') || source.includes('@hell-ui/angular/features/code-editor')) {
+      failures.push(
+        `Docs page ${file.replace(root + '/', '')} must keep CodeMirror imports within /components/code-editor`,
       );
     }
   }
@@ -383,8 +397,6 @@ function checkPackageDependencyContract() {
     '@angular/common',
     '@angular/core',
     '@angular/forms',
-    '@angular/router',
-    '@floating-ui/dom',
     '@ng-icons/core',
     '@ng-icons/font-awesome',
     'ng-primitives',
@@ -411,7 +423,6 @@ function checkPackageDependencyContract() {
     'tailwindcss',
     // ng-primitives exposes these as strict peers consumed by primitive wrappers.
     '@angular/cdk',
-    '@angular/router',
     '@floating-ui/dom',
   ]);
   for (const dependency of Object.keys(peerDependencies)) {

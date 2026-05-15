@@ -23,9 +23,12 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
       <h2>1. Install peers</h2>
       <p>
         npm peer metadata is package-wide, so every package entry point expects the light
-        UI stack: Angular Forms, core/common from your app, @angular/router, ng-primitives,
-        @angular/cdk, @floating-ui/dom, ng-icons, rxjs, and Tailwind. Feature entry
-        points add optional peers only when you import them.
+        UI stack: Angular Forms/core/common, ng-primitives, @angular/cdk, ng-icons, and
+        rxjs. If you want built-in style defaults, add style-only Tailwind via
+        <code>tailwindcss</code>. Feature entry points add optional peers only when you
+        import them. <code>ng-primitives</code> itself has a peer on <code>@floating-ui/dom</code>, so
+        install that alongside the light stack when you don't already rely on
+        ng-primitives directly.
       </p>
       <hd-code-block [code]="installCode" />
 

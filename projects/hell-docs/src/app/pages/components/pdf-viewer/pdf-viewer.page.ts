@@ -36,8 +36,9 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         workflows.
       </p>
       <p>
-        Install the exact supported <code>pdfjs-dist</code> peer version plus the light UI stack
-        (<code>@angular/forms ng-primitives @angular/cdk @angular/router @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss</code>).
+        Install the exact supported <code>pdfjs-dist@5.6.205</code> peer plus the light UI stack
+        (<code>@angular/forms ng-primitives @angular/cdk @ng-icons/core @ng-icons/font-awesome rxjs</code>)
+        and style-only <code>tailwindcss</code> when you import Hell's CSS.
         The PDF worker is packaged with Hell, so the pdf.js API peer must stay aligned with that
         bundled worker version. The docs page loads the pdf.js viewer stylesheet on demand, so lazy
         routes keep it out of the docs app's initial bundle.

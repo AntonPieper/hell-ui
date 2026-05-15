@@ -40,17 +40,15 @@ const angularAppDeps = [
   '@angular/compiler',
   '@angular/core',
   '@angular/forms',
-  '@angular/router',
   '@angular/platform-browser',
   'tslib',
 ];
 const lightUiDeps = [
   ...angularAppDeps,
   '@angular/cdk',
-  '@floating-ui/dom',
+  'ng-primitives',
   '@ng-icons/core',
   '@ng-icons/font-awesome',
-  'ng-primitives',
   'rxjs',
   'tailwindcss',
 ];
@@ -68,6 +66,7 @@ const pdfViewerDeps = [
   ...lightUiDeps,
   'pdfjs-dist',
 ];
+
 
 const scenarios = [
   {
