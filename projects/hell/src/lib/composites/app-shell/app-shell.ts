@@ -1,4 +1,5 @@
 import { HELL_LABELS } from '../../core/labels';
+import { isElementLike } from '../../core/dom';
 import { HellStyleable } from '../../core/styleable';
 import {
   ChangeDetectionStrategy,
@@ -56,6 +57,7 @@ let nextAppShellId = 0;
     '[attr.data-mobile-sidenav-open]': 'isMobileLayout() && !isSidenavCollapsed() ? "true" : null',
     '[attr.data-mobile-secondary-open]': 'isMobileLayout() && !isSecondaryHidden() ? "true" : null',
     '(pointerdown)': 'dismissMobilePanels($event)',
+    '(keydown.escape)': 'dismissMobilePanelsOnEscape()',
   },
   template: '<ng-content></ng-content>',
   exportAs: 'hellAppShell',
@@ -170,8 +172,16 @@ export class HellAppShell extends HellStyleable {
     if (!insidePanelOrToggle) this.closeMobilePanels();
   }
 
+  protected dismissMobilePanelsOnEscape() {
+    if (!this.isMobileLayout()) {
+      return;
+    }
+
+    this.closeMobilePanels();
+  }
+
   private pathContains(path: EventTarget[], predicate: (element: Element) => boolean): boolean {
-    return path.some((target) => isElementTarget(target) && predicate(target));
+    return path.some((target) => isElementLike(target) && predicate(target));
   }
 }
 
@@ -428,15 +438,6 @@ export class HellAppSecondaryBody extends HellStyleable {
 
 function nullableBooleanAttribute(value: boolean | string | null | undefined): boolean | null {
   return value == null ? null : booleanAttribute(value);
-}
-
-function isElementTarget(target: EventTarget): target is Element {
-  return (
-    typeof target === 'object' &&
-    target !== null &&
-    (target as Node).nodeType === 1 &&
-    typeof (target as Element).hasAttribute === 'function'
-  );
 }
 
 export const HELL_APP_SHELL_DIRECTIVES = [

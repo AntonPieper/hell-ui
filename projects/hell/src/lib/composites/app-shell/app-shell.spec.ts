@@ -280,6 +280,27 @@ describe('HellAppShell secondary panel', () => {
     expect(shell.getAttribute('data-mobile-sidenav-open')).toBeNull();
   });
 
+  it('closes mobile panels when Escape is pressed', () => {
+    mockMobileLayout(true);
+    const fixture = TestBed.createComponent(UnstyledShellHost);
+    fixture.detectChanges();
+
+    const shell = query(fixture.nativeElement, '#unstyled-shell');
+    const secondaryToggle = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      '#unstyled-secondary-toggle',
+    );
+    const content = query(fixture.nativeElement, '#unstyled-content');
+
+    secondaryToggle.click();
+    fixture.detectChanges();
+    expect(shell.getAttribute('data-mobile-secondary-open')).toBe('true');
+
+    keyDownEscape(content);
+    fixture.detectChanges();
+    expect(shell.getAttribute('data-mobile-secondary-open')).toBeNull();
+  });
+
   it('roundtrips state via header toggle and rail toggle', () => {
     const fixture = TestBed.createComponent(TestHost);
     fixture.detectChanges();
@@ -357,6 +378,10 @@ function createMobileLayoutController(matches: boolean) {
 
 function pointerDown(element: HTMLElement): void {
   element.dispatchEvent(new Event('pointerdown', { bubbles: true, composed: true }));
+}
+
+function keyDownEscape(element: HTMLElement): void {
+  element.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
 }
 
 function query<T extends HTMLElement = HTMLElement>(root: HTMLElement, selector: string): T {

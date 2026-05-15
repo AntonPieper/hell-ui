@@ -1,4 +1,8 @@
 import {
+  containsNode,
+  isElementLike,
+} from '../../core/dom';
+import {
   clampZoomScale,
   getCtrlWheelScaleFactor,
   getNextZoomStep,
@@ -425,19 +429,6 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   }
 }
 
-function containsNode(host: HTMLElement, target: EventTarget | Node | null | undefined): boolean {
-  return isNodeLike(target) && host.contains(target);
-}
-
-function isNodeLike(target: EventTarget | Node | null | undefined): target is Node {
-  return (
-    typeof target === 'object' &&
-    target !== null &&
-    typeof (target as Node).nodeType === 'number' &&
-    typeof (target as Node).contains === 'function'
-  );
-}
-
 function isPdfEditableTarget(target: EventTarget | null): boolean {
   if (!isElementLike(target)) return false;
 
@@ -458,8 +449,4 @@ function isInsideEditableRegion(element: Element): boolean {
   }
 
   return false;
-}
-
-function isElementLike(target: EventTarget | null): target is Element {
-  return isNodeLike(target) && target.nodeType === 1;
 }

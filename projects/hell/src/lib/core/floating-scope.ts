@@ -1,4 +1,5 @@
 import { DestroyRef, Directive, ElementRef, InjectionToken, inject } from '@angular/core';
+import { isElementLike, isNodeLike } from './dom';
 
 /** Shared ownership contract for Floating Interaction content rendered outside
  *  its logical host. Composites such as omnibar use it to treat registered
@@ -193,27 +194,12 @@ export class HellFloatingScopedInsetsRuntime {
 
   private styleTargets(): readonly HTMLElement[] {
     const targets = this.options.styleTargets?.() ?? [this.options.styleTarget?.()];
-    const concrete = targets.filter(isHtmlElementLike);
+    const concrete = targets.filter(
+      (target): target is HTMLElement =>
+        isElementLike(target) && typeof (target as HTMLElement).style?.setProperty === 'function',
+    );
     return concrete.length ? concrete : [this.options.document.documentElement];
   }
-}
-
-function isNodeLike(target: EventTarget | Node | null): target is Node {
-  return (
-    typeof target === 'object' &&
-    target !== null &&
-    typeof (target as Node).nodeType === 'number' &&
-    typeof (target as Node).contains === 'function'
-  );
-}
-
-function isHtmlElementLike(target: HTMLElement | null | undefined): target is HTMLElement {
-  return (
-    typeof target === 'object' &&
-    target !== null &&
-    (target as Node).nodeType === 1 &&
-    typeof (target as HTMLElement).style?.setProperty === 'function'
-  );
 }
 
 function hellSameNodes(
