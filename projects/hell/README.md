@@ -20,18 +20,19 @@ Composites and features remain behind scoped entry points.
 
 ```bash
 pnpm add @hell-ui/angular @angular/forms @angular/router ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+# or
+npm add @hell-ui/angular @angular/forms @angular/router ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
 ```
 
-Feature entry points add their own optional stacks only when imported. npm peer metadata is package-wide, so entry-point-specific peers are marked optional in `package.json`; treat this table as required for the entry point you import.
+Feature peers remain optional, but npm peer metadata is package-wide: install the base light stack for any package entry point.
 
 | Entry point | Install when used |
 | --- | --- |
-| `@hell-ui/angular/primitives`, `@hell-ui/angular/composites` | `@angular/forms @angular/router ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss` |
-| `@hell-ui/angular/features/table-utilities` | Angular + `tailwindcss` only |
+| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Base light stack: `@angular/forms @angular/router ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss` |
+| `@hell-ui/angular/features/table-utilities` | Base light stack |
 | `@hell-ui/angular/features/data-table` | Legacy compatibility alias for `@hell-ui/angular/features/table-utilities` |
-| `@hell-ui/angular/features/code-editor` | `@codemirror/view @codemirror/state @codemirror/commands @codemirror/language @lezer/highlight` plus any language package, e.g. `@codemirror/lang-javascript` |
-| `@hell-ui/angular/features/pdf-viewer` | `pdfjs-dist` plus the base light UI stack (`@angular/forms @angular/router ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss`) |
-| `@hell-ui/angular/testing` | `@angular/cdk`, `rxjs`; test-only import surface |
+| `@hell-ui/angular/features/code-editor` | Base light stack plus `@codemirror/view @codemirror/state @codemirror/commands @codemirror/language @lezer/highlight` and any language package, e.g. `@codemirror/lang-javascript` |
+| `@hell-ui/angular/features/pdf-viewer` | Base light stack plus `pdfjs-dist` |
 
 ## API Stability
 

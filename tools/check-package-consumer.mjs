@@ -54,18 +54,16 @@ const lightUiDeps = [
   'rxjs',
   'tailwindcss',
 ];
-const coreDeps = [...angularAppDeps, 'rxjs'];
+const coreDeps = lightUiDeps;
 const codeEditorDeps = [
-  ...angularAppDeps,
-  'tailwindcss',
+  ...lightUiDeps,
   '@codemirror/commands',
   '@codemirror/language',
   '@codemirror/state',
   '@codemirror/view',
   '@lezer/highlight',
 ];
-const dataTableDeps = [...angularAppDeps, 'tailwindcss'];
-const testingDeps = [...angularAppDeps, '@angular/cdk', 'rxjs'];
+const testingDeps = lightUiDeps;
 const pdfViewerDeps = [
   ...lightUiDeps,
   'pdfjs-dist',
@@ -81,7 +79,7 @@ const scenarios = [
   },
   {
     name: 'core',
-    description: 'core entry without primitive/composite/feature peers',
+    description: 'core entry with package-wide light peers',
     dependencies: coreDeps,
     mainTs: coreConsumerMainTs(),
     stylesCss: '',
@@ -102,29 +100,29 @@ const scenarios = [
   },
   {
     name: 'testing',
-    description: 'testing entry with harness-only public APIs',
+    description: 'testing entry with package-wide light peers',
     dependencies: testingDeps,
     mainTs: testingConsumerMainTs(),
     stylesCss: '',
   },
   {
     name: 'code-editor',
-    description: 'code-editor feature with only CodeMirror peers',
+    description: 'code-editor feature with package-wide light peers and CodeMirror peers',
     dependencies: codeEditorDeps,
     mainTs: codeEditorConsumerMainTs(),
     stylesCss: codeEditorConsumerStylesCss(),
   },
   {
     name: 'table-utilities',
-    description: 'preferred table utilities feature without light UI or CodeMirror/pdf peers',
-    dependencies: dataTableDeps,
+    description: 'preferred table utilities feature with package-wide light peers',
+    dependencies: lightUiDeps,
     mainTs: tableUtilitiesConsumerMainTs(),
     stylesCss: tableUtilitiesConsumerStylesCss(),
   },
   {
     name: 'data-table',
-    description: 'legacy data-table alias without light UI or CodeMirror/pdf peers',
-    dependencies: dataTableDeps,
+    description: 'legacy data-table alias with package-wide light peers',
+    dependencies: lightUiDeps,
     mainTs: dataTableConsumerMainTs(),
     stylesCss: dataTableConsumerStylesCss(),
   },

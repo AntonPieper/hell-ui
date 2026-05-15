@@ -8,9 +8,8 @@ Hell UI is a compact Angular component system for dense business applications.
 It favors directive-first primitives, optional styled primitives, opinionated
 composites, and heavier features behind feature-specific entry points.
 The root `@hell-ui/angular` export is intentionally scoped to stable core + primitives;
-composites and features are intended for secondary entry points. Feature
-dependencies are optional peers; install only the feature stacks your app
-imports.
+composites and features are intended for secondary entry points. Feature peers
+remain optional, while the light stack is required for package entrypoints.
 
 ## Workspace
 
@@ -48,19 +47,16 @@ import { HellButtonHarness } from '@hell-ui/angular/testing';
 
 Peer dependency expectations by entry point:
 
-> npm peer metadata is package-wide, so Hell marks entry-point-specific peers
-> optional in `package.json`. Treat the table below as required for the entry
-> point you import.
+> npm peer metadata is package-wide. Install the light UI stack for any
+> `@hell-ui/angular` package entry point; feature rows below list additional
+> optional peers required only when that feature is imported.
 
-| Entry point | Extra peers beyond Angular core/common |
+| Entry point | Required peers |
 |---|---|
-| `@hell-ui/angular/core` | `rxjs` |
-| `@hell-ui/angular/primitives` | `@angular/forms`, `@angular/router`, `ng-primitives`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `@ng-icons/font-awesome`, `rxjs`, `tailwindcss` |
-| `@hell-ui/angular/composites` | Light UI stack above |
-| `@hell-ui/angular/features/code-editor` | `@codemirror/*`, `@lezer/highlight`, `tailwindcss` |
-| `@hell-ui/angular/features/table-utilities` | `tailwindcss` |
-| `@hell-ui/angular/features/pdf-viewer` | `pdfjs-dist` plus the light UI stack |
-| `@hell-ui/angular/testing` | `@angular/cdk`, `rxjs`; test-only import surface |
+| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Light UI stack: `@angular/forms`, `@angular/router`, `ng-primitives`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `@ng-icons/font-awesome`, `rxjs`, `tailwindcss` |
+| `@hell-ui/angular/features/table-utilities` | Light UI stack |
+| `@hell-ui/angular/features/code-editor` | Light UI stack plus `@codemirror/*`, `@lezer/highlight` |
+| `@hell-ui/angular/features/pdf-viewer` | Light UI stack plus `pdfjs-dist` |
 
 `@hell-ui/angular/features/data-table` remains a legacy alias for table utilities.
 

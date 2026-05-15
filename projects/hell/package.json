@@ -56,43 +56,16 @@
     "pdfjs-dist": "^5.0.0"
   },
   "peerDependenciesMeta": {
-    "@angular/cdk": {
+    "@codemirror/commands": {
       "optional": true
     },
-    "@angular/forms": {
-      "optional": true
-    },
-    "@angular/router": {
-      "optional": true
-    },
-    "ng-primitives": {
-      "optional": true
-    },
-    "@floating-ui/dom": {
-      "optional": true
-    },
-    "@ng-icons/core": {
-      "optional": true
-    },
-    "@ng-icons/font-awesome": {
-      "optional": true
-    },
-    "rxjs": {
-      "optional": true
-    },
-    "tailwindcss": {
-      "optional": true
-    },
-    "@codemirror/view": {
+    "@codemirror/language": {
       "optional": true
     },
     "@codemirror/state": {
       "optional": true
     },
-    "@codemirror/commands": {
-      "optional": true
-    },
-    "@codemirror/language": {
+    "@codemirror/view": {
       "optional": true
     },
     "@lezer/highlight": {

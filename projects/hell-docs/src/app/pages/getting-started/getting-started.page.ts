@@ -22,9 +22,10 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
 
       <h2>1. Install peers</h2>
       <p>
-        Core + composites use the light UI stack: Angular Forms, Router, core/common from your app,
-        ng-primitives, @angular/cdk, @floating-ui/dom, ng-icons, rxjs, and Tailwind. Feature
-        components add optional packages only when you import them.
+        npm peer metadata is package-wide, so every package entry point expects the light
+        UI stack: Angular Forms, Router, core/common from your app, ng-primitives,
+        @angular/cdk, @floating-ui/dom, ng-icons, rxjs, and Tailwind. Feature entry
+        points add optional peers only when you import them.
       </p>
       <hd-code-block [code]="installCode" />
 

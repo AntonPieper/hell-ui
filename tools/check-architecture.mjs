@@ -371,10 +371,33 @@ function checkPackageDependencyContract() {
   const librarySource = sourceFiles.map(readFile).join('\n');
 
   const peerDependencies = packageJson.peerDependencies ?? {};
+  const peerDependenciesMeta = packageJson.peerDependenciesMeta ?? {};
   const dependencies = packageJson.dependencies ?? {};
   const importedPackages = new Set(
     sourceFiles.flatMap((file) => externalImportPackages(readFile(file))),
   );
+
+  const lightStackPeers = new Set([
+    '@angular/cdk',
+    '@angular/common',
+    '@angular/core',
+    '@angular/forms',
+    '@angular/router',
+    '@floating-ui/dom',
+    '@ng-icons/core',
+    '@ng-icons/font-awesome',
+    'ng-primitives',
+    'rxjs',
+    'tailwindcss',
+  ]);
+  const featureOnlyPeers = new Set([
+    '@codemirror/commands',
+    '@codemirror/language',
+    '@codemirror/state',
+    '@codemirror/view',
+    '@lezer/highlight',
+    'pdfjs-dist',
+  ]);
 
   for (const dependency of importedPackages) {
     if (!peerDependencies[dependency] && !dependencies[dependency]) {
@@ -394,11 +417,40 @@ function checkPackageDependencyContract() {
     if (!importedPackages.has(dependency) && !nonTsPeerDependencies.has(dependency)) {
       failures.push(`Package dependency contract declares unused peer dependency ${dependency}`);
     }
+
+    if (!peerDependencies[dependency]) continue;
+    if (lightStackPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional === true) {
+      failures.push(
+        `Package dependency contract must keep ${dependency} required because it is part of the light root/primitives stack`,
+      );
+    }
+
+    if (featureOnlyPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional !== true) {
+      failures.push(
+        `Package dependency contract must keep ${dependency} optional for feature-only consumers`,
+      );
+    }
   }
 
-  for (const dependency of Object.keys(packageJson.peerDependenciesMeta ?? {})) {
+  for (const dependency of Object.keys(peerDependenciesMeta)) {
     if (!peerDependencies[dependency]) {
       failures.push(`Package dependency contract has peerDependenciesMeta for undeclared ${dependency}`);
+    } else if (!featureOnlyPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional) {
+      failures.push(
+        `Package dependency contract marks ${dependency} optional but it is not a known feature-only peer`,
+      );
+    }
+  }
+
+  for (const dependency of lightStackPeers) {
+    if (!peerDependencies[dependency]) {
+      failures.push(`Package dependency contract is missing required light peer dependency ${dependency}`);
+    }
+  }
+
+  for (const dependency of featureOnlyPeers) {
+    if (!peerDependencies[dependency]) {
+      failures.push(`Package dependency contract is missing optional feature peer dependency ${dependency}`);
     }
   }
 

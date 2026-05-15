@@ -5,10 +5,6 @@ export function packageManagerInvocation(args) {
   const npmExecPath = process.env.npm_execpath;
 
   if (npmExecPath) {
-    if (!npmExecPath.toLowerCase().includes('pnpm')) {
-      throw new Error('Hell UI workspace commands must be run with pnpm/corepack.');
-    }
-
     return {
       command: process.execPath,
       args: [npmExecPath, ...args],
