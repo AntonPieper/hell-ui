@@ -95,6 +95,36 @@ class NativeCheckboxFormHost {
   readonly checkedEvents: boolean[] = [];
 }
 
+@Component({
+  selector: 'hell-checkbox-path-comparison-host',
+  imports: [HellCheckbox, HellNativeCheckbox],
+  template: `
+    <div>
+      <button
+        id="custom-checkbox"
+        hellCheckbox
+        [checked]="true"
+        unstyled
+      ></button>
+      <label>
+        <input
+          id="native-checkbox"
+          type="checkbox"
+          hellNativeCheckbox
+          checked
+          required
+          unstyled
+          [indeterminate]="indeterminate"
+        />
+        Native
+      </label>
+    </div>
+  `,
+})
+class CheckboxPathComparisonHost {
+  readonly indeterminate = signal(false);
+}
+
 describe('HellCheckbox', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -104,6 +134,7 @@ describe('HellCheckbox', () => {
         CheckboxRequiredFormHost,
         CheckboxDisabledRequiredHost,
         NativeCheckboxFormHost,
+        CheckboxPathComparisonHost,
       ],
     }).compileComponents();
   });
@@ -229,6 +260,25 @@ describe('HellCheckbox', () => {
 
     expect(host.control.value).toBe(false);
     expect(host.checkedEvents).toEqual([false]);
+  });
+
+  it('documents custom ARIA checkbox tradeoff and style opt-out behavior', () => {
+    const fixture = TestBed.createComponent(CheckboxPathComparisonHost);
+    fixture.detectChanges();
+
+    const custom = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellCheckbox]');
+    const native = query<HTMLInputElement>(fixture.nativeElement, 'input[hellNativeCheckbox]');
+
+    expect(custom.tagName).toBe('BUTTON');
+    expect(custom.type).toBe('button');
+    expect(custom.getAttribute('role')).toBe('checkbox');
+    expect(custom.classList.contains('hell-checkbox')).toBe(false);
+
+    expect(native.tagName).toBe('INPUT');
+    expect(native.type).toBe('checkbox');
+    expect(native.classList.contains('hell-checkbox')).toBe(false);
+    expect(native.getAttribute('aria-required')).toBe('true');
+    expect(native.getAttribute('required')).toBe('');
   });
 
   it('does not report required when control is disabled', () => {

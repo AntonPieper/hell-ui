@@ -12,6 +12,7 @@ const timeoutMs = positiveNumber(process.env.HELL_UNIT_TEST_TIMEOUT_MS, 180_000)
 const hangGraceMs = positiveNumber(process.env.HELL_UNIT_TEST_HANG_GRACE_MS, 2_500);
 const pollMs = positiveNumber(process.env.HELL_UNIT_TEST_POLL_MS, 250);
 const startedAt = Date.now();
+const coverageRequired = !process.argv.slice(2).some((arg) => arg === '--coverage=false');
 const coverageThresholds = {
   statements: 75,
   branches: 70,
@@ -61,7 +62,7 @@ const monitor = setInterval(() => {
   if (!report) return;
 
   const failed = report.failures > 0 || report.errors > 0;
-  const completeEnough = failed || coverageMeetsThresholds(coverage);
+  const completeEnough = failed || !coverageRequired || coverageMeetsThresholds(coverage);
   if (completeEnough && Date.now() - lastOutputAt >= hangGraceMs) {
     intentionalTerminate = true;
     terminate('SIGTERM');
@@ -95,7 +96,7 @@ if (report.failures > 0 || report.errors > 0) {
   process.exit(1);
 }
 
-if (!coverageMeetsThresholds(coverage)) {
+if (coverageRequired && !coverageMeetsThresholds(coverage)) {
   console.error('[unit] coverage summary is missing or below configured thresholds.');
   process.exit(1);
 }

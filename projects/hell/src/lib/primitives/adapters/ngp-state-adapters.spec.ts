@@ -31,6 +31,16 @@ describe('ngp-state adapter write helpers', () => {
     expect(value).not.toHaveBeenCalled();
   });
 
+  it('throws a descriptive error when select state shape is invalid', () => {
+    expect(() => writeSelectValue({} as never, 'value')).toThrowError(/writeSelectValue/);
+    expect(() =>
+      writeSelectValue({ value: { set: 'not-a-function' } as never, disabled: { set: vi.fn() } } as never, 'value'),
+    ).toThrowError(/value\.set/);
+    expect(() =>
+      writeSelectDisabled({ value: { set: vi.fn() }, disabled: { set: 0 } as never } as never, true),
+    ).toThrowError(/disabled\.set/);
+  });
+
   it('writes combobox value through value.set only', () => {
     const value = vi.fn();
     const disabled = vi.fn();
@@ -61,6 +71,13 @@ describe('ngp-state adapter write helpers', () => {
     expect(value).not.toHaveBeenCalled();
   });
 
+  it('throws a descriptive error when combobox state shape is invalid', () => {
+    expect(() => writeComboboxDisabled({} as never, true)).toThrowError(/writeComboboxDisabled/);
+    expect(() => writeComboboxDisabled({ value: { set: vi.fn() }, disabled: {} as never } as never, false)).toThrowError(
+      /disabled\.set/,
+    );
+  });
+
   it('writes radio-group value through value.set only', () => {
     const value = vi.fn();
     const disabled = vi.fn();
@@ -89,6 +106,14 @@ describe('ngp-state adapter write helpers', () => {
     expect(disabled).toHaveBeenCalledWith(true);
     expect(disabled).toHaveBeenCalledTimes(1);
     expect(value).not.toHaveBeenCalled();
+  });
+
+  it('throws a descriptive error when radio-group state shape is invalid', () => {
+    expect(() => writeRadioGroupValue({} as never, 'x')).toThrowError(/writeRadioGroupValue/);
+    expect(() => writeRadioGroupDisabled({} as never, true)).toThrowError(/writeRadioGroupDisabled/);
+    expect(() =>
+      writeRadioGroupDisabled({ value: { set: vi.fn() }, disabled: { set: 1 } as never } as never, true),
+    ).toThrowError(/disabled\.set/);
   });
 
   it('writes toggle-group value with copied value and default emit=true', () => {
@@ -138,5 +163,15 @@ describe('ngp-state adapter write helpers', () => {
     expect(setDisabled).toHaveBeenCalledWith(false);
     expect(setDisabled).toHaveBeenCalledTimes(1);
     expect(setValue).not.toHaveBeenCalled();
+  });
+
+  it('throws a descriptive error when toggle-group state shape is invalid', () => {
+    expect(() => writeToggleGroupValue({ setValue: 'nope', setDisabled: vi.fn() } as never, ['a'])).toThrowError(
+      /setValue/,
+    );
+    expect(() => writeToggleGroupDisabled({} as never, true)).toThrowError(/writeToggleGroupDisabled/);
+    expect(() =>
+      writeToggleGroupDisabled({ setValue: vi.fn(), setDisabled: {} as never } as never, true),
+    ).toThrowError(/setDisabled/);
   });
 });

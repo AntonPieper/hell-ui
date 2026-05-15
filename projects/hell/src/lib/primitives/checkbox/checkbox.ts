@@ -29,10 +29,13 @@ import { HellStyleable } from '../../core/styleable';
  * `disabled` and `required` through Hell-owned inputs and emits
  * `checkedChange` / `indeterminateChange`.
  *
- * The host is a real `<button>` — a natively labelable element — so wrapping
- * it in a `<label>` (directly, or via any `<label for>` mechanism such as
- * `hellField`) makes label clicks toggle the checkbox with zero wiring on
- * our side. It also implements `ControlValueAccessor` for Angular Forms.
+ * `button[hellCheckbox]` is a custom ARIA checkbox widget, not a native
+ * `<input type="checkbox">`. It remains useful for styled, compact controls
+ * but does not provide all native checkbox form semantics. For native input
+ * behavior (including built-in form constraints and input semantics), use
+ * `input[hellNativeCheckbox]`.
+ *
+ * It implements `ControlValueAccessor` for Angular Forms.
  */
 @Component({
   selector: 'button[hellCheckbox]',

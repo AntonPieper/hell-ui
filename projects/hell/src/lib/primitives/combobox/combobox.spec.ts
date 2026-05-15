@@ -133,6 +133,27 @@ describe('HellCombobox', () => {
     expect(combobox.getAttribute('data-disabled')).toBe('');
   });
 
+  it('writes through the ng-primitives state seam for value and disabled updates', () => {
+    const fixture = TestBed.createComponent(ComboboxFormHost);
+    fixture.detectChanges();
+
+    const debug = fixture.debugElement.query(By.directive(HellCombobox));
+    const comboboxInstance = debug.injector.get(HellCombobox<string>);
+    const ngpCombobox = debug.injector.get(NgpCombobox);
+    const state = (ngpCombobox as any).state as {
+      value: { set: (value: unknown) => void };
+      disabled: { set: (value: boolean) => void };
+    };
+    const valueSet = vi.spyOn(state.value, 'set');
+    const disabledSet = vi.spyOn(state.disabled, 'set');
+
+    comboboxInstance.writeValue('from-form-state');
+    comboboxInstance.setDisabledState(true);
+
+    expect(valueSet).toHaveBeenCalledWith('from-form-state');
+    expect(disabledSet).toHaveBeenCalledWith(true);
+  });
+
   it('integrates with reactive forms in multiple mode without echoing programmatic array writes', async () => {
     const fixture = TestBed.createComponent(ComboboxMultipleFormHost);
     fixture.detectChanges();

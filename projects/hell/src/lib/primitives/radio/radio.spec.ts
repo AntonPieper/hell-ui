@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { NgpRadioGroup } from 'ng-primitives/radio';
 
 import { HellNativeRadio, HellNativeRadioGroup, HellRadio, HellRadioGroup } from './radio';
 
@@ -157,6 +158,27 @@ describe('HellRadio', () => {
 
     expect(items[0].disabled).toBe(true);
     expect(items[1].disabled).toBe(true);
+  });
+
+  it('writes through the ng-primitives state seam for value and disabled updates', () => {
+    const fixture = TestBed.createComponent(RadioFormHost);
+    fixture.detectChanges();
+
+    const debug = fixture.debugElement.query(By.directive(HellRadioGroup));
+    const groupInstance = debug.injector.get(HellRadioGroup<string>);
+    const ngpRadioGroup = debug.injector.get(NgpRadioGroup);
+    const state = (ngpRadioGroup as any).state as {
+      value: { set: (value: unknown) => void };
+      disabled: { set: (value: boolean) => void };
+    };
+    const valueSet = vi.spyOn(state.value, 'set');
+    const disabledSet = vi.spyOn(state.disabled, 'set');
+
+    groupInstance.writeValue('a');
+    groupInstance.setDisabledState(true);
+
+    expect(valueSet).toHaveBeenCalledWith('a');
+    expect(disabledSet).toHaveBeenCalledWith(true);
   });
 
   it('validates required through its Validator implementation', () => {

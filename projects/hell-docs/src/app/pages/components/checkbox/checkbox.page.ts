@@ -17,27 +17,35 @@ import checkboxNativeExampleCodeRaw from './examples/native.example.ts?raw' with
     <article class="hd-prose">
       <h1>Checkbox</h1>
       <p>
-        Two- or three-state checkbox. Bind <code>checked</code> and listen for
-        <code>checkedChange</code>; <code>indeterminate</code> is also supported for parent/child
-        group patterns. The host is a <code>&lt;button&gt;</code>, so wrapping in a
-        <code>&lt;label&gt;</code> (or any <code>label[for]</code> mechanism) toggles it natively.
+        Two- or three-state checkbox API with an Angular Forms-ready facade. Bind
+        <code>checked</code> and listen for <code>checkedChange</code>; <code>indeterminate</code>
+        is also supported for parent/child group patterns.
       </p>
 
       <h2>Examples</h2>
       <p>
-        Wrap the checkbox in a <code>&lt;label&gt;</code> (directly or via <code>hellField</code>) —
-        because the host is a real <code>&lt;button&gt;</code>, the browser handles label clicks for
-        free.
+        <code>button[hellCheckbox]</code> is a compact custom ARIA checkbox control and is useful
+        when you need a styled, button-like primitive. If your form requires native checkbox
+        semantics (for example, built-in constraint behavior and native form tooling), prefer
+        <code>input[hellNativeCheckbox]</code>.
       </p>
       <hd-example-tabs [code]="checkboxExamplesExampleCode" previewClass="grid gap-2 max-w-md">
         <app-checkbox-examples-example />
       </hd-example-tabs>
 
       <h2>Native path</h2>
+      <p>
+        Use this path for full native checkbox behavior and form semantics.
+      </p>
       <hd-example-tabs [code]="checkboxNativeExampleCode" previewClass="grid gap-2 max-w-md">
         <app-checkbox-native-example />
       </hd-example-tabs>
 
+      <h2>Tradeoff</h2>
+      <p>
+        <code>button[hellCheckbox]</code> is intentionally opinionated for custom styling and
+        behavior, but it is not a drop-in native checkbox control.
+      </p>
       <h2>API</h2>
       <ul>
         <li><code>checked</code>, <code>checkedChange</code></li>
