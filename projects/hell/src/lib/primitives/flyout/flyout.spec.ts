@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { InteractivityChecker } from '@angular/cdk/a11y';
 
 import { HellFlyout, HellFlyoutTrigger } from './flyout';
 
@@ -41,9 +42,14 @@ class EnabledFlyoutAnchorTriggerHost {}
 class DisabledFlyoutTriggerHost {}
 
 describe('HellFlyout outside interaction', () => {
+  let focusChecker: { isFocusable: ReturnType<typeof vi.fn> };
+
   beforeEach(async () => {
+    focusChecker = { isFocusable: vi.fn(() => true) };
+
     await TestBed.configureTestingModule({
       imports: [FlyoutHost, EnabledFlyoutAnchorTriggerHost, DisabledFlyoutTriggerHost],
+      providers: [{ provide: InteractivityChecker, useValue: focusChecker }],
     }).compileComponents();
   });
 
@@ -118,6 +124,28 @@ describe('HellFlyout outside interaction', () => {
     await settle(fixture);
 
     expect(fixture.nativeElement.textContent).not.toContain('Panel');
+  });
+
+  it('passes CDK interactivity checks into Escape focus restoration', async () => {
+    const fixture = TestBed.createComponent(FlyoutHost);
+    await settle(fixture);
+
+    const trigger = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    trigger.click();
+    await settle(fixture);
+    expect(fixture.nativeElement.textContent).toContain('Panel');
+
+    focusChecker.isFocusable.mockReturnValue(false);
+    const focusSpy = vi.spyOn(trigger, 'focus');
+
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await settle(fixture);
+
+    expect(fixture.nativeElement.textContent).not.toContain('Panel');
+    expect(focusChecker.isFocusable).toHaveBeenCalledWith(trigger);
+    expect(focusSpy).not.toHaveBeenCalled();
+
+    focusSpy.mockRestore();
   });
 });
 

@@ -371,16 +371,20 @@ describe('PDF Adapter browser seam', () => {
     });
 
     const created = FakeWorker.instances.at(-1);
+    const customPdfWorker = pdfJsMock.pdfWorkers.at(-1);
     sessionWithCustomWorker.cleanup();
     expect(created?.url).toBe('/assets/pdf.worker.custom.js');
     expect(created?.options).toEqual({ type: 'module', name: 'worker' });
+    expect(customPdfWorker?.destroy).toHaveBeenCalledOnce();
 
     const externalPort = new FakeWorker('external.mjs');
     const sessionWithPort = await adapter.createViewer(document.createElement('div'), handlers, {
       worker: { port: externalPort as unknown as Worker },
     });
+    const externalPdfWorker = pdfJsMock.pdfWorkers.at(-1);
 
     sessionWithPort.cleanup();
+    expect(externalPdfWorker?.destroy).toHaveBeenCalledOnce();
     expect(externalPort.terminate).not.toHaveBeenCalled();
   });
 

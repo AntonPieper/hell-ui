@@ -14,6 +14,7 @@ class FakePdfRuntime implements HellPdfRuntimePort {
   hasDocument = false;
   currentScale = 1;
   bootstrappedWith: HTMLDivElement | null = null;
+  bootstrapOptions: { readonly worker?: unknown } | undefined;
   loadedSource: HellPdfSource | null = null;
   printedWith: RequestInit | undefined;
   cleanedUp = false;
@@ -22,9 +23,10 @@ class FakePdfRuntime implements HellPdfRuntimePort {
   async bootstrap(
     container: HTMLDivElement,
     handlers: HellPdfRuntimeHandlers,
-    _options?: { readonly worker?: unknown },
+    options?: { readonly worker?: unknown },
   ): Promise<void> {
     this.bootstrappedWith = container;
+    this.bootstrapOptions = options;
     this.handlers = handlers;
     handlers.onPagesReady();
   }
@@ -63,6 +65,7 @@ class FakePdfRuntime implements HellPdfRuntimePort {
       [src]="src"
       [globalShortcuts]="globalShortcuts"
       [printFetchOptions]="printFetchOptions"
+      [worker]="worker"
     />
   `,
 })
@@ -70,6 +73,7 @@ class PdfViewerHost {
   src: HellPdfSource = 'document.pdf';
   globalShortcuts = false;
   printFetchOptions: RequestInit | null = null;
+  worker: string | null = null;
 }
 
 describe('HellPdfViewer', () => {
@@ -132,6 +136,15 @@ describe('HellPdfViewer', () => {
     expect(fixture.nativeElement.querySelector('.hell-pdf-find-input')).toBeInstanceOf(
       HTMLInputElement,
     );
+  });
+
+  it('passes the worker input from the Angular surface to runtime bootstrap', async () => {
+    const fixture = TestBed.createComponent(PdfViewerHost);
+    fixture.componentInstance.worker = '/assets/pdf.worker.mjs';
+
+    await settle(fixture);
+
+    expect(runtime.bootstrapOptions).toEqual({ worker: '/assets/pdf.worker.mjs' });
   });
 
   it('passes print fetch options from the Angular surface to the runtime', async () => {

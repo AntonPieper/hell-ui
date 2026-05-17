@@ -833,6 +833,11 @@ function checkExperimentalFeatureContract() {
     failures.push('HellPdfViewer must mark the pdf.js wrapper experimental in its public JSDoc');
   }
 
+  const pdfFeatureApi = readFile(join(root, 'projects/hell/src/lib/public-api-feature-pdf-viewer.ts'));
+  if (!/HellPdfWorkerSource/.test(pdfFeatureApi)) {
+    failures.push('PDF Viewer feature entry point must export the public HellPdfWorkerSource worker input type');
+  }
+
   const pdfDocs = readFile(
     join(root, 'projects/hell-docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts'),
   );
@@ -1109,9 +1114,11 @@ function checkFloatingRegistrationContract() {
 }
 
 function checkNgpPrivateStateBridgeContract() {
-  const adapterPath = join(root, 'projects/hell/src/lib/primitives/adapters/ngp-state-adapters.ts');
+  const adapterRelPath = 'projects/hell/src/lib/primitives/adapters/ngp-state-adapters.ts';
+  const adapterPath = join(root, adapterRelPath);
   const adapterSource = readFile(adapterPath);
   const ngpPackage = parseJsonWithComments(readFile(join(root, 'node_modules/ng-primitives/package.json')));
+  const libraryPackage = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
   const expectedVersion = `ng-primitives@${ngpPackage.version}`;
 
   if (!adapterSource.includes(`HELL_NGP_PRIVATE_STATE_BRIDGE_VERSION = '${expectedVersion}'`)) {
@@ -1120,22 +1127,45 @@ function checkNgpPrivateStateBridgeContract() {
     );
   }
 
-  const allowedImports = new Set([
+  if (libraryPackage.peerDependencies?.['ng-primitives'] !== ngpPackage.version) {
+    failures.push(
+      `ng-primitives peer dependency must be pinned to ${ngpPackage.version} while private state bridge is version-bound`,
+    );
+  }
+
+  const allowedBridgeFiles = new Set([
+    adapterRelPath,
+    'projects/hell/src/lib/primitives/adapters/ngp-state-adapters.spec.ts',
     'projects/hell/src/lib/primitives/select/select.ts',
     'projects/hell/src/lib/primitives/combobox/combobox.ts',
     'projects/hell/src/lib/primitives/radio/radio.ts',
   ]);
-  const primitiveFiles = walk(join(root, 'projects/hell/src/lib/primitives')).filter((file) => file.endsWith('.ts'));
+  const privateBridgeTokens = [
+    'HELL_NGP_PRIVATE_STATE_BRIDGE_VERSION',
+    'writeSelectPrivateValue',
+    'writeSelectPrivateDisabled',
+    'writeComboboxPrivateValue',
+    'writeComboboxPrivateDisabled',
+    'writeRadioGroupPrivateValue',
+    'writeRadioGroupPrivateDisabled',
+  ];
+  const sourceFiles = walk(join(root, 'projects/hell/src/lib')).filter((file) => file.endsWith('.ts'));
 
-  for (const file of primitiveFiles) {
+  for (const file of sourceFiles) {
     const source = readFile(file);
     const rel = file.slice(root.length + 1);
-    if (!source.includes('ngp-state-adapters')) continue;
-    if (rel.endsWith('ngp-state-adapters.spec.ts')) continue;
-    if (rel === 'projects/hell/src/lib/primitives/adapters/adapters.ts') continue;
-    if (!allowedImports.has(rel)) {
-      failures.push(`ng-primitives private state bridge import is not approved in ${rel}`);
+    if (allowedBridgeFiles.has(rel)) continue;
+    const usesPrivateBridge =
+      source.includes('ngp-state-adapters') ||
+      privateBridgeTokens.some((token) => source.includes(token));
+    if (usesPrivateBridge) {
+      failures.push(`ng-primitives private state bridge usage is not approved in ${rel}`);
     }
+  }
+
+  const adaptersBarrel = readFile(join(root, 'projects/hell/src/lib/primitives/adapters/adapters.ts'));
+  if (/export\s+\*\s+from/.test(adaptersBarrel) || privateBridgeTokens.some((token) => adaptersBarrel.includes(token))) {
+    failures.push('ng-primitives private state bridge must not be re-exported through the adapters barrel');
   }
 
   for (const token of ['writeToggleGroupValue', 'writeToggleGroupDisabled', 'ToggleGroupStateMutation']) {

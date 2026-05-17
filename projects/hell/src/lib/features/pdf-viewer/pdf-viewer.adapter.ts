@@ -115,7 +115,6 @@ interface HellPdfJsWorkerHandle {
 interface HellPdfJsWorkerPortBinding {
   readonly port: Worker;
   readonly cleanup?: () => void;
-  readonly ownsPdfWorker: boolean;
 }
 
 interface HellPdfJsLoadingTask {
@@ -270,7 +269,6 @@ export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
     if (worker instanceof Worker) {
       return {
         port: worker,
-        ownsPdfWorker: false,
       };
     }
 
@@ -281,7 +279,6 @@ export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
       return {
         port,
         cleanup: () => port.terminate(),
-        ownsPdfWorker: true,
       };
     }
 
@@ -301,14 +298,12 @@ export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
         return {
           port,
           cleanup: () => port.terminate(),
-          ownsPdfWorker: true,
         };
       }
 
       if (workerObject.port instanceof Worker) {
         return {
           port: workerObject.port,
-          ownsPdfWorker: false,
         };
       }
     }
@@ -473,14 +468,8 @@ class HellPdfJsViewerSession implements HellPdfViewerSession {
 
   cleanup(): void {
     this.options.viewer?.cleanup?.();
-
-    if (this.options.workerBinding.cleanup) {
-      this.options.workerBinding.cleanup();
-    }
-
-    if (this.options.workerBinding.ownsPdfWorker) {
-      this.options.pdfWorker?.destroy?.();
-    }
+    this.options.pdfWorker?.destroy?.();
+    this.options.workerBinding.cleanup?.();
   }
 
   private installEventHandlers(): void {

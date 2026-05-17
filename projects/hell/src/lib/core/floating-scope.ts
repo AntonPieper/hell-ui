@@ -216,14 +216,14 @@ function isSafeRestoreFocusTarget(
   if (!target) return false;
   if (!target.isConnected) return false;
 
-  if (checker) {
-    return checker.isFocusable(target);
-  }
-
   if (target.matches(':disabled')) return false;
   if ((target as HTMLInputElement).disabled) return false;
   if (target.getAttribute('aria-disabled') === 'true') return false;
   if (target.hasAttribute('hidden')) return false;
+
+  if (checker) {
+    return checker.isFocusable(target);
+  }
 
   const style = target.ownerDocument.defaultView?.getComputedStyle(target);
   if (style && (style.display === 'none' || style.visibility === 'hidden')) return false;

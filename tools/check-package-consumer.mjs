@@ -32,6 +32,7 @@ if (!packageName) {
 }
 
 const packedHell = packBuiltPackage();
+assertPackedPackageDoesNotBundlePdfWorker(packedHell.tarball);
 
 const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 const deps = rootPackage.dependencies ?? {};
@@ -244,6 +245,23 @@ function packBuiltPackage() {
   const tarball = readdirSync(packRoot).find((name) => name.endsWith('.tgz'));
   if (!tarball) fail(`Packed package missing in ${packRoot}`);
   return { root: packRoot, tarball: join(packRoot, tarball) };
+}
+
+function assertPackedPackageDoesNotBundlePdfWorker(tarball) {
+  const result = spawnSync('tar', ['-tzf', tarball], { encoding: 'utf8' });
+  if (result.error) fail(`Unable to inspect packed package ${tarball}: ${result.error.message}`);
+  if (result.status !== 0) {
+    fail(`Unable to inspect packed package ${tarball}: ${result.stderr || result.stdout}`);
+  }
+
+  const bundledWorkers = result.stdout
+    .split('\n')
+    .filter((entry) => /pdf\.worker\.(?:mjs|js)$/.test(entry));
+  if (bundledWorkers.length) {
+    fail(
+      `Packed package must not bundle pdf.js workers; apps provide the worker source. Found: ${bundledWorkers.join(', ')}`,
+    );
+  }
 }
 
 function writeConsumerWorkspace(workspace, scenario) {
@@ -573,7 +591,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function pdfViewerConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellPdfViewer } from '${packageName}/features/pdf-viewer';
+import { HellPdfViewer, type HellPdfWorkerSource } from '${packageName}/features/pdf-viewer';
 
 @Component({
   selector: 'app-root',
@@ -583,7 +601,7 @@ import { HellPdfViewer } from '${packageName}/features/pdf-viewer';
 })
 class App {
   protected readonly pdfSrc = '/sample.pdf';
-  protected readonly pdfWorker = '/assets/pdf.worker.mjs';
+  protected readonly pdfWorker: HellPdfWorkerSource = '/assets/pdf.worker.mjs';
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));

@@ -234,6 +234,34 @@ describe('Floating Scope', () => {
     destroy.run();
   });
 
+  it('keeps hard focus-restore rejects before delegating to an optional checker', () => {
+    const root = document.createElement('div');
+    const outside = document.createElement('button');
+    const target = document.createElement('a');
+    target.href = '#disabled';
+    target.setAttribute('aria-disabled', 'true');
+    document.body.append(root, outside, target);
+
+    const focusSpy = vi.spyOn(target, 'focus');
+    const checker = { isFocusable: vi.fn(() => true) };
+    const destroy = createDestroyRef();
+    const controller = new HellFloatingDismissController({
+      root: () => root,
+      focusTargetChecker: checker,
+      dismiss: () => ({ restoreFocus: () => target }),
+      onDismiss: () => {},
+    });
+    controller.connect(destroy.ref);
+
+    outside.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+
+    expect(checker.isFocusable).not.toHaveBeenCalled();
+    expect(focusSpy).not.toHaveBeenCalled();
+
+    focusSpy.mockRestore();
+    destroy.run();
+  });
+
   it('does not focus restore targets that are detached, disabled, hidden, or non-focusable', () => {
     const root = document.createElement('div');
     const outside = document.createElement('button');

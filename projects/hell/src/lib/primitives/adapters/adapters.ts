@@ -1,9 +1,10 @@
 /**
- * Internal adapter seam for ng-primitives state-mutation compatibility.
+ * Internal adapter directory marker.
  *
- * Kept as an internal re-export target so callers can avoid importing these
- * helpers directly from the public API barrel.
+ * Private compatibility helpers are intentionally not re-exported from this
+ * barrel. Approved primitives must import their narrow helper directly so the
+ * architecture guard can keep the compatibility seam quarantined.
  *
  * @internal
  */
-export * from './ngp-state-adapters';
+export {};
