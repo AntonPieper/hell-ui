@@ -139,11 +139,13 @@ describe('HellCombobox', () => {
 
     const debug = fixture.debugElement.query(By.directive(HellCombobox));
     const comboboxInstance = debug.injector.get(HellCombobox<string>);
-    const ngpCombobox = debug.injector.get(NgpCombobox);
-    const state = (ngpCombobox as any).state as {
-      value: { set: (value: unknown) => void };
-      disabled: { set: (value: boolean) => void };
+    const ngpCombobox = debug.injector.get(NgpCombobox) as unknown as {
+      state: {
+        value: { set: (value: unknown) => void };
+        disabled: { set: (value: boolean) => void };
+      };
     };
+    const state = ngpCombobox.state;
     const valueSet = vi.spyOn(state.value, 'set');
     const disabledSet = vi.spyOn(state.disabled, 'set');
 

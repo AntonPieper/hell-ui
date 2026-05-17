@@ -136,11 +136,13 @@ describe('HellSelect', () => {
 
     const debug = fixture.debugElement.query(By.directive(HellSelect));
     const selectInstance = debug.injector.get(HellSelect<string>);
-    const ngpSelect = debug.injector.get(NgpSelect);
-    const state = (ngpSelect as any).state as {
-      value: { set: (value: unknown) => void };
-      disabled: { set: (value: boolean) => void };
+    const ngpSelect = debug.injector.get(NgpSelect) as unknown as {
+      state: {
+        value: { set: (value: unknown) => void };
+        disabled: { set: (value: boolean) => void };
+      };
     };
+    const state = ngpSelect.state;
     const valueSet = vi.spyOn(state.value, 'set');
     const disabledSet = vi.spyOn(state.disabled, 'set');
 

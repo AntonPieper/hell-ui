@@ -166,11 +166,13 @@ describe('HellRadio', () => {
 
     const debug = fixture.debugElement.query(By.directive(HellRadioGroup));
     const groupInstance = debug.injector.get(HellRadioGroup<string>);
-    const ngpRadioGroup = debug.injector.get(NgpRadioGroup);
-    const state = (ngpRadioGroup as any).state as {
-      value: { set: (value: unknown) => void };
-      disabled: { set: (value: boolean) => void };
+    const ngpRadioGroup = debug.injector.get(NgpRadioGroup) as unknown as {
+      state: {
+        value: { set: (value: unknown) => void };
+        disabled: { set: (value: boolean) => void };
+      };
     };
+    const state = ngpRadioGroup.state;
     const valueSet = vi.spyOn(state.value, 'set');
     const disabledSet = vi.spyOn(state.disabled, 'set');
 
