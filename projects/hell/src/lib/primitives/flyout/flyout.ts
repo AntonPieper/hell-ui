@@ -20,6 +20,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { InteractivityChecker } from '@angular/cdk/a11y';
 import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactive-disabled';
 
 let nextFlyoutId = 0;
@@ -119,6 +120,7 @@ export class HellFlyout extends HellStyleable {
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly floatingScope = inject(HELL_FLOATING_SCOPE, { optional: true });
+  private readonly interactivityChecker = inject(InteractivityChecker, { optional: true });
   private interaction: HellFloatingInteractionController | null = null;
 
   constructor() {
@@ -131,6 +133,7 @@ export class HellFlyout extends HellStyleable {
         scope: this.floatingScope,
         active: () => this.trigger().open(),
         activeKey: () => this.trigger().openVersion(),
+        focusTargetChecker: this.interactivityChecker,
         dismiss: hellDismissOn(
           hellGuardDismiss(hellOutsideClick, () => this.closeOnOutsideInteraction()),
           hellGuardDismiss(hellOutsideFocus, () => this.closeOnOutsideInteraction()),

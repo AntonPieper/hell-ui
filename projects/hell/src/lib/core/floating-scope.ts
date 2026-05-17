@@ -209,9 +209,17 @@ function hellSameNodes(
   return a.length === b.length && a.every((node, index) => node === b[index]);
 }
 
-function isSafeRestoreFocusTarget(target: HTMLElement | null | undefined): target is HTMLElement {
+function isSafeRestoreFocusTarget(
+  target: HTMLElement | null | undefined,
+  checker?: HellFloatingFocusTargetChecker | null,
+): target is HTMLElement {
   if (!target) return false;
   if (!target.isConnected) return false;
+
+  if (checker) {
+    return checker.isFocusable(target);
+  }
+
   if (target.matches(':disabled')) return false;
   if ((target as HTMLInputElement).disabled) return false;
   if (target.getAttribute('aria-disabled') === 'true') return false;
@@ -330,6 +338,10 @@ function isEscapeKeyEvent(event: Event): event is KeyboardEvent {
   );
 }
 
+export interface HellFloatingFocusTargetChecker {
+  isFocusable(element: HTMLElement): boolean;
+}
+
 export interface HellFloatingDismissOptions {
   /** Primary logical owner of the floating interaction. Checked first. */
   readonly root?: () => Node | null | undefined;
@@ -343,6 +355,8 @@ export interface HellFloatingDismissOptions {
   readonly active?: () => boolean;
   /** Monotonic identity for open/close cycles; invalidates deferred focus exits. */
   readonly activeKey?: () => unknown;
+  /** Optional focusability adapter, e.g. Angular CDK A11y's InteractivityChecker. */
+  readonly focusTargetChecker?: HellFloatingFocusTargetChecker | null | undefined;
   /** Pure matcher composition deciding whether a document event dismisses. */
   readonly dismiss?: HellDismissRule;
   readonly onDismiss?: (event: HellFloatingDismissEvent) => void;
@@ -486,7 +500,7 @@ export class HellFloatingDismissController {
 
     const target =
       typeof decision.restoreFocus === 'function' ? decision.restoreFocus() : decision.restoreFocus;
-    if (!isSafeRestoreFocusTarget(target)) return;
+    if (!isSafeRestoreFocusTarget(target, this.options.focusTargetChecker)) return;
 
     try {
       target.focus();
@@ -571,6 +585,7 @@ export class HellFloatingInteractionController {
         this.options.ownerDocument?.() ?? this.options.surface()?.ownerDocument ?? null,
       active: this.options.active,
       activeKey: this.options.activeKey,
+      focusTargetChecker: this.options.focusTargetChecker,
       dismiss: this.options.dismiss,
       onDismiss: this.options.onDismiss,
     });
