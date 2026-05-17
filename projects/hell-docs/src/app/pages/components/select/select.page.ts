@@ -20,6 +20,11 @@ import selectBasicPresetExampleCodeRaw from './examples/basic-preset.example.ts?
         and floats its dropdown in a portal — giving full control over alignment, scroll
         behaviour, and styling.
       </p>
+      <p>
+        Prefer native controls where browser/mobile semantics are the priority. The rich
+        headless select keeps Angular forms compatible through a version-bound
+        <code>ng-primitives</code> compatibility bridge until upstream public setters exist.
+      </p>
 
       <h2>Basic</h2>
       <hd-example-tabs [code]="selectBasicExampleCode">

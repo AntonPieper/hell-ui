@@ -35,6 +35,10 @@ import toggleToggleGroupSingleExampleCodeRaw from './examples/toggle-group-singl
         or wrap several <code>hellToggleGroupItem</code> buttons in a
         <code>hellToggleGroup</code> for single- or multi-select choices.
       </p>
+      <p>
+        Prefer native controls where native form semantics matter. Toggle group Angular form
+        writes use public <code>ng-primitives</code> setters; no private state bridge is used.
+      </p>
 
       <h2>Single toggle</h2>
       <hd-example-tabs [code]="toggleSingleToggleExampleCode" previewClass="flex gap-2">

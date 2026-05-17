@@ -160,7 +160,7 @@ describe('HellRadio', () => {
     expect(items[1].disabled).toBe(true);
   });
 
-  it('writes through the ng-primitives state seam for value and disabled updates', () => {
+  it('keeps the private ng-primitives compatibility bridge working for value and disabled CVA updates', () => {
     const fixture = TestBed.createComponent(RadioFormHost);
     fixture.detectChanges();
 

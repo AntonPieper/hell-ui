@@ -32,6 +32,11 @@ import comboboxBasicPresetExampleCodeRaw from './examples/basic-preset.example.t
         single and multiple selection, keyboard navigation (Arrow/Home/End/Enter/Escape) and
         active-descendant focus per WAI-ARIA combobox pattern.
       </p>
+      <p>
+        Prefer native controls where native form/mobile semantics matter most. This rich
+        headless combobox keeps Angular forms compatible through a version-bound
+        <code>ng-primitives</code> compatibility bridge until upstream public setters exist.
+      </p>
 
       <h2>Basic</h2>
       <hd-example-tabs [code]="comboboxBasicExampleCode">

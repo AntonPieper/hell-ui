@@ -28,7 +28,7 @@ import {
   NgpComboboxPortal,
   injectComboboxState,
 } from 'ng-primitives/combobox';
-import { writeComboboxDisabled, writeComboboxValue } from '../adapters/ngp-state-adapters';
+import { writeComboboxPrivateDisabled, writeComboboxPrivateValue } from '../adapters/ngp-state-adapters';
 
 export type HellComboboxSingleValue<T = unknown> = T | null;
 export type HellComboboxMultipleValue<T = unknown> = readonly T[];
@@ -92,7 +92,7 @@ export class HellCombobox<T = unknown> extends HellStyleable implements ControlV
   }
 
   writeValue(value: HellComboboxValue<T>): void {
-    writeComboboxValue(this.comboboxState(), this.normalizeWriteValue(value));
+    writeComboboxPrivateValue(this.comboboxState(), this.normalizeWriteValue(value));
   }
 
   registerOnChange(fn: (value: HellComboboxValue<T>) => void): void {
@@ -104,7 +104,7 @@ export class HellCombobox<T = unknown> extends HellStyleable implements ControlV
   }
 
   setDisabledState(isDisabled: boolean): void {
-    writeComboboxDisabled(this.comboboxState(), isDisabled);
+    writeComboboxPrivateDisabled(this.comboboxState(), isDisabled);
   }
 
   isOutsideControl(next: EventTarget | Node | null): boolean {

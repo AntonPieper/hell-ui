@@ -28,6 +28,7 @@ checkTableUtilityContract();
 checkTableSortButtonContract();
 checkFloatingRegistrationContract();
 checkFloatingAdapterContract();
+checkNgpPrivateStateBridgeContract();
 
 if (failures.length) {
   console.error('Architecture checks failed:\n');
@@ -1103,6 +1104,43 @@ function checkFloatingRegistrationContract() {
       failures.push(
         `${surface.file} ${surface.className} must register its Floating Interaction surface with the nearest Floating Scope`,
       );
+    }
+  }
+}
+
+function checkNgpPrivateStateBridgeContract() {
+  const adapterPath = join(root, 'projects/hell/src/lib/primitives/adapters/ngp-state-adapters.ts');
+  const adapterSource = readFile(adapterPath);
+  const ngpPackage = parseJsonWithComments(readFile(join(root, 'node_modules/ng-primitives/package.json')));
+  const expectedVersion = `ng-primitives@${ngpPackage.version}`;
+
+  if (!adapterSource.includes(`HELL_NGP_PRIVATE_STATE_BRIDGE_VERSION = '${expectedVersion}'`)) {
+    failures.push(
+      `ng-primitives private state bridge version must match installed ${expectedVersion}`,
+    );
+  }
+
+  const allowedImports = new Set([
+    'projects/hell/src/lib/primitives/select/select.ts',
+    'projects/hell/src/lib/primitives/combobox/combobox.ts',
+    'projects/hell/src/lib/primitives/radio/radio.ts',
+  ]);
+  const primitiveFiles = walk(join(root, 'projects/hell/src/lib/primitives')).filter((file) => file.endsWith('.ts'));
+
+  for (const file of primitiveFiles) {
+    const source = readFile(file);
+    const rel = file.slice(root.length + 1);
+    if (!source.includes('ngp-state-adapters')) continue;
+    if (rel.endsWith('ngp-state-adapters.spec.ts')) continue;
+    if (rel === 'projects/hell/src/lib/primitives/adapters/adapters.ts') continue;
+    if (!allowedImports.has(rel)) {
+      failures.push(`ng-primitives private state bridge import is not approved in ${rel}`);
+    }
+  }
+
+  for (const token of ['writeToggleGroupValue', 'writeToggleGroupDisabled', 'ToggleGroupStateMutation']) {
+    if (adapterSource.includes(token)) {
+      failures.push(`Toggle group must use public ng-primitives setters, not private bridge token ${token}`);
     }
   }
 }

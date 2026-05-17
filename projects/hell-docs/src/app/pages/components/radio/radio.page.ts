@@ -21,6 +21,12 @@ import radioNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
     <article class="hd-prose">
       <h1>Radio</h1>
       <p>Pick one option from a small set. Use a select instead for &gt; 5 options.</p>
+      <p>
+        Prefer <code>hellNativeRadio</code> where native input semantics and browser form
+        behavior are the priority. The rich button-based radio group keeps Angular forms
+        compatible through a version-bound <code>ng-primitives</code> compatibility bridge
+        until upstream public setters exist.
+      </p>
 
       <h2>Example</h2>
       <hd-example-tabs [code]="radioExampleExampleCode" previewClass="grid gap-4">

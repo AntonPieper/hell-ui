@@ -69,20 +69,15 @@ describe('HellToggleGroup', () => {
     expect(host.control.touched).toBe(true);
   });
 
-  it('writes through the ng-primitives state seam for value and disabled updates', () => {
+  it('writes through public ng-primitives toggle-group setters for value and disabled updates', () => {
     const fixture = TestBed.createComponent(ToggleGroupFormsHost);
     fixture.detectChanges();
 
     const debug = fixture.debugElement.query(By.directive(HellToggleGroup));
     const groupInstance = debug.injector.get(HellToggleGroup);
     const ngpToggleGroup = debug.injector.get(NgpToggleGroup);
-    const state = (ngpToggleGroup as any).state as {
-      setValue: (value: string[]) => void;
-      setDisabled: (isDisabled: boolean) => void;
-    };
-
-    const valueSet = vi.spyOn(state, 'setValue');
-    const disabledSet = vi.spyOn(state, 'setDisabled');
+    const valueSet = vi.spyOn(ngpToggleGroup, 'setValue');
+    const disabledSet = vi.spyOn(ngpToggleGroup, 'setDisabled');
 
     groupInstance.writeValue(['bold', 'italic']);
     groupInstance.setDisabledState(true);
