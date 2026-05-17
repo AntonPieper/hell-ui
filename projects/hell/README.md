@@ -34,7 +34,7 @@ Feature peers remain optional, but npm peer metadata is package-wide: install th
 | `@hell-ui/angular/features/table-utilities` | Base light stack |
 | `@hell-ui/angular/features/data-table` | Legacy compatibility alias for `@hell-ui/angular/features/table-utilities` |
 | `@hell-ui/angular/features/code-editor` | Base light stack plus `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight` |
-| `@hell-ui/angular/features/pdf-viewer` | Base light stack plus exact `pdfjs-dist@5.6.205` |
+| `@hell-ui/angular/features/pdf-viewer` | Base light stack plus exact `pdfjs-dist@5.6.205`; app must provide a pdf.js worker source |
 
 
 ## API Stability
@@ -52,7 +52,7 @@ Feature peers remain optional, but npm peer metadata is package-wide: install th
 The PDF viewer component now exposes:
 
 - `globalShortcuts` input (default `false`) to opt into document-level keyboard listeners.
-- `worker` input to pass a URL/Worker for a custom pdf.js worker source and avoid using the internal default.
+- `worker` input to pass an app-owned URL/Worker; Hell does not bundle a default worker in the package tarball.
 - incremental thumbnail rendering behind `IntersectionObserver` for overview mode.
 
 ## Angular Imports

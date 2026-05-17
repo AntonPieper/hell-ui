@@ -11,12 +11,15 @@ const PDF_VIEWER_STYLESHEET_PATH = 'pdfjs/pdf_viewer.css';
   template: `
     <hell-pdf-viewer
       src="https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf"
+      [worker]="worker"
       [initialPage]="1"
       class="h-120"
     ></hell-pdf-viewer>
   `,
 })
 export class PdfViewerLiveDemoExample {
+  protected readonly worker = '/assets/pdf.worker.mjs';
+
   constructor() {
     const document = inject(DOCUMENT);
     const destroyRef = inject(DestroyRef);

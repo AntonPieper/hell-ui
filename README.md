@@ -58,7 +58,7 @@ Peer dependency expectations by entry point:
 | `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Light UI stack: `@angular/forms`, `@angular/router`, `ng-primitives`, `@angular/cdk`, `@ng-icons/core`, `@ng-icons/font-awesome`, `rxjs`, and style-only `tailwindcss` |
 | `@hell-ui/angular/features/table-utilities` | Light UI stack |
 | `@hell-ui/angular/features/code-editor` | Light UI stack plus `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight` |
-| `@hell-ui/angular/features/pdf-viewer` | Light UI stack plus exact `pdfjs-dist@5.6.205` |
+| `@hell-ui/angular/features/pdf-viewer` | Light UI stack plus exact `pdfjs-dist@5.6.205`; app must provide a pdf.js worker source |
 
 `@hell-ui/angular/features/data-table` remains a legacy alias for table utilities.
 
@@ -70,7 +70,7 @@ Peer dependency expectations by entry point:
 | Composites | Beta | `@hell-ui/angular/composites` | Browser DOM + `document`/`window`/global listeners |
 | Table utilities | Beta | `@hell-ui/angular/features/table-utilities` | Uses `ResizeObserver`; browser-first |
 | Code editor | Beta/optional peer | `@hell-ui/angular/features/code-editor` | Needs `window` + `document` |
-| PDF viewer | Experimental | `@hell-ui/angular/features/pdf-viewer` | Experimental app surface/recipe; browser-only; requires `window`/`document`, pdf workers, global listeners, and your own pdf.js/browser compatibility decisions |
+| PDF viewer | Experimental | `@hell-ui/angular/features/pdf-viewer` | Experimental app surface/recipe; browser-only; requires `window`/`document`, app-provided pdf worker, global listeners, and your own pdf.js/browser compatibility decisions |
 | Testing harnesses | Beta/test-only | `@hell-ui/angular/testing` | CDK component harnesses for consumer and library tests |
 | Speech transcript | Experimental/best-effort (feature opt-in) | `@hell-ui/angular/composites` (`allowSpeechTranscript`, `allowLiveCaptions` alias) | Browser-only; uses `navigator` + `SpeechRecognition` + `captureStream`; best-effort only, not accessibility-grade captions/timed text |
 

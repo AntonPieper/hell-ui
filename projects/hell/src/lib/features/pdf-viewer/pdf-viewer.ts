@@ -74,9 +74,10 @@ const HELL_PDF_VIEWER_ICONS = {
 /**
  * Full PDF viewer backed by pdf.js. `src` accepts a URL string, `URL`, or
  * `ArrayBuffer`; loading starts after the viewer runtime bootstraps. Emits
- * page, zoom, loaded, and error events. Host keyboard shortcuts support
- * Ctrl/Cmd+F, Ctrl/Cmd+P, +/-/0, PageUp/PageDown, Home, End. Document-level
- * shortcuts are opt-in via `globalShortcuts`.
+ * page, zoom, loaded, and error events. Pass an app-owned pdf.js `worker`
+ * source; Hell does not bundle one in the package tarball. Host keyboard
+ * shortcuts support Ctrl/Cmd+F, Ctrl/Cmd+P, +/-/0, PageUp/PageDown, Home, End.
+ * Document-level shortcuts are opt-in via `globalShortcuts`.
  *
  * @experimental This feature wraps pdf.js viewer internals and may change as
  * the PDF Runtime seam is hardened.
@@ -105,7 +106,7 @@ export class HellPdfViewer extends HellStyleable {
   readonly globalShortcuts = input(false, { transform: booleanAttribute });
   /** Fetch options used by the print path when printing URL/string sources. */
   readonly printFetchOptions = input<RequestInit | null>(null);
-  /** Optional worker override for the PDF runtime. */
+  /** Required pdf.js worker source for the default runtime adapter. */
   readonly worker = input<HellPdfWorkerSource | null>(null);
 
   readonly pageChange = output<number>();

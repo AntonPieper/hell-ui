@@ -579,10 +579,11 @@ import { HellPdfViewer } from '${packageName}/features/pdf-viewer';
   selector: 'app-root',
   standalone: true,
   imports: [HellPdfViewer],
-  template: \`<hell-pdf-viewer [src]="pdfSrc" />\`,
+  template: \`<hell-pdf-viewer [src]="pdfSrc" [worker]="pdfWorker" />\`,
 })
 class App {
   protected readonly pdfSrc = '/sample.pdf';
+  protected readonly pdfWorker = '/assets/pdf.worker.mjs';
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));

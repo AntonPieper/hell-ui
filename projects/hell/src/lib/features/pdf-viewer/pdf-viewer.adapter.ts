@@ -48,7 +48,7 @@ export type HellPdfWorkerSource =
       readonly port: Worker;
     };
 
-/** Optional bootstrap options from runtime-to-adapter. */
+/** Bootstrap options from runtime-to-adapter. The default pdf.js adapter requires an explicit worker. */
 export interface HellPdfAdapterBootstrapOptions {
   readonly worker?: HellPdfWorkerSource;
 }
@@ -220,8 +220,6 @@ const HELL_PDF_FIND_STATE = {
   PENDING: 3,
 } as const;
 
-const DEFAULT_WORKER_SOURCE = new URL('../assets/pdf.worker.mjs', import.meta.url);
-
 export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
   async createViewer(
     container: HTMLDivElement,
@@ -264,12 +262,9 @@ export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
 
   private createWorkerBinding(worker?: HellPdfWorkerSource): HellPdfJsWorkerPortBinding {
     if (typeof worker === 'undefined' || worker === null) {
-      const port = new Worker(DEFAULT_WORKER_SOURCE, { type: 'module' });
-      return {
-        port,
-        cleanup: () => port.terminate(),
-        ownsPdfWorker: true,
-      };
+      throw new Error(
+        'HellPdfViewer requires an explicit pdf.js worker source. Pass the `worker` input or provide a custom PDF runtime adapter.',
+      );
     }
 
     if (worker instanceof Worker) {

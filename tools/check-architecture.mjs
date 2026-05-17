@@ -482,20 +482,16 @@ function checkPackageDependencyContract() {
     failures.push('Package dependency contract must not declare unused @tanstack/angular-table');
   }
 
-  const bundledPdfWorkerVersion = readFile(join(root, 'projects/hell/assets/pdf.worker.mjs')).match(
-    /pdfjsVersion = ([^\s]+)/,
-  )?.[1];
-  if (bundledPdfWorkerVersion) {
-    if (peerDependencies['pdfjs-dist'] !== bundledPdfWorkerVersion) {
-      failures.push(
-        `Package dependency contract must pin pdfjs-dist peer to bundled worker version ${bundledPdfWorkerVersion}`,
-      );
-    }
-    if (workspacePackageJson.dependencies?.['pdfjs-dist'] !== bundledPdfWorkerVersion) {
-      failures.push(
-        `Workspace pdfjs-dist dependency must match bundled worker version ${bundledPdfWorkerVersion}`,
-      );
-    }
+  const workspacePdfJsVersion = workspacePackageJson.dependencies?.['pdfjs-dist'];
+  if (peerDependencies['pdfjs-dist'] !== workspacePdfJsVersion) {
+    failures.push(
+      `Package dependency contract must pin pdfjs-dist peer to workspace version ${workspacePdfJsVersion}`,
+    );
+  }
+
+  const rootNgPackage = parseJsonWithComments(readFile(join(root, 'projects/hell/ng-package.json')));
+  if (JSON.stringify(rootNgPackage.assets ?? []).includes('pdf.worker')) {
+    failures.push('Root package assets must not copy pdf.worker.mjs; PDF viewer requires an app-provided worker source');
   }
 }
 
@@ -841,6 +837,9 @@ function checkExperimentalFeatureContract() {
   );
   if (!/PDF viewer is experimental/.test(pdfDocs)) {
     failures.push('PDF Viewer docs must disclose experimental status');
+  }
+  if (!/worker[^.]*Hell does not copy\s+a worker into the package tarball/s.test(pdfDocs)) {
+    failures.push('PDF Viewer docs must disclose that apps provide the pdf.js worker source');
   }
 }
 

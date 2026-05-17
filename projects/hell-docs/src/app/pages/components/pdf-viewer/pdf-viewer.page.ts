@@ -39,9 +39,10 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         Install the exact supported <code>pdfjs-dist@5.6.205</code> peer plus the light UI stack
         (<code>@angular/forms ng-primitives @angular/cdk @ng-icons/core @ng-icons/font-awesome rxjs</code>)
         and style-only <code>tailwindcss</code> when you import Hell's CSS.
-        The PDF worker is packaged with Hell, so the pdf.js API peer must stay aligned with that
-        bundled worker version. The docs page loads the pdf.js viewer stylesheet on demand, so lazy
-        routes keep it out of the docs app's initial bundle.
+        Your app must pass a pdf.js worker source through <code>worker</code>; Hell does not copy
+        a worker into the package tarball. The docs app serves a local sample worker from
+        <code>/assets/pdf.worker.mjs</code>. The docs page loads the pdf.js viewer stylesheet on
+        demand, so lazy routes keep it out of the docs app's initial bundle.
       </p>
 
       <h2>Lazy loading</h2>
@@ -60,6 +61,7 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         <li><code>initialPage</code> (default <code>1</code>)</li>
         <li><code>initialZoom</code> (default <code>'auto'</code>)</li>
         <li><code>fileName</code>: suggested download filename</li>
+        <li><code>worker</code>: app-owned pdf.js worker URL, <code>Worker</code>, or worker config.</li>
         <li>
           <code>globalShortcuts</code>: opt into document-level Ctrl/Cmd+F, Ctrl/Cmd+P, +/-/0
           shortcuts while the viewer is active (default <code>false</code>). Host keyboard
@@ -78,6 +80,7 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
       <h2>Do</h2>
       <ul>
         <li>Lazy-load the viewer route or feature area.</li>
+        <li>Provide <code>worker</code> from your app assets or bundler-owned pdf.js worker URL.</li>
         <li>Provide <code>fileName</code> so downloads and print jobs are recognizable.</li>
         <li>Handle <code>error</code> and offer a fallback download.</li>
         <li>Enable <code>globalShortcuts</code> only where document-level shortcuts are wanted.</li>

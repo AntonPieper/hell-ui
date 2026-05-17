@@ -211,10 +211,21 @@ describe('PDF Adapter browser seam', () => {
     vi.restoreAllMocks();
   });
 
+  it('fails fast when viewer creation has no worker source', async () => {
+    const adapter = new HellPdfJsRuntimeAdapter();
+    const handlers = createSessionHandlers();
+
+    await expect(adapter.createViewer(document.createElement('div'), handlers)).rejects.toThrow(
+      'HellPdfViewer requires an explicit pdf.js worker source.',
+    );
+  });
+
   it('adapts pdf.js viewer events and commands behind a stable session port', async () => {
     const adapter = new HellPdfJsRuntimeAdapter();
     const handlers = createSessionHandlers();
-    const session = await adapter.createViewer(document.createElement('div'), handlers);
+    const session = await adapter.createViewer(document.createElement('div'), handlers, {
+      worker: '/assets/pdf.worker.mjs',
+    });
     const eventBus = required(pdfViewerMock.eventBuses[0]);
     const linkService = required(pdfViewerMock.linkServices[0]);
     const findController = required(pdfViewerMock.findControllers[0]);
@@ -223,8 +234,7 @@ describe('PDF Adapter browser seam', () => {
     const pdfWorker = required(pdfJsMock.pdfWorkers[0]);
 
     expect(worker.options).toEqual({ type: 'module' });
-    expect(String(worker.url)).toContain('pdf.worker.mjs');
-    expect(String(worker.url)).not.toContain('pdf.worker.ts');
+    expect(worker.url).toBe('/assets/pdf.worker.mjs');
     expect(linkService.setViewer).toHaveBeenCalledWith(viewer);
 
     eventBus.emit('pagesinit');
