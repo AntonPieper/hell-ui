@@ -71,6 +71,10 @@ import dateInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
         <li><code>date</code>: <code>Date | null</code> current value.</li>
         <li><code>(dateChange)</code>: emits a valid <code>Date</code> after typing or picking, or <code>null</code> when cleared.</li>
         <li>Implements <code>ControlValueAccessor</code> for Angular forms. Reactive and template-driven forms read/write <code>Date | null</code>; native HTML form submission is not provided.</li>
+        <li>
+          Validator errors: <code>invalidDateInputDraft</code> for uncommittable typed text and
+          <code>outOfRangeDate</code> for values outside <code>min</code> / <code>max</code>.
+        </li>
         <li><code>min</code>, <code>max</code>: optional typed-input and picker bounds.</li>
         <li><code>size</code>: <code>sm | md | lg</code>.</li>
         <li><code>invalid</code>, <code>disabled</code>: visual / interaction states.</li>

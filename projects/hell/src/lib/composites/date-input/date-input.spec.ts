@@ -210,6 +210,29 @@ describe('HellDateInput', () => {
     expect(host.control.errors).toEqual({ invalidDateInputDraft: true });
   });
 
+  it('clears date draft validator errors after a valid commit', () => {
+    const fixture = TestBed.createComponent(DateInputValidationHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    input.value = 'not a date';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.control.errors).toEqual({ invalidDateInputDraft: true });
+
+    input.value = '2026-04-20';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.control.errors).toBeNull();
+    expect(formatDate(host.control.value)).toBe('2026-04-20');
+    expect(input.value).toBe('2026-04-20');
+  });
+
   it('surfaces out-of-range bound dates as Angular validator errors', () => {
     const fixture = TestBed.createComponent(DateInputValidationHost);
     const host = fixture.componentInstance;

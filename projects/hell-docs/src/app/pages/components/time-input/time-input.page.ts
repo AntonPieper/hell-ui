@@ -70,6 +70,9 @@ import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
           (two-way via <code>(valueChange)</code>).
         </li>
         <li>Implements <code>ControlValueAccessor</code> for Angular forms. Reactive and template-driven forms read/write <code>HellTimeValue | null</code>; native HTML form submission is not provided.</li>
+        <li>
+          Validator error: <code>invalidTimeInputDraft</code> for uncommittable typed text.
+        </li>
         <li><code>seconds</code>: include a seconds grid + readout.</li>
         <li><code>size</code>: <code>sm | md | lg</code></li>
         <li><code>invalid</code>, <code>disabled</code></li>
