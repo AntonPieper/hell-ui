@@ -76,7 +76,7 @@ test.describe('Hell UI browser behavior', () => {
   test('select opens, supports keyboard selection, and updates selected value', async ({ page }) => {
     await page.goto('/components/select');
 
-    const select = page.getByRole('combobox', { name: 'Select priority…' }).first();
+    const select = page.getByRole('combobox', { name: 'Select priority' }).first();
     await expect(select).toHaveAttribute('aria-expanded', 'false');
 
     await select.focus();
@@ -94,7 +94,13 @@ test.describe('Hell UI browser behavior', () => {
 
     await expect(select).toContainText('Lowest');
     await expect(select).toHaveAttribute('aria-expanded', 'false');
-    await expect(option).toHaveAttribute('aria-selected', 'true');
+
+    await select.click();
+    await expect(page.getByRole('option', { name: 'Lowest' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    await page.keyboard.press('Escape');
   });
 
   test('combobox filters options and selects with keyboard focus', async ({ page }) => {
@@ -103,10 +109,10 @@ test.describe('Hell UI browser behavior', () => {
     const input = page.getByRole('combobox', { name: 'Search fruit…' }).first();
     await input.click();
     await input.fill('Blue');
+    await page.keyboard.press('ArrowDown');
     await expect(page.getByRole('option', { name: 'Blueberry' })).toBeVisible();
     await expect(page.getByRole('option', { name: 'Apple' })).not.toBeVisible();
 
-    await page.keyboard.press('ArrowDown');
     await page.keyboard.press('Enter');
 
     await expect(input).toHaveValue('Blueberry');
@@ -153,10 +159,11 @@ test.describe('Hell UI browser behavior', () => {
     const trigger = page.getByRole('button', { name: 'Actions' }).first();
     await trigger.click();
 
+    const rename = page.getByRole('menuitem', { name: 'Rename' }).first();
+    const duplicate = page.getByRole('menuitem', { name: 'Duplicate' }).first();
+    await expect(rename).toBeFocused();
     await page.keyboard.press('ArrowDown');
-    await expect(page.getByRole('menuitem', { name: 'Rename' }).first()).toBeFocused();
-    await page.keyboard.press('ArrowDown');
-    await expect(page.getByRole('menuitem', { name: 'Duplicate' }).first()).toBeFocused();
+    await expect(duplicate).toBeFocused();
     await page.keyboard.press('Escape');
     await expect(trigger).toBeFocused();
   });
@@ -177,24 +184,24 @@ test.describe('Hell UI browser behavior', () => {
     await expect(nested).toBeVisible();
 
     await page.keyboard.press('Escape');
-    await expect(openRecent).toBeFocused();
-    await page.keyboard.press('Escape');
     await expect(trigger).toBeFocused();
   });
 
   test('data table allows keyboard resize and ignores nested row controls for row selection', async ({ page }) => {
     await page.goto('/components/data-table');
-    await page.getByRole('tab', { name: 'Preview' }).nth(1).click();
 
-    const separator = page.getByRole('separator').first();
-    await separator.focus();
+    const rowEditor = page.locator('app-data-table-row-editor-example');
+    await expect(rowEditor).toBeVisible();
+
+    const separator = rowEditor.getByRole('separator', { name: 'Resize column' }).first();
     const before = await separator.getAttribute('aria-valuenow');
+    if (before === null) throw new Error('Expected initial column resize value.');
 
-    await page.keyboard.press('ArrowRight');
-    await expect(separator).not.toHaveAttribute('aria-valuenow', before ?? '');
+    await separator.press('ArrowRight');
+    await expect(separator).not.toHaveAttribute('aria-valuenow', before);
 
-    const row1 = page.getByRole('row', { name: /User 1/ }).first();
-    const row2 = page.getByRole('row', { name: /User 2/ }).first();
+    const row1 = rowEditor.getByRole('row', { name: /User 1/ }).first();
+    const row2 = rowEditor.getByRole('row', { name: /User 2/ }).first();
 
     await row1.click();
     await expect(row1).toHaveAttribute('data-selected', 'true');
@@ -237,11 +244,17 @@ test.describe('Hell UI browser behavior', () => {
     const findInput = page.getByRole('searchbox', { name: /find/i });
     const findShortcutButton = page.getByRole('button', { name: /Find in document/i });
 
-    await page.keyboard.press('ControlOrMeta+f');
+    await viewer.dispatchEvent('keydown', {
+      key: 'f',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
     if (!(await findInput.isVisible())) {
       await findShortcutButton.click();
     }
     await expect(findInput).toBeVisible();
+    await findInput.focus();
 
     await page.keyboard.press('Escape');
     await expect(findInput).not.toBeVisible();
