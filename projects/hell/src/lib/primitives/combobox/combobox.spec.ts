@@ -80,6 +80,19 @@ class ComboboxBasicValueHost {
   readonly value = signal<string | null>('Atlas');
 }
 
+@Component({
+  imports: [HellComboboxBasic],
+  template: `
+    <hell-combobox-basic
+      aria-label="Choose a planet"
+      [options]="[]"
+      [toggleLabel]="'Open planet list'"
+      [emptyLabel]="'No planets found'"
+    />
+  `,
+})
+class ComboboxBasicLabelsHost {}
+
 describe('HellCombobox', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -88,6 +101,7 @@ describe('HellCombobox', () => {
         ComboboxMultipleFormHost,
         ComboboxBasicFormHost,
         ComboboxBasicValueHost,
+        ComboboxBasicLabelsHost,
       ],
     }).compileComponents();
   });
@@ -299,6 +313,38 @@ describe('HellCombobox', () => {
     fixture.detectChanges();
 
     expect(root.getAttribute('data-disabled')).toBe('');
+  });
+
+  it('lets basic combobox callers override helper labels without changing defaults', async () => {
+    const defaultFixture = TestBed.createComponent(ComboboxBasicFormHost);
+    defaultFixture.detectChanges();
+
+    expect(
+      query<HTMLButtonElement>(
+        defaultFixture.nativeElement,
+        'hell-combobox-basic button[hellComboboxButton]',
+      ).textContent?.trim(),
+    ).toBe('Toggle options');
+
+    const fixture = TestBed.createComponent(ComboboxBasicLabelsHost);
+    fixture.detectChanges();
+
+    const input = query<HTMLInputElement>(
+      fixture.nativeElement,
+      'hell-combobox-basic input[hellComboboxInput]',
+    );
+    const button = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      'hell-combobox-basic button[hellComboboxButton]',
+    );
+
+    expect(button.textContent?.trim()).toBe('Open planet list');
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    const dropdown = await waitForDropdown(fixture);
+    expect(query<HTMLElement>(dropdown, '[hellComboboxEmpty]').textContent?.trim()).toBe(
+      'No planets found',
+    );
   });
 
   it('syncs basic combobox external value changes into the filter input', async () => {
