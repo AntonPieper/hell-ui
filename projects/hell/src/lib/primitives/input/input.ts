@@ -6,7 +6,7 @@ import { HellStyleable } from '../../core/styleable';
 
 @Directive({
   selector: 'input[hellInput]',
-  hostDirectives: [{ directive: NgpInput, inputs: ['disabled'] }],
+  hostDirectives: [{ directive: NgpInput, inputs: ['disabled', 'id'] }],
   host: {
     '[class.hell-input]': '!unstyled()',
     '[attr.data-size]': 'size()',

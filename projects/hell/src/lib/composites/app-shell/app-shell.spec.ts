@@ -112,6 +112,7 @@ class UnstyledShellHost {}
         <button id="focus-sidenav-toggle" hellSidenavToggle type="button"></button>
       </header>
       <nav id="focus-sidenav" hellAppSidenav>
+        <button id="focus-sidenav-disabled" type="button" disabled>Disabled</button>
         <button id="focus-sidenav-item" type="button">Item</button>
       </nav>
       <main id="focus-content" hellAppContent>Content</main>
@@ -330,7 +331,7 @@ describe('HellAppShell secondary panel', () => {
     expect(shell.getAttribute('data-mobile-sidenav-open')).toBeNull();
   });
 
-  it('focuses first mobile panel tabbable and restores trigger focus after close', async () => {
+  it('uses CDK tabbability when focusing mobile panels and restores trigger focus', async () => {
     mockMobileLayout(true);
     const fixture = TestBed.createComponent(FocusShellHost);
     const toggle = query<HTMLButtonElement>(fixture.nativeElement, '#focus-sidenav-toggle');

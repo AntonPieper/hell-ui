@@ -29,13 +29,13 @@
       &[data-checked], &:checked {
         background-color: var(--color-hell-primary);
       }
-      :where(label):hover > &:not([data-checked], [data-disabled]) {
+      :where(label):hover > &:not([data-checked], [data-disabled], :disabled) {
         background-color: var(--color-hell-border);
       }
-      :where(label:has(> &:not([data-disabled]))) {
+      :where(label:has(> &:not([data-disabled], :disabled))) {
         cursor: pointer;
       }
-      :where(label:has(> &[data-disabled])) {
+      :where(label:has(> &[data-disabled]), label:has(> &:disabled)) {
         cursor: not-allowed;
       }
       &[data-focus-visible] {

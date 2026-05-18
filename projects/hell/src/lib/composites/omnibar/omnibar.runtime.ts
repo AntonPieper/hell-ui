@@ -41,17 +41,13 @@ export class HellOmnibarRuntime<T = unknown> {
   private requestId = 0;
 
   readonly activeIndex = computed(() => {
-    const items = this.items();
+    const items = this.enabledItems();
     if (!items.length) return -1;
     const i = this.activeIndexState();
     return Math.max(0, Math.min(i, items.length - 1));
   });
 
-  readonly activeItemId = computed(() => {
-    const items = this.items();
-    const i = this.activeIndex();
-    return items[i]?.itemId ?? null;
-  });
+  readonly activeItemId = computed(() => this.activeItem()?.itemId ?? null);
 
   readonly isEmpty = computed(() => !this.loading() && this.items().length === 0);
   readonly hasActions = computed(() => this.actionItems().length > 0);
@@ -131,35 +127,38 @@ export class HellOmnibarRuntime<T = unknown> {
   }
 
   setActive(item: HellOmnibarRegisteredItem): void {
-    const idx = this.items().indexOf(item);
+    if (item.disabled()) return;
+    const idx = this.enabledItems().indexOf(item);
     if (idx >= 0) this.activeIndexState.set(idx);
   }
 
   isActive(item: HellOmnibarRegisteredItem): boolean {
-    return this.items()[this.activeIndex()] === item;
+    return this.activeItem() === item;
   }
 
   activeItem(): HellOmnibarRegisteredItem | null {
-    return this.items()[this.activeIndex()] ?? null;
+    const enabledItems = this.enabledItems();
+    return enabledItems[this.activeIndex()] ?? null;
   }
 
   moveActive(delta: number): void {
-    const len = this.items().length;
+    const enabledItems = this.enabledItems();
+    const len = enabledItems.length;
     if (!len) return;
     const cur = this.activeIndex();
     let next = cur + delta;
     if (next < 0) next = len - 1;
     if (next >= len) next = 0;
     this.activeIndexState.set(next);
-    this.items()[next]?.scrollIntoView();
+    enabledItems[next]?.scrollIntoView();
   }
 
   firstActive(): void {
-    if (this.items().length) this.activeIndexState.set(0);
+    if (this.enabledItems().length) this.activeIndexState.set(0);
   }
 
   lastActive(): void {
-    const length = this.items().length;
+    const length = this.enabledItems().length;
     if (length) this.activeIndexState.set(length - 1);
   }
 
@@ -169,6 +168,10 @@ export class HellOmnibarRuntime<T = unknown> {
 
   unregisterAction(action: unknown): void {
     this.actionItems.update((list) => list.filter((a) => a !== action));
+  }
+
+  private enabledItems(): HellOmnibarRegisteredItem[] {
+    return this.items().filter((item) => !item.disabled());
   }
 
   private clearTimer(): void {

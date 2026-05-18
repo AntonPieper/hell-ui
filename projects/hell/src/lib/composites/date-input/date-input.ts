@@ -4,6 +4,7 @@ import {
   type ElementRef,
   effect,
   InjectionToken,
+  untracked,
   type Provider,
   booleanAttribute,
   inject,
@@ -13,15 +14,17 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALIDATORS, type AbstractControl, type ValidationErrors, type Validator, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, NG_VALIDATORS, type AbstractControl, type NgControl, type ValidationErrors, type Validator, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCalendar } from '@ng-icons/font-awesome/solid';
+import { injectFormFieldState, ngpFormField, provideFormFieldState } from 'ng-primitives/form-field';
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
 import { HellInput } from '../../primitives/input/input';
 import { HellPopover, HellPopoverTrigger } from '../../primitives/popover/popover';
 import { HellDatePicker } from '../../primitives/date-picker/date-picker';
 import { HELL_LABELS } from '../../core/labels';
+import { hellUniqueIdRefs } from '../../core/idrefs';
 import type { HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
 import {
@@ -34,6 +37,8 @@ import {
 const HELL_DATE_INPUT_ICONS = {
   faSolidCalendar,
 };
+
+let nextDateInputId = 0;
 
 export type HellDateInputParseResult = HellTypedValueParseResult<Date>;
 
@@ -138,6 +143,7 @@ export function hellCoerceDateInputValue(value: Date | null | undefined): Date |
   selector: 'hell-date-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton, HellIcon, HellInput, HellPopover, HellPopoverTrigger, HellDatePicker],
+  viewProviders: [provideFormFieldState()],
   providers: [
     provideIcons(HELL_DATE_INPUT_ICONS),
     {
@@ -166,6 +172,8 @@ export function hellCoerceDateInputValue(value: Date | null | undefined): Date |
       type="text"
       data-slot="field"
       [invalid]="isInvalid()"
+      [id]="inputId()"
+      [attr.name]="name()"
       [attr.aria-invalid]="isInvalid() ? 'true' : null"
       [attr.aria-label]="ariaLabel()"
       [disabled]="isDisabled()"
@@ -211,7 +219,11 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
   readonly min = input<Date | null>(null);
   readonly max = input<Date | null>(null);
   readonly placeholder = input<string>('YYYY-MM-DD');
+  readonly inputId = input<string>(`hell-date-input-${++nextDateInputId}-field`);
+  readonly name = input<string | null>(null);
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
+  readonly ariaDescribedby = input<string | null>(null, { alias: 'aria-describedby' });
+  readonly ariaLabelledby = input<string | null>(null, { alias: 'aria-labelledby' });
 
   readonly dateChange = output<Date | null>();
 
@@ -242,10 +254,25 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
   };
 
   private readonly labels = inject(HELL_LABELS);
+  private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
+  private readonly formField =
+    this.inheritedFormField() ?? ngpFormField({ ngControl: signal<NgControl | undefined>(undefined) });
   private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field');
 
   constructor() {
     super();
+    effect((onCleanup) => {
+      const existingDescriptions = untracked(() => new Set(this.formField.descriptions()));
+      const ids = hellUniqueIdRefs(this.ariaDescribedby()).filter((id) => !existingDescriptions.has(id));
+      untracked(() => ids.forEach((id) => this.formField.addDescription(id)));
+      onCleanup(() => untracked(() => ids.forEach((id) => this.formField.removeDescription(id))));
+    });
+    effect((onCleanup) => {
+      const existingLabels = untracked(() => new Set(this.formField.labels()));
+      const ids = hellUniqueIdRefs(this.ariaLabelledby()).filter((id) => !existingLabels.has(id));
+      untracked(() => ids.forEach((id) => this.formField.addLabel(id)));
+      onCleanup(() => untracked(() => ids.forEach((id) => this.formField.removeLabel(id))));
+    });
     effect(() => {
       this.invalidDraft();
       this.current();

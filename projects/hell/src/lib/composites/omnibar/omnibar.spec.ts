@@ -66,6 +66,22 @@ class OmnibarLoadingTemplateHost {
 
 @Component({
   imports: [...HELL_OMNIBAR_DIRECTIVES],
+  template: `
+    <hell-omnibar [openOnFocus]="true" (submit)="submitEvents.push($event)">
+      <button hellOmnibarItem value="disabled" disabled (select)="selectEvents.push($event)">
+        Disabled
+      </button>
+      <button hellOmnibarItem value="enabled" (select)="selectEvents.push($event)">Enabled</button>
+    </hell-omnibar>
+  `,
+})
+class OmnibarDisabledItemHost {
+  readonly selectEvents: unknown[] = [];
+  readonly submitEvents: HellOmnibarSubmitEvent[] = [];
+}
+
+@Component({
+  imports: [...HELL_OMNIBAR_DIRECTIVES],
   providers: [
     provideHellLabels({
       omnibar: {
@@ -121,7 +137,7 @@ describe('HellOmnibar interactions', () => {
     });
 
     await TestBed.configureTestingModule({
-      imports: [OmnibarHost],
+      imports: [OmnibarHost, OmnibarDisabledItemHost],
     }).compileComponents();
   });
 
@@ -215,6 +231,42 @@ describe('HellOmnibar interactions', () => {
     expect(fixture.nativeElement.querySelector('hell-omnibar').getAttribute('data-open')).toBe(
       'true',
     );
+  });
+
+  it('skips disabled items for keyboard and mouse activation', () => {
+    const fixture = TestBed.createComponent(OmnibarDisabledItemHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
+    input.dispatchEvent(new FocusEvent('focus'));
+    fixture.detectChanges();
+
+    const options = Array.from(overlayRoot().querySelectorAll('[role="option"]')) as HTMLElement[];
+    expect(options).toHaveLength(2);
+    expect(options[0].getAttribute('disabled')).toBe('');
+    expect(options[0].getAttribute('aria-disabled')).toBe('true');
+    expect(options[0].getAttribute('data-disabled')).toBe('true');
+    expect(options[0].getAttribute('aria-selected')).toBe('false');
+    expect(options[1].getAttribute('aria-selected')).toBe('true');
+    expect(input.getAttribute('aria-activedescendant')).toBe(options[1].id);
+
+    options[0].click();
+    fixture.detectChanges();
+    expect(host.selectEvents).toEqual([]);
+    expect(host.submitEvents).toEqual([]);
+
+    const enter = new KeyboardEvent('keydown', {
+      key: 'Enter',
+      bubbles: true,
+      cancelable: true,
+    });
+    input.dispatchEvent(enter);
+    fixture.detectChanges();
+
+    expect(enter.defaultPrevented).toBe(true);
+    expect(host.selectEvents).toEqual(['enabled']);
+    expect(host.submitEvents).toEqual([{ value: '', item: 'enabled', source: 'keyboard' }]);
   });
 
   it('renders its panel through CDK overlay while preserving scoped CSS variables', async () => {

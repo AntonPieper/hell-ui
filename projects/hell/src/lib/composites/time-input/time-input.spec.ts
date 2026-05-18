@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { HellTimeInput, provideHellTimeInputAdapter, type HellTimeValue } from './time-input';
+import { HELL_FIELD_DIRECTIVES } from '../../primitives/field/field';
 
 @Component({
   imports: [HellTimeInput],
@@ -12,7 +13,11 @@ import { HellTimeInput, provideHellTimeInputAdapter, type HellTimeValue } from '
       [value]="value()"
       [seconds]="seconds()"
       [placeholder]="placeholder"
+      [inputId]="inputId"
+      [name]="name"
       [aria-label]="ariaLabel"
+      [aria-describedby]="ariaDescribedby"
+      [aria-labelledby]="ariaLabelledby"
       (valueChange)="values.push($event)"
     />
   `,
@@ -21,9 +26,25 @@ class TimeInputHost {
   readonly value = signal<HellTimeValue | null>(null);
   readonly seconds = signal(false);
   placeholder: string | null = null;
+  inputId = 'start-time-input';
+  name = 'startTime';
   ariaLabel = 'Start time';
+  ariaDescribedby = 'start-time-help start-time-error';
+  ariaLabelledby = 'start-time-label';
   values: Array<HellTimeValue | null> = [];
 }
+
+@Component({
+  imports: [HellTimeInput, ...HELL_FIELD_DIRECTIVES],
+  template: `
+    <div hellField>
+      <label hellFieldLabel for="start-field-control">Start time</label>
+      <hell-time-input inputId="start-field-control" aria-label="Start time" />
+      <div hellFieldDescription>Use the local timezone.</div>
+    </div>
+  `,
+})
+class TimeInputFieldHost {}
 
 @Component({
   imports: [ReactiveFormsModule, HellTimeInput],
@@ -96,6 +117,7 @@ describe('HellTimeInput', () => {
     await TestBed.configureTestingModule({
       imports: [
         TimeInputHost,
+        TimeInputFieldHost,
         TimeInputFormHost,
         TimeInputBlurFormHost,
         TimeInputCustomAdapterHost,
@@ -106,6 +128,38 @@ describe('HellTimeInput', () => {
 
   afterEach(() => {
     document.body.replaceChildren();
+  });
+
+  it('forwards label and form attributes to the internal text field only', () => {
+    const fixture = TestBed.createComponent(TimeInputHost);
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    const trigger = triggerButton(fixture.nativeElement);
+
+    expect(input.id).toBe('start-time-input');
+    expect(input.getAttribute('name')).toBe('startTime');
+    expect(input.getAttribute('aria-label')).toBe('Start time');
+    expect(input.getAttribute('aria-describedby')).toBe('start-time-help start-time-error');
+    expect(input.getAttribute('aria-labelledby')).toBe('start-time-label');
+    expect(trigger.getAttribute('aria-label')).toBe('Choose time for Start time');
+    expect(trigger.getAttribute('aria-describedby')).toBeNull();
+    expect(trigger.getAttribute('aria-labelledby')).toBeNull();
+  });
+
+  it('inherits hellField label and description wiring for the internal text field', () => {
+    const fixture = TestBed.createComponent(TimeInputFieldHost);
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    const label = fixture.nativeElement.querySelector('label[hellFieldLabel]');
+    const description = fixture.nativeElement.querySelector('[hellFieldDescription]');
+    if (!(label instanceof HTMLLabelElement)) throw new Error('Expected field label.');
+    if (!(description instanceof HTMLElement)) throw new Error('Expected field description.');
+
+    expect(input.getAttribute('aria-labelledby')).toBe(label.id);
+    expect(input.getAttribute('aria-describedby')).toBe(description.id);
+    expect(label.getAttribute('for')).toBe(input.id);
   });
 
   it('parses common 12-hour text and emits structured time values', () => {

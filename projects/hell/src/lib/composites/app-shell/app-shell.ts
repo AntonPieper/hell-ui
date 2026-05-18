@@ -2,7 +2,7 @@ import { HELL_LABELS } from '../../core/labels';
 import { isElementLike } from '../../core/dom';
 import { HellStyleable } from '../../core/styleable';
 import { DOCUMENT } from '@angular/common';
-import { FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
+import { FocusTrap, FocusTrapFactory, InteractivityChecker } from '@angular/cdk/a11y';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -94,6 +94,7 @@ export class HellAppShell extends HellStyleable implements OnDestroy {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly document = inject(DOCUMENT);
   private readonly focusTrapFactory = inject(FocusTrapFactory);
+  private readonly interactivityChecker = inject(InteractivityChecker);
   private readonly breakpointObserver = inject(BreakpointObserver);
   private _activeMobilePanel: HellAppShellMobilePanel | null = null;
   private _mobilePanelFocusTrap: FocusTrap | null = null;
@@ -235,26 +236,29 @@ export class HellAppShell extends HellStyleable implements OnDestroy {
 
     this._activeMobilePanel = panel;
     this._mobilePanelFocusTrap = this.focusTrapFactory.create(panelElement);
-    if (!this.focusFirstTabbableInPanel(panelElement)) {
-      this.focusPanelFallback(panelElement);
-    }
+    void this._mobilePanelFocusTrap
+      .focusInitialElementWhenReady({ preventScroll: true })
+      .then((focused) => {
+        if (!focused && this._activeMobilePanel === panel && panelElement.isConnected) {
+          if (!this.focusFirstInteractiveInPanel(panelElement)) {
+            this.focusPanelFallback(panelElement);
+          }
+        }
+      });
   }
 
-  private focusFirstTabbableInPanel(panelElement: HTMLElement): boolean {
+  private focusFirstInteractiveInPanel(panelElement: HTMLElement): boolean {
     const candidates = panelElement.querySelectorAll<HTMLElement>(
       'a[href], button, input, select, textarea, [contenteditable], [tabindex]',
     );
 
     for (const candidate of candidates) {
-      if (!candidate.isConnected) {
-        continue;
-      }
-
-      if (isElementLike(candidate) && candidate.tabIndex >= 0 && candidate !== this._mobilePanelRestoreTarget) {
-        if (candidate instanceof HTMLInputElement && candidate.disabled) {
-          continue;
-        }
-
+      if (
+        candidate.isConnected &&
+        candidate !== this._mobilePanelRestoreTarget &&
+        this.interactivityChecker.isFocusable(candidate, { ignoreVisibility: true }) &&
+        this.interactivityChecker.isTabbable(candidate)
+      ) {
         candidate.focus({ preventScroll: true });
         return true;
       }

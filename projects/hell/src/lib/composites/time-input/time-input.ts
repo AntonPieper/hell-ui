@@ -10,16 +10,19 @@ import {
   input,
   output,
   signal,
+  untracked,
   type Provider,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALIDATORS, type AbstractControl, type ValidationErrors, type Validator, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, NG_VALIDATORS, type AbstractControl, type NgControl, type ValidationErrors, type Validator, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidClock } from '@ng-icons/font-awesome/solid';
+import { injectFormFieldState, ngpFormField, provideFormFieldState } from 'ng-primitives/form-field';
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
 import { HellInput } from '../../primitives/input/input';
 import { HellPopover, HellPopoverTrigger } from '../../primitives/popover/popover';
 import { HELL_LABELS } from '../../core/labels';
+import { hellUniqueIdRefs } from '../../core/idrefs';
 import type { HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
 import {
@@ -43,6 +46,8 @@ export interface HellTimeValue {
 const HELL_TIME_INPUT_ICONS = {
   faSolidClock,
 };
+
+let nextTimeInputId = 0;
 
 export interface HellTimeInputAdapterContext {
   readonly seconds: boolean;
@@ -173,6 +178,7 @@ export function hellSameTimeInputValue(
   selector: 'hell-time-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton, HellIcon, HellInput, HellPopover, HellPopoverTrigger],
+  viewProviders: [provideFormFieldState()],
   providers: [
     provideIcons(HELL_TIME_INPUT_ICONS),
     {
@@ -203,6 +209,8 @@ export function hellSameTimeInputValue(
       inputmode="text"
       autocomplete="off"
       [invalid]="isInvalid()"
+      [id]="inputId()"
+      [attr.name]="name()"
       [attr.aria-invalid]="isInvalid() ? 'true' : null"
       [attr.aria-label]="ariaLabel()"
       [disabled]="isDisabled()"
@@ -348,7 +356,11 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
   readonly value = input<HellTimeValue | null>(null);
   readonly seconds = input(false, { transform: booleanAttribute });
   readonly placeholder = input<string | null>(null);
+  readonly inputId = input<string>(`hell-time-input-${++nextTimeInputId}-field`);
+  readonly name = input<string | null>(null);
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
+  readonly ariaDescribedby = input<string | null>(null, { alias: 'aria-describedby' });
+  readonly ariaLabelledby = input<string | null>(null, { alias: 'aria-labelledby' });
 
   readonly valueChange = output<HellTimeValue | null>();
 
@@ -389,9 +401,24 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
   protected readonly isInvalid = () => this.invalid() || this.invalidDraft();
   protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
   protected readonly labels = inject(HELL_LABELS);
+  private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
+  private readonly formField =
+    this.inheritedFormField() ?? ngpFormField({ ngControl: signal<NgControl | undefined>(undefined) });
 
   constructor() {
     super();
+    effect((onCleanup) => {
+      const existingDescriptions = untracked(() => new Set(this.formField.descriptions()));
+      const ids = hellUniqueIdRefs(this.ariaDescribedby()).filter((id) => !existingDescriptions.has(id));
+      untracked(() => ids.forEach((id) => this.formField.addDescription(id)));
+      onCleanup(() => untracked(() => ids.forEach((id) => this.formField.removeDescription(id))));
+    });
+    effect((onCleanup) => {
+      const existingLabels = untracked(() => new Set(this.formField.labels()));
+      const ids = hellUniqueIdRefs(this.ariaLabelledby()).filter((id) => !existingLabels.has(id));
+      untracked(() => ids.forEach((id) => this.formField.addLabel(id)));
+      onCleanup(() => untracked(() => ids.forEach((id) => this.formField.removeLabel(id))));
+    });
     effect(() => {
       this.invalidDraft();
       this.current();

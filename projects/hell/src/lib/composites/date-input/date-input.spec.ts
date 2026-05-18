@@ -8,6 +8,7 @@ import {
   hellSameDateInputValue,
   provideHellDateInputAdapter,
 } from './date-input';
+import { HELL_FIELD_DIRECTIVES } from '../../primitives/field/field';
 
 @Component({
   imports: [HellDateInput],
@@ -17,7 +18,11 @@ import {
       [min]="min()"
       [max]="max()"
       [placeholder]="placeholder"
+      [inputId]="inputId"
+      [name]="name"
       [aria-label]="ariaLabel"
+      [aria-describedby]="ariaDescribedby"
+      [aria-labelledby]="ariaLabelledby"
       (dateChange)="dates.push($event)"
     />
   `,
@@ -27,9 +32,25 @@ class DateInputHost {
   readonly min = signal<Date | null>(null);
   readonly max = signal<Date | null>(null);
   placeholder = 'YYYY-MM-DD';
+  inputId = 'report-date-input';
+  name = 'reportDate';
   ariaLabel = 'Report date';
+  ariaDescribedby = 'report-date-help report-date-error';
+  ariaLabelledby = 'report-date-label';
   dates: Array<Date | null> = [];
 }
+
+@Component({
+  imports: [HellDateInput, ...HELL_FIELD_DIRECTIVES],
+  template: `
+    <div hellField>
+      <label hellFieldLabel for="report-field-control">Report date</label>
+      <hell-date-input inputId="report-field-control" aria-label="Report date" />
+      <div hellFieldDescription>Use the report timezone.</div>
+    </div>
+  `,
+})
+class DateInputFieldHost {}
 
 @Component({
   imports: [ReactiveFormsModule, HellDateInput],
@@ -99,12 +120,45 @@ describe('HellDateInput', () => {
     await TestBed.configureTestingModule({
       imports: [
         DateInputHost,
+        DateInputFieldHost,
         DateInputFormHost,
         DateInputBlurFormHost,
         DateInputCustomAdapterHost,
         DateInputValidationHost,
       ],
     }).compileComponents();
+  });
+
+  it('forwards label and form attributes to the internal text field only', () => {
+    const fixture = TestBed.createComponent(DateInputHost);
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    const trigger = triggerButton(fixture.nativeElement);
+
+    expect(input.id).toBe('report-date-input');
+    expect(input.getAttribute('name')).toBe('reportDate');
+    expect(input.getAttribute('aria-label')).toBe('Report date');
+    expect(input.getAttribute('aria-describedby')).toBe('report-date-help report-date-error');
+    expect(input.getAttribute('aria-labelledby')).toBe('report-date-label');
+    expect(trigger.getAttribute('aria-label')).toBe('Choose date for Report date');
+    expect(trigger.getAttribute('aria-describedby')).toBeNull();
+    expect(trigger.getAttribute('aria-labelledby')).toBeNull();
+  });
+
+  it('inherits hellField label and description wiring for the internal text field', () => {
+    const fixture = TestBed.createComponent(DateInputFieldHost);
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    const label = fixture.nativeElement.querySelector('label[hellFieldLabel]');
+    const description = fixture.nativeElement.querySelector('[hellFieldDescription]');
+    if (!(label instanceof HTMLLabelElement)) throw new Error('Expected field label.');
+    if (!(description instanceof HTMLElement)) throw new Error('Expected field description.');
+
+    expect(input.getAttribute('aria-labelledby')).toBe(label.id);
+    expect(input.getAttribute('aria-describedby')).toBe(description.id);
+    expect(label.getAttribute('for')).toBe(input.id);
   });
 
   it('emits parsed ISO dates from the text field', () => {

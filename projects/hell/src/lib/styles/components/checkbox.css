@@ -25,13 +25,13 @@
         width: calc(var(--spacing) * 3);
       }
       &[data-hover],
-      :where(label):hover > & {
+      :where(label):hover > &:not([data-disabled], :disabled) {
         border-color: var(--color-hell-primary);
       }
-      :where(label:has(> &:not([data-disabled]))) {
+      :where(label:has(> &:not([data-disabled], :disabled))) {
         cursor: pointer;
       }
-      :where(label:has(> &[data-disabled])) {
+      :where(label:has(> &[data-disabled]), label:has(> &:disabled)) {
         cursor: not-allowed;
       }
       &[data-focus-visible] {

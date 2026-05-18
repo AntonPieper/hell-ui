@@ -68,6 +68,8 @@ export interface HellOmnibarRegisteredItem {
   readonly itemId: string;
   /** Whether activation should close the parent omnibar. */
   readonly closeOnSelect: () => boolean;
+  /** Whether this item is disabled and unavailable for navigation/activation. */
+  readonly disabled: () => boolean;
 
   /** Raw item value used for active-item bookkeeping. */
   value(): unknown;
@@ -486,6 +488,8 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   }
 
   activate(item: HellOmnibarRegisteredItem, source: HellOmnibarActivationSource): void {
+    if (item.disabled()) return;
+
     const selected = item.selectValue();
 
     this.submit.emit({
@@ -677,6 +681,9 @@ export class HellOmnibarGroupLabel extends HellStyleable {}
     '[id]': 'itemId',
     role: 'option',
     type: 'button',
+    '[attr.disabled]': 'disabled() ? "" : null',
+    '[attr.aria-disabled]': 'disabled() ? "true" : null',
+    '[attr.data-disabled]': 'disabled() ? "true" : null',
     '[attr.aria-selected]': 'active() ? "true" : "false"',
     '[attr.data-active]': 'active() ? "true" : null',
     '(click)': 'onClick($event)',
@@ -689,6 +696,7 @@ export class HellOmnibarItem<T = unknown>
 {
   readonly itemValue = input<T>(undefined as T, { alias: 'value' });
   readonly closeOnSelect = input(true, { transform: booleanAttribute });
+  readonly disabled = input(false, { transform: booleanAttribute });
 
   readonly select = output<T>();
 
@@ -705,12 +713,17 @@ export class HellOmnibarItem<T = unknown>
   }
 
   protected onClick(event: MouseEvent): void {
-    void event;
+    if (this.disabled()) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
     this.omnibar.activate(this, 'mouse');
   }
 
   protected onMouseMove(): void {
-    if (!this.active()) this.omnibar.setActive(this);
+    if (!this.disabled() && !this.active()) this.omnibar.setActive(this);
   }
 
   scrollIntoView(): void {
