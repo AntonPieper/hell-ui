@@ -16,7 +16,9 @@ import { runPackageManager } from './package-manager.mjs';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const distHell = join(root, 'dist/hell');
 const keep = process.env.HELL_KEEP_PACKAGE_CONSUMER === '1';
-const selectedScenarioNames = parseScenarioSelection(process.argv.slice(2));
+const packageConsumerArgs = process.argv.slice(2);
+const selectedScenarioNames = parseScenarioSelection(packageConsumerArgs);
+const minimalDependencyMode = parseMinimalDependencyMode(packageConsumerArgs);
 const npmTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_TIMEOUT_MS, 240_000);
 
 runRootPackageManager(['run', 'build:lib'], root);
@@ -159,7 +161,7 @@ const scenarios = [
 const enabledScenarios = selectScenarios(scenarios, selectedScenarioNames);
 
 try {
-  for (const group of scenarioDependencyGroups(enabledScenarios)) {
+  for (const group of scenarioDependencyGroups(enabledScenarios, minimalDependencyMode)) {
     runConsumerScenarioGroup(group);
   }
 } finally {
@@ -176,6 +178,13 @@ function parseScenarioSelection(args) {
     true,
   );
   return envSelection;
+}
+
+function parseMinimalDependencyMode(args) {
+  const envMode = process.env.HELL_PACKAGE_CONSUMER_MINIMAL_DEPS;
+  if (envMode === '1' || envMode === 'true') return true;
+
+  return args.some((arg) => arg === '--minimal-deps' || arg === '--group-by-deps');
 }
 
 function parseScenarioTokens(values, envOnly) {
@@ -236,7 +245,18 @@ function selectScenarios(allScenarios, selectedNames) {
   return selected;
 }
 
-function scenarioDependencyGroups(scenarios) {
+function scenarioDependencyGroups(scenarios, minimalDependencies) {
+  if (!minimalDependencies) {
+    console.log('[package-consumer] dependency mode: fast union install');
+    return [
+      {
+        dependencies: unionDependencies(scenarios),
+        scenarios,
+      },
+    ];
+  }
+
+  console.log('[package-consumer] dependency mode: minimal grouped installs');
   const groups = new Map();
   for (const scenario of scenarios) {
     const key = [...new Set(scenario.dependencies)].sort().join('\0');
@@ -245,6 +265,10 @@ function scenarioDependencyGroups(scenarios) {
     groups.set(key, group);
   }
   return [...groups.values()];
+}
+
+function unionDependencies(scenarios) {
+  return [...new Set(scenarios.flatMap((scenario) => scenario.dependencies))];
 }
 
 function runConsumerScenarioGroup(group) {
