@@ -33,7 +33,6 @@ import {
   HellMenuHarness,
   HellMenuTriggerHarness,
   HellOmnibarHarness,
-  HellOmnibarItemHarness,
   HellOmnibarPanelHarness,
   HellSelectHarness,
   HellSliderHarness,
