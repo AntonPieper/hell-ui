@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  HostListener,
   booleanAttribute,
   computed,
   inject,
@@ -57,6 +56,7 @@ const HELL_DIALPAD_ICONS = {
     role: 'group',
     tabindex: '0',
     '[attr.aria-label]': 'labels.dialpad.dialpad',
+    '(keydown)': 'onKey($event)',
   },
   template: `
     <div data-slot="display">
@@ -134,7 +134,6 @@ export class HellDialpad extends HellStyleable {
     this.valueChange.emit(next);
   }
 
-  @HostListener('keydown', ['$event'])
   protected onKey(e: KeyboardEvent) {
     if (e.key === 'Backspace') {
       this.backspace();

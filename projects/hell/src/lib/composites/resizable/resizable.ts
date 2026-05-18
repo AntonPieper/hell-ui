@@ -6,7 +6,6 @@ import {
   DestroyRef,
   Directive,
   ElementRef,
-  HostListener,
   OnDestroy,
   booleanAttribute,
   computed,
@@ -285,6 +284,8 @@ export class HellResizablePane extends HellStyleable implements OnDestroy {
     '[attr.aria-valuemin]': '0',
     '[attr.aria-valuemax]': '100',
     '[attr.aria-valuenow]': 'ariaValueNow()',
+    '(pointerdown)': 'onPointerDown($event)',
+    '(keydown)': 'onKey($event)',
   },
   template: '<span data-slot="grip" aria-hidden="true"></span>',
 })
@@ -367,13 +368,11 @@ export class HellResizableHandle extends HellStyleable implements AfterViewInit,
     this.refreshAriaValueNow();
   }
 
-  @HostListener('pointerdown', ['$event'])
   protected onPointerDown(e: PointerEvent) {
     this.refreshAriaValueNow();
     this.resizeInteraction.startPointer(e);
   }
 
-  @HostListener('keydown', ['$event'])
   protected onKey(e: KeyboardEvent) {
     this.refreshAriaValueNow();
     this.resizeInteraction.applyKey(e);

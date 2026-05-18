@@ -2,11 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   booleanAttribute,
+  computed,
   input,
   signal,
   ViewEncapsulation,
 } from '@angular/core';
-import { NgClass } from '@angular/common';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCheck, faSolidCopy } from '@ng-icons/font-awesome/solid';
 import { HELL_TABS_DIRECTIVES, HellButton, HellIcon } from '@hell-ui/angular/primitives';
@@ -19,7 +19,7 @@ const EXAMPLE_TABS_ICONS = { faSolidCopy, faSolidCheck };
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   providers: [provideIcons(EXAMPLE_TABS_ICONS)],
-  imports: [NgClass, HellButton, HellIcon, ...HELL_TABS_DIRECTIVES],
+  imports: [HellButton, HellIcon, ...HELL_TABS_DIRECTIVES],
   template: `
     <div class="hd-example-tabs" hellTabset value="preview">
       <div hellTabList aria-label="Example view">
@@ -28,7 +28,7 @@ const EXAMPLE_TABS_ICONS = { faSolidCopy, faSolidCheck };
       </div>
 
       <div hellTabPanel value="preview" class="hd-example-tab-panel">
-        <div class="hd-example" [class.hd-example-flush]="flush()" [ngClass]="previewClass()">
+        <div [class]="previewClassValue()">
           <ng-content />
         </div>
       </div>
@@ -58,6 +58,15 @@ export class ExampleTabs {
   readonly flush = input(false, { transform: booleanAttribute });
 
   protected readonly copied = signal(false);
+  protected readonly previewClassValue = computed(() => {
+    const classes = ['hd-example'];
+    if (this.flush()) classes.push('hd-example-flush');
+
+    const previewClass = this.previewClass().trim();
+    if (previewClass) classes.push(previewClass);
+
+    return classes.join(' ');
+  });
 
   protected async copyCode(): Promise<void> {
     await hdCopyTextToClipboard(this.code());
