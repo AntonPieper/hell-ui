@@ -13,6 +13,7 @@ checkPackageEntryPoints();
 checkPackageDependencyContract();
 checkStyleEntryPoints();
 checkNgClassCustomizationContract();
+checkAngularHostMetadataContract();
 checkAppShellBreakpointContract();
 checkBehaviorSentinelContract();
 checkComponentContract();
@@ -662,6 +663,26 @@ function checkNgClassCustomizationContract() {
         `${file.slice(root.length + 1)} uses NgClass or [ngClass]; style customization must use data attrs/CSS vars`,
       );
     }
+  }
+}
+
+function checkAngularHostMetadataContract() {
+  const sourceRoot = join(root, 'projects/hell/src/lib');
+  const files = walk(sourceRoot).filter(
+    (file) =>
+      file.endsWith('.ts') &&
+      !file.endsWith('.spec.ts') &&
+      !file.endsWith('.d.ts') &&
+      !file.endsWith('pdf.worker.ts'),
+  );
+
+  for (const file of files) {
+    const source = readFile(file);
+    if (!/\bHostBinding\b|\bHostListener\b|@HostBinding|@HostListener/.test(source)) continue;
+
+    failures.push(
+      `${file.slice(root.length + 1)} uses @HostBinding/@HostListener; use Angular host metadata instead`,
+    );
   }
 }
 

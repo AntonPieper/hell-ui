@@ -2,7 +2,6 @@ import { HellStyleable } from '../../core/styleable';
 import {
   Directive,
   ElementRef,
-  HostListener,
   OnDestroy,
   booleanAttribute,
   effect,
@@ -50,6 +49,13 @@ function hellFileMatchesAccept(file: File, accept: string | null): boolean {
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
     '[attr.tabindex]': 'disabled() ? -1 : 0',
     role: 'button',
+    '(click)': 'onClick($event)',
+    '(keydown.enter)': 'onKey($event)',
+    '(keydown.space)': 'onKey($event)',
+    '(dragenter)': 'onDragEnter($event)',
+    '(dragover)': 'onDragOver($event)',
+    '(dragleave)': 'onDragLeave($event)',
+    '(drop)': 'onDrop($event)',
   },
 })
 export class HellDropZone extends HellStyleable implements OnDestroy {
@@ -103,7 +109,6 @@ export class HellDropZone extends HellStyleable implements OnDestroy {
     });
   }
 
-  @HostListener('click', ['$event'])
   protected onClick(event?: MouseEvent) {
     if (event?.target === this.fileInput) return;
     event?.preventDefault();
@@ -111,15 +116,12 @@ export class HellDropZone extends HellStyleable implements OnDestroy {
     this.ensureInput().click();
   }
 
-  @HostListener('keydown.enter', ['$event'])
-  @HostListener('keydown.space', ['$event'])
   protected onKey(e: Event) {
     if (this.disabled()) return;
     e.preventDefault();
     this.onClick();
   }
 
-  @HostListener('dragenter', ['$event'])
   protected onDragEnter(e: DragEvent) {
     if (this.disabled()) {
       this.resetDragState();
@@ -133,7 +135,6 @@ export class HellDropZone extends HellStyleable implements OnDestroy {
     this.active.set(true);
   }
 
-  @HostListener('dragover', ['$event'])
   protected onDragOver(e: DragEvent) {
     if (this.disabled()) {
       this.resetDragState();
@@ -144,7 +145,6 @@ export class HellDropZone extends HellStyleable implements OnDestroy {
     if (!this.dragDepth) this.dragDepth = 1;
   }
 
-  @HostListener('dragleave', ['$event'])
   protected onDragLeave(e: DragEvent) {
     if (this.disabled()) {
       this.resetDragState();
@@ -158,7 +158,6 @@ export class HellDropZone extends HellStyleable implements OnDestroy {
     }
   }
 
-  @HostListener('drop', ['$event'])
   protected onDrop(e: DragEvent) {
     if (this.disabled()) {
       this.resetDragState();
