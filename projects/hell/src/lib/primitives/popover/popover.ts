@@ -48,19 +48,36 @@ export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
       this.destroyed = true;
     });
 
-    effect(() => {
-      const overlay = this.trigger.overlay();
-      if (!overlay) return;
+    effect(() => this.configureOverlayClose(this.trigger.overlay()));
+  }
 
-      overlay.updateConfig({
-        onClose: () => {
-          if (!this.destroyed) {
-            this.trigger.openChange.emit(false);
-          }
-        },
-      });
+  private configureOverlayClose(overlay: unknown): void {
+    if (!hasPopoverOverlayConfigUpdater(overlay)) return;
+
+    overlay.updateConfig({
+      onClose: () => {
+        if (!this.destroyed) {
+          this.trigger.openChange.emit(false);
+        }
+      },
     });
   }
+}
+
+interface HellPopoverOverlayConfig {
+  onClose?: () => void;
+}
+
+interface HellPopoverOverlayConfigUpdater {
+  updateConfig(config: HellPopoverOverlayConfig): void;
+}
+
+function hasPopoverOverlayConfigUpdater(overlay: unknown): overlay is HellPopoverOverlayConfigUpdater {
+  return (
+    !!overlay &&
+    (typeof overlay === 'object' || typeof overlay === 'function') &&
+    typeof (overlay as { updateConfig?: unknown }).updateConfig === 'function'
+  );
 }
 
 /**

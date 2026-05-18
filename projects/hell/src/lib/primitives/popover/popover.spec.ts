@@ -101,6 +101,34 @@ describe('HellPopoverTrigger', () => {
     expect(click.defaultPrevented).toBe(true);
     expect(document.body.textContent).not.toContain('Popover');
   });
+
+  it('ignores missing or non-updatable overlay seams', () => {
+    const host = createPopoverPatchHost();
+
+    expect(() => configureOverlayClose(host, null)).not.toThrow();
+    expect(() => configureOverlayClose(host, undefined)).not.toThrow();
+    expect(() => configureOverlayClose(host, {})).not.toThrow();
+    expect(() => configureOverlayClose(host, { updateConfig: null })).not.toThrow();
+    expect(host.trigger.openChange.emit).not.toHaveBeenCalled();
+  });
+
+  it('patches callable overlay close config with a destroy guard', () => {
+    const host = createPopoverPatchHost();
+    const updateConfig = vi.fn();
+
+    configureOverlayClose(host, { updateConfig });
+
+    expect(updateConfig).toHaveBeenCalledOnce();
+    expect(updateConfig).toHaveBeenCalledWith({ onClose: expect.any(Function) });
+
+    const config = updateConfig.mock.calls[0][0] as { onClose: () => void };
+    config.onClose();
+    expect(host.trigger.openChange.emit).toHaveBeenCalledExactlyOnceWith(false);
+
+    host.destroyed = true;
+    config.onClose();
+    expect(host.trigger.openChange.emit).toHaveBeenCalledOnce();
+  });
 });
 
 async function settle(fixture: { detectChanges(): void; whenStable(): Promise<unknown> }) {
@@ -207,6 +235,34 @@ async function nextFrame(): Promise<void> {
   }
 
   await Promise.resolve();
+}
+
+interface PopoverPatchHost {
+  destroyed: boolean;
+  trigger: {
+    openChange: {
+      emit: ReturnType<typeof vi.fn>;
+    };
+  };
+}
+
+function createPopoverPatchHost(): PopoverPatchHost {
+  return {
+    destroyed: false,
+    trigger: {
+      openChange: {
+        emit: vi.fn(),
+      },
+    },
+  };
+}
+
+function configureOverlayClose(host: PopoverPatchHost, overlay: unknown): void {
+  (
+    HellPopoverTrigger.prototype as unknown as {
+      configureOverlayClose(this: PopoverPatchHost, overlay: unknown): void;
+    }
+  ).configureOverlayClose.call(host, overlay);
 }
 
 function query<T extends HTMLElement>(root: ParentNode, selector: string): T {
