@@ -14,7 +14,7 @@ Hell exposes:
 - Features: heavier modules behind feature-specific entry points.
 
 The root package `@hell-ui/angular` export is limited to stable core only.
-Primitives live behind `/primitives` and narrow primitive entry points; composites and features remain behind scoped entry points.
+Primitives live behind `/primitives` and narrow primitive entry points. Composites live behind `/composites` and narrow composite entry points; features remain behind scoped entry points.
 
 ## Install
 
@@ -27,11 +27,12 @@ npm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/
 
 Feature peers remain optional, but npm peer metadata is package-wide: install the base light stack for any package entry point.
 
-`@floating-ui/dom` is required by `ng-primitives`; install it explicitly with the primitive stack.
+`@floating-ui/dom` is required by `ng-primitives`; install it explicitly with the primitive stack. `@angular/router` is an optional peer only for `ng-primitives/dialog`; install it when importing Hell dialog or the aggregate `/primitives` entry point.
 
 | Entry point | Install when used |
 | --- | --- |
-| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Base light stack: `@angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs` plus style-only `tailwindcss`; add optional `@ng-icons/font-awesome` for icon-backed entries |
+| `@hell-ui/angular`, `/core`, `/primitives`, `/testing` | Base light stack: `@angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs` plus style-only `tailwindcss`; add optional `@angular/router` for dialog or aggregate `/primitives`; add optional `@ng-icons/font-awesome` for icon-backed entries |
+| `@hell-ui/angular/composites`, `/app-shell`, `/audio-player`, `/avatar-group`, `/date-input`, `/dialpad`, `/drop-zone`, `/omnibar`, `/resizable`, `/split-view`, `/time-input`, `/toast` | Base light stack; prefer narrow composite entry points such as `@hell-ui/angular/app-shell` when possible |
 | `@hell-ui/angular/features/table-utilities` | Base light stack |
 | `@hell-ui/angular/features/data-table` | Legacy compatibility alias for `@hell-ui/angular/features/table-utilities` |
 | `@hell-ui/angular/features/code-editor` | Base light stack plus `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight` |
@@ -43,7 +44,7 @@ Feature peers remain optional, but npm peer metadata is package-wide: install th
 | Tier | Stability | Browsing/SSR notes |
 |---|---|---|
 | Primitives (`@hell-ui/angular/primitives`) | Stable | SSR-safe |
-| Composites (`@hell-ui/angular/composites`) | Beta | Browser-first: `window`/`document` and global listeners for overlays |
+| Composites (`@hell-ui/angular/composites`, narrow composite entry points) | Beta | Browser-first: `window`/`document` and global listeners for overlays |
 | Table utilities (`@hell-ui/angular/features/table-utilities`) | Beta | Optional peer; uses `ResizeObserver` for table sizing |
 | Code editor (`@hell-ui/angular/features/code-editor`) | Beta/optional peer | Browser-only: `window`/`document` interactions |
 | PDF viewer (`@hell-ui/angular/features/pdf-viewer`) | Experimental | Browser-only app surface/recipe: `window`/`document`, pdf workers, global listeners, and app-owned pdf.js/browser compatibility decisions |
@@ -63,7 +64,7 @@ Prefer the narrowest entry point that contains the API you use:
 ```ts
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/primitives';
-import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/composites';
+import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
 import { HellButtonHarness } from '@hell-ui/angular/testing';
 ```

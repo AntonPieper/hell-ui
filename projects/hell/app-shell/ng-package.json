@@ -1,0 +1,5 @@
+{
+  "lib": {
+    "entryFile": "../src/lib/public-api-composite-app-shell.ts"
+  }
+}

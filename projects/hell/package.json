@@ -49,6 +49,7 @@
     "@angular/common": "^21.2.0",
     "@angular/core": "^21.2.0",
     "@angular/forms": "^21.2.0",
+    "@angular/router": "^21.2.0",
     "@floating-ui/dom": "^1.7.6",
     "ng-primitives": "0.117.2",
     "@ng-icons/core": "^33.0.0",
@@ -64,6 +65,9 @@
   },
   "peerDependenciesMeta": {
     "tailwindcss": {
+      "optional": true
+    },
+    "@angular/router": {
       "optional": true
     },
     "@ng-icons/font-awesome": {

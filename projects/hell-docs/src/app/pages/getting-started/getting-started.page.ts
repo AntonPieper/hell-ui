@@ -27,6 +27,9 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
         <code>@floating-ui/dom</code>, ng-icons core, and rxjs. If you want built-in style
         defaults, add style-only Tailwind via <code>tailwindcss</code>. Feature entry points
         add optional peers only when you import them. Add
+        <code>@angular/router</code> only when you import Hell dialog or the aggregate
+        <code>@hell-ui/angular/primitives</code> entry point, because
+        <code>ng-primitives/dialog</code> has a router peer. Add
         <code>@ng-icons/font-awesome</code> only when you use icon-backed entries such as
         pagination or date-picker.
       </p>
@@ -56,8 +59,10 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
 
       <h2>5. Use a directive</h2>
       <p>
-        Import only the standalone building blocks your component template uses. The same file is
-        rendered below and loaded raw for the code tab.
+        Import only the standalone building blocks your component template uses. Prefer narrow
+        primitive and composite entry points, such as <code>@hell-ui/angular/button</code> or
+        <code>@hell-ui/angular/app-shell</code>, over aggregate entry points when a component only
+        needs one family. The same file is rendered below and loaded raw for the code tab.
       </p>
       <hd-example-tabs [code]="buttonDemoCode" previewClass="flex items-center gap-2">
         <app-getting-started-button-demo />

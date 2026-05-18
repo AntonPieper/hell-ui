@@ -42,7 +42,7 @@ Prefer the narrowest entry point that contains the API you use:
 ```ts
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/primitives';
-import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/composites';
+import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
 import { HellButtonHarness } from '@hell-ui/angular/testing';
 ```
@@ -54,10 +54,13 @@ Peer dependency expectations by entry point:
 > optional peers required only when that feature is imported.
 >
 > `@floating-ui/dom` is required by `ng-primitives` (not by Hell directly).
+> `@angular/router` is an optional peer only for `ng-primitives/dialog` consumers;
+> install it when importing Hell dialog or the aggregate `/primitives` entry point.
 
 | Entry point | Required peers |
 |---|---|
-| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Light UI stack: `@angular/forms`, `ng-primitives`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `rxjs`, and style-only `tailwindcss`; add optional `@ng-icons/font-awesome` for icon-backed entries |
+| `@hell-ui/angular`, `/core`, `/primitives`, `/testing` | Light UI stack: `@angular/forms`, `ng-primitives`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `rxjs`, and style-only `tailwindcss`; add optional `@angular/router` when using dialog or aggregate `/primitives`; add optional `@ng-icons/font-awesome` for icon-backed entries |
+| `@hell-ui/angular/composites`, `/app-shell`, `/audio-player`, `/avatar-group`, `/date-input`, `/dialpad`, `/drop-zone`, `/omnibar`, `/resizable`, `/split-view`, `/time-input`, `/toast` | Light UI stack; prefer narrow composite entry points such as `@hell-ui/angular/app-shell` when possible |
 | `@hell-ui/angular/features/table-utilities` | Light UI stack |
 | `@hell-ui/angular/features/code-editor` | Light UI stack plus `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight` |
 | `@hell-ui/angular/features/pdf-viewer` | Light UI stack plus exact `pdfjs-dist@5.6.205`; app must provide a pdf.js worker source |
@@ -69,7 +72,7 @@ Peer dependency expectations by entry point:
 | Tier | Stability | Entry points | Compatibility |
 |---|---|---|---|
 | Primitives | Stable | `@hell-ui/angular/primitives` | SSR-compatible |
-| Composites | Beta | `@hell-ui/angular/composites` | Browser DOM + `document`/`window`/global listeners |
+| Composites | Beta | `@hell-ui/angular/composites` and narrow composite entry points such as `@hell-ui/angular/app-shell` | Browser DOM + `document`/`window`/global listeners |
 | Table utilities | Beta | `@hell-ui/angular/features/table-utilities` | Uses `ResizeObserver`; browser-first |
 | Code editor | Beta/optional peer | `@hell-ui/angular/features/code-editor` | Needs `window` + `document` |
 | PDF viewer | Experimental | `@hell-ui/angular/features/pdf-viewer` | Experimental app surface/recipe; browser-only; requires `window`/`document`, app-provided pdf worker, global listeners, and your own pdf.js/browser compatibility decisions |
