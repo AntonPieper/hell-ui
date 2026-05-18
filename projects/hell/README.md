@@ -25,7 +25,7 @@ pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui
 npm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs tailwindcss
 ```
 
-Feature peers remain optional, but npm peer metadata is package-wide: install the base light stack for any package entry point.
+Feature peers remain optional at runtime, but npm peer metadata is package-wide: install the base light stack for any package entry point, then add feature peers only for imported feature entry points.
 
 `@floating-ui/dom` is required by `ng-primitives`; install it explicitly with the primitive stack. `@angular/router` is an optional peer only for `ng-primitives/dialog`; install it when importing Hell dialog or the aggregate `/primitives` entry point.
 
@@ -71,12 +71,15 @@ import { HellButtonHarness } from '@hell-ui/angular/testing';
 
 ## CSS Imports
 
+Hell style entry points require Tailwind v4. Prefer fine-grained imports for production:
+
 ```css
 @import "tailwindcss";
-@import "@hell-ui/angular/styles/kitchen-sink";
+@import "@hell-ui/angular/styles/tokens";
+@import "@hell-ui/angular/styles/primitives";
 ```
 
-For progressive loading:
+For broader loading:
 
 ```css
 @import "@hell-ui/angular/styles/tokens";
@@ -88,8 +91,7 @@ For progressive loading:
 @import "@hell-ui/angular/styles/components/button";
 ```
 
-`@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` are legacy kitchen-sink aliases. Use `@hell-ui/angular/styles/features/data-table` only as the legacy CSS alias for table
-utilities.
+`@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` are legacy kitchen-sink aliases that include primitives, composites, and feature styles such as CodeMirror and PDF viewer. Use them only when the app intentionally accepts all feature styles. Use `@hell-ui/angular/styles/features/data-table` only as the legacy CSS alias for table utilities.
 
 ## Style Opt-Out
 

@@ -1,15 +1,18 @@
 /*
  * hell - kitchen-sink / legacy CSS entry-point.
  *
- * Consumer apps should import:
+ * Kitchen-sink is for docs, prototypes, or apps intentionally loading every
+ * Hell stylesheet:
  *   @import "tailwindcss";
  *   @import "@hell-ui/angular/styles/kitchen-sink";
  *
- * Prefer fine-grained imports when you do not need everything:
+ * Prefer fine-grained imports for production paths:
  *   @import "@hell-ui/angular/styles/tokens";
  *   @import "@hell-ui/angular/styles/primitives";
  *   @import "@hell-ui/angular/styles/composites";
  *   @import "@hell-ui/angular/styles/features/table-utilities";
+ *   @import "@hell-ui/angular/styles/features/code-editor";
+ *   @import "@hell-ui/angular/styles/features/pdf-viewer";
  *   @import "@hell-ui/angular/styles/features/data-table"; legacy alias
  *   @import "@hell-ui/angular/styles/components/button";
  *

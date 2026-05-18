@@ -15,18 +15,21 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
     <article class="hd-prose">
       <h1>Getting started</h1>
       <p>
-        hell ships Angular standalone components and directives with styling in one CSS entry point.
-        Install the peer packages, add the Tailwind v4 PostCSS plugin, import the styles, then
-        compose directives where you already write markup.
+        hell ships Angular standalone components and directives with optional Tailwind-v4-backed
+        style entry points. Install the peer packages, add the Tailwind v4 PostCSS plugin, import
+        only the styles you need, then compose directives where you already write markup.
       </p>
 
       <h2>1. Install peers</h2>
       <p>
-        npm peer metadata is package-wide, so every package entry point expects the light
-        UI stack: Angular Forms/core/common, ng-primitives, @angular/cdk,
-        <code>@floating-ui/dom</code>, ng-icons core, and rxjs. If you want built-in style
-        defaults, add style-only Tailwind via <code>tailwindcss</code>. Feature entry points
-        add optional peers only when you import them. Add
+        pnpm is the contributor default for this repository. The checked-in package lock backs
+        the repo's npm-smoke CI path; consumer npm support is covered by package metadata and
+        package-consumer tests. npm peer metadata is package-wide, so every package entry point
+        expects the light UI stack: Angular
+        Forms/core/common, ng-primitives, @angular/cdk, <code>@floating-ui/dom</code>,
+        ng-icons core, and rxjs. If you import Hell styles, Tailwind is required via
+        <code>tailwindcss</code>. Feature peers are still only runtime-needed when you import
+        their feature entry points. Add
         <code>@angular/router</code> only when you import Hell dialog or the aggregate
         <code>@hell-ui/angular/primitives</code> entry point, because
         <code>ng-primitives/dialog</code> has a router peer. Add
@@ -44,9 +47,12 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
 
       <h2>3. Import the styles</h2>
       <p>
-        Import Tailwind first, then hell. The library exposes Tailwind-facing CSS variables such as
-        <code>bg-hell-surface</code>, <code>text-hell-foreground</code>, and
-        <code>border-hell-border</code>.
+        Import Tailwind first, then the narrow Hell style entry points you need. The library
+        exposes Tailwind-facing CSS variables such as <code>bg-hell-surface</code>,
+        <code>text-hell-foreground</code>, and <code>border-hell-border</code>. The
+        <code>@hell-ui/angular/styles/kitchen-sink</code> alias includes composites and feature
+        styles such as CodeMirror and PDF viewer, so it is convenient for demos but not the
+        production default.
       </p>
       <hd-code-block [code]="stylesCode" />
 

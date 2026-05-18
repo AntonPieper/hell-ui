@@ -59,6 +59,27 @@ jobs:
             coverage/
           if-no-files-found: ignore
 
+  npm-smoke:
+    name: npm smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install with npm lock
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Check CI contract
+        run: npm run test:ci-contract
+
   build:
     name: Build
     runs-on: ubuntu-latest

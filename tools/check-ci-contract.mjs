@@ -10,6 +10,7 @@ const requiredFiles = [
   'tools/check-package-consumer.mjs',
   'tools/ci-summary.mjs',
   'tools/package-manager.mjs',
+  'package-lock.json',
 ];
 
 const requiredScripts = {
@@ -30,6 +31,10 @@ const adapterChecks = [
       'node tools/package-manager.mjs run ci:playwright',
       'node tools/package-manager.mjs run ci:test',
       'node tools/package-manager.mjs run ci:build',
+      'npm ci --ignore-scripts --no-audit --no-fund',
+      'npm run test:ci-contract',
+      'cache: npm',
+      'cache-dependency-path: package-lock.json',
       'actions/upload-artifact',
       'test-results/',
       'coverage/',

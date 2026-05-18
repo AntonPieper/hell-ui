@@ -22,13 +22,16 @@ pnpm ci:playwright
 pnpm ci:verify # full pre-push: unit, architecture, lint, e2e, package consumer, build
 ```
 
-The repository workspace is pnpm-first and CI-backed by the checked-in
-`pnpm-lock.yaml`. npm remains supported for applications consuming the published
-`@hell-ui/angular` package.
+The contributor workspace is pnpm-first and CI-backed by `pnpm-lock.yaml`.
+A root `package-lock.json` is also checked in so GitHub CI can smoke-test
+`npm ci`; packed-package consumer tests continue to verify npm installs for
+applications consuming `@hell-ui/angular`.
 
 ## Package Imports
 
-Install the light UI stack when using primitives/composites:
+Install the light UI stack when using primitives/composites. npm peer metadata
+is package-wide, so optional feature peers can appear in package metadata even
+though they are only runtime-needed when importing their feature entry points:
 
 ```bash
 pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs tailwindcss
@@ -81,13 +84,20 @@ Peer dependency expectations by entry point:
 
 ## Styles
 
+Hell's shipped CSS uses Tailwind v4 theme features, so Tailwind is required
+whenever an app imports Hell style entry points. Prefer fine-grained imports for
+production:
+
 ```css
 @import "tailwindcss";
-@import "@hell-ui/angular/styles/kitchen-sink";
+@import "@hell-ui/angular/styles/tokens";
+@import "@hell-ui/angular/styles/primitives";
 ```
 
-`@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` are kitchen-sink/legacy aliases: primitives, composites, and every feature stylesheet. Prefer fine-grained imports when the app only needs part of
-the library:
+`@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` are
+kitchen-sink/legacy aliases: primitives, composites, and every feature
+stylesheet, including CodeMirror and PDF viewer styling. Use them only when the
+app intentionally accepts all feature styles.
 
 ```css
 @import "@hell-ui/angular/styles/tokens";
