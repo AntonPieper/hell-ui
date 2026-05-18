@@ -25,8 +25,13 @@ import { HellButton, HellFlyout, HellFlyoutTrigger, HellInput } from '@hell-ui/a
       />
 
       @if (open()) {
-        <div [hellFlyout]="t" [boundary]="boundaryEl" class="hd-flyout-panel">
-          <strong>Anchored, non-modal</strong>
+        <div
+          [hellFlyout]="t"
+          [boundary]="boundaryEl"
+          class="hd-flyout-panel"
+          aria-labelledby="boundary-flyout-title"
+        >
+          <strong id="boundary-flyout-title">Anchored, non-modal</strong>
           <p class="hd-muted mt-2">
             Click anywhere inside the dashed boundary (including the input) and this flyout stays
             open. Click outside, focus another control or press <kbd>Escape</kbd> to dismiss.

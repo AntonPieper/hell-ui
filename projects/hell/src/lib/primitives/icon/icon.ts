@@ -21,12 +21,16 @@ import { HellStyleable } from '../../core/styleable';
     '[class.hell-icon]': '!unstyled()',
     '[style.--ng-icon__size]': 'size()',
     '[style.--_hell-icon-color]': 'color()',
+    '[attr.aria-hidden]': 'decorative() ? "true" : null',
+    '[attr.role]': 'decorative() ? null : "img"',
+    '[attr.aria-label]': 'decorative() ? null : ariaLabel()',
   },
-  template: `<ng-icon [name]="name()" [attr.aria-hidden]="decorative() ? 'true' : null" />`,
+  template: `<ng-icon [name]="name()" aria-hidden="true" />`,
 })
 export class HellIcon extends HellStyleable {
   readonly name = input.required<string>();
   readonly size = input<string>('1em');
   readonly color = input<string | null>(null);
   readonly decorative = input(true, { transform: booleanAttribute });
+  readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
 }

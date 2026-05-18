@@ -16,7 +16,9 @@ import flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw from './examp
       <p>
         An anchored, non-modal, light-dismiss surface that <strong>does not trap focus</strong>. Use
         a flyout when the surrounding context — for example a media player or a toolbar — must
-        remain interactive while the surface is open.
+        remain interactive while the surface is open. The panel has <code>role="dialog"</code>, so
+        give every flyout an accessible name with <code>aria-label</code> or
+        <code>aria-labelledby</code>.
       </p>
 
       <p class="hd-muted">
@@ -68,6 +70,10 @@ import flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw from './examp
         <li>
           <code>boundary</code>: optional <code>HTMLElement</code> treated as “inside” for dismiss
         </li>
+        <li>
+          <code>aria-label</code> or <code>aria-labelledby</code>: accessible name for the
+          dialog panel
+        </li>
         <li><code>closeOnEscape</code> (default <code>true</code>)</li>
         <li><code>closeOnOutsideInteraction</code> (default <code>true</code>)</li>
         <li><code>unstyled</code></li>
@@ -77,6 +83,10 @@ import flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw from './examp
       <ul>
         <li>Use flyout for anchored non-modal panels where nearby controls stay interactive.</li>
         <li>Pass <code>boundary</code> when siblings should count as inside.</li>
+        <li>
+          Name each flyout panel with visible heading text via
+          <code>aria-labelledby</code>, or a concise <code>aria-label</code>.
+        </li>
         <li>Close on Escape unless the composite has a stronger reason not to.</li>
       </ul>
 

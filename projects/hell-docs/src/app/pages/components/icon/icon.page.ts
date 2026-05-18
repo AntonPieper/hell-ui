@@ -47,7 +47,9 @@ const HD_ICON_PAGE_ICONS = {
       <p>
         Thin wrapper around <code>&lt;ng-icon&gt;</code> from <code>&#64;ng-icons/core</code>.
         Consumer apps must register the icons they use via <code>provideIcons()</code>, ideally in
-        the component that renders them.
+        the component that renders them. Icons are decorative by default and hidden from assistive
+        technology; set <code>decorative="false"</code> with an <code>aria-label</code> only when the
+        icon itself conveys meaning without adjacent text.
       </p>
 
       <h2>Example</h2>
@@ -75,7 +77,11 @@ const HD_ICON_PAGE_ICONS = {
         <li><code>name</code>: registered icon name (e.g. <code>faSolidCheck</code>)</li>
         <li><code>size</code>: any CSS length, defaults to <code>1em</code></li>
         <li><code>color</code>: any CSS colour, defaults to <code>currentColor</code></li>
-        <li><code>decorative</code>: when <code>false</code>, requires <code>aria-label</code></li>
+        <li>
+          <code>decorative</code>: defaults to <code>true</code> and hides the icon from assistive
+          tech
+        </li>
+        <li><code>aria-label</code>: required when <code>decorative="false"</code></li>
       </ul>
 
       <h2>Registering icons</h2>
@@ -89,7 +95,10 @@ const HD_ICON_PAGE_ICONS = {
       <h2>Do</h2>
       <ul>
         <li>Register only the icon packs needed by the page.</li>
-        <li>Set <code>decorative="false"</code> or add text when the icon carries meaning.</li>
+        <li>
+          Prefer visible text; use <code>decorative="false" aria-label="…"</code> only for
+          standalone meaningful icons.
+        </li>
         <li>Use <code>size</code> to align icons with text rhythm.</li>
       </ul>
 

@@ -107,6 +107,8 @@ export class HellFlyoutTrigger extends HellNativeInteractiveDisabledGuard {
     role: 'dialog',
     'aria-modal': 'false',
     '[id]': 'trigger().panelId',
+    '[attr.aria-label]': 'ariaLabel()',
+    '[attr.aria-labelledby]': 'ariaLabelledby()',
     'data-state': 'open',
     '[class.hell-flyout]': '!unstyled()',
   },
@@ -114,6 +116,8 @@ export class HellFlyoutTrigger extends HellNativeInteractiveDisabledGuard {
 export class HellFlyout extends HellStyleable {
   readonly trigger = input.required<HellFlyoutTrigger>({ alias: 'hellFlyout' });
   readonly boundary = input<HTMLElement | null>(null);
+  readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
+  readonly ariaLabelledby = input<string | null>(null, { alias: 'aria-labelledby' });
   readonly closeOnEscape = input(true, { transform: booleanAttribute });
   readonly closeOnOutsideInteraction = input(true, { transform: booleanAttribute });
 

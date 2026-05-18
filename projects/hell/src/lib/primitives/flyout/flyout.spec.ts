@@ -41,6 +41,36 @@ class EnabledFlyoutAnchorTriggerHost {}
 })
 class DisabledFlyoutTriggerHost {}
 
+@Component({
+  imports: [HellFlyout, HellFlyoutTrigger],
+  template: `
+    <button id="label-trigger" hellFlyoutTrigger #labelTrigger="hellFlyoutTrigger" type="button">
+      Toggle label
+    </button>
+
+    @if (labelTrigger.open()) {
+      <div [hellFlyout]="labelTrigger" aria-label="Flyout details">Panel</div>
+    }
+
+    <button
+      id="labelledby-trigger"
+      hellFlyoutTrigger
+      #labelledbyTrigger="hellFlyoutTrigger"
+      type="button"
+    >
+      Toggle labelledby
+    </button>
+
+    @if (labelledbyTrigger.open()) {
+      <div [hellFlyout]="labelledbyTrigger" aria-labelledby="flyout-title">
+        <h2 id="flyout-title">Details</h2>
+        Panel
+      </div>
+    }
+  `,
+})
+class LabelledFlyoutHost {}
+
 describe('HellFlyout outside interaction', () => {
   let focusChecker: { isFocusable: ReturnType<typeof vi.fn> };
 
@@ -48,7 +78,12 @@ describe('HellFlyout outside interaction', () => {
     focusChecker = { isFocusable: vi.fn(() => true) };
 
     await TestBed.configureTestingModule({
-      imports: [FlyoutHost, EnabledFlyoutAnchorTriggerHost, DisabledFlyoutTriggerHost],
+      imports: [
+        FlyoutHost,
+        EnabledFlyoutAnchorTriggerHost,
+        DisabledFlyoutTriggerHost,
+        LabelledFlyoutHost,
+      ],
       providers: [{ provide: InteractivityChecker, useValue: focusChecker }],
     }).compileComponents();
   });
@@ -87,6 +122,32 @@ describe('HellFlyout outside interaction', () => {
     await settle(fixture);
 
     expect(fixture.nativeElement.textContent).not.toContain('Panel');
+  });
+
+  it('reflects dialog naming attributes on the panel', async () => {
+    const fixture = TestBed.createComponent(LabelledFlyoutHost);
+    await settle(fixture);
+
+    const labelTrigger = query<HTMLButtonElement>(fixture.nativeElement, '#label-trigger');
+    labelTrigger.click();
+    await settle(fixture);
+
+    const labelledPanel = query<HTMLElement>(fixture.nativeElement, '[role="dialog"]');
+    expect(labelledPanel.getAttribute('role')).toBe('dialog');
+    expect(labelledPanel.getAttribute('aria-modal')).toBe('false');
+    expect(labelledPanel.getAttribute('aria-label')).toBe('Flyout details');
+    expect(labelledPanel.getAttribute('aria-labelledby')).toBeNull();
+
+    labelTrigger.click();
+    await settle(fixture);
+
+    const labelledbyTrigger = query<HTMLButtonElement>(fixture.nativeElement, '#labelledby-trigger');
+    labelledbyTrigger.click();
+    await settle(fixture);
+
+    const referencedPanel = query<HTMLElement>(fixture.nativeElement, '[role="dialog"]');
+    expect(referencedPanel.getAttribute('aria-label')).toBeNull();
+    expect(referencedPanel.getAttribute('aria-labelledby')).toBe('flyout-title');
   });
 
   it('toggles on click and closes on second click', async () => {
