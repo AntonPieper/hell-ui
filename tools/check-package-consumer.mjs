@@ -299,7 +299,6 @@ function runConsumerScenarioGroup(group) {
       'install',
       '--strict-peer-deps',
       '--ignore-scripts',
-      '--prefer-offline',
       '--no-audit',
       '--no-fund',
     ], tempRoot);
