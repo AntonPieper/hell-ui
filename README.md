@@ -7,9 +7,9 @@
 Hell UI is a compact Angular component system for dense business applications.
 It favors directive-first primitives, optional styled primitives, opinionated
 composites, and heavier features behind feature-specific entry points.
-The root `@hell-ui/angular` export is intentionally scoped to stable core + primitives;
-composites and features are intended for secondary entry points. Feature peers
-remain optional, while the light stack is required for package entrypoints.
+The root `@hell-ui/angular` export is intentionally scoped to stable core only;
+primitives remain available through `/primitives` and narrow primitive entry
+points. Composites and features are intended for secondary entry points.
 
 ## Workspace
 
@@ -31,15 +31,17 @@ The repository workspace is pnpm-first and CI-backed by the checked-in
 Install the light UI stack when using primitives/composites:
 
 ```bash
-pnpm add @hell-ui/angular @angular/forms @angular/router ng-primitives @angular/cdk @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs tailwindcss
+# add @ng-icons/font-awesome when you use icon-backed entries such as pagination or date-picker
 # or
-npm install @hell-ui/angular @angular/forms @angular/router ng-primitives @angular/cdk @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+npm install @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs tailwindcss
 ```
 
 Prefer the narrowest entry point that contains the API you use:
 
 ```ts
-import { HellButton, HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/primitives';
+import { HellButton } from '@hell-ui/angular/button';
+import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/primitives';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/composites';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
 import { HellButtonHarness } from '@hell-ui/angular/testing';
@@ -55,7 +57,7 @@ Peer dependency expectations by entry point:
 
 | Entry point | Required peers |
 |---|---|
-| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Light UI stack: `@angular/forms`, `@angular/router`, `ng-primitives`, `@angular/cdk`, `@ng-icons/core`, `@ng-icons/font-awesome`, `rxjs`, and style-only `tailwindcss` |
+| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Light UI stack: `@angular/forms`, `ng-primitives`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `rxjs`, and style-only `tailwindcss`; add optional `@ng-icons/font-awesome` for icon-backed entries |
 | `@hell-ui/angular/features/table-utilities` | Light UI stack |
 | `@hell-ui/angular/features/code-editor` | Light UI stack plus `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight` |
 | `@hell-ui/angular/features/pdf-viewer` | Light UI stack plus exact `pdfjs-dist@5.6.205`; app must provide a pdf.js worker source |

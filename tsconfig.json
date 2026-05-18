@@ -6,15 +6,120 @@
     "strict": true,
     "rootDir": ".",
     "paths": {
-      "@hell-ui/angular": ["./projects/hell/src/public-api.ts"],
-      "@hell-ui/angular/core": ["./projects/hell/src/lib/public-api-core.ts"],
-      "@hell-ui/angular/primitives": ["./projects/hell/src/lib/public-api-primitives.ts"],
-      "@hell-ui/angular/composites": ["./projects/hell/src/lib/public-api-composites.ts"],
-      "@hell-ui/angular/features/code-editor": ["./projects/hell/src/lib/public-api-feature-code-editor.ts"],
-      "@hell-ui/angular/features/data-table": ["./projects/hell/src/lib/public-api-feature-data-table.ts"],
-      "@hell-ui/angular/features/table-utilities": ["./projects/hell/src/lib/public-api-feature-table-utilities.ts"],
-      "@hell-ui/angular/features/pdf-viewer": ["./projects/hell/src/lib/public-api-feature-pdf-viewer.ts"],
-      "@hell-ui/angular/testing": ["./projects/hell/src/testing/public-api.ts"]
+      "@hell-ui/angular": [
+        "./projects/hell/src/public-api.ts"
+      ],
+      "@hell-ui/angular/core": [
+        "./projects/hell/src/lib/public-api-core.ts"
+      ],
+      "@hell-ui/angular/primitives": [
+        "./projects/hell/src/lib/public-api-primitives.ts"
+      ],
+      "@hell-ui/angular/composites": [
+        "./projects/hell/src/lib/public-api-composites.ts"
+      ],
+      "@hell-ui/angular/features/code-editor": [
+        "./projects/hell/src/lib/public-api-feature-code-editor.ts"
+      ],
+      "@hell-ui/angular/features/data-table": [
+        "./projects/hell/src/lib/public-api-feature-data-table.ts"
+      ],
+      "@hell-ui/angular/features/table-utilities": [
+        "./projects/hell/src/lib/public-api-feature-table-utilities.ts"
+      ],
+      "@hell-ui/angular/features/pdf-viewer": [
+        "./projects/hell/src/lib/public-api-feature-pdf-viewer.ts"
+      ],
+      "@hell-ui/angular/testing": [
+        "./projects/hell/src/testing/public-api.ts"
+      ],
+      "@hell-ui/angular/accordion": [
+        "./projects/hell/src/lib/public-api-primitive-accordion.ts"
+      ],
+      "@hell-ui/angular/avatar": [
+        "./projects/hell/src/lib/public-api-primitive-avatar.ts"
+      ],
+      "@hell-ui/angular/breadcrumbs": [
+        "./projects/hell/src/lib/public-api-primitive-breadcrumbs.ts"
+      ],
+      "@hell-ui/angular/button": [
+        "./projects/hell/src/lib/public-api-primitive-button.ts"
+      ],
+      "@hell-ui/angular/card": [
+        "./projects/hell/src/lib/public-api-primitive-card.ts"
+      ],
+      "@hell-ui/angular/checkbox": [
+        "./projects/hell/src/lib/public-api-primitive-checkbox.ts"
+      ],
+      "@hell-ui/angular/combobox": [
+        "./projects/hell/src/lib/public-api-primitive-combobox.ts"
+      ],
+      "@hell-ui/angular/date-picker": [
+        "./projects/hell/src/lib/public-api-primitive-date-picker.ts"
+      ],
+      "@hell-ui/angular/dialog": [
+        "./projects/hell/src/lib/public-api-primitive-dialog.ts"
+      ],
+      "@hell-ui/angular/field": [
+        "./projects/hell/src/lib/public-api-primitive-field.ts"
+      ],
+      "@hell-ui/angular/flyout": [
+        "./projects/hell/src/lib/public-api-primitive-flyout.ts"
+      ],
+      "@hell-ui/angular/icon": [
+        "./projects/hell/src/lib/public-api-primitive-icon.ts"
+      ],
+      "@hell-ui/angular/input": [
+        "./projects/hell/src/lib/public-api-primitive-input.ts"
+      ],
+      "@hell-ui/angular/listbox": [
+        "./projects/hell/src/lib/public-api-primitive-listbox.ts"
+      ],
+      "@hell-ui/angular/menu": [
+        "./projects/hell/src/lib/public-api-primitive-menu.ts"
+      ],
+      "@hell-ui/angular/pagination": [
+        "./projects/hell/src/lib/public-api-primitive-pagination.ts"
+      ],
+      "@hell-ui/angular/popover": [
+        "./projects/hell/src/lib/public-api-primitive-popover.ts"
+      ],
+      "@hell-ui/angular/progress": [
+        "./projects/hell/src/lib/public-api-primitive-progress.ts"
+      ],
+      "@hell-ui/angular/radio": [
+        "./projects/hell/src/lib/public-api-primitive-radio.ts"
+      ],
+      "@hell-ui/angular/search": [
+        "./projects/hell/src/lib/public-api-primitive-search.ts"
+      ],
+      "@hell-ui/angular/select": [
+        "./projects/hell/src/lib/public-api-primitive-select.ts"
+      ],
+      "@hell-ui/angular/separator": [
+        "./projects/hell/src/lib/public-api-primitive-separator.ts"
+      ],
+      "@hell-ui/angular/skeleton": [
+        "./projects/hell/src/lib/public-api-primitive-skeleton.ts"
+      ],
+      "@hell-ui/angular/slider": [
+        "./projects/hell/src/lib/public-api-primitive-slider.ts"
+      ],
+      "@hell-ui/angular/switch": [
+        "./projects/hell/src/lib/public-api-primitive-switch.ts"
+      ],
+      "@hell-ui/angular/tabs": [
+        "./projects/hell/src/lib/public-api-primitive-tabs.ts"
+      ],
+      "@hell-ui/angular/tag": [
+        "./projects/hell/src/lib/public-api-primitive-tag.ts"
+      ],
+      "@hell-ui/angular/toggle": [
+        "./projects/hell/src/lib/public-api-primitive-toggle.ts"
+      ],
+      "@hell-ui/angular/tooltip": [
+        "./projects/hell/src/lib/public-api-primitive-tooltip.ts"
+      ]
     },
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,

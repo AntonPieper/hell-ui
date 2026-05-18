@@ -44,19 +44,30 @@ const angularAppDeps = [
   '@angular/core',
   '@angular/forms',
   '@angular/platform-browser',
-  '@angular/router',
+  'rxjs',
   'tslib',
 ];
-const lightUiDeps = [
+const lightUiWithoutFontAwesomeDeps = [
   ...angularAppDeps,
   '@angular/cdk',
+  '@floating-ui/dom',
   'ng-primitives',
   '@ng-icons/core',
-  '@ng-icons/font-awesome',
-  'rxjs',
   'tailwindcss',
 ];
-const coreDeps = lightUiDeps;
+const lightUiDeps = [
+  ...lightUiWithoutFontAwesomeDeps,
+  '@ng-icons/font-awesome',
+];
+// The aggregate /primitives FESM includes dialog, and ng-primitives/dialog
+// currently imports @angular/router even though Hell no longer declares router
+// as a package peer. Narrow primitive entrypoints (for example /button) prove
+// router-free consumption for consumers that avoid the aggregate barrel.
+const primitivesDeps = [
+  ...lightUiDeps,
+  '@angular/router',
+];
+const coreDeps = lightUiWithoutFontAwesomeDeps;
 const codeEditorDeps = [
   ...lightUiDeps,
   '@codemirror/commands',
@@ -65,7 +76,7 @@ const codeEditorDeps = [
   '@codemirror/view',
   '@lezer/highlight',
 ];
-const testingDeps = lightUiDeps;
+const testingDeps = coreDeps;
 const pdfViewerDeps = [
   ...lightUiDeps,
   'pdfjs-dist',
@@ -75,10 +86,10 @@ const pdfViewerDeps = [
 const scenarios = [
   {
     name: 'root',
-    description: 'root entry without feature peers',
-    dependencies: lightUiDeps,
+    description: 'root entry core-only with package-wide light peers',
+    dependencies: coreDeps,
     mainTs: rootConsumerMainTs(),
-    stylesCss: rootConsumerStylesCss(),
+    stylesCss: '',
   },
   {
     name: 'core',
@@ -90,8 +101,15 @@ const scenarios = [
   {
     name: 'primitives',
     description: 'primitives entry without feature peers',
-    dependencies: lightUiDeps,
+    dependencies: primitivesDeps,
     mainTs: primitivesConsumerMainTs(),
+    stylesCss: primitivesConsumerStylesCss(),
+  },
+  {
+    name: 'button',
+    description: 'narrow primitive button entry without Font Awesome peer',
+    dependencies: coreDeps,
+    mainTs: buttonConsumerMainTs(),
     stylesCss: primitivesConsumerStylesCss(),
   },
   {
@@ -141,8 +159,8 @@ const scenarios = [
 const enabledScenarios = selectScenarios(scenarios, selectedScenarioNames);
 
 try {
-  for (const scenario of enabledScenarios) {
-    runConsumerScenario(scenario);
+  for (const group of scenarioDependencyGroups(enabledScenarios)) {
+    runConsumerScenarioGroup(group);
   }
 } finally {
   if (keep) console.log(`[package-consumer] kept packed hell package ${packedHell.root}`);
@@ -218,11 +236,23 @@ function selectScenarios(allScenarios, selectedNames) {
   return selected;
 }
 
-function runConsumerScenario(scenario) {
-  const tempRoot = mkdtempSync(join(tmpdir(), `hell-package-consumer-${scenario.name}-`));
+function scenarioDependencyGroups(scenarios) {
+  const groups = new Map();
+  for (const scenario of scenarios) {
+    const key = [...new Set(scenario.dependencies)].sort().join('\0');
+    const group = groups.get(key) ?? { dependencies: scenario.dependencies, scenarios: [] };
+    group.scenarios.push(scenario);
+    groups.set(key, group);
+  }
+  return [...groups.values()];
+}
+
+function runConsumerScenarioGroup(group) {
+  const groupName = group.scenarios.map((scenario) => scenario.name).join('-');
+  const tempRoot = mkdtempSync(join(tmpdir(), `hell-package-consumer-${groupName}-`));
 
   try {
-    writeConsumerWorkspace(tempRoot, scenario);
+    writeConsumerWorkspace(tempRoot, group.scenarios[0], group.dependencies);
     runNpm([
       'install',
       '--strict-peer-deps',
@@ -231,10 +261,14 @@ function runConsumerScenario(scenario) {
       '--no-audit',
       '--no-fund',
     ], tempRoot);
-    runNpm(['exec', '--', 'ng', 'build', 'consumer', '--configuration', 'production'], tempRoot);
-    console.log(`[package-consumer:${scenario.name}] built ${scenario.description}`);
+
+    for (const scenario of group.scenarios) {
+      writeConsumerScenarioFiles(tempRoot, scenario);
+      runNpm(['exec', '--', 'ng', 'build', 'consumer', '--configuration', 'production'], tempRoot);
+      console.log(`[package-consumer:${scenario.name}] built ${scenario.description}`);
+    }
   } finally {
-    if (keep) console.log(`[package-consumer:${scenario.name}] kept ${tempRoot}`);
+    if (keep) console.log(`[package-consumer:${groupName}] kept ${tempRoot}`);
     else rmSync(tempRoot, { force: true, recursive: true });
   }
 }
@@ -264,7 +298,7 @@ function assertPackedPackageDoesNotBundlePdfWorker(tarball) {
   }
 }
 
-function writeConsumerWorkspace(workspace, scenario) {
+function writeConsumerWorkspace(workspace, scenario, dependencies = scenario.dependencies) {
   const packageJson = {
     name: `hell-package-consumer-${scenario.name}`,
     private: true,
@@ -272,7 +306,7 @@ function writeConsumerWorkspace(workspace, scenario) {
     scripts: {
       build: 'ng build consumer --configuration production',
     },
-    dependencies: pickDeps(deps, scenario.dependencies),
+    dependencies: pickDeps(deps, dependencies),
     devDependencies: pickDeps(devDeps, [
       '@angular/build',
       '@angular/cli',
@@ -354,6 +388,10 @@ function writeConsumerWorkspace(workspace, scenario) {
     join(workspace, 'src/index.html'),
     '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Consumer</title><base href="/"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><app-root></app-root></body></html>\n',
   );
+  writeConsumerScenarioFiles(workspace, scenario);
+}
+
+function writeConsumerScenarioFiles(workspace, scenario) {
   writeFileSync(join(workspace, 'src/main.ts'), scenario.mainTs);
   writeFileSync(join(workspace, 'src/styles.css'), scenario.stylesCss);
 }
@@ -379,20 +417,18 @@ function exactInstalledVersion(name) {
 function rootConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellButton } from '${packageName}';
+import { HellStyleable, type HellSize } from '${packageName}';
+
+const size: HellSize = 'md';
+void size;
+void HellStyleable;
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [HellButton],
-  template: \`
-    <button hellButton type="button">Save</button>
-    <a hellButton href="#details" [disabled]="disabled">Details</a>
-  \`,
+  template: \`<p>Root core contract</p>\`,
 })
-class App {
-  protected readonly disabled = true;
-}
+class App {}
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
@@ -413,6 +449,28 @@ void HellStyleable;
   template: \`<p>Core contract</p>\`,
 })
 class App {}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function buttonConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HellButton } from '${packageName}/button';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [HellButton],
+  template: \`
+    <button hellButton type="button">Save</button>
+    <a hellButton href="#details" [disabled]="disabled">Details</a>
+  \`,
+})
+class App {
+  protected readonly disabled = true;
+}
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;

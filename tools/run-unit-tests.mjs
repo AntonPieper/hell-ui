@@ -9,8 +9,6 @@ const coverageDir = join(root, 'coverage');
 const junitPath = join(testResultsDir, 'vitest-junit.xml');
 const coverageSummaryPath = join(coverageDir, 'coverage-summary.json');
 const timeoutMs = positiveNumber(process.env.HELL_UNIT_TEST_TIMEOUT_MS, 180_000);
-const hangGraceMs = positiveNumber(process.env.HELL_UNIT_TEST_HANG_GRACE_MS, 2_500);
-const pollMs = positiveNumber(process.env.HELL_UNIT_TEST_POLL_MS, 250);
 const startedAt = Date.now();
 const coverageRequired = !process.argv.slice(2).some((arg) => arg === '--coverage=false');
 const coverageThresholds = {
@@ -42,35 +40,18 @@ const child = spawn(ng, args, {
   stdio: ['inherit', 'pipe', 'pipe'],
 });
 
-let lastOutputAt = Date.now();
-let intentionalTerminate = false;
 let timedOut = false;
 
 child.stdout.on('data', (chunk) => forwardOutput(chunk, process.stdout));
 child.stderr.on('data', (chunk) => forwardOutput(chunk, process.stderr));
 
-const monitor = setInterval(() => {
-  const report = readJUnitReport();
-  const coverage = readCoverageSummary();
-
-  if (Date.now() - startedAt > timeoutMs) {
-    timedOut = true;
-    terminate('SIGTERM');
-    return;
-  }
-
-  if (!report) return;
-
-  const failed = report.failures > 0 || report.errors > 0;
-  const completeEnough = failed || !coverageRequired || coverageMeetsThresholds(coverage);
-  if (completeEnough && Date.now() - lastOutputAt >= hangGraceMs) {
-    intentionalTerminate = true;
-    terminate('SIGTERM');
-  }
-}, pollMs);
+const timeout = setTimeout(() => {
+  timedOut = true;
+  terminate('SIGTERM');
+}, timeoutMs);
 
 const result = await waitForClose(child);
-clearInterval(monitor);
+clearTimeout(timeout);
 
 if (timedOut) {
   console.error(`[unit] timed out after ${timeoutMs}ms`);
@@ -101,19 +82,18 @@ if (coverageRequired && !coverageMeetsThresholds(coverage)) {
   process.exit(1);
 }
 
-if (!intentionalTerminate && result.signal) {
+if (result.signal) {
   console.error(`[unit] Angular/Vitest exited via ${result.signal}.`);
   process.exit(1);
 }
 
-if (!intentionalTerminate && result.code !== 0) {
+if (result.code !== 0) {
   process.exit(result.code ?? 1);
 }
 
 process.exit(0);
 
 function forwardOutput(chunk, stream) {
-  lastOutputAt = Date.now();
   stream.write(chunk);
 }
 

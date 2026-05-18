@@ -13,24 +13,25 @@ Hell exposes:
 - Composites: higher-level recipes that may own useful structure.
 - Features: heavier modules behind feature-specific entry points.
 
-The root package `@hell-ui/angular` export is limited to stable core + primitives.
-Composites and features remain behind scoped entry points.
+The root package `@hell-ui/angular` export is limited to stable core only.
+Primitives live behind `/primitives` and narrow primitive entry points; composites and features remain behind scoped entry points.
 
 ## Install
 
 ```bash
-pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs tailwindcss
+# add @ng-icons/font-awesome when you use icon-backed entries such as pagination or date-picker
 # or
-npm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @ng-icons/core @ng-icons/font-awesome rxjs tailwindcss
+npm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs tailwindcss
 ```
 
 Feature peers remain optional, but npm peer metadata is package-wide: install the base light stack for any package entry point.
 
-`@floating-ui/dom` is required by `ng-primitives` and should already be part of your primitive stack.
+`@floating-ui/dom` is required by `ng-primitives`; install it explicitly with the primitive stack.
 
 | Entry point | Install when used |
 | --- | --- |
-| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Base light stack: `@angular/forms ng-primitives @angular/cdk @ng-icons/core @ng-icons/font-awesome rxjs` plus style-only `tailwindcss` |
+| `@hell-ui/angular`, `/core`, `/primitives`, `/composites`, `/testing` | Base light stack: `@angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs` plus style-only `tailwindcss`; add optional `@ng-icons/font-awesome` for icon-backed entries |
 | `@hell-ui/angular/features/table-utilities` | Base light stack |
 | `@hell-ui/angular/features/data-table` | Legacy compatibility alias for `@hell-ui/angular/features/table-utilities` |
 | `@hell-ui/angular/features/code-editor` | Base light stack plus `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight` |
@@ -60,7 +61,8 @@ The PDF viewer component now exposes:
 Prefer the narrowest entry point that contains the API you use:
 
 ```ts
-import { HellButton, HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/primitives';
+import { HellButton } from '@hell-ui/angular/button';
+import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/primitives';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/composites';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
 import { HellButtonHarness } from '@hell-ui/angular/testing';

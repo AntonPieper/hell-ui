@@ -17,6 +17,9 @@ if (process.env.GITHUB_ACTIONS === 'true') {
 
 export default defineConfig({
   test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['projects/hell/src/test-setup.ts'],
     reporters,
     coverage: {
       enabled: true,

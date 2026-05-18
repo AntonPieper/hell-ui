@@ -293,7 +293,9 @@ function checkPackageEntryPoints() {
   ];
 
   const disallowedRootExports = exportPaths(rootApi).filter((path) =>
+    path.includes('public-api-primitives') || path.includes('public-api-primitive-') ||
     path.includes('public-api-composites') || path.includes('public-api-feature') ||
+    path.includes('/primitives/') ||
     path.includes('/features/') || path.includes('/composites/')
   );
   if (disallowedRootExports.length) {
@@ -315,7 +317,7 @@ function checkPackageEntryPoints() {
     }
   }
 
-  const requiredRootApiExports = new Set(['./lib/public-api-core', './lib/public-api-primitives']);
+  const requiredRootApiExports = new Set(['./lib/public-api-core']);
   for (const requiredExport of requiredRootApiExports) {
     if (!rootApi.includes(`'${requiredExport}'`) && !rootApi.includes(`"${requiredExport}"`)) {
       failures.push(`Root Package Entry Point is missing ${requiredExport}`);
@@ -332,6 +334,10 @@ function checkPackageEntryPoints() {
     '@hell-ui/angular/composites': './projects/hell/src/lib/public-api-composites.ts',
     '@hell-ui/angular/testing': './projects/hell/src/testing/public-api.ts',
   };
+  for (const primitive of primitiveDirectories()) {
+    expectedPaths[`@hell-ui/angular/${primitive}`] =
+      `./projects/hell/src/lib/public-api-primitive-${primitive}.ts`;
+  }
   for (const feature of features) {
     expectedPaths[`@hell-ui/angular/features/${feature}`] =
       `./projects/hell/src/lib/public-api-feature-${feature}.ts`;
@@ -356,6 +362,7 @@ function checkPackageEntryPoints() {
     'projects/hell/primitives/ng-package.json',
     'projects/hell/composites/ng-package.json',
     'projects/hell/testing/ng-package.json',
+    ...primitiveDirectories().map((primitive) => `projects/hell/${primitive}/ng-package.json`),
     ...features.map((feature) => `projects/hell/features/${feature}/ng-package.json`),
   ];
 
@@ -366,6 +373,7 @@ function checkPackageEntryPoints() {
   }
 
   checkSecondaryEntryPointCompleteness('primitives');
+  checkPrimitiveEntryPointCompleteness();
   checkSecondaryEntryPointCompleteness('composites');
   checkFeatureEntryPointCompleteness();
 }
@@ -398,12 +406,12 @@ function checkPackageDependencyContract() {
     '@angular/common',
     '@angular/core',
     '@angular/forms',
-    '@angular/router',
+    '@floating-ui/dom',
     '@ng-icons/core',
-    '@ng-icons/font-awesome',
     'ng-primitives',
     'rxjs',
   ]);
+  const iconOnlyPeers = new Set(['@ng-icons/font-awesome']);
   const featureOnlyPeers = new Set([
     '@codemirror/commands',
     '@codemirror/language',
@@ -425,7 +433,6 @@ function checkPackageDependencyContract() {
     'tailwindcss',
     // ng-primitives exposes these as strict peers consumed by primitive wrappers.
     '@angular/cdk',
-    '@angular/router',
     '@floating-ui/dom',
   ]);
   for (const dependency of Object.keys(peerDependencies)) {
@@ -448,15 +455,19 @@ function checkPackageDependencyContract() {
       failures.push(
         `Package dependency contract must keep ${dependency} optional for style-only consumers`,
       );
+    } else if (iconOnlyPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional !== true) {
+      failures.push(
+        `Package dependency contract must keep ${dependency} optional for icon-only consumers`,
+      );
     }
   }
 
   for (const dependency of Object.keys(peerDependenciesMeta)) {
     if (!peerDependencies[dependency]) {
       failures.push(`Package dependency contract has peerDependenciesMeta for undeclared ${dependency}`);
-    } else if (!featureOnlyPeers.has(dependency) && !styleOnlyPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional) {
+    } else if (!featureOnlyPeers.has(dependency) && !styleOnlyPeers.has(dependency) && !iconOnlyPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional) {
       failures.push(
-        `Package dependency contract marks ${dependency} optional but it is not a known feature-only or style-only peer`,
+        `Package dependency contract marks ${dependency} optional but it is not a known feature-only, icon-only, or style-only peer`,
       );
     }
   }
@@ -476,6 +487,12 @@ function checkPackageDependencyContract() {
   for (const dependency of styleOnlyPeers) {
     if (!peerDependencies[dependency]) {
       failures.push(`Package dependency contract is missing optional style peer dependency ${dependency}`);
+    }
+  }
+
+  for (const dependency of iconOnlyPeers) {
+    if (!peerDependencies[dependency]) {
+      failures.push(`Package dependency contract is missing optional icon peer dependency ${dependency}`);
     }
   }
 
@@ -1201,6 +1218,32 @@ function checkSecondaryEntryPointCompleteness(kind) {
   }
 }
 
+function checkPrimitiveEntryPointCompleteness() {
+  for (const primitive of primitiveDirectories()) {
+    const packagePath = join(root, `projects/hell/${primitive}/ng-package.json`);
+    if (!existsSync(packagePath)) {
+      failures.push(`Primitive Package Entry Point is missing projects/hell/${primitive}/ng-package.json`);
+      continue;
+    }
+
+    const ngPackage = parseJsonWithComments(readFile(packagePath));
+    const expectedEntryFile = `../src/lib/public-api-primitive-${primitive}.ts`;
+    if (ngPackage.lib?.entryFile !== expectedEntryFile) {
+      failures.push(
+        `Primitive Package Entry Point ${primitive} entryFile is ${ngPackage.lib?.entryFile ?? 'missing'}, expected ${expectedEntryFile}`,
+      );
+    }
+
+    const apiPath = join(root, `projects/hell/src/lib/public-api-primitive-${primitive}.ts`);
+    const expectedExport = `./primitives/${primitive}/${primitive}`;
+    if (!existsSync(apiPath)) {
+      failures.push(`Primitive Package Entry Point is missing projects/hell/src/lib/public-api-primitive-${primitive}.ts`);
+    } else if (!exportPaths(readFile(apiPath)).includes(expectedExport)) {
+      failures.push(`Primitive Package Entry Point ${primitive} must export ${expectedExport}`);
+    }
+  }
+}
+
 function checkFeatureEntryPointCompleteness() {
   for (const feature of featureDirectories()) {
     const apiPath = join(root, `projects/hell/src/lib/public-api-feature-${feature}.ts`);
@@ -1329,6 +1372,12 @@ function parseJsonWithComments(source) {
 
 function readFile(path) {
   return readFileSync(path, 'utf8');
+}
+
+function primitiveDirectories() {
+  return childDirectories(join(root, 'projects/hell/src/lib/primitives')).filter(
+    (primitive) => primitive !== 'adapters',
+  );
 }
 
 function featureDirectories() {

@@ -37,8 +37,9 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
       </p>
       <p>
         Install the exact supported <code>pdfjs-dist@5.6.205</code> peer plus the light UI stack
-        (<code>@angular/forms ng-primitives @angular/cdk @ng-icons/core @ng-icons/font-awesome rxjs</code>)
-        and style-only <code>tailwindcss</code> when you import Hell's CSS.
+        (<code>@angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs</code>),
+        optional <code>@ng-icons/font-awesome</code> for icon-backed controls, and style-only
+        <code>tailwindcss</code> when you import Hell's CSS.
         Your app must pass a pdf.js worker source through <code>worker</code>; Hell does not copy
         a worker into the package tarball. The docs app serves a local sample worker from
         <code>/assets/pdf.worker.mjs</code>. The docs page loads the pdf.js viewer stylesheet on
