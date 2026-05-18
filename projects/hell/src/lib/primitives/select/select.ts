@@ -224,7 +224,6 @@ export class HellSelectPortal {}
   ],
   host: {
     '[class.hell-select-option]': '!unstyled()',
-    role: 'option',
   },
 })
 export class HellSelectOption extends HellStyleable {}

@@ -180,8 +180,6 @@ export class HellComboboxInput extends HellStyleable {}
   hostDirectives: [NgpComboboxButton],
   host: {
     '[class.hell-combobox-button]': '!unstyled()',
-    type: 'button',
-    tabindex: '-1',
   },
 })
 export class HellComboboxButton extends HellStyleable {}
@@ -260,7 +258,6 @@ export class HellComboboxPortal {}
   ],
   host: {
     '[class.hell-combobox-option]': '!unstyled()',
-    role: 'option',
   },
 })
 export class HellComboboxOption extends HellStyleable {}
