@@ -35,7 +35,8 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         The speech transcript is experimental and relies on browser speech-recognition and
         media-capture APIs. It is intentionally best-effort only, not accessibility-grade captions
         or timed text; treat it as a convenience aid and never as a replacement for provided
-        captions, transcripts, or server-generated accessibility content.
+        captions, transcripts, or server-generated accessibility content. Remote media capture also
+        depends on the audio server's CORS headers and the configured <code>crossorigin</code> mode.
       </p>
 
       <h2>With title and date</h2>
@@ -72,6 +73,12 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         <li><code>downloadName</code>: filename for the download link</li>
         <li><code>allowDownload</code>: show / hide download button (default <code>true</code>)</li>
         <li>
+          <code>crossOrigin</code> / <code>crossorigin</code>: forwarded to the native audio
+          element. Defaults to <code>anonymous</code>; use <code>use-credentials</code> only
+          when the media server is configured for credentialed CORS, or <code>null</code> to omit
+          the attribute.
+        </li>
+        <li>
           <code>allowSpeechTranscript</code>: opt into experimental browser speech transcription
           (default <code>false</code>) that is best-effort only and not intended as
           accessibility-grade captions/timed text. <code>allowLiveCaptions</code> remains a
@@ -96,6 +103,8 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
           and <code>HTMLMediaElement.captureStream()</code> — currently Chromium-based desktops are
           common. Results are best-effort only, so recognition accuracy and timing may drift.
           Audio is piped via <code>start(track)</code>, so no microphone permission is needed.
+          For remote audio, capture may still fail unless the response permits the selected
+          <code>crossorigin</code> mode and the browser allows media-element capture.
         </li>
         <li>
           Toggling the transcript while paused only opens the panel. Transcription follows the

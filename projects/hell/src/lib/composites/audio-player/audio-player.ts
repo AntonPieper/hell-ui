@@ -57,6 +57,8 @@ function parseIsoDateOnly(value: string): Date | null {
  * download button and an opt-in speech-transcript strip backed by the
  * Web Speech API (Chromium-only). The transcript toggle is hidden unless enabled
  * and the browser exposes `SpeechRecognition` + `HTMLMediaElement.captureStream()`.
+ * Remote speech transcript capture also depends on the media URL, CORS mode,
+ * response headers, and browser media-capture behavior.
  *
  * @experimental Browser speech transcripts are best-effort convenience text,
  * not accessibility captions, timed text, or a replacement for transcripts.
@@ -72,7 +74,7 @@ function parseIsoDateOnly(value: string): Date | null {
       #audio
       [src]="src()"
       preload="metadata"
-      crossorigin="anonymous"
+      [attr.crossorigin]="crossOrigin()"
       (timeupdate)="onTime()"
       (loadedmetadata)="onMeta()"
       (play)="onPlay()"
@@ -257,6 +259,15 @@ function parseIsoDateOnly(value: string): Date | null {
 })
 export class HellAudioPlayer extends HellStyleable {
   readonly src = input.required<string>();
+  /**
+   * CORS mode forwarded to the native audio element. Defaults to `anonymous`.
+   * Set to `null` to omit the `crossorigin` attribute. Remote speech transcript
+   * capture depends on media CORS headers plus browser `captureStream()` and
+   * `SpeechRecognition` support.
+   */
+  readonly crossOrigin = input<'anonymous' | 'use-credentials' | null>('anonymous', {
+    alias: 'crossorigin',
+  });
   readonly downloadName = input<string | null>(null);
   readonly allowDownload = input(true, { transform: booleanAttribute });
   /** Show / hide the experimental Chromium-only speech-transcript feature. */

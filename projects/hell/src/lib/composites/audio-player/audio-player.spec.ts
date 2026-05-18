@@ -32,6 +32,30 @@ describe('HellAudioPlayer', () => {
     return { fixture, component, audio };
   }
 
+  it('defaults audio crossorigin to anonymous', async () => {
+    const { audio } = await createPlayer();
+
+    expect(audio.getAttribute('crossorigin')).toBe('anonymous');
+  });
+
+  it('forwards use-credentials audio crossorigin mode', async () => {
+    const { fixture, audio } = await createPlayer();
+
+    fixture.componentRef.setInput('crossorigin', 'use-credentials');
+    fixture.detectChanges();
+
+    expect(audio.getAttribute('crossorigin')).toBe('use-credentials');
+  });
+
+  it('omits audio crossorigin when configured with null', async () => {
+    const { fixture, audio } = await createPlayer();
+
+    fixture.componentRef.setInput('crossorigin', null);
+    fixture.detectChanges();
+
+    expect(audio.hasAttribute('crossorigin')).toBe(false);
+  });
+
   it('does not start playback when the speech transcript is toggled while paused', async () => {
     const { fixture, component } = await createPlayer();
     const playSpy = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
