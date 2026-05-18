@@ -338,6 +338,10 @@ function checkPackageEntryPoints() {
     expectedPaths[`@hell-ui/angular/${primitive}`] =
       `./projects/hell/src/lib/public-api-primitive-${primitive}.ts`;
   }
+  for (const composite of compositeDirectories()) {
+    expectedPaths[`@hell-ui/angular/${composite}`] =
+      `./projects/hell/src/lib/public-api-composite-${composite}.ts`;
+  }
   for (const feature of features) {
     expectedPaths[`@hell-ui/angular/features/${feature}`] =
       `./projects/hell/src/lib/public-api-feature-${feature}.ts`;
@@ -363,6 +367,7 @@ function checkPackageEntryPoints() {
     'projects/hell/composites/ng-package.json',
     'projects/hell/testing/ng-package.json',
     ...primitiveDirectories().map((primitive) => `projects/hell/${primitive}/ng-package.json`),
+    ...compositeDirectories().map((composite) => `projects/hell/${composite}/ng-package.json`),
     ...features.map((feature) => `projects/hell/features/${feature}/ng-package.json`),
   ];
 
@@ -375,6 +380,7 @@ function checkPackageEntryPoints() {
   checkSecondaryEntryPointCompleteness('primitives');
   checkPrimitiveEntryPointCompleteness();
   checkSecondaryEntryPointCompleteness('composites');
+  checkCompositeEntryPointCompleteness();
   checkFeatureEntryPointCompleteness();
 }
 
@@ -412,6 +418,7 @@ function checkPackageDependencyContract() {
     'rxjs',
   ]);
   const iconOnlyPeers = new Set(['@ng-icons/font-awesome']);
+  const transitiveOnlyPeers = new Set(['@angular/router']);
   const featureOnlyPeers = new Set([
     '@codemirror/commands',
     '@codemirror/language',
@@ -434,6 +441,8 @@ function checkPackageDependencyContract() {
     // ng-primitives exposes these as strict peers consumed by primitive wrappers.
     '@angular/cdk',
     '@floating-ui/dom',
+    // ng-primitives/dialog imports Router even though Hell only exposes it via dialog surfaces.
+    '@angular/router',
   ]);
   for (const dependency of Object.keys(peerDependencies)) {
     if (!importedPackages.has(dependency) && !nonTsPeerDependencies.has(dependency)) {
@@ -459,15 +468,25 @@ function checkPackageDependencyContract() {
       failures.push(
         `Package dependency contract must keep ${dependency} optional for icon-only consumers`,
       );
+    } else if (transitiveOnlyPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional !== true) {
+      failures.push(
+        `Package dependency contract must keep ${dependency} optional for transitive-only consumers`,
+      );
     }
   }
 
   for (const dependency of Object.keys(peerDependenciesMeta)) {
     if (!peerDependencies[dependency]) {
       failures.push(`Package dependency contract has peerDependenciesMeta for undeclared ${dependency}`);
-    } else if (!featureOnlyPeers.has(dependency) && !styleOnlyPeers.has(dependency) && !iconOnlyPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional) {
+    } else if (
+      !featureOnlyPeers.has(dependency) &&
+      !styleOnlyPeers.has(dependency) &&
+      !iconOnlyPeers.has(dependency) &&
+      !transitiveOnlyPeers.has(dependency) &&
+      peerDependenciesMeta[dependency]?.optional
+    ) {
       failures.push(
-        `Package dependency contract marks ${dependency} optional but it is not a known feature-only, icon-only, or style-only peer`,
+        `Package dependency contract marks ${dependency} optional but it is not a known feature-only, icon-only, style-only, or transitive-only peer`,
       );
     }
   }
@@ -1244,6 +1263,32 @@ function checkPrimitiveEntryPointCompleteness() {
   }
 }
 
+function checkCompositeEntryPointCompleteness() {
+  for (const composite of compositeDirectories()) {
+    const packagePath = join(root, `projects/hell/${composite}/ng-package.json`);
+    if (!existsSync(packagePath)) {
+      failures.push(`Composite Package Entry Point is missing projects/hell/${composite}/ng-package.json`);
+      continue;
+    }
+
+    const ngPackage = parseJsonWithComments(readFile(packagePath));
+    const expectedEntryFile = `../src/lib/public-api-composite-${composite}.ts`;
+    if (ngPackage.lib?.entryFile !== expectedEntryFile) {
+      failures.push(
+        `Composite Package Entry Point ${composite} entryFile is ${ngPackage.lib?.entryFile ?? 'missing'}, expected ${expectedEntryFile}`,
+      );
+    }
+
+    const apiPath = join(root, `projects/hell/src/lib/public-api-composite-${composite}.ts`);
+    const expectedExport = `./composites/${composite}/${composite}`;
+    if (!existsSync(apiPath)) {
+      failures.push(`Composite Package Entry Point is missing projects/hell/src/lib/public-api-composite-${composite}.ts`);
+    } else if (!exportPaths(readFile(apiPath)).includes(expectedExport)) {
+      failures.push(`Composite Package Entry Point ${composite} must export ${expectedExport}`);
+    }
+  }
+}
+
 function checkFeatureEntryPointCompleteness() {
   for (const feature of featureDirectories()) {
     const apiPath = join(root, `projects/hell/src/lib/public-api-feature-${feature}.ts`);
@@ -1378,6 +1423,10 @@ function primitiveDirectories() {
   return childDirectories(join(root, 'projects/hell/src/lib/primitives')).filter(
     (primitive) => primitive !== 'adapters',
   );
+}
+
+function compositeDirectories() {
+  return childDirectories(join(root, 'projects/hell/src/lib/composites'));
 }
 
 function featureDirectories() {

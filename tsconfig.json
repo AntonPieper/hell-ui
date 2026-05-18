@@ -18,6 +18,39 @@
       "@hell-ui/angular/composites": [
         "./projects/hell/src/lib/public-api-composites.ts"
       ],
+      "@hell-ui/angular/app-shell": [
+        "./projects/hell/src/lib/public-api-composite-app-shell.ts"
+      ],
+      "@hell-ui/angular/audio-player": [
+        "./projects/hell/src/lib/public-api-composite-audio-player.ts"
+      ],
+      "@hell-ui/angular/avatar-group": [
+        "./projects/hell/src/lib/public-api-composite-avatar-group.ts"
+      ],
+      "@hell-ui/angular/date-input": [
+        "./projects/hell/src/lib/public-api-composite-date-input.ts"
+      ],
+      "@hell-ui/angular/dialpad": [
+        "./projects/hell/src/lib/public-api-composite-dialpad.ts"
+      ],
+      "@hell-ui/angular/drop-zone": [
+        "./projects/hell/src/lib/public-api-composite-drop-zone.ts"
+      ],
+      "@hell-ui/angular/omnibar": [
+        "./projects/hell/src/lib/public-api-composite-omnibar.ts"
+      ],
+      "@hell-ui/angular/resizable": [
+        "./projects/hell/src/lib/public-api-composite-resizable.ts"
+      ],
+      "@hell-ui/angular/split-view": [
+        "./projects/hell/src/lib/public-api-composite-split-view.ts"
+      ],
+      "@hell-ui/angular/time-input": [
+        "./projects/hell/src/lib/public-api-composite-time-input.ts"
+      ],
+      "@hell-ui/angular/toast": [
+        "./projects/hell/src/lib/public-api-composite-toast.ts"
+      ],
       "@hell-ui/angular/features/code-editor": [
         "./projects/hell/src/lib/public-api-feature-code-editor.ts"
       ],
