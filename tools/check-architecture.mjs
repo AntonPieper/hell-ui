@@ -8,6 +8,7 @@ const failures = [];
 checkDocsExamples();
 checkDocsRootImportContract();
 checkDocsCodeEditorIsolationContract();
+checkDocsPdfViewerIsolationContract();
 checkPackageEntryPoints();
 checkPackageDependencyContract();
 checkStyleEntryPoints();
@@ -282,6 +283,53 @@ function checkDocsCodeEditorIsolationContract() {
       );
     }
   }
+}
+
+function checkDocsPdfViewerIsolationContract() {
+  const heavyImports = ['@hell-ui/angular/features/pdf-viewer', 'pdfjs-dist'];
+  const sharedFiles = [
+    'projects/hell-docs/src/app/shared/code-block.ts',
+    'projects/hell-docs/src/app/shared/example-tabs.ts',
+    'projects/hell-docs/src/app/shared/code-tools.ts',
+  ];
+
+  for (const file of sharedFiles) {
+    const path = join(root, file);
+    if (!existsSync(path)) {
+      failures.push(`Docs architecture check references missing file ${file}`);
+      continue;
+    }
+
+    const source = readFile(path);
+    if (hasPackageImport(source, heavyImports)) {
+      failures.push(
+        `Docs shared file ${file} must not import pdf.js or @hell-ui/angular/features/pdf-viewer`,
+      );
+    }
+  }
+
+  const docsPagesRoot = join(root, 'projects/hell-docs/src/app/pages');
+  const docsPages = walk(docsPagesRoot).filter((file) => file.endsWith('.ts'));
+  for (const file of docsPages) {
+    if (file.includes('/components/pdf-viewer/')) continue;
+
+    const source = readFile(file);
+    if (hasPackageImport(source, heavyImports)) {
+      failures.push(
+        `Docs page ${file.replace(root + '/', '')} must keep pdf.js imports within /components/pdf-viewer`,
+      );
+    }
+  }
+}
+
+function hasPackageImport(source, specifiers) {
+  return specifiers.some((specifier) => {
+    const escaped = escapeRegExp(specifier);
+    const pattern = new RegExp(
+      `(?:from\\s*['"]${escaped}(?:/[^'"]*)?['"]|import\\s*(?:\\(\\s*)?['"]${escaped}(?:/[^'"]*)?['"])`,
+    );
+    return pattern.test(source);
+  });
 }
 
 function checkPackageEntryPoints() {
