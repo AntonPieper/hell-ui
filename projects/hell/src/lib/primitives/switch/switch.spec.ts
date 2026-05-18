@@ -40,6 +40,7 @@ class SwitchFormHost {
         type="checkbox"
         hellNativeSwitch
         [formControl]="control"
+        [required]="required()"
         (checkedChange)="checkedEvents.push($event)"
       />
       Native switch
@@ -48,6 +49,7 @@ class SwitchFormHost {
 })
 class NativeSwitchFormHost {
   readonly control = new FormControl(false, { nonNullable: true });
+  readonly required = signal(false);
   readonly checkedEvents: boolean[] = [];
 }
 
@@ -121,11 +123,16 @@ describe('HellSwitch', () => {
     expect(sw.type).toBe('checkbox');
     expect(sw.getAttribute('role')).toBe('switch');
     expect(sw.classList.contains('hell-switch')).toBe(true);
+    expect(sw.hasAttribute('required')).toBe(false);
+    expect(sw.getAttribute('aria-required')).toBeNull();
 
+    host.required.set(true);
     host.control.setValue(true);
     fixture.detectChanges();
 
-    expect(sw.checked).toBe(true);
+    expect(sw.getAttribute('required')).toBe('');
+    expect(sw.getAttribute('aria-required')).toBe('true');
+    expect(sw.getAttribute('data-required')).toBe('true');
     expect(sw.checked).toBe(true);
 
     sw.click();

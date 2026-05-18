@@ -18,9 +18,10 @@ import switchNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
       <h1>Switch</h1>
       <p>
         Use for binary on/off settings whose effect is applied immediately. For deferred values that
-        are committed on submit, prefer <code>checkbox</code>. The host is a
-        <code>&lt;button&gt;</code>, so wrapping in a <code>&lt;label&gt;</code> toggles it
-        natively.
+        are committed on submit, prefer <code>checkbox</code>. The styled
+        <code>button[hellSwitch]</code> path is an Angular Forms-ready custom switch button that
+        defaults to <code>type="button"</code>; use <code>input[hellNativeSwitch]</code> when
+        browser checkbox semantics, labels, and native form tooling are the priority.
       </p>
 
       <h2>Examples</h2>
@@ -35,7 +36,15 @@ import switchNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
 
       <h2>API</h2>
       <ul>
-        <li><code>checked</code>, <code>checkedChange</code>, <code>disabled</code></li>
+        <li>
+          <code>button[hellSwitch]</code>: <code>checked</code>,
+          <code>checkedChange</code>, <code>disabled</code>
+        </li>
+        <li>
+          <code>input[type="checkbox"][hellNativeSwitch]</code>: native
+          <code>checked</code> / <code>disabled</code> and Angular Forms behavior,
+          <code>checkedChange</code>, <code>required</code>
+        </li>
       </ul>
 
       <h2>Do</h2>
