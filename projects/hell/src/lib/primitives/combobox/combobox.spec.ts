@@ -5,7 +5,12 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { NgpCombobox } from 'ng-primitives/combobox';
 
-import { HellCombobox, HellComboboxBasic, HellComboboxValue, HELL_COMBOBOX_DIRECTIVES } from './combobox';
+import {
+  HellCombobox,
+  HellComboboxBasic,
+  HellComboboxValue,
+  HELL_COMBOBOX_DIRECTIVES,
+} from './combobox';
 
 @Component({
   imports: [ReactiveFormsModule, ...HELL_COMBOBOX_DIRECTIVES],
@@ -28,7 +33,13 @@ class ComboboxFormHost {
 @Component({
   imports: [ReactiveFormsModule, ...HELL_COMBOBOX_DIRECTIVES],
   template: `
-    <div id="multi-combobox" hellCombobox multiple [formControl]="control" (valueChange)="values.push($any($event))">
+    <div
+      id="multi-combobox"
+      hellCombobox
+      multiple
+      [formControl]="control"
+      (valueChange)="values.push($any($event))"
+    >
       <input hellComboboxInput aria-label="Assignees" />
       <button hellComboboxButton type="button">Toggle</button>
       <div *hellComboboxPortal hellComboboxDropdown>
@@ -61,7 +72,7 @@ class ComboboxBasicFormHost {
 
 @Component({
   imports: [HellComboboxBasic],
-  template: `<hell-combobox-basic [options]="options" [value]="value()" />`
+  template: `<hell-combobox-basic [options]="options" [value]="value()" />`,
 })
 class ComboboxBasicValueHost {
   readonly options = ['Atlas', 'Nova'];
@@ -78,6 +89,10 @@ describe('HellCombobox', () => {
         ComboboxBasicValueHost,
       ],
     }).compileComponents();
+  });
+
+  afterEach(() => {
+    document.body.replaceChildren();
   });
 
   it('integrates with reactive forms without echoing programmatic writes', async () => {
@@ -133,13 +148,57 @@ describe('HellCombobox', () => {
     expect(combobox.getAttribute('data-disabled')).toBe('');
   });
 
+  it('exposes APG combobox input semantics while closed', () => {
+    const fixture = TestBed.createComponent(ComboboxBasicFormHost);
+    fixture.detectChanges();
+
+    const input = query<HTMLInputElement>(
+      fixture.nativeElement,
+      'hell-combobox-basic input[hellComboboxInput]',
+    );
+
+    expect(input.getAttribute('role')).toBe('combobox');
+    expect(input.getAttribute('aria-haspopup')).toBe('listbox');
+    expect(input.getAttribute('aria-autocomplete')).toBe('list');
+    expect(input.getAttribute('aria-expanded')).toBe('false');
+    expect(input.hasAttribute('aria-controls')).toBe(false);
+  });
+
   it('keeps the visible toggle button out of the tab order while preserving clickability', () => {
     const fixture = TestBed.createComponent(ComboboxFormHost);
     fixture.detectChanges();
 
     const button = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellComboboxButton]');
     expect(button.tabIndex).toBe(-1);
+    expect(button.getAttribute('aria-haspopup')).toBe('listbox');
+    expect(button.getAttribute('aria-expanded')).toBe('false');
     expect(button.disabled).toBe(false);
+  });
+
+  it('links the input and button to the opened listbox popup', async () => {
+    const fixture = TestBed.createComponent(ComboboxBasicFormHost);
+    fixture.detectChanges();
+
+    const input = query<HTMLInputElement>(
+      fixture.nativeElement,
+      'hell-combobox-basic input[hellComboboxInput]',
+    );
+    const button = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      'hell-combobox-basic button[hellComboboxButton]',
+    );
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    const dropdown = await waitForDropdown(fixture);
+    const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[role="option"]'));
+
+    expect(input.getAttribute('aria-expanded')).toBe('true');
+    expect(input.getAttribute('aria-controls')).toBe(dropdown.id);
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+    expect(button.getAttribute('aria-controls')).toBe(dropdown.id);
+    expect(dropdown.getAttribute('role')).toBe('listbox');
+    expect(options.map((option) => option.textContent?.trim())).toEqual(['Atlas', 'Nova']);
+    expect(options.every((option) => option.tabIndex === -1)).toBe(true);
   });
 
   it('keeps the private ng-primitives compatibility bridge working for value and disabled CVA updates', () => {
@@ -209,7 +268,10 @@ describe('HellCombobox', () => {
     const host = fixture.componentInstance;
     const preset = query<HTMLElement>(fixture.nativeElement, 'hell-combobox-basic');
     const root = query<HTMLElement>(fixture.nativeElement, 'hell-combobox-basic [hellCombobox]');
-    const input = query<HTMLInputElement>(fixture.nativeElement, 'hell-combobox-basic input[hellComboboxInput]');
+    const input = query<HTMLInputElement>(
+      fixture.nativeElement,
+      'hell-combobox-basic input[hellComboboxInput]',
+    );
 
     expect(preset.classList.contains('hell-combobox-basic')).toBe(true);
     expect(preset.classList.contains('hell-combobox')).toBe(false);
@@ -242,7 +304,10 @@ describe('HellCombobox', () => {
     await fixture.whenStable();
 
     const host = fixture.componentInstance;
-    const input = query<HTMLInputElement>(fixture.nativeElement, 'hell-combobox-basic input[hellComboboxInput]');
+    const input = query<HTMLInputElement>(
+      fixture.nativeElement,
+      'hell-combobox-basic input[hellComboboxInput]',
+    );
 
     expect(input.value).toBe('Atlas');
 
@@ -253,6 +318,24 @@ describe('HellCombobox', () => {
     expect(input.value).toBe('Nova');
   });
 });
+
+async function waitForDropdown(fixture: {
+  detectChanges: () => void;
+  whenStable: () => Promise<unknown>;
+}): Promise<HTMLElement> {
+  const timeout = Date.now() + 1000;
+
+  while (Date.now() < timeout) {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const dropdown = document.querySelector<HTMLElement>('[hellComboboxDropdown]');
+    if (dropdown) return dropdown;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  throw new Error('Expected combobox dropdown.');
+}
 
 function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {
   const element = root.querySelector<T>(selector);

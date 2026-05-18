@@ -28,7 +28,11 @@ class TimeInputHost {
 @Component({
   imports: [ReactiveFormsModule, HellTimeInput],
   template: `
-    <hell-time-input [formControl]="control" aria-label="Form time" (valueChange)="values.push($event)" />
+    <hell-time-input
+      [formControl]="control"
+      aria-label="Form time"
+      (valueChange)="values.push($event)"
+    />
   `,
 })
 class TimeInputFormHost {
@@ -38,14 +42,15 @@ class TimeInputFormHost {
 
 @Component({
   imports: [ReactiveFormsModule, HellTimeInput],
-  template: `
-    <hell-time-input [formControl]="control" aria-label="Blur form time" />
-  `,
+  template: ` <hell-time-input [formControl]="control" aria-label="Blur form time" /> `,
 })
 class TimeInputBlurFormHost {
-  readonly control = new FormControl<HellTimeValue | null>({ hour: 8, minute: 30, second: 0 }, {
-    updateOn: 'blur',
-  });
+  readonly control = new FormControl<HellTimeValue | null>(
+    { hour: 8, minute: 30, second: 0 },
+    {
+      updateOn: 'blur',
+    },
+  );
 }
 
 @Component({
@@ -58,10 +63,15 @@ class TimeInputBlurFormHost {
           : { valid: false },
       format: (value) => `${value.hour}h${value.minute.toString().padStart(2, '0')}`,
       normalize: (value) => (value && value.hour >= 12 ? value : null),
-      isSameValue: (a, b) => a?.hour === b?.hour && a?.minute === b?.minute && a?.second === b?.second,
+      isSameValue: (a, b) =>
+        a?.hour === b?.hour && a?.minute === b?.minute && a?.second === b?.second,
     }),
   ],
-  template: `<hell-time-input [value]="value()" aria-label="Custom time" (valueChange)="values.push($event)" />`,
+  template: `<hell-time-input
+    [value]="value()"
+    aria-label="Custom time"
+    (valueChange)="values.push($event)"
+  />`,
 })
 class TimeInputCustomAdapterHost {
   readonly value = signal<HellTimeValue | null>({ hour: 8, minute: 30, second: 0 });
@@ -70,7 +80,11 @@ class TimeInputCustomAdapterHost {
 
 @Component({
   imports: [ReactiveFormsModule, HellTimeInput],
-  template: `<hell-time-input [formControl]="control" aria-label="Validated time" (valueChange)="values.push($event)" />`,
+  template: `<hell-time-input
+    [formControl]="control"
+    aria-label="Validated time"
+    (valueChange)="values.push($event)"
+  />`,
 })
 class TimeInputValidationHost {
   readonly control = new FormControl<HellTimeValue | null>({ hour: 9, minute: 15, second: 0 });
@@ -238,48 +252,68 @@ describe('HellTimeInput', () => {
     triggerButton(fixture.nativeElement).dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
     const hourGrid = await waitForPickerGrid(fixture, 'hours');
-    const minuteGrid = document.querySelector<HTMLElement>('[data-slot="picker-grid"][data-unit="minutes"]');
-    const secondGrid = document.querySelector<HTMLElement>('[data-slot="picker-grid"][data-unit="seconds"]');
+    const minuteGrid = document.querySelector<HTMLElement>(
+      '[data-slot="picker-grid"][data-unit="minutes"]',
+    );
+    const secondGrid = document.querySelector<HTMLElement>(
+      '[data-slot="picker-grid"][data-unit="seconds"]',
+    );
 
     expect(hourGrid?.getAttribute('role')).toBe('grid');
     expect(hourGrid?.getAttribute('aria-label')).toBe('Hours');
     expect(hourGrid?.querySelectorAll('[role="row"]').length).toBe(4);
     expect(hourGrid?.querySelectorAll('[role="gridcell"]').length).toBe(24);
-    expect(hourGrid?.querySelector('[role="gridcell"][aria-selected="true"]')?.textContent?.trim()).toBe('08');
+    expect(
+      hourGrid?.querySelector('[role="gridcell"][aria-selected="true"]')?.textContent?.trim(),
+    ).toBe('08');
     expect(rovingDomTabStopCount(hourGrid)).toBe(1);
 
     expect(minuteGrid?.getAttribute('role')).toBe('grid');
-    expect(minuteGrid?.querySelector('[role="gridcell"][aria-selected="true"]')?.textContent?.trim()).toBe('30');
+    expect(
+      minuteGrid?.querySelector('[role="gridcell"][aria-selected="true"]')?.textContent?.trim(),
+    ).toBe('30');
     expect(rovingDomTabStopCount(minuteGrid)).toBe(1);
 
     expect(secondGrid?.getAttribute('role')).toBe('grid');
-    expect(secondGrid?.querySelector('[role="gridcell"][aria-selected="true"]')?.textContent?.trim()).toBe('00');
+    expect(
+      secondGrid?.querySelector('[role="gridcell"][aria-selected="true"]')?.textContent?.trim(),
+    ).toBe('00');
     expect(rovingDomTabStopCount(secondGrid)).toBe(1);
   });
 
-  it('supports Arrow/Home/End navigation in picker sections', () => {
+  it('supports Arrow/Home/End navigation in picker sections', async () => {
     const fixture = TestBed.createComponent(TimeInputHost);
     fixture.detectChanges();
 
-    const picker = timeInputInstance(fixture);
+    triggerButton(fixture.nativeElement).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    const hourGrid = await waitForPickerGrid(fixture, 'hours');
+    const minuteGrid = await waitForPickerGrid(fixture, 'minutes');
 
-    picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'ArrowRight' }), 'hour', 0);
-    expect(tabStopIndex(picker, 'hour', 24)).toBe(1);
+    dispatchPickerKey(hourGrid, 0, 'ArrowRight');
+    fixture.detectChanges();
+    expect(domTabStopIndex(hourGrid)).toBe(1);
+    expect(document.activeElement).toBe(pickerCell(hourGrid, 1));
 
-    picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'ArrowLeft' }), 'hour', 1);
-    expect(tabStopIndex(picker, 'hour', 24)).toBe(0);
+    dispatchPickerKey(hourGrid, 1, 'ArrowLeft');
+    fixture.detectChanges();
+    expect(domTabStopIndex(hourGrid)).toBe(0);
 
-    picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'End' }), 'hour', 0);
-    expect(tabStopIndex(picker, 'hour', 24)).toBe(23);
+    dispatchPickerKey(hourGrid, 0, 'End');
+    fixture.detectChanges();
+    expect(domTabStopIndex(hourGrid)).toBe(23);
+    expect(document.activeElement).toBe(pickerCell(hourGrid, 23));
 
-    picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'Home' }), 'hour', 23);
-    expect(tabStopIndex(picker, 'hour', 24)).toBe(0);
+    dispatchPickerKey(hourGrid, 23, 'Home');
+    fixture.detectChanges();
+    expect(domTabStopIndex(hourGrid)).toBe(0);
 
-    picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'ArrowDown' }), 'minute', 0);
-    expect(tabStopIndex(picker, 'minute', 60)).toBe(4);
+    dispatchPickerKey(minuteGrid, 0, 'ArrowDown');
+    fixture.detectChanges();
+    expect(domTabStopIndex(minuteGrid)).toBe(4);
 
-    picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'ArrowUp' }), 'minute', 4);
-    expect(tabStopIndex(picker, 'minute', 60)).toBe(0);
+    dispatchPickerKey(minuteGrid, 4, 'ArrowUp');
+    fixture.detectChanges();
+    expect(domTabStopIndex(minuteGrid)).toBe(0);
   });
 
   it('keeps roving tab stop stable for non-navigation keys', () => {
@@ -444,7 +478,10 @@ function textInput(root: HTMLElement): HTMLInputElement {
   return input;
 }
 
-function timeInputInstance(fixture: ComponentFixture<unknown>): { onPickerCellKeydown: (event: KeyboardEvent, unit: HellTimeUnit, index: number) => void; pickerCellTabIndex: (unit: HellTimeUnit, index: number) => string } {
+function timeInputInstance(fixture: ComponentFixture<unknown>): {
+  onPickerCellKeydown: (event: KeyboardEvent, unit: HellTimeUnit, index: number) => void;
+  pickerCellTabIndex: (unit: HellTimeUnit, index: number) => string;
+} {
   const host = fixture.debugElement.query(By.directive(HellTimeInput));
   if (!host) throw new Error('Expected HellTimeInput instance.');
   return host.componentInstance as {
@@ -461,9 +498,31 @@ function rovingDomTabStopCount(grid: HTMLElement | null): number {
   ).length;
 }
 
-function tabStopCount(picker: { pickerCellTabIndex: (unit: HellTimeUnit, index: number) => string }, unit: HellTimeUnit, count: number): number {
-  return Array.from({ length: count }, (_, index) => index).filter((index) =>
-    picker.pickerCellTabIndex(unit, index) === '0',
+function domTabStopIndex(grid: HTMLElement): number {
+  return pickerCells(grid).findIndex((cell) => cell.tabIndex === 0);
+}
+
+function dispatchPickerKey(grid: HTMLElement, index: number, key: string): void {
+  pickerCell(grid, index).dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+}
+
+function pickerCell(grid: HTMLElement, index: number): HTMLElement {
+  const cell = pickerCells(grid)[index];
+  if (!cell) throw new Error(`Expected picker cell ${index}.`);
+  return cell;
+}
+
+function pickerCells(grid: HTMLElement): HTMLElement[] {
+  return Array.from(grid.querySelectorAll<HTMLElement>('[role="gridcell"]'));
+}
+
+function tabStopCount(
+  picker: { pickerCellTabIndex: (unit: HellTimeUnit, index: number) => string },
+  unit: HellTimeUnit,
+  count: number,
+): number {
+  return Array.from({ length: count }, (_, index) => index).filter(
+    (index) => picker.pickerCellTabIndex(unit, index) === '0',
   ).length;
 }
 
