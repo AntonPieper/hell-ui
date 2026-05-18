@@ -66,6 +66,15 @@ const adapterChecks = [
   },
 ];
 
+const fileChecks = [
+  {
+    path: 'tools/run-ci-tests.mjs',
+    includes: [
+      "args: ['run', 'test:package-consumer', '--', '--minimal-deps']",
+    ],
+  },
+];
+
 const adapterForbiddenPatterns = [
   { pattern: /\bng\s+test\b/, message: 'CI adapters must call ci:test instead of ng test.' },
   { pattern: /pnpm\s+exec\s+playwright\s+install\s+--with-deps\s+chromium\s+firefox\s+webkit/, message: 'CI adapters must call ci:playwright instead of pnpm exec playwright install.' },
@@ -105,6 +114,19 @@ for (const check of adapterChecks) {
   for (const forbidden of adapterForbiddenPatterns) {
     if (forbidden.pattern.test(content)) {
       errors.push(`${check.path}: ${forbidden.message}`);
+    }
+  }
+}
+
+for (const check of fileChecks) {
+  if (!existsSync(check.path)) {
+    continue;
+  }
+
+  const content = readFileSync(check.path, 'utf8');
+  for (const expected of check.includes) {
+    if (!content.includes(expected)) {
+      errors.push(`${check.path} must include ${expected}`);
     }
   }
 }

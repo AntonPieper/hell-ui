@@ -29,7 +29,7 @@ const tasks = [
   },
   {
     name: 'package consumer',
-    args: ['run', 'test:package-consumer'],
+    args: ['run', 'test:package-consumer', '--', '--minimal-deps'],
   },
   {
     name: 'CI contract',

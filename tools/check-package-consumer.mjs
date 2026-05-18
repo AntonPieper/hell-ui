@@ -49,16 +49,19 @@ const angularAppDeps = [
   'rxjs',
   'tslib',
 ];
-const lightUiWithoutFontAwesomeDeps = [
+const behaviorUiWithoutFontAwesomeDeps = [
   ...angularAppDeps,
   '@angular/cdk',
   '@floating-ui/dom',
   'ng-primitives',
   '@ng-icons/core',
+];
+const styledUiWithoutFontAwesomeDeps = [
+  ...behaviorUiWithoutFontAwesomeDeps,
   'tailwindcss',
 ];
-const lightUiDeps = [
-  ...lightUiWithoutFontAwesomeDeps,
+const styledUiDeps = [
+  ...styledUiWithoutFontAwesomeDeps,
   '@ng-icons/font-awesome',
 ];
 // The aggregate /primitives FESM includes dialog, and ng-primitives/dialog
@@ -66,12 +69,13 @@ const lightUiDeps = [
 // as a package peer. Narrow primitive entrypoints (for example /button) prove
 // router-free consumption for consumers that avoid the aggregate barrel.
 const primitivesDeps = [
-  ...lightUiDeps,
+  ...styledUiDeps,
   '@angular/router',
 ];
-const coreDeps = lightUiWithoutFontAwesomeDeps;
+const coreDeps = behaviorUiWithoutFontAwesomeDeps;
+const buttonStyledDeps = styledUiWithoutFontAwesomeDeps;
 const codeEditorDeps = [
-  ...lightUiDeps,
+  ...styledUiWithoutFontAwesomeDeps,
   '@codemirror/commands',
   '@codemirror/language',
   '@codemirror/state',
@@ -80,7 +84,7 @@ const codeEditorDeps = [
 ];
 const testingDeps = coreDeps;
 const pdfViewerDeps = [
-  ...lightUiDeps,
+  ...styledUiDeps,
   'pdfjs-dist',
 ];
 
@@ -108,23 +112,30 @@ const scenarios = [
     stylesCss: primitivesConsumerStylesCss(),
   },
   {
-    name: 'button',
-    description: 'narrow primitive button entry without Font Awesome peer',
+    name: 'button-unstyled',
+    description: 'narrow primitive button entry without CSS or Tailwind peer',
     dependencies: coreDeps,
+    mainTs: buttonUnstyledConsumerMainTs(),
+    stylesCss: '',
+  },
+  {
+    name: 'button',
+    description: 'narrow primitive button entry with primitive styles and without Font Awesome peer',
+    dependencies: buttonStyledDeps,
     mainTs: buttonConsumerMainTs(),
     stylesCss: primitivesConsumerStylesCss(),
   },
   {
     name: 'composites',
     description: 'composites entry without feature peers',
-    dependencies: lightUiDeps,
+    dependencies: styledUiDeps,
     mainTs: compositesConsumerMainTs(),
     stylesCss: compositesConsumerStylesCss(),
   },
   {
     name: 'app-shell',
-    description: 'narrow app-shell composite entry without feature peers',
-    dependencies: lightUiDeps,
+    description: 'narrow app-shell composite entry without Font Awesome or feature peers',
+    dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: appShellConsumerMainTs(),
     stylesCss: compositesConsumerStylesCss(),
   },
@@ -137,22 +148,22 @@ const scenarios = [
   },
   {
     name: 'code-editor',
-    description: 'code-editor feature with package-wide light peers and CodeMirror peers',
+    description: 'code-editor feature with styled peers and CodeMirror peers',
     dependencies: codeEditorDeps,
     mainTs: codeEditorConsumerMainTs(),
     stylesCss: codeEditorConsumerStylesCss(),
   },
   {
     name: 'table-utilities',
-    description: 'preferred table utilities feature with package-wide light peers',
-    dependencies: lightUiDeps,
+    description: 'preferred table utilities feature without Font Awesome peer',
+    dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: tableUtilitiesConsumerMainTs(),
     stylesCss: tableUtilitiesConsumerStylesCss(),
   },
   {
     name: 'data-table',
-    description: 'legacy data-table alias with package-wide light peers',
-    dependencies: lightUiDeps,
+    description: 'legacy data-table alias without Font Awesome peer',
+    dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: dataTableConsumerMainTs(),
     stylesCss: dataTableConsumerStylesCss(),
   },
@@ -497,6 +508,28 @@ import { HellButton } from '${packageName}/button';
   template: \`
     <button hellButton type="button">Save</button>
     <a hellButton href="#details" [disabled]="disabled">Details</a>
+  \`,
+})
+class App {
+  protected readonly disabled = true;
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function buttonUnstyledConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HellButton } from '${packageName}/button';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [HellButton],
+  template: \`
+    <button hellButton unstyled type="button">Save</button>
+    <a hellButton unstyled href="#details" [disabled]="disabled">Details</a>
   \`,
 })
 class App {
