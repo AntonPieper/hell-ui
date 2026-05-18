@@ -472,8 +472,11 @@ function testingConsumerMainTs() {
 import { bootstrapApplication } from '@angular/platform-browser';
 import {
   HellButtonHarness,
+  HellComboboxHarness,
   HellDialogHarness,
   HellDialogOverlayHarness,
+  HellMenuTriggerHarness,
+  HellSelectHarness,
   HellTableHarness,
 } from '${packageName}/testing';
 
@@ -485,8 +488,11 @@ import {
 class App {
   protected readonly harnessTypes = [
     HellButtonHarness,
+    HellComboboxHarness,
     HellDialogHarness,
     HellDialogOverlayHarness,
+    HellMenuTriggerHarness,
+    HellSelectHarness,
     HellTableHarness,
   ];
 }

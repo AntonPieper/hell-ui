@@ -302,7 +302,7 @@ function checkPackageEntryPoints() {
     );
   }
 
-  const internalCoreExports = new Set(['floating-scope', 'resize-behavior']);
+  const internalCoreExports = new Set(['floating-dismissal', 'floating-scope', 'resize-behavior']);
   for (const [api, source] of [
     ['projects/hell/src/public-api.ts', rootApi],
     ...secondaryApis.map((api) => [api, readFile(join(root, api))]),
