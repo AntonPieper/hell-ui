@@ -24,7 +24,7 @@ import {
   NgpRadioIndicator,
   injectRadioGroupState,
 } from 'ng-primitives/radio';
-import { writeRadioGroupPrivateDisabled, writeRadioGroupPrivateValue } from '../adapters/ngp-state-adapters';
+import { writeRadioGroupStateDisabled, writeRadioGroupStateValue } from '../adapters/ngp-state-adapters';
 import { containsNode } from '../../core/dom';
 import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
 import { HellOrientation } from '../../core/types';
@@ -89,7 +89,7 @@ export class HellRadioGroup<T = unknown> extends HellStyleable implements Contro
   }
 
   writeValue(value: T | null): void {
-    writeRadioGroupPrivateValue(this.groupState(), value);
+    writeRadioGroupStateValue(this.groupState(), value);
   }
 
   registerOnChange(fn: (value: T | null) => void): void {
@@ -105,7 +105,7 @@ export class HellRadioGroup<T = unknown> extends HellStyleable implements Contro
   }
 
   setDisabledState(isDisabled: boolean): void {
-    writeRadioGroupPrivateDisabled(this.groupState(), isDisabled);
+    writeRadioGroupStateDisabled(this.groupState(), isDisabled);
     this.onValidatorChange();
   }
 

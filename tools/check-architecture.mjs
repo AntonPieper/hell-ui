@@ -1157,15 +1157,15 @@ function checkNgpPrivateStateBridgeContract() {
   const libraryPackage = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
   const expectedVersion = `ng-primitives@${ngpPackage.version}`;
 
-  if (!adapterSource.includes(`HELL_NGP_PRIVATE_STATE_BRIDGE_VERSION = '${expectedVersion}'`)) {
+  if (!adapterSource.includes(`HELL_NGP_STATE_WRITER_VERSION = '${expectedVersion}'`)) {
     failures.push(
-      `ng-primitives private state bridge version must match installed ${expectedVersion}`,
+      `ng-primitives state writer version must match installed ${expectedVersion}`,
     );
   }
 
   if (libraryPackage.peerDependencies?.['ng-primitives'] !== ngpPackage.version) {
     failures.push(
-      `ng-primitives peer dependency must be pinned to ${ngpPackage.version} while private state bridge is version-bound`,
+      `ng-primitives peer dependency must be pinned to ${ngpPackage.version} while the state writer fallback is version-bound`,
     );
   }
 
@@ -1176,7 +1176,16 @@ function checkNgpPrivateStateBridgeContract() {
     'projects/hell/src/lib/primitives/combobox/combobox.ts',
     'projects/hell/src/lib/primitives/radio/radio.ts',
   ]);
-  const privateBridgeTokens = [
+  const stateWriterTokens = [
+    'HELL_NGP_STATE_WRITER_VERSION',
+    'writeSelectStateValue',
+    'writeSelectStateDisabled',
+    'writeComboboxStateValue',
+    'writeComboboxStateDisabled',
+    'writeRadioGroupStateValue',
+    'writeRadioGroupStateDisabled',
+  ];
+  const retiredPrivateBridgeTokens = [
     'HELL_NGP_PRIVATE_STATE_BRIDGE_VERSION',
     'writeSelectPrivateValue',
     'writeSelectPrivateDisabled',
@@ -1190,23 +1199,26 @@ function checkNgpPrivateStateBridgeContract() {
   for (const file of sourceFiles) {
     const source = readFile(file);
     const rel = file.slice(root.length + 1);
+    if (retiredPrivateBridgeTokens.some((token) => source.includes(token))) {
+      failures.push(`Retired ng-primitives private bridge token is still used in ${rel}`);
+    }
     if (allowedBridgeFiles.has(rel)) continue;
-    const usesPrivateBridge =
+    const usesStateWriter =
       source.includes('ngp-state-adapters') ||
-      privateBridgeTokens.some((token) => source.includes(token));
-    if (usesPrivateBridge) {
-      failures.push(`ng-primitives private state bridge usage is not approved in ${rel}`);
+      stateWriterTokens.some((token) => source.includes(token));
+    if (usesStateWriter) {
+      failures.push(`ng-primitives state writer usage is not approved in ${rel}`);
     }
   }
 
   const adaptersBarrel = readFile(join(root, 'projects/hell/src/lib/primitives/adapters/adapters.ts'));
-  if (/export\s+\*\s+from/.test(adaptersBarrel) || privateBridgeTokens.some((token) => adaptersBarrel.includes(token))) {
-    failures.push('ng-primitives private state bridge must not be re-exported through the adapters barrel');
+  if (/export\s+\*\s+from/.test(adaptersBarrel) || stateWriterTokens.some((token) => adaptersBarrel.includes(token))) {
+    failures.push('ng-primitives state writer must not be re-exported through the adapters barrel');
   }
 
   for (const token of ['writeToggleGroupValue', 'writeToggleGroupDisabled', 'ToggleGroupStateMutation']) {
     if (adapterSource.includes(token)) {
-      failures.push(`Toggle group must use public ng-primitives setters, not private bridge token ${token}`);
+      failures.push(`Toggle group must use public ng-primitives setters, not state-writer token ${token}`);
     }
   }
 }

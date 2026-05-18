@@ -1,27 +1,42 @@
+import type { State } from 'ng-primitives/state';
+import type { NgpCombobox } from 'ng-primitives/combobox';
+import type { NgpRadioGroup } from 'ng-primitives/radio';
+import type { NgpSelect } from 'ng-primitives/select';
+
 /**
- * Private compatibility seam for ng-primitives state mutation.
+ * Internal compatibility seam for ng-primitives state writes.
  *
- * Hell uses public ng-primitives APIs whenever they can perform CVA writes.
- * Select, combobox, and radio group do not expose public value/disabled setters
- * in ng-primitives 0.117.2, so their CVA writes are isolated here until
- * upstream setters exist.
+ * Hell uses public ng-primitives setter methods whenever they can perform CVA
+ * writes. In ng-primitives 0.117.2, Select, Combobox, and RadioGroup expose
+ * State<T> through public inject-state APIs, but they do not expose public
+ * value/disabled setters. The only release-sensitive fallback is isolated here:
+ * writable State<T> signal channels for `value` and `disabled`.
  *
- * If ng-primitives changes this private state shape, fail loudly here instead
- * of silently dropping form writes.
+ * If ng-primitives changes those writable channels before adding setters, fail
+ * loudly in this adapter instead of silently dropping form writes across select,
+ * combobox, and radio.
  *
  * @internal
  */
 
-export const HELL_NGP_PRIVATE_STATE_BRIDGE_VERSION = 'ng-primitives@0.117.2';
+export const HELL_NGP_STATE_WRITER_VERSION = 'ng-primitives@0.117.2';
+
+type WritableStateChannel<T> = { set: (value: T) => void };
+type StateWithValueSetter<T> = { setValue?: (value: T) => void };
+type StateWithDisabledSetter = { setDisabled?: (isDisabled: boolean) => void };
+
+type SelectStateWriter = State<NgpSelect> & StateWithValueSetter<unknown> & StateWithDisabledSetter;
+type ComboboxStateWriter = State<NgpCombobox> & StateWithValueSetter<unknown> & StateWithDisabledSetter;
+type RadioGroupStateWriter<T> = State<NgpRadioGroup<T>> & StateWithValueSetter<T | null> & StateWithDisabledSetter;
 
 /**
- * Internal helper for asserting that a writable ng-primitives state channel is
- * present.
+ * Internal helper for asserting that the version-bound writable ng-primitives
+ * State<T> fallback channel is present.
  */
-function assertWritableSignal(state: unknown, operation: string, channel: string): void {
+function assertWritableSignal<T>(state: unknown, operation: string, channel: string): asserts state is Record<string, WritableStateChannel<T>> {
   if (!state || typeof state !== 'object') {
     throw new Error(
-      `[hell-ngp-private-state-bridge ${HELL_NGP_PRIVATE_STATE_BRIDGE_VERSION}] ${operation} requires state.${channel}.set from ng-primitives private state, received ${String(state)}.`,
+      `[hell-ngp-state-writer ${HELL_NGP_STATE_WRITER_VERSION}] ${operation} requires state.${channel}.set from ng-primitives State<T>, received ${String(state)}.`,
     );
   }
 
@@ -34,92 +49,84 @@ function assertWritableSignal(state: unknown, operation: string, channel: string
 
   if (!isWritableSignalLike) {
     throw new Error(
-      `[hell-ngp-private-state-bridge ${HELL_NGP_PRIVATE_STATE_BRIDGE_VERSION}] ${operation} requires state.${channel}.set to be callable. ` +
-        `Expected ng-primitives ${HELL_NGP_PRIVATE_STATE_BRIDGE_VERSION} private writable signal for channel "${channel}", received ${typeof value}.`,
+      `[hell-ngp-state-writer ${HELL_NGP_STATE_WRITER_VERSION}] ${operation} requires state.${channel}.set to be callable. ` +
+        `Expected ng-primitives ${HELL_NGP_STATE_WRITER_VERSION} writable State<T> signal fallback for channel "${channel}", received ${typeof value}.`,
     );
   }
 }
 
-function assertSelectPrivateState(state: unknown, operation: string): asserts state is SelectPrivateStateMutation {
-  assertWritableSignal(state, operation, 'value');
-  assertWritableSignal(state, operation, 'disabled');
+function hasValueSetter<T>(state: StateWithValueSetter<T>): state is { setValue: (value: T) => void } {
+  return typeof state.setValue === 'function';
 }
 
-function assertComboboxPrivateState(state: unknown, operation: string): asserts state is ComboboxPrivateStateMutation {
-  assertWritableSignal(state, operation, 'value');
-  assertWritableSignal(state, operation, 'disabled');
+function hasDisabledSetter(state: StateWithDisabledSetter): state is { setDisabled: (isDisabled: boolean) => void } {
+  return typeof state.setDisabled === 'function';
 }
 
-function assertRadioGroupPrivateState(state: unknown, operation: string): asserts state is RadioGroupPrivateStateMutation<unknown> {
-  assertWritableSignal(state, operation, 'value');
-  assertWritableSignal(state, operation, 'disabled');
+function writeStateValue<T>(state: StateWithValueSetter<T>, value: T, operation: string): void {
+  if (hasValueSetter(state)) {
+    state.setValue(value);
+    return;
+  }
+
+  assertWritableSignal<T>(state, operation, 'value');
+  state['value'].set(value);
 }
 
-type SelectPrivateStateMutation = {
-  value: { set: (value: unknown) => void };
-  disabled: { set: (isDisabled: boolean) => void };
-};
+function writeStateDisabled(state: StateWithDisabledSetter, isDisabled: boolean, operation: string): void {
+  if (hasDisabledSetter(state)) {
+    state.setDisabled(isDisabled);
+    return;
+  }
 
-type ComboboxPrivateStateMutation = {
-  value: { set: (value: unknown) => void };
-  disabled: { set: (isDisabled: boolean) => void };
-};
-
-type RadioGroupPrivateStateMutation<T = unknown> = {
-  value: { set: (value: T | null) => void };
-  disabled: { set: (isDisabled: boolean) => void };
-};
-
-/**
- * Private ng-primitives 0.117.2 bridge for select CVA writes. Remove when
- * NgpSelect exposes public value/disabled setters.
- */
-export function writeSelectPrivateValue(state: SelectPrivateStateMutation, value: unknown): void {
-  assertSelectPrivateState(state, 'writeSelectPrivateValue');
-  state.value.set(value);
+  assertWritableSignal<boolean>(state, operation, 'disabled');
+  state['disabled'].set(isDisabled);
 }
 
 /**
- * Private ng-primitives 0.117.2 bridge for select CVA disabled sync. Remove
- * when NgpSelect exposes public value/disabled setters.
+ * Internal ng-primitives state-writer for select CVA writes. Remove the
+ * fallback when NgpSelect exposes public value/disabled setters.
  */
-export function writeSelectPrivateDisabled(state: SelectPrivateStateMutation, isDisabled: boolean): void {
-  assertSelectPrivateState(state, 'writeSelectPrivateDisabled');
-  state.disabled.set(isDisabled);
+export function writeSelectStateValue(state: SelectStateWriter, value: unknown): void {
+  writeStateValue(state, value, 'writeSelectStateValue');
 }
 
 /**
- * Private ng-primitives 0.117.2 bridge for combobox CVA writes. Remove when
- * NgpCombobox exposes public value/disabled setters.
+ * Internal ng-primitives state-writer for select CVA disabled sync. Remove the
+ * fallback when NgpSelect exposes public value/disabled setters.
  */
-export function writeComboboxPrivateValue(state: ComboboxPrivateStateMutation, value: unknown): void {
-  assertComboboxPrivateState(state, 'writeComboboxPrivateValue');
-  state.value.set(value);
+export function writeSelectStateDisabled(state: SelectStateWriter, isDisabled: boolean): void {
+  writeStateDisabled(state, isDisabled, 'writeSelectStateDisabled');
 }
 
 /**
- * Private ng-primitives 0.117.2 bridge for combobox CVA disabled sync. Remove
- * when NgpCombobox exposes public value/disabled setters.
+ * Internal ng-primitives state-writer for combobox CVA writes. Remove the
+ * fallback when NgpCombobox exposes public value/disabled setters.
  */
-export function writeComboboxPrivateDisabled(state: ComboboxPrivateStateMutation, isDisabled: boolean): void {
-  assertComboboxPrivateState(state, 'writeComboboxPrivateDisabled');
-  state.disabled.set(isDisabled);
+export function writeComboboxStateValue(state: ComboboxStateWriter, value: unknown): void {
+  writeStateValue(state, value, 'writeComboboxStateValue');
 }
 
 /**
- * Private ng-primitives 0.117.2 bridge for radio group CVA writes. Remove when
- * NgpRadioGroup exposes public value/disabled setters.
+ * Internal ng-primitives state-writer for combobox CVA disabled sync. Remove
+ * the fallback when NgpCombobox exposes public value/disabled setters.
  */
-export function writeRadioGroupPrivateValue<T>(state: RadioGroupPrivateStateMutation<T>, value: T | null): void {
-  assertRadioGroupPrivateState(state, 'writeRadioGroupPrivateValue');
-  state.value.set(value);
+export function writeComboboxStateDisabled(state: ComboboxStateWriter, isDisabled: boolean): void {
+  writeStateDisabled(state, isDisabled, 'writeComboboxStateDisabled');
 }
 
 /**
- * Private ng-primitives 0.117.2 bridge for radio group CVA disabled sync.
- * Remove when NgpRadioGroup exposes public value/disabled setters.
+ * Internal ng-primitives state-writer for radio group CVA writes. Remove the
+ * fallback when NgpRadioGroup exposes public value/disabled setters.
  */
-export function writeRadioGroupPrivateDisabled<T>(state: RadioGroupPrivateStateMutation<T>, isDisabled: boolean): void {
-  assertRadioGroupPrivateState(state, 'writeRadioGroupPrivateDisabled');
-  state.disabled.set(isDisabled);
+export function writeRadioGroupStateValue<T>(state: RadioGroupStateWriter<T>, value: T | null): void {
+  writeStateValue(state, value, 'writeRadioGroupStateValue');
+}
+
+/**
+ * Internal ng-primitives state-writer for radio group CVA disabled sync. Remove
+ * the fallback when NgpRadioGroup exposes public value/disabled setters.
+ */
+export function writeRadioGroupStateDisabled<T>(state: RadioGroupStateWriter<T>, isDisabled: boolean): void {
+  writeStateDisabled(state, isDisabled, 'writeRadioGroupStateDisabled');
 }

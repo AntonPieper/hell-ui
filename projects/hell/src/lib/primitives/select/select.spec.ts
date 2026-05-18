@@ -130,7 +130,7 @@ describe('HellSelect', () => {
     expect(select.tabIndex).toBe(-1);
   });
 
-  it('keeps the private ng-primitives compatibility bridge working for value and disabled CVA updates', () => {
+  it('keeps the internal ng-primitives state writer working for value and disabled CVA updates', () => {
     const fixture = TestBed.createComponent(SelectFormHost);
     fixture.detectChanges();
 

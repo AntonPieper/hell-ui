@@ -26,7 +26,7 @@ import {
   NgpSelectPortal,
   injectSelectState,
 } from 'ng-primitives/select';
-import { writeSelectPrivateDisabled, writeSelectPrivateValue } from '../adapters/ngp-state-adapters';
+import { writeSelectStateDisabled, writeSelectStateValue } from '../adapters/ngp-state-adapters';
 
 export type HellSelectSingleValue<T = unknown> = T | null;
 export type HellSelectMultipleValue<T = unknown> = readonly T[];
@@ -86,7 +86,7 @@ export class HellSelect<T = unknown> extends HellStyleable implements ControlVal
   }
 
   writeValue(value: HellSelectFormValue<T>): void {
-    writeSelectPrivateValue(this.selectState(), this.normalizeWriteValue(value));
+    writeSelectStateValue(this.selectState(), this.normalizeWriteValue(value));
   }
 
   registerOnChange(fn: (value: HellSelectFormValue<T>) => void): void {
@@ -98,7 +98,7 @@ export class HellSelect<T = unknown> extends HellStyleable implements ControlVal
   }
 
   setDisabledState(isDisabled: boolean): void {
-    writeSelectPrivateDisabled(this.selectState(), isDisabled);
+    writeSelectStateDisabled(this.selectState(), isDisabled);
   }
 
   isOutsideControl(next: EventTarget | Node | null): boolean {
