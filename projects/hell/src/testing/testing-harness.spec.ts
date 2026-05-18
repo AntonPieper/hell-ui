@@ -1,9 +1,22 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
+import { NgpMenuTrigger } from 'ng-primitives/menu';
 
 import { HellButton } from '../lib/primitives/button/button';
+import { HELL_ACCORDION_DIRECTIVES } from '../lib/primitives/accordion/accordion';
+import { HELL_COMBOBOX_DIRECTIVES } from '../lib/primitives/combobox/combobox';
+import { HellDatePicker } from '../lib/primitives/date-picker/date-picker';
 import { HELL_DIALOG_DIRECTIVES } from '../lib/primitives/dialog/dialog';
+import { HELL_MENU_DIRECTIVES } from '../lib/primitives/menu/menu';
+import { HELL_SELECT_DIRECTIVES } from '../lib/primitives/select/select';
+import { HellSlider } from '../lib/primitives/slider/slider';
+import { HELL_TABS_DIRECTIVES } from '../lib/primitives/tabs/tabs';
+import { HellDateInput } from '../lib/composites/date-input/date-input';
+import { HellDropZone } from '../lib/composites/drop-zone/drop-zone';
+import { HELL_OMNIBAR_DIRECTIVES } from '../lib/composites/omnibar/omnibar';
+import { HellTimeInput } from '../lib/composites/time-input/time-input';
+import { HellToaster, HellToastService } from '../lib/composites/toast/toast';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '../lib/features/table-utilities/table-utilities';
 import {
   HellButtonHarness,
@@ -12,7 +25,22 @@ import {
   HellDialogOverlayHarness,
   HellDialogTitleHarness,
   HellDialogTriggerHarness,
+  HellAccordionHarness,
+  HellComboboxHarness,
+  HellDateInputHarness,
+  HellDatePickerHarness,
+  HellDropZoneHarness,
+  HellMenuHarness,
+  HellMenuTriggerHarness,
+  HellOmnibarHarness,
+  HellOmnibarItemHarness,
+  HellOmnibarPanelHarness,
+  HellSelectHarness,
+  HellSliderHarness,
+  HellTabsetHarness,
   HellTableContainerHarness,
+  HellTimeInputHarness,
+  HellToasterHarness,
 } from './public-api';
 
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
@@ -113,10 +141,168 @@ class TableHarnessHost {
   }
 }
 
+@Component({
+  imports: [...HELL_SELECT_DIRECTIVES],
+  template: `
+    <button hellSelect type="button" [value]="selected()" (valueChange)="selected.set($any($event))">
+      <span hellSelectValue>Priority</span>
+      <div *hellSelectPortal hellSelectDropdown>
+        <div hellSelectOption value="low">Low</div>
+        <div hellSelectOption value="high">High</div>
+      </div>
+    </button>
+  `,
+})
+class SelectHarnessHost {
+  readonly selected = signal<string | null>(null);
+}
+
+@Component({
+  imports: [...HELL_COMBOBOX_DIRECTIVES],
+  template: `
+    <div hellCombobox [value]="selected()" (valueChange)="selected.set($any($event))">
+      <input hellComboboxInput aria-label="Assignee" />
+      <button hellComboboxButton type="button">Toggle</button>
+      <div *hellComboboxPortal hellComboboxDropdown>
+        <div hellComboboxOption value="atlas">Atlas</div>
+        <div hellComboboxOption value="nova">Nova</div>
+      </div>
+    </div>
+  `,
+})
+class ComboboxHarnessHost {
+  readonly selected = signal<string | null>(null);
+}
+
+@Component({
+  imports: [...HELL_MENU_DIRECTIVES],
+  template: `
+    <ng-template #menu>
+      <div hellMenu><button hellMenuItem type="button" (click)="count += 1">Run</button></div>
+    </ng-template>
+    <button type="button" [hellMenuTrigger]="menu">Open menu</button>
+  `,
+})
+class MenuHarnessHost {
+  readonly trigger = viewChild.required(NgpMenuTrigger);
+  count = 0;
+}
+
+@Component({
+  imports: [...HELL_TABS_DIRECTIVES],
+  template: `
+    <div hellTabset [value]="value()" (valueChange)="value.set($any($event))">
+      <div hellTabList>
+        <button hellTab value="one">One</button>
+        <button hellTab value="two">Two</button>
+      </div>
+      <div hellTabPanel value="one">One panel</div>
+      <div hellTabPanel value="two">Two panel</div>
+    </div>
+  `,
+})
+class TabsHarnessHost {
+  readonly value = signal('one');
+}
+
+@Component({
+  imports: [...HELL_ACCORDION_DIRECTIVES],
+  template: `
+    <div hellAccordion type="single" collapsible>
+      <div hellAccordionItem value="details">
+        <button hellAccordionTrigger>Details</button>
+        <div hellAccordionContent>Hidden details</div>
+      </div>
+    </div>
+  `,
+})
+class AccordionHarnessHost {}
+
+@Component({
+  imports: [HellSlider],
+  template: `<hell-slider [value]="value()" aria-label="Volume" (valueChange)="value.set($event)" />`,
+})
+class SliderHarnessHost {
+  readonly value = signal(25);
+}
+
+@Component({
+  host: { 'data-harness-host': 'date-picker' },
+  imports: [HellDatePicker],
+  template: `<hell-date-picker [date]="date()" (dateChange)="date.set($event)" />`,
+})
+class DatePickerHarnessHost {
+  readonly date = signal<Date | null>(new Date(2024, 0, 15));
+}
+
+@Component({
+  host: { 'data-harness-host': 'date-input' },
+  imports: [HellDateInput],
+  template: `<hell-date-input [date]="date()" (dateChange)="date.set($event)" />`,
+})
+class DateInputHarnessHost {
+  readonly date = signal<Date | null>(null);
+}
+
+@Component({
+  imports: [HellTimeInput],
+  template: `<hell-time-input [value]="value()" (valueChange)="value.set($event)" />`,
+})
+class TimeInputHarnessHost {
+  readonly value = signal<{ hour: number; minute: number; second: number } | null>(null);
+}
+
+@Component({
+  imports: [HellToaster],
+  template: `<hell-toaster position="bottom-right" />`,
+})
+class ToastHarnessHost {
+  readonly toast = inject(HellToastService);
+}
+
+@Component({
+  imports: [HellDropZone],
+  template: `<div hellDropzone [disabled]="disabled()" (files)="files = $event">Drop files</div>`,
+})
+class DropZoneHarnessHost {
+  readonly disabled = signal(false);
+  files: File[] = [];
+}
+
+@Component({
+  imports: [...HELL_OMNIBAR_DIRECTIVES],
+  template: `
+    <hell-omnibar [openOnFocus]="true" [value]="value()" (valueChange)="value.set($event)" (submit)="submitted = $event.item">
+      <button hellOmnibarItem value="alpha">Alpha</button>
+      <button hellOmnibarItem value="beta">Beta</button>
+    </hell-omnibar>
+  `,
+})
+class OmnibarHarnessHost {
+  readonly value = signal('');
+  submitted: unknown = null;
+}
+
 describe('hell testing harness entrypoint', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ButtonHarnessHost, DialogHarnessHost, TableHarnessHost],
+      imports: [
+        ButtonHarnessHost,
+        DialogHarnessHost,
+        TableHarnessHost,
+        SelectHarnessHost,
+        ComboboxHarnessHost,
+        MenuHarnessHost,
+        TabsHarnessHost,
+        AccordionHarnessHost,
+        SliderHarnessHost,
+        DatePickerHarnessHost,
+        DateInputHarnessHost,
+        TimeInputHarnessHost,
+        ToastHarnessHost,
+        DropZoneHarnessHost,
+        OmnibarHarnessHost,
+      ],
     }).compileComponents();
   });
 
@@ -216,5 +402,150 @@ describe('hell testing harness entrypoint', () => {
     await fixture.whenStable();
 
     expect(fixture.componentInstance.rowSelectEvents).toBe(1);
+  });
+
+  it('interacts with select and combobox harnesses', async () => {
+    const selectFixture = TestBed.createComponent(SelectHarnessHost);
+    selectFixture.detectChanges();
+    const selectLoader = TestbedHarnessEnvironment.loader(selectFixture);
+    const select = await selectLoader.getHarness(HellSelectHarness.with({ text: 'Priority' }));
+
+    await select.click();
+    selectFixture.detectChanges();
+
+    expect(await select.isDisabled()).toBe(false);
+
+    const comboFixture = TestBed.createComponent(ComboboxHarnessHost);
+    comboFixture.detectChanges();
+    const comboLoader = TestbedHarnessEnvironment.loader(comboFixture);
+    const combo = await comboLoader.getHarness(HellComboboxHarness);
+    const input = await combo.getInput();
+
+    await input.setValue('nov');
+    expect(comboFixture.nativeElement.querySelector('input').value).toBe('nov');
+
+    await (await combo.getButton())!.click();
+    comboFixture.detectChanges();
+
+    expect(await combo.isDisabled()).toBe(false);
+  });
+
+  it('interacts with menu, tabs, and accordion harnesses', async () => {
+    const menuFixture = TestBed.createComponent(MenuHarnessHost);
+    menuFixture.detectChanges();
+    const menuLoader = TestbedHarnessEnvironment.loader(menuFixture);
+    const menuTrigger = await menuLoader.getHarness(HellMenuTriggerHarness.with({ text: 'Open menu' }));
+    expect(await menuTrigger.isDisabled()).toBe(false);
+    menuFixture.componentInstance.trigger().show();
+    await menuFixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    menuFixture.detectChanges();
+    const menuRootLoader = TestbedHarnessEnvironment.documentRootLoader(menuFixture);
+    const menu = await menuRootLoader.getHarness(HellMenuHarness);
+    const item = (await menu.getItems())[0];
+    expect(await item.getText()).toBe('Run');
+    await item.click();
+    await menuFixture.whenStable();
+    expect(menuFixture.componentInstance.count).toBe(1);
+
+    const tabsFixture = TestBed.createComponent(TabsHarnessHost);
+    tabsFixture.detectChanges();
+    const tabset = await TestbedHarnessEnvironment.loader(tabsFixture).getHarness(HellTabsetHarness);
+    const tabs = await tabset.getTabs();
+    expect(await tabset.getOrientation()).toBe('horizontal');
+    expect(await tabs[0].isSelected()).toBe(true);
+    await tabs[1].click();
+    await tabsFixture.whenStable();
+    expect(tabsFixture.componentInstance.value()).toBe('two');
+
+    const accordionFixture = TestBed.createComponent(AccordionHarnessHost);
+    accordionFixture.detectChanges();
+    const accordion = await TestbedHarnessEnvironment.loader(accordionFixture).getHarness(HellAccordionHarness);
+    const accordionTrigger = await (await accordion.getItems())[0].getTrigger();
+    expect(await accordionTrigger.getText()).toBe('Details');
+    await accordionTrigger.click();
+    await accordionFixture.whenStable();
+    expect(await accordionTrigger.isExpanded()).toBe(true);
+  });
+
+  it('queries slider and date picker harness state', async () => {
+    const sliderFixture = TestBed.createComponent(SliderHarnessHost);
+    sliderFixture.detectChanges();
+    const slider = await TestbedHarnessEnvironment.loader(sliderFixture).getHarness(HellSliderHarness);
+
+    expect(await slider.getDataSize()).toBe('md');
+    expect(await slider.getValue()).toBe('25');
+
+    const datePickerFixture = TestBed.createComponent(DatePickerHarnessHost);
+    datePickerFixture.detectChanges();
+    const datePicker = await TestbedHarnessEnvironment.loader(datePickerFixture).getHarness(HellDatePickerHarness);
+
+    expect(await datePicker.getLabel()).toMatch(/\w+ \d{4}/);
+    expect((await datePicker.getDateButtons()).length).toBeGreaterThan(20);
+  });
+
+  it('interacts with date input and time input harnesses', async () => {
+    const dateFixture = TestBed.createComponent(DateInputHarnessHost);
+    dateFixture.detectChanges();
+    const dateInput = await TestbedHarnessEnvironment.loader(dateFixture).getHarness(HellDateInputHarness);
+
+    await dateInput.setInputValue('2024-02-03');
+    expect(await dateInput.getInputValue()).toBe('2024-02-03');
+
+    const timeFixture = TestBed.createComponent(TimeInputHarnessHost);
+    timeFixture.detectChanges();
+    const timeInput = await TestbedHarnessEnvironment.loader(timeFixture).getHarness(HellTimeInputHarness);
+
+    await timeInput.setInputValue('09:30');
+    expect(await timeInput.getInputValue()).toBe('09:30');
+  });
+
+  it('interacts with toast and drop zone harnesses', async () => {
+    const toastFixture = TestBed.createComponent(ToastHarnessHost);
+    toastFixture.detectChanges();
+    toastFixture.componentInstance.toast.success('Saved', { description: 'Profile updated', duration: 0 });
+    toastFixture.detectChanges();
+
+    const toaster = await TestbedHarnessEnvironment.loader(toastFixture).getHarness(HellToasterHarness);
+    expect(await toaster.getPosition()).toBe('bottom-right');
+    const toast = (await toaster.getToasts())[0];
+    expect(await toast.getVariant()).toBe('success');
+    expect(await toast.getText()).toContain('Saved');
+    await toast.close();
+    toastFixture.detectChanges();
+    expect(await toast.getState()).toBe('closed');
+
+    const dropFixture = TestBed.createComponent(DropZoneHarnessHost);
+    dropFixture.detectChanges();
+    const dropzone = await TestbedHarnessEnvironment.loader(dropFixture).getHarness(HellDropZoneHarness);
+    expect(await dropzone.getText()).toContain('Drop files');
+    expect(await dropzone.isDisabled()).toBe(false);
+    dropFixture.componentInstance.disabled.set(true);
+    dropFixture.detectChanges();
+    expect(await dropzone.getAriaDisabled()).toBe('true');
+  });
+
+  it('interacts with omnibar harnesses', async () => {
+    const fixture = TestBed.createComponent(OmnibarHarnessHost);
+    fixture.detectChanges();
+    const loader = TestbedHarnessEnvironment.loader(fixture);
+    const documentRootLoader = TestbedHarnessEnvironment.documentRootLoader(fixture);
+    const omnibar = await loader.getHarness(HellOmnibarHarness);
+
+    await omnibar.focus();
+    fixture.detectChanges();
+    expect(await omnibar.isOpen()).toBe(true);
+
+    await omnibar.setInputValue('alp');
+    fixture.detectChanges();
+    expect(await omnibar.getInputValue()).toBe('alp');
+
+    const panel = await documentRootLoader.getHarness(HellOmnibarPanelHarness);
+    const items = await panel.getItems();
+    expect(await items[0].getText()).toBe('Alpha');
+    await items[0].click();
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.submitted).toBe('alpha');
   });
 });

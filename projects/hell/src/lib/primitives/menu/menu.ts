@@ -34,6 +34,7 @@ import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactiv
     },
   ],
   host: {
+    'data-hell-menu-trigger': '',
     '[attr.type]': 'nativeButtonType()',
     '[attr.disabled]': 'nativeButtonDisabled(trigger.disabled())',
     '[attr.aria-disabled]': 'anchorAriaDisabled(trigger.disabled())',
