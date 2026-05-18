@@ -10,7 +10,6 @@ import {
   input,
   output,
   signal,
-  untracked,
   type Provider,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALIDATORS, type AbstractControl, type NgControl, type ValidationErrors, type Validator, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -22,7 +21,10 @@ import { HellIcon } from '../../primitives/icon/icon';
 import { HellInput } from '../../primitives/input/input';
 import { HellPopover, HellPopoverTrigger } from '../../primitives/popover/popover';
 import { HELL_LABELS } from '../../core/labels';
-import { hellUniqueIdRefs } from '../../core/idrefs';
+import {
+  hellSyncFormFieldDescriptions,
+  hellSyncFormFieldLabels,
+} from '../../core/form-field-idrefs';
 import type { HellSize } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
 import {
@@ -407,18 +409,8 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
 
   constructor() {
     super();
-    effect((onCleanup) => {
-      const existingDescriptions = untracked(() => new Set(this.formField.descriptions()));
-      const ids = hellUniqueIdRefs(this.ariaDescribedby()).filter((id) => !existingDescriptions.has(id));
-      untracked(() => ids.forEach((id) => this.formField.addDescription(id)));
-      onCleanup(() => untracked(() => ids.forEach((id) => this.formField.removeDescription(id))));
-    });
-    effect((onCleanup) => {
-      const existingLabels = untracked(() => new Set(this.formField.labels()));
-      const ids = hellUniqueIdRefs(this.ariaLabelledby()).filter((id) => !existingLabels.has(id));
-      untracked(() => ids.forEach((id) => this.formField.addLabel(id)));
-      onCleanup(() => untracked(() => ids.forEach((id) => this.formField.removeLabel(id))));
-    });
+    hellSyncFormFieldDescriptions(this.formField, this.ariaDescribedby);
+    hellSyncFormFieldLabels(this.formField, this.ariaLabelledby);
     effect(() => {
       this.invalidDraft();
       this.current();
