@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_SELECT_BASIC_DIRECTIVES } from '@hell-ui/angular/primitives';
+import { HELL_SELECT_BASIC_DIRECTIVES } from '@hell-ui/angular/select';
 
 const PRIORITIES = ['Low', 'Medium', 'High', 'Urgent'];
 

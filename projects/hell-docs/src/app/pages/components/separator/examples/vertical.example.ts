@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_CARD_DIRECTIVES, HellSeparator } from '@hell-ui/angular/primitives';
+import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
+import { HellSeparator } from '@hell-ui/angular/separator';
 
 @Component({
   selector: 'app-separator-vertical-example',

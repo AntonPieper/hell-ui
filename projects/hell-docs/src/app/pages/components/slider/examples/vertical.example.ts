@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HELL_FIELD_DIRECTIVES, HellSlider } from '@hell-ui/angular/primitives';
+import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HellSlider } from '@hell-ui/angular/slider';
 
 @Component({
   selector: 'app-slider-vertical-example',

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_COMBOBOX_BASIC_DIRECTIVES } from '@hell-ui/angular/primitives';
+import { HELL_COMBOBOX_BASIC_DIRECTIVES } from '@hell-ui/angular/combobox';
 
 const FRUITS = ['Apple', 'Banana', 'Orange', 'Peach', 'Pear', 'Plum', 'Watermelon'];
 

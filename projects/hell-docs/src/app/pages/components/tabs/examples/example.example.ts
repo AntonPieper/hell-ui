@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_TABS_DIRECTIVES } from '@hell-ui/angular/primitives';
+import { HELL_TABS_DIRECTIVES } from '@hell-ui/angular/tabs';
 
 @Component({
   selector: 'app-tabs-example-example',

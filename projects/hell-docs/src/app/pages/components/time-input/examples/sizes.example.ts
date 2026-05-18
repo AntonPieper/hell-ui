@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HellTimeInput, type HellTimeValue } from '@hell-ui/angular/composites';
+import { HellTimeInput, type HellTimeValue } from '@hell-ui/angular/time-input';
 
 @Component({
   selector: 'app-time-input-sizes-example',

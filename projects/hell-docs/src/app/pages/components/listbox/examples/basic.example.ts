@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_LISTBOX_DIRECTIVES } from '@hell-ui/angular/primitives';
+import { HELL_LISTBOX_DIRECTIVES } from '@hell-ui/angular/listbox';
 
 interface Option {
   readonly id: string;

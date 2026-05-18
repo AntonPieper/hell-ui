@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HellDatePicker, HellDateRangePicker } from '@hell-ui/angular/primitives';
+import { HellDatePicker, HellDateRangePicker } from '@hell-ui/angular/date-picker';
 
 @Component({
   selector: 'app-date-picker-range-example',

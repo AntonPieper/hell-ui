@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_COMBOBOX_DIRECTIVES, HellTag } from '@hell-ui/angular/primitives';
+import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
+import { HellTag } from '@hell-ui/angular/tag';
 
 const TAGS = [
   'angular',

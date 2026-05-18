@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HellTimeInput, type HellTimeValue } from '@hell-ui/angular/composites';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/primitives';
+import { HellTimeInput, type HellTimeValue } from '@hell-ui/angular/time-input';
+import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 
 @Component({
   selector: 'app-time-input-examples-example',

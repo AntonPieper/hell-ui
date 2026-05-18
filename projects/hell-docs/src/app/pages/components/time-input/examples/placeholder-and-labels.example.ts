@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellTimeInput } from '@hell-ui/angular/composites';
+import { HellTimeInput } from '@hell-ui/angular/time-input';
 
 @Component({
   selector: 'app-time-input-placeholder-and-labels-example',

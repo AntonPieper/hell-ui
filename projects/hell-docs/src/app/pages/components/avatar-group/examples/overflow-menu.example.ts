@@ -1,13 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidChevronDown, faSolidUsers } from '@ng-icons/font-awesome/solid';
-import {
-  HELL_MENU_DIRECTIVES,
-  HellAvatar,
-  HellCheckbox,
-  HellIcon,
-} from '@hell-ui/angular/primitives';
-import { HELL_AVATAR_GROUP_DIRECTIVES } from '@hell-ui/angular/composites';
+import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
+import { HellAvatar } from '@hell-ui/angular/avatar';
+import { HellCheckbox } from '@hell-ui/angular/checkbox';
+import { HellIcon } from '@hell-ui/angular/icon';
+import { HELL_AVATAR_GROUP_DIRECTIVES } from '@hell-ui/angular/avatar-group';
 
 interface TeamMember {
   name: string;

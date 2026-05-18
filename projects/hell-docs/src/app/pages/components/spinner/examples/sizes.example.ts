@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HellButton, HellSpinner } from '@hell-ui/angular/primitives';
+import { HellButton } from '@hell-ui/angular/button';
+import { HellSpinner } from '@hell-ui/angular/skeleton';
 
 @Component({
   selector: 'app-spinner-sizes-example',

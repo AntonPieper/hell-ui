@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/primitives';
+import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { DateInputPlaceholdersAndLabelsExample } from './examples/placeholders-and-labels.example';
 import dateInputPlaceholdersAndLabelsExampleCodeRaw from './examples/placeholders-and-labels.example.ts?raw' with {

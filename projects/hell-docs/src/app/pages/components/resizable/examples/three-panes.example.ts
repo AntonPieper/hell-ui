@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/composites';
+import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
 
 @Component({
   selector: 'app-resizable-three-panes-example',

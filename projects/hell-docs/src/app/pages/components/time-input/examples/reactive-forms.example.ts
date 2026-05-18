@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { HellTimeInput, type HellTimeValue } from '@hell-ui/angular/composites';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/primitives';
+import { HellTimeInput, type HellTimeValue } from '@hell-ui/angular/time-input';
+import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 
 @Component({
   selector: 'app-time-input-reactive-forms-example',

@@ -1,7 +1,9 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidFolderOpen, faSolidGear, faSolidHouse } from '@ng-icons/font-awesome/solid';
-import { HELL_BREADCRUMBS_DIRECTIVES, HELL_MENU_DIRECTIVES, HellIcon } from '@hell-ui/angular/primitives';
+import { HELL_BREADCRUMBS_DIRECTIVES } from '@hell-ui/angular/breadcrumbs';
+import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
+import { HellIcon } from '@hell-ui/angular/icon';
 
 @Component({
   selector: 'app-breadcrumbs-with-icons-example',

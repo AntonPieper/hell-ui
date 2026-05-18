@@ -8,7 +8,7 @@ import {
   faSolidKey,
   faSolidUsers,
 } from '@ng-icons/font-awesome/solid';
-import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/composites';
+import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { AppShellLiveMiniatureExample } from './examples/live-miniature.example';
 import appShellLiveMiniatureExampleCodeRaw from './examples/live-miniature.example.ts?raw' with {

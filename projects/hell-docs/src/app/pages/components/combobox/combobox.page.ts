@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_COMBOBOX_BASIC_DIRECTIVES, HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/primitives';
+import { HELL_COMBOBOX_BASIC_DIRECTIVES, HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { ComboboxBasicExample } from './examples/basic.example';
 import comboboxBasicExampleCodeRaw from './examples/basic.example.ts?raw' with { loader: 'text' };

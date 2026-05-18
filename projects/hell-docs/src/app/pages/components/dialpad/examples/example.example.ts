@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HellDialpad } from '@hell-ui/angular/composites';
+import { HellDialpad } from '@hell-ui/angular/dialpad';
 
 @Component({
   selector: 'app-dialpad-example-example',

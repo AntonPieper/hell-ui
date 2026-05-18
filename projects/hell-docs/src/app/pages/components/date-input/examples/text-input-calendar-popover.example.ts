@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HellDateInput } from '@hell-ui/angular/composites';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/primitives';
+import { HellDateInput } from '@hell-ui/angular/date-input';
+import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 
 @Component({
   selector: 'app-date-input-text-input-calendar-popover-example',

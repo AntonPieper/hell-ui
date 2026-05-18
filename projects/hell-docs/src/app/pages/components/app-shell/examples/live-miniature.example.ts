@@ -8,8 +8,9 @@ import {
   faSolidKey,
   faSolidUsers,
 } from '@ng-icons/font-awesome/solid';
-import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/composites';
-import { HellButton, HellIcon } from '@hell-ui/angular/primitives';
+import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
+import { HellButton } from '@hell-ui/angular/button';
+import { HellIcon } from '@hell-ui/angular/icon';
 
 const HD_APP_SHELL_PAGE_ICONS = {
   faSolidBars,

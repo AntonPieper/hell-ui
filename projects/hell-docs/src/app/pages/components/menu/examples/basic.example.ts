@@ -7,7 +7,9 @@ import {
   faSolidPenToSquare,
   faSolidShareNodes,
 } from '@ng-icons/font-awesome/solid';
-import { HELL_MENU_DIRECTIVES, HellButton, HellIcon } from '@hell-ui/angular/primitives';
+import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
+import { HellButton } from '@hell-ui/angular/button';
+import { HellIcon } from '@hell-ui/angular/icon';
 
 const HD_MENU_PAGE_ICONS = {
   faSolidClock,

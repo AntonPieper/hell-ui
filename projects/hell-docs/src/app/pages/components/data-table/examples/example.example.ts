@@ -24,9 +24,14 @@ import {
   faSolidUsers,
   faSolidXmark,
 } from '@ng-icons/font-awesome/solid';
-import { HELL_OMNIBAR_DIRECTIVES, HELL_SPLIT_VIEW_DIRECTIVES } from '@hell-ui/angular/composites';
+import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
+import { HELL_SPLIT_VIEW_DIRECTIVES } from '@hell-ui/angular/split-view';
 import { hellSearchKey, hellSearchWords } from '@hell-ui/angular/core';
-import { HELL_MENU_DIRECTIVES, HellButton, HellIcon, HellPaginationStrip, HellSkeleton } from '@hell-ui/angular/primitives';
+import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
+import { HellButton } from '@hell-ui/angular/button';
+import { HellIcon } from '@hell-ui/angular/icon';
+import { HellPaginationStrip } from '@hell-ui/angular/pagination';
+import { HellSkeleton } from '@hell-ui/angular/skeleton';
 
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
 

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellDateInput } from '@hell-ui/angular/composites';
+import { HellDateInput } from '@hell-ui/angular/date-input';
 
 @Component({
   selector: 'app-date-input-placeholders-and-labels-example',

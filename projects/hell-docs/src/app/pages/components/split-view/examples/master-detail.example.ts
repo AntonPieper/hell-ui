@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_SPLIT_VIEW_DIRECTIVES } from '@hell-ui/angular/composites';
-import { HellButton } from '@hell-ui/angular/primitives';
+import { HELL_SPLIT_VIEW_DIRECTIVES } from '@hell-ui/angular/split-view';
+import { HellButton } from '@hell-ui/angular/button';
 
 interface Ticket {
   readonly id: string;

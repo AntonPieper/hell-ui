@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/primitives';
+import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 
 const PRIORITIES = ['Lowest', 'Low', 'Medium', 'High', 'Highest'];
 
@@ -11,6 +11,7 @@ const PRIORITIES = ['Lowest', 'Low', 'Medium', 'High', 'Highest'];
     <button
       hellSelect
       type="button"
+      aria-label="Select priority"
       style="max-width: 240px"
       [value]="value()"
       (valueChange)="value.set($event)"
@@ -20,14 +21,14 @@ const PRIORITIES = ['Lowest', 'Low', 'Medium', 'High', 'Highest'];
       } @else {
         <span hellSelectPlaceholder>Select priority…</span>
       }
+      <ng-template hellSelectPortal>
+        <div hellSelectDropdown>
+          @for (option of options; track option) {
+            <div hellSelectOption [value]="option">{{ option }}</div>
+          }
+        </div>
+      </ng-template>
     </button>
-    <ng-template hellSelectPortal>
-      <div hellSelectDropdown>
-        @for (option of options; track option) {
-          <div hellSelectOption [value]="option">{{ option }}</div>
-        }
-      </div>
-    </ng-template>
   `,
 })
 export class SelectBasicExample {

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HellNativeCheckbox } from '@hell-ui/angular/primitives';
+import { HellNativeCheckbox } from '@hell-ui/angular/checkbox';
 
 @Component({
   selector: 'app-checkbox-native-example',

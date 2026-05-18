@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellButton, HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/primitives';
+import { HellButton } from '@hell-ui/angular/button';
+import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';
 
 @Component({
   selector: 'app-tooltip-example-example',

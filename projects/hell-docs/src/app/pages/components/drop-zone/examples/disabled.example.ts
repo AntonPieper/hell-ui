@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HellDropZone } from '@hell-ui/angular/composites';
+import { HellDropZone } from '@hell-ui/angular/drop-zone';
 
 @Component({
   selector: 'app-drop-zone-disabled-example',

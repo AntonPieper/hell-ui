@@ -1,12 +1,9 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import {
-  HELL_FIELD_DIRECTIVES,
-  HellCheckbox,
-  HellInput,
-  HellNativeSelect,
-  HellSwitch,
-} from '@hell-ui/angular/primitives';
-import { HellDateInput } from '@hell-ui/angular/composites';
+import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { HellCheckbox } from '@hell-ui/angular/checkbox';
+import { HellInput, HellNativeSelect } from '@hell-ui/angular/input';
+import { HellSwitch } from '@hell-ui/angular/switch';
+import { HellDateInput } from '@hell-ui/angular/date-input';
 
 @Component({
   selector: 'app-field-vertical-default-example',

@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HellSkeleton } from '@hell-ui/angular/primitives';
+import { HellSkeleton } from '@hell-ui/angular/skeleton';
 
 @Component({
   selector: 'app-skeleton-card-placeholder-example',
