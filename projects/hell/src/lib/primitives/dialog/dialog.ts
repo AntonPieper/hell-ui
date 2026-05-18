@@ -114,6 +114,18 @@ export class HellDialogTrigger<TData = unknown, TResult = unknown> extends HellN
     dialogRef.closed
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(({ result }) => this.closed.emit(result as TResult));
+
+    dialogRef.afterClosed
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.restoreFocusToTrigger());
+  }
+
+  private restoreFocusToTrigger(): void {
+    const trigger = this.element.nativeElement;
+    requestAnimationFrame(() => {
+      if (!trigger.isConnected || this.disabled()) return;
+      trigger.focus({ preventScroll: true });
+    });
   }
 }
 

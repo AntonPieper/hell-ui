@@ -280,6 +280,23 @@ describe('HellDialogTrigger scoped overlays', () => {
     expect(fixture.componentInstance.results).toEqual(['result', undefined]);
   });
 
+  it('restores focus to the trigger after close animations finish', async () => {
+    const fixture = TestBed.createComponent(DialogClosedResultHost);
+    await settle(fixture);
+
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#open-result');
+    trigger.focus();
+    trigger.click();
+    await settle(fixture);
+
+    query<HTMLButtonElement>(document.body, '#result-close-empty').click();
+    await settle(fixture);
+    await animationFrame();
+    await settle(fixture);
+
+    expect(document.activeElement).toBe(trigger);
+  });
+
   it('passes dialog data from the trigger input to template context', async () => {
     const fixture = TestBed.createComponent(DialogDataHost);
     await settle(fixture);
@@ -334,6 +351,10 @@ async function settle(fixture: { detectChanges(): void; whenStable(): Promise<un
   fixture.detectChanges();
   await fixture.whenStable();
   fixture.detectChanges();
+}
+
+function animationFrame(): Promise<void> {
+  return new Promise((resolve) => requestAnimationFrame(() => resolve()));
 }
 
 function query<T extends HTMLElement = HTMLElement>(root: ParentNode, selector: string): T {

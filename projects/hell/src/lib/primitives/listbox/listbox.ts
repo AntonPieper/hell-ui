@@ -1,4 +1,4 @@
-import { Directive } from '@angular/core';
+import { Directive, inject } from '@angular/core';
 import { HellStyleable } from '../../core/styleable';
 import {
   NgpListbox,
@@ -53,9 +53,12 @@ export class HellListboxTrigger {}
   ],
   host: {
     '[class.hell-listbox-option]': '!unstyled()',
+    '[attr.aria-selected]': 'option.selected() ? "true" : "false"',
   },
 })
-export class HellListboxOption extends HellStyleable {}
+export class HellListboxOption extends HellStyleable {
+  protected readonly option = inject(NgpListboxOption);
+}
 
 /** Groups related options while preserving listbox keyboard behavior. */
 @Directive({

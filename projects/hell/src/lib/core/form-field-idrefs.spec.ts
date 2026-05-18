@@ -1,4 +1,4 @@
-import { Component, signal, type Signal, type WritableSignal } from '@angular/core';
+import { Component, signal, type WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { NgpFormFieldState } from 'ng-primitives/form-field';
 import { hellSyncFormFieldDescriptions, hellSyncFormFieldLabels } from './form-field-idrefs';
