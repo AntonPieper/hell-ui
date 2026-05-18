@@ -7,6 +7,7 @@ const failures = [];
 
 checkDocsExamples();
 checkDocsRootImportContract();
+checkDocsShellNarrowEntrypointContract();
 checkDocsCodeEditorIsolationContract();
 checkDocsPdfViewerIsolationContract();
 checkPackageEntryPoints();
@@ -244,6 +245,29 @@ function checkDocsRootImportContract() {
     if (/(?:from|import\()\s*['\"]@hell-ui\/angular['\"]/.test(source)) {
       failures.push(
         `Docs app file ${file.slice(root.length + 1)} imports the root @hell-ui/angular entry point`,
+      );
+    }
+  }
+}
+
+function checkDocsShellNarrowEntrypointContract() {
+  const shellFiles = [
+    'projects/hell-docs/src/app/app.ts',
+    'projects/hell-docs/src/app/shared/code-block.ts',
+    'projects/hell-docs/src/app/shared/example-tabs.ts',
+  ];
+
+  for (const file of shellFiles) {
+    const path = join(root, file);
+    if (!existsSync(path)) {
+      failures.push(`Docs shell narrow-entrypoint check references missing file ${file}`);
+      continue;
+    }
+
+    const source = readFile(path);
+    if (/(?:from|import\()\s*['"]@hell-ui\/angular\/(?:primitives|composites)['"]/.test(source)) {
+      failures.push(
+        `Docs shell file ${file} must import component-specific @hell-ui/angular/* entry points instead of aggregate primitives/composites`,
       );
     }
   }
