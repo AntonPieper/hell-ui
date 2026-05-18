@@ -9,7 +9,9 @@ import {
 } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCheck, faSolidCopy } from '@ng-icons/font-awesome/solid';
-import { HELL_TABS_DIRECTIVES, HellButton, HellIcon } from '@hell-ui/angular/primitives';
+import { HellButton } from '@hell-ui/angular/button';
+import { HellIcon } from '@hell-ui/angular/icon';
+import { HELL_TABS_DIRECTIVES } from '@hell-ui/angular/tabs';
 import { hdCopyTextToClipboard } from './code-tools';
 
 const EXAMPLE_TABS_ICONS = { faSolidCopy, faSolidCheck };

@@ -71,16 +71,14 @@ import {
   HellNavSection,
   HellNavSectionItems,
   HellNavSectionToggle,
-  HellToaster,
-  HELL_OMNIBAR_DIRECTIVES,
-} from '@hell-ui/angular/composites';
-import {
-  HellButton,
-  HellIcon,
-  HellTag,
-  HELL_MENU_DIRECTIVES,
-  HELL_SELECT_DIRECTIVES,
-} from '@hell-ui/angular/primitives';
+} from '@hell-ui/angular/app-shell';
+import { HellButton } from '@hell-ui/angular/button';
+import { HellIcon } from '@hell-ui/angular/icon';
+import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
+import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
+import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
+import { HellTag } from '@hell-ui/angular/tag';
+import { HellToaster } from '@hell-ui/angular/toast';
 import { type HellSearchField, type HellSearchResult } from '@hell-ui/angular/core';
 import {
   HD_DOCS_KIND_FILTER_LABEL,

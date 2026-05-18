@@ -7,7 +7,8 @@ import {
 } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCheck, faSolidCopy } from '@ng-icons/font-awesome/solid';
-import { HellButton, HellIcon } from '@hell-ui/angular/primitives';
+import { HellButton } from '@hell-ui/angular/button';
+import { HellIcon } from '@hell-ui/angular/icon';
 import { hdCopyTextToClipboard } from './code-tools';
 
 const CODE_BLOCK_ICONS = { faSolidCopy, faSolidCheck };
