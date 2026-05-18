@@ -20,7 +20,7 @@ export class HellInput extends HellStyleable {
 
 @Directive({
   selector: 'select[hellNativeSelect]',
-  hostDirectives: [{ directive: NgpInput, inputs: ['disabled'] }],
+  hostDirectives: [{ directive: NgpInput, inputs: ['disabled', 'id'] }],
   host: {
     '[class.hell-native-select]': '!unstyled()',
     '[attr.data-size]': 'size()',
@@ -34,7 +34,7 @@ export class HellNativeSelect extends HellStyleable {
 
 @Directive({
   selector: 'textarea[hellTextarea]',
-  hostDirectives: [{ directive: NgpTextarea, inputs: ['disabled'] }],
+  hostDirectives: [{ directive: NgpTextarea, inputs: ['disabled', 'id'] }],
   host: {
     '[class.hell-textarea]': '!unstyled()',
     '[attr.data-size]': 'size()',
