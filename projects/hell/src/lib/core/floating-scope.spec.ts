@@ -1,18 +1,20 @@
 import type { DestroyRef } from '@angular/core';
 
 import {
-  HellFloatingDismissController,
-  HellFloatingInteractionController,
   HellFloatingScopedInsetsRuntime,
   HellFloatingScopeRegistry,
+  hellRegisterFloatingElement,
+} from './floating-scope';
+import {
+  HellFloatingDismissController,
+  HellFloatingInteractionController,
   hellDismissOn,
   hellEscapeKey,
   hellOutsideClick,
   hellOutsideFocus,
   hellOutsidePointer,
-  hellRegisterFloatingElement,
   hellWithDismissEffect,
-} from './floating-scope';
+} from './floating-dismissal';
 
 describe('Floating Scope', () => {
   afterEach(() => {

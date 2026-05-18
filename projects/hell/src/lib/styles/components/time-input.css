@@ -135,9 +135,39 @@
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
+  .hell-time-input [data-slot='picker-row'] {
+      display: contents;
+    }
+
   .hell-time-input [data-slot='picker-cell'] {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       min-width: 0;
+      height: var(--spacing-hell-control-sm);
+      padding-inline: var(--spacing-hell-2);
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: var(--font-weight-medium);
       font-variant-numeric: tabular-nums;
+      color: var(--color-hell-foreground);
+      background: transparent;
+      cursor: pointer;
+      transition: background-color var(--hell-duration-fast) var(--ease-hell-out),
+                  color var(--hell-duration-fast) var(--ease-hell-out),
+                  border-color var(--hell-duration-fast) var(--ease-hell-out);
+      &:hover { background-color: var(--color-hell-surface-subtle); }
+      &:focus-visible {
+        outline: 0;
+        border-color: var(--color-hell-border-focus);
+        box-shadow: 0 0 0 2px var(--color-hell-focus-ring);
+      }
+      &[data-variant='primary'] {
+        color: var(--color-hell-primary-foreground);
+        background-color: var(--color-hell-primary);
+      }
     }
 
 }

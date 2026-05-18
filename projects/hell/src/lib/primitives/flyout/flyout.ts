@@ -1,6 +1,6 @@
 import { HellStyleable } from '../../core/styleable';
+import { HELL_FLOATING_SCOPE } from '../../core/floating-scope';
 import {
-  HELL_FLOATING_SCOPE,
   HellFloatingInteractionController,
   hellDismissOn,
   hellEscapeKey,
@@ -8,7 +8,7 @@ import {
   hellOutsideClick,
   hellOutsideFocus,
   hellWithDismissEffect,
-} from '../../core/floating-scope';
+} from '../../core/floating-dismissal';
 import {
   DestroyRef,
   Directive,

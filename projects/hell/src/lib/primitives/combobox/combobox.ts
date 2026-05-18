@@ -181,6 +181,7 @@ export class HellComboboxInput extends HellStyleable {}
   host: {
     '[class.hell-combobox-button]': '!unstyled()',
     type: 'button',
+    tabindex: '-1',
   },
 })
 export class HellComboboxButton extends HellStyleable {}

@@ -229,6 +229,34 @@ describe('HellTimeInput', () => {
     expect(tabStopCount(picker, 'minute', 60)).toBe(1);
   });
 
+  it('renders picker sections with grid rows, gridcells, and selected semantics', async () => {
+    const fixture = TestBed.createComponent(TimeInputHost);
+    fixture.componentInstance.value.set({ hour: 8, minute: 30, second: 0 });
+    fixture.componentInstance.seconds.set(true);
+    fixture.detectChanges();
+
+    triggerButton(fixture.nativeElement).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    const hourGrid = await waitForPickerGrid(fixture, 'hours');
+    const minuteGrid = document.querySelector<HTMLElement>('[data-slot="picker-grid"][data-unit="minutes"]');
+    const secondGrid = document.querySelector<HTMLElement>('[data-slot="picker-grid"][data-unit="seconds"]');
+
+    expect(hourGrid?.getAttribute('role')).toBe('grid');
+    expect(hourGrid?.getAttribute('aria-label')).toBe('Hours');
+    expect(hourGrid?.querySelectorAll('[role="row"]').length).toBe(4);
+    expect(hourGrid?.querySelectorAll('[role="gridcell"]').length).toBe(24);
+    expect(hourGrid?.querySelector('[role="gridcell"][aria-selected="true"]')?.textContent?.trim()).toBe('08');
+    expect(rovingDomTabStopCount(hourGrid)).toBe(1);
+
+    expect(minuteGrid?.getAttribute('role')).toBe('grid');
+    expect(minuteGrid?.querySelector('[role="gridcell"][aria-selected="true"]')?.textContent?.trim()).toBe('30');
+    expect(rovingDomTabStopCount(minuteGrid)).toBe(1);
+
+    expect(secondGrid?.getAttribute('role')).toBe('grid');
+    expect(secondGrid?.querySelector('[role="gridcell"][aria-selected="true"]')?.textContent?.trim()).toBe('00');
+    expect(rovingDomTabStopCount(secondGrid)).toBe(1);
+  });
+
   it('supports Arrow/Home/End navigation in picker sections', () => {
     const fixture = TestBed.createComponent(TimeInputHost);
     fixture.detectChanges();
@@ -427,6 +455,12 @@ function timeInputInstance(fixture: ComponentFixture<unknown>): { onPickerCellKe
 
 type HellTimeUnit = 'hour' | 'minute' | 'second';
 
+function rovingDomTabStopCount(grid: HTMLElement | null): number {
+  return Array.from(grid?.querySelectorAll<HTMLElement>('[role="gridcell"]') ?? []).filter(
+    (cell) => cell.tabIndex === 0,
+  ).length;
+}
+
 function tabStopCount(picker: { pickerCellTabIndex: (unit: HellTimeUnit, index: number) => string }, unit: HellTimeUnit, count: number): number {
   return Array.from({ length: count }, (_, index) => index).filter((index) =>
     picker.pickerCellTabIndex(unit, index) === '0',
@@ -447,4 +481,23 @@ function triggerButton(root: HTMLElement): HTMLButtonElement {
   const trigger = root.querySelector('button[data-slot="trigger"]');
   if (!(trigger instanceof HTMLButtonElement)) throw new Error('Expected time trigger.');
   return trigger;
+}
+
+async function waitForPickerGrid(
+  fixture: ComponentFixture<unknown>,
+  unit: 'hours' | 'minutes' | 'seconds',
+): Promise<HTMLElement> {
+  const selector = `[data-slot="picker-grid"][data-unit="${unit}"]`;
+  const timeout = Date.now() + 1000;
+
+  while (Date.now() < timeout) {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const grid = document.querySelector<HTMLElement>(selector);
+    if (grid) return grid;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  throw new Error(`Expected ${selector}.`);
 }

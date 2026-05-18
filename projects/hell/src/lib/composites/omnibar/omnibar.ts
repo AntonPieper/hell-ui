@@ -24,13 +24,15 @@ import {
 } from '@angular/core';
 import {
   HELL_FLOATING_SCOPE,
-  HellFloatingInteractionController,
   HellFloatingScopeRegistry,
+  type HellFloatingScope,
+} from '../../core/floating-scope';
+import {
+  HellFloatingInteractionController,
   hellDismissOn,
   hellOutsideFocus,
   hellOutsidePointer,
-  type HellFloatingScope,
-} from '../../core/floating-scope';
+} from '../../core/floating-dismissal';
 import {
   type HellSearchField,
   type HellSearchResult,

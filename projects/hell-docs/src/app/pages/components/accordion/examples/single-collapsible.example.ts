@@ -28,7 +28,7 @@ import { HELL_ACCORDION_DIRECTIVES } from '@hell-ui/angular/primitives';
       <div hellAccordionItem value="ssr">
         <button hellAccordionTrigger type="button">SSR</button>
         <div hellAccordionContent>
-          <div>hell is fully SSR-safe — no direct DOM access at module load.</div>
+          <div>hell avoids DOM access at module load; browser-only features document their client-only boundaries.</div>
         </div>
       </div>
     </div>

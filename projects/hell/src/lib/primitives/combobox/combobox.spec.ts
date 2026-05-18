@@ -133,6 +133,15 @@ describe('HellCombobox', () => {
     expect(combobox.getAttribute('data-disabled')).toBe('');
   });
 
+  it('keeps the visible toggle button out of the tab order while preserving clickability', () => {
+    const fixture = TestBed.createComponent(ComboboxFormHost);
+    fixture.detectChanges();
+
+    const button = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellComboboxButton]');
+    expect(button.tabIndex).toBe(-1);
+    expect(button.disabled).toBe(false);
+  });
+
   it('keeps the private ng-primitives compatibility bridge working for value and disabled CVA updates', () => {
     const fixture = TestBed.createComponent(ComboboxFormHost);
     fixture.detectChanges();

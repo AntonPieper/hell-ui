@@ -30,6 +30,7 @@ import {
 } from '../../core/typed-value-input';
 import {
   hellTimeInputNextPickerCellIndex,
+  hellTimeInputPickerColumns,
   type HellTimeInputPickerUnit,
 } from './time-input-picker';
 
@@ -256,44 +257,54 @@ export function hellSameTimeInputValue(
 
         <div data-slot="picker-section">
           <div data-slot="picker-section-label">{{ labels.timeInput.hours }}</div>
-          <div data-slot="picker-grid" data-unit="hours" role="group" [attr.aria-label]="labels.timeInput.hours">
-            @for (h of hours; track h; let hourIndex = $index) {
-              <button
-                hellButton
-                [variant]="h === current().hour ? 'primary' : 'ghost'"
-                size="sm"
-                type="button"
-                data-slot="picker-cell"
-                [attr.tabindex]="pickerCellTabIndex('hour', hourIndex)"
-                [attr.aria-pressed]="h === current().hour ? 'true' : 'false'"
-                (focus)="onPickerCellFocus('hour', hourIndex)"
-                (keydown)="onPickerCellKeydown($event, 'hour', hourIndex)"
-                (click)="setUnit('hour', h)"
-              >
-                {{ pad(h) }}
-              </button>
+          <div data-slot="picker-grid" data-unit="hours" role="grid" [attr.aria-label]="labels.timeInput.hours">
+            @for (row of pickerRows(hours, 'hour'); track $index; let rowIndex = $index) {
+              <div data-slot="picker-row" role="row">
+                @for (h of row; track h; let columnIndex = $index) {
+                  @let hourIndex = rowIndex * pickerColumnCount('hour') + columnIndex;
+                  <button
+                    [attr.data-variant]="h === current().hour ? 'primary' : 'ghost'"
+                    data-size="sm"
+                    type="button"
+                    role="gridcell"
+                    data-slot="picker-cell"
+                    [attr.tabindex]="pickerCellTabIndex('hour', hourIndex)"
+                    [attr.aria-selected]="h === current().hour ? 'true' : 'false'"
+                    (focus)="onPickerCellFocus('hour', hourIndex)"
+                    (keydown)="onPickerCellKeydown($event, 'hour', hourIndex)"
+                    (click)="setUnit('hour', h)"
+                  >
+                    {{ pad(h) }}
+                  </button>
+                }
+              </div>
             }
           </div>
         </div>
 
         <div data-slot="picker-section">
           <div data-slot="picker-section-label">{{ labels.timeInput.minutes }}</div>
-          <div data-slot="picker-grid" data-unit="minutes" role="group" [attr.aria-label]="labels.timeInput.minutes">
-            @for (m of minutes; track m; let minuteIndex = $index) {
-              <button
-                hellButton
-                [variant]="m === current().minute ? 'primary' : 'ghost'"
-                size="sm"
-                type="button"
-                data-slot="picker-cell"
-                [attr.tabindex]="pickerCellTabIndex('minute', minuteIndex)"
-                [attr.aria-pressed]="m === current().minute ? 'true' : 'false'"
-                (focus)="onPickerCellFocus('minute', minuteIndex)"
-                (keydown)="onPickerCellKeydown($event, 'minute', minuteIndex)"
-                (click)="setUnit('minute', m)"
-              >
-                {{ pad(m) }}
-              </button>
+          <div data-slot="picker-grid" data-unit="minutes" role="grid" [attr.aria-label]="labels.timeInput.minutes">
+            @for (row of pickerRows(minutes, 'minute'); track $index; let rowIndex = $index) {
+              <div data-slot="picker-row" role="row">
+                @for (m of row; track m; let columnIndex = $index) {
+                  @let minuteIndex = rowIndex * pickerColumnCount('minute') + columnIndex;
+                  <button
+                    [attr.data-variant]="m === current().minute ? 'primary' : 'ghost'"
+                    data-size="sm"
+                    type="button"
+                    role="gridcell"
+                    data-slot="picker-cell"
+                    [attr.tabindex]="pickerCellTabIndex('minute', minuteIndex)"
+                    [attr.aria-selected]="m === current().minute ? 'true' : 'false'"
+                    (focus)="onPickerCellFocus('minute', minuteIndex)"
+                    (keydown)="onPickerCellKeydown($event, 'minute', minuteIndex)"
+                    (click)="setUnit('minute', m)"
+                  >
+                    {{ pad(m) }}
+                  </button>
+                }
+              </div>
             }
           </div>
         </div>
@@ -301,22 +312,27 @@ export function hellSameTimeInputValue(
         @if (seconds()) {
           <div data-slot="picker-section">
             <div data-slot="picker-section-label">{{ labels.timeInput.seconds }}</div>
-            <div data-slot="picker-grid" data-unit="seconds" role="group" [attr.aria-label]="labels.timeInput.seconds">
-              @for (s of secondsList; track s; let secondIndex = $index) {
-                <button
-                  hellButton
-                  [variant]="s === current().second ? 'primary' : 'ghost'"
-                  size="sm"
-                  type="button"
-                  data-slot="picker-cell"
-                  [attr.tabindex]="pickerCellTabIndex('second', secondIndex)"
-                  [attr.aria-pressed]="s === current().second ? 'true' : 'false'"
-                  (focus)="onPickerCellFocus('second', secondIndex)"
-                  (keydown)="onPickerCellKeydown($event, 'second', secondIndex)"
-                  (click)="setUnit('second', s)"
-                >
-                  {{ pad(s) }}
-                </button>
+            <div data-slot="picker-grid" data-unit="seconds" role="grid" [attr.aria-label]="labels.timeInput.seconds">
+              @for (row of pickerRows(secondsList, 'second'); track $index; let rowIndex = $index) {
+                <div data-slot="picker-row" role="row">
+                  @for (s of row; track s; let columnIndex = $index) {
+                    @let secondIndex = rowIndex * pickerColumnCount('second') + columnIndex;
+                    <button
+                      [attr.data-variant]="s === current().second ? 'primary' : 'ghost'"
+                      data-size="sm"
+                      type="button"
+                      role="gridcell"
+                      data-slot="picker-cell"
+                      [attr.tabindex]="pickerCellTabIndex('second', secondIndex)"
+                      [attr.aria-selected]="s === current().second ? 'true' : 'false'"
+                      (focus)="onPickerCellFocus('second', secondIndex)"
+                      (keydown)="onPickerCellKeydown($event, 'second', secondIndex)"
+                      (click)="setUnit('second', s)"
+                    >
+                      {{ pad(s) }}
+                    </button>
+                  }
+                </div>
               }
             </div>
           </div>
@@ -463,6 +479,19 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
 
   protected pickerCellTabIndex(unit: HellTimeUnit, index: number): string {
     return this.focusedPickerCellIndex(unit) === index ? '0' : '-1';
+  }
+
+  protected pickerColumnCount(unit: HellTimeUnit): number {
+    return hellTimeInputPickerColumns(unit);
+  }
+
+  protected pickerRows(values: readonly number[], unit: HellTimeUnit): readonly (readonly number[])[] {
+    const columns = this.pickerColumnCount(unit);
+    const rows: number[][] = [];
+    for (let index = 0; index < values.length; index += columns) {
+      rows.push(values.slice(index, index + columns));
+    }
+    return rows;
   }
 
   protected onPickerCellFocus(unit: HellTimeUnit, index: number): void {
