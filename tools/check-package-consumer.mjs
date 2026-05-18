@@ -122,6 +122,13 @@ const scenarios = [
     stylesCss: compositesConsumerStylesCss(),
   },
   {
+    name: 'app-shell',
+    description: 'narrow app-shell composite entry without feature peers',
+    dependencies: lightUiDeps,
+    mainTs: appShellConsumerMainTs(),
+    stylesCss: compositesConsumerStylesCss(),
+  },
+  {
     name: 'testing',
     description: 'testing entry with package-wide light peers',
     dependencies: testingDeps,
@@ -524,6 +531,35 @@ function compositesConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/composites';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [...HELL_APP_SHELL_DIRECTIVES],
+  template: \`
+    <div hellAppShell>
+      <header hellAppTopbar>
+        <button hellSidenavToggle type="button"></button>
+      </header>
+      <nav hellAppSidenav>Navigation</nav>
+      <main hellAppContent>Content</main>
+      <aside hellAppSecondary>
+        <button hellSecondaryToggle type="button">Details</button>
+        <div hellAppSecondaryBody>Secondary</div>
+      </aside>
+    </div>
+  \`,
+})
+class App {}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function appShellConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/app-shell';
 
 @Component({
   selector: 'app-root',

@@ -24,7 +24,7 @@ describe('ngp state-writer compatibility helpers', () => {
 
     writeSelectStateValue(state as never, 'value');
 
-    expect(setValue).toHaveBeenCalledWith('value');
+    expect(setValue).toHaveBeenCalledWith('value', { emit: false });
     expect(value).not.toHaveBeenCalled();
   });
 

@@ -22,7 +22,8 @@ import type { NgpSelect } from 'ng-primitives/select';
 export const HELL_NGP_STATE_WRITER_VERSION = 'ng-primitives@0.117.2';
 
 type WritableStateChannel<T> = { set: (value: T) => void };
-type StateWithValueSetter<T> = { setValue?: (value: T) => void };
+type StateSetterOptions = { emit?: boolean };
+type StateWithValueSetter<T> = { setValue?: (value: T, options?: StateSetterOptions) => void };
 type StateWithDisabledSetter = { setDisabled?: (isDisabled: boolean) => void };
 
 type SelectStateWriter = State<NgpSelect> & StateWithValueSetter<unknown> & StateWithDisabledSetter;
@@ -55,7 +56,7 @@ function assertWritableSignal<T>(state: unknown, operation: string, channel: str
   }
 }
 
-function hasValueSetter<T>(state: StateWithValueSetter<T>): state is { setValue: (value: T) => void } {
+function hasValueSetter<T>(state: StateWithValueSetter<T>): state is { setValue: (value: T, options?: StateSetterOptions) => void } {
   return typeof state.setValue === 'function';
 }
 
@@ -65,7 +66,7 @@ function hasDisabledSetter(state: StateWithDisabledSetter): state is { setDisabl
 
 function writeStateValue<T>(state: StateWithValueSetter<T>, value: T, operation: string): void {
   if (hasValueSetter(state)) {
-    state.setValue(value);
+    state.setValue(value, { emit: false });
     return;
   }
 

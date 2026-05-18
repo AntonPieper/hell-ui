@@ -58,6 +58,7 @@ class ComboboxMultipleFormHost {
   imports: [ReactiveFormsModule, HellComboboxBasic],
   template: `
     <hell-combobox-basic
+      aria-label="Choose a planet"
       [options]="options"
       [formControl]="control"
       (valueChange)="values.push($any($event))"
@@ -72,7 +73,7 @@ class ComboboxBasicFormHost {
 
 @Component({
   imports: [HellComboboxBasic],
-  template: `<hell-combobox-basic [options]="options" [value]="value()" />`,
+  template: `<hell-combobox-basic aria-label="Choose a planet" [options]="options" [value]="value()" />`,
 })
 class ComboboxBasicValueHost {
   readonly options = ['Atlas', 'Nova'];
@@ -160,6 +161,7 @@ describe('HellCombobox', () => {
     expect(input.getAttribute('role')).toBe('combobox');
     expect(input.getAttribute('aria-haspopup')).toBe('listbox');
     expect(input.getAttribute('aria-autocomplete')).toBe('list');
+    expect(input.getAttribute('aria-label')).toBe('Choose a planet');
     expect(input.getAttribute('aria-expanded')).toBe('false');
     expect(input.hasAttribute('aria-controls')).toBe(false);
   });
@@ -193,6 +195,7 @@ describe('HellCombobox', () => {
     const options = Array.from(dropdown.querySelectorAll<HTMLElement>('[role="option"]'));
 
     expect(input.getAttribute('aria-expanded')).toBe('true');
+    expect(dropdown.id).not.toBe('');
     expect(input.getAttribute('aria-controls')).toBe(dropdown.id);
     expect(button.getAttribute('aria-expanded')).toBe('true');
     expect(button.getAttribute('aria-controls')).toBe(dropdown.id);

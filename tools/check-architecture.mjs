@@ -515,6 +515,12 @@ function checkPackageDependencyContract() {
     }
   }
 
+  for (const dependency of transitiveOnlyPeers) {
+    if (!peerDependencies[dependency]) {
+      failures.push(`Package dependency contract is missing optional transitive peer dependency ${dependency}`);
+    }
+  }
+
   if (peerDependencies['@tanstack/angular-table'] || librarySource.includes('@tanstack/angular-table')) {
     failures.push('Package dependency contract must not declare unused @tanstack/angular-table');
   }

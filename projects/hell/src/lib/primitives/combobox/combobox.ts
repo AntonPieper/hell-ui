@@ -316,6 +316,7 @@ export class HellComboboxEmpty extends HellStyleable {}
         [unstyled]="unstyled()"
         [value]="filter()"
         [placeholder]="placeholder()"
+        [attr.aria-label]="ariaLabel()"
         (input)="onFilterInput($any($event.target).value)"
       />
       <button hellComboboxButton [unstyled]="unstyled()" type="button">Toggle options</button>
@@ -337,6 +338,7 @@ export class HellComboboxBasic<T = unknown> extends HellStyleable implements Con
   readonly allowDeselect = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly placeholder = input('Search');
+  readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
   readonly compareWith = input<HellComboboxCompareWith<T>>((a, b) => a === b);
   readonly displayWith = input<HellComboboxDisplayWith<T>>((value) => String(value));
   readonly value = input<HellComboboxValue<T> | null>(null);
