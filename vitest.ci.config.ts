@@ -8,6 +8,7 @@ const coveragePath = resolve(workspaceRoot, 'coverage');
 
 const reporters = [
   'default',
+  'hanging-process',
   ['junit', { outputFile: testResultsPath, suiteName: 'hell unit tests' }],
 ];
 

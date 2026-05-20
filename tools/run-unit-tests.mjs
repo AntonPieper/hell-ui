@@ -53,17 +53,23 @@ const timeout = setTimeout(() => {
 const result = await waitForClose(child);
 clearTimeout(timeout);
 
+const reportStatus = inspectJUnitReport();
+
 if (timedOut) {
   console.error(`[unit] timed out after ${timeoutMs}ms`);
+  printJUnitDiagnostic(reportStatus);
+  printOpenHandleHint();
   process.exit(1);
 }
 
-const report = readJUnitReport();
 const coverage = readCoverageSummary();
-if (!report) {
-  console.error('[unit] Angular/Vitest did not produce a complete JUnit report.');
-  process.exit(result.code ?? 1);
+if (!reportStatus.ok) {
+  printJUnitDiagnostic(reportStatus);
+  printOpenHandleHint();
+  process.exit(1);
 }
+
+const report = reportStatus.report;
 
 if (report.tests <= 0) {
   console.error('[unit] JUnit report contains no tests.');
@@ -111,28 +117,62 @@ function waitForClose(processRef) {
   });
 }
 
-function readJUnitReport() {
-  if (!existsSync(junitPath)) return null;
+function inspectJUnitReport() {
+  if (!existsSync(junitPath)) {
+    return { ok: false, reason: 'file was not written' };
+  }
 
   try {
     const stats = statSync(junitPath);
-    if (stats.mtimeMs < startedAt || stats.size === 0) return null;
+    if (stats.mtimeMs < startedAt) {
+      return { ok: false, reason: 'file is stale from a previous run' };
+    }
+    if (stats.size === 0) {
+      return { ok: false, reason: 'file is empty' };
+    }
 
     const xml = readFileSync(junitPath, 'utf8');
-    if (!/<\/testsuites>|<\/testsuite>/.test(xml)) return null;
-
     const tag = xml.match(/<testsuites\b[^>]*>|<testsuite\b[^>]*>/)?.[0];
-    if (!tag) return null;
+    if (!tag) {
+      return { ok: false, reason: 'XML has no testsuite summary tag' };
+    }
+
+    const rootName = tag.startsWith('<testsuites') ? 'testsuites' : 'testsuite';
+    if (!xml.includes(`</${rootName}>`)) {
+      return { ok: false, reason: `XML has no closing ${rootName} tag` };
+    }
 
     return {
-      tests: readXmlNumber(tag, 'tests'),
-      failures: readXmlNumber(tag, 'failures'),
-      errors: readXmlNumber(tag, 'errors'),
-      skipped: readXmlNumber(tag, 'skipped'),
+      ok: true,
+      report: {
+        tests: readXmlNumber(tag, 'tests'),
+        failures: readXmlNumber(tag, 'failures'),
+        errors: readXmlNumber(tag, 'errors'),
+        skipped: readXmlNumber(tag, 'skipped'),
+      },
     };
-  } catch {
-    return null;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return { ok: false, reason: `could not read file: ${message}` };
   }
+}
+
+function printJUnitDiagnostic(status) {
+  if (status.ok) {
+    console.error(
+      `[unit] JUnit report is complete at ${junitPath}: ${status.report.tests} tests, ${status.report.failures} failures, ${status.report.errors} errors.`,
+    );
+    return;
+  }
+
+  console.error(`[unit] JUnit report is missing or incomplete at ${junitPath}: ${status.reason}.`);
+}
+
+function printOpenHandleHint() {
+  console.error('[unit] Open-handle diagnostics are enabled by the Vitest hanging-process reporter.');
+  console.error(
+    '[unit] If no handle list appears above, rerun with a larger HELL_UNIT_TEST_TIMEOUT_MS so Vitest can finish teardown diagnostics before this wrapper kills it.',
+  );
 }
 
 function readCoverageSummary() {

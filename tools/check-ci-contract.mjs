@@ -68,6 +68,12 @@ const adapterChecks = [
 
 const fileChecks = [
   {
+    path: 'vitest.ci.config.ts',
+    includes: [
+      "'hanging-process'",
+    ],
+  },
+  {
     path: 'tools/run-ci-tests.mjs',
     includes: [
       "args: ['run', 'test:package-consumer', '--', '--minimal-deps']",
