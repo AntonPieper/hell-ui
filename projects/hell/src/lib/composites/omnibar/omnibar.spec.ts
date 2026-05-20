@@ -5,6 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHellLabels } from '../../core/labels';
 import { type HellSearchSource } from '../../core/search';
 import { matchHotkey } from '../../core/hotkeys';
+import { HellMenu, HellMenuTrigger } from '../../primitives/menu/menu';
 import {
   HELL_OMNIBAR_DIRECTIVES,
   matchHotkey as matchHotkeyFromOmnibar,
@@ -12,7 +13,7 @@ import {
 } from './omnibar';
 
 @Component({
-  imports: [...HELL_OMNIBAR_DIRECTIVES],
+  imports: [...HELL_OMNIBAR_DIRECTIVES, HellMenu, HellMenuTrigger],
   template: `
     <hell-omnibar
       [value]="value()"
@@ -22,6 +23,16 @@ import {
       (openChange)="openEvents.push($event)"
       (submit)="submitEvents.push($event)"
     >
+      <ng-template #filtersMenu>
+        <div hellMenu>Filters</div>
+      </ng-template>
+      <span hellOmnibarLeading hellOmnibarChip>
+        Token
+        <button hellOmnibarChipRemove type="button" aria-label="Remove token"></button>
+      </span>
+      <div hellOmnibarActions aria-label="Filters">
+        <button hellOmnibarAction type="button" [hellMenuTrigger]="filtersMenu">Filters</button>
+      </div>
       <button hellOmnibarItem value="alpha" (select)="selectEvents.push($event)">Alpha</button>
       <button
         hellOmnibarItem
@@ -202,11 +213,15 @@ describe('HellOmnibar interactions', () => {
     fixture.detectChanges();
 
     const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
-    input.dispatchEvent(new FocusEvent('focus'));
+    input.focus();
     fixture.detectChanges();
 
+    const listbox = query<HTMLElement>(overlayRoot(), '[role="listbox"]');
     const options = Array.from(overlayRoot().querySelectorAll('[role="option"]')) as HTMLElement[];
+    expect(listbox.getAttribute('tabindex')).toBeNull();
     expect(options).toHaveLength(2);
+    expect(options.map((option) => option.tabIndex)).toEqual([-1, -1]);
+    expect(document.activeElement).toBe(input);
     expect(input.getAttribute('aria-activedescendant')).toBe(options[0].id);
 
     input.dispatchEvent(
@@ -215,6 +230,7 @@ describe('HellOmnibar interactions', () => {
     fixture.detectChanges();
 
     expect(options[1].getAttribute('aria-selected')).toBe('true');
+    expect(document.activeElement).toBe(input);
     expect(input.getAttribute('aria-activedescendant')).toBe(options[1].id);
 
     const enter = new KeyboardEvent('keydown', {
@@ -228,9 +244,102 @@ describe('HellOmnibar interactions', () => {
     expect(enter.defaultPrevented).toBe(true);
     expect(host.selectEvents).toEqual([host.beta]);
     expect(host.submitEvents).toEqual([{ value: 'be', item: host.beta, source: 'keyboard' }]);
+    expect(document.activeElement).toBe(input);
     expect(fixture.nativeElement.querySelector('hell-omnibar').getAttribute('data-open')).toBe(
       'true',
     );
+  });
+
+  it('keeps the open omnibar tab order anchored on the input', () => {
+    const fixture = TestBed.createComponent(OmnibarHost);
+    const host = fixture.componentInstance;
+    host.value.set('be');
+    fixture.detectChanges();
+
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
+    input.focus();
+    fixture.detectChanges();
+
+    const clear = query<HTMLButtonElement>(fixture.nativeElement, '[data-slot="clear"]');
+    const chipRemove = query<HTMLButtonElement>(fixture.nativeElement, '[hellOmnibarChipRemove]');
+    const action = query<HTMLButtonElement>(overlayRoot(), '[hellOmnibarAction]');
+    const tab = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      bubbles: true,
+      cancelable: true,
+    });
+    input.dispatchEvent(tab);
+    fixture.detectChanges();
+
+    expect(clear.tabIndex).toBe(-1);
+    expect(chipRemove.tabIndex).toBe(-1);
+    expect(action.tabIndex).toBe(-1);
+    expect(openOmnibarTabStops(fixture.nativeElement, overlayRoot())).toEqual([input]);
+    expect(tab.defaultPrevented).toBe(false);
+    expect(document.activeElement).toBe(input);
+  });
+
+  it('lets F6 reach popup actions without making them Tab stops', () => {
+    const fixture = TestBed.createComponent(OmnibarHost);
+    fixture.componentInstance.value.set('be');
+    fixture.detectChanges();
+
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
+    input.focus();
+    fixture.detectChanges();
+
+    const action = query<HTMLButtonElement>(overlayRoot(), '[hellOmnibarAction]');
+    const enterActions = new KeyboardEvent('keydown', {
+      key: 'F6',
+      bubbles: true,
+      cancelable: true,
+    });
+    input.dispatchEvent(enterActions);
+    fixture.detectChanges();
+
+    expect(enterActions.defaultPrevented).toBe(true);
+    expect(action.tabIndex).toBe(-1);
+    expect(document.activeElement).toBe(action);
+
+    const leaveActions = new KeyboardEvent('keydown', {
+      key: 'F6',
+      bubbles: true,
+      cancelable: true,
+    });
+    action.dispatchEvent(leaveActions);
+    fixture.detectChanges();
+
+    expect(leaveActions.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(input);
+  });
+
+  it('closes and clears from Escape without moving focus to an option', () => {
+    const fixture = TestBed.createComponent(OmnibarHost);
+    const host = fixture.componentInstance;
+    host.value.set('be');
+    fixture.detectChanges();
+
+    const root = query<HTMLElement>(fixture.nativeElement, 'hell-omnibar');
+    const clear = query<HTMLButtonElement>(fixture.nativeElement, '[data-slot="clear"]');
+    const chipRemove = query<HTMLButtonElement>(fixture.nativeElement, '[hellOmnibarChipRemove]');
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
+    input.focus();
+    fixture.detectChanges();
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+
+    expect(root.getAttribute('data-open')).toBeNull();
+    expect(host.value()).toBe('be');
+    expect(clear.tabIndex).toBe(0);
+    expect(chipRemove.tabIndex).toBe(0);
+    expect(document.activeElement).toBe(input);
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.value()).toBe('');
+    expect(document.activeElement).toBe(input);
   });
 
   it('skips disabled items for keyboard and mouse activation', () => {
@@ -445,6 +554,25 @@ describe('HellOmnibar hotkey activation', () => {
 
 function overlayRoot(): HTMLElement {
   return TestBed.inject(OverlayContainer).getContainerElement();
+}
+
+function openOmnibarTabStops(hostRoot: HTMLElement, panelRoot: HTMLElement): HTMLElement[] {
+  const selectors = [
+    'a[href]',
+    'button',
+    'input',
+    'select',
+    'textarea',
+    '[tabindex]',
+    '[contenteditable="true"]',
+  ];
+  const selector = selectors.join(', ');
+  const hostSelector = selectors.map((part) => `hell-omnibar ${part}`).join(', ');
+
+  return [
+    ...hostRoot.querySelectorAll<HTMLElement>(hostSelector),
+    ...panelRoot.querySelectorAll<HTMLElement>(selector),
+  ].filter((element) => !element.hasAttribute('disabled') && element.tabIndex >= 0);
 }
 
 function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {

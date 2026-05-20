@@ -35,7 +35,6 @@ import {
 } from '../../core/search';
 import { HELL_LABELS } from '../../core/labels';
 import { HellInput } from '../../primitives/input/input';
-import { HellListbox } from '../../primitives/listbox/listbox';
 import { HellSearch, HellSearchClear } from '../../primitives/search/search';
 import { HellSkeleton } from '../../primitives/skeleton/skeleton';
 import {
@@ -74,6 +73,11 @@ export interface HellOmnibarRegisteredItem {
   scrollIntoView(): void;
 }
 
+export interface HellOmnibarRegisteredAction {
+  /** Moves DOM focus into an action reached through the omnibar keyboard contract. */
+  focus(): void;
+}
+
 /* ──────────────────────────── Component ──────────────────────────── */
 
 let nextOmnibarId = 0;
@@ -108,6 +112,8 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
  * configurable actions strip, grouped results, and optional global hotkey.
  * Rendering of results is fully owned by projected content; the omnibar wires
  * up query state, keyboard navigation, active-item tracking, and selection.
+ * While open, Tab stays anchored on the input; options use `aria-activedescendant`,
+ * and F6 enters/leaves the optional actions strip without adding tab stops.
  *
  * Slots (multi-slot `<ng-content>` with attribute selectors):
  *   - `[hellOmnibarLeading]`  — icon/badge before the input
@@ -123,7 +129,6 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
   imports: [
     NgTemplateOutlet,
     HellInput,
-    HellListbox,
     HellSearch,
     HellSearchClear,
     HellSkeleton,
@@ -178,6 +183,7 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
         type="button"
         [attr.aria-label]="labels.omnibar.clearSearch"
         [attr.data-empty]="value() ? null : ''"
+        [attr.tabindex]="isOpen() ? -1 : null"
         (click)="onClearClick($event)"
       ></button>
       <ng-content select="[hellOmnibarTrailing]" />
@@ -209,7 +215,7 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
         <div data-slot="actions" [attr.data-empty]="!hasActions() ? 'true' : null">
           <ng-content select="[hellOmnibarActions]" />
         </div>
-        <div data-slot="results" hellListbox [id]="panelId">
+        <div data-slot="results" [id]="panelId" role="listbox">
           @if (loading()) {
             <div data-slot="loading" role="status" [attr.aria-label]="loadingMessage()">
               @if (loadingTemplate(); as tpl) {
@@ -416,6 +422,11 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     this.inputRef?.nativeElement.focus();
   }
 
+  /** @internal Open-state controls leave Tab on the input while keeping closed state native. */
+  internalControlTabIndex(): -1 | null {
+    return this.isOpen() ? -1 : null;
+  }
+
   /** Container for child Floating Interaction primitives (menus, popovers) that should
    *  behave as part of the omnibar instead of outside-click targets. */
   floatingContainer(): HTMLElement {
@@ -578,6 +589,11 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
           event.preventDefault();
         }
         break;
+      case 'F6':
+        if (this.isOpen() && this.focusPopupAction(event.shiftKey ? 'last' : 'first')) {
+          event.preventDefault();
+        }
+        break;
       case 'Enter': {
         const item = this.runtime.activeItem();
         if (item && this.isOpen()) {
@@ -602,6 +618,24 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
 
   private moveActive(delta: number): void {
     this.runtime.moveActive(delta);
+  }
+
+  focusAdjacentAction(action: HellOmnibarRegisteredAction, delta: number): void {
+    const actions = this.runtime.actionItems();
+    const current = actions.indexOf(action);
+    if (current < 0 || !actions.length) return;
+
+    let next = current + delta;
+    if (next < 0) next = actions.length - 1;
+    if (next >= actions.length) next = 0;
+    actions[next]?.focus();
+  }
+
+  private focusPopupAction(position: 'first' | 'last'): boolean {
+    const actions = this.runtime.actionItems();
+    const action = position === 'first' ? actions[0] : actions[actions.length - 1];
+    action?.focus();
+    return action !== undefined;
   }
 
   private syncOverlayPanelStyles(): void {
@@ -680,6 +714,7 @@ export class HellOmnibarGroupLabel extends HellStyleable {}
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
     '[attr.data-disabled]': 'disabled() ? "true" : null',
     '[attr.aria-selected]': 'active() ? "true" : "false"',
+    tabindex: '-1',
     '[attr.data-active]': 'active() ? "true" : null',
     '(click)': 'onClick($event)',
     '(mousemove)': 'onMouseMove()',
@@ -771,9 +806,16 @@ export class HellOmnibarChip extends HellStyleable {}
   host: {
     '[class.hell-omnibar-chip-remove]': '!unstyled()',
     type: 'button',
+    '[attr.tabindex]': 'tabIndex()',
   },
 })
-export class HellOmnibarChipRemove extends HellStyleable {}
+export class HellOmnibarChipRemove extends HellStyleable {
+  private readonly omnibar = inject(HellOmnibar, { optional: true });
+
+  protected tabIndex(): -1 | null {
+    return this.omnibar?.internalControlTabIndex() ?? null;
+  }
+}
 
 @Directive({
   selector: '[hellOmnibarActions]',
@@ -791,18 +833,52 @@ export class HellOmnibarActionsStrip extends HellStyleable {}
   host: {
     '[class.hell-omnibar-action]': '!unstyled()',
     type: 'button',
+    '[attr.tabindex]': 'tabIndex()',
     '[attr.data-active]': 'pressed() ? "true" : null',
+    '(keydown)': 'onKeyDown($event)',
   },
 })
-export class HellOmnibarAction extends HellStyleable {
+export class HellOmnibarAction extends HellStyleable implements HellOmnibarRegisteredAction {
   readonly pressed = input(false, { transform: booleanAttribute });
 
+  private readonly host = inject(ElementRef<HTMLButtonElement>);
   private readonly omnibar = inject(HellOmnibar);
 
   constructor() {
     super();
     this.omnibar.registerAction(this);
     inject(DestroyRef).onDestroy(() => this.omnibar.unregisterAction(this));
+  }
+
+  focus(): void {
+    this.host.nativeElement.focus();
+  }
+
+  protected tabIndex(): -1 | null {
+    return this.omnibar.internalControlTabIndex();
+  }
+
+  protected onKeyDown(event: KeyboardEvent): void {
+    switch (event.key) {
+      case 'ArrowLeft':
+        this.omnibar.focusAdjacentAction(this, -1);
+        event.preventDefault();
+        break;
+      case 'ArrowRight':
+        this.omnibar.focusAdjacentAction(this, 1);
+        event.preventDefault();
+        break;
+      case 'F6':
+        this.omnibar.focus();
+        event.preventDefault();
+        break;
+      case 'Escape':
+        this.omnibar.focus();
+        this.omnibar.close();
+        event.preventDefault();
+        event.stopPropagation();
+        break;
+    }
   }
 }
 

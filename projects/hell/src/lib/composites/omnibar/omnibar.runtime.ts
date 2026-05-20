@@ -6,7 +6,7 @@ import {
   type HellSearchField,
   type HellSearchSource,
 } from '../../core/search';
-import type { HellOmnibarRegisteredItem } from './omnibar';
+import type { HellOmnibarRegisteredAction, HellOmnibarRegisteredItem } from './omnibar';
 
 /** Search inputs captured from the component at the moment a query runs. */
 export interface HellOmnibarSearchOptions<T> {
@@ -33,7 +33,7 @@ export class HellOmnibarRuntime<T = unknown> {
   readonly error = signal<unknown | null>(null);
   readonly results = signal<readonly HellSearchResult<T>[]>([]);
   readonly items = signal<HellOmnibarRegisteredItem[]>([]);
-  readonly actionItems = signal<unknown[]>([]);
+  readonly actionItems = signal<HellOmnibarRegisteredAction[]>([]);
 
   private readonly activeIndexState = signal(0);
   private timer: ReturnType<typeof setTimeout> | null = null;
@@ -162,11 +162,11 @@ export class HellOmnibarRuntime<T = unknown> {
     if (length) this.activeIndexState.set(length - 1);
   }
 
-  registerAction(action: unknown): void {
+  registerAction(action: HellOmnibarRegisteredAction): void {
     this.actionItems.update((list) => [...list, action]);
   }
 
-  unregisterAction(action: unknown): void {
+  unregisterAction(action: HellOmnibarRegisteredAction): void {
     this.actionItems.update((list) => list.filter((a) => a !== action));
   }
 
