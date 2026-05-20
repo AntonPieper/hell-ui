@@ -130,29 +130,6 @@ describe('HellSelect', () => {
     expect(select.tabIndex).toBe(-1);
   });
 
-  it('keeps the internal ng-primitives state writer working for value and disabled CVA updates', () => {
-    const fixture = TestBed.createComponent(SelectFormHost);
-    fixture.detectChanges();
-
-    const debug = fixture.debugElement.query(By.directive(HellSelect));
-    const selectInstance = debug.injector.get(HellSelect<string>);
-    const ngpSelect = debug.injector.get(NgpSelect) as unknown as {
-      state: {
-        value: { set: (value: unknown) => void };
-        disabled: { set: (value: boolean) => void };
-      };
-    };
-    const state = ngpSelect.state;
-    const valueSet = vi.spyOn(state.value, 'set');
-    const disabledSet = vi.spyOn(state.disabled, 'set');
-
-    selectInstance.writeValue('from-form-state');
-    selectInstance.setDisabledState(true);
-
-    expect(valueSet).toHaveBeenCalledWith('from-form-state');
-    expect(disabledSet).toHaveBeenCalledWith(true);
-  });
-
   it('integrates with reactive forms in multiple mode without echoing programmatic array writes', async () => {
     const fixture = TestBed.createComponent(SelectMultipleFormHost);
     fixture.detectChanges();

@@ -31,7 +31,7 @@ checkTableUtilityContract();
 checkTableSortButtonContract();
 checkFloatingRegistrationContract();
 checkFloatingAdapterContract();
-checkNgpPrivateStateBridgeContract();
+checkNgpStateWriterContract();
 
 if (failures.length) {
   console.error('Architecture checks failed:\n');
@@ -1248,17 +1248,24 @@ function checkFloatingRegistrationContract() {
   }
 }
 
-function checkNgpPrivateStateBridgeContract() {
+function checkNgpStateWriterContract() {
   const adapterRelPath = 'projects/hell/src/lib/primitives/adapters/ngp-state-adapters.ts';
   const adapterPath = join(root, adapterRelPath);
   const adapterSource = readFile(adapterPath);
   const ngpPackage = parseJsonWithComments(readFile(join(root, 'node_modules/ng-primitives/package.json')));
+  const workspacePackage = parseJsonWithComments(readFile(join(root, 'package.json')));
   const libraryPackage = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
   const expectedVersion = `ng-primitives@${ngpPackage.version}`;
 
   if (!adapterSource.includes(`HELL_NGP_STATE_WRITER_VERSION = '${expectedVersion}'`)) {
     failures.push(
       `ng-primitives state writer version must match installed ${expectedVersion}`,
+    );
+  }
+
+  if (workspacePackage.dependencies?.['ng-primitives'] !== ngpPackage.version) {
+    failures.push(
+      `workspace ng-primitives dependency must be pinned to ${ngpPackage.version} while the state writer fallback is version-bound`,
     );
   }
 
@@ -1300,6 +1307,9 @@ function checkNgpPrivateStateBridgeContract() {
     const rel = file.slice(root.length + 1);
     if (retiredPrivateBridgeTokens.some((token) => source.includes(token))) {
       failures.push(`Retired ng-primitives private bridge token is still used in ${rel}`);
+    }
+    if (/\bngp[A-Za-z0-9_]*\.state\b/.test(source)) {
+      failures.push(`Direct ng-primitives instance state access is not allowed in ${rel}; use injected State<T> adapter seam`);
     }
     if (allowedBridgeFiles.has(rel)) continue;
     const usesStateWriter =

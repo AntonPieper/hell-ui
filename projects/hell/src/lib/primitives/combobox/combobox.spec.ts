@@ -218,29 +218,6 @@ describe('HellCombobox', () => {
     expect(options.every((option) => option.tabIndex === -1)).toBe(true);
   });
 
-  it('keeps the internal ng-primitives state writer working for value and disabled CVA updates', () => {
-    const fixture = TestBed.createComponent(ComboboxFormHost);
-    fixture.detectChanges();
-
-    const debug = fixture.debugElement.query(By.directive(HellCombobox));
-    const comboboxInstance = debug.injector.get(HellCombobox<string>);
-    const ngpCombobox = debug.injector.get(NgpCombobox) as unknown as {
-      state: {
-        value: { set: (value: unknown) => void };
-        disabled: { set: (value: boolean) => void };
-      };
-    };
-    const state = ngpCombobox.state;
-    const valueSet = vi.spyOn(state.value, 'set');
-    const disabledSet = vi.spyOn(state.disabled, 'set');
-
-    comboboxInstance.writeValue('from-form-state');
-    comboboxInstance.setDisabledState(true);
-
-    expect(valueSet).toHaveBeenCalledWith('from-form-state');
-    expect(disabledSet).toHaveBeenCalledWith(true);
-  });
-
   it('integrates with reactive forms in multiple mode without echoing programmatic array writes', async () => {
     const fixture = TestBed.createComponent(ComboboxMultipleFormHost);
     fixture.detectChanges();

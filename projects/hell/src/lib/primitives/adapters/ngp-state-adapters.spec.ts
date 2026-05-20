@@ -1,3 +1,10 @@
+import { Component, Directive, type Type } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { NgpCombobox, injectComboboxState } from 'ng-primitives/combobox';
+import { NgpRadioGroup, injectRadioGroupState } from 'ng-primitives/radio';
+import { NgpSelect, injectSelectState } from 'ng-primitives/select';
+
 import {
   HELL_NGP_STATE_WRITER_VERSION,
   writeComboboxStateDisabled,
@@ -8,9 +15,111 @@ import {
   writeSelectStateValue,
 } from './ngp-state-adapters';
 
+type WritableSignalLike<T> = (() => T) & { set: (value: T) => void };
+
+@Directive({
+  selector: '[hellSelectStateProbe]',
+  hostDirectives: [NgpSelect],
+})
+class SelectStateProbe {
+  readonly state = injectSelectState<NgpSelect>();
+}
+
+@Component({
+  imports: [SelectStateProbe],
+  template: `<button hellSelectStateProbe type="button"></button>`,
+})
+class SelectStateProbeHost {}
+
+@Directive({
+  selector: '[hellComboboxStateProbe]',
+  hostDirectives: [NgpCombobox],
+})
+class ComboboxStateProbe {
+  readonly state = injectComboboxState<NgpCombobox>();
+}
+
+@Component({
+  imports: [ComboboxStateProbe],
+  template: `<div hellComboboxStateProbe></div>`,
+})
+class ComboboxStateProbeHost {}
+
+@Directive({
+  selector: '[hellRadioGroupStateProbe]',
+  hostDirectives: [NgpRadioGroup],
+})
+class RadioGroupStateProbe {
+  readonly state = injectRadioGroupState<string>();
+}
+
+@Component({
+  imports: [RadioGroupStateProbe],
+  template: `<div hellRadioGroupStateProbe></div>`,
+})
+class RadioGroupStateProbeHost {}
+
+function writableChannel<T>(state: unknown, channel: 'value' | 'disabled'): WritableSignalLike<T> {
+  const value = (state as Record<string, unknown>)[channel];
+  if (typeof value !== 'function' || typeof (value as { set?: unknown }).set !== 'function') {
+    throw new Error(`Expected public ng-primitives state.${channel} writable signal.`);
+  }
+  return value as WritableSignalLike<T>;
+}
+
+function probe<T>(host: Type<unknown>, directive: Type<T>): T {
+  const fixture = TestBed.createComponent(host);
+  fixture.detectChanges();
+  return fixture.debugElement.query(By.directive(directive)).injector.get(directive);
+}
+
 describe('ngp state-writer compatibility helpers', () => {
   it('documents the installed ng-primitives version this state-writer fallback targets', () => {
     expect(HELL_NGP_STATE_WRITER_VERSION).toBe('ng-primitives@0.117.2');
+  });
+
+  describe('installed ng-primitives public state provider drift', () => {
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({
+        imports: [SelectStateProbeHost, ComboboxStateProbeHost, RadioGroupStateProbeHost],
+      }).compileComponents();
+    });
+
+    it('writes select CVA updates through the public injected State<T> channels', () => {
+      const state = probe(SelectStateProbeHost, SelectStateProbe).state();
+      const value = writableChannel<unknown>(state, 'value');
+      const disabled = writableChannel<boolean>(state, 'disabled');
+
+      writeSelectStateValue(state, 'from-public-state');
+      writeSelectStateDisabled(state, true);
+
+      expect(value()).toBe('from-public-state');
+      expect(disabled()).toBe(true);
+    });
+
+    it('writes combobox CVA updates through the public injected State<T> channels', () => {
+      const state = probe(ComboboxStateProbeHost, ComboboxStateProbe).state();
+      const value = writableChannel<unknown>(state, 'value');
+      const disabled = writableChannel<boolean>(state, 'disabled');
+
+      writeComboboxStateValue(state, 'from-public-state');
+      writeComboboxStateDisabled(state, true);
+
+      expect(value()).toBe('from-public-state');
+      expect(disabled()).toBe(true);
+    });
+
+    it('writes radio-group CVA updates through the public injected State<T> channels', () => {
+      const state = probe(RadioGroupStateProbeHost, RadioGroupStateProbe).state();
+      const value = writableChannel<string | null>(state, 'value');
+      const disabled = writableChannel<boolean>(state, 'disabled');
+
+      writeRadioGroupStateValue(state, 'from-public-state');
+      writeRadioGroupStateDisabled(state, true);
+
+      expect(value()).toBe('from-public-state');
+      expect(disabled()).toBe(true);
+    });
   });
 
   it('prefers select public value setter when present', () => {

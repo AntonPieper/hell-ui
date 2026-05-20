@@ -6,15 +6,18 @@ import type { NgpSelect } from 'ng-primitives/select';
 /**
  * Internal compatibility seam for ng-primitives state writes.
  *
- * Hell uses public ng-primitives setter methods whenever they can perform CVA
- * writes. In ng-primitives 0.117.2, Select, Combobox, and RadioGroup expose
- * State<T> through public inject-state APIs, but they do not expose public
- * value/disabled setters. The only release-sensitive fallback is isolated here:
- * writable State<T> signal channels for `value` and `disabled`.
+ * HELL-002 decision: use a narrow adapter over ng-primitives' public
+ * inject-state APIs instead of reading a primitive instance's private `state`
+ * field. Context7/ng-primitives usage docs describe state providers as the
+ * programmatic-control seam, and local 0.117.2 typings expose `State<T>` as
+ * writable input channels. Select, Combobox, and RadioGroup still do not expose
+ * public `setValue` / `setDisabled` methods, so Hell prefers those future
+ * setters when present and otherwise writes only the public injected `State<T>`
+ * `value` / `disabled` channels here.
  *
- * If ng-primitives changes those writable channels before adding setters, fail
- * loudly in this adapter instead of silently dropping form writes across select,
- * combobox, and radio.
+ * The dependency is pinned while this adapter exists. If ng-primitives changes
+ * those writable channels before adding setters, fail loudly here instead of
+ * silently dropping form writes across select, combobox, and radio.
  *
  * @internal
  */
