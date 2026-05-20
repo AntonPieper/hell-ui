@@ -185,6 +185,7 @@ function parseIsoDateOnly(value: string): Date | null {
         [hellFlyout]="ccTriggerInstance"
         [boundary]="hostElement"
         data-slot="captions"
+        [aria-label]="speechTranscriptLabel"
         [attr.data-state]="transcribing() ? 'live' : 'idle'"
       >
         <header data-slot="captions-bar">
@@ -301,6 +302,8 @@ export class HellAudioPlayer extends HellStyleable {
   protected readonly copied = this.audioRuntime.copied;
   protected readonly speechSupported = this.audioRuntime.speechSupported;
   protected readonly labels = inject(HELL_LABELS);
+  protected readonly speechTranscriptLabel =
+    this.labels.audioPlayer.speechTranscript ?? 'Speech transcript';
 
   private seekRestartTimer: ReturnType<typeof setTimeout> | null = null;
 

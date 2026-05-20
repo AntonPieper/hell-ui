@@ -138,6 +138,24 @@ class DialogClosedResultHost {
 })
 class DialogDataHost {}
 
+@Component({
+  imports: [...HELL_DIALOG_DIRECTIVES],
+  template: `
+    <button id="open-named" type="button" [hellDialogTrigger]="namedDialog">Open named</button>
+
+    <ng-template #namedDialog>
+      <div id="named-overlay" hellDialogOverlay>
+        <div hellDialog>
+          <h2 hellDialogTitle>Publish this article?</h2>
+          <p hellDialogDescription>Once published, the article will be visible to everyone.</p>
+          <button type="button">Close</button>
+        </div>
+      </div>
+    </ng-template>
+  `,
+})
+class NamedDialogHost {}
+
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
 
 beforeAll(() => {
@@ -163,6 +181,7 @@ describe('HellDialogTrigger scoped overlays', () => {
         ClosePolicyDialogHost,
         DialogClosedResultHost,
         DialogDataHost,
+        NamedDialogHost,
       ],
     }).compileComponents();
   });
@@ -306,6 +325,29 @@ describe('HellDialogTrigger scoped overlays', () => {
 
     const payload = query<HTMLElement>(document.body, '#data-payload');
     expect(payload.textContent).toBe('payload');
+  });
+
+  it('names dialogs from hellDialogTitle and links hellDialogDescription', async () => {
+    const fixture = TestBed.createComponent(NamedDialogHost);
+    await settle(fixture);
+
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-named').click();
+    await settle(fixture);
+
+    const overlay = query<HTMLElement>(document.body, '#named-overlay');
+    const dialog = query<HTMLElement>(overlay, '[role="dialog"]');
+    const titleIds = dialog.getAttribute('aria-labelledby')?.trim().split(/\s+/) ?? [];
+    const descriptionIds = dialog.getAttribute('aria-describedby')?.trim().split(/\s+/) ?? [];
+
+    expect(dialog.getAttribute('role')).toBe('dialog');
+    expect(titleIds).toHaveLength(1);
+    expect(document.getElementById(titleIds[0])?.textContent?.trim()).toBe(
+      'Publish this article?',
+    );
+    expect(descriptionIds).toHaveLength(1);
+    expect(document.getElementById(descriptionIds[0])?.textContent?.trim()).toBe(
+      'Once published, the article will be visible to everyone.',
+    );
   });
 });
 

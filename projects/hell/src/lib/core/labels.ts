@@ -16,6 +16,7 @@ export interface HellAudioPlayerLabels {
   readonly volume: string;
   readonly showLiveCaptions: string;
   readonly hideLiveCaptions: string;
+  readonly speechTranscript?: string;
   readonly download: string;
   readonly playbackSpeed: (rate: number) => string;
   readonly copyTranscript: string;
@@ -171,6 +172,7 @@ export const HELL_DEFAULT_LABELS: HellLabels = {
     volume: 'Volume',
     showLiveCaptions: 'Show speech transcript',
     hideLiveCaptions: 'Hide speech transcript',
+    speechTranscript: 'Speech transcript',
     download: 'Download',
     playbackSpeed: (rate) => `Playback speed ${rate}x`,
     copyTranscript: 'Copy transcript',

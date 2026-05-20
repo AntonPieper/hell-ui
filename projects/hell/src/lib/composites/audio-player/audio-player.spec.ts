@@ -74,6 +74,28 @@ describe('HellAudioPlayer', () => {
     playSpy.mockRestore();
   });
 
+  it('names the speech transcript flyout independently from trigger action labels', async () => {
+    const { fixture, component } = await createPlayer();
+
+    const transcriptButton = fixture.nativeElement.querySelector(
+      '[data-slot="cc-toggle"]',
+    ) as HTMLButtonElement;
+    transcriptButton.click();
+    fixture.detectChanges();
+
+    const flyout = fixture.nativeElement.querySelector('[data-slot="captions"]') as HTMLElement;
+    expect(transcriptButton.getAttribute('aria-label')).toBe('Hide speech transcript');
+    expect(flyout.getAttribute('role')).toBe('dialog');
+    expect(flyout.getAttribute('aria-modal')).toBe('false');
+    expect(flyout.getAttribute('aria-label')).toBe('Speech transcript');
+
+    component.error.set('Speech error: network');
+    component.transcript.set('Existing transcript');
+    fixture.detectChanges();
+
+    expect(flyout.getAttribute('aria-label')).toBe('Speech transcript');
+  });
+
   it('keeps the experimental speech transcript toggle opt-in', async () => {
     await TestBed.configureTestingModule({ imports: [HellAudioPlayer] }).compileComponents();
     const fixture = TestBed.createComponent(HellAudioPlayer);
