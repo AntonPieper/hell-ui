@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -56,7 +56,10 @@ class SelectMultipleFormHost {
 @Component({
   imports: [ReactiveFormsModule, HellSelectBasic],
   template: `
+    <p id="priority-help">Used to route incoming work.</p>
     <hell-select-basic
+      aria-label="Priority"
+      [aria-describedby]="'priority-help'"
       [options]="options"
       [formControl]="control"
       (valueChange)="values.push($any($event))"
@@ -69,10 +72,28 @@ class SelectBasicFormHost {
   readonly values: Array<string | null> = [];
 }
 
+@Component({
+  imports: [HellSelectBasic],
+  template: `
+    <span id="priority-label">Priority</span>
+    <p id="priority-description">Used to route incoming work.</p>
+    <hell-select-basic
+      [aria-labelledby]="'priority-label'"
+      [aria-describedby]="'priority-description'"
+      [options]="options"
+      [value]="value()"
+    />
+  `,
+})
+class SelectBasicLabelledHost {
+  readonly options = ['Low', 'High'];
+  readonly value = signal<string | null>(null);
+}
+
 describe('HellSelect', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SelectFormHost, SelectMultipleFormHost, SelectBasicFormHost],
+      imports: [SelectFormHost, SelectMultipleFormHost, SelectBasicFormHost, SelectBasicLabelledHost],
     }).compileComponents();
   });
 
@@ -178,11 +199,15 @@ describe('HellSelect', () => {
     expect(preset.classList.contains('hell-select-basic')).toBe(true);
     expect(preset.classList.contains('hell-select')).toBe(false);
     expect(trigger.textContent?.trim()).toContain('Select');
+    expect(trigger.getAttribute('aria-label')).toBe('Priority');
+    expect(trigger.getAttribute('aria-describedby')).toBe('priority-help');
 
     host.control.setValue('High');
     fixture.detectChanges();
 
     expect(trigger.textContent?.trim()).toContain('High');
+    expect(trigger.getAttribute('aria-label')).toBe('Priority');
+    expect(trigger.getAttribute('aria-describedby')).toBe('priority-help');
     expect(host.values).toEqual([]);
 
     trigger.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: trigger }));
@@ -198,7 +223,42 @@ describe('HellSelect', () => {
 
     expect(trigger.getAttribute('data-disabled')).toBe('');
   });
+
+  it('keeps the basic select accessible name stable before and after selection', () => {
+    const fixture = TestBed.createComponent(SelectBasicLabelledHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const root = fixture.nativeElement as HTMLElement;
+    const trigger = query<HTMLButtonElement>(root, 'hell-select-basic button[hellSelect]');
+
+    expect(trigger.textContent?.trim()).toContain('Select');
+    expect(trigger.getAttribute('aria-labelledby')).toBe('priority-label');
+    expect(trigger.getAttribute('aria-describedby')).toBe('priority-description');
+    expect(accessibleName(root, trigger)).toBe('Priority');
+
+    host.value.set('High');
+    fixture.detectChanges();
+
+    expect(trigger.textContent?.trim()).toContain('High');
+    expect(accessibleName(root, trigger)).toBe('Priority');
+    expect(trigger.getAttribute('aria-describedby')).toBe('priority-description');
+  });
 });
+
+function accessibleName(root: HTMLElement, element: HTMLElement): string {
+  const labelledby = element.getAttribute('aria-labelledby');
+  if (labelledby) {
+    return labelledby
+      .trim()
+      .split(/\s+/)
+      .map((id) => root.querySelector<HTMLElement>(`[id="${id}"]`)?.textContent?.trim() ?? '')
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  return element.getAttribute('aria-label') ?? element.textContent?.trim() ?? '';
+}
 
 function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {
   const element = root.querySelector<T>(selector);

@@ -40,7 +40,9 @@ import selectBasicPresetExampleCodeRaw from './examples/basic-preset.example.ts?
       <ul>
         <li>
           <code>&lt;hell-select-basic&gt;</code>: compact preset composing the select pieces and a single
-          option contract for quick adoption.
+          option contract for quick adoption. Bind <code>aria-label</code> or
+          <code>aria-labelledby</code> plus <code>aria-describedby</code> to keep the trigger name stable
+          after a value is selected.
         </li>
         <li>
           <code>[hellSelect]</code>: trigger and state container. Inputs <code>value</code>,

@@ -14,11 +14,15 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms';
 import { containsNode } from '../../core/dom';
 import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
 import { HellStyleable } from '../../core/styleable';
 import { hellRegisterFloatingHost } from '../../core/floating-scope';
+import {
+  hellSyncFormFieldDescriptions,
+  hellSyncFormFieldLabels,
+} from '../../core/form-field-idrefs';
 import {
   NgpSelect,
   NgpSelectDropdown,
@@ -26,6 +30,7 @@ import {
   NgpSelectPortal,
   injectSelectState,
 } from 'ng-primitives/select';
+import { injectFormFieldState, ngpFormField, provideFormFieldState } from 'ng-primitives/form-field';
 import { writeSelectStateDisabled, writeSelectStateValue } from '../adapters/ngp-state-adapters';
 
 export type HellSelectSingleValue<T = unknown> = T | null;
@@ -231,6 +236,7 @@ export class HellSelectOption extends HellStyleable {}
 @Component({
   selector: 'hell-select-basic',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  viewProviders: [provideFormFieldState()],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -258,6 +264,7 @@ export class HellSelectOption extends HellStyleable {}
       [multiple]="multiple()"
       [compareWith]="compareWith()"
       [disabled]="effectiveDisabled()"
+      [attr.aria-label]="triggerAriaLabel()"
       (focusout)="markControlTouched($event)"
       (openChange)="openChange.emit($event)"
       (valueChange)="onValueChange($event)"
@@ -287,6 +294,9 @@ export class HellSelectBasic<T = unknown> extends HellStyleable implements Contr
   readonly options = input<readonly T[]>([]);
   readonly multiple = input(false, { transform: booleanAttribute });
   readonly placeholder = input('Select');
+  readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
+  readonly ariaLabelledby = input<string | null>(null, { alias: 'aria-labelledby' });
+  readonly ariaDescribedby = input<string | null>(null, { alias: 'aria-describedby' });
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly compareWith = input<HellSelectCompareWith<T>>((a, b) => a === b);
   readonly displayWith = input<HellSelectDisplayWith<T>>((value) => String(value));
@@ -298,6 +308,9 @@ export class HellSelectBasic<T = unknown> extends HellStyleable implements Contr
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly innerSelect = viewChild(HellSelect);
   private readonly cva = new HellControlValueAccessorBridge<HellSelectFormValue<T>>();
+  private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
+  private readonly formField =
+    this.inheritedFormField() ?? ngpFormField({ ngControl: signal<NgControl | undefined>(undefined) });
   private readonly controlMode = signal(false);
   private readonly controlValue = signal<HellSelectFormValue<T> | null>(null);
   private readonly controlDisabled = signal(false);
@@ -306,6 +319,14 @@ export class HellSelectBasic<T = unknown> extends HellStyleable implements Contr
     this.controlMode() ? this.controlValue() : this.value(),
   );
   protected readonly effectiveDisabled = computed(() => this.disabled() || this.controlDisabled());
+  protected readonly triggerAriaLabel = () =>
+    this.ariaLabel() ?? this.host.nativeElement.getAttribute('aria-label');
+  private readonly triggerAriaLabelledby = computed(
+    () => this.ariaLabelledby() ?? this.host.nativeElement.getAttribute('aria-labelledby'),
+  );
+  private readonly triggerAriaDescribedby = computed(
+    () => this.ariaDescribedby() ?? this.host.nativeElement.getAttribute('aria-describedby'),
+  );
 
   protected readonly selectedLabel = computed(() => {
     const value = this.effectiveValue();
@@ -318,6 +339,12 @@ export class HellSelectBasic<T = unknown> extends HellStyleable implements Contr
     if (value == null) return null;
     return this.displayWith()(value as T);
   });
+
+  constructor() {
+    super();
+    hellSyncFormFieldLabels(this.formField, this.triggerAriaLabelledby);
+    hellSyncFormFieldDescriptions(this.formField, this.triggerAriaDescribedby);
+  }
 
   protected onValueChange(next: HellSelectFormValue<T>): void {
     if (this.controlMode()) {

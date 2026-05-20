@@ -8,12 +8,20 @@ const PRIORITIES = ['Low', 'Medium', 'High', 'Urgent'];
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [...HELL_SELECT_BASIC_DIRECTIVES],
   template: `
-    <hell-select-basic
-      [options]="options"
-      [value]="value()"
-      placeholder="Pick priority"
-      (valueChange)="value.set($event === null ? null : $any($event))"
-    />
+    <div class="grid max-w-60 gap-1">
+      <span id="priority-select-label" class="text-sm font-medium">Priority</span>
+      <p id="priority-select-description" class="m-0 text-sm text-hell-foreground-muted">
+        Used to sort incoming work.
+      </p>
+      <hell-select-basic
+        [aria-labelledby]="'priority-select-label'"
+        [aria-describedby]="'priority-select-description'"
+        [options]="options"
+        [value]="value()"
+        placeholder="Pick priority"
+        (valueChange)="value.set($event === null ? null : $any($event))"
+      />
+    </div>
   `,
 })
 export class SelectBasicPresetExample {
