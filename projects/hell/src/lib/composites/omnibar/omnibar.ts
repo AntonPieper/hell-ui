@@ -27,12 +27,7 @@ import {
   HellFloatingScopeRegistry,
   type HellFloatingScope,
 } from '../../core/floating-scope';
-import {
-  HellFloatingInteractionController,
-  hellDismissOn,
-  hellOutsideFocus,
-  hellOutsidePointer,
-} from '../../core/floating-dismissal';
+import { HellFloatingInteractionController, hellOutsideFocus } from '../../core/floating-dismissal';
 import {
   type HellSearchField,
   type HellSearchResult,
@@ -203,13 +198,13 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
       [cdkConnectedOverlayPanelClass]="'hell-omnibar-overlay-pane'"
       (detach)="onOverlayDetach()"
       (positionChange)="onOverlayPositionChange()"
+      (overlayOutsideClick)="onOverlayOutsideClick($event)"
     >
       <div
         #panel
         data-slot="panel"
         [id]="panelId + '-surface'"
         [class.hell-omnibar-panel-surface]="!unstyled()"
-        (pointerdown)="onPanelPointerDown($event)"
       >
         <div data-slot="actions" [attr.data-empty]="!hasActions() ? 'true' : null">
           <ng-content select="[hellOmnibarActions]" />
@@ -342,7 +337,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     ownerDocument: () => this.host.nativeElement.ownerDocument,
     active: () => this.isOpen(),
     activeKey: () => this.openVersion(),
-    dismiss: hellDismissOn(hellOutsidePointer, hellOutsideFocus),
+    dismiss: hellOutsideFocus,
     onDismiss: () => this.close(),
   });
 
@@ -542,9 +537,9 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     });
   }
 
-  protected onPanelPointerDown(event: PointerEvent): void {
-    void event;
-    this.floatingInteraction.markPointerDownInside();
+  protected onOverlayOutsideClick(event: MouseEvent): void {
+    if (this.floatingInteraction.isInside(event.target)) return;
+    this.close();
   }
 
   protected onOverlayDetach(): void {

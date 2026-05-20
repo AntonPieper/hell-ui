@@ -12,7 +12,6 @@ import {
   hellEscapeKey,
   hellOutsideClick,
   hellOutsideFocus,
-  hellOutsidePointer,
   hellWithDismissEffect,
 } from './floating-dismissal';
 
@@ -83,20 +82,20 @@ describe('Floating Scope', () => {
     const controller = new HellFloatingDismissController({
       root: () => root,
       ownerDocument: () => document,
-      dismiss: (context) => (enabled ? hellOutsidePointer(context) : null),
+      dismiss: (context) => (enabled ? hellOutsideClick(context) : null),
       onDismiss: ({ event }) => dismissals.push(event.type),
     });
     controller.connect(destroy.ref);
 
-    root.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    root.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     expect(dismissals).toEqual([]);
 
-    outside.dispatchEvent(new Event('pointerdown', { bubbles: true }));
-    expect(dismissals).toEqual(['pointerdown']);
+    outside.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(dismissals).toEqual(['click']);
 
     enabled = false;
-    outside.dispatchEvent(new Event('pointerdown', { bubbles: true }));
-    expect(dismissals).toEqual(['pointerdown']);
+    outside.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(dismissals).toEqual(['click']);
 
     destroy.run();
   });
@@ -202,7 +201,7 @@ describe('Floating Scope', () => {
     });
     controller.connect(destroy.ref);
 
-    outside.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    outside.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
     expect(focusSpy).toHaveBeenCalledTimes(1);
 
@@ -227,7 +226,7 @@ describe('Floating Scope', () => {
     });
     controller.connect(destroy.ref);
 
-    outside.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    outside.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
     expect(checker.isFocusable).toHaveBeenCalledWith(target);
     expect(focusSpy).not.toHaveBeenCalled();
@@ -255,7 +254,7 @@ describe('Floating Scope', () => {
     });
     controller.connect(destroy.ref);
 
-    outside.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    outside.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
     expect(checker.isFocusable).not.toHaveBeenCalled();
     expect(focusSpy).not.toHaveBeenCalled();
@@ -290,7 +289,7 @@ describe('Floating Scope', () => {
       if (target === detachedTarget) document.body.removeChild(target);
 
       expect(() => {
-        outside.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+        outside.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       }).not.toThrow();
       expect(focusSpy).not.toHaveBeenCalled();
 

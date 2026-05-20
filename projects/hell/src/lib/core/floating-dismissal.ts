@@ -105,10 +105,6 @@ export function hellGuardDismiss(
   };
 }
 
-/** Dismiss on pointerdown that starts outside the logical interaction. */
-export const hellOutsidePointer: HellDismissRule = (context) =>
-  context.event.type === 'pointerdown' && !context.isTargetInside() ? {} : null;
-
 /** Dismiss on click that lands outside the logical interaction. */
 export const hellOutsideClick: HellDismissRule = (context) =>
   context.event.type === 'click' && !context.isTargetInside() ? {} : null;
@@ -174,8 +170,8 @@ export interface HellFloatingInteractionOptions extends Omit<
 
 /**
  * Owns document-level Floating Dismissal listeners for one Floating Interaction.
- * Callers provide a composed dismiss rule; this module centralizes the
- * inside/outside and listener lifecycle rules.
+ * Callers provide a composed dismiss rule; this module centralizes click,
+ * focus, Escape, inside-pointer timing, and listener lifecycle rules.
  */
 export class HellFloatingDismissController {
   private cleanup: (() => void) | null = null;
@@ -191,11 +187,7 @@ export class HellFloatingDismissController {
 
     const onPointerDown = (event: PointerEvent) => {
       if (!this.isActive()) return;
-      if (this.isInsideEvent(event)) {
-        this.markPointerDownInside();
-        return;
-      }
-      this.dismiss(event);
+      if (this.isInsideEvent(event)) this.markPointerDownInside();
     };
 
     const onClick = (event: MouseEvent) => {
@@ -216,13 +208,13 @@ export class HellFloatingDismissController {
       this.dismiss(event);
     };
 
-    doc.addEventListener('pointerdown', onPointerDown);
+    doc.addEventListener('pointerdown', onPointerDown, true);
     doc.addEventListener('click', onClick, true);
     doc.addEventListener('focusin', onFocusIn);
     doc.addEventListener('keydown', onKeyDown, true);
 
     this.cleanup = () => {
-      doc.removeEventListener('pointerdown', onPointerDown);
+      doc.removeEventListener('pointerdown', onPointerDown, true);
       doc.removeEventListener('click', onClick, true);
       doc.removeEventListener('focusin', onFocusIn);
       doc.removeEventListener('keydown', onKeyDown, true);
@@ -243,10 +235,6 @@ export class HellFloatingDismissController {
       this.pointerDownInside = false;
       this.pointerDownInsideTimer = null;
     }, 0);
-  }
-
-  hasRecentPointerDownInside(): boolean {
-    return this.pointerDownInside;
   }
 
   handleFocusExit(event: FocusEvent): void {
@@ -367,7 +355,7 @@ export class HellFloatingDismissController {
 /**
  * Owns the common Floating Interaction lifecycle: register the rendered
  * surface with a Floating Scope, connect document dismissal listeners, and
- * expose the pointer/focus hooks that template code wires to DOM events.
+ * expose the focus-exit hook that template code wires to DOM events.
  */
 export class HellFloatingInteractionController {
   private readonly dismissController: HellFloatingDismissController;
@@ -398,10 +386,6 @@ export class HellFloatingInteractionController {
 
   destroy(): void {
     this.dismissController.destroy();
-  }
-
-  markPointerDownInside(): void {
-    this.dismissController.markPointerDownInside();
   }
 
   handleFocusExit(event: FocusEvent): void {

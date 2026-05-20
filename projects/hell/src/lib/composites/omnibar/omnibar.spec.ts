@@ -287,7 +287,7 @@ describe('HellOmnibar interactions', () => {
     expect(panel.style.getPropertyValue('--hell-omnibar-panel-max-height')).toBe('123px');
   });
 
-  it('treats the portaled CDK panel as inside for dismissal', async () => {
+  it('treats the portaled CDK panel as inside while CDK owns outside overlay clicks', async () => {
     const fixture = TestBed.createComponent(OmnibarHost);
     const host = fixture.componentInstance;
     fixture.detectChanges();
@@ -297,13 +297,14 @@ describe('HellOmnibar interactions', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    query<HTMLElement>(overlayRoot(), '[data-slot="panel"]').dispatchEvent(
-      new Event('pointerdown', { bubbles: true }),
-    );
+    const panel = query<HTMLElement>(overlayRoot(), '[data-slot="panel"]');
+    panel.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    panel.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     fixture.detectChanges();
     expect(host.openEvents).toEqual([true]);
 
-    document.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     fixture.detectChanges();
 
     expect(host.openEvents).toEqual([true, false]);
