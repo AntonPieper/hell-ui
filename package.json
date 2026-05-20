@@ -12,6 +12,7 @@
     "test": "node tools/package-manager.mjs run test:unit && node tools/package-manager.mjs run test:architecture && node tools/package-manager.mjs run test:ci-contract",
     "lint": "eslint .",
     "e2e": "playwright test",
+    "generate:entrypoints": "node tools/generate-entrypoint-manifests.mjs",
     "test:architecture": "node tools/check-architecture.mjs",
     "test:package-consumer": "node tools/check-package-consumer.mjs",
     "test:ci-contract": "node tools/check-ci-contract.mjs",

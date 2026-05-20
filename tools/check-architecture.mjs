@@ -2,6 +2,15 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import {
+  entrypointPublicApiFiles,
+  entrypointSourceGroups,
+  entrypointTsconfigPaths,
+  renderNgPackageFile,
+  renderPublicApiFile,
+  secondaryPackageEntrypoints,
+} from './entrypoint-manifest.mjs';
+
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
 
@@ -358,12 +367,13 @@ function hasPackageImport(source, specifiers) {
 }
 
 function checkPackageEntryPoints() {
-  const rootApiPath = join(root, 'projects/hell/src/public-api.ts');
+  const publicApiFiles = entrypointPublicApiFiles();
+  const rootPublicApi = publicApiFiles.find((entrypoint) => entrypoint.id === 'root');
+  const rootApiPath = join(root, rootPublicApi.publicApiPath);
   const rootApi = readFile(rootApiPath);
-  const secondaryApis = [
-    'projects/hell/src/lib/public-api-core.ts',
-    'projects/hell/src/lib/public-api-primitives.ts',
-  ];
+  const secondaryApis = publicApiFiles
+    .filter((entrypoint) => entrypoint.id !== 'root')
+    .map((entrypoint) => entrypoint.publicApiPath);
 
   const disallowedRootExports = exportPaths(rootApi).filter((path) =>
     path.includes('public-api-primitives') || path.includes('public-api-primitive-') ||
@@ -379,8 +389,10 @@ function checkPackageEntryPoints() {
 
   const internalCoreExports = new Set(['floating-dismissal', 'floating-scope', 'resize-behavior']);
   for (const [api, source] of [
-    ['projects/hell/src/public-api.ts', rootApi],
-    ...secondaryApis.map((api) => [api, readFile(join(root, api))]),
+    [rootPublicApi.publicApiPath, rootApi],
+    ...secondaryApis
+      .filter((api) => existsSync(join(root, api)))
+      .map((api) => [api, readFile(join(root, api))]),
   ]) {
     for (const exportPath of exportPaths(source)) {
       const module = basename(exportPath);
@@ -390,7 +402,7 @@ function checkPackageEntryPoints() {
     }
   }
 
-  const requiredRootApiExports = new Set(['./lib/public-api-core']);
+  const requiredRootApiExports = new Set(rootPublicApi.exports);
   for (const requiredExport of requiredRootApiExports) {
     if (!rootApi.includes(`'${requiredExport}'`) && !rootApi.includes(`"${requiredExport}"`)) {
       failures.push(`Root Package Entry Point is missing ${requiredExport}`);
@@ -399,26 +411,9 @@ function checkPackageEntryPoints() {
 
   const tsconfig = parseJsonWithComments(readFile(join(root, 'tsconfig.json')));
   const paths = tsconfig.compilerOptions?.paths ?? {};
-  const features = featureDirectories();
-  const expectedPaths = {
-    '@hell-ui/angular': './projects/hell/src/public-api.ts',
-    '@hell-ui/angular/core': './projects/hell/src/lib/public-api-core.ts',
-    '@hell-ui/angular/primitives': './projects/hell/src/lib/public-api-primitives.ts',
-    '@hell-ui/angular/composites': './projects/hell/src/lib/public-api-composites.ts',
-    '@hell-ui/angular/testing': './projects/hell/src/testing/public-api.ts',
-  };
-  for (const primitive of primitiveDirectories()) {
-    expectedPaths[`@hell-ui/angular/${primitive}`] =
-      `./projects/hell/src/lib/public-api-primitive-${primitive}.ts`;
-  }
-  for (const composite of compositeDirectories()) {
-    expectedPaths[`@hell-ui/angular/${composite}`] =
-      `./projects/hell/src/lib/public-api-composite-${composite}.ts`;
-  }
-  for (const feature of features) {
-    expectedPaths[`@hell-ui/angular/features/${feature}`] =
-      `./projects/hell/src/lib/public-api-feature-${feature}.ts`;
-  }
+  const expectedPaths = Object.fromEntries(
+    entrypointTsconfigPaths().map((entrypoint) => [entrypoint.specifier, entrypoint.path]),
+  );
 
   for (const [entryPoint, expectedPath] of Object.entries(expectedPaths)) {
     const actual = paths[entryPoint]?.[0];
@@ -434,15 +429,7 @@ function checkPackageEntryPoints() {
     failures.push(`Package Identity still exposes legacy alias paths in tsconfig.json: ${legacyPaths.join(', ')}`);
   }
 
-  const packagePaths = [
-    'projects/hell/core/ng-package.json',
-    'projects/hell/primitives/ng-package.json',
-    'projects/hell/composites/ng-package.json',
-    'projects/hell/testing/ng-package.json',
-    ...primitiveDirectories().map((primitive) => `projects/hell/${primitive}/ng-package.json`),
-    ...compositeDirectories().map((composite) => `projects/hell/${composite}/ng-package.json`),
-    ...features.map((feature) => `projects/hell/features/${feature}/ng-package.json`),
-  ];
+  const packagePaths = secondaryPackageEntrypoints().map((entrypoint) => entrypoint.packagePath);
 
   for (const packagePath of packagePaths) {
     if (!existsSync(join(root, packagePath))) {
@@ -450,11 +437,8 @@ function checkPackageEntryPoints() {
     }
   }
 
-  checkSecondaryEntryPointCompleteness('primitives');
-  checkPrimitiveEntryPointCompleteness();
-  checkSecondaryEntryPointCompleteness('composites');
-  checkCompositeEntryPointCompleteness();
-  checkFeatureEntryPointCompleteness();
+  checkEntrypointManifestSourceCoverage();
+  checkGeneratedEntrypointFiles();
 }
 
 function checkPackageDependencyContract() {
@@ -1340,88 +1324,55 @@ function checkFloatingAdapterContract() {
   }
 }
 
-function checkSecondaryEntryPointCompleteness(kind) {
-  const apiPath = join(root, `projects/hell/src/lib/public-api-${kind}.ts`);
-  const apiSource = readFile(apiPath);
-  const apiExports = new Set(exportPaths(apiSource));
-  const dir = join(root, `projects/hell/src/lib/${kind}`);
-  const internalDirectories = {
-    primitives: new Set(['adapters']),
-  };
-  for (const slug of childDirectories(dir)) {
-    if (internalDirectories[kind]?.has(slug)) continue;
+function checkEntrypointManifestSourceCoverage() {
+  for (const group of entrypointSourceGroups()) {
+    const manifestEntries = new Set(group.entries);
+    const sourceEntries = childDirectories(join(root, group.sourceDir)).filter(
+      (entry) => !group.internalDirectories.includes(entry),
+    );
 
-    const expected = `./${kind}/${slug}/${slug}`;
-    if (!apiExports.has(expected)) {
-      failures.push(`Package Entry Point @hell-ui/angular/${kind} is missing ${expected}`);
+    for (const entry of sourceEntries) {
+      if (!manifestEntries.has(entry)) {
+        failures.push(`Entrypoint Manifest ${group.id} is missing source directory ${group.sourceDir}/${entry}`);
+      }
+    }
+
+    for (const entry of group.entries) {
+      if (!sourceEntries.includes(entry)) {
+        failures.push(`Entrypoint Manifest ${group.id} references missing source directory ${group.sourceDir}/${entry}`);
+      }
     }
   }
 }
 
-function checkPrimitiveEntryPointCompleteness() {
-  for (const primitive of primitiveDirectories()) {
-    const packagePath = join(root, `projects/hell/${primitive}/ng-package.json`);
-    if (!existsSync(packagePath)) {
-      failures.push(`Primitive Package Entry Point is missing projects/hell/${primitive}/ng-package.json`);
+function checkGeneratedEntrypointFiles() {
+  for (const entrypoint of entrypointPublicApiFiles()) {
+    const filePath = join(root, entrypoint.publicApiPath);
+    if (!existsSync(filePath)) {
+      failures.push(`Entrypoint Manifest public API is missing ${entrypoint.publicApiPath}`);
       continue;
     }
 
-    const ngPackage = parseJsonWithComments(readFile(packagePath));
-    const expectedEntryFile = `../src/lib/public-api-primitive-${primitive}.ts`;
-    if (ngPackage.lib?.entryFile !== expectedEntryFile) {
+    const expected = renderPublicApiFile(entrypoint);
+    if (readFile(filePath) !== expected) {
       failures.push(
-        `Primitive Package Entry Point ${primitive} entryFile is ${ngPackage.lib?.entryFile ?? 'missing'}, expected ${expectedEntryFile}`,
+        `Entrypoint Manifest public API is stale: ${entrypoint.publicApiPath} (run npm run generate:entrypoints)`,
       );
-    }
-
-    const apiPath = join(root, `projects/hell/src/lib/public-api-primitive-${primitive}.ts`);
-    const expectedExport = `./primitives/${primitive}/${primitive}`;
-    if (!existsSync(apiPath)) {
-      failures.push(`Primitive Package Entry Point is missing projects/hell/src/lib/public-api-primitive-${primitive}.ts`);
-    } else if (!exportPaths(readFile(apiPath)).includes(expectedExport)) {
-      failures.push(`Primitive Package Entry Point ${primitive} must export ${expectedExport}`);
     }
   }
-}
 
-function checkCompositeEntryPointCompleteness() {
-  for (const composite of compositeDirectories()) {
-    const packagePath = join(root, `projects/hell/${composite}/ng-package.json`);
-    if (!existsSync(packagePath)) {
-      failures.push(`Composite Package Entry Point is missing projects/hell/${composite}/ng-package.json`);
+  for (const entrypoint of secondaryPackageEntrypoints()) {
+    const filePath = join(root, entrypoint.packagePath);
+    if (!existsSync(filePath)) {
+      failures.push(`Entrypoint Manifest ng-package is missing ${entrypoint.packagePath}`);
       continue;
     }
 
-    const ngPackage = parseJsonWithComments(readFile(packagePath));
-    const expectedEntryFile = `../src/lib/public-api-composite-${composite}.ts`;
-    if (ngPackage.lib?.entryFile !== expectedEntryFile) {
+    const expected = renderNgPackageFile(entrypoint);
+    if (readFile(filePath) !== expected) {
       failures.push(
-        `Composite Package Entry Point ${composite} entryFile is ${ngPackage.lib?.entryFile ?? 'missing'}, expected ${expectedEntryFile}`,
+        `Entrypoint Manifest ng-package is stale: ${entrypoint.packagePath} (run npm run generate:entrypoints)`,
       );
-    }
-
-    const apiPath = join(root, `projects/hell/src/lib/public-api-composite-${composite}.ts`);
-    const expectedExport = `./composites/${composite}/${composite}`;
-    if (!existsSync(apiPath)) {
-      failures.push(`Composite Package Entry Point is missing projects/hell/src/lib/public-api-composite-${composite}.ts`);
-    } else if (!exportPaths(readFile(apiPath)).includes(expectedExport)) {
-      failures.push(`Composite Package Entry Point ${composite} must export ${expectedExport}`);
-    }
-  }
-}
-
-function checkFeatureEntryPointCompleteness() {
-  for (const feature of featureDirectories()) {
-    const apiPath = join(root, `projects/hell/src/lib/public-api-feature-${feature}.ts`);
-    if (!existsSync(apiPath)) {
-      failures.push(
-        `Feature Package Entry Point is missing projects/hell/src/lib/public-api-feature-${feature}.ts`,
-      );
-      continue;
-    }
-    const expected = `./features/${feature}/${feature}`;
-    if (!exportPaths(readFile(apiPath)).includes(expected)) {
-      failures.push(`Feature Package Entry Point ${feature} must export ${expected}`);
     }
   }
 }
