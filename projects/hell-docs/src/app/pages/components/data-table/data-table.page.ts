@@ -21,8 +21,9 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
         <h1>Table utilities</h1>
         <p>
           Table utilities from <code>@hell-ui/angular/features/table-utilities</code> are a set of
-          low-level structural directives for table markup, selection, sorting affordances, and column
-          resizing. They are not a batteries-included data grid and do not wrap TanStack Table.
+          low-level structural directives for table markup, visual row selection, sorting affordances,
+          and column resizing. They are not a batteries-included data grid and do not wrap TanStack
+          Table.
           <code>@hell-ui/angular/features/data-table</code> is a compatibility naming alias for this
           package.
         </p>
@@ -40,7 +41,8 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
           <code>@hell-ui/angular/features/table-utilities</code>; <code>@hell-ui/angular/features/data-table</code>
           remains a compatibility naming alias. Bring Angular CDK Table, TanStack Table, AG Grid, a
           backend API, or your own state layer when you need a real data table. Use Hell's directives
-          only for host styling, row activation, sortable header affordances, and column resize handles.
+          only for host styling, selected-row state, sortable header affordances, and column resize
+          handles.
         </p>
 
         <h2>Example</h2>
@@ -59,8 +61,8 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
       <div class="hd-prose">
         <h2>Row editor</h2>
         <p>
-          Pair table selection with resizable panes when the table and editor both need persistent
-          room.
+          Pair an explicit cell action with resizable panes when the table and editor both need
+          persistent room.
         </p>
       </div>
 
@@ -70,6 +72,18 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
 
       <div class="hd-prose">
         <h2>Migration note</h2>
+        <p>
+          Rows are not buttons. For row actions such as Open or Edit, put a real
+          <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code> inside a cell and bind the action
+          there. Remove legacy <code>interactive</code> / <code>(rowSelect)</code> row actions from
+          action-only tables.
+        </p>
+        <p>
+          If row-level keyboard selection is a product requirement, use a formal grid or selection
+          model with explicit labels, instructions, focus management, and <code>aria-selected</code>
+          ownership. Hell's <code>[selectable]</code> row API is reserved for that explicit selection
+          contract; it is not a shortcut for making arbitrary rows clickable.
+        </p>
         <p>
           Sortable headers use <code>button[hellTableSortButton]</code>. The
           <code>&lt;th&gt;</code> keeps <code>aria-sort</code>; the button owns focus and activation.
@@ -93,10 +107,12 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
           </li>
           <li>
             <code>tr[hellTableRow]</code>: <code>[selected]</code> →
-            <code>data-selected="true"</code>; <code>[interactive]</code> enables click / Enter /
-            Space and emits <code>(rowSelect)</code>. <code>[selectionSemantics]</code> controls
-            whether the row exposes <code>aria-selected</code> (default <code>true</code>); set it
-            to <code>false</code> for action-only rows.
+            <code>data-selected="true"</code> for styling only. Prefer cell buttons/links for row
+            actions. Use <code>[selectable]</code> with <code>(rowSelect)</code> only for an explicit
+            row-selection model; that path adds <code>tabindex="0"</code> and
+            <code>aria-selected</code>. Legacy <code>[interactive]</code> activates only when paired
+            with <code>[selectionSemantics]="true"</code>, so action-only rows are no longer exposed
+            as generic focusable rows by default.
           </li>
           <li>
             <code>th[hellTableHeaderCell]</code>: <code>[sortable]</code>,
@@ -147,9 +163,14 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
             Angular CDK Table, TanStack Table, signals, and your own backend data source.
           </li>
           <li>
-            Drive selection from <code>(rowSelect)</code>, reflect it via <code>[selected]</code>,
-            and leave <code>[selectionSemantics]</code> enabled only when the row really belongs to
-            a selectable table/list model.
+            Put row actions such as Open, Edit, or View details in native controls inside
+            <code>td[hellTableCell]</code>.
+          </li>
+          <li>
+            Reflect current row state with <code>[selected]</code>. Use <code>[selectable]</code>
+            and <code>(rowSelect)</code> only when the row really belongs to an explicit selection
+            model; bring a grid implementation when you need roving focus, multi-select, or cell
+            navigation.
           </li>
           <li>
             Put sortable labels in <code>button[hellTableSortButton]</code> instead of making the
@@ -163,6 +184,7 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
         <h2>Don't</h2>
         <ul>
           <li>Don't call these directives a complete data-table implementation.</li>
+          <li>Don't put <code>interactive</code> on a row just to make the whole row open details.</li>
           <li>Don't leave <code>aria-selected</code> on action-only rows.</li>
           <li>Don't put a filter input inside the table; compose it as a sibling.</li>
           <li>

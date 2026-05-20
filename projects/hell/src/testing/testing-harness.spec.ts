@@ -118,7 +118,7 @@ class DialogHarnessHost {}
           </tr>
         </thead>
         <tbody hellTableBody>
-          <tr id="person-row" hellTableRow interactive [selected]="selected()" (rowSelect)="onRowSelect()">
+          <tr id="person-row" hellTableRow selectable [selected]="selected()" (rowSelect)="onRowSelect()">
             <td hellTableCell id="person-name">Alice</td>
             <td hellTableCell>Admin</td>
           </tr>
@@ -396,6 +396,7 @@ describe('hell testing harness entrypoint', () => {
     const selectedRows = await table.getRows();
     expect(selectedRows).toHaveLength(1);
     expect(await selectedRows[0].isSelected()).toBe(true);
+    expect(await selectedRows[0].isSelectable()).toBe(true);
 
     await selectedRows[0].click();
     await fixture.whenStable();

@@ -257,7 +257,7 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
     <div id="table-container" hellTableContainer busy>
       <table id="table" hellTable contentWidth>
         <thead id="table-head" hellTableHead>
-          <tr id="table-row" hellTableRow selected interactive>
+          <tr id="table-row" hellTableRow selected selectable>
             <th id="table-header-cell" hellTableHeaderCell sortable sort="asc">
               <button id="table-sort-button" hellTableSortButton type="button">Name</button>
               <button id="table-resizer" hellTableColumnResizer></button>

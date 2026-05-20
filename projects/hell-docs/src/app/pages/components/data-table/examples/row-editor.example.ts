@@ -48,18 +48,22 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
             </thead>
             <tbody hellTableBody>
               @for (row of rows; track row.id) {
-                <tr
-                  hellTableRow
-                  interactive
-                  [selected]="selectedId() === row.id"
-                  (rowSelect)="select(row)"
-                >
+                <tr hellTableRow [selected]="selectedId() === row.id">
                   <td hellTableCell>{{ row.id }}</td>
                   <td hellTableCell>{{ row.name }}</td>
                   <td hellTableCell>{{ row.email }}</td>
                   <td hellTableCell>{{ row.role }}</td>
                   <td hellTableCell>
-                    <button hellButton type="button" variant="ghost" size="xs">Open</button>
+                    <button
+                      hellButton
+                      type="button"
+                      variant="ghost"
+                      size="xs"
+                      [attr.aria-label]="'Open editor for ' + row.name"
+                      (click)="select(row)"
+                    >
+                      Open
+                    </button>
                   </td>
                 </tr>
               }

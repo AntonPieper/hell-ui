@@ -422,6 +422,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                     >
                       <button hellTableSortButton type="button">Assignee</button>
                     </th>
+                    <th hellTableHeaderCell class="w-28">Actions</th>
                   </tr>
                 </thead>
                 <tbody hellTableBody>
@@ -433,29 +434,37 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                         <td hellTableCell><div hellSkeleton width="84%" height="13px"></div></td>
                         <td hellTableCell><div hellSkeleton width="58px" height="13px"></div></td>
                         <td hellTableCell><div hellSkeleton width="72px" height="13px"></div></td>
+                        <td hellTableCell><div hellSkeleton width="54px" height="24px"></div></td>
                       </tr>
                     }
                   } @else if (error(); as message) {
                     <tr>
-                      <td hellTableCell align="center" space="empty" [attr.colspan]="5">{{ message }}</td>
+                      <td hellTableCell align="center" space="empty" [attr.colspan]="6">{{ message }}</td>
                     </tr>
                   } @else {
                     @for (row of rows(); track row.id) {
-                      <tr
-                        hellTableRow
-                        interactive
-                        [selected]="selectedId() === row.id"
-                        (rowSelect)="selectRow(row)"
-                      >
+                      <tr hellTableRow [selected]="selectedId() === row.id">
                         <td hellTableCell>{{ row.id }}</td>
                         <td hellTableCell>{{ row.name }}</td>
                         <td hellTableCell>{{ row.email }}</td>
                         <td hellTableCell>{{ row.role }}</td>
                         <td hellTableCell>{{ row.assignee }}</td>
+                        <td hellTableCell>
+                          <button
+                            hellButton
+                            type="button"
+                            variant="ghost"
+                            size="xs"
+                            [attr.aria-label]="'Open details for ' + row.name"
+                            (click)="selectRow(row)"
+                          >
+                            Open
+                          </button>
+                        </td>
                       </tr>
                     } @empty {
                       <tr>
-                        <td hellTableCell align="center" space="empty" [attr.colspan]="5">No results.</td>
+                        <td hellTableCell align="center" space="empty" [attr.colspan]="6">No results.</td>
                       </tr>
                     }
                   }

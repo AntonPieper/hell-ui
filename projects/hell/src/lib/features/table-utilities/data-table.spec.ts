@@ -49,6 +49,7 @@ import {
           id="person-row"
           hellTableRow
           [selected]="selected()"
+          [selectable]="selectable()"
           [interactive]="interactive()"
           [selectionSemantics]="selectionSemantics()"
           (rowSelect)="rowEvents.push($event)"
@@ -67,12 +68,13 @@ import {
   `,
 })
 class DataTableHost {
+  readonly selectable = signal(false);
   readonly interactive = signal(false);
   readonly selected = signal(false);
   readonly sortable = signal(false);
   readonly sort = signal<'asc' | 'desc' | null>(null);
   readonly minWidth = signal(40);
-  readonly selectionSemantics = signal(true);
+  readonly selectionSemantics = signal(false);
 
   readonly rowEvents: Array<MouseEvent | KeyboardEvent> = [];
   readonly cellEvents: MouseEvent[] = [];
@@ -147,7 +149,7 @@ describe('Hell table utilities directives', () => {
     }).compileComponents();
   });
 
-  it('emits row selection from click and keyboard only when interactive', () => {
+  it('keeps rows static unless a selectable row model is explicit', () => {
     const fixture = TestBed.createComponent(DataTableHost);
     const host = fixture.componentInstance;
     fixture.detectChanges();
@@ -156,10 +158,14 @@ describe('Hell table utilities directives', () => {
     row.click();
     expect(host.rowEvents).toEqual([]);
     expect(row.hasAttribute('tabindex')).toBe(false);
-    expect(row.getAttribute('aria-selected')).toBe('false');
+    expect(row.hasAttribute('aria-selected')).toBe(false);
 
-    host.interactive.set(true);
     host.selected.set(true);
+    fixture.detectChanges();
+    expect(row.getAttribute('data-selected')).toBe('true');
+    expect(row.hasAttribute('aria-selected')).toBe(false);
+
+    host.selectable.set(true);
     fixture.detectChanges();
 
     row.click();
@@ -174,7 +180,7 @@ describe('Hell table utilities directives', () => {
     expect(host.rowEvents).toHaveLength(3);
   });
 
-  it('allows action-only rows to drop aria-selected semantics', () => {
+  it('requires selection semantics before legacy interactive rows become focusable', () => {
     const fixture = TestBed.createComponent(DataTableHost);
     const host = fixture.componentInstance;
     host.interactive.set(true);
@@ -182,13 +188,21 @@ describe('Hell table utilities directives', () => {
     fixture.detectChanges();
 
     const row = byId<HTMLTableRowElement>(fixture.nativeElement, 'person-row');
-    expect(row.getAttribute('aria-selected')).toBe('true');
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+    row.dispatchEvent(enter);
+    row.click();
 
-    host.selectionSemantics.set(false);
+    expect(row.hasAttribute('tabindex')).toBe(false);
+    expect(row.hasAttribute('aria-selected')).toBe(false);
+    expect(row.hasAttribute('data-interactive')).toBe(false);
+    expect(enter.defaultPrevented).toBe(false);
+    expect(host.rowEvents).toEqual([]);
+
+    host.selectionSemantics.set(true);
     fixture.detectChanges();
 
-    expect(row.hasAttribute('aria-selected')).toBe(false);
-    expect(row.getAttribute('data-selected')).toBe('true');
+    expect(row.getAttribute('tabindex')).toBe('0');
+    expect(row.getAttribute('aria-selected')).toBe('true');
     row.click();
     expect(host.rowEvents).toHaveLength(1);
   });
@@ -196,7 +210,7 @@ describe('Hell table utilities directives', () => {
   it('does not select rows or cells from nested interactive controls', () => {
     const fixture = TestBed.createComponent(DataTableHost);
     const host = fixture.componentInstance;
-    host.interactive.set(true);
+    host.selectable.set(true);
     fixture.detectChanges();
 
     byId<HTMLButtonElement>(fixture.nativeElement, 'row-action').click();
@@ -220,7 +234,7 @@ describe('Hell table utilities directives', () => {
   it('does not select row from elements marked as table row ignore', () => {
     const fixture = TestBed.createComponent(DataTableHost);
     const host = fixture.componentInstance;
-    host.interactive.set(true);
+    host.selectable.set(true);
     fixture.detectChanges();
 
     const row = byId<HTMLTableRowElement>(fixture.nativeElement, 'person-row');
