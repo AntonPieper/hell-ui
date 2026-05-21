@@ -6,7 +6,14 @@ import { HellRadio, HellRadioGroup, HellRadioIndicator } from '@hell-ui/angular/
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellRadioGroup, HellRadio, HellRadioIndicator],
   template: `
-    <div hellRadioGroup orientation="vertical" [value]="plan()" (valueChange)="plan.set($event!)">
+    <div id="plan-radio-label" class="mb-2 text-sm font-medium">Plan</div>
+    <div
+      hellRadioGroup
+      aria-labelledby="plan-radio-label"
+      orientation="vertical"
+      [value]="plan()"
+      (valueChange)="plan.set($event!)"
+    >
       <button hellRadio value="free" type="button" class="inline-flex items-center gap-2">
         <span ngpRadioIndicator></span> Free
       </button>
@@ -25,5 +32,4 @@ import { HellRadio, HellRadioGroup, HellRadioIndicator } from '@hell-ui/angular/
 })
 export class RadioExampleExample {
   protected readonly plan = signal<'free' | 'pro' | 'enterprise'>('free');
-  protected readonly size = signal<'sm' | 'md' | 'lg'>('md');
 }

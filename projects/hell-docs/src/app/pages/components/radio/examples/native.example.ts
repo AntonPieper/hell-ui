@@ -6,7 +6,8 @@ import { HellNativeRadio, HellNativeRadioGroup } from '@hell-ui/angular/radio';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellNativeRadio, HellNativeRadioGroup],
   template: `
-    <div hellNativeRadioGroup orientation="horizontal">
+    <div id="priority-radio-label" class="mb-2 text-sm font-medium">Priority</div>
+    <div hellNativeRadioGroup aria-labelledby="priority-radio-label" orientation="horizontal">
       <label>
         <input
           type="radio"

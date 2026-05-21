@@ -7,7 +7,12 @@ import { HellProgress, HellProgressBar } from '@hell-ui/angular/progress';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton, HellProgress, HellProgressBar],
   template: `
-    <div hellProgress [value]="value()"><div hellProgressBar></div></div>
+    <div class="grid gap-1">
+      <span id="progress-storage-label" class="text-sm font-medium">Storage used</span>
+      <div hellProgress aria-labelledby="progress-storage-label" [value]="value()">
+        <div hellProgressBar></div>
+      </div>
+    </div>
     <div class="flex gap-2">
       <button hellButton size="sm" (click)="step(-10)">−10</button>
       <button hellButton size="sm" (click)="step(10)">+10</button>
