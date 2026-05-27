@@ -1284,11 +1284,28 @@ function checkNgpStateWriterContract() {
     'writeRadioGroupPrivateValue',
     'writeRadioGroupPrivateDisabled',
   ];
+  const privateStateWritePatterns = [
+    {
+      token: "state['value'].set(...) or state[\"value\"].set(...)",
+      pattern: /\bstate\[['"]value['"]\]\.set\(/,
+    },
+    {
+      token: "state['disabled'].set(...) or state[\"disabled\"].set(...)",
+      pattern: /\bstate\[['"]disabled['"]\]\.set\(/,
+    },
+  ];
   const sourceFiles = walk(join(root, 'projects/hell/src/lib')).filter((file) => file.endsWith('.ts'));
 
   for (const file of sourceFiles) {
     const source = readFile(file);
     const rel = file.slice(root.length + 1);
+    if (!rel.endsWith('.spec.ts')) {
+      for (const { token, pattern } of privateStateWritePatterns) {
+        if (pattern.test(source)) {
+          failures.push(`Private ng-primitives state channel write ${token} is not allowed in ${rel}`);
+        }
+      }
+    }
     if (retiredPrivateBridgeTokens.some((token) => source.includes(token))) {
       failures.push(`Retired ng-primitives private bridge token is still used in ${rel}`);
     }

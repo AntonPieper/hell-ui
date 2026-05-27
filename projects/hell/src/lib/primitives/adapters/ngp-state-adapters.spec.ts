@@ -59,12 +59,20 @@ class RadioGroupStateProbe {
 })
 class RadioGroupStateProbeHost {}
 
-function writableChannel<T>(state: unknown, channel: 'value' | 'disabled'): WritableSignalLike<T> {
-  const value = (state as Record<string, unknown>)[channel];
+function writableValueChannel<T>(state: { value: unknown }): WritableSignalLike<T> {
+  const value = state.value;
   if (typeof value !== 'function' || typeof (value as { set?: unknown }).set !== 'function') {
-    throw new Error(`Expected public ng-primitives state.${channel} writable signal.`);
+    throw new Error('Expected public ng-primitives state.value writable signal.');
   }
   return value as WritableSignalLike<T>;
+}
+
+function writableDisabledChannel(state: { disabled: unknown }): WritableSignalLike<boolean> {
+  const disabled = state.disabled;
+  if (typeof disabled !== 'function' || typeof (disabled as { set?: unknown }).set !== 'function') {
+    throw new Error('Expected public ng-primitives state.disabled writable signal.');
+  }
+  return disabled as WritableSignalLike<boolean>;
 }
 
 function probe<T>(host: Type<unknown>, directive: Type<T>): T {
@@ -73,22 +81,22 @@ function probe<T>(host: Type<unknown>, directive: Type<T>): T {
   return fixture.debugElement.query(By.directive(directive)).injector.get(directive);
 }
 
-describe('ngp state-writer compatibility helpers', () => {
-  it('documents the installed ng-primitives version this state-writer fallback targets', () => {
+describe('ngp form-state compatibility helpers', () => {
+  it('documents the installed ng-primitives version this form-state adapter targets', () => {
     expect(HELL_NGP_STATE_WRITER_VERSION).toBe('ng-primitives@0.117.2');
   });
 
-  describe('installed ng-primitives public state provider drift', () => {
+  describe('installed ng-primitives public typed State<T> channel drift', () => {
     beforeEach(async () => {
       await TestBed.configureTestingModule({
         imports: [SelectStateProbeHost, ComboboxStateProbeHost, RadioGroupStateProbeHost],
       }).compileComponents();
     });
 
-    it('writes select CVA updates through the public injected State<T> channels', () => {
+    it('writes select CVA updates through public typed State<T> channels', () => {
       const state = probe(SelectStateProbeHost, SelectStateProbe).state();
-      const value = writableChannel<unknown>(state, 'value');
-      const disabled = writableChannel<boolean>(state, 'disabled');
+      const value = writableValueChannel<unknown>(state);
+      const disabled = writableDisabledChannel(state);
 
       writeSelectStateValue(state, 'from-public-state');
       writeSelectStateDisabled(state, true);
@@ -97,10 +105,10 @@ describe('ngp state-writer compatibility helpers', () => {
       expect(disabled()).toBe(true);
     });
 
-    it('writes combobox CVA updates through the public injected State<T> channels', () => {
+    it('writes combobox CVA updates through public typed State<T> channels', () => {
       const state = probe(ComboboxStateProbeHost, ComboboxStateProbe).state();
-      const value = writableChannel<unknown>(state, 'value');
-      const disabled = writableChannel<boolean>(state, 'disabled');
+      const value = writableValueChannel<unknown>(state);
+      const disabled = writableDisabledChannel(state);
 
       writeComboboxStateValue(state, 'from-public-state');
       writeComboboxStateDisabled(state, true);
@@ -109,10 +117,10 @@ describe('ngp state-writer compatibility helpers', () => {
       expect(disabled()).toBe(true);
     });
 
-    it('writes radio-group CVA updates through the public injected State<T> channels', () => {
+    it('writes radio-group CVA updates through public typed State<T> channels', () => {
       const state = probe(RadioGroupStateProbeHost, RadioGroupStateProbe).state();
-      const value = writableChannel<string | null>(state, 'value');
-      const disabled = writableChannel<boolean>(state, 'disabled');
+      const value = writableValueChannel<string | null>(state);
+      const disabled = writableDisabledChannel(state);
 
       writeRadioGroupStateValue(state, 'from-public-state');
       writeRadioGroupStateDisabled(state, true);
@@ -137,7 +145,7 @@ describe('ngp state-writer compatibility helpers', () => {
     expect(value).not.toHaveBeenCalled();
   });
 
-  it('writes select value through ng-primitives State<T> value.set fallback only', () => {
+  it('writes select value through typed ng-primitives State<T>.value only', () => {
     const value = vi.fn();
     const disabled = vi.fn();
     const state = {
@@ -167,7 +175,7 @@ describe('ngp state-writer compatibility helpers', () => {
     expect(disabled).not.toHaveBeenCalled();
   });
 
-  it('writes select disabled through ng-primitives State<T> disabled.set fallback only', () => {
+  it('writes select disabled through typed ng-primitives State<T>.disabled only', () => {
     const value = vi.fn();
     const disabled = vi.fn();
     const state = {
@@ -182,7 +190,7 @@ describe('ngp state-writer compatibility helpers', () => {
     expect(value).not.toHaveBeenCalled();
   });
 
-  it('throws a version-bound error when select State<T> fallback shape is invalid', () => {
+  it('throws a version-bound error when select State<T> channel shape is invalid', () => {
     expect(() => writeSelectStateValue({} as never, 'value')).toThrowError(/ng-primitives@0\.117\.2/);
     expect(() =>
       writeSelectStateValue({ value: { set: 'not-a-function' } as never, disabled: { set: vi.fn() } } as never, 'value'),
@@ -192,7 +200,7 @@ describe('ngp state-writer compatibility helpers', () => {
     ).toThrowError(/disabled\.set/);
   });
 
-  it('writes combobox value through ng-primitives State<T> value.set fallback only', () => {
+  it('writes combobox value through typed ng-primitives State<T>.value only', () => {
     const value = vi.fn();
     const disabled = vi.fn();
     const state = {
@@ -207,7 +215,7 @@ describe('ngp state-writer compatibility helpers', () => {
     expect(disabled).not.toHaveBeenCalled();
   });
 
-  it('writes combobox disabled through ng-primitives State<T> disabled.set fallback only', () => {
+  it('writes combobox disabled through typed ng-primitives State<T>.disabled only', () => {
     const value = vi.fn();
     const disabled = vi.fn();
     const state = {
@@ -222,14 +230,14 @@ describe('ngp state-writer compatibility helpers', () => {
     expect(value).not.toHaveBeenCalled();
   });
 
-  it('throws a version-bound error when combobox State<T> fallback shape is invalid', () => {
+  it('throws a version-bound error when combobox State<T> channel shape is invalid', () => {
     expect(() => writeComboboxStateDisabled({} as never, true)).toThrowError(/writeComboboxStateDisabled/);
     expect(() => writeComboboxStateDisabled({ value: { set: vi.fn() }, disabled: {} as never } as never, false)).toThrowError(
       /disabled\.set/,
     );
   });
 
-  it('writes radio-group value through ng-primitives State<T> value.set fallback only', () => {
+  it('writes radio-group value through typed ng-primitives State<T>.value only', () => {
     const value = vi.fn();
     const disabled = vi.fn();
     const state = {
@@ -244,7 +252,7 @@ describe('ngp state-writer compatibility helpers', () => {
     expect(disabled).not.toHaveBeenCalled();
   });
 
-  it('writes radio-group disabled through ng-primitives State<T> disabled.set fallback only', () => {
+  it('writes radio-group disabled through typed ng-primitives State<T>.disabled only', () => {
     const value = vi.fn();
     const disabled = vi.fn();
     const state = {
@@ -259,7 +267,7 @@ describe('ngp state-writer compatibility helpers', () => {
     expect(value).not.toHaveBeenCalled();
   });
 
-  it('throws a version-bound error when radio-group State<T> fallback shape is invalid', () => {
+  it('throws a version-bound error when radio-group State<T> channel shape is invalid', () => {
     expect(() => writeRadioGroupStateValue({} as never, 'x')).toThrowError(/writeRadioGroupStateValue/);
     expect(() => writeRadioGroupStateDisabled({} as never, true)).toThrowError(/writeRadioGroupStateDisabled/);
     expect(() =>
