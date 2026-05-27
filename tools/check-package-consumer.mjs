@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import {
   existsSync,
   mkdirSync,
@@ -6,10 +6,11 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { tmpdir } from 'node:os';
+import { dirname, isAbsolute, join } from 'node:path';
+import { homedir, tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { runPackageManager } from './package-manager.mjs';
 
@@ -20,6 +21,8 @@ const packageConsumerArgs = process.argv.slice(2);
 const selectedScenarioNames = parseScenarioSelection(packageConsumerArgs);
 const minimalDependencyMode = parseMinimalDependencyMode(packageConsumerArgs);
 const npmTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_TIMEOUT_MS, 240_000);
+const npmHeartbeatMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_HEARTBEAT_MS, 30_000);
+const npmDebugLogTailLines = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_LOG_TAIL_LINES, 80);
 
 runRootPackageManager(['run', 'build:lib'], root);
 
@@ -33,7 +36,7 @@ if (!packageName) {
   fail('Built package.json is missing name');
 }
 
-const packedHell = packBuiltPackage();
+const packedHell = await packBuiltPackage();
 assertPackedPackageDoesNotBundlePdfWorker(packedHell.tarball);
 
 const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
@@ -180,7 +183,7 @@ const enabledScenarios = selectScenarios(scenarios, selectedScenarioNames);
 
 try {
   for (const group of scenarioDependencyGroups(enabledScenarios, minimalDependencyMode)) {
-    runConsumerScenarioGroup(group);
+    await runConsumerScenarioGroup(group);
   }
 } finally {
   if (keep) console.log(`[package-consumer] kept packed hell package ${packedHell.root}`);
@@ -289,23 +292,27 @@ function unionDependencies(scenarios) {
   return [...new Set(scenarios.flatMap((scenario) => scenario.dependencies))];
 }
 
-function runConsumerScenarioGroup(group) {
+async function runConsumerScenarioGroup(group) {
   const groupName = group.scenarios.map((scenario) => scenario.name).join('-');
   const tempRoot = mkdtempSync(join(tmpdir(), `hell-package-consumer-${groupName}-`));
 
   try {
     writeConsumerWorkspace(tempRoot, group.scenarios[0], group.dependencies);
-    runNpm([
+    await runNpm([
       'install',
       '--strict-peer-deps',
       '--ignore-scripts',
       '--no-audit',
       '--no-fund',
-    ], tempRoot);
+    ], tempRoot, { scenarioName: groupName, printInstallDiagnostics: true });
 
     for (const scenario of group.scenarios) {
       writeConsumerScenarioFiles(tempRoot, scenario);
-      runNpm(['exec', '--', 'ng', 'build', 'consumer', '--configuration', 'production'], tempRoot);
+      await runNpm(
+        ['exec', '--', 'ng', 'build', 'consumer', '--configuration', 'production'],
+        tempRoot,
+        { scenarioName: scenario.name },
+      );
       console.log(`[package-consumer:${scenario.name}] built ${scenario.description}`);
     }
   } finally {
@@ -314,9 +321,9 @@ function runConsumerScenarioGroup(group) {
   }
 }
 
-function packBuiltPackage() {
+async function packBuiltPackage() {
   const packRoot = mkdtempSync(join(tmpdir(), 'hell-package-consumer-pack-'));
-  runNpm(['pack', '--pack-destination', packRoot], distHell);
+  await runNpm(['pack', '--pack-destination', packRoot], distHell, { scenarioName: 'pack' });
   const tarball = readdirSync(packRoot).find((name) => name.endsWith('.tgz'));
   if (!tarball) fail(`Packed package missing in ${packRoot}`);
   return { root: packRoot, tarball: join(packRoot, tarball) };
@@ -824,24 +831,182 @@ function runRootPackageManager(args, cwd) {
   if (result.status !== 0) fail(`package-manager ${args.join(' ')} failed with ${result.status}`);
 }
 
-function runNpm(args, cwd) {
-  console.log(`[package-consumer] npm ${args.join(' ')}`);
+async function runNpm(args, cwd, options = {}) {
+  const env = npmCommandEnvironment();
+  const scenarioName = options.scenarioName ?? 'unknown';
+  const label = packageConsumerLabel(scenarioName);
+  const command = formatCommand('npm', args);
+
+  console.log(`${label} running command: ${command}`);
+  console.log(`${label} cwd: ${cwd}`);
+  const diagnostics = collectNpmDiagnostics(cwd, env);
+  if (options.printInstallDiagnostics) {
+    printNpmInstallDiagnostics(label, scenarioName, cwd, diagnostics);
+  }
+
+  const result = await spawnNpm(args, cwd, env, label, command);
+  if (result.timedOut) fail(npmTimeoutMessage(command, cwd, diagnostics, result.startedAt));
+  if (result.error) fail(`Unable to start command: ${command}\n${result.error.message}`);
+  if (result.signal) fail(`Command failed with signal ${result.signal}: ${command}`);
+  if (result.status !== 0) fail(`Command failed with status ${result.status}: ${command}`);
+}
+
+function spawnNpm(args, cwd, env, label, command) {
+  return new Promise((resolve) => {
+    const startedAt = Date.now();
+    const child = spawn('npm', args, {
+      cwd,
+      shell: process.platform === 'win32',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env,
+    });
+    let error = null;
+    let timedOut = false;
+    let killTimer = null;
+
+    const heartbeat = setInterval(() => {
+      console.log(
+        `${label} heartbeat: ${command} still running after ${formatDuration(Date.now() - startedAt)} ` +
+          `(timeout ${formatDuration(npmTimeoutMs)})`,
+      );
+    }, npmHeartbeatMs);
+    heartbeat.unref();
+
+    const timeout = setTimeout(() => {
+      timedOut = true;
+      clearInterval(heartbeat);
+      console.error(
+        `${label} timeout: terminating ${command} after ${formatDuration(Date.now() - startedAt)}`,
+      );
+      child.kill('SIGTERM');
+      killTimer = setTimeout(() => child.kill('SIGKILL'), 5_000);
+      killTimer.unref();
+    }, npmTimeoutMs);
+    timeout.unref();
+
+    child.stdout?.on('data', (chunk) => process.stdout.write(chunk));
+    child.stderr?.on('data', (chunk) => process.stderr.write(chunk));
+    child.on('error', (caught) => {
+      error = caught;
+    });
+    child.on('close', (status, signal) => {
+      clearInterval(heartbeat);
+      clearTimeout(timeout);
+      if (killTimer) clearTimeout(killTimer);
+      const verb = timedOut ? 'stopped' : 'finished';
+      console.log(`${label} ${verb} command after ${formatDuration(Date.now() - startedAt)}: ${command}`);
+      resolve({ status, signal, error, timedOut, startedAt });
+    });
+  });
+}
+
+function printNpmInstallDiagnostics(label, scenarioName, tempRoot, diagnostics) {
+  console.log(`${label} npm install diagnostics:`);
+  console.log(`${label} scenario name: ${scenarioName}`);
+  console.log(`${label} temp directory: ${tempRoot}`);
+  console.log(`${label} npm cache: ${diagnostics.cache}`);
+  console.log(`${label} registry: ${diagnostics.registry}`);
+  console.log(`${label} package manager version: npm ${diagnostics.version}`);
+  console.log(`${label} npm log directory: ${diagnostics.logDirectory}`);
+}
+
+function collectNpmDiagnostics(cwd, env) {
+  const cache = readNpmValue(['config', 'get', 'cache'], cwd, env) ?? join(homedir(), '.npm');
+  const registry = readNpmValue(['config', 'get', 'registry'], cwd, env) ?? 'unknown';
+  const version = readNpmValue(['--version'], cwd, env) ?? 'unknown';
+  const configuredLogDirectory = readNpmValue(['config', 'get', 'logs-dir'], cwd, env);
+  const logDirectory = normalizeNpmPath(configuredLogDirectory, cwd) ?? join(cache, '_logs');
+
+  return { cache, registry, version, logDirectory };
+}
+
+function readNpmValue(args, cwd, env) {
   const result = spawnSync('npm', args, {
     cwd,
     shell: process.platform === 'win32',
-    stdio: 'inherit',
-    env: npmCommandEnvironment(),
-    timeout: npmTimeoutMs,
+    encoding: 'utf8',
+    env,
+    timeout: 15_000,
   });
-  if (result.error) fail(npmErrorMessage(args, result.error));
-  if (result.status !== 0) fail(`npm ${args.join(' ')} failed with ${result.status}`);
+  if (result.error || result.status !== 0) return null;
+  return result.stdout.trim() || null;
 }
 
-function npmErrorMessage(args, error) {
-  if (error?.code === 'ETIMEDOUT') {
-    return `npm ${args.join(' ')} timed out after ${npmTimeoutMs}ms`;
+function normalizeNpmPath(value, cwd) {
+  if (!value) return null;
+
+  const normalized = value.trim();
+  if (!normalized || normalized === 'null' || normalized === 'undefined') return null;
+  return isAbsolute(normalized) ? normalized : join(cwd, normalized);
+}
+
+function npmTimeoutMessage(command, cwd, diagnostics, commandStartedAt) {
+  return [
+    `Command timed out after ${formatDuration(npmTimeoutMs)}: ${command}`,
+    `exact command: ${command}`,
+    `cwd: ${cwd}`,
+    `npm log directory: ${diagnostics?.logDirectory ?? 'unknown'}`,
+    npmDebugLogTail(diagnostics?.logDirectory, commandStartedAt),
+  ].join('\n');
+}
+
+function npmDebugLogTail(logDirectory, commandStartedAt) {
+  if (!logDirectory) return 'npm debug log tail: unavailable; npm log directory unknown';
+  if (!existsSync(logDirectory)) {
+    return `npm debug log tail: unavailable; npm log directory does not exist: ${logDirectory}`;
   }
-  return error?.message ?? String(error);
+
+  const candidates = readdirSync(logDirectory)
+    .filter((name) => name.endsWith('.log') && name.includes('debug'))
+    .map((name) => {
+      const path = join(logDirectory, name);
+      return { path, modifiedAt: statSync(path).mtimeMs };
+    })
+    .sort((a, b) => b.modifiedAt - a.modifiedAt);
+
+  if (!candidates.length) return `npm debug log tail: no debug logs found in ${logDirectory}`;
+
+  const commandCandidates = candidates.filter(
+    (candidate) => candidate.modifiedAt >= commandStartedAt - 1_000,
+  );
+  const latest = commandCandidates[0] ?? candidates[0];
+  const staleNote = commandCandidates.length
+    ? null
+    : 'npm debug log tail note: no command-local debug log found; showing newest existing log';
+  const tail = readFileSync(latest.path, 'utf8')
+    .split(/\r?\n/)
+    .slice(-npmDebugLogTailLines)
+    .join('\n')
+    .trimEnd();
+
+  return [
+    `last npm debug log: ${latest.path}`,
+    staleNote,
+    `--- npm debug log tail (last ${npmDebugLogTailLines} lines) ---`,
+    tail || '(empty debug log)',
+    '--- end npm debug log tail ---',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+function packageConsumerLabel(scenarioName) {
+  return scenarioName ? `[package-consumer:${scenarioName}]` : '[package-consumer]';
+}
+
+function formatDuration(ms) {
+  if (ms < 1_000) return `${ms}ms`;
+  return `${Math.round(ms / 1_000)}s`;
+}
+
+function formatCommand(command, args) {
+  return [command, ...args].map(shellQuote).join(' ');
+}
+
+function shellQuote(value) {
+  const text = String(value);
+  if (/^[A-Za-z0-9_@%+=:,./-]+$/.test(text)) return text;
+  return `'${text.replaceAll("'", "'\\''")}'`;
 }
 
 function npmCommandEnvironment() {
