@@ -28,7 +28,7 @@ describe('PDF print helpers', () => {
       headers: { Authorization: 'Bearer test' },
     };
     globalThis.fetch = vi.fn(async () =>
-      new Response(new Blob(['pdf'], { type: 'application/pdf' }), { status: 200 }),
+      createFetchResponse('%PDF', 'application/pdf'),
     );
     URL.createObjectURL = vi.fn(() => 'blob:hell-print');
     URL.revokeObjectURL = vi.fn();
@@ -50,9 +50,9 @@ describe('PDF print helpers', () => {
   });
 
   it('prints fetched non-PDF responses as PDF object URLs', async () => {
-    const arrayBuffer = new Uint8Array([1, 2, 3]).buffer;
-    const sourceBlob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
-    globalThis.fetch = vi.fn(async () => new Response(sourceBlob, { status: 200 }));
+    globalThis.fetch = vi.fn(async () =>
+      createFetchResponse('not pdf', 'application/octet-stream'),
+    );
     URL.createObjectURL = vi.fn(() => 'blob:coerced-pdf');
     URL.revokeObjectURL = vi.fn();
 
@@ -122,3 +122,9 @@ describe('PDF print helpers', () => {
     ).rejects.toThrow('Printable PDF iframe window is unavailable.');
   });
 });
+
+function createFetchResponse(body: string, contentType: string): Response {
+  // Keep the fetch mock independent of the jsdom Blob implementation; older
+  // constrained runners expose Blob objects that undici Response cannot stream.
+  return new Response(body, { status: 200, headers: { 'content-type': contentType } });
+}
