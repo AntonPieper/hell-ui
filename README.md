@@ -27,6 +27,16 @@ A root `package-lock.json` is also checked in so GitHub CI can smoke-test
 `npm ci`; packed-package consumer tests continue to verify npm installs for
 applications consuming `@hell-ui/angular`.
 
+### Unit test parallelism
+
+`pnpm test` and `pnpm ci:test` use Vitest's default worker pool and are the
+supported CI path. In constrained meta/agent containers, prefer the meta root
+`npm run hell:test:unit` command; it defaults `VITEST_MAX_WORKERS` to `1` and disables
+coverage so the suite runs serially with less worker pressure. Use the meta
+root `npm run hell:test:unit:parallel` command only when reproducing CI worker
+scheduling from that constrained environment. The serial and parallel commands
+are intentionally not equivalent defaults.
+
 ## Package Imports
 
 Install the light UI stack when using primitives/composites. npm peer metadata
