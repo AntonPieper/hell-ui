@@ -18,11 +18,20 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const distHell = join(root, 'dist/hell');
 const keep = process.env.HELL_KEEP_PACKAGE_CONSUMER === '1';
 const packageConsumerArgs = process.argv.slice(2);
-const selectedScenarioNames = parseScenarioSelection(packageConsumerArgs);
+const rawSelectedScenarioNames = parseScenarioSelection(packageConsumerArgs);
+const selectedScenarioNames = rawSelectedScenarioNames.filter((name) => !isPreflightScenarioName(name));
+const preflightOnly = parsePreflightOnly(packageConsumerArgs, rawSelectedScenarioNames);
 const minimalDependencyMode = parseMinimalDependencyMode(packageConsumerArgs);
 const npmTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_TIMEOUT_MS, 240_000);
 const npmHeartbeatMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_HEARTBEAT_MS, 30_000);
 const npmDebugLogTailLines = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_LOG_TAIL_LINES, 80);
+const npmPreflightTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_PREFLIGHT_TIMEOUT_MS, 30_000);
+
+runNpmPreflight(root);
+if (preflightOnly) {
+  console.log(`${packageConsumerLabel('preflight')} preflight passed; skipping package build and consumer scenarios`);
+  process.exit(0);
+}
 
 runRootPackageManager(['run', 'build:lib'], root);
 
@@ -206,6 +215,16 @@ function parseMinimalDependencyMode(args) {
   if (envMode === '1' || envMode === 'true') return true;
 
   return args.some((arg) => arg === '--minimal-deps' || arg === '--group-by-deps');
+}
+
+function parsePreflightOnly(args, selectedNames) {
+  if (args.some((arg) => arg === '--preflight' || arg === '--preflight-only')) return true;
+
+  return selectedNames.length > 0 && selectedNames.every(isPreflightScenarioName);
+}
+
+function isPreflightScenarioName(name) {
+  return name === 'preflight' || name === 'npm-preflight';
 }
 
 function parseScenarioTokens(values, envOnly) {
@@ -821,6 +840,149 @@ function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+function runNpmPreflight(cwd) {
+  const label = packageConsumerLabel('preflight');
+  const env = npmCommandEnvironment();
+
+  console.log(`${label} running npm preflight before package build`);
+
+  const version = requireNpmPreflightValue(['--version'], cwd, env, 'npm version');
+  if (!/^\d+\.\d+\.\d+(?:[-+].*)?$/.test(version)) {
+    failNpmPreflight('npm version is not a semver value', [`version: ${version}`]);
+  }
+
+  const registry = requireNpmPreflightValue(['config', 'get', 'registry'], cwd, env, 'registry config');
+  assertNpmRegistry(registry);
+
+  const cache = requireNpmPreflightValue(['config', 'get', 'cache'], cwd, env, 'cache config');
+  const cacheDirectory = assertWritableNpmCache(cache, cwd);
+
+  const strictPeerDeps = requireNpmPreflightValue(
+    ['config', 'get', 'strict-peer-deps'],
+    cwd,
+    env,
+    'strict-peer-deps config',
+  );
+  const legacyPeerDeps = requireNpmPreflightValue(
+    ['config', 'get', 'legacy-peer-deps'],
+    cwd,
+    env,
+    'legacy-peer-deps config',
+  );
+  assertStrictPeerMode(strictPeerDeps, legacyPeerDeps);
+
+  requireNpmPreflightCommand(['ping', '--registry', registry], cwd, env, 'registry reachability');
+
+  console.log(
+    `${label} ok: npm ${version}; registry ${registry}; cache ${cacheDirectory}; ` +
+      `strict-peer-deps=${strictPeerDeps}; legacy-peer-deps=${legacyPeerDeps}`,
+  );
+}
+
+function requireNpmPreflightValue(args, cwd, env, description) {
+  const result = requireNpmPreflightCommand(args, cwd, env, description);
+  const value = result.stdout.trim();
+  if (!value) failNpmPreflight(`${description} returned no value`, [`command: ${result.command}`]);
+  return value;
+}
+
+function requireNpmPreflightCommand(args, cwd, env, description) {
+  const command = formatCommand('npm', args);
+  const result = spawnSync('npm', args, {
+    cwd,
+    shell: process.platform === 'win32',
+    encoding: 'utf8',
+    env,
+    timeout: npmPreflightTimeoutMs,
+  });
+
+  if (result.error) {
+    failNpmPreflight(`${description} failed`, [
+      `command: ${command}`,
+      `error: ${result.error.message}`,
+      npmPreflightOutputSummary(result),
+    ]);
+  }
+
+  if (result.status !== 0) {
+    failNpmPreflight(`${description} failed`, [
+      `command: ${command}`,
+      `status: ${result.status}`,
+      npmPreflightOutputSummary(result),
+    ]);
+  }
+
+  return { command, stdout: result.stdout ?? '', stderr: result.stderr ?? '' };
+}
+
+function assertNpmRegistry(registry) {
+  try {
+    const parsed = new URL(registry);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+      failNpmPreflight('registry config must use http or https', [`registry: ${registry}`]);
+    }
+  } catch (error) {
+    failNpmPreflight('registry config is not a valid URL', [
+      `registry: ${registry}`,
+      error instanceof Error ? error.message : String(error),
+    ]);
+  }
+}
+
+function assertWritableNpmCache(cache, cwd) {
+  const cacheDirectory = normalizeNpmPath(cache, cwd);
+  if (!cacheDirectory) failNpmPreflight('npm cache config is empty');
+
+  const probe = join(cacheDirectory, `.hell-package-consumer-preflight-${process.pid}-${Date.now()}`);
+  try {
+    mkdirSync(cacheDirectory, { recursive: true });
+    writeFileSync(probe, 'ok\n');
+    rmSync(probe, { force: true });
+  } catch (error) {
+    failNpmPreflight('npm cache directory is not writable', [
+      `cache: ${cacheDirectory}`,
+      error instanceof Error ? error.message : String(error),
+    ]);
+  }
+
+  return cacheDirectory;
+}
+
+function assertStrictPeerMode(strictPeerDeps, legacyPeerDeps) {
+  if (!npmConfigBoolean(strictPeerDeps)) {
+    failNpmPreflight('strict-peer-deps must be true', [`strict-peer-deps=${strictPeerDeps}`]);
+  }
+  if (npmConfigBoolean(legacyPeerDeps)) {
+    failNpmPreflight('legacy-peer-deps must be false', [`legacy-peer-deps=${legacyPeerDeps}`]);
+  }
+}
+
+function npmConfigBoolean(value) {
+  return value.trim().toLowerCase() === 'true' || value.trim() === '1';
+}
+
+function failNpmPreflight(message, details = []) {
+  fail([`npm preflight failed: ${message}`, ...details.filter(Boolean)].join('\n'));
+}
+
+function npmPreflightOutputSummary(result) {
+  const output = [result.stderr, result.stdout]
+    .filter(Boolean)
+    .join('\n')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 4)
+    .join(' | ');
+
+  if (!output) return 'output: (none)';
+  return `output: ${truncate(output, 500)}`;
+}
+
+function truncate(value, maxLength) {
+  return value.length > maxLength ? `${value.slice(0, maxLength - 1)}…` : value;
+}
+
 function runRootPackageManager(args, cwd) {
   console.log(`[package-consumer] package-manager ${args.join(' ')}`);
   const result = runPackageManager(args, {
@@ -907,17 +1069,22 @@ function printNpmInstallDiagnostics(label, scenarioName, tempRoot, diagnostics) 
   console.log(`${label} npm cache: ${diagnostics.cache}`);
   console.log(`${label} registry: ${diagnostics.registry}`);
   console.log(`${label} package manager version: npm ${diagnostics.version}`);
+  console.log(`${label} strict-peer-deps: ${diagnostics.strictPeerDeps}`);
+  console.log(`${label} legacy-peer-deps: ${diagnostics.legacyPeerDeps}`);
   console.log(`${label} npm log directory: ${diagnostics.logDirectory}`);
 }
 
 function collectNpmDiagnostics(cwd, env) {
-  const cache = readNpmValue(['config', 'get', 'cache'], cwd, env) ?? join(homedir(), '.npm');
+  const configuredCache = readNpmValue(['config', 'get', 'cache'], cwd, env);
+  const cache = normalizeNpmPath(configuredCache, cwd) ?? join(homedir(), '.npm');
   const registry = readNpmValue(['config', 'get', 'registry'], cwd, env) ?? 'unknown';
   const version = readNpmValue(['--version'], cwd, env) ?? 'unknown';
+  const strictPeerDeps = readNpmValue(['config', 'get', 'strict-peer-deps'], cwd, env) ?? 'unknown';
+  const legacyPeerDeps = readNpmValue(['config', 'get', 'legacy-peer-deps'], cwd, env) ?? 'unknown';
   const configuredLogDirectory = readNpmValue(['config', 'get', 'logs-dir'], cwd, env);
   const logDirectory = normalizeNpmPath(configuredLogDirectory, cwd) ?? join(cache, '_logs');
 
-  return { cache, registry, version, logDirectory };
+  return { cache, registry, version, strictPeerDeps, legacyPeerDeps, logDirectory };
 }
 
 function readNpmValue(args, cwd, env) {
@@ -1032,6 +1199,8 @@ function npmCommandEnvironment() {
 
   env.npm_config_audit = 'false';
   env.npm_config_fund = 'false';
+  env.npm_config_strict_peer_deps = 'true';
+  env.npm_config_legacy_peer_deps = 'false';
   env.npm_config_update_notifier = 'false';
 
   return env;
