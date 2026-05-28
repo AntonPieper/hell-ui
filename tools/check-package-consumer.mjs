@@ -103,8 +103,10 @@ const pdfViewerDeps = [
 
 const scenarios = [
   {
-    name: 'root',
+    name: 'root-core',
+    aliases: ['root'],
     description: 'root entry core-only with package-wide light peers',
+    peerTier: 'core',
     dependencies: coreDeps,
     mainTs: rootConsumerMainTs(),
     stylesCss: '',
@@ -112,13 +114,16 @@ const scenarios = [
   {
     name: 'core',
     description: 'core entry with package-wide light peers',
+    peerTier: 'core',
     dependencies: coreDeps,
     mainTs: coreConsumerMainTs(),
     stylesCss: '',
   },
   {
-    name: 'primitives',
-    description: 'primitives entry without feature peers',
+    name: 'primitives-css',
+    aliases: ['primitives'],
+    description: 'primitives entry with primitive CSS and without feature peers',
+    peerTier: 'primitive-css',
     dependencies: primitivesDeps,
     mainTs: primitivesConsumerMainTs(),
     stylesCss: primitivesConsumerStylesCss(),
@@ -126,6 +131,7 @@ const scenarios = [
   {
     name: 'button-unstyled',
     description: 'narrow primitive button entry without CSS or Tailwind peer',
+    peerTier: 'primitive-unstyled',
     dependencies: coreDeps,
     mainTs: buttonUnstyledConsumerMainTs(),
     stylesCss: '',
@@ -133,13 +139,16 @@ const scenarios = [
   {
     name: 'button',
     description: 'narrow primitive button entry with primitive styles and without Font Awesome peer',
+    peerTier: 'primitive-css',
     dependencies: buttonStyledDeps,
     mainTs: buttonConsumerMainTs(),
     stylesCss: primitivesConsumerStylesCss(),
   },
   {
-    name: 'composites',
-    description: 'composites entry without feature peers',
+    name: 'composites-css',
+    aliases: ['composites'],
+    description: 'composites entry with composite CSS and without feature peers',
+    peerTier: 'composite-css',
     dependencies: styledUiDeps,
     mainTs: compositesConsumerMainTs(),
     stylesCss: compositesConsumerStylesCss(),
@@ -147,6 +156,7 @@ const scenarios = [
   {
     name: 'app-shell',
     description: 'narrow app-shell composite entry without Font Awesome or feature peers',
+    peerTier: 'composite-css',
     dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: appShellConsumerMainTs(),
     stylesCss: compositesConsumerStylesCss(),
@@ -154,6 +164,7 @@ const scenarios = [
   {
     name: 'testing',
     description: 'testing entry with package-wide light peers',
+    peerTier: 'testing',
     dependencies: testingDeps,
     mainTs: testingConsumerMainTs(),
     stylesCss: '',
@@ -161,6 +172,7 @@ const scenarios = [
   {
     name: 'code-editor',
     description: 'code-editor feature with styled peers and CodeMirror peers',
+    peerTier: 'code-editor',
     dependencies: codeEditorDeps,
     mainTs: codeEditorConsumerMainTs(),
     stylesCss: codeEditorConsumerStylesCss(),
@@ -168,6 +180,7 @@ const scenarios = [
   {
     name: 'table-utilities',
     description: 'preferred table utilities feature without Font Awesome peer',
+    peerTier: 'table-utilities',
     dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: tableUtilitiesConsumerMainTs(),
     stylesCss: tableUtilitiesConsumerStylesCss(),
@@ -175,6 +188,7 @@ const scenarios = [
   {
     name: 'data-table',
     description: 'legacy data-table alias without Font Awesome peer',
+    peerTier: 'data-table',
     dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: dataTableConsumerMainTs(),
     stylesCss: dataTableConsumerStylesCss(),
@@ -182,6 +196,7 @@ const scenarios = [
   {
     name: 'pdf-viewer',
     description: 'pdf-viewer feature with pdfjs and light UI peers',
+    peerTier: 'pdf-viewer',
     dependencies: pdfViewerDeps,
     mainTs: pdfViewerConsumerMainTs(),
     stylesCss: pdfViewerConsumerStylesCss(),
@@ -272,17 +287,35 @@ function normalizeScenarioName(value) {
 function selectScenarios(allScenarios, selectedNames) {
   if (!selectedNames.length) return allScenarios;
 
-  const byName = new Map(allScenarios.map((scenario) => [scenario.name.toLowerCase(), scenario]));
-  const selected = selectedNames.map((name) => byName.get(name)).filter(Boolean);
-  if (selected.length !== selectedNames.length) {
-    const missing = selectedNames.filter((name) => !byName.has(name));
-    fail(`Unknown package-consumer scenario(s): ${missing.join(', ')}`);
+  const byName = scenarioLookup(allScenarios);
+  const missing = selectedNames.filter((name) => !byName.has(name));
+  if (missing.length) fail(`Unknown package-consumer scenario(s): ${missing.join(', ')}`);
+
+  const selected = [];
+  const seen = new Set();
+  for (const name of selectedNames) {
+    const scenario = byName.get(name);
+    if (seen.has(scenario.name)) continue;
+    selected.push(scenario);
+    seen.add(scenario.name);
   }
 
   console.log(
     `[package-consumer] selected scenarios: ${selected.map((scenario) => scenario.name).join(', ')}`,
   );
   return selected;
+}
+
+function scenarioLookup(allScenarios) {
+  const byName = new Map();
+  for (const scenario of allScenarios) {
+    for (const name of [scenario.name, ...(scenario.aliases ?? [])]) {
+      const key = normalizeScenarioName(name);
+      if (byName.has(key)) fail(`Duplicate package-consumer scenario name or alias: ${name}`);
+      byName.set(key, scenario);
+    }
+  }
+  return byName;
 }
 
 function scenarioDependencyGroups(scenarios, minimalDependencies) {
@@ -311,11 +344,37 @@ function unionDependencies(scenarios) {
   return [...new Set(scenarios.flatMap((scenario) => scenario.dependencies))];
 }
 
+function printScenarioContract(scenario, phase) {
+  const label = packageConsumerLabel(scenario.name);
+  console.log(`${label} before ${phase} scenario contract:`);
+  console.log(`${label} import path: ${formatList(packageImportPaths(scenario.mainTs))}`);
+  console.log(`${label} style imports: ${formatList(styleImportPaths(scenario.stylesCss))}`);
+  console.log(`${label} peer tier: ${scenario.peerTier}`);
+}
+
+function packageImportPaths(mainTs) {
+  return uniqueMatches(mainTs, /from\s+['"]([^'"]+)['"]/g)
+    .filter((specifier) => specifier === packageName || specifier.startsWith(`${packageName}/`));
+}
+
+function styleImportPaths(stylesCss) {
+  return uniqueMatches(stylesCss, /@import\s+['"]([^'"]+)['"]/g);
+}
+
+function uniqueMatches(value, pattern) {
+  return [...new Set([...value.matchAll(pattern)].map((match) => match[1]))];
+}
+
+function formatList(values) {
+  return values.length ? values.join(', ') : '(none)';
+}
+
 async function runConsumerScenarioGroup(group) {
   const groupName = group.scenarios.map((scenario) => scenario.name).join('-');
   const tempRoot = mkdtempSync(join(tmpdir(), `hell-package-consumer-${groupName}-`));
 
   try {
+    for (const scenario of group.scenarios) printScenarioContract(scenario, 'install');
     writeConsumerWorkspace(tempRoot, group.scenarios[0], group.dependencies);
     await runNpm([
       'install',
@@ -326,6 +385,7 @@ async function runConsumerScenarioGroup(group) {
     ], tempRoot, { scenarioName: groupName, printInstallDiagnostics: true });
 
     for (const scenario of group.scenarios) {
+      printScenarioContract(scenario, 'build');
       writeConsumerScenarioFiles(tempRoot, scenario);
       await runNpm(
         ['exec', '--', 'ng', 'build', 'consumer', '--configuration', 'production'],
