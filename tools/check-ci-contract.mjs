@@ -9,6 +9,7 @@ const requiredFiles = [
   'tools/run-unit-tests.mjs',
   'tools/check-package-consumer.mjs',
   'tools/check-package-pack.mjs',
+  'tools/check-api-reports.mjs',
   'tools/package-pack-audit.mjs',
   'tools/ci-summary.mjs',
   'tools/package-manager.mjs',
@@ -20,9 +21,11 @@ const requiredScripts = {
   'test:unit': 'node tools/run-unit-tests.mjs',
   'test:package-consumer': 'node tools/check-package-consumer.mjs',
   'test:package-pack': 'node tools/check-package-pack.mjs',
+  'test:api-report': 'node tools/check-api-reports.mjs',
+  'api-report:update': 'node tools/check-api-reports.mjs --local',
   'ci:test': 'node tools/run-ci-tests.mjs',
   'ci:playwright': 'node tools/package-manager.mjs exec playwright install --with-deps chromium firefox webkit',
-  'ci:build': 'node tools/package-manager.mjs run build',
+  'ci:build': 'node tools/package-manager.mjs run build && node tools/package-manager.mjs run test:api-report',
   'ci:verify': 'node tools/package-manager.mjs run ci:test && node tools/package-manager.mjs run ci:build',
 };
 
@@ -80,6 +83,17 @@ const fileChecks = [
     path: 'tools/run-ci-tests.mjs',
     includes: [
       "args: ['run', 'test:package-consumer', '--', '--minimal-deps']",
+    ],
+  },
+  {
+    path: 'tools/check-api-reports.mjs',
+    includes: [
+      '@hell-ui/angular/core',
+      '@hell-ui/angular/primitives',
+      '@hell-ui/angular/testing',
+      'localBuild',
+      'reportFolder',
+      'reportTempFolder',
     ],
   },
   {

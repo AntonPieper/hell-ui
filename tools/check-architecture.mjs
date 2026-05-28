@@ -20,6 +20,7 @@ checkDocsShellNarrowEntrypointContract();
 checkDocsCodeEditorIsolationContract();
 checkDocsPdfViewerIsolationContract();
 checkPackageEntryPoints();
+checkApiReportContract();
 checkPackageDependencyContract();
 checkStyleEntryPoints();
 checkNgClassCustomizationContract();
@@ -439,6 +440,41 @@ function checkPackageEntryPoints() {
 
   checkEntrypointManifestSourceCoverage();
   checkGeneratedEntrypointFiles();
+}
+
+function checkApiReportContract() {
+  const packageJson = parseJsonWithComments(readFile(join(root, 'package.json')));
+  const script = readFile(join(root, 'tools/check-api-reports.mjs'));
+  const expectedEntrypoints = [
+    ['@hell-ui/angular', 'hell-ui-angular.api.md'],
+    ['@hell-ui/angular/core', 'hell-ui-angular-core.api.md'],
+    ['@hell-ui/angular/primitives', 'hell-ui-angular-primitives.api.md'],
+    ['@hell-ui/angular/testing', 'hell-ui-angular-testing.api.md'],
+  ];
+
+  if (packageJson.scripts?.['test:api-report'] !== 'node tools/check-api-reports.mjs') {
+    failures.push('API Report contract must expose npm run test:api-report');
+  }
+  if (packageJson.scripts?.['api-report:update'] !== 'node tools/check-api-reports.mjs --local') {
+    failures.push('API Report contract must expose npm run api-report:update for baseline approval');
+  }
+  if (!packageJson.scripts?.['ci:build']?.includes('node tools/package-manager.mjs run test:api-report')) {
+    failures.push('API Report contract must run from ci:build after the library package is built');
+  }
+
+  for (const [specifier, reportFileName] of expectedEntrypoints) {
+    if (!script.includes(specifier)) {
+      failures.push(`API Report script is missing stable entry point ${specifier}`);
+    }
+    if (!script.includes(reportFileName)) {
+      failures.push(`API Report script is missing report file ${reportFileName}`);
+    }
+
+    const reportPath = join(root, 'etc/api-reports', reportFileName);
+    if (!existsSync(reportPath)) {
+      failures.push(`API Report baseline is missing etc/api-reports/${reportFileName}`);
+    }
+  }
 }
 
 function checkPackageDependencyContract() {
