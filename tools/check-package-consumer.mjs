@@ -13,6 +13,7 @@ import { dirname, isAbsolute, join } from 'node:path';
 import { homedir, tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { runPackageManager } from './package-manager.mjs';
+import { auditPackedPackage } from './package-pack-audit.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const distHell = join(root, 'dist/hell');
@@ -46,7 +47,11 @@ if (!packageName) {
 }
 
 const packedHell = await packBuiltPackage();
-assertPackedPackageDoesNotBundlePdfWorker(packedHell.tarball);
+try {
+  auditPackedPackage({ distRoot: distHell, tarball: packedHell.tarball });
+} catch (error) {
+  fail(error instanceof Error ? error.message : String(error));
+}
 
 const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 const deps = rootPackage.dependencies ?? {};
@@ -406,23 +411,6 @@ async function packBuiltPackage() {
   const tarball = readdirSync(packRoot).find((name) => name.endsWith('.tgz'));
   if (!tarball) fail(`Packed package missing in ${packRoot}`);
   return { root: packRoot, tarball: join(packRoot, tarball) };
-}
-
-function assertPackedPackageDoesNotBundlePdfWorker(tarball) {
-  const result = spawnSync('tar', ['-tzf', tarball], { encoding: 'utf8' });
-  if (result.error) fail(`Unable to inspect packed package ${tarball}: ${result.error.message}`);
-  if (result.status !== 0) {
-    fail(`Unable to inspect packed package ${tarball}: ${result.stderr || result.stdout}`);
-  }
-
-  const bundledWorkers = result.stdout
-    .split('\n')
-    .filter((entry) => /pdf\.worker\.(?:mjs|js)$/.test(entry));
-  if (bundledWorkers.length) {
-    fail(
-      `Packed package must not bundle pdf.js workers; apps provide the worker source. Found: ${bundledWorkers.join(', ')}`,
-    );
-  }
 }
 
 function writeConsumerWorkspace(workspace, scenario, dependencies = scenario.dependencies) {
