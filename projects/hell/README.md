@@ -25,18 +25,22 @@ pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui
 npm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs tailwindcss
 ```
 
-Feature peers remain optional at runtime, but npm peer metadata is package-wide: install the base light stack for any package entry point, then add feature peers only for imported feature entry points.
+Feature peers remain optional at runtime, but npm peer metadata is package-wide: install the core peer group for any package entry point, then add tier peers only for entry points and styles you import. A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`; install any missing peers explicitly.
 
 `@floating-ui/dom` is required by `ng-primitives`; install it explicitly with the primitive stack. `@angular/router` is an optional peer only for `ng-primitives/dialog`; install it when importing Hell dialog or the aggregate `/primitives` entry point.
 
-| Entry point | Install when used |
-| --- | --- |
-| `@hell-ui/angular`, `/core`, `/primitives`, `/testing` | Base light stack: `@angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs` plus style-only `tailwindcss`; add optional `@angular/router` for dialog or aggregate `/primitives`; add optional `@ng-icons/font-awesome` for icon-backed entries |
-| `@hell-ui/angular/composites`, `/app-shell`, `/audio-player`, `/avatar-group`, `/date-input`, `/dialpad`, `/drop-zone`, `/omnibar`, `/resizable`, `/split-view`, `/time-input`, `/toast` | Base light stack; prefer narrow composite entry points such as `@hell-ui/angular/app-shell` when possible |
-| `@hell-ui/angular/features/table-utilities` | Base light stack |
-| `@hell-ui/angular/features/data-table` | Legacy compatibility alias for `@hell-ui/angular/features/table-utilities` |
-| `@hell-ui/angular/features/code-editor` | Base light stack plus `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight` |
-| `@hell-ui/angular/features/pdf-viewer` | Base light stack plus exact `pdfjs-dist@5.6.205`; app must provide a pdf.js worker source |
+### Peer dependency tiers
+
+Package-consumer scenarios assert these peer groups with strict peer installs. CodeMirror and pdf.js peers stay optional and are not required by the root or button scenarios.
+
+| Tier | Entry points / scenarios | Peer group asserted |
+| --- | --- | --- |
+| Core | `@hell-ui/angular`, `/core`, `/testing`; `root-core`, `core`, `testing` | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `ng-primitives`, `rxjs` |
+| Primitive | Narrow primitives such as `/button`; aggregate `/primitives`; `button-unstyled`, `button`, `primitives-css` | Core peers. Add `tailwindcss` when importing primitive CSS. Aggregate `/primitives` also asserts optional `@angular/router` and `@ng-icons/font-awesome` because dialog and icon-backed primitives are bundled in the aggregate FESM. |
+| Composite | `/composites` and narrow composite entry points such as `/app-shell`; `composites-css`, `app-shell` | Core peers plus `tailwindcss` for composite CSS. Aggregate/icon-backed composites also assert optional `@ng-icons/font-awesome`. |
+| Table utilities | `/features/table-utilities`, legacy `/features/data-table`; `table-utilities`, `data-table` | Core peers plus `tailwindcss`; no CodeMirror, pdf.js, router, or Font Awesome peers. |
+| Code editor | `/features/code-editor`; `code-editor` | Core peers plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight`. |
+| PDF viewer | `/features/pdf-viewer`; `pdf-viewer` | Core peers plus `tailwindcss`, `@ng-icons/font-awesome`, and exact `pdfjs-dist@5.6.205`; app must provide a pdf.js worker source. |
 
 
 ## API Stability

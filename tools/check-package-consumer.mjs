@@ -56,6 +56,63 @@ try {
 const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 const deps = rootPackage.dependencies ?? {};
 const devDeps = rootPackage.devDependencies ?? {};
+const sourcePackage = JSON.parse(readFileSync(join(root, 'projects/hell/package.json'), 'utf8'));
+const packagePeerDependencies = sourcePackage.peerDependencies ?? {};
+const packagePeerDependenciesMeta = sourcePackage.peerDependenciesMeta ?? {};
+
+const corePeerGroup = [
+  '@angular/cdk',
+  '@angular/common',
+  '@angular/core',
+  '@angular/forms',
+  '@floating-ui/dom',
+  '@ng-icons/core',
+  'ng-primitives',
+  'rxjs',
+];
+const stylePeerGroup = ['tailwindcss'];
+const routerPeerGroup = ['@angular/router'];
+const fontAwesomePeerGroup = ['@ng-icons/font-awesome'];
+const codeEditorPeerGroup = [
+  '@codemirror/commands',
+  '@codemirror/language',
+  '@codemirror/state',
+  '@codemirror/view',
+  '@lezer/highlight',
+];
+const pdfViewerPeerGroup = ['pdfjs-dist'];
+const heavyFeaturePeerGroup = [...codeEditorPeerGroup, ...pdfViewerPeerGroup];
+const packageConsumerPeerTiers = new Set([
+  'core',
+  'primitive',
+  'composite',
+  'table-utilities',
+  'code-editor',
+  'pdf-viewer',
+]);
+const peerGroupContracts = {
+  core: { tier: 'core', peers: corePeerGroup },
+  'primitive-unstyled': { tier: 'primitive', peers: corePeerGroup },
+  primitive: { tier: 'primitive', peers: [...corePeerGroup, ...stylePeerGroup] },
+  'primitive-aggregate': {
+    tier: 'primitive',
+    peers: [...corePeerGroup, ...stylePeerGroup, ...routerPeerGroup, ...fontAwesomePeerGroup],
+  },
+  composite: { tier: 'composite', peers: [...corePeerGroup, ...stylePeerGroup] },
+  'composite-icons': {
+    tier: 'composite',
+    peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup],
+  },
+  'table-utilities': { tier: 'table-utilities', peers: [...corePeerGroup, ...stylePeerGroup] },
+  'code-editor': {
+    tier: 'code-editor',
+    peers: [...corePeerGroup, ...stylePeerGroup, ...codeEditorPeerGroup],
+  },
+  'pdf-viewer': {
+    tier: 'pdf-viewer',
+    peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup, ...pdfViewerPeerGroup],
+  },
+};
 
 const angularAppDeps = [
   '@angular/common',
@@ -82,9 +139,10 @@ const styledUiDeps = [
   '@ng-icons/font-awesome',
 ];
 // The aggregate /primitives FESM includes dialog, and ng-primitives/dialog
-// currently imports @angular/router even though Hell no longer declares router
-// as a package peer. Narrow primitive entrypoints (for example /button) prove
-// router-free consumption for consumers that avoid the aggregate barrel.
+// currently imports @angular/router. Hell declares router as an optional peer
+// and only aggregate/dialog consumers should need it. Narrow primitive
+// entrypoints (for example /button) prove router-free consumption for consumers
+// that avoid the aggregate barrel.
 const primitivesDeps = [
   ...styledUiDeps,
   '@angular/router',
@@ -112,6 +170,7 @@ const scenarios = [
     aliases: ['root'],
     description: 'root entry core-only with package-wide light peers',
     peerTier: 'core',
+    peerGroup: 'core',
     dependencies: coreDeps,
     mainTs: rootConsumerMainTs(),
     stylesCss: '',
@@ -120,6 +179,7 @@ const scenarios = [
     name: 'core',
     description: 'core entry with package-wide light peers',
     peerTier: 'core',
+    peerGroup: 'core',
     dependencies: coreDeps,
     mainTs: coreConsumerMainTs(),
     stylesCss: '',
@@ -127,8 +187,9 @@ const scenarios = [
   {
     name: 'primitives-css',
     aliases: ['primitives'],
-    description: 'primitives entry with primitive CSS and without feature peers',
-    peerTier: 'primitive-css',
+    description: 'primitives entry with primitive CSS and aggregate primitive peers',
+    peerTier: 'primitive',
+    peerGroup: 'primitive-aggregate',
     dependencies: primitivesDeps,
     mainTs: primitivesConsumerMainTs(),
     stylesCss: primitivesConsumerStylesCss(),
@@ -136,7 +197,8 @@ const scenarios = [
   {
     name: 'button-unstyled',
     description: 'narrow primitive button entry without CSS or Tailwind peer',
-    peerTier: 'primitive-unstyled',
+    peerTier: 'primitive',
+    peerGroup: 'primitive-unstyled',
     dependencies: coreDeps,
     mainTs: buttonUnstyledConsumerMainTs(),
     stylesCss: '',
@@ -144,7 +206,8 @@ const scenarios = [
   {
     name: 'button',
     description: 'narrow primitive button entry with primitive styles and without Font Awesome peer',
-    peerTier: 'primitive-css',
+    peerTier: 'primitive',
+    peerGroup: 'primitive',
     dependencies: buttonStyledDeps,
     mainTs: buttonConsumerMainTs(),
     stylesCss: primitivesConsumerStylesCss(),
@@ -152,8 +215,9 @@ const scenarios = [
   {
     name: 'composites-css',
     aliases: ['composites'],
-    description: 'composites entry with composite CSS and without feature peers',
-    peerTier: 'composite-css',
+    description: 'composites entry with composite CSS and icon-backed composite peers',
+    peerTier: 'composite',
+    peerGroup: 'composite-icons',
     dependencies: styledUiDeps,
     mainTs: compositesConsumerMainTs(),
     stylesCss: compositesConsumerStylesCss(),
@@ -161,7 +225,8 @@ const scenarios = [
   {
     name: 'app-shell',
     description: 'narrow app-shell composite entry without Font Awesome or feature peers',
-    peerTier: 'composite-css',
+    peerTier: 'composite',
+    peerGroup: 'composite',
     dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: appShellConsumerMainTs(),
     stylesCss: compositesConsumerStylesCss(),
@@ -169,7 +234,8 @@ const scenarios = [
   {
     name: 'testing',
     description: 'testing entry with package-wide light peers',
-    peerTier: 'testing',
+    peerTier: 'core',
+    peerGroup: 'core',
     dependencies: testingDeps,
     mainTs: testingConsumerMainTs(),
     stylesCss: '',
@@ -178,6 +244,7 @@ const scenarios = [
     name: 'code-editor',
     description: 'code-editor feature with styled peers and CodeMirror peers',
     peerTier: 'code-editor',
+    peerGroup: 'code-editor',
     dependencies: codeEditorDeps,
     mainTs: codeEditorConsumerMainTs(),
     stylesCss: codeEditorConsumerStylesCss(),
@@ -186,6 +253,7 @@ const scenarios = [
     name: 'table-utilities',
     description: 'preferred table utilities feature without Font Awesome peer',
     peerTier: 'table-utilities',
+    peerGroup: 'table-utilities',
     dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: tableUtilitiesConsumerMainTs(),
     stylesCss: tableUtilitiesConsumerStylesCss(),
@@ -193,7 +261,8 @@ const scenarios = [
   {
     name: 'data-table',
     description: 'legacy data-table alias without Font Awesome peer',
-    peerTier: 'data-table',
+    peerTier: 'table-utilities',
+    peerGroup: 'table-utilities',
     dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: dataTableConsumerMainTs(),
     stylesCss: dataTableConsumerStylesCss(),
@@ -202,11 +271,14 @@ const scenarios = [
     name: 'pdf-viewer',
     description: 'pdf-viewer feature with pdfjs and light UI peers',
     peerTier: 'pdf-viewer',
+    peerGroup: 'pdf-viewer',
     dependencies: pdfViewerDeps,
     mainTs: pdfViewerConsumerMainTs(),
     stylesCss: pdfViewerConsumerStylesCss(),
   },
 ];
+
+assertPeerTierContracts(scenarios);
 
 const enabledScenarios = selectScenarios(scenarios, selectedScenarioNames);
 
@@ -323,6 +395,90 @@ function scenarioLookup(allScenarios) {
   return byName;
 }
 
+function assertPeerTierContracts(allScenarios) {
+  const packagePeerNames = new Set(Object.keys(packagePeerDependencies));
+  const optionalPeerNames = new Set(
+    Object.entries(packagePeerDependenciesMeta)
+      .filter(([, meta]) => meta?.optional === true)
+      .map(([name]) => name),
+  );
+  const requiredPackagePeerNames = [...packagePeerNames].filter((name) => !optionalPeerNames.has(name));
+
+  assertSameSet('core peer group', corePeerGroup, requiredPackagePeerNames);
+
+  for (const [groupName, contract] of Object.entries(peerGroupContracts)) {
+    const missingPeers = contract.peers.filter((peer) => !packagePeerNames.has(peer));
+    if (missingPeers.length) {
+      fail(`Peer group ${groupName} references undeclared package peer(s): ${missingPeers.join(', ')}`);
+    }
+  }
+
+  for (const peer of heavyFeaturePeerGroup) {
+    if (!optionalPeerNames.has(peer)) fail(`Heavy feature peer ${peer} must remain optional`);
+  }
+
+  const coveredTiers = new Set(allScenarios.map((scenario) => scenario.peerTier));
+  for (const tier of packageConsumerPeerTiers) {
+    if (!coveredTiers.has(tier)) fail(`Missing package-consumer scenario coverage for peer tier ${tier}`);
+  }
+
+  for (const scenario of allScenarios) assertScenarioPeerGroup(scenario, packagePeerNames);
+  assertHeavyPeersAreIsolated(allScenarios);
+}
+
+function assertScenarioPeerGroup(scenario, packagePeerNames) {
+  if (!packageConsumerPeerTiers.has(scenario.peerTier)) {
+    fail(`Scenario ${scenario.name} uses unknown peer tier ${scenario.peerTier}`);
+  }
+
+  const contract = resolvePeerGroup(scenario);
+  if (contract.tier !== scenario.peerTier) {
+    fail(
+      `Scenario ${scenario.name} peer group ${scenario.peerGroup} belongs to tier ${contract.tier}, not ${scenario.peerTier}`,
+    );
+  }
+
+  const actualPeers = scenario.dependencies.filter((dependency) => packagePeerNames.has(dependency));
+  assertSameSet(
+    `scenario ${scenario.name} peer group ${scenario.peerGroup ?? scenario.peerTier}`,
+    contract.peers,
+    actualPeers,
+  );
+}
+
+function assertHeavyPeersAreIsolated(allScenarios) {
+  const lightScenarioNames = new Set(['root-core', 'core', 'button-unstyled', 'button']);
+  for (const scenario of allScenarios) {
+    if (!lightScenarioNames.has(scenario.name)) continue;
+
+    const unexpected = scenario.dependencies.filter((dependency) => heavyFeaturePeerGroup.includes(dependency));
+    if (unexpected.length) {
+      fail(`Scenario ${scenario.name} must not require heavy feature peer(s): ${unexpected.join(', ')}`);
+    }
+  }
+}
+
+function resolvePeerGroup(scenario) {
+  const groupName = scenario.peerGroup ?? scenario.peerTier;
+  const contract = peerGroupContracts[groupName];
+  if (!contract) fail(`Scenario ${scenario.name} references unknown peer group ${groupName}`);
+  return contract;
+}
+
+function assertSameSet(label, expected, actual) {
+  const expectedList = uniqueSorted(expected);
+  const actualList = uniqueSorted(actual);
+  if (expectedList.length === actualList.length && expectedList.every((value, index) => value === actualList[index])) {
+    return;
+  }
+
+  fail(`${label} expected ${formatList(expectedList)} but found ${formatList(actualList)}`);
+}
+
+function uniqueSorted(values) {
+  return [...new Set(values)].sort();
+}
+
 function scenarioDependencyGroups(scenarios, minimalDependencies) {
   if (!minimalDependencies) {
     console.log('[package-consumer] dependency mode: fast union install');
@@ -355,6 +511,7 @@ function printScenarioContract(scenario, phase) {
   console.log(`${label} import path: ${formatList(packageImportPaths(scenario.mainTs))}`);
   console.log(`${label} style imports: ${formatList(styleImportPaths(scenario.stylesCss))}`);
   console.log(`${label} peer tier: ${scenario.peerTier}`);
+  console.log(`${label} expected peer group: ${formatList(resolvePeerGroup(scenario).peers)}`);
 }
 
 function packageImportPaths(mainTs) {
