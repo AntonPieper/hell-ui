@@ -108,7 +108,8 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "statsJson": true
             },
             "development": {
               "optimization": false,
