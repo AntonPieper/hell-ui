@@ -20,7 +20,15 @@ pnpm build:docs
 pnpm test
 pnpm ci:playwright
 pnpm ci:verify # full pre-push: unit, architecture, lint, e2e, package consumer, build
+pnpm release:dry-run -- --fast # local release preflight
+pnpm release:dry-run -- --full # release-candidate evidence gate
 ```
+
+`release:dry-run -- --full` runs lint, architecture, CI contract, unit tests,
+`build:lib`, pack audit, selected package-consumer scenarios, API report, and
+`build:docs`. Evidence is written to a timestamped log under
+`test-results/release-evidence/`. Use `--fast` for local preflight before the
+full release-candidate gate.
 
 The contributor workspace is pnpm-first and CI-backed by `pnpm-lock.yaml`.
 A root `package-lock.json` is also checked in so GitHub CI can smoke-test
