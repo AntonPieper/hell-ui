@@ -49,8 +49,18 @@ import {
 } from './pdf-viewer.utils';
 import type { HellPdfWorkerSource } from './pdf-viewer.adapter';
 
+/**
+ * Factory hook for replacing the browser/pdf.js runtime in tests or app-specific hosts.
+ *
+ * @experimental Runtime seam for the experimental PDF viewer feature entry point.
+ */
 export type HellPdfRuntimeFactory = () => HellPdfRuntimePort;
 
+/**
+ * Injection token for the PDF viewer runtime factory.
+ *
+ * @experimental Runtime seam for the experimental PDF viewer feature entry point.
+ */
 export const HELL_PDF_RUNTIME_FACTORY = new InjectionToken<HellPdfRuntimeFactory>(
   'HELL_PDF_RUNTIME_FACTORY',
 );

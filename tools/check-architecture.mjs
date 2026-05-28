@@ -21,6 +21,7 @@ checkDocsCodeEditorIsolationContract();
 checkDocsPdfViewerIsolationContract();
 checkPackageEntryPoints();
 checkApiReportContract();
+checkApiStabilityContract();
 checkPackageDependencyContract();
 checkStyleEntryPoints();
 checkNgClassCustomizationContract();
@@ -475,6 +476,179 @@ function checkApiReportContract() {
       failures.push(`API Report baseline is missing etc/api-reports/${reportFileName}`);
     }
   }
+}
+
+function checkApiStabilityContract() {
+  const readme = readFile(join(root, 'projects/hell/README.md'));
+  const requiredPolicyText = [
+    '### Stability category policy',
+    '`Stable`',
+    '`Experimental`',
+    '`Deprecated`',
+    '`Internal`',
+    'Public API files must not export from `/internal/`, `/adapters/`, or manifest-declared internal directories',
+  ];
+  for (const text of requiredPolicyText) {
+    if (!readme.includes(text)) failures.push(`API Stability policy is missing ${text}`);
+  }
+
+  const experimentalEntrypoints = [
+    {
+      name: 'Code editor',
+      publicApiPath: 'projects/hell/src/lib/public-api-feature-code-editor.ts',
+      sourcePath: 'projects/hell/src/lib/features/code-editor/code-editor.ts',
+      docsPath: 'projects/hell-docs/src/app/pages/components/code-editor/code-editor.page.ts',
+    },
+    {
+      name: 'PDF viewer',
+      publicApiPath: 'projects/hell/src/lib/public-api-feature-pdf-viewer.ts',
+      sourcePath: 'projects/hell/src/lib/features/pdf-viewer/pdf-viewer.ts',
+      docsPath: 'projects/hell-docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts',
+    },
+  ];
+
+  for (const entrypoint of experimentalEntrypoints) {
+    const publicApi = readFile(join(root, entrypoint.publicApiPath));
+    if (!/@experimental\b/.test(publicApi)) {
+      failures.push(`${entrypoint.name} feature entry point must carry @experimental in its public API comment`);
+    }
+
+    const source = readFile(join(root, entrypoint.sourcePath));
+    if (!/@experimental\b/.test(source)) {
+      failures.push(`${entrypoint.name} feature source must carry @experimental API JSDoc`);
+    }
+
+    const docs = readFile(join(root, entrypoint.docsPath));
+    if (!new RegExp(`${escapeRegExp(entrypoint.name)} is experimental`, 'i').test(docs)) {
+      failures.push(`${entrypoint.name} docs must disclose experimental status`);
+    }
+  }
+
+  const experimentalApiSymbols = [
+    ['projects/hell/src/lib/features/code-editor/code-editor.ts', 'HellCodeEditorRuntimeFactory'],
+    ['projects/hell/src/lib/features/code-editor/code-editor.ts', 'HELL_CODE_EDITOR_RUNTIME_FACTORY'],
+    ['projects/hell/src/lib/features/code-editor/code-editor.ts', 'HellCodeEditor'],
+    ['projects/hell/src/lib/features/code-editor/code-editor.runtime.ts', 'HellCodeEditorRuntimeOptions'],
+    ['projects/hell/src/lib/features/code-editor/code-editor.runtime.ts', 'HellCodeEditorRuntimePort'],
+    ['projects/hell/src/lib/features/code-editor/code-editor.runtime.ts', 'hellCodeEditorSetupFactory'],
+    ['projects/hell/src/lib/features/code-editor/code-editor.runtime.ts', 'hellCodeEditorSetup'],
+    ['projects/hell/src/lib/features/code-editor/code-editor.runtime.ts', 'hellCodeEditorTheme'],
+    ['projects/hell/src/lib/features/pdf-viewer/pdf-viewer.ts', 'HellPdfRuntimeFactory'],
+    ['projects/hell/src/lib/features/pdf-viewer/pdf-viewer.ts', 'HELL_PDF_RUNTIME_FACTORY'],
+    ['projects/hell/src/lib/features/pdf-viewer/pdf-viewer.ts', 'HellPdfViewer'],
+    ['projects/hell/src/lib/features/pdf-viewer/pdf-viewer.adapter.ts', 'HellPdfWorkerSource'],
+  ];
+  for (const [sourcePath, symbol] of experimentalApiSymbols) {
+    const source = readFile(join(root, sourcePath));
+    if (!hasTaggedApiSymbol(source, 'experimental', symbol)) {
+      failures.push(`${sourcePath} ${symbol} must carry @experimental API JSDoc`);
+    }
+  }
+
+  const dataTablePublicApi = readFile(join(root, 'projects/hell/src/lib/public-api-feature-data-table.ts'));
+  if (!/@deprecated\b/.test(dataTablePublicApi)) {
+    failures.push('Data Table legacy feature entry point must carry @deprecated in its public API comment');
+  }
+
+  const dataTableSource = readFile(join(root, 'projects/hell/src/lib/features/data-table/data-table.ts'));
+  if (!/@deprecated\b/.test(dataTableSource)) {
+    failures.push('Data Table legacy feature source must carry @deprecated API JSDoc');
+  }
+
+  const tableUtilitiesSource = readFile(
+    join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'),
+  );
+  for (const alias of ['HELL_TABLE_UTILITY_DIRECTIVES', 'HELL_TABLE_DIRECTIVES']) {
+    if (!hasTaggedApiSymbol(tableUtilitiesSource, 'deprecated', alias)) {
+      failures.push(`${alias} compatibility alias must carry @deprecated API JSDoc`);
+    }
+  }
+  if (!hasTaggedApiSymbol(tableUtilitiesSource, 'deprecated', 'interactive')) {
+    failures.push('HellTableRow interactive compatibility input must carry @deprecated API JSDoc');
+  }
+
+  const labelsSource = readFile(join(root, 'projects/hell/src/lib/core/labels.ts'));
+  if (!/@deprecated[^\n]*\nexport\s+type\s+HellDataTableLabels\b/.test(labelsSource)) {
+    failures.push('HellDataTableLabels compatibility alias must carry @deprecated API JSDoc');
+  }
+
+  const audioSource = readFile(join(root, 'projects/hell/src/lib/composites/audio-player/audio-player.ts'));
+  if (!hasTaggedApiSymbol(audioSource, 'deprecated', 'allowLiveCaptions')) {
+    failures.push('allowLiveCaptions compatibility alias must carry @deprecated API JSDoc');
+  }
+
+  const codeEditorRuntimeSource = readFile(
+    join(root, 'projects/hell/src/lib/features/code-editor/code-editor.runtime.ts'),
+  );
+  if (!hasTaggedApiSymbol(codeEditorRuntimeSource, 'deprecated', 'hellCodeEditorSetup')) {
+    failures.push('hellCodeEditorSetup compatibility alias must carry @deprecated API JSDoc');
+  }
+
+  const tableDocs = readFile(join(root, 'projects/hell-docs/src/app/pages/components/data-table/data-table.page.ts'));
+  if (!/deprecated compatibility (?:naming )?alias/i.test(tableDocs)) {
+    failures.push('Table utilities docs must disclose deprecated data-table/directive aliases');
+  }
+  if (!/Deprecated <code>\[interactive\]<\/code>/.test(tableDocs)) {
+    failures.push('Table utilities docs must disclose interactive as deprecated');
+  }
+
+  const audioDocs = readFile(join(root, 'projects/hell-docs/src/app/pages/components/audio-player/audio-player.page.ts'));
+  if (!/allowLiveCaptions[\s\S]{0,200}deprecated compatibility alias/i.test(audioDocs)) {
+    failures.push('Audio Player docs must disclose allowLiveCaptions as a deprecated compatibility alias');
+  }
+
+  const codeEditorDocs = readFile(join(root, 'projects/hell-docs/src/app/pages/components/code-editor/code-editor.page.ts'));
+  if (!/hellCodeEditorSetup[\s\S]{0,200}deprecated browser-global legacy compatibility/i.test(codeEditorDocs)) {
+    failures.push('Code Editor docs must disclose hellCodeEditorSetup as a deprecated compatibility alias');
+  }
+
+  checkPublicApiInternalExportContract();
+}
+
+function hasTaggedApiSymbol(source, tag, symbol) {
+  const pattern = new RegExp(
+    `@${escapeRegExp(tag)}\\b[\\s\\S]{0,1800}(?:export\\s+(?:abstract\\s+)?(?:class|const|type|interface|function)\\s+${escapeRegExp(symbol)}\\b|readonly\\s+${escapeRegExp(symbol)}\\b)`,
+  );
+  return pattern.test(source);
+}
+
+function checkPublicApiInternalExportContract() {
+  const internalDirectoryNames = new Set(['internal', 'adapters']);
+  for (const group of entrypointSourceGroups()) {
+    for (const internalDirectory of group.internalDirectories) {
+      internalDirectoryNames.add(internalDirectory);
+    }
+  }
+
+  const allowedPublicInternalExports = new Set([
+    // Format: `${publicApiPath} -> ${exportPath}`. Each exception must include a release-policy rationale.
+  ]);
+
+  for (const entrypoint of entrypointPublicApiFiles()) {
+    const publicApiPath = entrypoint.publicApiPath;
+    const fullPath = join(root, publicApiPath);
+    if (!existsSync(fullPath)) continue;
+
+    const source = readFile(fullPath);
+    for (const exportPath of exportPaths(source)) {
+      const exportKey = `${publicApiPath} -> ${exportPath}`;
+      if (allowedPublicInternalExports.has(exportKey)) continue;
+
+      const resolvedPath = resolvePublicExportPath(publicApiPath, exportPath);
+      const segments = resolvedPath.split('/').filter(Boolean);
+      const internalSegment = segments.find((segment) => internalDirectoryNames.has(segment));
+      if (internalSegment) {
+        failures.push(
+          `Public API ${publicApiPath} exports ${exportPath} from internal directory "${internalSegment}" without an explicit architecture allowlist entry`,
+        );
+      }
+    }
+  }
+}
+
+function resolvePublicExportPath(publicApiPath, exportPath) {
+  if (!exportPath.startsWith('.')) return exportPath;
+  return join(dirname(publicApiPath), exportPath).replaceAll('\\', '/');
 }
 
 function checkPackageDependencyContract() {

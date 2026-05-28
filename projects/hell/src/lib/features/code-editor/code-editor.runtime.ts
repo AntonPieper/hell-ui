@@ -17,7 +17,11 @@ const HELL_CODE_EDITOR_FOLD_PATH =
 const HELL_CODE_EDITOR_UNFOLD_PATH =
   'M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z';
 
-/** Construction inputs for the CodeMirror runtime boundary. */
+/**
+ * Construction inputs for the CodeMirror runtime boundary.
+ *
+ * @experimental Runtime seam for the experimental CodeMirror feature entry point.
+ */
 export interface HellCodeEditorRuntimeOptions {
   readonly host: HTMLElement;
   readonly value: string;
@@ -28,7 +32,11 @@ export interface HellCodeEditorRuntimeOptions {
   readonly onValueChange: (value: string) => void;
 }
 
-/** Imperative port used by the Angular wrapper to keep EditorView state alive. */
+/**
+ * Imperative port used by the Angular wrapper to keep EditorView state alive.
+ *
+ * @experimental Runtime seam for the experimental CodeMirror feature entry point.
+ */
 export interface HellCodeEditorRuntimePort {
   /** Replace document text without echoing through `onValueChange`. */
   setValue(next: string): void;
@@ -56,6 +64,8 @@ function hellCodeEditorFoldMarkerIcon(open: boolean, ownerDocument: Document): S
  * Create the base CodeMirror setup used by hell-code-editor. Language support is
  * intentionally excluded: pass Angular, JS, JSON, or any other CodeMirror
  * language extension through the `extensions` input at the call site.
+ *
+ * @experimental Setup helper for the experimental CodeMirror feature entry point.
  */
 export function hellCodeEditorSetupFactory(ownerDocument: Document): Extension {
   return [
@@ -82,6 +92,7 @@ export function hellCodeEditorSetupFactory(ownerDocument: Document): Extension {
 }
 
 /**
+ * @experimental Setup helper for the experimental CodeMirror feature entry point.
  * @deprecated Browser-global legacy setup kept for backward compatibility. Prefer
  * `hellCodeEditorSetupFactory(ownerDocument)` so callers can create setup for
  * the editor document realm explicitly.
@@ -92,6 +103,8 @@ export const hellCodeEditorSetup: Extension =
 /**
  * hell-flavoured CodeMirror theme. Uses CSS variables so light/dark mode and
  * local token overrides stay aligned with the rest of the component library.
+ *
+ * @experimental Theme helper for the experimental CodeMirror feature entry point.
  */
 export const hellCodeEditorTheme: Extension = [
   EditorView.theme({

@@ -82,7 +82,7 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
           <code>allowSpeechTranscript</code>: opt into experimental browser speech transcription
           (default <code>false</code>) that is best-effort only and not intended as
           accessibility-grade captions/timed text. <code>allowLiveCaptions</code> remains a
-          compatibility alias.
+          deprecated compatibility alias.
         </li>
         <li>
           <code>lang</code>: BCP-47 hint for <code>SpeechRecognition</code>. Defaults to

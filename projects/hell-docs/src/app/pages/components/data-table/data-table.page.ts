@@ -24,7 +24,7 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
           low-level structural directives for table markup, visual row selection, sorting affordances,
           and column resizing. They are not a batteries-included data grid and do not wrap TanStack
           Table.
-          <code>@hell-ui/angular/features/data-table</code> is a compatibility naming alias for this
+          <code>@hell-ui/angular/features/data-table</code> is a deprecated compatibility naming alias for this
           package.
         </p>
 
@@ -39,7 +39,7 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
           This feature deliberately does not own a data source, column definition model, filtering,
           pagination, virtualization, selection model, or grid semantics. Import it from
           <code>@hell-ui/angular/features/table-utilities</code>; <code>@hell-ui/angular/features/data-table</code>
-          remains a compatibility naming alias. Bring Angular CDK Table, TanStack Table, AG Grid, a
+          remains a deprecated compatibility naming alias. Bring Angular CDK Table, TanStack Table, AG Grid, a
           backend API, or your own state layer when you need a real data table. Use Hell's directives
           only for host styling, selected-row state, sortable header affordances, and column resize
           handles.
@@ -110,7 +110,7 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
             <code>data-selected="true"</code> for styling only. Prefer cell buttons/links for row
             actions. Use <code>[selectable]</code> with <code>(rowSelect)</code> only for an explicit
             row-selection model; that path adds <code>tabindex="0"</code> and
-            <code>aria-selected</code>. Legacy <code>[interactive]</code> activates only when paired
+            <code>aria-selected</code>. Deprecated <code>[interactive]</code> activates only when paired
             with <code>[selectionSemantics]="true"</code>, so action-only rows are no longer exposed
             as generic focusable rows by default.
           </li>
@@ -129,7 +129,7 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
           <li>
             <code>HELL_TABLE_UTILITIES_DIRECTIVES</code>: preferred standalone import list.
             <code>HELL_TABLE_UTILITY_DIRECTIVES</code> and <code>HELL_TABLE_DIRECTIVES</code> remain
-            compatibility aliases for older imports.
+            deprecated compatibility aliases for older imports.
           </li>
           <li>
             <code>td[hellTableCell]</code>: emits <code>(cellSelect)</code> on click for per-cell
@@ -184,7 +184,7 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
         <h2>Don't</h2>
         <ul>
           <li>Don't call these directives a complete data-table implementation.</li>
-          <li>Don't put <code>interactive</code> on a row just to make the whole row open details.</li>
+          <li>Don't put deprecated <code>interactive</code> on a row just to make the whole row open details.</li>
           <li>Don't leave <code>aria-selected</code> on action-only rows.</li>
           <li>Don't put a filter input inside the table; compose it as a sibling.</li>
           <li>

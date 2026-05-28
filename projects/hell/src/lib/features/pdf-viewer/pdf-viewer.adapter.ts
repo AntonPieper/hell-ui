@@ -32,7 +32,11 @@ export interface HellPdfViewerSessionHandlers {
   }) => void;
 }
 
-/** Explicit worker wiring from either URL or a pre-created Worker port. */
+/**
+ * Explicit worker wiring from either URL or a pre-created Worker port.
+ *
+ * @experimental Worker seam for the experimental PDF viewer feature entry point.
+ */
 export type HellPdfWorkerSource =
   | string
   | URL

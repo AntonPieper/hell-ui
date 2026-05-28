@@ -151,6 +151,13 @@ export const entrypointManifest = {
         exportPath: './features/{slug}/{slug}',
       },
       entryOverrides: {
+        'code-editor': {
+          header: [
+            '/**',
+            ' * @experimental CodeMirror feature entry point. Keep behind browser-only/lazy boundaries.',
+            ' */',
+          ],
+        },
         'data-table': {
           header: [
             '/**',
@@ -159,6 +166,11 @@ export const entrypointManifest = {
           ],
         },
         'pdf-viewer': {
+          header: [
+            '/**',
+            ' * @experimental PDF.js feature entry point. Apps own worker/browser compatibility.',
+            ' */',
+          ],
           extraExports: ["export type { HellPdfWorkerSource } from './features/pdf-viewer/pdf-viewer.adapter';"],
         },
       },

@@ -25,10 +25,20 @@ import {
 
 export { hellCodeEditorSetup, hellCodeEditorSetupFactory, hellCodeEditorTheme } from './code-editor.runtime';
 
+/**
+ * Factory hook for replacing the browser CodeMirror runtime in tests or app-specific hosts.
+ *
+ * @experimental Runtime seam for the experimental CodeMirror feature entry point.
+ */
 export type HellCodeEditorRuntimeFactory = (
   options: HellCodeEditorRuntimeOptions,
 ) => HellCodeEditorRuntimePort;
 
+/**
+ * Injection token for the CodeMirror runtime factory.
+ *
+ * @experimental Runtime seam for the experimental CodeMirror feature entry point.
+ */
 export const HELL_CODE_EDITOR_RUNTIME_FACTORY = new InjectionToken<HellCodeEditorRuntimeFactory>(
   'HELL_CODE_EDITOR_RUNTIME_FACTORY',
 );
@@ -37,6 +47,9 @@ export const HELL_CODE_EDITOR_RUNTIME_FACTORY = new InjectionToken<HellCodeEdito
  * CodeMirror 6 wrapper. Creates one EditorView after render and reconfigures
  * caller-provided extensions / read-only state / external value by transaction,
  * so cursor, selection, and history are preserved across input changes.
+ *
+ * @experimental Feature entry point with browser-only CodeMirror runtime seams;
+ * app integrations should keep it lazy/client-only until the runtime contract is hardened.
  */
 @Component({
   selector: 'hell-code-editor',

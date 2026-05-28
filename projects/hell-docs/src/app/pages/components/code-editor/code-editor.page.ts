@@ -35,6 +35,10 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
         Browser-only runtime: requires <code>window</code> / <code>document</code>. Keep this
         component behind client-only rendering boundaries; it is not SSR-safe.
       </p>
+      <p>
+        Code editor is experimental: the component is importable for browser-only app surfaces, but
+        the runtime setup/export contract may still change before a public beta.
+      </p>
 
       <h2>Editable Angular template</h2>
       <hd-example-tabs [code]="editorDemoCode" flush>
@@ -67,7 +71,7 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
         <li>
           <code>hellCodeEditorSetupFactory(document)</code>: preferred setup export when an app
           needs a specific document or shadow-root owner; <code>hellCodeEditorSetup</code> remains
-          as browser-global legacy compatibility.
+          as deprecated browser-global legacy compatibility.
         </li>
       </ul>
 

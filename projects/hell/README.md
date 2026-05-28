@@ -45,15 +45,29 @@ Package-consumer scenarios assert these peer groups with strict peer installs. C
 
 ## API Stability
 
-| Tier | Stability | Browsing/SSR notes |
+### Stability category policy
+
+Every exported API belongs to one documented category:
+
+- `Stable`: supported public contract. Stable entry points are API-report guarded where listed below; breaking changes need an explicit semver/changelog decision.
+- `Beta`: public but still pre-1.0. Shape changes require release notes and migration guidance, but are not promoted as final stable contracts.
+- `Experimental`: importable app surface for heavier/browser-specific features. API comments or generated entry-point comments must include `@experimental`, docs must disclose the risk, and apps should isolate the import behind lazy/client-only boundaries when applicable.
+- `Deprecated`: compatibility alias with a preferred replacement. API comments must include `@deprecated`, docs must name the replacement, and removal needs an explicit release decision.
+- `Internal`: implementation detail, not a consumer import path. Public API files must not export from `/internal/`, `/adapters/`, or manifest-declared internal directories unless the architecture allowlist names the exception and rationale.
+
+The stable API report set currently covers `@hell-ui/angular`, `@hell-ui/angular/core`, `@hell-ui/angular/primitives`, and `@hell-ui/angular/testing`.
+
+| Surface | Category | Browser/SSR notes |
 |---|---|---|
-| Primitives (`@hell-ui/angular/primitives`) | Stable | SSR-safe |
-| Composites (`@hell-ui/angular/composites`, narrow composite entry points) | Beta | Browser-first: `window`/`document` and global listeners for overlays |
-| Table utilities (`@hell-ui/angular/features/table-utilities`) | Beta | Optional peer; uses `ResizeObserver` for table sizing |
-| Code editor (`@hell-ui/angular/features/code-editor`) | Beta/optional peer | Browser-only: `window`/`document` interactions |
+| Root/core (`@hell-ui/angular`, `/core`) | Stable | Lightweight contracts; no composite or heavy feature exports |
+| Primitives (`@hell-ui/angular/primitives`, narrow primitive entry points) | Stable | SSR-safe unless a primitive's own docs say otherwise |
+| Composites (`@hell-ui/angular/composites`, narrow composite entry points) | Beta | Browser-first surfaces can use `window`/`document` and global listeners for overlays |
+| Table utilities (`@hell-ui/angular/features/table-utilities`) | Beta feature | Optional peer; uses `ResizeObserver` for table sizing |
+| Code editor (`@hell-ui/angular/features/code-editor`) | Experimental | Browser-only CodeMirror runtime: `window`/`document` interactions |
 | PDF viewer (`@hell-ui/angular/features/pdf-viewer`) | Experimental | Browser-only app surface/recipe: `window`/`document`, pdf workers, global listeners, and app-owned pdf.js/browser compatibility decisions |
-| Testing harnesses (`@hell-ui/angular/testing`) | Beta/test-only | CDK component harnesses for consumer and library tests |
+| Testing harnesses (`@hell-ui/angular/testing`) | Stable/test-only | CDK component harnesses for consumer and library tests |
 | Speech transcript (`allowSpeechTranscript`) | Experimental/browser-only/best-effort | Uses `navigator` + `SpeechRecognition` + `captureStream`; not accessibility-grade captions or production timed text |
+| Deprecated aliases (`/features/data-table`, `HELL_TABLE_DIRECTIVES`, `HELL_TABLE_UTILITY_DIRECTIVES`, `HellTableRow.interactive`, `allowLiveCaptions`, `HellDataTableLabels`, `hellCodeEditorSetup`) | Deprecated | Keep compatibility imports only while migrating to the documented replacements |
 
 The PDF viewer component now exposes:
 
