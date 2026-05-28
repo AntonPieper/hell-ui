@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 
 const requiredFiles = [
   '.github/workflows/ci.yml',
+  '.github/workflows/npm-publish.yml',
   '.gitlab-ci.yml',
   'Dockerfile.ci',
   'vitest.ci.config.ts',
@@ -15,6 +16,7 @@ const requiredFiles = [
   'tools/ci-summary.mjs',
   'tools/package-manager.mjs',
   'package-lock.json',
+  'docs/release/npm-publishing.md',
 ];
 
 const requiredScripts = {
@@ -107,6 +109,7 @@ const fileChecks = [
       'generated docs package alias',
       'unexpected worker asset',
       'sideEffects must include **/*.css',
+      'publishConfig.provenance',
       'Secondary entry point',
     ],
   },
@@ -124,6 +127,18 @@ const fileChecks = [
       'test:package-consumer',
       'test:api-report',
       'build:docs',
+    ],
+  },
+  {
+    path: 'docs/release/npm-publishing.md',
+    includes: [
+      'npm trusted publishing',
+      'AntonPieper',
+      'npm-publish.yml',
+      'npm-publish',
+      'Require two-factor authentication and disallow tokens',
+      'release-dry-run-evidence',
+      'id-token: write',
     ],
   },
 ];
@@ -185,6 +200,8 @@ for (const check of fileChecks) {
 }
 
 checkPackageConsumerPackAuditOrder();
+checkNpmPublishWorkflow();
+checkPublishedPackageMetadata();
 
 function checkPackageConsumerPackAuditOrder() {
   const path = 'tools/check-package-consumer.mjs';
@@ -208,6 +225,71 @@ function checkPackageConsumerPackAuditOrder() {
 
   if (auditIndex > consumerScenarioIndex) {
     errors.push('package-consumer must run package pack audit before consumer install/build scenarios');
+  }
+}
+
+function checkNpmPublishWorkflow() {
+  const path = '.github/workflows/npm-publish.yml';
+  if (!existsSync(path)) return;
+
+  const content = readFileSync(path, 'utf8');
+  const required = [
+    'needs: [release-dry-run, build-package]',
+    'id-token: write',
+    'actions/upload-artifact',
+    'actions/download-artifact',
+    'release-dry-run-evidence',
+    'release-package',
+    'node tools/package-manager.mjs run release:dry-run -- --full',
+    'node tools/package-manager.mjs run test:package-pack',
+    'npm pack ./dist/hell --pack-destination release-package',
+    'npm publish "$HELL_RELEASE_TARBALL" --access public --provenance',
+  ];
+
+  for (const expected of required) {
+    if (!content.includes(expected)) {
+      errors.push(`${path} must include ${expected}`);
+    }
+  }
+
+  for (const forbidden of ['NPM_TOKEN', 'NODE_AUTH_TOKEN']) {
+    if (content.includes(forbidden)) {
+      errors.push(`${path} must not depend on ${forbidden} for trusted publishing.`);
+    }
+  }
+
+  const publishJob = content.split('\n  publish:')[1] ?? '';
+  for (const forbidden of [
+    'actions/checkout',
+    'pnpm/action-setup',
+    'node tools/package-manager.mjs',
+    'npm pack',
+  ]) {
+    if (publishJob.includes(forbidden)) {
+      errors.push(`${path} publish job must stay minimal after id-token permission; found ${forbidden}.`);
+    }
+  }
+}
+
+function checkPublishedPackageMetadata() {
+  const path = 'projects/hell/package.json';
+  if (!existsSync(path)) return;
+
+  const packageJson = JSON.parse(readFileSync(path, 'utf8'));
+  if (packageJson.repository?.url !== 'git+https://github.com/AntonPieper/hell-ui.git') {
+    errors.push(`${path} repository.url must match the GitHub repository used for trusted publishing.`);
+  }
+  if (packageJson.repository?.directory !== 'projects/hell') {
+    errors.push(`${path} repository.directory must be projects/hell.`);
+  }
+  if (packageJson.publishConfig?.registry !== 'https://registry.npmjs.org/') {
+    errors.push(`${path} publishConfig.registry must be the public npm registry.`);
+  }
+  if (packageJson.publishConfig?.access !== 'public') {
+    errors.push(`${path} publishConfig.access must be public.`);
+  }
+  if (packageJson.publishConfig?.provenance !== true) {
+    errors.push(`${path} publishConfig.provenance must be true.`);
   }
 }
 

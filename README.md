@@ -28,7 +28,8 @@ pnpm release:dry-run -- --full # release-candidate evidence gate
 `build:lib`, pack audit, selected package-consumer scenarios, API report, and
 `build:docs`. Evidence is written to a timestamped log under
 `test-results/release-evidence/`. Use `--fast` for local preflight before the
-full release-candidate gate.
+full release-candidate gate. Trusted npm publishing and provenance setup is
+specified in `docs/release/npm-publishing.md`.
 
 The contributor workspace is pnpm-first and CI-backed by `pnpm-lock.yaml`.
 A root `package-lock.json` is also checked in so GitHub CI can smoke-test

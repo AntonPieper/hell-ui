@@ -108,6 +108,8 @@ function checkApfPackageJson(packageJson, fileSet, distRoot, failures) {
     failures.push('APF package.json sideEffects must include **/*.css for style entry points');
   }
 
+  checkPublishMetadata(packageJson, failures);
+
   const expectedCodeExports = expectedCodeExportKeys(packageJson.name);
   for (const key of expectedCodeExports) {
     checkCodeExport(key, exportsMap[key], fileSet, distRoot, failures);
@@ -122,6 +124,24 @@ function checkApfPackageJson(packageJson, fileSet, distRoot, failures) {
     }
 
     failures.push(`APF exports contains unexpected non-style export ${key}`);
+  }
+}
+
+function checkPublishMetadata(packageJson, failures) {
+  if (packageJson.repository?.url !== 'git+https://github.com/AntonPieper/hell-ui.git') {
+    failures.push('APF package.json repository.url must match the trusted-publishing GitHub repository');
+  }
+  if (packageJson.repository?.directory !== 'projects/hell') {
+    failures.push('APF package.json repository.directory must be projects/hell');
+  }
+  if (packageJson.publishConfig?.registry !== 'https://registry.npmjs.org/') {
+    failures.push('APF package.json publishConfig.registry must be https://registry.npmjs.org/');
+  }
+  if (packageJson.publishConfig?.access !== 'public') {
+    failures.push('APF package.json publishConfig.access must be public');
+  }
+  if (packageJson.publishConfig?.provenance !== true) {
+    failures.push('APF package.json publishConfig.provenance must be true');
   }
 }
 
