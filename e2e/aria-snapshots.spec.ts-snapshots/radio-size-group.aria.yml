@@ -1,0 +1,5 @@
+- text: T-shirt size
+- radiogroup "T-shirt size":
+  - radio "Small"
+  - radio "Medium" [checked]
+  - radio "Large"

@@ -258,9 +258,13 @@ export class HellComboboxPortal {}
   ],
   host: {
     '[class.hell-combobox-option]': '!unstyled()',
+    '[attr.aria-disabled]': 'disabled() ? "true" : null',
   },
 })
-export class HellComboboxOption extends HellStyleable {}
+export class HellComboboxOption extends HellStyleable {
+  private readonly option = inject(NgpComboboxOption);
+  protected readonly disabled = computed(() => this.option.disabled());
+}
 
 @Directive({
   selector: '[hellComboboxEmpty]',

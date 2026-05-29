@@ -6,10 +6,10 @@ import { HellRadio, HellRadioGroup, HellRadioIndicator } from '@hell-ui/angular/
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellRadioGroup, HellRadio, HellRadioIndicator],
   template: `
-    <div id="plan-radio-label" class="mb-2 text-sm font-medium">Plan</div>
+    <div class="mb-2 text-sm font-medium">Plan</div>
     <div
       hellRadioGroup
-      aria-labelledby="plan-radio-label"
+      aria-label="Plan"
       orientation="vertical"
       [value]="plan()"
       (valueChange)="plan.set($event!)"

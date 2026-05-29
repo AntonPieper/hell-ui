@@ -8,8 +8,8 @@ import { HellProgress, HellProgressBar } from '@hell-ui/angular/progress';
   imports: [HellButton, HellProgress, HellProgressBar],
   template: `
     <div class="grid gap-1">
-      <span id="progress-storage-label" class="text-sm font-medium">Storage used</span>
-      <div hellProgress aria-labelledby="progress-storage-label" [value]="value()">
+      <span class="text-sm font-medium">Storage used</span>
+      <div hellProgress aria-label="Storage used" [value]="value()">
         <div hellProgressBar></div>
       </div>
     </div>

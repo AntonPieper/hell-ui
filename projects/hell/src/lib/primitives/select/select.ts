@@ -229,9 +229,13 @@ export class HellSelectPortal {}
   ],
   host: {
     '[class.hell-select-option]': '!unstyled()',
+    '[attr.aria-disabled]': 'disabled() ? "true" : null',
   },
 })
-export class HellSelectOption extends HellStyleable {}
+export class HellSelectOption extends HellStyleable {
+  private readonly option = inject(NgpSelectOption);
+  protected readonly disabled = computed(() => this.option.disabled());
+}
 
 @Component({
   selector: 'hell-select-basic',

@@ -35,8 +35,8 @@ import progressInteractiveExampleCodeRaw from './examples/interactive.example.ts
       <ul>
         <li>
           <code>hellProgress</code>: <code>value</code>, <code>max</code> (default 100). Provide an
-          accessible name with visible text and <code>aria-labelledby</code>, or with a concise
-          <code>aria-label</code> when no visible label is present.
+          accessible name with a concise <code>aria-label</code> or a visible label referenced by
+          <code>aria-labelledby</code>.
         </li>
         <li><code>hellProgressBar</code>: the visual fill — apply on a child element</li>
       </ul>

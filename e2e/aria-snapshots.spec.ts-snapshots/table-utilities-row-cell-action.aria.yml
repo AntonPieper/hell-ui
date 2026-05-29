@@ -1,0 +1,7 @@
+- row /User 1/:
+  - cell
+  - cell
+  - cell
+  - cell
+  - cell:
+    - button "Open editor for User 1"

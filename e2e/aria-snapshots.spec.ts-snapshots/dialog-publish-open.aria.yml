@@ -1,0 +1,5 @@
+- dialog "Publish this article?":
+  - heading "Publish this article?" [level=2]
+  - paragraph
+  - button "Cancel"
+  - button "Publish"

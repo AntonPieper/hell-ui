@@ -50,9 +50,8 @@ import radioNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
           <code>orientation</code>, <code>disabled</code>
         </li>
         <li>
-          Name every <code>hellRadioGroup</code> and <code>hellNativeRadioGroup</code> with visible
-          text referenced by <code>aria-labelledby</code>, or with a concise <code>aria-label</code>
-          when no visible group label is present.
+          Name every <code>hellRadioGroup</code> and <code>hellNativeRadioGroup</code> with a
+          concise <code>aria-label</code> or visible text referenced by <code>aria-labelledby</code>.
         </li>
         <li><code>hellRadio</code>: <code>value</code>, <code>disabled</code></li>
         <li>

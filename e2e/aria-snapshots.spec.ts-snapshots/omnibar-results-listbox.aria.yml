@@ -1,0 +1,4 @@
+- listbox:
+  - group "People":
+    - option /User 1\s+user1@example\.com\s+Design/ [selected]
+    - option /User 2\s+user2@example\.com\s+Engineering/
