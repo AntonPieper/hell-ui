@@ -71,6 +71,45 @@ class DisabledFlyoutTriggerHost {}
 })
 class LabelledFlyoutHost {}
 
+@Component({
+  imports: [HellFlyout, HellFlyoutTrigger],
+  template: `
+    <section #boundary id="flyout-boundary">
+      <button hellFlyoutTrigger #trigger="hellFlyoutTrigger" type="button">
+        Toggle
+      </button>
+      <button id="boundary-action" type="button">Boundary action</button>
+
+      @if (trigger.open()) {
+        <div [hellFlyout]="trigger" [boundary]="boundary">Panel</div>
+      }
+    </section>
+
+    <button id="outside-action" type="button">Outside</button>
+  `,
+})
+class BoundaryFlyoutHost {}
+
+@Component({
+  imports: [HellFlyout, HellFlyoutTrigger],
+  template: `
+    <button hellFlyoutTrigger #trigger="hellFlyoutTrigger" type="button">
+      Toggle
+    </button>
+
+    @if (trigger.open()) {
+      <div
+        [hellFlyout]="trigger"
+        [closeOnOutsideInteraction]="false"
+        [closeOnEscape]="false"
+      >
+        Panel
+      </div>
+    }
+  `,
+})
+class NonDismissableFlyoutHost {}
+
 describe('HellFlyout outside interaction', () => {
   let focusChecker: { isFocusable: ReturnType<typeof vi.fn> };
 
@@ -83,6 +122,8 @@ describe('HellFlyout outside interaction', () => {
         EnabledFlyoutAnchorTriggerHost,
         DisabledFlyoutTriggerHost,
         LabelledFlyoutHost,
+        BoundaryFlyoutHost,
+        NonDismissableFlyoutHost,
       ],
       providers: [{ provide: InteractivityChecker, useValue: focusChecker }],
     }).compileComponents();
@@ -185,6 +226,45 @@ describe('HellFlyout outside interaction', () => {
     await settle(fixture);
 
     expect(fixture.nativeElement.textContent).not.toContain('Panel');
+  });
+
+  it('treats the configured boundary as inside for click and focus dismissal', async () => {
+    const fixture = TestBed.createComponent(BoundaryFlyoutHost);
+    await settle(fixture);
+
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '[hellFlyoutTrigger]');
+    const boundaryAction = query<HTMLButtonElement>(fixture.nativeElement, '#boundary-action');
+    const outsideAction = query<HTMLButtonElement>(fixture.nativeElement, '#outside-action');
+
+    trigger.click();
+    await settle(fixture);
+    expect(fixture.nativeElement.textContent).toContain('Panel');
+
+    boundaryAction.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    boundaryAction.click();
+    await settle(fixture);
+    expect(fixture.nativeElement.textContent).toContain('Panel');
+
+    outsideAction.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    await settle(fixture);
+    expect(fixture.nativeElement.textContent).not.toContain('Panel');
+  });
+
+  it('honors disabled outside-interaction and Escape close policies', async () => {
+    const fixture = TestBed.createComponent(NonDismissableFlyoutHost);
+    await settle(fixture);
+
+    const trigger = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    trigger.click();
+    await settle(fixture);
+    expect(fixture.nativeElement.textContent).toContain('Panel');
+
+    document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    document.body.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await settle(fixture);
+
+    expect(fixture.nativeElement.textContent).toContain('Panel');
   });
 
   it('passes CDK interactivity checks into Escape focus restoration', async () => {
