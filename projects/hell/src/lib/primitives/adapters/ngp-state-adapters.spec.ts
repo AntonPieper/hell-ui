@@ -1,10 +1,14 @@
 import { Component, Directive, type Type } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NgpCombobox, injectComboboxState } from 'ng-primitives/combobox';
 import { NgpRadioGroup, injectRadioGroupState } from 'ng-primitives/radio';
 import { NgpSelect, injectSelectState } from 'ng-primitives/select';
 
+import { HELL_COMBOBOX_DIRECTIVES } from '../combobox/combobox';
+import { HellRadio, HellRadioGroup } from '../radio/radio';
+import { HELL_SELECT_DIRECTIVES } from '../select/select';
 import {
   HELL_NGP_STATE_WRITER_VERSION,
   writeComboboxStateDisabled,
@@ -59,6 +63,93 @@ class RadioGroupStateProbe {
 })
 class RadioGroupStateProbeHost {}
 
+@Directive({
+  selector: '[hellSelectCvaStateProbe]',
+})
+class SelectCvaStateProbe {
+  readonly state = injectSelectState<NgpSelect>();
+}
+
+@Component({
+  imports: [ReactiveFormsModule, SelectCvaStateProbe, ...HELL_SELECT_DIRECTIVES],
+  template: `
+    <button
+      hellSelect
+      hellSelectCvaStateProbe
+      type="button"
+      [formControl]="control"
+      (valueChange)="values.push($any($event))"
+    >
+      <span hellSelectValue>Selection</span>
+      <div *hellSelectPortal hellSelectDropdown>
+        <div hellSelectOption value="low">Low</div>
+        <div hellSelectOption value="high">High</div>
+      </div>
+    </button>
+  `,
+})
+class SelectCvaContractHost {
+  readonly control = new FormControl<string | null>(null);
+  readonly values: Array<string | null> = [];
+}
+
+@Directive({
+  selector: '[hellComboboxCvaStateProbe]',
+})
+class ComboboxCvaStateProbe {
+  readonly state = injectComboboxState<NgpCombobox>();
+}
+
+@Component({
+  imports: [ReactiveFormsModule, ComboboxCvaStateProbe, ...HELL_COMBOBOX_DIRECTIVES],
+  template: `
+    <div
+      hellCombobox
+      hellComboboxCvaStateProbe
+      [formControl]="control"
+      (valueChange)="values.push($any($event))"
+    >
+      <input hellComboboxInput aria-label="Assignee" />
+      <button hellComboboxButton type="button">Toggle</button>
+      <div *hellComboboxPortal hellComboboxDropdown>
+        <div hellComboboxOption value="atlas">Atlas</div>
+        <div hellComboboxOption value="nova">Nova</div>
+      </div>
+    </div>
+  `,
+})
+class ComboboxCvaContractHost {
+  readonly control = new FormControl<string | null>(null);
+  readonly values: Array<string | null> = [];
+}
+
+@Directive({
+  selector: '[hellRadioGroupCvaStateProbe]',
+})
+class RadioGroupCvaStateProbe {
+  readonly state = injectRadioGroupState<string>();
+}
+
+@Component({
+  imports: [ReactiveFormsModule, RadioGroupCvaStateProbe, HellRadioGroup, HellRadio],
+  template: `
+    <div
+      hellRadioGroup
+      hellRadioGroupCvaStateProbe
+      [formControl]="control"
+      orientation="horizontal"
+      (valueChange)="values.push($any($event))"
+    >
+      <button hellRadio type="button" value="a">A</button>
+      <button hellRadio type="button" value="b">B</button>
+    </div>
+  `,
+})
+class RadioGroupCvaContractHost {
+  readonly control = new FormControl<string | null>(null);
+  readonly values: Array<string | null> = [];
+}
+
 function writableValueChannel<T>(state: { value: unknown }): WritableSignalLike<T> {
   const value = state.value;
   if (typeof value !== 'function' || typeof (value as { set?: unknown }).set !== 'function') {
@@ -79,6 +170,31 @@ function probe<T>(host: Type<unknown>, directive: Type<T>): T {
   const fixture = TestBed.createComponent(host);
   fixture.detectChanges();
   return fixture.debugElement.query(By.directive(directive)).injector.get(directive);
+}
+
+function getDirective<T>(fixture: ComponentFixture<unknown>, directive: Type<T>): T {
+  return fixture.debugElement.query(By.directive(directive)).injector.get(directive);
+}
+
+async function settle(fixture: ComponentFixture<unknown>): Promise<void> {
+  fixture.detectChanges();
+  await fixture.whenStable();
+  fixture.detectChanges();
+}
+
+function expectAdapterError(fn: () => void, operation: string, detail: RegExp): void {
+  let message: string | undefined;
+
+  try {
+    fn();
+  } catch (error) {
+    message = error instanceof Error ? error.message : String(error);
+  }
+
+  expect(message).toBeDefined();
+  expect(message).toContain(HELL_NGP_STATE_WRITER_VERSION);
+  expect(message).toContain(operation);
+  expect(message).toMatch(detail);
 }
 
 describe('ngp form-state compatibility helpers', () => {
@@ -130,6 +246,85 @@ describe('ngp form-state compatibility helpers', () => {
     });
   });
 
+  describe('Hell CVA contract through the adapter seam', () => {
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({
+        imports: [SelectCvaContractHost, ComboboxCvaContractHost, RadioGroupCvaContractHost],
+      }).compileComponents();
+    });
+
+    it('syncs select CVA value and disabled writes into ng-primitives state', async () => {
+      const fixture = TestBed.createComponent(SelectCvaContractHost);
+      await settle(fixture);
+
+      const host = fixture.componentInstance;
+      const state = getDirective(fixture, SelectCvaStateProbe).state;
+      const root = fixture.nativeElement as HTMLElement;
+      const select = root.querySelector<HTMLButtonElement>('button[hellSelect]');
+
+      host.control.setValue('high');
+      await settle(fixture);
+
+      expect(state().value()).toBe('high');
+      expect(host.values).toEqual([]);
+
+      host.control.disable();
+      await settle(fixture);
+
+      expect(state().disabled()).toBe(true);
+      expect(select?.getAttribute('data-disabled')).toBe('');
+      expect(select?.tabIndex).toBe(-1);
+    });
+
+    it('syncs combobox CVA value and disabled writes into ng-primitives state', async () => {
+      const fixture = TestBed.createComponent(ComboboxCvaContractHost);
+      await settle(fixture);
+
+      const host = fixture.componentInstance;
+      const state = getDirective(fixture, ComboboxCvaStateProbe).state;
+      const root = fixture.nativeElement as HTMLElement;
+      const combobox = root.querySelector<HTMLElement>('[hellCombobox]');
+
+      host.control.setValue('nova');
+      await settle(fixture);
+
+      expect(state().value()).toBe('nova');
+      expect(host.values).toEqual([]);
+
+      host.control.disable();
+      await settle(fixture);
+
+      expect(state().disabled()).toBe(true);
+      expect(combobox?.getAttribute('data-disabled')).toBe('');
+      expect(combobox?.tabIndex).toBe(-1);
+    });
+
+    it('syncs radio CVA value and disabled writes into ng-primitives state', async () => {
+      const fixture = TestBed.createComponent(RadioGroupCvaContractHost);
+      await settle(fixture);
+
+      const host = fixture.componentInstance;
+      const state = getDirective(fixture, RadioGroupCvaStateProbe).state;
+      const root = fixture.nativeElement as HTMLElement;
+      const radios = root.querySelectorAll<HTMLButtonElement>('button[hellRadio]');
+
+      host.control.setValue('b');
+      await settle(fixture);
+
+      expect(state().value()).toBe('b');
+      expect(radios[0].getAttribute('aria-checked')).toBe('false');
+      expect(radios[1].getAttribute('aria-checked')).toBe('true');
+      expect(host.values).toEqual([]);
+
+      host.control.disable();
+      await settle(fixture);
+
+      expect(state().disabled()).toBe(true);
+      expect(radios[0].disabled).toBe(true);
+      expect(radios[1].disabled).toBe(true);
+    });
+  });
+
   it('prefers select public value setter when present', () => {
     const setValue = vi.fn();
     const value = vi.fn();
@@ -145,7 +340,37 @@ describe('ngp form-state compatibility helpers', () => {
     expect(value).not.toHaveBeenCalled();
   });
 
-  it('writes select value through typed ng-primitives State<T>.value only', () => {
+  it('prefers combobox public value setter when present', () => {
+    const setValue = vi.fn();
+    const value = vi.fn();
+    const state = {
+      setValue,
+      value: { set: value },
+      disabled: { set: vi.fn() },
+    };
+
+    writeComboboxStateValue(state as never, 'value');
+
+    expect(setValue).toHaveBeenCalledWith('value', { emit: false });
+    expect(value).not.toHaveBeenCalled();
+  });
+
+  it('prefers radio-group public value setter when present', () => {
+    const setValue = vi.fn();
+    const value = vi.fn();
+    const state = {
+      setValue,
+      value: { set: value },
+      disabled: { set: vi.fn() },
+    };
+
+    writeRadioGroupStateValue(state as never, 'value');
+
+    expect(setValue).toHaveBeenCalledWith('value', { emit: false });
+    expect(value).not.toHaveBeenCalled();
+  });
+
+  it('falls back to select typed ng-primitives State<T>.value channel', () => {
     const value = vi.fn();
     const disabled = vi.fn();
     const state = {
@@ -175,7 +400,37 @@ describe('ngp form-state compatibility helpers', () => {
     expect(disabled).not.toHaveBeenCalled();
   });
 
-  it('writes select disabled through typed ng-primitives State<T>.disabled only', () => {
+  it('prefers combobox public disabled setter when present', () => {
+    const setDisabled = vi.fn();
+    const disabled = vi.fn();
+    const state = {
+      setDisabled,
+      value: { set: vi.fn() },
+      disabled: { set: disabled },
+    };
+
+    writeComboboxStateDisabled(state as never, true);
+
+    expect(setDisabled).toHaveBeenCalledWith(true);
+    expect(disabled).not.toHaveBeenCalled();
+  });
+
+  it('prefers radio-group public disabled setter when present', () => {
+    const setDisabled = vi.fn();
+    const disabled = vi.fn();
+    const state = {
+      setDisabled,
+      value: { set: vi.fn() },
+      disabled: { set: disabled },
+    };
+
+    writeRadioGroupStateDisabled(state as never, true);
+
+    expect(setDisabled).toHaveBeenCalledWith(true);
+    expect(disabled).not.toHaveBeenCalled();
+  });
+
+  it('falls back to select typed ng-primitives State<T>.disabled channel', () => {
     const value = vi.fn();
     const disabled = vi.fn();
     const state = {
@@ -190,17 +445,21 @@ describe('ngp form-state compatibility helpers', () => {
     expect(value).not.toHaveBeenCalled();
   });
 
-  it('throws a version-bound error when select State<T> channel shape is invalid', () => {
-    expect(() => writeSelectStateValue({} as never, 'value')).toThrowError(/ng-primitives@0\.117\.2/);
-    expect(() =>
-      writeSelectStateValue({ value: { set: 'not-a-function' } as never, disabled: { set: vi.fn() } } as never, 'value'),
-    ).toThrowError(/value\.set/);
-    expect(() =>
-      writeSelectStateDisabled({ value: { set: vi.fn() }, disabled: { set: 0 } as never } as never, true),
-    ).toThrowError(/disabled\.set/);
+  it('throws version-bound errors with affected operation when select State<T> channel shape is invalid', () => {
+    expectAdapterError(() => writeSelectStateValue({} as never, 'value'), 'writeSelectStateValue', /value\.set/);
+    expectAdapterError(
+      () => writeSelectStateValue({ value: { set: 'not-a-function' } as never, disabled: { set: vi.fn() } } as never, 'value'),
+      'writeSelectStateValue',
+      /value\.set/,
+    );
+    expectAdapterError(
+      () => writeSelectStateDisabled({ value: { set: vi.fn() }, disabled: { set: 0 } as never } as never, true),
+      'writeSelectStateDisabled',
+      /disabled\.set/,
+    );
   });
 
-  it('writes combobox value through typed ng-primitives State<T>.value only', () => {
+  it('falls back to combobox typed ng-primitives State<T>.value channel', () => {
     const value = vi.fn();
     const disabled = vi.fn();
     const state = {
@@ -215,7 +474,7 @@ describe('ngp form-state compatibility helpers', () => {
     expect(disabled).not.toHaveBeenCalled();
   });
 
-  it('writes combobox disabled through typed ng-primitives State<T>.disabled only', () => {
+  it('falls back to combobox typed ng-primitives State<T>.disabled channel', () => {
     const value = vi.fn();
     const disabled = vi.fn();
     const state = {
@@ -230,14 +489,17 @@ describe('ngp form-state compatibility helpers', () => {
     expect(value).not.toHaveBeenCalled();
   });
 
-  it('throws a version-bound error when combobox State<T> channel shape is invalid', () => {
-    expect(() => writeComboboxStateDisabled({} as never, true)).toThrowError(/writeComboboxStateDisabled/);
-    expect(() => writeComboboxStateDisabled({ value: { set: vi.fn() }, disabled: {} as never } as never, false)).toThrowError(
+  it('throws version-bound errors with affected operation when combobox State<T> channel shape is invalid', () => {
+    expectAdapterError(() => writeComboboxStateValue({} as never, 'x'), 'writeComboboxStateValue', /value\.set/);
+    expectAdapterError(() => writeComboboxStateDisabled({} as never, true), 'writeComboboxStateDisabled', /disabled\.set/);
+    expectAdapterError(
+      () => writeComboboxStateDisabled({ value: { set: vi.fn() }, disabled: {} as never } as never, false),
+      'writeComboboxStateDisabled',
       /disabled\.set/,
     );
   });
 
-  it('writes radio-group value through typed ng-primitives State<T>.value only', () => {
+  it('falls back to radio-group typed ng-primitives State<T>.value channel', () => {
     const value = vi.fn();
     const disabled = vi.fn();
     const state = {
@@ -252,7 +514,7 @@ describe('ngp form-state compatibility helpers', () => {
     expect(disabled).not.toHaveBeenCalled();
   });
 
-  it('writes radio-group disabled through typed ng-primitives State<T>.disabled only', () => {
+  it('falls back to radio-group typed ng-primitives State<T>.disabled channel', () => {
     const value = vi.fn();
     const disabled = vi.fn();
     const state = {
@@ -267,11 +529,13 @@ describe('ngp form-state compatibility helpers', () => {
     expect(value).not.toHaveBeenCalled();
   });
 
-  it('throws a version-bound error when radio-group State<T> channel shape is invalid', () => {
-    expect(() => writeRadioGroupStateValue({} as never, 'x')).toThrowError(/writeRadioGroupStateValue/);
-    expect(() => writeRadioGroupStateDisabled({} as never, true)).toThrowError(/writeRadioGroupStateDisabled/);
-    expect(() =>
-      writeRadioGroupStateDisabled({ value: { set: vi.fn() }, disabled: { set: 1 } as never } as never, true),
-    ).toThrowError(/disabled\.set/);
+  it('throws version-bound errors with affected operation when radio-group State<T> channel shape is invalid', () => {
+    expectAdapterError(() => writeRadioGroupStateValue({} as never, 'x'), 'writeRadioGroupStateValue', /value\.set/);
+    expectAdapterError(() => writeRadioGroupStateDisabled({} as never, true), 'writeRadioGroupStateDisabled', /disabled\.set/);
+    expectAdapterError(
+      () => writeRadioGroupStateDisabled({ value: { set: vi.fn() }, disabled: { set: 1 } as never } as never, true),
+      'writeRadioGroupStateDisabled',
+      /disabled\.set/,
+    );
   });
 });
