@@ -1,5 +1,11 @@
 import { existsSync, readFileSync } from 'node:fs';
 
+import {
+  parseBudgetSize,
+  readDocsBudgetPolicy,
+  validateDocsBudgetPolicy,
+} from './docs-budget-policy.mjs';
+
 const requiredFiles = [
   '.github/workflows/ci.yml',
   '.github/workflows/npm-publish.yml',
@@ -15,8 +21,11 @@ const requiredFiles = [
   'tools/package-pack-audit.mjs',
   'tools/ci-summary.mjs',
   'tools/package-manager.mjs',
+  'tools/docs-budget-policy.mjs',
   'package-lock.json',
   'docs/release/npm-publishing.md',
+  'docs/release/docs-budget-policy.md',
+  'docs/release/docs-bundle-budget-diagnosis.md',
 ];
 
 const requiredScripts = {
@@ -26,6 +35,7 @@ const requiredScripts = {
   'test:package-pack': 'node tools/check-package-pack.mjs',
   'test:api-report': 'node tools/check-api-reports.mjs',
   'api-report:update': 'node tools/check-api-reports.mjs --local',
+  'build:docs': 'node tools/setup-docs-hell-package-alias.mjs && ng build hell-docs && node tools/docs-bundle-budget-report.mjs --check --summary-only',
   'release:dry-run': 'node tools/release-dry-run.mjs',
   'ci:test': 'node tools/run-ci-tests.mjs',
   'ci:playwright': 'node tools/package-manager.mjs exec playwright install --with-deps chromium firefox webkit',
@@ -130,6 +140,18 @@ const fileChecks = [
     ],
   },
   {
+    path: 'docs/release/docs-budget-policy.md',
+    includes: [
+      'docs-budget-policy',
+      'Docs shell / global styles',
+      'Individual docs page owner',
+      'acceptedMaximum',
+      'accepted warning',
+      'regression',
+      'HELL-050',
+    ],
+  },
+  {
     path: 'docs/release/npm-publishing.md',
     includes: [
       'npm trusted publishing',
@@ -202,6 +224,7 @@ for (const check of fileChecks) {
 checkPackageConsumerPackAuditOrder();
 checkNpmPublishWorkflow();
 checkPublishedPackageMetadata();
+checkDocsBudgetPolicy();
 
 function checkPackageConsumerPackAuditOrder() {
   const path = 'tools/check-package-consumer.mjs';
@@ -291,6 +314,113 @@ function checkPublishedPackageMetadata() {
   if (packageJson.publishConfig?.provenance !== true) {
     errors.push(`${path} publishConfig.provenance must be true.`);
   }
+}
+
+function checkDocsBudgetPolicy() {
+  if (!existsSync('angular.json')) return;
+
+  const angularJson = JSON.parse(readFileSync('angular.json', 'utf8'));
+  const budgets =
+    angularJson.projects?.['hell-docs']?.architect?.build?.configurations?.production?.budgets ?? [];
+  const policyRead = readDocsBudgetPolicy();
+
+  errors.push(...policyRead.errors);
+  errors.push(...validateDocsBudgetPolicy(policyRead.policy, budgets));
+  checkDocsBudgetDiagnosis(policyRead.policy);
+
+  const buildDocsScript = packageJson.scripts?.['build:docs'] ?? '';
+  if (!buildDocsScript.includes('node tools/docs-bundle-budget-report.mjs --check --summary-only')) {
+    errors.push('build:docs must classify accepted docs budget warnings vs regressions after the Angular build.');
+  }
+}
+
+function checkDocsBudgetDiagnosis(policy) {
+  const path = 'docs/release/docs-bundle-budget-diagnosis.md';
+  if (!existsSync(path)) return;
+
+  const rows = readBudgetStatusRows(readFileSync(path, 'utf8'));
+  const acceptedWarnings = policy?.acceptedWarnings ?? [];
+  const seenWarningTypes = new Set();
+
+  for (const row of rows) {
+    const type = budgetTypeForReportLabel(row.label);
+    if (!type) continue;
+
+    const currentBytes = parseReportSize(row.current);
+    const warningBytes = parseReportSize(row.warning);
+    if (!Number.isFinite(currentBytes) || !Number.isFinite(warningBytes)) {
+      errors.push(`${path} budget row ${row.label} must include parseable current and warning sizes.`);
+      continue;
+    }
+
+    const acceptedWarning = acceptedWarnings.find((warning) => warning.type === type);
+    const isWarning = currentBytes > warningBytes;
+    if (row.status.includes('regression')) {
+      errors.push(`${path} records a ${row.label} budget regression; fix it or document a narrow accepted warning.`);
+    }
+
+    if (!isWarning) {
+      if (acceptedWarning) {
+        errors.push(`${path} shows ${row.label} within budget; remove stale accepted warning ${type} from docs-budget-policy.`);
+      }
+      continue;
+    }
+
+    seenWarningTypes.add(type);
+    if (!acceptedWarning) {
+      errors.push(`${path} shows a ${row.label} warning, but docs-budget-policy has no accepted warning for ${type}.`);
+      continue;
+    }
+
+    const acceptedMaximumBytes = parseBudgetSize(acceptedWarning.acceptedMaximum);
+    if (!Number.isFinite(acceptedMaximumBytes)) {
+      errors.push(`docs-budget-policy accepted warning ${type} must include a parseable acceptedMaximum.`);
+      continue;
+    }
+    if (currentBytes > acceptedMaximumBytes) {
+      errors.push(`${path} ${row.label} is ${row.current}, above accepted warning ceiling ${acceptedWarning.acceptedMaximum}.`);
+    }
+    if (!row.status.includes('accepted warning')) {
+      errors.push(`${path} ${row.label} warning must be classified as accepted or regression in the budget status table.`);
+    }
+  }
+
+  for (const warning of acceptedWarnings) {
+    if (!seenWarningTypes.has(warning.type)) {
+      errors.push(`${path} does not show current warning ${warning.type}; remove or refresh accepted warning policy.`);
+    }
+  }
+}
+
+function readBudgetStatusRows(content) {
+  const lines = content.split('\n');
+  const headerIndex = lines.findIndex((line) => line.trim() === '| Budget | Current | Warning | Error | Status |');
+  if (headerIndex === -1) return [];
+
+  const rows = [];
+  for (const line of lines.slice(headerIndex + 2)) {
+    if (!line.startsWith('| ')) break;
+    const cells = line.split('|').slice(1, -1).map((cell) => cell.trim());
+    if (cells.length < 5) continue;
+    rows.push({
+      label: cells[0],
+      current: cells[1],
+      warning: cells[2],
+      error: cells[3],
+      status: cells[4],
+    });
+  }
+  return rows;
+}
+
+function budgetTypeForReportLabel(label) {
+  if (label === 'Initial bundle') return 'initial';
+  if (label === 'Any component style') return 'anyComponentStyle';
+  return null;
+}
+
+function parseReportSize(value) {
+  return parseBudgetSize(String(value).replace(/\s+largest$/, ''));
 }
 
 if (errors.length > 0) {

@@ -3,11 +3,22 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import {
+  blockingDocsBudgetMessages,
+  classifyDocsBudget,
+  DOCS_BUDGET_POLICY_PATH,
+  formatBytes,
+  parseBudgetSize,
+  readDocsBudgetPolicy,
+  validateDocsBudgetPolicy,
+} from './docs-budget-policy.mjs';
+
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const options = parseArgs(process.argv.slice(2));
 const statsPath = resolveFromRoot(options.stats ?? 'dist/hell-docs/stats.json');
 const reportPath = resolveFromRoot(options.out ?? 'docs/release/docs-bundle-budget-diagnosis.md');
 const angularJsonPath = join(root, 'angular.json');
+const budgetPolicyPath = join(root, DOCS_BUDGET_POLICY_PATH);
 
 if (!existsSync(statsPath)) {
   console.error(`Missing ${relative(root, statsPath)}. Run npm run build:docs first.`);
@@ -19,6 +30,12 @@ const angularJson = JSON.parse(readFileSync(angularJsonPath, 'utf8'));
 const outputs = stats.outputs ?? {};
 const budgets =
   angularJson.projects?.['hell-docs']?.architect?.build?.configurations?.production?.budgets ?? [];
+const budgetPolicyRead = readDocsBudgetPolicy(budgetPolicyPath);
+const budgetPolicy = budgetPolicyRead.policy;
+const budgetPolicyErrors = [
+  ...budgetPolicyRead.errors,
+  ...validateDocsBudgetPolicy(budgetPolicy, budgets),
+];
 
 const initialFiles = findInitialFiles(outputs);
 const initialChunks = rowsForFiles([...initialFiles], outputs)
@@ -36,12 +53,36 @@ const componentStyles = rowsForFiles(Object.keys(outputs), outputs)
 
 const initialBudget = budgetFor('initial');
 const componentStyleBudget = budgetFor('anyComponentStyle');
+const budgetStatuses = [
+  classifyDocsBudget({ type: 'initial', currentBytes: initialTotal, budget: initialBudget, policy: budgetPolicy }),
+  classifyDocsBudget({
+    type: 'anyComponentStyle',
+    currentBytes: componentStyles[0]?.bytes ?? 0,
+    budget: componentStyleBudget,
+    policy: budgetPolicy,
+  }),
+];
+const blockingBudgetMessages = [
+  ...budgetPolicyErrors,
+  ...blockingDocsBudgetMessages(budgetStatuses),
+];
 const reverseImporters = buildReverseImporters(outputs);
 
 const report = renderReport();
-mkdirSync(dirname(reportPath), { recursive: true });
-writeFileSync(reportPath, report);
-console.log(`Wrote ${relative(root, reportPath)}`);
+if (!options.summaryOnly) {
+  mkdirSync(dirname(reportPath), { recursive: true });
+  writeFileSync(reportPath, report);
+  console.log(`Wrote ${relative(root, reportPath)}`);
+}
+printBudgetSummary();
+
+if (options.check && blockingBudgetMessages.length > 0) {
+  console.error('Docs budget policy failed:');
+  for (const message of blockingBudgetMessages) {
+    console.error(`- ${message}`);
+  }
+  process.exit(1);
+}
 
 function parseArgs(args) {
   const parsed = {};
@@ -50,6 +91,14 @@ function parseArgs(args) {
     if (arg === '--help' || arg === '-h') {
       printUsage();
       process.exit(0);
+    }
+    if (arg === '--check') {
+      parsed.check = true;
+      continue;
+    }
+    if (arg === '--summary-only') {
+      parsed.summaryOnly = true;
+      continue;
     }
     if (arg === '--stats' || arg === '--out') {
       const value = args[index + 1];
@@ -70,9 +119,9 @@ function parseArgs(args) {
 }
 
 function printUsage() {
-  console.log(`Usage: node tools/docs-bundle-budget-report.mjs [--stats dist/hell-docs/stats.json] [--out docs/release/docs-bundle-budget-diagnosis.md]
+  console.log(`Usage: node tools/docs-bundle-budget-report.mjs [--check] [--summary-only] [--stats dist/hell-docs/stats.json] [--out docs/release/docs-bundle-budget-diagnosis.md]
 
-Reads Angular's esbuild stats.json for the docs app and writes a bundle-budget diagnosis report.`);
+Reads Angular's esbuild stats.json for the docs app, classifies accepted budget warnings vs regressions, and writes a bundle-budget diagnosis report unless --summary-only is used.`);
 }
 
 function resolveFromRoot(path) {
@@ -125,17 +174,6 @@ function budgetFor(type) {
   };
 }
 
-function parseBudgetSize(value) {
-  if (!value) return null;
-  const match = String(value).trim().match(/^(\d+(?:\.\d+)?)\s*(b|kb|mb)$/i);
-  if (!match) return null;
-  const amount = Number(match[1]);
-  const unit = match[2].toLowerCase();
-  if (unit === 'b') return amount;
-  if (unit === 'kb') return amount * 1000;
-  return amount * 1000 * 1000;
-}
-
 function buildReverseImporters(allOutputs) {
   const reverse = new Map();
   for (const [from, output] of Object.entries(allOutputs)) {
@@ -167,16 +205,10 @@ function renderReport() {
 
 | Budget | Current | Warning | Error | Status |
 | --- | ---: | ---: | ---: | --- |
-| Initial bundle | ${formatBytes(initialTotal)} | ${formatBudget(initialBudget?.maximumWarningBytes)} | ${formatBudget(initialBudget?.maximumErrorBytes)} | ${
-    initialWarningOverage > 0
-      ? `warning: ${formatBytes(initialWarningOverage)} over`
-      : 'within warning budget'
-  } |
-| Any component style | ${formatBytes(componentStyles[0]?.bytes ?? 0)} largest | ${formatBudget(componentStyleBudget?.maximumWarningBytes)} | ${formatBudget(componentStyleBudget?.maximumErrorBytes)} | ${
-    componentStyleWarnings.length > 0
-      ? `warning: ${componentStyleWarnings.length} style chunk over budget`
-      : 'within warning budget'
-  } |
+| Initial bundle | ${formatBytes(initialTotal)} | ${formatBudget(initialBudget?.maximumWarningBytes)} | ${formatBudget(initialBudget?.maximumErrorBytes)} | ${renderBudgetStatus(budgetStatusFor('initial'))} |
+| Any component style | ${formatBytes(componentStyles[0]?.bytes ?? 0)} largest | ${formatBudget(componentStyleBudget?.maximumWarningBytes)} | ${formatBudget(componentStyleBudget?.maximumErrorBytes)} | ${renderBudgetStatus(budgetStatusFor('anyComponentStyle'))} |
+
+${renderBudgetPolicySection()}
 
 ## Largest initial chunks
 
@@ -198,7 +230,7 @@ ${renderComponentStyleTable(componentStyles.slice(0, 8))}
 
 | Warning / risk | Root cause from stats | Owner | Follow-up fix |
 | --- | --- | --- | --- |
-| Initial bundle exceeds 500 kB by ${formatBytes(initialWarningOverage)} | Static imports from \`main\` pull router/runtime plus docs-shell controls; \`styles.css\` globally imports Tailwind and \`@hell-ui/angular/styles/composites\`. Top chunks: ${initialChunks.slice(0, 5).map((row) => `\`${row.file}\``).join(', ')}. | Docs shell / global styles | HELL-032 must turn this into an explicit budget policy with owner/rationale; HELL-050 audits future eager imports across docs route boundaries. |
+| Initial bundle exceeds 500 kB by ${formatBytes(initialWarningOverage)} | Static imports from \`main\` pull router/runtime plus docs-shell controls; \`styles.css\` globally imports Tailwind and \`@hell-ui/angular/styles/composites\`. Top chunks: ${initialChunks.slice(0, 5).map((row) => `\`${row.file}\``).join(', ')}. | Docs shell / global styles | ${renderInitialBudgetFollowUp()} |
 ${renderPdfViewerStyleRow(pdfViewerStyleWarnings)}
 | PDF lazy weight is large even when initial bundle is protected | \`pdfjs-dist/build/pdf.mjs\`, \`pdfjs-dist/web/pdf_viewer.mjs\`, and \`hell-ui-angular-features-pdf-viewer.mjs\` are the top PDF lazy inputs. | PDF viewer feature | HELL-031 keeps the docs page lazy/isolated; HELL-053 splits PDF viewer into a separate Angular package before beta. |
 | Code editor lazy chunk is the largest lazy page | CodeMirror and Lezer packages dominate \`code-editor-page\`; this is expected feature weight, not initial shell weight. | Code editor feature | HELL-054 locks CodeMirror as a kept optional entrypoint and prevents leaks into root/composites. |
@@ -219,10 +251,77 @@ npm run diagnose:docs-bundle
 function renderHeader() {
   return `# Docs bundle budget diagnosis
 
-- Slice: HELL-030 diagnosis; HELL-031 remediation status
+- Slice: HELL-030 diagnosis; HELL-031 remediation; HELL-032 policy classification
 - Source stats: \`${relative(root, statsPath)}\`
+- Budget policy: \`${relative(root, budgetPolicyPath)}\`
 - Report generator: \`tools/docs-bundle-budget-report.mjs\`
-- Scope: diagnosis plus current remediation status; remaining policy/split work stays in HELL-032, HELL-050, HELL-053, HELL-054, and HELL-056.`;
+- Scope: diagnosis plus current remediation status; remaining split/import work stays in HELL-050, HELL-053, HELL-054, and HELL-056.`;
+}
+
+function budgetStatusFor(type) {
+  return budgetStatuses.find((status) => status.type === type);
+}
+
+function renderBudgetStatus(status) {
+  if (!status) return 'missing budget status';
+  if (status.state === 'accepted') {
+    return `accepted warning: ${formatBytes(status.overBytes)} over; accepted ceiling: ${formatBytes(status.acceptedMaximumBytes)}; owner: ${status.acceptedWarning.owner}; follow-up: ${status.acceptedWarning.followUp}`;
+  }
+  if (status.state === 'regression' && status.severity === 'error') {
+    return `regression: ${formatBytes(status.overBytes)} over error budget`;
+  }
+  if (status.state === 'regression' && status.reason === 'acceptedMaximumExceeded') {
+    return `regression: ${formatBytes(status.overBytes)} over accepted warning ceiling ${formatBytes(status.acceptedMaximumBytes)}`;
+  }
+  if (status.state === 'regression') {
+    return `regression: ${formatBytes(status.overBytes)} over warning budget; no accepted warning documented`;
+  }
+  if (status.state === 'within') return 'within warning budget';
+  return 'unknown budget status';
+}
+
+function renderBudgetPolicySection() {
+  const policyCheck = budgetPolicyErrors.length > 0
+    ? `failed — ${budgetPolicyErrors.join('; ')}`
+    : 'ok';
+  const accepted = budgetStatuses.filter((status) => status.state === 'accepted');
+  const regressions = budgetStatuses.filter((status) => status.state === 'regression');
+
+  return `## Budget policy
+
+- Policy source: \`${relative(root, budgetPolicyPath)}\`
+- Policy check: ${policyCheck}
+- Accepted current warnings: ${accepted.length > 0 ? accepted.map((status) => `${budgetLabel(status.type)} (${status.acceptedWarning.followUp})`).join(', ') : 'none'}
+- Regression budget warnings: ${regressions.length > 0 ? regressions.map((status) => `${budgetLabel(status.type)} (${formatBytes(status.overBytes)} over)`).join(', ') : 'none'}`;
+}
+
+function renderInitialBudgetFollowUp() {
+  const status = budgetStatusFor('initial');
+  if (status?.state === 'accepted') {
+    return `Accepted by the docs budget policy until ${status.acceptedWarning.followUp}; HELL-050 audits future eager imports across docs route boundaries, and any undocumented new warning is a regression.`;
+  }
+  return 'Undocumented budget warning; fix the eager import/CSS regression or document a narrow accepted warning with owner and follow-up.';
+}
+
+function printBudgetSummary() {
+  console.log('Docs budget summary:');
+  for (const status of budgetStatuses) {
+    console.log(`- ${budgetLabel(status.type)}: ${renderBudgetStatus(status)}`);
+  }
+  if (budgetPolicyErrors.length > 0) {
+    console.log(`- Policy check: failed (${budgetPolicyErrors.length} issue${budgetPolicyErrors.length === 1 ? '' : 's'})`);
+  } else {
+    console.log('- Policy check: ok');
+  }
+  const regressionCount = budgetStatuses.filter((status) => status.state === 'regression').length;
+  const acceptedCount = budgetStatuses.filter((status) => status.state === 'accepted').length;
+  console.log(`- Classification totals: ${acceptedCount} accepted warning${acceptedCount === 1 ? '' : 's'}, ${regressionCount} regression${regressionCount === 1 ? '' : 's'}`);
+}
+
+function budgetLabel(type) {
+  if (type === 'initial') return 'Initial bundle';
+  if (type === 'anyComponentStyle') return 'Any component style';
+  return type;
 }
 
 function renderPdfViewerStyleRow(pdfViewerStyleWarnings) {
@@ -230,7 +329,7 @@ function renderPdfViewerStyleRow(pdfViewerStyleWarnings) {
     return `| \`pdf-viewer.page.ts\` component style exceeds 4 kB | \`pdf-viewer.page.ts\` inline component style imports \`@hell-ui/angular/styles/features/pdf-viewer\`; stats emits ${pdfViewerStyleWarnings.map((row) => `\`${row.file}\` at ${formatBytes(row.bytes)}`).join(', ')}. | PDF viewer docs page | HELL-031 reduces the PDF docs style cost, moves it behind a documented lazy/global boundary, or records an intentional budget raise. |`;
   }
 
-  return '| PDF viewer docs style is isolated from component-style budget | No pdf-viewer component style chunk exceeds the 4 kB warning budget; the docs page serves `@hell-ui/angular/styles/features/pdf-viewer` as a copied lazy asset instead of an Angular component style. | PDF viewer docs page | HELL-031 keeps the lazy boundary; HELL-032 records the remaining docs budget policy. |';
+  return '| PDF viewer docs style is isolated from component-style budget | No pdf-viewer component style chunk exceeds the 4 kB warning budget; the docs page serves `@hell-ui/angular/styles/features/pdf-viewer` as a copied lazy asset instead of an Angular component style. | PDF viewer docs page | HELL-031 keeps the lazy boundary; docs budget policy keeps component-style warnings unaccepted unless explicitly documented. |';
 }
 
 function renderChunkTable(rows, mode) {
@@ -393,8 +492,3 @@ function formatBudget(bytes) {
   return typeof bytes === 'number' ? formatBytes(bytes) : 'not configured';
 }
 
-function formatBytes(bytes) {
-  if (!Number.isFinite(bytes)) return 'n/a';
-  if (bytes < 1000) return `${Math.round(bytes)} B`;
-  return `${(bytes / 1000).toFixed(2)} kB`;
-}
