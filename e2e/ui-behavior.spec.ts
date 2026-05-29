@@ -1,5 +1,5 @@
 import { AxeBuilder } from '@axe-core/playwright';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 
 async function expectNoSeriousA11yIssues(
   page: Page,
@@ -17,30 +17,126 @@ async function expectNoSeriousA11yIssues(
   expect(serious).toEqual([]);
 }
 
+interface DialogFocusContract {
+  label: string;
+  triggerName: string | RegExp;
+  dialogName: string | RegExp;
+  description: string;
+  initialFocusName: string | RegExp;
+  nextFocusName: string | RegExp;
+}
+
+async function expectDialogFocusContract(
+  page: Page,
+  contract: DialogFocusContract,
+): Promise<void> {
+  try {
+    await test.step(`${contract.label} focus trap`, async () => {
+      const trigger = page.getByRole('button', { name: contract.triggerName }).first();
+      await expect(trigger).toBeVisible();
+      await trigger.focus();
+      await expectFocused(page, trigger, `${contract.label} trigger before open`);
+
+      await trigger.click();
+
+      const dialog = page.getByRole('dialog', { name: contract.dialogName });
+      const initialFocus = dialog.getByRole('button', { name: contract.initialFocusName });
+      const nextFocus = dialog.getByRole('button', { name: contract.nextFocusName });
+
+      await expect(dialog).toBeVisible();
+      await expect(dialog.getByText(contract.description, { exact: true })).toBeVisible();
+      await expectNoSeriousA11yIssues(page, '[role="dialog"]');
+
+      await expectFocused(page, initialFocus, `${contract.label} initial focus`);
+      await page.keyboard.press('Tab');
+      await expectFocused(page, nextFocus, `${contract.label} forward tab stays inside`);
+      await page.keyboard.press('Tab');
+      await expectFocused(page, initialFocus, `${contract.label} forward tab wraps inside`);
+      await page.keyboard.press('Shift+Tab');
+      await expectFocused(page, nextFocus, `${contract.label} reverse tab wraps inside`);
+
+      await page.keyboard.press('Escape');
+      await expect(dialog).toBeHidden();
+      await expectFocused(page, trigger, `${contract.label} trigger restore`);
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `${contract.label} focus contract failed.\n${message}\n\n${await collectFocusDiagnostics(page)}`,
+      { cause: error },
+    );
+  }
+}
+
+async function expectFocused(page: Page, locator: Locator, label: string): Promise<void> {
+  try {
+    await expect(locator, label).toBeFocused();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`${message}\n\n${await collectFocusDiagnostics(page)}`, { cause: error });
+  }
+}
+
+async function collectFocusDiagnostics(page: Page): Promise<string> {
+  const [focusedPath, ariaSnapshot] = await Promise.all([
+    focusedElementPath(page),
+    page
+      .locator('body')
+      .ariaSnapshot()
+      .catch((error: unknown) => `Unavailable: ${error instanceof Error ? error.message : error}`),
+  ]);
+
+  return `Focused element path:\n${focusedPath}\n\nAccessibility tree:\n${ariaSnapshot}`;
+}
+
+async function focusedElementPath(page: Page): Promise<string> {
+  return page.evaluate(() => {
+    const active = document.activeElement;
+    if (!active) return '<none>';
+
+    const parts: string[] = [];
+    let current: Element | null = active;
+
+    while (current) {
+      const element = current;
+      const tag = element.tagName.toLowerCase();
+      const attributes = ['id', 'role', 'aria-label', 'data-hell-dialog-trigger']
+        .map((name) => [name, element.getAttribute(name)] as const)
+        .filter(([, value]) => value !== null && value !== '')
+        .map(([name, value]) => `[${name}="${value}"]`)
+        .join('');
+      const text = ['button', 'a'].includes(tag)
+        ? (element.textContent ?? '').trim().replace(/\s+/g, ' ').slice(0, 80)
+        : '';
+      parts.unshift(`${tag}${attributes}${text ? ` "${text}"` : ''}`);
+      current = element.parentElement;
+    }
+
+    return parts.join(' > ');
+  });
+}
+
 test.describe('Hell UI browser behavior', () => {
-  test('dialog opens, traps focus, closes with Escape, and passes axe smoke', async ({ page }) => {
+  test('dialog focus trap and restore covers styled and unstyled modes', async ({ page }) => {
     await page.goto('/components/dialog');
-    const trigger = page.getByRole('button', { name: 'Publish article' }).first();
-    await trigger.click();
 
-    const dialog = page.getByRole('dialog', { name: 'Publish this article?' });
-    const cancel = dialog.getByRole('button', { name: 'Cancel' });
-    const publish = dialog.getByRole('button', { name: 'Publish' });
-    await expect(dialog).toBeVisible();
-    await expect(
-      dialog.getByText('Once published, the article will be visible to everyone.', { exact: true }),
-    ).toBeVisible();
-    await expectNoSeriousA11yIssues(page, '[role="dialog"]');
+    await expectDialogFocusContract(page, {
+      label: 'styled dialog',
+      triggerName: 'Publish article',
+      dialogName: 'Publish this article?',
+      description: 'Once published, the article will be visible to everyone.',
+      initialFocusName: 'Cancel',
+      nextFocusName: 'Publish',
+    });
 
-    await publish.focus();
-    await page.keyboard.press('Tab');
-    await expect(cancel).toBeFocused();
-    await page.keyboard.press('Shift+Tab');
-    await expect(publish).toBeFocused();
-
-    await page.keyboard.press('Escape');
-    await expect(dialog).toBeHidden();
-    await expect(trigger).toBeFocused();
+    await expectDialogFocusContract(page, {
+      label: 'unstyled dialog',
+      triggerName: 'Open unstyled dialog',
+      dialogName: 'Unstyled confirmation',
+      description: 'The dialog behavior stays intact while consumer CSS owns the presentation.',
+      initialFocusName: 'Keep editing',
+      nextFocusName: 'Send unstyled',
+    });
   });
 
   test('toast renders in the notification region and passes axe smoke', async ({ page }) => {

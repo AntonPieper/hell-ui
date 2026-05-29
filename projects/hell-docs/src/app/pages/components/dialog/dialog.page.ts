@@ -9,6 +9,10 @@ import { DialogScopedToAppShellContentExample } from './examples/scoped-to-app-s
 import dialogScopedToAppShellContentExampleCodeRaw from './examples/scoped-to-app-shell-content.example.ts?raw' with {
   loader: 'text',
 };
+import { DialogUnstyledExample } from './examples/unstyled.example';
+import dialogUnstyledExampleCodeRaw from './examples/unstyled.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-dialog',
@@ -18,6 +22,7 @@ import dialogScopedToAppShellContentExampleCodeRaw from './examples/scoped-to-ap
     ...HELL_DIALOG_DIRECTIVES,
     DialogExampleExample,
     DialogScopedToAppShellContentExample,
+    DialogUnstyledExample,
   ],
   template: `
     <article class="hd-prose">
@@ -56,6 +61,15 @@ import dialogScopedToAppShellContentExampleCodeRaw from './examples/scoped-to-ap
       </p>
       <hd-example-tabs [code]="dialogScopedToAppShellContentExampleCode">
         <app-dialog-scoped-to-app-shell-content-example />
+      </hd-example-tabs>
+
+      <h2>Unstyled behavior</h2>
+      <p>
+        Add <code>unstyled</code> when you want Hell UI's dialog behavior while owning every
+        presentation class yourself.
+      </p>
+      <hd-example-tabs [code]="dialogUnstyledExampleCode">
+        <app-dialog-unstyled-example />
       </hd-example-tabs>
 
       <p class="hd-muted">
@@ -108,4 +122,5 @@ export class DialogPage {
   protected readonly dialogExampleExampleCode = dialogExampleExampleCodeRaw;
   protected readonly dialogScopedToAppShellContentExampleCode =
     dialogScopedToAppShellContentExampleCodeRaw;
+  protected readonly dialogUnstyledExampleCode = dialogUnstyledExampleCodeRaw;
 }
