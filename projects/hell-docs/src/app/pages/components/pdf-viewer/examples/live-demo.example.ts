@@ -2,8 +2,18 @@ import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
 import { HellPdfViewer } from '@hell-ui/angular/features/pdf-viewer';
 
-const PDF_VIEWER_STYLESHEET_ID = 'hd-pdfjs-viewer-styles';
-const PDF_VIEWER_STYLESHEET_PATH = 'pdfjs/pdf_viewer.css';
+// Copy these stylesheets as app-owned assets, then append them only while the lazy route is active.
+const PDF_VIEWER_STYLESHEETS = [
+  {
+    id: 'hd-hell-pdf-viewer-styles',
+    href: 'hell-ui/styles/features/pdf-viewer.css',
+  },
+  {
+    id: 'hd-pdfjs-viewer-styles',
+    href: 'pdfjs/pdf_viewer.css',
+  },
+] as const;
+
 @Component({
   selector: 'app-pdf-viewer-live-demo-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,19 +34,21 @@ export class PdfViewerLiveDemoExample {
     const document = inject(DOCUMENT);
     const destroyRef = inject(DestroyRef);
 
-    let addedLink: HTMLLinkElement | null = null;
-    const existingLink = document.getElementById(PDF_VIEWER_STYLESHEET_ID);
+    const addedLinks: HTMLLinkElement[] = [];
 
-    if (!existingLink) {
-      addedLink = document.createElement('link');
-      addedLink.id = PDF_VIEWER_STYLESHEET_ID;
-      addedLink.rel = 'stylesheet';
-      addedLink.href = new URL(PDF_VIEWER_STYLESHEET_PATH, document.baseURI).toString();
-      document.head.append(addedLink);
+    for (const stylesheet of PDF_VIEWER_STYLESHEETS) {
+      if (document.getElementById(stylesheet.id)) continue;
+
+      const link = document.createElement('link');
+      link.id = stylesheet.id;
+      link.rel = 'stylesheet';
+      link.href = new URL(stylesheet.href, document.baseURI).toString();
+      document.head.append(link);
+      addedLinks.push(link);
     }
 
     destroyRef.onDestroy(() => {
-      addedLink?.remove();
+      for (const link of addedLinks) link.remove();
     });
   }
 }

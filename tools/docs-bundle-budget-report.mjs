@@ -157,6 +157,9 @@ function renderReport() {
     (row) =>
       componentStyleBudget?.maximumWarningBytes && row.bytes > componentStyleBudget.maximumWarningBytes,
   );
+  const pdfViewerStyleWarnings = componentStyleWarnings.filter((row) =>
+    componentStyleOwner(row.output).includes('Pdf Viewer'),
+  );
 
   return `${renderHeader()}
 
@@ -196,7 +199,7 @@ ${renderComponentStyleTable(componentStyles.slice(0, 8))}
 | Warning / risk | Root cause from stats | Owner | Follow-up fix |
 | --- | --- | --- | --- |
 | Initial bundle exceeds 500 kB by ${formatBytes(initialWarningOverage)} | Static imports from \`main\` pull router/runtime plus docs-shell controls; \`styles.css\` globally imports Tailwind and \`@hell-ui/angular/styles/composites\`. Top chunks: ${initialChunks.slice(0, 5).map((row) => `\`${row.file}\``).join(', ')}. | Docs shell / global styles | HELL-032 must turn this into an explicit budget policy with owner/rationale; HELL-050 audits future eager imports across docs route boundaries. |
-| \`pdf-viewer.page.ts\` component style exceeds 4 kB | \`pdf-viewer.page.ts\` inline component style imports \`@hell-ui/angular/styles/features/pdf-viewer\`; stats emits ${componentStyleWarnings.map((row) => `\`${row.file}\` at ${formatBytes(row.bytes)}`).join(', ') || 'no current overage'}. | PDF viewer docs page | HELL-031 reduces the PDF docs style cost, moves it behind a documented lazy/global boundary, or records an intentional budget raise. |
+${renderPdfViewerStyleRow(pdfViewerStyleWarnings)}
 | PDF lazy weight is large even when initial bundle is protected | \`pdfjs-dist/build/pdf.mjs\`, \`pdfjs-dist/web/pdf_viewer.mjs\`, and \`hell-ui-angular-features-pdf-viewer.mjs\` are the top PDF lazy inputs. | PDF viewer feature | HELL-031 keeps the docs page lazy/isolated; HELL-053 splits PDF viewer into a separate Angular package before beta. |
 | Code editor lazy chunk is the largest lazy page | CodeMirror and Lezer packages dominate \`code-editor-page\`; this is expected feature weight, not initial shell weight. | Code editor feature | HELL-054 locks CodeMirror as a kept optional entrypoint and prevents leaks into root/composites. |
 | Table utilities lazy chunk carries demo/raw source cost | \`data-table-page\` includes live examples plus \`?raw\` source text and table utilities feature code. | Table utilities feature docs | HELL-056 locks table utilities as a kept feature entrypoint; HELL-050 verifies docs examples stay behind lazy routes. |
@@ -216,10 +219,18 @@ npm run diagnose:docs-bundle
 function renderHeader() {
   return `# Docs bundle budget diagnosis
 
-- Slice: HELL-030
+- Slice: HELL-030 diagnosis; HELL-031 remediation status
 - Source stats: \`${relative(root, statsPath)}\`
 - Report generator: \`tools/docs-bundle-budget-report.mjs\`
-- Scope: diagnosis only; remediation remains in HELL-031, HELL-032, HELL-050, HELL-053, HELL-054, and HELL-056.`;
+- Scope: diagnosis plus current remediation status; remaining policy/split work stays in HELL-032, HELL-050, HELL-053, HELL-054, and HELL-056.`;
+}
+
+function renderPdfViewerStyleRow(pdfViewerStyleWarnings) {
+  if (pdfViewerStyleWarnings.length > 0) {
+    return `| \`pdf-viewer.page.ts\` component style exceeds 4 kB | \`pdf-viewer.page.ts\` inline component style imports \`@hell-ui/angular/styles/features/pdf-viewer\`; stats emits ${pdfViewerStyleWarnings.map((row) => `\`${row.file}\` at ${formatBytes(row.bytes)}`).join(', ')}. | PDF viewer docs page | HELL-031 reduces the PDF docs style cost, moves it behind a documented lazy/global boundary, or records an intentional budget raise. |`;
+  }
+
+  return '| PDF viewer docs style is isolated from component-style budget | No pdf-viewer component style chunk exceeds the 4 kB warning budget; the docs page serves `@hell-ui/angular/styles/features/pdf-viewer` as a copied lazy asset instead of an Angular component style. | PDF viewer docs page | HELL-031 keeps the lazy boundary; HELL-032 records the remaining docs budget policy. |';
 }
 
 function renderChunkTable(rows, mode) {

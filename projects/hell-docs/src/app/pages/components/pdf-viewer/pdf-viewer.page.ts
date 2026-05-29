@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PdfViewerLazyLoadingExample } from './examples/lazy-loading.example';
 import pdfViewerLazyLoadingExampleCodeRaw from './examples/lazy-loading.example.ts?raw' with {
@@ -12,8 +12,6 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
 @Component({
   selector: 'hd-pdf-viewer',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  styles: [`@import '@hell-ui/angular/styles/features/pdf-viewer';`],
   imports: [ExampleTabs, PdfViewerLazyLoadingExample, PdfViewerLiveDemoExample],
   template: `
     <article class="hd-prose">
@@ -42,8 +40,9 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         <code>tailwindcss</code> when you import Hell's CSS.
         Your app must pass a pdf.js worker source through <code>worker</code>; Hell does not copy
         a worker into the package tarball. The docs app serves a local sample worker from
-        <code>/assets/pdf.worker.mjs</code>. The docs page loads the pdf.js viewer stylesheet on
-        demand, so lazy routes keep it out of the docs app's initial bundle.
+        <code>/assets/pdf.worker.mjs</code>. The docs examples load the Hell PDF viewer stylesheet
+        and the pdf.js viewer stylesheet on demand, so lazy routes keep both out of the docs
+        app's initial bundle and component-style budget.
       </p>
 
       <h2>Lazy loading</h2>

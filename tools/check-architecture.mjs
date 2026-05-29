@@ -323,11 +323,41 @@ function checkDocsCodeEditorIsolationContract() {
 
 function checkDocsPdfViewerIsolationContract() {
   const heavyImports = ['@hell-ui/angular/features/pdf-viewer', 'pdfjs-dist'];
+  const globalDocsFiles = [
+    'projects/hell-docs/src/app/app.routes.ts',
+    'projects/hell-docs/src/app/docs-catalog.ts',
+    'projects/hell-docs/src/app/docs-search-index.ts',
+  ];
   const sharedFiles = [
     'projects/hell-docs/src/app/shared/code-block.ts',
     'projects/hell-docs/src/app/shared/example-tabs.ts',
     'projects/hell-docs/src/app/shared/code-tools.ts',
   ];
+
+  for (const file of globalDocsFiles) {
+    const path = join(root, file);
+    if (!existsSync(path)) {
+      failures.push(`Docs architecture check references missing file ${file}`);
+      continue;
+    }
+
+    const source = readFile(path);
+    if (hasPackageImport(source, heavyImports)) {
+      failures.push(
+        `Docs global catalog/search file ${file} must not import pdf.js or @hell-ui/angular/features/pdf-viewer`,
+      );
+    }
+    if (hasStaticImportFrom(source, 'pages/components/pdf-viewer')) {
+      failures.push(
+        `Docs global catalog/search file ${file} must lazy-load the PDF viewer page instead of statically importing it`,
+      );
+    }
+    if (hasDynamicImportFrom(source, 'pages/components/pdf-viewer/examples')) {
+      failures.push(
+        `Docs global catalog/search file ${file} must not import PDF viewer demo code; keep examples behind the PDF page boundary`,
+      );
+    }
+  }
 
   for (const file of sharedFiles) {
     const path = join(root, file);
@@ -356,6 +386,17 @@ function checkDocsPdfViewerIsolationContract() {
       );
     }
   }
+
+  const pdfViewerPagePath = join(
+    root,
+    'projects/hell-docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts',
+  );
+  const pdfViewerPage = readFile(pdfViewerPagePath);
+  if (/styles\s*:\s*\[[\s\S]*@hell-ui\/angular\/styles\/features\/pdf-viewer/.test(pdfViewerPage)) {
+    failures.push(
+      'PDF viewer docs page must load feature CSS as a lazy external asset, not an Angular component style',
+    );
+  }
 }
 
 function hasPackageImport(source, specifiers) {
@@ -366,6 +407,18 @@ function hasPackageImport(source, specifiers) {
     );
     return pattern.test(source);
   });
+}
+
+function hasStaticImportFrom(source, pathFragment) {
+  return source.split('\n').some((line) => {
+    const trimmed = line.trimStart();
+    return trimmed.startsWith('import ') && !trimmed.startsWith('import(') && line.includes(pathFragment);
+  });
+}
+
+function hasDynamicImportFrom(source, pathFragment) {
+  const escaped = escapeRegExp(pathFragment);
+  return new RegExp(`import\\s*\\(\\s*['"][^'"]*${escaped}[^'"]*['"]`).test(source);
 }
 
 function checkPackageEntryPoints() {

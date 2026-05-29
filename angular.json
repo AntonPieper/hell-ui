@@ -80,6 +80,16 @@
                 "output": "assets"
               },
               {
+                "glob": "pdf-viewer.css",
+                "input": "dist/hell/styles/features",
+                "output": "hell-ui/styles/features"
+              },
+              {
+                "glob": "pdf-viewer.css",
+                "input": "dist/hell/styles/components",
+                "output": "hell-ui/styles/components"
+              },
+              {
                 "glob": "pdf_viewer.css",
                 "input": "node_modules/pdfjs-dist/web",
                 "output": "pdfjs"
