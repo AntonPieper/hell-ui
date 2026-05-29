@@ -105,8 +105,8 @@
       &[data-variant="success"] {
         --_hell-btn-bg-hover: var(--hell-button-background-hover, var(--color-hell-success-hover));
         --_hell-btn-bg-press: var(--hell-button-background-active, var(--color-hell-success-active));
-        --_hell-btn-bg: var(--hell-button-background, var(--color-hell-success));
-        --_hell-btn-border: var(--hell-button-border-color, var(--color-hell-success));
+        --_hell-btn-bg: var(--hell-button-background, var(--color-hell-success-strong));
+        --_hell-btn-border: var(--hell-button-border-color, var(--color-hell-success-strong));
         --_hell-btn-fg: var(--hell-button-color, var(--color-hell-foreground-inverse));
       }
       &[data-size="xs"] {

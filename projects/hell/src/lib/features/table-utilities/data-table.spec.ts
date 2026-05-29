@@ -463,7 +463,10 @@ describe('Hell table utilities directives', () => {
     resizer.dispatchEvent(pointer);
 
     expect(resizer.getAttribute('aria-disabled')).toBe('true');
+    expect(resizer.getAttribute('aria-label')).toBe('Resize column');
     expect(resizer.getAttribute('tabindex')).toBe('-1');
+    expect(resizer.getAttribute('role')).toBeNull();
+    expect(resizer.getAttribute('aria-valuenow')).toBeNull();
     expect(key.defaultPrevented).toBe(false);
     expect(pointer.defaultPrevented).toBe(false);
     expect(host.resizeEvents).toEqual([]);
