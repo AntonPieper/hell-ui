@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { FloatingDismissalHarnessPage } from '../../testing/floating-dismissal-harness.page';
 import { FlyoutExampleBoundaryKeepsSiblingsInteractiveExample } from './examples/example-boundary-keeps-siblings-interactive.example';
 import flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw from './examples/example-boundary-keeps-siblings-interactive.example.ts?raw' with {
   loader: 'text',
@@ -9,9 +10,17 @@ import flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw from './examp
 @Component({
   selector: 'hd-flyout',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, RouterLink, FlyoutExampleBoundaryKeepsSiblingsInteractiveExample],
+  imports: [
+    ExampleTabs,
+    RouterLink,
+    FloatingDismissalHarnessPage,
+    FlyoutExampleBoundaryKeepsSiblingsInteractiveExample,
+  ],
   template: `
-    <article class="hd-prose">
+    @if (showFloatingDismissalHarness) {
+      <hd-floating-dismissal-harness />
+    } @else {
+      <article class="hd-prose">
       <h1>Flyout</h1>
       <p>
         An anchored, non-modal, light-dismiss surface that <strong>does not trap focus</strong>. Use
@@ -95,10 +104,15 @@ import flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw from './examp
         <li>Don't use flyout when focus must be trapped; use Dialog or Popover.</li>
         <li>Don't place critical confirmation flows in a light-dismiss surface.</li>
       </ul>
-    </article>
+      </article>
+    }
   `,
 })
 export class FlyoutPage {
+  private readonly route = inject(ActivatedRoute);
+
+  protected readonly showFloatingDismissalHarness =
+    this.route.snapshot.queryParamMap.has('floatingDismissalHarness');
   protected readonly flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCode =
     flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw;
 }
