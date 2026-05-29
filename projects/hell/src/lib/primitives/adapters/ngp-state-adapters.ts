@@ -6,24 +6,30 @@ import type { NgpSelect } from 'ng-primitives/select';
 /**
  * Internal compatibility seam for ng-primitives form-control state sync.
  *
- * HELL-013 decision: do not write string-indexed private-looking value or
- * disabled channels. The Angular Primitives MCP server is unavailable in this
- * environment, so this slice uses Context7 docs plus local
- * `ng-primitives@0.117.2` typings/source. Those sources expose
- * select/combobox/radio value and disabled state as typed public `State<T>`
- * channels, while the primitives still do not expose `setValue` / `setDisabled`
- * APIs. Hell keeps one owned adapter here, prefers future public setters when
- * present, and otherwise writes the typed public `State<T>.value` /
- * `State<T>.disabled` channels only.
+ * HELL-035 decision: this is a deliberate version-bound State-channel seam for
+ * `ng-primitives@0.117.2`, not an ad hoc primitive-instance state escape hatch.
+ * Context7 documents state providers as the programmatic-control seam, and the
+ * installed `ng-primitives@0.117.2` typings/source expose select, combobox, and
+ * radio-group value/disabled state as typed public `State<T>` channels while the
+ * primitives still do not expose complete CVA-safe `setValue` / `setDisabled`
+ * APIs.
  *
- * The dependency remains pinned while this adapter exists. If ng-primitives
- * changes those writable channels before adding setters, fail loudly here
- * instead of silently dropping form writes across select, combobox, and radio.
+ * Keep `ng-primitives` pinned while this fallback exists. Upgrade/removal path:
+ * rerun `docs/adr/ng-primitives-state-adapter.md` for the target version, keep
+ * preferring public setters when they exist, and remove the State-channel
+ * fallback in a follow-up slice once select, combobox, and radio group all have
+ * public value + disabled setters that support silent CVA writes.
+ *
+ * If ng-primitives changes these writable channels before adding setters, fail
+ * loudly here instead of silently dropping form writes across select, combobox,
+ * and radio.
  *
  * @internal
  */
 
 export const HELL_NGP_STATE_WRITER_VERSION = 'ng-primitives@0.117.2';
+export const HELL_NGP_STATE_WRITER_UPGRADE_PATH =
+  'Upgrade/removal path: rerun docs/adr/ng-primitives-state-adapter.md for the target ng-primitives version; keep the package pin while this State<T> fallback is needed; remove the fallback once public value+disabled setters support silent CVA writes.';
 
 type WritableStateChannel<T> = { set: (value: T) => void };
 type StateSetterOptions = { emit?: boolean };
@@ -51,7 +57,7 @@ type RadioGroupStateWriter<T> = State<NgpRadioGroup<T>> &
 function assertObjectState(state: unknown, operation: string, channel: string): asserts state is object {
   if (!state || typeof state !== 'object') {
     throw new Error(
-      `[hell-ngp-state-writer ${HELL_NGP_STATE_WRITER_VERSION}] ${operation} requires state.${channel}.set from ng-primitives State<T>, received ${String(state)}.`,
+      `[hell-ngp-state-writer ${HELL_NGP_STATE_WRITER_VERSION}] ${operation} requires state.${channel}.set from ng-primitives State<T>, received ${String(state)}. ${HELL_NGP_STATE_WRITER_UPGRADE_PATH}`,
     );
   }
 }
@@ -74,7 +80,7 @@ function assertWritableValueSignal<T>(
   if (!isWritableSignalLike<T>(value)) {
     throw new Error(
       `[hell-ngp-state-writer ${HELL_NGP_STATE_WRITER_VERSION}] ${operation} requires state.value.set to be callable. ` +
-        `Expected ng-primitives ${HELL_NGP_STATE_WRITER_VERSION} writable State<T> signal for channel "value", received ${typeof value}.`,
+        `Expected ng-primitives ${HELL_NGP_STATE_WRITER_VERSION} writable State<T> signal for channel "value", received ${typeof value}. ${HELL_NGP_STATE_WRITER_UPGRADE_PATH}`,
     );
   }
 }
@@ -89,7 +95,7 @@ function assertWritableDisabledSignal(
   if (!isWritableSignalLike<boolean>(disabled)) {
     throw new Error(
       `[hell-ngp-state-writer ${HELL_NGP_STATE_WRITER_VERSION}] ${operation} requires state.disabled.set to be callable. ` +
-        `Expected ng-primitives ${HELL_NGP_STATE_WRITER_VERSION} writable State<T> signal for channel "disabled", received ${typeof disabled}.`,
+        `Expected ng-primitives ${HELL_NGP_STATE_WRITER_VERSION} writable State<T> signal for channel "disabled", received ${typeof disabled}. ${HELL_NGP_STATE_WRITER_UPGRADE_PATH}`,
     );
   }
 }

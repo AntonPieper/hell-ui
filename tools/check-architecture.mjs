@@ -1531,6 +1531,7 @@ function checkNgpStateWriterContract() {
   ]);
   const stateWriterTokens = [
     'HELL_NGP_STATE_WRITER_VERSION',
+    'HELL_NGP_STATE_WRITER_UPGRADE_PATH',
     'writeSelectStateValue',
     'writeSelectStateDisabled',
     'writeComboboxStateValue',
@@ -1547,7 +1548,7 @@ function checkNgpStateWriterContract() {
     'writeRadioGroupPrivateValue',
     'writeRadioGroupPrivateDisabled',
   ];
-  const privateStateWritePatterns = [
+  const indexedStateWritePatterns = [
     {
       token: "state['value'].set(...) or state[\"value\"].set(...)",
       pattern: /\bstate\[['"]value['"]\]\.set\(/,
@@ -1556,16 +1557,70 @@ function checkNgpStateWriterContract() {
       token: "state['disabled'].set(...) or state[\"disabled\"].set(...)",
       pattern: /\bstate\[['"]disabled['"]\]\.set\(/,
     },
+    {
+      token: "state()['value'].set(...) or state()[\"value\"].set(...)",
+      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*\(\)\[['"]value['"]\]\.set\(/,
+    },
+    {
+      token: "state()['disabled'].set(...) or state()[\"disabled\"].set(...)",
+      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*\(\)\[['"]disabled['"]\]\.set\(/,
+    },
+  ];
+  const directStateChannelWritePatterns = [
+    {
+      token: 'State<T>.value.set(...)',
+      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\.value\.set\(/,
+    },
+    {
+      token: 'State<T>.disabled.set(...)',
+      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\.disabled\.set\(/,
+    },
+    {
+      token: "State<T>['value'].set(...) or State<T>[\"value\"].set(...)",
+      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\[['"]value['"]\]\.set\(/,
+    },
+    {
+      token: "State<T>['disabled'].set(...) or State<T>[\"disabled\"].set(...)",
+      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\[['"]disabled['"]\]\.set\(/,
+    },
+  ];
+  const directPrimitiveStateAccessPattern = /\b(?:this\.)?[A-Za-z_$][\w$]*\.state\b/;
+  const guardedFormStateTokens = [
+    'NgpSelect',
+    'NgpCombobox',
+    'NgpRadioGroup',
+    'injectSelectState',
+    'injectComboboxState',
+    'injectRadioGroupState',
+    'State<NgpSelect',
+    'State<NgpCombobox',
+    'State<NgpRadioGroup',
   ];
   const sourceFiles = walk(join(root, 'projects/hell/src/lib')).filter((file) => file.endsWith('.ts'));
 
   for (const file of sourceFiles) {
     const source = readFile(file);
     const rel = file.slice(root.length + 1);
-    if (!rel.endsWith('.spec.ts')) {
-      for (const { token, pattern } of privateStateWritePatterns) {
+    const isSpec = rel.endsWith('.spec.ts');
+    const isAdapter = rel === adapterRelPath;
+    const usesGuardedFormState = guardedFormStateTokens.some((token) => source.includes(token));
+
+    if (!isSpec) {
+      for (const { token, pattern } of indexedStateWritePatterns) {
         if (pattern.test(source)) {
-          failures.push(`Private ng-primitives state channel write ${token} is not allowed in ${rel}`);
+          failures.push(`Ad hoc ng-primitives State<T> channel write ${token} is not allowed in ${rel}; use ${adapterRelPath}`);
+        }
+      }
+
+      if (usesGuardedFormState && !isAdapter) {
+        for (const { token, pattern } of directStateChannelWritePatterns) {
+          if (pattern.test(source)) {
+            failures.push(`Ad hoc ng-primitives ${token} is not allowed in ${rel}; use ${adapterRelPath}`);
+          }
+        }
+
+        if (directPrimitiveStateAccessPattern.test(source)) {
+          failures.push(`Direct ng-primitives primitive .state access is not allowed in ${rel}; use injected State<T> through ${adapterRelPath}`);
         }
       }
     }

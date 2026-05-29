@@ -10,6 +10,7 @@ import { HELL_COMBOBOX_DIRECTIVES } from '../combobox/combobox';
 import { HellRadio, HellRadioGroup } from '../radio/radio';
 import { HELL_SELECT_DIRECTIVES } from '../select/select';
 import {
+  HELL_NGP_STATE_WRITER_UPGRADE_PATH,
   HELL_NGP_STATE_WRITER_VERSION,
   writeComboboxStateDisabled,
   writeComboboxStateValue,
@@ -193,13 +194,16 @@ function expectAdapterError(fn: () => void, operation: string, detail: RegExp): 
 
   expect(message).toBeDefined();
   expect(message).toContain(HELL_NGP_STATE_WRITER_VERSION);
+  expect(message).toContain(HELL_NGP_STATE_WRITER_UPGRADE_PATH);
   expect(message).toContain(operation);
   expect(message).toMatch(detail);
 }
 
 describe('ngp form-state compatibility helpers', () => {
-  it('documents the installed ng-primitives version this form-state adapter targets', () => {
+  it('documents the installed ng-primitives version and upgrade/removal path this form-state adapter targets', () => {
     expect(HELL_NGP_STATE_WRITER_VERSION).toBe('ng-primitives@0.117.2');
+    expect(HELL_NGP_STATE_WRITER_UPGRADE_PATH).toContain('docs/adr/ng-primitives-state-adapter.md');
+    expect(HELL_NGP_STATE_WRITER_UPGRADE_PATH).toContain('public value+disabled setters');
   });
 
   describe('installed ng-primitives public typed State<T> channel drift', () => {
