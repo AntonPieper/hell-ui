@@ -43,7 +43,9 @@ const FRUITS = [
       <button hellComboboxButton type="button" aria-label="Toggle options"></button>
       <div *hellComboboxPortal hellComboboxDropdown>
         @for (option of filtered(); track option) {
-          <div hellComboboxOption [value]="option">{{ option }}</div>
+          <div hellComboboxOption [value]="option" [disabled]="option === disabledFruit">
+            {{ option }}
+          </div>
         } @empty {
           <div hellComboboxEmpty>No matches</div>
         }
@@ -53,6 +55,7 @@ const FRUITS = [
 })
 export class ComboboxBasicExample {
   protected readonly value = signal<string | null>(null);
+  protected readonly disabledFruit = 'Blackberry';
   protected readonly filter = signal('');
   protected readonly filtered = computed(() => {
     const q = this.filter().toLowerCase();

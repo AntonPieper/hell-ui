@@ -24,7 +24,9 @@ const PRIORITIES = ['Lowest', 'Low', 'Medium', 'High', 'Highest'];
       <ng-template hellSelectPortal>
         <div hellSelectDropdown>
           @for (option of options; track option) {
-            <div hellSelectOption [value]="option">{{ option }}</div>
+            <div hellSelectOption [value]="option" [disabled]="option === disabledPriority">
+              {{ option }}
+            </div>
           }
         </div>
       </ng-template>
@@ -33,5 +35,6 @@ const PRIORITIES = ['Lowest', 'Low', 'Medium', 'High', 'Highest'];
 })
 export class SelectBasicExample {
   protected readonly options = PRIORITIES;
+  protected readonly disabledPriority = 'Medium';
   protected readonly value = signal<string | null>(null);
 }
