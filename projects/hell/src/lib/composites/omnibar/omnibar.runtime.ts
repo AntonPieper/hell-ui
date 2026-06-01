@@ -7,6 +7,10 @@ import {
   type HellSearchSource,
 } from '../../core/search';
 import type { HellOmnibarRegisteredAction, HellOmnibarRegisteredItem } from './omnibar';
+import {
+  HellOmnibarActiveItemController,
+  type HellOmnibarActiveItemSnapshot,
+} from './omnibar.active-item';
 
 /** Search inputs captured from the component at the moment a query runs. */
 export interface HellOmnibarSearchOptions<T> {
@@ -35,17 +39,16 @@ export class HellOmnibarRuntime<T = unknown> {
   readonly items = signal<HellOmnibarRegisteredItem[]>([]);
   readonly actionItems = signal<HellOmnibarRegisteredAction[]>([]);
 
+  private readonly activeItemController =
+    new HellOmnibarActiveItemController<HellOmnibarRegisteredItem>();
   private readonly activeIndexState = signal(0);
   private timer: ReturnType<typeof setTimeout> | null = null;
   private controller: AbortController | null = null;
   private requestId = 0;
 
-  readonly activeIndex = computed(() => {
-    const items = this.enabledItems();
-    if (!items.length) return -1;
-    const i = this.activeIndexState();
-    return Math.max(0, Math.min(i, items.length - 1));
-  });
+  readonly activeIndex = computed(() =>
+    this.activeItemController.activeIndex(this.activeSnapshot()),
+  );
 
   readonly activeItemId = computed(() => this.activeItem()?.itemId ?? null);
 
@@ -57,7 +60,7 @@ export class HellOmnibarRuntime<T = unknown> {
   }
 
   resetActive(): void {
-    this.activeIndexState.set(0);
+    this.activeIndexState.set(this.activeItemController.reset());
   }
 
   setQuery(query: string): void {
@@ -127,9 +130,9 @@ export class HellOmnibarRuntime<T = unknown> {
   }
 
   setActive(item: HellOmnibarRegisteredItem): void {
-    if (item.disabled()) return;
-    const idx = this.enabledItems().indexOf(item);
-    if (idx >= 0) this.activeIndexState.set(idx);
+    const snapshot = this.activeSnapshot();
+    const next = this.activeItemController.setActive(snapshot, item);
+    if (next !== snapshot.activeIndex) this.activeIndexState.set(next);
   }
 
   isActive(item: HellOmnibarRegisteredItem): boolean {
@@ -137,29 +140,27 @@ export class HellOmnibarRuntime<T = unknown> {
   }
 
   activeItem(): HellOmnibarRegisteredItem | null {
-    const enabledItems = this.enabledItems();
-    return enabledItems[this.activeIndex()] ?? null;
+    return this.activeItemController.activeItem(this.activeSnapshot());
   }
 
   moveActive(delta: number): void {
-    const enabledItems = this.enabledItems();
-    const len = enabledItems.length;
-    if (!len) return;
-    const cur = this.activeIndex();
-    let next = cur + delta;
-    if (next < 0) next = len - 1;
-    if (next >= len) next = 0;
-    this.activeIndexState.set(next);
-    enabledItems[next]?.scrollIntoView();
+    const movement = this.activeItemController.move(this.activeSnapshot(), delta);
+    if (!movement.item) return;
+
+    this.activeIndexState.set(movement.activeIndex);
+    movement.item.scrollIntoView();
   }
 
   firstActive(): void {
-    if (this.enabledItems().length) this.activeIndexState.set(0);
+    const snapshot = this.activeSnapshot();
+    const next = this.activeItemController.first(snapshot);
+    if (next !== snapshot.activeIndex) this.activeIndexState.set(next);
   }
 
   lastActive(): void {
-    const length = this.enabledItems().length;
-    if (length) this.activeIndexState.set(length - 1);
+    const snapshot = this.activeSnapshot();
+    const next = this.activeItemController.last(snapshot);
+    if (next !== snapshot.activeIndex) this.activeIndexState.set(next);
   }
 
   registerAction(action: HellOmnibarRegisteredAction): void {
@@ -170,8 +171,8 @@ export class HellOmnibarRuntime<T = unknown> {
     this.actionItems.update((list) => list.filter((a) => a !== action));
   }
 
-  private enabledItems(): HellOmnibarRegisteredItem[] {
-    return this.items().filter((item) => !item.disabled());
+  private activeSnapshot(): HellOmnibarActiveItemSnapshot<HellOmnibarRegisteredItem> {
+    return { items: this.items(), activeIndex: this.activeIndexState() };
   }
 
   private clearTimer(): void {
