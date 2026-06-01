@@ -33,9 +33,9 @@ Source of truth:
   "acceptedWarnings": [
     {
       "type": "initial",
-      "acceptedMaximum": "775kB",
+      "acceptedMaximum": "776kB",
       "owner": "Docs shell / global styles",
-      "rationale": "HELL-030 traced the current initial warning to the docs shell baseline rather than a single routed page, and HELL-031 removed the PDF component-style warning. The remaining initial overage is accepted only while HELL-050 audits eager example imports and HELL-049 decides the production-readiness gate.",
+      "rationale": "HELL-030 traced the current initial warning to the docs shell baseline rather than a single routed page, HELL-031 removed the PDF component-style warning, and HELL-043 added one docs-shell catalog/search route for the accessibility matrix. The remaining initial overage is accepted only while HELL-050 audits eager example imports and HELL-049 decides the production-readiness gate.",
       "evidence": "docs/release/docs-bundle-budget-diagnosis.md",
       "followUp": "HELL-050",
       "expiresWhen": "Close HELL-050 or any build that reaches the initial maximumError threshold."
@@ -55,6 +55,6 @@ Source of truth:
 
 | Budget | Accepted ceiling | Owner | Why accepted now | Follow-up / expiry |
 | --- | ---: | --- | --- | --- |
-| Initial bundle warning | 775 kB | Docs shell / global styles | HELL-030 showed the overage is the docs shell baseline; HELL-031 removed the PDF component-style warning. This is accepted only as an alpha docs-shell overage, not as permission for new eager imports. | HELL-050 audits future eager imports; HELL-049 decides whether production readiness lowers, raises, or blocks on this budget. Expires immediately if the accepted ceiling or initial error budget is reached. |
+| Initial bundle warning | 776 kB | Docs shell / global styles | HELL-030 showed the overage is the docs shell baseline; HELL-031 removed the PDF component-style warning; HELL-043 adds one catalog/search route for the accessibility matrix. This is accepted only as an alpha docs-shell overage, not as permission for new eager imports. | HELL-050 audits future eager imports; HELL-049 decides whether production readiness lowers, raises, or blocks on this budget. Expires immediately if the accepted ceiling or initial error budget is reached. |
 
 No `anyComponentStyle` warning is accepted. If one appears, treat it as a regression until this policy records a specific owner, rationale, evidence, and follow-up slice.

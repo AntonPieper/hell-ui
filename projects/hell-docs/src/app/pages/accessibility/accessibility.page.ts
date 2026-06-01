@@ -1,0 +1,591 @@
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+
+interface AccessibilityMatrixRow {
+  readonly kind: 'Primitive' | 'Composite' | 'Feature';
+  readonly name: string;
+  readonly path: string;
+  readonly rolePattern: string;
+  readonly keyboardCoverage: string;
+  readonly automatedCoverage: string;
+  readonly knownGaps: string;
+  readonly criticalGap?: boolean;
+}
+
+const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
+  {
+    kind: 'Primitive',
+    name: 'Accordion',
+    path: '/components/accordion',
+    rolePattern: 'Disclosure/accordion: button triggers control expandable content through ng-primitives.',
+    keyboardCoverage: 'Native button Enter/Space is delegated; APG arrow/Home/End behavior is not browser-covered.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Critical gap: add accordion keyboard and role/name/state browser coverage before production-ready claims.',
+    criticalGap: true,
+  },
+  {
+    kind: 'Primitive',
+    name: 'Avatar',
+    path: '/components/avatar',
+    rolePattern: 'Image with fallback initials; decorative only when consumers provide empty alt text intentionally.',
+    keyboardCoverage: 'None required for the avatar surface itself.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Consumer docs still need stronger guidance for meaningful image alt text versus decorative avatars.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Breadcrumbs',
+    path: '/components/breadcrumbs',
+    rolePattern: 'Navigation landmark with ordered/list items, links, aria-current page, and optional ellipsis button.',
+    keyboardCoverage: 'Native link/button keyboard only.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Hidden-crumb menu behavior is consumer-owned and not covered by a Hell browser contract.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Button',
+    path: '/components/button',
+    rolePattern: 'Native button or anchor styling; Hell does not replace platform semantics.',
+    keyboardCoverage: 'Native Enter/Space for buttons and Enter for links.',
+    automatedCoverage: 'Axe docs smoke covers the public button page.',
+    knownGaps: 'No dedicated browser contract beyond platform behavior; icon-only buttons still require consumer names.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Card',
+    path: '/components/card',
+    rolePattern: 'Semantic-neutral layout container with header/body/footer slots.',
+    keyboardCoverage: 'None required unless projected content is interactive.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Consumers own headings, landmarks, and interactive descendants.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Checkbox',
+    path: '/components/checkbox',
+    rolePattern: 'Custom role=checkbox button plus native input[type=checkbox] variant.',
+    keyboardCoverage: 'Browser smoke checks custom/native semantics and click state; full Space/required/indeterminate path is not covered.',
+    automatedCoverage: 'Browser behavior smoke covers custom versus native semantics. No axe smoke or ARIA snapshot yet.',
+    knownGaps: 'Critical gap: add keyboard, required, disabled, and indeterminate browser/ARIA coverage.',
+    criticalGap: true,
+  },
+  {
+    kind: 'Primitive',
+    name: 'Combobox',
+    path: '/components/combobox',
+    rolePattern: 'Editable combobox with listbox popup and role=option rows; focus stays on the input via aria-activedescendant.',
+    keyboardCoverage: 'Browser matrix covers ArrowUp/Down, Home/End, Enter, Escape, filtering, and disabled option skip.',
+    automatedCoverage: 'Axe docs smoke, ARIA snapshots, browser behavior smoke, and dedicated keyboard matrix test cover public examples.',
+    knownGaps: 'Multiple-selection behavior and async option loading are not yet covered by browser tests.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Date picker',
+    path: '/components/date-picker',
+    rolePattern: 'Calendar grid/table with month/year navigation buttons and date buttons from ng-primitives.',
+    keyboardCoverage: 'Delegated to ng-primitives; no Hell browser contract proves grid navigation, month/year buttons, or range mode.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Critical gap: calendar grid keyboard and range-selection semantics are not release evidence.',
+    criticalGap: true,
+  },
+  {
+    kind: 'Primitive',
+    name: 'Dialog',
+    path: '/components/dialog',
+    rolePattern: 'Modal dialog with title/description wiring, overlay, focus trap, Escape close, outside-click close, and focus restore.',
+    keyboardCoverage: 'Browser contract covers initial focus, Tab/Shift+Tab wrap, Escape close, and trigger focus restore in styled and unstyled modes.',
+    automatedCoverage: 'Axe docs smoke, ARIA snapshot, and browser focus-trap contract cover public examples.',
+    knownGaps: 'No critical gap recorded; nested/stacked dialogs remain outside the current contract.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Field',
+    path: '/components/field',
+    rolePattern: 'Form-field shell that wires label, description, and error ids to the nested control.',
+    keyboardCoverage: 'None required on the shell; nested controls own keyboard behavior.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Consumer can still omit an actual label; docs examples cover the happy path but no browser assertion enforces it.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Flyout',
+    path: '/components/flyout',
+    rolePattern: 'Anchored non-modal dialog surface with aria-haspopup/expanded/controls on the trigger and aria-modal=false on the panel.',
+    keyboardCoverage: 'Floating dismissal browser harness covers Escape, outside pointer/focus dismissal, nested surfaces, and focus restoration guards.',
+    automatedCoverage: 'Browser floating-dismissal contract covers runtime dismissal. No axe smoke or ARIA snapshot yet.',
+    knownGaps: 'Critical gap: non-modal dialog naming and tab-order expectations are not covered on the public docs page.',
+    criticalGap: true,
+  },
+  {
+    kind: 'Primitive',
+    name: 'Icon',
+    path: '/components/icon',
+    rolePattern: 'Decorative aria-hidden icon by default; optional role=img with aria-label for meaningful standalone icons.',
+    keyboardCoverage: 'None required.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Consumers can misuse meaningful icons without labels; no automated example checks that guidance.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Input and native select',
+    path: '/components/input',
+    rolePattern: 'Native input, textarea, and select elements with invalid-state styling.',
+    keyboardCoverage: 'Platform keyboard behavior only.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Relies on Field or consumer labels; no docs axe page currently proves the combined labeled forms story.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Listbox',
+    path: '/components/listbox',
+    rolePattern: 'role=listbox with role=option children through ng-primitives listbox.',
+    keyboardCoverage: 'Browser behavior smoke covers focus, End, Enter selection, and aria-selected on the docs example.',
+    automatedCoverage: 'Browser behavior smoke exists. No axe smoke or ARIA snapshot yet.',
+    knownGaps: 'Critical gap: add full Arrow/Home/End/disabled/multiple-mode matrix plus axe/ARIA coverage.',
+    criticalGap: true,
+  },
+  {
+    kind: 'Primitive',
+    name: 'Menu',
+    path: '/components/menu',
+    rolePattern: 'Menu button with role=menu, menuitem rows, groups, separators, and submenu triggers.',
+    keyboardCoverage: 'Browser matrix covers Enter/Space open/activate, ArrowUp/Down, Home/End, disabled skip, Escape, submenu open, and focus restore.',
+    automatedCoverage: 'Axe docs smoke, ARIA snapshot, browser behavior smoke, and dedicated keyboard matrix test cover public examples.',
+    knownGaps: 'No critical gap recorded; typeahead is not claimed or covered.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Pagination',
+    path: '/components/pagination',
+    rolePattern: 'Navigation landmark with native page/first/previous/next/last buttons and current-page labels.',
+    keyboardCoverage: 'Native button keyboard only.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'No browser assertion for aria-labels, disabled edge buttons, or current page announcement.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Popover',
+    path: '/components/popover',
+    rolePattern: 'Anchored non-modal popover content delegated to ng-primitives; content semantics are consumer-owned.',
+    keyboardCoverage: 'Delegated Escape/outside-click behavior is not covered by a Hell browser test.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Critical gap: focus movement, close behavior, and accessible naming are not proven for the public docs example.',
+    criticalGap: true,
+  },
+  {
+    kind: 'Primitive',
+    name: 'Progress',
+    path: '/components/progress',
+    rolePattern: 'role=progressbar with value/max state delegated to ng-primitives and visible labels in examples.',
+    keyboardCoverage: 'None required.',
+    automatedCoverage: 'ARIA snapshot covers labeled values on the public docs examples. No axe/browser interaction test yet.',
+    knownGaps: 'No critical gap recorded; indeterminate/labeled edge cases are not in browser evidence.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Radio',
+    path: '/components/radio',
+    rolePattern: 'Radiogroup with custom button radios plus native radio-group/input variants.',
+    keyboardCoverage: 'Delegated to ng-primitives/native controls; browser key traversal is not covered.',
+    automatedCoverage: 'ARIA snapshots cover named groups and checked state. No axe smoke or browser keyboard test yet.',
+    knownGaps: 'Critical gap: add Arrow/Home/End/disabled/required browser coverage for custom radio groups.',
+    criticalGap: true,
+  },
+  {
+    kind: 'Primitive',
+    name: 'Search',
+    path: '/components/search',
+    rolePattern: 'Native search input styling plus clear button primitive.',
+    keyboardCoverage: 'Platform search input and native button keyboard only.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Clear-button accessible name and focus behavior are not browser-covered outside the Omnibar composite.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Select',
+    path: '/components/select',
+    rolePattern: 'Select-only combobox trigger with listbox popup and role=option rows; active option via aria-activedescendant.',
+    keyboardCoverage: 'Browser matrix covers ArrowUp/Down, Home/End, Enter, Space, Escape, disabled skip, and selected state.',
+    automatedCoverage: 'Axe docs smoke, ARIA snapshots, browser behavior smoke, and dedicated keyboard matrix test cover public examples.',
+    knownGaps: 'Multiple selection and form-field error announcement are not yet browser-covered.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Separator',
+    path: '/components/separator',
+    rolePattern: 'role=separator with horizontal/vertical orientation through ng-primitives.',
+    keyboardCoverage: 'None required for static separators.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Low-risk static primitive; no critical gap recorded.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Skeleton',
+    path: '/components/skeleton',
+    rolePattern: 'Pure loading placeholder that is aria-hidden by default.',
+    keyboardCoverage: 'None required.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Low-risk visual primitive; consumers still need real loading text when state must be announced.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Spinner',
+    path: '/components/spinner',
+    rolePattern: 'Indeterminate role=status indicator with a configurable loading label.',
+    keyboardCoverage: 'None required.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Status naming is unit-level only; the public spinner docs route does not have axe/ARIA evidence.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Slider',
+    path: '/components/slider',
+    rolePattern: 'Single-value role=slider through ng-primitives with aria-label supplied by the consumer.',
+    keyboardCoverage: 'Source docs claim arrows and Home/End; no browser test proves it on the public page.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Critical gap: add browser keyboard, disabled, vertical, and accessible-name coverage.',
+    criticalGap: true,
+  },
+  {
+    kind: 'Primitive',
+    name: 'Switch',
+    path: '/components/switch',
+    rolePattern: 'Custom button switch plus native input[type=checkbox][role=switch] variant.',
+    keyboardCoverage: 'Delegated to ng-primitives/native controls; no browser test proves Space/disabled/forms behavior.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Critical gap: add keyboard, name, checked state, disabled, and native/custom parity coverage.',
+    criticalGap: true,
+  },
+  {
+    kind: 'Primitive',
+    name: 'Tabs',
+    path: '/components/tabs',
+    rolePattern: 'Tabset with tablist, tab buttons, and tab panels delegated to ng-primitives.',
+    keyboardCoverage: 'Delegated roving focus/activation; no browser test proves Arrow/Home/End/manual activation behavior.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Critical gap: add tablist keyboard and role/name/state snapshots before production-ready claims.',
+    criticalGap: true,
+  },
+  {
+    kind: 'Primitive',
+    name: 'Tag, badge, and kbd',
+    path: '/components/tag',
+    rolePattern: 'Semantic-neutral badge/tag styling and native kbd hint styling.',
+    keyboardCoverage: 'None required unless used as projected interactive content.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Consumers must not use visual tags as fake buttons without real interactive elements.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Toggle',
+    path: '/components/toggle',
+    rolePattern: 'Pressed toggle button and role=group toggle groups through ng-primitives.',
+    keyboardCoverage: 'Native button Enter/Space; group roving behavior is not browser-covered.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'No browser assertion for aria-pressed/selected state, disabled items, or single versus multiple groups.',
+  },
+  {
+    kind: 'Primitive',
+    name: 'Tooltip',
+    path: '/components/tooltip',
+    rolePattern: 'role=tooltip floating content delegated to ng-primitives; trigger description relationship is delegated/consumer-dependent.',
+    keyboardCoverage: 'Show/hide on focus/hover is not covered by a Hell browser test.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Critical gap: accessible description wiring, delay, hoverable content, and Escape behavior are not release evidence.',
+    criticalGap: true,
+  },
+  {
+    kind: 'Composite',
+    name: 'App shell',
+    path: '/components/app-shell',
+    rolePattern: 'Application layout slots: topbar, sidenav, main content, optional secondary panel, and mobile panel focus trap.',
+    keyboardCoverage: 'Escape/pointer dismissal exists in source for mobile panels; no browser contract covers responsive focus trapping.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Mobile focus trap, restore target, and landmark guidance need browser coverage before broad app-shell claims.',
+  },
+  {
+    kind: 'Composite',
+    name: 'Audio player',
+    path: '/components/audio-player',
+    rolePattern: 'Native audio element with custom buttons, seek/volume sliders, download link, and optional non-modal transcript flyout.',
+    keyboardCoverage: 'Buttons/sliders use native/Hell primitives; no dedicated browser test covers player keyboard flow.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Speech transcript is explicitly best-effort and not accessibility captions or timed text.',
+  },
+  {
+    kind: 'Composite',
+    name: 'Avatar group',
+    path: '/components/avatar-group',
+    rolePattern: 'Visual stacked-avatar layout; projected controls own semantics.',
+    keyboardCoverage: 'None required unless projected content is interactive.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Overflow menus and selection affordances are consumer-composed and not covered here.',
+  },
+  {
+    kind: 'Composite',
+    name: 'Date input',
+    path: '/components/date-input',
+    rolePattern: 'Text input with calendar popover trigger and embedded date picker.',
+    keyboardCoverage: 'Enter commits typed text; picker/popover keyboard behavior lacks browser evidence.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Critical composite gap: invalid draft, picker navigation, field label/error wiring, and popover close are not covered.',
+    criticalGap: true,
+  },
+  {
+    kind: 'Composite',
+    name: 'Dialpad',
+    path: '/components/dialpad',
+    rolePattern: 'role=group with focusable keypad container, native digit/backspace/call buttons, and polite output.',
+    keyboardCoverage: 'Source handles digit keys and Backspace on the focused dialpad; no browser test covers it.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Needs browser coverage for keyboard digit entry, live output, and call/backspace button names.',
+  },
+  {
+    kind: 'Composite',
+    name: 'Drop zone',
+    path: '/components/drop-zone',
+    rolePattern: 'Focusable role=button drop target backed by a native file input seam.',
+    keyboardCoverage: 'Enter/Space/click path is source-backed; browser smoke covers click file selection and drag state stability.',
+    automatedCoverage: 'Browser behavior smoke covers public docs example. No axe smoke or ARIA snapshot yet.',
+    knownGaps: 'No browser assertion for Space key, disabled state, accept/multiple constraints, or error messaging.',
+  },
+  {
+    kind: 'Composite',
+    name: 'Omnibar',
+    path: '/components/omnibar',
+    rolePattern: 'Command/search combobox with listbox results, aria-activedescendant, optional actions strip, and global hotkey.',
+    keyboardCoverage: 'ARIA snapshot covers expanded input/results; floating-dismissal harness covers portaled F6 panel focus and outside focus close.',
+    automatedCoverage: 'ARIA snapshots and floating-dismissal browser contract cover key state. No axe smoke or full keyboard matrix yet.',
+    knownGaps: 'Critical composite gap: global hotkey, disabled skip, action-strip traversal, submit, and async error states lack browser matrix coverage.',
+    criticalGap: true,
+  },
+  {
+    kind: 'Composite',
+    name: 'Resizable',
+    path: '/components/resizable',
+    rolePattern: 'role=separator handles with aria-orientation, aria-valuemin/max/now, aria-controls, and pane size changes.',
+    keyboardCoverage: 'Browser behavior smoke covers focus and ArrowRight value changes.',
+    automatedCoverage: 'Browser behavior smoke exists. No axe smoke or ARIA snapshot yet.',
+    knownGaps: 'No browser coverage for vertical, RTL, Home/End, constrained/disabled handles, or pointer drag.',
+  },
+  {
+    kind: 'Composite',
+    name: 'Split view',
+    path: '/components/split-view',
+    rolePattern: 'Master/detail composition that embeds Resizable handles on wide layouts and a Back button on compact layouts.',
+    keyboardCoverage: 'Inherits Resizable keyboard on wide layout; compact Back button is native. No split-view-specific browser test.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Compact breakpoint navigation and detail-open state are not covered by browser tests.',
+  },
+  {
+    kind: 'Composite',
+    name: 'Time input',
+    path: '/components/time-input',
+    rolePattern: 'Text input with clock popover and roving time-unit picker grids.',
+    keyboardCoverage: 'Source claims arrow/Home/End picker movement and +/- 5 minute nudges; no browser test proves it.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Critical composite gap: picker keyboard model, labels, invalid draft, and popover close are not release evidence.',
+    criticalGap: true,
+  },
+  {
+    kind: 'Composite',
+    name: 'Toast',
+    path: '/components/toast',
+    rolePattern: 'Labeled notification region plus CDK LiveAnnouncer announcements; visible stack is not a live region.',
+    keyboardCoverage: 'Action/close buttons are native. Browser smoke covers region semantics after opening a toast.',
+    automatedCoverage: 'Browser behavior smoke includes an axe check on the notification region. No ARIA snapshot yet.',
+    knownGaps: 'No browser assertion for pausing, persistent toasts, action focus, or custom-template announcement text.',
+  },
+  {
+    kind: 'Feature',
+    name: 'Code editor',
+    path: '/components/code-editor',
+    rolePattern: 'CodeMirror editor/viewer widget inside the experimental feature entry point.',
+    keyboardCoverage: 'CodeMirror owns editor keyboard behavior; Hell has no browser accessibility contract for it.',
+    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    knownGaps: 'Experimental/browser-only feature. Do not claim production accessibility until CodeMirror role/name/read-only behavior is tested.',
+  },
+  {
+    kind: 'Feature',
+    name: 'PDF viewer',
+    path: '/components/pdf-viewer',
+    rolePattern: 'Experimental pdf.js viewer shell with toolbar buttons, find searchbox, page spinbutton, zoom select, and thumbnail overview.',
+    keyboardCoverage: 'Browser smoke covers Ctrl/Cmd+F find, Escape close, overview toggle, thumbnail activation, and page spinbutton smoke.',
+    automatedCoverage: 'Axe docs smoke covers the viewer shell. Browser behavior smoke covers key controls. No ARIA snapshot yet.',
+    knownGaps: 'Experimental app-surface recipe: PDF text-layer reading, worker compatibility, printing, and document-level shortcuts are not production proof.',
+  },
+  {
+    kind: 'Feature',
+    name: 'Table utilities',
+    path: '/components/data-table',
+    rolePattern: 'Native table markup with sortable header buttons, optional selectable rows, and role=separator column resizers.',
+    keyboardCoverage: 'Browser behavior covers column-resizer ArrowRight and nested row controls avoiding row selection.',
+    automatedCoverage: 'Axe docs smoke, ARIA snapshot, and browser behavior smoke cover public docs examples.',
+    knownGaps: 'Not a data grid. Grid navigation, multi-row selection model, and full table boundary are deferred to HELL-044.',
+  },
+  {
+    kind: 'Feature',
+    name: 'Data table compatibility alias',
+    path: '/components/data-table',
+    rolePattern: 'Deprecated entry-point alias for Table utilities; no separate data-grid semantics are provided.',
+    keyboardCoverage: 'Same coverage as Table utilities.',
+    automatedCoverage: 'Same axe, ARIA, and browser evidence as Table utilities.',
+    knownGaps: 'Alias must not be marketed as a full data-table/grid implementation.',
+  },
+];
+
+@Component({
+  selector: 'hd-accessibility',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink],
+  styles: [
+    `
+      :host {
+        display: block;
+      }
+
+      .hd-a11y-summary {
+        display: grid;
+        gap: var(--spacing-hell-3);
+        margin-block: var(--spacing-hell-4);
+        padding: var(--spacing-hell-4);
+        border: 1px solid var(--color-hell-border);
+        border-radius: var(--radius-hell-lg);
+        background: var(--color-hell-surface);
+      }
+
+      .hd-a11y-table-wrap {
+        max-width: 100%;
+        overflow: auto;
+        margin-block: var(--spacing-hell-4);
+        border: 1px solid var(--color-hell-border);
+        border-radius: var(--radius-hell-lg);
+        background: var(--color-hell-surface);
+      }
+
+      .hd-a11y-table {
+        width: 100%;
+        min-width: 1120px;
+        border-collapse: collapse;
+        font-size: var(--text-sm);
+        line-height: var(--leading-normal);
+      }
+
+      .hd-a11y-table th,
+      .hd-a11y-table td {
+        vertical-align: top;
+        padding: var(--spacing-hell-3);
+        border-bottom: 1px solid var(--color-hell-border);
+        text-align: start;
+      }
+
+      .hd-a11y-table th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: var(--color-hell-surface-elevated);
+        color: var(--color-hell-foreground);
+        font-weight: 700;
+      }
+
+      .hd-a11y-table tbody tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .hd-a11y-kind,
+      .hd-a11y-gap {
+        white-space: nowrap;
+      }
+
+      .hd-a11y-critical .hd-a11y-gap,
+      .hd-a11y-blocked {
+        color: var(--color-hell-danger);
+        font-weight: 700;
+      }
+
+      .hd-a11y-name {
+        font-weight: 700;
+      }
+    `,
+  ],
+  template: `
+    <article class="hd-doc-page">
+      <div class="hd-prose">
+        <h1>Accessibility support matrix</h1>
+        <p>
+          This matrix is the support claim for public Hell primitives, composites, and feature
+          entry points. It is intentionally conservative: a component is marked covered only when a
+          browser, axe, or ARIA snapshot test exists in the repository.
+        </p>
+
+        <div class="hd-a11y-summary" aria-label="Accessibility release status">
+          <p>
+            <strong class="hd-a11y-blocked">Production-ready accessibility claim is blocked.</strong>
+            {{ criticalGapCount }} public surfaces still have critical coverage gaps. Release notes,
+            package README copy, and npm descriptions must stay at internal beta / experimental
+            language until the release checklist is green.
+          </p>
+          <p>
+            Evidence sources: <code>docs-axe-smoke.spec.ts</code>,
+            <code>aria-snapshots.spec.ts</code>, <code>ui-behavior.spec.ts</code>,
+            <code>menu-select-combobox-keyboard.spec.ts</code>,
+            <code>floating-dismissal.spec.ts</code>, and
+            <code>docs/architecture/keyboard-navigation-matrix.md</code>.
+          </p>
+        </div>
+      </div>
+
+      <div class="hd-a11y-table-wrap" role="region" aria-label="Component accessibility support matrix" tabindex="0">
+        <table class="hd-a11y-table">
+          <thead>
+            <tr>
+              <th scope="col">Type</th>
+              <th scope="col">Surface</th>
+              <th scope="col">Role pattern</th>
+              <th scope="col">Keyboard coverage</th>
+              <th scope="col">Axe / ARIA / browser-test coverage</th>
+              <th scope="col">Known gaps</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of matrix; track row.kind + ':' + row.name) {
+              <tr [class.hd-a11y-critical]="row.criticalGap">
+                <td class="hd-a11y-kind">{{ row.kind }}</td>
+                <td>
+                  <a class="hd-a11y-name" [routerLink]="row.path">{{ row.name }}</a>
+                </td>
+                <td>{{ row.rolePattern }}</td>
+                <td>{{ row.keyboardCoverage }}</td>
+                <td>{{ row.automatedCoverage }}</td>
+                <td class="hd-a11y-gap">{{ row.knownGaps }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="hd-prose">
+        <h2>How to read this</h2>
+        <ul>
+          <li>
+            <strong>Native</strong> means Hell is intentionally relying on the browser element's
+            built-in keyboard behavior instead of reimplementing it.
+          </li>
+          <li>
+            <strong>Delegated</strong> means the role/keyboard contract comes from ng-primitives,
+            CDK, CodeMirror, or pdf.js, but Hell still needs browser evidence before it becomes a
+            production support claim.
+          </li>
+          <li>
+            <strong>Critical gap</strong> means release copy must not say production-ready for that
+            primitive/composite until the gap has a browser test or an explicit accepted exception.
+          </li>
+        </ul>
+      </div>
+    </article>
+  `,
+})
+export class AccessibilityPage {
+  protected readonly matrix = A11Y_MATRIX;
+  protected readonly criticalGapCount = A11Y_MATRIX.filter((row) => row.criticalGap).length;
+}

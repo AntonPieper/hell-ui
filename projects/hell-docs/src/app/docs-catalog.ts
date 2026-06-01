@@ -87,6 +87,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
         icon: 'faSolidPalette',
         loadComponent: () => import('./pages/theming/theming.page').then((m) => m.ThemingPage),
       },
+      {
+        routePath: 'accessibility',
+        label: 'Accessibility matrix',
+        icon: 'faSolidCheck',
+        loadComponent: () =>
+          import('./pages/accessibility/accessibility.page').then((m) => m.AccessibilityPage),
+      },
     ],
   },
   {

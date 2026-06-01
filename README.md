@@ -31,6 +31,14 @@ pnpm release:dry-run -- --full # release-candidate evidence gate
 full release-candidate gate. Trusted npm publishing and provenance setup is
 specified in `docs/release/npm-publishing.md`.
 
+## Production readiness
+
+Hell UI is not yet production-ready. The docs app accessibility matrix at
+`/accessibility` lists role patterns, keyboard coverage, axe/ARIA/browser-test
+evidence, and known gaps for every public primitive, composite, and feature. The
+release checklist in `docs/release/production-readiness-checklist.md` blocks any
+production-ready claim while critical accessibility gaps remain.
+
 The contributor workspace is pnpm-first and CI-backed by `pnpm-lock.yaml`.
 A root `package-lock.json` is also checked in so GitHub CI can smoke-test
 `npm ci`; packed-package consumer tests continue to verify npm installs for
