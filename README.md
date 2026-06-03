@@ -6,10 +6,10 @@
 
 Hell UI is a compact Angular component system for dense business applications.
 It favors directive-first primitives, optional styled primitives, opinionated
-composites, and heavier features behind feature-specific entry points.
+composites, and heavier features behind feature-specific entry points or split packages.
 The root `@hell-ui/angular` export is intentionally scoped to stable core only;
 primitives remain available through `/primitives` and narrow primitive entry
-points. Composites and features are intended for secondary entry points.
+points. Composites and kept features are intended for secondary entry points; the PDF viewer lives in `@hell-ui/pdf-viewer`.
 
 ## Workspace
 
@@ -103,11 +103,11 @@ Peer dependency tiers:
 | Core | `@hell-ui/angular`, `/core`, `/testing`; `root-core`, `core`, `testing` | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `ng-primitives`, `rxjs` |
 | Primitive | Narrow primitives such as `/button`; aggregate `/primitives`; `button-unstyled`, `button`, `primitives-css` | Core peers. Add `tailwindcss` when importing primitive CSS. Aggregate `/primitives` also asserts optional `@angular/router` and `@ng-icons/font-awesome` because dialog and icon-backed primitives are bundled in the aggregate FESM. |
 | Composite | `/composites` and narrow composite entry points such as `/app-shell`; `composites-css`, `app-shell` | Core peers plus `tailwindcss` for composite CSS. Aggregate/icon-backed composites also assert optional `@ng-icons/font-awesome`. |
-| Table utilities | `/features/table-utilities`, legacy `/features/data-table`; `table-utilities`, `data-table` | Core peers plus `tailwindcss`; no CodeMirror, pdf.js, router, or Font Awesome peers. |
+| Table utilities | `/features/table-utilities`, legacy `/features/data-table`; `table-utilities`, `data-table` | Core peers plus `tailwindcss`; no CodeMirror, router, or Font Awesome peers. |
 | Code editor | `/features/code-editor`; `code-editor` | Core peers plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight`. |
-| PDF viewer | `/features/pdf-viewer`; `pdf-viewer` | Core peers plus `tailwindcss`, `@ng-icons/font-awesome`, and exact `pdfjs-dist@5.6.205`; app must provide a pdf.js worker source. |
+| PDF viewer | `@hell-ui/pdf-viewer`; `pdf-viewer` | Separate package. Install the core peer group plus `@hell-ui/pdf-viewer`, `tailwindcss`, `@ng-icons/font-awesome`, and the package's pdf.js peer. |
 
-CodeMirror and pdf.js peers remain optional and are not required by the root or button package-consumer scenarios.
+CodeMirror peers remain optional and are not required by the root or button package-consumer scenarios. pdf.js belongs to `@hell-ui/pdf-viewer`, not `@hell-ui/angular`.
 
 ## Public API Tiers
 
@@ -117,7 +117,7 @@ CodeMirror and pdf.js peers remain optional and are not required by the root or 
 | Composites | Beta | `@hell-ui/angular/composites` and narrow composite entry points such as `@hell-ui/angular/app-shell` | Browser DOM + `document`/`window`/global listeners |
 | Table utilities | Beta | `@hell-ui/angular/features/table-utilities` | Uses `ResizeObserver`; browser-first |
 | Code editor | Beta/optional peer | `@hell-ui/angular/features/code-editor` | Needs `window` + `document` |
-| PDF viewer | Experimental | `@hell-ui/angular/features/pdf-viewer` | Experimental app surface/recipe; browser-only; requires `window`/`document`, app-provided pdf worker, global listeners, and your own pdf.js/browser compatibility decisions |
+| PDF viewer | Experimental split package | `@hell-ui/pdf-viewer` | Browser-only app surface/recipe owned outside `@hell-ui/angular` |
 | Testing harnesses | Beta/test-only | `@hell-ui/angular/testing` | CDK component harnesses for consumer and library tests |
 | Speech transcript | Experimental/best-effort (feature opt-in) | `@hell-ui/angular/composites` (`allowSpeechTranscript`, `allowLiveCaptions` alias) | Browser-only; uses `navigator` + `SpeechRecognition` + `captureStream`; best-effort only, not accessibility-grade captions/timed text |
 
@@ -134,9 +134,9 @@ production:
 ```
 
 `@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` are
-kitchen-sink/legacy aliases: primitives, composites, and every feature
-stylesheet, including CodeMirror and PDF viewer styling. Use them only when the
-app intentionally accepts all feature styles.
+kitchen-sink/legacy aliases: primitives, composites, and kept in-package feature
+styles such as CodeMirror. Use them only when the app intentionally accepts all
+in-package feature styles.
 
 ```css
 @import "@hell-ui/angular/styles/tokens";
@@ -144,7 +144,6 @@ app intentionally accepts all feature styles.
 @import "@hell-ui/angular/styles/composites";
 @import "@hell-ui/angular/styles/features/table-utilities";
 @import "@hell-ui/angular/styles/features/code-editor";
-@import "@hell-ui/angular/styles/features/pdf-viewer";
 @import "@hell-ui/angular/styles/components/button";
 ```
 

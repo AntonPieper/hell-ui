@@ -7,6 +7,7 @@ import { entrypointPublicApiFiles } from './entrypoint-manifest.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const defaultDistRoot = join(root, 'dist/hell');
+const splitPdfPackageName = '@hell-ui/pdf-viewer';
 
 export function auditPackedPackage({ distRoot = defaultDistRoot, tarball, logger = console } = {}) {
   if (!tarball) throw new Error('Package pack audit requires a tarball path.');
@@ -24,6 +25,7 @@ export function auditPackedPackage({ distRoot = defaultDistRoot, tarball, logger
 
   logPackedFiles(files, logger);
   failures.push(...findForbiddenPackedFileFailures(files));
+  checkPackageBoundary(packageJson, files, failures);
   checkApfPackageJson(packageJson, fileSet, distRoot, failures);
 
   if (failures.length) {
@@ -131,8 +133,9 @@ function checkPublishMetadata(packageJson, failures) {
   if (packageJson.repository?.url !== 'git+https://github.com/AntonPieper/hell-ui.git') {
     failures.push('APF package.json repository.url must match the trusted-publishing GitHub repository');
   }
-  if (packageJson.repository?.directory !== 'projects/hell') {
-    failures.push('APF package.json repository.directory must be projects/hell');
+  const expectedDirectory = expectedRepositoryDirectory(packageJson.name);
+  if (packageJson.repository?.directory !== expectedDirectory) {
+    failures.push(`APF package.json repository.directory must be ${expectedDirectory}`);
   }
   if (packageJson.publishConfig?.registry !== 'https://registry.npmjs.org/') {
     failures.push('APF package.json publishConfig.registry must be https://registry.npmjs.org/');
@@ -145,7 +148,40 @@ function checkPublishMetadata(packageJson, failures) {
   }
 }
 
+function expectedRepositoryDirectory(packageName) {
+  if (packageName === splitPdfPackageName) return 'projects/hell-pdf-viewer';
+  return 'projects/hell';
+}
+
+export function findPackageBoundaryFailures(packageJson, files) {
+  const failures = [];
+  checkPackageBoundary(packageJson, files, failures);
+  return failures;
+}
+
+function checkPackageBoundary(packageJson, files, failures) {
+  if (packageJson.name !== '@hell-ui/angular') return;
+
+  const pdfPeer = packageJson.peerDependencies?.['pdfjs-dist'];
+  const pdfPeerMeta = packageJson.peerDependenciesMeta?.['pdfjs-dist'];
+  if (pdfPeer || pdfPeerMeta) {
+    failures.push('@hell-ui/angular must not advertise pdfjs-dist after the PDF viewer split');
+  }
+
+  const pdfExports = Object.keys(packageJson.exports ?? {}).filter((key) => key.includes('pdf-viewer'));
+  if (pdfExports.length) {
+    failures.push(`@hell-ui/angular must not export PDF viewer paths: ${pdfExports.join(', ')}`);
+  }
+
+  const leakedFiles = files.filter((file) => /(^|\/)(?:features\/pdf-viewer|styles\/(?:features|components)\/pdf-viewer\.css|types\/.*pdf-viewer|fesm2022\/.*pdf-viewer)/i.test(file));
+  if (leakedFiles.length) {
+    failures.push(`@hell-ui/angular package includes split PDF viewer files: ${leakedFiles.join(', ')}`);
+  }
+}
+
 function expectedCodeExportKeys(packageName) {
+  if (packageName === splitPdfPackageName) return new Set(['.']);
+
   return new Set(
     entrypointPublicApiFiles().map((entrypoint) => {
       if (entrypoint.specifier === packageName) return '.';

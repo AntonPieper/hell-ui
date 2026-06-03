@@ -165,7 +165,6 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellTimeInput', area: 'composite', coverage: 'static' },
   { symbol: 'HellToaster', area: 'composite', coverage: 'static' },
   { symbol: 'HellCodeEditor', area: 'feature', coverage: 'static' },
-  { symbol: 'HellPdfViewer', area: 'feature', coverage: 'static' },
   { symbol: 'HellTable', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableBody', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableCell', area: 'feature', coverage: 'dom' },
@@ -433,7 +432,6 @@ describe('Hell Component Contract', () => {
     expect(PUBLIC_COMPONENT_CONTRACT_MODULES.length).toBe(PUBLIC_COMPONENT_CONTRACT_SYMBOLS.size);
     expect(PUBLIC_COMPONENT_CONTRACT_SYMBOLS.has('HellButton')).toBe(true);
     expect(PUBLIC_COMPONENT_CONTRACT_SYMBOLS.has('HellToaster')).toBe(true);
-    expect(PUBLIC_COMPONENT_CONTRACT_SYMBOLS.has('HellPdfViewer')).toBe(true);
   });
 
   it('exposes public classes, state attributes and slot attributes through one table', () => {

@@ -16,7 +16,9 @@
       "@hell-ui/angular/features/code-editor": ["../../dist/hell/types/hell-ui-angular-features-code-editor.d.ts"],
       "@hell-ui/angular/features/data-table": ["../../dist/hell/types/hell-ui-angular-features-data-table.d.ts"],
       "@hell-ui/angular/features/table-utilities": ["../../dist/hell/types/hell-ui-angular-features-table-utilities.d.ts"],
-      "@hell-ui/angular/features/pdf-viewer": ["../../dist/hell/types/hell-ui-angular-features-pdf-viewer.d.ts"]
+      "@hell-ui/pdf-viewer": ["../../dist/hell-pdf-viewer/types/hell-ui-pdf-viewer.d.ts"],
+      "@hell-ui/pdf-viewer/styles": ["../../dist/hell-pdf-viewer/styles/pdf-viewer.css"],
+      "@hell-ui/pdf-viewer/styles/*": ["../../dist/hell-pdf-viewer/styles/*"]
     }
   },
   "include": [

@@ -1,7 +1,4 @@
-import {
-  containsNode,
-  isElementLike,
-} from '../../core/dom';
+import { containsNode, isElementLike } from '../dom';
 import {
   clampZoomScale,
   getCtrlWheelScaleFactor,

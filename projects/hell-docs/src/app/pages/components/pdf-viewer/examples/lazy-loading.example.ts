@@ -6,7 +6,7 @@ import { RouterOutlet, type Routes } from '@angular/router';
 const PDF_VIEWER_STYLESHEETS = [
   {
     id: 'hd-hell-pdf-viewer-styles',
-    href: 'hell-ui/styles/features/pdf-viewer.css',
+    href: 'hell-ui/pdf-viewer/styles/pdf-viewer.css',
   },
   {
     id: 'hd-pdfjs-viewer-styles',
@@ -18,7 +18,7 @@ export const PDF_VIEWER_ROUTES: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('@hell-ui/angular/features/pdf-viewer').then((m) => m.HellPdfViewer),
+      import('@hell-ui/pdf-viewer').then((m) => m.HellPdfViewer),
   },
 ];
 

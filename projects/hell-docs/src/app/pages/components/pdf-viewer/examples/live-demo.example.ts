@@ -1,12 +1,12 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
-import { HellPdfViewer } from '@hell-ui/angular/features/pdf-viewer';
+import { HellPdfViewer } from '@hell-ui/pdf-viewer';
 
 // Copy these stylesheets as app-owned assets, then append them only while the lazy route is active.
 const PDF_VIEWER_STYLESHEETS = [
   {
     id: 'hd-hell-pdf-viewer-styles',
-    href: 'hell-ui/styles/features/pdf-viewer.css',
+    href: 'hell-ui/pdf-viewer/styles/pdf-viewer.css',
   },
   {
     id: 'hd-pdfjs-viewer-styles',

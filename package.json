@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "node tools/package-manager.mjs run build:lib && node tools/setup-docs-hell-package-alias.mjs && ng serve",
     "build": "node tools/package-manager.mjs run build:lib && node tools/package-manager.mjs run build:docs",
-    "build:lib": "ng build hell",
+    "build:lib": "ng build hell && ng build hell-pdf-viewer",
     "build:docs": "node tools/setup-docs-hell-package-alias.mjs && ng build hell-docs && node tools/docs-bundle-budget-report.mjs --check --summary-only",
     "diagnose:docs-bundle": "node tools/docs-bundle-budget-report.mjs",
     "watch": "ng build hell --watch --configuration development",

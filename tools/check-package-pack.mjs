@@ -7,24 +7,29 @@ import { fileURLToPath } from 'node:url';
 import {
   auditPackedPackage,
   findForbiddenPackedFileFailures,
+  findPackageBoundaryFailures,
 } from './package-pack-audit.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const distHell = join(root, 'dist/hell');
+const packageDistRoots = [join(root, 'dist/hell'), join(root, 'dist/hell-pdf-viewer')];
 
-if (!existsSync(join(distHell, 'package.json'))) {
-  fail(`Built package missing: ${distHell}. Run npm run build:lib first.`);
+for (const distRoot of packageDistRoots) {
+  if (!existsSync(join(distRoot, 'package.json'))) {
+    fail(`Built package missing: ${distRoot}. Run npm run build:lib first.`);
+  }
 }
 
 runForbiddenFileAuditSelfTest();
 
-const packedHell = packBuiltPackage(distHell);
-try {
-  auditPackedPackage({ distRoot: distHell, tarball: packedHell.tarball });
-} catch (error) {
-  fail(error instanceof Error ? error.message : String(error));
-} finally {
-  rmSync(packedHell.root, { force: true, recursive: true });
+for (const distRoot of packageDistRoots) {
+  const packedPackage = packBuiltPackage(distRoot);
+  try {
+    auditPackedPackage({ distRoot, tarball: packedPackage.tarball });
+  } catch (error) {
+    fail(error instanceof Error ? error.message : String(error));
+  } finally {
+    rmSync(packedPackage.root, { force: true, recursive: true });
+  }
 }
 
 function runForbiddenFileAuditSelfTest() {
@@ -41,6 +46,14 @@ function runForbiddenFileAuditSelfTest() {
     if (!failures.some((failure) => failure.includes(label))) {
       fail(`Forbidden-file self-test did not catch ${label}: ${files.join(', ')}`);
     }
+  }
+
+  const pdfLeakFailures = findPackageBoundaryFailures(
+    { name: '@hell-ui/angular', exports: {}, peerDependencies: {}, peerDependenciesMeta: {} },
+    ['package.json', 'styles/features/pdf-viewer.css'],
+  );
+  if (!pdfLeakFailures.some((failure) => failure.includes('split PDF viewer files'))) {
+    fail('Forbidden-file self-test did not catch split PDF viewer files: styles/features/pdf-viewer.css');
   }
 }
 

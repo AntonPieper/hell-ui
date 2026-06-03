@@ -60,9 +60,6 @@
       "@hell-ui/angular/features/table-utilities": [
         "./projects/hell/src/lib/public-api-feature-table-utilities.ts"
       ],
-      "@hell-ui/angular/features/pdf-viewer": [
-        "./projects/hell/src/lib/public-api-feature-pdf-viewer.ts"
-      ],
       "@hell-ui/angular/testing": [
         "./projects/hell/src/testing/public-api.ts"
       ],
@@ -152,6 +149,9 @@
       ],
       "@hell-ui/angular/tooltip": [
         "./projects/hell/src/lib/public-api-primitive-tooltip.ts"
+      ],
+      "@hell-ui/pdf-viewer": [
+        "./projects/hell-pdf-viewer/src/public-api.ts"
       ]
     },
     "noImplicitOverride": true,
@@ -181,6 +181,12 @@
     },
     {
       "path": "./projects/hell-docs/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/hell-pdf-viewer/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/hell-pdf-viewer/tsconfig.spec.json"
     }
   ]
 }

@@ -11,7 +11,7 @@ const rawArgs = process.argv.slice(2);
 const mode = parseMode(rawArgs);
 const selectedConsumerScenarios = parseList(
   process.env.HELL_RELEASE_DRY_RUN_CONSUMER_SCENARIOS,
-  ['root-core', 'button-unstyled', 'primitives-css', 'code-editor'],
+  ['root-core', 'button-unstyled', 'primitives-css', 'code-editor', 'pdf-viewer'],
 );
 const startedAt = new Date();
 const logPath = releaseEvidenceLogPath(mode, startedAt);

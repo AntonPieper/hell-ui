@@ -12,7 +12,6 @@
  *   @import "@hell-ui/angular/styles/composites";
  *   @import "@hell-ui/angular/styles/features/table-utilities";
  *   @import "@hell-ui/angular/styles/features/code-editor";
- *   @import "@hell-ui/angular/styles/features/pdf-viewer";
  *   @import "@hell-ui/angular/styles/features/data-table"; legacy alias
  *   @import "@hell-ui/angular/styles/components/button";
  *
@@ -24,4 +23,3 @@
 @import './composites.css';
 @import './features/table-utilities.css';
 @import './features/code-editor.css';
-@import './features/pdf-viewer.css';

@@ -15,7 +15,7 @@ Use this guide when moving an app from local/alpha Hell imports to the first bet
 
 ## Install peer tiers
 
-npm peer metadata is package-wide. Some optional peers appear in the package manifest even when they are only required by a feature entry point. The package-consumer runner proves the actual strict-peer install groups in [`tools/check-package-consumer.mjs`](../../tools/check-package-consumer.mjs).
+npm peer metadata is package-wide. Some optional peers appear in the package manifest even when they are only required by a kept feature entry point. The PDF viewer is now split into `@hell-ui/pdf-viewer`, so `@hell-ui/angular` no longer advertises pdf.js. The package-consumer runner proves the actual strict-peer install groups in [`tools/check-package-consumer.mjs`](../../tools/check-package-consumer.mjs).
 
 A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`; install any missing core peers explicitly. Use `npm install` in consumer snippets below because the package-consumer proof uses npm strict-peer installs. `pnpm add` is equivalent for pnpm apps.
 
@@ -28,7 +28,7 @@ A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`;
 | Composites | Core peer group plus `tailwindcss`; add `@ng-icons/font-awesome` for aggregate/icon-backed composites | Prefer narrow composite entry points such as `@hell-ui/angular/app-shell`; use `@hell-ui/angular/composites` only when you accept aggregate peers | [`app-shell`, `composites-css`](../../tools/check-package-consumer.mjs) |
 | Table utilities | Core peer group plus `tailwindcss` | `@hell-ui/angular/features/table-utilities`; legacy `@hell-ui/angular/features/data-table` only while migrating | [`table-utilities`, `data-table`](../../tools/check-package-consumer.mjs) |
 | Code editor | Core peer group plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, `@lezer/highlight` | `@hell-ui/angular/features/code-editor`; keep lazy/client-only when runtime risk matters | [`code-editor`](../../tools/check-package-consumer.mjs) |
-| PDF viewer | Core peer group plus `tailwindcss`, `@ng-icons/font-awesome`, exact `pdfjs-dist@5.6.205` | `@hell-ui/angular/features/pdf-viewer`; app must provide the pdf.js worker source | [`pdf-viewer`](../../tools/check-package-consumer.mjs) |
+| PDF viewer | Core peer group plus `@hell-ui/pdf-viewer`, `tailwindcss`, `@ng-icons/font-awesome`, and the split package's pdf.js peer | `@hell-ui/pdf-viewer`; app must provide the pdf.js worker source | [`pdf-viewer`](../../tools/check-package-consumer.mjs) |
 
 Examples:
 
@@ -42,8 +42,8 @@ npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-ic
 # Code editor feature. Proved by the code-editor scenario.
 npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss @codemirror/commands @codemirror/language @codemirror/state @codemirror/view @lezer/highlight
 
-# Current PDF viewer feature. Proved by the pdf-viewer scenario.
-npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome ng-primitives rxjs tailwindcss pdfjs-dist@5.6.205
+# Split PDF viewer package. Proved by the pdf-viewer scenario.
+npm install @hell-ui/angular @hell-ui/pdf-viewer @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome ng-primitives rxjs tailwindcss pdfjs-dist@5.6.205
 ```
 
 Maintainers can rerun a proof path from the product workspace:
@@ -104,10 +104,10 @@ Add only the feature CSS you import:
 @import "@hell-ui/angular/styles/composites";
 @import "@hell-ui/angular/styles/features/table-utilities";
 @import "@hell-ui/angular/styles/features/code-editor";
-@import "@hell-ui/angular/styles/features/pdf-viewer";
+@import "@hell-ui/pdf-viewer/styles";
 ```
 
-Avoid `@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` for production migration unless the app intentionally accepts every primitive, composite, CodeMirror, table-utility, and PDF viewer style in one bundle. Use `@hell-ui/angular/styles/features/data-table` only as the legacy CSS alias for table utilities.
+Avoid `@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` for production migration unless the app intentionally accepts every primitive, composite, CodeMirror, and table-utility style in one bundle. PDF viewer styles come from `@hell-ui/pdf-viewer/styles`. Use `@hell-ui/angular/styles/features/data-table` only as the legacy CSS alias for table utilities.
 
 ## Unstyled mode
 
@@ -134,7 +134,7 @@ Treat these as deliberate opt-ins, not default UI kit imports.
 | --- | --- | --- |
 | Table utilities | Keep behind `@hell-ui/angular/features/table-utilities`. It is table utilities, not a data-grid framework. Prefer semantic table markup with real cell controls. | Beta feature; legacy `/features/data-table` remains deprecated compatibility. |
 | Code editor | Keep behind `@hell-ui/angular/features/code-editor`; lazy-load or client-only load in SSR-sensitive apps; pass owner-document-aware setup where possible. | Experimental in package/source comments; follow-up HELL-054 locks the kept optional boundary. |
-| PDF viewer | Current package path is `@hell-ui/angular/features/pdf-viewer`, exact `pdfjs-dist@5.6.205`, app-owned worker source. Do not assume this remains in the main package for public beta. | Experimental/browser-only; HELL-053 will split PDF viewer into a separate Angular package before public beta. |
+| PDF viewer | Package path is `@hell-ui/pdf-viewer`; install the split package with its exact pdf.js peer and pass an app-owned worker source. | Experimental/browser-only split package. |
 | Audio speech transcript | Do not present `allowSpeechTranscript` as accessibility captions or timed text. Keep it behind explicit user opt-in and provide real captions/transcripts separately. | Experimental Chromium-only / best-effort; HELL-055 will isolate transcript runtime behind an optional feature seam. |
 | Floating/flyout/omnibar dismissal | Use documented components, but avoid building product-critical guarantees on unreviewed dismissal internals. | Browser contracts exist for key paths; follow-up HELL-057/HELL-058 shrink remaining seams. |
 | Resize behavior | Treat split/table resizing as browser behavior requiring current browser evidence. | HELL-061 still owns browser resize contracts. |
@@ -144,7 +144,7 @@ Treat these as deliberate opt-ins, not default UI kit imports.
 Known experimental/best-effort surfaces:
 
 - `@hell-ui/angular/features/code-editor`
-- `@hell-ui/angular/features/pdf-viewer`
+- `@hell-ui/pdf-viewer`
 - audio-player speech transcript options such as `allowSpeechTranscript`
 
 Known deprecated compatibility surfaces to migrate away from:
@@ -168,7 +168,7 @@ Current support is evidence-based and not a production guarantee.
 - Composites are browser-first and may use `document`, `window`, or global listeners for overlays, hotkeys, portals, and dismissal.
 - Table utilities use `ResizeObserver`.
 - Code editor needs browser `window`/`document` through CodeMirror.
-- PDF viewer is browser-only: pdf.js worker setup, printing/download helpers, thumbnails, global listeners, and browser compatibility are app-owned risk.
+- PDF viewer is browser-only and lives in `@hell-ui/pdf-viewer`: pdf.js worker setup, printing/download helpers, thumbnails, global listeners, and browser compatibility are app-owned risk.
 - Speech transcript uses Chromium-only Web Speech and media-capture APIs where available; it is not accessibility-grade captions.
 
 Current browser evidence is tracked through Playwright. The production-ready gate requires `test-results/playwright-report.json` to pass every `e2e/*.spec.ts` file across chromium, firefox, and webkit on the current commit. Until that gate passes, treat browser support as scenario evidence rather than a general browser-support guarantee.

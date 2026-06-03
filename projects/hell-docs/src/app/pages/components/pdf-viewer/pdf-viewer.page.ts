@@ -34,15 +34,17 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         workflows.
       </p>
       <p>
-        Install the exact supported <code>pdfjs-dist@5.6.205</code> peer plus the light UI stack
+        Install <code>@hell-ui/pdf-viewer</code> with the exact supported
+        <code>pdfjs-dist@5.6.205</code> peer plus the light <code>@hell-ui/angular</code> stack
         (<code>@angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs</code>),
-        optional <code>@ng-icons/font-awesome</code> for icon-backed controls, and style-only
+        <code>@ng-icons/font-awesome</code> for icon-backed controls, and style-only
         <code>tailwindcss</code> when you import Hell's CSS.
-        Your app must pass a pdf.js worker source through <code>worker</code>; Hell does not copy
-        a worker into the package tarball. The docs app serves a local sample worker from
-        <code>/assets/pdf.worker.mjs</code>. The docs examples load the Hell PDF viewer stylesheet
-        and the pdf.js viewer stylesheet on demand, so lazy routes keep both out of the docs
-        app's initial bundle and component-style budget.
+        Your app must pass a pdf.js worker source through <code>worker</code>; the PDF package does not copy
+        a worker into either package tarball. The docs app copies a matching sample worker from
+        <code>node_modules/pdfjs-dist/build/pdf.worker.mjs</code> to <code>/assets/pdf.worker.mjs</code>.
+        The docs examples load the PDF package stylesheet and the pdf.js viewer stylesheet on
+        demand, so lazy routes keep both out of the docs app's initial bundle and
+        component-style budget.
       </p>
 
       <h2>Lazy loading</h2>

@@ -20,7 +20,7 @@ export const entrypointManifest = {
       '// Composites and features are available through entry points:',
       '// - @hell-ui/angular/composites',
       '// - @hell-ui/angular/features/data-table (legacy), @hell-ui/angular/features/table-utilities,',
-      '//   @hell-ui/angular/features/code-editor, @hell-ui/angular/features/pdf-viewer',
+      '//   @hell-ui/angular/features/code-editor',
     ],
   },
   explicit: [
@@ -165,20 +165,11 @@ export const entrypointManifest = {
             ' */',
           ],
         },
-        'pdf-viewer': {
-          header: [
-            '/**',
-            ' * @experimental PDF.js feature entry point. Apps own worker/browser compatibility.',
-            ' */',
-          ],
-          extraExports: ["export type { HellPdfWorkerSource } from './features/pdf-viewer/pdf-viewer.adapter';"],
-        },
       },
       entries: [
         'code-editor',
         'data-table',
         'table-utilities',
-        'pdf-viewer',
       ],
     },
   ],

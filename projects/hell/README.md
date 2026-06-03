@@ -19,7 +19,7 @@ Hell exposes:
 - Features: heavier modules behind feature-specific entry points.
 
 The root package `@hell-ui/angular` export is limited to stable core only.
-Primitives live behind `/primitives` and narrow primitive entry points. Composites live behind `/composites` and narrow composite entry points; features remain behind scoped entry points.
+Primitives live behind `/primitives` and narrow primitive entry points. Composites live behind `/composites` and narrow composite entry points; kept features remain behind scoped entry points. The PDF viewer lives in the separate `@hell-ui/pdf-viewer` package.
 
 ## Install
 
@@ -36,16 +36,16 @@ Feature peers remain optional at runtime, but npm peer metadata is package-wide:
 
 ### Peer dependency tiers
 
-Package-consumer scenarios assert these peer groups with strict peer installs. CodeMirror and pdf.js peers stay optional and are not required by the root or button scenarios.
+Package-consumer scenarios assert these peer groups with strict peer installs. CodeMirror peers stay optional and are not required by the root or button scenarios. PDF viewer dependencies belong to `@hell-ui/pdf-viewer`, not this package.
 
 | Tier | Entry points / scenarios | Peer group asserted |
 | --- | --- | --- |
 | Core | `@hell-ui/angular`, `/core`, `/testing`; `root-core`, `core`, `testing` | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `ng-primitives`, `rxjs` |
 | Primitive | Narrow primitives such as `/button`; aggregate `/primitives`; `button-unstyled`, `button`, `primitives-css` | Core peers. Add `tailwindcss` when importing primitive CSS. Aggregate `/primitives` also asserts optional `@angular/router` and `@ng-icons/font-awesome` because dialog and icon-backed primitives are bundled in the aggregate FESM. |
 | Composite | `/composites` and narrow composite entry points such as `/app-shell`; `composites-css`, `app-shell` | Core peers plus `tailwindcss` for composite CSS. Aggregate/icon-backed composites also assert optional `@ng-icons/font-awesome`. |
-| Table utilities | `/features/table-utilities`, legacy `/features/data-table`; `table-utilities`, `data-table` | Core peers plus `tailwindcss`; no CodeMirror, pdf.js, router, or Font Awesome peers. |
+| Table utilities | `/features/table-utilities`, legacy `/features/data-table`; `table-utilities`, `data-table` | Core peers plus `tailwindcss`; no CodeMirror, router, or Font Awesome peers. |
 | Code editor | `/features/code-editor`; `code-editor` | Core peers plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight`. |
-| PDF viewer | `/features/pdf-viewer`; `pdf-viewer` | Core peers plus `tailwindcss`, `@ng-icons/font-awesome`, and exact `pdfjs-dist@5.6.205`; app must provide a pdf.js worker source. |
+| PDF viewer | `@hell-ui/pdf-viewer`; `pdf-viewer` | Separate package; see that package for its own install contract. |
 
 
 ## API Stability
@@ -69,16 +69,12 @@ The stable API report set currently covers `@hell-ui/angular`, `@hell-ui/angular
 | Composites (`@hell-ui/angular/composites`, narrow composite entry points) | Beta | Browser-first surfaces can use `window`/`document` and global listeners for overlays |
 | Table utilities (`@hell-ui/angular/features/table-utilities`) | Beta feature | Optional peer; uses `ResizeObserver` for table sizing |
 | Code editor (`@hell-ui/angular/features/code-editor`) | Experimental | Browser-only CodeMirror runtime: `window`/`document` interactions |
-| PDF viewer (`@hell-ui/angular/features/pdf-viewer`) | Experimental | Browser-only app surface/recipe: `window`/`document`, pdf workers, global listeners, and app-owned pdf.js/browser compatibility decisions |
+| PDF viewer (`@hell-ui/pdf-viewer`) | Experimental split package | Browser-only app surface/recipe owned outside `@hell-ui/angular` |
 | Testing harnesses (`@hell-ui/angular/testing`) | Stable/test-only | CDK component harnesses for consumer and library tests |
 | Speech transcript (`allowSpeechTranscript`) | Experimental/browser-only/best-effort | Uses `navigator` + `SpeechRecognition` + `captureStream`; not accessibility-grade captions or production timed text |
 | Deprecated aliases (`/features/data-table`, `HELL_TABLE_DIRECTIVES`, `HELL_TABLE_UTILITY_DIRECTIVES`, `HellTableRow.interactive`, `allowLiveCaptions`, `HellDataTableLabels`, `hellCodeEditorSetup`) | Deprecated | Keep compatibility imports only while migrating to the documented replacements |
 
-The PDF viewer component now exposes:
-
-- `globalShortcuts` input (default `false`) to opt into document-level keyboard listeners.
-- `worker` input to pass an app-owned URL/Worker; Hell does not bundle a default worker in the package tarball.
-- incremental thumbnail rendering behind `IntersectionObserver` for overview mode.
+The PDF viewer was split out before public beta; use `@hell-ui/pdf-viewer` for the component, styles, and worker setup docs.
 
 ## Angular Imports
 
@@ -110,11 +106,10 @@ For broader loading:
 @import "@hell-ui/angular/styles/composites";
 @import "@hell-ui/angular/styles/features/code-editor";
 @import "@hell-ui/angular/styles/features/table-utilities";
-@import "@hell-ui/angular/styles/features/pdf-viewer";
 @import "@hell-ui/angular/styles/components/button";
 ```
 
-`@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` are legacy kitchen-sink aliases that include primitives, composites, and feature styles such as CodeMirror and PDF viewer. Use them only when the app intentionally accepts all feature styles. Use `@hell-ui/angular/styles/features/data-table` only as the legacy CSS alias for table utilities.
+`@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` are legacy kitchen-sink aliases that include primitives, composites, and kept in-package feature styles such as CodeMirror. Use them only when the app intentionally accepts all in-package feature styles. Use `@hell-ui/angular/styles/features/data-table` only as the legacy CSS alias for table utilities.
 
 ## Style Opt-Out
 

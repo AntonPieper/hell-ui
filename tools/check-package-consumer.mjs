@@ -17,6 +17,7 @@ import { auditPackedPackage } from './package-pack-audit.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const distHell = join(root, 'dist/hell');
+const distPdfViewer = join(root, 'dist/hell-pdf-viewer');
 const keep = process.env.HELL_KEEP_PACKAGE_CONSUMER === '1';
 const packageConsumerArgs = process.argv.slice(2);
 const rawSelectedScenarioNames = parseScenarioSelection(packageConsumerArgs);
@@ -39,16 +40,26 @@ runRootPackageManager(['run', 'build:lib'], root);
 if (!existsSync(join(distHell, 'package.json'))) {
   fail(`Built package missing: ${distHell}`);
 }
+if (!existsSync(join(distPdfViewer, 'package.json'))) {
+  fail(`Built package missing: ${distPdfViewer}`);
+}
 
 const distPackageJson = JSON.parse(readFileSync(join(distHell, 'package.json'), 'utf8'));
 const packageName = distPackageJson.name;
 if (!packageName) {
   fail('Built package.json is missing name');
 }
+const distPdfPackageJson = JSON.parse(readFileSync(join(distPdfViewer, 'package.json'), 'utf8'));
+const pdfPackageName = distPdfPackageJson.name;
+if (!pdfPackageName) {
+  fail('Built PDF package.json is missing name');
+}
 
-const packedHell = await packBuiltPackage();
+const packedHell = await packBuiltPackage(distHell, 'pack-core');
+const packedPdfViewer = await packBuiltPackage(distPdfViewer, 'pack-pdf-viewer');
 try {
   auditPackedPackage({ distRoot: distHell, tarball: packedHell.tarball });
+  auditPackedPackage({ distRoot: distPdfViewer, tarball: packedPdfViewer.tarball });
 } catch (error) {
   fail(error instanceof Error ? error.message : String(error));
 }
@@ -59,6 +70,9 @@ const devDeps = rootPackage.devDependencies ?? {};
 const sourcePackage = JSON.parse(readFileSync(join(root, 'projects/hell/package.json'), 'utf8'));
 const packagePeerDependencies = sourcePackage.peerDependencies ?? {};
 const packagePeerDependenciesMeta = sourcePackage.peerDependenciesMeta ?? {};
+const sourcePdfPackage = JSON.parse(readFileSync(join(root, 'projects/hell-pdf-viewer/package.json'), 'utf8'));
+const pdfPackagePeerDependencies = sourcePdfPackage.peerDependencies ?? {};
+const pdfPackagePeerDependenciesMeta = sourcePdfPackage.peerDependenciesMeta ?? {};
 
 const corePeerGroup = [
   '@angular/cdk',
@@ -269,9 +283,10 @@ const scenarios = [
   },
   {
     name: 'pdf-viewer',
-    description: 'pdf-viewer feature with pdfjs and light UI peers',
+    description: 'split pdf-viewer package with pdfjs and light UI peers',
     peerTier: 'pdf-viewer',
     peerGroup: 'pdf-viewer',
+    installPdfPackage: true,
     dependencies: pdfViewerDeps,
     mainTs: pdfViewerConsumerMainTs(),
     stylesCss: pdfViewerConsumerStylesCss(),
@@ -287,8 +302,13 @@ try {
     await runConsumerScenarioGroup(group);
   }
 } finally {
-  if (keep) console.log(`[package-consumer] kept packed hell package ${packedHell.root}`);
-  else rmSync(packedHell.root, { force: true, recursive: true });
+  if (keep) {
+    console.log(`[package-consumer] kept packed hell package ${packedHell.root}`);
+    console.log(`[package-consumer] kept packed pdf-viewer package ${packedPdfViewer.root}`);
+  } else {
+    rmSync(packedHell.root, { force: true, recursive: true });
+    rmSync(packedPdfViewer.root, { force: true, recursive: true });
+  }
 }
 
 function parseScenarioSelection(args) {
@@ -397,8 +417,15 @@ function scenarioLookup(allScenarios) {
 
 function assertPeerTierContracts(allScenarios) {
   const packagePeerNames = new Set(Object.keys(packagePeerDependencies));
+  const pdfPackagePeerNames = new Set(Object.keys(pdfPackagePeerDependencies));
+  const allPackagePeerNames = new Set([...packagePeerNames, ...pdfPackagePeerNames]);
   const optionalPeerNames = new Set(
     Object.entries(packagePeerDependenciesMeta)
+      .filter(([, meta]) => meta?.optional === true)
+      .map(([name]) => name),
+  );
+  const pdfOptionalPeerNames = new Set(
+    Object.entries(pdfPackagePeerDependenciesMeta)
       .filter(([, meta]) => meta?.optional === true)
       .map(([name]) => name),
   );
@@ -407,14 +434,26 @@ function assertPeerTierContracts(allScenarios) {
   assertSameSet('core peer group', corePeerGroup, requiredPackagePeerNames);
 
   for (const [groupName, contract] of Object.entries(peerGroupContracts)) {
-    const missingPeers = contract.peers.filter((peer) => !packagePeerNames.has(peer));
+    const missingPeers = contract.peers.filter((peer) => !allPackagePeerNames.has(peer));
     if (missingPeers.length) {
       fail(`Peer group ${groupName} references undeclared package peer(s): ${missingPeers.join(', ')}`);
     }
   }
 
-  for (const peer of heavyFeaturePeerGroup) {
-    if (!optionalPeerNames.has(peer)) fail(`Heavy feature peer ${peer} must remain optional`);
+  if (packagePeerNames.has('pdfjs-dist') || optionalPeerNames.has('pdfjs-dist')) {
+    fail('Main @hell-ui/angular package must not advertise pdfjs-dist after the PDF split');
+  }
+  for (const peer of codeEditorPeerGroup) {
+    if (!optionalPeerNames.has(peer)) fail(`Code editor peer ${peer} must remain optional in @hell-ui/angular`);
+  }
+  if (pdfPackagePeerDependencies['pdfjs-dist'] !== deps['pdfjs-dist']) {
+    fail(`PDF package must pin pdfjs-dist peer to workspace version ${deps['pdfjs-dist']}`);
+  }
+  if (pdfOptionalPeerNames.has('pdfjs-dist')) {
+    fail('PDF package pdfjs-dist peer must be required, not optional');
+  }
+  if (pdfPackagePeerDependencies[packageName] !== distPackageJson.version) {
+    fail(`PDF package must peer ${packageName}@${distPackageJson.version}`);
   }
 
   const coveredTiers = new Set(allScenarios.map((scenario) => scenario.peerTier));
@@ -422,7 +461,7 @@ function assertPeerTierContracts(allScenarios) {
     if (!coveredTiers.has(tier)) fail(`Missing package-consumer scenario coverage for peer tier ${tier}`);
   }
 
-  for (const scenario of allScenarios) assertScenarioPeerGroup(scenario, packagePeerNames);
+  for (const scenario of allScenarios) assertScenarioPeerGroup(scenario, allPackagePeerNames);
   assertHeavyPeersAreIsolated(allScenarios);
 }
 
@@ -515,8 +554,13 @@ function printScenarioContract(scenario, phase) {
 }
 
 function packageImportPaths(mainTs) {
-  return uniqueMatches(mainTs, /from\s+['"]([^'"]+)['"]/g)
-    .filter((specifier) => specifier === packageName || specifier.startsWith(`${packageName}/`));
+  return uniqueMatches(mainTs, /from\s+['"]([^'"]+)['"]/g).filter(
+    (specifier) =>
+      specifier === packageName ||
+      specifier.startsWith(`${packageName}/`) ||
+      specifier === pdfPackageName ||
+      specifier.startsWith(`${pdfPackageName}/`),
+  );
 }
 
 function styleImportPaths(stylesCss) {
@@ -537,7 +581,7 @@ async function runConsumerScenarioGroup(group) {
 
   try {
     for (const scenario of group.scenarios) printScenarioContract(scenario, 'install');
-    writeConsumerWorkspace(tempRoot, group.scenarios[0], group.dependencies);
+    writeConsumerWorkspace(tempRoot, group.scenarios, group.dependencies);
     await runNpm([
       'install',
       '--strict-peer-deps',
@@ -562,15 +606,16 @@ async function runConsumerScenarioGroup(group) {
   }
 }
 
-async function packBuiltPackage() {
+async function packBuiltPackage(distRoot, scenarioName) {
   const packRoot = mkdtempSync(join(tmpdir(), 'hell-package-consumer-pack-'));
-  await runNpm(['pack', '--pack-destination', packRoot], distHell, { scenarioName: 'pack' });
+  await runNpm(['pack', '--pack-destination', packRoot], distRoot, { scenarioName });
   const tarball = readdirSync(packRoot).find((name) => name.endsWith('.tgz'));
   if (!tarball) fail(`Packed package missing in ${packRoot}`);
   return { root: packRoot, tarball: join(packRoot, tarball) };
 }
 
-function writeConsumerWorkspace(workspace, scenario, dependencies = scenario.dependencies) {
+function writeConsumerWorkspace(workspace, scenarios, dependencies = unionDependencies(scenarios)) {
+  const scenario = scenarios[0];
   const packageJson = {
     name: `hell-package-consumer-${scenario.name}`,
     private: true,
@@ -589,6 +634,9 @@ function writeConsumerWorkspace(workspace, scenario, dependencies = scenario.dep
     ]),
   };
   packageJson.dependencies[packageName] = pathToFileURL(packedHell.tarball).href;
+  if (scenarios.some((candidate) => candidate.installPdfPackage)) {
+    packageJson.dependencies[pdfPackageName] = pathToFileURL(packedPdfViewer.tarball).href;
+  }
 
   writeJson(join(workspace, 'package.json'), packageJson);
   writeFileSync(join(workspace, '.npmrc'), 'strict-peer-deps=true\nlegacy-peer-deps=false\n');
@@ -978,7 +1026,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function pdfViewerConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellPdfViewer, type HellPdfWorkerSource } from '${packageName}/features/pdf-viewer';
+import { HellPdfViewer, type HellPdfWorkerSource } from '${pdfPackageName}';
 
 @Component({
   selector: 'app-root',
@@ -1037,7 +1085,7 @@ function dataTableConsumerStylesCss() {
 function pdfViewerConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/styles/tokens";
-@import "${packageName}/styles/features/pdf-viewer";
+@import "${pdfPackageName}/styles";
 `;
 }
 

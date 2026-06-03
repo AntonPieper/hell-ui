@@ -30,12 +30,15 @@ import {
   faSolidTableColumns,
   faSolidXmark,
 } from '@ng-icons/font-awesome/solid';
-import { HellButton } from '../../primitives/button/button';
-import { HellIcon } from '../../primitives/icon/icon';
-import { HellInput, HellNativeSelect } from '../../primitives/input/input';
-import { HellGlobalKeydownService, HellGlobalPointerdownService } from '../../core/hotkeys';
-import { HELL_LABELS } from '../../core/labels';
-import { HellStyleable } from '../../core/styleable';
+import { HellButton } from '@hell-ui/angular/button';
+import { HellIcon } from '@hell-ui/angular/icon';
+import { HellInput, HellNativeSelect } from '@hell-ui/angular/input';
+import {
+  HELL_LABELS,
+  HellGlobalKeydownService,
+  HellGlobalPointerdownService,
+  HellStyleable,
+} from '@hell-ui/angular/core';
 import {
   HellPdfRuntime,
   HellPdfViewerInteractionScope,

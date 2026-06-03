@@ -50,10 +50,6 @@
       "style": "./styles/features/table-utilities.css",
       "default": "./styles/features/table-utilities.css"
     },
-    "./styles/features/pdf-viewer": {
-      "style": "./styles/features/pdf-viewer.css",
-      "default": "./styles/features/pdf-viewer.css"
-    },
     "./styles/kitchen-sink": {
       "style": "./styles/hell.css",
       "default": "./styles/hell.css"
@@ -79,8 +75,7 @@
     "@codemirror/state": "^6.0.0",
     "@codemirror/commands": "^6.0.0",
     "@codemirror/language": "^6.0.0",
-    "@lezer/highlight": "^1.0.0",
-    "pdfjs-dist": "5.6.205"
+    "@lezer/highlight": "^1.0.0"
   },
   "peerDependenciesMeta": {
     "tailwindcss": {
@@ -105,9 +100,6 @@
       "optional": true
     },
     "@lezer/highlight": {
-      "optional": true
-    },
-    "pdfjs-dist": {
       "optional": true
     }
   },

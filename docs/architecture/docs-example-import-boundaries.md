@@ -21,7 +21,7 @@ When the architecture check fails, it lists the page/example import edge that cr
 
 | Policy ID | Lazy route | Boundary | Guarded imports / references | Status |
 | --- | --- | --- | --- | --- |
-| pdf-viewer-docs | `/components/pdf-viewer` | `components/pdf-viewer` | `@hell-ui/angular/features/pdf-viewer`, `pdfjs-dist`, `@hell-ui/angular/styles/features/pdf-viewer`, `hell-ui/styles/features/pdf-viewer.css`, `pdfjs/pdf_viewer.css` | PDF examples are proven lazy by `docs-catalog.ts`; heavy imports and stylesheet references may appear only inside the PDF viewer route boundary. |
+| pdf-viewer-docs | `/components/pdf-viewer` | `components/pdf-viewer` | `@hell-ui/pdf-viewer`, `pdfjs-dist`, `@hell-ui/pdf-viewer/styles`, `hell-ui/pdf-viewer/styles/pdf-viewer.css`, `pdfjs/pdf_viewer.css` | PDF examples are proven lazy by `docs-catalog.ts`; heavy imports and stylesheet references may appear only inside the PDF viewer route boundary. |
 | code-editor-docs | `/components/code-editor` | `components/code-editor` | `@hell-ui/angular/features/code-editor`, `@codemirror/`, `@hell-ui/angular/styles/features/code-editor` | CodeMirror examples are proven lazy by `docs-catalog.ts`; CodeMirror imports and feature CSS may appear only inside the code editor route boundary. |
 | audio-player-docs | `/components/audio-player` | `components/audio-player` | `@hell-ui/angular/audio-player` | Audio player and speech transcript examples are proven lazy by `docs-catalog.ts`; audio-player runtime imports may appear only inside the audio player route boundary until HELL-055 isolates transcript runtime further. |
 
