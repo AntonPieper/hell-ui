@@ -2349,7 +2349,7 @@ const allowedBrowserGlobalSeams = [
     id: 'floating-dismissal-document-fallback',
     file: 'projects/hell/src/lib/core/floating-dismissal.ts',
     globals: ['document'],
-    owner: 'HELL-057/HELL-058',
+    owner: 'HELL-057',
     lines: ["return typeof document === 'undefined' ? null : document;"],
   },
   {

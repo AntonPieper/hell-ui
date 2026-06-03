@@ -27,7 +27,7 @@ import {
   HellFloatingScopeRegistry,
   type HellFloatingScope,
 } from '../../core/floating-scope';
-import { HellFloatingInteractionController, hellOutsideFocus } from '../../core/floating-dismissal';
+import { HellFloatingDismissController, hellOutsideFocus } from '../../core/floating-dismissal';
 import {
   type HellSearchField,
   type HellSearchResult,
@@ -335,10 +335,9 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   protected readonly hasActions = this.runtime.hasActions;
 
   private readonly floatingScope = new HellFloatingScopeRegistry(() => this.host.nativeElement);
-  private readonly floatingInteraction = new HellFloatingInteractionController({
-    surface: () => this.host.nativeElement,
+  private readonly floatingFocusDismissal = new HellFloatingDismissController({
+    root: () => this.host.nativeElement,
     scope: this,
-    registerSurface: () => false,
     ownerDocument: () => this.host.nativeElement.ownerDocument,
     active: () => this.isOpen(),
     activeKey: () => this.openVersion(),
@@ -410,7 +409,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     });
 
     this.installHotkey();
-    this.floatingInteraction.connect(this.destroyRef);
+    this.floatingFocusDismissal.connect(this.destroyRef);
     this.destroyRef.onDestroy(() => this.unregisterOverlayPanel());
   }
 
@@ -528,7 +527,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   }
 
   protected onBlur(event: FocusEvent): void {
-    this.floatingInteraction.handleFocusExit(event);
+    this.floatingFocusDismissal.handleFocusExit(event);
   }
 
   protected onCursorChange(): void {
@@ -548,7 +547,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   }
 
   protected onOverlayOutsideClick(event: MouseEvent): void {
-    if (this.floatingInteraction.isInside(event.target)) return;
+    if (this.floatingFocusDismissal.isInside(event.target)) return;
     this.close();
   }
 

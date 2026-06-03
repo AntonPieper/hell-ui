@@ -5,7 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHellLabels } from '../../core/labels';
 import { type HellSearchSource } from '../../core/search';
 import { HellGlobalKeydownService, matchHotkey } from '../../core/hotkeys';
-import { HellMenu, HellMenuTrigger } from '../../primitives/menu/menu';
+import { HELL_MENU_DIRECTIVES } from '../../primitives/menu/menu';
 import {
   HELL_OMNIBAR_DIRECTIVES,
   matchHotkey as matchHotkeyFromOmnibar,
@@ -13,7 +13,7 @@ import {
 } from './omnibar';
 
 @Component({
-  imports: [...HELL_OMNIBAR_DIRECTIVES, HellMenu, HellMenuTrigger],
+  imports: [...HELL_OMNIBAR_DIRECTIVES, ...HELL_MENU_DIRECTIVES],
   template: `
     <hell-omnibar
       [value]="value()"
@@ -24,7 +24,9 @@ import {
       (submit)="submitEvents.push($event)"
     >
       <ng-template #filtersMenu>
-        <div hellMenu>Filters</div>
+        <div hellMenu>
+          <button hellMenuItem data-testid="filters-menu-item" type="button">Filters</button>
+        </div>
       </ng-template>
       <span hellOmnibarLeading hellOmnibarChip>
         Token
@@ -43,6 +45,7 @@ import {
         Beta
       </button>
     </hell-omnibar>
+    <button data-testid="outside-focus" type="button">Outside focus</button>
   `,
 })
 class OmnibarHost {
@@ -311,6 +314,55 @@ describe('HellOmnibar interactions', () => {
 
     expect(leaveActions.defaultPrevented).toBe(true);
     expect(document.activeElement).toBe(input);
+  });
+
+  it('keeps focus inside registered nested floating surfaces before true outside focus closes', async () => {
+    const fixture = TestBed.createComponent(OmnibarHost);
+    const host = fixture.componentInstance;
+    host.value.set('be');
+    fixture.detectChanges();
+
+    const root = query<HTMLElement>(fixture.nativeElement, 'hell-omnibar');
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
+    const outsideFocus = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      '[data-testid="outside-focus"]',
+    );
+    input.focus();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const action = query<HTMLButtonElement>(overlayRoot(), '[hellOmnibarAction]');
+    input.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'F6', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+
+    expect(document.activeElement).toBe(action);
+    expect(root.getAttribute('data-open')).toBe('true');
+
+    action.click();
+    const menuItem = await waitForElement<HTMLButtonElement>(
+      fixture,
+      document.body,
+      '[data-testid="filters-menu-item"]',
+    );
+
+    menuItem.focus();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    expect(document.activeElement).toBe(menuItem);
+    expect(root.getAttribute('data-open')).toBe('true');
+    expect(host.openEvents).toEqual([true]);
+
+    outsideFocus.dispatchEvent(
+      new FocusEvent('focusin', { bubbles: true, relatedTarget: menuItem }),
+    );
+    fixture.detectChanges();
+
+    expect(root.getAttribute('data-open')).toBeNull();
+    expect(host.openEvents).toEqual([true, false]);
   });
 
   it('closes and clears from Escape without moving focus to an option', () => {
@@ -622,6 +674,31 @@ class FakeGlobalKeydownService {
 
 function overlayRoot(): HTMLElement {
   return TestBed.inject(OverlayContainer).getContainerElement();
+}
+
+async function waitForElement<T extends HTMLElement>(
+  fixture: { detectChanges(): void; whenStable(): Promise<unknown> },
+  root: ParentNode,
+  selector: string,
+): Promise<T> {
+  const timeout = Date.now() + 1000;
+  while (Date.now() < timeout) {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    const element = root.querySelector<T>(selector);
+    if (element instanceof HTMLElement) return element as T;
+
+    if (typeof requestAnimationFrame === 'function') {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    } else {
+      await Promise.resolve();
+    }
+  }
+
+  throw new Error(`Expected ${selector}.`);
 }
 
 function openOmnibarTabStops(hostRoot: HTMLElement, panelRoot: HTMLElement): HTMLElement[] {
