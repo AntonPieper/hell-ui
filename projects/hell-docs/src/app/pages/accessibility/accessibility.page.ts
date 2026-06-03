@@ -462,13 +462,38 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
         border-radius: var(--radius-hell-lg);
         background: var(--color-hell-surface);
       }
-
+      
       .hd-a11y-table {
         width: 100%;
         min-width: 1120px;
+        table-layout: fixed;
         border-collapse: collapse;
         font-size: var(--text-sm);
         line-height: var(--leading-normal);
+      }
+
+      .hd-a11y-col-kind {
+        width: 8%;
+      }
+
+      .hd-a11y-col-surface {
+        width: 14%;
+      }
+
+      .hd-a11y-col-role {
+        width: 23%;
+      }
+
+      .hd-a11y-col-keyboard {
+        width: 20%;
+      }
+
+      .hd-a11y-col-coverage {
+        width: 20%;
+      }
+
+      .hd-a11y-col-gaps {
+        width: 15%;
       }
 
       .hd-a11y-table th,
@@ -477,6 +502,8 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
         padding: var(--spacing-hell-3);
         border-bottom: 1px solid var(--color-hell-border);
         text-align: start;
+        overflow-wrap: break-word;
+        word-break: normal;
       }
 
       .hd-a11y-table th {
@@ -492,18 +519,21 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
         border-bottom: 0;
       }
 
-      .hd-a11y-kind,
-      .hd-a11y-gap {
+      .hd-a11y-kind {
         white-space: nowrap;
+      }
+
+      .hd-a11y-name {
+        font-weight: 700;
+      }
+
+      .hd-a11y-gap {
+        white-space: normal;
       }
 
       .hd-a11y-critical .hd-a11y-gap,
       .hd-a11y-blocked {
         color: var(--color-hell-danger);
-        font-weight: 700;
-      }
-
-      .hd-a11y-name {
         font-weight: 700;
       }
     `,
@@ -537,6 +567,15 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
 
       <div class="hd-a11y-table-wrap" role="region" aria-label="Component accessibility support matrix" tabindex="0">
         <table class="hd-a11y-table">
+          <colgroup>
+            <col class="hd-a11y-col-kind" />
+            <col class="hd-a11y-col-surface" />
+            <col class="hd-a11y-col-role" />
+            <col class="hd-a11y-col-keyboard" />
+            <col class="hd-a11y-col-coverage" />
+            <col class="hd-a11y-col-gaps" />
+          </colgroup>
+
           <thead>
             <tr>
               <th scope="col">Type</th>
