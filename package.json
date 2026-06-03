@@ -16,6 +16,7 @@
     "generate:entrypoints": "node tools/generate-entrypoint-manifests.mjs",
     "test:architecture": "node tools/check-architecture.mjs",
     "test:api-report": "node tools/check-api-reports.mjs",
+    "test:changelog": "node tools/check-changelog.mjs",
     "api-report:update": "node tools/check-api-reports.mjs --local",
     "release:dry-run": "node tools/release-dry-run.mjs",
     "release:dry-run:fast": "node tools/release-dry-run.mjs --fast",

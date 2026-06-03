@@ -612,14 +612,14 @@ export function provideHellSearchRanker(ranker: HellSearchRanker): Provider;
 // types/hell-ui-angular.d.ts:228:1 - (ae-undocumented) Missing documentation for "provideHellLabels".
 // types/hell-ui-angular.d.ts:230:1 - (ae-undocumented) Missing documentation for "HellGlobalKeydownHandler".
 // types/hell-ui-angular.d.ts:231:1 - (ae-undocumented) Missing documentation for "HellGlobalPointerdownHandler".
-// types/hell-ui-angular.d.ts:250:5 - (ae-undocumented) Missing documentation for "register".
-// types/hell-ui-angular.d.ts:251:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular.d.ts:252:5 - (ae-undocumented) Missing documentation for "ɵprov".
-// types/hell-ui-angular.d.ts:257:5 - (ae-undocumented) Missing documentation for "register".
-// types/hell-ui-angular.d.ts:258:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular.d.ts:259:5 - (ae-undocumented) Missing documentation for "ɵprov".
-// types/hell-ui-angular.d.ts:269:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular.d.ts:270:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular.d.ts:251:5 - (ae-undocumented) Missing documentation for "register".
+// types/hell-ui-angular.d.ts:252:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular.d.ts:253:5 - (ae-undocumented) Missing documentation for "ɵprov".
+// types/hell-ui-angular.d.ts:258:5 - (ae-undocumented) Missing documentation for "register".
+// types/hell-ui-angular.d.ts:259:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular.d.ts:260:5 - (ae-undocumented) Missing documentation for "ɵprov".
+// types/hell-ui-angular.d.ts:270:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular.d.ts:271:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

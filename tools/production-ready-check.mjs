@@ -23,6 +23,7 @@ const requiredApiReportPaths = [
   'etc/api-reports/hell-ui-angular-testing.api.md',
 ];
 const requiredFullReleaseTasks = [
+  'changelog entry',
   'lint',
   'architecture',
   'ci contract',

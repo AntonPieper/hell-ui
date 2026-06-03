@@ -17,6 +17,7 @@ const requiredFiles = [
   'tools/check-package-consumer.mjs',
   'tools/check-package-pack.mjs',
   'tools/check-api-reports.mjs',
+  'tools/check-changelog.mjs',
   'tools/release-dry-run.mjs',
   'tools/production-ready-check.mjs',
   'tools/package-pack-audit.mjs',
@@ -24,7 +25,9 @@ const requiredFiles = [
   'tools/package-manager.mjs',
   'tools/docs-budget-policy.mjs',
   'package-lock.json',
+  'CHANGELOG.md',
   'docs/release/npm-publishing.md',
+  'docs/release/semver-policy.md',
   'docs/release/production-readiness-checklist.md',
   'docs/release/docs-budget-policy.md',
   'docs/release/docs-bundle-budget-diagnosis.md',
@@ -36,6 +39,7 @@ const requiredScripts = {
   'test:package-consumer': 'node tools/check-package-consumer.mjs',
   'test:package-pack': 'node tools/check-package-pack.mjs',
   'test:api-report': 'node tools/check-api-reports.mjs',
+  'test:changelog': 'node tools/check-changelog.mjs',
   'api-report:update': 'node tools/check-api-reports.mjs --local',
   'build:docs': 'node tools/setup-docs-hell-package-alias.mjs && ng build hell-docs && node tools/docs-bundle-budget-report.mjs --check --summary-only',
   'release:dry-run': 'node tools/release-dry-run.mjs',
@@ -127,6 +131,17 @@ const fileChecks = [
     ],
   },
   {
+    path: 'tools/check-changelog.mjs',
+    includes: [
+      'CHANGELOG.md',
+      'docs/release/semver-policy.md',
+      'projects/hell/package.json',
+      'internal beta',
+      'public beta',
+      'stable',
+    ],
+  },
+  {
     path: 'tools/release-dry-run.mjs',
     includes: [
       '--fast',
@@ -136,6 +151,7 @@ const fileChecks = [
       'Git tracked changes:',
       'test:architecture',
       'test:ci-contract',
+      'test:changelog',
       'test:unit',
       'build:lib',
       'test:package-pack',
@@ -169,6 +185,27 @@ const fileChecks = [
     path: 'playwright.config.ts',
     includes: [
       "['json', { outputFile: 'test-results/playwright-report.json' }]",
+    ],
+  },
+  {
+    path: 'CHANGELOG.md',
+    includes: [
+      'Keep a Changelog',
+      'docs/release/semver-policy.md',
+      'HELL-023',
+      'HELL-049',
+    ],
+  },
+  {
+    path: 'docs/release/semver-policy.md',
+    includes: [
+      'alpha',
+      'internal beta',
+      'public beta',
+      'stable',
+      'SemVer',
+      'CHANGELOG.md',
+      'release:dry-run',
     ],
   },
   {

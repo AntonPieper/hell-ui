@@ -88,8 +88,8 @@ function printUsage() {
   console.log(`Usage: npm run release:dry-run -- [--fast|--full]
 
 Modes:
-  --fast  Local preflight: lint, architecture, CI contract, npm preflight, build, pack audit, API report.
-  --full  Release candidate gate: lint, architecture, CI contract, unit, build, pack audit, selected package-consumer scenarios, API report, docs build.
+  --fast  Local preflight: changelog entry, lint, architecture, CI contract, npm preflight, build, pack audit, API report.
+  --full  Release candidate gate: changelog entry, lint, architecture, CI contract, unit, build, pack audit, selected package-consumer scenarios, API report, docs build.
 
 Environment:
   HELL_RELEASE_DRY_RUN_LOG_DIR             Override evidence log directory.
@@ -118,6 +118,7 @@ function releaseEvidenceLogPath(selectedMode, date) {
 
 function fastTasks() {
   return [
+    packageTask('changelog entry', ['run', 'test:changelog']),
     packageTask('lint', ['run', 'lint']),
     packageTask('architecture', ['run', 'test:architecture']),
     packageTask('ci contract', ['run', 'test:ci-contract']),
@@ -130,6 +131,7 @@ function fastTasks() {
 
 function fullTasks(scenarios) {
   return [
+    packageTask('changelog entry', ['run', 'test:changelog']),
     packageTask('lint', ['run', 'lint']),
     packageTask('architecture', ['run', 'test:architecture']),
     packageTask('ci contract', ['run', 'test:ci-contract']),
