@@ -4,20 +4,20 @@
 - Source stats: `dist/hell-docs/stats.json`
 - Budget policy: `docs/release/docs-budget-policy.md`
 - Report generator: `tools/docs-bundle-budget-report.mjs`
-- Scope: diagnosis plus current remediation status; remaining split/import work stays in HELL-050, HELL-053, HELL-054, and HELL-056.
+- Scope: diagnosis plus current remediation status; HELL-050 now guards docs route imports, and remaining split/import work stays in HELL-053, HELL-054, and HELL-056.
 
 ## Budget status
 
 | Budget | Current | Warning | Error | Status |
 | --- | ---: | ---: | ---: | --- |
-| Initial bundle | 775.38 kB | 500.00 kB | 1050.00 kB | accepted warning: 275.38 kB over; accepted ceiling: 776.00 kB; owner: Docs shell / global styles; follow-up: HELL-050 |
+| Initial bundle | 775.38 kB | 500.00 kB | 1050.00 kB | accepted warning: 275.38 kB over; accepted ceiling: 776.70 kB; owner: Docs shell / global styles; follow-up: HELL-050 static guard |
 | Any component style | 3.98 kB largest | 4.00 kB | 8.00 kB | within warning budget |
 
 ## Budget policy
 
 - Policy source: `docs/release/docs-budget-policy.md`
 - Policy check: ok
-- Accepted current warnings: Initial bundle (HELL-050)
+- Accepted current warnings: Initial bundle (HELL-050 static guard)
 - Regression budget warnings: none
 
 ## Largest initial chunks
@@ -72,7 +72,7 @@ Lazy owner summary: the largest lazy chunks are correctly behind feature/page bo
 
 | Warning / risk | Root cause from stats | Owner | Follow-up fix |
 | --- | --- | --- | --- |
-| Initial bundle exceeds 500 kB by 275.38 kB | Static imports from `main` pull router/runtime plus docs-shell controls; `styles.css` globally imports Tailwind and `@hell-ui/angular/styles/composites`. Top chunks: `styles-MLBEIBJ3.css`, `chunk-5U5DV66A.js`, `chunk-2P637ENN.js`, `chunk-H7LPC6QE.js`, `chunk-Y2PQ2D3P.js`. | Docs shell / global styles | Accepted by the docs budget policy until HELL-050; HELL-050 audits future eager imports across docs route boundaries, and any undocumented new warning is a regression. |
+| Initial bundle exceeds 500 kB by 275.38 kB | Static imports from `main` pull router/runtime plus docs-shell controls; `styles.css` globally imports Tailwind and `@hell-ui/angular/styles/composites`. Top chunks: `styles-MLBEIBJ3.css`, `chunk-5U5DV66A.js`, `chunk-2P637ENN.js`, `chunk-H7LPC6QE.js`, `chunk-Y2PQ2D3P.js`. | Docs shell / global styles | Accepted by the docs budget policy (HELL-050 static guard); HELL-050 guards future eager imports across docs route boundaries, and any undocumented new warning is a regression. |
 | PDF viewer docs style is isolated from component-style budget | No pdf-viewer component style chunk exceeds the 4 kB warning budget; the docs page serves `@hell-ui/angular/styles/features/pdf-viewer` as a copied lazy asset instead of an Angular component style. | PDF viewer docs page | HELL-031 keeps the lazy boundary; docs budget policy keeps component-style warnings unaccepted unless explicitly documented. |
 | PDF lazy weight is large even when initial bundle is protected | `pdfjs-dist/build/pdf.mjs`, `pdfjs-dist/web/pdf_viewer.mjs`, and `hell-ui-angular-features-pdf-viewer.mjs` are the top PDF lazy inputs. | PDF viewer feature | HELL-031 keeps the docs page lazy/isolated; HELL-053 splits PDF viewer into a separate Angular package before beta. |
 | Code editor lazy chunk is the largest lazy page | CodeMirror and Lezer packages dominate `code-editor-page`; this is expected feature weight, not initial shell weight. | Code editor feature | HELL-054 locks CodeMirror as a kept optional entrypoint and prevents leaks into root/composites. |

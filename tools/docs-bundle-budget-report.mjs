@@ -255,7 +255,7 @@ function renderHeader() {
 - Source stats: \`${relative(root, statsPath)}\`
 - Budget policy: \`${relative(root, budgetPolicyPath)}\`
 - Report generator: \`tools/docs-bundle-budget-report.mjs\`
-- Scope: diagnosis plus current remediation status; remaining split/import work stays in HELL-050, HELL-053, HELL-054, and HELL-056.`;
+- Scope: diagnosis plus current remediation status; HELL-050 now guards docs route imports, and remaining split/import work stays in HELL-053, HELL-054, and HELL-056.`;
 }
 
 function budgetStatusFor(type) {
@@ -298,7 +298,7 @@ function renderBudgetPolicySection() {
 function renderInitialBudgetFollowUp() {
   const status = budgetStatusFor('initial');
   if (status?.state === 'accepted') {
-    return `Accepted by the docs budget policy until ${status.acceptedWarning.followUp}; HELL-050 audits future eager imports across docs route boundaries, and any undocumented new warning is a regression.`;
+    return `Accepted by the docs budget policy (${status.acceptedWarning.followUp}); HELL-050 guards future eager imports across docs route boundaries, and any undocumented new warning is a regression.`;
   }
   return 'Undocumented budget warning; fix the eager import/CSS regression or document a narrow accepted warning with owner and follow-up.';
 }

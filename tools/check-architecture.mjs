@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { basename, dirname, join } from 'node:path';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 import ts from 'typescript';
 import { fileURLToPath } from 'node:url';
 
@@ -15,8 +15,52 @@ import {
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
 
+const docsExampleImportBoundaryDocPath = 'docs/architecture/docs-example-import-boundaries.md';
+
+const allowedDocsLazyRouteCrossImports = [
+  {
+    from: 'projects/hell-docs/src/app/pages/components/flyout/flyout.page.ts',
+    to: 'projects/hell-docs/src/app/pages/testing/floating-dismissal-harness.page.ts',
+    owner: 'HELL-040/HELL-057',
+    rationale:
+      'Flyout exposes the query-param-only floating dismissal browser harness; it is deliberately bundled only with the lazy flyout route, not the docs shell.',
+  },
+];
+
+const docsHeavyLazyRoutePolicies = [
+  {
+    id: 'pdf-viewer-docs',
+    label: 'PDF viewer docs examples',
+    routePath: '/components/pdf-viewer',
+    boundary: 'components/pdf-viewer',
+    packageSpecifiers: ['@hell-ui/angular/features/pdf-viewer', 'pdfjs-dist'],
+    sourceFragments: [
+      '@hell-ui/angular/styles/features/pdf-viewer',
+      'hell-ui/styles/features/pdf-viewer.css',
+      'pdfjs/pdf_viewer.css',
+    ],
+  },
+  {
+    id: 'code-editor-docs',
+    label: 'Code editor docs examples',
+    routePath: '/components/code-editor',
+    boundary: 'components/code-editor',
+    packageSpecifiers: ['@hell-ui/angular/features/code-editor', '@codemirror/'],
+    sourceFragments: ['@hell-ui/angular/styles/features/code-editor'],
+  },
+  {
+    id: 'audio-player-docs',
+    label: 'Audio player docs examples',
+    routePath: '/components/audio-player',
+    boundary: 'components/audio-player',
+    packageSpecifiers: ['@hell-ui/angular/audio-player'],
+    sourceFragments: [],
+  },
+];
+
 function main() {
   checkDocsExamples();
+  checkDocsLazyRouteImportGraphContract();
   checkDocsRootImportContract();
   checkDocsShellNarrowEntrypointContract();
   checkDocsCodeEditorIsolationContract();
@@ -131,6 +175,311 @@ function checkDocsExamples() {
       failures.push(`Docs Usage "${usage.title}" points at missing route ${usage.path}`);
     }
   }
+}
+
+function checkDocsLazyRouteImportGraphContract() {
+  const docsRoot = join(root, 'projects/hell-docs/src/app');
+  const pagesRoot = join(docsRoot, 'pages');
+  const catalogPath = join(docsRoot, 'docs-catalog.ts');
+  const docPath = join(root, docsExampleImportBoundaryDocPath);
+  const routeEntries = docsLazyRouteEntries(catalogPath, pagesRoot);
+  const routeEntriesByBoundary = docsRouteEntriesByBoundary(routeEntries);
+
+  checkDocsExampleImportBoundaryDocs(docPath);
+
+  for (const policy of docsHeavyLazyRoutePolicies) {
+    const routeEntry = routeEntries.find(
+      (entry) => entry.boundary === policy.boundary && entry.routePaths.includes(policy.routePath),
+    );
+    if (!routeEntry) {
+      failures.push(
+        `Docs Lazy Route Import Graph policy ${policy.id} must be backed by lazy route ${policy.routePath} in projects/hell-docs/src/app/docs-catalog.ts`,
+      );
+    }
+  }
+
+  const docsFiles = walk(docsRoot).filter((file) => file.endsWith('.ts'));
+  const moduleImports = docsFiles.flatMap((file) => moduleImportSpecifiers(file));
+
+  const unusedAllowances = new Set(
+    allowedDocsLazyRouteCrossImports.map((allowance) => `${allowance.from}->${allowance.to}`),
+  );
+
+  for (const importHit of moduleImports) {
+    const target = resolveRelativeModuleFile(importHit.file, importHit.specifier);
+    if (!target || !isWithinDirectory(target, pagesRoot)) continue;
+    if (isDocsCatalogLazyRouteImport(importHit, target, catalogPath, routeEntries)) continue;
+
+    const fromRel = relPath(importHit.file);
+    const toRel = relPath(target);
+
+    if (!isWithinDirectory(importHit.file, pagesRoot)) {
+      failures.push(
+        `Docs Lazy Route Import Graph ${fromRel}:${importHit.line} imports ${importHit.specifier} -> ${toRel}; ` +
+          'docs shell/shared/search files must not eagerly reference lazy page or example code. Move shared code to projects/hell-docs/src/app/shared or add a documented narrow allowance.',
+      );
+      continue;
+    }
+
+    const fromBoundary = docsPageBoundary(importHit.file, pagesRoot, routeEntriesByBoundary);
+    const toBoundary = docsPageBoundary(target, pagesRoot, routeEntriesByBoundary);
+    if (fromBoundary.boundary === toBoundary.boundary) continue;
+
+    const allowanceKey = `${fromRel}->${toRel}`;
+    if (unusedAllowances.has(allowanceKey)) {
+      unusedAllowances.delete(allowanceKey);
+      continue;
+    }
+
+    failures.push(
+      `Docs Lazy Route Import Graph ${fromRel}:${importHit.line} imports ${importHit.specifier} -> ${toRel}; ` +
+        `${fromBoundary.label} must not eagerly reference ${toBoundary.label}. Move shared code to projects/hell-docs/src/app/shared or add a documented narrow allowance.`,
+    );
+  }
+
+  for (const allowanceKey of unusedAllowances) {
+    const allowance = allowedDocsLazyRouteCrossImports.find(
+      (candidate) => `${candidate.from}->${candidate.to}` === allowanceKey,
+    );
+    failures.push(
+      `Docs Lazy Route Import Graph allowance is stale: ${allowance.from} no longer imports ${allowance.to}`,
+    );
+  }
+
+  for (const importHit of moduleImports) {
+    for (const policy of docsHeavyLazyRoutePolicies) {
+      if (!matchesDocsHeavyPackagePolicy(importHit.specifier, policy)) continue;
+      if (isFileInDocsBoundary(importHit.file, pagesRoot, policy.boundary)) continue;
+
+      failures.push(
+        `Docs Lazy Route Import Graph ${relPath(importHit.file)}:${importHit.line} imports ${importHit.specifier}; ` +
+          `${policy.label} imports must stay inside lazy route ${policy.routePath} (${policy.boundary}).`,
+      );
+    }
+  }
+
+  for (const file of docsFiles) {
+    const source = readFile(file);
+    for (const policy of docsHeavyLazyRoutePolicies) {
+      for (const fragment of policy.sourceFragments) {
+        if (!source.includes(fragment)) continue;
+        if (isFileInDocsBoundary(file, pagesRoot, policy.boundary)) continue;
+
+        failures.push(
+          `Docs Lazy Route Import Graph ${relPath(file)} references ${fragment}; ` +
+            `${policy.label} stylesheet/runtime references must stay inside lazy route ${policy.routePath} (${policy.boundary}).`,
+        );
+      }
+    }
+  }
+}
+
+function checkDocsExampleImportBoundaryDocs(docPath) {
+  if (!existsSync(docPath)) {
+    failures.push(`Docs Lazy Route Import Graph missing ${docsExampleImportBoundaryDocPath}`);
+    return;
+  }
+
+  const docs = readFile(docPath);
+  const requiredParts = [
+    'docs-example-import-boundaries',
+    'tools/check-architecture.mjs',
+    'projects/hell-docs/src/app/docs-catalog.ts',
+    'projects/hell-docs/src/app/pages/<route>/examples/',
+    'projects/hell-docs/src/app/shared/',
+  ];
+  for (const part of requiredParts) {
+    if (!docs.includes(part)) {
+      failures.push(`Docs Lazy Route Import Graph note is missing ${part}`);
+    }
+  }
+
+  for (const policy of docsHeavyLazyRoutePolicies) {
+    const missingPolicyParts = [
+      policy.id,
+      policy.routePath,
+      policy.boundary,
+      ...policy.packageSpecifiers,
+      ...policy.sourceFragments,
+    ].filter((part) => !docs.includes(part));
+    if (missingPolicyParts.length) {
+      failures.push(
+        `Docs Lazy Route Import Graph note is missing ${policy.id}: ${missingPolicyParts.join(', ')}`,
+      );
+    }
+  }
+
+  for (const allowance of allowedDocsLazyRouteCrossImports) {
+    const missingAllowanceParts = [
+      allowance.from,
+      allowance.to,
+      allowance.owner,
+      allowance.rationale,
+    ].filter((part) => !docs.includes(part));
+    if (missingAllowanceParts.length) {
+      failures.push(
+        `Docs Lazy Route Import Graph note is missing allowance ${allowance.from} -> ${allowance.to}: ${missingAllowanceParts.join(', ')}`,
+      );
+    }
+  }
+}
+
+function docsLazyRouteEntries(catalogPath, pagesRoot) {
+  const catalog = readFile(catalogPath);
+  const entries = [];
+  const seen = new Set();
+  const routeImportRegex = /(?:routePath|path):\s*'([^']*)'[\s\S]*?loadComponent:\s*\(\)\s*=>\s*import\(\s*'([^']+)'\s*\)/g;
+
+  for (const match of catalog.matchAll(routeImportRegex)) {
+    const routePath = match[1] ? `/${match[1]}` : '/';
+    const modulePath = resolveRelativeModuleFile(catalogPath, match[2]);
+    if (!modulePath || !isWithinDirectory(modulePath, pagesRoot)) continue;
+
+    const boundary = relPathFrom(pagesRoot, dirname(modulePath));
+    const key = `${routePath}:${boundary}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    entries.push({ routePath, routePaths: [routePath], boundary, modulePath });
+  }
+
+  return mergeDocsRouteEntries(entries);
+}
+
+function mergeDocsRouteEntries(entries) {
+  const byBoundary = new Map();
+  for (const entry of entries) {
+    const existing = byBoundary.get(entry.boundary);
+    if (!existing) {
+      byBoundary.set(entry.boundary, { ...entry });
+      continue;
+    }
+
+    existing.routePaths.push(entry.routePath);
+  }
+
+  return [...byBoundary.values()].map((entry) => ({
+    ...entry,
+    routePaths: [...new Set(entry.routePaths)].sort(),
+  }));
+}
+
+function isDocsCatalogLazyRouteImport(importHit, target, catalogPath, routeEntries) {
+  return (
+    importHit.file === catalogPath &&
+    importHit.kind === 'dynamic' &&
+    routeEntries.some((entry) => entry.modulePath === target)
+  );
+}
+
+function docsRouteEntriesByBoundary(entries) {
+  return new Map(entries.map((entry) => [entry.boundary, entry]));
+}
+
+function docsPageBoundary(file, pagesRoot, routeEntriesByBoundary) {
+  const rel = relPathFrom(pagesRoot, file);
+  const routeEntry = [...routeEntriesByBoundary.values()]
+    .sort((a, b) => b.boundary.length - a.boundary.length)
+    .find((entry) => rel === entry.boundary || rel.startsWith(`${entry.boundary}/`));
+
+  if (routeEntry) {
+    return {
+      boundary: routeEntry.boundary,
+      label: `${routeEntry.routePaths.join(' or ')} lazy route boundary`,
+    };
+  }
+
+  const parts = rel.split('/');
+  const examplesIndex = parts.indexOf('examples');
+  const boundary = examplesIndex > 0 ? parts.slice(0, examplesIndex).join('/') : parts.slice(0, -1).join('/');
+  return { boundary, label: `${boundary} unrouted docs page boundary` };
+}
+
+function isFileInDocsBoundary(file, pagesRoot, boundary) {
+  if (!isWithinDirectory(file, pagesRoot)) return false;
+  const rel = relPathFrom(pagesRoot, file);
+  return rel === boundary || rel.startsWith(`${boundary}/`);
+}
+
+function matchesDocsHeavyPackagePolicy(specifier, policy) {
+  return policy.packageSpecifiers.some((prefix) => {
+    if (prefix.endsWith('/')) return specifier.startsWith(prefix);
+    return specifier === prefix || specifier.startsWith(`${prefix}/`);
+  });
+}
+
+function moduleImportSpecifiers(file) {
+  const source = readFile(file);
+  const sourceFile = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const imports = [];
+
+  function pushImport(node, specifier, kind) {
+    const line = sourceFile.getLineAndCharacterOfPosition(specifier.getStart(sourceFile)).line + 1;
+    imports.push({ file, kind, line, specifier: specifier.text });
+  }
+
+  function visit(node) {
+    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
+      if (!isTypeOnlyImportDeclaration(node)) pushImport(node, node.moduleSpecifier, 'static');
+    } else if (
+      ts.isExportDeclaration(node) &&
+      node.moduleSpecifier &&
+      ts.isStringLiteral(node.moduleSpecifier)
+    ) {
+      if (!isTypeOnlyExportDeclaration(node)) pushImport(node, node.moduleSpecifier, 'export');
+    } else if (
+      ts.isCallExpression(node) &&
+      node.expression.kind === ts.SyntaxKind.ImportKeyword &&
+      node.arguments.length === 1 &&
+      ts.isStringLiteral(node.arguments[0])
+    ) {
+      pushImport(node, node.arguments[0], 'dynamic');
+    }
+
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return imports;
+}
+
+function isTypeOnlyImportDeclaration(node) {
+  if (!node.importClause) return false;
+  if (node.importClause.isTypeOnly) return true;
+  if (node.importClause.name) return false;
+
+  const bindings = node.importClause.namedBindings;
+  if (!bindings || ts.isNamespaceImport(bindings)) return false;
+
+  return bindings.elements.length > 0 && bindings.elements.every((element) => element.isTypeOnly);
+}
+
+function isTypeOnlyExportDeclaration(node) {
+  if (node.isTypeOnly) return true;
+  const clause = node.exportClause;
+  if (!clause || !ts.isNamedExports(clause)) return false;
+  return clause.elements.length > 0 && clause.elements.every((element) => element.isTypeOnly);
+}
+
+function resolveRelativeModuleFile(fromFile, specifier) {
+  if (!specifier.startsWith('.')) return null;
+
+  const withoutQuery = specifier.replace(/[?#].*$/, '');
+  const basePath = resolve(dirname(fromFile), withoutQuery);
+  const candidates = [basePath, `${basePath}.ts`, `${basePath}.tsx`, join(basePath, 'index.ts')];
+  return candidates.find((candidate) => existsSync(candidate)) ?? null;
+}
+
+function isWithinDirectory(file, directory) {
+  const rel = relative(directory, file);
+  return rel === '' || (!rel.startsWith('..') && !rel.startsWith('/') && !rel.startsWith('\\'));
+}
+
+function relPathFrom(basePath, file) {
+  return relative(basePath, file).replaceAll('\\', '/');
+}
+
+function relPath(file) {
+  return relPathFrom(root, file);
 }
 
 function catalogRoutePaths(catalog) {
