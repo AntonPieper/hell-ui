@@ -10,4 +10,5 @@ export * from './lib/public-api-core';
 // Composites and features are available through entry points:
 // - @hell-ui/angular/composites
 // - @hell-ui/angular/features/data-table (legacy), @hell-ui/angular/features/table-utilities,
-//   @hell-ui/angular/features/code-editor (kept optional CodeMirror entry point)
+//   @hell-ui/angular/features/code-editor (kept optional CodeMirror entry point),
+//   @hell-ui/angular/features/audio-transcript (optional audio transcript provider)

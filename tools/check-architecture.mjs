@@ -53,13 +53,21 @@ const docsHeavyLazyRoutePolicies = [
     label: 'Audio player docs examples',
     routePath: '/components/audio-player',
     boundary: 'components/audio-player',
-    packageSpecifiers: ['@hell-ui/angular/audio-player'],
+    packageSpecifiers: [
+      '@hell-ui/angular/audio-player',
+      '@hell-ui/angular/features/audio-transcript',
+    ],
     sourceFragments: [],
   },
 ];
 
 const codeEditorEntrypointSpecifier = '@hell-ui/angular/features/code-editor';
 const codeMirrorPackageSpecifierPrefixes = ['@codemirror/', '@lezer/'];
+const audioTranscriptEntrypointSpecifier = '@hell-ui/angular/features/audio-transcript';
+const audioTranscriptRuntimeTerms = [
+  { label: 'SpeechRecognition', pattern: /\bSpeechRecognition\b|\bwebkitSpeechRecognition\b/ },
+  { label: 'captureStream()', pattern: /\bcaptureStream\b/ },
+];
 
 function main() {
   checkDocsExamples();
@@ -70,6 +78,7 @@ function main() {
   checkDocsPdfViewerIsolationContract();
   checkPackageEntryPoints();
   checkCodeMirrorEntrypointIsolationContract();
+  checkAudioTranscriptEntrypointIsolationContract();
   checkApiReportContract();
   checkApiStabilityContract();
   checkPackageDependencyContract();
@@ -963,6 +972,77 @@ function isCodeMirrorBoundarySpecifier(specifier) {
   );
 }
 
+function checkAudioTranscriptEntrypointIsolationContract() {
+  const audioTranscriptPublicApiPath = 'projects/hell/src/lib/public-api-feature-audio-transcript.ts';
+  const audioTranscriptPublicApi = readFile(join(root, audioTranscriptPublicApiPath));
+  if (!/@experimental\b/.test(audioTranscriptPublicApi)) {
+    failures.push('Audio Transcript feature entry point must carry @experimental in its public API comment');
+  }
+  if (!audioTranscriptPublicApi.includes('Optional browser transcript provider')) {
+    failures.push('Audio Transcript feature entry point must describe itself as an optional provider seam');
+  }
+
+  const audioTranscriptSourcePath = 'projects/hell/src/lib/features/audio-transcript/audio-transcript.ts';
+  const audioTranscriptSource = readFile(join(root, audioTranscriptSourcePath));
+  for (const symbol of [
+    'provideHellAudioTranscript',
+    'hellAudioSpeechSupported',
+    'HellAudioSpeechTranscriptRuntime',
+  ]) {
+    if (!hasTaggedApiSymbol(audioTranscriptSource, 'experimental', symbol)) {
+      failures.push(`${audioTranscriptSourcePath} ${symbol} must carry @experimental API JSDoc`);
+    }
+  }
+
+  const libraryProductionPaths = [
+    'projects/hell/src/public-api.ts',
+    ...entrypointPublicApiFiles().map((entrypoint) => entrypoint.publicApiPath),
+    ...productionTsFilesUnder('projects/hell/src/lib'),
+  ];
+
+  for (const rel of [...new Set(libraryProductionPaths)].sort()) {
+    if (isAudioTranscriptFeatureSeamPath(rel)) continue;
+    const file = join(root, rel);
+    if (!existsSync(file)) continue;
+
+    const source = readFile(file);
+    for (const term of audioTranscriptRuntimeTerms) {
+      if (term.pattern.test(source)) {
+        failures.push(
+          `Audio Transcript Optional Entrypoint boundary ${rel} references ${term.label}; ` +
+            'browser transcript runtime must stay inside @hell-ui/angular/features/audio-transcript.',
+        );
+      }
+    }
+
+    const hits = moduleSpecifierReferences(file).filter((hit) =>
+      isAudioTranscriptFeatureSpecifier(hit.specifier),
+    );
+    for (const hit of hits) {
+      failures.push(
+        `Audio Transcript Optional Entrypoint boundary ${rel}:${hit.line} references ${hit.specifier}; ` +
+          'base audio-player and composites must not import the transcript feature seam.',
+      );
+    }
+  }
+}
+
+function isAudioTranscriptFeatureSeamPath(rel) {
+  return (
+    rel === 'projects/hell/src/lib/public-api-feature-audio-transcript.ts' ||
+    rel.includes('/features/audio-transcript/')
+  );
+}
+
+function isAudioTranscriptFeatureSpecifier(specifier) {
+  return (
+    specifier === audioTranscriptEntrypointSpecifier ||
+    specifier.startsWith(`${audioTranscriptEntrypointSpecifier}/`) ||
+    specifier.includes('features/audio-transcript') ||
+    specifier.includes('public-api-feature-audio-transcript')
+  );
+}
+
 function checkApiReportContract() {
   const packageJson = parseJsonWithComments(readFile(join(root, 'package.json')));
   const script = readFile(join(root, 'tools/check-api-reports.mjs'));
@@ -1423,12 +1503,14 @@ function checkStyleEntryPoints() {
   const packageJson = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
   const exportsMap = packageJson.exports ?? {};
   const features = featureDirectories();
+  const stylelessFeatures = new Set(['audio-transcript']);
+  const styledFeatures = features.filter((feature) => !stylelessFeatures.has(feature));
   const expectedStyleExports = [
     './styles',
     './styles/tokens',
     './styles/primitives',
     './styles/composites',
-    ...features.map((feature) => `./styles/features/${feature}`),
+    ...styledFeatures.map((feature) => `./styles/features/${feature}`),
   ];
 
   for (const exportPath of expectedStyleExports) {
@@ -1448,7 +1530,7 @@ function checkStyleEntryPoints() {
 
   const allStyles = readFile(join(root, 'projects/hell/src/lib/styles/hell.css'));
   const legacyStyleAliasFeatures = new Set(['data-table']);
-  for (const feature of features) {
+  for (const feature of styledFeatures) {
     if (legacyStyleAliasFeatures.has(feature)) continue;
     if (!allStyles.includes(`./features/${feature}.css`)) {
       failures.push(`All-in style entry point is missing Feature CSS import for ${feature}`);
@@ -2224,7 +2306,7 @@ const browserGlobalSeamDocPath = 'docs/architecture/browser-global-seams.md';
 const allowedBrowserGlobalSeams = [
   {
     id: 'audio-transcript-window-probe',
-    file: 'projects/hell/src/lib/composites/audio-player/audio-player.runtime.ts',
+    file: 'projects/hell/src/lib/features/audio-transcript/audio-transcript.ts',
     globals: ['window'],
     owner: 'HELL-055',
     lines: [

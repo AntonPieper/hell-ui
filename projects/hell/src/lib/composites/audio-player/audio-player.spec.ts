@@ -1,11 +1,57 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { HellAudioPlayer } from './audio-player';
+import {
+  HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY,
+  type HellAudioTranscriptRuntime,
+} from './audio-player.transcript';
+
+class FakeTranscriptRuntime implements HellAudioTranscriptRuntime {
+  readonly transcript = signal('');
+  readonly interim = signal('');
+  readonly transcribing = signal(false);
+  readonly error = signal<string | null>(null);
+  readonly copied = signal(false);
+  readonly speechSupported = signal(true);
+  readonly startRecognition = vi.fn();
+  readonly stopRecognition = vi.fn(() => this.transcribing.set(false));
+  readonly resetTranscriptState = vi.fn(() => {
+    this.transcript.set('');
+    this.interim.set('');
+    this.error.set(null);
+    this.copied.set(false);
+  });
+  readonly copyTranscript = vi.fn(async () => undefined);
+  readonly destroy = vi.fn();
+
+  private recognizing = false;
+
+  isRecognizing(): boolean {
+    return this.recognizing;
+  }
+
+  setRecognizing(value: boolean): void {
+    this.recognizing = value;
+  }
+}
 
 describe('HellAudioPlayer', () => {
-  async function createPlayer() {
+  async function createPlayer(options: { provideTranscript?: boolean } = {}) {
+    const transcriptRuntime = new FakeTranscriptRuntime();
+    const providers =
+      options.provideTranscript === false
+        ? []
+        : [
+            {
+              provide: HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY,
+              useValue: () => transcriptRuntime,
+            },
+          ];
+
     await TestBed.configureTestingModule({
       imports: [HellAudioPlayer],
+      providers,
     }).compileComponents();
 
     const fixture = TestBed.createComponent(HellAudioPlayer);
@@ -14,7 +60,6 @@ describe('HellAudioPlayer', () => {
     fixture.detectChanges();
 
     const component = fixture.componentInstance as HellAudioPlayer & {
-      speechSupported: { set(value: boolean): void };
       captions: () => boolean;
       playing: () => boolean;
       transcript: { (): string; set(value: string): void };
@@ -25,11 +70,9 @@ describe('HellAudioPlayer', () => {
       toggleMute(): void;
       cyclePlaybackRate(): void;
     };
-    component.speechSupported.set(true);
-    fixture.detectChanges();
 
     const audio = fixture.nativeElement.querySelector('audio') as HTMLAudioElement;
-    return { fixture, component, audio };
+    return { fixture, component, audio, transcriptRuntime };
   }
 
   it('defaults audio crossorigin to anonymous', async () => {
@@ -97,15 +140,24 @@ describe('HellAudioPlayer', () => {
   });
 
   it('keeps the experimental speech transcript toggle opt-in', async () => {
-    await TestBed.configureTestingModule({ imports: [HellAudioPlayer] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [HellAudioPlayer],
+      providers: [
+        {
+          provide: HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY,
+          useValue: () => new FakeTranscriptRuntime(),
+        },
+      ],
+    }).compileComponents();
     const fixture = TestBed.createComponent(HellAudioPlayer);
     fixture.componentRef.setInput('src', '/test-audio.mp3');
-
-    const component = fixture.componentInstance as HellAudioPlayer & {
-      speechSupported: { set(value: boolean): void };
-    };
-    component.speechSupported.set(true);
     fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-slot="cc-toggle"]')).toBeNull();
+  });
+
+  it('hides the transcript toggle without the optional feature provider', async () => {
+    const { fixture } = await createPlayer({ provideTranscript: false });
 
     expect(fixture.nativeElement.querySelector('[data-slot="cc-toggle"]')).toBeNull();
   });
@@ -123,16 +175,19 @@ describe('HellAudioPlayer', () => {
     expect(fixture.nativeElement.querySelector('[data-slot="cc-toggle"]')).toBeNull();
   });
 
-  it('keeps allowLiveCaptions as a compatibility alias', async () => {
-    await TestBed.configureTestingModule({ imports: [HellAudioPlayer] }).compileComponents();
+  it('keeps allowLiveCaptions as a compatibility alias through the optional provider', async () => {
+    await TestBed.configureTestingModule({
+      imports: [HellAudioPlayer],
+      providers: [
+        {
+          provide: HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY,
+          useValue: () => new FakeTranscriptRuntime(),
+        },
+      ],
+    }).compileComponents();
     const fixture = TestBed.createComponent(HellAudioPlayer);
     fixture.componentRef.setInput('src', '/test-audio.mp3');
     fixture.componentRef.setInput('allowLiveCaptions', true);
-
-    const component = fixture.componentInstance as HellAudioPlayer & {
-      speechSupported: { set(value: boolean): void };
-    };
-    component.speechSupported.set(true);
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('[data-slot="cc-toggle"]')).toBeInstanceOf(

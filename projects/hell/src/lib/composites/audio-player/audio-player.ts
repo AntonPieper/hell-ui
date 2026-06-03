@@ -28,7 +28,11 @@ import { HellSlider } from '../../primitives/slider/slider';
 import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
 import { HellAudioRuntime, hellHtmlAudioElementAdapter } from './audio-player.runtime';
-export { hellAudioSpeechSupported } from './audio-player.runtime';
+import {
+  HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY,
+  HellAudioTranscriptUnavailableRuntime,
+} from './audio-player.transcript';
+export { hellAudioSpeechSupported } from './audio-player.transcript';
 
 const HELL_AUDIO_PLAYER_ICONS = {
   faSolidClosedCaptioning,
@@ -54,11 +58,10 @@ function parseIsoDateOnly(value: string): Date | null {
 
 /**
  * Compact audio player with seek bar, play/pause, mute, volume slider,
- * download button and an opt-in speech-transcript strip backed by the
- * Web Speech API (Chromium-only). The transcript toggle is hidden unless enabled
- * and the browser exposes `SpeechRecognition` + `HTMLMediaElement.captureStream()`.
- * Remote speech transcript capture also depends on the media URL, CORS mode,
- * response headers, and browser media-capture behavior.
+ * download button and an opt-in speech-transcript strip. Browser transcript
+ * capture is available only when the optional
+ * `@hell-ui/angular/features/audio-transcript` provider is imported. The toggle
+ * is hidden unless enabled and the provider reports support for the media.
  *
  * @experimental Browser speech transcripts are best-effort convenience text,
  * not accessibility captions, timed text, or a replacement for transcripts.
@@ -263,8 +266,7 @@ export class HellAudioPlayer extends HellStyleable {
   /**
    * CORS mode forwarded to the native audio element. Defaults to `anonymous`.
    * Set to `null` to omit the `crossorigin` attribute. Remote speech transcript
-   * capture depends on media CORS headers plus browser `captureStream()` and
-   * `SpeechRecognition` support.
+   * capture depends on media CORS headers plus browser media-capture support.
    */
   readonly crossOrigin = input<'anonymous' | 'use-credentials' | null>('anonymous', {
     alias: 'crossorigin',
@@ -279,7 +281,7 @@ export class HellAudioPlayer extends HellStyleable {
   readonly title = input<string | null>(null);
   /** Display a date/timestamp next to the title. Accepts a string or Date. */
   readonly date = input<string | Date | null>(null);
-  /** BCP-47 language hint for SpeechRecognition. Defaults to audio element document `lang` or `en-US`. */
+  /** BCP-47 language hint for the optional transcript recognizer. Defaults to audio element document `lang` or `en-US`. */
   readonly lang = input<string | null>(null);
 
   protected readonly captions = signal(false);
@@ -287,6 +289,11 @@ export class HellAudioPlayer extends HellStyleable {
     () => this.allowSpeechTranscript() || this.allowLiveCaptions(),
   );
   private readonly audioRuntime = new HellAudioRuntime();
+  private readonly createTranscriptRuntime = inject(HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY, {
+    optional: true,
+  });
+  private readonly transcriptRuntime =
+    this.createTranscriptRuntime?.() ?? new HellAudioTranscriptUnavailableRuntime();
   protected readonly playing = this.audioRuntime.playing;
   protected readonly currentTime = this.audioRuntime.currentTime;
   protected readonly duration = this.audioRuntime.duration;
@@ -295,12 +302,12 @@ export class HellAudioPlayer extends HellStyleable {
   protected readonly playbackRate = this.audioRuntime.playbackRate;
   protected readonly seekMax = this.audioRuntime.seekMax;
   protected readonly volumeLevel = this.audioRuntime.volumeLevel;
-  protected readonly transcript = this.audioRuntime.transcript;
-  protected readonly interim = this.audioRuntime.interim;
-  protected readonly transcribing = this.audioRuntime.transcribing;
-  protected readonly error = this.audioRuntime.error;
-  protected readonly copied = this.audioRuntime.copied;
-  protected readonly speechSupported = this.audioRuntime.speechSupported;
+  protected readonly transcript = this.transcriptRuntime.transcript;
+  protected readonly interim = this.transcriptRuntime.interim;
+  protected readonly transcribing = this.transcriptRuntime.transcribing;
+  protected readonly error = this.transcriptRuntime.error;
+  protected readonly copied = this.transcriptRuntime.copied;
+  protected readonly speechSupported = this.transcriptRuntime.speechSupported;
   protected readonly labels = inject(HELL_LABELS);
   protected readonly speechTranscriptLabel =
     this.labels.audioPlayer.speechTranscript ?? 'Speech transcript';
@@ -348,7 +355,7 @@ export class HellAudioPlayer extends HellStyleable {
   constructor() {
     super();
     inject(DestroyRef).onDestroy(() => {
-      this.audioRuntime.destroy();
+      this.transcriptRuntime.destroy();
       if (this.seekRestartTimer) clearTimeout(this.seekRestartTimer);
     });
     // Apply audio properties from runtime state.
@@ -361,9 +368,9 @@ export class HellAudioPlayer extends HellStyleable {
         this.captions() &&
         this.playing() &&
         this.speechSupported();
-      if (wantLive && !this.audioRuntime.isRecognizing()) {
+      if (wantLive && !this.transcriptRuntime.isRecognizing()) {
         this.startRecognition();
-      } else if (!wantLive && this.audioRuntime.isRecognizing()) {
+      } else if (!wantLive && this.transcriptRuntime.isRecognizing()) {
         this.stopRecognition();
       }
     });
@@ -429,7 +436,7 @@ export class HellAudioPlayer extends HellStyleable {
   /**
    * Slider-driven seek. Fires for every step change while dragging; we
    * commit immediately and debounce transcript recovery so we only restart
-   * `SpeechRecognition` once the user finishes scrubbing.
+   * the optional transcript recognizer once the user finishes scrubbing.
    */
   protected onSeek(value: number) {
     this.handleSeekResult(this.audioRuntime.seekTo(this.media, value));
@@ -475,7 +482,7 @@ export class HellAudioPlayer extends HellStyleable {
         this.captions() &&
         this.playing() &&
         this.speechSupported() &&
-        !this.audioRuntime.isRecognizing()
+        !this.transcriptRuntime.isRecognizing()
       ) {
         this.startRecognition();
       }
@@ -487,7 +494,7 @@ export class HellAudioPlayer extends HellStyleable {
       this.playing() &&
       this.captions() &&
       this.speechSupported() &&
-      this.audioRuntime.isRecognizing()
+      this.transcriptRuntime.isRecognizing()
     );
   }
 
@@ -501,7 +508,7 @@ export class HellAudioPlayer extends HellStyleable {
         this.captions() &&
         this.playing() &&
         this.speechSupported() &&
-        !this.audioRuntime.isRecognizing()
+        !this.transcriptRuntime.isRecognizing()
       ) {
         this.startRecognition();
       }
@@ -509,7 +516,7 @@ export class HellAudioPlayer extends HellStyleable {
   }
 
   private startRecognition() {
-    this.audioRuntime.startRecognition(
+    this.transcriptRuntime.startRecognition(
       this.audio().nativeElement,
       this.lang(),
       () => this.captions() && this.playing() && this.speechSupported(),
@@ -517,7 +524,7 @@ export class HellAudioPlayer extends HellStyleable {
   }
 
   private stopRecognition() {
-    this.audioRuntime.stopRecognition();
+    this.transcriptRuntime.stopRecognition();
   }
 
   protected clearTranscript() {
@@ -525,11 +532,11 @@ export class HellAudioPlayer extends HellStyleable {
   }
 
   private resetTranscriptState() {
-    this.audioRuntime.resetTranscriptState();
+    this.transcriptRuntime.resetTranscriptState();
   }
 
   protected async copyTranscript() {
-    await this.audioRuntime.copyTranscript();
+    await this.transcriptRuntime.copyTranscript();
   }
 
   protected format(s: number): string {

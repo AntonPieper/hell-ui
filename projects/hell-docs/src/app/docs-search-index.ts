@@ -540,7 +540,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     title: 'Audio Player: Speech Transcript',
     path: '/components/audio-player',
     detail: 'components/audio-player/examples/speech-transcript.example.ts',
-    terms: 'audio-player speech-transcript components/audio-player/examples/speech-transcript.example components/audio-player hell-audio-player allowSpeechTranscript SpeechRecognition captureStream experimental best-effort timed-text accessibility',
+    terms: 'audio-player speech-transcript components/audio-player/examples/speech-transcript.example components/audio-player hell-audio-player allowSpeechTranscript provideHellAudioTranscript features/audio-transcript SpeechRecognition captureStream experimental best-effort timed-text accessibility',
   },
   {
     title: 'Audio Player: Untitled Controls Only',

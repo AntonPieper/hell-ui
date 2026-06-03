@@ -101,6 +101,7 @@ const packageConsumerPeerTiers = new Set([
   'primitive',
   'composite',
   'table-utilities',
+  'audio-transcript',
   'code-editor',
   'pdf-viewer',
 ]);
@@ -118,6 +119,10 @@ const peerGroupContracts = {
     peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup],
   },
   'table-utilities': { tier: 'table-utilities', peers: [...corePeerGroup, ...stylePeerGroup] },
+  'audio-transcript': {
+    tier: 'audio-transcript',
+    peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup],
+  },
   'code-editor': {
     tier: 'code-editor',
     peers: [...corePeerGroup, ...stylePeerGroup, ...codeEditorPeerGroup],
@@ -176,7 +181,7 @@ const pdfViewerDeps = [
   ...styledUiDeps,
   'pdfjs-dist',
 ];
-
+const audioPlayerDeps = styledUiDeps;
 
 const scenarios = [
   {
@@ -243,6 +248,24 @@ const scenarios = [
     peerGroup: 'composite',
     dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: appShellConsumerMainTs(),
+    stylesCss: compositesConsumerStylesCss(),
+  },
+  {
+    name: 'audio-player',
+    description: 'narrow audio-player composite without transcript feature provider',
+    peerTier: 'composite',
+    peerGroup: 'composite-icons',
+    dependencies: audioPlayerDeps,
+    mainTs: audioPlayerConsumerMainTs(),
+    stylesCss: compositesConsumerStylesCss(),
+  },
+  {
+    name: 'audio-transcript',
+    description: 'audio transcript feature provider opt-in without CodeMirror or pdf.js peers',
+    peerTier: 'audio-transcript',
+    peerGroup: 'audio-transcript',
+    dependencies: audioPlayerDeps,
+    mainTs: audioTranscriptConsumerMainTs(),
     stylesCss: compositesConsumerStylesCss(),
   },
   {
@@ -487,7 +510,14 @@ function assertScenarioPeerGroup(scenario, packagePeerNames) {
 }
 
 function assertHeavyPeersAreIsolated(allScenarios) {
-  const lightScenarioNames = new Set(['root-core', 'core', 'button-unstyled', 'button']);
+  const lightScenarioNames = new Set([
+    'root-core',
+    'core',
+    'button-unstyled',
+    'button',
+    'audio-player',
+    'audio-transcript',
+  ]);
   for (const scenario of allScenarios) {
     if (!lightScenarioNames.has(scenario.name)) continue;
 
@@ -913,6 +943,43 @@ import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/app-shell';
 class App {}
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function audioPlayerConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HellAudioPlayer } from '${packageName}/audio-player';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [HellAudioPlayer],
+  template: \`<hell-audio-player src="/sample.ogg" title="Status recording" />\`,
+})
+class App {}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function audioTranscriptConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HellAudioPlayer } from '${packageName}/audio-player';
+import { provideHellAudioTranscript } from '${packageName}/features/audio-transcript';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [HellAudioPlayer],
+  template: \`<hell-audio-player src="/sample.ogg" title="Transcript recording" allowSpeechTranscript />\`,
+})
+class App {}
+
+bootstrapApplication(App, {
+  providers: [...provideHellAudioTranscript()],
+}).catch((error: unknown) => console.error(error));
 `;
 }
 

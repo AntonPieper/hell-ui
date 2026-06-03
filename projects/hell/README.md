@@ -42,7 +42,8 @@ Package-consumer scenarios assert these peer groups with strict peer installs. C
 | --- | --- | --- |
 | Core | `@hell-ui/angular`, `/core`, `/testing`; `root-core`, `core`, `testing` | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `ng-primitives`, `rxjs` |
 | Primitive | Narrow primitives such as `/button`; aggregate `/primitives`; `button-unstyled`, `button`, `primitives-css` | Core peers. Add `tailwindcss` when importing primitive CSS. Aggregate `/primitives` also asserts optional `@angular/router` and `@ng-icons/font-awesome` because dialog and icon-backed primitives are bundled in the aggregate FESM. |
-| Composite | `/composites` and narrow composite entry points such as `/app-shell`; `composites-css`, `app-shell` | Core peers plus `tailwindcss` for composite CSS. Aggregate/icon-backed composites also assert optional `@ng-icons/font-awesome`. |
+| Composite | `/composites` and narrow composite entry points such as `/app-shell` and `/audio-player`; `composites-css`, `app-shell`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Aggregate/icon-backed composites also assert optional `@ng-icons/font-awesome`. |
+| Audio transcript | `/features/audio-transcript`; `audio-transcript` | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled. |
 | Table utilities | `/features/table-utilities`, legacy `/features/data-table`; `table-utilities`, `data-table` | Core peers plus `tailwindcss`; no CodeMirror, router, or Font Awesome peers. |
 | Code editor | `/features/code-editor`; `code-editor` | Core peers plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight`. |
 | PDF viewer | `@hell-ui/pdf-viewer`; `pdf-viewer` | Separate package; see that package for its own install contract. |
@@ -71,8 +72,8 @@ The stable API report set currently covers `@hell-ui/angular`, `@hell-ui/angular
 | Code editor (`@hell-ui/angular/features/code-editor`) | Experimental | Browser-only CodeMirror runtime: `window`/`document` interactions |
 | PDF viewer (`@hell-ui/pdf-viewer`) | Experimental split package | Browser-only app surface/recipe owned outside `@hell-ui/angular` |
 | Testing harnesses (`@hell-ui/angular/testing`) | Stable/test-only | CDK component harnesses for consumer and library tests |
-| Speech transcript (`allowSpeechTranscript`) | Experimental/browser-only/best-effort | Uses `navigator` + `SpeechRecognition` + `captureStream`; not accessibility-grade captions or production timed text |
-| Deprecated aliases (`/features/data-table`, `HELL_TABLE_DIRECTIVES`, `HELL_TABLE_UTILITY_DIRECTIVES`, `HellTableRow.interactive`, `allowLiveCaptions`, `HellDataTableLabels`, `hellCodeEditorSetup`) | Deprecated | Keep compatibility imports only while migrating to the documented replacements |
+| Speech transcript (`allowSpeechTranscript`) | Experimental/browser-only/best-effort | Requires `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript`; uses `navigator` + `SpeechRecognition` + `captureStream`; not accessibility-grade captions or production timed text |
+| Deprecated aliases (`/features/data-table`, `HELL_TABLE_DIRECTIVES`, `HELL_TABLE_UTILITY_DIRECTIVES`, `HellTableRow.interactive`, `allowLiveCaptions`, `hellAudioSpeechSupported` from `/audio-player`, `HellDataTableLabels`, `hellCodeEditorSetup`) | Deprecated | Keep compatibility imports only while migrating to the documented replacements |
 
 The PDF viewer was split out before public beta; use `@hell-ui/pdf-viewer` for the component, styles, and worker setup docs.
 

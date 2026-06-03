@@ -51,6 +51,9 @@
       "@hell-ui/angular/toast": [
         "./projects/hell/src/lib/public-api-composite-toast.ts"
       ],
+      "@hell-ui/angular/features/audio-transcript": [
+        "./projects/hell/src/lib/public-api-feature-audio-transcript.ts"
+      ],
       "@hell-ui/angular/features/code-editor": [
         "./projects/hell/src/lib/public-api-feature-code-editor.ts"
       ],

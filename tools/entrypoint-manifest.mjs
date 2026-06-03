@@ -20,7 +20,8 @@ export const entrypointManifest = {
       '// Composites and features are available through entry points:',
       '// - @hell-ui/angular/composites',
       '// - @hell-ui/angular/features/data-table (legacy), @hell-ui/angular/features/table-utilities,',
-      '//   @hell-ui/angular/features/code-editor (kept optional CodeMirror entry point)',
+      '//   @hell-ui/angular/features/code-editor (kept optional CodeMirror entry point),',
+      '//   @hell-ui/angular/features/audio-transcript (optional audio transcript provider)',
     ],
   },
   explicit: [
@@ -151,6 +152,14 @@ export const entrypointManifest = {
         exportPath: './features/{slug}/{slug}',
       },
       entryOverrides: {
+        'audio-transcript': {
+          header: [
+            '/**',
+            ' * @experimental Optional browser transcript provider for @hell-ui/angular/audio-player.',
+            ' * Import only where best-effort transcript capture is deliberately enabled.',
+            ' */',
+          ],
+        },
         'code-editor': {
           header: [
             '/**',
@@ -167,6 +176,7 @@ export const entrypointManifest = {
         },
       },
       entries: [
+        'audio-transcript',
         'code-editor',
         'data-table',
         'table-utilities',

@@ -307,7 +307,7 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     kind: 'Composite',
     name: 'Audio player',
     path: '/components/audio-player',
-    rolePattern: 'Native audio element with custom buttons, seek/volume sliders, download link, and optional non-modal transcript flyout.',
+    rolePattern: 'Native audio element with custom buttons, seek/volume sliders, download link, and optional non-modal transcript flyout from the audio-transcript feature provider.',
     keyboardCoverage: 'Buttons/sliders use native/Hell primitives; no dedicated browser test covers player keyboard flow.',
     automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
     knownGaps: 'Speech transcript is explicitly best-effort and not accessibility captions or timed text.',

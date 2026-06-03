@@ -14,7 +14,14 @@ const requiredCategories = [
   'pack-audit',
   'release-dry-run',
 ];
-const requiredReleaseScenarios = ['root-core', 'button-unstyled', 'primitives-css', 'code-editor'];
+const requiredReleaseScenarios = [
+  'root-core',
+  'button-unstyled',
+  'primitives-css',
+  'audio-player',
+  'audio-transcript',
+  'code-editor',
+];
 const requiredPlaywrightProjects = ['chromium', 'firefox', 'webkit'];
 const requiredApiReportPaths = [
   'etc/api-reports/hell-ui-angular.api.md',

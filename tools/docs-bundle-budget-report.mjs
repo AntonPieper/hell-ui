@@ -419,6 +419,7 @@ function ownerForEntryPoint(entryPoint) {
   if (entryPoint.includes('pdfjs-dist/')) return 'PDF viewer feature (`pdfjs-dist`)';
   if (entryPoint.includes('hell-ui-angular-features-pdf-viewer')) return 'PDF viewer feature entrypoint';
   if (entryPoint.includes('hell-ui-angular-features-code-editor')) return 'Code editor feature entrypoint';
+  if (entryPoint.includes('hell-ui-angular-features-audio-transcript')) return 'Audio transcript feature entrypoint';
   if (entryPoint.includes('hell-ui-angular-features-table-utilities')) return 'Table utilities feature entrypoint';
   if (entryPoint.includes('hell-ui-angular-audio-player')) return 'Audio player composite entrypoint';
 

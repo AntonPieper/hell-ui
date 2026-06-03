@@ -102,12 +102,13 @@ Peer dependency tiers:
 |---|---|---|
 | Core | `@hell-ui/angular`, `/core`, `/testing`; `root-core`, `core`, `testing` | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `ng-primitives`, `rxjs` |
 | Primitive | Narrow primitives such as `/button`; aggregate `/primitives`; `button-unstyled`, `button`, `primitives-css` | Core peers. Add `tailwindcss` when importing primitive CSS. Aggregate `/primitives` also asserts optional `@angular/router` and `@ng-icons/font-awesome` because dialog and icon-backed primitives are bundled in the aggregate FESM. |
-| Composite | `/composites` and narrow composite entry points such as `/app-shell`; `composites-css`, `app-shell` | Core peers plus `tailwindcss` for composite CSS. Aggregate/icon-backed composites also assert optional `@ng-icons/font-awesome`. |
+| Composite | `/composites` and narrow composite entry points such as `/app-shell` and `/audio-player`; `composites-css`, `app-shell`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Aggregate/icon-backed composites also assert optional `@ng-icons/font-awesome`. |
+| Audio transcript | `/features/audio-transcript`; `audio-transcript` | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled. |
 | Table utilities | `/features/table-utilities`, legacy `/features/data-table`; `table-utilities`, `data-table` | Core peers plus `tailwindcss`; no CodeMirror, router, or Font Awesome peers. |
 | Code editor | `/features/code-editor`; `code-editor` | Core peers plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight`. |
 | PDF viewer | `@hell-ui/pdf-viewer`; `pdf-viewer` | Separate package. Install the core peer group plus `@hell-ui/pdf-viewer`, `tailwindcss`, `@ng-icons/font-awesome`, and the package's pdf.js peer. |
 
-CodeMirror peers remain optional and are not required by root, button, table, composite, or PDF package-consumer scenarios. `@hell-ui/angular/features/code-editor` is a kept optional entry point; keep live editor surfaces lazy/client-only when SSR, hydration, or third-party runtime risk matters. pdf.js belongs to `@hell-ui/pdf-viewer`, not `@hell-ui/angular`.
+CodeMirror peers remain optional and are not required by root, button, table, audio-player, audio-transcript, composite, or PDF package-consumer scenarios. `@hell-ui/angular/features/code-editor` is a kept optional entry point; keep live editor surfaces lazy/client-only when SSR, hydration, or third-party runtime risk matters. pdf.js belongs to `@hell-ui/pdf-viewer`, not `@hell-ui/angular`. The audio transcript runtime is isolated behind `@hell-ui/angular/features/audio-transcript` and has no CodeMirror/pdf.js peers.
 
 ## Public API Tiers
 
@@ -119,7 +120,7 @@ CodeMirror peers remain optional and are not required by root, button, table, co
 | Code editor | Beta/optional peer; excluded from stable API reports until policy promotion | `@hell-ui/angular/features/code-editor` | Needs `window` + `document`; keep lazy/client-only when runtime risk matters |
 | PDF viewer | Experimental split package | `@hell-ui/pdf-viewer` | Browser-only app surface/recipe owned outside `@hell-ui/angular` |
 | Testing harnesses | Beta/test-only | `@hell-ui/angular/testing` | CDK component harnesses for consumer and library tests |
-| Speech transcript | Experimental/best-effort (feature opt-in) | `@hell-ui/angular/composites` (`allowSpeechTranscript`, `allowLiveCaptions` alias) | Browser-only; uses `navigator` + `SpeechRecognition` + `captureStream`; best-effort only, not accessibility-grade captions/timed text |
+| Speech transcript | Experimental/best-effort (feature opt-in) | `@hell-ui/angular/features/audio-transcript` provider plus `allowSpeechTranscript` / deprecated `allowLiveCaptions` on `@hell-ui/angular/audio-player` or `/composites`; import `hellAudioSpeechSupported` from the feature entrypoint | Browser-only; uses `navigator` + `SpeechRecognition` + `captureStream`; best-effort only, not accessibility-grade captions/timed text |
 
 ## Styles
 

@@ -27,16 +27,18 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
       <h1>Audio player</h1>
       <p>
         Compact player wrapping a native <code>&lt;audio&gt;</code> element with play/pause,
-        draggable scrubber, mute, volume slider, an optional download button, and — when the browser
-        supports <code>SpeechRecognition</code> + <code>captureStream()</code> — an unobtrusive
-        speech transcript strip.
+        draggable scrubber, mute, volume slider, an optional download button, and — when the
+        optional transcript provider is imported and the browser supports
+        <code>SpeechRecognition</code> + <code>captureStream()</code> — an unobtrusive speech
+        transcript strip.
       </p>
       <p>
         The speech transcript is experimental and relies on browser speech-recognition and
-        media-capture APIs. It is intentionally best-effort only, not accessibility-grade captions
-        or timed text; treat it as a convenience aid and never as a replacement for provided
-        captions, transcripts, or server-generated accessibility content. Remote media capture also
-        depends on the audio server's CORS headers and the configured <code>crossorigin</code> mode.
+        media-capture APIs from <code>@hell-ui/angular/features/audio-transcript</code>. It is
+        intentionally best-effort only, not accessibility-grade captions or timed text; treat it as a
+        convenience aid and never as a replacement for provided captions, transcripts, or
+        server-generated accessibility content. Remote media capture also depends on the audio
+        server's CORS headers and the configured <code>crossorigin</code> mode.
       </p>
 
       <h2>With title and date</h2>
@@ -55,11 +57,12 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
 
       <h2>Speech transcript</h2>
       <p>
-        Use the transcript toggle to open the strip when you want it. Speech recognition auto-starts
-        with playback and auto-stops on pause — the dedicated speed pill (1× → 1.25× → …) lives
-        inside the strip so the main controls stay clean. Mute the audio entirely if you only want
-        the transcript. Seeking or replaying clears the best-effort transcript so it follows current
-        playback.
+        Import <code>provideHellAudioTranscript()</code> from
+        <code>@hell-ui/angular/features/audio-transcript</code>, then use the transcript toggle to
+        open the strip when you want it. Speech recognition auto-starts with playback and auto-stops
+        on pause — the dedicated speed pill (1× → 1.25× → …) lives inside the strip so the main
+        controls stay clean. Mute the audio entirely if you only want the transcript. Seeking or
+        replaying clears the best-effort transcript so it follows current playback.
       </p>
       <hd-example-tabs [code]="audioPlayerSpeechTranscriptExampleCode">
         <app-audio-player-speech-transcript-example />
@@ -80,13 +83,19 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         </li>
         <li>
           <code>allowSpeechTranscript</code>: opt into experimental browser speech transcription
-          (default <code>false</code>) that is best-effort only and not intended as
+          after importing <code>provideHellAudioTranscript()</code> from the optional feature
+          entrypoint (default <code>false</code>). It is best-effort only and not intended as
           accessibility-grade captions/timed text. <code>allowLiveCaptions</code> remains a
           deprecated compatibility alias.
         </li>
         <li>
           <code>lang</code>: BCP-47 hint for <code>SpeechRecognition</code>. Defaults to
           <code>&lt;html lang&gt;</code> or <code>en-US</code>.
+        </li>
+        <li>
+          <code>hellAudioSpeechSupported()</code>: import this support probe from
+          <code>@hell-ui/angular/features/audio-transcript</code>. The old
+          <code>@hell-ui/angular/audio-player</code> export is a deprecated compatibility stub.
         </li>
       </ul>
 
@@ -99,11 +108,12 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         <li><kbd>←</kbd> / <kbd>→</kbd> on the focused seek bar jumps 5s.</li>
         <li>Volume slider doubles as a mute toggle when dragged to 0.</li>
         <li>
-          The transcript button only appears in browsers that expose <code>SpeechRecognition</code>
-          and <code>HTMLMediaElement.captureStream()</code> — currently Chromium-based desktops are
-          common. Results are best-effort only, so recognition accuracy and timing may drift.
-          Audio is piped via <code>start(track)</code>, so no microphone permission is needed.
-          For remote audio, capture may still fail unless the response permits the selected
+          The transcript button only appears after the optional transcript provider is imported and
+          the browser exposes <code>SpeechRecognition</code> and
+          <code>HTMLMediaElement.captureStream()</code> — currently Chromium-based desktops are
+          common. Results are best-effort only, so recognition accuracy and timing may drift. Audio
+          is piped via <code>start(track)</code>, so no microphone permission is needed. For remote
+          audio, capture may still fail unless the response permits the selected
           <code>crossorigin</code> mode and the browser allows media-element capture.
         </li>
         <li>
@@ -123,7 +133,8 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         </li>
         <li>Use provided captions or transcripts when accessibility must be reliable.</li>
         <li>
-          Set <code>[allowSpeechTranscript]="true"</code> only for best-effort browser speech
+          Import <code>provideHellAudioTranscript()</code> and set
+          <code>[allowSpeechTranscript]="true"</code> only for best-effort browser speech
           transcripts.
         </li>
         <li>Disable downloads when audio is sensitive.</li>
