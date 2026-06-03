@@ -2043,6 +2043,33 @@ function checkTableUtilityContract() {
   if (!source.includes('HELL_TABLE_UTILITIES_DIRECTIVES')) {
     failures.push('Table primitives must expose HELL_TABLE_UTILITIES_DIRECTIVES as their standalone import list');
   }
+  for (const selector of [
+    'hellTableRoot',
+    'hellTableHeader',
+    'hellTableBody',
+    'hellTableRow',
+    'hellTableHeaderCell',
+    'hellTableCell',
+  ]) {
+    if (!source.includes(selector)) {
+      failures.push(`Table primitives must expose host-agnostic selector ${selector}`);
+    }
+  }
+  for (const dataAttr of [
+    'data-hell-table-root',
+    'data-hell-table-header',
+    'data-hell-table-body',
+    'data-hell-table-row',
+    'data-hell-table-header-cell',
+    'data-hell-table-cell',
+  ]) {
+    if (!source.includes(dataAttr)) {
+      failures.push(`Table primitives must stamp ${dataAttr} for host-agnostic testing/styling`);
+    }
+  }
+  if (!source.includes('hellTableInferredRoleForHost')) {
+    failures.push('Table primitives must keep host-agnostic role inference centralized and SSR-safe');
+  }
   for (const removed of ['HELL_TABLE_UTILITY_DIRECTIVES', 'HELL_TABLE_DIRECTIVES', 'selectionSemantics']) {
     if (source.includes(removed)) failures.push(`${removed} legacy table API must be removed`);
   }

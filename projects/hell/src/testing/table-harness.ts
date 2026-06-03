@@ -60,7 +60,7 @@ export class HellTableContainerHarness extends ComponentHarness {
 }
 
 export class HellTableHarness extends ComponentHarness {
-  static hostSelector = 'table[hellTable]';
+  static hostSelector = '[hellTableRoot], table[hellTable]';
 
   static with(options: HellTableHarnessFilters = {}): HarnessPredicate<HellTableHarness> {
     return new HarnessPredicate(HellTableHarness, options).addOption(
@@ -108,7 +108,7 @@ export class HellTableHarness extends ComponentHarness {
 }
 
 export class HellTableHeadHarness extends ComponentHarness {
-  static hostSelector = 'thead[hellTableHead]';
+  static hostSelector = '[hellTableHeader], thead[hellTableHead]';
 
   async getHeaderCells(): Promise<HellTableHeaderCellHarness[]> {
     return this.locatorForAll(HellTableHeaderCellHarness)();
@@ -116,7 +116,7 @@ export class HellTableHeadHarness extends ComponentHarness {
 }
 
 export class HellTableBodyHarness extends ComponentHarness {
-  static hostSelector = 'tbody[hellTableBody]';
+  static hostSelector = '[hellTableBody]';
 
   async getRows(): Promise<HellTableRowHarness[]> {
     return this.locatorForAll(HellTableRowHarness)();
@@ -132,7 +132,7 @@ export class HellTableRowIgnoreHarness extends ComponentHarness {
 }
 
 export class HellTableRowHarness extends ComponentHarness {
-  static hostSelector = 'tr[hellTableRow]';
+  static hostSelector = '[hellTableRow]';
 
   static with(options: HellTableRowHarnessFilters = {}): HarnessPredicate<HellTableRowHarness> {
     return new HarnessPredicate(HellTableRowHarness, options)
@@ -183,7 +183,7 @@ export class HellTableRowHarness extends ComponentHarness {
 }
 
 export class HellTableHeaderCellHarness extends ComponentHarness {
-  static hostSelector = 'th[hellTableHeaderCell]';
+  static hostSelector = '[hellTableHeaderCell]';
 
   static with(options: HellTableHeaderCellHarnessFilters = {}): HarnessPredicate<HellTableHeaderCellHarness> {
     return new HarnessPredicate(HellTableHeaderCellHarness, options).addOption(
@@ -256,7 +256,7 @@ export class HellTableSortButtonHarness extends ComponentHarness {
 }
 
 export class HellTableCellHarness extends ComponentHarness {
-  static hostSelector = 'td[hellTableCell]';
+  static hostSelector = '[hellTableCell]';
 
   static with(options: HellTableCellHarnessFilters = {}): HarnessPredicate<HellTableCellHarness> {
     return new HarnessPredicate(HellTableCellHarness, options).addOption(

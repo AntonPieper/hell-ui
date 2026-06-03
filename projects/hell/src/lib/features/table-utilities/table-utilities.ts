@@ -12,12 +12,19 @@ import {
   type HellTableColumnResizePair as HellTableColumnResizeRuntimePair,
 } from './data-table-column-resize.runtime';
 import {
+  hellHostElementName,
+  hellTableInferredRoleForHost,
+  type HellTableInferredRole,
+} from './table-role-inference';
+import {
   ChangeDetectionStrategy,
   Component,
   Directive,
   ElementRef,
   AfterViewInit,
   OnDestroy,
+  OnInit,
+  Renderer2,
   booleanAttribute,
   computed,
   inject,
@@ -48,6 +55,32 @@ function hellAriaControlsValue(
   }
   const ids = value.map((id) => id.trim()).filter(Boolean);
   return ids.length ? ids.join(' ') : null;
+}
+
+const HELL_TABLE_ROOT_NATIVE_ELEMENTS = ['TABLE'] as const;
+const HELL_TABLE_HEADER_NATIVE_ELEMENTS = ['THEAD'] as const;
+const HELL_TABLE_BODY_NATIVE_ELEMENTS = ['TBODY'] as const;
+const HELL_TABLE_ROW_NATIVE_ELEMENTS = ['TR'] as const;
+const HELL_TABLE_HEADER_CELL_NATIVE_ELEMENTS = ['TH'] as const;
+const HELL_TABLE_CELL_NATIVE_ELEMENTS = ['TD'] as const;
+
+@Directive()
+abstract class HellTableRoleDirective extends HellStyleable implements OnInit {
+  private readonly roleHost = inject(ElementRef<unknown>).nativeElement;
+  private readonly renderer = inject(Renderer2);
+
+  protected readonly nativeElementNames: readonly string[] = [];
+  protected readonly inferredRole: HellTableInferredRole | null = null;
+
+  ngOnInit(): void {
+    if (this.inferredRole === null) return;
+    const role = hellTableInferredRoleForHost(
+      this.roleHost,
+      this.nativeElementNames,
+      this.inferredRole,
+    );
+    if (role !== null) this.renderer.setAttribute(this.roleHost, 'role', role);
+  }
 }
 
 const HELL_TABLE_INTERACTIVE_TARGET_SELECTOR = [
@@ -122,19 +155,24 @@ export class HellTableContainer extends HellStyleable {
 }
 
 /**
- * Marks a `<table>` for table utilities. Applies the host class with the
- * shared dense typography and border treatment, and switches the table to
- * a fixed layout so column resize CSS custom properties can be mapped by
- * the stylesheet. Pass `unstyled` to opt out of all class-based styling.
+ * Marks a table root host for table utilities. Applies the host class with the
+ * shared dense typography and border treatment, and uses fixed table layout so
+ * column resize CSS custom properties can be mapped by the stylesheet. Pass
+ * `unstyled` to opt out of all class-based styling.
  */
 @Directive({
-  selector: 'table[hellTable]',
+  selector: '[hellTableRoot], table[hellTable]',
+  exportAs: 'hellTableRoot',
   host: {
     '[class.hell-table]': '!unstyled()',
+    '[attr.data-hell-table-root]': '""',
     '[attr.data-content-width]': 'contentWidth() ? "true" : null',
   },
 })
-export class HellTable extends HellStyleable {
+export class HellTable extends HellTableRoleDirective {
+  protected override readonly nativeElementNames = HELL_TABLE_ROOT_NATIVE_ELEMENTS;
+  protected override readonly inferredRole = 'table';
+
   readonly contentWidth = input(false, { transform: booleanAttribute });
 }
 
@@ -147,13 +185,17 @@ export type HellTableColumnResizePair = HellTableColumnResizeRuntimePair<HellTab
  * and resize them as a pair (sum of the two widths is conserved).
  */
 @Directive({
-  selector: 'thead[hellTableHead]',
-  exportAs: 'hellTableHead',
+  selector: '[hellTableHeader], thead[hellTableHead]',
+  exportAs: 'hellTableHeader, hellTableHead',
   host: {
     '[class.hell-table-head]': '!unstyled()',
+    '[attr.data-hell-table-header]': '""',
   },
 })
-export class HellTableHead extends HellStyleable {
+export class HellTableHead extends HellTableRoleDirective {
+  protected override readonly nativeElementNames = HELL_TABLE_HEADER_NATIVE_ELEMENTS;
+  protected override readonly inferredRole = 'rowgroup';
+
   private readonly resizeRuntime = new HellTableColumnResizeRuntime();
 
   private readonly cells = new Set<HellTableHeaderCell>();
@@ -191,12 +233,16 @@ export class HellTableHead extends HellStyleable {
 }
 
 @Directive({
-  selector: 'tbody[hellTableBody]',
+  selector: '[hellTableBody]',
   host: {
     '[class.hell-table-body]': '!unstyled()',
+    '[attr.data-hell-table-body]': '""',
   },
 })
-export class HellTableBody extends HellStyleable {}
+export class HellTableBody extends HellTableRoleDirective {
+  protected override readonly nativeElementNames = HELL_TABLE_BODY_NATIVE_ELEMENTS;
+  protected override readonly inferredRole = 'rowgroup';
+}
 
 /**
  * Marks nested content as exempt from row activation. Use this on custom control
@@ -212,7 +258,7 @@ export class HellTableRowIgnore {}
 
 /**
  * Behavioral row directive. Renders nothing of its own — consumers own
- * the `<tr>` markup and its children. Prefer real buttons or links inside
+ * the row host markup and its children. Prefer real buttons or links inside
  * cells for row actions. Use Hell row activation only for an explicit
  * row-selection model, not as a generic clickable-row shortcut.
  *
@@ -224,10 +270,11 @@ export class HellTableRowIgnore {}
  *   does not double-activate.
  */
 @Directive({
-  selector: 'tr[hellTableRow]',
+  selector: '[hellTableRow]',
   exportAs: 'hellTableRow',
   host: {
     '[class.hell-table-row]': '!unstyled()',
+    '[attr.data-hell-table-row]': '""',
     '[attr.data-selected]': 'selected() ? "true" : null',
     '[attr.data-interactive]': 'rowActivates() ? "true" : null',
     '[attr.aria-selected]': 'rowActivates() ? (selected() ? "true" : "false") : null',
@@ -237,7 +284,10 @@ export class HellTableRowIgnore {}
     '(keydown.space)': 'onKey($event)',
   },
 })
-export class HellTableRow extends HellStyleable {
+export class HellTableRow extends HellTableRoleDirective {
+  protected override readonly nativeElementNames = HELL_TABLE_ROW_NATIVE_ELEMENTS;
+  protected override readonly inferredRole = 'row';
+
   readonly selected = input(false, { transform: booleanAttribute });
   /** Preferred explicit row-selection activation API. Prefer cell buttons/links for row actions. */
   readonly selectable = input(false, { transform: booleanAttribute });
@@ -263,8 +313,8 @@ export class HellTableRow extends HellStyleable {
 /**
  * Header cell directive. Owns optional sort state and acts as the parent
  * for `hellTableColumnResizer`. The directive does not sort — it surfaces the
- * current sort state through `data-sort` / `aria-sort` on the `<th>`, while a
- * nested `button[hellTableSortButton]` owns keyboard focus and activation.
+ * current sort state through `data-sort` / `aria-sort` on the header-cell host,
+ * while a nested `button[hellTableSortButton]` owns keyboard focus and activation.
  * Sorting logic stays with the consumer.
  *
  * Initial column sizing belongs to consumer CSS/Tailwind. During resize, the
@@ -272,10 +322,11 @@ export class HellTableRow extends HellStyleable {
  * property; the stylesheet decides how that variable affects layout.
  */
 @Directive({
-  selector: 'th[hellTableHeaderCell]',
+  selector: '[hellTableHeaderCell]',
   exportAs: 'hellTableHeaderCell',
   host: {
     '[class.hell-table-header-cell]': '!unstyled()',
+    '[attr.data-hell-table-header-cell]': '""',
     '[attr.aria-sort]': 'ariaSort()',
     '[attr.data-column-id]': 'columnId()',
     '[attr.data-sort]': 'sort()',
@@ -283,7 +334,10 @@ export class HellTableRow extends HellStyleable {
     '[style.--hell-table-col-width]': 'widthVar()',
   },
 })
-export class HellTableHeaderCell extends HellStyleable implements OnDestroy {
+export class HellTableHeaderCell extends HellTableRoleDirective implements OnDestroy {
+  protected override readonly nativeElementNames = HELL_TABLE_HEADER_CELL_NATIVE_ELEMENTS;
+  protected override readonly inferredRole = 'columnheader';
+
   readonly sort = input<'asc' | 'desc' | null>(null);
   readonly sortable = input(false, { transform: booleanAttribute });
   readonly columnId = input<string | null>(null);
@@ -363,7 +417,7 @@ export class HellTableSortButton extends HellStyleable {
   private readonly header = inject(HellTableHeaderCell, { optional: true });
 
   protected nativeButtonType(): 'button' | null {
-    return this.host.tagName.toLowerCase() === 'button' ? 'button' : null;
+    return hellHostElementName(this.host) === 'BUTTON' ? 'button' : null;
   }
 
   protected disabled(): boolean {
@@ -378,20 +432,24 @@ export class HellTableSortButton extends HellStyleable {
 }
 
 /**
- * Body cell directive. Adds the host class and emits `(cellSelect)` on
+ * Body/data cell directive. Adds the host class and emits `(cellSelect)` on
  * click. Use the output if you need to react to a specific cell rather
  * than the whole row.
  */
 @Directive({
-  selector: 'td[hellTableCell]',
+  selector: '[hellTableCell]',
   host: {
     '[class.hell-table-cell]': '!unstyled()',
+    '[attr.data-hell-table-cell]': '""',
     '[attr.data-align]': 'align()',
     '[attr.data-space]': 'space()',
     '(click)': 'onClick($event)',
   },
 })
-export class HellTableCell extends HellStyleable {
+export class HellTableCell extends HellTableRoleDirective {
+  protected override readonly nativeElementNames = HELL_TABLE_CELL_NATIVE_ELEMENTS;
+  protected override readonly inferredRole = 'cell';
+
   readonly align = input<'start' | 'center' | 'end'>('start');
   readonly space = input<'normal' | 'empty'>('normal');
   readonly cellSelect = output<MouseEvent>();
@@ -405,7 +463,7 @@ export class HellTableCell extends HellStyleable {
 }
 
 /**
- * Resize grip placed inside `<th hellTableHeaderCell>` at the trailing
+ * Resize grip placed inside `[hellTableHeaderCell]` at the trailing
  * edge. Resizes the host cell and its right-hand neighbor as a pair so
  * the sum of their widths stays constant — the table never grows or
  * shrinks during a drag, the space is just redistributed.
@@ -497,7 +555,7 @@ export class HellTableColumnResizer extends HellStyleable implements AfterViewIn
   }
 
   protected nativeButtonType(): 'button' | null {
-    return this.host.tagName.toLowerCase() === 'button' ? 'button' : null;
+    return hellHostElementName(this.host) === 'BUTTON' ? 'button' : null;
   }
 
   ngAfterViewInit(): void {
@@ -537,6 +595,8 @@ export class HellTableColumnResizer extends HellStyleable implements AfterViewIn
     this.resizeInteraction.destroy();
   }
 }
+
+export { HellTable as HellTableRoot, HellTableHead as HellTableHeader };
 
 /**
  * Standalone imports for the table utilities feature: container, table sections,

@@ -1100,8 +1100,8 @@ import { HELL_TABLE_UTILITIES_DIRECTIVES, HellTableRowIgnore } from '${packageNa
   imports: [...HELL_TABLE_UTILITIES_DIRECTIVES, HellTableRowIgnore],
   template: \`
     <div hellTableContainer>
-      <table hellTable>
-        <thead hellTableHead>
+      <table hellTableRoot>
+        <thead hellTableHeader>
           <tr hellTableRow>
             <th hellTableHeaderCell columnId="name">Name</th>
             <th hellTableHeaderCell columnId="role">Role</th>

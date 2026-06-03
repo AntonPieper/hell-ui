@@ -29,12 +29,30 @@
       color: var(--color-hell-foreground);
     }
 
+  .hell-table:not(table) {
+      display: table;
+    }
+
   .hell-table[data-content-width='true'] {
       min-width: max-content;
     }
 
   .hell-table-head {
       background-color: var(--color-hell-surface-subtle);
+    }
+
+  .hell-table-head:not(thead),
+  .hell-table-body:not(tbody) {
+      display: table-row-group;
+    }
+
+  .hell-table-row:not(tr) {
+      display: table-row;
+    }
+
+  .hell-table-header-cell:not(th),
+  .hell-table-cell:not(td) {
+      display: table-cell;
     }
 
   .hell-table-header-cell,
