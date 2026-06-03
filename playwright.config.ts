@@ -7,7 +7,11 @@ export default defineConfig({
   timeout: 30_000,
   expect: { timeout: 5_000 },
   fullyParallel: true,
-  reporter: [['list'], ['html', { open: 'never', outputFolder: 'test-results/playwright-html' }]],
+  reporter: [
+    ['list'],
+    ['html', { open: 'never', outputFolder: 'test-results/playwright-html' }],
+    ['json', { outputFile: 'test-results/playwright-report.json' }],
+  ],
   outputDir: 'test-results/playwright',
   use: {
     baseURL: `http://127.0.0.1:${port}`,

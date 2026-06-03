@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { spawn } from 'node:child_process';
-import { createWriteStream, mkdirSync } from 'node:fs';
+import { spawn, spawnSync } from 'node:child_process';
+import { createWriteStream, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -15,6 +15,9 @@ const selectedConsumerScenarios = parseList(
 );
 const startedAt = new Date();
 const logPath = releaseEvidenceLogPath(mode, startedAt);
+const evidenceJsonPath = logPath.replace(/\.log$/, '.json');
+const gitCommit = gitOutput(['rev-parse', 'HEAD']) ?? 'unknown';
+const gitTrackedChanges = gitTrackedChangesState();
 const log = createWriteStream(logPath, { flags: 'wx' });
 
 const tasks = mode === 'full'
@@ -41,6 +44,7 @@ try {
   writeLog(`\nFatal error: ${error instanceof Error ? error.stack ?? error.message : String(error)}\n`);
 } finally {
   writeSummary();
+  writeEvidenceJson();
   await closeLog();
 }
 
@@ -49,9 +53,9 @@ if (fatalError) {
 }
 
 if (exitCode === 0) {
-  console.log(`\n[release-dry-run] ${mode} passed. Evidence: ${relative(process.cwd(), logPath)}`);
+  console.log(`\n[release-dry-run] ${mode} passed. Evidence: ${relative(process.cwd(), logPath)}; ${relative(process.cwd(), evidenceJsonPath)}`);
 } else {
-  console.error(`\n[release-dry-run] ${mode} failed. Evidence: ${relative(process.cwd(), logPath)}`);
+  console.error(`\n[release-dry-run] ${mode} failed. Evidence: ${relative(process.cwd(), logPath)}; ${relative(process.cwd(), evidenceJsonPath)}`);
 }
 
 process.exit(exitCode);
@@ -151,6 +155,8 @@ function writeHeader() {
   writeLog(`Mode: ${mode}\n`);
   writeLog(`Started: ${startedAt.toISOString()}\n`);
   writeLog(`Root: ${root}\n`);
+  writeLog(`Git commit: ${gitCommit}\n`);
+  writeLog(`Git tracked changes: ${gitTrackedChanges}\n`);
   writeLog(`Node: ${process.version}\n`);
   writeLog(`Platform: ${process.platform} ${process.arch}\n`);
   writeLog(`Selected package-consumer scenarios: ${selectedConsumerScenarios.join(', ')}\n`);
@@ -231,8 +237,60 @@ function writeSummary() {
   }
 }
 
+function writeEvidenceJson() {
+  const resultByName = new Map(results.map((result) => [result.name, result]));
+  const evidence = {
+    version: 1,
+    mode,
+    startedAt: startedAt.toISOString(),
+    finishedAt: new Date().toISOString(),
+    root,
+    logPath,
+    git: {
+      commit: gitCommit,
+      trackedChanges: gitTrackedChanges,
+    },
+    selectedConsumerScenarios,
+    exitCode,
+    tasks: tasks.map((task) => {
+      const invocation = packageManagerInvocation(task.args);
+      const result = resultByName.get(task.name);
+      return {
+        name: task.name,
+        command: formatCommand(invocation.command, invocation.args),
+        status: result?.status ?? null,
+        signal: result?.signal ?? null,
+        durationMs: result?.durationMs ?? null,
+        skipped: !result,
+      };
+    }),
+  };
+
+  writeFileSync(evidenceJsonPath, `${JSON.stringify(evidence, null, 2)}\n`, { flag: 'wx' });
+}
+
 function writeLog(value) {
   log.write(value);
+}
+
+function gitOutput(args) {
+  const result = spawnSync('git', args, {
+    cwd: root,
+    encoding: 'utf8',
+    shell: process.platform === 'win32',
+  });
+  if (result.status !== 0) return null;
+  return result.stdout.trim() || null;
+}
+
+function gitTrackedChangesState() {
+  const result = spawnSync('git', ['status', '--short', '--untracked-files=no'], {
+    cwd: root,
+    encoding: 'utf8',
+    shell: process.platform === 'win32',
+  });
+  if (result.status !== 0) return 'unknown';
+  return result.stdout.trim() ? 'dirty' : 'clean';
 }
 
 function closeLog() {

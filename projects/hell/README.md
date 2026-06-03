@@ -6,6 +6,10 @@
 
 Compact Angular component system for dense business applications.
 
+Release status: **internal beta**. Do not treat Hell as production-ready until
+the repository production-readiness gate passes against fresh release-candidate
+evidence.
+
 Hell exposes:
 
 - Behavior primitives: directive-first modules where callers own markup.

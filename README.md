@@ -22,22 +22,29 @@ pnpm ci:playwright
 pnpm ci:verify # full pre-push: unit, architecture, lint, e2e, package consumer, build
 pnpm release:dry-run -- --fast # local release preflight
 pnpm release:dry-run -- --full # release-candidate evidence gate
+pnpm production-ready:check     # production-ready claim gate
 ```
 
 `release:dry-run -- --full` runs lint, architecture, CI contract, unit tests,
 `build:lib`, pack audit, selected package-consumer scenarios, API report, and
-`build:docs`. Evidence is written to a timestamped log under
+`build:docs`. Evidence is written to timestamped log and JSON files under
 `test-results/release-evidence/`. Use `--fast` for local preflight before the
 full release-candidate gate. Trusted npm publishing and provenance setup is
 specified in `docs/release/npm-publishing.md`.
 
 ## Production readiness
 
-Hell UI is not yet production-ready. The docs app accessibility matrix at
-`/accessibility` lists role patterns, keyboard coverage, axe/ARIA/browser-test
-evidence, and known gaps for every public primitive, composite, and feature. The
-release checklist in `docs/release/production-readiness-checklist.md` blocks any
-production-ready claim while critical accessibility gaps remain.
+Hell UI is **internal beta** and not yet production-ready. Keep release notes,
+npm copy, docs, and README language in internal-beta/beta/experimental terms
+until `pnpm production-ready:check` passes against fresh release-candidate
+evidence.
+
+The docs app accessibility matrix at `/accessibility` lists role patterns,
+keyboard coverage, axe/ARIA/browser-test evidence, and known gaps for every
+public primitive, composite, and feature. The release checklist in
+`docs/release/production-readiness-checklist.md` maps package-consumer, API,
+a11y, docs budget, pack audit, and release dry-run blockers to slice IDs and
+command evidence.
 
 The contributor workspace is pnpm-first and CI-backed by `pnpm-lock.yaml`.
 A root `package-lock.json` is also checked in so GitHub CI can smoke-test

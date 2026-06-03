@@ -20,6 +20,7 @@
     "release:dry-run": "node tools/release-dry-run.mjs",
     "release:dry-run:fast": "node tools/release-dry-run.mjs --fast",
     "release:dry-run:full": "node tools/release-dry-run.mjs --full",
+    "production-ready:check": "node tools/production-ready-check.mjs",
     "test:package-consumer": "node tools/check-package-consumer.mjs",
     "test:package-pack": "node tools/check-package-pack.mjs",
     "test:ci-contract": "node tools/check-ci-contract.mjs",
