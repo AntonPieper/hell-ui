@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
+import ts from 'typescript';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -14,43 +15,46 @@ import {
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
 
-checkDocsExamples();
-checkDocsRootImportContract();
-checkDocsShellNarrowEntrypointContract();
-checkDocsCodeEditorIsolationContract();
-checkDocsPdfViewerIsolationContract();
-checkPackageEntryPoints();
-checkApiReportContract();
-checkApiStabilityContract();
-checkPackageDependencyContract();
-checkStyleEntryPoints();
-checkNgClassCustomizationContract();
-checkAngularHostMetadataContract();
-checkAppShellBreakpointContract();
-checkBehaviorSentinelContract();
-checkComponentContract();
-checkLabelContract();
-checkCodeEditorRuntimeContract();
-checkExperimentalFeatureContract();
-checkFormsContract();
-checkDateTimeAdapterContract();
-checkSearchContract();
-checkHotkeyContract();
-checkNativeButtonSelectorContract();
-checkInteractiveTriggerSelectorContract();
-checkTableUtilityContract();
-checkTableSortButtonContract();
-checkFloatingRegistrationContract();
-checkFloatingAdapterContract();
-checkNgpStateWriterContract();
+function main() {
+  checkDocsExamples();
+  checkDocsRootImportContract();
+  checkDocsShellNarrowEntrypointContract();
+  checkDocsCodeEditorIsolationContract();
+  checkDocsPdfViewerIsolationContract();
+  checkPackageEntryPoints();
+  checkApiReportContract();
+  checkApiStabilityContract();
+  checkPackageDependencyContract();
+  checkStyleEntryPoints();
+  checkNgClassCustomizationContract();
+  checkAngularHostMetadataContract();
+  checkAppShellBreakpointContract();
+  checkBehaviorSentinelContract();
+  checkComponentContract();
+  checkLabelContract();
+  checkCodeEditorRuntimeContract();
+  checkExperimentalFeatureContract();
+  checkFormsContract();
+  checkDateTimeAdapterContract();
+  checkSearchContract();
+  checkHotkeyContract();
+  checkNativeButtonSelectorContract();
+  checkInteractiveTriggerSelectorContract();
+  checkTableUtilityContract();
+  checkTableSortButtonContract();
+  checkFloatingRegistrationContract();
+  checkFloatingAdapterContract();
+  checkBrowserGlobalContract();
+  checkNgpStateWriterContract();
 
-if (failures.length) {
-  console.error('Architecture checks failed:\n');
-  for (const failure of failures) console.error(`- ${failure}`);
-  process.exit(1);
+  if (failures.length) {
+    console.error('Architecture checks failed:\n');
+    for (const failure of failures) console.error(`- ${failure}`);
+    process.exit(1);
+  }
+
+  console.log('Architecture checks passed.');
 }
-
-console.log('Architecture checks passed.');
 
 function checkDocsExamples() {
   const catalogPath = join(root, 'projects/hell-docs/src/app/docs-catalog.ts');
@@ -1659,6 +1663,274 @@ function checkFloatingAdapterContract() {
   }
 }
 
+const browserGlobalSeamDocPath = 'docs/architecture/browser-global-seams.md';
+const allowedBrowserGlobalSeams = [
+  {
+    id: 'audio-transcript-window-probe',
+    file: 'projects/hell/src/lib/composites/audio-player/audio-player.runtime.ts',
+    globals: ['window'],
+    owner: 'HELL-055',
+    lines: [
+      "if (typeof window === 'undefined') return null;",
+      'const w = window as unknown as {',
+      "typeof window !== 'undefined' &&",
+    ],
+  },
+  {
+    id: 'resizable-pane-resize-observer',
+    file: 'projects/hell/src/lib/composites/resizable/resizable.ts',
+    globals: ['ResizeObserver'],
+    owner: 'HELL-061',
+    lines: [
+      "if (typeof ResizeObserver === 'undefined') return;",
+      'const observer = new ResizeObserver(() => this.fitPanesToAvailableSize());',
+    ],
+  },
+  {
+    id: 'split-view-resize-observer',
+    file: 'projects/hell/src/lib/composites/split-view/split-view.ts',
+    globals: ['ResizeObserver'],
+    owner: 'HELL-048',
+    lines: [
+      "if (typeof ResizeObserver === 'undefined') return;",
+      'const observer = new ResizeObserver((entries) => {',
+    ],
+  },
+  {
+    id: 'toast-viewport-resize-observer',
+    file: 'projects/hell/src/lib/composites/toast/toast.ts',
+    globals: ['ResizeObserver'],
+    owner: 'HELL-048',
+    lines: [
+      "if (this.destroyed || typeof ResizeObserver === 'undefined') return;",
+      'this.ro = new ResizeObserver((entries) => {',
+    ],
+  },
+  {
+    id: 'floating-dismissal-document-fallback',
+    file: 'projects/hell/src/lib/core/floating-dismissal.ts',
+    globals: ['document'],
+    owner: 'HELL-057/HELL-058',
+    lines: ["return typeof document === 'undefined' ? null : document;"],
+  },
+  {
+    id: 'floating-scope-resize-observer',
+    file: 'projects/hell/src/lib/core/floating-scope.ts',
+    globals: ['ResizeObserver'],
+    owner: 'HELL-048',
+    lines: [
+      "if (typeof ResizeObserver === 'undefined') return;",
+      'this.resizeObserver = new ResizeObserver(this.syncScope);',
+    ],
+  },
+  {
+    id: 'code-editor-legacy-document-setup',
+    file: 'projects/hell/src/lib/features/code-editor/code-editor.runtime.ts',
+    globals: ['document'],
+    owner: 'HELL-054',
+    lines: ["typeof document === 'undefined' ? [] : hellCodeEditorSetupFactory(document);"],
+  },
+  {
+    id: 'pdf-adapter-document-fallback',
+    file: 'projects/hell/src/lib/features/pdf-viewer/pdf-viewer.adapter.ts',
+    globals: ['document'],
+    owner: 'HELL-053',
+    lines: ["if (typeof document !== 'undefined') return document;"],
+  },
+  {
+    id: 'pdf-print-document-fallback',
+    file: 'projects/hell/src/lib/features/pdf-viewer/pdf-viewer.print.ts',
+    globals: ['document'],
+    owner: 'HELL-053',
+    lines: ["if (typeof document !== 'undefined') return document;"],
+  },
+  {
+    id: 'pdf-print-cleanup-window',
+    file: 'projects/hell/src/lib/features/pdf-viewer/pdf-viewer.runtime.ts',
+    globals: ['window'],
+    owner: 'HELL-053',
+    lines: [
+      "const win = ownerDocument?.defaultView ?? (typeof window === 'undefined' ? null : window);",
+    ],
+  },
+  {
+    id: 'pdf-thumbnail-intersection-observer',
+    file: 'projects/hell/src/lib/features/pdf-viewer/pdf-viewer.ts',
+    globals: ['IntersectionObserver'],
+    owner: 'HELL-053',
+    lines: [
+      "if (typeof IntersectionObserver === 'undefined') {",
+      'const observer = new IntersectionObserver(',
+    ],
+  },
+  {
+    id: 'pdf-wheel-window-height',
+    file: 'projects/hell/src/lib/features/pdf-viewer/pdf-viewer.utils.ts',
+    globals: ['window'],
+    owner: 'HELL-053',
+    lines: ['return event.deltaY * window.innerHeight;'],
+  },
+];
+
+const browserGlobalNames = new Set([
+  'document',
+  'window',
+  'ResizeObserver',
+  'IntersectionObserver',
+]);
+
+function checkBrowserGlobalContract() {
+  const docPath = join(root, browserGlobalSeamDocPath);
+  if (!existsSync(docPath)) {
+    failures.push(`Browser Global Contract missing ${browserGlobalSeamDocPath}`);
+  } else {
+    const docs = readFile(docPath);
+    for (const seam of allowedBrowserGlobalSeams) {
+      const missingDocParts = [
+        seam.id,
+        seam.file,
+        seam.owner,
+        ...seam.globals.map((global) => `\`${global}\``),
+      ].filter((part) => !docs.includes(part));
+      if (missingDocParts.length) {
+        failures.push(
+          `Browser Global Contract docs for ${seam.id} are missing: ${missingDocParts.join(', ')}`,
+        );
+      }
+    }
+  }
+
+  const sourceRoot = join(root, 'projects/hell/src/lib');
+  const sourceFiles = walk(sourceRoot).filter(
+    (file) =>
+      file.endsWith('.ts') &&
+      !file.endsWith('.spec.ts') &&
+      !file.endsWith('.d.ts') &&
+      !file.endsWith('pdf.worker.ts'),
+  );
+  const hits = sourceFiles.flatMap((file) => browserGlobalHits(file));
+  const unusedAllowances = allowedBrowserGlobalSeams.flatMap((seam) =>
+    seam.lines.flatMap((line) =>
+      seam.globals.map((global) => ({
+        id: seam.id,
+        file: seam.file,
+        global,
+        line,
+      })),
+    ),
+  );
+
+  for (const hit of hits) {
+    const allowanceIndex = unusedAllowances.findIndex(
+      (allowance) =>
+        allowance.file === hit.file &&
+        allowance.global === hit.global &&
+        allowance.line === hit.source.trim(),
+    );
+
+    if (allowanceIndex >= 0) {
+      unusedAllowances.splice(allowanceIndex, 1);
+      continue;
+    }
+
+    failures.push(
+      `Browser Global Contract ${hit.file}:${hit.line} uses direct ${hit.global}; move it behind an allowed browser seam or add a documented follow-up slice before allowlisting it`,
+    );
+  }
+
+  for (const allowance of unusedAllowances) {
+    const filePath = join(root, allowance.file);
+    if (!existsSync(filePath)) {
+      failures.push(`Browser Global Contract allowlist references missing file ${allowance.file}`);
+      continue;
+    }
+
+    failures.push(
+      `Browser Global Contract allowlist entry ${allowance.id} is stale: expected ${allowance.file} to contain direct ${allowance.global} line "${allowance.line}"`,
+    );
+  }
+}
+
+function browserGlobalHits(file) {
+  const source = readFile(file);
+  const sourceFile = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const original = source.split('\n');
+  const rel = file.slice(root.length + 1).replaceAll('\\', '/');
+  const seen = new Set();
+  const hits = [];
+
+  function visit(node) {
+    if (ts.isIdentifier(node) && isDirectBrowserGlobalIdentifier(node)) {
+      const line = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
+      const key = `${node.text}:${line}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        hits.push({
+          file: rel,
+          line,
+          global: node.text,
+          source: original[line - 1] ?? '',
+        });
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return hits;
+}
+
+function isDirectBrowserGlobalIdentifier(node) {
+  if (!browserGlobalNames.has(node.text)) return false;
+  if (isTypeOnlyIdentifier(node)) return false;
+  if (isDeclarationIdentifier(node)) return false;
+  if (isPropertyNameIdentifier(node)) return false;
+  return true;
+}
+
+function isTypeOnlyIdentifier(node) {
+  for (let current = node.parent; current; current = current.parent) {
+    if (ts.isTypeNode(current)) return true;
+    if (ts.isExpression(current) || ts.isStatement(current) || ts.isSourceFile(current)) return false;
+  }
+
+  return false;
+}
+
+function isDeclarationIdentifier(node) {
+  const parent = node.parent;
+  if (ts.isVariableDeclaration(parent) && parent.name === node) return true;
+  if (ts.isParameter(parent) && parent.name === node) return true;
+  if (ts.isBindingElement(parent) && parent.name === node) return true;
+  if (ts.isFunctionDeclaration(parent) && parent.name === node) return true;
+  if (ts.isClassDeclaration(parent) && parent.name === node) return true;
+  if (ts.isInterfaceDeclaration(parent) && parent.name === node) return true;
+  if (ts.isTypeAliasDeclaration(parent) && parent.name === node) return true;
+  if (ts.isImportClause(parent) && parent.name === node) return true;
+  if (ts.isNamespaceImport(parent) && parent.name === node) return true;
+  if (ts.isImportSpecifier(parent) && parent.name === node) return true;
+  if (ts.isImportSpecifier(parent) && parent.propertyName === node) return true;
+  if (ts.isExportSpecifier(parent) && parent.name === node) return true;
+  if (ts.isExportSpecifier(parent) && parent.propertyName === node) return true;
+  return false;
+}
+
+function isPropertyNameIdentifier(node) {
+  const parent = node.parent;
+  if (ts.isPropertyAccessExpression(parent) && parent.name === node) {
+    return !(ts.isIdentifier(parent.expression) && parent.expression.text === 'globalThis');
+  }
+  if (ts.isPropertyAssignment(parent) && parent.name === node) return true;
+  if (ts.isPropertyDeclaration(parent) && parent.name === node) return true;
+  if (ts.isPropertySignature(parent) && parent.name === node) return true;
+  if (ts.isMethodDeclaration(parent) && parent.name === node) return true;
+  if (ts.isMethodSignature(parent) && parent.name === node) return true;
+  if (ts.isGetAccessor(parent) && parent.name === node) return true;
+  if (ts.isSetAccessor(parent) && parent.name === node) return true;
+  return false;
+}
+
 function checkEntrypointManifestSourceCoverage() {
   for (const group of entrypointSourceGroups()) {
     const manifestEntries = new Set(group.entries);
@@ -1861,3 +2133,5 @@ function walk(path) {
   }
   return out;
 }
+
+main();
