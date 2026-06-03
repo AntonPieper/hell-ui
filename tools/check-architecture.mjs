@@ -58,6 +58,9 @@ const docsHeavyLazyRoutePolicies = [
   },
 ];
 
+const codeEditorEntrypointSpecifier = '@hell-ui/angular/features/code-editor';
+const codeMirrorPackageSpecifierPrefixes = ['@codemirror/', '@lezer/'];
+
 function main() {
   checkDocsExamples();
   checkDocsLazyRouteImportGraphContract();
@@ -66,6 +69,7 @@ function main() {
   checkDocsCodeEditorIsolationContract();
   checkDocsPdfViewerIsolationContract();
   checkPackageEntryPoints();
+  checkCodeMirrorEntrypointIsolationContract();
   checkApiReportContract();
   checkApiStabilityContract();
   checkPackageDependencyContract();
@@ -440,6 +444,41 @@ function moduleImportSpecifiers(file) {
 
   visit(sourceFile);
   return imports;
+}
+
+function moduleSpecifierReferences(file) {
+  const source = readFile(file);
+  const sourceFile = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const references = [];
+
+  function pushReference(specifier, kind) {
+    const line = sourceFile.getLineAndCharacterOfPosition(specifier.getStart(sourceFile)).line + 1;
+    references.push({ file, kind, line, specifier: specifier.text });
+  }
+
+  function visit(node) {
+    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
+      pushReference(node.moduleSpecifier, 'import');
+    } else if (
+      ts.isExportDeclaration(node) &&
+      node.moduleSpecifier &&
+      ts.isStringLiteral(node.moduleSpecifier)
+    ) {
+      pushReference(node.moduleSpecifier, 'export');
+    } else if (
+      ts.isCallExpression(node) &&
+      node.expression.kind === ts.SyntaxKind.ImportKeyword &&
+      node.arguments.length === 1 &&
+      ts.isStringLiteral(node.arguments[0])
+    ) {
+      pushReference(node.arguments[0], 'dynamic');
+    }
+
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return references;
 }
 
 function isTypeOnlyImportDeclaration(node) {
@@ -849,6 +888,81 @@ function checkPackageEntryPoints() {
   checkGeneratedEntrypointFiles();
 }
 
+function checkCodeMirrorEntrypointIsolationContract() {
+  const codeEditorPublicApiPath = 'projects/hell/src/lib/public-api-feature-code-editor.ts';
+  const codeEditorPublicApi = readFile(join(root, codeEditorPublicApiPath));
+  if (!codeEditorPublicApi.includes('Kept optional CodeMirror feature entry point')) {
+    failures.push('Code Editor entry point public API must state it is a kept optional CodeMirror feature entry point');
+  }
+  if (!codeEditorPublicApi.includes('lazy/client-only')) {
+    failures.push('Code Editor entry point public API must require lazy/client-only browser boundaries');
+  }
+
+  const rootCorePaths = [
+    'projects/hell/src/public-api.ts',
+    'projects/hell/src/lib/public-api-core.ts',
+    ...productionTsFilesUnder('projects/hell/src/lib/core'),
+  ];
+  const compositePaths = [
+    'projects/hell/src/lib/public-api-composites.ts',
+    ...entrypointPublicApiFiles()
+      .filter((entrypoint) => entrypoint.group === 'composites')
+      .map((entrypoint) => entrypoint.publicApiPath),
+    ...productionTsFilesUnder('projects/hell/src/lib/composites'),
+  ];
+  const nonCodeEditorFeaturePaths = [
+    ...entrypointPublicApiFiles()
+      .filter((entrypoint) => entrypoint.group === 'features' && entrypoint.slug !== 'code-editor')
+      .map((entrypoint) => entrypoint.publicApiPath),
+    ...productionTsFilesUnder('projects/hell/src/lib/features').filter(
+      (file) => !file.includes('/features/code-editor/'),
+    ),
+  ];
+
+  const boundaries = [
+    { label: 'root/core', paths: rootCorePaths },
+    { label: 'composites', paths: compositePaths },
+    { label: 'non-code-editor feature', paths: nonCodeEditorFeaturePaths },
+  ];
+
+  for (const boundary of boundaries) {
+    for (const rel of [...new Set(boundary.paths)].sort()) {
+      const file = join(root, rel);
+      if (!existsSync(file)) continue;
+
+      const hits = moduleSpecifierReferences(file).filter((hit) =>
+        isCodeMirrorBoundarySpecifier(hit.specifier),
+      );
+      for (const hit of hits) {
+        failures.push(
+          `CodeMirror Optional Entrypoint ${boundary.label} boundary ${rel}:${hit.line} references ${hit.specifier}; ` +
+            'CodeMirror exports/imports must stay inside @hell-ui/angular/features/code-editor.',
+        );
+      }
+    }
+  }
+}
+
+function productionTsFilesUnder(relDir) {
+  const dir = join(root, relDir);
+  if (!existsSync(dir)) return [];
+
+  return walk(dir)
+    .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'))
+    .map(relPath);
+}
+
+function isCodeMirrorBoundarySpecifier(specifier) {
+  return (
+    specifier === codeEditorEntrypointSpecifier ||
+    specifier.startsWith(`${codeEditorEntrypointSpecifier}/`) ||
+    /(?:^|\/)code-editor(?:\/|$)/.test(specifier) ||
+    specifier.includes('features/code-editor') ||
+    specifier.includes('public-api-feature-code-editor') ||
+    codeMirrorPackageSpecifierPrefixes.some((prefix) => specifier.startsWith(prefix))
+  );
+}
+
 function checkApiReportContract() {
   const packageJson = parseJsonWithComments(readFile(join(root, 'package.json')));
   const script = readFile(join(root, 'tools/check-api-reports.mjs'));
@@ -857,6 +971,10 @@ function checkApiReportContract() {
     ['@hell-ui/angular/core', 'hell-ui-angular-core.api.md'],
     ['@hell-ui/angular/primitives', 'hell-ui-angular-primitives.api.md'],
     ['@hell-ui/angular/testing', 'hell-ui-angular-testing.api.md'],
+  ];
+  const forbiddenExperimentalApiReports = [
+    '@hell-ui/angular/features/code-editor',
+    'hell-ui-angular-features-code-editor.api.md',
   ];
 
   if (packageJson.scripts?.['test:api-report'] !== 'node tools/check-api-reports.mjs') {
@@ -880,6 +998,14 @@ function checkApiReportContract() {
     const reportPath = join(root, 'etc/api-reports', reportFileName);
     if (!existsSync(reportPath)) {
       failures.push(`API Report baseline is missing etc/api-reports/${reportFileName}`);
+    }
+  }
+
+  for (const forbidden of forbiddenExperimentalApiReports) {
+    if (script.includes(forbidden)) {
+      failures.push(
+        `API Report contract must keep Code Editor out of stable API reports until API report policy deliberately promotes it: ${forbidden}`,
+      );
     }
   }
 }
@@ -1006,6 +1132,16 @@ function checkApiStabilityContract() {
   const codeEditorDocs = readFile(join(root, 'projects/hell-docs/src/app/pages/components/code-editor/code-editor.page.ts'));
   if (!/hellCodeEditorSetup[\s\S]{0,200}deprecated browser-global legacy compatibility/i.test(codeEditorDocs)) {
     failures.push('Code Editor docs must disclose hellCodeEditorSetup as a deprecated compatibility alias');
+  }
+  for (const requiredCodeEditorDocText of [
+    '@hell-ui/angular/features/code-editor',
+    'kept optional entry point',
+    'lazy/client-only',
+    'API report policy deliberately promotes it',
+  ]) {
+    if (!codeEditorDocs.includes(requiredCodeEditorDocText)) {
+      failures.push(`Code Editor docs must state ${requiredCodeEditorDocText}`);
+    }
   }
 
   checkPublicApiInternalExportContract();

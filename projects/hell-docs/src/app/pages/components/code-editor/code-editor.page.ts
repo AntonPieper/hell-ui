@@ -32,12 +32,20 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
       </p>
 
       <p>
+        <code>@hell-ui/angular/features/code-editor</code> is a kept optional entry point. Do not
+        re-export it from root, composites, or other feature barrels; import it only where the editor
+        is intentionally used.
+      </p>
+
+      <p>
         Browser-only runtime: requires <code>window</code> / <code>document</code>. Keep this
-        component behind client-only rendering boundaries; it is not SSR-safe.
+        component behind lazy/client-only rendering boundaries when SSR, hydration, or third-party
+        runtime risk matters; it is not SSR-safe.
       </p>
       <p>
         Code editor is experimental: the component is importable for browser-only app surfaces, but
-        the runtime setup/export contract may still change before a public beta.
+        the runtime setup/export contract may still change before a public beta. It stays outside
+        stable API reports until API report policy deliberately promotes it.
       </p>
 
       <h2>Editable Angular template</h2>
@@ -79,6 +87,7 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
       <ul>
         <li>Install language packages in the app using the editor, not in the reusable library.</li>
         <li>Keep extension arrays stable when possible so reconfiguration is intentional.</li>
+        <li>Lazy-load the kept optional entry point for surfaces that do not always need CodeMirror.</li>
         <li>Use <code>readOnly</code> for docs, audit trails and generated-code viewers.</li>
         <li>Use <code>hellCodeEditorSetupFactory</code> instead of module-global setup for shadow DOM, iframe, or after-hydration document contexts.</li>
       </ul>

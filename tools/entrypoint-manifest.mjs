@@ -20,7 +20,7 @@ export const entrypointManifest = {
       '// Composites and features are available through entry points:',
       '// - @hell-ui/angular/composites',
       '// - @hell-ui/angular/features/data-table (legacy), @hell-ui/angular/features/table-utilities,',
-      '//   @hell-ui/angular/features/code-editor',
+      '//   @hell-ui/angular/features/code-editor (kept optional CodeMirror entry point)',
     ],
   },
   explicit: [
@@ -154,7 +154,7 @@ export const entrypointManifest = {
         'code-editor': {
           header: [
             '/**',
-            ' * @experimental CodeMirror feature entry point. Keep behind browser-only/lazy boundaries.',
+            ' * @experimental Kept optional CodeMirror feature entry point. Keep behind lazy/client-only browser boundaries.',
             ' */',
           ],
         },

@@ -463,6 +463,7 @@ function assertPeerTierContracts(allScenarios) {
 
   for (const scenario of allScenarios) assertScenarioPeerGroup(scenario, allPackagePeerNames);
   assertHeavyPeersAreIsolated(allScenarios);
+  assertCodeMirrorPeersAreIsolated(allScenarios);
 }
 
 function assertScenarioPeerGroup(scenario, packagePeerNames) {
@@ -493,6 +494,25 @@ function assertHeavyPeersAreIsolated(allScenarios) {
     const unexpected = scenario.dependencies.filter((dependency) => heavyFeaturePeerGroup.includes(dependency));
     if (unexpected.length) {
       fail(`Scenario ${scenario.name} must not require heavy feature peer(s): ${unexpected.join(', ')}`);
+    }
+  }
+}
+
+function assertCodeMirrorPeersAreIsolated(allScenarios) {
+  const codeEditorScenario = allScenarios.find((scenario) => scenario.name === 'code-editor');
+  if (!codeEditorScenario) fail('Missing package-consumer code-editor scenario');
+
+  const codeEditorPeers = codeEditorScenario.dependencies.filter((dependency) =>
+    codeEditorPeerGroup.includes(dependency),
+  );
+  assertSameSet('scenario code-editor CodeMirror peer group', codeEditorPeerGroup, codeEditorPeers);
+
+  for (const scenario of allScenarios) {
+    if (scenario.name === 'code-editor') continue;
+
+    const unexpected = scenario.dependencies.filter((dependency) => codeEditorPeerGroup.includes(dependency));
+    if (unexpected.length) {
+      fail(`Scenario ${scenario.name} must not require CodeMirror peer(s): ${unexpected.join(', ')}`);
     }
   }
 }

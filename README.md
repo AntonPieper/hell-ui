@@ -107,7 +107,7 @@ Peer dependency tiers:
 | Code editor | `/features/code-editor`; `code-editor` | Core peers plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight`. |
 | PDF viewer | `@hell-ui/pdf-viewer`; `pdf-viewer` | Separate package. Install the core peer group plus `@hell-ui/pdf-viewer`, `tailwindcss`, `@ng-icons/font-awesome`, and the package's pdf.js peer. |
 
-CodeMirror peers remain optional and are not required by the root or button package-consumer scenarios. pdf.js belongs to `@hell-ui/pdf-viewer`, not `@hell-ui/angular`.
+CodeMirror peers remain optional and are not required by root, button, table, composite, or PDF package-consumer scenarios. `@hell-ui/angular/features/code-editor` is a kept optional entry point; keep live editor surfaces lazy/client-only when SSR, hydration, or third-party runtime risk matters. pdf.js belongs to `@hell-ui/pdf-viewer`, not `@hell-ui/angular`.
 
 ## Public API Tiers
 
@@ -116,7 +116,7 @@ CodeMirror peers remain optional and are not required by the root or button pack
 | Primitives | Stable | `@hell-ui/angular/primitives` | SSR-compatible |
 | Composites | Beta | `@hell-ui/angular/composites` and narrow composite entry points such as `@hell-ui/angular/app-shell` | Browser DOM + `document`/`window`/global listeners |
 | Table utilities | Beta | `@hell-ui/angular/features/table-utilities` | Uses `ResizeObserver`; browser-first |
-| Code editor | Beta/optional peer | `@hell-ui/angular/features/code-editor` | Needs `window` + `document` |
+| Code editor | Beta/optional peer; excluded from stable API reports until policy promotion | `@hell-ui/angular/features/code-editor` | Needs `window` + `document`; keep lazy/client-only when runtime risk matters |
 | PDF viewer | Experimental split package | `@hell-ui/pdf-viewer` | Browser-only app surface/recipe owned outside `@hell-ui/angular` |
 | Testing harnesses | Beta/test-only | `@hell-ui/angular/testing` | CDK component harnesses for consumer and library tests |
 | Speech transcript | Experimental/best-effort (feature opt-in) | `@hell-ui/angular/composites` (`allowSpeechTranscript`, `allowLiveCaptions` alias) | Browser-only; uses `navigator` + `SpeechRecognition` + `captureStream`; best-effort only, not accessibility-grade captions/timed text |
