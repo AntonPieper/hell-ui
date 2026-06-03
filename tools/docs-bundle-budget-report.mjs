@@ -420,7 +420,7 @@ function ownerForEntryPoint(entryPoint) {
   if (entryPoint.includes('hell-ui-angular-features-pdf-viewer')) return 'PDF viewer feature entrypoint';
   if (entryPoint.includes('hell-ui-angular-features-code-editor')) return 'Code editor feature entrypoint';
   if (entryPoint.includes('hell-ui-angular-features-audio-transcript')) return 'Audio transcript feature entrypoint';
-  if (entryPoint.includes('hell-ui-angular-features-table-utilities')) return 'Table utilities feature entrypoint';
+  if (entryPoint.includes('hell-ui-angular-table')) return 'Table primitives entrypoint';
   if (entryPoint.includes('hell-ui-angular-audio-player')) return 'Audio player composite entrypoint';
 
   const componentPageMatch = entryPoint.match(
@@ -447,8 +447,8 @@ function ownerFromInputs(output) {
   if (paths.some((path) => path.includes('@codemirror') || path.includes('@lezer'))) {
     return 'Code editor feature';
   }
-  if (paths.some((path) => path.includes('hell-ui-angular-features-table-utilities'))) {
-    return 'Table utilities feature';
+  if (paths.some((path) => path.includes('hell-ui-angular-table'))) {
+    return 'Table primitives';
   }
   if (paths.some((path) => path.includes('hell-ui-angular-audio-player'))) {
     return 'Audio player composite';

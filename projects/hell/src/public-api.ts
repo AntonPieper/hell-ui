@@ -7,8 +7,11 @@ export * from './lib/public-api-core';
 
 // Primitives remain available through @hell-ui/angular/primitives and narrow
 // primitive entry points such as @hell-ui/angular/button.
-// Composites and features are available through entry points:
+// Composites and optional features are available through entry points:
 // - @hell-ui/angular/composites
-// - @hell-ui/angular/features/data-table (legacy), @hell-ui/angular/features/table-utilities,
-//   @hell-ui/angular/features/code-editor (kept optional CodeMirror entry point),
+// - @hell-ui/angular/table (table primitives)
+// - @hell-ui/angular/data-table (planned simple data table)
+// - @hell-ui/angular/table-tanstack, @hell-ui/angular/table-virtual,
+//   @hell-ui/angular/table-cdk (planned table adapters)
+// - @hell-ui/angular/features/code-editor (kept optional CodeMirror entry point),
 //   @hell-ui/angular/features/audio-transcript (optional audio transcript provider)

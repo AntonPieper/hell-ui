@@ -177,6 +177,25 @@ function checkPackageBoundary(packageJson, files, failures) {
   if (leakedFiles.length) {
     failures.push(`@hell-ui/angular package includes split PDF viewer files: ${leakedFiles.join(', ')}`);
   }
+
+  const legacyTableExports = Object.keys(packageJson.exports ?? {}).filter((key) =>
+    [
+      './features/data-table',
+      './features/table-utilities',
+      './styles/features/data-table',
+      './styles/features/table-utilities',
+    ].includes(key),
+  );
+  if (legacyTableExports.length) {
+    failures.push(`@hell-ui/angular must not export legacy table paths: ${legacyTableExports.join(', ')}`);
+  }
+
+  const legacyTableFiles = files.filter((file) =>
+    /(^|\/)(?:features\/(?:data-table|table-utilities)\/package\.json|styles\/(?:features\/(?:data-table|table-utilities)|components\/(?:data-table|table-utilities))\.css|types\/hell-ui-angular-features-(?:data-table|table-utilities)\.d\.ts)/i.test(file),
+  );
+  if (legacyTableFiles.length) {
+    failures.push(`@hell-ui/angular package includes legacy table alias files: ${legacyTableFiles.join(', ')}`);
+  }
 }
 
 function expectedCodeExportKeys(packageName) {

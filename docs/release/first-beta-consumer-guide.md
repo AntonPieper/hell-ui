@@ -27,7 +27,7 @@ A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`;
 | Aggregate primitives | Core peer group plus `tailwindcss`, `@angular/router`, `@ng-icons/font-awesome` | `@hell-ui/angular/primitives` plus primitive CSS. Router is needed because the aggregate includes dialog through `ng-primitives/dialog`; Font Awesome is needed because icon-backed primitives are bundled in the aggregate FESM. | [`primitives-css`](../../tools/check-package-consumer.mjs) |
 | Composites | Core peer group plus `tailwindcss`; add `@ng-icons/font-awesome` for aggregate/icon-backed composites | Prefer narrow composite entry points such as `@hell-ui/angular/app-shell` and `@hell-ui/angular/audio-player`; use `@hell-ui/angular/composites` only when you accept aggregate peers | [`app-shell`, `audio-player`, `composites-css`](../../tools/check-package-consumer.mjs) |
 | Audio transcript | Composite audio-player peer group; no CodeMirror or pdf.js peers | `@hell-ui/angular/audio-player` plus provider import from `@hell-ui/angular/features/audio-transcript`; use composite CSS, no feature CSS | [`audio-transcript`](../../tools/check-package-consumer.mjs) |
-| Table utilities | Core peer group plus `tailwindcss` | `@hell-ui/angular/features/table-utilities`; legacy `@hell-ui/angular/features/data-table` only while migrating | [`table-utilities`, `data-table`](../../tools/check-package-consumer.mjs) |
+| Table primitives / planned data table | Core peer group plus `tailwindcss` | `@hell-ui/angular/table`, planned `@hell-ui/angular/data-table`, and planned adapter entrypoints `@hell-ui/angular/table-tanstack`, `/table-virtual`, `/table-cdk`; CSS from `@hell-ui/angular/styles/table` | [`table`, `data-table`](../../tools/check-package-consumer.mjs) |
 | Code editor | Core peer group plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, `@lezer/highlight` | Kept optional entry point `@hell-ui/angular/features/code-editor`; keep lazy/client-only when runtime risk matters | [`code-editor`](../../tools/check-package-consumer.mjs) |
 | PDF viewer | Core peer group plus `@hell-ui/pdf-viewer`, `tailwindcss`, `@ng-icons/font-awesome`, and the split package's pdf.js peer | `@hell-ui/pdf-viewer`; app must provide the pdf.js worker source | [`pdf-viewer`](../../tools/check-package-consumer.mjs) |
 
@@ -57,6 +57,7 @@ HELL_PACKAGE_CONSUMER_SCENARIOS=button-unstyled pnpm test:package-consumer -- --
 HELL_PACKAGE_CONSUMER_SCENARIOS=primitives-css pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=audio-player pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=audio-transcript pnpm test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=table pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=pdf-viewer pnpm test:package-consumer -- --minimal-deps
 ```
@@ -71,7 +72,7 @@ Prefer:
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
+import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 import { HellButtonHarness } from '@hell-ui/angular/testing';
 ```
 
@@ -83,7 +84,7 @@ import { HellButton, HellInput } from '@hell-ui/angular/primitives';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/composites';
 ```
 
-Use `@hell-ui/angular` for stable core exports only. Use `/primitives`, `/composites`, `/features/*`, and narrow component entry points for UI surfaces.
+Use `@hell-ui/angular` for stable core exports only. Use `/primitives`, `/composites`, `/table`, `/data-table`, `/features/*`, and narrow component entry points for UI surfaces.
 
 ## CSS imports
 
@@ -108,12 +109,12 @@ Add only the feature CSS you import:
 
 ```css
 @import "@hell-ui/angular/styles/composites";
-@import "@hell-ui/angular/styles/features/table-utilities";
+@import "@hell-ui/angular/styles/table";
 @import "@hell-ui/angular/styles/features/code-editor";
 @import "@hell-ui/pdf-viewer/styles";
 ```
 
-Avoid `@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` for production migration unless the app intentionally accepts every primitive, composite, CodeMirror, and table-utility style in one bundle. PDF viewer styles come from `@hell-ui/pdf-viewer/styles`. Use `@hell-ui/angular/styles/features/data-table` only as the legacy CSS alias for table utilities.
+Avoid `@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` for production migration unless the app intentionally accepts every primitive, composite, CodeMirror, and table style in one bundle. PDF viewer styles come from `@hell-ui/pdf-viewer/styles`.
 
 ## Unstyled mode
 
@@ -138,7 +139,7 @@ Treat these as deliberate opt-ins, not default UI kit imports.
 
 | Feature | First-beta guidance | Current status |
 | --- | --- | --- |
-| Table utilities | Keep behind `@hell-ui/angular/features/table-utilities`. It is table utilities, not a data-grid framework. Prefer semantic table markup with real cell controls. | Beta feature; legacy `/features/data-table` remains deprecated compatibility. |
+| Table primitives / planned data table | Keep primitives behind `@hell-ui/angular/table`. It is table primitives, not a data-grid framework. Prefer semantic table markup with real cell controls. The simple data table and adapters are explicit planned entrypoints until their implementation slices land. | Beta primitives; data-table and adapters remain experimental/planned. Legacy table feature aliases were removed before beta. |
 | Code editor | Keep behind the kept optional `@hell-ui/angular/features/code-editor` entry point; lazy-load or client-only load in SSR-sensitive apps; pass owner-document-aware setup where possible. | Experimental in package/source comments; HELL-054 locks the kept optional boundary and leaves stable API report promotion to policy. |
 | PDF viewer | Package path is `@hell-ui/pdf-viewer`; install the split package with its exact pdf.js peer and pass an app-owned worker source. | Experimental/browser-only split package. |
 | Audio speech transcript | Do not present `allowSpeechTranscript` as accessibility captions or timed text. Import `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript` only where the route/app deliberately opts into the browser transcript provider, and provide real captions/transcripts separately. | Experimental Chromium-only / best-effort; runtime is isolated behind the optional feature provider. |
@@ -151,16 +152,25 @@ Known experimental/best-effort surfaces:
 
 - `@hell-ui/angular/features/audio-transcript`
 - `@hell-ui/angular/features/code-editor`
+- `@hell-ui/angular/data-table`
+- `@hell-ui/angular/table-tanstack`
+- `@hell-ui/angular/table-virtual`
+- `@hell-ui/angular/table-cdk`
 - `@hell-ui/pdf-viewer`
 - audio-player speech transcript options such as `allowSpeechTranscript`
 
-Known deprecated compatibility surfaces to migrate away from:
+Removed pre-beta table compatibility surfaces:
+
+| Removed surface | Replacement |
+| --- | --- |
+| old table feature entrypoints | `@hell-ui/angular/table`; planned simple renderer at `@hell-ui/angular/data-table` |
+| `HELL_TABLE_DIRECTIVES`, `HELL_TABLE_UTILITY_DIRECTIVES` | `HELL_TABLE_UTILITIES_DIRECTIVES` from `@hell-ui/angular/table` |
+| `HellTableRow.interactive` / `selectionSemantics` | real cell controls, explicit row selection, or `selectable` where documented |
+
+Known deprecated non-table compatibility surfaces to migrate away from:
 
 | Deprecated surface | Preferred replacement |
 | --- | --- |
-| `@hell-ui/angular/features/data-table` | `@hell-ui/angular/features/table-utilities` |
-| `HELL_TABLE_DIRECTIVES`, `HELL_TABLE_UTILITY_DIRECTIVES` | `HELL_TABLE_UTILITIES_DIRECTIVES` |
-| `HellTableRow.interactive` | real cell controls, explicit row selection, or `selectable` where documented |
 | `allowLiveCaptions` | `allowSpeechTranscript` plus `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript`, with the same best-effort warning |
 | `hellAudioSpeechSupported` from `@hell-ui/angular/audio-player` | `hellAudioSpeechSupported` from `@hell-ui/angular/features/audio-transcript` |
 | `HellDataTableLabels` | `HellTableUtilitiesLabels` from `@hell-ui/angular` or `@hell-ui/angular/core` |
@@ -174,7 +184,7 @@ Current support is evidence-based and not a production guarantee.
 
 - Root/core and stable primitives are the safest SSR import paths. Primitive docs may still name component-specific browser behavior.
 - Composites are browser-first and may use `document`, `window`, or global listeners for overlays, hotkeys, portals, and dismissal.
-- Table utilities use `ResizeObserver`.
+- Table primitives use `ResizeObserver`.
 - Code editor needs browser `window`/`document` through CodeMirror.
 - PDF viewer is browser-only and lives in `@hell-ui/pdf-viewer`: pdf.js worker setup, printing/download helpers, thumbnails, global listeners, and browser compatibility are app-owned risk.
 - Speech transcript uses Chromium-only Web Speech and media-capture APIs where available through `@hell-ui/angular/features/audio-transcript`; it is not accessibility-grade captions.

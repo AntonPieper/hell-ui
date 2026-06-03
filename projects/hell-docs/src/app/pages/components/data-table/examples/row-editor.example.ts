@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/c
 
 import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
 
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
+import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 import { HellButton } from '@hell-ui/angular/button';
 
 interface Row {

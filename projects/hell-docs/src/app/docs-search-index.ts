@@ -732,13 +732,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     title: 'Table Utilities: Example',
     path: '/components/data-table',
     detail: 'components/data-table/examples/example.example.ts',
-    terms: 'table utilities data-table example components/data-table/examples/example.example components/data-table hellTable hellTableRow hellTableSortButton hellOmnibar smart search ranking role assignee data-table compatibility alias',
+    terms: 'table utilities data-table example components/data-table/examples/example.example components/data-table hellTable hellTableRow hellTableSortButton hellOmnibar smart search ranking role assignee table primitives',
   },
   {
     title: 'Table Utilities: Row Editor',
     path: '/components/data-table',
     detail: 'components/data-table/examples/row-editor.example.ts',
-    terms: 'table utilities data-table row-editor components/data-table/examples/row-editor.example components/data-table hellResizable hellTable data-table compatibility alias textarea',
+    terms: 'table utilities data-table row-editor components/data-table/examples/row-editor.example components/data-table hellResizable hellTable table primitives textarea',
   },
   {
     title: 'Pdf Viewer: Lazy Loading',
@@ -861,7 +861,7 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
     title: 'Table utility directives',
     path: '/components/data-table',
     detail: 'hellTable, hellTableRow, hellTableHeaderCell, hellTableSortButton, hellTableColumnResizer',
-    terms: 'HELL_TABLE_UTILITIES_DIRECTIVES HELL_TABLE_UTILITY_DIRECTIVES HELL_TABLE_DIRECTIVES hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableSortButton hellTableCell hellTableColumnResizer',
+    terms: 'HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableSortButton hellTableCell hellTableColumnResizer',
   },
 ];
 

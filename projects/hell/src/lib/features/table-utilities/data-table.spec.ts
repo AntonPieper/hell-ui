@@ -2,15 +2,10 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { provideHellLabels } from '../../core/labels';
-import {
-  HELL_TABLE_DIRECTIVES,
-  HELL_TABLE_UTILITY_DIRECTIVES,
-  HELL_TABLE_UTILITIES_DIRECTIVES,
-  type HellTableColumnResizeEvent,
-} from './table-utilities';
+import { HELL_TABLE_UTILITIES_DIRECTIVES, type HellTableColumnResizeEvent } from './table-utilities';
 
 @Component({
-  imports: [...HELL_TABLE_DIRECTIVES],
+  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
   template: `
     <table hellTable>
       <thead hellTableHead>
@@ -50,8 +45,6 @@ import {
           hellTableRow
           [selected]="selected()"
           [selectable]="selectable()"
-          [interactive]="interactive()"
-          [selectionSemantics]="selectionSemantics()"
           (rowSelect)="rowEvents.push($event)"
         >
           <td hellTableCell (cellSelect)="cellEvents.push($event)">
@@ -69,12 +62,10 @@ import {
 })
 class DataTableHost {
   readonly selectable = signal(false);
-  readonly interactive = signal(false);
   readonly selected = signal(false);
   readonly sortable = signal(false);
   readonly sort = signal<'asc' | 'desc' | null>(null);
   readonly minWidth = signal(40);
-  readonly selectionSemantics = signal(false);
 
   readonly rowEvents: Array<MouseEvent | KeyboardEvent> = [];
   readonly cellEvents: MouseEvent[] = [];
@@ -83,7 +74,7 @@ class DataTableHost {
 }
 
 @Component({
-  imports: [...HELL_TABLE_DIRECTIVES],
+  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
   template: `
     <table hellTable>
       <thead hellTableHead>
@@ -115,7 +106,7 @@ class DataTableHost {
 class DataTableResizerAriaOverrideHost {}
 
 @Component({
-  imports: [...HELL_TABLE_DIRECTIVES],
+  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
   providers: [provideHellLabels({ tableUtilities: { resizeColumn: 'Spaltenbreite ändern' } })],
   template: `
     <table hellTable>
@@ -134,11 +125,6 @@ class DataTableResizerAriaOverrideHost {}
 class DataTableLocalizedLabelHost {}
 
 describe('Hell table utilities directives', () => {
-  it('preserves legacy alias exports while preferring plural import alias', () => {
-    expect(HELL_TABLE_UTILITIES_DIRECTIVES).toBe(HELL_TABLE_UTILITY_DIRECTIVES);
-    expect(HELL_TABLE_DIRECTIVES).toBe(HELL_TABLE_UTILITY_DIRECTIVES);
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -178,33 +164,6 @@ describe('Hell table utilities directives', () => {
     expect(row.getAttribute('aria-selected')).toBe('true');
     expect(space.defaultPrevented).toBe(true);
     expect(host.rowEvents).toHaveLength(3);
-  });
-
-  it('requires selection semantics before legacy interactive rows become focusable', () => {
-    const fixture = TestBed.createComponent(DataTableHost);
-    const host = fixture.componentInstance;
-    host.interactive.set(true);
-    host.selected.set(true);
-    fixture.detectChanges();
-
-    const row = byId<HTMLTableRowElement>(fixture.nativeElement, 'person-row');
-    const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
-    row.dispatchEvent(enter);
-    row.click();
-
-    expect(row.hasAttribute('tabindex')).toBe(false);
-    expect(row.hasAttribute('aria-selected')).toBe(false);
-    expect(row.hasAttribute('data-interactive')).toBe(false);
-    expect(enter.defaultPrevented).toBe(false);
-    expect(host.rowEvents).toEqual([]);
-
-    host.selectionSemantics.set(true);
-    fixture.detectChanges();
-
-    expect(row.getAttribute('tabindex')).toBe('0');
-    expect(row.getAttribute('aria-selected')).toBe('true');
-    row.click();
-    expect(host.rowEvents).toHaveLength(1);
   });
 
   it('does not select rows or cells from nested interactive controls', () => {

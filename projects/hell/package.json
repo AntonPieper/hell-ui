@@ -38,17 +38,13 @@
       "style": "./styles/composites.css",
       "default": "./styles/composites.css"
     },
+    "./styles/table": {
+      "style": "./styles/table.css",
+      "default": "./styles/table.css"
+    },
     "./styles/features/code-editor": {
       "style": "./styles/features/code-editor.css",
       "default": "./styles/features/code-editor.css"
-    },
-    "./styles/features/data-table": {
-      "style": "./styles/features/data-table.css",
-      "default": "./styles/features/data-table.css"
-    },
-    "./styles/features/table-utilities": {
-      "style": "./styles/features/table-utilities.css",
-      "default": "./styles/features/table-utilities.css"
     },
     "./styles/kitchen-sink": {
       "style": "./styles/hell.css",

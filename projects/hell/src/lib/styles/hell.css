@@ -10,9 +10,8 @@
  *   @import "@hell-ui/angular/styles/tokens";
  *   @import "@hell-ui/angular/styles/primitives";
  *   @import "@hell-ui/angular/styles/composites";
- *   @import "@hell-ui/angular/styles/features/table-utilities";
+ *   @import "@hell-ui/angular/styles/table";
  *   @import "@hell-ui/angular/styles/features/code-editor";
- *   @import "@hell-ui/angular/styles/features/data-table"; legacy alias
  *   @import "@hell-ui/angular/styles/components/button";
  *
  * Tokens + design system base are declared in tokens.css.
@@ -21,5 +20,5 @@
  * using native CSS declarations plus Tailwind theme variables.
  */
 @import './composites.css';
-@import './features/table-utilities.css';
+@import './table.css';
 @import './features/code-editor.css';

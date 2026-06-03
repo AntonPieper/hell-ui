@@ -33,7 +33,7 @@ import { HellIcon } from '@hell-ui/angular/icon';
 import { HellPaginationStrip } from '@hell-ui/angular/pagination';
 import { HellSkeleton } from '@hell-ui/angular/skeleton';
 
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/features/table-utilities';
+import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 
 type RowRole = 'Admin' | 'Editor' | 'Viewer';
 type RowAssignee = 'Ada' | 'Grace' | 'Linus' | 'Margaret';

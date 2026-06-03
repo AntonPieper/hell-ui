@@ -55,6 +55,9 @@ if (!pdfPackageName) {
   fail('Built PDF package.json is missing name');
 }
 
+assertModernTableEntrypointContract(distPackageJson, distHell);
+assertDocsAvoidLegacyTableEntrypoints();
+
 const packedHell = await packBuiltPackage(distHell, 'pack-core');
 const packedPdfViewer = await packBuiltPackage(distPdfViewer, 'pack-pdf-viewer');
 try {
@@ -100,7 +103,7 @@ const packageConsumerPeerTiers = new Set([
   'core',
   'primitive',
   'composite',
-  'table-utilities',
+  'table',
   'audio-transcript',
   'code-editor',
   'pdf-viewer',
@@ -118,7 +121,7 @@ const peerGroupContracts = {
     tier: 'composite',
     peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup],
   },
-  'table-utilities': { tier: 'table-utilities', peers: [...corePeerGroup, ...stylePeerGroup] },
+  table: { tier: 'table', peers: [...corePeerGroup, ...stylePeerGroup] },
   'audio-transcript': {
     tier: 'audio-transcript',
     peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup],
@@ -287,22 +290,22 @@ const scenarios = [
     stylesCss: codeEditorConsumerStylesCss(),
   },
   {
-    name: 'table-utilities',
-    description: 'preferred table utilities feature without Font Awesome peer',
-    peerTier: 'table-utilities',
-    peerGroup: 'table-utilities',
+    name: 'table',
+    description: 'table primitives without Font Awesome peer',
+    peerTier: 'table',
+    peerGroup: 'table',
     dependencies: styledUiWithoutFontAwesomeDeps,
-    mainTs: tableUtilitiesConsumerMainTs(),
-    stylesCss: tableUtilitiesConsumerStylesCss(),
+    mainTs: tableConsumerMainTs(),
+    stylesCss: tableConsumerStylesCss(),
   },
   {
     name: 'data-table',
-    description: 'legacy data-table alias without Font Awesome peer',
-    peerTier: 'table-utilities',
-    peerGroup: 'table-utilities',
+    description: 'planned simple data-table entrypoint without Font Awesome peer',
+    peerTier: 'table',
+    peerGroup: 'table',
     dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: dataTableConsumerMainTs(),
-    stylesCss: dataTableConsumerStylesCss(),
+    stylesCss: tableConsumerStylesCss(),
   },
   {
     name: 'pdf-viewer',
@@ -515,6 +518,8 @@ function assertHeavyPeersAreIsolated(allScenarios) {
     'core',
     'button-unstyled',
     'button',
+    'table',
+    'data-table',
     'audio-player',
     'audio-transcript',
   ]);
@@ -544,6 +549,54 @@ function assertCodeMirrorPeersAreIsolated(allScenarios) {
     if (unexpected.length) {
       fail(`Scenario ${scenario.name} must not require CodeMirror peer(s): ${unexpected.join(', ')}`);
     }
+  }
+}
+
+function assertModernTableEntrypointContract(packageJson, distRoot) {
+  const exportsMap = packageJson.exports ?? {};
+  for (const exportPath of [
+    './table',
+    './data-table',
+    './table-tanstack',
+    './table-virtual',
+    './table-cdk',
+    './styles/table',
+  ]) {
+    if (!exportsMap[exportPath]) fail(`Modern table package export is missing ${exportPath}`);
+  }
+
+  for (const exportPath of [
+    './features/data-table',
+    './features/table-utilities',
+    './styles/features/data-table',
+    './styles/features/table-utilities',
+  ]) {
+    if (exportsMap[exportPath]) fail(`Legacy table package export must be removed: ${exportPath}`);
+  }
+
+  for (const file of [
+    'features/data-table/package.json',
+    'features/table-utilities/package.json',
+    'styles/features/data-table.css',
+    'styles/features/table-utilities.css',
+    'styles/components/data-table.css',
+    'styles/components/table-utilities.css',
+    'types/hell-ui-angular-features-data-table.d.ts',
+    'types/hell-ui-angular-features-table-utilities.d.ts',
+  ]) {
+    if (existsSync(join(distRoot, file))) fail(`Legacy table package artifact must be absent: ${file}`);
+  }
+}
+
+function assertDocsAvoidLegacyTableEntrypoints() {
+  const docsRoot = join(root, 'projects/hell-docs/src/app');
+  const offenders = walkFiles(docsRoot)
+    .filter((file) => /\.(?:ts|html|md)$/.test(file))
+    .filter((file) => /@hell-ui\/angular\/features\/(?:data-table|table-utilities)\b/.test(readFileSync(file, 'utf8')))
+    .map((file) => file.slice(root.length + 1));
+
+  if (offenders.length) {
+    fail(`Docs must not import legacy table entrypoints: ${offenders.join(', ')}`);
   }
 }
 
@@ -1036,10 +1089,10 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
-function tableUtilitiesConsumerMainTs() {
+function tableConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_TABLE_UTILITIES_DIRECTIVES, HellTableRowIgnore } from '${packageName}/features/table-utilities';
+import { HELL_TABLE_UTILITIES_DIRECTIVES, HellTableRowIgnore } from '${packageName}/table';
 
 @Component({
   selector: 'app-root',
@@ -1073,36 +1126,14 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 }
 
 function dataTableConsumerMainTs() {
-  return tableConsumerMainTs(`${packageName}/features/data-table`, 'HELL_TABLE_DIRECTIVES');
-}
-
-function tableConsumerMainTs(entryPoint, directiveSymbol) {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { ${directiveSymbol} } from '${entryPoint}';
+import '${packageName}/data-table';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [...${directiveSymbol}],
-  template: \`
-    <div hellTableContainer>
-      <table hellTable>
-        <thead hellTableHead>
-          <tr hellTableRow>
-            <th hellTableHeaderCell columnId="name">Name</th>
-            <th hellTableHeaderCell columnId="role">Role</th>
-          </tr>
-        </thead>
-        <tbody hellTableBody>
-          <tr hellTableRow selected>
-            <td hellTableCell>Atlas</td>
-            <td hellTableCell>Admin</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  \`,
+  template: '<p>Planned data-table entrypoint compiles.</p>',
 })
 class App {}
 
@@ -1155,17 +1186,10 @@ function codeEditorConsumerStylesCss() {
 `;
 }
 
-function tableUtilitiesConsumerStylesCss() {
+function tableConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/styles/tokens";
-@import "${packageName}/styles/features/table-utilities";
-`;
-}
-
-function dataTableConsumerStylesCss() {
-  return `@import "tailwindcss";
-@import "${packageName}/styles/tokens";
-@import "${packageName}/styles/features/data-table";
+@import "${packageName}/styles/table";
 `;
 }
 
@@ -1549,6 +1573,16 @@ function npmCommandEnvironment() {
 function positiveNumber(raw, fallback) {
   const value = Number(raw);
   return Number.isFinite(value) && value > 0 ? value : fallback;
+}
+
+function walkFiles(path) {
+  const out = [];
+  for (const name of readdirSync(path)) {
+    const fullPath = join(path, name);
+    if (statSync(fullPath).isDirectory()) out.push(...walkFiles(fullPath));
+    else out.push(fullPath);
+  }
+  return out;
 }
 
 function fail(message) {

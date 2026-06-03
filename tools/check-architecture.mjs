@@ -880,6 +880,25 @@ function checkPackageEntryPoints() {
     }
   }
 
+  const manifestSpecifiers = new Set(publicApiFiles.map((entrypoint) => entrypoint.specifier));
+  for (const specifier of [
+    '@hell-ui/angular/table',
+    '@hell-ui/angular/data-table',
+    '@hell-ui/angular/table-tanstack',
+    '@hell-ui/angular/table-virtual',
+    '@hell-ui/angular/table-cdk',
+  ]) {
+    if (!manifestSpecifiers.has(specifier)) failures.push(`Table Entrypoint Manifest is missing ${specifier}`);
+  }
+  for (const specifier of [
+    '@hell-ui/angular/features/data-table',
+    '@hell-ui/angular/features/table-utilities',
+  ]) {
+    if (manifestSpecifiers.has(specifier) || paths[specifier]) {
+      failures.push(`Legacy table entry point must be removed from manifest/tsconfig: ${specifier}`);
+    }
+  }
+
   const legacyPaths = Object.keys(paths).filter((entryPoint) => entryPoint.startsWith('hell'));
   if (legacyPaths.length) {
     failures.push(`Package Identity still exposes legacy alias paths in tsconfig.json: ${legacyPaths.join(', ')}`);
@@ -1157,26 +1176,16 @@ function checkApiStabilityContract() {
     }
   }
 
-  const dataTablePublicApi = readFile(join(root, 'projects/hell/src/lib/public-api-feature-data-table.ts'));
-  if (!/@deprecated\b/.test(dataTablePublicApi)) {
-    failures.push('Data Table legacy feature entry point must carry @deprecated in its public API comment');
-  }
-
-  const dataTableSource = readFile(join(root, 'projects/hell/src/lib/features/data-table/data-table.ts'));
-  if (!/@deprecated\b/.test(dataTableSource)) {
-    failures.push('Data Table legacy feature source must carry @deprecated API JSDoc');
-  }
-
   const tableUtilitiesSource = readFile(
     join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'),
   );
-  for (const alias of ['HELL_TABLE_UTILITY_DIRECTIVES', 'HELL_TABLE_DIRECTIVES']) {
-    if (!hasTaggedApiSymbol(tableUtilitiesSource, 'deprecated', alias)) {
-      failures.push(`${alias} compatibility alias must carry @deprecated API JSDoc`);
+  for (const removed of ['HELL_TABLE_UTILITY_DIRECTIVES', 'HELL_TABLE_DIRECTIVES', 'selectionSemantics']) {
+    if (tableUtilitiesSource.includes(removed)) {
+      failures.push(`${removed} legacy table API must be removed, not deprecated`);
     }
   }
-  if (!hasTaggedApiSymbol(tableUtilitiesSource, 'deprecated', 'interactive')) {
-    failures.push('HellTableRow interactive compatibility input must carry @deprecated API JSDoc');
+  if (/readonly\s+interactive\b/.test(tableUtilitiesSource)) {
+    failures.push('HellTableRow interactive legacy input must be removed, not deprecated');
   }
 
   const labelsSource = readFile(join(root, 'projects/hell/src/lib/core/labels.ts'));
@@ -1194,14 +1203,6 @@ function checkApiStabilityContract() {
   );
   if (!hasTaggedApiSymbol(codeEditorRuntimeSource, 'deprecated', 'hellCodeEditorSetup')) {
     failures.push('hellCodeEditorSetup compatibility alias must carry @deprecated API JSDoc');
-  }
-
-  const tableDocs = readFile(join(root, 'projects/hell-docs/src/app/pages/components/data-table/data-table.page.ts'));
-  if (!/deprecated compatibility (?:naming )?alias/i.test(tableDocs)) {
-    failures.push('Table utilities docs must disclose deprecated data-table/directive aliases');
-  }
-  if (!/Deprecated <code>\[interactive\]<\/code>/.test(tableDocs)) {
-    failures.push('Table utilities docs must disclose interactive as deprecated');
   }
 
   const audioDocs = readFile(join(root, 'projects/hell-docs/src/app/pages/components/audio-player/audio-player.page.ts'));
@@ -1510,6 +1511,7 @@ function checkStyleEntryPoints() {
     './styles/tokens',
     './styles/primitives',
     './styles/composites',
+    './styles/table',
     ...styledFeatures.map((feature) => `./styles/features/${feature}`),
   ];
 
@@ -1528,10 +1530,25 @@ function checkStyleEntryPoints() {
     }
   }
 
+  for (const exportPath of ['./styles/features/data-table', './styles/features/table-utilities']) {
+    if (exportsMap[exportPath]) {
+      failures.push(`Legacy table CSS package export must be removed: ${exportPath}`);
+    }
+  }
+  for (const relPath of [
+    'projects/hell/src/lib/styles/features/data-table.css',
+    'projects/hell/src/lib/styles/features/table-utilities.css',
+    'projects/hell/src/lib/styles/components/data-table.css',
+    'projects/hell/src/lib/styles/components/table-utilities.css',
+  ]) {
+    if (existsSync(join(root, relPath))) failures.push(`Legacy table CSS alias file must be removed: ${relPath}`);
+  }
+
   const allStyles = readFile(join(root, 'projects/hell/src/lib/styles/hell.css'));
-  const legacyStyleAliasFeatures = new Set(['data-table']);
+  if (!allStyles.includes('./table.css')) {
+    failures.push('All-in style entry point is missing table CSS import');
+  }
   for (const feature of styledFeatures) {
-    if (legacyStyleAliasFeatures.has(feature)) continue;
     if (!allStyles.includes(`./features/${feature}.css`)) {
       failures.push(`All-in style entry point is missing Feature CSS import for ${feature}`);
     }
@@ -1542,13 +1559,6 @@ function checkStyleEntryPoints() {
     const feature = basename(file, '.css');
     const source = readFile(join(featureStyleDir, file));
     const expectedImport = `../components/${feature}.css`;
-    if (feature === 'data-table') {
-      if (!source.includes(expectedImport)) {
-        failures.push(`Feature style entry point ${file} must import ${expectedImport} as legacy alias`);
-      }
-      continue;
-    }
-
     if (!source.includes(expectedImport)) {
       failures.push(`Feature style entry point ${file} must import ${expectedImport}`);
     }
@@ -2031,23 +2041,41 @@ function checkInteractiveTriggerSelectorContract() {
 function checkTableUtilityContract() {
   const source = readFile(join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'));
   if (!source.includes('HELL_TABLE_UTILITIES_DIRECTIVES')) {
-    failures.push('Table utilities feature must expose HELL_TABLE_UTILITIES_DIRECTIVES as its preferred import');
+    failures.push('Table primitives must expose HELL_TABLE_UTILITIES_DIRECTIVES as their standalone import list');
   }
-  if (!source.includes('HELL_TABLE_UTILITY_DIRECTIVES')) {
-    failures.push('Table utilities feature must preserve HELL_TABLE_UTILITY_DIRECTIVES compatibility alias');
+  for (const removed of ['HELL_TABLE_UTILITY_DIRECTIVES', 'HELL_TABLE_DIRECTIVES', 'selectionSemantics']) {
+    if (source.includes(removed)) failures.push(`${removed} legacy table API must be removed`);
   }
-  if (!source.includes('HELL_TABLE_DIRECTIVES')) {
-    failures.push('Table utilities feature must preserve HELL_TABLE_DIRECTIVES compatibility alias');
+  if (/readonly\s+interactive\b/.test(source)) {
+    failures.push('HellTableRow interactive legacy input must be removed');
+  }
+
+  const tableHarness = readFile(join(root, 'projects/hell/src/testing/table-harness.ts'));
+  if (/\binteractive\?\s*:|\bisInteractive\b/.test(tableHarness)) {
+    failures.push('Testing table harness must not expose interactive legacy row aliases');
+  }
+
+  const tableFacade = readFile(join(root, 'projects/hell/src/lib/table/table.ts'));
+  if (!tableFacade.includes("../features/table-utilities/table-utilities")) {
+    failures.push('Modern @hell-ui/angular/table facade must own the table utilities export');
   }
 
   const docs = readFile(
     join(root, 'projects/hell-docs/src/app/pages/components/data-table/data-table.page.ts'),
   );
-  for (const text of ['Table utilities', 'not a', 'batteries-included data grid', 'TanStack Table']) {
+  for (const text of ['Table primitives', 'not a', 'batteries-included data grid', 'TanStack Table']) {
     if (!docs.includes(text)) {
-      failures.push('Table docs must present the feature as table utilities, not a full data table');
+      failures.push('Table docs must present the entrypoint as table primitives, not a full data table');
       break;
     }
+  }
+  const docsRoot = join(root, 'projects/hell-docs/src/app');
+  const offenders = walk(docsRoot)
+    .filter((file) => /\.(?:ts|html|md)$/.test(file))
+    .filter((file) => /@hell-ui\/angular\/features\/(?:data-table|table-utilities)\b/.test(readFile(file)))
+    .map((file) => file.slice(root.length + 1));
+  if (offenders.length) {
+    failures.push(`Docs must not reference legacy table feature entrypoints: ${offenders.join(', ')}`);
   }
 }
 
@@ -2708,7 +2736,7 @@ function compositeDirectories() {
 }
 
 function featureDirectories() {
-  const internalFeatureDirs = new Set(['assets']);
+  const internalFeatureDirs = new Set(['assets', 'table-utilities']);
   return childDirectories(join(root, 'projects/hell/src/lib/features')).filter(
     (feature) => !internalFeatureDirs.has(feature),
   );

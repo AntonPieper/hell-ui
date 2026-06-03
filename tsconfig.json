@@ -57,11 +57,20 @@
       "@hell-ui/angular/features/code-editor": [
         "./projects/hell/src/lib/public-api-feature-code-editor.ts"
       ],
-      "@hell-ui/angular/features/data-table": [
-        "./projects/hell/src/lib/public-api-feature-data-table.ts"
+      "@hell-ui/angular/table": [
+        "./projects/hell/src/lib/public-api-table.ts"
       ],
-      "@hell-ui/angular/features/table-utilities": [
-        "./projects/hell/src/lib/public-api-feature-table-utilities.ts"
+      "@hell-ui/angular/data-table": [
+        "./projects/hell/src/lib/public-api-data-table.ts"
+      ],
+      "@hell-ui/angular/table-tanstack": [
+        "./projects/hell/src/lib/public-api-table-tanstack.ts"
+      ],
+      "@hell-ui/angular/table-virtual": [
+        "./projects/hell/src/lib/public-api-table-virtual.ts"
+      ],
+      "@hell-ui/angular/table-cdk": [
+        "./projects/hell/src/lib/public-api-table-cdk.ts"
       ],
       "@hell-ui/angular/testing": [
         "./projects/hell/src/testing/public-api.ts"

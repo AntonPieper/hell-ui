@@ -16,8 +16,6 @@ export interface HellTableRowHarnessFilters extends BaseHarnessFilters {
   text?: string;
   selected?: boolean;
   selectable?: boolean;
-  /** @deprecated Use `selectable`. */
-  interactive?: boolean;
 }
 
 export interface HellTableSortButtonHarnessFilters extends BaseHarnessFilters {
@@ -149,21 +147,12 @@ export class HellTableRowHarness extends ComponentHarness {
       .addOption('selectable', options.selectable, async (harness, selectable) => {
         const current = await harness.isSelectable();
         return current === selectable;
-      })
-      .addOption('interactive', options.interactive, async (harness, interactive) => {
-        const current = await harness.isInteractive();
-        return current === interactive;
       });
   }
 
   async isSelectable(): Promise<boolean> {
     const interactive = await (await this.host()).getAttribute('data-interactive');
     return interactive === 'true';
-  }
-
-  /** @deprecated Use `isSelectable`. */
-  async isInteractive(): Promise<boolean> {
-    return this.isSelectable();
   }
 
   async isSelected(): Promise<boolean> {

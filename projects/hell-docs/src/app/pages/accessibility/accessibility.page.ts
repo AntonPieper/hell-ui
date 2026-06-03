@@ -416,21 +416,12 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
   },
   {
     kind: 'Feature',
-    name: 'Table utilities',
+    name: 'Table primitives',
     path: '/components/data-table',
     rolePattern: 'Native table markup with sortable header buttons, optional selectable rows, and role=separator column resizers.',
     keyboardCoverage: 'Browser behavior covers column-resizer ArrowRight and nested row controls avoiding row selection.',
     automatedCoverage: 'Axe docs smoke, ARIA snapshot, and browser behavior smoke cover public docs examples.',
-    knownGaps: 'Not a data grid. Grid navigation, multi-row selection model, and full table boundary are deferred to HELL-044.',
-  },
-  {
-    kind: 'Feature',
-    name: 'Data table compatibility alias',
-    path: '/components/data-table',
-    rolePattern: 'Deprecated entry-point alias for Table utilities; no separate data-grid semantics are provided.',
-    keyboardCoverage: 'Same coverage as Table utilities.',
-    automatedCoverage: 'Same axe, ARIA, and browser evidence as Table utilities.',
-    knownGaps: 'Alias must not be marketed as a full data-table/grid implementation.',
+    knownGaps: 'Not a data grid. Modern data-table, grid navigation, multi-row selection model, and adapter coverage are deferred to HELL-063 child slices.',
   },
 ];
 

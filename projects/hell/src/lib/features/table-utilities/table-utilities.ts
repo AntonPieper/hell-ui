@@ -219,10 +219,6 @@ export class HellTableRowIgnore {}
  * - `[selected]` -> `data-selected="true"` for row highlight styles.
  * - `[selectable]` -> `tabindex="0"`, `aria-selected`, and click/Enter/Space
  *   binding that emits `(rowSelect)` for a row-selection model.
- * - `[interactive]` is the legacy alias; it only activates the row when
- *   `[selectionSemantics]` is also enabled.
- * - `[selectionSemantics]` defaults to `false` so action-only rows are not
- *   silently exposed as focusable generic table rows.
  * - Nested buttons, links, inputs, ARIA widgets, `[contenteditable]`, and
  *   `[data-hell-row-ignore]`/`[hellTableRowIgnore]` opt out so row selection
  *   does not double-activate.
@@ -245,16 +241,10 @@ export class HellTableRow extends HellStyleable {
   readonly selected = input(false, { transform: booleanAttribute });
   /** Preferred explicit row-selection activation API. Prefer cell buttons/links for row actions. */
   readonly selectable = input(false, { transform: booleanAttribute });
-  /** @deprecated Use `selectable` for row selection or real buttons/links inside cells for actions. */
-  readonly interactive = input(false, { transform: booleanAttribute });
-  /** Legacy opt-in that lets `[interactive]` expose a selectable row. */
-  readonly selectionSemantics = input(false, { transform: booleanAttribute });
 
   readonly rowSelect = output<MouseEvent | KeyboardEvent>();
 
-  protected readonly rowActivates = computed(
-    () => this.selectable() || (this.interactive() && this.selectionSemantics()),
-  );
+  protected readonly rowActivates = computed(() => this.selectable());
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
 
@@ -565,15 +555,3 @@ export const HELL_TABLE_UTILITIES_DIRECTIVES = [
   HellTableCell,
   HellTableColumnResizer,
 ] as const;
-
-/**
- * @deprecated Use `HELL_TABLE_UTILITIES_DIRECTIVES`.
- */
-export const HELL_TABLE_UTILITY_DIRECTIVES = HELL_TABLE_UTILITIES_DIRECTIVES;
-
-/**
- * @deprecated Use `HELL_TABLE_UTILITIES_DIRECTIVES`.
- * The entry point remains `@hell-ui/angular/features/data-table` for compatibility,
- * but the module is table utilities rather than a full data grid/data-source abstraction.
- */
-export const HELL_TABLE_DIRECTIVES = HELL_TABLE_UTILITIES_DIRECTIVES;
