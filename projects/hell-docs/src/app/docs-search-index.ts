@@ -732,7 +732,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     title: 'Table Utilities: Example',
     path: '/components/data-table',
     detail: 'components/data-table/examples/example.example.ts',
-    terms: 'table utilities data-table example components/data-table/examples/example.example components/data-table hellTable hellTableRow hellTableSortButton hellOmnibar smart search ranking role assignee table primitives',
+    terms: 'table utilities data-table example components/data-table/examples/example.example components/data-table hellTable hellTableRow hellTableSortTrigger hellOmnibar smart search ranking role assignee table primitives',
   },
   {
     title: 'Table Utilities: Row Editor',
@@ -860,8 +860,8 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
   {
     title: 'Table utility directives',
     path: '/components/data-table',
-    detail: 'hellTable, hellTableRow, hellTableHeaderCell, hellTableSortButton, hellTableColumnResizer',
-    terms: 'HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableSortButton hellTableCell hellTableColumnResizer',
+    detail: 'hellTable, hellTableRow, hellTableHeaderCell, hellTableSortTrigger, hellTableColumnResizer',
+    terms: 'HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableSortTrigger hellTableCell hellTableColumnResizer',
   },
 ];
 

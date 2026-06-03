@@ -314,7 +314,7 @@ export class HellTableRow extends HellTableRoleDirective {
  * Header cell directive. Owns optional sort state and acts as the parent
  * for `hellTableColumnResizer`. The directive does not sort — it surfaces the
  * current sort state through `data-sort` / `aria-sort` on the header-cell host,
- * while a nested `button[hellTableSortButton]` owns keyboard focus and activation.
+ * while a nested `button[hellTableSortTrigger]` owns keyboard focus and activation.
  * Sorting logic stays with the consumer.
  *
  * Initial column sizing belongs to consumer CSS/Tailwind. During resize, the
@@ -396,21 +396,21 @@ export class HellTableHeaderCell extends HellTableRoleDirective implements OnDes
 }
 
 /**
- * Sort button placed inside a sortable table header cell. The header keeps
+ * Sort trigger placed inside a sortable table header cell. The header keeps
  * `aria-sort`; the native button owns focus and activation per APG sortable
- * table guidance.
+ * table guidance. The selector intentionally accepts only native button hosts.
  */
 @Directive({
-  selector: 'button[hellTableSortButton]',
-  exportAs: 'hellTableSortButton',
+  selector: 'button[hellTableSortTrigger]',
+  exportAs: 'hellTableSortTrigger',
   host: {
-    '[class.hell-table-sort-button]': '!unstyled()',
+    '[class.hell-table-sort-trigger]': '!unstyled()',
     '[attr.type]': 'nativeButtonType()',
     '[disabled]': 'disabled()',
     '(click)': 'onClick($event)',
   },
 })
-export class HellTableSortButton extends HellStyleable {
+export class HellTableSortTrigger extends HellStyleable {
   readonly sortToggle = output<MouseEvent>();
 
   private readonly host = inject(ElementRef<HTMLButtonElement>).nativeElement;
@@ -611,7 +611,7 @@ export const HELL_TABLE_UTILITIES_DIRECTIVES = [
   HellTableRow,
   HellTableRowIgnore,
   HellTableHeaderCell,
-  HellTableSortButton,
+  HellTableSortTrigger,
   HellTableCell,
   HellTableColumnResizer,
 ] as const;

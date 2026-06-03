@@ -376,7 +376,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                       [sort]="tableSortKey() === 'id' ? order() : null"
                       (sortToggle)="toggleSort('id')"
                     >
-                      <button hellTableSortButton type="button">ID</button>
+                      <button hellTableSortTrigger type="button">ID</button>
                       <span hellTableColumnResizer></span>
                     </th>
                     <th
@@ -387,7 +387,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                       [sort]="tableSortKey() === 'name' ? order() : null"
                       (sortToggle)="toggleSort('name')"
                     >
-                      <button hellTableSortButton type="button">Name</button>
+                      <button hellTableSortTrigger type="button">Name</button>
                       <span hellTableColumnResizer></span>
                     </th>
                     <th
@@ -398,7 +398,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                       [sort]="tableSortKey() === 'email' ? order() : null"
                       (sortToggle)="toggleSort('email')"
                     >
-                      <button hellTableSortButton type="button">Email</button>
+                      <button hellTableSortTrigger type="button">Email</button>
                       <span hellTableColumnResizer></span>
                     </th>
                     <th
@@ -409,7 +409,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                       [sort]="tableSortKey() === 'role' ? order() : null"
                       (sortToggle)="toggleSort('role')"
                     >
-                      <button hellTableSortButton type="button">Role</button>
+                      <button hellTableSortTrigger type="button">Role</button>
                       <span hellTableColumnResizer></span>
                     </th>
                     <th
@@ -420,7 +420,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                       [sort]="tableSortKey() === 'assignee' ? order() : null"
                       (sortToggle)="toggleSort('assignee')"
                     >
-                      <button hellTableSortButton type="button">Assignee</button>
+                      <button hellTableSortTrigger type="button">Assignee</button>
                     </th>
                     <th hellTableHeaderCell class="w-28">Actions</th>
                   </tr>

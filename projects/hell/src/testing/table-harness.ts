@@ -18,7 +18,7 @@ export interface HellTableRowHarnessFilters extends BaseHarnessFilters {
   selectable?: boolean;
 }
 
-export interface HellTableSortButtonHarnessFilters extends BaseHarnessFilters {
+export interface HellTableSortTriggerHarnessFilters extends BaseHarnessFilters {
   disabled?: boolean;
   text?: string;
 }
@@ -216,8 +216,8 @@ export class HellTableHeaderCellHarness extends ComponentHarness {
     return (await this.host()).text();
   }
 
-  async getSortButton(): Promise<HellTableSortButtonHarness | null> {
-    return this.locatorForOptional(HellTableSortButtonHarness)();
+  async getSortTrigger(): Promise<HellTableSortTriggerHarness | null> {
+    return this.locatorForOptional(HellTableSortTriggerHarness)();
   }
 
   async getColumnResizer(): Promise<HellTableColumnResizerHarness | null> {
@@ -225,13 +225,13 @@ export class HellTableHeaderCellHarness extends ComponentHarness {
   }
 }
 
-export class HellTableSortButtonHarness extends ComponentHarness {
-  static hostSelector = 'button[hellTableSortButton]';
+export class HellTableSortTriggerHarness extends ComponentHarness {
+  static hostSelector = 'button[hellTableSortTrigger]';
 
   static with(
-    options: HellTableSortButtonHarnessFilters = {},
-  ): HarnessPredicate<HellTableSortButtonHarness> {
-    return new HarnessPredicate(HellTableSortButtonHarness, options)
+    options: HellTableSortTriggerHarnessFilters = {},
+  ): HarnessPredicate<HellTableSortTriggerHarness> {
+    return new HarnessPredicate(HellTableSortTriggerHarness, options)
       .addOption('text', options.text, async (harness, text) => {
         const label = (await harness.getText()).trim();
         return label === text;

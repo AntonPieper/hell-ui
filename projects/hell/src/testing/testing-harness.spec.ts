@@ -106,7 +106,7 @@ class DialogHarnessHost {}
               [sortable]="sortable()"
               [sort]="sortValue()"
             >
-              <button hellTableSortButton id="sort-name" type="button">Name</button>
+              <button hellTableSortTrigger id="sort-name" type="button">Name</button>
               <button
                 id="name-resizer"
                 hellTableColumnResizer
@@ -373,11 +373,11 @@ describe('hell testing harness entrypoint', () => {
     expect(await nameHeader!.getColumnId()).toBe('name');
     expect(await nameHeader!.getSortState()).toBeNull();
 
-    const sortButton = await nameHeader!.getSortButton();
-    expect(sortButton).not.toBeNull();
+    const sortTrigger = await nameHeader!.getSortTrigger();
+    expect(sortTrigger).not.toBeNull();
 
-    expect(await sortButton!.getText()).toBe('Name');
-    expect(await sortButton!.isDisabled()).toBe(false);
+    expect(await sortTrigger!.getText()).toBe('Name');
+    expect(await sortTrigger!.isDisabled()).toBe(false);
 
     const resizer = await nameHeader!.getColumnResizer();
     expect(resizer).not.toBeNull();

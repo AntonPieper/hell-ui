@@ -18,7 +18,8 @@ import { HELL_TABLE_UTILITIES_DIRECTIVES, type HellTableColumnResizeEvent } from
             [sort]="sort()"
             (sortToggle)="sortEvents.push($event)"
           >
-            <button id="name-sort" hellTableSortButton type="button">Name</button>
+            <button id="name-sort" hellTableSortTrigger type="button">Name</button>
+            <span id="name-sort-non-button" hellTableSortTrigger tabindex="0">Ignored sort label</span>
             <button id="header-action" type="button">Filter</button>
             <button
               id="name-resizer"
@@ -80,7 +81,7 @@ class DataTableHost {
       <thead hellTableHead>
         <tr>
           <th id="override-left" hellTableHeaderCell columnId="override-left">
-            <button id="left-sort" hellTableSortButton type="button">Left</button>
+            <button id="left-sort" hellTableSortTrigger type="button">Left</button>
             <button
               id="left-resizer"
               hellTableColumnResizer
@@ -124,6 +125,40 @@ class DataTableResizerAriaOverrideHost {}
 })
 class DataTableLocalizedLabelHost {}
 
+@Component({
+  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  template: `
+    <table hellTable>
+      <thead hellTableHead>
+        <tr>
+          <th
+            id="alpha-header"
+            hellTableHeaderCell
+            columnId="alpha"
+            sortable
+            [sort]="activeColumn() === 'alpha' ? order() : null"
+          >
+            <button id="alpha-sort" hellTableSortTrigger type="button">Alpha</button>
+          </th>
+          <th
+            id="beta-header"
+            hellTableHeaderCell
+            columnId="beta"
+            sortable
+            [sort]="activeColumn() === 'beta' ? order() : null"
+          >
+            <button id="beta-sort" hellTableSortTrigger type="button">Beta</button>
+          </th>
+        </tr>
+      </thead>
+    </table>
+  `,
+})
+class DataTableSortableAriaHost {
+  readonly activeColumn = signal<'alpha' | 'beta'>('alpha');
+  readonly order = signal<'asc' | 'desc'>('asc');
+}
+
 describe('Hell table utilities directives', () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -131,7 +166,12 @@ describe('Hell table utilities directives', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DataTableHost, DataTableResizerAriaOverrideHost, DataTableLocalizedLabelHost],
+      imports: [
+        DataTableHost,
+        DataTableResizerAriaOverrideHost,
+        DataTableLocalizedLabelHost,
+        DataTableSortableAriaHost,
+      ],
     }).compileComponents();
   });
 
@@ -211,20 +251,20 @@ describe('Hell table utilities directives', () => {
     expect(host.rowEvents[0].type).toBe('click');
   });
 
-  it('disables the sort button when its header is not sortable', () => {
+  it('disables the sort trigger when its header is not sortable', () => {
     const fixture = TestBed.createComponent(DataTableHost);
     const host = fixture.componentInstance;
     fixture.detectChanges();
 
-    const sortButton = byId<HTMLButtonElement>(fixture.nativeElement, 'name-sort');
-    expect(sortButton.disabled).toBe(true);
+    const sortTrigger = byId<HTMLButtonElement>(fixture.nativeElement, 'name-sort');
+    expect(sortTrigger.disabled).toBe(true);
 
-    sortButton.click();
+    sortTrigger.click();
     expect(host.sortEvents).toEqual([]);
 
     host.sortable.set(true);
     fixture.detectChanges();
-    expect(sortButton.disabled).toBe(false);
+    expect(sortTrigger.disabled).toBe(false);
   });
 
   it('maps sortable header state and ignores resizer clicks', () => {
@@ -240,12 +280,12 @@ describe('Hell table utilities directives', () => {
     fixture.detectChanges();
 
     const header = byId<HTMLTableCellElement>(fixture.nativeElement, 'name');
-    const sortButton = byId<HTMLButtonElement>(fixture.nativeElement, 'name-sort');
+    const sortTrigger = byId<HTMLButtonElement>(fixture.nativeElement, 'name-sort');
     const resizer = byId<HTMLButtonElement>(fixture.nativeElement, 'name-resizer');
 
     expect(header.getAttribute('aria-sort')).toBe(null);
     expect(header.hasAttribute('tabindex')).toBe(false);
-    expect(sortButton.getAttribute('type')).toBe('button');
+    expect(sortTrigger.getAttribute('type')).toBe('button');
     expect(resizer.getAttribute('aria-valuenow')).toBe('60');
 
     host.sort.set('asc');
@@ -253,11 +293,63 @@ describe('Hell table utilities directives', () => {
     expect(header.getAttribute('aria-sort')).toBe('ascending');
     expect(header.getAttribute('data-sort')).toBe('asc');
 
-    sortButton.click();
+    sortTrigger.click();
     resizer.click();
     header.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
 
     expect(host.sortEvents).toHaveLength(1);
+  });
+
+  it('sets aria-sort only on the active sorted header', () => {
+    const fixture = TestBed.createComponent(DataTableSortableAriaHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const alpha = byId<HTMLTableCellElement>(fixture.nativeElement, 'alpha-header');
+    const beta = byId<HTMLTableCellElement>(fixture.nativeElement, 'beta-header');
+
+    expect(alpha.getAttribute('aria-sort')).toBe('ascending');
+    expect(beta.hasAttribute('aria-sort')).toBe(false);
+
+    host.activeColumn.set('beta');
+    host.order.set('desc');
+    fixture.detectChanges();
+
+    expect(alpha.hasAttribute('aria-sort')).toBe(false);
+    expect(beta.getAttribute('aria-sort')).toBe('descending');
+  });
+
+  it('does not sort from columnheader or non-button trigger hosts', () => {
+    const fixture = TestBed.createComponent(DataTableHost);
+    const host = fixture.componentInstance;
+    host.sortable.set(true);
+    fixture.detectChanges();
+
+    const header = byId<HTMLTableCellElement>(fixture.nativeElement, 'name');
+    const nonButtonTrigger = byId<HTMLElement>(fixture.nativeElement, 'name-sort-non-button');
+
+    header.click();
+    header.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    header.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    nonButtonTrigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    nonButtonTrigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+    expect(nonButtonTrigger.classList.contains('hell-table-sort-trigger')).toBe(false);
+    expect(host.sortEvents).toEqual([]);
+  });
+
+  it('emits sort activation from the native button trigger', () => {
+    const fixture = TestBed.createComponent(DataTableHost);
+    const host = fixture.componentInstance;
+    host.sortable.set(true);
+    fixture.detectChanges();
+
+    const sortTrigger = byId<HTMLButtonElement>(fixture.nativeElement, 'name-sort');
+    sortTrigger.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }));
+
+    expect(host.sortEvents).toHaveLength(1);
+    expect(host.sortEvents[0].type).toBe('click');
+    expect(host.sortEvents[0].target).toBe(sortTrigger);
   });
 
   it('does not sort from nested header controls', () => {

@@ -82,9 +82,10 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
           contract; it is not a shortcut for making arbitrary rows clickable.
         </p>
         <p>
-          Sortable headers use <code>button[hellTableSortButton]</code>. The
-          <code>&lt;th&gt;</code> keeps <code>aria-sort</code>; the button owns focus and activation.
-          Do not rely on a focusable or clickable header cell.
+          Sortable headers use <code>button[hellTableSortTrigger]</code>. The
+          <code>&lt;th&gt;</code> keeps <code>aria-sort</code> only while it is the active sorted
+          header; the native button owns click and keyboard activation. Do not rely on a
+          focusable or clickable header cell.
         </p>
 
         <h2>API</h2>
@@ -112,14 +113,15 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
           <li>
             <code>th[hellTableHeaderCell]</code>: <code>[sortable]</code>,
             <code>[sort]</code> (<code>'asc' | 'desc' | null</code>) → <code>aria-sort</code> /
-            <code>data-sort</code>. Add <code>columnId</code> when pairing with a column resizer.
-            Initial sizing belongs to your CSS/Tailwind.
+            <code>data-sort</code> only for the active sorted header. Unsorted sortable headers
+            omit <code>aria-sort</code> by default. Add <code>columnId</code> when pairing with a
+            column resizer. Initial sizing belongs to your CSS/Tailwind.
           </li>
           <li>
-            <code>button[hellTableSortButton]</code>: native button trigger for a sortable header.
-            Place it inside <code>th[hellTableHeaderCell]</code>; the header keeps
-            <code>aria-sort</code> while the button owns focus and emits
-            <code>(sortToggle)</code> through the header.
+            <code>button[hellTableSortTrigger]</code>: native button trigger for a sortable
+            header. Place it inside <code>th[hellTableHeaderCell]</code>; the selector accepts
+            only native <code>&lt;button&gt;</code> hosts, the header keeps <code>aria-sort</code>
+            only while sorted, and the button emits <code>(sortToggle)</code> through the header.
           </li>
           <li>
             <code>HELL_TABLE_UTILITIES_DIRECTIVES</code>: standalone import list for the table
@@ -167,8 +169,8 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
             navigation.
           </li>
           <li>
-            Put sortable labels in <code>button[hellTableSortButton]</code> instead of making the
-            <code>&lt;th&gt;</code> itself focusable.
+            Put sortable labels in <code>button[hellTableSortTrigger]</code> instead of making the
+            <code>&lt;th&gt;</code> or <code>role="columnheader"</code> host focusable or clickable.
           </li>
           <li>
             Use <code>hellTableContainer</code> when the table is a standalone framed surface.

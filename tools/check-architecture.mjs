@@ -98,7 +98,7 @@ function main() {
   checkNativeButtonSelectorContract();
   checkInteractiveTriggerSelectorContract();
   checkTableUtilityContract();
-  checkTableSortButtonContract();
+  checkTableSortTriggerContract();
   checkFloatingRegistrationContract();
   checkFloatingAdapterContract();
   checkBrowserGlobalContract();
@@ -2106,7 +2106,7 @@ function checkTableUtilityContract() {
   }
 }
 
-function checkTableSortButtonContract() {
+function checkTableSortTriggerContract() {
   const tableSourcePath = join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts');
   const tableSource = readFile(tableSourcePath);
   const headerModule = decoratedClassModules(tableSource).find(
@@ -2123,11 +2123,19 @@ function checkTableSortButtonContract() {
   }
 
   if (/(?:'|\")\(keydown\.|(?:'|\")\(click\)/.test(headerModule.moduleSource)) {
-    failures.push('HellTableHeaderCell must delegate sort activation to button[hellTableSortButton]');
+    failures.push('HellTableHeaderCell must delegate sort activation to button[hellTableSortTrigger]');
   }
 
-  if (!/export\s+class\s+HellTableSortButton\b/.test(tableSource)) {
-    failures.push('Table utilities must expose button[hellTableSortButton] for sortable headers');
+  if (!/export\s+class\s+HellTableSortTrigger\b/.test(tableSource)) {
+    failures.push('Table utilities must expose button[hellTableSortTrigger] for sortable headers');
+  }
+
+  if (!/selector:\s*'button\[hellTableSortTrigger\]'/.test(tableSource)) {
+    failures.push('hellTableSortTrigger must only match native button hosts');
+  }
+
+  if (/hellTableSortButton|HellTableSortButton|hell-table-sort-button/.test(tableSource)) {
+    failures.push('Legacy hellTableSortButton API must not remain in table utilities');
   }
 
   const docsRoot = join(root, 'projects/hell-docs/src/app/pages/components/data-table');
@@ -2135,9 +2143,9 @@ function checkTableSortButtonContract() {
   for (const file of docsFiles) {
     const source = readFile(file);
     for (const match of source.matchAll(/<th\b(?=[^>]*\bhellTableHeaderCell\b)(?=[^>]*\bsortable\b)[^>]*>[\s\S]*?<\/th>/g)) {
-      if (!match[0].includes('hellTableSortButton')) {
+      if (!match[0].includes('hellTableSortTrigger')) {
         failures.push(
-          `${file.slice(root.length + 1)} has a sortable table header without button[hellTableSortButton]`,
+          `${file.slice(root.length + 1)} has a sortable table header without button[hellTableSortTrigger]`,
         );
       }
     }
