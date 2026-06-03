@@ -8,7 +8,8 @@ Compact Angular component system for dense business applications.
 
 Release status: **internal beta**. Do not treat Hell as production-ready until
 the repository production-readiness gate passes against fresh release-candidate
-evidence.
+evidence. Read the [first-beta consumer migration guide](https://github.com/AntonPieper/hell-ui/blob/main/docs/release/first-beta-consumer-guide.md)
+before external pilot installs.
 
 Hell exposes:
 

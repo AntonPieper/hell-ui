@@ -44,7 +44,8 @@ keyboard coverage, axe/ARIA/browser-test evidence, and known gaps for every
 public primitive, composite, and feature. The release checklist in
 `docs/release/production-readiness-checklist.md` maps package-consumer, API,
 a11y, docs budget, pack audit, and release dry-run blockers to slice IDs and
-command evidence.
+command evidence. Read the [first-beta consumer migration guide](docs/release/first-beta-consumer-guide.md)
+before external pilot installs.
 
 The contributor workspace is pnpm-first and CI-backed by `pnpm-lock.yaml`.
 A root `package-lock.json` is also checked in so GitHub CI can smoke-test
