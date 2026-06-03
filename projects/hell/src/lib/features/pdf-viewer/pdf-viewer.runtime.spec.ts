@@ -249,6 +249,27 @@ describe('PDF Runtime', () => {
     outside.remove();
   });
 
+  it('requires exact command modifiers for global PDF shortcuts', () => {
+    const host = document.createElement('div');
+    const inside = document.createElement('button');
+    host.append(inside);
+    document.body.append(host);
+
+    const scope = new HellPdfViewerInteractionScope(() => host);
+    const actions = createShortcutActions();
+    scope.recordPointerTarget(inside);
+
+    expect(scope.handleGlobalShortcut(ctrlKey('f'), actions)).toBe(true);
+    expect(scope.handleGlobalShortcut(new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, altKey: true }), actions)).toBe(false);
+    expect(scope.handleGlobalShortcut(new KeyboardEvent('keydown', { key: 'p', ctrlKey: true, shiftKey: true }), actions)).toBe(false);
+    expect(scope.handleGlobalShortcut(new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, metaKey: true }), actions)).toBe(false);
+
+    expect(actions.openFind).toHaveBeenCalledOnce();
+    expect(actions.print).not.toHaveBeenCalled();
+
+    host.remove();
+  });
+
   it('does not leak global shortcuts across viewer scopes', () => {
     const hostA = document.createElement('div');
     const hostB = document.createElement('div');

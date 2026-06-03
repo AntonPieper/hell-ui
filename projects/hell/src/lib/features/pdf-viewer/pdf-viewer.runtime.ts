@@ -179,33 +179,38 @@ export class HellPdfViewerInteractionScope {
     event: KeyboardEvent,
     actions: HellPdfGlobalShortcutActions,
   ): boolean {
-    if (!(event.ctrlKey || event.metaKey)) return false;
+    const key = event.key.toLowerCase();
 
-    if (event.key === 'f' || event.key === 'F') {
+    if (key === 'f') {
+      if (!hasPdfCommandModifier(event)) return false;
       event.preventDefault();
       actions.openFind();
       return true;
     }
 
-    if (event.key === 'p' || event.key === 'P') {
+    if (key === 'p') {
+      if (!hasPdfCommandModifier(event)) return false;
       event.preventDefault();
       actions.print();
       return true;
     }
 
     if (event.key === '+' || event.key === '=') {
+      if (!hasPdfCommandModifier(event, event.key === '+')) return false;
       event.preventDefault();
       actions.zoomIn();
       return true;
     }
 
     if (event.key === '-' || event.key === '_') {
+      if (!hasPdfCommandModifier(event, event.key === '_')) return false;
       event.preventDefault();
       actions.zoomOut();
       return true;
     }
 
     if (event.key === '0') {
+      if (!hasPdfCommandModifier(event)) return false;
       event.preventDefault();
       actions.resetZoom();
       return true;
@@ -213,6 +218,11 @@ export class HellPdfViewerInteractionScope {
 
     return false;
   }
+}
+
+function hasPdfCommandModifier(event: KeyboardEvent, allowShift = false): boolean {
+  if (event.altKey || (!allowShift && event.shiftKey)) return false;
+  return event.ctrlKey !== event.metaKey;
 }
 
 export class HellPdfRuntime implements HellPdfRuntimePort {

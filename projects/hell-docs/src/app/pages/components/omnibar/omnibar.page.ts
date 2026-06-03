@@ -16,8 +16,8 @@ import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts
       <p>
         Command-palette searchbox built from the command palette service, search primitive, search
         service, and listbox wiring. It can call any async backend function; local object-search ranking
-        and the default global hotkey behavior are intentionally starter/default only, with optional
-        adapters for production-quality search and hotkey orchestration.
+        and the optional global hotkey behavior are intentionally starter/default only, with optional
+        adapters for production-quality search and app-level hotkey orchestration.
       </p>
 
       <h2>Async search</h2>
@@ -31,7 +31,7 @@ import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts
         <li><code>searchSource</code>: async backend-powered function. Receives <code>query</code>, <code>limit</code>, <code>params</code>, and <code>signal</code>.</li>
         <li><code>searchFields</code>: weighted attributes used for ranking returned items.</li>
         <li><code>provideHellSearchRanker</code>: replace local ranking with Fuse.js, MiniSearch, FlexSearch, or your own adapter.</li>
-        <li><code>hotkey</code>: optional global shortcut to open the panel, e.g. <code>mod+k</code>; treat as starter convenience and swap for scoped open logic when needed.</li>
+        <li><code>hotkey</code>: optional document-level shortcut to open the panel, e.g. <code>mod+k</code>. The default <code>null</code> value does not register a document listener.</li>
         <li><code>searchLimit</code>, <code>searchParams</code>, <code>searchDebounce</code>, <code>loadingRows</code>.</li>
         <li><code>loadingTemplate</code>: custom loading body; receives <code>{{ '{' }} rows, message {{ '}' }}</code> while the omnibar keeps the outer status wrapper.</li>
         <li><code>value</code>: model input for the draft query.</li>
@@ -46,6 +46,13 @@ import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts
         </li>
       </ul>
 
+      <h2>Global shortcuts and app shortcuts</h2>
+      <p>
+        <code>hotkey</code> is opt-in convenience, not an app shortcut manager. Hell ignores already
+        prevented keydowns, matches modifiers exactly, and avoids bare keys in other editable fields.
+        For product shortcut routing, keep <code>hotkey</code> <code>null</code> and open from app state.
+      </p>
+
       <h2>Ranker adapter examples</h2>
       <p>
         For local-only ranking, keep <code>HellSearchService</code> defaults. For richer ranking (typos,
@@ -59,11 +66,13 @@ import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts
         <li>Return backend results generically; avoid coupling the component to a specific API shape.</li>
         <li>Use <code>searchSource</code> + <code>provideHellSearchRanker</code> for production scopes and scoped/search adapters that need domain-specific ranking, typo handling, indexing, or worker-backed search.</li>
         <li>Use projected item templates so results can match the domain.</li>
+        <li>Let app shortcut managers own collisions; they can prevent the keydown or leave <code>hotkey</code> unset.</li>
       </ul>
 
       <h2>Don't</h2>
       <ul>
         <li>Don't encode filter syntax in the text input; commit filters as structured state.</li>
+        <li>Don't mount several always-on omnibars with the same global shortcut.</li>
       </ul>
     </article>
   `,

@@ -65,7 +65,7 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         <li>
           <code>globalShortcuts</code>: opt into document-level Ctrl/Cmd+F, Ctrl/Cmd+P, +/-/0
           shortcuts while the viewer is active (default <code>false</code>). Host keyboard
-          shortcuts still work without this.
+          shortcuts still work without this, and already-prevented app shortcuts win.
         </li>
         <li>
           <code>printFetchOptions</code>: optional <code>RequestInit</code> for authenticated or
@@ -77,13 +77,19 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         </li>
       </ul>
 
+      <h2>Global shortcuts and app shortcuts</h2>
+      <p>
+        <code>globalShortcuts</code> registers document shortcuts only when enabled. Handling is scoped
+        to the active viewer and skips keydowns your app already prevented.
+      </p>
+
       <h2>Do</h2>
       <ul>
         <li>Lazy-load the viewer route or feature area.</li>
         <li>Provide <code>worker</code> from your app assets or bundler-owned pdf.js worker URL.</li>
         <li>Provide <code>fileName</code> so downloads and print jobs are recognizable.</li>
         <li>Handle <code>error</code> and offer a fallback download.</li>
-        <li>Enable <code>globalShortcuts</code> only where document-level shortcuts are wanted.</li>
+        <li>Enable <code>globalShortcuts</code> only where document shortcuts fit your app policy.</li>
       </ul>
 
       <h2>Don't</h2>
@@ -91,6 +97,7 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         <li>Don't bundle PDF viewer into the initial shell.</li>
         <li>Don't assume every PDF allows fast text search or thumbnails.</li>
         <li>Don't enable document-level shortcuts globally without an app-level keyboard policy.</li>
+        <li>Don't rely on PDF globals to override app-reserved shortcuts.</li>
         <li>Don't treat this experimental wrapper as a complete PDF application; it is a preview
         recipe surface only.</li>
       </ul>

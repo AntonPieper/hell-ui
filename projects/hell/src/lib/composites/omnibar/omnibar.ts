@@ -278,8 +278,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   readonly loadingRows = input<number>(4);
 
   /** Optional global hotkey, e.g. `'mod+k'` (Cmd on macOS, Ctrl elsewhere)
-   *  or `'/'`. Pass `null` to disable. The omnibar attaches a `keydown`
-   *  listener on `document` while alive. */
+   *  or `'/'`. Pass `null` to avoid registering a document-level listener. */
   readonly hotkey = input<string | null>(null);
 
   /** When true (default), opens the panel automatically once the user types
@@ -659,16 +658,21 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   /* ── Hotkey ────────────────────────────────────────────────────────── */
 
   private installHotkey(): void {
-    const handler = (event: KeyboardEvent) => {
+    effect((onCleanup) => {
       const combo = this.hotkey();
-      if (!combo || this.disabled()) return;
-      if (!matchHotkey(event, combo)) return;
-      if (!hellShouldHandleGlobalHotkey(event, combo, this.inputRef?.nativeElement)) return;
-      event.preventDefault();
-      this.focus();
-      this.open();
-    };
-    this.globalKeydown.register(handler, this.destroyRef);
+      if (!combo) return;
+
+      const handler = (event: KeyboardEvent) => {
+        if (this.disabled()) return;
+        if (!matchHotkey(event, combo)) return;
+        if (!hellShouldHandleGlobalHotkey(event, combo, this.inputRef?.nativeElement)) return;
+        event.preventDefault();
+        this.focus();
+        this.open();
+      };
+
+      onCleanup(this.globalKeydown.register(handler, this.destroyRef));
+    });
   }
 }
 

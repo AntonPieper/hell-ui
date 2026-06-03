@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { provideHellLabels } from '../../core/labels';
 import { type HellSearchSource } from '../../core/search';
-import { matchHotkey } from '../../core/hotkeys';
+import { HellGlobalKeydownService, matchHotkey } from '../../core/hotkeys';
 import { HellMenu, HellMenuTrigger } from '../../primitives/menu/menu';
 import {
   HELL_OMNIBAR_DIRECTIVES,
@@ -116,7 +116,7 @@ class OmnibarLocalizedHost {}
   `,
 })
 class OmnibarHotkeyHost {
-  readonly hotkey = signal('ctrl+k');
+  readonly hotkey = signal<string | null>('ctrl+k');
   readonly openOnFocus = signal(false);
   readonly disabled = signal(false);
 
@@ -438,6 +438,41 @@ describe('HellOmnibar labels', () => {
   });
 });
 
+describe('HellOmnibar hotkey listener opt-in', () => {
+  let fakeGlobalKeydown: FakeGlobalKeydownService;
+
+  beforeEach(async () => {
+    fakeGlobalKeydown = new FakeGlobalKeydownService();
+    await TestBed.configureTestingModule({
+      imports: [OmnibarHotkeyHost],
+      providers: [{ provide: HellGlobalKeydownService, useValue: fakeGlobalKeydown }],
+    }).compileComponents();
+  });
+
+  it('registers document listeners only while a hotkey is configured', async () => {
+    const fixture = TestBed.createComponent(OmnibarHotkeyHost);
+    const host = fixture.componentInstance;
+    host.hotkey.set(null);
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fakeGlobalKeydown.register).not.toHaveBeenCalled();
+
+    host.hotkey.set('ctrl+k');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fakeGlobalKeydown.register).toHaveBeenCalledOnce();
+
+    host.hotkey.set(null);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fakeGlobalKeydown.unregisters[0]).toHaveBeenCalledOnce();
+  });
+});
+
 describe('HellOmnibar hotkey compatibility', () => {
   it('re-exports matchHotkey from the composite entry point', () => {
     const event = new KeyboardEvent('keydown', { key: 'k', ctrlKey: true });
@@ -506,6 +541,30 @@ describe('HellOmnibar hotkey activation', () => {
     expect(host.openEvents).toEqual([true]);
   });
 
+  it('does not open when an app shortcut already prevented the event', () => {
+    const fixture = TestBed.createComponent(OmnibarHotkeyHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const root = query<HTMLElement>(fixture.nativeElement, 'hell-omnibar');
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'k',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(event, 'view', { value: document.defaultView });
+    event.preventDefault();
+    document.dispatchEvent(event);
+    fixture.detectChanges();
+
+    expect(root.getAttribute('data-open')).toBeNull();
+    expect(document.activeElement).not.toBe(input);
+    expect(host.openEvents).toEqual([]);
+  });
+
   it('does not open when disabled', () => {
     const fixture = TestBed.createComponent(OmnibarHotkeyHost);
     const host = fixture.componentInstance;
@@ -551,6 +610,15 @@ describe('HellOmnibar hotkey activation', () => {
     expect(document.activeElement).toBe(editable);
   });
 });
+
+class FakeGlobalKeydownService {
+  readonly unregisters: Array<ReturnType<typeof vi.fn>> = [];
+  readonly register = vi.fn(() => {
+    const unregister = vi.fn();
+    this.unregisters.push(unregister);
+    return unregister;
+  });
+}
 
 function overlayRoot(): HTMLElement {
   return TestBed.inject(OverlayContainer).getContainerElement();

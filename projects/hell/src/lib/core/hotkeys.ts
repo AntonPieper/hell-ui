@@ -47,7 +47,9 @@ export function matchHotkey(event: KeyboardEvent, combo: string): boolean {
 
   const singleCharacter = key.length === 1;
   if (singleCharacter) {
-    if (!needShift && /[a-zA-Z]/.test(key) && event.shiftKey) return false;
+    if (!needShift && event.shiftKey && (/[a-zA-Z]/.test(key) || UNSHIFTED_KEYS.has(key))) {
+      return false;
+    }
     return event.key.toLowerCase() === key.toLowerCase();
   }
 
@@ -65,11 +67,15 @@ export function hellShouldHandleGlobalHotkey(
   combo: string,
   target?: EventTarget | null,
 ): boolean {
-  const active = event.view?.document.activeElement;
-  if (!active || active === target) return true;
-  if (!isEditableTarget(active)) return true;
+  const active = event.view?.document.activeElement ?? null;
+  const eventTarget = event.target;
+
+  if ((active && active === target) || (eventTarget && eventTarget === target)) return true;
+  if (!isEditableTarget(active) && !isEditableTarget(eventTarget)) return true;
   return comboRequiresModifier(combo);
 }
+
+const UNSHIFTED_KEYS = new Set(['`', '-', '=', '[', ']', '\\', ';', "'", ',', '.', '/']);
 
 const isMac = (() => {
   if (typeof navigator === 'undefined') return false;
@@ -87,15 +93,21 @@ function comboRequiresModifier(combo: string): boolean {
   );
 }
 
-function isEditableTarget(target: EventTarget): boolean {
-  const element = target as HTMLElement;
-  if (!(element instanceof HTMLElement)) return false;
-  return element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.isContentEditable;
+function isEditableTarget(target: EventTarget | null | undefined): boolean {
+  const element = target as Element | null | undefined;
+  if (!element || (element as Node).nodeType !== 1) return false;
+
+  const tagName = element.tagName.toLowerCase();
+  if (tagName === 'input' || tagName === 'textarea' || tagName === 'select') return true;
+  if ((element as HTMLElement).isContentEditable) return true;
+
+  return !!element.closest?.('[contenteditable=""], [contenteditable="true"]');
 }
 
 /** Central owner for document-level keyboard listeners. Components still decide
- * their own shortcut policy, but listener lifecycle and SSR guards stay in one
- * small service instead of every Composite touching `document` directly.
+ * their own opt-in shortcut policy, but default-prevented events, listener
+ * lifecycle, and SSR guards stay in one small service instead of every
+ * Composite touching `document` directly.
  */
 @Injectable({ providedIn: 'root' })
 export class HellGlobalKeydownService {
@@ -105,8 +117,17 @@ export class HellGlobalKeydownService {
     const doc = this.document;
     if (!doc?.addEventListener) return () => undefined;
 
-    const cleanup = () => doc.removeEventListener('keydown', handler);
-    doc.addEventListener('keydown', handler);
+    const listener = (event: KeyboardEvent) => {
+      if (!event.defaultPrevented) handler(event);
+    };
+    let active = true;
+    const cleanup = () => {
+      if (!active) return;
+      active = false;
+      doc.removeEventListener('keydown', listener);
+    };
+
+    doc.addEventListener('keydown', listener);
     destroyRef.onDestroy(cleanup);
     return cleanup;
   }
