@@ -39,11 +39,14 @@ import {
   hellTableResolveCellRenderer,
   hellTableResolveHeaderRenderer,
   hellTableResolveRowActionsRenderer,
+  hellTableResolveRowEditorRenderer,
 } from '../table/table-columns';
 import {
   HellCell,
+  HellEditField,
   HellHeaderCell,
   HellRowActions,
+  HellRowEditor,
   HELL_TABLE_RENDER_DIRECTIVES,
   hellTableCreateProjectedRenderRegistry,
 } from '../table/table-render-directives';
@@ -67,6 +70,7 @@ import {
   type HellTableRowKeyValue,
   type HellTableColumnVisibilityState,
   type HellTableRowPart,
+  type HellTableRowEditorRenderContext,
   type HellTableRowRenderContext,
   type HellTableRowSelectionState,
   type HellTableSelectionColumnConfig,
@@ -76,6 +80,7 @@ import {
   type HellTableState,
   type HellTableStateUpdater,
 } from '../table/table-model';
+import { HellRowDraftController } from '../table/row-draft';
 
 /** Visual density for the simple data-table renderer. */
 export type HellDataTableDensity = 'compact' | 'default' | 'comfortable';
@@ -86,6 +91,9 @@ export type HellDataTableRowKey<TData> = Extract<keyof TData, string> | HellTabl
 type HellDataTableHeaderView<TData> = HellDataTableRenderView<HellTableHeaderRenderContext<TData>>;
 type HellDataTableCellView<TData> = HellDataTableRenderView<
   HellTableCellRenderContext<TData, unknown> | HellTableRowRenderContext<TData>
+>;
+type HellDataTableRowEditorView<TData> = HellDataTableRenderView<
+  HellTableRowEditorRenderContext<TData>
 >;
 
 type HellDataTableRenderView<TContext> =
@@ -337,6 +345,32 @@ export class HellDataTableBulkActions {}
                   }
                 }
               </tr>
+              @if (commands.isActive(part.row)) {
+                @if (rowEditorView(part.row); as editorView) {
+                  <tr
+                    hellTableRow
+                    [unstyled]="unstyled()"
+                    data-row-editor
+                    [attr.data-row-key]="part.row.key"
+                  >
+                    <td hellTableCell [unstyled]="unstyled()" [colSpan]="visibleColumnCount()">
+                      @if (editorView.kind === 'template') {
+                        <ng-container
+                          [ngTemplateOutlet]="editorView.template"
+                          [ngTemplateOutletContext]="editorView.context"
+                        />
+                      } @else if (editorView.kind === 'component') {
+                        <ng-container
+                          [ngComponentOutlet]="editorView.component"
+                          [ngComponentOutletInputs]="editorView.inputs"
+                        />
+                      } @else {
+                        {{ editorView.value }}
+                      }
+                    </td>
+                  </tr>
+                }
+              }
             } @else if (part.kind === 'loader') {
               <tr hellTableRow [unstyled]="unstyled()" data-status="loading">
                 <td hellTableCell [unstyled]="unstyled()" align="center" space="empty" [colSpan]="visibleColumnCount()">
@@ -381,6 +415,9 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
   /** Empty-state text for the built-in empty row. */
   readonly empty = input<unknown>('No rows.');
 
+  /** Draft lifecycle controller used by active row-editor templates. */
+  readonly rowDraftController = input<HellRowDraftController<TData> | null>(null);
+
   /** Current sorting state. Use `[(sorting)]` for controlled sorting. */
   readonly sorting = input<readonly HellTableSortingState[]>([]);
 
@@ -407,8 +444,15 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
   private readonly projectedRowActions = contentChildren(HellRowActions<TData>, {
     descendants: true,
   });
+  private readonly projectedRowEditors = contentChildren(HellRowEditor<TData>, {
+    descendants: true,
+  });
+  private readonly projectedEditFields = contentChildren(HellEditField<TData, unknown>, {
+    descendants: true,
+  });
 
   private readonly internalSorting = signal<readonly HellTableSortingState[]>([]);
+  private readonly internalRowDraftController = new HellRowDraftController<TData>();
   private readonly selectionRadioGroupName = `hell-data-table-selection-${nextSelectionRadioGroupId++}`;
 
   protected readonly state = {
@@ -466,11 +510,16 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
     return rows.map((row) => ({ kind: 'row', key: `row:${row.key}`, row }));
   });
   protected readonly commands = hellTableCreateCommands(this.state, this.tableRows);
+  protected readonly draftController = computed(
+    () => this.rowDraftController() ?? this.internalRowDraftController,
+  );
   protected readonly renderRegistry = computed(() =>
     hellTableCreateProjectedRenderRegistry<TData>({
       cells: this.projectedCells(),
       headers: this.projectedHeaders(),
       rowActions: this.projectedRowActions(),
+      rowEditors: this.projectedRowEditors(),
+      editFields: this.projectedEditFields(),
     }),
   );
   protected readonly isEmpty = computed(
@@ -491,6 +540,9 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
       const key = this.activeRowKey();
       if (key === null) return;
       if (!this.tableRows().some((row) => row.key === key)) this.commands.closeRow(key);
+    });
+    effect(() => {
+      this.draftController().cleanupRows(this.tableRows());
     });
   }
 
@@ -661,6 +713,28 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
     const resolved = hellTableResolveCellRenderer(this.renderRegistry(), column);
     return renderView(resolved, context);
   }
+
+  protected rowEditorView(row: HellTableModelRow<TData>): HellDataTableRowEditorView<TData> | null {
+    const projectedEditorId = this.projectedRowEditors()[0]?.id;
+    const editorColumn =
+      this.visibleColumns().find((column) => column.id === projectedEditorId) ??
+      this.visibleColumns().find((column) => column.rowEditor !== undefined);
+    const editorId = projectedEditorId ?? editorColumn?.id ?? 'detail';
+    const resolved = hellTableResolveRowEditorRenderer(
+      this.renderRegistry(),
+      editorId,
+      editorColumn,
+    );
+    if (!resolved) return null;
+
+    const context = this.draftController().editorContext(row, this.state, this.commands, {
+      cancel: () => {
+        this.draftController().cancel(row);
+        this.commands.closeRow(row);
+      },
+    });
+    return renderView(resolved, context);
+  }
 }
 
 /** Standalone imports for the simple data-table renderer and projected slots. */
@@ -761,6 +835,7 @@ export {
   HellTableRowCheckbox,
   HellTableRowRadio,
   HellTableSelectionCell,
+  HellRowDraftController,
   actionColumn,
   booleanColumn,
   hellColumns,
@@ -779,13 +854,24 @@ export type {
   HellColumnDef,
   HellColumnKind,
   HellColumnMeta,
+  HellRowDraftControllerOptions,
+  HellRowDraftFactory,
+  HellRowDraftFieldContext,
+  HellRowDraftPatch,
+  HellRowDraftSaveHandler,
+  HellRowDraftSaveStatus,
+  HellRowDraftSnapshot,
+  HellRowDraftValidationErrors,
+  HellRowDraftValidator,
   HellTableCellRenderContext,
   HellTableColumn,
   HellTableColumnId,
   HellTableColumnVisibilityMode,
   HellTableColumnVisibilityState,
+  HellTableEditFieldRenderContext,
   HellTableHeaderRenderContext,
   HellTableRenderer,
+  HellTableRowEditorRenderContext,
   HellTableRowKey,
   HellTableRowRenderContext,
   HellTableRowSelectionState,

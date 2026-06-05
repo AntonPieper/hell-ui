@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import {
   HELL_DATA_TABLE_DIRECTIVES,
   HellDataTable,
+  HellRowDraftController,
   actionColumn,
   booleanColumn,
   hellColumns,
@@ -287,6 +288,72 @@ class SingleSelectableRowsDataTableHost {
 @Component({
   imports: [...HELL_DATA_TABLE_DIRECTIVES],
   template: `
+    <hell-data-table
+      [rows]="rows()"
+      [columns]="columns"
+      rowKey="id"
+      [rowDraftController]="drafts"
+      [(activeRowKey)]="activeRowKey"
+    >
+      <ng-template [hellRowActions]="'actions'" let-row="row" let-commands="commands">
+        <button hellTableRowAction type="button" (click)="commands.openRow(row)">
+          Edit {{ row.original.name }}
+        </button>
+      </ng-template>
+
+      <ng-template
+        [hellRowEditor]="'detail'"
+        let-row="row"
+        let-draft="draft"
+        let-field="field"
+        let-commands="commands"
+        let-commit="commit"
+        let-cancel="cancel"
+        let-saveStatus="saveStatus"
+      >
+        @let name = field('name');
+        <label>
+          Name
+          <input
+            data-edit-name
+            [value]="$any(name.value) ?? ''"
+            [disabled]="name.disabled"
+            (input)="name.patch($any($event.target).value)"
+            (blur)="name.touch()"
+          />
+        </label>
+        <span data-row-context>
+          {{ row.key }}|{{ draft.name }}|{{ name.touched }}|{{ name.errors.join('|') }}|{{ saveStatus }}
+        </span>
+        <span data-command-active>{{ commands.isActive(row) }}</span>
+        <button data-commit type="button" [disabled]="name.disabled" (click)="commit()">Save</button>
+        <button data-cancel type="button" (click)="cancel()">Cancel</button>
+      </ng-template>
+    </hell-data-table>
+  `,
+})
+class DraftEditorDataTableHost {
+  readonly activeRowKey = signal<string | null>(null);
+  readonly rows = signal<readonly Person[]>([
+    { id: 'ada', name: 'Ada', active: true },
+    { id: 'grace', name: 'Grace', active: true },
+  ]);
+  readonly saved: Partial<Person>[] = [];
+  readonly drafts = new HellRowDraftController<Person>({
+    validate: (draft) => (draft.name?.trim() ? null : { name: ['Name required'] }),
+    save: async (draft) => {
+      this.saved.push({ ...draft });
+    },
+  });
+  readonly columns = people.define([
+    textColumn<Person, string>('name', { header: 'Name', accessor: 'name' }),
+    actionColumn<Person>('actions', { header: 'Actions' }),
+  ]);
+}
+
+@Component({
+  imports: [...HELL_DATA_TABLE_DIRECTIVES],
+  template: `
     <hell-column-visibility-panel
       [columns]="columns"
       [(columnVisibility)]="columnVisibility"
@@ -336,6 +403,7 @@ describe('HellDataTable simple renderer', () => {
         ActiveRowDataTableHost,
         SelectableRowsDataTableHost,
         SingleSelectableRowsDataTableHost,
+        DraftEditorDataTableHost,
         ColumnVisibilityDataTableHost,
       ],
     }).compileComponents();
@@ -515,6 +583,85 @@ describe('HellDataTable simple renderer', () => {
     expect(fixture.componentInstance.activeRowKey()).toBeNull();
   });
 
+  it('passes draft, field, commands, commit, and cancel contexts to row editor templates', async () => {
+    const fixture = TestBed.createComponent(DraftEditorDataTableHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const host = fixture.componentInstance;
+
+    activeRowAction(root).click();
+    fixture.detectChanges();
+
+    expect(host.activeRowKey()).toBe('ada');
+    expect(rowEditorByKey(root, 'ada')).toBeTruthy();
+    expect(root.querySelector('[data-command-active]')?.textContent?.trim()).toBe('true');
+
+    const input = editNameInput(root);
+    expect(input.value).toBe('Ada');
+
+    input.value = '';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(root.querySelector('[data-row-context]')?.textContent?.replace(/\s+/g, '')).toBe(
+      'ada||true||idle',
+    );
+
+    commitDraftButton(root).click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.saved).toEqual([]);
+    expect(root.querySelector('[data-row-context]')?.textContent?.replace(/\s+/g, '')).toBe(
+      'ada||true|Namerequired|error',
+    );
+
+    input.value = 'Ada Lovelace';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    commitDraftButton(root).click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.saved).toEqual([{ id: 'ada', name: 'Ada Lovelace', active: true }]);
+    expect(root.querySelector('[data-row-context]')?.textContent?.replace(/\s+/g, '')).toBe(
+      'ada|AdaLovelace|false||saved',
+    );
+  });
+
+  it('rolls back and cleans row draft context when row editor rows cancel or disappear', () => {
+    const fixture = TestBed.createComponent(DraftEditorDataTableHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const host = fixture.componentInstance;
+
+    activeRowAction(root).click();
+    fixture.detectChanges();
+    editNameInput(root).value = 'Transient Ada';
+    editNameInput(root).dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.drafts.has('ada')).toBe(true);
+    expect(root.querySelector('[data-row-context]')?.textContent).toContain('Transient Ada');
+
+    cancelDraftButton(root).click();
+    fixture.detectChanges();
+
+    expect(host.activeRowKey()).toBeNull();
+    expect(root.querySelector('[data-row-editor]')).toBeNull();
+
+    activeRowAction(root).click();
+    fixture.detectChanges();
+    expect(editNameInput(root).value).toBe('Ada');
+
+    host.rows.set([{ id: 'grace', name: 'Grace', active: true }]);
+    fixture.detectChanges();
+
+    expect(host.activeRowKey()).toBeNull();
+    expect(host.drafts.has('ada')).toBe(false);
+  });
+
   it('keeps checkbox rowSelection keyed by row id across reorders and filtered pages', () => {
     const fixture = TestBed.createComponent(SelectableRowsDataTableHost);
     fixture.detectChanges();
@@ -688,6 +835,30 @@ function radioByLabel(root: Element, label: string): HTMLInputElement {
 function resetColumnVisibilityButton(root: Element): HTMLButtonElement {
   const button = root.querySelector('hell-column-visibility-panel button');
   if (!(button instanceof HTMLButtonElement)) throw new Error('Expected reset button.');
+  return button;
+}
+
+function rowEditorByKey(root: Element, key: string): HTMLTableRowElement {
+  const row = root.querySelector(`tbody tr[data-row-editor][data-row-key="${key}"]`);
+  if (!(row instanceof HTMLTableRowElement)) throw new Error(`Expected row editor ${key}.`);
+  return row;
+}
+
+function editNameInput(root: Element): HTMLInputElement {
+  const input = root.querySelector('[data-edit-name]');
+  if (!(input instanceof HTMLInputElement)) throw new Error('Expected draft name input.');
+  return input;
+}
+
+function commitDraftButton(root: Element): HTMLButtonElement {
+  const button = root.querySelector('[data-commit]');
+  if (!(button instanceof HTMLButtonElement)) throw new Error('Expected commit button.');
+  return button;
+}
+
+function cancelDraftButton(root: Element): HTMLButtonElement {
+  const button = root.querySelector('[data-cancel]');
+  if (!(button instanceof HTMLButtonElement)) throw new Error('Expected cancel button.');
   return button;
 }
 

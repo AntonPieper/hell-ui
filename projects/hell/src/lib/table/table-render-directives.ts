@@ -9,6 +9,7 @@ import {
   type HellTableHeaderRenderContext,
   type HellTableRenderRegistry,
   type HellTableRenderRegistryInput,
+  type HellTableRowEditorRenderContext,
   type HellTableRowRenderContext,
 } from './table-model';
 
@@ -61,7 +62,7 @@ export class HellRowActions<TData = unknown> {
 })
 export class HellRowEditor<TData = unknown> {
   @Input('hellRowEditor') id = '';
-  readonly template = inject(TemplateRef<HellTableRowRenderContext<TData>>);
+  readonly template = inject(TemplateRef<HellTableRowEditorRenderContext<TData>>);
 
   renderer() {
     return hellTemplateRenderer(this.template);

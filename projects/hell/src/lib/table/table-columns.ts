@@ -8,11 +8,13 @@ import {
   type HellTableColumnId,
   type HellTableColumnVisibilityMode,
   type HellTableComponentRenderer,
+  type HellTableEditFieldRenderContext,
   type HellTableHeaderRenderContext,
   type HellTableRenderFunction,
   type HellTableRenderRegistry,
   type HellTableRenderer,
   type HellTableResolvedRenderer,
+  type HellTableRowEditorRenderContext,
   type HellTableRowRenderContext,
   type HellTableSelectionColumnConfig,
   type HellTableSelectionDisabled,
@@ -68,7 +70,7 @@ export interface HellColumnOptions<TData, TValue = unknown> {
   readonly cell?: HellTableRenderer<HellTableCellRenderContext<TData, TValue>>;
   readonly headerCell?: HellTableRenderer<HellTableHeaderRenderContext<TData>>;
   readonly rowActions?: HellTableRenderer<HellTableRowRenderContext<TData>>;
-  readonly rowEditor?: HellTableRenderer<HellTableRowRenderContext<TData>>;
+  readonly rowEditor?: HellTableRenderer<HellTableRowEditorRenderContext<TData>>;
 }
 
 /** Options for select-style column definitions. */
@@ -338,11 +340,20 @@ export function hellTableResolveRowEditorRenderer<TData>(
   registry: Pick<HellTableRenderRegistry<TData>, 'rowEditors'>,
   id: string,
   column?: HellTableColumn<TData>,
-): HellTableResolvedRenderer<HellTableRowRenderContext<TData>> | null {
+): HellTableResolvedRenderer<HellTableRowEditorRenderContext<TData>> | null {
   const projected = registry.rowEditors[id];
   if (projected) return { source: 'projected', renderer: projected };
   if (column?.rowEditor) return { source: 'column', renderer: column.rowEditor };
   return null;
+}
+
+/** Resolves row-editor field rendering by field id. */
+export function hellTableResolveEditFieldRenderer<TData>(
+  registry: Pick<HellTableRenderRegistry<TData>, 'editFields'>,
+  fieldId: string,
+): HellTableResolvedRenderer<HellTableEditFieldRenderContext<TData>> | null {
+  const projected = registry.editFields[fieldId];
+  return projected ? { source: 'projected', renderer: projected } : null;
 }
 
 function selectionColumnConfig<TData>(

@@ -6,6 +6,22 @@ export type HellTableRowKey = string;
 /** Consumer or adapter row-key input before Hell normalizes it to a string key. */
 export type HellTableRowKeyValue = string | number;
 
+/** Draft object shape used by row editors when the row data itself is not object-like. */
+export type HellRowDraftValue<TData> = TData extends object ? Partial<TData> : Record<string, unknown>;
+
+/** Patch accepted by row-draft controllers and field contexts. */
+export type HellRowDraftPatch<TDraft extends object> =
+  | Partial<TDraft>
+  | {
+      bivarianceHack(draft: Readonly<TDraft>): TDraft;
+    }['bivarianceHack'];
+
+/** Validation errors keyed by draft field name. */
+export type HellRowDraftValidationErrors = Readonly<Record<string, readonly string[]>>;
+
+/** Async save lifecycle state for a row draft. */
+export type HellRowDraftSaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+
 /** Stable string id used by Hell table columns. */
 export type HellTableColumnId = string;
 
@@ -124,7 +140,7 @@ export interface HellTableColumn<TData = unknown, TValue = unknown> {
   readonly cell?: HellTableRenderer<HellTableCellRenderContext<TData, TValue>>;
   readonly headerCell?: HellTableRenderer<HellTableHeaderRenderContext<TData>>;
   readonly rowActions?: HellTableRenderer<HellTableRowRenderContext<TData>>;
-  readonly rowEditor?: HellTableRenderer<HellTableRowRenderContext<TData>>;
+  readonly rowEditor?: HellTableRenderer<HellTableRowEditorRenderContext<TData>>;
 }
 
 /** Public column-definition alias used by consumer-facing table DSL helpers. */
@@ -207,18 +223,62 @@ export interface HellTableCellRenderContext<TData = unknown, TValue = unknown> {
   readonly value: TValue;
 }
 
-/** Context passed to row action/editor renderers. */
+/** Context passed to row action renderers. */
 export interface HellTableRowRenderContext<TData = unknown> {
   readonly row: HellTableModelRow<TData>;
   readonly state: HellTableState;
   readonly commands: HellTableCommands<TData>;
 }
 
+/** Draft-field context passed to custom row editor controls. */
+export interface HellRowDraftFieldContext<
+  TData = unknown,
+  TDraft extends object = HellRowDraftValue<TData>,
+  TValue = unknown,
+> {
+  readonly name: string;
+  readonly row: HellTableModelRow<TData>;
+  readonly draft: TDraft;
+  readonly value: TValue | undefined;
+  readonly dirty: boolean;
+  readonly touched: boolean;
+  readonly disabled: boolean;
+  readonly errors: readonly string[];
+  patch(value: TValue): void;
+  set(value: TValue): void;
+  touch(touched?: boolean): void;
+  reset(): void;
+}
+
+/** Context passed to row editor renderers. */
+export interface HellTableRowEditorRenderContext<
+  TData = unknown,
+  TDraft extends object = HellRowDraftValue<TData>,
+> extends HellTableRowRenderContext<TData> {
+  readonly draft: TDraft;
+  readonly dirty: boolean;
+  readonly touched: Readonly<Record<string, boolean>>;
+  readonly disabled: boolean;
+  readonly validationErrors: HellRowDraftValidationErrors;
+  readonly saveStatus: HellRowDraftSaveStatus;
+  readonly saving: boolean;
+  readonly saveError: unknown | null;
+  field<TValue = unknown>(name: string): HellRowDraftFieldContext<TData, TDraft, TValue>;
+  patch(patch: HellRowDraftPatch<TDraft>): void;
+  reset(): void;
+  commit(): Promise<boolean>;
+  cancel(): void;
+}
+
 /** Context passed to row-editor field renderers. */
-export interface HellTableEditFieldRenderContext<TData = unknown, TValue = unknown>
-  extends HellTableRowRenderContext<TData> {
+export interface HellTableEditFieldRenderContext<
+  TData = unknown,
+  TValue = unknown,
+  TDraft extends object = HellRowDraftValue<TData>,
+> extends HellTableRowEditorRenderContext<TData, TDraft> {
   readonly fieldId: string;
-  readonly value?: TValue;
+  readonly fieldContext: HellRowDraftFieldContext<TData, TDraft, TValue>;
+  readonly value: TValue | undefined;
 }
 
 /** Function renderer used when rendering is resolved to a pure value transform. */
@@ -273,7 +333,7 @@ export interface HellTableRenderRegistry<TData = unknown> {
     Record<string, HellTableRenderer<HellTableRowRenderContext<TData>>>
   >;
   readonly rowEditors: Readonly<
-    Record<string, HellTableRenderer<HellTableRowRenderContext<TData>>>
+    Record<string, HellTableRenderer<HellTableRowEditorRenderContext<TData>>>
   >;
   readonly editFields: Readonly<
     Record<string, HellTableRenderer<HellTableEditFieldRenderContext<TData>>>
