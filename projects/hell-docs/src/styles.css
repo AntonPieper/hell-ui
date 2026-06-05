@@ -8,50 +8,26 @@
     line-height: var(--leading-relaxed);
     & code {
       border-radius: var(--radius-sm);
-    }
-    & code {
       background-color: var(--color-hell-surface);
-    }
-    & code {
       padding-inline: 0.3rem;
-    }
-    & code {
       padding-block: 0.1rem;
-    }
-    & code {
       font-family: var(--font-mono);
     }
     & h1 {
       margin-block: calc(var(--spacing) * 6);
-    }
-    & h1 {
       font-size: 2rem;
-    }
-    & h1 {
       font-weight: var(--font-weight-bold);
     }
     & h2 {
       margin-top: calc(var(--spacing) * 6);
-    }
-    & h2 {
       margin-bottom: calc(var(--spacing) * 2);
-    }
-    & h2 {
       font-size: 1.4rem;
-    }
-    & h2 {
       font-weight: var(--font-weight-semibold);
     }
     & h3 {
       margin-top: calc(var(--spacing) * 4);
-    }
-    & h3 {
       margin-bottom: calc(var(--spacing) * 2);
-    }
-    & h3 {
       font-size: 1.1rem;
-    }
-    & h3 {
       font-weight: var(--font-weight-semibold);
     }
     & p {
@@ -59,39 +35,21 @@
     }
     & pre {
       overflow: auto;
-    }
-    & pre {
       border-radius: var(--radius-lg);
-    }
-    & pre {
       border-style: solid;
       border-width: 1px;
-    }
-    & pre {
       border-color: var(--color-hell-border);
-    }
-    & pre {
       background-color: var(--color-hell-surface);
-    }
-    & pre {
       padding-inline: calc(var(--spacing) * 4);
-    }
-    & pre {
       padding-block: calc(var(--spacing) * 3);
-    }
-    & pre {
       font-family: var(--font-mono);
     }
     & pre code {
       background-color: transparent;
-    }
-    & pre code {
       padding: calc(var(--spacing) * 0);
     }
     & ul {
       list-style-type: disc;
-    }
-    & ul {
       padding-left: calc(var(--spacing) * 5);
     }
   }

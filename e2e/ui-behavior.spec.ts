@@ -283,7 +283,7 @@ test.describe('Hell UI browser behavior', () => {
     await expect(trigger).toBeFocused();
   });
 
-  test('data table allows keyboard resize and ignores nested row controls for row selection', async ({ page }) => {
+  test('data table allows keyboard resize and keeps native rows passive', async ({ page }) => {
     await page.goto('/components/data-table');
 
     const rowEditor = page.locator('app-data-table-row-editor-example');
@@ -300,13 +300,56 @@ test.describe('Hell UI browser behavior', () => {
     const row2 = rowEditor.getByRole('row', { name: /User 2/ }).first();
 
     await row1.click();
-    await expect(row1).toHaveAttribute('data-selected', 'true');
+    await expect(row1).not.toHaveAttribute('data-selected', 'true');
+    await expect(row1).not.toHaveAttribute('tabindex');
+    await expect(row1).not.toHaveAttribute('aria-selected');
 
-    const row2Action = row2.getByRole('button', { name: 'Open' }).first();
+    const row2Action = row2.getByRole('button', { name: /Open editor for User 2/ }).first();
     await row2Action.click();
 
-    await expect(row1).toHaveAttribute('data-selected', 'true');
+    await expect(row2).toHaveAttribute('data-active', 'true');
     await expect(row2).not.toHaveAttribute('data-selected', 'true');
+  });
+
+  test('docs visual regression smoke covers shell, table surfaces, and vertical sliders', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    const brandTag = page.locator('.hd-brand-tag');
+    await expect(brandTag).toHaveCSS('white-space', 'nowrap');
+
+    const themeSelect = page.getByRole('combobox', { name: 'Theme' });
+    await themeSelect.click();
+    const themeDropdown = page.locator('.hd-palette-dropdown');
+    await expect(themeDropdown).toBeVisible();
+    await expect(themeDropdown).toHaveCSS('z-index', '60');
+
+    await page.goto('/components/data-table');
+    const firstExample = page.locator('hd-example-tabs').first();
+    await firstExample.getByRole('tab', { name: 'Code' }).click();
+    await expect(firstExample.locator('pre.hd-example-code')).toBeVisible();
+
+    await firstExample.getByRole('tab', { name: 'Preview' }).click();
+    await expect(page.locator('hell-data-table.hell-data-table').first()).toBeVisible();
+    await expect(page.locator('hell-data-table table.hell-table').first()).toBeVisible();
+    await expect(page.locator('hell-column-visibility-panel.hell-column-visibility-panel')).toBeVisible();
+
+    await page.goto('/components/slider');
+    const verticalSlider = page.locator('hell-slider[data-orientation="vertical"]').first();
+    const verticalTrack = verticalSlider.locator('.hell-slider-track');
+    const verticalThumb = verticalSlider.locator('.hell-slider-thumb');
+    await expect(verticalThumb).toBeVisible();
+    const trackBox = await verticalTrack.boundingBox();
+    const thumbBox = await verticalThumb.boundingBox();
+    if (!trackBox || !thumbBox) throw new Error('Expected vertical slider track and thumb boxes.');
+    const trackCenterX = trackBox.x + trackBox.width / 2;
+    const thumbCenterX = thumbBox.x + thumbBox.width / 2;
+    expect(Math.abs(thumbCenterX - trackCenterX)).toBeLessThanOrEqual(1);
+
+    await page.goto('/accessibility');
+    await expect(page.locator('.hd-a11y-table-wrap.hell-table-container')).toBeVisible();
+    await expect(page.locator('table.hd-a11y-table.hell-table')).toBeVisible();
   });
 
   test('drop zone keeps nested drag state stable and accepts files', async ({ page }) => {

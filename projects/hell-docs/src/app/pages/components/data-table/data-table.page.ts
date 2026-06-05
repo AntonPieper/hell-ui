@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import '@hell-ui/angular/styles/table';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { DataTableColumnVisibilityExample } from './examples/column-visibility.example';
 import dataTableColumnVisibilityExampleCodeRaw from './examples/column-visibility.example.ts?raw' with {
@@ -24,8 +25,6 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
 @Component({
   selector: 'hd-data-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  styles: [`@import '@hell-ui/angular/styles/table';`],
   imports: [
     ExampleTabs,
     DataTableSimpleRendererExample,

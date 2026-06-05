@@ -163,6 +163,38 @@
       accent-color: var(--color-hell-primary);
     }
 
+  button.hell-table-row-action:not(.hell-button),
+  a.hell-table-row-action:not(.hell-button) {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: calc(var(--spacing) * 1.5);
+      border: 0;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      padding-inline: calc(var(--spacing) * 1.5);
+      padding-block: calc(var(--spacing) * 1);
+      color: var(--color-hell-primary);
+      font: inherit;
+      font-size: 12px;
+      font-weight: var(--font-weight-semibold);
+      line-height: 1.25;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+  button.hell-table-row-action:not(.hell-button):hover,
+  a.hell-table-row-action:not(.hell-button):hover {
+      background-color: var(--color-hell-primary-soft);
+      color: var(--color-hell-primary-soft-foreground);
+    }
+
+  button.hell-table-row-action:not(.hell-button):focus-visible,
+  a.hell-table-row-action:not(.hell-button):focus-visible {
+      outline: 2px solid var(--color-hell-focus-ring);
+      outline-offset: 2px;
+    }
+
   /* Resize handle — sits at the trailing edge of a header cell. */
 
   .hell-table-resize-handle {

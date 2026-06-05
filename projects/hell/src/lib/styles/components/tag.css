@@ -5,6 +5,8 @@
   .hell-tag {
       display: inline-flex;
       align-items: center;
+      white-space: nowrap;
+      line-height: 1.25;
       font-weight: var(--font-weight-semibold);
       gap: calc(var(--spacing) * 1);
       padding-inline: calc(var(--spacing) * 2);

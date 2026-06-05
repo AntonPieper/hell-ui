@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
+import '@hell-ui/angular/styles/components/table';
 
 interface AccessibilityMatrixRow {
   readonly kind: 'Primitive' | 'Composite' | 'Feature';
@@ -428,7 +430,7 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
 @Component({
   selector: 'hd-accessibility',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, ...HELL_TABLE_UTILITIES_DIRECTIVES],
   styles: [
     `
       :host {
@@ -449,16 +451,10 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
         max-width: 100%;
         overflow: auto;
         margin-block: var(--spacing-hell-4);
-        border: 1px solid var(--color-hell-border);
-        border-radius: var(--radius-hell-lg);
-        background: var(--color-hell-surface);
       }
-      
+
       .hd-a11y-table {
-        width: 100%;
         min-width: 1120px;
-        table-layout: fixed;
-        border-collapse: collapse;
         font-size: var(--text-sm);
         line-height: var(--leading-normal);
       }
@@ -487,27 +483,14 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
         width: 15%;
       }
 
-      .hd-a11y-table th,
-      .hd-a11y-table td {
+      .hd-a11y-table .hell-table-header-cell,
+      .hd-a11y-table .hell-table-cell {
         vertical-align: top;
         padding: var(--spacing-hell-3);
-        border-bottom: 1px solid var(--color-hell-border);
-        text-align: start;
+        overflow: visible;
         overflow-wrap: break-word;
+        white-space: normal;
         word-break: normal;
-      }
-
-      .hd-a11y-table th {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-        background: var(--color-hell-surface-elevated);
-        color: var(--color-hell-foreground);
-        font-weight: 700;
-      }
-
-      .hd-a11y-table tbody tr:last-child td {
-        border-bottom: 0;
       }
 
       .hd-a11y-kind {
@@ -516,10 +499,6 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
 
       .hd-a11y-name {
         font-weight: 700;
-      }
-
-      .hd-a11y-gap {
-        white-space: normal;
       }
 
       .hd-a11y-critical .hd-a11y-gap,
@@ -556,8 +535,14 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
         </div>
       </div>
 
-      <div class="hd-a11y-table-wrap" role="region" aria-label="Component accessibility support matrix" tabindex="0">
-        <table class="hd-a11y-table">
+      <div
+        hellTableContainer
+        class="hd-a11y-table-wrap"
+        role="region"
+        aria-label="Component accessibility support matrix"
+        tabindex="0"
+      >
+        <table hellTable contentWidth class="hd-a11y-table">
           <colgroup>
             <col class="hd-a11y-col-kind" />
             <col class="hd-a11y-col-surface" />
@@ -567,27 +552,27 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
             <col class="hd-a11y-col-gaps" />
           </colgroup>
 
-          <thead>
-            <tr>
-              <th scope="col">Type</th>
-              <th scope="col">Surface</th>
-              <th scope="col">Role pattern</th>
-              <th scope="col">Keyboard coverage</th>
-              <th scope="col">Axe / ARIA / browser-test coverage</th>
-              <th scope="col">Known gaps</th>
+          <thead hellTableHead>
+            <tr hellTableRow>
+              <th hellTableHeaderCell scope="col">Type</th>
+              <th hellTableHeaderCell scope="col">Surface</th>
+              <th hellTableHeaderCell scope="col">Role pattern</th>
+              <th hellTableHeaderCell scope="col">Keyboard coverage</th>
+              <th hellTableHeaderCell scope="col">Axe / ARIA / browser-test coverage</th>
+              <th hellTableHeaderCell scope="col">Known gaps</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody hellTableBody>
             @for (row of matrix; track row.kind + ':' + row.name) {
-              <tr [class.hd-a11y-critical]="row.criticalGap">
-                <td class="hd-a11y-kind">{{ row.kind }}</td>
-                <td>
+              <tr hellTableRow [class.hd-a11y-critical]="row.criticalGap">
+                <td hellTableCell class="hd-a11y-kind">{{ row.kind }}</td>
+                <td hellTableCell>
                   <a class="hd-a11y-name" [routerLink]="row.path">{{ row.name }}</a>
                 </td>
-                <td>{{ row.rolePattern }}</td>
-                <td>{{ row.keyboardCoverage }}</td>
-                <td>{{ row.automatedCoverage }}</td>
-                <td class="hd-a11y-gap">{{ row.knownGaps }}</td>
+                <td hellTableCell>{{ row.rolePattern }}</td>
+                <td hellTableCell>{{ row.keyboardCoverage }}</td>
+                <td hellTableCell>{{ row.automatedCoverage }}</td>
+                <td hellTableCell class="hd-a11y-gap">{{ row.knownGaps }}</td>
               </tr>
             }
           </tbody>

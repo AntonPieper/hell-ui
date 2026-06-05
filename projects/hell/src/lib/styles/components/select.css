@@ -101,6 +101,7 @@
       padding: var(--spacing-hell-2);
       gap: 1px;
       outline: none;
+      z-index: var(--hell-z-popover, 60);
       transform-origin: var(--ngp-select-transform-origin, top);
       animation: hell-pop-in var(--hell-duration-fast) var(--ease-hell-out);
     }

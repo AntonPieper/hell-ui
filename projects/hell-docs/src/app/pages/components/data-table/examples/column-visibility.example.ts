@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, effect, signal } from '@angular/core';
 
+import { HellButton } from '@hell-ui/angular/button';
 import {
   HELL_DATA_TABLE_DIRECTIVES,
   actionColumn,
@@ -46,7 +47,7 @@ const TABLE_COLUMNS = columns.define([
 @Component({
   selector: 'app-data-table-column-visibility-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_DATA_TABLE_DIRECTIVES],
+  imports: [HellButton, ...HELL_DATA_TABLE_DIRECTIVES],
   template: `
     <div class="grid gap-3 md:grid-cols-[260px_minmax(0,1fr)]">
       <hell-column-visibility-panel
@@ -64,13 +65,11 @@ const TABLE_COLUMNS = columns.define([
         [(rowSelection)]="rowSelection"
         [(columnVisibility)]="columnVisibility"
       >
-        <button hellDataTableBulkActions type="button" class="text-xs font-medium text-hell-primary">
+        <button hellDataTableBulkActions hellButton type="button" variant="primary" size="sm">
           Bulk actions for {{ selectedCount() }} rows
         </button>
         <ng-template [hellRowActions]="'actions'" let-row="row">
-          <button type="button" hellTableRowAction class="text-xs font-medium text-hell-primary">
-            Open {{ row.original.name }}
-          </button>
+          <button type="button" hellTableRowAction>Open {{ row.original.name }}</button>
         </ng-template>
       </hell-data-table>
     </div>
