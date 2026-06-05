@@ -7,10 +7,12 @@ import {
   type HellResizeDirection,
 } from '../../core/resize-behavior';
 import {
-  HellTableColumnResizeRuntime,
-  type HellTableColumnResizeEvent,
-  type HellTableColumnResizePair as HellTableColumnResizeRuntimePair,
-} from './data-table-column-resize.runtime';
+  hellTableResizeAdapterCanResize,
+  hellTableResizeEvent,
+  type HellTableResizeAdapter,
+  type HellTableResizeEvent,
+  type HellTableResizeItem,
+} from './table-resize-adapter';
 import {
   hellHostElementName,
   hellTableInferredRoleForHost,
@@ -35,9 +37,11 @@ import {
 } from '@angular/core';
 
 export type {
-  HellTableColumnResizeEvent,
-  HellTableColumnResizeSide,
-} from './data-table-column-resize.runtime';
+  HellTableResizeAdapter,
+  HellTableResizeEvent,
+  HellTableResizeItem,
+  HellTableResizeSide,
+} from './table-resize-adapter';
 
 function hellElementDirection(element: HTMLElement): HellResizeDirection {
   return element.ownerDocument.defaultView?.getComputedStyle(element).direction === 'rtl'
@@ -176,13 +180,10 @@ export class HellTable extends HellTableRoleDirective {
   readonly contentWidth = input(false, { transform: booleanAttribute });
 }
 
-/** Header-cell pair adjacent to a column resizer. */
-export type HellTableColumnResizePair = HellTableColumnResizeRuntimePair<HellTableHeaderCell>;
-
 /**
- * Header section. Tracks its child header cells so the Table Column Resize
- * Runtime can find the cell immediately to the right of the one being dragged
- * and resize them as a pair (sum of the two widths is conserved).
+ * Header section. Tracks child header cells only so the default table resize
+ * handle can discover its adjacent neighbor. Sizing state stays behind the
+ * handle adapter instead of living on the primitive header section.
  */
 @Directive({
   selector: '[hellTableHeader], thead[hellTableHead]',
@@ -196,8 +197,6 @@ export class HellTableHead extends HellTableRoleDirective {
   protected override readonly nativeElementNames = HELL_TABLE_HEADER_NATIVE_ELEMENTS;
   protected override readonly inferredRole = 'rowgroup';
 
-  private readonly resizeRuntime = new HellTableColumnResizeRuntime();
-
   private readonly cells = new Set<HellTableHeaderCell>();
 
   register(c: HellTableHeaderCell) {
@@ -205,22 +204,6 @@ export class HellTableHead extends HellTableRoleDirective {
   }
   unregister(c: HellTableHeaderCell) {
     this.cells.delete(c);
-  }
-
-  widthFor(columnId: string | null): number | null {
-    return this.resizeRuntime.widthFor(columnId);
-  }
-
-  setColumnWidth(columnId: string, px: number): void {
-    this.resizeRuntime.setWidth(columnId, px);
-  }
-
-  columnResizeEvent(
-    pair: HellTableColumnResizePair,
-    beforePx: number,
-    afterPx: number,
-  ): HellTableColumnResizeEvent | null {
-    return this.resizeRuntime.transactionEvent(pair, beforePx, afterPx);
   }
 
   /** Find the cell immediately following `cell` within the same row. */
@@ -311,15 +294,15 @@ export class HellTableRow extends HellTableRoleDirective {
 }
 
 /**
- * Header cell directive. Owns optional sort state and acts as the parent
- * for `hellTableColumnResizer`. The directive does not sort — it surfaces the
- * current sort state through `data-sort` / `aria-sort` on the header-cell host,
- * while a nested `button[hellTableSortTrigger]` owns keyboard focus and activation.
- * Sorting logic stays with the consumer.
+ * Header cell directive. Owns optional sort state and can provide the default
+ * adjacent item for `hellTableResizeHandle`. The directive does not sort — it
+ * surfaces the current sort state through `data-sort` / `aria-sort` on the
+ * header-cell host, while a nested `button[hellTableSortTrigger]` owns keyboard
+ * focus and activation. Sorting logic stays with the consumer.
  *
- * Initial column sizing belongs to consumer CSS/Tailwind. During resize, the
- * Table Column Resize Runtime exposes `--hell-table-col-width` as a CSS custom
- * property; the stylesheet decides how that variable affects layout.
+ * Initial column sizing belongs to consumer CSS/Tailwind. The default resize
+ * adapter writes `--hell-table-col-width` on the affected cells, while custom
+ * adapters may own sizing through TanStack, CDK, or simple table state instead.
  */
 @Directive({
   selector: '[hellTableHeaderCell]',
@@ -331,7 +314,6 @@ export class HellTableRow extends HellTableRoleDirective {
     '[attr.data-column-id]': 'columnId()',
     '[attr.data-sort]': 'sort()',
     '[attr.data-sortable]': 'sortable() ? "true" : null',
-    '[style.--hell-table-col-width]': 'widthVar()',
   },
 })
 export class HellTableHeaderCell extends HellTableRoleDirective implements OnDestroy {
@@ -346,11 +328,6 @@ export class HellTableHeaderCell extends HellTableRoleDirective implements OnDes
 
   readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   readonly head = inject(HellTableHead, { optional: true });
-
-  protected readonly widthVar = computed(() => {
-    const w = this.head?.widthFor(this.columnId()) ?? null;
-    return w == null ? null : `${w}px`;
-  });
 
   protected readonly ariaSort = computed<'ascending' | 'descending' | null>(() => {
     if (!this.sortable()) return null;
@@ -374,14 +351,23 @@ export class HellTableHeaderCell extends HellTableRoleDirective implements OnDes
     this.sortToggle.emit(e);
   }
 
-  columnKey(): string | null {
-    return this.columnId();
+  /** Default DOM-backed resize item used when the handle does not receive an adapter input. */
+  resizeItem(minSize: number): HellTableResizeItem | null {
+    const columnId = this.columnId();
+    if (!columnId) return null;
+    return {
+      columnId,
+      ariaControls: this.host.id || null,
+      measure: () => this.measure(),
+      minSize: () => minSize,
+      setSize: (px) => this.setLiveWidth(px),
+      commitSize: (px) => this.commit(px),
+    };
   }
 
-  /** Called by `HellTableColumnResizer` while the user is dragging. */
+  /** Called by the default resize adapter while the user is dragging. */
   setLiveWidth(px: number) {
-    const id = this.columnId();
-    if (id) this.head?.setColumnWidth(id, px);
+    this.host.style.setProperty('--hell-table-col-width', `${px}px`);
   }
 
   /** Current measured width — used as the drag start anchor. */
@@ -463,23 +449,20 @@ export class HellTableCell extends HellTableRoleDirective {
 }
 
 /**
- * Resize grip placed inside `[hellTableHeaderCell]` at the trailing
- * edge. Resizes the host cell and its right-hand neighbor as a pair so
- * the sum of their widths stays constant — the table never grows or
- * shrinks during a drag, the space is just redistributed.
+ * Resize handle placed inside a table header or adapter-rendered header edge.
+ * The handle owns separator pointer/keyboard semantics only; sizing storage is
+ * delegated to a narrow `HellTableResizeAdapter` so simple, TanStack, and CDK
+ * table layers can own their own column sizing state.
  *
- * Note: `HellResizable` is intentionally not reused. That composite
- * relies on a flex container with flex children and a handle that lives
- * as a sibling between the panes. Table cells live inside a
- * `display: table` row, are sized by table-layout instead of flexbox,
- * and cannot be siblings of an arbitrary handle element. The semantics
- * line up but the layout machinery is incompatible.
+ * Note: `HellResizable` is intentionally not reused. That composite relies on
+ * sibling flex panes. Table headers and adapter renderers need adjacent item
+ * adapters instead of flex-pane DOM assumptions.
  */
 @Component({
-  selector: '[hellTableColumnResizer]',
+  selector: '[hellTableResizeHandle]',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    '[class.hell-table-column-resizer]': '!unstyled()',
+    '[class.hell-table-resize-handle]': '!unstyled()',
     '[attr.data-active]': 'dragging() ? "true" : null',
     '[attr.type]': 'nativeButtonType()',
     '[attr.aria-label]': 'isDisabled() && nativeButtonType() === null ? null : (ariaLabel() ?? labels.tableUtilities?.resizeColumn ?? labels.dataTable.resizeColumn)',
@@ -496,62 +479,76 @@ export class HellTableCell extends HellTableRoleDirective {
   },
   template: '<span data-slot="grip" aria-hidden="true"></span>',
 })
-export class HellTableColumnResizer extends HellStyleable implements AfterViewInit, OnDestroy {
+export class HellTableResizeHandle extends HellStyleable implements AfterViewInit, OnDestroy {
   readonly minWidth = input(40, { transform: numberAttribute });
+  readonly resizeAdapter = input<HellTableResizeAdapter | null>(null);
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
   readonly ariaControls = input<string | readonly string[] | null>(null, {
     alias: 'aria-controls',
   });
 
-  protected readonly ariaControlsValue = computed(() => hellAriaControlsValue(this.ariaControls()));
+  protected readonly ariaControlsValue = computed(() =>
+    hellAriaControlsValue(this.ariaControls() ?? this.adapterAriaControls()),
+  );
 
-  readonly columnResize = output<HellTableColumnResizeEvent>();
+  readonly resizeCommit = output<HellTableResizeEvent>();
 
   protected readonly dragging = signal(false);
   protected readonly ariaValueNow = signal<number | null>(null);
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
-  private readonly cell = inject(HellTableHeaderCell);
+  private readonly cell = inject(HellTableHeaderCell, { optional: true });
   protected readonly labels = inject(HELL_LABELS);
-  private readonly resizeInteraction = new HellResizePairInteractionController<HellTableHeaderCell>(
-    {
-      handle: this.host,
-      ownerWindow: () => this.host.ownerDocument.defaultView,
-      onActiveChange: (active) => this.dragging.set(active),
-      onValueChange: (result) => this.ariaValueNow.set(result.ariaValueNow),
-      onCommit: (result) => this.emitResize(result.a, result.b),
-      orientation: () => 'horizontal',
-      direction: () => hellElementDirection(this.host),
-      stopPropagation: true,
-      pair: () => this.adjacentPair(),
-      itemAdapter: () => {
-        const min = this.minWidth();
-        return {
-          measure: (cell) => cell.measure(),
-          minSize: () => min,
-          setSize: (cell, size) => cell.setLiveWidth(size),
-          commitSize: (cell, size) => cell.commit(size),
-        };
+  private readonly resizeInteraction = new HellResizePairInteractionController<HellTableResizeItem>({
+    handle: this.host,
+    ownerWindow: () => this.host.ownerDocument.defaultView,
+    onActiveChange: (active) => this.dragging.set(active),
+    onValueChange: (result) => this.ariaValueNow.set(result.ariaValueNow),
+    onCommit: (result) => this.emitResize(result.a, result.b),
+    orientation: () => 'horizontal',
+    direction: () => hellElementDirection(this.host),
+    stopPropagation: true,
+    pair: () => this.resizePair(),
+    itemAdapter: () => ({
+      measure: (item) => item.measure(),
+      minSize: (item) => this.itemMinSize(item),
+      setSize: (item, size) => item.setSize(size),
+      commitSize: (item, size) => {
+        if (item.commitSize) item.commitSize(size);
+        else item.setSize(size);
       },
-    },
-  );
+    }),
+  });
 
-  private adjacentPair(): HellTableColumnResizePair | null {
-    const cell = this.cell;
-    const next = cell.head?.nextSibling(cell) ?? null;
-    if (!next || !cell.columnKey() || !next.columnKey()) return null;
-    return { before: cell, after: next };
+  private resizePair(): HellTableResizeAdapter | null {
+    return this.providedPair() ?? this.defaultHeaderPair();
+  }
+
+  private providedPair(): HellTableResizeAdapter | null {
+    const adapter = this.resizeAdapter();
+    return hellTableResizeAdapterCanResize(adapter) ? adapter : null;
+  }
+
+  private defaultHeaderPair(): HellTableResizeAdapter | null {
+    const beforeCell = this.cell;
+    const afterCell = beforeCell?.head?.nextSibling(beforeCell) ?? null;
+    if (!beforeCell || !afterCell) return null;
+
+    const min = this.minWidth();
+    const before = beforeCell.resizeItem(min);
+    const after = afterCell.resizeItem(min);
+    const adapter = before && after ? { before, after } : null;
+    return hellTableResizeAdapterCanResize(adapter) ? adapter : null;
   }
 
   private emitResize(beforePx: number, afterPx: number): void {
-    const pair = this.adjacentPair();
+    const pair = this.resizePair();
     if (!pair) return;
-    const event = this.cell.head?.columnResizeEvent(pair, beforePx, afterPx);
-    if (event) this.columnResize.emit(event);
+    this.resizeCommit.emit(hellTableResizeEvent(pair, beforePx, afterPx));
   }
 
   protected isDisabled(): boolean {
-    return this.adjacentPair() === null;
+    return this.resizePair() === null;
   }
 
   protected nativeButtonType(): 'button' | null {
@@ -575,7 +572,7 @@ export class HellTableColumnResizer extends HellStyleable implements AfterViewIn
   }
 
   private refreshAriaValueNow(): void {
-    const pair = this.adjacentPair();
+    const pair = this.resizePair();
     if (!pair) {
       this.ariaValueNow.set(null);
       return;
@@ -585,10 +582,32 @@ export class HellTableColumnResizer extends HellStyleable implements AfterViewIn
       hellResizePairAriaValue(
         pair.before.measure(),
         pair.after.measure(),
-        this.minWidth(),
-        this.minWidth(),
+        this.itemMinSize(pair.before),
+        this.itemMinSize(pair.after),
       ),
     );
+  }
+
+  private itemMinSize(item: HellTableResizeItem): number {
+    return item.minSize?.() ?? this.minWidth();
+  }
+
+  private adapterAriaControls(): readonly string[] | null {
+    const pair = this.resizePair();
+    if (!pair) return null;
+    const ids: string[] = [];
+    this.collectAriaControls(pair.before.ariaControls, ids);
+    this.collectAriaControls(pair.after.ariaControls, ids);
+    return ids.length ? ids : null;
+  }
+
+  private collectAriaControls(
+    value: string | readonly string[] | null | undefined,
+    ids: string[],
+  ): void {
+    if (!value) return;
+    if (typeof value === 'string') ids.push(value);
+    else ids.push(...value);
   }
 
   ngOnDestroy(): void {
@@ -600,7 +619,7 @@ export { HellTable as HellTableRoot, HellTableHead as HellTableHeader };
 
 /**
  * Standalone imports for the table utilities feature: container, table sections,
- * row/cell directives, sortable header cell, and column resizer.
+ * row/cell directives, sortable header cell, and resize handle.
  */
 /** Preferred plural alias for the table utility directives. */
 export const HELL_TABLE_UTILITIES_DIRECTIVES = [
@@ -613,5 +632,5 @@ export const HELL_TABLE_UTILITIES_DIRECTIVES = [
   HellTableHeaderCell,
   HellTableSortTrigger,
   HellTableCell,
-  HellTableColumnResizer,
+  HellTableResizeHandle,
 ] as const;

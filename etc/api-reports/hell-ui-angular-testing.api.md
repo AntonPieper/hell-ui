@@ -445,30 +445,6 @@ export interface HellTableCellHarnessFilters extends BaseHarnessFilters {
 }
 
 // @public (undocumented)
-export class HellTableColumnResizerHarness extends ComponentHarness {
-    // (undocumented)
-    getAriaControls(): Promise<string | null>;
-    // (undocumented)
-    getAriaLabel(): Promise<string | null>;
-    // (undocumented)
-    getAriaValueNow(): Promise<string | null>;
-    // (undocumented)
-    getText(): Promise<string>;
-    // (undocumented)
-    static hostSelector: string;
-    // (undocumented)
-    isDisabled(): Promise<boolean>;
-    // (undocumented)
-    static with(options?: HellTableColumnResizerHarnessFilters): HarnessPredicate<HellTableColumnResizerHarness>;
-}
-
-// @public (undocumented)
-export interface HellTableColumnResizerHarnessFilters extends BaseHarnessFilters {
-    // (undocumented)
-    disabled?: boolean;
-}
-
-// @public (undocumented)
 export class HellTableContainerHarness extends ComponentHarness {
     // (undocumented)
     getAriaBusy(): Promise<string | null>;
@@ -521,7 +497,7 @@ export class HellTableHeaderCellHarness extends ComponentHarness {
     // (undocumented)
     getColumnId(): Promise<string | null>;
     // (undocumented)
-    getColumnResizer(): Promise<HellTableColumnResizerHarness | null>;
+    getResizeHandle(): Promise<HellTableResizeHandleHarness | null>;
     // (undocumented)
     getSortState(): Promise<string | null>;
     // (undocumented)
@@ -548,6 +524,30 @@ export class HellTableHeadHarness extends ComponentHarness {
     getHeaderCells(): Promise<HellTableHeaderCellHarness[]>;
     // (undocumented)
     static hostSelector: string;
+}
+
+// @public (undocumented)
+export class HellTableResizeHandleHarness extends ComponentHarness {
+    // (undocumented)
+    getAriaControls(): Promise<string | null>;
+    // (undocumented)
+    getAriaLabel(): Promise<string | null>;
+    // (undocumented)
+    getAriaValueNow(): Promise<string | null>;
+    // (undocumented)
+    getText(): Promise<string>;
+    // (undocumented)
+    static hostSelector: string;
+    // (undocumented)
+    isDisabled(): Promise<boolean>;
+    // (undocumented)
+    static with(options?: HellTableResizeHandleHarnessFilters): HarnessPredicate<HellTableResizeHandleHarness>;
+}
+
+// @public (undocumented)
+export interface HellTableResizeHandleHarnessFilters extends BaseHarnessFilters {
+    // (undocumented)
+    disabled?: boolean;
 }
 
 // @public (undocumented)
@@ -884,7 +884,7 @@ export class HellToastHarness extends ComponentHarness {
 // types/hell-ui-angular-testing.d.ts:257:1 - (ae-undocumented) Missing documentation for "HellTableSortTriggerHarnessFilters".
 // types/hell-ui-angular-testing.d.ts:258:5 - (ae-undocumented) Missing documentation for "disabled".
 // types/hell-ui-angular-testing.d.ts:259:5 - (ae-undocumented) Missing documentation for "text".
-// types/hell-ui-angular-testing.d.ts:261:1 - (ae-undocumented) Missing documentation for "HellTableColumnResizerHarnessFilters".
+// types/hell-ui-angular-testing.d.ts:261:1 - (ae-undocumented) Missing documentation for "HellTableResizeHandleHarnessFilters".
 // types/hell-ui-angular-testing.d.ts:262:5 - (ae-undocumented) Missing documentation for "disabled".
 // types/hell-ui-angular-testing.d.ts:264:1 - (ae-undocumented) Missing documentation for "HellTableCellHarnessFilters".
 // types/hell-ui-angular-testing.d.ts:265:5 - (ae-undocumented) Missing documentation for "text".
@@ -931,7 +931,7 @@ export class HellToastHarness extends ComponentHarness {
 // types/hell-ui-angular-testing.d.ts:313:5 - (ae-undocumented) Missing documentation for "isSortable".
 // types/hell-ui-angular-testing.d.ts:314:5 - (ae-undocumented) Missing documentation for "getText".
 // types/hell-ui-angular-testing.d.ts:315:5 - (ae-undocumented) Missing documentation for "getSortTrigger".
-// types/hell-ui-angular-testing.d.ts:316:5 - (ae-undocumented) Missing documentation for "getColumnResizer".
+// types/hell-ui-angular-testing.d.ts:316:5 - (ae-undocumented) Missing documentation for "getResizeHandle".
 // types/hell-ui-angular-testing.d.ts:318:1 - (ae-undocumented) Missing documentation for "HellTableSortTriggerHarness".
 // types/hell-ui-angular-testing.d.ts:319:5 - (ae-undocumented) Missing documentation for "hostSelector".
 // types/hell-ui-angular-testing.d.ts:320:5 - (ae-undocumented) Missing documentation for "with".
@@ -943,7 +943,7 @@ export class HellToastHarness extends ComponentHarness {
 // types/hell-ui-angular-testing.d.ts:327:5 - (ae-undocumented) Missing documentation for "with".
 // types/hell-ui-angular-testing.d.ts:328:5 - (ae-undocumented) Missing documentation for "getText".
 // types/hell-ui-angular-testing.d.ts:329:5 - (ae-undocumented) Missing documentation for "click".
-// types/hell-ui-angular-testing.d.ts:331:1 - (ae-undocumented) Missing documentation for "HellTableColumnResizerHarness".
+// types/hell-ui-angular-testing.d.ts:331:1 - (ae-undocumented) Missing documentation for "HellTableResizeHandleHarness".
 // types/hell-ui-angular-testing.d.ts:332:5 - (ae-undocumented) Missing documentation for "hostSelector".
 // types/hell-ui-angular-testing.d.ts:333:5 - (ae-undocumented) Missing documentation for "with".
 // types/hell-ui-angular-testing.d.ts:334:5 - (ae-undocumented) Missing documentation for "isDisabled".

@@ -2,7 +2,12 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { provideHellLabels } from '../../core/labels';
-import { HELL_TABLE_UTILITIES_DIRECTIVES, type HellTableColumnResizeEvent } from './table-utilities';
+import {
+  HELL_TABLE_UTILITIES_DIRECTIVES,
+  type HellTableResizeAdapter,
+  type HellTableResizeEvent,
+  type HellTableResizeItem,
+} from './table-utilities';
 
 @Component({
   imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
@@ -23,19 +28,19 @@ import { HELL_TABLE_UTILITIES_DIRECTIVES, type HellTableColumnResizeEvent } from
             <button id="header-action" type="button">Filter</button>
             <button
               id="name-resizer"
-              hellTableColumnResizer
+              hellTableResizeHandle
               [minWidth]="minWidth()"
               [aria-controls]="[' name-resizer-pane ', ' ']"
-              (columnResize)="resizeEvents.push($event)"
+              (resizeCommit)="resizeEvents.push($event)"
             ></button>
           </th>
           <th id="role" hellTableHeaderCell columnId="role">
             Role
             <button
               id="role-resizer"
-              hellTableColumnResizer
+              hellTableResizeHandle
               [minWidth]="minWidth()"
-              (columnResize)="resizeEvents.push($event)"
+              (resizeCommit)="resizeEvents.push($event)"
             ></button>
           </th>
         </tr>
@@ -71,7 +76,7 @@ class DataTableHost {
   readonly rowEvents: Array<MouseEvent | KeyboardEvent> = [];
   readonly cellEvents: MouseEvent[] = [];
   readonly sortEvents: Array<MouseEvent | KeyboardEvent> = [];
-  readonly resizeEvents: HellTableColumnResizeEvent[] = [];
+  readonly resizeEvents: HellTableResizeEvent[] = [];
 }
 
 @Component({
@@ -84,14 +89,14 @@ class DataTableHost {
             <button id="left-sort" hellTableSortTrigger type="button">Left</button>
             <button
               id="left-resizer"
-              hellTableColumnResizer
+              hellTableResizeHandle
               [minWidth]="40"
               aria-label="Custom resize label"
             ></button>
           </th>
           <th id="override-right" hellTableHeaderCell columnId="override-right">
             Right
-            <button id="right-resizer" hellTableColumnResizer [minWidth]="40"></button>
+            <button id="right-resizer" hellTableResizeHandle [minWidth]="40"></button>
           </th>
         </tr>
       </thead>
@@ -115,7 +120,7 @@ class DataTableResizerAriaOverrideHost {}
         <tr>
           <th id="localized-left" hellTableHeaderCell columnId="localized-left">
             Left
-            <button id="localized-resizer" hellTableColumnResizer [minWidth]="40"></button>
+            <button id="localized-resizer" hellTableResizeHandle [minWidth]="40"></button>
           </th>
           <th id="localized-right" hellTableHeaderCell columnId="localized-right">Right</th>
         </tr>
@@ -159,6 +164,55 @@ class DataTableSortableAriaHost {
   readonly order = signal<'asc' | 'desc'>('asc');
 }
 
+@Component({
+  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  template: `
+    <table hellTable>
+      <thead hellTableHead>
+        <tr>
+          <th id="adapter-alpha" hellTableHeaderCell columnId="alpha">
+            Alpha
+            <button
+              id="adapter-resizer"
+              hellTableResizeHandle
+              aria-controls="adapter-alpha adapter-beta"
+              [resizeAdapter]="adapter"
+              (resizeCommit)="resizeEvents.push($event)"
+            ></button>
+          </th>
+          <th id="adapter-beta" hellTableHeaderCell columnId="beta">Beta</th>
+        </tr>
+      </thead>
+    </table>
+  `,
+})
+class DataTableResizeAdapterHost {
+  readonly widths = signal<Record<'alpha' | 'beta', number>>({ alpha: 100, beta: 100 });
+  readonly resizeEvents: HellTableResizeEvent[] = [];
+  readonly commitEvents: Array<{ columnId: 'alpha' | 'beta'; px: number }> = [];
+  readonly adapter: HellTableResizeAdapter = {
+    before: this.item('alpha'),
+    after: this.item('beta'),
+  };
+
+  private item(columnId: 'alpha' | 'beta'): HellTableResizeItem {
+    return {
+      columnId,
+      measure: () => this.widths()[columnId],
+      minSize: () => 70,
+      setSize: (px) => this.setWidth(columnId, px),
+      commitSize: (px) => {
+        this.commitEvents.push({ columnId, px });
+        this.setWidth(columnId, px);
+      },
+    };
+  }
+
+  private setWidth(columnId: 'alpha' | 'beta', px: number): void {
+    this.widths.update((current) => ({ ...current, [columnId]: px }));
+  }
+}
+
 describe('Hell table utilities directives', () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -171,6 +225,7 @@ describe('Hell table utilities directives', () => {
         DataTableResizerAriaOverrideHost,
         DataTableLocalizedLabelHost,
         DataTableSortableAriaHost,
+        DataTableResizeAdapterHost,
       ],
     }).compileComponents();
   });
@@ -388,10 +443,13 @@ describe('Hell table utilities directives', () => {
       cancelable: true,
     });
     const resizer = byId<HTMLButtonElement>(fixture.nativeElement, 'name-resizer');
+    let leakedKeys = 0;
+    name.addEventListener('keydown', () => leakedKeys++);
     resizer.dispatchEvent(key);
     fixture.detectChanges();
 
     expect(key.defaultPrevented).toBe(true);
+    expect(leakedKeys).toBe(0);
     expect(host.resizeEvents).toEqual([
       {
         before: { columnId: 'name', px: 136, share: 0.68 },
@@ -412,7 +470,36 @@ describe('Hell table utilities directives', () => {
     );
   });
 
-  it('uses RTL-aware horizontal arrow semantics for column resize', () => {
+  it('delegates sizing through a provided resize adapter without header-cell state', () => {
+    const fixture = TestBed.createComponent(DataTableResizeAdapterHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const resizer = byId<HTMLButtonElement>(fixture.nativeElement, 'adapter-resizer');
+    resizer.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+
+    expect(host.widths()).toEqual({ alpha: 116, beta: 84 });
+    expect(host.commitEvents).toEqual([
+      { columnId: 'alpha', px: 116 },
+      { columnId: 'beta', px: 84 },
+    ]);
+    expect(host.resizeEvents).toEqual([
+      {
+        before: { columnId: 'alpha', px: 116, share: 0.58 },
+        after: { columnId: 'beta', px: 84, share: 0.42 },
+        totalPx: 200,
+      },
+    ]);
+    expect(byId<HTMLElement>(fixture.nativeElement, 'adapter-alpha').style.getPropertyValue('--hell-table-col-width')).toBe('');
+    expect(byId<HTMLElement>(fixture.nativeElement, 'adapter-beta').style.getPropertyValue('--hell-table-col-width')).toBe('');
+    expect(resizer.getAttribute('aria-controls')).toBe('adapter-alpha adapter-beta');
+    expect(resizer.getAttribute('aria-valuenow')).toBe('58');
+  });
+
+  it('uses RTL-aware horizontal arrow semantics for resize intent', () => {
     const fixture = TestBed.createComponent(DataTableHost);
     const host = fixture.componentInstance;
     fixture.detectChanges();
@@ -455,10 +542,13 @@ describe('Hell table utilities directives', () => {
       bubbles: true,
       cancelable: true,
     });
+    let leakedPointerDown = 0;
+    name.addEventListener('pointerdown', () => leakedPointerDown++);
     resizer.dispatchEvent(pointerDown);
     fixture.detectChanges();
 
     expect(pointerDown.defaultPrevented).toBe(true);
+    expect(leakedPointerDown).toBe(0);
     expect(resizer.getAttribute('data-active')).toBe('true');
 
     window.dispatchEvent(
@@ -523,7 +613,7 @@ describe('Hell table utilities directives', () => {
     expect(host.resizeEvents).toEqual([]);
   });
 
-  it('uses explicit aria-label override for column resizer', () => {
+  it('uses explicit aria-label override for resize handle', () => {
     const fixture = TestBed.createComponent(DataTableResizerAriaOverrideHost);
     fixture.detectChanges();
 
@@ -531,7 +621,7 @@ describe('Hell table utilities directives', () => {
     expect(resizer.getAttribute('aria-label')).toBe('Custom resize label');
   });
 
-  it('uses preferred table utilities label overrides for column resizer defaults', () => {
+  it('uses preferred table utilities label overrides for resize handle defaults', () => {
     const fixture = TestBed.createComponent(DataTableLocalizedLabelHost);
     fixture.detectChanges();
 

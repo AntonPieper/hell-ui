@@ -99,6 +99,7 @@ function main() {
   checkInteractiveTriggerSelectorContract();
   checkTableUtilityContract();
   checkTableSortTriggerContract();
+  checkTableResizeHandleContract();
   checkFloatingRegistrationContract();
   checkFloatingAdapterContract();
   checkBrowserGlobalContract();
@@ -2050,6 +2051,7 @@ function checkTableUtilityContract() {
     'hellTableRow',
     'hellTableHeaderCell',
     'hellTableCell',
+    'hellTableResizeHandle',
   ]) {
     if (!source.includes(selector)) {
       failures.push(`Table primitives must expose host-agnostic selector ${selector}`);
@@ -2149,6 +2151,52 @@ function checkTableSortTriggerContract() {
         );
       }
     }
+  }
+}
+
+function checkTableResizeHandleContract() {
+  const tableSourcePath = join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts');
+  const tableSource = readFile(tableSourcePath);
+
+  if (!/export\s+class\s+HellTableResizeHandle\b/.test(tableSource)) {
+    failures.push('Table utilities must expose HellTableResizeHandle for modern column resizing');
+  }
+
+  if (!/selector:\s*'\[hellTableResizeHandle\]'/.test(tableSource)) {
+    failures.push('Table resize primitive must use the hellTableResizeHandle selector');
+  }
+
+  if (!tableSource.includes('resizeAdapter = input<HellTableResizeAdapter | null>')) {
+    failures.push('HellTableResizeHandle must delegate sizing through HellTableResizeAdapter input');
+  }
+
+  if (/hellTableColumnResizer|HellTableColumnResizer|hell-table-column-resizer|HellTableColumnResizeRuntime|data-table-column-resize/.test(tableSource)) {
+    failures.push('Legacy hellTableColumnResizer API must not remain in table utilities');
+  }
+
+  const styleSource = readFile(join(root, 'projects/hell/src/lib/styles/components/table.css'));
+  if (!styleSource.includes('.hell-table-resize-handle')) {
+    failures.push('Table resize handle styles must use hell-table-resize-handle class');
+  }
+  if (/hell-table-column-resizer/.test(styleSource)) {
+    failures.push('Legacy hell-table-column-resizer class must be removed from table styles');
+  }
+
+  const tableHarness = readFile(join(root, 'projects/hell/src/testing/table-harness.ts'));
+  if (!tableHarness.includes('HellTableResizeHandleHarness') || !tableHarness.includes('getResizeHandle')) {
+    failures.push('Testing table harness must expose HellTableResizeHandleHarness and getResizeHandle');
+  }
+  if (/HellTableColumnResizerHarness|getColumnResizer|hellTableColumnResizer/.test(tableHarness)) {
+    failures.push('Testing table harness must not expose legacy column-resizer APIs');
+  }
+
+  const docsRoot = join(root, 'projects/hell-docs/src/app');
+  const docsOffenders = walk(docsRoot)
+    .filter((file) => /\.(?:ts|html|md)$/.test(file))
+    .filter((file) => /hellTableColumnResizer|HellTableColumnResizer|columnResize/.test(readFile(file)))
+    .map((file) => file.slice(root.length + 1));
+  if (docsOffenders.length) {
+    failures.push(`Docs must use hellTableResizeHandle instead of legacy resizer APIs: ${docsOffenders.join(', ')}`);
   }
 }
 

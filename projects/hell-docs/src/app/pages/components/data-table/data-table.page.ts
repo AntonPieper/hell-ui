@@ -115,7 +115,7 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
             <code>[sort]</code> (<code>'asc' | 'desc' | null</code>) → <code>aria-sort</code> /
             <code>data-sort</code> only for the active sorted header. Unsorted sortable headers
             omit <code>aria-sort</code> by default. Add <code>columnId</code> when pairing with a
-            column resizer. Initial sizing belongs to your CSS/Tailwind.
+            resize handle. Initial sizing belongs to your CSS/Tailwind.
           </li>
           <li>
             <code>button[hellTableSortTrigger]</code>: native button trigger for a sortable
@@ -132,10 +132,11 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
             handlers.
           </li>
           <li>
-            <code>[hellTableColumnResizer]</code>: place inside a header cell with
-            <code>columnId</code>. Drives resize CSS custom properties via pointer drag and arrow
-            keys; emits one <code>(columnResize)</code> transaction containing both affected columns;
-            optional <code>aria-controls</code> for controlled DOM element IDs.
+            <code>[hellTableResizeHandle]</code>: place inside a header cell with
+            <code>columnId</code> or pass a narrow <code>[resizeAdapter]</code>. Pointer drag and
+            arrow keys keep separator ARIA while sizing state stays adapter-owned; emits one
+            <code>(resizeCommit)</code> transaction containing both affected columns; optional
+            <code>aria-controls</code> for controlled DOM element IDs.
           </li>
         </ul>
 

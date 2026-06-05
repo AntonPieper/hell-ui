@@ -32,17 +32,17 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
               <tr>
                 <th hellTableHeaderCell columnId="id" class="w-18">
                   ID
-                  <span hellTableColumnResizer></span>
+                  <span hellTableResizeHandle></span>
                 </th>
                 <th hellTableHeaderCell columnId="name">
                   Name
-                  <span hellTableColumnResizer></span>
+                  <span hellTableResizeHandle></span>
                 </th>
                 <th hellTableHeaderCell columnId="email">
                   Email
-                  <span hellTableColumnResizer></span>
+                  <span hellTableResizeHandle></span>
                 </th>
-                <th hellTableHeaderCell>Role</th>
+                <th hellTableHeaderCell columnId="role">Role</th>
                 <th hellTableHeaderCell>Actions</th>
               </tr>
             </thead>

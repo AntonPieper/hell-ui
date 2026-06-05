@@ -161,9 +161,9 @@
       outline-offset: -2px;
     }
 
-  /* Column resizer — sits at the trailing edge of a header cell. */
+  /* Resize handle — sits at the trailing edge of a header cell. */
 
-  .hell-table-column-resizer {
+  .hell-table-resize-handle {
       position: absolute;
       inset-block: 0;
       inset-inline-end: 0;
@@ -178,7 +178,7 @@
       justify-content: flex-end;
     }
 
-  .hell-table-column-resizer [data-slot='grip'] {
+  .hell-table-resize-handle [data-slot='grip'] {
       width: 1px;
       background-color: var(--color-hell-border);
       transition:
@@ -186,13 +186,13 @@
         width var(--hell-duration-fast) var(--ease-hell-out);
     }
 
-  .hell-table-column-resizer:hover [data-slot='grip'],
-  .hell-table-column-resizer[data-active='true'] [data-slot='grip'] {
+  .hell-table-resize-handle:hover [data-slot='grip'],
+  .hell-table-resize-handle[data-active='true'] [data-slot='grip'] {
       width: 2px;
       background-color: var(--color-hell-primary);
     }
 
-  .hell-table-column-resizer:focus-visible {
+  .hell-table-resize-handle:focus-visible {
       outline: 2px solid var(--color-hell-focus-ring);
       outline-offset: -2px;
     }

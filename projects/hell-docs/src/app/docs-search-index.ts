@@ -860,8 +860,8 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
   {
     title: 'Table utility directives',
     path: '/components/data-table',
-    detail: 'hellTable, hellTableRow, hellTableHeaderCell, hellTableSortTrigger, hellTableColumnResizer',
-    terms: 'HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableSortTrigger hellTableCell hellTableColumnResizer',
+    detail: 'hellTable, hellTableRow, hellTableHeaderCell, hellTableSortTrigger, hellTableResizeHandle',
+    terms: 'HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableSortTrigger hellTableCell hellTableResizeHandle resizeAdapter',
   },
 ];
 

@@ -168,7 +168,7 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellTable', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableBody', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableCell', area: 'feature', coverage: 'dom' },
-  { symbol: 'HellTableColumnResizer', area: 'feature', coverage: 'dom' },
+  { symbol: 'HellTableResizeHandle', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableContainer', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableHead', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableHeaderCell', area: 'feature', coverage: 'dom' },
@@ -259,7 +259,7 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
           <tr id="table-row" hellTableRow selected selectable>
             <th id="table-header-cell" hellTableHeaderCell columnId="name" sortable sort="asc">
               <button id="table-sort-trigger" hellTableSortTrigger type="button">Name</button>
-              <button id="table-resizer" hellTableColumnResizer></button>
+              <button id="table-resizer" hellTableResizeHandle></button>
             </th>
             <th hellTableHeaderCell columnId="role">Role</th>
             <td id="table-cell" hellTableCell align="end" space="empty">Ada</td>
@@ -393,8 +393,8 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
   },
   {
     id: 'table-resizer',
-    module: 'HellTableColumnResizer',
-    className: 'hell-table-column-resizer',
+    module: 'HellTableResizeHandle',
+    className: 'hell-table-resize-handle',
     attrs: { role: 'separator' },
   },
 ];

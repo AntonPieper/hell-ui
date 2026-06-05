@@ -23,7 +23,7 @@ export interface HellTableSortTriggerHarnessFilters extends BaseHarnessFilters {
   text?: string;
 }
 
-export interface HellTableColumnResizerHarnessFilters extends BaseHarnessFilters {
+export interface HellTableResizeHandleHarnessFilters extends BaseHarnessFilters {
   disabled?: boolean;
 }
 
@@ -220,8 +220,8 @@ export class HellTableHeaderCellHarness extends ComponentHarness {
     return this.locatorForOptional(HellTableSortTriggerHarness)();
   }
 
-  async getColumnResizer(): Promise<HellTableColumnResizerHarness | null> {
-    return this.locatorForOptional(HellTableColumnResizerHarness)();
+  async getResizeHandle(): Promise<HellTableResizeHandleHarness | null> {
+    return this.locatorForOptional(HellTableResizeHandleHarness)();
   }
 }
 
@@ -278,11 +278,11 @@ export class HellTableCellHarness extends ComponentHarness {
   }
 }
 
-export class HellTableColumnResizerHarness extends ComponentHarness {
-  static hostSelector = '[hellTableColumnResizer]';
+export class HellTableResizeHandleHarness extends ComponentHarness {
+  static hostSelector = '[hellTableResizeHandle]';
 
-  static with(options: HellTableColumnResizerHarnessFilters = {}): HarnessPredicate<HellTableColumnResizerHarness> {
-    return new HarnessPredicate(HellTableColumnResizerHarness, options).addOption(
+  static with(options: HellTableResizeHandleHarnessFilters = {}): HarnessPredicate<HellTableResizeHandleHarness> {
+    return new HarnessPredicate(HellTableResizeHandleHarness, options).addOption(
       'disabled',
       options.disabled,
       async (harness, disabled) => {
@@ -293,8 +293,11 @@ export class HellTableColumnResizerHarness extends ComponentHarness {
   }
 
   async isDisabled(): Promise<boolean> {
-    const value = await (await this.host()).getAttribute('aria-disabled');
-    return value === 'true';
+    const host = await this.host();
+    const ariaDisabled = await host.getAttribute('aria-disabled');
+    const role = await host.getAttribute('role');
+    const tabIndex = await host.getAttribute('tabindex');
+    return ariaDisabled === 'true' || role !== 'separator' || tabIndex === '-1';
   }
 
   async getAriaLabel(): Promise<string | null> {

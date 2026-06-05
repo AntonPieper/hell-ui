@@ -377,7 +377,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                       (sortToggle)="toggleSort('id')"
                     >
                       <button hellTableSortTrigger type="button">ID</button>
-                      <span hellTableColumnResizer></span>
+                      <span hellTableResizeHandle></span>
                     </th>
                     <th
                       hellTableHeaderCell
@@ -388,7 +388,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                       (sortToggle)="toggleSort('name')"
                     >
                       <button hellTableSortTrigger type="button">Name</button>
-                      <span hellTableColumnResizer></span>
+                      <span hellTableResizeHandle></span>
                     </th>
                     <th
                       hellTableHeaderCell
@@ -399,7 +399,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                       (sortToggle)="toggleSort('email')"
                     >
                       <button hellTableSortTrigger type="button">Email</button>
-                      <span hellTableColumnResizer></span>
+                      <span hellTableResizeHandle></span>
                     </th>
                     <th
                       hellTableHeaderCell
@@ -410,7 +410,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                       (sortToggle)="toggleSort('role')"
                     >
                       <button hellTableSortTrigger type="button">Role</button>
-                      <span hellTableColumnResizer></span>
+                      <span hellTableResizeHandle></span>
                     </th>
                     <th
                       hellTableHeaderCell

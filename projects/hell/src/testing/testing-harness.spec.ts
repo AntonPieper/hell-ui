@@ -109,7 +109,7 @@ class DialogHarnessHost {}
               <button hellTableSortTrigger id="sort-name" type="button">Name</button>
               <button
                 id="name-resizer"
-                hellTableColumnResizer
+                hellTableResizeHandle
                 aria-label="Resize name column"
                 [minWidth]="40"
               ></button>
@@ -379,7 +379,7 @@ describe('hell testing harness entrypoint', () => {
     expect(await sortTrigger!.getText()).toBe('Name');
     expect(await sortTrigger!.isDisabled()).toBe(false);
 
-    const resizer = await nameHeader!.getColumnResizer();
+    const resizer = await nameHeader!.getResizeHandle();
     expect(resizer).not.toBeNull();
     expect(await resizer!.getAriaLabel()).toBe('Resize name column');
     expect(await resizer!.getAriaValueNow()).toBe('50');
