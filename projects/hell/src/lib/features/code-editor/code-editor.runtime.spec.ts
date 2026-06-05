@@ -1,7 +1,32 @@
 import { EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 
-import { HellCodeEditorRuntime, hellCodeEditorSetupFactory } from './code-editor.runtime';
+import {
+  HellCodeEditorRuntime,
+  hellCodeEditorSetupFactory,
+  type HellCodeEditorRuntimeAccessibilityOptions,
+  type HellCodeEditorRuntimeOptions,
+} from './code-editor.runtime';
+
+const defaultAccessibility: HellCodeEditorRuntimeAccessibilityOptions = {
+  ariaLabel: 'Example source code',
+  ariaLabelledby: null,
+  ariaDescribedby: null,
+  readOnly: false,
+};
+
+function runtimeOptions(
+  options: Partial<HellCodeEditorRuntimeOptions> & Pick<HellCodeEditorRuntimeOptions, 'host'>,
+): HellCodeEditorRuntimeOptions {
+  return {
+    value: 'alpha',
+    extensions: [],
+    readOnly: false,
+    accessibility: defaultAccessibility,
+    onValueChange: () => {},
+    ...options,
+  };
+}
 
 describe('HellCodeEditorRuntime', () => {
   it('creates base setup per document via factory', () => {
@@ -24,13 +49,12 @@ describe('HellCodeEditorRuntime', () => {
   it('emits user edits but not external value writes', () => {
     const host = document.createElement('div');
     const values: string[] = [];
-    const runtime = new HellCodeEditorRuntime({
-      host,
-      value: 'alpha',
-      extensions: [],
-      readOnly: false,
-      onValueChange: (value) => values.push(value),
-    });
+    const runtime = new HellCodeEditorRuntime(
+      runtimeOptions({
+        host,
+        onValueChange: (value) => values.push(value),
+      }),
+    );
 
     runtime.setValue('beta');
     expect(values).toEqual([]);
@@ -42,22 +66,48 @@ describe('HellCodeEditorRuntime', () => {
     runtime.destroy();
   });
 
-  it('reconfigures extensions and read-only state without recreating the view', () => {
+  it('reconfigures extensions, read-only state, and accessibility without recreating the view', () => {
     const host = document.createElement('div');
-    const runtime = new HellCodeEditorRuntime({
-      host,
-      value: 'alpha',
-      extensions: [],
-      readOnly: false,
-      onValueChange: () => {},
-    });
+    const runtime = new HellCodeEditorRuntime(runtimeOptions({ host }));
     const view = runtime.view;
 
     runtime.setExtensions(EditorView.lineWrapping);
     runtime.setReadOnly(true);
+    runtime.setAccessibility({
+      ariaLabel: 'Read-only example source code',
+      ariaLabelledby: null,
+      ariaDescribedby: 'code-help',
+      readOnly: true,
+    });
 
     expect(runtime.view).toBe(view);
     expect(runtime.view.state.facet(EditorState.readOnly)).toBe(true);
+    expect(runtime.view.contentDOM.getAttribute('aria-label')).toBe(
+      'Read-only example source code',
+    );
+    expect(runtime.view.contentDOM.getAttribute('aria-describedby')).toBe('code-help');
+    expect(runtime.view.contentDOM.getAttribute('aria-readonly')).toBe('true');
+    expect(runtime.view.contentDOM.getAttribute('tabindex')).toBe('0');
+
+    runtime.destroy();
+  });
+
+  it('prefers aria-labelledby over aria-label for the content element name', () => {
+    const host = document.createElement('div');
+    const runtime = new HellCodeEditorRuntime(
+      runtimeOptions({
+        host,
+        accessibility: {
+          ariaLabel: 'Fallback label',
+          ariaLabelledby: 'visible-code-label',
+          ariaDescribedby: null,
+          readOnly: false,
+        },
+      }),
+    );
+
+    expect(runtime.view.contentDOM.getAttribute('aria-labelledby')).toBe('visible-code-label');
+    expect(runtime.view.contentDOM.hasAttribute('aria-label')).toBe(false);
 
     runtime.destroy();
   });
@@ -66,13 +116,7 @@ describe('HellCodeEditorRuntime', () => {
     const foreignDocument = document.implementation.createHTMLDocument('hell-code-editor');
     const host = foreignDocument.createElement('div');
 
-    const runtime = new HellCodeEditorRuntime({
-      host,
-      value: 'alpha',
-      extensions: [],
-      readOnly: false,
-      onValueChange: () => {},
-    });
+    const runtime = new HellCodeEditorRuntime(runtimeOptions({ host }));
 
     const root = (runtime.view as unknown as { root: Document | ShadowRoot }).root;
     expect(runtime.view.dom.ownerDocument).toBe(foreignDocument);
@@ -88,13 +132,7 @@ describe('HellCodeEditorRuntime', () => {
     shadow.append(host);
     document.body.append(container);
 
-    const runtime = new HellCodeEditorRuntime({
-      host,
-      value: 'alpha',
-      extensions: [],
-      readOnly: false,
-      onValueChange: () => {},
-    });
+    const runtime = new HellCodeEditorRuntime(runtimeOptions({ host }));
 
     const root = (runtime.view as unknown as { root: Document | ShadowRoot }).root;
     expect(root).toBe(shadow);

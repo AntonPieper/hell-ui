@@ -103,20 +103,15 @@
     font-size: var(--text-xs);
   }
 
-  .hd-example-code {
-    min-height: 160px;
+  .hd-example-code,
+  .hd-doc-code {
+    display: block;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
   }
 
-  .hd-example-code > pre,
-  .hd-doc-code > pre {
-    max-height: min(68vh, 560px);
-    margin-block: 0;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    overflow: auto;
-    background-color: var(--color-hell-surface-subtle);
+  .hd-example-code {
+    min-height: 160px;
   }
 
   .hd-doc-code-toolbar {

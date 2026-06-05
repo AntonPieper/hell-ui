@@ -62,6 +62,7 @@ const docsHeavyLazyRoutePolicies = [
 ];
 
 const codeEditorEntrypointSpecifier = '@hell-ui/angular/features/code-editor';
+const docsCodePreviewLazyWrapperPath = 'projects/hell-docs/src/app/shared/docs-code-viewer.ts';
 const codeMirrorPackageSpecifierPrefixes = ['@codemirror/', '@lezer/'];
 const audioTranscriptEntrypointSpecifier = '@hell-ui/angular/features/audio-transcript';
 const audioTranscriptRuntimeTerms = [
@@ -264,6 +265,7 @@ function checkDocsLazyRouteImportGraphContract() {
     for (const policy of docsHeavyLazyRoutePolicies) {
       if (!matchesDocsHeavyPackagePolicy(importHit.specifier, policy)) continue;
       if (isFileInDocsBoundary(importHit.file, pagesRoot, policy.boundary)) continue;
+      if (policy.id === 'code-editor-docs' && isDocsCodePreviewLazyWrapper(importHit.file)) continue;
 
       failures.push(
         `Docs Lazy Route Import Graph ${relPath(importHit.file)}:${importHit.line} imports ${importHit.specifier}; ` +
@@ -278,6 +280,7 @@ function checkDocsLazyRouteImportGraphContract() {
       for (const fragment of policy.sourceFragments) {
         if (!source.includes(fragment)) continue;
         if (isFileInDocsBoundary(file, pagesRoot, policy.boundary)) continue;
+        if (policy.id === 'code-editor-docs' && isDocsCodePreviewLazyWrapper(file)) continue;
 
         failures.push(
           `Docs Lazy Route Import Graph ${relPath(file)} references ${fragment}; ` +
@@ -412,6 +415,10 @@ function isFileInDocsBoundary(file, pagesRoot, boundary) {
   if (!isWithinDirectory(file, pagesRoot)) return false;
   const rel = relPathFrom(pagesRoot, file);
   return rel === boundary || rel.startsWith(`${boundary}/`);
+}
+
+function isDocsCodePreviewLazyWrapper(file) {
+  return relPath(file) === docsCodePreviewLazyWrapperPath;
 }
 
 function matchesDocsHeavyPackagePolicy(specifier, policy) {
@@ -687,13 +694,17 @@ function checkDocsShellNarrowEntrypointContract() {
 }
 
 function checkDocsCodeEditorIsolationContract() {
-  const sharedFiles = [
+  const directSharedFiles = [
     'projects/hell-docs/src/app/shared/code-block.ts',
     'projects/hell-docs/src/app/shared/example-tabs.ts',
     'projects/hell-docs/src/app/shared/code-tools.ts',
   ];
+  const deferredSharedFiles = [
+    'projects/hell-docs/src/app/shared/code-block.ts',
+    'projects/hell-docs/src/app/shared/example-tabs.ts',
+  ];
 
-  for (const file of sharedFiles) {
+  for (const file of directSharedFiles) {
     const path = join(root, file);
     if (!existsSync(path)) {
       failures.push(`Docs architecture check references missing file ${file}`);
@@ -703,8 +714,36 @@ function checkDocsCodeEditorIsolationContract() {
     const source = readFile(path);
     if (source.includes('@codemirror/') || source.includes('@hell-ui/angular/features/code-editor')) {
       failures.push(
-        `Docs shared file ${file} must not import CodeMirror or @hell-ui/angular/features/code-editor`,
+        `Docs shared file ${file} must not import CodeMirror or @hell-ui/angular/features/code-editor directly; use the deferred docs code viewer wrapper`,
       );
+    }
+    if (/<pre\b/.test(source)) {
+      failures.push(`Docs shared file ${file} must not render raw <pre> code blocks for shared code previews`);
+    }
+  }
+
+  for (const file of deferredSharedFiles) {
+    const source = readFile(join(root, file));
+    if (!source.includes("import('./docs-code-viewer')") || !source.includes('ngComponentOutlet')) {
+      failures.push(
+        `Docs shared file ${file} must lazy-load shared docs code previews through the docs-code-viewer dynamic component`,
+      );
+    }
+  }
+
+  const wrapperPath = join(root, docsCodePreviewLazyWrapperPath);
+  if (!existsSync(wrapperPath)) {
+    failures.push(`Docs architecture check references missing file ${docsCodePreviewLazyWrapperPath}`);
+  } else {
+    const wrapperSource = readFile(wrapperPath);
+    if (!wrapperSource.includes('@hell-ui/angular/features/code-editor')) {
+      failures.push('Docs code viewer wrapper must be the only shared file that imports @hell-ui/angular/features/code-editor');
+    }
+    if (!wrapperSource.includes('@hell-ui/angular/styles/features/code-editor')) {
+      failures.push('Docs code viewer wrapper must lazy-load the code-editor feature stylesheet with the viewer');
+    }
+    if (/<pre\b/.test(wrapperSource)) {
+      failures.push('Docs code viewer wrapper must render HellCodeEditor instead of raw <pre> code blocks');
     }
   }
 
@@ -1160,6 +1199,7 @@ function checkApiStabilityContract() {
     ['projects/hell/src/lib/features/code-editor/code-editor.ts', 'HellCodeEditorRuntimeFactory'],
     ['projects/hell/src/lib/features/code-editor/code-editor.ts', 'HELL_CODE_EDITOR_RUNTIME_FACTORY'],
     ['projects/hell/src/lib/features/code-editor/code-editor.ts', 'HellCodeEditor'],
+    ['projects/hell/src/lib/features/code-editor/code-editor.runtime.ts', 'HellCodeEditorRuntimeAccessibilityOptions'],
     ['projects/hell/src/lib/features/code-editor/code-editor.runtime.ts', 'HellCodeEditorRuntimeOptions'],
     ['projects/hell/src/lib/features/code-editor/code-editor.runtime.ts', 'HellCodeEditorRuntimePort'],
     ['projects/hell/src/lib/features/code-editor/code-editor.runtime.ts', 'hellCodeEditorSetupFactory'],

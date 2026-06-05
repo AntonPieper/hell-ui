@@ -14,7 +14,11 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
   selector: 'hd-code-editor',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  styles: [`@import '@hell-ui/angular/styles/features/code-editor';`],
+  styles: [
+    `
+      @import '@hell-ui/angular/styles/features/code-editor';
+    `,
+  ],
   imports: [ExampleTabs, EditorDemo, CodeBlock, CodeViewerDemo],
   template: `
     <article class="hd-prose">
@@ -33,8 +37,8 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
 
       <p>
         <code>@hell-ui/angular/features/code-editor</code> is a kept optional entry point. Do not
-        re-export it from root, composites, or other feature barrels; import it only where the editor
-        is intentionally used.
+        re-export it from root, composites, or other feature barrels; import it only where the
+        editor is intentionally used.
       </p>
 
       <p>
@@ -74,7 +78,14 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
           <code>extensions</code>: CodeMirror <code>Extension</code> supplied by the caller, e.g.
           <code>javascript()</code>.
         </li>
-        <li><code>readOnly</code>: disables editing and renders viewer styling.</li>
+        <li>
+          <code>readOnly</code>: disables editing, renders viewer styling, and exposes
+          <code>aria-readonly="true"</code> on the focusable CodeMirror content.
+        </li>
+        <li>
+          <code>ariaLabel</code>, <code>ariaLabelledby</code>, <code>ariaDescribedby</code>: name
+          and describe the focusable CodeMirror content element.
+        </li>
         <li><code>unstyled</code>: removes hell host classes but keeps CodeMirror setup.</li>
         <li>
           <code>hellCodeEditorSetupFactory(document)</code>: preferred setup export when an app
@@ -87,9 +98,17 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
       <ul>
         <li>Install language packages in the app using the editor, not in the reusable library.</li>
         <li>Keep extension arrays stable when possible so reconfiguration is intentional.</li>
-        <li>Lazy-load the kept optional entry point for surfaces that do not always need CodeMirror.</li>
-        <li>Use <code>readOnly</code> for docs, audit trails and generated-code viewers.</li>
-        <li>Use <code>hellCodeEditorSetupFactory</code> instead of module-global setup for shadow DOM, iframe, or after-hydration document contexts.</li>
+        <li>
+          Lazy-load the kept optional entry point for surfaces that do not always need CodeMirror.
+        </li>
+        <li>
+          Use <code>readOnly</code> for docs, audit trails and generated-code viewers, and give each
+          viewer a stable accessible name.
+        </li>
+        <li>
+          Use <code>hellCodeEditorSetupFactory</code> instead of module-global setup for shadow DOM,
+          iframe, or after-hydration document contexts.
+        </li>
       </ul>
 
       <h2>Don't</h2>

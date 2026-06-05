@@ -26,10 +26,7 @@ interface DialogFocusContract {
   nextFocusName: string | RegExp;
 }
 
-async function expectDialogFocusContract(
-  page: Page,
-  contract: DialogFocusContract,
-): Promise<void> {
+async function expectDialogFocusContract(page: Page, contract: DialogFocusContract): Promise<void> {
   try {
     await test.step(`${contract.label} focus trap`, async () => {
       const trigger = page.getByRole('button', { name: contract.triggerName }).first();
@@ -169,7 +166,9 @@ test.describe('Hell UI browser behavior', () => {
     await expect(handle).not.toHaveAttribute('aria-valuenow', before);
   });
 
-  test('select opens, supports keyboard selection, and updates selected value', async ({ page }) => {
+  test('select opens, supports keyboard selection, and updates selected value', async ({
+    page,
+  }) => {
     await page.goto('/components/select');
 
     const select = page.getByRole('combobox', { name: 'Select priority' }).first();
@@ -328,12 +327,17 @@ test.describe('Hell UI browser behavior', () => {
     await page.goto('/components/data-table');
     const firstExample = page.locator('hd-example-tabs').first();
     await firstExample.getByRole('tab', { name: 'Code' }).click();
-    await expect(firstExample.locator('pre.hd-example-code')).toBeVisible();
+    await expect(firstExample.locator('pre.hd-example-code')).toHaveCount(0);
+    await expect(
+      firstExample.locator('hell-code-editor.hd-code-viewer.hell-code-viewer'),
+    ).toBeVisible();
 
     await firstExample.getByRole('tab', { name: 'Preview' }).click();
     await expect(page.locator('hell-data-table.hell-data-table').first()).toBeVisible();
     await expect(page.locator('hell-data-table table.hell-table').first()).toBeVisible();
-    await expect(page.locator('hell-column-visibility-panel.hell-column-visibility-panel')).toBeVisible();
+    await expect(
+      page.locator('hell-column-visibility-panel.hell-column-visibility-panel'),
+    ).toBeVisible();
 
     await page.goto('/components/slider');
     const verticalSlider = page.locator('hell-slider[data-orientation="vertical"]').first();
@@ -350,6 +354,48 @@ test.describe('Hell UI browser behavior', () => {
     await page.goto('/accessibility');
     await expect(page.locator('.hd-a11y-table-wrap.hell-table-container')).toBeVisible();
     await expect(page.locator('table.hd-a11y-table.hell-table')).toBeVisible();
+  });
+
+  test('shared docs code tabs use the read-only Hell code viewer with copy and focus semantics', async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      let copiedText = '';
+      Object.defineProperty(navigator, 'clipboard', {
+        configurable: true,
+        value: {
+          readText: async () => copiedText,
+          writeText: async (value: string) => {
+            copiedText = value;
+          },
+        },
+      });
+    });
+
+    await page.goto('/components/data-table');
+
+    const firstExample = page.locator('hd-example-tabs').first();
+    await firstExample.getByRole('tab', { name: 'Code' }).click();
+
+    await expect(firstExample.locator('pre.hd-example-code')).toHaveCount(0);
+    const viewer = firstExample.locator('hell-code-editor.hd-code-viewer.hell-code-viewer');
+    await expect(viewer).toBeVisible();
+
+    const source = firstExample.getByRole('textbox', { name: 'Example source code' });
+    await expect(source).toBeVisible();
+    await expect(source).toHaveAttribute('aria-readonly', 'true');
+
+    const copy = firstExample.locator('.hd-example-code-toolbar button').first();
+    await expect(copy).toHaveAttribute('aria-label', 'Copy code');
+    await copy.click();
+    await expect(copy).toHaveAttribute('aria-label', 'Copied');
+    await expect
+      .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+      .toContain('hell-data-table');
+
+    await copy.focus();
+    await page.keyboard.press('Tab');
+    await expect(source).toBeFocused();
   });
 
   test('drop zone keeps nested drag state stable and accepts files', async ({ page }) => {
@@ -370,7 +416,9 @@ test.describe('Hell UI browser behavior', () => {
     await expect(page.getByText('browser-smoke.txt')).toBeVisible();
   });
 
-  test('pdf viewer keyboard controls and overview thumbnail smoke path remain stable', async ({ page }) => {
+  test('pdf viewer keyboard controls and overview thumbnail smoke path remain stable', async ({
+    page,
+  }) => {
     await page.goto('/components/pdf-viewer');
 
     const previewTabs = page.getByRole('tab', { name: 'Preview' });

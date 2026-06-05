@@ -19,11 +19,16 @@ import { type Extension } from '@codemirror/state';
 import { HellStyleable } from '../../core/styleable';
 import {
   HellCodeEditorRuntime,
+  type HellCodeEditorRuntimeAccessibilityOptions,
   type HellCodeEditorRuntimeOptions,
   type HellCodeEditorRuntimePort,
 } from './code-editor.runtime';
 
-export { hellCodeEditorSetup, hellCodeEditorSetupFactory, hellCodeEditorTheme } from './code-editor.runtime';
+export {
+  hellCodeEditorSetup,
+  hellCodeEditorSetupFactory,
+  hellCodeEditorTheme,
+} from './code-editor.runtime';
 
 /**
  * Factory hook for replacing the browser CodeMirror runtime in tests or app-specific hosts.
@@ -73,6 +78,12 @@ export class HellCodeEditor extends HellStyleable implements ControlValueAccesso
   /** Caller-owned CodeMirror extensions, including language support. */
   readonly extensions = input<Extension>([]);
   readonly readOnly = input(false, { transform: booleanAttribute });
+  /** Accessible name applied to CodeMirror's focusable content element. */
+  readonly ariaLabel = input<string | null>(null);
+  /** Visible label relationship applied to CodeMirror's focusable content element. */
+  readonly ariaLabelledby = input<string | null>(null);
+  /** Supporting description relationship applied to CodeMirror's focusable content element. */
+  readonly ariaDescribedby = input<string | null>(null);
   /** Emits only user/editor document edits, not external `value` writes. */
   readonly valueChange = output<string>();
 
@@ -101,6 +112,7 @@ export class HellCodeEditor extends HellStyleable implements ControlValueAccesso
         value: this.effectiveValue(),
         extensions: this.extensions(),
         readOnly: this.isReadOnly(),
+        accessibility: this.accessibilityOptions(),
         onValueChange: (value) => this.emitValue(value),
       });
     });
@@ -116,6 +128,10 @@ export class HellCodeEditor extends HellStyleable implements ControlValueAccesso
     effect(() => {
       const readOnly = this.isReadOnly();
       this.runtime?.setReadOnly(readOnly);
+    });
+    effect(() => {
+      const accessibility = this.accessibilityOptions();
+      this.runtime?.setAccessibility(accessibility);
     });
   }
 
@@ -142,6 +158,16 @@ export class HellCodeEditor extends HellStyleable implements ControlValueAccesso
 
   private effectiveValue(): string {
     return this.controlMode() ? this.controlValue() : this.value();
+  }
+
+  private accessibilityOptions(): HellCodeEditorRuntimeAccessibilityOptions {
+    const readOnly = this.isReadOnly();
+    return {
+      ariaLabel: this.ariaLabel(),
+      ariaLabelledby: this.ariaLabelledby(),
+      ariaDescribedby: this.ariaDescribedby(),
+      readOnly,
+    };
   }
 
   private emitValue(value: string): void {

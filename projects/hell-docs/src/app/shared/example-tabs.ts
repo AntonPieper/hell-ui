@@ -1,6 +1,8 @@
+import { NgComponentOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  Type,
   booleanAttribute,
   computed,
   input,
@@ -21,9 +23,14 @@ const EXAMPLE_TABS_ICONS = { faSolidCopy, faSolidCheck };
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   providers: [provideIcons(EXAMPLE_TABS_ICONS)],
-  imports: [HellButton, HellIcon, ...HELL_TABS_DIRECTIVES],
+  imports: [NgComponentOutlet, HellButton, HellIcon, ...HELL_TABS_DIRECTIVES],
   template: `
-    <div class="hd-example-tabs" hellTabset value="preview">
+    <div
+      class="hd-example-tabs"
+      hellTabset
+      [value]="selectedTab()"
+      (valueChange)="onTabChange($event)"
+    >
       <div hellTabList aria-label="Example view">
         <button hellTab value="preview" type="button">Preview</button>
         <button hellTab value="code" type="button">Code</button>
@@ -49,7 +56,13 @@ const EXAMPLE_TABS_ICONS = { faSolidCopy, faSolidCheck };
             <hell-icon [name]="copied() ? 'faSolidCheck' : 'faSolidCopy'" />
           </button>
         </div>
-        <pre class="hd-example-code"><code [textContent]="code()"></code></pre>
+        @if (codeViewer(); as viewer) {
+          <ng-container *ngComponentOutlet="viewer; inputs: codeViewerInputs()" />
+        } @else {
+          <div class="hd-code-viewer-placeholder hd-example-code" aria-hidden="true">
+            Loading code viewer…
+          </div>
+        }
       </div>
     </div>
   `,
@@ -59,7 +72,13 @@ export class ExampleTabs {
   readonly previewClass = input<string>('');
   readonly flush = input(false, { transform: booleanAttribute });
 
+  protected readonly selectedTab = signal('preview');
   protected readonly copied = signal(false);
+  protected readonly codeViewer = signal<Type<unknown> | null>(null);
+  protected readonly codeViewerInputs = computed(() => ({
+    code: this.code(),
+    label: 'Example source code',
+  }));
   protected readonly previewClassValue = computed(() => {
     const classes = ['hd-example'];
     if (this.flush()) classes.push('hd-example-flush');
@@ -70,9 +89,23 @@ export class ExampleTabs {
     return classes.join(' ');
   });
 
+  protected onTabChange(value: unknown): void {
+    const tab = String(value);
+    this.selectedTab.set(tab);
+    if (tab === 'code') void this.loadCodeViewer();
+  }
+
   protected async copyCode(): Promise<void> {
     await hdCopyTextToClipboard(this.code());
     this.copied.set(true);
     window.setTimeout(() => this.copied.set(false), 1200);
+  }
+
+  private codeViewerLoad: Promise<void> | null = null;
+
+  private loadCodeViewer(): Promise<void> {
+    return (this.codeViewerLoad ??= import('./docs-code-viewer').then((module) => {
+      this.codeViewer.set(module.DocsCodeViewer);
+    }));
   }
 }

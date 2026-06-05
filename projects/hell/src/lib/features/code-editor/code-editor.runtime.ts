@@ -18,6 +18,22 @@ const HELL_CODE_EDITOR_UNFOLD_PATH =
   'M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z';
 
 /**
+ * Accessibility attributes for the CodeMirror runtime boundary.
+ *
+ * @experimental Runtime seam for the experimental CodeMirror feature entry point.
+ */
+export interface HellCodeEditorRuntimeAccessibilityOptions {
+  /** Accessible name for the editor/content element when no labelled-by relationship is used. */
+  readonly ariaLabel: string | null;
+  /** ID reference for a visible label; takes precedence over `ariaLabel`. */
+  readonly ariaLabelledby: string | null;
+  /** Optional ID reference for supporting description text. */
+  readonly ariaDescribedby: string | null;
+  /** Mirrors the effective editor read-only state for assistive technology. */
+  readonly readOnly: boolean;
+}
+
+/**
  * Construction inputs for the CodeMirror runtime boundary.
  *
  * @experimental Runtime seam for the experimental CodeMirror feature entry point.
@@ -28,6 +44,7 @@ export interface HellCodeEditorRuntimeOptions {
   /** Caller-owned CodeMirror extensions; language support is passed here. */
   readonly extensions: Extension;
   readonly readOnly: boolean;
+  readonly accessibility: HellCodeEditorRuntimeAccessibilityOptions;
   /** Called for editor-originated document edits, not external `setValue` writes. */
   readonly onValueChange: (value: string) => void;
 }
@@ -44,6 +61,8 @@ export interface HellCodeEditorRuntimePort {
   setExtensions(extensions: Extension): void;
   /** Toggle the read-only compartment without recreating the editor. */
   setReadOnly(readOnly: boolean): void;
+  /** Reconfigure accessible name/description/state attributes on CodeMirror's content element. */
+  setAccessibility(options: HellCodeEditorRuntimeAccessibilityOptions): void;
   destroy(): void;
 }
 
@@ -296,6 +315,7 @@ export class HellCodeEditorRuntime implements HellCodeEditorRuntimePort {
 
   private readonly extensionCompartment = new Compartment();
   private readonly readOnlyCompartment = new Compartment();
+  private readonly accessibilityCompartment = new Compartment();
   private applyingExternalValue = false;
 
   constructor(options: HellCodeEditorRuntimeOptions) {
@@ -310,6 +330,7 @@ export class HellCodeEditorRuntime implements HellCodeEditorRuntimePort {
         hellCodeEditorTheme,
         this.extensionCompartment.of(options.extensions),
         this.readOnlyCompartment.of(this.readOnlyExtensions(options.readOnly)),
+        this.accessibilityCompartment.of(this.accessibilityExtensions(options.accessibility)),
         EditorView.updateListener.of((update) => {
           if (update.docChanged && !this.applyingExternalValue) {
             options.onValueChange(update.state.doc.toString());
@@ -342,6 +363,12 @@ export class HellCodeEditorRuntime implements HellCodeEditorRuntimePort {
     });
   }
 
+  setAccessibility(options: HellCodeEditorRuntimeAccessibilityOptions): void {
+    this.view.dispatch({
+      effects: this.accessibilityCompartment.reconfigure(this.accessibilityExtensions(options)),
+    });
+  }
+
   destroy(): void {
     this.view.destroy();
   }
@@ -349,4 +376,31 @@ export class HellCodeEditorRuntime implements HellCodeEditorRuntimePort {
   private readOnlyExtensions(readOnly: boolean): Extension {
     return [EditorState.readOnly.of(readOnly), EditorView.editable.of(!readOnly)];
   }
+
+  private accessibilityExtensions(options: HellCodeEditorRuntimeAccessibilityOptions): Extension {
+    const labelledby = cleanedAttribute(options.ariaLabelledby);
+    const describedby = cleanedAttribute(options.ariaDescribedby);
+    const attrs: Record<string, string> = {
+      role: 'textbox',
+      'aria-multiline': 'true',
+      'aria-readonly': options.readOnly ? 'true' : 'false',
+      spellcheck: 'false',
+    };
+
+    if (labelledby) {
+      attrs['aria-labelledby'] = labelledby;
+    } else {
+      attrs['aria-label'] =
+        cleanedAttribute(options.ariaLabel) ?? (options.readOnly ? 'Code viewer' : 'Code editor');
+    }
+    if (describedby) attrs['aria-describedby'] = describedby;
+    if (options.readOnly) attrs['tabindex'] = '0';
+
+    return EditorView.contentAttributes.of(attrs);
+  }
+}
+
+function cleanedAttribute(value: string | null): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
 }

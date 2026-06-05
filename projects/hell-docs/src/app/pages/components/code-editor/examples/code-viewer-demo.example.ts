@@ -7,7 +7,12 @@ import { HellCodeEditor } from '@hell-ui/angular/features/code-editor';
   selector: 'app-code-viewer-demo',
   imports: [HellCodeEditor],
   template: `
-    <hell-code-editor [value]="viewerCode" [extensions]="javascriptExtensions" readOnly />
+    <hell-code-editor
+      [value]="viewerCode"
+      [extensions]="javascriptExtensions"
+      [ariaLabel]="'Read-only button example source'"
+      readOnly
+    />
   `,
 })
 export class CodeViewerDemo {

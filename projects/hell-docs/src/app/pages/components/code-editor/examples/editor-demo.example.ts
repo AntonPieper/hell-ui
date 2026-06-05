@@ -11,6 +11,7 @@ import { HellCodeEditor } from '@hell-ui/angular/features/code-editor';
       <hell-code-editor
         [value]="snippet()"
         [extensions]="javascriptExtensions"
+        [ariaLabel]="'Editable card example source'"
         (valueChange)="snippet.set($event)"
       />
       <p class="text-sm opacity-70">Length: {{ snippet().length }} chars</p>

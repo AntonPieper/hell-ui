@@ -233,7 +233,7 @@ ${renderComponentStyleTable(componentStyles.slice(0, 8))}
 | Initial bundle exceeds 500 kB by ${formatBytes(initialWarningOverage)} | Static imports from \`main\` pull router/runtime plus docs-shell controls; \`styles.css\` globally imports Tailwind and \`@hell-ui/angular/styles/composites\`. Top chunks: ${initialChunks.slice(0, 5).map((row) => `\`${row.file}\``).join(', ')}. | Docs shell / global styles | ${renderInitialBudgetFollowUp()} |
 ${renderPdfViewerStyleRow(pdfViewerStyleWarnings)}
 | PDF lazy weight is large even when initial bundle is protected | \`pdfjs-dist/build/pdf.mjs\`, \`pdfjs-dist/web/pdf_viewer.mjs\`, and \`hell-ui-pdf-viewer.mjs\` are the top PDF lazy inputs. | PDF viewer split package | HELL-031 keeps the docs page lazy/isolated; HELL-053 keeps PDF outside the core package. |
-| Code editor lazy chunk is the largest lazy page | CodeMirror and Lezer packages dominate \`code-editor-page\`; this is expected feature weight, not initial shell weight. | Code editor feature | HELL-054 locks CodeMirror as a kept optional entrypoint and prevents leaks into root/composites. |
+| Code editor lazy chunks stay behind lazy docs boundaries | CodeMirror and Lezer packages dominate the code editor route and shared docs code-viewer lazy chunks; this is expected feature weight, not initial shell weight. | Code editor feature / docs code previews | HELL-054 locks CodeMirror as a kept optional entrypoint; HELL-087 keeps shared docs code previews dynamically imported instead of part of the docs shell. |
 | Table utilities lazy chunk carries demo/raw source cost | \`data-table-page\` includes live examples plus \`?raw\` source text and table utilities feature code. | Table utilities feature docs | HELL-056 locks table utilities as a kept feature entrypoint; HELL-050 verifies docs examples stay behind lazy routes. |
 
 ## Reproduce
@@ -255,7 +255,7 @@ function renderHeader() {
 - Source stats: \`${relative(root, statsPath)}\`
 - Budget policy: \`${relative(root, budgetPolicyPath)}\`
 - Report generator: \`tools/docs-bundle-budget-report.mjs\`
-- Scope: diagnosis plus current remediation status; HELL-050 now guards docs route imports, and remaining split/import work stays in HELL-053, HELL-054, and HELL-056.`;
+- Scope: diagnosis plus current remediation status; HELL-050 guards docs route imports, HELL-087 guards shared docs code-preview lazy loading, and remaining split/import work stays in HELL-053, HELL-054, and HELL-056.`;
 }
 
 function budgetStatusFor(type) {

@@ -5,6 +5,7 @@ import type { Extension } from '@codemirror/state';
 
 import { HELL_CODE_EDITOR_RUNTIME_FACTORY, HellCodeEditor } from './code-editor';
 import type {
+  HellCodeEditorRuntimeAccessibilityOptions,
   HellCodeEditorRuntimeOptions,
   HellCodeEditorRuntimePort,
 } from './code-editor.runtime';
@@ -13,6 +14,7 @@ class FakeCodeEditorRuntime implements HellCodeEditorRuntimePort {
   values: string[] = [];
   extensions: Extension[] = [];
   readOnlyStates: boolean[] = [];
+  accessibilityStates: HellCodeEditorRuntimeAccessibilityOptions[] = [];
   destroyed = false;
 
   constructor(readonly options: HellCodeEditorRuntimeOptions) {}
@@ -29,6 +31,10 @@ class FakeCodeEditorRuntime implements HellCodeEditorRuntimePort {
     this.readOnlyStates.push(readOnly);
   }
 
+  setAccessibility(options: HellCodeEditorRuntimeAccessibilityOptions): void {
+    this.accessibilityStates.push(options);
+  }
+
   destroy(): void {
     this.destroyed = true;
   }
@@ -36,11 +42,16 @@ class FakeCodeEditorRuntime implements HellCodeEditorRuntimePort {
 
 @Component({
   imports: [HellCodeEditor],
-  template: `<hell-code-editor [value]="value()" [readOnly]="readOnly()" />`,
+  template: `<hell-code-editor
+    [value]="value()"
+    [readOnly]="readOnly()"
+    [ariaLabel]="ariaLabel()"
+  />`,
 })
 class CodeEditorHost {
   readonly value = signal('alpha');
   readonly readOnly = signal(false);
+  readonly ariaLabel = signal('Example source code');
 }
 
 @Component({
@@ -76,13 +87,26 @@ describe('HellCodeEditor', () => {
 
     expect(runtime?.options.value).toBe('alpha');
     expect(runtime?.options.readOnly).toBe(false);
+    expect(runtime?.options.accessibility).toEqual({
+      ariaLabel: 'Example source code',
+      ariaLabelledby: null,
+      ariaDescribedby: null,
+      readOnly: false,
+    });
 
     fixture.componentInstance.value.set('beta');
     fixture.componentInstance.readOnly.set(true);
+    fixture.componentInstance.ariaLabel.set('Read-only example source code');
     await settle(fixture);
 
     expect(runtime?.values).toContain('beta');
     expect(runtime?.readOnlyStates).toContain(true);
+    expect(runtime?.accessibilityStates).toContainEqual({
+      ariaLabel: 'Read-only example source code',
+      ariaLabelledby: null,
+      ariaDescribedby: null,
+      readOnly: true,
+    });
 
     fixture.destroy();
 
