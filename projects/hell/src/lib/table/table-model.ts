@@ -7,7 +7,9 @@ export type HellTableRowKey = string;
 export type HellTableRowKeyValue = string | number;
 
 /** Draft object shape used by row editors when the row data itself is not object-like. */
-export type HellRowDraftValue<TData> = TData extends object ? Partial<TData> : Record<string, unknown>;
+export type HellRowDraftValue<TData> = TData extends object
+  ? Partial<TData>
+  : Record<string, unknown>;
 
 /** Patch accepted by row-draft controllers and field contexts. */
 export type HellRowDraftPatch<TDraft extends object> =
@@ -177,38 +179,117 @@ export type HellTableRowKeyAccessor<TData> = (row: TData, index: number) => Hell
 /** Stable row-key input accepted by adapter-free commands. */
 export type HellTableRowKeyInput<TData = unknown> = HellTableRowKeyValue | HellTableModelRow<TData>;
 
+/** Stable key used by flattened row parts and virtual adapters. */
+export type HellVirtualRowPartKey = string;
+
+/** Row-part kinds that can be rendered or virtualized without a table-engine dependency. */
+export type HellVirtualRowPartKind =
+  | 'row'
+  | 'editor'
+  | 'detail'
+  | 'group'
+  | 'loader'
+  | 'error'
+  | 'empty';
+
+/** Group input used when an adapter/app already grouped normalized rows. */
+export interface HellVirtualRowGroup<TData = unknown, TGroup = unknown> {
+  readonly id: HellTableRowKeyValue;
+  readonly value?: TGroup;
+  readonly rows: readonly HellTableModelRow<TData>[];
+}
+
 /** Data row part. Its key is stable across virtual/render adapters. */
-export interface HellTableDataRowPart<TData = unknown> {
+export interface HellVirtualDataRowPart<TData = unknown> {
   readonly kind: 'row';
-  readonly key: string;
+  readonly key: HellVirtualRowPartKey;
   readonly row: HellTableModelRow<TData>;
 }
 
+/** Active row-editor/detail-editor part inserted after its owning data row. */
+export interface HellVirtualRowEditorPart<TData = unknown> {
+  readonly kind: 'editor';
+  readonly key: HellVirtualRowPartKey;
+  readonly row: HellTableModelRow<TData>;
+}
+
+/** Expanded detail row part inserted after its owning data row. */
+export interface HellVirtualDetailRowPart<TData = unknown> {
+  readonly kind: 'detail';
+  readonly key: HellVirtualRowPartKey;
+  readonly row: HellTableModelRow<TData>;
+}
+
+/** Group heading/separator row part for grouped renderers and virtualizers. */
+export interface HellVirtualGroupRowPart<TData = unknown, TGroup = unknown> {
+  readonly kind: 'group';
+  readonly key: HellVirtualRowPartKey;
+  readonly groupKey: HellTableRowKey;
+  readonly group: TGroup | undefined;
+  readonly rows: readonly HellTableModelRow<TData>[];
+}
+
 /** Loading row part for engines that render loading inline. */
-export interface HellTableLoaderRowPart {
+export interface HellVirtualLoaderRowPart {
   readonly kind: 'loader';
-  readonly key: string;
+  readonly key: HellVirtualRowPartKey;
 }
 
 /** Error row part for engines that render errors inline. */
-export interface HellTableErrorRowPart {
+export interface HellVirtualErrorRowPart {
   readonly kind: 'error';
-  readonly key: string;
+  readonly key: HellVirtualRowPartKey;
   readonly error: unknown;
 }
 
 /** Empty-state row part. */
-export interface HellTableEmptyRowPart {
+export interface HellVirtualEmptyRowPart {
   readonly kind: 'empty';
-  readonly key: string;
+  readonly key: HellVirtualRowPartKey;
 }
 
-/** Flattened row-part primitive consumed by renderers and future virtualization helpers. */
-export type HellTableRowPart<TData = unknown> =
-  | HellTableDataRowPart<TData>
-  | HellTableLoaderRowPart
-  | HellTableErrorRowPart
-  | HellTableEmptyRowPart;
+/** Flattened row-part primitive consumed by renderers and virtualization helpers. */
+export type HellVirtualRowPart<TData = unknown, TGroup = unknown> =
+  | HellVirtualDataRowPart<TData>
+  | HellVirtualRowEditorPart<TData>
+  | HellVirtualDetailRowPart<TData>
+  | HellVirtualGroupRowPart<TData, TGroup>
+  | HellVirtualLoaderRowPart
+  | HellVirtualErrorRowPart
+  | HellVirtualEmptyRowPart;
+
+/** Compatibility alias for renderers that adopted row parts before the virtual naming landed. */
+export type HellTableRowPart<TData = unknown> = HellVirtualRowPart<TData>;
+export type HellTableDataRowPart<TData = unknown> = HellVirtualDataRowPart<TData>;
+export type HellTableLoaderRowPart = HellVirtualLoaderRowPart;
+export type HellTableErrorRowPart = HellVirtualErrorRowPart;
+export type HellTableEmptyRowPart = HellVirtualEmptyRowPart;
+
+/** Row-key matcher used to request expanded detail row parts. */
+export type HellVirtualRowPartMatcher<TData = unknown> =
+  | readonly HellTableRowKey[]
+  | ReadonlySet<HellTableRowKey>
+  | Readonly<Record<HellTableRowKey, boolean>>
+  | ((row: HellTableModelRow<TData>) => boolean);
+
+/** Options for flattening table rows into stable virtual row parts. */
+export interface HellTableVirtualRowPartsOptions<TData = unknown, TGroup = unknown> {
+  readonly rows: readonly HellTableModelRow<TData>[];
+  readonly groups?: readonly HellVirtualRowGroup<TData, TGroup>[];
+  readonly loading?: boolean;
+  readonly error?: unknown | null;
+  readonly activeEditorRowKey?: HellTableRowKey | null;
+  readonly expandedDetailRowKeys?: HellVirtualRowPartMatcher<TData> | null;
+  readonly loaderKey?: HellVirtualRowPartKey;
+  readonly errorKey?: HellVirtualRowPartKey;
+  readonly emptyKey?: HellVirtualRowPartKey;
+}
+
+/** Options layered on top of rows plus HellTableState. */
+export type HellTableRowPartsFromRowsOptions<TData = unknown, TGroup = unknown> = Omit<
+  HellTableVirtualRowPartsOptions<TData, TGroup>,
+  'rows' | 'loading' | 'error'
+>;
 
 /** Context passed to header renderers. */
 export interface HellTableHeaderRenderContext<TData = unknown> {
@@ -540,16 +621,61 @@ export function hellTableHeaderGroupsFromColumns<TData>(
   ];
 }
 
+/** Builds the prefixed stable key used by virtual row parts. */
+export function hellTableVirtualRowPartKey(
+  kind: Extract<HellVirtualRowPartKind, 'row' | 'editor' | 'detail' | 'group'>,
+  key: HellTableRowKeyValue,
+): HellVirtualRowPartKey {
+  return `${kind}:${hellTableNormalizeRowKey(key)}`;
+}
+
+/** Flattens rows, groups, active editors, expanded details, and status rows into stable virtual parts. */
+export function hellTableVirtualRowPartsFromRows<TData, TGroup = unknown>(
+  options: HellTableVirtualRowPartsOptions<TData, TGroup>,
+): readonly HellVirtualRowPart<TData, TGroup>[] {
+  if (options.loading) return [{ kind: 'loader', key: options.loaderKey ?? 'loader' }];
+  if (options.error !== null && options.error !== undefined) {
+    return [{ kind: 'error', key: options.errorKey ?? 'error', error: options.error }];
+  }
+
+  const parts: HellVirtualRowPart<TData, TGroup>[] = [];
+  let rowCount = 0;
+
+  if (options.groups?.length) {
+    for (const group of options.groups) {
+      const groupKey = hellTableNormalizeRowKey(group.id);
+      parts.push({
+        kind: 'group',
+        key: hellTableVirtualRowPartKey('group', groupKey),
+        groupKey,
+        group: group.value,
+        rows: group.rows,
+      });
+      rowCount += group.rows.length;
+      appendVirtualDataRowParts(parts, group.rows, options);
+    }
+  } else {
+    rowCount = options.rows.length;
+    appendVirtualDataRowParts(parts, options.rows, options);
+  }
+
+  if (rowCount === 0 && parts.length === 0)
+    return [{ kind: 'empty', key: options.emptyKey ?? 'empty' }];
+  return parts;
+}
+
 /** Builds stable row parts from normalized rows and loading/error state. */
-export function hellTableRowPartsFromRows<TData>(
+export function hellTableRowPartsFromRows<TData, TGroup = unknown>(
   rows: readonly HellTableModelRow<TData>[],
   state: Pick<HellTableState, 'loading' | 'error'>,
-): readonly HellTableRowPart<TData>[] {
-  if (state.loading.value()) return [{ kind: 'loader', key: 'loader' }];
-  const error = state.error.value();
-  if (error !== null && error !== undefined) return [{ kind: 'error', key: 'error', error }];
-  if (!rows.length) return [{ kind: 'empty', key: 'empty' }];
-  return rows.map((row) => ({ kind: 'row', key: `row:${row.key}`, row }));
+  options: HellTableRowPartsFromRowsOptions<TData, TGroup> = {},
+): readonly HellVirtualRowPart<TData, TGroup>[] {
+  return hellTableVirtualRowPartsFromRows({
+    ...options,
+    rows,
+    loading: state.loading.value(),
+    error: state.error.value(),
+  });
 }
 
 /** Creates adapter-free commands over the supplied state channels and optional row signal. */
@@ -648,6 +774,37 @@ export function hellTableCreateModel<TData>(
     state,
     commands,
   };
+}
+
+function appendVirtualDataRowParts<TData, TGroup>(
+  parts: HellVirtualRowPart<TData, TGroup>[],
+  rows: readonly HellTableModelRow<TData>[],
+  options: Pick<
+    HellTableVirtualRowPartsOptions<TData, TGroup>,
+    'activeEditorRowKey' | 'expandedDetailRowKeys'
+  >,
+): void {
+  for (const row of rows) {
+    parts.push({ kind: 'row', key: hellTableVirtualRowPartKey('row', row.key), row });
+    if (options.activeEditorRowKey === row.key) {
+      parts.push({ kind: 'editor', key: hellTableVirtualRowPartKey('editor', row.key), row });
+    }
+    if (hellTableVirtualRowMatches(row, options.expandedDetailRowKeys ?? null)) {
+      parts.push({ kind: 'detail', key: hellTableVirtualRowPartKey('detail', row.key), row });
+    }
+  }
+}
+
+function hellTableVirtualRowMatches<TData>(
+  row: HellTableModelRow<TData>,
+  matcher: HellVirtualRowPartMatcher<TData> | null,
+): boolean {
+  if (!matcher) return false;
+  if (typeof matcher === 'function') return matcher(row);
+  if (Array.isArray(matcher)) return matcher.includes(row.key);
+  const setMatcher = matcher as { has?: (key: HellTableRowKey) => boolean };
+  if (typeof setMatcher.has === 'function') return setMatcher.has(row.key);
+  return (matcher as Readonly<Record<string, boolean>>)[row.key] === true;
 }
 
 function hellTableCanUseValueAsKey(value: unknown): value is HellTableRowKeyValue {

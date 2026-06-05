@@ -9,6 +9,8 @@ import {
   hellTableResolveStateUpdater,
   hellTableRowsFromData,
   hellTableStateChannel,
+  hellTableVirtualRowPartKey,
+  hellTableVirtualRowPartsFromRows,
   hellTableVisibleColumns,
   type HellTableColumn,
   type HellTableSortingState,
@@ -181,6 +183,81 @@ describe('HellTableModel normalized state', () => {
 
     model.commands.toggleSingleRowSelected('grace');
     expect(model.state.selectedRowKey.value()).toBeNull();
+  });
+
+  it('flattens rows, editor parts, expanded detail parts, and groups with stable virtual keys', () => {
+    const rows = hellTableRowsFromData<Person>([
+      { id: '42', name: 'Ada' },
+      { id: '43', name: 'Grace' },
+    ]);
+    const groupedParts = hellTableVirtualRowPartsFromRows({
+      rows,
+      groups: [{ id: 'pioneers', value: { label: 'Pioneers' }, rows }],
+      activeEditorRowKey: '42',
+      expandedDetailRowKeys: new Set(['43']),
+    });
+
+    expect(hellTableVirtualRowPartKey('row', 42)).toBe('row:42');
+    expect(hellTableVirtualRowPartKey('editor', 42)).toBe('editor:42');
+    expect(groupedParts.map((part) => part.key)).toEqual([
+      'group:pioneers',
+      'row:42',
+      'editor:42',
+      'row:43',
+      'detail:43',
+    ]);
+    expect(groupedParts[0]).toEqual({
+      kind: 'group',
+      key: 'group:pioneers',
+      groupKey: 'pioneers',
+      group: { label: 'Pioneers' },
+      rows,
+    });
+  });
+
+  it('inserts and removes row-editor virtual parts without changing data-row keys', () => {
+    const rows = hellTableRowsFromData<Person>([
+      { id: '42', name: 'Ada' },
+      { id: '43', name: 'Grace' },
+    ]);
+
+    expect(hellTableVirtualRowPartsFromRows({ rows }).map((part) => part.key)).toEqual([
+      'row:42',
+      'row:43',
+    ]);
+    expect(
+      hellTableVirtualRowPartsFromRows({ rows, activeEditorRowKey: '42' }).map((part) => part.key),
+    ).toEqual(['row:42', 'editor:42', 'row:43']);
+    expect(
+      hellTableVirtualRowPartsFromRows({ rows, activeEditorRowKey: null }).map((part) => part.key),
+    ).toEqual(['row:42', 'row:43']);
+  });
+
+  it('keeps virtual row parts independent from hidden columns and covers loading/empty parts', () => {
+    const columns: readonly HellTableColumn<Person>[] = [
+      { id: 'name', header: 'Name' },
+      { id: 'email', header: 'Email', visibility: 'user-toggleable' },
+    ];
+    const model = hellTableCreateModel<Person>({
+      columns,
+      rows: [{ id: '42', name: 'Ada' }],
+    });
+
+    model.commands.setColumnVisible('email', false);
+
+    expect(model.visibleColumns().map((column) => column.id)).toEqual(['name']);
+    expect(
+      hellTableVirtualRowPartsFromRows({
+        rows: model.rows(),
+        activeEditorRowKey: '42',
+      }).map((part) => part.key),
+    ).toEqual(['row:42', 'editor:42']);
+    expect(hellTableVirtualRowPartsFromRows({ rows: model.rows(), loading: true })).toEqual([
+      { kind: 'loader', key: 'loader' },
+    ]);
+    expect(hellTableVirtualRowPartsFromRows({ rows: [] })).toEqual([
+      { kind: 'empty', key: 'empty' },
+    ]);
   });
 
   it('keeps adapter-free commands separate for active rows, selection, visibility, and status', () => {

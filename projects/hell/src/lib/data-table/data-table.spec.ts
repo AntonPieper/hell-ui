@@ -157,7 +157,12 @@ class CustomTemplateDataTableHost {
   imports: [...HELL_DATA_TABLE_DIRECTIVES],
   template: `
     <hell-data-table [rows]="rows" [columns]="columns" rowKey="id" [(activeRowKey)]="activeRowKey">
-      <ng-template [hellRowActions]="'actions'" let-row="row" let-state="state" let-commands="commands">
+      <ng-template
+        [hellRowActions]="'actions'"
+        let-row="row"
+        let-state="state"
+        let-commands="commands"
+      >
         <button
           hellTableRowAction
           type="button"
@@ -175,7 +180,9 @@ class CustomTemplateDataTableHost {
     <aside [id]="detailId">
       @if (activeRow(); as row) {
         <h2>Edit {{ row.name }}</h2>
-        <button data-close-detail type="button" (click)="activeRowKey.set(null)">Close detail</button>
+        <button data-close-detail type="button" (click)="activeRowKey.set(null)">
+          Close detail
+        </button>
       } @else {
         <p>No active row</p>
       }
@@ -323,10 +330,14 @@ class SingleSelectableRowsDataTableHost {
           />
         </label>
         <span data-row-context>
-          {{ row.key }}|{{ draft.name }}|{{ name.touched }}|{{ name.errors.join('|') }}|{{ saveStatus }}
+          {{ row.key }}|{{ draft.name }}|{{ name.touched }}|{{ name.errors.join('|') }}|{{
+            saveStatus
+          }}
         </span>
         <span data-command-active>{{ commands.isActive(row) }}</span>
-        <button data-commit type="button" [disabled]="name.disabled" (click)="commit()">Save</button>
+        <button data-commit type="button" [disabled]="name.disabled" (click)="commit()">
+          Save
+        </button>
         <button data-cancel type="button" (click)="cancel()">Cancel</button>
       </ng-template>
     </hell-data-table>
@@ -422,10 +433,11 @@ describe('HellDataTable simple renderer', () => {
       'Name',
       'Active',
     ]);
-    expect([...root.querySelectorAll('tbody tr')].map((row) => row.textContent?.replace(/\s+/g, ' ').trim())).toEqual([
-      'Ada true',
-      'Grace false',
-    ]);
+    expect(
+      [...root.querySelectorAll('tbody tr')].map((row) =>
+        row.textContent?.replace(/\s+/g, ' ').trim(),
+      ),
+    ).toEqual(['Ada true', 'Grace false']);
     expect(root.querySelector('tbody tr')?.getAttribute('data-row-key')).toBe('ada');
   });
 
@@ -547,7 +559,8 @@ describe('HellDataTable simple renderer', () => {
     expect(action.getAttribute('aria-expanded')).toBe('true');
 
     const closeDetail = root.querySelector('[data-close-detail]');
-    if (!(closeDetail instanceof HTMLButtonElement)) throw new Error('Expected detail close button.');
+    if (!(closeDetail instanceof HTMLButtonElement))
+      throw new Error('Expected detail close button.');
     closeDetail.click();
     fixture.detectChanges();
 
@@ -593,7 +606,7 @@ describe('HellDataTable simple renderer', () => {
     fixture.detectChanges();
 
     expect(host.activeRowKey()).toBe('ada');
-    expect(rowEditorByKey(root, 'ada')).toBeTruthy();
+    expect(rowEditorByKey(root, 'ada').getAttribute('data-row-part-key')).toBe('editor:ada');
     expect(root.querySelector('[data-command-active]')?.textContent?.trim()).toBe('true');
 
     const input = editNameInput(root);
@@ -694,7 +707,9 @@ describe('HellDataTable simple renderer', () => {
     expect(rowByKey(root, 'ada').getAttribute('data-selected')).toBe('true');
     expect(rowByKey(root, 'ada').hasAttribute('aria-selected')).toBe(false);
     expect(checkboxByLabel(root, 'Select visible people').indeterminate).toBe(true);
-    expect(root.querySelector('[data-hell-data-table-bulk-actions]')?.textContent).toContain('Bulk 1');
+    expect(root.querySelector('[data-hell-data-table-bulk-actions]')?.textContent).toContain(
+      'Bulk 1',
+    );
 
     host.reorderCoreRows();
     fixture.detectChanges();
@@ -810,7 +825,11 @@ function rowKeys(root: Element): string[] {
 
 function tableHeaderText(root: Element): string[] {
   return [...root.querySelectorAll('hell-data-table thead th')].map(
-    (cell) => cell.textContent?.replace(/Required|Initially hidden/g, '').replace(/\s+/g, ' ').trim() ?? '',
+    (cell) =>
+      cell.textContent
+        ?.replace(/Required|Initially hidden/g, '')
+        .replace(/\s+/g, ' ')
+        .trim() ?? '',
   );
 }
 
