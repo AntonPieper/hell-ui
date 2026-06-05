@@ -1,4 +1,4 @@
-import { computed, signal, type Signal } from '@angular/core';
+import { computed, signal, type Signal, type TemplateRef, type Type } from '@angular/core';
 
 /** Stable string key used by Hell table rows and row-derived parts. */
 export type HellTableRowKey = string;
@@ -59,18 +59,46 @@ export interface HellTableInitialState {
   readonly error?: unknown | null;
 }
 
-/** Minimal normalized column contract shared before HELL-070 adds the column DSL. */
+/** Built-in column kinds understood by the first-party table renderers. */
+export type HellColumnKind = 'text' | 'boolean' | 'select' | 'action' | 'selection' | 'custom';
+
+/** Consumer metadata carried through column definitions without Hell interpreting it. */
+export type HellColumnMeta = Readonly<Record<string, unknown>>;
+
+/** Select/dropdown option metadata for select-style cells and editors. */
+export interface HellSelectColumnOption<TValue = unknown> {
+  readonly value: TValue;
+  readonly label: unknown;
+  readonly disabled?: boolean;
+  readonly meta?: HellColumnMeta;
+}
+
+/** Normalized column contract shared by simple, TanStack, CDK, and virtual table layers. */
 export interface HellTableColumn<TData = unknown, TValue = unknown> {
   readonly id: HellTableColumnId;
+  readonly kind?: HellColumnKind;
   readonly header?: unknown;
   readonly accessor?: (row: TData) => TValue;
+  readonly accessorKey?: string;
   /** Default visibility before user/app columnVisibility overrides. */
   readonly visible?: boolean;
   /** `false` keeps required action/selection columns visible regardless of visibility state. */
   readonly hideable?: boolean;
   readonly sortable?: boolean;
-  readonly meta?: Readonly<Record<string, unknown>>;
+  readonly size?: number;
+  readonly minSize?: number;
+  readonly maxSize?: number;
+  readonly meta?: HellColumnMeta;
+  readonly options?: readonly HellSelectColumnOption<TValue>[];
+  readonly renderer?: HellTableRenderer<HellTableCellRenderContext<TData, TValue>>;
+  readonly cell?: HellTableRenderer<HellTableCellRenderContext<TData, TValue>>;
+  readonly headerCell?: HellTableRenderer<HellTableHeaderRenderContext<TData>>;
+  readonly rowActions?: HellTableRenderer<HellTableRowRenderContext<TData>>;
+  readonly rowEditor?: HellTableRenderer<HellTableRowRenderContext<TData>>;
 }
+
+/** Public column-definition alias used by consumer-facing table DSL helpers. */
+export type HellColumnDef<TData = unknown, TValue = unknown> = HellTableColumn<TData, TValue>;
 
 /** Normalized header cell. Header groups can come from simple, TanStack, or CDK adapters. */
 export interface HellTableModelHeader<TData = unknown> {
@@ -143,10 +171,10 @@ export interface HellTableHeaderRenderContext<TData = unknown> {
 }
 
 /** Context passed to cell renderers. */
-export interface HellTableCellRenderContext<TData = unknown> {
+export interface HellTableCellRenderContext<TData = unknown, TValue = unknown> {
   readonly row: HellTableModelRow<TData>;
-  readonly column: HellTableColumn<TData>;
-  readonly value: unknown;
+  readonly column: HellTableColumn<TData, TValue>;
+  readonly value: TValue;
 }
 
 /** Context passed to row action/editor renderers. */
@@ -156,8 +184,52 @@ export interface HellTableRowRenderContext<TData = unknown> {
   readonly commands: HellTableCommands<TData>;
 }
 
-/** Renderer value kept intentionally generic until HELL-070 wires TemplateRef/component renderers. */
-export type HellTableRenderer<TContext = unknown> = (context: TContext) => unknown;
+/** Context passed to row-editor field renderers. */
+export interface HellTableEditFieldRenderContext<TData = unknown, TValue = unknown>
+  extends HellTableRowRenderContext<TData> {
+  readonly fieldId: string;
+  readonly value?: TValue;
+}
+
+/** Function renderer used when rendering is resolved to a pure value transform. */
+export type HellTableRenderFunction<TContext = unknown, TResult = unknown> = {
+  bivarianceHack(context: TContext): TResult;
+}['bivarianceHack'];
+
+/** TemplateRef renderer descriptor for Angular template-backed table slots. */
+export interface HellTableTemplateRenderer<TContext = unknown> {
+  readonly kind: 'template';
+  readonly template: TemplateRef<TContext>;
+}
+
+/** Static or context-derived inputs passed to a component renderer. */
+export type HellTableComponentRendererInputs<TContext = unknown> =
+  | Readonly<Record<string, unknown>>
+  | {
+      bivarianceHack(context: TContext): Readonly<Record<string, unknown>>;
+    }['bivarianceHack'];
+
+/** Component renderer descriptor for dynamic table slots owned by consumers/adapters. */
+export interface HellTableComponentRenderer<TContext = unknown, TComponent = unknown> {
+  readonly kind: 'component';
+  readonly component: Type<TComponent>;
+  readonly inputs?: HellTableComponentRendererInputs<TContext>;
+}
+
+/** Renderer accepted by Hell table columns and projected renderer registries. */
+export type HellTableRenderer<TContext = unknown> =
+  | HellTableRenderFunction<TContext>
+  | HellTableTemplateRenderer<TContext>
+  | HellTableComponentRenderer<TContext>;
+
+/** Source chosen by renderer resolution. */
+export type HellTableRendererSource = 'projected' | 'column' | 'built-in' | 'accessor';
+
+/** Resolved renderer plus its winning source in the precedence chain. */
+export interface HellTableResolvedRenderer<TContext = unknown> {
+  readonly source: HellTableRendererSource;
+  readonly renderer: HellTableRenderer<TContext>;
+}
 
 /** Normalized render slots shared by simple and adapter-backed table engines. */
 export interface HellTableRenderRegistry<TData = unknown> {
@@ -172,6 +244,9 @@ export interface HellTableRenderRegistry<TData = unknown> {
   >;
   readonly rowEditors: Readonly<
     Record<string, HellTableRenderer<HellTableRowRenderContext<TData>>>
+  >;
+  readonly editFields: Readonly<
+    Record<string, HellTableRenderer<HellTableEditFieldRenderContext<TData>>>
   >;
 }
 
@@ -261,6 +336,7 @@ export function hellTableCreateRenderRegistry<TData>(
     cells: registry.cells ?? {},
     rowActions: registry.rowActions ?? {},
     rowEditors: registry.rowEditors ?? {},
+    editFields: registry.editFields ?? {},
   };
 }
 

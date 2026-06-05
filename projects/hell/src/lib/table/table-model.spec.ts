@@ -139,8 +139,10 @@ describe('HellTableModel normalized state', () => {
       { kind: 'row', key: 'row:ada', row: model.rows()[0] },
       { kind: 'row', key: 'row:grace', row: model.rows()[1] },
     ]);
+    const nameRenderer = model.render.cells['name'];
+    if (typeof nameRenderer !== 'function') throw new Error('Expected function cell renderer.');
     expect(
-      model.render.cells['name']({
+      nameRenderer({
         row: model.rows()[0],
         column: model.columns()[1],
         value: 'Ada',
