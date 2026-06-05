@@ -75,7 +75,10 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
         <p>
           Project <code>hellCell</code>, <code>hellHeaderCell</code>, and
           <code>hellRowActions</code> templates when a simple table needs custom cell, header, or
-          action rendering without changing the native table shell.
+          action rendering without changing the native table shell. Row-action templates receive
+          <code>commands.openRow</code>, <code>commands.closeRow</code>,
+          <code>commands.isActive</code>, and <code>commands.activeRow</code>, and the simple renderer
+          exposes <code>[(activeRowKey)]</code> for external master/detail panes.
         </p>
       </div>
 
@@ -101,7 +104,8 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
         <h2>Row editor</h2>
         <p>
           Pair an explicit cell action with resizable panes when the table and editor both need
-          persistent room.
+          persistent room. Wire <code>aria-controls</code> and <code>aria-expanded</code> from the
+          action to the controlled editor pane.
         </p>
       </div>
 
@@ -177,7 +181,8 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
           <li>
             <code>button[hellTableRowAction]</code> / <code>a[hellTableRowAction]</code>: native row
             action control. The button/link owns focus, click, keyboard activation, and accessible
-            name.
+            name. For master/detail editors, bind <code>aria-controls</code> to the editor pane id
+            and <code>aria-expanded</code> to the active-row state.
           </li>
           <li>
             <code>[hellTableSelectionCell]</code>: narrow styling hook for the cell that contains
@@ -196,6 +201,18 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
             arrow keys keep separator ARIA while sizing state stays adapter-owned; emits one
             <code>(resizeCommit)</code> transaction containing both affected columns; optional
             <code>aria-controls</code> for controlled DOM element IDs.
+          </li>
+        </ul>
+
+        <h3>Simple renderer</h3>
+        <ul>
+          <li>
+            <code>hell-data-table</code>: accepts <code>[activeRowKey]</code> /
+            <code>(activeRowKeyChange)</code> (or <code>[(activeRowKey)]</code>) for the visible
+            master/detail row. Projected <code>hellRowActions</code> templates receive
+            <code>commands.openRow(row)</code>, <code>commands.closeRow(row)</code>,
+            <code>commands.isActive(row)</code>, and <code>commands.activeRow()</code>. Active-row
+            state is independent from row selection.
           </li>
         </ul>
 

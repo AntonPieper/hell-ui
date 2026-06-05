@@ -485,6 +485,8 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                             variant="ghost"
                             size="xs"
                             [attr.aria-label]="'Open details for ' + row.name"
+                            [attr.aria-controls]="detailPaneId"
+                            [attr.aria-expanded]="activeRowId() === row.id ? 'true' : 'false'"
                             (click)="openRow(row)"
                           >
                             Open
@@ -531,7 +533,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
         </ng-template>
 
         <ng-template hellSplitDetail>
-          <div class="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div [id]="detailPaneId" class="flex min-h-0 min-w-0 flex-1 flex-col">
             @if (activeRow(); as row) {
               <div class="flex items-center justify-between border-b border-hell-border bg-hell-surface-subtle p-3">
                 <strong class="text-sm font-semibold text-hell-foreground">{{ row.name }}</strong>
@@ -596,6 +598,7 @@ export class DataTableExampleExample {
   protected readonly assignees = ASSIGNEES;
   protected readonly pageSizeOptions = PAGE_SIZES;
   protected readonly searchSuggestionLimit = SEARCH_SUGGESTION_LIMIT;
+  protected readonly detailPaneId = 'data-table-example-detail-pane';
   protected readonly menuOpenTriggers: ('click' | 'enter' | 'arrowkey')[] = [
     'click',
     'enter',

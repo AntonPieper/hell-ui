@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import {
@@ -147,6 +147,65 @@ class CustomTemplateDataTableHost {
   ]);
 }
 
+@Component({
+  imports: [...HELL_DATA_TABLE_DIRECTIVES],
+  template: `
+    <hell-data-table [rows]="rows" [columns]="columns" rowKey="id" [(activeRowKey)]="activeRowKey">
+      <ng-template [hellRowActions]="'actions'" let-row="row" let-state="state" let-commands="commands">
+        <button
+          hellTableRowAction
+          type="button"
+          [attr.aria-controls]="detailId"
+          [attr.aria-expanded]="commands.isActive(row) ? 'true' : 'false'"
+          (click)="commands.isActive(row) ? commands.closeRow(row) : commands.openRow(row)"
+        >
+          {{ commands.isActive(row) ? 'Close' : 'Open' }} {{ row.original.name }}
+        </button>
+        <span data-selection-count>{{ selectionCount(state.rowSelection.value()) }}</span>
+        <span data-active-name>{{ commands.activeRow()?.original.name ?? 'none' }}</span>
+      </ng-template>
+    </hell-data-table>
+
+    <aside [id]="detailId">
+      @if (activeRow(); as row) {
+        <h2>Edit {{ row.name }}</h2>
+        <button data-close-detail type="button" (click)="activeRowKey.set(null)">Close detail</button>
+      } @else {
+        <p>No active row</p>
+      }
+    </aside>
+  `,
+})
+class ActiveRowDataTableHost {
+  readonly detailId = 'active-row-detail';
+  readonly activeRowKey = signal<string | null>(null);
+  readonly page = signal(0);
+  readonly roleFilter = signal<Person['role'] | null>(null);
+  private readonly pageSize = 1;
+  private readonly allRows: readonly Person[] = [
+    { id: 'ada', name: 'Ada', active: true, role: 'Admin' },
+    { id: 'grace', name: 'Grace', active: false, role: 'Editor' },
+    { id: 'linus', name: 'Linus', active: true, role: 'Viewer' },
+  ];
+  readonly rows = computed(() => {
+    const filter = this.roleFilter();
+    const filtered = filter ? this.allRows.filter((row) => row.role === filter) : this.allRows;
+    const start = this.page() * this.pageSize;
+    return filtered.slice(start, start + this.pageSize);
+  });
+  readonly activeRow = computed(
+    () => this.rows().find((row) => row.id === this.activeRowKey()) ?? null,
+  );
+  readonly columns = people.define([
+    textColumn<Person, string>('name', { header: 'Name', accessor: 'name' }),
+    actionColumn<Person>('actions', { header: 'Actions' }),
+  ]);
+
+  selectionCount(selection: Readonly<Record<string, boolean>>): number {
+    return Object.values(selection).filter(Boolean).length;
+  }
+}
+
 describe('HellDataTable simple renderer', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -157,6 +216,7 @@ describe('HellDataTable simple renderer', () => {
         SortableDataTableHost,
         ControlledSortingDataTableHost,
         CustomTemplateDataTableHost,
+        ActiveRowDataTableHost,
       ],
     }).compileComponents();
   });
@@ -277,10 +337,73 @@ describe('HellDataTable simple renderer', () => {
     expect(root.querySelector('strong')?.textContent?.trim()).toBe('ada:Ada');
     expect(root.querySelector('tbody button')?.textContent?.trim()).toBe('Open ada');
   });
+
+  it('opens active row detail through row-action commands and clears when the pane closes', () => {
+    const fixture = TestBed.createComponent(ActiveRowDataTableHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+
+    let action = activeRowAction(root);
+    expect(action.getAttribute('aria-controls')).toBe('active-row-detail');
+    expect(action.getAttribute('aria-expanded')).toBe('false');
+
+    action.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.activeRowKey()).toBe('ada');
+    expect(root.querySelector('tbody tr')?.getAttribute('data-active')).toBe('true');
+    expect(root.querySelector('#active-row-detail')?.textContent).toContain('Edit Ada');
+    expect(root.querySelector('[data-selection-count]')?.textContent?.trim()).toBe('0');
+    expect(root.querySelector('[data-active-name]')?.textContent?.trim()).toBe('Ada');
+    action = activeRowAction(root);
+    expect(action.getAttribute('aria-expanded')).toBe('true');
+
+    const closeDetail = root.querySelector('[data-close-detail]');
+    if (!(closeDetail instanceof HTMLButtonElement)) throw new Error('Expected detail close button.');
+    closeDetail.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.activeRowKey()).toBeNull();
+    expect(root.querySelector('tbody tr')?.getAttribute('data-active')).toBeNull();
+    expect(root.querySelector('#active-row-detail')?.textContent).toContain('No active row');
+    expect(activeRowAction(root).getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('clears active row when filtering or pagination removes it from the visible rows', () => {
+    const fixture = TestBed.createComponent(ActiveRowDataTableHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+
+    activeRowAction(root).click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.activeRowKey()).toBe('ada');
+
+    fixture.componentInstance.page.set(1);
+    fixture.detectChanges();
+    expect(tableBodyText(root)).toContain('Grace');
+    expect(fixture.componentInstance.activeRowKey()).toBeNull();
+
+    fixture.componentInstance.page.set(0);
+    fixture.detectChanges();
+    activeRowAction(root).click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.activeRowKey()).toBe('ada');
+
+    fixture.componentInstance.roleFilter.set('Viewer');
+    fixture.detectChanges();
+    expect(tableBodyText(root)).toContain('Linus');
+    expect(fixture.componentInstance.activeRowKey()).toBeNull();
+  });
 });
 
 function tableBodyText(root: Element): string {
   return [...root.querySelectorAll('tbody tr')]
     .map((row) => row.textContent?.replace(/\s+/g, ' ').trim() ?? '')
     .join(' ');
+}
+
+function activeRowAction(root: Element): HTMLButtonElement {
+  const button = root.querySelector('button[hellTableRowAction]');
+  if (!(button instanceof HTMLButtonElement)) throw new Error('Expected row action button.');
+  return button;
 }

@@ -9,6 +9,7 @@ import {
   contentChildren,
   effect,
   input,
+  model,
   output,
   signal,
   type Signal,
@@ -22,6 +23,7 @@ import {
   HellTableHead,
   HellTableHeaderCell,
   HellTableRow,
+  HellTableRowAction,
   HellTableSortTrigger,
 } from '../features/table-utilities/table-utilities';
 import {
@@ -46,6 +48,7 @@ import {
   hellTableCreateState,
   hellTableDefaultRowKey,
   hellTableHeaderGroupsFromColumns,
+  hellTableResolveStateUpdater,
   hellTableRowsFromData,
   hellTableVisibleColumns,
   type HellColumnDef,
@@ -55,6 +58,7 @@ import {
   type HellTableModelHeader,
   type HellTableModelRow,
   type HellTableResolvedRenderer,
+  type HellTableRowKey,
   type HellTableRowKeyAccessor,
   type HellTableRowKeyValue,
   type HellTableRowPart,
@@ -62,6 +66,8 @@ import {
   type HellTableSignalInput,
   type HellTableSortDirection,
   type HellTableSortingState,
+  type HellTableState,
+  type HellTableStateUpdater,
 } from '../table/table-model';
 
 /** Visual density for the simple data-table renderer. */
@@ -205,7 +211,12 @@ export class HellDataTableToolbarEnd {}
         <tbody hellTableBody [unstyled]="unstyled()">
           @for (part of rowParts(); track part.key) {
             @if (part.kind === 'row') {
-              <tr hellTableRow [unstyled]="unstyled()" [attr.data-row-key]="part.row.key">
+              <tr
+                hellTableRow
+                [unstyled]="unstyled()"
+                [active]="commands.isActive(part.row)"
+                [attr.data-row-key]="part.row.key"
+              >
                 @for (column of visibleColumns(); track column.id) {
                   <td hellTableCell [unstyled]="unstyled()" [attr.data-column-id]="column.id">
                     @let view = cellView(part.row, column);
@@ -272,6 +283,9 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
   /** Current sorting state. Use `[(sorting)]` for controlled sorting. */
   readonly sorting = input<readonly HellTableSortingState[]>([]);
 
+  /** Active master/detail row key. Use `[(activeRowKey)]` for controlled row editors. */
+  readonly activeRowKey = model<HellTableRowKey | null>(null);
+
   /** Emits whenever a sortable header cycles sort state. */
   readonly sortingChange = output<readonly HellTableSortingState[]>();
 
@@ -286,7 +300,15 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
 
   private readonly internalSorting = signal<readonly HellTableSortingState[]>([]);
 
-  protected readonly state = hellTableCreateState();
+  protected readonly state = {
+    ...hellTableCreateState(),
+    activeRowKey: {
+      value: this.activeRowKey,
+      set: (next: HellTableRowKey | null) => this.activeRowKey.set(next),
+      update: (updater: HellTableStateUpdater<HellTableRowKey | null>) =>
+        this.activeRowKey.update((current) => hellTableResolveStateUpdater(current, updater)),
+    },
+  } satisfies HellTableState;
   protected readonly resolvedColumns = computed(() => readSignalInput(this.columns()));
   protected readonly visibleColumns = computed(() => hellTableVisibleColumns(this.resolvedColumns(), {}));
   protected readonly visibleColumnCount = computed(() => Math.max(this.visibleColumns().length, 1));
@@ -328,6 +350,11 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
       const sorting = this.sorting();
       this.internalSorting.set(sorting);
       this.state.sorting.set(sorting);
+    });
+    effect(() => {
+      const key = this.activeRowKey();
+      if (key === null) return;
+      if (!this.tableRows().some((row) => row.key === key)) this.commands.closeRow(key);
     });
   }
 
@@ -404,6 +431,7 @@ export const HELL_DATA_TABLE_DIRECTIVES = [
   HellDataTableToolbarStart,
   HellDataTableToolbar,
   HellDataTableToolbarEnd,
+  HellTableRowAction,
   ...HELL_TABLE_RENDER_DIRECTIVES,
 ] as const;
 
@@ -485,6 +513,7 @@ export {
   HellHeaderCell,
   HellRowActions,
   HellRowEditor,
+  HellTableRowAction,
   actionColumn,
   booleanColumn,
   hellColumns,

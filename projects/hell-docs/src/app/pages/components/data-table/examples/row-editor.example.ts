@@ -61,6 +61,8 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
                       variant="ghost"
                       size="xs"
                       [attr.aria-label]="'Open editor for ' + row.name"
+                      [attr.aria-controls]="editorId"
+                      [attr.aria-expanded]="activeRowId() === row.id ? 'true' : 'false'"
                       (click)="openEditor(row)"
                     >
                       Open
@@ -73,7 +75,7 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
         </div>
       </div>
       <div hellResizableHandle appearance="grip"></div>
-      <div hellResizablePane [initialFlex]="2" [minSize]="280" class="flex flex-col">
+      <div [id]="editorId" hellResizablePane [initialFlex]="2" [minSize]="280" class="flex flex-col">
         @if (activeRow(); as r) {
           <div class="flex items-center justify-between px-3 py-2 border-b hd-surface-subtle">
             <strong class="text-sm">{{ r.name }}</strong>
@@ -96,6 +98,7 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
 })
 export class DataTableRowEditorExample {
   protected readonly rows = ROWS;
+  protected readonly editorId = 'data-table-row-editor-pane';
   protected readonly activeRowId = signal<number | null>(null);
 
   private readonly drafts = signal<ReadonlyMap<number, string>>(new Map());
