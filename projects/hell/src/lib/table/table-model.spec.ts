@@ -48,6 +48,8 @@ describe('HellTableModel normalized state', () => {
     const selection = hellTableStateChannel({} as Record<string, boolean>);
     const state = hellTableCreateState({
       activeRowKey: 'ada',
+      rowSelection: { ada: true },
+      selectedRowKey: 'grace',
       sorting: [{ columnId: 'name', direction: 'asc' }],
       loading: true,
       error: 'failed',
@@ -67,7 +69,8 @@ describe('HellTableModel normalized state', () => {
     expect(hellTableResolveStateUpdater('old', 'new')).toBe('new');
     expect(selection.value()).toEqual({ ada: true, grace: false });
     expect(state.activeRowKey.value()).toBeNull();
-    expect(state.rowSelection.value()).toEqual({});
+    expect(state.rowSelection.value()).toEqual({ ada: true });
+    expect(state.selectedRowKey.value()).toBe('grace');
     expect(state.sorting.value()).toEqual([
       { columnId: 'name', direction: 'asc' },
       { columnId: 'age', direction: 'desc' },
@@ -117,6 +120,32 @@ describe('HellTableModel normalized state', () => {
     ]);
   });
 
+  it('clears single selection only when the targeted row key is selected', () => {
+    const model = hellTableCreateModel<Person>({
+      columns: [{ id: 'name', header: 'Name' }],
+      rows: [
+        { id: 'ada', name: 'Ada' },
+        { id: 'grace', name: 'Grace' },
+      ],
+    });
+
+    model.commands.selectSingleRow('ada');
+    model.commands.toggleSingleRowSelected('grace', false);
+    model.commands.clearSingleRowSelection('grace');
+
+    expect(model.state.selectedRowKey.value()).toBe('ada');
+    expect(model.commands.selectedRow()?.key).toBe('ada');
+
+    model.commands.toggleSingleRowSelected('ada', false);
+    expect(model.state.selectedRowKey.value()).toBeNull();
+
+    model.commands.toggleSingleRowSelected('grace');
+    expect(model.state.selectedRowKey.value()).toBe('grace');
+
+    model.commands.toggleSingleRowSelected('grace');
+    expect(model.state.selectedRowKey.value()).toBeNull();
+  });
+
   it('keeps adapter-free commands separate for active rows, selection, visibility, and status', () => {
     const rows = signal<readonly Person[]>([
       { id: 'ada', name: 'Ada', age: 36 },
@@ -152,21 +181,28 @@ describe('HellTableModel normalized state', () => {
     model.commands.openRow(model.rows()[0]);
     model.commands.toggleRowSelected('grace');
     model.commands.setRowSelected('ada', true);
+    model.commands.toggleRowSelected('grace', false);
+    model.commands.selectSingleRow('grace');
     model.commands.closeRow('grace');
 
     expect(model.state.activeRowKey.value()).toBe('ada');
     expect(model.commands.activeRow()?.original).toEqual({ id: 'ada', name: 'Ada', age: 36 });
+    expect(model.commands.selectedRow()?.original).toEqual({ id: 'grace', name: 'Grace', age: 85 });
     expect(model.commands.isActive('grace')).toBe(false);
-    expect(model.state.rowSelection.value()).toEqual({ grace: true, ada: true });
-    expect(model.commands.isRowSelected(model.rows()[1])).toBe(true);
+    expect(model.commands.isSingleRowSelected(model.rows()[1])).toBe(true);
+    expect(model.state.rowSelection.value()).toEqual({ grace: false, ada: true });
+    expect(model.commands.isRowSelected(model.rows()[1])).toBe(false);
+    expect(model.state.selectedRowKey.value()).toBe('grace');
 
     model.commands.closeRow('ada');
+    model.commands.clearSingleRowSelection('ada');
     model.commands.setColumnVisible('name', false);
     model.commands.setSorting([{ columnId: 'name', direction: 'asc' }]);
     model.commands.setColumnSize('name', 240);
 
     expect(model.state.activeRowKey.value()).toBeNull();
-    expect(model.state.rowSelection.value()).toEqual({ grace: true, ada: true });
+    expect(model.state.rowSelection.value()).toEqual({ grace: false, ada: true });
+    expect(model.state.selectedRowKey.value()).toBe('grace');
     expect(model.visibleColumns().map((column) => column.id)).toEqual(['select']);
     expect(model.state.sorting.value()).toEqual([{ columnId: 'name', direction: 'asc' }]);
     expect(model.state.columnSizing.value()).toEqual({ name: 240 });

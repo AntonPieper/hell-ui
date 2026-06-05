@@ -31,6 +31,28 @@ export interface HellTableSortingState {
 /** Selection state keyed by stable row key. Active rows live in a separate channel. */
 export type HellTableRowSelectionState = Readonly<Record<HellTableRowKey, boolean>>;
 
+/** Single-select state keyed by stable row key. Active rows live in a separate channel. */
+export type HellTableSelectedRowKeyState = HellTableRowKey | null;
+
+/** Built-in selection-control mode for a selection column. */
+export type HellTableSelectionMode = 'checkbox' | 'radio';
+
+/** Row-level selection disabled callback used by simple and adapter renderers. */
+export type HellTableSelectionDisabled<TData = unknown> = boolean | ((row: TData) => boolean);
+
+/** Accessible-label callback used by simple and adapter selection controls. */
+export type HellTableSelectionLabel<TData = unknown> = string | ((row: TData) => string);
+
+/** Selection-column behavior shared by simple, TanStack, CDK, and future renderers. */
+export interface HellTableSelectionColumnConfig<TData = unknown> {
+  readonly mode?: HellTableSelectionMode;
+  readonly selectAll?: boolean;
+  readonly disabled?: HellTableSelectionDisabled<TData>;
+  readonly ariaLabel?: HellTableSelectionLabel<TData>;
+  readonly selectAllAriaLabel?: string;
+  readonly radioName?: string;
+}
+
 /** Column visibility keyed by stable column id. `false` hides; missing or `true` shows. */
 export type HellTableColumnVisibilityState = Readonly<Record<HellTableColumnId, boolean>>;
 
@@ -41,6 +63,7 @@ export type HellTableColumnSizingState = Readonly<Record<HellTableColumnId, numb
 export interface HellTableState {
   readonly activeRowKey: HellTableStateChannel<HellTableRowKey | null>;
   readonly rowSelection: HellTableStateChannel<HellTableRowSelectionState>;
+  readonly selectedRowKey: HellTableStateChannel<HellTableSelectedRowKeyState>;
   readonly columnVisibility: HellTableStateChannel<HellTableColumnVisibilityState>;
   readonly sorting: HellTableStateChannel<readonly HellTableSortingState[]>;
   readonly columnSizing: HellTableStateChannel<HellTableColumnSizingState>;
@@ -52,6 +75,7 @@ export interface HellTableState {
 export interface HellTableInitialState {
   readonly activeRowKey?: HellTableRowKey | null;
   readonly rowSelection?: HellTableRowSelectionState;
+  readonly selectedRowKey?: HellTableSelectedRowKeyState;
   readonly columnVisibility?: HellTableColumnVisibilityState;
   readonly sorting?: readonly HellTableSortingState[];
   readonly columnSizing?: HellTableColumnSizingState;
@@ -90,6 +114,7 @@ export interface HellTableColumn<TData = unknown, TValue = unknown> {
   readonly maxSize?: number;
   readonly meta?: HellColumnMeta;
   readonly options?: readonly HellSelectColumnOption<TValue>[];
+  readonly selection?: HellTableSelectionColumnConfig<TData>;
   readonly renderer?: HellTableRenderer<HellTableCellRenderContext<TData, TValue>>;
   readonly cell?: HellTableRenderer<HellTableCellRenderContext<TData, TValue>>;
   readonly headerCell?: HellTableRenderer<HellTableHeaderRenderContext<TData>>;
@@ -260,6 +285,12 @@ export interface HellTableCommands<TData = unknown> {
   setActiveRowKey(key: HellTableRowKey | null): void;
   openRow(row: HellTableRowKeyInput<TData>): void;
   closeRow(row?: HellTableRowKeyInput<TData>): void;
+  selectedRow(): HellTableModelRow<TData> | null;
+  isSingleRowSelected(row: HellTableRowKeyInput<TData>): boolean;
+  setSelectedRowKey(key: HellTableSelectedRowKeyState): void;
+  selectSingleRow(row: HellTableRowKeyInput<TData>): void;
+  clearSingleRowSelection(row?: HellTableRowKeyInput<TData>): void;
+  toggleSingleRowSelected(row: HellTableRowKeyInput<TData>, selected?: boolean): void;
   isRowSelected(row: HellTableRowKeyInput<TData>): boolean;
   setRowSelected(row: HellTableRowKeyInput<TData>, selected: boolean): void;
   toggleRowSelected(row: HellTableRowKeyInput<TData>, selected?: boolean): void;
@@ -319,6 +350,7 @@ export function hellTableCreateState(initial: HellTableInitialState = {}): HellT
   return {
     activeRowKey: hellTableStateChannel(initial.activeRowKey ?? null),
     rowSelection: hellTableStateChannel(initial.rowSelection ?? {}),
+    selectedRowKey: hellTableStateChannel(initial.selectedRowKey ?? null),
     columnVisibility: hellTableStateChannel(initial.columnVisibility ?? {}),
     sorting: hellTableStateChannel(initial.sorting ?? []),
     columnSizing: hellTableStateChannel(initial.columnSizing ?? {}),
@@ -438,6 +470,26 @@ export function hellTableCreateCommands<TData>(
         state.activeRowKey.set(null);
       }
     },
+    selectedRow: () => selectedRow(state, rows),
+    isSingleRowSelected: (row) => state.selectedRowKey.value() === hellTableRowKeyFromInput(row),
+    setSelectedRowKey: (key) => state.selectedRowKey.set(key),
+    selectSingleRow: (row) => state.selectedRowKey.set(hellTableRowKeyFromInput(row)),
+    clearSingleRowSelection: (row) => {
+      if (row === undefined || state.selectedRowKey.value() === hellTableRowKeyFromInput(row)) {
+        state.selectedRowKey.set(null);
+      }
+    },
+    toggleSingleRowSelected: (row, selected) => {
+      const key = hellTableRowKeyFromInput(row);
+      const current = state.selectedRowKey.value();
+      if (selected === true) {
+        state.selectedRowKey.set(key);
+      } else if (selected === false) {
+        if (current === key) state.selectedRowKey.set(null);
+      } else {
+        state.selectedRowKey.set(current === key ? null : key);
+      }
+    },
     isRowSelected: (row) => state.rowSelection.value()[hellTableRowKeyFromInput(row)] === true,
     setRowSelected: (row, selected) =>
       updateBooleanRecord(state.rowSelection, hellTableRowKeyFromInput(row), selected),
@@ -515,7 +567,20 @@ function activeRow<TData>(
   state: Pick<HellTableState, 'activeRowKey'>,
   rows: Signal<readonly HellTableModelRow<TData>[]>,
 ): HellTableModelRow<TData> | null {
-  const key = state.activeRowKey.value();
+  return rowByKey(state.activeRowKey.value(), rows);
+}
+
+function selectedRow<TData>(
+  state: Pick<HellTableState, 'selectedRowKey'>,
+  rows: Signal<readonly HellTableModelRow<TData>[]>,
+): HellTableModelRow<TData> | null {
+  return rowByKey(state.selectedRowKey.value(), rows);
+}
+
+function rowByKey<TData>(
+  key: HellTableRowKey | null,
+  rows: Signal<readonly HellTableModelRow<TData>[]>,
+): HellTableModelRow<TData> | null {
   if (key === null) return null;
   return rows().find((row) => row.key === key) ?? null;
 }

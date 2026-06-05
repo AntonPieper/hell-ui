@@ -93,7 +93,13 @@ describe('Hell table column DSL and renderer registry', () => {
         ],
       }),
       columns.action({ header: 'Actions', meta: { slot: 'row-actions' } }),
-      columns.selection('select', { mode: 'radio' }),
+      columns.selection('select', {
+        mode: 'radio',
+        selectAll: false,
+        radioName: 'primary-person',
+        ariaLabel: (row) => `Choose ${row.name}`,
+        disabled: (row) => !row.active,
+      }),
     ]);
     const defaultText = textColumn<Person, string>('name');
     const directText = textColumn<Person, string>('displayName', { accessor: (row) => row.name });
@@ -132,6 +138,15 @@ describe('Hell table column DSL and renderer registry', () => {
       expect.objectContaining({ kind: 'selection', sortable: false, hideable: false }),
     );
     expect(definitions[4].meta).toEqual({ mode: 'radio' });
+    expect(definitions[4].selection).toEqual(
+      expect.objectContaining({ mode: 'radio', selectAll: false, radioName: 'primary-person' }),
+    );
+    const selection = definitions[4].selection;
+    if (typeof selection?.ariaLabel !== 'function' || typeof selection.disabled !== 'function') {
+      throw new Error('Expected function selection config.');
+    }
+    expect(selection.ariaLabel(ada)).toBe('Choose Ada');
+    expect(selection.disabled(ada)).toBe(false);
     expect(defaultText.accessorKey).toBe('name');
     expect(defaultText.accessor?.(ada)).toBe('Ada');
     expect(directText.accessorKey).toBeUndefined();

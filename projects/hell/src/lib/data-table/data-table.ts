@@ -24,6 +24,9 @@ import {
   HellTableHeaderCell,
   HellTableRow,
   HellTableRowAction,
+  HellTableRowCheckbox,
+  HellTableRowRadio,
+  HellTableSelectionCell,
   HellTableSortTrigger,
 } from '../features/table-utilities/table-utilities';
 import {
@@ -63,6 +66,8 @@ import {
   type HellTableRowKeyValue,
   type HellTableRowPart,
   type HellTableRowRenderContext,
+  type HellTableRowSelectionState,
+  type HellTableSelectionColumnConfig,
   type HellTableSignalInput,
   type HellTableSortDirection,
   type HellTableSortingState,
@@ -97,6 +102,8 @@ type HellDataTableRenderView<TContext> =
       readonly value: unknown;
     };
 
+let nextSelectionRadioGroupId = 0;
+
 /** Projected toolbar content for the leading side of `hell-data-table`. */
 @Directive({
   selector: '[hellDataTableToolbarStart]',
@@ -124,6 +131,15 @@ export class HellDataTableToolbar {}
 })
 export class HellDataTableToolbarEnd {}
 
+/** Projected toolbar content shown only when checkbox row selection is non-empty. */
+@Directive({
+  selector: '[hellDataTableBulkActions]',
+  host: {
+    '[attr.data-hell-data-table-bulk-actions]': '""',
+  },
+})
+export class HellDataTableBulkActions {}
+
 /**
  * Simple native-table renderer for Hell column definitions.
  *
@@ -143,8 +159,11 @@ export class HellDataTableToolbarEnd {}
     HellTableBody,
     HellTableRow,
     HellTableHeaderCell,
+    HellTableSelectionCell,
     HellTableSortTrigger,
     HellTableCell,
+    HellTableRowCheckbox,
+    HellTableRowRadio,
   ],
   host: {
     '[class.hell-data-table]': '!unstyled()',
@@ -159,6 +178,9 @@ export class HellDataTableToolbarEnd {}
       <ng-content select="[hellDataTableToolbarStart]" />
       <ng-content select="[hellDataTableToolbar]" />
       <ng-content select="[hellDataTableToolbarEnd]" />
+      @if (selectedRowCount()) {
+        <ng-content select="[hellDataTableBulkActions]" />
+      }
     </div>
 
     <div data-slot="scroller">
@@ -167,42 +189,86 @@ export class HellDataTableToolbarEnd {}
           @for (headerGroup of headerGroups(); track headerGroup.id) {
             <tr hellTableRow [unstyled]="unstyled()">
               @for (header of headerGroup.headers; track header.id) {
-                <th
-                  hellTableHeaderCell
-                  scope="col"
-                  [unstyled]="unstyled()"
-                  [attr.colspan]="header.colSpan ?? null"
-                  [attr.rowspan]="header.rowSpan ?? null"
-                  [columnId]="header.columnId ?? null"
-                  [sortable]="isSortable(header.column)"
-                  [sort]="sortForHeader(header)"
-                  (sortToggle)="toggleSort(header.column)"
-                >
-                  @if (isSortable(header.column)) {
-                    <button hellTableSortTrigger [unstyled]="unstyled()" type="button">
-                      <ng-container [ngTemplateOutlet]="headerContent" [ngTemplateOutletContext]="{ $implicit: header }" />
-                    </button>
-                  } @else {
-                    <ng-container [ngTemplateOutlet]="headerContent" [ngTemplateOutletContext]="{ $implicit: header }" />
-                  }
-
-                  <ng-template #headerContent let-currentHeader>
-                    @let view = headerView(currentHeader);
-                    @if (view.kind === 'template') {
-                      <ng-container
-                        [ngTemplateOutlet]="view.template"
-                        [ngTemplateOutletContext]="view.context"
-                      />
-                    } @else if (view.kind === 'component') {
-                      <ng-container
-                        [ngComponentOutlet]="view.component"
-                        [ngComponentOutletInputs]="view.inputs"
+                @if (isSelectionColumn(header.column)) {
+                  <th
+                    hellTableHeaderCell
+                    hellTableSelectionCell
+                    scope="col"
+                    [unstyled]="unstyled()"
+                    [attr.colspan]="header.colSpan ?? null"
+                    [attr.rowspan]="header.rowSpan ?? null"
+                    [columnId]="header.columnId ?? null"
+                  >
+                    @if (selectionSelectAllEnabled(header.column)) {
+                      <input
+                        hellTableRowCheckbox
+                        type="checkbox"
+                        [unstyled]="unstyled()"
+                        [attr.aria-label]="selectAllAriaLabel(header.column)"
+                        [checked]="allVisibleRowsSelected(header.column)"
+                        [indeterminate]="someVisibleRowsSelected(header.column)"
+                        [disabled]="!selectableRowsForColumn(header.column).length"
+                        (checkedChange)="setVisibleRowsSelected(header.column, $event)"
                       />
                     } @else {
-                      {{ view.value }}
+                      <ng-container [ngTemplateOutlet]="headerContent" [ngTemplateOutletContext]="{ $implicit: header }" />
                     }
-                  </ng-template>
-                </th>
+
+                    <ng-template #headerContent let-currentHeader>
+                      @let view = headerView(currentHeader);
+                      @if (view.kind === 'template') {
+                        <ng-container
+                          [ngTemplateOutlet]="view.template"
+                          [ngTemplateOutletContext]="view.context"
+                        />
+                      } @else if (view.kind === 'component') {
+                        <ng-container
+                          [ngComponentOutlet]="view.component"
+                          [ngComponentOutletInputs]="view.inputs"
+                        />
+                      } @else {
+                        {{ view.value }}
+                      }
+                    </ng-template>
+                  </th>
+                } @else {
+                  <th
+                    hellTableHeaderCell
+                    scope="col"
+                    [unstyled]="unstyled()"
+                    [attr.colspan]="header.colSpan ?? null"
+                    [attr.rowspan]="header.rowSpan ?? null"
+                    [columnId]="header.columnId ?? null"
+                    [sortable]="isSortable(header.column)"
+                    [sort]="sortForHeader(header)"
+                    (sortToggle)="toggleSort(header.column)"
+                  >
+                    @if (isSortable(header.column)) {
+                      <button hellTableSortTrigger [unstyled]="unstyled()" type="button">
+                        <ng-container [ngTemplateOutlet]="headerContent" [ngTemplateOutletContext]="{ $implicit: header }" />
+                      </button>
+                    } @else {
+                      <ng-container [ngTemplateOutlet]="headerContent" [ngTemplateOutletContext]="{ $implicit: header }" />
+                    }
+
+                    <ng-template #headerContent let-currentHeader>
+                      @let view = headerView(currentHeader);
+                      @if (view.kind === 'template') {
+                        <ng-container
+                          [ngTemplateOutlet]="view.template"
+                          [ngTemplateOutletContext]="view.context"
+                        />
+                      } @else if (view.kind === 'component') {
+                        <ng-container
+                          [ngComponentOutlet]="view.component"
+                          [ngComponentOutletInputs]="view.inputs"
+                        />
+                      } @else {
+                        {{ view.value }}
+                      }
+                    </ng-template>
+                  </th>
+                }
               }
             </tr>
           }
@@ -215,25 +281,58 @@ export class HellDataTableToolbarEnd {}
                 hellTableRow
                 [unstyled]="unstyled()"
                 [active]="commands.isActive(part.row)"
+                [selected]="isDataRowSelected(part.row)"
                 [attr.data-row-key]="part.row.key"
               >
                 @for (column of visibleColumns(); track column.id) {
-                  <td hellTableCell [unstyled]="unstyled()" [attr.data-column-id]="column.id">
-                    @let view = cellView(part.row, column);
-                    @if (view.kind === 'template') {
-                      <ng-container
-                        [ngTemplateOutlet]="view.template"
-                        [ngTemplateOutletContext]="view.context"
-                      />
-                    } @else if (view.kind === 'component') {
-                      <ng-container
-                        [ngComponentOutlet]="view.component"
-                        [ngComponentOutletInputs]="view.inputs"
-                      />
-                    } @else {
-                      {{ view.value }}
-                    }
-                  </td>
+                  @if (isSelectionColumn(column)) {
+                    <td
+                      hellTableCell
+                      hellTableSelectionCell
+                      [unstyled]="unstyled()"
+                      [attr.data-column-id]="column.id"
+                    >
+                      @if (selectionMode(column) === 'radio') {
+                        <input
+                          hellTableRowRadio
+                          type="radio"
+                          [unstyled]="unstyled()"
+                          [name]="selectionRadioName(column)"
+                          [attr.aria-label]="selectionControlAriaLabel(part.row, column)"
+                          [checked]="isSingleRowSelected(part.row)"
+                          [disabled]="isSelectionDisabled(part.row, column)"
+                          (checkedChange)="setSingleRowSelected(part.row, column, $event)"
+                        />
+                      } @else {
+                        <input
+                          hellTableRowCheckbox
+                          type="checkbox"
+                          [unstyled]="unstyled()"
+                          [attr.aria-label]="selectionControlAriaLabel(part.row, column)"
+                          [checked]="commands.isRowSelected(part.row)"
+                          [disabled]="isSelectionDisabled(part.row, column)"
+                          (checkedChange)="setRowSelected(part.row, column, $event)"
+                        />
+                      }
+                    </td>
+                  } @else {
+                    <td hellTableCell [unstyled]="unstyled()" [attr.data-column-id]="column.id">
+                      @let view = cellView(part.row, column);
+                      @if (view.kind === 'template') {
+                        <ng-container
+                          [ngTemplateOutlet]="view.template"
+                          [ngTemplateOutletContext]="view.context"
+                        />
+                      } @else if (view.kind === 'component') {
+                        <ng-container
+                          [ngComponentOutlet]="view.component"
+                          [ngComponentOutletInputs]="view.inputs"
+                        />
+                      } @else {
+                        {{ view.value }}
+                      }
+                    </td>
+                  }
                 }
               </tr>
             } @else if (part.kind === 'loader') {
@@ -286,6 +385,12 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
   /** Active master/detail row key. Use `[(activeRowKey)]` for controlled row editors. */
   readonly activeRowKey = model<HellTableRowKey | null>(null);
 
+  /** Multi-row checkbox selection keyed by stable row key. Use `[(rowSelection)]` for controlled bulk selection. */
+  readonly rowSelection = model<HellTableRowSelectionState>({});
+
+  /** Single radio selection keyed by stable row key. Use `[(selectedRowKey)]` for controlled single selection. */
+  readonly selectedRowKey = model<HellTableRowKey | null>(null);
+
   /** Emits whenever a sortable header cycles sort state. */
   readonly sortingChange = output<readonly HellTableSortingState[]>();
 
@@ -299,6 +404,7 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
   });
 
   private readonly internalSorting = signal<readonly HellTableSortingState[]>([]);
+  private readonly selectionRadioGroupName = `hell-data-table-selection-${nextSelectionRadioGroupId++}`;
 
   protected readonly state = {
     ...hellTableCreateState(),
@@ -307,6 +413,18 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
       set: (next: HellTableRowKey | null) => this.activeRowKey.set(next),
       update: (updater: HellTableStateUpdater<HellTableRowKey | null>) =>
         this.activeRowKey.update((current) => hellTableResolveStateUpdater(current, updater)),
+    },
+    rowSelection: {
+      value: this.rowSelection,
+      set: (next: HellTableRowSelectionState) => this.rowSelection.set(next),
+      update: (updater: HellTableStateUpdater<HellTableRowSelectionState>) =>
+        this.rowSelection.update((current) => hellTableResolveStateUpdater(current, updater)),
+    },
+    selectedRowKey: {
+      value: this.selectedRowKey,
+      set: (next: HellTableRowKey | null) => this.selectedRowKey.set(next),
+      update: (updater: HellTableStateUpdater<HellTableRowKey | null>) =>
+        this.selectedRowKey.update((current) => hellTableResolveStateUpdater(current, updater)),
     },
   } satisfies HellTableState;
   protected readonly resolvedColumns = computed(() => readSignalInput(this.columns()));
@@ -342,6 +460,9 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
   );
   protected readonly isEmpty = computed(
     () => !this.loading() && (this.error() === null || this.error() === undefined) && !this.tableRows().length,
+  );
+  protected readonly selectedRowCount = computed(
+    () => Object.values(this.rowSelection()).filter(Boolean).length,
   );
 
   constructor() {
@@ -385,6 +506,108 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
     this.internalSorting.set(next);
     this.state.sorting.set(next);
     this.sortingChange.emit(next);
+  }
+
+  protected isSelectionColumn(column: HellTableColumn<TData> | undefined): boolean {
+    return column?.kind === 'selection';
+  }
+
+  protected selectionMode(column: HellTableColumn<TData> | undefined): 'checkbox' | 'radio' {
+    return this.selectionConfig(column).mode ?? 'checkbox';
+  }
+
+  protected selectionSelectAllEnabled(column: HellTableColumn<TData> | undefined): boolean {
+    return this.selectionMode(column) === 'checkbox' && this.selectionConfig(column).selectAll !== false;
+  }
+
+  protected selectableRowsForColumn(
+    column: HellTableColumn<TData> | undefined,
+  ): readonly HellTableModelRow<TData>[] {
+    return this.tableRows().filter((row) => !this.isSelectionDisabled(row, column));
+  }
+
+  protected allVisibleRowsSelected(column: HellTableColumn<TData> | undefined): boolean {
+    const rows = this.selectableRowsForColumn(column);
+    return rows.length > 0 && rows.every((row) => this.commands.isRowSelected(row));
+  }
+
+  protected someVisibleRowsSelected(column: HellTableColumn<TData> | undefined): boolean {
+    const rows = this.selectableRowsForColumn(column);
+    const selected = rows.filter((row) => this.commands.isRowSelected(row)).length;
+    return selected > 0 && selected < rows.length;
+  }
+
+  protected setVisibleRowsSelected(
+    column: HellTableColumn<TData> | undefined,
+    selected: boolean,
+  ): void {
+    const rows = this.selectableRowsForColumn(column);
+    if (!rows.length) return;
+    this.rowSelection.update((current) => {
+      const next: Record<string, boolean> = { ...current };
+      for (const row of rows) next[row.key] = selected;
+      return next;
+    });
+  }
+
+  protected isDataRowSelected(row: HellTableModelRow<TData>): boolean {
+    return this.commands.isRowSelected(row) || this.isSingleRowSelected(row);
+  }
+
+  protected isSingleRowSelected(row: HellTableModelRow<TData>): boolean {
+    return this.selectedRowKey() === row.key;
+  }
+
+  protected setRowSelected(
+    row: HellTableModelRow<TData>,
+    column: HellTableColumn<TData>,
+    selected: boolean,
+  ): void {
+    if (this.isSelectionDisabled(row, column)) return;
+    this.commands.setRowSelected(row, selected);
+  }
+
+  protected setSingleRowSelected(
+    row: HellTableModelRow<TData>,
+    column: HellTableColumn<TData>,
+    selected: boolean,
+  ): void {
+    if (this.isSelectionDisabled(row, column)) return;
+    if (selected) this.commands.selectSingleRow(row);
+    else this.commands.clearSingleRowSelection(row);
+  }
+
+  protected isSelectionDisabled(
+    row: HellTableModelRow<TData>,
+    column: HellTableColumn<TData> | undefined,
+  ): boolean {
+    const disabled = this.selectionConfig(column).disabled;
+    return typeof disabled === 'function' ? disabled(row.original) : disabled === true;
+  }
+
+  protected selectionControlAriaLabel(
+    row: HellTableModelRow<TData>,
+    column: HellTableColumn<TData>,
+  ): string {
+    const label = this.selectionConfig(column).ariaLabel;
+    if (typeof label === 'function') return label(row.original);
+    if (typeof label === 'string' && label.trim().length) return label;
+    return this.selectionMode(column) === 'radio' ? `Select ${row.key}` : `Select row ${row.key}`;
+  }
+
+  protected selectAllAriaLabel(column: HellTableColumn<TData> | undefined): string {
+    const label = this.selectionConfig(column).selectAllAriaLabel;
+    return label && label.trim().length ? label : 'Select visible rows';
+  }
+
+  protected selectionRadioName(column: HellTableColumn<TData>): string {
+    return this.selectionConfig(column).radioName ?? `${this.selectionRadioGroupName}-${column.id}`;
+  }
+
+  private selectionConfig(
+    column: HellTableColumn<TData> | undefined,
+  ): HellTableSelectionColumnConfig<TData> {
+    return column?.selection ?? {};
   }
 
   protected headerView(header: HellTableModelHeader<TData>): HellDataTableHeaderView<TData> {
@@ -431,7 +654,11 @@ export const HELL_DATA_TABLE_DIRECTIVES = [
   HellDataTableToolbarStart,
   HellDataTableToolbar,
   HellDataTableToolbarEnd,
+  HellDataTableBulkActions,
   HellTableRowAction,
+  HellTableSelectionCell,
+  HellTableRowCheckbox,
+  HellTableRowRadio,
   ...HELL_TABLE_RENDER_DIRECTIVES,
 ] as const;
 
@@ -514,6 +741,9 @@ export {
   HellRowActions,
   HellRowEditor,
   HellTableRowAction,
+  HellTableRowCheckbox,
+  HellTableRowRadio,
+  HellTableSelectionCell,
   actionColumn,
   booleanColumn,
   hellColumns,
@@ -535,5 +765,8 @@ export type {
   HellTableRenderer,
   HellTableRowKey,
   HellTableRowRenderContext,
+  HellTableRowSelectionState,
+  HellTableSelectedRowKeyState,
+  HellTableSelectionColumnConfig,
   HellTableSortingState,
 } from '../table/table';

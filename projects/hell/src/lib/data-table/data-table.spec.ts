@@ -7,7 +7,9 @@ import {
   actionColumn,
   booleanColumn,
   hellColumns,
+  selectionColumn,
   textColumn,
+  type HellTableRowSelectionState,
   type HellTableSortingState,
 } from './data-table';
 
@@ -206,6 +208,79 @@ class ActiveRowDataTableHost {
   }
 }
 
+@Component({
+  imports: [...HELL_DATA_TABLE_DIRECTIVES],
+  template: `
+    <hell-data-table [rows]="rows" [columns]="columns" rowKey="id" [(rowSelection)]="rowSelection">
+      <button hellDataTableBulkActions type="button">Bulk {{ selectedCount() }}</button>
+    </hell-data-table>
+  `,
+})
+class SelectableRowsDataTableHost {
+  readonly group = signal<'core' | 'systems'>('core');
+  readonly rowSelection = signal<HellTableRowSelectionState>({});
+  readonly sourceRows = signal<readonly Person[]>([
+    { id: 'ada', name: 'Ada', active: true, role: 'core' },
+    { id: 'grace', name: 'Grace', active: true, role: 'core' },
+    { id: 'linus', name: 'Linus', active: false, role: 'systems' },
+    { id: 'dorothy', name: 'Dorothy', active: true, role: 'systems' },
+  ]);
+  readonly rows = computed(() => this.sourceRows().filter((row) => row.role === this.group()));
+  readonly columns = people.define([
+    selectionColumn<Person>('selection', {
+      header: 'Select',
+      selectAllAriaLabel: 'Select visible people',
+      ariaLabel: (row) => `Select ${row.name}`,
+      disabled: (row) => row.id === 'linus',
+    }),
+    textColumn<Person, string>('name', { header: 'Name', accessor: 'name' }),
+  ]);
+
+  selectedCount(): number {
+    return Object.values(this.rowSelection()).filter(Boolean).length;
+  }
+
+  reorderCoreRows(): void {
+    this.sourceRows.update((rows) => [rows[1], rows[0], ...rows.slice(2)]);
+  }
+}
+
+@Component({
+  imports: [...HELL_DATA_TABLE_DIRECTIVES],
+  template: `
+    <hell-data-table
+      [rows]="rows"
+      [columns]="columns"
+      rowKey="id"
+      [(activeRowKey)]="activeRowKey"
+      [(selectedRowKey)]="selectedRowKey"
+    >
+      <ng-template [hellRowActions]="'actions'" let-row="row" let-commands="commands">
+        <button hellTableRowAction type="button" (click)="commands.openRow(row)">
+          Open {{ row.original.name }}
+        </button>
+      </ng-template>
+    </hell-data-table>
+  `,
+})
+class SingleSelectableRowsDataTableHost {
+  readonly activeRowKey = signal<string | null>(null);
+  readonly selectedRowKey = signal<string | null>(null);
+  readonly rows: readonly Person[] = [
+    { id: 'ada', name: 'Ada', active: true },
+    { id: 'grace', name: 'Grace', active: true },
+  ];
+  readonly columns = people.define([
+    selectionColumn<Person>('primary', {
+      mode: 'radio',
+      radioName: 'primary-person',
+      ariaLabel: (row) => `Make ${row.name} primary`,
+    }),
+    textColumn<Person, string>('name', { header: 'Name', accessor: 'name' }),
+    actionColumn<Person>('actions', { header: 'Actions' }),
+  ]);
+}
+
 describe('HellDataTable simple renderer', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -217,6 +292,8 @@ describe('HellDataTable simple renderer', () => {
         ControlledSortingDataTableHost,
         CustomTemplateDataTableHost,
         ActiveRowDataTableHost,
+        SelectableRowsDataTableHost,
+        SingleSelectableRowsDataTableHost,
       ],
     }).compileComponents();
   });
@@ -394,12 +471,130 @@ describe('HellDataTable simple renderer', () => {
     expect(tableBodyText(root)).toContain('Linus');
     expect(fixture.componentInstance.activeRowKey()).toBeNull();
   });
+
+  it('keeps checkbox rowSelection keyed by row id across reorders and filtered pages', () => {
+    const fixture = TestBed.createComponent(SelectableRowsDataTableHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const host = fixture.componentInstance;
+
+    expect(root.querySelector('[data-hell-data-table-bulk-actions]')).toBeNull();
+    expect(rowKeys(root)).toEqual(['ada', 'grace']);
+
+    const rowSpace = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
+    rowByKey(root, 'ada').dispatchEvent(rowSpace);
+    expect(rowSpace.defaultPrevented).toBe(false);
+    expect(host.rowSelection()).toEqual({});
+
+    const adaCheckbox = checkboxByLabel(root, 'Select Ada');
+    adaCheckbox.focus();
+    const controlSpace = new KeyboardEvent('keydown', {
+      key: ' ',
+      bubbles: true,
+      cancelable: true,
+    });
+    adaCheckbox.dispatchEvent(controlSpace);
+    expect(controlSpace.defaultPrevented).toBe(false);
+
+    adaCheckbox.click();
+    fixture.detectChanges();
+
+    expect(host.rowSelection()).toEqual({ ada: true });
+    expect(checkboxByLabel(root, 'Select Ada').checked).toBe(true);
+    expect(rowByKey(root, 'ada').getAttribute('data-selected')).toBe('true');
+    expect(rowByKey(root, 'ada').hasAttribute('aria-selected')).toBe(false);
+    expect(checkboxByLabel(root, 'Select visible people').indeterminate).toBe(true);
+    expect(root.querySelector('[data-hell-data-table-bulk-actions]')?.textContent).toContain('Bulk 1');
+
+    host.reorderCoreRows();
+    fixture.detectChanges();
+
+    expect(rowKeys(root)).toEqual(['grace', 'ada']);
+    expect(checkboxByLabel(root, 'Select Ada').checked).toBe(true);
+
+    checkboxByLabel(root, 'Select visible people').click();
+    fixture.detectChanges();
+    expect(host.rowSelection()).toEqual({ ada: true, grace: true });
+
+    host.group.set('systems');
+    fixture.detectChanges();
+
+    expect(rowKeys(root)).toEqual(['linus', 'dorothy']);
+    expect(checkboxByLabel(root, 'Select Linus').disabled).toBe(true);
+    expect(checkboxByLabel(root, 'Select Dorothy').checked).toBe(false);
+    expect(checkboxByLabel(root, 'Select visible people').checked).toBe(false);
+
+    checkboxByLabel(root, 'Select visible people').click();
+    fixture.detectChanges();
+
+    expect(host.rowSelection()).toEqual({ ada: true, grace: true, dorothy: true });
+    expect(checkboxByLabel(root, 'Select Linus').checked).toBe(false);
+    expect(checkboxByLabel(root, 'Select Dorothy').checked).toBe(true);
+
+    checkboxByLabel(root, 'Select visible people').click();
+    fixture.detectChanges();
+
+    expect(host.rowSelection()).toEqual({ ada: true, grace: true, dorothy: false });
+  });
+
+  it('uses selectedRowKey for radio selection without reusing activeRowKey', () => {
+    const fixture = TestBed.createComponent(SingleSelectableRowsDataTableHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const host = fixture.componentInstance;
+
+    expect(root.querySelector('thead input[type="checkbox"]')).toBeNull();
+
+    const graceRadio = radioByLabel(root, 'Make Grace primary');
+    expect(graceRadio.name).toBe('primary-person');
+    graceRadio.click();
+    fixture.detectChanges();
+
+    expect(host.selectedRowKey()).toBe('grace');
+    expect(host.activeRowKey()).toBeNull();
+    expect(rowByKey(root, 'grace').getAttribute('data-selected')).toBe('true');
+    expect(rowByKey(root, 'grace').hasAttribute('aria-selected')).toBe(false);
+
+    activeRowAction(root).click();
+    fixture.detectChanges();
+
+    expect(host.activeRowKey()).toBe('ada');
+    expect(host.selectedRowKey()).toBe('grace');
+    expect(rowByKey(root, 'ada').getAttribute('data-active')).toBe('true');
+    expect(rowByKey(root, 'ada').getAttribute('data-selected')).toBeNull();
+    expect(rowByKey(root, 'ada').hasAttribute('aria-selected')).toBe(false);
+    expect(radioByLabel(root, 'Make Grace primary').checked).toBe(true);
+  });
 });
 
 function tableBodyText(root: Element): string {
   return [...root.querySelectorAll('tbody tr')]
     .map((row) => row.textContent?.replace(/\s+/g, ' ').trim() ?? '')
     .join(' ');
+}
+
+function rowKeys(root: Element): string[] {
+  return [...root.querySelectorAll('tbody tr[data-row-key]')].map(
+    (row) => row.getAttribute('data-row-key') ?? '',
+  );
+}
+
+function rowByKey(root: Element, key: string): HTMLTableRowElement {
+  const row = root.querySelector(`tbody tr[data-row-key="${key}"]`);
+  if (!(row instanceof HTMLTableRowElement)) throw new Error(`Expected row ${key}.`);
+  return row;
+}
+
+function checkboxByLabel(root: Element, label: string): HTMLInputElement {
+  const checkbox = root.querySelector(`input[type="checkbox"][aria-label="${label}"]`);
+  if (!(checkbox instanceof HTMLInputElement)) throw new Error(`Expected checkbox ${label}.`);
+  return checkbox;
+}
+
+function radioByLabel(root: Element, label: string): HTMLInputElement {
+  const radio = root.querySelector(`input[type="radio"][aria-label="${label}"]`);
+  if (!(radio instanceof HTMLInputElement)) throw new Error(`Expected radio ${label}.`);
+  return radio;
 }
 
 function activeRowAction(root: Element): HTMLButtonElement {

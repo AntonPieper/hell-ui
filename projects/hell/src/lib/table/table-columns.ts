@@ -13,6 +13,10 @@ import {
   type HellTableRenderer,
   type HellTableResolvedRenderer,
   type HellTableRowRenderContext,
+  type HellTableSelectionColumnConfig,
+  type HellTableSelectionDisabled,
+  type HellTableSelectionLabel,
+  type HellTableSelectionMode,
   type HellTableTemplateRenderer,
 } from './table-model';
 import { type TemplateRef, type Type } from '@angular/core';
@@ -83,7 +87,12 @@ export type HellSelectionColumnOptions<TData> = Omit<
 > & {
   readonly sortable?: false;
   readonly hideable?: false;
-  readonly mode?: 'checkbox' | 'radio';
+  readonly mode?: HellTableSelectionMode;
+  readonly selectAll?: boolean;
+  readonly disabled?: HellTableSelectionDisabled<TData>;
+  readonly ariaLabel?: HellTableSelectionLabel<TData>;
+  readonly selectAllAriaLabel?: string;
+  readonly radioName?: string;
 };
 
 /** Builder returned by `hellColumns<TData>()` for strongly typed column creation. */
@@ -208,6 +217,7 @@ export function selectionColumn<TData>(
   options: HellSelectionColumnOptions<TData> = {},
 ): HellColumnDef<TData, never> {
   const [id, resolvedOptions] = resolveSpecialColumnArgs(idOrOptions, options, 'selection');
+  const selection = selectionColumnConfig(resolvedOptions);
   return {
     ...createColumn(id, resolvedOptions, {
       kind: 'selection',
@@ -215,7 +225,8 @@ export function selectionColumn<TData>(
       hideable: false,
       accessorFromId: false,
     }),
-    meta: { mode: resolvedOptions.mode ?? 'checkbox', ...(resolvedOptions.meta ?? {}) },
+    selection,
+    meta: { mode: selection.mode ?? 'checkbox', ...(resolvedOptions.meta ?? {}) },
   };
 }
 
@@ -327,6 +338,19 @@ export function hellTableResolveRowEditorRenderer<TData>(
   if (projected) return { source: 'projected', renderer: projected };
   if (column?.rowEditor) return { source: 'column', renderer: column.rowEditor };
   return null;
+}
+
+function selectionColumnConfig<TData>(
+  options: HellSelectionColumnOptions<TData>,
+): HellTableSelectionColumnConfig<TData> {
+  return {
+    mode: options.mode ?? 'checkbox',
+    selectAll: options.selectAll,
+    disabled: options.disabled,
+    ariaLabel: options.ariaLabel,
+    selectAllAriaLabel: options.selectAllAriaLabel,
+    radioName: options.radioName,
+  };
 }
 
 function createColumn<TData, TValue, TOptions extends HellColumnOptions<TData, TValue>>(

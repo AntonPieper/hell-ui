@@ -214,6 +214,14 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
             <code>commands.isActive(row)</code>, and <code>commands.activeRow()</code>. Active-row
             state is independent from row selection.
           </li>
+          <li>
+            Add <code>selectionColumn()</code> to render native checkbox or radio controls. Checkbox
+            selection binds to <code>[(rowSelection)]</code> as a stable
+            <code>Record&lt;rowKey, boolean&gt;</code>; radio selection binds to
+            <code>[(selectedRowKey)]</code> and never reuses <code>activeRowKey</code>. A projected
+            <code>[hellDataTableBulkActions]</code> toolbar slot appears when checkbox selection is
+            non-empty.
+          </li>
         </ul>
 
         <h3>Theming</h3>
