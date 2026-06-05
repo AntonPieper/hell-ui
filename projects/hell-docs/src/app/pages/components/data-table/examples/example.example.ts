@@ -229,6 +229,14 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
           <hell-icon name="faSolidArrowRotateLeft" size="12px" />
           Reset
         </button>
+        @if (selectedRowIds().size) {
+          <span class="rounded-full bg-hell-primary-soft px-2 py-1 text-xs text-hell-primary">
+            {{ selectedRowIds().size }} selected for bulk actions
+          </span>
+          <button hellButton size="sm" type="button" variant="ghost" (click)="clearRowSelection()">
+            Clear selection
+          </button>
+        }
       </div>
 
       <ng-template #filterMenu>
@@ -359,7 +367,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
         [detailFlex]="2"
         [primaryMinSize]="320"
         [detailMinSize]="260"
-        [detailOpen]="!!selected()"
+        [detailOpen]="!!activeRow()"
         (detailOpenChange)="onDetailOpenChange($event)"
       >
         <ng-template hellSplitPrimary>
@@ -368,6 +376,16 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
               <table hellTable contentWidth>
                 <thead hellTableHead>
                   <tr>
+                    <th hellTableHeaderCell hellTableSelectionCell class="w-12">
+                      <input
+                        hellTableRowCheckbox
+                        type="checkbox"
+                        aria-label="Select visible rows"
+                        [checked]="allVisibleSelected()"
+                        [indeterminate]="someVisibleSelected()"
+                        (checkedChange)="setVisibleSelection($event)"
+                      />
+                    </th>
                     <th
                       hellTableHeaderCell
                       columnId="id"
@@ -429,6 +447,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                   @if (loading()) {
                     @for (row of skeletonRows(); track row) {
                       <tr hellTableRow>
+                        <td hellTableCell hellTableSelectionCell><div hellSkeleton width="14px" height="14px"></div></td>
                         <td hellTableCell><div hellSkeleton width="34px" height="13px"></div></td>
                         <td hellTableCell><div hellSkeleton width="70%" height="13px"></div></td>
                         <td hellTableCell><div hellSkeleton width="84%" height="13px"></div></td>
@@ -439,11 +458,20 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                     }
                   } @else if (error(); as message) {
                     <tr>
-                      <td hellTableCell align="center" space="empty" [attr.colspan]="6">{{ message }}</td>
+                      <td hellTableCell align="center" space="empty" [attr.colspan]="7">{{ message }}</td>
                     </tr>
                   } @else {
                     @for (row of rows(); track row.id) {
-                      <tr hellTableRow [selected]="selectedId() === row.id">
+                      <tr hellTableRow [active]="activeRowId() === row.id" [selected]="isSelected(row)">
+                        <td hellTableCell hellTableSelectionCell>
+                          <input
+                            hellTableRowCheckbox
+                            type="checkbox"
+                            [attr.aria-label]="'Select ' + row.name + ' for bulk actions'"
+                            [checked]="isSelected(row)"
+                            (checkedChange)="setRowSelected(row, $event)"
+                          />
+                        </td>
                         <td hellTableCell>{{ row.id }}</td>
                         <td hellTableCell>{{ row.name }}</td>
                         <td hellTableCell>{{ row.email }}</td>
@@ -452,11 +480,12 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                         <td hellTableCell>
                           <button
                             hellButton
+                            hellTableRowAction
                             type="button"
                             variant="ghost"
                             size="xs"
                             [attr.aria-label]="'Open details for ' + row.name"
-                            (click)="selectRow(row)"
+                            (click)="openRow(row)"
                           >
                             Open
                           </button>
@@ -464,7 +493,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
                       </tr>
                     } @empty {
                       <tr>
-                        <td hellTableCell align="center" space="empty" [attr.colspan]="6">No results.</td>
+                        <td hellTableCell align="center" space="empty" [attr.colspan]="7">No results.</td>
                       </tr>
                     }
                   }
@@ -503,7 +532,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
 
         <ng-template hellSplitDetail>
           <div class="flex min-h-0 min-w-0 flex-1 flex-col">
-            @if (selected(); as row) {
+            @if (activeRow(); as row) {
               <div class="flex items-center justify-between border-b border-hell-border bg-hell-surface-subtle p-3">
                 <strong class="text-sm font-semibold text-hell-foreground">{{ row.name }}</strong>
                 <span class="text-xs text-hell-foreground-muted">#{{ row.id }}</span>
@@ -516,7 +545,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
               ></textarea>
             } @else {
               <div class="flex flex-1 items-center justify-center text-center text-sm text-hell-foreground-muted">
-                Select a row to edit.
+                Open a row to edit.
               </div>
             }
           </div>
@@ -558,8 +587,8 @@ export class DataTableExampleExample {
   protected readonly order = signal<RowOrder>('desc');
   protected readonly roleFilter = signal<RowFilter<RowRole>>('all');
   protected readonly assigneeFilter = signal<RowFilter<RowAssignee>>('all');
-  protected readonly selectedId = signal<number | null>(null);
-
+  protected readonly activeRowId = signal<number | null>(null);
+  protected readonly selectedRowIds = signal<ReadonlySet<number>>(new Set());
 
   private readonly drafts = signal<ReadonlyMap<number, string>>(new Map());
 
@@ -645,11 +674,20 @@ export class DataTableExampleExample {
   protected readonly assigneeLabel = computed(() =>
     this.assigneeFilter() === 'all' ? 'Anyone' : this.assigneeFilter(),
   );
-  protected readonly selected = computed(
-    () => this.rows().find((row) => row.id === this.selectedId()) ?? null,
+  protected readonly activeRow = computed(
+    () => this.rows().find((row) => row.id === this.activeRowId()) ?? null,
   );
+  protected readonly allVisibleSelected = computed(() => {
+    const rows = this.rows();
+    return rows.length > 0 && rows.every((row) => this.selectedRowIds().has(row.id));
+  });
+  protected readonly someVisibleSelected = computed(() => {
+    const rows = this.rows();
+    const selectedCount = rows.filter((row) => this.selectedRowIds().has(row.id)).length;
+    return selectedCount > 0 && selectedCount < rows.length;
+  });
   protected readonly docText = computed(() => {
-    const row = this.selected();
+    const row = this.activeRow();
     if (!row) return '';
     return this.drafts().get(row.id) ?? JSON.stringify(row, null, 2);
   });
@@ -749,16 +787,44 @@ export class DataTableExampleExample {
     this.page.set(0);
   }
 
-  protected selectRow(row: Row): void {
-    this.selectedId.set(row.id);
+  protected isSelected(row: Row): boolean {
+    return this.selectedRowIds().has(row.id);
+  }
+
+  protected setRowSelected(row: Row, checked: boolean): void {
+    this.selectedRowIds.update((current) => {
+      const next = new Set(current);
+      if (checked) next.add(row.id);
+      else next.delete(row.id);
+      return next;
+    });
+  }
+
+  protected setVisibleSelection(checked: boolean): void {
+    this.selectedRowIds.update((current) => {
+      const next = new Set(current);
+      for (const row of this.rows()) {
+        if (checked) next.add(row.id);
+        else next.delete(row.id);
+      }
+      return next;
+    });
+  }
+
+  protected clearRowSelection(): void {
+    this.selectedRowIds.set(new Set());
+  }
+
+  protected openRow(row: Row): void {
+    this.activeRowId.set(row.id);
   }
 
   protected onDetailOpenChange(open: boolean): void {
-    if (!open) this.selectedId.set(null);
+    if (!open) this.activeRowId.set(null);
   }
 
   protected onEditorChange(text: string): void {
-    const id = this.selectedId();
+    const id = this.activeRowId();
     if (id == null) return;
     const next = new Map(this.drafts());
     next.set(id, text);
@@ -778,8 +844,8 @@ export class DataTableExampleExample {
       if (id !== this.requestId || controller.signal.aborted) return;
       this.rows.set(page.hits.map((hit) => hit.row));
       this.totalRows.set(page.total);
-      if (!page.hits.some((hit) => hit.row.id === this.selectedId())) {
-        this.selectedId.set(null);
+      if (!page.hits.some((hit) => hit.row.id === this.activeRowId())) {
+        this.activeRowId.set(null);
       }
     } catch (error) {
       if (id !== this.requestId || controller.signal.aborted) return;

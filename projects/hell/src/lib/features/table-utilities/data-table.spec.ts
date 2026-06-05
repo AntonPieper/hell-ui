@@ -15,6 +15,16 @@ import {
     <table hellTable>
       <thead hellTableHead>
         <tr>
+          <th hellTableHeaderCell hellTableSelectionCell>
+            <input
+              id="select-all"
+              hellTableRowCheckbox
+              type="checkbox"
+              aria-label="Select all people"
+              [indeterminate]="indeterminate()"
+              (checkedChange)="checkboxEvents.push($event)"
+            />
+          </th>
           <th
             id="name"
             hellTableHeaderCell
@@ -46,20 +56,49 @@ import {
         </tr>
       </thead>
       <tbody hellTableBody>
-        <tr
-          id="person-row"
-          hellTableRow
-          [selected]="selected()"
-          [selectable]="selectable()"
-          (rowSelect)="rowEvents.push($event)"
-        >
-          <td hellTableCell (cellSelect)="cellEvents.push($event)">
+        <tr id="person-row" hellTableRow [active]="active()" [selected]="selected()">
+          <td hellTableCell hellTableSelectionCell>
+            <input
+              id="row-checkbox"
+              hellTableRowCheckbox
+              type="checkbox"
+              aria-label="Select Ada"
+              [checked]="selected()"
+              (checkedChange)="onCheckboxChange($event)"
+            />
+          </td>
+          <td hellTableCell>
             Ada
-            <button id="row-action" type="button">Edit</button>
-            <a id="row-link" href="/people/ada">Profile</a>
+            <button
+              id="row-action"
+              hellTableRowAction
+              type="button"
+              (click)="actionEvents.push($event)"
+            >
+              Edit
+            </button>
+            <a
+              id="row-link"
+              hellTableRowAction
+              href="/people/ada"
+              (click)="actionEvents.push($event)"
+            >
+              Profile
+            </a>
             <input id="row-input" aria-label="Inline edit" />
             <span id="row-ignore" hellTableRowIgnore>Ignore</span>
             <span id="row-legacy-ignore" data-hell-row-ignore>Legacy Ignore</span>
+          </td>
+          <td hellTableCell hellTableSelectionCell>
+            <input
+              id="row-radio"
+              hellTableRowRadio
+              type="radio"
+              name="primary-row"
+              aria-label="Make Ada primary"
+              [checked]="radioSelected()"
+              (checkedChange)="onRadioChange($event)"
+            />
           </td>
         </tr>
       </tbody>
@@ -67,16 +106,29 @@ import {
   `,
 })
 class DataTableHost {
-  readonly selectable = signal(false);
+  readonly active = signal(false);
   readonly selected = signal(false);
+  readonly indeterminate = signal(false);
+  readonly radioSelected = signal(false);
   readonly sortable = signal(false);
   readonly sort = signal<'asc' | 'desc' | null>(null);
   readonly minWidth = signal(40);
 
-  readonly rowEvents: Array<MouseEvent | KeyboardEvent> = [];
-  readonly cellEvents: MouseEvent[] = [];
+  readonly actionEvents: MouseEvent[] = [];
+  readonly checkboxEvents: boolean[] = [];
+  readonly radioEvents: boolean[] = [];
   readonly sortEvents: Array<MouseEvent | KeyboardEvent> = [];
   readonly resizeEvents: HellTableResizeEvent[] = [];
+
+  onCheckboxChange(checked: boolean): void {
+    this.checkboxEvents.push(checked);
+    this.selected.set(checked);
+  }
+
+  onRadioChange(checked: boolean): void {
+    this.radioEvents.push(checked);
+    this.radioSelected.set(checked);
+  }
 }
 
 @Component({
@@ -230,68 +282,79 @@ describe('Hell table utilities directives', () => {
     }).compileComponents();
   });
 
-  it('keeps rows static unless a selectable row model is explicit', () => {
+  it('keeps active and selected row states visual in native table mode', () => {
     const fixture = TestBed.createComponent(DataTableHost);
     const host = fixture.componentInstance;
     fixture.detectChanges();
 
     const row = byId<HTMLTableRowElement>(fixture.nativeElement, 'person-row');
-    row.click();
-    expect(host.rowEvents).toEqual([]);
-    expect(row.hasAttribute('tabindex')).toBe(false);
-    expect(row.hasAttribute('aria-selected')).toBe(false);
-
-    host.selected.set(true);
-    fixture.detectChanges();
-    expect(row.getAttribute('data-selected')).toBe('true');
-    expect(row.hasAttribute('aria-selected')).toBe(false);
-
-    host.selectable.set(true);
-    fixture.detectChanges();
-
     row.click();
     const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
     row.dispatchEvent(enter);
     const space = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
     row.dispatchEvent(space);
 
-    expect(row.getAttribute('tabindex')).toBe('0');
-    expect(row.getAttribute('aria-selected')).toBe('true');
-    expect(space.defaultPrevented).toBe(true);
-    expect(host.rowEvents).toHaveLength(3);
-  });
+    expect(row.hasAttribute('tabindex')).toBe(false);
+    expect(row.hasAttribute('aria-selected')).toBe(false);
+    expect(row.hasAttribute('data-interactive')).toBe(false);
+    expect(enter.defaultPrevented).toBe(false);
+    expect(space.defaultPrevented).toBe(false);
+    expect(host.actionEvents).toEqual([]);
 
-  it('does not select rows or cells from nested interactive controls', () => {
-    const fixture = TestBed.createComponent(DataTableHost);
-    const host = fixture.componentInstance;
-    host.selectable.set(true);
+    host.active.set(true);
+    host.selected.set(true);
     fixture.detectChanges();
 
-    byId<HTMLButtonElement>(fixture.nativeElement, 'row-action').click();
-    const link = byId<HTMLAnchorElement>(fixture.nativeElement, 'row-link');
-    link.addEventListener('click', (event) => event.preventDefault(), { once: true });
-    link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-    byId<HTMLInputElement>(fixture.nativeElement, 'row-input').click();
-
-    const enter = new KeyboardEvent('keydown', {
-      key: 'Enter',
-      bubbles: true,
-      cancelable: true,
-    });
-    byId<HTMLButtonElement>(fixture.nativeElement, 'row-action').dispatchEvent(enter);
-
-    expect(enter.defaultPrevented).toBe(false);
-    expect(host.rowEvents).toEqual([]);
-    expect(host.cellEvents).toEqual([]);
+    expect(row.getAttribute('data-active')).toBe('true');
+    expect(row.getAttribute('data-selected')).toBe('true');
+    expect(row.hasAttribute('tabindex')).toBe(false);
+    expect(row.hasAttribute('aria-selected')).toBe(false);
   });
 
-  it('does not select row from elements marked as table row ignore', () => {
+  it('uses native row action, checkbox, and radio controls for row interaction', () => {
     const fixture = TestBed.createComponent(DataTableHost);
     const host = fixture.componentInstance;
-    host.selectable.set(true);
+    host.indeterminate.set(true);
     fixture.detectChanges();
 
     const row = byId<HTMLTableRowElement>(fixture.nativeElement, 'person-row');
+    const action = byId<HTMLButtonElement>(fixture.nativeElement, 'row-action');
+    const link = byId<HTMLAnchorElement>(fixture.nativeElement, 'row-link');
+    const checkbox = byId<HTMLInputElement>(fixture.nativeElement, 'row-checkbox');
+    const radio = byId<HTMLInputElement>(fixture.nativeElement, 'row-radio');
+    const selectAll = byId<HTMLInputElement>(fixture.nativeElement, 'select-all');
+
+    expect(action.getAttribute('type')).toBe('button');
+    expect(action.getAttribute('data-hell-table-row-action')).toBe('');
+    expect(link.getAttribute('type')).toBeNull();
+    expect(checkbox.checked).toBe(false);
+    expect(radio.checked).toBe(false);
+    expect(selectAll.indeterminate).toBe(true);
+    expect(selectAll.getAttribute('data-indeterminate')).toBe('true');
+    expect(byId<HTMLElement>(fixture.nativeElement, 'row-checkbox').getAttribute('data-hell-table-row-checkbox')).toBe('');
+    expect(byId<HTMLElement>(fixture.nativeElement, 'row-radio').getAttribute('data-hell-table-row-radio')).toBe('');
+
+    action.click();
+    link.addEventListener('click', (event) => event.preventDefault(), { once: true });
+    link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    checkbox.click();
+    radio.click();
+    fixture.detectChanges();
+
+    expect(host.actionEvents).toHaveLength(2);
+    expect(host.checkboxEvents).toEqual([true]);
+    expect(host.radioEvents).toEqual([true]);
+    expect(checkbox.checked).toBe(true);
+    expect(radio.checked).toBe(true);
+    expect(row.getAttribute('data-selected')).toBe('true');
+    expect(row.hasAttribute('aria-selected')).toBe(false);
+  });
+
+  it('keeps row-ignore markers inert now that rows do not activate', () => {
+    const fixture = TestBed.createComponent(DataTableHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
     byId<HTMLSpanElement>(fixture.nativeElement, 'row-ignore').dispatchEvent(
       new MouseEvent('click', { bubbles: true }),
     );
@@ -299,11 +362,9 @@ describe('Hell table utilities directives', () => {
       new MouseEvent('click', { bubbles: true }),
     );
 
-    expect(host.rowEvents).toEqual([]);
-    row.click();
-
-    expect(host.rowEvents).toHaveLength(1);
-    expect(host.rowEvents[0].type).toBe('click');
+    expect(host.actionEvents).toEqual([]);
+    expect(byId<HTMLSpanElement>(fixture.nativeElement, 'row-ignore').getAttribute('data-hell-row-ignore')).toBe('');
+    expect(byId<HTMLSpanElement>(fixture.nativeElement, 'row-legacy-ignore').getAttribute('data-hell-row-ignore')).toBe('');
   });
 
   it('disables the sort trigger when its header is not sortable', () => {

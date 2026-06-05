@@ -48,7 +48,7 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
             </thead>
             <tbody hellTableBody>
               @for (row of rows; track row.id) {
-                <tr hellTableRow [selected]="selectedId() === row.id">
+                <tr hellTableRow [active]="activeRowId() === row.id">
                   <td hellTableCell>{{ row.id }}</td>
                   <td hellTableCell>{{ row.name }}</td>
                   <td hellTableCell>{{ row.email }}</td>
@@ -56,11 +56,12 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
                   <td hellTableCell>
                     <button
                       hellButton
+                      hellTableRowAction
                       type="button"
                       variant="ghost"
                       size="xs"
                       [attr.aria-label]="'Open editor for ' + row.name"
-                      (click)="select(row)"
+                      (click)="openEditor(row)"
                     >
                       Open
                     </button>
@@ -73,7 +74,7 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
       </div>
       <div hellResizableHandle appearance="grip"></div>
       <div hellResizablePane [initialFlex]="2" [minSize]="280" class="flex flex-col">
-        @if (selected(); as r) {
+        @if (activeRow(); as r) {
           <div class="flex items-center justify-between px-3 py-2 border-b hd-surface-subtle">
             <strong class="text-sm">{{ r.name }}</strong>
             <span class="text-xs hd-text-muted">#{{ r.id }}</span>
@@ -86,7 +87,7 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
           ></textarea>
         } @else {
           <div class="flex items-center justify-center grow text-sm hd-text-muted">
-            Select a row to edit.
+            Open a row to edit.
           </div>
         }
       </div>
@@ -95,27 +96,26 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
 })
 export class DataTableRowEditorExample {
   protected readonly rows = ROWS;
-  protected readonly selectedId = signal<number | null>(null);
-
+  protected readonly activeRowId = signal<number | null>(null);
 
   private readonly drafts = signal<ReadonlyMap<number, string>>(new Map());
 
-  protected readonly selected = computed(
-    () => this.rows.find((r) => r.id === this.selectedId()) ?? null,
+  protected readonly activeRow = computed(
+    () => this.rows.find((r) => r.id === this.activeRowId()) ?? null,
   );
 
   protected readonly docText = computed(() => {
-    const r = this.selected();
+    const r = this.activeRow();
     if (!r) return '';
     return this.drafts().get(r.id) ?? JSON.stringify(r, null, 2);
   });
 
-  protected select(row: Row) {
-    this.selectedId.set(row.id);
+  protected openEditor(row: Row) {
+    this.activeRowId.set(row.id);
   }
 
   protected onChange(text: string) {
-    const id = this.selectedId();
+    const id = this.activeRowId();
     if (id == null) return;
     const next = new Map(this.drafts());
     next.set(id, text);

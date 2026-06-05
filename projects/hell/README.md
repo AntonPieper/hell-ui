@@ -74,7 +74,7 @@ The stable API report set currently covers `@hell-ui/angular`, `@hell-ui/angular
 | PDF viewer (`@hell-ui/pdf-viewer`) | Experimental split package | Browser-only app surface/recipe owned outside `@hell-ui/angular` |
 | Testing harnesses (`@hell-ui/angular/testing`) | Stable/test-only | CDK component harnesses for consumer and library tests |
 | Speech transcript (`allowSpeechTranscript`) | Experimental/browser-only/best-effort | Requires `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript`; uses `navigator` + `SpeechRecognition` + `captureStream`; not accessibility-grade captions or production timed text |
-| Removed table aliases (`/features/data-table`, `/features/table-utilities`, `HELL_TABLE_DIRECTIVES`, `HELL_TABLE_UTILITY_DIRECTIVES`, `HellTableRow.interactive`, `selectionSemantics`) | Removed before beta | Use `@hell-ui/angular/table` plus `HELL_TABLE_UTILITIES_DIRECTIVES`; use real cell controls or documented explicit selection |
+| Removed table aliases and row-as-control APIs (`/features/data-table`, `/features/table-utilities`, `HELL_TABLE_DIRECTIVES`, `HELL_TABLE_UTILITY_DIRECTIVES`, `HellTableRow.interactive`, `selectionSemantics`, `(rowSelect)`, `[selectable]`) | Removed before beta | Use `@hell-ui/angular/table` plus `HELL_TABLE_UTILITIES_DIRECTIVES`; use `hellTableRowAction` for row actions and checkbox/radio controls for selection |
 | Deprecated non-table aliases (`allowLiveCaptions`, `hellAudioSpeechSupported` from `/audio-player`, `HellDataTableLabels`, `hellCodeEditorSetup`) | Deprecated | Keep compatibility imports only while migrating to the documented replacements |
 
 The PDF viewer was split out before public beta; use `@hell-ui/pdf-viewer` for the component, styles, and worker setup docs.

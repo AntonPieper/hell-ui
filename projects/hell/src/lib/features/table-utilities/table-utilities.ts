@@ -1,5 +1,4 @@
 import { HELL_LABELS } from '../../core/labels';
-import { hellFloatingTargetNode } from '../../core/floating-scope';
 import { HellStyleable } from '../../core/styleable';
 import {
   HellResizePairInteractionController,
@@ -29,6 +28,7 @@ import {
   Renderer2,
   booleanAttribute,
   computed,
+  effect,
   inject,
   input,
   numberAttribute,
@@ -84,60 +84,6 @@ abstract class HellTableRoleDirective extends HellStyleable implements OnInit {
       this.inferredRole,
     );
     if (role !== null) this.renderer.setAttribute(this.roleHost, 'role', role);
-  }
-}
-
-const HELL_TABLE_INTERACTIVE_TARGET_SELECTOR = [
-  'button',
-  'a[href]',
-  'input',
-  'select',
-  'textarea',
-  'summary',
-  'label',
-  '[contenteditable]:not([contenteditable="false"])',
-  '[data-hell-row-ignore]',
-  '[data-hell-table-ignore]',
-  '[role="button"]',
-  '[role="link"]',
-  '[role="checkbox"]',
-  '[role="radio"]',
-  '[role="switch"]',
-  '[role="tab"]',
-  '[role="menuitem"]',
-  '[role="menuitemcheckbox"]',
-  '[role="menuitemradio"]',
-  '[role="option"]',
-  '[role="textbox"]',
-  '[role="combobox"]',
-  '[role="slider"]',
-  '[role="spinbutton"]',
-  '[tabindex]:not([tabindex="-1"])',
-].join(',');
-
-function hellEventFromInteractiveTarget(event: Event, host: HTMLElement): boolean {
-  const target = hellAsElement(hellFloatingTargetNode(event.target));
-  if (!target || target === host) return false;
-
-  const interactive = target.closest(HELL_TABLE_INTERACTIVE_TARGET_SELECTOR);
-  return !!interactive && interactive !== host && hostContains(host, interactive);
-}
-
-function hellAsElement(target: EventTarget | Node | null): Element | null {
-  return target != null &&
-    typeof target === 'object' &&
-    (target as { nodeType?: number }).nodeType === 1 &&
-    typeof (target as Element).matches === 'function' &&
-    typeof (target as Element).closest === 'function'
-    ? (target as Element)
-    : null;
-}
-
-function hostContains(host: HTMLElement, node: Node): boolean {
-  try {
-    return host.contains(node);
-  } catch {
-    return false;
   }
 }
 
@@ -228,8 +174,9 @@ export class HellTableBody extends HellTableRoleDirective {
 }
 
 /**
- * Marks nested content as exempt from row activation. Use this on custom control
- * hosts that should keep their own keyboard and click behavior.
+ * Compatibility marker for custom row content that wants a stable data hook.
+ * Hell rows no longer use it for activation because rows are static in native
+ * table mode.
  */
 @Directive({
   selector: '[data-hell-row-ignore], [hellTableRowIgnore]',
@@ -240,17 +187,15 @@ export class HellTableBody extends HellTableRoleDirective {
 export class HellTableRowIgnore {}
 
 /**
- * Behavioral row directive. Renders nothing of its own — consumers own
- * the row host markup and its children. Prefer real buttons or links inside
- * cells for row actions. Use Hell row activation only for an explicit
- * row-selection model, not as a generic clickable-row shortcut.
+ * Visual row state only. Native table rows stay static: no tabindex,
+ * aria-selected, click, or keydown handlers are installed by this directive.
  *
- * - `[selected]` -> `data-selected="true"` for row highlight styles.
- * - `[selectable]` -> `tabindex="0"`, `aria-selected`, and click/Enter/Space
- *   binding that emits `(rowSelect)` for a row-selection model.
- * - Nested buttons, links, inputs, ARIA widgets, `[contenteditable]`, and
- *   `[data-hell-row-ignore]`/`[hellTableRowIgnore]` opt out so row selection
- *   does not double-activate.
+ * - `[active]` -> `data-active="true"` for a master/detail or editor row.
+ * - `[selected]` -> `data-selected="true"` for a bulk-selection highlight.
+ *
+ * Use `button[hellTableRowAction]`, `a[hellTableRowAction]`,
+ * `input[hellTableRowCheckbox]`, or `input[hellTableRowRadio]` inside cells
+ * for built-in row interactions.
  */
 @Directive({
   selector: '[hellTableRow]',
@@ -258,38 +203,104 @@ export class HellTableRowIgnore {}
   host: {
     '[class.hell-table-row]': '!unstyled()',
     '[attr.data-hell-table-row]': '""',
+    '[attr.data-active]': 'active() ? "true" : null',
     '[attr.data-selected]': 'selected() ? "true" : null',
-    '[attr.data-interactive]': 'rowActivates() ? "true" : null',
-    '[attr.aria-selected]': 'rowActivates() ? (selected() ? "true" : "false") : null',
-    '[attr.tabindex]': 'rowActivates() ? "0" : null',
-    '(click)': 'onClick($event)',
-    '(keydown.enter)': 'onKey($event)',
-    '(keydown.space)': 'onKey($event)',
   },
 })
 export class HellTableRow extends HellTableRoleDirective {
   protected override readonly nativeElementNames = HELL_TABLE_ROW_NATIVE_ELEMENTS;
   protected override readonly inferredRole = 'row';
 
+  readonly active = input(false, { transform: booleanAttribute });
   readonly selected = input(false, { transform: booleanAttribute });
-  /** Preferred explicit row-selection activation API. Prefer cell buttons/links for row actions. */
-  readonly selectable = input(false, { transform: booleanAttribute });
+}
 
-  readonly rowSelect = output<MouseEvent | KeyboardEvent>();
-
-  protected readonly rowActivates = computed(() => this.selectable());
-
+/**
+ * Native row action. The host button or link owns focus, click, and keyboard
+ * activation; Hell adds only table-specific styling hooks.
+ */
+@Directive({
+  selector: 'button[hellTableRowAction], a[hellTableRowAction]',
+  exportAs: 'hellTableRowAction',
+  host: {
+    '[class.hell-table-row-action]': '!unstyled()',
+    '[attr.data-hell-table-row-action]': '""',
+    '[attr.type]': 'nativeButtonType()',
+  },
+})
+export class HellTableRowAction extends HellStyleable {
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
 
-  protected onClick(e: MouseEvent) {
-    if (!this.rowActivates() || hellEventFromInteractiveTarget(e, this.host)) return;
-    this.rowSelect.emit(e);
+  protected nativeButtonType(): 'button' | null {
+    return hellHostElementName(this.host) === 'BUTTON' ? 'button' : null;
+  }
+}
+
+/**
+ * Marks the narrow cell that contains row checkbox/radio controls. Combine it
+ * with `hellTableCell` or `hellTableHeaderCell` so table semantics stay native.
+ */
+@Directive({
+  selector: '[hellTableSelectionCell]',
+  exportAs: 'hellTableSelectionCell',
+  host: {
+    '[class.hell-table-selection-cell]': '!unstyled()',
+    '[attr.data-hell-table-selection-cell]': '""',
+  },
+})
+export class HellTableSelectionCell extends HellStyleable {}
+
+/** Native checkbox for row-selection columns. */
+@Directive({
+  selector: 'input[type="checkbox"][hellTableRowCheckbox]',
+  exportAs: 'hellTableRowCheckbox',
+  host: {
+    '[class.hell-table-row-checkbox]': '!unstyled()',
+    '[attr.data-hell-table-row-checkbox]': '""',
+    '[attr.type]': '"checkbox"',
+    '[attr.data-indeterminate]': 'indeterminate() ? "true" : null',
+    '(change)': 'onChange()',
+  },
+})
+export class HellTableRowCheckbox extends HellStyleable {
+  readonly indeterminate = input(false, { transform: booleanAttribute });
+
+  readonly checkedChange = output<boolean>();
+  readonly indeterminateChange = output<boolean>();
+
+  private readonly host = inject(ElementRef<HTMLInputElement>).nativeElement;
+
+  constructor() {
+    super();
+    effect(() => {
+      this.host.indeterminate = this.indeterminate();
+    });
   }
 
-  protected onKey(e: Event) {
-    if (!this.rowActivates() || hellEventFromInteractiveTarget(e, this.host)) return;
-    e.preventDefault();
-    this.rowSelect.emit(e as KeyboardEvent);
+  protected onChange(): void {
+    this.checkedChange.emit(this.host.checked);
+    this.indeterminateChange.emit(this.host.indeterminate);
+  }
+}
+
+/** Native radio for single row-selection columns. */
+@Directive({
+  selector: 'input[type="radio"][hellTableRowRadio]',
+  exportAs: 'hellTableRowRadio',
+  host: {
+    '[class.hell-table-row-radio]': '!unstyled()',
+    '[attr.data-hell-table-row-radio]': '""',
+    '[attr.type]': '"radio"',
+    '(change)': 'onChange()',
+  },
+})
+export class HellTableRowRadio extends HellStyleable {
+  readonly checkedChange = output<boolean>();
+
+  private readonly host = inject(ElementRef<HTMLInputElement>).nativeElement;
+
+  protected onChange(): void {
+    this.checkedChange.emit(this.host.checked);
   }
 }
 
@@ -418,9 +429,9 @@ export class HellTableSortTrigger extends HellStyleable {
 }
 
 /**
- * Body/data cell directive. Adds the host class and emits `(cellSelect)` on
- * click. Use the output if you need to react to a specific cell rather
- * than the whole row.
+ * Body/data cell directive. Adds the host class and optional alignment/empty
+ * state hooks. Cells stay passive; use a nested row action or selection control
+ * for interaction.
  */
 @Directive({
   selector: '[hellTableCell]',
@@ -429,7 +440,6 @@ export class HellTableSortTrigger extends HellStyleable {
     '[attr.data-hell-table-cell]': '""',
     '[attr.data-align]': 'align()',
     '[attr.data-space]': 'space()',
-    '(click)': 'onClick($event)',
   },
 })
 export class HellTableCell extends HellTableRoleDirective {
@@ -438,14 +448,6 @@ export class HellTableCell extends HellTableRoleDirective {
 
   readonly align = input<'start' | 'center' | 'end'>('start');
   readonly space = input<'normal' | 'empty'>('normal');
-  readonly cellSelect = output<MouseEvent>();
-
-  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
-
-  protected onClick(e: MouseEvent) {
-    if (hellEventFromInteractiveTarget(e, this.host)) return;
-    this.cellSelect.emit(e);
-  }
 }
 
 /**
@@ -619,7 +621,8 @@ export { HellTable as HellTableRoot, HellTableHead as HellTableHeader };
 
 /**
  * Standalone imports for the table utilities feature: container, table sections,
- * row/cell directives, sortable header cell, and resize handle.
+ * row/cell directives, row action/selection controls, sortable header cell, and
+ * resize handle.
  */
 /** Preferred plural alias for the table utility directives. */
 export const HELL_TABLE_UTILITIES_DIRECTIVES = [
@@ -629,6 +632,10 @@ export const HELL_TABLE_UTILITIES_DIRECTIVES = [
   HellTableBody,
   HellTableRow,
   HellTableRowIgnore,
+  HellTableRowAction,
+  HellTableSelectionCell,
+  HellTableRowCheckbox,
+  HellTableRowRadio,
   HellTableHeaderCell,
   HellTableSortTrigger,
   HellTableCell,

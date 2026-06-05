@@ -144,11 +144,7 @@
       transition: background-color var(--hell-duration-fast) var(--ease-hell-out);
     }
 
-  .hell-table-row[data-interactive='true'] {
-      cursor: pointer;
-    }
-
-  .hell-table-row[data-interactive='true']:hover {
+  .hell-table-row[data-active='true'] {
       background-color: var(--color-hell-surface-subtle);
     }
 
@@ -156,9 +152,15 @@
       background-color: var(--color-hell-primary-soft);
     }
 
-  .hell-table-row[data-interactive='true']:focus-visible {
-      outline: 2px solid var(--color-hell-focus-ring);
-      outline-offset: -2px;
+  .hell-table-selection-cell {
+      width: 1%;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+  .hell-table-row-checkbox,
+  .hell-table-row-radio {
+      accent-color: var(--color-hell-primary);
     }
 
   /* Resize handle — sits at the trailing edge of a header cell. */

@@ -173,6 +173,10 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellTableHead', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableHeaderCell', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableRow', area: 'feature', coverage: 'dom' },
+  { symbol: 'HellTableRowAction', area: 'feature', coverage: 'dom' },
+  { symbol: 'HellTableRowCheckbox', area: 'feature', coverage: 'dom' },
+  { symbol: 'HellTableRowRadio', area: 'feature', coverage: 'dom' },
+  { symbol: 'HellTableSelectionCell', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableSortTrigger', area: 'feature', coverage: 'dom' },
 ];
 
@@ -256,13 +260,20 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
     <div id="table-container" hellTableContainer busy>
       <table id="table" hellTableRoot contentWidth>
         <thead id="table-head" hellTableHeader>
-          <tr id="table-row" hellTableRow selected selectable>
+          <tr id="table-row" hellTableRow active selected>
+            <th id="table-selection-header" hellTableHeaderCell hellTableSelectionCell>
+              <input id="table-row-checkbox" hellTableRowCheckbox type="checkbox" checked />
+            </th>
             <th id="table-header-cell" hellTableHeaderCell columnId="name" sortable sort="asc">
               <button id="table-sort-trigger" hellTableSortTrigger type="button">Name</button>
               <button id="table-resizer" hellTableResizeHandle></button>
             </th>
             <th hellTableHeaderCell columnId="role">Role</th>
-            <td id="table-cell" hellTableCell align="end" space="empty">Ada</td>
+            <td id="table-cell" hellTableCell align="end" space="empty">
+              Ada
+              <button id="table-row-action" hellTableRowAction type="button">Open</button>
+              <input id="table-row-radio" hellTableRowRadio type="radio" name="table-radio" checked />
+            </td>
           </tr>
         </thead>
         <tbody id="table-body" hellTableBody></tbody>
@@ -371,7 +382,13 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
     id: 'table-row',
     module: 'HellTableRow',
     className: 'hell-table-row',
-    attrs: { 'data-selected': 'true', 'aria-selected': 'true', tabindex: '0' },
+    attrs: { 'data-active': 'true', 'data-selected': 'true' },
+  },
+  {
+    id: 'table-selection-header',
+    module: 'HellTableSelectionCell',
+    className: 'hell-table-selection-cell',
+    attrs: { 'data-hell-table-selection-cell': '' },
   },
   {
     id: 'table-header-cell',
@@ -384,6 +401,24 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
     module: 'HellTableSortTrigger',
     className: 'hell-table-sort-trigger',
     attrs: { type: 'button' },
+  },
+  {
+    id: 'table-row-checkbox',
+    module: 'HellTableRowCheckbox',
+    className: 'hell-table-row-checkbox',
+    attrs: { type: 'checkbox', 'data-hell-table-row-checkbox': '' },
+  },
+  {
+    id: 'table-row-action',
+    module: 'HellTableRowAction',
+    className: 'hell-table-row-action',
+    attrs: { type: 'button', 'data-hell-table-row-action': '' },
+  },
+  {
+    id: 'table-row-radio',
+    module: 'HellTableRowRadio',
+    className: 'hell-table-row-radio',
+    attrs: { type: 'radio', 'data-hell-table-row-radio': '' },
   },
   {
     id: 'table-cell',

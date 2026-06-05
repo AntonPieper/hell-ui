@@ -15,7 +15,7 @@ import { HELL_TABLE_UTILITIES_DIRECTIVES } from './table';
         </tr>
       </thead>
       <tbody id="native-body" hellTableBody>
-        <tr id="native-row" hellTableRow selected>
+        <tr id="native-row" hellTableRow active selected>
           <td id="native-cell" hellTableCell align="end" space="empty">Ada</td>
         </tr>
       </tbody>
@@ -138,7 +138,11 @@ describe('host-agnostic Hell table primitives', () => {
     );
     expectClassAndData(byId(root, 'native-cell'), 'hell-table-cell', 'data-hell-table-cell');
     expect(byId(root, 'native-root').getAttribute('data-content-width')).toBe('true');
+    expect(byId(root, 'native-row').getAttribute('data-active')).toBe('true');
     expect(byId(root, 'native-row').getAttribute('data-selected')).toBe('true');
+    expect(byId(root, 'native-row').hasAttribute('data-interactive')).toBe(false);
+    expect(byId(root, 'native-row').hasAttribute('tabindex')).toBe(false);
+    expect(byId(root, 'native-row').hasAttribute('aria-selected')).toBe(false);
     expect(byId(root, 'native-cell').getAttribute('data-align')).toBe('end');
     expect(byId(root, 'native-cell').getAttribute('data-space')).toBe('empty');
   });

@@ -1103,14 +1103,21 @@ import { HELL_TABLE_UTILITIES_DIRECTIVES, HellTableRowIgnore } from '${packageNa
       <table hellTableRoot>
         <thead hellTableHeader>
           <tr hellTableRow>
+            <th hellTableHeaderCell hellTableSelectionCell>
+              <input hellTableRowCheckbox type="checkbox" aria-label="Select all" />
+            </th>
             <th hellTableHeaderCell columnId="name">Name</th>
             <th hellTableHeaderCell columnId="role">Role</th>
           </tr>
         </thead>
         <tbody hellTableBody>
-          <tr hellTableRow selected>
+          <tr hellTableRow active selected>
+            <td hellTableCell hellTableSelectionCell>
+              <input hellTableRowRadio type="radio" name="primary" aria-label="Primary row" checked />
+            </td>
             <td hellTableCell>
               <span hellTableRowIgnore>ignore</span>
+              <button hellTableRowAction type="button">Open</button>
             </td>
             <td hellTableCell>Admin</td>
           </tr>

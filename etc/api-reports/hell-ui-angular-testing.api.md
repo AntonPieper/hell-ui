@@ -551,23 +551,67 @@ export interface HellTableResizeHandleHarnessFilters extends BaseHarnessFilters 
 }
 
 // @public (undocumented)
-export class HellTableRowHarness extends ComponentHarness {
+export class HellTableRowActionHarness extends ComponentHarness {
     // (undocumented)
     click(): Promise<void>;
-    // (undocumented)
-    getCell(index: number): Promise<HellTableCellHarness | null>;
-    // (undocumented)
-    getCells(): Promise<HellTableCellHarness[]>;
     // (undocumented)
     getText(): Promise<string>;
     // (undocumented)
     static hostSelector: string;
     // (undocumented)
-    isSelectable(): Promise<boolean>;
+    static with(options?: HellTableRowActionHarnessFilters): HarnessPredicate<HellTableRowActionHarness>;
+}
+
+// @public (undocumented)
+export interface HellTableRowActionHarnessFilters extends BaseHarnessFilters {
+    // (undocumented)
+    text?: string;
+}
+
+// @public (undocumented)
+export class HellTableRowCheckboxHarness extends ComponentHarness {
+    // (undocumented)
+    check(): Promise<void>;
+    // (undocumented)
+    static hostSelector: string;
+    // (undocumented)
+    isChecked(): Promise<boolean>;
+    // (undocumented)
+    isIndeterminate(): Promise<boolean>;
+    // (undocumented)
+    uncheck(): Promise<void>;
+    // (undocumented)
+    static with(options?: HellTableRowCheckboxHarnessFilters): HarnessPredicate<HellTableRowCheckboxHarness>;
+}
+
+// @public (undocumented)
+export interface HellTableRowCheckboxHarnessFilters extends BaseHarnessFilters {
+    // (undocumented)
+    checked?: boolean;
+}
+
+// @public (undocumented)
+export class HellTableRowHarness extends ComponentHarness {
+    // (undocumented)
+    getActions(): Promise<HellTableRowActionHarness[]>;
+    // (undocumented)
+    getCell(index: number): Promise<HellTableCellHarness | null>;
+    // (undocumented)
+    getCells(): Promise<HellTableCellHarness[]>;
+    // (undocumented)
+    getCheckboxes(): Promise<HellTableRowCheckboxHarness[]>;
+    // (undocumented)
+    getRadios(): Promise<HellTableRowRadioHarness[]>;
+    // (undocumented)
+    getSelectionCells(): Promise<HellTableSelectionCellHarness[]>;
+    // (undocumented)
+    getText(): Promise<string>;
+    // (undocumented)
+    static hostSelector: string;
+    // (undocumented)
+    isActive(): Promise<boolean>;
     // (undocumented)
     isSelected(): Promise<boolean>;
-    // (undocumented)
-    select(): Promise<void>;
     // (undocumented)
     static with(options?: HellTableRowHarnessFilters): HarnessPredicate<HellTableRowHarness>;
 }
@@ -575,7 +619,7 @@ export class HellTableRowHarness extends ComponentHarness {
 // @public (undocumented)
 export interface HellTableRowHarnessFilters extends BaseHarnessFilters {
     // (undocumented)
-    selectable?: boolean;
+    active?: boolean;
     // (undocumented)
     selected?: boolean;
     // (undocumented)
@@ -588,6 +632,40 @@ export class HellTableRowIgnoreHarness extends ComponentHarness {
     getText(): Promise<string>;
     // (undocumented)
     static hostSelector: string;
+}
+
+// @public (undocumented)
+export class HellTableRowRadioHarness extends ComponentHarness {
+    // (undocumented)
+    check(): Promise<void>;
+    // (undocumented)
+    static hostSelector: string;
+    // (undocumented)
+    isChecked(): Promise<boolean>;
+    // (undocumented)
+    static with(options?: HellTableRowRadioHarnessFilters): HarnessPredicate<HellTableRowRadioHarness>;
+}
+
+// @public (undocumented)
+export interface HellTableRowRadioHarnessFilters extends BaseHarnessFilters {
+    // (undocumented)
+    checked?: boolean;
+}
+
+// @public (undocumented)
+export class HellTableSelectionCellHarness extends ComponentHarness {
+    // (undocumented)
+    getText(): Promise<string>;
+    // (undocumented)
+    static hostSelector: string;
+    // (undocumented)
+    static with(options?: HellTableSelectionCellHarnessFilters): HarnessPredicate<HellTableSelectionCellHarness>;
+}
+
+// @public (undocumented)
+export interface HellTableSelectionCellHarnessFilters extends BaseHarnessFilters {
+    // (undocumented)
+    text?: string;
 }
 
 // @public (undocumented)
@@ -879,78 +957,109 @@ export class HellToastHarness extends ComponentHarness {
 // types/hell-ui-angular-testing.d.ts:250:5 - (ae-undocumented) Missing documentation for "columnId".
 // types/hell-ui-angular-testing.d.ts:252:1 - (ae-undocumented) Missing documentation for "HellTableRowHarnessFilters".
 // types/hell-ui-angular-testing.d.ts:253:5 - (ae-undocumented) Missing documentation for "text".
-// types/hell-ui-angular-testing.d.ts:254:5 - (ae-undocumented) Missing documentation for "selected".
-// types/hell-ui-angular-testing.d.ts:255:5 - (ae-undocumented) Missing documentation for "selectable".
-// types/hell-ui-angular-testing.d.ts:257:1 - (ae-undocumented) Missing documentation for "HellTableSortTriggerHarnessFilters".
-// types/hell-ui-angular-testing.d.ts:258:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-testing.d.ts:259:5 - (ae-undocumented) Missing documentation for "text".
-// types/hell-ui-angular-testing.d.ts:261:1 - (ae-undocumented) Missing documentation for "HellTableResizeHandleHarnessFilters".
-// types/hell-ui-angular-testing.d.ts:262:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-testing.d.ts:264:1 - (ae-undocumented) Missing documentation for "HellTableCellHarnessFilters".
-// types/hell-ui-angular-testing.d.ts:265:5 - (ae-undocumented) Missing documentation for "text".
-// types/hell-ui-angular-testing.d.ts:267:1 - (ae-undocumented) Missing documentation for "HellTableContainerHarness".
-// types/hell-ui-angular-testing.d.ts:268:5 - (ae-undocumented) Missing documentation for "hostSelector".
-// types/hell-ui-angular-testing.d.ts:269:5 - (ae-undocumented) Missing documentation for "with".
-// types/hell-ui-angular-testing.d.ts:270:5 - (ae-undocumented) Missing documentation for "isBusy".
-// types/hell-ui-angular-testing.d.ts:271:5 - (ae-undocumented) Missing documentation for "getAriaBusy".
-// types/hell-ui-angular-testing.d.ts:272:5 - (ae-undocumented) Missing documentation for "getTable".
-// types/hell-ui-angular-testing.d.ts:274:1 - (ae-undocumented) Missing documentation for "HellTableHarness".
-// types/hell-ui-angular-testing.d.ts:275:5 - (ae-undocumented) Missing documentation for "hostSelector".
-// types/hell-ui-angular-testing.d.ts:276:5 - (ae-undocumented) Missing documentation for "with".
-// types/hell-ui-angular-testing.d.ts:277:5 - (ae-undocumented) Missing documentation for "isContentWidth".
-// types/hell-ui-angular-testing.d.ts:278:5 - (ae-undocumented) Missing documentation for "getHead".
-// types/hell-ui-angular-testing.d.ts:279:5 - (ae-undocumented) Missing documentation for "getBody".
-// types/hell-ui-angular-testing.d.ts:280:5 - (ae-undocumented) Missing documentation for "getHeaderCells".
-// types/hell-ui-angular-testing.d.ts:281:5 - (ae-undocumented) Missing documentation for "getRows".
-// types/hell-ui-angular-testing.d.ts:282:5 - (ae-undocumented) Missing documentation for "getHeaderCellByColumnId".
-// types/hell-ui-angular-testing.d.ts:284:1 - (ae-undocumented) Missing documentation for "HellTableHeadHarness".
-// types/hell-ui-angular-testing.d.ts:285:5 - (ae-undocumented) Missing documentation for "hostSelector".
-// types/hell-ui-angular-testing.d.ts:286:5 - (ae-undocumented) Missing documentation for "getHeaderCells".
-// types/hell-ui-angular-testing.d.ts:288:1 - (ae-undocumented) Missing documentation for "HellTableBodyHarness".
-// types/hell-ui-angular-testing.d.ts:289:5 - (ae-undocumented) Missing documentation for "hostSelector".
-// types/hell-ui-angular-testing.d.ts:290:5 - (ae-undocumented) Missing documentation for "getRows".
-// types/hell-ui-angular-testing.d.ts:292:1 - (ae-undocumented) Missing documentation for "HellTableRowIgnoreHarness".
-// types/hell-ui-angular-testing.d.ts:293:5 - (ae-undocumented) Missing documentation for "hostSelector".
-// types/hell-ui-angular-testing.d.ts:294:5 - (ae-undocumented) Missing documentation for "getText".
-// types/hell-ui-angular-testing.d.ts:296:1 - (ae-undocumented) Missing documentation for "HellTableRowHarness".
+// types/hell-ui-angular-testing.d.ts:254:5 - (ae-undocumented) Missing documentation for "active".
+// types/hell-ui-angular-testing.d.ts:255:5 - (ae-undocumented) Missing documentation for "selected".
+// types/hell-ui-angular-testing.d.ts:257:1 - (ae-undocumented) Missing documentation for "HellTableRowActionHarnessFilters".
+// types/hell-ui-angular-testing.d.ts:258:5 - (ae-undocumented) Missing documentation for "text".
+// types/hell-ui-angular-testing.d.ts:260:1 - (ae-undocumented) Missing documentation for "HellTableSelectionCellHarnessFilters".
+// types/hell-ui-angular-testing.d.ts:261:5 - (ae-undocumented) Missing documentation for "text".
+// types/hell-ui-angular-testing.d.ts:263:1 - (ae-undocumented) Missing documentation for "HellTableRowCheckboxHarnessFilters".
+// types/hell-ui-angular-testing.d.ts:264:5 - (ae-undocumented) Missing documentation for "checked".
+// types/hell-ui-angular-testing.d.ts:266:1 - (ae-undocumented) Missing documentation for "HellTableRowRadioHarnessFilters".
+// types/hell-ui-angular-testing.d.ts:267:5 - (ae-undocumented) Missing documentation for "checked".
+// types/hell-ui-angular-testing.d.ts:269:1 - (ae-undocumented) Missing documentation for "HellTableSortTriggerHarnessFilters".
+// types/hell-ui-angular-testing.d.ts:270:5 - (ae-undocumented) Missing documentation for "disabled".
+// types/hell-ui-angular-testing.d.ts:271:5 - (ae-undocumented) Missing documentation for "text".
+// types/hell-ui-angular-testing.d.ts:273:1 - (ae-undocumented) Missing documentation for "HellTableResizeHandleHarnessFilters".
+// types/hell-ui-angular-testing.d.ts:274:5 - (ae-undocumented) Missing documentation for "disabled".
+// types/hell-ui-angular-testing.d.ts:276:1 - (ae-undocumented) Missing documentation for "HellTableCellHarnessFilters".
+// types/hell-ui-angular-testing.d.ts:277:5 - (ae-undocumented) Missing documentation for "text".
+// types/hell-ui-angular-testing.d.ts:279:1 - (ae-undocumented) Missing documentation for "HellTableContainerHarness".
+// types/hell-ui-angular-testing.d.ts:280:5 - (ae-undocumented) Missing documentation for "hostSelector".
+// types/hell-ui-angular-testing.d.ts:281:5 - (ae-undocumented) Missing documentation for "with".
+// types/hell-ui-angular-testing.d.ts:282:5 - (ae-undocumented) Missing documentation for "isBusy".
+// types/hell-ui-angular-testing.d.ts:283:5 - (ae-undocumented) Missing documentation for "getAriaBusy".
+// types/hell-ui-angular-testing.d.ts:284:5 - (ae-undocumented) Missing documentation for "getTable".
+// types/hell-ui-angular-testing.d.ts:286:1 - (ae-undocumented) Missing documentation for "HellTableHarness".
+// types/hell-ui-angular-testing.d.ts:287:5 - (ae-undocumented) Missing documentation for "hostSelector".
+// types/hell-ui-angular-testing.d.ts:288:5 - (ae-undocumented) Missing documentation for "with".
+// types/hell-ui-angular-testing.d.ts:289:5 - (ae-undocumented) Missing documentation for "isContentWidth".
+// types/hell-ui-angular-testing.d.ts:290:5 - (ae-undocumented) Missing documentation for "getHead".
+// types/hell-ui-angular-testing.d.ts:291:5 - (ae-undocumented) Missing documentation for "getBody".
+// types/hell-ui-angular-testing.d.ts:292:5 - (ae-undocumented) Missing documentation for "getHeaderCells".
+// types/hell-ui-angular-testing.d.ts:293:5 - (ae-undocumented) Missing documentation for "getRows".
+// types/hell-ui-angular-testing.d.ts:294:5 - (ae-undocumented) Missing documentation for "getHeaderCellByColumnId".
+// types/hell-ui-angular-testing.d.ts:296:1 - (ae-undocumented) Missing documentation for "HellTableHeadHarness".
 // types/hell-ui-angular-testing.d.ts:297:5 - (ae-undocumented) Missing documentation for "hostSelector".
-// types/hell-ui-angular-testing.d.ts:298:5 - (ae-undocumented) Missing documentation for "with".
-// types/hell-ui-angular-testing.d.ts:299:5 - (ae-undocumented) Missing documentation for "isSelectable".
-// types/hell-ui-angular-testing.d.ts:300:5 - (ae-undocumented) Missing documentation for "isSelected".
-// types/hell-ui-angular-testing.d.ts:301:5 - (ae-undocumented) Missing documentation for "getText".
-// types/hell-ui-angular-testing.d.ts:302:5 - (ae-undocumented) Missing documentation for "getCells".
-// types/hell-ui-angular-testing.d.ts:303:5 - (ae-undocumented) Missing documentation for "getCell".
-// types/hell-ui-angular-testing.d.ts:304:5 - (ae-undocumented) Missing documentation for "click".
-// types/hell-ui-angular-testing.d.ts:305:5 - (ae-undocumented) Missing documentation for "select".
-// types/hell-ui-angular-testing.d.ts:307:1 - (ae-undocumented) Missing documentation for "HellTableHeaderCellHarness".
-// types/hell-ui-angular-testing.d.ts:308:5 - (ae-undocumented) Missing documentation for "hostSelector".
-// types/hell-ui-angular-testing.d.ts:309:5 - (ae-undocumented) Missing documentation for "with".
-// types/hell-ui-angular-testing.d.ts:310:5 - (ae-undocumented) Missing documentation for "getColumnId".
-// types/hell-ui-angular-testing.d.ts:311:5 - (ae-undocumented) Missing documentation for "getSortState".
-// types/hell-ui-angular-testing.d.ts:312:5 - (ae-undocumented) Missing documentation for "getAriaSort".
-// types/hell-ui-angular-testing.d.ts:313:5 - (ae-undocumented) Missing documentation for "isSortable".
-// types/hell-ui-angular-testing.d.ts:314:5 - (ae-undocumented) Missing documentation for "getText".
-// types/hell-ui-angular-testing.d.ts:315:5 - (ae-undocumented) Missing documentation for "getSortTrigger".
-// types/hell-ui-angular-testing.d.ts:316:5 - (ae-undocumented) Missing documentation for "getResizeHandle".
-// types/hell-ui-angular-testing.d.ts:318:1 - (ae-undocumented) Missing documentation for "HellTableSortTriggerHarness".
-// types/hell-ui-angular-testing.d.ts:319:5 - (ae-undocumented) Missing documentation for "hostSelector".
-// types/hell-ui-angular-testing.d.ts:320:5 - (ae-undocumented) Missing documentation for "with".
-// types/hell-ui-angular-testing.d.ts:321:5 - (ae-undocumented) Missing documentation for "getText".
-// types/hell-ui-angular-testing.d.ts:322:5 - (ae-undocumented) Missing documentation for "isDisabled".
-// types/hell-ui-angular-testing.d.ts:323:5 - (ae-undocumented) Missing documentation for "click".
-// types/hell-ui-angular-testing.d.ts:325:1 - (ae-undocumented) Missing documentation for "HellTableCellHarness".
-// types/hell-ui-angular-testing.d.ts:326:5 - (ae-undocumented) Missing documentation for "hostSelector".
-// types/hell-ui-angular-testing.d.ts:327:5 - (ae-undocumented) Missing documentation for "with".
-// types/hell-ui-angular-testing.d.ts:328:5 - (ae-undocumented) Missing documentation for "getText".
-// types/hell-ui-angular-testing.d.ts:329:5 - (ae-undocumented) Missing documentation for "click".
-// types/hell-ui-angular-testing.d.ts:331:1 - (ae-undocumented) Missing documentation for "HellTableResizeHandleHarness".
-// types/hell-ui-angular-testing.d.ts:332:5 - (ae-undocumented) Missing documentation for "hostSelector".
-// types/hell-ui-angular-testing.d.ts:333:5 - (ae-undocumented) Missing documentation for "with".
-// types/hell-ui-angular-testing.d.ts:334:5 - (ae-undocumented) Missing documentation for "isDisabled".
-// types/hell-ui-angular-testing.d.ts:335:5 - (ae-undocumented) Missing documentation for "getAriaLabel".
-// types/hell-ui-angular-testing.d.ts:336:5 - (ae-undocumented) Missing documentation for "getAriaControls".
-// types/hell-ui-angular-testing.d.ts:337:5 - (ae-undocumented) Missing documentation for "getAriaValueNow".
-// types/hell-ui-angular-testing.d.ts:338:5 - (ae-undocumented) Missing documentation for "getText".
+// types/hell-ui-angular-testing.d.ts:298:5 - (ae-undocumented) Missing documentation for "getHeaderCells".
+// types/hell-ui-angular-testing.d.ts:300:1 - (ae-undocumented) Missing documentation for "HellTableBodyHarness".
+// types/hell-ui-angular-testing.d.ts:301:5 - (ae-undocumented) Missing documentation for "hostSelector".
+// types/hell-ui-angular-testing.d.ts:302:5 - (ae-undocumented) Missing documentation for "getRows".
+// types/hell-ui-angular-testing.d.ts:304:1 - (ae-undocumented) Missing documentation for "HellTableRowIgnoreHarness".
+// types/hell-ui-angular-testing.d.ts:305:5 - (ae-undocumented) Missing documentation for "hostSelector".
+// types/hell-ui-angular-testing.d.ts:306:5 - (ae-undocumented) Missing documentation for "getText".
+// types/hell-ui-angular-testing.d.ts:308:1 - (ae-undocumented) Missing documentation for "HellTableRowHarness".
+// types/hell-ui-angular-testing.d.ts:309:5 - (ae-undocumented) Missing documentation for "hostSelector".
+// types/hell-ui-angular-testing.d.ts:310:5 - (ae-undocumented) Missing documentation for "with".
+// types/hell-ui-angular-testing.d.ts:311:5 - (ae-undocumented) Missing documentation for "isActive".
+// types/hell-ui-angular-testing.d.ts:312:5 - (ae-undocumented) Missing documentation for "isSelected".
+// types/hell-ui-angular-testing.d.ts:313:5 - (ae-undocumented) Missing documentation for "getText".
+// types/hell-ui-angular-testing.d.ts:314:5 - (ae-undocumented) Missing documentation for "getCells".
+// types/hell-ui-angular-testing.d.ts:315:5 - (ae-undocumented) Missing documentation for "getCell".
+// types/hell-ui-angular-testing.d.ts:316:5 - (ae-undocumented) Missing documentation for "getSelectionCells".
+// types/hell-ui-angular-testing.d.ts:317:5 - (ae-undocumented) Missing documentation for "getActions".
+// types/hell-ui-angular-testing.d.ts:318:5 - (ae-undocumented) Missing documentation for "getCheckboxes".
+// types/hell-ui-angular-testing.d.ts:319:5 - (ae-undocumented) Missing documentation for "getRadios".
+// types/hell-ui-angular-testing.d.ts:321:1 - (ae-undocumented) Missing documentation for "HellTableRowActionHarness".
+// types/hell-ui-angular-testing.d.ts:322:5 - (ae-undocumented) Missing documentation for "hostSelector".
+// types/hell-ui-angular-testing.d.ts:323:5 - (ae-undocumented) Missing documentation for "with".
+// types/hell-ui-angular-testing.d.ts:324:5 - (ae-undocumented) Missing documentation for "getText".
+// types/hell-ui-angular-testing.d.ts:325:5 - (ae-undocumented) Missing documentation for "click".
+// types/hell-ui-angular-testing.d.ts:327:1 - (ae-undocumented) Missing documentation for "HellTableSelectionCellHarness".
+// types/hell-ui-angular-testing.d.ts:328:5 - (ae-undocumented) Missing documentation for "hostSelector".
+// types/hell-ui-angular-testing.d.ts:329:5 - (ae-undocumented) Missing documentation for "with".
+// types/hell-ui-angular-testing.d.ts:330:5 - (ae-undocumented) Missing documentation for "getText".
+// types/hell-ui-angular-testing.d.ts:332:1 - (ae-undocumented) Missing documentation for "HellTableRowCheckboxHarness".
+// types/hell-ui-angular-testing.d.ts:333:5 - (ae-undocumented) Missing documentation for "hostSelector".
+// types/hell-ui-angular-testing.d.ts:334:5 - (ae-undocumented) Missing documentation for "with".
+// types/hell-ui-angular-testing.d.ts:335:5 - (ae-undocumented) Missing documentation for "isChecked".
+// types/hell-ui-angular-testing.d.ts:336:5 - (ae-undocumented) Missing documentation for "isIndeterminate".
+// types/hell-ui-angular-testing.d.ts:337:5 - (ae-undocumented) Missing documentation for "check".
+// types/hell-ui-angular-testing.d.ts:338:5 - (ae-undocumented) Missing documentation for "uncheck".
+// types/hell-ui-angular-testing.d.ts:340:1 - (ae-undocumented) Missing documentation for "HellTableRowRadioHarness".
+// types/hell-ui-angular-testing.d.ts:341:5 - (ae-undocumented) Missing documentation for "hostSelector".
+// types/hell-ui-angular-testing.d.ts:342:5 - (ae-undocumented) Missing documentation for "with".
+// types/hell-ui-angular-testing.d.ts:343:5 - (ae-undocumented) Missing documentation for "isChecked".
+// types/hell-ui-angular-testing.d.ts:344:5 - (ae-undocumented) Missing documentation for "check".
+// types/hell-ui-angular-testing.d.ts:346:1 - (ae-undocumented) Missing documentation for "HellTableHeaderCellHarness".
+// types/hell-ui-angular-testing.d.ts:347:5 - (ae-undocumented) Missing documentation for "hostSelector".
+// types/hell-ui-angular-testing.d.ts:348:5 - (ae-undocumented) Missing documentation for "with".
+// types/hell-ui-angular-testing.d.ts:349:5 - (ae-undocumented) Missing documentation for "getColumnId".
+// types/hell-ui-angular-testing.d.ts:350:5 - (ae-undocumented) Missing documentation for "getSortState".
+// types/hell-ui-angular-testing.d.ts:351:5 - (ae-undocumented) Missing documentation for "getAriaSort".
+// types/hell-ui-angular-testing.d.ts:352:5 - (ae-undocumented) Missing documentation for "isSortable".
+// types/hell-ui-angular-testing.d.ts:353:5 - (ae-undocumented) Missing documentation for "getText".
+// types/hell-ui-angular-testing.d.ts:354:5 - (ae-undocumented) Missing documentation for "getSortTrigger".
+// types/hell-ui-angular-testing.d.ts:355:5 - (ae-undocumented) Missing documentation for "getResizeHandle".
+// types/hell-ui-angular-testing.d.ts:357:1 - (ae-undocumented) Missing documentation for "HellTableSortTriggerHarness".
+// types/hell-ui-angular-testing.d.ts:358:5 - (ae-undocumented) Missing documentation for "hostSelector".
+// types/hell-ui-angular-testing.d.ts:359:5 - (ae-undocumented) Missing documentation for "with".
+// types/hell-ui-angular-testing.d.ts:360:5 - (ae-undocumented) Missing documentation for "getText".
+// types/hell-ui-angular-testing.d.ts:361:5 - (ae-undocumented) Missing documentation for "isDisabled".
+// types/hell-ui-angular-testing.d.ts:362:5 - (ae-undocumented) Missing documentation for "click".
+// types/hell-ui-angular-testing.d.ts:364:1 - (ae-undocumented) Missing documentation for "HellTableCellHarness".
+// types/hell-ui-angular-testing.d.ts:365:5 - (ae-undocumented) Missing documentation for "hostSelector".
+// types/hell-ui-angular-testing.d.ts:366:5 - (ae-undocumented) Missing documentation for "with".
+// types/hell-ui-angular-testing.d.ts:367:5 - (ae-undocumented) Missing documentation for "getText".
+// types/hell-ui-angular-testing.d.ts:368:5 - (ae-undocumented) Missing documentation for "click".
+// types/hell-ui-angular-testing.d.ts:370:1 - (ae-undocumented) Missing documentation for "HellTableResizeHandleHarness".
+// types/hell-ui-angular-testing.d.ts:371:5 - (ae-undocumented) Missing documentation for "hostSelector".
+// types/hell-ui-angular-testing.d.ts:372:5 - (ae-undocumented) Missing documentation for "with".
+// types/hell-ui-angular-testing.d.ts:373:5 - (ae-undocumented) Missing documentation for "isDisabled".
+// types/hell-ui-angular-testing.d.ts:374:5 - (ae-undocumented) Missing documentation for "getAriaLabel".
+// types/hell-ui-angular-testing.d.ts:375:5 - (ae-undocumented) Missing documentation for "getAriaControls".
+// types/hell-ui-angular-testing.d.ts:376:5 - (ae-undocumented) Missing documentation for "getAriaValueNow".
+// types/hell-ui-angular-testing.d.ts:377:5 - (ae-undocumented) Missing documentation for "getText".
 
 // (No @packageDocumentation comment for this package)
 

@@ -14,8 +14,24 @@ export interface HellTableHeaderCellHarnessFilters extends BaseHarnessFilters {
 
 export interface HellTableRowHarnessFilters extends BaseHarnessFilters {
   text?: string;
+  active?: boolean;
   selected?: boolean;
-  selectable?: boolean;
+}
+
+export interface HellTableRowActionHarnessFilters extends BaseHarnessFilters {
+  text?: string;
+}
+
+export interface HellTableSelectionCellHarnessFilters extends BaseHarnessFilters {
+  text?: string;
+}
+
+export interface HellTableRowCheckboxHarnessFilters extends BaseHarnessFilters {
+  checked?: boolean;
+}
+
+export interface HellTableRowRadioHarnessFilters extends BaseHarnessFilters {
+  checked?: boolean;
 }
 
 export interface HellTableSortTriggerHarnessFilters extends BaseHarnessFilters {
@@ -140,19 +156,19 @@ export class HellTableRowHarness extends ComponentHarness {
         const label = (await harness.getText()).trim();
         return label.includes(text);
       })
+      .addOption('active', options.active, async (harness, active) => {
+        const current = await harness.isActive();
+        return current === active;
+      })
       .addOption('selected', options.selected, async (harness, selected) => {
         const current = await harness.isSelected();
         return current === selected;
-      })
-      .addOption('selectable', options.selectable, async (harness, selectable) => {
-        const current = await harness.isSelectable();
-        return current === selectable;
       });
   }
 
-  async isSelectable(): Promise<boolean> {
-    const interactive = await (await this.host()).getAttribute('data-interactive');
-    return interactive === 'true';
+  async isActive(): Promise<boolean> {
+    const active = await (await this.host()).getAttribute('data-active');
+    return active === 'true';
   }
 
   async isSelected(): Promise<boolean> {
@@ -173,12 +189,124 @@ export class HellTableRowHarness extends ComponentHarness {
     return cells[index] ?? null;
   }
 
+  async getSelectionCells(): Promise<HellTableSelectionCellHarness[]> {
+    return this.locatorForAll(HellTableSelectionCellHarness)();
+  }
+
+  async getActions(): Promise<HellTableRowActionHarness[]> {
+    return this.locatorForAll(HellTableRowActionHarness)();
+  }
+
+  async getCheckboxes(): Promise<HellTableRowCheckboxHarness[]> {
+    return this.locatorForAll(HellTableRowCheckboxHarness)();
+  }
+
+  async getRadios(): Promise<HellTableRowRadioHarness[]> {
+    return this.locatorForAll(HellTableRowRadioHarness)();
+  }
+}
+
+export class HellTableRowActionHarness extends ComponentHarness {
+  static hostSelector = '[hellTableRowAction]';
+
+  static with(
+    options: HellTableRowActionHarnessFilters = {},
+  ): HarnessPredicate<HellTableRowActionHarness> {
+    return new HarnessPredicate(HellTableRowActionHarness, options).addOption(
+      'text',
+      options.text,
+      async (harness, text) => {
+        const label = (await harness.getText()).trim();
+        return label === text;
+      },
+    );
+  }
+
+  async getText(): Promise<string> {
+    return (await this.host()).text();
+  }
+
   async click(): Promise<void> {
     return (await this.host()).click();
   }
+}
 
-  async select(): Promise<void> {
-    await this.click();
+export class HellTableSelectionCellHarness extends ComponentHarness {
+  static hostSelector = '[hellTableSelectionCell]';
+
+  static with(
+    options: HellTableSelectionCellHarnessFilters = {},
+  ): HarnessPredicate<HellTableSelectionCellHarness> {
+    return new HarnessPredicate(HellTableSelectionCellHarness, options).addOption(
+      'text',
+      options.text,
+      async (harness, text) => {
+        const label = (await harness.getText()).trim();
+        return label === text;
+      },
+    );
+  }
+
+  async getText(): Promise<string> {
+    return (await this.host()).text();
+  }
+}
+
+export class HellTableRowCheckboxHarness extends ComponentHarness {
+  static hostSelector = 'input[hellTableRowCheckbox]';
+
+  static with(
+    options: HellTableRowCheckboxHarnessFilters = {},
+  ): HarnessPredicate<HellTableRowCheckboxHarness> {
+    return new HarnessPredicate(HellTableRowCheckboxHarness, options).addOption(
+      'checked',
+      options.checked,
+      async (harness, checked) => {
+        const current = await harness.isChecked();
+        return current === checked;
+      },
+    );
+  }
+
+  async isChecked(): Promise<boolean> {
+    return (await this.host()).getProperty<boolean>('checked');
+  }
+
+  async isIndeterminate(): Promise<boolean> {
+    return (await this.host()).getProperty<boolean>('indeterminate');
+  }
+
+  async check(): Promise<void> {
+    if (!(await this.isChecked())) await (await this.host()).click();
+  }
+
+  async uncheck(): Promise<void> {
+    if (await this.isChecked()) await (await this.host()).click();
+  }
+}
+
+export class HellTableRowRadioHarness extends ComponentHarness {
+  static hostSelector = 'input[hellTableRowRadio]';
+
+  static with(
+    options: HellTableRowRadioHarnessFilters = {},
+  ): HarnessPredicate<HellTableRowRadioHarness> {
+    return new HarnessPredicate(HellTableRowRadioHarness, options).addOption(
+      'checked',
+      options.checked,
+      async (harness, checked) => {
+        const current = await harness.isChecked();
+        return current === checked;
+      },
+    );
+  }
+
+  async isChecked(): Promise<boolean> {
+    return (await this.host()).getProperty<boolean>('checked');
+  }
+
+  async check(): Promise<void> {
+    if (!(await this.isChecked())) await (await this.host()).click();
   }
 }
 

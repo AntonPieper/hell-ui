@@ -165,7 +165,7 @@ Removed pre-beta table compatibility surfaces:
 | --- | --- |
 | old table feature entrypoints | `@hell-ui/angular/table`; planned simple renderer at `@hell-ui/angular/data-table` |
 | `HELL_TABLE_DIRECTIVES`, `HELL_TABLE_UTILITY_DIRECTIVES` | `HELL_TABLE_UTILITIES_DIRECTIVES` from `@hell-ui/angular/table` |
-| `HellTableRow.interactive` / `selectionSemantics` | real cell controls, explicit row selection, or `selectable` where documented |
+| `HellTableRow.interactive` / `selectionSemantics` / `[selectable]` / `(rowSelect)` | `hellTableRowAction` for row actions; `hellTableRowCheckbox` / `hellTableRowRadio` inside `hellTableSelectionCell` for row selection |
 
 Known deprecated non-table compatibility surfaces to migrate away from:
 

@@ -38,6 +38,9 @@ import {
   HellSliderHarness,
   HellTabsetHarness,
   HellTableContainerHarness,
+  HellTableRowActionHarness,
+  HellTableRowCheckboxHarness,
+  HellTableRowRadioHarness,
   HellTimeInputHarness,
   HellToasterHarness,
 } from './public-api';
@@ -118,9 +121,31 @@ class DialogHarnessHost {}
           </tr>
         </thead>
         <tbody hellTableBody>
-          <tr id="person-row" hellTableRow selectable [selected]="selected()" (rowSelect)="onRowSelect()">
+          <tr id="person-row" hellTableRow [active]="active()" [selected]="selected()">
+            <td hellTableCell hellTableSelectionCell>
+              <input
+                id="person-checkbox"
+                hellTableRowCheckbox
+                type="checkbox"
+                [checked]="selected()"
+                (checkedChange)="onRowCheck($event)"
+              />
+            </td>
             <td hellTableCell id="person-name">Alice</td>
             <td hellTableCell>Admin</td>
+            <td hellTableCell>
+              <button id="person-action" hellTableRowAction type="button" (click)="onRowAction()">
+                Open
+              </button>
+              <input
+                id="person-radio"
+                hellTableRowRadio
+                type="radio"
+                name="person-choice"
+                [checked]="primary()"
+                (checkedChange)="onRowRadio($event)"
+              />
+            </td>
           </tr>
         </tbody>
       </table>
@@ -129,14 +154,24 @@ class DialogHarnessHost {}
 })
 class TableHarnessHost {
   readonly nameColumnId = signal('name');
+  readonly active = signal(true);
   readonly selected = signal(true);
+  readonly primary = signal(false);
   readonly sortable = signal(true);
   readonly sortValue = signal<'asc' | 'desc' | null>(null);
 
-  rowSelectEvents = 0;
+  rowActionEvents = 0;
 
-  onRowSelect(): void {
-    this.rowSelectEvents += 1;
+  onRowAction(): void {
+    this.rowActionEvents += 1;
+  }
+
+  onRowCheck(checked: boolean): void {
+    this.selected.set(checked);
+  }
+
+  onRowRadio(checked: boolean): void {
+    this.primary.set(checked);
   }
 }
 
@@ -389,19 +424,31 @@ describe('hell testing harness entrypoint', () => {
     expect(await roleHeader!.isSortable()).toBe(false);
 
     const rowCells = await row.getCells();
-    expect(rowCells).toHaveLength(2);
-    expect(await rowCells[0].getText()).toBe('Alice');
-    expect(await rowCells[1].getText()).toBe('Admin');
+    expect(rowCells).toHaveLength(4);
+    expect(await rowCells[1].getText()).toBe('Alice');
+    expect(await rowCells[2].getText()).toBe('Admin');
 
     const selectedRows = await table.getRows();
     expect(selectedRows).toHaveLength(1);
+    expect(await selectedRows[0].isActive()).toBe(true);
     expect(await selectedRows[0].isSelected()).toBe(true);
-    expect(await selectedRows[0].isSelectable()).toBe(true);
+    expect(await selectedRows[0].getSelectionCells()).toHaveLength(1);
 
-    await selectedRows[0].click();
-    await fixture.whenStable();
+    const action = await loader.getHarness(HellTableRowActionHarness.with({ text: 'Open' }));
+    await action.click();
+    expect(fixture.componentInstance.rowActionEvents).toBe(1);
 
-    expect(fixture.componentInstance.rowSelectEvents).toBe(1);
+    const checkbox = await loader.getHarness(HellTableRowCheckboxHarness.with({ checked: true }));
+    await checkbox.uncheck();
+    fixture.detectChanges();
+    expect(await checkbox.isChecked()).toBe(false);
+    expect(fixture.componentInstance.selected()).toBe(false);
+
+    const radio = await loader.getHarness(HellTableRowRadioHarness.with({ checked: false }));
+    await radio.check();
+    fixture.detectChanges();
+    expect(await radio.isChecked()).toBe(true);
+    expect(fixture.componentInstance.primary()).toBe(true);
   });
 
   it('interacts with select and combobox harnesses', async () => {

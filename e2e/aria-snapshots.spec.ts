@@ -118,15 +118,19 @@ test.describe('public docs aria snapshots', () => {
     await expectNamedAriaSnapshot(horizontal, 'radio-size-group.aria.yml');
   });
 
-  test('table utility snapshot records row semantics and cell action name', async ({ page }) => {
+  test('table utility snapshot records active row semantics and cell action name', async ({ page }) => {
     await gotoDocsPage(page, '/components/data-table', 'Table utilities');
 
     const rowEditor = page.locator('app-data-table-row-editor-example');
     await expect(rowEditor).toBeVisible();
 
     const firstRow = rowEditor.getByRole('row', { name: /User 1/ }).first();
-    await expect(firstRow.getByRole('button', { name: 'Open editor for User 1' })).toBeVisible();
+    const open = firstRow.getByRole('button', { name: 'Open editor for User 1' });
+    await expect(open).toBeVisible();
+    await open.click();
+    await expect(firstRow).toHaveAttribute('data-active', 'true');
     await expect(firstRow).not.toHaveAttribute('aria-selected');
+    await expect(firstRow).not.toHaveAttribute('tabindex');
 
     await expectNamedAriaSnapshot(firstRow, 'table-utilities-row-cell-action.aria.yml');
   });
