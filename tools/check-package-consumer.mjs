@@ -300,7 +300,7 @@ const scenarios = [
   },
   {
     name: 'data-table',
-    description: 'planned simple data-table entrypoint without Font Awesome peer',
+    description: 'simple data-table entrypoint without Font Awesome or optional table-engine peers',
     peerTier: 'table',
     peerGroup: 'table',
     dependencies: styledUiWithoutFontAwesomeDeps,
@@ -1133,16 +1133,42 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 }
 
 function dataTableConsumerMainTs() {
-  return `import { Component } from '@angular/core';
+  return `import { Component, signal } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import '${packageName}/data-table';
+import { HellDataTable, hellColumns, textColumn } from '${packageName}/data-table';
+
+interface Person {
+  readonly id: string;
+  readonly name: string;
+  readonly role: string;
+}
+
+const columns = hellColumns<Person>();
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  template: '<p>Planned data-table entrypoint compiles.</p>',
+  imports: [HellDataTable],
+  template: \`
+    <hell-data-table
+      [rows]="rows"
+      [columns]="tableColumns"
+      rowKey="id"
+      density="compact"
+      empty="No people yet."
+    />
+  \`,
 })
-class App {}
+class App {
+  protected readonly rows = signal<readonly Person[]>([
+    { id: 'ada', name: 'Ada Lovelace', role: 'Admin' },
+    { id: 'grace', name: 'Grace Hopper', role: 'Editor' },
+  ]);
+  protected readonly tableColumns = columns.define([
+    textColumn<Person, string>('name', { header: 'Name', accessor: 'name' }),
+    textColumn<Person, string>('role', { header: 'Role', accessor: 'role' }),
+  ]);
+}
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;

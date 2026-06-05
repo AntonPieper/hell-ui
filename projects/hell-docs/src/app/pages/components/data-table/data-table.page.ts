@@ -1,5 +1,9 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { DataTableCustomRenderersExample } from './examples/custom-renderers.example';
+import dataTableCustomRenderersExampleCodeRaw from './examples/custom-renderers.example.ts?raw' with {
+  loader: 'text',
+};
 import { DataTableExampleExample } from './examples/example.example';
 import dataTableExampleExampleCodeRaw from './examples/example.example.ts?raw' with {
   loader: 'text',
@@ -8,13 +12,23 @@ import { DataTableRowEditorExample } from './examples/row-editor.example';
 import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?raw' with {
   loader: 'text',
 };
+import { DataTableSimpleRendererExample } from './examples/simple-renderer.example';
+import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-data-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   styles: [`@import '@hell-ui/angular/styles/table';`],
-  imports: [ExampleTabs, DataTableExampleExample, DataTableRowEditorExample],
+  imports: [
+    ExampleTabs,
+    DataTableSimpleRendererExample,
+    DataTableCustomRenderersExample,
+    DataTableExampleExample,
+    DataTableRowEditorExample,
+  ],
   template: `
     <article class="hd-doc-page">
       <div class="hd-prose">
@@ -24,8 +38,8 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
           directives for table markup, visual active/selected row states, explicit row action and
           selection controls, sorting affordances, and column resizing. They are not a
           batteries-included data grid and do not wrap TanStack Table.
-          The planned simple renderer will live at <code>@hell-ui/angular/data-table</code>, with
-          optional adapter entrypoints for TanStack, virtual rows, and Angular CDK table skins.
+          The simple native renderer lives at <code>@hell-ui/angular/data-table</code>, with
+          optional adapter entrypoints still planned for TanStack, virtual rows, and Angular CDK table skins.
         </p>
 
         <p>
@@ -44,7 +58,33 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
           selection controls, sortable header affordances, and column resize handles.
         </p>
 
-        <h2>Example</h2>
+        <h2>Simple renderer smoke</h2>
+        <p>
+          <code>hell-data-table</code> renders <code>HellColumnDef</code> columns against array or
+          signal rows with native <code>&lt;table&gt;</code> semantics. Minimal usage does not need
+          projected templates or optional table engines.
+        </p>
+      </div>
+
+      <hd-example-tabs class="hd-doc-wide" [code]="dataTableSimpleRendererExampleCode" flush>
+        <app-data-table-simple-renderer-example />
+      </hd-example-tabs>
+
+      <div class="hd-prose">
+        <h2>Custom renderers smoke</h2>
+        <p>
+          Project <code>hellCell</code>, <code>hellHeaderCell</code>, and
+          <code>hellRowActions</code> templates when a simple table needs custom cell, header, or
+          action rendering without changing the native table shell.
+        </p>
+      </div>
+
+      <hd-example-tabs class="hd-doc-wide" [code]="dataTableCustomRenderersExampleCode" flush>
+        <app-data-table-custom-renderers-example />
+      </hd-example-tabs>
+
+      <div class="hd-prose">
+        <h2>Table primitives example</h2>
         <p>
           Commit searches through <code>hell-omnibar</code>, tune filters and sorting from menu
           submenus, fetch pages asynchronously with table skeletons, paginate via
@@ -216,6 +256,8 @@ import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?r
   `,
 })
 export class DataTablePage {
+  protected readonly dataTableSimpleRendererExampleCode = dataTableSimpleRendererExampleCodeRaw;
+  protected readonly dataTableCustomRenderersExampleCode = dataTableCustomRenderersExampleCodeRaw;
   protected readonly dataTableExampleExampleCode = dataTableExampleExampleCodeRaw;
   protected readonly dataTableRowEditorExampleCode = dataTableRowEditorExampleCodeRaw;
 }

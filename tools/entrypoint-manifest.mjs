@@ -20,7 +20,7 @@ export const entrypointManifest = {
       '// Composites and optional features are available through entry points:',
       '// - @hell-ui/angular/composites',
       '// - @hell-ui/angular/table (table primitives)',
-      '// - @hell-ui/angular/data-table (planned simple data table)',
+      '// - @hell-ui/angular/data-table (simple native data table)',
       '// - @hell-ui/angular/table-tanstack, @hell-ui/angular/table-virtual,',
       '//   @hell-ui/angular/table-cdk (planned table adapters)',
       '// - @hell-ui/angular/features/code-editor (kept optional CodeMirror entry point),',
@@ -73,7 +73,7 @@ export const entrypointManifest = {
       exports: ['./data-table/data-table'],
       header: [
         '/**',
-        ' * @experimental Planned simple data table entry point. Implementation lands in HELL-071.',
+        ' * @experimental Simple native-table data renderer for HellColumnDef rows.',
         ' */',
       ],
     },

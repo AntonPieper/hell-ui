@@ -429,11 +429,6 @@ export const HD_DOCS_SECTIONS: readonly DocsNavSection[] = HD_DOCS_CATALOG_SECTI
 );
 
 export const HD_DOCS_ROUTES: Routes = [
-  {
-    path: 'components/table-utilities',
-    loadComponent: () =>
-      import('./pages/components/data-table/data-table.page').then((m) => m.DataTablePage),
-  },
   ...HD_DOCS_CATALOG_SECTIONS.flatMap((section) =>
     section.items.map((item) => ({
       path: item.routePath,

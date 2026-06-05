@@ -1,4 +1,4 @@
 /**
- * @experimental Planned simple data table entry point. Implementation lands in HELL-071.
+ * @experimental Simple native-table data renderer for HellColumnDef rows.
  */
 export * from './data-table/data-table';

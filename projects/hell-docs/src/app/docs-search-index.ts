@@ -729,6 +729,18 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     terms: 'code-editor editor-demo components/code-editor/examples/editor-demo.example components/code-editor hell-code-editor CodeMirror',
   },
   {
+    title: 'Data Table: Simple Renderer',
+    path: '/components/data-table',
+    detail: 'components/data-table/examples/simple-renderer.example.ts',
+    terms: 'data-table simple-renderer components/data-table/examples/simple-renderer.example components/data-table hell-data-table HellDataTable HellColumnDef hellColumns textColumn signal rows native table minimal no projected templates',
+  },
+  {
+    title: 'Data Table: Custom Renderers',
+    path: '/components/data-table',
+    detail: 'components/data-table/examples/custom-renderers.example.ts',
+    terms: 'data-table custom-renderers components/data-table/examples/custom-renderers.example components/data-table hell-data-table HELL_DATA_TABLE_DIRECTIVES hellCell hellHeaderCell hellRowActions toolbar slots actionColumn custom templates',
+  },
+  {
     title: 'Table Utilities: Example',
     path: '/components/data-table',
     detail: 'components/data-table/examples/example.example.ts',

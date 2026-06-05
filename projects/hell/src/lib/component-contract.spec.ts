@@ -9,6 +9,7 @@ import { HellInput, HellNativeSelect, HellTextarea } from './primitives/input/in
 import { HellBadge, HellKbd, HellTag } from './primitives/tag/tag';
 import { HELL_SELECT_DIRECTIVES } from './primitives/select/select';
 import { HELL_APP_SHELL_DIRECTIVES } from './composites/app-shell/app-shell';
+import { HellDataTable, textColumn, type HellColumnDef } from './data-table/data-table';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from './features/table-utilities/table-utilities';
 
 interface ContractCase {
@@ -165,6 +166,7 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellTimeInput', area: 'composite', coverage: 'static' },
   { symbol: 'HellToaster', area: 'composite', coverage: 'static' },
   { symbol: 'HellCodeEditor', area: 'feature', coverage: 'static' },
+  { symbol: 'HellDataTable', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTable', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableBody', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableCell', area: 'feature', coverage: 'dom' },
@@ -198,6 +200,7 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
     ...HELL_FIELD_DIRECTIVES,
     ...HELL_SELECT_DIRECTIVES,
     ...HELL_APP_SHELL_DIRECTIVES,
+    HellDataTable,
     ...HELL_TABLE_UTILITIES_DIRECTIVES,
   ],
   template: `
@@ -257,6 +260,14 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
       </div>
     </nav>
 
+    <hell-data-table
+      id="data-table"
+      [rows]="dataTableRows"
+      [columns]="dataTableColumns"
+      rowKey="id"
+      density="compact"
+    />
+
     <div id="table-container" hellTableContainer busy>
       <table id="table" hellTableRoot contentWidth>
         <thead id="table-head" hellTableHeader>
@@ -281,7 +292,12 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
     </div>
   `,
 })
-class ContractHost {}
+class ContractHost {
+  protected readonly dataTableRows = [{ id: 'ada', name: 'Ada' }];
+  protected readonly dataTableColumns: readonly HellColumnDef<{ id: string; name: string }>[] = [
+    textColumn<{ id: string; name: string }, string>('name', { header: 'Name', accessor: 'name' }),
+  ];
+}
 
 const STYLEABLE_CASES: readonly ContractCase[] = [
   {
@@ -363,6 +379,12 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
     module: 'HellNavSectionItems',
     className: 'hell-nav-section-items',
     attrs: { 'data-slot': 'nav-section-items' },
+  },
+  {
+    id: 'data-table',
+    module: 'HellDataTable',
+    className: 'hell-data-table',
+    attrs: { 'data-density': 'compact' },
   },
   {
     id: 'table-container',
