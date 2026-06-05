@@ -7,8 +7,10 @@ import {
   actionColumn,
   booleanColumn,
   hellColumns,
+  hellTableInitialColumnVisibility,
   selectionColumn,
   textColumn,
+  type HellTableColumnVisibilityState,
   type HellTableRowSelectionState,
   type HellTableSortingState,
 } from './data-table';
@@ -18,6 +20,7 @@ interface Person {
   readonly name: string;
   readonly active: boolean;
   readonly role?: string;
+  readonly email?: string;
 }
 
 const people = hellColumns<Person>();
@@ -281,6 +284,45 @@ class SingleSelectableRowsDataTableHost {
   ]);
 }
 
+@Component({
+  imports: [...HELL_DATA_TABLE_DIRECTIVES],
+  template: `
+    <hell-column-visibility-panel
+      [columns]="columns"
+      [(columnVisibility)]="columnVisibility"
+      label="Columns"
+      description="Choose visible columns."
+    />
+
+    <hell-data-table
+      [rows]="rows"
+      [columns]="columns"
+      rowKey="id"
+      [(columnVisibility)]="columnVisibility"
+    />
+  `,
+})
+class ColumnVisibilityDataTableHost {
+  readonly rows: readonly Person[] = [
+    { id: 'ada', name: 'Ada', active: true, role: 'Admin', email: 'ada@example.com' },
+    { id: 'grace', name: 'Grace', active: true, role: 'Editor', email: 'grace@example.com' },
+  ];
+  readonly columns = people.define([
+    selectionColumn<Person>('selection', { header: 'Select', selectAll: false }),
+    textColumn<Person, string>('name', { header: 'Name', accessor: 'name' }),
+    textColumn<Person, string>('email', { header: 'Email', accessor: 'email' }),
+    textColumn<Person, string>('role', {
+      header: 'Role',
+      accessor: 'role',
+      visibility: 'initially-hidden',
+    }),
+    actionColumn<Person>('actions', { header: 'Actions' }),
+  ]);
+  readonly columnVisibility = signal<HellTableColumnVisibilityState>(
+    hellTableInitialColumnVisibility(this.columns),
+  );
+}
+
 describe('HellDataTable simple renderer', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -294,6 +336,7 @@ describe('HellDataTable simple renderer', () => {
         ActiveRowDataTableHost,
         SelectableRowsDataTableHost,
         SingleSelectableRowsDataTableHost,
+        ColumnVisibilityDataTableHost,
       ],
     }).compileComponents();
   });
@@ -565,6 +608,45 @@ describe('HellDataTable simple renderer', () => {
     expect(rowByKey(root, 'ada').hasAttribute('aria-selected')).toBe(false);
     expect(radioByLabel(root, 'Make Grace primary').checked).toBe(true);
   });
+
+  it('uses app-owned columnVisibility with an accessible resettable picker panel', () => {
+    const fixture = TestBed.createComponent(ColumnVisibilityDataTableHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const host = fixture.componentInstance;
+
+    expect(host.columnVisibility()).toEqual({ role: false });
+    expect(tableHeaderText(root)).toEqual(['Select', 'Name', 'Email', 'Actions']);
+    expect(checkboxByLabel(root, 'Select').disabled).toBe(true);
+    expect(checkboxByLabel(root, 'Actions').disabled).toBe(true);
+    expect(checkboxByLabel(root, 'Role').checked).toBe(false);
+    expect(checkboxByLabel(root, 'Email').checked).toBe(true);
+
+    checkboxByLabel(root, 'Email').click();
+    fixture.detectChanges();
+
+    expect(host.columnVisibility()).toEqual({ role: false, email: false });
+    expect(tableHeaderText(root)).toEqual(['Select', 'Name', 'Actions']);
+
+    checkboxByLabel(root, 'Role').click();
+    fixture.detectChanges();
+
+    expect(host.columnVisibility()).toEqual({ role: true, email: false });
+    expect(tableHeaderText(root)).toEqual(['Select', 'Name', 'Role', 'Actions']);
+
+    resetColumnVisibilityButton(root).click();
+    fixture.detectChanges();
+
+    expect(host.columnVisibility()).toEqual({ role: false });
+    expect(tableHeaderText(root)).toEqual(['Select', 'Name', 'Email', 'Actions']);
+    expect(resetColumnVisibilityButton(root).disabled).toBe(true);
+
+    host.columnVisibility.set({});
+    fixture.detectChanges();
+
+    expect(checkboxByLabel(root, 'Role').checked).toBe(true);
+    expect(tableHeaderText(root)).toEqual(['Select', 'Name', 'Email', 'Role', 'Actions']);
+  });
 });
 
 function tableBodyText(root: Element): string {
@@ -576,6 +658,12 @@ function tableBodyText(root: Element): string {
 function rowKeys(root: Element): string[] {
   return [...root.querySelectorAll('tbody tr[data-row-key]')].map(
     (row) => row.getAttribute('data-row-key') ?? '',
+  );
+}
+
+function tableHeaderText(root: Element): string[] {
+  return [...root.querySelectorAll('hell-data-table thead th')].map(
+    (cell) => cell.textContent?.replace(/Required|Initially hidden/g, '').replace(/\s+/g, ' ').trim() ?? '',
   );
 }
 
@@ -595,6 +683,12 @@ function radioByLabel(root: Element, label: string): HTMLInputElement {
   const radio = root.querySelector(`input[type="radio"][aria-label="${label}"]`);
   if (!(radio instanceof HTMLInputElement)) throw new Error(`Expected radio ${label}.`);
   return radio;
+}
+
+function resetColumnVisibilityButton(root: Element): HTMLButtonElement {
+  const button = root.querySelector('hell-column-visibility-panel button');
+  if (!(button instanceof HTMLButtonElement)) throw new Error('Expected reset button.');
+  return button;
 }
 
 function activeRowAction(root: Element): HTMLButtonElement {

@@ -6,6 +6,7 @@ import {
   type HellTableCellRenderContext,
   type HellTableColumn,
   type HellTableColumnId,
+  type HellTableColumnVisibilityMode,
   type HellTableComponentRenderer,
   type HellTableHeaderRenderContext,
   type HellTableRenderFunction,
@@ -33,11 +34,15 @@ export type HellColumnAccessorValue<TData, TAccessor> = TAccessor extends keyof 
     ? TValue
     : unknown;
 
-/** Column visibility options before table state overrides are applied. */
+/** Column visibility options before app-owned table state overrides are applied. */
 export interface HellColumnVisibilityOptions {
+  readonly mode?: HellTableColumnVisibilityMode;
   readonly visible?: boolean;
   readonly hideable?: boolean;
 }
+
+/** Column visibility shorthand accepted by column-definition helpers. */
+export type HellColumnVisibilityConfig = HellTableColumnVisibilityMode | HellColumnVisibilityOptions;
 
 /** Column sizing hints used by simple renderers and adapter layers. */
 export interface HellColumnSizingOptions {
@@ -52,7 +57,7 @@ export interface HellColumnOptions<TData, TValue = unknown> {
   readonly accessor?: HellColumnAccessor<TData, TValue>;
   readonly visible?: boolean;
   readonly hideable?: boolean;
-  readonly visibility?: HellColumnVisibilityOptions;
+  readonly visibility?: HellColumnVisibilityConfig;
   readonly sortable?: boolean;
   readonly size?: number;
   readonly minSize?: number;
@@ -75,7 +80,7 @@ export interface HellSelectColumnOptions<TData, TValue = unknown>
 /** Options for action columns. Action columns intentionally do not infer row values. */
 export type HellActionColumnOptions<TData> = Omit<
   HellColumnOptions<TData, never>,
-  'accessor' | 'sortable'
+  'accessor' | 'sortable' | 'visible' | 'hideable' | 'visibility'
 > & {
   readonly sortable?: false;
 };
@@ -83,7 +88,7 @@ export type HellActionColumnOptions<TData> = Omit<
 /** Options for row-selection columns. Selection columns intentionally remain required by default. */
 export type HellSelectionColumnOptions<TData> = Omit<
   HellColumnOptions<TData, never>,
-  'accessor' | 'sortable' | 'hideable'
+  'accessor' | 'sortable' | 'visible' | 'hideable' | 'visibility'
 > & {
   readonly sortable?: false;
   readonly hideable?: false;
@@ -203,7 +208,7 @@ export function actionColumn<TData>(
   options: HellActionColumnOptions<TData> = {},
 ): HellColumnDef<TData, never> {
   const [id, resolvedOptions] = resolveSpecialColumnArgs(idOrOptions, options, 'actions');
-  return createColumn(id, resolvedOptions, {
+  return createColumn(id, requiredColumnOptions(resolvedOptions), {
     kind: 'action',
     sortable: false,
     hideable: false,
@@ -219,7 +224,7 @@ export function selectionColumn<TData>(
   const [id, resolvedOptions] = resolveSpecialColumnArgs(idOrOptions, options, 'selection');
   const selection = selectionColumnConfig(resolvedOptions);
   return {
-    ...createColumn(id, resolvedOptions, {
+    ...createColumn(id, requiredColumnOptions(resolvedOptions), {
       kind: 'selection',
       sortable: false,
       hideable: false,
@@ -359,6 +364,7 @@ function createColumn<TData, TValue, TOptions extends HellColumnOptions<TData, T
   defaults: HellCreateColumnDefaults,
 ): HellColumnDef<TData, TValue> {
   const accessor = resolveAccessor<TData, TValue>(id, options.accessor, defaults.accessorFromId);
+  const visibility = resolveColumnVisibility(options, defaults);
   return {
     id,
     kind: defaults.kind,
@@ -370,8 +376,9 @@ function createColumn<TData, TValue, TOptions extends HellColumnOptions<TData, T
         : options.accessor === undefined && defaults.accessorFromId
           ? id
           : undefined,
-    visible: options.visible ?? options.visibility?.visible ?? defaults.visible,
-    hideable: options.hideable ?? options.visibility?.hideable ?? defaults.hideable,
+    visibility,
+    visible: visibility !== 'initially-hidden',
+    hideable: visibility !== 'always',
     sortable: options.sortable ?? defaults.sortable,
     size: options.size ?? options.sizing?.size,
     minSize: options.minSize ?? options.sizing?.minSize,
@@ -383,6 +390,32 @@ function createColumn<TData, TValue, TOptions extends HellColumnOptions<TData, T
     rowActions: options.rowActions,
     rowEditor: options.rowEditor,
   };
+}
+
+function requiredColumnOptions<TData>(
+  options: HellActionColumnOptions<TData> | HellSelectionColumnOptions<TData>,
+): HellColumnOptions<TData, never> {
+  return {
+    ...options,
+    visible: true,
+    hideable: false,
+    visibility: 'always',
+  };
+}
+
+function resolveColumnVisibility<TData, TValue>(
+  options: HellColumnOptions<TData, TValue>,
+  defaults: HellCreateColumnDefaults,
+): HellTableColumnVisibilityMode {
+  const explicit = options.visibility;
+  if (typeof explicit === 'string') return explicit;
+  if (explicit?.mode) return explicit.mode;
+
+  const hideable = options.hideable ?? explicit?.hideable ?? defaults.hideable;
+  if (hideable === false) return 'always';
+
+  const visible = options.visible ?? explicit?.visible ?? defaults.visible;
+  return visible === false ? 'initially-hidden' : 'user-toggleable';
 }
 
 function resolveSpecialColumnArgs<TOptions extends object>(

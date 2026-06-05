@@ -1,8 +1,11 @@
 import { signal } from '@angular/core';
 
 import {
+  hellTableColumnIsVisible,
+  hellTableColumnVisibilityMode,
   hellTableCreateModel,
   hellTableCreateState,
+  hellTableInitialColumnVisibility,
   hellTableResolveStateUpdater,
   hellTableRowsFromData,
   hellTableStateChannel,
@@ -79,23 +82,50 @@ describe('HellTableModel normalized state', () => {
     expect(state.error.value()).toBeNull();
   });
 
-  it('derives visible columns from required columns, default visibility, and state', () => {
+  it('derives visible columns from required columns, definition defaults, and state', () => {
     const columns: readonly HellTableColumn<Person>[] = [
-      { id: 'select', header: 'Select', hideable: false },
-      { id: 'name', header: 'Name' },
-      { id: 'age', header: 'Age', visible: false },
-      { id: 'role', header: 'Role', visible: false },
+      { id: 'select', header: 'Select', visibility: 'always' },
+      { id: 'name', header: 'Name', visibility: 'user-toggleable' },
+      { id: 'age', header: 'Age', visibility: 'initially-hidden' },
+      { id: 'role', header: 'Role', hideable: true },
     ];
     const model = hellTableCreateModel({ columns, rows: [] });
+    const defaultVisibility = hellTableInitialColumnVisibility(columns);
+    const initiallyHiddenModel = hellTableCreateModel({
+      columns,
+      rows: [],
+      initialState: { columnVisibility: defaultVisibility },
+    });
+
+    expect(hellTableColumnVisibilityMode(columns[0])).toBe('always');
+    expect(hellTableColumnVisibilityMode({ visible: false })).toBe('initially-hidden');
+    expect(defaultVisibility).toEqual({ age: false });
+    expect(hellTableColumnIsVisible(columns[1], {})).toBe(true);
+    expect(hellTableColumnIsVisible(columns[1], { name: false })).toBe(false);
+    expect(hellTableColumnIsVisible(columns[2], {})).toBe(true);
+    expect(hellTableColumnIsVisible(columns[2], { age: true })).toBe(true);
+    expect(hellTableColumnIsVisible(columns[0], { select: false })).toBe(true);
 
     expect(hellTableVisibleColumns(columns, {}).map((column) => column.id)).toEqual([
       'select',
       'name',
+      'age',
+      'role',
+    ]);
+    expect(hellTableVisibleColumns(columns, defaultVisibility).map((column) => column.id)).toEqual([
+      'select',
+      'name',
+      'role',
+    ]);
+    expect(initiallyHiddenModel.visibleColumns().map((column) => column.id)).toEqual([
+      'select',
+      'name',
+      'role',
     ]);
 
     model.state.columnVisibility.set({ select: false, name: false, age: true });
 
-    expect(model.visibleColumns().map((column) => column.id)).toEqual(['select', 'age']);
+    expect(model.visibleColumns().map((column) => column.id)).toEqual(['select', 'age', 'role']);
     expect(model.headerGroups()).toEqual([
       {
         id: 'default',
@@ -113,6 +143,13 @@ describe('HellTableModel normalized state', () => {
             columnId: 'age',
             column: columns[2],
             label: 'Age',
+            colSpan: 1,
+          },
+          {
+            id: 'header:role',
+            columnId: 'role',
+            column: columns[3],
+            label: 'Role',
             colSpan: 1,
           },
         ],

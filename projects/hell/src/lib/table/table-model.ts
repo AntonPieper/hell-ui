@@ -53,8 +53,11 @@ export interface HellTableSelectionColumnConfig<TData = unknown> {
   readonly radioName?: string;
 }
 
-/** Column visibility keyed by stable column id. `false` hides; missing or `true` shows. */
+/** Column visibility keyed by stable column id. `false` hides; missing or `true` shows toggleable columns. */
 export type HellTableColumnVisibilityState = Readonly<Record<HellTableColumnId, boolean>>;
+
+/** Definition-level visibility behavior before the app-owned visibility state is applied. */
+export type HellTableColumnVisibilityMode = 'always' | 'user-toggleable' | 'initially-hidden';
 
 /** Column sizing state keyed by stable column id, in CSS pixels. */
 export type HellTableColumnSizingState = Readonly<Record<HellTableColumnId, number>>;
@@ -104,9 +107,11 @@ export interface HellTableColumn<TData = unknown, TValue = unknown> {
   readonly header?: unknown;
   readonly accessor?: (row: TData) => TValue;
   readonly accessorKey?: string;
-  /** Default visibility before user/app columnVisibility overrides. */
+  /** Definition-level visibility behavior before app-owned columnVisibility overrides. */
+  readonly visibility?: HellTableColumnVisibilityMode;
+  /** Compatibility mirror for initial visibility; prefer `visibility`. */
   readonly visible?: boolean;
-  /** `false` keeps required action/selection columns visible regardless of visibility state. */
+  /** Compatibility mirror for whether the picker may toggle the column; prefer `visibility`. */
   readonly hideable?: boolean;
   readonly sortable?: boolean;
   readonly size?: number;
@@ -409,17 +414,51 @@ export function hellTableRowsFromData<TData>(
   });
 }
 
-/** Derives visible columns from default column visibility plus the columnVisibility state channel. */
+/** Resolves a column's visibility mode from the modern `visibility` field or legacy mirrors. */
+export function hellTableColumnVisibilityMode(
+  column: Pick<HellTableColumn, 'visibility' | 'visible' | 'hideable'>,
+): HellTableColumnVisibilityMode {
+  if (column.visibility) return column.visibility;
+  if (column.hideable === false) return 'always';
+  if (column.visible === false) return 'initially-hidden';
+  return 'user-toggleable';
+}
+
+/** True when the column picker may change this column's visibility. */
+export function hellTableColumnCanToggleVisibility(
+  column: Pick<HellTableColumn, 'visibility' | 'visible' | 'hideable'>,
+): boolean {
+  return hellTableColumnVisibilityMode(column) !== 'always';
+}
+
+/** Default app-owned visibility state implied by initially-hidden column definitions. */
+export function hellTableInitialColumnVisibility<TData>(
+  columns: readonly Pick<HellTableColumn<TData>, 'id' | 'visibility' | 'visible' | 'hideable'>[],
+): HellTableColumnVisibilityState {
+  const visibility: Record<HellTableColumnId, boolean> = {};
+  for (const column of columns) {
+    if (hellTableColumnVisibilityMode(column) === 'initially-hidden') {
+      visibility[column.id] = false;
+    }
+  }
+  return visibility;
+}
+
+/** Resolves final visibility for one column. */
+export function hellTableColumnIsVisible<TData>(
+  column: Pick<HellTableColumn<TData>, 'id' | 'visibility' | 'visible' | 'hideable'>,
+  columnVisibility: HellTableColumnVisibilityState,
+): boolean {
+  if (!hellTableColumnCanToggleVisibility(column)) return true;
+  return columnVisibility[column.id] !== false;
+}
+
+/** Derives visible columns from the app-owned columnVisibility state channel. */
 export function hellTableVisibleColumns<TData>(
   columns: readonly HellTableColumn<TData>[],
   columnVisibility: HellTableColumnVisibilityState,
 ): readonly HellTableColumn<TData>[] {
-  return columns.filter((column) => {
-    if (column.hideable === false) return true;
-    const stateValue = columnVisibility[column.id];
-    if (stateValue !== undefined) return stateValue;
-    return column.visible !== false;
-  });
+  return columns.filter((column) => hellTableColumnIsVisible(column, columnVisibility));
 }
 
 /** Builds a single normalized header group from the current visible columns. */

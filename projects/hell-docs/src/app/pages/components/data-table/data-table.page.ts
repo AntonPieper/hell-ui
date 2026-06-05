@@ -1,5 +1,9 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { DataTableColumnVisibilityExample } from './examples/column-visibility.example';
+import dataTableColumnVisibilityExampleCodeRaw from './examples/column-visibility.example.ts?raw' with {
+  loader: 'text',
+};
 import { DataTableCustomRenderersExample } from './examples/custom-renderers.example';
 import dataTableCustomRenderersExampleCodeRaw from './examples/custom-renderers.example.ts?raw' with {
   loader: 'text',
@@ -25,6 +29,7 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
   imports: [
     ExampleTabs,
     DataTableSimpleRendererExample,
+    DataTableColumnVisibilityExample,
     DataTableCustomRenderersExample,
     DataTableExampleExample,
     DataTableRowEditorExample,
@@ -50,12 +55,12 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
 
         <h2>Scope</h2>
         <p>
-          This entrypoint deliberately does not own a data source, column definition model,
-          filtering, pagination, virtualization, selection model, or grid semantics yet. Import it
-          from <code>@hell-ui/angular/table</code>. Bring Angular CDK Table, TanStack Table, AG Grid,
-          a backend API, or your own state layer when you need a real data table. Use Hell's
-          directives only for host styling, active-row state, selected-row state, row action or
-          selection controls, sortable header affordances, and column resize handles.
+          This entrypoint deliberately does not own a backend data source, filtering, pagination,
+          virtualization, column-visibility persistence, or grid semantics yet. Import it from
+          <code>@hell-ui/angular/table</code>. Bring Angular CDK Table, TanStack Table, AG Grid, a
+          backend API, or your own state layer when you need a real data table. Use Hell's directives
+          only for host styling, active-row state, selected-row state, row action or selection
+          controls, sortable header affordances, column visibility UI, and column resize handles.
         </p>
 
         <h2>Simple renderer smoke</h2>
@@ -84,6 +89,22 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
 
       <hd-example-tabs class="hd-doc-wide" [code]="dataTableCustomRenderersExampleCode" flush>
         <app-data-table-custom-renderers-example />
+      </hd-example-tabs>
+
+      <div class="hd-prose">
+        <h2>Column visibility</h2>
+        <p>
+          Bind <code>[(columnVisibility)]</code> to app state and pass the same state to
+          <code>hell-column-visibility-panel</code>. The state is a stable
+          <code>Record&lt;columnId, boolean&gt;</code>: <code>false</code> hides a toggleable column,
+          while missing or <code>true</code> shows it. Hell renders the picker and reset behavior;
+          your application owns persistence such as <code>localStorage</code>, a backend profile, or
+          URL state.
+        </p>
+      </div>
+
+      <hd-example-tabs class="hd-doc-wide" [code]="dataTableColumnVisibilityExampleCode" flush>
+        <app-data-table-column-visibility-example />
       </hd-example-tabs>
 
       <div class="hd-prose">
@@ -222,6 +243,13 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
             <code>[hellDataTableBulkActions]</code> toolbar slot appears when checkbox selection is
             non-empty.
           </li>
+          <li>
+            Bind <code>[(columnVisibility)]</code> on both <code>hell-data-table</code> and
+            <code>hell-column-visibility-panel</code> for app-owned visibility persistence. Column
+            helpers accept <code>visibility: 'always'</code>, <code>'user-toggleable'</code>, or
+            <code>'initially-hidden'</code>; required action and selection columns render as disabled
+            checked options in the picker.
+          </li>
         </ul>
 
         <h3>Theming</h3>
@@ -282,6 +310,7 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
 })
 export class DataTablePage {
   protected readonly dataTableSimpleRendererExampleCode = dataTableSimpleRendererExampleCodeRaw;
+  protected readonly dataTableColumnVisibilityExampleCode = dataTableColumnVisibilityExampleCodeRaw;
   protected readonly dataTableCustomRenderersExampleCode = dataTableCustomRenderersExampleCodeRaw;
   protected readonly dataTableExampleExampleCode = dataTableExampleExampleCodeRaw;
   protected readonly dataTableRowEditorExampleCode = dataTableRowEditorExampleCodeRaw;

@@ -16,6 +16,7 @@ import {
 } from '@angular/core';
 
 import { HellStyleable } from '../core/styleable';
+import { HellColumnVisibilityPanel } from '../table/column-visibility-panel';
 import {
   HellTable,
   HellTableBody,
@@ -64,6 +65,7 @@ import {
   type HellTableRowKey,
   type HellTableRowKeyAccessor,
   type HellTableRowKeyValue,
+  type HellTableColumnVisibilityState,
   type HellTableRowPart,
   type HellTableRowRenderContext,
   type HellTableRowSelectionState,
@@ -362,7 +364,7 @@ export class HellDataTableBulkActions {}
 })
 export class HellDataTable<TData = unknown> extends HellStyleable {
   /** Column definitions from `hellColumns<T>()`, `textColumn`, or compatible objects. */
-  readonly columns = input.required<HellTableSignalInput<readonly HellColumnDef<TData>[]>>();
+  readonly columns = input<HellTableSignalInput<readonly HellColumnDef<TData>[]>>([]);
 
   /** Row data as a static array or Angular signal. */
   readonly rows = input<HellTableSignalInput<readonly TData[]>>([]);
@@ -390,6 +392,9 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
 
   /** Single radio selection keyed by stable row key. Use `[(selectedRowKey)]` for controlled single selection. */
   readonly selectedRowKey = model<HellTableRowKey | null>(null);
+
+  /** Column visibility keyed by stable column id. Use `[(columnVisibility)]` for app-owned persistence. */
+  readonly columnVisibility = model<HellTableColumnVisibilityState>({});
 
   /** Emits whenever a sortable header cycles sort state. */
   readonly sortingChange = output<readonly HellTableSortingState[]>();
@@ -426,18 +431,28 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
       update: (updater: HellTableStateUpdater<HellTableRowKey | null>) =>
         this.selectedRowKey.update((current) => hellTableResolveStateUpdater(current, updater)),
     },
+    columnVisibility: {
+      value: this.columnVisibility,
+      set: (next: HellTableColumnVisibilityState) => this.columnVisibility.set(next),
+      update: (updater: HellTableStateUpdater<HellTableColumnVisibilityState>) =>
+        this.columnVisibility.update((current) => hellTableResolveStateUpdater(current, updater)),
+    },
   } satisfies HellTableState;
   protected readonly resolvedColumns = computed(() => readSignalInput(this.columns()));
-  protected readonly visibleColumns = computed(() => hellTableVisibleColumns(this.resolvedColumns(), {}));
+  protected readonly visibleColumns = computed(() =>
+    hellTableVisibleColumns(this.resolvedColumns(), this.columnVisibility()),
+  );
   protected readonly visibleColumnCount = computed(() => Math.max(this.visibleColumns().length, 1));
   protected readonly headerGroups = computed(() =>
     hellTableHeaderGroupsFromColumns(this.visibleColumns()),
   );
   protected readonly rawRows = computed(() => readSignalInput(this.rows()));
   protected readonly activeSorting = computed(() => this.internalSorting());
-  protected readonly sortedRows = computed(() =>
-    sortRows(this.rawRows(), this.visibleColumns(), this.activeSorting()),
-  );
+  protected readonly sortedRows = computed(() => {
+    const rows = this.rawRows();
+    const sorting = this.activeSorting();
+    return sorting.length ? sortRows(rows, this.visibleColumns(), sorting) : rows;
+  });
   protected readonly rowKeyAccessor = computed(() => rowKeyAccessorFor(this.rowKey()));
   protected readonly tableRows = computed(() =>
     hellTableRowsFromData(this.sortedRows(), this.rowKeyAccessor()),
@@ -651,6 +666,7 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
 /** Standalone imports for the simple data-table renderer and projected slots. */
 export const HELL_DATA_TABLE_DIRECTIVES = [
   HellDataTable,
+  HellColumnVisibilityPanel,
   HellDataTableToolbarStart,
   HellDataTableToolbar,
   HellDataTableToolbarEnd,
@@ -740,6 +756,7 @@ export {
   HellHeaderCell,
   HellRowActions,
   HellRowEditor,
+  HellColumnVisibilityPanel,
   HellTableRowAction,
   HellTableRowCheckbox,
   HellTableRowRadio,
@@ -748,6 +765,10 @@ export {
   booleanColumn,
   hellColumns,
   hellComponentRenderer,
+  hellTableColumnCanToggleVisibility,
+  hellTableColumnIsVisible,
+  hellTableColumnVisibilityMode,
+  hellTableInitialColumnVisibility,
   hellTemplateRenderer,
   selectColumn,
   selectionColumn,
@@ -761,6 +782,8 @@ export type {
   HellTableCellRenderContext,
   HellTableColumn,
   HellTableColumnId,
+  HellTableColumnVisibilityMode,
+  HellTableColumnVisibilityState,
   HellTableHeaderRenderContext,
   HellTableRenderer,
   HellTableRowKey,

@@ -9,7 +9,12 @@ import { HellInput, HellNativeSelect, HellTextarea } from './primitives/input/in
 import { HellBadge, HellKbd, HellTag } from './primitives/tag/tag';
 import { HELL_SELECT_DIRECTIVES } from './primitives/select/select';
 import { HELL_APP_SHELL_DIRECTIVES } from './composites/app-shell/app-shell';
-import { HellDataTable, textColumn, type HellColumnDef } from './data-table/data-table';
+import {
+  HellColumnVisibilityPanel,
+  HellDataTable,
+  textColumn,
+  type HellColumnDef,
+} from './data-table/data-table';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from './features/table-utilities/table-utilities';
 
 interface ContractCase {
@@ -166,6 +171,7 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellTimeInput', area: 'composite', coverage: 'static' },
   { symbol: 'HellToaster', area: 'composite', coverage: 'static' },
   { symbol: 'HellCodeEditor', area: 'feature', coverage: 'static' },
+  { symbol: 'HellColumnVisibilityPanel', area: 'feature', coverage: 'dom' },
   { symbol: 'HellDataTable', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTable', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableBody', area: 'feature', coverage: 'dom' },
@@ -200,6 +206,7 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
     ...HELL_FIELD_DIRECTIVES,
     ...HELL_SELECT_DIRECTIVES,
     ...HELL_APP_SHELL_DIRECTIVES,
+    HellColumnVisibilityPanel,
     HellDataTable,
     ...HELL_TABLE_UTILITIES_DIRECTIVES,
   ],
@@ -259,6 +266,12 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
         </div>
       </div>
     </nav>
+
+    <hell-column-visibility-panel
+      id="column-visibility-panel"
+      [columns]="dataTableColumns"
+      label="Columns"
+    />
 
     <hell-data-table
       id="data-table"
@@ -379,6 +392,12 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
     module: 'HellNavSectionItems',
     className: 'hell-nav-section-items',
     attrs: { 'data-slot': 'nav-section-items' },
+  },
+  {
+    id: 'column-visibility-panel',
+    module: 'HellColumnVisibilityPanel',
+    className: 'hell-column-visibility-panel',
+    attrs: { 'data-hell-column-visibility-panel': '' },
   },
   {
     id: 'data-table',

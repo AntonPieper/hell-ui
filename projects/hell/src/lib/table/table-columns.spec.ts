@@ -75,14 +75,14 @@ describe('Hell table column DSL and renderer registry', () => {
       columns.text<string>('name', {
         accessor: 'name',
         header: 'Name',
-        visibility: { visible: true, hideable: true },
+        visibility: { mode: 'user-toggleable', visible: true, hideable: true },
         sizing: { size: 180, minSize: 120, maxSize: 320 },
         sortable: true,
         meta: { priority: 'primary' },
       }),
       columns.boolean<boolean>('active', {
         accessor: (row) => row.active,
-        visible: false,
+        visibility: 'initially-hidden',
         sortable: false,
       }),
       columns.select<Person['role']>('role', {
@@ -106,7 +106,13 @@ describe('Hell table column DSL and renderer registry', () => {
     const directBoolean = booleanColumn<Person, boolean>('active', { accessor: 'active' });
     const directSelect = selectColumn<Person, Person['role']>('role', { accessor: 'role' });
     const directAction = actionColumn<Person>('actions');
+    const forcedAction = actionColumn<Person>('forced-actions', {
+      visibility: 'user-toggleable',
+    } as never);
     const directSelection = selectionColumn<Person>('selection');
+    const forcedSelection = selectionColumn<Person>('forced-selection', {
+      visibility: 'user-toggleable',
+    } as never);
 
     expect(definitions.map((column) => column.id)).toEqual([
       'name',
@@ -120,6 +126,7 @@ describe('Hell table column DSL and renderer registry', () => {
       expect.objectContaining({
         kind: 'text',
         header: 'Name',
+        visibility: 'user-toggleable',
         visible: true,
         hideable: true,
         sortable: true,
@@ -129,13 +136,15 @@ describe('Hell table column DSL and renderer registry', () => {
         meta: { priority: 'primary' },
       }),
     );
-    expect(definitions[1]).toEqual(expect.objectContaining({ kind: 'boolean', visible: false }));
+    expect(definitions[1]).toEqual(
+      expect.objectContaining({ kind: 'boolean', visibility: 'initially-hidden', visible: false }),
+    );
     expect(definitions[2].options?.[0]).toEqual({ value: 'admin', label: 'Administrator' });
     expect(definitions[3]).toEqual(
-      expect.objectContaining({ kind: 'action', sortable: false, hideable: false }),
+      expect.objectContaining({ kind: 'action', visibility: 'always', sortable: false, hideable: false }),
     );
     expect(definitions[4]).toEqual(
-      expect.objectContaining({ kind: 'selection', sortable: false, hideable: false }),
+      expect.objectContaining({ kind: 'selection', visibility: 'always', sortable: false, hideable: false }),
     );
     expect(definitions[4].meta).toEqual({ mode: 'radio' });
     expect(definitions[4].selection).toEqual(
@@ -155,6 +164,8 @@ describe('Hell table column DSL and renderer registry', () => {
     expect(directSelect.accessor?.(ada)).toBe('admin');
     expect(directAction.accessor).toBeUndefined();
     expect(directSelection.accessor).toBeUndefined();
+    expect(forcedAction).toEqual(expect.objectContaining({ visibility: 'always', hideable: false }));
+    expect(forcedSelection).toEqual(expect.objectContaining({ visibility: 'always', hideable: false }));
   });
 
   it('registers projected TemplateRef renderers by column, action, editor, and field ids', () => {

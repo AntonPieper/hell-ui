@@ -741,6 +741,12 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     terms: 'data-table custom-renderers components/data-table/examples/custom-renderers.example components/data-table hell-data-table HELL_DATA_TABLE_DIRECTIVES hellCell hellHeaderCell hellRowActions toolbar slots actionColumn custom templates',
   },
   {
+    title: 'Data Table: Column Visibility',
+    path: '/components/data-table',
+    detail: 'components/data-table/examples/column-visibility.example.ts',
+    terms: 'data-table column-visibility components/data-table/examples/column-visibility.example components/data-table hell-column-visibility-panel columnVisibility visibility always user-toggleable initially-hidden external persistence localStorage',
+  },
+  {
     title: 'Table Utilities: Example',
     path: '/components/data-table',
     detail: 'components/data-table/examples/example.example.ts',
