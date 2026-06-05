@@ -1,4 +1,4 @@
 /**
- * @experimental Planned TanStack Table adapter entry point. Implementation lands in HELL-077.
+ * @experimental TanStack Table adapter entry point. Keeps TanStack behind this optional peer boundary.
  */
 export * from './table-tanstack/table-tanstack';

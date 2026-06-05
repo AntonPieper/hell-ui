@@ -1329,8 +1329,6 @@ function checkPackageDependencyContract() {
   const sourceFiles = walk(sourceRoot).filter(
     (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'),
   );
-  const librarySource = sourceFiles.map(readFile).join('\n');
-
   const peerDependencies = packageJson.peerDependencies ?? {};
   const peerDependenciesMeta = packageJson.peerDependenciesMeta ?? {};
   const dependencies = packageJson.dependencies ?? {};
@@ -1357,6 +1355,7 @@ function checkPackageDependencyContract() {
     '@codemirror/view',
     '@lezer/highlight',
   ]);
+  const adapterOnlyPeers = new Set(['@tanstack/angular-table']);
   const styleOnlyPeers = new Set(['tailwindcss']);
 
   for (const dependency of importedPackages) {
@@ -1390,6 +1389,10 @@ function checkPackageDependencyContract() {
       failures.push(
         `Package dependency contract must keep ${dependency} optional for feature-only consumers`,
       );
+    } else if (adapterOnlyPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional !== true) {
+      failures.push(
+        `Package dependency contract must keep ${dependency} optional for adapter-only consumers`,
+      );
     } else if (styleOnlyPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional !== true) {
       failures.push(
         `Package dependency contract must keep ${dependency} optional for style-only consumers`,
@@ -1410,13 +1413,14 @@ function checkPackageDependencyContract() {
       failures.push(`Package dependency contract has peerDependenciesMeta for undeclared ${dependency}`);
     } else if (
       !featureOnlyPeers.has(dependency) &&
+      !adapterOnlyPeers.has(dependency) &&
       !styleOnlyPeers.has(dependency) &&
       !iconOnlyPeers.has(dependency) &&
       !transitiveOnlyPeers.has(dependency) &&
       peerDependenciesMeta[dependency]?.optional
     ) {
       failures.push(
-        `Package dependency contract marks ${dependency} optional but it is not a known feature-only, icon-only, style-only, or transitive-only peer`,
+        `Package dependency contract marks ${dependency} optional but it is not a known feature-only, adapter-only, icon-only, style-only, or transitive-only peer`,
       );
     }
   }
@@ -1430,6 +1434,12 @@ function checkPackageDependencyContract() {
   for (const dependency of featureOnlyPeers) {
     if (!peerDependencies[dependency]) {
       failures.push(`Package dependency contract is missing optional feature peer dependency ${dependency}`);
+    }
+  }
+
+  for (const dependency of adapterOnlyPeers) {
+    if (!peerDependencies[dependency]) {
+      failures.push(`Package dependency contract is missing optional adapter peer dependency ${dependency}`);
     }
   }
 
@@ -1451,8 +1461,15 @@ function checkPackageDependencyContract() {
     }
   }
 
-  if (peerDependencies['@tanstack/angular-table'] || librarySource.includes('@tanstack/angular-table')) {
-    failures.push('Package dependency contract must not declare unused @tanstack/angular-table');
+  const tanStackImportOffenders = sourceFiles
+    .filter((file) => !relPath(file).includes('/table-tanstack/'))
+    .filter((file) => relPath(file) !== 'projects/hell/src/lib/public-api-table-tanstack.ts')
+    .filter((file) => readFile(file).includes('@tanstack/angular-table'))
+    .map(relPath);
+  if (tanStackImportOffenders.length) {
+    failures.push(
+      `Package dependency contract must keep @tanstack/angular-table inside @hell-ui/angular/table-tanstack: ${tanStackImportOffenders.join(', ')}`,
+    );
   }
 
   if (peerDependencies['pdfjs-dist'] || peerDependenciesMeta['pdfjs-dist']) {

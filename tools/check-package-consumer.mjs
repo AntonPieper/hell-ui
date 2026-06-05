@@ -98,12 +98,14 @@ const codeEditorPeerGroup = [
   '@lezer/highlight',
 ];
 const pdfViewerPeerGroup = ['pdfjs-dist'];
+const tanStackTablePeerGroup = ['@tanstack/angular-table'];
 const heavyFeaturePeerGroup = [...codeEditorPeerGroup, ...pdfViewerPeerGroup];
 const packageConsumerPeerTiers = new Set([
   'core',
   'primitive',
   'composite',
   'table',
+  'table-tanstack',
   'audio-transcript',
   'code-editor',
   'pdf-viewer',
@@ -122,6 +124,10 @@ const peerGroupContracts = {
     peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup],
   },
   table: { tier: 'table', peers: [...corePeerGroup, ...stylePeerGroup] },
+  'table-tanstack': {
+    tier: 'table-tanstack',
+    peers: [...corePeerGroup, ...stylePeerGroup, ...tanStackTablePeerGroup],
+  },
   'audio-transcript': {
     tier: 'audio-transcript',
     peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup],
@@ -185,6 +191,10 @@ const pdfViewerDeps = [
   'pdfjs-dist',
 ];
 const audioPlayerDeps = styledUiDeps;
+const tableTanStackDeps = [
+  ...styledUiWithoutFontAwesomeDeps,
+  '@tanstack/angular-table',
+];
 
 const scenarios = [
   {
@@ -194,6 +204,7 @@ const scenarios = [
     peerTier: 'core',
     peerGroup: 'core',
     dependencies: coreDeps,
+    forbiddenDependencies: tanStackTablePeerGroup,
     mainTs: rootConsumerMainTs(),
     stylesCss: '',
   },
@@ -295,6 +306,7 @@ const scenarios = [
     peerTier: 'table',
     peerGroup: 'table',
     dependencies: styledUiWithoutFontAwesomeDeps,
+    forbiddenDependencies: tanStackTablePeerGroup,
     mainTs: tableConsumerMainTs(),
     stylesCss: tableConsumerStylesCss(),
   },
@@ -304,7 +316,17 @@ const scenarios = [
     peerTier: 'table',
     peerGroup: 'table',
     dependencies: styledUiWithoutFontAwesomeDeps,
+    forbiddenDependencies: tanStackTablePeerGroup,
     mainTs: dataTableConsumerMainTs(),
+    stylesCss: tableConsumerStylesCss(),
+  },
+  {
+    name: 'table-tanstack',
+    description: 'TanStack Table adapter with strict optional table-engine peer',
+    peerTier: 'table-tanstack',
+    peerGroup: 'table-tanstack',
+    dependencies: tableTanStackDeps,
+    mainTs: tableTanStackConsumerMainTs(),
     stylesCss: tableConsumerStylesCss(),
   },
   {
@@ -472,6 +494,9 @@ function assertPeerTierContracts(allScenarios) {
   for (const peer of codeEditorPeerGroup) {
     if (!optionalPeerNames.has(peer)) fail(`Code editor peer ${peer} must remain optional in @hell-ui/angular`);
   }
+  for (const peer of tanStackTablePeerGroup) {
+    if (!optionalPeerNames.has(peer)) fail(`TanStack Table peer ${peer} must remain optional in @hell-ui/angular`);
+  }
   if (pdfPackagePeerDependencies['pdfjs-dist'] !== deps['pdfjs-dist']) {
     fail(`PDF package must pin pdfjs-dist peer to workspace version ${deps['pdfjs-dist']}`);
   }
@@ -490,6 +515,7 @@ function assertPeerTierContracts(allScenarios) {
   for (const scenario of allScenarios) assertScenarioPeerGroup(scenario, allPackagePeerNames);
   assertHeavyPeersAreIsolated(allScenarios);
   assertCodeMirrorPeersAreIsolated(allScenarios);
+  assertTanStackTablePeersAreIsolated(allScenarios);
 }
 
 function assertScenarioPeerGroup(scenario, packagePeerNames) {
@@ -529,6 +555,25 @@ function assertHeavyPeersAreIsolated(allScenarios) {
     const unexpected = scenario.dependencies.filter((dependency) => heavyFeaturePeerGroup.includes(dependency));
     if (unexpected.length) {
       fail(`Scenario ${scenario.name} must not require heavy feature peer(s): ${unexpected.join(', ')}`);
+    }
+  }
+}
+
+function assertTanStackTablePeersAreIsolated(allScenarios) {
+  const tanStackScenario = allScenarios.find((scenario) => scenario.name === 'table-tanstack');
+  if (!tanStackScenario) fail('Missing package-consumer table-tanstack scenario');
+
+  const tanStackPeers = tanStackScenario.dependencies.filter((dependency) =>
+    tanStackTablePeerGroup.includes(dependency),
+  );
+  assertSameSet('scenario table-tanstack TanStack peer group', tanStackTablePeerGroup, tanStackPeers);
+
+  for (const scenario of allScenarios) {
+    if (scenario.name === 'table-tanstack') continue;
+
+    const unexpected = scenario.dependencies.filter((dependency) => tanStackTablePeerGroup.includes(dependency));
+    if (unexpected.length) {
+      fail(`Scenario ${scenario.name} must not require TanStack Table peer(s): ${unexpected.join(', ')}`);
     }
   }
 }
@@ -692,6 +737,7 @@ async function runConsumerScenarioGroup(group) {
       '--no-audit',
       '--no-fund',
     ], tempRoot, { scenarioName: groupName, printInstallDiagnostics: true });
+    assertForbiddenDependenciesNotInstalled(tempRoot, group);
 
     for (const scenario of group.scenarios) {
       printScenarioContract(scenario, 'build');
@@ -706,6 +752,23 @@ async function runConsumerScenarioGroup(group) {
   } finally {
     if (keep) console.log(`[package-consumer:${groupName}] kept ${tempRoot}`);
     else rmSync(tempRoot, { force: true, recursive: true });
+  }
+}
+
+function assertForbiddenDependenciesNotInstalled(workspace, group) {
+  for (const scenario of group.scenarios) {
+    for (const dependency of scenario.forbiddenDependencies ?? []) {
+      if (group.dependencies.includes(dependency)) continue;
+      const dependencyPath = join(workspace, 'node_modules', dependency);
+      if (existsSync(dependencyPath)) {
+        fail(
+          `Scenario ${scenario.name} must not install forbidden optional dependency ${dependency}; found ${dependencyPath}`,
+        );
+      }
+      console.log(
+        `${packageConsumerLabel(scenario.name)} ok: forbidden optional dependency ${dependency} is not installed`,
+      );
+    }
   }
 }
 
@@ -1168,6 +1231,107 @@ class App {
     textColumn<Person, string>('name', { header: 'Name', accessor: 'name' }),
     textColumn<Person, string>('role', { header: 'Role', accessor: 'role' }),
   ]);
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function tableTanStackConsumerMainTs() {
+  return `import { Component, computed, signal, type WritableSignal } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import {
+  createAngularTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  type ColumnDef,
+  type ColumnSizingState,
+  type RowSelectionState,
+  type SortingState,
+  type Updater,
+  type VisibilityState,
+} from '@tanstack/angular-table';
+import {
+  HellTanStackFlexRenderOutlet,
+  hellTanStackTableModel,
+  type HellTanStackFlexRenderValue,
+} from '${packageName}/table-tanstack';
+
+interface Person {
+  readonly id: string;
+  readonly name: string;
+  readonly active: boolean;
+}
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [HellTanStackFlexRenderOutlet],
+  template: \`
+    @if (firstRender(); as render) {
+      <hell-tanstack-flex-render [value]="render" />
+    }
+  \`,
+})
+class App {
+  protected readonly rows = signal<Person[]>([
+    { id: 'ada', name: 'Ada Lovelace', active: true },
+    { id: 'grace', name: 'Grace Hopper', active: false },
+  ]);
+  protected readonly sorting = signal<SortingState>([]);
+  protected readonly rowSelection = signal<RowSelectionState>({});
+  protected readonly columnVisibility = signal<VisibilityState>({});
+  protected readonly columnSizing = signal<ColumnSizingState>({ name: 180 });
+  protected readonly columns: ColumnDef<Person>[] = [
+    {
+      header: 'People',
+      columns: [
+        {
+          accessorKey: 'name',
+          header: 'Name',
+          cell: (context) => \`Person \${context.getValue<string>()}\`,
+          enableSorting: true,
+          size: 180,
+        },
+        {
+          accessorKey: 'active',
+          header: 'Active',
+          cell: (context) => (context.getValue<boolean>() ? 'Active' : 'Inactive'),
+          enableSorting: false,
+        },
+      ],
+    },
+  ];
+  protected readonly table = createAngularTable<Person>(() => ({
+    data: this.rows(),
+    columns: this.columns,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getRowId: (row) => row.id,
+    enableRowSelection: true,
+    enableColumnResizing: true,
+    state: {
+      sorting: this.sorting(),
+      rowSelection: this.rowSelection(),
+      columnVisibility: this.columnVisibility(),
+      columnSizing: this.columnSizing(),
+    },
+    onSortingChange: (updater) => applyUpdater(this.sorting, updater),
+    onRowSelectionChange: (updater) => applyUpdater(this.rowSelection, updater),
+    onColumnVisibilityChange: (updater) => applyUpdater(this.columnVisibility, updater),
+    onColumnSizingChange: (updater) => applyUpdater(this.columnSizing, updater),
+  }));
+  protected readonly model = hellTanStackTableModel({ table: this.table });
+  protected readonly firstRender = computed<HellTanStackFlexRenderValue | null>(() => {
+    const row = this.model.rows()[0];
+    return row ? this.model.cellsForRow(row)[0]?.render ?? null : null;
+  });
+}
+
+function applyUpdater<T>(target: WritableSignal<T>, updater: Updater<T>): void {
+  target.update((current) =>
+    typeof updater === 'function' ? (updater as (value: T) => T)(current) : updater,
+  );
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
