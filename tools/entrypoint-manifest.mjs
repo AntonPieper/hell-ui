@@ -23,7 +23,7 @@ export const entrypointManifest = {
       '// - @hell-ui/angular/data-table (simple native data table)',
       '// - @hell-ui/angular/table-tanstack (TanStack Table adapter)',
       '// - @hell-ui/angular/table-virtual (TanStack Virtual adapter)',
-      '// - @hell-ui/angular/table-cdk (planned adapter)',
+      '// - @hell-ui/angular/table-cdk (Angular CDK Table skin adapter)',
       '// - @hell-ui/angular/features/code-editor (kept optional CodeMirror entry point),',
       '//   @hell-ui/angular/features/audio-transcript (optional audio transcript provider)',
     ],
@@ -113,7 +113,7 @@ export const entrypointManifest = {
       exports: ['./table-cdk/table-cdk'],
       header: [
         '/**',
-        ' * @experimental Planned Angular CDK table adapter entry point. Implementation lands in HELL-079.',
+        ' * @experimental Angular CDK Table skin adapter entry point.',
         ' */',
       ],
     },

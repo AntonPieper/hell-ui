@@ -330,6 +330,16 @@ const scenarios = [
     stylesCss: tableConsumerStylesCss(),
   },
   {
+    name: 'table-cdk',
+    description: 'CDK Table skin adapter without optional TanStack peer',
+    peerTier: 'table',
+    peerGroup: 'table',
+    dependencies: styledUiWithoutFontAwesomeDeps,
+    forbiddenDependencies: tanStackTablePeerGroup,
+    mainTs: tableCdkConsumerMainTs(),
+    stylesCss: tableConsumerStylesCss(),
+  },
+  {
     name: 'pdf-viewer',
     description: 'split pdf-viewer package with pdfjs and light UI peers',
     peerTier: 'pdf-viewer',
@@ -546,6 +556,7 @@ function assertHeavyPeersAreIsolated(allScenarios) {
     'button',
     'table',
     'data-table',
+    'table-cdk',
     'audio-player',
     'audio-transcript',
   ]);
@@ -1332,6 +1343,95 @@ function applyUpdater<T>(target: WritableSignal<T>, updater: Updater<T>): void {
   target.update((current) =>
     typeof updater === 'function' ? (updater as (value: T) => T)(current) : updater,
   );
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function tableCdkConsumerMainTs() {
+  return `import { Component, computed, signal } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import {
+  hellColumns,
+  textColumn,
+  type HellTableColumnVisibilityState,
+  type HellTableSortDirection,
+  type HellTableSortingState,
+} from '${packageName}/table';
+import { HELL_CDK_TABLE_DIRECTIVES, hellCdkDisplayedColumns } from '${packageName}/table-cdk';
+
+interface Person {
+  readonly id: string;
+  readonly name: string;
+  readonly role: string;
+}
+
+const columns = hellColumns<Person>();
+const tableColumns = columns.define([
+  textColumn<Person, string>('name', { header: 'Name', accessor: 'name', sortable: true, visibility: 'always' }),
+  textColumn<Person, string>('role', { header: 'Role', accessor: 'role', visibility: 'user-toggleable' }),
+]);
+const rows: readonly Person[] = [
+  { id: 'ada', name: 'Ada Lovelace', role: 'Admin' },
+  { id: 'grace', name: 'Grace Hopper', role: 'Editor' },
+];
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [...HELL_CDK_TABLE_DIRECTIVES],
+  template: \`
+    <table cdk-table fixedLayout [dataSource]="pagedRows()">
+      <ng-container cdkColumnDef="name">
+        <th
+          cdk-header-cell
+          *cdkHeaderCellDef
+          scope="col"
+          columnId="name"
+          sortable
+          [sort]="sortFor('name')"
+          (sortToggle)="toggleSort('name')"
+        >
+          <button hellTableSortTrigger type="button">Name</button>
+        </th>
+        <td cdk-cell *cdkCellDef="let row">{{ row.name }}</td>
+      </ng-container>
+
+      <ng-container cdkColumnDef="role">
+        <th cdk-header-cell *cdkHeaderCellDef scope="col" columnId="role">Role</th>
+        <td cdk-cell *cdkCellDef="let row">{{ row.role }}</td>
+      </ng-container>
+
+      <tr cdk-header-row *cdkHeaderRowDef="displayedColumns()"></tr>
+      <tr cdk-row *cdkRowDef="let row; columns: displayedColumns()"></tr>
+    </table>
+  \`,
+})
+class App {
+  protected readonly columnVisibility = signal<HellTableColumnVisibilityState>({});
+  protected readonly sorting = signal<readonly HellTableSortingState[]>([]);
+  protected readonly displayedColumns = computed(() => hellCdkDisplayedColumns(tableColumns, this.columnVisibility()));
+  protected readonly pagedRows = computed(() => sortRows(rows, this.sorting()).slice(0, 2));
+
+  protected sortFor(columnId: string): HellTableSortDirection | null {
+    return this.sorting().find((sort) => sort.columnId === columnId)?.direction ?? null;
+  }
+
+  protected toggleSort(columnId: string): void {
+    const current = this.sortFor(columnId);
+    const direction: HellTableSortDirection | null = current === 'asc' ? 'desc' : current === 'desc' ? null : 'asc';
+    this.sorting.set(direction ? [{ columnId, direction }] : []);
+  }
+}
+
+function sortRows(sourceRows: readonly Person[], sorting: readonly HellTableSortingState[]): readonly Person[] {
+  const activeSort = sorting[0];
+  if (!activeSort) return sourceRows;
+  return [...sourceRows].sort((a, b) => {
+    const result = a.name.localeCompare(b.name);
+    return activeSort.direction === 'desc' ? -result : result;
+  });
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));

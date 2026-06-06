@@ -13,6 +13,6 @@ export * from './lib/public-api-core';
 // - @hell-ui/angular/data-table (simple native data table)
 // - @hell-ui/angular/table-tanstack (TanStack Table adapter)
 // - @hell-ui/angular/table-virtual (TanStack Virtual adapter)
-// - @hell-ui/angular/table-cdk (planned adapter)
+// - @hell-ui/angular/table-cdk (Angular CDK Table skin adapter)
 // - @hell-ui/angular/features/code-editor (kept optional CodeMirror entry point),
 //   @hell-ui/angular/features/audio-transcript (optional audio transcript provider)

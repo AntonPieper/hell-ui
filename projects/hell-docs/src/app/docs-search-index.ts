@@ -747,6 +747,12 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     terms: 'data-table column-visibility components/data-table/examples/column-visibility.example components/data-table hell-column-visibility-panel columnVisibility visibility always user-toggleable initially-hidden external persistence localStorage',
   },
   {
+    title: 'Data Table: CDK Skin',
+    path: '/components/data-table',
+    detail: 'components/data-table/examples/cdk-skin.example.ts',
+    terms: 'data-table cdk-skin components/data-table/examples/cdk-skin.example components/data-table table-cdk HELL_CDK_TABLE_DIRECTIVES hellCdkDisplayedColumns cdk-table cdk-header-cell cdk-cell cdk-row columnVisibility displayedColumns fixed-size virtual scroll TanStack Virtual',
+  },
+  {
     title: 'Table Utilities: Example',
     path: '/components/data-table',
     detail: 'components/data-table/examples/example.example.ts',

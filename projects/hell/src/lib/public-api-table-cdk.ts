@@ -1,4 +1,4 @@
 /**
- * @experimental Planned Angular CDK table adapter entry point. Implementation lands in HELL-079.
+ * @experimental Angular CDK Table skin adapter entry point.
  */
 export * from './table-cdk/table-cdk';

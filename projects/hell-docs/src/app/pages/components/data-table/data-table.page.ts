@@ -1,6 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import '@hell-ui/angular/styles/table';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { DataTableCdkSkinExample } from './examples/cdk-skin.example';
+import dataTableCdkSkinExampleCodeRaw from './examples/cdk-skin.example.ts?raw' with {
+  loader: 'text',
+};
 import { DataTableColumnVisibilityExample } from './examples/column-visibility.example';
 import dataTableColumnVisibilityExampleCodeRaw from './examples/column-visibility.example.ts?raw' with {
   loader: 'text',
@@ -30,6 +34,7 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
     DataTableSimpleRendererExample,
     DataTableColumnVisibilityExample,
     DataTableCustomRenderersExample,
+    DataTableCdkSkinExample,
     DataTableExampleExample,
     DataTableRowEditorExample,
   ],
@@ -43,7 +48,7 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
           selection controls, sorting affordances, and column resizing. They are not a
           batteries-included data grid and do not wrap TanStack Table.
           The simple native renderer lives at <code>@hell-ui/angular/data-table</code>, with
-          optional adapter entrypoints still planned for TanStack, virtual rows, and Angular CDK table skins.
+          optional adapter entrypoints for TanStack Table, TanStack Virtual row parts, and Angular CDK table skins.
         </p>
 
         <p>
@@ -104,6 +109,27 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
 
       <hd-example-tabs class="hd-doc-wide" [code]="dataTableColumnVisibilityExampleCode" flush>
         <app-data-table-column-visibility-example />
+      </hd-example-tabs>
+
+      <div class="hd-prose">
+        <h2>Angular CDK table skin</h2>
+        <p>
+          Import <code>@hell-ui/angular/table-cdk</code> when an Angular CDK table should use the
+          Hell table skin without replacing CDK row definitions. The adapter layers Hell classes,
+          data attributes, active/selected row visuals, sortable header inputs, and row actions onto
+          <code>cdk-table</code>, <code>cdk-header-cell</code>, <code>cdk-cell</code>, and
+          <code>cdk-row</code> hosts, including native <code>&lt;table cdk-table&gt;</code> markup.
+        </p>
+        <p>
+          Keep <code>dataSource</code>, sorting transforms, pagination, and persistence in the app or
+          CDK layer. Derive <code>displayedColumns</code> from Hell's
+          <code>columnVisibility</code> state with <code>hellCdkDisplayedColumns()</code> and pass the
+          result to the CDK header/data row definitions.
+        </p>
+      </div>
+
+      <hd-example-tabs class="hd-doc-wide" [code]="dataTableCdkSkinExampleCode" flush>
+        <app-data-table-cdk-skin-example />
       </hd-example-tabs>
 
       <div class="hd-prose">
@@ -251,6 +277,28 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
           </li>
         </ul>
 
+        <h3>CDK adapter</h3>
+        <ul>
+          <li>
+            <code>HELL_CDK_TABLE_DIRECTIVES</code>: standalone import list for CDK Table plus the
+            Hell skin directives. It skins existing CDK table, header row, data row, header cell,
+            data cell, and footer hosts; it does not create wrapper rows or duplicate
+            <code>cdkHeaderRowDef</code>/<code>cdkRowDef</code> templates.
+          </li>
+          <li>
+            <code>hellCdkDisplayedColumns(columns, columnVisibility)</code>: derives the string array
+            consumed by <code>cdkHeaderRowDef</code> and <code>cdkRowDefColumns</code> from Hell
+            column definitions while the app/CDK layer keeps data source, sorting, and pagination
+            ownership.
+          </li>
+          <li>
+            CDK virtual scrolling is the fixed-size path: wrap the table in
+            <code>cdk-virtual-scroll-viewport</code> with a stable <code>itemSize</code>. Use
+            <code>@hell-ui/angular/table-virtual</code> with TanStack Virtual for dynamic row, detail,
+            or editor heights.
+          </li>
+        </ul>
+
         <h3>Theming</h3>
         <ul>
           <li>
@@ -311,6 +359,7 @@ export class DataTablePage {
   protected readonly dataTableSimpleRendererExampleCode = dataTableSimpleRendererExampleCodeRaw;
   protected readonly dataTableColumnVisibilityExampleCode = dataTableColumnVisibilityExampleCodeRaw;
   protected readonly dataTableCustomRenderersExampleCode = dataTableCustomRenderersExampleCodeRaw;
+  protected readonly dataTableCdkSkinExampleCode = dataTableCdkSkinExampleCodeRaw;
   protected readonly dataTableExampleExampleCode = dataTableExampleExampleCodeRaw;
   protected readonly dataTableRowEditorExampleCode = dataTableRowEditorExampleCodeRaw;
 }

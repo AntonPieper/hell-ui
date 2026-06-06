@@ -36,7 +36,7 @@ Feature peers remain optional at runtime, but npm peer metadata is package-wide:
 
 ### Peer dependency tiers
 
-Package-consumer scenarios assert these peer groups with strict peer installs. CodeMirror and TanStack peers stay optional and are not required by root, button, table, or data-table scenarios. PDF viewer dependencies belong to `@hell-ui/pdf-viewer`, not this package.
+Package-consumer scenarios assert these peer groups with strict peer installs. CodeMirror and TanStack peers stay optional and are not required by root, button, table, data-table, or table-cdk scenarios. PDF viewer dependencies belong to `@hell-ui/pdf-viewer`, not this package.
 
 | Tier | Entry points / scenarios | Peer group asserted |
 | --- | --- | --- |
@@ -44,7 +44,7 @@ Package-consumer scenarios assert these peer groups with strict peer installs. C
 | Primitive | Narrow primitives such as `/button`; aggregate `/primitives`; `button-unstyled`, `button`, `primitives-css` | Core peers. Add `tailwindcss` when importing primitive CSS. Aggregate `/primitives` also asserts optional `@angular/router` and `@ng-icons/font-awesome` because dialog and icon-backed primitives are bundled in the aggregate FESM. |
 | Composite | `/composites` and narrow composite entry points such as `/app-shell` and `/audio-player`; `composites-css`, `app-shell`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Aggregate/icon-backed composites also assert optional `@ng-icons/font-awesome`. |
 | Audio transcript | `/features/audio-transcript`; `audio-transcript` | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled. |
-| Table | `/table`, `/data-table`, planned `/table-virtual`, `/table-cdk`; `table`, `data-table` | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack, or adapter-specific peers for the primitive/simple paths. |
+| Table | `/table`, `/data-table`, `/table-virtual`, `/table-cdk`; `table`, `data-table`, `table-cdk` | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack, or adapter-specific peers for the primitive/simple/CDK skin paths. |
 | TanStack table | `/table-tanstack`; `table-tanstack` | Core peers plus `tailwindcss` and optional `@tanstack/angular-table`. Root, `/table`, and `/data-table` scenarios prove TanStack is not installed unless this adapter is imported. |
 | Code editor | `/features/code-editor`; `code-editor` | Core peers plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight`. |
 | PDF viewer | `@hell-ui/pdf-viewer`; `pdf-viewer` | Separate package; see that package for its own install contract. |
@@ -70,7 +70,7 @@ The stable API report set currently covers `@hell-ui/angular`, `@hell-ui/angular
 | Primitives (`@hell-ui/angular/primitives`, narrow primitive entry points) | Stable | SSR-safe unless a primitive's own docs say otherwise |
 | Composites (`@hell-ui/angular/composites`, narrow composite entry points) | Beta | Browser-first surfaces can use `window`/`document` and global listeners for overlays |
 | Table primitives (`@hell-ui/angular/table`) | Beta | Optional peer; uses `ResizeObserver` for table sizing |
-| Data table and table adapters (`@hell-ui/angular/data-table`, `/table-tanstack`, `/table-virtual`, `/table-cdk`) | Experimental | Simple native data table and TanStack adapter are available; virtual/CDK adapter entrypoints remain placeholders until HELL-078/079 land |
+| Data table and table adapters (`@hell-ui/angular/data-table`, `/table-tanstack`, `/table-virtual`, `/table-cdk`) | Experimental | Simple native data table, TanStack Table adapter, TanStack Virtual adapter, and CDK Table skin adapter are available; keep adapter-specific engines behind their entrypoints |
 | Code editor (`@hell-ui/angular/features/code-editor`) | Experimental | Browser-only CodeMirror runtime: `window`/`document` interactions |
 | PDF viewer (`@hell-ui/pdf-viewer`) | Experimental split package | Browser-only app surface/recipe owned outside `@hell-ui/angular` |
 | Testing harnesses (`@hell-ui/angular/testing`) | Stable/test-only | CDK component harnesses for consumer and library tests |
