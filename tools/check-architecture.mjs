@@ -102,6 +102,9 @@ function main() {
   checkTableSemanticsContract();
   checkTableSortTriggerContract();
   checkTableResizeHandleContract();
+  checkTableLegacyRemovalContract();
+  checkTableAdapterBoundaryContract();
+  checkTableSemanticDefaultGuardContract();
   checkFloatingRegistrationContract();
   checkFloatingAdapterContract();
   checkBrowserGlobalContract();
@@ -2400,6 +2403,254 @@ function checkTableResizeHandleContract() {
     .map((file) => file.slice(root.length + 1));
   if (docsOffenders.length) {
     failures.push(`Docs must use hellTableResizeHandle instead of legacy resizer APIs: ${docsOffenders.join(', ')}`);
+  }
+}
+
+function checkTableLegacyRemovalContract() {
+  const legacyEntrypointSpecifiers = [
+    '@hell-ui/angular/features/data-table',
+    '@hell-ui/angular/features/table-utilities',
+  ];
+  const legacyStyleSpecifiers = [
+    '@hell-ui/angular/styles/features/data-table',
+    '@hell-ui/angular/styles/features/table-utilities',
+  ];
+  const legacyEntrypointFiles = [
+    'projects/hell/features/data-table/ng-package.json',
+    'projects/hell/features/table-utilities/ng-package.json',
+    'projects/hell/src/lib/public-api-feature-data-table.ts',
+    'projects/hell/src/lib/public-api-feature-table-utilities.ts',
+  ];
+  const legacyStyleFiles = [
+    'projects/hell/src/lib/styles/features/data-table.css',
+    'projects/hell/src/lib/styles/features/table-utilities.css',
+    'projects/hell/src/lib/styles/components/data-table.css',
+    'projects/hell/src/lib/styles/components/table-utilities.css',
+  ];
+
+  const manifestSpecifiers = new Set(entrypointPublicApiFiles().map((entrypoint) => entrypoint.specifier));
+  const packageJson = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
+  const tsconfig = parseJsonWithComments(readFile(join(root, 'tsconfig.json')));
+  const tsconfigPaths = tsconfig.compilerOptions?.paths ?? {};
+  const exportsMap = packageJson.exports ?? {};
+
+  for (const specifier of legacyEntrypointSpecifiers) {
+    if (manifestSpecifiers.has(specifier)) {
+      failures.push(`Legacy table entry point must be absent from the manifest: ${specifier}`);
+    }
+    if (tsconfigPaths[specifier]) {
+      failures.push(`Legacy table entry point must be absent from tsconfig paths: ${specifier}`);
+    }
+  }
+
+  for (const exportPath of ['./features/data-table', './features/table-utilities']) {
+    if (exportsMap[exportPath]) {
+      failures.push(`Legacy table package export must be removed: ${exportPath}`);
+    }
+  }
+
+  for (const exportPath of ['./styles/features/data-table', './styles/features/table-utilities']) {
+    if (exportsMap[exportPath]) {
+      failures.push(`Legacy table CSS package export must be removed: ${exportPath}`);
+    }
+  }
+
+  for (const rel of [...legacyEntrypointFiles, ...legacyStyleFiles]) {
+    if (existsSync(join(root, rel))) failures.push(`Legacy table alias file must be removed: ${rel}`);
+  }
+
+  const importRoots = [
+    'projects/hell/src',
+    'projects/hell-docs/src/app',
+  ];
+  const legacyModuleSpecifiers = [...legacyEntrypointSpecifiers, ...legacyStyleSpecifiers];
+  const importFiles = importRoots
+    .flatMap((rel) => walk(join(root, rel)))
+    .filter((file) => file.endsWith('.ts'));
+  for (const file of importFiles) {
+    for (const hit of moduleSpecifierReferences(file)) {
+      const matched = legacyModuleSpecifiers.find(
+        (specifier) => hit.specifier === specifier || hit.specifier.startsWith(`${specifier}/`),
+      );
+      if (!matched) continue;
+      failures.push(
+        `Legacy table entry/style import ${relPath(file)}:${hit.line} references ${hit.specifier}; use @hell-ui/angular/table, @hell-ui/angular/data-table, or styles/table.`,
+      );
+    }
+  }
+
+  const productionFiles = walk(join(root, 'projects/hell/src'))
+    .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'));
+  const legacySymbols = [
+    { label: 'HELL_TABLE_DIRECTIVES', pattern: /\bHELL_TABLE_DIRECTIVES\b/ },
+    { label: 'HELL_TABLE_UTILITY_DIRECTIVES', pattern: /\bHELL_TABLE_UTILITY_DIRECTIVES\b/ },
+    { label: 'selectionSemantics', pattern: /\bselectionSemantics\b/ },
+    { label: 'hellTableSortButton', pattern: /\bhellTableSortButton\b|\bHellTableSortButton\b|\bhell-table-sort-button\b/ },
+    { label: 'hellTableColumnResizer', pattern: /\bhellTableColumnResizer\b|\bHellTableColumnResizer\b|\bhell-table-column-resizer\b|\bHellTableColumnResizeRuntime\b|\bdata-table-column-resize\b/ },
+  ];
+  for (const file of productionFiles) {
+    const source = readFile(file);
+    for (const symbol of legacySymbols) {
+      if (symbol.pattern.test(source)) {
+        failures.push(`Legacy table API ${symbol.label} must not appear in ${relPath(file)}`);
+      }
+    }
+  }
+
+  const tableSource = readFile(join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'));
+  const rowModule = decoratedClassModules(tableSource).find((module) => module.className === 'HellTableRow');
+  if (!rowModule) {
+    failures.push('Legacy table removal contract could not inspect HellTableRow');
+  } else if (/\breadonly\s+interactive\b|\binteractive\s*=\s*input\b|\bHellTableRow\.interactive\b/.test(rowModule.moduleSource)) {
+    failures.push('HellTableRow.interactive legacy input must be removed from table primitives');
+  }
+
+  const styleEntrypointSources = [
+    'projects/hell/src/lib/styles/hell.css',
+    'projects/hell/src/lib/styles/table.css',
+  ];
+  for (const rel of styleEntrypointSources) {
+    const source = readFile(join(root, rel));
+    if (/styles\/features\/data-table|\.\/features\/data-table\.css|features\/data-table\.css/.test(source)) {
+      failures.push(`Legacy styles/features/data-table reference must be removed from ${rel}`);
+    }
+  }
+}
+
+function checkTableAdapterBoundaryContract() {
+  const coreTableBoundaryDirs = [
+    'projects/hell/src/lib/features/table-utilities',
+    'projects/hell/src/lib/table',
+    'projects/hell/src/lib/data-table',
+  ];
+  const coreTableBoundaryFiles = [
+    ...coreTableBoundaryDirs.flatMap((rel) => walk(join(root, rel))),
+    join(root, 'projects/hell/src/lib/public-api-table.ts'),
+    join(root, 'projects/hell/src/lib/public-api-data-table.ts'),
+  ]
+    .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'));
+  const adapterDirs = [
+    'projects/hell/src/lib/table-tanstack',
+    'projects/hell/src/lib/table-virtual',
+    'projects/hell/src/lib/table-cdk',
+  ];
+  const adapterFiles = adapterDirs
+    .flatMap((rel) => walk(join(root, rel)))
+    .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'));
+  const policies = [
+    {
+      label: 'TanStack Table',
+      matches: (specifier) => specifier.startsWith('@tanstack/angular-table') || specifier.startsWith('@tanstack/table'),
+      allowedDir: 'projects/hell/src/lib/table-tanstack',
+    },
+    {
+      label: 'TanStack Virtual',
+      matches: (specifier) => specifier.startsWith('@tanstack/virtual'),
+      allowedDir: 'projects/hell/src/lib/table-virtual',
+    },
+    {
+      label: 'Angular CDK table adapter',
+      matches: (specifier) => specifier.startsWith('@angular/cdk/'),
+      allowedDir: 'projects/hell/src/lib/table-cdk',
+    },
+  ];
+  const adapterSourceDirs = new Set(adapterDirs);
+
+  for (const file of [...coreTableBoundaryFiles, ...adapterFiles]) {
+    const rel = relPath(file);
+    const hits = moduleSpecifierReferences(file);
+    for (const hit of hits) {
+      for (const policy of policies) {
+        if (!policy.matches(hit.specifier)) continue;
+        if (rel === policy.allowedDir || rel.startsWith(`${policy.allowedDir}/`)) continue;
+        failures.push(
+          `Table adapter boundary ${rel}:${hit.line} imports ${hit.specifier}; ${policy.label} imports must stay inside ${policy.allowedDir}.`,
+        );
+      }
+
+      const target = resolveRelativeModuleFile(file, hit.specifier);
+      if (!target) continue;
+      const targetRel = relPath(target);
+      const adapterDir = [...adapterSourceDirs].find(
+        (dir) => targetRel === dir || targetRel.startsWith(`${dir}/`),
+      );
+      if (adapterDir && !rel.startsWith(`${adapterDir}/`)) {
+        failures.push(
+          `Table adapter boundary ${rel}:${hit.line} imports ${hit.specifier} -> ${targetRel}; core table and simple data-table code must not depend on adapter entrypoints.`,
+        );
+      }
+    }
+  }
+}
+
+function checkTableSemanticDefaultGuardContract() {
+  const tableSource = readFile(join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'));
+  const dataTableSource = readFile(join(root, 'projects/hell/src/lib/data-table/data-table.ts'));
+  const modules = new Map(decoratedClassModules(tableSource).map((module) => [module.className, module]));
+  const tableModule = modules.get('HellTable');
+  const passiveRoleModules = [
+    ['HellTableHead', 'rowgroup'],
+    ['HellTableBody', 'rowgroup'],
+    ['HellTableRow', 'row'],
+    ['HellTableHeaderCell', 'columnheader'],
+    ['HellTableCell', 'gridcell'],
+  ];
+
+  if (!tableModule) {
+    failures.push('Table semantic default guard could not inspect HellTable');
+  } else {
+    for (const required of [
+      "return this.isGridMode() ? 'grid' : null;",
+      'return this.isGridMode() ? 0 : null;',
+      'if (!this.isGridMode()) return null;',
+      "if (this.semantics() !== 'grid') return;",
+    ]) {
+      if (!tableModule.moduleSource.includes(required)) {
+        failures.push(`HellTable semantic defaults must gate grid roles/focus behind isGridMode(): missing ${required}`);
+      }
+    }
+  }
+
+  if (/readonly\s+semantics\s*=\s*input<HellTableSemantics>\('grid'\)/.test(tableSource)) {
+    failures.push('HellTable semantics must default to table, not grid');
+  }
+  if (/readonly\s+interactionMode\s*=\s*input<HellTableGridInteractionMode \| null>\('[^']+'\)/.test(tableSource)) {
+    failures.push('HellTable interactionMode must default to null so grid behavior is opt-in');
+  }
+
+  for (const [className, role] of passiveRoleModules) {
+    const module = modules.get(className);
+    if (!module) {
+      failures.push(`Table semantic default guard could not inspect ${className}`);
+      continue;
+    }
+    if (!module.moduleSource.includes(`return this.table?.isGridMode() ? '${role}' : null;`)) {
+      failures.push(`${className} must gate grid role ${role} behind opt-in grid semantics`);
+    }
+  }
+
+  const rowModule = modules.get('HellTableRow');
+  if (rowModule) {
+    for (const forbidden of [
+      { label: 'tabindex', pattern: /\[attr\.tabindex\]|tabindex\s*:/ },
+      { label: 'row click handler', pattern: /\(click\)/ },
+      { label: 'row keydown handler', pattern: /\(keydown/ },
+      { label: 'aria-activedescendant', pattern: /aria-activedescendant/ },
+    ]) {
+      if (forbidden.pattern.test(rowModule.moduleSource)) {
+        failures.push(`HellTableRow must not add row roving-focus behavior in table mode: ${forbidden.label}`);
+      }
+    }
+  }
+
+  if (/readonly\s+semantics\s*=\s*input<HellTableSemantics>\('grid'\)/.test(dataTableSource)) {
+    failures.push('HellDataTable semantics must default to table, not grid');
+  }
+  if (/readonly\s+interactionMode\s*=\s*input<HellTableGridInteractionMode \| null>\('[^']+'\)/.test(dataTableSource)) {
+    failures.push('HellDataTable interactionMode must default to null so grid behavior is opt-in');
+  }
+  if (/role=["']grid|\[attr\.tabindex\]|aria-activedescendant/.test(dataTableSource)) {
+    failures.push('HellDataTable template must not add grid roles or focus state directly; delegate only through explicit HellTable grid mode inputs');
   }
 }
 
