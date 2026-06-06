@@ -1355,7 +1355,7 @@ function checkPackageDependencyContract() {
     '@codemirror/view',
     '@lezer/highlight',
   ]);
-  const adapterOnlyPeers = new Set(['@tanstack/angular-table']);
+  const adapterOnlyPeers = new Set(['@tanstack/angular-table', '@tanstack/virtual-core']);
   const styleOnlyPeers = new Set(['tailwindcss']);
 
   for (const dependency of importedPackages) {
@@ -1469,6 +1469,17 @@ function checkPackageDependencyContract() {
   if (tanStackImportOffenders.length) {
     failures.push(
       `Package dependency contract must keep @tanstack/angular-table inside @hell-ui/angular/table-tanstack: ${tanStackImportOffenders.join(', ')}`,
+    );
+  }
+
+  const tanStackVirtualImportOffenders = sourceFiles
+    .filter((file) => !relPath(file).includes('/table-virtual/'))
+    .filter((file) => relPath(file) !== 'projects/hell/src/lib/public-api-table-virtual.ts')
+    .filter((file) => readFile(file).includes('@tanstack/virtual-core'))
+    .map(relPath);
+  if (tanStackVirtualImportOffenders.length) {
+    failures.push(
+      `Package dependency contract must keep @tanstack/virtual-core inside @hell-ui/angular/table-virtual: ${tanStackVirtualImportOffenders.join(', ')}`,
     );
   }
 

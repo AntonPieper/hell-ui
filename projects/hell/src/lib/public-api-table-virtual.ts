@@ -1,4 +1,4 @@
 /**
- * @experimental Planned table virtualization adapter entry point. Implementation lands in HELL-078.
+ * @experimental TanStack Virtual adapter entry point for dynamic Hell row parts.
  */
 export * from './table-virtual/table-virtual';
