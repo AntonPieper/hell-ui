@@ -99,6 +99,7 @@ function main() {
   checkNativeButtonSelectorContract();
   checkInteractiveTriggerSelectorContract();
   checkTableUtilityContract();
+  checkTableSemanticsContract();
   checkTableSortTriggerContract();
   checkTableResizeHandleContract();
   checkFloatingRegistrationContract();
@@ -2173,6 +2174,105 @@ function checkTableUtilityContract() {
     .map((file) => file.slice(root.length + 1));
   if (offenders.length) {
     failures.push(`Docs must not reference legacy table feature entrypoints: ${offenders.join(', ')}`);
+  }
+}
+
+function checkTableSemanticsContract() {
+  const tableSourcePath = join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts');
+  const tableSource = readFile(tableSourcePath);
+  const dataTableSourcePath = join(root, 'projects/hell/src/lib/data-table/data-table.ts');
+  const dataTableSource = readFile(dataTableSourcePath);
+  const tableModule = decoratedClassModules(tableSource).find((module) => module.className === 'HellTable');
+  const rowModule = decoratedClassModules(tableSource).find((module) => module.className === 'HellTableRow');
+  const headerCellModule = decoratedClassModules(tableSource).find(
+    (module) => module.className === 'HellTableHeaderCell',
+  );
+  const cellModule = decoratedClassModules(tableSource).find((module) => module.className === 'HellTableCell');
+
+  for (const required of [
+    "export type HellTableSemantics = 'table' | 'grid'",
+    "export type HellTableGridInteractionMode = 'row-selection' | 'cell-navigation' | 'editing'",
+    "readonly semantics = input<HellTableSemantics>('table')",
+    'readonly interactionMode = input<HellTableGridInteractionMode | null>(null)',
+    'HellTable semantics="grid" requires interactionMode',
+    "this.semantics() === 'grid' && hellTableGridInteractionModeValid(this.interactionMode())",
+  ]) {
+    if (!tableSource.includes(required)) {
+      failures.push(`Table semantics contract is missing ${required}`);
+    }
+  }
+
+  if (!tableModule) {
+    failures.push('Table semantics contract must be owned by HellTable');
+  } else {
+    for (const required of [
+      "[attr.role]': 'role()",
+      "[attr.tabindex]': 'gridTabIndex()",
+      "[attr.aria-rowcount]': 'gridRowCount()",
+      "[attr.aria-colcount]': 'gridColCount()",
+      "[attr.aria-activedescendant]': 'gridActiveDescendant()",
+      "(keydown)': 'onGridKeydown($event)",
+      "return this.isGridMode() ? 'grid' : null",
+      'if (!this.isGridMode()) return null',
+    ]) {
+      if (!tableModule.moduleSource.includes(required)) {
+        failures.push(`HellTable grid adapter contract is missing ${required}`);
+      }
+    }
+  }
+
+  for (const [label, module] of [
+    ['HellTableRow', rowModule],
+    ['HellTableHeaderCell', headerCellModule],
+    ['HellTableCell', cellModule],
+  ]) {
+    if (!module) {
+      failures.push(`Table semantics contract must include ${label}`);
+      continue;
+    }
+    if (module.moduleSource.includes('[attr.tabindex]')) {
+      failures.push(`${label} must not add roving tabindex; grid mode keeps one tab stop on HellTable`);
+    }
+    if (module.moduleSource.includes('aria-activedescendant')) {
+      failures.push(`${label} must not own aria-activedescendant; the grid root owns active descendant`);
+    }
+    if (!module.moduleSource.includes('return this.table?.isGridMode() ?')) {
+      failures.push(`${label} grid roles must be gated by the opt-in grid adapter`);
+    }
+  }
+
+  for (const required of [
+    "readonly semantics = input<HellTableSemantics>('table')",
+    'readonly interactionMode = input<HellTableGridInteractionMode | null>(null)',
+    '[semantics]="semantics()"',
+    '[interactionMode]="interactionMode()"',
+    '[rowCount]="gridRowCount()"',
+    '[colCount]="gridColCount()"',
+    '[rowIndex]="bodyGridRowIndex(rowPartIndex)"',
+    '[colIndex]="columnIndex + 1"',
+  ]) {
+    if (!dataTableSource.includes(required)) {
+      failures.push(`HellDataTable grid semantics contract is missing ${required}`);
+    }
+  }
+
+  for (const [specPath, required] of [
+    ['projects/hell/src/lib/table/table.spec.ts', 'uses modern selectors on native table markup without adding redundant ARIA roles'],
+    ['projects/hell/src/lib/table/table.spec.ts', "native-root').getAttribute('role')).toBeNull()"],
+    ['projects/hell/src/lib/table/table.spec.ts', "native-cell').getAttribute('role')).toBeNull()"],
+    ['projects/hell/src/lib/table/table.spec.ts', "native-root').hasAttribute('tabindex')).toBe(false)"],
+    ['projects/hell/src/lib/table/table.spec.ts', "native-root').hasAttribute('aria-activedescendant')).toBe(false)"],
+    ['projects/hell/src/lib/table/table.spec.ts', 'enables explicit grid semantics only with an interaction mode'],
+    ['projects/hell/src/lib/table/table.spec.ts', 'removes generated grid roles and focus state when semantics switch back to table'],
+    ['projects/hell/src/lib/table/table.spec.ts', 'rejects grid semantics without an explicit interaction mode'],
+    ['projects/hell/src/lib/data-table/data-table.spec.ts', "querySelector('table')?.hasAttribute('tabindex')).toBe(false)"],
+    ['projects/hell/src/lib/data-table/data-table.spec.ts', "querySelector('table')?.hasAttribute('aria-activedescendant')).toBe(false)"],
+    ['projects/hell/src/lib/data-table/data-table.spec.ts', 'renders explicit grid semantics with one table tab stop and indexed cells'],
+    ['projects/hell/src/lib/data-table/data-table.spec.ts', 'requires an interaction mode before enabling data-table grid semantics'],
+  ]) {
+    if (!readFile(join(root, specPath)).includes(required)) {
+      failures.push(`Table semantics contract test is missing: ${specPath} ${required}`);
+    }
   }
 }
 

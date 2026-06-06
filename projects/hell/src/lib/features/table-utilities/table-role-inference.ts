@@ -1,4 +1,11 @@
-export type HellTableInferredRole = 'table' | 'rowgroup' | 'row' | 'columnheader' | 'cell';
+export type HellTableInferredRole =
+  | 'table'
+  | 'grid'
+  | 'rowgroup'
+  | 'row'
+  | 'columnheader'
+  | 'cell'
+  | 'gridcell';
 
 type HellTableRoleHost = {
   readonly tagName?: string;
@@ -13,21 +20,23 @@ export function hellHostElementName(host: unknown): string | null {
   return typeof name === 'string' ? name.toUpperCase() : null;
 }
 
-function hellHostHasExplicitRole(host: unknown): boolean {
-  if (host == null || typeof host !== 'object') return false;
+export function hellHostExplicitRole(host: unknown): string | null {
+  if (host == null || typeof host !== 'object') return null;
   const getAttribute = (host as HellTableRoleHost).getAttribute;
-  if (typeof getAttribute !== 'function') return false;
-  return getAttribute.call(host, 'role') !== null;
+  if (typeof getAttribute !== 'function') return null;
+  const role = getAttribute.call(host, 'role');
+  return typeof role === 'string' && role.trim().length ? role : null;
 }
 
 export function hellTableInferredRoleForHost(
   host: unknown,
   nativeElementNames: readonly string[],
   inferredRole: HellTableInferredRole,
+  explicitRole: string | null = hellHostExplicitRole(host),
 ): HellTableInferredRole | null {
   const elementName = hellHostElementName(host);
   if (elementName === null) return null;
   if (nativeElementNames.includes(elementName)) return null;
-  if (hellHostHasExplicitRole(host)) return null;
+  if (explicitRole !== null) return null;
   return inferredRole;
 }

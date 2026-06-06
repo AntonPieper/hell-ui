@@ -29,6 +29,8 @@ import {
   HellTableRowRadio,
   HellTableSelectionCell,
   HellTableSortTrigger,
+  type HellTableGridInteractionMode,
+  type HellTableSemantics,
 } from '../features/table-utilities/table-utilities';
 import {
   hellTableColumnValue,
@@ -197,11 +199,18 @@ export class HellDataTableBulkActions {}
     </div>
 
     <div data-slot="scroller">
-      <table hellTable [unstyled]="unstyled()">
+      <table
+        hellTable
+        [unstyled]="unstyled()"
+        [semantics]="semantics()"
+        [interactionMode]="interactionMode()"
+        [rowCount]="gridRowCount()"
+        [colCount]="gridColCount()"
+      >
         <thead hellTableHeader [unstyled]="unstyled()">
-          @for (headerGroup of headerGroups(); track headerGroup.id) {
-            <tr hellTableRow [unstyled]="unstyled()">
-              @for (header of headerGroup.headers; track header.id) {
+          @for (headerGroup of headerGroups(); track headerGroup.id; let headerRowIndex = $index) {
+            <tr hellTableRow [unstyled]="unstyled()" [rowIndex]="headerRowIndex + 1">
+              @for (header of headerGroup.headers; track header.id; let headerColIndex = $index) {
                 @if (isSelectionColumn(header.column)) {
                   <th
                     hellTableHeaderCell
@@ -211,6 +220,7 @@ export class HellDataTableBulkActions {}
                     [attr.colspan]="header.colSpan ?? null"
                     [attr.rowspan]="header.rowSpan ?? null"
                     [columnId]="header.columnId ?? null"
+                    [colIndex]="headerColIndex + 1"
                   >
                     @if (selectionSelectAllEnabled(header.column)) {
                       <input
@@ -255,6 +265,7 @@ export class HellDataTableBulkActions {}
                     [attr.colspan]="header.colSpan ?? null"
                     [attr.rowspan]="header.rowSpan ?? null"
                     [columnId]="header.columnId ?? null"
+                    [colIndex]="headerColIndex + 1"
                     [sortable]="isSortable(header.column)"
                     [sort]="sortForHeader(header)"
                     (sortToggle)="toggleSort(header.column)"
@@ -297,21 +308,23 @@ export class HellDataTableBulkActions {}
         </thead>
 
         <tbody hellTableBody [unstyled]="unstyled()">
-          @for (part of rowParts(); track part.key) {
+          @for (part of rowParts(); track part.key; let rowPartIndex = $index) {
             @if (part.kind === 'row') {
               <tr
                 hellTableRow
                 [unstyled]="unstyled()"
+                [rowIndex]="bodyGridRowIndex(rowPartIndex)"
                 [active]="commands.isActive(part.row)"
                 [selected]="isDataRowSelected(part.row)"
                 [attr.data-row-key]="part.row.key"
               >
-                @for (column of visibleColumns(); track column.id) {
+                @for (column of visibleColumns(); track column.id; let columnIndex = $index) {
                   @if (isSelectionColumn(column)) {
                     <td
                       hellTableCell
                       hellTableSelectionCell
                       [unstyled]="unstyled()"
+                      [colIndex]="columnIndex + 1"
                       [attr.data-column-id]="column.id"
                     >
                       @if (selectionMode(column) === 'radio') {
@@ -338,7 +351,12 @@ export class HellDataTableBulkActions {}
                       }
                     </td>
                   } @else {
-                    <td hellTableCell [unstyled]="unstyled()" [attr.data-column-id]="column.id">
+                    <td
+                      hellTableCell
+                      [unstyled]="unstyled()"
+                      [colIndex]="columnIndex + 1"
+                      [attr.data-column-id]="column.id"
+                    >
                       @let view = cellView(part.row, column);
                       @if (view.kind === 'template') {
                         <ng-container
@@ -362,11 +380,17 @@ export class HellDataTableBulkActions {}
                 <tr
                   hellTableRow
                   [unstyled]="unstyled()"
+                  [rowIndex]="bodyGridRowIndex(rowPartIndex)"
                   data-row-editor
                   [attr.data-row-key]="part.row.key"
                   [attr.data-row-part-key]="part.key"
                 >
-                  <td hellTableCell [unstyled]="unstyled()" [colSpan]="visibleColumnCount()">
+                  <td
+                    hellTableCell
+                    [unstyled]="unstyled()"
+                    [colIndex]="1"
+                    [colSpan]="visibleColumnCount()"
+                  >
                     @if (editorView.kind === 'template') {
                       <ng-container
                         [ngTemplateOutlet]="editorView.template"
@@ -384,10 +408,16 @@ export class HellDataTableBulkActions {}
                 </tr>
               }
             } @else if (part.kind === 'loader') {
-              <tr hellTableRow [unstyled]="unstyled()" data-status="loading">
+              <tr
+                hellTableRow
+                [unstyled]="unstyled()"
+                [rowIndex]="bodyGridRowIndex(rowPartIndex)"
+                data-status="loading"
+              >
                 <td
                   hellTableCell
                   [unstyled]="unstyled()"
+                  [colIndex]="1"
                   align="center"
                   space="empty"
                   [colSpan]="visibleColumnCount()"
@@ -396,10 +426,16 @@ export class HellDataTableBulkActions {}
                 </td>
               </tr>
             } @else if (part.kind === 'error') {
-              <tr hellTableRow [unstyled]="unstyled()" data-status="error">
+              <tr
+                hellTableRow
+                [unstyled]="unstyled()"
+                [rowIndex]="bodyGridRowIndex(rowPartIndex)"
+                data-status="error"
+              >
                 <td
                   hellTableCell
                   [unstyled]="unstyled()"
+                  [colIndex]="1"
                   align="center"
                   space="empty"
                   [colSpan]="visibleColumnCount()"
@@ -408,10 +444,16 @@ export class HellDataTableBulkActions {}
                 </td>
               </tr>
             } @else {
-              <tr hellTableRow [unstyled]="unstyled()" data-status="empty">
+              <tr
+                hellTableRow
+                [unstyled]="unstyled()"
+                [rowIndex]="bodyGridRowIndex(rowPartIndex)"
+                data-status="empty"
+              >
                 <td
                   hellTableCell
                   [unstyled]="unstyled()"
+                  [colIndex]="1"
                   align="center"
                   space="empty"
                   [colSpan]="visibleColumnCount()"
@@ -447,6 +489,12 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
 
   /** Draft lifecycle controller used by active row-editor templates. */
   readonly rowDraftController = input<HellRowDraftController<TData> | null>(null);
+
+  /** Semantic mode. Native table semantics stay the default; grid requires an explicit interaction mode. */
+  readonly semantics = input<HellTableSemantics>('table');
+
+  /** Explicit keyboard interaction mode required when `semantics="grid"`. */
+  readonly interactionMode = input<HellTableGridInteractionMode | null>(null);
 
   /** Current sorting state. Use `[(sorting)]` for controlled sorting. */
   readonly sorting = input<readonly HellTableSortingState[]>([]);
@@ -578,6 +626,8 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
   protected readonly selectedRowCount = computed(
     () => Object.values(this.rowSelection()).filter(Boolean).length,
   );
+  protected readonly gridRowCount = computed(() => this.headerGroups().length + this.rowParts().length);
+  protected readonly gridColCount = computed(() => this.visibleColumnCount());
 
   constructor() {
     super();
@@ -594,6 +644,10 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
     effect(() => {
       this.draftController().cleanupRows(this.tableRows());
     });
+  }
+
+  protected bodyGridRowIndex(rowPartIndex: number): number {
+    return this.headerGroups().length + rowPartIndex + 1;
   }
 
   protected loadingText(): string {
@@ -954,3 +1008,5 @@ export type {
   HellVirtualRowPartKey,
   HellVirtualRowPartMatcher,
 } from '../table/table';
+
+export type { HellTableGridInteractionMode, HellTableSemantics } from '../features/table-utilities/table-utilities';

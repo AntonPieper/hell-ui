@@ -43,6 +43,38 @@ class MinimalDataTableHost {
 
 @Component({
   imports: [HellDataTable],
+  template: `
+    <hell-data-table
+      [rows]="rows"
+      [columns]="columns"
+      rowKey="id"
+      semantics="grid"
+      interactionMode="cell-navigation"
+    />
+  `,
+})
+class GridDataTableHost {
+  readonly rows: readonly Person[] = [
+    { id: 'ada', name: 'Ada', active: true },
+    { id: 'grace', name: 'Grace', active: false },
+  ];
+  readonly columns = people.define([
+    textColumn<Person, string>('name', { header: 'Name', accessor: 'name' }),
+    booleanColumn<Person, boolean>('active', { header: 'Active', accessor: 'active' }),
+  ]);
+}
+
+@Component({
+  imports: [HellDataTable],
+  template: `<hell-data-table [rows]="rows" [columns]="columns" rowKey="id" semantics="grid" />`,
+})
+class InvalidGridDataTableHost {
+  readonly rows: readonly Person[] = [{ id: 'ada', name: 'Ada', active: true }];
+  readonly columns = people.define([textColumn<Person, string>('name', { accessor: 'name' })]);
+}
+
+@Component({
+  imports: [HellDataTable],
   template: `<hell-data-table [rows]="rows" [columns]="columns" rowKey="id" />`,
 })
 class SignalRowsDataTableHost {
@@ -406,6 +438,8 @@ describe('HellDataTable simple renderer', () => {
     await TestBed.configureTestingModule({
       imports: [
         MinimalDataTableHost,
+        GridDataTableHost,
+        InvalidGridDataTableHost,
         SignalRowsDataTableHost,
         StatusDataTableHost,
         SortableDataTableHost,
@@ -426,6 +460,8 @@ describe('HellDataTable simple renderer', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.querySelector('table')?.getAttribute('role')).toBeNull();
+    expect(root.querySelector('table')?.hasAttribute('tabindex')).toBe(false);
+    expect(root.querySelector('table')?.hasAttribute('aria-activedescendant')).toBe(false);
     expect(root.querySelector('thead')?.getAttribute('role')).toBeNull();
     expect(root.querySelector('tbody')?.getAttribute('role')).toBeNull();
     expect(root.querySelector('tr')?.getAttribute('role')).toBeNull();
@@ -439,6 +475,54 @@ describe('HellDataTable simple renderer', () => {
       ),
     ).toEqual(['Ada true', 'Grace false']);
     expect(root.querySelector('tbody tr')?.getAttribute('data-row-key')).toBe('ada');
+  });
+
+  it('renders explicit grid semantics with one table tab stop and indexed cells', () => {
+    const fixture = TestBed.createComponent(GridDataTableHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const table = root.querySelector('table');
+    if (!(table instanceof HTMLTableElement)) throw new Error('Expected table.');
+    const headerCells = [...root.querySelectorAll('thead th')];
+    const dataCells = [...root.querySelectorAll('tbody td')];
+
+    expect(table.getAttribute('role')).toBe('grid');
+    expect(table.getAttribute('tabindex')).toBe('0');
+    expect(table.getAttribute('aria-rowcount')).toBe('3');
+    expect(table.getAttribute('aria-colcount')).toBe('2');
+    expect(root.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
+    expect([...root.querySelectorAll('button[tabindex="-1"]')].map((button) => button.textContent?.trim())).toEqual([
+      'Name',
+      'Active',
+    ]);
+    expect(root.querySelector('thead tr')?.getAttribute('aria-rowindex')).toBe('1');
+    expect(root.querySelector('tbody tr')?.getAttribute('aria-rowindex')).toBe('2');
+    expect(headerCells[0]?.getAttribute('role')).toBe('columnheader');
+    expect(headerCells[1]?.getAttribute('aria-colindex')).toBe('2');
+    expect(dataCells[0]?.getAttribute('role')).toBe('gridcell');
+    expect(dataCells[1]?.getAttribute('aria-colindex')).toBe('2');
+    expect(headerCells[0]?.id).toBeTruthy();
+    expect(headerCells[1]?.id).toBeTruthy();
+    expect(table.getAttribute('aria-activedescendant')).toBe(headerCells[0]?.id);
+
+    const right = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true });
+    table.dispatchEvent(right);
+    fixture.detectChanges();
+
+    expect(right.defaultPrevented).toBe(true);
+    expect(table.getAttribute('aria-activedescendant')).toBe(headerCells[1]?.id);
+
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+    table.dispatchEvent(enter);
+    fixture.detectChanges();
+
+    expect(enter.defaultPrevented).toBe(true);
+    expect(headerCells[1]?.getAttribute('aria-sort')).toBe('ascending');
+  });
+
+  it('requires an interaction mode before enabling data-table grid semantics', () => {
+    const fixture = TestBed.createComponent(InvalidGridDataTableHost);
+    expect(() => fixture.detectChanges()).toThrow(/semantics="grid" requires interactionMode/);
   });
 
   it('updates when rows are supplied as a signal', () => {

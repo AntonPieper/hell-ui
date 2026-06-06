@@ -1,5 +1,5 @@
 import { CdkTableModule } from '@angular/cdk/table';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { hellTableInferredRoleForHost } from '../features/table-utilities/table-role-inference';
@@ -65,6 +65,77 @@ class ExplicitRoleTablePrimitiveHost {}
 @Component({
   imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
   template: `
+    <table
+      id="grid-root"
+      hellTable
+      semantics="grid"
+      interactionMode="cell-navigation"
+      [rowCount]="2"
+      [colCount]="2"
+    >
+      <thead hellTableHead>
+        <tr id="grid-header-row" hellTableRow [rowIndex]="1">
+          <th id="grid-name" hellTableHeaderCell [colIndex]="1">Name</th>
+          <th id="grid-status" hellTableHeaderCell [colIndex]="2">Status</th>
+        </tr>
+      </thead>
+      <tbody hellTableBody>
+        <tr id="grid-row" hellTableRow [rowIndex]="2">
+          <td id="grid-name-cell" hellTableCell [colIndex]="1">
+            Ada
+            <button id="grid-action" hellTableRowAction type="button">Edit</button>
+          </td>
+          <td id="grid-status-cell" hellTableCell [colIndex]="2">Active</td>
+        </tr>
+      </tbody>
+    </table>
+  `,
+})
+class GridTablePrimitiveHost {}
+
+@Component({
+  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  template: `
+    <table
+      id="dynamic-grid-root"
+      hellTable
+      [semantics]="semantics()"
+      interactionMode="cell-navigation"
+      [rowCount]="2"
+      [colCount]="1"
+    >
+      <thead hellTableHead>
+        <tr id="dynamic-grid-header-row" hellTableRow [rowIndex]="1">
+          <th id="dynamic-grid-name" hellTableHeaderCell [colIndex]="1">Name</th>
+        </tr>
+      </thead>
+      <tbody hellTableBody>
+        <tr id="dynamic-grid-row" hellTableRow [rowIndex]="2">
+          <td id="dynamic-grid-cell" hellTableCell [colIndex]="1">Ada</td>
+        </tr>
+      </tbody>
+    </table>
+  `,
+})
+class DynamicGridTablePrimitiveHost {
+  readonly semantics = signal<'table' | 'grid'>('grid');
+}
+
+@Component({
+  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  template: `
+    <table id="invalid-grid-root" hellTable semantics="grid">
+      <tbody hellTableBody>
+        <tr hellTableRow><td hellTableCell>Ada</td></tr>
+      </tbody>
+    </table>
+  `,
+})
+class InvalidGridTablePrimitiveHost {}
+
+@Component({
+  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  template: `
     <div id="unstyled-root" hellTableRoot unstyled>
       <div id="unstyled-header" hellTableHeader unstyled>
         <div id="unstyled-header-row" hellTableRow unstyled>
@@ -109,6 +180,9 @@ describe('host-agnostic Hell table primitives', () => {
         NativeTablePrimitiveHost,
         InferredRoleTablePrimitiveHost,
         ExplicitRoleTablePrimitiveHost,
+        GridTablePrimitiveHost,
+        DynamicGridTablePrimitiveHost,
+        InvalidGridTablePrimitiveHost,
         UnstyledTablePrimitiveHost,
         CdkTablePrimitiveHost,
       ],
@@ -121,6 +195,8 @@ describe('host-agnostic Hell table primitives', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(byId(root, 'native-root').getAttribute('role')).toBeNull();
+    expect(byId(root, 'native-root').hasAttribute('tabindex')).toBe(false);
+    expect(byId(root, 'native-root').hasAttribute('aria-activedescendant')).toBe(false);
     expect(byId(root, 'native-header').getAttribute('role')).toBeNull();
     expect(byId(root, 'native-body').getAttribute('role')).toBeNull();
     expect(byId(root, 'native-row').getAttribute('role')).toBeNull();
@@ -173,6 +249,61 @@ describe('host-agnostic Hell table primitives', () => {
     expect(byId(root, 'explicit-body').getAttribute('role')).toBe('rowgroup');
     expect(byId(root, 'explicit-row').getAttribute('role')).toBe('row');
     expect(byId(root, 'explicit-cell').getAttribute('role')).toBe('gridcell');
+  });
+
+  it('enables explicit grid semantics only with an interaction mode', () => {
+    const fixture = TestBed.createComponent(GridTablePrimitiveHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const grid = byId(root, 'grid-root');
+
+    expect(grid.getAttribute('role')).toBe('grid');
+    expect(grid.getAttribute('tabindex')).toBe('0');
+    expect(grid.getAttribute('aria-rowcount')).toBe('2');
+    expect(grid.getAttribute('aria-colcount')).toBe('2');
+    expect(grid.getAttribute('aria-activedescendant')).toBe('grid-name');
+    expect(root.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
+    expect(byId(root, 'grid-action').getAttribute('tabindex')).toBe('-1');
+    expect(byId(root, 'grid-header-row').getAttribute('role')).toBe('row');
+    expect(byId(root, 'grid-row').getAttribute('aria-rowindex')).toBe('2');
+    expect(byId(root, 'grid-name').getAttribute('role')).toBe('columnheader');
+    expect(byId(root, 'grid-status').getAttribute('aria-colindex')).toBe('2');
+    expect(byId(root, 'grid-name-cell').getAttribute('role')).toBe('gridcell');
+    expect(byId(root, 'grid-status-cell').getAttribute('aria-colindex')).toBe('2');
+
+    const right = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true });
+    grid.dispatchEvent(right);
+    fixture.detectChanges();
+
+    expect(right.defaultPrevented).toBe(true);
+    expect(grid.getAttribute('aria-activedescendant')).toBe('grid-status');
+  });
+
+  it('removes generated grid roles and focus state when semantics switch back to table', () => {
+    const fixture = TestBed.createComponent(DynamicGridTablePrimitiveHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const table = byId(root, 'dynamic-grid-root');
+
+    expect(table.getAttribute('role')).toBe('grid');
+    expect(byId(root, 'dynamic-grid-cell').getAttribute('role')).toBe('gridcell');
+
+    fixture.componentInstance.semantics.set('table');
+    fixture.detectChanges();
+
+    expect(table.getAttribute('role')).toBeNull();
+    expect(table.hasAttribute('tabindex')).toBe(false);
+    expect(table.hasAttribute('aria-activedescendant')).toBe(false);
+    expect(table.hasAttribute('aria-rowcount')).toBe(false);
+    expect(table.hasAttribute('aria-colcount')).toBe(false);
+    expect(byId(root, 'dynamic-grid-row').hasAttribute('aria-rowindex')).toBe(false);
+    expect(byId(root, 'dynamic-grid-cell').getAttribute('role')).toBeNull();
+    expect(byId(root, 'dynamic-grid-cell').hasAttribute('aria-colindex')).toBe(false);
+  });
+
+  it('rejects grid semantics without an explicit interaction mode', () => {
+    const fixture = TestBed.createComponent(InvalidGridTablePrimitiveHost);
+    expect(() => fixture.detectChanges()).toThrow(/semantics="grid" requires interactionMode/);
   });
 
   it('keeps roles and data attributes in unstyled mode without Hell classes', () => {
