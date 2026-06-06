@@ -27,7 +27,10 @@ A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`;
 | Aggregate primitives | Core peer group plus `tailwindcss`, `@angular/router`, `@ng-icons/font-awesome` | `@hell-ui/angular/primitives` plus primitive CSS. Router is needed because the aggregate includes dialog through `ng-primitives/dialog`; Font Awesome is needed because icon-backed primitives are bundled in the aggregate FESM. | [`primitives-css`](../../tools/check-package-consumer.mjs) |
 | Composites | Core peer group plus `tailwindcss`; add `@ng-icons/font-awesome` for aggregate/icon-backed composites | Prefer narrow composite entry points such as `@hell-ui/angular/app-shell` and `@hell-ui/angular/audio-player`; use `@hell-ui/angular/composites` only when you accept aggregate peers | [`app-shell`, `audio-player`, `composites-css`](../../tools/check-package-consumer.mjs) |
 | Audio transcript | Composite audio-player peer group; no CodeMirror or pdf.js peers | `@hell-ui/angular/audio-player` plus provider import from `@hell-ui/angular/features/audio-transcript`; use composite CSS, no feature CSS | [`audio-transcript`](../../tools/check-package-consumer.mjs) |
-| Table primitives / simple data table | Core peer group plus `tailwindcss` | `@hell-ui/angular/table`, `@hell-ui/angular/data-table`, and planned adapter entrypoints `@hell-ui/angular/table-tanstack`, `/table-virtual`, `/table-cdk`; CSS from `@hell-ui/angular/styles/table` | [`table`, `data-table`](../../tools/check-package-consumer.mjs) |
+| Table primitives / simple data table | Core peer group plus `tailwindcss`; no optional table-engine peers | `@hell-ui/angular/table`, `@hell-ui/angular/data-table`; CSS from `@hell-ui/angular/styles/table`; removed legacy aliases stay unavailable | [`table`, `data-table`, `no-legacy-alias`](../../tools/check-package-consumer.mjs) |
+| TanStack Table adapter | Core peer group plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core` | `@hell-ui/angular/table-tanstack`; keep this adapter isolated to routes/components that own TanStack Table state | [`table-tanstack`](../../tools/check-package-consumer.mjs) |
+| TanStack Virtual adapter | Core peer group plus `tailwindcss` and optional `@tanstack/virtual-core`; no `@tanstack/angular-table` | `@hell-ui/angular/table-virtual`; dynamic row/detail/editor heights use Hell row parts and TanStack Virtual | [`table-virtual`](../../tools/check-package-consumer.mjs) |
+| CDK table skin adapter | Core peer group plus `tailwindcss`; no extra peer beyond the core `@angular/cdk` peer | `@hell-ui/angular/table-cdk`; CDK remains app-owned for data source, row definitions, sorting, pagination, and fixed-size virtual scroll | [`table-cdk`](../../tools/check-package-consumer.mjs) |
 | Code editor | Core peer group plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, `@lezer/highlight` | Kept optional entry point `@hell-ui/angular/features/code-editor`; keep lazy/client-only when runtime risk matters | [`code-editor`](../../tools/check-package-consumer.mjs) |
 | PDF viewer | Core peer group plus `@hell-ui/pdf-viewer`, `tailwindcss`, `@ng-icons/font-awesome`, and the split package's pdf.js peer | `@hell-ui/pdf-viewer`; app must provide the pdf.js worker source | [`pdf-viewer`](../../tools/check-package-consumer.mjs) |
 
@@ -43,6 +46,18 @@ npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-ic
 # Audio transcript feature. Proved by the audio-transcript scenario.
 npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome ng-primitives rxjs tailwindcss
 
+# Table primitives and simple data table. Proved by the table/data-table/no-legacy-alias scenarios.
+npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss
+
+# TanStack Table adapter. Proved by the table-tanstack scenario.
+npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss @tanstack/angular-table
+
+# TanStack Virtual adapter. Proved by the table-virtual scenario.
+npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss @tanstack/virtual-core
+
+# CDK table skin. Proved by the table-cdk scenario; @angular/cdk is already in the core peer group.
+npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss
+
 # Code editor feature. Proved by the code-editor scenario.
 npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss @codemirror/commands @codemirror/language @codemirror/state @codemirror/view @lezer/highlight
 
@@ -57,7 +72,10 @@ HELL_PACKAGE_CONSUMER_SCENARIOS=button-unstyled pnpm test:package-consumer -- --
 HELL_PACKAGE_CONSUMER_SCENARIOS=primitives-css pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=audio-player pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=audio-transcript pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=table pnpm test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=table,data-table,no-legacy-alias pnpm test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=table-tanstack pnpm test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=table-virtual pnpm test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=table-cdk pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=pdf-viewer pnpm test:package-consumer -- --minimal-deps
 ```
@@ -139,7 +157,7 @@ Treat these as deliberate opt-ins, not default UI kit imports.
 
 | Feature | First-beta guidance | Current status |
 | --- | --- | --- |
-| Table primitives / simple data table | Keep primitives behind `@hell-ui/angular/table` and the simple native renderer behind `@hell-ui/angular/data-table`. It is not a data-grid framework. Prefer semantic table markup with real cell controls; adapter entrypoints stay planned until their implementation slices land. | Beta primitives; data-table is experimental; adapters remain planned. Legacy table feature aliases were removed before beta. |
+| Table primitives / simple data table | Keep primitives behind `@hell-ui/angular/table` and the simple native renderer behind `@hell-ui/angular/data-table`. It is not a data-grid framework. Prefer semantic table markup with real cell controls; adapter entrypoints stay optional and engine-specific. | Beta primitives; data-table is experimental; TanStack Table, TanStack Virtual, and CDK skin adapters are experimental. Legacy table feature aliases were removed before beta and the `no-legacy-alias` package-consumer scenario rejects them. |
 | Code editor | Keep behind the kept optional `@hell-ui/angular/features/code-editor` entry point; lazy-load or client-only load in SSR-sensitive apps; pass owner-document-aware setup where possible. | Experimental in package/source comments; HELL-054 locks the kept optional boundary and leaves stable API report promotion to policy. |
 | PDF viewer | Package path is `@hell-ui/pdf-viewer`; install the split package with its exact pdf.js peer and pass an app-owned worker source. | Experimental/browser-only split package. |
 | Audio speech transcript | Do not present `allowSpeechTranscript` as accessibility captions or timed text. Import `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript` only where the route/app deliberately opts into the browser transcript provider, and provide real captions/transcripts separately. | Experimental Chromium-only / best-effort; runtime is isolated behind the optional feature provider. |

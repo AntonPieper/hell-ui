@@ -64,6 +64,11 @@ export const entrypointManifest = {
       publicApiPath: `${libraryRoot}/src/lib/public-api-table.ts`,
       entryFile: '../src/lib/public-api-table.ts',
       exports: ['./table/table'],
+      header: [
+        '/**',
+        ' * @beta Table primitive entry point for semantic table utilities and model helpers.',
+        ' */',
+      ],
     },
     {
       id: 'data-table',

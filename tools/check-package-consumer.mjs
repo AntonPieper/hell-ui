@@ -99,13 +99,17 @@ const codeEditorPeerGroup = [
 ];
 const pdfViewerPeerGroup = ['pdfjs-dist'];
 const tanStackTablePeerGroup = ['@tanstack/angular-table'];
+const tanStackVirtualPeerGroup = ['@tanstack/virtual-core'];
+const tableAdapterPeerGroup = [...tanStackTablePeerGroup, ...tanStackVirtualPeerGroup];
 const heavyFeaturePeerGroup = [...codeEditorPeerGroup, ...pdfViewerPeerGroup];
 const packageConsumerPeerTiers = new Set([
   'core',
   'primitive',
   'composite',
   'table',
+  'table-cdk',
   'table-tanstack',
+  'table-virtual',
   'audio-transcript',
   'code-editor',
   'pdf-viewer',
@@ -124,9 +128,14 @@ const peerGroupContracts = {
     peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup],
   },
   table: { tier: 'table', peers: [...corePeerGroup, ...stylePeerGroup] },
+  'table-cdk': { tier: 'table-cdk', peers: [...corePeerGroup, ...stylePeerGroup] },
   'table-tanstack': {
     tier: 'table-tanstack',
     peers: [...corePeerGroup, ...stylePeerGroup, ...tanStackTablePeerGroup],
+  },
+  'table-virtual': {
+    tier: 'table-virtual',
+    peers: [...corePeerGroup, ...stylePeerGroup, ...tanStackVirtualPeerGroup],
   },
   'audio-transcript': {
     tier: 'audio-transcript',
@@ -195,6 +204,10 @@ const tableTanStackDeps = [
   ...styledUiWithoutFontAwesomeDeps,
   '@tanstack/angular-table',
 ];
+const tableVirtualDeps = [
+  ...styledUiWithoutFontAwesomeDeps,
+  '@tanstack/virtual-core',
+];
 
 const scenarios = [
   {
@@ -204,7 +217,7 @@ const scenarios = [
     peerTier: 'core',
     peerGroup: 'core',
     dependencies: coreDeps,
-    forbiddenDependencies: tanStackTablePeerGroup,
+    forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: rootConsumerMainTs(),
     stylesCss: '',
   },
@@ -233,6 +246,7 @@ const scenarios = [
     peerTier: 'primitive',
     peerGroup: 'primitive-unstyled',
     dependencies: coreDeps,
+    forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: buttonUnstyledConsumerMainTs(),
     stylesCss: '',
   },
@@ -242,6 +256,7 @@ const scenarios = [
     peerTier: 'primitive',
     peerGroup: 'primitive',
     dependencies: buttonStyledDeps,
+    forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: buttonConsumerMainTs(),
     stylesCss: primitivesConsumerStylesCss(),
   },
@@ -306,7 +321,7 @@ const scenarios = [
     peerTier: 'table',
     peerGroup: 'table',
     dependencies: styledUiWithoutFontAwesomeDeps,
-    forbiddenDependencies: tanStackTablePeerGroup,
+    forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: tableConsumerMainTs(),
     stylesCss: tableConsumerStylesCss(),
   },
@@ -316,7 +331,7 @@ const scenarios = [
     peerTier: 'table',
     peerGroup: 'table',
     dependencies: styledUiWithoutFontAwesomeDeps,
-    forbiddenDependencies: tanStackTablePeerGroup,
+    forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: dataTableConsumerMainTs(),
     stylesCss: tableConsumerStylesCss(),
   },
@@ -326,18 +341,40 @@ const scenarios = [
     peerTier: 'table-tanstack',
     peerGroup: 'table-tanstack',
     dependencies: tableTanStackDeps,
+    forbiddenDependencies: tanStackVirtualPeerGroup,
     mainTs: tableTanStackConsumerMainTs(),
     stylesCss: tableConsumerStylesCss(),
   },
   {
+    name: 'table-virtual',
+    description: 'TanStack Virtual row-part adapter with strict optional virtual peer',
+    peerTier: 'table-virtual',
+    peerGroup: 'table-virtual',
+    dependencies: tableVirtualDeps,
+    forbiddenDependencies: tanStackTablePeerGroup,
+    mainTs: tableVirtualConsumerMainTs(),
+    stylesCss: tableConsumerStylesCss(),
+  },
+  {
     name: 'table-cdk',
-    description: 'CDK Table skin adapter without optional TanStack peer',
+    description: 'CDK Table skin adapter with no extra optional table-engine peer',
+    peerTier: 'table-cdk',
+    peerGroup: 'table-cdk',
+    dependencies: styledUiWithoutFontAwesomeDeps,
+    forbiddenDependencies: tableAdapterPeerGroup,
+    mainTs: tableCdkConsumerMainTs(),
+    stylesCss: tableConsumerStylesCss(),
+  },
+  {
+    name: 'no-legacy-alias',
+    description: 'negative check that removed table aliases cannot compile',
     peerTier: 'table',
     peerGroup: 'table',
     dependencies: styledUiWithoutFontAwesomeDeps,
-    forbiddenDependencies: tanStackTablePeerGroup,
-    mainTs: tableCdkConsumerMainTs(),
-    stylesCss: tableConsumerStylesCss(),
+    forbiddenDependencies: tableAdapterPeerGroup,
+    mainTs: noLegacyTableAliasConsumerMainTs(),
+    stylesCss: noLegacyTableAliasConsumerStylesCss(),
+    expectBuildFailure: true,
   },
   {
     name: 'pdf-viewer',
@@ -507,6 +544,9 @@ function assertPeerTierContracts(allScenarios) {
   for (const peer of tanStackTablePeerGroup) {
     if (!optionalPeerNames.has(peer)) fail(`TanStack Table peer ${peer} must remain optional in @hell-ui/angular`);
   }
+  for (const peer of tanStackVirtualPeerGroup) {
+    if (!optionalPeerNames.has(peer)) fail(`TanStack Virtual peer ${peer} must remain optional in @hell-ui/angular`);
+  }
   if (pdfPackagePeerDependencies['pdfjs-dist'] !== deps['pdfjs-dist']) {
     fail(`PDF package must pin pdfjs-dist peer to workspace version ${deps['pdfjs-dist']}`);
   }
@@ -525,7 +565,7 @@ function assertPeerTierContracts(allScenarios) {
   for (const scenario of allScenarios) assertScenarioPeerGroup(scenario, allPackagePeerNames);
   assertHeavyPeersAreIsolated(allScenarios);
   assertCodeMirrorPeersAreIsolated(allScenarios);
-  assertTanStackTablePeersAreIsolated(allScenarios);
+  assertTableAdapterPeersAreIsolated(allScenarios);
 }
 
 function assertScenarioPeerGroup(scenario, packagePeerNames) {
@@ -557,6 +597,7 @@ function assertHeavyPeersAreIsolated(allScenarios) {
     'table',
     'data-table',
     'table-cdk',
+    'no-legacy-alias',
     'audio-player',
     'audio-transcript',
   ]);
@@ -570,21 +611,40 @@ function assertHeavyPeersAreIsolated(allScenarios) {
   }
 }
 
-function assertTanStackTablePeersAreIsolated(allScenarios) {
+function assertTableAdapterPeersAreIsolated(allScenarios) {
   const tanStackScenario = allScenarios.find((scenario) => scenario.name === 'table-tanstack');
   if (!tanStackScenario) fail('Missing package-consumer table-tanstack scenario');
+
+  const virtualScenario = allScenarios.find((scenario) => scenario.name === 'table-virtual');
+  if (!virtualScenario) fail('Missing package-consumer table-virtual scenario');
 
   const tanStackPeers = tanStackScenario.dependencies.filter((dependency) =>
     tanStackTablePeerGroup.includes(dependency),
   );
-  assertSameSet('scenario table-tanstack TanStack peer group', tanStackTablePeerGroup, tanStackPeers);
+  assertSameSet('scenario table-tanstack TanStack Table peer group', tanStackTablePeerGroup, tanStackPeers);
+
+  const virtualPeers = virtualScenario.dependencies.filter((dependency) =>
+    tanStackVirtualPeerGroup.includes(dependency),
+  );
+  assertSameSet('scenario table-virtual TanStack Virtual peer group', tanStackVirtualPeerGroup, virtualPeers);
 
   for (const scenario of allScenarios) {
-    if (scenario.name === 'table-tanstack') continue;
+    if (scenario.name !== 'table-tanstack') {
+      const unexpectedTablePeers = scenario.dependencies.filter((dependency) =>
+        tanStackTablePeerGroup.includes(dependency),
+      );
+      if (unexpectedTablePeers.length) {
+        fail(`Scenario ${scenario.name} must not require TanStack Table peer(s): ${unexpectedTablePeers.join(', ')}`);
+      }
+    }
 
-    const unexpected = scenario.dependencies.filter((dependency) => tanStackTablePeerGroup.includes(dependency));
-    if (unexpected.length) {
-      fail(`Scenario ${scenario.name} must not require TanStack Table peer(s): ${unexpected.join(', ')}`);
+    if (scenario.name !== 'table-virtual') {
+      const unexpectedVirtualPeers = scenario.dependencies.filter((dependency) =>
+        tanStackVirtualPeerGroup.includes(dependency),
+      );
+      if (unexpectedVirtualPeers.length) {
+        fail(`Scenario ${scenario.name} must not require TanStack Virtual peer(s): ${unexpectedVirtualPeers.join(', ')}`);
+      }
     }
   }
 }
@@ -751,19 +811,27 @@ async function runConsumerScenarioGroup(group) {
     assertForbiddenDependenciesNotInstalled(tempRoot, group);
 
     for (const scenario of group.scenarios) {
-      printScenarioContract(scenario, 'build');
-      writeConsumerScenarioFiles(tempRoot, scenario);
-      await runNpm(
-        ['exec', '--', 'ng', 'build', 'consumer', '--configuration', 'production'],
-        tempRoot,
-        { scenarioName: scenario.name },
-      );
-      console.log(`[package-consumer:${scenario.name}] built ${scenario.description}`);
+      await runConsumerScenarioBuild(tempRoot, scenario);
     }
   } finally {
     if (keep) console.log(`[package-consumer:${groupName}] kept ${tempRoot}`);
     else rmSync(tempRoot, { force: true, recursive: true });
   }
+}
+
+async function runConsumerScenarioBuild(tempRoot, scenario) {
+  printScenarioContract(scenario, 'build');
+  writeConsumerScenarioFiles(tempRoot, scenario);
+
+  const buildCommand = ['exec', '--', 'ng', 'build', 'consumer', '--configuration', 'production'];
+  if (scenario.expectBuildFailure) {
+    await runNpmExpectingFailure(buildCommand, tempRoot, { scenarioName: scenario.name });
+    console.log(`[package-consumer:${scenario.name}] rejected ${scenario.description}`);
+    return;
+  }
+
+  await runNpm(buildCommand, tempRoot, { scenarioName: scenario.name });
+  console.log(`[package-consumer:${scenario.name}] built ${scenario.description}`);
 }
 
 function assertForbiddenDependenciesNotInstalled(workspace, group) {
@@ -1349,6 +1417,72 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
+function tableVirtualConsumerMainTs() {
+  return `import { Component, ElementRef, signal, viewChild } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import {
+  hellTableRowsFromData,
+  hellTableVirtualRowPartsFromRows,
+  type HellVirtualRowPart,
+} from '${packageName}/table';
+import {
+  HELL_TANSTACK_VIRTUAL_DEFAULT_ESTIMATE_SIZE,
+  injectHellTanStackVirtualRows,
+  type HellTanStackVirtualRowPartItem,
+} from '${packageName}/table-virtual';
+
+interface Person {
+  readonly id: string;
+  readonly name: string;
+  readonly active: boolean;
+}
+
+const rows: readonly Person[] = [
+  { id: 'ada', name: 'Ada Lovelace', active: true },
+  { id: 'grace', name: 'Grace Hopper', active: false },
+];
+type PersonPart = HellVirtualRowPart<Person>;
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  template: \`
+    <div #scrollRoot style="height: 240px; overflow: auto">
+      @for (item of virtual.virtualItems(); track item.key) {
+        <div [attr.data-part-key]="item.partKey">{{ describe(item) }}</div>
+      }
+    </div>
+    <p>Total virtual height: {{ virtual.totalSize() }}</p>
+  \`,
+})
+class App {
+  protected readonly scrollRoot = viewChild<ElementRef<HTMLElement>>('scrollRoot');
+  protected readonly rowParts = signal<readonly PersonPart[]>(
+    hellTableVirtualRowPartsFromRows({
+      rows: hellTableRowsFromData(rows, (row) => row.id),
+      activeEditorRowKey: 'ada',
+      expandedDetailRowKeys: (row) => row.original.active,
+    }),
+  );
+  protected readonly virtual = injectHellTanStackVirtualRows<PersonPart>({
+    rowParts: this.rowParts,
+    scrollElement: this.scrollRoot,
+    estimateSize: ({ part }) =>
+      part.kind === 'editor' ? 96 : HELL_TANSTACK_VIRTUAL_DEFAULT_ESTIMATE_SIZE,
+    getItemKey: ({ part }) => part.key,
+    overscan: 2,
+    initialRect: { width: 320, height: 240 },
+  });
+
+  protected describe(item: HellTanStackVirtualRowPartItem<PersonPart>): string {
+    return item.partKey;
+  }
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
 function tableCdkConsumerMainTs() {
   return `import { Component, computed, signal } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -1438,6 +1572,26 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
+function noLegacyTableAliasConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HELL_TABLE_DIRECTIVES } from '${packageName}/features/data-table';
+import { HELL_TABLE_UTILITY_DIRECTIVES } from '${packageName}/features/table-utilities';
+
+const removedTableAliases = [HELL_TABLE_DIRECTIVES, HELL_TABLE_UTILITY_DIRECTIVES];
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [...removedTableAliases],
+  template: \`<p>Legacy table aliases must not compile.</p>\`,
+})
+class App {}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
 function pdfViewerConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -1494,6 +1648,13 @@ function pdfViewerConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/styles/tokens";
 @import "${pdfPackageName}/styles";
+`;
+}
+
+function noLegacyTableAliasConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/styles/features/data-table";
+@import "${packageName}/styles/features/table-utilities";
 `;
 }
 
@@ -1655,6 +1816,23 @@ function runRootPackageManager(args, cwd) {
 }
 
 async function runNpm(args, cwd, options = {}) {
+  const { command, diagnostics, result } = await runNpmCommand(args, cwd, options);
+  if (result.timedOut) fail(npmTimeoutMessage(command, cwd, diagnostics, result.startedAt));
+  if (result.error) fail(`Unable to start command: ${command}\n${result.error.message}`);
+  if (result.signal) fail(`Command failed with signal ${result.signal}: ${command}`);
+  if (result.status !== 0) fail(`Command failed with status ${result.status}: ${command}`);
+}
+
+async function runNpmExpectingFailure(args, cwd, options = {}) {
+  const { command, diagnostics, label, result } = await runNpmCommand(args, cwd, options);
+  if (result.timedOut) fail(npmTimeoutMessage(command, cwd, diagnostics, result.startedAt));
+  if (result.error) fail(`Unable to start command: ${command}\n${result.error.message}`);
+  if (result.signal) fail(`Command failed with signal ${result.signal}: ${command}`);
+  if (result.status === 0) fail(`Expected command to fail for negative scenario ${label}: ${command}`);
+  console.log(`${label} ok: command failed as expected with status ${result.status}: ${command}`);
+}
+
+async function runNpmCommand(args, cwd, options = {}) {
   const env = npmCommandEnvironment();
   const scenarioName = options.scenarioName ?? 'unknown';
   const label = packageConsumerLabel(scenarioName);
@@ -1668,10 +1846,7 @@ async function runNpm(args, cwd, options = {}) {
   }
 
   const result = await spawnNpm(args, cwd, env, label, command);
-  if (result.timedOut) fail(npmTimeoutMessage(command, cwd, diagnostics, result.startedAt));
-  if (result.error) fail(`Unable to start command: ${command}\n${result.error.message}`);
-  if (result.signal) fail(`Command failed with signal ${result.signal}: ${command}`);
-  if (result.status !== 0) fail(`Command failed with status ${result.status}: ${command}`);
+  return { command, diagnostics, label, result };
 }
 
 function spawnNpm(args, cwd, env, label, command) {

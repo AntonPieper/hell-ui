@@ -1196,6 +1196,41 @@ function checkApiStabilityContract() {
     }
   }
 
+  const tableEntrypointStatuses = [
+    {
+      name: 'Table primitives',
+      publicApiPath: 'projects/hell/src/lib/public-api-table.ts',
+      tag: 'beta',
+    },
+    {
+      name: 'Data table',
+      publicApiPath: 'projects/hell/src/lib/public-api-data-table.ts',
+      tag: 'experimental',
+    },
+    {
+      name: 'TanStack Table adapter',
+      publicApiPath: 'projects/hell/src/lib/public-api-table-tanstack.ts',
+      tag: 'experimental',
+    },
+    {
+      name: 'TanStack Virtual adapter',
+      publicApiPath: 'projects/hell/src/lib/public-api-table-virtual.ts',
+      tag: 'experimental',
+    },
+    {
+      name: 'CDK Table skin adapter',
+      publicApiPath: 'projects/hell/src/lib/public-api-table-cdk.ts',
+      tag: 'experimental',
+    },
+  ];
+  for (const entrypoint of tableEntrypointStatuses) {
+    const publicApi = readFile(join(root, entrypoint.publicApiPath));
+    const tagPattern = new RegExp(`@${entrypoint.tag}\\b`);
+    if (!tagPattern.test(publicApi)) {
+      failures.push(`${entrypoint.name} table entry point must carry @${entrypoint.tag} in its public API comment`);
+    }
+  }
+
   const experimentalApiSymbols = [
     ['projects/hell/src/lib/features/code-editor/code-editor.ts', 'HellCodeEditorRuntimeFactory'],
     ['projects/hell/src/lib/features/code-editor/code-editor.ts', 'HELL_CODE_EDITOR_RUNTIME_FACTORY'],

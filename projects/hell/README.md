@@ -36,7 +36,7 @@ Feature peers remain optional at runtime, but npm peer metadata is package-wide:
 
 ### Peer dependency tiers
 
-Package-consumer scenarios assert these peer groups with strict peer installs. CodeMirror and TanStack peers stay optional and are not required by root, button, table, data-table, or table-cdk scenarios. PDF viewer dependencies belong to `@hell-ui/pdf-viewer`, not this package.
+Package-consumer scenarios assert these peer groups with strict peer installs. CodeMirror, TanStack Table, and TanStack Virtual peers stay optional and are not required by root, button, table, data-table, or table-cdk scenarios. The CDK table skin is an optional entry point but adds no peer beyond the core `@angular/cdk` peer. PDF viewer dependencies belong to `@hell-ui/pdf-viewer`, not this package.
 
 | Tier | Entry points / scenarios | Peer group asserted |
 | --- | --- | --- |
@@ -44,8 +44,10 @@ Package-consumer scenarios assert these peer groups with strict peer installs. C
 | Primitive | Narrow primitives such as `/button`; aggregate `/primitives`; `button-unstyled`, `button`, `primitives-css` | Core peers. Add `tailwindcss` when importing primitive CSS. Aggregate `/primitives` also asserts optional `@angular/router` and `@ng-icons/font-awesome` because dialog and icon-backed primitives are bundled in the aggregate FESM. |
 | Composite | `/composites` and narrow composite entry points such as `/app-shell` and `/audio-player`; `composites-css`, `app-shell`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Aggregate/icon-backed composites also assert optional `@ng-icons/font-awesome`. |
 | Audio transcript | `/features/audio-transcript`; `audio-transcript` | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled. |
-| Table | `/table`, `/data-table`, `/table-virtual`, `/table-cdk`; `table`, `data-table`, `table-cdk` | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack, or adapter-specific peers for the primitive/simple/CDK skin paths. |
-| TanStack table | `/table-tanstack`; `table-tanstack` | Core peers plus `tailwindcss` and optional `@tanstack/angular-table`. Root, `/table`, and `/data-table` scenarios prove TanStack is not installed unless this adapter is imported. |
+| Table primitives / simple data table | `/table`, `/data-table`; `table`, `data-table`, `no-legacy-alias` | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack Table, or TanStack Virtual peers. The negative scenario proves removed legacy table aliases and CSS aliases stay unavailable. |
+| TanStack table adapter | `/table-tanstack`; `table-tanstack` | Core peers plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`. Root, button, `/table`, and `/data-table` scenarios prove TanStack Table is not installed unless this adapter is imported. |
+| TanStack virtual adapter | `/table-virtual`; `table-virtual` | Core peers plus `tailwindcss` and optional `@tanstack/virtual-core`; no `@tanstack/angular-table`. Root, button, `/table`, and `/data-table` scenarios prove TanStack Virtual is not installed unless this adapter is imported. |
+| CDK table skin adapter | `/table-cdk`; `table-cdk` | Core peers plus `tailwindcss`; no TanStack Table or TanStack Virtual peer. The CDK adapter uses the core `@angular/cdk` peer already required by Hell. |
 | Code editor | `/features/code-editor`; `code-editor` | Core peers plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight`. |
 | PDF viewer | `@hell-ui/pdf-viewer`; `pdf-viewer` | Separate package; see that package for its own install contract. |
 
