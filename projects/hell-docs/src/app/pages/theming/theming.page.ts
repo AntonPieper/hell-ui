@@ -32,7 +32,7 @@ import tokenOverrideCodeRaw from './examples/token-override.example.css?raw' wit
       </p>
 
       <h2>Brand anchors</h2>
-      <ul>
+      <ul class="hd-token-map">
         <li>
           <code>primary</code> — <code>--color-hell-primary-900</code> →
           <code>--color-hell-primary</code>

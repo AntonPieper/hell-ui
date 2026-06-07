@@ -5,6 +5,7 @@ import {
   computed,
   input,
 } from '@angular/core';
+import { EditorView } from '@codemirror/view';
 import { HellCodeEditor } from '@hell-ui/angular/features/code-editor';
 
 type DocsCodeViewerVariant = 'example' | 'block';
@@ -31,6 +32,7 @@ type DocsCodeViewerVariant = 'example' | 'block';
         max-height: min(68vh, 560px);
         overflow: auto;
       }
+
     `,
   ],
   imports: [HellCodeEditor],
@@ -40,6 +42,7 @@ type DocsCodeViewerVariant = 'example' | 'block';
       [class.hd-example-code]="variant() === 'example'"
       [class.hd-doc-code]="variant() === 'block'"
       [value]="code()"
+      [extensions]="extensions()"
       [ariaLabel]="ariaLabel()"
       readOnly
     />
@@ -51,4 +54,7 @@ export class DocsCodeViewer {
   readonly label = input<string>('Example source code');
 
   protected readonly ariaLabel = computed(() => this.label().trim() || 'Example source code');
+  protected readonly extensions = computed(() =>
+    this.variant() === 'block' ? EditorView.lineWrapping : [],
+  );
 }
