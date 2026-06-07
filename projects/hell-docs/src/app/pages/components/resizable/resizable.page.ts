@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { ResizableContractHarnessPage } from './resizable-contract-harness.page';
 import { ResizableGripHandle5Example } from './examples/grip-handle-5.example';
 import resizableGripHandle5ExampleCodeRaw from './examples/grip-handle-5.example.ts?raw' with {
   loader: 'text',
@@ -33,8 +35,12 @@ import resizableVerticalSplitExampleCodeRaw from './examples/vertical-split.exam
     ResizableVerticalSplitExample,
     ResizableGripHandleExample,
     ResizableGripHandle5Example,
+    ResizableContractHarnessPage,
   ],
   template: `
+    @if (showResizeHarness) {
+      <hd-resizable-contract-harness />
+    } @else {
     <article class="hd-prose">
       <h1>Resizable</h1>
       <p>
@@ -102,9 +108,13 @@ import resizableVerticalSplitExampleCodeRaw from './examples/vertical-split.exam
         <li>Don't place resize handles where they conflict with scrollbars.</li>
       </ul>
     </article>
+    }
   `,
 })
 export class ResizablePage {
+  private readonly route = inject(ActivatedRoute);
+
+  protected readonly showResizeHarness = this.route.snapshot.queryParamMap.has('resizeHarness');
   protected readonly resizableHorizontalSplitExampleCode = resizableHorizontalSplitExampleCodeRaw;
   protected readonly resizableThreePanesExampleCode = resizableThreePanesExampleCodeRaw;
   protected readonly resizableVerticalSplitExampleCode = resizableVerticalSplitExampleCodeRaw;

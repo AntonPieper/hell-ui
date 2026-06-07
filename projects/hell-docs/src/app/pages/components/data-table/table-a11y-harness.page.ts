@@ -1,3 +1,4 @@
+import { CdkTableModule } from '@angular/cdk/table';
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import {
   HELL_TABLE_UTILITIES_DIRECTIVES,
@@ -8,8 +9,18 @@ import {
   selectionColumn,
   textColumn,
   type HellTableColumnVisibilityState,
+  type HellTableResizeAdapter,
+  type HellTableResizeEvent,
+  type HellTableResizeItem,
   type HellTableSortDirection,
 } from '@hell-ui/angular/table';
+import {
+  HellCdkCell,
+  HellCdkHeaderCell,
+  HellCdkHeaderRow,
+  HellCdkRow,
+  HellCdkTable,
+} from '@hell-ui/angular/table-cdk';
 
 interface HarnessPerson {
   readonly id: string;
@@ -52,7 +63,16 @@ const VISIBILITY_COLUMNS = columns.define([
 @Component({
   selector: 'hd-table-a11y-harness',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellColumnVisibilityPanel, ...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [
+    CdkTableModule,
+    HellColumnVisibilityPanel,
+    ...HELL_TABLE_UTILITIES_DIRECTIVES,
+    HellCdkTable,
+    HellCdkHeaderRow,
+    HellCdkRow,
+    HellCdkHeaderCell,
+    HellCdkCell,
+  ],
   template: `
     <section
       class="grid gap-6 p-6"
@@ -114,6 +134,138 @@ const VISIBILITY_COLUMNS = columns.define([
                 </tr>
               }
             </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-labelledby="semantic-resize-heading" data-testid="table-resize-semantic-section">
+        <h2 id="semantic-resize-heading">Semantic table resize contract</h2>
+        <div class="text-xs text-hell-foreground-muted" aria-hidden="true">
+          sort <output data-testid="semantic-resize-sort-count">{{ semanticResizeSortCount() }}</output>
+          action <output data-testid="semantic-resize-action-count">{{ semanticResizeActionCount() }}</output>
+          resize <output data-testid="semantic-resize-commit-count">{{ semanticResizeCommitCount() }}</output>
+        </div>
+        <div hellTableContainer class="overflow-auto max-w-[680px]">
+          <table hellTable data-testid="semantic-resize-table" class="w-[640px]">
+            <thead hellTableHead>
+              <tr hellTableRow>
+                <th
+                  id="semantic-resize-name"
+                  hellTableHeaderCell
+                  scope="col"
+                  columnId="name"
+                  sortable
+                  [sort]="null"
+                  style="--hell-table-col-width: 220px;"
+                  data-testid="semantic-resize-name-header"
+                  (sortToggle)="recordSemanticResizeSort()"
+                >
+                  <button hellTableSortTrigger type="button">Name</button>
+                  <button
+                    hellTableResizeHandle
+                    type="button"
+                    [minWidth]="120"
+                    aria-controls="semantic-resize-name semantic-resize-role"
+                    data-testid="semantic-resize-handle"
+                    (resizeCommit)="recordSemanticResizeCommit($event)"
+                  ></button>
+                </th>
+                <th
+                  id="semantic-resize-role"
+                  hellTableHeaderCell
+                  scope="col"
+                  columnId="role"
+                  style="--hell-table-col-width: 180px;"
+                  data-testid="semantic-resize-role-header"
+                >
+                  Role
+                </th>
+                <th hellTableHeaderCell scope="col" columnId="actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody hellTableBody>
+              @for (row of rows; track row.id) {
+                <tr hellTableRow>
+                  <td hellTableCell>{{ row.name }}</td>
+                  <td hellTableCell>{{ row.role }}</td>
+                  <td hellTableCell>
+                    <button hellTableRowAction type="button" (click)="recordSemanticResizeAction()">
+                      Inspect {{ row.name }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-labelledby="cdk-resize-heading" data-testid="table-resize-cdk-section">
+        <h2 id="cdk-resize-heading">CDK adapter-rendered resize contract</h2>
+        <div class="text-xs text-hell-foreground-muted" aria-hidden="true">
+          sort <output data-testid="cdk-resize-sort-count">{{ cdkResizeSortCount() }}</output>
+          action <output data-testid="cdk-resize-action-count">{{ cdkResizeActionCount() }}</output>
+          resize <output data-testid="cdk-resize-commit-count">{{ cdkResizeCommitCount() }}</output>
+        </div>
+        <div hellTableContainer class="overflow-auto max-w-[680px]">
+          <table cdk-table fixedLayout data-testid="cdk-resize-table" class="w-[640px]" [dataSource]="rows">
+            <ng-container cdkColumnDef="name">
+              <th
+                id="cdk-resize-name"
+                cdk-header-cell
+                *cdkHeaderCellDef
+                scope="col"
+                columnId="name"
+                sortable
+                [sort]="null"
+                [style.--hell-table-col-width]="cdkResizeWidths().name + 'px'"
+                data-testid="cdk-resize-name-header"
+                (sortToggle)="recordCdkResizeSort()"
+              >
+                <button hellTableSortTrigger type="button">Name</button>
+                <button
+                  hellTableResizeHandle
+                  type="button"
+                  [minWidth]="120"
+                  [resizeAdapter]="cdkResizeAdapter"
+                  aria-controls="cdk-resize-name cdk-resize-role"
+                  data-testid="cdk-resize-handle"
+                  (resizeCommit)="recordCdkResizeCommit($event)"
+                ></button>
+              </th>
+              <td cdk-cell *cdkCellDef="let row">{{ row.name }}</td>
+            </ng-container>
+
+            <ng-container cdkColumnDef="role">
+              <th
+                id="cdk-resize-role"
+                cdk-header-cell
+                *cdkHeaderCellDef
+                scope="col"
+                columnId="role"
+                [style.--hell-table-col-width]="cdkResizeWidths().role + 'px'"
+                data-testid="cdk-resize-role-header"
+              >
+                Role
+              </th>
+              <td cdk-cell *cdkCellDef="let row">{{ row.role }}</td>
+            </ng-container>
+
+            <ng-container cdkColumnDef="actions">
+              <th cdk-header-cell *cdkHeaderCellDef scope="col" columnId="actions">Actions</th>
+              <td cdk-cell *cdkCellDef="let row">
+                <button hellTableRowAction type="button" (click)="recordCdkResizeAction(row.id)">
+                  Inspect {{ row.name }}
+                </button>
+              </td>
+            </ng-container>
+
+            <tr cdk-header-row *cdkHeaderRowDef="cdkResizeDisplayedColumns"></tr>
+            <tr
+              cdk-row
+              *cdkRowDef="let row; columns: cdkResizeDisplayedColumns"
+              [active]="cdkResizeActiveRowId() === row.id"
+            ></tr>
           </table>
         </div>
       </section>
@@ -285,8 +437,21 @@ export class TableA11yHarnessPage {
   protected readonly rows = HARNESS_ROWS;
   protected readonly visibilityColumns = VISIBILITY_COLUMNS;
   protected readonly activeEditorPaneId = 'table-a11y-active-editor-pane';
+  protected readonly cdkResizeDisplayedColumns = ['name', 'role', 'actions'];
 
   protected readonly sortDirection = signal<HellTableSortDirection | null>(null);
+  protected readonly semanticResizeSortCount = signal(0);
+  protected readonly semanticResizeActionCount = signal(0);
+  protected readonly semanticResizeCommitCount = signal(0);
+  protected readonly cdkResizeSortCount = signal(0);
+  protected readonly cdkResizeActionCount = signal(0);
+  protected readonly cdkResizeCommitCount = signal(0);
+  protected readonly cdkResizeActiveRowId = signal<string | null>(null);
+  protected readonly cdkResizeWidths = signal<Record<'name' | 'role', number>>({ name: 220, role: 180 });
+  protected readonly cdkResizeAdapter: HellTableResizeAdapter = {
+    before: this.cdkResizeItem('name', 'cdk-resize-name'),
+    after: this.cdkResizeItem('role', 'cdk-resize-role'),
+  };
   protected readonly activeRowId = signal<string | null>(null);
   protected readonly checkboxSelection = signal<Readonly<Record<string, boolean>>>({});
   protected readonly radioRowId = signal<string | null>(null);
@@ -311,6 +476,46 @@ export class TableA11yHarnessPage {
   protected cycleSort(): void {
     const current = this.sortDirection();
     this.sortDirection.set(current === 'asc' ? 'desc' : current === 'desc' ? null : 'asc');
+  }
+
+  protected recordSemanticResizeSort(): void {
+    this.semanticResizeSortCount.update((count) => count + 1);
+  }
+
+  protected recordSemanticResizeAction(): void {
+    this.semanticResizeActionCount.update((count) => count + 1);
+  }
+
+  protected recordSemanticResizeCommit(_event: HellTableResizeEvent): void {
+    this.semanticResizeCommitCount.update((count) => count + 1);
+  }
+
+  protected recordCdkResizeSort(): void {
+    this.cdkResizeSortCount.update((count) => count + 1);
+  }
+
+  protected recordCdkResizeAction(rowId: string): void {
+    this.cdkResizeActionCount.update((count) => count + 1);
+    this.cdkResizeActiveRowId.set(rowId);
+  }
+
+  protected recordCdkResizeCommit(_event: HellTableResizeEvent): void {
+    this.cdkResizeCommitCount.update((count) => count + 1);
+  }
+
+  private cdkResizeItem(columnId: 'name' | 'role', ariaControls: string): HellTableResizeItem {
+    return {
+      columnId,
+      ariaControls,
+      measure: () => this.cdkResizeWidths()[columnId],
+      minSize: () => 120,
+      setSize: (px) => this.setCdkResizeWidth(columnId, px),
+      commitSize: (px) => this.setCdkResizeWidth(columnId, px),
+    };
+  }
+
+  private setCdkResizeWidth(columnId: 'name' | 'role', px: number): void {
+    this.cdkResizeWidths.update((current) => ({ ...current, [columnId]: px }));
   }
 
   protected openEditor(rowId: string): void {
