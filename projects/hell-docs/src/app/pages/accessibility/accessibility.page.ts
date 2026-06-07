@@ -447,10 +447,29 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
         background: var(--color-hell-surface);
       }
 
+      .hd-a11y-table-hint {
+        display: none;
+        margin: 0 0 var(--spacing-hell-2);
+        font-size: var(--text-xs);
+        color: var(--color-hell-foreground-muted);
+      }
+
       .hd-a11y-table-wrap {
         max-width: 100%;
         overflow: auto;
         margin-block: var(--spacing-hell-4);
+      }
+
+      @media (max-width: 640px) {
+        .hd-a11y-table-hint {
+          display: block;
+        }
+
+        .hd-a11y-table-wrap {
+          border: 1px solid var(--color-hell-border);
+          border-radius: var(--radius-hell-lg);
+          padding-block-end: var(--spacing-hell-2);
+        }
       }
 
       .hd-a11y-table {
@@ -535,11 +554,15 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
         </div>
       </div>
 
+      <p id="hd-a11y-table-hint" class="hd-a11y-table-hint">
+        Scroll horizontally to view role, keyboard, coverage, and known-gap columns.
+      </p>
       <div
         hellTableContainer
         class="hd-a11y-table-wrap"
         role="region"
         aria-label="Component accessibility support matrix"
+        aria-describedby="hd-a11y-table-hint"
         tabindex="0"
       >
         <table hellTable contentWidth class="hd-a11y-table">

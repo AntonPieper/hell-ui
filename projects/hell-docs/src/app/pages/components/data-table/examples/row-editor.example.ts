@@ -25,9 +25,9 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
   imports: [...HELL_RESIZABLE_DIRECTIVES, ...HELL_TABLE_UTILITIES_DIRECTIVES, HellButton],
   template: `
     <div hellResizable orientation="horizontal" class="h-[420px]">
-      <div hellResizablePane [initialFlex]="3" [minSize]="280">
+      <div hellResizablePane [initialFlex]="5" [minSize]="340">
         <div hellTableContainer class="h-full overflow-auto">
-          <table hellTable>
+          <table hellTable class="min-w-[640px]">
             <thead hellTableHead>
               <tr>
                 <th hellTableHeaderCell columnId="id" class="w-18">
@@ -75,7 +75,7 @@ const ROWS: Row[] = Array.from({ length: 12 }, (_, i) => ({
         </div>
       </div>
       <div hellResizableHandle appearance="grip"></div>
-      <div [id]="editorId" hellResizablePane [initialFlex]="2" [minSize]="280" class="flex flex-col">
+      <div [id]="editorId" hellResizablePane [initialFlex]="2" [minSize]="220" class="flex flex-col">
         @if (activeRow(); as r) {
           <div class="flex items-center justify-between px-3 py-2 border-b hd-surface-subtle">
             <strong class="text-sm">{{ r.name }}</strong>
