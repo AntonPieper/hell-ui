@@ -33,7 +33,17 @@ import { HellIcon } from '@hell-ui/angular/icon';
 import { HellPaginationStrip } from '@hell-ui/angular/pagination';
 import { HellSkeleton } from '@hell-ui/angular/skeleton';
 
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
+import {
+  HELL_TABLE_UTILITIES_DIRECTIVES,
+  HellColumnVisibilityPanel,
+  actionColumn,
+  hellColumns,
+  hellTableInitialColumnVisibility,
+  hellTableVisibleColumns,
+  selectionColumn,
+  textColumn,
+  type HellTableColumnVisibilityState,
+} from '@hell-ui/angular/table';
 
 type RowRole = 'Admin' | 'Editor' | 'Viewer';
 type RowAssignee = 'Ada' | 'Grace' | 'Linus' | 'Margaret';
@@ -111,6 +121,41 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
   assignee: ASSIGNEES[i % ASSIGNEES.length],
 }));
 
+const columns = hellColumns<Row>();
+const TABLE_COLUMNS = columns.define([
+  selectionColumn<Row>('selection', {
+    header: 'Select',
+    selectAll: true,
+    ariaLabel: (row) => `Select ${row.name} for bulk actions`,
+  }),
+  textColumn<Row, number>('id', {
+    header: 'ID',
+    accessor: 'id',
+    visibility: 'always',
+  }),
+  textColumn<Row, string>('name', {
+    header: 'Name',
+    accessor: 'name',
+    visibility: 'always',
+  }),
+  textColumn<Row, string>('email', {
+    header: 'Email',
+    accessor: 'email',
+    visibility: 'user-toggleable',
+  }),
+  textColumn<Row, RowRole>('role', {
+    header: 'Role',
+    accessor: 'role',
+    visibility: 'user-toggleable',
+  }),
+  textColumn<Row, RowAssignee>('assignee', {
+    header: 'Assignee',
+    accessor: 'assignee',
+    visibility: 'user-toggleable',
+  }),
+  actionColumn<Row>('actions', { header: 'Actions' }),
+]);
+
 @Component({
   selector: 'app-data-table-example-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -119,6 +164,7 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
     ...HELL_OMNIBAR_DIRECTIVES,
     ...HELL_SPLIT_VIEW_DIRECTIVES,
     ...HELL_TABLE_UTILITIES_DIRECTIVES,
+    HellColumnVisibilityPanel,
     HellButton,
     HellIcon,
     HellPaginationStrip,
@@ -229,14 +275,31 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
           <hell-icon name="faSolidArrowRotateLeft" size="12px" />
           Reset
         </button>
-        @if (selectedRowIds().size) {
+        @if (selectedCount()) {
           <span class="rounded-full bg-hell-primary-soft px-2 py-1 text-xs text-hell-primary">
-            {{ selectedRowIds().size }} selected for bulk actions
+            {{ selectedCount() }} selected for bulk actions
           </span>
           <button hellButton size="sm" type="button" variant="ghost" (click)="clearRowSelection()">
             Clear selection
           </button>
         }
+      </div>
+
+      <div class="grid gap-3 rounded-md border border-hell-border bg-hell-surface-subtle p-3 md:grid-cols-[260px_minmax(0,1fr)]">
+        <div class="text-sm text-hell-foreground-muted">
+          <strong class="text-hell-foreground">Column visibility is app-owned state.</strong>
+          <p class="mt-2">
+            This example stores <code>columnVisibility</code> locally and applies it to primitive
+            header/body markup. The picker can hide user-toggleable data columns without changing
+            <code>activeRowKey</code> or <code>rowSelection</code>.
+          </p>
+        </div>
+        <hell-column-visibility-panel
+          [columns]="tableColumns"
+          [(columnVisibility)]="columnVisibility"
+          label="Visible columns"
+          description="Selection and actions stay required; data columns can be toggled."
+        />
       </div>
 
       <ng-template #filterMenu>
@@ -376,126 +439,172 @@ const ALL: readonly Row[] = Array.from({ length: 47 }, (_, i) => ({
               <table hellTable contentWidth>
                 <thead hellTableHead>
                   <tr>
-                    <th hellTableHeaderCell hellTableSelectionCell class="w-12">
-                      <input
-                        hellTableRowCheckbox
-                        type="checkbox"
-                        aria-label="Select visible rows"
-                        [checked]="allVisibleSelected()"
-                        [indeterminate]="someVisibleSelected()"
-                        (checkedChange)="setVisibleSelection($event)"
-                      />
-                    </th>
-                    <th
-                      hellTableHeaderCell
-                      columnId="id"
-                      class="w-20"
-                      sortable
-                      [sort]="tableSortKey() === 'id' ? order() : null"
-                      (sortToggle)="toggleSort('id')"
-                    >
-                      <button hellTableSortTrigger type="button">ID</button>
-                      <span hellTableResizeHandle></span>
-                    </th>
-                    <th
-                      hellTableHeaderCell
-                      columnId="name"
-                      class="w-45"
-                      sortable
-                      [sort]="tableSortKey() === 'name' ? order() : null"
-                      (sortToggle)="toggleSort('name')"
-                    >
-                      <button hellTableSortTrigger type="button">Name</button>
-                      <span hellTableResizeHandle></span>
-                    </th>
-                    <th
-                      hellTableHeaderCell
-                      columnId="email"
-                      class="w-65"
-                      sortable
-                      [sort]="tableSortKey() === 'email' ? order() : null"
-                      (sortToggle)="toggleSort('email')"
-                    >
-                      <button hellTableSortTrigger type="button">Email</button>
-                      <span hellTableResizeHandle></span>
-                    </th>
-                    <th
-                      hellTableHeaderCell
-                      columnId="role"
-                      class="w-35"
-                      sortable
-                      [sort]="tableSortKey() === 'role' ? order() : null"
-                      (sortToggle)="toggleSort('role')"
-                    >
-                      <button hellTableSortTrigger type="button">Role</button>
-                      <span hellTableResizeHandle></span>
-                    </th>
-                    <th
-                      hellTableHeaderCell
-                      columnId="assignee"
-                      class="w-45"
-                      sortable
-                      [sort]="tableSortKey() === 'assignee' ? order() : null"
-                      (sortToggle)="toggleSort('assignee')"
-                    >
-                      <button hellTableSortTrigger type="button">Assignee</button>
-                    </th>
-                    <th hellTableHeaderCell class="w-28">Actions</th>
+                    @if (columnVisible('selection')) {
+                      <th hellTableHeaderCell hellTableSelectionCell class="w-12">
+                        <input
+                          hellTableRowCheckbox
+                          type="checkbox"
+                          aria-label="Select visible rows"
+                          [checked]="allVisibleSelected()"
+                          [indeterminate]="someVisibleSelected()"
+                          (checkedChange)="setVisibleSelection($event)"
+                        />
+                      </th>
+                    }
+                    @if (columnVisible('id')) {
+                      <th
+                        hellTableHeaderCell
+                        columnId="id"
+                        class="w-20"
+                        sortable
+                        [sort]="tableSortKey() === 'id' ? order() : null"
+                        (sortToggle)="toggleSort('id')"
+                      >
+                        <button hellTableSortTrigger type="button">ID</button>
+                        <span hellTableResizeHandle></span>
+                      </th>
+                    }
+                    @if (columnVisible('name')) {
+                      <th
+                        hellTableHeaderCell
+                        columnId="name"
+                        class="w-45"
+                        sortable
+                        [sort]="tableSortKey() === 'name' ? order() : null"
+                        (sortToggle)="toggleSort('name')"
+                      >
+                        <button hellTableSortTrigger type="button">Name</button>
+                        <span hellTableResizeHandle></span>
+                      </th>
+                    }
+                    @if (columnVisible('email')) {
+                      <th
+                        hellTableHeaderCell
+                        columnId="email"
+                        class="w-65"
+                        sortable
+                        [sort]="tableSortKey() === 'email' ? order() : null"
+                        (sortToggle)="toggleSort('email')"
+                      >
+                        <button hellTableSortTrigger type="button">Email</button>
+                        <span hellTableResizeHandle></span>
+                      </th>
+                    }
+                    @if (columnVisible('role')) {
+                      <th
+                        hellTableHeaderCell
+                        columnId="role"
+                        class="w-35"
+                        sortable
+                        [sort]="tableSortKey() === 'role' ? order() : null"
+                        (sortToggle)="toggleSort('role')"
+                      >
+                        <button hellTableSortTrigger type="button">Role</button>
+                        <span hellTableResizeHandle></span>
+                      </th>
+                    }
+                    @if (columnVisible('assignee')) {
+                      <th
+                        hellTableHeaderCell
+                        columnId="assignee"
+                        class="w-45"
+                        sortable
+                        [sort]="tableSortKey() === 'assignee' ? order() : null"
+                        (sortToggle)="toggleSort('assignee')"
+                      >
+                        <button hellTableSortTrigger type="button">Assignee</button>
+                      </th>
+                    }
+                    @if (columnVisible('actions')) {
+                      <th hellTableHeaderCell class="w-28">Actions</th>
+                    }
                   </tr>
                 </thead>
                 <tbody hellTableBody>
                   @if (loading()) {
                     @for (row of skeletonRows(); track row) {
                       <tr hellTableRow>
-                        <td hellTableCell hellTableSelectionCell><div hellSkeleton width="14px" height="14px"></div></td>
-                        <td hellTableCell><div hellSkeleton width="34px" height="13px"></div></td>
-                        <td hellTableCell><div hellSkeleton width="70%" height="13px"></div></td>
-                        <td hellTableCell><div hellSkeleton width="84%" height="13px"></div></td>
-                        <td hellTableCell><div hellSkeleton width="58px" height="13px"></div></td>
-                        <td hellTableCell><div hellSkeleton width="72px" height="13px"></div></td>
-                        <td hellTableCell><div hellSkeleton width="54px" height="24px"></div></td>
+                        @if (columnVisible('selection')) {
+                          <td hellTableCell hellTableSelectionCell><div hellSkeleton width="14px" height="14px"></div></td>
+                        }
+                        @if (columnVisible('id')) {
+                          <td hellTableCell><div hellSkeleton width="34px" height="13px"></div></td>
+                        }
+                        @if (columnVisible('name')) {
+                          <td hellTableCell><div hellSkeleton width="70%" height="13px"></div></td>
+                        }
+                        @if (columnVisible('email')) {
+                          <td hellTableCell><div hellSkeleton width="84%" height="13px"></div></td>
+                        }
+                        @if (columnVisible('role')) {
+                          <td hellTableCell><div hellSkeleton width="58px" height="13px"></div></td>
+                        }
+                        @if (columnVisible('assignee')) {
+                          <td hellTableCell><div hellSkeleton width="72px" height="13px"></div></td>
+                        }
+                        @if (columnVisible('actions')) {
+                          <td hellTableCell><div hellSkeleton width="54px" height="24px"></div></td>
+                        }
                       </tr>
                     }
                   } @else if (error(); as message) {
                     <tr>
-                      <td hellTableCell align="center" space="empty" [attr.colspan]="7">{{ message }}</td>
+                      <td hellTableCell align="center" space="empty" [attr.colspan]="visibleColumnCount()">
+                        {{ message }}
+                      </td>
                     </tr>
                   } @else {
                     @for (row of rows(); track row.id) {
-                      <tr hellTableRow [active]="activeRowId() === row.id" [selected]="isSelected(row)">
-                        <td hellTableCell hellTableSelectionCell>
-                          <input
-                            hellTableRowCheckbox
-                            type="checkbox"
-                            [attr.aria-label]="'Select ' + row.name + ' for bulk actions'"
-                            [checked]="isSelected(row)"
-                            (checkedChange)="setRowSelected(row, $event)"
-                          />
-                        </td>
-                        <td hellTableCell>{{ row.id }}</td>
-                        <td hellTableCell>{{ row.name }}</td>
-                        <td hellTableCell>{{ row.email }}</td>
-                        <td hellTableCell>{{ row.role }}</td>
-                        <td hellTableCell>{{ row.assignee }}</td>
-                        <td hellTableCell>
-                          <button
-                            hellButton
-                            hellTableRowAction
-                            type="button"
-                            variant="ghost"
-                            size="xs"
-                            [attr.aria-label]="'Open details for ' + row.name"
-                            [attr.aria-controls]="detailPaneId"
-                            [attr.aria-expanded]="activeRowId() === row.id ? 'true' : 'false'"
-                            (click)="openRow(row)"
-                          >
-                            Open
-                          </button>
-                        </td>
+                      <tr hellTableRow [active]="activeRowKey() === row.id" [selected]="isSelected(row)">
+                        @if (columnVisible('selection')) {
+                          <td hellTableCell hellTableSelectionCell>
+                            <input
+                              hellTableRowCheckbox
+                              type="checkbox"
+                              [attr.aria-label]="'Select ' + row.name + ' for bulk actions'"
+                              [checked]="isSelected(row)"
+                              (checkedChange)="setRowSelected(row, $event)"
+                            />
+                          </td>
+                        }
+                        @if (columnVisible('id')) {
+                          <td hellTableCell>{{ row.id }}</td>
+                        }
+                        @if (columnVisible('name')) {
+                          <td hellTableCell>{{ row.name }}</td>
+                        }
+                        @if (columnVisible('email')) {
+                          <td hellTableCell>{{ row.email }}</td>
+                        }
+                        @if (columnVisible('role')) {
+                          <td hellTableCell>{{ row.role }}</td>
+                        }
+                        @if (columnVisible('assignee')) {
+                          <td hellTableCell>{{ row.assignee }}</td>
+                        }
+                        @if (columnVisible('actions')) {
+                          <td hellTableCell>
+                            <button
+                              hellButton
+                              hellTableRowAction
+                              type="button"
+                              variant="ghost"
+                              size="xs"
+                              [attr.aria-label]="'Open details for ' + row.name"
+                              [attr.aria-controls]="detailPaneId"
+                              [attr.aria-expanded]="activeRowKey() === row.id ? 'true' : 'false'"
+                              (click)="openRow(row)"
+                            >
+                              Open
+                            </button>
+                          </td>
+                        }
                       </tr>
                     } @empty {
                       <tr>
-                        <td hellTableCell align="center" space="empty" [attr.colspan]="7">No results.</td>
+                        <td hellTableCell align="center" space="empty" [attr.colspan]="visibleColumnCount()">
+                          No results.
+                        </td>
                       </tr>
                     }
                   }
@@ -589,10 +698,22 @@ export class DataTableExampleExample {
   protected readonly order = signal<RowOrder>('desc');
   protected readonly roleFilter = signal<RowFilter<RowRole>>('all');
   protected readonly assigneeFilter = signal<RowFilter<RowAssignee>>('all');
-  protected readonly activeRowId = signal<number | null>(null);
-  protected readonly selectedRowIds = signal<ReadonlySet<number>>(new Set());
+  protected readonly activeRowKey = signal<number | null>(null);
+  protected readonly rowSelection = signal<Readonly<Record<string, boolean>>>({});
+  protected readonly columnVisibility = signal<HellTableColumnVisibilityState>(
+    hellTableInitialColumnVisibility(TABLE_COLUMNS),
+  );
 
   private readonly drafts = signal<ReadonlyMap<number, string>>(new Map());
+
+  protected readonly tableColumns = TABLE_COLUMNS;
+  protected readonly visibleColumns = computed(() =>
+    hellTableVisibleColumns(this.tableColumns, this.columnVisibility()),
+  );
+  protected readonly visibleColumnCount = computed(() => this.visibleColumns().length);
+  protected readonly selectedCount = computed(
+    () => Object.values(this.rowSelection()).filter(Boolean).length,
+  );
 
   protected readonly roles = ROLES;
   protected readonly assignees = ASSIGNEES;
@@ -678,15 +799,15 @@ export class DataTableExampleExample {
     this.assigneeFilter() === 'all' ? 'Anyone' : this.assigneeFilter(),
   );
   protected readonly activeRow = computed(
-    () => this.rows().find((row) => row.id === this.activeRowId()) ?? null,
+    () => this.rows().find((row) => row.id === this.activeRowKey()) ?? null,
   );
   protected readonly allVisibleSelected = computed(() => {
     const rows = this.rows();
-    return rows.length > 0 && rows.every((row) => this.selectedRowIds().has(row.id));
+    return rows.length > 0 && rows.every((row) => this.isSelected(row));
   });
   protected readonly someVisibleSelected = computed(() => {
     const rows = this.rows();
-    const selectedCount = rows.filter((row) => this.selectedRowIds().has(row.id)).length;
+    const selectedCount = rows.filter((row) => this.isSelected(row)).length;
     return selectedCount > 0 && selectedCount < rows.length;
   });
   protected readonly docText = computed(() => {
@@ -790,44 +911,42 @@ export class DataTableExampleExample {
     this.page.set(0);
   }
 
+  protected columnVisible(columnId: string): boolean {
+    return this.visibleColumns().some((column) => column.id === columnId);
+  }
+
   protected isSelected(row: Row): boolean {
-    return this.selectedRowIds().has(row.id);
+    return this.rowSelection()[row.id] === true;
   }
 
   protected setRowSelected(row: Row, checked: boolean): void {
-    this.selectedRowIds.update((current) => {
-      const next = new Set(current);
-      if (checked) next.add(row.id);
-      else next.delete(row.id);
-      return next;
-    });
+    this.rowSelection.update((current) => rowSelectionWith(current, row.id, checked));
   }
 
   protected setVisibleSelection(checked: boolean): void {
-    this.selectedRowIds.update((current) => {
-      const next = new Set(current);
+    this.rowSelection.update((current) => {
+      let next = current;
       for (const row of this.rows()) {
-        if (checked) next.add(row.id);
-        else next.delete(row.id);
+        next = rowSelectionWith(next, row.id, checked);
       }
       return next;
     });
   }
 
   protected clearRowSelection(): void {
-    this.selectedRowIds.set(new Set());
+    this.rowSelection.set({});
   }
 
   protected openRow(row: Row): void {
-    this.activeRowId.set(row.id);
+    this.activeRowKey.set(row.id);
   }
 
   protected onDetailOpenChange(open: boolean): void {
-    if (!open) this.activeRowId.set(null);
+    if (!open) this.activeRowKey.set(null);
   }
 
   protected onEditorChange(text: string): void {
-    const id = this.activeRowId();
+    const id = this.activeRowKey();
     if (id == null) return;
     const next = new Map(this.drafts());
     next.set(id, text);
@@ -847,8 +966,8 @@ export class DataTableExampleExample {
       if (id !== this.requestId || controller.signal.aborted) return;
       this.rows.set(page.hits.map((hit) => hit.row));
       this.totalRows.set(page.total);
-      if (!page.hits.some((hit) => hit.row.id === this.activeRowId())) {
-        this.activeRowId.set(null);
+      if (!page.hits.some((hit) => hit.row.id === this.activeRowKey())) {
+        this.activeRowKey.set(null);
       }
     } catch (error) {
       if (id !== this.requestId || controller.signal.aborted) return;
@@ -859,6 +978,17 @@ export class DataTableExampleExample {
       if (id === this.requestId) this.loading.set(false);
     }
   }
+}
+
+function rowSelectionWith(
+  current: Readonly<Record<string, boolean>>,
+  rowId: number,
+  checked: boolean,
+): Readonly<Record<string, boolean>> {
+  const next = { ...current };
+  if (checked) next[String(rowId)] = true;
+  else delete next[String(rowId)];
+  return next;
 }
 
 function fetchRowsPage(request: RowApiRequest, signal?: AbortSignal): Promise<RowApiPage> {

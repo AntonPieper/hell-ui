@@ -602,6 +602,10 @@ function docsExampleRouteFromDetail(detail, title) {
 }
 
 function docsExampleComponentMeta(example, source) {
+  if (docsExampleCodeOnly(source)) {
+    return { codeOnly: true, stem: basename(example.detail, '.ts') };
+  }
+
   const selector = source.match(/selector:\s*'([^']+)'/)?.[1] ?? null;
   if (!selector) {
     failures.push(`Docs Example "${example.title}" has no Angular selector in ${example.detail}`);
@@ -619,11 +623,13 @@ function docsExampleComponentMeta(example, source) {
 
 function checkDocsExamplePageBinding(example, pageSource, meta) {
   const stemPattern = escapeRegExp(meta.stem);
-  const classImport = new RegExp(
-    `import\\s+\\{[^}]*\\b${escapeRegExp(meta.className)}\\b[^}]*\\}\\s+from\\s+['"]\\.\\/examples\\/${stemPattern}['"]`,
-  );
-  if (!classImport.test(pageSource)) {
-    failures.push(`Docs Example "${example.title}" is indexed but not imported by its page`);
+  if (!meta.codeOnly) {
+    const classImport = new RegExp(
+      `import\\s+\\{[^}]*\\b${escapeRegExp(meta.className)}\\b[^}]*\\}\\s+from\\s+['"]\\.\\/examples\\/${stemPattern}['"]`,
+    );
+    if (!classImport.test(pageSource)) {
+      failures.push(`Docs Example "${example.title}" is indexed but not imported by its page`);
+    }
   }
 
   const rawImport = new RegExp(
@@ -645,14 +651,20 @@ function checkDocsExamplePageBinding(example, pageSource, meta) {
   }
 
   const exampleTabs = pageSource.match(/<hd-example-tabs\b[\s\S]*?<\/hd-example-tabs>/g) ?? [];
-  const matchingTabs = exampleTabs.filter(
-    (block) => block.includes(`[code]="${codeField}"`) && block.includes(`<${meta.selector}`),
-  );
+  const matchingTabs = exampleTabs.filter((block) => {
+    if (!block.includes(`[code]="${codeField}"`)) return false;
+    return meta.codeOnly || block.includes(`<${meta.selector}`);
+  });
   if (matchingTabs.length !== 1) {
-    failures.push(
-      `Docs Example "${example.title}" must bind ${codeField} and render <${meta.selector}> in exactly one hd-example-tabs block`,
-    );
+    const requirement = meta.codeOnly
+      ? `bind ${codeField} in exactly one code-only hd-example-tabs block`
+      : `bind ${codeField} and render <${meta.selector}> in exactly one hd-example-tabs block`;
+    failures.push(`Docs Example "${example.title}" must ${requirement}`);
   }
+}
+
+function docsExampleCodeOnly(source) {
+  return source.includes('@hell-docs-code-only');
 }
 
 function checkDocsRootImportContract() {
@@ -2399,11 +2411,20 @@ function checkTableResizeHandleContract() {
   const docsRoot = join(root, 'projects/hell-docs/src/app');
   const docsOffenders = walk(docsRoot)
     .filter((file) => /\.(?:ts|html|md)$/.test(file))
-    .filter((file) => /hellTableColumnResizer|HellTableColumnResizer|columnResize/.test(readFile(file)))
+    .filter((file) => {
+      const source = readFile(file);
+      return /hellTableColumnResizer|HellTableColumnResizer|columnResize/.test(
+        sourceWithoutAllowedTableMigrationNote(source),
+      );
+    })
     .map((file) => file.slice(root.length + 1));
   if (docsOffenders.length) {
     failures.push(`Docs must use hellTableResizeHandle instead of legacy resizer APIs: ${docsOffenders.join(', ')}`);
   }
+}
+
+function sourceWithoutAllowedTableMigrationNote(source) {
+  return source.replace(/<h2>Migration note<\/h2>[\s\S]*?<h2>API<\/h2>/, '<h2>API</h2>');
 }
 
 function checkTableLegacyRemovalContract() {

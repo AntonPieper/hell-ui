@@ -18,12 +18,26 @@ import { DataTableExampleExample } from './examples/example.example';
 import dataTableExampleExampleCodeRaw from './examples/example.example.ts?raw' with {
   loader: 'text',
 };
+import { DataTableGridModeExample } from './examples/grid-mode.example';
+import dataTableGridModeExampleCodeRaw from './examples/grid-mode.example.ts?raw' with {
+  loader: 'text',
+};
 import { DataTableRowEditorExample } from './examples/row-editor.example';
 import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?raw' with {
   loader: 'text',
 };
+import { DataTableSelectionExample } from './examples/selection.example';
+import dataTableSelectionExampleCodeRaw from './examples/selection.example.ts?raw' with {
+  loader: 'text',
+};
 import { DataTableSimpleRendererExample } from './examples/simple-renderer.example';
 import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.example.ts?raw' with {
+  loader: 'text',
+};
+import dataTableTanStackTableExampleCodeRaw from './examples/tanstack-table.example.ts?raw' with {
+  loader: 'text',
+};
+import dataTableVirtualExampleCodeRaw from './examples/virtual.example.ts?raw' with {
   loader: 'text',
 };
 import { TableA11yHarnessPage } from './table-a11y-harness.page';
@@ -39,7 +53,9 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
     DataTableCustomRenderersExample,
     DataTableCdkSkinExample,
     DataTableExampleExample,
+    DataTableGridModeExample,
     DataTableRowEditorExample,
+    DataTableSelectionExample,
   ],
   template: `
     @if (showTableA11yHarness) {
@@ -49,35 +65,25 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
       <div class="hd-prose">
         <h1>Table utilities</h1>
         <p>
-          Table primitives from <code>@hell-ui/angular/table</code> are a set of low-level structural
-          directives for table markup, visual active/selected row states, explicit row action and
-          selection controls, sorting affordances, and column resizing. They are not a
-          batteries-included data grid and do not wrap TanStack Table.
-          The simple native renderer lives at <code>@hell-ui/angular/data-table</code>, with
-          optional adapter entrypoints for TanStack Table, TanStack Virtual row parts, and Angular CDK table skins.
+          Table utilities are composable layers, not a batteries-included data grid. Table primitives
+          from <code>@hell-ui/angular/table</code> provide semantic structure and state helpers,
+          <code>@hell-ui/angular/data-table</code> for the simple native array renderer, and optional
+          adapter entrypoints for TanStack Table, TanStack Virtual dynamic row parts, and Angular CDK
+          table skins.
         </p>
 
         <p>
-          The directives apply only host classes, data attributes, and ARIA wiring; the consumer
-          owns the <code>&lt;table&gt;</code>, <code>&lt;tr&gt;</code>, and cell markup, and composes
-          search, filtering, sorting, and pagination from other <code>hell</code> primitives.
+          Hell owns styling hooks, explicit active/selected visuals, native row action and selection
+          controls, sortable header affordances, column visibility UI, resize handles, and explicit
+          grid-mode semantics. Your app or table engine owns data sources, filtering, pagination,
+          persistence, and complex grid behavior.
         </p>
 
-        <h2>Scope</h2>
+        <h2>Simple array table</h2>
         <p>
-          This entrypoint deliberately does not own a backend data source, filtering, pagination,
-          virtualization, column-visibility persistence, or grid semantics yet. Import it from
-          <code>@hell-ui/angular/table</code>. Bring Angular CDK Table, TanStack Table, AG Grid, a
-          backend API, or your own state layer when you need a real data table. Use Hell's directives
-          only for host styling, active-row state, selected-row state, row action or selection
-          controls, sortable header affordances, column visibility UI, and column resize handles.
-        </p>
-
-        <h2>Simple renderer smoke</h2>
-        <p>
-          <code>hell-data-table</code> renders <code>HellColumnDef</code> columns against array or
-          signal rows with native <code>&lt;table&gt;</code> semantics. Minimal usage does not need
-          projected templates or optional table engines.
+          <code>hell-data-table</code> renders <code>HellColumnDef</code> columns against a simple
+          array with native <code>&lt;table&gt;</code> semantics. Minimal usage does not need projected
+          templates, TanStack, CDK, virtual scrolling, router, Font Awesome, CodeMirror, or pdf.js.
         </p>
       </div>
 
@@ -86,7 +92,20 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
       </hd-example-tabs>
 
       <div class="hd-prose">
-        <h2>Custom renderers smoke</h2>
+        <h2>Selectable rows</h2>
+        <p>
+          Add <code>selectionColumn()</code> and bind <code>[(rowSelection)]</code> when rows need
+          bulk actions. Selection is a stable <code>Record&lt;rowKey, boolean&gt;</code> and is exposed
+          through native checkbox or radio controls, not through row click shortcuts.
+        </p>
+      </div>
+
+      <hd-example-tabs class="hd-doc-wide" [code]="dataTableSelectionExampleCode" flush>
+        <app-data-table-selection-example />
+      </hd-example-tabs>
+
+      <div class="hd-prose">
+        <h2>Custom renderers</h2>
         <p>
           Project <code>hellCell</code>, <code>hellHeaderCell</code>, and
           <code>hellRowActions</code> templates when a simple table needs custom cell, header, or
@@ -118,6 +137,36 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
       </hd-example-tabs>
 
       <div class="hd-prose">
+        <h2>TanStack Table adapter</h2>
+        <p>
+          Import <code>@hell-ui/angular/table-tanstack</code> when TanStack owns row models, sorting,
+          selection, column visibility, and sizing. The adapter normalizes the TanStack table into a
+          Hell model so primitive table markup and render slots can stay consistent.
+        </p>
+      </div>
+
+      <hd-example-tabs class="hd-doc-wide" [code]="dataTableTanStackTableExampleCode" flush>
+        <div class="p-4 text-sm text-hell-foreground-muted">
+          Code-only adapter recipe. Open the Code tab to see TanStack state mapped into Hell table primitives.
+        </div>
+      </hd-example-tabs>
+
+      <div class="hd-prose">
+        <h2>TanStack Virtual dynamic rows</h2>
+        <p>
+          Import <code>@hell-ui/angular/table-virtual</code> for dynamic-height row, detail, or
+          editor parts. Hell flattens rows into stable keys such as <code>row:42</code> and
+          <code>editor:42</code>; TanStack Virtual owns windowing, measurement, and scrolling.
+        </p>
+      </div>
+
+      <hd-example-tabs class="hd-doc-wide" [code]="dataTableVirtualExampleCode" flush>
+        <div class="p-4 text-sm text-hell-foreground-muted">
+          Code-only dynamic-row recipe. Open the Code tab to see row-part measurement and virtual scrolling.
+        </div>
+      </hd-example-tabs>
+
+      <div class="hd-prose">
         <h2>Angular CDK table skin</h2>
         <p>
           Import <code>@hell-ui/angular/table-cdk</code> when an Angular CDK table should use the
@@ -139,12 +188,28 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
       </hd-example-tabs>
 
       <div class="hd-prose">
-        <h2>Table primitives example</h2>
+        <h2>Explicit grid mode</h2>
         <p>
-          Commit searches through <code>hell-omnibar</code>, tune filters and sorting from menu
-          submenus, fetch pages asynchronously with table skeletons, paginate via
-          <code>hell-pagination</code>, select rows for bulk actions with native checkboxes, and open
-          one active row in a responsive <code>hell-split-view</code> editor.
+          Normal tables remain semantic tables. Opt into grid semantics only with
+          <code>semantics=&quot;grid&quot;</code> plus an <code>interactionMode</code> such as
+          <code>cell-navigation</code>, <code>row-selection</code>, or <code>editing</code>. Grid mode
+          provides one table-root tab stop, row/column counts, row/cell indexes, and
+          <code>aria-activedescendant</code> wiring.
+        </p>
+      </div>
+
+      <hd-example-tabs class="hd-doc-wide" [code]="dataTableGridModeExampleCode" flush>
+        <app-data-table-grid-mode-example />
+      </hd-example-tabs>
+
+      <div class="hd-prose">
+        <h2>Master/detail split editor</h2>
+        <p>
+          The larger primitive example combines <code>hell-omnibar</code>, menus, skeletons,
+          pagination, column visibility, native checkbox bulk selection, and a responsive
+          <code>hell-split-view</code> editor. It uses <code>activeRowKey</code> only for the open
+          detail pane, <code>rowSelection</code> only for bulk actions, and
+          <code>columnVisibility</code> only for user show/hide preferences.
         </p>
       </div>
 
@@ -168,23 +233,41 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
       <div class="hd-prose">
         <h2>Migration note</h2>
         <p>
-          Rows are not buttons. For row actions such as Open or Edit, put a real
-          <code>button[hellTableRowAction]</code> or <code>a[hellTableRowAction]</code> inside a cell
-          and bind the native action there. Avoid whole-row actions for action-only tables.
+          The modern table layer intentionally removed the legacy compatibility names before beta:
         </p>
+        <ul>
+          <li>
+            Legacy <code>features/data-table</code> entrypoint aliases and
+            <code>styles/features/data-table</code> style aliases were removed. Use
+            <code>@hell-ui/angular/table</code>, <code>@hell-ui/angular/data-table</code>, and
+            <code>@hell-ui/angular/styles/table</code>.
+          </li>
+          <li>
+            Old directive constants such as <code>HELL_TABLE_DIRECTIVES</code> and
+            <code>HELL_TABLE_UTILITY_DIRECTIVES</code> were removed. Import standalone directives or
+            the current <code>HELL_TABLE_UTILITIES_DIRECTIVES</code> list.
+          </li>
+          <li>
+            Row interactive shortcuts such as <code>HellTableRow.interactive</code>,
+            <code>selectionSemantics</code>, <code>[selectable]</code>, and <code>(rowSelect)</code>
+            were removed. Put real <code>button[hellTableRowAction]</code> or
+            <code>a[hellTableRowAction]</code> controls inside cells for row actions.
+          </li>
+          <li>
+            <code>hellTableSortButton</code> was replaced by
+            <code>button[hellTableSortTrigger]</code>; the native button owns click and keyboard
+            activation while the header owns <code>aria-sort</code>.
+          </li>
+          <li>
+            <code>hellTableColumnResizer</code> was replaced by
+            <code>hellTableResizeHandle</code>; sizing state stays app- or adapter-owned.
+          </li>
+        </ul>
         <p>
-          Active rows and selected rows are separate. Use <code>[active]</code> on
-          <code>tr[hellTableRow]</code> for the row opened in a master/detail editor. Use
-          <code>[selected]</code> only as a visual mirror of a row-selection model, and expose the
-          actual checked state through <code>input[hellTableRowCheckbox]</code> or
-          <code>input[hellTableRowRadio]</code>. Native table rows do not get
-          <code>aria-selected</code>, <code>tabindex</code>, or row keyboard handlers.
-        </p>
-        <p>
-          Sortable headers use <code>button[hellTableSortTrigger]</code>. The
-          <code>&lt;th&gt;</code> keeps <code>aria-sort</code> only while it is the active sorted
-          header; the native button owns click and keyboard activation. Do not rely on a
-          focusable or clickable header cell.
+          Active rows, selected rows, and checked controls are separate. Use <code>[active]</code>
+          for the row opened in a master/detail editor, <code>[selected]</code> only as a visual
+          mirror of <code>rowSelection</code>, and native checkbox/radio checked state for assistive
+          technology.
         </p>
 
         <h2>API</h2>
@@ -368,9 +451,13 @@ export class DataTablePage {
   protected readonly showTableA11yHarness =
     this.route.snapshot.queryParamMap.has('tableA11yHarness');
   protected readonly dataTableSimpleRendererExampleCode = dataTableSimpleRendererExampleCodeRaw;
+  protected readonly dataTableSelectionExampleCode = dataTableSelectionExampleCodeRaw;
   protected readonly dataTableColumnVisibilityExampleCode = dataTableColumnVisibilityExampleCodeRaw;
   protected readonly dataTableCustomRenderersExampleCode = dataTableCustomRenderersExampleCodeRaw;
   protected readonly dataTableCdkSkinExampleCode = dataTableCdkSkinExampleCodeRaw;
   protected readonly dataTableExampleExampleCode = dataTableExampleExampleCodeRaw;
+  protected readonly dataTableGridModeExampleCode = dataTableGridModeExampleCodeRaw;
   protected readonly dataTableRowEditorExampleCode = dataTableRowEditorExampleCodeRaw;
+  protected readonly dataTableTanStackTableExampleCode = dataTableTanStackTableExampleCodeRaw;
+  protected readonly dataTableVirtualExampleCode = dataTableVirtualExampleCodeRaw;
 }

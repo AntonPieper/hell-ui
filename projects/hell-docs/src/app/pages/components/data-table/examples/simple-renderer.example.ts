@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 import { HellDataTable, hellColumns, textColumn } from '@hell-ui/angular/data-table';
 
@@ -25,11 +25,11 @@ const columns = hellColumns<Person>();
   `,
 })
 export class DataTableSimpleRendererExample {
-  protected readonly rows = signal<readonly Person[]>([
+  protected readonly rows: readonly Person[] = [
     { id: 'ada', name: 'Ada Lovelace', role: 'Admin' },
     { id: 'grace', name: 'Grace Hopper', role: 'Editor' },
     { id: 'margaret', name: 'Margaret Hamilton', role: 'Viewer' },
-  ]);
+  ];
 
   protected readonly tableColumns = columns.define([
     textColumn<Person, string>('name', { header: 'Name', accessor: 'name' }),

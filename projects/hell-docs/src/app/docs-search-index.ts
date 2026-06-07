@@ -729,10 +729,16 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     terms: 'code-editor editor-demo components/code-editor/examples/editor-demo.example components/code-editor hell-code-editor CodeMirror',
   },
   {
-    title: 'Data Table: Simple Renderer',
+    title: 'Data Table: Simple Array Renderer',
     path: '/components/data-table',
     detail: 'components/data-table/examples/simple-renderer.example.ts',
-    terms: 'data-table simple-renderer components/data-table/examples/simple-renderer.example components/data-table hell-data-table HellDataTable HellColumnDef hellColumns textColumn signal rows native table minimal no projected templates',
+    terms: 'data-table simple-renderer components/data-table/examples/simple-renderer.example components/data-table hell-data-table HellDataTable HellColumnDef hellColumns textColumn array rows native table minimal no projected templates',
+  },
+  {
+    title: 'Data Table: Selectable Rows',
+    path: '/components/data-table',
+    detail: 'components/data-table/examples/selection.example.ts',
+    terms: 'data-table selection selectable rows components/data-table/examples/selection.example components/data-table hell-data-table selectionColumn rowSelection checkbox bulk actions selected checked',
   },
   {
     title: 'Data Table: Custom Renderers',
@@ -747,16 +753,34 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     terms: 'data-table column-visibility components/data-table/examples/column-visibility.example components/data-table hell-column-visibility-panel columnVisibility visibility always user-toggleable initially-hidden external persistence localStorage',
   },
   {
+    title: 'Data Table: TanStack Table Adapter',
+    path: '/components/data-table',
+    detail: 'components/data-table/examples/tanstack-table.example.ts',
+    terms: 'data-table tanstack-table adapter components/data-table/examples/tanstack-table.example components/data-table table-tanstack hellTanStackTableModel HELL_TANSTACK_TABLE_DIRECTIVES createAngularTable sorting rowSelection columnVisibility flexRender',
+  },
+  {
+    title: 'Data Table: TanStack Virtual Dynamic Rows',
+    path: '/components/data-table',
+    detail: 'components/data-table/examples/virtual.example.ts',
+    terms: 'data-table tanstack-virtual dynamic rows components/data-table/examples/virtual.example components/data-table table-virtual injectHellTanStackVirtualRows hellTableMeasureRow row parts editor dynamic height measureElement virtualizer',
+  },
+  {
     title: 'Data Table: CDK Skin',
     path: '/components/data-table',
     detail: 'components/data-table/examples/cdk-skin.example.ts',
     terms: 'data-table cdk-skin components/data-table/examples/cdk-skin.example components/data-table table-cdk HELL_CDK_TABLE_DIRECTIVES hellCdkDisplayedColumns cdk-table cdk-header-cell cdk-cell cdk-row columnVisibility displayedColumns fixed-size virtual scroll TanStack Virtual',
   },
   {
-    title: 'Table Utilities: Example',
+    title: 'Data Table: Explicit Grid Mode',
+    path: '/components/data-table',
+    detail: 'components/data-table/examples/grid-mode.example.ts',
+    terms: 'data-table grid mode explicit components/data-table/examples/grid-mode.example components/data-table hellTable semantics grid interactionMode cell-navigation aria-activedescendant rowcount colcount one tab stop',
+  },
+  {
+    title: 'Table Utilities: Master Detail Example',
     path: '/components/data-table',
     detail: 'components/data-table/examples/example.example.ts',
-    terms: 'table utilities data-table example components/data-table/examples/example.example components/data-table hellTable hellTableRow hellTableSortTrigger hellOmnibar smart search ranking role assignee table primitives',
+    terms: 'table utilities data-table master detail split editor components/data-table/examples/example.example components/data-table hellTable hellTableRow hellTableRowAction hellTableSortTrigger hellOmnibar activeRowKey rowSelection columnVisibility bulk selection',
   },
   {
     title: 'Table Utilities: Row Editor',
@@ -885,7 +909,7 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
     title: 'Table utility directives',
     path: '/components/data-table',
     detail: 'hellTable, hellTableRow, hellTableHeaderCell, hellTableSortTrigger, hellTableResizeHandle',
-    terms: 'HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableSortTrigger hellTableCell hellTableResizeHandle resizeAdapter',
+    terms: 'HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTable hellTableHead hellTableBody hellTableRow hellTableHeaderCell hellTableSortTrigger hellTableCell hellTableResizeHandle resizeAdapter activeRowKey rowSelection columnVisibility grid semantics TanStack Table TanStack Virtual CDK',
   },
 ];
 
