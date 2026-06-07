@@ -296,12 +296,12 @@ describe('HellCombobox', () => {
     const defaultFixture = TestBed.createComponent(ComboboxBasicFormHost);
     defaultFixture.detectChanges();
 
-    expect(
-      query<HTMLButtonElement>(
-        defaultFixture.nativeElement,
-        'hell-combobox-basic button[hellComboboxButton]',
-      ).textContent?.trim(),
-    ).toBe('Toggle options');
+    const defaultButton = query<HTMLButtonElement>(
+      defaultFixture.nativeElement,
+      'hell-combobox-basic button[hellComboboxButton]',
+    );
+    expect(defaultButton.textContent?.trim()).toBe('');
+    expect(defaultButton.getAttribute('aria-label')).toBe('Toggle options');
 
     const fixture = TestBed.createComponent(ComboboxBasicLabelsHost);
     fixture.detectChanges();
@@ -315,7 +315,8 @@ describe('HellCombobox', () => {
       'hell-combobox-basic button[hellComboboxButton]',
     );
 
-    expect(button.textContent?.trim()).toBe('Open planet list');
+    expect(button.textContent?.trim()).toBe('');
+    expect(button.getAttribute('aria-label')).toBe('Open planet list');
 
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
     const dropdown = await waitForDropdown(fixture);

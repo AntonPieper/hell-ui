@@ -320,7 +320,12 @@ export class HellComboboxEmpty extends HellStyleable {}
         [attr.aria-label]="ariaLabel()"
         (input)="onFilterInput($any($event.target).value)"
       />
-      <button hellComboboxButton [unstyled]="unstyled()" type="button">{{ toggleLabel() }}</button>
+      <button
+        hellComboboxButton
+        [unstyled]="unstyled()"
+        type="button"
+        [attr.aria-label]="toggleLabel()"
+      ></button>
       <div *hellComboboxPortal hellComboboxDropdown [unstyled]="unstyled()">
         @for (option of filteredOptions(); track option) {
           <div hellComboboxOption [value]="option" [unstyled]="unstyled()">
