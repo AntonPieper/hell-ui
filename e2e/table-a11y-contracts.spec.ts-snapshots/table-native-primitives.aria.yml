@@ -1,0 +1,22 @@
+- table:
+  - rowgroup:
+    - row "Name Role Actions":
+      - columnheader "Name"
+      - columnheader "Role"
+      - columnheader "Actions"
+  - rowgroup:
+    - row "Ada Lovelace Admin View Ada Lovelace":
+      - cell "Ada Lovelace"
+      - cell "Admin"
+      - cell "View Ada Lovelace":
+        - button "View Ada Lovelace"
+    - row "Grace Hopper Editor View Grace Hopper":
+      - cell "Grace Hopper"
+      - cell "Editor"
+      - cell "View Grace Hopper":
+        - button "View Grace Hopper"
+    - row "Margaret Hamilton Viewer View Margaret Hamilton":
+      - cell "Margaret Hamilton"
+      - cell "Viewer"
+      - cell "View Margaret Hamilton":
+        - button "View Margaret Hamilton"

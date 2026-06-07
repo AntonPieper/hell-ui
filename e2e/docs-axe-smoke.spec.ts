@@ -65,10 +65,29 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     },
   },
   {
-    name: 'table utilities',
+    name: 'table primitives docs example',
     path: '/components/data-table',
     heading: 'Table utilities',
-    include: ['main'],
+    include: ['app-data-table-example-example'],
+    prepare: async (page) => {
+      await expect(
+        page
+          .locator('app-data-table-example-example')
+          .getByRole('cell', { name: 'user1@example.com' }),
+      ).toBeVisible();
+    },
+  },
+  {
+    name: 'simple data-table docs example',
+    path: '/components/data-table',
+    heading: 'Table utilities',
+    include: ['app-data-table-simple-renderer-example'],
+  },
+  {
+    name: 'table CDK adapter docs example',
+    path: '/components/data-table',
+    heading: 'Table utilities',
+    include: ['app-data-table-cdk-skin-example'],
   },
   {
     name: 'pdf viewer shell',

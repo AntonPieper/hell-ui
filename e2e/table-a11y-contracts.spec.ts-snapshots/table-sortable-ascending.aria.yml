@@ -1,0 +1,16 @@
+- table:
+  - rowgroup:
+    - row "Name Role":
+      - columnheader "Name":
+        - button "Name"
+      - columnheader "Role"
+  - rowgroup:
+    - row "Ada Lovelace Admin":
+      - cell "Ada Lovelace"
+      - cell "Admin"
+    - row "Grace Hopper Editor":
+      - cell "Grace Hopper"
+      - cell "Editor"
+    - row "Margaret Hamilton Viewer":
+      - cell "Margaret Hamilton"
+      - cell "Viewer"

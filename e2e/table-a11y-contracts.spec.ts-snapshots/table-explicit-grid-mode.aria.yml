@@ -1,0 +1,17 @@
+- grid:
+  - rowgroup:
+    - row "Name Role Action":
+      - columnheader "Name"
+      - columnheader "Role"
+      - columnheader "Action"
+  - rowgroup:
+    - row "Ada Lovelace Admin Edit Ada Lovelace" [selected]:
+      - gridcell "Ada Lovelace"
+      - gridcell "Admin"
+      - gridcell "Edit Ada Lovelace":
+        - button "Edit Ada Lovelace"
+    - row "Grace Hopper Editor Edit Grace Hopper":
+      - gridcell "Grace Hopper"
+      - gridcell "Editor"
+      - gridcell "Edit Grace Hopper":
+        - button "Edit Grace Hopper"

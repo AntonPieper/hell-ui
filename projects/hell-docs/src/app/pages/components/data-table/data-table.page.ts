@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import '@hell-ui/angular/styles/table';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { DataTableCdkSkinExample } from './examples/cdk-skin.example';
@@ -25,6 +26,7 @@ import { DataTableSimpleRendererExample } from './examples/simple-renderer.examp
 import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.example.ts?raw' with {
   loader: 'text',
 };
+import { TableA11yHarnessPage } from './table-a11y-harness.page';
 
 @Component({
   selector: 'hd-data-table',
@@ -32,6 +34,7 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
   imports: [
     ExampleTabs,
     DataTableSimpleRendererExample,
+    TableA11yHarnessPage,
     DataTableColumnVisibilityExample,
     DataTableCustomRenderersExample,
     DataTableCdkSkinExample,
@@ -39,6 +42,9 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
     DataTableRowEditorExample,
   ],
   template: `
+    @if (showTableA11yHarness) {
+      <hd-table-a11y-harness />
+    } @else {
     <article class="hd-doc-page">
       <div class="hd-prose">
         <h1>Table utilities</h1>
@@ -353,9 +359,14 @@ import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.ex
         </ul>
       </div>
     </article>
+    }
   `,
 })
 export class DataTablePage {
+  private readonly route = inject(ActivatedRoute);
+
+  protected readonly showTableA11yHarness =
+    this.route.snapshot.queryParamMap.has('tableA11yHarness');
   protected readonly dataTableSimpleRendererExampleCode = dataTableSimpleRendererExampleCodeRaw;
   protected readonly dataTableColumnVisibilityExampleCode = dataTableColumnVisibilityExampleCodeRaw;
   protected readonly dataTableCustomRenderersExampleCode = dataTableCustomRenderersExampleCodeRaw;
