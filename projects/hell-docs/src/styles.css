@@ -421,4 +421,15 @@
       font-weight: 600;
     }
   }
+
+  @media (max-width: 767px) {
+    .hell-shell:has(> .hd-docs-secondary) {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: 'topbar' 'content';
+    }
+
+    .hd-docs-secondary {
+      display: none;
+    }
+  }
 }
