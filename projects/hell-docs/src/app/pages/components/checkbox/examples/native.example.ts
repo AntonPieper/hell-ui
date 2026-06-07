@@ -6,7 +6,7 @@ import { HellNativeCheckbox } from '@hell-ui/angular/checkbox';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellNativeCheckbox],
   template: `
-    <label>
+    <label class="inline-flex items-center gap-2">
       <input
         type="checkbox"
         hellNativeCheckbox

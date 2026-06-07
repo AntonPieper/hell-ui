@@ -6,12 +6,15 @@ import { HellPaginationStrip } from '@hell-ui/angular/pagination';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellPaginationStrip],
   template: `
-    <hell-pagination
-      [page]="page2()"
-      [pageCount]="40"
-      [siblingCount]="4"
-      (pageChange)="page2.set($event)"
-    />
+    <div class="max-w-full overflow-x-auto pb-1">
+      <hell-pagination
+        class="w-max"
+        [page]="page2()"
+        [pageCount]="40"
+        [siblingCount]="4"
+        (pageChange)="page2.set($event)"
+      />
+    </div>
   `,
 })
 export class PaginationLargerWindowExample {

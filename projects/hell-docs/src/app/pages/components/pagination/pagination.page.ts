@@ -24,7 +24,7 @@ import paginationLargerWindowExampleCodeRaw from './examples/larger-window.examp
       </p>
 
       <h2>Basic</h2>
-      <hd-example-tabs [code]="paginationBasicExampleCode" previewClass="flex items-center gap-4">
+      <hd-example-tabs [code]="paginationBasicExampleCode" previewClass="flex flex-wrap items-center gap-3">
         <app-pagination-basic-example />
       </hd-example-tabs>
 

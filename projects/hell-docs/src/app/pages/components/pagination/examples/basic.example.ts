@@ -7,7 +7,7 @@ import { HellPaginationStrip } from '@hell-ui/angular/pagination';
   imports: [HellPaginationStrip],
   template: `
     <hell-pagination [page]="page()" [pageCount]="pageCount" (pageChange)="page.set($event)" />
-    <span>Page {{ page() }} of {{ pageCount }}</span>
+    <span class="whitespace-nowrap text-sm hd-muted">Page {{ page() }} of {{ pageCount }}</span>
   `,
 })
 export class PaginationBasicExample {

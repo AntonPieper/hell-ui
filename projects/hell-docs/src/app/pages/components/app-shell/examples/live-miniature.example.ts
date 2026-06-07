@@ -67,7 +67,7 @@ const HD_APP_SHELL_PAGE_ICONS = {
           Sections in the sidenav (e.g. <em>Settings</em>) collapse on click. When the rail itself
           is collapsed, section toggles disappear and items remain reachable as icons.
         </p>
-        <div class="mt-4 flex gap-2">
+        <div class="mt-4 flex flex-wrap gap-2">
           <button hellButton variant="primary" size="sm" type="button">New project</button>
           <button hellButton variant="ghost" size="sm" type="button">Invite</button>
         </div>
