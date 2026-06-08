@@ -49,12 +49,13 @@ const TABLE_COLUMNS = columns.define([
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton, HellColumnVisibilityPanel, HellTableContainer, ...HELL_CDK_TABLE_DIRECTIVES],
   template: `
-    <div class="grid gap-3 lg:grid-cols-[250px_minmax(0,1fr)]">
+    <div class="grid gap-3">
       <hell-column-visibility-panel
         [columns]="tableColumns"
         [(columnVisibility)]="columnVisibility"
         label="CDK columns"
         description="The CDK row definitions receive this derived displayedColumns list."
+        resetLabel="Restore"
       />
 
       <div class="grid gap-3">
@@ -93,7 +94,14 @@ const TABLE_COLUMNS = columns.define([
             <ng-container cdkColumnDef="actions">
               <th cdk-header-cell *cdkHeaderCellDef scope="col" columnId="actions">Actions</th>
               <td cdk-cell *cdkCellDef="let row">
-                <button hellTableRowAction type="button" (click)="openRow(row)">
+                <button
+                  hellButton
+                  hellTableRowAction
+                  type="button"
+                  size="xs"
+                  variant="ghost"
+                  (click)="openRow(row)"
+                >
                   Open {{ row.name }}
                 </button>
               </td>

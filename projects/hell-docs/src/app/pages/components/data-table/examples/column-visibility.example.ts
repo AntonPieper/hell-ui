@@ -49,12 +49,13 @@ const TABLE_COLUMNS = columns.define([
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton, ...HELL_DATA_TABLE_DIRECTIVES],
   template: `
-    <div class="grid gap-3 md:grid-cols-[260px_minmax(0,1fr)]">
+    <div class="grid gap-3">
       <hell-column-visibility-panel
         [columns]="tableColumns"
         [(columnVisibility)]="columnVisibility"
         label="Columns"
         description="Preferences are stored by this example component, not by Hell."
+        resetLabel="Restore"
       />
 
       <hell-data-table
@@ -69,7 +70,9 @@ const TABLE_COLUMNS = columns.define([
           Bulk actions for {{ selectedCount() }} rows
         </button>
         <ng-template [hellRowActions]="'actions'" let-row="row">
-          <button type="button" hellTableRowAction>Open {{ row.original.name }}</button>
+          <button type="button" hellButton hellTableRowAction size="xs" variant="ghost">
+            Open {{ row.original.name }}
+          </button>
         </ng-template>
       </hell-data-table>
     </div>

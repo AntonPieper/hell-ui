@@ -1,6 +1,7 @@
 - group "Harness columns":
-  - text: ""
+  - text: Harness columns
   - paragraph: Toggle optional harness table columns. Required columns stay checked.
+  - button "Reset columns"
   - list:
     - listitem:
       - checkbox "Select" [checked] [disabled]
@@ -17,4 +18,3 @@
     - listitem:
       - checkbox "Actions" [checked] [disabled]
       - text: ActionsRequired
-  - button "Reset columns"

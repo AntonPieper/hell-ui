@@ -1,4 +1,3 @@
-// @hell-docs-code-only
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, signal, type WritableSignal } from '@angular/core';
 import {
@@ -12,6 +11,7 @@ import {
   type VisibilityState,
 } from '@tanstack/angular-table';
 
+import { HellButton } from '@hell-ui/angular/button';
 import {
   HELL_TABLE_UTILITIES_DIRECTIVES,
   type HellTableSortDirection,
@@ -61,12 +61,17 @@ const COLUMNS: ColumnDef<Person>[] = [
 @Component({
   selector: 'app-data-table-tanstack-table-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgTemplateOutlet, ...HELL_TABLE_UTILITIES_DIRECTIVES, ...HELL_TANSTACK_TABLE_DIRECTIVES],
+  imports: [
+    HellButton,
+    NgTemplateOutlet,
+    ...HELL_TABLE_UTILITIES_DIRECTIVES,
+    ...HELL_TANSTACK_TABLE_DIRECTIVES,
+  ],
   template: `
     <div class="grid gap-3">
       <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-hell-foreground-muted">
         <span>TanStack owns sorting, row models, and visibility; Hell renders the normalized model.</span>
-        <button type="button" hellTableRowAction (click)="toggleEmailColumn()">
+        <button type="button" hellButton size="sm" variant="ghost" (click)="toggleEmailColumn()">
           {{ columnVisibility()['email'] === false ? 'Show email' : 'Hide email' }}
         </button>
       </div>

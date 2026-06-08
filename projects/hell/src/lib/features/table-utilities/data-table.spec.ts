@@ -330,7 +330,9 @@ describe('Hell table utilities directives', () => {
     expect(checkbox.checked).toBe(false);
     expect(radio.checked).toBe(false);
     expect(selectAll.indeterminate).toBe(true);
-    expect(selectAll.getAttribute('data-indeterminate')).toBe('true');
+    expect(selectAll.getAttribute('data-indeterminate')).toBe('');
+    expect(checkbox.classList.contains('hell-checkbox')).toBe(true);
+    expect(radio.classList.contains('hell-radio')).toBe(true);
     expect(byId<HTMLElement>(fixture.nativeElement, 'row-checkbox').getAttribute('data-hell-table-row-checkbox')).toBe('');
     expect(byId<HTMLElement>(fixture.nativeElement, 'row-radio').getAttribute('data-hell-table-row-radio')).toBe('');
 

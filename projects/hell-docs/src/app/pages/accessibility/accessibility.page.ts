@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
-import '@hell-ui/angular/styles/components/table';
+import '@hell-ui/angular/styles/table';
 
 interface AccessibilityMatrixRow {
   readonly kind: 'Primitive' | 'Composite' | 'Feature';

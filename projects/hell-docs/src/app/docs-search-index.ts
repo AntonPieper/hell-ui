@@ -783,12 +783,6 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     terms: 'table utilities data-table master detail split editor components/data-table/examples/example.example components/data-table hellTable hellTableRow hellTableRowAction hellTableSortTrigger hellOmnibar activeRowKey rowSelection columnVisibility bulk selection',
   },
   {
-    title: 'Table Utilities: Row Editor',
-    path: '/components/data-table',
-    detail: 'components/data-table/examples/row-editor.example.ts',
-    terms: 'table utilities data-table row-editor components/data-table/examples/row-editor.example components/data-table hellResizable hellTable table primitives textarea',
-  },
-  {
     title: 'Pdf Viewer: Lazy Loading',
     path: '/components/pdf-viewer',
     detail: 'components/pdf-viewer/examples/lazy-loading.example.ts',

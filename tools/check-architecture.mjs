@@ -1916,11 +1916,13 @@ function checkLabelContract() {
 }
 
 function exportedStyleableClasses(source) {
-  const styleableBases = new Set(
-    [...source.matchAll(/(?:abstract\s+)?class\s+([A-Za-z0-9_]+)[^{]*extends\s+(?:HellStyleable|HellNativeInteractiveDisabledGuard)\b/g)].map(
+  const styleableBases = new Set([
+    'HellNativeCheckbox',
+    'HellNativeRadio',
+    ...[...source.matchAll(/(?:abstract\s+)?class\s+([A-Za-z0-9_]+)[^{]*extends\s+(?:HellStyleable|HellNativeInteractiveDisabledGuard)\b/g)].map(
       (match) => match[1],
     ),
-  );
+  ]);
 
   return decoratedClassModules(source).filter((module) => {
     if (module.classSource.includes('extends HellStyleable')) return true;

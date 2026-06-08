@@ -37,8 +37,11 @@ const columns = hellColumns<Person>();
 
         <ng-template [hellRowActions]="'actions'" let-row="row" let-commands="commands">
           <button
+            hellButton
             hellTableRowAction
             type="button"
+            size="xs"
+            variant="ghost"
             [attr.aria-controls]="editorId"
             [attr.aria-expanded]="commands.isActive(row) ? 'true' : 'false'"
             (click)="commands.isActive(row) ? commands.closeRow(row) : commands.openRow(row)"

@@ -1,5 +1,6 @@
 import { CdkTableModule } from '@angular/cdk/table';
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { HellButton } from '@hell-ui/angular/button';
 import {
   HELL_TABLE_UTILITIES_DIRECTIVES,
   HellColumnVisibilityPanel,
@@ -65,6 +66,7 @@ const VISIBILITY_COLUMNS = columns.define([
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CdkTableModule,
+    HellButton,
     HellColumnVisibilityPanel,
     ...HELL_TABLE_UTILITIES_DIRECTIVES,
     HellCdkTable,
@@ -98,7 +100,9 @@ const VISIBILITY_COLUMNS = columns.define([
                   <td hellTableCell>{{ row.name }}</td>
                   <td hellTableCell>{{ row.role }}</td>
                   <td hellTableCell>
-                    <button hellTableRowAction type="button">View {{ row.name }}</button>
+                    <button hellButton hellTableRowAction type="button" size="xs" variant="ghost">
+                      View {{ row.name }}
+                    </button>
                   </td>
                 </tr>
               }
@@ -189,7 +193,14 @@ const VISIBILITY_COLUMNS = columns.define([
                   <td hellTableCell>{{ row.name }}</td>
                   <td hellTableCell>{{ row.role }}</td>
                   <td hellTableCell>
-                    <button hellTableRowAction type="button" (click)="recordSemanticResizeAction()">
+                    <button
+                      hellButton
+                      hellTableRowAction
+                      type="button"
+                      size="xs"
+                      variant="ghost"
+                      (click)="recordSemanticResizeAction()"
+                    >
                       Inspect {{ row.name }}
                     </button>
                   </td>
@@ -254,7 +265,14 @@ const VISIBILITY_COLUMNS = columns.define([
             <ng-container cdkColumnDef="actions">
               <th cdk-header-cell *cdkHeaderCellDef scope="col" columnId="actions">Actions</th>
               <td cdk-cell *cdkCellDef="let row">
-                <button hellTableRowAction type="button" (click)="recordCdkResizeAction(row.id)">
+                <button
+                  hellButton
+                  hellTableRowAction
+                  type="button"
+                  size="xs"
+                  variant="ghost"
+                  (click)="recordCdkResizeAction(row.id)"
+                >
                   Inspect {{ row.name }}
                 </button>
               </td>
@@ -289,8 +307,11 @@ const VISIBILITY_COLUMNS = columns.define([
                     <td hellTableCell>{{ row.role }}</td>
                     <td hellTableCell>
                       <button
+                        hellButton
                         hellTableRowAction
                         type="button"
+                        size="xs"
+                        variant="ghost"
                         [attr.aria-label]="'Open editor for ' + row.name"
                         [attr.aria-controls]="activeEditorPaneId"
                         [attr.aria-expanded]="activeRowId() === row.id ? 'true' : 'false'"
@@ -416,14 +437,18 @@ const VISIBILITY_COLUMNS = columns.define([
                 <td id="grid-ada-name" hellTableCell [colIndex]="1">Ada Lovelace</td>
                 <td id="grid-ada-role" hellTableCell [colIndex]="2">Admin</td>
                 <td id="grid-ada-action" hellTableCell [colIndex]="3">
-                  <button hellTableRowAction type="button">Edit Ada Lovelace</button>
+                  <button hellButton hellTableRowAction type="button" size="xs" variant="ghost">
+                    Edit Ada Lovelace
+                  </button>
                 </td>
               </tr>
               <tr hellTableRow [rowIndex]="3">
                 <td id="grid-grace-name" hellTableCell [colIndex]="1">Grace Hopper</td>
                 <td id="grid-grace-role" hellTableCell [colIndex]="2">Editor</td>
                 <td id="grid-grace-action" hellTableCell [colIndex]="3">
-                  <button hellTableRowAction type="button">Edit Grace Hopper</button>
+                  <button hellButton hellTableRowAction type="button" size="xs" variant="ghost">
+                    Edit Grace Hopper
+                  </button>
                 </td>
               </tr>
             </tbody>

@@ -286,25 +286,25 @@ test.describe('Hell UI browser behavior', () => {
   test('data table allows keyboard resize and keeps native rows passive', async ({ page }) => {
     await page.goto('/components/data-table');
 
-    const rowEditor = page.locator('app-data-table-row-editor-example');
-    await expect(rowEditor).toBeVisible();
+    const masterDetail = page.locator('app-data-table-example-example');
+    await expect(masterDetail).toBeVisible();
 
-    const separator = rowEditor.getByRole('separator', { name: 'Resize column' }).first();
+    const separator = masterDetail.getByRole('separator', { name: 'Resize column' }).first();
     const before = await separator.getAttribute('aria-valuenow');
     if (before === null) throw new Error('Expected initial column resize value.');
 
     await separator.press('ArrowRight');
     await expect(separator).not.toHaveAttribute('aria-valuenow', before);
 
-    const row1 = rowEditor.getByRole('row', { name: /User 1/ }).first();
-    const row2 = rowEditor.getByRole('row', { name: /User 2/ }).first();
+    const row1 = masterDetail.getByRole('row', { name: /User 1/ }).first();
+    const row2 = masterDetail.getByRole('row', { name: /User 2/ }).first();
 
     await row1.click();
     await expect(row1).not.toHaveAttribute('data-selected', 'true');
     await expect(row1).not.toHaveAttribute('tabindex');
     await expect(row1).not.toHaveAttribute('aria-selected');
 
-    const row2Action = row2.getByRole('button', { name: /Open editor for User 2/ }).first();
+    const row2Action = row2.getByRole('button', { name: /Open details for User 2/ }).first();
     await row2Action.click();
 
     await expect(row2).toHaveAttribute('data-active', 'true');

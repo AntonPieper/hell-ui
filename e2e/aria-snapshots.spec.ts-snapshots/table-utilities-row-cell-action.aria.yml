@@ -1,7 +1,10 @@
 - row /User 1/:
-  - cell
-  - cell
-  - cell
-  - cell
   - cell:
-    - button "Open editor for User 1"
+    - checkbox "Select User 1 for bulk actions"
+  - cell "1"
+  - cell "User 1"
+  - cell "user1@example.com"
+  - cell "Admin"
+  - cell "Ada"
+  - cell:
+    - button "Open details for User 1"

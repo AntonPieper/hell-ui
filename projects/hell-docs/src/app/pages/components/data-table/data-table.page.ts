@@ -22,10 +22,6 @@ import { DataTableGridModeExample } from './examples/grid-mode.example';
 import dataTableGridModeExampleCodeRaw from './examples/grid-mode.example.ts?raw' with {
   loader: 'text',
 };
-import { DataTableRowEditorExample } from './examples/row-editor.example';
-import dataTableRowEditorExampleCodeRaw from './examples/row-editor.example.ts?raw' with {
-  loader: 'text',
-};
 import { DataTableSelectionExample } from './examples/selection.example';
 import dataTableSelectionExampleCodeRaw from './examples/selection.example.ts?raw' with {
   loader: 'text',
@@ -34,9 +30,11 @@ import { DataTableSimpleRendererExample } from './examples/simple-renderer.examp
 import dataTableSimpleRendererExampleCodeRaw from './examples/simple-renderer.example.ts?raw' with {
   loader: 'text',
 };
+import { DataTableTanStackTableExample } from './examples/tanstack-table.example';
 import dataTableTanStackTableExampleCodeRaw from './examples/tanstack-table.example.ts?raw' with {
   loader: 'text',
 };
+import { DataTableVirtualExample } from './examples/virtual.example';
 import dataTableVirtualExampleCodeRaw from './examples/virtual.example.ts?raw' with {
   loader: 'text',
 };
@@ -54,8 +52,9 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
     DataTableCdkSkinExample,
     DataTableExampleExample,
     DataTableGridModeExample,
-    DataTableRowEditorExample,
     DataTableSelectionExample,
+    DataTableTanStackTableExample,
+    DataTableVirtualExample,
   ],
   template: `
     @if (showTableA11yHarness) {
@@ -146,9 +145,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
       </div>
 
       <hd-example-tabs class="hd-doc-wide" [code]="dataTableTanStackTableExampleCode" flush>
-        <div class="p-4 text-sm text-hell-foreground-muted">
-          Code-only adapter recipe. Open the Code tab to see TanStack state mapped into Hell table primitives.
-        </div>
+        <app-data-table-tanstack-table-example />
       </hd-example-tabs>
 
       <div class="hd-prose">
@@ -161,9 +158,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
       </div>
 
       <hd-example-tabs class="hd-doc-wide" [code]="dataTableVirtualExampleCode" flush>
-        <div class="p-4 text-sm text-hell-foreground-muted">
-          Code-only dynamic-row recipe. Open the Code tab to see row-part measurement and virtual scrolling.
-        </div>
+        <app-data-table-virtual-example />
       </hd-example-tabs>
 
       <div class="hd-prose">
@@ -217,18 +212,6 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
         <app-data-table-example-example />
       </hd-example-tabs>
 
-      <div class="hd-prose">
-        <h2>Row editor</h2>
-        <p>
-          Pair an explicit cell action with resizable panes when the table and editor both need
-          persistent room. Wire <code>aria-controls</code> and <code>aria-expanded</code> from the
-          action to the controlled editor pane.
-        </p>
-      </div>
-
-      <hd-example-tabs class="hd-doc-wide" [code]="dataTableRowEditorExampleCode" flush>
-        <app-data-table-row-editor-example />
-      </hd-example-tabs>
 
       <div class="hd-prose">
         <h2>Migration note</h2>
@@ -326,9 +309,9 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
           </li>
           <li>
             <code>input[type="checkbox"][hellTableRowCheckbox]</code> and
-            <code>input[type="radio"][hellTableRowRadio]</code>: native controls for row selection.
-            Their <code>checked</code> state, not <code>aria-selected</code> on the row, exposes
-            selection to assistive technology.
+            <code>input[type="radio"][hellTableRowRadio]</code>: table selection controls layered on
+            the Hell native checkbox/radio primitives. Their <code>checked</code> state, not
+            <code>aria-selected</code> on the row, exposes selection to assistive technology.
           </li>
           <li>
             <code>[hellTableResizeHandle]</code>: place inside a header cell with
@@ -457,7 +440,6 @@ export class DataTablePage {
   protected readonly dataTableCdkSkinExampleCode = dataTableCdkSkinExampleCodeRaw;
   protected readonly dataTableExampleExampleCode = dataTableExampleExampleCodeRaw;
   protected readonly dataTableGridModeExampleCode = dataTableGridModeExampleCodeRaw;
-  protected readonly dataTableRowEditorExampleCode = dataTableRowEditorExampleCodeRaw;
   protected readonly dataTableTanStackTableExampleCode = dataTableTanStackTableExampleCodeRaw;
   protected readonly dataTableVirtualExampleCode = dataTableVirtualExampleCodeRaw;
 }

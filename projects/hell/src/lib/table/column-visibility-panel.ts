@@ -8,6 +8,8 @@ import {
 } from '@angular/core';
 
 import { HellStyleable } from '../core/styleable';
+import { HellButton } from '../primitives/button/button';
+import { HellNativeCheckbox } from '../primitives/checkbox/checkbox';
 import {
   hellTableColumnCanToggleVisibility,
   hellTableColumnIsVisible,
@@ -40,45 +42,64 @@ let nextColumnVisibilityPanelId = 0;
 @Component({
   selector: 'hell-column-visibility-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellButton, HellNativeCheckbox],
   host: {
     '[class.hell-column-visibility-panel]': '!unstyled()',
     '[attr.data-hell-column-visibility-panel]': '""',
   },
   template: `
-    <fieldset [attr.aria-describedby]="description() ? descriptionId : null">
-      <legend [id]="legendId">{{ label() }}</legend>
-      @if (description(); as text) {
-        <p [id]="descriptionId" data-slot="description">{{ text }}</p>
-      }
+    <fieldset
+      role="group"
+      [attr.aria-labelledby]="legendId"
+      [attr.aria-describedby]="description() ? descriptionId : null"
+    >
+      <div data-slot="header">
+        <div data-slot="heading">
+          <legend [id]="legendId">{{ label() }}</legend>
+          @if (description(); as text) {
+            <p [id]="descriptionId" data-slot="description">{{ text }}</p>
+          }
+        </div>
+
+        <button
+          hellButton
+          type="button"
+          size="xs"
+          variant="ghost"
+          [disabled]="!canReset()"
+          (click)="resetColumnVisibility()"
+        >
+          {{ resetLabel() }}
+        </button>
+      </div>
 
       <ul data-slot="list">
         @for (item of items(); track item.column.id) {
-          <li data-slot="item" [attr.data-required]="item.disabled ? 'true' : null">
+          <li
+            data-slot="item"
+            [attr.data-visible]="item.checked ? 'true' : null"
+            [attr.data-required]="item.disabled ? 'true' : null"
+          >
             <label data-slot="option">
               <input
+                hellNativeCheckbox
                 type="checkbox"
                 [attr.aria-label]="item.label"
                 [attr.aria-describedby]="item.noteId"
                 [checked]="item.checked"
                 [disabled]="item.disabled"
-                (change)="setColumnVisible(item.column, $any($event.target).checked)"
+                (checkedChange)="setColumnVisible(item.column, $event)"
               />
               <span data-slot="label">{{ item.label }}</span>
+              @if (item.note) {
+                <span [id]="item.noteId" data-slot="note">{{ item.note }}</span>
+              }
             </label>
-            @if (item.note) {
-              <span [id]="item.noteId" data-slot="note">{{ item.note }}</span>
-            }
           </li>
         } @empty {
           <li data-slot="empty">{{ empty() }}</li>
         }
       </ul>
-
-      <div data-slot="actions">
-        <button type="button" [disabled]="!canReset()" (click)="resetColumnVisibility()">
-          {{ resetLabel() }}
-        </button>
-      </div>
     </fieldset>
   `,
 })

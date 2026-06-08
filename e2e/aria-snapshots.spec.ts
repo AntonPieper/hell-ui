@@ -121,11 +121,11 @@ test.describe('public docs aria snapshots', () => {
   test('table utility snapshot records active row semantics and cell action name', async ({ page }) => {
     await gotoDocsPage(page, '/components/data-table', 'Table utilities');
 
-    const rowEditor = page.locator('app-data-table-row-editor-example');
-    await expect(rowEditor).toBeVisible();
+    const masterDetail = page.locator('app-data-table-example-example');
+    await expect(masterDetail).toBeVisible();
 
-    const firstRow = rowEditor.getByRole('row', { name: /User 1/ }).first();
-    const open = firstRow.getByRole('button', { name: 'Open editor for User 1' });
+    const firstRow = masterDetail.getByRole('row', { name: /User 1/ }).first();
+    const open = firstRow.getByRole('button', { name: 'Open details for User 1' });
     await expect(open).toBeVisible();
     await open.click();
     await expect(firstRow).toHaveAttribute('data-active', 'true');

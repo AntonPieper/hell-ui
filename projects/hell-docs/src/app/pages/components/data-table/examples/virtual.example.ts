@@ -1,4 +1,3 @@
-// @hell-docs-code-only
 import {
   ChangeDetectionStrategy,
   Component,
@@ -8,6 +7,7 @@ import {
   signal,
 } from '@angular/core';
 
+import { HellButton } from '@hell-ui/angular/button';
 import {
   HellTableMeasureRow,
   hellTableRowsFromData,
@@ -37,12 +37,14 @@ const PEOPLE: readonly Person[] = Array.from({ length: 80 }, (_, index) => ({
 @Component({
   selector: 'app-data-table-virtual-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellTableMeasureRow],
+  imports: [HellButton, HellTableMeasureRow],
   template: `
     <div class="grid gap-3">
       <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-hell-foreground-muted">
         <span>TanStack Virtual renders Hell row parts, including an active dynamic-height editor.</span>
-        <button type="button" (click)="scrollToActiveRow()">Scroll to active row</button>
+        <button type="button" hellButton size="sm" variant="ghost" (click)="scrollToActiveRow()">
+          Scroll to active row
+        </button>
       </div>
 
       <div #scrollHost class="relative h-[420px] overflow-auto rounded-md border border-hell-border bg-hell-surface-subtle">
@@ -62,7 +64,13 @@ const PEOPLE: readonly Person[] = Array.from({ length: 80 }, (_, index) => ({
                       <div class="text-xs text-hell-foreground-muted">{{ part.key }}</div>
                     </div>
                     <span>{{ part.row.original.role }}</span>
-                    <button type="button" (click)="toggleEditor(part.row.key)">
+                    <button
+                      type="button"
+                      hellButton
+                      size="xs"
+                      variant="ghost"
+                      (click)="toggleEditor(part.row.key)"
+                    >
                       {{ activeRowKey() === part.row.key ? 'Close' : 'Open' }} editor
                     </button>
                   </div>
@@ -71,6 +79,7 @@ const PEOPLE: readonly Person[] = Array.from({ length: 80 }, (_, index) => ({
                     <strong>Dynamic editor for {{ part.row.original.name }}</strong>
                     <p class="mt-2">{{ part.row.original.notes }}</p>
                     <textarea
+                      [id]="'data-table-virtual-editor-' + part.row.key"
                       class="mt-2 w-full resize-none rounded border border-hell-border bg-hell-surface-subtle p-2 text-hell-foreground"
                       [value]="part.row.original.notes"
                       aria-label="Dynamic editor content"

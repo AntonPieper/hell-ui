@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 
+import { HellButton } from '@hell-ui/angular/button';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 
 interface Person {
@@ -11,7 +12,7 @@ interface Person {
 @Component({
   selector: 'app-data-table-grid-mode-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [HellButton, ...HELL_TABLE_UTILITIES_DIRECTIVES],
   template: `
     <div class="grid gap-3">
       <div hellTableContainer class="overflow-auto">
@@ -38,8 +39,11 @@ interface Person {
                 <td hellTableCell [colIndex]="2">{{ row.role }}</td>
                 <td hellTableCell [colIndex]="3">
                   <button
+                    hellButton
                     hellTableRowAction
                     type="button"
+                    size="xs"
+                    variant="ghost"
                     [attr.aria-pressed]="activeRowKey() === row.id ? 'true' : 'false'"
                     (click)="activeRowKey.set(row.id)"
                   >

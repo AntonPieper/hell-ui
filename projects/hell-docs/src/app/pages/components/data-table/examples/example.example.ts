@@ -239,66 +239,59 @@ const TABLE_COLUMNS = columns.define([
         }
       </hell-omnibar>
 
-      <div class="flex flex-wrap items-center gap-2">
-        <button
-          hellButton
-          size="sm"
-          type="button"
-          [variant]="hasActiveFilters() ? 'soft' : 'default'"
-          [hellMenuTrigger]="filterMenu"
-          [openTriggers]="menuOpenTriggers"
-          placement="bottom-start"
-        >
-          <hell-icon name="faSolidFilter" size="12px" />
-          Filters
-        </button>
-        <button
-          hellButton
-          size="sm"
-          type="button"
-          [variant]="orderBy() !== 'rank' || order() !== 'desc' ? 'soft' : 'default'"
-          [hellMenuTrigger]="sortMenu"
-          [openTriggers]="menuOpenTriggers"
-          placement="bottom-start"
-        >
-          <hell-icon name="faSolidTable" size="12px" />
-          {{ orderByLabel() }}
-        </button>
-        <button
-          hellButton
-          size="sm"
-          type="button"
-          variant="ghost"
-          [disabled]="!hasQueryState()"
-          (click)="clearQueryState()"
-        >
-          <hell-icon name="faSolidArrowRotateLeft" size="12px" />
-          Reset
-        </button>
-        @if (selectedCount()) {
-          <span class="rounded-full bg-hell-primary-soft px-2 py-1 text-xs text-hell-primary">
-            {{ selectedCount() }} selected for bulk actions
-          </span>
-          <button hellButton size="sm" type="button" variant="ghost" (click)="clearRowSelection()">
-            Clear selection
+      <div class="grid gap-3 rounded-lg border border-hell-border bg-hell-surface-subtle p-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            hellButton
+            size="sm"
+            type="button"
+            [variant]="hasActiveFilters() ? 'soft' : 'default'"
+            [hellMenuTrigger]="filterMenu"
+            [openTriggers]="menuOpenTriggers"
+            placement="bottom-start"
+          >
+            <hell-icon name="faSolidFilter" size="12px" />
+            Filters
           </button>
-        }
-      </div>
-
-      <div class="grid gap-3 rounded-md border border-hell-border bg-hell-surface-subtle p-3 md:grid-cols-[260px_minmax(0,1fr)]">
-        <div class="text-sm text-hell-foreground-muted">
-          <strong class="text-hell-foreground">Column visibility is app-owned state.</strong>
-          <p class="mt-2">
-            This example stores <code>columnVisibility</code> locally and applies it to primitive
-            header/body markup. The picker can hide user-toggleable data columns without changing
-            <code>activeRowKey</code> or <code>rowSelection</code>.
-          </p>
+          <button
+            hellButton
+            size="sm"
+            type="button"
+            [variant]="orderBy() !== 'rank' || order() !== 'desc' ? 'soft' : 'default'"
+            [hellMenuTrigger]="sortMenu"
+            [openTriggers]="menuOpenTriggers"
+            placement="bottom-start"
+          >
+            <hell-icon name="faSolidTable" size="12px" />
+            {{ orderByLabel() }}
+          </button>
+          <button
+            hellButton
+            size="sm"
+            type="button"
+            variant="ghost"
+            [disabled]="!hasQueryState()"
+            (click)="clearQueryState()"
+          >
+            <hell-icon name="faSolidArrowRotateLeft" size="12px" />
+            Reset
+          </button>
+          @if (selectedCount()) {
+            <span class="rounded-full bg-hell-primary-soft px-2 py-1 text-xs text-hell-primary">
+              {{ selectedCount() }} selected for bulk actions
+            </span>
+            <button hellButton size="sm" type="button" variant="ghost" (click)="clearRowSelection()">
+              Clear selection
+            </button>
+          }
         </div>
+
         <hell-column-visibility-panel
           [columns]="tableColumns"
           [(columnVisibility)]="columnVisibility"
-          label="Visible columns"
-          description="Selection and actions stay required; data columns can be toggled."
+          label="View"
+          description="Show/hide optional data columns. Selection and actions stay locked."
+          resetLabel="Restore"
         />
       </div>
 
@@ -513,10 +506,11 @@ const TABLE_COLUMNS = columns.define([
                         (sortToggle)="toggleSort('assignee')"
                       >
                         <button hellTableSortTrigger type="button">Assignee</button>
+                        <span hellTableResizeHandle></span>
                       </th>
                     }
                     @if (columnVisible('actions')) {
-                      <th hellTableHeaderCell class="w-28">Actions</th>
+                      <th hellTableHeaderCell columnId="actions" class="w-28">Actions</th>
                     }
                   </tr>
                 </thead>
@@ -642,21 +636,67 @@ const TABLE_COLUMNS = columns.define([
         </ng-template>
 
         <ng-template hellSplitDetail>
-          <div [id]="detailPaneId" class="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div [id]="detailPaneId" class="flex min-h-0 min-w-0 flex-1 flex-col bg-hell-surface-elevated">
             @if (activeRow(); as row) {
-              <div class="flex items-center justify-between border-b border-hell-border bg-hell-surface-subtle p-3">
-                <strong class="text-sm font-semibold text-hell-foreground">{{ row.name }}</strong>
-                <span class="text-xs text-hell-foreground-muted">#{{ row.id }}</span>
+              <div class="border-b border-hell-border bg-hell-surface-subtle p-3">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-hell-foreground-subtle">
+                      Editing record
+                    </p>
+                    <strong class="block truncate text-base font-semibold text-hell-foreground">
+                      {{ row.name }}
+                    </strong>
+                    <span class="text-xs text-hell-foreground-muted">{{ row.email }}</span>
+                  </div>
+                  <button
+                    hellButton
+                    type="button"
+                    size="xs"
+                    variant="ghost"
+                    [attr.aria-controls]="detailPaneId"
+                    (click)="closeDetail()"
+                  >
+                    Close
+                  </button>
+                </div>
+
+                <dl class="mt-3 grid grid-cols-3 gap-2 text-xs">
+                  <div class="rounded-md border border-hell-border bg-hell-surface-elevated px-2 py-1.5">
+                    <dt class="text-hell-foreground-subtle">ID</dt>
+                    <dd class="font-semibold text-hell-foreground">#{{ row.id }}</dd>
+                  </div>
+                  <div class="rounded-md border border-hell-border bg-hell-surface-elevated px-2 py-1.5">
+                    <dt class="text-hell-foreground-subtle">Role</dt>
+                    <dd class="font-semibold text-hell-foreground">{{ row.role }}</dd>
+                  </div>
+                  <div class="rounded-md border border-hell-border bg-hell-surface-elevated px-2 py-1.5">
+                    <dt class="text-hell-foreground-subtle">Assignee</dt>
+                    <dd class="font-semibold text-hell-foreground">{{ row.assignee }}</dd>
+                  </div>
+                </dl>
               </div>
+
+              <label
+                class="flex items-center justify-between gap-3 border-b border-hell-border px-3 py-2 text-xs font-semibold text-hell-foreground-muted"
+                [attr.for]="detailEditorId"
+              >
+                <span>Draft JSON</span>
+                <span>Autosaved locally in this example</span>
+              </label>
               <textarea
-                class="min-h-0 min-w-0 flex-1 resize-none rounded border border-hell-border bg-transparent p-3 text-sm text-hell-foreground"
+                [id]="detailEditorId"
+                class="min-h-0 min-w-0 flex-1 resize-none border-0 bg-transparent p-3 font-mono text-xs leading-relaxed text-hell-foreground outline-none focus-visible:ring-2 focus-visible:ring-hell-focus-ring"
                 rows="12"
                 [value]="docText()"
                 (input)="onEditorChange($any($event.target).value ?? '')"
               ></textarea>
             } @else {
-              <div class="flex flex-1 items-center justify-center text-center text-sm text-hell-foreground-muted">
-                Open a row to edit.
+              <div class="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center text-sm text-hell-foreground-muted">
+                <span class="rounded-full bg-hell-primary-soft px-3 py-1 text-xs font-semibold text-hell-primary">
+                  No row open
+                </span>
+                <p>Choose an Open action in the table to inspect and edit that row.</p>
               </div>
             }
           </div>
@@ -720,6 +760,7 @@ export class DataTableExampleExample {
   protected readonly pageSizeOptions = PAGE_SIZES;
   protected readonly searchSuggestionLimit = SEARCH_SUGGESTION_LIMIT;
   protected readonly detailPaneId = 'data-table-example-detail-pane';
+  protected readonly detailEditorId = 'data-table-example-detail-editor';
   protected readonly menuOpenTriggers: ('click' | 'enter' | 'arrowkey')[] = [
     'click',
     'enter',
@@ -943,6 +984,10 @@ export class DataTableExampleExample {
 
   protected onDetailOpenChange(open: boolean): void {
     if (!open) this.activeRowKey.set(null);
+  }
+
+  protected closeDetail(): void {
+    this.activeRowKey.set(null);
   }
 
   protected onEditorChange(text: string): void {

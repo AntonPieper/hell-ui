@@ -1,5 +1,7 @@
 import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
+import { HellNativeCheckbox } from '../../primitives/checkbox/checkbox';
+import { HellNativeRadio } from '../../primitives/radio/radio';
 import {
   HellResizePairInteractionController,
   hellResizePairAriaValue,
@@ -555,66 +557,36 @@ export class HellTableRowAction extends HellStyleable {
 })
 export class HellTableSelectionCell extends HellStyleable {}
 
-/** Native checkbox for row-selection columns. */
+/** Native checkbox primitive for row-selection columns with table-specific grid focus hooks. */
 @Directive({
   selector: 'input[type="checkbox"][hellTableRowCheckbox]',
   exportAs: 'hellTableRowCheckbox',
   host: {
     '[class.hell-table-row-checkbox]': '!unstyled()',
     '[attr.data-hell-table-row-checkbox]': '""',
-    '[attr.type]': '"checkbox"',
-    '[attr.data-indeterminate]': 'indeterminate() ? "true" : null',
     '[attr.tabindex]': 'gridTabIndex()',
-    '(change)': 'onChange()',
   },
 })
-export class HellTableRowCheckbox extends HellStyleable {
-  readonly indeterminate = input(false, { transform: booleanAttribute });
-
-  readonly checkedChange = output<boolean>();
-  readonly indeterminateChange = output<boolean>();
-
-  private readonly host = inject(ElementRef<HTMLInputElement>).nativeElement;
+export class HellTableRowCheckbox extends HellNativeCheckbox {
   private readonly table = inject(HellTable, { optional: true, skipSelf: true });
-
-  constructor() {
-    super();
-    effect(() => {
-      this.host.indeterminate = this.indeterminate();
-    });
-  }
-
-  protected onChange(): void {
-    this.checkedChange.emit(this.host.checked);
-    this.indeterminateChange.emit(this.host.indeterminate);
-  }
 
   protected gridTabIndex(): -1 | null {
     return this.table?.isGridMode() ? -1 : null;
   }
 }
 
-/** Native radio for single row-selection columns. */
+/** Native radio primitive for single row-selection columns with table-specific grid focus hooks. */
 @Directive({
   selector: 'input[type="radio"][hellTableRowRadio]',
   exportAs: 'hellTableRowRadio',
   host: {
     '[class.hell-table-row-radio]': '!unstyled()',
     '[attr.data-hell-table-row-radio]': '""',
-    '[attr.type]': '"radio"',
     '[attr.tabindex]': 'gridTabIndex()',
-    '(change)': 'onChange()',
   },
 })
-export class HellTableRowRadio extends HellStyleable {
-  readonly checkedChange = output<boolean>();
-
-  private readonly host = inject(ElementRef<HTMLInputElement>).nativeElement;
+export class HellTableRowRadio extends HellNativeRadio {
   private readonly table = inject(HellTable, { optional: true, skipSelf: true });
-
-  protected onChange(): void {
-    this.checkedChange.emit(this.host.checked);
-  }
 
   protected gridTabIndex(): -1 | null {
     return this.table?.isGridMode() ? -1 : null;
