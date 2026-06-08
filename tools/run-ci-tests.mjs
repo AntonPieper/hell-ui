@@ -1,6 +1,5 @@
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, rmSync } from 'node:fs';
-import { runPackageManager } from './package-manager.mjs';
 
 const reports = ['test-results', 'coverage'];
 
@@ -41,7 +40,10 @@ let failed = false;
 
 for (const task of tasks) {
   console.log(`\n[ci] ${task.name}`);
-  const result = runPackageManager(task.args);
+  const result = spawnSync('pnpm', task.args, {
+    shell: process.platform === 'win32',
+    stdio: 'inherit',
+  });
 
   if (result.error) {
     console.error(`[ci] ${task.name} failed to start: ${result.error.message}`);

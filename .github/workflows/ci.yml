@@ -40,13 +40,13 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install
-        run: node tools/package-manager.mjs run ci:install
+        run: pnpm run ci:install
 
       - name: Install Playwright browsers
-        run: node tools/package-manager.mjs run ci:playwright
+        run: pnpm run ci:playwright
 
       - name: Test
-        run: node tools/package-manager.mjs run ci:test
+        run: pnpm run ci:test
 
       - name: Upload test reports
         if: always()
@@ -58,27 +58,6 @@ jobs:
             playwright-report/
             coverage/
           if-no-files-found: ignore
-
-  npm-smoke:
-    name: npm smoke
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: package-lock.json
-
-      - name: Install with npm lock
-        run: npm ci --ignore-scripts --no-audit --no-fund
-
-      - name: Check CI contract
-        run: npm run test:ci-contract
 
   build:
     name: Build
@@ -102,10 +81,10 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install
-        run: node tools/package-manager.mjs run ci:install
+        run: pnpm run ci:install
 
       - name: Build
-        run: node tools/package-manager.mjs run ci:build
+        run: pnpm run ci:build
 
       - name: Upload build output
         uses: actions/upload-artifact@v4

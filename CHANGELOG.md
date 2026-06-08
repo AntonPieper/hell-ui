@@ -18,7 +18,7 @@ Initial internal-beta seed reconstructed from the slice board through HELL-050. 
 
 - HELL-004: Generated entrypoint manifests so public package entrypoints can be audited instead of hand-maintained.
 - HELL-020, HELL-021, HELL-022: Made package-consumer checks observable, preflighted, and runnable by individual install scenario.
-- HELL-023, HELL-024: Added npm pack/APF audit coverage and documented peer-dependency tiers for core, primitive, composite, table-utilities, code-editor, and PDF viewer entrypoints.
+- HELL-023, HELL-024: Added pnpm pack/APF audit coverage and documented peer-dependency tiers for core, primitive, composite, table-utilities, code-editor, and PDF viewer entrypoints.
 - HELL-025, HELL-026: Added API Extractor reports for stable public entrypoints and documented stable, beta, experimental, deprecated, and internal export categories.
 - HELL-027, HELL-028, HELL-049: Added release dry-run evidence, trusted npm publishing/provenance workflow docs, and a production-readiness checklist gate.
 - HELL-038, HELL-039, HELL-040, HELL-041, HELL-042, HELL-043: Added browser accessibility contracts, keyboard matrices, axe smoke checks, ARIA snapshots, and a component accessibility support matrix.

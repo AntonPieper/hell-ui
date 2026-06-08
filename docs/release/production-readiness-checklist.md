@@ -2,7 +2,7 @@
 
 Status: **internal beta until the production-readiness gate passes**.
 
-This checklist is the release-claim gate for Hell UI. Until `pnpm production-ready:check` passes against fresh release-candidate evidence, release notes, README copy, npm descriptions, docs pages, and agent handoffs must keep using internal-beta, beta, or experimental language instead of "production ready". Version bumps must also satisfy `docs/release/semver-policy.md` and the `CHANGELOG.md` entry enforced by release dry-run.
+This checklist is the release-claim gate for Hell UI. Until `pnpm production-ready:check` passes against fresh release-candidate evidence, release notes, README copy, package registry descriptions, docs pages, and agent handoffs must keep using internal-beta, beta, or experimental language instead of "production ready". Version bumps must also satisfy `docs/release/semver-policy.md` and the `CHANGELOG.md` entry enforced by release dry-run.
 
 The gate is evidence-based, not a replacement for running the commands. Evidence under `test-results/` is intentionally untracked; run the commands, inspect failures, then run the gate.
 
@@ -156,7 +156,7 @@ pnpm production-ready:check
     },
     {
       "category": "pack-audit",
-      "title": "npm pack contents and APF audit proof",
+      "title": "pnpm pack contents and APF audit proof",
       "sliceIds": [
         "HELL-023",
         "HELL-024",

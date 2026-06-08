@@ -21,7 +21,7 @@ const angularJsonPath = join(root, 'angular.json');
 const budgetPolicyPath = join(root, DOCS_BUDGET_POLICY_PATH);
 
 if (!existsSync(statsPath)) {
-  console.error(`Missing ${relative(root, statsPath)}. Run npm run build:docs first.`);
+  console.error(`Missing ${relative(root, statsPath)}. Run pnpm run build:docs first.`);
   process.exit(1);
 }
 
@@ -239,9 +239,9 @@ ${renderPdfViewerStyleRow(pdfViewerStyleWarnings)}
 ## Reproduce
 
 ~~~bash
-npm run build:lib
-npm run build:docs
-npm run diagnose:docs-bundle
+pnpm run build:lib
+pnpm run build:docs
+pnpm run diagnose:docs-bundle
 ~~~
 
 \`build:docs\` enables Angular's \`statsJson\` option for the production docs app, which writes \`dist/hell-docs/stats.json\`. Local Angular builder schema documents that \`statsJson\` generates a \`stats.json\` file for esbuild analysis; Context7 \`/websites/angular_dev\` confirms \`ng build\` uses the application builder options from \`angular.json\` for app builds.

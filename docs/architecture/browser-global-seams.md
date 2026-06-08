@@ -1,7 +1,7 @@
 # SSR/browser global seams
 
 - Slice: HELL-048
-- Enforced by: `npm run test:architecture` (`tools/check-architecture.mjs`, `checkBrowserGlobalContract()`)
+- Enforced by: `pnpm run test:architecture` (`tools/check-architecture.mjs`, `checkBrowserGlobalContract()`)
 - Scope: production TypeScript under `projects/hell/src/lib`; specs, declarations, and the PDF worker file are excluded.
 
 ## Rule

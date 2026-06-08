@@ -9,18 +9,17 @@ RUN corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml angular.json tsconfig.json ./
 COPY projects/hell/package.json projects/hell/package.json
-COPY tools/package-manager.mjs tools/package-manager.mjs
-RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store node tools/package-manager.mjs run ci:install
-RUN node tools/package-manager.mjs run ci:playwright
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store pnpm run ci:install
+RUN pnpm run ci:playwright
 
 FROM deps AS source
 COPY . .
 
 FROM source AS test
-RUN --mount=type=cache,id=angular-cache,target=/workspace/.angular/cache node tools/package-manager.mjs run ci:test
+RUN --mount=type=cache,id=angular-cache,target=/workspace/.angular/cache pnpm run ci:test
 
 FROM source AS build
-RUN --mount=type=cache,id=angular-cache,target=/workspace/.angular/cache node tools/package-manager.mjs run ci:build
+RUN --mount=type=cache,id=angular-cache,target=/workspace/.angular/cache pnpm run ci:build
 
 FROM source AS verify
-RUN --mount=type=cache,id=angular-cache,target=/workspace/.angular/cache node tools/package-manager.mjs run ci:verify
+RUN --mount=type=cache,id=angular-cache,target=/workspace/.angular/cache pnpm run ci:verify

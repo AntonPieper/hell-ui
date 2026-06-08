@@ -4,8 +4,6 @@ import { createWriteStream, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { packageManagerInvocation } from './package-manager.mjs';
-
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const rawArgs = process.argv.slice(2);
 const mode = parseMode(rawArgs);
@@ -99,10 +97,10 @@ function parseMode(args) {
 }
 
 function printUsage() {
-  console.log(`Usage: npm run release:dry-run -- [--fast|--full]
+  console.log(`Usage: pnpm run release:dry-run -- [--fast|--full]
 
 Modes:
-  --fast  Local preflight: changelog entry, lint, architecture, CI contract, npm preflight, build, pack audit, API report.
+  --fast  Local preflight: changelog entry, lint, architecture, CI contract, pnpm preflight, build, pack audit, API report.
   --full  Release candidate gate: changelog entry, lint, architecture, CI contract, unit, build, pack audit, selected package-consumer scenarios, API report, docs build.
 
 Environment:
@@ -136,7 +134,7 @@ function fastTasks() {
     packageTask('lint', ['run', 'lint']),
     packageTask('architecture', ['run', 'test:architecture']),
     packageTask('ci contract', ['run', 'test:ci-contract']),
-    packageTask('package-consumer npm preflight', ['run', 'test:package-consumer', '--', '--preflight']),
+    packageTask('package-consumer pnpm preflight', ['run', 'test:package-consumer', '--', '--preflight']),
     packageTask('build lib', ['run', 'build:lib']),
     packageTask('pack audit', ['run', 'test:package-pack']),
     packageTask('api report', ['run', 'test:api-report']),
@@ -179,14 +177,14 @@ function writeHeader() {
   writeLog(`Evidence log: ${logPath}\n\n`);
   writeLog(`## Planned tasks\n`);
   for (const task of tasks) {
-    const invocation = packageManagerInvocation(task.args);
+    const invocation = pnpmInvocation(task.args);
     writeLog(`- ${task.name}: ${formatCommand(invocation.command, invocation.args)}\n`);
   }
   writeLog('\n');
 }
 
 async function runTask(task) {
-  const invocation = packageManagerInvocation(task.args);
+  const invocation = pnpmInvocation(task.args);
   const taskStartedAt = new Date();
   const startedNs = process.hrtime.bigint();
   const commandLine = formatCommand(invocation.command, invocation.args);
@@ -269,7 +267,7 @@ function writeEvidenceJson() {
     selectedConsumerScenarios,
     exitCode,
     tasks: tasks.map((task) => {
-      const invocation = packageManagerInvocation(task.args);
+      const invocation = pnpmInvocation(task.args);
       const result = resultByName.get(task.name);
       return {
         name: task.name,
@@ -311,6 +309,14 @@ function gitTrackedChangesState() {
 
 function closeLog() {
   return new Promise((resolvePromise) => log.end(resolvePromise));
+}
+
+function pnpmInvocation(args) {
+  return {
+    command: 'pnpm',
+    args,
+    shell: process.platform === 'win32',
+  };
 }
 
 function formatCommand(command, args) {

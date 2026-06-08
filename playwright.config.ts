@@ -18,7 +18,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   webServer: {
-    command: `node tools/package-manager.mjs run build:lib && node tools/setup-docs-hell-package-alias.mjs && node tools/package-manager.mjs exec -- ng serve hell-docs --configuration production --host 127.0.0.1 --port ${port}`,
+    command: `pnpm run build:lib && node tools/setup-docs-hell-package-alias.mjs && pnpm exec ng serve hell-docs --configuration production --host 127.0.0.1 --port ${port}`,
     url: `http://127.0.0.1:${port}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

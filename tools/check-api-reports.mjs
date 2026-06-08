@@ -42,7 +42,7 @@ const apiReportEntrypoints = [
 
 const missingInputs = requiredBuildInputs().filter((path) => !existsSync(path));
 if (missingInputs.length) {
-  console.error('API report check requires a built library. Run `npm run build:lib` first.');
+  console.error('API report check requires a built library. Run `pnpm run build:lib` first.');
   for (const path of missingInputs) console.error(`- missing ${relativeToRoot(path)}`);
   process.exit(1);
 }
@@ -77,7 +77,7 @@ if (failed) {
   console.error(
     localBuild
       ? '[api-report] update failed.'
-      : '[api-report] report drift detected. Run `npm run build:lib && npm run api-report:update`, review the API report changes, and commit approved updates.',
+      : '[api-report] report drift detected. Run `pnpm run build:lib && pnpm run api-report:update`, review the API report changes, and commit approved updates.',
   );
   process.exit(1);
 }

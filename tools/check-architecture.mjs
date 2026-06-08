@@ -1133,12 +1133,12 @@ function checkApiReportContract() {
   ];
 
   if (packageJson.scripts?.['test:api-report'] !== 'node tools/check-api-reports.mjs') {
-    failures.push('API Report contract must expose npm run test:api-report');
+    failures.push('API Report contract must expose pnpm run test:api-report');
   }
   if (packageJson.scripts?.['api-report:update'] !== 'node tools/check-api-reports.mjs --local') {
-    failures.push('API Report contract must expose npm run api-report:update for baseline approval');
+    failures.push('API Report contract must expose pnpm run api-report:update for baseline approval');
   }
-  if (!packageJson.scripts?.['ci:build']?.includes('node tools/package-manager.mjs run test:api-report')) {
+  if (!packageJson.scripts?.['ci:build']?.includes('pnpm run test:api-report')) {
     failures.push('API Report contract must run from ci:build after the library package is built');
   }
 
@@ -3148,7 +3148,7 @@ function checkGeneratedEntrypointFiles() {
     const expected = renderPublicApiFile(entrypoint);
     if (readFile(filePath) !== expected) {
       failures.push(
-        `Entrypoint Manifest public API is stale: ${entrypoint.publicApiPath} (run npm run generate:entrypoints)`,
+        `Entrypoint Manifest public API is stale: ${entrypoint.publicApiPath} (run pnpm run generate:entrypoints)`,
       );
     }
   }
@@ -3163,7 +3163,7 @@ function checkGeneratedEntrypointFiles() {
     const expected = renderNgPackageFile(entrypoint);
     if (readFile(filePath) !== expected) {
       failures.push(
-        `Entrypoint Manifest ng-package is stale: ${entrypoint.packagePath} (run npm run generate:entrypoints)`,
+        `Entrypoint Manifest ng-package is stale: ${entrypoint.packagePath} (run pnpm run generate:entrypoints)`,
       );
     }
   }

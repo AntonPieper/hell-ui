@@ -81,9 +81,9 @@ Lazy owner summary: the largest lazy chunks are correctly behind feature/page bo
 ## Reproduce
 
 ~~~bash
-npm run build:lib
-npm run build:docs
-npm run diagnose:docs-bundle
+pnpm run build:lib
+pnpm run build:docs
+pnpm run diagnose:docs-bundle
 ~~~
 
 `build:docs` enables Angular's `statsJson` option for the production docs app, which writes `dist/hell-docs/stats.json`. Local Angular builder schema documents that `statsJson` generates a `stats.json` file for esbuild analysis; Context7 `/websites/angular_dev` confirms `ng build` uses the application builder options from `angular.json` for app builds.

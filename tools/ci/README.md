@@ -1,7 +1,7 @@
 # CI Contract
 
 CI providers are adapters over shared repo commands. The repository workspace
-is pnpm-first and CI-backed by the checked-in `pnpm-lock.yaml`:
+is pnpm-only and CI-backed by the checked-in `pnpm-lock.yaml`:
 
 ```bash
 pnpm ci:install
@@ -15,7 +15,7 @@ pnpm ci:verify
 Unit tests run through `test:unit` with Vitest's default worker pool and coverage
 thresholds enabled; CI adapters should not clamp `VITEST_MAX_WORKERS` unless a
 provider-specific incident is being debugged. The meta root serial command
-(`npm run hell:test:unit`) is the default for constrained local/agent containers,
+(`pnpm run hell:test:unit`) is the default for constrained local/agent containers,
 not the CI contract.
 
 Adapters publish these shared artifacts:

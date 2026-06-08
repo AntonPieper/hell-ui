@@ -541,7 +541,7 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
           <p>
             <strong class="hd-a11y-blocked">Production-ready accessibility claim is blocked.</strong>
             {{ criticalGapCount }} public surfaces still have critical coverage gaps. Release notes,
-            package README copy, and npm descriptions must stay at internal beta / experimental
+            package README copy, and package registry descriptions must stay at internal beta / experimental
             language until the release checklist is green.
           </p>
           <p>

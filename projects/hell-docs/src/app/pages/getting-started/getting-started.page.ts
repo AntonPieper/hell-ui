@@ -22,10 +22,9 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
 
       <h2>1. Install peers</h2>
       <p>
-        pnpm is the contributor default for this repository. The checked-in package lock backs
-        the repo's npm-smoke CI path; consumer npm support is covered by package metadata and
-        package-consumer tests. npm peer metadata is package-wide, so every package entry point
-        expects the light UI stack: Angular
+        pnpm is the only supported package manager for this repository. The checked-in pnpm lock
+        backs CI and package-consumer tests with strict-peer installs. Package peer metadata is
+        package-wide, so every package entry point expects the light UI stack: Angular
         Forms/core/common, ng-primitives, @angular/cdk, <code>@floating-ui/dom</code>,
         ng-icons core, and rxjs. If you import Hell styles, Tailwind is required via
         <code>tailwindcss</code>. Feature peers are still only runtime-needed when you import

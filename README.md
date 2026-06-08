@@ -35,7 +35,7 @@ specified in `docs/release/npm-publishing.md`.
 ## Production readiness
 
 Hell UI is **internal beta** and not yet production-ready. Keep release notes,
-npm copy, docs, and README language in internal-beta/beta/experimental terms
+package registry copy, docs, and README language in internal-beta/beta/experimental terms
 until `pnpm production-ready:check` passes against fresh release-candidate
 evidence.
 
@@ -47,32 +47,29 @@ a11y, docs budget, pack audit, and release dry-run blockers to slice IDs and
 command evidence. Read the [first-beta consumer migration guide](docs/release/first-beta-consumer-guide.md)
 before external pilot installs.
 
-The contributor workspace is pnpm-first and CI-backed by `pnpm-lock.yaml`.
-A root `package-lock.json` is also checked in so GitHub CI can smoke-test
-`npm ci`; packed-package consumer tests continue to verify npm installs for
-applications consuming `@hell-ui/angular`.
+The contributor workspace is pnpm-only and CI-backed by `pnpm-lock.yaml`.
+Use `pnpm install --frozen-lockfile` for reproducible CI installs; package-consumer
+scenarios verify pnpm strict-peer installs for applications consuming `@hell-ui/angular`.
 
 ### Unit test parallelism
 
 `pnpm test` and `pnpm ci:test` use Vitest's default worker pool and are the
 supported CI path. In constrained meta/agent containers, prefer the meta root
-`npm run hell:test:unit` command; it defaults `VITEST_MAX_WORKERS` to `1` and disables
+`pnpm run hell:test:unit` command; it defaults `VITEST_MAX_WORKERS` to `1` and disables
 coverage so the suite runs serially with less worker pressure. Use the meta
-root `npm run hell:test:unit:parallel` command only when reproducing CI worker
+root `pnpm run hell:test:unit:parallel` command only when reproducing CI worker
 scheduling from that constrained environment. The serial and parallel commands
 are intentionally not equivalent defaults.
 
 ## Package Imports
 
-Install the light UI stack when using primitives/composites. npm peer metadata
+Install the light UI stack when using primitives/composites. Package peer metadata
 is package-wide, so optional feature peers can appear in package metadata even
 though they are only runtime-needed when importing their feature entry points:
 
 ```bash
 pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs tailwindcss
 # add @ng-icons/font-awesome when you use icon-backed entries such as pagination or date-picker
-# or
-npm install @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs tailwindcss
 ```
 
 Prefer the narrowest entry point that contains the API you use:
@@ -87,7 +84,7 @@ import { HellButtonHarness } from '@hell-ui/angular/testing';
 
 Peer dependency tiers:
 
-> npm peer metadata is package-wide. Install the core peer group for any
+> Package peer metadata is package-wide. Install the core peer group for any
 > `@hell-ui/angular` package entry point, then add tier peers only for entry
 > points and styles you import. A normal Angular app already has
 > `@angular/common`, `@angular/core`, and `rxjs`; install missing peers

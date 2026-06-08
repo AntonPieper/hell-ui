@@ -15,9 +15,9 @@ Use this guide when moving an app from local/alpha Hell imports to the first bet
 
 ## Install peer tiers
 
-npm peer metadata is package-wide. Some optional peers appear in the package manifest even when they are only required by a kept feature entry point. The PDF viewer is now split into `@hell-ui/pdf-viewer`, so `@hell-ui/angular` no longer advertises pdf.js. The package-consumer runner proves the actual strict-peer install groups in [`tools/check-package-consumer.mjs`](../../tools/check-package-consumer.mjs).
+Package peer metadata is package-wide. Some optional peers appear in the package manifest even when they are only required by a kept feature entry point. The PDF viewer is now split into `@hell-ui/pdf-viewer`, so `@hell-ui/angular` no longer advertises pdf.js. The package-consumer runner proves the actual strict-peer install groups in [`tools/check-package-consumer.mjs`](../../tools/check-package-consumer.mjs).
 
-A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`; install any missing core peers explicitly. Use `npm install` in consumer snippets below because the package-consumer proof uses npm strict-peer installs. `pnpm add` is equivalent for pnpm apps.
+A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`; install any missing core peers explicitly. Use `pnpm add` in consumer snippets below because the package-consumer proof uses pnpm strict-peer installs.
 
 | Consumer path | Install peers for this path | Entry points / CSS | Proof scenario |
 | --- | --- | --- | --- |
@@ -38,31 +38,31 @@ Examples:
 
 ```bash
 # Behavior-only button. Proved by the button-unstyled scenario.
-npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs
+pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs
 
 # Styled primitives. Proved by the button/primitives-css scenarios.
-npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss
+pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss
 
 # Audio transcript feature. Proved by the audio-transcript scenario.
-npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome ng-primitives rxjs tailwindcss
+pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome ng-primitives rxjs tailwindcss
 
 # Table primitives and simple data table. Proved by the table/data-table/no-legacy-alias scenarios.
-npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss
+pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss
 
 # TanStack Table adapter. Proved by the table-tanstack scenario.
-npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss @tanstack/angular-table
+pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss @tanstack/angular-table
 
 # TanStack Virtual adapter. Proved by the table-virtual scenario.
-npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss @tanstack/virtual-core
+pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss @tanstack/virtual-core
 
 # CDK table skin. Proved by the table-cdk scenario; @angular/cdk is already in the core peer group.
-npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss
+pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss
 
 # Code editor feature. Proved by the code-editor scenario.
-npm install @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss @codemirror/commands @codemirror/language @codemirror/state @codemirror/view @lezer/highlight
+pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss @codemirror/commands @codemirror/language @codemirror/state @codemirror/view @lezer/highlight
 
 # Split PDF viewer package. Proved by the pdf-viewer scenario.
-npm install @hell-ui/angular @hell-ui/pdf-viewer @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome ng-primitives rxjs tailwindcss pdfjs-dist@5.6.205
+pnpm add @hell-ui/angular @hell-ui/pdf-viewer @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome ng-primitives rxjs tailwindcss pdfjs-dist@5.6.205
 ```
 
 Maintainers can rerun a proof path from the product workspace:

@@ -10,9 +10,8 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { dirname, isAbsolute, join } from 'node:path';
-import { homedir, tmpdir } from 'node:os';
+import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { runPackageManager } from './package-manager.mjs';
 import { auditPackedPackage } from './package-pack-audit.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -24,18 +23,17 @@ const rawSelectedScenarioNames = parseScenarioSelection(packageConsumerArgs);
 const selectedScenarioNames = rawSelectedScenarioNames.filter((name) => !isPreflightScenarioName(name));
 const preflightOnly = parsePreflightOnly(packageConsumerArgs, rawSelectedScenarioNames);
 const minimalDependencyMode = parseMinimalDependencyMode(packageConsumerArgs);
-const npmTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_TIMEOUT_MS, 240_000);
-const npmHeartbeatMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_HEARTBEAT_MS, 30_000);
-const npmDebugLogTailLines = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_LOG_TAIL_LINES, 80);
-const npmPreflightTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_PREFLIGHT_TIMEOUT_MS, 30_000);
+const pnpmTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_TIMEOUT_MS, 240_000);
+const pnpmHeartbeatMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_HEARTBEAT_MS, 30_000);
+const pnpmPreflightTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_PREFLIGHT_TIMEOUT_MS, 30_000);
 
-runNpmPreflight(root);
+runPnpmPreflight(root);
 if (preflightOnly) {
   console.log(`${packageConsumerLabel('preflight')} preflight passed; skipping package build and consumer scenarios`);
   process.exit(0);
 }
 
-runRootPackageManager(['run', 'build:lib'], root);
+runRootPnpm(['run', 'build:lib'], root);
 
 if (!existsSync(join(distHell, 'package.json'))) {
   fail(`Built package missing: ${distHell}`);
@@ -431,7 +429,7 @@ function parsePreflightOnly(args, selectedNames) {
 }
 
 function isPreflightScenarioName(name) {
-  return name === 'preflight' || name === 'npm-preflight';
+  return name === 'preflight' || name === 'pnpm-preflight';
 }
 
 function parseScenarioTokens(values, envOnly) {
@@ -801,12 +799,10 @@ async function runConsumerScenarioGroup(group) {
   try {
     for (const scenario of group.scenarios) printScenarioContract(scenario, 'install');
     writeConsumerWorkspace(tempRoot, group.scenarios, group.dependencies);
-    await runNpm([
+    await runPnpm([
       'install',
-      '--strict-peer-deps',
+      '--strict-peer-dependencies',
       '--ignore-scripts',
-      '--no-audit',
-      '--no-fund',
     ], tempRoot, { scenarioName: groupName, printInstallDiagnostics: true });
     assertForbiddenDependenciesNotInstalled(tempRoot, group);
 
@@ -825,12 +821,12 @@ async function runConsumerScenarioBuild(tempRoot, scenario) {
 
   const buildCommand = ['exec', '--', 'ng', 'build', 'consumer', '--configuration', 'production'];
   if (scenario.expectBuildFailure) {
-    await runNpmExpectingFailure(buildCommand, tempRoot, { scenarioName: scenario.name });
+    await runPnpmExpectingFailure(buildCommand, tempRoot, { scenarioName: scenario.name });
     console.log(`[package-consumer:${scenario.name}] rejected ${scenario.description}`);
     return;
   }
 
-  await runNpm(buildCommand, tempRoot, { scenarioName: scenario.name });
+  await runPnpm(buildCommand, tempRoot, { scenarioName: scenario.name });
   console.log(`[package-consumer:${scenario.name}] built ${scenario.description}`);
 }
 
@@ -853,7 +849,7 @@ function assertForbiddenDependenciesNotInstalled(workspace, group) {
 
 async function packBuiltPackage(distRoot, scenarioName) {
   const packRoot = mkdtempSync(join(tmpdir(), 'hell-package-consumer-pack-'));
-  await runNpm(['pack', '--pack-destination', packRoot], distRoot, { scenarioName });
+  await runPnpm(['pack', '--pack-destination', packRoot], distRoot, { scenarioName });
   const tarball = readdirSync(packRoot).find((name) => name.endsWith('.tgz'));
   if (!tarball) fail(`Packed package missing in ${packRoot}`);
   return { root: packRoot, tarball: join(packRoot, tarball) };
@@ -884,7 +880,7 @@ function writeConsumerWorkspace(workspace, scenarios, dependencies = unionDepend
   }
 
   writeJson(join(workspace, 'package.json'), packageJson);
-  writeFileSync(join(workspace, '.npmrc'), 'strict-peer-deps=true\nlegacy-peer-deps=false\n');
+  writeFileSync(join(workspace, '.npmrc'), 'strict-peer-dependencies=true\nauto-install-peers=false\n');
   writeJson(join(workspace, 'angular.json'), {
     $schema: './node_modules/@angular/cli/lib/config/schema.json',
     version: 1,
@@ -1662,132 +1658,135 @@ function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-function runNpmPreflight(cwd) {
+function runPnpmPreflight(cwd) {
   const label = packageConsumerLabel('preflight');
-  const env = npmCommandEnvironment();
+  const env = pnpmCommandEnvironment();
 
-  console.log(`${label} running npm preflight before package build`);
+  console.log(`${label} running pnpm preflight before package build`);
 
-  const version = requireNpmPreflightValue(['--version'], cwd, env, 'npm version');
+  const version = requirePnpmPreflightValue(['--version'], cwd, env, 'pnpm version');
   if (!/^\d+\.\d+\.\d+(?:[-+].*)?$/.test(version)) {
-    failNpmPreflight('npm version is not a semver value', [`version: ${version}`]);
+    failPnpmPreflight('pnpm version is not a semver value', [`version: ${version}`]);
   }
 
-  const registry = requireNpmPreflightValue(['config', 'get', 'registry'], cwd, env, 'registry config');
-  assertNpmRegistry(registry);
+  const registry = requirePnpmPreflightValue(['config', 'get', 'registry'], cwd, env, 'registry config');
+  assertPnpmRegistry(registry);
 
-  const cache = requireNpmPreflightValue(['config', 'get', 'cache'], cwd, env, 'cache config');
-  const cacheDirectory = assertWritableNpmCache(cache, cwd);
+  const store = requirePnpmPreflightValue(['store', 'path'], cwd, env, 'store path');
+  const storeDirectory = assertWritablePnpmStore(store, cwd);
 
-  const strictPeerDeps = requireNpmPreflightValue(
-    ['config', 'get', 'strict-peer-deps'],
+  const strictPeerDependencies = requirePnpmPreflightValue(
+    ['config', 'get', 'strict-peer-dependencies'],
     cwd,
     env,
-    'strict-peer-deps config',
+    'strict-peer-dependencies config',
   );
-  const legacyPeerDeps = requireNpmPreflightValue(
-    ['config', 'get', 'legacy-peer-deps'],
+  const autoInstallPeers = requirePnpmPreflightValue(
+    ['config', 'get', 'auto-install-peers'],
     cwd,
     env,
-    'legacy-peer-deps config',
+    'auto-install-peers config',
   );
-  assertStrictPeerMode(strictPeerDeps, legacyPeerDeps);
+  assertStrictPeerMode(strictPeerDependencies, autoInstallPeers);
 
-  requireNpmPreflightCommand(['ping', '--registry', registry], cwd, env, 'registry reachability');
+  requirePnpmPreflightCommand(['ping', '--registry', registry], cwd, env, 'registry reachability');
 
   console.log(
-    `${label} ok: npm ${version}; registry ${registry}; cache ${cacheDirectory}; ` +
-      `strict-peer-deps=${strictPeerDeps}; legacy-peer-deps=${legacyPeerDeps}`,
+    `${label} ok: pnpm ${version}; registry ${registry}; store ${storeDirectory}; ` +
+      `strict-peer-dependencies=${strictPeerDependencies}; auto-install-peers=${autoInstallPeers}`,
   );
 }
 
-function requireNpmPreflightValue(args, cwd, env, description) {
-  const result = requireNpmPreflightCommand(args, cwd, env, description);
+function requirePnpmPreflightValue(args, cwd, env, description) {
+  const result = requirePnpmPreflightCommand(args, cwd, env, description);
   const value = result.stdout.trim();
-  if (!value) failNpmPreflight(`${description} returned no value`, [`command: ${result.command}`]);
+  if (!value) failPnpmPreflight(`${description} returned no value`, [`command: ${result.command}`]);
   return value;
 }
 
-function requireNpmPreflightCommand(args, cwd, env, description) {
-  const command = formatCommand('npm', args);
-  const result = spawnSync('npm', args, {
+function requirePnpmPreflightCommand(args, cwd, env, description) {
+  const commandArgs = args[0] === 'config' ? pnpmConfigCommandArgs(args) : pnpmCommandArgs(args);
+  const command = formatCommand('pnpm', commandArgs);
+  const result = spawnSync('pnpm', commandArgs, {
     cwd,
     shell: process.platform === 'win32',
     encoding: 'utf8',
     env,
-    timeout: npmPreflightTimeoutMs,
+    timeout: pnpmPreflightTimeoutMs,
   });
 
   if (result.error) {
-    failNpmPreflight(`${description} failed`, [
+    failPnpmPreflight(`${description} failed`, [
       `command: ${command}`,
       `error: ${result.error.message}`,
-      npmPreflightOutputSummary(result),
+      pnpmPreflightOutputSummary(result),
     ]);
   }
 
   if (result.status !== 0) {
-    failNpmPreflight(`${description} failed`, [
+    failPnpmPreflight(`${description} failed`, [
       `command: ${command}`,
       `status: ${result.status}`,
-      npmPreflightOutputSummary(result),
+      pnpmPreflightOutputSummary(result),
     ]);
   }
 
   return { command, stdout: result.stdout ?? '', stderr: result.stderr ?? '' };
 }
 
-function assertNpmRegistry(registry) {
+function assertPnpmRegistry(registry) {
   try {
     const parsed = new URL(registry);
     if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-      failNpmPreflight('registry config must use http or https', [`registry: ${registry}`]);
+      failPnpmPreflight('registry config must use http or https', [`registry: ${registry}`]);
     }
   } catch (error) {
-    failNpmPreflight('registry config is not a valid URL', [
+    failPnpmPreflight('registry config is not a valid URL', [
       `registry: ${registry}`,
       error instanceof Error ? error.message : String(error),
     ]);
   }
 }
 
-function assertWritableNpmCache(cache, cwd) {
-  const cacheDirectory = normalizeNpmPath(cache, cwd);
-  if (!cacheDirectory) failNpmPreflight('npm cache config is empty');
+function assertWritablePnpmStore(store, cwd) {
+  const storeDirectory = normalizePnpmPath(store, cwd);
+  if (!storeDirectory) failPnpmPreflight('pnpm store path is empty');
 
-  const probe = join(cacheDirectory, `.hell-package-consumer-preflight-${process.pid}-${Date.now()}`);
+  const probe = join(storeDirectory, `.hell-package-consumer-preflight-${process.pid}-${Date.now()}`);
   try {
-    mkdirSync(cacheDirectory, { recursive: true });
+    mkdirSync(storeDirectory, { recursive: true });
     writeFileSync(probe, 'ok\n');
     rmSync(probe, { force: true });
   } catch (error) {
-    failNpmPreflight('npm cache directory is not writable', [
-      `cache: ${cacheDirectory}`,
+    failPnpmPreflight('pnpm store directory is not writable', [
+      `store: ${storeDirectory}`,
       error instanceof Error ? error.message : String(error),
     ]);
   }
 
-  return cacheDirectory;
+  return storeDirectory;
 }
 
-function assertStrictPeerMode(strictPeerDeps, legacyPeerDeps) {
-  if (!npmConfigBoolean(strictPeerDeps)) {
-    failNpmPreflight('strict-peer-deps must be true', [`strict-peer-deps=${strictPeerDeps}`]);
+function assertStrictPeerMode(strictPeerDependencies, autoInstallPeers) {
+  if (!packageManagerConfigBoolean(strictPeerDependencies)) {
+    failPnpmPreflight('strict-peer-dependencies must be true', [
+      `strict-peer-dependencies=${strictPeerDependencies}`,
+    ]);
   }
-  if (npmConfigBoolean(legacyPeerDeps)) {
-    failNpmPreflight('legacy-peer-deps must be false', [`legacy-peer-deps=${legacyPeerDeps}`]);
+  if (packageManagerConfigBoolean(autoInstallPeers)) {
+    failPnpmPreflight('auto-install-peers must be false', [`auto-install-peers=${autoInstallPeers}`]);
   }
 }
 
-function npmConfigBoolean(value) {
+function packageManagerConfigBoolean(value) {
   return value.trim().toLowerCase() === 'true' || value.trim() === '1';
 }
 
-function failNpmPreflight(message, details = []) {
-  fail([`npm preflight failed: ${message}`, ...details.filter(Boolean)].join('\n'));
+function failPnpmPreflight(message, details = []) {
+  fail([`pnpm preflight failed: ${message}`, ...details.filter(Boolean)].join('\n'));
 }
 
-function npmPreflightOutputSummary(result) {
+function pnpmPreflightOutputSummary(result) {
   const output = [result.stderr, result.stdout]
     .filter(Boolean)
     .join('\n')
@@ -1805,54 +1804,58 @@ function truncate(value, maxLength) {
   return value.length > maxLength ? `${value.slice(0, maxLength - 1)}…` : value;
 }
 
-function runRootPackageManager(args, cwd) {
-  console.log(`[package-consumer] package-manager ${args.join(' ')}`);
-  const result = runPackageManager(args, {
+function runRootPnpm(args, cwd) {
+  const commandArgs = pnpmCommandArgs(args);
+  console.log(`[package-consumer] ${formatCommand('pnpm', commandArgs)}`);
+  const result = spawnSync('pnpm', commandArgs, {
     cwd,
-    env: { ...process.env, CI: 'true' },
+    env: pnpmCommandEnvironment(),
+    shell: process.platform === 'win32',
+    stdio: 'inherit',
   });
   if (result.error) fail(result.error.message);
-  if (result.status !== 0) fail(`package-manager ${args.join(' ')} failed with ${result.status}`);
+  if (result.status !== 0) fail(`${formatCommand('pnpm', commandArgs)} failed with ${result.status}`);
 }
 
-async function runNpm(args, cwd, options = {}) {
-  const { command, diagnostics, result } = await runNpmCommand(args, cwd, options);
-  if (result.timedOut) fail(npmTimeoutMessage(command, cwd, diagnostics, result.startedAt));
+async function runPnpm(args, cwd, options = {}) {
+  const { command, diagnostics, result } = await runPnpmCommand(args, cwd, options);
+  if (result.timedOut) fail(pnpmTimeoutMessage(command, cwd, diagnostics));
   if (result.error) fail(`Unable to start command: ${command}\n${result.error.message}`);
   if (result.signal) fail(`Command failed with signal ${result.signal}: ${command}`);
   if (result.status !== 0) fail(`Command failed with status ${result.status}: ${command}`);
 }
 
-async function runNpmExpectingFailure(args, cwd, options = {}) {
-  const { command, diagnostics, label, result } = await runNpmCommand(args, cwd, options);
-  if (result.timedOut) fail(npmTimeoutMessage(command, cwd, diagnostics, result.startedAt));
+async function runPnpmExpectingFailure(args, cwd, options = {}) {
+  const { command, diagnostics, label, result } = await runPnpmCommand(args, cwd, options);
+  if (result.timedOut) fail(pnpmTimeoutMessage(command, cwd, diagnostics));
   if (result.error) fail(`Unable to start command: ${command}\n${result.error.message}`);
   if (result.signal) fail(`Command failed with signal ${result.signal}: ${command}`);
   if (result.status === 0) fail(`Expected command to fail for negative scenario ${label}: ${command}`);
   console.log(`${label} ok: command failed as expected with status ${result.status}: ${command}`);
 }
 
-async function runNpmCommand(args, cwd, options = {}) {
-  const env = npmCommandEnvironment();
+async function runPnpmCommand(args, cwd, options = {}) {
+  const env = pnpmCommandEnvironment();
   const scenarioName = options.scenarioName ?? 'unknown';
   const label = packageConsumerLabel(scenarioName);
-  const command = formatCommand('npm', args);
+  const commandArgs = pnpmCommandArgs(args);
+  const command = formatCommand('pnpm', commandArgs);
 
   console.log(`${label} running command: ${command}`);
   console.log(`${label} cwd: ${cwd}`);
-  const diagnostics = collectNpmDiagnostics(cwd, env);
+  const diagnostics = collectPnpmDiagnostics(cwd, env);
   if (options.printInstallDiagnostics) {
-    printNpmInstallDiagnostics(label, scenarioName, cwd, diagnostics);
+    printPnpmInstallDiagnostics(label, scenarioName, cwd, diagnostics);
   }
 
-  const result = await spawnNpm(args, cwd, env, label, command);
+  const result = await spawnPnpm(commandArgs, cwd, env, label, command);
   return { command, diagnostics, label, result };
 }
 
-function spawnNpm(args, cwd, env, label, command) {
+function spawnPnpm(args, cwd, env, label, command) {
   return new Promise((resolve) => {
     const startedAt = Date.now();
-    const child = spawn('npm', args, {
+    const child = spawn('pnpm', args, {
       cwd,
       shell: process.platform === 'win32',
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -1865,9 +1868,9 @@ function spawnNpm(args, cwd, env, label, command) {
     const heartbeat = setInterval(() => {
       console.log(
         `${label} heartbeat: ${command} still running after ${formatDuration(Date.now() - startedAt)} ` +
-          `(timeout ${formatDuration(npmTimeoutMs)})`,
+          `(timeout ${formatDuration(pnpmTimeoutMs)})`,
       );
-    }, npmHeartbeatMs);
+    }, pnpmHeartbeatMs);
     heartbeat.unref();
 
     const timeout = setTimeout(() => {
@@ -1879,7 +1882,7 @@ function spawnNpm(args, cwd, env, label, command) {
       child.kill('SIGTERM');
       killTimer = setTimeout(() => child.kill('SIGKILL'), 5_000);
       killTimer.unref();
-    }, npmTimeoutMs);
+    }, pnpmTimeoutMs);
     timeout.unref();
 
     child.stdout?.on('data', (chunk) => process.stdout.write(chunk));
@@ -1893,38 +1896,35 @@ function spawnNpm(args, cwd, env, label, command) {
       if (killTimer) clearTimeout(killTimer);
       const verb = timedOut ? 'stopped' : 'finished';
       console.log(`${label} ${verb} command after ${formatDuration(Date.now() - startedAt)}: ${command}`);
-      resolve({ status, signal, error, timedOut, startedAt });
+      resolve({ status, signal, error, timedOut });
     });
   });
 }
 
-function printNpmInstallDiagnostics(label, scenarioName, tempRoot, diagnostics) {
-  console.log(`${label} npm install diagnostics:`);
+function printPnpmInstallDiagnostics(label, scenarioName, tempRoot, diagnostics) {
+  console.log(`${label} pnpm install diagnostics:`);
   console.log(`${label} scenario name: ${scenarioName}`);
   console.log(`${label} temp directory: ${tempRoot}`);
-  console.log(`${label} npm cache: ${diagnostics.cache}`);
+  console.log(`${label} pnpm store: ${diagnostics.store}`);
   console.log(`${label} registry: ${diagnostics.registry}`);
-  console.log(`${label} package manager version: npm ${diagnostics.version}`);
-  console.log(`${label} strict-peer-deps: ${diagnostics.strictPeerDeps}`);
-  console.log(`${label} legacy-peer-deps: ${diagnostics.legacyPeerDeps}`);
-  console.log(`${label} npm log directory: ${diagnostics.logDirectory}`);
+  console.log(`${label} package manager version: pnpm ${diagnostics.version}`);
+  console.log(`${label} strict-peer-dependencies: ${diagnostics.strictPeerDependencies}`);
+  console.log(`${label} auto-install-peers: ${diagnostics.autoInstallPeers}`);
 }
 
-function collectNpmDiagnostics(cwd, env) {
-  const configuredCache = readNpmValue(['config', 'get', 'cache'], cwd, env);
-  const cache = normalizeNpmPath(configuredCache, cwd) ?? join(homedir(), '.npm');
-  const registry = readNpmValue(['config', 'get', 'registry'], cwd, env) ?? 'unknown';
-  const version = readNpmValue(['--version'], cwd, env) ?? 'unknown';
-  const strictPeerDeps = readNpmValue(['config', 'get', 'strict-peer-deps'], cwd, env) ?? 'unknown';
-  const legacyPeerDeps = readNpmValue(['config', 'get', 'legacy-peer-deps'], cwd, env) ?? 'unknown';
-  const configuredLogDirectory = readNpmValue(['config', 'get', 'logs-dir'], cwd, env);
-  const logDirectory = normalizeNpmPath(configuredLogDirectory, cwd) ?? join(cache, '_logs');
+function collectPnpmDiagnostics(cwd, env) {
+  const store = normalizePnpmPath(readPnpmValue(['store', 'path'], cwd, env), cwd) ?? 'unknown';
+  const registry = readPnpmValue(['config', 'get', 'registry'], cwd, env) ?? 'unknown';
+  const version = readPnpmValue(['--version'], cwd, env) ?? 'unknown';
+  const strictPeerDependencies = readPnpmValue(['config', 'get', 'strict-peer-dependencies'], cwd, env) ?? 'unknown';
+  const autoInstallPeers = readPnpmValue(['config', 'get', 'auto-install-peers'], cwd, env) ?? 'unknown';
 
-  return { cache, registry, version, strictPeerDeps, legacyPeerDeps, logDirectory };
+  return { store, registry, version, strictPeerDependencies, autoInstallPeers };
 }
 
-function readNpmValue(args, cwd, env) {
-  const result = spawnSync('npm', args, {
+function readPnpmValue(args, cwd, env) {
+  const commandArgs = args[0] === 'config' ? pnpmConfigCommandArgs(args) : pnpmCommandArgs(args);
+  const result = spawnSync('pnpm', commandArgs, {
     cwd,
     shell: process.platform === 'win32',
     encoding: 'utf8',
@@ -1935,7 +1935,7 @@ function readNpmValue(args, cwd, env) {
   return result.stdout.trim() || null;
 }
 
-function normalizeNpmPath(value, cwd) {
+function normalizePnpmPath(value, cwd) {
   if (!value) return null;
 
   const normalized = value.trim();
@@ -1943,54 +1943,13 @@ function normalizeNpmPath(value, cwd) {
   return isAbsolute(normalized) ? normalized : join(cwd, normalized);
 }
 
-function npmTimeoutMessage(command, cwd, diagnostics, commandStartedAt) {
+function pnpmTimeoutMessage(command, cwd, diagnostics) {
   return [
-    `Command timed out after ${formatDuration(npmTimeoutMs)}: ${command}`,
+    `Command timed out after ${formatDuration(pnpmTimeoutMs)}: ${command}`,
     `exact command: ${command}`,
     `cwd: ${cwd}`,
-    `npm log directory: ${diagnostics?.logDirectory ?? 'unknown'}`,
-    npmDebugLogTail(diagnostics?.logDirectory, commandStartedAt),
+    `pnpm store: ${diagnostics?.store ?? 'unknown'}`,
   ].join('\n');
-}
-
-function npmDebugLogTail(logDirectory, commandStartedAt) {
-  if (!logDirectory) return 'npm debug log tail: unavailable; npm log directory unknown';
-  if (!existsSync(logDirectory)) {
-    return `npm debug log tail: unavailable; npm log directory does not exist: ${logDirectory}`;
-  }
-
-  const candidates = readdirSync(logDirectory)
-    .filter((name) => name.endsWith('.log') && name.includes('debug'))
-    .map((name) => {
-      const path = join(logDirectory, name);
-      return { path, modifiedAt: statSync(path).mtimeMs };
-    })
-    .sort((a, b) => b.modifiedAt - a.modifiedAt);
-
-  if (!candidates.length) return `npm debug log tail: no debug logs found in ${logDirectory}`;
-
-  const commandCandidates = candidates.filter(
-    (candidate) => candidate.modifiedAt >= commandStartedAt - 1_000,
-  );
-  const latest = commandCandidates[0] ?? candidates[0];
-  const staleNote = commandCandidates.length
-    ? null
-    : 'npm debug log tail note: no command-local debug log found; showing newest existing log';
-  const tail = readFileSync(latest.path, 'utf8')
-    .split(/\r?\n/)
-    .slice(-npmDebugLogTailLines)
-    .join('\n')
-    .trimEnd();
-
-  return [
-    `last npm debug log: ${latest.path}`,
-    staleNote,
-    `--- npm debug log tail (last ${npmDebugLogTailLines} lines) ---`,
-    tail || '(empty debug log)',
-    '--- end npm debug log tail ---',
-  ]
-    .filter(Boolean)
-    .join('\n');
 }
 
 function packageConsumerLabel(scenarioName) {
@@ -2000,6 +1959,18 @@ function packageConsumerLabel(scenarioName) {
 function formatDuration(ms) {
   if (ms < 1_000) return `${ms}ms`;
   return `${Math.round(ms / 1_000)}s`;
+}
+
+function pnpmCommandArgs(args) {
+  return args;
+}
+
+function pnpmConfigCommandArgs(args) {
+  return [
+    '--config.strict-peer-dependencies=true',
+    '--config.auto-install-peers=false',
+    ...args,
+  ];
 }
 
 function formatCommand(command, args) {
@@ -2012,32 +1983,18 @@ function shellQuote(value) {
   return `'${text.replaceAll("'", "'\\''")}'`;
 }
 
-function npmCommandEnvironment() {
+function pnpmCommandEnvironment() {
   const env = { ...process.env, CI: 'true' };
-  const deniedKeys = new Set([
-    'npm_execpath',
-    'npm_command',
-    'npm_config_argv',
-    'npm_config_node_gyp',
-    'npm_config_npm_globalconfig',
-    'npm_config_verify_deps_before_run',
-    'npm_config__jsr_registry',
-    'npm_lifecycle_event',
-    'npm_lifecycle_script',
+  const deniedPnpmKeys = new Set([
     'pnpm_config_npm_globalconfig',
     'pnpm_config_verify_deps_before_run',
     'pnpm_config__jsr_registry',
   ]);
 
   for (const key of Object.keys(env)) {
-    if (deniedKeys.has(key.toLowerCase())) delete env[key];
+    const normalized = key.toLowerCase();
+    if (normalized.startsWith('npm_') || deniedPnpmKeys.has(normalized)) delete env[key];
   }
-
-  env.npm_config_audit = 'false';
-  env.npm_config_fund = 'false';
-  env.npm_config_strict_peer_deps = 'true';
-  env.npm_config_legacy_peer_deps = 'false';
-  env.npm_config_update_notifier = 'false';
 
   return env;
 }

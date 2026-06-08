@@ -22,9 +22,7 @@ const requiredFiles = [
   'tools/production-ready-check.mjs',
   'tools/package-pack-audit.mjs',
   'tools/ci-summary.mjs',
-  'tools/package-manager.mjs',
   'tools/docs-budget-policy.mjs',
-  'package-lock.json',
   'CHANGELOG.md',
   'docs/release/npm-publishing.md',
   'docs/release/semver-policy.md',
@@ -34,7 +32,7 @@ const requiredFiles = [
 ];
 
 const requiredScripts = {
-  'ci:install': 'node tools/package-manager.mjs install',
+  'ci:install': 'pnpm install --frozen-lockfile',
   'test:unit': 'node tools/run-unit-tests.mjs',
   'test:package-consumer': 'node tools/check-package-consumer.mjs',
   'test:package-pack': 'node tools/check-package-pack.mjs',
@@ -45,23 +43,21 @@ const requiredScripts = {
   'release:dry-run': 'node tools/release-dry-run.mjs',
   'production-ready:check': 'node tools/production-ready-check.mjs',
   'ci:test': 'node tools/run-ci-tests.mjs',
-  'ci:playwright': 'node tools/package-manager.mjs exec playwright install --with-deps chromium firefox webkit',
-  'ci:build': 'node tools/package-manager.mjs run build && node tools/package-manager.mjs run test:api-report',
-  'ci:verify': 'node tools/package-manager.mjs run ci:test && node tools/package-manager.mjs run ci:build',
+  'ci:playwright': 'pnpm exec playwright install --with-deps chromium firefox webkit',
+  'ci:build': 'pnpm run build && pnpm run test:api-report',
+  'ci:verify': 'pnpm run ci:test && pnpm run ci:build',
 };
 
 const adapterChecks = [
   {
     path: '.github/workflows/ci.yml',
     includes: [
-      'node tools/package-manager.mjs run ci:install',
-      'node tools/package-manager.mjs run ci:playwright',
-      'node tools/package-manager.mjs run ci:test',
-      'node tools/package-manager.mjs run ci:build',
-      'npm ci --ignore-scripts --no-audit --no-fund',
-      'npm run test:ci-contract',
-      'cache: npm',
-      'cache-dependency-path: package-lock.json',
+      'pnpm run ci:install',
+      'pnpm run ci:playwright',
+      'pnpm run ci:test',
+      'pnpm run ci:build',
+      'cache: pnpm',
+      'cache-dependency-path: pnpm-lock.yaml',
       'actions/upload-artifact',
       'test-results/',
       'coverage/',
@@ -70,10 +66,10 @@ const adapterChecks = [
   {
     path: '.gitlab-ci.yml',
     includes: [
-      'node tools/package-manager.mjs run ci:install',
-      'node tools/package-manager.mjs run ci:playwright',
-      'node tools/package-manager.mjs run ci:test',
-      'node tools/package-manager.mjs run ci:build',
+      'pnpm run ci:install',
+      'pnpm run ci:playwright',
+      'pnpm run ci:test',
+      'pnpm run ci:build',
       'reports:',
       'junit: test-results/vitest-junit.xml',
       'coverage_format: cobertura',
@@ -83,12 +79,11 @@ const adapterChecks = [
   {
     path: 'Dockerfile.ci',
     includes: [
-      'COPY tools/package-manager.mjs tools/package-manager.mjs',
-      'node tools/package-manager.mjs run ci:install',
-      'node tools/package-manager.mjs run ci:playwright',
-      'node tools/package-manager.mjs run ci:test',
-      'node tools/package-manager.mjs run ci:build',
-      'node tools/package-manager.mjs run ci:verify',
+      'pnpm run ci:install',
+      'pnpm run ci:playwright',
+      'pnpm run ci:test',
+      'pnpm run ci:build',
+      'pnpm run ci:verify',
     ],
   },
 ];
@@ -257,7 +252,7 @@ const fileChecks = [
 const adapterForbiddenPatterns = [
   { pattern: /\bng\s+test\b/, message: 'CI adapters must call ci:test instead of ng test.' },
   { pattern: /pnpm\s+exec\s+playwright\s+install\s+--with-deps\s+chromium\s+firefox\s+webkit/, message: 'CI adapters must call ci:playwright instead of pnpm exec playwright install.' },
-  { pattern: /\bng\s+build\b/, message: 'CI adapters must call pnpm ci:build instead of ng build.' },
+  { pattern: /\bng\s+build\b/, message: 'CI adapters must call pnpm run ci:build instead of ng build.' },
   { pattern: /\b(?:pnpm\s+(?:exec\s+)?vitest|npx\s+vitest|vitest\s+run)\b/, message: 'CI adapters must not inline Vitest commands.' },
   { pattern: /\btest:architecture\b/, message: 'CI adapters must not know internal check scripts.' },
   { pattern: /--coverage\b/, message: 'CI adapters must not own coverage flags.' },
@@ -326,7 +321,7 @@ function checkPackageConsumerPackAuditOrder() {
   const consumerScenarioIndex = content.indexOf('await runConsumerScenarioGroup(group);');
 
   if (auditIndex === -1) {
-    errors.push('package-consumer must run the package pack audit after npm pack');
+    errors.push('package-consumer must run the package pack audit after pnpm pack');
     return;
   }
 
@@ -352,10 +347,11 @@ function checkNpmPublishWorkflow() {
     'actions/download-artifact',
     'release-dry-run-evidence',
     'release-package',
-    'node tools/package-manager.mjs run release:dry-run -- --full',
-    'node tools/package-manager.mjs run test:package-pack',
-    'npm pack ./dist/hell --pack-destination release-package',
-    'npm publish "$HELL_RELEASE_TARBALL" --access public --provenance',
+    'pnpm/action-setup',
+    'pnpm run release:dry-run -- --full',
+    'pnpm run test:package-pack',
+    'pnpm --dir ./dist/hell pack --pack-destination ../../release-package',
+    'pnpm publish "$HELL_RELEASE_TARBALL" --access public --provenance --no-git-checks',
   ];
 
   for (const expected of required) {
@@ -371,14 +367,14 @@ function checkNpmPublishWorkflow() {
   }
 
   const publishJob = content.split('\n  publish:')[1] ?? '';
-  for (const forbidden of [
-    'actions/checkout',
-    'pnpm/action-setup',
-    'node tools/package-manager.mjs',
-    'npm pack',
-  ]) {
-    if (publishJob.includes(forbidden)) {
-      errors.push(`${path} publish job must stay minimal after id-token permission; found ${forbidden}.`);
+  const publishJobForbiddenPatterns = [
+    { label: 'checkout step', pattern: /actions\/checkout/ },
+    { label: 'legacy pack command', pattern: /\bnpm\s+pack\b/ },
+    { label: 'legacy publish command', pattern: /\bnpm\s+publish\b/ },
+  ];
+  for (const forbidden of publishJobForbiddenPatterns) {
+    if (forbidden.pattern.test(publishJob)) {
+      errors.push(`${path} publish job must stay minimal after id-token permission; found ${forbidden.label}.`);
     }
   }
 }

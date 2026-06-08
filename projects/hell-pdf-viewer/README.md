@@ -5,7 +5,7 @@ Experimental Angular PDF viewer package for Hell UI. This package owns the PDF v
 ## Install
 
 ```bash
-npm install @hell-ui/angular @hell-ui/pdf-viewer pdfjs-dist@5.6.205 @ng-icons/font-awesome tailwindcss
+pnpm add @hell-ui/angular @hell-ui/pdf-viewer pdfjs-dist@5.6.205 @ng-icons/font-awesome tailwindcss
 ```
 
 A normal Hell UI Angular app also needs the light `@hell-ui/angular` peer stack: `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `ng-primitives`, and `rxjs`.

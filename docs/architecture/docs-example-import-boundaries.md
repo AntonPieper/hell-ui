@@ -2,7 +2,7 @@
 
 - ID: docs-example-import-boundaries
 - Slice: HELL-050; HELL-087 docs code preview exception
-- Enforced by: `npm run test:architecture` (`tools/check-architecture.mjs`, `checkDocsLazyRouteImportGraphContract()`)
+- Enforced by: `pnpm run test:architecture` (`tools/check-architecture.mjs`, `checkDocsLazyRouteImportGraphContract()`)
 - Source of truth: `projects/hell-docs/src/app/docs-catalog.ts`
 
 ## Rule

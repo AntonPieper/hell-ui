@@ -12,7 +12,7 @@ Configure these settings on npm before the first automated publish:
 4. Repository: `hell-ui`.
 5. Workflow filename: `npm-publish.yml`.
 6. Environment name: `npm-publish`.
-7. Allowed action: `npm publish`.
+7. Publish command: `pnpm publish`.
 8. Under package settings → publishing access, choose **Require two-factor authentication and disallow tokens**.
 
 The package manifest must keep these publish-time fields:
@@ -33,10 +33,10 @@ The release workflow lives at `.github/workflows/npm-publish.yml` in this reposi
 - The dry-run job uploads `test-results/release-evidence/` as the `release-dry-run-evidence` artifact.
 - A separate no-OIDC `build-package` job rebuilds, pack-audits, and uploads one package tarball as `release-package`.
 - The publish job has `needs: [release-dry-run, build-package]`, downloads both artifacts, and refuses to publish without a passing summary exit in the dry-run log.
-- The publish job has `permissions.id-token: write` and `permissions.contents: read` so npm can mint the short-lived OIDC credential at `npm publish` time.
+- The publish job has `permissions.id-token: write` and `permissions.contents: read` so the npm registry can mint the short-lived OIDC credential for `pnpm publish`.
 - Normal publish does not set `NPM_TOKEN` or `NODE_AUTH_TOKEN`. Trusted publishing authenticates the publish command directly.
-- The job runs on `ubuntu-latest` with Node 24 so npm is new enough for trusted publishing and provenance.
-- The OIDC-enabled publish job does not install dependencies, build, or run package scripts; it only verifies the downloaded artifacts and runs `npm publish "$HELL_RELEASE_TARBALL" --access public --provenance`.
+- The job runs on `ubuntu-latest` with Node 24 and the pinned pnpm version so trusted publishing and provenance are available.
+- The OIDC-enabled publish job does not install dependencies, build, or run package scripts; it only verifies the downloaded artifacts and runs `pnpm publish "$HELL_RELEASE_TARBALL" --access public --provenance --no-git-checks`.
 
 `workflow_dispatch` is evidence-only. To publish, create a protected tag whose name matches the package version, for example `v0.1.0`.
 
