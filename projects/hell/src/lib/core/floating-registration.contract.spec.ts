@@ -18,7 +18,10 @@ class FakeFloatingScope implements HellFloatingScope {
   }
 
   containsFloatingTarget(target: EventTarget | Node | null): boolean {
-    return target instanceof Node && this.registered.some((element) => element.contains(target));
+    return this.registered.some((element) => {
+      const NodeCtor = element.ownerDocument.defaultView?.Node;
+      return !!NodeCtor && target instanceof NodeCtor && element.contains(target);
+    });
   }
 }
 

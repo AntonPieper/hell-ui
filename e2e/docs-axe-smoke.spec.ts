@@ -27,7 +27,9 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['.hell-dialog'],
     prepare: async (page) => {
       await page.getByRole('button', { name: 'Publish article' }).click();
-      await expect(page.getByRole('dialog', { name: 'Publish this article?' })).toBeVisible();
+      const dialog = page.getByRole('dialog', { name: 'Publish this article?' });
+      await expect(dialog).toBeVisible();
+      await expect.poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity)).toBe('1');
     },
   },
   {
