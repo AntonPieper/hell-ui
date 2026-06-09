@@ -1,6 +1,7 @@
 import { Component, Injectable } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
+import { containsNode } from './dom';
 import { HELL_FLOATING_SCOPE, type HellFloatingScope } from './floating-scope';
 import { HellFloatingElement } from './floating-element';
 
@@ -18,10 +19,7 @@ class FakeFloatingScope implements HellFloatingScope {
   }
 
   containsFloatingTarget(target: EventTarget | Node | null): boolean {
-    return this.registered.some((element) => {
-      const NodeCtor = element.ownerDocument.defaultView?.Node;
-      return !!NodeCtor && target instanceof NodeCtor && element.contains(target);
-    });
+    return this.registered.some((element) => containsNode(element, target));
   }
 }
 
