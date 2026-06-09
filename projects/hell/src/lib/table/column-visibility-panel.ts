@@ -11,6 +11,16 @@ import { HellStyleable } from '../core/styleable';
 import { HellButton } from '../primitives/button/button';
 import { HellNativeCheckbox } from '../primitives/checkbox/checkbox';
 import {
+  HellMenu,
+  HellMenuItem,
+  HellMenuItemCheckbox,
+  HellMenuItemIndicator,
+  HellMenuItemTrailing,
+  HellMenuLabel,
+  HellMenuSection,
+  HellMenuSeparator,
+} from '../primitives/menu/menu';
+import {
   hellTableColumnCanToggleVisibility,
   hellTableColumnIsVisible,
   hellTableColumnVisibilityMode,
@@ -134,7 +144,9 @@ export class HellColumnVisibilityPanel<TData = unknown> extends HellStyleable {
   private readonly effectiveColumnVisibility = computed(() => this.columnVisibility());
 
   protected readonly items = computed<readonly HellColumnVisibilityPanelItem<TData>[]>(() =>
-    this.resolvedColumns().map((column) => this.itemFor(column)),
+    this.resolvedColumns().map((column) =>
+      columnVisibilityItemFor(column, this.effectiveColumnVisibility(), this.panelId),
+    ),
   );
 
   protected readonly canReset = computed(
@@ -142,31 +154,150 @@ export class HellColumnVisibilityPanel<TData = unknown> extends HellStyleable {
   );
 
   protected setColumnVisible(column: HellTableColumn<TData>, visible: boolean): void {
-    if (!hellTableColumnCanToggleVisibility(column)) return;
-    this.columnVisibility.update((current) => ({ ...current, [column.id]: visible }));
+    setColumnVisible(this.columnVisibility, column, visible);
   }
 
   protected resetColumnVisibility(): void {
     this.columnVisibility.set({ ...this.defaultColumnVisibility() });
   }
+}
 
-  private itemFor(column: HellTableColumn<TData>): HellColumnVisibilityPanelItem<TData> {
-    const mode = hellTableColumnVisibilityMode(column);
-    const disabled = !hellTableColumnCanToggleVisibility(column);
-    const note = disabled ? 'Required' : mode === 'initially-hidden' ? 'Initially hidden' : null;
-    return {
-      column,
-      label: columnLabel(column),
-      checked: hellTableColumnIsVisible(column, this.effectiveColumnVisibility()),
-      disabled,
-      note,
-      noteId: note ? `${this.panelId}-${domId(column.id)}-note` : null,
-    };
+/**
+ * Menu variant of the column visibility picker for dense table toolbars.
+ *
+ * Place it inside a `[hellMenuTrigger]` template. Toggleable columns render as
+ * `menuitemcheckbox` rows and stay open while users make multiple changes.
+ */
+@Component({
+  selector: 'hell-column-visibility-menu',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    HellMenu,
+    HellMenuItem,
+    HellMenuItemCheckbox,
+    HellMenuItemIndicator,
+    HellMenuItemTrailing,
+    HellMenuLabel,
+    HellMenuSection,
+    HellMenuSeparator,
+  ],
+  host: {
+    '[class.hell-column-visibility-menu-host]': '!unstyled()',
+    '[attr.data-hell-column-visibility-menu]': '""',
+  },
+  template: `
+    <div
+      hellMenu
+      class="hell-column-visibility-menu"
+      [unstyled]="unstyled()"
+      [attr.aria-label]="label()"
+      [attr.aria-description]="description()"
+    >
+      <div hellMenuSection>
+        <div hellMenuLabel>{{ label() }}</div>
+        @for (item of items(); track item.column.id) {
+          <button
+            hellMenuItemCheckbox
+            type="button"
+            [checked]="item.checked"
+            [disabled]="item.disabled"
+            (checkedChange)="setColumnVisible(item.column, $event)"
+          >
+            <span hellMenuItemIndicator></span>
+            <span>{{ item.label }}</span>
+            @if (item.note) {
+              <span hellMenuItemTrailing>{{ item.note }}</span>
+            }
+          </button>
+        } @empty {
+          <button hellMenuItem type="button" disabled>{{ empty() }}</button>
+        }
+      </div>
+      <div hellMenuSeparator></div>
+      <button hellMenuItem type="button" [disabled]="!canReset()" (click)="resetColumnVisibility()">
+        <span hellMenuItemIndicator></span>
+        <span>{{ resetLabel() }}</span>
+      </button>
+    </div>
+  `,
+})
+export class HellColumnVisibilityMenu<TData = unknown> extends HellStyleable {
+  /** Column definitions to list. */
+  readonly columns = input<HellTableSignalInput<readonly HellColumnDef<TData>[]>>([]);
+
+  /** App-owned column visibility map. Use `[(columnVisibility)]` for two-way binding. */
+  readonly columnVisibility = model<HellTableColumnVisibilityState>({});
+
+  /** Accessible menu label. */
+  readonly label = input('Columns');
+
+  /** Optional description exposed to assistive technology. */
+  readonly description = input<string | null>(null);
+
+  /** Menu item text for restoring definition defaults. */
+  readonly resetLabel = input('Restore columns');
+
+  /** Empty text shown when there are no columns. */
+  readonly empty = input('No columns available.');
+
+  private readonly resolvedColumns = computed(() => readSignalInput(this.columns()));
+  private readonly defaultColumnVisibility = computed(() =>
+    hellTableInitialColumnVisibility(this.resolvedColumns()),
+  );
+  private readonly effectiveColumnVisibility = computed(() => this.columnVisibility());
+
+  protected readonly items = computed<readonly HellColumnVisibilityPanelItem<TData>[]>(() =>
+    this.resolvedColumns().map((column) =>
+      columnVisibilityItemFor(column, this.effectiveColumnVisibility()),
+    ),
+  );
+
+  protected readonly canReset = computed(
+    () => !sameVisibility(this.columnVisibility(), this.defaultColumnVisibility()),
+  );
+
+  protected setColumnVisible(column: HellTableColumn<TData>, visible: boolean): void {
+    setColumnVisible(this.columnVisibility, column, visible);
+  }
+
+  protected resetColumnVisibility(): void {
+    this.columnVisibility.set({ ...this.defaultColumnVisibility() });
   }
 }
 
 function readSignalInput<T>(inputValue: HellTableSignalInput<T>): T {
   return typeof inputValue === 'function' ? (inputValue as Signal<T>)() : inputValue;
+}
+
+function columnVisibilityItemFor<TData>(
+  column: HellTableColumn<TData>,
+  columnVisibility: HellTableColumnVisibilityState,
+  noteIdPrefix?: string,
+): HellColumnVisibilityPanelItem<TData> {
+  const mode = hellTableColumnVisibilityMode(column);
+  const disabled = !hellTableColumnCanToggleVisibility(column);
+  const note = disabled ? 'Required' : mode === 'initially-hidden' ? 'Initially hidden' : null;
+  return {
+    column,
+    label: columnLabel(column),
+    checked: hellTableColumnIsVisible(column, columnVisibility),
+    disabled,
+    note,
+    noteId: note && noteIdPrefix ? `${noteIdPrefix}-${domId(column.id)}-note` : null,
+  };
+}
+
+function setColumnVisible<TData>(
+  columnVisibility: {
+    update(
+      updateFn: (current: HellTableColumnVisibilityState) => HellTableColumnVisibilityState,
+    ): void;
+  },
+  column: HellTableColumn<TData>,
+  visible: boolean,
+): void {
+  if (!hellTableColumnCanToggleVisibility(column)) return;
+  columnVisibility.update((current) => ({ ...current, [column.id]: visible }));
 }
 
 function columnLabel(column: Pick<HellTableColumn, 'id' | 'header'>): string {

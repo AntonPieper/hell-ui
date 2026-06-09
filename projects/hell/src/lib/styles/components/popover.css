@@ -16,6 +16,7 @@
       outline: none;
       animation: hell-pop-in var(--hell-duration-fast) var(--ease-hell-out);
       max-width: 320px;
+      z-index: var(--hell-z-popover, 60);
     }
 
 }

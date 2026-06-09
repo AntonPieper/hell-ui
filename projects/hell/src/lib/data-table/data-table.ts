@@ -626,7 +626,9 @@ export class HellDataTable<TData = unknown> extends HellStyleable {
   protected readonly selectedRowCount = computed(
     () => Object.values(this.rowSelection()).filter(Boolean).length,
   );
-  protected readonly gridRowCount = computed(() => this.headerGroups().length + this.rowParts().length);
+  protected readonly gridRowCount = computed(
+    () => this.headerGroups().length + this.rowParts().length,
+  );
   protected readonly gridColCount = computed(() => this.visibleColumnCount());
 
   constructor() {
@@ -937,6 +939,7 @@ export {
   HellHeaderCell,
   HellRowActions,
   HellRowEditor,
+  HellColumnVisibilityMenu,
   HellColumnVisibilityPanel,
   HellTableRowAction,
   HellTableRowCheckbox,
@@ -953,6 +956,7 @@ export {
   hellTableColumnVisibilityMode,
   hellTableInitialColumnVisibility,
   hellTableRowPartsFromRows,
+  hellTableVisibleColumns,
   hellTableVirtualRowPartKey,
   hellTableVirtualRowPartsFromRows,
   hellTemplateRenderer,
@@ -1009,4 +1013,7 @@ export type {
   HellVirtualRowPartMatcher,
 } from '../table/table';
 
-export type { HellTableGridInteractionMode, HellTableSemantics } from '../features/table-utilities/table-utilities';
+export type {
+  HellTableGridInteractionMode,
+  HellTableSemantics,
+} from '../features/table-utilities/table-utilities';

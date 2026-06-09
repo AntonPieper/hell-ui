@@ -45,6 +45,41 @@ class EnabledMenuAnchorTriggerHost {}
 })
 class DisabledMenuTriggerHost {}
 
+@Component({
+  imports: [...HELL_MENU_DIRECTIVES],
+  template: `
+    <ng-template #menu>
+      <div hellMenu>
+        <button
+          hellMenuItemCheckbox
+          type="button"
+          [checked]="checked()"
+          (checkedChange)="checked.set($event)"
+        >
+          <span hellMenuItemIndicator></span>
+          <span>Show archived</span>
+        </button>
+        <div hellMenuItemRadioGroup [value]="density()" (valueChange)="density.set($event)">
+          <button hellMenuItemRadio type="button" value="comfortable">
+            <span hellMenuItemIndicator></span>
+            <span>Comfortable</span>
+          </button>
+          <button hellMenuItemRadio type="button" value="compact">
+            <span hellMenuItemIndicator></span>
+            <span>Compact</span>
+          </button>
+        </div>
+      </div>
+    </ng-template>
+    <button type="button" [hellMenuTrigger]="menu">Preferences</button>
+  `,
+})
+class CheckableMenuHost {
+  readonly checked = signal(false);
+  readonly density = signal('comfortable');
+  readonly trigger = viewChild.required(NgpMenuTrigger);
+}
+
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
 
 beforeAll(() => {
@@ -63,7 +98,7 @@ afterAll(() => {
 describe('HellMenuItem', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MenuHost, EnabledMenuAnchorTriggerHost, DisabledMenuTriggerHost],
+      imports: [MenuHost, EnabledMenuAnchorTriggerHost, DisabledMenuTriggerHost, CheckableMenuHost],
     }).compileComponents();
   });
 
@@ -96,9 +131,46 @@ describe('HellMenuItem', () => {
     expect(trigger.dispatchEvent(click)).toBe(false);
     expect(click.defaultPrevented).toBe(true);
 
-    const menuItem = await waitForOverlayElement<HTMLButtonElement>(fixture, document.body, 'button[hellMenuItem]');
+    const menuItem = await waitForOverlayElement<HTMLButtonElement>(
+      fixture,
+      document.body,
+      'button[hellMenuItem]',
+    );
     expect(menuItem).toBeTruthy();
     expect(menuItem.textContent).toBe('Item');
+  });
+
+  it('keeps checkbox and radio menu items open while updating checked state', async () => {
+    const fixture = TestBed.createComponent(CheckableMenuHost);
+    await settle(fixture);
+
+    fixture.componentInstance.trigger().show();
+    const checkbox = await waitForOverlayElement<HTMLButtonElement>(
+      fixture,
+      document.body,
+      '[role="menuitemcheckbox"]',
+    );
+    const compact = query<HTMLButtonElement>(
+      document.body,
+      '[role="menuitemradio"][value="compact"]',
+    );
+
+    expect(checkbox.getAttribute('aria-checked')).toBe('false');
+    expect(compact.getAttribute('aria-checked')).toBe('false');
+
+    checkbox.click();
+    await settle(fixture);
+
+    expect(fixture.componentInstance.checked()).toBe(true);
+    expect(checkbox.getAttribute('aria-checked')).toBe('true');
+    expect(document.body.querySelector('[role="menu"]')).toBeTruthy();
+
+    compact.click();
+    await settle(fixture);
+
+    expect(fixture.componentInstance.density()).toBe('compact');
+    expect(compact.getAttribute('aria-checked')).toBe('true');
+    expect(document.body.querySelector('[role="menu"]')).toBeTruthy();
   });
 
   it('guards disabled non-native menu items', async () => {

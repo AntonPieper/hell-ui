@@ -354,7 +354,7 @@ export class HellResizePairInteractionController<TItem> {
   }
 
   startPointer(event: PointerEvent): boolean {
-    if (event.button !== 0) return false;
+    if (event.pointerType === 'mouse' && event.button !== 0) return false;
     if (this.options.stopPropagation) event.stopPropagation();
     const orientation = this.options.orientation();
     const operation = this.operationFor(orientation, hellResizeCoordinate(event, orientation));
@@ -410,7 +410,7 @@ export class HellResizeInteractionController {
   constructor(private readonly options: HellResizeInteractionControllerOptions) {}
 
   startPointer(event: PointerEvent, operation: HellResizeOperation): boolean {
-    if (event.button !== 0 || !operation.canResize) return false;
+    if ((event.pointerType === 'mouse' && event.button !== 0) || !operation.canResize) return false;
 
     event.preventDefault();
     this.cancelPointer();

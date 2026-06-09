@@ -86,7 +86,10 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellListboxSection', area: 'primitive', coverage: 'static' },
   { symbol: 'HellMenu', area: 'primitive', coverage: 'static' },
   { symbol: 'HellMenuItem', area: 'primitive', coverage: 'static' },
+  { symbol: 'HellMenuItemCheckbox', area: 'primitive', coverage: 'static' },
   { symbol: 'HellMenuItemIcon', area: 'primitive', coverage: 'static' },
+  { symbol: 'HellMenuItemIndicator', area: 'primitive', coverage: 'static' },
+  { symbol: 'HellMenuItemRadio', area: 'primitive', coverage: 'static' },
   { symbol: 'HellMenuItemTrailing', area: 'primitive', coverage: 'static' },
   { symbol: 'HellMenuLabel', area: 'primitive', coverage: 'static' },
   { symbol: 'HellMenuSection', area: 'primitive', coverage: 'static' },
@@ -171,6 +174,7 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellTimeInput', area: 'composite', coverage: 'static' },
   { symbol: 'HellToaster', area: 'composite', coverage: 'static' },
   { symbol: 'HellCodeEditor', area: 'feature', coverage: 'static' },
+  { symbol: 'HellColumnVisibilityMenu', area: 'feature', coverage: 'static' },
   { symbol: 'HellColumnVisibilityPanel', area: 'feature', coverage: 'dom' },
   { symbol: 'HellDataTable', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTable', area: 'feature', coverage: 'dom' },
@@ -296,7 +300,13 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
             <td id="table-cell" hellTableCell align="end" space="empty">
               Ada
               <button id="table-row-action" hellTableRowAction type="button">Open</button>
-              <input id="table-row-radio" hellTableRowRadio type="radio" name="table-radio" checked />
+              <input
+                id="table-row-radio"
+                hellTableRowRadio
+                type="radio"
+                name="table-radio"
+                checked
+              />
             </td>
           </tr>
         </thead>

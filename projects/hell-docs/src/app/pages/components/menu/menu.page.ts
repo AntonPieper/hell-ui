@@ -40,7 +40,8 @@ const HD_MENU_PAGE_ICONS = {
       <p>
         A floating list of actions, anchored to a trigger. Use for overflow menus and contextual
         actions; use <code>tabs</code> for navigation between sibling views. Supports leading icons,
-        sectioned groups with labels, trailing slots, and nested submenus.
+        sectioned groups with labels, trailing slots, nested submenus, and checkable multi-select
+        menu items.
       </p>
 
       <h2>Basic</h2>
@@ -65,6 +66,10 @@ const HD_MENU_PAGE_ICONS = {
           (<code>[hellMenuItemTrailing]</code>).
         </li>
         <li>
+          <code>hellMenuItemCheckbox</code> + <code>hellMenuItemIndicator</code>: multi-select menu
+          rows that stay open on toggle; works in root menus and submenus.
+        </li>
+        <li>
           <code>hellMenuSection</code> + <code>hellMenuLabel</code>: grouped items with a header.
         </li>
         <li><code>hellSubmenuTrigger</code>: nested menus on a <code>hellMenuItem</code>.</li>
@@ -76,6 +81,9 @@ const HD_MENU_PAGE_ICONS = {
         <li>Use menus for compact action lists tied to a trigger.</li>
         <li>Group destructive or secondary actions with separators and labels.</li>
         <li>Use submenu only when it reduces scanning cost.</li>
+        <li>
+          Use checkbox menu items for compact preference toggles that belong in the menu model.
+        </li>
       </ul>
 
       <h2>Don't</h2>

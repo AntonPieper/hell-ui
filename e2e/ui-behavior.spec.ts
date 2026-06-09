@@ -42,7 +42,9 @@ async function expectDialogFocusContract(page: Page, contract: DialogFocusContra
 
       await expect(dialog).toBeVisible();
       await expect(dialog.getByText(contract.description, { exact: true })).toBeVisible();
-      await expect.poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity)).toBe('1');
+      await expect
+        .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity))
+        .toBe('1');
       await expectNoSeriousA11yIssues(page, '[role="dialog"]');
 
       await expectFocused(page, initialFocus, `${contract.label} initial focus`);
@@ -341,9 +343,9 @@ test.describe('Hell UI browser behavior', () => {
     await expect(page.locator('hell-data-table table.hell-table').first()).toBeVisible();
 
     await page.getByRole('button', { name: 'Columns' }).first().click();
-    await expect(
-      page.locator('hell-column-visibility-panel.hell-column-visibility-panel').first(),
-    ).toBeVisible();
+    const columnsMenu = page.getByRole('menu', { name: 'Columns' }).first();
+    await expect(columnsMenu).toBeVisible();
+    await expect(columnsMenu.getByRole('menuitemcheckbox', { name: /Email/ })).toBeVisible();
 
     await page.goto('/components/slider');
     const verticalSlider = page.locator('hell-slider[data-orientation="vertical"]').first();

@@ -31,12 +31,11 @@ import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellPaginationStrip } from '@hell-ui/angular/pagination';
-import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
 import { HellSkeleton } from '@hell-ui/angular/skeleton';
 
 import {
   HELL_TABLE_UTILITIES_DIRECTIVES,
-  HellColumnVisibilityPanel,
+  HellColumnVisibilityMenu,
   actionColumn,
   hellColumns,
   hellTableInitialColumnVisibility,
@@ -107,7 +106,12 @@ const SEARCH_SCOPES: readonly {
   readonly detail: string;
   readonly icon: string;
 }[] = [
-  { value: 'all', label: 'All fields', detail: 'Name, email, role, assignee, ID', icon: 'faSolidMagnifyingGlass' },
+  {
+    value: 'all',
+    label: 'All fields',
+    detail: 'Name, email, role, assignee, ID',
+    icon: 'faSolidMagnifyingGlass',
+  },
   { value: 'name', label: 'Name', detail: 'Only row names', icon: 'faSolidUser' },
   { value: 'email', label: 'Email', detail: 'Only email addresses', icon: 'faSolidEnvelope' },
   { value: 'role', label: 'Role', detail: 'Only role values', icon: 'faSolidLayerGroup' },
@@ -165,12 +169,10 @@ const TABLE_COLUMNS = columns.define([
     ...HELL_OMNIBAR_DIRECTIVES,
     ...HELL_SPLIT_VIEW_DIRECTIVES,
     ...HELL_TABLE_UTILITIES_DIRECTIVES,
-    HellColumnVisibilityPanel,
+    HellColumnVisibilityMenu,
     HellButton,
     HellIcon,
     HellPaginationStrip,
-    HellPopover,
-    HellPopoverTrigger,
     HellSkeleton,
   ],
   providers: [
@@ -273,7 +275,8 @@ const TABLE_COLUMNS = columns.define([
             size="sm"
             type="button"
             [variant]="hiddenColumnCount() ? 'soft' : 'default'"
-            [hellPopoverTrigger]="columnsMenu"
+            [hellMenuTrigger]="columnsMenu"
+            [openTriggers]="menuOpenTriggers"
             placement="bottom-start"
           >
             <hell-icon name="faSolidSliders" size="12px" />
@@ -294,12 +297,17 @@ const TABLE_COLUMNS = columns.define([
             <span class="rounded-full bg-hell-primary-soft px-2 py-1 text-xs text-hell-primary">
               {{ selectedCount() }} selected for bulk actions
             </span>
-            <button hellButton size="sm" type="button" variant="ghost" (click)="clearRowSelection()">
+            <button
+              hellButton
+              size="sm"
+              type="button"
+              variant="ghost"
+              (click)="clearRowSelection()"
+            >
               Clear selection
             </button>
           }
         </div>
-
       </div>
 
       <ng-template #filterMenu>
@@ -377,15 +385,13 @@ const TABLE_COLUMNS = columns.define([
       </ng-template>
 
       <ng-template #columnsMenu>
-        <div hellPopover class="min-w-80">
-          <hell-column-visibility-panel
-            [columns]="tableColumns"
-            [(columnVisibility)]="columnVisibility"
-            label="View columns"
-            description="Selection and actions stay locked."
-            resetLabel="Restore"
-          />
-        </div>
+        <hell-column-visibility-menu
+          [columns]="tableColumns"
+          [(columnVisibility)]="columnVisibility"
+          label="Columns"
+          description="Selection and actions stay locked."
+          resetLabel="Restore"
+        />
       </ng-template>
 
       <ng-template #sortMenu>
@@ -538,7 +544,9 @@ const TABLE_COLUMNS = columns.define([
                     @for (row of skeletonRows(); track row) {
                       <tr hellTableRow>
                         @if (columnVisible('selection')) {
-                          <td hellTableCell hellTableSelectionCell><div hellSkeleton width="14px" height="14px"></div></td>
+                          <td hellTableCell hellTableSelectionCell>
+                            <div hellSkeleton width="14px" height="14px"></div>
+                          </td>
                         }
                         @if (columnVisible('id')) {
                           <td hellTableCell><div hellSkeleton width="34px" height="13px"></div></td>
@@ -562,13 +570,22 @@ const TABLE_COLUMNS = columns.define([
                     }
                   } @else if (error(); as message) {
                     <tr>
-                      <td hellTableCell align="center" space="empty" [attr.colspan]="visibleColumnCount()">
+                      <td
+                        hellTableCell
+                        align="center"
+                        space="empty"
+                        [attr.colspan]="visibleColumnCount()"
+                      >
                         {{ message }}
                       </td>
                     </tr>
                   } @else {
                     @for (row of rows(); track row.id) {
-                      <tr hellTableRow [active]="activeRowKey() === row.id" [selected]="isSelected(row)">
+                      <tr
+                        hellTableRow
+                        [active]="activeRowKey() === row.id"
+                        [selected]="isSelected(row)"
+                      >
                         @if (columnVisible('selection')) {
                           <td hellTableCell hellTableSelectionCell>
                             <input
@@ -615,7 +632,12 @@ const TABLE_COLUMNS = columns.define([
                       </tr>
                     } @empty {
                       <tr>
-                        <td hellTableCell align="center" space="empty" [attr.colspan]="visibleColumnCount()">
+                        <td
+                          hellTableCell
+                          align="center"
+                          space="empty"
+                          [attr.colspan]="visibleColumnCount()"
+                        >
                           No results.
                         </td>
                       </tr>
@@ -655,12 +677,17 @@ const TABLE_COLUMNS = columns.define([
         </ng-template>
 
         <ng-template hellSplitDetail>
-          <div [id]="detailPaneId" class="flex min-h-0 min-w-0 flex-1 flex-col bg-hell-surface-elevated">
+          <div
+            [id]="detailPaneId"
+            class="flex min-h-0 min-w-0 flex-1 flex-col bg-hell-surface-elevated"
+          >
             @if (activeRow(); as row) {
               <div class="border-b border-hell-border bg-hell-surface-subtle p-3">
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">
-                    <p class="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-hell-foreground-subtle">
+                    <p
+                      class="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-hell-foreground-subtle"
+                    >
                       Editing record
                     </p>
                     <strong class="block truncate text-base font-semibold text-hell-foreground">
@@ -681,15 +708,21 @@ const TABLE_COLUMNS = columns.define([
                 </div>
 
                 <dl class="mt-3 grid grid-cols-3 gap-2 text-xs">
-                  <div class="rounded-md border border-hell-border bg-hell-surface-elevated px-2 py-1.5">
+                  <div
+                    class="rounded-md border border-hell-border bg-hell-surface-elevated px-2 py-1.5"
+                  >
                     <dt class="text-hell-foreground-subtle">ID</dt>
                     <dd class="font-semibold text-hell-foreground">#{{ row.id }}</dd>
                   </div>
-                  <div class="rounded-md border border-hell-border bg-hell-surface-elevated px-2 py-1.5">
+                  <div
+                    class="rounded-md border border-hell-border bg-hell-surface-elevated px-2 py-1.5"
+                  >
                     <dt class="text-hell-foreground-subtle">Role</dt>
                     <dd class="font-semibold text-hell-foreground">{{ row.role }}</dd>
                   </div>
-                  <div class="rounded-md border border-hell-border bg-hell-surface-elevated px-2 py-1.5">
+                  <div
+                    class="rounded-md border border-hell-border bg-hell-surface-elevated px-2 py-1.5"
+                  >
                     <dt class="text-hell-foreground-subtle">Assignee</dt>
                     <dd class="font-semibold text-hell-foreground">{{ row.assignee }}</dd>
                   </div>
@@ -711,8 +744,12 @@ const TABLE_COLUMNS = columns.define([
                 (input)="onEditorChange($any($event.target).value ?? '')"
               ></textarea>
             } @else {
-              <div class="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center text-sm text-hell-foreground-muted">
-                <span class="rounded-full bg-hell-primary-soft px-3 py-1 text-xs font-semibold text-hell-primary">
+              <div
+                class="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center text-sm text-hell-foreground-muted"
+              >
+                <span
+                  class="rounded-full bg-hell-primary-soft px-3 py-1 text-xs font-semibold text-hell-primary"
+                >
                   No row open
                 </span>
                 <p>Choose an Open action in the table to inspect and edit that row.</p>
@@ -788,7 +825,10 @@ export class DataTableExampleExample {
     'enter',
     'arrowkey',
   ];
-  protected readonly orderByOptions: readonly { readonly value: RowOrderBy; readonly label: string }[] = [
+  protected readonly orderByOptions: readonly {
+    readonly value: RowOrderBy;
+    readonly label: string;
+  }[] = [
     { value: 'rank', label: 'Best match' },
     { value: 'id', label: 'ID' },
     { value: 'name', label: 'Name' },
@@ -796,10 +836,11 @@ export class DataTableExampleExample {
     { value: 'role', label: 'Role' },
     { value: 'assignee', label: 'Assignee' },
   ];
-  protected readonly orderOptions: readonly { readonly value: RowOrder; readonly label: string }[] = [
-    { value: 'asc', label: 'Ascending' },
-    { value: 'desc', label: 'Descending' },
-  ];
+  protected readonly orderOptions: readonly { readonly value: RowOrder; readonly label: string }[] =
+    [
+      { value: 'asc', label: 'Ascending' },
+      { value: 'desc', label: 'Descending' },
+    ];
 
   protected readonly searchSuggestions = computed<readonly SearchSuggestion[]>(() => {
     const value = this.draftSearch().trim();
@@ -850,7 +891,8 @@ export class DataTableExampleExample {
       this.order() !== 'desc',
   );
   protected readonly orderByLabel = computed(
-    () => this.orderByOptions.find((option) => option.value === this.orderBy())?.label ?? 'Best match',
+    () =>
+      this.orderByOptions.find((option) => option.value === this.orderBy())?.label ?? 'Best match',
   );
   protected readonly orderLabel = computed(
     () => this.orderOptions.find((option) => option.value === this.order())?.label ?? 'Descending',

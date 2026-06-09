@@ -1,13 +1,18 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 
+import { provideIcons } from '@ng-icons/core';
+import { faSolidSliders } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
-import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
+import { HellIcon } from '@hell-ui/angular/icon';
+import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
+import { HellPaginationStrip } from '@hell-ui/angular/pagination';
 import {
-  HellColumnVisibilityPanel,
+  HellColumnVisibilityMenu,
   HellTableContainer,
   actionColumn,
   hellColumns,
   hellTableInitialColumnVisibility,
+  hellTableVisibleColumns,
   textColumn,
   type HellTableColumnVisibilityState,
   type HellTableSortDirection,
@@ -50,42 +55,45 @@ const TABLE_COLUMNS = columns.define([
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     HellButton,
-    HellColumnVisibilityPanel,
+    HellIcon,
+    HellColumnVisibilityMenu,
+    HellPaginationStrip,
     HellTableContainer,
-    HellPopover,
-    HellPopoverTrigger,
+    ...HELL_MENU_DIRECTIVES,
     ...HELL_CDK_TABLE_DIRECTIVES,
   ],
+  providers: [provideIcons({ faSolidSliders })],
   template: `
     <div class="grid gap-3">
       <div class="grid gap-3">
-        <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-hell-foreground-muted">
+        <div
+          class="flex flex-wrap items-center justify-between gap-2 text-xs text-hell-foreground-muted"
+        >
           <span>CDK owns dataSource, sorting transform, and pagination state.</span>
           <div class="flex flex-wrap items-center gap-2">
-            <span>Page {{ pageIndex() + 1 }} of {{ pageCount() }}</span>
             <button
               hellButton
               type="button"
               size="sm"
-              variant="soft"
-              [hellPopoverTrigger]="columnsMenu"
+              [variant]="hiddenColumnCount() ? 'soft' : 'default'"
+              [hellMenuTrigger]="columnsMenu"
+              [openTriggers]="menuOpenTriggers"
               placement="bottom-end"
             >
-              CDK columns
+              <hell-icon name="faSolidSliders" size="12px" />
+              Columns
             </button>
           </div>
         </div>
 
         <ng-template #columnsMenu>
-          <div hellPopover class="min-w-72">
-            <hell-column-visibility-panel
-              [columns]="tableColumns"
-              [(columnVisibility)]="columnVisibility"
-              label="CDK columns"
-              description="The CDK row definitions receive this derived displayedColumns list."
-              resetLabel="Restore"
-            />
-          </div>
+          <hell-column-visibility-menu
+            [columns]="tableColumns"
+            [(columnVisibility)]="columnVisibility"
+            label="Columns"
+            description="The CDK row definitions receive this derived displayedColumns list."
+            resetLabel="Restore"
+          />
         </ng-template>
 
         <div hellTableContainer class="overflow-auto">
@@ -140,24 +148,23 @@ const TABLE_COLUMNS = columns.define([
           </table>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
-          <button hellButton type="button" size="sm" variant="ghost" [disabled]="pageIndex() === 0" (click)="previousPage()">
-            Previous
-          </button>
-          <button
-            hellButton
-            type="button"
-            size="sm"
-            variant="ghost"
-            [disabled]="pageIndex() >= pageCount() - 1"
-            (click)="nextPage()"
-          >
-            Next
-          </button>
-          @if (activeRow(); as row) {
-            <span class="text-xs text-hell-foreground-muted">Active row: {{ row.name }}</span>
-          }
+        <div
+          class="overflow-x-auto overflow-y-hidden rounded-md border border-hell-border bg-hell-surface-subtle"
+        >
+          <div class="flex min-w-max items-center justify-between gap-3 p-2 text-xs">
+            <span>{{ rangeLabel() }}</span>
+            <hell-pagination
+              [siblingCount]="1"
+              [page]="pageIndex() + 1"
+              [pageCount]="pageCount()"
+              (pageChange)="setPage($event - 1)"
+            />
+          </div>
         </div>
+
+        @if (activeRow(); as row) {
+          <span class="text-xs text-hell-foreground-muted">Active row: {{ row.name }}</span>
+        }
       </div>
     </div>
   `,
@@ -180,16 +187,34 @@ export class DataTableCdkSkinExample {
   protected readonly displayedColumns = computed(() =>
     hellCdkDisplayedColumns(this.tableColumns, this.columnVisibility()),
   );
+  protected readonly hiddenColumnCount = computed(
+    () =>
+      this.tableColumns.length -
+      hellTableVisibleColumns(this.tableColumns, this.columnVisibility()).length,
+  );
   protected readonly sortedRows = computed(() => sortRows(this.rows, this.sorting()));
-  protected readonly pageCount = computed(() => Math.ceil(this.sortedRows().length / this.pageSize));
+  protected readonly pageCount = computed(() =>
+    Math.ceil(this.sortedRows().length / this.pageSize),
+  );
   protected readonly pagedRows = computed(() => {
     const page = Math.min(this.pageIndex(), Math.max(this.pageCount() - 1, 0));
     const start = page * this.pageSize;
     return this.sortedRows().slice(start, start + this.pageSize);
   });
-  protected readonly activeRow = computed(() =>
-    this.rows.find((row) => row.id === this.activeRowId()) ?? null,
+  protected readonly rangeLabel = computed(() => {
+    const total = this.sortedRows().length;
+    if (!total) return '0 of 0';
+    const start = this.pageIndex() * this.pageSize;
+    return `${start + 1}-${Math.min(start + this.pagedRows().length, total)} of ${total}`;
+  });
+  protected readonly activeRow = computed(
+    () => this.rows.find((row) => row.id === this.activeRowId()) ?? null,
   );
+  protected readonly menuOpenTriggers: ('click' | 'enter' | 'arrowkey')[] = [
+    'click',
+    'enter',
+    'arrowkey',
+  ];
 
   protected sortFor(columnId: string): HellTableSortDirection | null {
     return this.sorting().find((sort) => sort.columnId === columnId)?.direction ?? null;
@@ -203,12 +228,8 @@ export class DataTableCdkSkinExample {
     this.pageIndex.set(0);
   }
 
-  protected previousPage(): void {
-    this.pageIndex.update((page) => Math.max(page - 1, 0));
-  }
-
-  protected nextPage(): void {
-    this.pageIndex.update((page) => Math.min(page + 1, Math.max(this.pageCount() - 1, 0)));
+  protected setPage(page: number): void {
+    this.pageIndex.set(Math.max(0, Math.min(page, Math.max(this.pageCount() - 1, 0))));
   }
 
   protected openRow(row: Person): void {

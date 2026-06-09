@@ -122,13 +122,12 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
         <h2>Column visibility</h2>
         <p>
           Bind <code>[(columnVisibility)]</code> to app state and pass the same state to
-          <code>hell-column-visibility-panel</code>. The state is a stable
-          <code>Record&lt;columnId, boolean&gt;</code>: <code>false</code> hides a toggleable column,
-          while missing or <code>true</code> shows it. Hell renders the picker and reset behavior;
-          your application owns persistence such as <code>localStorage</code>, a backend profile, or
-          URL state. In dense toolbars, place the panel inside a <code>hellPopover</code> next to
-          the filter menu so the default page layout does not spend permanent space on column
-          preferences.
+          <code>hell-column-visibility-menu</code> in dense toolbars or
+          <code>hell-column-visibility-panel</code> in persistent settings surfaces. The state is a
+          stable <code>Record&lt;columnId, boolean&gt;</code>: <code>false</code> hides a toggleable
+          column, while missing or <code>true</code> shows it. Hell renders the menu/panel picker
+          and reset behavior; your application owns persistence such as <code>localStorage</code>, a
+          backend profile, or URL state.
         </p>
       </div>
 
@@ -345,9 +344,10 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
             non-empty.
           </li>
           <li>
-            Bind <code>[(columnVisibility)]</code> on both <code>hell-data-table</code> and
-            <code>hell-column-visibility-panel</code> for app-owned visibility persistence. Column
-            helpers accept <code>visibility: 'always'</code>, <code>'user-toggleable'</code>, or
+            Bind <code>[(columnVisibility)]</code> on <code>hell-data-table</code> and on either
+            <code>hell-column-visibility-menu</code> or <code>hell-column-visibility-panel</code> for
+            app-owned visibility persistence. Column helpers accept
+            <code>visibility: 'always'</code>, <code>'user-toggleable'</code>, or
             <code>'initially-hidden'</code>; required action and selection columns render as disabled
             checked options in the picker.
           </li>

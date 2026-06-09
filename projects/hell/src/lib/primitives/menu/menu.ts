@@ -3,6 +3,10 @@ import type { Signal } from '@angular/core';
 import {
   NgpMenu,
   NgpMenuItem,
+  NgpMenuItemCheckbox,
+  NgpMenuItemIndicator,
+  NgpMenuItemRadio,
+  NgpMenuItemRadioGroup,
   NgpMenuTrigger,
   NgpSubmenuTrigger,
   injectSubmenuTriggerState,
@@ -127,6 +131,71 @@ export class HellMenuItem extends HellStyleable {
   }
 }
 
+/** Checkable menu item. Does not close its owning menu when toggled. */
+@Directive({
+  selector: 'button[hellMenuItemCheckbox]',
+  hostDirectives: [
+    {
+      directive: NgpMenuItemCheckbox,
+      inputs: ['ngpMenuItemCheckboxChecked:checked', 'ngpMenuItemCheckboxDisabled:disabled'],
+      outputs: ['ngpMenuItemCheckboxCheckedChange:checkedChange'],
+    },
+  ],
+  host: {
+    '[class.hell-menu-item]': '!unstyled()',
+    '[class.hell-menu-item-checkable]': '!unstyled()',
+    type: 'button',
+    '[attr.disabled]': 'menuItem.disabled() ? "" : null',
+  },
+})
+export class HellMenuItemCheckbox extends HellStyleable {
+  protected readonly menuItem = inject(NgpMenuItemCheckbox);
+}
+
+/** Radio-style menu item. Use inside `[hellMenuItemRadioGroup]`. */
+@Directive({
+  selector: 'button[hellMenuItemRadio]',
+  hostDirectives: [
+    {
+      directive: NgpMenuItemRadio,
+      inputs: ['ngpMenuItemRadioValue:value', 'ngpMenuItemRadioDisabled:disabled'],
+    },
+  ],
+  host: {
+    '[class.hell-menu-item]': '!unstyled()',
+    '[class.hell-menu-item-checkable]': '!unstyled()',
+    type: 'button',
+    '[attr.disabled]': 'menuItem.disabled() ? "" : null',
+  },
+})
+export class HellMenuItemRadio extends HellStyleable {
+  protected readonly menuItem = inject(NgpMenuItemRadio);
+}
+
+/** Group wrapper for radio menu items. */
+@Directive({
+  selector: '[hellMenuItemRadioGroup]',
+  hostDirectives: [
+    {
+      directive: NgpMenuItemRadioGroup,
+      inputs: ['ngpMenuItemRadioGroupValue:value'],
+      outputs: ['ngpMenuItemRadioGroupValueChange:valueChange'],
+    },
+  ],
+})
+export class HellMenuItemRadioGroup {}
+
+/** Indicator slot inside checkbox or radio menu items. */
+@Directive({
+  selector: '[hellMenuItemIndicator]',
+  hostDirectives: [NgpMenuItemIndicator],
+  host: {
+    '[class.hell-menu-item-indicator]': '!unstyled()',
+    'aria-hidden': 'true',
+  },
+})
+export class HellMenuItemIndicator extends HellStyleable {}
+
 @Directive({
   selector: '[hellMenuSeparator]',
   host: {
@@ -178,6 +247,10 @@ export const HELL_MENU_DIRECTIVES = [
   HellSubmenuTrigger,
   HellMenu,
   HellMenuItem,
+  HellMenuItemCheckbox,
+  HellMenuItemRadio,
+  HellMenuItemRadioGroup,
+  HellMenuItemIndicator,
   HellMenuSeparator,
   HellMenuSection,
   HellMenuLabel,

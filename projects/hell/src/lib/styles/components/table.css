@@ -208,4 +208,20 @@
       outline-offset: -2px;
     }
 
+  @media (pointer: coarse) {
+    .hell-table-header-cell[data-sortable='true'] {
+      padding-inline-end: calc(var(--spacing) * 10);
+    }
+
+    .hell-table-resize-handle {
+      width: 24px;
+      inset-inline-end: -8px;
+      justify-content: center;
+    }
+
+    .hell-table-resize-handle [data-slot='grip'] {
+      width: 2px;
+    }
+  }
+
 }

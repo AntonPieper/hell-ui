@@ -17,7 +17,7 @@
       min-width: 200px;
       outline: none;
       gap: 1px;
-      z-index: var(--hell-z-popover, 60);
+      z-index: var(--hell-z-menu, var(--hell-z-popover, 60));
       animation: hell-pop-in var(--hell-duration-fast) var(--ease-hell-out);
       &[data-submenu="true"] {
         /* Compensate surface padding + row gap so the first submenu item
@@ -87,6 +87,35 @@
       font-size: 11px;
       color: var(--color-hell-foreground-subtle);
       font-variant-numeric: tabular-nums;
+    }
+
+  .hell-menu-item-indicator {
+      display: inline-flex;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      width: calc(var(--spacing) * 4);
+      color: var(--color-hell-primary);
+      opacity: 0;
+    }
+
+  .hell-menu-item-indicator::before {
+      content: '';
+      display: block;
+      width: 8px;
+      height: 5px;
+      border-left: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: translateY(-1px) rotate(-45deg);
+      transform-origin: center;
+    }
+
+  .hell-menu-item-indicator[data-checked] {
+      opacity: 1;
+    }
+
+  .hell-menu-item-checkable[aria-checked='true'] {
+      color: var(--color-hell-foreground);
     }
 
   /* Submenu trigger gets an automatic chevron on the trailing edge. */

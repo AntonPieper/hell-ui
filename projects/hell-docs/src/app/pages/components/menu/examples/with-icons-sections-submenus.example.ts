@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import {
   faSolidClock,
@@ -44,6 +44,10 @@ const HD_MENU_PAGE_ICONS = {
             <hell-icon name="faSolidClock" />
             <span>Open recent</span>
           </button>
+          <button hellMenuItem type="button" [hellSubmenuTrigger]="viewOptions">
+            <span hellMenuItemIcon></span>
+            <span>View options</span>
+          </button>
         </div>
 
         <div hellMenuSeparator></div>
@@ -70,9 +74,35 @@ const HD_MENU_PAGE_ICONS = {
         <button hellMenuItem type="button" (click)="onAction('recent:pulse')">Pulse weekly</button>
       </div>
     </ng-template>
+
+    <ng-template #viewOptions>
+      <div hellMenu aria-label="View options">
+        <button
+          hellMenuItemCheckbox
+          type="button"
+          [checked]="showLineNumbers()"
+          (checkedChange)="showLineNumbers.set($event)"
+        >
+          <span hellMenuItemIndicator></span>
+          <span>Line numbers</span>
+        </button>
+        <button
+          hellMenuItemCheckbox
+          type="button"
+          [checked]="wrapText()"
+          (checkedChange)="wrapText.set($event)"
+        >
+          <span hellMenuItemIndicator></span>
+          <span>Wrap text</span>
+        </button>
+      </div>
+    </ng-template>
   `,
 })
 export class MenuWithIconsSectionsSubmenusExample {
+  protected readonly showLineNumbers = signal(true);
+  protected readonly wrapText = signal(false);
+
   protected onAction(name: string) {
     console.log('menu action:', name);
   }

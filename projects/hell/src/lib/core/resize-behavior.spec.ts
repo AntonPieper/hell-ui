@@ -164,6 +164,42 @@ describe('Resize Behavior', () => {
     handle.remove();
   });
 
+  it('starts pointer resize for touch events that do not report a primary mouse button', () => {
+    const handle = document.createElement('div');
+    document.body.append(handle);
+    const before = createResizeAdapter(100, 40);
+    const after = createResizeAdapter(80, 40);
+    const commits: number[] = [];
+    const operation = new HellResizeOperation({
+      before,
+      after,
+      orientation: 'horizontal',
+      startCoordinate: 10,
+    });
+    const interaction = new HellResizeInteractionController({
+      handle,
+      ownerWindow: () => window,
+      onCommit: (result) => commits.push(result.ariaValueNow),
+    });
+
+    expect(
+      interaction.startPointer(
+        new PointerEvent('pointerdown', { button: -1, pointerId: 2, pointerType: 'touch' }),
+        operation,
+      ),
+    ).toBe(true);
+
+    window.dispatchEvent(new PointerEvent('pointermove', { pointerId: 2, clientX: 60 }));
+    window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 2, clientX: 60 }));
+
+    expect(commits).toEqual([78]);
+    expect(before.committed).toBe(140);
+    expect(after.committed).toBe(40);
+
+    interaction.destroy();
+    handle.remove();
+  });
+
   it('runs keyboard resize interaction lifecycle through layout adapters', () => {
     const handle = document.createElement('div');
     const before = createResizeAdapter(100, 40);
@@ -234,6 +270,44 @@ describe('Resize Behavior', () => {
     expect(before.size).toBe(116);
     expect(after.size).toBe(64);
     expect(commits).toEqual([116]);
+  });
+
+  it('starts pair pointer resize for touch events without a primary mouse button', () => {
+    const handle = document.createElement('div');
+    document.body.append(handle);
+    const before = createResizeAdapter(100, 40);
+    const after = createResizeAdapter(80, 40);
+    const commits: number[] = [];
+
+    const interaction = new HellResizePairInteractionController({
+      handle,
+      ownerWindow: () => window,
+      orientation: () => 'horizontal',
+      pair: () => ({ before, after }),
+      adapters: (pair) => ({ before: pair.before, after: pair.after }),
+      onCommit: (result) => commits.push(result.a),
+    });
+
+    expect(
+      interaction.startPointer(
+        new PointerEvent('pointerdown', {
+          button: -1,
+          pointerId: 3,
+          pointerType: 'touch',
+          clientX: 10,
+        }),
+      ),
+    ).toBe(true);
+
+    window.dispatchEvent(new PointerEvent('pointermove', { pointerId: 3, clientX: 60 }));
+    window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 3, clientX: 60 }));
+
+    expect(commits).toEqual([140]);
+    expect(before.committed).toBe(140);
+    expect(after.committed).toBe(40);
+
+    interaction.destroy();
+    handle.remove();
   });
 
   it('uses orientation when reading pointer coordinates', () => {
