@@ -5,16 +5,16 @@
   - list:
     - listitem:
       - checkbox "Select" [checked] [disabled]
-      - text: SelectRequired
+      - text: Select Required
     - listitem:
       - checkbox "Name" [checked] [disabled]
-      - text: NameRequired
+      - text: Name Required
     - listitem:
       - checkbox "Email"
       - text: Email
     - listitem:
       - checkbox "Role"
-      - text: RoleInitially hidden
+      - text: Role Initially hidden
     - listitem:
       - checkbox "Actions" [checked] [disabled]
-      - text: ActionsRequired
+      - text: Actions Required
