@@ -43,8 +43,9 @@ describe('Hell Floating registration contract', () => {
 
     const scope = fixture.debugElement.injector.get(FakeFloatingScope);
     expect(scope.registered.map((element) => element.id)).toEqual(['custom']);
-    const registeredChild = scope.registered[0]?.querySelector('#child') as HTMLButtonElement;
-    expect(scope.containsFloatingTarget(registeredChild)).toBe(true);
+    const [registered] = scope.registered;
+    expect(registered?.querySelector('#child')?.textContent).toBe('Custom');
+    expect(scope.containsFloatingTarget(registered)).toBe(true);
 
     fixture.destroy();
 
