@@ -334,8 +334,13 @@ test.describe('Hell UI browser behavior', () => {
     ).toBeVisible();
 
     await firstExample.getByRole('tab', { name: 'Preview' }).click();
-    await expect(page.locator('hell-data-table.hell-data-table').first()).toBeVisible();
+    const firstDataTable = page.locator('hell-data-table.hell-data-table').first();
+    await expect(firstDataTable).toBeVisible();
+    await expect(firstDataTable).toHaveCSS('display', 'block');
+    await expect(firstDataTable).toHaveCSS('border-top-width', '1px');
     await expect(page.locator('hell-data-table table.hell-table').first()).toBeVisible();
+
+    await page.getByRole('button', { name: 'Columns' }).first().click();
     await expect(
       page.locator('hell-column-visibility-panel.hell-column-visibility-panel').first(),
     ).toBeVisible();

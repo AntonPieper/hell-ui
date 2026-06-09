@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, effect, signal } from '@angular/core';
 
 import { HellButton } from '@hell-ui/angular/button';
+import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
 import {
   HELL_DATA_TABLE_DIRECTIVES,
   actionColumn,
@@ -47,16 +48,34 @@ const TABLE_COLUMNS = columns.define([
 @Component({
   selector: 'app-data-table-column-visibility-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, ...HELL_DATA_TABLE_DIRECTIVES],
+  imports: [HellButton, HellPopover, HellPopoverTrigger, ...HELL_DATA_TABLE_DIRECTIVES],
   template: `
     <div class="grid gap-3">
-      <hell-column-visibility-panel
-        [columns]="tableColumns"
-        [(columnVisibility)]="columnVisibility"
-        label="Columns"
-        description="Preferences are stored by this example component, not by Hell."
-        resetLabel="Restore"
-      />
+      <div class="flex flex-wrap items-center justify-between gap-2 rounded-md border border-hell-border bg-hell-surface-subtle p-2 text-xs text-hell-foreground-muted">
+        <span>Preferences are stored by this example component, not by Hell.</span>
+        <button
+          hellButton
+          type="button"
+          size="sm"
+          variant="soft"
+          [hellPopoverTrigger]="columnsMenu"
+          placement="bottom-end"
+        >
+          Columns
+        </button>
+      </div>
+
+      <ng-template #columnsMenu>
+        <div hellPopover class="min-w-72">
+          <hell-column-visibility-panel
+            [columns]="tableColumns"
+            [(columnVisibility)]="columnVisibility"
+            label="Columns"
+            description="Show or hide optional columns."
+            resetLabel="Restore"
+          />
+        </div>
+      </ng-template>
 
       <hell-data-table
         [rows]="rows"

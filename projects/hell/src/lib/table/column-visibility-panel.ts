@@ -64,6 +64,7 @@ let nextColumnVisibilityPanelId = 0;
         <button
           hellButton
           type="button"
+          data-slot="reset"
           size="xs"
           variant="ghost"
           [disabled]="!canReset()"

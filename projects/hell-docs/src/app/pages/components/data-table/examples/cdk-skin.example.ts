@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 
 import { HellButton } from '@hell-ui/angular/button';
+import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
 import {
   HellColumnVisibilityPanel,
   HellTableContainer,
@@ -47,22 +48,45 @@ const TABLE_COLUMNS = columns.define([
 @Component({
   selector: 'app-data-table-cdk-skin-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellColumnVisibilityPanel, HellTableContainer, ...HELL_CDK_TABLE_DIRECTIVES],
+  imports: [
+    HellButton,
+    HellColumnVisibilityPanel,
+    HellTableContainer,
+    HellPopover,
+    HellPopoverTrigger,
+    ...HELL_CDK_TABLE_DIRECTIVES,
+  ],
   template: `
     <div class="grid gap-3">
-      <hell-column-visibility-panel
-        [columns]="tableColumns"
-        [(columnVisibility)]="columnVisibility"
-        label="CDK columns"
-        description="The CDK row definitions receive this derived displayedColumns list."
-        resetLabel="Restore"
-      />
-
       <div class="grid gap-3">
         <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-hell-foreground-muted">
           <span>CDK owns dataSource, sorting transform, and pagination state.</span>
-          <span>Page {{ pageIndex() + 1 }} of {{ pageCount() }}</span>
+          <div class="flex flex-wrap items-center gap-2">
+            <span>Page {{ pageIndex() + 1 }} of {{ pageCount() }}</span>
+            <button
+              hellButton
+              type="button"
+              size="sm"
+              variant="soft"
+              [hellPopoverTrigger]="columnsMenu"
+              placement="bottom-end"
+            >
+              CDK columns
+            </button>
+          </div>
         </div>
+
+        <ng-template #columnsMenu>
+          <div hellPopover class="min-w-72">
+            <hell-column-visibility-panel
+              [columns]="tableColumns"
+              [(columnVisibility)]="columnVisibility"
+              label="CDK columns"
+              description="The CDK row definitions receive this derived displayedColumns list."
+              resetLabel="Restore"
+            />
+          </div>
+        </ng-template>
 
         <div hellTableContainer class="overflow-auto">
           <table cdk-table fixedLayout contentWidth [dataSource]="pagedRows()">

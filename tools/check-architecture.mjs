@@ -2213,13 +2213,49 @@ function checkTableUtilityContract() {
   const docs = readFile(
     join(root, 'projects/hell-docs/src/app/pages/components/data-table/data-table.page.ts'),
   );
+  const docsRoot = join(root, 'projects/hell-docs/src/app');
+  const docsGlobalStyles = readFile(join(root, 'projects/hell-docs/src/styles.css'));
+  if (!docsGlobalStyles.includes("@import '@hell-ui/angular/styles/table';")) {
+    failures.push('Docs app must load table CSS from the global stylesheet so production routes are styled');
+  }
+  const routeTableStyleImports = walk(docsRoot)
+    .filter((file) => file.endsWith('.ts'))
+    .flatMap((file) =>
+      moduleImportSpecifiers(file).filter(
+        (importHit) => importHit.specifier === '@hell-ui/angular/styles/table',
+      ),
+    );
+  for (const importHit of routeTableStyleImports) {
+    failures.push(
+      `Docs table routes must not rely on TypeScript side-effect imports for table CSS: ${relPath(
+        importHit.file,
+      )}:${importHit.line}`,
+    );
+  }
+  const tableStyleSource = `${readFile(join(root, 'projects/hell/src/lib/styles/components/table.css'))}\n${readFile(
+    join(root, 'projects/hell/src/lib/styles/components/table-renderer.css'),
+  )}`;
+  for (const forbidden of [
+    'button.hell-table-row-action:not(.hell-button)',
+    'a.hell-table-row-action:not(.hell-button)',
+    '.hell-table-row-checkbox.hell-checkbox',
+    '.hell-table-row-radio.hell-radio',
+    '.hell-column-visibility-panel .hell-checkbox',
+    '.hell-column-visibility-panel .hell-button',
+  ]) {
+    if (tableStyleSource.includes(forbidden)) {
+      failures.push(`Table styles must compose primitives instead of special-casing ${forbidden}`);
+    }
+  }
+  if (/\baccent-color\s*:/.test(tableStyleSource)) {
+    failures.push('Table styles must not override native checkbox/radio accent-color; compose checkbox/radio primitives instead');
+  }
   for (const text of ['Table primitives', 'not a', 'batteries-included data grid', 'TanStack Table']) {
     if (!docs.includes(text)) {
       failures.push('Table docs must present the entrypoint as table primitives, not a full data table');
       break;
     }
   }
-  const docsRoot = join(root, 'projects/hell-docs/src/app');
   const offenders = walk(docsRoot)
     .filter((file) => /\.(?:ts|html|md)$/.test(file))
     .filter((file) => /@hell-ui\/angular\/features\/(?:data-table|table-utilities)\b/.test(readFile(file)))

@@ -4,20 +4,20 @@
 - Source stats: `dist/hell-docs/stats.json`
 - Budget policy: `docs/release/docs-budget-policy.md`
 - Report generator: `tools/docs-bundle-budget-report.mjs`
-- Scope: diagnosis plus current remediation status; HELL-050 guards docs route imports, HELL-087 guards shared docs code-preview lazy loading, and remaining split/import work stays in HELL-053, HELL-054, and HELL-056.
+- Scope: diagnosis plus current remediation status; HELL-050 guards docs route imports, HELL-087 guards shared docs code-preview lazy loading, HELL-120 records the intentional global table stylesheet needed for production styling, and remaining split/import work stays in HELL-053, HELL-054, and HELL-056.
 
 ## Budget status
 
 | Budget | Current | Warning | Error | Status |
 | --- | ---: | ---: | ---: | --- |
-| Initial bundle | 796.31 kB | 500.00 kB | 1050.00 kB | accepted warning: 296.31 kB over; accepted ceiling: 800.00 kB; owner: Docs shell / global styles; follow-up: HELL-050 static guard |
+| Initial bundle | 805.06 kB | 500.00 kB | 1050.00 kB | accepted warning: 305.06 kB over; accepted ceiling: 820.00 kB; owner: Docs shell / global styles; follow-up: HELL-050 static guard + HELL-120 table CSS guard |
 | Any component style | 1.29 kB largest | 4.00 kB | 8.00 kB | within warning budget |
 
 ## Budget policy
 
 - Policy source: `docs/release/docs-budget-policy.md`
 - Policy check: ok
-- Accepted current warnings: Initial bundle (HELL-050 static guard)
+- Accepted current warnings: Initial bundle (HELL-050 static guard + HELL-120 table CSS guard)
 - Regression budget warnings: none
 
 ## Largest initial chunks
@@ -25,7 +25,7 @@
 | Rank | Chunk | Size | Owner | Largest inputs |
 | ---: | --- | ---: | --- | --- |
 | 1 | `chunk-GFDEGWDO.js` | 183.62 kB | Angular runtime baseline | `node_modules/.pnpm/@angular+core@21.2.13_@angular+compiler@21.2.13_rxjs@7.8.2/node_modules/@angular/core/fesm2022/_debug_node-chunk.mjs` (98.22 kB)<br>`node_modules/.pnpm/@angular+core@21.2.13_@angular+compiler@21.2.13_rxjs@7.8.2/node_modules/@angular/core/fesm2022/_effect-chunk2.mjs` (24.68 kB)<br>`node_modules/.pnpm/@angular+core@21.2.13_@angular+compiler@21.2.13_rxjs@7.8.2/node_modules/@angular/core/fesm2022/core.mjs` (16.65 kB) |
-| 2 | `styles-7EK6VVO7.css` | 171.43 kB | Docs global stylesheet (`styles.css`) | `projects/hell-docs/src/styles.css` (171.43 kB)<br>`angular:styles/global:styles` (0 B) |
+| 2 | `styles-N4CYBOYN.css` | 180.18 kB | Docs global stylesheet (`styles.css`) | `projects/hell-docs/src/styles.css` (180.18 kB, including the intentional global `@hell-ui/angular/styles/table` import from HELL-120)<br>`angular:styles/global:styles` (0 B) |
 | 3 | `chunk-R4KRB32A.js` | 78.73 kB | Docs router shell | `node_modules/.pnpm/@angular+router@21.2.13_@angular+common@21.2.13_@angular+core@21.2.13_@angular+compiler_3a63d3eb80a3a395ad0c90972845f556/node_modules/@angular/router/fesm2022/_router-chunk.mjs` (67.56 kB)<br>`node_modules/.pnpm/@angular+router@21.2.13_@angular+common@21.2.13_@angular+core@21.2.13_@angular+compiler_3a63d3eb80a3a395ad0c90972845f556/node_modules/@angular/router/fesm2022/_router_module-chunk.mjs` (10.32 kB)<br>`node_modules/.pnpm/@angular+router@21.2.13_@angular+common@21.2.13_@angular+core@21.2.13_@angular+compiler_3a63d3eb80a3a395ad0c90972845f556/node_modules/@angular/router/fesm2022/router.mjs` (0 B) |
 | 4 | `chunk-7QE2LEZ5.js` | 73.94 kB | Docs search / omnibar shell | `node_modules/.pnpm/@angular+cdk@21.2.11_@angular+common@21.2.13_@angular+core@21.2.13_@angular+compiler@21_04df65e2704088424dcd37e685ec6dc2/node_modules/@angular/cdk/fesm2022/_overlay-module-chunk.mjs` (39.50 kB)<br>`dist/hell/fesm2022/hell-ui-angular-omnibar.mjs` (33.32 kB)<br>`node_modules/.pnpm/@angular+cdk@21.2.11_@angular+common@21.2.13_@angular+core@21.2.13_@angular+compiler@21_04df65e2704088424dcd37e685ec6dc2/node_modules/@angular/cdk/fesm2022/_test-environment-chunk.mjs` (138 B) |
 | 5 | `chunk-UVKHLKUU.js` | 57.09 kB | Docs shell primitive dependencies | `node_modules/.pnpm/@angular+platform-browser@21.2.13_@angular+common@21.2.13_@angular+core@21.2.13_@angula_a3fa5d93eb842c3383125d4df5d950df/node_modules/@angular/platform-browser/fesm2022/_dom_renderer-chunk.mjs` (8.10 kB)<br>`node_modules/.pnpm/@angular+cdk@21.2.11_@angular+common@21.2.13_@angular+core@21.2.13_@angular+compiler@21_04df65e2704088424dcd37e685ec6dc2/node_modules/@angular/cdk/fesm2022/_a11y-module-chunk.mjs` (7.96 kB)<br>`node_modules/.pnpm/@angular+cdk@21.2.11_@angular+common@21.2.13_@angular+core@21.2.13_@angular+compiler@21_04df65e2704088424dcd37e685ec6dc2/node_modules/@angular/cdk/fesm2022/_focus-monitor-chunk.mjs` (6.23 kB) |
@@ -72,7 +72,7 @@ Lazy owner summary: the largest lazy chunks are correctly behind feature/page bo
 
 | Warning / risk | Root cause from stats | Owner | Follow-up fix |
 | --- | --- | --- | --- |
-| Initial bundle exceeds 500 kB by 296.31 kB | Static imports from `main` pull router/runtime plus docs-shell controls; `styles.css` globally imports Tailwind and `@hell-ui/angular/styles/composites`. Top chunks: `chunk-GFDEGWDO.js`, `styles-7EK6VVO7.css`, `chunk-R4KRB32A.js`, `chunk-7QE2LEZ5.js`, `chunk-UVKHLKUU.js`. | Docs shell / global styles | Accepted by the docs budget policy (HELL-050 static guard); HELL-050 guards future eager imports across docs route boundaries, and any undocumented new warning is a regression. |
+| Initial bundle exceeds 500 kB by 305.06 kB | Static imports from `main` pull router/runtime plus docs-shell controls; `styles.css` globally imports Tailwind, `@hell-ui/angular/styles/composites`, and the intentional HELL-120 table stylesheet. Top chunks: `chunk-GFDEGWDO.js`, `styles-N4CYBOYN.css`, `chunk-R4KRB32A.js`, `chunk-7QE2LEZ5.js`, `chunk-UVKHLKUU.js`. | Docs shell / global styles | Accepted by the docs budget policy (HELL-050 static guard + HELL-120 table CSS guard); HELL-050 guards future eager imports across docs route boundaries, HELL-120 blocks route TypeScript table CSS imports that produced unstyled production tables, and any undocumented new warning is a regression. |
 | PDF viewer docs style is isolated from component-style budget | No pdf-viewer component style chunk exceeds the 4 kB warning budget; the docs page serves `@hell-ui/pdf-viewer/styles` as a copied lazy asset instead of an Angular component style. | PDF viewer docs page | HELL-031 keeps the lazy boundary; docs budget policy keeps component-style warnings unaccepted unless explicitly documented. |
 | PDF lazy weight is large even when initial bundle is protected | `pdfjs-dist/build/pdf.mjs`, `pdfjs-dist/web/pdf_viewer.mjs`, and `hell-ui-pdf-viewer.mjs` are the top PDF lazy inputs. | PDF viewer split package | HELL-031 keeps the docs page lazy/isolated; HELL-053 keeps PDF outside the core package. |
 | Code editor lazy chunks stay behind lazy docs boundaries | CodeMirror and Lezer packages dominate the code editor route and shared docs code-viewer lazy chunks; this is expected feature weight, not initial shell weight. | Code editor feature / docs code previews | HELL-054 locks CodeMirror as a kept optional entrypoint; HELL-087 keeps shared docs code previews dynamically imported instead of part of the docs shell. |

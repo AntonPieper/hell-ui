@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import '@hell-ui/angular/styles/table';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { DataTableCdkSkinExample } from './examples/cdk-skin.example';
 import dataTableCdkSkinExampleCodeRaw from './examples/cdk-skin.example.ts?raw' with {
@@ -127,7 +126,9 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
           <code>Record&lt;columnId, boolean&gt;</code>: <code>false</code> hides a toggleable column,
           while missing or <code>true</code> shows it. Hell renders the picker and reset behavior;
           your application owns persistence such as <code>localStorage</code>, a backend profile, or
-          URL state.
+          URL state. In dense toolbars, place the panel inside a <code>hellPopover</code> next to
+          the filter menu so the default page layout does not spend permanent space on column
+          preferences.
         </p>
       </div>
 
@@ -233,8 +234,9 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
           <li>
             Row interactive shortcuts such as <code>HellTableRow.interactive</code>,
             <code>selectionSemantics</code>, <code>[selectable]</code>, and <code>(rowSelect)</code>
-            were removed. Put real <code>button[hellTableRowAction]</code> or
-            <code>a[hellTableRowAction]</code> controls inside cells for row actions.
+            were removed. Put real row-action controls inside cells, and compose
+            <code>hellButton</code> with <code>hellTableRowAction</code> when you want the default
+            Hell button appearance.
           </li>
           <li>
             <code>hellTableSortButton</code> was replaced by
@@ -299,8 +301,10 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
           <li>
             <code>button[hellTableRowAction]</code> / <code>a[hellTableRowAction]</code>: native row
             action control. The button/link owns focus, click, keyboard activation, and accessible
-            name. For master/detail editors, bind <code>aria-controls</code> to the editor pane id
-            and <code>aria-expanded</code> to the active-row state.
+            name. Compose <code>hellButton</code> on the same host for styled button visuals; the
+            row-action primitive itself stays a table state hook. For master/detail editors, bind
+            <code>aria-controls</code> to the editor pane id and <code>aria-expanded</code> to the
+            active-row state.
           </li>
           <li>
             <code>[hellTableSelectionCell]</code>: narrow styling hook for the cell that contains
@@ -392,9 +396,9 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
             Angular CDK Table, TanStack Table, signals, and your own backend data source.
           </li>
           <li>
-            Put row actions such as Open, Edit, or View details in native
-            <code>button[hellTableRowAction]</code> or <code>a[hellTableRowAction]</code> controls
-            inside <code>td[hellTableCell]</code>.
+            Put row actions such as Open, Edit, or View details in native controls inside
+            <code>td[hellTableCell]</code>. Add <code>hellButton</code> to the same host when the
+            action should use Hell's styled button primitive.
           </li>
           <li>
             Reflect the editor row with <code>[active]</code>, bulk selection with
