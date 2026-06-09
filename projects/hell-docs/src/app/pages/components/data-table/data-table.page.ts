@@ -85,7 +85,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
         </p>
       </div>
 
-      <hd-example-tabs class="hd-doc-wide" [code]="dataTableSimpleRendererExampleCode" flush>
+      <hd-example-tabs class="hd-doc-wide" [code]="dataTableSimpleRendererExampleCode">
         <app-data-table-simple-renderer-example />
       </hd-example-tabs>
 
@@ -98,7 +98,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
         </p>
       </div>
 
-      <hd-example-tabs class="hd-doc-wide" [code]="dataTableSelectionExampleCode" flush>
+      <hd-example-tabs class="hd-doc-wide" [code]="dataTableSelectionExampleCode">
         <app-data-table-selection-example />
       </hd-example-tabs>
 
@@ -114,7 +114,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
         </p>
       </div>
 
-      <hd-example-tabs class="hd-doc-wide" [code]="dataTableCustomRenderersExampleCode" flush>
+      <hd-example-tabs class="hd-doc-wide" [code]="dataTableCustomRenderersExampleCode">
         <app-data-table-custom-renderers-example />
       </hd-example-tabs>
 
@@ -122,7 +122,8 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
         <h2>Column visibility</h2>
         <p>
           Bind <code>[(columnVisibility)]</code> to app state and pass the same state to
-          <code>hell-column-visibility-menu</code> in dense toolbars or
+          <code>hell-column-visibility-selector</code> for the standard compact Columns trigger,
+          <code>hell-column-visibility-menu</code> for custom menu triggers, or
           <code>hell-column-visibility-panel</code> in persistent settings surfaces. The state is a
           stable <code>Record&lt;columnId, boolean&gt;</code>: <code>false</code> hides a toggleable
           column, while missing or <code>true</code> shows it. Hell renders the menu/panel picker
@@ -131,7 +132,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
         </p>
       </div>
 
-      <hd-example-tabs class="hd-doc-wide" [code]="dataTableColumnVisibilityExampleCode" flush>
+      <hd-example-tabs class="hd-doc-wide" [code]="dataTableColumnVisibilityExampleCode">
         <app-data-table-column-visibility-example />
       </hd-example-tabs>
 
@@ -144,7 +145,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
         </p>
       </div>
 
-      <hd-example-tabs class="hd-doc-wide" [code]="dataTableTanStackTableExampleCode" flush>
+      <hd-example-tabs class="hd-doc-wide" [code]="dataTableTanStackTableExampleCode">
         <app-data-table-tanstack-table-example />
       </hd-example-tabs>
 
@@ -157,7 +158,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
         </p>
       </div>
 
-      <hd-example-tabs class="hd-doc-wide" [code]="dataTableVirtualExampleCode" flush>
+      <hd-example-tabs class="hd-doc-wide" [code]="dataTableVirtualExampleCode">
         <app-data-table-virtual-example />
       </hd-example-tabs>
 
@@ -178,7 +179,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
         </p>
       </div>
 
-      <hd-example-tabs class="hd-doc-wide" [code]="dataTableCdkSkinExampleCode" flush>
+      <hd-example-tabs class="hd-doc-wide" [code]="dataTableCdkSkinExampleCode">
         <app-data-table-cdk-skin-example />
       </hd-example-tabs>
 
@@ -193,7 +194,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
         </p>
       </div>
 
-      <hd-example-tabs class="hd-doc-wide" [code]="dataTableGridModeExampleCode" flush>
+      <hd-example-tabs class="hd-doc-wide" [code]="dataTableGridModeExampleCode">
         <app-data-table-grid-mode-example />
       </hd-example-tabs>
 
@@ -208,7 +209,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
         </p>
       </div>
 
-      <hd-example-tabs class="hd-doc-wide" [code]="dataTableExampleExampleCode" flush>
+      <hd-example-tabs class="hd-doc-wide" [code]="dataTableExampleExampleCode">
         <app-data-table-example-example />
       </hd-example-tabs>
 
@@ -345,8 +346,8 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
           </li>
           <li>
             Bind <code>[(columnVisibility)]</code> on <code>hell-data-table</code> and on either
-            <code>hell-column-visibility-menu</code> or <code>hell-column-visibility-panel</code> for
-            app-owned visibility persistence. Column helpers accept
+            <code>hell-column-visibility-selector</code>, <code>hell-column-visibility-menu</code>, or
+            <code>hell-column-visibility-panel</code> for app-owned visibility persistence. Column helpers accept
             <code>visibility: 'always'</code>, <code>'user-toggleable'</code>, or
             <code>'initially-hidden'</code>; required action and selection columns render as disabled
             checked options in the picker.

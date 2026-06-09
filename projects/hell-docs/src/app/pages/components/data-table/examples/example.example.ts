@@ -35,7 +35,7 @@ import { HellSkeleton } from '@hell-ui/angular/skeleton';
 
 import {
   HELL_TABLE_UTILITIES_DIRECTIVES,
-  HellColumnVisibilityMenu,
+  HellColumnVisibilitySelector,
   actionColumn,
   hellColumns,
   hellTableInitialColumnVisibility,
@@ -169,7 +169,7 @@ const TABLE_COLUMNS = columns.define([
     ...HELL_OMNIBAR_DIRECTIVES,
     ...HELL_SPLIT_VIEW_DIRECTIVES,
     ...HELL_TABLE_UTILITIES_DIRECTIVES,
-    HellColumnVisibilityMenu,
+    HellColumnVisibilitySelector,
     HellButton,
     HellIcon,
     HellPaginationStrip,
@@ -193,7 +193,7 @@ const TABLE_COLUMNS = columns.define([
     }),
   ],
   template: `
-    <div class="grid gap-4 p-4">
+    <div class="grid gap-4">
       <hell-omnibar
         #rowsOmnibar="hellOmnibar"
         size="sm"
@@ -270,18 +270,14 @@ const TABLE_COLUMNS = columns.define([
             <hell-icon name="faSolidTable" size="12px" />
             {{ orderByLabel() }}
           </button>
-          <button
-            hellButton
-            size="sm"
-            type="button"
-            [variant]="hiddenColumnCount() ? 'soft' : 'default'"
-            [hellMenuTrigger]="columnsMenu"
-            [openTriggers]="menuOpenTriggers"
+          <hell-column-visibility-selector
+            [columns]="tableColumns"
+            [(columnVisibility)]="columnVisibility"
+            description="Selection and actions stay locked."
             placement="bottom-start"
           >
-            <hell-icon name="faSolidSliders" size="12px" />
-            Columns
-          </button>
+            <hell-icon hellColumnVisibilitySelectorIcon name="faSolidSliders" size="12px" />
+          </hell-column-visibility-selector>
           <button
             hellButton
             size="sm"
@@ -382,16 +378,6 @@ const TABLE_COLUMNS = columns.define([
             </button>
           }
         </div>
-      </ng-template>
-
-      <ng-template #columnsMenu>
-        <hell-column-visibility-menu
-          [columns]="tableColumns"
-          [(columnVisibility)]="columnVisibility"
-          label="Columns"
-          description="Selection and actions stay locked."
-          resetLabel="Restore"
-        />
       </ng-template>
 
       <ng-template #sortMenu>
@@ -807,9 +793,6 @@ export class DataTableExampleExample {
     hellTableVisibleColumns(this.tableColumns, this.columnVisibility()),
   );
   protected readonly visibleColumnCount = computed(() => this.visibleColumns().length);
-  protected readonly hiddenColumnCount = computed(
-    () => this.tableColumns.length - this.visibleColumnCount(),
-  );
   protected readonly selectedCount = computed(
     () => Object.values(this.rowSelection()).filter(Boolean).length,
   );

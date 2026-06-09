@@ -1,17 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, effect, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, signal } from '@angular/core';
 
 import { provideIcons } from '@ng-icons/core';
 import { faSolidSliders } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
 import {
   HELL_DATA_TABLE_DIRECTIVES,
-  HellColumnVisibilityMenu,
+  HellColumnVisibilitySelector,
   actionColumn,
   hellColumns,
   hellTableInitialColumnVisibility,
-  hellTableVisibleColumns,
   selectionColumn,
   textColumn,
   type HellTableColumnVisibilityState,
@@ -56,8 +54,7 @@ const TABLE_COLUMNS = columns.define([
   imports: [
     HellButton,
     HellIcon,
-    HellColumnVisibilityMenu,
-    ...HELL_MENU_DIRECTIVES,
+    HellColumnVisibilitySelector,
     ...HELL_DATA_TABLE_DIRECTIVES,
   ],
   providers: [provideIcons({ faSolidSliders })],
@@ -67,29 +64,14 @@ const TABLE_COLUMNS = columns.define([
         class="flex flex-wrap items-center justify-between gap-2 rounded-md border border-hell-border bg-hell-surface-subtle p-2 text-xs text-hell-foreground-muted"
       >
         <span>Preferences are stored by this example component, not by Hell.</span>
-        <button
-          hellButton
-          type="button"
-          size="sm"
-          [variant]="hiddenColumnCount() ? 'soft' : 'default'"
-          [hellMenuTrigger]="columnsMenu"
-          [openTriggers]="menuOpenTriggers"
-          placement="bottom-end"
-        >
-          <hell-icon name="faSolidSliders" size="12px" />
-          Columns
-        </button>
-      </div>
-
-      <ng-template #columnsMenu>
-        <hell-column-visibility-menu
+        <hell-column-visibility-selector
           [columns]="tableColumns"
           [(columnVisibility)]="columnVisibility"
-          label="Columns"
           description="Show or hide optional columns."
-          resetLabel="Restore"
-        />
-      </ng-template>
+        >
+          <hell-icon hellColumnVisibilitySelectorIcon name="faSolidSliders" size="12px" />
+        </hell-column-visibility-selector>
+      </div>
 
       <hell-data-table
         [rows]="rows"
@@ -122,16 +104,6 @@ export class DataTableColumnVisibilityExample {
   protected readonly columnVisibility = signal<HellTableColumnVisibilityState>(
     readStoredVisibility() ?? hellTableInitialColumnVisibility(TABLE_COLUMNS),
   );
-  protected readonly hiddenColumnCount = computed(
-    () =>
-      this.tableColumns.length -
-      hellTableVisibleColumns(this.tableColumns, this.columnVisibility()).length,
-  );
-  protected readonly menuOpenTriggers: ('click' | 'enter' | 'arrowkey')[] = [
-    'click',
-    'enter',
-    'arrowkey',
-  ];
 
   constructor() {
     effect(() => writeStoredVisibility(this.columnVisibility()));

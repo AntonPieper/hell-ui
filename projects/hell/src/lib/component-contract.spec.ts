@@ -11,6 +11,7 @@ import { HELL_SELECT_DIRECTIVES } from './primitives/select/select';
 import { HELL_APP_SHELL_DIRECTIVES } from './composites/app-shell/app-shell';
 import {
   HellColumnVisibilityPanel,
+  HellColumnVisibilitySelector,
   HellDataTable,
   textColumn,
   type HellColumnDef,
@@ -176,6 +177,7 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellCodeEditor', area: 'feature', coverage: 'static' },
   { symbol: 'HellColumnVisibilityMenu', area: 'feature', coverage: 'static' },
   { symbol: 'HellColumnVisibilityPanel', area: 'feature', coverage: 'dom' },
+  { symbol: 'HellColumnVisibilitySelector', area: 'feature', coverage: 'dom' },
   { symbol: 'HellDataTable', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTable', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableBody', area: 'feature', coverage: 'dom' },
@@ -211,6 +213,7 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
     ...HELL_SELECT_DIRECTIVES,
     ...HELL_APP_SHELL_DIRECTIVES,
     HellColumnVisibilityPanel,
+    HellColumnVisibilitySelector,
     HellDataTable,
     ...HELL_TABLE_UTILITIES_DIRECTIVES,
   ],
@@ -273,6 +276,12 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
 
     <hell-column-visibility-panel
       id="column-visibility-panel"
+      [columns]="dataTableColumns"
+      label="Columns"
+    />
+
+    <hell-column-visibility-selector
+      id="column-visibility-selector"
       [columns]="dataTableColumns"
       label="Columns"
     />
@@ -408,6 +417,12 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
     module: 'HellColumnVisibilityPanel',
     className: 'hell-column-visibility-panel',
     attrs: { 'data-hell-column-visibility-panel': '' },
+  },
+  {
+    id: 'column-visibility-selector',
+    module: 'HellColumnVisibilitySelector',
+    className: 'hell-column-visibility-selector',
+    attrs: { 'data-hell-column-visibility-selector': '' },
   },
   {
     id: 'data-table',

@@ -21,7 +21,7 @@ import splitViewMasterDetailExampleCodeRaw from './examples/master-detail.exampl
         <h2>Master/detail</h2>
       </div>
 
-      <hd-example-tabs class="hd-doc-wide" [code]="splitViewMasterDetailExampleCode" flush>
+      <hd-example-tabs class="hd-doc-wide" [code]="splitViewMasterDetailExampleCode">
         <app-split-view-master-detail-example />
       </hd-example-tabs>
 

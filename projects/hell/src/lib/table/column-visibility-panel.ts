@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 
 import { HellStyleable } from '../core/styleable';
+import { type HellButtonVariant, type HellSize } from '../core/types';
 import { HellButton } from '../primitives/button/button';
 import { HellNativeCheckbox } from '../primitives/checkbox/checkbox';
 import {
@@ -19,6 +20,7 @@ import {
   HellMenuLabel,
   HellMenuSection,
   HellMenuSeparator,
+  HellMenuTrigger,
 } from '../primitives/menu/menu';
 import {
   hellTableColumnCanToggleVisibility,
@@ -39,6 +41,20 @@ interface HellColumnVisibilityPanelItem<TData> {
   readonly note: string | null;
   readonly noteId: string | null;
 }
+
+export type HellColumnVisibilitySelectorPlacement =
+  | 'top'
+  | 'right'
+  | 'bottom'
+  | 'left'
+  | 'top-start'
+  | 'top-end'
+  | 'right-start'
+  | 'right-end'
+  | 'bottom-start'
+  | 'bottom-end'
+  | 'left-start'
+  | 'left-end';
 
 let nextColumnVisibilityPanelId = 0;
 
@@ -263,6 +279,84 @@ export class HellColumnVisibilityMenu<TData = unknown> extends HellStyleable {
   protected resetColumnVisibility(): void {
     this.columnVisibility.set({ ...this.defaultColumnVisibility() });
   }
+}
+
+/**
+ * Compact button + menu composition for dense table toolbars.
+ *
+ * Use this when the table should expose a standard Columns trigger instead of
+ * hand-rolling a trigger button around `hell-column-visibility-menu`.
+ */
+@Component({
+  selector: 'hell-column-visibility-selector',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellButton, HellMenuTrigger, HellColumnVisibilityMenu],
+  host: {
+    '[class.hell-column-visibility-selector]': '!unstyled()',
+    '[attr.data-hell-column-visibility-selector]': '""',
+  },
+  template: `
+    <button
+      hellButton
+      type="button"
+      [size]="buttonSize()"
+      [variant]="buttonVariant()"
+      [unstyled]="unstyled()"
+      [hellMenuTrigger]="columnsMenu"
+      [openTriggers]="menuOpenTriggers"
+      [placement]="placement()"
+    >
+      <ng-content select="[hellColumnVisibilitySelectorIcon]" />
+      <span>{{ label() }}</span>
+    </button>
+
+    <ng-template #columnsMenu>
+      <hell-column-visibility-menu
+        [columns]="columns()"
+        [columnVisibility]="columnVisibility()"
+        (columnVisibilityChange)="columnVisibility.set($event)"
+        [label]="label()"
+        [description]="description()"
+        [resetLabel]="resetLabel()"
+        [empty]="empty()"
+        [unstyled]="unstyled()"
+      />
+    </ng-template>
+  `,
+})
+export class HellColumnVisibilitySelector<TData = unknown> extends HellStyleable {
+  /** Column definitions to list. */
+  readonly columns = input<HellTableSignalInput<readonly HellColumnDef<TData>[]>>([]);
+
+  /** App-owned column visibility map. Use `[(columnVisibility)]` for two-way binding. */
+  readonly columnVisibility = model<HellTableColumnVisibilityState>({});
+
+  /** Visible button text and accessible menu label. */
+  readonly label = input('Columns');
+
+  /** Optional description exposed to assistive technology on the menu. */
+  readonly description = input<string | null>(null);
+
+  /** Menu item text for restoring definition defaults. */
+  readonly resetLabel = input('Restore');
+
+  /** Empty text shown when there are no columns. */
+  readonly empty = input('No columns available.');
+
+  /** Floating menu placement relative to the trigger. */
+  readonly placement = input<HellColumnVisibilitySelectorPlacement>('bottom-end');
+
+  /** Hell button variant used by the trigger. */
+  readonly buttonVariant = input<HellButtonVariant>('soft');
+
+  /** Hell button size used by the trigger. */
+  readonly buttonSize = input<HellSize>('sm');
+
+  protected readonly menuOpenTriggers: ('click' | 'enter' | 'arrowkey')[] = [
+    'click',
+    'enter',
+    'arrowkey',
+  ];
 }
 
 function readSignalInput<T>(inputValue: HellTableSignalInput<T>): T {

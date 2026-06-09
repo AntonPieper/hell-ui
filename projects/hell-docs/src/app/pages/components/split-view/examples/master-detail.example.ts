@@ -38,6 +38,9 @@ const TICKETS: readonly Ticket[] = [
               <button
                 hellButton
                 variant="ghost"
+                size="sm"
+                block
+                class="justify-start"
                 type="button"
                 (click)="select(ticket.id)"
               >

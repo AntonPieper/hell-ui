@@ -703,7 +703,9 @@ export class HellTableHeaderCell extends HellTableRoleDirective implements HellT
 
   /** Called by the default resize adapter while the user is dragging. */
   setLiveWidth(px: number) {
-    this.host.style.setProperty('--hell-table-col-width', `${px}px`);
+    const width = `${px}px`;
+    this.host.style.setProperty('--hell-table-col-width', width);
+    this.host.style.width = width;
   }
 
   /** Current measured width — used as the drag start anchor. */

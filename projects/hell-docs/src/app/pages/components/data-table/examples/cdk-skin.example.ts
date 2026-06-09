@@ -4,15 +4,13 @@ import { provideIcons } from '@ng-icons/core';
 import { faSolidSliders } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
 import { HellPaginationStrip } from '@hell-ui/angular/pagination';
 import {
-  HellColumnVisibilityMenu,
+  HellColumnVisibilitySelector,
   HellTableContainer,
   actionColumn,
   hellColumns,
   hellTableInitialColumnVisibility,
-  hellTableVisibleColumns,
   textColumn,
   type HellTableColumnVisibilityState,
   type HellTableSortDirection,
@@ -56,10 +54,9 @@ const TABLE_COLUMNS = columns.define([
   imports: [
     HellButton,
     HellIcon,
-    HellColumnVisibilityMenu,
     HellPaginationStrip,
     HellTableContainer,
-    ...HELL_MENU_DIRECTIVES,
+    HellColumnVisibilitySelector,
     ...HELL_CDK_TABLE_DIRECTIVES,
   ],
   providers: [provideIcons({ faSolidSliders })],
@@ -71,30 +68,15 @@ const TABLE_COLUMNS = columns.define([
         >
           <span>CDK owns dataSource, sorting transform, and pagination state.</span>
           <div class="flex flex-wrap items-center gap-2">
-            <button
-              hellButton
-              type="button"
-              size="sm"
-              [variant]="hiddenColumnCount() ? 'soft' : 'default'"
-              [hellMenuTrigger]="columnsMenu"
-              [openTriggers]="menuOpenTriggers"
-              placement="bottom-end"
+            <hell-column-visibility-selector
+              [columns]="tableColumns"
+              [(columnVisibility)]="columnVisibility"
+              description="The CDK row definitions receive this derived displayedColumns list."
             >
-              <hell-icon name="faSolidSliders" size="12px" />
-              Columns
-            </button>
+              <hell-icon hellColumnVisibilitySelectorIcon name="faSolidSliders" size="12px" />
+            </hell-column-visibility-selector>
           </div>
         </div>
-
-        <ng-template #columnsMenu>
-          <hell-column-visibility-menu
-            [columns]="tableColumns"
-            [(columnVisibility)]="columnVisibility"
-            label="Columns"
-            description="The CDK row definitions receive this derived displayedColumns list."
-            resetLabel="Restore"
-          />
-        </ng-template>
 
         <div hellTableContainer class="overflow-auto">
           <table cdk-table fixedLayout contentWidth [dataSource]="pagedRows()">
@@ -187,11 +169,6 @@ export class DataTableCdkSkinExample {
   protected readonly displayedColumns = computed(() =>
     hellCdkDisplayedColumns(this.tableColumns, this.columnVisibility()),
   );
-  protected readonly hiddenColumnCount = computed(
-    () =>
-      this.tableColumns.length -
-      hellTableVisibleColumns(this.tableColumns, this.columnVisibility()).length,
-  );
   protected readonly sortedRows = computed(() => sortRows(this.rows, this.sorting()));
   protected readonly pageCount = computed(() =>
     Math.ceil(this.sortedRows().length / this.pageSize),
@@ -210,11 +187,6 @@ export class DataTableCdkSkinExample {
   protected readonly activeRow = computed(
     () => this.rows.find((row) => row.id === this.activeRowId()) ?? null,
   );
-  protected readonly menuOpenTriggers: ('click' | 'enter' | 'arrowkey')[] = [
-    'click',
-    'enter',
-    'arrowkey',
-  ];
 
   protected sortFor(columnId: string): HellTableSortDirection | null {
     return this.sorting().find((sort) => sort.columnId === columnId)?.direction ?? null;

@@ -61,6 +61,10 @@
       padding-block: calc(var(--spacing) * 3);
     }
 
+  .hell-column-visibility-selector {
+      display: inline-flex;
+    }
+
   .hell-column-visibility-menu.hell-menu {
       min-width: min(18rem, calc(100vw - var(--spacing-hell-8)));
     }
