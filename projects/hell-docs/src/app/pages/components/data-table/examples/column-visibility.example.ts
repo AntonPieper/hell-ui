@@ -5,8 +5,11 @@ import { faSolidSliders } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 import {
-  HELL_DATA_TABLE_DIRECTIVES,
   HellColumnVisibilitySelector,
+  HellDataTable,
+  HellDataTableBulkActions,
+  HellRowActions,
+  HellTableRowAction,
   actionColumn,
   hellColumns,
   hellTableInitialColumnVisibility,
@@ -55,7 +58,10 @@ const TABLE_COLUMNS = columns.define([
     HellButton,
     HellIcon,
     HellColumnVisibilitySelector,
-    ...HELL_DATA_TABLE_DIRECTIVES,
+    HellDataTable,
+    HellDataTableBulkActions,
+    HellRowActions,
+    HellTableRowAction,
   ],
   providers: [provideIcons({ faSolidSliders })],
   template: `

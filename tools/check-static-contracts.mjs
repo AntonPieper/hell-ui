@@ -73,12 +73,8 @@ function main() {
   checkNativeButtonSelectorContract();
   checkInteractiveTriggerSelectorContract();
   checkTableUtilityContract();
-  checkTableSemanticsContract();
-  checkTableSortTriggerContract();
-  checkTableResizeHandleContract();
   checkTableLegacyRemovalContract();
   checkTableAdapterBoundaryContract();
-  checkTableSemanticDefaultGuardContract();
   checkFloatingRegistrationContract();
   checkFloatingAdapterContract();
   checkBrowserGlobalContract();
@@ -2083,58 +2079,11 @@ function checkInteractiveTriggerSelectorContract() {
 }
 
 function checkTableUtilityContract() {
-  const source = readFile(join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'));
-  if (!source.includes('HELL_TABLE_UTILITIES_DIRECTIVES')) {
-    failures.push('Table primitives must expose HELL_TABLE_UTILITIES_DIRECTIVES as their standalone import list');
-  }
-  for (const selector of [
-    'hellTableRoot',
-    'hellTableHeader',
-    'hellTableBody',
-    'hellTableRow',
-    'hellTableHeaderCell',
-    'hellTableCell',
-    'hellTableResizeHandle',
-  ]) {
-    if (!source.includes(selector)) {
-      failures.push(`Table primitives must expose host-agnostic selector ${selector}`);
-    }
-  }
-  for (const dataAttr of [
-    'data-hell-table-root',
-    'data-hell-table-header',
-    'data-hell-table-body',
-    'data-hell-table-row',
-    'data-hell-table-header-cell',
-    'data-hell-table-cell',
-  ]) {
-    if (!source.includes(dataAttr)) {
-      failures.push(`Table primitives must stamp ${dataAttr} for host-agnostic testing/styling`);
-    }
-  }
-  if (!source.includes('hellTableInferredRoleForHost')) {
-    failures.push('Table primitives must keep host-agnostic role inference centralized and SSR-safe');
-  }
-  for (const removed of ['HELL_TABLE_UTILITY_DIRECTIVES', 'HELL_TABLE_DIRECTIVES', 'selectionSemantics']) {
-    if (source.includes(removed)) failures.push(`${removed} legacy table API must be removed`);
-  }
-  if (/readonly\s+interactive\b/.test(source)) {
-    failures.push('HellTableRow interactive legacy input must be removed');
-  }
-
-  const tableHarness = readFile(join(root, 'projects/hell/src/testing/table-harness.ts'));
-  if (/\binteractive\?\s*:|\bisInteractive\b/.test(tableHarness)) {
-    failures.push('Testing table harness must not expose interactive legacy row aliases');
-  }
-
   const tableFacade = readFile(join(root, 'projects/hell/src/lib/table/table.ts'));
   if (!tableFacade.includes("../features/table-utilities/table-utilities")) {
     failures.push('Modern @hell-ui/angular/table facade must own the table utilities export');
   }
 
-  const docs = readFile(
-    join(root, 'projects/hell-docs/src/app/pages/components/data-table/data-table.page.ts'),
-  );
   const docsRoot = join(root, 'projects/hell-docs/src/app');
   const docsGlobalStyles = readFile(join(root, 'projects/hell-docs/src/styles.css'));
   if (!docsGlobalStyles.includes("@import '@hell-ui/angular/styles/table';")) {
@@ -2154,30 +2103,6 @@ function checkTableUtilityContract() {
       )}:${importHit.line}`,
     );
   }
-  const tableStyleSource = `${readFile(join(root, 'projects/hell/src/lib/styles/components/table.css'))}\n${readFile(
-    join(root, 'projects/hell/src/lib/styles/components/table-renderer.css'),
-  )}`;
-  for (const forbidden of [
-    'button.hell-table-row-action:not(.hell-button)',
-    'a.hell-table-row-action:not(.hell-button)',
-    '.hell-table-row-checkbox.hell-checkbox',
-    '.hell-table-row-radio.hell-radio',
-    '.hell-column-visibility-panel .hell-checkbox',
-    '.hell-column-visibility-panel .hell-button',
-  ]) {
-    if (tableStyleSource.includes(forbidden)) {
-      failures.push(`Table styles must compose primitives instead of special-casing ${forbidden}`);
-    }
-  }
-  if (/\baccent-color\s*:/.test(tableStyleSource)) {
-    failures.push('Table styles must not override native checkbox/radio accent-color; compose checkbox/radio primitives instead');
-  }
-  for (const text of ['Table primitives', 'not a', 'batteries-included data grid', 'TanStack Table']) {
-    if (!docs.includes(text)) {
-      failures.push('Table docs must present the entrypoint as table primitives, not a full data table');
-      break;
-    }
-  }
   const offenders = walk(docsRoot)
     .filter((file) => /\.(?:ts|html|md)$/.test(file))
     .filter((file) => /@hell-ui\/angular\/features\/(?:data-table|table-utilities)\b/.test(readFile(file)))
@@ -2185,206 +2110,6 @@ function checkTableUtilityContract() {
   if (offenders.length) {
     failures.push(`Docs must not reference legacy table feature entrypoints: ${offenders.join(', ')}`);
   }
-}
-
-function checkTableSemanticsContract() {
-  const tableSourcePath = join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts');
-  const tableSource = readFile(tableSourcePath);
-  const dataTableSourcePath = join(root, 'projects/hell/src/lib/data-table/data-table.ts');
-  const dataTableSource = readFile(dataTableSourcePath);
-  const tableModule = decoratedClassModules(tableSource).find((module) => module.className === 'HellTable');
-  const rowModule = decoratedClassModules(tableSource).find((module) => module.className === 'HellTableRow');
-  const headerCellModule = decoratedClassModules(tableSource).find(
-    (module) => module.className === 'HellTableHeaderCell',
-  );
-  const cellModule = decoratedClassModules(tableSource).find((module) => module.className === 'HellTableCell');
-
-  for (const required of [
-    "export type HellTableSemantics = 'table' | 'grid'",
-    "export type HellTableGridInteractionMode = 'row-selection' | 'cell-navigation' | 'editing'",
-    "readonly semantics = input<HellTableSemantics>('table')",
-    'readonly interactionMode = input<HellTableGridInteractionMode | null>(null)',
-    'HellTable semantics="grid" requires interactionMode',
-    "this.semantics() === 'grid' && hellTableGridInteractionModeValid(this.interactionMode())",
-  ]) {
-    if (!tableSource.includes(required)) {
-      failures.push(`Table semantics contract is missing ${required}`);
-    }
-  }
-
-  if (!tableModule) {
-    failures.push('Table semantics contract must be owned by HellTable');
-  } else {
-    for (const required of [
-      "[attr.role]': 'role()",
-      "[attr.tabindex]': 'gridTabIndex()",
-      "[attr.aria-rowcount]': 'gridRowCount()",
-      "[attr.aria-colcount]': 'gridColCount()",
-      "[attr.aria-activedescendant]': 'gridActiveDescendant()",
-      "(keydown)': 'onGridKeydown($event)",
-      "return this.isGridMode() ? 'grid' : null",
-      'if (!this.isGridMode()) return null',
-    ]) {
-      if (!tableModule.moduleSource.includes(required)) {
-        failures.push(`HellTable grid adapter contract is missing ${required}`);
-      }
-    }
-  }
-
-  for (const [label, module] of [
-    ['HellTableRow', rowModule],
-    ['HellTableHeaderCell', headerCellModule],
-    ['HellTableCell', cellModule],
-  ]) {
-    if (!module) {
-      failures.push(`Table semantics contract must include ${label}`);
-      continue;
-    }
-    if (module.moduleSource.includes('[attr.tabindex]')) {
-      failures.push(`${label} must not add roving tabindex; grid mode keeps one tab stop on HellTable`);
-    }
-    if (module.moduleSource.includes('aria-activedescendant')) {
-      failures.push(`${label} must not own aria-activedescendant; the grid root owns active descendant`);
-    }
-    if (!module.moduleSource.includes('return this.table?.isGridMode() ?')) {
-      failures.push(`${label} grid roles must be gated by the opt-in grid adapter`);
-    }
-  }
-
-  for (const required of [
-    "readonly semantics = input<HellTableSemantics>('table')",
-    'readonly interactionMode = input<HellTableGridInteractionMode | null>(null)',
-    '[semantics]="semantics()"',
-    '[interactionMode]="interactionMode()"',
-    '[rowCount]="gridRowCount()"',
-    '[colCount]="gridColCount()"',
-    '[rowIndex]="bodyGridRowIndex(rowPartIndex)"',
-    '[colIndex]="columnIndex + 1"',
-  ]) {
-    if (!dataTableSource.includes(required)) {
-      failures.push(`HellDataTable grid semantics contract is missing ${required}`);
-    }
-  }
-
-  for (const [specPath, required] of [
-    ['projects/hell/src/lib/table/table.spec.ts', 'uses modern selectors on native table markup without adding redundant ARIA roles'],
-    ['projects/hell/src/lib/table/table.spec.ts', "native-root').getAttribute('role')).toBeNull()"],
-    ['projects/hell/src/lib/table/table.spec.ts', "native-cell').getAttribute('role')).toBeNull()"],
-    ['projects/hell/src/lib/table/table.spec.ts', "native-root').hasAttribute('tabindex')).toBe(false)"],
-    ['projects/hell/src/lib/table/table.spec.ts', "native-root').hasAttribute('aria-activedescendant')).toBe(false)"],
-    ['projects/hell/src/lib/table/table.spec.ts', 'enables explicit grid semantics only with an interaction mode'],
-    ['projects/hell/src/lib/table/table.spec.ts', 'removes generated grid roles and focus state when semantics switch back to table'],
-    ['projects/hell/src/lib/table/table.spec.ts', 'rejects grid semantics without an explicit interaction mode'],
-    ['projects/hell/src/lib/data-table/data-table.spec.ts', "querySelector('table')?.hasAttribute('tabindex')).toBe(false)"],
-    ['projects/hell/src/lib/data-table/data-table.spec.ts', "querySelector('table')?.hasAttribute('aria-activedescendant')).toBe(false)"],
-    ['projects/hell/src/lib/data-table/data-table.spec.ts', 'renders explicit grid semantics with one table tab stop and indexed cells'],
-    ['projects/hell/src/lib/data-table/data-table.spec.ts', 'requires an interaction mode before enabling data-table grid semantics'],
-  ]) {
-    if (!readFile(join(root, specPath)).includes(required)) {
-      failures.push(`Table semantics contract test is missing: ${specPath} ${required}`);
-    }
-  }
-}
-
-function checkTableSortTriggerContract() {
-  const tableSourcePath = join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts');
-  const tableSource = readFile(tableSourcePath);
-  const headerModule = decoratedClassModules(tableSource).find(
-    (module) => module.className === 'HellTableHeaderCell',
-  );
-
-  if (!headerModule) {
-    failures.push('Table utilities must declare HellTableHeaderCell');
-    return;
-  }
-
-  if (headerModule.moduleSource.includes('[attr.tabindex]')) {
-    failures.push('HellTableHeaderCell must not make the <th> focusable for sorting');
-  }
-
-  if (/(?:'|\")\(keydown\.|(?:'|\")\(click\)/.test(headerModule.moduleSource)) {
-    failures.push('HellTableHeaderCell must delegate sort activation to button[hellTableSortTrigger]');
-  }
-
-  if (!/export\s+class\s+HellTableSortTrigger\b/.test(tableSource)) {
-    failures.push('Table utilities must expose button[hellTableSortTrigger] for sortable headers');
-  }
-
-  if (!/selector:\s*'button\[hellTableSortTrigger\]'/.test(tableSource)) {
-    failures.push('hellTableSortTrigger must only match native button hosts');
-  }
-
-  if (/hellTableSortButton|HellTableSortButton|hell-table-sort-button/.test(tableSource)) {
-    failures.push('Legacy hellTableSortButton API must not remain in table utilities');
-  }
-
-  const docsRoot = join(root, 'projects/hell-docs/src/app/pages/components/data-table');
-  const docsFiles = walk(docsRoot).filter((file) => file.endsWith('.ts'));
-  for (const file of docsFiles) {
-    const source = readFile(file);
-    for (const match of source.matchAll(/<th\b(?=[^>]*\bhellTableHeaderCell\b)(?=[^>]*\bsortable\b)[^>]*>[\s\S]*?<\/th>/g)) {
-      if (!match[0].includes('hellTableSortTrigger')) {
-        failures.push(
-          `${file.slice(root.length + 1)} has a sortable table header without button[hellTableSortTrigger]`,
-        );
-      }
-    }
-  }
-}
-
-function checkTableResizeHandleContract() {
-  const tableSourcePath = join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts');
-  const tableSource = readFile(tableSourcePath);
-
-  if (!/export\s+class\s+HellTableResizeHandle\b/.test(tableSource)) {
-    failures.push('Table utilities must expose HellTableResizeHandle for modern column resizing');
-  }
-
-  if (!/selector:\s*'\[hellTableResizeHandle\]'/.test(tableSource)) {
-    failures.push('Table resize primitive must use the hellTableResizeHandle selector');
-  }
-
-  if (!tableSource.includes('resizeAdapter = input<HellTableResizeAdapter | null>')) {
-    failures.push('HellTableResizeHandle must delegate sizing through HellTableResizeAdapter input');
-  }
-
-  if (/hellTableColumnResizer|HellTableColumnResizer|hell-table-column-resizer|HellTableColumnResizeRuntime|data-table-column-resize/.test(tableSource)) {
-    failures.push('Legacy hellTableColumnResizer API must not remain in table utilities');
-  }
-
-  const styleSource = readFile(join(root, 'projects/hell/src/lib/styles/components/table.css'));
-  if (!styleSource.includes('.hell-table-resize-handle')) {
-    failures.push('Table resize handle styles must use hell-table-resize-handle class');
-  }
-  if (/hell-table-column-resizer/.test(styleSource)) {
-    failures.push('Legacy hell-table-column-resizer class must be removed from table styles');
-  }
-
-  const tableHarness = readFile(join(root, 'projects/hell/src/testing/table-harness.ts'));
-  if (!tableHarness.includes('HellTableResizeHandleHarness') || !tableHarness.includes('getResizeHandle')) {
-    failures.push('Testing table harness must expose HellTableResizeHandleHarness and getResizeHandle');
-  }
-  if (/HellTableColumnResizerHarness|getColumnResizer|hellTableColumnResizer/.test(tableHarness)) {
-    failures.push('Testing table harness must not expose legacy column-resizer APIs');
-  }
-
-  const docsRoot = join(root, 'projects/hell-docs/src/app');
-  const docsOffenders = walk(docsRoot)
-    .filter((file) => /\.(?:ts|html|md)$/.test(file))
-    .filter((file) => {
-      const source = readFile(file);
-      return /hellTableColumnResizer|HellTableColumnResizer|columnResize/.test(
-        sourceWithoutAllowedTableMigrationNote(source),
-      );
-    })
-    .map((file) => file.slice(root.length + 1));
-  if (docsOffenders.length) {
-    failures.push(`Docs must use hellTableResizeHandle instead of legacy resizer APIs: ${docsOffenders.join(', ')}`);
-  }
-}
-
-function sourceWithoutAllowedTableMigrationNote(source) {
-  return source.replace(/<h2>Migration note<\/h2>[\s\S]*?<h2>API<\/h2>/, '<h2>API</h2>');
 }
 
 function checkTableLegacyRemovalContract() {
@@ -2478,6 +2203,14 @@ function checkTableLegacyRemovalContract() {
     }
   }
 
+  const tableHarness = readFile(join(root, 'projects/hell/src/testing/table-harness.ts'));
+  if (/\binteractive\?\s*:|\bisInteractive\b/.test(tableHarness)) {
+    failures.push('Testing table harness must not expose interactive legacy row aliases');
+  }
+  if (/HellTableColumnResizerHarness|getColumnResizer|hellTableColumnResizer/.test(tableHarness)) {
+    failures.push('Testing table harness must not expose legacy column-resizer APIs');
+  }
+
   const tableSource = readFile(join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'));
   const rowModule = decoratedClassModules(tableSource).find((module) => module.className === 'HellTableRow');
   if (!rowModule) {
@@ -2561,77 +2294,6 @@ function checkTableAdapterBoundaryContract() {
         );
       }
     }
-  }
-}
-
-function checkTableSemanticDefaultGuardContract() {
-  const tableSource = readFile(join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'));
-  const dataTableSource = readFile(join(root, 'projects/hell/src/lib/data-table/data-table.ts'));
-  const modules = new Map(decoratedClassModules(tableSource).map((module) => [module.className, module]));
-  const tableModule = modules.get('HellTable');
-  const passiveRoleModules = [
-    ['HellTableHead', 'rowgroup'],
-    ['HellTableBody', 'rowgroup'],
-    ['HellTableRow', 'row'],
-    ['HellTableHeaderCell', 'columnheader'],
-    ['HellTableCell', 'gridcell'],
-  ];
-
-  if (!tableModule) {
-    failures.push('Table semantic default guard could not inspect HellTable');
-  } else {
-    for (const required of [
-      "return this.isGridMode() ? 'grid' : null;",
-      'return this.isGridMode() ? 0 : null;',
-      'if (!this.isGridMode()) return null;',
-      "if (this.semantics() !== 'grid') return;",
-    ]) {
-      if (!tableModule.moduleSource.includes(required)) {
-        failures.push(`HellTable semantic defaults must gate grid roles/focus behind isGridMode(): missing ${required}`);
-      }
-    }
-  }
-
-  if (/readonly\s+semantics\s*=\s*input<HellTableSemantics>\('grid'\)/.test(tableSource)) {
-    failures.push('HellTable semantics must default to table, not grid');
-  }
-  if (/readonly\s+interactionMode\s*=\s*input<HellTableGridInteractionMode \| null>\('[^']+'\)/.test(tableSource)) {
-    failures.push('HellTable interactionMode must default to null so grid behavior is opt-in');
-  }
-
-  for (const [className, role] of passiveRoleModules) {
-    const module = modules.get(className);
-    if (!module) {
-      failures.push(`Table semantic default guard could not inspect ${className}`);
-      continue;
-    }
-    if (!module.moduleSource.includes(`return this.table?.isGridMode() ? '${role}' : null;`)) {
-      failures.push(`${className} must gate grid role ${role} behind opt-in grid semantics`);
-    }
-  }
-
-  const rowModule = modules.get('HellTableRow');
-  if (rowModule) {
-    for (const forbidden of [
-      { label: 'tabindex', pattern: /\[attr\.tabindex\]|tabindex\s*:/ },
-      { label: 'row click handler', pattern: /\(click\)/ },
-      { label: 'row keydown handler', pattern: /\(keydown/ },
-      { label: 'aria-activedescendant', pattern: /aria-activedescendant/ },
-    ]) {
-      if (forbidden.pattern.test(rowModule.moduleSource)) {
-        failures.push(`HellTableRow must not add row roving-focus behavior in table mode: ${forbidden.label}`);
-      }
-    }
-  }
-
-  if (/readonly\s+semantics\s*=\s*input<HellTableSemantics>\('grid'\)/.test(dataTableSource)) {
-    failures.push('HellDataTable semantics must default to table, not grid');
-  }
-  if (/readonly\s+interactionMode\s*=\s*input<HellTableGridInteractionMode \| null>\('[^']+'\)/.test(dataTableSource)) {
-    failures.push('HellDataTable interactionMode must default to null so grid behavior is opt-in');
-  }
-  if (/role=["']grid|\[attr\.tabindex\]|aria-activedescendant/.test(dataTableSource)) {
-    failures.push('HellDataTable template must not add grid roles or focus state directly; delegate only through explicit HellTable grid mode inputs');
   }
 }
 

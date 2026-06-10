@@ -2,7 +2,10 @@ import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/c
 
 import { HellButton } from '@hell-ui/angular/button';
 import {
-  HELL_DATA_TABLE_DIRECTIVES,
+  HellDataTable,
+  HellDataTableBulkActions,
+  HellDataTableToolbarEnd,
+  HellDataTableToolbarStart,
   hellColumns,
   selectionColumn,
   textColumn,
@@ -19,7 +22,13 @@ const columns = hellColumns<Person>();
 @Component({
   selector: 'app-data-table-selection-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, ...HELL_DATA_TABLE_DIRECTIVES],
+  imports: [
+    HellButton,
+    HellDataTable,
+    HellDataTableToolbarStart,
+    HellDataTableToolbarEnd,
+    HellDataTableBulkActions,
+  ],
   template: `
     <div class="grid gap-3">
       <hell-data-table

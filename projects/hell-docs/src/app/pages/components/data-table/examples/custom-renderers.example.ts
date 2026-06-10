@@ -3,7 +3,13 @@ import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/c
 import { HellButton } from '@hell-ui/angular/button';
 import { HellTag } from '@hell-ui/angular/tag';
 import {
-  HELL_DATA_TABLE_DIRECTIVES,
+  HellCell,
+  HellDataTable,
+  HellDataTableToolbarEnd,
+  HellDataTableToolbarStart,
+  HellHeaderCell,
+  HellRowActions,
+  HellTableRowAction,
   actionColumn,
   hellColumns,
   textColumn,
@@ -20,7 +26,17 @@ const columns = hellColumns<Person>();
 @Component({
   selector: 'app-data-table-custom-renderers-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellTag, ...HELL_DATA_TABLE_DIRECTIVES],
+  imports: [
+    HellButton,
+    HellTag,
+    HellDataTable,
+    HellDataTableToolbarStart,
+    HellDataTableToolbarEnd,
+    HellHeaderCell,
+    HellCell,
+    HellRowActions,
+    HellTableRowAction,
+  ],
   template: `
     <div class="grid gap-3">
       <hell-data-table [rows]="rows" [columns]="tableColumns" rowKey="id" [(activeRowKey)]="activeRowKey">

@@ -1,3 +1,4 @@
+import { CdkTableModule } from '@angular/cdk/table';
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 
 import { provideIcons } from '@ng-icons/core';
@@ -8,6 +9,8 @@ import { HellPaginationStrip } from '@hell-ui/angular/pagination';
 import {
   HellColumnVisibilitySelector,
   HellTableContainer,
+  HellTableRowAction,
+  HellTableSortTrigger,
   actionColumn,
   hellColumns,
   hellTableInitialColumnVisibility,
@@ -16,7 +19,14 @@ import {
   type HellTableSortDirection,
   type HellTableSortingState,
 } from '@hell-ui/angular/table';
-import { HELL_CDK_TABLE_DIRECTIVES, hellCdkDisplayedColumns } from '@hell-ui/angular/table-cdk';
+import {
+  HellCdkCell,
+  HellCdkHeaderCell,
+  HellCdkHeaderRow,
+  HellCdkRow,
+  HellCdkTable,
+  hellCdkDisplayedColumns,
+} from '@hell-ui/angular/table-cdk';
 
 interface Person {
   readonly id: string;
@@ -54,12 +64,19 @@ const TABLE_COLUMNS = columns.define([
   selector: 'app-data-table-cdk-skin-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CdkTableModule,
     HellButton,
     HellIcon,
     HellPaginationStrip,
     HellTableContainer,
     HellColumnVisibilitySelector,
-    ...HELL_CDK_TABLE_DIRECTIVES,
+    HellTableSortTrigger,
+    HellTableRowAction,
+    HellCdkTable,
+    HellCdkHeaderRow,
+    HellCdkRow,
+    HellCdkHeaderCell,
+    HellCdkCell,
   ],
   providers: [provideIcons({ faSolidSliders })],
   template: `
