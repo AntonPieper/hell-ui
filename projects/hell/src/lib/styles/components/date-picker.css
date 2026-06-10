@@ -88,8 +88,7 @@
         background-color: var(--color-hell-surface-muted);
       }
       &[data-outside-month] {
-        color: var(--color-hell-foreground-subtle);
-        opacity: 0.6;
+        color: var(--color-hell-foreground-muted);
       }
       &[data-selected] {
         background-color: var(--color-hell-primary);

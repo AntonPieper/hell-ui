@@ -101,11 +101,11 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     rolePattern:
       'Calendar grid/table with month/year navigation buttons and date buttons from ng-primitives.',
     keyboardCoverage:
-      'Delegated to ng-primitives; no Hell browser contract proves grid navigation, month/year buttons, or range mode.',
-    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+      'Browser contract covers Arrow/Home/End/PageUp/PageDown navigation, Enter/Space date selection, month/year navigation buttons, disabled bounds, and range reselection.',
+    automatedCoverage:
+      'Axe docs smoke, ARIA snapshots, unit coverage for Hell year-nav disabled state, and a dedicated browser contract cover the public date picker examples.',
     knownGaps:
-      'Critical gap: calendar grid keyboard and range-selection semantics are not release evidence.',
-    criticalGap: true,
+      'No critical gap recorded for the standalone picker; date input remains a separate composite gap for popover, parsing, and field wiring.',
   },
   {
     kind: 'Primitive',

@@ -3,6 +3,7 @@ import {
   Component,
   Directive,
   computed,
+  effect,
   inject,
   input,
 } from '@angular/core';
@@ -27,6 +28,7 @@ import {
   injectDatePickerState,
   injectDateRangePickerState,
 } from 'ng-primitives/date-picker';
+import { injectButtonState } from 'ng-primitives/button';
 import { HellButton } from '../button/button';
 import { HellIcon } from '../icon/icon';
 import { HELL_LABELS } from '../../core/labels';
@@ -54,6 +56,36 @@ function hellShiftDateByMonths(date: Date, months: number): Date {
   );
 }
 
+interface HellDatePickerNavigationState {
+  readonly disabled: () => boolean;
+  readonly focusedDate: () => Date;
+  readonly min: () => Date | undefined;
+  readonly max: () => Date | undefined;
+}
+
+function hellDatePickerYearShiftDisabled(
+  state: HellDatePickerNavigationState | undefined,
+  months: number,
+): boolean {
+  if (!state || state.disabled()) return true;
+
+  const target = hellShiftDateByMonths(state.focusedDate(), months);
+  const targetMonthStart = new Date(target.getFullYear(), target.getMonth(), 1, 0, 0, 0, 0);
+  const targetMonthEnd = new Date(
+    target.getFullYear(),
+    target.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+    999,
+  );
+  const min = state.min();
+  const max = state.max();
+
+  return Boolean((min && targetMonthEnd < min) || (max && targetMonthStart > max));
+}
+
 /**
  * Previous/next year buttons. ng-primitives ships month nav out of the box;
  * year nav is implemented here on top of the picker state so users can jump
@@ -63,7 +95,10 @@ function hellShiftDateByMonths(date: Date, months: number): Date {
   selector: 'button[hellDatePickerPreviousYear]',
   host: {
     type: 'button',
+    '[disabled]': 'disabled()',
     '[attr.aria-label]': 'labels.datePicker.previousYear',
+    '[attr.aria-disabled]': 'disabled()',
+    '[attr.data-disabled]': 'disabled() ? "" : null',
     '(click)': 'shift(-12)',
   },
 })
@@ -71,7 +106,17 @@ export class HellDatePickerPreviousYear {
   protected readonly labels = inject(HELL_LABELS);
   private readonly state = injectDatePickerState<Date>({ optional: true });
   private readonly rangeState = injectDateRangePickerState<Date>({ optional: true });
+  private readonly buttonState = injectButtonState({ optional: true });
+  protected readonly disabled = computed(() =>
+    hellDatePickerYearShiftDisabled(this.state() ?? this.rangeState(), -12),
+  );
+
+  constructor() {
+    effect(() => this.buttonState()?.setDisabled(this.disabled()));
+  }
+
   protected shift(months: number) {
+    if (this.disabled()) return;
     const s = this.state() ?? this.rangeState();
     if (!s) return;
     const focused = s.focusedDate();
@@ -84,7 +129,10 @@ export class HellDatePickerPreviousYear {
   selector: 'button[hellDatePickerNextYear]',
   host: {
     type: 'button',
+    '[disabled]': 'disabled()',
     '[attr.aria-label]': 'labels.datePicker.nextYear',
+    '[attr.aria-disabled]': 'disabled()',
+    '[attr.data-disabled]': 'disabled() ? "" : null',
     '(click)': 'shift(12)',
   },
 })
@@ -92,7 +140,17 @@ export class HellDatePickerNextYear {
   protected readonly labels = inject(HELL_LABELS);
   private readonly state = injectDatePickerState<Date>({ optional: true });
   private readonly rangeState = injectDateRangePickerState<Date>({ optional: true });
+  private readonly buttonState = injectButtonState({ optional: true });
+  protected readonly disabled = computed(() =>
+    hellDatePickerYearShiftDisabled(this.state() ?? this.rangeState(), 12),
+  );
+
+  constructor() {
+    effect(() => this.buttonState()?.setDisabled(this.disabled()));
+  }
+
   protected shift(months: number) {
+    if (this.disabled()) return;
     const s = this.state() ?? this.rangeState();
     if (!s) return;
     const focused = s.focusedDate();
@@ -123,7 +181,11 @@ const PICKER_TEMPLATE = `
       </button>
     </div>
   </div>
-  <table ngpDatePickerGrid class="hell-date-picker-grid">
+  <table
+    ngpDatePickerGrid
+    class="hell-date-picker-grid"
+    [attr.aria-label]="label()"
+  >
     <thead>
       <tr>
         @for (weekday of weekdayLabels(); track weekday.abbr) {

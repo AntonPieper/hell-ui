@@ -9,6 +9,42 @@ async function gotoDocsPage(page: Page, path: string, heading: string | RegExp):
   await expect(page.getByRole('heading', { name: heading, level: 1 })).toBeVisible();
 }
 
+async function freezeBrowserDate(page: Page): Promise<void> {
+  await page.addInitScript({
+    content: `
+      (() => {
+        const RealDate = Date;
+        const fixedTime = new RealDate(2026, 3, 22, 12, 0, 0, 0).getTime();
+
+        class FixedDate extends RealDate {
+          constructor(...args) {
+            if (args.length === 0) {
+              super(fixedTime);
+            } else {
+              super(...args);
+            }
+          }
+
+          static now() {
+            return fixedTime;
+          }
+
+          static parse(value) {
+            return RealDate.parse(value);
+          }
+
+          static UTC(...args) {
+            return RealDate.UTC(...args);
+          }
+        }
+
+        Object.defineProperty(FixedDate, 'name', { value: 'Date' });
+        globalThis.Date = FixedDate;
+      })();
+    `,
+  });
+}
+
 async function openBasicMenu(page: Page): Promise<Locator> {
   await gotoDocsPage(page, '/components/menu', 'Menu');
   await page.getByRole('button', { name: 'Actions' }).first().click();
@@ -54,6 +90,47 @@ test.describe('public docs aria snapshots', () => {
 
     await expectNamedAriaSnapshot(custom, 'checkbox-custom-states.aria.yml');
     await expectNamedAriaSnapshot(native, 'checkbox-native-required-indeterminate.aria.yml');
+  });
+
+  test('date picker snapshots record single-date grid and range states', async ({
+    page,
+  }) => {
+    await freezeBrowserDate(page);
+    await gotoDocsPage(page, '/components/date-picker', 'Date picker');
+
+    const single = page.locator('app-date-picker-single-date-example hell-date-picker');
+    const range = page.locator('app-date-picker-range-example hell-date-range-picker');
+
+    await expect(single.getByRole('grid', { name: 'April 2026' })).toBeVisible();
+    await expect(
+      single
+        .locator('button[ngpdatepickerdatebutton]:not([data-outside-month])')
+        .filter({ hasText: /^\s*22\s*$/ }),
+    ).toHaveAttribute('data-selected', '');
+    await expect(
+      range
+        .locator('button[ngpdatepickerdatebutton]:not([data-outside-month])')
+        .filter({ hasText: /^\s*5\s*$/ }),
+    ).toHaveAttribute('data-range-start', '');
+
+    await expectNamedAriaSnapshot(single, 'date-picker-single-grid.aria.yml');
+    await expectNamedAriaSnapshot(range, 'date-picker-range-grid.aria.yml');
+  });
+
+  test('date picker snapshots record bounded and disabled navigation states', async ({
+    page,
+  }) => {
+    await freezeBrowserDate(page);
+    await gotoDocsPage(page, '/components/date-picker', 'Date picker');
+
+    const bounded = page.locator('app-date-picker-bounded-example hell-date-picker');
+    const disabled = page.locator('app-date-picker-disabled-example hell-date-picker').first();
+
+    await expect(bounded.getByRole('button', { name: 'Previous year' })).toBeDisabled();
+    await expect(disabled.getByRole('grid')).toHaveAttribute('data-disabled', '');
+
+    await expectNamedAriaSnapshot(bounded, 'date-picker-bounded-nav.aria.yml');
+    await expectNamedAriaSnapshot(disabled, 'date-picker-disabled-grid.aria.yml');
   });
 
   test('dialog snapshot records the named modal surface and actions', async ({ page }) => {
