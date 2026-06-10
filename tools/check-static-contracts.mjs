@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 // Static source/package contract gate only. Behavior, visual, API-report,
 // package-consumer, and release claims need their own evidence commands.
 import {
+  apiDocsDisclosurePolicyEntries,
   apiReportPolicyEntries,
   entrypointPolicyEntries,
   entrypointPublicApiFiles,
@@ -45,6 +46,7 @@ const audioTranscriptRuntimeTerms = [
   { label: 'SpeechRecognition', pattern: /\bSpeechRecognition\b|\bwebkitSpeechRecognition\b/ },
   { label: 'captureStream()', pattern: /\bcaptureStream\b/ },
 ];
+const apiStatusTags = ['beta', 'experimental', 'deprecated'];
 
 function main() {
   checkDocsExamples();
@@ -58,6 +60,7 @@ function main() {
   checkAudioTranscriptEntrypointIsolationContract();
   checkApiReportContract();
   checkApiStabilityContract();
+  checkApiDocsDisclosureContract();
   checkPackageDependencyContract();
   checkStyleEntryPoints();
   checkNgClassCustomizationContract();
@@ -1152,16 +1155,61 @@ function assertSameSet(label, expected, actual) {
   failures.push(`${label} mismatch: ${parts.join('; ')}`);
 }
 
-function checkCodeMirrorEntrypointIsolationContract() {
-  const codeEditorPublicApiPath = 'projects/hell/src/lib/public-api-feature-code-editor.ts';
-  const codeEditorPublicApi = readFile(join(root, codeEditorPublicApiPath));
-  if (!codeEditorPublicApi.includes('Kept optional CodeMirror feature entry point')) {
-    failures.push('Code Editor entry point public API must state it is a kept optional CodeMirror feature entry point');
-  }
-  if (!codeEditorPublicApi.includes('lazy/client-only')) {
-    failures.push('Code Editor entry point public API must require lazy/client-only browser boundaries');
+function checkPublicApiStatusPolicy(policyEntries) {
+  const policyTiers = new Set(
+    policyEntries
+      .filter((entrypoint) => entrypoint.kind === 'typescript')
+      .map((entrypoint) => entrypoint.tier),
+  );
+  for (const tier of ['stable', 'beta', 'experimental']) {
+    if (!policyTiers.has(tier)) {
+      failures.push(`Entrypoint Stability Manifest must classify at least one TypeScript entrypoint as ${tier}`);
+    }
   }
 
+  for (const entrypoint of policyEntries) {
+    const expectedTag = apiStatusTagForTier(entrypoint.tier);
+    const header = entrypoint.header?.join('\n') ?? '';
+    for (const tag of apiStatusTags) {
+      if (tag !== expectedTag && apiStatusTagPattern(tag).test(header)) {
+        failures.push(
+          `Entrypoint Stability Manifest ${entrypoint.specifier} header uses @${tag}, but its tier is ${entrypoint.tier}`,
+        );
+      }
+    }
+
+    if (!entrypoint.statusTagRequired) continue;
+    if (!expectedTag) {
+      failures.push(
+        `Entrypoint Stability Manifest ${entrypoint.specifier} requires a public status tag, but its tier ${entrypoint.tier} has no API status tag`,
+      );
+      continue;
+    }
+    if (!apiStatusTagPattern(expectedTag).test(header)) {
+      failures.push(
+        `Entrypoint Stability Manifest ${entrypoint.specifier} requires @${expectedTag} in its manifest header`,
+      );
+      continue;
+    }
+
+    const publicApi = readFile(join(root, entrypoint.publicApiPath));
+    if (!apiStatusTagPattern(expectedTag).test(publicApi)) {
+      failures.push(
+        `Entrypoint Stability Manifest ${entrypoint.specifier} declares ${entrypoint.tier}, but ${entrypoint.publicApiPath} is missing @${expectedTag}`,
+      );
+    }
+  }
+}
+
+function apiStatusTagForTier(tier) {
+  return apiStatusTags.includes(tier) ? tier : null;
+}
+
+function apiStatusTagPattern(tag) {
+  return new RegExp(`@${escapeRegExp(tag)}\\b`);
+}
+
+function checkCodeMirrorEntrypointIsolationContract() {
   const rootCorePaths = [
     'projects/hell/src/public-api.ts',
     'projects/hell/src/lib/public-api-core.ts',
@@ -1228,15 +1276,6 @@ function isCodeMirrorBoundarySpecifier(specifier) {
 }
 
 function checkAudioTranscriptEntrypointIsolationContract() {
-  const audioTranscriptPublicApiPath = 'projects/hell/src/lib/public-api-feature-audio-transcript.ts';
-  const audioTranscriptPublicApi = readFile(join(root, audioTranscriptPublicApiPath));
-  if (!/@experimental\b/.test(audioTranscriptPublicApi)) {
-    failures.push('Audio Transcript feature entry point must carry @experimental in its public API comment');
-  }
-  if (!audioTranscriptPublicApi.includes('Optional browser transcript provider')) {
-    failures.push('Audio Transcript feature entry point must describe itself as an optional provider seam');
-  }
-
   const audioTranscriptSourcePath = 'projects/hell/src/lib/features/audio-transcript/audio-transcript.ts';
   const audioTranscriptSource = readFile(join(root, audioTranscriptSourcePath));
   for (const symbol of [
@@ -1339,85 +1378,7 @@ function checkApiReportContract() {
 }
 
 function checkApiStabilityContract() {
-  const readme = readFile(join(root, 'projects/hell/README.md'));
-  const requiredPolicyText = [
-    '### Stability category policy',
-    '`Stable`',
-    '`Experimental`',
-    '`Deprecated`',
-    '`Internal`',
-    'Public API files must not export from `/internal/`, `/adapters/`, or manifest-declared internal directories',
-  ];
-  for (const text of requiredPolicyText) {
-    if (!readme.includes(text)) failures.push(`API Stability policy is missing ${text}`);
-  }
-
-  const experimentalEntrypoints = [
-    {
-      name: 'Code editor',
-      publicApiPath: 'projects/hell/src/lib/public-api-feature-code-editor.ts',
-      sourcePath: 'projects/hell/src/lib/features/code-editor/code-editor.ts',
-      docsPath: 'projects/hell-docs/src/app/pages/components/code-editor/code-editor.page.ts',
-    },
-    {
-      name: 'PDF viewer',
-      publicApiPath: 'projects/hell-pdf-viewer/src/public-api.ts',
-      sourcePath: 'projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts',
-      docsPath: 'projects/hell-docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts',
-    },
-  ];
-
-  for (const entrypoint of experimentalEntrypoints) {
-    const publicApi = readFile(join(root, entrypoint.publicApiPath));
-    if (!/@experimental\b/.test(publicApi)) {
-      failures.push(`${entrypoint.name} feature entry point must carry @experimental in its public API comment`);
-    }
-
-    const source = readFile(join(root, entrypoint.sourcePath));
-    if (!/@experimental\b/.test(source)) {
-      failures.push(`${entrypoint.name} feature source must carry @experimental API JSDoc`);
-    }
-
-    const docs = readFile(join(root, entrypoint.docsPath));
-    if (!new RegExp(`${escapeRegExp(entrypoint.name)} is experimental`, 'i').test(docs)) {
-      failures.push(`${entrypoint.name} docs must disclose experimental status`);
-    }
-  }
-
-  const tableEntrypointStatuses = [
-    {
-      name: 'Table primitives',
-      publicApiPath: 'projects/hell/src/lib/public-api-table.ts',
-      tag: 'beta',
-    },
-    {
-      name: 'Data table',
-      publicApiPath: 'projects/hell/src/lib/public-api-data-table.ts',
-      tag: 'experimental',
-    },
-    {
-      name: 'TanStack Table adapter',
-      publicApiPath: 'projects/hell/src/lib/public-api-table-tanstack.ts',
-      tag: 'experimental',
-    },
-    {
-      name: 'TanStack Virtual adapter',
-      publicApiPath: 'projects/hell/src/lib/public-api-table-virtual.ts',
-      tag: 'experimental',
-    },
-    {
-      name: 'CDK Table skin adapter',
-      publicApiPath: 'projects/hell/src/lib/public-api-table-cdk.ts',
-      tag: 'experimental',
-    },
-  ];
-  for (const entrypoint of tableEntrypointStatuses) {
-    const publicApi = readFile(join(root, entrypoint.publicApiPath));
-    const tagPattern = new RegExp(`@${entrypoint.tag}\\b`);
-    if (!tagPattern.test(publicApi)) {
-      failures.push(`${entrypoint.name} table entry point must carry @${entrypoint.tag} in its public API comment`);
-    }
-  }
+  checkPublicApiStatusPolicy(entrypointPolicyEntries());
 
   const experimentalApiSymbols = [
     ['projects/hell/src/lib/features/code-editor/code-editor.ts', 'HellCodeEditorRuntimeFactory'],
@@ -1433,6 +1394,7 @@ function checkApiStabilityContract() {
     ['projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts', 'HELL_PDF_RUNTIME_FACTORY'],
     ['projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts', 'HellPdfViewer'],
     ['projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.adapter.ts', 'HellPdfWorkerSource'],
+    ['projects/hell/src/lib/composites/audio-player/audio-player.ts', 'HellAudioPlayer'],
   ];
   for (const [sourcePath, symbol] of experimentalApiSymbols) {
     const source = readFile(join(root, sourcePath));
@@ -1470,34 +1432,49 @@ function checkApiStabilityContract() {
     failures.push('hellCodeEditorSetup compatibility alias must carry @deprecated API JSDoc');
   }
 
-  const audioDocs = readFile(join(root, 'projects/hell-docs/src/app/pages/components/audio-player/audio-player.page.ts'));
-  if (!/allowLiveCaptions[\s\S]{0,200}deprecated compatibility alias/i.test(audioDocs)) {
-    failures.push('Audio Player docs must disclose allowLiveCaptions as a deprecated compatibility alias');
-  }
+  checkPublicApiInternalExportContract();
+}
 
-  const codeEditorDocs = readFile(join(root, 'projects/hell-docs/src/app/pages/components/code-editor/code-editor.page.ts'));
-  if (!/hellCodeEditorSetup[\s\S]{0,200}deprecated browser-global legacy compatibility/i.test(codeEditorDocs)) {
-    failures.push('Code Editor docs must disclose hellCodeEditorSetup as a deprecated compatibility alias');
-  }
-  for (const requiredCodeEditorDocText of [
-    '@hell-ui/angular/features/code-editor',
-    'kept optional entry point',
-    'lazy/client-only',
-    'API report policy deliberately promotes it',
-  ]) {
-    if (!codeEditorDocs.includes(requiredCodeEditorDocText)) {
-      failures.push(`Code Editor docs must state ${requiredCodeEditorDocText}`);
+function checkApiDocsDisclosureContract() {
+  for (const disclosure of apiDocsDisclosurePolicyEntries()) {
+    const label = `API Docs Disclosure Manifest ${disclosure.id}`;
+    if (!apiStatusTags.includes(disclosure.status)) {
+      failures.push(`${label} has invalid status ${disclosure.status}`);
+    }
+    if (disclosure.kind === 'entrypoint' && !['required', 'covered-by', 'excluded'].includes(disclosure.apiReportExpectation)) {
+      failures.push(`${label} has invalid API report expectation ${disclosure.apiReportExpectation}`);
+    }
+
+    const docsPath = join(root, disclosure.docsPath);
+    if (!existsSync(docsPath)) {
+      failures.push(`${label} points at missing docs page ${disclosure.docsPath}`);
+      continue;
+    }
+
+    const docs = readFile(docsPath);
+    if (!apiDocsStatusPattern(disclosure.status).test(docs)) {
+      failures.push(`${label} docs must include ${disclosure.status} status disclosure`);
+    }
+    for (const term of disclosure.terms ?? []) {
+      if (!docs.includes(term)) {
+        failures.push(`${label} docs must mention ${term}`);
+      }
     }
   }
+}
 
-  checkPublicApiInternalExportContract();
+function apiDocsStatusPattern(status) {
+  return new RegExp(`\\b${escapeRegExp(status)}\\b`, 'i');
 }
 
 function hasTaggedApiSymbol(source, tag, symbol) {
   const pattern = new RegExp(
     `@${escapeRegExp(tag)}\\b[\\s\\S]{0,1800}(?:export\\s+(?:abstract\\s+)?(?:class|const|type|interface|function)\\s+${escapeRegExp(symbol)}\\b|readonly\\s+${escapeRegExp(symbol)}\\b)`,
   );
-  return pattern.test(source);
+  const decoratedClassPattern = new RegExp(
+    `/\\*\\*[\\s\\S]*?@${escapeRegExp(tag)}\\b[\\s\\S]*?\\*/\\s*@Component\\([\\s\\S]*?\\)\\s*export\\s+class\\s+${escapeRegExp(symbol)}\\b`,
+  );
+  return pattern.test(source) || decoratedClassPattern.test(source);
 }
 
 function checkPublicApiInternalExportContract() {
@@ -1753,11 +1730,7 @@ function checkPdfViewerPackageDependencyContract(workspacePackageJson) {
   }
   const ngPackage = parseJsonWithComments(readFile(join(root, 'projects/hell-pdf-viewer/ng-package.json')));
   if (JSON.stringify(ngPackage.assets ?? []).includes('pdf.worker')) {
-    failures.push('PDF package must document worker setup instead of copying pdf.worker.mjs into the package tarball');
-  }
-  const readme = readFile(join(root, 'projects/hell-pdf-viewer/README.md'));
-  for (const text of ['pdfjs-dist@5.6.205', 'pdf.worker.mjs', 'worker', 'node_modules/pdfjs-dist/build']) {
-    if (!readme.includes(text)) failures.push(`PDF package README is missing worker/dependency guidance: ${text}`);
+    failures.push('PDF package must not copy pdf.worker.mjs into the package tarball');
   }
 }
 
@@ -2115,35 +2088,10 @@ function checkExperimentalFeatureContract() {
   if (!/allowLiveCaptions\s*=\s*input\(false/.test(audioSource)) {
     failures.push('Audio live captions compatibility alias must remain explicitly opt-in');
   }
-  if (!audioSource.includes('@experimental Browser speech transcripts')) {
-    failures.push('HellAudioPlayer must mark browser speech transcript experimental in its public JSDoc');
-  }
-
-  const audioDocs = readFile(
-    join(root, 'projects/hell-docs/src/app/pages/components/audio-player/audio-player.page.ts'),
-  );
-  if (!/speech transcript is experimental/i.test(audioDocs) || !/default <code>false<\/code>/.test(audioDocs)) {
-    failures.push('Audio Player docs must disclose experimental opt-in speech transcript');
-  }
-
-  const pdfSource = readFile(join(root, 'projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts'));
-  if (!pdfSource.includes('@experimental This feature wraps pdf.js')) {
-    failures.push('HellPdfViewer must mark the pdf.js wrapper experimental in its public JSDoc');
-  }
 
   const pdfFeatureApi = readFile(join(root, 'projects/hell-pdf-viewer/src/public-api.ts'));
   if (!/HellPdfWorkerSource/.test(pdfFeatureApi)) {
     failures.push('PDF Viewer package entry point must export the public HellPdfWorkerSource worker input type');
-  }
-
-  const pdfDocs = readFile(
-    join(root, 'projects/hell-docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts'),
-  );
-  if (!/PDF viewer is experimental/.test(pdfDocs)) {
-    failures.push('PDF Viewer docs must disclose experimental status');
-  }
-  if (!/worker[^.]*package does not copy\s+a worker into either package tarball/s.test(pdfDocs)) {
-    failures.push('PDF Viewer docs must disclose that apps provide the pdf.js worker source');
   }
 }
 

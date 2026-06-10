@@ -2,6 +2,7 @@ const packageName = '@hell-ui/angular';
 const pdfPackageName = '@hell-ui/pdf-viewer';
 const libraryRoot = 'projects/hell';
 const pdfLibraryRoot = 'projects/hell-pdf-viewer';
+const docsRoot = 'projects/hell-docs';
 
 export const entrypointManifest = {
   root: {
@@ -71,6 +72,7 @@ export const entrypointManifest = {
         ' * @beta Table primitive entry point for semantic table utilities and model helpers.',
         ' */',
       ],
+      statusTagRequired: true,
     },
     {
       id: 'data-table',
@@ -84,6 +86,7 @@ export const entrypointManifest = {
         ' * @experimental Simple native-table data renderer for HellColumnDef rows.',
         ' */',
       ],
+      statusTagRequired: true,
     },
     {
       id: 'table-tanstack',
@@ -97,6 +100,7 @@ export const entrypointManifest = {
         ' * @experimental TanStack Table adapter entry point. Keeps TanStack behind this optional peer boundary.',
         ' */',
       ],
+      statusTagRequired: true,
     },
     {
       id: 'table-virtual',
@@ -110,6 +114,7 @@ export const entrypointManifest = {
         ' * @experimental TanStack Virtual adapter entry point for dynamic Hell row parts.',
         ' */',
       ],
+      statusTagRequired: true,
     },
     {
       id: 'table-cdk',
@@ -123,6 +128,7 @@ export const entrypointManifest = {
         ' * @experimental Angular CDK Table skin adapter entry point.',
         ' */',
       ],
+      statusTagRequired: true,
     },
   ],
   groups: [
@@ -230,6 +236,11 @@ export const entrypointManifest = {
             ' * Import only where best-effort transcript capture is deliberately enabled.',
             ' */',
           ],
+          statusTagRequired: true,
+          docsDisclosure: {
+            docsPath: `${docsRoot}/src/app/pages/components/audio-player/audio-player.page.ts`,
+            terms: ['allowSpeechTranscript'],
+          },
         },
         'code-editor': {
           header: [
@@ -237,6 +248,10 @@ export const entrypointManifest = {
             ' * @experimental Kept optional CodeMirror feature entry point. Keep behind lazy/client-only browser boundaries.',
             ' */',
           ],
+          statusTagRequired: true,
+          docsDisclosure: {
+            docsPath: `${docsRoot}/src/app/pages/components/code-editor/code-editor.page.ts`,
+          },
         },
       },
       entries: ['audio-transcript', 'code-editor'],
@@ -339,6 +354,15 @@ export function entrypointPolicyEntries() {
       ownerPackage: pdfPackageName,
       publicApiPath: `${pdfLibraryRoot}/src/public-api.ts`,
       packageDir: pdfLibraryRoot,
+      header: [
+        '/**',
+        ' * @experimental PDF.js package entry point. Apps own worker/browser compatibility.',
+        ' */',
+      ],
+      statusTagRequired: true,
+      docsDisclosure: {
+        docsPath: `${docsRoot}/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts`,
+      },
       tier: 'experimental',
       peerTier: 'pdf-viewer',
       consumerScenario: 'pdf-viewer',
@@ -353,6 +377,39 @@ export function styleEntrypointPolicyEntries() {
 
 export function apiReportPolicyEntries() {
   return entrypointPolicyEntries().filter((entrypoint) => entrypoint.apiReport.expectation !== 'covered-by');
+}
+
+export function apiDocsDisclosurePolicyEntries() {
+  return [
+    ...entrypointPolicyEntries()
+      .filter((entrypoint) => entrypoint.docsDisclosure)
+      .map((entrypoint) => ({
+        id: `${entrypoint.id}-entrypoint-docs-disclosure`,
+        kind: 'entrypoint',
+        specifier: entrypoint.specifier,
+        docsPath: entrypoint.docsDisclosure.docsPath,
+        status: entrypoint.tier,
+        apiReportExpectation: entrypoint.apiReport.expectation,
+        terms: [
+          entrypoint.specifier,
+          ...(entrypoint.docsDisclosure.terms ?? []),
+        ],
+      })),
+    {
+      id: 'allow-live-captions-deprecation-docs-disclosure',
+      kind: 'api-symbol',
+      docsPath: `${docsRoot}/src/app/pages/components/audio-player/audio-player.page.ts`,
+      status: 'deprecated',
+      terms: ['allowLiveCaptions'],
+    },
+    {
+      id: 'hell-code-editor-setup-deprecation-docs-disclosure',
+      kind: 'api-symbol',
+      docsPath: `${docsRoot}/src/app/pages/components/code-editor/code-editor.page.ts`,
+      status: 'deprecated',
+      terms: ['hellCodeEditorSetup'],
+    },
+  ];
 }
 
 export function secondaryPackageEntrypoints() {
@@ -426,6 +483,8 @@ function individualEntrypoints() {
         header: override.header,
         footer: override.footer,
         extraExports: override.extraExports,
+        statusTagRequired: override.statusTagRequired,
+        docsDisclosure: override.docsDisclosure,
       };
     }),
   );
