@@ -123,3 +123,4 @@ _Avoid_: Trust-me review, summary review
 - A **Static Contract Manifest** is appropriate for stable entrypoints, peer tiers, API-report expectations, docs lazy-route boundaries, and accepted browser-global seams, but not for volatile component internals or docs prose.
 - A **Release Evidence Gate** verifies that required **Validation Evidence** exists and is fresh; it must not replace the commands or reviews that produce that evidence.
 - An **Evidence-Based Review** may use **Static Contract Checks** as one signal, but it must reject claims that are only supported by patchable sentinels or agent assertions.
+- The product validation policy lives in `docs/architecture/validation-policy.md`; scripts must not enforce its exact prose.
