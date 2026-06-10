@@ -6,7 +6,7 @@ import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactiv
 
 /**
  * Trigger for an `ng-template` popover. Bind `[hellPopoverTrigger]="template"`
- * and optionally pass placement, offset, flip, disabled, and close policy
+ * and optionally pass placement, offset, flip, shift, disabled, and close policy
  * inputs through to ng-primitives.
  */
 @Directive({
@@ -19,6 +19,7 @@ import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactiv
         'ngpPopoverTriggerPlacement:placement',
         'ngpPopoverTriggerOffset:offset',
         'ngpPopoverTriggerFlip:flip',
+        'ngpPopoverTriggerShift:shift',
         'ngpPopoverTriggerContainer:container',
         'ngpPopoverTriggerDisabled:disabled',
         'ngpPopoverTriggerCloseOnEscape:closeOnEscape',

@@ -1,6 +1,5 @@
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { HellTimeInput, provideHellTimeInputAdapter, type HellTimeValue } from './time-input';
@@ -217,7 +216,7 @@ describe('HellTimeInput', () => {
     expect(textInput(fixture.nativeElement).placeholder).toBe('HH:mm:ss');
   });
 
-  it('focuses picker units that match parsed minutes/seconds', () => {
+  it('syncs picker spinbutton values with parsed minutes/seconds', async () => {
     const fixture = TestBed.createComponent(TimeInputHost);
     fixture.detectChanges();
 
@@ -227,9 +226,11 @@ describe('HellTimeInput', () => {
     input.dispatchEvent(new Event('blur', { bubbles: true }));
     fixture.detectChanges();
 
-    const picker = timeInputInstance(fixture);
-    expect(tabStopIndex(picker, 'hour', 24)).toBe(10);
-    expect(tabStopIndex(picker, 'minute', 60)).toBe(7);
+    triggerButton(fixture.nativeElement).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    const hour = await waitForPickerSpinbutton(fixture, 'hour');
+    const minute = await waitForPickerSpinbutton(fixture, 'minute');
+    expect(hour.getAttribute('aria-valuenow')).toBe('10');
+    expect(minute.getAttribute('aria-valuenow')).toBe('7');
 
     fixture.componentInstance.seconds.set(true);
     fixture.detectChanges();
@@ -239,7 +240,8 @@ describe('HellTimeInput', () => {
     input.dispatchEvent(new Event('blur', { bubbles: true }));
     fixture.detectChanges();
 
-    expect(tabStopIndex(picker, 'second', 60)).toBe(13);
+    const second = await waitForPickerSpinbutton(fixture, 'second');
+    expect(second.getAttribute('aria-valuenow')).toBe('13');
   });
 
   it('keeps invalid typed text visible without emitting', () => {
@@ -287,17 +289,7 @@ describe('HellTimeInput', () => {
     expect(trigger.getAttribute('aria-label')).toBe('Choose time for Start time');
   });
 
-  it('uses a single tab stop per picker section', () => {
-    const fixture = TestBed.createComponent(TimeInputHost);
-    fixture.detectChanges();
-
-    const picker = timeInputInstance(fixture);
-
-    expect(tabStopCount(picker, 'hour', 24)).toBe(1);
-    expect(tabStopCount(picker, 'minute', 60)).toBe(1);
-  });
-
-  it('renders picker sections with grid rows, gridcells, and selected semantics', async () => {
+  it('renders a compact segmented picker with named spinbuttons and minute presets', async () => {
     const fixture = TestBed.createComponent(TimeInputHost);
     fixture.componentInstance.value.set({ hour: 8, minute: 30, second: 0 });
     fixture.componentInstance.seconds.set(true);
@@ -305,82 +297,71 @@ describe('HellTimeInput', () => {
 
     triggerButton(fixture.nativeElement).dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
-    const hourGrid = await waitForPickerGrid(fixture, 'hours');
-    const minuteGrid = document.querySelector<HTMLElement>(
-      '[data-slot="picker-grid"][data-unit="minutes"]',
-    );
-    const secondGrid = document.querySelector<HTMLElement>(
-      '[data-slot="picker-grid"][data-unit="seconds"]',
-    );
+    const hour = await waitForPickerSpinbutton(fixture, 'hour');
+    const minute = await waitForPickerSpinbutton(fixture, 'minute');
+    const second = await waitForPickerSpinbutton(fixture, 'second');
+    const picker = document.querySelector<HTMLElement>('[data-slot="picker"]');
+    const presets = document.querySelectorAll<HTMLButtonElement>('[data-slot="minute-preset"]');
 
-    expect(hourGrid?.getAttribute('role')).toBe('grid');
-    expect(hourGrid?.getAttribute('aria-label')).toBe('Hours');
-    expect(hourGrid?.querySelectorAll('[role="row"]').length).toBe(4);
-    expect(hourGrid?.querySelectorAll('[role="gridcell"]').length).toBe(24);
-    expect(
-      hourGrid?.querySelector('[role="gridcell"][aria-selected="true"]')?.textContent?.trim(),
-    ).toBe('08');
-    expect(rovingDomTabStopCount(hourGrid)).toBe(1);
-
-    expect(minuteGrid?.getAttribute('role')).toBe('grid');
-    expect(
-      minuteGrid?.querySelector('[role="gridcell"][aria-selected="true"]')?.textContent?.trim(),
-    ).toBe('30');
-    expect(rovingDomTabStopCount(minuteGrid)).toBe(1);
-
-    expect(secondGrid?.getAttribute('role')).toBe('grid');
-    expect(
-      secondGrid?.querySelector('[role="gridcell"][aria-selected="true"]')?.textContent?.trim(),
-    ).toBe('00');
-    expect(rovingDomTabStopCount(secondGrid)).toBe(1);
+    expect(picker?.querySelectorAll('[role="spinbutton"]').length).toBe(3);
+    expect(picker?.querySelector('[role="grid"]')).toBeNull();
+    expect(hour.getAttribute('aria-valuemin')).toBe('0');
+    expect(hour.getAttribute('aria-valuemax')).toBe('23');
+    expect(hour.getAttribute('aria-valuenow')).toBe('8');
+    expect(hour.getAttribute('aria-valuetext')).toBe('08 hours');
+    expect(hour.getAttribute('aria-labelledby')).toBe('start-time-input-hour-label');
+    expect(minute.getAttribute('aria-valuenow')).toBe('30');
+    expect(second.getAttribute('aria-valuenow')).toBe('0');
+    expect(presets.length).toBe(4);
+    expect(presets[2]?.getAttribute('aria-pressed')).toBe('true');
+    expect(presets[2]?.textContent?.trim()).toBe('30');
   });
 
-  it('supports Arrow/Home/End navigation in picker sections', async () => {
+  it('supports spinbutton keyboard changes and quick minute presets', async () => {
     const fixture = TestBed.createComponent(TimeInputHost);
+    fixture.componentInstance.value.set({ hour: 8, minute: 30, second: 0 });
     fixture.detectChanges();
 
     triggerButton(fixture.nativeElement).dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    const hourGrid = await waitForPickerGrid(fixture, 'hours');
-    const minuteGrid = await waitForPickerGrid(fixture, 'minutes');
+    const hour = await waitForPickerSpinbutton(fixture, 'hour');
+    const minute = await waitForPickerSpinbutton(fixture, 'minute');
 
-    dispatchPickerKey(hourGrid, 0, 'ArrowRight');
+    dispatchPickerKey(hour, 'ArrowUp');
     fixture.detectChanges();
-    expect(domTabStopIndex(hourGrid)).toBe(1);
-    expect(document.activeElement).toBe(pickerCell(hourGrid, 1));
+    expect(textInput(fixture.nativeElement).value).toBe('09:30');
+    expect(hour.getAttribute('aria-valuenow')).toBe('9');
 
-    dispatchPickerKey(hourGrid, 1, 'ArrowLeft');
+    dispatchPickerKey(hour, 'Home');
     fixture.detectChanges();
-    expect(domTabStopIndex(hourGrid)).toBe(0);
+    expect(textInput(fixture.nativeElement).value).toBe('00:30');
 
-    dispatchPickerKey(hourGrid, 0, 'End');
+    dispatchPickerKey(hour, 'End');
     fixture.detectChanges();
-    expect(domTabStopIndex(hourGrid)).toBe(23);
-    expect(document.activeElement).toBe(pickerCell(hourGrid, 23));
+    expect(textInput(fixture.nativeElement).value).toBe('23:30');
 
-    dispatchPickerKey(hourGrid, 23, 'Home');
+    dispatchPickerKey(minute, 'PageDown');
     fixture.detectChanges();
-    expect(domTabStopIndex(hourGrid)).toBe(0);
+    expect(textInput(fixture.nativeElement).value).toBe('23:25');
 
-    dispatchPickerKey(minuteGrid, 0, 'ArrowDown');
+    minutePreset(45).dispatchEvent(new MouseEvent('click', { bubbles: true }));
     fixture.detectChanges();
-    expect(domTabStopIndex(minuteGrid)).toBe(4);
-
-    dispatchPickerKey(minuteGrid, 4, 'ArrowUp');
-    fixture.detectChanges();
-    expect(domTabStopIndex(minuteGrid)).toBe(0);
+    expect(textInput(fixture.nativeElement).value).toBe('23:45');
+    expect(fixture.componentInstance.values.at(-1)).toEqual({ hour: 23, minute: 45, second: 0 });
   });
 
-  it('keeps roving tab stop stable for non-navigation keys', () => {
+  it('keeps unsupported spinbutton keys from changing the value', async () => {
     const fixture = TestBed.createComponent(TimeInputHost);
+    fixture.componentInstance.value.set({ hour: 8, minute: 30, second: 0 });
     fixture.detectChanges();
 
-    const picker = timeInputInstance(fixture);
+    triggerButton(fixture.nativeElement).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    const hour = await waitForPickerSpinbutton(fixture, 'hour');
 
-    picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'ArrowRight' }), 'hour', 0);
-    expect(tabStopIndex(picker, 'hour', 24)).toBe(1);
+    dispatchPickerKey(hour, 'x');
+    fixture.detectChanges();
 
-    picker.onPickerCellKeydown(new KeyboardEvent('keydown', { key: 'PageDown' }), 'hour', 1);
-    expect(tabStopIndex(picker, 'hour', 24)).toBe(1);
+    expect(textInput(fixture.nativeElement).value).toBe('08:30');
+    expect(hour.getAttribute('aria-valuenow')).toBe('8');
   });
 
   it('drops in-progress typing when the bound value changes externally', async () => {
@@ -532,62 +513,18 @@ function textInput(root: HTMLElement): HTMLInputElement {
   return input;
 }
 
-function timeInputInstance(fixture: ComponentFixture<unknown>): {
-  onPickerCellKeydown: (event: KeyboardEvent, unit: HellTimeUnit, index: number) => void;
-  pickerCellTabIndex: (unit: HellTimeUnit, index: number) => string;
-} {
-  const host = fixture.debugElement.query(By.directive(HellTimeInput));
-  if (!host) throw new Error('Expected HellTimeInput instance.');
-  return host.componentInstance as {
-    onPickerCellKeydown: (event: KeyboardEvent, unit: HellTimeUnit, index: number) => void;
-    pickerCellTabIndex: (unit: HellTimeUnit, index: number) => string;
-  };
-}
-
 type HellTimeUnit = 'hour' | 'minute' | 'second';
 
-function rovingDomTabStopCount(grid: HTMLElement | null): number {
-  return Array.from(grid?.querySelectorAll<HTMLElement>('[role="gridcell"]') ?? []).filter(
-    (cell) => cell.tabIndex === 0,
-  ).length;
+function dispatchPickerKey(spinbutton: HTMLElement, key: string): void {
+  spinbutton.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
 }
 
-function domTabStopIndex(grid: HTMLElement): number {
-  return pickerCells(grid).findIndex((cell) => cell.tabIndex === 0);
-}
-
-function dispatchPickerKey(grid: HTMLElement, index: number, key: string): void {
-  pickerCell(grid, index).dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
-}
-
-function pickerCell(grid: HTMLElement, index: number): HTMLElement {
-  const cell = pickerCells(grid)[index];
-  if (!cell) throw new Error(`Expected picker cell ${index}.`);
-  return cell;
-}
-
-function pickerCells(grid: HTMLElement): HTMLElement[] {
-  return Array.from(grid.querySelectorAll<HTMLElement>('[role="gridcell"]'));
-}
-
-function tabStopCount(
-  picker: { pickerCellTabIndex: (unit: HellTimeUnit, index: number) => string },
-  unit: HellTimeUnit,
-  count: number,
-): number {
-  return Array.from({ length: count }, (_, index) => index).filter(
-    (index) => picker.pickerCellTabIndex(unit, index) === '0',
-  ).length;
-}
-
-function tabStopIndex(
-  picker: { pickerCellTabIndex: (unit: HellTimeUnit, index: number) => string },
-  unit: HellTimeUnit,
-  count: number,
-): number {
-  return Array.from({ length: count }, (_, index) => index).findIndex(
-    (index) => picker.pickerCellTabIndex(unit, index) === '0',
-  );
+function minutePreset(minute: number): HTMLButtonElement {
+  const preset = Array.from(
+    document.querySelectorAll<HTMLButtonElement>('[data-slot="minute-preset"]'),
+  ).find((button) => button.textContent?.trim() === minute.toString().padStart(2, '0'));
+  if (!preset) throw new Error(`Expected minute preset ${minute}.`);
+  return preset;
 }
 
 function triggerButton(root: HTMLElement): HTMLButtonElement {
@@ -596,19 +533,19 @@ function triggerButton(root: HTMLElement): HTMLButtonElement {
   return trigger;
 }
 
-async function waitForPickerGrid(
+async function waitForPickerSpinbutton(
   fixture: ComponentFixture<unknown>,
-  unit: 'hours' | 'minutes' | 'seconds',
+  unit: HellTimeUnit,
 ): Promise<HTMLElement> {
-  const selector = `[data-slot="picker-grid"][data-unit="${unit}"]`;
+  const selector = `[data-slot="picker-unit"][data-unit="${unit}"] [role="spinbutton"]`;
   const timeout = Date.now() + 1000;
 
   while (Date.now() < timeout) {
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
-    const grid = document.querySelector<HTMLElement>(selector);
-    if (grid) return grid;
+    const spinbutton = document.querySelector<HTMLElement>(selector);
+    if (spinbutton) return spinbutton;
     await new Promise((resolve) => setTimeout(resolve, 0));
   }
 

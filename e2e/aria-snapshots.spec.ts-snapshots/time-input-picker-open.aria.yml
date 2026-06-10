@@ -1,0 +1,14 @@
+- dialog:
+  - text: /\d+:\d+ Hours/
+  - button "Decrease hours"
+  - spinbutton "Hours"
+  - button "Increase hours"
+  - text: Minutes
+  - button "Decrease minutes"
+  - spinbutton "Minutes"
+  - button "Increase minutes"
+  - group "Minute presets":
+    - button /Set minutes to \d+/
+    - button /Set minutes to \d+/
+    - button /Set minutes to \d+/ [pressed]
+    - button /Set minutes to \d+/

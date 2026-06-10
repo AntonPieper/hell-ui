@@ -1,26 +1,28 @@
 export type HellTimeInputPickerUnit = 'hour' | 'minute' | 'second';
 
-export function hellTimeInputPickerColumns(unit: HellTimeInputPickerUnit): 4 | 6 {
-  return unit === 'hour' ? 6 : 4;
+export function hellTimeInputPickerMaxValue(unit: HellTimeInputPickerUnit): 23 | 59 {
+  return unit === 'hour' ? 23 : 59;
 }
 
-export function hellTimeInputNextPickerCellIndex(
+export function hellTimeInputNextPickerValue(
   key: string,
-  currentIndex: number,
+  currentValue: number,
   unit: HellTimeInputPickerUnit,
-  count: number,
 ): number | null {
-  if (!count) return null;
+  const max = hellTimeInputPickerMaxValue(unit);
+  const value = clamp(Math.trunc(currentValue), 0, max);
+  const largeStep = 5;
 
-  const index = Math.min(Math.max(currentIndex, 0), count - 1);
-  const columns = hellTimeInputPickerColumns(unit);
-
-  if (key === 'ArrowLeft') return (index - 1 + count) % count;
-  if (key === 'ArrowRight') return (index + 1) % count;
-  if (key === 'ArrowUp') return (index - columns + count) % count;
-  if (key === 'ArrowDown') return (index + columns) % count;
+  if (key === 'ArrowUp' || key === 'ArrowRight') return clamp(value + 1, 0, max);
+  if (key === 'ArrowDown' || key === 'ArrowLeft') return clamp(value - 1, 0, max);
+  if (key === 'PageUp') return clamp(value + largeStep, 0, max);
+  if (key === 'PageDown') return clamp(value - largeStep, 0, max);
   if (key === 'Home') return 0;
-  if (key === 'End') return count - 1;
+  if (key === 'End') return max;
 
   return null;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
 }

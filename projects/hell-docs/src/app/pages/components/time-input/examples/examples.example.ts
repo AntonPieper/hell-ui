@@ -9,24 +9,40 @@ import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
   template: `
     <div hellField>
       <label hellFieldLabel for="reminder-time">Reminder time</label>
-      <hell-time-input id="reminder-time" aria-label="Reminder time" [value]="value()" (valueChange)="value.set($event)" />
-      <div hellFieldDescription>Type or pick from the dial.</div>
+      <hell-time-input
+        inputId="reminder-time"
+        aria-label="Reminder time"
+        [value]="value()"
+        (valueChange)="value.set($event)"
+      />
+      <div hellFieldDescription>Type directly or adjust the segmented picker.</div>
     </div>
 
     <div hellField>
       <label hellFieldLabel for="precise-time">With seconds</label>
-      <hell-time-input id="precise-time" aria-label="With seconds" [value]="precise()" (valueChange)="precise.set($event)" [seconds]="true" />
+      <hell-time-input
+        inputId="precise-time"
+        aria-label="With seconds"
+        [value]="precise()"
+        (valueChange)="precise.set($event)"
+        [seconds]="true"
+      />
     </div>
 
     <div hellField>
       <label hellFieldLabel for="invalid-time">Invalid</label>
-      <hell-time-input id="invalid-time" aria-label="Invalid time" invalid [value]="value()" />
+      <hell-time-input inputId="invalid-time" aria-label="Invalid time" invalid [value]="value()" />
       <div hellFieldError>Pick a time at least 15 minutes from now.</div>
     </div>
 
     <div hellField>
       <label hellFieldLabel for="disabled-time">Disabled</label>
-      <hell-time-input id="disabled-time" aria-label="Disabled time" disabled [value]="value()" />
+      <hell-time-input
+        inputId="disabled-time"
+        aria-label="Disabled time"
+        disabled
+        [value]="value()"
+      />
     </div>
     <p class="hd-muted">Selected: {{ format(value()) || '-' }}</p>
   `,

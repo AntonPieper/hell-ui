@@ -34,9 +34,8 @@ import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
         A text-first time field with a business-default parser: <code>HH:mm</code>, documented
         common 12-hour shortcuts (<code>9:00 am</code>, <code>1:30PM</code>), and
         <code>HH:mm:ss</code> only when <code>seconds</code> mode is enabled. Locale parsing is
-        intentionally off by default. Click or keyboard-activate the clock icon to open a compact grid
-        picker: hour and minute cells you can click directly, with roving keyboard focus and ±5 minute
-        nudges for fine-tuning.
+        intentionally off by default. Click or keyboard-activate the clock icon to open a compact
+        segmented picker with hour, minute, and optional second controls plus common minute presets.
       </p>
 
       <h2>Examples</h2>
@@ -45,7 +44,10 @@ import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
       </hd-example-tabs>
 
       <h2>Reactive forms</h2>
-      <hd-example-tabs [code]="timeInputReactiveFormsExampleCode" previewClass="grid gap-3 max-w-md">
+      <hd-example-tabs
+        [code]="timeInputReactiveFormsExampleCode"
+        previewClass="grid gap-3 max-w-md"
+      >
         <app-time-input-reactive-forms-example />
       </hd-example-tabs>
 
@@ -65,31 +67,35 @@ import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
       <h2>API</h2>
       <ul>
         <li>
-          <code>value</code>: structured <code>HellTimeValue | null</code>
-          with <code>hour</code>, <code>minute</code>, and <code>second</code>
-          (two-way via <code>(valueChange)</code>).
+          <code>value</code>: structured <code>HellTimeValue | null</code> with <code>hour</code>,
+          <code>minute</code>, and <code>second</code> (two-way via <code>(valueChange)</code>).
         </li>
-        <li>Implements <code>ControlValueAccessor</code> for Angular forms. Reactive and template-driven forms read/write <code>HellTimeValue | null</code>; native HTML form submission is not provided.</li>
         <li>
-          Validator error: <code>invalidTimeInputDraft</code> for uncommittable typed text.
+          Implements <code>ControlValueAccessor</code> for Angular forms. Reactive and
+          template-driven forms read/write <code>HellTimeValue | null</code>; native HTML form
+          submission is not provided.
         </li>
-        <li><code>seconds</code>: include a seconds grid + readout.</li>
+        <li>Validator error: <code>invalidTimeInputDraft</code> for uncommittable typed text.</li>
+        <li><code>seconds</code>: include a seconds control + readout.</li>
         <li><code>size</code>: <code>sm | md | lg</code></li>
         <li><code>invalid</code>, <code>disabled</code></li>
         <li><code>placeholder</code>, <code>aria-label</code></li>
-        <li><code>provideHellTimeInputAdapter</code>: replace the default parse/format policy for locale, masking, or product-specific shortcuts.</li>
+        <li>
+          <code>provideHellTimeInputAdapter</code>: replace the default parse/format policy for
+          locale, masking, or product-specific shortcuts.
+        </li>
         <li><code>unstyled</code></li>
       </ul>
 
       <h2>Adapter contract</h2>
       <p>
         The built-in parser emits a structured 24-hour <code>HellTimeValue</code>. It accepts
-        <code>HH:mm</code> and documented common 12-hour shortcuts such as
-        <code>9:00 am</code> / <code>1:30PM</code>. <code>HH:mm:ss</code> text is accepted only with
-        <code>seconds</code> enabled, and then normalizes output to 24-hour values. It does not attempt
-        locale parsing.
-        Product teams that need localized parsing, named shortcuts, or a different display policy should
-        provide <code>HELL_TIME_INPUT_ADAPTER</code> instead of forking the component.
+        <code>HH:mm</code> and documented common 12-hour shortcuts such as <code>9:00 am</code> /
+        <code>1:30PM</code>. <code>HH:mm:ss</code> text is accepted only with
+        <code>seconds</code> enabled, and then normalizes output to 24-hour values. It does not
+        attempt locale parsing. Product teams that need localized parsing, named shortcuts, or a
+        different display policy should provide <code>HELL_TIME_INPUT_ADAPTER</code> instead of
+        forking the component.
       </p>
 
       <h2>Do</h2>

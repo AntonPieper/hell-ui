@@ -111,6 +111,11 @@ export interface HellTimeInputLabels {
   readonly hours: string;
   readonly minutes: string;
   readonly seconds: string;
+  readonly selectedTime?: (time: string) => string;
+  readonly decreaseUnit?: (unitLabel: string) => string;
+  readonly increaseUnit?: (unitLabel: string) => string;
+  readonly minutePresets?: string;
+  readonly minutePreset?: (minute: number) => string;
 }
 
 export interface HellToastLabels {
@@ -184,7 +189,7 @@ export const HELL_DEFAULT_LABELS: HellLabels = {
     copy: 'Copy',
     clear: 'Clear',
     listening: 'Listening…',
-    pressPlayForCaptions: 'Press play to capture a speech transcript.'
+    pressPlayForCaptions: 'Press play to capture a speech transcript.',
   },
   dialpad: {
     dialpad: 'Dial pad',
@@ -257,6 +262,11 @@ export const HELL_DEFAULT_LABELS: HellLabels = {
     hours: 'Hours',
     minutes: 'Minutes',
     seconds: 'Seconds',
+    selectedTime: (time) => `Selected time ${time}`,
+    decreaseUnit: (unitLabel) => `Decrease ${unitLabel.toLowerCase()}`,
+    increaseUnit: (unitLabel) => `Increase ${unitLabel.toLowerCase()}`,
+    minutePresets: 'Minute presets',
+    minutePreset: (minute) => `Set minutes to ${minute.toString().padStart(2, '0')}`,
   },
   toast: {
     notifications: 'Notifications',

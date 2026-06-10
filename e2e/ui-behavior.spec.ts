@@ -185,11 +185,6 @@ test.describe('Hell UI browser behavior', () => {
     await expect(option).toBeVisible();
     await page.keyboard.press('Enter');
 
-    const selectedText = await select.textContent();
-    if (!selectedText?.includes('Lowest')) {
-      await option.click();
-    }
-
     await expect(select).toContainText('Lowest');
     await expect(select).toHaveAttribute('aria-expanded', 'false');
 

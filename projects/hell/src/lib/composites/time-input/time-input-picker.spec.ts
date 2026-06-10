@@ -1,45 +1,46 @@
 import {
-  hellTimeInputNextPickerCellIndex,
-  hellTimeInputPickerColumns,
+  hellTimeInputNextPickerValue,
+  hellTimeInputPickerMaxValue,
   type HellTimeInputPickerUnit,
 } from './time-input-picker';
 
 describe('time input picker navigation', () => {
-  it('uses 6 columns for hours and 4 columns for minutes/seconds', () => {
-    expect(hellTimeInputPickerColumns('hour')).toBe(6);
-    expect(hellTimeInputPickerColumns('minute')).toBe(4);
-    expect(hellTimeInputPickerColumns('second')).toBe(4);
+  it('uses bounded hour/minute/second spinbutton ranges', () => {
+    expect(hellTimeInputPickerMaxValue('hour')).toBe(23);
+    expect(hellTimeInputPickerMaxValue('minute')).toBe(59);
+    expect(hellTimeInputPickerMaxValue('second')).toBe(59);
   });
 
-  it('maps arrow and Home/End keys with wrapping', () => {
-    expect(next('hour', 'ArrowRight', 0, 24)).toBe(1);
-    expect(next('hour', 'ArrowLeft', 0, 24)).toBe(23);
-    expect(next('hour', 'ArrowDown', 1, 24)).toBe(7);
-    expect(next('hour', 'ArrowUp', 7, 24)).toBe(1);
-    expect(next('hour', 'Home', 19, 24)).toBe(0);
-    expect(next('hour', 'End', 0, 24)).toBe(23);
-    expect(next('minute', 'ArrowDown', 1, 60)).toBe(5);
-    expect(next('minute', 'ArrowUp', 1, 60)).toBe(57);
-    expect(next('minute', 'Home', 15, 60)).toBe(0);
-    expect(next('minute', 'End', 15, 60)).toBe(59);
+  it('maps arrow, PageUp/PageDown, and Home/End keys without wrapping', () => {
+    expect(next('hour', 'ArrowUp', 14)).toBe(15);
+    expect(next('hour', 'ArrowRight', 14)).toBe(15);
+    expect(next('hour', 'ArrowDown', 14)).toBe(13);
+    expect(next('hour', 'ArrowLeft', 14)).toBe(13);
+    expect(next('hour', 'PageUp', 14)).toBe(19);
+    expect(next('hour', 'PageDown', 14)).toBe(9);
+    expect(next('hour', 'Home', 19)).toBe(0);
+    expect(next('hour', 'End', 0)).toBe(23);
+
+    expect(next('minute', 'ArrowUp', 30)).toBe(31);
+    expect(next('minute', 'ArrowDown', 30)).toBe(29);
+    expect(next('minute', 'PageUp', 30)).toBe(35);
+    expect(next('minute', 'PageDown', 30)).toBe(25);
+    expect(next('minute', 'Home', 15)).toBe(0);
+    expect(next('minute', 'End', 15)).toBe(59);
   });
 
-  it('clamps out-of-range source indexes before navigation', () => {
-    expect(next('minute', 'ArrowRight', -1, 60)).toBe(1);
-    expect(next('minute', 'ArrowLeft', 61, 60)).toBe(58);
+  it('clamps source and target values to the unit range', () => {
+    expect(next('minute', 'ArrowUp', -1)).toBe(1);
+    expect(next('minute', 'ArrowDown', 61)).toBe(58);
+    expect(next('hour', 'PageUp', 22)).toBe(23);
+    expect(next('hour', 'PageDown', 2)).toBe(0);
   });
 
-  it('returns null for unsupported keys and empty grids', () => {
-    expect(next('hour', 'PageDown', 0, 24)).toBeNull();
-    expect(next('hour', 'x', 0, 0)).toBeNull();
+  it('returns null for unsupported keys', () => {
+    expect(next('hour', 'x', 0)).toBeNull();
   });
 });
 
-function next(
-  unit: HellTimeInputPickerUnit,
-  key: string,
-  index: number,
-  count: number,
-): number | null {
-  return hellTimeInputNextPickerCellIndex(key, index, unit, count);
+function next(unit: HellTimeInputPickerUnit, key: string, value: number): number | null {
+  return hellTimeInputNextPickerValue(key, value, unit);
 }

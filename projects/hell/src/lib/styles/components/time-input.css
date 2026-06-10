@@ -1,173 +1,227 @@
 @layer components {
-
   /*
    * Time input — text field + clock trigger. Same shell as date-input so
-   * the two read as a pair. Picker pops up a 24-hour grid and a 5-minute
-   * grid with +/- 5m nudge buttons, replacing the old scrolling-column UI.
+   * the two read as a pair. Picker pops up segmented time controls and
+   * minute presets, replacing the old dense grid UI.
    */
 
   .hell-time-input {
-      position: relative;
-      display: inline-flex;
-      align-items: stretch;
-      width: 100%;
-      max-width: 12rem;
-      min-width: 9rem;
-      background-color: var(--color-hell-surface-elevated);
-      border-style: solid;
-      border-width: 1px;
+    position: relative;
+    display: inline-flex;
+    align-items: stretch;
+    width: 100%;
+    max-width: 12rem;
+    min-width: 9rem;
+    background-color: var(--color-hell-surface-elevated);
+    border-style: solid;
+    border-width: 1px;
+    border-color: var(--color-hell-border);
+    border-radius: var(--radius-md);
+    transition:
+      border-color var(--hell-duration-fast) var(--ease-hell-out),
+      box-shadow var(--hell-duration-fast) var(--ease-hell-out),
+      background-color var(--hell-duration-fast) var(--ease-hell-out);
+    &:hover:not([data-disabled='true']) {
+      border-color: var(--color-hell-border-strong);
+    }
+    &:focus-within:not([data-disabled='true']) {
+      border-color: var(--color-hell-border-focus);
+      box-shadow: 0 0 0 3px var(--color-hell-focus-ring);
+    }
+    &[data-invalid='true'] {
+      border-color: var(--color-hell-danger);
+    }
+    &[data-disabled='true'] {
+      background-color: var(--color-hell-surface-subtle);
       border-color: var(--color-hell-border);
-      border-radius: var(--radius-md);
-      transition: border-color var(--hell-duration-fast) var(--ease-hell-out),
-                  box-shadow var(--hell-duration-fast) var(--ease-hell-out),
-                  background-color var(--hell-duration-fast) var(--ease-hell-out);
-      &:hover:not([data-disabled="true"]) {
-        border-color: var(--color-hell-border-strong);
-      }
-      &:focus-within:not([data-disabled="true"]) {
-        border-color: var(--color-hell-border-focus);
-        box-shadow: 0 0 0 3px var(--color-hell-focus-ring);
-      }
-      &[data-invalid="true"] {
-        border-color: var(--color-hell-danger);
-      }
-      &[data-disabled="true"] {
-        background-color: var(--color-hell-surface-subtle);
-        border-color: var(--color-hell-border);
-        cursor: not-allowed;
-        & [data-slot='field'] { color: var(--color-hell-foreground-muted); }
+      cursor: not-allowed;
+      & [data-slot='field'] {
+        color: var(--color-hell-foreground-muted);
       }
     }
+  }
 
   .hell-time-input [data-slot='field'] {
-      flex: 1 1 auto;
-      min-width: 0;
-      height: var(--spacing-hell-control-md);
-      padding-inline: var(--spacing-hell-3);
-      font-family: inherit;
-      font-size: 13px;
-      color: var(--color-hell-foreground);
-      background: transparent;
-      border: 0;
-      outline: 0;
-      border-radius: var(--radius-md);
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.02em;
-      &::placeholder { color: var(--color-hell-foreground-subtle); }
-      &:disabled { cursor: not-allowed; color: var(--color-hell-foreground-muted); }
-      &[data-size="sm"] { height: var(--spacing-hell-control-sm); padding-inline: var(--spacing-hell-2); font-size: 12px; }
-      &[data-size="lg"] { height: var(--spacing-hell-control-lg); padding-inline: var(--spacing-hell-4); font-size: 14px; }
-    }
-
-  .hell-time-input [data-slot='trigger'] {
-      flex: 0 0 auto;
-      align-self: center;
-      margin-inline-end: var(--spacing-hell-1);
+    flex: 1 1 auto;
+    min-width: 0;
+    height: var(--spacing-hell-control-md);
+    padding-inline: var(--spacing-hell-3);
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--color-hell-foreground);
+    background: transparent;
+    border: 0;
+    outline: 0;
+    border-radius: var(--radius-md);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    &::placeholder {
       color: var(--color-hell-foreground-subtle);
-      &:hover { color: var(--color-hell-foreground); }
     }
-
-  .hell-time-input[data-disabled="true"] [data-slot='trigger'] {
-      pointer-events: none;
-      color: var(--color-hell-foreground-subtle);
-      opacity: 0.5;
+    &:disabled {
+      cursor: not-allowed;
+      color: var(--color-hell-foreground-muted);
     }
-
-  /*
-   * Time picker dial — header readout + nudges, then a sectioned grid of
-   * hour/minute (and optional second) buttons.
-   */
-
-  .hell-time-input [data-slot='picker'] {
-      display: grid;
-      gap: var(--spacing-hell-3);
-      min-width: 14rem;
-      padding: var(--spacing-hell-2);
-    }
-
-  .hell-time-input [data-slot='picker-header'] {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--spacing-hell-2);
-      padding-inline: var(--spacing-hell-2);
-    }
-
-  .hell-time-input [data-slot='picker-readout'] {
-      font-size: var(--text-lg);
-      line-height: 1;
-      font-weight: var(--font-weight-semibold);
-      color: var(--color-hell-foreground);
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.02em;
-    }
-
-  .hell-time-input [data-slot='picker-stepper'] {
-      display: inline-flex;
-      gap: var(--spacing-hell-1);
-    }
-
-  .hell-time-input [data-slot='picker-section'] {
-      display: grid;
-      gap: var(--spacing-hell-1);
-    }
-
-  .hell-time-input [data-slot='picker-section-label'] {
-      font-size: 10px;
-      font-weight: var(--font-weight-semibold);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--color-hell-foreground-subtle);
-      padding-inline: var(--spacing-hell-2);
-    }
-
-  .hell-time-input [data-slot='picker-grid'] {
-      display: grid;
-      gap: var(--spacing-hell-1);
-    }
-
-  .hell-time-input [data-slot='picker-grid'][data-unit='hours'] {
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-    }
-
-  .hell-time-input [data-slot='picker-grid'][data-unit='minutes'],
-  .hell-time-input [data-slot='picker-grid'][data-unit='seconds'] {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-
-  .hell-time-input [data-slot='picker-row'] {
-      display: contents;
-    }
-
-  .hell-time-input [data-slot='picker-cell'] {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 0;
+    &[data-size='sm'] {
       height: var(--spacing-hell-control-sm);
       padding-inline: var(--spacing-hell-2);
-      border: 1px solid transparent;
-      border-radius: var(--radius-sm);
-      font-family: inherit;
       font-size: 12px;
-      font-weight: var(--font-weight-medium);
-      font-variant-numeric: tabular-nums;
-      color: var(--color-hell-foreground);
-      background: transparent;
-      cursor: pointer;
-      transition: background-color var(--hell-duration-fast) var(--ease-hell-out),
-                  color var(--hell-duration-fast) var(--ease-hell-out),
-                  border-color var(--hell-duration-fast) var(--ease-hell-out);
-      &:hover { background-color: var(--color-hell-surface-subtle); }
-      &:focus-visible {
-        outline: 0;
-        border-color: var(--color-hell-border-focus);
-        box-shadow: 0 0 0 2px var(--color-hell-focus-ring);
-      }
-      &[data-variant='primary'] {
-        color: var(--color-hell-primary-foreground);
-        background-color: var(--color-hell-primary);
-      }
     }
+    &[data-size='lg'] {
+      height: var(--spacing-hell-control-lg);
+      padding-inline: var(--spacing-hell-4);
+      font-size: 14px;
+    }
+  }
 
+  .hell-time-input [data-slot='trigger'] {
+    flex: 0 0 auto;
+    align-self: center;
+    margin-inline-end: var(--spacing-hell-1);
+    color: var(--color-hell-foreground-muted);
+    &:hover {
+      color: var(--color-hell-foreground);
+    }
+  }
+
+  .hell-time-input[data-disabled='true'] [data-slot='trigger'] {
+    pointer-events: none;
+    color: var(--color-hell-foreground-subtle);
+    opacity: 0.5;
+  }
+
+  /*
+   * Time picker — header readout, segmented spinbutton controls, and common
+   * minute presets. Text entry remains primary; the popover is for quick
+   * adjustment without the old dense grid.
+   */
+
+  .hell-popover[data-slot='picker'] {
+    display: grid;
+    gap: var(--spacing-hell-3);
+    width: min(21rem, calc(100vw - 2rem));
+    padding: var(--spacing-hell-3);
+  }
+
+  .hell-popover[data-slot='picker'] [data-slot='picker-header'] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--spacing-hell-control-sm);
+  }
+
+  .hell-popover[data-slot='picker'] [data-slot='picker-readout'] {
+    font-size: var(--text-xl);
+    line-height: 1;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-hell-foreground);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  .hell-popover[data-slot='picker'] [data-slot='picker-units'] {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
+    gap: var(--spacing-hell-2);
+  }
+
+  .hell-popover[data-slot='picker'] [data-slot='picker-unit'] {
+    display: grid;
+    min-width: 0;
+    gap: var(--spacing-hell-1);
+  }
+
+  .hell-popover[data-slot='picker'] [data-slot='picker-unit-label'] {
+    font-size: 10px;
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-hell-foreground-muted);
+  }
+
+  .hell-popover[data-slot='picker'] [data-slot='picker-unit-control'] {
+    display: grid;
+    grid-template-columns: var(--spacing-hell-control-sm) minmax(0, 1fr) var(
+        --spacing-hell-control-sm
+      );
+    align-items: stretch;
+    min-width: 0;
+    overflow: hidden;
+    background-color: var(--color-hell-surface-elevated);
+    border: 1px solid var(--color-hell-border);
+    border-radius: var(--radius-sm);
+  }
+
+  .hell-popover[data-slot='picker'] [data-slot='picker-unit-step'],
+  .hell-popover[data-slot='picker'] [data-slot='minute-preset'] {
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: var(--font-weight-medium);
+    color: var(--color-hell-foreground);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    transition:
+      background-color var(--hell-duration-fast) var(--ease-hell-out),
+      color var(--hell-duration-fast) var(--ease-hell-out),
+      box-shadow var(--hell-duration-fast) var(--ease-hell-out);
+    &:hover {
+      background-color: var(--color-hell-surface-subtle);
+    }
+    &:focus-visible {
+      position: relative;
+      outline: 0;
+      box-shadow:
+        inset 0 0 0 2px var(--color-hell-border-focus),
+        0 0 0 2px var(--color-hell-focus-ring);
+      z-index: 1;
+    }
+  }
+
+  .hell-popover[data-slot='picker'] [data-slot='picker-unit-step'] {
+    height: var(--spacing-hell-control-sm);
+    color: var(--color-hell-foreground-muted);
+    font-size: 15px;
+  }
+
+  .hell-popover[data-slot='picker'] [data-slot='picker-unit-value'] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    height: var(--spacing-hell-control-sm);
+    padding-inline: var(--spacing-hell-2);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: var(--font-weight-semibold);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-hell-primary-foreground);
+    background-color: var(--color-hell-primary);
+    cursor: pointer;
+    &:focus-visible {
+      outline: 0;
+      box-shadow:
+        inset 0 0 0 2px var(--color-hell-primary-foreground),
+        0 0 0 3px var(--color-hell-focus-ring);
+    }
+  }
+
+  .hell-popover[data-slot='picker'] [data-slot='minute-presets'] {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--spacing-hell-1);
+  }
+
+  .hell-popover[data-slot='picker'] [data-slot='minute-preset'] {
+    height: var(--spacing-hell-control-sm);
+    border: 1px solid var(--color-hell-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-hell-surface-elevated);
+    font-variant-numeric: tabular-nums;
+    &[data-selected='true'] {
+      color: var(--color-hell-primary-foreground);
+      background-color: var(--color-hell-primary);
+      border-color: var(--color-hell-primary);
+    }
+  }
 }

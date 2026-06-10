@@ -470,13 +470,14 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     kind: 'Composite',
     name: 'Time input',
     path: '/components/time-input',
-    rolePattern: 'Text input with clock popover and roving time-unit picker grids.',
+    rolePattern:
+      'Text input with clock popover, segmented spinbutton picker, visible unit labels, and minute preset buttons.',
     keyboardCoverage:
-      'Source claims arrow/Home/End picker movement and +/- 5 minute nudges; no browser test proves it.',
-    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+      'Browser contract covers label wiring, invalid drafts, Escape focus restore, spinbutton Arrow/Home/Page keys, and minute presets.',
+    automatedCoverage:
+      'Axe docs smoke, ARIA snapshot, browser behavior smoke, and dedicated time-input contract cover public examples.',
     knownGaps:
-      'Critical composite gap: picker keyboard model, labels, invalid draft, and popover close are not release evidence.',
-    criticalGap: true,
+      'No critical gap recorded; locale-specific 12-hour display and pointer-drag style interactions are outside the current contract.',
   },
   {
     kind: 'Composite',

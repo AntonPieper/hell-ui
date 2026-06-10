@@ -106,6 +106,16 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['app-data-table-cdk-skin-example'],
   },
   {
+    name: 'time input docs example',
+    path: '/components/time-input',
+    heading: 'Time input',
+    include: ['main', '.hell-popover'],
+    prepare: async (page) => {
+      await page.getByRole('button', { name: 'Choose time for Reminder time' }).first().click();
+      await expect(page.getByRole('spinbutton', { name: 'Hours' })).toBeVisible();
+    },
+  },
+  {
     name: 'pdf viewer shell',
     path: '/components/pdf-viewer',
     heading: 'PDF viewer',

@@ -10,9 +10,10 @@ import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
   template: `
     <div hellField>
       <label hellFieldLabel for="reactive-time">Meeting time</label>
-      <hell-time-input id="reactive-time" aria-label="Meeting time" [formControl]="control" />
+      <hell-time-input inputId="reactive-time" aria-label="Meeting time" [formControl]="control" />
       <div hellFieldDescription>
-        Reactive forms receive <code>HellTimeValue | null</code>; the transport format stays your responsibility.
+        Reactive forms receive <code>HellTimeValue | null</code>; the transport format stays your
+        responsibility.
       </div>
     </div>
 

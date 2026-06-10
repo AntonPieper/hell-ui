@@ -173,4 +173,16 @@ test.describe('public docs aria snapshots', () => {
 
     await expectNamedAriaSnapshot(firstRow, 'table-utilities-row-cell-action.aria.yml');
   });
+
+  test('time input snapshot records labeled spinbuttons and minute presets', async ({ page }) => {
+    await gotoDocsPage(page, '/components/time-input', 'Time input');
+
+    await page.getByRole('button', { name: 'Choose time for Reminder time' }).first().click();
+    const picker = page
+      .locator('.hell-popover')
+      .filter({ has: page.getByRole('spinbutton', { name: 'Hours' }) });
+    await expect(picker).toBeVisible();
+
+    await expectNamedAriaSnapshot(picker, 'time-input-picker-open.aria.yml');
+  });
 });
