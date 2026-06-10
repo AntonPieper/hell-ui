@@ -105,7 +105,7 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     automatedCoverage:
       'Axe docs smoke, ARIA snapshots, unit coverage for Hell year-nav disabled state, and a dedicated browser contract cover the public date picker examples.',
     knownGaps:
-      'No critical gap recorded for the standalone picker; date input remains a separate composite gap for popover, parsing, and field wiring.',
+      'No critical gap recorded for the standalone picker; Date input owns separate composite evidence for popover, parsing, and field wiring.',
   },
   {
     kind: 'Primitive',
@@ -400,11 +400,11 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     path: '/components/date-input',
     rolePattern: 'Text input with calendar popover trigger and embedded date picker.',
     keyboardCoverage:
-      'Enter commits typed text; picker/popover keyboard behavior lacks browser evidence.',
-    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+      'Browser contract covers invalid typed drafts, field label/description/error wiring, date-picker Arrow/Page navigation, picker selection, and Escape dismissal.',
+    automatedCoverage:
+      'ARIA snapshots cover an invalid labelled field and open picker popover; docs axe smoke includes Date input with the popover open.',
     knownGaps:
-      'Critical composite gap: invalid draft, picker navigation, field label/error wiring, and popover close are not covered.',
-    criticalGap: true,
+      'No critical gap recorded; Date input still depends on the standalone Date picker contract for full grid semantics and localization remains adapter-owned.',
   },
   {
     kind: 'Composite',

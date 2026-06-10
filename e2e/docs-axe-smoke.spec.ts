@@ -39,6 +39,18 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['main'],
   },
   {
+    name: 'date input',
+    path: '/components/date-input',
+    heading: 'Date input',
+    include: ['main', '.hell-popover'],
+    prepare: async (page) => {
+      const example = page.locator('app-date-input-text-input-calendar-popover-example');
+      const departure = example.getByRole('textbox', { name: 'Departure' });
+      await departure.locator('xpath=..').getByRole('button', { name: 'Choose date' }).click();
+      await expect(page.getByRole('grid')).toBeVisible();
+    },
+  },
+  {
     name: 'dialog',
     path: '/components/dialog',
     heading: 'Dialog',

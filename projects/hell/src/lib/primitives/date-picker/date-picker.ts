@@ -71,15 +71,7 @@ function hellDatePickerYearShiftDisabled(
 
   const target = hellShiftDateByMonths(state.focusedDate(), months);
   const targetMonthStart = new Date(target.getFullYear(), target.getMonth(), 1, 0, 0, 0, 0);
-  const targetMonthEnd = new Date(
-    target.getFullYear(),
-    target.getMonth() + 1,
-    0,
-    23,
-    59,
-    59,
-    999,
-  );
+  const targetMonthEnd = new Date(target.getFullYear(), target.getMonth() + 1, 0, 23, 59, 59, 999);
   const min = state.min();
   const max = state.max();
 
@@ -267,12 +259,16 @@ const PICKER_IMPORTS = [
       directive: NgpDatePicker,
       inputs: [
         'ngpDatePickerDate:date',
+        'ngpDatePickerFocusedDate:focusedDate',
         'ngpDatePickerMin:min',
         'ngpDatePickerMax:max',
         'ngpDatePickerDisabled:disabled',
         'ngpDatePickerFirstDayOfWeek:firstDayOfWeek',
       ],
-      outputs: ['ngpDatePickerDateChange:dateChange'],
+      outputs: [
+        'ngpDatePickerDateChange:dateChange',
+        'ngpDatePickerFocusedDateChange:focusedDateChange',
+      ],
     },
   ],
   imports: [...PICKER_IMPORTS],
@@ -308,6 +304,7 @@ export class HellDatePicker extends HellStyleable {
       inputs: [
         'ngpDateRangePickerStartDate:startDate',
         'ngpDateRangePickerEndDate:endDate',
+        'ngpDateRangePickerFocusedDate:focusedDate',
         'ngpDateRangePickerMin:min',
         'ngpDateRangePickerMax:max',
         'ngpDateRangePickerDisabled:disabled',
@@ -316,6 +313,7 @@ export class HellDatePicker extends HellStyleable {
       outputs: [
         'ngpDateRangePickerStartDateChange:startDateChange',
         'ngpDateRangePickerEndDateChange:endDateChange',
+        'ngpDateRangePickerFocusedDateChange:focusedDateChange',
       ],
     },
   ],

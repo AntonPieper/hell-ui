@@ -13,10 +13,22 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALIDATORS, type AbstractControl, type NgControl, type ValidationErrors, type Validator, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+  ControlValueAccessor,
+  NG_VALIDATORS,
+  type AbstractControl,
+  type NgControl,
+  type ValidationErrors,
+  type Validator,
+  NG_VALUE_ACCESSOR,
+} from '@angular/forms';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCalendar } from '@ng-icons/font-awesome/solid';
-import { injectFormFieldState, ngpFormField, provideFormFieldState } from 'ng-primitives/form-field';
+import {
+  injectFormFieldState,
+  ngpFormField,
+  provideFormFieldState,
+} from 'ng-primitives/form-field';
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
 import { HellInput } from '../../primitives/input/input';
@@ -186,6 +198,7 @@ export function hellCoerceDateInputValue(value: Date | null | undefined): Date |
       (keydown.enter)="commit(field.value, $event)"
     />
     <button
+      #calendarTrigger="hellPopoverTrigger"
       hellButton
       variant="ghost"
       size="sm"
@@ -204,10 +217,12 @@ export function hellCoerceDateInputValue(value: Date | null | undefined): Date |
       <div hellPopover>
         <hell-date-picker
           [date]="current() ?? undefined"
+          [focusedDate]="pickerFocusedDate()"
           [min]="min() ?? undefined"
           [max]="max() ?? undefined"
           [disabled]="isDisabled()"
           (dateChange)="onPick($event)"
+          (focusedDateChange)="pickerFocusedDate.set($event)"
         />
       </div>
     </ng-template>
@@ -248,8 +263,10 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
   protected readonly current = this.valueState.current;
   protected readonly display = this.valueState.display;
   protected readonly invalidDraft = this.valueState.invalidDraft;
-  protected readonly isInvalid = () => this.invalid() || this.invalidDraft();
+  protected readonly isInvalid = () =>
+    this.invalid() || this.invalidDraft() || this.formField.invalid() === true;
   protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
+  protected readonly pickerFocusedDate = signal<Date>(dateDayValue(new Date()) ?? new Date());
   protected readonly triggerAriaLabel = () => {
     const label = this.ariaLabel();
     return label ? this.labels.dateInput.chooseDateFor(label) : this.labels.dateInput.chooseDate;
@@ -258,8 +275,10 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
   private readonly labels = inject(HELL_LABELS);
   private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
   private readonly formField =
-    this.inheritedFormField() ?? ngpFormField({ ngControl: signal<NgControl | undefined>(undefined) });
+    this.inheritedFormField() ??
+    ngpFormField({ ngControl: signal<NgControl | undefined>(undefined) });
   private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field');
+  private readonly calendarTrigger = viewChild.required<HellPopoverTrigger>('calendarTrigger');
 
   constructor() {
     super();
@@ -272,6 +291,7 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
       this.max();
       this.onValidatorChange();
     });
+    effect(() => this.pickerFocusedDate.set(this.resolvePickerFocusedDate()));
   }
 
   writeValue(value: Date | null): void {
@@ -305,9 +325,7 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
   private parseText(text: string) {
     const parsed = this.dateAdapter.parseText(text);
     if (!parsed.valid || !parsed.value) return parsed;
-    return this.isWithinBounds(parsed.value)
-      ? parsed
-      : hellInvalidTypedValue();
+    return this.isWithinBounds(parsed.value) ? parsed : hellInvalidTypedValue();
   }
 
   protected onInput(value: string) {
@@ -329,12 +347,14 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
     this.onValidatorChange();
   }
 
-  protected onPick(d: Date | undefined) {
+  protected async onPick(d: Date | undefined) {
     if (!d || !this.isWithinBounds(d)) return;
     const picked = this.valueState.setValue(d);
     if (picked.committed) this.emitValue(picked.value);
     this.onControlTouched();
-    this.field().nativeElement.focus();
+    await this.calendarTrigger().hide();
+    const field = this.field().nativeElement;
+    setTimeout(() => field.focus());
     this.onValidatorChange();
   }
 
@@ -353,6 +373,19 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
       this.dateAdapter.isWithinBounds?.(value, this.min(), this.max()) ??
       hellIsDateInputValueWithinBounds(value, this.min(), this.max())
     );
+  }
+
+  private resolvePickerFocusedDate(): Date {
+    const current = this.current();
+    if (current) return current;
+
+    const today = dateDayValue(new Date()) ?? new Date();
+    const min = this.min();
+    const max = this.max();
+
+    if (min && dateDayTime(today) < dateDayTime(min)) return min;
+    if (max && dateDayTime(today) > dateDayTime(max)) return max;
+    return today;
   }
 
   validate(_control: AbstractControl | null): ValidationErrors | null {

@@ -47,7 +47,12 @@ export class HellFieldDescription extends HellStyleable {}
 
 @Directive({
   selector: '[hellFieldError]',
-  hostDirectives: [NgpError],
+  hostDirectives: [
+    {
+      directive: NgpError,
+      inputs: ['id', 'ngpErrorValidator'],
+    },
+  ],
   host: { '[class.hell-field-error]': '!unstyled()' },
 })
 export class HellFieldError extends HellStyleable {}

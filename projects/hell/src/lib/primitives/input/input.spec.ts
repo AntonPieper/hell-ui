@@ -11,6 +11,7 @@ import { HellInput, HellNativeSelect, HellTextarea } from './input';
       <label data-field="input-label" hellFieldLabel for="input-control">Input</label>
       <input id="input-control" hellInput />
       <div data-field="input-description" hellFieldDescription>Input description</div>
+      <div id="input-error" data-field="input-error" hellFieldError>Input error</div>
     </div>
 
     <div hellField>
@@ -51,6 +52,13 @@ describe('Hell input primitives', () => {
     assertFieldWiring(fixture, 'input');
     assertFieldWiring(fixture, 'select');
     assertFieldWiring(fixture, 'textarea');
+  });
+
+  it('preserves explicit ids on hellFieldError', () => {
+    const fixture = TestBed.createComponent(FieldControlHost);
+    fixture.detectChanges();
+
+    expect(fieldPart(fixture, 'input-error').id).toBe('input-error');
   });
 });
 

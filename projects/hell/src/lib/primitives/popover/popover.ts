@@ -1,4 +1,5 @@
 import { DestroyRef, Directive, effect, inject } from '@angular/core';
+import type { FocusOrigin } from '@angular/cdk/a11y';
 import { NgpPopover, NgpPopoverTrigger } from 'ng-primitives/popover';
 import { HellStyleable } from '../../core/styleable';
 import { hellRegisterFloatingHost } from '../../core/floating-scope';
@@ -11,6 +12,7 @@ import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactiv
  */
 @Directive({
   selector: 'button[hellPopoverTrigger], a[hellPopoverTrigger]',
+  exportAs: 'hellPopoverTrigger',
   hostDirectives: [
     {
       directive: NgpPopoverTrigger,
@@ -63,6 +65,14 @@ export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
       },
     });
   }
+
+  show(): Promise<void> {
+    return this.trigger.show();
+  }
+
+  hide(origin?: FocusOrigin): Promise<void> {
+    return this.trigger.hide(origin);
+  }
 }
 
 interface HellPopoverOverlayConfig {
@@ -73,7 +83,9 @@ interface HellPopoverOverlayConfigUpdater {
   updateConfig(config: HellPopoverOverlayConfig): void;
 }
 
-function hasPopoverOverlayConfigUpdater(overlay: unknown): overlay is HellPopoverOverlayConfigUpdater {
+function hasPopoverOverlayConfigUpdater(
+  overlay: unknown,
+): overlay is HellPopoverOverlayConfigUpdater {
   return (
     !!overlay &&
     (typeof overlay === 'object' || typeof overlay === 'function') &&

@@ -35,8 +35,9 @@ import dateInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
     <article class="hd-prose">
       <h1>Date input</h1>
       <p>
-        Composite date field: a text input plus calendar-trigger popover. Type or paste an
-        explicit <code>YYYY-MM-DD</code> date, then blur or press Enter to commit. Empty text clears to <code>null</code>. Click or keyboard-activate the calendar icon to pick from
+        Composite date field: a text input plus calendar-trigger popover. Type or paste an explicit
+        <code>YYYY-MM-DD</code> date, then blur or press Enter to commit. Empty text clears to
+        <code>null</code>. Click or keyboard-activate the calendar icon to pick from
         <a routerLink="/components/date-picker">Date picker</a>.
       </p>
 
@@ -49,7 +50,10 @@ import dateInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
       </hd-example-tabs>
 
       <h2>Reactive forms</h2>
-      <hd-example-tabs [code]="dateInputReactiveFormsExampleCode" previewClass="grid gap-3 max-w-md">
+      <hd-example-tabs
+        [code]="dateInputReactiveFormsExampleCode"
+        previewClass="grid gap-3 max-w-md"
+      >
         <app-date-input-reactive-forms-example />
       </hd-example-tabs>
 
@@ -69,8 +73,15 @@ import dateInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
       <h2>API</h2>
       <ul>
         <li><code>date</code>: <code>Date | null</code> current value.</li>
-        <li><code>(dateChange)</code>: emits a valid <code>Date</code> after typing or picking, or <code>null</code> when cleared.</li>
-        <li>Implements <code>ControlValueAccessor</code> for Angular forms. Reactive and template-driven forms read/write <code>Date | null</code>; native HTML form submission is not provided.</li>
+        <li>
+          <code>(dateChange)</code>: emits a valid <code>Date</code> after typing or picking, or
+          <code>null</code> when cleared.
+        </li>
+        <li>
+          Implements <code>ControlValueAccessor</code> for Angular forms. Reactive and
+          template-driven forms read/write <code>Date | null</code>; native HTML form submission is
+          not provided.
+        </li>
         <li>
           Validator errors: <code>invalidDateInputDraft</code> for uncommittable typed text and
           <code>outOfRangeDate</code> for values outside <code>min</code> / <code>max</code>.
@@ -79,18 +90,26 @@ import dateInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
         <li><code>size</code>: <code>sm | md | lg</code>.</li>
         <li><code>invalid</code>, <code>disabled</code>: visual / interaction states.</li>
         <li><code>placeholder</code>: text shown while empty.</li>
+        <li>
+          <code>inputId</code>: id applied to the internal textbox for visible label
+          <code>for</code> wiring.
+        </li>
         <li><code>aria-label</code>: accessible name for standalone usage.</li>
-        <li><code>provideHellDateInputAdapter</code>: replace the default strict ISO parse/format policy at an application or feature boundary.</li>
+        <li>
+          <code>provideHellDateInputAdapter</code>: replace the default strict ISO parse/format
+          policy at an application or feature boundary.
+        </li>
         <li><code>unstyled</code>: opt out of host styling.</li>
       </ul>
 
       <h2>Adapter contract</h2>
       <p>
         The built-in adapter accepts only strict ISO date-only <code>YYYY-MM-DD</code> typed input
-        (exactly four-digit year, two-digit month, two-digit day). It treats the typed value as a date
-        (local midnight) without attempting locale parsing. If your product needs locale parsing,
-        masked input, or a Temporal-backed model, provide a
-        <code>HELL_DATE_INPUT_ADAPTER</code> with explicit parse, format, coercion, and equality rules.
+        (exactly four-digit year, two-digit month, two-digit day). It treats the typed value as a
+        date (local midnight) without attempting locale parsing. If your product needs locale
+        parsing, masked input, or a Temporal-backed model, provide a
+        <code>HELL_DATE_INPUT_ADAPTER</code> with explicit parse, format, coercion, and equality
+        rules.
       </p>
 
       <h2>Do</h2>

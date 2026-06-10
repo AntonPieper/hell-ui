@@ -10,7 +10,7 @@ import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
   template: `
     <div hellField>
       <label hellFieldLabel for="reactive-date">Invoice date</label>
-      <hell-date-input id="reactive-date" aria-label="Invoice date" [formControl]="control" />
+      <hell-date-input inputId="reactive-date" [formControl]="control" />
       <div hellFieldDescription>
         Reactive forms receive <code>Date | null</code>; empty text writes <code>null</code>.
       </div>

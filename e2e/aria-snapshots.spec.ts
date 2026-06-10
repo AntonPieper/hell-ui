@@ -92,9 +92,7 @@ test.describe('public docs aria snapshots', () => {
     await expectNamedAriaSnapshot(native, 'checkbox-native-required-indeterminate.aria.yml');
   });
 
-  test('date picker snapshots record single-date grid and range states', async ({
-    page,
-  }) => {
+  test('date picker snapshots record single-date grid and range states', async ({ page }) => {
     await freezeBrowserDate(page);
     await gotoDocsPage(page, '/components/date-picker', 'Date picker');
 
@@ -117,9 +115,7 @@ test.describe('public docs aria snapshots', () => {
     await expectNamedAriaSnapshot(range, 'date-picker-range-grid.aria.yml');
   });
 
-  test('date picker snapshots record bounded and disabled navigation states', async ({
-    page,
-  }) => {
+  test('date picker snapshots record bounded and disabled navigation states', async ({ page }) => {
     await freezeBrowserDate(page);
     await gotoDocsPage(page, '/components/date-picker', 'Date picker');
 
@@ -133,6 +129,29 @@ test.describe('public docs aria snapshots', () => {
     await expectNamedAriaSnapshot(disabled, 'date-picker-disabled-grid.aria.yml');
   });
 
+  test('date input snapshots record invalid field state and open picker popover', async ({
+    page,
+  }) => {
+    await freezeBrowserDate(page);
+    await gotoDocsPage(page, '/components/date-input', 'Date input');
+
+    const example = page.locator('app-date-input-text-input-calendar-popover-example');
+    const invalid = example.getByRole('textbox', { name: 'Invalid' });
+    await expect(invalid).toHaveAttribute('aria-invalid', 'true');
+    await expect(invalid).toHaveAccessibleDescription('Pick a date in the future.');
+
+    const departure = example.getByRole('textbox', { name: 'Departure' });
+    await departure.locator('xpath=..').getByRole('button', { name: 'Choose date' }).click();
+    const popover = page.locator('.hell-popover', {
+      has: page.getByRole('grid'),
+    });
+    await expect(popover).toBeVisible();
+    await expect(popover.getByRole('grid')).toBeVisible();
+
+    await expectNamedAriaSnapshot(invalid, 'date-input-invalid-field.aria.yml');
+    await expectNamedAriaSnapshot(popover, 'date-input-picker-open.aria.yml');
+  });
+
   test('dialog snapshot records the named modal surface and actions', async ({ page }) => {
     await gotoDocsPage(page, '/components/dialog', 'Dialog');
     await page.getByRole('button', { name: 'Publish article' }).click();
@@ -143,9 +162,7 @@ test.describe('public docs aria snapshots', () => {
     await expectNamedAriaSnapshot(dialog, 'dialog-publish-open.aria.yml');
   });
 
-  test('flyout snapshot records the named non-modal dialog and trigger state', async ({
-    page,
-  }) => {
+  test('flyout snapshot records the named non-modal dialog and trigger state', async ({ page }) => {
     await gotoDocsPage(page, '/components/flyout', 'Flyout');
 
     const example = page.locator('app-flyout-example-boundary-keeps-siblings-interactive-example');
