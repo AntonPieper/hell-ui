@@ -143,6 +143,23 @@ test.describe('public docs aria snapshots', () => {
     await expectNamedAriaSnapshot(dialog, 'dialog-publish-open.aria.yml');
   });
 
+  test('flyout snapshot records the named non-modal dialog and trigger state', async ({
+    page,
+  }) => {
+    await gotoDocsPage(page, '/components/flyout', 'Flyout');
+
+    const example = page.locator('app-flyout-example-boundary-keeps-siblings-interactive-example');
+    const trigger = example.getByRole('button', { name: /^(Show|Hide) flyout$/ });
+    await trigger.click();
+
+    const flyout = page.getByRole('dialog', { name: 'Anchored, non-modal' });
+    await expect(flyout).toBeVisible();
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    await expect(flyout).toHaveAttribute('aria-modal', 'false');
+
+    await expectNamedAriaSnapshot(example, 'flyout-boundary-open.aria.yml');
+  });
+
   test('menu snapshot records action roles, names, and disabled state', async ({ page }) => {
     const menu = await openBasicMenu(page);
 

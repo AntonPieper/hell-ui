@@ -138,12 +138,11 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     rolePattern:
       'Anchored non-modal dialog surface with aria-haspopup/expanded/controls on the trigger and aria-modal=false on the panel.',
     keyboardCoverage:
-      'Floating dismissal browser harness covers Escape, outside pointer/focus dismissal, nested surfaces, and focus restoration guards.',
+      'Public browser contract covers trigger relationships, named non-modal dialog state, natural Tab order through boundary and panel controls, outside-focus dismissal, and Escape focus restoration.',
     automatedCoverage:
-      'Browser floating-dismissal contract covers runtime dismissal. No axe smoke or ARIA snapshot yet.',
+      'Browser floating-dismissal contract covers runtime dismissal; public docs contract, ARIA snapshot, and axe smoke cover the documented flyout example.',
     knownGaps:
-      'Critical gap: non-modal dialog naming and tab-order expectations are not covered on the public docs page.',
-    criticalGap: true,
+      'No critical gap recorded for the primitive; consumers remain responsible for naming any custom flyout content they provide.',
   },
   {
     kind: 'Primitive',

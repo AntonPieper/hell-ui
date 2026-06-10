@@ -53,6 +53,16 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     },
   },
   {
+    name: 'flyout',
+    path: '/components/flyout',
+    heading: 'Flyout',
+    include: ['main', '.hell-flyout'],
+    prepare: async (page) => {
+      await page.getByRole('button', { name: 'Show flyout' }).click();
+      await expect(page.getByRole('dialog', { name: 'Anchored, non-modal' })).toBeVisible();
+    },
+  },
+  {
     name: 'menu',
     path: '/components/menu',
     heading: 'Menu',

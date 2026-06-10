@@ -1,0 +1,8 @@
+- button "Hide flyout" [expanded]
+- textbox "Sibling input within boundary":
+  - /placeholder: Type here — flyout stays open
+- dialog "Anchored, non-modal":
+  - strong: Anchored, non-modal
+  - paragraph: Click anywhere inside the dashed boundary (including the input) and this flyout stays open. Click outside, focus another control or press Escape to dismiss.
+  - button "Review settings"
+- button "Outside boundary action"
