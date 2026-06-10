@@ -4,6 +4,8 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { apiReportPolicyEntries } from './entrypoint-manifest.mjs';
+
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const checklistPath = join(root, 'docs/release/production-readiness-checklist.md');
 const requiredCategories = [
@@ -29,12 +31,9 @@ const requiredReleaseScenarios = [
   'code-editor',
 ];
 const requiredPlaywrightProjects = ['chromium', 'firefox', 'webkit'];
-const requiredApiReportPaths = [
-  'etc/api-reports/hell-ui-angular.api.md',
-  'etc/api-reports/hell-ui-angular-core.api.md',
-  'etc/api-reports/hell-ui-angular-primitives.api.md',
-  'etc/api-reports/hell-ui-angular-testing.api.md',
-];
+const requiredApiReportPaths = apiReportPolicyEntries()
+  .filter((entrypoint) => entrypoint.apiReport.expectation === 'required')
+  .map((entrypoint) => `etc/api-reports/${entrypoint.apiReport.reportFileName}`);
 const requiredFullReleaseTasks = [
   'changelog entry',
   'lint',
@@ -61,7 +60,7 @@ const checklistContracts = {
     checkTypes: ['releaseDryRunEvidence'],
   },
   api: {
-    sliceIds: ['HELL-025', 'HELL-026', 'HELL-051'],
+    sliceIds: ['HELL-025', 'HELL-026', 'HELL-051', 'HELL-113', 'HELL-114'],
     commands: ['pnpm build:lib', 'pnpm test:api-report', 'pnpm run release:dry-run --full'],
     checkTypes: ['fileExists', 'releaseDryRunEvidence'],
   },

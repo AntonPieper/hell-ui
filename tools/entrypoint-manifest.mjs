@@ -465,7 +465,7 @@ function entrypointPolicy(entrypoint) {
         tier: 'beta',
         peerTier: 'table',
         consumerScenario: 'table',
-        apiReport: excludedApiReport('HELL-114 owns promoted-beta API report coverage for table'),
+        apiReport: requiredApiReport('hell-ui-angular-table.api.md'),
       };
     case 'data-table':
       return {
@@ -507,7 +507,7 @@ function entrypointPolicy(entrypoint) {
         tier: 'beta',
         peerTier: 'composite',
         consumerScenario: 'composites-css',
-        apiReport: excludedApiReport('HELL-114 owns promoted-beta API report coverage for composites'),
+        apiReport: requiredApiReport('hell-ui-angular-composites.api.md'),
       };
     default:
       break;
@@ -531,7 +531,7 @@ function entrypointPolicy(entrypoint) {
       tier: 'beta',
       peerTier: 'composite',
       consumerScenario: scenarioBySlug[entrypoint.slug] ?? 'composites-css',
-      apiReport: excludedApiReport('HELL-114 owns promoted-beta API report coverage for composites'),
+      apiReport: coveredApiReport('@hell-ui/angular/composites'),
     };
   }
 

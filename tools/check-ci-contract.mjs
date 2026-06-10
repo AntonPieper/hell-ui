@@ -114,6 +114,7 @@ const fileChecks = [
     path: 'tools/check-api-reports.mjs',
     includes: [
       'apiReportPolicyEntries',
+      'excludedApiReportEntrypoints',
       'apiReportTypeFileBase',
       'packageDistRoot',
       'localBuild',

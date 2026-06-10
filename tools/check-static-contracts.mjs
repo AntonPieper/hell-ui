@@ -1039,6 +1039,9 @@ function checkEntrypointPolicyManifestContract() {
       .filter((entrypoint) => entrypoint.apiReport?.expectation === 'required')
       .map((entrypoint) => entrypoint.specifier),
   );
+  const policyEntryBySpecifier = new Map(
+    policyEntries.map((entrypoint) => [entrypoint.specifier, entrypoint]),
+  );
   const requiredReportFileNames = new Set(
     apiReportEntries
       .filter((entrypoint) => entrypoint.apiReport.expectation === 'required')
@@ -1070,11 +1073,28 @@ function checkEntrypointPolicyManifestContract() {
     if ((entrypoint.kind === 'style' || entrypoint.kind === 'style-pattern') && expectation !== 'not-applicable') {
       failures.push(`${label} is a style entrypoint and must not claim API report coverage`);
     }
+    if (entrypoint.kind === 'typescript' && ['stable', 'beta'].includes(entrypoint.tier) && !['required', 'covered-by'].includes(expectation)) {
+      failures.push(`${label} is ${entrypoint.tier} and must be API-report required or covered-by another report`);
+    }
+    if (entrypoint.kind === 'typescript' && entrypoint.tier === 'experimental' && expectation !== 'excluded') {
+      failures.push(`${label} is experimental and must carry an explicit API report exclusion`);
+    }
     if (expectation === 'required' && !/\.api\.md$/.test(entrypoint.apiReport.reportFileName ?? '')) {
       failures.push(`${label} requires an API report but has no reportFileName`);
     }
     if (expectation === 'covered-by' && !requiredReportSpecifiers.has(entrypoint.apiReport.coveredBy)) {
       failures.push(`${label} is covered by unknown API report entrypoint ${entrypoint.apiReport.coveredBy}`);
+    }
+    if (expectation === 'covered-by' && requiredReportSpecifiers.has(entrypoint.apiReport.coveredBy)) {
+      const coveringEntry = policyEntryBySpecifier.get(entrypoint.apiReport.coveredBy);
+      const missingExports = (entrypoint.exports ?? []).filter(
+        (exportPath) => !coveringEntry?.exports?.includes(exportPath),
+      );
+      if (missingExports.length) {
+        failures.push(
+          `${label} claims API report coverage from ${entrypoint.apiReport.coveredBy}, but its exports are not in that aggregate entrypoint: ${missingExports.join(', ')}`,
+        );
+      }
     }
     if (expectation === 'excluded' && !entrypoint.apiReport.reason) {
       failures.push(`${label} excludes API reports without a reason`);
@@ -1297,6 +1317,9 @@ function checkApiReportContract() {
 
   if (!script.includes('apiReportPolicyEntries')) {
     failures.push('API Report contract must derive report entrypoints from entrypoint manifest policy');
+  }
+  if (!script.includes('excludedApiReportEntrypoints') || !script.includes('checked') || !script.includes('excluded')) {
+    failures.push('API Report contract must print checked and excluded policy counts');
   }
 
   const expectedReportFiles = new Set();

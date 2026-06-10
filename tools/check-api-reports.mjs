@@ -14,9 +14,13 @@ const reportTempFolder = join(root, 'tmp/api-reports');
 const tsconfigFilePath = join(root, 'tsconfig.json');
 const localBuild = process.argv.includes('--local') || process.argv.includes('--update');
 
-const apiReportEntrypoints = apiReportPolicyEntries()
+const apiReportPolicies = apiReportPolicyEntries();
+const apiReportEntrypoints = apiReportPolicies
   .filter((entrypoint) => entrypoint.apiReport.expectation === 'required')
   .map(apiReportEntrypoint);
+const excludedApiReportEntrypoints = apiReportPolicies.filter(
+  (entrypoint) => entrypoint.apiReport.expectation === 'excluded',
+);
 
 const missingInputs = requiredBuildInputs().filter((path) => !existsSync(path));
 if (missingInputs.length) {
@@ -60,7 +64,9 @@ if (failed) {
   process.exit(1);
 }
 
-console.log(`[api-report] ${localBuild ? 'updated' : 'current'}: ${apiReportEntrypoints.length} entrypoints.`);
+console.log(
+  `[api-report] ${localBuild ? 'updated' : 'current'}: checked ${apiReportEntrypoints.length}, excluded ${excludedApiReportEntrypoints.length}.`,
+);
 
 function requiredBuildInputs() {
   return [
