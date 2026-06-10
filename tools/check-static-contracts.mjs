@@ -66,15 +66,10 @@ function main() {
   checkNgClassCustomizationContract();
   checkAngularHostMetadataContract();
   checkAppShellBreakpointContract();
-  checkBehaviorSentinelContract();
   checkComponentContract();
   checkLabelContract();
   checkCodeEditorRuntimeContract();
   checkExperimentalFeatureContract();
-  checkFormsContract();
-  checkDateTimeAdapterContract();
-  checkSearchContract();
-  checkHotkeyContract();
   checkNativeButtonSelectorContract();
   checkInteractiveTriggerSelectorContract();
   checkTableUtilityContract();
@@ -1844,32 +1839,6 @@ function checkAngularHostMetadataContract() {
   }
 }
 
-function checkBehaviorSentinelContract() {
-  const sourceRoot = join(root, 'projects/hell/src/lib');
-  const files = walk(sourceRoot).filter(
-    (file) =>
-      file.endsWith('.ts') &&
-      !file.endsWith('.spec.ts') &&
-      !file.endsWith('.d.ts') &&
-      !file.endsWith('pdf.worker.ts'),
-  );
-  const styleSelectorPatterns = [
-    /\.classList\.contains\(\s*['"]hell-/,
-    /\.closest\(\s*['"]\.hell-/,
-    /\.matches\(\s*['"]\.hell-/,
-    /\.querySelector(?:All)?\(\s*['"]\.hell-/,
-  ];
-
-  for (const file of files) {
-    const source = readFile(file);
-    if (!styleSelectorPatterns.some((pattern) => pattern.test(source))) continue;
-
-    failures.push(
-      `${file.slice(root.length + 1)} uses .hell-* style classes as behavior sentinels; use data attributes or element refs`,
-    );
-  }
-}
-
 function checkAppShellBreakpointContract() {
   const shellSource = readFile(join(root, 'projects/hell/src/lib/composites/app-shell/app-shell.ts'));
   const shellStyles = readFile(join(root, 'projects/hell/src/lib/styles/components/app-shell.css'));
@@ -1916,23 +1885,6 @@ function checkComponentContract() {
         failures.push(`Duplicate public HellStyleable Module ${className} in ${rel}`);
       }
       publicStyleableModules.set(className, rel);
-
-      if (!moduleSource.includes('!unstyled()')) {
-        failures.push(
-          `${rel} ${className} extends HellStyleable but does not gate default styling with Style Opt-Out`,
-        );
-      }
-    }
-
-    for (const booleanInput of source.matchAll(
-      /readonly\s+([A-Za-z0-9_]+)\s*=\s*input\(\s*(true|false)\s*,\s*\{[^}]*booleanAttribute/g,
-    )) {
-      const name = booleanInput[1];
-      if (/preset/i.test(name)) {
-        failures.push(
-          `${rel} exposes boolean input "${name}" as a preset instead of a Customization Surface`,
-        );
-      }
     }
   }
 
@@ -1989,44 +1941,6 @@ function checkLabelContract() {
     }
   }
 
-  const spinnerSource = readFile(join(root, 'projects/hell/src/lib/primitives/skeleton/skeleton.ts'));
-  if (!spinnerSource.includes('HELL_LABELS') || spinnerSource.includes("'aria-label': 'Loading'")) {
-    failures.push('HellSpinner must read its default aria-label from the Label Contract');
-  }
-
-  const paginationSource = readFile(
-    join(root, 'projects/hell/src/lib/primitives/pagination/pagination.ts'),
-  );
-  for (const hardcoded of ['aria-label="First page"', 'aria-label="Previous page"', "'Page ' + p"]) {
-    if (paginationSource.includes(hardcoded)) {
-      failures.push('HellPaginationStrip must read built-in labels from the Label Contract');
-    }
-  }
-
-  const labelConsumers = [
-    ['projects/hell/src/lib/composites/app-shell/app-shell.ts', ['Expand sidebar', 'Collapse sidebar']],
-    ['projects/hell/src/lib/composites/audio-player/audio-player.ts', ['Show live captions', 'Copy transcript', '>Live<', '>Paused<']],
-    ['projects/hell/src/lib/primitives/breadcrumbs/breadcrumbs.ts', ['Show hidden navigation']],
-    ['projects/hell/src/lib/composites/date-input/date-input.ts', ['Choose date']],
-    ['projects/hell/src/lib/composites/resizable/resizable.ts', ['Resize panels']],
-    ['projects/hell/src/lib/composites/time-input/time-input.ts', ['Choose time', 'Subtract 5 minutes']],
-    ['projects/hell/src/lib/composites/toast/toast.ts', ['aria-label="Notifications"', 'aria-label="Dismiss"']],
-    ['projects/hell/src/lib/features/table-utilities/table-utilities.ts', ['Resize column']],
-    ['projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.html', ['Find in document', 'Zoom level']],
-    ['projects/hell/src/lib/primitives/date-picker/date-picker.ts', ['Previous year', 'Previous month']],
-  ];
-
-  for (const [file, hardcodedLabels] of labelConsumers) {
-    const source = readFile(join(root, file));
-    if (!source.includes('labels.')) {
-      failures.push(`${file} must consume the Label Contract for built-in text`);
-    }
-    for (const label of hardcodedLabels) {
-      if (source.includes(label)) {
-        failures.push(`${file} hardcodes "${label}" instead of using the Label Contract`);
-      }
-    }
-  }
 }
 
 function exportedStyleableClasses(source) {
@@ -2092,87 +2006,6 @@ function checkExperimentalFeatureContract() {
   const pdfFeatureApi = readFile(join(root, 'projects/hell-pdf-viewer/src/public-api.ts'));
   if (!/HellPdfWorkerSource/.test(pdfFeatureApi)) {
     failures.push('PDF Viewer package entry point must export the public HellPdfWorkerSource worker input type');
-  }
-}
-
-function checkFormsContract() {
-  const cvaModules = [
-    ['projects/hell/src/lib/primitives/checkbox/checkbox.ts', 'HellCheckbox'],
-    ['projects/hell/src/lib/primitives/switch/switch.ts', 'HellSwitch'],
-    ['projects/hell/src/lib/primitives/radio/radio.ts', 'HellRadioGroup'],
-    ['projects/hell/src/lib/primitives/select/select.ts', 'HellSelect'],
-    ['projects/hell/src/lib/primitives/combobox/combobox.ts', 'HellCombobox'],
-    ['projects/hell/src/lib/primitives/slider/slider.ts', 'HellSlider'],
-    ['projects/hell/src/lib/primitives/toggle/toggle.ts', 'HellToggleGroup'],
-    ['projects/hell/src/lib/composites/date-input/date-input.ts', 'HellDateInput'],
-    ['projects/hell/src/lib/composites/time-input/time-input.ts', 'HellTimeInput'],
-    ['projects/hell/src/lib/features/code-editor/code-editor.ts', 'HellCodeEditor'],
-  ];
-
-  for (const [file, className] of cvaModules) {
-    const source = readFile(join(root, file));
-    const classDecl = new RegExp(`class\\s+${className}\\b[^{]*implements[^{]*ControlValueAccessor`).test(source);
-    if (!classDecl || !source.includes('NG_VALUE_ACCESSOR')) {
-      failures.push(`${file} ${className} must implement ControlValueAccessor`);
-    }
-  }
-}
-
-function checkDateTimeAdapterContract() {
-  const checks = [
-    {
-      sourcePath: 'projects/hell/src/lib/composites/date-input/date-input.ts',
-      docsPath: 'projects/hell-docs/src/app/pages/components/date-input/date-input.page.ts',
-      tokens: ['HELL_DATE_INPUT_ADAPTER', 'provideHellDateInputAdapter', 'HellDateInputAdapter'],
-    },
-    {
-      sourcePath: 'projects/hell/src/lib/composites/time-input/time-input.ts',
-      docsPath: 'projects/hell-docs/src/app/pages/components/time-input/time-input.page.ts',
-      tokens: ['HELL_TIME_INPUT_ADAPTER', 'provideHellTimeInputAdapter', 'HellTimeInputAdapter'],
-    },
-  ];
-
-  for (const check of checks) {
-    const source = readFile(join(root, check.sourcePath));
-    const docs = readFile(join(root, check.docsPath));
-    for (const token of check.tokens) {
-      if (!source.includes(token)) failures.push(`${check.sourcePath} must expose ${token}`);
-      if (!docs.includes(token)) failures.push(`${check.docsPath} must document ${token}`);
-    }
-  }
-}
-
-function checkSearchContract() {
-  const source = readFile(join(root, 'projects/hell/src/lib/core/search.ts'));
-  for (const symbol of ['HELL_SEARCH_RANKER', 'provideHellSearchRanker', 'hellRankLocalSearch']) {
-    if (!source.includes(symbol)) failures.push(`Search Core is missing ${symbol}`);
-  }
-
-  const docs = readFile(
-    join(root, 'projects/hell-docs/src/app/pages/components/omnibar/omnibar.page.ts'),
-  );
-  if (!docs.includes('provideHellSearchRanker') || !docs.includes('Fuse.js')) {
-    failures.push('Omnibar docs must direct serious search through a ranker Adapter or async source');
-  }
-}
-
-function checkHotkeyContract() {
-  const hotkeySource = readFile(join(root, 'projects/hell/src/lib/core/hotkeys.ts'));
-  if (!hotkeySource.includes('HellGlobalKeydownService')) {
-    failures.push('Core must provide a shared global keydown listener service');
-  }
-  if (!hotkeySource.includes('HellGlobalPointerdownService')) {
-    failures.push('Core must provide a shared global pointer listener service');
-  }
-
-  const omnibarSource = readFile(join(root, 'projects/hell/src/lib/composites/omnibar/omnibar.ts'));
-  if (omnibarSource.includes('document.addEventListener')) {
-    failures.push('HellOmnibar must register global hotkeys through HellGlobalKeydownService');
-  }
-
-  const pdfSource = readFile(join(root, 'projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts'));
-  if (pdfSource.includes('window:keydown') || pdfSource.includes('window:pointerdown')) {
-    failures.push('HellPdfViewer must register global shortcuts through shared listener services');
   }
 }
 

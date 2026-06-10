@@ -1,6 +1,7 @@
-import { signal } from '@angular/core';
+import { type Provider, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
+import { provideHellLabels } from '../../core/labels';
 import { HellAudioPlayer } from './audio-player';
 import {
   HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY,
@@ -37,9 +38,11 @@ class FakeTranscriptRuntime implements HellAudioTranscriptRuntime {
 }
 
 describe('HellAudioPlayer', () => {
-  async function createPlayer(options: { provideTranscript?: boolean } = {}) {
+  async function createPlayer(
+    options: { provideTranscript?: boolean; providers?: Provider[] } = {},
+  ) {
     const transcriptRuntime = new FakeTranscriptRuntime();
-    const providers =
+    const transcriptProviders =
       options.provideTranscript === false
         ? []
         : [
@@ -48,6 +51,7 @@ describe('HellAudioPlayer', () => {
               useValue: () => transcriptRuntime,
             },
           ];
+    const providers = [...transcriptProviders, ...(options.providers ?? [])];
 
     await TestBed.configureTestingModule({
       imports: [HellAudioPlayer],
@@ -64,7 +68,9 @@ describe('HellAudioPlayer', () => {
       playing: () => boolean;
       transcript: { (): string; set(value: string): void };
       interim: { (): string; set(value: string): void };
+      transcribing: { (): boolean; set(value: boolean): void };
       error: { (): string | null; set(value: string | null): void };
+      copied: { (): boolean; set(value: boolean): void };
       currentTime: { (): number; set(value: number): void };
       onVolume(value: number): void;
       toggleMute(): void;
@@ -137,6 +143,59 @@ describe('HellAudioPlayer', () => {
     fixture.detectChanges();
 
     expect(flyout.getAttribute('aria-label')).toBe('Speech transcript');
+  });
+
+  it('uses injected label contract text for transcript controls and status', async () => {
+    const { fixture, component } = await createPlayer({
+      providers: [
+        provideHellLabels({
+          audioPlayer: {
+            showLiveCaptions: 'Show local transcript',
+            hideLiveCaptions: 'Hide local transcript',
+            speechTranscript: 'Local transcript panel',
+            copyTranscript: 'Copy local transcript',
+            liveStatus: 'Local live',
+            pausedStatus: 'Local paused',
+            copied: 'Copied local',
+            copy: 'Copy local',
+          },
+        }),
+      ],
+    });
+
+    const transcriptButton = fixture.nativeElement.querySelector(
+      '[data-slot="cc-toggle"]',
+    ) as HTMLButtonElement;
+    expect(transcriptButton.getAttribute('aria-label')).toBe('Show local transcript');
+
+    transcriptButton.click();
+    fixture.detectChanges();
+
+    const flyout = fixture.nativeElement.querySelector('[data-slot="captions"]') as HTMLElement;
+    const status = fixture.nativeElement.querySelector(
+      '[data-slot="captions-status"]',
+    ) as HTMLElement;
+    expect(transcriptButton.getAttribute('aria-label')).toBe('Hide local transcript');
+    expect(flyout.getAttribute('aria-label')).toBe('Local transcript panel');
+    expect(status.textContent?.trim()).toBe('Local paused');
+
+    component.transcribing.set(true);
+    fixture.detectChanges();
+    expect(status.textContent?.trim()).toBe('Local live');
+
+    component.transcribing.set(false);
+    component.transcript.set('Ready transcript');
+    fixture.detectChanges();
+
+    const copyButton = fixture.nativeElement.querySelector(
+      'button[aria-label="Copy local transcript"]',
+    ) as HTMLButtonElement;
+    expect(copyButton).toBeInstanceOf(HTMLButtonElement);
+    expect(copyButton.textContent?.trim()).toBe('Copy local');
+
+    component.copied.set(true);
+    fixture.detectChanges();
+    expect(copyButton.textContent?.trim()).toBe('Copied local');
   });
 
   it('keeps the experimental speech transcript toggle opt-in', async () => {

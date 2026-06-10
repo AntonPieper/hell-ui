@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { BreakpointObserver, type BreakpointState } from '@angular/cdk/layout';
 import { ReplaySubject } from 'rxjs';
 
+import { provideHellLabels } from '../../core/labels';
 import { HELL_APP_SHELL_DIRECTIVES, HELL_APP_SHELL_MOBILE_MEDIA } from './app-shell';
 
 @Component({
@@ -35,17 +36,9 @@ import { HELL_APP_SHELL_DIRECTIVES, HELL_APP_SHELL_MOBILE_MEDIA } from './app-sh
       </nav>
       <main hellAppContent>Content</main>
       <aside hellAppSecondary>
-        <button
-          hellSecondaryToggle
-          appearance="rail"
-          type="button"
-        ></button>
+        <button hellSecondaryToggle appearance="rail" type="button"></button>
         <div hellAppSecondaryBody>
-          <button
-            hellSecondaryToggle
-            appearance="header"
-            type="button"
-          >Title</button>
+          <button hellSecondaryToggle appearance="header" type="button">Title</button>
           <p>Body</p>
         </div>
       </aside>
@@ -56,6 +49,34 @@ class TestHost {
   readonly controlledNavSectionCollapsed = signal(false);
   readonly collapsedEvents: boolean[] = [];
 }
+
+@Component({
+  imports: [...HELL_APP_SHELL_DIRECTIVES],
+  providers: [
+    provideHellLabels({
+      appShell: {
+        expandSidebar: 'Open local navigation',
+        collapseSidebar: 'Close local navigation',
+        showSecondaryPanel: 'Show local secondary panel',
+        hideSecondaryPanel: 'Hide local secondary panel',
+      },
+    }),
+  ],
+  template: `
+    <div hellAppShell>
+      <header hellAppTopbar>
+        <button id="localized-sidenav-toggle" hellSidenavToggle type="button"></button>
+      </header>
+      <nav id="localized-sidenav" hellAppSidenav>Navigation</nav>
+      <main hellAppContent>Content</main>
+      <aside id="localized-secondary" hellAppSecondary>
+        <button id="localized-secondary-toggle" hellSecondaryToggle type="button"></button>
+        <div hellAppSecondaryBody>Secondary</div>
+      </aside>
+    </div>
+  `,
+})
+class LocalizedShellHost {}
 
 @Component({
   imports: [...HELL_APP_SHELL_DIRECTIVES],
@@ -149,7 +170,6 @@ class FocusShellHost {}
 })
 class FallbackShellHost {}
 
-
 let mediaController: ReturnType<typeof createMobileLayoutController>;
 
 describe('HellAppShell secondary panel', () => {
@@ -158,6 +178,7 @@ describe('HellAppShell secondary panel', () => {
     await TestBed.configureTestingModule({
       imports: [
         TestHost,
+        LocalizedShellHost,
         ControlledShellHost,
         UnstyledShellHost,
         FocusShellHost,
@@ -184,6 +205,30 @@ describe('HellAppShell secondary panel', () => {
     expect(sidenav.getAttribute('data-collapsed')).toBe('true');
     expect(toggle.getAttribute('aria-label')).toBe('Expand sidebar');
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('uses injected label contract text for shell toggles', () => {
+    const fixture = TestBed.createComponent(LocalizedShellHost);
+    fixture.detectChanges();
+
+    const sidenavToggle = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      '#localized-sidenav-toggle',
+    );
+    const secondaryToggle = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      '#localized-secondary-toggle',
+    );
+
+    expect(sidenavToggle.getAttribute('aria-label')).toBe('Close local navigation');
+    sidenavToggle.click();
+    fixture.detectChanges();
+    expect(sidenavToggle.getAttribute('aria-label')).toBe('Open local navigation');
+
+    expect(secondaryToggle.getAttribute('aria-label')).toBe('Hide local secondary panel');
+    secondaryToggle.click();
+    fixture.detectChanges();
+    expect(secondaryToggle.getAttribute('aria-label')).toBe('Show local secondary panel');
   });
 
   it('owns nav section classes and collapsed attributes', () => {
@@ -232,7 +277,10 @@ describe('HellAppShell secondary panel', () => {
 
     const sidenav = query(fixture.nativeElement, '#controlled-sidenav');
     const secondary = query(fixture.nativeElement, '#controlled-secondary');
-    const sidenavToggle = query<HTMLButtonElement>(fixture.nativeElement, '#controlled-sidenav-toggle');
+    const sidenavToggle = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      '#controlled-sidenav-toggle',
+    );
     const secondaryToggle = query<HTMLButtonElement>(
       fixture.nativeElement,
       '#controlled-secondary-toggle',
@@ -265,7 +313,10 @@ describe('HellAppShell secondary panel', () => {
     const shell = query(fixture.nativeElement, '#unstyled-shell');
     const sidenav = query(fixture.nativeElement, '#unstyled-sidenav');
     const secondary = query(fixture.nativeElement, '#unstyled-secondary');
-    const sidenavToggle = query<HTMLButtonElement>(fixture.nativeElement, '#unstyled-sidenav-toggle');
+    const sidenavToggle = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      '#unstyled-sidenav-toggle',
+    );
     const secondaryToggle = query<HTMLButtonElement>(
       fixture.nativeElement,
       '#unstyled-secondary-toggle',
@@ -287,7 +338,10 @@ describe('HellAppShell secondary panel', () => {
 
     const shell = query(fixture.nativeElement, '#unstyled-shell');
     const sidenav = query(fixture.nativeElement, '#unstyled-sidenav');
-    const sidenavToggle = query<HTMLButtonElement>(fixture.nativeElement, '#unstyled-sidenav-toggle');
+    const sidenavToggle = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      '#unstyled-sidenav-toggle',
+    );
 
     sidenavToggle.click();
     fixture.detectChanges();
@@ -316,7 +370,10 @@ describe('HellAppShell secondary panel', () => {
     const shell = query(fixture.nativeElement, '#unstyled-shell');
     const sidenav = query(fixture.nativeElement, '#unstyled-sidenav');
     const content = query(fixture.nativeElement, '#unstyled-content');
-    const sidenavToggle = query<HTMLButtonElement>(fixture.nativeElement, '#unstyled-sidenav-toggle');
+    const sidenavToggle = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      '#unstyled-sidenav-toggle',
+    );
 
     sidenavToggle.click();
     fixture.detectChanges();
@@ -475,7 +532,10 @@ function keyDownEscape(element: HTMLElement): void {
   element.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
 }
 
-async function settle(fixture: { detectChanges(): void; whenStable(): Promise<unknown> }): Promise<void> {
+async function settle(fixture: {
+  detectChanges(): void;
+  whenStable(): Promise<unknown>;
+}): Promise<void> {
   fixture.detectChanges();
   await fixture.whenStable();
   fixture.detectChanges();

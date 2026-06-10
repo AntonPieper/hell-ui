@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideHellLabels } from '@hell-ui/angular/core';
 
 import { HELL_PDF_RUNTIME_FACTORY, HellPdfViewer } from './pdf-viewer';
 import type {
@@ -76,13 +77,37 @@ class PdfViewerHost {
   worker: string | null = null;
 }
 
+@Component({
+  imports: [HellPdfViewer],
+  providers: [
+    provideHellLabels({
+      pdfViewer: {
+        togglePageOverview: 'Toggle local overview',
+        findInDocument: 'Search local document',
+        print: 'Print local document',
+        zoomLevel: 'Local zoom level',
+        findPlaceholder: 'Find local text',
+        findQuery: 'Local find query',
+        searching: 'Searching locally',
+        notFound: 'No local result',
+        pageOverview: 'Local page overview',
+        goToPage: (page) => `Open local page ${page}`,
+      },
+    }),
+  ],
+  template: `<hell-pdf-viewer [src]="src" />`,
+})
+class PdfViewerLocalizedLabelsHost {
+  src: HellPdfSource = 'document.pdf';
+}
+
 describe('HellPdfViewer', () => {
   let runtime: FakePdfRuntime;
 
   beforeEach(async () => {
     runtime = new FakePdfRuntime();
     await TestBed.configureTestingModule({
-      imports: [PdfViewerHost],
+      imports: [PdfViewerHost, PdfViewerLocalizedLabelsHost],
       providers: [{ provide: HELL_PDF_RUNTIME_FACTORY, useValue: () => runtime }],
     }).compileComponents();
   });
@@ -182,6 +207,42 @@ describe('HellPdfViewer', () => {
     expect(thumbnail.getAttribute('data-size')).toBe('sm');
     expect(thumbnail.getAttribute('data-block')).toBe('');
     expect(thumbnail.getAttribute('aria-current')).toBe('page');
+  });
+
+  it('uses injected label contract text for toolbar and find controls', async () => {
+    const fixture = TestBed.createComponent(PdfViewerLocalizedLabelsHost);
+    await settle(fixture);
+
+    const findButton = fixture.nativeElement.querySelector(
+      'button[aria-label="Search local document"]',
+    ) as HTMLButtonElement;
+    expect(findButton).toBeInstanceOf(HTMLButtonElement);
+    expect(
+      fixture.nativeElement.querySelector('button[aria-label="Print local document"]'),
+    ).toBeInstanceOf(HTMLButtonElement);
+    expect(
+      fixture.nativeElement.querySelector('select[aria-label="Local zoom level"]'),
+    ).toBeInstanceOf(HTMLSelectElement);
+
+    findButton.click();
+    await settle(fixture);
+
+    const findInput = fixture.nativeElement.querySelector(
+      '.hell-pdf-find-input',
+    ) as HTMLInputElement;
+    const status = fixture.nativeElement.querySelector('.hell-pdf-find-count') as HTMLElement;
+    expect(findInput.getAttribute('aria-label')).toBe('Local find query');
+    expect(findInput.getAttribute('placeholder')).toBe('Find local text');
+
+    runtime['handlers']?.onFindState({ status: 'pending' });
+    await settle(fixture);
+    expect(status.textContent?.trim()).toBe('Searching locally');
+
+    findInput.value = 'missing';
+    findInput.dispatchEvent(new Event('input'));
+    runtime['handlers']?.onFindState({ status: 'not-found', current: 0, total: 0 });
+    await settle(fixture);
+    expect(status.textContent?.trim()).toBe('No local result');
   });
 
   it('announces PDF find status updates through a live region', async () => {

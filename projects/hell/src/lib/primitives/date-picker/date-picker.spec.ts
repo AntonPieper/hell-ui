@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
+import { provideHellLabels } from '../../core/labels';
 import { HellDatePicker } from './date-picker';
 
 @Component({
@@ -27,6 +28,22 @@ class DatePickerHost {
   readonly dates: Array<Date | undefined> = [];
 }
 
+@Component({
+  imports: [HellDatePicker],
+  providers: [
+    provideHellLabels({
+      datePicker: {
+        previousYear: 'Previous local year',
+        nextYear: 'Next local year',
+        previousMonth: 'Previous local month',
+        nextMonth: 'Next local month',
+      },
+    }),
+  ],
+  template: `<hell-date-picker />`,
+})
+class DatePickerLocalizedLabelsHost {}
+
 describe('HellDatePicker', () => {
   afterEach(() => {
     vi.useRealTimers();
@@ -34,7 +51,7 @@ describe('HellDatePicker', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DatePickerHost],
+      imports: [DatePickerHost, DatePickerLocalizedLabelsHost],
     }).compileComponents();
   });
 
@@ -96,6 +113,20 @@ describe('HellDatePicker', () => {
     expect(button(fixture.nativeElement, 'Previous year').getAttribute('aria-disabled')).toBe('true');
     expect(button(fixture.nativeElement, 'Next year').disabled).toBe(true);
     expect(button(fixture.nativeElement, 'Next year').getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('uses injected label contract text for navigation buttons', () => {
+    vi.setSystemTime(new Date(2026, 3, 30));
+    const fixture = TestBed.createComponent(DatePickerLocalizedLabelsHost);
+    fixture.detectChanges();
+
+    button(fixture.nativeElement, 'Previous local year').click();
+    fixture.detectChanges();
+
+    expect(label(fixture.nativeElement)).toBe('April 2025');
+    expect(button(fixture.nativeElement, 'Next local year')).toBeInstanceOf(HTMLButtonElement);
+    expect(button(fixture.nativeElement, 'Previous local month')).toBeInstanceOf(HTMLButtonElement);
+    expect(button(fixture.nativeElement, 'Next local month')).toBeInstanceOf(HTMLButtonElement);
   });
 });
 
