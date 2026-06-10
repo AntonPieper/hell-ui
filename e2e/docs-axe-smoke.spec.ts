@@ -159,6 +159,17 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     },
   },
   {
+    name: 'omnibar',
+    path: '/components/omnibar',
+    heading: 'Omnibar',
+    include: ['main', '.hell-omnibar-panel-surface'],
+    prepare: async (page) => {
+      const input = page.getByRole('combobox', { name: 'Search people' });
+      await input.fill('user');
+      await expect(page.getByRole('option', { name: /User 1/ }).first()).toBeVisible();
+    },
+  },
+  {
     name: 'table primitives docs example',
     path: '/components/data-table',
     heading: 'Table utilities',

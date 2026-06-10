@@ -437,12 +437,11 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     rolePattern:
       'Command/search combobox with listbox results, aria-activedescendant, optional actions strip, and global hotkey.',
     keyboardCoverage:
-      'ARIA snapshot covers expanded input/results; floating-dismissal harness covers portaled F6 panel focus and outside focus close.',
+      'Browser contract covers global hotkey open, disabled option skip, F6/Arrow action-strip traversal, Enter submit, and async error recovery; floating-dismissal harness covers portaled panel focus and outside focus close.',
     automatedCoverage:
-      'ARIA snapshots and floating-dismissal browser contract cover key state. No axe smoke or full keyboard matrix yet.',
+      'Dedicated Omnibar browser contract, ARIA snapshots, docs axe smoke with the portaled panel, and floating-dismissal contract cover current release behavior.',
     knownGaps:
-      'Critical composite gap: global hotkey, disabled skip, action-strip traversal, submit, and async error states lack browser matrix coverage.',
-    criticalGap: true,
+      'No critical gap recorded; production search quality and app-wide shortcut collision policy remain consumer-owned adapter concerns.',
   },
   {
     kind: 'Composite',
@@ -632,6 +631,11 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
         color: var(--color-hell-danger);
         font-weight: 700;
       }
+
+      .hd-a11y-clear {
+        color: var(--color-hell-success);
+        font-weight: 700;
+      }
     `,
   ],
   template: `
@@ -645,14 +649,23 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
         </p>
 
         <div class="hd-a11y-summary" aria-label="Accessibility release status">
-          <p>
-            <strong class="hd-a11y-blocked"
-              >Production-ready accessibility claim is blocked.</strong
-            >
-            {{ criticalGapCount }} public surfaces still have critical coverage gaps. Release notes,
-            package README copy, and package registry descriptions must stay at internal beta /
-            experimental language until the release checklist is green.
-          </p>
+          @if (criticalGapCount > 0) {
+            <p>
+              <strong class="hd-a11y-blocked"
+                >Production-ready accessibility claim is blocked.</strong
+              >
+              {{ criticalGapCount }} public surfaces still have critical coverage gaps. Release
+              notes, package README copy, and package registry descriptions must stay at internal
+              beta / experimental language until the release checklist is green.
+            </p>
+          } @else {
+            <p>
+              <strong class="hd-a11y-clear">Critical accessibility matrix is clear.</strong>
+              Public surface blockers in this table have browser, axe, or ARIA snapshot evidence.
+              Release notes, package README copy, and package registry descriptions still depend on
+              the full release checklist.
+            </p>
+          }
           <p>
             Evidence sources: <code>docs-axe-smoke.spec.ts</code>,
             <code>aria-snapshots.spec.ts</code>, component-specific
@@ -725,8 +738,8 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
             production support claim.
           </li>
           <li>
-            <strong>Critical gap</strong> means release copy must not say production-ready for that
-            primitive/composite until the gap has a browser test or an explicit accepted exception.
+            <strong>Release blocker</strong> marks a row whose missing browser evidence blocks
+            production-ready accessibility copy for that primitive or composite.
           </li>
         </ul>
       </div>
