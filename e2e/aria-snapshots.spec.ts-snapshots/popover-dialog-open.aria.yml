@@ -1,0 +1,5 @@
+- dialog "Profile summary":
+  - heading "Profile summary" [level=3]
+  - paragraph: /Heinrich K\. Senior Engineer, Berlin, last seen \d+[hmsp]+ ago\./
+  - button "Message Heinrich"
+  - button "View activity"

@@ -69,6 +69,16 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['main'],
   },
   {
+    name: 'popover',
+    path: '/components/popover',
+    heading: 'Popover',
+    include: ['main', '.hell-popover'],
+    prepare: async (page) => {
+      await page.getByRole('button', { name: 'Show profile summary' }).click();
+      await expect(page.getByRole('dialog', { name: 'Profile summary' })).toBeVisible();
+    },
+  },
+  {
     name: 'menu',
     path: '/components/menu',
     heading: 'Menu',

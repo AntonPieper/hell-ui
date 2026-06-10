@@ -205,13 +205,13 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     name: 'Popover',
     path: '/components/popover',
     rolePattern:
-      'Anchored non-modal popover content delegated to ng-primitives; content semantics are consumer-owned.',
+      'Anchored non-modal dialog surface delegated to ng-primitives; documented examples provide consumer-owned aria-labelledby naming.',
     keyboardCoverage:
-      'Delegated Escape/outside-click behavior is not covered by a Hell browser test.',
-    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+      'Browser contract covers trigger open, initial focus movement, Tab and Shift+Tab wrapping, Escape close with focus restore, and outside-click close.',
+    automatedCoverage:
+      'Dedicated browser contract, ARIA snapshots, and docs axe smoke cover the public Popover example.',
     knownGaps:
-      'Critical gap: focus movement, close behavior, and accessible naming are not proven for the public docs example.',
-    criticalGap: true,
+      'No critical gap recorded; consumers remain responsible for naming custom popover content and testing nested or long-form interactions.',
   },
   {
     kind: 'Primitive',

@@ -189,6 +189,22 @@ test.describe('public docs aria snapshots', () => {
     await expectNamedAriaSnapshot(menu, 'menu-actions-open.aria.yml');
   });
 
+  test('popover snapshots record trigger state and named dialog actions', async ({ page }) => {
+    await gotoDocsPage(page, '/components/popover', 'Popover');
+
+    const example = page.locator('app-popover-example-example');
+    const trigger = example.getByRole('button', { name: 'Show profile summary' });
+    await trigger.click();
+
+    const popover = page.getByRole('dialog', { name: 'Profile summary' });
+    await expect(popover).toBeVisible();
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    await expect(popover).toHaveAttribute('aria-labelledby', 'profile-popover-title');
+
+    await expectNamedAriaSnapshot(trigger, 'popover-trigger-open.aria.yml');
+    await expectNamedAriaSnapshot(popover, 'popover-dialog-open.aria.yml');
+  });
+
   test('select snapshots record the expanded trigger and option roles', async ({ page }) => {
     await gotoDocsPage(page, '/components/select', 'Select');
 
