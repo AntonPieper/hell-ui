@@ -6,8 +6,8 @@ import { HELL_TABS_DIRECTIVES } from '@hell-ui/angular/tabs';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [...HELL_TABS_DIRECTIVES],
   template: `
-    <div hellTabset value="a" orientation="vertical">
-      <div hellTabList>
+    <div hellTabset value="a" orientation="vertical" [activateOnFocus]="false">
+      <div hellTabList aria-label="Manual content sections">
         <button hellTab value="a">Section A</button>
         <button hellTab value="b">Section B</button>
         <button hellTab value="c">Section C</button>

@@ -30,8 +30,8 @@ import tabsVerticalExampleCodeRaw from './examples/vertical.example.ts?raw' with
 
       <h2>Vertical</h2>
       <p class="hd-note">
-        Each vertical tab reserves space for the active indicator, so labels stay still when
-        activation moves between tabs — no horizontal jitter.
+        This example uses manual activation: arrow keys move focus, while Enter, Space, or click
+        changes the selected panel.
       </p>
       <hd-example-tabs [code]="tabsVerticalExampleCode">
         <app-tabs-vertical-example />

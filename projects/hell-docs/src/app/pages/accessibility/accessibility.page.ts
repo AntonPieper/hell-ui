@@ -318,13 +318,14 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     kind: 'Primitive',
     name: 'Tabs',
     path: '/components/tabs',
-    rolePattern: 'Tabset with tablist, tab buttons, and tab panels delegated to ng-primitives.',
+    rolePattern:
+      'Named horizontal and vertical tablists with tab buttons linked to tab panels through aria-controls/aria-labelledby via ng-primitives.',
     keyboardCoverage:
-      'Delegated roving focus/activation; no browser test proves Arrow/Home/End/manual activation behavior.',
-    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+      'Browser contract covers automatic horizontal ArrowLeft/Right/Home/End focus and selection plus manual vertical ArrowDown/Home/End focus with Enter/Space activation.',
+    automatedCoverage:
+      'ARIA snapshots cover tablist names, selected tab state, and linked panels; Playwright browser contract covers keyboard focus/selection behavior; docs axe smoke includes the Tabs page.',
     knownGaps:
-      'Critical gap: add tablist keyboard and role/name/state snapshots before production-ready claims.',
-    criticalGap: true,
+      'No critical gap recorded; roving focus does not wrap at list ends in the current ng-primitives Tabset integration.',
   },
   {
     kind: 'Primitive',
@@ -653,10 +654,11 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
           </p>
           <p>
             Evidence sources: <code>docs-axe-smoke.spec.ts</code>,
-            <code>aria-snapshots.spec.ts</code>, <code>ui-behavior.spec.ts</code>,
-            <code>menu-select-combobox-keyboard.spec.ts</code>,
-            <code>floating-dismissal.spec.ts</code>, and
-            <code>docs/architecture/keyboard-navigation-matrix.md</code>.
+            <code>aria-snapshots.spec.ts</code>, component-specific
+            <code>*-a11y-contracts.spec.ts</code> files such as
+            <code>tabs-a11y-contracts.spec.ts</code>, <code>ui-behavior.spec.ts</code>,
+            <code>menu-select-combobox-keyboard.spec.ts</code>, and
+            <code>floating-dismissal.spec.ts</code>.
           </p>
         </div>
       </div>

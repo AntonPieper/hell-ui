@@ -7,7 +7,7 @@ import { HELL_TABS_DIRECTIVES } from '@hell-ui/angular/tabs';
   imports: [...HELL_TABS_DIRECTIVES],
   template: `
     <div hellTabset value="general">
-      <div hellTabList>
+      <div hellTabList aria-label="Account sections">
         <button hellTab value="general">General</button>
         <button hellTab value="security">Security</button>
         <button hellTab value="billing">Billing</button>

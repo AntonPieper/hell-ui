@@ -1,0 +1,5 @@
+- tablist "Manual content sections":
+  - tab "Section A" [selected]
+  - tab "Section B"
+  - tab "Section C"
+- tabpanel "Section A": Content A

@@ -356,6 +356,31 @@ test.describe('public docs aria snapshots', () => {
     await expectNamedAriaSnapshot(native, 'switch-native-required.aria.yml');
   });
 
+  test('tabs snapshots record tablist names, selected tabs, and linked panels', async ({
+    page,
+  }) => {
+    await gotoDocsPage(page, '/components/tabs', 'Tabs');
+
+    const automatic = page.locator('app-tabs-example-example');
+    const manual = page.locator('app-tabs-vertical-example');
+    const automaticList = automatic.getByRole('tablist', { name: 'Account sections' });
+    const manualList = manual.getByRole('tablist', { name: 'Manual content sections' });
+
+    await expect(automaticList).toHaveAttribute('aria-orientation', 'horizontal');
+    await expect(manualList).toHaveAttribute('aria-orientation', 'vertical');
+    await expect(automatic.getByRole('tab', { name: 'General' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    await expect(manual.getByRole('tab', { name: 'Section A' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+
+    await expectNamedAriaSnapshot(automatic, 'tabs-automatic-selected.aria.yml');
+    await expectNamedAriaSnapshot(manual, 'tabs-manual-vertical-selected.aria.yml');
+  });
+
   test('table utility snapshot records active row semantics and cell action name', async ({
     page,
   }) => {

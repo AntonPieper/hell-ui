@@ -97,6 +97,12 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['main'],
   },
   {
+    name: 'tabs',
+    path: '/components/tabs',
+    heading: 'Tabs',
+    include: ['main'],
+  },
+  {
     name: 'menu',
     path: '/components/menu',
     heading: 'Menu',
