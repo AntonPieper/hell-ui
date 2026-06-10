@@ -17,34 +17,30 @@
     --hell-toaster-peek: 14px;
     --hell-toaster-scale-step: 0.06;
     --hell-toaster-viewport-max-h: min(420px, calc(100vh - 104px));
+    --hell-toast-dir: -1;
+    --hell-toast-origin: bottom center;
     position: fixed;
     z-index: 9999;
     pointer-events: none;
     width: var(--hell-toaster-w);
     max-width: calc(100vw - 32px);
-    &[data-position='bottom-right'] {
+    &[data-position^='bottom'] {
       bottom: 24px;
+      --hell-toast-dir: -1;
+      --hell-toast-origin: bottom center;
+    }
+    &[data-position^='top'] {
+      top: 24px;
+      --hell-toast-dir: 1;
+      --hell-toast-origin: top center;
+    }
+    &[data-position$='right'] {
       right: 24px;
     }
-    &[data-position='bottom-left'] {
-      bottom: 24px;
+    &[data-position$='left'] {
       left: 24px;
     }
-    &[data-position='bottom-center'] {
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-    &[data-position='top-right'] {
-      top: 24px;
-      right: 24px;
-    }
-    &[data-position='top-left'] {
-      top: 24px;
-      left: 24px;
-    }
-    &[data-position='top-center'] {
-      top: 24px;
+    &[data-position$='center'] {
       left: 50%;
       transform: translateX(-50%);
     }
@@ -89,38 +85,16 @@
   }
 
   .hell-toaster[data-expanded='true'][data-scrollable='true'] [data-slot='viewport'] {
-    --hell-toast-viewport-bg: color-mix(
-      in oklab,
-      var(--color-hell-surface) 92%,
-      var(--color-hell-surface-elevated)
-    );
-    background: var(--hell-toast-viewport-bg);
     border-radius: calc(var(--radius-hell-lg) + 2px);
-    box-shadow: 0 24px 64px -48px rgba(20, 24, 31, 0.55);
-    backdrop-filter: blur(10px) saturate(115%);
-    -webkit-backdrop-filter: blur(10px) saturate(115%);
   }
 
   .hell-toaster[data-expanded='true']
     [data-slot='region']:is(:hover, :focus-within)
     [data-slot='viewport'] {
-    scrollbar-color: color-mix(in oklab, var(--color-hell-border-strong) 70%, transparent)
-      transparent;
+    scrollbar-color: var(--color-hell-border-strong) transparent;
     scrollbar-width: thin;
     &::-webkit-scrollbar {
       width: 8px;
-    }
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    &::-webkit-scrollbar-thumb {
-      border: 2px solid transparent;
-      border-radius: 999px;
-      background-clip: padding-box;
-      background-color: color-mix(in oklab, var(--color-hell-border-strong) 70%, transparent);
-    }
-    &::-webkit-scrollbar-thumb:hover {
-      background-color: var(--color-hell-border-strong);
     }
   }
 
@@ -132,7 +106,6 @@
     width: 100%;
     height: 64px;
     pointer-events: auto;
-    min-height: 64px;
   }
 
   .hell-toaster[data-expanded='true'] [data-slot='list'] {
@@ -204,7 +177,7 @@
     grid-template-columns: auto 1fr auto auto;
     align-items: start;
     gap: var(--spacing-hell-3);
-    padding: var(--spacing-hell-4) var(--spacing-hell-4);
+    padding: var(--spacing-hell-4);
     background: var(--color-hell-surface-elevated);
     color: var(--color-hell-foreground);
     border: 1px solid var(--color-hell-border);
@@ -212,8 +185,15 @@
     box-shadow: var(--shadow-hell-lg);
     font-size: 13px;
     line-height: 1.4;
+    --hell-toast-accent: var(--color-hell-border);
+    --hell-toast-glyph: var(--color-hell-foreground-muted);
+    --hell-toast-y: calc(
+      var(--hell-toast-front) * var(--hell-toaster-peek) * var(--hell-toast-dir, -1)
+    );
+    --hell-toast-scale: calc(1 - var(--hell-toast-front) * var(--hell-toaster-scale-step));
     z-index: var(--hell-toast-z, 1);
-    transform-origin: bottom center;
+    transform: translateY(var(--hell-toast-y)) scale(var(--hell-toast-scale));
+    transform-origin: var(--hell-toast-origin, bottom center);
     will-change: transform, opacity;
     transition:
       transform var(--hell-duration-base) var(--ease-hell-out),
@@ -227,59 +207,28 @@
       bottom: 0;
       width: 3px;
       border-radius: var(--radius-hell-lg) 0 0 var(--radius-hell-lg);
-      background: var(--color-hell-border);
+      background: var(--hell-toast-accent);
+    }
+    & [data-slot='glyph'] {
+      color: var(--hell-toast-glyph);
     }
     &[data-variant='success'] {
-      color: var(--color-hell-foreground);
+      --hell-toast-accent: var(--color-hell-success);
+      --hell-toast-glyph: var(--color-hell-success);
     }
-    &[data-variant='success']::before {
-      background: var(--color-hell-success);
+    &[data-variant='info'] {
+      --hell-toast-accent: var(--color-hell-info);
+      --hell-toast-glyph: var(--color-hell-info-strong);
     }
-    &[data-variant='success'] [data-slot='glyph'] {
-      color: var(--color-hell-success);
+    &[data-variant='warning'] {
+      --hell-toast-accent: var(--color-hell-warning);
+      --hell-toast-glyph: var(--color-hell-warning-strong);
     }
-    &[data-variant='info']::before {
-      background: var(--color-hell-info);
-    }
-    &[data-variant='info'] [data-slot='glyph'] {
-      color: var(--color-hell-info-strong);
-    }
-    &[data-variant='warning']::before {
-      background: var(--color-hell-warning);
-    }
-    &[data-variant='warning'] [data-slot='glyph'] {
-      color: var(--color-hell-warning-strong);
-    }
-    &[data-variant='danger']::before {
-      background: var(--color-hell-danger);
-    }
-    &[data-variant='danger'] [data-slot='glyph'] {
-      color: var(--color-hell-danger);
-    }
-    &[data-variant='default'] [data-slot='glyph'] {
-      color: var(--color-hell-foreground-muted);
+    &[data-variant='danger'] {
+      --hell-toast-accent: var(--color-hell-danger);
+      --hell-toast-glyph: var(--color-hell-danger);
     }
   }
-}
-
-/* ── Bottom-anchored: collapsed stack ────────────────────────────────────
- * Front item (--front:0) sits at the bottom flush. Older items behind it
- * step UP by `peek`, scale down, and fade out past `maxVisible`. */
-
-.hell-toaster[data-position^='bottom'] [data-slot='toast'] {
-  --hell-toast-y: calc(var(--hell-toast-front) * (var(--hell-toaster-peek) * -1));
-  --hell-toast-scale: calc(1 - var(--hell-toast-front) * var(--hell-toaster-scale-step));
-  transform: translateY(var(--hell-toast-y)) scale(var(--hell-toast-scale));
-  transform-origin: bottom center;
-}
-
-/* ── Top-anchored: collapsed stack mirrors downward ────────────────────── */
-
-.hell-toaster[data-position^='top'] [data-slot='toast'] {
-  --hell-toast-y: calc(var(--hell-toast-front) * var(--hell-toaster-peek));
-  --hell-toast-scale: calc(1 - var(--hell-toast-front) * var(--hell-toaster-scale-step));
-  transform: translateY(var(--hell-toast-y)) scale(var(--hell-toast-scale));
-  transform-origin: top center;
 }
 
 /* Hidden (further than maxVisible behind the front) */
@@ -291,14 +240,8 @@
 
 /* ── Expanded (hover / focus): real column with measured offsets ──────── */
 
-.hell-toaster[data-expanded='true'][data-position^='bottom'] [data-slot='toast'] {
-  --hell-toast-y: calc(var(--hell-toast-offset) * -1);
-  --hell-toast-scale: calc(1 - var(--hell-toast-edge-progress, 0) * var(--hell-toaster-scale-step));
-  opacity: var(--hell-toast-edge-opacity, 1);
-}
-
-.hell-toaster[data-expanded='true'][data-position^='top'] [data-slot='toast'] {
-  --hell-toast-y: var(--hell-toast-offset);
+.hell-toaster[data-expanded='true'] [data-slot='toast'] {
+  --hell-toast-y: calc(var(--hell-toast-offset) * var(--hell-toast-dir, -1));
   --hell-toast-scale: calc(1 - var(--hell-toast-edge-progress, 0) * var(--hell-toaster-scale-step));
   opacity: var(--hell-toast-edge-opacity, 1);
 }
@@ -345,8 +288,7 @@
 /* High-specificity selector so it wins over the expanded-state rules
  * (which set opacity:1 and override the layout transform otherwise). */
 
-.hell-toaster [data-slot='toast'][data-state='closed'],
-.hell-toaster[data-expanded='true'] [data-slot='toast'][data-state='closed'] {
+.hell-toaster [data-slot='toast'][data-state='closed'] {
   opacity: 0;
   transform: translateY(var(--hell-toast-y, 0)) translateX(110%) scale(var(--hell-toast-scale, 1));
   pointer-events: none;
@@ -426,11 +368,7 @@
   .hell-toaster [data-slot='dismiss-all'] {
     appearance: none;
     border: 1px solid var(--color-hell-border);
-    background: color-mix(
-      in oklab,
-      var(--color-hell-surface) 88%,
-      var(--color-hell-surface-elevated)
-    );
+    background: var(--color-hell-surface-elevated);
     color: var(--color-hell-foreground);
     box-shadow: var(--shadow-hell-md);
     font-size: 12px;
@@ -443,6 +381,7 @@
     align-items: center;
     gap: 6px;
     white-space: nowrap;
+    text-decoration: none;
     transition:
       border-color var(--hell-duration-fast) var(--ease-hell-out),
       background var(--hell-duration-fast) var(--ease-hell-out),
