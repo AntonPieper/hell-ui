@@ -1,4 +1,11 @@
-import { DestroyRef, Directive, ElementRef, InjectionToken, inject } from '@angular/core';
+import {
+  DestroyRef,
+  Directive,
+  ElementRef,
+  InjectionToken,
+  inject,
+  type AfterViewInit,
+} from '@angular/core';
 import { isElementLike, isNodeLike } from './dom';
 
 /** Shared ownership contract for Floating Interaction content rendered outside
@@ -82,9 +89,13 @@ export function hellRegisterFloatingHost(): void {
  * Consumers should import `HellFloatingElement` from the public `floating-element` seam.
  */
 @Directive({ selector: '[hellFloatingElement]' })
-export class HellFloatingElement {
-  constructor() {
-    hellRegisterFloatingHost();
+export class HellFloatingElement implements AfterViewInit {
+  private readonly scope = inject(HELL_FLOATING_SCOPE, { optional: true });
+  private readonly element = inject(ElementRef<HTMLElement>).nativeElement;
+  private readonly destroyRef = inject(DestroyRef);
+
+  ngAfterViewInit(): void {
+    hellRegisterFloatingElement(this.scope, this.element, this.destroyRef);
   }
 }
 
@@ -208,4 +219,3 @@ export function hellFindFloatingScopeRoot(
 ): HTMLElement | null {
   return trigger.closest<HTMLElement>(selector);
 }
-
