@@ -81,3 +81,45 @@ The query state, open state, search orchestration, projected item registry, keyb
 
 **Typed Value Input**
 The draft, parse, stable business formatting, validation, invalid draft state, nullable clear commits, external-value synchronization, and picker coordination shared by text-backed value Composites such as date input and time input. Time values use a structured value inside the module instead of leaking string parsing across callers.
+
+**Validation Evidence**
+Proof that a product claim is true, produced by the narrowest reliable validation method: unit test, integration/build check, browser/e2e test, visual review, package-consumer install, API report, release evidence, or a narrow Static Contract Check for stable source/package/metadata boundaries.
+_Avoid_: Static check, gate, sentinel
+
+**Evidence Class**
+The declared kind of Validation Evidence a Specification Slice needs: unit, integration/build, browser/e2e, visual, package-consumer, api-report, static-contract, or release-evidence.
+_Avoid_: Generic validation, check bucket
+
+**Static Contract Check**
+A static analysis rule that enforces a structural invariant better proven from source or package metadata than by executing the UI.
+_Avoid_: Architecture test, quality gate
+
+**Brittle Static Sentinel**
+A Static Contract Check smell where the rule hardcodes volatile files, strings, examples, or implementation details so normal feature work must patch the check instead of violating a real boundary.
+_Avoid_: Architecture protection, policy guard
+
+**Static Contract Manifest**
+A machine-readable source of truth for stable boundaries that a Static Contract Check can validate without hardcoding volatile implementation details.
+_Avoid_: String allowlist, hidden policy
+
+**Release Evidence Gate**
+A release-only check that verifies fresh Validation Evidence exists for a release or production-readiness claim, without replacing the commands that produce that evidence.
+_Avoid_: Development gate, architecture check
+
+**Specification Slice**
+A bounded unit of planned Hell UI work with explicit acceptance criteria, required Validation Evidence, and fresh-context review before commit.
+_Avoid_: Task, ticket
+
+**Evidence-Based Review**
+A review that judges a Specification Slice from concrete Validation Evidence and inspected code behavior instead of accepting an agent's summary or a Static Contract Check as proof of product quality.
+_Avoid_: Trust-me review, summary review
+
+## Relationships
+
+- A **Specification Slice** must name the **Validation Evidence** needed to prove its acceptance criteria.
+- A **Specification Slice** should declare one or more **Evidence Classes** before implementation starts.
+- A **Static Contract Check** may support **Validation Evidence**, but it is not proof of behavior, accessibility, visual quality, or user workflow by itself.
+- A **Static Contract Check** should encode a stable boundary or machine-readable manifest rule; a **Brittle Static Sentinel** should be deleted or replaced with better Validation Evidence.
+- A **Static Contract Manifest** is appropriate for stable entrypoints, peer tiers, API-report expectations, docs lazy-route boundaries, and accepted browser-global seams, but not for volatile component internals or docs prose.
+- A **Release Evidence Gate** verifies that required **Validation Evidence** exists and is fresh; it must not replace the commands or reviews that produce that evidence.
+- An **Evidence-Based Review** may use **Static Contract Checks** as one signal, but it must reject claims that are only supported by patchable sentinels or agent assertions.
