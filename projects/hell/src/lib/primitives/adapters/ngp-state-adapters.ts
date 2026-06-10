@@ -1,6 +1,7 @@
 import type { State } from 'ng-primitives/state';
 import type { NgpCombobox } from 'ng-primitives/combobox';
 import type { NgpRadioGroup } from 'ng-primitives/radio';
+import type { NgpRovingFocusGroupState } from 'ng-primitives/roving-focus';
 import type { NgpSelect } from 'ng-primitives/select';
 
 /**
@@ -18,7 +19,8 @@ import type { NgpSelect } from 'ng-primitives/select';
  * rerun `docs/adr/ng-primitives-state-adapter.md` for the target version, keep
  * preferring public setters when they exist, and remove the State-channel
  * fallback in a follow-up slice once select, combobox, and radio group all have
- * public value + disabled setters that support silent CVA writes.
+ * public value + disabled setters that support silent CVA writes, and roving
+ * focus has a public non-focusing active-item setter.
  *
  * If ng-primitives changes these writable channels before adding setters, fail
  * loudly here instead of silently dropping form writes across select, combobox,
@@ -29,12 +31,13 @@ import type { NgpSelect } from 'ng-primitives/select';
 
 export const HELL_NGP_STATE_WRITER_VERSION = 'ng-primitives@0.117.2';
 export const HELL_NGP_STATE_WRITER_UPGRADE_PATH =
-  'Upgrade/removal path: rerun docs/adr/ng-primitives-state-adapter.md for the target ng-primitives version; keep the package pin while this State<T> fallback is needed; remove the fallback once public value+disabled setters support silent CVA writes.';
+  'Upgrade/removal path: rerun docs/adr/ng-primitives-state-adapter.md for the target ng-primitives version; keep the package pin while this State<T> fallback is needed; remove the fallback once public value+disabled setters support silent CVA writes and roving-focus exposes a non-focusing active-item setter.';
 
 type WritableStateChannel<T> = { set: (value: T) => void };
 type StateSetterOptions = { emit?: boolean };
 type StateWithValueChannel<T> = { value: WritableStateChannel<T> };
 type StateWithDisabledChannel = { disabled: WritableStateChannel<boolean> };
+type StateWithActiveItemChannel = { activeItem: WritableStateChannel<string | null> };
 type StateWithValueSetter<T> = { setValue?: (value: T, options?: StateSetterOptions) => void };
 type StateWithDisabledSetter = { setDisabled?: (isDisabled: boolean) => void };
 
@@ -54,7 +57,11 @@ type RadioGroupStateWriter<T> = State<NgpRadioGroup<T>> &
   StateWithValueSetter<T | null> &
   StateWithDisabledSetter;
 
-function assertObjectState(state: unknown, operation: string, channel: string): asserts state is object {
+function assertObjectState(
+  state: unknown,
+  operation: string,
+  channel: string,
+): asserts state is object {
   if (!state || typeof state !== 'object') {
     throw new Error(
       `[hell-ngp-state-writer ${HELL_NGP_STATE_WRITER_VERSION}] ${operation} requires state.${channel}.set from ng-primitives State<T>, received ${String(state)}. ${HELL_NGP_STATE_WRITER_UPGRADE_PATH}`,
@@ -100,11 +107,30 @@ function assertWritableDisabledSignal(
   }
 }
 
-function hasValueSetter<T>(state: StateWithValueSetter<T>): state is { setValue: (value: T, options?: StateSetterOptions) => void } {
+function assertWritableActiveItemSignal(
+  state: unknown,
+  operation: string,
+): asserts state is StateWithActiveItemChannel {
+  assertObjectState(state, operation, 'activeItem');
+
+  const activeItem = (state as { activeItem?: unknown }).activeItem;
+  if (!isWritableSignalLike<string | null>(activeItem)) {
+    throw new Error(
+      `[hell-ngp-state-writer ${HELL_NGP_STATE_WRITER_VERSION}] ${operation} requires state.activeItem.set to be callable. ` +
+        `Expected ng-primitives ${HELL_NGP_STATE_WRITER_VERSION} writable State<T> signal for channel "activeItem", received ${typeof activeItem}. ${HELL_NGP_STATE_WRITER_UPGRADE_PATH}`,
+    );
+  }
+}
+
+function hasValueSetter<T>(
+  state: StateWithValueSetter<T>,
+): state is { setValue: (value: T, options?: StateSetterOptions) => void } {
   return typeof state.setValue === 'function';
 }
 
-function hasDisabledSetter(state: StateWithDisabledSetter): state is { setDisabled: (isDisabled: boolean) => void } {
+function hasDisabledSetter(
+  state: StateWithDisabledSetter,
+): state is { setDisabled: (isDisabled: boolean) => void } {
   return typeof state.setDisabled === 'function';
 }
 
@@ -172,7 +198,10 @@ export function writeComboboxStateDisabled(state: ComboboxStateWriter, isDisable
  * Internal ng-primitives form-state sync for radio group CVA writes. Replace
  * this with public ng-primitives setters when NgpRadioGroup exposes them.
  */
-export function writeRadioGroupStateValue<T>(state: RadioGroupStateWriter<T>, value: T | null): void {
+export function writeRadioGroupStateValue<T>(
+  state: RadioGroupStateWriter<T>,
+  value: T | null,
+): void {
   writeStateValue(state, value, 'writeRadioGroupStateValue');
 }
 
@@ -180,6 +209,22 @@ export function writeRadioGroupStateValue<T>(state: RadioGroupStateWriter<T>, va
  * Internal ng-primitives form-state sync for radio group CVA disabled sync.
  * Replace this with public ng-primitives setters when NgpRadioGroup exposes them.
  */
-export function writeRadioGroupStateDisabled<T>(state: RadioGroupStateWriter<T>, isDisabled: boolean): void {
+export function writeRadioGroupStateDisabled<T>(
+  state: RadioGroupStateWriter<T>,
+  isDisabled: boolean,
+): void {
   writeStateDisabled(state, isDisabled, 'writeRadioGroupStateDisabled');
+}
+
+/**
+ * Internal ng-primitives roving-focus sync for radio checked item tab stops.
+ * Replace this with a public non-focusing active item setter, or remove it when
+ * ng-primitives radio maps checked/disabled item state into roving focus.
+ */
+export function writeRovingFocusActiveItem(
+  state: NgpRovingFocusGroupState,
+  itemId: string | null,
+): void {
+  assertWritableActiveItemSignal(state, 'writeRovingFocusActiveItem');
+  state.activeItem.set(itemId);
 }

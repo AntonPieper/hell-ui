@@ -8,7 +8,12 @@ import { HellNativeRadio, HellNativeRadioGroup, HellRadio, HellRadioGroup } from
   selector: 'hell-radio-host',
   imports: [HellRadioGroup, HellRadio],
   template: `
-    <div hellRadioGroup [value]="value()" orientation="horizontal" (valueChange)="events.push($any($event))">
+    <div
+      hellRadioGroup
+      [value]="value()"
+      orientation="horizontal"
+      (valueChange)="events.push($any($event))"
+    >
       <button hellRadio type="button" value="a">A</button>
       <button hellRadio type="button" value="b">B</button>
     </div>
@@ -23,7 +28,12 @@ class RadioHost {
   selector: 'hell-radio-form-host',
   imports: [ReactiveFormsModule, HellRadioGroup, HellRadio],
   template: `
-    <div hellRadioGroup [formControl]="control" orientation="horizontal" (valueChange)="events.push($any($event))">
+    <div
+      hellRadioGroup
+      [formControl]="control"
+      orientation="horizontal"
+      (valueChange)="events.push($any($event))"
+    >
       <button hellRadio type="button" value="a">A</button>
       <button hellRadio type="button" value="b">B</button>
     </div>
@@ -63,6 +73,44 @@ class RadioDisabledRequiredHost {
 }
 
 @Component({
+  selector: 'hell-radio-keyboard-host',
+  imports: [HellRadioGroup, HellRadio],
+  template: `
+    <div
+      hellRadioGroup
+      aria-label="Plan"
+      orientation="vertical"
+      [required]="true"
+      [value]="value()"
+      (valueChange)="value.set($any($event)); events.push($any($event))"
+    >
+      <button hellRadio type="button" value="free">Free</button>
+      <button hellRadio type="button" value="legacy" [disabled]="true">Legacy</button>
+      <button hellRadio type="button" value="pro">Pro</button>
+      <button hellRadio type="button" value="enterprise">Enterprise</button>
+    </div>
+  `,
+})
+class RadioKeyboardHost {
+  readonly value = signal<'free' | 'legacy' | 'pro' | 'enterprise'>('free');
+  readonly events: string[] = [];
+}
+
+@Component({
+  selector: 'hell-radio-checked-tab-stop-host',
+  imports: [HellRadioGroup, HellRadio],
+  template: `
+    <div hellRadioGroup [value]="value()" orientation="horizontal">
+      <button hellRadio type="button" value="a">A</button>
+      <button hellRadio type="button" value="b">B</button>
+    </div>
+  `,
+})
+class RadioCheckedTabStopHost {
+  readonly value = signal<string | null>('b');
+}
+
+@Component({
   selector: 'hell-radio-item-disabled-host',
   imports: [HellRadioGroup, HellRadio],
   template: `
@@ -96,6 +144,8 @@ describe('HellRadio', () => {
         RadioFormHost,
         RadioRequiredFormHost,
         RadioDisabledRequiredHost,
+        RadioKeyboardHost,
+        RadioCheckedTabStopHost,
         RadioItemDisabledHost,
         NativeRadioFormHost,
       ],
@@ -114,6 +164,8 @@ describe('HellRadio', () => {
     expect(group.classList.contains('hell-radio-group')).toBe(true);
     expect(group.getAttribute('role')).toBe('radiogroup');
     expect(group.getAttribute('data-orientation')).toBe('horizontal');
+    expect(group.getAttribute('aria-required')).toBe(null);
+    expect(group.getAttribute('data-required')).toBe(null);
     expect(items[0].type).toBe('button');
     expect(items[0].getAttribute('role')).toBe('radio');
     expect(items[0].getAttribute('aria-checked')).toBe('true');
@@ -162,8 +214,13 @@ describe('HellRadio', () => {
     const fixture = TestBed.createComponent(RadioRequiredFormHost);
     fixture.detectChanges();
 
-    const group = fixture.debugElement.query(By.css('[hellRadioGroup]')).injector.get(HellRadioGroup);
+    const hostElement = query<HTMLElement>(fixture.nativeElement, '[hellRadioGroup]');
+    const group = fixture.debugElement
+      .query(By.css('[hellRadioGroup]'))
+      .injector.get(HellRadioGroup);
 
+    expect(hostElement.getAttribute('aria-required')).toBe('true');
+    expect(hostElement.getAttribute('data-required')).toBe('true');
     expect(group.validate(new FormControl(null))).toEqual({ required: true });
     expect(group.validate(new FormControl(''))).toEqual({ required: true });
     expect(group.validate(new FormControl('a'))).toBeNull();
@@ -211,6 +268,92 @@ describe('HellRadio', () => {
     expect(host.control.disabled).toBe(true);
   });
 
+  it('moves custom radio keyboard focus by orientation and skips disabled items', () => {
+    const fixture = TestBed.createComponent(RadioKeyboardHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const root = fixture.nativeElement as HTMLElement;
+    const group = query<HTMLElement>(root, '[hellRadioGroup]');
+    const free = query<HTMLButtonElement>(root, 'button[value="free"]');
+    const legacy = query<HTMLButtonElement>(root, 'button[value="legacy"]');
+    const pro = query<HTMLButtonElement>(root, 'button[value="pro"]');
+    const enterprise = query<HTMLButtonElement>(root, 'button[value="enterprise"]');
+
+    expect(group.getAttribute('aria-required')).toBe('true');
+    expect(legacy.disabled).toBe(true);
+
+    free.focus();
+    expect(press(free, 'ArrowRight').defaultPrevented).toBe(true);
+    fixture.detectChanges();
+
+    expect(root.ownerDocument.activeElement).toBe(pro);
+    expect(host.value()).toBe('pro');
+    expect(host.events.at(-1)).toBe('pro');
+    expect(legacy.getAttribute('aria-checked')).toBe('false');
+
+    expect(press(pro, 'ArrowLeft').defaultPrevented).toBe(true);
+    fixture.detectChanges();
+
+    expect(root.ownerDocument.activeElement).toBe(free);
+    expect(host.value()).toBe('free');
+
+    expect(press(free, 'ArrowDown').defaultPrevented).toBe(true);
+    fixture.detectChanges();
+
+    expect(root.ownerDocument.activeElement).toBe(pro);
+    expect(host.value()).toBe('pro');
+
+    expect(press(pro, 'ArrowUp').defaultPrevented).toBe(true);
+    fixture.detectChanges();
+
+    expect(root.ownerDocument.activeElement).toBe(free);
+    expect(host.value()).toBe('free');
+
+    expect(press(free, 'ArrowDown').defaultPrevented).toBe(true);
+    fixture.detectChanges();
+
+    expect(root.ownerDocument.activeElement).toBe(pro);
+    expect(host.value()).toBe('pro');
+
+    expect(press(pro, 'End').defaultPrevented).toBe(true);
+    fixture.detectChanges();
+
+    expect(root.ownerDocument.activeElement).toBe(enterprise);
+    expect(host.value()).toBe('enterprise');
+
+    expect(press(enterprise, 'Home').defaultPrevented).toBe(true);
+    fixture.detectChanges();
+
+    expect(root.ownerDocument.activeElement).toBe(free);
+    expect(host.value()).toBe('free');
+  });
+
+  it('makes the checked custom radio the tab stop without moving focus', () => {
+    const fixture = TestBed.createComponent(RadioCheckedTabStopHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const root = fixture.nativeElement as HTMLElement;
+    const first = query<HTMLButtonElement>(root, 'button[value="a"]');
+    const second = query<HTMLButtonElement>(root, 'button[value="b"]');
+
+    expect(first.getAttribute('aria-checked')).toBe('false');
+    expect(first.getAttribute('tabindex')).toBe('-1');
+    expect(second.getAttribute('aria-checked')).toBe('true');
+    expect(second.getAttribute('tabindex')).toBe('0');
+    expect(root.ownerDocument.activeElement).not.toBe(second);
+
+    host.value.set(null);
+    fixture.detectChanges();
+
+    expect(first.getAttribute('aria-checked')).toBe('false');
+    expect(first.getAttribute('tabindex')).toBe('0');
+    expect(second.getAttribute('aria-checked')).toBe('false');
+    expect(second.getAttribute('tabindex')).toBe('-1');
+    expect(root.ownerDocument.activeElement).not.toBe(first);
+  });
+
   it('applies item-level disabled state to the button host', () => {
     const fixture = TestBed.createComponent(RadioItemDisabledHost);
     fixture.detectChanges();
@@ -256,4 +399,10 @@ function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {
   const element = root.querySelector<T>(selector);
   if (!element) throw new Error(`Expected ${selector}.`);
   return element;
+}
+
+function press(element: HTMLElement, key: string): KeyboardEvent {
+  const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+  element.dispatchEvent(event);
+  return event;
 }

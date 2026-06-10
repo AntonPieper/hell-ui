@@ -283,8 +283,17 @@ test.describe('public docs aria snapshots', () => {
     const horizontal = page.locator('app-radio-horizontal-example');
     await expect(vertical).toBeVisible();
     await expect(horizontal).toBeVisible();
+    await expect(vertical.getByRole('radiogroup', { name: 'Plan' })).toHaveAttribute(
+      'aria-required',
+      'true',
+    );
+    await expect(vertical.getByRole('radio', { name: 'Legacy' })).toBeDisabled();
 
     await expectNamedAriaSnapshot(vertical, 'radio-plan-group.aria.yml');
+    await expectNamedAriaSnapshot(
+      vertical.getByRole('radio', { name: 'Legacy' }),
+      'radio-disabled-option.aria.yml',
+    );
     await expectNamedAriaSnapshot(horizontal, 'radio-size-group.aria.yml');
   });
 

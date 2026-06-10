@@ -47,7 +47,7 @@ import radioNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
       <ul>
         <li>
           <code>hellRadioGroup</code>: <code>value</code>, <code>valueChange</code>,
-          <code>orientation</code>, <code>disabled</code>
+          <code>orientation</code>, <code>disabled</code>, <code>required</code>
         </li>
         <li>
           Name every <code>hellRadioGroup</code> and <code>hellNativeRadioGroup</code> with a

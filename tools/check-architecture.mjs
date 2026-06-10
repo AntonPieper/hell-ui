@@ -2805,6 +2805,7 @@ function checkNgpStateWriterContract() {
     'writeComboboxStateDisabled',
     'writeRadioGroupStateValue',
     'writeRadioGroupStateDisabled',
+    'writeRovingFocusActiveItem',
   ];
   const retiredPrivateBridgeTokens = [
     'HELL_NGP_PRIVATE_STATE_BRIDGE_VERSION',
@@ -2825,12 +2826,20 @@ function checkNgpStateWriterContract() {
       pattern: /\bstate\[['"]disabled['"]\]\.set\(/,
     },
     {
+      token: "state['activeItem'].set(...) or state[\"activeItem\"].set(...)",
+      pattern: /\bstate\[['"]activeItem['"]\]\.set\(/,
+    },
+    {
       token: "state()['value'].set(...) or state()[\"value\"].set(...)",
       pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*\(\)\[['"]value['"]\]\.set\(/,
     },
     {
       token: "state()['disabled'].set(...) or state()[\"disabled\"].set(...)",
       pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*\(\)\[['"]disabled['"]\]\.set\(/,
+    },
+    {
+      token: "state()['activeItem'].set(...) or state()[\"activeItem\"].set(...)",
+      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*\(\)\[['"]activeItem['"]\]\.set\(/,
     },
   ];
   const directStateChannelWritePatterns = [
@@ -2843,6 +2852,10 @@ function checkNgpStateWriterContract() {
       pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\.disabled\.set\(/,
     },
     {
+      token: 'State<T>.activeItem.set(...)',
+      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\.activeItem\.set\(/,
+    },
+    {
       token: "State<T>['value'].set(...) or State<T>[\"value\"].set(...)",
       pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\[['"]value['"]\]\.set\(/,
     },
@@ -2850,18 +2863,25 @@ function checkNgpStateWriterContract() {
       token: "State<T>['disabled'].set(...) or State<T>[\"disabled\"].set(...)",
       pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\[['"]disabled['"]\]\.set\(/,
     },
+    {
+      token: "State<T>['activeItem'].set(...) or State<T>[\"activeItem\"].set(...)",
+      pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\[['"]activeItem['"]\]\.set\(/,
+    },
   ];
   const directPrimitiveStateAccessPattern = /\b(?:this\.)?[A-Za-z_$][\w$]*\.state\b/;
   const guardedFormStateTokens = [
     'NgpSelect',
     'NgpCombobox',
     'NgpRadioGroup',
+    'NgpRovingFocusGroup',
     'injectSelectState',
     'injectComboboxState',
     'injectRadioGroupState',
+    'injectRovingFocusGroupState',
     'State<NgpSelect',
     'State<NgpCombobox',
     'State<NgpRadioGroup',
+    'NgpRovingFocusGroupState',
   ];
   const sourceFiles = walk(join(root, 'projects/hell/src/lib')).filter((file) => file.endsWith('.ts'));
 

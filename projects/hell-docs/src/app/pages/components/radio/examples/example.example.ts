@@ -11,11 +11,21 @@ import { HellRadio, HellRadioGroup, HellRadioIndicator } from '@hell-ui/angular/
       hellRadioGroup
       aria-label="Plan"
       orientation="vertical"
+      [required]="true"
       [value]="plan()"
       (valueChange)="plan.set($event!)"
     >
       <button hellRadio value="free" type="button" class="inline-flex items-center gap-2">
         <span ngpRadioIndicator></span> Free
+      </button>
+      <button
+        hellRadio
+        value="legacy"
+        type="button"
+        class="inline-flex items-center gap-2"
+        [disabled]="true"
+      >
+        <span ngpRadioIndicator></span> Legacy
       </button>
       <button hellRadio value="pro" type="button" class="inline-flex items-center gap-2">
         <span ngpRadioIndicator></span> Pro
@@ -31,5 +41,5 @@ import { HellRadio, HellRadioGroup, HellRadioIndicator } from '@hell-ui/angular/
   `,
 })
 export class RadioExampleExample {
-  protected readonly plan = signal<'free' | 'pro' | 'enterprise'>('free');
+  protected readonly plan = signal<'free' | 'legacy' | 'pro' | 'enterprise'>('free');
 }

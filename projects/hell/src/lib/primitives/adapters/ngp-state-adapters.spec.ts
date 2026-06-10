@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NgpCombobox, injectComboboxState } from 'ng-primitives/combobox';
 import { NgpRadioGroup, injectRadioGroupState } from 'ng-primitives/radio';
+import { NgpRovingFocusGroup, injectRovingFocusGroupState } from 'ng-primitives/roving-focus';
 import { NgpSelect, injectSelectState } from 'ng-primitives/select';
 
 import { HELL_COMBOBOX_DIRECTIVES } from '../combobox/combobox';
@@ -16,6 +17,7 @@ import {
   writeComboboxStateValue,
   writeRadioGroupStateDisabled,
   writeRadioGroupStateValue,
+  writeRovingFocusActiveItem,
   writeSelectStateDisabled,
   writeSelectStateValue,
 } from './ngp-state-adapters';
@@ -63,6 +65,20 @@ class RadioGroupStateProbe {
   template: `<div hellRadioGroupStateProbe></div>`,
 })
 class RadioGroupStateProbeHost {}
+
+@Directive({
+  selector: '[hellRovingFocusGroupStateProbe]',
+  hostDirectives: [NgpRovingFocusGroup],
+})
+class RovingFocusGroupStateProbe {
+  readonly state = injectRovingFocusGroupState();
+}
+
+@Component({
+  imports: [RovingFocusGroupStateProbe],
+  template: `<div hellRovingFocusGroupStateProbe></div>`,
+})
+class RovingFocusGroupStateProbeHost {}
 
 @Directive({
   selector: '[hellSelectCvaStateProbe]',
@@ -167,6 +183,19 @@ function writableDisabledChannel(state: { disabled: unknown }): WritableSignalLi
   return disabled as WritableSignalLike<boolean>;
 }
 
+function writableActiveItemChannel(state: {
+  activeItem: unknown;
+}): WritableSignalLike<string | null> {
+  const activeItem = state.activeItem;
+  if (
+    typeof activeItem !== 'function' ||
+    typeof (activeItem as { set?: unknown }).set !== 'function'
+  ) {
+    throw new Error('Expected public ng-primitives state.activeItem writable signal.');
+  }
+  return activeItem as WritableSignalLike<string | null>;
+}
+
 function probe<T>(host: Type<unknown>, directive: Type<T>): T {
   const fixture = TestBed.createComponent(host);
   fixture.detectChanges();
@@ -209,7 +238,12 @@ describe('ngp form-state compatibility helpers', () => {
   describe('installed ng-primitives public typed State<T> channel drift', () => {
     beforeEach(async () => {
       await TestBed.configureTestingModule({
-        imports: [SelectStateProbeHost, ComboboxStateProbeHost, RadioGroupStateProbeHost],
+        imports: [
+          SelectStateProbeHost,
+          ComboboxStateProbeHost,
+          RadioGroupStateProbeHost,
+          RovingFocusGroupStateProbeHost,
+        ],
       }).compileComponents();
     });
 
@@ -247,6 +281,15 @@ describe('ngp form-state compatibility helpers', () => {
 
       expect(value()).toBe('from-public-state');
       expect(disabled()).toBe(true);
+    });
+
+    it('writes roving-focus active item through the public typed State<T> channel', () => {
+      const state = probe(RovingFocusGroupStateProbeHost, RovingFocusGroupStateProbe).state();
+      const activeItem = writableActiveItemChannel(state);
+
+      writeRovingFocusActiveItem(state, 'from-public-state');
+
+      expect(activeItem()).toBe('from-public-state');
     });
   });
 
@@ -450,14 +493,26 @@ describe('ngp form-state compatibility helpers', () => {
   });
 
   it('throws version-bound errors with affected operation when select State<T> channel shape is invalid', () => {
-    expectAdapterError(() => writeSelectStateValue({} as never, 'value'), 'writeSelectStateValue', /value\.set/);
     expectAdapterError(
-      () => writeSelectStateValue({ value: { set: 'not-a-function' } as never, disabled: { set: vi.fn() } } as never, 'value'),
+      () => writeSelectStateValue({} as never, 'value'),
       'writeSelectStateValue',
       /value\.set/,
     );
     expectAdapterError(
-      () => writeSelectStateDisabled({ value: { set: vi.fn() }, disabled: { set: 0 } as never } as never, true),
+      () =>
+        writeSelectStateValue(
+          { value: { set: 'not-a-function' } as never, disabled: { set: vi.fn() } } as never,
+          'value',
+        ),
+      'writeSelectStateValue',
+      /value\.set/,
+    );
+    expectAdapterError(
+      () =>
+        writeSelectStateDisabled(
+          { value: { set: vi.fn() }, disabled: { set: 0 } as never } as never,
+          true,
+        ),
       'writeSelectStateDisabled',
       /disabled\.set/,
     );
@@ -494,10 +549,22 @@ describe('ngp form-state compatibility helpers', () => {
   });
 
   it('throws version-bound errors with affected operation when combobox State<T> channel shape is invalid', () => {
-    expectAdapterError(() => writeComboboxStateValue({} as never, 'x'), 'writeComboboxStateValue', /value\.set/);
-    expectAdapterError(() => writeComboboxStateDisabled({} as never, true), 'writeComboboxStateDisabled', /disabled\.set/);
     expectAdapterError(
-      () => writeComboboxStateDisabled({ value: { set: vi.fn() }, disabled: {} as never } as never, false),
+      () => writeComboboxStateValue({} as never, 'x'),
+      'writeComboboxStateValue',
+      /value\.set/,
+    );
+    expectAdapterError(
+      () => writeComboboxStateDisabled({} as never, true),
+      'writeComboboxStateDisabled',
+      /disabled\.set/,
+    );
+    expectAdapterError(
+      () =>
+        writeComboboxStateDisabled(
+          { value: { set: vi.fn() }, disabled: {} as never } as never,
+          false,
+        ),
       'writeComboboxStateDisabled',
       /disabled\.set/,
     );
@@ -534,12 +601,37 @@ describe('ngp form-state compatibility helpers', () => {
   });
 
   it('throws version-bound errors with affected operation when radio-group State<T> channel shape is invalid', () => {
-    expectAdapterError(() => writeRadioGroupStateValue({} as never, 'x'), 'writeRadioGroupStateValue', /value\.set/);
-    expectAdapterError(() => writeRadioGroupStateDisabled({} as never, true), 'writeRadioGroupStateDisabled', /disabled\.set/);
     expectAdapterError(
-      () => writeRadioGroupStateDisabled({ value: { set: vi.fn() }, disabled: { set: 1 } as never } as never, true),
+      () => writeRadioGroupStateValue({} as never, 'x'),
+      'writeRadioGroupStateValue',
+      /value\.set/,
+    );
+    expectAdapterError(
+      () => writeRadioGroupStateDisabled({} as never, true),
       'writeRadioGroupStateDisabled',
       /disabled\.set/,
+    );
+    expectAdapterError(
+      () =>
+        writeRadioGroupStateDisabled(
+          { value: { set: vi.fn() }, disabled: { set: 1 } as never } as never,
+          true,
+        ),
+      'writeRadioGroupStateDisabled',
+      /disabled\.set/,
+    );
+  });
+
+  it('throws version-bound errors with affected operation when roving-focus activeItem shape is invalid', () => {
+    expectAdapterError(
+      () => writeRovingFocusActiveItem({} as never, 'x'),
+      'writeRovingFocusActiveItem',
+      /activeItem\.set/,
+    );
+    expectAdapterError(
+      () => writeRovingFocusActiveItem({ activeItem: { set: false } } as never, 'x'),
+      'writeRovingFocusActiveItem',
+      /activeItem\.set/,
     );
   });
 });

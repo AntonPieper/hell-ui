@@ -231,12 +231,11 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     path: '/components/radio',
     rolePattern: 'Radiogroup with custom button radios plus native radio-group/input variants.',
     keyboardCoverage:
-      'Delegated to ng-primitives/native controls; browser key traversal is not covered.',
+      'Browser contract covers custom radio ArrowRight/ArrowDown next movement, ArrowLeft/ArrowUp previous movement, disabled skip, Home/End movement, checked tab stop, and required group state.',
     automatedCoverage:
-      'ARIA snapshots cover named groups and checked state. No axe smoke or browser keyboard test yet.',
+      'ARIA snapshots cover named groups and checked state; Playwright assertions cover required state and disabled options. Docs axe smoke and dedicated browser keyboard coverage run in Playwright.',
     knownGaps:
-      'Critical gap: add Arrow/Home/End/disabled/required browser coverage for custom radio groups.',
-    criticalGap: true,
+      'No critical gap recorded; consumers still need to provide concise group names and should choose hellNativeRadio when native form semantics are the priority.',
   },
   {
     kind: 'Primitive',
