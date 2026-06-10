@@ -21,6 +21,8 @@ The release stage defines the package-level promise. API comments and docs still
 - **Deprecated**: still present for compatibility, with changelog and migration notes required before removal.
 - **Internal**: not public API, even if reachable through built files; static-contract checks should keep these out of public exports.
 
+The entrypoint stability source of truth is `tools/entrypoint-manifest.mjs`. It records the tier, owning package, peer tier, consumer scenario, and API-report expectation for each importable TypeScript and style entrypoint.
+
 ## What counts as breaking
 
 Record a breaking change when a consumer may need to edit code, styles, package manifests, or release assumptions. Examples:

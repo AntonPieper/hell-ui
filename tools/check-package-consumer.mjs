@@ -168,6 +168,12 @@ const scenarios = [
     mainTs: compositesConsumerMainTs(),
     stylesCss: compositesConsumerStylesCss(),
   }),
+  scenario('kitchen-sink-styles', {
+    dependencies: styledUiDeps,
+    forbiddenDependencies: tableAdapterPeerGroup,
+    mainTs: rootConsumerMainTs(),
+    stylesCss: rootConsumerStylesCss(),
+  }),
   scenario('app-shell', {
     dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: appShellConsumerMainTs(),
@@ -1511,6 +1517,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function rootConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/styles";
+@import "${packageName}/styles/kitchen-sink";
 `;
 }
 

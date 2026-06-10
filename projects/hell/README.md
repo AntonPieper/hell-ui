@@ -56,27 +56,13 @@ Package-consumer scenarios assert these peer groups with strict peer installs. T
 
 Every exported API belongs to one documented category:
 
-- `Stable`: supported public contract. Stable entry points are API-report guarded where listed below; breaking changes need an explicit semver/changelog decision.
+- `Stable`: supported public contract. Stable entry points are API-report guarded by the entrypoint stability manifest; breaking changes need an explicit semver/changelog decision.
 - `Beta`: public but still pre-1.0. Shape changes require release notes and migration guidance, but are not promoted as final stable contracts.
 - `Experimental`: importable app surface for heavier/browser-specific features. API comments or generated entry-point comments must include `@experimental`, docs must disclose the risk, and apps should isolate the import behind lazy/client-only boundaries when applicable.
 - `Deprecated`: compatibility alias with a preferred replacement. API comments must include `@deprecated`, docs must name the replacement, and removal needs an explicit release decision.
 - `Internal`: implementation detail, not a consumer import path. Public API files must not export from `/internal/`, `/adapters/`, or manifest-declared internal directories unless the static-contract allowlist names the exception and rationale.
 
-The stable API report set currently covers `@hell-ui/angular`, `@hell-ui/angular/core`, `@hell-ui/angular/primitives`, and `@hell-ui/angular/testing`.
-
-| Surface | Category | Browser/SSR notes |
-|---|---|---|
-| Root/core (`@hell-ui/angular`, `/core`) | Stable | Lightweight contracts; no composite or heavy feature exports |
-| Primitives (`@hell-ui/angular/primitives`, narrow primitive entry points) | Stable | SSR-safe unless a primitive's own docs say otherwise |
-| Composites (`@hell-ui/angular/composites`, narrow composite entry points) | Beta | Browser-first surfaces can use `window`/`document` and global listeners for overlays |
-| Table primitives (`@hell-ui/angular/table`) | Beta | Optional peer; uses `ResizeObserver` for table sizing |
-| Data table and table adapters (`@hell-ui/angular/data-table`, `/table-tanstack`, `/table-virtual`, `/table-cdk`) | Experimental | Simple native data table, TanStack Table adapter, TanStack Virtual adapter, and CDK Table skin adapter are available; keep adapter-specific engines behind their entrypoints |
-| Code editor (`@hell-ui/angular/features/code-editor`) | Experimental | Browser-only CodeMirror runtime: `window`/`document` interactions |
-| PDF viewer (`@hell-ui/pdf-viewer`) | Experimental split package | Browser-only app surface/recipe owned outside `@hell-ui/angular` |
-| Testing harnesses (`@hell-ui/angular/testing`) | Stable/test-only | CDK component harnesses for consumer and library tests |
-| Speech transcript (`allowSpeechTranscript`) | Experimental/browser-only/best-effort | Requires `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript`; uses `navigator` + `SpeechRecognition` + `captureStream`; not accessibility-grade captions or production timed text |
-| Removed table aliases and row-as-control APIs (`/features/data-table`, `/features/table-utilities`, `HELL_TABLE_DIRECTIVES`, `HELL_TABLE_UTILITY_DIRECTIVES`, `HellTableRow.interactive`, `selectionSemantics`, `(rowSelect)`, `[selectable]`) | Removed before beta | Use `@hell-ui/angular/table` plus `HELL_TABLE_UTILITIES_DIRECTIVES`; use `hellTableRowAction` for row actions and checkbox/radio controls for selection |
-| Deprecated non-table aliases (`allowLiveCaptions`, `hellAudioSpeechSupported` from `/audio-player`, `HellDataTableLabels`, `hellCodeEditorSetup`) | Deprecated | Keep compatibility imports only while migrating to the documented replacements |
+The machine-readable source of truth for entrypoint tier, owner package, peer tier, package-consumer scenario, and API-report expectation is `tools/entrypoint-manifest.mjs`.
 
 The PDF viewer was split out before public beta; use `@hell-ui/pdf-viewer` for the component, styles, and worker setup docs.
 

@@ -113,9 +113,9 @@ const fileChecks = [
   {
     path: 'tools/check-api-reports.mjs',
     includes: [
-      '@hell-ui/angular/core',
-      '@hell-ui/angular/primitives',
-      '@hell-ui/angular/testing',
+      'apiReportPolicyEntries',
+      'apiReportTypeFileBase',
+      'packageDistRoot',
       'localBuild',
       'reportFolder',
       'reportTempFolder',

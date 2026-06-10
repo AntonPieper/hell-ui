@@ -1,5 +1,7 @@
 const packageName = '@hell-ui/angular';
+const pdfPackageName = '@hell-ui/pdf-viewer';
 const libraryRoot = 'projects/hell';
+const pdfLibraryRoot = 'projects/hell-pdf-viewer';
 
 export const entrypointManifest = {
   root: {
@@ -242,6 +244,77 @@ export const entrypointManifest = {
   ],
 };
 
+export const styleEntrypointManifest = [
+  styleEntrypoint(packageName, './styles', 'experimental', 'composite', 'kitchen-sink-styles'),
+  styleEntrypoint(packageName, './styles/tokens', 'stable', 'primitive', 'primitives-css'),
+  styleEntrypoint(packageName, './styles/primitives', 'stable', 'primitive', 'primitives-css'),
+  styleEntrypoint(packageName, './styles/composites', 'beta', 'composite', 'composites-css'),
+  styleEntrypoint(packageName, './styles/table', 'beta', 'table', 'table'),
+  styleEntrypoint(packageName, './styles/features/code-editor', 'experimental', 'code-editor', 'code-editor'),
+  styleEntrypoint(packageName, './styles/kitchen-sink', 'experimental', 'composite', 'kitchen-sink-styles'),
+  styleEntrypoint(packageName, './styles/components/*', 'beta', 'primitive', 'primitives-css', 'style-pattern'),
+  ...componentStyleEntrypoints(
+    packageName,
+    [
+      'overlay',
+      'button',
+      'card',
+      'separator',
+      'input',
+      'field',
+      'checkbox',
+      'radio',
+      'switch',
+      'toggle',
+      'tabs',
+      'accordion',
+      'dialog',
+      'popover',
+      'flyout',
+      'menu',
+      'combobox',
+      'select',
+      'tooltip',
+      'avatar',
+      'icon',
+      'tag',
+      'skeleton',
+      'progress',
+      'slider',
+      'breadcrumbs',
+      'pagination',
+      'date-picker',
+    ],
+    'stable',
+    'primitive',
+    'primitives-css',
+  ),
+  ...componentStyleEntrypoints(
+    packageName,
+    [
+      'avatar-group',
+      'date-input',
+      'time-input',
+      'app-shell',
+      'resizable',
+      'split-view',
+      'audio-player',
+      'drop-zone',
+      'dialpad',
+      'toast',
+      'omnibar',
+    ],
+    'beta',
+    'composite',
+    'composites-css',
+  ),
+  ...componentStyleEntrypoints(packageName, ['table', 'table-renderer'], 'beta', 'table', 'table'),
+  styleEntrypoint(packageName, './styles/components/code-editor', 'experimental', 'code-editor', 'code-editor'),
+  styleEntrypoint(pdfPackageName, './styles', 'experimental', 'pdf-viewer', 'pdf-viewer'),
+  styleEntrypoint(pdfPackageName, './styles/pdf-viewer', 'experimental', 'pdf-viewer', 'pdf-viewer'),
+  styleEntrypoint(pdfPackageName, './styles/components/pdf-viewer', 'experimental', 'pdf-viewer', 'pdf-viewer'),
+];
+
 export function entrypointPublicApiFiles() {
   return [
     entrypointManifest.root,
@@ -249,6 +322,37 @@ export function entrypointPublicApiFiles() {
     ...aggregateEntrypoints(),
     ...individualEntrypoints(),
   ];
+}
+
+export function entrypointPolicyEntries() {
+  return [
+    ...entrypointPublicApiFiles().map((entrypoint) => ({
+      ...entrypoint,
+      kind: 'typescript',
+      ownerPackage: packageName,
+      ...entrypointPolicy(entrypoint),
+    })),
+    {
+      id: 'pdf-viewer',
+      specifier: pdfPackageName,
+      kind: 'typescript',
+      ownerPackage: pdfPackageName,
+      publicApiPath: `${pdfLibraryRoot}/src/public-api.ts`,
+      packageDir: pdfLibraryRoot,
+      tier: 'experimental',
+      peerTier: 'pdf-viewer',
+      consumerScenario: 'pdf-viewer',
+      apiReport: excludedApiReport('experimental split package; API report promotion is explicit policy work'),
+    },
+  ];
+}
+
+export function styleEntrypointPolicyEntries() {
+  return styleEntrypointManifest.map((entrypoint) => ({ ...entrypoint }));
+}
+
+export function apiReportPolicyEntries() {
+  return entrypointPolicyEntries().filter((entrypoint) => entrypoint.apiReport.expectation !== 'covered-by');
 }
 
 export function secondaryPackageEntrypoints() {
@@ -329,4 +433,163 @@ function individualEntrypoints() {
 
 function interpolate(template, slug) {
   return template.replaceAll('{slug}', slug);
+}
+
+function entrypointPolicy(entrypoint) {
+  if (entrypoint.id === 'root') {
+    return {
+      tier: 'stable',
+      peerTier: 'core',
+      consumerScenario: 'root-core',
+      apiReport: requiredApiReport('hell-ui-angular.api.md'),
+    };
+  }
+
+  switch (entrypoint.id) {
+    case 'core':
+      return {
+        tier: 'stable',
+        peerTier: 'core',
+        consumerScenario: 'core',
+        apiReport: requiredApiReport('hell-ui-angular-core.api.md'),
+      };
+    case 'testing':
+      return {
+        tier: 'stable',
+        peerTier: 'core',
+        consumerScenario: 'testing',
+        apiReport: requiredApiReport('hell-ui-angular-testing.api.md'),
+      };
+    case 'table':
+      return {
+        tier: 'beta',
+        peerTier: 'table',
+        consumerScenario: 'table',
+        apiReport: excludedApiReport('HELL-114 owns promoted-beta API report coverage for table'),
+      };
+    case 'data-table':
+      return {
+        tier: 'experimental',
+        peerTier: 'table',
+        consumerScenario: 'data-table',
+        apiReport: excludedApiReport('experimental simple data-table entrypoint'),
+      };
+    case 'table-tanstack':
+      return {
+        tier: 'experimental',
+        peerTier: 'table-tanstack',
+        consumerScenario: 'table-tanstack',
+        apiReport: excludedApiReport('experimental TanStack adapter entrypoint'),
+      };
+    case 'table-virtual':
+      return {
+        tier: 'experimental',
+        peerTier: 'table-virtual',
+        consumerScenario: 'table-virtual',
+        apiReport: excludedApiReport('experimental TanStack Virtual adapter entrypoint'),
+      };
+    case 'table-cdk':
+      return {
+        tier: 'experimental',
+        peerTier: 'table-cdk',
+        consumerScenario: 'table-cdk',
+        apiReport: excludedApiReport('experimental CDK table skin entrypoint'),
+      };
+    case 'primitives':
+      return {
+        tier: 'stable',
+        peerTier: 'primitive',
+        consumerScenario: 'primitives-css',
+        apiReport: requiredApiReport('hell-ui-angular-primitives.api.md'),
+      };
+    case 'composites':
+      return {
+        tier: 'beta',
+        peerTier: 'composite',
+        consumerScenario: 'composites-css',
+        apiReport: excludedApiReport('HELL-114 owns promoted-beta API report coverage for composites'),
+      };
+    default:
+      break;
+  }
+
+  if (entrypoint.group === 'primitives') {
+    return {
+      tier: 'stable',
+      peerTier: 'primitive',
+      consumerScenario: entrypoint.slug === 'button' ? 'button-unstyled' : 'primitives-css',
+      apiReport: coveredApiReport('@hell-ui/angular/primitives'),
+    };
+  }
+
+  if (entrypoint.group === 'composites') {
+    const scenarioBySlug = {
+      'app-shell': 'app-shell',
+      'audio-player': 'audio-player',
+    };
+    return {
+      tier: 'beta',
+      peerTier: 'composite',
+      consumerScenario: scenarioBySlug[entrypoint.slug] ?? 'composites-css',
+      apiReport: excludedApiReport('HELL-114 owns promoted-beta API report coverage for composites'),
+    };
+  }
+
+  if (entrypoint.group === 'features') {
+    if (entrypoint.slug === 'audio-transcript') {
+      return {
+        tier: 'experimental',
+        peerTier: 'audio-transcript',
+        consumerScenario: 'audio-transcript',
+        apiReport: excludedApiReport('experimental browser speech transcript provider'),
+      };
+    }
+    if (entrypoint.slug === 'code-editor') {
+      return {
+        tier: 'experimental',
+        peerTier: 'code-editor',
+        consumerScenario: 'code-editor',
+        apiReport: excludedApiReport('experimental CodeMirror feature entrypoint'),
+      };
+    }
+  }
+
+  return {
+    tier: 'unclassified',
+    peerTier: 'core',
+    consumerScenario: 'root-core',
+    apiReport: excludedApiReport(`unclassified entrypoint ${entrypoint.specifier}`),
+  };
+}
+
+function componentStyleEntrypoints(ownerPackage, slugs, tier, peerTier, consumerScenario) {
+  return slugs.map((slug) =>
+    styleEntrypoint(ownerPackage, `./styles/components/${slug}`, tier, peerTier, consumerScenario),
+  );
+}
+
+function styleEntrypoint(ownerPackage, exportPath, tier, peerTier, consumerScenario, kind = 'style') {
+  return {
+    id: `${ownerPackage}:${exportPath}`,
+    specifier: `${ownerPackage}/${exportPath.replace(/^\.\//, '')}`,
+    kind,
+    ownerPackage,
+    exportPath,
+    tier,
+    peerTier,
+    consumerScenario,
+    apiReport: { expectation: 'not-applicable' },
+  };
+}
+
+function requiredApiReport(reportFileName) {
+  return { expectation: 'required', reportFileName };
+}
+
+function coveredApiReport(coveredBy) {
+  return { expectation: 'covered-by', coveredBy };
+}
+
+function excludedApiReport(reason) {
+  return { expectation: 'excluded', reason };
 }

@@ -6,12 +6,15 @@ import { fileURLToPath } from 'node:url';
 // Static source/package contract gate only. Behavior, visual, API-report,
 // package-consumer, and release claims need their own evidence commands.
 import {
+  apiReportPolicyEntries,
+  entrypointPolicyEntries,
   entrypointPublicApiFiles,
   entrypointSourceGroups,
   entrypointTsconfigPaths,
   renderNgPackageFile,
   renderPublicApiFile,
   secondaryPackageEntrypoints,
+  styleEntrypointPolicyEntries,
 } from './entrypoint-manifest.mjs';
 import {
   loadStaticContractManifest,
@@ -924,6 +927,209 @@ function checkPackageEntryPoints() {
 
   checkEntrypointManifestSourceCoverage();
   checkGeneratedEntrypointFiles();
+  checkEntrypointPolicyManifestContract();
+}
+
+function checkEntrypointPolicyManifestContract() {
+  const policyEntries = entrypointPolicyEntries();
+  const stylePolicyEntries = styleEntrypointPolicyEntries();
+  const apiReportEntries = apiReportPolicyEntries();
+  const validTiers = new Set(['stable', 'beta', 'experimental', 'deprecated', 'internal']);
+  const validApiReportExpectations = new Set(['required', 'covered-by', 'excluded', 'not-applicable']);
+  const validPeerTiers = new Set(packageConsumerPeerContractManifest.peerTiers ?? []);
+  const validScenarios = new Set(
+    Object.keys(packageConsumerPeerContractManifest.scenarioPeerContracts ?? {}),
+  );
+
+  const expectedTsSpecifiers = new Set([
+    ...entrypointPublicApiFiles().map((entrypoint) => entrypoint.specifier),
+    '@hell-ui/pdf-viewer',
+  ]);
+  const actualTsSpecifiers = new Set(policyEntries.map((entrypoint) => entrypoint.specifier));
+  assertSameSet(
+    'Entrypoint Stability Manifest TypeScript specifiers',
+    expectedTsSpecifiers,
+    actualTsSpecifiers,
+  );
+
+  const tsconfig = parseJsonWithComments(readFile(join(root, 'tsconfig.json')));
+  const packageAliases = new Set(
+    Object.keys(tsconfig.compilerOptions?.paths ?? {}).filter(
+      (specifier) =>
+        specifier === '@hell-ui/angular' ||
+        specifier.startsWith('@hell-ui/angular/') ||
+        specifier === '@hell-ui/pdf-viewer' ||
+        specifier.startsWith('@hell-ui/pdf-viewer/'),
+    ),
+  );
+  assertSameSet(
+    'Entrypoint Stability Manifest TypeScript package aliases',
+    packageAliases,
+    actualTsSpecifiers,
+  );
+  const tsconfigPaths = tsconfig.compilerOptions?.paths ?? {};
+  for (const entrypoint of policyEntries) {
+    const expectedPath = `./${entrypoint.publicApiPath}`;
+    const actualPath = tsconfigPaths[entrypoint.specifier]?.[0];
+    if (actualPath !== expectedPath) {
+      failures.push(
+        `Entrypoint Stability Manifest ${entrypoint.specifier} tsconfig path is ${actualPath ?? 'missing'}, expected ${expectedPath}`,
+      );
+    }
+  }
+
+  const expectedNgPackagePaths = new Set([
+    'projects/hell/ng-package.json',
+    'projects/hell-pdf-viewer/ng-package.json',
+    ...secondaryPackageEntrypoints().map((entrypoint) => entrypoint.packagePath),
+  ]);
+  const actualNgPackagePaths = new Set(
+    walk(join(root, 'projects'))
+      .filter((file) => basename(file) === 'ng-package.json')
+      .map(relPath),
+  );
+  assertSameSet('Entrypoint Stability Manifest ng-package files', expectedNgPackagePaths, actualNgPackagePaths);
+
+  const styleSpecifiers = new Set(stylePolicyEntries.map((entrypoint) => entrypoint.specifier));
+  const styleExportMaps = new Map();
+  const concreteStyleSpecifiers = new Set(
+    stylePolicyEntries
+      .filter((entrypoint) => entrypoint.kind === 'style')
+      .map((entrypoint) => entrypoint.specifier),
+  );
+  const expectedConcreteStyleSpecifiers = new Set();
+  for (const [packagePath, packageName] of [
+    ['projects/hell/package.json', '@hell-ui/angular'],
+    ['projects/hell-pdf-viewer/package.json', '@hell-ui/pdf-viewer'],
+  ]) {
+    const packageJson = parseJsonWithComments(readFile(join(root, packagePath)));
+    styleExportMaps.set(packageName, packageJson.exports ?? {});
+    for (const exportPath of Object.keys(packageJson.exports ?? {})) {
+      const specifier = styleSpecifierForExport(packageName, exportPath);
+      if (!styleSpecifiers.has(specifier)) {
+        failures.push(`Entrypoint Stability Manifest is missing style entrypoint ${specifier}`);
+      }
+      if (!exportPath.includes('*')) expectedConcreteStyleSpecifiers.add(specifier);
+    }
+  }
+  for (const file of readdirSync(join(root, 'projects/hell/src/lib/styles/components')).filter((name) =>
+    name.endsWith('.css'),
+  )) {
+    expectedConcreteStyleSpecifiers.add(
+      `@hell-ui/angular/styles/components/${basename(file, '.css')}`,
+    );
+  }
+  assertSameSet(
+    'Entrypoint Stability Manifest concrete style entrypoints',
+    expectedConcreteStyleSpecifiers,
+    concreteStyleSpecifiers,
+  );
+
+  for (const entrypoint of stylePolicyEntries) {
+    const exportsMap = styleExportMaps.get(entrypoint.ownerPackage);
+    if (!styleEntrypointHasPackageExport(entrypoint, exportsMap)) {
+      failures.push(
+        `Entrypoint Stability Manifest ${entrypoint.specifier} is not backed by an importable package style export`,
+      );
+    }
+  }
+
+  const requiredReportSpecifiers = new Set(
+    policyEntries
+      .filter((entrypoint) => entrypoint.apiReport?.expectation === 'required')
+      .map((entrypoint) => entrypoint.specifier),
+  );
+  const requiredReportFileNames = new Set(
+    apiReportEntries
+      .filter((entrypoint) => entrypoint.apiReport.expectation === 'required')
+      .map((entrypoint) => entrypoint.apiReport.reportFileName),
+  );
+  const actualReportFileNames = new Set(
+    readdirSync(join(root, 'etc/api-reports')).filter((name) => name.endsWith('.api.md')),
+  );
+  assertSameSet(
+    'Entrypoint Stability Manifest API report baselines',
+    requiredReportFileNames,
+    actualReportFileNames,
+  );
+  for (const entrypoint of [...policyEntries, ...stylePolicyEntries]) {
+    const label = `Entrypoint Stability Manifest ${entrypoint.specifier}`;
+    if (!validTiers.has(entrypoint.tier)) failures.push(`${label} has invalid tier ${entrypoint.tier}`);
+    if (!entrypoint.ownerPackage) failures.push(`${label} is missing ownerPackage`);
+    if (!validPeerTiers.has(entrypoint.peerTier)) {
+      failures.push(`${label} has unknown peer tier ${entrypoint.peerTier}`);
+    }
+    if (!validScenarios.has(entrypoint.consumerScenario)) {
+      failures.push(`${label} has unknown package-consumer scenario ${entrypoint.consumerScenario}`);
+    }
+
+    const expectation = entrypoint.apiReport?.expectation;
+    if (!validApiReportExpectations.has(expectation)) {
+      failures.push(`${label} has invalid API report expectation ${expectation}`);
+    }
+    if ((entrypoint.kind === 'style' || entrypoint.kind === 'style-pattern') && expectation !== 'not-applicable') {
+      failures.push(`${label} is a style entrypoint and must not claim API report coverage`);
+    }
+    if (expectation === 'required' && !/\.api\.md$/.test(entrypoint.apiReport.reportFileName ?? '')) {
+      failures.push(`${label} requires an API report but has no reportFileName`);
+    }
+    if (expectation === 'covered-by' && !requiredReportSpecifiers.has(entrypoint.apiReport.coveredBy)) {
+      failures.push(`${label} is covered by unknown API report entrypoint ${entrypoint.apiReport.coveredBy}`);
+    }
+    if (expectation === 'excluded' && !entrypoint.apiReport.reason) {
+      failures.push(`${label} excludes API reports without a reason`);
+    }
+  }
+}
+
+function styleSpecifierForExport(packageName, exportPath) {
+  return `${packageName}/${exportPath.replace(/^\.\//, '')}`;
+}
+
+function styleEntrypointHasPackageExport(entrypoint, exportsMap) {
+  if (!exportsMap) return false;
+  const exact = exportsMap[entrypoint.exportPath];
+  if (entrypoint.kind === 'style-pattern') return styleExportTargetsCss(exact, true);
+  if (styleExportTargetsCss(exact, false)) return true;
+
+  return Object.entries(exportsMap).some(
+    ([exportPath, exportValue]) =>
+      exportPath.includes('*') &&
+      styleExportTargetsCss(exportValue, true) &&
+      exportPathPatternMatches(exportPath, entrypoint.exportPath),
+  );
+}
+
+function styleExportTargetsCss(exportValue, allowPattern) {
+  if (!exportValue || typeof exportValue !== 'object' || Array.isArray(exportValue)) return false;
+  return ['style', 'default'].every((condition) => {
+    const target = exportValue[condition];
+    return (
+      typeof target === 'string' &&
+      target.startsWith('./') &&
+      target.endsWith('.css') &&
+      !target.includes('..') &&
+      (allowPattern || !target.includes('*'))
+    );
+  });
+}
+
+function exportPathPatternMatches(pattern, exportPath) {
+  const [prefix, suffix] = pattern.split('*');
+  return exportPath.startsWith(prefix) && exportPath.endsWith(suffix);
+}
+
+function assertSameSet(label, expected, actual) {
+  const expectedList = [...expected].sort();
+  const actualList = [...actual].sort();
+  const missing = expectedList.filter((value) => !actual.has(value));
+  const unexpected = actualList.filter((value) => !expected.has(value));
+  if (!missing.length && !unexpected.length) return;
+
+  const parts = [];
+  if (missing.length) parts.push(`missing ${missing.join(', ')}`);
+  if (unexpected.length) parts.push(`unexpected ${unexpected.join(', ')}`);
+  failures.push(`${label} mismatch: ${parts.join('; ')}`);
 }
 
 function checkCodeMirrorEntrypointIsolationContract() {
@@ -1075,16 +1281,9 @@ function isAudioTranscriptFeatureSpecifier(specifier) {
 function checkApiReportContract() {
   const packageJson = parseJsonWithComments(readFile(join(root, 'package.json')));
   const script = readFile(join(root, 'tools/check-api-reports.mjs'));
-  const expectedEntrypoints = [
-    ['@hell-ui/angular', 'hell-ui-angular.api.md'],
-    ['@hell-ui/angular/core', 'hell-ui-angular-core.api.md'],
-    ['@hell-ui/angular/primitives', 'hell-ui-angular-primitives.api.md'],
-    ['@hell-ui/angular/testing', 'hell-ui-angular-testing.api.md'],
-  ];
-  const forbiddenExperimentalApiReports = [
-    '@hell-ui/angular/features/code-editor',
-    'hell-ui-angular-features-code-editor.api.md',
-  ];
+  const expectedEntrypoints = apiReportPolicyEntries().filter(
+    (entrypoint) => entrypoint.apiReport.expectation === 'required',
+  );
 
   if (packageJson.scripts?.['test:api-report'] !== 'node tools/check-api-reports.mjs') {
     failures.push('API Report contract must expose pnpm run test:api-report');
@@ -1096,27 +1295,24 @@ function checkApiReportContract() {
     failures.push('API Report contract must run from ci:build after the library package is built');
   }
 
-  for (const [specifier, reportFileName] of expectedEntrypoints) {
-    if (!script.includes(specifier)) {
-      failures.push(`API Report script is missing stable entry point ${specifier}`);
-    }
-    if (!script.includes(reportFileName)) {
-      failures.push(`API Report script is missing report file ${reportFileName}`);
-    }
+  if (!script.includes('apiReportPolicyEntries')) {
+    failures.push('API Report contract must derive report entrypoints from entrypoint manifest policy');
+  }
 
+  const expectedReportFiles = new Set();
+  for (const entrypoint of expectedEntrypoints) {
+    const reportFileName = entrypoint.apiReport.reportFileName;
+    expectedReportFiles.add(reportFileName);
     const reportPath = join(root, 'etc/api-reports', reportFileName);
     if (!existsSync(reportPath)) {
       failures.push(`API Report baseline is missing etc/api-reports/${reportFileName}`);
     }
   }
 
-  for (const forbidden of forbiddenExperimentalApiReports) {
-    if (script.includes(forbidden)) {
-      failures.push(
-        `API Report contract must keep Code Editor out of stable API reports until API report policy deliberately promotes it: ${forbidden}`,
-      );
-    }
-  }
+  const actualReportFiles = new Set(
+    readdirSync(join(root, 'etc/api-reports')).filter((name) => name.endsWith('.api.md')),
+  );
+  assertSameSet('API Report contract manifest baselines', expectedReportFiles, actualReportFiles);
 }
 
 function checkApiStabilityContract() {

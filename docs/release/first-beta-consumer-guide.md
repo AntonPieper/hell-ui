@@ -15,7 +15,7 @@ Use this guide when moving an app from local/alpha Hell imports to the first bet
 
 ## Install peer tiers
 
-Package peer metadata is package-wide. Some optional peers appear in the package manifest even when they are only required by a kept feature entry point. The PDF viewer is now split into `@hell-ui/pdf-viewer`, so `@hell-ui/angular` no longer advertises pdf.js. The static peer-tier source of truth is [`tools/static-contracts/package-consumer-peer-contracts.json`](../../tools/static-contracts/package-consumer-peer-contracts.json), and the package-consumer runner proves the actual strict-peer install groups in [`tools/check-package-consumer.mjs`](../../tools/check-package-consumer.mjs).
+Package peer metadata is package-wide. Some optional peers appear in the package manifest even when they are only required by a kept feature entry point. The PDF viewer is now split into `@hell-ui/pdf-viewer`, so `@hell-ui/angular` no longer advertises pdf.js. The static peer-tier source of truth is [`tools/static-contracts/package-consumer-peer-contracts.json`](../../tools/static-contracts/package-consumer-peer-contracts.json), entrypoint stability/API policy lives in [`tools/entrypoint-manifest.mjs`](../../tools/entrypoint-manifest.mjs), and the package-consumer runner proves the actual strict-peer install groups in [`tools/check-package-consumer.mjs`](../../tools/check-package-consumer.mjs).
 
 A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`; install any missing core peers explicitly. Use `pnpm add` in consumer snippets below because the package-consumer proof uses pnpm strict-peer installs.
 
@@ -153,29 +153,20 @@ The [`button-unstyled`](../../tools/check-package-consumer.mjs) package-consumer
 
 ## Heavy and browser-only features
 
-Treat these as deliberate opt-ins, not default UI kit imports.
+Treat these as deliberate opt-ins, not default UI kit imports. `tools/entrypoint-manifest.mjs` owns the current stability/API-report status for each entrypoint.
 
-| Feature | First-beta guidance | Current status |
-| --- | --- | --- |
-| Table primitives / simple data table | Keep primitives behind `@hell-ui/angular/table` and the simple native renderer behind `@hell-ui/angular/data-table`. It is not a data-grid framework. Prefer semantic table markup with real cell controls; adapter entrypoints stay optional and engine-specific. | Beta primitives; data-table is experimental; TanStack Table, TanStack Virtual, and CDK skin adapters are experimental. Legacy table feature aliases were removed before beta and the `no-legacy-alias` package-consumer scenario rejects them. |
-| Code editor | Keep behind the kept optional `@hell-ui/angular/features/code-editor` entry point; lazy-load or client-only load in SSR-sensitive apps; pass owner-document-aware setup where possible. | Experimental in package/source comments; HELL-054 locks the kept optional boundary and leaves stable API report promotion to policy. |
-| PDF viewer | Package path is `@hell-ui/pdf-viewer`; install the split package with its exact pdf.js peer and pass an app-owned worker source. | Experimental/browser-only split package. |
-| Audio speech transcript | Do not present `allowSpeechTranscript` as accessibility captions or timed text. Import `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript` only where the route/app deliberately opts into the browser transcript provider, and provide real captions/transcripts separately. | Experimental Chromium-only / best-effort; runtime is isolated behind the optional feature provider. |
-| Floating/flyout/omnibar dismissal | Use documented components, but avoid building product-critical guarantees on unreviewed dismissal internals. | Browser contracts exist for key paths; follow-up HELL-057/HELL-058 shrink remaining seams. |
-| Resize behavior | Treat split/table resizing as browser behavior requiring current browser evidence. | HELL-061 still owns browser resize contracts. |
+| Feature | First-beta guidance |
+| --- | --- |
+| Table primitives / simple data table | Keep primitives behind `@hell-ui/angular/table` and the simple native renderer behind `@hell-ui/angular/data-table`. It is not a data-grid framework. Prefer semantic table markup with real cell controls; adapter entrypoints stay optional and engine-specific. Legacy table feature aliases were removed before beta and the `no-legacy-alias` package-consumer scenario rejects them. |
+| Code editor | Keep behind the kept optional `@hell-ui/angular/features/code-editor` entry point; lazy-load or client-only load in SSR-sensitive apps; pass owner-document-aware setup where possible. |
+| PDF viewer | Package path is `@hell-ui/pdf-viewer`; install the split package with its exact pdf.js peer and pass an app-owned worker source. |
+| Audio speech transcript | Do not present `allowSpeechTranscript` as accessibility captions or timed text. Import `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript` only where the route/app deliberately opts into the browser transcript provider, and provide real captions/transcripts separately. |
+| Floating/flyout/omnibar dismissal | Use documented components, but avoid building product-critical guarantees on unreviewed dismissal internals. |
+| Resize behavior | Treat split/table resizing as browser behavior requiring current browser evidence. |
 
 ## Known experimental and deprecated APIs
 
-Known experimental/best-effort surfaces:
-
-- `@hell-ui/angular/features/audio-transcript`
-- `@hell-ui/angular/features/code-editor`
-- `@hell-ui/angular/data-table`
-- `@hell-ui/angular/table-tanstack`
-- `@hell-ui/angular/table-virtual`
-- `@hell-ui/angular/table-cdk`
-- `@hell-ui/pdf-viewer`
-- audio-player speech transcript options such as `allowSpeechTranscript`
+The entrypoint manifest owns the current experimental entrypoint list. Deprecated aliases below exist only to help alpha/internal-beta consumers migrate; removal needs a changelog and migration note.
 
 Removed pre-beta table compatibility surfaces:
 
@@ -194,7 +185,7 @@ Known deprecated non-table compatibility surfaces to migrate away from:
 | `HellDataTableLabels` | `HellTableUtilitiesLabels` from `@hell-ui/angular` or `@hell-ui/angular/core` |
 | `hellCodeEditorSetup` | `hellCodeEditorSetupFactory(ownerDocument)` |
 
-Experimental APIs may change or disappear between pre-1.0 releases. Deprecated aliases exist only to help alpha/internal-beta consumers migrate; removal needs a changelog and migration note.
+Experimental APIs may change or disappear between pre-1.0 releases.
 
 ## Browser, SSR, and accessibility support
 

@@ -153,6 +153,11 @@
       "peerTier": "composite",
       "peerGroup": "composite-icons"
     },
+    "kitchen-sink-styles": {
+      "description": "legacy kitchen-sink style entrypoint with full in-package CSS graph",
+      "peerTier": "composite",
+      "peerGroup": "composite-icons"
+    },
     "app-shell": {
       "description": "narrow app-shell composite entry without Font Awesome or feature peers",
       "peerTier": "composite",
