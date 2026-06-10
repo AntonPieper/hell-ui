@@ -9,6 +9,7 @@ import { HellCheckbox } from '@hell-ui/angular/checkbox';
     <div class="inline-flex items-center gap-2">
       <button
         hellCheckbox
+        required
         aria-label="I agree to the terms"
         [checked]="agree()"
         (checkedChange)="agree.set($event)"

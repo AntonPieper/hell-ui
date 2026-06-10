@@ -34,6 +34,28 @@ test.describe('public docs aria snapshots', () => {
     await expectNamedAriaSnapshot(example, 'accordion-single-open.aria.yml');
   });
 
+  test('checkbox snapshots record required, mixed, disabled, and native states', async ({
+    page,
+  }) => {
+    await gotoDocsPage(page, '/components/checkbox', 'Checkbox');
+
+    const custom = page.locator('app-checkbox-examples-example');
+    const native = page.locator('app-checkbox-native-example');
+    await expect(custom).toBeVisible();
+    await expect(native).toBeVisible();
+    await expect(custom.getByRole('checkbox', { name: 'Indeterminate' })).toHaveAttribute(
+      'aria-checked',
+      'mixed',
+    );
+    await expect(native.getByRole('checkbox', { name: 'Accept terms' })).toHaveJSProperty(
+      'indeterminate',
+      true,
+    );
+
+    await expectNamedAriaSnapshot(custom, 'checkbox-custom-states.aria.yml');
+    await expectNamedAriaSnapshot(native, 'checkbox-native-required-indeterminate.aria.yml');
+  });
+
   test('dialog snapshot records the named modal surface and actions', async ({ page }) => {
     await gotoDocsPage(page, '/components/dialog', 'Dialog');
     await page.getByRole('button', { name: 'Publish article' }).click();

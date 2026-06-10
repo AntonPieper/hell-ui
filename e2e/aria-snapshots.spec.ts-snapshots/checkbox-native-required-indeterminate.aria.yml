@@ -1,0 +1,3 @@
+- checkbox "Accept terms" [checked=mixed]
+- text: Accept terms
+- paragraph: "State: indeterminate"

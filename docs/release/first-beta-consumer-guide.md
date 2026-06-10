@@ -213,7 +213,7 @@ Accessibility support lives in the docs app accessibility matrix source at [`pro
 
 Current not-production-ready gaps until the HELL-049 production-readiness gate passes:
 
-- Critical accessibility gaps still block a production-ready claim for several public surfaces, including checkbox, date picker/date input, flyout, listbox, popover, radio, slider, switch, tabs, tooltip, omnibar, and time input.
+- Critical accessibility gaps still block a production-ready claim for several public surfaces, including date picker/date input, flyout, listbox, popover, radio, slider, switch, tabs, tooltip, omnibar, and time input.
 - Full release-candidate evidence must prove package-consumer, API report, accessibility/browser, docs budget, pack audit, and release dry-run tasks on the current commit.
 - Local `test-results/` evidence is intentionally untracked; rerun the commands for each release candidate instead of relying on stale artifacts.
 

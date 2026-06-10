@@ -72,14 +72,14 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     kind: 'Primitive',
     name: 'Checkbox',
     path: '/components/checkbox',
-    rolePattern: 'Custom role=checkbox button plus native input[type=checkbox] variant.',
+    rolePattern:
+      'Custom role=checkbox button with required, checked, mixed, and disabled ARIA state plus native input[type=checkbox] variant.',
     keyboardCoverage:
-      'Browser smoke checks custom/native semantics and click state; full Space/required/indeterminate path is not covered.',
+      'Browser contract covers Space toggling, Enter no-op for the custom ARIA checkbox, disabled behavior, and native Space toggling from an indeterminate required state.',
     automatedCoverage:
-      'Browser behavior smoke covers custom versus native semantics. No axe smoke or ARIA snapshot yet.',
+      'Axe docs smoke, ARIA snapshots, browser behavior smoke, and dedicated browser contract cover the public checkbox examples.',
     knownGaps:
-      'Critical gap: add keyboard, required, disabled, and indeterminate browser/ARIA coverage.',
-    criticalGap: true,
+      'No critical gap recorded; custom button checkboxes still are not native form constraint controls, so required form semantics belong on input[hellNativeCheckbox].',
   },
   {
     kind: 'Primitive',

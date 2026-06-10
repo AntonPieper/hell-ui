@@ -27,6 +27,12 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['main'],
   },
   {
+    name: 'checkbox',
+    path: '/components/checkbox',
+    heading: 'Checkbox',
+    include: ['main'],
+  },
+  {
     name: 'dialog',
     path: '/components/dialog',
     heading: 'Dialog',
