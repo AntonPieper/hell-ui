@@ -8,7 +8,9 @@ import { HELL_ACCORDION_DIRECTIVES } from '@hell-ui/angular/accordion';
   template: `
     <div hellAccordion type="single" collapsible value="install">
       <div hellAccordionItem value="install">
-        <button hellAccordionTrigger type="button">Installation</button>
+        <h3 class="m-0">
+          <button hellAccordionTrigger type="button">Installation</button>
+        </h3>
         <div hellAccordionContent>
           <div>
             <p class="my-2">Install via your package manager:</p>
@@ -17,7 +19,9 @@ import { HELL_ACCORDION_DIRECTIVES } from '@hell-ui/angular/accordion';
         </div>
       </div>
       <div hellAccordionItem value="theming">
-        <button hellAccordionTrigger type="button">Theming</button>
+        <h3 class="m-0">
+          <button hellAccordionTrigger type="button">Theming</button>
+        </h3>
         <div hellAccordionContent>
           <div>
             Override CSS custom properties under <code>--color-hell-*</code>
@@ -26,9 +30,14 @@ import { HELL_ACCORDION_DIRECTIVES } from '@hell-ui/angular/accordion';
         </div>
       </div>
       <div hellAccordionItem value="ssr">
-        <button hellAccordionTrigger type="button">SSR</button>
+        <h3 class="m-0">
+          <button hellAccordionTrigger type="button">SSR</button>
+        </h3>
         <div hellAccordionContent>
-          <div>hell avoids DOM access at module load; browser-only features document their client-only boundaries.</div>
+          <div>
+            hell avoids DOM access at module load; browser-only features document their client-only
+            boundaries.
+          </div>
         </div>
       </div>
     </div>

@@ -1,0 +1,9 @@
+- heading "Installation" [level=3]:
+  - button "Installation" [expanded]
+- region "Installation":
+  - paragraph: "Install via your package manager:"
+  - code: pnpm add @hell-ui/angular ng-primitives
+- heading "Theming" [level=3]:
+  - button "Theming"
+- heading "SSR" [level=3]:
+  - button "SSR"

@@ -83,6 +83,8 @@
    *     (instead of display:none) — this is what makes the *expand* animation
    *     fire: a transition from `display:none → block` is non-animatable, but
    *     `height: 0 → 200px` on an always-rendered element is.
+   *   • HellAccordionContent mirrors closed state to aria-hidden/inert so this
+   *     animation affordance does not expose collapsed panels to AT or focus.
    *   • `interpolate-size: allow-keywords` lets us animate even when
    *     ng-primitives sets `height: auto` instead of a pixel value.
    */

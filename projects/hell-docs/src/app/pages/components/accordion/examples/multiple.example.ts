@@ -8,13 +8,17 @@ import { HELL_ACCORDION_DIRECTIVES } from '@hell-ui/angular/accordion';
   template: `
     <div hellAccordion type="multiple">
       <div hellAccordionItem value="a">
-        <button hellAccordionTrigger type="button">First</button>
+        <h3 class="m-0">
+          <button hellAccordionTrigger type="button">First</button>
+        </h3>
         <div hellAccordionContent>
           <div>You can open me…</div>
         </div>
       </div>
       <div hellAccordionItem value="b">
-        <button hellAccordionTrigger type="button">Second</button>
+        <h3 class="m-0">
+          <button hellAccordionTrigger type="button">Second</button>
+        </h3>
         <div hellAccordionContent>
           <div>…and me at the same time.</div>
         </div>

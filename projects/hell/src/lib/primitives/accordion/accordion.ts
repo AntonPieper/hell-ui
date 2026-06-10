@@ -1,10 +1,11 @@
-import { Directive } from '@angular/core';
+import { computed, Directive } from '@angular/core';
 import { HellStyleable } from '../../core/styleable';
 import {
   NgpAccordion,
   NgpAccordionItem,
   NgpAccordionTrigger,
   NgpAccordionContent,
+  injectAccordionItemState,
 } from 'ng-primitives/accordion';
 
 @Directive({
@@ -51,9 +52,16 @@ export class HellAccordionTrigger extends HellStyleable {}
 @Directive({
   selector: '[hellAccordionContent]',
   hostDirectives: [NgpAccordionContent],
-  host: { '[class.hell-accordion-content]': '!unstyled()' },
+  host: {
+    '[class.hell-accordion-content]': '!unstyled()',
+    '[attr.aria-hidden]': 'closed() ? "true" : null',
+    '[attr.inert]': 'closed() ? "" : null',
+  },
 })
-export class HellAccordionContent extends HellStyleable {}
+export class HellAccordionContent extends HellStyleable {
+  private readonly accordionItem = injectAccordionItemState<unknown>();
+  protected readonly closed = computed(() => !this.accordionItem().open());
+}
 
 export const HELL_ACCORDION_DIRECTIVES = [
   HellAccordion,

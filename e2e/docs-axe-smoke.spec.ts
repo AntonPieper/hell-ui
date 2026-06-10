@@ -15,6 +15,12 @@ const WCAG_SMOKE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 
 const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
   {
+    name: 'accordion',
+    path: '/components/accordion',
+    heading: 'Accordion',
+    include: ['main'],
+  },
+  {
     name: 'button',
     path: '/components/button',
     heading: 'Button',
@@ -29,7 +35,9 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
       await page.getByRole('button', { name: 'Publish article' }).click();
       const dialog = page.getByRole('dialog', { name: 'Publish this article?' });
       await expect(dialog).toBeVisible();
-      await expect.poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity)).toBe('1');
+      await expect
+        .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity))
+        .toBe('1');
     },
   },
   {

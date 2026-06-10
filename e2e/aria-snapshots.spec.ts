@@ -19,6 +19,21 @@ async function openBasicMenu(page: Page): Promise<Locator> {
 }
 
 test.describe('public docs aria snapshots', () => {
+  test('accordion snapshot records heading buttons and named expanded panel state', async ({
+    page,
+  }) => {
+    await gotoDocsPage(page, '/components/accordion', 'Accordion');
+
+    const example = page.locator('app-accordion-single-collapsible-example');
+    await expect(example).toBeVisible();
+    await expect(example.getByRole('button', { name: 'Installation' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+
+    await expectNamedAriaSnapshot(example, 'accordion-single-open.aria.yml');
+  });
+
   test('dialog snapshot records the named modal surface and actions', async ({ page }) => {
     await gotoDocsPage(page, '/components/dialog', 'Dialog');
     await page.getByRole('button', { name: 'Publish article' }).click();
@@ -118,7 +133,9 @@ test.describe('public docs aria snapshots', () => {
     await expectNamedAriaSnapshot(horizontal, 'radio-size-group.aria.yml');
   });
 
-  test('table utility snapshot records active row semantics and cell action name', async ({ page }) => {
+  test('table utility snapshot records active row semantics and cell action name', async ({
+    page,
+  }) => {
     await gotoDocsPage(page, '/components/data-table', 'Table utilities');
 
     const masterDetail = page.locator('app-data-table-example-example');
