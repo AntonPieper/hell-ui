@@ -5,7 +5,9 @@ const TABLE_A11Y_HARNESS_PATH = '/components/data-table?tableA11yHarness=1';
 
 async function gotoResizableHarness(page: Page): Promise<void> {
   await page.goto(RESIZABLE_HARNESS_PATH);
-  await expect(page.getByRole('heading', { name: 'Resizable contract harness', level: 1 })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Resizable contract harness', level: 1 }),
+  ).toBeVisible();
 }
 
 async function gotoTableHarness(page: Page): Promise<void> {
@@ -22,7 +24,9 @@ async function numericAriaValue(locator: Locator): Promise<number> {
   return Number(value);
 }
 
-async function boxFor(locator: Locator): Promise<{ x: number; y: number; width: number; height: number }> {
+async function boxFor(
+  locator: Locator,
+): Promise<{ x: number; y: number; width: number; height: number }> {
   await locator.scrollIntoViewIfNeeded();
   const box = await locator.boundingBox();
   if (!box) throw new Error('Expected locator to have a bounding box.');
@@ -55,7 +59,11 @@ interface PointerDragState {
   readonly y: number;
 }
 
-async function dispatchPointerDrag(page: Page, handle: Locator, deltaX: number): Promise<PointerDragState> {
+async function dispatchPointerDrag(
+  page: Page,
+  handle: Locator,
+  deltaX: number,
+): Promise<PointerDragState> {
   const box = await boxFor(handle);
   const pointerId = 21;
   const startX = box.x + box.width / 2;
@@ -110,7 +118,11 @@ async function finishPointerDrag(page: Page, state: PointerDragState): Promise<v
   expect(pointerUpPrevented).toBe(true);
 }
 
-async function dispatchPointerMove(page: Page, state: PointerDragState, deltaX: number): Promise<void> {
+async function dispatchPointerMove(
+  page: Page,
+  state: PointerDragState,
+  deltaX: number,
+): Promise<void> {
   await page.evaluate(
     (eventInit) => {
       window.dispatchEvent(
@@ -139,7 +151,10 @@ test.describe('modern resize handle browser contracts', () => {
 
     await expect(ltrHandle).toHaveAttribute('role', 'separator');
     await expect(ltrHandle).toHaveAttribute('aria-orientation', 'vertical');
-    await expect(ltrHandle).toHaveAttribute('aria-controls', 'resizable-ltr-before resizable-ltr-after');
+    await expect(ltrHandle).toHaveAttribute(
+      'aria-controls',
+      'resizable-ltr-before resizable-ltr-after',
+    );
     await expect(ltrHandle).toHaveAttribute('aria-valuemin', '0');
     await expect(ltrHandle).toHaveAttribute('aria-valuemax', '100');
 
@@ -162,8 +177,7 @@ test.describe('modern resize handle browser contracts', () => {
     const rtlHandle = page.getByTestId('resizable-rtl-handle');
     const rtlStart = await numericAriaValue(rtlHandle);
     await rtlHandle.press('ArrowRight');
-    const rtlEnd = await numericAriaValue(rtlHandle);
-    expect(rtlEnd).toBeLessThan(rtlStart);
+    await expect.poll(() => numericAriaValue(rtlHandle)).toBeLessThan(rtlStart);
   });
 
   test('hellTableResizeHandle resizes semantic table markup without sort, row action, or text selection leakage', async ({
@@ -179,7 +193,10 @@ test.describe('modern resize handle browser contracts', () => {
     await expect(table).toBeVisible();
     await expect(handle).toHaveAttribute('role', 'separator');
     await expect(handle).toHaveAttribute('aria-orientation', 'vertical');
-    await expect(handle).toHaveAttribute('aria-controls', 'semantic-resize-name semantic-resize-role');
+    await expect(handle).toHaveAttribute(
+      'aria-controls',
+      'semantic-resize-name semantic-resize-role',
+    );
     await expect(handle).toHaveAttribute('aria-valuemin', '0');
     await expect(handle).toHaveAttribute('aria-valuemax', '100');
 
