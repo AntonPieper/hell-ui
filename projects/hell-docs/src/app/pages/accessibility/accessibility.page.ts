@@ -305,13 +305,14 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     kind: 'Primitive',
     name: 'Switch',
     path: '/components/switch',
-    rolePattern: 'Custom button switch plus native input[type=checkbox][role=switch] variant.',
+    rolePattern:
+      'Custom button role=switch plus native input[type=checkbox][role=switch] variant; both examples use visible labels as the accessible name.',
     keyboardCoverage:
-      'Delegated to ng-primitives/native controls; no browser test proves Space/disabled/forms behavior.',
-    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+      'Browser contract covers visible-label activation, custom Space/Enter toggling, native Space toggling, checked state updates, and disabled custom switches.',
+    automatedCoverage:
+      'ARIA snapshots cover custom checked/disabled states and native labelled state; Playwright browser contract covers keyboard/name/state parity; docs axe smoke includes the Switch page.',
     knownGaps:
-      'Critical gap: add keyboard, name, checked state, disabled, and native/custom parity coverage.',
-    criticalGap: true,
+      'No critical gap recorded; native input remains preferred when form validity, browser autofill, or platform checkbox behavior is required.',
   },
   {
     kind: 'Primitive',

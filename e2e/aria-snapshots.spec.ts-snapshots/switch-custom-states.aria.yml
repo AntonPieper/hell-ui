@@ -1,0 +1,9 @@
+- switch "Email notifications" [checked]
+- text: Email notifications
+- switch "Disabled" [disabled]
+- text: Disabled
+- switch "Disabled, on" [checked] [disabled]
+- text: Disabled, on
+- paragraph:
+  - text: "Current value:"
+  - code: "true"

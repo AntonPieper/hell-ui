@@ -1,0 +1,5 @@
+- switch "Auto updates"
+- text: Auto updates
+- paragraph:
+  - text: "Checked:"
+  - code: "false"

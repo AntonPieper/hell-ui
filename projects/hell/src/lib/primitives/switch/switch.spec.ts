@@ -22,6 +22,38 @@ class SwitchHost {
 }
 
 @Component({
+  imports: [HellSwitch],
+  template: `
+    <div>
+      <button
+        id="email-notifications-switch"
+        hellSwitch
+        [checked]="checked()"
+        [disabled]="disabled()"
+        (checkedChange)="onCheckedChange($event)"
+        (keydown.space)="onSpaceKeydown()"
+      ></button>
+      <label for="email-notifications-switch">Email notifications</label>
+    </div>
+  `,
+})
+class LabelledSwitchHost {
+  readonly checked = signal(false);
+  readonly disabled = signal(false);
+  readonly checkedEvents: boolean[] = [];
+  spaceKeydowns = 0;
+
+  onCheckedChange(checked: boolean): void {
+    this.checked.set(checked);
+    this.checkedEvents.push(checked);
+  }
+
+  onSpaceKeydown(): void {
+    this.spaceKeydowns++;
+  }
+}
+
+@Component({
   imports: [ReactiveFormsModule, HellSwitch],
   template: `
     <button hellSwitch [formControl]="control" (checkedChange)="checkedEvents.push($event)"></button>
@@ -56,7 +88,7 @@ class NativeSwitchFormHost {
 describe('HellSwitch', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SwitchHost, SwitchFormHost, NativeSwitchFormHost],
+      imports: [SwitchHost, LabelledSwitchHost, SwitchFormHost, NativeSwitchFormHost],
     }).compileComponents();
   });
 
@@ -83,6 +115,38 @@ describe('HellSwitch', () => {
 
     expect(sw.getAttribute('aria-checked')).toBe('true');
     expect(sw.disabled).toBe(true);
+  });
+
+  it('toggles the custom switch with click and Space while keeping a visible label association', () => {
+    const fixture = TestBed.createComponent(LabelledSwitchHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const label = query<HTMLLabelElement>(fixture.nativeElement, 'label');
+    const sw = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSwitch]');
+
+    expect(label.htmlFor).toBe('email-notifications-switch');
+    expect(sw.id).toBe('email-notifications-switch');
+
+    sw.click();
+    fixture.detectChanges();
+
+    expect(sw.getAttribute('aria-checked')).toBe('true');
+    expect(host.checkedEvents).toEqual([true]);
+
+    const keydown = new KeyboardEvent('keydown', {
+      key: ' ',
+      bubbles: true,
+      cancelable: true,
+    });
+    const dispatched = sw.dispatchEvent(keydown);
+    fixture.detectChanges();
+
+    expect(dispatched).toBe(false);
+    expect(keydown.defaultPrevented).toBe(true);
+    expect(sw.getAttribute('aria-checked')).toBe('false');
+    expect(host.checkedEvents).toEqual([true, false]);
+    expect(host.spaceKeydowns).toBe(1);
   });
 
   it('integrates with reactive forms without echoing programmatic writes', async () => {

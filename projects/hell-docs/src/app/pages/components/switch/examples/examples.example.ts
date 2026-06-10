@@ -8,20 +8,20 @@ import { HellSwitch } from '@hell-ui/angular/switch';
   template: `
     <div class="inline-flex items-center gap-3">
       <button
+        id="email-notifications-switch"
         hellSwitch
-        aria-label="Email notifications"
         [checked]="notify()"
         (checkedChange)="notify.set($event)"
       ></button>
-      <span>Email notifications</span>
+      <label for="email-notifications-switch">Email notifications</label>
     </div>
     <div class="inline-flex items-center gap-3">
-      <button hellSwitch disabled aria-label="Disabled"></button>
-      <span>Disabled</span>
+      <button id="disabled-switch" hellSwitch disabled></button>
+      <label for="disabled-switch">Disabled</label>
     </div>
     <div class="inline-flex items-center gap-3">
-      <button hellSwitch checked disabled aria-label="Disabled, on"></button>
-      <span>Disabled, on</span>
+      <button id="disabled-on-switch" hellSwitch checked disabled></button>
+      <label for="disabled-on-switch">Disabled, on</label>
     </div>
     <p>
       Current value: <code>{{ notify() }}</code>

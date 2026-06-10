@@ -20,8 +20,10 @@ import switchNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
         Use for binary on/off settings whose effect is applied immediately. For deferred values that
         are committed on submit, prefer <code>checkbox</code>. The styled
         <code>button[hellSwitch]</code> path is an Angular Forms-ready custom switch button that
-        defaults to <code>type="button"</code>; use <code>input[hellNativeSwitch]</code> when
-        browser checkbox semantics, labels, and native form tooling are the priority.
+        defaults to <code>type="button"</code>. Pair it with a visible <code>label</code> using
+        <code>for</code>/<code>id</code>, or use <code>aria-labelledby</code>, so the switch name
+        matches the text on screen; use <code>input[hellNativeSwitch]</code> when browser checkbox
+        semantics, labels, and native form tooling are the priority.
       </p>
 
       <h2>Examples</h2>
@@ -50,7 +52,7 @@ import switchNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
       <h2>Do</h2>
       <ul>
         <li>Use switches for immediate on/off settings.</li>
-        <li>Keep labels outside the control and always visible.</li>
+        <li>Keep labels visible and wire them as the accessible name.</li>
         <li>Use disabled only when the reason is clear nearby.</li>
       </ul>
 

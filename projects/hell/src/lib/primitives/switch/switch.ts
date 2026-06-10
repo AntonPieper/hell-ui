@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   Directive,
   ElementRef,
   booleanAttribute,
@@ -15,6 +16,8 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgpSwitchThumb, ngpSwitch, provideSwitchState } from 'ng-primitives/switch';
 import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
 import { HellStyleable } from '../../core/styleable';
+
+let nextSwitchId = 0;
 
 /**
  * Styled switch built on `ngpSwitch`. Use for binary on/off settings where the
@@ -54,6 +57,11 @@ export class HellSwitch extends HellStyleable implements ControlValueAccessor {
   private readonly controlChecked = signal(false);
   private readonly controlDisabled = signal(false);
   private readonly cva = new HellControlValueAccessorBridge<boolean>();
+  private readonly host = inject<ElementRef<HTMLButtonElement>>(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly switchId = signal(
+    this.host.nativeElement.getAttribute('id') ?? `hell-switch-${nextSwitchId++}`,
+  );
 
   private readonly effectiveChecked = computed(() =>
     this.controlMode() ? this.controlChecked() : this.checked(),
@@ -61,6 +69,7 @@ export class HellSwitch extends HellStyleable implements ControlValueAccessor {
   private readonly effectiveDisabled = computed(() => this.disabled() || this.controlDisabled());
 
   protected readonly state = ngpSwitch({
+    id: this.switchId,
     checked: this.effectiveChecked,
     disabled: this.effectiveDisabled,
     onCheckedChange: (checked) => {
@@ -69,6 +78,7 @@ export class HellSwitch extends HellStyleable implements ControlValueAccessor {
       this.cva.emitValue(checked);
     },
   });
+  private readonly installSpaceKeyHandler = this.registerSpaceKeyHandler();
 
   writeValue(value: boolean): void {
     this.controlMode.set(true);
@@ -89,6 +99,29 @@ export class HellSwitch extends HellStyleable implements ControlValueAccessor {
 
   protected markControlTouched(): void {
     this.cva.markTouched();
+  }
+
+  private onKeydown(event: KeyboardEvent): void {
+    if (event.defaultPrevented || !this.isSpaceKey(event.key)) return;
+
+    event.preventDefault();
+    if (this.effectiveDisabled()) return;
+
+    this.state.toggle(event);
+  }
+
+  private isSpaceKey(key: string): boolean {
+    return key === ' ' || key === 'Space' || key === 'Spacebar';
+  }
+
+  private registerSpaceKeyHandler(): true {
+    const host = this.host.nativeElement;
+    const onKeydown = (event: KeyboardEvent) => this.onKeydown(event);
+    host.addEventListener('keydown', onKeydown, { capture: true });
+    this.destroyRef.onDestroy(() =>
+      host.removeEventListener('keydown', onKeydown, { capture: true }),
+    );
+    return true;
   }
 }
 

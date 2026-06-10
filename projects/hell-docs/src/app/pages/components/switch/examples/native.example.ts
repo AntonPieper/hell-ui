@@ -6,7 +6,7 @@ import { HellNativeSwitch } from '@hell-ui/angular/switch';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellNativeSwitch],
   template: `
-    <label>
+    <label class="inline-flex items-center gap-3">
       <input
         type="checkbox"
         hellNativeSwitch
@@ -16,7 +16,9 @@ import { HellNativeSwitch } from '@hell-ui/angular/switch';
       />
       <span>Auto updates</span>
     </label>
-    <p>Checked: {{ value() }}</p>
+    <p>
+      Checked: <code>{{ value() }}</code>
+    </p>
   `,
 })
 export class SwitchNativeExample {

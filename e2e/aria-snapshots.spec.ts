@@ -336,6 +336,26 @@ test.describe('public docs aria snapshots', () => {
     await expectNamedAriaSnapshot(disabled, 'slider-disabled-labelled.aria.yml');
   });
 
+  test('switch snapshots record visible labels and switch states', async ({ page }) => {
+    await gotoDocsPage(page, '/components/switch', 'Switch');
+
+    const custom = page.locator('app-switch-examples-example');
+    const native = page.locator('app-switch-native-example');
+
+    await expect(custom.getByRole('switch', { name: 'Email notifications' })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    await expect(custom.getByRole('switch', { name: 'Disabled', exact: true })).toBeDisabled();
+    await expect(native.getByRole('switch', { name: 'Auto updates' })).toHaveAttribute(
+      'aria-required',
+      'true',
+    );
+
+    await expectNamedAriaSnapshot(custom, 'switch-custom-states.aria.yml');
+    await expectNamedAriaSnapshot(native, 'switch-native-required.aria.yml');
+  });
+
   test('table utility snapshot records active row semantics and cell action name', async ({
     page,
   }) => {
