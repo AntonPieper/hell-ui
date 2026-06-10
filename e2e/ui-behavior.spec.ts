@@ -463,4 +463,54 @@ test.describe('Hell UI browser behavior', () => {
       await expect(page.getByRole('spinbutton', { name: /page/i })).toHaveValue(/\d+/);
     }
   });
+
+  test('pdf viewer mobile pinch zoom scales the document', async ({ page, browserName }) => {
+    test.skip(
+      browserName !== 'chromium',
+      'Mobile pinch regression uses Chromium DevTools Protocol touch input.',
+    );
+
+    await page.goto('/components/pdf-viewer');
+
+    const previewTabs = page.getByRole('tab', { name: 'Preview' });
+    await previewTabs.nth(1).click();
+
+    const viewer = page.locator('hell-pdf-viewer');
+    await expect(viewer).toBeVisible();
+    await viewer.scrollIntoViewIfNeeded();
+
+    const scrollContainer = viewer.locator('.hell-pdf-scroll');
+    const firstPdfPage = viewer.locator('.pdfViewer .page').first();
+    await expect(firstPdfPage).toBeVisible();
+    const beforePinchBox = await firstPdfPage.boundingBox();
+    const scrollBox = await scrollContainer.boundingBox();
+    if (!beforePinchBox || !scrollBox) {
+      throw new Error('Expected PDF viewer page and scroll container boxes for pinch test.');
+    }
+
+    const pinchCenterX = Math.round(scrollBox.x + scrollBox.width / 2);
+    const pinchY = Math.round(
+      scrollBox.y + Math.min(scrollBox.height * 0.45, scrollBox.height - 20),
+    );
+    const client = await page.context().newCDPSession(page);
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [
+        { id: 41, x: pinchCenterX - 45, y: pinchY },
+        { id: 42, x: pinchCenterX + 45, y: pinchY },
+      ],
+    });
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchMove',
+      touchPoints: [
+        { id: 41, x: pinchCenterX - 95, y: pinchY },
+        { id: 42, x: pinchCenterX + 95, y: pinchY },
+      ],
+    });
+    await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+
+    await expect
+      .poll(async () => (await firstPdfPage.boundingBox())?.width ?? 0)
+      .toBeGreaterThan(beforePinchBox.width * 1.2);
+  });
 });

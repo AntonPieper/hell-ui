@@ -162,7 +162,9 @@ interface HellPdfJsViewer {
 
 interface HellPdfJsViewerModule {
   readonly EventBus: new () => HellPdfJsEventBus;
-  readonly PDFLinkService: new (options: { readonly eventBus: HellPdfJsEventBus }) => HellPdfJsLinkService;
+  readonly PDFLinkService: new (options: {
+    readonly eventBus: HellPdfJsEventBus;
+  }) => HellPdfJsLinkService;
   readonly PDFFindController: new (options: {
     readonly eventBus: HellPdfJsEventBus;
     readonly linkService: HellPdfJsLinkService;
@@ -175,6 +177,7 @@ interface HellPdfJsViewerModule {
     readonly textLayerMode: number;
     readonly annotationMode: number;
     readonly annotationEditorMode: number;
+    readonly supportsPinchToZoom?: boolean;
   }) => HellPdfJsViewer;
 }
 
@@ -234,7 +237,8 @@ export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
     const pdfWorker = new pdfjs.PDFWorker({ port: workerBinding.port });
     const viewerMod = await hellWithPdfJsGlobal(
       pdfjs,
-      async () => (await import('pdfjs-dist/web/pdf_viewer.mjs')) as unknown as HellPdfJsViewerModule,
+      async () =>
+        (await import('pdfjs-dist/web/pdf_viewer.mjs')) as unknown as HellPdfJsViewerModule,
     );
     const eventBus = new viewerMod.EventBus();
     const linkService = new viewerMod.PDFLinkService({ eventBus });
@@ -247,6 +251,7 @@ export class HellPdfJsRuntimeAdapter implements HellPdfRuntimeAdapter {
       textLayerMode: 2,
       annotationMode: 2,
       annotationEditorMode: -1,
+      supportsPinchToZoom: false,
     });
 
     linkService.setViewer(viewer);

@@ -156,23 +156,48 @@ describe('HellPdfViewer', () => {
 
     await settle(fixture);
 
-    const button = fixture.nativeElement.querySelector('button[aria-label="Print"]') as HTMLButtonElement;
+    const button = fixture.nativeElement.querySelector(
+      'button[aria-label="Print"]',
+    ) as HTMLButtonElement;
     button.click();
     await settle(fixture);
 
     expect(runtime.printedWith).toEqual(fixture.componentInstance.printFetchOptions);
   });
 
+  it('composes page overview thumbnails with the Hell button primitive', async () => {
+    const fixture = TestBed.createComponent(PdfViewerHost);
+    await settle(fixture);
+
+    const overviewButton = fixture.nativeElement.querySelector(
+      'button[aria-label="Toggle page overview"]',
+    ) as HTMLButtonElement;
+    overviewButton.click();
+    await settle(fixture);
+
+    const thumbnail = fixture.nativeElement.querySelector('.hell-pdf-thumb') as HTMLButtonElement;
+    expect(thumbnail).toBeInstanceOf(HTMLButtonElement);
+    expect(thumbnail.classList.contains('hell-button')).toBe(true);
+    expect(thumbnail.getAttribute('data-variant')).toBe('ghost');
+    expect(thumbnail.getAttribute('data-size')).toBe('sm');
+    expect(thumbnail.getAttribute('data-block')).toBe('');
+    expect(thumbnail.getAttribute('aria-current')).toBe('page');
+  });
+
   it('announces PDF find status updates through a live region', async () => {
     const fixture = TestBed.createComponent(PdfViewerHost);
     await settle(fixture);
 
-    const findButton = fixture.nativeElement.querySelector('button[aria-label="Find in document (Ctrl/Cmd+F)"]');
+    const findButton = fixture.nativeElement.querySelector(
+      'button[aria-label="Find in document (Ctrl/Cmd+F)"]',
+    );
     expect(findButton).toBeInstanceOf(HTMLButtonElement);
     findButton!.click();
     await settle(fixture);
 
-    const findInput = fixture.nativeElement.querySelector('.hell-pdf-find-input') as HTMLInputElement;
+    const findInput = fixture.nativeElement.querySelector(
+      '.hell-pdf-find-input',
+    ) as HTMLInputElement;
     const status = fixture.nativeElement.querySelector('.hell-pdf-find-count') as HTMLElement;
     expect(status?.getAttribute('role')).toBe('status');
     expect(status?.getAttribute('aria-live')).toBe('polite');

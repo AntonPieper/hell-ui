@@ -1,220 +1,255 @@
 @layer components {
-
   /* PDF viewer container + toolbar styling.
   The page rendering itself is handled by `pdfjs-dist/web/pdf_viewer.css`,
   which consumers should load once globally or with a lazy route. */
 
   .hell-pdf {
-      display: flex;
-      flex-direction: column;
-      min-height: calc(var(--spacing) * 0);
-      overflow: hidden;
-      background-color: var(--color-hell-surface);
-      border-style: solid;
-      border-width: 1px;
-      border-color: var(--color-hell-border);
-      border-radius: var(--radius-md);
-      outline: none;
-      position: relative;
-      &:focus-visible {
-        box-shadow: 0 0 0 2px var(--color-hell-surface), 0 0 0 4px var(--color-hell-focus-ring);
-      }
+    display: flex;
+    flex-direction: column;
+    min-height: calc(var(--spacing) * 0);
+    overflow: hidden;
+    background-color: var(--color-hell-surface);
+    border-style: solid;
+    border-width: 1px;
+    border-color: var(--color-hell-border);
+    border-radius: var(--radius-md);
+    outline: none;
+    position: relative;
+    &:focus-visible {
+      box-shadow:
+        0 0 0 2px var(--color-hell-surface),
+        0 0 0 4px var(--color-hell-focus-ring);
     }
+  }
 
   .hell-pdf-toolbar {
-      display: flex;
-      align-items: center;
-      gap: calc(var(--spacing) * 1);
-      padding-inline: calc(var(--spacing) * 2.5);
-      padding-block: calc(var(--spacing) * 1.5);
-      border-bottom: 1px solid var(--color-hell-border);
-      background-color: var(--color-hell-surface);
-      @supports (color: color-mix(in lab, red, red)) {
-        background-color: color-mix(in srgb, var(--color-hell-surface) 92%, var(--color-hell-foreground));
-      }
-      flex: 0 0 auto;
-      flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing) * 1);
+    padding-inline: calc(var(--spacing) * 2.5);
+    padding-block: calc(var(--spacing) * 1.5);
+    border-bottom: 1px solid var(--color-hell-border);
+    background-color: var(--color-hell-surface);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(
+        in srgb,
+        var(--color-hell-surface) 92%,
+        var(--color-hell-foreground)
+      );
     }
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+  }
 
   .hell-pdf-spacer {
-      flex: 1 1 auto;
-    }
+    flex: 1 1 auto;
+  }
 
   .hell-pdf-divider {
-      width: 1px;
-      height: calc(var(--spacing) * 5);
-      background-color: var(--color-hell-border);
-      margin-inline: calc(var(--spacing) * 1);
-      margin-block: calc(var(--spacing) * 0);
-    }
+    width: 1px;
+    height: calc(var(--spacing) * 5);
+    background-color: var(--color-hell-border);
+    margin-inline: calc(var(--spacing) * 1);
+    margin-block: calc(var(--spacing) * 0);
+  }
 
   .hell-pdf-toolbar-text {
-      font-size: var(--text-sm);
-      line-height: var(--text-sm--line-height);
-      color: var(--color-hell-foreground-muted);
-      margin-inline: calc(var(--spacing) * 1);
-      margin-block: calc(var(--spacing) * 0);
-    }
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+    color: var(--color-hell-foreground-muted);
+    margin-inline: calc(var(--spacing) * 1);
+    margin-block: calc(var(--spacing) * 0);
+  }
 
   .hell-pdf-page-input {
-      width: calc(var(--spacing) * 14);
-      flex: 0 0 56px;
-      text-align: center;
-      padding-inline: calc(var(--spacing) * 1.5);
-      padding-block: calc(var(--spacing) * 1);
-      font-size: var(--text-sm);
-      line-height: var(--text-sm--line-height);
-      appearance: textfield;
-      -moz-appearance: textfield;
-      &::-webkit-outer-spin-button, &::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: calc(var(--spacing) * 0);
-      }
+    width: calc(var(--spacing) * 14);
+    flex: 0 0 56px;
+    text-align: center;
+    padding-inline: calc(var(--spacing) * 1.5);
+    padding-block: calc(var(--spacing) * 1);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+    appearance: textfield;
+    -moz-appearance: textfield;
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: calc(var(--spacing) * 0);
     }
+  }
 
   .hell-pdf-zoom-select {
-      width: auto;
-      min-width: 8.5rem;
-      flex: 0 0 auto;
-    }
+    width: auto;
+    min-width: 8.5rem;
+    flex: 0 0 auto;
+  }
 
   .hell-pdf-findbar {
-      display: flex;
-      align-items: center;
-      gap: calc(var(--spacing) * 1.5);
-      padding-inline: calc(var(--spacing) * 2.5);
-      padding-block: calc(var(--spacing) * 1.5);
-      border-bottom: 1px solid var(--color-hell-border);
-      background-color: var(--color-hell-surface);
-      flex: 0 0 auto;
-    }
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing) * 1.5);
+    padding-inline: calc(var(--spacing) * 2.5);
+    padding-block: calc(var(--spacing) * 1.5);
+    border-bottom: 1px solid var(--color-hell-border);
+    background-color: var(--color-hell-surface);
+    flex: 0 0 auto;
+  }
 
   .hell-pdf-find-input {
-      flex: 1 1 auto;
-      min-width: 120px;
-      max-width: 320px;
-    }
+    flex: 1 1 auto;
+    min-width: 120px;
+    max-width: 320px;
+  }
 
   .hell-pdf-find-count {
-      font-size: var(--text-sm);
-      line-height: var(--text-sm--line-height);
-      color: var(--color-hell-foreground-muted);
-      min-width: calc(var(--spacing) * 14);
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+    color: var(--color-hell-foreground-muted);
+    min-width: calc(var(--spacing) * 14);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
 
   .hell-pdf-host {
-      flex: 1 1 auto;
-      min-height: calc(var(--spacing) * 0);
-      position: relative;
-      display: flex;
-      background-color: var(--color-hell-foreground);
-      @supports (color: color-mix(in lab, red, red)) {
-        background-color: color-mix(in srgb, var(--color-hell-foreground) 6%, var(--color-hell-surface));
-      }
+    flex: 1 1 auto;
+    min-height: calc(var(--spacing) * 0);
+    position: relative;
+    display: flex;
+    background-color: var(--color-hell-foreground);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(
+        in srgb,
+        var(--color-hell-foreground) 6%,
+        var(--color-hell-surface)
+      );
     }
+  }
 
   .hell-pdf-overview {
-      flex: 0 0 auto;
-      width: 168px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding: calc(var(--spacing) * 3);
-      display: flex;
-      flex-direction: column;
-      gap: calc(var(--spacing) * 2);
-      background-color: var(--color-hell-foreground);
-      @supports (color: color-mix(in lab, red, red)) {
-        background-color: color-mix(in srgb, var(--color-hell-foreground) 4%, var(--color-hell-surface));
-      }
-      border-right: 1px solid var(--color-hell-border);
+    flex: 0 0 auto;
+    width: 168px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: calc(var(--spacing) * 3);
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing) * 2);
+    background-color: var(--color-hell-foreground);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(
+        in srgb,
+        var(--color-hell-foreground) 4%,
+        var(--color-hell-surface)
+      );
     }
+    border-right: 1px solid var(--color-hell-border);
+  }
 
   .hell-pdf-thumb {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: calc(var(--spacing) * 1);
-      padding: calc(var(--spacing) * 1.5);
-      background-color: transparent;
-      border-style: solid;
-      border-width: 1px;
-      border-color: transparent;
-      border-radius: 0.25rem;
-      cursor: pointer;
-      font-family: inherit;
-      font-size: var(--text-sm);
-      line-height: var(--text-sm--line-height);
-      color: var(--color-hell-foreground-muted);
-      transition: background var(--hell-duration-fast) var(--ease-hell-out), border-color var(--hell-duration-fast) var(--ease-hell-out), color var(--hell-duration-fast) var(--ease-hell-out);
-      &:hover {
-        background-color: var(--color-hell-foreground);
-        @supports (color: color-mix(in lab, red, red)) {
-          background-color: color-mix(in srgb, var(--color-hell-foreground) 5%, transparent);
-        }
-        color: var(--color-hell-foreground);
-      }
-      &:focus-visible {
-        outline: 2px solid var(--color-hell-focus-ring);
-        outline-offset: 2px;
-      }
-      &[data-active="true"] {
-        background-color: var(--color-hell-surface);
-        border-color: var(--color-hell-primary);
-        @supports (color: color-mix(in lab, red, red)) {
-          border-color: color-mix(in srgb, var(--color-hell-primary) 60%, var(--color-hell-border));
-        }
-        color: var(--color-hell-primary);
-        font-weight: var(--font-weight-semibold);
+    --hell-button-background: transparent;
+    --hell-button-background-hover: var(--color-hell-foreground);
+    --hell-button-background-active: var(--color-hell-foreground);
+    --hell-button-border-color: transparent;
+    --hell-button-color: var(--color-hell-foreground-muted);
+    --hell-button-height: auto;
+    --hell-button-padding-inline: calc(var(--spacing) * 1.5);
+    --hell-button-shadow: none;
+    width: 100%;
+    height: auto;
+    min-height: calc(160px + var(--text-sm--line-height) + (var(--spacing) * 4));
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--spacing) * 1);
+    padding-block: calc(var(--spacing) * 1.5);
+    border-radius: 0.25rem;
+    line-height: var(--text-sm--line-height);
+    white-space: normal;
+    @supports (color: color-mix(in lab, red, red)) {
+      --hell-button-background-hover: color-mix(
+        in srgb,
+        var(--color-hell-foreground) 5%,
+        transparent
+      );
+      --hell-button-background-active: color-mix(
+        in srgb,
+        var(--color-hell-foreground) 8%,
+        transparent
+      );
+    }
+    &[data-hover] {
+      @supports (color: color-mix(in lab, red, red)) {
+        --hell-button-background-hover: color-mix(
+          in srgb,
+          var(--color-hell-foreground) 5%,
+          transparent
+        );
       }
     }
+    &[data-active='true'] {
+      --hell-button-background: var(--color-hell-surface);
+      --hell-button-background-hover: var(--color-hell-surface);
+      --hell-button-background-active: var(--color-hell-surface);
+      --hell-button-border-color: var(--color-hell-primary);
+      --hell-button-color: var(--color-hell-primary);
+      @supports (color: color-mix(in lab, red, red)) {
+        --hell-button-border-color: color-mix(
+          in srgb,
+          var(--color-hell-primary) 60%,
+          var(--color-hell-border)
+        );
+      }
+      font-weight: var(--font-weight-semibold);
+    }
+  }
 
   .hell-pdf-thumb-canvas-wrap {
+    display: block;
+    pointer-events: none;
+    background-color: white;
+    border-style: solid;
+    border-width: 1px;
+    border-color: var(--color-hell-border);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+    line-height: 1;
+    & > canvas {
       display: block;
-      background-color: white;
+      max-width: 100%;
+      height: auto;
+    }
+  }
+
+  .hell-pdf-thumb-label {
+    pointer-events: none;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .hell-pdf-scroll {
+    position: absolute;
+    inset: calc(var(--spacing) * 0);
+    overflow: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-x pan-y;
+    -webkit-overflow-scrolling: touch;
+    .hell-pdf-overview + & {
+      position: relative;
+      inset: auto;
+      flex: 1 1 auto;
+    }
+    & .pdfViewer {
+      padding-inline: calc(var(--spacing) * 0);
+      padding-block: calc(var(--spacing) * 3);
+    }
+    & .pdfViewer .page {
+      margin-inline: auto;
+      margin-block: calc(var(--spacing) * 2);
       border-style: solid;
       border-width: 1px;
       border-color: var(--color-hell-border);
-      box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
-      line-height: 1;
-      & > canvas {
-        display: block;
-        max-width: 100%;
-        height: auto;
-      }
+      box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.06),
+        0 8px 24px -12px rgb(0 0 0 / 0.18);
+      background-color: white;
     }
-
-  .hell-pdf-thumb-label {
-      font-variant-numeric: tabular-nums;
-      line-height: 1;
-    }
-
-  .hell-pdf-scroll {
-      position: absolute;
-      inset: calc(var(--spacing) * 0);
-      overflow: auto;
-      overscroll-behavior: contain;
-      touch-action: pan-x pan-y pinch-zoom;
-      -webkit-overflow-scrolling: touch;
-      .hell-pdf-overview + & {
-        position: relative;
-        inset: auto;
-        flex: 1 1 auto;
-      }
-      & .pdfViewer {
-        padding-inline: calc(var(--spacing) * 0);
-        padding-block: calc(var(--spacing) * 3);
-      }
-      & .pdfViewer .page {
-        margin-inline: auto;
-        margin-block: calc(var(--spacing) * 2);
-        border-style: solid;
-        border-width: 1px;
-        border-color: var(--color-hell-border);
-        box-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 8px 24px -12px rgb(0 0 0 / 0.18);
-        background-color: white;
-      }
-    }
-
+  }
 }

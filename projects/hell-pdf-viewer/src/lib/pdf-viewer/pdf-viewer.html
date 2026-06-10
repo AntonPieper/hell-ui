@@ -117,11 +117,15 @@
     (change)="onZoomSelect(zoomSelect.value)"
     [attr.aria-label]="labels.pdfViewer.zoomLevel"
   >
-    <option value="auto" [selected]="effectiveZoomValue() === 'auto'">{{ labels.pdfViewer.automaticZoom }}</option>
+    <option value="auto" [selected]="effectiveZoomValue() === 'auto'">
+      {{ labels.pdfViewer.automaticZoom }}
+    </option>
     <option value="page-actual" [selected]="effectiveZoomValue() === 'page-actual'">
       {{ labels.pdfViewer.actualSize }}
     </option>
-    <option value="page-fit" [selected]="effectiveZoomValue() === 'page-fit'">{{ labels.pdfViewer.pageFit }}</option>
+    <option value="page-fit" [selected]="effectiveZoomValue() === 'page-fit'">
+      {{ labels.pdfViewer.pageFit }}
+    </option>
     <option value="page-width" [selected]="effectiveZoomValue() === 'page-width'">
       {{ labels.pdfViewer.pageWidth }}
     </option>
@@ -161,12 +165,7 @@
       (keydown.escape)="onFindEscape($event)"
       [attr.aria-label]="labels.pdfViewer.findQuery"
     />
-    <span
-      class="hell-pdf-find-count"
-      role="status"
-      aria-live="polite"
-      aria-atomic="true"
-    >
+    <span class="hell-pdf-find-count" role="status" aria-live="polite" aria-atomic="true">
       @if (findStatus() === 'pending') {
         {{ labels.pdfViewer.searching }}
       } @else if (findStatus() === 'not-found' && findQuery()) {
@@ -226,6 +225,10 @@
     <aside #overview class="hell-pdf-overview" [attr.aria-label]="labels.pdfViewer.pageOverview">
       @for (n of pageList(); track n) {
         <button
+          hellButton
+          variant="ghost"
+          size="sm"
+          block
           type="button"
           class="hell-pdf-thumb"
           [attr.data-active]="page() === n ? 'true' : null"

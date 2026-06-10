@@ -227,6 +227,16 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   private doc: HellPdfDocumentHandle | null = null;
   private container: HTMLDivElement | null = null;
   private containerEventCleanup: (() => void) | null = null;
+  private readonly activeTouchPointers = new Map<
+    number,
+    { readonly clientX: number; readonly clientY: number }
+  >();
+  private pinchGesture: { readonly startDistance: number; readonly startScale: number } | null =
+    null;
+  private touchPinchGesture: {
+    readonly startDistance: number;
+    readonly startScale: number;
+  } | null = null;
   private readonly renderedThumbs = new Set<number>();
   private handlers: HellPdfRuntimeHandlers | null = null;
   private initialZoom: HellPdfInitialZoom = 'auto';
@@ -313,6 +323,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     this.loadToken++;
     this.containerEventCleanup?.();
     this.containerEventCleanup = null;
+    this.resetPinchGesture();
     this.clearPrintSession();
     void this.cancelActiveLoadTask();
     this.clearActiveDocument();
@@ -410,7 +421,9 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     }
   }
 
-  private normalizeBootstrapOptions(options: HellPdfRuntimeBootstrapOptions): HellPdfAdapterBootstrapOptions {
+  private normalizeBootstrapOptions(
+    options: HellPdfRuntimeBootstrapOptions,
+  ): HellPdfAdapterBootstrapOptions {
     if (!options.worker) {
       return {};
     }
@@ -444,10 +457,33 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     this.containerEventCleanup?.();
 
     const onWheel = (event: WheelEvent) => this.onWheelZoom(event);
+    const onPointerDown = (event: PointerEvent) => this.onPointerDown(event);
+    const onPointerMove = (event: PointerEvent) => this.onPointerMove(event);
+    const onPointerEnd = (event: PointerEvent) => this.onPointerEnd(event);
+    const onTouchStart = (event: TouchEvent) => this.onTouchStart(event);
+    const onTouchMove = (event: TouchEvent) => this.onTouchMove(event);
+    const onTouchEnd = (event: TouchEvent) => this.onTouchEnd(event);
     container.addEventListener('wheel', onWheel, { passive: false });
+    container.addEventListener('pointerdown', onPointerDown, { passive: true });
+    container.addEventListener('pointermove', onPointerMove, { passive: false });
+    container.addEventListener('pointerup', onPointerEnd);
+    container.addEventListener('pointercancel', onPointerEnd);
+    container.addEventListener('touchstart', onTouchStart, { passive: true });
+    container.addEventListener('touchmove', onTouchMove, { passive: false });
+    container.addEventListener('touchend', onTouchEnd);
+    container.addEventListener('touchcancel', onTouchEnd);
 
     this.containerEventCleanup = () => {
       container.removeEventListener('wheel', onWheel);
+      container.removeEventListener('pointerdown', onPointerDown);
+      container.removeEventListener('pointermove', onPointerMove);
+      container.removeEventListener('pointerup', onPointerEnd);
+      container.removeEventListener('pointercancel', onPointerEnd);
+      container.removeEventListener('touchstart', onTouchStart);
+      container.removeEventListener('touchmove', onTouchMove);
+      container.removeEventListener('touchend', onTouchEnd);
+      container.removeEventListener('touchcancel', onTouchEnd);
+      this.resetPinchGesture();
     };
   }
 
@@ -459,6 +495,143 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
 
     event.preventDefault();
     this.setNumericZoom(this.currentScale * scaleFactor, getZoomOrigin(this.container, event));
+  }
+
+  private onPointerDown(event: PointerEvent): void {
+    if (!this.session || !this.container || event.pointerType !== 'touch') return;
+
+    this.activeTouchPointers.set(event.pointerId, {
+      clientX: event.clientX,
+      clientY: event.clientY,
+    });
+
+    try {
+      this.container.setPointerCapture(event.pointerId);
+    } catch {
+      /* Pointer capture is best-effort; jsdom and some browsers can reject it. */
+    }
+
+    if (this.activeTouchPointers.size >= 2) {
+      this.startPinchGesture();
+    }
+  }
+
+  private onPointerMove(event: PointerEvent): void {
+    if (!this.session || !this.container || event.pointerType !== 'touch') return;
+    if (!this.activeTouchPointers.has(event.pointerId)) return;
+
+    this.activeTouchPointers.set(event.pointerId, {
+      clientX: event.clientX,
+      clientY: event.clientY,
+    });
+
+    if (this.activeTouchPointers.size < 2) return;
+    if (!this.pinchGesture) this.startPinchGesture();
+    if (!this.pinchGesture || this.pinchGesture.startDistance <= 0) return;
+
+    const points = this.getPinchPoints();
+    if (!points) return;
+
+    const distance = getPointerDistance(points[0], points[1]);
+    if (!Number.isFinite(distance) || distance <= 0) return;
+
+    if (event.cancelable) event.preventDefault();
+
+    const center = getPointerCenter(points[0], points[1]);
+    this.setNumericZoom(
+      this.pinchGesture.startScale * (distance / this.pinchGesture.startDistance),
+      getZoomOrigin(this.container, center),
+    );
+  }
+
+  private onPointerEnd(event: PointerEvent): void {
+    if (event.pointerType !== 'touch') return;
+
+    this.activeTouchPointers.delete(event.pointerId);
+    this.pinchGesture = null;
+
+    if (this.activeTouchPointers.size >= 2) {
+      this.startPinchGesture();
+    }
+  }
+
+  private onTouchStart(event: TouchEvent): void {
+    if (!this.session || !this.container || this.activeTouchPointers.size > 0) return;
+
+    if (event.touches.length >= 2) {
+      this.startTouchPinchGesture(event);
+    }
+  }
+
+  private onTouchMove(event: TouchEvent): void {
+    if (!this.session || !this.container || this.activeTouchPointers.size > 0) return;
+    if (event.touches.length < 2) {
+      this.touchPinchGesture = null;
+      return;
+    }
+
+    if (!this.touchPinchGesture) this.startTouchPinchGesture(event);
+    if (!this.touchPinchGesture || this.touchPinchGesture.startDistance <= 0) return;
+
+    const points = getTouchPinchPoints(event);
+    if (!points) return;
+
+    const distance = getPointerDistance(points[0], points[1]);
+    if (!Number.isFinite(distance) || distance <= 0) return;
+
+    if (event.cancelable) event.preventDefault();
+
+    const center = getPointerCenter(points[0], points[1]);
+    this.setNumericZoom(
+      this.touchPinchGesture.startScale * (distance / this.touchPinchGesture.startDistance),
+      getZoomOrigin(this.container, center),
+    );
+  }
+
+  private onTouchEnd(event: TouchEvent): void {
+    if (this.activeTouchPointers.size > 0) return;
+
+    this.touchPinchGesture = null;
+    if (event.touches.length >= 2) {
+      this.startTouchPinchGesture(event);
+    }
+  }
+
+  private startPinchGesture(): void {
+    const points = this.getPinchPoints();
+    if (!points) return;
+
+    this.pinchGesture = {
+      startDistance: getPointerDistance(points[0], points[1]),
+      startScale: this.currentScale,
+    };
+  }
+
+  private startTouchPinchGesture(event: TouchEvent): void {
+    const points = getTouchPinchPoints(event);
+    if (!points) return;
+
+    this.touchPinchGesture = {
+      startDistance: getPointerDistance(points[0], points[1]),
+      startScale: this.currentScale,
+    };
+  }
+
+  private resetPinchGesture(): void {
+    this.activeTouchPointers.clear();
+    this.pinchGesture = null;
+    this.touchPinchGesture = null;
+  }
+
+  private getPinchPoints():
+    | readonly [
+        { readonly clientX: number; readonly clientY: number },
+        { readonly clientX: number; readonly clientY: number },
+      ]
+    | null {
+    const points = Array.from(this.activeTouchPointers.values());
+    if (points.length < 2) return null;
+    return [points[0], points[1]];
   }
 
   private setNumericZoom(scale: number, origin?: [number, number]): void {
@@ -493,6 +666,38 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
 
     this.destroyDocument(doc);
   }
+}
+
+function getPointerDistance(
+  a: { readonly clientX: number; readonly clientY: number },
+  b: { readonly clientX: number; readonly clientY: number },
+): number {
+  return Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
+}
+
+function getPointerCenter(
+  a: { readonly clientX: number; readonly clientY: number },
+  b: { readonly clientX: number; readonly clientY: number },
+): { readonly clientX: number; readonly clientY: number } {
+  return {
+    clientX: (a.clientX + b.clientX) / 2,
+    clientY: (a.clientY + b.clientY) / 2,
+  };
+}
+
+function getTouchPinchPoints(
+  event: TouchEvent,
+):
+  | readonly [
+      { readonly clientX: number; readonly clientY: number },
+      { readonly clientX: number; readonly clientY: number },
+    ]
+  | null {
+  if (event.touches.length < 2) return null;
+  return [
+    { clientX: event.touches[0].clientX, clientY: event.touches[0].clientY },
+    { clientX: event.touches[1].clientX, clientY: event.touches[1].clientY },
+  ];
 }
 
 function isPdfEditableTarget(target: EventTarget | null): boolean {

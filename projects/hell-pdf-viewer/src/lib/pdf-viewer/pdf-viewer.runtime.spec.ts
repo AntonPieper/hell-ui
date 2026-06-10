@@ -19,13 +19,13 @@ describe('PDF Runtime', () => {
     const runtime = new HellPdfRuntime(adapter);
     const container = document.createElement('div') as HTMLDivElement;
 
-    await runtime.bootstrap(container, createRuntimeHandlers(), { worker: '/assets/worker.mjs' as const });
+    await runtime.bootstrap(container, createRuntimeHandlers(), {
+      worker: '/assets/worker.mjs' as const,
+    });
 
-    expect(adapter.createViewer).toHaveBeenCalledWith(
-      container,
-      expect.any(Object),
-      { worker: '/assets/worker.mjs' },
-    );
+    expect(adapter.createViewer).toHaveBeenCalledWith(container, expect.any(Object), {
+      worker: '/assets/worker.mjs',
+    });
   });
 
   it('keeps download and print browser work behind the PDF Adapter seam', async () => {
@@ -112,7 +112,10 @@ describe('PDF Runtime', () => {
     const second = deferred<HellPdfDocumentHandle>();
     const firstDoc = fakeDocument(1);
     const secondDoc = fakeDocument(2);
-    adapter.loadQueue.push({ promise: first.promise, destroy: vi.fn() }, { promise: second.promise, destroy: vi.fn() });
+    adapter.loadQueue.push(
+      { promise: first.promise, destroy: vi.fn() },
+      { promise: second.promise, destroy: vi.fn() },
+    );
 
     const firstLoad = runtime.loadDocument('first.pdf', {
       initialPage: 1,
@@ -171,10 +174,51 @@ describe('PDF Runtime', () => {
     expect(adapter.session.setNumericZoom).toHaveBeenCalledOnce();
   });
 
+  it('zooms around the gesture center on two-touch pinch', async () => {
+    const adapter = new FakePdfAdapter();
+    const runtime = new HellPdfRuntime(adapter);
+    const container = document.createElement('div') as HTMLDivElement;
+    vi.spyOn(container, 'offsetLeft', 'get').mockReturnValue(10);
+    vi.spyOn(container, 'offsetTop', 'get').mockReturnValue(20);
+    vi.spyOn(container, 'clientWidth', 'get').mockReturnValue(300);
+    vi.spyOn(container, 'clientHeight', 'get').mockReturnValue(400);
+    vi.spyOn(container, 'getBoundingClientRect').mockReturnValue({
+      x: 100,
+      y: 200,
+      width: 300,
+      height: 400,
+      top: 200,
+      right: 400,
+      bottom: 600,
+      left: 100,
+      toJSON: () => ({}),
+    });
+    await runtime.bootstrap(container, createRuntimeHandlers());
+
+    container.dispatchEvent(touchPointer('pointerdown', 1, 130, 260));
+    container.dispatchEvent(touchPointer('pointerdown', 2, 230, 260));
+
+    const pinchMove = touchPointer('pointermove', 2, 280, 260);
+    container.dispatchEvent(pinchMove);
+
+    expect(pinchMove.defaultPrevented).toBe(true);
+    expect(adapter.session.setNumericZoom).toHaveBeenCalledWith(1.5);
+    expect(container.scrollLeft).toBeCloseTo(52.5);
+    expect(container.scrollTop).toBeCloseTo(30);
+
+    runtime.cleanup();
+    container.dispatchEvent(touchPointer('pointermove', 2, 340, 260));
+
+    expect(adapter.session.setNumericZoom).toHaveBeenCalledOnce();
+  });
+
   it('keeps thumbnails behind the PDF Adapter seam', async () => {
     const adapter = new FakePdfAdapter();
     const runtime = new HellPdfRuntime(adapter);
-    await runtime.bootstrap(document.createElement('div') as HTMLDivElement, createRuntimeHandlers());
+    await runtime.bootstrap(
+      document.createElement('div') as HTMLDivElement,
+      createRuntimeHandlers(),
+    );
     const doc = fakeDocument(3);
     adapter.loadQueue.push({ promise: Promise.resolve(doc), destroy: vi.fn() });
     await runtime.loadDocument('thumbs.pdf', {
@@ -193,7 +237,10 @@ describe('PDF Runtime', () => {
   it('retries thumbnails after adapter render failures', async () => {
     const adapter = new FakePdfAdapter();
     const runtime = new HellPdfRuntime(adapter);
-    await runtime.bootstrap(document.createElement('div') as HTMLDivElement, createRuntimeHandlers());
+    await runtime.bootstrap(
+      document.createElement('div') as HTMLDivElement,
+      createRuntimeHandlers(),
+    );
     const doc = fakeDocument(3);
     adapter.loadQueue.push({ promise: Promise.resolve(doc), destroy: vi.fn() });
     await runtime.loadDocument('thumbs.pdf', {
@@ -214,7 +261,10 @@ describe('PDF Runtime', () => {
   it('destroys the active document during cleanup', async () => {
     const adapter = new FakePdfAdapter();
     const runtime = new HellPdfRuntime(adapter);
-    await runtime.bootstrap(document.createElement('div') as HTMLDivElement, createRuntimeHandlers());
+    await runtime.bootstrap(
+      document.createElement('div') as HTMLDivElement,
+      createRuntimeHandlers(),
+    );
     const doc = fakeDocument(1);
     adapter.loadQueue.push({ promise: Promise.resolve(doc), destroy: vi.fn() });
     await runtime.loadDocument('active.pdf', {
@@ -260,9 +310,24 @@ describe('PDF Runtime', () => {
     scope.recordPointerTarget(inside);
 
     expect(scope.handleGlobalShortcut(ctrlKey('f'), actions)).toBe(true);
-    expect(scope.handleGlobalShortcut(new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, altKey: true }), actions)).toBe(false);
-    expect(scope.handleGlobalShortcut(new KeyboardEvent('keydown', { key: 'p', ctrlKey: true, shiftKey: true }), actions)).toBe(false);
-    expect(scope.handleGlobalShortcut(new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, metaKey: true }), actions)).toBe(false);
+    expect(
+      scope.handleGlobalShortcut(
+        new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, altKey: true }),
+        actions,
+      ),
+    ).toBe(false);
+    expect(
+      scope.handleGlobalShortcut(
+        new KeyboardEvent('keydown', { key: 'p', ctrlKey: true, shiftKey: true }),
+        actions,
+      ),
+    ).toBe(false);
+    expect(
+      scope.handleGlobalShortcut(
+        new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, metaKey: true }),
+        actions,
+      ),
+    ).toBe(false);
 
     expect(actions.openFind).toHaveBeenCalledOnce();
     expect(actions.print).not.toHaveBeenCalled();
@@ -351,7 +416,9 @@ describe('PDF Runtime', () => {
       handled = scope.handleViewerKey(event, actions);
     });
 
-    input.dispatchEvent(new foreignWindow.KeyboardEvent('keydown', { key: 'PageDown', bubbles: true }));
+    input.dispatchEvent(
+      new foreignWindow.KeyboardEvent('keydown', { key: 'PageDown', bubbles: true }),
+    );
 
     expect(handled).toBe(false);
     expect(actions.nextPage).not.toHaveBeenCalled();
@@ -417,7 +484,11 @@ describe('PDF Runtime', () => {
       handled = scope.handleViewerKey(event, actions);
     });
 
-    const event = new KeyboardEvent('keydown', { key: 'PageDown', bubbles: true, cancelable: true });
+    const event = new KeyboardEvent('keydown', {
+      key: 'PageDown',
+      bubbles: true,
+      cancelable: true,
+    });
     textLayer.dispatchEvent(event);
 
     expect(handled).toBe(true);
@@ -475,6 +546,22 @@ class FakePdfSession implements HellPdfViewerSession {
 
 function ctrlKey(key: string): KeyboardEvent {
   return new KeyboardEvent('keydown', { key, ctrlKey: true });
+}
+
+function touchPointer(
+  type: 'pointerdown' | 'pointermove' | 'pointerup' | 'pointercancel',
+  pointerId: number,
+  clientX: number,
+  clientY: number,
+): PointerEvent {
+  return new PointerEvent(type, {
+    pointerId,
+    pointerType: 'touch',
+    clientX,
+    clientY,
+    bubbles: true,
+    cancelable: true,
+  });
 }
 
 function createShortcutActions() {
