@@ -15,7 +15,7 @@ Use this guide when moving an app from local/alpha Hell imports to the first bet
 
 ## Install peer tiers
 
-Package peer metadata is package-wide. Some optional peers appear in the package manifest even when they are only required by a kept feature entry point. The PDF viewer is now split into `@hell-ui/pdf-viewer`, so `@hell-ui/angular` no longer advertises pdf.js. The package-consumer runner proves the actual strict-peer install groups in [`tools/check-package-consumer.mjs`](../../tools/check-package-consumer.mjs).
+Package peer metadata is package-wide. Some optional peers appear in the package manifest even when they are only required by a kept feature entry point. The PDF viewer is now split into `@hell-ui/pdf-viewer`, so `@hell-ui/angular` no longer advertises pdf.js. The static peer-tier source of truth is [`tools/static-contracts/package-consumer-peer-contracts.json`](../../tools/static-contracts/package-consumer-peer-contracts.json), and the package-consumer runner proves the actual strict-peer install groups in [`tools/check-package-consumer.mjs`](../../tools/check-package-consumer.mjs).
 
 A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`; install any missing core peers explicitly. Use `pnpm add` in consumer snippets below because the package-consumer proof uses pnpm strict-peer installs.
 
@@ -68,16 +68,16 @@ pnpm add @hell-ui/angular @hell-ui/pdf-viewer @angular/forms @angular/cdk @float
 Maintainers can rerun a proof path from the product workspace:
 
 ```bash
-HELL_PACKAGE_CONSUMER_SCENARIOS=button-unstyled pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=primitives-css pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=audio-player pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=audio-transcript pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=table,data-table,no-legacy-alias pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=table-tanstack pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=table-virtual pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=table-cdk pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=pdf-viewer pnpm test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=button-unstyled pnpm test:package-consumer --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=primitives-css pnpm test:package-consumer --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=audio-player pnpm test:package-consumer --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=audio-transcript pnpm test:package-consumer --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=table,data-table,no-legacy-alias pnpm test:package-consumer --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=table-tanstack pnpm test:package-consumer --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=table-virtual pnpm test:package-consumer --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=table-cdk pnpm test:package-consumer --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor pnpm test:package-consumer --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=pdf-viewer pnpm test:package-consumer --minimal-deps
 ```
 
 ## Root imports versus narrow imports

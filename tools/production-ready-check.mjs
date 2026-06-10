@@ -57,7 +57,7 @@ const releaseTasksByCategory = {
 const checklistContracts = {
   'package-consumer': {
     sliceIds: ['HELL-012', 'HELL-020', 'HELL-021', 'HELL-022', 'HELL-023', 'HELL-024', 'HELL-055', 'HELL-081'],
-    commands: ['pnpm test:package-consumer -- --minimal-deps', 'pnpm run release:dry-run --full'],
+    commands: ['pnpm test:package-consumer --minimal-deps', 'pnpm run release:dry-run --full'],
     checkTypes: ['releaseDryRunEvidence'],
   },
   api: {

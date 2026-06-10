@@ -13,6 +13,11 @@ import { dirname, isAbsolute, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { auditPackedPackage } from './package-pack-audit.mjs';
+import {
+  loadStaticContractManifest,
+  peerGroupContractsFromManifest,
+  peersFromPeerSets,
+} from './static-contract-manifests.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const distHell = join(root, 'dist/hell');
@@ -27,127 +32,43 @@ const pnpmTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_TIMEOUT_M
 const pnpmHeartbeatMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_HEARTBEAT_MS, 30_000);
 const pnpmPreflightTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_PREFLIGHT_TIMEOUT_MS, 30_000);
 
-runPnpmPreflight(root);
-if (preflightOnly) {
-  console.log(`${packageConsumerLabel('preflight')} preflight passed; skipping package build and consumer scenarios`);
-  process.exit(0);
-}
-
-runRootPnpm(['run', 'build:lib'], root);
-
-if (!existsSync(join(distHell, 'package.json'))) {
-  fail(`Built package missing: ${distHell}`);
-}
-if (!existsSync(join(distPdfViewer, 'package.json'))) {
-  fail(`Built package missing: ${distPdfViewer}`);
-}
-
-const distPackageJson = JSON.parse(readFileSync(join(distHell, 'package.json'), 'utf8'));
-const packageName = distPackageJson.name;
-if (!packageName) {
-  fail('Built package.json is missing name');
-}
-const distPdfPackageJson = JSON.parse(readFileSync(join(distPdfViewer, 'package.json'), 'utf8'));
-const pdfPackageName = distPdfPackageJson.name;
-if (!pdfPackageName) {
-  fail('Built PDF package.json is missing name');
-}
-
-assertModernTableEntrypointContract(distPackageJson, distHell);
-assertDocsAvoidLegacyTableEntrypoints();
-
-const packedHell = await packBuiltPackage(distHell, 'pack-core');
-const packedPdfViewer = await packBuiltPackage(distPdfViewer, 'pack-pdf-viewer');
-try {
-  auditPackedPackage({ distRoot: distHell, tarball: packedHell.tarball });
-  auditPackedPackage({ distRoot: distPdfViewer, tarball: packedPdfViewer.tarball });
-} catch (error) {
-  fail(error instanceof Error ? error.message : String(error));
-}
-
 const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 const deps = rootPackage.dependencies ?? {};
 const devDeps = rootPackage.devDependencies ?? {};
 const sourcePackage = JSON.parse(readFileSync(join(root, 'projects/hell/package.json'), 'utf8'));
+const packageName = sourcePackage.name;
+if (!packageName) {
+  fail('Source package.json is missing name');
+}
 const packagePeerDependencies = sourcePackage.peerDependencies ?? {};
 const packagePeerDependenciesMeta = sourcePackage.peerDependenciesMeta ?? {};
 const sourcePdfPackage = JSON.parse(readFileSync(join(root, 'projects/hell-pdf-viewer/package.json'), 'utf8'));
+const pdfPackageName = sourcePdfPackage.name;
+if (!pdfPackageName) {
+  fail('Source PDF package.json is missing name');
+}
 const pdfPackagePeerDependencies = sourcePdfPackage.peerDependencies ?? {};
 const pdfPackagePeerDependenciesMeta = sourcePdfPackage.peerDependenciesMeta ?? {};
 
-const corePeerGroup = [
-  '@angular/cdk',
-  '@angular/common',
-  '@angular/core',
-  '@angular/forms',
-  '@floating-ui/dom',
-  '@ng-icons/core',
-  'ng-primitives',
-  'rxjs',
-];
-const stylePeerGroup = ['tailwindcss'];
-const routerPeerGroup = ['@angular/router'];
-const fontAwesomePeerGroup = ['@ng-icons/font-awesome'];
-const codeEditorPeerGroup = [
-  '@codemirror/commands',
-  '@codemirror/language',
-  '@codemirror/state',
-  '@codemirror/view',
-  '@lezer/highlight',
-];
-const pdfViewerPeerGroup = ['pdfjs-dist'];
-const tanStackTablePeerGroup = ['@tanstack/angular-table'];
-const tanStackVirtualPeerGroup = ['@tanstack/virtual-core'];
-const tableAdapterPeerGroup = [...tanStackTablePeerGroup, ...tanStackVirtualPeerGroup];
-const heavyFeaturePeerGroup = [...codeEditorPeerGroup, ...pdfViewerPeerGroup];
-const packageConsumerPeerTiers = new Set([
-  'core',
-  'primitive',
-  'composite',
-  'table',
-  'table-cdk',
-  'table-tanstack',
-  'table-virtual',
-  'audio-transcript',
-  'code-editor',
-  'pdf-viewer',
-]);
-const peerGroupContracts = {
-  core: { tier: 'core', peers: corePeerGroup },
-  'primitive-unstyled': { tier: 'primitive', peers: corePeerGroup },
-  primitive: { tier: 'primitive', peers: [...corePeerGroup, ...stylePeerGroup] },
-  'primitive-aggregate': {
-    tier: 'primitive',
-    peers: [...corePeerGroup, ...stylePeerGroup, ...routerPeerGroup, ...fontAwesomePeerGroup],
-  },
-  composite: { tier: 'composite', peers: [...corePeerGroup, ...stylePeerGroup] },
-  'composite-icons': {
-    tier: 'composite',
-    peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup],
-  },
-  table: { tier: 'table', peers: [...corePeerGroup, ...stylePeerGroup] },
-  'table-cdk': { tier: 'table-cdk', peers: [...corePeerGroup, ...stylePeerGroup] },
-  'table-tanstack': {
-    tier: 'table-tanstack',
-    peers: [...corePeerGroup, ...stylePeerGroup, ...tanStackTablePeerGroup],
-  },
-  'table-virtual': {
-    tier: 'table-virtual',
-    peers: [...corePeerGroup, ...stylePeerGroup, ...tanStackVirtualPeerGroup],
-  },
-  'audio-transcript': {
-    tier: 'audio-transcript',
-    peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup],
-  },
-  'code-editor': {
-    tier: 'code-editor',
-    peers: [...corePeerGroup, ...stylePeerGroup, ...codeEditorPeerGroup],
-  },
-  'pdf-viewer': {
-    tier: 'pdf-viewer',
-    peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup, ...pdfViewerPeerGroup],
-  },
-};
+const peerContractManifest = loadStaticContractManifest('package-consumer-peer-contracts.json');
+const corePeerGroup = peersFromPeerSets(peerContractManifest, ['core']);
+const stylePeerGroup = peersFromPeerSets(peerContractManifest, ['style']);
+const fontAwesomePeerGroup = peersFromPeerSets(peerContractManifest, ['font-awesome']);
+const codeEditorPeerGroup = peersFromPeerSets(peerContractManifest, ['code-editor']);
+const pdfViewerPeerGroup = peersFromPeerSets(peerContractManifest, ['pdf-viewer']);
+const tanStackTablePeerGroup = peersFromPeerSets(peerContractManifest, ['tanstack-table']);
+const tanStackVirtualPeerGroup = peersFromPeerSets(peerContractManifest, ['tanstack-virtual']);
+const tableAdapterPeerGroup = peersFromPeerSets(
+  peerContractManifest,
+  peerContractManifest.packageConsumer.tableAdapterPeerSets,
+);
+const heavyFeaturePeerGroup = peersFromPeerSets(
+  peerContractManifest,
+  peerContractManifest.packageConsumer.heavyPeerSets,
+);
+const packageConsumerPeerTiers = new Set(peerContractManifest.peerTiers);
+const peerGroupContracts = peerGroupContractsFromManifest(peerContractManifest);
+const scenarioPeerContracts = peerContractManifest.scenarioPeerContracts;
 
 const angularAppDeps = [
   '@angular/common',
@@ -207,188 +128,155 @@ const tableVirtualDeps = [
   '@tanstack/virtual-core',
 ];
 
+function scenario(name, implementation) {
+  const contract = scenarioPeerContracts[name];
+  if (!contract) fail(`Package-consumer peer manifest is missing scenario ${name}`);
+  return { name, ...contract, ...implementation };
+}
+
 const scenarios = [
-  {
-    name: 'root-core',
-    aliases: ['root'],
-    description: 'root entry core-only with package-wide light peers',
-    peerTier: 'core',
-    peerGroup: 'core',
+  scenario('root-core', {
     dependencies: coreDeps,
     forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: rootConsumerMainTs(),
     stylesCss: '',
-  },
-  {
-    name: 'core',
-    description: 'core entry with package-wide light peers',
-    peerTier: 'core',
-    peerGroup: 'core',
+  }),
+  scenario('core', {
     dependencies: coreDeps,
     mainTs: coreConsumerMainTs(),
     stylesCss: '',
-  },
-  {
-    name: 'primitives-css',
-    aliases: ['primitives'],
-    description: 'primitives entry with primitive CSS and aggregate primitive peers',
-    peerTier: 'primitive',
-    peerGroup: 'primitive-aggregate',
+  }),
+  scenario('primitives-css', {
     dependencies: primitivesDeps,
     mainTs: primitivesConsumerMainTs(),
     stylesCss: primitivesConsumerStylesCss(),
-  },
-  {
-    name: 'button-unstyled',
-    description: 'narrow primitive button entry without CSS or Tailwind peer',
-    peerTier: 'primitive',
-    peerGroup: 'primitive-unstyled',
+  }),
+  scenario('button-unstyled', {
     dependencies: coreDeps,
     forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: buttonUnstyledConsumerMainTs(),
     stylesCss: '',
-  },
-  {
-    name: 'button',
-    description: 'narrow primitive button entry with primitive styles and without Font Awesome peer',
-    peerTier: 'primitive',
-    peerGroup: 'primitive',
+  }),
+  scenario('button', {
     dependencies: buttonStyledDeps,
     forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: buttonConsumerMainTs(),
     stylesCss: primitivesConsumerStylesCss(),
-  },
-  {
-    name: 'composites-css',
-    aliases: ['composites'],
-    description: 'composites entry with composite CSS and icon-backed composite peers',
-    peerTier: 'composite',
-    peerGroup: 'composite-icons',
+  }),
+  scenario('composites-css', {
     dependencies: styledUiDeps,
     mainTs: compositesConsumerMainTs(),
     stylesCss: compositesConsumerStylesCss(),
-  },
-  {
-    name: 'app-shell',
-    description: 'narrow app-shell composite entry without Font Awesome or feature peers',
-    peerTier: 'composite',
-    peerGroup: 'composite',
+  }),
+  scenario('app-shell', {
     dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: appShellConsumerMainTs(),
     stylesCss: compositesConsumerStylesCss(),
-  },
-  {
-    name: 'audio-player',
-    description: 'narrow audio-player composite without transcript feature provider',
-    peerTier: 'composite',
-    peerGroup: 'composite-icons',
+  }),
+  scenario('audio-player', {
     dependencies: audioPlayerDeps,
     mainTs: audioPlayerConsumerMainTs(),
     stylesCss: compositesConsumerStylesCss(),
-  },
-  {
-    name: 'audio-transcript',
-    description: 'audio transcript feature provider opt-in without CodeMirror or pdf.js peers',
-    peerTier: 'audio-transcript',
-    peerGroup: 'audio-transcript',
+  }),
+  scenario('audio-transcript', {
     dependencies: audioPlayerDeps,
     mainTs: audioTranscriptConsumerMainTs(),
     stylesCss: compositesConsumerStylesCss(),
-  },
-  {
-    name: 'testing',
-    description: 'testing entry with package-wide light peers',
-    peerTier: 'core',
-    peerGroup: 'core',
+  }),
+  scenario('testing', {
     dependencies: testingDeps,
     mainTs: testingConsumerMainTs(),
     stylesCss: '',
-  },
-  {
-    name: 'code-editor',
-    description: 'code-editor feature with styled peers and CodeMirror peers',
-    peerTier: 'code-editor',
-    peerGroup: 'code-editor',
+  }),
+  scenario('code-editor', {
     dependencies: codeEditorDeps,
     mainTs: codeEditorConsumerMainTs(),
     stylesCss: codeEditorConsumerStylesCss(),
-  },
-  {
-    name: 'table',
-    description: 'table primitives without Font Awesome peer',
-    peerTier: 'table',
-    peerGroup: 'table',
+  }),
+  scenario('table', {
     dependencies: styledUiWithoutFontAwesomeDeps,
     forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: tableConsumerMainTs(),
     stylesCss: tableConsumerStylesCss(),
-  },
-  {
-    name: 'data-table',
-    description: 'simple data-table entrypoint without Font Awesome or optional table-engine peers',
-    peerTier: 'table',
-    peerGroup: 'table',
+  }),
+  scenario('data-table', {
     dependencies: styledUiWithoutFontAwesomeDeps,
     forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: dataTableConsumerMainTs(),
     stylesCss: tableConsumerStylesCss(),
-  },
-  {
-    name: 'table-tanstack',
-    description: 'TanStack Table adapter with strict optional table-engine peer',
-    peerTier: 'table-tanstack',
-    peerGroup: 'table-tanstack',
+  }),
+  scenario('table-tanstack', {
     dependencies: tableTanStackDeps,
     forbiddenDependencies: tanStackVirtualPeerGroup,
     mainTs: tableTanStackConsumerMainTs(),
     stylesCss: tableConsumerStylesCss(),
-  },
-  {
-    name: 'table-virtual',
-    description: 'TanStack Virtual row-part adapter with strict optional virtual peer',
-    peerTier: 'table-virtual',
-    peerGroup: 'table-virtual',
+  }),
+  scenario('table-virtual', {
     dependencies: tableVirtualDeps,
     forbiddenDependencies: tanStackTablePeerGroup,
     mainTs: tableVirtualConsumerMainTs(),
     stylesCss: tableConsumerStylesCss(),
-  },
-  {
-    name: 'table-cdk',
-    description: 'CDK Table skin adapter with no extra optional table-engine peer',
-    peerTier: 'table-cdk',
-    peerGroup: 'table-cdk',
+  }),
+  scenario('table-cdk', {
     dependencies: styledUiWithoutFontAwesomeDeps,
     forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: tableCdkConsumerMainTs(),
     stylesCss: tableConsumerStylesCss(),
-  },
-  {
-    name: 'no-legacy-alias',
-    description: 'negative check that removed table aliases cannot compile',
-    peerTier: 'table',
-    peerGroup: 'table',
+  }),
+  scenario('no-legacy-alias', {
     dependencies: styledUiWithoutFontAwesomeDeps,
     forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: noLegacyTableAliasConsumerMainTs(),
     stylesCss: noLegacyTableAliasConsumerStylesCss(),
     expectBuildFailure: true,
-  },
-  {
-    name: 'pdf-viewer',
-    description: 'split pdf-viewer package with pdfjs and light UI peers',
-    peerTier: 'pdf-viewer',
-    peerGroup: 'pdf-viewer',
+  }),
+  scenario('pdf-viewer', {
     installPdfPackage: true,
     dependencies: pdfViewerDeps,
     mainTs: pdfViewerConsumerMainTs(),
     stylesCss: pdfViewerConsumerStylesCss(),
-  },
+  }),
 ];
 
 assertPeerTierContracts(scenarios);
 
 const enabledScenarios = selectScenarios(scenarios, selectedScenarioNames);
+
+runPnpmPreflight(root);
+if (preflightOnly) {
+  console.log(`${packageConsumerLabel('preflight')} preflight and manifest contracts passed; skipping package build and consumer scenarios`);
+  process.exit(0);
+}
+
+runRootPnpm(['run', 'build:lib'], root);
+
+if (!existsSync(join(distHell, 'package.json'))) {
+  fail(`Built package missing: ${distHell}`);
+}
+if (!existsSync(join(distPdfViewer, 'package.json'))) {
+  fail(`Built package missing: ${distPdfViewer}`);
+}
+
+const distPackageJson = JSON.parse(readFileSync(join(distHell, 'package.json'), 'utf8'));
+if (distPackageJson.name !== packageName) {
+  fail(`Built package name ${distPackageJson.name ?? '(missing)'} does not match ${packageName}`);
+}
+const distPdfPackageJson = JSON.parse(readFileSync(join(distPdfViewer, 'package.json'), 'utf8'));
+if (distPdfPackageJson.name !== pdfPackageName) {
+  fail(`Built PDF package name ${distPdfPackageJson.name ?? '(missing)'} does not match ${pdfPackageName}`);
+}
+
+assertModernTableEntrypointContract(distPackageJson, distHell);
+assertDocsAvoidLegacyTableEntrypoints();
+
+const packedHell = await packBuiltPackage(distHell, 'pack-core');
+const packedPdfViewer = await packBuiltPackage(distPdfViewer, 'pack-pdf-viewer');
+try {
+  auditPackedPackage({ distRoot: distHell, tarball: packedHell.tarball });
+  auditPackedPackage({ distRoot: distPdfViewer, tarball: packedPdfViewer.tarball });
+} catch (error) {
+  fail(error instanceof Error ? error.message : String(error));
+}
 
 try {
   for (const group of scenarioDependencyGroups(enabledScenarios, minimalDependencyMode)) {
@@ -509,6 +397,8 @@ function scenarioLookup(allScenarios) {
 }
 
 function assertPeerTierContracts(allScenarios) {
+  assertScenarioPeerManifestCoverage(allScenarios);
+
   const packagePeerNames = new Set(Object.keys(packagePeerDependencies));
   const pdfPackagePeerNames = new Set(Object.keys(pdfPackagePeerDependencies));
   const allPackagePeerNames = new Set([...packagePeerNames, ...pdfPackagePeerNames]);
@@ -551,8 +441,8 @@ function assertPeerTierContracts(allScenarios) {
   if (pdfOptionalPeerNames.has('pdfjs-dist')) {
     fail('PDF package pdfjs-dist peer must be required, not optional');
   }
-  if (pdfPackagePeerDependencies[packageName] !== distPackageJson.version) {
-    fail(`PDF package must peer ${packageName}@${distPackageJson.version}`);
+  if (pdfPackagePeerDependencies[packageName] !== sourcePackage.version) {
+    fail(`PDF package must peer ${packageName}@${sourcePackage.version}`);
   }
 
   const coveredTiers = new Set(allScenarios.map((scenario) => scenario.peerTier));
@@ -586,19 +476,19 @@ function assertScenarioPeerGroup(scenario, packagePeerNames) {
   );
 }
 
+function assertScenarioPeerManifestCoverage(allScenarios) {
+  const scenarioNames = new Set(allScenarios.map((scenario) => scenario.name));
+  for (const scenarioName of Object.keys(scenarioPeerContracts)) {
+    if (!scenarioNames.has(scenarioName)) {
+      fail(`Package-consumer peer manifest scenario ${scenarioName} has no implemented consumer scenario`);
+    }
+  }
+}
+
 function assertHeavyPeersAreIsolated(allScenarios) {
-  const lightScenarioNames = new Set([
-    'root-core',
-    'core',
-    'button-unstyled',
-    'button',
-    'table',
-    'data-table',
-    'table-cdk',
-    'no-legacy-alias',
-    'audio-player',
-    'audio-transcript',
-  ]);
+  const lightScenarioNames = new Set(
+    peerContractManifest.packageConsumer.lightScenariosMustAvoidHeavyPeers,
+  );
   for (const scenario of allScenarios) {
     if (!lightScenarioNames.has(scenario.name)) continue;
 
@@ -610,10 +500,14 @@ function assertHeavyPeersAreIsolated(allScenarios) {
 }
 
 function assertTableAdapterPeersAreIsolated(allScenarios) {
-  const tanStackScenario = allScenarios.find((scenario) => scenario.name === 'table-tanstack');
+  const tanStackScenario = allScenarios.find(
+    (scenario) => scenario.name === peerContractManifest.packageConsumer.tableTanStackScenario,
+  );
   if (!tanStackScenario) fail('Missing package-consumer table-tanstack scenario');
 
-  const virtualScenario = allScenarios.find((scenario) => scenario.name === 'table-virtual');
+  const virtualScenario = allScenarios.find(
+    (scenario) => scenario.name === peerContractManifest.packageConsumer.tableVirtualScenario,
+  );
   if (!virtualScenario) fail('Missing package-consumer table-virtual scenario');
 
   const tanStackPeers = tanStackScenario.dependencies.filter((dependency) =>
@@ -627,7 +521,7 @@ function assertTableAdapterPeersAreIsolated(allScenarios) {
   assertSameSet('scenario table-virtual TanStack Virtual peer group', tanStackVirtualPeerGroup, virtualPeers);
 
   for (const scenario of allScenarios) {
-    if (scenario.name !== 'table-tanstack') {
+    if (scenario.name !== peerContractManifest.packageConsumer.tableTanStackScenario) {
       const unexpectedTablePeers = scenario.dependencies.filter((dependency) =>
         tanStackTablePeerGroup.includes(dependency),
       );
@@ -636,7 +530,7 @@ function assertTableAdapterPeersAreIsolated(allScenarios) {
       }
     }
 
-    if (scenario.name !== 'table-virtual') {
+    if (scenario.name !== peerContractManifest.packageConsumer.tableVirtualScenario) {
       const unexpectedVirtualPeers = scenario.dependencies.filter((dependency) =>
         tanStackVirtualPeerGroup.includes(dependency),
       );
@@ -648,7 +542,9 @@ function assertTableAdapterPeersAreIsolated(allScenarios) {
 }
 
 function assertCodeMirrorPeersAreIsolated(allScenarios) {
-  const codeEditorScenario = allScenarios.find((scenario) => scenario.name === 'code-editor');
+  const codeEditorScenario = allScenarios.find(
+    (scenario) => scenario.name === peerContractManifest.packageConsumer.codeEditorScenario,
+  );
   if (!codeEditorScenario) fail('Missing package-consumer code-editor scenario');
 
   const codeEditorPeers = codeEditorScenario.dependencies.filter((dependency) =>
@@ -657,7 +553,7 @@ function assertCodeMirrorPeersAreIsolated(allScenarios) {
   assertSameSet('scenario code-editor CodeMirror peer group', codeEditorPeerGroup, codeEditorPeers);
 
   for (const scenario of allScenarios) {
-    if (scenario.name === 'code-editor') continue;
+    if (scenario.name === peerContractManifest.packageConsumer.codeEditorScenario) continue;
 
     const unexpected = scenario.dependencies.filter((dependency) => codeEditorPeerGroup.includes(dependency));
     if (unexpected.length) {
@@ -880,7 +776,7 @@ function writeConsumerWorkspace(workspace, scenarios, dependencies = unionDepend
   }
 
   writeJson(join(workspace, 'package.json'), packageJson);
-  writeFileSync(join(workspace, '.npmrc'), 'strict-peer-dependencies=true\nauto-install-peers=false\n');
+  writeFileSync(join(workspace, '.npmrc'), consumerNpmrc());
   writeJson(join(workspace, 'angular.json'), {
     $schema: './node_modules/@angular/cli/lib/config/schema.json',
     version: 1,
@@ -950,6 +846,10 @@ function writeConsumerWorkspace(workspace, scenarios, dependencies = unionDepend
     '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Consumer</title><base href="/"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><app-root></app-root></body></html>\n',
   );
   writeConsumerScenarioFiles(workspace, scenario);
+}
+
+function consumerNpmrc() {
+  return 'strict-peer-dependencies=true\nauto-install-peers=false\n';
 }
 
 function writeConsumerScenarioFiles(workspace, scenario) {
@@ -1661,40 +1561,58 @@ function writeJson(path, value) {
 function runPnpmPreflight(cwd) {
   const label = packageConsumerLabel('preflight');
   const env = pnpmCommandEnvironment();
+  const preflightRoot = mkdtempSync(join(tmpdir(), 'hell-package-consumer-preflight-'));
+  const warnings = [];
 
   console.log(`${label} running pnpm preflight before package build`);
 
-  const version = requirePnpmPreflightValue(['--version'], cwd, env, 'pnpm version');
-  if (!/^\d+\.\d+\.\d+(?:[-+].*)?$/.test(version)) {
-    failPnpmPreflight('pnpm version is not a semver value', [`version: ${version}`]);
+  try {
+    writeJson(join(preflightRoot, 'package.json'), {
+      name: 'hell-package-consumer-preflight',
+      private: true,
+      packageManager: rootPackage.packageManager,
+    });
+    writeFileSync(join(preflightRoot, '.npmrc'), consumerNpmrc());
+
+    const version = requirePnpmPreflightValue(['--version'], cwd, env, 'pnpm version');
+    if (!/^\d+\.\d+\.\d+(?:[-+].*)?$/.test(version)) {
+      failPnpmPreflight('pnpm version is not a semver value', [`version: ${version}`]);
+    }
+
+    const registry = readOptionalPnpmPreflightValue(['config', 'get', 'registry'], cwd, env, 'registry config', warnings);
+    if (registry) {
+      assertPnpmRegistry(registry);
+    }
+
+    const store = requirePnpmPreflightValue(['store', 'path'], cwd, env, 'store path');
+    const storeDirectory = assertWritablePnpmStore(store, cwd);
+
+    const strictPeerDependencies = requirePnpmPreflightValue(
+      ['config', 'get', 'strict-peer-dependencies'],
+      preflightRoot,
+      env,
+      'strict-peer-dependencies config',
+    );
+    const autoInstallPeers = requirePnpmPreflightValue(
+      ['config', 'get', 'auto-install-peers'],
+      preflightRoot,
+      env,
+      'auto-install-peers config',
+    );
+    assertStrictPeerMode(strictPeerDependencies, autoInstallPeers);
+
+    const pingArgs = registry ? ['ping', '--registry', registry] : ['ping'];
+    requirePnpmPreflightCommand(pingArgs, cwd, env, 'registry reachability');
+
+    for (const warning of warnings) console.warn(`${label} warning: ${warning}`);
+    console.log(
+      `${label} ok: pnpm ${version}; registry ${registry ?? 'default'}; store ${storeDirectory}; ` +
+        `strict-peer-dependencies=${strictPeerDependencies}; auto-install-peers=${autoInstallPeers}`,
+    );
+  } finally {
+    if (keep) console.log(`${label} kept ${preflightRoot}`);
+    else rmSync(preflightRoot, { force: true, recursive: true });
   }
-
-  const registry = requirePnpmPreflightValue(['config', 'get', 'registry'], cwd, env, 'registry config');
-  assertPnpmRegistry(registry);
-
-  const store = requirePnpmPreflightValue(['store', 'path'], cwd, env, 'store path');
-  const storeDirectory = assertWritablePnpmStore(store, cwd);
-
-  const strictPeerDependencies = requirePnpmPreflightValue(
-    ['config', 'get', 'strict-peer-dependencies'],
-    cwd,
-    env,
-    'strict-peer-dependencies config',
-  );
-  const autoInstallPeers = requirePnpmPreflightValue(
-    ['config', 'get', 'auto-install-peers'],
-    cwd,
-    env,
-    'auto-install-peers config',
-  );
-  assertStrictPeerMode(strictPeerDependencies, autoInstallPeers);
-
-  requirePnpmPreflightCommand(['ping', '--registry', registry], cwd, env, 'registry reachability');
-
-  console.log(
-    `${label} ok: pnpm ${version}; registry ${registry}; store ${storeDirectory}; ` +
-      `strict-peer-dependencies=${strictPeerDependencies}; auto-install-peers=${autoInstallPeers}`,
-  );
 }
 
 function requirePnpmPreflightValue(args, cwd, env, description) {
@@ -1705,7 +1623,7 @@ function requirePnpmPreflightValue(args, cwd, env, description) {
 }
 
 function requirePnpmPreflightCommand(args, cwd, env, description) {
-  const commandArgs = args[0] === 'config' ? pnpmConfigCommandArgs(args) : pnpmCommandArgs(args);
+  const commandArgs = pnpmCommandArgs(args);
   const command = formatCommand('pnpm', commandArgs);
   const result = spawnSync('pnpm', commandArgs, {
     cwd,
@@ -1732,6 +1650,27 @@ function requirePnpmPreflightCommand(args, cwd, env, description) {
   }
 
   return { command, stdout: result.stdout ?? '', stderr: result.stderr ?? '' };
+}
+
+function readOptionalPnpmPreflightValue(args, cwd, env, description, warnings) {
+  const commandArgs = pnpmCommandArgs(args);
+  const command = formatCommand('pnpm', commandArgs);
+  const result = spawnSync('pnpm', commandArgs, {
+    cwd,
+    shell: process.platform === 'win32',
+    encoding: 'utf8',
+    env,
+    timeout: pnpmPreflightTimeoutMs,
+  });
+
+  if (result.error || result.status !== 0) {
+    warnings.push(
+      `${description} unavailable; continuing with normal pnpm command behavior (${command}; ${pnpmPreflightOutputSummary(result)})`,
+    );
+    return null;
+  }
+
+  return result.stdout.trim() || null;
 }
 
 function assertPnpmRegistry(registry) {
@@ -1923,7 +1862,7 @@ function collectPnpmDiagnostics(cwd, env) {
 }
 
 function readPnpmValue(args, cwd, env) {
-  const commandArgs = args[0] === 'config' ? pnpmConfigCommandArgs(args) : pnpmCommandArgs(args);
+  const commandArgs = pnpmCommandArgs(args);
   const result = spawnSync('pnpm', commandArgs, {
     cwd,
     shell: process.platform === 'win32',
@@ -1965,14 +1904,6 @@ function pnpmCommandArgs(args) {
   return args;
 }
 
-function pnpmConfigCommandArgs(args) {
-  return [
-    '--config.strict-peer-dependencies=true',
-    '--config.auto-install-peers=false',
-    ...args,
-  ];
-}
-
 function formatCommand(command, args) {
   return [command, ...args].map(shellQuote).join(' ');
 }
@@ -1984,19 +1915,7 @@ function shellQuote(value) {
 }
 
 function pnpmCommandEnvironment() {
-  const env = { ...process.env, CI: 'true' };
-  const deniedPnpmKeys = new Set([
-    'pnpm_config_npm_globalconfig',
-    'pnpm_config_verify_deps_before_run',
-    'pnpm_config__jsr_registry',
-  ]);
-
-  for (const key of Object.keys(env)) {
-    const normalized = key.toLowerCase();
-    if (normalized.startsWith('npm_') || deniedPnpmKeys.has(normalized)) delete env[key];
-  }
-
-  return env;
+  return { ...process.env, CI: 'true' };
 }
 
 function positiveNumber(raw, fallback) {

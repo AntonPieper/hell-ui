@@ -13,58 +13,29 @@ import {
   renderPublicApiFile,
   secondaryPackageEntrypoints,
 } from './entrypoint-manifest.mjs';
+import {
+  loadStaticContractManifest,
+  peerCategoryContractsFromManifest,
+  peersFromPeerSets,
+} from './static-contract-manifests.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
 
-const docsExampleImportBoundaryDocPath = 'docs/architecture/docs-example-import-boundaries.md';
+const docsLazyRouteBoundaryManifest = loadStaticContractManifest('docs-lazy-route-boundaries.json');
+const docsExampleImportBoundaryDocPath = docsLazyRouteBoundaryManifest.docPath;
+const allowedDocsLazyRouteCrossImports = docsLazyRouteBoundaryManifest.allowedCrossImports;
+const docsHeavyLazyRoutePolicies = docsLazyRouteBoundaryManifest.heavyLazyRoutePolicies;
+const docsCodePreviewLazyWrapperPath = docsLazyRouteBoundaryManifest.codePreviewLazyWrapperPath;
+const docsCodeEditorIsolation = docsLazyRouteBoundaryManifest.codeEditorIsolation;
+const docsPdfViewerIsolation = docsLazyRouteBoundaryManifest.pdfViewerIsolation;
 
-const allowedDocsLazyRouteCrossImports = [
-  {
-    from: 'projects/hell-docs/src/app/pages/components/flyout/flyout.page.ts',
-    to: 'projects/hell-docs/src/app/pages/testing/floating-dismissal-harness.page.ts',
-    owner: 'HELL-040/HELL-057',
-    rationale:
-      'Flyout exposes the query-param-only floating dismissal browser harness; it is deliberately bundled only with the lazy flyout route, not the docs shell.',
-  },
-];
-
-const docsHeavyLazyRoutePolicies = [
-  {
-    id: 'pdf-viewer-docs',
-    label: 'PDF viewer docs examples',
-    routePath: '/components/pdf-viewer',
-    boundary: 'components/pdf-viewer',
-    packageSpecifiers: ['@hell-ui/pdf-viewer', 'pdfjs-dist'],
-    sourceFragments: [
-      '@hell-ui/pdf-viewer/styles',
-      'hell-ui/pdf-viewer/styles/pdf-viewer.css',
-      'pdfjs/pdf_viewer.css',
-    ],
-  },
-  {
-    id: 'code-editor-docs',
-    label: 'Code editor docs examples',
-    routePath: '/components/code-editor',
-    boundary: 'components/code-editor',
-    packageSpecifiers: ['@hell-ui/angular/features/code-editor', '@codemirror/'],
-    sourceFragments: ['@hell-ui/angular/styles/features/code-editor'],
-  },
-  {
-    id: 'audio-player-docs',
-    label: 'Audio player docs examples',
-    routePath: '/components/audio-player',
-    boundary: 'components/audio-player',
-    packageSpecifiers: [
-      '@hell-ui/angular/audio-player',
-      '@hell-ui/angular/features/audio-transcript',
-    ],
-    sourceFragments: [],
-  },
-];
+const packageConsumerPeerContractManifest = loadStaticContractManifest(
+  'package-consumer-peer-contracts.json',
+);
+const browserGlobalSeamManifest = loadStaticContractManifest('browser-global-seams.json');
 
 const codeEditorEntrypointSpecifier = '@hell-ui/angular/features/code-editor';
-const docsCodePreviewLazyWrapperPath = 'projects/hell-docs/src/app/shared/docs-code-viewer.ts';
 const codeMirrorPackageSpecifierPrefixes = ['@codemirror/', '@lezer/'];
 const audioTranscriptEntrypointSpecifier = '@hell-ui/angular/features/audio-transcript';
 const audioTranscriptRuntimeTerms = [
@@ -306,6 +277,7 @@ function checkDocsExampleImportBoundaryDocs(docPath) {
   const docs = readFile(docPath);
   const requiredParts = [
     'docs-example-import-boundaries',
+    'tools/static-contracts/docs-lazy-route-boundaries.json',
     'tools/check-static-contracts.mjs',
     'projects/hell-docs/src/app/docs-catalog.ts',
     'projects/hell-docs/src/app/pages/<route>/examples/',
@@ -314,35 +286,6 @@ function checkDocsExampleImportBoundaryDocs(docPath) {
   for (const part of requiredParts) {
     if (!docs.includes(part)) {
       failures.push(`Docs Lazy Route Import Graph note is missing ${part}`);
-    }
-  }
-
-  for (const policy of docsHeavyLazyRoutePolicies) {
-    const missingPolicyParts = [
-      policy.id,
-      policy.routePath,
-      policy.boundary,
-      ...policy.packageSpecifiers,
-      ...policy.sourceFragments,
-    ].filter((part) => !docs.includes(part));
-    if (missingPolicyParts.length) {
-      failures.push(
-        `Docs Lazy Route Import Graph note is missing ${policy.id}: ${missingPolicyParts.join(', ')}`,
-      );
-    }
-  }
-
-  for (const allowance of allowedDocsLazyRouteCrossImports) {
-    const missingAllowanceParts = [
-      allowance.from,
-      allowance.to,
-      allowance.owner,
-      allowance.rationale,
-    ].filter((part) => !docs.includes(part));
-    if (missingAllowanceParts.length) {
-      failures.push(
-        `Docs Lazy Route Import Graph note is missing allowance ${allowance.from} -> ${allowance.to}: ${missingAllowanceParts.join(', ')}`,
-      );
     }
   }
 }
@@ -712,15 +655,9 @@ function checkDocsShellNarrowEntrypointContract() {
 }
 
 function checkDocsCodeEditorIsolationContract() {
-  const directSharedFiles = [
-    'projects/hell-docs/src/app/shared/code-block.ts',
-    'projects/hell-docs/src/app/shared/example-tabs.ts',
-    'projects/hell-docs/src/app/shared/code-tools.ts',
-  ];
-  const deferredSharedFiles = [
-    'projects/hell-docs/src/app/shared/code-block.ts',
-    'projects/hell-docs/src/app/shared/example-tabs.ts',
-  ];
+  const directSharedFiles = docsCodeEditorIsolation.directSharedFiles;
+  const deferredSharedFiles = docsCodeEditorIsolation.lazyWrapperImportFiles;
+  const codeEditorImports = docsCodeEditorIsolation.packageSpecifiers;
 
   for (const file of directSharedFiles) {
     const path = join(root, file);
@@ -730,7 +667,7 @@ function checkDocsCodeEditorIsolationContract() {
     }
 
     const source = readFile(path);
-    if (source.includes('@codemirror/') || source.includes('@hell-ui/angular/features/code-editor')) {
+    if (hasPackageImport(source, codeEditorImports)) {
       failures.push(
         `Docs shared file ${file} must not import CodeMirror or @hell-ui/angular/features/code-editor directly; use the deferred docs code viewer wrapper`,
       );
@@ -741,11 +678,14 @@ function checkDocsCodeEditorIsolationContract() {
   }
 
   for (const file of deferredSharedFiles) {
-    const source = readFile(join(root, file));
-    if (!source.includes("import('./docs-code-viewer')") || !source.includes('ngComponentOutlet')) {
+    const path = join(root, file);
+    if (!hasDynamicImportTo(path, docsCodePreviewLazyWrapperPath)) {
       failures.push(
         `Docs shared file ${file} must lazy-load shared docs code previews through the docs-code-viewer dynamic component`,
       );
+    }
+    if (hasStaticImportTo(path, docsCodePreviewLazyWrapperPath)) {
+      failures.push(`Docs shared file ${file} must not statically import ${docsCodePreviewLazyWrapperPath}`);
     }
   }
 
@@ -754,11 +694,10 @@ function checkDocsCodeEditorIsolationContract() {
     failures.push(`Docs static contract check references missing file ${docsCodePreviewLazyWrapperPath}`);
   } else {
     const wrapperSource = readFile(wrapperPath);
-    if (!wrapperSource.includes('@hell-ui/angular/features/code-editor')) {
-      failures.push('Docs code viewer wrapper must be the only shared file that imports @hell-ui/angular/features/code-editor');
-    }
-    if (!wrapperSource.includes('@hell-ui/angular/styles/features/code-editor')) {
-      failures.push('Docs code viewer wrapper must lazy-load the code-editor feature stylesheet with the viewer');
+    for (const specifier of docsCodeEditorIsolation.wrapperPackageSpecifiers) {
+      if (!hasPackageImport(wrapperSource, [specifier])) {
+        failures.push(`Docs code viewer wrapper must import ${specifier}`);
+      }
     }
     if (/<pre\b/.test(wrapperSource)) {
       failures.push('Docs code viewer wrapper must render HellCodeEditor instead of raw <pre> code blocks');
@@ -768,11 +707,11 @@ function checkDocsCodeEditorIsolationContract() {
   const docsPagesRoot = join(root, 'projects/hell-docs/src/app/pages');
   const docsPages = walk(docsPagesRoot).filter((file) => file.endsWith('.ts'));
   for (const file of docsPages) {
-    if (file.includes('/components/code-editor/')) continue;
+    if (isFileInDocsBoundary(file, docsPagesRoot, docsCodeEditorIsolation.pageBoundary)) continue;
     if (/\bcode-editor\b/i.test(file)) continue;
 
     const source = readFile(file);
-    if (source.includes('@codemirror/') || source.includes('@hell-ui/angular/features/code-editor')) {
+    if (hasPackageImport(source, codeEditorImports)) {
       failures.push(
         `Docs page ${file.replace(root + '/', '')} must keep CodeMirror imports within /components/code-editor`,
       );
@@ -781,17 +720,10 @@ function checkDocsCodeEditorIsolationContract() {
 }
 
 function checkDocsPdfViewerIsolationContract() {
-  const heavyImports = ['@hell-ui/pdf-viewer', 'pdfjs-dist'];
-  const globalDocsFiles = [
-    'projects/hell-docs/src/app/app.routes.ts',
-    'projects/hell-docs/src/app/docs-catalog.ts',
-    'projects/hell-docs/src/app/docs-search-index.ts',
-  ];
-  const sharedFiles = [
-    'projects/hell-docs/src/app/shared/code-block.ts',
-    'projects/hell-docs/src/app/shared/example-tabs.ts',
-    'projects/hell-docs/src/app/shared/code-tools.ts',
-  ];
+  const heavyImports = docsPdfViewerIsolation.packageSpecifiers;
+  const globalDocsFiles = docsPdfViewerIsolation.globalDocsFiles;
+  const sharedFiles = docsPdfViewerIsolation.sharedFiles;
+  const pdfViewerPageImportFragment = `pages/${docsPdfViewerIsolation.pageBoundary}`;
 
   for (const file of globalDocsFiles) {
     const path = join(root, file);
@@ -806,12 +738,12 @@ function checkDocsPdfViewerIsolationContract() {
         `Docs global catalog/search file ${file} must not import pdf.js or @hell-ui/pdf-viewer`,
       );
     }
-    if (hasStaticImportFrom(source, 'pages/components/pdf-viewer')) {
+    if (hasStaticImportFrom(source, pdfViewerPageImportFragment)) {
       failures.push(
         `Docs global catalog/search file ${file} must lazy-load the PDF viewer page instead of statically importing it`,
       );
     }
-    if (hasDynamicImportFrom(source, 'pages/components/pdf-viewer/examples')) {
+    if (hasDynamicImportFrom(source, `${pdfViewerPageImportFragment}/examples`)) {
       failures.push(
         `Docs global catalog/search file ${file} must not import PDF viewer demo code; keep examples behind the PDF page boundary`,
       );
@@ -836,7 +768,7 @@ function checkDocsPdfViewerIsolationContract() {
   const docsPagesRoot = join(root, 'projects/hell-docs/src/app/pages');
   const docsPages = walk(docsPagesRoot).filter((file) => file.endsWith('.ts'));
   for (const file of docsPages) {
-    if (file.includes('/components/pdf-viewer/')) continue;
+    if (isFileInDocsBoundary(file, docsPagesRoot, docsPdfViewerIsolation.pageBoundary)) continue;
 
     const source = readFile(file);
     if (hasPackageImport(source, heavyImports)) {
@@ -846,12 +778,9 @@ function checkDocsPdfViewerIsolationContract() {
     }
   }
 
-  const pdfViewerPagePath = join(
-    root,
-    'projects/hell-docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts',
-  );
+  const pdfViewerPagePath = join(root, docsPdfViewerIsolation.pagePath);
   const pdfViewerPage = readFile(pdfViewerPagePath);
-  if (/styles\s*:\s*\[[\s\S]*(?:@hell-ui\/angular\/styles\/features\/pdf-viewer|@hell-ui\/pdf-viewer\/styles)/.test(pdfViewerPage)) {
+  if (componentStyleArrayIncludes(pdfViewerPage, docsPdfViewerIsolation.forbiddenComponentStyleSpecifiers)) {
     failures.push(
       'PDF viewer docs page must load feature CSS as a lazy external asset, not an Angular component style',
     );
@@ -878,6 +807,29 @@ function hasStaticImportFrom(source, pathFragment) {
 function hasDynamicImportFrom(source, pathFragment) {
   const escaped = escapeRegExp(pathFragment);
   return new RegExp(`import\\s*\\(\\s*['"][^'"]*${escaped}[^'"]*['"]`).test(source);
+}
+
+function hasDynamicImportTo(file, targetRelPath) {
+  return hasModuleReferenceTo(file, targetRelPath, (kind) => kind === 'dynamic');
+}
+
+function hasStaticImportTo(file, targetRelPath) {
+  return hasModuleReferenceTo(file, targetRelPath, (kind) => kind !== 'dynamic');
+}
+
+function hasModuleReferenceTo(file, targetRelPath, kindMatches) {
+  if (!existsSync(file)) return false;
+
+  return moduleImportSpecifiers(file).some((hit) => {
+    if (!kindMatches(hit.kind)) return false;
+    const target = resolveRelativeModuleFile(hit.file, hit.specifier);
+    return target ? relPath(target) === targetRelPath : false;
+  });
+}
+
+function componentStyleArrayIncludes(source, specifiers) {
+  const stylesBlock = /styles\s*:\s*\[([\s\S]*?)\]/.exec(source)?.[1] ?? '';
+  return specifiers.some((specifier) => stylesBlock.includes(specifier));
 }
 
 function checkPackageEntryPoints() {
@@ -1389,27 +1341,20 @@ function checkPackageDependencyContract() {
     sourceFiles.flatMap((file) => externalImportPackages(readFile(file))),
   );
 
-  const lightStackPeers = new Set([
-    '@angular/cdk',
-    '@angular/common',
-    '@angular/core',
-    '@angular/forms',
-    '@floating-ui/dom',
-    '@ng-icons/core',
-    'ng-primitives',
-    'rxjs',
-  ]);
-  const iconOnlyPeers = new Set(['@ng-icons/font-awesome']);
-  const transitiveOnlyPeers = new Set(['@angular/router']);
-  const featureOnlyPeers = new Set([
-    '@codemirror/commands',
-    '@codemirror/language',
-    '@codemirror/state',
-    '@codemirror/view',
-    '@lezer/highlight',
-  ]);
-  const adapterOnlyPeers = new Set(['@tanstack/angular-table', '@tanstack/virtual-core']);
-  const styleOnlyPeers = new Set(['tailwindcss']);
+  const mainPeerPolicy = packageConsumerPeerContractManifest.mainPackage;
+  const lightStackPeers = new Set(
+    peersFromPeerSets(packageConsumerPeerContractManifest, mainPeerPolicy.requiredPeerSets),
+  );
+  const optionalPeerCategories = peerCategoryContractsFromManifest(
+    packageConsumerPeerContractManifest,
+    mainPeerPolicy.optionalPeerCategories,
+  );
+  const featureOnlyPeers = new Set(optionalPeerCategories['feature-only']);
+  const adapterOnlyPeers = new Set(optionalPeerCategories['adapter-only']);
+  const styleOnlyPeers = new Set(optionalPeerCategories['style-only']);
+  const iconOnlyPeers = new Set(optionalPeerCategories['icon-only']);
+  const transitiveOnlyPeers = new Set(optionalPeerCategories['transitive-only']);
+  const knownOptionalPeers = new Set(Object.values(optionalPeerCategories).flat());
 
   for (const dependency of importedPackages) {
     if (!peerDependencies[dependency] && !dependencies[dependency]) {
@@ -1417,15 +1362,9 @@ function checkPackageDependencyContract() {
     }
   }
 
-  const nonTsPeerDependencies = new Set([
-    // CSS entry points depend on Tailwind theme variables.
-    'tailwindcss',
-    // ng-primitives exposes these as strict peers consumed by primitive wrappers.
-    '@angular/cdk',
-    '@floating-ui/dom',
-    // ng-primitives/dialog imports Router even though Hell only exposes it via dialog surfaces.
-    '@angular/router',
-  ]);
+  const nonTsPeerDependencies = new Set(
+    peersFromPeerSets(packageConsumerPeerContractManifest, mainPeerPolicy.nonTsPeerSets),
+  );
   for (const dependency of Object.keys(peerDependencies)) {
     if (!importedPackages.has(dependency) && !nonTsPeerDependencies.has(dependency)) {
       failures.push(`Package dependency contract declares unused peer dependency ${dependency}`);
@@ -1465,12 +1404,7 @@ function checkPackageDependencyContract() {
     if (!peerDependencies[dependency]) {
       failures.push(`Package dependency contract has peerDependenciesMeta for undeclared ${dependency}`);
     } else if (
-      !featureOnlyPeers.has(dependency) &&
-      !adapterOnlyPeers.has(dependency) &&
-      !styleOnlyPeers.has(dependency) &&
-      !iconOnlyPeers.has(dependency) &&
-      !transitiveOnlyPeers.has(dependency) &&
-      peerDependenciesMeta[dependency]?.optional
+      !knownOptionalPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional
     ) {
       failures.push(
         `Package dependency contract marks ${dependency} optional but it is not a known feature-only, adapter-only, icon-only, style-only, or transitive-only peer`,
@@ -1484,40 +1418,19 @@ function checkPackageDependencyContract() {
     }
   }
 
-  for (const dependency of featureOnlyPeers) {
-    if (!peerDependencies[dependency]) {
-      failures.push(`Package dependency contract is missing optional feature peer dependency ${dependency}`);
+  for (const [category, peers] of Object.entries(optionalPeerCategories)) {
+    for (const dependency of peers) {
+      if (!peerDependencies[dependency]) {
+        failures.push(`Package dependency contract is missing optional ${category} peer dependency ${dependency}`);
+      }
     }
   }
 
-  for (const dependency of adapterOnlyPeers) {
-    if (!peerDependencies[dependency]) {
-      failures.push(`Package dependency contract is missing optional adapter peer dependency ${dependency}`);
-    }
-  }
-
-  for (const dependency of styleOnlyPeers) {
-    if (!peerDependencies[dependency]) {
-      failures.push(`Package dependency contract is missing optional style peer dependency ${dependency}`);
-    }
-  }
-
-  for (const dependency of iconOnlyPeers) {
-    if (!peerDependencies[dependency]) {
-      failures.push(`Package dependency contract is missing optional icon peer dependency ${dependency}`);
-    }
-  }
-
-  for (const dependency of transitiveOnlyPeers) {
-    if (!peerDependencies[dependency]) {
-      failures.push(`Package dependency contract is missing optional transitive peer dependency ${dependency}`);
-    }
-  }
-
+  const tanStackTablePeers = peersFromPeerSets(packageConsumerPeerContractManifest, ['tanstack-table']);
   const tanStackImportOffenders = sourceFiles
     .filter((file) => !relPath(file).includes('/table-tanstack/'))
     .filter((file) => relPath(file) !== 'projects/hell/src/lib/public-api-table-tanstack.ts')
-    .filter((file) => readFile(file).includes('@tanstack/angular-table'))
+    .filter((file) => tanStackTablePeers.some((peer) => readFile(file).includes(peer)))
     .map(relPath);
   if (tanStackImportOffenders.length) {
     failures.push(
@@ -1525,10 +1438,11 @@ function checkPackageDependencyContract() {
     );
   }
 
+  const tanStackVirtualPeers = peersFromPeerSets(packageConsumerPeerContractManifest, ['tanstack-virtual']);
   const tanStackVirtualImportOffenders = sourceFiles
     .filter((file) => !relPath(file).includes('/table-virtual/'))
     .filter((file) => relPath(file) !== 'projects/hell/src/lib/public-api-table-virtual.ts')
-    .filter((file) => readFile(file).includes('@tanstack/virtual-core'))
+    .filter((file) => tanStackVirtualPeers.some((peer) => readFile(file).includes(peer)))
     .map(relPath);
   if (tanStackVirtualImportOffenders.length) {
     failures.push(
@@ -1536,8 +1450,10 @@ function checkPackageDependencyContract() {
     );
   }
 
-  if (peerDependencies['pdfjs-dist'] || peerDependenciesMeta['pdfjs-dist']) {
-    failures.push('Main @hell-ui/angular package must not advertise pdfjs-dist after the PDF viewer split');
+  for (const peer of mainPeerPolicy.forbiddenPeers ?? []) {
+    if (peerDependencies[peer] || peerDependenciesMeta[peer]) {
+      failures.push(`Main @hell-ui/angular package must not advertise ${peer} after the PDF viewer split`);
+    }
   }
 
   checkPdfViewerPackageDependencyContract(workspacePackageJson);
@@ -1575,30 +1491,34 @@ function checkPdfViewerPackageDependencyContract(workspacePackageJson) {
     }
   }
 
-  const requiredPeers = new Set([
-    '@angular/common',
-    '@angular/core',
-    '@hell-ui/angular',
-    '@ng-icons/core',
-    '@ng-icons/font-awesome',
-    'pdfjs-dist',
-  ]);
+  const pdfPeerPolicy = packageConsumerPeerContractManifest.pdfPackage;
+  const requiredPeers = new Set(
+    peersFromPeerSets(packageConsumerPeerContractManifest, pdfPeerPolicy.requiredPeerSets),
+  );
   for (const peer of requiredPeers) {
     if (!peerDependencies[peer]) failures.push(`PDF package dependency contract is missing required peer ${peer}`);
     if (peerDependenciesMeta[peer]?.optional === true) {
       failures.push(`PDF package dependency contract must keep ${peer} required`);
     }
   }
-  if (peerDependencies['pdfjs-dist'] !== workspacePackageJson.dependencies?.['pdfjs-dist']) {
+  const workspacePinnedPeer = pdfPeerPolicy.workspacePinnedPeer;
+  if (peerDependencies[workspacePinnedPeer] !== workspacePackageJson.dependencies?.[workspacePinnedPeer]) {
     failures.push(
-      `PDF package dependency contract must pin pdfjs-dist peer to workspace version ${workspacePackageJson.dependencies?.['pdfjs-dist']}`,
+      `PDF package dependency contract must pin ${workspacePinnedPeer} peer to workspace version ${workspacePackageJson.dependencies?.[workspacePinnedPeer]}`,
     );
   }
-  if (peerDependencies['@hell-ui/angular'] !== mainPackageJson.version) {
-    failures.push(`PDF package dependency contract must peer @hell-ui/angular@${mainPackageJson.version}`);
+  const mainPackagePeer = pdfPeerPolicy.mainPackagePeer;
+  if (peerDependencies[mainPackagePeer] !== mainPackageJson.version) {
+    failures.push(`PDF package dependency contract must peer ${mainPackagePeer}@${mainPackageJson.version}`);
   }
-  if (!peerDependencies.tailwindcss || peerDependenciesMeta.tailwindcss?.optional !== true) {
-    failures.push('PDF package dependency contract must declare optional tailwindcss for CSS entry points');
+  const optionalPdfPeers = peersFromPeerSets(
+    packageConsumerPeerContractManifest,
+    pdfPeerPolicy.optionalPeerSets,
+  );
+  for (const peer of optionalPdfPeers) {
+    if (!peerDependencies[peer] || peerDependenciesMeta[peer]?.optional !== true) {
+      failures.push(`PDF package dependency contract must declare optional ${peer} for CSS entry points`);
+    }
   }
   for (const metaPeer of Object.keys(peerDependenciesMeta)) {
     if (!peerDependencies[metaPeer]) {
@@ -2928,81 +2848,9 @@ function checkFloatingAdapterContract() {
   }
 }
 
-const browserGlobalSeamDocPath = 'docs/architecture/browser-global-seams.md';
-const allowedBrowserGlobalSeams = [
-  {
-    id: 'audio-transcript-window-probe',
-    file: 'projects/hell/src/lib/features/audio-transcript/audio-transcript.ts',
-    globals: ['window'],
-    owner: 'HELL-055',
-    lines: [
-      "if (typeof window === 'undefined') return null;",
-      'const w = window as unknown as {',
-      "typeof window !== 'undefined' &&",
-    ],
-  },
-  {
-    id: 'resizable-pane-resize-observer',
-    file: 'projects/hell/src/lib/composites/resizable/resizable.ts',
-    globals: ['ResizeObserver'],
-    owner: 'HELL-061',
-    lines: [
-      "if (typeof ResizeObserver === 'undefined') return;",
-      'const observer = new ResizeObserver(() => this.fitPanesToAvailableSize());',
-    ],
-  },
-  {
-    id: 'split-view-resize-observer',
-    file: 'projects/hell/src/lib/composites/split-view/split-view.ts',
-    globals: ['ResizeObserver'],
-    owner: 'HELL-048',
-    lines: [
-      "if (typeof ResizeObserver === 'undefined') return;",
-      'const observer = new ResizeObserver((entries) => {',
-    ],
-  },
-  {
-    id: 'toast-viewport-resize-observer',
-    file: 'projects/hell/src/lib/composites/toast/toast.ts',
-    globals: ['ResizeObserver'],
-    owner: 'HELL-048',
-    lines: [
-      "if (this.destroyed || typeof ResizeObserver === 'undefined') return;",
-      'this.ro = new ResizeObserver((entries) => {',
-    ],
-  },
-  {
-    id: 'floating-dismissal-document-fallback',
-    file: 'projects/hell/src/lib/core/floating-dismissal.ts',
-    globals: ['document'],
-    owner: 'HELL-057',
-    lines: ["return typeof document === 'undefined' ? null : document;"],
-  },
-  {
-    id: 'floating-scope-resize-observer',
-    file: 'projects/hell/src/lib/core/floating-scope.ts',
-    globals: ['ResizeObserver'],
-    owner: 'HELL-048',
-    lines: [
-      "if (typeof ResizeObserver === 'undefined') return;",
-      'this.resizeObserver = new ResizeObserver(this.syncScope);',
-    ],
-  },
-  {
-    id: 'code-editor-legacy-document-setup',
-    file: 'projects/hell/src/lib/features/code-editor/code-editor.runtime.ts',
-    globals: ['document'],
-    owner: 'HELL-054',
-    lines: ["typeof document === 'undefined' ? [] : hellCodeEditorSetupFactory(document);"],
-  },
-];
-
-const browserGlobalNames = new Set([
-  'document',
-  'window',
-  'ResizeObserver',
-  'IntersectionObserver',
-]);
+const browserGlobalSeamDocPath = browserGlobalSeamManifest.docPath;
+const allowedBrowserGlobalSeams = browserGlobalSeamManifest.allowedSeams;
+const browserGlobalNames = new Set(browserGlobalSeamManifest.globalNames);
 
 function checkBrowserGlobalContract() {
   const docPath = join(root, browserGlobalSeamDocPath);
@@ -3010,18 +2858,12 @@ function checkBrowserGlobalContract() {
     failures.push(`Browser Global Contract missing ${browserGlobalSeamDocPath}`);
   } else {
     const docs = readFile(docPath);
-    for (const seam of allowedBrowserGlobalSeams) {
-      const missingDocParts = [
-        seam.id,
-        seam.file,
-        seam.owner,
-        ...seam.globals.map((global) => `\`${global}\``),
-      ].filter((part) => !docs.includes(part));
-      if (missingDocParts.length) {
-        failures.push(
-          `Browser Global Contract docs for ${seam.id} are missing: ${missingDocParts.join(', ')}`,
-        );
-      }
+    for (const part of [
+      'SSR/browser global seams',
+      'tools/static-contracts/browser-global-seams.json',
+      'pnpm run test:static-contracts',
+    ]) {
+      if (!docs.includes(part)) failures.push(`Browser Global Contract docs are missing ${part}`);
     }
   }
 
@@ -3034,27 +2876,22 @@ function checkBrowserGlobalContract() {
       !file.endsWith('pdf.worker.ts'),
   );
   const hits = sourceFiles.flatMap((file) => browserGlobalHits(file));
-  const unusedAllowances = allowedBrowserGlobalSeams.flatMap((seam) =>
-    seam.lines.flatMap((line) =>
-      seam.globals.map((global) => ({
-        id: seam.id,
-        file: seam.file,
-        global,
-        line,
-      })),
-    ),
-  );
+  const allowedGlobalKeys = new Map();
+  for (const seam of allowedBrowserGlobalSeams) {
+    for (const global of seam.globals) {
+      const key = browserGlobalAllowanceKey(seam.file, global);
+      if (allowedGlobalKeys.has(key)) {
+        failures.push(`Browser Global Contract duplicate allowlist entry for ${seam.file} ${global}`);
+      }
+      allowedGlobalKeys.set(key, { id: seam.id, file: seam.file, global });
+    }
+  }
+  const usedAllowedGlobalKeys = new Set();
 
   for (const hit of hits) {
-    const allowanceIndex = unusedAllowances.findIndex(
-      (allowance) =>
-        allowance.file === hit.file &&
-        allowance.global === hit.global &&
-        allowance.line === hit.source.trim(),
-    );
-
-    if (allowanceIndex >= 0) {
-      unusedAllowances.splice(allowanceIndex, 1);
+    const allowanceKey = browserGlobalAllowanceKey(hit.file, hit.global);
+    if (allowedGlobalKeys.has(allowanceKey)) {
+      usedAllowedGlobalKeys.add(allowanceKey);
       continue;
     }
 
@@ -3063,17 +2900,23 @@ function checkBrowserGlobalContract() {
     );
   }
 
-  for (const allowance of unusedAllowances) {
+  for (const allowance of allowedGlobalKeys.values()) {
     const filePath = join(root, allowance.file);
     if (!existsSync(filePath)) {
       failures.push(`Browser Global Contract allowlist references missing file ${allowance.file}`);
       continue;
     }
+    const allowanceKey = browserGlobalAllowanceKey(allowance.file, allowance.global);
+    if (usedAllowedGlobalKeys.has(allowanceKey)) continue;
 
     failures.push(
-      `Browser Global Contract allowlist entry ${allowance.id} is stale: expected ${allowance.file} to contain direct ${allowance.global} line "${allowance.line}"`,
+      `Browser Global Contract allowlist entry ${allowance.id} is stale: expected ${allowance.file} to contain direct ${allowance.global}`,
     );
   }
+}
+
+function browserGlobalAllowanceKey(file, global) {
+  return `${file}\0${global}`;
 }
 
 function browserGlobalHits(file) {

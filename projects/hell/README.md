@@ -34,7 +34,7 @@ Feature peers remain optional at runtime, but package peer metadata is package-w
 
 ### Peer dependency tiers
 
-Package-consumer scenarios assert these peer groups with strict peer installs. CodeMirror, TanStack Table, and TanStack Virtual peers stay optional and are not required by root, button, table, data-table, or table-cdk scenarios. The CDK table skin is an optional entry point but adds no peer beyond the core `@angular/cdk` peer. PDF viewer dependencies belong to `@hell-ui/pdf-viewer`, not this package.
+Package-consumer scenarios assert these peer groups with strict peer installs. The source repository keeps the peer tier/group manifest at `tools/static-contracts/package-consumer-peer-contracts.json`. CodeMirror, TanStack Table, and TanStack Virtual peers stay optional and are not required by root, button, table, data-table, or table-cdk scenarios. The CDK table skin is an optional entry point but adds no peer beyond the core `@angular/cdk` peer. PDF viewer dependencies belong to `@hell-ui/pdf-viewer`, not this package.
 
 | Tier | Entry points / scenarios | Peer group asserted |
 | --- | --- | --- |

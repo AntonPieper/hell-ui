@@ -1,0 +1,63 @@
+{
+  "id": "browser-global-seams",
+  "docPath": "docs/architecture/browser-global-seams.md",
+  "globalNames": ["document", "window", "ResizeObserver", "IntersectionObserver"],
+  "allowedSeams": [
+    {
+      "id": "audio-transcript-window-probe",
+      "file": "projects/hell/src/lib/features/audio-transcript/audio-transcript.ts",
+      "globals": ["window"],
+      "owner": "HELL-055",
+      "status": "Accepted optional feature seam",
+      "rationale": "The speech-transcript provider probes SpeechRecognition/webkitSpeechRecognition only after a typeof window guard and is imported from @hell-ui/angular/features/audio-transcript, not the base audio-player/composites paths."
+    },
+    {
+      "id": "resizable-pane-resize-observer",
+      "file": "projects/hell/src/lib/composites/resizable/resizable.ts",
+      "globals": ["ResizeObserver"],
+      "owner": "HELL-061",
+      "status": "Browser-contract follow-up",
+      "rationale": "Split-pane resize observes rendered panes after view init and disconnects on teardown; HELL-061 owns browser evidence for the kept resize behavior."
+    },
+    {
+      "id": "split-view-resize-observer",
+      "file": "projects/hell/src/lib/composites/split-view/split-view.ts",
+      "globals": ["ResizeObserver"],
+      "owner": "HELL-048",
+      "status": "Accepted component seam",
+      "rationale": "Split-view observes only its rendered host after view init, guards missing ResizeObserver, and disconnects through DestroyRef; no module-import browser access is allowed."
+    },
+    {
+      "id": "toast-viewport-resize-observer",
+      "file": "projects/hell/src/lib/composites/toast/toast.ts",
+      "globals": ["ResizeObserver"],
+      "owner": "HELL-048",
+      "status": "Accepted component seam",
+      "rationale": "Toast viewport collapse logic needs rendered viewport dimensions, is guarded for non-browser runtimes, and disconnects on destroy."
+    },
+    {
+      "id": "floating-dismissal-document-fallback",
+      "file": "projects/hell/src/lib/core/floating-dismissal.ts",
+      "globals": ["document"],
+      "owner": "HELL-057",
+      "status": "Accepted flyout/core fallback",
+      "rationale": "Floating dismissal is a pure controller usable outside Angular DI, so it has a guarded fallback when no owner document is passed."
+    },
+    {
+      "id": "floating-scope-resize-observer",
+      "file": "projects/hell/src/lib/core/floating-scope.ts",
+      "globals": ["ResizeObserver"],
+      "owner": "HELL-048",
+      "status": "Accepted core seam",
+      "rationale": "Floating scope is the documented owner for portaled-surface CSS variable sync; it guards observer creation and disconnects listeners/observer on teardown."
+    },
+    {
+      "id": "code-editor-legacy-document-setup",
+      "file": "projects/hell/src/lib/features/code-editor/code-editor.runtime.ts",
+      "globals": ["document"],
+      "owner": "HELL-054",
+      "status": "Provisional follow-up",
+      "rationale": "The deprecated hellCodeEditorSetup compatibility constant guards document on import and points consumers at hellCodeEditorSetupFactory(ownerDocument)."
+    }
+  ]
+}

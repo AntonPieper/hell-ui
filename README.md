@@ -93,7 +93,9 @@ Peer dependency tiers:
 > `@floating-ui/dom` is required by `ng-primitives` (not by Hell directly).
 > `@angular/router` is an optional peer only for `ng-primitives/dialog` consumers;
 > install it when importing Hell dialog or the aggregate `/primitives` entry point.
-> Package-consumer scenarios assert these groups with strict peer installs.
+> Package-consumer scenarios assert these groups with strict peer installs. The
+> peer tier/group manifest lives at
+> `tools/static-contracts/package-consumer-peer-contracts.json`.
 
 | Tier | Entry points / scenarios | Peer group asserted |
 |---|---|---|

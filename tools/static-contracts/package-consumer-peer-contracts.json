@@ -1,0 +1,217 @@
+{
+  "id": "package-consumer-peer-contracts",
+  "peerSets": {
+    "core": [
+      "@angular/cdk",
+      "@angular/common",
+      "@angular/core",
+      "@angular/forms",
+      "@floating-ui/dom",
+      "@ng-icons/core",
+      "ng-primitives",
+      "rxjs"
+    ],
+    "style": ["tailwindcss"],
+    "router": ["@angular/router"],
+    "font-awesome": ["@ng-icons/font-awesome"],
+    "code-editor": [
+      "@codemirror/commands",
+      "@codemirror/language",
+      "@codemirror/state",
+      "@codemirror/view",
+      "@lezer/highlight"
+    ],
+    "pdf-viewer": ["pdfjs-dist"],
+    "tanstack-table": ["@tanstack/angular-table"],
+    "tanstack-virtual": ["@tanstack/virtual-core"],
+    "non-ts-runtime": ["tailwindcss", "@angular/cdk", "@floating-ui/dom", "@angular/router"],
+    "pdf-package-required": [
+      "@angular/common",
+      "@angular/core",
+      "@hell-ui/angular",
+      "@ng-icons/core",
+      "@ng-icons/font-awesome",
+      "pdfjs-dist"
+    ]
+  },
+  "peerTiers": [
+    "core",
+    "primitive",
+    "composite",
+    "table",
+    "table-cdk",
+    "table-tanstack",
+    "table-virtual",
+    "audio-transcript",
+    "code-editor",
+    "pdf-viewer"
+  ],
+  "peerGroups": {
+    "core": { "tier": "core", "peerSets": ["core"] },
+    "primitive-unstyled": { "tier": "primitive", "peerSets": ["core"] },
+    "primitive": { "tier": "primitive", "peerSets": ["core", "style"] },
+    "primitive-aggregate": {
+      "tier": "primitive",
+      "peerSets": ["core", "style", "router", "font-awesome"]
+    },
+    "composite": { "tier": "composite", "peerSets": ["core", "style"] },
+    "composite-icons": {
+      "tier": "composite",
+      "peerSets": ["core", "style", "font-awesome"]
+    },
+    "table": { "tier": "table", "peerSets": ["core", "style"] },
+    "table-cdk": { "tier": "table-cdk", "peerSets": ["core", "style"] },
+    "table-tanstack": {
+      "tier": "table-tanstack",
+      "peerSets": ["core", "style", "tanstack-table"]
+    },
+    "table-virtual": {
+      "tier": "table-virtual",
+      "peerSets": ["core", "style", "tanstack-virtual"]
+    },
+    "audio-transcript": {
+      "tier": "audio-transcript",
+      "peerSets": ["core", "style", "font-awesome"]
+    },
+    "code-editor": {
+      "tier": "code-editor",
+      "peerSets": ["core", "style", "code-editor"]
+    },
+    "pdf-viewer": {
+      "tier": "pdf-viewer",
+      "peerSets": ["core", "style", "font-awesome", "pdf-viewer"]
+    }
+  },
+  "mainPackage": {
+    "requiredPeerSets": ["core"],
+    "optionalPeerCategories": {
+      "feature-only": ["code-editor"],
+      "adapter-only": ["tanstack-table", "tanstack-virtual"],
+      "style-only": ["style"],
+      "icon-only": ["font-awesome"],
+      "transitive-only": ["router"]
+    },
+    "nonTsPeerSets": ["non-ts-runtime"],
+    "forbiddenPeers": ["pdfjs-dist"]
+  },
+  "pdfPackage": {
+    "requiredPeerSets": ["pdf-package-required"],
+    "optionalPeerSets": ["style"],
+    "workspacePinnedPeer": "pdfjs-dist",
+    "mainPackagePeer": "@hell-ui/angular"
+  },
+  "packageConsumer": {
+    "tableAdapterPeerSets": ["tanstack-table", "tanstack-virtual"],
+    "heavyPeerSets": ["code-editor", "pdf-viewer"],
+    "lightScenariosMustAvoidHeavyPeers": [
+      "root-core",
+      "core",
+      "button-unstyled",
+      "button",
+      "table",
+      "data-table",
+      "table-cdk",
+      "no-legacy-alias",
+      "audio-player",
+      "audio-transcript"
+    ],
+    "codeEditorScenario": "code-editor",
+    "tableTanStackScenario": "table-tanstack",
+    "tableVirtualScenario": "table-virtual"
+  },
+  "scenarioPeerContracts": {
+    "root-core": {
+      "aliases": ["root"],
+      "description": "root entry core-only with package-wide light peers",
+      "peerTier": "core",
+      "peerGroup": "core"
+    },
+    "core": {
+      "description": "core entry with package-wide light peers",
+      "peerTier": "core",
+      "peerGroup": "core"
+    },
+    "primitives-css": {
+      "aliases": ["primitives"],
+      "description": "primitives entry with primitive CSS and aggregate primitive peers",
+      "peerTier": "primitive",
+      "peerGroup": "primitive-aggregate"
+    },
+    "button-unstyled": {
+      "description": "narrow primitive button entry without CSS or Tailwind peer",
+      "peerTier": "primitive",
+      "peerGroup": "primitive-unstyled"
+    },
+    "button": {
+      "description": "narrow primitive button entry with primitive styles and without Font Awesome peer",
+      "peerTier": "primitive",
+      "peerGroup": "primitive"
+    },
+    "composites-css": {
+      "aliases": ["composites"],
+      "description": "composites entry with composite CSS and icon-backed composite peers",
+      "peerTier": "composite",
+      "peerGroup": "composite-icons"
+    },
+    "app-shell": {
+      "description": "narrow app-shell composite entry without Font Awesome or feature peers",
+      "peerTier": "composite",
+      "peerGroup": "composite"
+    },
+    "audio-player": {
+      "description": "narrow audio-player composite without transcript feature provider",
+      "peerTier": "composite",
+      "peerGroup": "composite-icons"
+    },
+    "audio-transcript": {
+      "description": "audio transcript feature provider opt-in without CodeMirror or pdf.js peers",
+      "peerTier": "audio-transcript",
+      "peerGroup": "audio-transcript"
+    },
+    "testing": {
+      "description": "testing entry with package-wide light peers",
+      "peerTier": "core",
+      "peerGroup": "core"
+    },
+    "code-editor": {
+      "description": "code-editor feature with styled peers and CodeMirror peers",
+      "peerTier": "code-editor",
+      "peerGroup": "code-editor"
+    },
+    "table": {
+      "description": "table primitives without Font Awesome peer",
+      "peerTier": "table",
+      "peerGroup": "table"
+    },
+    "data-table": {
+      "description": "simple data-table entrypoint without Font Awesome or optional table-engine peers",
+      "peerTier": "table",
+      "peerGroup": "table"
+    },
+    "table-tanstack": {
+      "description": "TanStack Table adapter with strict optional table-engine peer",
+      "peerTier": "table-tanstack",
+      "peerGroup": "table-tanstack"
+    },
+    "table-virtual": {
+      "description": "TanStack Virtual row-part adapter with strict optional virtual peer",
+      "peerTier": "table-virtual",
+      "peerGroup": "table-virtual"
+    },
+    "table-cdk": {
+      "description": "CDK Table skin adapter with no extra optional table-engine peer",
+      "peerTier": "table-cdk",
+      "peerGroup": "table-cdk"
+    },
+    "no-legacy-alias": {
+      "description": "negative check that removed table aliases cannot compile",
+      "peerTier": "table",
+      "peerGroup": "table"
+    },
+    "pdf-viewer": {
+      "description": "split pdf-viewer package with pdfjs and light UI peers",
+      "peerTier": "pdf-viewer",
+      "peerGroup": "pdf-viewer"
+    }
+  }
+}
