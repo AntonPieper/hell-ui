@@ -450,9 +450,13 @@ export interface HellToastLabels {
     // (undocumented)
     readonly dismiss: string;
     // (undocumented)
+    readonly dismissAll: string;
+    // (undocumented)
     readonly notification: string;
     // (undocumented)
     readonly notifications: string;
+    // (undocumented)
+    readonly stack: string;
 }
 
 // @public
@@ -591,53 +595,55 @@ export function provideHellSearchRanker(ranker: HellSearchRanker): Provider;
 // types/hell-ui-angular.d.ts:192:1 - (ae-undocumented) Missing documentation for "HellToastLabels".
 // types/hell-ui-angular.d.ts:193:5 - (ae-undocumented) Missing documentation for "notifications".
 // types/hell-ui-angular.d.ts:194:5 - (ae-undocumented) Missing documentation for "notification".
-// types/hell-ui-angular.d.ts:195:5 - (ae-undocumented) Missing documentation for "dismiss".
-// types/hell-ui-angular.d.ts:197:1 - (ae-undocumented) Missing documentation for "HellLabels".
-// types/hell-ui-angular.d.ts:198:5 - (ae-undocumented) Missing documentation for "loading".
-// types/hell-ui-angular.d.ts:199:5 - (ae-undocumented) Missing documentation for "appShell".
-// types/hell-ui-angular.d.ts:200:5 - (ae-undocumented) Missing documentation for "audioPlayer".
-// types/hell-ui-angular.d.ts:201:5 - (ae-undocumented) Missing documentation for "breadcrumbs".
-// types/hell-ui-angular.d.ts:202:5 - (ae-undocumented) Missing documentation for "dataTable".
-// types/hell-ui-angular.d.ts:203:5 - (ae-undocumented) Missing documentation for "tableUtilities".
-// types/hell-ui-angular.d.ts:204:5 - (ae-undocumented) Missing documentation for "dateInput".
-// types/hell-ui-angular.d.ts:205:5 - (ae-undocumented) Missing documentation for "datePicker".
-// types/hell-ui-angular.d.ts:206:5 - (ae-undocumented) Missing documentation for "dialpad".
-// types/hell-ui-angular.d.ts:207:5 - (ae-undocumented) Missing documentation for "omnibar".
-// types/hell-ui-angular.d.ts:208:5 - (ae-undocumented) Missing documentation for "pagination".
-// types/hell-ui-angular.d.ts:209:5 - (ae-undocumented) Missing documentation for "pdfViewer".
-// types/hell-ui-angular.d.ts:210:5 - (ae-undocumented) Missing documentation for "resizable".
-// types/hell-ui-angular.d.ts:211:5 - (ae-undocumented) Missing documentation for "timeInput".
-// types/hell-ui-angular.d.ts:212:5 - (ae-undocumented) Missing documentation for "toast".
-// types/hell-ui-angular.d.ts:214:1 - (ae-undocumented) Missing documentation for "HellLabelOverrides".
-// types/hell-ui-angular.d.ts:215:5 - (ae-undocumented) Missing documentation for "loading".
-// types/hell-ui-angular.d.ts:216:5 - (ae-undocumented) Missing documentation for "appShell".
-// types/hell-ui-angular.d.ts:217:5 - (ae-undocumented) Missing documentation for "audioPlayer".
-// types/hell-ui-angular.d.ts:218:5 - (ae-undocumented) Missing documentation for "breadcrumbs".
-// types/hell-ui-angular.d.ts:219:5 - (ae-undocumented) Missing documentation for "dataTable".
-// types/hell-ui-angular.d.ts:220:5 - (ae-undocumented) Missing documentation for "tableUtilities".
-// types/hell-ui-angular.d.ts:221:5 - (ae-undocumented) Missing documentation for "dateInput".
-// types/hell-ui-angular.d.ts:222:5 - (ae-undocumented) Missing documentation for "datePicker".
-// types/hell-ui-angular.d.ts:223:5 - (ae-undocumented) Missing documentation for "dialpad".
-// types/hell-ui-angular.d.ts:224:5 - (ae-undocumented) Missing documentation for "omnibar".
-// types/hell-ui-angular.d.ts:225:5 - (ae-undocumented) Missing documentation for "pagination".
-// types/hell-ui-angular.d.ts:226:5 - (ae-undocumented) Missing documentation for "pdfViewer".
-// types/hell-ui-angular.d.ts:227:5 - (ae-undocumented) Missing documentation for "resizable".
-// types/hell-ui-angular.d.ts:228:5 - (ae-undocumented) Missing documentation for "timeInput".
-// types/hell-ui-angular.d.ts:229:5 - (ae-undocumented) Missing documentation for "toast".
-// types/hell-ui-angular.d.ts:231:15 - (ae-undocumented) Missing documentation for "HELL_DEFAULT_LABELS".
-// types/hell-ui-angular.d.ts:232:15 - (ae-undocumented) Missing documentation for "HELL_LABELS".
-// types/hell-ui-angular.d.ts:233:1 - (ae-undocumented) Missing documentation for "provideHellLabels".
-// types/hell-ui-angular.d.ts:235:1 - (ae-undocumented) Missing documentation for "HellGlobalKeydownHandler".
-// types/hell-ui-angular.d.ts:236:1 - (ae-undocumented) Missing documentation for "HellGlobalPointerdownHandler".
-// types/hell-ui-angular.d.ts:256:5 - (ae-undocumented) Missing documentation for "register".
-// types/hell-ui-angular.d.ts:257:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular.d.ts:258:5 - (ae-undocumented) Missing documentation for "ɵprov".
-// types/hell-ui-angular.d.ts:263:5 - (ae-undocumented) Missing documentation for "register".
-// types/hell-ui-angular.d.ts:264:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular.d.ts:265:5 - (ae-undocumented) Missing documentation for "ɵprov".
-// types/hell-ui-angular.d.ts:277:5 - (ae-undocumented) Missing documentation for "ngAfterViewInit".
-// types/hell-ui-angular.d.ts:278:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular.d.ts:279:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular.d.ts:195:5 - (ae-undocumented) Missing documentation for "stack".
+// types/hell-ui-angular.d.ts:196:5 - (ae-undocumented) Missing documentation for "dismiss".
+// types/hell-ui-angular.d.ts:197:5 - (ae-undocumented) Missing documentation for "dismissAll".
+// types/hell-ui-angular.d.ts:199:1 - (ae-undocumented) Missing documentation for "HellLabels".
+// types/hell-ui-angular.d.ts:200:5 - (ae-undocumented) Missing documentation for "loading".
+// types/hell-ui-angular.d.ts:201:5 - (ae-undocumented) Missing documentation for "appShell".
+// types/hell-ui-angular.d.ts:202:5 - (ae-undocumented) Missing documentation for "audioPlayer".
+// types/hell-ui-angular.d.ts:203:5 - (ae-undocumented) Missing documentation for "breadcrumbs".
+// types/hell-ui-angular.d.ts:204:5 - (ae-undocumented) Missing documentation for "dataTable".
+// types/hell-ui-angular.d.ts:205:5 - (ae-undocumented) Missing documentation for "tableUtilities".
+// types/hell-ui-angular.d.ts:206:5 - (ae-undocumented) Missing documentation for "dateInput".
+// types/hell-ui-angular.d.ts:207:5 - (ae-undocumented) Missing documentation for "datePicker".
+// types/hell-ui-angular.d.ts:208:5 - (ae-undocumented) Missing documentation for "dialpad".
+// types/hell-ui-angular.d.ts:209:5 - (ae-undocumented) Missing documentation for "omnibar".
+// types/hell-ui-angular.d.ts:210:5 - (ae-undocumented) Missing documentation for "pagination".
+// types/hell-ui-angular.d.ts:211:5 - (ae-undocumented) Missing documentation for "pdfViewer".
+// types/hell-ui-angular.d.ts:212:5 - (ae-undocumented) Missing documentation for "resizable".
+// types/hell-ui-angular.d.ts:213:5 - (ae-undocumented) Missing documentation for "timeInput".
+// types/hell-ui-angular.d.ts:214:5 - (ae-undocumented) Missing documentation for "toast".
+// types/hell-ui-angular.d.ts:216:1 - (ae-undocumented) Missing documentation for "HellLabelOverrides".
+// types/hell-ui-angular.d.ts:217:5 - (ae-undocumented) Missing documentation for "loading".
+// types/hell-ui-angular.d.ts:218:5 - (ae-undocumented) Missing documentation for "appShell".
+// types/hell-ui-angular.d.ts:219:5 - (ae-undocumented) Missing documentation for "audioPlayer".
+// types/hell-ui-angular.d.ts:220:5 - (ae-undocumented) Missing documentation for "breadcrumbs".
+// types/hell-ui-angular.d.ts:221:5 - (ae-undocumented) Missing documentation for "dataTable".
+// types/hell-ui-angular.d.ts:222:5 - (ae-undocumented) Missing documentation for "tableUtilities".
+// types/hell-ui-angular.d.ts:223:5 - (ae-undocumented) Missing documentation for "dateInput".
+// types/hell-ui-angular.d.ts:224:5 - (ae-undocumented) Missing documentation for "datePicker".
+// types/hell-ui-angular.d.ts:225:5 - (ae-undocumented) Missing documentation for "dialpad".
+// types/hell-ui-angular.d.ts:226:5 - (ae-undocumented) Missing documentation for "omnibar".
+// types/hell-ui-angular.d.ts:227:5 - (ae-undocumented) Missing documentation for "pagination".
+// types/hell-ui-angular.d.ts:228:5 - (ae-undocumented) Missing documentation for "pdfViewer".
+// types/hell-ui-angular.d.ts:229:5 - (ae-undocumented) Missing documentation for "resizable".
+// types/hell-ui-angular.d.ts:230:5 - (ae-undocumented) Missing documentation for "timeInput".
+// types/hell-ui-angular.d.ts:231:5 - (ae-undocumented) Missing documentation for "toast".
+// types/hell-ui-angular.d.ts:233:15 - (ae-undocumented) Missing documentation for "HELL_DEFAULT_LABELS".
+// types/hell-ui-angular.d.ts:234:15 - (ae-undocumented) Missing documentation for "HELL_LABELS".
+// types/hell-ui-angular.d.ts:235:1 - (ae-undocumented) Missing documentation for "provideHellLabels".
+// types/hell-ui-angular.d.ts:237:1 - (ae-undocumented) Missing documentation for "HellGlobalKeydownHandler".
+// types/hell-ui-angular.d.ts:238:1 - (ae-undocumented) Missing documentation for "HellGlobalPointerdownHandler".
+// types/hell-ui-angular.d.ts:258:5 - (ae-undocumented) Missing documentation for "register".
+// types/hell-ui-angular.d.ts:259:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular.d.ts:260:5 - (ae-undocumented) Missing documentation for "ɵprov".
+// types/hell-ui-angular.d.ts:265:5 - (ae-undocumented) Missing documentation for "register".
+// types/hell-ui-angular.d.ts:266:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular.d.ts:267:5 - (ae-undocumented) Missing documentation for "ɵprov".
+// types/hell-ui-angular.d.ts:279:5 - (ae-undocumented) Missing documentation for "ngAfterViewInit".
+// types/hell-ui-angular.d.ts:280:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular.d.ts:281:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

@@ -1,0 +1,534 @@
+{
+  "baseUrl": "http://127.0.0.1:4302/components/toast",
+  "consoleErrors": [],
+  "evidence": [
+    {
+      "label": "desktop expanded default",
+      "toasterExpanded": "true",
+      "toasterScrollable": "true",
+      "region": {
+        "x": 1056,
+        "y": 456,
+        "width": 360,
+        "height": 420
+      },
+      "viewport": {
+        "x": 1056,
+        "y": 456,
+        "width": 360,
+        "height": 420,
+        "scrollTop": 176,
+        "scrollHeight": 596,
+        "clientHeight": 420,
+        "scrollbarWidth": "thin"
+      },
+      "dismissAll": {
+        "x": 1312,
+        "y": 419,
+        "width": 104,
+        "height": 29,
+        "text": "Dismiss all",
+        "tabIndex": null,
+        "opacity": "1",
+        "textDecorationLine": "none",
+        "svgPathCount": 1
+      },
+      "toastGaps": [
+        23.8,
+        18.9,
+        12.3,
+        12.3,
+        12.3,
+        12.3,
+        12.3
+      ],
+      "minToastGap": 12.3,
+      "toasts": [
+        {
+          "text": "Build startedmain @ 7c9a02b",
+          "rect": {
+            "x": 1088,
+            "y": 292,
+            "width": 287,
+            "height": 52
+          },
+          "edgeProgress": "3",
+          "opacity": "0"
+        },
+        {
+          "text": "Tests passed482 specs in 14.2s",
+          "rect": {
+            "x": 1088,
+            "y": 368,
+            "width": 287,
+            "height": 52
+          },
+          "edgeProgress": "3",
+          "opacity": "0"
+        },
+        {
+          "text": "Bundle readymain.js — 142kb gzipped",
+          "rect": {
+            "x": 1074,
+            "y": 439,
+            "width": 314,
+            "height": 57
+          },
+          "edgeProgress": "1.7142857142857142",
+          "opacity": "0"
+        },
+        {
+          "text": "Deployedpreview-42.heinrich.app",
+          "rect": {
+            "x": 1056,
+            "y": 508,
+            "width": 350,
+            "height": 64
+          },
+          "edgeProgress": "0",
+          "opacity": "1"
+        },
+        {
+          "text": "Notified team#release on Slack",
+          "rect": {
+            "x": 1056,
+            "y": 584,
+            "width": 350,
+            "height": 64
+          },
+          "edgeProgress": "0",
+          "opacity": "1"
+        },
+        {
+          "text": "Smoke check queuedchromium / firefox / webkit",
+          "rect": {
+            "x": 1056,
+            "y": 660,
+            "width": 350,
+            "height": 64
+          },
+          "edgeProgress": "0",
+          "opacity": "1"
+        },
+        {
+          "text": "Release note drafteddocs/changelog.md",
+          "rect": {
+            "x": 1056,
+            "y": 736,
+            "width": 350,
+            "height": 64
+          },
+          "edgeProgress": "0",
+          "opacity": "1"
+        },
+        {
+          "text": "Rollback point saveddeploy-41",
+          "rect": {
+            "x": 1056,
+            "y": 812,
+            "width": 350,
+            "height": 64
+          },
+          "edgeProgress": "0",
+          "opacity": "1"
+        }
+      ]
+    },
+    {
+      "label": "desktop scrolled to older toasts",
+      "toasterExpanded": "true",
+      "toasterScrollable": "true",
+      "region": {
+        "x": 1056,
+        "y": 456,
+        "width": 360,
+        "height": 420
+      },
+      "viewport": {
+        "x": 1056,
+        "y": 456,
+        "width": 360,
+        "height": 420,
+        "scrollTop": 0,
+        "scrollHeight": 596,
+        "clientHeight": 420,
+        "scrollbarWidth": "thin"
+      },
+      "dismissAll": {
+        "x": 1312,
+        "y": 419,
+        "width": 104,
+        "height": 29,
+        "text": "Dismiss all",
+        "tabIndex": null,
+        "opacity": "1",
+        "textDecorationLine": "none",
+        "svgPathCount": 1
+      },
+      "toastGaps": [
+        12.3,
+        12.3,
+        12.3,
+        12.3,
+        18.9,
+        23.8,
+        23.8
+      ],
+      "minToastGap": 12.3,
+      "toasts": [
+        {
+          "text": "Build startedmain @ 7c9a02b",
+          "rect": {
+            "x": 1056,
+            "y": 456,
+            "width": 350,
+            "height": 64
+          },
+          "edgeProgress": "0",
+          "opacity": "1"
+        },
+        {
+          "text": "Tests passed482 specs in 14.2s",
+          "rect": {
+            "x": 1056,
+            "y": 532,
+            "width": 350,
+            "height": 64
+          },
+          "edgeProgress": "0",
+          "opacity": "1"
+        },
+        {
+          "text": "Bundle readymain.js — 142kb gzipped",
+          "rect": {
+            "x": 1056,
+            "y": 608,
+            "width": 350,
+            "height": 64
+          },
+          "edgeProgress": "0",
+          "opacity": "1"
+        },
+        {
+          "text": "Deployedpreview-42.heinrich.app",
+          "rect": {
+            "x": 1056,
+            "y": 684,
+            "width": 350,
+            "height": 64
+          },
+          "edgeProgress": "0",
+          "opacity": "1"
+        },
+        {
+          "text": "Notified team#release on Slack",
+          "rect": {
+            "x": 1056,
+            "y": 760,
+            "width": 350,
+            "height": 64
+          },
+          "edgeProgress": "0",
+          "opacity": "1"
+        },
+        {
+          "text": "Smoke check queuedchromium / firefox / webkit",
+          "rect": {
+            "x": 1074,
+            "y": 843,
+            "width": 314,
+            "height": 57
+          },
+          "edgeProgress": "1.7142857142857142",
+          "opacity": "0"
+        },
+        {
+          "text": "Release note drafteddocs/changelog.md",
+          "rect": {
+            "x": 1088,
+            "y": 924,
+            "width": 287,
+            "height": 52
+          },
+          "edgeProgress": "3",
+          "opacity": "0"
+        },
+        {
+          "text": "Rollback point saveddeploy-41",
+          "rect": {
+            "x": 1088,
+            "y": 1000,
+            "width": 287,
+            "height": 52
+          },
+          "edgeProgress": "3",
+          "opacity": "0"
+        }
+      ]
+    },
+    {
+      "label": "desktop collapse transition",
+      "toasterExpanded": null,
+      "toasterScrollable": "true",
+      "region": {
+        "x": 1056,
+        "y": 546,
+        "width": 360,
+        "height": 330
+      },
+      "viewport": {
+        "x": 1056,
+        "y": 546,
+        "width": 360,
+        "height": 330,
+        "scrollTop": 0,
+        "scrollHeight": 330,
+        "clientHeight": 330,
+        "scrollbarWidth": "none"
+      },
+      "dismissAll": {
+        "x": 1312,
+        "y": 510,
+        "width": 103,
+        "height": 29,
+        "text": "Dismiss all",
+        "tabIndex": "-1",
+        "opacity": "1",
+        "textDecorationLine": "none",
+        "svgPathCount": 1
+      },
+      "toastGaps": [
+        2.5,
+        1.5,
+        0.5,
+        -0.4,
+        3.5,
+        6.2,
+        5.3
+      ],
+      "minToastGap": -0.4,
+      "toasts": [
+        {
+          "text": "Build startedmain @ 7c9a02b",
+          "rect": {
+            "x": 1075,
+            "y": 130,
+            "width": 322,
+            "height": 57
+          },
+          "edgeProgress": "5",
+          "opacity": "0.747848"
+        },
+        {
+          "text": "Tests passed482 specs in 14.2s",
+          "rect": {
+            "x": 1072,
+            "y": 190,
+            "width": 327,
+            "height": 58
+          },
+          "edgeProgress": "4",
+          "opacity": "0.747848"
+        },
+        {
+          "text": "Bundle readymain.js — 142kb gzipped",
+          "rect": {
+            "x": 1070,
+            "y": 249,
+            "width": 333,
+            "height": 59
+          },
+          "edgeProgress": "3",
+          "opacity": "0.747848"
+        },
+        {
+          "text": "Deployedpreview-42.heinrich.app",
+          "rect": {
+            "x": 1067,
+            "y": 308,
+            "width": 338,
+            "height": 60
+          },
+          "edgeProgress": "2",
+          "opacity": "0.747848"
+        },
+        {
+          "text": "Notified team#release on Slack",
+          "rect": {
+            "x": 1064,
+            "y": 368,
+            "width": 344,
+            "height": 61
+          },
+          "edgeProgress": "1",
+          "opacity": "0.747848"
+        },
+        {
+          "text": "Smoke check queuedchromium / firefox / webkit",
+          "rect": {
+            "x": 1075,
+            "y": 432,
+            "width": 321,
+            "height": 57
+          },
+          "edgeProgress": "0",
+          "opacity": "0.252152"
+        },
+        {
+          "text": "Release note drafteddocs/changelog.md",
+          "rect": {
+            "x": 1083,
+            "y": 495,
+            "width": 306,
+            "height": 54
+          },
+          "edgeProgress": "0",
+          "opacity": "0.252152"
+        },
+        {
+          "text": "Rollback point saveddeploy-41",
+          "rect": {
+            "x": 1080,
+            "y": 555,
+            "width": 312,
+            "height": 55
+          },
+          "edgeProgress": "0",
+          "opacity": "0.252152"
+        }
+      ]
+    },
+    {
+      "label": "desktop after mouse leave collapse",
+      "toasterExpanded": null,
+      "toasterScrollable": "true",
+      "region": {
+        "x": 1056,
+        "y": 812,
+        "width": 360,
+        "height": 64
+      },
+      "viewport": {
+        "x": 1056,
+        "y": 812,
+        "width": 360,
+        "height": 64,
+        "scrollTop": 0,
+        "scrollHeight": 64,
+        "clientHeight": 64,
+        "scrollbarWidth": "none"
+      },
+      "dismissAll": {
+        "x": 1313,
+        "y": 779,
+        "width": 102,
+        "height": 28,
+        "text": "Dismiss all",
+        "tabIndex": "-1",
+        "opacity": "1",
+        "textDecorationLine": "none",
+        "svgPathCount": 1
+      },
+      "toastGaps": [
+        -26.8,
+        -30.6,
+        -34.4,
+        -38.2,
+        -42,
+        -45.9,
+        -49.7
+      ],
+      "minToastGap": -49.7,
+      "toasts": [
+        {
+          "text": "Build startedmain @ 7c9a02b",
+          "rect": {
+            "x": 1132,
+            "y": 741,
+            "width": 209,
+            "height": 37
+          },
+          "edgeProgress": "5",
+          "opacity": "0"
+        },
+        {
+          "text": "Tests passed482 specs in 14.2s",
+          "rect": {
+            "x": 1121,
+            "y": 751,
+            "width": 230,
+            "height": 41
+          },
+          "edgeProgress": "4",
+          "opacity": "0"
+        },
+        {
+          "text": "Bundle readymain.js — 142kb gzipped",
+          "rect": {
+            "x": 1110,
+            "y": 761,
+            "width": 252,
+            "height": 45
+          },
+          "edgeProgress": "3",
+          "opacity": "0"
+        },
+        {
+          "text": "Deployedpreview-42.heinrich.app",
+          "rect": {
+            "x": 1099,
+            "y": 772,
+            "width": 274,
+            "height": 48
+          },
+          "edgeProgress": "2",
+          "opacity": "0"
+        },
+        {
+          "text": "Notified team#release on Slack",
+          "rect": {
+            "x": 1088,
+            "y": 782,
+            "width": 295,
+            "height": 52
+          },
+          "edgeProgress": "1",
+          "opacity": "0"
+        },
+        {
+          "text": "Smoke check queuedchromium / firefox / webkit",
+          "rect": {
+            "x": 1078,
+            "y": 792,
+            "width": 317,
+            "height": 56
+          },
+          "edgeProgress": "0",
+          "opacity": "1"
+        },
+        {
+          "text": "Release note drafteddocs/changelog.md",
+          "rect": {
+            "x": 1067,
+            "y": 802,
+            "width": 338,
+            "height": 60
+          },
+          "edgeProgress": "0",
+          "opacity": "1"
+        },
+        {
+          "text": "Rollback point saveddeploy-41",
+          "rect": {
+            "x": 1056,
+            "y": 812,
+            "width": 360,
+            "height": 64
+          },
+          "edgeProgress": "0",
+          "opacity": "1"
+        }
+      ]
+    }
+  ]
+}

@@ -152,6 +152,73 @@ test.describe('Hell UI browser behavior', () => {
     await expectNoSeriousA11yIssues(page, '[role="region"][aria-label="Notifications"]');
   });
 
+  test('toast stack scrolls long bursts and exposes dismiss all', async ({ page }) => {
+    await page.goto('/components/toast');
+    await page.getByRole('button', { name: 'Send 8 toasts' }).click();
+
+    const notifications = page.getByRole('region', { name: 'Notifications' });
+    const viewport = notifications.locator('[data-slot="viewport"]');
+    const toasts = notifications.locator('[data-slot="toast"]');
+
+    await expect(toasts).toHaveCount(8);
+    await notifications.hover();
+    await expect(notifications.locator('[data-slot="dismiss-all"]')).toBeVisible();
+    await expect(notifications.locator('[data-slot="dismiss-all"] svg path')).toHaveCount(1);
+    await expect(viewport).toHaveAttribute('aria-label', 'Notification stack');
+
+    await expect
+      .poll(() =>
+        viewport.evaluate(
+          (element) => element.scrollHeight > element.clientHeight && element.scrollTop > 0,
+        ),
+      )
+      .toBe(true);
+
+    await expect
+      .poll(() =>
+        viewport.evaluate((element) => {
+          const rects = [...element.querySelectorAll<HTMLElement>('[data-slot="toast"]')]
+            .filter((toast) => toast.getAttribute('data-state') === 'open')
+            .map((toast) => {
+              const rect = toast.getBoundingClientRect();
+              return {
+                top: rect.top,
+                bottom: rect.bottom,
+              };
+            })
+            .sort((a, b) => a.top - b.top);
+          const gaps = rects.slice(1).map((rect, index) => rect.top - rects[index].bottom);
+          if (rects.length < 8 || gaps.length === 0) return -Infinity;
+          return Math.min(...gaps);
+        }),
+      )
+      .toBeGreaterThanOrEqual(8);
+
+    await viewport.evaluate((element) => {
+      element.scrollTop = 0;
+      element.dispatchEvent(new Event('scroll', { bubbles: true }));
+    });
+
+    await expect
+      .poll(() =>
+        toasts.last().evaluate((element) => {
+          const progress = getComputedStyle(element)
+            .getPropertyValue('--hell-toast-edge-progress')
+            .trim();
+          return Number(progress) > 0;
+        }),
+      )
+      .toBe(true);
+
+    await page.mouse.move(10, 10);
+    await expect(notifications).not.toHaveAttribute('data-expanded', 'true');
+    await expect.poll(() => viewport.evaluate((element) => element.scrollTop)).toBe(0);
+    await notifications.hover();
+
+    await notifications.locator('[data-slot="dismiss-all"]').click();
+    await expect(toasts).toHaveCount(0);
+  });
+
   test('resizable handles support keyboard resizing semantics', async ({ page }) => {
     await page.goto('/components/resizable');
 
