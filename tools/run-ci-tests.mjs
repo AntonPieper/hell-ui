@@ -15,8 +15,8 @@ const tasks = [
     args: ['run', 'test:unit'],
   },
   {
-    name: 'architecture contract',
-    args: ['run', 'test:architecture'],
+    name: 'static contracts',
+    args: ['run', 'test:static-contracts'],
   },
   {
     name: 'lint',

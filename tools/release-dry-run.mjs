@@ -97,11 +97,11 @@ function parseMode(args) {
 }
 
 function printUsage() {
-  console.log(`Usage: pnpm run release:dry-run -- [--fast|--full]
+  console.log(`Usage: pnpm run release:dry-run [--fast|--full]
 
 Modes:
-  --fast  Local preflight: changelog entry, lint, architecture, CI contract, pnpm preflight, build, pack audit, API report.
-  --full  Release candidate gate: changelog entry, lint, architecture, CI contract, unit, build, pack audit, selected package-consumer scenarios, API report, docs build.
+  --fast  Local preflight: changelog entry, lint, static contracts, CI contract, pnpm preflight, build, pack audit, API report.
+  --full  Release candidate gate: changelog entry, lint, static contracts, CI contract, unit, build, pack audit, selected package-consumer scenarios, API report, docs build.
 
 Environment:
   HELL_RELEASE_DRY_RUN_LOG_DIR             Override evidence log directory.
@@ -132,7 +132,7 @@ function fastTasks() {
   return [
     packageTask('changelog entry', ['run', 'test:changelog']),
     packageTask('lint', ['run', 'lint']),
-    packageTask('architecture', ['run', 'test:architecture']),
+    packageTask('static contracts', ['run', 'test:static-contracts']),
     packageTask('ci contract', ['run', 'test:ci-contract']),
     packageTask('package-consumer pnpm preflight', ['run', 'test:package-consumer', '--', '--preflight']),
     packageTask('build lib', ['run', 'build:lib']),
@@ -145,7 +145,7 @@ function fullTasks(scenarios) {
   return [
     packageTask('changelog entry', ['run', 'test:changelog']),
     packageTask('lint', ['run', 'lint']),
-    packageTask('architecture', ['run', 'test:architecture']),
+    packageTask('static contracts', ['run', 'test:static-contracts']),
     packageTask('ci contract', ['run', 'test:ci-contract']),
     packageTask('unit', ['run', 'test:unit']),
     packageTask('build lib', ['run', 'build:lib']),

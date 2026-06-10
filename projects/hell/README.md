@@ -60,7 +60,7 @@ Every exported API belongs to one documented category:
 - `Beta`: public but still pre-1.0. Shape changes require release notes and migration guidance, but are not promoted as final stable contracts.
 - `Experimental`: importable app surface for heavier/browser-specific features. API comments or generated entry-point comments must include `@experimental`, docs must disclose the risk, and apps should isolate the import behind lazy/client-only boundaries when applicable.
 - `Deprecated`: compatibility alias with a preferred replacement. API comments must include `@deprecated`, docs must name the replacement, and removal needs an explicit release decision.
-- `Internal`: implementation detail, not a consumer import path. Public API files must not export from `/internal/`, `/adapters/`, or manifest-declared internal directories unless the architecture allowlist names the exception and rationale.
+- `Internal`: implementation detail, not a consumer import path. Public API files must not export from `/internal/`, `/adapters/`, or manifest-declared internal directories unless the static-contract allowlist names the exception and rationale.
 
 The stable API report set currently covers `@hell-ui/angular`, `@hell-ui/angular/core`, `@hell-ui/angular/primitives`, and `@hell-ui/angular/testing`.
 

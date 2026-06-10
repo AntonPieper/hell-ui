@@ -1,7 +1,7 @@
 # SSR/browser global seams
 
 - Slice: HELL-048
-- Enforced by: `pnpm run test:architecture` (`tools/check-architecture.mjs`, `checkBrowserGlobalContract()`)
+- Enforced by: `pnpm run test:static-contracts` (`tools/check-static-contracts.mjs`, `checkBrowserGlobalContract()`)
 - Scope: production TypeScript under `projects/hell/src/lib`; specs, declarations, and the PDF worker file are excluded.
 
 ## Rule
@@ -30,4 +30,4 @@ A new direct global must do one of these in the same slice:
 
 ## Follow-up ownership
 
-The provisional rows above are not permanent waivers. They map to existing board slices: HELL-054 (CodeMirror optional/client-only boundary) and HELL-061 (resize browser contracts). HELL-053 moved PDF browser globals out of the main `@hell-ui/angular` package into `@hell-ui/pdf-viewer`; HELL-055 moved audio transcript globals into the optional transcript feature provider; HELL-057 accepted the remaining flyout/core floating-dismissal fallback; HELL-058 shrank omnibar to a focus-only owner-document rule. Those feature/package seams own their browser-only runtime separately. If any of those slices changes scope, update this document and the architecture allowlist in the same commit.
+The provisional rows above are not permanent waivers. They map to existing board slices: HELL-054 (CodeMirror optional/client-only boundary) and HELL-061 (resize browser contracts). HELL-053 moved PDF browser globals out of the main `@hell-ui/angular` package into `@hell-ui/pdf-viewer`; HELL-055 moved audio transcript globals into the optional transcript feature provider; HELL-057 accepted the remaining flyout/core floating-dismissal fallback; HELL-058 shrank omnibar to a focus-only owner-document rule. Those feature/package seams own their browser-only runtime separately. If any of those slices changes scope, update this document and the static-contract allowlist in the same commit.

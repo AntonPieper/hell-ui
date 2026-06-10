@@ -220,7 +220,7 @@ Current not-production-ready gaps until the HELL-049 production-readiness gate p
 Before telling external consumers that Hell UI is production-ready, run:
 
 ```bash
-pnpm release:dry-run -- --full
+pnpm run release:dry-run --full
 pnpm e2e
 pnpm production-ready:check
 ```

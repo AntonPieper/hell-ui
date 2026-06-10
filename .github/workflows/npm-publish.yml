@@ -40,7 +40,7 @@ jobs:
         run: pnpm run ci:install
 
       - name: Run release dry-run
-        run: pnpm run release:dry-run -- --full
+        run: pnpm run release:dry-run --full
 
       - name: Upload release dry-run evidence
         if: always()

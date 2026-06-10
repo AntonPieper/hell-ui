@@ -36,7 +36,7 @@ interface PublicComponentContractModule {
 }
 
 /**
- * Public Component Contract manifest. `tools/check-architecture.mjs` compares this list against
+ * Public Component Contract manifest. `tools/check-static-contracts.mjs` compares this list against
  * every exported `HellStyleable` Module so a new public Module cannot skip contract review.
  */
 const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[] = [

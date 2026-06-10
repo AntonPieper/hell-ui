@@ -7,7 +7,7 @@ This checklist is the release-claim gate for Hell UI. Until `pnpm production-rea
 The gate is evidence-based, not a replacement for running the commands. Evidence under `test-results/` is intentionally untracked; run the commands, inspect failures, then run the gate.
 
 ```bash
-pnpm release:dry-run -- --full
+pnpm run release:dry-run --full
 pnpm e2e
 pnpm production-ready:check
 ```
@@ -36,7 +36,7 @@ pnpm production-ready:check
       ],
       "commandEvidence": [
         "pnpm test:package-consumer -- --minimal-deps",
-        "pnpm release:dry-run -- --full"
+        "pnpm run release:dry-run --full"
       ],
       "evidenceChecks": [
         {
@@ -56,7 +56,7 @@ pnpm production-ready:check
       "commandEvidence": [
         "pnpm build:lib",
         "pnpm test:api-report",
-        "pnpm release:dry-run -- --full"
+        "pnpm run release:dry-run --full"
       ],
       "evidenceChecks": [
         {
@@ -99,7 +99,7 @@ pnpm production-ready:check
       ],
       "commandEvidence": [
         "pnpm e2e",
-        "pnpm release:dry-run -- --full"
+        "pnpm run release:dry-run --full"
       ],
       "evidenceChecks": [
         {
@@ -133,7 +133,7 @@ pnpm production-ready:check
       "commandEvidence": [
         "pnpm build:docs",
         "pnpm diagnose:docs-bundle",
-        "pnpm release:dry-run -- --full"
+        "pnpm run release:dry-run --full"
       ],
       "evidenceChecks": [
         {
@@ -165,7 +165,7 @@ pnpm production-ready:check
       "commandEvidence": [
         "pnpm build:lib",
         "pnpm test:package-pack",
-        "pnpm release:dry-run -- --full"
+        "pnpm run release:dry-run --full"
       ],
       "evidenceChecks": [
         {
@@ -185,7 +185,7 @@ pnpm production-ready:check
         "HELL-052"
       ],
       "commandEvidence": [
-        "pnpm release:dry-run -- --full"
+        "pnpm run release:dry-run --full"
       ],
       "evidenceChecks": [
         {
@@ -202,12 +202,12 @@ pnpm production-ready:check
 
 | Blocker category | Slice IDs | Required command evidence | What blocks the production-ready claim |
 | --- | --- | --- | --- |
-| Package-consumer | HELL-012, HELL-020, HELL-021, HELL-022, HELL-023, HELL-024, HELL-055, HELL-081 | `pnpm test:package-consumer -- --minimal-deps`; `pnpm release:dry-run -- --full` | Full release JSON evidence must show selected strict-peer consumer scenarios passing (`root-core`, `button-unstyled`, `primitives-css`, `audio-player`, `audio-transcript`, `table`, `data-table`, `table-tanstack`, `table-virtual`, `table-cdk`, `no-legacy-alias`, `code-editor`). |
-| API | HELL-025, HELL-026, HELL-051 | `pnpm build:lib`; `pnpm test:api-report`; `pnpm release:dry-run -- --full` | Stable API reports must exist and the full release dry-run must pass the API report task. HELL-051 still owns semver/changelog policy before public beta. |
-| Accessibility | HELL-038, HELL-039, HELL-040, HELL-041, HELL-042, HELL-043, HELL-061 | `pnpm e2e`; `pnpm release:dry-run -- --full` | `test-results/playwright-report.json` must report zero unexpected results for every `e2e/*.spec.ts` file across chromium, firefox, and webkit on the current commit; the accessibility matrix must not contain `Critical gap` or `criticalGap: true` rows. Current critical gaps keep Hell UI internal beta. |
-| Docs budgets | HELL-019, HELL-030, HELL-031, HELL-032, HELL-050 | `pnpm build:docs`; `pnpm diagnose:docs-bundle`; `pnpm release:dry-run -- --full` | The budget diagnosis must classify warnings as accepted or regression, and the full release dry-run must pass docs build. HELL-050 owns the remaining eager-import audit. |
-| Pack audit | HELL-023, HELL-024, HELL-053 | `pnpm build:lib`; `pnpm test:package-pack`; `pnpm release:dry-run -- --full` | Full release JSON evidence must show the pack audit passing before production language. HELL-053 still owns PDF package split risk before beta. |
-| Release dry-run | HELL-027, HELL-028, HELL-049, HELL-051, HELL-052 | `pnpm release:dry-run -- --full` | The latest full release-candidate JSON evidence must pass every dry-run task, including the changelog entry check for the current package version. |
+| Package-consumer | HELL-012, HELL-020, HELL-021, HELL-022, HELL-023, HELL-024, HELL-055, HELL-081 | `pnpm test:package-consumer -- --minimal-deps`; `pnpm run release:dry-run --full` | Full release JSON evidence must show selected strict-peer consumer scenarios passing (`root-core`, `button-unstyled`, `primitives-css`, `audio-player`, `audio-transcript`, `table`, `data-table`, `table-tanstack`, `table-virtual`, `table-cdk`, `no-legacy-alias`, `code-editor`). |
+| API | HELL-025, HELL-026, HELL-051 | `pnpm build:lib`; `pnpm test:api-report`; `pnpm run release:dry-run --full` | Stable API reports must exist and the full release dry-run must pass the API report task. HELL-051 still owns semver/changelog policy before public beta. |
+| Accessibility | HELL-038, HELL-039, HELL-040, HELL-041, HELL-042, HELL-043, HELL-061 | `pnpm e2e`; `pnpm run release:dry-run --full` | `test-results/playwright-report.json` must report zero unexpected results for every `e2e/*.spec.ts` file across chromium, firefox, and webkit on the current commit; the accessibility matrix must not contain `Critical gap` or `criticalGap: true` rows. Current critical gaps keep Hell UI internal beta. |
+| Docs budgets | HELL-019, HELL-030, HELL-031, HELL-032, HELL-050 | `pnpm build:docs`; `pnpm diagnose:docs-bundle`; `pnpm run release:dry-run --full` | The budget diagnosis must classify warnings as accepted or regression, and the full release dry-run must pass docs build. HELL-050 owns the remaining eager-import audit. |
+| Pack audit | HELL-023, HELL-024, HELL-053 | `pnpm build:lib`; `pnpm test:package-pack`; `pnpm run release:dry-run --full` | Full release JSON evidence must show the pack audit passing before production language. HELL-053 still owns PDF package split risk before beta. |
+| Release dry-run | HELL-027, HELL-028, HELL-049, HELL-051, HELL-052 | `pnpm run release:dry-run --full` | The latest full release-candidate JSON evidence must pass every dry-run task, including the changelog entry check for the current package version. |
 
 ## Current blocker notes
 
