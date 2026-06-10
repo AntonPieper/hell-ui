@@ -34,7 +34,7 @@ import toastVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
         Stacked, dismissable, non-blocking notifications. Drop a single
         <code>&lt;hell-toaster /&gt;</code> near the root of your app and call
         <code>HellToastService</code> from anywhere. Newest toasts pile at the front; hover (or
-        focus) the stack to fan it out.
+        focus) the stack to fan it out, scroll longer stacks, and clear them at once.
       </p>
       <p>
         The toaster renders a labeled visual <code>region</code> for the toast stack. Screen-reader
@@ -81,8 +81,9 @@ import toastVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
 
       <h2>Stacking</h2>
       <p>
-        Spam the buttons above and the stack collapses behind the front-most toast. Hover or focus
-        the stack to fan it out into a column &mdash; the auto-dismiss timer pauses while you do.
+        Send a burst and the stack collapses behind the front-most toast. Hover or focus the stack
+        to fan it out into a scrollable column with a built-in dismiss-all action &mdash; the
+        auto-dismiss timer pauses while you do.
       </p>
       <hd-example-tabs [code]="toastStackingExampleCode">
         <app-toast-stacking-example />
@@ -118,9 +119,9 @@ import toastVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
           >.
         </li>
         <li>
-          <code>announcement</code>: explicit announcement text sent via
-          <code>LiveAnnouncer</code>; overrides default title/description fallback. Useful for
-          template toasts with non-text visuals.
+          <code>announcement</code>: explicit announcement text sent via <code>LiveAnnouncer</code>;
+          overrides default title/description fallback. Useful for template toasts with non-text
+          visuals.
         </li>
         <li><code>id</code>: update an existing toast in place.</li>
       </ul>

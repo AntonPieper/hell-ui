@@ -22,7 +22,11 @@ import {
   hellToastHeightPx,
   hellToastOffsetPx,
   hellToastOverflow,
+  hellToastScrollEdgeOpacity,
+  hellToastScrollEdgeProgress,
   hellToastSnapshotExits,
+  hellToastStackHeightPx,
+  hellToastStackHeightValuePx,
   hellToastStackSnapshotsEqual,
   type HellToastStackSnapshot,
 } from './toast-stack.runtime';
@@ -68,7 +72,9 @@ export interface HellToastOptions {
   id?: number;
 }
 
-interface ToastInternal extends Required<Omit<HellToastOptions, 'template' | 'action' | 'id' | 'announcement'>> {
+interface ToastInternal extends Required<
+  Omit<HellToastOptions, 'template' | 'action' | 'id' | 'announcement'>
+> {
   id: number;
   template: HellToastOptions['template'] | null;
   action: HellToastAction | null;
@@ -218,7 +224,8 @@ export class HellToastService {
    */
   private announceToast(toast: ToastInternal, opts?: Pick<HellToastOptions, 'announcement'>): void {
     const explicitAnnouncement = opts?.announcement?.trim();
-    const announcement = explicitAnnouncement ||
+    const announcement =
+      explicitAnnouncement ||
       [toast.title, toast.description].filter((part) => part.length > 0).join('. ') ||
       (toast.template ? this.labels.toast.notification : '');
     if (!announcement) return;
@@ -266,6 +273,7 @@ export class HellToastTemplate {}
     '[class.hell-toaster]': '!unstyled()',
     '[attr.data-position]': 'position()',
     '[attr.data-expanded]': 'expanded() ? "true" : null',
+    '[attr.data-scrollable]': 'isScrollable() ? "true" : null',
   },
   template: `
     @if (hasToasts()) {
@@ -274,104 +282,139 @@ export class HellToastTemplate {}
         data-slot="region"
         role="region"
         [attr.aria-label]="labels.toast.notifications"
+        [style.--hell-toast-stack-h]="stackHeightPx()"
+        [style.--hell-toast-viewport-h]="expandedViewportHeightPx()"
         tabindex="-1"
         (mouseenter)="onEnter()"
         (mouseleave)="onLeave()"
         (focusin)="onEnter()"
-        (focusout)="onLeave()"
+        (focusout)="onFocusOut($event)"
       >
-        <ol data-slot="list">
-          @for (t of svc.toasts(); track t.id; let i = $index) {
-            <li
-              data-slot="toast"
-              [attr.data-variant]="t.variant"
-              [attr.data-state]="t.removing ? 'closed' : 'open'"
-              [attr.data-front]="frontDistance(t)"
-              [attr.data-visible]="frontDistance(t) < maxVisible() ? 'true' : 'false'"
-              [attr.data-overflow]="overflow(t) > 0 ? overflow(t) : null"
-              [style.--hell-toast-front]="frontDistance(t)"
-              [style.--hell-toast-overflow]="overflow(t)"
-              [style.--hell-toast-offset]="offsetPx(t)"
-              [style.--hell-toast-h]="heightPx(t.id)"
-              [style.--hell-toast-z]="i + 1"
-              (mouseenter)="svc.pauseAll()"
-              (mouseleave)="svc.resumeAll()"
+        <div
+          data-slot="viewport"
+          [attr.tabindex]="isScrollable() ? 0 : null"
+          [attr.aria-label]="isScrollable() ? labels.toast.stack : null"
+          (scroll)="onViewportScroll($event)"
+        >
+          <ol data-slot="list">
+            @for (t of svc.toasts(); track t.id; let i = $index) {
+              <li
+                data-slot="toast"
+                [attr.data-variant]="t.variant"
+                [attr.data-state]="t.removing ? 'closed' : 'open'"
+                [attr.data-front]="frontDistance(t)"
+                [attr.data-visible]="frontDistance(t) < maxVisible() ? 'true' : 'false'"
+                [attr.data-overflow]="overflow(t) > 0 ? overflow(t) : null"
+                [attr.data-edge]="edgeProgress(t) > 0 ? 'true' : null"
+                [attr.aria-hidden]="isCollapsedOverflow(t) ? 'true' : null"
+                [style.--hell-toast-front]="frontDistance(t)"
+                [style.--hell-toast-overflow]="overflow(t)"
+                [style.--hell-toast-offset]="offsetPx(t)"
+                [style.--hell-toast-h]="heightPx(t.id)"
+                [style.--hell-toast-z]="i + 1"
+                [style.--hell-toast-edge-progress]="edgeProgress(t)"
+                [style.--hell-toast-edge-opacity]="edgeOpacity(t)"
+              >
+                <div data-slot="glyph" aria-hidden="true">
+                  @switch (t.variant) {
+                    @case ('success') {
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="8" cy="8" r="6.5" />
+                        <path d="M5 8.5l2 2 4-4.5" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    }
+                    @case ('danger') {
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="8" cy="8" r="6.5" />
+                        <path d="M5.5 5.5l5 5m0-5l-5 5" stroke-linecap="round" />
+                      </svg>
+                    }
+                    @case ('warning') {
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8 1.5L15 14H1L8 1.5z" stroke-linejoin="round" />
+                        <path d="M8 6v3.5M8 11.8v.4" stroke-linecap="round" />
+                      </svg>
+                    }
+                    @case ('info') {
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="8" cy="8" r="6.5" />
+                        <path d="M8 7v4M8 4.6v.4" stroke-linecap="round" />
+                      </svg>
+                    }
+                    @default {
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="8" cy="8" r="6.5" />
+                      </svg>
+                    }
+                  }
+                </div>
+
+                <div data-slot="body">
+                  @if (t.template) {
+                    <ng-container
+                      [ngTemplateOutlet]="t.template"
+                      [ngTemplateOutletContext]="{ $implicit: ctxFor(t.id) }"
+                    />
+                  } @else {
+                    @if (t.title) {
+                      <div data-slot="title">{{ t.title }}</div>
+                    }
+                    @if (t.description) {
+                      <div data-slot="description">{{ t.description }}</div>
+                    }
+                  }
+                </div>
+
+                @if (t.action) {
+                  <button
+                    type="button"
+                    data-slot="action"
+                    [attr.tabindex]="toastControlTabIndex(t)"
+                    (click)="t.action!.onClick(() => svc.dismiss(t.id))"
+                  >
+                    {{ t.action.label }}
+                  </button>
+                }
+
+                @if (t.dismissible) {
+                  <button
+                    type="button"
+                    data-slot="close"
+                    [attr.aria-label]="labels.toast.dismiss"
+                    [attr.tabindex]="toastControlTabIndex(t)"
+                    (click)="svc.dismiss(t.id)"
+                  >
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M4 4l8 8m0-8l-8 8" stroke-linecap="round" />
+                    </svg>
+                  </button>
+                }
+              </li>
+            }
+          </ol>
+        </div>
+        @if (showDismissAll()) {
+          <div data-slot="toolbar">
+            <button
+              type="button"
+              data-slot="dismiss-all"
+              [attr.aria-label]="labels.toast.dismissAll"
+              [attr.tabindex]="expanded() ? null : -1"
+              (click)="svc.dismissAll()"
             >
-            <div data-slot="glyph" aria-hidden="true">
-              @switch (t.variant) {
-                @case ('success') {
-                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="8" cy="8" r="6.5" />
-                    <path d="M5 8.5l2 2 4-4.5" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                }
-                @case ('danger') {
-                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="8" cy="8" r="6.5" />
-                    <path d="M5.5 5.5l5 5m0-5l-5 5" stroke-linecap="round" />
-                  </svg>
-                }
-                @case ('warning') {
-                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M8 1.5L15 14H1L8 1.5z" stroke-linejoin="round" />
-                    <path d="M8 6v3.5M8 11.8v.4" stroke-linecap="round" />
-                  </svg>
-                }
-                @case ('info') {
-                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="8" cy="8" r="6.5" />
-                    <path d="M8 7v4M8 4.6v.4" stroke-linecap="round" />
-                  </svg>
-                }
-                @default {
-                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="8" cy="8" r="6.5" />
-                  </svg>
-                }
-              }
-            </div>
-
-            <div data-slot="body">
-              @if (t.template) {
-                <ng-container
-                  [ngTemplateOutlet]="t.template"
-                  [ngTemplateOutletContext]="{ $implicit: ctxFor(t.id) }"
-                />
-              } @else {
-                @if (t.title) {
-                  <div data-slot="title">{{ t.title }}</div>
-                }
-                @if (t.description) {
-                  <div data-slot="description">{{ t.description }}</div>
-                }
-              }
-            </div>
-
-            @if (t.action) {
-              <button
-                type="button"
-                data-slot="action"
-                (click)="t.action!.onClick(() => svc.dismiss(t.id))"
+              <svg
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
               >
-                {{ t.action.label }}
-              </button>
-            }
-
-            @if (t.dismissible) {
-              <button
-                type="button"
-                data-slot="close"
-                [attr.aria-label]="labels.toast.dismiss"
-                (click)="svc.dismiss(t.id)"
-              >
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M4 4l8 8m0-8l-8 8" stroke-linecap="round" />
-                </svg>
-              </button>
-            }
-            </li>
-          }
-        </ol>
+                <path d="M4 4l8 8m0-8l-8 8" stroke-linecap="round" />
+              </svg>
+              <span>{{ labels.toast.dismissAll }}</span>
+            </button>
+          </div>
+        }
       </section>
     }
   `,
@@ -382,6 +425,10 @@ export class HellToaster extends HellStyleable {
   private readonly host: HTMLElement = inject(ElementRef).nativeElement;
 
   protected readonly hasToasts = computed(() => this.svc.toasts().length > 0);
+  protected readonly liveToastCount = computed(
+    () => this.svc.toasts().filter((toast) => !toast.removing).length,
+  );
+  protected readonly showDismissAll = computed(() => this.liveToastCount() > 1);
 
   readonly position = input<HellToastPosition>('bottom-right');
   readonly maxVisible = input<number>(3);
@@ -395,6 +442,27 @@ export class HellToaster extends HellStyleable {
   private ro: ResizeObserver | null = null;
   private observed = new WeakSet<Element>();
   private destroyed = false;
+  private readonly viewportHeight = signal(0);
+  private readonly scrollTop = signal(0);
+  protected readonly stackHeightValue = computed(() =>
+    hellToastStackHeightValuePx(this.svc.toasts(), this.heights()),
+  );
+  protected readonly stackHeightPx = computed(() =>
+    hellToastStackHeightPx(this.svc.toasts(), this.heights()),
+  );
+  protected readonly expandedViewportHeightValue = computed(() =>
+    Math.min(this.stackHeightValue(), this.viewportHeightLimit()),
+  );
+  protected readonly expandedViewportHeightPx = computed(
+    () => `${this.expandedViewportHeightValue()}px`,
+  );
+  protected readonly isScrollable = computed(() => {
+    const viewportHeight = this.viewportHeight();
+    return (
+      this.liveToastCount() > this.maxVisible() ||
+      (viewportHeight > 0 && this.stackHeightValue() > viewportHeight + 1)
+    );
+  });
   /** Pending collapse handle. Re-entry cancels it so transient mouseleave
    *  events during dismiss-driven reflows don't yank the stack closed. */
   private collapseHandle: ReturnType<typeof setTimeout> | null = null;
@@ -417,26 +485,27 @@ export class HellToaster extends HellStyleable {
         }
         this.expanded.set(false);
       }
-      const snap = hellToastSnapshotExits(
-        list,
-        this.heights(),
-        this.maxVisible(),
-        this.exitSnapshot(),
-      );
+      const snap = hellToastSnapshotExits(list, this.heights(), this.exitSnapshot());
       if (!hellToastStackSnapshotsEqual(snap, this.exitSnapshot())) this.exitSnapshot.set(snap);
       // Re-observe after the list changed.
-      queueMicrotask(() => this.observeAll());
+      queueMicrotask(() => {
+        this.observeAll();
+        this.scheduleViewportStateSync();
+      });
     });
   }
 
   protected onEnter() {
+    const wasExpanded = this.expanded();
     if (this.collapseHandle != null) {
       clearTimeout(this.collapseHandle);
       this.collapseHandle = null;
     }
     this.expanded.set(true);
     this.svc.pauseAll();
+    this.scheduleViewportStateSync(!wasExpanded);
   }
+
   protected onLeave() {
     if (this.collapseHandle != null) clearTimeout(this.collapseHandle);
     // Defer collapse so a re-enter within the grace window (e.g. after the
@@ -449,9 +518,20 @@ export class HellToaster extends HellStyleable {
     this.collapseHandle = setTimeout(() => {
       this.collapseHandle = null;
       if (this.host.matches(':hover')) return;
-      this.expanded.set(false);
-      this.svc.resumeAll();
+      const active = this.host.ownerDocument.activeElement;
+      if (active && this.host.contains(active)) return;
+      this.collapseStack();
     }, 320);
+  }
+
+  protected onFocusOut(event: FocusEvent) {
+    const next = event.relatedTarget;
+    if (next instanceof Node && this.host.contains(next)) return;
+    this.onLeave();
+  }
+
+  protected onViewportScroll(event: Event) {
+    this.syncViewportState(event.currentTarget as HTMLElement);
   }
 
   /**
@@ -464,16 +544,10 @@ export class HellToaster extends HellStyleable {
   }
 
   /** Cumulative height of live toasts visually in front of `t` (expanded).
-   *  Toasts beyond `maxVisible` clamp to the back-most visible slot so they
-   *  peek behind it instead of running off-screen. */
+   *  Expanded stacks keep the full measured offset so overflow toasts remain
+   *  reachable through the scroll viewport. */
   protected offsetPx(t: ToastInternal): string {
-    return hellToastOffsetPx(
-      this.svc.toasts(),
-      t,
-      this.heights(),
-      this.maxVisible(),
-      this.exitSnapshot(),
-    );
+    return hellToastOffsetPx(this.svc.toasts(), t, this.heights(), this.exitSnapshot());
   }
 
   /** How many positions past the visible cap this toast sits (>=0). */
@@ -483,6 +557,34 @@ export class HellToaster extends HellStyleable {
 
   protected heightPx(id: number): string {
     return hellToastHeightPx(id, this.heights());
+  }
+
+  protected edgeProgress(t: ToastInternal): number {
+    if (!this.expanded()) return this.overflow(t);
+    return hellToastScrollEdgeProgress(
+      this.svc.toasts(),
+      t,
+      this.heights(),
+      {
+        anchor: this.position().startsWith('bottom') ? 'bottom' : 'top',
+        scrollTop: this.scrollTop(),
+        viewportHeight: this.viewportHeight(),
+        stackHeight: this.stackHeightValue(),
+      },
+      this.exitSnapshot(),
+    );
+  }
+
+  protected edgeOpacity(t: ToastInternal): number {
+    return hellToastScrollEdgeOpacity(this.edgeProgress(t));
+  }
+
+  protected isCollapsedOverflow(t: ToastInternal): boolean {
+    return !this.expanded() && this.frontDistance(t) >= this.maxVisible();
+  }
+
+  protected toastControlTabIndex(t: ToastInternal): -1 | null {
+    return this.isCollapsedOverflow(t) ? -1 : null;
   }
 
   protected ctxFor(id: number) {
@@ -499,6 +601,52 @@ export class HellToaster extends HellStyleable {
     this.ro = null;
   }
 
+  private collapseStack(): void {
+    const viewport = this.viewportElement();
+    if (viewport) {
+      viewport.scrollTop = 0;
+      this.syncViewportState(viewport);
+    }
+    this.expanded.set(false);
+    this.svc.resumeAll();
+    this.scheduleViewportStateSync();
+  }
+
+  private scheduleViewportStateSync(resetOrigin = false): void {
+    setTimeout(() => {
+      if (this.destroyed) return;
+      this.syncViewportState();
+      if (resetOrigin) this.scrollToStackOrigin();
+    }, 0);
+  }
+
+  private scrollToStackOrigin(): void {
+    const viewport = this.viewportElement();
+    if (!viewport) return;
+    if (!this.expanded() || !this.position().startsWith('bottom')) {
+      viewport.scrollTop = 0;
+    } else {
+      viewport.scrollTop = Math.max(0, viewport.scrollHeight - this.expandedViewportHeightValue());
+    }
+    this.syncViewportState(viewport);
+  }
+
+  private viewportHeightLimit(): number {
+    const win = this.host.ownerDocument.defaultView;
+    return Math.max(64, Math.min(420, (win?.innerHeight ?? 900) - 104));
+  }
+
+  private syncViewportState(viewport = this.viewportElement()): void {
+    if (!viewport) return;
+    const height = viewport.getBoundingClientRect().height || viewport.clientHeight;
+    if (this.viewportHeight() !== height) this.viewportHeight.set(height);
+    if (this.scrollTop() !== viewport.scrollTop) this.scrollTop.set(viewport.scrollTop);
+  }
+
+  private viewportElement(): HTMLElement | null {
+    return this.host.querySelector<HTMLElement>('[data-slot="viewport"]');
+  }
+
   private observeAll(): void {
     if (this.destroyed || typeof ResizeObserver === 'undefined') return;
     if (!this.ro) {
@@ -508,7 +656,7 @@ export class HellToaster extends HellStyleable {
         for (const e of entries) {
           const id = Number((e.target as HTMLElement).dataset['toastId']);
           if (!Number.isFinite(id)) continue;
-          const h = (e.target as HTMLElement).getBoundingClientRect().height;
+          const h = this.measureToastHeight(e.target as HTMLElement);
           if (next.get(id) !== h) {
             next.set(id, h);
             changed = true;
@@ -530,13 +678,14 @@ export class HellToaster extends HellStyleable {
       }
       // Seed heights on first paint so initial offsets are correct.
       const cur = this.heights().get(id);
-      const h = el.getBoundingClientRect().height;
+      const h = this.measureToastHeight(el);
       if (cur !== h && h > 0) {
         const next = new Map(this.heights());
         next.set(id, h);
         this.heights.set(next);
       }
     });
+    this.syncViewportState();
     // Drop heights for toasts that no longer exist.
     const next = new Map(this.heights());
     let trimmed = false;
@@ -547,6 +696,10 @@ export class HellToaster extends HellStyleable {
       }
     }
     if (trimmed) this.heights.set(next);
+  }
+
+  private measureToastHeight(element: HTMLElement): number {
+    return element.offsetHeight || element.getBoundingClientRect().height;
   }
 }
 

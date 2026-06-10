@@ -121,7 +121,9 @@ export interface HellTimeInputLabels {
 export interface HellToastLabels {
   readonly notifications: string;
   readonly notification: string;
+  readonly stack: string;
   readonly dismiss: string;
+  readonly dismissAll: string;
 }
 
 export interface HellLabels {
@@ -271,7 +273,9 @@ export const HELL_DEFAULT_LABELS: HellLabels = {
   toast: {
     notifications: 'Notifications',
     notification: 'Notification',
+    stack: 'Notification stack',
     dismiss: 'Dismiss',
+    dismissAll: 'Dismiss all',
   },
 };
 

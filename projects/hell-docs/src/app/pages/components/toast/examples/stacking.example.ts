@@ -6,10 +6,7 @@ import { HellButton } from '@hell-ui/angular/button';
   selector: 'app-toast-stacking-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton],
-  template: `
-    <button hellButton variant="ghost" (click)="burst()">Send 5 toasts</button>
-    <button hellButton variant="ghost" (click)="svc.dismissAll()">Dismiss all</button>
-  `,
+  template: ` <button hellButton variant="ghost" (click)="burst()">Send 8 toasts</button> `,
 })
 export class ToastStackingExample {
   protected readonly svc = inject(HellToastService);
@@ -45,9 +42,12 @@ export class ToastStackingExample {
       ['Bundle ready', 'main.js — 142kb gzipped'],
       ['Deployed', 'preview-42.heinrich.app'],
       ['Notified team', '#release on Slack'],
+      ['Smoke check queued', 'chromium / firefox / webkit'],
+      ['Release note drafted', 'docs/changelog.md'],
+      ['Rollback point saved', 'deploy-41'],
     ] as const;
     lines.forEach(([t, d], i) => {
-      setTimeout(() => this.svc.success(t, { description: d }), i * 220);
+      setTimeout(() => this.svc.success(t, { description: d, duration: 0 }), i * 180);
     });
   }
 }
