@@ -5,6 +5,7 @@ import {
   ElementRef,
   booleanAttribute,
   computed,
+  effect,
   forwardRef,
   inject,
   input,
@@ -14,6 +15,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { injectFormFieldState } from 'ng-primitives/form-field';
 import {
   NgpSliderRange,
   NgpSliderThumb,
@@ -22,8 +24,11 @@ import {
   provideSliderState,
 } from 'ng-primitives/slider';
 import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
+import { hellUniqueIdRefs } from '../../core/idrefs';
 import { HellSize, type HellOrientation } from '../../core/types';
 import { HellStyleable } from '../../core/styleable';
+
+let nextSliderId = 0;
 
 /**
  * Single-value slider built on `ng-primitives/slider`. Drag the thumb,
@@ -50,6 +55,7 @@ import { HellStyleable } from '../../core/styleable';
     '[attr.data-thumb]': 'thumb()',
     '[attr.data-grow]': 'grow() ? "true" : null',
     '[attr.data-active-drag]': 'activeDrag() ? "true" : null',
+    '[attr.tabindex]': '-1',
     '(pointerdown)': 'markActiveDrag($event)',
     '(focusout)': 'markControlTouched()',
   },
@@ -57,7 +63,11 @@ import { HellStyleable } from '../../core/styleable';
     <div ngpSliderTrack class="hell-slider-track" (pointerdown)="continueAsDrag($event)">
       <div ngpSliderRange class="hell-slider-range"></div>
     </div>
-    <div #thumb ngpSliderThumb class="hell-slider-thumb" [attr.aria-label]="ariaLabel()"></div>
+    <div
+      #thumb
+      ngpSliderThumb
+      class="hell-slider-thumb"
+    ></div>
   `,
 })
 export class HellSlider extends HellStyleable implements ControlValueAccessor {
@@ -92,6 +102,13 @@ export class HellSlider extends HellStyleable implements ControlValueAccessor {
   private readonly controlDisabled = signal(false);
   private readonly cva = new HellControlValueAccessorBridge<number>();
   private readonly destroyRef = inject(DestroyRef);
+  private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
+  private readonly hostAriaLabel = signal<string | null>(null);
+  private readonly hostAriaLabelledby = signal<string | null>(null);
+  private readonly hostAriaDescribedby = signal<string | null>(null);
+  private readonly sliderId = signal(
+    this.host.nativeElement.getAttribute('id') ?? `hell-slider-${nextSliderId++}`,
+  );
   private removeActiveDragListeners: (() => void) | null = null;
 
   private readonly effectiveValue = computed(() =>
@@ -100,6 +117,7 @@ export class HellSlider extends HellStyleable implements ControlValueAccessor {
   private readonly effectiveDisabled = computed(() => this.disabled() || this.controlDisabled());
 
   protected readonly sliderState = ngpSlider({
+    id: this.sliderId,
     value: this.effectiveValue,
     min: this.min,
     max: this.max,
@@ -112,10 +130,62 @@ export class HellSlider extends HellStyleable implements ControlValueAccessor {
       this.cva.emitValue(value);
     },
   });
+  private readonly thumbAriaLabel = computed(() => this.ariaLabel() ?? this.hostAriaLabel());
+  private readonly thumbAriaLabelledby = computed(() =>
+    this.mergedIdrefs(
+      this.hostAriaLabelledby(),
+      this.inheritedFormField()?.labels() ?? [],
+    ),
+  );
+  private readonly thumbAriaDescribedby = computed(() =>
+    this.mergedIdrefs(
+      this.hostAriaDescribedby(),
+      this.inheritedFormField()?.descriptions() ?? [],
+    ),
+  );
 
   constructor() {
     super();
+    this.syncHostAriaAttributes();
+    const hostElement = this.host.nativeElement;
+    const focusThumb = () => this.sliderState.focusThumb('program');
+    hostElement.addEventListener('focus', focusThumb);
+    this.destroyRef.onDestroy(() => hostElement.removeEventListener('focus', focusThumb));
+
+    const MutationObserverCtor = hostElement.ownerDocument.defaultView?.MutationObserver;
+    if (MutationObserverCtor) {
+      const observer = new MutationObserverCtor(() => this.syncHostAriaAttributes());
+      observer.observe(hostElement, {
+        attributes: true,
+        attributeFilter: ['aria-label', 'aria-labelledby', 'aria-describedby'],
+      });
+      this.destroyRef.onDestroy(() => observer.disconnect());
+    }
+
     this.destroyRef.onDestroy(() => this.removeActiveDragListeners?.());
+    effect(() => {
+      const thumb = this.thumbRef()?.nativeElement;
+      if (!thumb) return;
+
+      this.setNullableAttribute(thumb, 'aria-label', this.thumbAriaLabel());
+      this.setNullableAttribute(thumb, 'aria-labelledby', this.thumbAriaLabelledby());
+      this.setNullableAttribute(thumb, 'aria-describedby', this.thumbAriaDescribedby());
+      this.setNullableAttribute(thumb, 'aria-disabled', this.effectiveDisabled() ? 'true' : null);
+    });
+    effect((onCleanup) => {
+      const thumb = this.thumbRef()?.nativeElement;
+      if (!thumb) return;
+
+      const onKeydown = (event: KeyboardEvent) => {
+        if (!this.effectiveDisabled()) return;
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      };
+
+      thumb.addEventListener('keydown', onKeydown, { capture: true });
+      onCleanup(() => thumb.removeEventListener('keydown', onKeydown, { capture: true }));
+    });
   }
 
   writeValue(value: number): void {
@@ -215,5 +285,25 @@ export class HellSlider extends HellStyleable implements ControlValueAccessor {
     if (!Number.isFinite(step) || step <= 0) return clamped;
     const stepped = Math.round((clamped - min) / step) * step + min;
     return Math.min(max, Math.max(min, stepped));
+  }
+
+  private mergedIdrefs(explicit: string | null, inherited: readonly string[]): string | null {
+    const ids = Array.from(new Set([...hellUniqueIdRefs(explicit), ...inherited]));
+    return ids.length ? ids.join(' ') : null;
+  }
+
+  private syncHostAriaAttributes(): void {
+    const host = this.host.nativeElement;
+    this.hostAriaLabel.set(host.getAttribute('aria-label'));
+    this.hostAriaLabelledby.set(host.getAttribute('aria-labelledby'));
+    this.hostAriaDescribedby.set(host.getAttribute('aria-describedby'));
+  }
+
+  private setNullableAttribute(element: HTMLElement, name: string, value: string | null): void {
+    if (value) {
+      element.setAttribute(name, value);
+    } else {
+      element.removeAttribute(name);
+    }
   }
 }

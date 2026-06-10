@@ -1,14 +1,18 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 import { HellSlider } from '@hell-ui/angular/slider';
 
 @Component({
   selector: 'app-slider-disabled-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellSlider],
-  template: ` <hell-slider [value]="50" disabled /> `,
+  imports: [...HELL_FIELD_DIRECTIVES, HellSlider],
+  template: `
+    <div hellField>
+      <label hellFieldLabel id="disabled-volume-slider-label" for="disabled-volume-slider">
+        Disabled volume
+      </label>
+      <hell-slider id="disabled-volume-slider" [value]="50" disabled />
+    </div>
+  `,
 })
-export class SliderDisabledExample {
-  protected readonly vol = signal(50);
-  protected readonly seek = signal(35);
-}
+export class SliderDisabledExample {}

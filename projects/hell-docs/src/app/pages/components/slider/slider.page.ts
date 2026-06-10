@@ -38,7 +38,8 @@ import sliderVerticalExampleCodeRaw from './examples/vertical.example.ts?raw' wi
       <p>
         Single-thumb range selector built on <code>ng-primitives/slider</code>. Drag the thumb,
         click anywhere on the track (which then continues into a drag in one fluid motion), or use
-        arrow keys (Home/End jump to min/max).
+        arrow keys (Home/End jump to min/max). Pair it with <code>hellField</code> labels or pass
+        explicit ARIA idrefs so the focusable thumb has a stable accessible name.
       </p>
 
       <h2>Basic</h2>
@@ -84,6 +85,11 @@ import sliderVerticalExampleCodeRaw from './examples/vertical.example.ts?raw' wi
         <li><code>orientation</code>: <code>'horizontal' | 'vertical'</code></li>
         <li><code>size</code>: <code>'sm' | 'md' | 'lg'</code></li>
         <li>
+          <code>aria-label</code>, <code>aria-labelledby</code>, <code>aria-describedby</code>:
+          forwarded to the slider thumb; <code>hellField</code> labels and descriptions are
+          inherited automatically.
+        </li>
+        <li>
           <code>thumb</code>: <code>'always' | 'hover'</code> — hide the thumb until interaction.
         </li>
         <li><code>grow</code>: track expands on hover/focus/press for a tactile media-bar feel.</li>
@@ -93,7 +99,10 @@ import sliderVerticalExampleCodeRaw from './examples/vertical.example.ts?raw' wi
       <h2>Do</h2>
       <ul>
         <li>Use sliders for approximate values where dragging is faster than typing.</li>
-        <li>Provide an accessible label through <code>aria-label</code> or visible field text.</li>
+        <li>
+          Provide an accessible label through <code>hellFieldLabel</code>,
+          <code>aria-labelledby</code>, or a concise <code>aria-label</code>.
+        </li>
         <li>Use <code>grow</code> when the slider should fill toolbar space.</li>
       </ul>
 

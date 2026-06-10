@@ -85,6 +85,12 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['main'],
   },
   {
+    name: 'slider',
+    path: '/components/slider',
+    heading: 'Slider',
+    include: ['main'],
+  },
+  {
     name: 'menu',
     path: '/components/menu',
     heading: 'Menu',

@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
+import { HELL_FIELD_DIRECTIVES } from '../field/field';
 import { HellSlider } from './slider';
 
 @Component({
@@ -34,10 +35,30 @@ class SliderFormHost {
   readonly valueEvents: number[] = [];
 }
 
+@Component({
+  imports: [...HELL_FIELD_DIRECTIVES, HellSlider],
+  template: `
+    <span id="external-slider-label">External volume</span>
+    <p id="external-slider-help">Applies to the current output device.</p>
+    <div hellField>
+      <label hellFieldLabel id="field-slider-label" for="field-slider">Volume</label>
+      <p hellFieldDescription id="field-slider-help">Use arrows for fine changes.</p>
+      <hell-slider
+        id="field-slider"
+        [value]="35"
+        aria-label="Fallback volume"
+        aria-labelledby="external-slider-label"
+        aria-describedby="external-slider-help"
+      />
+    </div>
+  `,
+})
+class SliderFieldHost {}
+
 describe('HellSlider', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SliderHost, SliderFormHost],
+      imports: [SliderHost, SliderFormHost, SliderFieldHost],
     }).compileComponents();
   });
 
@@ -221,6 +242,20 @@ describe('HellSlider', () => {
     fixture.detectChanges();
 
     expect(thumb.hasAttribute('data-disabled')).toBe(true);
+    expect(thumb.getAttribute('aria-disabled')).toBe('true');
+
+    const keydown = new KeyboardEvent('keydown', {
+      key: 'ArrowRight',
+      bubbles: true,
+      cancelable: true,
+    });
+    thumb.dispatchEvent(keydown);
+    fixture.detectChanges();
+
+    expect(keydown.defaultPrevented).toBe(true);
+    expect(host.value()).toBe(35);
+    expect(host.valueEvents).toEqual([]);
+    expect(thumb.getAttribute('aria-valuenow')).toBe('35');
     expect(thumbPointerDown).not.toHaveBeenCalled();
     expect(slider.hasAttribute('data-active-drag')).toBe(false);
   });
@@ -263,6 +298,29 @@ describe('HellSlider', () => {
     expect(slider.getAttribute('data-grow')).toBe('true');
     expect(thumb.getAttribute('aria-label')).toBe('Volume');
     expect(thumb.getAttribute('aria-valuenow')).toBe('35');
+  });
+
+  it('forwards explicit and inherited label and description references to the thumb', () => {
+    const fixture = TestBed.createComponent(SliderFieldHost);
+    fixture.detectChanges();
+
+    const thumb = fixture.nativeElement.querySelector('.hell-slider-thumb') as HTMLElement;
+    const label = fixture.nativeElement.querySelector('label[hellFieldLabel]') as HTMLLabelElement;
+    const description = fixture.nativeElement.querySelector(
+      '[hellFieldDescription]',
+    ) as HTMLElement;
+
+    expect(thumb.getAttribute('aria-label')).toBe('Fallback volume');
+    expect(thumb.getAttribute('aria-labelledby')).toBe(`external-slider-label ${label.id}`);
+    expect(thumb.getAttribute('aria-describedby')).toBe(
+      `external-slider-help ${description.id}`,
+    );
+    expect(label.getAttribute('for')).toBe('field-slider');
+
+    label.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(thumb);
   });
 
   it('integrates with reactive forms without echoing programmatic writes', async () => {

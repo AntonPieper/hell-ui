@@ -1,5 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { HellSlider } from '@hell-ui/angular/slider';
 
 @Component({
@@ -11,7 +10,4 @@ import { HellSlider } from '@hell-ui/angular/slider';
     <hell-slider orientation="vertical" [value]="70" aria-label="Vertical high" />
   `,
 })
-export class SliderVerticalExample {
-  protected readonly vol = signal(50);
-  protected readonly seek = signal(35);
-}
+export class SliderVerticalExample {}

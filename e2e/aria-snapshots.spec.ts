@@ -297,6 +297,45 @@ test.describe('public docs aria snapshots', () => {
     await expectNamedAriaSnapshot(horizontal, 'radio-size-group.aria.yml');
   });
 
+  test('slider snapshot records visible label and value state', async ({ page }) => {
+    await gotoDocsPage(page, '/components/slider', 'Slider');
+
+    const basic = page.locator('app-slider-basic-example');
+
+    await expect(basic.getByRole('slider', { name: 'Volume' })).toHaveAttribute(
+      'aria-valuenow',
+      '50',
+    );
+
+    await expectNamedAriaSnapshot(basic, 'slider-basic-labelled.aria.yml');
+  });
+
+  test('slider snapshot records vertical orientation', async ({ page }) => {
+    await gotoDocsPage(page, '/components/slider', 'Slider');
+
+    const vertical = page.locator('app-slider-vertical-example');
+
+    await expect(vertical.getByRole('slider', { name: 'Vertical low' })).toHaveAttribute(
+      'aria-orientation',
+      'vertical',
+    );
+
+    await expectNamedAriaSnapshot(vertical, 'slider-vertical-orientation.aria.yml');
+  });
+
+  test('slider snapshot records disabled state', async ({ page }) => {
+    await gotoDocsPage(page, '/components/slider', 'Slider');
+
+    const disabled = page.locator('app-slider-disabled-example');
+
+    await expect(disabled.getByRole('slider', { name: 'Disabled volume' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+
+    await expectNamedAriaSnapshot(disabled, 'slider-disabled-labelled.aria.yml');
+  });
+
   test('table utility snapshot records active row semantics and cell action name', async ({
     page,
   }) => {

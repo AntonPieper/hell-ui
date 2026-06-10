@@ -293,13 +293,13 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     name: 'Slider',
     path: '/components/slider',
     rolePattern:
-      'Single-value role=slider through ng-primitives with aria-label supplied by the consumer.',
+      'Single-value role=slider through ng-primitives with aria-label, aria-labelledby, or inherited hellField label idrefs supplied by the consumer.',
     keyboardCoverage:
-      'Source docs claim arrows and Home/End; no browser test proves it on the public page.',
-    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+      'Browser contract covers horizontal and vertical ArrowLeft/ArrowRight/ArrowUp/ArrowDown plus Home/End value changes, and proves disabled sliders are not tabbable or keyboard-mutable.',
+    automatedCoverage:
+      'ARIA snapshots cover labelled, disabled, and vertical slider states; Playwright browser contract covers keyboard and disabled behavior; docs axe smoke includes the Slider page.',
     knownGaps:
-      'Critical gap: add browser keyboard, disabled, vertical, and accessible-name coverage.',
-    criticalGap: true,
+      'Touch assistive-technology operation is not release-certified; use native range inputs when a touch-primary production flow needs platform-native slider behavior.',
   },
   {
     kind: 'Primitive',

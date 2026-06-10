@@ -8,7 +8,7 @@ import { HellSlider } from '@hell-ui/angular/slider';
   imports: [...HELL_FIELD_DIRECTIVES, HellSlider],
   template: `
     <div hellField>
-      <label hellFieldLabel for="volume-slider">Volume</label>
+      <label hellFieldLabel id="volume-slider-label" for="volume-slider">Volume</label>
       <div class="flex items-center gap-4">
         <hell-slider
           id="volume-slider"
@@ -17,7 +17,6 @@ import { HellSlider } from '@hell-ui/angular/slider';
           [min]="0"
           [max]="100"
           [step]="1"
-          aria-label="Volume"
         />
         <code class="w-12 text-end">{{ vol() }}%</code>
       </div>
@@ -26,5 +25,4 @@ import { HellSlider } from '@hell-ui/angular/slider';
 })
 export class SliderBasicExample {
   protected readonly vol = signal(50);
-  protected readonly seek = signal(35);
 }
