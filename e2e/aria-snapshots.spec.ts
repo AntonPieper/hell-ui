@@ -160,6 +160,29 @@ test.describe('public docs aria snapshots', () => {
     await expectNamedAriaSnapshot(example, 'flyout-boundary-open.aria.yml');
   });
 
+  test('listbox snapshot records disabled, single-select, and multi-select option states', async ({
+    page,
+  }) => {
+    await gotoDocsPage(page, '/components/listbox', 'Listbox');
+
+    const example = page.locator('app-listbox-basic-example');
+    const single = example.getByRole('listbox', { name: 'Choose a reviewer' });
+    const multiple = example.getByRole('listbox', { name: 'Choose launch checks' });
+
+    await expect(single).toBeVisible();
+    await expect(multiple).toHaveAttribute('aria-multiselectable', 'true');
+    await expect(example.getByRole('option', { name: /Margaret Hamilton/ })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+    await expect(example.getByRole('option', { name: /Accessibility review/ })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+
+    await expectNamedAriaSnapshot(example, 'listbox-basic-matrix.aria.yml');
+  });
+
   test('menu snapshot records action roles, names, and disabled state', async ({ page }) => {
     const menu = await openBasicMenu(page);
 

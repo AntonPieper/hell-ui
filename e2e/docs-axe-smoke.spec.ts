@@ -63,6 +63,12 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     },
   },
   {
+    name: 'listbox',
+    path: '/components/listbox',
+    heading: 'Listbox',
+    include: ['main'],
+  },
+  {
     name: 'menu',
     path: '/components/menu',
     heading: 'Menu',

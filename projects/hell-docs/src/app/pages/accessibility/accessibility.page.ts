@@ -171,11 +171,11 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     path: '/components/listbox',
     rolePattern: 'role=listbox with role=option children through ng-primitives listbox.',
     keyboardCoverage:
-      'Browser behavior smoke covers focus, End, Enter selection, and aria-selected on the docs example.',
-    automatedCoverage: 'Browser behavior smoke exists. No axe smoke or ARIA snapshot yet.',
+      'Browser matrix covers focus ownership, ArrowDown disabled-option skip, Home, End, Enter, Space, single-select replacement, and multiple-mode toggling.',
+    automatedCoverage:
+      'Browser behavior smoke, dedicated Listbox keyboard matrix, ARIA snapshot, and docs axe smoke cover the public example.',
     knownGaps:
-      'Critical gap: add full Arrow/Home/End/disabled/multiple-mode matrix plus axe/ARIA coverage.',
-    criticalGap: true,
+      'No critical gap recorded; typeahead remains delegated to ng-primitives and is not claimed in the public support matrix.',
   },
   {
     kind: 'Primitive',

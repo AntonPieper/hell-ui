@@ -1,0 +1,14 @@
+- heading "Choose a reviewer" [level=3]
+- listbox "Choose a reviewer":
+  - text: ""
+  - option "Ada Lovelace Algorithm design"
+  - option "Grace Hopper Compilers" [selected]
+  - option "Margaret Hamilton Release blocked" [disabled]
+  - option "Katherine Johnson Orbital mechanics"
+- heading "Choose launch checks" [level=3]
+- listbox "Choose launch checks":
+  - text: ""
+  - option "Documentation Public guidance is current"
+  - option "Accessibility review Keyboard and screen-reader pass" [selected]
+  - option "Blocked migration Waiting on upstream" [disabled]
+  - option "Release notes Consumer-facing notes are drafted"
