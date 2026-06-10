@@ -89,6 +89,8 @@ const adapterChecks = [
 ];
 
 const fileChecks = [
+  // Keep these to source/command implementation markers. Release-doc prose is
+  // reviewed by purpose-built evidence gates instead of exact-string CI sentinels.
   {
     path: 'vitest.ci.config.ts',
     includes: [
@@ -180,71 +182,6 @@ const fileChecks = [
     path: 'playwright.config.ts',
     includes: [
       "['json', { outputFile: 'test-results/playwright-report.json' }]",
-    ],
-  },
-  {
-    path: 'CHANGELOG.md',
-    includes: [
-      'Keep a Changelog',
-      'docs/release/semver-policy.md',
-      'HELL-023',
-      'HELL-049',
-    ],
-  },
-  {
-    path: 'docs/release/semver-policy.md',
-    includes: [
-      'alpha',
-      'internal beta',
-      'public beta',
-      'stable',
-      'SemVer',
-      'CHANGELOG.md',
-      'release:dry-run',
-    ],
-  },
-  {
-    path: 'docs/release/production-readiness-checklist.md',
-    includes: [
-      'production-readiness-gate',
-      'internal beta until the production-readiness gate passes',
-      'package-consumer',
-      'api',
-      'accessibility',
-      'docs-budgets',
-      'pack-audit',
-      'release-dry-run',
-      'test-results/playwright-report.json',
-      'releaseDryRunEvidence',
-      'allE2eSpecs',
-      'modifiedAfterCurrentGitCommit',
-      'clean tracked tree',
-      'Critical gap',
-      'criticalGap: true',
-    ],
-  },
-  {
-    path: 'docs/release/docs-budget-policy.md',
-    includes: [
-      'docs-budget-policy',
-      'Docs shell / global styles',
-      'Individual docs page owner',
-      'acceptedMaximum',
-      'accepted warning',
-      'regression',
-      'HELL-050',
-    ],
-  },
-  {
-    path: 'docs/release/npm-publishing.md',
-    includes: [
-      'npm trusted publishing',
-      'AntonPieper',
-      'npm-publish.yml',
-      'npm-publish',
-      'Require two-factor authentication and disallow tokens',
-      'release-dry-run-evidence',
-      'id-token: write',
     ],
   },
 ];
