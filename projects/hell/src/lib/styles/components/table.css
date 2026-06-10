@@ -30,7 +30,8 @@
   }
 
   .hell-table[data-content-width='true'] {
-    min-width: max-content;
+    width: max-content;
+    min-width: 100%;
   }
 
   .hell-table-head {
