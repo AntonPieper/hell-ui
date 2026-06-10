@@ -619,7 +619,7 @@ export class HellDialogTrigger<TData = unknown, TResult = unknown> extends HellN
 
 // @public
 export class HellField extends HellStyleable {
-    readonly orientation: i0.InputSignal<"vertical" | "horizontal">;
+    readonly orientation: i0.InputSignal<"horizontal" | "vertical">;
     // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellField, "[hellField]", never, { "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1$6.NgpFormField; inputs: {}; outputs: {}; }]>;
     // (undocumented)
