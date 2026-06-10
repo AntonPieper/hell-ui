@@ -16,5 +16,9 @@
     max-width: min(240px, calc(100vw - var(--spacing-hell-8)));
     overflow-wrap: anywhere;
     pointer-events: none;
+
+    &[data-hoverable] {
+      pointer-events: auto;
+    }
   }
 }

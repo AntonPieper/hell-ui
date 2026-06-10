@@ -8,11 +8,15 @@ import { TooltipWithDelayExample } from './examples/with-delay.example';
 import tooltipWithDelayExampleCodeRaw from './examples/with-delay.example.ts?raw' with {
   loader: 'text',
 };
+import { TooltipHoverableExample } from './examples/hoverable.example';
+import tooltipHoverableExampleCodeRaw from './examples/hoverable.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-tooltip',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, TooltipExampleExample, TooltipWithDelayExample],
+  imports: [ExampleTabs, TooltipExampleExample, TooltipWithDelayExample, TooltipHoverableExample],
   template: `
     <article class="hd-prose">
       <h1>Tooltip</h1>
@@ -29,6 +33,11 @@ import tooltipWithDelayExampleCodeRaw from './examples/with-delay.example.ts?raw
       <h2>With delay</h2>
       <hd-example-tabs [code]="tooltipWithDelayExampleCode">
         <app-tooltip-with-delay-example />
+      </hd-example-tabs>
+
+      <h2>Hoverable content</h2>
+      <hd-example-tabs [code]="tooltipHoverableExampleCode">
+        <app-tooltip-hoverable-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -56,4 +65,5 @@ import tooltipWithDelayExampleCodeRaw from './examples/with-delay.example.ts?raw
 export class TooltipPage {
   protected readonly tooltipExampleExampleCode = tooltipExampleExampleCodeRaw;
   protected readonly tooltipWithDelayExampleCode = tooltipWithDelayExampleCodeRaw;
+  protected readonly tooltipHoverableExampleCode = tooltipHoverableExampleCodeRaw;
 }

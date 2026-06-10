@@ -7,7 +7,7 @@ import { HellTooltip, HellTooltipTrigger } from '@hell-ui/angular/tooltip';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton, HellTooltip, HellTooltipTrigger],
   template: `
-    <button hellButton [hellTooltipTrigger]="slow" [showDelay]="600" [hideDelay]="100">
+    <button hellButton [hellTooltipTrigger]="slow" [showDelay]="600" [hideDelay]="300">
       Hover for 600ms
     </button>
     <ng-template #slow><span hellTooltip>Took my time</span></ng-template>

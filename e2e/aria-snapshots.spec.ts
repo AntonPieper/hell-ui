@@ -381,6 +381,22 @@ test.describe('public docs aria snapshots', () => {
     await expectNamedAriaSnapshot(manual, 'tabs-manual-vertical-selected.aria.yml');
   });
 
+  test('tooltip snapshots record trigger description and tooltip role', async ({ page }) => {
+    await gotoDocsPage(page, '/components/tooltip', 'Tooltip');
+
+    const trigger = page.getByRole('button', { name: 'Top' });
+    await trigger.focus();
+    const tooltip = page.getByRole('tooltip', { name: "I'm on top" });
+    await expect(tooltip).toBeVisible();
+
+    const tooltipId = await tooltip.getAttribute('id');
+    if (!tooltipId) throw new Error('Tooltip must expose a non-empty id.');
+    await expect(trigger).toHaveAttribute('aria-describedby', tooltipId ?? '');
+
+    await expectNamedAriaSnapshot(trigger, 'tooltip-trigger-described.aria.yml');
+    await expectNamedAriaSnapshot(tooltip, 'tooltip-open.aria.yml');
+  });
+
   test('table utility snapshot records active row semantics and cell action name', async ({
     page,
   }) => {

@@ -525,6 +525,12 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     terms: 'tooltip with-delay components/tooltip/examples/with-delay.example components/tooltip hellTooltip delay',
   },
   {
+    title: 'Tooltip: Hoverable',
+    path: '/components/tooltip',
+    detail: 'components/tooltip/examples/hoverable.example.ts',
+    terms: 'tooltip hoverable components/tooltip/examples/hoverable.example components/tooltip hellTooltip hoverableContent',
+  },
+  {
     title: 'App Shell: Live Miniature',
     path: '/components/app-shell',
     detail: 'components/app-shell/examples/live-miniature.example.ts',

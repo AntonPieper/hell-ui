@@ -1,5 +1,5 @@
 import { Directive, inject } from '@angular/core';
-import { NgpTooltip, NgpTooltipTrigger } from 'ng-primitives/tooltip';
+import { NgpTooltip, NgpTooltipTrigger, injectTooltipTriggerState } from 'ng-primitives/tooltip';
 import { HellStyleable } from '../../core/styleable';
 import { hellRegisterFloatingHost } from '../../core/floating-scope';
 import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactive-disabled';
@@ -48,10 +48,13 @@ export class HellTooltipTrigger extends HellNativeInteractiveDisabledGuard {
   hostDirectives: [NgpTooltip],
   host: {
     '[class.hell-tooltip]': '!unstyled()',
+    '[attr.data-hoverable]': 'tooltipTrigger().hoverableContent() ? "" : null',
     role: 'tooltip',
   },
 })
 export class HellTooltip extends HellStyleable {
+  protected readonly tooltipTrigger = injectTooltipTriggerState();
+
   constructor() {
     super();
     hellRegisterFloatingHost();

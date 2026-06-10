@@ -352,12 +352,13 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     name: 'Tooltip',
     path: '/components/tooltip',
     rolePattern:
-      'role=tooltip floating content delegated to ng-primitives; trigger description relationship is delegated/consumer-dependent.',
-    keyboardCoverage: 'Show/hide on focus/hover is not covered by a Hell browser test.',
-    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+      'role=tooltip floating content delegated to ng-primitives; trigger receives aria-describedby while the tooltip is open.',
+    keyboardCoverage:
+      'Browser contract covers focus-open description wiring, Escape close, hover show/hide delay behavior, and hoverable-content pointer retention.',
+    automatedCoverage:
+      'ARIA snapshots cover the described trigger and open tooltip role; Playwright browser contract covers focus, hover, delay, hoverable content, and Escape; docs axe smoke includes an open Tooltip page state.',
     knownGaps:
-      'Critical gap: accessible description wiring, delay, hoverable content, and Escape behavior are not release evidence.',
-    criticalGap: true,
+      'No critical gap recorded; tooltip content must remain supplemental and must not contain required instructions or interactive controls.',
   },
   {
     kind: 'Composite',
