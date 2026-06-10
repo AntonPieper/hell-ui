@@ -57,6 +57,10 @@ class TimeInputFieldHost {}
         addFiveMinutes: 'Local plus five',
         hours: 'Local hours',
         minutes: 'Local minutes',
+        decreaseUnit: (unitLabel) => `Local decrease ${unitLabel}`,
+        increaseUnit: (unitLabel) => `Local increase ${unitLabel}`,
+        minutePresets: 'Local minute presets',
+        minutePreset: (minute) => `Local minute ${minute.toString().padStart(2, '0')}`,
       },
     }),
   ],
@@ -174,15 +178,25 @@ describe('HellTimeInput', () => {
     expect(trigger.getAttribute('aria-label')).toBe('Pick local time for Localized time');
 
     trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    const hourGrid = await waitForPickerGrid(fixture, 'hours');
-    const minuteGrid = await waitForPickerGrid(fixture, 'minutes');
+    const hour = await waitForPickerSpinbutton(fixture, 'hour');
+    const minute = await waitForPickerSpinbutton(fixture, 'minute');
+    const hourLabel = document.getElementById(hour.getAttribute('aria-labelledby') ?? '');
+    const minuteLabel = document.getElementById(minute.getAttribute('aria-labelledby') ?? '');
 
-    expect(hourGrid.getAttribute('aria-label')).toBe('Local hours');
-    expect(minuteGrid.getAttribute('aria-label')).toBe('Local minutes');
-    expect(document.querySelector('button[aria-label="Local minus five"]')).toBeInstanceOf(
-      HTMLButtonElement,
+    expect(hourLabel?.textContent?.trim()).toBe('Local hours');
+    expect(hour.getAttribute('aria-valuetext')).toBe('00 local hours');
+    expect(minuteLabel?.textContent?.trim()).toBe('Local minutes');
+    expect(minute.getAttribute('aria-valuetext')).toBe('00 local minutes');
+    expect(
+      document.querySelector('button[aria-label="Local decrease Local hours"]'),
+    ).toBeInstanceOf(HTMLButtonElement);
+    expect(
+      document.querySelector('button[aria-label="Local increase Local minutes"]'),
+    ).toBeInstanceOf(HTMLButtonElement);
+    expect(document.querySelector('[data-slot="minute-presets"]')?.getAttribute('aria-label')).toBe(
+      'Local minute presets',
     );
-    expect(document.querySelector('button[aria-label="Local plus five"]')).toBeInstanceOf(
+    expect(document.querySelector('button[aria-label="Local minute 15"]')).toBeInstanceOf(
       HTMLButtonElement,
     );
   });
