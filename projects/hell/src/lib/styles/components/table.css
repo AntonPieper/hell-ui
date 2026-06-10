@@ -1,16 +1,15 @@
 @layer components {
-
   /* Optional shell — frames the table with a border and rounded corners. */
 
   .hell-table-container {
-      display: flex;
-      min-width: 0;
-      flex-direction: column;
-      overflow: clip;
-      background-color: var(--color-hell-surface-elevated);
-      border: 1px solid var(--color-hell-border);
-      border-radius: var(--radius-md);
-    }
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    overflow: clip;
+    background-color: var(--color-hell-surface-elevated);
+    border: 1px solid var(--color-hell-border);
+    border-radius: var(--radius-md);
+  }
 
   /*
    * Core table — uses table-layout: fixed so resize CSS custom properties
@@ -21,192 +20,192 @@
    */
 
   .hell-table {
-      display: table;
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      table-layout: fixed;
-      font-size: 13px;
-      color: var(--color-hell-foreground);
-    }
+    display: table;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+    font-size: 13px;
+    color: var(--color-hell-foreground);
+  }
 
   .hell-table[data-content-width='true'] {
-      min-width: max-content;
-    }
+    min-width: max-content;
+  }
 
   .hell-table-head {
-      display: table-header-group;
-      background-color: var(--color-hell-surface-subtle);
-    }
+    display: table-header-group;
+    background-color: var(--color-hell-surface-subtle);
+  }
 
   .hell-table-body {
-      display: table-row-group;
-    }
+    display: table-row-group;
+  }
 
   .hell-table-header-cell,
   .hell-table-cell {
-      display: table-cell;
-      text-align: start;
-      vertical-align: middle;
-      padding-inline: calc(var(--spacing) * 3);
-      padding-block: calc(var(--spacing) * 2);
-      border-bottom: 1px solid var(--color-hell-border);
-    }
+    display: table-cell;
+    text-align: start;
+    vertical-align: middle;
+    padding-inline: calc(var(--spacing) * 3);
+    padding-block: calc(var(--spacing) * 2);
+    border-bottom: 1px solid var(--color-hell-border);
+  }
 
   .hell-table-cell {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
   .hell-table-cell[data-align='center'] {
-      text-align: center;
-    }
+    text-align: center;
+  }
 
   .hell-table-cell[data-align='end'] {
-      text-align: end;
-    }
+    text-align: end;
+  }
 
   .hell-table-cell[data-space='empty'] {
-      padding-block: calc(var(--spacing) * 8);
-    }
+    padding-block: calc(var(--spacing) * 8);
+  }
 
   .hell-table-header-cell {
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      width: var(--hell-table-col-width, auto);
-      font-weight: var(--font-weight-semibold);
-      white-space: nowrap;
-      -webkit-user-select: none;
-      user-select: none;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--color-hell-foreground-muted);
-      background-color: var(--color-hell-surface-subtle);
-    }
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    width: var(--hell-table-col-width, auto);
+    font-weight: var(--font-weight-semibold);
+    white-space: nowrap;
+    -webkit-user-select: none;
+    user-select: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-hell-foreground-muted);
+    background-color: var(--color-hell-surface-subtle);
+  }
 
   .hell-table-header-cell[data-sortable='true'] {
-      padding-inline-end: calc(var(--spacing) * 8);
-    }
+    padding-inline-end: calc(var(--spacing) * 8);
+  }
 
   .hell-table-sort-trigger {
-      display: inline-flex;
-      align-items: center;
-      gap: calc(var(--spacing) * 1.5);
-      padding: 0;
-      border: 0;
-      border-radius: var(--radius-sm);
-      color: inherit;
-      font: inherit;
-      letter-spacing: inherit;
-      text-align: inherit;
-      text-transform: inherit;
-      background: transparent;
-    }
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--spacing) * 1.5);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-sm);
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: inherit;
+    text-transform: inherit;
+    background: transparent;
+  }
 
   .hell-table-sort-trigger:not(:disabled) {
-      cursor: pointer;
-    }
+    cursor: pointer;
+  }
 
   .hell-table-header-cell[data-sortable='true'] .hell-table-sort-trigger::after {
-      content: '';
-      display: block;
-      width: calc(var(--spacing) * 3);
-      height: calc(var(--spacing) * 3);
-      flex: 0 0 auto;
-      background-color: currentcolor;
-      color: var(--color-hell-foreground-subtle);
-      -webkit-mask: var(--hell-icon-chevron-up-down) center / contain no-repeat;
-      mask: var(--hell-icon-chevron-up-down) center / contain no-repeat;
-    }
+    content: '';
+    display: block;
+    width: calc(var(--spacing) * 3);
+    height: calc(var(--spacing) * 3);
+    flex: 0 0 auto;
+    background-color: currentcolor;
+    color: var(--color-hell-foreground-subtle);
+    -webkit-mask: var(--hell-icon-chevron-up-down) center / contain no-repeat;
+    mask: var(--hell-icon-chevron-up-down) center / contain no-repeat;
+  }
 
   .hell-table-header-cell[data-sort='asc'] .hell-table-sort-trigger::after {
-      color: var(--color-hell-primary);
-      -webkit-mask-image: var(--hell-icon-chevron-up);
-      mask-image: var(--hell-icon-chevron-up);
-    }
+    color: var(--color-hell-primary);
+    -webkit-mask-image: var(--hell-icon-chevron-up);
+    mask-image: var(--hell-icon-chevron-up);
+  }
 
   .hell-table-header-cell[data-sort='desc'] .hell-table-sort-trigger::after {
-      color: var(--color-hell-primary);
-      -webkit-mask-image: var(--hell-icon-chevron-down);
-      mask-image: var(--hell-icon-chevron-down);
-    }
+    color: var(--color-hell-primary);
+    -webkit-mask-image: var(--hell-icon-chevron-down);
+    mask-image: var(--hell-icon-chevron-down);
+  }
 
   .hell-table-sort-trigger:focus-visible {
-      outline: 2px solid var(--color-hell-focus-ring);
-      outline-offset: 2px;
-    }
+    outline: 2px solid var(--color-hell-focus-ring);
+    outline-offset: 2px;
+  }
 
   .hell-table-row {
-      display: table-row;
-      transition: background-color var(--hell-duration-fast) var(--ease-hell-out);
-    }
+    display: table-row;
+    transition: background-color var(--hell-duration-fast) var(--ease-hell-out);
+  }
 
   .hell-table-row[data-active='true'] {
-      background-color: var(--color-hell-surface-subtle);
-    }
+    background-color: var(--color-hell-surface-subtle);
+  }
 
   .hell-table-row[data-selected='true'] {
-      background-color: var(--color-hell-primary-soft);
-    }
+    background-color: var(--color-hell-primary-soft);
+  }
 
   .hell-table-selection-cell {
-      box-sizing: border-box;
-      width: 44px;
-      min-width: 44px;
-      text-align: center;
-      white-space: nowrap;
-    }
+    box-sizing: border-box;
+    width: 44px;
+    min-width: 44px;
+    text-align: center;
+    white-space: nowrap;
+  }
 
   .hell-table-header-cell.hell-table-selection-cell,
   .hell-table-cell.hell-table-selection-cell {
-      overflow: visible;
-      padding-inline: var(--spacing-hell-3);
-    }
+    overflow: visible;
+    padding-inline: var(--spacing-hell-3);
+  }
 
   .hell-table-selection-cell .hell-table-row-checkbox,
   .hell-table-selection-cell .hell-table-row-radio {
-      margin-inline: auto;
-      vertical-align: middle;
-    }
+    margin-inline: auto;
+    vertical-align: middle;
+  }
 
   /* Resize handle — sits at the trailing edge of a header cell. */
 
   .hell-table-resize-handle {
-      position: absolute;
-      inset-block: 0;
-      inset-inline-end: 0;
-      z-index: 2;
-      width: 8px;
-      cursor: col-resize;
-      -webkit-user-select: none;
-      user-select: none;
-      touch-action: none;
-      display: inline-flex;
-      align-items: stretch;
-      justify-content: flex-end;
-    }
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    z-index: 2;
+    width: 8px;
+    cursor: col-resize;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: none;
+    display: inline-flex;
+    align-items: stretch;
+    justify-content: flex-end;
+  }
 
   .hell-table-resize-handle [data-slot='grip'] {
-      width: 1px;
-      background-color: var(--color-hell-border);
-      transition:
-        background-color var(--hell-duration-fast) var(--ease-hell-out),
-        width var(--hell-duration-fast) var(--ease-hell-out);
-    }
+    width: 1px;
+    background-color: var(--color-hell-border);
+    transition:
+      background-color var(--hell-duration-fast) var(--ease-hell-out),
+      width var(--hell-duration-fast) var(--ease-hell-out);
+  }
 
   .hell-table-resize-handle:hover [data-slot='grip'],
   .hell-table-resize-handle[data-active='true'] [data-slot='grip'] {
-      width: 2px;
-      background-color: var(--color-hell-primary);
-    }
+    width: 2px;
+    background-color: var(--color-hell-primary);
+  }
 
   .hell-table-resize-handle:focus-visible {
-      outline: 2px solid var(--color-hell-focus-ring);
-      outline-offset: -2px;
-    }
+    outline: 2px solid var(--color-hell-focus-ring);
+    outline-offset: -2px;
+  }
 
   @media (pointer: coarse) {
     .hell-table-header-cell[data-sortable='true'] {
@@ -224,4 +223,135 @@
     }
   }
 
+  /*
+   * Virtual table layout — visual parity for windowed row-part renderers that
+   * cannot use native table rows. Keep the typography, padding, borders, and
+   * row states aligned with the semantic table primitives above.
+   */
+
+  .hell-table-virtual-x-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .hell-table-virtual {
+    display: block;
+    width: 100%;
+    min-width: var(--hell-table-virtual-min-width, 560px);
+    color: var(--color-hell-foreground);
+    font-size: 13px;
+    --hell-table-virtual-columns: minmax(12rem, 1fr) 8rem 9rem;
+  }
+
+  .hell-table-virtual-grid {
+    display: grid;
+    min-width: var(--hell-table-virtual-min-width, 560px);
+    grid-template-columns: var(--hell-table-virtual-columns);
+  }
+
+  .hell-table-virtual-header {
+    background-color: var(--color-hell-surface-subtle);
+  }
+
+  .hell-table-virtual-header-cell,
+  .hell-table-virtual-cell {
+    min-width: 0;
+    padding-inline: calc(var(--spacing) * 3);
+    padding-block: calc(var(--spacing) * 2);
+    border-bottom: 1px solid var(--color-hell-border);
+    text-align: start;
+    vertical-align: middle;
+  }
+
+  .hell-table-virtual-header-cell {
+    font-size: 11px;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-hell-foreground-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    background-color: var(--color-hell-surface-subtle);
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .hell-table-virtual-cell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hell-table-virtual-cell[data-space='action'] {
+    overflow: visible;
+    white-space: normal;
+  }
+
+  .hell-table-virtual-row-part {
+    position: absolute;
+    inset-inline: 0;
+    width: 100%;
+    background-color: var(--color-hell-surface-elevated);
+  }
+
+  .hell-table-virtual-row {
+    min-height: 56px;
+    transition: background-color var(--hell-duration-fast) var(--ease-hell-out);
+  }
+
+  .hell-table-virtual-row[data-active='true'] {
+    background-color: var(--color-hell-surface-subtle);
+  }
+
+  .hell-table-virtual-body-scroll {
+    height: var(--hell-table-virtual-height, 420px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: var(--color-hell-surface-elevated);
+  }
+
+  .hell-table-virtual-body {
+    position: relative;
+    min-width: var(--hell-table-virtual-min-width, 560px);
+  }
+
+  .hell-table-virtual-primary {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .hell-table-virtual-meta {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-block-start: calc(var(--spacing) * 0.5);
+    color: var(--color-hell-foreground-muted);
+    font-size: 12px;
+  }
+
+  .hell-table-virtual-editor {
+    border-bottom: 1px solid var(--color-hell-border);
+    background-color: var(--color-hell-primary-soft);
+    padding: calc(var(--spacing) * 3);
+    color: var(--color-hell-primary);
+    font-size: 13px;
+  }
+
+  .hell-table-virtual-editor textarea {
+    margin-block-start: calc(var(--spacing) * 2);
+    width: 100%;
+    resize: none;
+    border: 1px solid var(--color-hell-border);
+    border-radius: var(--radius-hell-sm);
+    background-color: var(--color-hell-surface-subtle);
+    padding: calc(var(--spacing) * 2);
+    color: var(--color-hell-foreground);
+    font: inherit;
+  }
 }

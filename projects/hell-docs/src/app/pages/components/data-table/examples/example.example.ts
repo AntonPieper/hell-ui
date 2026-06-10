@@ -160,6 +160,7 @@ const TABLE_COLUMNS = columns.define([
   }),
   actionColumn<Row>('actions', { header: 'Actions' }),
 ]);
+const INITIAL_COLUMN_VISIBILITY = hellTableInitialColumnVisibility(TABLE_COLUMNS);
 
 @Component({
   selector: 'app-data-table-example-example',
@@ -273,6 +274,7 @@ const TABLE_COLUMNS = columns.define([
           <hell-column-visibility-selector
             [columns]="tableColumns"
             [(columnVisibility)]="columnVisibility"
+            [buttonVariant]="columnSelectorVariant()"
             description="Selection and actions stay locked."
             placement="bottom-start"
           >
@@ -782,9 +784,9 @@ export class DataTableExampleExample {
   protected readonly assigneeFilter = signal<RowFilter<RowAssignee>>('all');
   protected readonly activeRowKey = signal<number | null>(null);
   protected readonly rowSelection = signal<Readonly<Record<string, boolean>>>({});
-  protected readonly columnVisibility = signal<HellTableColumnVisibilityState>(
-    hellTableInitialColumnVisibility(TABLE_COLUMNS),
-  );
+  protected readonly columnVisibility = signal<HellTableColumnVisibilityState>({
+    ...INITIAL_COLUMN_VISIBILITY,
+  });
 
   private readonly drafts = signal<ReadonlyMap<number, string>>(new Map());
 
@@ -865,6 +867,9 @@ export class DataTableExampleExample {
   );
   protected readonly hasActiveFilters = computed(
     () => this.roleFilter() !== 'all' || this.assigneeFilter() !== 'all',
+  );
+  protected readonly columnSelectorVariant = computed(() =>
+    sameColumnVisibility(this.columnVisibility(), INITIAL_COLUMN_VISIBILITY) ? 'default' : 'soft',
   );
   protected readonly hasQueryState = computed(
     () =>
@@ -1081,6 +1086,17 @@ function rowSelectionWith(
   if (checked) next[String(rowId)] = true;
   else delete next[String(rowId)];
   return next;
+}
+
+function sameColumnVisibility(
+  a: HellTableColumnVisibilityState,
+  b: HellTableColumnVisibilityState,
+): boolean {
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  for (const key of keys) {
+    if (a[key] !== b[key]) return false;
+  }
+  return true;
 }
 
 function fetchRowsPage(request: RowApiRequest, signal?: AbortSignal): Promise<RowApiPage> {

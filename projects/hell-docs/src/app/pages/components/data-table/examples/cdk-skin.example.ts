@@ -36,12 +36,14 @@ const TABLE_COLUMNS = columns.define([
   textColumn<Person, string>('email', {
     header: 'Email',
     accessor: 'email',
+    sortable: true,
     visibility: 'user-toggleable',
   }),
   textColumn<Person, string>('role', {
     header: 'Role',
     accessor: 'role',
-    visibility: 'initially-hidden',
+    sortable: true,
+    visibility: 'user-toggleable',
   }),
   actionColumn<Person>('actions', {
     header: 'Actions',
@@ -96,12 +98,32 @@ const TABLE_COLUMNS = columns.define([
             </ng-container>
 
             <ng-container cdkColumnDef="email">
-              <th cdk-header-cell *cdkHeaderCellDef scope="col" columnId="email">Email</th>
+              <th
+                cdk-header-cell
+                *cdkHeaderCellDef
+                scope="col"
+                columnId="email"
+                sortable
+                [sort]="sortFor('email')"
+                (sortToggle)="toggleSort('email')"
+              >
+                <button hellTableSortTrigger type="button">Email</button>
+              </th>
               <td cdk-cell *cdkCellDef="let row">{{ row.email }}</td>
             </ng-container>
 
             <ng-container cdkColumnDef="role">
-              <th cdk-header-cell *cdkHeaderCellDef scope="col" columnId="role">Role</th>
+              <th
+                cdk-header-cell
+                *cdkHeaderCellDef
+                scope="col"
+                columnId="role"
+                sortable
+                [sort]="sortFor('role')"
+                (sortToggle)="toggleSort('role')"
+              >
+                <button hellTableSortTrigger type="button">Role</button>
+              </th>
               <td cdk-cell *cdkCellDef="let row">{{ row.role }}</td>
             </ng-container>
 
@@ -216,7 +238,22 @@ function sortRows(
   const activeSort = sorting[0];
   if (!activeSort) return rows;
   return [...rows].sort((a, b) => {
-    const result = a.name.localeCompare(b.name);
+    const result = sortableValue(a, activeSort.columnId).localeCompare(
+      sortableValue(b, activeSort.columnId),
+    );
     return activeSort.direction === 'desc' ? -result : result;
   });
+}
+
+function sortableValue(row: Person, columnId: string): string {
+  switch (columnId) {
+    case 'name':
+      return row.name;
+    case 'email':
+      return row.email;
+    case 'role':
+      return row.role;
+    default:
+      return '';
+  }
 }

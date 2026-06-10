@@ -69,7 +69,7 @@ export function hellCdkDisplayedColumns<TData>(
 @Directive({
   selector: 'cdk-table, table[cdk-table]',
   exportAs: 'hellCdkTable',
-  hostDirectives: [{ directive: HellTable, inputs: ['unstyled', 'contentWidth'] }],
+  hostDirectives: [{ directive: HellTable, inputs: ['contentWidth'] }],
   host: {
     '[attr.data-hell-cdk-table]': '""',
   },
@@ -80,7 +80,7 @@ export class HellCdkTable {}
 @Directive({
   selector: 'cdk-header-row, tr[cdk-header-row]',
   exportAs: 'hellCdkHeaderRow',
-  hostDirectives: [{ directive: HellTableRow, inputs: ['unstyled', 'active', 'selected'] }],
+  hostDirectives: [{ directive: HellTableRow, inputs: ['active', 'selected'] }],
   host: {
     '[attr.data-hell-cdk-header-row]': '""',
   },
@@ -91,7 +91,7 @@ export class HellCdkHeaderRow {}
 @Directive({
   selector: 'cdk-row, tr[cdk-row]',
   exportAs: 'hellCdkRow',
-  hostDirectives: [{ directive: HellTableRow, inputs: ['unstyled', 'active', 'selected'] }],
+  hostDirectives: [{ directive: HellTableRow, inputs: ['active', 'selected'] }],
   host: {
     '[attr.data-hell-cdk-row]': '""',
   },
@@ -102,7 +102,7 @@ export class HellCdkRow {}
 @Directive({
   selector: 'cdk-footer-row, tr[cdk-footer-row]',
   exportAs: 'hellCdkFooterRow',
-  hostDirectives: [{ directive: HellTableRow, inputs: ['unstyled', 'active', 'selected'] }],
+  hostDirectives: [{ directive: HellTableRow, inputs: ['active', 'selected'] }],
   host: {
     '[attr.data-hell-cdk-footer-row]': '""',
   },
@@ -116,7 +116,7 @@ export class HellCdkFooterRow {}
   hostDirectives: [
     {
       directive: HellTableHeaderCell,
-      inputs: ['unstyled', 'sort', 'sortable', 'columnId'],
+      inputs: ['sort', 'sortable', 'columnId'],
       outputs: ['sortToggle'],
     },
   ],
@@ -130,7 +130,7 @@ export class HellCdkHeaderCell {}
 @Directive({
   selector: 'cdk-cell, td[cdk-cell]',
   exportAs: 'hellCdkCell',
-  hostDirectives: [{ directive: HellTableCell, inputs: ['unstyled', 'align', 'space'] }],
+  hostDirectives: [{ directive: HellTableCell, inputs: ['align', 'space'] }],
   host: {
     '[attr.data-hell-cdk-cell]': '""',
   },
@@ -141,7 +141,7 @@ export class HellCdkCell {}
 @Directive({
   selector: 'cdk-footer-cell, td[cdk-footer-cell]',
   exportAs: 'hellCdkFooterCell',
-  hostDirectives: [{ directive: HellTableCell, inputs: ['unstyled', 'align', 'space'] }],
+  hostDirectives: [{ directive: HellTableCell, inputs: ['align', 'space'] }],
   host: {
     '[attr.data-hell-cdk-footer-cell]': '""',
   },

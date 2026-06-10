@@ -15,13 +15,7 @@ const columns = hellColumns<Person>();
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellDataTable],
   template: `
-    <hell-data-table
-      [rows]="rows"
-      [columns]="tableColumns"
-      rowKey="id"
-      density="compact"
-      empty="No people yet."
-    />
+    <hell-data-table [rows]="rows" [columns]="tableColumns" rowKey="id" empty="No people yet." />
   `,
 })
 export class DataTableSimpleRendererExample {

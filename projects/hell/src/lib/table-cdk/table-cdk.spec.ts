@@ -37,6 +37,7 @@ const TABLE_COLUMNS = columnBuilder.define([
   textColumn<Person, string>('role', {
     header: 'Role',
     accessor: 'role',
+    sortable: true,
     visibility: 'user-toggleable',
   }),
   textColumn<Person, string>('region', {
@@ -108,7 +109,17 @@ class CdkFlexHost {
       </ng-container>
 
       <ng-container cdkColumnDef="role">
-        <th cdk-header-cell *cdkHeaderCellDef scope="col" columnId="role">Role</th>
+        <th
+          cdk-header-cell
+          *cdkHeaderCellDef
+          scope="col"
+          columnId="role"
+          sortable
+          [sort]="sortFor('role')"
+          (sortToggle)="toggleSort('role')"
+        >
+          <button hellTableSortTrigger type="button">Role</button>
+        </th>
         <td cdk-cell *cdkCellDef="let row">{{ row.role }}</td>
       </ng-container>
 
@@ -150,7 +161,9 @@ class CdkNativeHost {
 
 describe('Hell CDK table skin adapter', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [CdkFlexHost, CdkNativeHost] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [CdkFlexHost, CdkNativeHost],
+    }).compileComponents();
   });
 
   it('skins flex CDK table hosts with Hell table primitives without extra CDK row definitions', () => {
@@ -185,7 +198,9 @@ describe('Hell CDK table skin adapter', () => {
     expect(bodyText(root)).not.toContain('Margaret Hamilton');
     expect(root.querySelector('table')?.classList).toContain('hell-table');
     expect(root.querySelector('tr[cdk-header-row]')?.classList).toContain('hell-table-row');
-    expect(root.querySelector('th[cdk-header-cell]')?.classList).toContain('hell-table-header-cell');
+    expect(root.querySelector('th[cdk-header-cell]')?.classList).toContain(
+      'hell-table-header-cell',
+    );
     expect(root.querySelector('td[cdk-cell]')?.classList).toContain('hell-table-cell');
 
     fixture.componentInstance.columnVisibility.set({ role: false, region: true });
@@ -193,17 +208,36 @@ describe('Hell CDK table skin adapter', () => {
     expect(fixture.componentInstance.displayedColumns()).toEqual(['name', 'region']);
     expect(headerText(root)).toBe('Name Region');
 
-    root.querySelector<HTMLButtonElement>('button[hellTableSortTrigger]')?.click();
+    fixture.componentInstance.columnVisibility.set({ region: false });
+    fixture.detectChanges();
+    expect(fixture.componentInstance.displayedColumns()).toEqual(['name', 'role']);
+
+    const [nameSortButton, roleSortButton] = root.querySelectorAll<HTMLButtonElement>(
+      'button[hellTableSortTrigger]',
+    );
+
+    nameSortButton?.click();
     fixture.componentInstance.pageIndex.set(0);
     fixture.detectChanges();
     expect(fixture.componentInstance.sorting()).toEqual([{ columnId: 'name', direction: 'asc' }]);
     expect(firstDataCellText(root)).toBe('Ada Lovelace');
 
-    root.querySelector<HTMLButtonElement>('button[hellTableSortTrigger]')?.click();
+    nameSortButton?.click();
     fixture.componentInstance.pageIndex.set(1);
     fixture.detectChanges();
     expect(fixture.componentInstance.sorting()).toEqual([{ columnId: 'name', direction: 'desc' }]);
     expect(firstDataCellText(root)).toBe('Ada Lovelace');
+
+    roleSortButton?.click();
+    fixture.componentInstance.pageIndex.set(0);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.sorting()).toEqual([{ columnId: 'role', direction: 'asc' }]);
+    expect(bodyText(root)).toMatch(/Ada Lovelace\s+Admin\s+Grace Hopper\s+Editor/);
+
+    roleSortButton?.click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.sorting()).toEqual([{ columnId: 'role', direction: 'desc' }]);
+    expect(bodyText(root)).toMatch(/Margaret Hamilton\s+Viewer\s+Grace Hopper\s+Editor/);
   });
 
   it('states that CDK virtual scrolling is fixed-size while dynamic heights use TanStack Virtual', () => {
@@ -220,9 +254,22 @@ function sortRows(
   const activeSort = sorting[0];
   if (!activeSort) return rows;
   return [...rows].sort((a, b) => {
-    const result = a.name.localeCompare(b.name);
+    const result = sortableValue(a, activeSort.columnId).localeCompare(
+      sortableValue(b, activeSort.columnId),
+    );
     return activeSort.direction === 'desc' ? -result : result;
   });
+}
+
+function sortableValue(row: Person, columnId: string): string {
+  switch (columnId) {
+    case 'name':
+      return row.name;
+    case 'role':
+      return row.role;
+    default:
+      return '';
+  }
 }
 
 function headerText(root: HTMLElement): string {
@@ -238,5 +285,8 @@ function firstDataCellText(root: HTMLElement): string {
 }
 
 function text(elements: Element[]): string {
-  return elements.map((element) => element.textContent?.trim()).filter(Boolean).join(' ');
+  return elements
+    .map((element) => element.textContent?.trim())
+    .filter(Boolean)
+    .join(' ');
 }

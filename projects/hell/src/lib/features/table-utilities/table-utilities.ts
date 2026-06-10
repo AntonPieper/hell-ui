@@ -25,8 +25,11 @@ import {
   Component,
   Directive,
   ElementRef,
+  EventEmitter,
   AfterViewInit,
   OnDestroy,
+  Input,
+  Output,
   booleanAttribute,
   computed,
   effect,
@@ -180,11 +183,20 @@ export class HellTable extends HellTableRoleDirective {
   protected override readonly nativeElementNames = HELL_TABLE_ROOT_NATIVE_ELEMENTS;
   protected override readonly inferredRole = 'table';
 
-  readonly contentWidth = input(false, { transform: booleanAttribute });
+  readonly contentWidth = signal(false);
   readonly semantics = input<HellTableSemantics>('table');
   readonly interactionMode = input<HellTableGridInteractionMode | null>(null);
-  readonly rowCount = input<number | null>(null, { transform: hellNullablePositiveIntegerAttribute });
-  readonly colCount = input<number | null>(null, { transform: hellNullablePositiveIntegerAttribute });
+  readonly rowCount = input<number | null>(null, {
+    transform: hellNullablePositiveIntegerAttribute,
+  });
+  readonly colCount = input<number | null>(null, {
+    transform: hellNullablePositiveIntegerAttribute,
+  });
+
+  @Input({ alias: 'contentWidth', transform: booleanAttribute })
+  set contentWidthInput(value: boolean) {
+    this.contentWidth.set(value);
+  }
 
   private readonly registeredRows = signal<readonly HellTableRow[]>([]);
   private readonly registeredCells = signal<readonly HellTableGridCellRegistration[]>([]);
@@ -222,7 +234,9 @@ export class HellTable extends HellTableRoleDirective {
   colIndexFor(cell: HellTableGridCellRegistration): number | null {
     const rowIndex = cell.gridRowIndex();
     if (rowIndex === null) return this.indexFor(this.registeredCells(), cell);
-    const rowCells = this.registeredCells().filter((candidate) => candidate.gridRowIndex() === rowIndex);
+    const rowCells = this.registeredCells().filter(
+      (candidate) => candidate.gridRowIndex() === rowIndex,
+    );
     return this.indexFor(rowCells, cell);
   }
 
@@ -320,13 +334,15 @@ export class HellTable extends HellTableRoleDirective {
     const active = this.activeGridCell();
     return (
       this.registeredCells().find(
-        (cell) => cell.gridRowIndex() === active.rowIndex && cell.gridColIndex() === active.colIndex,
+        (cell) =>
+          cell.gridRowIndex() === active.rowIndex && cell.gridColIndex() === active.colIndex,
       ) ?? null
     );
   }
 
   private activateCurrentGridCellWidget(key: string): boolean {
-    if (this.interactionMode() === 'editing' && key === 'Enter') return this.focusCurrentGridCellWidget();
+    if (this.interactionMode() === 'editing' && key === 'Enter')
+      return this.focusCurrentGridCellWidget();
     const widget = this.currentGridCellWidget();
     if (!widget) return false;
     widget.click();
@@ -472,9 +488,21 @@ export class HellTableRow extends HellTableRoleDirective implements OnDestroy {
   protected override readonly nativeElementNames = HELL_TABLE_ROW_NATIVE_ELEMENTS;
   protected override readonly inferredRole = 'row';
 
-  readonly active = input(false, { transform: booleanAttribute });
-  readonly selected = input(false, { transform: booleanAttribute });
-  readonly rowIndex = input<number | null>(null, { transform: hellNullablePositiveIntegerAttribute });
+  readonly active = signal(false);
+  readonly selected = signal(false);
+  readonly rowIndex = input<number | null>(null, {
+    transform: hellNullablePositiveIntegerAttribute,
+  });
+
+  @Input({ alias: 'active', transform: booleanAttribute })
+  set activeInput(value: boolean) {
+    this.active.set(value);
+  }
+
+  @Input({ alias: 'selected', transform: booleanAttribute })
+  set selectedInput(value: boolean) {
+    this.selected.set(value);
+  }
 
   private readonly table = inject(HellTable, { optional: true, skipSelf: true });
   private readonly cells = signal<readonly HellTableGridCellRegistration[]>([]);
@@ -618,16 +646,36 @@ export class HellTableRowRadio extends HellNativeRadio {
     '[attr.aria-colindex]': 'gridColIndex()',
   },
 })
-export class HellTableHeaderCell extends HellTableRoleDirective implements HellTableGridCellRegistration, OnDestroy {
+export class HellTableHeaderCell
+  extends HellTableRoleDirective
+  implements HellTableGridCellRegistration, OnDestroy
+{
   protected override readonly nativeElementNames = HELL_TABLE_HEADER_CELL_NATIVE_ELEMENTS;
   protected override readonly inferredRole = 'columnheader';
 
-  readonly sort = input<'asc' | 'desc' | null>(null);
-  readonly sortable = input(false, { transform: booleanAttribute });
-  readonly columnId = input<string | null>(null);
-  readonly colIndex = input<number | null>(null, { transform: hellNullablePositiveIntegerAttribute });
+  readonly sort = signal<'asc' | 'desc' | null>(null);
+  readonly sortable = signal(false);
+  readonly columnId = signal<string | null>(null);
+  readonly colIndex = input<number | null>(null, {
+    transform: hellNullablePositiveIntegerAttribute,
+  });
 
-  readonly sortToggle = output<MouseEvent | KeyboardEvent>();
+  @Input({ alias: 'sort' })
+  set sortInput(value: 'asc' | 'desc' | null) {
+    this.sort.set(value);
+  }
+
+  @Input({ alias: 'sortable', transform: booleanAttribute })
+  set sortableInput(value: boolean) {
+    this.sortable.set(value);
+  }
+
+  @Input({ alias: 'columnId' })
+  set columnIdInput(value: string | null) {
+    this.columnId.set(value);
+  }
+
+  @Output() readonly sortToggle = new EventEmitter<MouseEvent | KeyboardEvent>();
 
   readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   readonly head = inject(HellTableHead, { optional: true });
@@ -665,7 +713,11 @@ export class HellTableHeaderCell extends HellTableRoleDirective implements HellT
 
   gridColIndex(): number | null {
     if (!this.table?.isGridMode()) return null;
-    return hellClampedIndex(this.colIndex()) ?? this.row?.colIndexFor(this) ?? this.table.colIndexFor(this);
+    return (
+      hellClampedIndex(this.colIndex()) ??
+      this.row?.colIndexFor(this) ??
+      this.table.colIndexFor(this)
+    );
   }
 
   private syncGeneratedGridCellId(): void {
@@ -777,13 +829,28 @@ export class HellTableSortTrigger extends HellStyleable {
     '[attr.aria-colindex]': 'gridColIndex()',
   },
 })
-export class HellTableCell extends HellTableRoleDirective implements HellTableGridCellRegistration, OnDestroy {
+export class HellTableCell
+  extends HellTableRoleDirective
+  implements HellTableGridCellRegistration, OnDestroy
+{
   protected override readonly nativeElementNames = HELL_TABLE_CELL_NATIVE_ELEMENTS;
   protected override readonly inferredRole = 'cell';
 
-  readonly align = input<'start' | 'center' | 'end'>('start');
-  readonly space = input<'normal' | 'empty'>('normal');
-  readonly colIndex = input<number | null>(null, { transform: hellNullablePositiveIntegerAttribute });
+  readonly align = signal<'start' | 'center' | 'end'>('start');
+  readonly space = signal<'normal' | 'empty'>('normal');
+  readonly colIndex = input<number | null>(null, {
+    transform: hellNullablePositiveIntegerAttribute,
+  });
+
+  @Input({ alias: 'align' })
+  set alignInput(value: 'start' | 'center' | 'end') {
+    this.align.set(value);
+  }
+
+  @Input({ alias: 'space' })
+  set spaceInput(value: 'normal' | 'empty') {
+    this.space.set(value);
+  }
 
   readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly table = inject(HellTable, { optional: true, skipSelf: true });
@@ -811,7 +878,11 @@ export class HellTableCell extends HellTableRoleDirective implements HellTableGr
 
   gridColIndex(): number | null {
     if (!this.table?.isGridMode()) return null;
-    return hellClampedIndex(this.colIndex()) ?? this.row?.colIndexFor(this) ?? this.table.colIndexFor(this);
+    return (
+      hellClampedIndex(this.colIndex()) ??
+      this.row?.colIndexFor(this) ??
+      this.table.colIndexFor(this)
+    );
   }
 
   private syncGeneratedGridCellId(): void {
@@ -845,7 +916,8 @@ export class HellTableCell extends HellTableRoleDirective implements HellTableGr
     '[class.hell-table-resize-handle]': '!unstyled()',
     '[attr.data-active]': 'dragging() ? "true" : null',
     '[attr.type]': 'nativeButtonType()',
-    '[attr.aria-label]': 'isDisabled() && nativeButtonType() === null ? null : (ariaLabel() ?? labels.tableUtilities?.resizeColumn ?? labels.dataTable.resizeColumn)',
+    '[attr.aria-label]':
+      'isDisabled() && nativeButtonType() === null ? null : (ariaLabel() ?? labels.tableUtilities?.resizeColumn ?? labels.dataTable.resizeColumn)',
     '[attr.aria-controls]': 'isDisabled() ? null : ariaControlsValue()',
     '[attr.aria-valuemin]': 'isDisabled() ? null : 0',
     '[attr.aria-valuemax]': 'isDisabled() ? null : 100',
@@ -880,26 +952,28 @@ export class HellTableResizeHandle extends HellStyleable implements AfterViewIni
   private readonly cell = inject(HellTableHeaderCell, { optional: true });
   private readonly table = inject(HellTable, { optional: true, skipSelf: true });
   protected readonly labels = inject(HELL_LABELS);
-  private readonly resizeInteraction = new HellResizePairInteractionController<HellTableResizeItem>({
-    handle: this.host,
-    ownerWindow: () => this.host.ownerDocument.defaultView,
-    onActiveChange: (active) => this.dragging.set(active),
-    onValueChange: (result) => this.ariaValueNow.set(result.ariaValueNow),
-    onCommit: (result) => this.emitResize(result.a, result.b),
-    orientation: () => 'horizontal',
-    direction: () => hellElementDirection(this.host),
-    stopPropagation: true,
-    pair: () => this.resizePair(),
-    itemAdapter: () => ({
-      measure: (item) => item.measure(),
-      minSize: (item) => this.itemMinSize(item),
-      setSize: (item, size) => item.setSize(size),
-      commitSize: (item, size) => {
-        if (item.commitSize) item.commitSize(size);
-        else item.setSize(size);
-      },
-    }),
-  });
+  private readonly resizeInteraction = new HellResizePairInteractionController<HellTableResizeItem>(
+    {
+      handle: this.host,
+      ownerWindow: () => this.host.ownerDocument.defaultView,
+      onActiveChange: (active) => this.dragging.set(active),
+      onValueChange: (result) => this.ariaValueNow.set(result.ariaValueNow),
+      onCommit: (result) => this.emitResize(result.a, result.b),
+      orientation: () => 'horizontal',
+      direction: () => hellElementDirection(this.host),
+      stopPropagation: true,
+      pair: () => this.resizePair(),
+      itemAdapter: () => ({
+        measure: (item) => item.measure(),
+        minSize: (item) => this.itemMinSize(item),
+        setSize: (item, size) => item.setSize(size),
+        commitSize: (item, size) => {
+          if (item.commitSize) item.commitSize(size);
+          else item.setSize(size);
+        },
+      }),
+    },
+  );
 
   private resizePair(): HellTableResizeAdapter | null {
     return this.providedPair() ?? this.defaultHeaderPair();
