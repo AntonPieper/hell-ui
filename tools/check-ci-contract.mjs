@@ -145,6 +145,7 @@ const adapterChecks = [
     path: '.github/workflows/ci.yml',
     includes: [
       'pnpm run ci:install',
+      'FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true',
       'Static contracts',
       'Unit tests',
       'Build and API',
