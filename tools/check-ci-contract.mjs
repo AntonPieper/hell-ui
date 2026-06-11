@@ -147,25 +147,21 @@ const adapterChecks = [
       'pnpm run ci:install',
       'Static contracts',
       'Unit tests',
-      'Build packages',
+      'Build and API',
       'Package consumer (${{ matrix.scenario }})',
-      'Build docs',
       'API report',
-      'E2E (${{ matrix.browser }} / ${{ matrix.group }})',
+      'E2E (${{ matrix.group }})',
       'nginx:1.27-alpine',
       'tools/ci/nginx-spa.conf:/etc/nginx/conf.d/default.conf:ro',
       'mcr.microsoft.com/playwright:v1.59.1-noble',
-      'HELL_E2E_BASE_URL: http://127.0.0.1:4200',
       'docker run --rm --network host',
       'strategy:',
+      'needs: build',
       'scenario: core',
       'scenarios: root-core,core,testing',
       'scenario: audio',
       'scenario: table-tanstack-virtual',
       'scenario: table-cdk',
-      '          - chromium',
-      '          - firefox',
-      '          - webkit',
       'group:',
       '          - aria-snapshots-foundations',
       '          - aria-snapshots-overlays-data',
@@ -178,54 +174,38 @@ const adapterChecks = [
       '          - behavior-regressions',
       'pnpm run ci:test:static',
       'pnpm run ci:test:unit',
-      'pnpm run ci:build:lib',
       'HELL_PACKAGE_CONSUMER_SCENARIOS: ${{ matrix.scenarios }}',
       'pnpm run ci:test:package-consumer',
       'HELL_PACKAGE_CONSUMER_SKIP_BUILD: 1',
       'pnpm run ci:ensure:build:lib',
       'pnpm run ci:ensure:build:docs',
-      'pnpm run ci:build:docs:prepared',
       'pnpm run ci:test:api-report:prepared',
-      'Restore Playwright browser',
-      "if: matrix.browser != 'webkit'",
-      '~/.cache/ms-playwright',
-      'playwright-${{ runner.os }}-${{ matrix.browser }}-${{ hashFiles',
-      'PLAYWRIGHT_BROWSER: ${{ matrix.browser }}',
-      'pnpm exec playwright install "${PLAYWRIGHT_BROWSER}"',
-      'pnpm exec playwright install --with-deps "${PLAYWRIGHT_BROWSER}"',
-      'Restore Playwright image',
-      'actions/cache/restore@v4',
-      "if: matrix.browser == 'webkit'",
+      'Restore Playwright image cache',
+      'Prepare Playwright image',
       '.ci-cache/playwright-image-v1.59.1-noble.tar',
       'playwright-image-${{ runner.os }}-v1.59.1-noble',
-      'docker pull mcr.microsoft.com/playwright:v1.59.1-noble',
-      'docker save --output .ci-cache/playwright-image-v1.59.1-noble.tar',
-      'docker load --input .ci-cache/playwright-image-v1.59.1-noble.tar',
-      'Save Playwright image',
-      "matrix.group == 'aria-snapshots-foundations'",
-      'actions/cache/save@v4',
-      'HELL_E2E_PROJECTS: ci',
-      'PLAYWRIGHT_PROJECT: ${{ matrix.browser }}-${{ matrix.group }}',
+      'docker load --input "${image_tar}"',
+      'docker pull "${image}"',
+      'docker save --output "${image_tar}" "${image}"',
+      '--env HELL_E2E_PROJECTS=ci',
+      'PLAYWRIGHT_GROUP: ${{ matrix.group }}',
       'Browser tests',
-      'Browser tests in Playwright image',
-      'pnpm run ci:test:e2e --workers=8 --project="${PLAYWRIGHT_PROJECT}"',
+      '--project="chromium-${PLAYWRIGHT_GROUP}"',
+      '--project="firefox-${PLAYWRIGHT_GROUP}"',
+      '--project="webkit-${PLAYWRIGHT_GROUP}"',
       'cache: pnpm',
       'cache-dependency-path: pnpm-lock.yaml',
-      'actions/cache',
-      'actions/cache/restore',
-      'actions/cache/save',
+      'actions/cache@v4',
       'actions/download-artifact@v4',
       '.angular/cache',
       'actions/upload-artifact',
-      'Restore built packages',
       'Download built packages',
-      'Restore built docs',
+      'Download built docs',
       'Ensure built docs',
       'dist-packages',
       'docs-dist',
       'docs-dist-${{ runner.os }}-${{ hashFiles',
-      "if: steps.packages-cache.outputs.cache-hit != 'true'",
-      "if: steps.docs-cache.outputs.cache-hit != 'true'",
+      'playwright-${{ matrix.group }}',
       'test-results/',
       'coverage/',
     ],
@@ -237,7 +217,6 @@ const adapterChecks = [
       'PLAYWRIGHT_BROWSERS_PATH',
       'PACKAGE_CONSUMER_GROUP',
       'PACKAGE_CONSUMER_SCENARIOS',
-      'PLAYWRIGHT_PROJECT',
       'PLAYWRIGHT_GROUP',
       'HELL_PACKAGE_CONSUMER_SKIP_BUILD',
       'PACKAGE_CONSUMER_GROUP: audio',
@@ -245,17 +224,17 @@ const adapterChecks = [
       'HELL_E2E_PROJECTS: ci',
       'pnpm run ci:test:static',
       'pnpm run ci:test:unit',
-      'pnpm run ci:build:lib',
       'HELL_PACKAGE_CONSUMER_SCENARIOS="${PACKAGE_CONSUMER_SCENARIOS}" pnpm run ci:test:package-consumer',
       'pnpm run ci:ensure:build:lib',
+      'pnpm run ci:ensure:build:docs',
       'needs:',
+      'job: build',
       'artifacts: true',
-      'pnpm run ci:build:docs:prepared',
       'pnpm run ci:test:api-report:prepared',
       'mcr.microsoft.com/playwright:v1.59.1-noble',
       'HOME: /root',
       'PLAYWRIGHT_BROWSERS_PATH: /ms-playwright',
-      'pnpm run ci:test:e2e --workers=8 --project="${PLAYWRIGHT_PROJECT}-${PLAYWRIGHT_GROUP}"',
+      'pnpm run ci:test:e2e --workers=8 --project="chromium-${PLAYWRIGHT_GROUP}" --project="firefox-${PLAYWRIGHT_GROUP}" --project="webkit-${PLAYWRIGHT_GROUP}"',
       'reports:',
       'junit: test-results/vitest-junit.xml',
       'coverage_format: cobertura',
@@ -585,12 +564,13 @@ function checkSemanticE2eGroups() {
   }
 
   for (const browser of e2eBrowsers) {
-    if (!githubWorkflow.includes(`          - ${browser}`)) {
-      errors.push(`GitHub Actions E2E matrix must include ${browser}.`);
+    const browserProject = `--project="${browser}-\${PLAYWRIGHT_GROUP}"`;
+    if (!githubWorkflow.includes(browserProject)) {
+      errors.push(`GitHub Actions E2E group job must run ${browser}.`);
     }
 
-    if (!gitlabWorkflow.includes(`- ${browser}`)) {
-      errors.push(`GitLab E2E matrix must include ${browser}.`);
+    if (!gitlabWorkflow.includes(browserProject)) {
+      errors.push(`GitLab E2E group job must run ${browser}.`);
     }
   }
 
@@ -618,6 +598,19 @@ function checkSemanticE2eGroups() {
   for (const forbiddenFilter of ['PLAYWRIGHT_ARGS', '--grep', '--grep-invert']) {
     if (githubWorkflow.includes(forbiddenFilter) || gitlabWorkflow.includes(forbiddenFilter)) {
       errors.push(`CI E2E adapters must select named Playwright projects without ${forbiddenFilter}.`);
+    }
+  }
+
+  for (const browserMatrixPattern of [
+    { label: 'matrix.browser', pattern: /matrix\.browser/ },
+    { label: 'PLAYWRIGHT_PROJECT', pattern: /\bPLAYWRIGHT_PROJECT\b/ },
+    { label: 'PLAYWRIGHT_BROWSER', pattern: /\bPLAYWRIGHT_BROWSER\b/ },
+    { label: '~/.cache/ms-playwright', pattern: /~\/\.cache\/ms-playwright/ },
+    { label: 'actions/cache/restore@v4', pattern: /actions\/cache\/restore@v4/ },
+    { label: 'actions/cache/save@v4', pattern: /actions\/cache\/save@v4/ },
+  ]) {
+    if (browserMatrixPattern.pattern.test(githubWorkflow) || browserMatrixPattern.pattern.test(gitlabWorkflow)) {
+      errors.push(`CI E2E adapters must not reintroduce split browser setup via ${browserMatrixPattern.label}.`);
     }
   }
 
