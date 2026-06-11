@@ -145,7 +145,6 @@ const adapterChecks = [
     path: '.github/workflows/ci.yml',
     includes: [
       'pnpm run ci:install',
-      'FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true',
       'Static contracts',
       'Unit tests',
       'Build and API',
@@ -196,10 +195,10 @@ const adapterChecks = [
       '--project="webkit-${PLAYWRIGHT_GROUP}"',
       'cache: pnpm',
       'cache-dependency-path: pnpm-lock.yaml',
-      'actions/cache@v4',
-      'actions/download-artifact@v4',
+      'actions/cache@v5',
+      'actions/download-artifact@v8',
       '.angular/cache',
-      'actions/upload-artifact',
+      'actions/upload-artifact@v7',
       'Download built packages',
       'Download built docs',
       'Ensure built docs',
@@ -607,8 +606,8 @@ function checkSemanticE2eGroups() {
     { label: 'PLAYWRIGHT_PROJECT', pattern: /\bPLAYWRIGHT_PROJECT\b/ },
     { label: 'PLAYWRIGHT_BROWSER', pattern: /\bPLAYWRIGHT_BROWSER\b/ },
     { label: '~/.cache/ms-playwright', pattern: /~\/\.cache\/ms-playwright/ },
-    { label: 'actions/cache/restore@v4', pattern: /actions\/cache\/restore@v4/ },
-    { label: 'actions/cache/save@v4', pattern: /actions\/cache\/save@v4/ },
+    { label: 'actions/cache/restore@*', pattern: /actions\/cache\/restore@/ },
+    { label: 'actions/cache/save@*', pattern: /actions\/cache\/save@/ },
   ]) {
     if (browserMatrixPattern.pattern.test(githubWorkflow) || browserMatrixPattern.pattern.test(gitlabWorkflow)) {
       errors.push(`CI E2E adapters must not reintroduce split browser setup via ${browserMatrixPattern.label}.`);
