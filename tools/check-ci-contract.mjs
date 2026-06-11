@@ -14,6 +14,11 @@ const requiredFiles = [
   'vitest.ci.config.ts',
   'tools/run-ci-tests.mjs',
   'tools/run-unit-tests.mjs',
+  'tools/check-static-contracts.mjs',
+  'tools/static-contract-manifests.mjs',
+  'tools/static-contracts/browser-global-seams.json',
+  'tools/static-contracts/docs-lazy-route-boundaries.json',
+  'tools/static-contracts/package-consumer-peer-contracts.json',
   'tools/check-package-consumer.mjs',
   'tools/check-package-pack.mjs',
   'tools/check-api-reports.mjs',
@@ -34,6 +39,8 @@ const requiredFiles = [
 const requiredScripts = {
   'ci:install': 'pnpm install --frozen-lockfile',
   'test:unit': 'node tools/run-unit-tests.mjs',
+  'test:static-contracts': 'node tools/check-static-contracts.mjs',
+  'test:architecture': 'pnpm run test:static-contracts',
   'test:package-consumer': 'node tools/check-package-consumer.mjs',
   'test:package-pack': 'node tools/check-package-pack.mjs',
   'test:api-report': 'node tools/check-api-reports.mjs',
@@ -89,6 +96,8 @@ const adapterChecks = [
 ];
 
 const fileChecks = [
+  // Keep these to source/command implementation markers. Release-doc prose is
+  // reviewed by purpose-built evidence gates instead of exact-string CI sentinels.
   {
     path: 'vitest.ci.config.ts',
     includes: [
@@ -104,9 +113,10 @@ const fileChecks = [
   {
     path: 'tools/check-api-reports.mjs',
     includes: [
-      '@hell-ui/angular/core',
-      '@hell-ui/angular/primitives',
-      '@hell-ui/angular/testing',
+      'apiReportPolicyEntries',
+      'excludedApiReportEntrypoints',
+      'apiReportTypeFileBase',
+      'packageDistRoot',
       'localBuild',
       'reportFolder',
       'reportTempFolder',
@@ -144,7 +154,7 @@ const fileChecks = [
       'test-results/release-evidence',
       'Git commit:',
       'Git tracked changes:',
-      'test:architecture',
+      'test:static-contracts',
       'test:ci-contract',
       'test:changelog',
       'test:unit',
@@ -180,71 +190,6 @@ const fileChecks = [
     path: 'playwright.config.ts',
     includes: [
       "['json', { outputFile: 'test-results/playwright-report.json' }]",
-    ],
-  },
-  {
-    path: 'CHANGELOG.md',
-    includes: [
-      'Keep a Changelog',
-      'docs/release/semver-policy.md',
-      'HELL-023',
-      'HELL-049',
-    ],
-  },
-  {
-    path: 'docs/release/semver-policy.md',
-    includes: [
-      'alpha',
-      'internal beta',
-      'public beta',
-      'stable',
-      'SemVer',
-      'CHANGELOG.md',
-      'release:dry-run',
-    ],
-  },
-  {
-    path: 'docs/release/production-readiness-checklist.md',
-    includes: [
-      'production-readiness-gate',
-      'internal beta until the production-readiness gate passes',
-      'package-consumer',
-      'api',
-      'accessibility',
-      'docs-budgets',
-      'pack-audit',
-      'release-dry-run',
-      'test-results/playwright-report.json',
-      'releaseDryRunEvidence',
-      'allE2eSpecs',
-      'modifiedAfterCurrentGitCommit',
-      'clean tracked tree',
-      'Critical gap',
-      'criticalGap: true',
-    ],
-  },
-  {
-    path: 'docs/release/docs-budget-policy.md',
-    includes: [
-      'docs-budget-policy',
-      'Docs shell / global styles',
-      'Individual docs page owner',
-      'acceptedMaximum',
-      'accepted warning',
-      'regression',
-      'HELL-050',
-    ],
-  },
-  {
-    path: 'docs/release/npm-publishing.md',
-    includes: [
-      'npm trusted publishing',
-      'AntonPieper',
-      'npm-publish.yml',
-      'npm-publish',
-      'Require two-factor authentication and disallow tokens',
-      'release-dry-run-evidence',
-      'id-token: write',
     ],
   },
 ];
@@ -348,7 +293,7 @@ function checkNpmPublishWorkflow() {
     'release-dry-run-evidence',
     'release-package',
     'pnpm/action-setup',
-    'pnpm run release:dry-run -- --full',
+    'pnpm run release:dry-run --full',
     'pnpm run test:package-pack',
     'pnpm --dir ./dist/hell pack --pack-destination ../../release-package',
     'pnpm publish "$HELL_RELEASE_TARBALL" --access public --provenance --no-git-checks',

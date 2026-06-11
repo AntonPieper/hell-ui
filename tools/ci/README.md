@@ -11,7 +11,8 @@ pnpm ci:build
 pnpm ci:verify
 ```
 
-`ci:test` owns unit test, architecture, report, coverage, and contract checks.
+`ci:test` owns unit tests, static contracts, browser checks, package-consumer
+checks, coverage, and CI contract checks.
 Unit tests run through `test:unit` with Vitest's default worker pool and coverage
 thresholds enabled; CI adapters should not clamp `VITEST_MAX_WORKERS` unless a
 provider-specific incident is being debugged. The meta root serial command

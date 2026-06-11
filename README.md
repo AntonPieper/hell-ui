@@ -19,13 +19,13 @@ pnpm build:lib
 pnpm build:docs
 pnpm test
 pnpm ci:playwright
-pnpm ci:verify # full pre-push: unit, architecture, lint, e2e, package consumer, build
-pnpm release:dry-run -- --fast # local release preflight
-pnpm release:dry-run -- --full # release-candidate evidence gate
+pnpm ci:verify # full pre-push: unit, static contracts, lint, e2e, package consumer, build
+pnpm run release:dry-run --fast # local release preflight
+pnpm run release:dry-run --full # release-candidate evidence gate
 pnpm production-ready:check     # production-ready claim gate
 ```
 
-`release:dry-run -- --full` runs lint, architecture, CI contract, unit tests,
+`release:dry-run --full` runs lint, static contracts, CI contract, unit tests,
 `build:lib`, pack audit, selected package-consumer scenarios, API report, and
 `build:docs`. Evidence is written to timestamped log and JSON files under
 `test-results/release-evidence/`. Use `--fast` for local preflight before the
@@ -93,7 +93,9 @@ Peer dependency tiers:
 > `@floating-ui/dom` is required by `ng-primitives` (not by Hell directly).
 > `@angular/router` is an optional peer only for `ng-primitives/dialog` consumers;
 > install it when importing Hell dialog or the aggregate `/primitives` entry point.
-> Package-consumer scenarios assert these groups with strict peer installs.
+> Package-consumer scenarios assert these groups with strict peer installs. The
+> peer tier/group manifest lives at
+> `tools/static-contracts/package-consumer-peer-contracts.json`.
 
 | Tier | Entry points / scenarios | Peer group asserted |
 |---|---|---|

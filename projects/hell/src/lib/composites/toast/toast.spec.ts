@@ -2,6 +2,7 @@ import type { TemplateRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 
+import { provideHellLabels } from '../../core/labels';
 import { HellToastService, HellToaster } from './toast';
 import {
   hellToastFrontDistance,
@@ -252,7 +253,15 @@ describe('HellToaster', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HellToaster],
-      providers: [{ provide: LiveAnnouncer, useValue: announcementService }],
+      providers: [
+        { provide: LiveAnnouncer, useValue: announcementService },
+        provideHellLabels({
+          toast: {
+            notifications: 'Local notifications',
+            dismiss: 'Local dismiss',
+          },
+        }),
+      ],
     }).compileComponents();
   });
 
@@ -335,5 +344,19 @@ describe('HellToaster', () => {
 
     expect(overflowToast.getAttribute('aria-hidden')).toBeNull();
     expect(close.getAttribute('tabindex')).toBeNull();
+  });
+
+  it('uses injected label contract text for the region and dismiss button', () => {
+    const fixture = TestBed.createComponent(HellToaster);
+    const svc = TestBed.inject(HellToastService);
+    fixture.detectChanges();
+
+    svc.success('Saved', { duration: 0 });
+    fixture.detectChanges();
+
+    const region = fixture.nativeElement.querySelector('[data-slot="region"]') as HTMLElement;
+    const close = fixture.nativeElement.querySelector('[data-slot="close"]') as HTMLButtonElement;
+    expect(region.getAttribute('aria-label')).toBe('Local notifications');
+    expect(close.getAttribute('aria-label')).toBe('Local dismiss');
   });
 });

@@ -1,5 +1,6 @@
 import { EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
+import { foldService } from '@codemirror/language';
 
 import {
   HellCodeEditorRuntime,
@@ -44,6 +45,34 @@ describe('HellCodeEditorRuntime', () => {
     expect(view.dom.ownerDocument).toBe(foreignDocument);
 
     view.destroy();
+  });
+
+  it('renders fold gutter markers as SVG nodes in the host document realm', async () => {
+    const foreignDocument = document.implementation.createHTMLDocument('hell-code-editor');
+    const host = foreignDocument.createElement('div');
+    foreignDocument.body.append(host);
+
+    const runtime = new HellCodeEditorRuntime(
+      runtimeOptions({
+        host,
+        value: 'alpha\n  beta\nomega',
+        extensions: foldService.of((state, lineStart, lineEnd) =>
+          lineStart === 0 ? { from: lineEnd, to: state.doc.length } : null,
+        ),
+      }),
+    );
+
+    await Promise.resolve();
+
+    const marker = host.querySelector<SVGSVGElement>('.cm-foldGutter svg');
+    const markerPath = marker?.querySelector('path');
+
+    expect(marker?.ownerDocument).toBe(foreignDocument);
+    expect(marker?.namespaceURI).toBe('http://www.w3.org/2000/svg');
+    expect(markerPath?.ownerDocument).toBe(foreignDocument);
+    expect(markerPath?.namespaceURI).toBe('http://www.w3.org/2000/svg');
+
+    runtime.destroy();
   });
 
   it('emits user edits but not external value writes', () => {

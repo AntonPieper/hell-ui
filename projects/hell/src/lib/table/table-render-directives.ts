@@ -1,4 +1,4 @@
-import { Directive, Input, TemplateRef, inject } from '@angular/core';
+import { Directive, Input, TemplateRef, inject, type Type } from '@angular/core';
 
 import { hellTemplateRenderer } from './table-columns';
 import {
@@ -7,8 +7,10 @@ import {
   type HellTableColumnId,
   type HellTableEditFieldRenderContext,
   type HellTableHeaderRenderContext,
+  type HellTableRenderer,
   type HellTableRenderRegistry,
   type HellTableRenderRegistryInput,
+  type HellTableTemplateRenderer,
   type HellTableRowEditorRenderContext,
   type HellTableRowRenderContext,
 } from './table-model';
@@ -22,7 +24,7 @@ export class HellCell<TData = unknown, TValue = unknown> {
   @Input('hellCell') columnId: HellTableColumnId = '';
   readonly template = inject(TemplateRef<HellTableCellRenderContext<TData, TValue>>);
 
-  renderer() {
+  renderer(): HellTableTemplateRenderer<unknown> {
     return hellTemplateRenderer(this.template);
   }
 }
@@ -36,7 +38,7 @@ export class HellHeaderCell<TData = unknown> {
   @Input('hellHeaderCell') columnId: HellTableColumnId = '';
   readonly template = inject(TemplateRef<HellTableHeaderRenderContext<TData>>);
 
-  renderer() {
+  renderer(): HellTableTemplateRenderer<unknown> {
     return hellTemplateRenderer(this.template);
   }
 }
@@ -50,7 +52,7 @@ export class HellRowActions<TData = unknown> {
   @Input('hellRowActions') id = '';
   readonly template = inject(TemplateRef<HellTableRowRenderContext<TData>>);
 
-  renderer() {
+  renderer(): HellTableTemplateRenderer<unknown> {
     return hellTemplateRenderer(this.template);
   }
 }
@@ -64,7 +66,7 @@ export class HellRowEditor<TData = unknown> {
   @Input('hellRowEditor') id = '';
   readonly template = inject(TemplateRef<HellTableRowEditorRenderContext<TData>>);
 
-  renderer() {
+  renderer(): HellTableTemplateRenderer<unknown> {
     return hellTemplateRenderer(this.template);
   }
 }
@@ -78,7 +80,7 @@ export class HellEditField<TData = unknown, TValue = unknown> {
   @Input('hellEditField') fieldId = '';
   readonly template = inject(TemplateRef<HellTableEditFieldRenderContext<TData, TValue>>);
 
-  renderer() {
+  renderer(): HellTableTemplateRenderer<unknown> {
     return hellTemplateRenderer(this.template);
   }
 }
@@ -103,22 +105,35 @@ export function hellTableCreateProjectedRenderRegistry<TData>(
   const rowEditors = { ...(base.rowEditors ?? {}) };
   const editFields = { ...(base.editFields ?? {}) };
 
-  for (const template of projected.headers ?? []) headers[template.columnId] = template.renderer();
-  for (const template of projected.cells ?? []) cells[template.columnId] = template.renderer();
-  for (const template of projected.rowActions ?? []) rowActions[template.id] = template.renderer();
-  for (const template of projected.rowEditors ?? []) rowEditors[template.id] = template.renderer();
+  for (const template of projected.headers ?? []) {
+    headers[template.columnId] =
+      template.renderer() as HellTableRenderer<HellTableHeaderRenderContext<TData>>;
+  }
+  for (const template of projected.cells ?? []) {
+    cells[template.columnId] =
+      template.renderer() as HellTableRenderer<HellTableCellRenderContext<TData, unknown>>;
+  }
+  for (const template of projected.rowActions ?? []) {
+    rowActions[template.id] =
+      template.renderer() as HellTableRenderer<HellTableRowRenderContext<TData>>;
+  }
+  for (const template of projected.rowEditors ?? []) {
+    rowEditors[template.id] =
+      template.renderer() as HellTableRenderer<HellTableRowEditorRenderContext<TData>>;
+  }
   for (const template of projected.editFields ?? []) {
-    editFields[template.fieldId] = template.renderer();
+    editFields[template.fieldId] =
+      template.renderer() as HellTableRenderer<HellTableEditFieldRenderContext<TData, unknown>>;
   }
 
   return hellTableCreateRenderRegistry({ headers, cells, rowActions, rowEditors, editFields });
 }
 
 /** Standalone imports for projected table render-template directives. */
-export const HELL_TABLE_RENDER_DIRECTIVES = [
+export const HELL_TABLE_RENDER_DIRECTIVES: readonly Type<unknown>[] = [
   HellCell,
   HellHeaderCell,
   HellRowActions,
   HellRowEditor,
   HellEditField,
-] as const;
+];

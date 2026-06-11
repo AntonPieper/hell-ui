@@ -43,7 +43,7 @@ The release workflow lives at `.github/workflows/npm-publish.yml` in this reposi
 ## Release steps
 
 1. Update `projects/hell/package.json` version in a release-prep slice.
-2. Run `pnpm release:dry-run -- --full` locally or wait for the release workflow dry-run evidence.
+2. Run `pnpm run release:dry-run --full` locally or wait for the release workflow dry-run evidence.
 3. Create and push a protected tag: `git tag v<version>` then `git push origin v<version>`.
 4. Approve the `npm-publish` GitHub environment deployment.
 5. After publish, verify the npm package page shows provenance and that the GitHub Actions run contains both `release-dry-run-evidence` and `release-package` artifacts.

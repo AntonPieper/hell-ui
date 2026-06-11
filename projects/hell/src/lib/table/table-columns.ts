@@ -209,7 +209,9 @@ export function actionColumn<TData>(
   idOrOptions: HellTableColumnId | HellActionColumnOptions<TData> = 'actions',
   options: HellActionColumnOptions<TData> = {},
 ): HellColumnDef<TData, never> {
-  const [id, resolvedOptions] = resolveSpecialColumnArgs(idOrOptions, options, 'actions');
+  const args = resolveSpecialColumnArgs(idOrOptions, options, 'actions');
+  const id = args[0];
+  const resolvedOptions = args[1];
   return createColumn(id, requiredColumnOptions(resolvedOptions), {
     kind: 'action',
     sortable: false,
@@ -223,7 +225,9 @@ export function selectionColumn<TData>(
   idOrOptions: HellTableColumnId | HellSelectionColumnOptions<TData> = 'selection',
   options: HellSelectionColumnOptions<TData> = {},
 ): HellColumnDef<TData, never> {
-  const [id, resolvedOptions] = resolveSpecialColumnArgs(idOrOptions, options, 'selection');
+  const args = resolveSpecialColumnArgs(idOrOptions, options, 'selection');
+  const id = args[0];
+  const resolvedOptions = args[1];
   const selection = selectionColumnConfig(resolvedOptions);
   return {
     ...createColumn(id, requiredColumnOptions(resolvedOptions), {

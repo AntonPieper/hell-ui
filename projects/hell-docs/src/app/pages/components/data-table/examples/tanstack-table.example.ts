@@ -13,11 +13,18 @@ import {
 
 import { HellButton } from '@hell-ui/angular/button';
 import {
-  HELL_TABLE_UTILITIES_DIRECTIVES,
+  HellTable,
+  HellTableBody,
+  HellTableCell,
+  HellTableContainer,
+  HellTableHead,
+  HellTableHeaderCell,
+  HellTableRow,
+  HellTableSortTrigger,
   type HellTableSortDirection,
 } from '@hell-ui/angular/table';
 import {
-  HELL_TANSTACK_TABLE_DIRECTIVES,
+  HellTanStackFlexRenderOutlet,
   hellTanStackIsFlexRenderValue,
   hellTanStackResolveFlexRenderValue,
   hellTanStackTableModel,
@@ -64,8 +71,15 @@ const COLUMNS: ColumnDef<Person>[] = [
   imports: [
     HellButton,
     NgTemplateOutlet,
-    ...HELL_TABLE_UTILITIES_DIRECTIVES,
-    ...HELL_TANSTACK_TABLE_DIRECTIVES,
+    HellTableContainer,
+    HellTable,
+    HellTableHead,
+    HellTableBody,
+    HellTableRow,
+    HellTableHeaderCell,
+    HellTableSortTrigger,
+    HellTableCell,
+    HellTanStackFlexRenderOutlet,
   ],
   template: `
     <div class="grid gap-3">

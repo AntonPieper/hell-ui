@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { HellTimeInput, provideHellTimeInputAdapter, type HellTimeValue } from './time-input';
+import { provideHellLabels } from '../../core/labels';
 import { HELL_FIELD_DIRECTIVES } from '../../primitives/field/field';
 
 @Component({
@@ -44,6 +45,28 @@ class TimeInputHost {
   `,
 })
 class TimeInputFieldHost {}
+
+@Component({
+  imports: [HellTimeInput],
+  providers: [
+    provideHellLabels({
+      timeInput: {
+        chooseTime: 'Pick local time',
+        chooseTimeFor: (label) => `Pick local time for ${label}`,
+        subtractFiveMinutes: 'Local minus five',
+        addFiveMinutes: 'Local plus five',
+        hours: 'Local hours',
+        minutes: 'Local minutes',
+        decreaseUnit: (unitLabel) => `Local decrease ${unitLabel}`,
+        increaseUnit: (unitLabel) => `Local increase ${unitLabel}`,
+        minutePresets: 'Local minute presets',
+        minutePreset: (minute) => `Local minute ${minute.toString().padStart(2, '0')}`,
+      },
+    }),
+  ],
+  template: `<hell-time-input aria-label="Localized time" />`,
+})
+class TimeInputLocalizedLabelsHost {}
 
 @Component({
   imports: [ReactiveFormsModule, HellTimeInput],
@@ -117,6 +140,7 @@ describe('HellTimeInput', () => {
       imports: [
         TimeInputHost,
         TimeInputFieldHost,
+        TimeInputLocalizedLabelsHost,
         TimeInputFormHost,
         TimeInputBlurFormHost,
         TimeInputCustomAdapterHost,
@@ -144,6 +168,37 @@ describe('HellTimeInput', () => {
     expect(trigger.getAttribute('aria-label')).toBe('Choose time for Start time');
     expect(trigger.getAttribute('aria-describedby')).toBeNull();
     expect(trigger.getAttribute('aria-labelledby')).toBeNull();
+  });
+
+  it('uses injected label contract text for trigger and picker controls', async () => {
+    const fixture = TestBed.createComponent(TimeInputLocalizedLabelsHost);
+    fixture.detectChanges();
+
+    const trigger = triggerButton(fixture.nativeElement);
+    expect(trigger.getAttribute('aria-label')).toBe('Pick local time for Localized time');
+
+    trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    const hour = await waitForPickerSpinbutton(fixture, 'hour');
+    const minute = await waitForPickerSpinbutton(fixture, 'minute');
+    const hourLabel = document.getElementById(hour.getAttribute('aria-labelledby') ?? '');
+    const minuteLabel = document.getElementById(minute.getAttribute('aria-labelledby') ?? '');
+
+    expect(hourLabel?.textContent?.trim()).toBe('Local hours');
+    expect(hour.getAttribute('aria-valuetext')).toBe('00 local hours');
+    expect(minuteLabel?.textContent?.trim()).toBe('Local minutes');
+    expect(minute.getAttribute('aria-valuetext')).toBe('00 local minutes');
+    expect(
+      document.querySelector('button[aria-label="Local decrease Local hours"]'),
+    ).toBeInstanceOf(HTMLButtonElement);
+    expect(
+      document.querySelector('button[aria-label="Local increase Local minutes"]'),
+    ).toBeInstanceOf(HTMLButtonElement);
+    expect(document.querySelector('[data-slot="minute-presets"]')?.getAttribute('aria-label')).toBe(
+      'Local minute presets',
+    );
+    expect(document.querySelector('button[aria-label="Local minute 15"]')).toBeInstanceOf(
+      HTMLButtonElement,
+    );
   });
 
   it('inherits hellField label and description wiring for the internal text field', () => {

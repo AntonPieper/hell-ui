@@ -1,0 +1,82 @@
+{
+  "id": "docs-lazy-route-boundaries",
+  "docPath": "docs/architecture/docs-example-import-boundaries.md",
+  "codePreviewLazyWrapperPath": "projects/hell-docs/src/app/shared/docs-code-viewer.ts",
+  "codeEditorIsolation": {
+    "directSharedFiles": [
+      "projects/hell-docs/src/app/shared/code-block.ts",
+      "projects/hell-docs/src/app/shared/example-tabs.ts",
+      "projects/hell-docs/src/app/shared/code-tools.ts"
+    ],
+    "lazyWrapperImportFiles": [
+      "projects/hell-docs/src/app/shared/code-block.ts",
+      "projects/hell-docs/src/app/shared/example-tabs.ts"
+    ],
+    "pageBoundary": "components/code-editor",
+    "packageSpecifiers": ["@codemirror/", "@hell-ui/angular/features/code-editor"],
+    "wrapperPackageSpecifiers": [
+      "@hell-ui/angular/features/code-editor",
+      "@hell-ui/angular/styles/features/code-editor"
+    ]
+  },
+  "pdfViewerIsolation": {
+    "globalDocsFiles": [
+      "projects/hell-docs/src/app/app.routes.ts",
+      "projects/hell-docs/src/app/docs-catalog.ts",
+      "projects/hell-docs/src/app/docs-search-index.ts"
+    ],
+    "sharedFiles": [
+      "projects/hell-docs/src/app/shared/code-block.ts",
+      "projects/hell-docs/src/app/shared/example-tabs.ts",
+      "projects/hell-docs/src/app/shared/code-tools.ts"
+    ],
+    "pageBoundary": "components/pdf-viewer",
+    "pagePath": "projects/hell-docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts",
+    "packageSpecifiers": ["@hell-ui/pdf-viewer", "pdfjs-dist"],
+    "forbiddenComponentStyleSpecifiers": [
+      "@hell-ui/angular/styles/features/pdf-viewer",
+      "@hell-ui/pdf-viewer/styles"
+    ]
+  },
+  "allowedCrossImports": [
+    {
+      "from": "projects/hell-docs/src/app/pages/components/flyout/flyout.page.ts",
+      "to": "projects/hell-docs/src/app/pages/testing/floating-dismissal-harness.page.ts",
+      "owner": "HELL-040/HELL-057",
+      "rationale": "Flyout exposes the query-param-only floating dismissal browser harness; it is deliberately bundled only with the lazy flyout route, not the docs shell."
+    }
+  ],
+  "heavyLazyRoutePolicies": [
+    {
+      "id": "pdf-viewer-docs",
+      "label": "PDF viewer docs examples",
+      "routePath": "/components/pdf-viewer",
+      "boundary": "components/pdf-viewer",
+      "packageSpecifiers": ["@hell-ui/pdf-viewer", "pdfjs-dist"],
+      "sourceFragments": [
+        "@hell-ui/pdf-viewer/styles",
+        "hell-ui/pdf-viewer/styles/pdf-viewer.css",
+        "pdfjs/pdf_viewer.css"
+      ]
+    },
+    {
+      "id": "code-editor-docs",
+      "label": "Code editor docs examples",
+      "routePath": "/components/code-editor",
+      "boundary": "components/code-editor",
+      "packageSpecifiers": ["@hell-ui/angular/features/code-editor", "@codemirror/"],
+      "sourceFragments": ["@hell-ui/angular/styles/features/code-editor"]
+    },
+    {
+      "id": "audio-player-docs",
+      "label": "Audio player docs examples",
+      "routePath": "/components/audio-player",
+      "boundary": "components/audio-player",
+      "packageSpecifiers": [
+        "@hell-ui/angular/audio-player",
+        "@hell-ui/angular/features/audio-transcript"
+      ],
+      "sourceFragments": []
+    }
+  ]
+}

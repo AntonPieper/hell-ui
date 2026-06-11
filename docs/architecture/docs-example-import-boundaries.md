@@ -2,8 +2,9 @@
 
 - ID: docs-example-import-boundaries
 - Slice: HELL-050; HELL-087 docs code preview exception
-- Enforced by: `pnpm run test:architecture` (`tools/check-architecture.mjs`, `checkDocsLazyRouteImportGraphContract()`)
-- Source of truth: `projects/hell-docs/src/app/docs-catalog.ts`
+- Enforced by: `pnpm run test:static-contracts` (`tools/check-static-contracts.mjs`, `checkDocsLazyRouteImportGraphContract()`)
+- Route source of truth: `projects/hell-docs/src/app/docs-catalog.ts`
+- Static Contract Manifest: `tools/static-contracts/docs-lazy-route-boundaries.json`
 
 ## Rule
 
@@ -13,22 +14,16 @@ Docs pages are lazy routes. Keep each page's live examples and raw source import
 2. Import the live example component and its `?raw` source only from that route's page component.
 3. Register search metadata in `projects/hell-docs/src/app/docs-search-index.ts`; do not import example implementations there.
 4. Put reusable docs shell widgets in `projects/hell-docs/src/app/shared/`, not in another page directory.
-5. Do not import page/example code from another lazy route unless the exact edge is listed below and mirrored in `tools/check-architecture.mjs`.
+5. Do not import page/example code from another lazy route unless the exact edge is listed in `tools/static-contracts/docs-lazy-route-boundaries.json`.
 
-When the architecture check fails, it lists the page/example import edge that crosses a lazy-route boundary so the next agent can move the code to `shared/`, move the example under the owning route, or add a narrow documented allowance.
+When the static-contract check fails, it lists the page/example import edge that crosses a lazy-route boundary so the next agent can move the code to `shared/`, move the example under the owning route, or add a narrow documented allowance.
 
-## Heavy lazy-route policies
+## Manifest-owned Policies
 
-| Policy ID         | Lazy route                                                                  | Boundary                                                                          | Guarded imports / references                                                                                                          | Status                                                                                                                                                                                                                                                                                                                                               |
-| ----------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| pdf-viewer-docs   | `/components/pdf-viewer`                                                    | `components/pdf-viewer`                                                           | `@hell-ui/pdf-viewer`, `pdfjs-dist`, `@hell-ui/pdf-viewer/styles`, `hell-ui/pdf-viewer/styles/pdf-viewer.css`, `pdfjs/pdf_viewer.css` | PDF examples are proven lazy by `docs-catalog.ts`; heavy imports and stylesheet references may appear only inside the PDF viewer route boundary.                                                                                                                                                                                                     |
-| code-editor-docs  | `/components/code-editor` plus dynamically imported shared docs code viewer | `components/code-editor`; `projects/hell-docs/src/app/shared/docs-code-viewer.ts` | `@hell-ui/angular/features/code-editor`, `@codemirror/`, `@hell-ui/angular/styles/features/code-editor`                               | CodeMirror examples are proven lazy by `docs-catalog.ts`; shared docs code tabs/blocks may use the single `docs-code-viewer` wrapper only when `hd-example-tabs` and `hd-code-block` render it through `import('./docs-code-viewer')` + `NgComponentOutlet`, keeping the docs shell free of CodeMirror and Angular deferrable-view runtime overhead. |
-| audio-player-docs | `/components/audio-player`                                                  | `components/audio-player`                                                         | `@hell-ui/angular/audio-player`, `@hell-ui/angular/features/audio-transcript`                                                         | Audio player and speech transcript examples are proven lazy by `docs-catalog.ts`; the optional transcript provider may appear only inside the audio player route boundary.                                                                                                                                                                           |
+`tools/static-contracts/docs-lazy-route-boundaries.json` owns:
 
-## Allowed cross-boundary page imports
+- heavy lazy-route package and stylesheet boundaries;
+- the single shared docs code-preview wrapper exception;
+- allowed cross-boundary page imports, including owner slice and rationale.
 
-| From                                                                | To                                                                            | Owner             | Rationale                                                                                                                                               |
-| ------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `projects/hell-docs/src/app/pages/components/flyout/flyout.page.ts` | `projects/hell-docs/src/app/pages/testing/floating-dismissal-harness.page.ts` | HELL-040/HELL-057 | Flyout exposes the query-param-only floating dismissal browser harness; it is deliberately bundled only with the lazy flyout route, not the docs shell. |
-
-No other page-to-page or example-to-other-page imports are allowed. Future test harnesses should either live under the routed page that owns them or be promoted to `projects/hell-docs/src/app/shared/` if more than one lazy route needs them.
+No other page-to-page or example-to-other-page imports are allowed. Future test harnesses should either live under the routed page that owns them or be promoted to `projects/hell-docs/src/app/shared/` if more than one lazy route needs them. If a stable exception is needed, add it to the manifest in the same slice as the route change.

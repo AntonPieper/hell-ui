@@ -38,6 +38,7 @@ import {
   numberAttribute,
   output,
   signal,
+  type Type,
 } from '@angular/core';
 
 export type {
@@ -1083,7 +1084,7 @@ export { HellTable as HellTableRoot, HellTableHead as HellTableHeader };
  * resize handle.
  */
 /** Preferred plural alias for the table utility directives. */
-export const HELL_TABLE_UTILITIES_DIRECTIVES = [
+export const HELL_TABLE_UTILITIES_DIRECTIVES: readonly Type<unknown>[] = [
   HellTableContainer,
   HellTable,
   HellTableHead,
@@ -1098,4 +1099,4 @@ export const HELL_TABLE_UTILITIES_DIRECTIVES = [
   HellTableSortTrigger,
   HellTableCell,
   HellTableResizeHandle,
-] as const;
+];

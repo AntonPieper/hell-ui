@@ -3,6 +3,8 @@ import { existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { apiReportPolicyEntries } from './entrypoint-manifest.mjs';
+
 const require = createRequire(import.meta.url);
 const { Extractor, ExtractorConfig } = require('@microsoft/api-extractor');
 
@@ -10,35 +12,15 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const reportFolder = join(root, 'etc/api-reports');
 const reportTempFolder = join(root, 'tmp/api-reports');
 const tsconfigFilePath = join(root, 'tsconfig.json');
-const packageJsonFullPath = join(root, 'dist/hell/package.json');
 const localBuild = process.argv.includes('--local') || process.argv.includes('--update');
 
-const apiReportEntrypoints = [
-  {
-    id: 'root',
-    specifier: '@hell-ui/angular',
-    mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular.d.ts',
-    reportFileName: 'hell-ui-angular.api.md',
-  },
-  {
-    id: 'core',
-    specifier: '@hell-ui/angular/core',
-    mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular-core.d.ts',
-    reportFileName: 'hell-ui-angular-core.api.md',
-  },
-  {
-    id: 'primitives',
-    specifier: '@hell-ui/angular/primitives',
-    mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular-primitives.d.ts',
-    reportFileName: 'hell-ui-angular-primitives.api.md',
-  },
-  {
-    id: 'testing',
-    specifier: '@hell-ui/angular/testing',
-    mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular-testing.d.ts',
-    reportFileName: 'hell-ui-angular-testing.api.md',
-  },
-];
+const apiReportPolicies = apiReportPolicyEntries();
+const apiReportEntrypoints = apiReportPolicies
+  .filter((entrypoint) => entrypoint.apiReport.expectation === 'required')
+  .map(apiReportEntrypoint);
+const excludedApiReportEntrypoints = apiReportPolicies.filter(
+  (entrypoint) => entrypoint.apiReport.expectation === 'excluded',
+);
 
 const missingInputs = requiredBuildInputs().filter((path) => !existsSync(path));
 if (missingInputs.length) {
@@ -57,7 +39,7 @@ for (const entrypoint of apiReportEntrypoints) {
   const extractorConfig = ExtractorConfig.prepare({
     configObject: apiExtractorConfig(entrypoint),
     configObjectFullPath: undefined,
-    packageJsonFullPath,
+    packageJsonFullPath: packageJsonPath(entrypoint),
   });
 
   const result = Extractor.invoke(extractorConfig, {
@@ -82,10 +64,17 @@ if (failed) {
   process.exit(1);
 }
 
-console.log(`[api-report] ${localBuild ? 'updated' : 'current'}: ${apiReportEntrypoints.length} entrypoints.`);
+console.log(
+  `[api-report] ${localBuild ? 'updated' : 'current'}: checked ${apiReportEntrypoints.length}, excluded ${excludedApiReportEntrypoints.length}.`,
+);
 
 function requiredBuildInputs() {
-  return [packageJsonFullPath, ...apiReportEntrypoints.map((entrypoint) => mainEntryPointPath(entrypoint))];
+  return [
+    ...new Set([
+      ...apiReportEntrypoints.map(packageJsonPath),
+      ...apiReportEntrypoints.map(mainEntryPointPath),
+    ]),
+  ];
 }
 
 function apiExtractorConfig(entrypoint) {
@@ -141,7 +130,35 @@ function apiExtractorConfig(entrypoint) {
 }
 
 function mainEntryPointPath(entrypoint) {
-  return join(root, entrypoint.mainEntryPointFilePath);
+  return join(
+    root,
+    entrypoint.distRoot,
+    'types',
+    `${apiReportTypeFileBase(entrypoint.specifier)}.d.ts`,
+  );
+}
+
+function packageJsonPath(entrypoint) {
+  return join(root, entrypoint.distRoot, 'package.json');
+}
+
+function apiReportEntrypoint(entrypoint) {
+  return {
+    id: entrypoint.id,
+    specifier: entrypoint.specifier,
+    distRoot: packageDistRoot(entrypoint.ownerPackage),
+    reportFileName: entrypoint.apiReport.reportFileName,
+  };
+}
+
+function packageDistRoot(ownerPackage) {
+  if (ownerPackage === '@hell-ui/angular') return 'dist/hell';
+  if (ownerPackage === '@hell-ui/pdf-viewer') return 'dist/hell-pdf-viewer';
+  throw new Error(`Unknown API report owner package ${ownerPackage}`);
+}
+
+function apiReportTypeFileBase(specifier) {
+  return specifier.replace(/^@/, '').replaceAll('/', '-');
 }
 
 function relativeToRoot(path) {

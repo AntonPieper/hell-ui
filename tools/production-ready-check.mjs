@@ -4,6 +4,8 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { apiReportPolicyEntries } from './entrypoint-manifest.mjs';
+
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const checklistPath = join(root, 'docs/release/production-readiness-checklist.md');
 const requiredCategories = [
@@ -29,16 +31,13 @@ const requiredReleaseScenarios = [
   'code-editor',
 ];
 const requiredPlaywrightProjects = ['chromium', 'firefox', 'webkit'];
-const requiredApiReportPaths = [
-  'etc/api-reports/hell-ui-angular.api.md',
-  'etc/api-reports/hell-ui-angular-core.api.md',
-  'etc/api-reports/hell-ui-angular-primitives.api.md',
-  'etc/api-reports/hell-ui-angular-testing.api.md',
-];
+const requiredApiReportPaths = apiReportPolicyEntries()
+  .filter((entrypoint) => entrypoint.apiReport.expectation === 'required')
+  .map((entrypoint) => `etc/api-reports/${entrypoint.apiReport.reportFileName}`);
 const requiredFullReleaseTasks = [
   'changelog entry',
   'lint',
-  'architecture',
+  'static contracts',
   'ci contract',
   'unit',
   'build lib',
@@ -57,32 +56,32 @@ const releaseTasksByCategory = {
 const checklistContracts = {
   'package-consumer': {
     sliceIds: ['HELL-012', 'HELL-020', 'HELL-021', 'HELL-022', 'HELL-023', 'HELL-024', 'HELL-055', 'HELL-081'],
-    commands: ['pnpm test:package-consumer -- --minimal-deps', 'pnpm release:dry-run -- --full'],
+    commands: ['pnpm test:package-consumer --minimal-deps', 'pnpm run release:dry-run --full'],
     checkTypes: ['releaseDryRunEvidence'],
   },
   api: {
-    sliceIds: ['HELL-025', 'HELL-026', 'HELL-051'],
-    commands: ['pnpm build:lib', 'pnpm test:api-report', 'pnpm release:dry-run -- --full'],
+    sliceIds: ['HELL-025', 'HELL-026', 'HELL-051', 'HELL-113', 'HELL-114'],
+    commands: ['pnpm build:lib', 'pnpm test:api-report', 'pnpm run release:dry-run --full'],
     checkTypes: ['fileExists', 'releaseDryRunEvidence'],
   },
   accessibility: {
     sliceIds: ['HELL-038', 'HELL-039', 'HELL-040', 'HELL-041', 'HELL-042', 'HELL-043', 'HELL-061'],
-    commands: ['pnpm e2e', 'pnpm release:dry-run -- --full'],
+    commands: ['pnpm e2e', 'pnpm run release:dry-run --full'],
     checkTypes: ['playwrightJsonReport', 'fileNotContains'],
   },
   'docs-budgets': {
     sliceIds: ['HELL-019', 'HELL-030', 'HELL-031', 'HELL-032', 'HELL-050'],
-    commands: ['pnpm build:docs', 'pnpm diagnose:docs-bundle', 'pnpm release:dry-run -- --full'],
+    commands: ['pnpm build:docs', 'pnpm diagnose:docs-bundle', 'pnpm run release:dry-run --full'],
     checkTypes: ['fileContains', 'releaseDryRunEvidence'],
   },
   'pack-audit': {
     sliceIds: ['HELL-023', 'HELL-024', 'HELL-053'],
-    commands: ['pnpm build:lib', 'pnpm test:package-pack', 'pnpm release:dry-run -- --full'],
+    commands: ['pnpm build:lib', 'pnpm test:package-pack', 'pnpm run release:dry-run --full'],
     checkTypes: ['releaseDryRunEvidence'],
   },
   'release-dry-run': {
     sliceIds: ['HELL-027', 'HELL-028', 'HELL-049', 'HELL-051', 'HELL-052'],
-    commands: ['pnpm release:dry-run -- --full'],
+    commands: ['pnpm run release:dry-run --full'],
     checkTypes: ['releaseDryRunEvidence'],
   },
 };
@@ -122,7 +121,7 @@ if (failures.length) {
   console.error('Production readiness gate failed:');
   for (const failure of failures) console.error(`- ${failure}`);
   console.error('\nRun fresh evidence before claiming production readiness:');
-  console.error('- pnpm release:dry-run -- --full');
+  console.error('- pnpm run release:dry-run --full');
   console.error('- pnpm e2e');
   console.error('- pnpm production-ready:check');
   process.exit(1);

@@ -1,7 +1,16 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
+import {
+  HellTable,
+  HellTableBody,
+  HellTableCell,
+  HellTableContainer,
+  HellTableHead,
+  HellTableHeaderCell,
+  HellTableRow,
+  HellTableRowAction,
+} from '@hell-ui/angular/table';
 
 interface Person {
   readonly id: string;
@@ -12,7 +21,17 @@ interface Person {
 @Component({
   selector: 'app-data-table-grid-mode-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, ...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [
+    HellButton,
+    HellTableContainer,
+    HellTable,
+    HellTableHead,
+    HellTableBody,
+    HellTableRow,
+    HellTableHeaderCell,
+    HellTableCell,
+    HellTableRowAction,
+  ],
   template: `
     <div class="grid gap-3">
       <div hellTableContainer class="overflow-auto">

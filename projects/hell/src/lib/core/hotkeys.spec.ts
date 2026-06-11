@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 
 import {
   HellGlobalKeydownService,
+  HellGlobalPointerdownService,
   matchHotkey,
   hellShouldHandleGlobalHotkey,
 } from './hotkeys';
@@ -57,7 +58,8 @@ describe('Core Hotkeys', () => {
   });
 
   it('blocks bare shortcuts from nested contenteditable targets', () => {
-    document.body.innerHTML = '<div id="editor" contenteditable="true"><span id="child"></span></div>';
+    document.body.innerHTML =
+      '<div id="editor" contenteditable="true"><span id="child"></span></div>';
     const child = document.getElementById('child') as HTMLSpanElement;
     const results: boolean[] = [];
 
@@ -65,7 +67,9 @@ describe('Core Hotkeys', () => {
       results.push(hellShouldHandleGlobalHotkey(event, '/'));
       results.push(hellShouldHandleGlobalHotkey(event, 'ctrl+k'));
     });
-    child.dispatchEvent(new KeyboardEvent('keydown', { key: '/', bubbles: true, cancelable: true }));
+    child.dispatchEvent(
+      new KeyboardEvent('keydown', { key: '/', bubbles: true, cancelable: true }),
+    );
 
     expect(results).toEqual([false, true]);
   });
@@ -78,10 +82,7 @@ describe('HellGlobalKeydownService', () => {
   beforeEach(() => {
     doc = new FakeDocument();
     TestBed.configureTestingModule({
-      providers: [
-        HellGlobalKeydownService,
-        { provide: DOCUMENT, useValue: doc },
-      ],
+      providers: [HellGlobalKeydownService, { provide: DOCUMENT, useValue: doc }],
     });
     service = TestBed.inject(HellGlobalKeydownService);
   });
@@ -146,17 +147,46 @@ describe('HellGlobalKeydownService', () => {
   });
 });
 
-class FakeDocument {
-  readonly listeners = new Set<EventListener>();
-  readonly addEventListener = vi.fn((type: string, listener: EventListener) => {
-    if (type === 'keydown') this.listeners.add(listener);
-  });
-  readonly removeEventListener = vi.fn((type: string, listener: EventListener) => {
-    if (type === 'keydown') this.listeners.delete(listener);
+describe('HellGlobalPointerdownService', () => {
+  let doc: FakeDocument;
+  let service: HellGlobalPointerdownService;
+
+  beforeEach(() => {
+    doc = new FakeDocument();
+    TestBed.configureTestingModule({
+      providers: [HellGlobalPointerdownService, { provide: DOCUMENT, useValue: doc }],
+    });
+    service = TestBed.inject(HellGlobalPointerdownService);
   });
 
-  dispatch(event: KeyboardEvent): void {
-    for (const listener of [...this.listeners]) listener(event);
+  it('cleans up pointerdown listeners on destroy', () => {
+    const destroyRef = createDestroyRef();
+    const handler = vi.fn();
+
+    service.register(handler, destroyRef);
+    doc.dispatch(new PointerEvent('pointerdown', { pointerId: 1 }));
+    destroyRef.destroy();
+    doc.dispatch(new PointerEvent('pointerdown', { pointerId: 2 }));
+
+    expect(handler).toHaveBeenCalledOnce();
+    expect(doc.addEventListener).toHaveBeenCalledOnce();
+    expect(doc.removeEventListener).toHaveBeenCalledOnce();
+  });
+});
+
+class FakeDocument {
+  readonly listeners = new Map<string, Set<EventListener>>();
+  readonly addEventListener = vi.fn((type: string, listener: EventListener) => {
+    const bucket = this.listeners.get(type) ?? new Set<EventListener>();
+    bucket.add(listener);
+    this.listeners.set(type, bucket);
+  });
+  readonly removeEventListener = vi.fn((type: string, listener: EventListener) => {
+    this.listeners.get(type)?.delete(listener);
+  });
+
+  dispatch(event: Event): void {
+    for (const listener of [...(this.listeners.get(event.type) ?? [])]) listener(event);
   }
 }
 

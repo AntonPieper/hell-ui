@@ -19,7 +19,9 @@ The release stage defines the package-level promise. API comments and docs still
 - **Beta**: intended for real use, but may still change at minor boundaries before `1.0.0`.
 - **Experimental**: may change or disappear between any pre-1.0 releases; consumers must opt in deliberately.
 - **Deprecated**: still present for compatibility, with changelog and migration notes required before removal.
-- **Internal**: not public API, even if reachable through built files; architecture checks should keep these out of public exports.
+- **Internal**: not public API, even if reachable through built files; static-contract checks should keep these out of public exports.
+
+The entrypoint stability source of truth is `tools/entrypoint-manifest.mjs`. It records the tier, owning package, peer tier, consumer scenario, and API-report expectation for each importable TypeScript and style entrypoint.
 
 ## What counts as breaking
 
@@ -42,7 +44,7 @@ Hell UI uses `CHANGELOG.md` in Keep a Changelog shape:
 - Breaking changes get a dedicated `### Breaking changes` section with affected entrypoints, migration steps, and the first version carrying the break.
 - Release notes must keep alpha/internal-beta/public-beta/stable wording aligned with this policy and the production-readiness checklist.
 
-`pnpm release:dry-run -- --fast` and `pnpm release:dry-run -- --full` run `pnpm test:changelog`. That check reads the published package source manifest at `projects/hell/package.json` and fails if the current package version lacks a matching changelog section or this policy is missing its required stage definitions.
+`pnpm run release:dry-run --fast` and `pnpm run release:dry-run --full` run `pnpm test:changelog`. That check reads the published package source manifest at `projects/hell/package.json` and fails if the current package version lacks a matching changelog section or this policy is missing its required stage definitions.
 
 ## Promotion rules
 

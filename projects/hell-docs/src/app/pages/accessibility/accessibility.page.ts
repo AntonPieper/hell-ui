@@ -1,6 +1,14 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
+import {
+  HellTable,
+  HellTableBody,
+  HellTableCell,
+  HellTableContainer,
+  HellTableHead,
+  HellTableHeaderCell,
+  HellTableRow,
+} from '@hell-ui/angular/table';
 
 interface AccessibilityMatrixRow {
   readonly kind: 'Primitive' | 'Composite' | 'Feature';
@@ -536,7 +544,16 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
 @Component({
   selector: 'hd-accessibility',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, ...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [
+    RouterLink,
+    HellTableContainer,
+    HellTable,
+    HellTableHead,
+    HellTableBody,
+    HellTableRow,
+    HellTableHeaderCell,
+    HellTableCell,
+  ],
   styles: [
     `
       :host {
