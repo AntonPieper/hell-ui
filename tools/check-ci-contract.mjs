@@ -75,7 +75,11 @@ const requiredScripts = {
 const e2eBrowsers = ['chromium', 'firefox', 'webkit'];
 const e2eGroups = [
   {
-    name: 'aria-snapshots',
+    name: 'aria-snapshots-foundations',
+    specs: ['e2e/aria-snapshots.spec.ts'],
+  },
+  {
+    name: 'aria-snapshots-overlays-data',
     specs: ['e2e/aria-snapshots.spec.ts'],
   },
   {
@@ -131,7 +135,10 @@ const e2eGroups = [
   },
 ];
 
-const splitE2eSpecCounts = new Map([['e2e/docs-axe-smoke.spec.ts', 2]]);
+const splitE2eSpecCounts = new Map([
+  ['e2e/aria-snapshots.spec.ts', 2],
+  ['e2e/docs-axe-smoke.spec.ts', 2],
+]);
 
 const adapterChecks = [
   {
@@ -160,7 +167,8 @@ const adapterChecks = [
       '          - firefox',
       '          - webkit',
       'group:',
-      '          - aria-snapshots',
+      '          - aria-snapshots-foundations',
+      '          - aria-snapshots-overlays-data',
       '          - docs-smoke-foundations',
       '          - docs-smoke-surfaces',
       '          - controls-a11y',
@@ -186,12 +194,16 @@ const adapterChecks = [
       'pnpm exec playwright install "${PLAYWRIGHT_BROWSER}"',
       'pnpm exec playwright install --with-deps "${PLAYWRIGHT_BROWSER}"',
       'Restore Playwright image',
+      'actions/cache/restore@v4',
       "if: matrix.browser == 'webkit'",
       '.ci-cache/playwright-image-v1.59.1-noble.tar',
       'playwright-image-${{ runner.os }}-v1.59.1-noble',
       'docker pull mcr.microsoft.com/playwright:v1.59.1-noble',
       'docker save --output .ci-cache/playwright-image-v1.59.1-noble.tar',
       'docker load --input .ci-cache/playwright-image-v1.59.1-noble.tar',
+      'Save Playwright image',
+      "matrix.group == 'aria-snapshots-foundations'",
+      'actions/cache/save@v4',
       'HELL_E2E_PROJECTS: ci',
       'PLAYWRIGHT_PROJECT: ${{ matrix.browser }}-${{ matrix.group }}',
       'Browser tests',

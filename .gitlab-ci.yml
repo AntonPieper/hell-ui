@@ -120,7 +120,8 @@ e2e:
           - firefox
           - webkit
         PLAYWRIGHT_GROUP:
-          - aria-snapshots
+          - aria-snapshots-foundations
+          - aria-snapshots-overlays-data
           - docs-smoke-foundations
           - docs-smoke-surfaces
           - controls-a11y

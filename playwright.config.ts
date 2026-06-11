@@ -24,8 +24,16 @@ const browserProjects = [
 
 const ciGroups = [
   {
-    name: 'aria-snapshots',
+    name: 'aria-snapshots-foundations',
     testMatch: 'aria-snapshots.spec.ts',
+    grep:
+      /accordion|checkbox|date picker|date input|listbox|progress|radio|switch|tabs|tooltip|time input/,
+  },
+  {
+    name: 'aria-snapshots-overlays-data',
+    testMatch: 'aria-snapshots.spec.ts',
+    grep:
+      /dialog|flyout|menu snapshot|popover snapshots|select snapshots|combobox|slider|omnibar|table utility/,
   },
   {
     name: 'docs-smoke-foundations',

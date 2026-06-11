@@ -351,7 +351,8 @@ jobs:
           - firefox
           - webkit
         group:
-          - aria-snapshots
+          - aria-snapshots-foundations
+          - aria-snapshots-overlays-data
           - docs-smoke-foundations
           - docs-smoke-surfaces
           - controls-a11y
@@ -411,7 +412,7 @@ jobs:
       - name: Restore Playwright image
         if: matrix.browser == 'webkit'
         id: playwright-image-cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: .ci-cache/playwright-image-v1.59.1-noble.tar
           key: playwright-image-${{ runner.os }}-v1.59.1-noble
@@ -487,6 +488,13 @@ jobs:
             --env PLAYWRIGHT_PROJECT \
             mcr.microsoft.com/playwright:v1.59.1-noble \
             sh -lc 'corepack enable && pnpm run ci:test:e2e --workers=8 --project="${PLAYWRIGHT_PROJECT}"'
+
+      - name: Save Playwright image
+        if: always() && matrix.browser == 'webkit' && matrix.group == 'aria-snapshots-foundations' && steps.playwright-image-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .ci-cache/playwright-image-v1.59.1-noble.tar
+          key: playwright-image-${{ runner.os }}-v1.59.1-noble
 
       - name: Stop docs server
         if: always()
