@@ -387,6 +387,7 @@ jobs:
         run: pnpm run ci:install
 
       - name: Restore Playwright browser
+        if: matrix.browser != 'webkit'
         id: playwright-cache
         uses: actions/cache@v4
         with:
@@ -396,6 +397,7 @@ jobs:
             playwright-${{ runner.os }}-${{ matrix.browser }}-
 
       - name: Install Playwright browser
+        if: matrix.browser != 'webkit'
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.browser }}
           PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
@@ -405,6 +407,26 @@ jobs:
           else
             pnpm exec playwright install --with-deps "${PLAYWRIGHT_BROWSER}"
           fi
+
+      - name: Restore Playwright image
+        if: matrix.browser == 'webkit'
+        id: playwright-image-cache
+        uses: actions/cache@v4
+        with:
+          path: .ci-cache/playwright-image-v1.59.1-noble.tar
+          key: playwright-image-${{ runner.os }}-v1.59.1-noble
+
+      - name: Pull Playwright image
+        if: matrix.browser == 'webkit' && steps.playwright-image-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p .ci-cache
+          docker pull mcr.microsoft.com/playwright:v1.59.1-noble
+          docker save --output .ci-cache/playwright-image-v1.59.1-noble.tar \
+            mcr.microsoft.com/playwright:v1.59.1-noble
+
+      - name: Load Playwright image
+        if: matrix.browser == 'webkit' && steps.playwright-image-cache.outputs.cache-hit == 'true'
+        run: docker load --input .ci-cache/playwright-image-v1.59.1-noble.tar
 
       - name: Restore built docs
         id: e2e-docs-cache
@@ -442,11 +464,29 @@ jobs:
           curl --fail --show-error http://127.0.0.1:4200/
 
       - name: Browser tests
+        if: matrix.browser != 'webkit'
         env:
           HELL_E2E_BASE_URL: http://127.0.0.1:4200
           HELL_E2E_PROJECTS: ci
           PLAYWRIGHT_PROJECT: ${{ matrix.browser }}-${{ matrix.group }}
         run: pnpm run ci:test:e2e --workers=8 --project="${PLAYWRIGHT_PROJECT}"
+
+      - name: Browser tests in Playwright image
+        if: matrix.browser == 'webkit'
+        env:
+          PLAYWRIGHT_PROJECT: ${{ matrix.browser }}-${{ matrix.group }}
+        run: |
+          docker run --rm --network host \
+            --volume "${PWD}:/workspace" \
+            --workdir /workspace \
+            --env CI=true \
+            --env HOME=/root \
+            --env PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+            --env HELL_E2E_BASE_URL=http://127.0.0.1:4200 \
+            --env HELL_E2E_PROJECTS=ci \
+            --env PLAYWRIGHT_PROJECT \
+            mcr.microsoft.com/playwright:v1.59.1-noble \
+            sh -lc 'corepack enable && pnpm run ci:test:e2e --workers=8 --project="${PLAYWRIGHT_PROJECT}"'
 
       - name: Stop docs server
         if: always()
