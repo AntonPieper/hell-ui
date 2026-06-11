@@ -19,10 +19,10 @@ env:
   NODE_VERSION: 22
 
 jobs:
-  test:
-    name: Test
+  static:
+    name: Static contracts
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 8
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -42,28 +42,264 @@ jobs:
       - name: Install
         run: pnpm run ci:install
 
-      - name: Install Playwright browsers
-        run: pnpm run ci:playwright
+      - name: Lint and contract checks
+        run: pnpm run ci:test:static
 
-      - name: Test
-        run: pnpm run ci:test
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Enable pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Restore Angular cache
+        uses: actions/cache@v4
+        with:
+          path: .angular/cache
+          key: angular-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'angular.json', 'tsconfig*.json', 'projects/**/tsconfig*.json') }}
+          restore-keys: |
+            angular-${{ runner.os }}-
+
+      - name: Install
+        run: pnpm run ci:install
+
+      - name: Unit tests
+        run: pnpm run ci:test:unit
 
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports
+          name: test-reports-unit
           path: |
             test-results/
-            playwright-report/
             coverage/
           if-no-files-found: ignore
 
-  build:
-    name: Build
+  package-consumer:
+    name: Package consumer (${{ matrix.scenario }})
     runs-on: ubuntu-latest
-    needs: test
-    timeout-minutes: 20
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - scenario: core
+            scenarios: root-core,core,testing
+          - scenario: primitive-foundations
+            scenarios: primitives-css,button-unstyled
+          - scenario: button
+            scenarios: button
+          - scenario: composite-foundations
+            scenarios: composites-css,app-shell
+          - scenario: audio
+            scenarios: audio-player,audio-transcript
+          - scenario: features
+            scenarios: code-editor,pdf-viewer
+          - scenario: table-core
+            scenarios: table,data-table,no-legacy-alias
+          - scenario: table-tanstack-virtual
+            scenarios: table-tanstack,table-virtual
+          - scenario: table-cdk
+            scenarios: table-cdk
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Restore built packages
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            dist/hell
+            dist/hell-pdf-viewer
+          key: dist-packages-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'angular.json', 'tsconfig*.json', 'projects/hell/**', 'projects/hell-pdf-viewer/**') }}
+
+      - name: Enable pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Restore Angular cache
+        uses: actions/cache@v4
+        with:
+          path: .angular/cache
+          key: angular-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'angular.json', 'tsconfig*.json', 'projects/**/tsconfig*.json') }}
+          restore-keys: |
+            angular-${{ runner.os }}-
+
+      - name: Install
+        run: pnpm run ci:install
+
+      - name: Ensure built packages
+        run: pnpm run ci:ensure:build:lib
+
+      - name: Package consumer scenario
+        env:
+          HELL_PACKAGE_CONSUMER_SKIP_BUILD: 1
+          HELL_PACKAGE_CONSUMER_SCENARIOS: ${{ matrix.scenarios }}
+        run: pnpm run ci:test:package-consumer
+
+  build-lib:
+    name: Build packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Restore built package cache marker
+        id: packages-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            dist/hell
+            dist/hell-pdf-viewer
+          key: dist-packages-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'angular.json', 'tsconfig*.json', 'projects/hell/**', 'projects/hell-pdf-viewer/**') }}
+
+      - name: Enable pnpm
+        if: steps.packages-cache.outputs.cache-hit != 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node
+        if: steps.packages-cache.outputs.cache-hit != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Restore Angular cache
+        if: steps.packages-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: .angular/cache
+          key: angular-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'angular.json', 'tsconfig*.json', 'projects/**/tsconfig*.json') }}
+          restore-keys: |
+            angular-${{ runner.os }}-
+
+      - name: Install
+        if: steps.packages-cache.outputs.cache-hit != 'true'
+        run: pnpm run ci:install
+
+      - name: Build packages
+        if: steps.packages-cache.outputs.cache-hit != 'true'
+        run: pnpm run ci:build:lib
+
+      - name: Save built package cache
+        if: steps.packages-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            dist/hell
+            dist/hell-pdf-viewer
+          key: dist-packages-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'angular.json', 'tsconfig*.json', 'projects/hell/**', 'projects/hell-pdf-viewer/**') }}
+
+      - name: Upload built packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-packages
+          path: dist/
+          if-no-files-found: error
+
+  build-docs:
+    name: Build docs
+    runs-on: ubuntu-latest
+    needs: build-lib
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Restore docs cache marker
+        id: docs-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: dist/hell-docs
+          key: docs-dist-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'angular.json', 'tsconfig*.json', 'projects/hell/**', 'projects/hell-pdf-viewer/**', 'projects/hell-docs/**') }}
+
+      - name: Enable pnpm
+        if: steps.docs-cache.outputs.cache-hit != 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node
+        if: steps.docs-cache.outputs.cache-hit != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Restore Angular cache
+        if: steps.docs-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: .angular/cache
+          key: angular-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'angular.json', 'tsconfig*.json', 'projects/**/tsconfig*.json') }}
+          restore-keys: |
+            angular-${{ runner.os }}-
+
+      - name: Install
+        if: steps.docs-cache.outputs.cache-hit != 'true'
+        run: pnpm run ci:install
+
+      - name: Download built packages
+        if: steps.docs-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-packages
+          path: dist
+
+      - name: Ensure built packages
+        if: steps.docs-cache.outputs.cache-hit != 'true'
+        run: pnpm run ci:ensure:build:lib
+
+      - name: Build docs
+        if: steps.docs-cache.outputs.cache-hit != 'true'
+        run: pnpm run ci:build:docs:prepared
+
+      - name: Save docs cache
+        if: steps.docs-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: dist/hell-docs
+          key: docs-dist-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'angular.json', 'tsconfig*.json', 'projects/hell/**', 'projects/hell-pdf-viewer/**', 'projects/hell-docs/**') }}
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-dist
+          path: dist/hell-docs/
+          if-no-files-found: error
+
+  api-report:
+    name: API report
+    runs-on: ubuntu-latest
+    needs: build-lib
+    timeout-minutes: 8
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -80,15 +316,128 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
+      - name: Restore Angular cache
+        uses: actions/cache@v4
+        with:
+          path: .angular/cache
+          key: angular-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'angular.json', 'tsconfig*.json', 'projects/**/tsconfig*.json') }}
+          restore-keys: |
+            angular-${{ runner.os }}-
+
       - name: Install
         run: pnpm run ci:install
 
-      - name: Build
-        run: pnpm run ci:build
+      - name: Download built packages
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-packages
+          path: dist
 
-      - name: Upload build output
+      - name: Ensure built packages
+        run: pnpm run ci:ensure:build:lib
+
+      - name: API report
+        run: pnpm run ci:test:api-report:prepared
+
+  e2e:
+    name: E2E (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        browser:
+          - chromium
+          - firefox
+          - webkit
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Enable pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Restore Angular cache
+        uses: actions/cache@v4
+        with:
+          path: .angular/cache
+          key: angular-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'angular.json', 'tsconfig*.json', 'projects/**/tsconfig*.json') }}
+          restore-keys: |
+            angular-${{ runner.os }}-
+
+      - name: Install
+        run: pnpm run ci:install
+
+      - name: Restore built docs
+        id: e2e-docs-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: dist/hell-docs
+          key: docs-dist-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'angular.json', 'tsconfig*.json', 'projects/hell/**', 'projects/hell-pdf-viewer/**', 'projects/hell-docs/**') }}
+
+      - name: Ensure built docs
+        if: steps.e2e-docs-cache.outputs.cache-hit != 'true'
+        run: pnpm run ci:ensure:build:docs
+
+      - name: Start docs server
+        run: |
+          docs_root="dist/hell-docs/browser"
+          if [ ! -f "${docs_root}/index.html" ]; then
+            docs_root="dist/hell-docs"
+          fi
+
+          test -f "${docs_root}/index.html"
+          docker run --detach --name hell-docs \
+            --publish 127.0.0.1:4200:80 \
+            --volume "${PWD}/${docs_root}:/usr/share/nginx/html:ro" \
+            --volume "${PWD}/tools/ci/nginx-spa.conf:/etc/nginx/conf.d/default.conf:ro" \
+            nginx:1.27-alpine
+
+      - name: Wait for docs server
+        run: |
+          for attempt in 1 2 3 4 5; do
+            if curl --fail --silent --show-error http://127.0.0.1:4200/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          curl --fail --show-error http://127.0.0.1:4200/
+
+      - name: Browser tests in Playwright image
+        env:
+          PLAYWRIGHT_PROJECT: ${{ matrix.browser }}
+        run: |
+          docker run --rm --network host \
+            --volume "${PWD}:/workspace" \
+            --workdir /workspace \
+            --env CI=true \
+            --env HOME=/root \
+            --env PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+            --env HELL_E2E_BASE_URL=http://127.0.0.1:4200 \
+            --env PLAYWRIGHT_PROJECT \
+            mcr.microsoft.com/playwright:v1.59.1-noble \
+            sh -lc 'corepack enable && pnpm run ci:test:e2e --workers=8 --project="${PLAYWRIGHT_PROJECT}"'
+
+      - name: Stop docs server
+        if: always()
+        run: docker rm --force hell-docs || true
+
+      - name: Upload browser reports
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: dist
-          path: dist/
-          if-no-files-found: error
+          name: playwright-${{ matrix.browser }}
+          path: |
+            test-results/playwright-report.json
+            test-results/playwright-html/
+            test-results/playwright/
+          if-no-files-found: ignore

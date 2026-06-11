@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 
 import {
   parseBudgetSize,
@@ -14,6 +14,7 @@ const requiredFiles = [
   'vitest.ci.config.ts',
   'tools/run-ci-tests.mjs',
   'tools/run-unit-tests.mjs',
+  'tools/ci/nginx-spa.conf',
   'tools/check-package-consumer.mjs',
   'tools/check-package-pack.mjs',
   'tools/check-api-reports.mjs',
@@ -44,21 +45,90 @@ const requiredScripts = {
   'production-ready:check': 'node tools/production-ready-check.mjs',
   'ci:test': 'node tools/run-ci-tests.mjs',
   'ci:playwright': 'pnpm exec playwright install --with-deps chromium firefox webkit',
-  'ci:build': 'pnpm run build && pnpm run test:api-report',
+  'ci:playwright:chromium': 'pnpm exec playwright install --with-deps chromium',
+  'ci:playwright:firefox': 'pnpm exec playwright install --with-deps firefox',
+  'ci:playwright:webkit': 'pnpm exec playwright install --with-deps webkit',
+  'ci:test:unit': 'pnpm run test:unit && node tools/ci-summary.mjs',
+  'ci:test:static': 'pnpm run lint && pnpm run test:architecture && pnpm run test:ci-contract',
+  'ci:test:e2e': 'pnpm exec playwright test',
+  'ci:test:package-consumer': 'pnpm run test:package-consumer -- --minimal-deps',
+  'ci:test:package-consumer:core': 'HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing pnpm run ci:test:package-consumer',
+  'ci:test:package-consumer:primitives': 'HELL_PACKAGE_CONSUMER_SCENARIOS=primitives-css,button-unstyled,button pnpm run ci:test:package-consumer',
+  'ci:test:package-consumer:composites': 'HELL_PACKAGE_CONSUMER_SCENARIOS=composites-css,app-shell,audio-player,audio-transcript pnpm run ci:test:package-consumer',
+  'ci:test:package-consumer:features': 'HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor,pdf-viewer pnpm run ci:test:package-consumer',
+  'ci:test:package-consumer:tables': 'HELL_PACKAGE_CONSUMER_SCENARIOS=table,data-table,table-tanstack,table-virtual,table-cdk,no-legacy-alias pnpm run ci:test:package-consumer',
+  'ci:test:package-consumer:code-editor': 'HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor pnpm run ci:test:package-consumer',
+  'ci:test:package-consumer:pdf-viewer': 'HELL_PACKAGE_CONSUMER_SCENARIOS=pdf-viewer pnpm run ci:test:package-consumer',
+  'ci:test:package-consumer:table-core': 'HELL_PACKAGE_CONSUMER_SCENARIOS=table,data-table,no-legacy-alias pnpm run ci:test:package-consumer',
+  'ci:test:package-consumer:table-adapters': 'HELL_PACKAGE_CONSUMER_SCENARIOS=table-tanstack,table-virtual,table-cdk pnpm run ci:test:package-consumer',
+  'ci:build:lib': 'pnpm run build:lib',
+  'ci:build:docs': 'pnpm run build:lib && pnpm run build:docs',
+  'ci:build:docs:prepared': 'pnpm run build:docs',
+  'ci:ensure:build:lib': "sh -c 'test -f dist/hell/package.json && test -f dist/hell-pdf-viewer/package.json || pnpm run ci:build:lib'",
+  'ci:ensure:build:docs': "sh -c 'test -f dist/hell-docs/browser/index.html || test -f dist/hell-docs/index.html || (pnpm run ci:ensure:build:lib && pnpm run ci:build:docs:prepared)'",
+  'ci:test:api-report': 'pnpm run build:lib && pnpm run test:api-report',
+  'ci:test:api-report:prepared': 'pnpm run test:api-report',
+  'ci:build': 'pnpm run build:lib && pnpm run build:docs && pnpm run test:api-report',
   'ci:verify': 'pnpm run ci:test && pnpm run ci:build',
 };
+
+const e2eBrowsers = ['chromium', 'firefox', 'webkit'];
 
 const adapterChecks = [
   {
     path: '.github/workflows/ci.yml',
     includes: [
       'pnpm run ci:install',
-      'pnpm run ci:playwright',
-      'pnpm run ci:test',
-      'pnpm run ci:build',
+      'Static contracts',
+      'Unit tests',
+      'Build packages',
+      'Package consumer (${{ matrix.scenario }})',
+      'Build docs',
+      'API report',
+      'E2E (${{ matrix.browser }})',
+      'nginx:1.27-alpine',
+      'tools/ci/nginx-spa.conf:/etc/nginx/conf.d/default.conf:ro',
+      'mcr.microsoft.com/playwright:v1.59.1-noble',
+      'HELL_E2E_BASE_URL=http://127.0.0.1:4200',
+      'docker run --rm --network host',
+      'strategy:',
+      'scenario: core',
+      'scenarios: root-core,core,testing',
+      'scenario: audio',
+      'scenario: table-tanstack-virtual',
+      'scenario: table-cdk',
+      '          - chromium',
+      '          - firefox',
+      '          - webkit',
+      'pnpm run ci:test:static',
+      'pnpm run ci:test:unit',
+      'pnpm run ci:build:lib',
+      'HELL_PACKAGE_CONSUMER_SCENARIOS: ${{ matrix.scenarios }}',
+      'pnpm run ci:test:package-consumer',
+      'HELL_PACKAGE_CONSUMER_SKIP_BUILD: 1',
+      'pnpm run ci:ensure:build:lib',
+      'pnpm run ci:ensure:build:docs',
+      'pnpm run ci:build:docs:prepared',
+      'pnpm run ci:test:api-report:prepared',
+      'Browser tests in Playwright image',
+      'pnpm run ci:test:e2e --workers=8 --project="${PLAYWRIGHT_PROJECT}"',
       'cache: pnpm',
       'cache-dependency-path: pnpm-lock.yaml',
+      'actions/cache',
+      'actions/cache/restore',
+      'actions/cache/save',
+      'actions/download-artifact@v4',
+      '.angular/cache',
       'actions/upload-artifact',
+      'Restore built packages',
+      'Download built packages',
+      'Restore built docs',
+      'Ensure built docs',
+      'dist-packages',
+      'docs-dist',
+      'docs-dist-${{ runner.os }}-${{ hashFiles',
+      "if: steps.packages-cache.outputs.cache-hit != 'true'",
+      "if: steps.docs-cache.outputs.cache-hit != 'true'",
       'test-results/',
       'coverage/',
     ],
@@ -67,9 +137,26 @@ const adapterChecks = [
     path: '.gitlab-ci.yml',
     includes: [
       'pnpm run ci:install',
-      'pnpm run ci:playwright',
-      'pnpm run ci:test',
-      'pnpm run ci:build',
+      'PLAYWRIGHT_BROWSERS_PATH',
+      'PACKAGE_CONSUMER_GROUP',
+      'PACKAGE_CONSUMER_SCENARIOS',
+      'PLAYWRIGHT_PROJECT',
+      'HELL_PACKAGE_CONSUMER_SKIP_BUILD',
+      'PACKAGE_CONSUMER_GROUP: audio',
+      'PACKAGE_CONSUMER_GROUP: table-cdk',
+      'pnpm run ci:test:static',
+      'pnpm run ci:test:unit',
+      'pnpm run ci:build:lib',
+      'HELL_PACKAGE_CONSUMER_SCENARIOS="${PACKAGE_CONSUMER_SCENARIOS}" pnpm run ci:test:package-consumer',
+      'pnpm run ci:ensure:build:lib',
+      'needs:',
+      'artifacts: true',
+      'pnpm run ci:build:docs:prepared',
+      'pnpm run ci:test:api-report:prepared',
+      'mcr.microsoft.com/playwright:v1.59.1-noble',
+      'HOME: /root',
+      'PLAYWRIGHT_BROWSERS_PATH: /ms-playwright',
+      'pnpm run ci:test:e2e --workers=8 --project="${PLAYWRIGHT_PROJECT}"',
       'reports:',
       'junit: test-results/vitest-junit.xml',
       'coverage_format: cobertura',
@@ -79,10 +166,16 @@ const adapterChecks = [
   {
     path: 'Dockerfile.ci',
     includes: [
+      'FROM mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble AS deps',
+      'PLAYWRIGHT_BROWSERS_PATH=/ms-playwright',
       'pnpm run ci:install',
-      'pnpm run ci:playwright',
+      'FROM source AS test',
+      'FROM source AS build',
+      'FROM source AS e2e',
+      'FROM source AS verify',
       'pnpm run ci:test',
       'pnpm run ci:build',
+      'pnpm run ci:test:e2e',
       'pnpm run ci:verify',
     ],
   },
@@ -99,6 +192,31 @@ const fileChecks = [
     path: 'tools/run-ci-tests.mjs',
     includes: [
       "args: ['run', 'test:package-consumer', '--', '--minimal-deps']",
+    ],
+  },
+  {
+    path: 'tools/check-package-consumer.mjs',
+    includes: [
+      'HELL_PACKAGE_CONSUMER_SKIP_BUILD',
+      'using prebuilt packages from dist',
+      '--skip-build',
+    ],
+  },
+  {
+    path: 'tools/ci/nginx-spa.conf',
+    includes: [
+      'default_type application/javascript;',
+      'try_files $uri $uri/ /index.html;',
+    ],
+  },
+  {
+    path: 'playwright.config.ts',
+    includes: [
+      'pnpm run ci:ensure:build:lib',
+      'pnpm exec ng serve hell-docs',
+      'HELL_E2E_BASE_URL',
+      'retries: process.env.CI ? 1 : 0',
+      "['json', { outputFile: 'test-results/playwright-report.json' }]",
     ],
   },
   {
@@ -177,12 +295,6 @@ const fileChecks = [
     ],
   },
   {
-    path: 'playwright.config.ts',
-    includes: [
-      "['json', { outputFile: 'test-results/playwright-report.json' }]",
-    ],
-  },
-  {
     path: 'CHANGELOG.md',
     includes: [
       'Keep a Changelog',
@@ -256,6 +368,10 @@ const adapterForbiddenPatterns = [
   { pattern: /\b(?:pnpm\s+(?:exec\s+)?vitest|npx\s+vitest|vitest\s+run)\b/, message: 'CI adapters must not inline Vitest commands.' },
   { pattern: /\btest:architecture\b/, message: 'CI adapters must not know internal check scripts.' },
   { pattern: /--coverage\b/, message: 'CI adapters must not own coverage flags.' },
+  { pattern: /\b(?:shard|total_shards|PLAYWRIGHT_SHARD)\b|--shard\b/, message: 'CI adapters must use semantic E2E groups instead of numeric shards.' },
+  { pattern: /serve-built-docs|HELL_E2E_USE_BUILT_DOCS|ci:test:e2e:built/, message: 'CI adapters must use official Angular dev server or nginx serving instead of custom servers.' },
+  { pattern: /install-playwright-webkit-deps|webkit-linux-deps|HELL_WEBKIT_DEPS_CACHE_DIR|webkit-system-deps|MiniBrowser/, message: 'CI adapters must use the official Playwright image for browser dependencies.' },
+  { pattern: /ci:playwright:cached/, message: 'CI adapters must use official Playwright install commands when caching browsers.' },
 ];
 
 const errors = [];
@@ -270,6 +386,18 @@ const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
 for (const [scriptName, expectedCommand] of Object.entries(requiredScripts)) {
   if (packageJson.scripts?.[scriptName] !== expectedCommand) {
     errors.push(`package.json script ${scriptName} must be: ${expectedCommand}`);
+  }
+}
+
+for (const obsoleteScript of [
+  'ci:playwright:cached:chromium',
+  'ci:playwright:cached:firefox',
+  'ci:playwright:cached:webkit',
+  'ci:playwright:webkit-linux-deps',
+  'ci:test:e2e:built',
+]) {
+  if (packageJson.scripts?.[obsoleteScript]) {
+    errors.push(`package.json must not define obsolete script ${obsoleteScript}`);
   }
 }
 
@@ -305,10 +433,52 @@ for (const check of fileChecks) {
   }
 }
 
+checkRemovedBrittleCiHelpers();
+checkSemanticE2eGroups();
 checkPackageConsumerPackAuditOrder();
 checkNpmPublishWorkflow();
 checkPublishedPackageMetadata();
 checkDocsBudgetPolicy();
+
+function checkRemovedBrittleCiHelpers() {
+  for (const path of ['tools/serve-built-docs.mjs', 'tools/install-playwright-webkit-deps.sh']) {
+    if (existsSync(path)) {
+      errors.push(`${path} must be removed in favor of official Angular/Playwright CI patterns.`);
+    }
+  }
+}
+
+function checkSemanticE2eGroups() {
+  const githubWorkflow = readFileSync('.github/workflows/ci.yml', 'utf8');
+  const gitlabWorkflow = readFileSync('.gitlab-ci.yml', 'utf8');
+
+  for (const browser of e2eBrowsers) {
+    if (!githubWorkflow.includes(`          - ${browser}`)) {
+      errors.push(`GitHub Actions E2E matrix must include ${browser}.`);
+    }
+
+    if (!gitlabWorkflow.includes(`- ${browser}`)) {
+      errors.push(`GitLab E2E matrix must include ${browser}.`);
+    }
+  }
+
+  const e2eSpecFiles = readdirSync('e2e')
+    .filter((file) => file.endsWith('.spec.ts'))
+    .map((file) => `e2e/${file}`)
+    .sort();
+
+  for (const spec of e2eSpecFiles) {
+    if (githubWorkflow.includes(spec) || gitlabWorkflow.includes(spec)) {
+      errors.push(`CI E2E adapters must run full browser projects, not filter ${spec}.`);
+    }
+  }
+
+  for (const forbiddenFilter of ['PLAYWRIGHT_ARGS', '--grep', '--grep-invert']) {
+    if (githubWorkflow.includes(forbiddenFilter) || gitlabWorkflow.includes(forbiddenFilter)) {
+      errors.push(`CI E2E adapters must run full browser projects without ${forbiddenFilter}.`);
+    }
+  }
+}
 
 function checkPackageConsumerPackAuditOrder() {
   const path = 'tools/check-package-consumer.mjs';
