@@ -73,6 +73,65 @@ const requiredScripts = {
 };
 
 const e2eBrowsers = ['chromium', 'firefox', 'webkit'];
+const e2eGroups = [
+  {
+    name: 'aria-snapshots',
+    specs: ['e2e/aria-snapshots.spec.ts'],
+  },
+  {
+    name: 'docs-smoke-foundations',
+    specs: ['e2e/docs-axe-smoke.spec.ts'],
+  },
+  {
+    name: 'docs-smoke-surfaces',
+    specs: ['e2e/docs-axe-smoke.spec.ts'],
+  },
+  {
+    name: 'controls-a11y',
+    specs: [
+      'e2e/accordion-a11y-contracts.spec.ts',
+      'e2e/checkbox-a11y-contracts.spec.ts',
+      'e2e/radio-a11y-contracts.spec.ts',
+      'e2e/slider-a11y-contracts.spec.ts',
+      'e2e/switch-a11y-contracts.spec.ts',
+      'e2e/tabs-a11y-contracts.spec.ts',
+      'e2e/tooltip-a11y-contracts.spec.ts',
+    ],
+  },
+  {
+    name: 'date-selection-a11y',
+    specs: [
+      'e2e/date-input-a11y-contracts.spec.ts',
+      'e2e/date-picker-a11y-contracts.spec.ts',
+      'e2e/listbox-a11y-contracts.spec.ts',
+      'e2e/time-input-a11y-contracts.spec.ts',
+    ],
+  },
+  {
+    name: 'overlays-keyboard',
+    specs: [
+      'e2e/floating-dismissal.spec.ts',
+      'e2e/flyout-a11y-contracts.spec.ts',
+      'e2e/menu-select-combobox-keyboard.spec.ts',
+      'e2e/omnibar-a11y-contracts.spec.ts',
+      'e2e/popover-a11y-contracts.spec.ts',
+    ],
+  },
+  {
+    name: 'table-resize',
+    specs: [
+      'e2e/resize-contracts.spec.ts',
+      'e2e/table-a11y-contracts.spec.ts',
+      'e2e/table-docs-regressions.spec.ts',
+    ],
+  },
+  {
+    name: 'behavior-regressions',
+    specs: ['e2e/ui-behavior.spec.ts'],
+  },
+];
+
+const splitE2eSpecCounts = new Map([['e2e/docs-axe-smoke.spec.ts', 2]]);
 
 const adapterChecks = [
   {
@@ -85,12 +144,10 @@ const adapterChecks = [
       'Package consumer (${{ matrix.scenario }})',
       'Build docs',
       'API report',
-      'E2E (${{ matrix.browser }})',
+      'E2E (${{ matrix.browser }} / ${{ matrix.group }})',
       'nginx:1.27-alpine',
       'tools/ci/nginx-spa.conf:/etc/nginx/conf.d/default.conf:ro',
-      'mcr.microsoft.com/playwright:v1.59.1-noble',
-      'HELL_E2E_BASE_URL=http://127.0.0.1:4200',
-      'docker run --rm --network host',
+      'HELL_E2E_BASE_URL: http://127.0.0.1:4200',
       'strategy:',
       'scenario: core',
       'scenarios: root-core,core,testing',
@@ -100,6 +157,15 @@ const adapterChecks = [
       '          - chromium',
       '          - firefox',
       '          - webkit',
+      'group:',
+      '          - aria-snapshots',
+      '          - docs-smoke-foundations',
+      '          - docs-smoke-surfaces',
+      '          - controls-a11y',
+      '          - date-selection-a11y',
+      '          - overlays-keyboard',
+      '          - table-resize',
+      '          - behavior-regressions',
       'pnpm run ci:test:static',
       'pnpm run ci:test:unit',
       'pnpm run ci:build:lib',
@@ -110,7 +176,15 @@ const adapterChecks = [
       'pnpm run ci:ensure:build:docs',
       'pnpm run ci:build:docs:prepared',
       'pnpm run ci:test:api-report:prepared',
-      'Browser tests in Playwright image',
+      'Restore Playwright browser',
+      '~/.cache/ms-playwright',
+      'playwright-${{ runner.os }}-${{ matrix.browser }}-${{ hashFiles',
+      'PLAYWRIGHT_BROWSER: ${{ matrix.browser }}',
+      'pnpm exec playwright install "${PLAYWRIGHT_BROWSER}"',
+      'pnpm exec playwright install --with-deps "${PLAYWRIGHT_BROWSER}"',
+      'HELL_E2E_PROJECTS: ci',
+      'PLAYWRIGHT_PROJECT: ${{ matrix.browser }}-${{ matrix.group }}',
+      'Browser tests',
       'pnpm run ci:test:e2e --workers=8 --project="${PLAYWRIGHT_PROJECT}"',
       'cache: pnpm',
       'cache-dependency-path: pnpm-lock.yaml',
@@ -141,9 +215,11 @@ const adapterChecks = [
       'PACKAGE_CONSUMER_GROUP',
       'PACKAGE_CONSUMER_SCENARIOS',
       'PLAYWRIGHT_PROJECT',
+      'PLAYWRIGHT_GROUP',
       'HELL_PACKAGE_CONSUMER_SKIP_BUILD',
       'PACKAGE_CONSUMER_GROUP: audio',
       'PACKAGE_CONSUMER_GROUP: table-cdk',
+      'HELL_E2E_PROJECTS: ci',
       'pnpm run ci:test:static',
       'pnpm run ci:test:unit',
       'pnpm run ci:build:lib',
@@ -156,7 +232,7 @@ const adapterChecks = [
       'mcr.microsoft.com/playwright:v1.59.1-noble',
       'HOME: /root',
       'PLAYWRIGHT_BROWSERS_PATH: /ms-playwright',
-      'pnpm run ci:test:e2e --workers=8 --project="${PLAYWRIGHT_PROJECT}"',
+      'pnpm run ci:test:e2e --workers=8 --project="${PLAYWRIGHT_PROJECT}-${PLAYWRIGHT_GROUP}"',
       'reports:',
       'junit: test-results/vitest-junit.xml',
       'coverage_format: cobertura',
@@ -215,6 +291,11 @@ const fileChecks = [
       'pnpm run ci:ensure:build:lib',
       'pnpm exec ng serve hell-docs',
       'HELL_E2E_BASE_URL',
+      'HELL_E2E_PROJECTS',
+      'ciGroups',
+      'docs-smoke-foundations',
+      'docs-smoke-surfaces',
+      'table-resize',
       'retries: process.env.CI ? 1 : 0',
       "['json', { outputFile: 'test-results/playwright-report.json' }]",
     ],
@@ -451,6 +532,34 @@ function checkRemovedBrittleCiHelpers() {
 function checkSemanticE2eGroups() {
   const githubWorkflow = readFileSync('.github/workflows/ci.yml', 'utf8');
   const gitlabWorkflow = readFileSync('.gitlab-ci.yml', 'utf8');
+  const playwrightConfig = readFileSync('playwright.config.ts', 'utf8');
+  const e2eSpecFiles = readdirSync('e2e')
+    .filter((file) => file.endsWith('.spec.ts'))
+    .map((file) => `e2e/${file}`)
+    .sort();
+  const groupedSpecs = e2eGroups.flatMap((group) => group.specs);
+  const groupedSpecCounts = new Map();
+
+  for (const spec of groupedSpecs) {
+    groupedSpecCounts.set(spec, (groupedSpecCounts.get(spec) ?? 0) + 1);
+  }
+
+  for (const spec of e2eSpecFiles) {
+    if (!groupedSpecCounts.has(spec)) {
+      errors.push(`E2E spec ${spec} must be assigned to a semantic CI group.`);
+    }
+  }
+
+  for (const [spec, count] of groupedSpecCounts) {
+    if (!e2eSpecFiles.includes(spec)) {
+      errors.push(`E2E group references missing spec ${spec}.`);
+    }
+
+    const expectedCount = splitE2eSpecCounts.get(spec) ?? 1;
+    if (count !== expectedCount) {
+      errors.push(`E2E spec ${spec} must appear in ${expectedCount} semantic CI group(s), found ${count}.`);
+    }
+  }
 
   for (const browser of e2eBrowsers) {
     if (!githubWorkflow.includes(`          - ${browser}`)) {
@@ -462,22 +571,43 @@ function checkSemanticE2eGroups() {
     }
   }
 
-  const e2eSpecFiles = readdirSync('e2e')
-    .filter((file) => file.endsWith('.spec.ts'))
-    .map((file) => `e2e/${file}`)
-    .sort();
+  for (const group of e2eGroups) {
+    if (countOccurrences(githubWorkflow, `          - ${group.name}`) !== 1) {
+      errors.push(`GitHub Actions E2E matrix must include ${group.name} once.`);
+    }
 
-  for (const spec of e2eSpecFiles) {
-    if (githubWorkflow.includes(spec) || gitlabWorkflow.includes(spec)) {
-      errors.push(`CI E2E adapters must run full browser projects, not filter ${spec}.`);
+    if (countOccurrences(gitlabWorkflow, `          - ${group.name}`) !== 1) {
+      errors.push(`GitLab E2E matrix must include ${group.name} once.`);
+    }
+
+    if (!playwrightConfig.includes(`name: '${group.name}'`)) {
+      errors.push(`playwright.config.ts must define semantic E2E group ${group.name}.`);
+    }
+
+    for (const spec of group.specs) {
+      const basename = spec.replace('e2e/', '');
+      if (!playwrightConfig.includes(`'${basename}'`)) {
+        errors.push(`playwright.config.ts group ${group.name} must include ${basename}.`);
+      }
     }
   }
 
   for (const forbiddenFilter of ['PLAYWRIGHT_ARGS', '--grep', '--grep-invert']) {
     if (githubWorkflow.includes(forbiddenFilter) || gitlabWorkflow.includes(forbiddenFilter)) {
-      errors.push(`CI E2E adapters must run full browser projects without ${forbiddenFilter}.`);
+      errors.push(`CI E2E adapters must select named Playwright projects without ${forbiddenFilter}.`);
     }
   }
+
+  for (const spec of e2eSpecFiles) {
+    if (githubWorkflow.includes(spec) || gitlabWorkflow.includes(spec)) {
+      errors.push(`CI E2E adapters must select semantic Playwright projects, not filter ${spec}.`);
+    }
+  }
+}
+
+function countOccurrences(content, needle) {
+  if (!needle) return 0;
+  return content.split(needle).length - 1;
 }
 
 function checkPackageConsumerPackAuditOrder() {

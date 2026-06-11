@@ -340,7 +340,7 @@ jobs:
         run: pnpm run ci:test:api-report:prepared
 
   e2e:
-    name: E2E (${{ matrix.browser }})
+    name: E2E (${{ matrix.browser }} / ${{ matrix.group }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
@@ -350,6 +350,15 @@ jobs:
           - chromium
           - firefox
           - webkit
+        group:
+          - aria-snapshots
+          - docs-smoke-foundations
+          - docs-smoke-surfaces
+          - controls-a11y
+          - date-selection-a11y
+          - overlays-keyboard
+          - table-resize
+          - behavior-regressions
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -376,6 +385,26 @@ jobs:
 
       - name: Install
         run: pnpm run ci:install
+
+      - name: Restore Playwright browser
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ matrix.browser }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-${{ matrix.browser }}-
+
+      - name: Install Playwright browser
+        env:
+          PLAYWRIGHT_BROWSER: ${{ matrix.browser }}
+          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
+        run: |
+          if [ "${PLAYWRIGHT_CACHE_HIT}" = "true" ]; then
+            pnpm exec playwright install "${PLAYWRIGHT_BROWSER}"
+          else
+            pnpm exec playwright install --with-deps "${PLAYWRIGHT_BROWSER}"
+          fi
 
       - name: Restore built docs
         id: e2e-docs-cache
@@ -412,20 +441,12 @@ jobs:
           done
           curl --fail --show-error http://127.0.0.1:4200/
 
-      - name: Browser tests in Playwright image
+      - name: Browser tests
         env:
-          PLAYWRIGHT_PROJECT: ${{ matrix.browser }}
-        run: |
-          docker run --rm --network host \
-            --volume "${PWD}:/workspace" \
-            --workdir /workspace \
-            --env CI=true \
-            --env HOME=/root \
-            --env PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
-            --env HELL_E2E_BASE_URL=http://127.0.0.1:4200 \
-            --env PLAYWRIGHT_PROJECT \
-            mcr.microsoft.com/playwright:v1.59.1-noble \
-            sh -lc 'corepack enable && pnpm run ci:test:e2e --workers=8 --project="${PLAYWRIGHT_PROJECT}"'
+          HELL_E2E_BASE_URL: http://127.0.0.1:4200
+          HELL_E2E_PROJECTS: ci
+          PLAYWRIGHT_PROJECT: ${{ matrix.browser }}-${{ matrix.group }}
+        run: pnpm run ci:test:e2e --workers=8 --project="${PLAYWRIGHT_PROJECT}"
 
       - name: Stop docs server
         if: always()
@@ -435,7 +456,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-${{ matrix.browser }}
+          name: playwright-${{ matrix.browser }}-${{ matrix.group }}
           path: |
             test-results/playwright-report.json
             test-results/playwright-html/

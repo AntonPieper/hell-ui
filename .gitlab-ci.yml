@@ -119,12 +119,22 @@ e2e:
           - chromium
           - firefox
           - webkit
+        PLAYWRIGHT_GROUP:
+          - aria-snapshots
+          - docs-smoke-foundations
+          - docs-smoke-surfaces
+          - controls-a11y
+          - date-selection-a11y
+          - overlays-keyboard
+          - table-resize
+          - behavior-regressions
   variables:
     HOME: /root
+    HELL_E2E_PROJECTS: ci
     PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
   script:
     - pnpm run ci:ensure:build:lib
-    - pnpm run ci:test:e2e --workers=8 --project="${PLAYWRIGHT_PROJECT}"
+    - pnpm run ci:test:e2e --workers=8 --project="${PLAYWRIGHT_PROJECT}-${PLAYWRIGHT_GROUP}"
   artifacts:
     when: always
     expire_in: 14 days
