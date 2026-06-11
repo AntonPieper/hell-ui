@@ -4,11 +4,11 @@ CI providers are adapters over shared repo commands. The repository workspace
 is pnpm-only and CI-backed by the checked-in `pnpm-lock.yaml`:
 
 ```bash
-pnpm ci:install
-pnpm ci:playwright
-pnpm ci:test
-pnpm ci:build
-pnpm ci:verify
+pnpm run ci:install
+pnpm run ci:playwright
+pnpm run ci:test
+pnpm run ci:build
+pnpm run ci:verify
 ```
 
 `ci:test` owns unit test, architecture, report, coverage, and contract checks.
@@ -28,10 +28,11 @@ Adapters publish these shared artifacts:
 New CI provider checklist:
 
 1. Install Node 22 and enable pnpm through Corepack.
-2. Run `pnpm ci:install`.
-3. Run `pnpm ci:playwright` before browser tests.
-4. Run `pnpm ci:test` and publish `test-results/` plus `coverage/`.
-5. Run `pnpm ci:build` and publish `dist/` if desired.
+2. Run `pnpm run ci:install`.
+3. Use the official Playwright image for browser jobs, or run `pnpm run ci:playwright` before browser tests on non-container Linux agents.
+   Built docs can be served by nginx with `HELL_E2E_BASE_URL` set; local tests default to Angular's dev server.
+4. Run `pnpm run ci:test` and publish `test-results/` plus `coverage/`.
+5. Run `pnpm run ci:build` and publish `dist/` if desired.
 
 Docker path:
 

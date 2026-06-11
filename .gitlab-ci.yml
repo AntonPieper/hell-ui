@@ -4,13 +4,12 @@ workflow:
     - if: '$CI_COMMIT_BRANCH'
 
 stages:
-  - test
-  - build
+  - validate
 
 default:
   image: node:22-bookworm-slim
   interruptible: true
-  timeout: 20m
+  timeout: 10m
   before_script:
     - corepack enable
     - pnpm config set store-dir .pnpm-store
@@ -21,12 +20,18 @@ default:
         - pnpm-lock.yaml
     paths:
       - .pnpm-store/
+      - .angular/cache/
+      - dist/
 
-test:
-  stage: test
+static:
+  stage: validate
   script:
-    - pnpm run ci:playwright
-    - pnpm run ci:test
+    - pnpm run ci:test:static
+
+unit:
+  stage: validate
+  script:
+    - pnpm run ci:test:unit
   coverage: '/CI coverage lines: ([0-9.]+)%/'
   artifacts:
     when: always
@@ -40,14 +45,77 @@ test:
         coverage_format: cobertura
         path: coverage/cobertura-coverage.xml
 
-build:
-  stage: build
+package-consumer:
+  stage: validate
   needs:
-    - job: test
-      artifacts: false
+    - job: build
+      artifacts: true
+  parallel:
+    matrix:
+      - PACKAGE_CONSUMER_GROUP: core
+        PACKAGE_CONSUMER_SCENARIOS: root-core,core,testing
+      - PACKAGE_CONSUMER_GROUP: primitive-foundations
+        PACKAGE_CONSUMER_SCENARIOS: primitives-css,button-unstyled
+      - PACKAGE_CONSUMER_GROUP: button
+        PACKAGE_CONSUMER_SCENARIOS: button
+      - PACKAGE_CONSUMER_GROUP: composite-foundations
+        PACKAGE_CONSUMER_SCENARIOS: composites-css,app-shell
+      - PACKAGE_CONSUMER_GROUP: audio
+        PACKAGE_CONSUMER_SCENARIOS: audio-player,audio-transcript
+      - PACKAGE_CONSUMER_GROUP: features
+        PACKAGE_CONSUMER_SCENARIOS: code-editor,pdf-viewer
+      - PACKAGE_CONSUMER_GROUP: table-core
+        PACKAGE_CONSUMER_SCENARIOS: table,data-table,no-legacy-alias
+      - PACKAGE_CONSUMER_GROUP: table-tanstack-virtual
+        PACKAGE_CONSUMER_SCENARIOS: table-tanstack,table-virtual
+      - PACKAGE_CONSUMER_GROUP: table-cdk
+        PACKAGE_CONSUMER_SCENARIOS: table-cdk
+  variables:
+    HELL_PACKAGE_CONSUMER_SKIP_BUILD: "1"
   script:
-    - pnpm run ci:build
+    - pnpm run ci:ensure:build:lib
+    - HELL_PACKAGE_CONSUMER_SCENARIOS="${PACKAGE_CONSUMER_SCENARIOS}" pnpm run ci:test:package-consumer
+
+build:
+  stage: validate
+  script:
+    - pnpm run ci:ensure:build:lib
+    - pnpm run ci:ensure:build:docs
+    - pnpm run ci:test:api-report:prepared
   artifacts:
     expire_in: 14 days
     paths:
       - dist/
+
+e2e:
+  stage: validate
+  image: mcr.microsoft.com/playwright:v1.59.1-noble
+  needs:
+    - job: build
+      artifacts: true
+  parallel:
+    matrix:
+      - PLAYWRIGHT_GROUP:
+          - aria-snapshots-foundations
+          - aria-snapshots-overlays-data
+          - docs-smoke-foundations
+          - docs-smoke-surfaces
+          - controls-a11y
+          - date-selection-a11y
+          - overlays-keyboard
+          - table-resize
+          - behavior-regressions
+  variables:
+    HOME: /root
+    HELL_E2E_PROJECTS: ci
+    PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+  script:
+    - pnpm run ci:ensure:build:lib
+    - pnpm run ci:test:e2e --workers=8 --project="chromium-${PLAYWRIGHT_GROUP}" --project="firefox-${PLAYWRIGHT_GROUP}" --project="webkit-${PLAYWRIGHT_GROUP}"
+  artifacts:
+    when: always
+    expire_in: 14 days
+    paths:
+      - test-results/playwright-report.json
+      - test-results/playwright-html/
+      - test-results/playwright/

@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 
 import {
   parseBudgetSize,
@@ -14,6 +14,7 @@ const requiredFiles = [
   'vitest.ci.config.ts',
   'tools/run-ci-tests.mjs',
   'tools/run-unit-tests.mjs',
+  'tools/ci/nginx-spa.conf',
   'tools/check-package-consumer.mjs',
   'tools/check-package-pack.mjs',
   'tools/check-api-reports.mjs',
@@ -44,21 +45,163 @@ const requiredScripts = {
   'production-ready:check': 'node tools/production-ready-check.mjs',
   'ci:test': 'node tools/run-ci-tests.mjs',
   'ci:playwright': 'pnpm exec playwright install --with-deps chromium firefox webkit',
-  'ci:build': 'pnpm run build && pnpm run test:api-report',
+  'ci:playwright:chromium': 'pnpm exec playwright install --with-deps chromium',
+  'ci:playwright:firefox': 'pnpm exec playwright install --with-deps firefox',
+  'ci:playwright:webkit': 'pnpm exec playwright install --with-deps webkit',
+  'ci:test:unit': 'pnpm run test:unit && node tools/ci-summary.mjs',
+  'ci:test:static': 'pnpm run lint && pnpm run test:architecture && pnpm run test:ci-contract',
+  'ci:test:e2e': 'pnpm exec playwright test',
+  'ci:test:package-consumer': 'pnpm run test:package-consumer -- --minimal-deps',
+  'ci:test:package-consumer:core': 'HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing pnpm run ci:test:package-consumer',
+  'ci:test:package-consumer:primitives': 'HELL_PACKAGE_CONSUMER_SCENARIOS=primitives-css,button-unstyled,button pnpm run ci:test:package-consumer',
+  'ci:test:package-consumer:composites': 'HELL_PACKAGE_CONSUMER_SCENARIOS=composites-css,app-shell,audio-player,audio-transcript pnpm run ci:test:package-consumer',
+  'ci:test:package-consumer:features': 'HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor,pdf-viewer pnpm run ci:test:package-consumer',
+  'ci:test:package-consumer:tables': 'HELL_PACKAGE_CONSUMER_SCENARIOS=table,data-table,table-tanstack,table-virtual,table-cdk,no-legacy-alias pnpm run ci:test:package-consumer',
+  'ci:test:package-consumer:code-editor': 'HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor pnpm run ci:test:package-consumer',
+  'ci:test:package-consumer:pdf-viewer': 'HELL_PACKAGE_CONSUMER_SCENARIOS=pdf-viewer pnpm run ci:test:package-consumer',
+  'ci:test:package-consumer:table-core': 'HELL_PACKAGE_CONSUMER_SCENARIOS=table,data-table,no-legacy-alias pnpm run ci:test:package-consumer',
+  'ci:test:package-consumer:table-adapters': 'HELL_PACKAGE_CONSUMER_SCENARIOS=table-tanstack,table-virtual,table-cdk pnpm run ci:test:package-consumer',
+  'ci:build:lib': 'pnpm run build:lib',
+  'ci:build:docs': 'pnpm run build:lib && pnpm run build:docs',
+  'ci:build:docs:prepared': 'pnpm run build:docs',
+  'ci:ensure:build:lib': "sh -c 'test -f dist/hell/package.json && test -f dist/hell-pdf-viewer/package.json || pnpm run ci:build:lib'",
+  'ci:ensure:build:docs': "sh -c 'test -f dist/hell-docs/browser/index.html || test -f dist/hell-docs/index.html || (pnpm run ci:ensure:build:lib && pnpm run ci:build:docs:prepared)'",
+  'ci:test:api-report': 'pnpm run build:lib && pnpm run test:api-report',
+  'ci:test:api-report:prepared': 'pnpm run test:api-report',
+  'ci:build': 'pnpm run build:lib && pnpm run build:docs && pnpm run test:api-report',
   'ci:verify': 'pnpm run ci:test && pnpm run ci:build',
 };
+
+const e2eBrowsers = ['chromium', 'firefox', 'webkit'];
+const e2eGroups = [
+  {
+    name: 'aria-snapshots-foundations',
+    specs: ['e2e/aria-snapshots.spec.ts'],
+  },
+  {
+    name: 'aria-snapshots-overlays-data',
+    specs: ['e2e/aria-snapshots.spec.ts'],
+  },
+  {
+    name: 'docs-smoke-foundations',
+    specs: ['e2e/docs-axe-smoke.spec.ts'],
+  },
+  {
+    name: 'docs-smoke-surfaces',
+    specs: ['e2e/docs-axe-smoke.spec.ts'],
+  },
+  {
+    name: 'controls-a11y',
+    specs: [
+      'e2e/accordion-a11y-contracts.spec.ts',
+      'e2e/checkbox-a11y-contracts.spec.ts',
+      'e2e/radio-a11y-contracts.spec.ts',
+      'e2e/slider-a11y-contracts.spec.ts',
+      'e2e/switch-a11y-contracts.spec.ts',
+      'e2e/tabs-a11y-contracts.spec.ts',
+      'e2e/tooltip-a11y-contracts.spec.ts',
+    ],
+  },
+  {
+    name: 'date-selection-a11y',
+    specs: [
+      'e2e/date-input-a11y-contracts.spec.ts',
+      'e2e/date-picker-a11y-contracts.spec.ts',
+      'e2e/listbox-a11y-contracts.spec.ts',
+      'e2e/time-input-a11y-contracts.spec.ts',
+    ],
+  },
+  {
+    name: 'overlays-keyboard',
+    specs: [
+      'e2e/floating-dismissal.spec.ts',
+      'e2e/flyout-a11y-contracts.spec.ts',
+      'e2e/menu-select-combobox-keyboard.spec.ts',
+      'e2e/omnibar-a11y-contracts.spec.ts',
+      'e2e/popover-a11y-contracts.spec.ts',
+    ],
+  },
+  {
+    name: 'table-resize',
+    specs: [
+      'e2e/resize-contracts.spec.ts',
+      'e2e/table-a11y-contracts.spec.ts',
+      'e2e/table-docs-regressions.spec.ts',
+    ],
+  },
+  {
+    name: 'behavior-regressions',
+    specs: ['e2e/ui-behavior.spec.ts'],
+  },
+];
+
+const splitE2eSpecCounts = new Map([
+  ['e2e/aria-snapshots.spec.ts', 2],
+  ['e2e/docs-axe-smoke.spec.ts', 2],
+]);
 
 const adapterChecks = [
   {
     path: '.github/workflows/ci.yml',
     includes: [
       'pnpm run ci:install',
-      'pnpm run ci:playwright',
-      'pnpm run ci:test',
-      'pnpm run ci:build',
+      'Static contracts',
+      'Unit tests',
+      'Build and API',
+      'Package consumer (${{ matrix.scenario }})',
+      'API report',
+      'E2E (${{ matrix.group }})',
+      'nginx:1.27-alpine',
+      'tools/ci/nginx-spa.conf:/etc/nginx/conf.d/default.conf:ro',
+      'mcr.microsoft.com/playwright:v1.59.1-noble',
+      'docker run --rm --network host',
+      'strategy:',
+      'needs: build',
+      'scenario: core',
+      'scenarios: root-core,core,testing',
+      'scenario: audio',
+      'scenario: table-tanstack-virtual',
+      'scenario: table-cdk',
+      'group:',
+      '          - aria-snapshots-foundations',
+      '          - aria-snapshots-overlays-data',
+      '          - docs-smoke-foundations',
+      '          - docs-smoke-surfaces',
+      '          - controls-a11y',
+      '          - date-selection-a11y',
+      '          - overlays-keyboard',
+      '          - table-resize',
+      '          - behavior-regressions',
+      'pnpm run ci:test:static',
+      'pnpm run ci:test:unit',
+      'HELL_PACKAGE_CONSUMER_SCENARIOS: ${{ matrix.scenarios }}',
+      'pnpm run ci:test:package-consumer',
+      'HELL_PACKAGE_CONSUMER_SKIP_BUILD: 1',
+      'pnpm run ci:ensure:build:lib',
+      'pnpm run ci:ensure:build:docs',
+      'pnpm run ci:test:api-report:prepared',
+      'Restore Playwright image cache',
+      'Prepare Playwright image',
+      '.ci-cache/playwright-image-v1.59.1-noble.tar',
+      'playwright-image-${{ runner.os }}-v1.59.1-noble',
+      'docker load --input "${image_tar}"',
+      'docker pull "${image}"',
+      'docker save --output "${image_tar}" "${image}"',
+      '--env HELL_E2E_PROJECTS=ci',
+      'PLAYWRIGHT_GROUP: ${{ matrix.group }}',
+      'Browser tests',
+      '--project="chromium-${PLAYWRIGHT_GROUP}"',
+      '--project="firefox-${PLAYWRIGHT_GROUP}"',
+      '--project="webkit-${PLAYWRIGHT_GROUP}"',
       'cache: pnpm',
       'cache-dependency-path: pnpm-lock.yaml',
-      'actions/upload-artifact',
+      'actions/cache@v5',
+      '.angular/cache',
+      'actions/upload-artifact@v7',
+      'Ensure built docs',
+      'dist-packages-${{ runner.os }}-${{ hashFiles',
+      'docs-dist-${{ runner.os }}-${{ hashFiles',
+      'playwright-${{ matrix.group }}',
       'test-results/',
       'coverage/',
     ],
@@ -67,9 +210,27 @@ const adapterChecks = [
     path: '.gitlab-ci.yml',
     includes: [
       'pnpm run ci:install',
-      'pnpm run ci:playwright',
-      'pnpm run ci:test',
-      'pnpm run ci:build',
+      'PLAYWRIGHT_BROWSERS_PATH',
+      'PACKAGE_CONSUMER_GROUP',
+      'PACKAGE_CONSUMER_SCENARIOS',
+      'PLAYWRIGHT_GROUP',
+      'HELL_PACKAGE_CONSUMER_SKIP_BUILD',
+      'PACKAGE_CONSUMER_GROUP: audio',
+      'PACKAGE_CONSUMER_GROUP: table-cdk',
+      'HELL_E2E_PROJECTS: ci',
+      'pnpm run ci:test:static',
+      'pnpm run ci:test:unit',
+      'HELL_PACKAGE_CONSUMER_SCENARIOS="${PACKAGE_CONSUMER_SCENARIOS}" pnpm run ci:test:package-consumer',
+      'pnpm run ci:ensure:build:lib',
+      'pnpm run ci:ensure:build:docs',
+      'needs:',
+      'job: build',
+      'artifacts: true',
+      'pnpm run ci:test:api-report:prepared',
+      'mcr.microsoft.com/playwright:v1.59.1-noble',
+      'HOME: /root',
+      'PLAYWRIGHT_BROWSERS_PATH: /ms-playwright',
+      'pnpm run ci:test:e2e --workers=8 --project="chromium-${PLAYWRIGHT_GROUP}" --project="firefox-${PLAYWRIGHT_GROUP}" --project="webkit-${PLAYWRIGHT_GROUP}"',
       'reports:',
       'junit: test-results/vitest-junit.xml',
       'coverage_format: cobertura',
@@ -79,10 +240,16 @@ const adapterChecks = [
   {
     path: 'Dockerfile.ci',
     includes: [
+      'FROM mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble AS deps',
+      'PLAYWRIGHT_BROWSERS_PATH=/ms-playwright',
       'pnpm run ci:install',
-      'pnpm run ci:playwright',
+      'FROM source AS test',
+      'FROM source AS build',
+      'FROM source AS e2e',
+      'FROM source AS verify',
       'pnpm run ci:test',
       'pnpm run ci:build',
+      'pnpm run ci:test:e2e',
       'pnpm run ci:verify',
     ],
   },
@@ -99,6 +266,36 @@ const fileChecks = [
     path: 'tools/run-ci-tests.mjs',
     includes: [
       "args: ['run', 'test:package-consumer', '--', '--minimal-deps']",
+    ],
+  },
+  {
+    path: 'tools/check-package-consumer.mjs',
+    includes: [
+      'HELL_PACKAGE_CONSUMER_SKIP_BUILD',
+      'using prebuilt packages from dist',
+      '--skip-build',
+    ],
+  },
+  {
+    path: 'tools/ci/nginx-spa.conf',
+    includes: [
+      'default_type application/javascript;',
+      'try_files $uri $uri/ /index.html;',
+    ],
+  },
+  {
+    path: 'playwright.config.ts',
+    includes: [
+      'pnpm run ci:ensure:build:lib',
+      'pnpm exec ng serve hell-docs',
+      'HELL_E2E_BASE_URL',
+      'HELL_E2E_PROJECTS',
+      'ciGroups',
+      'docs-smoke-foundations',
+      'docs-smoke-surfaces',
+      'table-resize',
+      'retries: process.env.CI ? 1 : 0',
+      "['json', { outputFile: 'test-results/playwright-report.json' }]",
     ],
   },
   {
@@ -177,12 +374,6 @@ const fileChecks = [
     ],
   },
   {
-    path: 'playwright.config.ts',
-    includes: [
-      "['json', { outputFile: 'test-results/playwright-report.json' }]",
-    ],
-  },
-  {
     path: 'CHANGELOG.md',
     includes: [
       'Keep a Changelog',
@@ -256,6 +447,10 @@ const adapterForbiddenPatterns = [
   { pattern: /\b(?:pnpm\s+(?:exec\s+)?vitest|npx\s+vitest|vitest\s+run)\b/, message: 'CI adapters must not inline Vitest commands.' },
   { pattern: /\btest:architecture\b/, message: 'CI adapters must not know internal check scripts.' },
   { pattern: /--coverage\b/, message: 'CI adapters must not own coverage flags.' },
+  { pattern: /\b(?:shard|total_shards|PLAYWRIGHT_SHARD)\b|--shard\b/, message: 'CI adapters must use semantic E2E groups instead of numeric shards.' },
+  { pattern: /serve-built-docs|HELL_E2E_USE_BUILT_DOCS|ci:test:e2e:built/, message: 'CI adapters must use official Angular dev server or nginx serving instead of custom servers.' },
+  { pattern: /install-playwright-webkit-deps|webkit-linux-deps|HELL_WEBKIT_DEPS_CACHE_DIR|webkit-system-deps|MiniBrowser/, message: 'CI adapters must use the official Playwright image for browser dependencies.' },
+  { pattern: /ci:playwright:cached/, message: 'CI adapters must use official Playwright install commands when caching browsers.' },
 ];
 
 const errors = [];
@@ -270,6 +465,18 @@ const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
 for (const [scriptName, expectedCommand] of Object.entries(requiredScripts)) {
   if (packageJson.scripts?.[scriptName] !== expectedCommand) {
     errors.push(`package.json script ${scriptName} must be: ${expectedCommand}`);
+  }
+}
+
+for (const obsoleteScript of [
+  'ci:playwright:cached:chromium',
+  'ci:playwright:cached:firefox',
+  'ci:playwright:cached:webkit',
+  'ci:playwright:webkit-linux-deps',
+  'ci:test:e2e:built',
+]) {
+  if (packageJson.scripts?.[obsoleteScript]) {
+    errors.push(`package.json must not define obsolete script ${obsoleteScript}`);
   }
 }
 
@@ -305,10 +512,115 @@ for (const check of fileChecks) {
   }
 }
 
+checkRemovedBrittleCiHelpers();
+checkSemanticE2eGroups();
 checkPackageConsumerPackAuditOrder();
 checkNpmPublishWorkflow();
 checkPublishedPackageMetadata();
 checkDocsBudgetPolicy();
+
+function checkRemovedBrittleCiHelpers() {
+  for (const path of ['tools/serve-built-docs.mjs', 'tools/install-playwright-webkit-deps.sh']) {
+    if (existsSync(path)) {
+      errors.push(`${path} must be removed in favor of official Angular/Playwright CI patterns.`);
+    }
+  }
+}
+
+function checkSemanticE2eGroups() {
+  const githubWorkflow = readFileSync('.github/workflows/ci.yml', 'utf8');
+  const gitlabWorkflow = readFileSync('.gitlab-ci.yml', 'utf8');
+  const playwrightConfig = readFileSync('playwright.config.ts', 'utf8');
+  const e2eSpecFiles = readdirSync('e2e')
+    .filter((file) => file.endsWith('.spec.ts'))
+    .map((file) => `e2e/${file}`)
+    .sort();
+  const groupedSpecs = e2eGroups.flatMap((group) => group.specs);
+  const groupedSpecCounts = new Map();
+
+  for (const spec of groupedSpecs) {
+    groupedSpecCounts.set(spec, (groupedSpecCounts.get(spec) ?? 0) + 1);
+  }
+
+  for (const spec of e2eSpecFiles) {
+    if (!groupedSpecCounts.has(spec)) {
+      errors.push(`E2E spec ${spec} must be assigned to a semantic CI group.`);
+    }
+  }
+
+  for (const [spec, count] of groupedSpecCounts) {
+    if (!e2eSpecFiles.includes(spec)) {
+      errors.push(`E2E group references missing spec ${spec}.`);
+    }
+
+    const expectedCount = splitE2eSpecCounts.get(spec) ?? 1;
+    if (count !== expectedCount) {
+      errors.push(`E2E spec ${spec} must appear in ${expectedCount} semantic CI group(s), found ${count}.`);
+    }
+  }
+
+  for (const browser of e2eBrowsers) {
+    const browserProject = `--project="${browser}-\${PLAYWRIGHT_GROUP}"`;
+    if (!githubWorkflow.includes(browserProject)) {
+      errors.push(`GitHub Actions E2E group job must run ${browser}.`);
+    }
+
+    if (!gitlabWorkflow.includes(browserProject)) {
+      errors.push(`GitLab E2E group job must run ${browser}.`);
+    }
+  }
+
+  for (const group of e2eGroups) {
+    if (countOccurrences(githubWorkflow, `          - ${group.name}`) !== 1) {
+      errors.push(`GitHub Actions E2E matrix must include ${group.name} once.`);
+    }
+
+    if (countOccurrences(gitlabWorkflow, `          - ${group.name}`) !== 1) {
+      errors.push(`GitLab E2E matrix must include ${group.name} once.`);
+    }
+
+    if (!playwrightConfig.includes(`name: '${group.name}'`)) {
+      errors.push(`playwright.config.ts must define semantic E2E group ${group.name}.`);
+    }
+
+    for (const spec of group.specs) {
+      const basename = spec.replace('e2e/', '');
+      if (!playwrightConfig.includes(`'${basename}'`)) {
+        errors.push(`playwright.config.ts group ${group.name} must include ${basename}.`);
+      }
+    }
+  }
+
+  for (const forbiddenFilter of ['PLAYWRIGHT_ARGS', '--grep', '--grep-invert']) {
+    if (githubWorkflow.includes(forbiddenFilter) || gitlabWorkflow.includes(forbiddenFilter)) {
+      errors.push(`CI E2E adapters must select named Playwright projects without ${forbiddenFilter}.`);
+    }
+  }
+
+  for (const browserMatrixPattern of [
+    { label: 'matrix.browser', pattern: /matrix\.browser/ },
+    { label: 'PLAYWRIGHT_PROJECT', pattern: /\bPLAYWRIGHT_PROJECT\b/ },
+    { label: 'PLAYWRIGHT_BROWSER', pattern: /\bPLAYWRIGHT_BROWSER\b/ },
+    { label: '~/.cache/ms-playwright', pattern: /~\/\.cache\/ms-playwright/ },
+    { label: 'actions/cache/restore@*', pattern: /actions\/cache\/restore@/ },
+    { label: 'actions/cache/save@*', pattern: /actions\/cache\/save@/ },
+  ]) {
+    if (browserMatrixPattern.pattern.test(githubWorkflow) || browserMatrixPattern.pattern.test(gitlabWorkflow)) {
+      errors.push(`CI E2E adapters must not reintroduce split browser setup via ${browserMatrixPattern.label}.`);
+    }
+  }
+
+  for (const spec of e2eSpecFiles) {
+    if (githubWorkflow.includes(spec) || gitlabWorkflow.includes(spec)) {
+      errors.push(`CI E2E adapters must select semantic Playwright projects, not filter ${spec}.`);
+    }
+  }
+}
+
+function countOccurrences(content, needle) {
+  if (!needle) return 0;
+  return content.split(needle).length - 1;
+}
 
 function checkPackageConsumerPackAuditOrder() {
   const path = 'tools/check-package-consumer.mjs';

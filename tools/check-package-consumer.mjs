@@ -23,6 +23,7 @@ const rawSelectedScenarioNames = parseScenarioSelection(packageConsumerArgs);
 const selectedScenarioNames = rawSelectedScenarioNames.filter((name) => !isPreflightScenarioName(name));
 const preflightOnly = parsePreflightOnly(packageConsumerArgs, rawSelectedScenarioNames);
 const minimalDependencyMode = parseMinimalDependencyMode(packageConsumerArgs);
+const skipPackageBuild = parseSkipPackageBuild(packageConsumerArgs);
 const pnpmTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_TIMEOUT_MS, 240_000);
 const pnpmHeartbeatMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_HEARTBEAT_MS, 30_000);
 const pnpmPreflightTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_PREFLIGHT_TIMEOUT_MS, 30_000);
@@ -33,7 +34,11 @@ if (preflightOnly) {
   process.exit(0);
 }
 
-runRootPnpm(['run', 'build:lib'], root);
+if (skipPackageBuild) {
+  console.log('[package-consumer] using prebuilt packages from dist; skipping build:lib');
+} else {
+  runRootPnpm(['run', 'build:lib'], root);
+}
 
 if (!existsSync(join(distHell, 'package.json'))) {
   fail(`Built package missing: ${distHell}`);
@@ -420,6 +425,13 @@ function parseMinimalDependencyMode(args) {
   if (envMode === '1' || envMode === 'true') return true;
 
   return args.some((arg) => arg === '--minimal-deps' || arg === '--group-by-deps');
+}
+
+function parseSkipPackageBuild(args) {
+  const envMode = process.env.HELL_PACKAGE_CONSUMER_SKIP_BUILD;
+  if (envMode === '1' || envMode === 'true') return true;
+
+  return args.some((arg) => arg === '--skip-build' || arg === '--prebuilt');
 }
 
 function parsePreflightOnly(args, selectedNames) {
