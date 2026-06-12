@@ -75,6 +75,8 @@ export interface HellPaginationLabels {
   readonly nextPage: string;
   readonly lastPage: string;
   readonly page: (page: number) => string;
+  readonly pageStatus?: (page: number, pageCount: number) => string;
+  readonly selectPage?: string;
 }
 
 export interface HellPdfViewerLabels {
@@ -230,6 +232,8 @@ export const HELL_DEFAULT_LABELS: HellLabels = {
     nextPage: 'Next page',
     lastPage: 'Last page',
     page: (page) => `Page ${page}`,
+    pageStatus: (page, pageCount) => `Page ${page} of ${pageCount}`,
+    selectPage: 'Select page',
   },
   pdfViewer: {
     togglePageOverview: 'Toggle page overview',

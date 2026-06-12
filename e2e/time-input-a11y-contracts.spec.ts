@@ -62,4 +62,21 @@ test.describe('time input accessibility contract', () => {
     await expect(input).toHaveValue('00:45');
     await expect(minutes).toHaveAttribute('aria-valuenow', '45');
   });
+
+  test('supports efficient keyboard stepping from the text field', async ({ page }) => {
+    await gotoTimeInput(page);
+
+    const input = page.getByRole('textbox', { name: 'Reminder time' }).first();
+    await expect(input).toHaveValue('14:30');
+
+    await input.focus();
+    await page.keyboard.press('ArrowUp');
+    await expect(input).toHaveValue('14:35');
+
+    await page.keyboard.press('Shift+ArrowUp');
+    await expect(input).toHaveValue('15:35');
+
+    await page.keyboard.press('PageDown');
+    await expect(input).toHaveValue('14:35');
+  });
 });

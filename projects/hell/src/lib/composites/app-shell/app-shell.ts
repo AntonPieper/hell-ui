@@ -499,7 +499,8 @@ export class HellAppContent extends HellStyleable {
     '(click)': 'toggle()',
     '[attr.aria-expanded]': '!collapsed()',
     '[attr.aria-controls]': 'shell.sidenavPanelId',
-    '[attr.aria-label]': 'collapsed() ? labels.appShell.expandSidebar : labels.appShell.collapseSidebar',
+    '[attr.aria-label]':
+      'collapsed() ? labels.appShell.expandSidebar : labels.appShell.collapseSidebar',
     '[attr.data-hell-app-shell-toggle]': '"sidenav"',
     '[attr.data-hell-sidenav-toggle]': 'appearance() === "plain" ? null : appearance()',
   },
@@ -522,7 +523,8 @@ export class HellSidenavToggle {
     '(click)': 'toggle()',
     '[attr.aria-expanded]': '!hidden()',
     '[attr.aria-controls]': 'shell.secondaryPanelId',
-    '[attr.aria-label]': 'hidden() ? labels.appShell.showSecondaryPanel : labels.appShell.hideSecondaryPanel',
+    '[attr.aria-label]':
+      'hidden() ? labels.appShell.showSecondaryPanel : labels.appShell.hideSecondaryPanel',
     '[attr.data-hell-app-shell-toggle]': '"secondary"',
     '[attr.data-hell-secondary-toggle]': 'appearance() === "plain" ? null : appearance()',
   },
@@ -545,8 +547,6 @@ export class HellSecondaryToggle {
     '[attr.data-hell-app-shell-panel]': '"secondary"',
     '[attr.data-hidden]': 'isHidden() ? "true" : null',
     '[attr.data-mobile-hidden]': 'isMobileHidden() ? "true" : null',
-    '[attr.aria-hidden]': 'isMobileHidden() ? "true" : null',
-    '[attr.inert]': 'isMobileHidden() ? "" : null',
   },
 })
 export class HellAppSecondary extends HellStyleable {

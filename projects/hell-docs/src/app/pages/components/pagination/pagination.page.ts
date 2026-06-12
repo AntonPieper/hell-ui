@@ -19,12 +19,15 @@ import paginationLargerWindowExampleCodeRaw from './examples/larger-window.examp
       <p>
         Navigate between pages. Built on the
         <code>ng-primitives/pagination</code> primitives. Renders first / previous / numbered window
-        / next / last buttons with chevron icons, and emits <code>(pageChange)</code> with the new
-        1-based page number.
+        / next / last buttons with chevron icons by default, can switch to a previous/next-only
+        mode, and emits <code>(pageChange)</code> with the new 1-based page number.
       </p>
 
       <h2>Basic</h2>
-      <hd-example-tabs [code]="paginationBasicExampleCode" previewClass="flex flex-wrap items-center gap-3">
+      <hd-example-tabs
+        [code]="paginationBasicExampleCode"
+        previewClass="flex flex-wrap items-center gap-3"
+      >
         <app-pagination-basic-example />
       </hd-example-tabs>
 
@@ -44,6 +47,12 @@ import paginationLargerWindowExampleCodeRaw from './examples/larger-window.examp
         </li>
         <li><code>pageCount</code>: total number of pages.</li>
         <li><code>siblingCount</code>: numbered buttons shown either side of current.</li>
+        <li>
+          <code>mode</code>: <code>window</code> (default) or <code>previous-next</code> for
+          adjacent-only controls.
+        </li>
+        <li><code>showStatus</code>: display current page and total inside the strip.</li>
+        <li><code>pagePicker</code>: <code>none</code> or <code>select</code>.</li>
         <li><code>disabled</code>: disable all controls.</li>
       </ul>
 

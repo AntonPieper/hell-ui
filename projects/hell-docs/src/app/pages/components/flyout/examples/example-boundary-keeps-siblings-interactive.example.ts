@@ -54,11 +54,15 @@ import { HellInput } from '@hell-ui/angular/input';
       display: grid;
       gap: var(--spacing-hell-3);
       align-items: start;
+      min-height: 260px;
     }
     .hd-flyout-boundary {
+      position: relative;
       display: grid;
       gap: var(--spacing-hell-3);
       align-items: start;
+      align-content: start;
+      min-height: 214px;
       padding: var(--spacing-hell-4);
       border: 1px dashed var(--color-hell-border);
       border-radius: var(--radius-md);
@@ -70,13 +74,18 @@ import { HellInput } from '@hell-ui/angular/input';
       flex-wrap: wrap;
     }
     .hd-flyout-panel {
+      position: absolute;
+      inset-block-start: calc(
+        var(--spacing-hell-4) + var(--spacing-hell-control-md) + var(--spacing-hell-3)
+      );
+      inset-inline-start: var(--spacing-hell-4);
       max-width: 320px;
       padding: var(--spacing-hell-4);
       background-color: var(--color-hell-surface-elevated);
       border: 1px solid var(--color-hell-border);
       border-radius: var(--radius-md);
       box-shadow: var(--shadow-hell-lg);
-      z-index: 1;
+      z-index: var(--hell-z-popover, 60);
       display: grid;
       gap: var(--spacing-hell-3);
     }

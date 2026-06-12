@@ -7,11 +7,18 @@ import { provideHellLabels } from '../../core/labels';
 @Component({
   selector: 'app-dialpad-host',
   imports: [HellDialpad],
-  template: `<hell-dialpad (digit)="digits.push($event)" (valueChange)="values.push($event)" />`,
+  template: `
+    <hell-dialpad
+      (digit)="digits.push($event)"
+      (valueChange)="values.push($event)"
+      (call)="calls.push($event)"
+    />
+  `,
 })
 class DialpadHost {
   readonly digits: string[] = [];
   readonly values: string[] = [];
+  readonly calls: string[] = [];
 }
 
 @Component({
@@ -132,6 +139,37 @@ describe('HellDialpad labels', () => {
     expect(fixture.componentInstance.values).toEqual(['1']);
     expect(normalizeDisplay(query(host, '[data-slot="number-inner"]').textContent)).toBe('');
     expect(backspace.getAttribute('disabled')).toBe('');
+  });
+
+  it('supports keyboard call and clear shortcuts', () => {
+    const fixture = TestBed.createComponent(DialpadHost);
+    const host = fixture.nativeElement;
+    fixture.detectChanges();
+
+    const dialpad = query(host, 'hell-dialpad');
+    dispatchKey(dialpad, '5');
+    dispatchKey(dialpad, 'Enter');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.calls).toEqual(['5']);
+    expect(normalizeDisplay(query(host, '[data-slot="number-inner"]').textContent)).toBe('5');
+
+    const escape = dispatchKey(dialpad, 'Escape');
+    fixture.detectChanges();
+
+    expect(escape.defaultPrevented).toBe(true);
+    expect(fixture.componentInstance.values).toEqual(['5', '']);
+    expect(normalizeDisplay(query(host, '[data-slot="number-inner"]').textContent)).toBe('');
+  });
+
+  it('names digit buttons with their associated letters', () => {
+    const fixture = TestBed.createComponent(DialpadHost);
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement;
+
+    expect(query(host, '[data-slot="key"][aria-label="2, ABC"]')).not.toBeNull();
+    expect(query(host, '[data-slot="key"][aria-label="0, +"]')).not.toBeNull();
   });
 });
 

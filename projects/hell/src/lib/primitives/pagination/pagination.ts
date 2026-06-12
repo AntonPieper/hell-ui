@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   Directive,
+  booleanAttribute,
   computed,
   inject,
   input,
@@ -33,6 +34,9 @@ const HELL_PAGINATION_ICONS = {
   faSolidChevronLeft,
   faSolidChevronRight,
 };
+
+export type HellPaginationMode = 'window' | 'previous-next';
+export type HellPaginationPagePicker = 'none' | 'select';
 
 abstract class HellPaginationDisabledGuard extends HellNativeInteractiveDisabledGuard {}
 
@@ -178,7 +182,9 @@ export class HellPaginationButton extends HellPaginationDisabledGuard {
 
 /**
  * Ready-made pagination strip. Numbered buttons are clamped to a sliding
- * window of `siblingCount * 2 + 1` around the active page.
+ * window of `siblingCount * 2 + 1` around the active page. Set
+ * `mode="previous-next"` when a flow only needs adjacent navigation, and opt
+ * into `pagePicker="select"` for direct page jumps.
  */
 @Component({
   selector: 'hell-pagination',
@@ -205,41 +211,83 @@ export class HellPaginationButton extends HellPaginationDisabledGuard {
   ],
   host: {
     '[class.hell-pagination]': '!unstyled()',
+    '[attr.data-mode]': 'mode()',
+    '[attr.data-page-picker]': 'pagePicker()',
     '[attr.aria-label]': 'labels.pagination.navigation',
     role: 'navigation',
   },
   template: `
-    <button hellPaginationFirst type="button" [attr.aria-label]="labels.pagination.firstPage">
-      <hell-icon name="faSolidAnglesLeft" />
-    </button>
+    @if (mode() === 'window') {
+      <button hellPaginationFirst type="button" [attr.aria-label]="labels.pagination.firstPage">
+        <hell-icon name="faSolidAnglesLeft" />
+      </button>
+    }
     <button hellPaginationPrev type="button" [attr.aria-label]="labels.pagination.previousPage">
       <hell-icon name="faSolidChevronLeft" />
     </button>
-    @for (p of pages(); track trackPage($index, p)) {
-      <button hellPaginationButton [page]="p" type="button" [attr.aria-label]="labels.pagination.page(p)">
-        {{ p }}
-      </button>
+    @if (mode() === 'window') {
+      @for (p of pages(); track trackPage($index, p)) {
+        <button
+          hellPaginationButton
+          [page]="p"
+          type="button"
+          [attr.aria-label]="labels.pagination.page(p)"
+        >
+          {{ p }}
+        </button>
+      }
+    }
+    @if (showStatus() || pagePicker() === 'select') {
+      <span class="hell-pagination-status" aria-live="polite">
+        @if (pagePicker() === 'select') {
+          <select
+            class="hell-pagination-select"
+            [attr.aria-label]="labels.pagination.selectPage ?? 'Select page'"
+            [value]="currentPage()"
+            [disabled]="isDisabled()"
+            (change)="onPageSelect($event)"
+          >
+            @for (p of pageOptions(); track p) {
+              <option [value]="p" [selected]="p === currentPage()">{{ p }}</option>
+            }
+          </select>
+        } @else {
+          <span>{{ currentPage() }}</span>
+        }
+        <span>/</span><span>{{ totalPages() }}</span>
+      </span>
     }
     <button hellPaginationNext type="button" [attr.aria-label]="labels.pagination.nextPage">
       <hell-icon name="faSolidChevronRight" />
     </button>
-    <button hellPaginationLast type="button" [attr.aria-label]="labels.pagination.lastPage">
-      <hell-icon name="faSolidAnglesRight" />
-    </button>
+    @if (mode() === 'window') {
+      <button hellPaginationLast type="button" [attr.aria-label]="labels.pagination.lastPage">
+        <hell-icon name="faSolidAnglesRight" />
+      </button>
+    }
   `,
 })
 export class HellPaginationStrip extends HellStyleable {
   readonly siblingCount = input<number>(2);
+  readonly mode = input<HellPaginationMode>('window');
+  readonly pagePicker = input<HellPaginationPagePicker>('none');
+  readonly showStatus = input(false, { transform: booleanAttribute });
 
   protected readonly labels = inject(HELL_LABELS);
 
   private readonly state = injectPaginationState();
 
   protected readonly trackPage = (_: number, page: number) => page;
+  protected readonly currentPage = computed(() => this.state().page());
+  protected readonly totalPages = computed(() => this.state().pageCount());
+  protected readonly isDisabled = computed(() => this.state().disabled());
+  protected readonly pageOptions = computed(() =>
+    Array.from({ length: Math.max(0, this.totalPages()) }, (_, i) => i + 1),
+  );
 
   protected readonly pages = computed(() => {
-    const total = this.state().pageCount();
-    const current = this.state().page();
+    const total = this.totalPages();
+    const current = this.currentPage();
     const span = this.siblingCount() * 2 + 1;
     if (total <= span) {
       return Array.from({ length: total }, (_, i) => i + 1);
@@ -252,6 +300,12 @@ export class HellPaginationStrip extends HellStyleable {
     }
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   });
+
+  protected onPageSelect(event: Event): void {
+    const page = Number((event.target as HTMLSelectElement).value);
+    if (!Number.isFinite(page)) return;
+    this.state().goToPage(page);
+  }
 }
 
 export const HELL_PAGINATION_DIRECTIVES = [

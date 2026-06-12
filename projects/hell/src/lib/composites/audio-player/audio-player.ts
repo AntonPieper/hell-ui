@@ -109,7 +109,7 @@ function parseIsoDateOnly(value: string): Date | null {
         <hell-icon [name]="playing() ? 'faSolidPause' : 'faSolidPlay'" />
       </button>
 
-      <span data-slot="time">{{ format(currentTime()) }}</span>
+      <span data-slot="time" data-time="current">{{ format(currentTime()) }}</span>
 
       <hell-slider
         data-slot="seek"
@@ -125,7 +125,7 @@ function parseIsoDateOnly(value: string): Date | null {
         [attr.aria-label]="labels.audioPlayer.seek"
       />
 
-      <span data-slot="time">{{ format(duration()) }}</span>
+      <span data-slot="time" data-time="duration">{{ format(duration()) }}</span>
 
       <button
         hellButton
@@ -159,7 +159,9 @@ function parseIsoDateOnly(value: string): Date | null {
           type="button"
           data-slot="cc-toggle"
           [attr.aria-pressed]="captions()"
-          [attr.aria-label]="captions() ? labels.audioPlayer.hideLiveCaptions : labels.audioPlayer.showLiveCaptions"
+          [attr.aria-label]="
+            captions() ? labels.audioPlayer.hideLiveCaptions : labels.audioPlayer.showLiveCaptions
+          "
           [attr.data-active]="captions() ? 'true' : null"
           (openChange)="captions.set($event)"
         >
@@ -550,7 +552,9 @@ export class HellAudioPlayer extends HellStyleable {
 
     const hours = Math.floor(total / 3600);
     if (hours > 0) {
-      const mins = Math.floor((total % 3600) / 60).toString().padStart(2, '0');
+      const mins = Math.floor((total % 3600) / 60)
+        .toString()
+        .padStart(2, '0');
       return `${hours}:${mins}:${seconds}`;
     }
 

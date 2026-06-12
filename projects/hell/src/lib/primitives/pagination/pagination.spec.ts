@@ -2,7 +2,12 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { provideHellLabels } from '../../core/labels';
-import { HellPagination, HellPaginationFirst, HellPaginationNext, HellPaginationStrip } from './pagination';
+import {
+  HellPagination,
+  HellPaginationFirst,
+  HellPaginationNext,
+  HellPaginationStrip,
+} from './pagination';
 
 @Component({
   imports: [HellPaginationStrip],
@@ -48,6 +53,25 @@ class PaginationExplicitDisabledHost {}
 
 @Component({
   imports: [HellPaginationStrip],
+  template: `
+    <hell-pagination
+      mode="previous-next"
+      pagePicker="select"
+      [showStatus]="true"
+      [page]="page()"
+      [pageCount]="pageCount()"
+      (pageChange)="pageEvents.push($event)"
+    />
+  `,
+})
+class SimplePaginationHost {
+  readonly page = signal(2);
+  readonly pageCount = signal(5);
+  readonly pageEvents: number[] = [];
+}
+
+@Component({
+  imports: [HellPaginationStrip],
   providers: [
     provideHellLabels({
       pagination: {
@@ -68,6 +92,7 @@ describe('HellPaginationStrip', () => {
         PaginationHost,
         PaginationAnchorHost,
         PaginationExplicitDisabledHost,
+        SimplePaginationHost,
         LocalizedPaginationHost,
       ],
     }).compileComponents();
@@ -94,7 +119,9 @@ describe('HellPaginationStrip', () => {
     const fixture = TestBed.createComponent(PaginationAnchorHost);
     fixture.detectChanges();
 
-    const first = fixture.nativeElement.querySelector('a[hellPaginationFirst]') as HTMLAnchorElement;
+    const first = fixture.nativeElement.querySelector(
+      'a[hellPaginationFirst]',
+    ) as HTMLAnchorElement;
     const click = new MouseEvent('click', { bubbles: true, cancelable: true });
 
     expect(first.getAttribute('aria-disabled')).toBe('true');
@@ -110,7 +137,9 @@ describe('HellPaginationStrip', () => {
     const button = fixture.nativeElement.querySelector(
       '#disabled-next-button',
     ) as HTMLButtonElement;
-    const anchor = fixture.nativeElement.querySelector('#disabled-next-anchor') as HTMLAnchorElement;
+    const anchor = fixture.nativeElement.querySelector(
+      '#disabled-next-anchor',
+    ) as HTMLAnchorElement;
     const click = new MouseEvent('click', { bubbles: true, cancelable: true });
 
     expect(button.disabled).toBe(true);
@@ -143,6 +172,25 @@ describe('HellPaginationStrip', () => {
 
     expect(fixture.componentInstance.pageEvents).toEqual([8, 7, 5, 1, 10]);
   });
+
+  it('supports previous-next mode with direct page selection', () => {
+    const fixture = TestBed.createComponent(SimplePaginationHost);
+    fixture.detectChanges();
+
+    expect(button(fixture.nativeElement, 'First page', false)).toBeNull();
+    expect(button(fixture.nativeElement, 'Last page', false)).toBeNull();
+    expect(pageButtonLabels(fixture.nativeElement)).toEqual([]);
+    expect(fixture.nativeElement.textContent).toContain('/5');
+
+    const select = fixture.nativeElement.querySelector('select') as HTMLSelectElement;
+    expect(select.value).toBe('2');
+
+    select.value = '4';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.pageEvents).toEqual([4]);
+  });
 });
 
 function pageButtonLabels(root: HTMLElement): string[] {
@@ -151,8 +199,11 @@ function pageButtonLabels(root: HTMLElement): string[] {
   );
 }
 
-function button(root: HTMLElement, ariaLabel: string): HTMLButtonElement {
+function button(root: HTMLElement, ariaLabel: string, required?: true): HTMLButtonElement;
+function button(root: HTMLElement, ariaLabel: string, required: false): HTMLButtonElement | null;
+function button(root: HTMLElement, ariaLabel: string, required = true): HTMLButtonElement | null {
   const element = root.querySelector(`button[aria-label="${ariaLabel}"]`);
+  if (!required && element === null) return null;
   if (!(element instanceof HTMLButtonElement)) throw new Error(`Expected ${ariaLabel} button.`);
   return element;
 }

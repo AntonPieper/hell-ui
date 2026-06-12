@@ -99,8 +99,8 @@
   .hell-popover[data-slot='picker'] {
     display: grid;
     gap: var(--spacing-hell-3);
-    width: min(21rem, calc(100vw - 2rem));
-    padding: var(--spacing-hell-3);
+    width: min(23rem, calc(100vw - 2rem));
+    padding: var(--spacing-hell-4);
   }
 
   .hell-popover[data-slot='picker'] [data-slot='picker-header'] {
@@ -111,6 +111,13 @@
   }
 
   .hell-popover[data-slot='picker'] [data-slot='picker-readout'] {
+    display: inline-flex;
+    min-width: 9ch;
+    justify-content: center;
+    border: 1px solid var(--color-hell-border);
+    border-radius: var(--radius-hell-md);
+    background-color: var(--color-hell-surface-subtle);
+    padding: var(--spacing-hell-2) var(--spacing-hell-4);
     font-size: var(--text-xl);
     line-height: 1;
     font-weight: var(--font-weight-semibold);
@@ -121,7 +128,7 @@
 
   .hell-popover[data-slot='picker'] [data-slot='picker-units'] {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(6.25rem, 1fr));
     gap: var(--spacing-hell-2);
   }
 
@@ -141,8 +148,8 @@
 
   .hell-popover[data-slot='picker'] [data-slot='picker-unit-control'] {
     display: grid;
-    grid-template-columns: var(--spacing-hell-control-sm) minmax(0, 1fr) var(
-        --spacing-hell-control-sm
+    grid-template-columns: var(--spacing-hell-control-md) minmax(0, 1fr) var(
+        --spacing-hell-control-md
       );
     align-items: stretch;
     min-width: 0;
@@ -179,9 +186,9 @@
   }
 
   .hell-popover[data-slot='picker'] [data-slot='picker-unit-step'] {
-    height: var(--spacing-hell-control-sm);
+    height: var(--spacing-hell-control-md);
     color: var(--color-hell-foreground-muted);
-    font-size: 15px;
+    font-size: 16px;
   }
 
   .hell-popover[data-slot='picker'] [data-slot='picker-unit-value'] {
@@ -189,7 +196,7 @@
     align-items: center;
     justify-content: center;
     min-width: 0;
-    height: var(--spacing-hell-control-sm);
+    height: var(--spacing-hell-control-md);
     padding-inline: var(--spacing-hell-2);
     font-family: inherit;
     font-size: 14px;
@@ -213,7 +220,7 @@
   }
 
   .hell-popover[data-slot='picker'] [data-slot='minute-preset'] {
-    height: var(--spacing-hell-control-sm);
+    height: var(--spacing-hell-control-md);
     border: 1px solid var(--color-hell-border);
     border-radius: var(--radius-sm);
     background-color: var(--color-hell-surface-elevated);
@@ -222,6 +229,17 @@
       color: var(--color-hell-primary-foreground);
       background-color: var(--color-hell-primary);
       border-color: var(--color-hell-primary);
+    }
+  }
+
+  @media (max-width: 430px) {
+    .hell-popover[data-slot='picker'] {
+      width: min(18rem, calc(100vw - 1rem));
+      padding: var(--spacing-hell-3);
+    }
+
+    .hell-popover[data-slot='picker'] [data-slot='picker-units'] {
+      grid-template-columns: 1fr;
     }
   }
 }

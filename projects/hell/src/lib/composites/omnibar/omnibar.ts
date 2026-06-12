@@ -314,6 +314,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   protected readonly isOpen = computed(() => !this.disabled() && this._open());
   protected readonly overlayPositions = HELL_OMNIBAR_OVERLAY_POSITIONS;
   private overlayPanelElement: HTMLElement | null = null;
+  private readonly overlayPanelContainer = signal<HTMLElement | null>(null);
   protected readonly cursor = signal(0);
   readonly searchResults = computed(() => this.runtime.results());
   readonly loading = computed(() => this.runtime.loading());
@@ -354,6 +355,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
 
     this.unregisterOverlayPanel();
     this.overlayPanelElement = next;
+    this.overlayPanelContainer.set(next);
 
     if (next) {
       this.floatingScope.registerFloatingElement(next);
@@ -425,10 +427,14 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     return this.isOpen() ? -1 : null;
   }
 
-  /** Container for child Floating Interaction primitives (menus, popovers) that should
-   *  behave as part of the omnibar instead of outside-click targets. */
+  /** Current container for child Floating Interaction primitives (menus, popovers). */
+  get floatingContainerElement(): HTMLElement {
+    return this.overlayPanelContainer() ?? this.host.nativeElement;
+  }
+
+  /** Container for child Floating Interaction primitives that should behave as part of the omnibar. */
   floatingContainer(): HTMLElement {
-    return this.host.nativeElement;
+    return this.floatingContainerElement;
   }
 
   registerFloatingElement(element: HTMLElement): void {
@@ -652,6 +658,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     if (!this.overlayPanelElement) return;
     this.floatingScope.unregisterFloatingElement(this.overlayPanelElement);
     this.overlayPanelElement = null;
+    this.overlayPanelContainer.set(null);
   }
 
   /* ── Hotkey ────────────────────────────────────────────────────────── */

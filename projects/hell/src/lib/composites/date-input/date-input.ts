@@ -214,7 +214,7 @@ export function hellCoerceDateInputValue(value: Date | null | undefined): Date |
     </button>
 
     <ng-template #cal>
-      <div hellPopover>
+      <div hellPopover unstyled data-slot="picker-popover">
         <hell-date-picker
           [date]="current() ?? undefined"
           [focusedDate]="pickerFocusedDate()"

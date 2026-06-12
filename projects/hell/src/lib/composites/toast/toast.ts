@@ -501,6 +501,7 @@ export class HellToaster extends HellStyleable {
       clearTimeout(this.collapseHandle);
       this.collapseHandle = null;
     }
+    this.observeAll();
     this.expanded.set(true);
     this.svc.pauseAll();
     this.scheduleViewportStateSync(!wasExpanded);
@@ -613,11 +614,24 @@ export class HellToaster extends HellStyleable {
   }
 
   private scheduleViewportStateSync(resetOrigin = false): void {
-    setTimeout(() => {
+    const sync = () => {
       if (this.destroyed) return;
+      this.observeAll();
       this.syncViewportState();
       if (resetOrigin) this.scrollToStackOrigin();
-    }, 0);
+    };
+
+    queueMicrotask(sync);
+
+    const win = this.host.ownerDocument.defaultView;
+    if (win) {
+      win.requestAnimationFrame(() => {
+        sync();
+        win.requestAnimationFrame(sync);
+      });
+    }
+
+    setTimeout(sync, 120);
   }
 
   private scrollToStackOrigin(): void {
