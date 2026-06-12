@@ -88,7 +88,7 @@ const ciGroups = [
   },
   {
     name: 'behavior-regressions',
-    testMatch: 'ui-behavior.spec.ts',
+    testMatch: ['component-polish-regressions.spec.ts', 'ui-behavior.spec.ts'],
   },
 ] as const;
 

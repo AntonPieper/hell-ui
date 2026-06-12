@@ -80,7 +80,15 @@ const HELL_DIALPAD_ICONS = {
 
     <div data-slot="grid">
       @for (k of keys; track k.digit) {
-        <button hellButton variant="ghost" data-slot="key" type="button" (click)="press(k.digit)">
+        <button
+          hellButton
+          variant="ghost"
+          data-slot="key"
+          type="button"
+          [attr.aria-label]="keyLabel(k)"
+          [attr.data-active]="activeKey() === k.digit ? 'true' : null"
+          (click)="press(k.digit)"
+        >
           <span data-slot="digit">{{ k.digit }}</span>
           <span data-slot="letters">{{ k.letters || ' ' }}</span>
         </button>
@@ -114,7 +122,9 @@ export class HellDialpad extends HellStyleable {
   readonly call = output<string>();
 
   protected readonly keys = KEYS;
+  protected readonly activeKey = signal<string | null>(null);
   private readonly local = signal('');
+  private activeKeyTimer: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly display = computed(() => {
     const value = this.value();
@@ -124,6 +134,7 @@ export class HellDialpad extends HellStyleable {
   protected press(d: string) {
     const next = this.display() + d;
     this.local.set(next);
+    this.flashKey(d);
     this.digit.emit(d);
     this.valueChange.emit(next);
   }
@@ -140,9 +151,33 @@ export class HellDialpad extends HellStyleable {
       e.preventDefault();
       return;
     }
+    if (e.key === 'Escape') {
+      this.local.set('');
+      this.valueChange.emit('');
+      e.preventDefault();
+      return;
+    }
+    if (e.key === 'Enter') {
+      if (this.display()) this.call.emit(this.display());
+      e.preventDefault();
+      return;
+    }
     if (/^[0-9*#+]$/.test(e.key)) {
       this.press(e.key);
       e.preventDefault();
     }
+  }
+
+  protected keyLabel(key: HellDialpadKey): string {
+    return key.letters ? `${key.digit}, ${key.letters}` : key.digit;
+  }
+
+  private flashKey(digit: string): void {
+    this.activeKey.set(digit);
+    if (this.activeKeyTimer) clearTimeout(this.activeKeyTimer);
+    this.activeKeyTimer = setTimeout(() => {
+      this.activeKey.set(null);
+      this.activeKeyTimer = null;
+    }, 120);
   }
 }

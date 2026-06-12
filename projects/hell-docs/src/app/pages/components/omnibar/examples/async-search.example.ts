@@ -1,6 +1,11 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
-import { faSolidMagnifyingGlass, faSolidUser } from '@ng-icons/font-awesome/solid';
+import {
+  faSolidFilter,
+  faSolidMagnifyingGlass,
+  faSolidUser,
+  faSolidXmark,
+} from '@ng-icons/font-awesome/solid';
 import { HELL_OMNIBAR_DIRECTIVES } from '@hell-ui/angular/omnibar';
 import { type HellSearchField, type HellSearchSource } from '@hell-ui/angular/core';
 import { HellIcon } from '@hell-ui/angular/icon';
@@ -27,7 +32,7 @@ const PEOPLE: readonly Person[] = Array.from({ length: 32 }, (_, index) => {
   selector: 'app-omnibar-async-search-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellIcon, ...HELL_OMNIBAR_DIRECTIVES],
-  providers: [provideIcons({ faSolidMagnifyingGlass, faSolidUser })],
+  providers: [provideIcons({ faSolidFilter, faSolidMagnifyingGlass, faSolidUser, faSolidXmark })],
   template: `
     <ng-template #peopleLoading let-message="message">
       <div class="p-3 text-sm text-hell-foreground-muted">{{ message }} people…</div>
@@ -59,9 +64,13 @@ const PEOPLE: readonly Person[] = Array.from({ length: 32 }, (_, index) => {
           [attr.aria-pressed]="filtersActive()"
           (click)="toggleFilters()"
         >
-          Filters
+          <hell-icon name="faSolidFilter" size="12px" />
+          <span>Filters</span>
         </button>
-        <button hellOmnibarAction type="button" (click)="clearSelection()">Clear selection</button>
+        <button hellOmnibarAction type="button" (click)="clearSelection()">
+          <hell-icon name="faSolidXmark" size="12px" />
+          <span>Clear selection</span>
+        </button>
       </div>
 
       <div hellOmnibarGroup label="People">

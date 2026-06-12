@@ -5,9 +5,7 @@ test.describe('flyout browser accessibility contract', () => {
     await gotoFlyoutDocs(page);
   });
 
-  test('exposes a named non-modal dialog with trigger relationships', async ({
-    page,
-  }) => {
+  test('exposes a named non-modal dialog with trigger relationships', async ({ page }) => {
     const { example, trigger } = flyoutExample(page);
 
     await expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
@@ -54,9 +52,19 @@ test.describe('flyout browser accessibility contract', () => {
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 
-  test('Escape closes the flyout and restores focus to the trigger', async ({
-    page,
-  }) => {
+  test('opens without moving the outside sibling action', async ({ page }) => {
+    const { example, trigger } = flyoutExample(page);
+    const outsideAction = example.getByRole('button', { name: 'Outside boundary action' });
+
+    const before = await topOffset(outsideAction);
+    await trigger.click();
+    await expect(page.getByRole('dialog', { name: 'Anchored, non-modal' })).toBeVisible();
+    const after = await topOffset(outsideAction);
+
+    expect(Math.abs(after - before)).toBeLessThanOrEqual(1);
+  });
+
+  test('Escape closes the flyout and restores focus to the trigger', async ({ page }) => {
     const { trigger } = flyoutExample(page);
 
     await trigger.click();
@@ -84,4 +92,10 @@ function flyoutExample(page: Page): { example: Locator; trigger: Locator } {
     example,
     trigger: example.getByRole('button', { name: /^(Show|Hide) flyout$/ }),
   };
+}
+
+async function topOffset(locator: Locator): Promise<number> {
+  const box = await locator.boundingBox();
+  if (!box) throw new Error('Expected element to have a bounding box.');
+  return box.y;
 }

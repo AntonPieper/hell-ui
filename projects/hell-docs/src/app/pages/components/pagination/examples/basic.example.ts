@@ -6,12 +6,29 @@ import { HellPaginationStrip } from '@hell-ui/angular/pagination';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellPaginationStrip],
   template: `
-    <hell-pagination [page]="page()" [pageCount]="pageCount" (pageChange)="page.set($event)" />
-    <span class="whitespace-nowrap text-sm hd-muted">Page {{ page() }} of {{ pageCount }}</span>
+    <div class="grid gap-3">
+      <div class="flex flex-wrap items-center gap-3">
+        <hell-pagination
+          [page]="page()"
+          [pageCount]="pageCount"
+          pagePicker="select"
+          [showStatus]="true"
+          (pageChange)="page.set($event)"
+        />
+      </div>
+
+      <hell-pagination
+        mode="previous-next"
+        [showStatus]="true"
+        [page]="simplePage()"
+        [pageCount]="pageCount"
+        (pageChange)="simplePage.set($event)"
+      />
+    </div>
   `,
 })
 export class PaginationBasicExample {
   protected readonly page = signal(3);
-  protected readonly page2 = signal(8);
+  protected readonly simplePage = signal(3);
   protected readonly pageCount = 12;
 }

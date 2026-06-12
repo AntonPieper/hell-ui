@@ -6,8 +6,10 @@ import { HellSlider } from '@hell-ui/angular/slider';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellSlider],
   template: `
-    <hell-slider orientation="vertical" [value]="30" aria-label="Vertical low" />
-    <hell-slider orientation="vertical" [value]="70" aria-label="Vertical high" />
+    <div class="flex h-52 items-center gap-8 overflow-visible px-4 py-3">
+      <hell-slider orientation="vertical" [value]="30" aria-label="Vertical low" />
+      <hell-slider orientation="vertical" [value]="70" aria-label="Vertical high" />
+    </div>
   `,
 })
 export class SliderVerticalExample {}

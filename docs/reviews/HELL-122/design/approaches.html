@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HELL-122 Component Polish Approaches</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #17202a;
+        --muted: #637083;
+        --line: #d7dde7;
+        --soft: #f4f6f9;
+        --surface: #ffffff;
+        --blue: #2459d6;
+        --teal: #087f7a;
+        --amber: #b45309;
+        --rose: #be123c;
+        --violet: #6d28d9;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: #eef1f5;
+        color: var(--ink);
+      }
+
+      main {
+        width: min(1420px, calc(100vw - 48px));
+        margin: 0 auto;
+        padding: 28px 0 36px;
+      }
+
+      header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 16px;
+        align-items: end;
+        margin-bottom: 20px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 24px;
+        line-height: 1.1;
+        letter-spacing: 0;
+      }
+
+      header p {
+        color: var(--muted);
+        margin-top: 6px;
+        font-size: 13px;
+      }
+
+      .chosen {
+        justify-self: end;
+        border: 1px solid #9fb4dc;
+        background: #e9f0ff;
+        color: #173b8f;
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .approach {
+        min-height: 760px;
+        display: grid;
+        grid-template-rows: auto auto 1fr auto;
+        gap: 12px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        box-shadow: 0 10px 24px rgb(23 32 42 / 0.08);
+      }
+
+      .approach h2 {
+        font-size: 15px;
+        line-height: 1.2;
+      }
+
+      .approach p {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .tag {
+        width: max-content;
+        padding: 4px 7px;
+        border-radius: 6px;
+        background: var(--soft);
+        color: var(--muted);
+        border: 1px solid var(--line);
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .panel {
+        display: grid;
+        gap: 12px;
+        align-content: start;
+      }
+
+      .mock {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--soft);
+        padding: 10px;
+      }
+
+      .label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .calendar {
+        display: grid;
+        gap: 6px;
+      }
+
+      .calendar-head {
+        display: grid;
+        grid-template-columns: 24px 1fr 24px;
+        align-items: center;
+        text-align: center;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .chev,
+      .icon-btn {
+        display: grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        font-size: 12px;
+      }
+
+      .days {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 3px;
+      }
+
+      .day {
+        display: grid;
+        place-items: center;
+        aspect-ratio: 1;
+        border-radius: 6px;
+        background: #fff;
+        font-size: 11px;
+      }
+
+      .day.current {
+        color: var(--blue);
+        box-shadow: inset 0 0 0 1px var(--blue);
+        font-weight: 700;
+      }
+
+      .day.selected {
+        color: #fff;
+        background: var(--blue);
+        font-weight: 800;
+      }
+
+      .pager {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        align-items: center;
+      }
+
+      .pager button,
+      .pager select,
+      .pill {
+        min-height: 28px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        padding: 0 8px;
+        font-size: 12px;
+      }
+
+      .pager .active,
+      .strong {
+        border-color: var(--blue);
+        background: var(--blue);
+        color: #fff;
+      }
+
+      .flyout-stage {
+        position: relative;
+        min-height: 160px;
+        border: 1px dashed #b6c1d1;
+        border-radius: 8px;
+        padding: 10px;
+        background: #fff;
+      }
+
+      .flyout-card {
+        position: absolute;
+        left: 10px;
+        right: 10px;
+        top: 54px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 12px 22px rgb(23 32 42 / 0.16);
+        font-size: 12px;
+      }
+
+      .mobile-player {
+        display: grid;
+        grid-template-columns: auto 1fr auto auto;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .rail {
+        display: grid;
+        grid-template-columns: 38px 1fr 32px;
+        gap: 8px;
+        align-items: stretch;
+        min-height: 170px;
+      }
+
+      .side,
+      .main,
+      .secondary {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        padding: 8px;
+        font-size: 11px;
+      }
+
+      .secondary {
+        display: grid;
+        place-items: start center;
+      }
+
+      .contrast-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .toggle {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 6px 8px;
+        background: #1f2937;
+        color: #cbd5e1;
+        font-size: 12px;
+      }
+
+      .toggle.active {
+        border-color: #9dc5ff;
+        background: #9dc5ff;
+        color: #111827;
+        font-weight: 800;
+      }
+
+      .dialpad {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 7px;
+      }
+
+      .key {
+        min-height: 48px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        font-size: 15px;
+        font-weight: 800;
+      }
+
+      .key small {
+        display: block;
+        color: var(--muted);
+        font-size: 9px;
+        letter-spacing: 0;
+      }
+
+      .time-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .stepper {
+        display: grid;
+        grid-template-columns: 28px 1fr 28px;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .meter {
+        height: 8px;
+        border-radius: 99px;
+        background: #dce3ee;
+        overflow: hidden;
+      }
+
+      .meter span {
+        display: block;
+        width: 62%;
+        height: 100%;
+        background: var(--teal);
+      }
+
+      .decision {
+        padding-top: 10px;
+        border-top: 1px solid var(--line);
+        color: var(--ink);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .a {
+        --blue: #2459d6;
+      }
+
+      .b {
+        --blue: var(--teal);
+      }
+
+      .c {
+        --blue: var(--amber);
+      }
+
+      .d {
+        background: #111827;
+        color: #edf2f7;
+        --surface: #111827;
+        --soft: #1f2937;
+        --line: #475569;
+        --muted: #aeb8c8;
+        --blue: #9dc5ff;
+      }
+
+      .d .mock,
+      .d .day,
+      .d .chev,
+      .d .icon-btn,
+      .d .pager button,
+      .d .pager select,
+      .d .pill,
+      .d .key,
+      .d .side,
+      .d .main,
+      .d .secondary,
+      .d .flyout-stage,
+      .d .flyout-card {
+        background: #1f2937;
+        color: #edf2f7;
+      }
+
+      .e {
+        --blue: var(--violet);
+      }
+
+      @media (max-width: 1100px) {
+        .grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <h1>HELL-122 component polish: five visual directions</h1>
+          <p>
+            Compared before implementation: calendar centering, compact pagination, no-shift
+            overlays, mobile wrapping, high-contrast selection, and keyboard-first inputs.
+          </p>
+        </div>
+        <div class="chosen">
+          Chosen blend: A pagination + B overlays + C mobile + D contrast + E keyboard
+        </div>
+      </header>
+
+      <section class="grid" aria-label="Five design approaches">
+        <article class="approach a">
+          <span class="tag">A. Dense utility</span>
+          <h2>Compact controls for repeated operations</h2>
+          <p>
+            Keep primitives tight and scannable. Status and direct page select sit inside the
+            pagination strip, and date cells use fixed geometry.
+          </p>
+          <div class="panel">
+            <div class="mock">
+              <span class="label">Date picker</span>
+              <div class="calendar">
+                <div class="calendar-head">
+                  <span class="chev">&lt;</span><span>April 2026</span
+                  ><span class="chev">&gt;</span>
+                </div>
+                <div class="days">
+                  <span class="day">20</span><span class="day">21</span
+                  ><span class="day selected">22</span><span class="day">23</span
+                  ><span class="day">24</span><span class="day">25</span><span class="day">26</span>
+                </div>
+              </div>
+            </div>
+            <div class="mock">
+              <span class="label">Pagination</span>
+              <div class="pager">
+                <button>&lt;</button><button>1</button><button>2</button
+                ><button class="active">3</button
+                ><select>
+                  <option>3</option></select
+                ><span class="pill">/ 12</span><button>&gt;</button>
+              </div>
+            </div>
+            <div class="mock">
+              <span class="label">Audio</span>
+              <div class="mobile-player">
+                <span class="icon-btn">P</span><span class="pill">0:12</span
+                ><span class="pill">2:04</span><span class="icon-btn">V</span>
+                <div class="meter" style="grid-column: 1 / -1"><span></span></div>
+              </div>
+            </div>
+          </div>
+          <div class="decision">
+            Use for pagination and date-picker geometry. Too compact alone for dialpad and time
+            input.
+          </div>
+        </article>
+
+        <article class="approach b">
+          <span class="tag">B. Overlay-first</span>
+          <h2>No layout shift, no hidden floating layers</h2>
+          <p>
+            Flyouts, date-input pickers, and omnibar menus float over reserved interaction areas
+            instead of pushing siblings or hiding behind parent panels.
+          </p>
+          <div class="panel">
+            <div class="mock">
+              <span class="label">Flyout</span>
+              <div class="flyout-stage">
+                <button class="pill strong">Show flyout</button>
+                <button class="pill">Sibling input</button>
+                <div class="flyout-card">
+                  Anchored panel stays inside the boundary while the outside action keeps its
+                  position.
+                </div>
+              </div>
+            </div>
+            <div class="mock">
+              <span class="label">Omnibar</span>
+              <div class="pager">
+                <span class="pill strong">Search docs</span><button>sliders</button
+                ><button>filter</button><button>layers</button>
+              </div>
+              <div class="flyout-card" style="position: static; margin-top: 8px">
+                Menu z-index is above the omnibar panel.
+              </div>
+            </div>
+            <div class="mock">
+              <span class="label">Date input</span>
+              <span class="pill">2026-04-22</span>
+              <div class="calendar" style="margin-top: 8px">
+                <div class="days">
+                  <span class="day">20</span><span class="day">21</span
+                  ><span class="day selected">22</span><span class="day">23</span
+                  ><span class="day">24</span><span class="day">25</span><span class="day">26</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="decision">
+            Chosen for flyout, omnibar menu layering, and date-input chrome removal.
+          </div>
+        </article>
+
+        <article class="approach c">
+          <span class="tag">C. Mobile stack</span>
+          <h2>Purposeful rows instead of accidental wrapping</h2>
+          <p>
+            Controls switch to explicit CSS grids at narrow widths. Audio controls, time input,
+            sliders, and secondary rails keep stable hit areas.
+          </p>
+          <div class="panel">
+            <div class="mock">
+              <span class="label">Audio grid</span>
+              <div class="mobile-player">
+                <span class="icon-btn">P</span><span>0:00</span><span>2:04</span
+                ><span class="icon-btn">M</span>
+                <div class="meter" style="grid-column: 1 / -1"><span></span></div>
+                <div class="meter" style="grid-column: 1 / 3"><span style="width: 45%"></span></div>
+                <span class="icon-btn">CC</span><span class="icon-btn">D</span>
+              </div>
+            </div>
+            <div class="mock">
+              <span class="label">App shell</span>
+              <div class="rail">
+                <div class="side">nav</div>
+                <div class="main">content</div>
+                <div class="secondary">
+                  <span class="icon-btn">i</span>
+                </div>
+              </div>
+            </div>
+            <div class="mock">
+              <span class="label">Vertical slider</span>
+              <div style="display: flex; gap: 18px; height: 150px; align-items: center">
+                <div
+                  style="
+                    width: 28px;
+                    height: 132px;
+                    border-radius: 99px;
+                    background: #dce3ee;
+                    position: relative;
+                  "
+                >
+                  <span
+                    style="
+                      position: absolute;
+                      bottom: 0;
+                      left: 9px;
+                      width: 10px;
+                      height: 45%;
+                      border-radius: 99px;
+                      background: var(--blue);
+                    "
+                  ></span>
+                </div>
+                <div
+                  style="
+                    width: 28px;
+                    height: 132px;
+                    border-radius: 99px;
+                    background: #dce3ee;
+                    position: relative;
+                  "
+                >
+                  <span
+                    style="
+                      position: absolute;
+                      bottom: 0;
+                      left: 9px;
+                      width: 10px;
+                      height: 72%;
+                      border-radius: 99px;
+                      background: var(--blue);
+                    "
+                  ></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="decision">
+            Chosen for audio mobile wrapping, app-shell mobile rail, and vertical slider
+            containment.
+          </div>
+        </article>
+
+        <article class="approach d">
+          <span class="tag">D. Contrast led</span>
+          <h2>Selection reads before decoration</h2>
+          <p>
+            Dark-mode selected states use actual active surfaces, not faint border shifts. Avatar
+            overflow receives the same lift and ring language as visible avatars.
+          </p>
+          <div class="panel">
+            <div class="mock">
+              <span class="label">Toggle group</span>
+              <div class="contrast-row">
+                <span class="toggle">Left</span><span class="toggle active">Center</span
+                ><span class="toggle">Right</span>
+              </div>
+            </div>
+            <div class="mock">
+              <span class="label">Avatar overflow</span>
+              <div class="contrast-row">
+                <span class="day selected">HK</span><span class="day">AP</span
+                ><span class="day">BS</span
+                ><span class="day" style="box-shadow: 0 0 0 3px rgb(157 197 255 / 0.35)">+3</span>
+              </div>
+            </div>
+            <div class="mock">
+              <span class="label">Toast stack</span>
+              <div class="flyout-card" style="position: static; margin-bottom: 6px">
+                Build started
+              </div>
+              <div class="flyout-card" style="position: static; margin-bottom: 6px">
+                Tests passed
+              </div>
+              <div class="flyout-card" style="position: static">All items measured on expand</div>
+            </div>
+          </div>
+          <div class="decision">
+            Chosen for toggle contrast, avatar overflow hover/focus, and toast expanded readability.
+          </div>
+        </article>
+
+        <article class="approach e">
+          <span class="tag">E. Keyboard flow</span>
+          <h2>Direct input is faster than repeated clicks</h2>
+          <p>
+            Dialpad and time input expose obvious keyboard paths. Split-view detail gets adjacent
+            pagination so users can move through items without returning to the list.
+          </p>
+          <div class="panel">
+            <div class="mock">
+              <span class="label">Dialpad</span>
+              <div class="dialpad">
+                <span class="key">1</span><span class="key">2<small>ABC</small></span
+                ><span class="key">3<small>DEF</small></span>
+                <span class="key">4<small>GHI</small></span
+                ><span class="key">5<small>JKL</small></span
+                ><span class="key">6<small>MNO</small></span> <span class="key">*</span
+                ><span class="key">0<small>+</small></span
+                ><span class="key">#</span>
+              </div>
+            </div>
+            <div class="mock">
+              <span class="label">Time input</span>
+              <div class="time-grid">
+                <div class="stepper">
+                  <button class="icon-btn">-</button><span class="pill">14</span
+                  ><button class="icon-btn">+</button>
+                </div>
+                <div class="stepper">
+                  <button class="icon-btn">-</button><span class="pill">35</span
+                  ><button class="icon-btn">+</button>
+                </div>
+              </div>
+              <p style="margin-top: 8px">ArrowUp +5m, Shift+ArrowUp +60m, PageUp/PageDown +60m.</p>
+            </div>
+            <div class="mock">
+              <span class="label">Split view</span>
+              <div class="pager">
+                <button>&lt;</button><span class="pill">2 / 3</span><button>&gt;</button>
+              </div>
+            </div>
+          </div>
+          <div class="decision">
+            Chosen for dialpad keyboard UX, time-input stepping, and split-view previous/next
+            navigation.
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

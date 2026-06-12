@@ -233,6 +233,7 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
       (input)="onInput(field.value)"
       (blur)="onBlur()"
       (keydown.enter)="commit(field.value, $event)"
+      (keydown)="onFieldKeydown($event)"
     />
     <button
       hellButton
@@ -434,6 +435,14 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
     this.onValidatorChange();
   }
 
+  protected onFieldKeydown(event: KeyboardEvent): void {
+    const keyDeltaMinutes = this.fieldKeyDeltaMinutes(event);
+    if (keyDeltaMinutes === null) return;
+
+    event.preventDefault();
+    this.stepTimeByMinutes(keyDeltaMinutes);
+  }
+
   protected setUnit(unit: HellTimeUnit, n: number) {
     const value = this.normalizeValue({ ...this.current(), [unit]: n });
     if (!value) return;
@@ -507,6 +516,32 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
 
     event.preventDefault();
     this.setUnit(unit, next);
+  }
+
+  private fieldKeyDeltaMinutes(event: KeyboardEvent): number | null {
+    if (event.key === 'ArrowUp') return event.shiftKey ? 60 : 5;
+    if (event.key === 'ArrowDown') return event.shiftKey ? -60 : -5;
+    if (event.key === 'PageUp') return 60;
+    if (event.key === 'PageDown') return -60;
+    return null;
+  }
+
+  private stepTimeByMinutes(deltaMinutes: number): void {
+    const current = this.current();
+    const currentSeconds = current.hour * 3600 + current.minute * 60 + current.second;
+    const daySeconds = 24 * 3600;
+    const nextSeconds =
+      (((currentSeconds + deltaMinutes * 60) % daySeconds) + daySeconds) % daySeconds;
+    const value = this.normalizeValue({
+      hour: Math.floor(nextSeconds / 3600),
+      minute: Math.floor((nextSeconds % 3600) / 60),
+      second: this.seconds() ? nextSeconds % 60 : 0,
+    });
+    if (!value) return;
+    const next = this.valueState.setValue(value);
+    if (next.committed) this.emitValue(next.value);
+    this.onControlTouched();
+    this.onValidatorChange();
   }
 
   private normalizeValue(value: HellTimeValue | null | undefined): HellTimeValue | null {

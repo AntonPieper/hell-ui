@@ -222,7 +222,7 @@
   }
 
   .hell-omnibar-overlay-pane {
-    z-index: var(--hell-z-popover, 60);
+    z-index: var(--hell-z-omnibar, 1000);
   }
 
   /* Panel — positioned by Angular CDK ConnectedOverlay. The component copies
@@ -240,6 +240,11 @@
     box-shadow: var(--hell-omnibar-panel-shadow);
     overflow: hidden;
     animation: hell-pop-in var(--hell-duration-fast) var(--ease-hell-out);
+  }
+
+  .hell-omnibar .hell-menu,
+  .hell-omnibar-panel-surface .hell-menu {
+    z-index: var(--hell-z-omnibar-menu, 1001);
   }
 
   .hell-omnibar-panel-surface [data-slot='actions'] {
