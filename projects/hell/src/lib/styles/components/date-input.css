@@ -92,8 +92,10 @@
   }
 
   [data-slot='picker-popover'] {
+    position: absolute;
     z-index: var(--hell-z-popover, 60);
     max-width: max-content;
     outline: none;
+    animation: hell-pop-in var(--hell-duration-fast) var(--ease-hell-out);
   }
 }

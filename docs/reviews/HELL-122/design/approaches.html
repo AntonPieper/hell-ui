@@ -517,7 +517,7 @@
           <h2>Purposeful rows instead of accidental wrapping</h2>
           <p>
             Controls switch to explicit CSS grids at narrow widths. Audio controls, time input,
-            sliders, and secondary rails keep stable hit areas.
+            sliders, and mobile secondary panels keep stable hit areas.
           </p>
           <div class="panel">
             <div class="mock">
@@ -531,11 +531,16 @@
               </div>
             </div>
             <div class="mock">
-              <span class="label">App shell</span>
+              <span class="label">Docs app shell</span>
               <div class="rail">
                 <div class="side">nav</div>
-                <div class="main">content</div>
-                <div class="secondary">
+                <div class="main">
+                  content
+                  <div class="flyout-card" style="position: static; margin-top: 12px">
+                    Secondary opens as a sheet from a topbar info button.
+                  </div>
+                </div>
+                <div class="secondary" style="display: none">
                   <span class="icon-btn">i</span>
                 </div>
               </div>
@@ -589,7 +594,7 @@
             </div>
           </div>
           <div class="decision">
-            Chosen for audio mobile wrapping, app-shell mobile rail, and vertical slider
+            Chosen for audio small-screen wrapping, app-shell mobile sheet, and vertical slider
             containment.
           </div>
         </article>
@@ -599,7 +604,8 @@
           <h2>Selection reads before decoration</h2>
           <p>
             Dark-mode selected states use actual active surfaces, not faint border shifts. Avatar
-            overflow receives the same lift and ring language as visible avatars.
+            overflow receives the same hover lift as visible avatars, while rings stay reserved for
+            focus-visible.
           </p>
           <div class="panel">
             <div class="mock">
@@ -613,8 +619,9 @@
               <span class="label">Avatar overflow</span>
               <div class="contrast-row">
                 <span class="day selected">HK</span><span class="day">AP</span
-                ><span class="day">BS</span
-                ><span class="day" style="box-shadow: 0 0 0 3px rgb(157 197 255 / 0.35)">+3</span>
+                ><span class="day">BS</span><span class="day" style="transform: translateY(-1px)"
+                  >+3</span
+                >
               </div>
             </div>
             <div class="mock">

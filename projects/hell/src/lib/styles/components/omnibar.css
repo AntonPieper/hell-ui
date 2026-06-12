@@ -34,6 +34,10 @@
     position: relative;
   }
 
+  .hell-omnibar:has(.hell-menu) {
+    z-index: var(--hell-z-omnibar-menu, 1001);
+  }
+
   .hell-omnibar[data-size='sm'] {
     --hell-omnibar-height: var(--spacing-hell-control-sm);
     --hell-omnibar-font: 12px;
@@ -238,7 +242,7 @@
     border: 1px solid var(--color-hell-border);
     border-radius: var(--hell-omnibar-panel-radius);
     box-shadow: var(--hell-omnibar-panel-shadow);
-    overflow: hidden;
+    overflow: visible;
     animation: hell-pop-in var(--hell-duration-fast) var(--ease-hell-out);
   }
 
@@ -248,6 +252,8 @@
   }
 
   .hell-omnibar-panel-surface [data-slot='actions'] {
+    position: relative;
+    z-index: 2;
     display: flex;
     align-items: center;
     gap: var(--spacing-hell-1);
@@ -297,6 +303,8 @@
   }
 
   .hell-omnibar-panel-surface [data-slot='results'] {
+    position: relative;
+    z-index: 1;
     flex: 1 1 auto;
     overflow-y: auto;
     padding: var(--spacing-hell-2);

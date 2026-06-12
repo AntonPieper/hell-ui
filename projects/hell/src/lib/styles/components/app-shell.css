@@ -59,6 +59,10 @@
     grid-area: topbar;
   }
 
+  .hell-topbar:has(.hell-omnibar .hell-menu) {
+    z-index: var(--hell-z-omnibar-menu, 1001);
+  }
+
   /*
    * Sidenav toggle button — opt-in styled appearance for `[hellSidenavToggle]`.
    * Sits in the topbar's leading slot. Outer width matches

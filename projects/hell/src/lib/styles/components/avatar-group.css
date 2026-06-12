@@ -111,20 +111,19 @@
     &:is(button, a) {
       cursor: pointer;
     }
-    &:is(:hover, :focus-visible) {
-      box-shadow:
-        0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-cutout),
-        0 0 0 calc(var(--_hell-avatar-group-ring-width) * 2) var(--_hell-avatar-group-ring-color),
-        0 0 0 calc(var(--_hell-avatar-group-ring-width) * 3) var(--_hell-avatar-group-cutout);
-    }
     &:hover {
       z-index: 3;
       transform: translateY(-1px);
-      --_hell-avatar-group-ring-color: var(--color-hell-border-focus);
+      background-color: var(--color-hell-surface-elevated);
+      color: var(--color-hell-foreground);
     }
     &:focus-visible {
       z-index: 2;
       --_hell-avatar-group-ring-color: var(--color-hell-focus-ring);
+      box-shadow:
+        0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-cutout),
+        0 0 0 calc(var(--_hell-avatar-group-ring-width) * 2) var(--_hell-avatar-group-ring-color),
+        0 0 0 calc(var(--_hell-avatar-group-ring-width) * 3) var(--_hell-avatar-group-cutout);
     }
   }
 }

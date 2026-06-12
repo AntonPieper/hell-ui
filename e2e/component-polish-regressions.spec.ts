@@ -137,24 +137,79 @@ test.describe('component polish regressions', () => {
     await capturePage(page, testInfo, 'app-shell-mobile-secondary-open');
   });
 
-  test('wraps audio-player controls on mobile without horizontal overflow', async ({
+  test('keeps the docs-site secondary sidebar reachable on mobile', async ({
     page,
   }, testInfo) => {
-    await page.setViewportSize({ width: 390, height: 760 });
-    await gotoDocsPage(page, '/components/audio-player', 'Audio player');
+    await page.setViewportSize({ width: 390, height: 900 });
+    await gotoDocsPage(page, '/', 'hell — Heinrich Element Library');
 
-    const player = page.locator('app-audio-player-with-title-and-date-example hell-audio-player');
-    const controls = player.locator('[data-slot="controls"]');
-    const seek = player.locator('[data-slot="seek"]');
-    const volume = player.locator('[data-slot="volume"]');
+    const shell = page.locator('body > hd-root > div[hellAppShell]');
+    const main = page.locator('main[hellAppContent]');
+    const secondary = page.locator('aside.hd-docs-secondary');
+    const secondaryBody = secondary.locator('.hell-secondary-body');
+    const topbarToggle = page.locator('.hd-docs-secondary-toggle');
 
-    await expect(controls).toBeVisible();
-    await expect.poll(() => hasHorizontalChildOverflow(controls)).toBe(false);
+    await expect(shell).toHaveAttribute('data-mobile-layout', 'true');
+    await expect(shell).toHaveAttribute('data-secondary-hidden', 'true');
+    await expect(topbarToggle).toBeVisible();
+    await expect(topbarToggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(secondaryBody).toHaveAttribute('aria-hidden', 'true');
 
-    expect((await requiredBox(seek, 'audio seek slider')).width).toBeGreaterThan(180);
-    expect((await requiredBox(volume, 'audio volume slider')).width).toBeGreaterThan(90);
+    const mainBox = await requiredBox(main, 'docs mobile main content');
+    expect(mainBox.width).toBeGreaterThanOrEqual(360);
 
-    await captureLocator(player, testInfo, 'audio-player-mobile-wrapping');
+    await topbarToggle.click();
+    await expect(shell).not.toHaveAttribute('data-secondary-hidden');
+    await expect(topbarToggle).toHaveAttribute('aria-expanded', 'true');
+    await expect(secondary).toBeVisible();
+    await expect(secondaryBody).not.toHaveAttribute('aria-hidden');
+    await expect
+      .poll(() => secondaryBody.evaluate((element) => element.hasAttribute('inert')))
+      .toBe(false);
+
+    await capturePage(page, testInfo, 'docs-site-mobile-secondary-open');
+  });
+
+  test('wraps audio-player controls on smaller screens without horizontal overflow', async ({
+    page,
+  }, testInfo) => {
+    for (const viewport of [
+      { width: 390, height: 760, label: 'mobile' },
+      { width: 640, height: 760, label: 'small-tablet' },
+    ]) {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await gotoDocsPage(page, '/components/audio-player', 'Audio player');
+
+      const player = page.locator('app-audio-player-with-title-and-date-example hell-audio-player');
+      const controls = player.locator('[data-slot="controls"]');
+      const seek = player.locator('[data-slot="seek"]');
+      const volume = player.locator('[data-slot="volume"]');
+      const play = player.getByRole('button', { name: 'Play' });
+      const mute = player.getByRole('button', { name: 'Mute' });
+      const download = player.getByRole('link', { name: 'Download' });
+
+      await expect(controls).toBeVisible();
+      await expect.poll(() => hasHorizontalChildOverflow(controls)).toBe(false);
+
+      const gaps = await gridGaps(controls);
+      expect(gaps.column).toBeLessThanOrEqual(12);
+      expect(gaps.row).toBeLessThanOrEqual(12);
+
+      const playBox = await requiredBox(play, 'audio play button');
+      const muteBox = await requiredBox(mute, 'audio mute button');
+      const downloadBox = await requiredBox(download, 'audio download action');
+      const seekBox = await requiredBox(seek, 'audio seek slider');
+      const volumeBox = await requiredBox(volume, 'audio volume slider');
+
+      expect(Math.abs(centerY(muteBox) - centerY(playBox))).toBeLessThanOrEqual(1);
+      expect(Math.abs(centerY(downloadBox) - centerY(playBox))).toBeLessThanOrEqual(1);
+      expect(seekBox.y).toBeGreaterThan(playBox.y + playBox.height - 1);
+      expect(volumeBox.y).toBeGreaterThan(seekBox.y + seekBox.height - 1);
+      expect(seekBox.width).toBeGreaterThan(180);
+      expect(volumeBox.width).toBeGreaterThan(90);
+
+      await captureLocator(player, testInfo, `audio-player-${viewport.label}-wrapping`);
+    }
   });
 
   test('matches avatar overflow hover affordance to avatar items', async ({ page }, testInfo) => {
@@ -162,10 +217,19 @@ test.describe('component polish regressions', () => {
 
     const example = page.locator('app-avatar-group-overflow-menu-example');
     const overflow = example.getByRole('button', { name: '3 more people' });
+    const borderColorBeforeHover = await overflow.evaluate(
+      (element) => getComputedStyle(element).borderColor,
+    );
     await overflow.hover();
     await expect
-      .poll(() => overflow.evaluate((element) => getComputedStyle(element).boxShadow !== 'none'))
+      .poll(() => overflow.evaluate((element) => getComputedStyle(element).transform !== 'none'))
       .toBe(true);
+    await expect
+      .poll(() => overflow.evaluate((element) => getComputedStyle(element).boxShadow))
+      .toBe('none');
+    await expect
+      .poll(() => overflow.evaluate((element) => getComputedStyle(element).borderColor))
+      .toBe(borderColorBeforeHover);
 
     await overflow.click();
     await expect(page.getByRole('menu').first()).toBeVisible();
@@ -179,7 +243,9 @@ test.describe('component polish regressions', () => {
 
     const example = page.locator('app-date-input-text-input-calendar-popover-example');
     const input = example.getByRole('textbox', { name: 'Departure' });
-    await dateInputHost(input).getByRole('button', { name: 'Choose date' }).click();
+    const trigger = dateInputHost(input).getByRole('button', { name: 'Choose date' });
+    const triggerBox = await requiredBox(trigger, 'date input picker trigger');
+    await trigger.click();
 
     const popover = page.locator('[data-slot="picker-popover"]');
     await expect(popover).toBeVisible();
@@ -187,6 +253,11 @@ test.describe('component polish regressions', () => {
     await expect(popover.locator('hell-date-picker')).toBeVisible();
     await expect(popover).toHaveCSS('padding-top', '0px');
     await expect(popover).toHaveCSS('border-top-width', '0px');
+
+    const popoverBox = await requiredBox(popover, 'date input picker popover');
+    expect(Math.abs(popoverBox.x + popoverBox.width - (triggerBox.x + triggerBox.width))).toBeLessThanOrEqual(4);
+    expect(popoverBox.y).toBeGreaterThanOrEqual(triggerBox.y + triggerBox.height - 1);
+    expect(popoverBox.y).toBeLessThanOrEqual(triggerBox.y + triggerBox.height + 12);
 
     await capturePage(page, testInfo, 'date-input-unstyled-picker-popover');
   });
@@ -233,6 +304,7 @@ test.describe('component polish regressions', () => {
       zIndex(page.locator('.hell-omnibar-overlay-pane').first()),
     ]);
     expect(menuZ).toBeGreaterThan(paneZ);
+    await expect.poll(() => menuOwnsHitTarget(menu)).toBe(true);
 
     await capturePage(page, testInfo, 'omnibar-menu-icons-z-order');
   });
@@ -294,7 +366,9 @@ test.describe('component polish regressions', () => {
 
 async function gotoDocsPage(page: Page, path: string, heading: string): Promise<void> {
   await page.goto(path);
-  await expect(page.getByRole('heading', { name: heading, level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: heading, level: 1 })).toBeVisible({
+    timeout: 15_000,
+  });
 }
 
 async function freezeBrowserDate(page: Page): Promise<void> {
@@ -404,6 +478,16 @@ async function hasHorizontalChildOverflow(locator: Locator): Promise<boolean> {
   });
 }
 
+async function gridGaps(locator: Locator): Promise<{ column: number; row: number }> {
+  return locator.evaluate((element) => {
+    const styles = getComputedStyle(element);
+    return {
+      column: Number.parseFloat(styles.columnGap) || 0,
+      row: Number.parseFloat(styles.rowGap) || 0,
+    };
+  });
+}
+
 async function visibleMeasuredToastCount(locator: Locator): Promise<number> {
   return locator.evaluateAll(
     (elements) =>
@@ -416,6 +500,14 @@ async function visibleMeasuredToastCount(locator: Locator): Promise<number> {
 
 async function zIndex(locator: Locator): Promise<number> {
   return locator.evaluate((element) => Number(getComputedStyle(element).zIndex) || 0);
+}
+
+async function menuOwnsHitTarget(locator: Locator): Promise<boolean> {
+  return locator.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const target = document.elementFromPoint(rect.left + rect.width / 2, rect.top + Math.min(24, rect.height / 2));
+    return !!target && (target === element || !!target.closest('[role="menu"], [role^="menuitem"]'));
+  });
 }
 
 interface RgbColor {

@@ -33,7 +33,7 @@
           type="button"
           aria-label="Docs search controls"
           [hellMenuTrigger]="docsControlsMenu"
-          [container]="docsOmnibar.floatingContainer()"
+          [container]="docsOmnibar.floatingContainerElement"
           [openTriggers]="docsMenuOpenTriggers"
           placement="bottom-start"
           [pressed]="docsSearchControlsActive()"
@@ -44,7 +44,7 @@
           hellOmnibarAction
           type="button"
           [hellMenuTrigger]="docsKindMenu"
-          [container]="docsOmnibar.floatingContainer()"
+          [container]="docsOmnibar.floatingContainerElement"
           [openTriggers]="docsMenuOpenTriggers"
           placement="bottom-start"
           [pressed]="docsKindFilter() !== 'all'"
@@ -56,7 +56,7 @@
           hellOmnibarAction
           type="button"
           [hellMenuTrigger]="docsSectionMenu"
-          [container]="docsOmnibar.floatingContainer()"
+          [container]="docsOmnibar.floatingContainerElement"
           [openTriggers]="docsMenuOpenTriggers"
           placement="bottom-start"
           [pressed]="docsSectionFilter() !== 'all'"
@@ -177,6 +177,18 @@
       }
     </hell-omnibar>
     <span class="hd-fill"></span>
+    <button
+      hellButton
+      hellSecondaryToggle
+      iconOnly
+      class="hd-docs-secondary-toggle"
+      variant="ghost"
+      size="sm"
+      type="button"
+      [attr.title]="shell.isSecondaryHidden() ? 'Show docs info' : 'Hide docs info'"
+    >
+      <hell-icon name="faSolidQuestion" size="14px" />
+    </button>
     <button
       hellSelect
       type="button"
