@@ -55,6 +55,7 @@ test.describe('date picker browser accessibility contract', () => {
 
     const grid = picker.getByRole('grid', { name: 'April 2026' });
     await expect(grid).toBeVisible();
+    await expectPickerLayoutAligned(picker);
     await expect(cellForDay(picker, 22)).toHaveAttribute('aria-selected', 'true');
     await expect(dayButton(picker, 22)).toHaveAttribute('data-selected', '');
 
@@ -171,4 +172,40 @@ function dayButton(picker: Locator, day: number): Locator {
 
 function cellForDay(picker: Locator, day: number): Locator {
   return dayButton(picker, day).locator('xpath=ancestor::td[1]');
+}
+
+async function expectPickerLayoutAligned(picker: Locator): Promise<void> {
+  const header = await requiredBox(picker.locator('.hell-date-picker-header'), 'picker header');
+  const grid = await requiredBox(picker.locator('.hell-date-picker-grid'), 'picker grid');
+  const label = await requiredBox(picker.locator('.hell-date-picker-label'), 'picker label');
+  const previousMonth = await requiredBox(
+    picker.getByRole('button', { name: 'Previous month' }),
+    'previous month button',
+  );
+  const nextMonth = await requiredBox(
+    picker.getByRole('button', { name: 'Next month' }),
+    'next month button',
+  );
+
+  expect(Math.abs(header.width - grid.width)).toBeLessThanOrEqual(1);
+  expect(Math.abs(centerX(header) - centerX(grid))).toBeLessThanOrEqual(1);
+  expect(Math.abs(centerY(label) - centerY(previousMonth))).toBeLessThanOrEqual(1);
+  expect(Math.abs(centerY(label) - centerY(nextMonth))).toBeLessThanOrEqual(1);
+}
+
+async function requiredBox(
+  locator: Locator,
+  label: string,
+): Promise<NonNullable<Awaited<ReturnType<Locator['boundingBox']>>>> {
+  const box = await locator.boundingBox();
+  expect(box, `${label} should have a browser layout box`).not.toBeNull();
+  return box!;
+}
+
+function centerX(box: NonNullable<Awaited<ReturnType<Locator['boundingBox']>>>): number {
+  return box.x + box.width / 2;
+}
+
+function centerY(box: NonNullable<Awaited<ReturnType<Locator['boundingBox']>>>): number {
+  return box.y + box.height / 2;
 }

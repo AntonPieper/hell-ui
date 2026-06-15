@@ -2,7 +2,12 @@ import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { HellTimeInput, provideHellTimeInputAdapter, type HellTimeValue } from './time-input';
+import {
+  HellTimeInput,
+  hellParseTimeInputText,
+  provideHellTimeInputAdapter,
+  type HellTimeValue,
+} from './time-input';
 import { HELL_FIELD_DIRECTIVES } from '../../primitives/field/field';
 
 @Component({
@@ -111,6 +116,28 @@ class TimeInputValidationHost {
   values: Array<HellTimeValue | null> = [];
 }
 
+@Component({
+  imports: [ReactiveFormsModule, HellTimeInput],
+  providers: [
+    provideHellTimeInputAdapter({
+      parseText: (text) =>
+        text.trim().toLowerCase() === 'noon'
+          ? { valid: true, value: { hour: 12, minute: 0, second: 0 } }
+          : text.trim() === ''
+            ? { valid: true, value: null }
+            : { valid: false },
+      format: (value) => `${value.hour}h${value.minute.toString().padStart(2, '0')}`,
+      normalize: (value) => value ?? null,
+      isSameValue: (a, b) =>
+        a?.hour === b?.hour && a?.minute === b?.minute && a?.second === b?.second,
+    }),
+  ],
+  template: `<hell-time-input [formControl]="control" aria-label="Custom validated time" />`,
+})
+class TimeInputCustomValidationHost {
+  readonly control = new FormControl<HellTimeValue | null>({ hour: 9, minute: 15, second: 0 });
+}
+
 describe('HellTimeInput', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -121,6 +148,7 @@ describe('HellTimeInput', () => {
         TimeInputBlurFormHost,
         TimeInputCustomAdapterHost,
         TimeInputValidationHost,
+        TimeInputCustomValidationHost,
       ],
     }).compileComponents();
   });
@@ -162,62 +190,68 @@ describe('HellTimeInput', () => {
     expect(label.getAttribute('for')).toBe(input.id);
   });
 
-  it('parses common 12-hour text and emits structured time values', () => {
+  it('uses a native time field for default keyboard entry', async () => {
     const fixture = TestBed.createComponent(TimeInputHost);
+    document.body.append(fixture.nativeElement);
     fixture.detectChanges();
 
     const input = textInput(fixture.nativeElement);
-    input.value = '9:05 pm';
+    expect(input.type).toBe('time');
+    expect(input.getAttribute('inputmode')).toBeNull();
+    expect(input.getAttribute('min')).toBe('00:00');
+    expect(input.getAttribute('max')).toBe('23:59');
+    expect(input.getAttribute('step')).toBe('60');
+
+    input.value = '09:05';
+    let selectCalls = 0;
+    Object.defineProperty(input, 'select', {
+      configurable: true,
+      value: () => {
+        selectCalls += 1;
+      },
+    });
+    input.focus();
+    await Promise.resolve();
+    expect(selectCalls).toBe(1);
+
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('blur', { bubbles: true }));
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.values).toEqual([{ hour: 21, minute: 5, second: 0 }]);
+    expect(fixture.componentInstance.values).toEqual([{ hour: 9, minute: 5, second: 0 }]);
+    expect(input.value).toBe('09:05');
   });
 
-  it('parses compact desktop keyboard entry without separators', () => {
-    const fixture = TestBed.createComponent(TimeInputHost);
-    fixture.detectChanges();
-
-    const input = textInput(fixture.nativeElement);
-    input.value = '930';
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    input.dispatchEvent(new Event('blur', { bubbles: true }));
-    fixture.detectChanges();
-
-    expect(fixture.componentInstance.values).toEqual([{ hour: 9, minute: 30, second: 0 }]);
-    expect(input.value).toBe('09:30');
-
-    input.value = '17';
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    fixture.detectChanges();
-
-    expect(fixture.componentInstance.values.at(-1)).toEqual({ hour: 17, minute: 0, second: 0 });
-    expect(input.value).toBe('17:00');
+  it('keeps default parser support for text adapters and direct parser consumers', () => {
+    expect(hellParseTimeInputText('9:05 pm', { seconds: false })).toEqual({
+      valid: true,
+      value: { hour: 21, minute: 5, second: 0 },
+    });
+    expect(hellParseTimeInputText('930', { seconds: false })).toEqual({
+      valid: true,
+      value: { hour: 9, minute: 30, second: 0 },
+    });
+    expect(hellParseTimeInputText('17', { seconds: false })).toEqual({
+      valid: true,
+      value: { hour: 17, minute: 0, second: 0 },
+    });
+    expect(hellParseTimeInputText('9p', { seconds: false })).toEqual({
+      valid: true,
+      value: { hour: 21, minute: 0, second: 0 },
+    });
   });
 
-  it('parses short am/pm keyboard suffixes', () => {
-    const fixture = TestBed.createComponent(TimeInputHost);
-    fixture.detectChanges();
-
-    const input = textInput(fixture.nativeElement);
-    input.value = '9p';
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    input.dispatchEvent(new Event('blur', { bubbles: true }));
-    fixture.detectChanges();
-
-    expect(fixture.componentInstance.values).toEqual([{ hour: 21, minute: 0, second: 0 }]);
-    expect(input.value).toBe('21:00');
-  });
-
-  it('includes seconds in display when seconds mode is enabled', () => {
+  it('updates native time constraints when seconds mode is enabled', () => {
     const fixture = TestBed.createComponent(TimeInputHost);
     fixture.componentInstance.seconds.set(true);
     fixture.detectChanges();
 
     const input = textInput(fixture.nativeElement);
-    input.value = '1:02:03 am';
+    expect(input.type).toBe('time');
+    expect(input.getAttribute('max')).toBe('23:59:59');
+    expect(input.getAttribute('step')).toBe('1');
+
+    input.value = '01:02:03';
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     fixture.detectChanges();
@@ -226,21 +260,20 @@ describe('HellTimeInput', () => {
     expect(input.value).toBe('01:02:03');
   });
 
-  it('rejects seconds when seconds mode is disabled', () => {
+  it('keeps illegal native time strings out of the default field value', () => {
     const fixture = TestBed.createComponent(TimeInputHost);
     fixture.detectChanges();
 
     const input = textInput(fixture.nativeElement);
-    expect(input.getAttribute('inputmode')).toBe('text');
 
-    input.value = '1:02:03 am';
+    input.value = '25:99';
+    expect(input.value).toBe('');
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('blur', { bubbles: true }));
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.values).toEqual([]);
-    expect(input.value).toBe('1:02:03 am');
-    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(fixture.componentInstance.values).toEqual([null]);
+    expect(input.getAttribute('aria-invalid')).toBeNull();
   });
 
   it('uses HH:mm and HH:mm:ss placeholders by default', () => {
@@ -281,23 +314,24 @@ describe('HellTimeInput', () => {
     expect(second.getAttribute('aria-valuenow')).toBe('13');
   });
 
-  it('keeps invalid typed text visible without emitting', () => {
-    const fixture = TestBed.createComponent(TimeInputHost);
-    const host = fixture.componentInstance;
-    host.value.set({ hour: 8, minute: 30, second: 0 });
+  it('keeps invalid custom-adapter text visible without emitting', () => {
+    const fixture = TestBed.createComponent(TimeInputCustomAdapterHost);
     fixture.detectChanges();
 
     const input = textInput(fixture.nativeElement);
-    input.value = '25:99';
+    expect(input.type).toBe('text');
+    expect(input.getAttribute('inputmode')).toBe('text');
+
+    input.value = 'later';
     input.dispatchEvent(new Event('input', { bubbles: true }));
     fixture.detectChanges();
-    expect(input.value).toBe('25:99');
+    expect(input.value).toBe('later');
 
     input.dispatchEvent(new Event('blur', { bubbles: true }));
     fixture.detectChanges();
 
-    expect(host.values).toEqual([]);
-    expect(input.value).toBe('25:99');
+    expect(fixture.componentInstance.values).toEqual([]);
+    expect(input.value).toBe('later');
     expect(input.getAttribute('aria-invalid')).toBe('true');
   });
 
@@ -429,6 +463,7 @@ describe('HellTimeInput', () => {
     fixture.detectChanges();
 
     const input = textInput(fixture.nativeElement);
+    expect(input.type).toBe('text');
     expect(input.value).toBe('');
 
     input.value = 'noon';
@@ -440,13 +475,13 @@ describe('HellTimeInput', () => {
     expect(input.value).toBe('12h00');
   });
 
-  it('exposes validator errors for invalid time drafts', () => {
-    const fixture = TestBed.createComponent(TimeInputValidationHost);
+  it('exposes validator errors for invalid custom-adapter drafts', () => {
+    const fixture = TestBed.createComponent(TimeInputCustomValidationHost);
     fixture.detectChanges();
 
     const host = fixture.componentInstance;
     const input = textInput(fixture.nativeElement);
-    input.value = '25:99';
+    input.value = 'later';
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('blur', { bubbles: true }));
     fixture.detectChanges();

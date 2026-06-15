@@ -19,16 +19,28 @@ test.describe('time input accessibility contract', () => {
   }) => {
     await gotoTimeInput(page);
 
-    const input = page.getByRole('textbox', { name: 'Reminder time' }).first();
-    await expect(input).toHaveAttribute('id', 'reminder-time');
+    const input = page.locator('#reminder-time');
+    await expect(input).toHaveAccessibleName('Reminder time');
     await expect(input).toHaveAccessibleDescription(
-      'Type directly (14:30 or 1430) or adjust the segmented picker.',
+      'Type in the native time field or adjust the segmented picker.',
     );
+    await expect(input).toHaveAttribute('type', 'time');
+    await expect(input).toHaveAttribute('step', '60');
 
-    await input.fill('25:99');
+    await input.fill('09:05');
+    await expect(input).toHaveValue('09:05');
+
+    const sanitizedIllegalValue = await input.evaluate((node) => {
+      const field = node as HTMLInputElement;
+      field.value = '25:99';
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+      field.dispatchEvent(new Event('blur', { bubbles: true }));
+      return field.value;
+    });
+    expect(sanitizedIllegalValue).toBe('');
     await input.blur();
-    await expect(input).toHaveValue('25:99');
-    await expect(input).toHaveAttribute('aria-invalid', 'true');
+    await expect(input).toHaveValue('');
+    await expect(input).not.toHaveAttribute('aria-invalid', 'true');
 
     const { trigger, hours } = await openReminderPicker(page);
     await expect(page.getByRole('spinbutton', { name: 'Minutes' })).toBeVisible();
@@ -40,7 +52,7 @@ test.describe('time input accessibility contract', () => {
   test('supports spinbutton keyboard changes and quick minute presets', async ({ page }) => {
     await gotoTimeInput(page);
 
-    const input = page.getByRole('textbox', { name: 'Reminder time' }).first();
+    const input = page.locator('#reminder-time');
     const { hours } = await openReminderPicker(page);
     const minutes = page.getByRole('spinbutton', { name: 'Minutes' });
 
