@@ -5,7 +5,7 @@
     position: fixed;
     top: var(--hell-flyout-y, 0);
     left: var(--hell-flyout-x, 0);
-    z-index: var(--hell-z-flyout, var(--hell-z-popover, 60));
+    z-index: var(--hell-z-popover, 1000);
     max-inline-size: min(
       var(--hell-flyout-max-inline-size, 320px),
       calc(100vw - (var(--spacing-hell-4) * 2))

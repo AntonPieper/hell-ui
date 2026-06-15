@@ -65,6 +65,8 @@ test.describe('omnibar accessibility contract', () => {
     const toolbar = page.getByRole('toolbar', { name: 'People search filters' });
     const filters = toolbar.getByRole('button', { name: 'Filters' });
     const clearSelection = toolbar.getByRole('button', { name: 'Clear selection' });
+    await expect(filters.locator('hell-icon')).toBeVisible();
+    await expect(clearSelection.locator('hell-icon')).toBeVisible();
     await expect(filters).toHaveAttribute('tabindex', '-1');
     await expect(clearSelection).toHaveAttribute('tabindex', '-1');
 
@@ -98,5 +100,45 @@ test.describe('omnibar accessibility contract', () => {
     await expect(peopleOption(page, 1, 'Design')).toBeVisible();
     await expect(page.getByRole('alert')).toBeHidden();
     await expect(input).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('docs omnibar menus render above the omnibar panel with icon-labelled triggers', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const docsSearch = page.getByRole('combobox', { name: 'Search docs' });
+
+    await docsSearch.click();
+    await docsSearch.fill('table');
+    await expect(docsSearch).toHaveAttribute('aria-expanded', 'true');
+
+    const toolbar = page.getByRole('toolbar', { name: 'Docs search controls' });
+    const controls = toolbar.getByRole('button', { name: 'Docs search controls' });
+    const kind = toolbar.getByRole('button', { name: 'All types' });
+    const section = toolbar.getByRole('button', { name: 'All sections' });
+    await expect(controls.locator('hell-icon')).toBeVisible();
+    await expect(kind.locator('hell-icon')).toBeVisible();
+    await expect(section.locator('hell-icon')).toBeVisible();
+
+    await controls.click();
+    const menu = page.getByRole('menu').first();
+    await expect(menu).toBeVisible();
+
+    const stack = await page.evaluate(() => {
+      const menu = document.querySelector<HTMLElement>('.hell-menu');
+      const pane = document.querySelector<HTMLElement>('.hell-omnibar-overlay-pane');
+      if (!menu || !pane) throw new Error('Expected omnibar menu and pane.');
+
+      const rect = menu.getBoundingClientRect();
+      const target = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      return {
+        menuZ: Number(getComputedStyle(menu).zIndex),
+        paneZ: Number(getComputedStyle(pane).zIndex),
+        topIsMenu: Boolean(target?.closest('.hell-menu')),
+      };
+    });
+
+    expect(stack.menuZ).toBeGreaterThan(stack.paneZ);
+    expect(stack.topIsMenu).toBe(true);
   });
 });

@@ -387,7 +387,7 @@ test.describe('Hell UI browser behavior', () => {
     await themeSelect.click();
     const themeDropdown = page.locator('.hd-palette-dropdown');
     await expect(themeDropdown).toBeVisible();
-    await expect(themeDropdown).toHaveCSS('z-index', '60');
+    await expect(themeDropdown).toHaveCSS('z-index', '1000');
 
     await page.goto('/components/data-table');
     const firstExample = page.locator('hd-example-tabs').first();

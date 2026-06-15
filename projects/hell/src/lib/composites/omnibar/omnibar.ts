@@ -245,6 +245,7 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
         </div>
         <ng-content select="[hellOmnibarFooter]" />
       </div>
+      <div #floatingOutlet></div>
     </ng-template>
   `,
   exportAs: 'hellOmnibar',
@@ -360,6 +361,17 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
       this.syncOverlayPanelStyles();
     }
   }
+  @ViewChild('floatingOutlet') private set floatingOutletRef(
+    ref: ElementRef<HTMLElement> | undefined,
+  ) {
+    const next = ref?.nativeElement ?? null;
+    if (next === this.floatingOutletElement) return;
+
+    this.unregisterFloatingOutlet();
+    this.floatingOutletElement = next;
+    if (next) this.floatingScope.registerFloatingElement(next);
+  }
+  private floatingOutletElement: HTMLElement | null = null;
 
   constructor() {
     super();
@@ -410,7 +422,10 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
 
     this.installHotkey();
     this.floatingFocusDismissal.connect(this.destroyRef);
-    this.destroyRef.onDestroy(() => this.unregisterOverlayPanel());
+    this.destroyRef.onDestroy(() => {
+      this.unregisterOverlayPanel();
+      this.unregisterFloatingOutlet();
+    });
   }
 
   /* ── Public API for actions / hotkey wiring ────────────────────────── */
@@ -428,7 +443,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   /** Container for child Floating Interaction primitives (menus, popovers) that should
    *  behave as part of the omnibar instead of outside-click targets. */
   floatingContainer(): HTMLElement {
-    return this.host.nativeElement;
+    return this.floatingOutletElement ?? this.host.nativeElement;
   }
 
   registerFloatingElement(element: HTMLElement): void {
@@ -652,6 +667,12 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     if (!this.overlayPanelElement) return;
     this.floatingScope.unregisterFloatingElement(this.overlayPanelElement);
     this.overlayPanelElement = null;
+  }
+
+  private unregisterFloatingOutlet(): void {
+    if (!this.floatingOutletElement) return;
+    this.floatingScope.unregisterFloatingElement(this.floatingOutletElement);
+    this.floatingOutletElement = null;
   }
 
   /* ── Hotkey ────────────────────────────────────────────────────────── */

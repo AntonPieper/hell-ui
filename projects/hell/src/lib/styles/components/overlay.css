@@ -1,6 +1,8 @@
 @layer components {
   :root {
-    --hell-z-dialog-scoped: 1000;
+    --hell-z-popover: 1000;
+    --hell-z-menu: 1010;
+    --hell-z-dialog-scoped: 1020;
     --hell-z-app-backdrop: 1080;
     --hell-z-app-drawer: 1090;
     --hell-z-dialog: 1200;

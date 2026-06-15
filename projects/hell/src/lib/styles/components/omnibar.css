@@ -222,7 +222,7 @@
   }
 
   .hell-omnibar-overlay-pane {
-    z-index: var(--hell-z-popover, 60);
+    z-index: var(--hell-z-popover, 1000);
   }
 
   /* Panel — positioned by Angular CDK ConnectedOverlay. The component copies
