@@ -276,14 +276,19 @@ export class HellAppShell extends HellStyleable implements OnDestroy {
 
     for (const candidate of candidates) {
       if (
-        candidate.isConnected &&
-        candidate !== this._mobilePanelRestoreTarget &&
-        !candidate.hasAttribute('disabled') &&
-        this.interactivityChecker.isFocusable(candidate, { ignoreVisibility: true }) &&
-        (this.interactivityChecker.isTabbable(candidate) ||
-          (candidate.getClientRects().length > 0 && candidate.tabIndex >= 0))
+        !candidate.isConnected ||
+        candidate === this._mobilePanelRestoreTarget ||
+        candidate.hasAttribute('disabled') ||
+        candidate.closest('[inert], [aria-hidden="true"]') ||
+        candidate.getClientRects().length === 0 ||
+        candidate.tabIndex < 0 ||
+        !this.interactivityChecker.isFocusable(candidate)
       ) {
-        candidate.focus({ preventScroll: true });
+        continue;
+      }
+
+      candidate.focus({ preventScroll: true });
+      if (this.document.activeElement === candidate) {
         return true;
       }
     }

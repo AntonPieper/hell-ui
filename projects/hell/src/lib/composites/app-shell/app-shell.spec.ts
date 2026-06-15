@@ -340,6 +340,7 @@ describe('HellAppShell secondary panel', () => {
     const toggle = query<HTMLButtonElement>(fixture.nativeElement, '#focus-sidenav-toggle');
     const panelItem = query<HTMLButtonElement>(fixture.nativeElement, '#focus-sidenav-item');
     const content = query<HTMLElement>(fixture.nativeElement, '#focus-content');
+    mockRenderedBox(panelItem);
 
     toggle.focus();
     await settle(fixture);
@@ -507,6 +508,31 @@ function pointerDown(element: HTMLElement): void {
 
 function keyDownEscape(element: HTMLElement): void {
   element.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+}
+
+function mockRenderedBox(element: HTMLElement): void {
+  const rect = {
+    x: 0,
+    y: 0,
+    width: 40,
+    height: 24,
+    top: 0,
+    right: 40,
+    bottom: 24,
+    left: 0,
+    toJSON: () => ({}),
+  } as DOMRect;
+  const rects = {
+    0: rect,
+    length: 1,
+    item: (index: number) => (index === 0 ? rect : null),
+    [Symbol.iterator]: function* () {
+      yield rect;
+    },
+  } as DOMRectList;
+
+  vi.spyOn(element, 'getBoundingClientRect').mockReturnValue(rect);
+  vi.spyOn(element, 'getClientRects').mockReturnValue(rects);
 }
 
 async function settle(fixture: {

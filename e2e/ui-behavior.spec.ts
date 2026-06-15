@@ -468,10 +468,10 @@ test.describe('Hell UI browser behavior', () => {
 
     await rail.focus();
     await expectFocused(page, rail, 'mobile secondary rail before open');
-    await rail.click();
+    await rail.press('Enter');
 
     await expect(shell).toHaveAttribute('data-mobile-secondary-open', 'true');
-    await expect(shell).not.toHaveAttribute('data-mobile-sidenav-open', 'true');
+    await expect.poll(async () => shell.getAttribute('data-mobile-sidenav-open')).not.toBe('true');
     await expect(secondary).not.toHaveAttribute('data-hidden', 'true');
     await expect(header).toHaveAttribute('aria-label', 'Hide secondary panel');
     await expectFocused(page, header, 'mobile secondary initial focus');
@@ -484,7 +484,8 @@ test.describe('Hell UI browser behavior', () => {
 
     await page.getByRole('button', { name: 'Expand sidebar' }).first().click();
     await expect(shell).toHaveAttribute('data-mobile-sidenav-open', 'true');
-    await rail.click();
+    await rail.focus();
+    await rail.press('Enter');
     await expect(shell).not.toHaveAttribute('data-mobile-sidenav-open', 'true');
     await expect(shell).toHaveAttribute('data-mobile-secondary-open', 'true');
     await expectNoHorizontalOverflow(page);
