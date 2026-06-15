@@ -17,11 +17,20 @@ import {
   booleanAttribute,
   inject,
   input,
+  numberAttribute,
   output,
   signal,
 } from '@angular/core';
 import { InteractivityChecker } from '@angular/cdk/a11y';
 import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactive-disabled';
+import {
+  autoUpdate,
+  computePosition,
+  flip,
+  offset as floatingOffset,
+  shift,
+  type Placement,
+} from '@floating-ui/dom';
 
 let nextFlyoutId = 0;
 
@@ -110,27 +119,33 @@ export class HellFlyoutTrigger extends HellNativeInteractiveDisabledGuard {
     '[attr.aria-label]': 'ariaLabel()',
     '[attr.aria-labelledby]': 'ariaLabelledby()',
     'data-state': 'open',
+    '[attr.data-placement]': 'computedPlacement()',
     '[class.hell-flyout]': '!unstyled()',
   },
 })
 export class HellFlyout extends HellStyleable {
   readonly trigger = input.required<HellFlyoutTrigger>({ alias: 'hellFlyout' });
   readonly boundary = input<HTMLElement | null>(null);
+  readonly placement = input<Placement>('bottom-start');
+  readonly offset = input(8, { transform: numberAttribute });
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
   readonly ariaLabelledby = input<string | null>(null, { alias: 'aria-labelledby' });
   readonly closeOnEscape = input(true, { transform: booleanAttribute });
   readonly closeOnOutsideInteraction = input(true, { transform: booleanAttribute });
+  protected readonly computedPlacement = signal<Placement>('bottom-start');
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly floatingScope = inject(HELL_FLOATING_SCOPE, { optional: true });
   private readonly interactivityChecker = inject(InteractivityChecker, { optional: true });
   private interaction: HellFloatingInteractionController | null = null;
+  private cleanupPosition: (() => void) | null = null;
 
   constructor() {
     super();
     afterNextRender(() => {
       const panel = this.element.nativeElement;
+      this.connectPositioning(panel);
       this.interaction = new HellFloatingInteractionController({
         surface: () => panel,
         inside: () => [this.trigger().element.nativeElement, this.boundary()],
@@ -153,5 +168,30 @@ export class HellFlyout extends HellStyleable {
       });
       this.interaction.connect(this.destroyRef);
     });
+    this.destroyRef.onDestroy(() => this.cleanupPosition?.());
+  }
+
+  private connectPositioning(panel: HTMLElement): void {
+    const trigger = this.trigger().element.nativeElement;
+    const update = () => {
+      void computePosition(trigger, panel, {
+        placement: this.placement(),
+        strategy: 'fixed',
+        middleware: [
+          floatingOffset(this.offset()),
+          flip({ padding: 8 }),
+          shift({ padding: 8 }),
+        ],
+      }).then(({ x, y, placement }) => {
+        if (!panel.isConnected) return;
+        const styles = panel.style;
+        styles.setProperty('--hell-flyout-x', `${Math.round(x)}px`);
+        styles.setProperty('--hell-flyout-y', `${Math.round(y)}px`);
+        this.computedPlacement.set(placement);
+      });
+    };
+
+    this.cleanupPosition = autoUpdate(trigger, panel, update);
+    update();
   }
 }

@@ -54,6 +54,46 @@ test.describe('flyout browser accessibility contract', () => {
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 
+  test('opens as anchored floating UI without moving surrounding content', async ({
+    page,
+  }) => {
+    const { example, trigger } = flyoutExample(page);
+    const outsideAction = example.getByRole('button', { name: 'Outside boundary action' });
+
+    await trigger.scrollIntoViewIfNeeded();
+    const beforeOutside = await requiredBox(outsideAction, 'outside action before open');
+    const beforeBoundary = await requiredBox(example.locator('.hd-flyout-boundary'), 'boundary');
+
+    await trigger.click();
+    const panel = page.getByRole('dialog', { name: 'Anchored, non-modal' });
+    await expect(panel).toBeVisible();
+
+    const afterOutside = await requiredBox(outsideAction, 'outside action after open');
+    const afterBoundary = await requiredBox(example.locator('.hd-flyout-boundary'), 'boundary');
+    expect(Math.abs(afterOutside.y - beforeOutside.y)).toBeLessThanOrEqual(1);
+    expect(Math.abs(afterBoundary.height - beforeBoundary.height)).toBeLessThanOrEqual(1);
+
+    const triggerBox = await requiredBox(trigger, 'trigger');
+    const panelBox = await requiredBox(panel, 'panel');
+    await expectAnchoredToTrigger(panel, triggerBox, panelBox);
+    expect(Math.abs(panelBox.x - triggerBox.x)).toBeLessThanOrEqual(2);
+
+    await page.mouse.wheel(0, 120);
+    await expect
+      .poll(async () => {
+        const scrolledTrigger = await requiredBox(trigger, 'scrolled trigger');
+        const scrolledPanel = await requiredBox(panel, 'scrolled panel');
+        return Math.abs(scrolledPanel.x - scrolledTrigger.x);
+      })
+      .toBeLessThanOrEqual(2);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(panel).toBeVisible();
+    const resizedTrigger = await requiredBox(trigger, 'resized trigger');
+    const resizedPanel = await requiredBox(panel, 'resized panel');
+    await expectAnchoredToTrigger(panel, resizedTrigger, resizedPanel);
+  });
+
   test('Escape closes the flyout and restores focus to the trigger', async ({
     page,
   }) => {
@@ -84,4 +124,24 @@ function flyoutExample(page: Page): { example: Locator; trigger: Locator } {
     example,
     trigger: example.getByRole('button', { name: /^(Show|Hide) flyout$/ }),
   };
+}
+
+async function requiredBox(locator: Locator, label: string) {
+  const box = await locator.boundingBox();
+  if (!box) throw new Error(`Expected ${label} to have a bounding box.`);
+  return box;
+}
+
+async function expectAnchoredToTrigger(
+  panel: Locator,
+  triggerBox: { y: number; height: number },
+  panelBox: { y: number; height: number },
+) {
+  const placement = (await panel.getAttribute('data-placement')) ?? 'bottom';
+  if (placement.startsWith('top')) {
+    expect(panelBox.y + panelBox.height).toBeLessThanOrEqual(triggerBox.y);
+    return;
+  }
+
+  expect(panelBox.y).toBeGreaterThanOrEqual(triggerBox.y + triggerBox.height);
 }
