@@ -260,7 +260,7 @@ export class HellAppShell extends HellStyleable implements OnDestroy {
     const activeElement = this.document.activeElement;
     const panelHasFocus =
       activeElement instanceof HTMLElement && panelElement.contains(activeElement);
-    if (panelHasFocus) {
+    if (panelHasFocus && activeElement !== panelElement) {
       return;
     }
 
@@ -282,7 +282,7 @@ export class HellAppShell extends HellStyleable implements OnDestroy {
         candidate.closest('[inert], [aria-hidden="true"]') ||
         candidate.getClientRects().length === 0 ||
         candidate.tabIndex < 0 ||
-        !this.interactivityChecker.isFocusable(candidate)
+        !this.interactivityChecker.isFocusable(candidate, { ignoreVisibility: true })
       ) {
         continue;
       }
@@ -345,6 +345,7 @@ export class HellAppShell extends HellStyleable implements OnDestroy {
     const view = this.document.defaultView;
     setTimeout(task, 0);
     setTimeout(task, 50);
+    setTimeout(task, 150);
     if (view?.requestAnimationFrame) {
       view.requestAnimationFrame(task);
     }
