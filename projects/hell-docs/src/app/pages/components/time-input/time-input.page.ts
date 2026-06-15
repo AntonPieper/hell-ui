@@ -32,10 +32,11 @@ import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
       <h1>Time input</h1>
       <p>
         A text-first time field with a business-default parser: <code>HH:mm</code>, documented
-        common 12-hour shortcuts (<code>9:00 am</code>, <code>1:30PM</code>), and
-        <code>HH:mm:ss</code> only when <code>seconds</code> mode is enabled. Locale parsing is
-        intentionally off by default. Click or keyboard-activate the clock icon to open a compact
-        segmented picker with hour, minute, and optional second controls plus common minute presets.
+        common 12-hour shortcuts (<code>9:00 am</code>, <code>1:30PM</code>), and compact keyboard
+        entry (<code>930</code> for <code>09:30</code>). <code>HH:mm:ss</code> is accepted only when
+        <code>seconds</code> mode is enabled. Locale parsing is intentionally off by default. Click
+        or keyboard-activate the clock icon to open a compact segmented picker with hour, minute,
+        and optional second controls plus common minute presets.
       </p>
 
       <h2>Examples</h2>
@@ -91,7 +92,8 @@ import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
       <p>
         The built-in parser emits a structured 24-hour <code>HellTimeValue</code>. It accepts
         <code>HH:mm</code> and documented common 12-hour shortcuts such as <code>9:00 am</code> /
-        <code>1:30PM</code>. <code>HH:mm:ss</code> text is accepted only with
+        <code>1:30PM</code>, plus separator-free keyboard entry such as <code>9</code>,
+        <code>930</code>, and <code>1730</code>. <code>HH:mm:ss</code> text is accepted only with
         <code>seconds</code> enabled, and then normalizes output to 24-hour values. It does not
         attempt locale parsing. Product teams that need localized parsing, named shortcuts, or a
         different display policy should provide <code>HELL_TIME_INPUT_ADAPTER</code> instead of

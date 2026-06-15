@@ -141,6 +141,7 @@ describe('HellTimeInput', () => {
     expect(input.getAttribute('aria-label')).toBe('Start time');
     expect(input.getAttribute('aria-describedby')).toBe('start-time-help start-time-error');
     expect(input.getAttribute('aria-labelledby')).toBe('start-time-label');
+    expect(input.classList.contains('hell-input')).toBe(false);
     expect(trigger.getAttribute('aria-label')).toBe('Choose time for Start time');
     expect(trigger.getAttribute('aria-describedby')).toBeNull();
     expect(trigger.getAttribute('aria-labelledby')).toBeNull();
@@ -172,6 +173,42 @@ describe('HellTimeInput', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance.values).toEqual([{ hour: 21, minute: 5, second: 0 }]);
+  });
+
+  it('parses compact desktop keyboard entry without separators', () => {
+    const fixture = TestBed.createComponent(TimeInputHost);
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    input.value = '930';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.values).toEqual([{ hour: 9, minute: 30, second: 0 }]);
+    expect(input.value).toBe('09:30');
+
+    input.value = '17';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.values.at(-1)).toEqual({ hour: 17, minute: 0, second: 0 });
+    expect(input.value).toBe('17:00');
+  });
+
+  it('parses short am/pm keyboard suffixes', () => {
+    const fixture = TestBed.createComponent(TimeInputHost);
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    input.value = '9p';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.values).toEqual([{ hour: 21, minute: 0, second: 0 }]);
+    expect(input.value).toBe('21:00');
   });
 
   it('includes seconds in display when seconds mode is enabled', () => {
@@ -305,6 +342,11 @@ describe('HellTimeInput', () => {
 
     expect(picker?.querySelectorAll('[role="spinbutton"]').length).toBe(3);
     expect(picker?.querySelector('[role="grid"]')).toBeNull();
+    expect(
+      picker
+        ?.querySelector('[data-slot="picker-unit-control"]')
+        ?.firstElementChild?.getAttribute('role'),
+    ).toBe('spinbutton');
     expect(hour.getAttribute('aria-valuemin')).toBe('0');
     expect(hour.getAttribute('aria-valuemax')).toBe('23');
     expect(hour.getAttribute('aria-valuenow')).toBe('8');
@@ -410,6 +452,7 @@ describe('HellTimeInput', () => {
     fixture.detectChanges();
 
     expect(host.control.errors).toEqual({ invalidTimeInputDraft: true });
+    expect(timeInputHost(fixture.nativeElement).getAttribute('data-invalid')).toBe('true');
   });
 
   it('clears time draft validator errors after a valid commit', () => {
@@ -504,6 +547,7 @@ describe('HellTimeInput', () => {
 
     expect(textInput(fixture.nativeElement).disabled).toBe(true);
     expect(triggerButton(fixture.nativeElement).disabled).toBe(true);
+    expect(timeInputHost(fixture.nativeElement).getAttribute('data-disabled')).toBe('true');
   });
 });
 
@@ -531,6 +575,12 @@ function triggerButton(root: HTMLElement): HTMLButtonElement {
   const trigger = root.querySelector('button[data-slot="trigger"]');
   if (!(trigger instanceof HTMLButtonElement)) throw new Error('Expected time trigger.');
   return trigger;
+}
+
+function timeInputHost(root: HTMLElement): HTMLElement {
+  const host = root.querySelector('hell-time-input');
+  if (!(host instanceof HTMLElement)) throw new Error('Expected time input host.');
+  return host;
 }
 
 async function waitForPickerSpinbutton(

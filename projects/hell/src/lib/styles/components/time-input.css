@@ -6,6 +6,10 @@
    */
 
   .hell-time-input {
+    --hell-time-input-height: var(--spacing-hell-control-md);
+    --hell-time-input-padding-inline: var(--spacing-hell-3);
+    --hell-time-input-trigger-size: var(--spacing-hell-control-sm);
+
     position: relative;
     display: inline-flex;
     align-items: stretch;
@@ -39,13 +43,23 @@
         color: var(--color-hell-foreground-muted);
       }
     }
+    &[data-size='sm'] {
+      --hell-time-input-height: var(--spacing-hell-control-sm);
+      --hell-time-input-padding-inline: var(--spacing-hell-2);
+      --hell-time-input-trigger-size: var(--spacing-hell-control-xs);
+    }
+    &[data-size='lg'] {
+      --hell-time-input-height: var(--spacing-hell-control-lg);
+      --hell-time-input-padding-inline: var(--spacing-hell-4);
+      --hell-time-input-trigger-size: var(--spacing-hell-control-md);
+    }
   }
 
   .hell-time-input [data-slot='field'] {
     flex: 1 1 auto;
     min-width: 0;
-    height: var(--spacing-hell-control-md);
-    padding-inline: var(--spacing-hell-3);
+    height: var(--hell-time-input-height);
+    padding-inline: var(--hell-time-input-padding-inline) var(--spacing-hell-2);
     font-family: inherit;
     font-size: 13px;
     color: var(--color-hell-foreground);
@@ -63,24 +77,32 @@
       color: var(--color-hell-foreground-muted);
     }
     &[data-size='sm'] {
-      height: var(--spacing-hell-control-sm);
-      padding-inline: var(--spacing-hell-2);
       font-size: 12px;
     }
     &[data-size='lg'] {
-      height: var(--spacing-hell-control-lg);
-      padding-inline: var(--spacing-hell-4);
       font-size: 14px;
     }
   }
 
   .hell-time-input [data-slot='trigger'] {
+    --hell-button-background-hover: transparent;
+    --hell-button-background-active: transparent;
+    --hell-button-border-color: transparent;
+    --hell-button-shadow: none;
+    --hell-button-color: var(--color-hell-foreground-muted);
+    --hell-button-height: var(--hell-time-input-trigger-size);
+
     flex: 0 0 auto;
     align-self: center;
     margin-inline-end: var(--spacing-hell-1);
+    width: var(--hell-time-input-trigger-size);
     color: var(--color-hell-foreground-muted);
     &:hover {
       color: var(--color-hell-foreground);
+    }
+    &[data-focus-visible] {
+      outline: 0;
+      box-shadow: inset 0 0 0 2px var(--color-hell-border-focus);
     }
   }
 
@@ -98,20 +120,20 @@
 
   .hell-popover[data-slot='picker'] {
     display: grid;
-    gap: var(--spacing-hell-3);
-    width: min(21rem, calc(100vw - 2rem));
+    gap: var(--spacing-hell-2);
+    width: min(20rem, calc(100vw - 2rem));
     padding: var(--spacing-hell-3);
   }
 
   .hell-popover[data-slot='picker'] [data-slot='picker-header'] {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     min-height: var(--spacing-hell-control-sm);
   }
 
   .hell-popover[data-slot='picker'] [data-slot='picker-readout'] {
-    font-size: var(--text-xl);
+    font-size: 22px;
     line-height: 1;
     font-weight: var(--font-weight-semibold);
     color: var(--color-hell-foreground);
@@ -141,7 +163,7 @@
 
   .hell-popover[data-slot='picker'] [data-slot='picker-unit-control'] {
     display: grid;
-    grid-template-columns: var(--spacing-hell-control-sm) minmax(0, 1fr) var(
+    grid-template-columns: minmax(0, 1fr) var(--spacing-hell-control-sm) var(
         --spacing-hell-control-sm
       );
     align-items: stretch;
@@ -181,7 +203,7 @@
   .hell-popover[data-slot='picker'] [data-slot='picker-unit-step'] {
     height: var(--spacing-hell-control-sm);
     color: var(--color-hell-foreground-muted);
-    font-size: 15px;
+    font-size: 13px;
   }
 
   .hell-popover[data-slot='picker'] [data-slot='picker-unit-value'] {
@@ -192,11 +214,12 @@
     height: var(--spacing-hell-control-sm);
     padding-inline: var(--spacing-hell-2);
     font-family: inherit;
-    font-size: 14px;
+    font-size: 18px;
     font-weight: var(--font-weight-semibold);
     font-variant-numeric: tabular-nums;
-    color: var(--color-hell-primary-foreground);
-    background-color: var(--color-hell-primary);
+    color: var(--color-hell-foreground);
+    background-color: transparent;
+    border-inline-end: 1px solid var(--color-hell-border);
     cursor: pointer;
     &:focus-visible {
       outline: 0;
@@ -215,7 +238,7 @@
   .hell-popover[data-slot='picker'] [data-slot='minute-preset'] {
     height: var(--spacing-hell-control-sm);
     border: 1px solid var(--color-hell-border);
-    border-radius: var(--radius-sm);
+    border-radius: 999px;
     background-color: var(--color-hell-surface-elevated);
     font-variant-numeric: tabular-nums;
     &[data-selected='true'] {
