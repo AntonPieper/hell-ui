@@ -98,89 +98,95 @@ function parseIsoDateOnly(value: string): Date | null {
     }
 
     <div data-slot="controls">
-      <button
-        hellButton
-        variant="ghost"
-        [iconOnly]="true"
-        type="button"
-        [attr.aria-label]="playing() ? labels.audioPlayer.pause : labels.audioPlayer.play"
-        (click)="toggle()"
-      >
-        <hell-icon [name]="playing() ? 'faSolidPause' : 'faSolidPlay'" />
-      </button>
-
-      <span data-slot="time">{{ format(currentTime()) }}</span>
-
-      <hell-slider
-        data-slot="seek"
-        size="sm"
-        grow
-        thumb="hover"
-        [value]="currentTime()"
-        [min]="0"
-        [max]="seekMax()"
-        [step]="0.1"
-        (valueChange)="onSeek($event)"
-        (keydown)="onSeekKey($event)"
-        [attr.aria-label]="labels.audioPlayer.seek"
-      />
-
-      <span data-slot="time">{{ format(duration()) }}</span>
-
-      <button
-        hellButton
-        variant="ghost"
-        [iconOnly]="true"
-        type="button"
-        [attr.aria-label]="muted() ? labels.audioPlayer.unmute : labels.audioPlayer.mute"
-        (click)="toggleMute()"
-      >
-        <hell-icon [name]="volumeIcon()" />
-      </button>
-
-      <hell-slider
-        data-slot="volume"
-        size="sm"
-        [value]="volume() * 100"
-        [min]="0"
-        [max]="100"
-        [step]="1"
-        (valueChange)="onVolume($event)"
-        [attr.aria-label]="labels.audioPlayer.volume"
-      />
-
-      @if (speechTranscriptEnabled() && speechSupported()) {
+      <div class="hell-a-g" data-slot="transport">
         <button
           hellButton
-          hellFlyoutTrigger
-          #ccTrigger="hellFlyoutTrigger"
           variant="ghost"
           [iconOnly]="true"
           type="button"
-          data-slot="cc-toggle"
-          [attr.aria-pressed]="captions()"
-          [attr.aria-label]="captions() ? labels.audioPlayer.hideLiveCaptions : labels.audioPlayer.showLiveCaptions"
-          [attr.data-active]="captions() ? 'true' : null"
-          (openChange)="captions.set($event)"
+          [attr.aria-label]="playing() ? labels.audioPlayer.pause : labels.audioPlayer.play"
+          (click)="toggle()"
         >
-          <hell-icon name="faSolidClosedCaptioning" />
+          <hell-icon [name]="playing() ? 'faSolidPause' : 'faSolidPlay'" />
         </button>
-      }
 
-      @if (allowDownload()) {
-        <a
+        <span data-slot="time">{{ format(currentTime()) }}</span>
+
+        <hell-slider
+          data-slot="seek"
+          size="sm"
+          grow
+          thumb="hover"
+          [value]="currentTime()"
+          [min]="0"
+          [max]="seekMax()"
+          [step]="0.1"
+          (valueChange)="onSeek($event)"
+          (keydown)="onSeekKey($event)"
+          [attr.aria-label]="labels.audioPlayer.seek"
+        />
+
+        <span data-slot="time">{{ format(duration()) }}</span>
+      </div>
+
+      <div class="hell-a-g" data-slot="actions">
+        <button
           hellButton
           variant="ghost"
           [iconOnly]="true"
-          [href]="src()"
-          [download]="downloadName()"
-          target="_blank"
-          rel="noopener"
-          [attr.aria-label]="labels.audioPlayer.download"
+          type="button"
+          [attr.aria-label]="muted() ? labels.audioPlayer.unmute : labels.audioPlayer.mute"
+          (click)="toggleMute()"
         >
-          <hell-icon name="faSolidDownload" />
-        </a>
-      }
+          <hell-icon [name]="volumeIcon()" />
+        </button>
+
+        <hell-slider
+          data-slot="volume"
+          size="sm"
+          [value]="volume() * 100"
+          [min]="0"
+          [max]="100"
+          [step]="1"
+          (valueChange)="onVolume($event)"
+          [attr.aria-label]="labels.audioPlayer.volume"
+        />
+
+        @if (speechTranscriptEnabled() && speechSupported()) {
+          <button
+            hellButton
+            hellFlyoutTrigger
+            #ccTrigger="hellFlyoutTrigger"
+            variant="ghost"
+            [iconOnly]="true"
+            type="button"
+            data-slot="cc-toggle"
+            [attr.aria-pressed]="captions()"
+            [attr.aria-label]="
+              captions() ? labels.audioPlayer.hideLiveCaptions : labels.audioPlayer.showLiveCaptions
+            "
+            [attr.data-active]="captions() ? 'true' : null"
+            (openChange)="captions.set($event)"
+          >
+            <hell-icon name="faSolidClosedCaptioning" />
+          </button>
+        }
+
+        @if (allowDownload()) {
+          <a
+            hellButton
+            variant="ghost"
+            [iconOnly]="true"
+            [href]="src()"
+            [download]="downloadName()"
+            target="_blank"
+            rel="noopener"
+            [attr.aria-label]="labels.audioPlayer.download"
+          >
+            <hell-icon name="faSolidDownload" />
+          </a>
+        }
+      </div>
     </div>
 
     @if (captions() && ccTrigger(); as ccTriggerInstance) {
@@ -550,7 +556,9 @@ export class HellAudioPlayer extends HellStyleable {
 
     const hours = Math.floor(total / 3600);
     if (hours > 0) {
-      const mins = Math.floor((total % 3600) / 60).toString().padStart(2, '0');
+      const mins = Math.floor((total % 3600) / 60)
+        .toString()
+        .padStart(2, '0');
       return `${hours}:${mins}:${seconds}`;
     }
 

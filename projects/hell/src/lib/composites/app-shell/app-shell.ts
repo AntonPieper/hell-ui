@@ -236,15 +236,37 @@ export class HellAppShell extends HellStyleable implements OnDestroy {
 
     this._activeMobilePanel = panel;
     this._mobilePanelFocusTrap = this.focusTrapFactory.create(panelElement);
+    this.scheduleMobilePanelFocusCheck(panel, panelElement);
     void this._mobilePanelFocusTrap
       .focusInitialElementWhenReady({ preventScroll: true })
-      .then((focused) => {
-        if (!focused && this._activeMobilePanel === panel && panelElement.isConnected) {
-          if (!this.focusFirstInteractiveInPanel(panelElement)) {
-            this.focusPanelFallback(panelElement);
-          }
-        }
-      });
+      .then(() => this.scheduleMobilePanelFocusCheck(panel, panelElement))
+      .catch(() => this.scheduleMobilePanelFocusCheck(panel, panelElement));
+  }
+
+  private scheduleMobilePanelFocusCheck(
+    panel: HellAppShellMobilePanel,
+    panelElement: HTMLElement,
+  ): void {
+    const focusPanel = () => this.ensureMobilePanelFocus(panel, panelElement);
+    queueMicrotask(focusPanel);
+    this.scheduleMobilePanelTask(focusPanel);
+  }
+
+  private ensureMobilePanelFocus(panel: HellAppShellMobilePanel, panelElement: HTMLElement): void {
+    if (this._activeMobilePanel !== panel || !panelElement.isConnected) {
+      return;
+    }
+
+    const activeElement = this.document.activeElement;
+    const panelHasFocus =
+      activeElement instanceof HTMLElement && panelElement.contains(activeElement);
+    if (panelHasFocus && activeElement !== panelElement) {
+      return;
+    }
+
+    if (!this.focusFirstInteractiveInPanel(panelElement)) {
+      this.focusPanelFallback(panelElement);
+    }
   }
 
   private focusFirstInteractiveInPanel(panelElement: HTMLElement): boolean {
@@ -254,12 +276,19 @@ export class HellAppShell extends HellStyleable implements OnDestroy {
 
     for (const candidate of candidates) {
       if (
-        candidate.isConnected &&
-        candidate !== this._mobilePanelRestoreTarget &&
-        this.interactivityChecker.isFocusable(candidate, { ignoreVisibility: true }) &&
-        this.interactivityChecker.isTabbable(candidate)
+        !candidate.isConnected ||
+        candidate === this._mobilePanelRestoreTarget ||
+        candidate.hasAttribute('disabled') ||
+        candidate.closest('[inert], [aria-hidden="true"]') ||
+        candidate.getClientRects().length === 0 ||
+        candidate.tabIndex < 0 ||
+        !this.interactivityChecker.isFocusable(candidate, { ignoreVisibility: true })
       ) {
-        candidate.focus({ preventScroll: true });
+        continue;
+      }
+
+      candidate.focus({ preventScroll: true });
+      if (this.document.activeElement === candidate) {
         return true;
       }
     }
@@ -287,7 +316,9 @@ export class HellAppShell extends HellStyleable implements OnDestroy {
     }
 
     target.focus({ preventScroll: true });
-    this._mobilePanelRestoreTarget = null;
+    if (this.document.activeElement === target) {
+      this._mobilePanelRestoreTarget = null;
+    }
   }
 
   private teardownMobileFocusTrap(restoreFocus = true): void {
@@ -298,8 +329,25 @@ export class HellAppShell extends HellStyleable implements OnDestroy {
     this.restoreMobilePanelTabindex();
     if (restoreFocus) {
       this.restoreMobileFocusTarget();
+      if (this._mobilePanelRestoreTarget) {
+        this.scheduleMobileFocusRestore();
+      }
     } else {
       this._mobilePanelRestoreTarget = null;
+    }
+  }
+
+  private scheduleMobileFocusRestore(): void {
+    this.scheduleMobilePanelTask(() => this.restoreMobileFocusTarget());
+  }
+
+  private scheduleMobilePanelTask(task: () => void): void {
+    const view = this.document.defaultView;
+    setTimeout(task, 0);
+    setTimeout(task, 50);
+    setTimeout(task, 150);
+    if (view?.requestAnimationFrame) {
+      view.requestAnimationFrame(task);
     }
   }
 
@@ -321,7 +369,7 @@ export class HellAppShell extends HellStyleable implements OnDestroy {
 
   private getMobilePanelElement(panel: HellAppShellMobilePanel): HTMLElement | null {
     const root = this.elementRef.nativeElement;
-    const selector = `[data-hell-app-shell-panel="${panel}"]`;
+    const selector = `:scope > [data-hell-app-shell-panel="${panel}"]`;
     return root.querySelector<HTMLElement>(selector);
   }
 
@@ -499,7 +547,8 @@ export class HellAppContent extends HellStyleable {
     '(click)': 'toggle()',
     '[attr.aria-expanded]': '!collapsed()',
     '[attr.aria-controls]': 'shell.sidenavPanelId',
-    '[attr.aria-label]': 'collapsed() ? labels.appShell.expandSidebar : labels.appShell.collapseSidebar',
+    '[attr.aria-label]':
+      'collapsed() ? labels.appShell.expandSidebar : labels.appShell.collapseSidebar',
     '[attr.data-hell-app-shell-toggle]': '"sidenav"',
     '[attr.data-hell-sidenav-toggle]': 'appearance() === "plain" ? null : appearance()',
   },
@@ -522,7 +571,8 @@ export class HellSidenavToggle {
     '(click)': 'toggle()',
     '[attr.aria-expanded]': '!hidden()',
     '[attr.aria-controls]': 'shell.secondaryPanelId',
-    '[attr.aria-label]': 'hidden() ? labels.appShell.showSecondaryPanel : labels.appShell.hideSecondaryPanel',
+    '[attr.aria-label]':
+      'hidden() ? labels.appShell.showSecondaryPanel : labels.appShell.hideSecondaryPanel',
     '[attr.data-hell-app-shell-toggle]': '"secondary"',
     '[attr.data-hell-secondary-toggle]': 'appearance() === "plain" ? null : appearance()',
   },
@@ -545,8 +595,6 @@ export class HellSecondaryToggle {
     '[attr.data-hell-app-shell-panel]': '"secondary"',
     '[attr.data-hidden]': 'isHidden() ? "true" : null',
     '[attr.data-mobile-hidden]': 'isMobileHidden() ? "true" : null',
-    '[attr.aria-hidden]': 'isMobileHidden() ? "true" : null',
-    '[attr.inert]': 'isMobileHidden() ? "" : null',
   },
 })
 export class HellAppSecondary extends HellStyleable {
