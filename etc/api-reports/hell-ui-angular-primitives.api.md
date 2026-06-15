@@ -1007,6 +1007,9 @@ export class HellPaginationLast extends HellPaginationDisabledGuard {
 }
 
 // @public (undocumented)
+export type HellPaginationMode = 'pages' | 'previous-next' | 'jump';
+
+// @public (undocumented)
 export class HellPaginationNext extends HellPaginationDisabledGuard {
     // (undocumented)
     protected readonly disabled: i0.Signal<boolean>;
@@ -1029,15 +1032,33 @@ export class HellPaginationPrev extends HellPaginationDisabledGuard {
 // @public
 export class HellPaginationStrip extends HellStyleable {
     // (undocumented)
+    protected currentPage(): number;
+    // (undocumented)
+    protected goToSelectedPage(event: Event): void;
+    // (undocumented)
     protected readonly labels: HellLabels;
     // (undocumented)
+    readonly mode: i0.InputSignal<HellPaginationMode>;
+    // (undocumented)
+    protected pageCount(): number;
+    // (undocumented)
+    protected pageJumpLabel(): string;
+    // (undocumented)
+    protected readonly pageOptions: i0.Signal<number[]>;
+    // (undocumented)
     protected readonly pages: i0.Signal<number[]>;
+    // (undocumented)
+    protected pageStatusLabel(): string;
+    // (undocumented)
+    protected pageTotalLabel(): string;
+    // (undocumented)
+    protected paginationDisabled(): boolean;
     // (undocumented)
     readonly siblingCount: i0.InputSignal<number>;
     // (undocumented)
     protected readonly trackPage: (_: number, page: number) => number;
     // (undocumented)
-    static ɵcmp: i0.ɵɵComponentDeclaration<HellPaginationStrip, "hell-pagination", never, { "siblingCount": { "alias": "siblingCount"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1$j.NgpPagination; inputs: { "ngpPaginationPage": "page"; "ngpPaginationPageCount": "pageCount"; "ngpPaginationDisabled": "disabled"; }; outputs: { "ngpPaginationPageChange": "pageChange"; }; }]>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<HellPaginationStrip, "hell-pagination", never, { "siblingCount": { "alias": "siblingCount"; "required": false; "isSignal": true; }; "mode": { "alias": "mode"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1$j.NgpPagination; inputs: { "ngpPaginationPage": "page"; "ngpPaginationPageCount": "pageCount"; "ngpPaginationDisabled": "disabled"; }; outputs: { "ngpPaginationPageChange": "pageChange"; }; }]>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellPaginationStrip, never>;
 }
@@ -1974,97 +1995,107 @@ export class HellTooltipTrigger extends HellNativeInteractiveDisabledGuard {
 // types/hell-ui-angular-primitives.d.ts:1083:5 - (ae-undocumented) Missing documentation for "markControlTouched".
 // types/hell-ui-angular-primitives.d.ts:1088:5 - (ae-undocumented) Missing documentation for "ɵfac".
 // types/hell-ui-angular-primitives.d.ts:1089:5 - (ae-undocumented) Missing documentation for "ɵcmp".
-// types/hell-ui-angular-primitives.d.ts:1224:5 - (ae-undocumented) Missing documentation for "width".
-// types/hell-ui-angular-primitives.d.ts:1225:5 - (ae-undocumented) Missing documentation for "height".
-// types/hell-ui-angular-primitives.d.ts:1228:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1229:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-primitives.d.ts:1231:1 - (ae-undocumented) Missing documentation for "HellSpinnerVariant".
-// types/hell-ui-angular-primitives.d.ts:1237:5 - (ae-undocumented) Missing documentation for "variant".
-// types/hell-ui-angular-primitives.d.ts:1238:5 - (ae-undocumented) Missing documentation for "size".
-// types/hell-ui-angular-primitives.d.ts:1239:5 - (ae-undocumented) Missing documentation for "ariaLabel".
-// types/hell-ui-angular-primitives.d.ts:1240:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-primitives.d.ts:1241:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1242:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-primitives.d.ts:1258:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1259:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-primitives.d.ts:1261:1 - (ae-undocumented) Missing documentation for "HellBreadcrumbList".
-// types/hell-ui-angular-primitives.d.ts:1262:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1263:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-primitives.d.ts:1265:1 - (ae-undocumented) Missing documentation for "HellBreadcrumbItem".
-// types/hell-ui-angular-primitives.d.ts:1266:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1267:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-primitives.d.ts:1272:5 - (ae-undocumented) Missing documentation for "nativeButtonType".
-// types/hell-ui-angular-primitives.d.ts:1273:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1274:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-primitives.d.ts:1278:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1279:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-primitives.d.ts:1288:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1289:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-primitives.d.ts:1297:5 - (ae-undocumented) Missing documentation for "ariaLabel".
-// types/hell-ui-angular-primitives.d.ts:1299:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-primitives.d.ts:1300:5 - (ae-undocumented) Missing documentation for "nativeButtonType".
-// types/hell-ui-angular-primitives.d.ts:1301:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1302:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-primitives.d.ts:1304:15 - (ae-undocumented) Missing documentation for "HELL_BREADCRUMBS_DIRECTIVES".
-// types/hell-ui-angular-primitives.d.ts:1318:5 - (ae-undocumented) Missing documentation for "name".
-// types/hell-ui-angular-primitives.d.ts:1319:5 - (ae-undocumented) Missing documentation for "size".
-// types/hell-ui-angular-primitives.d.ts:1320:5 - (ae-undocumented) Missing documentation for "color".
-// types/hell-ui-angular-primitives.d.ts:1321:5 - (ae-undocumented) Missing documentation for "decorative".
-// types/hell-ui-angular-primitives.d.ts:1322:5 - (ae-undocumented) Missing documentation for "ariaLabel".
-// types/hell-ui-angular-primitives.d.ts:1323:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1324:5 - (ae-undocumented) Missing documentation for "ɵcmp".
-// types/hell-ui-angular-primitives.d.ts:1340:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1341:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-primitives.d.ts:1343:1 - (ae-undocumented) Missing documentation for "HellPaginationFirst".
-// types/hell-ui-angular-primitives.d.ts:1344:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-primitives.d.ts:1345:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1346:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-primitives.d.ts:1348:1 - (ae-undocumented) Missing documentation for "HellPaginationPrev".
-// types/hell-ui-angular-primitives.d.ts:1349:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-primitives.d.ts:1350:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1351:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-primitives.d.ts:1353:1 - (ae-undocumented) Missing documentation for "HellPaginationNext".
-// types/hell-ui-angular-primitives.d.ts:1354:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-primitives.d.ts:1355:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1356:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-primitives.d.ts:1358:1 - (ae-undocumented) Missing documentation for "HellPaginationLast".
-// types/hell-ui-angular-primitives.d.ts:1359:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-primitives.d.ts:1360:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1361:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-primitives.d.ts:1363:1 - (ae-undocumented) Missing documentation for "HellPaginationButton".
-// types/hell-ui-angular-primitives.d.ts:1364:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-primitives.d.ts:1365:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1366:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-primitives.d.ts:1373:5 - (ae-undocumented) Missing documentation for "siblingCount".
-// types/hell-ui-angular-primitives.d.ts:1374:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-primitives.d.ts:1376:5 - (ae-undocumented) Missing documentation for "trackPage".
-// types/hell-ui-angular-primitives.d.ts:1377:5 - (ae-undocumented) Missing documentation for "pages".
-// types/hell-ui-angular-primitives.d.ts:1378:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1379:5 - (ae-undocumented) Missing documentation for "ɵcmp".
-// types/hell-ui-angular-primitives.d.ts:1381:15 - (ae-undocumented) Missing documentation for "HELL_PAGINATION_DIRECTIVES".
-// types/hell-ui-angular-primitives.d.ts:1389:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-primitives.d.ts:1393:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-primitives.d.ts:1395:5 - (ae-undocumented) Missing documentation for "shift".
-// types/hell-ui-angular-primitives.d.ts:1396:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1397:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-primitives.d.ts:1399:1 - (ae-undocumented) Missing documentation for "HellDatePickerNextYear".
-// types/hell-ui-angular-primitives.d.ts:1400:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-primitives.d.ts:1404:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-primitives.d.ts:1406:5 - (ae-undocumented) Missing documentation for "shift".
-// types/hell-ui-angular-primitives.d.ts:1407:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1408:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-primitives.d.ts:1420:5 - (ae-undocumented) Missing documentation for "locale".
-// types/hell-ui-angular-primitives.d.ts:1421:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-primitives.d.ts:1423:5 - (ae-undocumented) Missing documentation for "label".
-// types/hell-ui-angular-primitives.d.ts:1424:5 - (ae-undocumented) Missing documentation for "weekdayLabels".
-// types/hell-ui-angular-primitives.d.ts:1425:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1426:5 - (ae-undocumented) Missing documentation for "ɵcmp".
-// types/hell-ui-angular-primitives.d.ts:1434:5 - (ae-undocumented) Missing documentation for "locale".
-// types/hell-ui-angular-primitives.d.ts:1435:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-primitives.d.ts:1437:5 - (ae-undocumented) Missing documentation for "label".
-// types/hell-ui-angular-primitives.d.ts:1438:5 - (ae-undocumented) Missing documentation for "weekdayLabels".
-// types/hell-ui-angular-primitives.d.ts:1439:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1440:5 - (ae-undocumented) Missing documentation for "ɵcmp".
+// types/hell-ui-angular-primitives.d.ts:1227:5 - (ae-undocumented) Missing documentation for "width".
+// types/hell-ui-angular-primitives.d.ts:1228:5 - (ae-undocumented) Missing documentation for "height".
+// types/hell-ui-angular-primitives.d.ts:1231:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1232:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-primitives.d.ts:1234:1 - (ae-undocumented) Missing documentation for "HellSpinnerVariant".
+// types/hell-ui-angular-primitives.d.ts:1240:5 - (ae-undocumented) Missing documentation for "variant".
+// types/hell-ui-angular-primitives.d.ts:1241:5 - (ae-undocumented) Missing documentation for "size".
+// types/hell-ui-angular-primitives.d.ts:1242:5 - (ae-undocumented) Missing documentation for "ariaLabel".
+// types/hell-ui-angular-primitives.d.ts:1243:5 - (ae-undocumented) Missing documentation for "labels".
+// types/hell-ui-angular-primitives.d.ts:1244:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1245:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-primitives.d.ts:1261:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1262:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-primitives.d.ts:1264:1 - (ae-undocumented) Missing documentation for "HellBreadcrumbList".
+// types/hell-ui-angular-primitives.d.ts:1265:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1266:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-primitives.d.ts:1268:1 - (ae-undocumented) Missing documentation for "HellBreadcrumbItem".
+// types/hell-ui-angular-primitives.d.ts:1269:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1270:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-primitives.d.ts:1275:5 - (ae-undocumented) Missing documentation for "nativeButtonType".
+// types/hell-ui-angular-primitives.d.ts:1276:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1277:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-primitives.d.ts:1281:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1282:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-primitives.d.ts:1291:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1292:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-primitives.d.ts:1300:5 - (ae-undocumented) Missing documentation for "ariaLabel".
+// types/hell-ui-angular-primitives.d.ts:1302:5 - (ae-undocumented) Missing documentation for "labels".
+// types/hell-ui-angular-primitives.d.ts:1303:5 - (ae-undocumented) Missing documentation for "nativeButtonType".
+// types/hell-ui-angular-primitives.d.ts:1304:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1305:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-primitives.d.ts:1307:15 - (ae-undocumented) Missing documentation for "HELL_BREADCRUMBS_DIRECTIVES".
+// types/hell-ui-angular-primitives.d.ts:1321:5 - (ae-undocumented) Missing documentation for "name".
+// types/hell-ui-angular-primitives.d.ts:1322:5 - (ae-undocumented) Missing documentation for "size".
+// types/hell-ui-angular-primitives.d.ts:1323:5 - (ae-undocumented) Missing documentation for "color".
+// types/hell-ui-angular-primitives.d.ts:1324:5 - (ae-undocumented) Missing documentation for "decorative".
+// types/hell-ui-angular-primitives.d.ts:1325:5 - (ae-undocumented) Missing documentation for "ariaLabel".
+// types/hell-ui-angular-primitives.d.ts:1326:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1327:5 - (ae-undocumented) Missing documentation for "ɵcmp".
+// types/hell-ui-angular-primitives.d.ts:1330:1 - (ae-undocumented) Missing documentation for "HellPaginationMode".
+// types/hell-ui-angular-primitives.d.ts:1344:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1345:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-primitives.d.ts:1347:1 - (ae-undocumented) Missing documentation for "HellPaginationFirst".
+// types/hell-ui-angular-primitives.d.ts:1348:5 - (ae-undocumented) Missing documentation for "disabled".
+// types/hell-ui-angular-primitives.d.ts:1349:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1350:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-primitives.d.ts:1352:1 - (ae-undocumented) Missing documentation for "HellPaginationPrev".
+// types/hell-ui-angular-primitives.d.ts:1353:5 - (ae-undocumented) Missing documentation for "disabled".
+// types/hell-ui-angular-primitives.d.ts:1354:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1355:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-primitives.d.ts:1357:1 - (ae-undocumented) Missing documentation for "HellPaginationNext".
+// types/hell-ui-angular-primitives.d.ts:1358:5 - (ae-undocumented) Missing documentation for "disabled".
+// types/hell-ui-angular-primitives.d.ts:1359:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1360:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-primitives.d.ts:1362:1 - (ae-undocumented) Missing documentation for "HellPaginationLast".
+// types/hell-ui-angular-primitives.d.ts:1363:5 - (ae-undocumented) Missing documentation for "disabled".
+// types/hell-ui-angular-primitives.d.ts:1364:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1365:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-primitives.d.ts:1367:1 - (ae-undocumented) Missing documentation for "HellPaginationButton".
+// types/hell-ui-angular-primitives.d.ts:1368:5 - (ae-undocumented) Missing documentation for "disabled".
+// types/hell-ui-angular-primitives.d.ts:1369:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1370:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-primitives.d.ts:1379:5 - (ae-undocumented) Missing documentation for "siblingCount".
+// types/hell-ui-angular-primitives.d.ts:1380:5 - (ae-undocumented) Missing documentation for "mode".
+// types/hell-ui-angular-primitives.d.ts:1381:5 - (ae-undocumented) Missing documentation for "labels".
+// types/hell-ui-angular-primitives.d.ts:1383:5 - (ae-undocumented) Missing documentation for "trackPage".
+// types/hell-ui-angular-primitives.d.ts:1384:5 - (ae-undocumented) Missing documentation for "pageOptions".
+// types/hell-ui-angular-primitives.d.ts:1385:5 - (ae-undocumented) Missing documentation for "pages".
+// types/hell-ui-angular-primitives.d.ts:1386:5 - (ae-undocumented) Missing documentation for "currentPage".
+// types/hell-ui-angular-primitives.d.ts:1387:5 - (ae-undocumented) Missing documentation for "pageCount".
+// types/hell-ui-angular-primitives.d.ts:1388:5 - (ae-undocumented) Missing documentation for "paginationDisabled".
+// types/hell-ui-angular-primitives.d.ts:1389:5 - (ae-undocumented) Missing documentation for "pageStatusLabel".
+// types/hell-ui-angular-primitives.d.ts:1390:5 - (ae-undocumented) Missing documentation for "pageJumpLabel".
+// types/hell-ui-angular-primitives.d.ts:1391:5 - (ae-undocumented) Missing documentation for "pageTotalLabel".
+// types/hell-ui-angular-primitives.d.ts:1392:5 - (ae-undocumented) Missing documentation for "goToSelectedPage".
+// types/hell-ui-angular-primitives.d.ts:1393:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1394:5 - (ae-undocumented) Missing documentation for "ɵcmp".
+// types/hell-ui-angular-primitives.d.ts:1396:15 - (ae-undocumented) Missing documentation for "HELL_PAGINATION_DIRECTIVES".
+// types/hell-ui-angular-primitives.d.ts:1404:5 - (ae-undocumented) Missing documentation for "labels".
+// types/hell-ui-angular-primitives.d.ts:1408:5 - (ae-undocumented) Missing documentation for "disabled".
+// types/hell-ui-angular-primitives.d.ts:1410:5 - (ae-undocumented) Missing documentation for "shift".
+// types/hell-ui-angular-primitives.d.ts:1411:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1412:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-primitives.d.ts:1414:1 - (ae-undocumented) Missing documentation for "HellDatePickerNextYear".
+// types/hell-ui-angular-primitives.d.ts:1415:5 - (ae-undocumented) Missing documentation for "labels".
+// types/hell-ui-angular-primitives.d.ts:1419:5 - (ae-undocumented) Missing documentation for "disabled".
+// types/hell-ui-angular-primitives.d.ts:1421:5 - (ae-undocumented) Missing documentation for "shift".
+// types/hell-ui-angular-primitives.d.ts:1422:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1423:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-primitives.d.ts:1435:5 - (ae-undocumented) Missing documentation for "locale".
+// types/hell-ui-angular-primitives.d.ts:1436:5 - (ae-undocumented) Missing documentation for "labels".
+// types/hell-ui-angular-primitives.d.ts:1438:5 - (ae-undocumented) Missing documentation for "label".
+// types/hell-ui-angular-primitives.d.ts:1439:5 - (ae-undocumented) Missing documentation for "weekdayLabels".
+// types/hell-ui-angular-primitives.d.ts:1440:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1441:5 - (ae-undocumented) Missing documentation for "ɵcmp".
+// types/hell-ui-angular-primitives.d.ts:1449:5 - (ae-undocumented) Missing documentation for "locale".
+// types/hell-ui-angular-primitives.d.ts:1450:5 - (ae-undocumented) Missing documentation for "labels".
+// types/hell-ui-angular-primitives.d.ts:1452:5 - (ae-undocumented) Missing documentation for "label".
+// types/hell-ui-angular-primitives.d.ts:1453:5 - (ae-undocumented) Missing documentation for "weekdayLabels".
+// types/hell-ui-angular-primitives.d.ts:1454:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1455:5 - (ae-undocumented) Missing documentation for "ɵcmp".
 
 // (No @packageDocumentation comment for this package)
 

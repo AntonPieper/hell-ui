@@ -10,7 +10,15 @@ import { HELL_SPLIT_VIEW_DIRECTIVES } from './split-view';
       [compactBelow]="compactBelow()"
       [detailOpen]="detailOpen()"
       [height]="height()"
+      [itemNavigation]="itemNavigation()"
+      itemNavigationLabel="Ticket navigation"
+      previousItemLabel="Previous ticket"
+      nextItemLabel="Next ticket"
+      [previousItemDisabled]="previousItemDisabled()"
+      [nextItemDisabled]="nextItemDisabled()"
       (detailOpenChange)="detailEvents.push($event)"
+      (previousItem)="previousEvents.push('previous')"
+      (nextItem)="nextEvents.push('next')"
     >
       <ng-template hellSplitPrimary let-compact="compact" let-detailOpen="detailOpen">
         <section id="primary">Primary {{ compact }} {{ detailOpen }}</section>
@@ -25,7 +33,12 @@ class SplitViewHost {
   readonly compactBelow = signal(700);
   readonly detailOpen = signal(false);
   readonly height = signal<string | number | null>(null);
+  readonly itemNavigation = signal(false);
+  readonly previousItemDisabled = signal(false);
+  readonly nextItemDisabled = signal(false);
   readonly detailEvents: boolean[] = [];
+  readonly previousEvents: string[] = [];
+  readonly nextEvents: string[] = [];
 }
 
 describe('HellSplitView', () => {
@@ -86,6 +99,44 @@ describe('HellSplitView', () => {
 
     expect(splitView.style.getPropertyValue('--hell-split-view-height')).toBe('min(70vh, 42rem)');
   });
+
+  it('renders item navigation without replacing the resizable desktop layout', () => {
+    const fixture = TestBed.createComponent(SplitViewHost);
+    fixture.componentInstance.itemNavigation.set(true);
+    fixture.componentInstance.previousItemDisabled.set(true);
+    fixture.detectChanges();
+
+    observeWidth(fixture.nativeElement, 900);
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.querySelector('[data-slot="resizable"]')).toBeInstanceOf(HTMLElement);
+    expect(root.querySelector('[hellResizableHandle]')).toBeInstanceOf(HTMLElement);
+    expect(root.querySelector('[data-slot="detail-header"]')).toBeInstanceOf(HTMLElement);
+
+    expect(button(root, 'Previous ticket').disabled).toBe(true);
+    expect(button(root, 'Next ticket').disabled).toBe(false);
+
+    button(root, 'Previous ticket').click();
+    button(root, 'Next ticket').click();
+
+    expect(fixture.componentInstance.previousEvents).toEqual([]);
+    expect(fixture.componentInstance.nextEvents).toEqual(['next']);
+
+    fixture.componentInstance.previousItemDisabled.set(false);
+    fixture.componentInstance.nextItemDisabled.set(true);
+    fixture.detectChanges();
+
+    expect(button(root, 'Previous ticket').disabled).toBe(false);
+    expect(button(root, 'Next ticket').disabled).toBe(true);
+
+    button(root, 'Previous ticket').click();
+    button(root, 'Next ticket').click();
+
+    expect(fixture.componentInstance.previousEvents).toEqual(['previous']);
+    expect(fixture.componentInstance.nextEvents).toEqual(['next']);
+  });
 });
 
 class TestResizeObserver {
@@ -119,4 +170,10 @@ function text(root: HTMLElement, selector: string): string {
   const element = root.querySelector(selector);
   if (!(element instanceof HTMLElement)) throw new Error(`Expected ${selector}.`);
   return element.textContent ?? '';
+}
+
+function button(root: HTMLElement, ariaLabel: string): HTMLButtonElement {
+  const element = root.querySelector(`button[aria-label="${ariaLabel}"]`);
+  if (!(element instanceof HTMLButtonElement)) throw new Error(`Expected ${ariaLabel} button.`);
+  return element;
 }

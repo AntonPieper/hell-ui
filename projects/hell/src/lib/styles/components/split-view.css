@@ -39,16 +39,42 @@
     flex: 1 1 auto;
   }
 
-  .hell-split-view [data-slot='compact-header'] {
+  .hell-split-view :is([data-slot='compact-header'], [data-slot='detail-header']) {
     display: flex;
     flex: 0 0 auto;
     align-items: center;
-    justify-content: flex-start;
     gap: var(--spacing-hell-2);
     border-bottom: 1px solid var(--color-hell-border);
     background-color: var(--color-hell-surface-subtle);
     padding-inline: var(--spacing-hell-2);
     padding-block: var(--spacing-hell-2);
+  }
+
+  .hell-split-view [data-slot='compact-header'] {
+    justify-content: space-between;
+  }
+
+  .hell-split-view [data-slot='detail-header'] {
+    justify-content: flex-end;
+  }
+
+  .hell-split-view [data-slot='item-navigation'] {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: var(--spacing-hell-1);
+    margin-inline-start: auto;
+  }
+
+  .hell-split-view [data-slot='item-navigation'] [data-direction='next'] {
+    transform: rotate(180deg);
+  }
+
+  .hell-split-view [data-slot='master-item'][data-current='true'] {
+    --hell-button-background: var(--color-hell-primary-soft);
+    --hell-button-background-hover: var(--color-hell-surface-muted);
+    --hell-button-border-color: var(--color-hell-border);
+    --hell-button-color: var(--color-hell-primary-soft-foreground);
   }
 
   .hell-split-view[data-compact='true'] [data-pane='detail'] {

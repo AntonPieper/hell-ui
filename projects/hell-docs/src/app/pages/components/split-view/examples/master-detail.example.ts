@@ -24,8 +24,16 @@ const TICKETS: readonly Ticket[] = [
       framed
       [height]="360"
       [detailOpen]="detailOpen()"
+      itemNavigation
+      itemNavigationLabel="Ticket navigation"
+      previousItemLabel="Previous ticket"
+      nextItemLabel="Next ticket"
+      [previousItemDisabled]="selectedIndex() === 0"
+      [nextItemDisabled]="selectedIndex() === tickets.length - 1"
       (detailOpenChange)="detailOpen.set($event)"
-      >
+      (previousItem)="move(-1)"
+      (nextItem)="move(1)"
+    >
       <ng-template hellSplitPrimary>
         <div class="flex min-h-0 min-w-0 flex-1 flex-col gap-2 p-3">
           <div class="flex items-center justify-between gap-2">
@@ -37,11 +45,14 @@ const TICKETS: readonly Ticket[] = [
             @for (ticket of tickets; track ticket.id) {
               <button
                 hellButton
-                variant="ghost"
                 size="sm"
                 block
+                variant="ghost"
                 class="justify-start"
                 type="button"
+                [attr.aria-current]="ticket.id === selectedId() ? 'true' : null"
+                data-slot="master-item"
+                [attr.data-current]="ticket.id === selectedId() ? 'true' : null"
                 (click)="select(ticket.id)"
               >
                 {{ ticket.id }} · {{ ticket.title }}
@@ -54,16 +65,27 @@ const TICKETS: readonly Ticket[] = [
       <ng-template hellSplitDetail>
         <div class="flex min-h-0 min-w-0 flex-1 flex-col gap-3 p-3">
           @if (selected(); as ticket) {
-            <div class="grid gap-0.5">
-              <strong class="text-sm font-semibold text-hell-foreground">{{ ticket.title }}</strong>
-              <span class="text-xs text-hell-foreground-muted">{{ ticket.id }} · {{ ticket.state }}</span>
+            <div class="flex items-start justify-between gap-3">
+              <div class="grid gap-0.5">
+                <strong class="text-sm font-semibold text-hell-foreground">{{
+                  ticket.title
+                }}</strong>
+                <span class="text-xs text-hell-foreground-muted"
+                  >{{ ticket.id }} · {{ ticket.state }}</span
+                >
+              </div>
+              <span class="whitespace-nowrap text-xs text-hell-foreground-muted">
+                {{ selectedIndex() + 1 }} of {{ tickets.length }}
+              </span>
             </div>
             <p class="m-0 text-sm text-hell-foreground-muted">
               {{ ticket.owner }} owns this ticket. On narrow containers the detail pane becomes a
-              screen with a back button.
+              screen with a back button and the same previous/next item navigation.
             </p>
           } @else {
-            <div class="flex flex-1 items-center justify-center text-center text-sm text-hell-foreground-muted">
+            <div
+              class="flex flex-1 items-center justify-center text-center text-sm text-hell-foreground-muted"
+            >
               Select a ticket
             </div>
           }
@@ -76,12 +98,23 @@ export class SplitViewMasterDetailExample {
   protected readonly tickets = TICKETS;
   protected readonly selectedId = signal(TICKETS[0].id);
   protected readonly detailOpen = signal(false);
-  protected readonly selected = computed(() =>
-    TICKETS.find((ticket) => ticket.id === this.selectedId()) ?? null,
+  protected readonly selectedIndex = computed(() =>
+    Math.max(
+      0,
+      TICKETS.findIndex((ticket) => ticket.id === this.selectedId()),
+    ),
+  );
+  protected readonly selected = computed(
+    () => TICKETS.find((ticket) => ticket.id === this.selectedId()) ?? null,
   );
 
   protected select(id: string): void {
     this.selectedId.set(id);
     this.detailOpen.set(true);
+  }
+
+  protected move(delta: -1 | 1): void {
+    const nextIndex = Math.min(Math.max(this.selectedIndex() + delta, 0), TICKETS.length - 1);
+    this.select(TICKETS[nextIndex].id);
   }
 }

@@ -20,7 +20,7 @@ import { faSolidArrowLeft } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
 import { HellStyleable } from '../../core/styleable';
-import { HELL_RESIZABLE_DIRECTIVES } from '../resizable/resizable';
+import { HellResizable, HellResizableHandle, HellResizablePane } from '../resizable/resizable';
 
 /** Primary pane template for `hell-split-view`; receives `{ compact, detailOpen }`. */
 @Directive({
@@ -47,7 +47,14 @@ export class HellSplitDetail {
 @Component({
   selector: 'hell-split-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgTemplateOutlet, HellButton, HellIcon, ...HELL_RESIZABLE_DIRECTIVES],
+  imports: [
+    NgTemplateOutlet,
+    HellButton,
+    HellIcon,
+    HellResizable,
+    HellResizablePane,
+    HellResizableHandle,
+  ],
   providers: [provideIcons({ faSolidArrowLeft })],
   host: {
     '[class.hell-split-view]': '!unstyled()',
@@ -57,14 +64,46 @@ export class HellSplitDetail {
     '[style.--hell-split-view-height]': 'heightValue()',
   },
   template: `
+    <ng-template #itemNavigationControls>
+      @if (itemNavigation()) {
+        <div data-slot="item-navigation" role="group" [attr.aria-label]="itemNavigationLabel()">
+          <button
+            hellButton
+            variant="ghost"
+            size="sm"
+            iconOnly
+            type="button"
+            [disabled]="previousItemDisabled()"
+            [attr.aria-label]="previousItemLabel()"
+            (click)="goToPreviousItem()"
+          >
+            <hell-icon [name]="'faSolidArrowLeft'" size="12px" />
+          </button>
+          <button
+            hellButton
+            variant="ghost"
+            size="sm"
+            iconOnly
+            type="button"
+            [disabled]="nextItemDisabled()"
+            [attr.aria-label]="nextItemLabel()"
+            (click)="goToNextItem()"
+          >
+            <hell-icon data-direction="next" [name]="'faSolidArrowLeft'" size="12px" />
+          </button>
+        </div>
+      }
+    </ng-template>
+
     @if (isCompact()) {
       <div data-slot="screen">
         @if (detailOpen()) {
           <div data-slot="compact-header">
             <button hellButton variant="ghost" size="sm" type="button" (click)="closeDetail()">
-              <hell-icon name="faSolidArrowLeft" size="13px" />
+              <hell-icon [name]="'faSolidArrowLeft'" size="13px" />
               <span>{{ backLabel() }}</span>
             </button>
+            <ng-container [ngTemplateOutlet]="itemNavigationControls" />
           </div>
           <div data-slot="pane" data-pane="detail">
             <ng-container
@@ -103,6 +142,11 @@ export class HellSplitDetail {
           [initialFlex]="detailFlex()"
           [minSize]="detailMinSize()"
         >
+          @if (itemNavigation()) {
+            <div data-slot="detail-header">
+              <ng-container [ngTemplateOutlet]="itemNavigationControls" />
+            </div>
+          }
           <ng-container
             [ngTemplateOutlet]="detailTemplate()?.template ?? null"
             [ngTemplateOutletContext]="templateContext()"
@@ -122,8 +166,16 @@ export class HellSplitView extends HellStyleable {
   readonly primaryMinSize = input(320, { transform: numberAttribute });
   readonly detailMinSize = input(260, { transform: numberAttribute });
   readonly height = input<string | number | null>(null);
+  readonly itemNavigation = input(false, { transform: booleanAttribute });
+  readonly itemNavigationLabel = input('Item navigation');
+  readonly previousItemLabel = input('Previous item');
+  readonly nextItemLabel = input('Next item');
+  readonly previousItemDisabled = input(false, { transform: booleanAttribute });
+  readonly nextItemDisabled = input(false, { transform: booleanAttribute });
 
   readonly detailOpenChange = output<boolean>();
+  readonly previousItem = output<void>();
+  readonly nextItem = output<void>();
 
   protected readonly primaryTemplate = contentChild(HellSplitPrimary);
   protected readonly detailTemplate = contentChild(HellSplitDetail);
@@ -167,6 +219,18 @@ export class HellSplitView extends HellStyleable {
 
   protected closeDetail(): void {
     this.detailOpenChange.emit(false);
+  }
+
+  protected goToPreviousItem(): void {
+    if (!this.previousItemDisabled()) {
+      this.previousItem.emit();
+    }
+  }
+
+  protected goToNextItem(): void {
+    if (!this.nextItemDisabled()) {
+      this.nextItem.emit();
+    }
   }
 }
 
