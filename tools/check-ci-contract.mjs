@@ -131,7 +131,7 @@ const e2eGroups = [
   },
   {
     name: 'behavior-regressions',
-    specs: ['e2e/ui-behavior.spec.ts'],
+    specs: ['e2e/navigation-controls.spec.ts', 'e2e/ui-behavior.spec.ts'],
   },
 ];
 
