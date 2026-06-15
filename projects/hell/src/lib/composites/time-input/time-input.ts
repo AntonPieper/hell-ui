@@ -230,12 +230,12 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
       hellInput
       unstyled
       [size]="size()"
-      [type]="fieldType()"
+      [type]="nativeTimeInput ? 'time' : 'text'"
       data-slot="field"
-      [attr.inputmode]="fieldInputMode()"
-      [attr.min]="fieldMin()"
-      [attr.max]="fieldMax()"
-      [attr.step]="fieldStep()"
+      [attr.inputmode]="nativeTimeInput ? null : 'text'"
+      [attr.min]="nativeTimeInput ? '00:00' : null"
+      [attr.max]="nativeTimeInput ? (seconds() ? '23:59:59' : '23:59') : null"
+      [attr.step]="nativeTimeInput ? (seconds() ? '1' : '60') : null"
       autocomplete="off"
       [invalid]="isInvalid()"
       [id]="inputId()"
@@ -356,13 +356,6 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
   protected readonly format = (value: HellTimeValue | null, seconds: boolean) =>
     value ? this.timeAdapter.format(value, { seconds }) : '';
   protected readonly nativeTimeInput = this.timeAdapter === HELL_DEFAULT_TIME_INPUT_ADAPTER;
-  protected readonly fieldType = () => (this.nativeTimeInput ? 'time' : 'text');
-  protected readonly fieldInputMode = () => (this.nativeTimeInput ? null : 'text');
-  protected readonly fieldMin = () => (this.nativeTimeInput ? '00:00' : null);
-  protected readonly fieldMax = () =>
-    this.nativeTimeInput ? (this.seconds() ? '23:59:59' : '23:59') : null;
-  protected readonly fieldStep = () =>
-    this.nativeTimeInput ? (this.seconds() ? '1' : '60') : null;
 
   private readonly controlMode = signal(false);
   private readonly controlValue = signal<HellTimeValue | null>(null);
