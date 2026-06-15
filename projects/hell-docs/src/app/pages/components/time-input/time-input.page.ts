@@ -31,12 +31,11 @@ import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
     <article class="hd-prose">
       <h1>Time input</h1>
       <p>
-        A text-first time field with a business-default parser: <code>HH:mm</code>, documented
-        common 12-hour shortcuts (<code>9:00 am</code>, <code>1:30PM</code>), and compact keyboard
-        entry (<code>930</code> for <code>09:30</code>). <code>HH:mm:ss</code> is accepted only when
-        <code>seconds</code> mode is enabled. Locale parsing is intentionally off by default. Click
-        or keyboard-activate the clock icon to open a compact segmented picker with hour, minute,
-        and optional second controls plus common minute presets.
+        A native-backed time field that keeps the colon visible, selects the current value on focus,
+        and lets the browser reject illegal time strings. The default editor commits
+        <code>HH:mm</code>; <code>seconds</code> mode switches the native step to
+        <code>HH:mm:ss</code>. Click or keyboard-activate the clock icon to open a compact segmented
+        picker with hour, minute, and optional second controls plus common minute presets.
       </p>
 
       <h2>Examples</h2>
@@ -76,28 +75,30 @@ import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
           template-driven forms read/write <code>HellTimeValue | null</code>; native HTML form
           submission is not provided.
         </li>
-        <li>Validator error: <code>invalidTimeInputDraft</code> for uncommittable typed text.</li>
+        <li>
+          Validator error: <code>invalidTimeInputDraft</code> for uncommittable typed text when a
+          custom text adapter is provided.
+        </li>
         <li><code>seconds</code>: include a seconds control + readout.</li>
         <li><code>size</code>: <code>sm | md | lg</code></li>
         <li><code>invalid</code>, <code>disabled</code></li>
         <li><code>placeholder</code>, <code>aria-label</code></li>
         <li>
-          <code>provideHellTimeInputAdapter</code>: replace the default parse/format policy for
-          locale, masking, or product-specific shortcuts.
+          <code>provideHellTimeInputAdapter</code>: replace the default native-compatible
+          parse/format policy. Custom adapters keep the field in text mode so product-specific
+          shortcuts and locale masks can own their draft behavior.
         </li>
         <li><code>unstyled</code></li>
       </ul>
 
       <h2>Adapter contract</h2>
       <p>
-        The built-in parser emits a structured 24-hour <code>HellTimeValue</code>. It accepts
-        <code>HH:mm</code> and documented common 12-hour shortcuts such as <code>9:00 am</code> /
-        <code>1:30PM</code>, plus separator-free keyboard entry such as <code>9</code>,
-        <code>930</code>, and <code>1730</code>. <code>HH:mm:ss</code> text is accepted only with
-        <code>seconds</code> enabled, and then normalizes output to 24-hour values. It does not
-        attempt locale parsing. Product teams that need localized parsing, named shortcuts, or a
-        different display policy should provide <code>HELL_TIME_INPUT_ADAPTER</code> instead of
-        forking the component.
+        The built-in adapter emits a structured 24-hour <code>HellTimeValue</code> and formats
+        native-compatible <code>HH:mm</code> / <code>HH:mm:ss</code> strings. The exported parser
+        still accepts common text forms for adapter reuse, but the default field uses
+        <code>input[type=time]</code> so illegal values never become visible drafts. Product teams
+        that need localized parsing, named shortcuts, or a different display policy should provide
+        <code>HELL_TIME_INPUT_ADAPTER</code>; custom adapters use the text-backed editing path.
       </p>
 
       <h2>Do</h2>

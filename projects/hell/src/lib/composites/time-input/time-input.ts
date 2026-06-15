@@ -230,9 +230,12 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
       hellInput
       unstyled
       [size]="size()"
-      type="text"
+      [type]="fieldType()"
       data-slot="field"
-      inputmode="text"
+      [attr.inputmode]="fieldInputMode()"
+      [attr.min]="fieldMin()"
+      [attr.max]="fieldMax()"
+      [attr.step]="fieldStep()"
       autocomplete="off"
       [invalid]="isInvalid()"
       [id]="inputId()"
@@ -242,6 +245,7 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
       [disabled]="isDisabled()"
       [placeholder]="placeholder() ?? (seconds() ? 'HH:mm:ss' : 'HH:mm')"
       [value]="display()"
+      (focus)="onFieldFocus(field)"
       (input)="onInput(field.value)"
       (blur)="onBlur()"
       (keydown.enter)="commit(field.value, $event)"
@@ -347,10 +351,18 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
   protected readonly minutePresets = [0, 15, 30, 45] as const;
   protected readonly pickerShift = { padding: 8 } as const;
   protected readonly pad = pad;
+  private readonly timeAdapter = inject(HELL_TIME_INPUT_ADAPTER);
+
   protected readonly format = (value: HellTimeValue | null, seconds: boolean) =>
     value ? this.timeAdapter.format(value, { seconds }) : '';
-
-  private readonly timeAdapter = inject(HELL_TIME_INPUT_ADAPTER);
+  protected readonly nativeTimeInput = this.timeAdapter === HELL_DEFAULT_TIME_INPUT_ADAPTER;
+  protected readonly fieldType = () => (this.nativeTimeInput ? 'time' : 'text');
+  protected readonly fieldInputMode = () => (this.nativeTimeInput ? null : 'text');
+  protected readonly fieldMin = () => (this.nativeTimeInput ? '00:00' : null);
+  protected readonly fieldMax = () =>
+    this.nativeTimeInput ? (this.seconds() ? '23:59:59' : '23:59') : null;
+  protected readonly fieldStep = () =>
+    this.nativeTimeInput ? (this.seconds() ? '1' : '60') : null;
 
   private readonly controlMode = signal(false);
   private readonly controlValue = signal<HellTimeValue | null>(null);
@@ -430,6 +442,17 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
   protected onInput(value: string) {
     this.valueState.writeDraft(value);
     this.onValidatorChange();
+  }
+
+  protected onFieldFocus(field: HTMLInputElement) {
+    if (!field.value || this.isDisabled()) return;
+    queueMicrotask(() => {
+      try {
+        field.select();
+      } catch {
+        // Some native time controls expose segmented selection instead of text ranges.
+      }
+    });
   }
 
   protected onBlur() {
