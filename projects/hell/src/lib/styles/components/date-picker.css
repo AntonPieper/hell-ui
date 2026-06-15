@@ -3,13 +3,16 @@
      [data-today], [data-selected], [data-outside-month], [data-disabled]. */
 
   .hell-date-picker {
+    --hell-date-picker-cell-size: calc(var(--spacing) * 7.5);
+    --hell-date-picker-day-size: calc(var(--spacing) * 7);
+
     display: inline-block;
     background-color: var(--color-hell-surface-elevated);
     border-style: solid;
     border-width: 1px;
     border-color: var(--color-hell-border);
     border-radius: var(--radius-md);
-    padding: var(--spacing-hell-4);
+    padding: var(--spacing-hell-3);
     box-shadow: var(--shadow-hell-sm);
   }
 
@@ -19,8 +22,8 @@
     align-items: center;
     justify-items: center;
     column-gap: var(--spacing-hell-2);
-    min-height: calc(var(--spacing) * 8);
-    margin-bottom: var(--spacing-hell-3);
+    min-height: var(--spacing-hell-control-sm);
+    margin-bottom: var(--spacing-hell-2);
   }
 
   .hell-date-picker-nav {
@@ -43,23 +46,36 @@
   }
 
   .hell-date-picker-grid {
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
     & th {
       font-size: 11px;
       font-weight: var(--font-weight-semibold);
-      width: calc(var(--spacing) * 8);
-      height: calc(var(--spacing) * 7);
+      width: var(--hell-date-picker-cell-size);
+      height: calc(var(--spacing) * 6);
+      padding: 0;
       text-align: center;
+      vertical-align: middle;
       color: var(--color-hell-foreground-subtle);
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
+    & td {
+      width: var(--hell-date-picker-cell-size);
+      height: var(--hell-date-picker-cell-size);
+      padding: 0;
+      text-align: center;
+      vertical-align: middle;
+    }
     & [ngpDatePickerDateButton] {
-      width: calc(var(--spacing) * 8);
-      height: calc(var(--spacing) * 8);
+      appearance: none;
+      width: var(--hell-date-picker-day-size);
+      height: var(--hell-date-picker-day-size);
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      padding: 0;
       border-radius: 0.25rem;
       background-color: transparent;
       border-style: solid;

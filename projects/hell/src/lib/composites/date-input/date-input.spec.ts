@@ -55,7 +55,11 @@ class DateInputFieldHost {}
 @Component({
   imports: [ReactiveFormsModule, HellDateInput],
   template: `
-    <hell-date-input [formControl]="control" aria-label="Form date" (dateChange)="dates.push($event)" />
+    <hell-date-input
+      [formControl]="control"
+      aria-label="Form date"
+      (dateChange)="dates.push($event)"
+    />
   `,
 })
 class DateInputFormHost {
@@ -65,9 +69,7 @@ class DateInputFormHost {
 
 @Component({
   imports: [ReactiveFormsModule, HellDateInput],
-  template: `
-    <hell-date-input [formControl]="control" aria-label="Blur form date" />
-  `,
+  template: ` <hell-date-input [formControl]="control" aria-label="Blur form date" /> `,
 })
 class DateInputBlurFormHost {
   readonly control = new FormControl<Date | null>(new Date(2026, 3, 22), {
@@ -84,12 +86,15 @@ class DateInputBlurFormHost {
           ? { valid: true, value: new Date(2026, 0, 2) }
           : { valid: false },
       format: (value) => (value ? `custom:${value.getFullYear()}` : ''),
-      coerce: (value) =>
-        value instanceof Date && value.getFullYear() >= 2026 ? value : null,
+      coerce: (value) => (value instanceof Date && value.getFullYear() >= 2026 ? value : null),
       isSameValue: (a, b) => a?.getTime() === b?.getTime(),
     }),
   ],
-  template: `<hell-date-input [date]="date()" aria-label="Custom date" (dateChange)="dates.push($event)" />`,
+  template: `<hell-date-input
+    [date]="date()"
+    aria-label="Custom date"
+    (dateChange)="dates.push($event)"
+  />`,
 })
 class DateInputCustomAdapterHost {
   readonly date = signal<Date | null>(new Date(2025, 0, 1));
@@ -141,6 +146,7 @@ describe('HellDateInput', () => {
     expect(input.getAttribute('aria-label')).toBe('Report date');
     expect(input.getAttribute('aria-describedby')).toBe('report-date-help report-date-error');
     expect(input.getAttribute('aria-labelledby')).toBe('report-date-label');
+    expect(input.classList.contains('hell-input')).toBe(false);
     expect(trigger.getAttribute('aria-label')).toBe('Choose date for Report date');
     expect(trigger.getAttribute('aria-describedby')).toBeNull();
     expect(trigger.getAttribute('aria-labelledby')).toBeNull();
@@ -262,6 +268,7 @@ describe('HellDateInput', () => {
     fixture.detectChanges();
 
     expect(host.control.errors).toEqual({ invalidDateInputDraft: true });
+    expect(dateInputHost(fixture.nativeElement).getAttribute('data-invalid')).toBe('true');
   });
 
   it('clears date draft validator errors after a valid commit', () => {
@@ -362,12 +369,10 @@ describe('HellDateInput', () => {
   });
 
   it('compares default dates by local day instead of exact timestamp', () => {
-    expect(
-      hellSameDateInputValue(new Date(2026, 3, 22), new Date(2026, 3, 22, 23, 59, 59)),
-    ).toBe(true);
-    expect(hellSameDateInputValue(new Date(2026, 3, 22), new Date(2026, 3, 23))).toBe(
-      false,
+    expect(hellSameDateInputValue(new Date(2026, 3, 22), new Date(2026, 3, 22, 23, 59, 59))).toBe(
+      true,
     );
+    expect(hellSameDateInputValue(new Date(2026, 3, 22), new Date(2026, 3, 23))).toBe(false);
   });
 
   it('coerces external Date values to local midnight', () => {
@@ -522,6 +527,7 @@ describe('HellDateInput', () => {
 
     expect(textInput(fixture.nativeElement).disabled).toBe(true);
     expect(triggerButton(fixture.nativeElement).disabled).toBe(true);
+    expect(dateInputHost(fixture.nativeElement).getAttribute('data-disabled')).toBe('true');
   });
 });
 
@@ -535,6 +541,12 @@ function triggerButton(root: HTMLElement): HTMLButtonElement {
   const trigger = root.querySelector('button[data-slot="trigger"]');
   if (!(trigger instanceof HTMLButtonElement)) throw new Error('Expected date trigger.');
   return trigger;
+}
+
+function dateInputHost(root: HTMLElement): HTMLElement {
+  const host = root.querySelector('hell-date-input');
+  if (!(host instanceof HTMLElement)) throw new Error('Expected date input host.');
+  return host;
 }
 
 function formatDate(date: Date | null): string {
