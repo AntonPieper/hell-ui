@@ -3,8 +3,8 @@
      [data-today], [data-selected], [data-outside-month], [data-disabled]. */
 
   .hell-date-picker {
-    --hell-date-picker-cell-size: calc(var(--spacing) * 7.5);
-    --hell-date-picker-day-size: calc(var(--spacing) * 7);
+    --_cell: calc(var(--spacing) * 7.5);
+    --_day: calc(var(--spacing) * 7);
 
     display: inline-block;
     background-color: var(--color-hell-surface-elevated);
@@ -52,26 +52,22 @@
     & th {
       font-size: 11px;
       font-weight: var(--font-weight-semibold);
-      width: var(--hell-date-picker-cell-size);
+      width: var(--_cell);
       height: calc(var(--spacing) * 6);
       padding: 0;
-      text-align: center;
-      vertical-align: middle;
       color: var(--color-hell-foreground-subtle);
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
     & td {
-      width: var(--hell-date-picker-cell-size);
-      height: var(--hell-date-picker-cell-size);
+      height: var(--_cell);
       padding: 0;
       text-align: center;
-      vertical-align: middle;
     }
     & [ngpDatePickerDateButton] {
       appearance: none;
-      width: var(--hell-date-picker-day-size);
-      height: var(--hell-date-picker-day-size);
+      width: var(--_day);
+      height: var(--_day);
       display: inline-flex;
       align-items: center;
       justify-content: center;

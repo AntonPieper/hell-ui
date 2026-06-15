@@ -8,10 +8,6 @@
    */
 
   .hell-date-input {
-    --hell-date-input-height: var(--spacing-hell-control-md);
-    --hell-date-input-padding-inline: var(--spacing-hell-3);
-    --hell-date-input-trigger-size: var(--spacing-hell-control-sm);
-
     position: relative;
     display: inline-flex;
     align-items: stretch;
@@ -45,23 +41,13 @@
         color: var(--color-hell-foreground-muted);
       }
     }
-    &[data-size='sm'] {
-      --hell-date-input-height: var(--spacing-hell-control-sm);
-      --hell-date-input-padding-inline: var(--spacing-hell-2);
-      --hell-date-input-trigger-size: var(--spacing-hell-control-xs);
-    }
-    &[data-size='lg'] {
-      --hell-date-input-height: var(--spacing-hell-control-lg);
-      --hell-date-input-padding-inline: var(--spacing-hell-4);
-      --hell-date-input-trigger-size: var(--spacing-hell-control-md);
-    }
   }
 
   .hell-date-input [data-slot='field'] {
     flex: 1 1 auto;
     min-width: 0;
-    height: var(--hell-date-input-height);
-    padding-inline: var(--hell-date-input-padding-inline) var(--spacing-hell-2);
+    height: var(--spacing-hell-control-md);
+    padding-inline: var(--spacing-hell-3) var(--spacing-hell-2);
     font-family: inherit;
     font-size: 13px;
     color: var(--color-hell-foreground);
@@ -78,32 +64,24 @@
       color: var(--color-hell-foreground-muted);
     }
     &[data-size='sm'] {
+      height: var(--spacing-hell-control-sm);
+      padding-inline-start: var(--spacing-hell-2);
       font-size: 12px;
     }
     &[data-size='lg'] {
+      height: var(--spacing-hell-control-lg);
+      padding-inline-start: var(--spacing-hell-4);
       font-size: 14px;
     }
   }
 
   .hell-date-input [data-slot='trigger'] {
-    --hell-button-background-hover: transparent;
-    --hell-button-background-active: transparent;
-    --hell-button-border-color: transparent;
-    --hell-button-shadow: none;
-    --hell-button-color: var(--color-hell-foreground-muted);
-    --hell-button-height: var(--hell-date-input-trigger-size);
-
     flex: 0 0 auto;
     align-self: center;
     margin-inline-end: var(--spacing-hell-1);
-    width: var(--hell-date-input-trigger-size);
     color: var(--color-hell-foreground-subtle);
     &:hover {
       color: var(--color-hell-foreground);
-    }
-    &[data-focus-visible] {
-      outline: 0;
-      box-shadow: inset 0 0 0 2px var(--color-hell-border-focus);
     }
   }
 
