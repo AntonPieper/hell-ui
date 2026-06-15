@@ -47,10 +47,12 @@ const TICKETS: readonly Ticket[] = [
                 hellButton
                 size="sm"
                 block
-                [variant]="ticket.id === selectedId() ? 'soft' : 'ghost'"
+                variant="ghost"
                 class="justify-start"
                 type="button"
                 [attr.aria-current]="ticket.id === selectedId() ? 'true' : null"
+                data-slot="master-item"
+                [attr.data-current]="ticket.id === selectedId() ? 'true' : null"
                 (click)="select(ticket.id)"
               >
                 {{ ticket.id }} · {{ ticket.title }}
