@@ -50,23 +50,30 @@
 
   .hell-audio [data-slot='controls'] {
     display: flex;
-    min-width: calc(var(--spacing) * 0);
+    min-width: 0;
     width: 100%;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--spacing-hell-3);
-    /* Keep icon buttons + timestamps intrinsic; sliders flex/wrap so the
-       * control row does not overflow narrow cards. */
-    > [hellButton],
-    > a[hellButton],
-    > [data-slot='time'],
-    > [data-slot='volume'] {
-      flex-shrink: 0;
-    }
+    gap: var(--spacing-hell-2);
+  }
+
+  .hell-a-g {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: var(--spacing-hell-2);
+  }
+
+  .hell-a-g:first-child {
+    flex: 1;
+  }
+
+  .hell-a-g:last-child {
+    margin-inline-start: auto;
   }
 
   .hell-audio [data-slot='time'] {
-    min-width: calc(var(--spacing) * 9.5);
+    min-width: 5ch;
     text-align: center;
     color: var(--color-hell-foreground-muted);
     font-variant-numeric: tabular-nums;
@@ -74,14 +81,12 @@
 
   /* Seek bar — built on hell-slider with grow + thumb-on-hover variant. */
   .hell-audio [data-slot='seek'] {
-    flex: 1 1 calc(var(--spacing) * 28);
-    min-width: calc(var(--spacing) * 12);
+    flex: 1;
+    min-width: 5rem;
   }
 
   .hell-audio [data-slot='volume'] {
-    width: calc(var(--spacing) * 18);
-    min-width: calc(var(--spacing) * 14);
-    flex: 0 1 calc(var(--spacing) * 18);
+    flex: 0 1 4.5rem;
   }
 
   .hell-audio [data-slot='cc-toggle'][data-active='true'] {
@@ -224,13 +229,12 @@
       white-space: nowrap;
     }
 
-    .hell-audio [data-slot='seek'] {
-      order: 1;
+    .hell-a-g {
       flex-basis: 100%;
     }
 
-    .hell-audio [data-slot='volume'] {
-      flex: 1 1 calc(var(--spacing) * 28);
+    .hell-a-g:last-child {
+      margin-inline-start: 0;
     }
   }
 }

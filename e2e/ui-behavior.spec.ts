@@ -77,6 +77,18 @@ async function expectFocused(page: Page, locator: Locator, label: string): Promi
   }
 }
 
+async function expectNoHorizontalOverflow(page: Page): Promise<void> {
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) <=
+          window.innerWidth,
+      ),
+    )
+    .toBe(true);
+}
+
 async function collectFocusDiagnostics(page: Page): Promise<string> {
   const [focusedPath, ariaSnapshot] = await Promise.all([
     focusedElementPath(page),
@@ -113,6 +125,65 @@ async function focusedElementPath(page: Page): Promise<string> {
     }
 
     return parts.join(' > ');
+  });
+}
+
+interface LayoutBox {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+  readonly right: number;
+  readonly bottom: number;
+}
+
+async function audioLayoutMetrics(player: Locator): Promise<{
+  readonly controls: LayoutBox;
+  readonly transport: LayoutBox;
+  readonly actions: LayoutBox;
+  readonly overflowing: readonly string[];
+}> {
+  return player.evaluate((element) => {
+    const controls = element.querySelector<HTMLElement>('[data-slot="controls"]');
+    const transport = element.querySelector<HTMLElement>('[data-slot="transport"]');
+    const actions = element.querySelector<HTMLElement>('[data-slot="actions"]');
+    if (!controls || !transport || !actions) {
+      throw new Error('Expected audio player controls, transport, and actions slots.');
+    }
+
+    const box = (target: Element): LayoutBox => {
+      const rect = target.getBoundingClientRect();
+      return {
+        x: Math.round(rect.x),
+        y: Math.round(rect.y),
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+        right: Math.round(rect.right),
+        bottom: Math.round(rect.bottom),
+      };
+    };
+
+    const controlsBox = box(controls);
+    const overflowing = [
+      ...controls.querySelectorAll<HTMLElement>(
+        '[data-slot="transport"] > *, [data-slot="actions"] > *',
+      ),
+    ]
+      .filter((child) => {
+        const childBox = child.getBoundingClientRect();
+        return childBox.left < controlsBox.x - 1 || childBox.right > controlsBox.right + 1;
+      })
+      .map(
+        (child) =>
+          child.getAttribute('aria-label') ?? child.getAttribute('data-slot') ?? child.tagName,
+      );
+
+    return {
+      controls: controlsBox,
+      transport: box(transport),
+      actions: box(actions),
+      overflowing,
+    };
   });
 }
 
@@ -373,6 +444,76 @@ test.describe('Hell UI browser behavior', () => {
 
     await expect(row2).toHaveAttribute('data-active', 'true');
     await expect(row2).not.toHaveAttribute('data-selected', 'true');
+  });
+
+  test('app shell secondary drawer opens, closes, and does not fight mobile sidenav', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/components/app-shell');
+
+    const shell = page.locator('hd-root > .hell-shell');
+    const secondary = page.locator('hd-root > .hell-shell > .hd-docs-secondary');
+    const rail = secondary.locator('[data-hell-secondary-toggle="rail"]');
+    const header = secondary.locator('[data-hell-secondary-toggle="header"]');
+
+    await expect(shell).toHaveAttribute('data-mobile-layout', 'true');
+    await expect(shell).toHaveAttribute('data-secondary-hidden', 'true');
+    await expect(secondary).toHaveAttribute('data-mobile-hidden', 'true');
+    await expect(secondary).not.toHaveAttribute('inert', '');
+    await expect(secondary).not.toHaveAttribute('aria-hidden', 'true');
+    await expect(rail).toBeVisible();
+    await expect(rail).toHaveAttribute('aria-label', 'Show secondary panel');
+    await expectNoHorizontalOverflow(page);
+
+    await rail.focus();
+    await expectFocused(page, rail, 'mobile secondary rail before open');
+    await rail.click();
+
+    await expect(shell).toHaveAttribute('data-mobile-secondary-open', 'true');
+    await expect(shell).not.toHaveAttribute('data-mobile-sidenav-open', 'true');
+    await expect(secondary).not.toHaveAttribute('data-hidden', 'true');
+    await expect(header).toHaveAttribute('aria-label', 'Hide secondary panel');
+    await expectFocused(page, header, 'mobile secondary initial focus');
+    await expectNoHorizontalOverflow(page);
+
+    await page.keyboard.press('Escape');
+    await expect(shell).not.toHaveAttribute('data-mobile-secondary-open', 'true');
+    await expect(shell).toHaveAttribute('data-secondary-hidden', 'true');
+    await expectFocused(page, rail, 'mobile secondary rail after close');
+
+    await page.getByRole('button', { name: 'Expand sidebar' }).first().click();
+    await expect(shell).toHaveAttribute('data-mobile-sidenav-open', 'true');
+    await rail.click();
+    await expect(shell).not.toHaveAttribute('data-mobile-sidenav-open', 'true');
+    await expect(shell).toHaveAttribute('data-mobile-secondary-open', 'true');
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test('audio player controls keep reachable rows without narrow overflow', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/components/audio-player');
+
+    const player = page.locator('hell-audio-player').first();
+    await expect(player).toBeVisible();
+    await player.scrollIntoViewIfNeeded();
+
+    const mobile = await audioLayoutMetrics(player);
+    expect(mobile.overflowing).toEqual([]);
+    expect(mobile.transport.y).toBeLessThan(mobile.actions.y);
+    expect(mobile.transport.width).toBeLessThanOrEqual(mobile.controls.width + 1);
+    expect(mobile.actions.width).toBeLessThanOrEqual(mobile.controls.width + 1);
+    await expectNoHorizontalOverflow(page);
+
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/components/audio-player');
+    const desktopPlayer = page.locator('hell-audio-player').first();
+    await expect(desktopPlayer).toBeVisible();
+    const desktop = await audioLayoutMetrics(desktopPlayer);
+    expect(desktop.overflowing).toEqual([]);
+    expect(Math.abs(desktop.transport.y - desktop.actions.y)).toBeLessThanOrEqual(2);
+    expect(desktop.actions.x).toBeGreaterThan(desktop.transport.x);
+    await expectNoHorizontalOverflow(page);
   });
 
   test('docs visual regression smoke covers shell, table surfaces, and vertical sliders', async ({

@@ -35,17 +35,9 @@ import { HELL_APP_SHELL_DIRECTIVES, HELL_APP_SHELL_MOBILE_MEDIA } from './app-sh
       </nav>
       <main hellAppContent>Content</main>
       <aside hellAppSecondary>
-        <button
-          hellSecondaryToggle
-          appearance="rail"
-          type="button"
-        ></button>
+        <button hellSecondaryToggle appearance="rail" type="button"></button>
         <div hellAppSecondaryBody>
-          <button
-            hellSecondaryToggle
-            appearance="header"
-            type="button"
-          >Title</button>
+          <button hellSecondaryToggle appearance="header" type="button">Title</button>
           <p>Body</p>
         </div>
       </aside>
@@ -149,7 +141,6 @@ class FocusShellHost {}
 })
 class FallbackShellHost {}
 
-
 let mediaController: ReturnType<typeof createMobileLayoutController>;
 
 describe('HellAppShell secondary panel', () => {
@@ -232,7 +223,10 @@ describe('HellAppShell secondary panel', () => {
 
     const sidenav = query(fixture.nativeElement, '#controlled-sidenav');
     const secondary = query(fixture.nativeElement, '#controlled-secondary');
-    const sidenavToggle = query<HTMLButtonElement>(fixture.nativeElement, '#controlled-sidenav-toggle');
+    const sidenavToggle = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      '#controlled-sidenav-toggle',
+    );
     const secondaryToggle = query<HTMLButtonElement>(
       fixture.nativeElement,
       '#controlled-secondary-toggle',
@@ -265,7 +259,10 @@ describe('HellAppShell secondary panel', () => {
     const shell = query(fixture.nativeElement, '#unstyled-shell');
     const sidenav = query(fixture.nativeElement, '#unstyled-sidenav');
     const secondary = query(fixture.nativeElement, '#unstyled-secondary');
-    const sidenavToggle = query<HTMLButtonElement>(fixture.nativeElement, '#unstyled-sidenav-toggle');
+    const sidenavToggle = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      '#unstyled-sidenav-toggle',
+    );
     const secondaryToggle = query<HTMLButtonElement>(
       fixture.nativeElement,
       '#unstyled-secondary-toggle',
@@ -287,7 +284,10 @@ describe('HellAppShell secondary panel', () => {
 
     const shell = query(fixture.nativeElement, '#unstyled-shell');
     const sidenav = query(fixture.nativeElement, '#unstyled-sidenav');
-    const sidenavToggle = query<HTMLButtonElement>(fixture.nativeElement, '#unstyled-sidenav-toggle');
+    const sidenavToggle = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      '#unstyled-sidenav-toggle',
+    );
 
     sidenavToggle.click();
     fixture.detectChanges();
@@ -316,7 +316,10 @@ describe('HellAppShell secondary panel', () => {
     const shell = query(fixture.nativeElement, '#unstyled-shell');
     const sidenav = query(fixture.nativeElement, '#unstyled-sidenav');
     const content = query(fixture.nativeElement, '#unstyled-content');
-    const sidenavToggle = query<HTMLButtonElement>(fixture.nativeElement, '#unstyled-sidenav-toggle');
+    const sidenavToggle = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      '#unstyled-sidenav-toggle',
+    );
 
     sidenavToggle.click();
     fixture.detectChanges();
@@ -390,6 +393,37 @@ describe('HellAppShell secondary panel', () => {
     keyDownEscape(content);
     fixture.detectChanges();
     expect(shell.getAttribute('data-mobile-secondary-open')).toBeNull();
+  });
+
+  it('keeps the mobile secondary rail operable while hiding the secondary body', () => {
+    mockMobileLayout(true);
+    const fixture = TestBed.createComponent(TestHost);
+    fixture.detectChanges();
+
+    const shell = query(fixture.nativeElement, '.hell-shell');
+    const secondary = query(fixture.nativeElement, 'aside');
+    const body = query(fixture.nativeElement, '.hell-secondary-body');
+    const rail = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      'button[data-hell-secondary-toggle="rail"]',
+    );
+
+    expect(shell.getAttribute('data-secondary-hidden')).toBe('true');
+    expect(secondary.getAttribute('data-mobile-hidden')).toBe('true');
+    expect(secondary.getAttribute('aria-hidden')).toBeNull();
+    expect(secondary.hasAttribute('inert')).toBe(false);
+    expect(body.getAttribute('aria-hidden')).toBe('true');
+    expect(body.hasAttribute('inert')).toBe(true);
+    expect(rail.getAttribute('aria-label')).toBe('Show secondary panel');
+
+    rail.click();
+    fixture.detectChanges();
+
+    expect(shell.getAttribute('data-mobile-secondary-open')).toBe('true');
+    expect(secondary.getAttribute('data-mobile-hidden')).toBeNull();
+    expect(body.getAttribute('aria-hidden')).toBeNull();
+    expect(body.hasAttribute('inert')).toBe(false);
+    expect(rail.getAttribute('aria-label')).toBe('Hide secondary panel');
   });
 
   it('roundtrips state via header toggle and rail toggle', () => {
@@ -475,7 +509,10 @@ function keyDownEscape(element: HTMLElement): void {
   element.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
 }
 
-async function settle(fixture: { detectChanges(): void; whenStable(): Promise<unknown> }): Promise<void> {
+async function settle(fixture: {
+  detectChanges(): void;
+  whenStable(): Promise<unknown>;
+}): Promise<void> {
   fixture.detectChanges();
   await fixture.whenStable();
   fixture.detectChanges();
