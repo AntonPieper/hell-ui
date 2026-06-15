@@ -32,20 +32,40 @@ import splitViewMasterDetailExampleCodeRaw from './examples/master-detail.exampl
           <li><code>ng-template hellSplitPrimary</code>: primary pane content.</li>
           <li><code>ng-template hellSplitDetail</code>: detail pane content.</li>
           <li><code>compactBelow</code>: container width below which compact mode is used.</li>
-          <li><code>detailOpen</code> / <code>detailOpenChange</code>: compact detail screen state.</li>
-          <li><code>primaryFlex</code>, <code>detailFlex</code>, <code>primaryMinSize</code>, <code>detailMinSize</code>: desktop pane sizing.</li>
-          <li><code>framed</code>, <code>height</code>, <code>backLabel</code>, <code>unstyled</code>.</li>
+          <li>
+            <code>detailOpen</code> / <code>detailOpenChange</code>: compact detail screen state.
+          </li>
+          <li>
+            <code>itemNavigation</code>, <code>previousItemDisabled</code>,
+            <code>nextItemDisabled</code>, <code>previousItem</code>, and <code>nextItem</code>:
+            opt-in detail item navigation.
+          </li>
+          <li>
+            <code>primaryFlex</code>, <code>detailFlex</code>, <code>primaryMinSize</code>,
+            <code>detailMinSize</code>: desktop pane sizing.
+          </li>
+          <li>
+            <code>framed</code>, <code>height</code>, <code>backLabel</code>,
+            <code>itemNavigationLabel</code>, <code>previousItemLabel</code>,
+            <code>nextItemLabel</code>, <code>unstyled</code>.
+          </li>
         </ul>
 
         <h2>Do</h2>
         <ul>
           <li>Drive selection outside the split view and pass compact detail state explicitly.</li>
-          <li>Use compact mode for small containers instead of forcing unusable resizable panes.</li>
+          <li>Disable previous/next item controls at collection boundaries.</li>
+          <li>
+            Use compact mode for small containers instead of forcing unusable resizable panes.
+          </li>
         </ul>
 
         <h2>Don't</h2>
         <ul>
-          <li>Don't assume viewport size equals available component size; split view watches its own container.</li>
+          <li>
+            Don't assume viewport size equals available component size; split view watches its own
+            container.
+          </li>
         </ul>
       </div>
     </article>
