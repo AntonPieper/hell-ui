@@ -291,6 +291,18 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     terms: 'pagination larger-window components/pagination/examples/larger-window.example components/pagination hell-pagination',
   },
   {
+    title: 'Pagination: Previous Next',
+    path: '/components/pagination',
+    detail: 'components/pagination/examples/previous-next.example.ts',
+    terms: 'pagination previous-next previous next components/pagination/examples/previous-next.example components/pagination hell-pagination mode',
+  },
+  {
+    title: 'Pagination: Jump',
+    path: '/components/pagination',
+    detail: 'components/pagination/examples/jump.example.ts',
+    terms: 'pagination jump select page jump components/pagination/examples/jump.example components/pagination hell-pagination mode',
+  },
+  {
     title: 'Popover: Example',
     path: '/components/popover',
     detail: 'components/popover/examples/example.example.ts',
@@ -891,7 +903,7 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
     title: 'Split view directives',
     path: '/components/split-view',
     detail: 'hell-split-view, hellSplitPrimary, hellSplitDetail',
-    terms: 'HELL_SPLIT_VIEW_DIRECTIVES hell-split-view hellSplitPrimary hellSplitDetail compactBelow detailOpen detailOpenChange responsive resizable panes',
+    terms: 'HELL_SPLIT_VIEW_DIRECTIVES hell-split-view hellSplitPrimary hellSplitDetail compactBelow detailOpen detailOpenChange itemNavigation previousItem nextItem responsive resizable panes',
   },
   {
     title: 'Time input adapter',

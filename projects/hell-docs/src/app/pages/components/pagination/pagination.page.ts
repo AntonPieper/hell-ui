@@ -8,11 +8,25 @@ import { PaginationLargerWindowExample } from './examples/larger-window.example'
 import paginationLargerWindowExampleCodeRaw from './examples/larger-window.example.ts?raw' with {
   loader: 'text',
 };
+import { PaginationPreviousNextExample } from './examples/previous-next.example';
+import paginationPreviousNextExampleCodeRaw from './examples/previous-next.example.ts?raw' with {
+  loader: 'text',
+};
+import { PaginationJumpExample } from './examples/jump.example';
+import paginationJumpExampleCodeRaw from './examples/jump.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-pagination',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, PaginationBasicExample, PaginationLargerWindowExample],
+  imports: [
+    ExampleTabs,
+    PaginationBasicExample,
+    PaginationLargerWindowExample,
+    PaginationPreviousNextExample,
+    PaginationJumpExample,
+  ],
   template: `
     <article class="hd-prose">
       <h1>Pagination</h1>
@@ -24,7 +38,10 @@ import paginationLargerWindowExampleCodeRaw from './examples/larger-window.examp
       </p>
 
       <h2>Basic</h2>
-      <hd-example-tabs [code]="paginationBasicExampleCode" previewClass="flex flex-wrap items-center gap-3">
+      <hd-example-tabs
+        [code]="paginationBasicExampleCode"
+        previewClass="flex flex-wrap items-center gap-3"
+      >
         <app-pagination-basic-example />
       </hd-example-tabs>
 
@@ -37,12 +54,42 @@ import paginationLargerWindowExampleCodeRaw from './examples/larger-window.examp
         <app-pagination-larger-window-example />
       </hd-example-tabs>
 
+      <h2>Previous / next only</h2>
+      <p>
+        Use <code>mode="previous-next"</code> when page numbers would be noisy but users still need
+        clear position and disabled boundary states. For custom markup, compose
+        <code>[hellPagination]</code> with only <code>hellPaginationPrev</code> and
+        <code>hellPaginationNext</code>.
+      </p>
+      <hd-example-tabs
+        [code]="paginationPreviousNextExampleCode"
+        previewClass="flex flex-wrap items-center gap-3"
+      >
+        <app-pagination-previous-next-example />
+      </hd-example-tabs>
+
+      <h2>Page jump</h2>
+      <p>
+        Use <code>mode="jump"</code> for large page sets. The native select is keyboard and screen
+        reader reachable while keeping the current page and page count compact.
+      </p>
+      <hd-example-tabs
+        [code]="paginationJumpExampleCode"
+        previewClass="flex flex-wrap items-center gap-3"
+      >
+        <app-pagination-jump-example />
+      </hd-example-tabs>
+
       <h2>API</h2>
       <ul>
         <li>
           <code>page</code>: 1-based current page (two-way bindable via <code>(pageChange)</code>).
         </li>
         <li><code>pageCount</code>: total number of pages.</li>
+        <li>
+          <code>mode</code>: <code>pages</code> (default), <code>previous-next</code>, or
+          <code>jump</code>.
+        </li>
         <li><code>siblingCount</code>: numbered buttons shown either side of current.</li>
         <li><code>disabled</code>: disable all controls.</li>
       </ul>
@@ -65,4 +112,6 @@ import paginationLargerWindowExampleCodeRaw from './examples/larger-window.examp
 export class PaginationPage {
   protected readonly paginationBasicExampleCode = paginationBasicExampleCodeRaw;
   protected readonly paginationLargerWindowExampleCode = paginationLargerWindowExampleCodeRaw;
+  protected readonly paginationPreviousNextExampleCode = paginationPreviousNextExampleCodeRaw;
+  protected readonly paginationJumpExampleCode = paginationJumpExampleCodeRaw;
 }

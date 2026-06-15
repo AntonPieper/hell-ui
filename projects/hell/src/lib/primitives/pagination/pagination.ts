@@ -23,6 +23,7 @@ import {
   injectPaginationState,
 } from 'ng-primitives/pagination';
 import { HellIcon } from '../icon/icon';
+import { HellNativeSelect } from '../input/input';
 import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
 import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactive-disabled';
@@ -33,6 +34,8 @@ const HELL_PAGINATION_ICONS = {
   faSolidChevronLeft,
   faSolidChevronRight,
 };
+
+export type HellPaginationMode = 'pages' | 'previous-next' | 'jump';
 
 abstract class HellPaginationDisabledGuard extends HellNativeInteractiveDisabledGuard {}
 
@@ -178,7 +181,9 @@ export class HellPaginationButton extends HellPaginationDisabledGuard {
 
 /**
  * Ready-made pagination strip. Numbered buttons are clamped to a sliding
- * window of `siblingCount * 2 + 1` around the active page.
+ * window of `siblingCount * 2 + 1` around the active page. Set `mode` to
+ * `previous-next` for a compact previous/next-only control or `jump` for a
+ * previous/select/next control.
  */
 @Component({
   selector: 'hell-pagination',
@@ -191,6 +196,7 @@ export class HellPaginationButton extends HellPaginationDisabledGuard {
     HellPaginationNext,
     HellPaginationLast,
     HellPaginationButton,
+    HellNativeSelect,
   ],
   hostDirectives: [
     {
@@ -205,31 +211,66 @@ export class HellPaginationButton extends HellPaginationDisabledGuard {
   ],
   host: {
     '[class.hell-pagination]': '!unstyled()',
+    '[attr.data-mode]': 'mode()',
     '[attr.aria-label]': 'labels.pagination.navigation',
     role: 'navigation',
   },
   template: `
-    <button hellPaginationFirst type="button" [attr.aria-label]="labels.pagination.firstPage">
-      <hell-icon name="faSolidAnglesLeft" />
-    </button>
-    <button hellPaginationPrev type="button" [attr.aria-label]="labels.pagination.previousPage">
-      <hell-icon name="faSolidChevronLeft" />
-    </button>
-    @for (p of pages(); track trackPage($index, p)) {
-      <button hellPaginationButton [page]="p" type="button" [attr.aria-label]="labels.pagination.page(p)">
-        {{ p }}
+    @if (mode() === 'pages') {
+      <button hellPaginationFirst type="button" [attr.aria-label]="labels.pagination.firstPage">
+        <hell-icon [name]="'faSolidAnglesLeft'" />
       </button>
     }
+    <button hellPaginationPrev type="button" [attr.aria-label]="labels.pagination.previousPage">
+      <hell-icon [name]="'faSolidChevronLeft'" />
+    </button>
+    @if (mode() === 'pages') {
+      @for (p of pages(); track trackPage($index, p)) {
+        <button
+          hellPaginationButton
+          [page]="p"
+          type="button"
+          [attr.aria-label]="labels.pagination.page(p)"
+        >
+          {{ p }}
+        </button>
+      }
+    }
+    @if (mode() === 'previous-next') {
+      <span data-slot="status" aria-live="polite">{{ pageStatusLabel() }}</span>
+    }
+    @if (mode() === 'jump' && pageCount() > 0) {
+      <label data-slot="jump">
+        <span data-slot="jump-label">{{ pageJumpLabel() }}</span>
+        <select
+          hellNativeSelect
+          size="sm"
+          data-slot="jump-select"
+          [attr.aria-label]="pageJumpLabel()"
+          [value]="currentPage()"
+          [disabled]="paginationDisabled() || pageCount() < 2"
+          (change)="goToSelectedPage($event)"
+        >
+          @for (p of pageOptions(); track trackPage($index, p)) {
+            <option [value]="p" [selected]="p === currentPage()">{{ p }}</option>
+          }
+        </select>
+        <span data-slot="jump-total">{{ pageTotalLabel() }}</span>
+      </label>
+    }
     <button hellPaginationNext type="button" [attr.aria-label]="labels.pagination.nextPage">
-      <hell-icon name="faSolidChevronRight" />
+      <hell-icon [name]="'faSolidChevronRight'" />
     </button>
-    <button hellPaginationLast type="button" [attr.aria-label]="labels.pagination.lastPage">
-      <hell-icon name="faSolidAnglesRight" />
-    </button>
+    @if (mode() === 'pages') {
+      <button hellPaginationLast type="button" [attr.aria-label]="labels.pagination.lastPage">
+        <hell-icon [name]="'faSolidAnglesRight'" />
+      </button>
+    }
   `,
 })
 export class HellPaginationStrip extends HellStyleable {
   readonly siblingCount = input<number>(2);
+  readonly mode = input<HellPaginationMode>('pages');
 
   protected readonly labels = inject(HELL_LABELS);
 
@@ -237,9 +278,13 @@ export class HellPaginationStrip extends HellStyleable {
 
   protected readonly trackPage = (_: number, page: number) => page;
 
+  protected readonly pageOptions = computed(() =>
+    Array.from({ length: this.pageCount() }, (_, i) => i + 1),
+  );
+
   protected readonly pages = computed(() => {
-    const total = this.state().pageCount();
-    const current = this.state().page();
+    const total = this.pageCount();
+    const current = this.currentPage();
     const span = this.siblingCount() * 2 + 1;
     if (total <= span) {
       return Array.from({ length: total }, (_, i) => i + 1);
@@ -252,6 +297,45 @@ export class HellPaginationStrip extends HellStyleable {
     }
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   });
+
+  protected currentPage(): number {
+    return this.state().page();
+  }
+
+  protected pageCount(): number {
+    const pageCount = Math.floor(this.state().pageCount());
+    return Number.isFinite(pageCount) ? Math.max(0, pageCount) : 0;
+  }
+
+  protected paginationDisabled(): boolean {
+    return this.state().disabled();
+  }
+
+  protected pageStatusLabel(): string {
+    return (
+      this.labels.pagination.pageStatus?.(this.currentPage(), this.pageCount()) ??
+      `Page ${this.currentPage()} of ${this.pageCount()}`
+    );
+  }
+
+  protected pageJumpLabel(): string {
+    return this.labels.pagination.jumpToPage ?? 'Page';
+  }
+
+  protected pageTotalLabel(): string {
+    return this.labels.pagination.pageTotal?.(this.pageCount()) ?? `of ${this.pageCount()}`;
+  }
+
+  protected goToSelectedPage(event: Event): void {
+    if (this.paginationDisabled()) return;
+    const target = event.target;
+    if (!(target instanceof HTMLSelectElement)) return;
+
+    const page = Number.parseInt(target.value, 10);
+    if (Number.isFinite(page)) {
+      this.state().goToPage(page);
+    }
+  }
 }
 
 export const HELL_PAGINATION_DIRECTIVES = [
