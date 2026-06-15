@@ -93,6 +93,7 @@ test.describe('date input accessibility contract', () => {
     const popover = page.locator('.hell-popover');
     await expect(popover).toBeVisible();
     await expect(popover.getByRole('grid', { name: 'June 2026' })).toBeVisible();
+    await expectPickerLayoutAligned(popover.locator('hell-date-picker'));
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
 
     await dayButton(popover, 15).focus();
@@ -137,4 +138,40 @@ async function requiredId(locator: Locator, label: string): Promise<string> {
 
 function dateInputHost(input: Locator): Locator {
   return input.locator('xpath=..');
+}
+
+async function expectPickerLayoutAligned(picker: Locator): Promise<void> {
+  const header = await requiredBox(picker.locator('.hell-date-picker-header'), 'picker header');
+  const grid = await requiredBox(picker.locator('.hell-date-picker-grid'), 'picker grid');
+  const label = await requiredBox(picker.locator('.hell-date-picker-label'), 'picker label');
+  const previousMonth = await requiredBox(
+    picker.getByRole('button', { name: 'Previous month' }),
+    'previous month button',
+  );
+  const nextMonth = await requiredBox(
+    picker.getByRole('button', { name: 'Next month' }),
+    'next month button',
+  );
+
+  expect(Math.abs(header.width - grid.width)).toBeLessThanOrEqual(1);
+  expect(Math.abs(centerX(header) - centerX(grid))).toBeLessThanOrEqual(1);
+  expect(Math.abs(centerY(label) - centerY(previousMonth))).toBeLessThanOrEqual(1);
+  expect(Math.abs(centerY(label) - centerY(nextMonth))).toBeLessThanOrEqual(1);
+}
+
+async function requiredBox(
+  locator: Locator,
+  label: string,
+): Promise<NonNullable<Awaited<ReturnType<Locator['boundingBox']>>>> {
+  const box = await locator.boundingBox();
+  expect(box, `${label} should have a browser layout box`).not.toBeNull();
+  return box!;
+}
+
+function centerX(box: NonNullable<Awaited<ReturnType<Locator['boundingBox']>>>): number {
+  return box.x + box.width / 2;
+}
+
+function centerY(box: NonNullable<Awaited<ReturnType<Locator['boundingBox']>>>): number {
+  return box.y + box.height / 2;
 }
