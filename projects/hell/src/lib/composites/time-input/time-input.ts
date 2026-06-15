@@ -138,14 +138,26 @@ export function hellParseTimeInputText(
 ): HellTimeInputParseResult {
   const t = text.trim().toLowerCase();
   if (!t) return hellTypedValue<HellTimeValue>(null);
-  const ampm = /^(\d{1,2})(?::(\d{1,2}))?(?::(\d{1,2}))?\s*(am|pm)$/.exec(t);
+
+  const compact = /^(\d{1,4})$/.exec(t);
+  if (compact) {
+    const digits = compact[1];
+    const hourText = digits.length <= 2 ? digits : digits.slice(0, -2);
+    const minuteText = digits.length <= 2 ? '0' : digits.slice(-2);
+    const value = { hour: +hourText, minute: +minuteText, second: 0 };
+    return isValidTime(value)
+      ? hellTypedValue(hellNormalizeTimeInputValue(value, context))
+      : hellInvalidTypedValue();
+  }
+
+  const ampm = /^(\d{1,2})(?::(\d{1,2}))?(?::(\d{1,2}))?\s*(a|am|p|pm)$/.exec(t);
   if (ampm) {
     if (!context.seconds && ampm[3] !== undefined) return hellInvalidTypedValue();
     let hour = +ampm[1];
     const minute = +(ampm[2] ?? '0');
     const second = +(ampm[3] ?? '0');
     if (hour === 12) hour = 0;
-    if (ampm[4] === 'pm') hour += 12;
+    if (ampm[4].startsWith('p')) hour += 12;
     const value = { hour, minute, second };
     if (!isValidTime(value)) return hellInvalidTypedValue();
     return hellTypedValue(hellNormalizeTimeInputValue(value, context));
@@ -265,14 +277,6 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
                 {{ unitLabel(unit) }}
               </span>
               <div data-slot="picker-unit-control">
-                <button
-                  type="button"
-                  data-slot="picker-unit-step"
-                  (click)="stepUnit(unit, -1)"
-                  [attr.aria-label]="decreaseUnitLabel(unit)"
-                >
-                  −
-                </button>
                 <div
                   data-slot="picker-unit-value"
                   role="spinbutton"
@@ -286,6 +290,14 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
                 >
                   {{ pad(unitValue(unit)) }}
                 </div>
+                <button
+                  type="button"
+                  data-slot="picker-unit-step"
+                  (click)="stepUnit(unit, -1)"
+                  [attr.aria-label]="decreaseUnitLabel(unit)"
+                >
+                  −
+                </button>
                 <button
                   type="button"
                   data-slot="picker-unit-step"

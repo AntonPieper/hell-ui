@@ -22,7 +22,7 @@ test.describe('time input accessibility contract', () => {
     const input = page.getByRole('textbox', { name: 'Reminder time' }).first();
     await expect(input).toHaveAttribute('id', 'reminder-time');
     await expect(input).toHaveAccessibleDescription(
-      'Type directly or adjust the segmented picker.',
+      'Type directly (14:30 or 1430) or adjust the segmented picker.',
     );
 
     await input.fill('25:99');
@@ -44,7 +44,8 @@ test.describe('time input accessibility contract', () => {
     const { hours } = await openReminderPicker(page);
     const minutes = page.getByRole('spinbutton', { name: 'Minutes' });
 
-    await hours.focus();
+    await expect(hours).toBeFocused();
+
     await page.keyboard.press('ArrowUp');
     await expect(input).toHaveValue('15:30');
     await expect(hours).toHaveAttribute('aria-valuenow', '15');

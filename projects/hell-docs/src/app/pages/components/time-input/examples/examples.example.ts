@@ -15,7 +15,7 @@ import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
         [value]="value()"
         (valueChange)="value.set($event)"
       />
-      <div hellFieldDescription>Type directly or adjust the segmented picker.</div>
+      <div hellFieldDescription>Type directly (14:30 or 1430) or adjust the segmented picker.</div>
     </div>
 
     <div hellField>
