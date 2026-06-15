@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellFlyout, HellFlyoutTrigger } from '@hell-ui/angular/flyout';
 import { HellInput } from '@hell-ui/angular/input';
@@ -70,13 +69,8 @@ import { HellInput } from '@hell-ui/angular/input';
       flex-wrap: wrap;
     }
     .hd-flyout-panel {
-      max-width: 320px;
+      --hell-flyout-max-inline-size: 320px;
       padding: var(--spacing-hell-4);
-      background-color: var(--color-hell-surface-elevated);
-      border: 1px solid var(--color-hell-border);
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-hell-lg);
-      z-index: 1;
       display: grid;
       gap: var(--spacing-hell-3);
     }

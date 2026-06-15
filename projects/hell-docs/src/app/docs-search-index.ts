@@ -914,8 +914,8 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
 ];
 
 const HD_DOCS_KIND_ICON: Record<DocsSearchKind, string> = {
-  page: 'faSolidBookOpen',
-  example: 'faSolidFileLines',
+  page: 'faSolidSignsPost',
+  example: 'faSolidCode',
   usage: 'faSolidCode',
 };
 

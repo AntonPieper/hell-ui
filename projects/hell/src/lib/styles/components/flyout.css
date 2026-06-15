@@ -2,7 +2,14 @@
   /* Flyout: anchored, non-modal, light-dismiss surface. No focus trap. */
 
   .hell-flyout {
-    z-index: 20;
+    position: fixed;
+    top: var(--hell-flyout-y, 0);
+    left: var(--hell-flyout-x, 0);
+    z-index: var(--hell-z-popover, 1000);
+    max-inline-size: min(
+      var(--hell-flyout-max-inline-size, 320px),
+      calc(100vw - (var(--spacing-hell-4) * 2))
+    );
     background-color: var(--color-hell-surface-elevated);
     border: 1px solid var(--color-hell-border);
     border-radius: var(--radius-md);

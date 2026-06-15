@@ -191,6 +191,22 @@ describe('HellFlyout outside interaction', () => {
     expect(referencedPanel.getAttribute('aria-labelledby')).toBe('flyout-title');
   });
 
+  it('writes trigger-anchored floating geometry to CSS variables', async () => {
+    const fixture = TestBed.createComponent(FlyoutHost);
+    await settle(fixture);
+
+    const trigger = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    trigger.click();
+    await settle(fixture);
+
+    const panel = query<HTMLElement>(fixture.nativeElement, '[role="dialog"]');
+    await waitFor(() => panel.style.getPropertyValue('--hell-flyout-x') !== '');
+
+    expect(panel.getAttribute('data-placement')).toBe('bottom-start');
+    expect(panel.style.getPropertyValue('--hell-flyout-x')).toMatch(/px$/);
+    expect(panel.style.getPropertyValue('--hell-flyout-y')).toMatch(/px$/);
+  });
+
   it('toggles on click and closes on second click', async () => {
     const fixture = TestBed.createComponent(FlyoutHost);
     await settle(fixture);
@@ -294,6 +310,14 @@ async function settle(fixture: { detectChanges(): void; whenStable(): Promise<un
   fixture.detectChanges();
   await fixture.whenStable();
   fixture.detectChanges();
+}
+
+async function waitFor(condition: () => boolean): Promise<void> {
+  for (let attempt = 0; attempt < 20; attempt++) {
+    if (condition()) return;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  throw new Error('Condition was not met before timeout.');
 }
 
 function query<T extends HTMLElement>(root: ParentNode, selector: string): T {
