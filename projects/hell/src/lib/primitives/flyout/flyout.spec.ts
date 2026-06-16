@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { InteractivityChecker } from '@angular/cdk/a11y';
 
@@ -7,9 +7,7 @@ import { HellFlyout, HellFlyoutTrigger } from './flyout';
 @Component({
   imports: [HellFlyout, HellFlyoutTrigger],
   template: `
-    <button hellFlyoutTrigger #trigger="hellFlyoutTrigger" type="button">
-      Toggle
-    </button>
+    <button hellFlyoutTrigger #trigger="hellFlyoutTrigger" type="button">Toggle</button>
 
     @if (trigger.open()) {
       <div [hellFlyout]="trigger">Panel</div>
@@ -17,6 +15,35 @@ import { HellFlyout, HellFlyoutTrigger } from './flyout';
   `,
 })
 class FlyoutHost {}
+
+@Component({
+  imports: [HellFlyout, HellFlyoutTrigger],
+  template: `
+    <button hellFlyoutTrigger #trigger="hellFlyoutTrigger" type="button">Toggle</button>
+    <input id="anchor-input" #anchor type="text" />
+
+    @if (trigger.open()) {
+      <div [hellFlyout]="trigger" [anchor]="anchor">Panel</div>
+    }
+  `,
+})
+class AnchoredFlyoutHost {}
+
+@Component({
+  imports: [HellFlyout, HellFlyoutTrigger],
+  template: `
+    <button hellFlyoutTrigger #trigger="hellFlyoutTrigger" type="button">Toggle</button>
+    <input id="anchor-one" #anchorOne type="text" />
+    <input id="anchor-two" #anchorTwo type="text" />
+
+    @if (trigger.open()) {
+      <div [hellFlyout]="trigger" [anchor]="useSecondAnchor() ? anchorTwo : anchorOne">Panel</div>
+    }
+  `,
+})
+class DynamicAnchorFlyoutHost {
+  readonly useSecondAnchor = signal(false);
+}
 
 @Component({
   imports: [HellFlyout, HellFlyoutTrigger],
@@ -75,9 +102,7 @@ class LabelledFlyoutHost {}
   imports: [HellFlyout, HellFlyoutTrigger],
   template: `
     <section #boundary id="flyout-boundary">
-      <button hellFlyoutTrigger #trigger="hellFlyoutTrigger" type="button">
-        Toggle
-      </button>
+      <button hellFlyoutTrigger #trigger="hellFlyoutTrigger" type="button">Toggle</button>
       <button id="boundary-action" type="button">Boundary action</button>
 
       @if (trigger.open()) {
@@ -93,16 +118,10 @@ class BoundaryFlyoutHost {}
 @Component({
   imports: [HellFlyout, HellFlyoutTrigger],
   template: `
-    <button hellFlyoutTrigger #trigger="hellFlyoutTrigger" type="button">
-      Toggle
-    </button>
+    <button hellFlyoutTrigger #trigger="hellFlyoutTrigger" type="button">Toggle</button>
 
     @if (trigger.open()) {
-      <div
-        [hellFlyout]="trigger"
-        [closeOnOutsideInteraction]="false"
-        [closeOnEscape]="false"
-      >
+      <div [hellFlyout]="trigger" [closeOnOutsideInteraction]="false" [closeOnEscape]="false">
         Panel
       </div>
     }
@@ -119,6 +138,8 @@ describe('HellFlyout outside interaction', () => {
     await TestBed.configureTestingModule({
       imports: [
         FlyoutHost,
+        AnchoredFlyoutHost,
+        DynamicAnchorFlyoutHost,
         EnabledFlyoutAnchorTriggerHost,
         DisabledFlyoutTriggerHost,
         LabelledFlyoutHost,
@@ -182,7 +203,10 @@ describe('HellFlyout outside interaction', () => {
     labelTrigger.click();
     await settle(fixture);
 
-    const labelledbyTrigger = query<HTMLButtonElement>(fixture.nativeElement, '#labelledby-trigger');
+    const labelledbyTrigger = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      '#labelledby-trigger',
+    );
     labelledbyTrigger.click();
     await settle(fixture);
 
@@ -205,6 +229,61 @@ describe('HellFlyout outside interaction', () => {
     expect(panel.getAttribute('data-placement')).toBe('bottom-start');
     expect(panel.style.getPropertyValue('--hell-flyout-x')).toMatch(/px$/);
     expect(panel.style.getPropertyValue('--hell-flyout-y')).toMatch(/px$/);
+  });
+
+  it('treats the optional anchor element as inside for dismissal', async () => {
+    const fixture = TestBed.createComponent(AnchoredFlyoutHost);
+    await settle(fixture);
+
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '[hellFlyoutTrigger]');
+    const anchor = query<HTMLInputElement>(fixture.nativeElement, '#anchor-input');
+
+    trigger.click();
+    await settle(fixture);
+
+    expect(fixture.nativeElement.textContent).toContain('Panel');
+
+    anchor.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    anchor.click();
+    await settle(fixture);
+
+    expect(fixture.nativeElement.textContent).toContain('Panel');
+  });
+
+  it('reconnects floating reference and inside dismissal when the anchor changes', async () => {
+    const fixture = TestBed.createComponent(DynamicAnchorFlyoutHost);
+    await settle(fixture);
+
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '[hellFlyoutTrigger]');
+    const firstAnchor = query<HTMLInputElement>(fixture.nativeElement, '#anchor-one');
+    const secondAnchor = query<HTMLInputElement>(fixture.nativeElement, '#anchor-two');
+
+    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(domRect(0, 0, 80, 32));
+    const firstAnchorRect = vi
+      .spyOn(firstAnchor, 'getBoundingClientRect')
+      .mockReturnValue(domRect(30, 40, 120, 24));
+    const secondAnchorRect = vi
+      .spyOn(secondAnchor, 'getBoundingClientRect')
+      .mockReturnValue(domRect(70, 90, 120, 24));
+
+    trigger.click();
+    await settle(fixture);
+
+    const panel = query<HTMLElement>(fixture.nativeElement, '[role="dialog"]');
+    await waitFor(() => panel.style.getPropertyValue('--hell-flyout-y') !== '');
+    expect(firstAnchorRect).toHaveBeenCalled();
+    expect(secondAnchorRect).not.toHaveBeenCalled();
+
+    fixture.componentInstance.useSecondAnchor.set(true);
+    await settle(fixture);
+
+    await waitFor(() => secondAnchorRect.mock.calls.length > 0);
+
+    secondAnchor.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    secondAnchor.click();
+    await settle(fixture);
+
+    expect(fixture.nativeElement.textContent).toContain('Panel');
   });
 
   it('toggles on click and closes on second click', async () => {
@@ -324,4 +403,18 @@ function query<T extends HTMLElement>(root: ParentNode, selector: string): T {
   const element = root.querySelector<T>(selector);
   if (!element) throw new Error(`Expected ${selector}.`);
   return element;
+}
+
+function domRect(x: number, y: number, width: number, height: number): DOMRect {
+  return {
+    x,
+    y,
+    width,
+    height,
+    top: y,
+    left: x,
+    right: x + width,
+    bottom: y + height,
+    toJSON: () => ({}),
+  } as DOMRect;
 }

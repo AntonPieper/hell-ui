@@ -2,6 +2,9 @@
 
 @import '@hell-ui/angular/styles/composites';
 @import '@hell-ui/angular/styles/table';
+
+@source "../../hell/src/lib/primitives/flyout/flyout.ts";
+
 @layer components {
   .hd-prose {
     max-width: min(72ch, 100%);
