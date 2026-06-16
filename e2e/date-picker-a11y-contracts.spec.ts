@@ -127,6 +127,16 @@ test.describe('date picker browser accessibility contract', () => {
     }
     await expect(dayButton(disabledPicker, 22)).toBeDisabled();
     await expect(cellForDay(disabledPicker, 22)).toHaveAttribute('aria-disabled', 'true');
+
+    const disabledRangePicker = page
+      .locator('app-date-picker-disabled-example')
+      .locator('hell-date-range-picker');
+    await expectRangeDays(disabledRangePicker, {
+      start: 5,
+      between: [6, 7, 8, 9, 10, 11],
+      end: 12,
+    });
+    await expectRangeRailGeometry(disabledRangePicker);
   });
 
   test('range picker exposes start, between, end states and keyboard range reselection', async ({
@@ -137,10 +147,12 @@ test.describe('date picker browser accessibility contract', () => {
     const example = page.locator('app-date-picker-range-example');
     const picker = example.locator('hell-date-range-picker');
     await expect(picker).toHaveAttribute('data-range', 'true');
-    await expect(dayButton(picker, 5)).toHaveAttribute('data-range-start', '');
-    await expect(dayButton(picker, 6)).toHaveAttribute('data-range-between', '');
-    await expect(dayButton(picker, 12)).toHaveAttribute('data-range-end', '');
-    await expectRangeSelectionContinuous(picker);
+    await expectRangeDays(picker, {
+      start: 5,
+      between: [6, 7, 8, 9, 10, 11],
+      end: 12,
+    });
+    await expectRangeRailGeometry(picker);
     await expect(example).toContainText('Sun Apr 05 2026');
     await expect(example).toContainText('Sun Apr 12 2026');
 
@@ -148,15 +160,29 @@ test.describe('date picker browser accessibility contract', () => {
     await page.keyboard.press('Enter');
     await expect(dayButton(picker, 18)).toHaveAttribute('data-range-start', '');
     await expect(dayButton(picker, 12)).not.toHaveAttribute('data-range-end');
+    await expectStandaloneRangeButton(picker, 18);
     await expect(example).toContainText('Sat Apr 18 2026');
     await expect(example).toContainText(/Sat Apr 18 2026\s*\u2192\s*\u2014/);
 
     await page.keyboard.press('ArrowRight');
     await expect(dayButton(picker, 19)).toBeFocused();
     await page.keyboard.press('Space');
-    await expect(dayButton(picker, 18)).toHaveAttribute('data-range-start', '');
-    await expect(dayButton(picker, 19)).toHaveAttribute('data-range-end', '');
+    await expectRangeDays(picker, {
+      start: 18,
+      between: [],
+      end: 19,
+    });
+    await expectRangeRailGeometry(picker);
     await expect(example).toContainText('Sun Apr 19 2026');
+
+    await dayButton(picker, 22).focus();
+    await page.keyboard.press('Enter');
+    await expectStandaloneRangeButton(picker, 22);
+    await page.keyboard.press('Enter');
+    await expect(dayButton(picker, 22)).toHaveAttribute('data-range-start', '');
+    await expect(dayButton(picker, 22)).toHaveAttribute('data-range-end', '');
+    await expectStandaloneRangeButton(picker, 22);
+    await expect(example).toContainText(/Wed Apr 22 2026\s*\u2192\s*Wed Apr 22 2026/);
   });
 });
 
@@ -194,35 +220,263 @@ async function expectPickerLayoutAligned(picker: Locator): Promise<void> {
   expect(Math.abs(centerY(label) - centerY(nextMonth))).toBeLessThanOrEqual(1);
 }
 
-async function expectRangeSelectionContinuous(picker: Locator): Promise<void> {
-  const gaps = await picker.evaluate((element) => {
-    return Array.from(element.querySelectorAll('tbody tr')).flatMap((row) => {
-      const rangeButtons = Array.from(
-        row.querySelectorAll<HTMLElement>(
-          'button[data-range-start], button[data-range-between], button[data-range-end]',
-        ),
-      );
+async function expectRangeDays(
+  picker: Locator,
+  selection: { start: number; between: readonly number[]; end: number },
+): Promise<void> {
+  await expect(dayButton(picker, selection.start)).toHaveAttribute('data-range-start', '');
 
-      return rangeButtons.slice(1).map((button, index) => {
-        const previous = rangeButtons[index];
-        const previousBox = previous.getBoundingClientRect();
-        const buttonBox = button.getBoundingClientRect();
+  for (const day of selection.between) {
+    await expect(dayButton(picker, day)).toHaveAttribute('data-range-between', '');
+  }
 
-        return {
-          from: previous.textContent?.trim() ?? '',
-          to: button.textContent?.trim() ?? '',
-          gap: buttonBox.left - previousBox.right,
-        };
-      });
-    });
+  await expect(dayButton(picker, selection.end)).toHaveAttribute('data-range-end', '');
+}
+
+async function expectRangeRailGeometry(picker: Locator): Promise<void> {
+  const geometry = await picker.evaluate((element) => {
+    const grid = element.querySelector<HTMLElement>('.hell-date-picker-grid');
+    const gridBox = grid?.getBoundingClientRect();
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--color-hell-primary-soft)';
+    element.append(probe);
+    const railColor = getComputedStyle(probe).color;
+    probe.remove();
+
+    return {
+      gridLeft: gridBox?.left ?? 0,
+      gridRight: gridBox?.right ?? 0,
+      railColor,
+      rows: Array.from(element.querySelectorAll('tbody tr'))
+        .map((row) => {
+          return Array.from(row.querySelectorAll<HTMLTableCellElement>('td')).flatMap((cell) => {
+            const button = cell.querySelector<HTMLElement>(
+              'button[data-range-start], button[data-range-between], button[data-range-end]',
+            );
+
+            if (!button) {
+              return [];
+            }
+
+            const cellBox = cell.getBoundingClientRect();
+            const buttonBox = button.getBoundingClientRect();
+            const before = getComputedStyle(cell, '::before');
+            const buttonStyle = getComputedStyle(button);
+            const starts = button.hasAttribute('data-range-start');
+            const ends = button.hasAttribute('data-range-end');
+            const kind = starts && ends ? 'single' : starts ? 'start' : ends ? 'end' : 'between';
+
+            return [
+              {
+                day: button.textContent?.trim() ?? '',
+                kind,
+                cellLeft: cellBox.left,
+                cellRight: cellBox.right,
+                cellWidth: cellBox.width,
+                buttonCenter: buttonBox.left + buttonBox.width / 2,
+                buttonWidth: buttonBox.width,
+                cellCenter: cellBox.left + cellBox.width / 2,
+                railBackgroundColor: before.backgroundColor,
+                railBackgroundImage: before.backgroundImage,
+                radiusTopLeft: parseFloat(buttonStyle.borderTopLeftRadius),
+                radiusTopRight: parseFloat(buttonStyle.borderTopRightRadius),
+                radiusBottomRight: parseFloat(buttonStyle.borderBottomRightRadius),
+                radiusBottomLeft: parseFloat(buttonStyle.borderBottomLeftRadius),
+              },
+            ];
+          });
+        })
+        .filter((row) => row.length > 0),
+    };
   });
 
-  expect(gaps.length).toBeGreaterThan(0);
-  for (const gap of gaps) {
-    expect(Math.abs(gap.gap), `range gap between ${gap.from} and ${gap.to}`).toBeLessThanOrEqual(
-      1,
-    );
+  const rows = geometry.rows;
+  const cells = rows.flat();
+  expect(cells.length).toBeGreaterThan(0);
+
+  for (const [rowIndex, row] of rows.entries()) {
+    const first = row[0];
+    const last = row[row.length - 1];
+    const wrapsIn = rowIndex > 0 && first.kind !== 'start' && first.kind !== 'single';
+    const wrapsOut = rowIndex < rows.length - 1 && last.kind !== 'end' && last.kind !== 'single';
+
+    if (wrapsIn) {
+      expect(
+        Math.abs(first.cellLeft - geometry.gridLeft),
+        'range rail should enter wrapped row',
+      ).toBeLessThanOrEqual(1);
+    }
+
+    if (wrapsOut) {
+      expect(
+        Math.abs(last.cellRight - geometry.gridRight),
+        'range rail should leave wrapped row without a missing terminal cell',
+      ).toBeLessThanOrEqual(1);
+    }
+
+    for (const [index, cell] of row.entries()) {
+      expectCompactCenteredRangeButton(cell);
+
+      if (index > 0) {
+        const previous = row[index - 1];
+        expect(
+          Math.abs(cell.cellLeft - previous.cellRight),
+          `range rail cells ${previous.day} and ${cell.day} should touch`,
+        ).toBeLessThanOrEqual(1);
+      }
+
+      if (cell.kind === 'between') {
+        expect(hasVisibleRail(cell), `range day ${cell.day} should paint the soft rail`).toBe(true);
+        expectNoButtonRadius(cell, `range day ${cell.day}`);
+      } else if (cell.kind === 'start') {
+        expectOutgoingRail(cell, geometry.railColor);
+        expectOutsideLeftRadius(cell, `range start ${cell.day}`);
+      } else if (cell.kind === 'end') {
+        expectIncomingRail(cell, geometry.railColor);
+        expectOutsideRightRadius(cell, `range end ${cell.day}`);
+      } else {
+        expectStandaloneRangeCell(cell, `single-day range ${cell.day}`);
+      }
+    }
   }
+}
+
+async function expectStandaloneRangeButton(picker: Locator, day: number): Promise<void> {
+  const cell = await dayButton(picker, day).evaluate((button) => {
+    const tableCell = button.closest<HTMLTableCellElement>('td');
+    if (!tableCell) throw new Error('date button should be inside a table cell');
+
+    const cellBox = tableCell.getBoundingClientRect();
+    const buttonBox = button.getBoundingClientRect();
+    const before = getComputedStyle(tableCell, '::before');
+    const buttonStyle = getComputedStyle(button);
+
+    return {
+      day: button.textContent?.trim() ?? '',
+      kind: 'single',
+      cellLeft: cellBox.left,
+      cellRight: cellBox.right,
+      cellWidth: cellBox.width,
+      buttonCenter: buttonBox.left + buttonBox.width / 2,
+      buttonWidth: buttonBox.width,
+      cellCenter: cellBox.left + cellBox.width / 2,
+      railBackgroundColor: before.backgroundColor,
+      railBackgroundImage: before.backgroundImage,
+      radiusTopLeft: parseFloat(buttonStyle.borderTopLeftRadius),
+      radiusTopRight: parseFloat(buttonStyle.borderTopRightRadius),
+      radiusBottomRight: parseFloat(buttonStyle.borderBottomRightRadius),
+      radiusBottomLeft: parseFloat(buttonStyle.borderBottomLeftRadius),
+    };
+  });
+
+  expectCompactCenteredRangeButton(cell);
+  expectStandaloneRangeCell(cell, `standalone range day ${day}`);
+}
+
+interface RangeCellGeometry {
+  readonly day: string;
+  readonly kind: string;
+  readonly cellLeft: number;
+  readonly cellRight: number;
+  readonly cellWidth: number;
+  readonly buttonCenter: number;
+  readonly buttonWidth: number;
+  readonly cellCenter: number;
+  readonly railBackgroundColor: string;
+  readonly railBackgroundImage: string;
+  readonly radiusTopLeft: number;
+  readonly radiusTopRight: number;
+  readonly radiusBottomRight: number;
+  readonly radiusBottomLeft: number;
+}
+
+function expectCompactCenteredRangeButton(cell: RangeCellGeometry): void {
+  expect(
+    cell.buttonWidth,
+    `range day ${cell.day} should keep the compact button size`,
+  ).toBeLessThan(cell.cellWidth - 0.75);
+  expect(
+    Math.abs(cell.buttonCenter - cell.cellCenter),
+    `range day ${cell.day} button should stay centered in its grid cell`,
+  ).toBeLessThanOrEqual(1);
+}
+
+function expectOutgoingRail(cell: RangeCellGeometry, railColor: string): void {
+  expect(
+    cell.railBackgroundImage,
+    `range start ${cell.day} should extend the rail forward`,
+  ).toContain('linear-gradient');
+  expect(
+    cell.railBackgroundImage,
+    `range start ${cell.day} should use the soft rail color`,
+  ).toContain(railColor);
+  expect(
+    firstTransparentStopIndex(cell.railBackgroundImage),
+    `range start ${cell.day} should begin transparent before the chip edge`,
+  ).toBeLessThan(cell.railBackgroundImage.indexOf(railColor));
+}
+
+function expectIncomingRail(cell: RangeCellGeometry, railColor: string): void {
+  expect(cell.railBackgroundImage, `range end ${cell.day} should receive the rail`).toContain(
+    'linear-gradient',
+  );
+  expect(
+    cell.railBackgroundImage,
+    `range end ${cell.day} should use the soft rail color`,
+  ).toContain(railColor);
+  expect(
+    cell.railBackgroundImage.indexOf(railColor),
+    `range end ${cell.day} should paint the rail before the end chip`,
+  ).toBeLessThan(firstTransparentStopIndex(cell.railBackgroundImage));
+}
+
+function expectStandaloneRangeCell(cell: RangeCellGeometry, label: string): void {
+  expect(hasVisibleRail(cell), `${label} should not paint a range rail`).toBe(false);
+  expect(cell.radiusTopLeft, `${label} should keep the top-left corner`).toBeGreaterThan(0);
+  expect(cell.radiusTopRight, `${label} should keep the top-right corner`).toBeGreaterThan(0);
+  expect(cell.radiusBottomRight, `${label} should keep the bottom-right corner`).toBeGreaterThan(0);
+  expect(cell.radiusBottomLeft, `${label} should keep the bottom-left corner`).toBeGreaterThan(0);
+}
+
+function expectNoButtonRadius(cell: RangeCellGeometry, label: string): void {
+  expect(cell.radiusTopLeft, `${label} should not have inner chip radius`).toBe(0);
+  expect(cell.radiusTopRight, `${label} should not have inner chip radius`).toBe(0);
+  expect(cell.radiusBottomRight, `${label} should not have inner chip radius`).toBe(0);
+  expect(cell.radiusBottomLeft, `${label} should not have inner chip radius`).toBe(0);
+}
+
+function expectOutsideLeftRadius(cell: RangeCellGeometry, label: string): void {
+  expect(cell.radiusTopLeft, `${label} should keep the outside corner`).toBeGreaterThan(0);
+  expect(cell.radiusBottomLeft, `${label} should keep the outside corner`).toBeGreaterThan(0);
+  expect(cell.radiusTopRight, `${label} should remove the inside corner`).toBe(0);
+  expect(cell.radiusBottomRight, `${label} should remove the inside corner`).toBe(0);
+}
+
+function expectOutsideRightRadius(cell: RangeCellGeometry, label: string): void {
+  expect(cell.radiusTopRight, `${label} should keep the outside corner`).toBeGreaterThan(0);
+  expect(cell.radiusBottomRight, `${label} should keep the outside corner`).toBeGreaterThan(0);
+  expect(cell.radiusTopLeft, `${label} should remove the inside corner`).toBe(0);
+  expect(cell.radiusBottomLeft, `${label} should remove the inside corner`).toBe(0);
+}
+
+function hasVisibleRail(cell: RangeCellGeometry): boolean {
+  return (
+    !isTransparentColor(cell.railBackgroundColor) || cell.railBackgroundImage.trim() !== 'none'
+  );
+}
+
+function isTransparentColor(value: string): boolean {
+  return value === 'transparent' || value === 'rgba(0, 0, 0, 0)' || /\/\s*0\)?$/.test(value.trim());
+}
+
+function firstTransparentStopIndex(backgroundImage: string): number {
+  const transparent = backgroundImage.indexOf('transparent');
+  if (transparent >= 0) return transparent;
+
+  const rgbaTransparent = backgroundImage.indexOf('rgba(0, 0, 0, 0)');
+  if (rgbaTransparent >= 0) return rgbaTransparent;
+
+  return Number.POSITIVE_INFINITY;
 }
 
 async function requiredBox(
