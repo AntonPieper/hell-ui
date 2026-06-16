@@ -109,10 +109,18 @@
       }
       &[data-range-start],
       &[data-range-end] {
+        width: 100%;
         background-color: var(--color-hell-primary);
         color: var(--color-hell-primary-foreground);
       }
+      &[data-range-start] {
+        border-radius: .25rem 0 0 .25rem;
+      }
+      &[data-range-end] {
+        border-radius: 0 .25rem .25rem 0;
+      }
       &[data-range-between] {
+        width: 100%;
         background-color: var(--color-hell-primary-soft);
         color: var(--color-hell-primary-soft-foreground);
         border-radius: 0;
