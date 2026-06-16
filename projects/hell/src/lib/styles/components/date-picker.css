@@ -6,14 +6,13 @@
     --_cell: calc(var(--spacing) * 7.5);
     --_day: calc(var(--spacing) * 7);
     --_nav: calc(var(--spacing-hell-control-sm) * 2 + var(--spacing-hell-1));
+    --_rail: var(--color-hell-primary-soft);
     --_width: calc(8rem + var(--_nav) * 2 + var(--spacing-hell-2) * 2);
 
     display: inline-block;
     width: var(--_width);
-    background-color: var(--color-hell-surface-elevated);
-    border-style: solid;
-    border-width: 1px;
-    border-color: var(--color-hell-border);
+    background: var(--color-hell-surface-elevated);
+    border: 1px solid var(--color-hell-border);
     border-radius: var(--radius-md);
     padding: var(--spacing-hell-3);
     box-shadow: var(--shadow-hell-sm);
@@ -23,14 +22,12 @@
     display: grid;
     grid-template-columns: var(--_nav) minmax(0, 1fr) var(--_nav);
     align-items: center;
-    column-gap: var(--spacing-hell-2);
+    gap: var(--spacing-hell-2);
     margin-bottom: var(--spacing-hell-2);
   }
 
   .hell-date-picker-nav {
     display: inline-flex;
-    align-items: center;
-    width: var(--_nav);
     gap: var(--spacing-hell-1);
   }
 
@@ -42,18 +39,15 @@
     line-height: var(--spacing-hell-control-sm);
     text-align: center;
     white-space: nowrap;
-    font-variant-numeric: tabular-nums;
   }
 
   .hell-date-picker-grid {
     width: 100%;
-    border-collapse: separate;
     border-spacing: 0;
     table-layout: fixed;
     & th {
       font-size: 11px;
       font-weight: var(--font-weight-semibold);
-      width: var(--_cell);
       height: calc(var(--spacing) * 6);
       padding: 0;
       color: var(--color-hell-foreground-subtle);
@@ -65,71 +59,93 @@
       padding: 0;
       text-align: center;
     }
-    & [ngpDatePickerDateButton] {
+    & button {
       appearance: none;
       width: var(--_day);
       height: var(--_day);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      display: inline-grid;
+      place-items: center;
       padding: 0;
       border-radius: 0.25rem;
-      background-color: transparent;
-      border-style: solid;
-      border-width: 0px;
+      background: transparent;
+      border: 0;
       color: var(--color-hell-foreground);
       font-family: inherit;
       font-size: var(--text-xs);
-      line-height: var(--text-xs--line-height);
       cursor: pointer;
       transition:
-        background-color var(--hell-duration-fast) var(--ease-hell-out),
+        background var(--hell-duration-fast) var(--ease-hell-out),
         color var(--hell-duration-fast) var(--ease-hell-out);
       &[data-today]:not([data-selected]) {
         color: var(--color-hell-primary);
         font-weight: var(--font-weight-semibold);
-        box-shadow: inset 0 0 0 1px var(--color-hell-primary-soft);
+        box-shadow: inset 0 0 0 1px var(--_rail);
       }
       &[data-hover]:not([data-disabled]):not([data-selected]) {
-        background-color: var(--color-hell-surface-subtle);
+        background: var(--color-hell-surface-subtle);
       }
       &[data-focus-visible] {
         outline: 2px solid var(--color-hell-focus-ring);
         outline-offset: 1px;
       }
       &[data-press]:not([data-disabled]):not([data-selected]) {
-        background-color: var(--color-hell-surface-muted);
+        background: var(--color-hell-surface-muted);
       }
       &[data-outside-month] {
         color: var(--color-hell-foreground-muted);
       }
       &[data-selected] {
-        background-color: var(--color-hell-primary);
+        background: var(--color-hell-primary);
         color: var(--color-hell-primary-foreground);
-      }
-      &[data-range-start],
-      &[data-range-end] {
-        width: 100%;
-        background-color: var(--color-hell-primary);
-        color: var(--color-hell-primary-foreground);
-      }
-      &[data-range-start] {
-        border-radius: .25rem 0 0 .25rem;
-      }
-      &[data-range-end] {
-        border-radius: 0 .25rem .25rem 0;
-      }
-      &[data-range-between] {
-        width: 100%;
-        background-color: var(--color-hell-primary-soft);
-        color: var(--color-hell-primary-soft-foreground);
-        border-radius: 0;
       }
       &[data-disabled] {
         cursor: not-allowed;
         color: var(--color-hell-foreground-subtle);
         opacity: 0.4;
       }
+    }
+  }
+
+  .hell-date-picker:has([data-range-end]) {
+    & td {
+      position: relative;
+    }
+
+    & td::before {
+      content: '';
+      position: absolute;
+      z-index: 0;
+      inset: calc((var(--_cell) - var(--_day)) / 2) 0;
+    }
+
+    & button {
+      position: relative;
+      z-index: 1;
+    }
+
+    & td:has(> [data-range-between])::before {
+      background: var(--_rail);
+    }
+
+    & td:has(> [data-range-start]:not([data-range-end]))::before {
+      background: linear-gradient(90deg, transparent 50%, var(--_rail) 0);
+    }
+
+    & td:has(> [data-range-end]:not([data-range-start]))::before {
+      background: linear-gradient(90deg, var(--_rail) 50%, transparent 0);
+    }
+
+    & [data-range-start]:not([data-range-end]) {
+      border-radius: 0.25rem 0 0 0.25rem;
+    }
+
+    & [data-range-end]:not([data-range-start]) {
+      border-radius: 0 0.25rem 0.25rem 0;
+    }
+
+    & [data-range-between]:not([data-range-start], [data-range-end]) {
+      color: var(--color-hell-primary-soft-foreground);
+      border-radius: 0;
     }
   }
 
