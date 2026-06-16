@@ -140,6 +140,7 @@ test.describe('date picker browser accessibility contract', () => {
     await expect(dayButton(picker, 5)).toHaveAttribute('data-range-start', '');
     await expect(dayButton(picker, 6)).toHaveAttribute('data-range-between', '');
     await expect(dayButton(picker, 12)).toHaveAttribute('data-range-end', '');
+    await expectRangeSelectionContinuous(picker);
     await expect(example).toContainText('Sun Apr 05 2026');
     await expect(example).toContainText('Sun Apr 12 2026');
 
@@ -191,6 +192,37 @@ async function expectPickerLayoutAligned(picker: Locator): Promise<void> {
   expect(Math.abs(centerX(header) - centerX(grid))).toBeLessThanOrEqual(1);
   expect(Math.abs(centerY(label) - centerY(previousMonth))).toBeLessThanOrEqual(1);
   expect(Math.abs(centerY(label) - centerY(nextMonth))).toBeLessThanOrEqual(1);
+}
+
+async function expectRangeSelectionContinuous(picker: Locator): Promise<void> {
+  const gaps = await picker.evaluate((element) => {
+    return Array.from(element.querySelectorAll('tbody tr')).flatMap((row) => {
+      const rangeButtons = Array.from(
+        row.querySelectorAll<HTMLElement>(
+          'button[data-range-start], button[data-range-between], button[data-range-end]',
+        ),
+      );
+
+      return rangeButtons.slice(1).map((button, index) => {
+        const previous = rangeButtons[index];
+        const previousBox = previous.getBoundingClientRect();
+        const buttonBox = button.getBoundingClientRect();
+
+        return {
+          from: previous.textContent?.trim() ?? '',
+          to: button.textContent?.trim() ?? '',
+          gap: buttonBox.left - previousBox.right,
+        };
+      });
+    });
+  });
+
+  expect(gaps.length).toBeGreaterThan(0);
+  for (const gap of gaps) {
+    expect(Math.abs(gap.gap), `range gap between ${gap.from} and ${gap.to}`).toBeLessThanOrEqual(
+      1,
+    );
+  }
 }
 
 async function requiredBox(
