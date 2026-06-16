@@ -77,7 +77,19 @@ import flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw from './examp
           <code>[hellFlyout]</code>: the trigger instance (template ref or <code>viewChild</code>)
         </li>
         <li>
-          <code>boundary</code>: optional <code>HTMLElement</code> treated as “inside” for dismiss
+          <code>boundary</code>: optional <code>HTMLElement</code> or
+          <code>ElementRef</code> treated as “inside” for dismiss
+        </li>
+        <li>
+          <code>anchor</code>: optional visual reference <code>HTMLElement</code> or
+          <code>ElementRef</code> when the panel should align to a sibling control instead of the
+          trigger
+        </li>
+        <li>
+          <code>flip</code> (default <code>true</code>): allow viewport-aware placement flipping
+        </li>
+        <li>
+          <code>shift</code> (default <code>true</code>): allow viewport-aware placement shifting
         </li>
         <li>
           <code>aria-label</code> or <code>aria-labelledby</code>: accessible name for the
@@ -91,6 +103,7 @@ import flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw from './examp
       <h2>Do</h2>
       <ul>
         <li>Use flyout for anchored non-modal panels where nearby controls stay interactive.</li>
+        <li>Pass <code>anchor</code> when the panel should visually attach to a sibling control.</li>
         <li>Pass <code>boundary</code> when siblings should count as inside.</li>
         <li>
           Name each flyout panel with visible heading text via

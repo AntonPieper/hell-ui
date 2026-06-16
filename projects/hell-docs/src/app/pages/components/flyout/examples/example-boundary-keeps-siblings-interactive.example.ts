@@ -22,6 +22,7 @@ import { HellInput } from '@hell-ui/angular/input';
           </button>
 
           <input
+            #inputAnchor
             hellInput
             placeholder="Type here — flyout stays open"
             aria-label="Sibling input within boundary"
@@ -31,7 +32,10 @@ import { HellInput } from '@hell-ui/angular/input';
         @if (open()) {
           <div
             [hellFlyout]="t"
+            [anchor]="inputAnchor"
             [boundary]="boundaryEl"
+            [flip]="false"
+            [shift]="false"
             class="hd-flyout-panel"
             aria-labelledby="boundary-flyout-title"
           >

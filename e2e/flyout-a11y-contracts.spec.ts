@@ -5,9 +5,7 @@ test.describe('flyout browser accessibility contract', () => {
     await gotoFlyoutDocs(page);
   });
 
-  test('exposes a named non-modal dialog with trigger relationships', async ({
-    page,
-  }) => {
+  test('exposes a named non-modal dialog with trigger relationships', async ({ page }) => {
     const { example, trigger } = flyoutExample(page);
 
     await expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
@@ -54,10 +52,8 @@ test.describe('flyout browser accessibility contract', () => {
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 
-  test('opens as anchored floating UI without moving surrounding content', async ({
-    page,
-  }) => {
-    const { example, trigger } = flyoutExample(page);
+  test('opens as anchored floating UI without moving surrounding content', async ({ page }) => {
+    const { example, input, trigger } = flyoutExample(page);
     const outsideAction = example.getByRole('button', { name: 'Outside boundary action' });
 
     await trigger.scrollIntoViewIfNeeded();
@@ -73,30 +69,28 @@ test.describe('flyout browser accessibility contract', () => {
     expect(Math.abs(afterOutside.y - beforeOutside.y)).toBeLessThanOrEqual(1);
     expect(Math.abs(afterBoundary.height - beforeBoundary.height)).toBeLessThanOrEqual(1);
 
-    const triggerBox = await requiredBox(trigger, 'trigger');
+    const inputBox = await requiredBox(input, 'input anchor');
     const panelBox = await requiredBox(panel, 'panel');
-    await expectAnchoredToTrigger(panel, triggerBox, panelBox);
-    expect(Math.abs(panelBox.x - triggerBox.x)).toBeLessThanOrEqual(2);
+    await expectAnchoredToReference(panel, inputBox, panelBox);
+    expect(Math.abs(panelBox.x - inputBox.x)).toBeLessThanOrEqual(2);
 
     await page.mouse.wheel(0, 120);
     await expect
       .poll(async () => {
-        const scrolledTrigger = await requiredBox(trigger, 'scrolled trigger');
+        const scrolledInput = await requiredBox(input, 'scrolled input anchor');
         const scrolledPanel = await requiredBox(panel, 'scrolled panel');
-        return Math.abs(scrolledPanel.x - scrolledTrigger.x);
+        return Math.abs(scrolledPanel.x - scrolledInput.x);
       })
       .toBeLessThanOrEqual(2);
 
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(panel).toBeVisible();
-    const resizedTrigger = await requiredBox(trigger, 'resized trigger');
+    const resizedInput = await requiredBox(input, 'resized input anchor');
     const resizedPanel = await requiredBox(panel, 'resized panel');
-    await expectAnchoredToTrigger(panel, resizedTrigger, resizedPanel);
+    await expectAnchoredToReference(panel, resizedInput, resizedPanel);
   });
 
-  test('Escape closes the flyout and restores focus to the trigger', async ({
-    page,
-  }) => {
+  test('Escape closes the flyout and restores focus to the trigger', async ({ page }) => {
     const { trigger } = flyoutExample(page);
 
     await trigger.click();
@@ -118,10 +112,11 @@ async function gotoFlyoutDocs(page: Page): Promise<void> {
   await expect(page.getByRole('heading', { name: 'Flyout', level: 1 })).toBeVisible();
 }
 
-function flyoutExample(page: Page): { example: Locator; trigger: Locator } {
+function flyoutExample(page: Page): { example: Locator; input: Locator; trigger: Locator } {
   const example = page.locator('app-flyout-example-boundary-keeps-siblings-interactive-example');
   return {
     example,
+    input: example.getByLabel('Sibling input within boundary'),
     trigger: example.getByRole('button', { name: /^(Show|Hide) flyout$/ }),
   };
 }
@@ -132,16 +127,12 @@ async function requiredBox(locator: Locator, label: string) {
   return box;
 }
 
-async function expectAnchoredToTrigger(
+async function expectAnchoredToReference(
   panel: Locator,
-  triggerBox: { y: number; height: number },
+  referenceBox: { y: number; height: number },
   panelBox: { y: number; height: number },
 ) {
   const placement = (await panel.getAttribute('data-placement')) ?? 'bottom';
-  if (placement.startsWith('top')) {
-    expect(panelBox.y + panelBox.height).toBeLessThanOrEqual(triggerBox.y);
-    return;
-  }
-
-  expect(panelBox.y).toBeGreaterThanOrEqual(triggerBox.y + triggerBox.height);
+  expect(placement).toMatch(/^bottom/);
+  expect(panelBox.y).toBeGreaterThanOrEqual(referenceBox.y + referenceBox.height);
 }
