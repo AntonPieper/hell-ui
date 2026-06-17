@@ -36,8 +36,11 @@
   }
 
   .hell-toggle-group .hell-toggle {
+    --hell-button-border-color: transparent;
+    --hell-button-background: transparent;
     --hell-button-background-hover: var(--color-hell-surface-subtle);
     --hell-button-background-active: var(--color-hell-surface-muted);
+    --hell-button-shadow: none;
   }
   .hell-toggle-group .hell-toggle:is(:hover, [data-hover]) {
     background-color: var(--color-hell-surface-subtle);
@@ -52,13 +55,13 @@
   .hell-toggle-group .hell-toggle[data-selected] {
     background-color: var(--color-hell-primary-soft);
     color: var(--color-hell-primary-soft-foreground);
-    border-color: var(--color-hell-primary);
-    box-shadow: var(--shadow-hell-xs);
+    border-color: transparent;
+    box-shadow: none;
   }
   .hell-toggle-group .hell-toggle[data-selected]:is(:hover, :active, [data-hover], [data-press]) {
-    background-color: var(--color-hell-primary);
-    color: var(--color-hell-primary-foreground);
-    border-color: var(--color-hell-primary);
+    background-color: var(--color-hell-primary-soft);
+    color: var(--color-hell-primary-soft-foreground);
+    border-color: transparent;
   }
   .hell-toggle-group .hell-toggle[data-disabled]:is(:hover, :active, [data-hover], [data-press]) {
     background-color: var(--_hell-btn-bg);
