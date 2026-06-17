@@ -136,7 +136,7 @@ test.describe('date picker browser accessibility contract', () => {
       between: [6, 7, 8, 9, 10, 11],
       end: 12,
     });
-    await expectStableRangeButtons(disabledRangePicker);
+    await expectSquareRangeButtons(disabledRangePicker);
   });
 
   test('range picker exposes start, between, end states and keyboard range reselection', async ({
@@ -152,7 +152,7 @@ test.describe('date picker browser accessibility contract', () => {
       between: [6, 7, 8, 9, 10, 11],
       end: 12,
     });
-    await expectStableRangeButtons(picker);
+    await expectSquareRangeButtons(picker);
     await expect(example).toContainText('Sun Apr 05 2026');
     await expect(example).toContainText('Sun Apr 12 2026');
 
@@ -172,7 +172,7 @@ test.describe('date picker browser accessibility contract', () => {
       between: [],
       end: 19,
     });
-    await expectStableRangeButtons(picker);
+    await expectSquareRangeButtons(picker);
     await expect(example).toContainText('Sun Apr 19 2026');
 
     await dayButton(picker, 22).focus();
@@ -233,7 +233,7 @@ async function expectRangeDays(
   await expect(dayButton(picker, selection.end)).toHaveAttribute('data-range-end', '');
 }
 
-async function expectStableRangeButtons(picker: Locator): Promise<void> {
+async function expectSquareRangeButtons(picker: Locator): Promise<void> {
   const geometry = await picker.evaluate((element) => {
     const referenceButton =
       Array.from(
@@ -278,7 +278,9 @@ async function expectStableRangeButtons(picker: Locator): Promise<void> {
                 buttonRight: buttonBox.right,
                 buttonCenter: buttonBox.left + buttonBox.width / 2,
                 buttonWidth: buttonBox.width,
+                buttonHeight: buttonBox.height,
                 cellCenter: cellBox.left + cellBox.width / 2,
+                cellHeight: cellBox.height,
                 cellPseudoBackgroundColor: before.backgroundColor,
                 cellPseudoBackgroundImage: before.backgroundImage,
                 buttonBackgroundColor: buttonStyle.backgroundColor,
@@ -308,12 +310,12 @@ async function expectStableRangeButtons(picker: Locator): Promise<void> {
         const previous = row[index - 1];
         expect(
           cell.buttonLeft - previous.buttonRight,
-          `range buttons ${previous.day} and ${cell.day} should keep their stable compact widths`,
-        ).toBeGreaterThan(0);
+          `range buttons ${previous.day} and ${cell.day} should touch horizontally`,
+        ).toBeLessThanOrEqual(1);
       }
 
       if (cell.kind === 'between') {
-        expectStableDateButtonGeometry(
+        expectSquareDateButtonGeometry(
           cell,
           geometry.referenceButtonWidth,
           geometry.referenceCellWidth,
@@ -322,7 +324,7 @@ async function expectStableRangeButtons(picker: Locator): Promise<void> {
         expectButtonFill(cell, `range day ${cell.day}`);
         expectNoRadius(cell, `range day ${cell.day}`);
       } else if (cell.kind === 'start') {
-        expectStableDateButtonGeometry(
+        expectSquareDateButtonGeometry(
           cell,
           geometry.referenceButtonWidth,
           geometry.referenceCellWidth,
@@ -331,7 +333,7 @@ async function expectStableRangeButtons(picker: Locator): Promise<void> {
         expectButtonFill(cell, `range start ${cell.day}`);
         expectOutsideLeftRadius(cell, `range start ${cell.day}`);
       } else if (cell.kind === 'end') {
-        expectStableDateButtonGeometry(
+        expectSquareDateButtonGeometry(
           cell,
           geometry.referenceButtonWidth,
           geometry.referenceCellWidth,
@@ -340,7 +342,7 @@ async function expectStableRangeButtons(picker: Locator): Promise<void> {
         expectButtonFill(cell, `range end ${cell.day}`);
         expectOutsideRightRadius(cell, `range end ${cell.day}`);
       } else {
-        expectStableDateButtonGeometry(
+        expectSquareDateButtonGeometry(
           cell,
           geometry.referenceButtonWidth,
           geometry.referenceCellWidth,
@@ -385,7 +387,9 @@ async function expectStandaloneRangeButton(picker: Locator, day: number): Promis
         buttonRight: buttonBox.right,
         buttonCenter: buttonBox.left + buttonBox.width / 2,
         buttonWidth: buttonBox.width,
+        buttonHeight: buttonBox.height,
         cellCenter: cellBox.left + cellBox.width / 2,
+        cellHeight: cellBox.height,
         cellPseudoBackgroundColor: before.backgroundColor,
         cellPseudoBackgroundImage: before.backgroundImage,
         buttonBackgroundColor: buttonStyle.backgroundColor,
@@ -399,7 +403,7 @@ async function expectStandaloneRangeButton(picker: Locator, day: number): Promis
 
   expect(geometry.referenceButtonWidth).toBeGreaterThan(0);
   expect(geometry.referenceCellWidth).toBeGreaterThan(0);
-  expectStableDateButtonGeometry(
+  expectSquareDateButtonGeometry(
     geometry.cell,
     geometry.referenceButtonWidth,
     geometry.referenceCellWidth,
@@ -418,7 +422,9 @@ interface RangeCellGeometry {
   readonly buttonRight: number;
   readonly buttonCenter: number;
   readonly buttonWidth: number;
+  readonly buttonHeight: number;
   readonly cellCenter: number;
+  readonly cellHeight: number;
   readonly cellPseudoBackgroundColor: string;
   readonly cellPseudoBackgroundImage: string;
   readonly buttonBackgroundColor: string;
@@ -428,7 +434,7 @@ interface RangeCellGeometry {
   readonly radiusBottomLeft: number;
 }
 
-function expectStableDateButtonGeometry(
+function expectSquareDateButtonGeometry(
   cell: RangeCellGeometry,
   referenceButtonWidth: number,
   referenceCellWidth: number,
@@ -442,9 +448,18 @@ function expectStableDateButtonGeometry(
     Math.abs(cell.cellWidth - referenceCellWidth),
     `${label} should not resize its date cell`,
   ).toBeLessThanOrEqual(1);
-  expect(cell.buttonWidth, `${label} should keep the compact button size`).toBeLessThan(
-    cell.cellWidth - 0.75,
-  );
+  expect(
+    Math.abs(cell.buttonWidth - cell.cellWidth),
+    `${label} button should fill its square date cell`,
+  ).toBeLessThanOrEqual(1);
+  expect(
+    Math.abs(cell.buttonHeight - cell.buttonWidth),
+    `${label} button should be square`,
+  ).toBeLessThanOrEqual(1);
+  expect(
+    Math.abs(cell.cellHeight - cell.buttonHeight),
+    `${label} cell should not add vertical growth around the square button`,
+  ).toBeLessThanOrEqual(1);
   expect(
     Math.abs(cell.buttonCenter - cell.cellCenter),
     `${label} button should stay centered in its grid cell`,
