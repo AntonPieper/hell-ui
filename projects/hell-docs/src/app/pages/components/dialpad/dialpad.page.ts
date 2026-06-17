@@ -13,9 +13,8 @@ import dialpadExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
     <article class="hd-prose">
       <h1>Dialpad</h1>
       <p>
-        Telephony dialpad with key letters, used in CTI / VoIP applications. Emits
-        <code>(digit)</code> on every key press and <code>(valueChange)</code> with the running
-        number.
+        Telephony dialpad with key letters, used in CTI / VoIP applications. Users can tap, click,
+        or focus the dial pad and type digits from the keyboard.
       </p>
 
       <h2>Example</h2>
@@ -29,6 +28,9 @@ import dialpadExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
       <h2>API</h2>
       <ul>
         <li><code>value</code>: controlled mode</li>
+        <li><code>disabled</code>: disables the dial pad and removes it from tab order</li>
+        <li><code>readOnly</code>: keeps the value readable and callable while preventing edits</li>
+        <li><code>invalid</code>: marks the value invalid with <code>aria-invalid</code></li>
         <li>
           <code>showCallButton</code>: render the primary call action (default <code>true</code>)
         </li>
@@ -37,11 +39,18 @@ import dialpadExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
         <li><code>(call)</code>: emits current number when the call button is pressed</li>
       </ul>
 
+      <h2>Keyboard</h2>
+      <ul>
+        <li>Digit keys, <code>*</code>, <code>#</code>, and <code>+</code> append to the value.</li>
+        <li><code>Backspace</code> removes one character; <code>Delete</code> clears the value.</li>
+        <li><code>Enter</code> emits <code>(call)</code> when the dial pad host has focus.</li>
+      </ul>
+
       <h2>Do</h2>
       <ul>
         <li>Use for phone-like numeric entry and DTMF flows.</li>
         <li>Listen to <code>digit</code> for tones and <code>valueChange</code> for form state.</li>
-        <li>Keep call actions visually separated from number entry.</li>
+        <li>Keep call, clear, and delete actions visually separated from number entry.</li>
       </ul>
 
       <h2>Don't</h2>

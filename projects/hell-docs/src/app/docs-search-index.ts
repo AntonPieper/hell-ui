@@ -618,7 +618,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     title: 'Dialpad: Example',
     path: '/components/dialpad',
     detail: 'components/dialpad/examples/example.example.ts',
-    terms: 'dialpad example components/dialpad/examples/example.example components/dialpad hell-dialpad',
+    terms: 'dialpad example components/dialpad/examples/example.example components/dialpad hell-dialpad keyboard Backspace Delete Enter disabled readOnly readonly invalid clear call digit valueChange',
   },
   {
     title: 'Drop Zone: Disabled',
