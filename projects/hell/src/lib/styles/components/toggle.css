@@ -25,75 +25,40 @@
   }
 
   .hell-toggle-group {
-    --hell-toggle-group-background: var(--color-hell-surface-muted);
-    --hell-toggle-group-border-color: var(--color-hell-border);
-    --hell-toggle-group-item-hover-background: var(--color-hell-surface-subtle);
-    --hell-toggle-group-item-active-background: var(--color-hell-surface-muted);
-    --hell-toggle-group-selected-background: color-mix(
-      in oklab,
-      var(--color-hell-primary-soft) 58%,
-      var(--color-hell-surface-elevated)
-    );
-    --hell-toggle-group-selected-color: var(--color-hell-primary-soft-foreground);
-    --hell-toggle-group-selected-border-color: color-mix(
-      in oklab,
-      var(--color-hell-primary) 28%,
-      var(--color-hell-border)
-    );
-    --hell-toggle-group-selected-background-hover: color-mix(
-      in oklab,
-      var(--color-hell-primary-soft) 82%,
-      var(--color-hell-surface-elevated)
-    );
-    --hell-toggle-group-selected-border-color-hover: color-mix(
-      in oklab,
-      var(--color-hell-primary) 42%,
-      var(--color-hell-border)
-    );
-    --hell-toggle-group-selected-shadow:
-      inset 0 0 0 1px color-mix(in oklab, var(--color-hell-primary) 10%, transparent),
-      var(--shadow-hell-xs);
     display: inline-flex;
-    background-color: var(--hell-toggle-group-background);
+    background-color: var(--color-hell-surface-muted);
     border-style: solid;
     border-width: 1px;
-    border-color: var(--hell-toggle-group-border-color);
+    border-color: var(--color-hell-border);
     border-radius: var(--radius-hell-md);
     padding: 3px;
     gap: 2px;
   }
 
   .hell-toggle-group .hell-toggle {
-    --hell-button-background-hover: var(--hell-toggle-group-item-hover-background);
-    --hell-button-background-active: var(--hell-toggle-group-item-active-background);
+    --hell-button-background-hover: var(--color-hell-surface-subtle);
+    --hell-button-background-active: var(--color-hell-surface-muted);
   }
   .hell-toggle-group .hell-toggle:is(:hover, [data-hover]) {
-    background-color: var(--hell-toggle-group-item-hover-background);
+    background-color: var(--color-hell-surface-subtle);
   }
   .hell-toggle-group .hell-toggle:is(:active, [data-press]) {
-    background-color: var(--hell-toggle-group-item-active-background);
+    background-color: var(--color-hell-surface-muted);
   }
 
   /* Inside a group, switch to a segmented-control look: the selected
      item carries the primary tint, border, and foreground so it remains
      legible on both light and dark muted tracks. */
   .hell-toggle-group .hell-toggle[data-selected] {
-    background-color: var(--hell-toggle-group-selected-background);
-    color: var(--hell-toggle-group-selected-color);
-    border-color: var(--hell-toggle-group-selected-border-color);
-    box-shadow: var(--hell-toggle-group-selected-shadow);
-  }
-  .hell-toggle-group .hell-toggle[data-selected]:is(:hover, [data-hover]) {
-    background-color: var(--hell-toggle-group-selected-background-hover);
-    border-color: var(--hell-toggle-group-selected-border-color-hover);
-  }
-  .hell-toggle-group .hell-toggle[data-selected]:is(:active, [data-press]) {
     background-color: var(--color-hell-primary-soft);
-    border-color: var(--hell-toggle-group-selected-border-color-hover);
+    color: var(--color-hell-primary-soft-foreground);
+    border-color: var(--color-hell-primary);
+    box-shadow: var(--shadow-hell-xs);
   }
-  .hell-toggle-group .hell-toggle[data-disabled] {
-    --hell-button-background-hover: var(--hell-button-background);
-    --hell-button-background-active: var(--hell-button-background);
+  .hell-toggle-group .hell-toggle[data-selected]:is(:hover, :active, [data-hover], [data-press]) {
+    background-color: var(--color-hell-primary);
+    color: var(--color-hell-primary-foreground);
+    border-color: var(--color-hell-primary);
   }
   .hell-toggle-group .hell-toggle[data-disabled]:is(:hover, :active, [data-hover], [data-press]) {
     background-color: var(--_hell-btn-bg);

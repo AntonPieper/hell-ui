@@ -11,17 +11,6 @@
     --_hell-avatar-group-hover-shadow:
       0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-cutout),
       0 2px 6px rgb(0 0 0 / 0.12);
-    --_hell-avatar-group-overflow-bg: var(--color-hell-surface-muted);
-    --_hell-avatar-group-overflow-bg-hover: var(--color-hell-surface-subtle);
-    --_hell-avatar-group-overflow-bg-active: var(--color-hell-primary-soft);
-    --_hell-avatar-group-overflow-fg: var(--color-hell-foreground);
-    --_hell-avatar-group-overflow-fg-muted: var(--color-hell-foreground-muted);
-    --_hell-avatar-group-overflow-border: var(--color-hell-surface-elevated);
-    --_hell-avatar-group-overflow-border-active: color-mix(
-      in oklab,
-      var(--color-hell-primary) 36%,
-      var(--color-hell-border)
-    );
     &[data-size='xs'] {
       --_hell-av-size: 20px;
       --_hell-avatar-group-overlap: calc(var(--spacing) * -1.5);
@@ -64,7 +53,6 @@
     outline: none;
     transition:
       box-shadow var(--hell-duration-fast) var(--ease-hell-out),
-      filter var(--hell-duration-fast) var(--ease-hell-out),
       transform var(--hell-duration-fast) var(--ease-hell-out);
     &:is(button, a) {
       border-width: 0;
@@ -73,12 +61,6 @@
       color: inherit;
       font: inherit;
       cursor: pointer;
-    }
-    &:is(button, a):hover {
-      z-index: 3;
-      filter: saturate(1.08) brightness(0.98);
-      transform: translateY(-1px) scale(1.03);
-      box-shadow: var(--_hell-avatar-group-hover-shadow);
     }
     &:is(button, a):active {
       transform: translateY(0) scale(0.98);
@@ -110,48 +92,41 @@
     width: var(--_hell-av-size, 32px);
     align-items: center;
     justify-content: center;
-    gap: 2px;
     border-radius: calc(infinity * 1px);
     border-style: solid;
     border-width: 2px;
-    border-color: var(--_hell-avatar-group-overflow-border);
-    background-color: var(--_hell-avatar-group-overflow-bg);
+    border-color: var(--color-hell-surface-elevated);
+    background-color: var(--color-hell-surface-muted);
     padding: 0;
     font: inherit;
     font-size: 11px;
     font-weight: var(--font-weight-semibold);
-    color: var(--_hell-avatar-group-overflow-fg-muted);
+    color: var(--color-hell-foreground-muted);
     outline: none;
     transition:
       background-color var(--hell-duration-fast) var(--ease-hell-out),
       border-color var(--hell-duration-fast) var(--ease-hell-out),
       box-shadow var(--hell-duration-fast) var(--ease-hell-out),
       color var(--hell-duration-fast) var(--ease-hell-out),
-      filter var(--hell-duration-fast) var(--ease-hell-out),
       transform var(--hell-duration-fast) var(--ease-hell-out);
     &:is(button, a) {
       cursor: pointer;
     }
     &:is(button, a):hover {
-      z-index: 3;
-      background-color: var(--_hell-avatar-group-overflow-bg-hover);
-      color: var(--_hell-avatar-group-overflow-fg);
-      filter: saturate(1.08) brightness(0.98);
-      transform: translateY(-1px) scale(1.03);
-      box-shadow: var(--_hell-avatar-group-hover-shadow);
+      background-color: var(--color-hell-surface-subtle);
+      color: var(--color-hell-foreground);
     }
     &:is(button, a):active,
     &[data-open],
     &[aria-expanded='true'] {
       z-index: 4;
-      background-color: var(--_hell-avatar-group-overflow-bg-active);
-      border-color: var(--_hell-avatar-group-overflow-border-active);
+      background-color: var(--color-hell-primary-soft);
+      border-color: var(--color-hell-primary);
       color: var(--color-hell-primary-soft-foreground);
       transform: translateY(0) scale(1);
       box-shadow:
         0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-cutout),
-        0 0 0 calc(var(--_hell-avatar-group-ring-width) * 2)
-          var(--_hell-avatar-group-overflow-border-active);
+        0 0 0 calc(var(--_hell-avatar-group-ring-width) * 2) var(--color-hell-primary);
     }
     &:focus-visible {
       z-index: 5;
@@ -160,5 +135,12 @@
         0 0 0 calc(var(--_hell-avatar-group-ring-width) * 2) var(--color-hell-focus-ring),
         0 0 0 calc(var(--_hell-avatar-group-ring-width) * 3) var(--_hell-avatar-group-cutout);
     }
+  }
+
+  .hell-avatar-group-item:is(button, a):hover:not(:active),
+  .hell-avatar-group-overflow:is(button, a):hover:not(:active):not([data-open]):not([aria-expanded='true']) {
+    z-index: 3;
+    transform: translateY(-1px) scale(1.03);
+    box-shadow: var(--_hell-avatar-group-hover-shadow);
   }
 }

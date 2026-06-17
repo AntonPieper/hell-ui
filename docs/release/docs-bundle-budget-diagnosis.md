@@ -1,16 +1,16 @@
 # Docs bundle budget diagnosis
 
-- Slice: HELL-030 diagnosis; HELL-031 remediation; HELL-032 policy classification
+- Slice: HELL-030 diagnosis; HELL-031 remediation; HELL-032 policy classification; slider/toggle/avatar polish
 - Source stats: `dist/hell-docs/stats.json`
 - Budget policy: `docs/release/docs-budget-policy.md`
 - Report generator: `tools/docs-bundle-budget-report.mjs`
-- Scope: diagnosis plus current remediation status; HELL-050 guards docs route imports, HELL-087 guards shared docs code-preview lazy loading, and remaining split/import work stays in HELL-053, HELL-054, and HELL-056.
+- Scope: diagnosis plus current remediation status; HELL-050 guards docs route imports, HELL-087 guards shared docs code-preview lazy loading, the slider/toggle/avatar polish records global component-state CSS cost, and remaining split/import work stays in HELL-053, HELL-054, and HELL-056.
 
 ## Budget status
 
 | Budget | Current | Warning | Error | Status |
 | --- | ---: | ---: | ---: | --- |
-| Initial bundle | 821.71 kB | 500.00 kB | 1050.00 kB | accepted warning: 321.71 kB over; accepted ceiling: 822.00 kB; owner: Docs shell / global styles; follow-up: HELL-050 static guard |
+| Initial bundle | 824.45 kB | 500.00 kB | 1050.00 kB | accepted warning: 324.45 kB over; accepted ceiling: 825.00 kB; owner: Docs shell / global styles; follow-up: HELL-050 static guard |
 | Any component style | 1.35 kB largest | 4.00 kB | 8.00 kB | within warning budget |
 
 ## Budget policy
@@ -24,7 +24,7 @@
 
 | Rank | Chunk | Size | Owner | Largest inputs |
 | ---: | --- | ---: | --- | --- |
-| 1 | `styles-XOK3VB46.css` | 188.64 kB | Docs global stylesheet (`styles.css`) | `projects/hell-docs/src/styles.css` (188.64 kB)<br>`angular:styles/global:styles` (0 B) |
+| 1 | `styles-SHF3PUCH.css` | 191.68 kB | Docs global stylesheet (`styles.css`) | `projects/hell-docs/src/styles.css` (191.68 kB)<br>`angular:styles/global:styles` (0 B) |
 | 2 | `chunk-MWRJDVZP.js` | 183.74 kB | Angular runtime baseline | `node_modules/.pnpm/@angular+core@21.2.13_@angular+compiler@21.2.13_rxjs@7.8.2/node_modules/@angular/core/fesm2022/_debug_node-chunk.mjs` (98.25 kB)<br>`node_modules/.pnpm/@angular+core@21.2.13_@angular+compiler@21.2.13_rxjs@7.8.2/node_modules/@angular/core/fesm2022/_effect-chunk2.mjs` (24.74 kB)<br>`node_modules/.pnpm/@angular+core@21.2.13_@angular+compiler@21.2.13_rxjs@7.8.2/node_modules/@angular/core/fesm2022/core.mjs` (16.65 kB) |
 | 3 | `chunk-5TBVP3O2.js` | 78.73 kB | Docs router shell | `node_modules/.pnpm/@angular+router@21.2.13_@angular+common@21.2.13_@angular+core@21.2.13_@angular+compiler_3a63d3eb80a3a395ad0c90972845f556/node_modules/@angular/router/fesm2022/_router-chunk.mjs` (67.56 kB)<br>`node_modules/.pnpm/@angular+router@21.2.13_@angular+common@21.2.13_@angular+core@21.2.13_@angular+compiler_3a63d3eb80a3a395ad0c90972845f556/node_modules/@angular/router/fesm2022/_router_module-chunk.mjs` (10.32 kB)<br>`node_modules/.pnpm/@angular+router@21.2.13_@angular+common@21.2.13_@angular+core@21.2.13_@angular+compiler_3a63d3eb80a3a395ad0c90972845f556/node_modules/@angular/router/fesm2022/router.mjs` (0 B) |
 | 4 | `chunk-OV2DKPRR.js` | 74.86 kB | Docs search / omnibar shell | `node_modules/.pnpm/@angular+cdk@21.2.11_@angular+common@21.2.13_@angular+core@21.2.13_@angular+compiler@21_04df65e2704088424dcd37e685ec6dc2/node_modules/@angular/cdk/fesm2022/_overlay-module-chunk.mjs` (39.50 kB)<br>`dist/hell/fesm2022/hell-ui-angular-omnibar.mjs` (34.24 kB)<br>`node_modules/.pnpm/@angular+cdk@21.2.11_@angular+common@21.2.13_@angular+core@21.2.13_@angular+compiler@21_04df65e2704088424dcd37e685ec6dc2/node_modules/@angular/cdk/fesm2022/_test-environment-chunk.mjs` (138 B) |
