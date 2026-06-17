@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   Directive,
+  ElementRef,
+  Renderer2,
   computed,
   effect,
   inject,
@@ -329,6 +331,18 @@ export class HellDateRangePicker extends HellStyleable {
 
   protected readonly labels = inject(HELL_LABELS);
   private readonly state = injectDateRangePickerState<Date>();
+  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly renderer = inject(Renderer2);
+  private readonly rangeCompletionState = effect(() => {
+    const complete = Boolean(this.state().startDate() && this.state().endDate());
+    const element = this.elementRef.nativeElement;
+
+    if (complete) {
+      this.renderer.setAttribute(element, 'data-range-complete', '');
+    } else {
+      this.renderer.removeAttribute(element, 'data-range-complete');
+    }
+  });
 
   protected readonly label = computed(() =>
     formatMonthLabel(this.state().focusedDate(), this.locale()),

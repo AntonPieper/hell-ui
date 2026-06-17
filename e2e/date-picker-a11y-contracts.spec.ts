@@ -184,6 +184,45 @@ test.describe('date picker browser accessibility contract', () => {
     await expectStandaloneRangeButton(picker, 22);
     await expect(example).toContainText(/Wed Apr 22 2026\s*\u2192\s*Wed Apr 22 2026/);
   });
+
+  test('range picker keeps completed ranges visible across month and year views', async ({
+    page,
+  }) => {
+    await gotoDatePicker(page);
+
+    const example = page.locator('app-date-picker-range-example');
+    const picker = example.locator('hell-date-range-picker');
+    await navigateMonths(picker, 7);
+    await expect(monthLabel(picker, 'November 2026')).toBeVisible();
+
+    await dayButton(picker, 24).click();
+    await navigateMonths(picker, 2);
+    await expect(monthLabel(picker, 'January 2027')).toBeVisible();
+    await dayButton(picker, 2).click();
+
+    await expect(picker).toHaveAttribute('data-range-complete', '');
+    await expectRangeDays(picker, {
+      between: [1],
+      end: 2,
+    });
+    await expectSquareRangeButtons(picker);
+    await expect(example).toContainText(/Tue Nov 24 2026\s*\u2192\s*Sat Jan 02 2027/);
+
+    await navigateMonths(picker, -1);
+    await expect(monthLabel(picker, 'December 2026')).toBeVisible();
+    await expectRangeDays(picker, {
+      between: [1, 15, 31],
+    });
+    await expectSquareRangeButtons(picker);
+
+    await navigateMonths(picker, -1);
+    await expect(monthLabel(picker, 'November 2026')).toBeVisible();
+    await expectRangeDays(picker, {
+      start: 24,
+      between: [25, 26, 27, 28, 29, 30],
+    });
+    await expectSquareRangeButtons(picker);
+  });
 });
 
 function monthLabel(picker: Locator, name: string): Locator {
@@ -222,25 +261,37 @@ async function expectPickerLayoutAligned(picker: Locator): Promise<void> {
 
 async function expectRangeDays(
   picker: Locator,
-  selection: { start: number; between: readonly number[]; end: number },
+  selection: { start?: number; between: readonly number[]; end?: number },
 ): Promise<void> {
-  await expect(dayButton(picker, selection.start)).toHaveAttribute('data-range-start', '');
+  if (selection.start !== undefined) {
+    await expect(dayButton(picker, selection.start)).toHaveAttribute('data-range-start', '');
+  }
 
   for (const day of selection.between) {
     await expect(dayButton(picker, day)).toHaveAttribute('data-range-between', '');
   }
 
-  await expect(dayButton(picker, selection.end)).toHaveAttribute('data-range-end', '');
+  if (selection.end !== undefined) {
+    await expect(dayButton(picker, selection.end)).toHaveAttribute('data-range-end', '');
+  }
 }
 
 async function expectSquareRangeButtons(picker: Locator): Promise<void> {
   const geometry = await picker.evaluate((element) => {
+    const buttons = Array.from(
+      element.querySelectorAll<HTMLElement>('.hell-date-picker-grid tbody button'),
+    );
     const referenceButton =
-      Array.from(
-        element.querySelectorAll<HTMLElement>(
-          '.hell-date-picker-grid tbody button:not([data-range-start]):not([data-range-between]):not([data-range-end])',
-        ),
-      ).find((button) => !button.hasAttribute('data-outside-month')) ?? null;
+      buttons.find(
+        (button) =>
+          !button.hasAttribute('data-outside-month') &&
+          !button.hasAttribute('data-range-start') &&
+          !button.hasAttribute('data-range-between') &&
+          !button.hasAttribute('data-range-end'),
+      ) ??
+      buttons.find((button) => !button.hasAttribute('data-outside-month')) ??
+      buttons[0] ??
+      null;
     const referenceCell = referenceButton?.closest<HTMLTableCellElement>('td') ?? null;
     const referenceButtonBox = referenceButton?.getBoundingClientRect();
     const referenceCellBox = referenceCell?.getBoundingClientRect();
@@ -273,9 +324,13 @@ async function expectSquareRangeButtons(picker: Locator): Promise<void> {
                 kind,
                 cellLeft: cellBox.left,
                 cellRight: cellBox.right,
+                cellTop: cellBox.top,
+                cellBottom: cellBox.bottom,
                 cellWidth: cellBox.width,
                 buttonLeft: buttonBox.left,
                 buttonRight: buttonBox.right,
+                buttonTop: buttonBox.top,
+                buttonBottom: buttonBox.bottom,
                 buttonCenter: buttonBox.left + buttonBox.width / 2,
                 buttonWidth: buttonBox.width,
                 buttonHeight: buttonBox.height,
@@ -302,12 +357,25 @@ async function expectSquareRangeButtons(picker: Locator): Promise<void> {
   expect(geometry.referenceButtonWidth).toBeGreaterThan(0);
   expect(geometry.referenceCellWidth).toBeGreaterThan(0);
 
-  for (const row of rows) {
+  for (const [rowIndex, row] of rows.entries()) {
+    if (rowIndex > 0) {
+      const previousCell = rows[rowIndex - 1][0];
+      const currentCell = row[0];
+      expect(
+        currentCell.buttonTop - previousCell.buttonBottom,
+        `range rows ending at ${previousCell.day} and starting at ${currentCell.day} should keep a vertical gap`,
+      ).toBeGreaterThan(1);
+    }
+
     for (const [index, cell] of row.entries()) {
       expectNoCellRail(cell, `range day ${cell.day}`);
 
       if (index > 0) {
         const previous = row[index - 1];
+        expect(
+          cell.cellLeft - previous.cellRight,
+          `range cells ${previous.day} and ${cell.day} should touch horizontally`,
+        ).toBeLessThanOrEqual(1);
         expect(
           cell.buttonLeft - previous.buttonRight,
           `range buttons ${previous.day} and ${cell.day} should touch horizontally`,
@@ -382,9 +450,13 @@ async function expectStandaloneRangeButton(picker: Locator, day: number): Promis
         kind: 'single',
         cellLeft: cellBox.left,
         cellRight: cellBox.right,
+        cellTop: cellBox.top,
+        cellBottom: cellBox.bottom,
         cellWidth: cellBox.width,
         buttonLeft: buttonBox.left,
         buttonRight: buttonBox.right,
+        buttonTop: buttonBox.top,
+        buttonBottom: buttonBox.bottom,
         buttonCenter: buttonBox.left + buttonBox.width / 2,
         buttonWidth: buttonBox.width,
         buttonHeight: buttonBox.height,
@@ -417,9 +489,13 @@ interface RangeCellGeometry {
   readonly kind: string;
   readonly cellLeft: number;
   readonly cellRight: number;
+  readonly cellTop: number;
+  readonly cellBottom: number;
   readonly cellWidth: number;
   readonly buttonLeft: number;
   readonly buttonRight: number;
+  readonly buttonTop: number;
+  readonly buttonBottom: number;
   readonly buttonCenter: number;
   readonly buttonWidth: number;
   readonly buttonHeight: number;
@@ -512,6 +588,13 @@ function expectNoCellRail(cell: RangeCellGeometry, label: string): void {
 
 function isTransparentColor(value: string): boolean {
   return value === 'transparent' || value === 'rgba(0, 0, 0, 0)' || /\/\s*0\)?$/.test(value.trim());
+}
+
+async function navigateMonths(picker: Locator, delta: number): Promise<void> {
+  const direction = delta > 0 ? 'Next month' : 'Previous month';
+  for (let index = 0; index < Math.abs(delta); index += 1) {
+    await picker.getByRole('button', { name: direction }).click();
+  }
 }
 
 async function requiredBox(

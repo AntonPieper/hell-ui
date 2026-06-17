@@ -41,6 +41,7 @@
 
   .hell-date-picker-grid {
     width: 100%;
+    border-collapse: separate;
     border-spacing: 0 var(--spacing-hell-1);
     table-layout: fixed;
     & th {
@@ -113,7 +114,7 @@
     }
   }
 
-  .hell-date-picker:has([data-range-end]) {
+  .hell-date-picker[data-range-complete] {
     & [data-range-start]:not([data-range-end]) {
       border-radius: 0.25rem 0 0 0.25rem;
     }
