@@ -107,10 +107,15 @@
   }
 
   .hell-date-picker:has([data-range-end]) {
-    & [data-range-start]:not([data-range-end]),
-    & [data-range-end]:not([data-range-start]),
-    & [data-range-between] {
-      width: 100%;
+    & [data-range-start],
+    & [data-range-end] {
+      background: var(--color-hell-primary);
+      color: var(--color-hell-primary-foreground);
+    }
+
+    & [data-range-start][data-disabled],
+    & [data-range-end][data-disabled] {
+      color: var(--color-hell-foreground-subtle);
     }
 
     & [data-range-start]:not([data-range-end]) {

@@ -136,7 +136,7 @@ test.describe('date picker browser accessibility contract', () => {
       between: [6, 7, 8, 9, 10, 11],
       end: 12,
     });
-    await expectContiguousRangeButtons(disabledRangePicker);
+    await expectStableRangeButtons(disabledRangePicker);
   });
 
   test('range picker exposes start, between, end states and keyboard range reselection', async ({
@@ -152,7 +152,7 @@ test.describe('date picker browser accessibility contract', () => {
       between: [6, 7, 8, 9, 10, 11],
       end: 12,
     });
-    await expectContiguousRangeButtons(picker);
+    await expectStableRangeButtons(picker);
     await expect(example).toContainText('Sun Apr 05 2026');
     await expect(example).toContainText('Sun Apr 12 2026');
 
@@ -172,7 +172,7 @@ test.describe('date picker browser accessibility contract', () => {
       between: [],
       end: 19,
     });
-    await expectContiguousRangeButtons(picker);
+    await expectStableRangeButtons(picker);
     await expect(example).toContainText('Sun Apr 19 2026');
 
     await dayButton(picker, 22).focus();
@@ -233,14 +233,21 @@ async function expectRangeDays(
   await expect(dayButton(picker, selection.end)).toHaveAttribute('data-range-end', '');
 }
 
-async function expectContiguousRangeButtons(picker: Locator): Promise<void> {
+async function expectStableRangeButtons(picker: Locator): Promise<void> {
   const geometry = await picker.evaluate((element) => {
-    const grid = element.querySelector<HTMLElement>('.hell-date-picker-grid');
-    const gridBox = grid?.getBoundingClientRect();
+    const referenceButton =
+      Array.from(
+        element.querySelectorAll<HTMLElement>(
+          '.hell-date-picker-grid tbody button:not([data-range-start]):not([data-range-between]):not([data-range-end])',
+        ),
+      ).find((button) => !button.hasAttribute('data-outside-month')) ?? null;
+    const referenceCell = referenceButton?.closest<HTMLTableCellElement>('td') ?? null;
+    const referenceButtonBox = referenceButton?.getBoundingClientRect();
+    const referenceCellBox = referenceCell?.getBoundingClientRect();
 
     return {
-      gridLeft: gridBox?.left ?? 0,
-      gridRight: gridBox?.right ?? 0,
+      referenceButtonWidth: referenceButtonBox?.width ?? 0,
+      referenceCellWidth: referenceCellBox?.width ?? 0,
       rows: Array.from(element.querySelectorAll('tbody tr'))
         .map((row) => {
           return Array.from(row.querySelectorAll<HTMLTableCellElement>('td')).flatMap((cell) => {
@@ -290,51 +297,55 @@ async function expectContiguousRangeButtons(picker: Locator): Promise<void> {
   const rows = geometry.rows;
   const cells = rows.flat();
   expect(cells.length).toBeGreaterThan(0);
+  expect(geometry.referenceButtonWidth).toBeGreaterThan(0);
+  expect(geometry.referenceCellWidth).toBeGreaterThan(0);
 
-  for (const [rowIndex, row] of rows.entries()) {
-    const first = row[0];
-    const last = row[row.length - 1];
-    const wrapsIn = rowIndex > 0 && first.kind !== 'start' && first.kind !== 'single';
-    const wrapsOut = rowIndex < rows.length - 1 && last.kind !== 'end' && last.kind !== 'single';
-
-    if (wrapsIn) {
-      expect(
-        Math.abs(first.buttonLeft - geometry.gridLeft),
-        'range selection should enter wrapped row',
-      ).toBeLessThanOrEqual(1);
-    }
-
-    if (wrapsOut) {
-      expect(
-        Math.abs(last.buttonRight - geometry.gridRight),
-        'range selection should leave wrapped row without a missing terminal cell',
-      ).toBeLessThanOrEqual(1);
-    }
-
+  for (const row of rows) {
     for (const [index, cell] of row.entries()) {
       expectNoCellRail(cell, `range day ${cell.day}`);
 
       if (index > 0) {
         const previous = row[index - 1];
         expect(
-          Math.abs(cell.buttonLeft - previous.buttonRight),
-          `range buttons ${previous.day} and ${cell.day} should touch`,
-        ).toBeLessThanOrEqual(1);
+          cell.buttonLeft - previous.buttonRight,
+          `range buttons ${previous.day} and ${cell.day} should keep their stable compact widths`,
+        ).toBeGreaterThan(0);
       }
 
       if (cell.kind === 'between') {
-        expectFullCellRangeButton(cell, `range day ${cell.day}`);
+        expectStableDateButtonGeometry(
+          cell,
+          geometry.referenceButtonWidth,
+          geometry.referenceCellWidth,
+          `range day ${cell.day}`,
+        );
         expectButtonFill(cell, `range day ${cell.day}`);
         expectNoRadius(cell, `range day ${cell.day}`);
       } else if (cell.kind === 'start') {
-        expectFullCellRangeButton(cell, `range start ${cell.day}`);
+        expectStableDateButtonGeometry(
+          cell,
+          geometry.referenceButtonWidth,
+          geometry.referenceCellWidth,
+          `range start ${cell.day}`,
+        );
         expectButtonFill(cell, `range start ${cell.day}`);
         expectOutsideLeftRadius(cell, `range start ${cell.day}`);
       } else if (cell.kind === 'end') {
-        expectFullCellRangeButton(cell, `range end ${cell.day}`);
+        expectStableDateButtonGeometry(
+          cell,
+          geometry.referenceButtonWidth,
+          geometry.referenceCellWidth,
+          `range end ${cell.day}`,
+        );
         expectButtonFill(cell, `range end ${cell.day}`);
         expectOutsideRightRadius(cell, `range end ${cell.day}`);
       } else {
+        expectStableDateButtonGeometry(
+          cell,
+          geometry.referenceButtonWidth,
+          geometry.referenceCellWidth,
+          `single-day range ${cell.day}`,
+        );
         expectStandaloneRangeCell(cell, `single-day range ${cell.day}`);
       }
     }
@@ -342,38 +353,59 @@ async function expectContiguousRangeButtons(picker: Locator): Promise<void> {
 }
 
 async function expectStandaloneRangeButton(picker: Locator, day: number): Promise<void> {
-  const cell = await dayButton(picker, day).evaluate((button) => {
+  const geometry = await dayButton(picker, day).evaluate((button) => {
     const tableCell = button.closest<HTMLTableCellElement>('td');
     if (!tableCell) throw new Error('date button should be inside a table cell');
 
+    const root = button.closest('hell-date-picker, hell-date-range-picker') ?? button.ownerDocument;
+    const referenceButton =
+      Array.from(
+        root.querySelectorAll<HTMLElement>(
+          '.hell-date-picker-grid tbody button:not([data-range-start]):not([data-range-between]):not([data-range-end])',
+        ),
+      ).find((candidate) => !candidate.hasAttribute('data-outside-month')) ?? null;
+    const referenceCell = referenceButton?.closest<HTMLTableCellElement>('td') ?? null;
+    const referenceButtonBox = referenceButton?.getBoundingClientRect();
+    const referenceCellBox = referenceCell?.getBoundingClientRect();
     const cellBox = tableCell.getBoundingClientRect();
     const buttonBox = button.getBoundingClientRect();
     const before = getComputedStyle(tableCell, '::before');
     const buttonStyle = getComputedStyle(button);
 
     return {
-      day: button.textContent?.trim() ?? '',
-      kind: 'single',
-      cellLeft: cellBox.left,
-      cellRight: cellBox.right,
-      cellWidth: cellBox.width,
-      buttonLeft: buttonBox.left,
-      buttonRight: buttonBox.right,
-      buttonCenter: buttonBox.left + buttonBox.width / 2,
-      buttonWidth: buttonBox.width,
-      cellCenter: cellBox.left + cellBox.width / 2,
-      cellPseudoBackgroundColor: before.backgroundColor,
-      cellPseudoBackgroundImage: before.backgroundImage,
-      buttonBackgroundColor: buttonStyle.backgroundColor,
-      radiusTopLeft: parseFloat(buttonStyle.borderTopLeftRadius),
-      radiusTopRight: parseFloat(buttonStyle.borderTopRightRadius),
-      radiusBottomRight: parseFloat(buttonStyle.borderBottomRightRadius),
-      radiusBottomLeft: parseFloat(buttonStyle.borderBottomLeftRadius),
+      referenceButtonWidth: referenceButtonBox?.width ?? 0,
+      referenceCellWidth: referenceCellBox?.width ?? 0,
+      cell: {
+        day: button.textContent?.trim() ?? '',
+        kind: 'single',
+        cellLeft: cellBox.left,
+        cellRight: cellBox.right,
+        cellWidth: cellBox.width,
+        buttonLeft: buttonBox.left,
+        buttonRight: buttonBox.right,
+        buttonCenter: buttonBox.left + buttonBox.width / 2,
+        buttonWidth: buttonBox.width,
+        cellCenter: cellBox.left + cellBox.width / 2,
+        cellPseudoBackgroundColor: before.backgroundColor,
+        cellPseudoBackgroundImage: before.backgroundImage,
+        buttonBackgroundColor: buttonStyle.backgroundColor,
+        radiusTopLeft: parseFloat(buttonStyle.borderTopLeftRadius),
+        radiusTopRight: parseFloat(buttonStyle.borderTopRightRadius),
+        radiusBottomRight: parseFloat(buttonStyle.borderBottomRightRadius),
+        radiusBottomLeft: parseFloat(buttonStyle.borderBottomLeftRadius),
+      },
     };
   });
 
-  expectCompactCenteredRangeButton(cell);
-  expectStandaloneRangeCell(cell, `standalone range day ${day}`);
+  expect(geometry.referenceButtonWidth).toBeGreaterThan(0);
+  expect(geometry.referenceCellWidth).toBeGreaterThan(0);
+  expectStableDateButtonGeometry(
+    geometry.cell,
+    geometry.referenceButtonWidth,
+    geometry.referenceCellWidth,
+    `standalone range day ${day}`,
+  );
+  expectStandaloneRangeCell(geometry.cell, `standalone range day ${day}`);
 }
 
 interface RangeCellGeometry {
@@ -396,25 +428,26 @@ interface RangeCellGeometry {
   readonly radiusBottomLeft: number;
 }
 
-function expectCompactCenteredRangeButton(cell: RangeCellGeometry): void {
+function expectStableDateButtonGeometry(
+  cell: RangeCellGeometry,
+  referenceButtonWidth: number,
+  referenceCellWidth: number,
+  label: string,
+): void {
   expect(
-    cell.buttonWidth,
-    `range day ${cell.day} should keep the compact button size`,
-  ).toBeLessThan(cell.cellWidth - 0.75);
-  expect(
-    Math.abs(cell.buttonCenter - cell.cellCenter),
-    `range day ${cell.day} button should stay centered in its grid cell`,
+    Math.abs(cell.buttonWidth - referenceButtonWidth),
+    `${label} should keep the same button width as a neutral date`,
   ).toBeLessThanOrEqual(1);
-}
-
-function expectFullCellRangeButton(cell: RangeCellGeometry, label: string): void {
   expect(
-    cell.buttonWidth,
-    `${label} should fill the date cell instead of relying on a separate rail`,
-  ).toBeGreaterThanOrEqual(cell.cellWidth - 1);
+    Math.abs(cell.cellWidth - referenceCellWidth),
+    `${label} should not resize its date cell`,
+  ).toBeLessThanOrEqual(1);
+  expect(cell.buttonWidth, `${label} should keep the compact button size`).toBeLessThan(
+    cell.cellWidth - 0.75,
+  );
   expect(
     Math.abs(cell.buttonCenter - cell.cellCenter),
-    `${label} should stay centered in its grid cell`,
+    `${label} button should stay centered in its grid cell`,
   ).toBeLessThanOrEqual(1);
 }
 
