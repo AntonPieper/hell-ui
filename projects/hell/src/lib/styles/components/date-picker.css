@@ -95,6 +95,7 @@
       }
       &[data-selected] {
         background: var(--color-hell-primary);
+        background-color: var(--color-hell-primary);
         color: var(--color-hell-primary-foreground);
       }
       &[data-disabled] {
@@ -105,6 +106,7 @@
       &[data-range-start],
       &[data-range-end] {
         background: var(--color-hell-primary);
+        background-color: var(--color-hell-primary);
         color: var(--color-hell-primary-foreground);
       }
       &[data-range-start][data-disabled],
@@ -125,6 +127,7 @@
 
     & [data-range-between]:not([data-range-start], [data-range-end]) {
       background: var(--_range);
+      background-color: var(--_range);
       color: var(--color-hell-primary-soft-foreground);
       border-radius: 0;
     }

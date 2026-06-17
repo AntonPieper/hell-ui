@@ -33,7 +33,7 @@ const ciGroups = [
     name: 'aria-snapshots-overlays-data',
     testMatch: 'aria-snapshots.spec.ts',
     grep:
-      /dialog|flyout|menu snapshot|popover snapshots|select snapshots|combobox|slider|omnibar|table utility/,
+      /dialog|dialpad|flyout|menu snapshot|popover snapshots|select snapshots|combobox|slider|omnibar|table utility/,
   },
   {
     name: 'docs-smoke-foundations',
@@ -45,7 +45,7 @@ const ciGroups = [
     name: 'docs-smoke-surfaces',
     testMatch: 'docs-axe-smoke.spec.ts',
     grep:
-      /dialog|flyout|listbox|popover|menu|select|combobox|omnibar|table|time.*input|pdf.*viewer/,
+      /dialog|dialpad|flyout|listbox|popover|menu|select|combobox|omnibar|table|time.*input|pdf.*viewer/,
   },
   {
     name: 'controls-a11y',

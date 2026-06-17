@@ -1,0 +1,30 @@
+- group "Dial pad":
+    - text: ''
+    - status "Number"
+    - button "Clear" [disabled]
+    - button "Backspace" [disabled]
+    - button "Digit 1"
+    - button "Digit 2, ABC"
+    - button "Digit 3, DEF"
+    - button "Digit 4, GHI"
+    - button "Digit 5, JKL"
+    - button "Digit 6, MNO"
+    - button "Digit 7, PQRS"
+    - button "Digit 8, TUV"
+    - button "Digit 9, WXYZ"
+    - button "Star"
+    - button "Digit 0, plus"
+    - button "Pound"
+    - button "Call" [disabled]
+- button "Disabled"
+- button "Readonly"
+- button "Invalid" [pressed]
+- term: Last digit
+- definition:
+    - code: —
+- term: Current number
+- definition:
+    - code: —
+- term: Last call
+- definition:
+    - code: —

@@ -411,12 +411,12 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     name: 'Dialpad',
     path: '/components/dialpad',
     rolePattern:
-      'role=group with focusable keypad container, native digit/backspace/call buttons, and polite output.',
+      'role=group with focusable keypad container, named native digit/clear/backspace/call buttons, visible focus, state data attributes, and polite output.',
     keyboardCoverage:
-      'Source handles digit keys and Backspace on the focused dialpad; no browser test covers it.',
-    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
-    knownGaps:
-      'Needs browser coverage for keyboard digit entry, live output, and call/backspace button names.',
+      'Browser contract covers focused keyboard digit entry, child-focus keyboard entry, Backspace delete, Delete clear, Enter call, and Tab focus order.',
+    automatedCoverage:
+      'ARIA snapshot covers named keys/actions and states; docs axe smoke includes the dialpad page.',
+    knownGaps: 'No critical gap recorded; full phone-number formatting remains consumer-owned.',
   },
   {
     kind: 'Composite',

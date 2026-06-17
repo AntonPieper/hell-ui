@@ -15,6 +15,31 @@ class DialpadHost {
 }
 
 @Component({
+  selector: 'app-stated-dialpad-host',
+  imports: [HellDialpad],
+  template: `
+    <hell-dialpad
+      [value]="value()"
+      [disabled]="disabled()"
+      [readOnly]="readOnly()"
+      [invalid]="invalid()"
+      (digit)="digits.push($event)"
+      (valueChange)="values.push($event)"
+      (call)="calls.push($event)"
+    />
+  `,
+})
+class StatedDialpadHost {
+  readonly value = signal('');
+  readonly disabled = signal(false);
+  readonly readOnly = signal(false);
+  readonly invalid = signal(false);
+  readonly digits: string[] = [];
+  readonly values: string[] = [];
+  readonly calls: string[] = [];
+}
+
+@Component({
   selector: 'app-localized-dialpad-host',
   imports: [HellDialpad],
   providers: [
@@ -43,7 +68,7 @@ class ControlledDialpadHost {
 describe('HellDialpad labels', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DialpadHost, LocalizedDialpadHost, ControlledDialpadHost],
+      imports: [DialpadHost, StatedDialpadHost, LocalizedDialpadHost, ControlledDialpadHost],
     }).compileComponents();
   });
 
@@ -54,7 +79,12 @@ describe('HellDialpad labels', () => {
     const host = fixture.nativeElement;
 
     expect(query(host, 'hell-dialpad').getAttribute('aria-label')).toBe('Dial pad');
+    expect(query(host, '[data-slot="display-label"]').textContent?.trim()).toBe('Number');
+    expect(query(host, '[data-slot="clear"]').textContent?.trim()).toBe('Clear');
     expect(query(host, '[data-slot="back"]').getAttribute('aria-label')).toBe('Backspace');
+    expect(query(host, '[data-key="2"]').getAttribute('aria-label')).toBe('Digit 2, ABC');
+    expect(query(host, '[data-key="*"]').getAttribute('aria-label')).toBe('Star');
+    expect(query(host, '[data-key="#"]').getAttribute('aria-label')).toBe('Pound');
     expect(query(host, '[data-slot="call"]').textContent?.trim()).toBe('Call');
   });
 
@@ -110,6 +140,127 @@ describe('HellDialpad labels', () => {
     expect(normalizeDisplay(query(host, '[data-slot="number-inner"]').textContent)).toBe('');
   });
 
+  it('handles keyboard input while a child key has focus', () => {
+    const fixture = TestBed.createComponent(DialpadHost);
+    const host = fixture.nativeElement;
+    fixture.detectChanges();
+
+    const two = query<HTMLButtonElement>(host, '[data-key="2"]');
+    two.focus();
+
+    const digit = dispatchKey(two, '7');
+    fixture.detectChanges();
+
+    expect(digit.defaultPrevented).toBe(true);
+    expect(fixture.componentInstance.digits).toEqual(['7']);
+    expect(fixture.componentInstance.values).toEqual(['7']);
+    expect(normalizeDisplay(query(host, '[data-slot="number-inner"]').textContent)).toBe('7');
+  });
+
+  it('clears with Delete and submits with Enter from host focus', () => {
+    const fixture = TestBed.createComponent(DialpadHost);
+    const host = fixture.nativeElement;
+    fixture.detectChanges();
+
+    const dialpad = query(host, 'hell-dialpad');
+    dispatchKey(dialpad, '1');
+    dispatchKey(dialpad, '2');
+    fixture.detectChanges();
+
+    const enter = dispatchKey(dialpad, 'Enter');
+    fixture.detectChanges();
+
+    expect(enter.defaultPrevented).toBe(true);
+    expect(fixture.componentInstance.values).toEqual(['1', '12']);
+    expect(normalizeDisplay(query(host, '[data-slot="number-inner"]').textContent)).toBe('12');
+
+    const clear = dispatchKey(dialpad, 'Delete');
+    fixture.detectChanges();
+
+    expect(clear.defaultPrevented).toBe(true);
+    expect(fixture.componentInstance.values).toEqual(['1', '12', '']);
+    expect(normalizeDisplay(query(host, '[data-slot="number-inner"]').textContent)).toBe('');
+  });
+
+  it('emits call from the call button and host Enter', () => {
+    const fixture = TestBed.createComponent(StatedDialpadHost);
+    fixture.componentInstance.value.set('5550137');
+    const host = fixture.nativeElement;
+    fixture.detectChanges();
+
+    query<HTMLButtonElement>(host, '[data-slot="call"]').click();
+    fixture.detectChanges();
+
+    const dialpad = query(host, 'hell-dialpad');
+    dispatchKey(dialpad, 'Enter');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.calls).toEqual(['5550137', '5550137']);
+  });
+
+  it('exposes disabled state and blocks keyboard and pointer edits', () => {
+    const fixture = TestBed.createComponent(StatedDialpadHost);
+    fixture.componentInstance.value.set('12');
+    fixture.componentInstance.disabled.set(true);
+    const host = fixture.nativeElement;
+    fixture.detectChanges();
+
+    const dialpad = query(host, 'hell-dialpad');
+    expect(dialpad.getAttribute('aria-disabled')).toBe('true');
+    expect(dialpad.getAttribute('data-disabled')).toBe('');
+    expect(dialpad.getAttribute('tabindex')).toBe('-1');
+    expect(query<HTMLButtonElement>(host, '[data-key="3"]').disabled).toBe(true);
+    expect(query<HTMLButtonElement>(host, '[data-slot="clear"]').disabled).toBe(true);
+    expect(query<HTMLButtonElement>(host, '[data-slot="back"]').disabled).toBe(true);
+    expect(query<HTMLButtonElement>(host, '[data-slot="call"]').disabled).toBe(true);
+
+    dispatchKey(dialpad, '3');
+    query<HTMLButtonElement>(host, '[data-key="3"]').click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.digits).toEqual([]);
+    expect(fixture.componentInstance.values).toEqual([]);
+    expect(normalizeDisplay(query(host, '[data-slot="number-inner"]').textContent)).toBe('12');
+  });
+
+  it('keeps readonly values callable while blocking edits', () => {
+    const fixture = TestBed.createComponent(StatedDialpadHost);
+    fixture.componentInstance.value.set('12');
+    fixture.componentInstance.readOnly.set(true);
+    const host = fixture.nativeElement;
+    fixture.detectChanges();
+
+    const dialpad = query(host, 'hell-dialpad');
+    expect(dialpad.getAttribute('data-readonly')).toBe('');
+    expect(query<HTMLButtonElement>(host, '[data-key="3"]').disabled).toBe(true);
+    expect(query<HTMLButtonElement>(host, '[data-slot="clear"]').disabled).toBe(true);
+    expect(query<HTMLButtonElement>(host, '[data-slot="back"]').disabled).toBe(true);
+    expect(query<HTMLButtonElement>(host, '[data-slot="call"]').disabled).toBe(false);
+
+    const digit = dispatchKey(dialpad, '3');
+    dispatchKey(dialpad, 'Backspace');
+    dispatchKey(dialpad, 'Enter');
+    fixture.detectChanges();
+
+    expect(digit.defaultPrevented).toBe(true);
+    expect(fixture.componentInstance.digits).toEqual([]);
+    expect(fixture.componentInstance.values).toEqual([]);
+    expect(fixture.componentInstance.calls).toEqual(['12']);
+    expect(normalizeDisplay(query(host, '[data-slot="number-inner"]').textContent)).toBe('12');
+  });
+
+  it('exposes invalid state for styling and accessibility', () => {
+    const fixture = TestBed.createComponent(StatedDialpadHost);
+    fixture.componentInstance.invalid.set(true);
+    const host = fixture.nativeElement;
+    fixture.detectChanges();
+
+    const dialpad = query(host, 'hell-dialpad');
+
+    expect(dialpad.getAttribute('aria-invalid')).toBe('true');
+    expect(dialpad.getAttribute('data-invalid')).toBe('');
+  });
+
   it('treats an explicit empty controlled value as controlled state', () => {
     const fixture = TestBed.createComponent(ControlledDialpadHost);
     fixture.componentInstance.value.set('');
@@ -125,6 +276,7 @@ describe('HellDialpad labels', () => {
     }
 
     expect(backspace.getAttribute('disabled')).toBe('');
+    expect(query(host, '[data-slot="clear"]').getAttribute('disabled')).toBe('');
 
     firstDigit.click();
     fixture.detectChanges();
@@ -144,7 +296,8 @@ function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {
 }
 
 function normalizeDisplay(text: string | null): string {
-  return (text ?? '').replace(/\u00A0/g, '').trim();
+  const normalized = (text ?? '').replace(/\u00A0/g, '').trim();
+  return normalized === '—' ? '' : normalized;
 }
 
 function dispatchKey(target: HTMLElement, key: string): KeyboardEvent {

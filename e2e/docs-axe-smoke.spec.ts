@@ -65,6 +65,12 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     },
   },
   {
+    name: 'dialpad',
+    path: '/components/dialpad',
+    heading: 'Dialpad',
+    include: ['main'],
+  },
+  {
     name: 'flyout',
     path: '/components/flyout',
     heading: 'Flyout',
