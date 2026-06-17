@@ -25,7 +25,7 @@ interface TeamMember {
   providers: [provideIcons({ faSolidChevronDown, faSolidUsers })],
   template: `
     <ng-template #overflowMenu>
-      <div hellMenu class="hd-avatar-menu">
+      <div hellMenu class="hd-avatar-menu" aria-label="More people">
         <div hellMenuLabel>
           <span class="hd-avatar-menu-label">
             <hell-icon name="faSolidUsers" />
