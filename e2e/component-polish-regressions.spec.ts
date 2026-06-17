@@ -51,6 +51,16 @@ test.describe('component visual polish regressions', () => {
       const trackBox = await boxFor(track);
       const rangeBox = await boxFor(range);
       const thumbBox = await boxFor(thumb);
+      const visualTrack = await track.evaluate((element) => {
+        const box = element.getBoundingClientRect();
+        const trackStyles = getComputedStyle(element, '::before');
+        const top = Number.parseFloat(trackStyles.top) || 0;
+        const bottom = Number.parseFloat(trackStyles.bottom) || 0;
+        return {
+          top: box.top + top,
+          bottom: box.bottom - bottom,
+        };
+      });
 
       expect(sliderBox.y).toBeGreaterThanOrEqual(previewBox.y);
       expect(sliderBox.y + sliderBox.height).toBeLessThanOrEqual(previewBox.y + previewBox.height);
@@ -58,6 +68,9 @@ test.describe('component visual polish regressions', () => {
       expect(trackBox.y + trackBox.height).toBeLessThan(sliderBox.y + sliderBox.height);
       expect(Math.abs(centerX(trackBox) - centerX(thumbBox))).toBeLessThanOrEqual(1);
       expect(Math.abs(centerX(rangeBox) - centerX(trackBox))).toBeLessThanOrEqual(1);
+      expect(thumbBox.height).toBeLessThanOrEqual(14);
+      expect(thumbBox.y).toBeGreaterThanOrEqual(visualTrack.top - 1);
+      expect(thumbBox.y + thumbBox.height).toBeLessThanOrEqual(visualTrack.bottom + 1);
       expect(thumbBox.y).toBeGreaterThanOrEqual(previewBox.y);
       expect(thumbBox.y + thumbBox.height).toBeLessThanOrEqual(previewBox.y + previewBox.height);
     }
@@ -121,9 +134,9 @@ test.describe('component visual polish regressions', () => {
     });
 
     expect(colors.selected.backgroundColor).not.toBe(colors.group.backgroundColor);
-    expect(colors.selected.borderColor).not.toBe(colors.unselected.borderColor);
+    expect(colors.selected.borderColor).toBe(colors.unselected.borderColor);
     expect(colors.selected.color).not.toBe(colors.unselected.color);
-    expect(colors.selected.boxShadow).not.toBe('none');
+    expect(colors.selected.boxShadow).toBe('none');
 
     await unselected.hover();
     await expect(unselected).not.toHaveAttribute('data-selected');
@@ -131,6 +144,12 @@ test.describe('component visual polish regressions', () => {
       (element) => getComputedStyle(element).backgroundColor,
     );
     expect(hoverBackground).not.toBe(colors.unselected.backgroundColor);
+
+    await selected.hover();
+    const selectedHoverBackground = await selected.evaluate(
+      (element) => getComputedStyle(element).backgroundColor,
+    );
+    expect(selectedHoverBackground).toBe(colors.selected.backgroundColor);
   });
 
   test('avatar overflow trigger behaves like a group member and keeps menu keyboard access', async ({
@@ -149,6 +168,8 @@ test.describe('component visual polish regressions', () => {
         backgroundColor: styles.backgroundColor,
         color: styles.color,
         transform: styles.transform,
+        zIndex: styles.zIndex,
+        opacity: styles.opacity,
       };
     });
 
@@ -159,11 +180,15 @@ test.describe('component visual polish regressions', () => {
         backgroundColor: styles.backgroundColor,
         color: styles.color,
         transform: styles.transform,
+        zIndex: styles.zIndex,
+        opacity: styles.opacity,
       };
     });
     expect(hovered.backgroundColor).not.toBe(idle.backgroundColor);
     expect(hovered.color).not.toBe(idle.color);
-    expect(hovered.transform).not.toBe(idle.transform);
+    expect(hovered.transform).toBe(idle.transform);
+    expect(hovered.zIndex).toBe(idle.zIndex);
+    expect(hovered.opacity).toBe('1');
 
     await trigger.focus();
     await expect(trigger).toBeFocused();
@@ -175,11 +200,19 @@ test.describe('component visual polish regressions', () => {
     const openState = await trigger.evaluate((element) => ({
       ariaExpanded: element.getAttribute('aria-expanded'),
       dataOpen: element.hasAttribute('data-open'),
+      backgroundColor: getComputedStyle(element).backgroundColor,
       borderColor: getComputedStyle(element).borderColor,
       boxShadow: getComputedStyle(element).boxShadow,
+      opacity: getComputedStyle(element).opacity,
+      transform: getComputedStyle(element).transform,
+      zIndex: getComputedStyle(element).zIndex,
     }));
     expect(openState.ariaExpanded === 'true' || openState.dataOpen).toBe(true);
+    expect(openState.backgroundColor).not.toBe(idle.backgroundColor);
     expect(openState.boxShadow).not.toBe('none');
+    expect(openState.opacity).toBe('1');
+    expect(openState.transform).toBe(idle.transform);
+    expect(openState.zIndex).toBe(idle.zIndex);
 
     const triggerBox = await boxFor(trigger);
     const menuBox = await boxFor(menu);

@@ -51,9 +51,7 @@
     border-radius: calc(infinity * 1px);
     isolation: isolate;
     outline: none;
-    transition:
-      box-shadow var(--hell-duration-fast) var(--ease-hell-out),
-      transform var(--hell-duration-fast) var(--ease-hell-out);
+    transition: box-shadow var(--hell-duration-fast) var(--ease-hell-out);
     &:is(button, a) {
       border-width: 0;
       background-color: transparent;
@@ -63,10 +61,9 @@
       cursor: pointer;
     }
     &:is(button, a):active {
-      transform: translateY(0) scale(0.98);
+      box-shadow: var(--_hell-avatar-group-hover-shadow);
     }
     &[data-selected] {
-      z-index: 2;
       --_hell-avatar-group-ring-color: var(--color-hell-primary);
     }
     &[data-selected]:is(.hell-avatar),
@@ -107,8 +104,7 @@
       background-color var(--hell-duration-fast) var(--ease-hell-out),
       border-color var(--hell-duration-fast) var(--ease-hell-out),
       box-shadow var(--hell-duration-fast) var(--ease-hell-out),
-      color var(--hell-duration-fast) var(--ease-hell-out),
-      transform var(--hell-duration-fast) var(--ease-hell-out);
+      color var(--hell-duration-fast) var(--ease-hell-out);
     &:is(button, a) {
       cursor: pointer;
     }
@@ -119,14 +115,12 @@
     &:is(button, a):active,
     &[data-open],
     &[aria-expanded='true'] {
-      z-index: 4;
-      background-color: var(--color-hell-primary-soft);
-      border-color: var(--color-hell-primary);
-      color: var(--color-hell-primary-soft-foreground);
-      transform: translateY(0) scale(1);
+      background-color: var(--color-hell-surface-subtle);
+      border-color: var(--color-hell-border-strong);
+      color: var(--color-hell-foreground);
       box-shadow:
         0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-cutout),
-        0 0 0 calc(var(--_hell-avatar-group-ring-width) * 2) var(--color-hell-primary);
+        0 0 0 calc(var(--_hell-avatar-group-ring-width) * 2) var(--color-hell-border-strong);
     }
     &:focus-visible {
       z-index: 5;
@@ -138,9 +132,9 @@
   }
 
   .hell-avatar-group-item:is(button, a):hover:not(:active),
-  .hell-avatar-group-overflow:is(button, a):hover:not(:active):not([data-open]):not([aria-expanded='true']) {
-    z-index: 3;
-    transform: translateY(-1px) scale(1.03);
+  .hell-avatar-group-overflow:is(button, a):hover:not(:active):not([data-open]):not(
+      [aria-expanded='true']
+    ) {
     box-shadow: var(--_hell-avatar-group-hover-shadow);
   }
 }
