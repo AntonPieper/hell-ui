@@ -15,10 +15,14 @@
     align-items: center;
     width: 100%;
     height: calc(var(--spacing) * 6);
+    box-sizing: border-box;
     touch-action: none;
     -webkit-user-select: none;
     user-select: none;
     cursor: pointer;
+    --_hell-slider-track-size: calc(var(--spacing) * 1.5);
+    --_hell-slider-thumb-size: 18px;
+    --_hell-slider-thumb-clearance: calc(var(--_hell-slider-thumb-size) / 2);
     &[data-disabled] {
       opacity: 50%;
       cursor: not-allowed;
@@ -26,14 +30,25 @@
     }
     &[data-orientation='vertical'] {
       width: calc(var(--spacing) * 6);
-      height: 160px;
+      height: var(--hell-slider-vertical-height, 100%);
+      min-height: var(--hell-slider-vertical-min-height, calc(var(--spacing) * 24));
+      max-height: 100%;
+      padding-block: var(--_hell-slider-thumb-clearance);
       flex-direction: column;
     }
-    &[data-size='sm'] {
+    &[data-orientation='horizontal'][data-size='sm'] {
       height: calc(var(--spacing) * 5);
     }
-    &[data-size='lg'] {
+    &[data-orientation='horizontal'][data-size='lg'] {
       height: calc(var(--spacing) * 7);
+    }
+    &[data-size='sm'] {
+      --_hell-slider-track-size: calc(var(--spacing) * 1);
+      --_hell-slider-thumb-size: 14px;
+    }
+    &[data-size='lg'] {
+      --_hell-slider-track-size: calc(var(--spacing) * 2);
+      --_hell-slider-thumb-size: 22px;
     }
   }
 
@@ -41,6 +56,8 @@
     position: relative;
     flex: 1 1 auto;
     align-self: stretch;
+    min-width: 0;
+    min-height: 0;
     background-color: transparent;
     &::before {
       content: '';
@@ -48,7 +65,7 @@
       inset-inline: calc(var(--spacing) * 0);
       top: 50%;
       translate: 0 calc(calc(1 / 2 * 100%) * -1);
-      height: calc(var(--spacing) * 1.5);
+      height: var(--_hell-slider-track-size);
       border-radius: calc(infinity * 1px);
       background-color: var(--color-hell-surface-muted);
       box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.05);
@@ -63,22 +80,15 @@
         top: calc(var(--spacing) * 0);
         bottom: calc(var(--spacing) * 0);
         translate: calc(calc(1 / 2 * 100%) * -1) 0;
-        width: calc(var(--spacing) * 1.5);
+        width: var(--_hell-slider-track-size);
         height: auto;
       }
     }
-    [data-size='sm'] > &::before {
-      height: calc(var(--spacing) * 1);
+    [data-orientation='horizontal'][data-size] > &::before {
+      height: var(--_hell-slider-track-size);
     }
-    [data-size='lg'] > &::before {
-      height: calc(var(--spacing) * 2);
-    }
-    [data-orientation='vertical'][data-size='sm'] > &::before {
-      width: calc(var(--spacing) * 1);
-      height: auto;
-    }
-    [data-orientation='vertical'][data-size='lg'] > &::before {
-      width: calc(var(--spacing) * 2);
+    [data-orientation='vertical'][data-size] > &::before {
+      width: var(--_hell-slider-track-size);
       height: auto;
     }
   }
@@ -86,7 +96,7 @@
   .hell-slider-range {
     position: absolute;
     top: 50%;
-    height: calc(var(--spacing) * 1.5);
+    height: var(--_hell-slider-track-size);
     translate: 0 calc(calc(1 / 2 * 100%) * -1);
     border-radius: calc(infinity * 1px);
     background-image: linear-gradient(180deg, var(--color-hell-primary), var(--color-hell-primary));
@@ -103,22 +113,23 @@
       inset-inline: calc(1 / 2 * 100%);
       top: auto;
       height: auto;
-      width: calc(var(--spacing) * 1.5);
+      width: var(--_hell-slider-track-size);
       translate: calc(calc(1 / 2 * 100%) * -1) 0;
     }
-    [data-size='sm'] > [ngpSliderTrack] > & {
-      height: calc(var(--spacing) * 1);
+    [data-orientation='horizontal'][data-size] > [ngpSliderTrack] > & {
+      height: var(--_hell-slider-track-size);
     }
-    [data-size='lg'] > [ngpSliderTrack] > & {
-      height: calc(var(--spacing) * 2);
+    [data-orientation='vertical'][data-size] > [ngpSliderTrack] > & {
+      width: var(--_hell-slider-track-size);
+      height: auto;
     }
   }
 
   .hell-slider-thumb {
     position: absolute;
     display: block;
-    width: 18px;
-    height: 18px;
+    width: var(--_hell-slider-thumb-size);
+    height: var(--_hell-slider-thumb-size);
     border-radius: 50%;
     background-color: var(--color-white);
     --_hell-slider-thumb-border: var(--color-hell-primary);
@@ -163,12 +174,12 @@
       --_hell-slider-thumb-y: calc(calc(1 / 2 * 100%) * -1);
     }
     [data-size='sm'] > & {
-      width: 14px;
-      height: 14px;
+      width: var(--_hell-slider-thumb-size);
+      height: var(--_hell-slider-thumb-size);
     }
     [data-size='lg'] > & {
-      width: 22px;
-      height: 22px;
+      width: var(--_hell-slider-thumb-size);
+      height: var(--_hell-slider-thumb-size);
     }
     &[data-hover] {
       scale: 1.08;
@@ -226,7 +237,7 @@
     }
   }
 
-  .hell-slider[data-grow='true'] {
+  .hell-slider[data-grow='true'][data-orientation='horizontal'] {
     --_hell-slider-track-h: calc(var(--spacing) * 1.5);
     --_hell-slider-track-h-active: calc(var(--spacing) * 2.5);
     .hell-slider-track::before,
@@ -254,5 +265,27 @@
   .hell-slider[data-grow='true'][data-size='lg'] {
     --_hell-slider-track-h: calc(var(--spacing) * 2);
     --_hell-slider-track-h-active: calc(var(--spacing) * 3);
+  }
+
+  .hell-slider[data-grow='true'][data-orientation='vertical'] {
+    --_hell-slider-track-w: var(--_hell-slider-track-size);
+    --_hell-slider-track-w-active: calc(var(--_hell-slider-track-size) + var(--spacing));
+    .hell-slider-track::before,
+    .hell-slider-range {
+      width: var(--_hell-slider-track-w);
+      transition: width var(--hell-duration-fast) var(--ease-hell-out);
+    }
+    &:hover .hell-slider-track::before,
+    &:hover .hell-slider-range,
+    &:active .hell-slider-track::before,
+    &:active .hell-slider-range,
+    &[data-active-drag='true'] .hell-slider-track::before,
+    &[data-active-drag='true'] .hell-slider-range,
+    &:has(.hell-slider-thumb[data-press]) .hell-slider-track::before,
+    &:has(.hell-slider-thumb[data-press]) .hell-slider-range,
+    &:has(.hell-slider-thumb[data-focus-visible]) .hell-slider-track::before,
+    &:has(.hell-slider-thumb[data-focus-visible]) .hell-slider-range {
+      width: var(--_hell-slider-track-w-active);
+    }
   }
 }
