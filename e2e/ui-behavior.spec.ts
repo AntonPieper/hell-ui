@@ -210,6 +210,78 @@ test.describe('Hell UI browser behavior', () => {
     });
   });
 
+  test('dialpad supports keyboard entry, focus order, and state attributes', async ({ page }) => {
+    await page.goto('/components/dialpad');
+
+    const example = page.locator('app-dialpad-example-example');
+    const dialpad = example.getByRole('group', { name: 'Dial pad' });
+    const display = dialpad.locator('[data-slot="number-inner"]');
+    const currentNumber = example.locator('dd code').nth(1);
+    const lastCall = example.locator('dd code').nth(2);
+
+    await expect(dialpad).toBeVisible();
+    await expect(dialpad.getByRole('button', { name: 'Digit 1' })).toBeVisible();
+    await expect(dialpad.getByRole('button', { name: 'Digit 2, ABC' })).toBeVisible();
+    await expect(dialpad.getByRole('button', { name: 'Star' })).toBeVisible();
+    await expect(dialpad.getByRole('button', { name: 'Pound' })).toBeVisible();
+
+    await dialpad.focus();
+    await expectFocused(page, dialpad, 'dialpad host focus');
+    await page.keyboard.press('2');
+    await expect(display).toHaveText('2');
+    await expect(currentNumber).toHaveText('2');
+
+    const five = dialpad.getByRole('button', { name: 'Digit 5, JKL' });
+    await five.focus();
+    await expectFocused(page, five, 'dialpad child key focus');
+    await page.keyboard.press('6');
+    await expect(display).toHaveText('26');
+
+    await page.keyboard.press('Backspace');
+    await expect(display).toHaveText('2');
+    await page.keyboard.press('Delete');
+    await expect(display).toHaveText('—');
+    await expect(currentNumber).toHaveText('—');
+
+    await dialpad.focus();
+    await page.keyboard.press('3');
+    await page.keyboard.press('Enter');
+    await expect(lastCall).toHaveText('3');
+
+    await dialpad.focus();
+    await page.keyboard.press('Tab');
+    await expectFocused(
+      page,
+      dialpad.getByRole('button', { name: 'Clear' }),
+      'dialpad clear focus',
+    );
+    await page.keyboard.press('Tab');
+    await expectFocused(
+      page,
+      dialpad.getByRole('button', { name: 'Backspace' }),
+      'dialpad backspace focus',
+    );
+    await page.keyboard.press('Tab');
+    await expectFocused(
+      page,
+      dialpad.getByRole('button', { name: 'Digit 1' }),
+      'dialpad first key focus',
+    );
+
+    await example.getByRole('button', { name: 'Invalid' }).click();
+    await expect(dialpad).toHaveAttribute('aria-invalid', 'true');
+    await example.getByRole('button', { name: 'Readonly' }).click();
+    await expect(dialpad).toHaveAttribute('data-readonly', '');
+    await expect(dialpad.getByRole('button', { name: 'Digit 1' })).toBeDisabled();
+    await expect(dialpad.getByRole('button', { name: 'Call' })).toBeEnabled();
+    await example.getByRole('button', { name: 'Disabled' }).click();
+    await expect(dialpad).toHaveAttribute('aria-disabled', 'true');
+    await expect(dialpad).toHaveAttribute('tabindex', '-1');
+    await expect(dialpad.getByRole('button', { name: 'Call' })).toBeDisabled();
+
+    await expectNoSeriousA11yIssues(page, 'app-dialpad-example-example');
+  });
+
   test('toast renders in the notification region and passes axe smoke', async ({ page }) => {
     await page.goto('/components/toast');
     await page.getByRole('button', { name: 'Success' }).first().click();

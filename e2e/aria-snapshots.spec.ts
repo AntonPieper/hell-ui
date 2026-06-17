@@ -162,6 +162,20 @@ test.describe('public docs aria snapshots', () => {
     await expectNamedAriaSnapshot(dialog, 'dialog-publish-open.aria.yml');
   });
 
+  test('dialpad snapshot records named keys and state controls', async ({ page }) => {
+    await gotoDocsPage(page, '/components/dialpad', 'Dialpad');
+
+    const example = page.locator('app-dialpad-example-example');
+    const dialpad = example.getByRole('group', { name: 'Dial pad' });
+    await expect(dialpad).toBeVisible();
+    await expect(dialpad.getByRole('button', { name: 'Digit 2, ABC' })).toBeVisible();
+    await expect(dialpad.getByRole('button', { name: 'Star' })).toBeVisible();
+    await example.getByRole('button', { name: 'Invalid' }).click();
+    await expect(dialpad).toHaveAttribute('aria-invalid', 'true');
+
+    await expectNamedAriaSnapshot(example, 'dialpad-interactive.aria.yml');
+  });
+
   test('flyout snapshot records the named non-modal dialog and trigger state', async ({ page }) => {
     await gotoDocsPage(page, '/components/flyout', 'Flyout');
 
