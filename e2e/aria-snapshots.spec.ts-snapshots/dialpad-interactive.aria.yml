@@ -1,6 +1,7 @@
 - group "Dial pad":
     - text: ''
-    - status "Number"
+    - textbox "Number":
+        - /placeholder: —
     - button "Clear" [disabled]
     - button "Backspace" [disabled]
     - button "Digit 1"
@@ -16,9 +17,10 @@
     - button "Digit 0, plus"
     - button "Pound"
     - button "Call" [disabled]
-- button "Disabled"
-- button "Readonly"
-- button "Invalid" [pressed]
+- group "Dialpad states":
+    - radio "Disabled"
+    - radio "Readonly"
+    - radio "Invalid" [checked]
 - term: Last digit
 - definition:
     - code: —

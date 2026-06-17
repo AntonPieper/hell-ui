@@ -14,7 +14,7 @@ import dialpadExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
       <h1>Dialpad</h1>
       <p>
         Telephony dialpad with key letters, used in CTI / VoIP applications. Users can tap, click,
-        or focus the dial pad and type digits from the keyboard.
+        focus the number field, or type digits from the keyboard.
       </p>
 
       <h2>Example</h2>
@@ -28,7 +28,7 @@ import dialpadExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
       <h2>API</h2>
       <ul>
         <li><code>value</code>: controlled mode</li>
-        <li><code>disabled</code>: disables the dial pad and removes it from tab order</li>
+        <li><code>disabled</code>: disables the dial pad controls</li>
         <li><code>readOnly</code>: keeps the value readable and callable while preventing edits</li>
         <li><code>invalid</code>: marks the value invalid with <code>aria-invalid</code></li>
         <li>
@@ -43,7 +43,8 @@ import dialpadExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
       <ul>
         <li>Digit keys, <code>*</code>, <code>#</code>, and <code>+</code> append to the value.</li>
         <li><code>Backspace</code> removes one character; <code>Delete</code> clears the value.</li>
-        <li><code>Enter</code> emits <code>(call)</code> when the dial pad host has focus.</li>
+        <li><code>Enter</code> emits <code>(call)</code> when the number field has focus.</li>
+        <li>Press and hold <code>0</code> with touch or pointer input to enter <code>+</code>.</li>
       </ul>
 
       <h2>Do</h2>
