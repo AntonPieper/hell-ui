@@ -19,17 +19,17 @@
   .hell-dialpad [data-slot='display'] {
     display: grid;
     gap: 2px;
-    min-height: 58px;
+    min-height: 64px;
     padding-inline: var(--spacing-hell-3);
     padding-block: var(--spacing-hell-2);
     background-color: var(--color-hell-surface-subtle);
     border: 1px solid var(--color-hell-border);
     border-radius: var(--radius-hell-md);
+    cursor: text;
   }
 
   .hell-dialpad[data-invalid] [data-slot='display'] {
     border-color: var(--color-hell-danger);
-    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-hell-danger) 18%, transparent);
   }
 
   .hell-dialpad [data-slot='display-label'] {
@@ -39,20 +39,21 @@
   }
 
   .hell-dialpad [data-slot='number'] {
+    min-width: 0;
+    --hell-input-background: transparent;
+    --hell-input-border-color: transparent;
+    --hell-input-height: 34px;
+    --hell-input-padding-inline: 0;
     color: var(--color-hell-foreground);
     font-size: 24px;
     font-weight: var(--font-weight-semibold);
-    font-variant-numeric: tabular-nums;
     letter-spacing: 0;
     line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   .hell-dialpad [data-slot='controls'] {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) 42px;
     gap: var(--spacing-hell-2);
   }
 
@@ -63,7 +64,13 @@
     --hell-button-padding-inline: var(--spacing-hell-3);
   }
 
-  .hell-dialpad [data-slot='grid'] {
+  .hell-dialpad [data-action='edit'] {
+    &[data-active] {
+      scale: 0.96;
+    }
+  }
+
+  .hell-dialpad :is([data-slot='grid'], [data-slot='lower-grid']) {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-hell-2);
@@ -76,19 +83,9 @@
     --hell-button-padding-inline: 0;
     --hell-button-shadow: none;
     --hell-button-border-color: var(--color-hell-border);
-    &[data-hover] {
-      --hell-button-border-color: color-mix(
-        in oklab,
-        var(--color-hell-primary) 36%,
-        var(--color-hell-border)
-      );
-    }
-    &[data-press] {
-      --hell-button-border-color: color-mix(
-        in oklab,
-        var(--color-hell-primary) 52%,
-        var(--color-hell-border)
-      );
+    touch-action: manipulation;
+    &[data-press],
+    &[data-active] {
       scale: 0.94;
     }
     &[data-disabled] {
@@ -104,7 +101,6 @@
   }
 
   .hell-dialpad [data-slot='letters'] {
-    min-height: 10px;
     color: var(--color-hell-foreground-muted);
     font-size: 9px;
     font-weight: var(--font-weight-bold);
@@ -115,6 +111,9 @@
   .hell-dialpad [data-slot='call'] {
     width: 100%;
     --hell-button-height: 44px;
+    &[data-active] {
+      scale: 0.98;
+    }
   }
 
   @media (max-width: 480px) {

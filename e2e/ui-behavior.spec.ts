@@ -215,7 +215,7 @@ test.describe('Hell UI browser behavior', () => {
 
     const example = page.locator('app-dialpad-example-example');
     const dialpad = example.getByRole('group', { name: 'Dial pad' });
-    const display = dialpad.locator('[data-slot="number-inner"]');
+    const display = dialpad.getByRole('textbox', { name: 'Number' });
     const currentNumber = example.locator('dd code').nth(1);
     const lastCall = example.locator('dd code').nth(2);
 
@@ -223,32 +223,46 @@ test.describe('Hell UI browser behavior', () => {
     await expect(dialpad.getByRole('button', { name: 'Digit 1' })).toBeVisible();
     await expect(dialpad.getByRole('button', { name: 'Digit 2, ABC' })).toBeVisible();
     await expect(dialpad.getByRole('button', { name: 'Star' })).toBeVisible();
+    await expect(dialpad.getByRole('button', { name: 'Digit 0, plus' })).toBeVisible();
     await expect(dialpad.getByRole('button', { name: 'Pound' })).toBeVisible();
+    await expect(dialpad.getByRole('button', { name: 'Backspace' })).toHaveAttribute(
+      'data-icon-only',
+      '',
+    );
 
-    await dialpad.focus();
-    await expectFocused(page, dialpad, 'dialpad host focus');
+    await display.click();
+    await expectFocused(page, display, 'dialpad number input focus');
     await page.keyboard.press('2');
-    await expect(display).toHaveText('2');
+    await expect(display).toHaveValue('2');
     await expect(currentNumber).toHaveText('2');
 
     const five = dialpad.getByRole('button', { name: 'Digit 5, JKL' });
     await five.focus();
     await expectFocused(page, five, 'dialpad child key focus');
     await page.keyboard.press('6');
-    await expect(display).toHaveText('26');
+    await expect(display).toHaveValue('26');
 
     await page.keyboard.press('Backspace');
-    await expect(display).toHaveText('2');
+    await expect(display).toHaveValue('2');
     await page.keyboard.press('Delete');
-    await expect(display).toHaveText('—');
+    await expect(display).toHaveValue('');
     await expect(currentNumber).toHaveText('—');
 
-    await dialpad.focus();
+    const zero = dialpad.getByRole('button', { name: 'Digit 0, plus' });
+    await zero.hover();
+    await page.mouse.down();
+    await page.waitForTimeout(560);
+    await page.mouse.up();
+    await expect(display).toHaveValue('+');
+    await expect(currentNumber).toHaveText('+');
+
+    await display.focus();
+    await page.keyboard.press('Delete');
     await page.keyboard.press('3');
     await page.keyboard.press('Enter');
     await expect(lastCall).toHaveText('3');
 
-    await dialpad.focus();
+    await display.focus();
     await page.keyboard.press('Tab');
     await expectFocused(
       page,
@@ -268,15 +282,15 @@ test.describe('Hell UI browser behavior', () => {
       'dialpad first key focus',
     );
 
-    await example.getByRole('button', { name: 'Invalid' }).click();
+    await example.getByRole('radio', { name: 'Invalid' }).click();
     await expect(dialpad).toHaveAttribute('aria-invalid', 'true');
-    await example.getByRole('button', { name: 'Readonly' }).click();
+    await example.getByRole('radio', { name: 'Readonly' }).click();
     await expect(dialpad).toHaveAttribute('data-readonly', '');
     await expect(dialpad.getByRole('button', { name: 'Digit 1' })).toBeDisabled();
     await expect(dialpad.getByRole('button', { name: 'Call' })).toBeEnabled();
-    await example.getByRole('button', { name: 'Disabled' }).click();
+    await example.getByRole('radio', { name: 'Disabled' }).click();
     await expect(dialpad).toHaveAttribute('aria-disabled', 'true');
-    await expect(dialpad).toHaveAttribute('tabindex', '-1');
+    await expect(display).toBeDisabled();
     await expect(dialpad.getByRole('button', { name: 'Call' })).toBeDisabled();
 
     await expectNoSeriousA11yIssues(page, 'app-dialpad-example-example');

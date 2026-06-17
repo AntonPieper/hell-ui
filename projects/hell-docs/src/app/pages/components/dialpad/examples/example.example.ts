@@ -1,11 +1,15 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HellButton } from '@hell-ui/angular/button';
+import { Component, ChangeDetectionStrategy, computed, signal } from '@angular/core';
 import { HellDialpad } from '@hell-ui/angular/dialpad';
+import {
+  HellToggleGroup,
+  HellToggleGroupItem,
+  type HellToggleGroupValue,
+} from '@hell-ui/angular/toggle';
 
 @Component({
   selector: 'app-dialpad-example-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellDialpad],
+  imports: [HellDialpad, HellToggleGroup, HellToggleGroupItem],
   template: `
     <div class="grid gap-4 md:grid-cols-[minmax(260px,300px)_minmax(220px,1fr)]">
       <div class="grid gap-3">
@@ -17,37 +21,17 @@ import { HellDialpad } from '@hell-ui/angular/dialpad';
           (valueChange)="onValue($event)"
           (call)="called.set($event)"
         />
-        <div class="flex flex-wrap gap-2">
-          <button
-            hellButton
-            type="button"
-            size="sm"
-            variant="soft"
-            [attr.aria-pressed]="disabled()"
-            (click)="disabled.update(toggle)"
-          >
-            Disabled
-          </button>
-          <button
-            hellButton
-            type="button"
-            size="sm"
-            variant="soft"
-            [attr.aria-pressed]="readOnly()"
-            (click)="readOnly.update(toggle)"
-          >
-            Readonly
-          </button>
-          <button
-            hellButton
-            type="button"
-            size="sm"
-            variant="soft"
-            [attr.aria-pressed]="invalid()"
-            (click)="invalid.update(toggle)"
-          >
-            Invalid
-          </button>
+        <div
+          hellToggleGroup
+          type="multiple"
+          class="flex flex-wrap"
+          aria-label="Dialpad states"
+          [value]="states()"
+          (valueChange)="onStatesChange($event)"
+        >
+          <button hellToggleGroupItem type="button" value="disabled">Disabled</button>
+          <button hellToggleGroupItem type="button" value="readonly">Readonly</button>
+          <button hellToggleGroupItem type="button" value="invalid">Invalid</button>
         </div>
       </div>
 
@@ -78,10 +62,10 @@ export class DialpadExampleExample {
   protected readonly last = signal('');
   protected readonly number = signal('');
   protected readonly called = signal('');
-  protected readonly disabled = signal(false);
-  protected readonly readOnly = signal(false);
-  protected readonly invalid = signal(false);
-  protected readonly toggle = (value: boolean) => !value;
+  protected readonly states = signal<string[]>([]);
+  protected readonly disabled = computed(() => this.states().includes('disabled'));
+  protected readonly readOnly = computed(() => this.states().includes('readonly'));
+  protected readonly invalid = computed(() => this.states().includes('invalid'));
 
   protected onDigit(d: string) {
     this.last.set(d);
@@ -89,5 +73,9 @@ export class DialpadExampleExample {
 
   protected onValue(value: string) {
     this.number.set(value);
+  }
+
+  protected onStatesChange(value: HellToggleGroupValue) {
+    this.states.set(Array.isArray(value) ? [...value] : value ? [value] : []);
   }
 }
