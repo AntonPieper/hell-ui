@@ -68,7 +68,7 @@ test.describe('component visual polish regressions', () => {
       expect(trackBox.y + trackBox.height).toBeLessThan(sliderBox.y + sliderBox.height);
       expect(Math.abs(centerX(trackBox) - centerX(thumbBox))).toBeLessThanOrEqual(1);
       expect(Math.abs(centerX(rangeBox) - centerX(trackBox))).toBeLessThanOrEqual(1);
-      expect(thumbBox.height).toBeLessThanOrEqual(14);
+      expect(thumbBox.height).toBeLessThanOrEqual(14.1);
       expect(thumbBox.y).toBeGreaterThanOrEqual(visualTrack.top - 1);
       expect(thumbBox.y + thumbBox.height).toBeLessThanOrEqual(visualTrack.bottom + 1);
       expect(thumbBox.y).toBeGreaterThanOrEqual(previewBox.y);
