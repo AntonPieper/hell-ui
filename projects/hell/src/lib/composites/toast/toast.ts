@@ -615,20 +615,18 @@ export class HellToaster extends HellStyleable {
   private scheduleViewportStateSync(resetOrigin = false): void {
     setTimeout(() => {
       if (this.destroyed) return;
-      this.syncViewportState();
-      if (resetOrigin) this.scrollToStackOrigin();
+      this.syncViewportState(undefined, resetOrigin);
     }, 0);
   }
 
-  private scrollToStackOrigin(): void {
-    const viewport = this.viewportElement();
+  private scrollToStackOrigin(viewport = this.viewportElement()): void {
     if (!viewport) return;
     if (!this.expanded() || !this.position().startsWith('bottom')) {
       viewport.scrollTop = 0;
     } else {
-      viewport.scrollTop = Math.max(0, viewport.scrollHeight - this.expandedViewportHeightValue());
+      const viewportHeight = viewport.clientHeight || viewport.getBoundingClientRect().height;
+      viewport.scrollTop = Math.max(0, viewport.scrollHeight - viewportHeight);
     }
-    this.syncViewportState(viewport);
   }
 
   private viewportHeightLimit(): number {
@@ -636,9 +634,10 @@ export class HellToaster extends HellStyleable {
     return Math.max(64, Math.min(420, (win?.innerHeight ?? 900) - 104));
   }
 
-  private syncViewportState(viewport = this.viewportElement()): void {
+  private syncViewportState(viewport = this.viewportElement(), alignToOrigin = false): void {
     if (!viewport) return;
-    const height = viewport.getBoundingClientRect().height || viewport.clientHeight;
+    if (alignToOrigin) this.scrollToStackOrigin(viewport);
+    const height = viewport.clientHeight || viewport.getBoundingClientRect().height;
     if (this.viewportHeight() !== height) this.viewportHeight.set(height);
     if (this.scrollTop() !== viewport.scrollTop) this.scrollTop.set(viewport.scrollTop);
   }
@@ -653,7 +652,12 @@ export class HellToaster extends HellStyleable {
       this.ro = new ResizeObserver((entries) => {
         let changed = false;
         const next = new Map(this.heights());
+        const viewport = this.viewportElement();
         for (const e of entries) {
+          if (viewport && e.target === viewport) {
+            this.syncViewportState(viewport);
+            continue;
+          }
           const id = Number((e.target as HTMLElement).dataset['toastId']);
           if (!Number.isFinite(id)) continue;
           const h = this.measureToastHeight(e.target as HTMLElement);
@@ -665,6 +669,8 @@ export class HellToaster extends HellStyleable {
         if (changed) this.heights.set(next);
       });
     }
+    const viewport = this.viewportElement();
+    if (viewport) this.ro.observe(viewport);
     const items = this.host.querySelectorAll<HTMLElement>('[data-slot="toast"]');
     const seen = new Set<number>();
     items.forEach((el, i) => {

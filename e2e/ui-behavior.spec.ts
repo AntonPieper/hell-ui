@@ -237,6 +237,20 @@ test.describe('Hell UI browser behavior', () => {
     await expect(notifications.locator('[data-slot="dismiss-all"] svg path')).toHaveCount(1);
     await expect(viewport).toHaveAttribute('aria-label', 'Notification stack');
 
+    const renderedToastCount = () =>
+      viewport.evaluate((element) => {
+        const viewportRect = element.getBoundingClientRect();
+        return [...element.querySelectorAll<HTMLElement>('[data-slot="toast"]')].filter((toast) => {
+          if (toast.getAttribute('data-state') !== 'open') return false;
+          const rect = toast.getBoundingClientRect();
+          const opacity = Number(getComputedStyle(toast).opacity);
+          return rect.bottom > viewportRect.top && rect.top < viewportRect.bottom && opacity > 0.45;
+        }).length;
+      });
+
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+    expect(await renderedToastCount()).toBeGreaterThanOrEqual(3);
+
     await expect
       .poll(() =>
         viewport.evaluate(
@@ -244,6 +258,7 @@ test.describe('Hell UI browser behavior', () => {
         ),
       )
       .toBe(true);
+    await expect.poll(renderedToastCount).toBeGreaterThanOrEqual(5);
 
     await expect
       .poll(() =>
