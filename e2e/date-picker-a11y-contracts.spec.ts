@@ -136,7 +136,7 @@ test.describe('date picker browser accessibility contract', () => {
       between: [6, 7, 8, 9, 10, 11],
       end: 12,
     });
-    await expectRangeRailGeometry(disabledRangePicker);
+    await expectContiguousRangeButtons(disabledRangePicker);
   });
 
   test('range picker exposes start, between, end states and keyboard range reselection', async ({
@@ -152,7 +152,7 @@ test.describe('date picker browser accessibility contract', () => {
       between: [6, 7, 8, 9, 10, 11],
       end: 12,
     });
-    await expectRangeRailGeometry(picker);
+    await expectContiguousRangeButtons(picker);
     await expect(example).toContainText('Sun Apr 05 2026');
     await expect(example).toContainText('Sun Apr 12 2026');
 
@@ -172,7 +172,7 @@ test.describe('date picker browser accessibility contract', () => {
       between: [],
       end: 19,
     });
-    await expectRangeRailGeometry(picker);
+    await expectContiguousRangeButtons(picker);
     await expect(example).toContainText('Sun Apr 19 2026');
 
     await dayButton(picker, 22).focus();
@@ -233,20 +233,14 @@ async function expectRangeDays(
   await expect(dayButton(picker, selection.end)).toHaveAttribute('data-range-end', '');
 }
 
-async function expectRangeRailGeometry(picker: Locator): Promise<void> {
+async function expectContiguousRangeButtons(picker: Locator): Promise<void> {
   const geometry = await picker.evaluate((element) => {
     const grid = element.querySelector<HTMLElement>('.hell-date-picker-grid');
     const gridBox = grid?.getBoundingClientRect();
-    const probe = document.createElement('span');
-    probe.style.color = 'var(--color-hell-primary-soft)';
-    element.append(probe);
-    const railColor = getComputedStyle(probe).color;
-    probe.remove();
 
     return {
       gridLeft: gridBox?.left ?? 0,
       gridRight: gridBox?.right ?? 0,
-      railColor,
       rows: Array.from(element.querySelectorAll('tbody tr'))
         .map((row) => {
           return Array.from(row.querySelectorAll<HTMLTableCellElement>('td')).flatMap((cell) => {
@@ -273,11 +267,14 @@ async function expectRangeRailGeometry(picker: Locator): Promise<void> {
                 cellLeft: cellBox.left,
                 cellRight: cellBox.right,
                 cellWidth: cellBox.width,
+                buttonLeft: buttonBox.left,
+                buttonRight: buttonBox.right,
                 buttonCenter: buttonBox.left + buttonBox.width / 2,
                 buttonWidth: buttonBox.width,
                 cellCenter: cellBox.left + cellBox.width / 2,
-                railBackgroundColor: before.backgroundColor,
-                railBackgroundImage: before.backgroundImage,
+                cellPseudoBackgroundColor: before.backgroundColor,
+                cellPseudoBackgroundImage: before.backgroundImage,
+                buttonBackgroundColor: buttonStyle.backgroundColor,
                 radiusTopLeft: parseFloat(buttonStyle.borderTopLeftRadius),
                 radiusTopRight: parseFloat(buttonStyle.borderTopRightRadius),
                 radiusBottomRight: parseFloat(buttonStyle.borderBottomRightRadius),
@@ -302,37 +299,40 @@ async function expectRangeRailGeometry(picker: Locator): Promise<void> {
 
     if (wrapsIn) {
       expect(
-        Math.abs(first.cellLeft - geometry.gridLeft),
-        'range rail should enter wrapped row',
+        Math.abs(first.buttonLeft - geometry.gridLeft),
+        'range selection should enter wrapped row',
       ).toBeLessThanOrEqual(1);
     }
 
     if (wrapsOut) {
       expect(
-        Math.abs(last.cellRight - geometry.gridRight),
-        'range rail should leave wrapped row without a missing terminal cell',
+        Math.abs(last.buttonRight - geometry.gridRight),
+        'range selection should leave wrapped row without a missing terminal cell',
       ).toBeLessThanOrEqual(1);
     }
 
     for (const [index, cell] of row.entries()) {
-      expectCompactCenteredRangeButton(cell);
+      expectNoCellRail(cell, `range day ${cell.day}`);
 
       if (index > 0) {
         const previous = row[index - 1];
         expect(
-          Math.abs(cell.cellLeft - previous.cellRight),
-          `range rail cells ${previous.day} and ${cell.day} should touch`,
+          Math.abs(cell.buttonLeft - previous.buttonRight),
+          `range buttons ${previous.day} and ${cell.day} should touch`,
         ).toBeLessThanOrEqual(1);
       }
 
       if (cell.kind === 'between') {
-        expect(hasVisibleRail(cell), `range day ${cell.day} should paint the soft rail`).toBe(true);
-        expectNoButtonRadius(cell, `range day ${cell.day}`);
+        expectFullCellRangeButton(cell, `range day ${cell.day}`);
+        expectButtonFill(cell, `range day ${cell.day}`);
+        expectNoRadius(cell, `range day ${cell.day}`);
       } else if (cell.kind === 'start') {
-        expectOutgoingRail(cell, geometry.railColor);
+        expectFullCellRangeButton(cell, `range start ${cell.day}`);
+        expectButtonFill(cell, `range start ${cell.day}`);
         expectOutsideLeftRadius(cell, `range start ${cell.day}`);
       } else if (cell.kind === 'end') {
-        expectIncomingRail(cell, geometry.railColor);
+        expectFullCellRangeButton(cell, `range end ${cell.day}`);
+        expectButtonFill(cell, `range end ${cell.day}`);
         expectOutsideRightRadius(cell, `range end ${cell.day}`);
       } else {
         expectStandaloneRangeCell(cell, `single-day range ${cell.day}`);
@@ -357,11 +357,14 @@ async function expectStandaloneRangeButton(picker: Locator, day: number): Promis
       cellLeft: cellBox.left,
       cellRight: cellBox.right,
       cellWidth: cellBox.width,
+      buttonLeft: buttonBox.left,
+      buttonRight: buttonBox.right,
       buttonCenter: buttonBox.left + buttonBox.width / 2,
       buttonWidth: buttonBox.width,
       cellCenter: cellBox.left + cellBox.width / 2,
-      railBackgroundColor: before.backgroundColor,
-      railBackgroundImage: before.backgroundImage,
+      cellPseudoBackgroundColor: before.backgroundColor,
+      cellPseudoBackgroundImage: before.backgroundImage,
+      buttonBackgroundColor: buttonStyle.backgroundColor,
       radiusTopLeft: parseFloat(buttonStyle.borderTopLeftRadius),
       radiusTopRight: parseFloat(buttonStyle.borderTopRightRadius),
       radiusBottomRight: parseFloat(buttonStyle.borderBottomRightRadius),
@@ -379,11 +382,14 @@ interface RangeCellGeometry {
   readonly cellLeft: number;
   readonly cellRight: number;
   readonly cellWidth: number;
+  readonly buttonLeft: number;
+  readonly buttonRight: number;
   readonly buttonCenter: number;
   readonly buttonWidth: number;
   readonly cellCenter: number;
-  readonly railBackgroundColor: string;
-  readonly railBackgroundImage: string;
+  readonly cellPseudoBackgroundColor: string;
+  readonly cellPseudoBackgroundImage: string;
+  readonly buttonBackgroundColor: string;
   readonly radiusTopLeft: number;
   readonly radiusTopRight: number;
   readonly radiusBottomRight: number;
@@ -401,44 +407,33 @@ function expectCompactCenteredRangeButton(cell: RangeCellGeometry): void {
   ).toBeLessThanOrEqual(1);
 }
 
-function expectOutgoingRail(cell: RangeCellGeometry, railColor: string): void {
+function expectFullCellRangeButton(cell: RangeCellGeometry, label: string): void {
   expect(
-    cell.railBackgroundImage,
-    `range start ${cell.day} should extend the rail forward`,
-  ).toContain('linear-gradient');
+    cell.buttonWidth,
+    `${label} should fill the date cell instead of relying on a separate rail`,
+  ).toBeGreaterThanOrEqual(cell.cellWidth - 1);
   expect(
-    cell.railBackgroundImage,
-    `range start ${cell.day} should use the soft rail color`,
-  ).toContain(railColor);
-  expect(
-    firstTransparentStopIndex(cell.railBackgroundImage),
-    `range start ${cell.day} should begin transparent before the chip edge`,
-  ).toBeLessThan(cell.railBackgroundImage.indexOf(railColor));
+    Math.abs(cell.buttonCenter - cell.cellCenter),
+    `${label} should stay centered in its grid cell`,
+  ).toBeLessThanOrEqual(1);
 }
 
-function expectIncomingRail(cell: RangeCellGeometry, railColor: string): void {
-  expect(cell.railBackgroundImage, `range end ${cell.day} should receive the rail`).toContain(
-    'linear-gradient',
-  );
+function expectButtonFill(cell: RangeCellGeometry, label: string): void {
   expect(
-    cell.railBackgroundImage,
-    `range end ${cell.day} should use the soft rail color`,
-  ).toContain(railColor);
-  expect(
-    cell.railBackgroundImage.indexOf(railColor),
-    `range end ${cell.day} should paint the rail before the end chip`,
-  ).toBeLessThan(firstTransparentStopIndex(cell.railBackgroundImage));
+    isTransparentColor(cell.buttonBackgroundColor),
+    `${label} should paint selection on the button itself`,
+  ).toBe(false);
 }
 
 function expectStandaloneRangeCell(cell: RangeCellGeometry, label: string): void {
-  expect(hasVisibleRail(cell), `${label} should not paint a range rail`).toBe(false);
+  expectNoCellRail(cell, label);
   expect(cell.radiusTopLeft, `${label} should keep the top-left corner`).toBeGreaterThan(0);
   expect(cell.radiusTopRight, `${label} should keep the top-right corner`).toBeGreaterThan(0);
   expect(cell.radiusBottomRight, `${label} should keep the bottom-right corner`).toBeGreaterThan(0);
   expect(cell.radiusBottomLeft, `${label} should keep the bottom-left corner`).toBeGreaterThan(0);
 }
 
-function expectNoButtonRadius(cell: RangeCellGeometry, label: string): void {
+function expectNoRadius(cell: RangeCellGeometry, label: string): void {
   expect(cell.radiusTopLeft, `${label} should not have inner chip radius`).toBe(0);
   expect(cell.radiusTopRight, `${label} should not have inner chip radius`).toBe(0);
   expect(cell.radiusBottomRight, `${label} should not have inner chip radius`).toBe(0);
@@ -459,24 +454,16 @@ function expectOutsideRightRadius(cell: RangeCellGeometry, label: string): void 
   expect(cell.radiusBottomLeft, `${label} should remove the inside corner`).toBe(0);
 }
 
-function hasVisibleRail(cell: RangeCellGeometry): boolean {
-  return (
-    !isTransparentColor(cell.railBackgroundColor) || cell.railBackgroundImage.trim() !== 'none'
-  );
+function expectNoCellRail(cell: RangeCellGeometry, label: string): void {
+  expect(
+    !isTransparentColor(cell.cellPseudoBackgroundColor) ||
+      cell.cellPseudoBackgroundImage.trim() !== 'none',
+    `${label} should not paint a cell pseudo-element rail`,
+  ).toBe(false);
 }
 
 function isTransparentColor(value: string): boolean {
   return value === 'transparent' || value === 'rgba(0, 0, 0, 0)' || /\/\s*0\)?$/.test(value.trim());
-}
-
-function firstTransparentStopIndex(backgroundImage: string): number {
-  const transparent = backgroundImage.indexOf('transparent');
-  if (transparent >= 0) return transparent;
-
-  const rgbaTransparent = backgroundImage.indexOf('rgba(0, 0, 0, 0)');
-  if (rgbaTransparent >= 0) return rgbaTransparent;
-
-  return Number.POSITIVE_INFINITY;
 }
 
 async function requiredBox(

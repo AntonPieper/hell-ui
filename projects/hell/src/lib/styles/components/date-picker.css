@@ -6,7 +6,7 @@
     --_cell: calc(var(--spacing) * 7.5);
     --_day: calc(var(--spacing) * 7);
     --_nav: calc(var(--spacing-hell-control-sm) * 2 + var(--spacing-hell-1));
-    --_rail: var(--color-hell-primary-soft);
+    --_range: var(--color-hell-primary-soft);
     --_width: calc(8rem + var(--_nav) * 2 + var(--spacing-hell-2) * 2);
 
     display: inline-block;
@@ -79,7 +79,7 @@
       &[data-today]:not([data-selected]) {
         color: var(--color-hell-primary);
         font-weight: var(--font-weight-semibold);
-        box-shadow: inset 0 0 0 1px var(--_rail);
+        box-shadow: inset 0 0 0 1px var(--_range);
       }
       &[data-hover]:not([data-disabled]):not([data-selected]) {
         background: var(--color-hell-surface-subtle);
@@ -107,32 +107,10 @@
   }
 
   .hell-date-picker:has([data-range-end]) {
-    & td {
-      position: relative;
-    }
-
-    & td::before {
-      content: '';
-      position: absolute;
-      z-index: 0;
-      inset: calc((var(--_cell) - var(--_day)) / 2) 0;
-    }
-
-    & button {
-      position: relative;
-      z-index: 1;
-    }
-
-    & td:has(> [data-range-between])::before {
-      background: var(--_rail);
-    }
-
-    & td:has(> [data-range-start]:not([data-range-end]))::before {
-      background: linear-gradient(90deg, transparent 50%, var(--_rail) 0);
-    }
-
-    & td:has(> [data-range-end]:not([data-range-start]))::before {
-      background: linear-gradient(90deg, var(--_rail) 50%, transparent 0);
+    & [data-range-start]:not([data-range-end]),
+    & [data-range-end]:not([data-range-start]),
+    & [data-range-between] {
+      width: 100%;
     }
 
     & [data-range-start]:not([data-range-end]) {
@@ -144,6 +122,7 @@
     }
 
     & [data-range-between]:not([data-range-start], [data-range-end]) {
+      background: var(--_range);
       color: var(--color-hell-primary-soft-foreground);
       border-radius: 0;
     }
