@@ -2101,10 +2101,10 @@ export class HellTooltipTrigger extends HellNativeInteractiveDisabledGuard {
 // types/hell-ui-angular-primitives.d.ts:1449:5 - (ae-undocumented) Missing documentation for "ɵcmp".
 // types/hell-ui-angular-primitives.d.ts:1457:5 - (ae-undocumented) Missing documentation for "locale".
 // types/hell-ui-angular-primitives.d.ts:1458:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-primitives.d.ts:1460:5 - (ae-undocumented) Missing documentation for "label".
-// types/hell-ui-angular-primitives.d.ts:1461:5 - (ae-undocumented) Missing documentation for "weekdayLabels".
-// types/hell-ui-angular-primitives.d.ts:1462:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-primitives.d.ts:1463:5 - (ae-undocumented) Missing documentation for "ɵcmp".
+// types/hell-ui-angular-primitives.d.ts:1463:5 - (ae-undocumented) Missing documentation for "label".
+// types/hell-ui-angular-primitives.d.ts:1464:5 - (ae-undocumented) Missing documentation for "weekdayLabels".
+// types/hell-ui-angular-primitives.d.ts:1465:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-primitives.d.ts:1466:5 - (ae-undocumented) Missing documentation for "ɵcmp".
 
 // (No @packageDocumentation comment for this package)
 

@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellDatePicker } from './date-picker';
+import { HellDatePicker, HellDateRangePicker } from './date-picker';
 
 @Component({
   imports: [HellDatePicker],
@@ -25,6 +25,15 @@ class DatePickerHost {
   readonly max = signal<Date | undefined>(undefined);
   readonly disabled = signal(false);
   readonly dates: Array<Date | undefined> = [];
+}
+
+@Component({
+  imports: [HellDateRangePicker],
+  template: ` <hell-date-range-picker [startDate]="startDate()" [endDate]="endDate()" /> `,
+})
+class DateRangePickerHost {
+  readonly startDate = signal<Date | undefined>(new Date(2026, 10, 24));
+  readonly endDate = signal<Date | undefined>(new Date(2027, 0, 2));
 }
 
 describe('HellDatePicker', () => {
@@ -93,9 +102,26 @@ describe('HellDatePicker', () => {
     fixture.detectChanges();
 
     expect(button(fixture.nativeElement, 'Previous year').disabled).toBe(true);
-    expect(button(fixture.nativeElement, 'Previous year').getAttribute('aria-disabled')).toBe('true');
+    expect(button(fixture.nativeElement, 'Previous year').getAttribute('aria-disabled')).toBe(
+      'true',
+    );
     expect(button(fixture.nativeElement, 'Next year').disabled).toBe(true);
     expect(button(fixture.nativeElement, 'Next year').getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('marks date ranges complete independently of the focused month', () => {
+    vi.setSystemTime(new Date(2026, 3, 22));
+    const fixture = TestBed.createComponent(DateRangePickerHost);
+    fixture.detectChanges();
+
+    const picker = rangePicker(fixture.nativeElement);
+    expect(label(fixture.nativeElement)).toBe('April 2026');
+    expect(picker.getAttribute('data-range-complete')).toBe('');
+
+    fixture.componentInstance.endDate.set(undefined);
+    fixture.detectChanges();
+
+    expect(picker.hasAttribute('data-range-complete')).toBe(false);
   });
 });
 
@@ -121,5 +147,11 @@ function grid(root: HTMLElement): HTMLTableElement {
 function button(root: HTMLElement, ariaLabel: string): HTMLButtonElement {
   const element = root.querySelector(`button[aria-label="${ariaLabel}"]`);
   if (!(element instanceof HTMLButtonElement)) throw new Error(`Expected ${ariaLabel} button.`);
+  return element;
+}
+
+function rangePicker(root: HTMLElement): HTMLElement {
+  const element = root.querySelector('hell-date-range-picker');
+  if (!(element instanceof HTMLElement)) throw new Error('Expected date range picker.');
   return element;
 }
