@@ -1,130 +1,130 @@
 @layer components {
-
-  /*
-   * Dialpad — telephony-style 3-column key pad with display + call action.
-   *
-   * Layout:
-   *   ┌─────────────────────┐
-   *   │  display    ⌫       │  ← number readout
-   *   ├─────────────────────┤
-   *   │  1    2    3        │
-   *   │  4    5    6        │  ← keypad grid
-   *   │  7    8    9        │
-   *   │  *    0    #        │
-   *   ├─────────────────────┤
-   *   │  📞 Call            │  ← optional call button
-   *   └─────────────────────┘
-   */
-
   .hell-dialpad {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-hell-3);
-      width: 100%;
-      max-width: 280px;
-      outline: none;
-      &:focus-visible {
-        outline: 2px solid var(--color-hell-focus-ring);
-        outline-offset: 4px;
-        border-radius: var(--radius-md);
-      }
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-hell-2);
+    width: 100%;
+    max-width: 300px;
+    outline: none;
+    &[data-disabled] {
+      opacity: 0.72;
     }
+    &:focus-visible {
+      outline: 2px solid var(--color-hell-focus-ring);
+      outline-offset: 4px;
+      border-radius: var(--radius-hell-md);
+    }
+  }
 
   .hell-dialpad [data-slot='display'] {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-hell-2);
-      height: calc(var(--spacing) * 14);
-      padding-inline: var(--spacing-hell-4);
-      padding-block: calc(var(--spacing) * 0);
-      background-color: var(--color-hell-surface-subtle);
-      border-style: solid;
-      border-width: 1px;
-      border-color: var(--color-hell-border);
-      border-radius: var(--radius-md);
-    }
+    display: grid;
+    gap: 2px;
+    min-height: 58px;
+    padding-inline: var(--spacing-hell-3);
+    padding-block: var(--spacing-hell-2);
+    background-color: var(--color-hell-surface-subtle);
+    border: 1px solid var(--color-hell-border);
+    border-radius: var(--radius-hell-md);
+  }
+
+  .hell-dialpad[data-invalid] [data-slot='display'] {
+    border-color: var(--color-hell-danger);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-hell-danger) 18%, transparent);
+  }
+
+  .hell-dialpad [data-slot='display-label'] {
+    color: var(--color-hell-foreground-muted);
+    font-size: 11px;
+    font-weight: var(--font-weight-bold);
+  }
 
   .hell-dialpad [data-slot='number'] {
-      flex: 1 1 auto;
-      min-width: calc(var(--spacing) * 0);
-      font-size: 26px;
-      font-weight: var(--font-weight-medium);
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.02em;
-      color: var(--color-hell-foreground);
-      white-space: nowrap;
-      overflow: hidden;
-      direction: rtl;
-      text-align: left;
-      > [data-slot='number-inner'] {
-        direction: ltr;
-        unicode-bidi: bidi-override;
-        display: inline-block;
-      }
-    }
+    color: var(--color-hell-foreground);
+    font-size: 24px;
+    font-weight: var(--font-weight-semibold);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
+  .hell-dialpad [data-slot='controls'] {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-hell-2);
+  }
+
+  .hell-dialpad [data-slot='clear'],
   .hell-dialpad [data-slot='back'] {
-      flex: 0 0 auto;
-    }
+    min-width: 0;
+    --hell-button-height: 42px;
+    --hell-button-padding-inline: var(--spacing-hell-3);
+  }
 
   .hell-dialpad [data-slot='grid'] {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--spacing-hell-2);
-    }
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-hell-2);
+  }
 
   .hell-dialpad [data-slot='key'] {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 64px;
-      gap: 2px;
-      padding: calc(var(--spacing) * 0);
-      background-color: var(--color-hell-surface-elevated);
-      border-style: solid;
-      border-width: 1px;
-      border-color: var(--color-hell-border);
-      border-radius: var(--radius-md);
-      color: var(--color-hell-foreground);
-      cursor: pointer;
-      -webkit-user-select: none;
-      user-select: none;
-      font-feature-settings: 'tnum' on, 'lnum' on;
-      transition: background var(--hell-duration-fast) var(--ease-hell-out), border-color var(--hell-duration-fast) var(--ease-hell-out), transform var(--hell-duration-fast) var(--ease-hell-out);
-      &:hover {
-        background-color: var(--color-hell-surface-subtle);
-        border-color: var(--color-hell-primary);
-        @supports (color: color-mix(in lab, red, red)) {
-          border-color: color-mix(in srgb, var(--color-hell-primary) 35%, var(--color-hell-border));
-        }
-      }
-      &:active {
-        scale: 0.96;
-        background-color: var(--color-hell-surface-muted);
-      }
+    flex-direction: column;
+    gap: 3px;
+    --hell-button-height: 56px;
+    --hell-button-padding-inline: 0;
+    --hell-button-shadow: none;
+    --hell-button-border-color: var(--color-hell-border);
+    &[data-hover] {
+      --hell-button-border-color: color-mix(
+        in oklab,
+        var(--color-hell-primary) 36%,
+        var(--color-hell-border)
+      );
     }
+    &[data-press] {
+      --hell-button-border-color: color-mix(
+        in oklab,
+        var(--color-hell-primary) 52%,
+        var(--color-hell-border)
+      );
+      scale: 0.94;
+    }
+    &[data-disabled] {
+      scale: 1;
+    }
+  }
 
   .hell-dialpad [data-slot='digit'] {
-      font-size: 26px;
-      font-weight: var(--font-weight-medium);
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: -0.01em;
-    }
+    font-size: 24px;
+    font-weight: var(--font-weight-semibold);
+    line-height: 1;
+    letter-spacing: 0;
+  }
 
   .hell-dialpad [data-slot='letters'] {
-      font-size: 9px;
-      font-weight: var(--font-weight-bold);
-      letter-spacing: 0.18em;
-      color: var(--color-hell-foreground-subtle);
-      text-transform: uppercase;
-      line-height: 1;
-    }
+    min-height: 10px;
+    color: var(--color-hell-foreground-muted);
+    font-size: 9px;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0;
+    line-height: 1;
+  }
 
   .hell-dialpad [data-slot='call'] {
-      width: 100%;
-      margin-top: var(--spacing-hell-2);
+    width: 100%;
+    --hell-button-height: 44px;
+  }
+
+  @media (max-width: 480px) {
+    .hell-dialpad [data-slot='clear'],
+    .hell-dialpad [data-slot='back'] {
+      --hell-button-height: 44px;
     }
 
+    .hell-dialpad [data-slot='key'] {
+      --hell-button-height: 64px;
+    }
+  }
 }

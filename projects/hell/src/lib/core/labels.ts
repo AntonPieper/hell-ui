@@ -33,8 +33,11 @@ export interface HellAudioPlayerLabels {
 
 export interface HellDialpadLabels {
   readonly dialpad: string;
+  readonly number?: string;
   readonly backspace: string;
+  readonly clear?: string;
   readonly call: string;
+  readonly key?: (digit: string, letters?: string) => string;
 }
 
 export interface HellBreadcrumbLabels {

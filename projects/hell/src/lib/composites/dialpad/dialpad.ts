@@ -1,17 +1,16 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
   booleanAttribute,
   computed,
   inject,
-  input,
-  output,
   signal,
 } from '@angular/core';
-import { provideIcons } from '@ng-icons/core';
-import { faSolidDeleteLeft, faSolidPhone } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../../primitives/button/button';
-import { HellIcon } from '../../primitives/icon/icon';
 import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
 
@@ -35,111 +34,231 @@ const KEYS: HellDialpadKey[] = [
   { digit: '#' },
 ];
 
-const HELL_DIALPAD_ICONS = {
-  faSolidDeleteLeft,
-  faSolidPhone,
-};
-
 /**
  * Telephony dialpad. Emits `(digit)` whenever a key is pressed and maintains
  * the entered number internally. Bind `[value]` for controlled mode, listen
  * to `(valueChange)` for the running number. Backspace removes the last
- * digit; keyboard input is supported when the dialpad has focus.
+ * digit; keyboard input is supported when the dialpad or one of its controls
+ * has focus.
  */
 @Component({
   selector: 'hell-dialpad',
-  imports: [HellButton, HellIcon],
-  providers: [provideIcons(HELL_DIALPAD_ICONS)],
+  imports: [HellButton],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class.hell-dialpad]': '!unstyled()',
     role: 'group',
-    tabindex: '0',
+    '[attr.tabindex]': 'disabled() ? -1 : 0',
     '[attr.aria-label]': 'labels.dialpad.dialpad',
+    '[attr.aria-disabled]': 'disabled() ? "true" : null',
+    '[attr.aria-invalid]': 'invalid() ? "true" : null',
+    '[attr.data-empty]': 'hasValue() ? null : ""',
+    '[attr.data-disabled]': 'disabled() ? "" : null',
+    '[attr.data-readonly]': 'readOnly() ? "" : null',
+    '[attr.data-invalid]': 'invalid() ? "" : null',
     '(keydown)': 'onKey($event)',
   },
   template: `
     <div data-slot="display">
-      <output data-slot="number" aria-live="polite"
-        ><span data-slot="number-inner">{{ display() || ' ' }}</span></output
-      >
+      <span data-slot="display-label">{{ numberLabel() }}</span>
+      <output data-slot="number" aria-live="polite" [attr.aria-label]="numberLabel()">
+        <span data-slot="number-inner">{{ display() || '—' }}</span>
+      </output>
+    </div>
+
+    <div data-slot="controls">
       <button
         hellButton
-        variant="ghost"
+        variant="default"
         size="sm"
-        iconOnly
+        type="button"
+        data-slot="clear"
+        [disabled]="!canEdit() || !hasValue()"
+        (click)="clear()"
+        [attr.aria-label]="clearLabel()"
+      >
+        {{ clearLabel() }}
+      </button>
+      <button
+        hellButton
+        variant="default"
+        size="sm"
         type="button"
         data-slot="back"
-        [disabled]="!display()"
+        [disabled]="!canEdit() || !hasValue()"
         (click)="backspace()"
         [attr.aria-label]="labels.dialpad.backspace"
       >
-        <hell-icon name="faSolidDeleteLeft" />
+        {{ labels.dialpad.backspace }}
       </button>
     </div>
 
     <div data-slot="grid">
       @for (k of keys; track k.digit) {
-        <button hellButton variant="ghost" data-slot="key" type="button" (click)="press(k.digit)">
+        <button
+          hellButton
+          variant="default"
+          data-slot="key"
+          type="button"
+          [disabled]="!canEdit()"
+          [attr.aria-label]="keyLabel(k)"
+          [attr.data-key]="k.digit"
+          (click)="press(k.digit)"
+        >
           <span data-slot="digit">{{ k.digit }}</span>
           <span data-slot="letters">{{ k.letters || ' ' }}</span>
         </button>
       }
     </div>
 
-    @if (showCallButton()) {
+    @if (showCallButtonState()) {
       <button
         hellButton
         variant="primary"
         size="lg"
         type="button"
         data-slot="call"
-        (click)="call.emit(display())"
-        [disabled]="!display()"
+        (click)="submit()"
+        [disabled]="disabled() || !hasValue()"
+        [attr.aria-label]="labels.dialpad.call"
       >
-        <hell-icon name="faSolidPhone" /> {{ labels.dialpad.call }}
+        {{ labels.dialpad.call }}
       </button>
     }
   `,
 })
 export class HellDialpad extends HellStyleable {
-  protected readonly labels = inject(HELL_LABELS);
+  private readonly valueInput = signal<string | null | undefined>(null);
+  private readonly showCallButtonInput = signal(true);
+  private readonly disabledInput = signal(false);
+  private readonly readOnlyInput = signal(false);
+  private readonly invalidInput = signal(false);
 
-  readonly value = input<string | null | undefined>(null);
+  /** Controlled value. Leave nullish to let the dialpad keep local state. */
+  readonly value = this.valueInput.asReadonly();
+
   /** Render a primary "Call" action button below the keys. */
-  readonly showCallButton = input(true, { transform: booleanAttribute });
+  readonly showCallButton = this.showCallButtonInput.asReadonly();
 
-  readonly digit = output<string>();
-  readonly valueChange = output<string>();
-  readonly call = output<string>();
+  /** Disable every dialpad control and remove the host from tab order. */
+  readonly disabled = this.disabledInput.asReadonly();
+
+  /** Keep the dialpad readable and callable while preventing number edits. */
+  readonly readOnly = this.readOnlyInput.asReadonly();
+
+  /** Mark the current number invalid for styling and accessibility. */
+  readonly invalid = this.invalidInput.asReadonly();
+
+  @Output() readonly digit = new EventEmitter<string>();
+  @Output() readonly valueChange = new EventEmitter<string>();
+  @Output() readonly call = new EventEmitter<string>();
+
+  protected readonly labels = inject(HELL_LABELS);
+  private readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
   protected readonly keys = KEYS;
   private readonly local = signal('');
+  protected readonly showCallButtonState = this.showCallButton;
+
+  @Input('value')
+  set valueBinding(value: string | null | undefined) {
+    this.valueInput.set(value);
+  }
+
+  @Input({ alias: 'showCallButton', transform: booleanAttribute })
+  set showCallButtonBinding(value: boolean) {
+    this.showCallButtonInput.set(value);
+  }
+
+  @Input({ alias: 'disabled', transform: booleanAttribute })
+  set disabledBinding(value: boolean) {
+    this.disabledInput.set(value);
+  }
+
+  @Input({ alias: 'readOnly', transform: booleanAttribute })
+  set readOnlyBinding(value: boolean) {
+    this.readOnlyInput.set(value);
+  }
+
+  @Input({ alias: 'invalid', transform: booleanAttribute })
+  set invalidBinding(value: boolean) {
+    this.invalidInput.set(value);
+  }
 
   protected readonly display = computed(() => {
     const value = this.value();
     return value === null || value === undefined ? this.local() : value;
   });
 
-  protected press(d: string) {
+  protected readonly hasValue = computed(() => this.display().length > 0);
+  protected readonly canEdit = computed(() => !this.disabled() && !this.readOnly());
+
+  protected numberLabel(): string {
+    return this.labels.dialpad.number ?? 'Number';
+  }
+
+  protected clearLabel(): string {
+    return this.labels.dialpad.clear ?? 'Clear';
+  }
+
+  protected keyLabel(key: HellDialpadKey): string {
+    const label = this.labels.dialpad.key;
+    if (label) return label(key.digit, key.letters);
+    if (key.digit === '*') return 'Star';
+    if (key.digit === '#') return 'Pound';
+    const letters = key.letters === '+' ? 'plus' : key.letters;
+    return letters ? `Digit ${key.digit}, ${letters}` : `Digit ${key.digit}`;
+  }
+
+  protected press(d: string): void {
+    if (!this.canEdit()) return;
     const next = this.display() + d;
     this.local.set(next);
     this.digit.emit(d);
     this.valueChange.emit(next);
   }
 
-  protected backspace() {
+  protected backspace(): void {
+    if (!this.canEdit() || !this.hasValue()) return;
     const next = this.display().slice(0, -1);
     this.local.set(next);
     this.valueChange.emit(next);
   }
 
-  protected onKey(e: KeyboardEvent) {
+  protected clear(): void {
+    if (!this.canEdit() || !this.hasValue()) return;
+    this.local.set('');
+    this.valueChange.emit('');
+  }
+
+  protected submit(): void {
+    if (this.disabled() || !this.hasValue()) return;
+    this.call.emit(this.display());
+  }
+
+  protected onKey(e: KeyboardEvent): void {
+    if (this.disabled() || e.defaultPrevented) return;
+
+    if (e.key === 'Enter') {
+      if (e.target === this.hostElement && this.showCallButtonState() && this.hasValue()) {
+        this.submit();
+        e.preventDefault();
+      }
+      return;
+    }
+
     if (e.key === 'Backspace') {
       this.backspace();
       e.preventDefault();
       return;
     }
+
+    if (e.key === 'Delete') {
+      this.clear();
+      e.preventDefault();
+      return;
+    }
+
     if (/^[0-9*#+]$/.test(e.key)) {
       this.press(e.key);
       e.preventDefault();
