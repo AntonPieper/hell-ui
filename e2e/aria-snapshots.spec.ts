@@ -431,13 +431,13 @@ test.describe('public docs aria snapshots', () => {
   test('table utility snapshot records active row semantics and cell action name', async ({
     page,
   }) => {
-    await gotoDocsPage(page, '/components/data-table', 'Table utilities');
+    await gotoDocsPage(page, '/components/table', 'Table');
 
-    const masterDetail = page.locator('app-data-table-example-example');
-    await expect(masterDetail).toBeVisible();
+    const primitive = page.locator('app-table-primitive-example');
+    await expect(primitive).toBeVisible();
 
-    const firstRow = masterDetail.getByRole('row', { name: /User 1/ }).first();
-    const open = firstRow.getByRole('button', { name: 'Open details for User 1' });
+    const firstRow = primitive.getByRole('row', { name: /Ada Lovelace/ }).first();
+    const open = firstRow.getByRole('button', { name: 'Open Ada Lovelace' });
     await expect(open).toBeVisible();
     await open.click();
     await expect(firstRow).toHaveAttribute('data-active', 'true');

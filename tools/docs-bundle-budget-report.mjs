@@ -234,7 +234,7 @@ ${renderComponentStyleTable(componentStyles.slice(0, 8))}
 ${renderPdfViewerStyleRow(pdfViewerStyleWarnings)}
 | PDF lazy weight is large even when initial bundle is protected | \`pdfjs-dist/build/pdf.mjs\`, \`pdfjs-dist/web/pdf_viewer.mjs\`, and \`hell-ui-pdf-viewer.mjs\` are the top PDF lazy inputs. | PDF viewer split package | HELL-031 keeps the docs page lazy/isolated; HELL-053 keeps PDF outside the core package. |
 | Code editor lazy chunks stay behind lazy docs boundaries | CodeMirror and Lezer packages dominate the code editor route and shared docs code-viewer lazy chunks; this is expected feature weight, not initial shell weight. | Code editor feature / docs code previews | HELL-054 locks CodeMirror as a kept optional entrypoint; HELL-087 keeps shared docs code previews dynamically imported instead of part of the docs shell. |
-| Table utilities lazy chunk carries demo/raw source cost | \`data-table-page\` includes live examples plus \`?raw\` source text and table utilities feature code. | Table utilities feature docs | HELL-056 locks table utilities as a kept feature entrypoint; HELL-050 verifies docs examples stay behind lazy routes. |
+| Table docs lazy chunk carries demo/raw source cost | \`table-page\` includes live examples plus \`?raw\` source text and TanStack table shell examples. | Table docs | HELL-129 keeps table examples behind the lazy docs route and verifies the supported \`/table\` plus \`/table-tanstack\` paths. |
 
 ## Reproduce
 
@@ -428,7 +428,7 @@ function ownerForEntryPoint(entryPoint) {
   );
   if (componentPageMatch) {
     const slug = componentPageMatch[1];
-    if (slug === 'data-table') return 'Table utilities docs page (`/components/data-table`)';
+    if (slug === 'table') return 'Table docs page (`/components/table`)';
     return `${titleFromSlug(slug)} docs page (\`/components/${slug}\`)`;
   }
 
@@ -492,4 +492,3 @@ function titleFromSlug(slug) {
 function formatBudget(bytes) {
   return typeof bytes === 'number' ? formatBytes(bytes) : 'not configured';
 }
-

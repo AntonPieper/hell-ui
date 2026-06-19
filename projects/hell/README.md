@@ -34,7 +34,7 @@ Feature peers remain optional at runtime, but package peer metadata is package-w
 
 ### Peer dependency tiers
 
-Package-consumer scenarios assert these peer groups with strict peer installs. CodeMirror, TanStack Table, and TanStack Virtual peers stay optional and are not required by root, button, table, data-table, or table-cdk scenarios. The CDK table skin is an optional entry point but adds no peer beyond the core `@angular/cdk` peer. PDF viewer dependencies belong to `@hell-ui/pdf-viewer`, not this package.
+Package-consumer scenarios assert these peer groups with strict peer installs. CodeMirror, TanStack Table, and TanStack Virtual peers stay optional and are not required by root, button, or table scenarios. TanStack Table is isolated behind `@hell-ui/angular/table-tanstack`, and TanStack Virtual is isolated behind `@hell-ui/angular/table-tanstack/virtual`. PDF viewer dependencies belong to `@hell-ui/pdf-viewer`, not this package.
 
 | Tier | Entry points / scenarios | Peer group asserted |
 | --- | --- | --- |
@@ -42,10 +42,9 @@ Package-consumer scenarios assert these peer groups with strict peer installs. C
 | Primitive | Narrow primitives such as `/button`; aggregate `/primitives`; `button-unstyled`, `button`, `primitives-css` | Core peers. Add `tailwindcss` when importing primitive CSS. Aggregate `/primitives` also asserts optional `@angular/router` and `@ng-icons/font-awesome` because dialog and icon-backed primitives are bundled in the aggregate FESM. |
 | Composite | `/composites` and narrow composite entry points such as `/app-shell` and `/audio-player`; `composites-css`, `app-shell`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Aggregate/icon-backed composites also assert optional `@ng-icons/font-awesome`. |
 | Audio transcript | `/features/audio-transcript`; `audio-transcript` | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled. |
-| Table primitives / simple data table | `/table`, `/data-table`; `table`, `data-table`, `no-legacy-alias` | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack Table, or TanStack Virtual peers. The negative scenario proves removed legacy table aliases and CSS aliases stay unavailable. |
-| TanStack table adapter | `/table-tanstack`; `table-tanstack` | Core peers plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`. Root, button, `/table`, and `/data-table` scenarios prove TanStack Table is not installed unless this adapter is imported. |
-| TanStack virtual adapter | `/table-virtual`; `table-virtual` | Core peers plus `tailwindcss` and optional `@tanstack/virtual-core`; no `@tanstack/angular-table`. Root, button, `/table`, and `/data-table` scenarios prove TanStack Virtual is not installed unless this adapter is imported. |
-| CDK table skin adapter | `/table-cdk`; `table-cdk` | Core peers plus `tailwindcss`; no TanStack Table or TanStack Virtual peer. The CDK adapter uses the core `@angular/cdk` peer already required by Hell. |
+| Table primitives | `/table`; `table`, `no-legacy-alias` | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack Table, or TanStack Virtual peers. The negative scenario proves removed legacy table aliases and CSS aliases stay unavailable. |
+| TanStack table shell | `/table-tanstack`; `table-tanstack` | Core peers plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`. Root, button, and `/table` scenarios prove TanStack Table is not installed unless this shell is imported. |
+| TanStack virtual row strategy | `/table-tanstack/virtual`; `table-tanstack-virtual` | Same shell peers plus optional `@tanstack/virtual-core`. The strategy mounts on `hell-tanstack-table`; it is not a separate table engine or root component. |
 | Code editor | `/features/code-editor`; `code-editor` | Core peers plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight`. |
 | PDF viewer | `@hell-ui/pdf-viewer`; `pdf-viewer` | Separate package; see that package for its own install contract. |
 
@@ -70,13 +69,13 @@ The stable API report set currently covers `@hell-ui/angular`, `@hell-ui/angular
 | Primitives (`@hell-ui/angular/primitives`, narrow primitive entry points) | Stable | SSR-safe unless a primitive's own docs say otherwise |
 | Composites (`@hell-ui/angular/composites`, narrow composite entry points) | Beta | Browser-first surfaces can use `window`/`document` and global listeners for overlays |
 | Table primitives (`@hell-ui/angular/table`) | Beta | Optional peer; uses `ResizeObserver` for table sizing |
-| Data table and table adapters (`@hell-ui/angular/data-table`, `/table-tanstack`, `/table-virtual`, `/table-cdk`) | Experimental | Simple native data table, TanStack Table adapter, TanStack Virtual adapter, and CDK Table skin adapter are available; keep adapter-specific engines behind their entrypoints |
+| TanStack table shell (`@hell-ui/angular/table-tanstack`, `/table-tanstack/virtual`) | Experimental | Caller-owned TanStack Table remains the engine; Hell owns shell chrome, styling, projection regions, status views, controls, and the optional TanStack Virtual body strategy |
 | Code editor (`@hell-ui/angular/features/code-editor`) | Experimental | Browser-only CodeMirror runtime: `window`/`document` interactions |
 | PDF viewer (`@hell-ui/pdf-viewer`) | Experimental split package | Browser-only app surface/recipe owned outside `@hell-ui/angular` |
 | Testing harnesses (`@hell-ui/angular/testing`) | Stable/test-only | CDK component harnesses for consumer and library tests |
 | Speech transcript (`allowSpeechTranscript`) | Experimental/browser-only/best-effort | Requires `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript`; uses `navigator` + `SpeechRecognition` + `captureStream`; not accessibility-grade captions or production timed text |
-| Removed table aliases and row-as-control APIs (`/features/data-table`, `/features/table-utilities`, `HELL_TABLE_DIRECTIVES`, `HELL_TABLE_UTILITY_DIRECTIVES`, `HellTableRow.interactive`, `selectionSemantics`, `(rowSelect)`, `[selectable]`) | Removed before beta | Use `@hell-ui/angular/table` plus `HELL_TABLE_UTILITIES_DIRECTIVES`; use `hellTableRowAction` for row actions and checkbox/radio controls for selection |
-| Deprecated non-table aliases (`allowLiveCaptions`, `hellAudioSpeechSupported` from `/audio-player`, `HellDataTableLabels`, `hellCodeEditorSetup`) | Deprecated | Keep compatibility imports only while migrating to the documented replacements |
+| Removed table aliases and row-as-control APIs | Removed before beta | Use `@hell-ui/angular/table` for primitives or `@hell-ui/angular/table-tanstack` for a TanStack-owned table shell |
+| Deprecated non-table aliases (`allowLiveCaptions`, `hellAudioSpeechSupported` from `/audio-player`, `hellCodeEditorSetup`) | Deprecated | Keep compatibility imports only while migrating to the documented replacements |
 
 The PDF viewer was split out before public beta; use `@hell-ui/pdf-viewer` for the component, styles, and worker setup docs.
 

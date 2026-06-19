@@ -21,10 +21,8 @@ const requiredReleaseScenarios = [
   'audio-player',
   'audio-transcript',
   'table',
-  'data-table',
   'table-tanstack',
-  'table-virtual',
-  'table-cdk',
+  'table-tanstack-virtual',
   'no-legacy-alias',
   'code-editor',
 ];

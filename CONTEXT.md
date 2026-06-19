@@ -13,6 +13,10 @@ A Behavior Primitive plus optional Hell host classes, data attributes, and publi
 **Composite**
 A module that combines multiple primitives into a higher-level experience. A Composite may own some DOM structure when that structure is part of the leverage it provides, but its docs should name the owned parts and the escape hatches.
 
+**Multi-Select Menu Button**
+A general Composite that opens a menu of checkable options from a button and reflects the selected count through button text, an icon, or a badge. It is domain-agnostic; table column visibility is only one possible consumer-owned use case.
+_Avoid_: Column visibility selector, table column picker.
+
 **Feature**
 A heavier module with optional dependencies, runtime setup, or large styling. Features stay behind feature-specific Package Entry Points and feature-specific CSS imports.
 
@@ -73,8 +77,57 @@ The editor lifecycle behind the code editor Feature: bootstrapping, value synchr
 **Audio Runtime**
 The media element, playback state, seek/volume policy, best-effort browser live-caption session, transcript state, and browser speech lifecycle behind the audio player Composite. Captions are optional and browser-backed only, reset on seek/playback restart, and stay behind an internal Adapter; playback controls expose structured state/events while clipboard copy remains a small UI helper outside the runtime.
 
+**Table Primitives**
+Hell-owned table building blocks for table semantics, accessibility, styling hooks, and narrow interaction affordances. They do not own data sourcing, row models, filtering, pagination, virtualization, or a first-party data-table renderer.
+They may expose semantic native-table directives, row/cell styling hooks, sort and resize affordances, row action hooks, selection-control hooks, and primitive-level measurement hooks. They may reflect app-owned or TanStack-owned state through inputs/data attributes, but they do not own selection state, active-row state, grid semantics, or composite grid keyboard navigation.
+_Avoid_: Data table library, data grid, simple data-table renderer, normalized table model, table state channels, column definition DSL, row draft controller, column visibility panel, column visibility selector, grid mode.
+
+**Table Engine**
+TanStack-owned table logic that owns row and column models, sorting, filtering, pagination, grouping, selection state, virtualization, or data querying. Hell does not define a parallel table model or state abstraction.
+_Avoid_: HellDataTable, first-party data-table renderer, HellTableModel, table state channels.
+
+**TanStack Table Adapter**
+The supported high-level Adapter path for rendering TanStack-owned table and virtual-row behavior with Hell Table Primitives. It should make common TanStack table experiences simple and consistent in Hell UI, including styled pagination, filtering controls, sticky headers, pinned columns, and table layout states, while preserving TanStack's table instance, state, row-model, and feature API as the engine. It is the only first-class higher-level table engine path and must not translate TanStack into a competing Hell table engine.
+_Avoid_: CDK table adapter, custom data-table component, separate virtual-table entry point.
+
+**TanStack Table Shell**
+A reusable Hell-styled shell that renders a caller-owned TanStack Table instance with standard Hell table chrome, styling, controls, and renderer integration. It improves ergonomics around TanStack rather than accepting raw data or defining a parallel table model.
+TanStack column definitions are the primary source of truth for header, cell, and footer renderers; projected Hell templates fill only otherwise undefined one-off slots.
+Sticky headers are shell-owned chrome; column pinning comes from TanStack column pinning state and is reflected through stable Hell classes and data attributes without parallel pinning inputs.
+Virtualization is an optional body strategy inside this shell, not a separate table engine or root component; the base shell must remain usable without the virtual strategy.
+_Avoid_: HellDataTable, data-table shell, raw rows-and-columns table component.
+
+**Table Body Strategy**
+A shell-internal rendering policy for the TanStack Table Shell body. The normal strategy renders TanStack rows directly; the virtual strategy uses TanStack Virtual while preserving the same shell chrome, projection, status rendering, and styling contract.
+_Avoid_: Separate virtual table, virtual table engine, virtual root component.
+
+**Table Shell Status**
+The shell-owned external display state for ready, loading, and error chrome around a TanStack Table. Empty chrome is inferred from the rendered TanStack row model when the status is ready; error payload belongs to the error status rather than a parallel input.
+_Avoid_: Separate loading input, separate error input, empty status, separate empty input.
+
+**Table Shell Region**
+A repeatable projected region marker inside the TanStack Table Shell. Region children render in template order and are not shorthand props or singleton slots.
+Names should describe table-shell chrome, such as `hellTableShellToolbar` and `hellTableShellFooter`, rather than semantic table structure or TanStack-specific ownership.
+_Avoid_: Pagination input, toolbar mode, singleton footer slot, hellTableFooter, hellTanStackTableFooter.
+
+**Expanded Row**
+A TanStack-owned row expansion state rendered by the TanStack Table Shell as additional row chrome. Hell may project native TanStack `Row<T>` context into the expanded-row template, but it does not own active-row state or a master/detail feature.
+_Avoid_: Detail panel, active row editor, master/detail API.
+
+**TanStack Pagination Control**
+A reusable Hell-styled control that reads and mutates pagination through a caller-owned TanStack Table instance. Consumers place it in a Table Shell Region instead of enabling pagination through a shell shorthand.
+_Avoid_: Pagination shorthand, shell-owned pagination mode.
+
+**TanStack Filter Control**
+A reusable Hell-styled control that reads and mutates filtering through a caller-owned TanStack Table instance or column. Consumers place filter controls in Table Shell Regions instead of enabling filtering through shell shorthand props.
+_Avoid_: Filtering shorthand, search shorthand, shell-owned filter mode.
+
+**Unsupported Table Path**
+A table integration route that Hell deliberately does not expose, document, or test as a supported product surface. CDK table skinning, first-party data-table rendering, and separate virtual-table entry points are Unsupported Table Paths.
+_Avoid_: Experimental table adapter, compatibility table route, grid mode.
+
 **Table Column Resize Runtime**
-The table-specific column pair lookup, measurement, live width, minimum-width, total-width-preserving resize transaction, and commit policy that adapts table utility header cells to Resize Behavior. Initial column sizing belongs to consumer CSS/Tailwind rather than caller-controlled pixel inputs. The runtime measures rendered columns, owns internal resize state, and exposes sizing through CSS custom properties rather than direct concrete CSS properties such as `width` or `flex-basis`. It emits one resize transaction event for both affected columns using column ids and relative resize intent rather than making pixel widths the public Customization Surface. Resize Behavior remains layout-agnostic.
+The table-specific column pair lookup, measurement, live width, minimum-width, total-width-preserving resize transaction, and commit policy that adapts table primitive header cells to Resize Behavior. Initial column sizing, persisted sizing state, and table-engine sizing policy belong to the app or TanStack. The runtime may measure rendered columns and emit primitive resize events, but it must not become a table sizing model. Resize Behavior remains layout-agnostic.
 
 **Omnibar Runtime**
 The query state, open state, search orchestration, projected item registry, keyboard navigation, delegated Floating Dismissal, anchor positioning, and hotkey policy behind the omnibar Composite. Dynamic positioning is exposed to CSS through CSS custom properties written by a visual Adapter; concrete layout remains in CSS.

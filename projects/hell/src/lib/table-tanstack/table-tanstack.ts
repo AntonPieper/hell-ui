@@ -1,17 +1,31 @@
-import { ChangeDetectionStrategy, Component, Injector, computed, inject, input, signal, type Signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  Directive,
+  ElementRef,
+  InjectionToken,
+  OnChanges,
+  OnDestroy,
+  TemplateRef,
+  Type,
+  booleanAttribute,
+  computed,
+  contentChildren,
+  inject,
+  input,
+  isDevMode,
+  type Provider,
+} from '@angular/core';
 import {
   FlexRenderDirective,
   type Cell,
-  type CellContext,
   type Column,
-  type FlexRenderContent,
   type Header,
   type Row,
   type RowData,
-  type RowSelectionState,
-  type SortingState,
   type Table,
-  type Updater,
 } from '@tanstack/angular-table';
 export {
   FlexRenderDirective,
@@ -23,546 +37,940 @@ export {
   type FlexRenderComponentProps,
 } from '@tanstack/angular-table';
 
-import {
-  hellTableCreateCommands,
-  hellTableCreateRenderRegistry,
-  hellTableCreateState,
-  hellTableNormalizeRowKey,
-  hellTableResolveStateUpdater,
-  hellTableVirtualRowPartsFromRows,
-  type HellColumnMeta,
-  type HellTableCellRenderContext,
-  type HellTableColumn,
-  type HellTableColumnId,
-  type HellTableHeaderGroup,
-  type HellTableHeaderRenderContext,
-  type HellTableInitialState,
-  type HellTableModel,
-  type HellTableModelHeader,
-  type HellTableModelRow,
-  type HellTableRenderRegistryInput,
-  type HellTableRenderer,
-  type HellTableRowKey,
-  type HellTableRowKeyValue,
-  type HellTableRowPart,
-  type HellTableRowSelectionState,
-  type HellTableSortingState,
-  type HellTableState,
-  type HellTableStateChannel,
-} from '../table/table';
+type ɵHellStrategyCleanup = VoidFunction | void;
 
-/** Static table instance or Angular signal returned by `createAngularTable`. */
-export type HellTanStackTableInput<TData extends RowData> = Table<TData> | Signal<Table<TData>>;
-
-/** Stable key callback for TanStack rows before Hell normalizes keys to strings. */
-export type HellTanStackRowKey<TData extends RowData> = (
-  row: Row<TData>,
-  index: number,
-) => HellTableRowKeyValue;
-
-/** Options for adapting an app-owned TanStack Table into a HellTableModel. */
-export interface HellTanStackTableModelOptions<TData extends RowData> {
-  readonly table: HellTanStackTableInput<TData>;
-  readonly rowKey?: HellTanStackRowKey<TData>;
-  /** Local Hell-only channels for active row, single selection, loading, and error. */
-  readonly state?: HellTableState;
-  /** Initial values for Hell-only channels when `state` is not supplied. */
-  readonly initialState?: HellTableInitialState;
-  /** Additional render slots layered under TanStack header/cell FlexRender slots. */
-  readonly render?: HellTableRenderRegistryInput<TData>;
-}
-
-/** Hell column with the owning TanStack column preserved for adapter renderers. */
-export interface HellTanStackTableColumn<TData extends RowData = unknown, TValue = unknown>
-  extends HellTableColumn<TData, TValue> {
-  readonly tanStackColumn: Column<TData, TValue>;
-}
-
-/** Hell header with the owning TanStack header preserved for adapter renderers. */
-export interface HellTanStackTableModelHeader<TData extends RowData = unknown, TValue = unknown>
-  extends HellTableModelHeader<TData> {
-  readonly column?: HellTanStackTableColumn<TData, TValue>;
-  readonly tanStackHeader: Header<TData, TValue>;
-}
-
-/** Hell row with the owning TanStack row preserved for adapter renderers. */
-export interface HellTanStackTableModelRow<TData extends RowData = unknown>
-  extends HellTableModelRow<TData> {
-  readonly tanStackRow: Row<TData>;
-}
-
-/** One visible TanStack cell normalized for Hell renderers. */
-export interface HellTanStackTableModelCell<TData extends RowData = unknown, TValue = unknown>
-  extends HellTableCellRenderContext<TData, TValue> {
-  readonly id: string;
-  readonly row: HellTanStackTableModelRow<TData>;
-  readonly column: HellTanStackTableColumn<TData, TValue>;
-  readonly renderValue: TValue | null;
-  readonly render: HellTanStackFlexRenderValue<CellContext<TData, TValue>>;
-  readonly tanStackCell: Cell<TData, TValue>;
-}
-
-/** FlexRender descriptor carried through Hell render registries without reimplementing TanStack rendering. */
-export interface HellTanStackFlexRenderValue<TProps extends NonNullable<unknown> = NonNullable<unknown>> {
-  readonly kind: 'tanstack-flex-render';
-  readonly content: unknown;
-  readonly props: TProps;
-  readonly fallback?: unknown;
-}
-
-/** HellTableModel extended with TanStack table/cell accessors. */
-export interface HellTanStackTableModel<TData extends RowData = unknown> extends HellTableModel<TData> {
-  readonly table: Signal<Table<TData>>;
-  readonly columns: Signal<readonly HellTanStackTableColumn<TData>[]>;
-  readonly rows: Signal<readonly HellTanStackTableModelRow<TData>[]>;
-  readonly headerGroups: Signal<readonly HellTableHeaderGroup<TData>[]>;
-  readonly visibleColumns: Signal<readonly HellTanStackTableColumn<TData>[]>;
-  readonly tanStackRows: Signal<readonly Row<TData>[]>;
-  cellsForRow(row: HellTableModelRow<TData> | Row<TData> | HellTableRowKey): readonly HellTanStackTableModelCell<TData>[];
-}
-
-/** Standalone renderer for values produced by `hellTanStackFlexRenderValue`. */
-@Component({
-  selector: 'hell-tanstack-flex-render',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FlexRenderDirective],
-  template: `
-    <ng-template
-      [flexRender]="directiveContent()"
-      [flexRenderProps]="value().props"
-      [flexRenderInjector]="injector"
-      let-rendered
-    >
-      {{ rendered }}
-    </ng-template>
-  `,
-})
-export class HellTanStackFlexRenderOutlet {
-  readonly value = input.required<HellTanStackFlexRenderValue>();
-
-  protected readonly injector = inject(Injector);
-
-  protected directiveContent(): HellTanStackDirectiveContent {
-    return hellTanStackDirectiveContent(this.value());
-  }
-}
-
-/** Standalone import set for the TanStack adapter and its FlexRender outlet. */
-export const HELL_TANSTACK_TABLE_DIRECTIVES = [HellTanStackFlexRenderOutlet, FlexRenderDirective] as const;
-
-/** Creates a FlexRender descriptor for TanStack Angular's `FlexRenderDirective`. */
-export function hellTanStackFlexRenderValue<TProps extends NonNullable<unknown>>(
-  content: unknown,
-  props: TProps,
-  fallback?: unknown,
-): HellTanStackFlexRenderValue<TProps> {
-  return { kind: 'tanstack-flex-render', content, props, fallback };
-}
-
-/** True when a Hell render result is a TanStack FlexRender descriptor. */
-export function hellTanStackIsFlexRenderValue(
-  value: unknown,
-): value is HellTanStackFlexRenderValue {
-  return isRecord(value) && value['kind'] === 'tanstack-flex-render';
-}
-
-/** Resolves primitive/function FlexRender content for tests, strings, and non-Angular fallbacks. */
-export function hellTanStackResolveFlexRenderValue(value: unknown): unknown {
-  if (!hellTanStackIsFlexRenderValue(value)) return value;
-  const content = value.content;
-  if (typeof content === 'function' && !isAngularDeclarable(content)) {
-    const rendered = (content as (props: NonNullable<unknown>) => unknown)(value.props);
-    return rendered ?? value.fallback ?? null;
-  }
-  return content ?? value.fallback ?? null;
-}
-
-/** Converts TanStack sorting state into Hell's adapter-free sort channel shape. */
-export function hellTanStackSortingToHell(
-  sorting: readonly { readonly id: string; readonly desc: boolean }[],
-): readonly HellTableSortingState[] {
-  return sorting.map((sort) => ({
-    columnId: sort.id,
-    direction: sort.desc ? 'desc' : 'asc',
-  }));
-}
-
-/** Converts Hell sorting state back into TanStack's controlled table shape. */
-export function hellTanStackSortingFromHell(
-  sorting: readonly HellTableSortingState[],
-): SortingState {
-  return sorting.map((sort) => ({ id: sort.columnId, desc: sort.direction === 'desc' }));
-}
-
-/** Adapts a TanStack Table instance into Hell's normalized table model without owning TanStack state. */
-export function hellTanStackTableModel<TData extends RowData>(
-  options: HellTanStackTableModelOptions<TData>,
-): HellTanStackTableModel<TData> {
-  const table = toTableSignal(options.table);
-  const localState = options.state ?? hellTableCreateState(options.initialState);
-
-  const columns = computed<readonly HellTanStackTableColumn<TData>[]>(() =>
-    table()
-      .getAllLeafColumns()
-      .map((column) => hellTanStackColumn(column)),
-  );
-  const visibleColumns = computed<readonly HellTanStackTableColumn<TData>[]>(() =>
-    table()
-      .getVisibleLeafColumns()
-      .map((column) => hellTanStackColumn(column)),
-  );
-  const tanStackRows = computed<readonly Row<TData>[]>(() => table().getRowModel().rows);
-  const rows = computed<readonly HellTanStackTableModelRow<TData>[]>(() =>
-    hellTanStackRows(tanStackRows(), options.rowKey),
-  );
-  const state = hellTanStackState(table, localState, rows);
-  const headerGroups = computed<readonly HellTableHeaderGroup<TData>[]>(() =>
-    hellTanStackHeaderGroups(table().getHeaderGroups(), columns()),
-  );
-  const rowParts = computed<readonly HellTableRowPart<TData>[]>(() =>
-    hellTableVirtualRowPartsFromRows({
-      rows: rows(),
-      loading: state.loading.value(),
-      error: state.error.value(),
-      activeEditorRowKey: state.activeRowKey.value(),
-    }),
-  );
-  const commands = hellTableCreateCommands(state, rows);
-  const render = computed(() => hellTanStackRenderRegistry(table(), options.render));
-
-  return {
-    table,
-    tanStackRows,
-    columns,
-    rows,
-    headerGroups,
-    visibleColumns,
-    rowParts,
-    get render() {
-      return render();
-    },
-    state,
-    commands,
-    cellsForRow: (row) => hellTanStackCellsForRow(row, rows(), visibleColumns()),
-  };
-}
-
-function hellTanStackState<TData extends RowData>(
-  table: Signal<Table<TData>>,
-  localState: HellTableState,
-  rows: Signal<readonly HellTanStackTableModelRow<TData>[]>,
-): HellTableState {
-  return {
-    ...localState,
-    rowSelection: tanStackRowSelectionStateChannel(table, rows),
-    columnVisibility: tanStackStateChannel(
-      table,
-      (current) => current.columnVisibility,
-      (current) => current,
-      (current) => current,
-      (target, updater) => target.setColumnVisibility(updater),
-    ),
-    sorting: tanStackStateChannel(
-      table,
-      (current) => current.sorting,
-      hellTanStackSortingToHell,
-      hellTanStackSortingFromHell,
-      (target, updater) => target.setSorting(updater),
-    ),
-    columnSizing: tanStackStateChannel(
-      table,
-      (current) => current.columnSizing,
-      (current) => current,
-      (current) => current,
-      (target, updater) => target.setColumnSizing(updater),
-    ),
-  };
-}
-
-function tanStackRowSelectionStateChannel<TData extends RowData>(
-  table: Signal<Table<TData>>,
-  rows: Signal<readonly HellTanStackTableModelRow<TData>[]>,
-): HellTableStateChannel<HellTableRowSelectionState> {
-  const value = computed(() => hellTanStackRowSelectionToHell(table().getState().rowSelection, rows()));
-  return {
-    value,
-    set: (next) => table().setRowSelection(hellTanStackRowSelectionFromHell(next, rows())),
-    update: (updater) => {
-      const next = hellTableResolveStateUpdater(value(), updater);
-      table().setRowSelection((current) => hellTanStackRowSelectionFromHell(next, rows(), current));
-    },
-  };
-}
-
-function hellTanStackRowSelectionToHell<TData extends RowData>(
-  selection: RowSelectionState,
-  rows: readonly HellTanStackTableModelRow<TData>[],
-): HellTableRowSelectionState {
-  const keyByTanStackId = new Map(rows.map((row) => [row.tanStackRow.id, row.key]));
-  const next: Record<HellTableRowKey, boolean> = {};
-  for (const [tanStackRowId, selected] of Object.entries(selection)) {
-    const key = keyByTanStackId.get(tanStackRowId);
-    if (key !== undefined) next[key] = selected;
-  }
-  return next;
-}
-
-function hellTanStackRowSelectionFromHell<TData extends RowData>(
-  selection: HellTableRowSelectionState,
-  rows: readonly HellTanStackTableModelRow<TData>[],
-  current?: RowSelectionState,
-): RowSelectionState {
-  const tanStackIdByKey = new Map(rows.map((row) => [row.key, row.tanStackRow.id]));
-  const mappedTanStackIds = new Set(rows.map((row) => row.tanStackRow.id));
-  const next: RowSelectionState = {};
-
-  if (current) {
-    for (const [tanStackRowId, selected] of Object.entries(current)) {
-      if (!mappedTanStackIds.has(tanStackRowId)) next[tanStackRowId] = selected;
-    }
-  }
-
-  for (const [key, selected] of Object.entries(selection)) {
-    next[tanStackIdByKey.get(key) ?? key] = selected;
-  }
-
-  return next;
-}
-
-function tanStackStateChannel<TData extends RowData, TTanStack, THell>(
-  table: Signal<Table<TData>>,
-  read: (state: ReturnType<Table<TData>['getState']>) => TTanStack,
-  toHell: (value: TTanStack) => THell,
-  toTanStack: (value: THell) => TTanStack,
-  write: (table: Table<TData>, updater: Updater<TTanStack>) => void,
-): HellTableStateChannel<THell> {
-  const value = computed(() => toHell(read(table().getState())));
-  return {
-    value,
-    set: (next) => write(table(), toTanStack(next)),
-    update: (updater) => {
-      const next = hellTableResolveStateUpdater(value(), updater);
-      write(table(), toTanStack(next));
-    },
-  };
-}
-
-function hellTanStackColumn<TData extends RowData, TValue = unknown>(
-  column: Column<TData, TValue>,
-): HellTanStackTableColumn<TData, TValue> {
-  return {
-    id: column.id,
-    kind: 'custom',
-    header: column.columnDef.header ?? column.id,
-    accessorKey: accessorKeyFromColumnDef(column.columnDef),
-    visibility: column.getCanHide() ? 'user-toggleable' : 'always',
-    visible: column.getIsVisible(),
-    hideable: column.getCanHide(),
-    sortable: column.getCanSort(),
-    size: column.getSize(),
-    minSize: column.columnDef.minSize,
-    maxSize: column.columnDef.maxSize,
-    meta: hellTanStackColumnMeta(column.columnDef.meta),
-    tanStackColumn: column,
-  };
-}
-
-function hellTanStackRows<TData extends RowData>(
-  rows: readonly Row<TData>[],
-  rowKey: HellTanStackRowKey<TData> | undefined,
-): readonly HellTanStackTableModelRow<TData>[] {
-  const seen = new Set<HellTableRowKey>();
-  return rows.map((row, index) => {
-    const key = hellTableNormalizeRowKey(rowKey ? rowKey(row, index) : row.id);
-    if (seen.has(key)) {
-      throw new Error(`Hell TanStack Table adapter requires unique row keys; duplicate key "${key}".`);
-    }
-    seen.add(key);
-    return { key, original: row.original, index, tanStackRow: row };
-  });
-}
-
-function hellTanStackHeaderGroups<TData extends RowData>(
-  groups: readonly { readonly id: string; readonly depth: number; readonly headers: readonly Header<TData, unknown>[] }[],
-  columns: readonly HellTanStackTableColumn<TData>[],
-): readonly HellTableHeaderGroup<TData>[] {
-  const columnById = new Map(columns.map((column) => [column.id, column]));
-  return groups.map((group) => ({
-    id: group.id,
-    depth: group.depth,
-    headers: group.headers.map((header) => {
-      const column = columnById.get(header.column.id);
-      return {
-        id: header.id,
-        columnId: header.column.id,
-        column,
-        label: header.isPlaceholder
-          ? null
-          : hellTanStackFlexRenderValue(header.column.columnDef.header, header.getContext(), header.column.id),
-        colSpan: header.colSpan,
-        rowSpan: header.rowSpan,
-        placeholder: header.isPlaceholder,
-        tanStackHeader: header,
-      } satisfies HellTanStackTableModelHeader<TData>;
-    }),
-  }));
-}
-
-function hellTanStackRenderRegistry<TData extends RowData>(
-  table: Table<TData>,
-  base: HellTableRenderRegistryInput<TData> = {},
-) {
-  const headers: Record<HellTableColumnId, HellTableRenderer<HellTableHeaderRenderContext<TData>>> = {
-    ...(base.headers ?? {}),
-  };
-  const cells: Record<HellTableColumnId, HellTableRenderer<HellTableCellRenderContext<TData, unknown>>> = {
-    ...(base.cells ?? {}),
-  };
-
-  for (const column of table.getAllLeafColumns()) {
-    headers[column.id] ??= (context) => {
-      const header = tanStackHeaderFromHellContext(context, table, column.id);
-      return hellTanStackFlexRenderValue(header.column.columnDef.header, header.getContext(), column.id);
-    };
-    cells[column.id] ??= (context) => {
-      const row = tanStackRowFromHellContext(context.row, table);
-      const cell = tanStackCellForColumn(row, column.id);
-      return hellTanStackFlexRenderValue(
-        cell.column.columnDef.cell,
-        cell.getContext(),
-        cell.renderValue(),
-      );
-    };
-  }
-
-  return hellTableCreateRenderRegistry({
-    ...base,
-    headers,
-    cells,
-  });
-}
-
-function hellTanStackCellsForRow<TData extends RowData>(
-  rowInput: HellTableModelRow<TData> | Row<TData> | HellTableRowKey,
-  rows: readonly HellTanStackTableModelRow<TData>[],
-  columns: readonly HellTanStackTableColumn<TData>[],
-): readonly HellTanStackTableModelCell<TData>[] {
-  const row = tanStackRowFromInput(rowInput, rows);
-  const hellRow = rows.find((candidate) => candidate.tanStackRow.id === row.id || candidate.key === row.id);
-  if (!hellRow) throw new Error(`Hell TanStack Table adapter could not find row "${row.id}".`);
-  const columnById = new Map(columns.map((column) => [column.id, column]));
-  return row.getVisibleCells().map((cell) => {
-    const column = columnById.get(cell.column.id) ?? hellTanStackColumn(cell.column);
-    return {
-      id: cell.id,
-      row: hellRow,
-      column,
-      value: cell.getValue(),
-      renderValue: cell.renderValue(),
-      render: hellTanStackFlexRenderValue(cell.column.columnDef.cell, cell.getContext(), cell.renderValue()),
-      tanStackCell: cell,
-    } satisfies HellTanStackTableModelCell<TData>;
-  });
-}
-
-function tanStackHeaderFromHellContext<TData extends RowData>(
-  context: HellTableHeaderRenderContext<TData>,
-  table: Table<TData>,
-  columnId: HellTableColumnId,
-): Header<TData, unknown> {
-  const header = context.header as Partial<HellTanStackTableModelHeader<TData>>;
-  if (header.tanStackHeader) return header.tanStackHeader;
-  const found = table
-    .getFlatHeaders()
-    .find((candidate) => candidate.id === context.header.id || candidate.column.id === columnId);
-  if (!found) throw new Error(`Hell TanStack Table adapter could not find header "${context.header.id}".`);
-  return found;
-}
-
-function tanStackRowFromHellContext<TData extends RowData>(
-  row: HellTableModelRow<TData>,
-  table: Table<TData>,
-): Row<TData> {
-  const adapterRow = row as Partial<HellTanStackTableModelRow<TData>>;
-  if (adapterRow.tanStackRow) return adapterRow.tanStackRow;
-  const found = table.getRowModel().rows.find((candidate) => candidate.id === row.key);
-  if (!found) throw new Error(`Hell TanStack Table adapter could not find row "${row.key}".`);
-  return found;
-}
-
-function tanStackRowFromInput<TData extends RowData>(
-  rowInput: HellTableModelRow<TData> | Row<TData> | HellTableRowKey,
-  rows: readonly HellTanStackTableModelRow<TData>[],
-): Row<TData> {
-  if (typeof rowInput === 'string') {
-    const row = rows.find((candidate) => candidate.key === rowInput || candidate.tanStackRow.id === rowInput);
-    if (!row) throw new Error(`Hell TanStack Table adapter could not find row "${rowInput}".`);
-    return row.tanStackRow;
-  }
-
-  const maybeTanStackRow = rowInput as Partial<Row<TData>>;
-  if (maybeTanStackRow.getVisibleCells && maybeTanStackRow.id) return maybeTanStackRow as Row<TData>;
-
-  const maybeHellRow = rowInput as Partial<HellTanStackTableModelRow<TData>>;
-  if (maybeHellRow.tanStackRow) return maybeHellRow.tanStackRow;
-
-  if (isRecord(rowInput) && typeof rowInput['key'] === 'string') {
-    const key = rowInput['key'];
-    const row = rows.find((candidate) => candidate.key === key);
-    if (!row) throw new Error(`Hell TanStack Table adapter could not find row "${key}".`);
-    return row.tanStackRow;
-  }
-
-  throw new Error('Hell TanStack Table adapter could not resolve the provided row input.');
-}
-
-function tanStackCellForColumn<TData extends RowData>(
-  row: Row<TData>,
-  columnId: HellTableColumnId,
-): Cell<TData, unknown> {
-  const cell = row.getAllCells().find((candidate) => candidate.column.id === columnId);
-  if (!cell) throw new Error(`Hell TanStack Table adapter could not find cell for column "${columnId}".`);
-  return cell;
-}
-
-function toTableSignal<TData extends RowData>(inputValue: HellTanStackTableInput<TData>): Signal<Table<TData>> {
-  return typeof inputValue === 'function' ? (inputValue as Signal<Table<TData>>) : signal(inputValue);
-}
-
-function accessorKeyFromColumnDef(columnDef: object): string | undefined {
-  const value = (columnDef as Partial<Record<'accessorKey', unknown>>).accessorKey;
-  return typeof value === 'string' ? value : undefined;
-}
-
-function hellTanStackColumnMeta(meta: unknown): HellColumnMeta | undefined {
-  return isRecord(meta) ? meta : undefined;
-}
-
-function hellTanStackDirectiveContent(value: HellTanStackFlexRenderValue): HellTanStackDirectiveContent {
-  const content = value.content ?? value.fallback;
-  if (content === null || content === undefined || typeof content === 'string' || typeof content === 'number') {
-    return content;
-  }
-  if (typeof content === 'function' && !isAngularDeclarable(content)) {
-    return (props) =>
-      ((content as (props: NonNullable<unknown>) => FlexRenderContent<NonNullable<unknown>>)(props) ??
-        value.fallback) as FlexRenderContent<NonNullable<unknown>>;
-  }
-  return () => content as FlexRenderContent<NonNullable<unknown>>;
-}
-
-type HellTanStackDirectiveContent =
+type HellClassValue =
   | string
-  | number
-  | ((props: NonNullable<unknown>) => FlexRenderContent<NonNullable<unknown>>)
+  | readonly string[]
+  | Readonly<Record<string, boolean | null | undefined>>
   | null
   | undefined;
 
-function isAngularDeclarable(value: unknown): boolean {
-  return typeof value === 'function' && ('ɵcmp' in value || 'ɵdir' in value);
+export type HellTanStackRowClass<TData extends RowData = RowData> = {
+  bivarianceHack(row: Row<TData>): HellClassValue;
+}['bivarianceHack'];
+
+export type HellTableStatusValue =
+  | { readonly kind: 'ready' }
+  | { readonly kind: 'loading' }
+  | { readonly kind: 'error'; readonly error: unknown };
+
+export const HellTableStatus = {
+  READY: { kind: 'ready' } as HellTableStatusValue,
+  LOADING: { kind: 'loading' } as HellTableStatusValue,
+  error(error: unknown): HellTableStatusValue {
+    return { kind: 'error', error };
+  },
+} as const;
+
+export interface HellTableStatusViews {
+  readonly loading?: Type<unknown>;
+  readonly empty?: Type<unknown>;
+  readonly error?: Type<unknown>;
 }
 
-function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
-  return value !== null && typeof value === 'object';
+export const HELL_TABLE_STATUS_VIEWS = new InjectionToken<HellTableStatusViews>(
+  'HELL_TABLE_STATUS_VIEWS',
+  { factory: () => ({}) },
+);
+
+export function provideHellTableStatusViews(views: HellTableStatusViews): Provider {
+  return { provide: HELL_TABLE_STATUS_VIEWS, useValue: views };
 }
+
+export type ɵHellTanStackBodyItemKind = 'row' | 'expanded';
+
+export interface ɵHellTanStackBodyItem<TData extends RowData = RowData> {
+  readonly row: Row<TData>;
+  readonly key: string;
+  readonly kind: ɵHellTanStackBodyItemKind;
+}
+
+export interface ɵHellTanStackBodyStrategy<TData extends RowData = RowData> {
+  rows(items: readonly ɵHellTanStackBodyItem<TData>[]): readonly ɵHellTanStackBodyItem<TData>[];
+  connectScrollport?(el: HTMLElement, writer: ɵHellDomWriter): ɵHellStrategyCleanup;
+  connectBody?(el: HTMLElement, writer: ɵHellDomWriter): ɵHellStrategyCleanup;
+  connectRow?(
+    el: HTMLElement,
+    item: ɵHellTanStackBodyItem<TData>,
+    writer: ɵHellDomWriter,
+  ): ɵHellStrategyCleanup;
+}
+
+export const ɵHELL_TANSTACK_BODY_STRATEGY = new InjectionToken<ɵHellTanStackBodyStrategy>(
+  'ɵHELL_TANSTACK_BODY_STRATEGY',
+);
+
+export class ɵHellDomWriter {
+  private readonly cleanups: VoidFunction[] = [];
+
+  data(el: HTMLElement, name: string, value: string | null | undefined): void {
+    const attr = `data-hell-${normalizeDomName(name)}`;
+    if (value === null || value === undefined) {
+      el.removeAttribute(attr);
+      return;
+    }
+    el.setAttribute(attr, value);
+    this.cleanups.push(() => el.removeAttribute(attr));
+  }
+
+  cssVar(el: HTMLElement, name: string, value: string | null | undefined): void {
+    const property = name.startsWith('--') ? name : `--hell-${normalizeDomName(name)}`;
+    if (value === null || value === undefined) {
+      el.style.removeProperty(property);
+      return;
+    }
+    el.style.setProperty(property, value);
+    this.cleanups.push(() => el.style.removeProperty(property));
+  }
+
+  cleanup(_el?: HTMLElement): void {
+    for (const cleanup of this.cleanups.splice(0).reverse()) cleanup();
+  }
+}
+
+@Directive({
+  selector: '[hellTanStackInternalBodyScrollport]',
+  standalone: true,
+})
+export class ɵHellTanStackBodyScrollportConnector implements AfterViewInit, OnChanges, OnDestroy {
+  readonly strategy = input<ɵHellTanStackBodyStrategy | null>(null, {
+    alias: 'hellTanStackInternalBodyScrollport',
+  });
+
+  private readonly el = inject(ElementRef<HTMLElement>).nativeElement;
+  private viewReady = false;
+  private cleanup: VoidFunction = () => {};
+
+  ngAfterViewInit(): void {
+    this.viewReady = true;
+    this.reconnect();
+  }
+
+  ngOnChanges(): void {
+    this.reconnect();
+  }
+
+  ngOnDestroy(): void {
+    this.cleanup();
+  }
+
+  private reconnect(): void {
+    if (!this.viewReady) return;
+    this.cleanup();
+    const strategy = this.strategy();
+    if (!strategy?.connectScrollport) {
+      this.cleanup = () => {};
+      return;
+    }
+    const writer = new ɵHellDomWriter();
+    const strategyCleanup = strategy.connectScrollport(this.el, writer);
+    this.cleanup = () => {
+      if (strategyCleanup) strategyCleanup();
+      writer.cleanup(this.el);
+    };
+  }
+}
+
+@Directive({
+  selector: '[hellTanStackInternalBody]',
+  standalone: true,
+})
+export class ɵHellTanStackBodyConnector implements AfterViewInit, OnChanges, OnDestroy {
+  readonly strategy = input<ɵHellTanStackBodyStrategy | null>(null, {
+    alias: 'hellTanStackInternalBody',
+  });
+
+  private readonly el = inject(ElementRef<HTMLElement>).nativeElement;
+  private viewReady = false;
+  private cleanup: VoidFunction = () => {};
+
+  ngAfterViewInit(): void {
+    this.viewReady = true;
+    this.reconnect();
+  }
+
+  ngOnChanges(): void {
+    this.reconnect();
+  }
+
+  ngOnDestroy(): void {
+    this.cleanup();
+  }
+
+  private reconnect(): void {
+    if (!this.viewReady) return;
+    this.cleanup();
+    const strategy = this.strategy();
+    if (!strategy?.connectBody) {
+      this.cleanup = () => {};
+      return;
+    }
+    const writer = new ɵHellDomWriter();
+    const strategyCleanup = strategy.connectBody(this.el, writer);
+    this.cleanup = () => {
+      if (strategyCleanup) strategyCleanup();
+      writer.cleanup(this.el);
+    };
+  }
+}
+
+@Directive({
+  selector: '[hellTanStackInternalBodyItemConnector]',
+  standalone: true,
+})
+export class ɵHellTanStackBodyItemConnector implements AfterViewInit, OnChanges, OnDestroy {
+  readonly strategy = input<ɵHellTanStackBodyStrategy | null>(null, {
+    alias: 'hellTanStackInternalBodyItemConnector',
+  });
+  readonly item = input.required<ɵHellTanStackBodyItem>({
+    alias: 'hellTanStackInternalBodyItem',
+  });
+
+  private readonly el = inject(ElementRef<HTMLElement>).nativeElement;
+  private viewReady = false;
+  private cleanup: VoidFunction = () => {};
+
+  ngAfterViewInit(): void {
+    this.viewReady = true;
+    this.reconnect();
+  }
+
+  ngOnChanges(): void {
+    this.reconnect();
+  }
+
+  ngOnDestroy(): void {
+    this.cleanup();
+  }
+
+  private reconnect(): void {
+    if (!this.viewReady) return;
+    this.cleanup();
+    const strategy = this.strategy();
+    if (!strategy?.connectRow) {
+      this.cleanup = () => {};
+      return;
+    }
+    const writer = new ɵHellDomWriter();
+    const strategyCleanup = strategy.connectRow(this.el, this.item(), writer);
+    this.cleanup = () => {
+      if (strategyCleanup) strategyCleanup();
+      writer.cleanup(this.el);
+    };
+  }
+}
+
+@Directive({ selector: 'ng-template[hellTableShellHeader]' })
+export class HellTableShellHeader<TData extends RowData = RowData, TValue = unknown> {
+  readonly columnId = input.required<string>({ alias: 'hellTableShellHeader' });
+  readonly template = inject<TemplateRef<HellTableShellHeaderContext<TData, TValue>>>(TemplateRef);
+}
+
+@Directive({ selector: 'ng-template[hellTableShellCell]' })
+export class HellTableShellCell<TData extends RowData = RowData, TValue = unknown> {
+  readonly columnId = input.required<string>({ alias: 'hellTableShellCell' });
+  readonly template = inject<TemplateRef<HellTableShellCellContext<TData, TValue>>>(TemplateRef);
+}
+
+@Directive({ selector: 'ng-template[hellTableShellFooterCell]' })
+export class HellTableShellFooterCell<TData extends RowData = RowData, TValue = unknown> {
+  readonly columnId = input.required<string>({ alias: 'hellTableShellFooterCell' });
+  readonly template = inject<TemplateRef<HellTableShellHeaderContext<TData, TValue>>>(TemplateRef);
+}
+
+@Directive({ selector: 'ng-template[hellTableShellExpandedRow]' })
+export class HellTableShellExpandedRow<TData extends RowData = RowData> {
+  readonly template = inject<TemplateRef<HellTableShellExpandedRowContext<TData>>>(TemplateRef);
+}
+
+@Directive({ selector: 'ng-template[hellTableShellLoading]' })
+export class HellTableShellLoading {
+  readonly template = inject<TemplateRef<unknown>>(TemplateRef);
+}
+
+@Directive({ selector: 'ng-template[hellTableShellEmpty]' })
+export class HellTableShellEmpty {
+  readonly template = inject<TemplateRef<unknown>>(TemplateRef);
+}
+
+@Directive({ selector: 'ng-template[hellTableShellError]' })
+export class HellTableShellError {
+  readonly template = inject<TemplateRef<{ $implicit: unknown; error: unknown }>>(TemplateRef);
+}
+
+@Directive({
+  selector: '[hellTableShellToolbar]',
+  host: { '[attr.data-hell-table-shell-toolbar-item]': '""' },
+})
+export class HellTableShellToolbar {}
+
+@Directive({
+  selector: '[hellTableShellFooter]',
+  host: { '[attr.data-hell-table-shell-footer-item]': '""' },
+})
+export class HellTableShellFooter {}
+
+export interface HellTableShellCellContext<TData extends RowData = RowData, TValue = unknown> {
+  readonly $implicit: Cell<TData, TValue>;
+  readonly cell: Cell<TData, TValue>;
+  readonly row: Row<TData>;
+  readonly column: Column<TData, TValue>;
+  readonly table: Table<TData>;
+}
+
+export interface HellTableShellHeaderContext<TData extends RowData = RowData, TValue = unknown> {
+  readonly $implicit: Header<TData, TValue>;
+  readonly header: Header<TData, TValue>;
+  readonly column: Column<TData, TValue>;
+  readonly table: Table<TData>;
+}
+
+export interface HellTableShellExpandedRowContext<TData extends RowData = RowData> {
+  readonly $implicit: Row<TData>;
+  readonly row: Row<TData>;
+  readonly table: Table<TData>;
+}
+
+interface HellColumnMeta {
+  readonly hell?: {
+    readonly headerClass?: HellClassValue;
+    readonly cellClass?: HellClassValue;
+    readonly footerClass?: HellClassValue;
+  };
+}
+
+@Component({
+  selector: 'hell-tanstack-table',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FlexRenderDirective,
+    ɵHellTanStackBodyScrollportConnector,
+    ɵHellTanStackBodyConnector,
+    ɵHellTanStackBodyItemConnector,
+  ],
+  host: {
+    class: 'hell-tanstack-table',
+    '[attr.data-sticky-header]': 'stickyHeader() ? "true" : null',
+    '[attr.data-status]': 'status().kind',
+  },
+  template: `
+    @if (hasToolbar()) {
+      <div class="hell-table-shell-toolbar" data-hell-table-shell-toolbar>
+        <ng-content select="[hellTableShellToolbar]" />
+      </div>
+    }
+
+    <div
+      class="hell-table-shell-scrollport"
+      data-hell-table-shell-scrollport
+      [hellTanStackInternalBodyScrollport]="bodyStrategyBridge()"
+    >
+      <table class="hell-table hell-table-shell-table" data-hell-table-shell-table>
+        <thead class="hell-table-head" data-hell-table-shell-head>
+          @for (headerGroup of table().getHeaderGroups(); track headerGroup.id) {
+            <tr class="hell-table-row" data-hell-table-shell-header-row>
+              @for (header of headerGroup.headers; track header.id) {
+                <th
+                  [attr.class]="headerClass(header)"
+                  [attr.colspan]="header.colSpan"
+                  [attr.data-column-id]="header.column.id"
+                  [attr.data-pinned]="pinnedSide(header.column)"
+                  [attr.data-pinned-last]="pinnedLast(header.column)"
+                  [attr.data-pinned-first]="pinnedFirst(header.column)"
+                  [style.--hell-table-pinned-start.px]="pinnedStart(header.column)"
+                  [style.--hell-table-pinned-after.px]="pinnedAfter(header.column)"
+                >
+                  @if (!header.isPlaceholder) {
+                    @if (headerTemplateFor(header); as projected) {
+                      <ng-container
+                        [ngTemplateOutlet]="projected.template"
+                        [ngTemplateOutletContext]="headerContext(header)"
+                      />
+                    } @else {
+                      <ng-container
+                        *flexRender="
+                          header.column.columnDef.header;
+                          props: header.getContext();
+                          let rendered
+                        "
+                      >
+                        {{ rendered ?? header.column.id }}
+                      </ng-container>
+                    }
+                  }
+                </th>
+              }
+            </tr>
+          }
+        </thead>
+
+        <tbody
+          class="hell-table-body"
+          data-hell-table-shell-body
+          [hellTanStackInternalBody]="bodyStrategyBridge()"
+        >
+          @switch (displayState()) {
+            @case ('loading') {
+              <tr class="hell-table-row" data-hell-table-shell-status-row>
+                <td class="hell-table-cell" [attr.colspan]="visibleColumnCount()">
+                  <ng-container [ngTemplateOutlet]="loadingTemplate()?.template ?? null" />
+                  @if (!loadingTemplate()) {
+                    <ng-container
+                      *ngComponentOutlet="
+                        providerViews.loading ?? null;
+                        inputs: statusComponentInputs()
+                      "
+                    />
+                  }
+                </td>
+              </tr>
+            }
+            @case ('error') {
+              <tr class="hell-table-row" data-hell-table-shell-status-row>
+                <td class="hell-table-cell" [attr.colspan]="visibleColumnCount()">
+                  <ng-container
+                    [ngTemplateOutlet]="errorTemplate()?.template ?? null"
+                    [ngTemplateOutletContext]="errorContext()"
+                  />
+                  @if (!errorTemplate()) {
+                    <ng-container
+                      *ngComponentOutlet="
+                        providerViews.error ?? null;
+                        inputs: statusComponentInputs(errorValue())
+                      "
+                    />
+                  }
+                </td>
+              </tr>
+            }
+            @case ('empty') {
+              <tr class="hell-table-row" data-hell-table-shell-status-row>
+                <td class="hell-table-cell" [attr.colspan]="visibleColumnCount()">
+                  <ng-container [ngTemplateOutlet]="emptyTemplate()?.template ?? null" />
+                  @if (!emptyTemplate()) {
+                    <ng-container
+                      *ngComponentOutlet="
+                        providerViews.empty ?? null;
+                        inputs: statusComponentInputs()
+                      "
+                    />
+                  }
+                </td>
+              </tr>
+            }
+            @default {
+              @for (item of bodyItems(); track item.key) {
+                @if (item.kind === 'expanded') {
+                  <tr
+                    class="hell-table-row"
+                    data-hell-table-shell-expanded-row
+                    [hellTanStackInternalBodyItemConnector]="bodyStrategyBridge()"
+                    [hellTanStackInternalBodyItem]="bodyItemBridge(item)"
+                  >
+                    <td
+                      class="hell-table-cell hell-table-shell-expanded-cell"
+                      data-hell-table-shell-expanded-cell
+                      [attr.colspan]="visibleColumnCount()"
+                    >
+                      @if (expandedRowTemplate(); as expanded) {
+                        <ng-container
+                          [ngTemplateOutlet]="expanded.template"
+                          [ngTemplateOutletContext]="expandedRowContext(item.row)"
+                        />
+                      }
+                    </td>
+                  </tr>
+                } @else {
+                  <tr
+                    [attr.class]="rowClassValue(item.row)"
+                    data-hell-table-shell-row
+                    [hellTanStackInternalBodyItemConnector]="bodyStrategyBridge()"
+                    [hellTanStackInternalBodyItem]="bodyItemBridge(item)"
+                  >
+                    @for (cell of item.row.getVisibleCells(); track cell.id) {
+                      <td
+                        [attr.class]="cellClass(cell)"
+                        [attr.data-column-id]="cell.column.id"
+                        [attr.data-pinned]="pinnedSide(cell.column)"
+                        [attr.data-pinned-last]="pinnedLast(cell.column)"
+                        [attr.data-pinned-first]="pinnedFirst(cell.column)"
+                        [style.--hell-table-pinned-start.px]="pinnedStart(cell.column)"
+                        [style.--hell-table-pinned-after.px]="pinnedAfter(cell.column)"
+                      >
+                        @if (cellTemplateFor(cell); as projected) {
+                          <ng-container
+                            [ngTemplateOutlet]="projected.template"
+                            [ngTemplateOutletContext]="cellContext(cell)"
+                          />
+                        } @else if (cell.column.columnDef.cell) {
+                          <ng-container
+                            *flexRender="
+                              cell.column.columnDef.cell;
+                              props: cell.getContext();
+                              let rendered
+                            "
+                          >
+                            {{ rendered }}
+                          </ng-container>
+                        } @else {
+                          {{ cell.renderValue() }}
+                        }
+                      </td>
+                    }
+                  </tr>
+                }
+              }
+            }
+          }
+        </tbody>
+
+        @if (hasFooters()) {
+          <tfoot class="hell-table-footer" data-hell-table-shell-foot>
+            @for (footerGroup of table().getFooterGroups(); track footerGroup.id) {
+              <tr class="hell-table-row" data-hell-table-shell-footer-row>
+                @for (footer of footerGroup.headers; track footer.id) {
+                  <td
+                    [attr.class]="footerClass(footer)"
+                    [attr.colspan]="footer.colSpan"
+                    [attr.data-column-id]="footer.column.id"
+                    [attr.data-pinned]="pinnedSide(footer.column)"
+                    [attr.data-pinned-last]="pinnedLast(footer.column)"
+                    [attr.data-pinned-first]="pinnedFirst(footer.column)"
+                    [style.--hell-table-pinned-start.px]="pinnedStart(footer.column)"
+                    [style.--hell-table-pinned-after.px]="pinnedAfter(footer.column)"
+                  >
+                    @if (!footer.isPlaceholder) {
+                      @if (footerTemplateFor(footer); as projected) {
+                        <ng-container
+                          [ngTemplateOutlet]="projected.template"
+                          [ngTemplateOutletContext]="headerContext(footer)"
+                        />
+                      } @else if (footer.column.columnDef.footer) {
+                        <ng-container
+                          *flexRender="
+                            footer.column.columnDef.footer;
+                            props: footer.getContext();
+                            let rendered
+                          "
+                        >
+                          {{ rendered }}
+                        </ng-container>
+                      }
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          </tfoot>
+        }
+      </table>
+    </div>
+
+    @if (hasFooter()) {
+      <div class="hell-table-shell-footer" data-hell-table-shell-footer>
+        <ng-content select="[hellTableShellFooter]" />
+      </div>
+    }
+  `,
+})
+export class HellTanStackTable<TData extends RowData = RowData> {
+  readonly table = input.required<Table<TData>>();
+  readonly status = input<HellTableStatusValue>(HellTableStatus.READY);
+  readonly stickyHeader = input(false, { transform: booleanAttribute });
+  readonly rowClass = input<HellTanStackRowClass<TData> | HellClassValue>(null);
+
+  protected readonly providerViews = inject(HELL_TABLE_STATUS_VIEWS);
+  protected readonly bodyStrategy =
+    inject(ɵHELL_TANSTACK_BODY_STRATEGY, { optional: true, self: true }) as
+      | ɵHellTanStackBodyStrategy<TData>
+      | null;
+  private readonly headers = contentChildren(HellTableShellHeader<TData, unknown>, {
+    descendants: true,
+  });
+  private readonly cells = contentChildren(HellTableShellCell<TData, unknown>, {
+    descendants: true,
+  });
+  private readonly footers = contentChildren(HellTableShellFooterCell<TData, unknown>, {
+    descendants: true,
+  });
+  private readonly loadingTemplates = contentChildren(HellTableShellLoading, {
+    descendants: true,
+  });
+  private readonly emptyTemplates = contentChildren(HellTableShellEmpty, {
+    descendants: true,
+  });
+  private readonly errorTemplates = contentChildren(HellTableShellError, {
+    descendants: true,
+  });
+  private readonly toolbars = contentChildren(HellTableShellToolbar, {
+    descendants: true,
+  });
+  private readonly footersShell = contentChildren(HellTableShellFooter, {
+    descendants: true,
+  });
+  protected readonly expandedRows = contentChildren(HellTableShellExpandedRow<TData>, {
+    descendants: true,
+  });
+
+  protected readonly displayState = computed(() => {
+    const status = this.status();
+    if (status.kind === 'loading') return this.assertStatusView('loading');
+    if (status.kind === 'error') return this.assertStatusView('error');
+    if (this.table().getRowModel().rows.length === 0) return this.assertStatusView('empty');
+    return 'ready';
+  });
+
+  protected bodyItems(): readonly ɵHellTanStackBodyItem<TData>[] {
+    const items = this.allBodyItems();
+    return this.bodyStrategy?.rows(items) ?? items;
+  }
+
+  private allBodyItems(): readonly ɵHellTanStackBodyItem<TData>[] {
+    const expanded = this.expandedRowTemplate();
+    const items: ɵHellTanStackBodyItem<TData>[] = [];
+    for (const row of this.table().getRowModel().rows) {
+      items.push({ kind: 'row', row, key: row.id });
+      if (expanded && row.getIsExpanded()) {
+        items.push({ kind: 'expanded', row, key: `${row.id}:expanded` });
+      }
+    }
+    return items;
+  }
+
+  protected visibleColumnCount(): number {
+    return Math.max(this.table().getVisibleLeafColumns().length, 1);
+  }
+
+  protected loadingTemplate(): HellTableShellLoading | null {
+    return this.loadingTemplates()[0] ?? null;
+  }
+
+  protected emptyTemplate(): HellTableShellEmpty | null {
+    return this.emptyTemplates()[0] ?? null;
+  }
+
+  protected errorTemplate(): HellTableShellError | null {
+    return this.errorTemplates()[0] ?? null;
+  }
+
+  protected hasToolbar(): boolean {
+    return this.toolbars().length > 0;
+  }
+
+  protected hasFooter(): boolean {
+    return this.footersShell().length > 0;
+  }
+
+  protected hasFooters(): boolean {
+    return this.table()
+      .getFooterGroups()
+      .some((group) =>
+        group.headers.some(
+          (header) =>
+            !header.isPlaceholder &&
+            (header.column.columnDef.footer || this.templateFor(this.footers(), header.column.id)),
+        ),
+      );
+  }
+
+  protected headerTemplateFor(header: Header<TData, unknown>) {
+    const template = this.templateFor(this.headers(), header.column.id);
+    this.assertNoRendererConflict('header', header.column.id, template, header.column.columnDef.header);
+    return template;
+  }
+
+  protected cellTemplateFor(cell: Cell<TData, unknown>) {
+    const template = this.templateFor(this.cells(), cell.column.id);
+    this.assertNoRendererConflict('cell', cell.column.id, template, this.explicitCellRenderer(cell));
+    return template;
+  }
+
+  protected footerTemplateFor(header: Header<TData, unknown>) {
+    const template = this.templateFor(this.footers(), header.column.id);
+    this.assertNoRendererConflict('footer', header.column.id, template, header.column.columnDef.footer);
+    return template;
+  }
+
+  protected expandedRowTemplate() {
+    return this.expandedRows()[0] ?? null;
+  }
+
+  protected bodyStrategyBridge(): ɵHellTanStackBodyStrategy | null {
+    return this.bodyStrategy as unknown as ɵHellTanStackBodyStrategy | null;
+  }
+
+  protected bodyItemBridge(item: ɵHellTanStackBodyItem<TData>): ɵHellTanStackBodyItem {
+    return item as unknown as ɵHellTanStackBodyItem;
+  }
+
+  protected cellContext(cell: Cell<TData, unknown>): HellTableShellCellContext<TData, unknown> {
+    return { $implicit: cell, cell, row: cell.row, column: cell.column, table: cell.getContext().table };
+  }
+
+  protected headerContext(header: Header<TData, unknown>): HellTableShellHeaderContext<TData, unknown> {
+    return { $implicit: header, header, column: header.column, table: header.getContext().table };
+  }
+
+  protected expandedRowContext(row: Row<TData>): HellTableShellExpandedRowContext<TData> {
+    return { $implicit: row, row, table: this.table() };
+  }
+
+  protected errorValue(): unknown {
+    const status = this.status();
+    return status.kind === 'error' ? status.error : null;
+  }
+
+  protected errorContext(): { $implicit: unknown; error: unknown } {
+    const error = this.errorValue();
+    return { $implicit: error, error };
+  }
+
+  protected statusComponentInputs(error?: unknown): Record<string, unknown> {
+    return arguments.length > 0 ? { error } : {};
+  }
+
+  protected headerClass(header: Header<TData, unknown>): string {
+    return classValue([
+      'hell-table-header-cell',
+      classValue((header.column.columnDef.meta as HellColumnMeta | undefined)?.hell?.headerClass),
+    ]);
+  }
+
+  protected cellClass(cell: Cell<TData, unknown>): string {
+    return classValue([
+      'hell-table-cell',
+      classValue((cell.column.columnDef.meta as HellColumnMeta | undefined)?.hell?.cellClass),
+    ]);
+  }
+
+  protected footerClass(header: Header<TData, unknown>): string {
+    return classValue([
+      'hell-table-cell',
+      classValue((header.column.columnDef.meta as HellColumnMeta | undefined)?.hell?.footerClass),
+    ]);
+  }
+
+  protected rowClassValue(row: Row<TData>): string {
+    const value = this.rowClass();
+    return classValue(['hell-table-row', classValue(typeof value === 'function' ? value(row) : value)]);
+  }
+
+  protected pinnedSide(column: Column<TData, unknown>): 'left' | 'right' | null {
+    return column.getIsPinned() || null;
+  }
+
+  protected pinnedStart(column: Column<TData, unknown>): number | null {
+    return column.getIsPinned() === 'left' ? column.getStart('left') : null;
+  }
+
+  protected pinnedAfter(column: Column<TData, unknown>): number | null {
+    return column.getIsPinned() === 'right' ? column.getAfter('right') : null;
+  }
+
+  protected pinnedLast(column: Column<TData, unknown>): 'true' | null {
+    return column.getIsPinned() === 'left' && column.getIsLastColumn('left') ? 'true' : null;
+  }
+
+  protected pinnedFirst(column: Column<TData, unknown>): 'true' | null {
+    return column.getIsPinned() === 'right' && column.getIsFirstColumn('right') ? 'true' : null;
+  }
+
+  private templateFor<TTemplate extends { columnId(): string }>(
+    templates: readonly TTemplate[],
+    columnId: string,
+  ): TTemplate | null {
+    return templates.find((template) => template.columnId() === columnId) ?? null;
+  }
+
+  private assertNoRendererConflict(
+    kind: 'header' | 'cell' | 'footer',
+    columnId: string,
+    template: unknown,
+    renderer: unknown,
+  ): void {
+    if (!isDevMode() || !template || renderer === null || renderer === undefined) return;
+    throw new Error(
+      `Hell TanStack table ${kind} template for column "${columnId}" conflicts with TanStack columnDef.${kind}. Remove one renderer.`,
+    );
+  }
+
+  private assertStatusView(kind: 'loading' | 'error' | 'empty'): 'loading' | 'error' | 'empty' {
+    const local =
+      kind === 'loading'
+        ? this.loadingTemplates()[0]
+        : kind === 'error'
+          ? this.errorTemplates()[0]
+          : this.emptyTemplates()[0];
+    if (!isDevMode() || local || this.providerViews[kind]) return kind;
+    throw new Error(
+      `Hell TanStack table needs a ${kind} state template or provideHellTableStatusViews() provider.`,
+    );
+  }
+
+  private explicitCellRenderer(cell: Cell<TData, unknown>): unknown {
+    const renderer = cell.column.columnDef.cell;
+    return renderer === this.table()._getDefaultColumnDef().cell ? undefined : renderer;
+  }
+}
+
+@Component({
+  selector: 'hell-default-table-loading-state',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<span class="hell-table-shell-status">Loading...</span>`,
+})
+export class HellDefaultTableLoadingState {}
+
+@Component({
+  selector: 'hell-default-table-empty-state',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<span class="hell-table-shell-status">No rows.</span>`,
+})
+export class HellDefaultTableEmptyState {}
+
+@Component({
+  selector: 'hell-default-table-error-state',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<span class="hell-table-shell-status">Could not load rows.</span>`,
+})
+export class HellDefaultTableErrorState {
+  readonly error = input<unknown>(null);
+}
+
+@Component({
+  selector: 'hell-tanstack-pagination',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <nav class="hell-tanstack-pagination" aria-label="Table pagination">
+      <button type="button" (click)="table().setPageIndex(0)" [disabled]="!table().getCanPreviousPage()">
+        First
+      </button>
+      <button type="button" (click)="table().previousPage()" [disabled]="!table().getCanPreviousPage()">
+        Previous
+      </button>
+      <span data-slot="page">
+        {{ table().getState().pagination.pageIndex + 1 }} / {{ table().getPageCount() || 1 }}
+      </span>
+      <button type="button" (click)="table().nextPage()" [disabled]="!table().getCanNextPage()">
+        Next
+      </button>
+      <button type="button" (click)="table().setPageIndex(lastPageIndex())" [disabled]="!table().getCanNextPage()">
+        Last
+      </button>
+      @if (pageSizeOptions().length) {
+        <label>
+          <span>Rows</span>
+          <select [value]="table().getState().pagination.pageSize" (change)="setPageSize($event)">
+            @for (size of pageSizeOptions(); track size) {
+              <option [value]="size">{{ size }}</option>
+            }
+          </select>
+        </label>
+      }
+    </nav>
+  `,
+})
+export class HellTanStackPagination<TData extends RowData = RowData> {
+  readonly table = input.required<Table<TData>>();
+  readonly pageSizeOptions = input<readonly number[]>([]);
+
+  protected lastPageIndex(): number {
+    return Math.max(this.table().getPageCount() - 1, 0);
+  }
+
+  protected setPageSize(event: Event): void {
+    const size = Number((event.target as HTMLSelectElement | null)?.value);
+    if (Number.isFinite(size) && size > 0) this.table().setPageSize(size);
+  }
+}
+
+@Component({
+  selector: 'hell-tanstack-global-filter',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <input
+      class="hell-tanstack-filter"
+      type="search"
+      [attr.placeholder]="placeholder()"
+      [value]="table().getState().globalFilter ?? ''"
+      (input)="setFilter($event)"
+    />
+  `,
+})
+export class HellTanStackGlobalFilter<TData extends RowData = RowData> {
+  readonly table = input.required<Table<TData>>();
+  readonly placeholder = input('Filter rows');
+
+  protected setFilter(event: Event): void {
+    this.table().setGlobalFilter((event.target as HTMLInputElement | null)?.value ?? '');
+  }
+}
+
+@Component({
+  selector: 'hell-tanstack-column-filter',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <input
+      class="hell-tanstack-filter"
+      type="search"
+      [attr.placeholder]="placeholder()"
+      [value]="value()"
+      (input)="setFilter($event)"
+    />
+  `,
+})
+export class HellTanStackColumnFilter<TData extends RowData = RowData> {
+  readonly table = input.required<Table<TData>>();
+  readonly columnId = input.required<string>();
+  readonly placeholder = input('Filter column');
+
+  protected readonly column = computed(() => this.table().getColumn(this.columnId()));
+  protected readonly value = computed(() => String(this.column()?.getFilterValue() ?? ''));
+
+  protected setFilter(event: Event): void {
+    this.column()?.setFilterValue((event.target as HTMLInputElement | null)?.value ?? '');
+  }
+}
+
+function classValue(value: HellClassValue): string {
+  if (!value) return '';
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value)) return value.filter(Boolean).join(' ');
+  return Object.entries(value)
+    .filter(([, enabled]) => enabled)
+    .map(([name]) => name)
+    .join(' ');
+}
+
+function normalizeDomName(name: string): string {
+  return name
+    .replace(/^data-hell-/, '')
+    .replace(/^--hell-/, '')
+    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+    .toLowerCase();
+}
+
+export const HELL_TANSTACK_TABLE_DIRECTIVES = [
+  HellTanStackTable,
+  HellTableShellHeader,
+  HellTableShellCell,
+  HellTableShellFooterCell,
+  HellTableShellExpandedRow,
+  HellTableShellLoading,
+  HellTableShellEmpty,
+  HellTableShellError,
+  HellTableShellToolbar,
+  HellTableShellFooter,
+  HellTanStackPagination,
+  HellTanStackGlobalFilter,
+  HellTanStackColumnFilter,
+  FlexRenderDirective,
+] as const;

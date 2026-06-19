@@ -110,9 +110,7 @@ const packageConsumerPeerTiers = new Set([
   'primitive',
   'composite',
   'table',
-  'table-cdk',
   'table-tanstack',
-  'table-virtual',
   'audio-transcript',
   'code-editor',
   'pdf-viewer',
@@ -131,14 +129,13 @@ const peerGroupContracts = {
     peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup],
   },
   table: { tier: 'table', peers: [...corePeerGroup, ...stylePeerGroup] },
-  'table-cdk': { tier: 'table-cdk', peers: [...corePeerGroup, ...stylePeerGroup] },
   'table-tanstack': {
     tier: 'table-tanstack',
     peers: [...corePeerGroup, ...stylePeerGroup, ...tanStackTablePeerGroup],
   },
-  'table-virtual': {
-    tier: 'table-virtual',
-    peers: [...corePeerGroup, ...stylePeerGroup, ...tanStackVirtualPeerGroup],
+  'table-tanstack-virtual': {
+    tier: 'table-tanstack',
+    peers: [...corePeerGroup, ...stylePeerGroup, ...tanStackTablePeerGroup, ...tanStackVirtualPeerGroup],
   },
   'audio-transcript': {
     tier: 'audio-transcript',
@@ -207,8 +204,9 @@ const tableTanStackDeps = [
   ...styledUiWithoutFontAwesomeDeps,
   '@tanstack/angular-table',
 ];
-const tableVirtualDeps = [
+const tableTanStackVirtualDeps = [
   ...styledUiWithoutFontAwesomeDeps,
+  '@tanstack/angular-table',
   '@tanstack/virtual-core',
 ];
 
@@ -329,18 +327,8 @@ const scenarios = [
     stylesCss: tableConsumerStylesCss(),
   },
   {
-    name: 'data-table',
-    description: 'simple data-table entrypoint without Font Awesome or optional table-engine peers',
-    peerTier: 'table',
-    peerGroup: 'table',
-    dependencies: styledUiWithoutFontAwesomeDeps,
-    forbiddenDependencies: tableAdapterPeerGroup,
-    mainTs: dataTableConsumerMainTs(),
-    stylesCss: tableConsumerStylesCss(),
-  },
-  {
     name: 'table-tanstack',
-    description: 'TanStack Table adapter with strict optional table-engine peer',
+    description: 'Hell-styled TanStack Table shell with strict optional table peer',
     peerTier: 'table-tanstack',
     peerGroup: 'table-tanstack',
     dependencies: tableTanStackDeps,
@@ -349,23 +337,12 @@ const scenarios = [
     stylesCss: tableConsumerStylesCss(),
   },
   {
-    name: 'table-virtual',
-    description: 'TanStack Virtual row-part adapter with strict optional virtual peer',
-    peerTier: 'table-virtual',
-    peerGroup: 'table-virtual',
-    dependencies: tableVirtualDeps,
-    forbiddenDependencies: tanStackTablePeerGroup,
-    mainTs: tableVirtualConsumerMainTs(),
-    stylesCss: tableConsumerStylesCss(),
-  },
-  {
-    name: 'table-cdk',
-    description: 'CDK Table skin adapter with no extra optional table-engine peer',
-    peerTier: 'table-cdk',
-    peerGroup: 'table-cdk',
-    dependencies: styledUiWithoutFontAwesomeDeps,
-    forbiddenDependencies: tableAdapterPeerGroup,
-    mainTs: tableCdkConsumerMainTs(),
+    name: 'table-tanstack-virtual',
+    description: 'Hell-styled TanStack Table shell with optional TanStack Virtual body strategy',
+    peerTier: 'table-tanstack',
+    peerGroup: 'table-tanstack-virtual',
+    dependencies: tableTanStackVirtualDeps,
+    mainTs: tableTanStackVirtualConsumerMainTs(),
     stylesCss: tableConsumerStylesCss(),
   },
   {
@@ -605,8 +582,6 @@ function assertHeavyPeersAreIsolated(allScenarios) {
     'button-unstyled',
     'button',
     'table',
-    'data-table',
-    'table-cdk',
     'no-legacy-alias',
     'audio-player',
     'audio-transcript',
@@ -625,8 +600,8 @@ function assertTableAdapterPeersAreIsolated(allScenarios) {
   const tanStackScenario = allScenarios.find((scenario) => scenario.name === 'table-tanstack');
   if (!tanStackScenario) fail('Missing package-consumer table-tanstack scenario');
 
-  const virtualScenario = allScenarios.find((scenario) => scenario.name === 'table-virtual');
-  if (!virtualScenario) fail('Missing package-consumer table-virtual scenario');
+  const virtualScenario = allScenarios.find((scenario) => scenario.name === 'table-tanstack-virtual');
+  if (!virtualScenario) fail('Missing package-consumer table-tanstack-virtual scenario');
 
   const tanStackPeers = tanStackScenario.dependencies.filter((dependency) =>
     tanStackTablePeerGroup.includes(dependency),
@@ -636,10 +611,10 @@ function assertTableAdapterPeersAreIsolated(allScenarios) {
   const virtualPeers = virtualScenario.dependencies.filter((dependency) =>
     tanStackVirtualPeerGroup.includes(dependency),
   );
-  assertSameSet('scenario table-virtual TanStack Virtual peer group', tanStackVirtualPeerGroup, virtualPeers);
+  assertSameSet('scenario table-tanstack-virtual TanStack Virtual peer group', tanStackVirtualPeerGroup, virtualPeers);
 
   for (const scenario of allScenarios) {
-    if (scenario.name !== 'table-tanstack') {
+    if (scenario.name !== 'table-tanstack' && scenario.name !== 'table-tanstack-virtual') {
       const unexpectedTablePeers = scenario.dependencies.filter((dependency) =>
         tanStackTablePeerGroup.includes(dependency),
       );
@@ -648,7 +623,7 @@ function assertTableAdapterPeersAreIsolated(allScenarios) {
       }
     }
 
-    if (scenario.name !== 'table-virtual') {
+    if (scenario.name !== 'table-tanstack-virtual') {
       const unexpectedVirtualPeers = scenario.dependencies.filter((dependency) =>
         tanStackVirtualPeerGroup.includes(dependency),
       );
@@ -680,18 +655,14 @@ function assertCodeMirrorPeersAreIsolated(allScenarios) {
 
 function assertModernTableEntrypointContract(packageJson, distRoot) {
   const exportsMap = packageJson.exports ?? {};
-  for (const exportPath of [
-    './table',
-    './data-table',
-    './table-tanstack',
-    './table-virtual',
-    './table-cdk',
-    './styles/table',
-  ]) {
+  for (const exportPath of ['./table', './table-tanstack', './table-tanstack/virtual', './styles/table']) {
     if (!exportsMap[exportPath]) fail(`Modern table package export is missing ${exportPath}`);
   }
 
   for (const exportPath of [
+    './data-table',
+    './table-virtual',
+    './table-cdk',
     './features/data-table',
     './features/table-utilities',
     './styles/features/data-table',
@@ -703,10 +674,14 @@ function assertModernTableEntrypointContract(packageJson, distRoot) {
   for (const file of [
     'features/data-table/package.json',
     'features/table-utilities/package.json',
+    'data-table/package.json',
+    'table-virtual/package.json',
+    'table-cdk/package.json',
     'styles/features/data-table.css',
     'styles/features/table-utilities.css',
     'styles/components/data-table.css',
     'styles/components/table-utilities.css',
+    'styles/components/table-renderer.css',
     'types/hell-ui-angular-features-data-table.d.ts',
     'types/hell-ui-angular-features-table-utilities.d.ts',
   ]) {
@@ -718,11 +693,15 @@ function assertDocsAvoidLegacyTableEntrypoints() {
   const docsRoot = join(root, 'projects/hell-docs/src/app');
   const offenders = walkFiles(docsRoot)
     .filter((file) => /\.(?:ts|html|md)$/.test(file))
-    .filter((file) => /@hell-ui\/angular\/features\/(?:data-table|table-utilities)\b/.test(readFileSync(file, 'utf8')))
+    .filter((file) =>
+      /@hell-ui\/angular\/(?:data-table|table-virtual|table-cdk|features\/(?:data-table|table-utilities))\b|HellDataTable|HellTableModel|hellTanStackTableModel/.test(
+        readFileSync(file, 'utf8'),
+      ),
+    )
     .map((file) => file.slice(root.length + 1));
 
   if (offenders.length) {
-    fail(`Docs must not import legacy table entrypoints: ${offenders.join(', ')}`);
+    fail(`Docs must not reference removed table APIs: ${offenders.join(', ')}`);
   }
 }
 
@@ -1282,66 +1261,30 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
-function dataTableConsumerMainTs() {
-  return `import { Component, signal } from '@angular/core';
-import { bootstrapApplication } from '@angular/platform-browser';
-import { HellDataTable, hellColumns, textColumn } from '${packageName}/data-table';
-
-interface Person {
-  readonly id: string;
-  readonly name: string;
-  readonly role: string;
-}
-
-const columns = hellColumns<Person>();
-
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [HellDataTable],
-  template: \`
-    <hell-data-table
-      [rows]="rows"
-      [columns]="tableColumns"
-      rowKey="id"
-      density="compact"
-      empty="No people yet."
-    />
-  \`,
-})
-class App {
-  protected readonly rows = signal<readonly Person[]>([
-    { id: 'ada', name: 'Ada Lovelace', role: 'Admin' },
-    { id: 'grace', name: 'Grace Hopper', role: 'Editor' },
-  ]);
-  protected readonly tableColumns = columns.define([
-    textColumn<Person, string>('name', { header: 'Name', accessor: 'name' }),
-    textColumn<Person, string>('role', { header: 'Role', accessor: 'role' }),
-  ]);
-}
-
-bootstrapApplication(App).catch((error: unknown) => console.error(error));
-`;
-}
-
 function tableTanStackConsumerMainTs() {
-  return `import { Component, computed, signal, type WritableSignal } from '@angular/core';
+  return `import { Component, signal, type WritableSignal } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import {
   createAngularTable,
   getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
   type ColumnDef,
-  type ColumnSizingState,
+  type PaginationState,
   type RowSelectionState,
   type SortingState,
   type Updater,
-  type VisibilityState,
 } from '@tanstack/angular-table';
 import {
-  HellTanStackFlexRenderOutlet,
-  hellTanStackTableModel,
-  type HellTanStackFlexRenderValue,
+  HellTableShellCell,
+  HellTableShellEmpty,
+  HellTableShellFooter,
+  HellTableShellToolbar,
+  HellTableStatus,
+  HellTanStackGlobalFilter,
+  HellTanStackPagination,
+  HellTanStackTable,
 } from '${packageName}/table-tanstack';
 
 interface Person {
@@ -1353,66 +1296,79 @@ interface Person {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [HellTanStackFlexRenderOutlet],
+  imports: [
+    HellTanStackTable,
+    HellTableShellCell,
+    HellTableShellEmpty,
+    HellTableShellFooter,
+    HellTableShellToolbar,
+    HellTanStackGlobalFilter,
+    HellTanStackPagination,
+  ],
   template: \`
-    @if (firstRender(); as render) {
-      <hell-tanstack-flex-render [value]="render" />
-    }
+    <hell-tanstack-table [table]="table" [status]="HellTableStatus.READY" stickyHeader>
+      <hell-tanstack-global-filter hellTableShellToolbar [table]="table" />
+
+      <ng-template hellTableShellCell="actions" let-row="row">
+        <button type="button">Edit {{ row.original.name }}</button>
+      </ng-template>
+
+      <ng-template hellTableShellEmpty>No people.</ng-template>
+
+      <span hellTableShellFooter>{{ table.getRowModel().rows.length }} visible</span>
+      <hell-tanstack-pagination hellTableShellFooter [table]="table" [pageSizeOptions]="[1, 2]" />
+    </hell-tanstack-table>
   \`,
 })
 class App {
+  protected readonly HellTableStatus = HellTableStatus;
   protected readonly rows = signal<Person[]>([
     { id: 'ada', name: 'Ada Lovelace', active: true },
     { id: 'grace', name: 'Grace Hopper', active: false },
   ]);
   protected readonly sorting = signal<SortingState>([]);
   protected readonly rowSelection = signal<RowSelectionState>({});
-  protected readonly columnVisibility = signal<VisibilityState>({});
-  protected readonly columnSizing = signal<ColumnSizingState>({ name: 180 });
+  protected readonly pagination = signal<PaginationState>({ pageIndex: 0, pageSize: 1 });
+  protected readonly globalFilter = signal('');
   protected readonly columns: ColumnDef<Person>[] = [
     {
-      header: 'People',
-      columns: [
-        {
-          accessorKey: 'name',
-          header: 'Name',
-          cell: (context) => \`Person \${context.getValue<string>()}\`,
-          enableSorting: true,
-          size: 180,
-        },
-        {
-          accessorKey: 'active',
-          header: 'Active',
-          cell: (context) => (context.getValue<boolean>() ? 'Active' : 'Inactive'),
-          enableSorting: false,
-        },
-      ],
+      accessorKey: 'name',
+      header: 'Name',
+      cell: (context) => \`Person \${context.getValue<string>()}\`,
+      enableSorting: true,
+      meta: { hell: { headerClass: 'w-56', cellClass: 'font-medium' } },
+    },
+    {
+      accessorKey: 'active',
+      header: 'Active',
+      cell: (context) => (context.getValue<boolean>() ? 'Active' : 'Inactive'),
+      enableSorting: false,
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
     },
   ];
   protected readonly table = createAngularTable<Person>(() => ({
     data: this.rows(),
     columns: this.columns,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getRowId: (row) => row.id,
     enableRowSelection: true,
-    enableColumnResizing: true,
     state: {
       sorting: this.sorting(),
       rowSelection: this.rowSelection(),
-      columnVisibility: this.columnVisibility(),
-      columnSizing: this.columnSizing(),
+      pagination: this.pagination(),
+      globalFilter: this.globalFilter(),
     },
     onSortingChange: (updater) => applyUpdater(this.sorting, updater),
     onRowSelectionChange: (updater) => applyUpdater(this.rowSelection, updater),
-    onColumnVisibilityChange: (updater) => applyUpdater(this.columnVisibility, updater),
-    onColumnSizingChange: (updater) => applyUpdater(this.columnSizing, updater),
+    onPaginationChange: (updater) => applyUpdater(this.pagination, updater),
+    onGlobalFilterChange: (updater) => applyUpdater(this.globalFilter, updater),
   }));
-  protected readonly model = hellTanStackTableModel({ table: this.table });
-  protected readonly firstRender = computed<HellTanStackFlexRenderValue | null>(() => {
-    const row = this.model.rows()[0];
-    return row ? this.model.cellsForRow(row)[0]?.render ?? null : null;
-  });
 }
 
 function applyUpdater<T>(target: WritableSignal<T>, updater: Updater<T>): void {
@@ -1425,19 +1381,23 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
-function tableVirtualConsumerMainTs() {
-  return `import { Component, ElementRef, signal, viewChild } from '@angular/core';
+function tableTanStackVirtualConsumerMainTs() {
+  return `import { Component, signal, type WritableSignal } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import {
-  hellTableRowsFromData,
-  hellTableVirtualRowPartsFromRows,
-  type HellVirtualRowPart,
-} from '${packageName}/table';
+  createAngularTable,
+  getCoreRowModel,
+  getExpandedRowModel,
+  type ColumnDef,
+  type ExpandedState,
+  type Updater,
+} from '@tanstack/angular-table';
 import {
-  HELL_TANSTACK_VIRTUAL_DEFAULT_ESTIMATE_SIZE,
-  injectHellTanStackVirtualRows,
-  type HellTanStackVirtualRowPartItem,
-} from '${packageName}/table-virtual';
+  HellTableShellEmpty,
+  HellTableShellExpandedRow,
+  HellTanStackTable,
+} from '${packageName}/table-tanstack';
+import { HellTanStackVirtualRows } from '${packageName}/table-tanstack/virtual';
 
 interface Person {
   readonly id: string;
@@ -1445,135 +1405,50 @@ interface Person {
   readonly active: boolean;
 }
 
-const rows: readonly Person[] = [
-  { id: 'ada', name: 'Ada Lovelace', active: true },
-  { id: 'grace', name: 'Grace Hopper', active: false },
-];
-type PersonPart = HellVirtualRowPart<Person>;
-
 @Component({
   selector: 'app-root',
   standalone: true,
+  imports: [HellTanStackTable, HellTanStackVirtualRows, HellTableShellEmpty, HellTableShellExpandedRow],
   template: \`
-    <div #scrollRoot style="height: 240px; overflow: auto">
-      @for (item of virtual.virtualItems(); track item.key) {
-        <div [attr.data-part-key]="item.partKey">{{ describe(item) }}</div>
-      }
-    </div>
-    <p>Total virtual height: {{ virtual.totalSize() }}</p>
+    <hell-tanstack-table
+      [table]="table"
+      hellTanStackVirtualRows
+      [virtualEstimateRowSize]="44"
+      [virtualOverscan]="2"
+    >
+      <ng-template hellTableShellEmpty>No people.</ng-template>
+      <ng-template hellTableShellExpandedRow let-row="row">
+        <p>{{ row.original.name }} details</p>
+      </ng-template>
+    </hell-tanstack-table>
   \`,
 })
 class App {
-  protected readonly scrollRoot = viewChild<ElementRef<HTMLElement>>('scrollRoot');
-  protected readonly rowParts = signal<readonly PersonPart[]>(
-    hellTableVirtualRowPartsFromRows({
-      rows: hellTableRowsFromData(rows, (row) => row.id),
-      activeEditorRowKey: 'ada',
-      expandedDetailRowKeys: (row) => row.original.active,
-    }),
+  protected readonly rows = signal<Person[]>([
+    { id: 'ada', name: 'Ada Lovelace', active: true },
+    { id: 'grace', name: 'Grace Hopper', active: false },
+  ]);
+  protected readonly expanded = signal<ExpandedState>({ ada: true });
+  protected readonly columns: ColumnDef<Person>[] = [
+    { accessorKey: 'name', header: 'Name' },
+    { accessorKey: 'active', header: 'Active', cell: (context) => String(context.getValue<boolean>()) },
+  ];
+  protected readonly table = createAngularTable<Person>(() => ({
+    data: this.rows(),
+    columns: this.columns,
+    getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    getRowCanExpand: () => true,
+    getRowId: (row) => row.id,
+    state: { expanded: this.expanded() },
+    onExpandedChange: (updater) => applyUpdater(this.expanded, updater),
+  }));
+}
+
+function applyUpdater<T>(target: WritableSignal<T>, updater: Updater<T>): void {
+  target.update((current) =>
+    typeof updater === 'function' ? (updater as (value: T) => T)(current) : updater,
   );
-  protected readonly virtual = injectHellTanStackVirtualRows<PersonPart>({
-    rowParts: this.rowParts,
-    scrollElement: this.scrollRoot,
-    estimateSize: ({ part }) =>
-      part.kind === 'editor' ? 96 : HELL_TANSTACK_VIRTUAL_DEFAULT_ESTIMATE_SIZE,
-    getItemKey: ({ part }) => part.key,
-    overscan: 2,
-    initialRect: { width: 320, height: 240 },
-  });
-
-  protected describe(item: HellTanStackVirtualRowPartItem<PersonPart>): string {
-    return item.partKey;
-  }
-}
-
-bootstrapApplication(App).catch((error: unknown) => console.error(error));
-`;
-}
-
-function tableCdkConsumerMainTs() {
-  return `import { Component, computed, signal } from '@angular/core';
-import { bootstrapApplication } from '@angular/platform-browser';
-import {
-  hellColumns,
-  textColumn,
-  type HellTableColumnVisibilityState,
-  type HellTableSortDirection,
-  type HellTableSortingState,
-} from '${packageName}/table';
-import { HELL_CDK_TABLE_DIRECTIVES, hellCdkDisplayedColumns } from '${packageName}/table-cdk';
-
-interface Person {
-  readonly id: string;
-  readonly name: string;
-  readonly role: string;
-}
-
-const columns = hellColumns<Person>();
-const tableColumns = columns.define([
-  textColumn<Person, string>('name', { header: 'Name', accessor: 'name', sortable: true, visibility: 'always' }),
-  textColumn<Person, string>('role', { header: 'Role', accessor: 'role', visibility: 'user-toggleable' }),
-]);
-const rows: readonly Person[] = [
-  { id: 'ada', name: 'Ada Lovelace', role: 'Admin' },
-  { id: 'grace', name: 'Grace Hopper', role: 'Editor' },
-];
-
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [...HELL_CDK_TABLE_DIRECTIVES],
-  template: \`
-    <table cdk-table fixedLayout [dataSource]="pagedRows()">
-      <ng-container cdkColumnDef="name">
-        <th
-          cdk-header-cell
-          *cdkHeaderCellDef
-          scope="col"
-          columnId="name"
-          sortable
-          [sort]="sortFor('name')"
-          (sortToggle)="toggleSort('name')"
-        >
-          <button hellTableSortTrigger type="button">Name</button>
-        </th>
-        <td cdk-cell *cdkCellDef="let row">{{ row.name }}</td>
-      </ng-container>
-
-      <ng-container cdkColumnDef="role">
-        <th cdk-header-cell *cdkHeaderCellDef scope="col" columnId="role">Role</th>
-        <td cdk-cell *cdkCellDef="let row">{{ row.role }}</td>
-      </ng-container>
-
-      <tr cdk-header-row *cdkHeaderRowDef="displayedColumns()"></tr>
-      <tr cdk-row *cdkRowDef="let row; columns: displayedColumns()"></tr>
-    </table>
-  \`,
-})
-class App {
-  protected readonly columnVisibility = signal<HellTableColumnVisibilityState>({});
-  protected readonly sorting = signal<readonly HellTableSortingState[]>([]);
-  protected readonly displayedColumns = computed(() => hellCdkDisplayedColumns(tableColumns, this.columnVisibility()));
-  protected readonly pagedRows = computed(() => sortRows(rows, this.sorting()).slice(0, 2));
-
-  protected sortFor(columnId: string): HellTableSortDirection | null {
-    return this.sorting().find((sort) => sort.columnId === columnId)?.direction ?? null;
-  }
-
-  protected toggleSort(columnId: string): void {
-    const current = this.sortFor(columnId);
-    const direction: HellTableSortDirection | null = current === 'asc' ? 'desc' : current === 'desc' ? null : 'asc';
-    this.sorting.set(direction ? [{ columnId, direction }] : []);
-  }
-}
-
-function sortRows(sourceRows: readonly Person[], sorting: readonly HellTableSortingState[]): readonly Person[] {
-  const activeSort = sorting[0];
-  if (!activeSort) return sourceRows;
-  return [...sourceRows].sort((a, b) => {
-    const result = a.name.localeCompare(b.name);
-    return activeSort.direction === 'desc' ? -result : result;
-  });
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
@@ -1583,10 +1458,19 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function noLegacyTableAliasConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
+import { REMOVED_DATA_TABLE } from '${packageName}/data-table';
 import { HELL_TABLE_DIRECTIVES } from '${packageName}/features/data-table';
 import { HELL_TABLE_UTILITY_DIRECTIVES } from '${packageName}/features/table-utilities';
+import { REMOVED_TABLE_CDK } from '${packageName}/table-cdk';
+import { REMOVED_TABLE_VIRTUAL } from '${packageName}/table-virtual';
 
-const removedTableAliases = [HELL_TABLE_DIRECTIVES, HELL_TABLE_UTILITY_DIRECTIVES];
+const removedTableAliases = [
+  HELL_TABLE_DIRECTIVES,
+  HELL_TABLE_UTILITY_DIRECTIVES,
+  REMOVED_DATA_TABLE,
+  REMOVED_TABLE_CDK,
+  REMOVED_TABLE_VIRTUAL,
+];
 
 @Component({
   selector: 'app-root',
@@ -1661,8 +1545,10 @@ function pdfViewerConsumerStylesCss() {
 
 function noLegacyTableAliasConsumerStylesCss() {
   return `@import "tailwindcss";
+@import "${packageName}/styles/components/data-table";
 @import "${packageName}/styles/features/data-table";
 @import "${packageName}/styles/features/table-utilities";
+@import "${packageName}/styles/components/table-renderer";
 `;
 }
 

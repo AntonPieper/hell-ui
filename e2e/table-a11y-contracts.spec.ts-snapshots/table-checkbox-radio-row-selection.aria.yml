@@ -1,32 +1,12 @@
-- region "Checkbox and radio row selection":
-  - heading "Checkbox and radio row selection" [level=2]
+- region "Native selection controls":
+  - heading "Native selection controls" [level=2]
   - table:
     - rowgroup:
-      - row "Select all harness rows Primary row Name Role":
-        - columnheader "Select all harness rows":
-          - checkbox "Select all harness rows" [checked=mixed]
-        - columnheader "Primary row"
-        - columnheader "Name"
-        - columnheader "Role"
-    - rowgroup:
-      - row "Select Ada Lovelace for bulk actions Choose Ada Lovelace as the primary row Ada Lovelace Admin":
-        - cell "Select Ada Lovelace for bulk actions":
-          - checkbox "Select Ada Lovelace for bulk actions" [checked]
-        - cell "Choose Ada Lovelace as the primary row":
-          - radio "Choose Ada Lovelace as the primary row"
+      - row "Ada Lovelace Choose Ada Lovelace as primary":
         - cell "Ada Lovelace"
-        - cell "Admin"
-      - row "Select Grace Hopper for bulk actions Choose Grace Hopper as the primary row Grace Hopper Editor":
-        - cell "Select Grace Hopper for bulk actions":
-          - checkbox "Select Grace Hopper for bulk actions"
-        - cell "Choose Grace Hopper as the primary row":
-          - radio "Choose Grace Hopper as the primary row" [checked]
+        - cell "Choose Ada Lovelace as primary":
+          - radio "Choose Ada Lovelace as primary" [checked]
+      - row "Grace Hopper Choose Grace Hopper as primary":
         - cell "Grace Hopper"
-        - cell "Editor"
-      - row "Select Margaret Hamilton for bulk actions Choose Margaret Hamilton as the primary row Margaret Hamilton Viewer":
-        - cell "Select Margaret Hamilton for bulk actions":
-          - checkbox "Select Margaret Hamilton for bulk actions"
-        - cell "Choose Margaret Hamilton as the primary row":
-          - radio "Choose Margaret Hamilton as the primary row"
-        - cell "Margaret Hamilton"
-        - cell "Viewer"
+        - cell "Choose Grace Hopper as primary":
+          - radio "Choose Grace Hopper as primary"

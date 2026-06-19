@@ -182,6 +182,9 @@ function checkPackageBoundary(packageJson, files, failures) {
     [
       './features/data-table',
       './features/table-utilities',
+      './data-table',
+      './table-virtual',
+      './table-cdk',
       './styles/features/data-table',
       './styles/features/table-utilities',
     ].includes(key),
@@ -191,7 +194,7 @@ function checkPackageBoundary(packageJson, files, failures) {
   }
 
   const legacyTableFiles = files.filter((file) =>
-    /(^|\/)(?:features\/(?:data-table|table-utilities)\/package\.json|styles\/(?:features\/(?:data-table|table-utilities)|components\/(?:data-table|table-utilities))\.css|types\/hell-ui-angular-features-(?:data-table|table-utilities)\.d\.ts)/i.test(file),
+    /(^|\/)(?:(?:data-table|table-virtual|table-cdk|features\/(?:data-table|table-utilities))\/package\.json|styles\/(?:features\/(?:data-table|table-utilities)|components\/(?:data-table|table-utilities|table-renderer))\.css|types\/hell-ui-angular-(?:data-table|table-virtual|table-cdk|features-(?:data-table|table-utilities))\.d\.ts)/i.test(file),
   );
   if (legacyTableFiles.length) {
     failures.push(`@hell-ui/angular package includes legacy table alias files: ${legacyTableFiles.join(', ')}`);

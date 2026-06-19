@@ -1,22 +1,31 @@
-import { CdkTableModule } from '@angular/cdk/table';
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { hellTableInferredRoleForHost } from '../features/table-utilities/table-role-inference';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from './table';
 
 @Component({
+  standalone: true,
   imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
   template: `
     <table id="native-root" hellTableRoot contentWidth>
       <thead id="native-header" hellTableHeader>
         <tr id="native-header-row" hellTableRow>
-          <th id="native-header-cell" hellTableHeaderCell columnId="name">Name</th>
+          <th id="native-header-cell" hellTableHeaderCell columnId="name" sortable sort="asc">
+            <button id="sort" hellTableSortTrigger>Name</button>
+          </th>
+          <th id="select-header" hellTableHeaderCell hellTableSelectionCell>
+            <input id="select-all" type="checkbox" hellTableRowCheckbox />
+          </th>
         </tr>
       </thead>
       <tbody id="native-body" hellTableBody>
         <tr id="native-row" hellTableRow active selected>
           <td id="native-cell" hellTableCell align="end" space="empty">Ada</td>
+          <td id="select-cell" hellTableCell hellTableSelectionCell>
+            <input id="select-row" type="radio" hellTableRowRadio />
+            <button id="edit-row" hellTableRowAction>Edit</button>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -25,6 +34,7 @@ import { HELL_TABLE_UTILITIES_DIRECTIVES } from './table';
 class NativeTablePrimitiveHost {}
 
 @Component({
+  standalone: true,
   imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
   template: `
     <div id="inferred-root" hellTableRoot>
@@ -44,18 +54,12 @@ class NativeTablePrimitiveHost {}
 class InferredRoleTablePrimitiveHost {}
 
 @Component({
+  standalone: true,
   imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
   template: `
     <div id="explicit-root" hellTableRoot role="grid">
-      <div id="explicit-header" hellTableHeader role="presentation">
-        <div id="explicit-header-row" hellTableRow role="row">
-          <div id="explicit-header-cell" hellTableHeaderCell role="columnheader">Name</div>
-        </div>
-      </div>
-      <div id="explicit-body" hellTableBody role="rowgroup">
-        <div id="explicit-row" hellTableRow role="row">
-          <div id="explicit-cell" hellTableCell role="gridcell">Ada</div>
-        </div>
+      <div id="explicit-row" hellTableRow role="row">
+        <div id="explicit-cell" hellTableCell role="gridcell">Ada</div>
       </div>
     </div>
   `,
@@ -63,115 +67,17 @@ class InferredRoleTablePrimitiveHost {}
 class ExplicitRoleTablePrimitiveHost {}
 
 @Component({
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
-  template: `
-    <table
-      id="grid-root"
-      hellTable
-      semantics="grid"
-      interactionMode="cell-navigation"
-      [rowCount]="2"
-      [colCount]="2"
-    >
-      <thead hellTableHead>
-        <tr id="grid-header-row" hellTableRow [rowIndex]="1">
-          <th id="grid-name" hellTableHeaderCell [colIndex]="1">Name</th>
-          <th id="grid-status" hellTableHeaderCell [colIndex]="2">Status</th>
-        </tr>
-      </thead>
-      <tbody hellTableBody>
-        <tr id="grid-row" hellTableRow [rowIndex]="2">
-          <td id="grid-name-cell" hellTableCell [colIndex]="1">
-            Ada
-            <button id="grid-action" hellTableRowAction type="button">Edit</button>
-          </td>
-          <td id="grid-status-cell" hellTableCell [colIndex]="2">Active</td>
-        </tr>
-      </tbody>
-    </table>
-  `,
-})
-class GridTablePrimitiveHost {}
-
-@Component({
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
-  template: `
-    <table
-      id="dynamic-grid-root"
-      hellTable
-      [semantics]="semantics()"
-      interactionMode="cell-navigation"
-      [rowCount]="2"
-      [colCount]="1"
-    >
-      <thead hellTableHead>
-        <tr id="dynamic-grid-header-row" hellTableRow [rowIndex]="1">
-          <th id="dynamic-grid-name" hellTableHeaderCell [colIndex]="1">Name</th>
-        </tr>
-      </thead>
-      <tbody hellTableBody>
-        <tr id="dynamic-grid-row" hellTableRow [rowIndex]="2">
-          <td id="dynamic-grid-cell" hellTableCell [colIndex]="1">Ada</td>
-        </tr>
-      </tbody>
-    </table>
-  `,
-})
-class DynamicGridTablePrimitiveHost {
-  readonly semantics = signal<'table' | 'grid'>('grid');
-}
-
-@Component({
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
-  template: `
-    <table id="invalid-grid-root" hellTable semantics="grid">
-      <tbody hellTableBody>
-        <tr hellTableRow><td hellTableCell>Ada</td></tr>
-      </tbody>
-    </table>
-  `,
-})
-class InvalidGridTablePrimitiveHost {}
-
-@Component({
+  standalone: true,
   imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
   template: `
     <div id="unstyled-root" hellTableRoot unstyled>
-      <div id="unstyled-header" hellTableHeader unstyled>
-        <div id="unstyled-header-row" hellTableRow unstyled>
-          <div id="unstyled-header-cell" hellTableHeaderCell unstyled>Name</div>
-        </div>
-      </div>
-      <div id="unstyled-body" hellTableBody unstyled>
-        <div id="unstyled-row" hellTableRow unstyled>
-          <div id="unstyled-cell" hellTableCell unstyled>Ada</div>
-        </div>
+      <div id="unstyled-row" hellTableRow unstyled>
+        <div id="unstyled-cell" hellTableCell unstyled>Ada</div>
       </div>
     </div>
   `,
 })
 class UnstyledTablePrimitiveHost {}
-
-@Component({
-  imports: [CdkTableModule, ...HELL_TABLE_UTILITIES_DIRECTIVES],
-  template: `
-    <cdk-table id="cdk-root" hellTableRoot [dataSource]="rows">
-      <ng-container cdkColumnDef="name">
-        <cdk-header-cell id="cdk-header-cell" *cdkHeaderCellDef hellTableHeaderCell columnId="name">
-          Name
-        </cdk-header-cell>
-        <cdk-cell id="cdk-cell" *cdkCellDef="let row" hellTableCell>{{ $any(row).name }}</cdk-cell>
-      </ng-container>
-
-      <cdk-header-row id="cdk-header-row" *cdkHeaderRowDef="columns" hellTableRow />
-      <cdk-row id="cdk-row" *cdkRowDef="let row; columns: columns" hellTableRow />
-    </cdk-table>
-  `,
-})
-class CdkTablePrimitiveHost {
-  readonly columns = ['name'];
-  readonly rows = [{ name: 'Ada' }];
-}
 
 describe('host-agnostic Hell table primitives', () => {
   beforeEach(async () => {
@@ -180,28 +86,34 @@ describe('host-agnostic Hell table primitives', () => {
         NativeTablePrimitiveHost,
         InferredRoleTablePrimitiveHost,
         ExplicitRoleTablePrimitiveHost,
-        GridTablePrimitiveHost,
-        DynamicGridTablePrimitiveHost,
-        InvalidGridTablePrimitiveHost,
         UnstyledTablePrimitiveHost,
-        CdkTablePrimitiveHost,
       ],
     }).compileComponents();
   });
 
-  it('uses modern selectors on native table markup without adding redundant ARIA roles', () => {
+  it('uses native table markup without adding redundant ARIA or row-as-button behavior', () => {
     const fixture = TestBed.createComponent(NativeTablePrimitiveHost);
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
 
+    for (const id of [
+      'native-root',
+      'native-header',
+      'native-body',
+      'native-row',
+      'native-header-cell',
+      'native-cell',
+    ]) {
+      expect(byId(root, id).getAttribute('role'), id).toBeNull();
+    }
     expect(byId(root, 'native-root').getAttribute('role')).toBeNull();
+    expect(byId(root, 'native-cell').getAttribute('role')).toBeNull();
+
     expect(byId(root, 'native-root').hasAttribute('tabindex')).toBe(false);
     expect(byId(root, 'native-root').hasAttribute('aria-activedescendant')).toBe(false);
-    expect(byId(root, 'native-header').getAttribute('role')).toBeNull();
-    expect(byId(root, 'native-body').getAttribute('role')).toBeNull();
-    expect(byId(root, 'native-row').getAttribute('role')).toBeNull();
-    expect(byId(root, 'native-header-cell').getAttribute('role')).toBeNull();
-    expect(byId(root, 'native-cell').getAttribute('role')).toBeNull();
+    expect(byId(root, 'native-row').hasAttribute('tabindex')).toBe(false);
+    expect(byId(root, 'native-row').hasAttribute('aria-selected')).toBe(false);
+    expect(byId(root, 'native-row').hasAttribute('data-interactive')).toBe(false);
 
     expectClassAndData(byId(root, 'native-root'), 'hell-table', 'data-hell-table-root');
     expectClassAndData(byId(root, 'native-header'), 'hell-table-head', 'data-hell-table-header');
@@ -213,12 +125,15 @@ describe('host-agnostic Hell table primitives', () => {
       'data-hell-table-header-cell',
     );
     expectClassAndData(byId(root, 'native-cell'), 'hell-table-cell', 'data-hell-table-cell');
+
     expect(byId(root, 'native-root').getAttribute('data-content-width')).toBe('true');
     expect(byId(root, 'native-row').getAttribute('data-active')).toBe('true');
     expect(byId(root, 'native-row').getAttribute('data-selected')).toBe('true');
-    expect(byId(root, 'native-row').hasAttribute('data-interactive')).toBe(false);
-    expect(byId(root, 'native-row').hasAttribute('tabindex')).toBe(false);
-    expect(byId(root, 'native-row').hasAttribute('aria-selected')).toBe(false);
+    expect(byId(root, 'native-header-cell').getAttribute('aria-sort')).toBe('ascending');
+    expect(byId(root, 'sort').getAttribute('type')).toBe('button');
+    expect(byId(root, 'edit-row').getAttribute('type')).toBe('button');
+    expect(byId(root, 'select-header').getAttribute('data-hell-table-selection-cell')).toBe('');
+    expect(byId(root, 'select-row').getAttribute('data-hell-table-row-radio')).toBe('');
     expect(byId(root, 'native-cell').getAttribute('data-align')).toBe('end');
     expect(byId(root, 'native-cell').getAttribute('data-space')).toBe('empty');
   });
@@ -237,114 +152,26 @@ describe('host-agnostic Hell table primitives', () => {
     expect(byId(root, 'inferred-cell').getAttribute('role')).toBe('cell');
   });
 
-  it('preserves explicit consumer roles on non-native role markup', () => {
+  it('preserves explicit consumer roles on non-native markup', () => {
     const fixture = TestBed.createComponent(ExplicitRoleTablePrimitiveHost);
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
 
     expect(byId(root, 'explicit-root').getAttribute('role')).toBe('grid');
-    expect(byId(root, 'explicit-header').getAttribute('role')).toBe('presentation');
-    expect(byId(root, 'explicit-header-row').getAttribute('role')).toBe('row');
-    expect(byId(root, 'explicit-header-cell').getAttribute('role')).toBe('columnheader');
-    expect(byId(root, 'explicit-body').getAttribute('role')).toBe('rowgroup');
     expect(byId(root, 'explicit-row').getAttribute('role')).toBe('row');
     expect(byId(root, 'explicit-cell').getAttribute('role')).toBe('gridcell');
   });
 
-  it('enables explicit grid semantics only with an interaction mode', () => {
-    const fixture = TestBed.createComponent(GridTablePrimitiveHost);
-    fixture.detectChanges();
-    const root = fixture.nativeElement as HTMLElement;
-    const grid = byId(root, 'grid-root');
-
-    expect(grid.getAttribute('role')).toBe('grid');
-    expect(grid.getAttribute('tabindex')).toBe('0');
-    expect(grid.getAttribute('aria-rowcount')).toBe('2');
-    expect(grid.getAttribute('aria-colcount')).toBe('2');
-    expect(grid.getAttribute('aria-activedescendant')).toBe('grid-name');
-    expect(root.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
-    expect(byId(root, 'grid-action').getAttribute('tabindex')).toBe('-1');
-    expect(byId(root, 'grid-header-row').getAttribute('role')).toBe('row');
-    expect(byId(root, 'grid-row').getAttribute('aria-rowindex')).toBe('2');
-    expect(byId(root, 'grid-name').getAttribute('role')).toBe('columnheader');
-    expect(byId(root, 'grid-status').getAttribute('aria-colindex')).toBe('2');
-    expect(byId(root, 'grid-name-cell').getAttribute('role')).toBe('gridcell');
-    expect(byId(root, 'grid-status-cell').getAttribute('aria-colindex')).toBe('2');
-
-    const right = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true });
-    grid.dispatchEvent(right);
-    fixture.detectChanges();
-
-    expect(right.defaultPrevented).toBe(true);
-    expect(grid.getAttribute('aria-activedescendant')).toBe('grid-status');
-  });
-
-  it('removes generated grid roles and focus state when semantics switch back to table', () => {
-    const fixture = TestBed.createComponent(DynamicGridTablePrimitiveHost);
-    fixture.detectChanges();
-    const root = fixture.nativeElement as HTMLElement;
-    const table = byId(root, 'dynamic-grid-root');
-
-    expect(table.getAttribute('role')).toBe('grid');
-    expect(byId(root, 'dynamic-grid-cell').getAttribute('role')).toBe('gridcell');
-
-    fixture.componentInstance.semantics.set('table');
-    fixture.detectChanges();
-
-    expect(table.getAttribute('role')).toBeNull();
-    expect(table.hasAttribute('tabindex')).toBe(false);
-    expect(table.hasAttribute('aria-activedescendant')).toBe(false);
-    expect(table.hasAttribute('aria-rowcount')).toBe(false);
-    expect(table.hasAttribute('aria-colcount')).toBe(false);
-    expect(byId(root, 'dynamic-grid-row').hasAttribute('aria-rowindex')).toBe(false);
-    expect(byId(root, 'dynamic-grid-cell').getAttribute('role')).toBeNull();
-    expect(byId(root, 'dynamic-grid-cell').hasAttribute('aria-colindex')).toBe(false);
-  });
-
-  it('rejects grid semantics without an explicit interaction mode', () => {
-    const fixture = TestBed.createComponent(InvalidGridTablePrimitiveHost);
-    expect(() => fixture.detectChanges()).toThrow(/semantics="grid" requires interactionMode/);
-  });
-
-  it('keeps roles and data attributes in unstyled mode without Hell classes', () => {
+  it('keeps data attributes in unstyled mode without Hell classes', () => {
     const fixture = TestBed.createComponent(UnstyledTablePrimitiveHost);
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
 
     expectUnstyledPrimitive(byId(root, 'unstyled-root'), 'hell-table', 'data-hell-table-root');
-    expectUnstyledPrimitive(byId(root, 'unstyled-header'), 'hell-table-head', 'data-hell-table-header');
-    expectUnstyledPrimitive(byId(root, 'unstyled-body'), 'hell-table-body', 'data-hell-table-body');
     expectUnstyledPrimitive(byId(root, 'unstyled-row'), 'hell-table-row', 'data-hell-table-row');
-    expectUnstyledPrimitive(
-      byId(root, 'unstyled-header-cell'),
-      'hell-table-header-cell',
-      'data-hell-table-header-cell',
-    );
     expectUnstyledPrimitive(byId(root, 'unstyled-cell'), 'hell-table-cell', 'data-hell-table-cell');
     expect(byId(root, 'unstyled-root').getAttribute('role')).toBe('table');
     expect(byId(root, 'unstyled-cell').getAttribute('role')).toBe('cell');
-  });
-
-  it('coexists with CDK table hosts without overriding CDK roles', () => {
-    const fixture = TestBed.createComponent(CdkTablePrimitiveHost);
-    fixture.detectChanges();
-    const root = fixture.nativeElement as HTMLElement;
-
-    expectClassAndData(byId(root, 'cdk-root'), 'hell-table', 'data-hell-table-root');
-    expectClassAndData(byId(root, 'cdk-header-row'), 'hell-table-row', 'data-hell-table-row');
-    expectClassAndData(byId(root, 'cdk-row'), 'hell-table-row', 'data-hell-table-row');
-    expectClassAndData(
-      byId(root, 'cdk-header-cell'),
-      'hell-table-header-cell',
-      'data-hell-table-header-cell',
-    );
-    expectClassAndData(byId(root, 'cdk-cell'), 'hell-table-cell', 'data-hell-table-cell');
-
-    expect(byId(root, 'cdk-root').getAttribute('role')).toBe('table');
-    expect(byId(root, 'cdk-header-row').getAttribute('role')).toBe('row');
-    expect(byId(root, 'cdk-row').getAttribute('role')).toBe('row');
-    expect(byId(root, 'cdk-header-cell').getAttribute('role')).toBe('columnheader');
-    expect(byId(root, 'cdk-cell').getAttribute('role')).toBe('cell');
   });
 
   it('keeps role inference safe for SSR-like hosts with minimal DOM shape', () => {

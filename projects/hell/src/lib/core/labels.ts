@@ -56,9 +56,6 @@ export interface HellTableUtilitiesLabels {
   readonly resizeColumn: string;
 }
 
-/** @deprecated Use {@link HellTableUtilitiesLabels}. */
-export type HellDataTableLabels = HellTableUtilitiesLabels;
-
 export interface HellDateInputLabels {
   readonly chooseDate: string;
   readonly chooseDateFor: (label: string) => string;
@@ -137,7 +134,6 @@ export interface HellLabels {
   readonly appShell: HellAppShellLabels;
   readonly audioPlayer: HellAudioPlayerLabels;
   readonly breadcrumbs: HellBreadcrumbLabels;
-  readonly dataTable: HellDataTableLabels;
   readonly tableUtilities: HellTableUtilitiesLabels;
   readonly dateInput: HellDateInputLabels;
   readonly datePicker: HellDatePickerLabels;
@@ -155,7 +151,6 @@ export interface HellLabelOverrides {
   readonly appShell?: Partial<HellAppShellLabels>;
   readonly audioPlayer?: Partial<HellAudioPlayerLabels>;
   readonly breadcrumbs?: Partial<HellBreadcrumbLabels>;
-  readonly dataTable?: Partial<HellDataTableLabels>;
   readonly tableUtilities?: Partial<HellTableUtilitiesLabels>;
   readonly dateInput?: Partial<HellDateInputLabels>;
   readonly datePicker?: Partial<HellDatePickerLabels>;
@@ -212,9 +207,6 @@ export const HELL_DEFAULT_LABELS: HellLabels = {
   },
   resizable: {
     resizePanels: 'Resize panels',
-  },
-  dataTable: {
-    resizeColumn: 'Resize column',
   },
   tableUtilities: {
     resizeColumn: 'Resize column',
@@ -310,8 +302,7 @@ function hellMergeLabels(base: HellLabels, overrides: HellLabelOverrides): HellL
     appShell: { ...base.appShell, ...overrides.appShell },
     audioPlayer: { ...base.audioPlayer, ...overrides.audioPlayer },
     breadcrumbs: { ...base.breadcrumbs, ...overrides.breadcrumbs },
-    dataTable: { ...base.dataTable, ...overrides.dataTable, ...overrides.tableUtilities },
-    tableUtilities: { ...base.tableUtilities, ...overrides.tableUtilities, ...overrides.dataTable },
+    tableUtilities: { ...base.tableUtilities, ...overrides.tableUtilities },
     dateInput: { ...base.dateInput, ...overrides.dateInput },
     datePicker: { ...base.datePicker, ...overrides.datePicker },
     dialpad: { ...base.dialpad, ...overrides.dialpad },

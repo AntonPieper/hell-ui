@@ -2,9 +2,9 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import {
+  type HellTableMeasurableItem,
   HellTableMeasureRow,
   type HellTableRowMeasurement,
-  type HellVirtualRowPart,
 } from './table';
 
 interface Person {
@@ -14,7 +14,14 @@ interface Person {
 
 const row = { key: '42', original: { id: '42', name: 'Ada' }, index: 0 };
 
+interface TestMeasuredItem<TData> extends HellTableMeasurableItem {
+  readonly kind: 'row' | 'expanded' | 'editor';
+  readonly key: string;
+  readonly row: typeof row & { readonly original: TData };
+}
+
 @Component({
+  standalone: true,
   imports: [HellTableMeasureRow],
   template: `
     <div
@@ -27,11 +34,11 @@ const row = { key: '42', original: { id: '42', name: 'Ada' }, index: 0 };
   `,
 })
 class MeasureRowHost {
-  readonly part = signal<HellVirtualRowPart<Person>>({ kind: 'row', key: 'row:42', row });
-  readonly measurements: HellTableRowMeasurement<HellVirtualRowPart<Person>>[] = [];
-  readonly outputMeasurements: HellTableRowMeasurement<HellVirtualRowPart<Person>>[] = [];
+  readonly part = signal<TestMeasuredItem<Person>>({ kind: 'row', key: 'row:42', row });
+  readonly measurements: HellTableRowMeasurement<TestMeasuredItem<Person>>[] = [];
+  readonly outputMeasurements: HellTableRowMeasurement<TestMeasuredItem<Person>>[] = [];
   readonly recordMeasurement = (
-    measurement: HellTableRowMeasurement<HellVirtualRowPart<Person>>,
+    measurement: HellTableRowMeasurement<TestMeasuredItem<Person>>,
   ) => {
     this.measurements.push(measurement);
   };

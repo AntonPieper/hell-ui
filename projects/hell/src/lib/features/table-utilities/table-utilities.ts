@@ -25,14 +25,11 @@ import {
   Component,
   Directive,
   ElementRef,
-  EventEmitter,
   AfterViewInit,
   OnDestroy,
   Input,
-  Output,
   booleanAttribute,
   computed,
-  effect,
   inject,
   input,
   numberAttribute,
@@ -65,47 +62,6 @@ function hellAriaControlsValue(
   return ids.length ? ids.join(' ') : null;
 }
 
-function hellNullablePositiveIntegerAttribute(value: unknown): number | null {
-  if (value === null || value === undefined || value === '') return null;
-  const parsed = Number(value);
-  if (!Number.isInteger(parsed) || parsed < 1) return null;
-  return parsed;
-}
-
-function hellClampedIndex(value: number | null): number | null {
-  return value !== null && Number.isInteger(value) && value > 0 ? value : null;
-}
-
-export type HellTableSemantics = 'table' | 'grid';
-
-export type HellTableGridInteractionMode = 'row-selection' | 'cell-navigation' | 'editing';
-
-const HELL_TABLE_GRID_INTERACTION_MODES = ['row-selection', 'cell-navigation', 'editing'] as const;
-
-function hellTableGridInteractionModeValid(
-  mode: string | null,
-): mode is HellTableGridInteractionMode {
-  return HELL_TABLE_GRID_INTERACTION_MODES.some((candidate) => candidate === mode);
-}
-
-const HELL_TABLE_GRID_CELL_WIDGET_SELECTOR = [
-  'button:not([disabled])',
-  'a[href]',
-  'input:not([disabled])',
-  'select:not([disabled])',
-  'textarea:not([disabled])',
-  '[contenteditable="true"]',
-].join(',');
-
-interface HellTableGridCellRegistration {
-  readonly host: HTMLElement;
-  gridCellId(): string;
-  gridRowIndex(): number | null;
-  gridColIndex(): number | null;
-}
-
-let nextGridCellId = 0;
-
 const HELL_TABLE_ROOT_NATIVE_ELEMENTS = ['TABLE'] as const;
 const HELL_TABLE_HEADER_NATIVE_ELEMENTS = ['THEAD'] as const;
 const HELL_TABLE_BODY_NATIVE_ELEMENTS = ['TBODY'] as const;
@@ -124,9 +80,6 @@ abstract class HellTableRoleDirective extends HellStyleable {
   protected role(): string | null {
     if (this.explicitRole !== null) return this.explicitRole;
 
-    const gridRole = this.gridRole();
-    if (gridRole !== null) return gridRole;
-
     if (this.inferredRole === null) return null;
     return hellTableInferredRoleForHost(
       this.roleHost,
@@ -134,10 +87,6 @@ abstract class HellTableRoleDirective extends HellStyleable {
       this.inferredRole,
       this.explicitRole,
     );
-  }
-
-  protected gridRole(): HellTableInferredRole | null {
-    return null;
   }
 }
 
@@ -172,11 +121,6 @@ export class HellTableContainer extends HellStyleable {
     '[attr.data-hell-table-root]': '""',
     '[attr.data-content-width]': 'contentWidth() ? "true" : null',
     '[attr.role]': 'role()',
-    '[attr.tabindex]': 'gridTabIndex()',
-    '[attr.aria-rowcount]': 'gridRowCount()',
-    '[attr.aria-colcount]': 'gridColCount()',
-    '[attr.aria-activedescendant]': 'gridActiveDescendant()',
-    '(keydown)': 'onGridKeydown($event)',
   },
 })
 export class HellTable extends HellTableRoleDirective {
@@ -184,206 +128,10 @@ export class HellTable extends HellTableRoleDirective {
   protected override readonly inferredRole = 'table';
 
   readonly contentWidth = signal(false);
-  readonly semantics = input<HellTableSemantics>('table');
-  readonly interactionMode = input<HellTableGridInteractionMode | null>(null);
-  readonly rowCount = input<number | null>(null, {
-    transform: hellNullablePositiveIntegerAttribute,
-  });
-  readonly colCount = input<number | null>(null, {
-    transform: hellNullablePositiveIntegerAttribute,
-  });
 
   @Input({ alias: 'contentWidth', transform: booleanAttribute })
   set contentWidthInput(value: boolean) {
     this.contentWidth.set(value);
-  }
-
-  private readonly registeredRows = signal<readonly HellTableRow[]>([]);
-  private readonly registeredCells = signal<readonly HellTableGridCellRegistration[]>([]);
-  private readonly activeGridCell = signal({ rowIndex: 1, colIndex: 1 });
-
-  constructor() {
-    super();
-    effect(() => this.assertGridInteractionMode());
-  }
-
-  isGridMode(): boolean {
-    return this.semantics() === 'grid' && hellTableGridInteractionModeValid(this.interactionMode());
-  }
-
-  registerRow(row: HellTableRow): void {
-    this.registeredRows.update((rows) => (rows.includes(row) ? rows : [...rows, row]));
-  }
-
-  unregisterRow(row: HellTableRow): void {
-    this.registeredRows.update((rows) => rows.filter((candidate) => candidate !== row));
-  }
-
-  registerCell(cell: HellTableGridCellRegistration): void {
-    this.registeredCells.update((cells) => (cells.includes(cell) ? cells : [...cells, cell]));
-  }
-
-  unregisterCell(cell: HellTableGridCellRegistration): void {
-    this.registeredCells.update((cells) => cells.filter((candidate) => candidate !== cell));
-  }
-
-  rowIndexFor(row: HellTableRow): number | null {
-    return this.indexFor(this.registeredRows(), row);
-  }
-
-  colIndexFor(cell: HellTableGridCellRegistration): number | null {
-    const rowIndex = cell.gridRowIndex();
-    if (rowIndex === null) return this.indexFor(this.registeredCells(), cell);
-    const rowCells = this.registeredCells().filter(
-      (candidate) => candidate.gridRowIndex() === rowIndex,
-    );
-    return this.indexFor(rowCells, cell);
-  }
-
-  protected override gridRole(): HellTableInferredRole | null {
-    return this.isGridMode() ? 'grid' : null;
-  }
-
-  protected gridTabIndex(): 0 | null {
-    return this.isGridMode() ? 0 : null;
-  }
-
-  protected gridRowCount(): number | null {
-    if (!this.isGridMode()) return null;
-    return this.rowCount() ?? (this.registeredRows().length || null);
-  }
-
-  protected gridColCount(): number | null {
-    if (!this.isGridMode()) return null;
-    return this.colCount() ?? this.inferredColCount();
-  }
-
-  protected gridActiveDescendant(): string | null {
-    if (!this.isGridMode()) return null;
-    return this.activeCell()?.gridCellId() ?? this.firstCell()?.gridCellId() ?? null;
-  }
-
-  protected onGridKeydown(event: KeyboardEvent): void {
-    if (!this.isGridMode()) return;
-    const current = this.activeCell() ?? this.firstCell();
-    if (!current) return;
-
-    const rowIndex = current.gridRowIndex() ?? 1;
-    const colIndex = current.gridColIndex() ?? 1;
-    let nextRow = rowIndex;
-    let nextCol = colIndex;
-
-    switch (event.key) {
-      case 'ArrowRight':
-        nextCol += 1;
-        break;
-      case 'ArrowLeft':
-        nextCol -= 1;
-        break;
-      case 'ArrowDown':
-        nextRow += 1;
-        break;
-      case 'ArrowUp':
-        nextRow -= 1;
-        break;
-      case 'Home':
-        nextCol = 1;
-        break;
-      case 'End':
-        nextCol = this.gridColCount() ?? colIndex;
-        break;
-      case 'Enter':
-      case ' ':
-        if (this.activateCurrentGridCellWidget(event.key)) event.preventDefault();
-        return;
-      case 'F2':
-        if (this.focusCurrentGridCellWidget()) event.preventDefault();
-        return;
-      default:
-        return;
-    }
-
-    if (this.activateGridCell(nextRow, nextCol)) event.preventDefault();
-  }
-
-  private assertGridInteractionMode(): void {
-    if (this.semantics() !== 'grid') return;
-    if (hellTableGridInteractionModeValid(this.interactionMode())) return;
-    throw new Error(
-      'HellTable semantics="grid" requires interactionMode="row-selection", "cell-navigation", or "editing".',
-    );
-  }
-
-  private indexFor<T>(items: readonly T[], item: T): number | null {
-    const index = items.indexOf(item);
-    return index >= 0 ? index + 1 : null;
-  }
-
-  private inferredColCount(): number | null {
-    const indexes = this.registeredCells()
-      .map((cell) => cell.gridColIndex())
-      .filter((index): index is number => index !== null);
-    return indexes.length ? Math.max(...indexes) : null;
-  }
-
-  private firstCell(): HellTableGridCellRegistration | null {
-    return this.registeredCells()[0] ?? null;
-  }
-
-  private activeCell(): HellTableGridCellRegistration | null {
-    const active = this.activeGridCell();
-    return (
-      this.registeredCells().find(
-        (cell) =>
-          cell.gridRowIndex() === active.rowIndex && cell.gridColIndex() === active.colIndex,
-      ) ?? null
-    );
-  }
-
-  private activateCurrentGridCellWidget(key: string): boolean {
-    if (this.interactionMode() === 'editing' && key === 'Enter')
-      return this.focusCurrentGridCellWidget();
-    const widget = this.currentGridCellWidget();
-    if (!widget) return false;
-    widget.click();
-    return true;
-  }
-
-  private focusCurrentGridCellWidget(): boolean {
-    const widget = this.currentGridCellWidget();
-    if (!widget) return false;
-    widget.focus();
-    return true;
-  }
-
-  private currentGridCellWidget(): HTMLElement | null {
-    const cell = this.activeCell() ?? this.firstCell();
-    return cell?.host.querySelector<HTMLElement>(HELL_TABLE_GRID_CELL_WIDGET_SELECTOR) ?? null;
-  }
-
-  private activateGridCell(rowIndex: number, colIndex: number): boolean {
-    const rowCount = this.gridRowCount() ?? rowIndex;
-    const colCount = this.gridColCount() ?? colIndex;
-    const nextRow = Math.min(Math.max(rowIndex, 1), rowCount);
-    const nextCol = Math.min(Math.max(colIndex, 1), colCount);
-    const nextCell = this.cellAt(nextRow, nextCol) ?? this.cellInRow(nextRow) ?? this.activeCell();
-    if (!nextCell) return false;
-    const resolvedRow = nextCell.gridRowIndex() ?? nextRow;
-    const resolvedCol = nextCell.gridColIndex() ?? nextCol;
-    this.activeGridCell.set({ rowIndex: resolvedRow, colIndex: resolvedCol });
-    return true;
-  }
-
-  private cellAt(rowIndex: number, colIndex: number): HellTableGridCellRegistration | null {
-    return (
-      this.registeredCells().find(
-        (cell) => cell.gridRowIndex() === rowIndex && cell.gridColIndex() === colIndex,
-      ) ?? null
-    );
-  }
-
-  private cellInRow(rowIndex: number): HellTableGridCellRegistration | null {
-    return this.registeredCells().find((cell) => cell.gridRowIndex() === rowIndex) ?? null;
   }
 }
 
@@ -405,12 +153,7 @@ export class HellTableHead extends HellTableRoleDirective {
   protected override readonly nativeElementNames = HELL_TABLE_HEADER_NATIVE_ELEMENTS;
   protected override readonly inferredRole = 'rowgroup';
 
-  private readonly table = inject(HellTable, { optional: true, skipSelf: true });
   private readonly cells = new Set<HellTableHeaderCell>();
-
-  protected override gridRole(): HellTableInferredRole | null {
-    return this.table?.isGridMode() ? 'rowgroup' : null;
-  }
 
   register(c: HellTableHeaderCell) {
     this.cells.add(c);
@@ -439,12 +182,6 @@ export class HellTableHead extends HellTableRoleDirective {
 export class HellTableBody extends HellTableRoleDirective {
   protected override readonly nativeElementNames = HELL_TABLE_BODY_NATIVE_ELEMENTS;
   protected override readonly inferredRole = 'rowgroup';
-
-  private readonly table = inject(HellTable, { optional: true, skipSelf: true });
-
-  protected override gridRole(): HellTableInferredRole | null {
-    return this.table?.isGridMode() ? 'rowgroup' : null;
-  }
 }
 
 /**
@@ -480,19 +217,14 @@ export class HellTableRowIgnore {}
     '[attr.data-active]': 'active() ? "true" : null',
     '[attr.data-selected]': 'selected() ? "true" : null',
     '[attr.role]': 'role()',
-    '[attr.aria-rowindex]': 'gridRowIndex()',
-    '[attr.aria-selected]': 'gridSelected()',
   },
 })
-export class HellTableRow extends HellTableRoleDirective implements OnDestroy {
+export class HellTableRow extends HellTableRoleDirective {
   protected override readonly nativeElementNames = HELL_TABLE_ROW_NATIVE_ELEMENTS;
   protected override readonly inferredRole = 'row';
 
   readonly active = signal(false);
   readonly selected = signal(false);
-  readonly rowIndex = input<number | null>(null, {
-    transform: hellNullablePositiveIntegerAttribute,
-  });
 
   @Input({ alias: 'active', transform: booleanAttribute })
   set activeInput(value: boolean) {
@@ -502,45 +234,6 @@ export class HellTableRow extends HellTableRoleDirective implements OnDestroy {
   @Input({ alias: 'selected', transform: booleanAttribute })
   set selectedInput(value: boolean) {
     this.selected.set(value);
-  }
-
-  private readonly table = inject(HellTable, { optional: true, skipSelf: true });
-  private readonly cells = signal<readonly HellTableGridCellRegistration[]>([]);
-
-  constructor() {
-    super();
-    this.table?.registerRow(this);
-  }
-
-  registerCell(cell: HellTableGridCellRegistration): void {
-    this.cells.update((cells) => (cells.includes(cell) ? cells : [...cells, cell]));
-  }
-
-  unregisterCell(cell: HellTableGridCellRegistration): void {
-    this.cells.update((cells) => cells.filter((candidate) => candidate !== cell));
-  }
-
-  colIndexFor(cell: HellTableGridCellRegistration): number | null {
-    const index = this.cells().indexOf(cell);
-    return index >= 0 ? index + 1 : null;
-  }
-
-  protected override gridRole(): HellTableInferredRole | null {
-    return this.table?.isGridMode() ? 'row' : null;
-  }
-
-  gridRowIndex(): number | null {
-    if (!this.table?.isGridMode()) return null;
-    return hellClampedIndex(this.rowIndex()) ?? this.table.rowIndexFor(this);
-  }
-
-  protected gridSelected(): 'true' | 'false' | null {
-    if (!this.table?.isGridMode()) return null;
-    return this.selected() ? 'true' : 'false';
-  }
-
-  ngOnDestroy(): void {
-    this.table?.unregisterRow(this);
   }
 }
 
@@ -555,19 +248,13 @@ export class HellTableRow extends HellTableRoleDirective implements OnDestroy {
     '[class.hell-table-row-action]': '!unstyled()',
     '[attr.data-hell-table-row-action]': '""',
     '[attr.type]': 'nativeButtonType()',
-    '[attr.tabindex]': 'gridTabIndex()',
   },
 })
 export class HellTableRowAction extends HellStyleable {
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
-  private readonly table = inject(HellTable, { optional: true, skipSelf: true });
 
   protected nativeButtonType(): 'button' | null {
     return hellHostElementName(this.host) === 'BUTTON' ? 'button' : null;
-  }
-
-  protected gridTabIndex(): -1 | null {
-    return this.table?.isGridMode() ? -1 : null;
   }
 }
 
@@ -585,41 +272,27 @@ export class HellTableRowAction extends HellStyleable {
 })
 export class HellTableSelectionCell extends HellStyleable {}
 
-/** Native checkbox primitive for row-selection columns with table-specific grid focus hooks. */
+/** Native checkbox primitive for row-selection columns with table-specific styling hooks. */
 @Directive({
   selector: 'input[type="checkbox"][hellTableRowCheckbox]',
   exportAs: 'hellTableRowCheckbox',
   host: {
     '[class.hell-table-row-checkbox]': '!unstyled()',
     '[attr.data-hell-table-row-checkbox]': '""',
-    '[attr.tabindex]': 'gridTabIndex()',
   },
 })
-export class HellTableRowCheckbox extends HellNativeCheckbox {
-  private readonly table = inject(HellTable, { optional: true, skipSelf: true });
+export class HellTableRowCheckbox extends HellNativeCheckbox {}
 
-  protected gridTabIndex(): -1 | null {
-    return this.table?.isGridMode() ? -1 : null;
-  }
-}
-
-/** Native radio primitive for single row-selection columns with table-specific grid focus hooks. */
+/** Native radio primitive for single row-selection columns with table-specific styling hooks. */
 @Directive({
   selector: 'input[type="radio"][hellTableRowRadio]',
   exportAs: 'hellTableRowRadio',
   host: {
     '[class.hell-table-row-radio]': '!unstyled()',
     '[attr.data-hell-table-row-radio]': '""',
-    '[attr.tabindex]': 'gridTabIndex()',
   },
 })
-export class HellTableRowRadio extends HellNativeRadio {
-  private readonly table = inject(HellTable, { optional: true, skipSelf: true });
-
-  protected gridTabIndex(): -1 | null {
-    return this.table?.isGridMode() ? -1 : null;
-  }
-}
+export class HellTableRowRadio extends HellNativeRadio {}
 
 /**
  * Header cell directive. Owns optional sort state and can provide the default
@@ -630,7 +303,7 @@ export class HellTableRowRadio extends HellNativeRadio {
  *
  * Initial column sizing belongs to consumer CSS/Tailwind. The default resize
  * adapter writes `--hell-table-col-width` on the affected cells, while custom
- * adapters may own sizing through TanStack, CDK, or simple table state instead.
+ * adapters may delegate sizing to app-owned state or TanStack column sizing.
  */
 @Directive({
   selector: '[hellTableHeaderCell]',
@@ -643,22 +316,15 @@ export class HellTableRowRadio extends HellNativeRadio {
     '[attr.data-sort]': 'sort()',
     '[attr.data-sortable]': 'sortable() ? "true" : null',
     '[attr.role]': 'role()',
-    '[attr.aria-colindex]': 'gridColIndex()',
   },
 })
-export class HellTableHeaderCell
-  extends HellTableRoleDirective
-  implements HellTableGridCellRegistration, OnDestroy
-{
+export class HellTableHeaderCell extends HellTableRoleDirective implements OnDestroy {
   protected override readonly nativeElementNames = HELL_TABLE_HEADER_CELL_NATIVE_ELEMENTS;
   protected override readonly inferredRole = 'columnheader';
 
   readonly sort = signal<'asc' | 'desc' | null>(null);
   readonly sortable = signal(false);
   readonly columnId = signal<string | null>(null);
-  readonly colIndex = input<number | null>(null, {
-    transform: hellNullablePositiveIntegerAttribute,
-  });
 
   @Input({ alias: 'sort' })
   set sortInput(value: 'asc' | 'desc' | null) {
@@ -675,13 +341,10 @@ export class HellTableHeaderCell
     this.columnId.set(value);
   }
 
-  @Output() readonly sortToggle = new EventEmitter<MouseEvent | KeyboardEvent>();
+  readonly sortToggle = output<MouseEvent | KeyboardEvent>();
 
   readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   readonly head = inject(HellTableHead, { optional: true });
-  private readonly table = inject(HellTable, { optional: true, skipSelf: true });
-  private readonly row = inject(HellTableRow, { optional: true, skipSelf: true });
-  private readonly generatedGridCellId = `hell-table-grid-cell-${nextGridCellId++}`;
 
   protected readonly ariaSort = computed<'ascending' | 'descending' | null>(() => {
     if (!this.sortable()) return null;
@@ -694,44 +357,10 @@ export class HellTableHeaderCell
   constructor() {
     super();
     this.head?.register(this);
-    this.table?.registerCell(this);
-    this.row?.registerCell(this);
-    effect(() => this.syncGeneratedGridCellId());
-  }
-
-  gridCellId(): string {
-    return this.host.id || this.generatedGridCellId;
-  }
-
-  protected override gridRole(): HellTableInferredRole | null {
-    return this.table?.isGridMode() ? 'columnheader' : null;
-  }
-
-  gridRowIndex(): number | null {
-    return this.table?.isGridMode() ? (this.row?.gridRowIndex() ?? null) : null;
-  }
-
-  gridColIndex(): number | null {
-    if (!this.table?.isGridMode()) return null;
-    return (
-      hellClampedIndex(this.colIndex()) ??
-      this.row?.colIndexFor(this) ??
-      this.table.colIndexFor(this)
-    );
-  }
-
-  private syncGeneratedGridCellId(): void {
-    if (!this.table?.isGridMode()) {
-      if (this.host.id === this.generatedGridCellId) this.host.removeAttribute('id');
-      return;
-    }
-    if (!this.host.id) this.host.id = this.generatedGridCellId;
   }
 
   ngOnDestroy() {
     this.head?.unregister(this);
-    this.table?.unregisterCell(this);
-    this.row?.unregisterCell(this);
   }
 
   toggleSortFrom(e: MouseEvent | KeyboardEvent): void {
@@ -782,7 +411,6 @@ export class HellTableHeaderCell
   host: {
     '[class.hell-table-sort-trigger]': '!unstyled()',
     '[attr.type]': 'nativeButtonType()',
-    '[attr.tabindex]': 'gridTabIndex()',
     '[disabled]': 'disabled()',
     '(click)': 'onClick($event)',
   },
@@ -792,7 +420,6 @@ export class HellTableSortTrigger extends HellStyleable {
 
   private readonly host = inject(ElementRef<HTMLButtonElement>).nativeElement;
   private readonly header = inject(HellTableHeaderCell, { optional: true });
-  private readonly table = inject(HellTable, { optional: true, skipSelf: true });
 
   protected nativeButtonType(): 'button' | null {
     return hellHostElementName(this.host) === 'BUTTON' ? 'button' : null;
@@ -800,10 +427,6 @@ export class HellTableSortTrigger extends HellStyleable {
 
   protected disabled(): boolean {
     return this.header ? !this.header.sortable() : false;
-  }
-
-  protected gridTabIndex(): -1 | null {
-    return this.table?.isGridMode() ? -1 : null;
   }
 
   protected onClick(e: MouseEvent): void {
@@ -826,21 +449,14 @@ export class HellTableSortTrigger extends HellStyleable {
     '[attr.data-align]': 'align()',
     '[attr.data-space]': 'space()',
     '[attr.role]': 'role()',
-    '[attr.aria-colindex]': 'gridColIndex()',
   },
 })
-export class HellTableCell
-  extends HellTableRoleDirective
-  implements HellTableGridCellRegistration, OnDestroy
-{
+export class HellTableCell extends HellTableRoleDirective {
   protected override readonly nativeElementNames = HELL_TABLE_CELL_NATIVE_ELEMENTS;
   protected override readonly inferredRole = 'cell';
 
   readonly align = signal<'start' | 'center' | 'end'>('start');
   readonly space = signal<'normal' | 'empty'>('normal');
-  readonly colIndex = input<number | null>(null, {
-    transform: hellNullablePositiveIntegerAttribute,
-  });
 
   @Input({ alias: 'align' })
   set alignInput(value: 'start' | 'center' | 'end') {
@@ -853,57 +469,13 @@ export class HellTableCell
   }
 
   readonly host = inject(ElementRef<HTMLElement>).nativeElement;
-  private readonly table = inject(HellTable, { optional: true, skipSelf: true });
-  private readonly row = inject(HellTableRow, { optional: true, skipSelf: true });
-  private readonly generatedGridCellId = `hell-table-grid-cell-${nextGridCellId++}`;
-
-  constructor() {
-    super();
-    this.table?.registerCell(this);
-    this.row?.registerCell(this);
-    effect(() => this.syncGeneratedGridCellId());
-  }
-
-  gridCellId(): string {
-    return this.host.id || this.generatedGridCellId;
-  }
-
-  protected override gridRole(): HellTableInferredRole | null {
-    return this.table?.isGridMode() ? 'gridcell' : null;
-  }
-
-  gridRowIndex(): number | null {
-    return this.table?.isGridMode() ? (this.row?.gridRowIndex() ?? null) : null;
-  }
-
-  gridColIndex(): number | null {
-    if (!this.table?.isGridMode()) return null;
-    return (
-      hellClampedIndex(this.colIndex()) ??
-      this.row?.colIndexFor(this) ??
-      this.table.colIndexFor(this)
-    );
-  }
-
-  private syncGeneratedGridCellId(): void {
-    if (!this.table?.isGridMode()) {
-      if (this.host.id === this.generatedGridCellId) this.host.removeAttribute('id');
-      return;
-    }
-    if (!this.host.id) this.host.id = this.generatedGridCellId;
-  }
-
-  ngOnDestroy(): void {
-    this.table?.unregisterCell(this);
-    this.row?.unregisterCell(this);
-  }
 }
 
 /**
  * Resize handle placed inside a table header or adapter-rendered header edge.
  * The handle owns separator pointer/keyboard semantics only; sizing storage is
- * delegated to a narrow `HellTableResizeAdapter` so simple, TanStack, and CDK
- * table layers can own their own column sizing state.
+ * delegated to a narrow `HellTableResizeAdapter` so apps or TanStack can own
+ * their own column sizing state.
  *
  * Note: `HellResizable` is intentionally not reused. That composite relies on
  * sibling flex panes. Table headers and adapter renderers need adjacent item
@@ -917,7 +489,7 @@ export class HellTableCell
     '[attr.data-active]': 'dragging() ? "true" : null',
     '[attr.type]': 'nativeButtonType()',
     '[attr.aria-label]':
-      'isDisabled() && nativeButtonType() === null ? null : (ariaLabel() ?? labels.tableUtilities?.resizeColumn ?? labels.dataTable.resizeColumn)',
+      'isDisabled() && nativeButtonType() === null ? null : (ariaLabel() ?? labels.tableUtilities.resizeColumn)',
     '[attr.aria-controls]': 'isDisabled() ? null : ariaControlsValue()',
     '[attr.aria-valuemin]': 'isDisabled() ? null : 0',
     '[attr.aria-valuemax]': 'isDisabled() ? null : 100',
@@ -950,7 +522,6 @@ export class HellTableResizeHandle extends HellStyleable implements AfterViewIni
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly cell = inject(HellTableHeaderCell, { optional: true });
-  private readonly table = inject(HellTable, { optional: true, skipSelf: true });
   protected readonly labels = inject(HELL_LABELS);
   private readonly resizeInteraction = new HellResizePairInteractionController<HellTableResizeItem>(
     {
@@ -1011,7 +582,6 @@ export class HellTableResizeHandle extends HellStyleable implements AfterViewIni
   }
 
   protected resizeTabIndex(): -1 | 0 {
-    if (this.table?.isGridMode()) return -1;
     return this.isDisabled() ? -1 : 0;
   }
 

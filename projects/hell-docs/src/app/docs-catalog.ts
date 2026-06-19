@@ -399,11 +399,11 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/code-editor/code-editor.page').then((m) => m.CodeEditorPage),
       },
       {
-        routePath: 'components/data-table',
-        label: 'Table utilities',
+        routePath: 'components/table',
+        label: 'Table',
         icon: 'faSolidTable',
         loadComponent: () =>
-          import('./pages/components/data-table/data-table.page').then((m) => m.DataTablePage),
+          import('./pages/components/table/table.page').then((m) => m.TablePage),
       },
       {
         routePath: 'components/pdf-viewer',

@@ -1,5 +1,0 @@
-{
-  "lib": {
-    "entryFile": "../src/lib/public-api-table-virtual.ts"
-  }
-}

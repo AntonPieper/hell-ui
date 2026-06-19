@@ -15,8 +15,3 @@
       - cell "Editor"
       - cell "View Grace Hopper":
         - button "View Grace Hopper"
-    - row "Margaret Hamilton Viewer View Margaret Hamilton":
-      - cell "Margaret Hamilton"
-      - cell "Viewer"
-      - cell "View Margaret Hamilton":
-        - button "View Margaret Hamilton"

@@ -519,32 +519,38 @@ test.describe('Hell UI browser behavior', () => {
     await expect(trigger).toBeFocused();
   });
 
-  test('data table allows keyboard resize and keeps native rows passive', async ({ page }) => {
-    await page.goto('/components/data-table');
+  test('table primitives allow keyboard resize and keep native rows passive', async ({ page }) => {
+    await page.goto('/components/table?tableA11yHarness=1');
+    await expect(
+      page.getByRole('heading', { name: 'Table accessibility harness', level: 1 }),
+    ).toBeVisible();
 
-    const masterDetail = page.locator('app-data-table-example-example');
-    await expect(masterDetail).toBeVisible();
-
-    const separator = masterDetail.getByRole('separator', { name: 'Resize column' }).first();
+    const section = page.getByTestId('table-resize-semantic-section');
+    const separator = section.getByRole('separator', { name: 'Resize column' }).first();
     const before = await separator.getAttribute('aria-valuenow');
     if (before === null) throw new Error('Expected initial column resize value.');
 
     await separator.press('ArrowRight');
     await expect(separator).not.toHaveAttribute('aria-valuenow', before);
 
-    const row1 = masterDetail.getByRole('row', { name: /User 1/ }).first();
-    const row2 = masterDetail.getByRole('row', { name: /User 2/ }).first();
+    const table = page.getByTestId('native-table');
+    const adaRow = table.getByRole('row', { name: /Ada Lovelace/ }).first();
+    const graceRow = table.getByRole('row', { name: /Grace Hopper/ }).first();
 
-    await row1.click();
-    await expect(row1).not.toHaveAttribute('data-selected', 'true');
-    await expect(row1).not.toHaveAttribute('tabindex');
-    await expect(row1).not.toHaveAttribute('aria-selected');
+    await expect(adaRow).toHaveAttribute('data-active', 'true');
+    await expect(adaRow).not.toHaveAttribute('tabindex');
+    await expect(adaRow).not.toHaveAttribute('aria-selected');
+    await expect(graceRow).toHaveAttribute('data-selected', 'true');
+    await expect(graceRow).not.toHaveAttribute('tabindex');
+    await expect(graceRow).not.toHaveAttribute('aria-selected');
 
-    const row2Action = row2.getByRole('button', { name: /Open details for User 2/ }).first();
-    await row2Action.click();
+    await graceRow.click();
+    await expect(graceRow).not.toHaveAttribute('data-active', 'true');
 
-    await expect(row2).toHaveAttribute('data-active', 'true');
-    await expect(row2).not.toHaveAttribute('data-selected', 'true');
+    const graceAction = graceRow.getByRole('button', { name: 'View Grace Hopper' }).first();
+    await graceAction.click();
+
+    await expect(graceRow).toHaveAttribute('data-active', 'true');
   });
 
   test('app shell secondary drawer opens, closes, and does not fight mobile sidenav', async ({
@@ -632,7 +638,7 @@ test.describe('Hell UI browser behavior', () => {
     await expect(themeDropdown).toBeVisible();
     await expect(themeDropdown).toHaveCSS('z-index', '1000');
 
-    await page.goto('/components/data-table');
+    await page.goto('/components/table');
     const firstExample = page.locator('hd-example-tabs').first();
     await firstExample.getByRole('tab', { name: 'Code' }).click();
     await expect(firstExample.locator('pre.hd-example-code')).toHaveCount(0);
@@ -641,16 +647,16 @@ test.describe('Hell UI browser behavior', () => {
     ).toBeVisible();
 
     await firstExample.getByRole('tab', { name: 'Preview' }).click();
-    const firstDataTable = page.locator('hell-data-table.hell-data-table').first();
-    await expect(firstDataTable).toBeVisible();
-    await expect(firstDataTable).toHaveCSS('display', 'block');
-    await expect(firstDataTable).toHaveCSS('border-top-width', '1px');
-    await expect(page.locator('hell-data-table table.hell-table').first()).toBeVisible();
+    const primitiveTable = page.locator('app-table-primitive-example .hell-table-container').first();
+    await expect(primitiveTable).toBeVisible();
+    await expect(primitiveTable).toHaveCSS('display', 'flex');
+    await expect(primitiveTable).toHaveCSS('border-top-width', '1px');
+    await expect(page.locator('app-table-primitive-example table.hell-table').first()).toBeVisible();
 
-    await page.getByRole('button', { name: 'Columns' }).first().click();
-    const columnsMenu = page.getByRole('menu', { name: 'Columns' }).first();
-    await expect(columnsMenu).toBeVisible();
-    await expect(columnsMenu.getByRole('menuitemcheckbox', { name: /Email/ })).toBeVisible();
+    const tanstackShell = page.locator('app-table-tanstack-shell-example hell-tanstack-table').first();
+    await expect(tanstackShell).toBeVisible();
+    await expect(tanstackShell).toHaveCSS('display', 'block');
+    await expect(tanstackShell.locator('hell-tanstack-pagination')).toBeVisible();
 
     await page.goto('/components/slider');
     const verticalSlider = page.locator('hell-slider[data-orientation="vertical"]').first();
@@ -685,7 +691,7 @@ test.describe('Hell UI browser behavior', () => {
       });
     });
 
-    await page.goto('/components/data-table');
+    await page.goto('/components/table');
 
     const firstExample = page.locator('hd-example-tabs').first();
     await firstExample.getByRole('tab', { name: 'Code' }).click();
@@ -704,7 +710,7 @@ test.describe('Hell UI browser behavior', () => {
     await expect(copy).toHaveAttribute('aria-label', 'Copied');
     await expect
       .poll(() => page.evaluate(() => navigator.clipboard.readText()))
-      .toContain('hell-data-table');
+      .toContain('hellTableRoot');
 
     await copy.focus();
     await page.keyboard.press('Tab');
