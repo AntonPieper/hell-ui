@@ -105,7 +105,7 @@ import {
     </table>
   `,
 })
-class DataTableHost {
+class TableUtilitiesHost {
   readonly active = signal(false);
   readonly selected = signal(false);
   readonly indeterminate = signal(false);
@@ -161,7 +161,7 @@ class DataTableHost {
     </table>
   `,
 })
-class DataTableResizerAriaOverrideHost {}
+class TableUtilitiesResizerAriaOverrideHost {}
 
 @Component({
   imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
@@ -180,7 +180,7 @@ class DataTableResizerAriaOverrideHost {}
     </table>
   `,
 })
-class DataTableLocalizedLabelHost {}
+class TableUtilitiesLocalizedLabelHost {}
 
 @Component({
   imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
@@ -211,7 +211,7 @@ class DataTableLocalizedLabelHost {}
     </table>
   `,
 })
-class DataTableSortableAriaHost {
+class TableUtilitiesSortableAriaHost {
   readonly activeColumn = signal<'alpha' | 'beta'>('alpha');
   readonly order = signal<'asc' | 'desc'>('asc');
 }
@@ -238,7 +238,7 @@ class DataTableSortableAriaHost {
     </table>
   `,
 })
-class DataTableResizeAdapterHost {
+class TableUtilitiesResizeAdapterHost {
   readonly widths = signal<Record<'alpha' | 'beta', number>>({ alpha: 100, beta: 100 });
   readonly resizeEvents: HellTableResizeEvent[] = [];
   readonly commitEvents: Array<{ columnId: 'alpha' | 'beta'; px: number }> = [];
@@ -273,17 +273,17 @@ describe('Hell table utilities directives', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        DataTableHost,
-        DataTableResizerAriaOverrideHost,
-        DataTableLocalizedLabelHost,
-        DataTableSortableAriaHost,
-        DataTableResizeAdapterHost,
+        TableUtilitiesHost,
+        TableUtilitiesResizerAriaOverrideHost,
+        TableUtilitiesLocalizedLabelHost,
+        TableUtilitiesSortableAriaHost,
+        TableUtilitiesResizeAdapterHost,
       ],
     }).compileComponents();
   });
 
   it('keeps active and selected row states visual in native table mode', () => {
-    const fixture = TestBed.createComponent(DataTableHost);
+    const fixture = TestBed.createComponent(TableUtilitiesHost);
     const host = fixture.componentInstance;
     fixture.detectChanges();
 
@@ -312,7 +312,7 @@ describe('Hell table utilities directives', () => {
   });
 
   it('uses native row action, checkbox, and radio controls for row interaction', () => {
-    const fixture = TestBed.createComponent(DataTableHost);
+    const fixture = TestBed.createComponent(TableUtilitiesHost);
     const host = fixture.componentInstance;
     host.indeterminate.set(true);
     fixture.detectChanges();
@@ -353,7 +353,7 @@ describe('Hell table utilities directives', () => {
   });
 
   it('keeps row-ignore markers inert now that rows do not activate', () => {
-    const fixture = TestBed.createComponent(DataTableHost);
+    const fixture = TestBed.createComponent(TableUtilitiesHost);
     const host = fixture.componentInstance;
     fixture.detectChanges();
 
@@ -370,7 +370,7 @@ describe('Hell table utilities directives', () => {
   });
 
   it('disables the sort trigger when its header is not sortable', () => {
-    const fixture = TestBed.createComponent(DataTableHost);
+    const fixture = TestBed.createComponent(TableUtilitiesHost);
     const host = fixture.componentInstance;
     fixture.detectChanges();
 
@@ -386,7 +386,7 @@ describe('Hell table utilities directives', () => {
   });
 
   it('maps sortable header state and ignores resizer clicks', () => {
-    const fixture = TestBed.createComponent(DataTableHost);
+    const fixture = TestBed.createComponent(TableUtilitiesHost);
     const host = fixture.componentInstance;
 
     const name = byId<HTMLTableCellElement>(fixture.nativeElement, 'name');
@@ -419,7 +419,7 @@ describe('Hell table utilities directives', () => {
   });
 
   it('sets aria-sort only on the active sorted header', () => {
-    const fixture = TestBed.createComponent(DataTableSortableAriaHost);
+    const fixture = TestBed.createComponent(TableUtilitiesSortableAriaHost);
     const host = fixture.componentInstance;
     fixture.detectChanges();
 
@@ -438,7 +438,7 @@ describe('Hell table utilities directives', () => {
   });
 
   it('does not sort from columnheader or non-button trigger hosts', () => {
-    const fixture = TestBed.createComponent(DataTableHost);
+    const fixture = TestBed.createComponent(TableUtilitiesHost);
     const host = fixture.componentInstance;
     host.sortable.set(true);
     fixture.detectChanges();
@@ -457,7 +457,7 @@ describe('Hell table utilities directives', () => {
   });
 
   it('emits sort activation from the native button trigger', () => {
-    const fixture = TestBed.createComponent(DataTableHost);
+    const fixture = TestBed.createComponent(TableUtilitiesHost);
     const host = fixture.componentInstance;
     host.sortable.set(true);
     fixture.detectChanges();
@@ -471,7 +471,7 @@ describe('Hell table utilities directives', () => {
   });
 
   it('does not sort from nested header controls', () => {
-    const fixture = TestBed.createComponent(DataTableHost);
+    const fixture = TestBed.createComponent(TableUtilitiesHost);
     const host = fixture.componentInstance;
     host.sortable.set(true);
     fixture.detectChanges();
@@ -491,7 +491,7 @@ describe('Hell table utilities directives', () => {
   });
 
   it('resizes adjacent header cells from the keyboard and emits one transaction', () => {
-    const fixture = TestBed.createComponent(DataTableHost);
+    const fixture = TestBed.createComponent(TableUtilitiesHost);
     const host = fixture.componentInstance;
     fixture.detectChanges();
 
@@ -534,7 +534,7 @@ describe('Hell table utilities directives', () => {
   });
 
   it('delegates sizing through a provided resize adapter without header-cell state', () => {
-    const fixture = TestBed.createComponent(DataTableResizeAdapterHost);
+    const fixture = TestBed.createComponent(TableUtilitiesResizeAdapterHost);
     const host = fixture.componentInstance;
     fixture.detectChanges();
 
@@ -563,7 +563,7 @@ describe('Hell table utilities directives', () => {
   });
 
   it('uses RTL-aware horizontal arrow semantics for resize intent', () => {
-    const fixture = TestBed.createComponent(DataTableHost);
+    const fixture = TestBed.createComponent(TableUtilitiesHost);
     const host = fixture.componentInstance;
     fixture.detectChanges();
 
@@ -587,7 +587,7 @@ describe('Hell table utilities directives', () => {
   });
 
   it('resizes adjacent header cells from pointer drag and commits once on release', () => {
-    const fixture = TestBed.createComponent(DataTableHost);
+    const fixture = TestBed.createComponent(TableUtilitiesHost);
     const host = fixture.componentInstance;
     host.minWidth.set(70);
     fixture.detectChanges();
@@ -648,7 +648,7 @@ describe('Hell table utilities directives', () => {
   });
 
   it('marks the last header resizer disabled when it has no neighbor', () => {
-    const fixture = TestBed.createComponent(DataTableHost);
+    const fixture = TestBed.createComponent(TableUtilitiesHost);
     const host = fixture.componentInstance;
     fixture.detectChanges();
 
@@ -677,7 +677,7 @@ describe('Hell table utilities directives', () => {
   });
 
   it('uses explicit aria-label override for resize handle', () => {
-    const fixture = TestBed.createComponent(DataTableResizerAriaOverrideHost);
+    const fixture = TestBed.createComponent(TableUtilitiesResizerAriaOverrideHost);
     fixture.detectChanges();
 
     const resizer = byId<HTMLButtonElement>(fixture.nativeElement, 'left-resizer');
@@ -685,7 +685,7 @@ describe('Hell table utilities directives', () => {
   });
 
   it('uses preferred table utilities label overrides for resize handle defaults', () => {
-    const fixture = TestBed.createComponent(DataTableLocalizedLabelHost);
+    const fixture = TestBed.createComponent(TableUtilitiesLocalizedLabelHost);
     fixture.detectChanges();
 
     const resizer = byId<HTMLButtonElement>(fixture.nativeElement, 'localized-resizer');

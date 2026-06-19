@@ -177,28 +177,28 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
   },
   {
     name: 'table primitives docs example',
-    path: '/components/data-table',
-    heading: 'Table utilities',
-    include: ['app-data-table-example-example'],
+    path: '/components/table',
+    heading: 'Table',
+    include: ['app-table-primitive-example'],
     prepare: async (page) => {
       await expect(
         page
-          .locator('app-data-table-example-example')
-          .getByRole('cell', { name: 'user1@example.com' }),
+          .locator('app-table-primitive-example')
+          .getByRole('cell', { name: 'Ada Lovelace', exact: true }),
       ).toBeVisible();
     },
   },
   {
-    name: 'simple data-table docs example',
-    path: '/components/data-table',
-    heading: 'Table utilities',
-    include: ['app-data-table-simple-renderer-example'],
+    name: 'TanStack table shell docs example',
+    path: '/components/table',
+    heading: 'Table',
+    include: ['app-table-tanstack-shell-example'],
   },
   {
-    name: 'table CDK adapter docs example',
-    path: '/components/data-table',
-    heading: 'Table utilities',
-    include: ['app-data-table-cdk-skin-example'],
+    name: 'TanStack virtual row strategy docs example',
+    path: '/components/table',
+    heading: 'Table',
+    include: ['app-table-tanstack-virtual-example'],
   },
   {
     name: 'time input docs example',

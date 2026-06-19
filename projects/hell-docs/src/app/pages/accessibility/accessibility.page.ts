@@ -520,16 +520,16 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
   },
   {
     kind: 'Feature',
-    name: 'Table primitives',
-    path: '/components/data-table',
+    name: 'Table',
+    path: '/components/table',
     rolePattern:
-      'Native table markup with passive active/selected row highlights, row action buttons/links, checkbox/radio selection controls, sortable header buttons, and role=separator resize handles.',
+      'Native table primitives plus a Hell-styled TanStack Table shell. TanStack owns row models and feature state; Hell owns passive table chrome, row action buttons/links, checkbox/radio selection controls, sortable header buttons, status views, and role=separator resize handles.',
     keyboardCoverage:
-      'Browser behavior covers resize-handle ArrowRight and native row action/selection controls without row-as-button behavior.',
+      'Browser behavior covers resize-handle ArrowRight and native row action/selection controls without row-as-button behavior. TanStack shell examples keep behavior in the caller-owned table instance.',
     automatedCoverage:
-      'Axe docs smoke, ARIA snapshot, and browser behavior smoke cover public docs examples.',
+      'Axe docs smoke, ARIA snapshot, unit, and package-consumer gates cover public table examples and shell contracts.',
     knownGaps:
-      'Not a data grid. Modern data-table, grid navigation, multi-row selection model, and adapter coverage are deferred to HELL-063 child slices.',
+      'Not a custom table library. Advanced grid navigation belongs to app code or a dedicated table engine such as TanStack Table.',
   },
 ];
 

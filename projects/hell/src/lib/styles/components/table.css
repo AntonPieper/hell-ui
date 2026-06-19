@@ -224,135 +224,183 @@
     }
   }
 
-  /*
-   * Virtual table layout — visual parity for windowed row-part renderers that
-   * cannot use native table rows. Keep the typography, padding, borders, and
-   * row states aligned with the semantic table primitives above.
-   */
+  /* TanStack shell chrome. */
 
-  .hell-table-virtual-x-scroll {
-    max-width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-  }
-
-  .hell-table-virtual {
+  .hell-tanstack-table {
     display: block;
-    width: 100%;
-    min-width: var(--hell-table-virtual-min-width, 560px);
+    min-width: 0;
+    overflow: clip;
     color: var(--color-hell-foreground);
-    font-size: 13px;
-    --hell-table-virtual-columns: minmax(12rem, 1fr) 8rem 9rem;
-  }
-
-  .hell-table-virtual-grid {
-    display: grid;
-    min-width: var(--hell-table-virtual-min-width, 560px);
-    grid-template-columns: var(--hell-table-virtual-columns);
-  }
-
-  .hell-table-virtual-header {
-    background-color: var(--color-hell-surface-subtle);
-  }
-
-  .hell-table-virtual-header-cell,
-  .hell-table-virtual-cell {
-    min-width: 0;
-    padding-inline: calc(var(--spacing) * 3);
-    padding-block: calc(var(--spacing) * 2);
-    border-bottom: 1px solid var(--color-hell-border);
-    text-align: start;
-    vertical-align: middle;
-  }
-
-  .hell-table-virtual-header-cell {
-    font-size: 11px;
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-hell-foreground-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    white-space: nowrap;
-    background-color: var(--color-hell-surface-subtle);
-    -webkit-user-select: none;
-    user-select: none;
-  }
-
-  .hell-table-virtual-cell {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .hell-table-virtual-cell[data-space='action'] {
-    overflow: visible;
-    white-space: normal;
-  }
-
-  .hell-table-virtual-row-part {
-    position: absolute;
-    inset-inline: 0;
-    width: 100%;
     background-color: var(--color-hell-surface-elevated);
+    border: 1px solid var(--color-hell-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-hell-xs);
   }
 
-  .hell-table-virtual-row {
-    min-height: 56px;
-    transition: background-color var(--hell-duration-fast) var(--ease-hell-out);
-  }
-
-  .hell-table-virtual-row[data-active='true'] {
-    background-color: var(--color-hell-surface-subtle);
-  }
-
-  .hell-table-virtual-body-scroll {
-    height: var(--hell-table-virtual-height, 420px);
-    overflow-x: hidden;
-    overflow-y: auto;
-    background-color: var(--color-hell-surface-elevated);
-  }
-
-  .hell-table-virtual-body {
-    position: relative;
-    min-width: var(--hell-table-virtual-min-width, 560px);
-  }
-
-  .hell-table-virtual-primary {
-    display: block;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-weight: var(--font-weight-semibold);
-  }
-
-  .hell-table-virtual-meta {
-    display: block;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    margin-block-start: calc(var(--spacing) * 0.5);
+  .hell-table-shell-toolbar,
+  .hell-table-shell-footer {
+    display: flex;
+    min-height: calc(var(--spacing) * 10);
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-hell-2);
+    padding-inline: var(--spacing-hell-3);
+    padding-block: var(--spacing-hell-2);
     color: var(--color-hell-foreground-muted);
     font-size: 12px;
   }
 
-  .hell-table-virtual-editor {
+  .hell-table-shell-toolbar {
     border-bottom: 1px solid var(--color-hell-border);
-    background-color: var(--color-hell-primary-soft);
-    padding: calc(var(--spacing) * 3);
-    color: var(--color-hell-primary);
-    font-size: 13px;
+    background-color: var(--color-hell-surface-subtle);
   }
 
-  .hell-table-virtual-editor textarea {
-    margin-block-start: calc(var(--spacing) * 2);
-    width: 100%;
-    resize: none;
+  .hell-table-shell-footer {
+    justify-content: flex-end;
+    border-top: 1px solid var(--color-hell-border);
+    background-color: var(--color-hell-surface-elevated);
+  }
+
+  .hell-table-shell-toolbar [data-hell-table-shell-toolbar-item],
+  .hell-table-shell-footer [data-hell-table-shell-footer-item] {
+    min-width: 0;
+  }
+
+  .hell-table-shell-scrollport {
+    max-width: 100%;
+    overflow: auto;
+  }
+
+  .hell-table-shell-table {
+    min-width: 100%;
+  }
+
+  .hell-tanstack-table:not([data-sticky-header='true']) .hell-table-shell-table .hell-table-header-cell {
+    position: static;
+  }
+
+  .hell-tanstack-table [data-pinned='left'],
+  .hell-tanstack-table [data-pinned='right'] {
+    position: sticky;
+    z-index: 2;
+    background-color: var(--color-hell-surface-elevated);
+  }
+
+  .hell-tanstack-table .hell-table-header-cell[data-pinned='left'],
+  .hell-tanstack-table .hell-table-header-cell[data-pinned='right'] {
+    z-index: 3;
+    background-color: var(--color-hell-surface-subtle);
+  }
+
+  .hell-tanstack-table [data-pinned='left'] {
+    left: var(--hell-table-pinned-start, 0);
+  }
+
+  .hell-tanstack-table [data-pinned='right'] {
+    right: var(--hell-table-pinned-after, 0);
+  }
+
+  .hell-tanstack-table [data-pinned-last='true'] {
+    box-shadow: 8px 0 8px -8px rgb(0 0 0 / 0.16);
+  }
+
+  .hell-tanstack-table [data-pinned-first='true'] {
+    box-shadow: -8px 0 8px -8px rgb(0 0 0 / 0.16);
+  }
+
+  .hell-table-shell-status {
+    display: inline-flex;
+    min-height: calc(var(--spacing) * 10);
+    align-items: center;
+    color: var(--color-hell-foreground-muted);
+  }
+
+  .hell-table-shell-expanded-cell {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .hell-tanstack-pagination {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-hell-1);
+  }
+
+  .hell-tanstack-pagination button,
+  .hell-tanstack-pagination select,
+  .hell-tanstack-filter {
+    min-height: var(--spacing-hell-control-sm);
     border: 1px solid var(--color-hell-border);
     border-radius: var(--radius-hell-sm);
-    background-color: var(--color-hell-surface-subtle);
-    padding: calc(var(--spacing) * 2);
+    background-color: var(--color-hell-surface-elevated);
     color: var(--color-hell-foreground);
     font: inherit;
+  }
+
+  .hell-tanstack-pagination button {
+    padding-inline: var(--spacing-hell-2);
+  }
+
+  .hell-tanstack-pagination button:not(:disabled) {
+    cursor: pointer;
+  }
+
+  .hell-tanstack-pagination button:disabled {
+    cursor: not-allowed;
+    color: var(--color-hell-foreground-subtle);
+    background-color: var(--color-hell-surface-subtle);
+  }
+
+  .hell-tanstack-pagination [data-slot='page'] {
+    padding-inline: var(--spacing-hell-2);
+    color: var(--color-hell-foreground-muted);
+    white-space: nowrap;
+  }
+
+  .hell-tanstack-pagination label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-hell-1);
+    white-space: nowrap;
+  }
+
+  .hell-tanstack-pagination select {
+    padding-inline: var(--spacing-hell-2);
+  }
+
+  .hell-tanstack-filter {
+    min-width: min(18rem, 100%);
+    padding-inline: var(--spacing-hell-2);
+  }
+
+  .hell-tanstack-table[data-hell-tanstack-virtual-rows='true'] .hell-table-shell-scrollport {
+    max-height: var(--hell-table-virtual-height, 420px);
+    overflow: auto;
+  }
+
+  .hell-tanstack-table[data-hell-tanstack-virtual-rows='true'] [data-hell-table-virtual-body='true'] {
+    display: block;
+    position: relative;
+    width: var(--hell-table-virtual-row-width, 100%);
+    min-width: 100%;
+    height: var(--hell-table-virtual-total-size, auto);
+  }
+
+  .hell-tanstack-table[data-hell-tanstack-virtual-rows='true'] [data-hell-table-virtual-row='true'] {
+    position: absolute;
+    inset-inline: 0;
+    display: table;
+    width: var(--hell-table-virtual-row-width, 100%);
+    min-height: var(--hell-table-virtual-row-size, 44px);
+    table-layout: fixed;
+    transform: translateY(var(--hell-table-virtual-row-start, 0));
+    background-color: var(--color-hell-surface-elevated);
+  }
+
+  .hell-tanstack-table[data-hell-tanstack-virtual-rows='true'] [data-hell-table-virtual-row-kind='expanded'] {
+    background-color: var(--color-hell-surface-subtle);
   }
 }

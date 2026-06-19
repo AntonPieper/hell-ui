@@ -1,7 +1,7 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
 const RESIZABLE_HARNESS_PATH = '/components/resizable?resizeHarness=1';
-const TABLE_A11Y_HARNESS_PATH = '/components/data-table?tableA11yHarness=1';
+const TABLE_A11Y_HARNESS_PATH = '/components/table?tableA11yHarness=1';
 
 async function gotoResizableHarness(page: Page): Promise<void> {
   await page.goto(RESIZABLE_HARNESS_PATH);
@@ -35,13 +35,6 @@ async function boxFor(
 
 async function widthOf(locator: Locator): Promise<number> {
   return locator.evaluate((element) => element.getBoundingClientRect().width);
-}
-
-async function cssColumnWidth(locator: Locator): Promise<number> {
-  return locator.evaluate((element) => {
-    const value = getComputedStyle(element).getPropertyValue('--hell-table-col-width').trim();
-    return Number.parseFloat(value);
-  });
 }
 
 async function expectNoTextSelection(page: Page): Promise<void> {
@@ -218,41 +211,4 @@ test.describe('modern resize handle browser contracts', () => {
     await expectNoTextSelection(page);
   });
 
-  test('hellTableResizeHandle resizes CDK adapter-rendered markup without sort, row action, or text selection leakage', async ({
-    page,
-  }) => {
-    await gotoTableHarness(page);
-
-    const section = page.getByTestId('table-resize-cdk-section');
-    const table = page.getByTestId('cdk-resize-table');
-    const handle = page.getByTestId('cdk-resize-handle');
-    const roleHeader = page.getByTestId('cdk-resize-role-header');
-    const commitCount = section.getByTestId('cdk-resize-commit-count');
-
-    await expect(table).toHaveAttribute('data-hell-cdk-table', '');
-    await expect(handle).toHaveAttribute('role', 'separator');
-    await expect(handle).toHaveAttribute('aria-orientation', 'vertical');
-    await expect(handle).toHaveAttribute('aria-controls', 'cdk-resize-name cdk-resize-role');
-    await expect(handle).toHaveAttribute('aria-valuemin', '0');
-    await expect(handle).toHaveAttribute('aria-valuemax', '100');
-
-    const start = await numericAriaValue(handle);
-    await handle.press('ArrowRight');
-    const afterKey = await numericAriaValue(handle);
-    expect(afterKey).toBeGreaterThanOrEqual(start);
-    await expect.poll(() => outputNumber(commitCount)).toBeGreaterThan(0);
-    const commitsAfterKey = await outputNumber(commitCount);
-    await expect(section.getByTestId('cdk-resize-sort-count')).toHaveText('0');
-    await expect(section.getByTestId('cdk-resize-action-count')).toHaveText('0');
-
-    const cdkDrag = await dispatchPointerDrag(page, handle, 500);
-    await expect.poll(() => cssColumnWidth(roleHeader)).toBeGreaterThanOrEqual(119);
-    await expect.poll(() => numericAriaValue(handle)).not.toBe(afterKey);
-    await finishPointerDrag(page, cdkDrag);
-    await expect(handle).not.toHaveAttribute('data-active', 'true');
-    await expect.poll(() => outputNumber(commitCount)).toBeGreaterThan(commitsAfterKey);
-    await expect(section.getByTestId('cdk-resize-sort-count')).toHaveText('0');
-    await expect(section.getByTestId('cdk-resize-action-count')).toHaveText('0');
-    await expectNoTextSelection(page);
-  });
 });

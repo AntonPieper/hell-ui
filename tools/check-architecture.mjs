@@ -939,14 +939,15 @@ function checkPackageEntryPoints() {
   const manifestSpecifiers = new Set(publicApiFiles.map((entrypoint) => entrypoint.specifier));
   for (const specifier of [
     '@hell-ui/angular/table',
-    '@hell-ui/angular/data-table',
     '@hell-ui/angular/table-tanstack',
-    '@hell-ui/angular/table-virtual',
-    '@hell-ui/angular/table-cdk',
+    '@hell-ui/angular/table-tanstack/virtual',
   ]) {
     if (!manifestSpecifiers.has(specifier)) failures.push(`Table Entrypoint Manifest is missing ${specifier}`);
   }
   for (const specifier of [
+    '@hell-ui/angular/data-table',
+    '@hell-ui/angular/table-virtual',
+    '@hell-ui/angular/table-cdk',
     '@hell-ui/angular/features/data-table',
     '@hell-ui/angular/features/table-utilities',
   ]) {
@@ -1218,23 +1219,8 @@ function checkApiStabilityContract() {
       tag: 'beta',
     },
     {
-      name: 'Data table',
-      publicApiPath: 'projects/hell/src/lib/public-api-data-table.ts',
-      tag: 'experimental',
-    },
-    {
-      name: 'TanStack Table adapter',
+      name: 'TanStack Table shell',
       publicApiPath: 'projects/hell/src/lib/public-api-table-tanstack.ts',
-      tag: 'experimental',
-    },
-    {
-      name: 'TanStack Virtual adapter',
-      publicApiPath: 'projects/hell/src/lib/public-api-table-virtual.ts',
-      tag: 'experimental',
-    },
-    {
-      name: 'CDK Table skin adapter',
-      publicApiPath: 'projects/hell/src/lib/public-api-table-cdk.ts',
       tag: 'experimental',
     },
   ];
@@ -1278,11 +1264,6 @@ function checkApiStabilityContract() {
   }
   if (/readonly\s+interactive\b/.test(tableUtilitiesSource)) {
     failures.push('HellTableRow interactive legacy input must be removed, not deprecated');
-  }
-
-  const labelsSource = readFile(join(root, 'projects/hell/src/lib/core/labels.ts'));
-  if (!/@deprecated[^\n]*\nexport\s+type\s+HellDataTableLabels\b/.test(labelsSource)) {
-    failures.push('HellDataTableLabels compatibility alias must carry @deprecated API JSDoc');
   }
 
   const audioSource = readFile(join(root, 'projects/hell/src/lib/composites/audio-player/audio-player.ts'));
@@ -1384,7 +1365,9 @@ function checkPackageDependencyContract() {
   const peerDependenciesMeta = packageJson.peerDependenciesMeta ?? {};
   const dependencies = packageJson.dependencies ?? {};
   const importedPackages = new Set(
-    sourceFiles.flatMap((file) => externalImportPackages(readFile(file))),
+    sourceFiles
+      .flatMap((file) => externalImportPackages(readFile(file)))
+      .filter((dependency) => dependency !== packageJson.name),
   );
 
   const lightStackPeers = new Set([
@@ -1524,13 +1507,12 @@ function checkPackageDependencyContract() {
   }
 
   const tanStackVirtualImportOffenders = sourceFiles
-    .filter((file) => !relPath(file).includes('/table-virtual/'))
-    .filter((file) => relPath(file) !== 'projects/hell/src/lib/public-api-table-virtual.ts')
+    .filter((file) => !relPath(file).includes('/table-tanstack/virtual/'))
     .filter((file) => readFile(file).includes('@tanstack/virtual-core'))
     .map(relPath);
   if (tanStackVirtualImportOffenders.length) {
     failures.push(
-      `Package dependency contract must keep @tanstack/virtual-core inside @hell-ui/angular/table-virtual: ${tanStackVirtualImportOffenders.join(', ')}`,
+      `Package dependency contract must keep @tanstack/virtual-core inside @hell-ui/angular/table-tanstack virtual strategy files: ${tanStackVirtualImportOffenders.join(', ')}`,
     );
   }
 
@@ -1660,6 +1642,7 @@ function checkStyleEntryPoints() {
     'projects/hell/src/lib/styles/features/table-utilities.css',
     'projects/hell/src/lib/styles/components/data-table.css',
     'projects/hell/src/lib/styles/components/table-utilities.css',
+    'projects/hell/src/lib/styles/components/table-renderer.css',
   ]) {
     if (existsSync(join(root, relPath))) failures.push(`Legacy table CSS alias file must be removed: ${relPath}`);
   }
@@ -2211,7 +2194,7 @@ function checkTableUtilityContract() {
   }
 
   const docs = readFile(
-    join(root, 'projects/hell-docs/src/app/pages/components/data-table/data-table.page.ts'),
+    join(root, 'projects/hell-docs/src/app/pages/components/table/table.page.ts'),
   );
   const docsRoot = join(root, 'projects/hell-docs/src/app');
   const docsGlobalStyles = readFile(join(root, 'projects/hell-docs/src/styles.css'));
@@ -2232,9 +2215,7 @@ function checkTableUtilityContract() {
       )}:${importHit.line}`,
     );
   }
-  const tableStyleSource = `${readFile(join(root, 'projects/hell/src/lib/styles/components/table.css'))}\n${readFile(
-    join(root, 'projects/hell/src/lib/styles/components/table-renderer.css'),
-  )}`;
+  const tableStyleSource = readFile(join(root, 'projects/hell/src/lib/styles/components/table.css'));
   for (const forbidden of [
     'button.hell-table-row-action:not(.hell-button)',
     'a.hell-table-row-action:not(.hell-button)',
@@ -2250,9 +2231,14 @@ function checkTableUtilityContract() {
   if (/\baccent-color\s*:/.test(tableStyleSource)) {
     failures.push('Table styles must not override native checkbox/radio accent-color; compose checkbox/radio primitives instead');
   }
-  for (const text of ['Table primitives', 'not a', 'batteries-included data grid', 'TanStack Table']) {
+  for (const text of [
+    'Hell supports two table paths',
+    '@hell-ui/angular/table',
+    '@hell-ui/angular/table-tanstack',
+    'TanStack owns columns, rows, sorting, filtering, pagination, selection, pinning, sizing',
+  ]) {
     if (!docs.includes(text)) {
-      failures.push('Table docs must present the entrypoint as table primitives, not a full data table');
+      failures.push('Table docs must present the two-path primitive/TanStack ownership boundary');
       break;
     }
   }
@@ -2268,98 +2254,54 @@ function checkTableUtilityContract() {
 function checkTableSemanticsContract() {
   const tableSourcePath = join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts');
   const tableSource = readFile(tableSourcePath);
-  const dataTableSourcePath = join(root, 'projects/hell/src/lib/data-table/data-table.ts');
-  const dataTableSource = readFile(dataTableSourcePath);
   const tableModule = decoratedClassModules(tableSource).find((module) => module.className === 'HellTable');
   const rowModule = decoratedClassModules(tableSource).find((module) => module.className === 'HellTableRow');
-  const headerCellModule = decoratedClassModules(tableSource).find(
-    (module) => module.className === 'HellTableHeaderCell',
-  );
-  const cellModule = decoratedClassModules(tableSource).find((module) => module.className === 'HellTableCell');
-
-  for (const required of [
-    "export type HellTableSemantics = 'table' | 'grid'",
-    "export type HellTableGridInteractionMode = 'row-selection' | 'cell-navigation' | 'editing'",
-    "readonly semantics = input<HellTableSemantics>('table')",
-    'readonly interactionMode = input<HellTableGridInteractionMode | null>(null)',
-    'HellTable semantics="grid" requires interactionMode',
-    "this.semantics() === 'grid' && hellTableGridInteractionModeValid(this.interactionMode())",
-  ]) {
-    if (!tableSource.includes(required)) {
-      failures.push(`Table semantics contract is missing ${required}`);
-    }
-  }
 
   if (!tableModule) {
     failures.push('Table semantics contract must be owned by HellTable');
   } else {
-    for (const required of [
-      "[attr.role]': 'role()",
-      "[attr.tabindex]': 'gridTabIndex()",
-      "[attr.aria-rowcount]': 'gridRowCount()",
-      "[attr.aria-colcount]': 'gridColCount()",
-      "[attr.aria-activedescendant]': 'gridActiveDescendant()",
-      "(keydown)': 'onGridKeydown($event)",
-      "return this.isGridMode() ? 'grid' : null",
-      'if (!this.isGridMode()) return null',
-    ]) {
-      if (!tableModule.moduleSource.includes(required)) {
-        failures.push(`HellTable grid adapter contract is missing ${required}`);
+    if (!tableModule.moduleSource.includes("[attr.role]': 'role()")) {
+      failures.push('HellTable must keep host role inference through role()');
+    }
+    for (const forbidden of ['aria-activedescendant', 'aria-rowcount', 'aria-colcount', '(keydown)', 'tabindex']) {
+      if (tableModule.moduleSource.includes(forbidden)) {
+        failures.push(`HellTable primitive root must not own grid/focus behavior: ${forbidden}`);
       }
     }
   }
 
-  for (const [label, module] of [
-    ['HellTableRow', rowModule],
-    ['HellTableHeaderCell', headerCellModule],
-    ['HellTableCell', cellModule],
-  ]) {
-    if (!module) {
-      failures.push(`Table semantics contract must include ${label}`);
-      continue;
-    }
-    if (module.moduleSource.includes('[attr.tabindex]')) {
-      failures.push(`${label} must not add roving tabindex; grid mode keeps one tab stop on HellTable`);
-    }
-    if (module.moduleSource.includes('aria-activedescendant')) {
-      failures.push(`${label} must not own aria-activedescendant; the grid root owns active descendant`);
-    }
-    if (!module.moduleSource.includes('return this.table?.isGridMode() ?')) {
-      failures.push(`${label} grid roles must be gated by the opt-in grid adapter`);
-    }
-  }
-
-  for (const required of [
-    "readonly semantics = input<HellTableSemantics>('table')",
-    'readonly interactionMode = input<HellTableGridInteractionMode | null>(null)',
-    '[semantics]="semantics()"',
-    '[interactionMode]="interactionMode()"',
-    '[rowCount]="gridRowCount()"',
-    '[colCount]="gridColCount()"',
-    '[rowIndex]="bodyGridRowIndex(rowPartIndex)"',
-    '[colIndex]="columnIndex + 1"',
-  ]) {
-    if (!dataTableSource.includes(required)) {
-      failures.push(`HellDataTable grid semantics contract is missing ${required}`);
+  if (!rowModule) {
+    failures.push('Table semantics contract must include HellTableRow');
+  } else {
+    for (const forbidden of ['[attr.tabindex]', '(click)', '(keydown', 'aria-selected', 'aria-activedescendant']) {
+      if (rowModule.moduleSource.includes(forbidden)) {
+        failures.push(`HellTableRow must stay passive in primitive table mode: ${forbidden}`);
+      }
     }
   }
 
   for (const [specPath, required] of [
-    ['projects/hell/src/lib/table/table.spec.ts', 'uses modern selectors on native table markup without adding redundant ARIA roles'],
+    ['projects/hell/src/lib/table/table.spec.ts', 'uses native table markup without adding redundant ARIA or row-as-button behavior'],
     ['projects/hell/src/lib/table/table.spec.ts', "native-root').getAttribute('role')).toBeNull()"],
     ['projects/hell/src/lib/table/table.spec.ts', "native-cell').getAttribute('role')).toBeNull()"],
     ['projects/hell/src/lib/table/table.spec.ts', "native-root').hasAttribute('tabindex')).toBe(false)"],
     ['projects/hell/src/lib/table/table.spec.ts', "native-root').hasAttribute('aria-activedescendant')).toBe(false)"],
-    ['projects/hell/src/lib/table/table.spec.ts', 'enables explicit grid semantics only with an interaction mode'],
-    ['projects/hell/src/lib/table/table.spec.ts', 'removes generated grid roles and focus state when semantics switch back to table'],
-    ['projects/hell/src/lib/table/table.spec.ts', 'rejects grid semantics without an explicit interaction mode'],
-    ['projects/hell/src/lib/data-table/data-table.spec.ts', "querySelector('table')?.hasAttribute('tabindex')).toBe(false)"],
-    ['projects/hell/src/lib/data-table/data-table.spec.ts', "querySelector('table')?.hasAttribute('aria-activedescendant')).toBe(false)"],
-    ['projects/hell/src/lib/data-table/data-table.spec.ts', 'renders explicit grid semantics with one table tab stop and indexed cells'],
-    ['projects/hell/src/lib/data-table/data-table.spec.ts', 'requires an interaction mode before enabling data-table grid semantics'],
   ]) {
     if (!readFile(join(root, specPath)).includes(required)) {
       failures.push(`Table semantics contract test is missing: ${specPath} ${required}`);
+    }
+  }
+
+  for (const forbidden of [
+    'HellTableSemantics',
+    'HellTableGridInteractionMode',
+    'interactionMode',
+    'isGridMode',
+    'gridActiveDescendant',
+    'aria-activedescendant',
+  ]) {
+    if (tableSource.includes(forbidden)) {
+      failures.push(`Table primitives must not expose Hell-owned grid mode: ${forbidden}`);
     }
   }
 }
@@ -2396,7 +2338,7 @@ function checkTableSortTriggerContract() {
     failures.push('Legacy hellTableSortButton API must not remain in table utilities');
   }
 
-  const docsRoot = join(root, 'projects/hell-docs/src/app/pages/components/data-table');
+  const docsRoot = join(root, 'projects/hell-docs/src/app/pages/components/table');
   const docsFiles = walk(docsRoot).filter((file) => file.endsWith('.ts'));
   for (const file of docsFiles) {
     const source = readFile(file);
@@ -2533,7 +2475,7 @@ function checkTableLegacyRemovalContract() {
       );
       if (!matched) continue;
       failures.push(
-        `Legacy table entry/style import ${relPath(file)}:${hit.line} references ${hit.specifier}; use @hell-ui/angular/table, @hell-ui/angular/data-table, or styles/table.`,
+        `Legacy table entry/style import ${relPath(file)}:${hit.line} references ${hit.specifier}; use @hell-ui/angular/table, @hell-ui/angular/table-tanstack, or styles/table.`,
       );
     }
   }
@@ -2580,19 +2522,13 @@ function checkTableAdapterBoundaryContract() {
   const coreTableBoundaryDirs = [
     'projects/hell/src/lib/features/table-utilities',
     'projects/hell/src/lib/table',
-    'projects/hell/src/lib/data-table',
   ];
   const coreTableBoundaryFiles = [
     ...coreTableBoundaryDirs.flatMap((rel) => walk(join(root, rel))),
     join(root, 'projects/hell/src/lib/public-api-table.ts'),
-    join(root, 'projects/hell/src/lib/public-api-data-table.ts'),
   ]
     .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'));
-  const adapterDirs = [
-    'projects/hell/src/lib/table-tanstack',
-    'projects/hell/src/lib/table-virtual',
-    'projects/hell/src/lib/table-cdk',
-  ];
+  const adapterDirs = ['projects/hell/src/lib/table-tanstack'];
   const adapterFiles = adapterDirs
     .flatMap((rel) => walk(join(root, rel)))
     .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'));
@@ -2605,12 +2541,12 @@ function checkTableAdapterBoundaryContract() {
     {
       label: 'TanStack Virtual',
       matches: (specifier) => specifier.startsWith('@tanstack/virtual'),
-      allowedDir: 'projects/hell/src/lib/table-virtual',
+      allowedDir: 'projects/hell/src/lib/table-tanstack/virtual',
     },
     {
       label: 'Angular CDK table adapter',
       matches: (specifier) => specifier.startsWith('@angular/cdk/'),
-      allowedDir: 'projects/hell/src/lib/table-cdk',
+      allowedDir: 'FORBIDDEN',
     },
   ];
   const adapterSourceDirs = new Set(adapterDirs);
@@ -2635,16 +2571,37 @@ function checkTableAdapterBoundaryContract() {
       );
       if (adapterDir && !rel.startsWith(`${adapterDir}/`)) {
         failures.push(
-          `Table adapter boundary ${rel}:${hit.line} imports ${hit.specifier} -> ${targetRel}; core table and simple data-table code must not depend on adapter entrypoints.`,
+          `Table adapter boundary ${rel}:${hit.line} imports ${hit.specifier} -> ${targetRel}; core table primitives must not depend on adapter entrypoints.`,
         );
       }
+    }
+  }
+
+  const tanStackShellSource = readFile(
+    join(root, 'projects/hell/src/lib/table-tanstack/table-tanstack.ts'),
+  );
+  const publicLookingBodyConnectorBindings = [
+    'hellTanStackBodyScrollport',
+    'hellTanStackBody',
+    'hellTanStackBodyItemConnector',
+    'hellTanStackBodyItem',
+  ];
+  for (const binding of publicLookingBodyConnectorBindings) {
+    if (
+      tanStackShellSource.includes(`selector: '[${binding}`) ||
+      tanStackShellSource.includes(`selector: "[${binding}`) ||
+      tanStackShellSource.includes(`alias: '${binding}'`) ||
+      tanStackShellSource.includes(`alias: "${binding}"`)
+    ) {
+      failures.push(
+        `TanStack shell body-strategy connector binding ${binding} must stay internal under a ɵ-prefixed alias/selector.`,
+      );
     }
   }
 }
 
 function checkTableSemanticDefaultGuardContract() {
   const tableSource = readFile(join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'));
-  const dataTableSource = readFile(join(root, 'projects/hell/src/lib/data-table/data-table.ts'));
   const modules = new Map(decoratedClassModules(tableSource).map((module) => [module.className, module]));
   const tableModule = modules.get('HellTable');
   const passiveRoleModules = [
@@ -2652,29 +2609,17 @@ function checkTableSemanticDefaultGuardContract() {
     ['HellTableBody', 'rowgroup'],
     ['HellTableRow', 'row'],
     ['HellTableHeaderCell', 'columnheader'],
-    ['HellTableCell', 'gridcell'],
+    ['HellTableCell', 'cell'],
   ];
 
   if (!tableModule) {
     failures.push('Table semantic default guard could not inspect HellTable');
   } else {
-    for (const required of [
-      "return this.isGridMode() ? 'grid' : null;",
-      'return this.isGridMode() ? 0 : null;',
-      'if (!this.isGridMode()) return null;',
-      "if (this.semantics() !== 'grid') return;",
-    ]) {
-      if (!tableModule.moduleSource.includes(required)) {
-        failures.push(`HellTable semantic defaults must gate grid roles/focus behind isGridMode(): missing ${required}`);
+    for (const forbidden of ['isGridMode', 'gridTabIndex', 'gridActiveDescendant', 'aria-activedescendant']) {
+      if (tableModule.moduleSource.includes(forbidden)) {
+        failures.push(`HellTable semantic defaults must not own grid behavior: ${forbidden}`);
       }
     }
-  }
-
-  if (/readonly\s+semantics\s*=\s*input<HellTableSemantics>\('grid'\)/.test(tableSource)) {
-    failures.push('HellTable semantics must default to table, not grid');
-  }
-  if (/readonly\s+interactionMode\s*=\s*input<HellTableGridInteractionMode \| null>\('[^']+'\)/.test(tableSource)) {
-    failures.push('HellTable interactionMode must default to null so grid behavior is opt-in');
   }
 
   for (const [className, role] of passiveRoleModules) {
@@ -2683,8 +2628,13 @@ function checkTableSemanticDefaultGuardContract() {
       failures.push(`Table semantic default guard could not inspect ${className}`);
       continue;
     }
-    if (!module.moduleSource.includes(`return this.table?.isGridMode() ? '${role}' : null;`)) {
-      failures.push(`${className} must gate grid role ${role} behind opt-in grid semantics`);
+    if (!module.moduleSource.includes(`protected override readonly inferredRole = '${role}'`)) {
+      failures.push(`${className} must keep passive inferred role ${role}`);
+    }
+    for (const forbidden of ['isGridMode', 'gridRole', 'aria-activedescendant']) {
+      if (module.moduleSource.includes(forbidden)) {
+        failures.push(`${className} must not gate or own Hell grid behavior: ${forbidden}`);
+      }
     }
   }
 
@@ -2700,16 +2650,6 @@ function checkTableSemanticDefaultGuardContract() {
         failures.push(`HellTableRow must not add row roving-focus behavior in table mode: ${forbidden.label}`);
       }
     }
-  }
-
-  if (/readonly\s+semantics\s*=\s*input<HellTableSemantics>\('grid'\)/.test(dataTableSource)) {
-    failures.push('HellDataTable semantics must default to table, not grid');
-  }
-  if (/readonly\s+interactionMode\s*=\s*input<HellTableGridInteractionMode \| null>\('[^']+'\)/.test(dataTableSource)) {
-    failures.push('HellDataTable interactionMode must default to null so grid behavior is opt-in');
-  }
-  if (/role=["']grid|\[attr\.tabindex\]|aria-activedescendant/.test(dataTableSource)) {
-    failures.push('HellDataTable template must not add grid roles or focus state directly; delegate only through explicit HellTable grid mode inputs');
   }
 }
 

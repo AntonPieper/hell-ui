@@ -1,0 +1,143 @@
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { ExampleTabs } from '../../../shared/example-tabs';
+import { TablePrimitiveExample } from './examples/primitive-table.example';
+import tablePrimitiveExampleCodeRaw from './examples/primitive-table.example.ts?raw' with {
+  loader: 'text',
+};
+import { TableTanStackShellExample } from './examples/tanstack-shell.example';
+import tableTanStackShellExampleCodeRaw from './examples/tanstack-shell.example.ts?raw' with {
+  loader: 'text',
+};
+import { TableTanStackVirtualExample } from './examples/tanstack-virtual.example';
+import tableTanStackVirtualExampleCodeRaw from './examples/tanstack-virtual.example.ts?raw' with {
+  loader: 'text',
+};
+import { TableA11yHarnessPage } from './table-a11y-harness.page';
+
+@Component({
+  selector: 'hd-table-page',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ExampleTabs,
+    TablePrimitiveExample,
+    TableTanStackShellExample,
+    TableTanStackVirtualExample,
+    TableA11yHarnessPage,
+  ],
+  template: `
+    @if (showTableA11yHarness) {
+      <hd-table-a11y-harness />
+    } @else {
+      <article class="hd-doc-page">
+        <div class="hd-prose">
+          <h1>Table</h1>
+          <p>
+            Hell supports two table paths. <code>@hell-ui/angular/table</code> is the low-level
+            native-table primitive layer. <code>@hell-ui/angular/table-tanstack</code> is a
+            Hell-styled shell for a caller-owned TanStack Table instance.
+          </p>
+          <p>
+            TanStack owns columns, rows, sorting, filtering, pagination, selection, pinning, sizing,
+            expansion, virtualization math, and state. Hell owns the reusable chrome: table markup,
+            sticky header styling, pinned-column attributes, projected shell regions, status views,
+            pagination/filter controls, and FlexRender integration.
+          </p>
+
+          <h2>Primitive table</h2>
+          <p>
+            Use the primitive path when you already have simple native markup and only need Hell
+            styling hooks, sortable header triggers, resize handles, active/selected row visuals, or
+            native selection controls. The primitives do not create a table model or data renderer.
+          </p>
+        </div>
+
+        <hd-example-tabs class="hd-doc-wide" [code]="tablePrimitiveExampleCode">
+          <app-table-primitive-example />
+        </hd-example-tabs>
+
+        <div class="hd-prose">
+          <h2>TanStack shell</h2>
+          <p>
+            Create the TanStack <code>Table&lt;T&gt;</code> in your component and pass it to
+            <code>hell-tanstack-table</code>. Column definitions are the primary source of truth.
+            Plain accessor columns render normally, reusable custom cells use TanStack/FlexRender,
+            and one-off Angular markup can be projected with
+            <code>ng-template hellTableShellCell="columnId"</code> when that column does not define
+            <code>cell</code>.
+          </p>
+          <p>
+            Pagination is projected by the consumer. Use <code>hell-tanstack-pagination</code> in a
+            repeatable <code>hellTableShellFooter</code> region instead of a shorthand prop.
+          </p>
+        </div>
+
+        <hd-example-tabs class="hd-doc-wide" [code]="tableTanStackShellExampleCode">
+          <app-table-tanstack-shell-example />
+        </hd-example-tabs>
+
+        <div class="hd-prose">
+          <h2>Virtual rows</h2>
+          <p>
+            Virtualization is an optional body strategy on the same shell. Add
+            <code>HellTanStackVirtualRows</code> from
+            <code>@hell-ui/angular/table-tanstack/virtual</code> when the table needs TanStack
+            Virtual row math. Expanded rows still come from TanStack expansion state and render
+            through the shell's <code>hellTableShellExpandedRow</code> template.
+          </p>
+        </div>
+
+        <hd-example-tabs class="hd-doc-wide" [code]="tableTanStackVirtualExampleCode">
+          <app-table-tanstack-virtual-example />
+        </hd-example-tabs>
+
+        <div class="hd-prose">
+          <h2>Status views</h2>
+          <p>
+            The shell accepts one external status value:
+            <code>HellTableStatus.READY</code>, <code>HellTableStatus.LOADING</code>, or
+            <code>HellTableStatus.error(error)</code>. A ready table with no rendered rows shows the
+            empty template. Local loading, error, and empty templates override any provided default
+            status-view components.
+          </p>
+
+          <h2>API Summary</h2>
+          <ul>
+            <li><code>HELL_TABLE_UTILITIES_DIRECTIVES</code>: native table primitive import list.</li>
+            <li><code>hell-tanstack-table</code>: shell for a caller-owned TanStack table.</li>
+            <li><code>hellTableShellToolbar</code>: repeatable projected toolbar region.</li>
+            <li><code>hellTableShellFooter</code>: repeatable projected footer region.</li>
+            <li><code>hellTableShellCell</code>, <code>hellTableShellHeader</code>, and <code>hellTableShellFooterCell</code>: one-off projected TanStack contexts.</li>
+            <li><code>hellTableShellExpandedRow</code>: expanded row template driven by TanStack row expansion.</li>
+            <li><code>hellTanStackVirtualRows</code>: optional TanStack Virtual body strategy.</li>
+          </ul>
+
+          <h2>Do</h2>
+          <ul>
+            <li>Let TanStack own table state and feature behavior.</li>
+            <li>Use projected shell regions for pagination, selected-count summaries, and exports.</li>
+            <li>Use <code>columnDef.meta.hell.*Class</code> for shell cell/header/footer class passthrough.</li>
+            <li>Keep one-off projected templates small and derive feature state from the native TanStack context.</li>
+          </ul>
+
+          <h2>Don't</h2>
+          <ul>
+            <li>Don't build a second table model or column-definition DSL in Hell.</li>
+            <li>Don't use row click shortcuts for actions; put native controls in cells.</li>
+            <li>Don't add parallel Hell props for column pinning, sorting, filtering, pagination, or expansion state.</li>
+            <li>Don't create a separate virtual-table root component.</li>
+          </ul>
+        </div>
+      </article>
+    }
+  `,
+})
+export class TablePage {
+  private readonly route = inject(ActivatedRoute);
+
+  protected readonly showTableA11yHarness =
+    this.route.snapshot.queryParamMap.has('tableA11yHarness');
+  protected readonly tablePrimitiveExampleCode = tablePrimitiveExampleCodeRaw;
+  protected readonly tableTanStackShellExampleCode = tableTanStackShellExampleCodeRaw;
+  protected readonly tableTanStackVirtualExampleCode = tableTanStackVirtualExampleCodeRaw;
+}

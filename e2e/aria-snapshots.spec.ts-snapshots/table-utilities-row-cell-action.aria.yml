@@ -1,10 +1,7 @@
-- row /User 1/:
-  - cell:
-    - checkbox "Select User 1 for bulk actions"
-  - cell "1"
-  - cell "User 1"
-  - cell "user1@example.com"
+- row "Ada Lovelace Admin Select Ada Lovelace Open Ada Lovelace":
+  - cell "Ada Lovelace"
   - cell "Admin"
-  - cell "Ada"
-  - cell:
-    - button "Open details for User 1"
+  - cell "Select Ada Lovelace":
+    - radio "Select Ada Lovelace"
+  - cell "Open Ada Lovelace":
+    - button "Open Ada Lovelace": Open

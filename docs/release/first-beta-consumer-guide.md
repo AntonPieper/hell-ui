@@ -27,10 +27,9 @@ A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`;
 | Aggregate primitives | Core peer group plus `tailwindcss`, `@angular/router`, `@ng-icons/font-awesome` | `@hell-ui/angular/primitives` plus primitive CSS. Router is needed because the aggregate includes dialog through `ng-primitives/dialog`; Font Awesome is needed because icon-backed primitives are bundled in the aggregate FESM. | [`primitives-css`](../../tools/check-package-consumer.mjs) |
 | Composites | Core peer group plus `tailwindcss`; add `@ng-icons/font-awesome` for aggregate/icon-backed composites | Prefer narrow composite entry points such as `@hell-ui/angular/app-shell` and `@hell-ui/angular/audio-player`; use `@hell-ui/angular/composites` only when you accept aggregate peers | [`app-shell`, `audio-player`, `composites-css`](../../tools/check-package-consumer.mjs) |
 | Audio transcript | Composite audio-player peer group; no CodeMirror or pdf.js peers | `@hell-ui/angular/audio-player` plus provider import from `@hell-ui/angular/features/audio-transcript`; use composite CSS, no feature CSS | [`audio-transcript`](../../tools/check-package-consumer.mjs) |
-| Table primitives / simple data table | Core peer group plus `tailwindcss`; no optional table-engine peers | `@hell-ui/angular/table`, `@hell-ui/angular/data-table`; CSS from `@hell-ui/angular/styles/table`; removed legacy aliases stay unavailable | [`table`, `data-table`, `no-legacy-alias`](../../tools/check-package-consumer.mjs) |
-| TanStack Table adapter | Core peer group plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core` | `@hell-ui/angular/table-tanstack`; keep this adapter isolated to routes/components that own TanStack Table state | [`table-tanstack`](../../tools/check-package-consumer.mjs) |
-| TanStack Virtual adapter | Core peer group plus `tailwindcss` and optional `@tanstack/virtual-core`; no `@tanstack/angular-table` | `@hell-ui/angular/table-virtual`; dynamic row/detail/editor heights use Hell row parts and TanStack Virtual | [`table-virtual`](../../tools/check-package-consumer.mjs) |
-| CDK table skin adapter | Core peer group plus `tailwindcss`; no extra peer beyond the core `@angular/cdk` peer | `@hell-ui/angular/table-cdk`; CDK remains app-owned for data source, row definitions, sorting, pagination, and fixed-size virtual scroll | [`table-cdk`](../../tools/check-package-consumer.mjs) |
+| Table primitives | Core peer group plus `tailwindcss`; no optional table-engine peers | `@hell-ui/angular/table`; CSS from `@hell-ui/angular/styles/table`; removed table aliases stay unavailable | [`table`, `no-legacy-alias`](../../tools/check-package-consumer.mjs) |
+| TanStack table shell | Core peer group plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core` | `@hell-ui/angular/table-tanstack`; caller-owned TanStack Table remains the engine | [`table-tanstack`](../../tools/check-package-consumer.mjs) |
+| TanStack virtual row strategy | TanStack shell peer group plus optional `@tanstack/virtual-core` | `@hell-ui/angular/table-tanstack/virtual`; mounts on `hell-tanstack-table` and does not create a second table engine or root component | [`table-tanstack-virtual`](../../tools/check-package-consumer.mjs) |
 | Code editor | Core peer group plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, `@lezer/highlight` | Kept optional entry point `@hell-ui/angular/features/code-editor`; keep lazy/client-only when runtime risk matters | [`code-editor`](../../tools/check-package-consumer.mjs) |
 | PDF viewer | Core peer group plus `@hell-ui/pdf-viewer`, `tailwindcss`, `@ng-icons/font-awesome`, and the split package's pdf.js peer | `@hell-ui/pdf-viewer`; app must provide the pdf.js worker source | [`pdf-viewer`](../../tools/check-package-consumer.mjs) |
 
@@ -46,17 +45,14 @@ pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons
 # Audio transcript feature. Proved by the audio-transcript scenario.
 pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome ng-primitives rxjs tailwindcss
 
-# Table primitives and simple data table. Proved by the table/data-table/no-legacy-alias scenarios.
+# Table primitives. Proved by the table/no-legacy-alias scenarios.
 pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss
 
-# TanStack Table adapter. Proved by the table-tanstack scenario.
+# TanStack table shell. Proved by the table-tanstack scenario.
 pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss @tanstack/angular-table
 
-# TanStack Virtual adapter. Proved by the table-virtual scenario.
-pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss @tanstack/virtual-core
-
-# CDK table skin. Proved by the table-cdk scenario; @angular/cdk is already in the core peer group.
-pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss
+# TanStack virtual row strategy. Proved by the table-tanstack-virtual scenario.
+pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss @tanstack/angular-table @tanstack/virtual-core
 
 # Code editor feature. Proved by the code-editor scenario.
 pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss @codemirror/commands @codemirror/language @codemirror/state @codemirror/view @lezer/highlight
@@ -72,10 +68,9 @@ HELL_PACKAGE_CONSUMER_SCENARIOS=button-unstyled pnpm test:package-consumer -- --
 HELL_PACKAGE_CONSUMER_SCENARIOS=primitives-css pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=audio-player pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=audio-transcript pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=table,data-table,no-legacy-alias pnpm test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=table,no-legacy-alias pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=table-tanstack pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=table-virtual pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=table-cdk pnpm test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=table-tanstack-virtual pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=pdf-viewer pnpm test:package-consumer -- --minimal-deps
 ```
@@ -102,7 +97,7 @@ import { HellButton, HellInput } from '@hell-ui/angular/primitives';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/composites';
 ```
 
-Use `@hell-ui/angular` for stable core exports only. Use `/primitives`, `/composites`, `/table`, `/data-table`, `/features/*`, and narrow component entry points for UI surfaces.
+Use `@hell-ui/angular` for stable core exports only. Use `/primitives`, `/composites`, `/table`, `/table-tanstack`, `/features/*`, and narrow component entry points for UI surfaces.
 
 ## CSS imports
 
@@ -157,7 +152,7 @@ Treat these as deliberate opt-ins, not default UI kit imports.
 
 | Feature | First-beta guidance | Current status |
 | --- | --- | --- |
-| Table primitives / simple data table | Keep primitives behind `@hell-ui/angular/table` and the simple native renderer behind `@hell-ui/angular/data-table`. It is not a data-grid framework. Prefer semantic table markup with real cell controls; adapter entrypoints stay optional and engine-specific. | Beta primitives; data-table is experimental; TanStack Table, TanStack Virtual, and CDK skin adapters are experimental. Legacy table feature aliases were removed before beta and the `no-legacy-alias` package-consumer scenario rejects them. |
+| Table primitives and TanStack shell | Keep primitives behind `@hell-ui/angular/table`. Use `@hell-ui/angular/table-tanstack` for a Hell-styled shell around a caller-owned TanStack Table instance. Use `@hell-ui/angular/table-tanstack/virtual` only when the shell needs TanStack Virtual row math. | Beta primitives; TanStack shell and virtual row strategy are experimental. Legacy table feature aliases and unsupported table paths are removed before beta and the `no-legacy-alias` package-consumer scenario rejects them. |
 | Code editor | Keep behind the kept optional `@hell-ui/angular/features/code-editor` entry point; lazy-load or client-only load in SSR-sensitive apps; pass owner-document-aware setup where possible. | Experimental in package/source comments; HELL-054 locks the kept optional boundary and leaves stable API report promotion to policy. |
 | PDF viewer | Package path is `@hell-ui/pdf-viewer`; install the split package with its exact pdf.js peer and pass an app-owned worker source. | Experimental/browser-only split package. |
 | Audio speech transcript | Do not present `allowSpeechTranscript` as accessibility captions or timed text. Import `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript` only where the route/app deliberately opts into the browser transcript provider, and provide real captions/transcripts separately. | Experimental Chromium-only / best-effort; runtime is isolated behind the optional feature provider. |
@@ -170,10 +165,8 @@ Known experimental/best-effort surfaces:
 
 - `@hell-ui/angular/features/audio-transcript`
 - `@hell-ui/angular/features/code-editor`
-- `@hell-ui/angular/data-table`
 - `@hell-ui/angular/table-tanstack`
-- `@hell-ui/angular/table-virtual`
-- `@hell-ui/angular/table-cdk`
+- `@hell-ui/angular/table-tanstack/virtual`
 - `@hell-ui/pdf-viewer`
 - audio-player speech transcript options such as `allowSpeechTranscript`
 
@@ -181,7 +174,7 @@ Removed pre-beta table compatibility surfaces:
 
 | Removed surface | Replacement |
 | --- | --- |
-| old table feature entrypoints | `@hell-ui/angular/table`; simple renderer at `@hell-ui/angular/data-table` |
+| old table feature entrypoints and unsupported adapter paths | `@hell-ui/angular/table` for primitives; `@hell-ui/angular/table-tanstack` for TanStack-owned table behavior |
 | `HELL_TABLE_DIRECTIVES`, `HELL_TABLE_UTILITY_DIRECTIVES` | `HELL_TABLE_UTILITIES_DIRECTIVES` from `@hell-ui/angular/table` |
 | `HellTableRow.interactive` / `selectionSemantics` / `[selectable]` / `(rowSelect)` | `hellTableRowAction` for row actions; `hellTableRowCheckbox` / `hellTableRowRadio` inside `hellTableSelectionCell` for row selection |
 
@@ -191,7 +184,6 @@ Known deprecated non-table compatibility surfaces to migrate away from:
 | --- | --- |
 | `allowLiveCaptions` | `allowSpeechTranscript` plus `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript`, with the same best-effort warning |
 | `hellAudioSpeechSupported` from `@hell-ui/angular/audio-player` | `hellAudioSpeechSupported` from `@hell-ui/angular/features/audio-transcript` |
-| `HellDataTableLabels` | `HellTableUtilitiesLabels` from `@hell-ui/angular` or `@hell-ui/angular/core` |
 | `hellCodeEditorSetup` | `hellCodeEditorSetupFactory(ownerDocument)` |
 
 Experimental APIs may change or disappear between pre-1.0 releases. Deprecated aliases exist only to help alpha/internal-beta consumers migrate; removal needs a changelog and migration note.

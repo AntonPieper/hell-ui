@@ -10,9 +10,6 @@ export * from './lib/public-api-core';
 // Composites and optional features are available through entry points:
 // - @hell-ui/angular/composites
 // - @hell-ui/angular/table (table primitives)
-// - @hell-ui/angular/data-table (simple native data table)
-// - @hell-ui/angular/table-tanstack (TanStack Table adapter)
-// - @hell-ui/angular/table-virtual (TanStack Virtual adapter)
-// - @hell-ui/angular/table-cdk (Angular CDK Table skin adapter)
+// - @hell-ui/angular/table-tanstack (Hell-styled TanStack Table shell)
 // - @hell-ui/angular/features/code-editor (kept optional CodeMirror entry point),
 //   @hell-ui/angular/features/audio-transcript (optional audio transcript provider)

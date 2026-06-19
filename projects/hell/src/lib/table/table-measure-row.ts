@@ -1,16 +1,14 @@
 import {
+  AfterViewInit,
   Directive,
   ElementRef,
-  OnDestroy,
-  AfterViewInit,
   computed,
   effect,
   inject,
   input,
+  OnDestroy,
   output,
 } from '@angular/core';
-
-import { type HellVirtualRowPart } from './table-model';
 
 type HellTableResizeObserver = {
   observe(element: Element): void;
@@ -19,13 +17,17 @@ type HellTableResizeObserver = {
 
 type HellTableResizeObserverConstructor = new (callback: () => void) => HellTableResizeObserver;
 
-/** Reason a row-part measurement was reported. */
+export interface HellTableMeasurableItem {
+  readonly key?: string | number | null;
+}
+
+/** Reason a row-sized element measurement was reported. */
 export type HellTableRowMeasurementReason = 'init' | 'input' | 'manual' | 'resize';
 
-/** Adapter-safe row-part size report. `size` is the block-axis row height in CSS pixels. */
-export interface HellTableRowMeasurement<TPart extends HellVirtualRowPart = HellVirtualRowPart> {
+/** Adapter-safe row size report. `size` is the block-axis row height in CSS pixels. */
+export interface HellTableRowMeasurement<TItem = unknown> {
   readonly key: string;
-  readonly part: TPart | null;
+  readonly item: TItem | null;
   readonly element: HTMLElement;
   readonly size: number;
   readonly height: number;
@@ -34,13 +36,13 @@ export interface HellTableRowMeasurement<TPart extends HellVirtualRowPart = Hell
 }
 
 /** Callback accepted by `hellTableMeasureRow`; adapters can map this to their own invalidation APIs. */
-export type HellTableMeasureRowCallback<TPart extends HellVirtualRowPart = HellVirtualRowPart> = {
-  bivarianceHack(measurement: HellTableRowMeasurement<TPart>): void;
+export type HellTableMeasureRowCallback<TItem = unknown> = {
+  bivarianceHack(measurement: HellTableRowMeasurement<TItem>): void;
 }['bivarianceHack'];
 
 /**
- * Measures a rendered virtual row part and reports height changes without depending on
- * TanStack Virtual, CDK virtual scroll, or any concrete table engine.
+ * Measures a rendered row-sized element and reports block-axis size changes
+ * without depending on TanStack Virtual, CDK virtual scroll, or a table model.
  */
 @Directive({
   selector: '[hellTableMeasureRow]',
@@ -49,24 +51,22 @@ export type HellTableMeasureRowCallback<TPart extends HellVirtualRowPart = HellV
     '[attr.data-hell-table-measure-row]': 'partKey()',
   },
 })
-export class HellTableMeasureRow<TPart extends HellVirtualRowPart = HellVirtualRowPart>
-  implements AfterViewInit, OnDestroy
-{
-  /** Row part to measure. The part key is used unless `hellTableMeasureRowKey` is supplied. */
-  readonly rowPart = input<TPart | null>(null, { alias: 'hellTableMeasureRow' });
+export class HellTableMeasureRow<TItem = unknown> implements AfterViewInit, OnDestroy {
+  /** Row item to measure. Its `key` is used unless `hellTableMeasureRowKey` is supplied. */
+  readonly rowPart = input<TItem | null>(null, { alias: 'hellTableMeasureRow' });
 
   /** Explicit key override for custom adapter rows. */
   readonly rowPartKey = input<string | null>(null, { alias: 'hellTableMeasureRowKey' });
 
-  /** Adapter callback invoked when the row part is first measured or changes size/key. */
-  readonly measureRow = input<HellTableMeasureRowCallback<TPart> | null>(null, {
+  /** Adapter callback invoked when the row item is first measured or changes size/key. */
+  readonly measureRow = input<HellTableMeasureRowCallback<TItem> | null>(null, {
     alias: 'hellTableMeasureRowCallback',
   });
 
   /** Output mirror for Angular templates that prefer event binding over callback inputs. */
-  readonly measured = output<HellTableRowMeasurement<TPart>>();
+  readonly measured = output<HellTableRowMeasurement<TItem>>();
 
-  protected readonly partKey = computed(() => this.rowPartKey() ?? this.rowPart()?.key ?? null);
+  protected readonly partKey = computed(() => this.rowPartKey() ?? keyFromItem(this.rowPart()));
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private resizeObserver: HellTableResizeObserver | null = null;
@@ -124,13 +124,13 @@ export class HellTableMeasureRow<TPart extends HellVirtualRowPart = HellVirtualR
     this.lastMeasurement = { key, size };
     const measurement = {
       key,
-      part: this.rowPart(),
+      item: this.rowPart(),
       element: this.host,
       size,
       height,
       width,
       reason,
-    } satisfies HellTableRowMeasurement<TPart>;
+    } satisfies HellTableRowMeasurement<TItem>;
 
     this.measureRow()?.(measurement);
     this.measured.emit(measurement);
@@ -144,4 +144,12 @@ export class HellTableMeasureRow<TPart extends HellVirtualRowPart = HellVirtualR
 
 function finitePixel(value: number): number {
   return Number.isFinite(value) && value >= 0 ? value : 0;
+}
+
+function keyFromItem(item: unknown): string | null {
+  if (item === null || item === undefined || typeof item !== 'object') return null;
+  const key = (item as HellTableMeasurableItem).key;
+  if (typeof key === 'string' && key.length) return key;
+  if (typeof key === 'number' && Number.isFinite(key)) return String(key);
+  return null;
 }

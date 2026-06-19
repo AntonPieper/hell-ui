@@ -65,11 +65,9 @@ package-consumer:
       - PACKAGE_CONSUMER_GROUP: features
         PACKAGE_CONSUMER_SCENARIOS: code-editor,pdf-viewer
       - PACKAGE_CONSUMER_GROUP: table-core
-        PACKAGE_CONSUMER_SCENARIOS: table,data-table,no-legacy-alias
+        PACKAGE_CONSUMER_SCENARIOS: table,no-legacy-alias
       - PACKAGE_CONSUMER_GROUP: table-tanstack-virtual
-        PACKAGE_CONSUMER_SCENARIOS: table-tanstack,table-virtual
-      - PACKAGE_CONSUMER_GROUP: table-cdk
-        PACKAGE_CONSUMER_SCENARIOS: table-cdk
+        PACKAGE_CONSUMER_SCENARIOS: table-tanstack,table-tanstack-virtual
   variables:
     HELL_PACKAGE_CONSUMER_SKIP_BUILD: "1"
   script:

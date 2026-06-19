@@ -111,11 +111,9 @@ jobs:
           - scenario: features
             scenarios: code-editor,pdf-viewer
           - scenario: table-core
-            scenarios: table,data-table,no-legacy-alias
+            scenarios: table,no-legacy-alias
           - scenario: table-tanstack-virtual
-            scenarios: table-tanstack,table-virtual
-          - scenario: table-cdk
-            scenarios: table-cdk
+            scenarios: table-tanstack,table-tanstack-virtual
     steps:
       - name: Checkout
         uses: actions/checkout@v6

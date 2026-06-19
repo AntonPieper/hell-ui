@@ -15,10 +15,8 @@
       "@hell-ui/angular/composites": ["../../dist/hell/types/hell-ui-angular-composites.d.ts"],
       "@hell-ui/angular/features/code-editor": ["../../dist/hell/types/hell-ui-angular-features-code-editor.d.ts"],
       "@hell-ui/angular/table": ["../../dist/hell/types/hell-ui-angular-table.d.ts"],
-      "@hell-ui/angular/data-table": ["../../dist/hell/types/hell-ui-angular-data-table.d.ts"],
       "@hell-ui/angular/table-tanstack": ["../../dist/hell/types/hell-ui-angular-table-tanstack.d.ts"],
-      "@hell-ui/angular/table-virtual": ["../../dist/hell/types/hell-ui-angular-table-virtual.d.ts"],
-      "@hell-ui/angular/table-cdk": ["../../dist/hell/types/hell-ui-angular-table-cdk.d.ts"],
+      "@hell-ui/angular/table-tanstack/virtual": ["../../dist/hell/types/hell-ui-angular-table-tanstack-virtual.d.ts"],
       "@hell-ui/pdf-viewer": ["../../dist/hell-pdf-viewer/types/hell-ui-pdf-viewer.d.ts"],
       "@hell-ui/pdf-viewer/styles": ["../../dist/hell-pdf-viewer/styles/pdf-viewer.css"],
       "@hell-ui/pdf-viewer/styles/*": ["../../dist/hell-pdf-viewer/styles/*"]
