@@ -68,7 +68,14 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
           </p>
           <p>
             Pagination is projected by the consumer. Use <code>hell-tanstack-pagination</code> in a
-            repeatable <code>hellTableShellFooter</code> region instead of a shorthand prop.
+            repeatable <code>hellTableShellFooter</code> region instead of a shorthand prop. The
+            control adapts TanStack pagination APIs to the reusable Hell pagination strip, so
+            callers keep one table engine while avoiding repeated pagination markup.
+          </p>
+          <p>
+            The example composes the shell with Hell Omnibar, Menu, and Split View. Those remain
+            normal app-level controls around the caller-owned TanStack table, not a second
+            table-state abstraction.
           </p>
         </div>
 
@@ -103,28 +110,47 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
 
           <h2>API Summary</h2>
           <ul>
-            <li><code>HELL_TABLE_UTILITIES_DIRECTIVES</code>: native table primitive import list.</li>
+            <li>
+              <code>HELL_TABLE_UTILITIES_DIRECTIVES</code>: native table primitive import list.
+            </li>
             <li><code>hell-tanstack-table</code>: shell for a caller-owned TanStack table.</li>
             <li><code>hellTableShellToolbar</code>: repeatable projected toolbar region.</li>
             <li><code>hellTableShellFooter</code>: repeatable projected footer region.</li>
-            <li><code>hellTableShellCell</code>, <code>hellTableShellHeader</code>, and <code>hellTableShellFooterCell</code>: one-off projected TanStack contexts.</li>
-            <li><code>hellTableShellExpandedRow</code>: expanded row template driven by TanStack row expansion.</li>
+            <li>
+              <code>hellTableShellCell</code>, <code>hellTableShellHeader</code>, and
+              <code>hellTableShellFooterCell</code>: one-off projected TanStack contexts.
+            </li>
+            <li>
+              <code>hellTableShellExpandedRow</code>: expanded row template driven by TanStack row
+              expansion.
+            </li>
             <li><code>hellTanStackVirtualRows</code>: optional TanStack Virtual body strategy.</li>
           </ul>
 
           <h2>Do</h2>
           <ul>
             <li>Let TanStack own table state and feature behavior.</li>
-            <li>Use projected shell regions for pagination, selected-count summaries, and exports.</li>
-            <li>Use <code>columnDef.meta.hell.*Class</code> for shell cell/header/footer class passthrough.</li>
-            <li>Keep one-off projected templates small and derive feature state from the native TanStack context.</li>
+            <li>
+              Use projected shell regions for pagination, selected-count summaries, and exports.
+            </li>
+            <li>
+              Use <code>columnDef.meta.hell.*Class</code> for shell cell/header/footer class
+              passthrough.
+            </li>
+            <li>
+              Keep one-off projected templates small and derive feature state from the native
+              TanStack context.
+            </li>
           </ul>
 
           <h2>Don't</h2>
           <ul>
             <li>Don't build a second table model or column-definition DSL in Hell.</li>
-            <li>Don't use row click shortcuts for actions; put native controls in cells.</li>
-            <li>Don't add parallel Hell props for column pinning, sorting, filtering, pagination, or expansion state.</li>
+            <li>Don't use row click shortcuts for actions; put Hell table controls in cells.</li>
+            <li>
+              Don't add parallel Hell props for column pinning, sorting, filtering, pagination, or
+              expansion state.
+            </li>
             <li>Don't create a separate virtual-table root component.</li>
           </ul>
         </div>

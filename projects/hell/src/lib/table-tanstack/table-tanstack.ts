@@ -27,6 +27,11 @@ import {
   type RowData,
   type Table,
 } from '@tanstack/angular-table';
+import { HellButton } from '../primitives/button/button';
+import { HellTableSortTrigger } from '../features/table-utilities/table-utilities';
+import { HellInput, HellNativeSelect } from '../primitives/input/input';
+import { HellPaginationStrip } from '../primitives/pagination/pagination';
+import { HELL_SEARCH_DIRECTIVES } from '../primitives/search/search';
 export {
   FlexRenderDirective,
   FlexRenderDirective as FlexRender,
@@ -347,6 +352,7 @@ interface HellColumnMeta {
   imports: [
     CommonModule,
     FlexRenderDirective,
+    HellTableSortTrigger,
     ɵHellTanStackBodyScrollportConnector,
     ɵHellTanStackBodyConnector,
     ɵHellTanStackBodyItemConnector,
@@ -368,7 +374,16 @@ interface HellColumnMeta {
       data-hell-table-shell-scrollport
       [hellTanStackInternalBodyScrollport]="bodyStrategyBridge()"
     >
-      <table class="hell-table hell-table-shell-table" data-hell-table-shell-table>
+      <table
+        class="hell-table hell-table-shell-table"
+        data-hell-table-shell-table
+        [style.--hell-table-total-size.px]="tableTotalSize()"
+      >
+        <colgroup>
+          @for (column of table().getVisibleLeafColumns(); track column.id) {
+            <col [style.width.px]="columnSize(column)" />
+          }
+        </colgroup>
         <thead class="hell-table-head" data-hell-table-shell-head>
           @for (headerGroup of table().getHeaderGroups(); track headerGroup.id) {
             <tr class="hell-table-row" data-hell-table-shell-header-row>
@@ -380,6 +395,9 @@ interface HellColumnMeta {
                   [attr.data-pinned]="pinnedSide(header.column)"
                   [attr.data-pinned-last]="pinnedLast(header.column)"
                   [attr.data-pinned-first]="pinnedFirst(header.column)"
+                  [attr.data-sortable]="header.column.getCanSort() ? 'true' : null"
+                  [attr.data-sort]="sortState(header)"
+                  [attr.aria-sort]="ariaSort(header)"
                   [style.--hell-table-pinned-start.px]="pinnedStart(header.column)"
                   [style.--hell-table-pinned-after.px]="pinnedAfter(header.column)"
                 >
@@ -390,15 +408,37 @@ interface HellColumnMeta {
                         [ngTemplateOutletContext]="headerContext(header)"
                       />
                     } @else {
-                      <ng-container
-                        *flexRender="
-                          header.column.columnDef.header;
-                          props: header.getContext();
-                          let rendered
-                        "
-                      >
-                        {{ rendered ?? header.column.id }}
-                      </ng-container>
+                      @if (header.column.getCanSort()) {
+                        <button
+                          hellTableSortTrigger
+                          type="button"
+                          [attr.aria-label]="sortButtonLabel(header)"
+                          (click)="toggleSorting(header, $event)"
+                        >
+                          <ng-container
+                            *flexRender="
+                              header.column.columnDef.header;
+                              props: header.getContext();
+                              let rendered
+                            "
+                          >
+                            {{ rendered ?? header.column.id }}
+                          </ng-container>
+                          @if (sortState(header); as state) {
+                            <span data-slot="sort-state">{{ state }}</span>
+                          }
+                        </button>
+                      } @else {
+                        <ng-container
+                          *flexRender="
+                            header.column.columnDef.header;
+                            props: header.getContext();
+                            let rendered
+                          "
+                        >
+                          {{ rendered ?? header.column.id }}
+                        </ng-container>
+                      }
                     }
                   }
                 </th>
@@ -497,6 +537,7 @@ interface HellColumnMeta {
                         [attr.data-pinned]="pinnedSide(cell.column)"
                         [attr.data-pinned-last]="pinnedLast(cell.column)"
                         [attr.data-pinned-first]="pinnedFirst(cell.column)"
+                        [style.--hell-table-column-size.px]="columnSize(cell.column)"
                         [style.--hell-table-pinned-start.px]="pinnedStart(cell.column)"
                         [style.--hell-table-pinned-after.px]="pinnedAfter(cell.column)"
                       >
@@ -583,10 +624,10 @@ export class HellTanStackTable<TData extends RowData = RowData> {
   readonly rowClass = input<HellTanStackRowClass<TData> | HellClassValue>(null);
 
   protected readonly providerViews = inject(HELL_TABLE_STATUS_VIEWS);
-  protected readonly bodyStrategy =
-    inject(ɵHELL_TANSTACK_BODY_STRATEGY, { optional: true, self: true }) as
-      | ɵHellTanStackBodyStrategy<TData>
-      | null;
+  protected readonly bodyStrategy = inject(ɵHELL_TANSTACK_BODY_STRATEGY, {
+    optional: true,
+    self: true,
+  }) as ɵHellTanStackBodyStrategy<TData> | null;
   private readonly headers = contentChildren(HellTableShellHeader<TData, unknown>, {
     descendants: true,
   });
@@ -626,6 +667,16 @@ export class HellTanStackTable<TData extends RowData = RowData> {
   protected bodyItems(): readonly ɵHellTanStackBodyItem<TData>[] {
     const items = this.allBodyItems();
     return this.bodyStrategy?.rows(items) ?? items;
+  }
+
+  protected columnSize(column: Column<TData, unknown>): number | null {
+    const size = column.getSize();
+    return Number.isFinite(size) && size > 0 ? size : null;
+  }
+
+  protected tableTotalSize(): number | null {
+    const size = this.table().getTotalSize();
+    return Number.isFinite(size) && size > 0 ? size : null;
   }
 
   private allBodyItems(): readonly ɵHellTanStackBodyItem<TData>[] {
@@ -678,19 +729,34 @@ export class HellTanStackTable<TData extends RowData = RowData> {
 
   protected headerTemplateFor(header: Header<TData, unknown>) {
     const template = this.templateFor(this.headers(), header.column.id);
-    this.assertNoRendererConflict('header', header.column.id, template, header.column.columnDef.header);
+    this.assertNoRendererConflict(
+      'header',
+      header.column.id,
+      template,
+      header.column.columnDef.header,
+    );
     return template;
   }
 
   protected cellTemplateFor(cell: Cell<TData, unknown>) {
     const template = this.templateFor(this.cells(), cell.column.id);
-    this.assertNoRendererConflict('cell', cell.column.id, template, this.explicitCellRenderer(cell));
+    this.assertNoRendererConflict(
+      'cell',
+      cell.column.id,
+      template,
+      this.explicitCellRenderer(cell),
+    );
     return template;
   }
 
   protected footerTemplateFor(header: Header<TData, unknown>) {
     const template = this.templateFor(this.footers(), header.column.id);
-    this.assertNoRendererConflict('footer', header.column.id, template, header.column.columnDef.footer);
+    this.assertNoRendererConflict(
+      'footer',
+      header.column.id,
+      template,
+      header.column.columnDef.footer,
+    );
     return template;
   }
 
@@ -707,10 +773,18 @@ export class HellTanStackTable<TData extends RowData = RowData> {
   }
 
   protected cellContext(cell: Cell<TData, unknown>): HellTableShellCellContext<TData, unknown> {
-    return { $implicit: cell, cell, row: cell.row, column: cell.column, table: cell.getContext().table };
+    return {
+      $implicit: cell,
+      cell,
+      row: cell.row,
+      column: cell.column,
+      table: cell.getContext().table,
+    };
   }
 
-  protected headerContext(header: Header<TData, unknown>): HellTableShellHeaderContext<TData, unknown> {
+  protected headerContext(
+    header: Header<TData, unknown>,
+  ): HellTableShellHeaderContext<TData, unknown> {
     return { $implicit: header, header, column: header.column, table: header.getContext().table };
   }
 
@@ -755,7 +829,32 @@ export class HellTanStackTable<TData extends RowData = RowData> {
 
   protected rowClassValue(row: Row<TData>): string {
     const value = this.rowClass();
-    return classValue(['hell-table-row', classValue(typeof value === 'function' ? value(row) : value)]);
+    return classValue([
+      'hell-table-row',
+      classValue(typeof value === 'function' ? value(row) : value),
+    ]);
+  }
+
+  protected sortState(header: Header<TData, unknown>): 'asc' | 'desc' | null {
+    const sorted = header.column.getIsSorted();
+    return sorted === 'asc' || sorted === 'desc' ? sorted : null;
+  }
+
+  protected ariaSort(header: Header<TData, unknown>): 'ascending' | 'descending' | null {
+    const sort = this.sortState(header);
+    if (sort === 'asc') return 'ascending';
+    if (sort === 'desc') return 'descending';
+    return null;
+  }
+
+  protected sortButtonLabel(header: Header<TData, unknown>): string {
+    const sort = this.sortState(header);
+    const next = sort === 'asc' ? 'descending' : sort === 'desc' ? 'clear sorting' : 'ascending';
+    return `Sort ${header.column.id} ${next}`;
+  }
+
+  protected toggleSorting(header: Header<TData, unknown>, event: MouseEvent): void {
+    header.column.getToggleSortingHandler()?.(event);
   }
 
   protected pinnedSide(column: Column<TData, unknown>): 'left' | 'right' | null {
@@ -846,42 +945,51 @@ export class HellDefaultTableErrorState {
   selector: 'hell-tanstack-pagination',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellNativeSelect, HellPaginationStrip],
+  host: { class: 'hell-tanstack-pagination' },
   template: `
-    <nav class="hell-tanstack-pagination" aria-label="Table pagination">
-      <button type="button" (click)="table().setPageIndex(0)" [disabled]="!table().getCanPreviousPage()">
-        First
-      </button>
-      <button type="button" (click)="table().previousPage()" [disabled]="!table().getCanPreviousPage()">
-        Previous
-      </button>
-      <span data-slot="page">
-        {{ table().getState().pagination.pageIndex + 1 }} / {{ table().getPageCount() || 1 }}
-      </span>
-      <button type="button" (click)="table().nextPage()" [disabled]="!table().getCanNextPage()">
-        Next
-      </button>
-      <button type="button" (click)="table().setPageIndex(lastPageIndex())" [disabled]="!table().getCanNextPage()">
-        Last
-      </button>
-      @if (pageSizeOptions().length) {
-        <label>
-          <span>Rows</span>
-          <select [value]="table().getState().pagination.pageSize" (change)="setPageSize($event)">
-            @for (size of pageSizeOptions(); track size) {
-              <option [value]="size">{{ size }}</option>
-            }
-          </select>
-        </label>
-      }
-    </nav>
+    <hell-pagination
+      [page]="currentPage()"
+      [pageCount]="pageCount()"
+      [siblingCount]="1"
+      (pageChange)="setPage($event)"
+    />
+    @if (pageSizeOptions().length) {
+      <label data-slot="page-size">
+        <span>Rows</span>
+        <select
+          hellNativeSelect
+          size="sm"
+          data-slot="page-size-select"
+          [value]="table().getState().pagination.pageSize"
+          (change)="setPageSize($event)"
+        >
+          @for (size of pageSizeOptions(); track size) {
+            <option [value]="size" [selected]="size === pageSize()">{{ size }}</option>
+          }
+        </select>
+      </label>
+    }
   `,
 })
 export class HellTanStackPagination<TData extends RowData = RowData> {
   readonly table = input.required<Table<TData>>();
   readonly pageSizeOptions = input<readonly number[]>([]);
 
-  protected lastPageIndex(): number {
-    return Math.max(this.table().getPageCount() - 1, 0);
+  protected currentPage(): number {
+    return this.table().getState().pagination.pageIndex + 1;
+  }
+
+  protected pageCount(): number {
+    return this.table().getPageCount() || 1;
+  }
+
+  protected pageSize(): number {
+    return this.table().getState().pagination.pageSize;
+  }
+
+  protected setPage(page: number): void {
+    this.table().setPageIndex(Math.max(page - 1, 0));
   }
 
   protected setPageSize(event: Event): void {
@@ -894,14 +1002,29 @@ export class HellTanStackPagination<TData extends RowData = RowData> {
   selector: 'hell-tanstack-global-filter',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellButton, HellInput, ...HELL_SEARCH_DIRECTIVES],
   template: `
-    <input
-      class="hell-tanstack-filter"
-      type="search"
-      [attr.placeholder]="placeholder()"
-      [value]="table().getState().globalFilter ?? ''"
-      (input)="setFilter($event)"
-    />
+    <div hellSearch class="hell-tanstack-filter-search">
+      <input
+        hellInput
+        class="hell-tanstack-filter"
+        size="sm"
+        type="search"
+        [attr.placeholder]="placeholder()"
+        [value]="table().getState().globalFilter ?? ''"
+        (input)="setFilter($event)"
+      />
+      <button
+        hellButton
+        hellSearchClear
+        size="sm"
+        variant="ghost"
+        type="button"
+        (click)="clearFilter()"
+      >
+        Clear
+      </button>
+    </div>
   `,
 })
 export class HellTanStackGlobalFilter<TData extends RowData = RowData> {
@@ -911,20 +1034,39 @@ export class HellTanStackGlobalFilter<TData extends RowData = RowData> {
   protected setFilter(event: Event): void {
     this.table().setGlobalFilter((event.target as HTMLInputElement | null)?.value ?? '');
   }
+
+  protected clearFilter(): void {
+    this.table().setGlobalFilter('');
+  }
 }
 
 @Component({
   selector: 'hell-tanstack-column-filter',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellButton, HellInput, ...HELL_SEARCH_DIRECTIVES],
   template: `
-    <input
-      class="hell-tanstack-filter"
-      type="search"
-      [attr.placeholder]="placeholder()"
-      [value]="value()"
-      (input)="setFilter($event)"
-    />
+    <div hellSearch class="hell-tanstack-filter-search">
+      <input
+        hellInput
+        class="hell-tanstack-filter"
+        size="sm"
+        type="search"
+        [attr.placeholder]="placeholder()"
+        [value]="value()"
+        (input)="setFilter($event)"
+      />
+      <button
+        hellButton
+        hellSearchClear
+        size="sm"
+        variant="ghost"
+        type="button"
+        (click)="clearFilter()"
+      >
+        Clear
+      </button>
+    </div>
   `,
 })
 export class HellTanStackColumnFilter<TData extends RowData = RowData> {
@@ -937,6 +1079,10 @@ export class HellTanStackColumnFilter<TData extends RowData = RowData> {
 
   protected setFilter(event: Event): void {
     this.column()?.setFilterValue((event.target as HTMLInputElement | null)?.value ?? '');
+  }
+
+  protected clearFilter(): void {
+    this.column()?.setFilterValue('');
   }
 }
 
