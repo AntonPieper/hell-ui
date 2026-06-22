@@ -19,6 +19,11 @@ import { provideIcons } from '@ng-icons/core';
 import { faSolidArrowLeft } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
+import {
+  HellPagination,
+  HellPaginationNext,
+  HellPaginationPrev,
+} from '../../primitives/pagination/pagination';
 import { HellStyleable } from '../../core/styleable';
 import { HellResizable, HellResizableHandle, HellResizablePane } from '../resizable/resizable';
 
@@ -51,6 +56,9 @@ export class HellSplitDetail {
     NgTemplateOutlet,
     HellButton,
     HellIcon,
+    HellPagination,
+    HellPaginationPrev,
+    HellPaginationNext,
     HellResizable,
     HellResizablePane,
     HellResizableHandle,
@@ -66,32 +74,31 @@ export class HellSplitDetail {
   template: `
     <ng-template #itemNavigationControls>
       @if (itemNavigation()) {
-        <div data-slot="item-navigation" role="group" [attr.aria-label]="itemNavigationLabel()">
+        <nav
+          hellPagination
+          data-slot="item-navigation"
+          [page]="itemNavigationPage()"
+          [pageCount]="itemNavigationPageCount()"
+          [attr.aria-label]="itemNavigationLabel()"
+          (pageChange)="goToItemPage($event)"
+        >
           <button
-            hellButton
-            variant="ghost"
-            size="sm"
-            iconOnly
+            hellPaginationPrev
             type="button"
             [disabled]="previousItemDisabled()"
             [attr.aria-label]="previousItemLabel()"
-            (click)="goToPreviousItem()"
           >
             <hell-icon [name]="'faSolidArrowLeft'" size="12px" />
           </button>
           <button
-            hellButton
-            variant="ghost"
-            size="sm"
-            iconOnly
+            hellPaginationNext
             type="button"
             [disabled]="nextItemDisabled()"
             [attr.aria-label]="nextItemLabel()"
-            (click)="goToNextItem()"
           >
             <hell-icon data-direction="next" [name]="'faSolidArrowLeft'" size="12px" />
           </button>
-        </div>
+        </nav>
       }
     </ng-template>
 
@@ -221,13 +228,30 @@ export class HellSplitView extends HellStyleable {
     this.detailOpenChange.emit(false);
   }
 
-  protected goToPreviousItem(): void {
+  protected itemNavigationPageCount(): number {
+    if (this.previousItemDisabled() && this.nextItemDisabled()) return 1;
+    return this.previousItemDisabled() || this.nextItemDisabled() ? 2 : 3;
+  }
+
+  protected itemNavigationPage(): number {
+    if (this.previousItemDisabled()) return 1;
+    if (this.nextItemDisabled()) return this.itemNavigationPageCount();
+    return 2;
+  }
+
+  protected goToItemPage(page: number): void {
+    const current = this.itemNavigationPage();
+    if (page < current) this.goToPreviousItem();
+    if (page > current) this.goToNextItem();
+  }
+
+  private goToPreviousItem(): void {
     if (!this.previousItemDisabled()) {
       this.previousItem.emit();
     }
   }
 
-  protected goToNextItem(): void {
+  private goToNextItem(): void {
     if (!this.nextItemDisabled()) {
       this.nextItem.emit();
     }

@@ -160,7 +160,7 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
           [attr.role]="'combobox'"
           [attr.aria-expanded]="isOpen()"
           [attr.aria-controls]="panelId"
-          [attr.aria-activedescendant]="activeItemId()"
+          [attr.aria-activedescendant]="activeDescendantId()"
           [attr.aria-autocomplete]="'list'"
           [attr.aria-label]="ariaLabel()"
           [attr.placeholder]="placeholder()"
@@ -331,7 +331,9 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   /* ── Item registry ─────────────────────────────────────────────────── */
 
   protected readonly activeIndex = this.runtime.activeIndex;
-  protected readonly activeItemId = this.runtime.activeItemId;
+  protected readonly activeDescendantId = computed(() =>
+    this.isOpen() ? this.runtime.activeItemId() : null,
+  );
   protected readonly isEmpty = this.runtime.isEmpty;
   protected readonly hasActions = this.runtime.hasActions;
 

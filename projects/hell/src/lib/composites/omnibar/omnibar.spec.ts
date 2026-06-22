@@ -253,6 +253,30 @@ describe('HellOmnibar interactions', () => {
     );
   });
 
+  it('removes the active descendant when the panel closes', () => {
+    const fixture = TestBed.createComponent(OmnibarHost);
+    const host = fixture.componentInstance;
+    host.value.set('be');
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement.querySelector('hell-omnibar') as HTMLElement;
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
+    input.focus();
+    fixture.detectChanges();
+
+    const options = Array.from(overlayRoot().querySelectorAll('[role="option"]')) as HTMLElement[];
+    expect(options).toHaveLength(2);
+    expect(input.getAttribute('aria-activedescendant')).toBe(options[0].id);
+
+    input.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+
+    expect(root.getAttribute('data-open')).toBeNull();
+    expect(input.getAttribute('aria-activedescendant')).toBeNull();
+  });
+
   it('keeps the open omnibar tab order anchored on the input', () => {
     const fixture = TestBed.createComponent(OmnibarHost);
     const host = fixture.componentInstance;
@@ -469,7 +493,9 @@ describe('HellOmnibar interactions', () => {
     fixture.detectChanges();
 
     expect(host.openEvents).toEqual([true, false]);
-    expect(fixture.nativeElement.querySelector('hell-omnibar').getAttribute('data-open')).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('hell-omnibar').getAttribute('data-open'),
+    ).toBeNull();
   });
 });
 
@@ -484,9 +510,11 @@ describe('HellOmnibar labels', () => {
     const fixture = TestBed.createComponent(OmnibarLocalizedHost);
     fixture.detectChanges();
 
-    expect(query<HTMLButtonElement>(fixture.nativeElement, '[data-slot="clear"]').getAttribute('aria-label')).toBe(
-      'Suche löschen',
-    );
+    expect(
+      query<HTMLButtonElement>(fixture.nativeElement, '[data-slot="clear"]').getAttribute(
+        'aria-label',
+      ),
+    ).toBe('Suche löschen');
   });
 });
 
@@ -555,7 +583,8 @@ describe('HellOmnibar hotkey matching', () => {
 
   it('rejects extra shift when combo does not request it', () => {
     expect(
-      matchHotkey(new KeyboardEvent('keydown', { key: 'K', shiftKey: true, ctrlKey: true }),
+      matchHotkey(
+        new KeyboardEvent('keydown', { key: 'K', shiftKey: true, ctrlKey: true }),
         'ctrl+k',
       ),
     ).toBe(false);

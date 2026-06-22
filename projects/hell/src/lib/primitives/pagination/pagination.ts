@@ -6,13 +6,6 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { provideIcons } from '@ng-icons/core';
-import {
-  faSolidAnglesLeft,
-  faSolidAnglesRight,
-  faSolidChevronLeft,
-  faSolidChevronRight,
-} from '@ng-icons/font-awesome/solid';
 import {
   NgpPagination,
   NgpPaginationButton,
@@ -22,18 +15,10 @@ import {
   NgpPaginationPrevious,
   injectPaginationState,
 } from 'ng-primitives/pagination';
-import { HellIcon } from '../icon/icon';
 import { HellNativeSelect } from '../input/input';
 import { HELL_LABELS } from '../../core/labels';
 import { HellStyleable } from '../../core/styleable';
 import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactive-disabled';
-
-const HELL_PAGINATION_ICONS = {
-  faSolidAnglesLeft,
-  faSolidAnglesRight,
-  faSolidChevronLeft,
-  faSolidChevronRight,
-};
 
 export type HellPaginationMode = 'pages' | 'previous-next' | 'jump';
 
@@ -188,9 +173,7 @@ export class HellPaginationButton extends HellPaginationDisabledGuard {
 @Component({
   selector: 'hell-pagination',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [provideIcons(HELL_PAGINATION_ICONS)],
   imports: [
-    HellIcon,
     HellPaginationFirst,
     HellPaginationPrev,
     HellPaginationNext,
@@ -218,11 +201,11 @@ export class HellPaginationButton extends HellPaginationDisabledGuard {
   template: `
     @if (mode() === 'pages') {
       <button hellPaginationFirst type="button" [attr.aria-label]="labels.pagination.firstPage">
-        <hell-icon [name]="'faSolidAnglesLeft'" />
+        <span data-slot="control-glyph" aria-hidden="true">&laquo;</span>
       </button>
     }
     <button hellPaginationPrev type="button" [attr.aria-label]="labels.pagination.previousPage">
-      <hell-icon [name]="'faSolidChevronLeft'" />
+      <span data-slot="control-glyph" aria-hidden="true">&lsaquo;</span>
     </button>
     @if (mode() === 'pages') {
       @for (p of pages(); track trackPage($index, p)) {
@@ -259,11 +242,11 @@ export class HellPaginationButton extends HellPaginationDisabledGuard {
       </label>
     }
     <button hellPaginationNext type="button" [attr.aria-label]="labels.pagination.nextPage">
-      <hell-icon [name]="'faSolidChevronRight'" />
+      <span data-slot="control-glyph" aria-hidden="true">&rsaquo;</span>
     </button>
     @if (mode() === 'pages') {
       <button hellPaginationLast type="button" [attr.aria-label]="labels.pagination.lastPage">
-        <hell-icon [name]="'faSolidAnglesRight'" />
+        <span data-slot="control-glyph" aria-hidden="true">&raquo;</span>
       </button>
     }
   `,

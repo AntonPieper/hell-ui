@@ -114,6 +114,9 @@ describe('HellSplitView', () => {
     expect(root.querySelector('[data-slot="resizable"]')).toBeInstanceOf(HTMLElement);
     expect(root.querySelector('[hellResizableHandle]')).toBeInstanceOf(HTMLElement);
     expect(root.querySelector('[data-slot="detail-header"]')).toBeInstanceOf(HTMLElement);
+    expect(root.querySelector('[data-slot="item-navigation"].hell-pagination')).toBeInstanceOf(
+      HTMLElement,
+    );
 
     expect(button(root, 'Previous ticket').disabled).toBe(true);
     expect(button(root, 'Next ticket').disabled).toBe(false);

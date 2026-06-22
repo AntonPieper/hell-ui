@@ -1,7 +1,7 @@
-- row "Ada Lovelace Admin Select Ada Lovelace Open Ada Lovelace":
+- row "Select Ada Lovelace Ada Lovelace Admin Open Ada Lovelace":
+  - cell "Select Ada Lovelace":
+    - radio "Select Ada Lovelace" [checked]
   - cell "Ada Lovelace"
   - cell "Admin"
-  - cell "Select Ada Lovelace":
-    - radio "Select Ada Lovelace"
   - cell "Open Ada Lovelace":
-    - button "Open Ada Lovelace": Open
+    - button "Open Ada Lovelace"

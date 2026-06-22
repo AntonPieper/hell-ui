@@ -1,4 +1,8 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { provideIcons } from '@ng-icons/core';
+import { faSolidFolderOpen } from '@ng-icons/font-awesome/solid';
+import { HellButton } from '@hell-ui/angular/button';
+import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 
 interface Person {
@@ -16,26 +20,43 @@ const people: readonly Person[] = [
 @Component({
   selector: 'app-table-primitive-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [HellButton, HellIcon, ...HELL_TABLE_UTILITIES_DIRECTIVES],
+  providers: [provideIcons({ faSolidFolderOpen })],
   template: `
-    <div hellTableContainer>
+    <div hellTableContainer data-testid="primitive-table">
       <table hellTableRoot>
         <thead hellTableHeader>
           <tr hellTableRow>
-            <th hellTableHeaderCell columnId="name" sortable [sort]="sort()" (sortToggle)="toggleSort()">
+            <th hellTableHeaderCell hellTableSelectionCell aria-label="Primary person"></th>
+            <th
+              hellTableHeaderCell
+              columnId="name"
+              sortable
+              [sort]="sort().column === 'name' ? sort().direction : null"
+              (sortToggle)="toggleSort('name')"
+            >
               <button hellTableSortTrigger type="button">Name</button>
             </th>
-            <th hellTableHeaderCell columnId="role">Role</th>
-            <th hellTableHeaderCell hellTableSelectionCell aria-label="Primary person"></th>
+            <th
+              hellTableHeaderCell
+              columnId="role"
+              sortable
+              [sort]="sort().column === 'role' ? sort().direction : null"
+              (sortToggle)="toggleSort('role')"
+            >
+              <button hellTableSortTrigger type="button">Role</button>
+            </th>
             <th hellTableHeaderCell>Action</th>
           </tr>
         </thead>
 
         <tbody hellTableBody>
           @for (person of sortedPeople(); track person.id) {
-            <tr hellTableRow [active]="activeId() === person.id" [selected]="selectedId() === person.id">
-              <td hellTableCell>{{ person.name }}</td>
-              <td hellTableCell>{{ person.role }}</td>
+            <tr
+              hellTableRow
+              [active]="activeId() === person.id"
+              [selected]="selectedId() === person.id"
+            >
               <td hellTableCell hellTableSelectionCell>
                 <input
                   hellTableRowRadio
@@ -46,14 +67,20 @@ const people: readonly Person[] = [
                   (change)="selectedId.set(person.id)"
                 />
               </td>
+              <td hellTableCell>{{ person.name }}</td>
+              <td hellTableCell>{{ person.role }}</td>
               <td hellTableCell>
                 <button
+                  hellButton
                   hellTableRowAction
+                  iconOnly
+                  size="xs"
+                  variant="ghost"
                   type="button"
                   [attr.aria-label]="'Open ' + person.name"
                   (click)="activeId.set(person.id)"
                 >
-                  Open
+                  <hell-icon name="faSolidFolderOpen" />
                 </button>
               </td>
             </tr>
@@ -61,22 +88,41 @@ const people: readonly Person[] = [
         </tbody>
       </table>
     </div>
+
+    @if (activePerson(); as person) {
+      <p class="mt-2 text-sm text-hell-foreground-muted" data-testid="primitive-open-result">
+        Opened {{ person.name }}.
+      </p>
+    }
   `,
 })
 export class TablePrimitiveExample {
-  protected readonly sort = signal<'asc' | 'desc' | null>('asc');
+  protected readonly sort = signal<{
+    readonly column: 'name' | 'role';
+    readonly direction: 'asc' | 'desc' | null;
+  }>({ column: 'name', direction: 'asc' });
   protected readonly activeId = signal('ada');
-  protected readonly selectedId = signal('grace');
+  protected readonly selectedId = signal('ada');
+  protected readonly activePerson = computed(
+    () => people.find((person) => person.id === this.activeId()) ?? null,
+  );
 
   protected sortedPeople(): readonly Person[] {
-    const direction = this.sort();
+    const { column, direction } = this.sort();
     if (!direction) return people;
     return [...people].sort((a, b) =>
-      direction === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name),
+      direction === 'asc' ? a[column].localeCompare(b[column]) : b[column].localeCompare(a[column]),
     );
   }
 
-  protected toggleSort(): void {
-    this.sort.update((current) => (current === 'asc' ? 'desc' : current === 'desc' ? null : 'asc'));
+  protected toggleSort(column: 'name' | 'role'): void {
+    this.sort.update((current) => {
+      if (current.column !== column) return { column, direction: 'asc' };
+      return {
+        column,
+        direction:
+          current.direction === 'asc' ? 'desc' : current.direction === 'desc' ? null : 'asc',
+      };
+    });
   }
 }

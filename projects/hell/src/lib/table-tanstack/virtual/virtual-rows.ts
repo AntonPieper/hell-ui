@@ -31,6 +31,14 @@ interface HellVirtualBodyItem<TData extends RowData> extends ɵHellTanStackBodyI
   readonly virtualIndex: number;
 }
 
+type HellVirtualResizeObserver = {
+  observe(el: Element): void;
+  disconnect(): void;
+};
+type HellVirtualResizeObserverConstructor = new (
+  callback: ResizeObserverCallback,
+) => HellVirtualResizeObserver;
+
 /** Optional TanStack Virtual row strategy registration for `hell-tanstack-table`. */
 @Directive({
   selector: 'hell-tanstack-table[hellTanStackVirtualRows]',
@@ -67,6 +75,8 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData>
   private virtualItems: readonly VirtualItem[] = [];
   private virtualItemsByKey = new Map<string, VirtualItem>();
   private mountedCleanup: VoidFunction | null = null;
+  private resizeObserver: HellVirtualResizeObserver | null = null;
+  private readonly observedWidthElements = new Set<HTMLElement>();
 
   protected readonly totalSize = signal(0);
   protected readonly rowWidth = signal<number | null>(null);
@@ -84,7 +94,8 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData>
     measureElement,
     indexAttribute: 'data-hell-table-virtual-row-index',
     enabled: this.enabled(),
-    onChange: (instance) => this.syncVirtualItems(instance.getVirtualItems(), instance.getTotalSize()),
+    onChange: (instance) =>
+      this.syncVirtualItems(instance.getVirtualItems(), instance.getTotalSize()),
   });
 
   constructor() {
@@ -100,9 +111,7 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData>
     });
   }
 
-  rows(
-    items: readonly ɵHellTanStackBodyItem<TData>[],
-  ): readonly ɵHellTanStackBodyItem<TData>[] {
+  rows(items: readonly ɵHellTanStackBodyItem<TData>[]): readonly ɵHellTanStackBodyItem<TData>[] {
     this.version();
     this.sourceItems = items;
     this.setCount(items.length);
@@ -122,6 +131,11 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData>
   connectScrollport(el: HTMLElement, writer: ɵHellDomWriter): VoidFunction {
     this.scrollport = el;
     writer.data(el, 'table-virtual-scrollport', 'true');
+    this.observeWidthElement(el);
+    queueMicrotask(() => {
+      this.observeTableWidth();
+      this.syncRowWidth();
+    });
     this.syncRowWidth();
     this.ensureMounted();
     this.virtualizer._willUpdate();
@@ -134,6 +148,8 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData>
   connectBody(el: HTMLElement, writer: ɵHellDomWriter): VoidFunction {
     this.body = el;
     writer.data(el, 'table-virtual-body', 'true');
+    this.observeTableWidth();
+    this.syncRowWidth();
     return () => {
       if (this.body === el) this.body = null;
     };
@@ -145,7 +161,8 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData>
     writer: ɵHellDomWriter,
   ): VoidFunction {
     const virtualItem = this.virtualItemFor(item);
-    const virtualIndex = virtualItem?.index ?? this.sourceItems.findIndex((source) => source.key === item.key);
+    const virtualIndex =
+      virtualItem?.index ?? this.sourceItems.findIndex((source) => source.key === item.key);
 
     writer.data(el, 'table-virtual-row', 'true');
     writer.data(el, 'table-virtual-row-kind', item.kind);
@@ -164,6 +181,9 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData>
   ngOnDestroy(): void {
     this.mountedCleanup?.();
     this.mountedCleanup = null;
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
+    this.observedWidthElements.clear();
   }
 
   private setCount(count: number): void {
@@ -198,9 +218,28 @@ export class HellTanStackVirtualRows<TData extends RowData = RowData>
     this.bump();
   }
 
+  private observeTableWidth(): void {
+    const table = this.host.querySelector('[data-hell-table-shell-table]') as HTMLElement | null;
+    if (table) this.observeWidthElement(table);
+  }
+
+  private observeWidthElement(el: HTMLElement): void {
+    if (this.observedWidthElements.has(el)) return;
+    const ResizeObserverConstructor = this.host.ownerDocument.defaultView?.ResizeObserver as
+      | HellVirtualResizeObserverConstructor
+      | undefined;
+    if (!ResizeObserverConstructor) return;
+    this.resizeObserver ??= new ResizeObserverConstructor(() => this.syncRowWidth());
+    this.resizeObserver.observe(el);
+    this.observedWidthElements.add(el);
+  }
+
   private syncRowWidth(): void {
-    const width = this.scrollport?.clientWidth ?? null;
-    this.rowWidth.set(width && width > 0 ? width : null);
+    const table = this.host.querySelector('[data-hell-table-shell-table]') as HTMLElement | null;
+    const tableWidth = table?.getBoundingClientRect().width ?? 0;
+    const scrollportWidth = this.scrollport?.clientWidth ?? 0;
+    const width = Math.max(tableWidth, scrollportWidth);
+    this.rowWidth.set(width > 0 ? width : null);
     this.cdr.markForCheck();
   }
 

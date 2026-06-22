@@ -21,6 +21,7 @@ import {
   HellTableShellFooter,
   HellTableShellLoading,
 } from './table-tanstack';
+import { HellButton } from '../primitives/button/button';
 import { HellTanStackVirtualRows } from './virtual/virtual-rows';
 
 interface Person {
@@ -45,11 +46,14 @@ const people: Person[] = [
     HellTableShellLoading,
     HellTableShellFooter,
     HellTanStackPagination,
+    HellButton,
   ],
   template: `
     <hell-tanstack-table [table]="table" [status]="status()">
       <ng-template hellTableShellCell="actions" let-row="row" let-cell>
-        <button type="button" data-action>{{ row.original.name }} {{ cell.column.id }}</button>
+        <button hellButton type="button" data-action>
+          {{ row.original.name }} {{ cell.column.id }}
+        </button>
       </ng-template>
 
       <ng-template hellTableShellLoading>Loading rows</ng-template>
@@ -178,6 +182,25 @@ describe('Hell TanStack table shell', () => {
     expect(text(root)).toContain('No rows');
     expect(root.querySelector('[data-selected]')?.textContent).toContain('2 selected');
     expect(root.querySelector('hell-tanstack-pagination')).not.toBeNull();
+    expect(root.querySelector('hell-tanstack-pagination hell-pagination')).not.toBeNull();
+    expect(root.querySelectorAll('hell-tanstack-pagination [role="navigation"]')).toHaveLength(1);
+    expect(root.querySelector('hell-tanstack-pagination nav')).toBeNull();
+  });
+
+  it('adapts the reusable Hell pagination strip to TanStack pagination APIs', () => {
+    const fixture = TestBed.createComponent(ShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const nextPage = root.querySelector(
+      'hell-tanstack-pagination hell-pagination button[aria-label="Page 2"]',
+    ) as HTMLButtonElement | null;
+
+    expect(nextPage).not.toBeNull();
+    nextPage?.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.pagination().pageIndex).toBe(1);
+    expect(text(root)).toContain('Person Grace');
   });
 
   it('renders loading and error states from the single status value', () => {
@@ -207,17 +230,17 @@ describe('Hell TanStack table shell', () => {
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
 
-    expect(root.querySelector('hell-tanstack-table')?.getAttribute('data-hell-tanstack-virtual-rows')).toBe(
-      'true',
-    );
-    expect(root.querySelectorAll('[data-hell-table-virtual-row]')).toHaveLength(3);
-    expect(root.querySelector('[data-hell-table-virtual-row-kind="expanded"]')?.textContent).toContain(
-      'Ada details',
-    );
     expect(
-      (root.querySelector('[data-hell-table-virtual-body]') as HTMLElement | null)?.style.getPropertyValue(
-        '--hell-table-virtual-total-size',
-      ),
+      root.querySelector('hell-tanstack-table')?.getAttribute('data-hell-tanstack-virtual-rows'),
+    ).toBe('true');
+    expect(root.querySelectorAll('[data-hell-table-virtual-row]')).toHaveLength(3);
+    expect(
+      root.querySelector('[data-hell-table-virtual-row-kind="expanded"]')?.textContent,
+    ).toContain('Ada details');
+    expect(
+      (
+        root.querySelector('[data-hell-table-virtual-body]') as HTMLElement | null
+      )?.style.getPropertyValue('--hell-table-virtual-total-size'),
     ).toBe('');
   });
 });

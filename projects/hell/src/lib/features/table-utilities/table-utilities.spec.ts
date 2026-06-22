@@ -2,6 +2,8 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { provideHellLabels } from '../../core/labels';
+import { HellButton } from '../../primitives/button/button';
+import { HellInput } from '../../primitives/input/input';
 import {
   HELL_TABLE_UTILITIES_DIRECTIVES,
   type HellTableResizeAdapter,
@@ -10,7 +12,7 @@ import {
 } from './table-utilities';
 
 @Component({
-  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [HellButton, HellInput, ...HELL_TABLE_UTILITIES_DIRECTIVES],
   template: `
     <table hellTable>
       <thead hellTableHead>
@@ -34,8 +36,10 @@ import {
             (sortToggle)="sortEvents.push($event)"
           >
             <button id="name-sort" hellTableSortTrigger type="button">Name</button>
-            <span id="name-sort-non-button" hellTableSortTrigger tabindex="0">Ignored sort label</span>
-            <button id="header-action" type="button">Filter</button>
+            <span id="name-sort-non-button" hellTableSortTrigger tabindex="0"
+              >Ignored sort label</span
+            >
+            <button id="header-action" hellButton type="button">Filter</button>
             <button
               id="name-resizer"
               hellTableResizeHandle
@@ -71,6 +75,7 @@ import {
             Ada
             <button
               id="row-action"
+              hellButton
               hellTableRowAction
               type="button"
               (click)="actionEvents.push($event)"
@@ -85,7 +90,7 @@ import {
             >
               Profile
             </a>
-            <input id="row-input" aria-label="Inline edit" />
+            <input id="row-input" hellInput aria-label="Inline edit" />
             <span id="row-ignore" hellTableRowIgnore>Ignore</span>
             <span id="row-legacy-ignore" data-hell-row-ignore>Legacy Ignore</span>
           </td>
@@ -333,8 +338,16 @@ describe('Hell table utilities directives', () => {
     expect(selectAll.getAttribute('data-indeterminate')).toBe('');
     expect(checkbox.classList.contains('hell-checkbox')).toBe(true);
     expect(radio.classList.contains('hell-radio')).toBe(true);
-    expect(byId<HTMLElement>(fixture.nativeElement, 'row-checkbox').getAttribute('data-hell-table-row-checkbox')).toBe('');
-    expect(byId<HTMLElement>(fixture.nativeElement, 'row-radio').getAttribute('data-hell-table-row-radio')).toBe('');
+    expect(
+      byId<HTMLElement>(fixture.nativeElement, 'row-checkbox').getAttribute(
+        'data-hell-table-row-checkbox',
+      ),
+    ).toBe('');
+    expect(
+      byId<HTMLElement>(fixture.nativeElement, 'row-radio').getAttribute(
+        'data-hell-table-row-radio',
+      ),
+    ).toBe('');
 
     action.click();
     link.addEventListener('click', (event) => event.preventDefault(), { once: true });
@@ -365,8 +378,16 @@ describe('Hell table utilities directives', () => {
     );
 
     expect(host.actionEvents).toEqual([]);
-    expect(byId<HTMLSpanElement>(fixture.nativeElement, 'row-ignore').getAttribute('data-hell-row-ignore')).toBe('');
-    expect(byId<HTMLSpanElement>(fixture.nativeElement, 'row-legacy-ignore').getAttribute('data-hell-row-ignore')).toBe('');
+    expect(
+      byId<HTMLSpanElement>(fixture.nativeElement, 'row-ignore').getAttribute(
+        'data-hell-row-ignore',
+      ),
+    ).toBe('');
+    expect(
+      byId<HTMLSpanElement>(fixture.nativeElement, 'row-legacy-ignore').getAttribute(
+        'data-hell-row-ignore',
+      ),
+    ).toBe('');
   });
 
   it('disables the sort trigger when its header is not sortable', () => {
@@ -528,9 +549,9 @@ describe('Hell table utilities directives', () => {
     expect(resizer.getAttribute('aria-valuemin')).toBe('0');
     expect(resizer.getAttribute('aria-valuemax')).toBe('100');
     expect(resizer.getAttribute('aria-valuenow')).toBe('68');
-    expect(byId<HTMLButtonElement>(fixture.nativeElement, 'role-resizer').getAttribute('aria-controls')).toBe(
-      null,
-    );
+    expect(
+      byId<HTMLButtonElement>(fixture.nativeElement, 'role-resizer').getAttribute('aria-controls'),
+    ).toBe(null);
   });
 
   it('delegates sizing through a provided resize adapter without header-cell state', () => {
@@ -556,8 +577,16 @@ describe('Hell table utilities directives', () => {
         totalPx: 200,
       },
     ]);
-    expect(byId<HTMLElement>(fixture.nativeElement, 'adapter-alpha').style.getPropertyValue('--hell-table-col-width')).toBe('');
-    expect(byId<HTMLElement>(fixture.nativeElement, 'adapter-beta').style.getPropertyValue('--hell-table-col-width')).toBe('');
+    expect(
+      byId<HTMLElement>(fixture.nativeElement, 'adapter-alpha').style.getPropertyValue(
+        '--hell-table-col-width',
+      ),
+    ).toBe('');
+    expect(
+      byId<HTMLElement>(fixture.nativeElement, 'adapter-beta').style.getPropertyValue(
+        '--hell-table-col-width',
+      ),
+    ).toBe('');
     expect(resizer.getAttribute('aria-controls')).toBe('adapter-alpha adapter-beta');
     expect(resizer.getAttribute('aria-valuenow')).toBe('58');
   });
@@ -653,7 +682,11 @@ describe('Hell table utilities directives', () => {
     fixture.detectChanges();
 
     const resizer = byId<HTMLButtonElement>(fixture.nativeElement, 'role-resizer');
-    const key = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true });
+    const key = new KeyboardEvent('keydown', {
+      key: 'ArrowRight',
+      bubbles: true,
+      cancelable: true,
+    });
     const pointer = new PointerEvent('pointerdown', {
       button: 0,
       pointerId: 8,
