@@ -45,7 +45,9 @@ test.describe('table layer browser accessibility contracts', () => {
     await expect(nameHeader).not.toHaveAttribute('aria-sort');
     await expect(trigger).toHaveAttribute('type', 'button');
 
-    await trigger.click();
+    await trigger.focus();
+    await expect(trigger).toBeFocused();
+    await trigger.press('Enter');
 
     await expect(nameHeader).toHaveAttribute('aria-sort', 'ascending');
     await expect(nameHeader).toHaveAttribute('data-sort', 'asc');

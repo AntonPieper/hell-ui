@@ -2,9 +2,11 @@
   - heading "TanStack shell" [level=2]
   - table:
     - rowgroup:
-      - row "Name Role Actions":
-        - columnheader "Name"
-        - columnheader "Role"
+      - row "Sort name ascending Sort role ascending Actions":
+        - columnheader "Sort name ascending":
+          - button "Sort name ascending": Name
+        - columnheader "Sort role ascending":
+          - button "Sort role ascending": Role
         - columnheader "Actions"
     - rowgroup:
       - row "Ada Lovelace Admin Details":

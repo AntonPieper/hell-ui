@@ -425,7 +425,7 @@
   .hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
     [data-hell-table-virtual-row='true']
     > .hell-table-cell {
-    width: calc(var(--hell-table-column-size, 0px) / var(--hell-table-total-size, 1px) * 100%);
+    width: var(--hell-table-column-size, auto);
   }
 
   .hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
