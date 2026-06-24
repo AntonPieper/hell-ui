@@ -6,11 +6,7 @@ import { provideHellLabels } from '../../core/labels';
 import { type HellSearchSource } from '../../core/search';
 import { HellGlobalKeydownService, matchHotkey } from '../../core/hotkeys';
 import { HELL_MENU_DIRECTIVES } from '../../primitives/menu/menu';
-import {
-  HELL_OMNIBAR_DIRECTIVES,
-  matchHotkey as matchHotkeyFromOmnibar,
-  type HellOmnibarSubmitEvent,
-} from './omnibar';
+import { HELL_OMNIBAR_DIRECTIVES, type HellOmnibarSubmitEvent } from './omnibar';
 
 @Component({
   imports: [...HELL_OMNIBAR_DIRECTIVES, ...HELL_MENU_DIRECTIVES],
@@ -550,14 +546,6 @@ describe('HellOmnibar hotkey listener opt-in', () => {
     await fixture.whenStable();
 
     expect(fakeGlobalKeydown.unregisters[0]).toHaveBeenCalledOnce();
-  });
-});
-
-describe('HellOmnibar hotkey compatibility', () => {
-  it('re-exports matchHotkey from the composite entry point', () => {
-    const event = new KeyboardEvent('keydown', { key: 'k', ctrlKey: true });
-
-    expect(matchHotkeyFromOmnibar(event, 'ctrl+k')).toBe(matchHotkey(event, 'ctrl+k'));
   });
 });
 

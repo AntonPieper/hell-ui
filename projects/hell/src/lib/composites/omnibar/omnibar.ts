@@ -1026,5 +1026,3 @@ export const HELL_OMNIBAR_DIRECTIVES = [
   HellOmnibarActionsStrip,
   HellOmnibarAction,
 ] as const;
-
-export { matchHotkey };

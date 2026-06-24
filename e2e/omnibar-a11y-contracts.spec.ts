@@ -55,6 +55,26 @@ test.describe('omnibar accessibility contract', () => {
     await expect(input).toBeFocused();
   });
 
+  test('bare global hotkey does not steal typing from another editable field', async ({ page }) => {
+    await gotoOmnibar(page);
+
+    const input = peopleInput(page);
+    await page.evaluate(() => {
+      const field = document.createElement('input');
+      field.setAttribute('aria-label', 'Outside editor');
+      document.body.append(field);
+      field.focus();
+    });
+
+    const outsideEditor = page.getByRole('textbox', { name: 'Outside editor' });
+    await expect(outsideEditor).toBeFocused();
+
+    await page.keyboard.press('/');
+
+    await expect(outsideEditor).toHaveValue('/');
+    await expect(input).toHaveAttribute('aria-expanded', 'false');
+  });
+
   test('F6 moves through the action strip without adding tab stops', async ({ page }) => {
     await gotoOmnibar(page);
 

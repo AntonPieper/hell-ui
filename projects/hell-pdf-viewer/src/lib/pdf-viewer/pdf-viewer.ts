@@ -33,12 +33,11 @@ import {
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellInput, HellNativeSelect } from '@hell-ui/angular/input';
+import { HELL_LABELS, HellStyleable } from '@hell-ui/angular/core';
 import {
-  HELL_LABELS,
   HellGlobalKeydownService,
   HellGlobalPointerdownService,
-  HellStyleable,
-} from '@hell-ui/angular/core';
+} from '@hell-ui/angular/internal/hotkeys';
 import {
   HellPdfRuntime,
   HellPdfViewerInteractionScope,

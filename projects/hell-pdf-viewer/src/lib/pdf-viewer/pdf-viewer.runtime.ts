@@ -160,16 +160,19 @@ export class HellPdfViewerInteractionScope {
     const activeElement = doc.activeElement;
     const target = event.target;
     const selection = doc.defaultView?.getSelection();
-
-    return (
-      this.viewerActive ||
-      containsNode(host, activeElement) ||
-      containsNode(host, target) ||
-      !!(
-        selection &&
-        (containsNode(host, selection.anchorNode) || containsNode(host, selection.focusNode))
-      )
+    const activeElementInside = containsNode(host, activeElement);
+    const targetInside = containsNode(host, target);
+    const selectionInside = !!(
+      selection &&
+      (containsNode(host, selection.anchorNode) || containsNode(host, selection.focusNode))
     );
+
+    if (isOutsideKeyboardScope(host, activeElement) || isOutsideKeyboardScope(host, target)) {
+      this.viewerActive = false;
+      return false;
+    }
+
+    return this.viewerActive || activeElementInside || targetInside || selectionInside;
   }
 
   private handleCommandShortcut(
@@ -220,6 +223,16 @@ export class HellPdfViewerInteractionScope {
 function hasPdfCommandModifier(event: KeyboardEvent, allowShift = false): boolean {
   if (event.altKey || (!allowShift && event.shiftKey)) return false;
   return event.ctrlKey !== event.metaKey;
+}
+
+function isOutsideKeyboardScope(
+  host: HTMLElement,
+  target: EventTarget | Node | null | undefined,
+): boolean {
+  if (!isElementLike(target)) return false;
+  const doc = host.ownerDocument;
+  if (target === doc.body || target === doc.documentElement) return false;
+  return !containsNode(host, target);
 }
 
 export class HellPdfRuntime implements HellPdfRuntimePort {
