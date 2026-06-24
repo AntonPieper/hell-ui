@@ -9,7 +9,7 @@ Use this guide when moving an app from local/alpha Hell imports to the first bet
 1. Start from an Angular 21 app that satisfies `@angular/common`, `@angular/core`, `@angular/forms`, and `rxjs` peer ranges from [`projects/hell/package.json`](../../projects/hell/package.json).
 2. Install the smallest peer tier for the entry points and CSS you import.
 3. Replace root or kitchen-sink imports with narrow secondary entry points where possible.
-4. Import only the Hell CSS files you need, or use `unstyled` behavior-only directives and own the styling yourself.
+4. Import only the Hell CSS files you need. Migrated components such as Button use `[ui]` part style maps; components not yet migrated still support `unstyled`.
 5. Treat browser-only/heavy features as lazy, client-only, and beta/experimental unless their own docs say otherwise.
 6. Check the accessibility matrix and the production-readiness gate before making production claims.
 
@@ -22,7 +22,7 @@ A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`;
 | Consumer path | Install peers for this path | Entry points / CSS | Proof scenario |
 | --- | --- | --- | --- |
 | Root/core only | `@hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs` plus Angular app peers | `@hell-ui/angular`, `@hell-ui/angular/core`, `@hell-ui/angular/testing`; no Hell CSS required | [`root-core`, `core`, `testing`](../../tools/check-package-consumer.mjs) |
-| Behavior-only primitive | Core peer group only | Narrow primitive import such as `@hell-ui/angular/button`; use `unstyled`; no Hell CSS/Tailwind required | [`button-unstyled`](../../tools/check-package-consumer.mjs) |
+| Button Part Style Map | Core peer group only | Narrow Button import plus `[ui]`; no Hell CSS/Tailwind required for compile-time behavior proof | [`button-ui`](../../tools/check-package-consumer.mjs) |
 | Styled narrow primitive | Core peer group plus `tailwindcss` | Narrow primitive import plus `@hell-ui/angular/styles/tokens` and primitive/component CSS | [`button`](../../tools/check-package-consumer.mjs) |
 | Aggregate primitives | Core peer group plus `tailwindcss`, `@angular/router`, `@ng-icons/font-awesome` | `@hell-ui/angular/primitives` plus primitive CSS. Router is needed because the aggregate includes dialog through `ng-primitives/dialog`; Font Awesome is needed because icon-backed primitives are bundled in the aggregate FESM. | [`primitives-css`](../../tools/check-package-consumer.mjs) |
 | Composites | Core peer group plus `tailwindcss`; add `@ng-icons/font-awesome` for aggregate/icon-backed composites | Prefer narrow composite entry points such as `@hell-ui/angular/app-shell` and `@hell-ui/angular/audio-player`; use `@hell-ui/angular/composites` only when you accept aggregate peers | [`app-shell`, `audio-player`, `composites-css`](../../tools/check-package-consumer.mjs) |
@@ -36,7 +36,7 @@ A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`;
 Examples:
 
 ```bash
-# Behavior-only button. Proved by the button-unstyled scenario.
+# Button Part Style Map. Proved by the button-ui scenario.
 pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs
 
 # Styled primitives. Proved by the button/primitives-css scenarios.
@@ -64,7 +64,7 @@ pnpm add @hell-ui/angular @hell-ui/pdf-viewer @angular/forms @angular/cdk @float
 Maintainers can rerun a proof path from the product workspace:
 
 ```bash
-HELL_PACKAGE_CONSUMER_SCENARIOS=button-unstyled pnpm test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=button-ui pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=primitives-css pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=audio-player pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=audio-transcript pnpm test:package-consumer -- --minimal-deps
@@ -129,22 +129,26 @@ Add only the feature CSS you import:
 
 Avoid `@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` for production migration unless the app intentionally accepts every primitive, composite, CodeMirror, and table style in one bundle. PDF viewer styles come from `@hell-ui/pdf-viewer/styles`.
 
-## Unstyled mode
+## Part Style Maps and Unstyled mode
 
-Use `unstyled` when you want Hell behavior, state attributes, and accessibility wiring without Hell host classes.
+Button has migrated from Style Opt-Out to the Part Style Map API. Pass `[ui]`
+when you want to refine its public `root` part while keeping Hell behavior,
+state attributes, and accessibility wiring.
 
 ```html
-<button hellButton unstyled type="button">Save</button>
+<button hellButton type="button" [ui]="{ root: 'rounded-hell-pill bg-hell-primary' }">
+  Save
+</button>
 ```
 
 Rules for migration:
 
 - Keep the directive import narrow, for example `@hell-ui/angular/button`.
-- Do not import Hell CSS for behavior-only controls unless another Hell surface needs it.
-- Own focus, color, density, and layout styles in your app CSS.
-- Continue to test the behavior and accessible name; `unstyled` is not an accessibility opt-out.
+- Import Hell CSS when you want shipped default visuals.
+- Use `[ui]` for Button visual refinements instead of `unstyled`.
+- Continue to test the behavior and accessible name; styling APIs are not accessibility opt-outs.
 
-The [`button-unstyled`](../../tools/check-package-consumer.mjs) package-consumer scenario proves this path without Tailwind or Hell CSS.
+The [`button-ui`](../../tools/check-package-consumer.mjs) package-consumer scenario proves the typed Button `[ui]` path without Tailwind or Hell CSS. Other primitives that have not migrated yet still document `unstyled` locally.
 
 ## Heavy and browser-only features
 

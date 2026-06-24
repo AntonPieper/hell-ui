@@ -39,7 +39,7 @@ Package-consumer scenarios assert these peer groups with strict peer installs. C
 | Tier | Entry points / scenarios | Peer group asserted |
 | --- | --- | --- |
 | Core | `@hell-ui/angular`, `/core`, `/testing`; `root-core`, `core`, `testing` | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `ng-primitives`, `rxjs` |
-| Primitive | Narrow primitives such as `/button`; aggregate `/primitives`; `button-unstyled`, `button`, `primitives-css` | Core peers. Add `tailwindcss` when importing primitive CSS. Aggregate `/primitives` also asserts optional `@angular/router` and `@ng-icons/font-awesome` because dialog and icon-backed primitives are bundled in the aggregate FESM. |
+| Primitive | Narrow primitives such as `/button`; aggregate `/primitives`; `button-ui`, `button`, `primitives-css` | Core peers. Add `tailwindcss` when importing primitive CSS. Aggregate `/primitives` also asserts optional `@angular/router` and `@ng-icons/font-awesome` because dialog and icon-backed primitives are bundled in the aggregate FESM. |
 | Composite | `/composites` and narrow composite entry points such as `/app-shell` and `/audio-player`; `composites-css`, `app-shell`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Aggregate/icon-backed composites also assert optional `@ng-icons/font-awesome`. |
 | Audio transcript | `/features/audio-transcript`; `audio-transcript` | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled. |
 | Table primitives | `/table`; `table`, `no-legacy-alias` | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack Table, or TanStack Virtual peers. The negative scenario proves removed legacy table aliases and CSS aliases stay unavailable. |
@@ -114,14 +114,16 @@ For broader loading:
 
 `@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` are legacy kitchen-sink aliases that include primitives, composites, and kept in-package feature styles such as CodeMirror. Use them only when the app intentionally accepts all in-package feature styles.
 
-## Style Opt-Out
+## Part Style Maps
 
-`unstyled` removes Hell host classes while keeping behavior, accessibility, and
-state attributes.
+Button supports a typed Part Style Map. Pass `[ui]` with a `root` class string
+to refine the default recipe while keeping behavior, accessibility, and state
+attributes. Primitives that have not migrated yet still document `unstyled`
+locally.
 
 ```html
 <button hellButton variant="primary">Save</button>
-<button hellButton unstyled variant="primary">Save</button>
+<button hellButton [ui]="{ root: 'rounded-hell-pill bg-hell-primary' }">Save</button>
 ```
 
 ## Customization
@@ -130,8 +132,6 @@ Hell uses semantic tokens and supported component variables:
 
 ```css
 .danger-zone {
-  --hell-button-radius: 999px;
-  --hell-button-height: 40px;
   --hell-select-width: auto;
   --hell-select-indicator-display: none;
 }

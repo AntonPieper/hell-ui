@@ -1,0 +1,236 @@
+{
+  "capturedAt": "2026-06-24T20:11:33.064Z",
+  "captures": [
+    "/Users/apieper/dev/hell-ui-hell-131/projects/hell/docs/reviews/HELL-131/button-desktop-full.png",
+    "/Users/apieper/dev/hell-ui-hell-131/projects/hell/docs/reviews/HELL-131/button-desktop-part-style-map-region.png",
+    "/Users/apieper/dev/hell-ui-hell-131/projects/hell/docs/reviews/HELL-131/button-mobile-full.png",
+    "/Users/apieper/dev/hell-ui-hell-131/projects/hell/docs/reviews/HELL-131/button-mobile-part-style-map-region.png",
+    "/Users/apieper/dev/hell-ui-hell-131/projects/hell/docs/reviews/HELL-131/split-view-desktop-master-detail-region.png"
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "button": {
+    "desktop": {
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 1100
+      },
+      "clip": {
+        "x": 0,
+        "y": 485,
+        "width": 1440,
+        "height": 360
+      },
+      "customizationButtons": [
+        {
+          "text": "Confirm transfer",
+          "className": "bg-hell-success-strong border border-[color:var(--hell-button-border-color,var(--color-hell-border))] border-solid cursor-pointer data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:saturate-[0.65] data-disabled:shadow-none data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1 data-hover:bg-hell-success-hover data-press:bg-hell-success-active duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] font-medium gap-hell-2 h-hell-control-md inline-flex items-center justify-center px-hell-5 rounded-hell-pill select-none shadow-[var(--shadow-hell-xs)] text-[13px] text-hell-foreground-inverse transition-[background-color,border-color,color,box-shadow] whitespace-nowrap",
+          "dataSlot": "root",
+          "current": null,
+          "ariaCurrent": null,
+          "hasLegacyClass": false,
+          "rect": {
+            "x": 433,
+            "y": 708,
+            "width": 136,
+            "height": 34
+          },
+          "backgroundColor": "rgb(22, 101, 52)",
+          "color": "rgb(255, 255, 255)",
+          "borderColor": "rgb(227, 230, 236)",
+          "borderRadius": "999px",
+          "lineHeight": "21.125px",
+          "cssVars": {
+            "background": "",
+            "hover": "",
+            "border": "",
+            "color": ""
+          }
+        },
+        {
+          "text": "Audit log",
+          "className": "bg-hell-surface-subtle border border-hell-border-strong border-solid cursor-pointer data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:saturate-[0.65] data-disabled:shadow-none data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1 data-hover:bg-hell-surface-muted data-press:bg-[var(--hell-button-background-active,var(--color-hell-surface-muted))] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] font-medium gap-hell-2 h-hell-control-md inline-flex items-center justify-center px-hell-5 rounded-hell-md select-none shadow-[var(--shadow-hell-xs)] shadow-none text-[13px] text-hell-foreground-muted transition-[background-color,border-color,color,box-shadow] whitespace-nowrap",
+          "dataSlot": "root",
+          "current": null,
+          "ariaCurrent": null,
+          "hasLegacyClass": false,
+          "rect": {
+            "x": 576,
+            "y": 708,
+            "width": 89,
+            "height": 34
+          },
+          "backgroundColor": "rgb(247, 248, 250)",
+          "color": "rgb(91, 99, 112)",
+          "borderColor": "rgb(200, 205, 214)",
+          "borderRadius": "6px",
+          "lineHeight": "21.125px",
+          "cssVars": {
+            "background": "",
+            "hover": "",
+            "border": "",
+            "color": ""
+          }
+        }
+      ]
+    },
+    "mobile": {
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 386,
+        "width": 390,
+        "height": 360
+      },
+      "customizationButtons": [
+        {
+          "text": "Confirm transfer",
+          "className": "bg-hell-success-strong border border-[color:var(--hell-button-border-color,var(--color-hell-border))] border-solid cursor-pointer data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:saturate-[0.65] data-disabled:shadow-none data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1 data-hover:bg-hell-success-hover data-press:bg-hell-success-active duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] font-medium gap-hell-2 h-hell-control-md inline-flex items-center justify-center px-hell-5 rounded-hell-pill select-none shadow-[var(--shadow-hell-xs)] text-[13px] text-hell-foreground-inverse transition-[background-color,border-color,color,box-shadow] whitespace-nowrap",
+          "dataSlot": "root",
+          "current": null,
+          "ariaCurrent": null,
+          "hasLegacyClass": false,
+          "rect": {
+            "x": 31,
+            "y": 626,
+            "width": 136,
+            "height": 34
+          },
+          "backgroundColor": "rgb(22, 101, 52)",
+          "color": "rgb(255, 255, 255)",
+          "borderColor": "rgb(227, 230, 236)",
+          "borderRadius": "999px",
+          "lineHeight": "21.125px",
+          "cssVars": {
+            "background": "",
+            "hover": "",
+            "border": "",
+            "color": ""
+          }
+        },
+        {
+          "text": "Audit log",
+          "className": "bg-hell-surface-subtle border border-hell-border-strong border-solid cursor-pointer data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:saturate-[0.65] data-disabled:shadow-none data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1 data-hover:bg-hell-surface-muted data-press:bg-[var(--hell-button-background-active,var(--color-hell-surface-muted))] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] font-medium gap-hell-2 h-hell-control-md inline-flex items-center justify-center px-hell-5 rounded-hell-md select-none shadow-[var(--shadow-hell-xs)] shadow-none text-[13px] text-hell-foreground-muted transition-[background-color,border-color,color,box-shadow] whitespace-nowrap",
+          "dataSlot": "root",
+          "current": null,
+          "ariaCurrent": null,
+          "hasLegacyClass": false,
+          "rect": {
+            "x": 174,
+            "y": 626,
+            "width": 89,
+            "height": 34
+          },
+          "backgroundColor": "rgb(247, 248, 250)",
+          "color": "rgb(91, 99, 112)",
+          "borderColor": "rgb(200, 205, 214)",
+          "borderRadius": "6px",
+          "lineHeight": "21.125px",
+          "cssVars": {
+            "background": "",
+            "hover": "",
+            "border": "",
+            "color": ""
+          }
+        }
+      ]
+    }
+  },
+  "splitView": {
+    "desktop": {
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 128,
+        "y": 215,
+        "width": 920,
+        "height": 460
+      },
+      "masterItems": [
+        {
+          "text": "T-104 · Approve invoice",
+          "className": "justify-start bg-[var(--hell-button-background,transparent)] border border-[color:var(--hell-button-border-color,transparent)] border-solid cursor-pointer data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:saturate-[0.65] data-disabled:shadow-none data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1 data-hover:bg-[var(--hell-button-background-hover,var(--color-hell-surface-muted))] data-press:bg-[var(--hell-button-background-active,var(--color-hell-surface-muted))] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] font-medium gap-hell-2 h-hell-control-sm inline-flex items-center justify-center px-hell-4 rounded-hell-md select-none shadow-[var(--shadow-hell-xs)] shadow-none text-[13px] text-[color:var(--hell-button-color,var(--color-hell-foreground))] transition-[background-color,border-color,color,box-shadow] w-full whitespace-nowrap",
+          "dataSlot": "master-item",
+          "current": "true",
+          "ariaCurrent": "true",
+          "hasLegacyClass": false,
+          "rect": {
+            "x": 288,
+            "y": 356,
+            "width": 509,
+            "height": 28
+          },
+          "backgroundColor": "rgb(238, 240, 243)",
+          "color": "rgb(49, 58, 70)",
+          "borderColor": "rgb(227, 230, 236)",
+          "borderRadius": "6px",
+          "lineHeight": "19.5px",
+          "cssVars": {
+            "background": "#eef0f3",
+            "hover": "#eef0f3",
+            "border": "#e3e6ec",
+            "color": "#313a46"
+          }
+        },
+        {
+          "text": "T-109 · Review rollout",
+          "className": "justify-start bg-[var(--hell-button-background,transparent)] border border-[color:var(--hell-button-border-color,transparent)] border-solid cursor-pointer data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:saturate-[0.65] data-disabled:shadow-none data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1 data-hover:bg-[var(--hell-button-background-hover,var(--color-hell-surface-muted))] data-press:bg-[var(--hell-button-background-active,var(--color-hell-surface-muted))] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] font-medium gap-hell-2 h-hell-control-sm inline-flex items-center justify-center px-hell-4 rounded-hell-md select-none shadow-[var(--shadow-hell-xs)] shadow-none text-[13px] text-[color:var(--hell-button-color,var(--color-hell-foreground))] transition-[background-color,border-color,color,box-shadow] w-full whitespace-nowrap",
+          "dataSlot": "master-item",
+          "current": null,
+          "ariaCurrent": null,
+          "hasLegacyClass": false,
+          "rect": {
+            "x": 288,
+            "y": 387,
+            "width": 509,
+            "height": 28
+          },
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgb(28, 34, 42)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "6px",
+          "lineHeight": "19.5px",
+          "cssVars": {
+            "background": "",
+            "hover": "",
+            "border": "",
+            "color": ""
+          }
+        },
+        {
+          "text": "T-118 · Update access",
+          "className": "justify-start bg-[var(--hell-button-background,transparent)] border border-[color:var(--hell-button-border-color,transparent)] border-solid cursor-pointer data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:saturate-[0.65] data-disabled:shadow-none data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1 data-hover:bg-[var(--hell-button-background-hover,var(--color-hell-surface-muted))] data-press:bg-[var(--hell-button-background-active,var(--color-hell-surface-muted))] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] font-medium gap-hell-2 h-hell-control-sm inline-flex items-center justify-center px-hell-4 rounded-hell-md select-none shadow-[var(--shadow-hell-xs)] shadow-none text-[13px] text-[color:var(--hell-button-color,var(--color-hell-foreground))] transition-[background-color,border-color,color,box-shadow] w-full whitespace-nowrap",
+          "dataSlot": "master-item",
+          "current": null,
+          "ariaCurrent": null,
+          "hasLegacyClass": false,
+          "rect": {
+            "x": 288,
+            "y": 419,
+            "width": 509,
+            "height": 28
+          },
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgb(28, 34, 42)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderRadius": "6px",
+          "lineHeight": "19.5px",
+          "cssVars": {
+            "background": "",
+            "hover": "",
+            "border": "",
+            "color": ""
+          }
+        }
+      ]
+    }
+  }
+}

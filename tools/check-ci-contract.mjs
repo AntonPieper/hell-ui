@@ -53,7 +53,7 @@ const requiredScripts = {
   'ci:test:e2e': 'pnpm exec playwright test',
   'ci:test:package-consumer': 'pnpm run test:package-consumer -- --minimal-deps',
   'ci:test:package-consumer:core': 'HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing pnpm run ci:test:package-consumer',
-  'ci:test:package-consumer:primitives': 'HELL_PACKAGE_CONSUMER_SCENARIOS=primitives-css,button-unstyled,button pnpm run ci:test:package-consumer',
+  'ci:test:package-consumer:primitives': 'HELL_PACKAGE_CONSUMER_SCENARIOS=primitives-css,button-ui,button pnpm run ci:test:package-consumer',
   'ci:test:package-consumer:composites': 'HELL_PACKAGE_CONSUMER_SCENARIOS=composites-css,app-shell,audio-player,audio-transcript pnpm run ci:test:package-consumer',
   'ci:test:package-consumer:features': 'HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor,pdf-viewer pnpm run ci:test:package-consumer',
   'ci:test:package-consumer:tables': 'HELL_PACKAGE_CONSUMER_SCENARIOS=table,table-tanstack,table-tanstack-virtual,no-legacy-alias pnpm run ci:test:package-consumer',

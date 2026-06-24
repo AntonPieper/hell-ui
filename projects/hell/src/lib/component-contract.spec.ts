@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellButton } from './primitives/button/button';
+import { HellButton, type HellButtonUi } from './primitives/button/button';
 import { HELL_CARD_DIRECTIVES } from './primitives/card/card';
 import { HELL_FIELD_DIRECTIVES } from './primitives/field/field';
 import { HellAvatar } from './primitives/avatar/avatar';
@@ -207,9 +207,7 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
     <button id="styled-button" hellButton variant="primary" size="sm" iconOnly block type="button">
       Save
     </button>
-    <button id="unstyled-button" hellButton unstyled variant="danger" size="lg" type="button">
-      Delete
-    </button>
+    <button id="custom-button" hellButton [ui]="buttonUi" type="button">Custom</button>
 
     <input data-contract="input" hellInput size="sm" [invalid]="true" />
     <select data-contract="native-select" hellNativeSelect size="md" [invalid]="true">
@@ -289,20 +287,13 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
     </div>
   `,
 })
-class ContractHost {}
+class ContractHost {
+  readonly buttonUi = {
+    root: 'rounded-hell-pill bg-hell-danger',
+  } satisfies HellButtonUi;
+}
 
 const STYLEABLE_CASES: readonly ContractCase[] = [
-  {
-    id: 'styled-button',
-    module: 'HellButton',
-    className: 'hell-button',
-    attrs: {
-      'data-variant': 'primary',
-      'data-size': 'sm',
-      'data-icon-only': '',
-      'data-block': '',
-    },
-  },
   {
     id: 'input',
     module: 'HellInput',
@@ -444,12 +435,6 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
 
 const STYLE_OPT_OUT_CASES: readonly ContractCase[] = [
   {
-    id: 'unstyled-button',
-    module: 'HellButton',
-    className: 'hell-button',
-    attrs: { 'data-variant': 'danger', 'data-size': 'lg' },
-  },
-  {
     id: 'unstyled-card',
     module: 'HellCard',
     className: 'hell-card',
@@ -476,6 +461,29 @@ describe('Hell Component Contract', () => {
     fixture.detectChanges();
 
     for (const contract of STYLEABLE_CASES) assertContract(fixture.nativeElement, contract, true);
+  });
+
+  it('exposes migrated Part Style Map contracts through public root parts', () => {
+    const fixture = TestBed.createComponent(ContractHost);
+    fixture.detectChanges();
+
+    const styled = query(fixture.nativeElement, '#styled-button');
+    expect(styled.classList.contains('hell-button')).toBe(false);
+    expect(styled.getAttribute('data-slot')).toBe('root');
+    expect(styled.getAttribute('data-variant')).toBe('primary');
+    expect(styled.getAttribute('data-size')).toBe('sm');
+    expect(styled.getAttribute('data-icon-only')).toBe('');
+    expect(styled.getAttribute('data-block')).toBe('');
+    expect(styled.className).toContain(
+      'bg-[var(--hell-button-background,var(--color-hell-primary))]',
+    );
+    expect(styled.className).toContain('w-full');
+
+    const custom = query(fixture.nativeElement, '#custom-button');
+    expect(custom.classList.contains('hell-button')).toBe(false);
+    expect(custom.getAttribute('data-slot')).toBe('root');
+    expect(custom.className).toContain('rounded-hell-pill');
+    expect(custom.className).toContain('bg-hell-danger');
   });
 
   it('keeps state attributes while Style Opt-Out removes default classes', () => {
@@ -536,4 +544,10 @@ function assertContract(root: HTMLElement, contract: ContractCase, styled: boole
   for (const [name, value] of Object.entries(contract.attrs ?? {})) {
     expect(element.getAttribute(name), `${contract.id}.${name}`).toBe(value);
   }
+}
+
+function query<T extends HTMLElement = HTMLElement>(root: HTMLElement, selector: string): T {
+  const element = root.querySelector<T>(selector);
+  if (!(element instanceof HTMLElement)) throw new Error(`Expected ${selector}.`);
+  return element;
 }

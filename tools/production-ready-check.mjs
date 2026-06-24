@@ -16,7 +16,7 @@ const requiredCategories = [
 ];
 const requiredReleaseScenarios = [
   'root-core',
-  'button-unstyled',
+  'button-ui',
   'primitives-css',
   'audio-player',
   'audio-transcript',

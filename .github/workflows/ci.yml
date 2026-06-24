@@ -101,7 +101,7 @@ jobs:
           - scenario: core
             scenarios: root-core,core,testing
           - scenario: primitive-foundations
-            scenarios: primitives-css,button-unstyled
+            scenarios: primitives-css,button-ui
           - scenario: button
             scenarios: button
           - scenario: composite-foundations

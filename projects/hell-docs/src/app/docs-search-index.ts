@@ -97,6 +97,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     terms: 'button block components/button/examples/block.example components/button hellButton',
   },
   {
+    title: 'Button: Customization',
+    path: '/components/button',
+    detail: 'components/button/examples/customization.example.ts',
+    terms:
+      'button customization components/button/examples/customization.example components/button hellButton ui part style map',
+  },
+  {
     title: 'Button: Icon Only',
     path: '/components/button',
     detail: 'components/button/examples/icon-only.example.ts',
