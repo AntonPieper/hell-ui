@@ -108,6 +108,7 @@
     }
   },
   "dependencies": {
+    "tailwind-merge": "^3.5.0",
     "tslib": "^2.3.0"
   },
   "sideEffects": [

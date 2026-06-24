@@ -34,10 +34,29 @@ import dialpadExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
         <li>
           <code>showCallButton</code>: render the primary call action (default <code>true</code>)
         </li>
+        <li>
+          <code>ui</code>: part style map keyed by <code>HellDialpadPart</code>; consumer classes
+          merge with Dialpad's Tailwind recipe.
+        </li>
         <li><code>(digit)</code>: emits the pressed key</li>
         <li><code>(valueChange)</code>: emits the running number</li>
         <li><code>(call)</code>: emits current number when the call button is pressed</li>
       </ul>
+
+      <h2>Parts</h2>
+      <p>
+        Public parts render with matching <code>data-slot</code> values: <code>root</code>,
+        <code>display</code>, <code>displayLabel</code>, <code>numberInput</code>,
+        <code>controls</code>, <code>clearButton</code>, <code>backspaceButton</code>,
+        <code>grid</code>, <code>keyButton</code>, <code>digit</code>, <code>letters</code>,
+        <code>lowerGrid</code>, and <code>callButton</code>.
+      </p>
+      <p>
+        Dialpad temporarily renders native <code>&lt;button&gt;</code> and
+        <code>&lt;input&gt;</code> controls internally while <code>HellButton</code> and
+        <code>HellInput</code> still use the legacy styleable model. Revisit that bridge once those
+        primitives migrate to <code>HellPartStyleable</code>.
+      </p>
 
       <h2>Keyboard</h2>
       <ul>

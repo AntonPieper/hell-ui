@@ -269,7 +269,8 @@ function checkDocsLazyRouteImportGraphContract() {
     for (const policy of docsHeavyLazyRoutePolicies) {
       if (!matchesDocsHeavyPackagePolicy(importHit.specifier, policy)) continue;
       if (isFileInDocsBoundary(importHit.file, pagesRoot, policy.boundary)) continue;
-      if (policy.id === 'code-editor-docs' && isDocsCodePreviewLazyWrapper(importHit.file)) continue;
+      if (policy.id === 'code-editor-docs' && isDocsCodePreviewLazyWrapper(importHit.file))
+        continue;
 
       failures.push(
         `Docs Lazy Route Import Graph ${relPath(importHit.file)}:${importHit.line} imports ${importHit.specifier}; ` +
@@ -349,7 +350,8 @@ function docsLazyRouteEntries(catalogPath, pagesRoot) {
   const catalog = readFile(catalogPath);
   const entries = [];
   const seen = new Set();
-  const routeImportRegex = /(?:routePath|path):\s*'([^']*)'[\s\S]*?loadComponent:\s*\(\)\s*=>\s*import\(\s*'([^']+)'\s*\)/g;
+  const routeImportRegex =
+    /(?:routePath|path):\s*'([^']*)'[\s\S]*?loadComponent:\s*\(\)\s*=>\s*import\(\s*'([^']+)'\s*\)/g;
 
   for (const match of catalog.matchAll(routeImportRegex)) {
     const routePath = match[1] ? `/${match[1]}` : '/';
@@ -411,7 +413,8 @@ function docsPageBoundary(file, pagesRoot, routeEntriesByBoundary) {
 
   const parts = rel.split('/');
   const examplesIndex = parts.indexOf('examples');
-  const boundary = examplesIndex > 0 ? parts.slice(0, examplesIndex).join('/') : parts.slice(0, -1).join('/');
+  const boundary =
+    examplesIndex > 0 ? parts.slice(0, examplesIndex).join('/') : parts.slice(0, -1).join('/');
   return { boundary, label: `${boundary} unrouted docs page boundary` };
 }
 
@@ -434,7 +437,13 @@ function matchesDocsHeavyPackagePolicy(specifier, policy) {
 
 function moduleImportSpecifiers(file) {
   const source = readFile(file);
-  const sourceFile = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const sourceFile = ts.createSourceFile(
+    file,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
   const imports = [];
 
   function pushImport(node, specifier, kind) {
@@ -469,7 +478,13 @@ function moduleImportSpecifiers(file) {
 
 function moduleSpecifierReferences(file) {
   const source = readFile(file);
-  const sourceFile = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const sourceFile = ts.createSourceFile(
+    file,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
   const references = [];
 
   function pushReference(specifier, kind) {
@@ -566,7 +581,9 @@ function docsSearchIndexSeeds(searchIndex, variable) {
 
   const body = searchIndex.slice(bodyStart, bodyEnd);
   const seeds = [];
-  for (const match of body.matchAll(/\{\s*title:\s*'([^']+)'\s*,\s*path:\s*'([^']+)'\s*,\s*detail:\s*'([^']+)'/g)) {
+  for (const match of body.matchAll(
+    /\{\s*title:\s*'([^']+)'\s*,\s*path:\s*'([^']+)'\s*,\s*detail:\s*'([^']+)'/g,
+  )) {
     seeds.push({
       title: match[1],
       path: match[2],
@@ -728,13 +745,18 @@ function checkDocsCodeEditorIsolationContract() {
     }
 
     const source = readFile(path);
-    if (source.includes('@codemirror/') || source.includes('@hell-ui/angular/features/code-editor')) {
+    if (
+      source.includes('@codemirror/') ||
+      source.includes('@hell-ui/angular/features/code-editor')
+    ) {
       failures.push(
         `Docs shared file ${file} must not import CodeMirror or @hell-ui/angular/features/code-editor directly; use the deferred docs code viewer wrapper`,
       );
     }
     if (/<pre\b/.test(source)) {
-      failures.push(`Docs shared file ${file} must not render raw <pre> code blocks for shared code previews`);
+      failures.push(
+        `Docs shared file ${file} must not render raw <pre> code blocks for shared code previews`,
+      );
     }
   }
 
@@ -749,17 +771,25 @@ function checkDocsCodeEditorIsolationContract() {
 
   const wrapperPath = join(root, docsCodePreviewLazyWrapperPath);
   if (!existsSync(wrapperPath)) {
-    failures.push(`Docs architecture check references missing file ${docsCodePreviewLazyWrapperPath}`);
+    failures.push(
+      `Docs architecture check references missing file ${docsCodePreviewLazyWrapperPath}`,
+    );
   } else {
     const wrapperSource = readFile(wrapperPath);
     if (!wrapperSource.includes('@hell-ui/angular/features/code-editor')) {
-      failures.push('Docs code viewer wrapper must be the only shared file that imports @hell-ui/angular/features/code-editor');
+      failures.push(
+        'Docs code viewer wrapper must be the only shared file that imports @hell-ui/angular/features/code-editor',
+      );
     }
     if (!wrapperSource.includes('@hell-ui/angular/styles/features/code-editor')) {
-      failures.push('Docs code viewer wrapper must lazy-load the code-editor feature stylesheet with the viewer');
+      failures.push(
+        'Docs code viewer wrapper must lazy-load the code-editor feature stylesheet with the viewer',
+      );
     }
     if (/<pre\b/.test(wrapperSource)) {
-      failures.push('Docs code viewer wrapper must render HellCodeEditor instead of raw <pre> code blocks');
+      failures.push(
+        'Docs code viewer wrapper must render HellCodeEditor instead of raw <pre> code blocks',
+      );
     }
   }
 
@@ -770,7 +800,10 @@ function checkDocsCodeEditorIsolationContract() {
     if (/\bcode-editor\b/i.test(file)) continue;
 
     const source = readFile(file);
-    if (source.includes('@codemirror/') || source.includes('@hell-ui/angular/features/code-editor')) {
+    if (
+      source.includes('@codemirror/') ||
+      source.includes('@hell-ui/angular/features/code-editor')
+    ) {
       failures.push(
         `Docs page ${file.replace(root + '/', '')} must keep CodeMirror imports within /components/code-editor`,
       );
@@ -825,9 +858,7 @@ function checkDocsPdfViewerIsolationContract() {
 
     const source = readFile(path);
     if (hasPackageImport(source, heavyImports)) {
-      failures.push(
-        `Docs shared file ${file} must not import pdf.js or @hell-ui/pdf-viewer`,
-      );
+      failures.push(`Docs shared file ${file} must not import pdf.js or @hell-ui/pdf-viewer`);
     }
   }
 
@@ -849,7 +880,11 @@ function checkDocsPdfViewerIsolationContract() {
     'projects/hell-docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts',
   );
   const pdfViewerPage = readFile(pdfViewerPagePath);
-  if (/styles\s*:\s*\[[\s\S]*(?:@hell-ui\/angular\/styles\/features\/pdf-viewer|@hell-ui\/pdf-viewer\/styles)/.test(pdfViewerPage)) {
+  if (
+    /styles\s*:\s*\[[\s\S]*(?:@hell-ui\/angular\/styles\/features\/pdf-viewer|@hell-ui\/pdf-viewer\/styles)/.test(
+      pdfViewerPage,
+    )
+  ) {
     failures.push(
       'PDF viewer docs page must load feature CSS as a lazy external asset, not an Angular component style',
     );
@@ -869,7 +904,9 @@ function hasPackageImport(source, specifiers) {
 function hasStaticImportFrom(source, pathFragment) {
   return source.split('\n').some((line) => {
     const trimmed = line.trimStart();
-    return trimmed.startsWith('import ') && !trimmed.startsWith('import(') && line.includes(pathFragment);
+    return (
+      trimmed.startsWith('import ') && !trimmed.startsWith('import(') && line.includes(pathFragment)
+    );
   });
 }
 
@@ -887,11 +924,15 @@ function checkPackageEntryPoints() {
     .filter((entrypoint) => entrypoint.id !== 'root')
     .map((entrypoint) => entrypoint.publicApiPath);
 
-  const disallowedRootExports = exportPaths(rootApi).filter((path) =>
-    path.includes('public-api-primitives') || path.includes('public-api-primitive-') ||
-    path.includes('public-api-composites') || path.includes('public-api-feature') ||
-    path.includes('/primitives/') ||
-    path.includes('/features/') || path.includes('/composites/')
+  const disallowedRootExports = exportPaths(rootApi).filter(
+    (path) =>
+      path.includes('public-api-primitives') ||
+      path.includes('public-api-primitive-') ||
+      path.includes('public-api-composites') ||
+      path.includes('public-api-feature') ||
+      path.includes('/primitives/') ||
+      path.includes('/features/') ||
+      path.includes('/composites/'),
   );
   if (disallowedRootExports.length) {
     failures.push(
@@ -942,7 +983,8 @@ function checkPackageEntryPoints() {
     '@hell-ui/angular/table-tanstack',
     '@hell-ui/angular/table-tanstack/virtual',
   ]) {
-    if (!manifestSpecifiers.has(specifier)) failures.push(`Table Entrypoint Manifest is missing ${specifier}`);
+    if (!manifestSpecifiers.has(specifier))
+      failures.push(`Table Entrypoint Manifest is missing ${specifier}`);
   }
   for (const specifier of [
     '@hell-ui/angular/data-table',
@@ -952,13 +994,17 @@ function checkPackageEntryPoints() {
     '@hell-ui/angular/features/table-utilities',
   ]) {
     if (manifestSpecifiers.has(specifier) || paths[specifier]) {
-      failures.push(`Legacy table entry point must be removed from manifest/tsconfig: ${specifier}`);
+      failures.push(
+        `Legacy table entry point must be removed from manifest/tsconfig: ${specifier}`,
+      );
     }
   }
 
   const legacyPaths = Object.keys(paths).filter((entryPoint) => entryPoint.startsWith('hell'));
   if (legacyPaths.length) {
-    failures.push(`Package Identity still exposes legacy alias paths in tsconfig.json: ${legacyPaths.join(', ')}`);
+    failures.push(
+      `Package Identity still exposes legacy alias paths in tsconfig.json: ${legacyPaths.join(', ')}`,
+    );
   }
 
   const packagePaths = secondaryPackageEntrypoints().map((entrypoint) => entrypoint.packagePath);
@@ -977,10 +1023,14 @@ function checkCodeMirrorEntrypointIsolationContract() {
   const codeEditorPublicApiPath = 'projects/hell/src/lib/public-api-feature-code-editor.ts';
   const codeEditorPublicApi = readFile(join(root, codeEditorPublicApiPath));
   if (!codeEditorPublicApi.includes('Kept optional CodeMirror feature entry point')) {
-    failures.push('Code Editor entry point public API must state it is a kept optional CodeMirror feature entry point');
+    failures.push(
+      'Code Editor entry point public API must state it is a kept optional CodeMirror feature entry point',
+    );
   }
   if (!codeEditorPublicApi.includes('lazy/client-only')) {
-    failures.push('Code Editor entry point public API must require lazy/client-only browser boundaries');
+    failures.push(
+      'Code Editor entry point public API must require lazy/client-only browser boundaries',
+    );
   }
 
   const rootCorePaths = [
@@ -1049,16 +1099,22 @@ function isCodeMirrorBoundarySpecifier(specifier) {
 }
 
 function checkAudioTranscriptEntrypointIsolationContract() {
-  const audioTranscriptPublicApiPath = 'projects/hell/src/lib/public-api-feature-audio-transcript.ts';
+  const audioTranscriptPublicApiPath =
+    'projects/hell/src/lib/public-api-feature-audio-transcript.ts';
   const audioTranscriptPublicApi = readFile(join(root, audioTranscriptPublicApiPath));
   if (!/@experimental\b/.test(audioTranscriptPublicApi)) {
-    failures.push('Audio Transcript feature entry point must carry @experimental in its public API comment');
+    failures.push(
+      'Audio Transcript feature entry point must carry @experimental in its public API comment',
+    );
   }
   if (!audioTranscriptPublicApi.includes('Optional browser transcript provider')) {
-    failures.push('Audio Transcript feature entry point must describe itself as an optional provider seam');
+    failures.push(
+      'Audio Transcript feature entry point must describe itself as an optional provider seam',
+    );
   }
 
-  const audioTranscriptSourcePath = 'projects/hell/src/lib/features/audio-transcript/audio-transcript.ts';
+  const audioTranscriptSourcePath =
+    'projects/hell/src/lib/features/audio-transcript/audio-transcript.ts';
   const audioTranscriptSource = readFile(join(root, audioTranscriptSourcePath));
   for (const symbol of [
     'provideHellAudioTranscript',
@@ -1138,7 +1194,9 @@ function checkApiReportContract() {
     failures.push('API Report contract must expose pnpm run test:api-report');
   }
   if (packageJson.scripts?.['api-report:update'] !== 'node tools/check-api-reports.mjs --local') {
-    failures.push('API Report contract must expose pnpm run api-report:update for baseline approval');
+    failures.push(
+      'API Report contract must expose pnpm run api-report:update for baseline approval',
+    );
   }
   if (!packageJson.scripts?.['ci:build']?.includes('pnpm run test:api-report')) {
     failures.push('API Report contract must run from ci:build after the library package is built');
@@ -1199,7 +1257,9 @@ function checkApiStabilityContract() {
   for (const entrypoint of experimentalEntrypoints) {
     const publicApi = readFile(join(root, entrypoint.publicApiPath));
     if (!/@experimental\b/.test(publicApi)) {
-      failures.push(`${entrypoint.name} feature entry point must carry @experimental in its public API comment`);
+      failures.push(
+        `${entrypoint.name} feature entry point must carry @experimental in its public API comment`,
+      );
     }
 
     const source = readFile(join(root, entrypoint.sourcePath));
@@ -1229,18 +1289,35 @@ function checkApiStabilityContract() {
     const publicApi = readFile(join(root, entrypoint.publicApiPath));
     const tagPattern = new RegExp(`@${entrypoint.tag}\\b`);
     if (!tagPattern.test(publicApi)) {
-      failures.push(`${entrypoint.name} table entry point must carry @${entrypoint.tag} in its public API comment`);
+      failures.push(
+        `${entrypoint.name} table entry point must carry @${entrypoint.tag} in its public API comment`,
+      );
     }
   }
 
   const experimentalApiSymbols = [
     ['projects/hell/src/lib/features/code-editor/code-editor.ts', 'HellCodeEditorRuntimeFactory'],
-    ['projects/hell/src/lib/features/code-editor/code-editor.ts', 'HELL_CODE_EDITOR_RUNTIME_FACTORY'],
+    [
+      'projects/hell/src/lib/features/code-editor/code-editor.ts',
+      'HELL_CODE_EDITOR_RUNTIME_FACTORY',
+    ],
     ['projects/hell/src/lib/features/code-editor/code-editor.ts', 'HellCodeEditor'],
-    ['projects/hell/src/lib/features/code-editor/code-editor.runtime.ts', 'HellCodeEditorRuntimeAccessibilityOptions'],
-    ['projects/hell/src/lib/features/code-editor/code-editor.runtime.ts', 'HellCodeEditorRuntimeOptions'],
-    ['projects/hell/src/lib/features/code-editor/code-editor.runtime.ts', 'HellCodeEditorRuntimePort'],
-    ['projects/hell/src/lib/features/code-editor/code-editor.runtime.ts', 'hellCodeEditorSetupFactory'],
+    [
+      'projects/hell/src/lib/features/code-editor/code-editor.runtime.ts',
+      'HellCodeEditorRuntimeAccessibilityOptions',
+    ],
+    [
+      'projects/hell/src/lib/features/code-editor/code-editor.runtime.ts',
+      'HellCodeEditorRuntimeOptions',
+    ],
+    [
+      'projects/hell/src/lib/features/code-editor/code-editor.runtime.ts',
+      'HellCodeEditorRuntimePort',
+    ],
+    [
+      'projects/hell/src/lib/features/code-editor/code-editor.runtime.ts',
+      'hellCodeEditorSetupFactory',
+    ],
     ['projects/hell/src/lib/features/code-editor/code-editor.runtime.ts', 'hellCodeEditorSetup'],
     ['projects/hell/src/lib/features/code-editor/code-editor.runtime.ts', 'hellCodeEditorTheme'],
     ['projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts', 'HellPdfRuntimeFactory'],
@@ -1258,7 +1335,11 @@ function checkApiStabilityContract() {
   const tableUtilitiesSource = readFile(
     join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'),
   );
-  for (const removed of ['HELL_TABLE_UTILITY_DIRECTIVES', 'HELL_TABLE_DIRECTIVES', 'selectionSemantics']) {
+  for (const removed of [
+    'HELL_TABLE_UTILITY_DIRECTIVES',
+    'HELL_TABLE_DIRECTIVES',
+    'selectionSemantics',
+  ]) {
     if (tableUtilitiesSource.includes(removed)) {
       failures.push(`${removed} legacy table API must be removed, not deprecated`);
     }
@@ -1267,7 +1348,9 @@ function checkApiStabilityContract() {
     failures.push('HellTableRow interactive legacy input must be removed, not deprecated');
   }
 
-  const audioSource = readFile(join(root, 'projects/hell/src/lib/composites/audio-player/audio-player.ts'));
+  const audioSource = readFile(
+    join(root, 'projects/hell/src/lib/composites/audio-player/audio-player.ts'),
+  );
   if (!hasTaggedApiSymbol(audioSource, 'deprecated', 'allowLiveCaptions')) {
     failures.push('allowLiveCaptions compatibility alias must carry @deprecated API JSDoc');
   }
@@ -1279,14 +1362,26 @@ function checkApiStabilityContract() {
     failures.push('hellCodeEditorSetup compatibility alias must carry @deprecated API JSDoc');
   }
 
-  const audioDocs = readFile(join(root, 'projects/hell-docs/src/app/pages/components/audio-player/audio-player.page.ts'));
+  const audioDocs = readFile(
+    join(root, 'projects/hell-docs/src/app/pages/components/audio-player/audio-player.page.ts'),
+  );
   if (!/allowLiveCaptions[\s\S]{0,200}deprecated compatibility alias/i.test(audioDocs)) {
-    failures.push('Audio Player docs must disclose allowLiveCaptions as a deprecated compatibility alias');
+    failures.push(
+      'Audio Player docs must disclose allowLiveCaptions as a deprecated compatibility alias',
+    );
   }
 
-  const codeEditorDocs = readFile(join(root, 'projects/hell-docs/src/app/pages/components/code-editor/code-editor.page.ts'));
-  if (!/hellCodeEditorSetup[\s\S]{0,200}deprecated browser-global legacy compatibility/i.test(codeEditorDocs)) {
-    failures.push('Code Editor docs must disclose hellCodeEditorSetup as a deprecated compatibility alias');
+  const codeEditorDocs = readFile(
+    join(root, 'projects/hell-docs/src/app/pages/components/code-editor/code-editor.page.ts'),
+  );
+  if (
+    !/hellCodeEditorSetup[\s\S]{0,200}deprecated browser-global legacy compatibility/i.test(
+      codeEditorDocs,
+    )
+  ) {
+    failures.push(
+      'Code Editor docs must disclose hellCodeEditorSetup as a deprecated compatibility alias',
+    );
   }
   for (const requiredCodeEditorDocText of [
     '@hell-ui/angular/features/code-editor',
@@ -1424,19 +1519,31 @@ function checkPackageDependencyContract() {
       failures.push(
         `Package dependency contract must keep ${dependency} optional for feature-only consumers`,
       );
-    } else if (adapterOnlyPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional !== true) {
+    } else if (
+      adapterOnlyPeers.has(dependency) &&
+      peerDependenciesMeta[dependency]?.optional !== true
+    ) {
       failures.push(
         `Package dependency contract must keep ${dependency} optional for adapter-only consumers`,
       );
-    } else if (styleOnlyPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional !== true) {
+    } else if (
+      styleOnlyPeers.has(dependency) &&
+      peerDependenciesMeta[dependency]?.optional !== true
+    ) {
       failures.push(
         `Package dependency contract must keep ${dependency} optional for style-only consumers`,
       );
-    } else if (iconOnlyPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional !== true) {
+    } else if (
+      iconOnlyPeers.has(dependency) &&
+      peerDependenciesMeta[dependency]?.optional !== true
+    ) {
       failures.push(
         `Package dependency contract must keep ${dependency} optional for icon-only consumers`,
       );
-    } else if (transitiveOnlyPeers.has(dependency) && peerDependenciesMeta[dependency]?.optional !== true) {
+    } else if (
+      transitiveOnlyPeers.has(dependency) &&
+      peerDependenciesMeta[dependency]?.optional !== true
+    ) {
       failures.push(
         `Package dependency contract must keep ${dependency} optional for transitive-only consumers`,
       );
@@ -1445,7 +1552,9 @@ function checkPackageDependencyContract() {
 
   for (const dependency of Object.keys(peerDependenciesMeta)) {
     if (!peerDependencies[dependency]) {
-      failures.push(`Package dependency contract has peerDependenciesMeta for undeclared ${dependency}`);
+      failures.push(
+        `Package dependency contract has peerDependenciesMeta for undeclared ${dependency}`,
+      );
     } else if (
       !featureOnlyPeers.has(dependency) &&
       !adapterOnlyPeers.has(dependency) &&
@@ -1462,37 +1571,49 @@ function checkPackageDependencyContract() {
 
   for (const dependency of lightStackPeers) {
     if (!peerDependencies[dependency]) {
-      failures.push(`Package dependency contract is missing required light peer dependency ${dependency}`);
+      failures.push(
+        `Package dependency contract is missing required light peer dependency ${dependency}`,
+      );
     }
   }
 
   for (const dependency of featureOnlyPeers) {
     if (!peerDependencies[dependency]) {
-      failures.push(`Package dependency contract is missing optional feature peer dependency ${dependency}`);
+      failures.push(
+        `Package dependency contract is missing optional feature peer dependency ${dependency}`,
+      );
     }
   }
 
   for (const dependency of adapterOnlyPeers) {
     if (!peerDependencies[dependency]) {
-      failures.push(`Package dependency contract is missing optional adapter peer dependency ${dependency}`);
+      failures.push(
+        `Package dependency contract is missing optional adapter peer dependency ${dependency}`,
+      );
     }
   }
 
   for (const dependency of styleOnlyPeers) {
     if (!peerDependencies[dependency]) {
-      failures.push(`Package dependency contract is missing optional style peer dependency ${dependency}`);
+      failures.push(
+        `Package dependency contract is missing optional style peer dependency ${dependency}`,
+      );
     }
   }
 
   for (const dependency of iconOnlyPeers) {
     if (!peerDependencies[dependency]) {
-      failures.push(`Package dependency contract is missing optional icon peer dependency ${dependency}`);
+      failures.push(
+        `Package dependency contract is missing optional icon peer dependency ${dependency}`,
+      );
     }
   }
 
   for (const dependency of transitiveOnlyPeers) {
     if (!peerDependencies[dependency]) {
-      failures.push(`Package dependency contract is missing optional transitive peer dependency ${dependency}`);
+      failures.push(
+        `Package dependency contract is missing optional transitive peer dependency ${dependency}`,
+      );
     }
   }
 
@@ -1518,19 +1639,27 @@ function checkPackageDependencyContract() {
   }
 
   if (peerDependencies['pdfjs-dist'] || peerDependenciesMeta['pdfjs-dist']) {
-    failures.push('Main @hell-ui/angular package must not advertise pdfjs-dist after the PDF viewer split');
+    failures.push(
+      'Main @hell-ui/angular package must not advertise pdfjs-dist after the PDF viewer split',
+    );
   }
 
   checkPdfViewerPackageDependencyContract(workspacePackageJson);
 
-  const rootNgPackage = parseJsonWithComments(readFile(join(root, 'projects/hell/ng-package.json')));
+  const rootNgPackage = parseJsonWithComments(
+    readFile(join(root, 'projects/hell/ng-package.json')),
+  );
   if (JSON.stringify(rootNgPackage.assets ?? []).includes('pdf.worker')) {
-    failures.push('Root package assets must not copy pdf.worker.mjs; PDF viewer requires an app-provided worker source');
+    failures.push(
+      'Root package assets must not copy pdf.worker.mjs; PDF viewer requires an app-provided worker source',
+    );
   }
 }
 
 function checkPdfViewerPackageDependencyContract(workspacePackageJson) {
-  const packageJson = parseJsonWithComments(readFile(join(root, 'projects/hell-pdf-viewer/package.json')));
+  const packageJson = parseJsonWithComments(
+    readFile(join(root, 'projects/hell-pdf-viewer/package.json')),
+  );
   const mainPackageJson = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
   const optionalDependencies = Object.keys(packageJson.optionalDependencies ?? {});
   if (optionalDependencies.length) {
@@ -1552,7 +1681,9 @@ function checkPdfViewerPackageDependencyContract(workspacePackageJson) {
 
   for (const dependency of importedPackages) {
     if (!peerDependencies[dependency] && !dependencies[dependency]) {
-      failures.push(`PDF package dependency contract is missing dependency for imported ${dependency}`);
+      failures.push(
+        `PDF package dependency contract is missing dependency for imported ${dependency}`,
+      );
     }
   }
 
@@ -1565,7 +1696,8 @@ function checkPdfViewerPackageDependencyContract(workspacePackageJson) {
     'pdfjs-dist',
   ]);
   for (const peer of requiredPeers) {
-    if (!peerDependencies[peer]) failures.push(`PDF package dependency contract is missing required peer ${peer}`);
+    if (!peerDependencies[peer])
+      failures.push(`PDF package dependency contract is missing required peer ${peer}`);
     if (peerDependenciesMeta[peer]?.optional === true) {
       failures.push(`PDF package dependency contract must keep ${peer} required`);
     }
@@ -1576,30 +1708,48 @@ function checkPdfViewerPackageDependencyContract(workspacePackageJson) {
     );
   }
   if (peerDependencies['@hell-ui/angular'] !== mainPackageJson.version) {
-    failures.push(`PDF package dependency contract must peer @hell-ui/angular@${mainPackageJson.version}`);
+    failures.push(
+      `PDF package dependency contract must peer @hell-ui/angular@${mainPackageJson.version}`,
+    );
   }
   if (!peerDependencies.tailwindcss || peerDependenciesMeta.tailwindcss?.optional !== true) {
-    failures.push('PDF package dependency contract must declare optional tailwindcss for CSS entry points');
+    failures.push(
+      'PDF package dependency contract must declare optional tailwindcss for CSS entry points',
+    );
   }
   for (const metaPeer of Object.keys(peerDependenciesMeta)) {
     if (!peerDependencies[metaPeer]) {
-      failures.push(`PDF package dependency contract has peerDependenciesMeta for undeclared ${metaPeer}`);
+      failures.push(
+        `PDF package dependency contract has peerDependenciesMeta for undeclared ${metaPeer}`,
+      );
     }
   }
 
   const packageExports = packageJson.exports ?? {};
   for (const exportPath of ['./styles', './styles/pdf-viewer', './styles/components/pdf-viewer']) {
     if (!packageExports[exportPath]?.style) {
-      failures.push(`PDF package style export ${exportPath} is missing from projects/hell-pdf-viewer/package.json`);
+      failures.push(
+        `PDF package style export ${exportPath} is missing from projects/hell-pdf-viewer/package.json`,
+      );
     }
   }
-  const ngPackage = parseJsonWithComments(readFile(join(root, 'projects/hell-pdf-viewer/ng-package.json')));
+  const ngPackage = parseJsonWithComments(
+    readFile(join(root, 'projects/hell-pdf-viewer/ng-package.json')),
+  );
   if (JSON.stringify(ngPackage.assets ?? []).includes('pdf.worker')) {
-    failures.push('PDF package must document worker setup instead of copying pdf.worker.mjs into the package tarball');
+    failures.push(
+      'PDF package must document worker setup instead of copying pdf.worker.mjs into the package tarball',
+    );
   }
   const readme = readFile(join(root, 'projects/hell-pdf-viewer/README.md'));
-  for (const text of ['pdfjs-dist@5.6.205', 'pdf.worker.mjs', 'worker', 'node_modules/pdfjs-dist/build']) {
-    if (!readme.includes(text)) failures.push(`PDF package README is missing worker/dependency guidance: ${text}`);
+  for (const text of [
+    'pdfjs-dist@5.6.205',
+    'pdf.worker.mjs',
+    'worker',
+    'node_modules/pdfjs-dist/build',
+  ]) {
+    if (!readme.includes(text))
+      failures.push(`PDF package README is missing worker/dependency guidance: ${text}`);
   }
 }
 
@@ -1645,7 +1795,8 @@ function checkStyleEntryPoints() {
     'projects/hell/src/lib/styles/components/table-utilities.css',
     'projects/hell/src/lib/styles/components/table-renderer.css',
   ]) {
-    if (existsSync(join(root, relPath))) failures.push(`Legacy table CSS alias file must be removed: ${relPath}`);
+    if (existsSync(join(root, relPath)))
+      failures.push(`Legacy table CSS alias file must be removed: ${relPath}`);
   }
 
   const allStyles = readFile(join(root, 'projects/hell/src/lib/styles/hell.css'));
@@ -1741,7 +1892,9 @@ function checkBehaviorSentinelContract() {
 }
 
 function checkAppShellBreakpointContract() {
-  const shellSource = readFile(join(root, 'projects/hell/src/lib/composites/app-shell/app-shell.ts'));
+  const shellSource = readFile(
+    join(root, 'projects/hell/src/lib/composites/app-shell/app-shell.ts'),
+  );
   const shellStyles = readFile(join(root, 'projects/hell/src/lib/styles/components/app-shell.css'));
   const desktopMin = Number(
     /HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX\s*=\s*(\d+)/.exec(shellSource)?.[1],
@@ -1752,8 +1905,14 @@ function checkAppShellBreakpointContract() {
     return;
   }
 
-  if (!shellSource.includes('HELL_APP_SHELL_MOBILE_MAX_WIDTH_PX = HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX - 1')) {
-    failures.push('App Shell mobile matchMedia breakpoint must derive from the desktop CSS breakpoint');
+  if (
+    !shellSource.includes(
+      'HELL_APP_SHELL_MOBILE_MAX_WIDTH_PX = HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX - 1',
+    )
+  ) {
+    failures.push(
+      'App Shell mobile matchMedia breakpoint must derive from the desktop CSS breakpoint',
+    );
   }
 
   if (!shellStyles.includes(`@media (min-width: ${desktopMin}px)`)) {
@@ -1783,11 +1942,20 @@ function checkComponentContract() {
     const rel = file.slice(root.length + 1);
     for (const { className, moduleSource } of styleableClasses) {
       if (publicStyleableModules.has(className)) {
-        failures.push(`Duplicate public HellStyleable Module ${className} in ${rel}`);
+        failures.push(`Duplicate public styled Module ${className} in ${rel}`);
       }
       publicStyleableModules.set(className, rel);
 
-      if (!moduleSource.includes('!unstyled()')) {
+      if (moduleSource.includes('extends HellPartStyleable')) {
+        if (!moduleSource.includes('part(') || !moduleSource.includes('recipe')) {
+          failures.push(
+            `${rel} ${className} extends HellPartStyleable but does not use the Part-Class Pipeline`,
+          );
+        }
+        if (moduleSource.includes('unstyled')) {
+          failures.push(`${rel} ${className} extends HellPartStyleable but keeps Style Opt-Out`);
+        }
+      } else if (!moduleSource.includes('!unstyled()')) {
         failures.push(
           `${rel} ${className} extends HellStyleable but does not gate default styling with Style Opt-Out`,
         );
@@ -1821,7 +1989,7 @@ function checkComponentContract() {
   for (const [className, rel] of publicStyleableModules) {
     if (!manifestSet.has(className)) {
       failures.push(
-        `${rel} exports HellStyleable Module ${className} but component-contract.spec.ts does not declare its Component Contract`,
+        `${rel} exports styled Module ${className} but component-contract.spec.ts does not declare its Component Contract`,
       );
     }
   }
@@ -1829,7 +1997,7 @@ function checkComponentContract() {
   for (const symbol of manifestSymbols) {
     if (!publicStyleableModules.has(symbol)) {
       failures.push(
-        `component-contract.spec.ts declares ${symbol}, but no exported HellStyleable Module was found`,
+        `component-contract.spec.ts declares ${symbol}, but no exported styled Module was found`,
       );
     }
   }
@@ -1859,7 +2027,9 @@ function checkLabelContract() {
     }
   }
 
-  const spinnerSource = readFile(join(root, 'projects/hell/src/lib/primitives/skeleton/skeleton.ts'));
+  const spinnerSource = readFile(
+    join(root, 'projects/hell/src/lib/primitives/skeleton/skeleton.ts'),
+  );
   if (!spinnerSource.includes('HELL_LABELS') || spinnerSource.includes("'aria-label': 'Loading'")) {
     failures.push('HellSpinner must read its default aria-label from the Label Contract');
   }
@@ -1867,23 +2037,45 @@ function checkLabelContract() {
   const paginationSource = readFile(
     join(root, 'projects/hell/src/lib/primitives/pagination/pagination.ts'),
   );
-  for (const hardcoded of ['aria-label="First page"', 'aria-label="Previous page"', "'Page ' + p"]) {
+  for (const hardcoded of [
+    'aria-label="First page"',
+    'aria-label="Previous page"',
+    "'Page ' + p",
+  ]) {
     if (paginationSource.includes(hardcoded)) {
       failures.push('HellPaginationStrip must read built-in labels from the Label Contract');
     }
   }
 
   const labelConsumers = [
-    ['projects/hell/src/lib/composites/app-shell/app-shell.ts', ['Expand sidebar', 'Collapse sidebar']],
-    ['projects/hell/src/lib/composites/audio-player/audio-player.ts', ['Show live captions', 'Copy transcript', '>Live<', '>Paused<']],
+    [
+      'projects/hell/src/lib/composites/app-shell/app-shell.ts',
+      ['Expand sidebar', 'Collapse sidebar'],
+    ],
+    [
+      'projects/hell/src/lib/composites/audio-player/audio-player.ts',
+      ['Show live captions', 'Copy transcript', '>Live<', '>Paused<'],
+    ],
     ['projects/hell/src/lib/primitives/breadcrumbs/breadcrumbs.ts', ['Show hidden navigation']],
     ['projects/hell/src/lib/composites/date-input/date-input.ts', ['Choose date']],
     ['projects/hell/src/lib/composites/resizable/resizable.ts', ['Resize panels']],
-    ['projects/hell/src/lib/composites/time-input/time-input.ts', ['Choose time', 'Subtract 5 minutes']],
-    ['projects/hell/src/lib/composites/toast/toast.ts', ['aria-label="Notifications"', 'aria-label="Dismiss"']],
+    [
+      'projects/hell/src/lib/composites/time-input/time-input.ts',
+      ['Choose time', 'Subtract 5 minutes'],
+    ],
+    [
+      'projects/hell/src/lib/composites/toast/toast.ts',
+      ['aria-label="Notifications"', 'aria-label="Dismiss"'],
+    ],
     ['projects/hell/src/lib/features/table-utilities/table-utilities.ts', ['Resize column']],
-    ['projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.html', ['Find in document', 'Zoom level']],
-    ['projects/hell/src/lib/primitives/date-picker/date-picker.ts', ['Previous year', 'Previous month']],
+    [
+      'projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.html',
+      ['Find in document', 'Zoom level'],
+    ],
+    [
+      'projects/hell/src/lib/primitives/date-picker/date-picker.ts',
+      ['Previous year', 'Previous month'],
+    ],
   ];
 
   for (const [file, hardcodedLabels] of labelConsumers) {
@@ -1903,13 +2095,20 @@ function exportedStyleableClasses(source) {
   const styleableBases = new Set([
     'HellNativeCheckbox',
     'HellNativeRadio',
-    ...[...source.matchAll(/(?:abstract\s+)?class\s+([A-Za-z0-9_]+)[^{]*extends\s+(?:HellStyleable|HellNativeInteractiveDisabledGuard)\b/g)].map(
-      (match) => match[1],
-    ),
+    ...[
+      ...source.matchAll(
+        /(?:abstract\s+)?class\s+([A-Za-z0-9_]+)[^{]*extends\s+(?:HellStyleable|HellPartStyleable|HellNativeInteractiveDisabledGuard)\b/g,
+      ),
+    ].map((match) => match[1]),
   ]);
 
   return decoratedClassModules(source).filter((module) => {
-    if (module.classSource.includes('extends HellStyleable')) return true;
+    if (
+      module.classSource.includes('extends HellStyleable') ||
+      module.classSource.includes('extends HellPartStyleable')
+    ) {
+      return true;
+    }
 
     const base = /extends\s+([A-Za-z0-9_]+)/.exec(module.classSource)?.[1];
     return !!base && styleableBases.has(base);
@@ -1951,7 +2150,9 @@ function checkCodeEditorRuntimeContract() {
 }
 
 function checkExperimentalFeatureContract() {
-  const audioSource = readFile(join(root, 'projects/hell/src/lib/composites/audio-player/audio-player.ts'));
+  const audioSource = readFile(
+    join(root, 'projects/hell/src/lib/composites/audio-player/audio-player.ts'),
+  );
   if (!/allowSpeechTranscript\s*=\s*input\(false/.test(audioSource)) {
     failures.push('Audio speech transcript must remain explicitly opt-in while experimental');
   }
@@ -1959,24 +2160,33 @@ function checkExperimentalFeatureContract() {
     failures.push('Audio live captions compatibility alias must remain explicitly opt-in');
   }
   if (!audioSource.includes('@experimental Browser speech transcripts')) {
-    failures.push('HellAudioPlayer must mark browser speech transcript experimental in its public JSDoc');
+    failures.push(
+      'HellAudioPlayer must mark browser speech transcript experimental in its public JSDoc',
+    );
   }
 
   const audioDocs = readFile(
     join(root, 'projects/hell-docs/src/app/pages/components/audio-player/audio-player.page.ts'),
   );
-  if (!/speech transcript is experimental/i.test(audioDocs) || !/default <code>false<\/code>/.test(audioDocs)) {
+  if (
+    !/speech transcript is experimental/i.test(audioDocs) ||
+    !/default <code>false<\/code>/.test(audioDocs)
+  ) {
     failures.push('Audio Player docs must disclose experimental opt-in speech transcript');
   }
 
-  const pdfSource = readFile(join(root, 'projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts'));
+  const pdfSource = readFile(
+    join(root, 'projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts'),
+  );
   if (!pdfSource.includes('@experimental This feature wraps pdf.js')) {
     failures.push('HellPdfViewer must mark the pdf.js wrapper experimental in its public JSDoc');
   }
 
   const pdfFeatureApi = readFile(join(root, 'projects/hell-pdf-viewer/src/public-api.ts'));
   if (!/HellPdfWorkerSource/.test(pdfFeatureApi)) {
-    failures.push('PDF Viewer package entry point must export the public HellPdfWorkerSource worker input type');
+    failures.push(
+      'PDF Viewer package entry point must export the public HellPdfWorkerSource worker input type',
+    );
   }
 
   const pdfDocs = readFile(
@@ -2006,7 +2216,9 @@ function checkFormsContract() {
 
   for (const [file, className] of cvaModules) {
     const source = readFile(join(root, file));
-    const classDecl = new RegExp(`class\\s+${className}\\b[^{]*implements[^{]*ControlValueAccessor`).test(source);
+    const classDecl = new RegExp(
+      `class\\s+${className}\\b[^{]*implements[^{]*ControlValueAccessor`,
+    ).test(source);
     if (!classDecl || !source.includes('NG_VALUE_ACCESSOR')) {
       failures.push(`${file} ${className} must implement ControlValueAccessor`);
     }
@@ -2047,7 +2259,9 @@ function checkSearchContract() {
     join(root, 'projects/hell-docs/src/app/pages/components/omnibar/omnibar.page.ts'),
   );
   if (!docs.includes('provideHellSearchRanker') || !docs.includes('Fuse.js')) {
-    failures.push('Omnibar docs must direct serious search through a ranker Adapter or async source');
+    failures.push(
+      'Omnibar docs must direct serious search through a ranker Adapter or async source',
+    );
   }
 }
 
@@ -2075,7 +2289,10 @@ function checkHotkeyContract() {
   ];
   const publicHotkeySurfaces = [
     ['Core Package Entry Point', coreApi],
-    ['Omnibar Package Entry Point', readFile(join(root, 'projects/hell/src/lib/composites/omnibar/omnibar.ts'))],
+    [
+      'Omnibar Package Entry Point',
+      readFile(join(root, 'projects/hell/src/lib/composites/omnibar/omnibar.ts')),
+    ],
   ];
   for (const [label, source] of publicHotkeySurfaces) {
     const leaked = hotkeyPublicSymbols.filter((symbol) => exportedSymbolNames(source).has(symbol));
@@ -2084,7 +2301,9 @@ function checkHotkeyContract() {
     }
   }
 
-  const internalHotkeysApi = readFile(join(root, 'projects/hell/src/lib/public-api-internal-hotkeys.ts'));
+  const internalHotkeysApi = readFile(
+    join(root, 'projects/hell/src/lib/public-api-internal-hotkeys.ts'),
+  );
   const internalHotkeyExports = exportedSymbolNames(internalHotkeysApi);
   const allowedInternalHotkeyExports = new Set([
     'HellGlobalKeydownHandler',
@@ -2094,7 +2313,9 @@ function checkHotkeyContract() {
   ]);
   for (const symbol of allowedInternalHotkeyExports) {
     if (!internalHotkeyExports.has(symbol)) {
-      failures.push(`Internal Hotkeys Entry Point must export shared listener owner symbol ${symbol}`);
+      failures.push(
+        `Internal Hotkeys Entry Point must export shared listener owner symbol ${symbol}`,
+      );
     }
   }
   const unexpectedInternalHotkeyExports = [...internalHotkeyExports].filter(
@@ -2113,7 +2334,9 @@ function checkHotkeyContract() {
     failures.push('HellOmnibar must register global hotkeys through HellGlobalKeydownService');
   }
 
-  const pdfSource = readFile(join(root, 'projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts'));
+  const pdfSource = readFile(
+    join(root, 'projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts'),
+  );
   if (pdfSource.includes('window:keydown') || pdfSource.includes('window:pointerdown')) {
     failures.push('HellPdfViewer must register global shortcuts through shared listener services');
   }
@@ -2193,9 +2416,13 @@ function checkInteractiveTriggerSelectorContract() {
 }
 
 function checkTableUtilityContract() {
-  const source = readFile(join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'));
+  const source = readFile(
+    join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'),
+  );
   if (!source.includes('HELL_TABLE_UTILITIES_DIRECTIVES')) {
-    failures.push('Table primitives must expose HELL_TABLE_UTILITIES_DIRECTIVES as their standalone import list');
+    failures.push(
+      'Table primitives must expose HELL_TABLE_UTILITIES_DIRECTIVES as their standalone import list',
+    );
   }
   for (const selector of [
     'hellTableRoot',
@@ -2223,9 +2450,15 @@ function checkTableUtilityContract() {
     }
   }
   if (!source.includes('hellTableInferredRoleForHost')) {
-    failures.push('Table primitives must keep host-agnostic role inference centralized and SSR-safe');
+    failures.push(
+      'Table primitives must keep host-agnostic role inference centralized and SSR-safe',
+    );
   }
-  for (const removed of ['HELL_TABLE_UTILITY_DIRECTIVES', 'HELL_TABLE_DIRECTIVES', 'selectionSemantics']) {
+  for (const removed of [
+    'HELL_TABLE_UTILITY_DIRECTIVES',
+    'HELL_TABLE_DIRECTIVES',
+    'selectionSemantics',
+  ]) {
     if (source.includes(removed)) failures.push(`${removed} legacy table API must be removed`);
   }
   if (/readonly\s+interactive\b/.test(source)) {
@@ -2238,7 +2471,7 @@ function checkTableUtilityContract() {
   }
 
   const tableFacade = readFile(join(root, 'projects/hell/src/lib/table/table.ts'));
-  if (!tableFacade.includes("../features/table-utilities/table-utilities")) {
+  if (!tableFacade.includes('../features/table-utilities/table-utilities')) {
     failures.push('Modern @hell-ui/angular/table facade must own the table utilities export');
   }
 
@@ -2248,7 +2481,9 @@ function checkTableUtilityContract() {
   const docsRoot = join(root, 'projects/hell-docs/src/app');
   const docsGlobalStyles = readFile(join(root, 'projects/hell-docs/src/styles.css'));
   if (!docsGlobalStyles.includes("@import '@hell-ui/angular/styles/table';")) {
-    failures.push('Docs app must load table CSS from the global stylesheet so production routes are styled');
+    failures.push(
+      'Docs app must load table CSS from the global stylesheet so production routes are styled',
+    );
   }
   const routeTableStyleImports = walk(docsRoot)
     .filter((file) => file.endsWith('.ts'))
@@ -2264,7 +2499,9 @@ function checkTableUtilityContract() {
       )}:${importHit.line}`,
     );
   }
-  const tableStyleSource = readFile(join(root, 'projects/hell/src/lib/styles/components/table.css'));
+  const tableStyleSource = readFile(
+    join(root, 'projects/hell/src/lib/styles/components/table.css'),
+  );
   for (const forbidden of [
     'button.hell-table-row-action:not(.hell-button)',
     'a.hell-table-row-action:not(.hell-button)',
@@ -2278,7 +2515,9 @@ function checkTableUtilityContract() {
     }
   }
   if (/\baccent-color\s*:/.test(tableStyleSource)) {
-    failures.push('Table styles must not override native checkbox/radio accent-color; compose checkbox/radio primitives instead');
+    failures.push(
+      'Table styles must not override native checkbox/radio accent-color; compose checkbox/radio primitives instead',
+    );
   }
   for (const text of [
     'Hell supports two table paths',
@@ -2293,18 +2532,29 @@ function checkTableUtilityContract() {
   }
   const offenders = walk(docsRoot)
     .filter((file) => /\.(?:ts|html|md)$/.test(file))
-    .filter((file) => /@hell-ui\/angular\/features\/(?:data-table|table-utilities)\b/.test(readFile(file)))
+    .filter((file) =>
+      /@hell-ui\/angular\/features\/(?:data-table|table-utilities)\b/.test(readFile(file)),
+    )
     .map((file) => file.slice(root.length + 1));
   if (offenders.length) {
-    failures.push(`Docs must not reference legacy table feature entrypoints: ${offenders.join(', ')}`);
+    failures.push(
+      `Docs must not reference legacy table feature entrypoints: ${offenders.join(', ')}`,
+    );
   }
 }
 
 function checkTableSemanticsContract() {
-  const tableSourcePath = join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts');
+  const tableSourcePath = join(
+    root,
+    'projects/hell/src/lib/features/table-utilities/table-utilities.ts',
+  );
   const tableSource = readFile(tableSourcePath);
-  const tableModule = decoratedClassModules(tableSource).find((module) => module.className === 'HellTable');
-  const rowModule = decoratedClassModules(tableSource).find((module) => module.className === 'HellTableRow');
+  const tableModule = decoratedClassModules(tableSource).find(
+    (module) => module.className === 'HellTable',
+  );
+  const rowModule = decoratedClassModules(tableSource).find(
+    (module) => module.className === 'HellTableRow',
+  );
 
   if (!tableModule) {
     failures.push('Table semantics contract must be owned by HellTable');
@@ -2312,7 +2562,13 @@ function checkTableSemanticsContract() {
     if (!tableModule.moduleSource.includes("[attr.role]': 'role()")) {
       failures.push('HellTable must keep host role inference through role()');
     }
-    for (const forbidden of ['aria-activedescendant', 'aria-rowcount', 'aria-colcount', '(keydown)', 'tabindex']) {
+    for (const forbidden of [
+      'aria-activedescendant',
+      'aria-rowcount',
+      'aria-colcount',
+      '(keydown)',
+      'tabindex',
+    ]) {
       if (tableModule.moduleSource.includes(forbidden)) {
         failures.push(`HellTable primitive root must not own grid/focus behavior: ${forbidden}`);
       }
@@ -2322,7 +2578,13 @@ function checkTableSemanticsContract() {
   if (!rowModule) {
     failures.push('Table semantics contract must include HellTableRow');
   } else {
-    for (const forbidden of ['[attr.tabindex]', '(click)', '(keydown', 'aria-selected', 'aria-activedescendant']) {
+    for (const forbidden of [
+      '[attr.tabindex]',
+      '(click)',
+      '(keydown',
+      'aria-selected',
+      'aria-activedescendant',
+    ]) {
       if (rowModule.moduleSource.includes(forbidden)) {
         failures.push(`HellTableRow must stay passive in primitive table mode: ${forbidden}`);
       }
@@ -2330,11 +2592,20 @@ function checkTableSemanticsContract() {
   }
 
   for (const [specPath, required] of [
-    ['projects/hell/src/lib/table/table.spec.ts', 'uses native table markup without adding redundant ARIA or row-as-button behavior'],
+    [
+      'projects/hell/src/lib/table/table.spec.ts',
+      'uses native table markup without adding redundant ARIA or row-as-button behavior',
+    ],
     ['projects/hell/src/lib/table/table.spec.ts', "native-root').getAttribute('role')).toBeNull()"],
     ['projects/hell/src/lib/table/table.spec.ts', "native-cell').getAttribute('role')).toBeNull()"],
-    ['projects/hell/src/lib/table/table.spec.ts', "native-root').hasAttribute('tabindex')).toBe(false)"],
-    ['projects/hell/src/lib/table/table.spec.ts', "native-root').hasAttribute('aria-activedescendant')).toBe(false)"],
+    [
+      'projects/hell/src/lib/table/table.spec.ts',
+      "native-root').hasAttribute('tabindex')).toBe(false)",
+    ],
+    [
+      'projects/hell/src/lib/table/table.spec.ts',
+      "native-root').hasAttribute('aria-activedescendant')).toBe(false)",
+    ],
   ]) {
     if (!readFile(join(root, specPath)).includes(required)) {
       failures.push(`Table semantics contract test is missing: ${specPath} ${required}`);
@@ -2356,7 +2627,10 @@ function checkTableSemanticsContract() {
 }
 
 function checkTableSortTriggerContract() {
-  const tableSourcePath = join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts');
+  const tableSourcePath = join(
+    root,
+    'projects/hell/src/lib/features/table-utilities/table-utilities.ts',
+  );
   const tableSource = readFile(tableSourcePath);
   const headerModule = decoratedClassModules(tableSource).find(
     (module) => module.className === 'HellTableHeaderCell',
@@ -2372,7 +2646,9 @@ function checkTableSortTriggerContract() {
   }
 
   if (/(?:'|\")\(keydown\.|(?:'|\")\(click\)/.test(headerModule.moduleSource)) {
-    failures.push('HellTableHeaderCell must delegate sort activation to button[hellTableSortTrigger]');
+    failures.push(
+      'HellTableHeaderCell must delegate sort activation to button[hellTableSortTrigger]',
+    );
   }
 
   if (!/export\s+class\s+HellTableSortTrigger\b/.test(tableSource)) {
@@ -2391,7 +2667,9 @@ function checkTableSortTriggerContract() {
   const docsFiles = walk(docsRoot).filter((file) => file.endsWith('.ts'));
   for (const file of docsFiles) {
     const source = readFile(file);
-    for (const match of source.matchAll(/<th\b(?=[^>]*\bhellTableHeaderCell\b)(?=[^>]*\bsortable\b)[^>]*>[\s\S]*?<\/th>/g)) {
+    for (const match of source.matchAll(
+      /<th\b(?=[^>]*\bhellTableHeaderCell\b)(?=[^>]*\bsortable\b)[^>]*>[\s\S]*?<\/th>/g,
+    )) {
       if (!match[0].includes('hellTableSortTrigger')) {
         failures.push(
           `${file.slice(root.length + 1)} has a sortable table header without button[hellTableSortTrigger]`,
@@ -2402,7 +2680,10 @@ function checkTableSortTriggerContract() {
 }
 
 function checkTableResizeHandleContract() {
-  const tableSourcePath = join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts');
+  const tableSourcePath = join(
+    root,
+    'projects/hell/src/lib/features/table-utilities/table-utilities.ts',
+  );
   const tableSource = readFile(tableSourcePath);
 
   if (!/export\s+class\s+HellTableResizeHandle\b/.test(tableSource)) {
@@ -2414,10 +2695,16 @@ function checkTableResizeHandleContract() {
   }
 
   if (!tableSource.includes('resizeAdapter = input<HellTableResizeAdapter | null>')) {
-    failures.push('HellTableResizeHandle must delegate sizing through HellTableResizeAdapter input');
+    failures.push(
+      'HellTableResizeHandle must delegate sizing through HellTableResizeAdapter input',
+    );
   }
 
-  if (/hellTableColumnResizer|HellTableColumnResizer|hell-table-column-resizer|HellTableColumnResizeRuntime|data-table-column-resize/.test(tableSource)) {
+  if (
+    /hellTableColumnResizer|HellTableColumnResizer|hell-table-column-resizer|HellTableColumnResizeRuntime|data-table-column-resize/.test(
+      tableSource,
+    )
+  ) {
     failures.push('Legacy hellTableColumnResizer API must not remain in table utilities');
   }
 
@@ -2430,8 +2717,13 @@ function checkTableResizeHandleContract() {
   }
 
   const tableHarness = readFile(join(root, 'projects/hell/src/testing/table-harness.ts'));
-  if (!tableHarness.includes('HellTableResizeHandleHarness') || !tableHarness.includes('getResizeHandle')) {
-    failures.push('Testing table harness must expose HellTableResizeHandleHarness and getResizeHandle');
+  if (
+    !tableHarness.includes('HellTableResizeHandleHarness') ||
+    !tableHarness.includes('getResizeHandle')
+  ) {
+    failures.push(
+      'Testing table harness must expose HellTableResizeHandleHarness and getResizeHandle',
+    );
   }
   if (/HellTableColumnResizerHarness|getColumnResizer|hellTableColumnResizer/.test(tableHarness)) {
     failures.push('Testing table harness must not expose legacy column-resizer APIs');
@@ -2448,7 +2740,9 @@ function checkTableResizeHandleContract() {
     })
     .map((file) => file.slice(root.length + 1));
   if (docsOffenders.length) {
-    failures.push(`Docs must use hellTableResizeHandle instead of legacy resizer APIs: ${docsOffenders.join(', ')}`);
+    failures.push(
+      `Docs must use hellTableResizeHandle instead of legacy resizer APIs: ${docsOffenders.join(', ')}`,
+    );
   }
 }
 
@@ -2478,7 +2772,9 @@ function checkTableLegacyRemovalContract() {
     'projects/hell/src/lib/styles/components/table-utilities.css',
   ];
 
-  const manifestSpecifiers = new Set(entrypointPublicApiFiles().map((entrypoint) => entrypoint.specifier));
+  const manifestSpecifiers = new Set(
+    entrypointPublicApiFiles().map((entrypoint) => entrypoint.specifier),
+  );
   const packageJson = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
   const tsconfig = parseJsonWithComments(readFile(join(root, 'tsconfig.json')));
   const tsconfigPaths = tsconfig.compilerOptions?.paths ?? {};
@@ -2506,13 +2802,11 @@ function checkTableLegacyRemovalContract() {
   }
 
   for (const rel of [...legacyEntrypointFiles, ...legacyStyleFiles]) {
-    if (existsSync(join(root, rel))) failures.push(`Legacy table alias file must be removed: ${rel}`);
+    if (existsSync(join(root, rel)))
+      failures.push(`Legacy table alias file must be removed: ${rel}`);
   }
 
-  const importRoots = [
-    'projects/hell/src',
-    'projects/hell-docs/src/app',
-  ];
+  const importRoots = ['projects/hell/src', 'projects/hell-docs/src/app'];
   const legacyModuleSpecifiers = [...legacyEntrypointSpecifiers, ...legacyStyleSpecifiers];
   const importFiles = importRoots
     .flatMap((rel) => walk(join(root, rel)))
@@ -2529,14 +2823,22 @@ function checkTableLegacyRemovalContract() {
     }
   }
 
-  const productionFiles = walk(join(root, 'projects/hell/src'))
-    .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'));
+  const productionFiles = walk(join(root, 'projects/hell/src')).filter(
+    (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'),
+  );
   const legacySymbols = [
     { label: 'HELL_TABLE_DIRECTIVES', pattern: /\bHELL_TABLE_DIRECTIVES\b/ },
     { label: 'HELL_TABLE_UTILITY_DIRECTIVES', pattern: /\bHELL_TABLE_UTILITY_DIRECTIVES\b/ },
     { label: 'selectionSemantics', pattern: /\bselectionSemantics\b/ },
-    { label: 'hellTableSortButton', pattern: /\bhellTableSortButton\b|\bHellTableSortButton\b|\bhell-table-sort-button\b/ },
-    { label: 'hellTableColumnResizer', pattern: /\bhellTableColumnResizer\b|\bHellTableColumnResizer\b|\bhell-table-column-resizer\b|\bHellTableColumnResizeRuntime\b|\bdata-table-column-resize\b/ },
+    {
+      label: 'hellTableSortButton',
+      pattern: /\bhellTableSortButton\b|\bHellTableSortButton\b|\bhell-table-sort-button\b/,
+    },
+    {
+      label: 'hellTableColumnResizer',
+      pattern:
+        /\bhellTableColumnResizer\b|\bHellTableColumnResizer\b|\bhell-table-column-resizer\b|\bHellTableColumnResizeRuntime\b|\bdata-table-column-resize\b/,
+    },
   ];
   for (const file of productionFiles) {
     const source = readFile(file);
@@ -2547,11 +2849,19 @@ function checkTableLegacyRemovalContract() {
     }
   }
 
-  const tableSource = readFile(join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'));
-  const rowModule = decoratedClassModules(tableSource).find((module) => module.className === 'HellTableRow');
+  const tableSource = readFile(
+    join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'),
+  );
+  const rowModule = decoratedClassModules(tableSource).find(
+    (module) => module.className === 'HellTableRow',
+  );
   if (!rowModule) {
     failures.push('Legacy table removal contract could not inspect HellTableRow');
-  } else if (/\breadonly\s+interactive\b|\binteractive\s*=\s*input\b|\bHellTableRow\.interactive\b/.test(rowModule.moduleSource)) {
+  } else if (
+    /\breadonly\s+interactive\b|\binteractive\s*=\s*input\b|\bHellTableRow\.interactive\b/.test(
+      rowModule.moduleSource,
+    )
+  ) {
     failures.push('HellTableRow.interactive legacy input must be removed from table primitives');
   }
 
@@ -2561,7 +2871,11 @@ function checkTableLegacyRemovalContract() {
   ];
   for (const rel of styleEntrypointSources) {
     const source = readFile(join(root, rel));
-    if (/styles\/features\/data-table|\.\/features\/data-table\.css|features\/data-table\.css/.test(source)) {
+    if (
+      /styles\/features\/data-table|\.\/features\/data-table\.css|features\/data-table\.css/.test(
+        source,
+      )
+    ) {
       failures.push(`Legacy styles/features/data-table reference must be removed from ${rel}`);
     }
   }
@@ -2575,16 +2889,18 @@ function checkTableAdapterBoundaryContract() {
   const coreTableBoundaryFiles = [
     ...coreTableBoundaryDirs.flatMap((rel) => walk(join(root, rel))),
     join(root, 'projects/hell/src/lib/public-api-table.ts'),
-  ]
-    .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'));
+  ].filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'));
   const adapterDirs = ['projects/hell/src/lib/table-tanstack'];
   const adapterFiles = adapterDirs
     .flatMap((rel) => walk(join(root, rel)))
-    .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'));
+    .filter(
+      (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'),
+    );
   const policies = [
     {
       label: 'TanStack Table',
-      matches: (specifier) => specifier.startsWith('@tanstack/angular-table') || specifier.startsWith('@tanstack/table'),
+      matches: (specifier) =>
+        specifier.startsWith('@tanstack/angular-table') || specifier.startsWith('@tanstack/table'),
       allowedDir: 'projects/hell/src/lib/table-tanstack',
     },
     {
@@ -2663,8 +2979,12 @@ function checkTableAdapterBoundaryContract() {
 }
 
 function checkTableSemanticDefaultGuardContract() {
-  const tableSource = readFile(join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'));
-  const modules = new Map(decoratedClassModules(tableSource).map((module) => [module.className, module]));
+  const tableSource = readFile(
+    join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'),
+  );
+  const modules = new Map(
+    decoratedClassModules(tableSource).map((module) => [module.className, module]),
+  );
   const tableModule = modules.get('HellTable');
   const passiveRoleModules = [
     ['HellTableHead', 'rowgroup'],
@@ -2677,7 +2997,12 @@ function checkTableSemanticDefaultGuardContract() {
   if (!tableModule) {
     failures.push('Table semantic default guard could not inspect HellTable');
   } else {
-    for (const forbidden of ['isGridMode', 'gridTabIndex', 'gridActiveDescendant', 'aria-activedescendant']) {
+    for (const forbidden of [
+      'isGridMode',
+      'gridTabIndex',
+      'gridActiveDescendant',
+      'aria-activedescendant',
+    ]) {
       if (tableModule.moduleSource.includes(forbidden)) {
         failures.push(`HellTable semantic defaults must not own grid behavior: ${forbidden}`);
       }
@@ -2709,7 +3034,9 @@ function checkTableSemanticDefaultGuardContract() {
       { label: 'aria-activedescendant', pattern: /aria-activedescendant/ },
     ]) {
       if (forbidden.pattern.test(rowModule.moduleSource)) {
-        failures.push(`HellTableRow must not add row roving-focus behavior in table mode: ${forbidden.label}`);
+        failures.push(
+          `HellTableRow must not add row roving-focus behavior in table mode: ${forbidden.label}`,
+        );
       }
     }
   }
@@ -2804,15 +3131,15 @@ function checkNgpStateWriterContract() {
   const adapterRelPath = 'projects/hell/src/lib/primitives/adapters/ngp-state-adapters.ts';
   const adapterPath = join(root, adapterRelPath);
   const adapterSource = readFile(adapterPath);
-  const ngpPackage = parseJsonWithComments(readFile(join(root, 'node_modules/ng-primitives/package.json')));
+  const ngpPackage = parseJsonWithComments(
+    readFile(join(root, 'node_modules/ng-primitives/package.json')),
+  );
   const workspacePackage = parseJsonWithComments(readFile(join(root, 'package.json')));
   const libraryPackage = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
   const expectedVersion = `ng-primitives@${ngpPackage.version}`;
 
   if (!adapterSource.includes(`HELL_NGP_STATE_WRITER_VERSION = '${expectedVersion}'`)) {
-    failures.push(
-      `ng-primitives state writer version must match installed ${expectedVersion}`,
-    );
+    failures.push(`ng-primitives state writer version must match installed ${expectedVersion}`);
   }
 
   if (workspacePackage.dependencies?.['ng-primitives'] !== ngpPackage.version) {
@@ -2856,27 +3183,27 @@ function checkNgpStateWriterContract() {
   ];
   const indexedStateWritePatterns = [
     {
-      token: "state['value'].set(...) or state[\"value\"].set(...)",
+      token: 'state[\'value\'].set(...) or state["value"].set(...)',
       pattern: /\bstate\[['"]value['"]\]\.set\(/,
     },
     {
-      token: "state['disabled'].set(...) or state[\"disabled\"].set(...)",
+      token: 'state[\'disabled\'].set(...) or state["disabled"].set(...)',
       pattern: /\bstate\[['"]disabled['"]\]\.set\(/,
     },
     {
-      token: "state['activeItem'].set(...) or state[\"activeItem\"].set(...)",
+      token: 'state[\'activeItem\'].set(...) or state["activeItem"].set(...)',
       pattern: /\bstate\[['"]activeItem['"]\]\.set\(/,
     },
     {
-      token: "state()['value'].set(...) or state()[\"value\"].set(...)",
+      token: 'state()[\'value\'].set(...) or state()["value"].set(...)',
       pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*\(\)\[['"]value['"]\]\.set\(/,
     },
     {
-      token: "state()['disabled'].set(...) or state()[\"disabled\"].set(...)",
+      token: 'state()[\'disabled\'].set(...) or state()["disabled"].set(...)',
       pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*\(\)\[['"]disabled['"]\]\.set\(/,
     },
     {
-      token: "state()['activeItem'].set(...) or state()[\"activeItem\"].set(...)",
+      token: 'state()[\'activeItem\'].set(...) or state()["activeItem"].set(...)',
       pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*\(\)\[['"]activeItem['"]\]\.set\(/,
     },
   ];
@@ -2894,15 +3221,15 @@ function checkNgpStateWriterContract() {
       pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\.activeItem\.set\(/,
     },
     {
-      token: "State<T>['value'].set(...) or State<T>[\"value\"].set(...)",
+      token: 'State<T>[\'value\'].set(...) or State<T>["value"].set(...)',
       pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\[['"]value['"]\]\.set\(/,
     },
     {
-      token: "State<T>['disabled'].set(...) or State<T>[\"disabled\"].set(...)",
+      token: 'State<T>[\'disabled\'].set(...) or State<T>["disabled"].set(...)',
       pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\[['"]disabled['"]\]\.set\(/,
     },
     {
-      token: "State<T>['activeItem'].set(...) or State<T>[\"activeItem\"].set(...)",
+      token: 'State<T>[\'activeItem\'].set(...) or State<T>["activeItem"].set(...)',
       pattern: /\b(?:this\.)?[A-Za-z_$][\w$]*(?:\(\))?\[['"]activeItem['"]\]\.set\(/,
     },
   ];
@@ -2921,7 +3248,9 @@ function checkNgpStateWriterContract() {
     'State<NgpRadioGroup',
     'NgpRovingFocusGroupState',
   ];
-  const sourceFiles = walk(join(root, 'projects/hell/src/lib')).filter((file) => file.endsWith('.ts'));
+  const sourceFiles = walk(join(root, 'projects/hell/src/lib')).filter((file) =>
+    file.endsWith('.ts'),
+  );
 
   for (const file of sourceFiles) {
     const source = readFile(file);
@@ -2933,19 +3262,25 @@ function checkNgpStateWriterContract() {
     if (!isSpec) {
       for (const { token, pattern } of indexedStateWritePatterns) {
         if (pattern.test(source)) {
-          failures.push(`Ad hoc ng-primitives State<T> channel write ${token} is not allowed in ${rel}; use ${adapterRelPath}`);
+          failures.push(
+            `Ad hoc ng-primitives State<T> channel write ${token} is not allowed in ${rel}; use ${adapterRelPath}`,
+          );
         }
       }
 
       if (usesGuardedFormState && !isAdapter) {
         for (const { token, pattern } of directStateChannelWritePatterns) {
           if (pattern.test(source)) {
-            failures.push(`Ad hoc ng-primitives ${token} is not allowed in ${rel}; use ${adapterRelPath}`);
+            failures.push(
+              `Ad hoc ng-primitives ${token} is not allowed in ${rel}; use ${adapterRelPath}`,
+            );
           }
         }
 
         if (directPrimitiveStateAccessPattern.test(source)) {
-          failures.push(`Direct ng-primitives primitive .state access is not allowed in ${rel}; use injected State<T> through ${adapterRelPath}`);
+          failures.push(
+            `Direct ng-primitives primitive .state access is not allowed in ${rel}; use injected State<T> through ${adapterRelPath}`,
+          );
         }
       }
     }
@@ -2953,7 +3288,9 @@ function checkNgpStateWriterContract() {
       failures.push(`Retired ng-primitives private bridge token is still used in ${rel}`);
     }
     if (/\bngp[A-Za-z0-9_]*\.state\b/.test(source)) {
-      failures.push(`Direct ng-primitives instance state access is not allowed in ${rel}; use injected State<T> adapter seam`);
+      failures.push(
+        `Direct ng-primitives instance state access is not allowed in ${rel}; use injected State<T> adapter seam`,
+      );
     }
     if (allowedBridgeFiles.has(rel)) continue;
     const usesStateWriter =
@@ -2964,23 +3301,37 @@ function checkNgpStateWriterContract() {
     }
   }
 
-  const adaptersBarrel = readFile(join(root, 'projects/hell/src/lib/primitives/adapters/adapters.ts'));
-  if (/export\s+\*\s+from/.test(adaptersBarrel) || stateWriterTokens.some((token) => adaptersBarrel.includes(token))) {
+  const adaptersBarrel = readFile(
+    join(root, 'projects/hell/src/lib/primitives/adapters/adapters.ts'),
+  );
+  if (
+    /export\s+\*\s+from/.test(adaptersBarrel) ||
+    stateWriterTokens.some((token) => adaptersBarrel.includes(token))
+  ) {
     failures.push('ng-primitives state writer must not be re-exported through the adapters barrel');
   }
 
-  for (const token of ['writeToggleGroupValue', 'writeToggleGroupDisabled', 'ToggleGroupStateMutation']) {
+  for (const token of [
+    'writeToggleGroupValue',
+    'writeToggleGroupDisabled',
+    'ToggleGroupStateMutation',
+  ]) {
     if (adapterSource.includes(token)) {
-      failures.push(`Toggle group must use public ng-primitives setters, not state-writer token ${token}`);
+      failures.push(
+        `Toggle group must use public ng-primitives setters, not state-writer token ${token}`,
+      );
     }
   }
 }
 
 function checkFloatingAdapterContract() {
   const coreApi = readFile(join(root, 'projects/hell/src/lib/public-api-core.ts'));
-  const popoverAdapterRelPath = 'projects/hell/src/lib/primitives/adapters/ngp-popover-close-adapter.ts';
+  const popoverAdapterRelPath =
+    'projects/hell/src/lib/primitives/adapters/ngp-popover-close-adapter.ts';
   const popoverAdapterSource = readFile(join(root, popoverAdapterRelPath));
-  const ngpPackage = parseJsonWithComments(readFile(join(root, 'node_modules/ng-primitives/package.json')));
+  const ngpPackage = parseJsonWithComments(
+    readFile(join(root, 'node_modules/ng-primitives/package.json')),
+  );
   const expectedPopoverAdapterVersion = `ng-primitives@${ngpPackage.version}`;
 
   if (!coreApi.includes("export * from './core/floating-element'")) {
@@ -2998,7 +3349,11 @@ function checkFloatingAdapterContract() {
     );
   }
 
-  if (!popoverAdapterSource.includes(`HELL_NGP_POPOVER_CLOSE_ADAPTER_VERSION = '${expectedPopoverAdapterVersion}'`)) {
+  if (
+    !popoverAdapterSource.includes(
+      `HELL_NGP_POPOVER_CLOSE_ADAPTER_VERSION = '${expectedPopoverAdapterVersion}'`,
+    )
+  ) {
     failures.push(
       `ng-primitives popover close adapter version must match installed ${expectedPopoverAdapterVersion}`,
     );
@@ -3161,7 +3516,13 @@ function checkBrowserGlobalContract() {
 
 function browserGlobalHits(file) {
   const source = readFile(file);
-  const sourceFile = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const sourceFile = ts.createSourceFile(
+    file,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
   const original = source.split('\n');
   const rel = file.slice(root.length + 1).replaceAll('\\', '/');
   const seen = new Set();
@@ -3200,7 +3561,8 @@ function isDirectBrowserGlobalIdentifier(node) {
 function isTypeOnlyIdentifier(node) {
   for (let current = node.parent; current; current = current.parent) {
     if (ts.isTypeNode(current)) return true;
-    if (ts.isExpression(current) || ts.isStatement(current) || ts.isSourceFile(current)) return false;
+    if (ts.isExpression(current) || ts.isStatement(current) || ts.isSourceFile(current))
+      return false;
   }
 
   return false;
@@ -3248,13 +3610,17 @@ function checkEntrypointManifestSourceCoverage() {
 
     for (const entry of sourceEntries) {
       if (!manifestEntries.has(entry)) {
-        failures.push(`Entrypoint Manifest ${group.id} is missing source directory ${group.sourceDir}/${entry}`);
+        failures.push(
+          `Entrypoint Manifest ${group.id} is missing source directory ${group.sourceDir}/${entry}`,
+        );
       }
     }
 
     for (const entry of group.entries) {
       if (!sourceEntries.includes(entry)) {
-        failures.push(`Entrypoint Manifest ${group.id} references missing source directory ${group.sourceDir}/${entry}`);
+        failures.push(
+          `Entrypoint Manifest ${group.id} references missing source directory ${group.sourceDir}/${entry}`,
+        );
       }
     }
   }
@@ -3294,7 +3660,8 @@ function checkGeneratedEntrypointFiles() {
 
 function externalImportPackages(source) {
   const packages = [];
-  const importRegex = /(?:import|export)\s+(?:type\s+)?(?:[\s\S]*?\s+from\s+)?['"]([^.'"/][^'"]*)['"]/g;
+  const importRegex =
+    /(?:import|export)\s+(?:type\s+)?(?:[\s\S]*?\s+from\s+)?['"]([^.'"/][^'"]*)['"]/g;
   for (const match of source.matchAll(importRegex)) {
     packages.push(packageNameFromSpecifier(match[1]));
   }

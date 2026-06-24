@@ -13,15 +13,31 @@ import {
 } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { faSolidDeleteLeft, faSolidPhone } from '@ng-icons/font-awesome/solid';
-import { HellButton } from '../../primitives/button/button';
-import { HellInput } from '../../primitives/input/input';
 import { HELL_LABELS } from '../../core/labels';
-import { HellStyleable } from '../../core/styleable';
+import { hellMergePartClasses } from '../../core/part-style-merge';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '../../core/styleable';
 
 interface HellDialpadKey {
   digit: string;
   letters?: string;
 }
+
+export type HellDialpadPart =
+  | 'root'
+  | 'display'
+  | 'displayLabel'
+  | 'numberInput'
+  | 'controls'
+  | 'clearButton'
+  | 'backspaceButton'
+  | 'grid'
+  | 'keyButton'
+  | 'digit'
+  | 'letters'
+  | 'lowerGrid'
+  | 'callButton';
+
+export type HellDialpadUi = HellUi<HellDialpadPart>;
 
 const MAIN_KEYS: HellDialpadKey[] = [
   { digit: '1' },
@@ -39,6 +55,31 @@ const LOWER_KEYS: HellDialpadKey[] = [{ digit: '*' }, { digit: '0', letters: '+'
 
 const HELL_DIALPAD_ICONS = { faSolidDeleteLeft, faSolidPhone };
 
+const HELL_DIALPAD_RECIPE = {
+  root: 'group flex w-full max-w-[300px] flex-col gap-hell-2 rounded-hell-md outline-none data-disabled:opacity-70 focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-4',
+  display:
+    'grid min-h-16 cursor-text gap-0.5 rounded-hell-md border border-hell-border bg-hell-surface-subtle px-hell-3 py-hell-2 data-invalid:border-hell-danger',
+  displayLabel: 'text-xs font-bold text-hell-foreground-muted',
+  numberInput:
+    'h-9 min-w-0 border-0 bg-transparent p-0 font-[inherit] text-2xl font-semibold leading-tight tracking-normal text-hell-foreground outline-none placeholder:text-hell-foreground-subtle read-only:cursor-default disabled:cursor-not-allowed disabled:text-hell-foreground-muted',
+  controls: 'grid grid-cols-[minmax(0,1fr)_42px] gap-hell-2',
+  clearButton:
+    'inline-flex h-[42px] min-w-0 cursor-pointer items-center justify-center gap-hell-2 rounded-hell-md border border-hell-danger bg-hell-danger px-hell-3 font-[inherit] text-sm font-medium leading-none text-hell-foreground-inverse shadow-sm transition hover:bg-hell-danger-hover active:scale-[0.96] active:bg-hell-danger-active data-active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1 disabled:cursor-not-allowed disabled:bg-hell-danger disabled:opacity-50 disabled:shadow-none max-[480px]:h-[44px]',
+  backspaceButton:
+    'inline-flex h-[42px] w-[42px] min-w-0 cursor-pointer items-center justify-center rounded-hell-md border border-hell-danger bg-hell-danger p-0 font-[inherit] text-sm font-medium leading-none text-hell-foreground-inverse shadow-sm transition hover:bg-hell-danger-hover active:scale-[0.96] active:bg-hell-danger-active data-active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1 disabled:cursor-not-allowed disabled:bg-hell-danger disabled:opacity-50 disabled:shadow-none max-[480px]:h-[44px]',
+  grid: 'grid grid-cols-3 gap-hell-2',
+  keyButton:
+    'inline-flex h-[56px] min-w-0 touch-manipulation cursor-pointer flex-col items-center justify-center gap-1 rounded-hell-md border border-hell-border bg-hell-surface-elevated px-0 font-[inherit] leading-none text-hell-foreground shadow-none transition hover:bg-hell-surface-muted active:scale-[0.94] active:bg-hell-surface-muted data-active:scale-[0.94] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1 disabled:cursor-not-allowed disabled:scale-100 disabled:bg-hell-surface-elevated disabled:opacity-50 max-[480px]:h-[64px]',
+  digit: 'text-2xl font-semibold leading-none tracking-normal',
+  letters: 'min-h-2.5 text-[9px] font-bold leading-none tracking-normal text-hell-foreground-muted',
+  lowerGrid: 'grid grid-cols-3 gap-hell-2',
+  callButton:
+    'inline-flex h-[44px] w-full cursor-pointer items-center justify-center gap-hell-2 rounded-hell-md border border-hell-primary bg-hell-primary px-hell-6 font-[inherit] text-sm font-medium leading-none text-hell-primary-foreground shadow-sm transition hover:bg-hell-primary-hover active:scale-[0.98] active:bg-hell-primary-active data-active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1 disabled:cursor-not-allowed disabled:bg-hell-primary disabled:opacity-50 disabled:shadow-none',
+} satisfies HellRecipe<HellDialpadPart>;
+
+// HELL-130 temporary native-control bridge: Dialpad owns these native button
+// and input elements until HellButton and HellInput migrate to HellPartStyleable.
+
 /**
  * Telephony dialpad. Emits `(digit)` whenever a key is pressed and maintains
  * the entered number internally. Bind `[value]` for controlled mode, listen
@@ -48,12 +89,13 @@ const HELL_DIALPAD_ICONS = { faSolidDeleteLeft, faSolidPhone };
  */
 @Component({
   selector: 'hell-dialpad',
-  imports: [HellButton, HellInput, NgIcon],
+  imports: [NgIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [provideIcons(HELL_DIALPAD_ICONS)],
   host: {
-    '[class.hell-dialpad]': '!unstyled()',
+    '[class]': "part('root')",
     role: 'group',
+    'data-slot': 'root',
     '[attr.aria-label]': 'labels.dialpad.dialpad',
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
     '[attr.aria-invalid]': 'invalid() ? "true" : null',
@@ -64,12 +106,15 @@ const HELL_DIALPAD_ICONS = { faSolidDeleteLeft, faSolidPhone };
     '(keydown)': 'onKey($event)',
   },
   template: `
-    <label data-slot="display">
-      <span data-slot="display-label">{{ numberLabel() }}</span>
+    <label
+      data-slot="display"
+      [class]="part('display')"
+      [attr.data-invalid]="invalid() ? '' : null"
+    >
+      <span data-slot="displayLabel" [class]="part('displayLabel')">{{ numberLabel() }}</span>
       <input
-        hellInput
-        data-slot="number"
-        size="lg"
+        data-slot="numberInput"
+        [class]="part('numberInput')"
         type="tel"
         inputmode="tel"
         autocomplete="tel"
@@ -79,20 +124,23 @@ const HELL_DIALPAD_ICONS = { faSolidDeleteLeft, faSolidPhone };
         [readOnly]="readOnly()"
         [attr.aria-invalid]="invalid() ? 'true' : null"
         [attr.aria-label]="numberLabel()"
+        [attr.data-disabled]="disabled() ? '' : null"
+        [attr.data-readonly]="readOnly() ? '' : null"
+        [attr.data-invalid]="invalid() ? '' : null"
         (beforeinput)="onBeforeInput($event)"
         (input)="onNumberInput($event)"
       />
     </label>
 
-    <div data-slot="controls">
+    <div data-slot="controls" [class]="part('controls')">
       <button
-        hellButton
-        variant="danger"
-        size="sm"
         type="button"
-        data-slot="clear"
+        data-slot="clearButton"
+        tabindex="0"
+        [class]="part('clearButton')"
         data-action="edit"
         [attr.data-active]="isActive('clear') ? '' : null"
+        [attr.data-disabled]="!canEdit() || !hasValue() ? '' : null"
         [disabled]="!canEdit() || !hasValue()"
         (click)="clear()"
         [attr.aria-label]="clearLabel()"
@@ -100,14 +148,14 @@ const HELL_DIALPAD_ICONS = { faSolidDeleteLeft, faSolidPhone };
         {{ clearLabel() }}
       </button>
       <button
-        hellButton
-        variant="danger"
-        size="sm"
-        iconOnly
         type="button"
-        data-slot="back"
+        data-slot="backspaceButton"
+        data-icon-only=""
+        tabindex="0"
+        [class]="part('backspaceButton')"
         data-action="edit"
         [attr.data-active]="isActive('back') ? '' : null"
+        [attr.data-disabled]="!canEdit() || !hasValue() ? '' : null"
         [disabled]="!canEdit() || !hasValue()"
         (click)="backspace()"
         [attr.aria-label]="labels.dialpad.backspace"
@@ -116,44 +164,46 @@ const HELL_DIALPAD_ICONS = { faSolidDeleteLeft, faSolidPhone };
       </button>
     </div>
 
-    <div data-slot="grid">
+    <div data-slot="grid" [class]="part('grid')">
       @for (k of mainKeys; track k.digit) {
         <button
-          hellButton
-          variant="default"
-          data-slot="key"
+          data-slot="keyButton"
+          tabindex="0"
+          [class]="part('keyButton')"
           type="button"
           [disabled]="!canEdit()"
           [attr.aria-label]="keyLabel(k)"
           [attr.data-key]="k.digit"
           [attr.data-active]="isKeyActive(k.digit) ? '' : null"
+          [attr.data-disabled]="!canEdit() ? '' : null"
           (click)="onKeyClick(k.digit)"
         >
-          <span data-slot="digit">{{ k.digit }}</span>
-          <span data-slot="letters">{{ k.letters || ' ' }}</span>
+          <span data-slot="digit" [class]="part('digit')">{{ k.digit }}</span>
+          <span data-slot="letters" [class]="part('letters')">{{ k.letters || ' ' }}</span>
         </button>
       }
     </div>
 
-    <div data-slot="lower-grid">
+    <div data-slot="lowerGrid" [class]="part('lowerGrid')">
       @for (k of lowerKeys; track k.digit) {
         <button
-          hellButton
-          variant="default"
-          data-slot="key"
+          data-slot="keyButton"
+          tabindex="0"
+          [class]="part('keyButton')"
           type="button"
           [disabled]="!canEdit()"
           [attr.aria-label]="keyLabel(k)"
           [attr.data-key]="k.digit"
           [attr.data-active]="isKeyActive(k.digit) ? '' : null"
+          [attr.data-disabled]="!canEdit() ? '' : null"
           (pointerdown)="onPointerDown($event, k.digit)"
           (pointerup)="onPointerUp($event, k.digit)"
           (pointercancel)="cancelPlusHold()"
           (click)="onKeyClick(k.digit)"
         >
-          <span data-slot="digit">{{ k.digit }}</span>
+          <span data-slot="digit" [class]="part('digit')">{{ k.digit }}</span>
           @if (k.letters) {
-            <span data-slot="letters">{{ k.letters }}</span>
+            <span data-slot="letters" [class]="part('letters')">{{ k.letters }}</span>
           }
         </button>
       }
@@ -161,12 +211,12 @@ const HELL_DIALPAD_ICONS = { faSolidDeleteLeft, faSolidPhone };
 
     @if (showCallButtonState()) {
       <button
-        hellButton
-        variant="primary"
-        size="lg"
         type="button"
-        data-slot="call"
+        data-slot="callButton"
+        tabindex="0"
+        [class]="part('callButton')"
         [attr.data-active]="isActive('call') ? '' : null"
+        [attr.data-disabled]="disabled() || !hasValue() ? '' : null"
         (click)="submit()"
         [disabled]="disabled() || !hasValue()"
         [attr.aria-label]="labels.dialpad.call"
@@ -177,7 +227,10 @@ const HELL_DIALPAD_ICONS = { faSolidDeleteLeft, faSolidPhone };
     }
   `,
 })
-export class HellDialpad extends HellStyleable {
+export class HellDialpad extends HellPartStyleable<HellDialpadPart> {
+  protected readonly recipe = HELL_DIALPAD_RECIPE;
+  protected readonly mergePartClasses = hellMergePartClasses;
+
   private readonly valueInput = signal<string | null | undefined>(null);
   private readonly showCallButtonInput = signal(true);
   private readonly disabledInput = signal(false);
@@ -375,6 +428,7 @@ export class HellDialpad extends HellStyleable {
       if (this.shouldSubmitFrom(e.target) && this.showCallButtonState() && this.hasValue()) {
         this.submit();
         e.preventDefault();
+        this.restoreNumberInputFocus(e.target);
       }
       return;
     }
@@ -401,8 +455,18 @@ export class HellDialpad extends HellStyleable {
     return target === this.hostElement || this.isNumberInputTarget(target);
   }
 
-  private isNumberInputTarget(target: EventTarget | null): boolean {
-    return target instanceof HTMLInputElement && target.getAttribute('data-slot') === 'number';
+  private isNumberInputTarget(target: EventTarget | null): target is HTMLInputElement {
+    return target instanceof HTMLInputElement && target.getAttribute('data-slot') === 'numberInput';
+  }
+
+  private restoreNumberInputFocus(target: EventTarget | null): void {
+    if (!this.isNumberInputTarget(target)) return;
+    const input = target;
+    setTimeout(() => {
+      if (this.hostElement.contains(input)) {
+        input.focus();
+      }
+    });
   }
 
   private setNumber(value: string): void {

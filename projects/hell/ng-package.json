@@ -1,6 +1,7 @@
 {
   "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
   "dest": "../../dist/hell",
+  "allowedNonPeerDependencies": ["tailwind-merge"],
   "assets": [
     {
       "glob": "**/*.css",
