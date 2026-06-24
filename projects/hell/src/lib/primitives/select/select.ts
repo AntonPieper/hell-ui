@@ -15,11 +15,14 @@ import {
   viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms';
-import { containsNode } from '../../core/dom';
 import { HellControlledValueState } from '../../core/controlled-value-state';
 import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
 import { HellStyleable } from '../../core/styleable';
-import { hellRegisterFloatingHost } from '../../core/floating-scope';
+import {
+  hellContainsFloatingTarget,
+  hellRegisterFloatingHost,
+  HellFloatingScopeRegistry,
+} from '../../core/floating-scope';
 import {
   hellSyncFormFieldDescriptions,
   hellSyncFormFieldLabels,
@@ -31,12 +34,18 @@ import {
   NgpSelectPortal,
   injectSelectState,
 } from 'ng-primitives/select';
-import { injectFormFieldState, ngpFormField, provideFormFieldState } from 'ng-primitives/form-field';
+import {
+  injectFormFieldState,
+  ngpFormField,
+  provideFormFieldState,
+} from 'ng-primitives/form-field';
 import { writeSelectStateDisabled, writeSelectStateValue } from '../adapters/ngp-state-adapters';
 
 export type HellSelectSingleValue<T = unknown> = T | null;
 export type HellSelectMultipleValue<T = unknown> = readonly T[];
-export type HellSelectFormValue<T = unknown> = HellSelectSingleValue<T> | HellSelectMultipleValue<T>;
+export type HellSelectFormValue<T = unknown> =
+  | HellSelectSingleValue<T>
+  | HellSelectMultipleValue<T>;
 export type HellSelectDisplayWith<T = unknown> = (value: T) => string;
 export type HellSelectCompareWith<T = unknown> = (a: T, b: T) => boolean;
 
@@ -81,14 +90,21 @@ export class HellSelect<T = unknown> extends HellStyleable implements ControlVal
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly cva = new HellControlValueAccessorBridge<HellSelectFormValue<T>>();
-  private readonly dropdowns = new Set<HTMLElement>();
+  private readonly floatingScope = new HellFloatingScopeRegistry();
+  private dropdownOpen = false;
 
   constructor() {
     super();
     const valueSub = this.select.valueChange.subscribe((value) => {
       this.cva.emitValue(this.normalizeValue(value));
     });
-    this.destroyRef.onDestroy(() => valueSub.unsubscribe());
+    const openSub = this.select.openChange.subscribe((open) => {
+      this.dropdownOpen = open;
+    });
+    this.destroyRef.onDestroy(() => {
+      valueSub.unsubscribe();
+      openSub.unsubscribe();
+    });
   }
 
   writeValue(value: HellSelectFormValue<T>): void {
@@ -108,22 +124,14 @@ export class HellSelect<T = unknown> extends HellStyleable implements ControlVal
   }
 
   isOutsideControl(next: EventTarget | Node | null): boolean {
-    const open = this.selectState().open();
-    if (containsNode(this.host.nativeElement, next)) {
-      return false;
-    }
-
-    if (!open) {
-      return true;
-    }
-
-    for (const dropdown of this.dropdowns) {
-      if (containsNode(dropdown, next)) {
-        return false;
-      }
-    }
-
-    return true;
+    return !hellContainsFloatingTarget(
+      {
+        root: () => this.host.nativeElement,
+        scope: this.floatingScope,
+        floatingActive: () => this.dropdownOpen,
+      },
+      next,
+    );
   }
 
   markControlTouched(event: FocusEvent): void {
@@ -133,11 +141,11 @@ export class HellSelect<T = unknown> extends HellStyleable implements ControlVal
   }
 
   registerDropdown(dropdown: HTMLElement): void {
-    this.dropdowns.add(dropdown);
+    this.floatingScope.registerFloatingElement(dropdown);
   }
 
   unregisterDropdown(dropdown: HTMLElement): void {
-    this.dropdowns.delete(dropdown);
+    this.floatingScope.unregisterFloatingElement(dropdown);
   }
 
   private normalizeValue(value: unknown): HellSelectFormValue<T> {
@@ -282,11 +290,7 @@ export class HellSelectOption extends HellStyleable {
       <ng-template hellSelectPortal>
         <div hellSelectDropdown [unstyled]="unstyled()">
           @for (option of options(); track option) {
-            <div
-              hellSelectOption
-              [value]="option"
-              [unstyled]="unstyled()"
-            >
+            <div hellSelectOption [value]="option" [unstyled]="unstyled()">
               {{ displayWith()(option) }}
             </div>
           }
@@ -315,7 +319,8 @@ export class HellSelectBasic<T = unknown> extends HellStyleable implements Contr
   private readonly cva = new HellControlValueAccessorBridge<HellSelectFormValue<T>>();
   private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
   private readonly formField =
-    this.inheritedFormField() ?? ngpFormField({ ngControl: signal<NgControl | undefined>(undefined) });
+    this.inheritedFormField() ??
+    ngpFormField({ ngControl: signal<NgControl | undefined>(undefined) });
   private readonly controlledValue = new HellControlledValueState<HellSelectFormValue<T>>({
     externalValue: this.value,
     externalDisabled: this.disabled,
@@ -361,7 +366,7 @@ export class HellSelectBasic<T = unknown> extends HellStyleable implements Contr
     const inner = this.innerSelect();
     const outside = inner
       ? inner.isOutsideControl(event.relatedTarget)
-      : !containsNode(this.host.nativeElement, event.relatedTarget);
+      : !hellContainsFloatingTarget({ root: () => this.host.nativeElement }, event.relatedTarget);
 
     if (outside) this.cva.markTouched();
   }

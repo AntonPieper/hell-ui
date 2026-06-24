@@ -2762,6 +2762,42 @@ function checkFloatingRegistrationContract() {
       );
     }
   }
+
+  const touchedContainmentOwners = [
+    {
+      file: 'projects/hell/src/lib/primitives/select/select.ts',
+      className: 'HellSelect',
+    },
+    {
+      file: 'projects/hell/src/lib/primitives/combobox/combobox.ts',
+      className: 'HellCombobox',
+    },
+  ];
+
+  for (const owner of touchedContainmentOwners) {
+    const source = readFile(join(root, owner.file));
+    const classBody = source.match(
+      new RegExp(
+        `export\\s+class\\s+${owner.className}\\b[\\s\\S]*?(?=\\nexport\\s+class|\\nexport\\s+const|$)`,
+      ),
+    )?.[0];
+
+    if (!classBody || !/hellContainsFloatingTarget\(/.test(classBody)) {
+      failures.push(
+        `${owner.file} ${owner.className} must route touched containment through the shared floating-scope helper`,
+      );
+      continue;
+    }
+
+    if (
+      /dropdowns\s*=\s*new\s+Set<HTMLElement>\s*\(/.test(classBody) ||
+      /for\s*\(\s*const\s+dropdown\s+of\s+this\.dropdowns\s*\)/.test(classBody)
+    ) {
+      failures.push(
+        `${owner.file} ${owner.className} must not maintain a parallel dropdown Set containment policy`,
+      );
+    }
+  }
 }
 
 function checkNgpStateWriterContract() {

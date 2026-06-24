@@ -1,6 +1,7 @@
 import type { DestroyRef } from '@angular/core';
 
 import {
+  hellContainsFloatingTarget,
   HellFloatingScopedInsetsRuntime,
   HellFloatingScopeRegistry,
   hellRegisterFloatingElement,
@@ -37,6 +38,38 @@ describe('Floating Scope', () => {
     destroy.run();
 
     expect(scope.containsFloatingTarget(child)).toBe(false);
+  });
+
+  it('shares root and active registered floating containment through one predicate', () => {
+    const root = document.createElement('div');
+    const rootChild = document.createElement('button');
+    const dropdown = document.createElement('div');
+    const option = document.createElement('button');
+    const outside = document.createElement('button');
+    root.append(rootChild);
+    dropdown.append(option);
+    document.body.append(root, dropdown, outside);
+
+    const scope = new HellFloatingScopeRegistry();
+    scope.registerFloatingElement(dropdown);
+    const contains = (target: Node, active = true) =>
+      hellContainsFloatingTarget(
+        {
+          root: () => root,
+          scope,
+          floatingActive: () => active,
+        },
+        target,
+      );
+
+    expect(contains(rootChild)).toBe(true);
+    expect(contains(option)).toBe(true);
+    expect(contains(option, false)).toBe(false);
+    expect(contains(outside)).toBe(false);
+
+    scope.unregisterFloatingElement(dropdown);
+
+    expect(contains(option)).toBe(false);
   });
 
   it('writes scoped inset vars to foreign-realm elements without falling back globally', () => {
@@ -143,7 +176,9 @@ describe('Floating Scope', () => {
     });
     controller.connect(destroy.ref);
 
-    root.dispatchEvent(new foreignWindow.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    root.dispatchEvent(
+      new foreignWindow.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+    );
 
     expect(dismissals).toEqual(['keydown']);
 
@@ -272,7 +307,14 @@ describe('Floating Scope', () => {
     const nonFocusableTarget = document.createElement('div');
     disabledTarget.disabled = true;
     hiddenTarget.hidden = true;
-    document.body.append(root, outside, detachedTarget, disabledTarget, hiddenTarget, nonFocusableTarget);
+    document.body.append(
+      root,
+      outside,
+      detachedTarget,
+      disabledTarget,
+      hiddenTarget,
+      nonFocusableTarget,
+    );
 
     const cases: HTMLElement[] = [detachedTarget, disabledTarget, hiddenTarget, nonFocusableTarget];
 
@@ -319,7 +361,9 @@ describe('Floating Scope', () => {
     controller.connect(destroy.ref);
 
     const focusout = new FocusEvent('focusout', { bubbles: true, relatedTarget: outside });
-    focusedChild.addEventListener('focusout', (event) => controller.handleFocusExit(event as FocusEvent));
+    focusedChild.addEventListener('focusout', (event) =>
+      controller.handleFocusExit(event as FocusEvent),
+    );
     focusedChild.dispatchEvent(focusout);
     active = false;
     activeKey++;

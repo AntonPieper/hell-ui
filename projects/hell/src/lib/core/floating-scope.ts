@@ -18,6 +18,17 @@ export interface HellFloatingScope {
   containsFloatingTarget(target: EventTarget | Node | null): boolean;
 }
 
+export interface HellFloatingContainmentOptions {
+  /** Primary logical owner of the interaction. */
+  readonly root?: () => Node | null | undefined;
+  /** Extra inline nodes that should count as inside. */
+  readonly inside?: () => readonly (Node | null | undefined)[];
+  /** Registered portaled floating surfaces. */
+  readonly scope?: HellFloatingScope | null | undefined;
+  /** Gate for whether registered floating surfaces currently count as inside. */
+  readonly floatingActive?: () => boolean;
+}
+
 /**
  * DI token for a logical Floating Scope. Provide it on composites that own
  * portaled children so nested floating surfaces count as inside for dismissal.
@@ -54,6 +65,27 @@ export class HellFloatingScopeRegistry implements HellFloatingScope {
 
     return false;
   }
+}
+
+export function hellContainsFloatingTarget(
+  options: HellFloatingContainmentOptions,
+  target: EventTarget | Node | null,
+): boolean {
+  const node = hellFloatingTargetNode(target);
+  if (!node) return false;
+
+  const root = options.root?.();
+  if (root?.contains(node)) return true;
+
+  for (const element of options.inside?.() ?? []) {
+    if (element?.contains(node)) return true;
+  }
+
+  if (options.floatingActive?.() ?? true) {
+    return options.scope?.containsFloatingTarget(node) ?? false;
+  }
+
+  return false;
 }
 
 export function hellFloatingTargetNode(target: EventTarget | Node | null): Node | null {
