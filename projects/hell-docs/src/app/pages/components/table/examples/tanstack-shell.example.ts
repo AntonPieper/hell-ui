@@ -40,6 +40,7 @@ import {
   type ColumnDef,
   type ColumnFiltersState,
   type PaginationState,
+  type Row,
   type RowSelectionState,
   type SortingState,
   type Updater,
@@ -121,7 +122,12 @@ interface PeopleServerResult {
       (nextItem)="openAdjacentPerson(1)"
     >
       <ng-template hellSplitPrimary>
-        <hell-tanstack-table [table]="table" [status]="status()" stickyHeader>
+        <hell-tanstack-table
+          [table]="table"
+          [status]="status()"
+          [rowClass]="selectedRowClass"
+          stickyHeader
+        >
           <hell-omnibar
             hellTableShellToolbar
             #peopleSearch="hellOmnibar"
@@ -344,6 +350,8 @@ export class TableTanStackShellExample implements OnDestroy {
   protected readonly globalFilter = signal('');
   protected readonly detailOpen = signal(false);
   protected readonly openedId = signal<string | null>(null);
+  protected readonly selectedRowClass = (row: Row<Person>) =>
+    row.getIsSelected() ? 'bg-hell-primary-soft' : null;
   private queryVersion = 0;
   private queryTimer: ReturnType<typeof setTimeout> | null = null;
   private failNextQuery = false;

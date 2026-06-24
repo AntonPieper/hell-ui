@@ -8,6 +8,7 @@ import {
   type ColumnDef,
   type ExpandedState,
   type PaginationState,
+  type Row,
   type RowSelectionState,
 } from '@tanstack/angular-table';
 
@@ -50,7 +51,7 @@ const people: Person[] = [
     HellButton,
   ],
   template: `
-    <hell-tanstack-table [table]="table" [status]="status()">
+    <hell-tanstack-table [table]="table" [status]="status()" [rowClass]="selectedRowClass">
       <ng-template hellTableShellCell="actions" let-row="row" let-cell>
         <button hellButton type="button" data-action>
           {{ row.original.name }} {{ cell.column.id }}
@@ -61,7 +62,7 @@ const people: Person[] = [
       <ng-template hellTableShellEmpty>No rows</ng-template>
       <ng-template hellTableShellError let-error>{{ error }}</ng-template>
 
-      <span hellTableShellFooter data-selected>2 selected</span>
+      <span hellTableShellFooter data-testid="selected-summary">2 selected</span>
       <hell-tanstack-pagination hellTableShellFooter [table]="table" [pageSizeOptions]="[1, 2]" />
     </hell-tanstack-table>
   `,
@@ -71,6 +72,8 @@ class ShellHost {
   readonly status = signal(HellTableStatus.READY);
   readonly pagination = signal<PaginationState>({ pageIndex: 0, pageSize: 1 });
   readonly rowSelection = signal<RowSelectionState>({ ada: true });
+  protected readonly selectedRowClass = (row: Row<Person>) =>
+    row.getIsSelected() ? 'bg-hell-primary-soft' : null;
 
   readonly columns: ColumnDef<Person>[] = [
     {
@@ -178,9 +181,20 @@ describe('Hell TanStack table shell', () => {
     expect(text(root)).toContain('Ada actions');
     expect(root.querySelector('td.name-cell')?.textContent).toContain('Person Ada');
     expect(root.querySelector('th.name-header')?.textContent).toContain('Name');
-    expect(root.querySelector('tr[data-hell-table-shell-row]')?.getAttribute('data-selected')).toBe(
-      'true',
+    expect(root.querySelector('tr[data-hell-table-shell-row]')?.hasAttribute('data-selected')).toBe(
+      false,
     );
+  });
+
+  it('lets callers map TanStack row selection to a rowClass visual', () => {
+    const fixture = TestBed.createComponent(ShellHost);
+    fixture.componentInstance.pagination.set({ pageIndex: 0, pageSize: 2 });
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const [selectedRow, idleRow] = root.querySelectorAll('tr[data-hell-table-shell-row]');
+
+    expect(selectedRow?.classList.contains('bg-hell-primary-soft')).toBe(true);
+    expect(idleRow?.classList.contains('bg-hell-primary-soft')).toBe(false);
   });
 
   it('infers empty from the ready row model and keeps footer projection repeatable', () => {
@@ -190,7 +204,9 @@ describe('Hell TanStack table shell', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(text(root)).toContain('No rows');
-    expect(root.querySelector('[data-selected]')?.textContent).toContain('2 selected');
+    expect(root.querySelector('[data-testid="selected-summary"]')?.textContent).toContain(
+      '2 selected',
+    );
     expect(root.querySelector('hell-tanstack-pagination')).not.toBeNull();
     expect(root.querySelector('hell-tanstack-pagination hell-pagination')).not.toBeNull();
     expect(root.querySelectorAll('hell-tanstack-pagination [role="navigation"]')).toHaveLength(1);

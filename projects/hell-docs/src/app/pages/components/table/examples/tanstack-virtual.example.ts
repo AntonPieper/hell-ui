@@ -39,6 +39,7 @@ import {
   type ColumnDef,
   type ColumnFiltersState,
   type ExpandedState,
+  type Row,
   type RowSelectionState,
   type SortingState,
   type Updater,
@@ -89,6 +90,7 @@ type StatusFilter = 'all' | Person['status'];
       [status]="HellTableStatus.READY"
       stickyHeader
       hellTanStackVirtualRows
+      [rowClass]="selectedRowClass"
       [virtualEstimateRowSize]="44"
       [virtualOverscan]="6"
     >
@@ -279,6 +281,8 @@ export class TableTanStackVirtualExample {
   protected readonly rowSelection = signal<RowSelectionState>({ 'person-1': true });
   protected readonly expanded = signal<ExpandedState>({});
   protected readonly globalFilter = signal('');
+  protected readonly selectedRowClass = (row: Row<Person>) =>
+    row.getIsSelected() ? 'bg-hell-primary-soft' : null;
 
   protected readonly statusFilters: readonly {
     readonly value: StatusFilter;
