@@ -16,6 +16,7 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { containsNode } from '../../core/dom';
+import { HellControlledValueState } from '../../core/controlled-value-state';
 import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
 import { HellStyleable } from '../../core/styleable';
 import { hellRegisterFloatingHost } from '../../core/floating-scope';
@@ -356,16 +357,16 @@ export class HellComboboxBasic<T = unknown> extends HellStyleable implements Con
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly cva = new HellControlValueAccessorBridge<HellComboboxValue<T>>();
-  private readonly controlMode = signal(false);
-  private readonly controlValue = signal<HellComboboxValue<T> | null>(null);
-  private readonly controlDisabled = signal(false);
+  private readonly controlledValue = new HellControlledValueState<HellComboboxValue<T>>({
+    externalValue: this.value,
+    externalDisabled: this.disabled,
+    initialValue: null,
+  });
   private readonly filterOverride = signal<string | null>(null);
   private readonly combobox = viewChild(HellCombobox);
 
-  protected readonly effectiveValue = computed(() =>
-    this.controlMode() ? this.controlValue() : this.value(),
-  );
-  protected readonly effectiveDisabled = computed(() => this.disabled() || this.controlDisabled());
+  protected readonly effectiveValue = this.controlledValue.value;
+  protected readonly effectiveDisabled = this.controlledValue.disabled;
 
   protected readonly selectedLabel = computed(() => {
     const value = this.effectiveValue();
@@ -390,9 +391,7 @@ export class HellComboboxBasic<T = unknown> extends HellStyleable implements Con
   });
 
   protected onValueChange(next: HellComboboxValue<T>): void {
-    if (this.controlMode()) {
-      this.controlValue.set(next);
-    }
+    this.controlledValue.acceptUserValue(next);
     this.valueChange.emit(next);
     this.cva.emitValue(next);
     this.filterOverride.set(null);
@@ -420,8 +419,7 @@ export class HellComboboxBasic<T = unknown> extends HellStyleable implements Con
   }
 
   writeValue(value: HellComboboxValue<T>): void {
-    this.controlMode.set(true);
-    this.controlValue.set(this.normalizeWriteValue(value));
+    this.controlledValue.writeValue(this.normalizeWriteValue(value));
     this.filterOverride.set(null);
   }
 
@@ -434,7 +432,7 @@ export class HellComboboxBasic<T = unknown> extends HellStyleable implements Con
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.controlDisabled.set(isDisabled);
+    this.controlledValue.setDisabledState(isDisabled);
   }
 
   protected filter(): string {

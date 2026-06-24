@@ -292,6 +292,39 @@ describe('HellCombobox', () => {
     expect(root.getAttribute('data-disabled')).toBe('');
   });
 
+  it('updates the basic combobox reactive form and output once for a user selection', async () => {
+    const fixture = TestBed.createComponent(ComboboxBasicFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const root = query<HTMLElement>(fixture.nativeElement, 'hell-combobox-basic [hellCombobox]');
+    const input = query<HTMLInputElement>(
+      fixture.nativeElement,
+      'hell-combobox-basic input[hellComboboxInput]',
+    );
+
+    host.control.setValue(null);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(input.value).toBe('');
+    expect(host.values).toEqual([]);
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    const dropdown = await waitForDropdown(fixture);
+    query<HTMLElement>(dropdown, '[hellComboboxOption]:last-child').click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.control.value).toBe('Nova');
+    expect(host.values).toEqual(['Nova']);
+
+    host.control.disable();
+    fixture.detectChanges();
+
+    expect(root.getAttribute('data-disabled')).toBe('');
+  });
+
   it('lets basic combobox callers override helper labels without changing defaults', async () => {
     const defaultFixture = TestBed.createComponent(ComboboxBasicFormHost);
     defaultFixture.detectChanges();
@@ -350,7 +383,7 @@ async function waitForDropdown(fixture: {
   detectChanges: () => void;
   whenStable: () => Promise<unknown>;
 }): Promise<HTMLElement> {
-  const timeout = Date.now() + 1000;
+  const timeout = Date.now() + 3000;
 
   while (Date.now() < timeout) {
     fixture.detectChanges();

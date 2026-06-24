@@ -5,7 +5,6 @@ import {
   Directive,
   ElementRef,
   booleanAttribute,
-  computed,
   forwardRef,
   inject,
   input,
@@ -14,6 +13,7 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgpSwitchThumb, ngpSwitch, provideSwitchState } from 'ng-primitives/switch';
+import { HellControlledValueState } from '../../core/controlled-value-state';
 import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
 import { HellStyleable } from '../../core/styleable';
 
@@ -53,9 +53,11 @@ export class HellSwitch extends HellStyleable implements ControlValueAccessor {
 
   readonly checkedChange = output<boolean>();
 
-  private readonly controlMode = signal(false);
-  private readonly controlChecked = signal(false);
-  private readonly controlDisabled = signal(false);
+  private readonly controlledChecked = new HellControlledValueState<boolean>({
+    externalValue: this.checked,
+    externalDisabled: this.disabled,
+    initialValue: false,
+  });
   private readonly cva = new HellControlValueAccessorBridge<boolean>();
   private readonly host = inject<ElementRef<HTMLButtonElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
@@ -63,17 +65,15 @@ export class HellSwitch extends HellStyleable implements ControlValueAccessor {
     this.host.nativeElement.getAttribute('id') ?? `hell-switch-${nextSwitchId++}`,
   );
 
-  private readonly effectiveChecked = computed(() =>
-    this.controlMode() ? this.controlChecked() : this.checked(),
-  );
-  private readonly effectiveDisabled = computed(() => this.disabled() || this.controlDisabled());
+  private readonly effectiveChecked = this.controlledChecked.value;
+  private readonly effectiveDisabled = this.controlledChecked.disabled;
 
   protected readonly state = ngpSwitch({
     id: this.switchId,
     checked: this.effectiveChecked,
     disabled: this.effectiveDisabled,
     onCheckedChange: (checked) => {
-      if (this.controlMode()) this.controlChecked.set(checked);
+      this.controlledChecked.acceptUserValue(checked);
       this.checkedChange.emit(checked);
       this.cva.emitValue(checked);
     },
@@ -81,8 +81,7 @@ export class HellSwitch extends HellStyleable implements ControlValueAccessor {
   private readonly installSpaceKeyHandler = this.registerSpaceKeyHandler();
 
   writeValue(value: boolean): void {
-    this.controlMode.set(true);
-    this.controlChecked.set(value === true);
+    this.controlledChecked.writeValue(value === true);
   }
 
   registerOnChange(fn: (value: boolean) => void): void {
@@ -94,7 +93,7 @@ export class HellSwitch extends HellStyleable implements ControlValueAccessor {
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.controlDisabled.set(isDisabled);
+    this.controlledChecked.setDisabledState(isDisabled);
   }
 
   protected markControlTouched(): void {
