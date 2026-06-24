@@ -23,6 +23,7 @@ import {
   ngpSlider,
   provideSliderState,
 } from 'ng-primitives/slider';
+import { HellControlledValueState } from '../../core/controlled-value-state';
 import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
 import { hellUniqueIdRefs } from '../../core/idrefs';
 import { HellSize, type HellOrientation } from '../../core/types';
@@ -97,9 +98,11 @@ export class HellSlider extends HellStyleable implements ControlValueAccessor {
 
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly thumbRef = viewChild<ElementRef<HTMLElement>>('thumb');
-  private readonly controlMode = signal(false);
-  private readonly controlValue = signal(0);
-  private readonly controlDisabled = signal(false);
+  private readonly controlledValue = new HellControlledValueState<number>({
+    externalValue: this.value,
+    externalDisabled: this.disabled,
+    initialValue: 0,
+  });
   private readonly cva = new HellControlValueAccessorBridge<number>();
   private readonly destroyRef = inject(DestroyRef);
   private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
@@ -111,10 +114,8 @@ export class HellSlider extends HellStyleable implements ControlValueAccessor {
   );
   private removeActiveDragListeners: (() => void) | null = null;
 
-  private readonly effectiveValue = computed(() =>
-    this.coerceValue(this.controlMode() ? this.controlValue() : this.value()),
-  );
-  private readonly effectiveDisabled = computed(() => this.disabled() || this.controlDisabled());
+  private readonly effectiveValue = computed(() => this.coerceValue(this.controlledValue.value()));
+  private readonly effectiveDisabled = this.controlledValue.disabled;
 
   protected readonly sliderState = ngpSlider({
     id: this.sliderId,
@@ -125,7 +126,7 @@ export class HellSlider extends HellStyleable implements ControlValueAccessor {
     orientation: this.orientation,
     disabled: this.effectiveDisabled,
     onValueChange: (value) => {
-      if (this.controlMode()) this.controlValue.set(value);
+      this.controlledValue.acceptUserValue(value);
       this.valueChange.emit(value);
       this.cva.emitValue(value);
     },
@@ -189,8 +190,7 @@ export class HellSlider extends HellStyleable implements ControlValueAccessor {
   }
 
   writeValue(value: number): void {
-    this.controlMode.set(true);
-    this.controlValue.set(value);
+    this.controlledValue.writeValue(value);
   }
 
   registerOnChange(fn: (value: number) => void): void {
@@ -202,7 +202,7 @@ export class HellSlider extends HellStyleable implements ControlValueAccessor {
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.controlDisabled.set(isDisabled);
+    this.controlledValue.setDisabledState(isDisabled);
   }
 
   /**

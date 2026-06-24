@@ -16,6 +16,7 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms';
 import { containsNode } from '../../core/dom';
+import { HellControlledValueState } from '../../core/controlled-value-state';
 import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
 import { HellStyleable } from '../../core/styleable';
 import { hellRegisterFloatingHost } from '../../core/floating-scope';
@@ -315,14 +316,14 @@ export class HellSelectBasic<T = unknown> extends HellStyleable implements Contr
   private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
   private readonly formField =
     this.inheritedFormField() ?? ngpFormField({ ngControl: signal<NgControl | undefined>(undefined) });
-  private readonly controlMode = signal(false);
-  private readonly controlValue = signal<HellSelectFormValue<T> | null>(null);
-  private readonly controlDisabled = signal(false);
+  private readonly controlledValue = new HellControlledValueState<HellSelectFormValue<T>>({
+    externalValue: this.value,
+    externalDisabled: this.disabled,
+    initialValue: null,
+  });
 
-  protected readonly effectiveValue = computed(() =>
-    this.controlMode() ? this.controlValue() : this.value(),
-  );
-  protected readonly effectiveDisabled = computed(() => this.disabled() || this.controlDisabled());
+  protected readonly effectiveValue = this.controlledValue.value;
+  protected readonly effectiveDisabled = this.controlledValue.disabled;
   protected readonly triggerAriaLabel = () =>
     this.ariaLabel() ?? this.host.nativeElement.getAttribute('aria-label');
   private readonly triggerAriaLabelledby = computed(
@@ -351,9 +352,7 @@ export class HellSelectBasic<T = unknown> extends HellStyleable implements Contr
   }
 
   protected onValueChange(next: HellSelectFormValue<T>): void {
-    if (this.controlMode()) {
-      this.controlValue.set(next);
-    }
+    this.controlledValue.acceptUserValue(next);
     this.valueChange.emit(next);
     this.cva.emitValue(next);
   }
@@ -368,8 +367,7 @@ export class HellSelectBasic<T = unknown> extends HellStyleable implements Contr
   }
 
   writeValue(value: HellSelectFormValue<T>): void {
-    this.controlMode.set(true);
-    this.controlValue.set(this.normalizeWriteValue(value));
+    this.controlledValue.writeValue(this.normalizeWriteValue(value));
   }
 
   registerOnChange(fn: (value: HellSelectFormValue<T>) => void): void {
@@ -381,7 +379,7 @@ export class HellSelectBasic<T = unknown> extends HellStyleable implements Contr
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.controlDisabled.set(isDisabled);
+    this.controlledValue.setDisabledState(isDisabled);
   }
 
   private normalizeSingleValue(value: unknown): HellSelectSingleValue<T> {

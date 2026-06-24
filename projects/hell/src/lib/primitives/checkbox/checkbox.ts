@@ -4,13 +4,11 @@ import {
   Directive,
   ElementRef,
   booleanAttribute,
-  computed,
   effect,
   forwardRef,
   inject,
   input,
   output,
-  signal,
 } from '@angular/core';
 import {
   ControlValueAccessor,
@@ -21,6 +19,7 @@ import {
   type Validator,
 } from '@angular/forms';
 import { ngpCheckbox } from 'ng-primitives/checkbox';
+import { HellControlledValueState } from '../../core/controlled-value-state';
 import { HellControlValueAccessorBridge } from '../../core/control-value-accessor';
 import { HellStyleable } from '../../core/styleable';
 
@@ -93,16 +92,16 @@ export class HellCheckbox extends HellStyleable implements ControlValueAccessor,
   readonly checkedChange = output<boolean>();
   readonly indeterminateChange = output<boolean>();
 
-  private readonly controlMode = signal(false);
-  private readonly controlChecked = signal(false);
-  private readonly controlDisabled = signal(false);
+  private readonly controlledChecked = new HellControlledValueState<boolean>({
+    externalValue: this.checked,
+    externalDisabled: this.disabled,
+    initialValue: false,
+  });
   private readonly cva = new HellControlValueAccessorBridge<boolean>();
   private onValidatorChange: () => void = () => {};
 
-  private readonly effectiveChecked = computed(() =>
-    this.controlMode() ? this.controlChecked() : this.checked(),
-  );
-  private readonly effectiveDisabled = computed(() => this.disabled() || this.controlDisabled());
+  private readonly effectiveChecked = this.controlledChecked.value;
+  private readonly effectiveDisabled = this.controlledChecked.disabled;
 
   constructor() {
     super();
@@ -118,7 +117,7 @@ export class HellCheckbox extends HellStyleable implements ControlValueAccessor,
     indeterminate: this.indeterminate,
     disabled: this.effectiveDisabled,
     onCheckedChange: (checked) => {
-      if (this.controlMode()) this.controlChecked.set(checked);
+      this.controlledChecked.acceptUserValue(checked);
       this.checkedChange.emit(checked);
       this.cva.emitValue(checked);
     },
@@ -126,8 +125,7 @@ export class HellCheckbox extends HellStyleable implements ControlValueAccessor,
   });
 
   writeValue(value: boolean): void {
-    this.controlMode.set(true);
-    this.controlChecked.set(value === true);
+    this.controlledChecked.writeValue(value === true);
   }
 
   registerOnChange(fn: (value: boolean) => void): void {
@@ -143,7 +141,7 @@ export class HellCheckbox extends HellStyleable implements ControlValueAccessor,
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.controlDisabled.set(isDisabled);
+    this.controlledChecked.setDisabledState(isDisabled);
   }
 
   protected markControlTouched(): void {

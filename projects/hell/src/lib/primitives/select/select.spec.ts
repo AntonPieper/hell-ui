@@ -224,6 +224,38 @@ describe('HellSelect', () => {
     expect(trigger.getAttribute('data-disabled')).toBe('');
   });
 
+  it('updates the basic select reactive form and output once for a user selection', async () => {
+    const fixture = TestBed.createComponent(SelectBasicFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const trigger = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      'hell-select-basic button[hellSelect]',
+    );
+    const debug = fixture.debugElement.query(By.directive(HellSelect));
+    const ngpSelect = debug.injector.get(NgpSelect);
+
+    host.control.setValue('Low');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.values).toEqual([]);
+    expect(trigger.textContent?.trim()).toContain('Low');
+
+    ngpSelect.valueChange.emit('High');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.control.value).toBe('High');
+    expect(host.values).toEqual(['High']);
+
+    host.control.disable();
+    fixture.detectChanges();
+
+    expect(trigger.getAttribute('data-disabled')).toBe('');
+  });
+
   it('keeps the basic select accessible name stable before and after selection', () => {
     const fixture = TestBed.createComponent(SelectBasicLabelledHost);
     fixture.detectChanges();
