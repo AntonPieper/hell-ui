@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   signal,
+  type OnDestroy,
   type WritableSignal,
 } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
@@ -24,18 +25,18 @@ import { HellTableRowRadio } from '@hell-ui/angular/table';
 import {
   HellTableShellCell,
   HellTableShellEmpty,
+  HellTableShellError,
   HellTableShellFooter,
+  HellTableShellLoading,
   HellTableShellToolbar,
   HellTableStatus,
+  type HellTableStatusValue,
   HellTanStackPagination,
   HellTanStackTable,
 } from '@hell-ui/angular/table-tanstack';
 import {
   createAngularTable,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
   type ColumnDef,
   type ColumnFiltersState,
   type PaginationState,
@@ -72,6 +73,18 @@ const TABLE_EXAMPLE_ICONS = {
 type RoleFilter = 'all' | Person['role'];
 type StatusFilter = 'all' | Person['status'];
 
+interface PeopleServerQuery {
+  readonly sorting: SortingState;
+  readonly columnFilters: ColumnFiltersState;
+  readonly pagination: PaginationState;
+  readonly globalFilter: string;
+}
+
+interface PeopleServerResult {
+  readonly rows: Person[];
+  readonly totalRows: number;
+}
+
 @Component({
   selector: 'app-table-tanstack-shell-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -81,7 +94,9 @@ type StatusFilter = 'all' | Person['status'];
     HellTanStackTable,
     HellTableShellCell,
     HellTableShellEmpty,
+    HellTableShellError,
     HellTableShellFooter,
+    HellTableShellLoading,
     HellTableShellToolbar,
     HellTanStackPagination,
     HellTableRowRadio,
@@ -106,7 +121,7 @@ type StatusFilter = 'all' | Person['status'];
       (nextItem)="openAdjacentPerson(1)"
     >
       <ng-template hellSplitPrimary>
-        <hell-tanstack-table [table]="table" [status]="HellTableStatus.READY" stickyHeader>
+        <hell-tanstack-table [table]="table" [status]="status()" stickyHeader>
           <hell-omnibar
             hellTableShellToolbar
             #peopleSearch="hellOmnibar"
@@ -115,7 +130,7 @@ type StatusFilter = 'all' | Person['status'];
             placeholder="Search people"
             ariaLabel="Search people"
             [value]="globalFilter()"
-            [searchItems]="rows()"
+            [searchItems]="serverCatalog"
             [searchFields]="searchFields"
             [searchLimit]="5"
             [searchDebounce]="80"
@@ -125,7 +140,7 @@ type StatusFilter = 'all' | Person['status'];
           >
             <hell-icon hellOmnibarLeading name="faSolidMagnifyingGlass" size="13px" />
             <span hellOmnibarTrailing class="text-xs text-hell-foreground-muted">
-              {{ table.getFilteredRowModel().rows.length }}
+              {{ totalRows() }}
             </span>
 
             <div hellOmnibarActions aria-label="People table quick actions">
@@ -234,7 +249,15 @@ type StatusFilter = 'all' | Person['status'];
               </button>
               <button hellMenuItem type="button" (click)="resetControls()">
                 <hell-icon hellMenuItemIcon name="faSolidSliders" />
-                <span>Reset table controls</span>
+                <span>Reset server query</span>
+              </button>
+              <button hellMenuItem type="button" (click)="reloadServerRows()">
+                <hell-icon hellMenuItemIcon name="faSolidMagnifyingGlass" />
+                <span>Reload server rows</span>
+              </button>
+              <button hellMenuItem type="button" (click)="simulateServerError()">
+                <hell-icon hellMenuItemIcon name="faSolidFilter" />
+                <span>Simulate server error</span>
               </button>
             </div>
           </ng-template>
@@ -253,7 +276,6 @@ type StatusFilter = 'all' | Person['status'];
           <ng-template hellTableShellCell="actions" let-row="row">
             <button
               hellButton
-              iconOnly
               size="xs"
               variant="ghost"
               type="button"
@@ -261,12 +283,21 @@ type StatusFilter = 'all' | Person['status'];
               (click)="openPerson(row.original)"
             >
               <hell-icon name="faSolidFolderOpen" />
+              <span>Open</span>
             </button>
           </ng-template>
 
-          <ng-template hellTableShellEmpty>No people found.</ng-template>
+          <ng-template hellTableShellLoading>
+            <span data-testid="table-server-loading">Loading server rows...</span>
+          </ng-template>
+          <ng-template hellTableShellError let-error>
+            <span data-testid="table-server-error">{{ error }}</span>
+          </ng-template>
+          <ng-template hellTableShellEmpty>
+            <span data-testid="table-server-empty">No people matched the server query.</span>
+          </ng-template>
 
-          <span hellTableShellFooter>{{ table.getFilteredRowModel().rows.length }} visible</span>
+          <span hellTableShellFooter>{{ totalRows() }} server rows</span>
           <span hellTableShellFooter>{{ selectedPerson()?.name ?? 'No one' }} selected</span>
           <hell-tanstack-pagination
             hellTableShellFooter
@@ -301,9 +332,11 @@ type StatusFilter = 'all' | Person['status'];
     </hell-split-view>
   `,
 })
-export class TableTanStackShellExample {
-  protected readonly HellTableStatus = HellTableStatus;
-  protected readonly rows = signal<Person[]>([...PEOPLE]);
+export class TableTanStackShellExample implements OnDestroy {
+  protected readonly serverCatalog = PEOPLE;
+  protected readonly rows = signal<Person[]>([]);
+  protected readonly totalRows = signal(0);
+  protected readonly status = signal<HellTableStatusValue>(HellTableStatus.LOADING);
   protected readonly sorting = signal<SortingState>([{ id: 'name', desc: false }]);
   protected readonly columnFilters = signal<ColumnFiltersState>([]);
   protected readonly pagination = signal<PaginationState>({ pageIndex: 0, pageSize: 2 });
@@ -311,6 +344,10 @@ export class TableTanStackShellExample {
   protected readonly globalFilter = signal('');
   protected readonly detailOpen = signal(false);
   protected readonly openedId = signal<string | null>(null);
+  private queryVersion = 0;
+  private queryTimer: ReturnType<typeof setTimeout> | null = null;
+  private failNextQuery = false;
+  private pendingAdjacentPageOpen: -1 | 1 | null = null;
 
   protected readonly statusFilters: readonly {
     readonly value: StatusFilter;
@@ -338,11 +375,11 @@ export class TableTanStackShellExample {
 
   protected readonly selectedPerson = computed(() => {
     const selectedId = Object.keys(this.rowSelection())[0];
-    return this.rows().find((person) => person.id === selectedId) ?? null;
+    return this.serverCatalog.find((person) => person.id === selectedId) ?? null;
   });
   protected readonly openedPerson = computed(() => {
     const openedId = this.openedId();
-    return this.rows().find((person) => person.id === openedId) ?? null;
+    return this.serverCatalog.find((person) => person.id === openedId) ?? null;
   });
   protected readonly statusFilter = computed<StatusFilter>(
     () =>
@@ -358,6 +395,9 @@ export class TableTanStackShellExample {
   );
   protected readonly filtersActive = computed(
     () => this.statusFilter() !== 'all' || this.roleFilter() !== 'all',
+  );
+  protected readonly pageCount = computed(() =>
+    Math.max(1, Math.ceil(this.totalRows() / this.pagination().pageSize)),
   );
 
   protected readonly columns: ColumnDef<Person>[] = [
@@ -393,7 +433,7 @@ export class TableTanStackShellExample {
     {
       id: 'actions',
       header: 'Actions',
-      size: 88,
+      size: 104,
       enableSorting: false,
       enableGlobalFilter: false,
       meta: { hell: { cellClass: 'text-right', headerClass: 'text-right' } },
@@ -405,10 +445,11 @@ export class TableTanStackShellExample {
     columns: this.columns,
     enableRowSelection: true,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     getRowId: (row) => row.id,
+    manualFiltering: true,
+    manualPagination: true,
+    manualSorting: true,
+    pageCount: this.pageCount(),
     state: {
       sorting: this.sorting(),
       columnFilters: this.columnFilters(),
@@ -416,16 +457,41 @@ export class TableTanStackShellExample {
       rowSelection: this.rowSelection(),
       globalFilter: this.globalFilter(),
     },
-    onSortingChange: (updater) => applyUpdater(this.sorting, updater),
-    onColumnFiltersChange: (updater) => applyUpdater(this.columnFilters, updater),
-    onPaginationChange: (updater) => applyUpdater(this.pagination, updater),
+    onSortingChange: (updater) => {
+      applyUpdater(this.sorting, updater);
+      this.resetPage();
+      this.reloadServerRows();
+    },
+    onColumnFiltersChange: (updater) => {
+      applyUpdater(this.columnFilters, updater);
+      this.resetPage();
+      this.reloadServerRows();
+    },
+    onPaginationChange: (updater) => {
+      applyUpdater(this.pagination, updater);
+      this.reloadServerRows();
+    },
     onRowSelectionChange: (updater) => applyUpdater(this.rowSelection, updater),
-    onGlobalFilterChange: (updater) => applyUpdater(this.globalFilter, updater),
+    onGlobalFilterChange: (updater) => {
+      applyUpdater(this.globalFilter, updater);
+      this.resetPage();
+      this.reloadServerRows();
+    },
   }));
 
+  constructor() {
+    this.reloadServerRows();
+  }
+
+  ngOnDestroy(): void {
+    if (this.queryTimer) clearTimeout(this.queryTimer);
+  }
+
   protected setGlobalFilter(value: string): void {
+    this.pendingAdjacentPageOpen = null;
     this.globalFilter.set(value);
     this.resetPage();
+    this.reloadServerRows();
   }
 
   protected selectRow(rowId: string): void {
@@ -452,18 +518,58 @@ export class TableTanStackShellExample {
   }
 
   protected resetControls(): void {
+    this.pendingAdjacentPageOpen = null;
     this.globalFilter.set('');
     this.columnFilters.set([]);
     this.sorting.set([{ id: 'name', desc: false }]);
     this.pagination.set({ pageIndex: 0, pageSize: this.pagination().pageSize });
+    this.status.set(HellTableStatus.LOADING);
+    this.reloadServerRows();
+  }
+
+  protected simulateServerError(): void {
+    this.failNextQuery = true;
+    this.reloadServerRows();
+  }
+
+  protected reloadServerRows(): void {
+    const request: PeopleServerQuery = {
+      sorting: this.sorting(),
+      columnFilters: this.columnFilters(),
+      pagination: this.pagination(),
+      globalFilter: this.globalFilter(),
+    };
+    const queryVersion = ++this.queryVersion;
+    const shouldFail = this.failNextQuery;
+    this.failNextQuery = false;
+    this.status.set(HellTableStatus.LOADING);
+    if (this.queryTimer) clearTimeout(this.queryTimer);
+    this.queryTimer = setTimeout(() => {
+      if (queryVersion !== this.queryVersion) return;
+      if (shouldFail) {
+        this.pendingAdjacentPageOpen = null;
+        this.rows.set([]);
+        this.totalRows.set(0);
+        this.status.set(HellTableStatus.error('Server query failed.'));
+        return;
+      }
+
+      const result = queryPeople(request);
+      this.rows.set(result.rows);
+      this.totalRows.set(result.totalRows);
+      this.status.set(HellTableStatus.READY);
+      this.openPendingAdjacentPageRow();
+    }, 120);
   }
 
   private setColumnFilter(columnId: 'role' | 'status', value: RoleFilter | StatusFilter): void {
+    this.pendingAdjacentPageOpen = null;
     this.columnFilters.update((filters) => [
       ...filters.filter((filter) => filter.id !== columnId),
       ...(value === 'all' ? [] : [{ id: columnId, value }]),
     ]);
     this.resetPage();
+    this.reloadServerRows();
   }
 
   private resetPage(): void {
@@ -492,18 +598,65 @@ export class TableTanStackShellExample {
     }
 
     if (direction > 0 && this.table.getCanNextPage()) {
+      this.pendingAdjacentPageOpen = 1;
       this.table.nextPage();
-      queueMicrotask(() => this.openPerson(this.table.getRowModel().rows[0]?.original ?? null));
     } else if (direction < 0 && this.table.getCanPreviousPage()) {
+      this.pendingAdjacentPageOpen = -1;
       this.table.previousPage();
-      queueMicrotask(() => this.openPerson(this.table.getRowModel().rows.at(-1)?.original ?? null));
     }
+  }
+
+  private openPendingAdjacentPageRow(): void {
+    const pending = this.pendingAdjacentPageOpen;
+    if (!pending) return;
+
+    this.pendingAdjacentPageOpen = null;
+    queueMicrotask(() => {
+      const rows = this.table.getRowModel().rows;
+      const row = pending > 0 ? rows[0] : rows.at(-1);
+      this.openPerson(row?.original ?? null);
+    });
   }
 
   private openedRowIndex(rows: readonly { readonly original: Person }[]): number {
     const openedId = this.openedId();
     return rows.findIndex((row) => row.original.id === openedId);
   }
+}
+
+function queryPeople(query: PeopleServerQuery): PeopleServerResult {
+  const globalFilter = query.globalFilter.trim().toLowerCase();
+  const statusFilter = query.columnFilters.find((filter) => filter.id === 'status')?.value as
+    | StatusFilter
+    | undefined;
+  const roleFilter = query.columnFilters.find((filter) => filter.id === 'role')?.value as
+    | RoleFilter
+    | undefined;
+  const sorting = query.sorting[0];
+  const filtered = PEOPLE.filter((person) => {
+    const matchesSearch =
+      !globalFilter ||
+      [person.name, person.role, person.status, person.team].some((value) =>
+        value.toLowerCase().includes(globalFilter),
+      );
+    const matchesStatus = !statusFilter || statusFilter === 'all' || person.status === statusFilter;
+    const matchesRole = !roleFilter || roleFilter === 'all' || person.role === roleFilter;
+    return matchesSearch && matchesStatus && matchesRole;
+  });
+  const sorted = sorting ? [...filtered].sort((a, b) => comparePeople(a, b, sorting)) : filtered;
+  const start = query.pagination.pageIndex * query.pagination.pageSize;
+  const end = start + query.pagination.pageSize;
+
+  return {
+    rows: sorted.slice(start, end),
+    totalRows: sorted.length,
+  };
+}
+
+function comparePeople(a: Person, b: Person, sorting: SortingState[number]): number {
+  const id = sorting.id as keyof Person;
+  const direction = sorting.desc ? -1 : 1;
+  return String(a[id]).localeCompare(String(b[id])) * direction;
 }
 
 function applyUpdater<T>(target: WritableSignal<T>, updater: Updater<T>): void {

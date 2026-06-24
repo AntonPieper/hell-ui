@@ -2,7 +2,9 @@ import { NgTemplateOutlet } from '@angular/common';
 import {
   CdkConnectedOverlay,
   CdkOverlayOrigin,
+  Overlay,
   type ConnectedPosition,
+  type ScrollStrategy,
 } from '@angular/cdk/overlay';
 import {
   ChangeDetectionStrategy,
@@ -201,6 +203,7 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
       [cdkConnectedOverlayGrowAfterOpen]="true"
       [cdkConnectedOverlayPush]="true"
       [cdkConnectedOverlayViewportMargin]="8"
+      [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
       [cdkConnectedOverlayPanelClass]="'hell-omnibar-overlay-pane'"
       (detach)="onOverlayDetach()"
       (positionChange)="onOverlayPositionChange()"
@@ -252,6 +255,7 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
 })
 export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   protected readonly labels = inject(HELL_LABELS);
+  private readonly overlay = inject(Overlay);
 
   /* ── Inputs ────────────────────────────────────────────────────────── */
 
@@ -314,6 +318,9 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   private readonly openVersion = signal(0);
   protected readonly isOpen = computed(() => !this.disabled() && this._open());
   protected readonly overlayPositions = HELL_OMNIBAR_OVERLAY_POSITIONS;
+  protected readonly overlayScrollStrategy: ScrollStrategy = this.overlay.scrollStrategies.reposition({
+    scrollThrottle: 0,
+  });
   private overlayPanelElement: HTMLElement | null = null;
   protected readonly cursor = signal(0);
   readonly searchResults = computed(() => this.runtime.results());

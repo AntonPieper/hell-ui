@@ -8,6 +8,7 @@ import {
   type ColumnDef,
   type ExpandedState,
   type PaginationState,
+  type RowSelectionState,
 } from '@tanstack/angular-table';
 
 import {
@@ -69,6 +70,7 @@ class ShellHost {
   readonly rows = signal<Person[]>(people);
   readonly status = signal(HellTableStatus.READY);
   readonly pagination = signal<PaginationState>({ pageIndex: 0, pageSize: 1 });
+  readonly rowSelection = signal<RowSelectionState>({ ada: true });
 
   readonly columns: ColumnDef<Person>[] = [
     {
@@ -87,9 +89,14 @@ class ShellHost {
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getRowId: (row) => row.id,
-    state: { pagination: this.pagination() },
+    enableRowSelection: true,
+    state: { pagination: this.pagination(), rowSelection: this.rowSelection() },
     onPaginationChange: (updater) =>
       this.pagination.update((current) =>
+        typeof updater === 'function' ? updater(current) : updater,
+      ),
+    onRowSelectionChange: (updater) =>
+      this.rowSelection.update((current) =>
         typeof updater === 'function' ? updater(current) : updater,
       ),
   }));
@@ -171,6 +178,9 @@ describe('Hell TanStack table shell', () => {
     expect(text(root)).toContain('Ada actions');
     expect(root.querySelector('td.name-cell')?.textContent).toContain('Person Ada');
     expect(root.querySelector('th.name-header')?.textContent).toContain('Name');
+    expect(root.querySelector('tr[data-hell-table-shell-row]')?.getAttribute('data-selected')).toBe(
+      'true',
+    );
   });
 
   it('infers empty from the ready row model and keeps footer projection repeatable', () => {
