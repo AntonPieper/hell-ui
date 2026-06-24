@@ -8,7 +8,7 @@ hell is a compact Angular component system for dense business applications. It f
 A directive-first module whose Interface is behavior, accessibility, and state attributes while consumers own DOM structure and visual styling.
 
 **Styled Primitive**
-A Behavior Primitive plus optional Hell host classes, data attributes, and public CSS variables. Consumers can use Style Opt-Out to keep behavior while removing the default visual implementation.
+A Behavior Primitive plus default Tailwind part classes, data attributes, and public CSS variables. Consumers can use a Part Style Map to refine named public parts while preserving behavior.
 
 **Composite**
 A module that combines multiple primitives into a higher-level experience. A Composite may own some DOM structure when that structure is part of the leverage it provides, but its docs should name the owned parts and the escape hatches.
@@ -21,10 +21,27 @@ _Avoid_: Column visibility selector, table column picker.
 A heavier module with optional dependencies, runtime setup, or large styling. Features stay behind feature-specific Package Entry Points and feature-specific CSS imports.
 
 **Component Contract**
-The shared Interface expected from public Hell modules: behavior directives, optional default class, data-slot attributes for owned parts, data-state/data-size/data-variant attributes for stateful styling, public CSS variables for supported visual overrides, and Style Opt-Out for full visual opt-out.
+The shared Interface expected from public Hell modules: behavior directives, stable public parts for owned structure, data-state/data-size/data-variant attributes for stateful styling, public CSS variables for supported visual values, and a Part Style Map for visual customization.
 
 **Style Opt-Out**
-The shared contract that lets consumers keep a hell module's behavior and accessibility while removing its default host styling with `unstyled`.
+The legacy all-or-nothing contract that lets consumers keep a Hell module's behavior and accessibility while removing its default host styling.
+_Avoid_: Future customization surface, part style map.
+
+**Public Part**
+A named, stable element or region in a Hell module's owned structure that consumers may refine through the module's Part Style Map. Public Parts are represented in DOM with `data-slot`, and the `data-slot` value should match the public part name unless a component documents an exception; unknown internal DOM is not part of the component contract.
+_Avoid_: Private element, arbitrary descendant.
+
+**Part Style Map**
+The future shared contract that lets consumers refine a Hell module's named Public Parts with Tailwind classes. In code, this is the `HellUi<Part>` shape: a partial map from component-local Public Part names to class strings.
+_Avoid_: Style Opt-Out, unstyled mode, class override object, omit map, visual layers.
+
+**Part Recipe**
+The component-owned default Tailwind class map for its Public Parts. It is the default half of the Part-Class Pipeline and is not a consumer schema.
+_Avoid_: Legacy `.hell-*` CSS styling model, global recipe taxonomy.
+
+**Part-Class Pipeline**
+The single class computation path for one Public Part: default recipe classes plus the consumer's matching Part Style Map entry, merged deterministically.
+_Avoid_: Multiple late class override channels.
 
 **Customization Surface**
 The consumer-facing Interface for changing a hell module's behavior, styling, and policy without forking or fighting the library. A good Customization Surface exposes the underlying settings consumers naturally want to adjust rather than mode switches or booleans that apply bundled presets.
