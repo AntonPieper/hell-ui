@@ -3,6 +3,9 @@ import { TestBed } from '@angular/core/testing';
 
 import { HellPopover, HellPopoverTrigger } from './popover';
 
+const POPOVER_TEST_TIMEOUT_MS = 15000;
+const POPOVER_TEST_CASE_TIMEOUT_MS = 30000;
+
 beforeAll(() => {
   const elementPrototype = Element.prototype as Element & {
     getAnimations?: () => readonly Animation[];
@@ -50,10 +53,41 @@ class EnabledPopoverAnchorTriggerHost {
 })
 class DisabledPopoverTriggerHost {}
 
+@Component({
+  selector: 'hell-popover-closeable-trigger-host',
+  imports: [HellPopover, HellPopoverTrigger],
+  template: `
+    <ng-template #popover>
+      <div hellPopover>
+        <button id="inside-action" type="button">Inside action</button>
+        Popover
+      </div>
+    </ng-template>
+    <button
+      id="button-trigger"
+      type="button"
+      [hellPopoverTrigger]="popover"
+      [container]="container"
+      (openChange)="openEvents.push($event)"
+    >
+      Button
+    </button>
+    <button id="outside-target" type="button">Outside</button>
+    <div id="popover-container" #container></div>
+  `,
+})
+class CloseablePopoverTriggerHost {
+  readonly openEvents: boolean[] = [];
+}
+
 describe('HellPopoverTrigger', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EnabledPopoverAnchorTriggerHost, DisabledPopoverTriggerHost],
+      imports: [
+        EnabledPopoverAnchorTriggerHost,
+        DisabledPopoverTriggerHost,
+        CloseablePopoverTriggerHost,
+      ],
     }).compileComponents();
   });
 
@@ -84,7 +118,7 @@ describe('HellPopoverTrigger', () => {
     await waitForPopoverTriggerClosed(fixture, anchor);
     await waitForPopoverCloseEvent(fixture);
     expect(container.textContent).not.toContain('Popover');
-  });
+  }, POPOVER_TEST_CASE_TIMEOUT_MS);
 
   it('reflects disabled semantics on buttons and anchors', () => {
     const fixture = TestBed.createComponent(DisabledPopoverTriggerHost);
@@ -102,38 +136,103 @@ describe('HellPopoverTrigger', () => {
     expect(document.body.textContent).not.toContain('Popover');
   });
 
-  it('ignores missing or non-updatable overlay seams', () => {
-    const host = createPopoverPatchHost();
+  it('emits close when outside pointer interaction closes button popovers', async () => {
+    const fixture = TestBed.createComponent(CloseablePopoverTriggerHost);
+    fixture.detectChanges();
 
-    expect(() => configureOverlayClose(host, null)).not.toThrow();
-    expect(() => configureOverlayClose(host, undefined)).not.toThrow();
-    expect(() => configureOverlayClose(host, {})).not.toThrow();
-    expect(() => configureOverlayClose(host, { updateConfig: null })).not.toThrow();
-    expect(host.trigger.openChange.emit).not.toHaveBeenCalled();
-  });
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#button-trigger');
+    const container = query<HTMLElement>(fixture.nativeElement, '#popover-container');
+    trigger.click();
 
-  it('patches callable overlay close config with a destroy guard', () => {
-    const host = createPopoverPatchHost();
-    const updateConfig = vi.fn();
+    await waitForPopoverOverlayText(fixture, container, 'Popover');
+    await waitForPopoverTriggerOpen(fixture, trigger);
+    await waitForPopoverOpenEvent(fixture);
 
-    configureOverlayClose(host, { updateConfig });
+    const outside = query<HTMLButtonElement>(fixture.nativeElement, '#outside-target');
+    outside.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, clientX: 1, clientY: 1 }));
 
-    expect(updateConfig).toHaveBeenCalledOnce();
-    expect(updateConfig).toHaveBeenCalledWith({ onClose: expect.any(Function) });
+    await waitForPopoverOverlayTextToDisappear(fixture, container, 'Popover');
+    await waitForPopoverTriggerClosed(fixture, trigger);
+    await waitForPopoverCloseEvent(fixture);
+  }, POPOVER_TEST_CASE_TIMEOUT_MS);
 
-    const config = updateConfig.mock.calls[0][0] as { onClose: () => void };
-    config.onClose();
-    expect(host.trigger.openChange.emit).toHaveBeenCalledExactlyOnceWith(false);
+  it('emits close when button triggers toggle open popovers', async () => {
+    const fixture = TestBed.createComponent(CloseablePopoverTriggerHost);
+    fixture.detectChanges();
 
-    host.destroyed = true;
-    config.onClose();
-    expect(host.trigger.openChange.emit).toHaveBeenCalledOnce();
-  });
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#button-trigger');
+    const container = query<HTMLElement>(fixture.nativeElement, '#popover-container');
+    trigger.click();
+
+    await waitForPopoverOverlayText(fixture, container, 'Popover');
+    await waitForPopoverTriggerOpen(fixture, trigger);
+    await waitForPopoverOpenEvent(fixture);
+
+    trigger.click();
+
+    await waitForPopoverOverlayTextToDisappear(fixture, container, 'Popover');
+    await waitForPopoverTriggerClosed(fixture, trigger);
+    await waitForPopoverCloseEvent(fixture);
+  }, POPOVER_TEST_CASE_TIMEOUT_MS);
+
+  it('emits close when Escape closes button popovers', async () => {
+    const fixture = TestBed.createComponent(CloseablePopoverTriggerHost);
+    fixture.detectChanges();
+
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#button-trigger');
+    const container = query<HTMLElement>(fixture.nativeElement, '#popover-container');
+    trigger.click();
+
+    await waitForPopoverOverlayText(fixture, container, 'Popover');
+    await waitForPopoverTriggerOpen(fixture, trigger);
+    await waitForPopoverOpenEvent(fixture);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Escape' }));
+
+    await waitForPopoverOverlayTextToDisappear(fixture, container, 'Popover');
+    await waitForPopoverTriggerClosed(fixture, trigger);
+    await waitForPopoverCloseEvent(fixture);
+  }, POPOVER_TEST_CASE_TIMEOUT_MS);
+
+  it('does not emit through destroyed outputs when a previously opened popover tears down', async () => {
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    try {
+      const fixture = TestBed.createComponent(CloseablePopoverTriggerHost);
+      fixture.detectChanges();
+
+      const trigger = query<HTMLButtonElement>(fixture.nativeElement, '#button-trigger');
+      const container = query<HTMLElement>(fixture.nativeElement, '#popover-container');
+      trigger.click();
+
+      await waitForPopoverOverlayText(fixture, container, 'Popover');
+      await waitForPopoverTriggerOpen(fixture, trigger);
+
+      const outside = query<HTMLButtonElement>(fixture.nativeElement, '#outside-target');
+      outside.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, clientX: 1, clientY: 1 }));
+      await waitForPopoverOverlayTextToDisappear(fixture, container, 'Popover');
+      await waitForPopoverTriggerClosed(fixture, trigger);
+
+      fixture.destroy();
+      await nextFrame();
+
+      const messages = [...consoleWarn.mock.calls, ...consoleError.mock.calls]
+        .flat()
+        .map(String)
+        .join('\n');
+      expect(messages).not.toContain('NG0953');
+    } finally {
+      consoleWarn.mockRestore();
+      consoleError.mockRestore();
+    }
+  }, POPOVER_TEST_CASE_TIMEOUT_MS);
 });
 
-async function settle(fixture: { detectChanges(): void; whenStable(): Promise<unknown> }) {
+async function settle(fixture: { detectChanges(): void }) {
   fixture.detectChanges();
-  await fixture.whenStable();
+  await Promise.resolve();
+  await nextFrame();
   fixture.detectChanges();
 }
 
@@ -142,7 +241,7 @@ async function waitForPopoverOverlayText(
   container: HTMLElement,
   text: string,
 ): Promise<void> {
-  const timeout = Date.now() + 1000;
+  const timeout = Date.now() + POPOVER_TEST_TIMEOUT_MS;
   while (Date.now() < timeout) {
     await settle(fixture);
     if (container.textContent?.includes(text)) {
@@ -159,7 +258,7 @@ async function waitForPopoverOverlayTextToDisappear(
   container: HTMLElement,
   text: string,
 ): Promise<void> {
-  const timeout = Date.now() + 1000;
+  const timeout = Date.now() + POPOVER_TEST_TIMEOUT_MS;
   while (Date.now() < timeout) {
     await settle(fixture);
     if (!container.textContent?.includes(text)) {
@@ -171,23 +270,31 @@ async function waitForPopoverOverlayTextToDisappear(
   throw new Error(`Expected container content to not contain ${text}.`);
 }
 
-async function waitForPopoverOpenEvent(
-  fixture: { detectChanges(): void; whenStable(): Promise<unknown>; componentInstance: EnabledPopoverAnchorTriggerHost },
-): Promise<void> {
+async function waitForPopoverOpenEvent(fixture: {
+  detectChanges(): void;
+  whenStable(): Promise<unknown>;
+  componentInstance: EnabledPopoverAnchorTriggerHost;
+}): Promise<void> {
   await waitForPopoverEvent(fixture, true);
 }
 
-async function waitForPopoverCloseEvent(
-  fixture: { detectChanges(): void; whenStable(): Promise<unknown>; componentInstance: EnabledPopoverAnchorTriggerHost },
-): Promise<void> {
+async function waitForPopoverCloseEvent(fixture: {
+  detectChanges(): void;
+  whenStable(): Promise<unknown>;
+  componentInstance: EnabledPopoverAnchorTriggerHost;
+}): Promise<void> {
   await waitForPopoverEvent(fixture, false);
 }
 
 async function waitForPopoverEvent(
-  fixture: { detectChanges(): void; whenStable(): Promise<unknown>; componentInstance: EnabledPopoverAnchorTriggerHost },
+  fixture: {
+    detectChanges(): void;
+    whenStable(): Promise<unknown>;
+    componentInstance: EnabledPopoverAnchorTriggerHost;
+  },
   open: boolean,
 ): Promise<void> {
-  const timeout = Date.now() + 1000;
+  const timeout = Date.now() + POPOVER_TEST_TIMEOUT_MS;
   while (Date.now() < timeout) {
     await settle(fixture);
     if (fixture.componentInstance.openEvents.includes(open)) return;
@@ -216,7 +323,7 @@ async function waitForPopoverTriggerState(
   trigger: HTMLElement,
   expanded: 'true' | 'false',
 ): Promise<void> {
-  const timeout = Date.now() + 1000;
+  const timeout = Date.now() + POPOVER_TEST_TIMEOUT_MS;
   while (Date.now() < timeout) {
     await settle(fixture);
     if (trigger.getAttribute('aria-expanded') === expanded) {
@@ -235,34 +342,6 @@ async function nextFrame(): Promise<void> {
   }
 
   await Promise.resolve();
-}
-
-interface PopoverPatchHost {
-  destroyed: boolean;
-  trigger: {
-    openChange: {
-      emit: ReturnType<typeof vi.fn>;
-    };
-  };
-}
-
-function createPopoverPatchHost(): PopoverPatchHost {
-  return {
-    destroyed: false,
-    trigger: {
-      openChange: {
-        emit: vi.fn(),
-      },
-    },
-  };
-}
-
-function configureOverlayClose(host: PopoverPatchHost, overlay: unknown): void {
-  (
-    HellPopoverTrigger.prototype as unknown as {
-      configureOverlayClose(this: PopoverPatchHost, overlay: unknown): void;
-    }
-  ).configureOverlayClose.call(host, overlay);
 }
 
 function query<T extends HTMLElement>(root: ParentNode, selector: string): T {

@@ -1,0 +1,62 @@
+import { DestroyRef, effect } from '@angular/core';
+import type { NgpPopoverTrigger } from 'ng-primitives/popover';
+
+export const HELL_NGP_POPOVER_CLOSE_ADAPTER_VERSION = 'ng-primitives@0.117.2';
+
+export const HELL_NGP_POPOVER_CLOSE_ADAPTER_REASON =
+  'ng-primitives@0.117.2 emits popover openChange(false) from overlay destroy after Angular destroys the trigger OutputRef, causing Angular NG0953 warnings. Keep this adapter only until ng-primitives guards overlay destroy callbacks or exposes a public close callback hook.';
+
+/**
+ * Version-bound ng-primitives popover close adapter.
+ *
+ * Local source confirms ng-primitives owns normal open/close/outside/Escape behavior,
+ * but its overlay destroy path still calls the internal close callback after the
+ * trigger output is destroyed. This keeps the public output quiet during teardown.
+ */
+export function hellConnectNgpPopoverCloseAdapter(
+  trigger: NgpPopoverTrigger,
+  destroyRef: DestroyRef,
+): void {
+  let destroyed = false;
+  destroyRef.onDestroy(() => {
+    destroyed = true;
+  });
+
+  effect(() => {
+    const overlay = popoverOverlay(trigger);
+    if (!overlay) return;
+
+    overlay.updateConfig({
+      onClose: () => {
+        if (!destroyed) {
+          trigger.openChange.emit(false);
+        }
+      },
+    });
+  });
+}
+
+interface HellNgpPopoverOverlayConfig {
+  onClose?: (origin: unknown) => void;
+}
+
+interface HellNgpPopoverOverlay {
+  updateConfig(config: HellNgpPopoverOverlayConfig): void;
+}
+
+interface HellNgpPopoverTriggerWithOverlay {
+  overlay(): unknown;
+}
+
+function popoverOverlay(trigger: NgpPopoverTrigger): HellNgpPopoverOverlay | null {
+  const overlay = (trigger as unknown as HellNgpPopoverTriggerWithOverlay).overlay();
+  return isPopoverOverlay(overlay) ? overlay : null;
+}
+
+function isPopoverOverlay(overlay: unknown): overlay is HellNgpPopoverOverlay {
+  return (
+    !!overlay &&
+    (typeof overlay === 'object' || typeof overlay === 'function') &&
+    typeof (overlay as { updateConfig?: unknown }).updateConfig === 'function'
+  );
+}
