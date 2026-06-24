@@ -424,9 +424,6 @@ interface HellColumnMeta {
                           >
                             {{ rendered ?? header.column.id }}
                           </ng-container>
-                          @if (sortState(header); as state) {
-                            <span data-slot="sort-state">{{ state }}</span>
-                          }
                         </button>
                       } @else {
                         <ng-container
@@ -527,6 +524,7 @@ interface HellColumnMeta {
                   <tr
                     [attr.class]="rowClassValue(item.row)"
                     data-hell-table-shell-row
+                    [attr.data-selected]="item.row.getIsSelected() ? 'true' : null"
                     [hellTanStackInternalBodyItemConnector]="bodyStrategyBridge()"
                     [hellTanStackInternalBodyItem]="bodyItemBridge(item)"
                   >

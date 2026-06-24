@@ -238,7 +238,6 @@ type StatusFilter = 'all' | Person['status'];
       <ng-template hellTableShellCell="actions" let-row="row">
         <button
           hellButton
-          iconOnly
           size="xs"
           variant="ghost"
           type="button"
@@ -247,6 +246,7 @@ type StatusFilter = 'all' | Person['status'];
           (click)="toggleExpansion(row.id)"
         >
           <hell-icon name="faSolidFolderOpen" />
+          <span>Details</span>
         </button>
       </ng-template>
 
@@ -357,7 +357,7 @@ export class TableTanStackVirtualExample {
     {
       id: 'actions',
       header: 'Actions',
-      size: 88,
+      size: 112,
       enableSorting: false,
       enableGlobalFilter: false,
       meta: { hell: { cellClass: 'text-right', headerClass: 'text-right' } },

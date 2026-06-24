@@ -295,13 +295,6 @@
     min-width: var(--hell-table-total-size, 100%);
   }
 
-  .hell-table-sort-trigger [data-slot='sort-state'] {
-    color: var(--color-hell-primary);
-    font-size: 10px;
-    font-weight: var(--font-weight-semibold);
-    text-transform: none;
-  }
-
   .hell-tanstack-table:not([data-sticky-header='true'])
     .hell-table-shell-table
     .hell-table-header-cell {
@@ -413,11 +406,11 @@
     [data-hell-table-virtual-row='true'] {
     position: absolute;
     inset-inline-start: 0;
-    display: table;
+    display: flex;
+    align-items: stretch;
     width: var(--hell-table-virtual-row-width, 100%);
     min-width: var(--hell-table-virtual-row-width, 100%);
     min-height: var(--hell-table-virtual-row-size, 44px);
-    table-layout: fixed;
     transform: translateY(var(--hell-table-virtual-row-start, 0));
     background-color: var(--color-hell-surface-elevated);
   }
@@ -425,7 +418,19 @@
   .hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
     [data-hell-table-virtual-row='true']
     > .hell-table-cell {
+    display: block;
+    box-sizing: border-box;
+    flex: 0 0 var(--hell-table-column-size, auto);
     width: var(--hell-table-column-size, auto);
+    min-width: var(--hell-table-column-size, auto);
+  }
+
+  .hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
+    [data-hell-table-virtual-row-kind='expanded']
+    > .hell-table-shell-expanded-cell {
+    flex-basis: 100%;
+    width: 100%;
+    min-width: 100%;
   }
 
   .hell-tanstack-table[data-hell-tanstack-virtual-rows='true']

@@ -77,6 +77,11 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
             normal app-level controls around the caller-owned TanStack table, not a second
             table-state abstraction.
           </p>
+          <p>
+            The shell example treats sorting, filtering, search, and pagination as async
+            server-side work: the component owns the request state, passes manual TanStack state to
+            the table, and uses shell status templates for loading, error, and empty display.
+          </p>
         </div>
 
         <hd-example-tabs class="hd-doc-wide" [code]="tableTanStackShellExampleCode">

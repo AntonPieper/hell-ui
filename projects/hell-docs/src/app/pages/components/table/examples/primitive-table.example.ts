@@ -73,7 +73,6 @@ const people: readonly Person[] = [
                 <button
                   hellButton
                   hellTableRowAction
-                  iconOnly
                   size="xs"
                   variant="ghost"
                   type="button"
@@ -81,6 +80,7 @@ const people: readonly Person[] = [
                   (click)="activeId.set(person.id)"
                 >
                   <hell-icon name="faSolidFolderOpen" />
+                  <span>Open</span>
                 </button>
               </td>
             </tr>
