@@ -1125,6 +1125,7 @@ function checkApiReportContract() {
   const expectedEntrypoints = [
     ['@hell-ui/angular', 'hell-ui-angular.api.md'],
     ['@hell-ui/angular/core', 'hell-ui-angular-core.api.md'],
+    ['@hell-ui/angular/internal/hotkeys', 'hell-ui-angular-internal-hotkeys.api.md'],
     ['@hell-ui/angular/primitives', 'hell-ui-angular-primitives.api.md'],
     ['@hell-ui/angular/testing', 'hell-ui-angular-testing.api.md'],
   ];
@@ -2057,6 +2058,54 @@ function checkHotkeyContract() {
   }
   if (!hotkeySource.includes('HellGlobalPointerdownService')) {
     failures.push('Core must provide a shared global pointer listener service');
+  }
+
+  const coreApi = readFile(join(root, 'projects/hell/src/lib/public-api-core.ts'));
+  if (coreApi.includes('./core/hotkeys')) {
+    failures.push('Core Package Entry Point must keep hotkey listener internals private');
+  }
+
+  const hotkeyPublicSymbols = [
+    'matchHotkey',
+    'hellShouldHandleGlobalHotkey',
+    'HellGlobalKeydownService',
+    'HellGlobalPointerdownService',
+    'HellGlobalKeydownHandler',
+    'HellGlobalPointerdownHandler',
+  ];
+  const publicHotkeySurfaces = [
+    ['Core Package Entry Point', coreApi],
+    ['Omnibar Package Entry Point', readFile(join(root, 'projects/hell/src/lib/composites/omnibar/omnibar.ts'))],
+  ];
+  for (const [label, source] of publicHotkeySurfaces) {
+    const leaked = hotkeyPublicSymbols.filter((symbol) => exportedSymbolNames(source).has(symbol));
+    if (leaked.length) {
+      failures.push(`${label} must not export hotkey internals: ${leaked.join(', ')}`);
+    }
+  }
+
+  const internalHotkeysApi = readFile(join(root, 'projects/hell/src/lib/public-api-internal-hotkeys.ts'));
+  const internalHotkeyExports = exportedSymbolNames(internalHotkeysApi);
+  const allowedInternalHotkeyExports = new Set([
+    'HellGlobalKeydownHandler',
+    'HellGlobalKeydownService',
+    'HellGlobalPointerdownHandler',
+    'HellGlobalPointerdownService',
+  ]);
+  for (const symbol of allowedInternalHotkeyExports) {
+    if (!internalHotkeyExports.has(symbol)) {
+      failures.push(`Internal Hotkeys Entry Point must export shared listener owner symbol ${symbol}`);
+    }
+  }
+  const unexpectedInternalHotkeyExports = [...internalHotkeyExports].filter(
+    (symbol) => !allowedInternalHotkeyExports.has(symbol),
+  );
+  if (unexpectedInternalHotkeyExports.length) {
+    failures.push(
+      `Internal Hotkeys Entry Point must only export shared listener owner symbols: ${unexpectedInternalHotkeyExports.join(
+        ', ',
+      )}`,
+    );
   }
 
   const omnibarSource = readFile(join(root, 'projects/hell/src/lib/composites/omnibar/omnibar.ts'));
@@ -3215,6 +3264,29 @@ function exportPaths(source) {
   return [...source.matchAll(/export\s+[^;]*?\s+from\s+['"]([^'"]+)['"]/g)].map(
     (match) => match[1],
   );
+}
+
+function exportedSymbolNames(source) {
+  const names = new Set();
+  const declarationPattern =
+    /\bexport\s+(?:declare\s+)?(?:abstract\s+)?(?:class|interface|type|function|const|let|var|enum)\s+([A-Za-z_$][A-Za-z0-9_$]*)/g;
+  for (const match of source.matchAll(declarationPattern)) {
+    names.add(match[1]);
+  }
+
+  for (const match of source.matchAll(/\bexport\s+(?:type\s+)?\{([^}]*)\}/g)) {
+    for (const part of match[1].split(',')) {
+      const tokens = part
+        .trim()
+        .split(/\s+as\s+/i)
+        .map((token) => token.trim());
+      for (const token of tokens) {
+        if (/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(token)) names.add(token);
+      }
+    }
+  }
+
+  return names;
 }
 
 function escapeRegExp(value) {

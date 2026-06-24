@@ -5,6 +5,10 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ## [Unreleased]
 
+### Breaking changes
+
+- HELL-047: Removed the accidental public hotkey helpers and listener services from `@hell-ui/angular` and `@hell-ui/angular/core`, and removed `matchHotkey` from `@hell-ui/angular/omnibar`. Consumers should stop importing Hell hotkey internals; use component opt-ins such as `HellOmnibar`'s `hotkey` input or `HellPdfViewer`'s `globalShortcuts` input, and keep app-wide shortcut policy in the host application.
+
 ### Added
 
 - HELL-051: Added this changelog, the alpha-to-beta SemVer policy, and a release dry-run guard that fails when the current package version has no changelog entry.

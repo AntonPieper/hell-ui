@@ -12,6 +12,9 @@
       "@hell-ui/angular/core": [
         "./projects/hell/src/lib/public-api-core.ts"
       ],
+      "@hell-ui/angular/internal/hotkeys": [
+        "./projects/hell/src/lib/public-api-internal-hotkeys.ts"
+      ],
       "@hell-ui/angular/primitives": [
         "./projects/hell/src/lib/public-api-primitives.ts"
       ],

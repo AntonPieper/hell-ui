@@ -56,6 +56,22 @@ describe('Core Hotkeys', () => {
     expect(hellShouldHandleGlobalHotkey(withModifierEvent, 'ctrl+k')).toBe(true);
   });
 
+  it('blocks shift-only printable shortcuts from editable active targets', () => {
+    document.body.innerHTML = '<input id="editor">';
+    const editor = document.getElementById('editor') as HTMLInputElement;
+    editor.focus();
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'A',
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(event, 'view', { value: document.defaultView });
+
+    expect(hellShouldHandleGlobalHotkey(event, 'shift+a')).toBe(false);
+  });
+
   it('blocks bare shortcuts from nested contenteditable targets', () => {
     document.body.innerHTML = '<div id="editor" contenteditable="true"><span id="child"></span></div>';
     const child = document.getElementById('child') as HTMLSpanElement;

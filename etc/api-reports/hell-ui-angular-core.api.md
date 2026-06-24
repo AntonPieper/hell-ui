@@ -5,7 +5,6 @@
 ```ts
 
 import { AfterViewInit } from '@angular/core';
-import { DestroyRef } from '@angular/core';
 import * as i0 from '@angular/core';
 import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -131,32 +130,6 @@ export class HellFloatingElement implements AfterViewInit {
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellFloatingElement, "[hellFloatingElement]", never, {}, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellFloatingElement, never>;
-}
-
-// @public (undocumented)
-export type HellGlobalKeydownHandler = (event: KeyboardEvent) => void;
-
-// @public
-export class HellGlobalKeydownService {
-    // (undocumented)
-    register(handler: HellGlobalKeydownHandler, destroyRef: DestroyRef): () => void;
-    // (undocumented)
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellGlobalKeydownService, never>;
-    // (undocumented)
-    static ɵprov: i0.ɵɵInjectableDeclaration<HellGlobalKeydownService>;
-}
-
-// @public (undocumented)
-export type HellGlobalPointerdownHandler = (event: PointerEvent) => void;
-
-// @public
-export class HellGlobalPointerdownService {
-    // (undocumented)
-    register(handler: HellGlobalPointerdownHandler, destroyRef: DestroyRef): () => void;
-    // (undocumented)
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellGlobalPointerdownService, never>;
-    // (undocumented)
-    static ɵprov: i0.ɵɵInjectableDeclaration<HellGlobalPointerdownService>;
 }
 
 // @public (undocumented)
@@ -398,9 +371,6 @@ export interface HellSearchSourceRequest<P = unknown> {
 // @public
 export function hellSearchWords(value: string): readonly string[];
 
-// @public
-export function hellShouldHandleGlobalHotkey(event: KeyboardEvent, combo: string, target?: EventTarget | null): boolean;
-
 // @public (undocumented)
 export type HellSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
@@ -463,9 +433,6 @@ export interface HellToastLabels {
     // (undocumented)
     readonly stack: string;
 }
-
-// @public
-export function matchHotkey(event: KeyboardEvent, combo: string): boolean;
 
 // @public (undocumented)
 export function provideHellLabels(overrides: HellLabelOverrides): Provider;
@@ -641,17 +608,9 @@ export function provideHellSearchRanker(ranker: HellSearchRanker): Provider;
 // types/hell-ui-angular-core.d.ts:235:15 - (ae-undocumented) Missing documentation for "HELL_DEFAULT_LABELS".
 // types/hell-ui-angular-core.d.ts:236:15 - (ae-undocumented) Missing documentation for "HELL_LABELS".
 // types/hell-ui-angular-core.d.ts:237:1 - (ae-undocumented) Missing documentation for "provideHellLabels".
-// types/hell-ui-angular-core.d.ts:239:1 - (ae-undocumented) Missing documentation for "HellGlobalKeydownHandler".
-// types/hell-ui-angular-core.d.ts:240:1 - (ae-undocumented) Missing documentation for "HellGlobalPointerdownHandler".
-// types/hell-ui-angular-core.d.ts:260:5 - (ae-undocumented) Missing documentation for "register".
-// types/hell-ui-angular-core.d.ts:261:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-core.d.ts:262:5 - (ae-undocumented) Missing documentation for "ɵprov".
-// types/hell-ui-angular-core.d.ts:267:5 - (ae-undocumented) Missing documentation for "register".
-// types/hell-ui-angular-core.d.ts:268:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-core.d.ts:269:5 - (ae-undocumented) Missing documentation for "ɵprov".
-// types/hell-ui-angular-core.d.ts:281:5 - (ae-undocumented) Missing documentation for "ngAfterViewInit".
-// types/hell-ui-angular-core.d.ts:282:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-core.d.ts:283:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-core.d.ts:248:5 - (ae-undocumented) Missing documentation for "ngAfterViewInit".
+// types/hell-ui-angular-core.d.ts:249:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-core.d.ts:250:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

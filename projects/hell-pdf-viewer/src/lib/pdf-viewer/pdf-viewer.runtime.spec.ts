@@ -299,6 +299,33 @@ describe('PDF Runtime', () => {
     outside.remove();
   });
 
+  it('stops global PDF shortcuts when focus moves outside after pointer activity', () => {
+    const host = document.createElement('div');
+    const inside = document.createElement('button');
+    const outside = document.createElement('input');
+    host.append(inside);
+    document.body.append(host, outside);
+
+    const scope = new HellPdfViewerInteractionScope(() => host);
+    const actions = createShortcutActions();
+    let handled = true;
+
+    scope.recordPointerTarget(inside);
+    outside.focus();
+    outside.addEventListener('keydown', (event) => {
+      handled = scope.handleGlobalShortcut(event, actions);
+    });
+    outside.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, bubbles: true, cancelable: true }),
+    );
+
+    expect(handled).toBe(false);
+    expect(actions.openFind).not.toHaveBeenCalled();
+
+    host.remove();
+    outside.remove();
+  });
+
   it('requires exact command modifiers for global PDF shortcuts', () => {
     const host = document.createElement('div');
     const inside = document.createElement('button');

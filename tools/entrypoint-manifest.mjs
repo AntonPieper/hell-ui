@@ -37,8 +37,25 @@ export const entrypointManifest = {
         './core/styleable',
         './core/search',
         './core/labels',
-        './core/hotkeys',
         './core/floating-element',
+      ],
+    },
+    {
+      id: 'internal:hotkeys',
+      specifier: `${packageName}/internal/hotkeys`,
+      packageDir: `${libraryRoot}/internal/hotkeys`,
+      publicApiPath: `${libraryRoot}/src/lib/public-api-internal-hotkeys.ts`,
+      entryFile: '../../src/lib/public-api-internal-hotkeys.ts',
+      exports: [],
+      extraExports: [
+        "export { HellGlobalKeydownService, HellGlobalPointerdownService } from './core/hotkeys';",
+        "export type { HellGlobalKeydownHandler, HellGlobalPointerdownHandler } from './core/hotkeys';",
+      ],
+      header: [
+        '/**',
+        ' * @internal Shared listener owner for Hell-owned packages only.',
+        ' * Not a consumer shortcut API.',
+        ' */',
       ],
     },
     {

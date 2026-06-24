@@ -88,9 +88,7 @@ const isMac = (() => {
 
 function comboRequiresModifier(combo: string): boolean {
   const tokens = combo.toLowerCase().split('+').map((part) => part.trim()).filter(Boolean);
-  return tokens.some(
-    (part) => part === 'mod' || part === 'ctrl' || part === 'meta' || part === 'alt' || part === 'shift',
-  );
+  return tokens.some((part) => part === 'mod' || part === 'ctrl' || part === 'meta' || part === 'alt');
 }
 
 function isEditableTarget(target: EventTarget | null | undefined): boolean {
