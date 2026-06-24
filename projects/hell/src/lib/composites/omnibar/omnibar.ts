@@ -37,7 +37,7 @@ import {
   type HellSearchSource,
 } from '../../core/search';
 import { HELL_LABELS } from '../../core/labels';
-import { HellInput } from '../../primitives/input/input';
+import { NgpInput } from 'ng-primitives/input';
 import { HellSearch, HellSearchClear } from '../../primitives/search/search';
 import { HellSkeleton } from '../../primitives/skeleton/skeleton';
 import {
@@ -131,7 +131,7 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
   selector: 'hell-omnibar',
   imports: [
     NgTemplateOutlet,
-    HellInput,
+    NgpInput,
     HellSearch,
     HellSearchClear,
     HellSkeleton,
@@ -155,8 +155,7 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
       <div data-slot="input-wrap" #wrap>
         <input
           #input
-          hellInput
-          [unstyled]="true"
+          ngpInput
           data-slot="input"
           type="search"
           [id]="inputId"
@@ -321,9 +320,10 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   private readonly openVersion = signal(0);
   protected readonly isOpen = computed(() => !this.disabled() && this._open());
   protected readonly overlayPositions = HELL_OMNIBAR_OVERLAY_POSITIONS;
-  protected readonly overlayScrollStrategy: ScrollStrategy = this.overlay.scrollStrategies.reposition({
-    scrollThrottle: 0,
-  });
+  protected readonly overlayScrollStrategy: ScrollStrategy =
+    this.overlay.scrollStrategies.reposition({
+      scrollThrottle: 0,
+    });
   private overlayPanelElement: HTMLElement | null = null;
   protected readonly cursor = signal(0);
   readonly searchResults = computed(() => this.runtime.results());

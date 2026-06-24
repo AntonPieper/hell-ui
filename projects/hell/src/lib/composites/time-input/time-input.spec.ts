@@ -169,7 +169,9 @@ describe('HellTimeInput', () => {
     expect(input.getAttribute('aria-label')).toBe('Start time');
     expect(input.getAttribute('aria-describedby')).toBe('start-time-help start-time-error');
     expect(input.getAttribute('aria-labelledby')).toBe('start-time-label');
+    expect(input.getAttribute('data-slot')).toBe('field');
     expect(input.classList.contains('hell-input')).toBe(false);
+    expect(input.classList.contains('inline-flex')).toBe(true);
     expect(trigger.getAttribute('aria-label')).toBe('Choose time for Start time');
     expect(trigger.getAttribute('aria-describedby')).toBeNull();
     expect(trigger.getAttribute('aria-labelledby')).toBeNull();

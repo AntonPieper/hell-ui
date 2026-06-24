@@ -1,5 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { InputCustomizationExample } from './examples/customization.example';
+import inputCustomizationExampleCodeRaw from './examples/customization.example.ts?raw' with {
+  loader: 'text',
+};
 import { InputSelectExample } from './examples/select.example';
 import inputSelectExampleCodeRaw from './examples/select.example.ts?raw' with {
   loader: 'text',
@@ -22,6 +26,7 @@ import inputTextareaExampleCodeRaw from './examples/textarea.example.ts?raw' wit
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ExampleTabs,
+    InputCustomizationExample,
     InputSizesExample,
     InputStatesExample,
     InputSelectExample,
@@ -33,8 +38,8 @@ import inputTextareaExampleCodeRaw from './examples/textarea.example.ts?raw' wit
       <p>
         Single-line inputs, native selects and multi-line textareas. Apply the
         <code>hellInput</code> directive to a native <code>&lt;input&gt;</code>,
-        <code>hellNativeSelect</code> to a <code>&lt;select&gt;</code>, and <code>hellTextarea</code> to a
-        <code>&lt;textarea&gt;</code>.
+        <code>hellNativeSelect</code> to a <code>&lt;select&gt;</code>, and
+        <code>hellTextarea</code> to a <code>&lt;textarea&gt;</code>.
       </p>
 
       <h2>Sizes</h2>
@@ -45,6 +50,11 @@ import inputTextareaExampleCodeRaw from './examples/textarea.example.ts?raw' wit
       <h2>States</h2>
       <hd-example-tabs [code]="inputStatesExampleCode" previewClass="flex flex-wrap gap-2">
         <app-input-states-example />
+      </hd-example-tabs>
+
+      <h2>Customization</h2>
+      <hd-example-tabs [code]="inputCustomizationExampleCode" previewClass="grid max-w-lg gap-2">
+        <app-input-customization-example />
       </hd-example-tabs>
 
       <h2>Select</h2>
@@ -61,17 +71,27 @@ import inputTextareaExampleCodeRaw from './examples/textarea.example.ts?raw' wit
       <ul>
         <li>
           <code>hellInput</code>: <code>size</code> (<code>sm | md | lg</code>),
-          <code>invalid</code>, <code>disabled</code>, <code>unstyled</code>
+          <code>invalid</code>, <code>disabled</code>, <code>ui</code> keyed by
+          <code>HellInputPart</code>
         </li>
         <li>
           <code>hellNativeSelect</code>: <code>size</code> (<code>sm | md | lg</code>),
-          <code>invalid</code>, <code>disabled</code>, <code>unstyled</code>
+          <code>invalid</code>, <code>disabled</code>, <code>ui</code> keyed by
+          <code>HellNativeSelectPart</code>
         </li>
         <li>
           <code>hellTextarea</code>: <code>size</code> (<code>sm | md | lg</code>),
-          <code>invalid</code>, <code>disabled</code>, <code>unstyled</code>
+          <code>invalid</code>, <code>disabled</code>, <code>ui</code> keyed by
+          <code>HellTextareaPart</code>
         </li>
       </ul>
+
+      <h2>Parts</h2>
+      <p>
+        Each directive exposes one public part named <code>root</code> on the native control. The
+        rendered element carries <code>data-slot="root"</code>, and consumer classes passed through
+        <code>ui.root</code> merge with the built-in Tailwind recipe.
+      </p>
 
       <h2>Do</h2>
       <ul>
@@ -91,6 +111,7 @@ import inputTextareaExampleCodeRaw from './examples/textarea.example.ts?raw' wit
 export class InputPage {
   protected readonly inputSizesExampleCode = inputSizesExampleCodeRaw;
   protected readonly inputStatesExampleCode = inputStatesExampleCodeRaw;
+  protected readonly inputCustomizationExampleCode = inputCustomizationExampleCodeRaw;
   protected readonly inputSelectExampleCode = inputSelectExampleCodeRaw;
   protected readonly inputTextareaExampleCode = inputTextareaExampleCodeRaw;
 }

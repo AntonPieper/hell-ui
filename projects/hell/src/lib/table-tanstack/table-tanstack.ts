@@ -29,7 +29,7 @@ import {
 } from '@tanstack/angular-table';
 import { HellButton } from '../primitives/button/button';
 import { HellTableSortTrigger } from '../features/table-utilities/table-utilities';
-import { HellInput, HellNativeSelect } from '../primitives/input/input';
+import { HellInput, HellNativeSelect, type HellInputUi } from '../primitives/input/input';
 import { HellPaginationStrip } from '../primitives/pagination/pagination';
 import { HELL_SEARCH_DIRECTIVES } from '../primitives/search/search';
 export {
@@ -43,6 +43,10 @@ export {
 } from '@tanstack/angular-table';
 
 type ɵHellStrategyCleanup = VoidFunction | void;
+
+const HELL_TANSTACK_FILTER_INPUT_UI = {
+  root: 'min-w-[calc(var(--spacing)*44)] max-w-full rounded-hell-sm px-hell-2',
+} satisfies HellInputUi;
 
 type HellClassValue =
   | string
@@ -1004,9 +1008,9 @@ export class HellTanStackPagination<TData extends RowData = RowData> {
     <div hellSearch class="hell-tanstack-filter-search">
       <input
         hellInput
-        class="hell-tanstack-filter"
         size="sm"
         type="search"
+        [ui]="filterInputUi"
         [attr.placeholder]="placeholder()"
         [value]="table().getState().globalFilter ?? ''"
         (input)="setFilter($event)"
@@ -1027,6 +1031,7 @@ export class HellTanStackPagination<TData extends RowData = RowData> {
 export class HellTanStackGlobalFilter<TData extends RowData = RowData> {
   readonly table = input.required<Table<TData>>();
   readonly placeholder = input('Filter rows');
+  protected readonly filterInputUi = HELL_TANSTACK_FILTER_INPUT_UI;
 
   protected setFilter(event: Event): void {
     this.table().setGlobalFilter((event.target as HTMLInputElement | null)?.value ?? '');
@@ -1046,9 +1051,9 @@ export class HellTanStackGlobalFilter<TData extends RowData = RowData> {
     <div hellSearch class="hell-tanstack-filter-search">
       <input
         hellInput
-        class="hell-tanstack-filter"
         size="sm"
         type="search"
+        [ui]="filterInputUi"
         [attr.placeholder]="placeholder()"
         [value]="value()"
         (input)="setFilter($event)"
@@ -1070,6 +1075,7 @@ export class HellTanStackColumnFilter<TData extends RowData = RowData> {
   readonly table = input.required<Table<TData>>();
   readonly columnId = input.required<string>();
   readonly placeholder = input('Filter column');
+  protected readonly filterInputUi = HELL_TANSTACK_FILTER_INPUT_UI;
 
   protected readonly column = computed(() => this.table().getColumn(this.columnId()));
   protected readonly value = computed(() => String(this.column()?.getFilterValue() ?? ''));

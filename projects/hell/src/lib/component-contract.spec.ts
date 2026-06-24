@@ -212,7 +212,6 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
     </button>
 
     <input data-contract="input" hellInput size="sm" [invalid]="true" />
-    <input data-contract="unstyled-input" hellInput unstyled size="lg" [invalid]="true" />
     <select data-contract="native-select" hellNativeSelect size="md" [invalid]="true">
       <option>Germany</option>
     </select>
@@ -290,8 +289,7 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
     </div>
   `,
 })
-class ContractHost {
-}
+class ContractHost {}
 
 const STYLEABLE_CASES: readonly ContractCase[] = [
   {
@@ -308,20 +306,20 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
   {
     id: 'input',
     module: 'HellInput',
-    className: 'hell-input',
-    attrs: { 'data-size': 'sm', 'aria-invalid': 'true' },
+    className: 'inline-flex',
+    attrs: { 'data-slot': 'root', 'data-size': 'sm', 'aria-invalid': 'true' },
   },
   {
     id: 'native-select',
     module: 'HellNativeSelect',
-    className: 'hell-native-select',
-    attrs: { 'data-size': 'md', 'aria-invalid': 'true' },
+    className: 'appearance-none',
+    attrs: { 'data-slot': 'root', 'data-size': 'md', 'aria-invalid': 'true' },
   },
   {
     id: 'textarea',
     module: 'HellTextarea',
-    className: 'hell-textarea',
-    attrs: { 'data-size': 'md', 'aria-invalid': 'true' },
+    className: 'resize-y',
+    attrs: { 'data-slot': 'root', 'data-size': 'md', 'aria-invalid': 'true' },
   },
   {
     id: 'avatar',
@@ -450,12 +448,6 @@ const STYLE_OPT_OUT_CASES: readonly ContractCase[] = [
     module: 'HellButton',
     className: 'hell-button',
     attrs: { 'data-variant': 'danger', 'data-size': 'lg' },
-  },
-  {
-    id: 'unstyled-input',
-    module: 'HellInput',
-    className: 'hell-input',
-    attrs: { 'data-size': 'lg', 'aria-invalid': 'true' },
   },
   {
     id: 'unstyled-card',

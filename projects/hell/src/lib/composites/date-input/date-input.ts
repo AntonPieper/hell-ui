@@ -31,7 +31,8 @@ import {
 } from 'ng-primitives/form-field';
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
-import { HellInput } from '../../primitives/input/input';
+import { HellInput, type HellInputUi } from '../../primitives/input/input';
+import { HELL_EMBEDDED_INPUT_UI } from '../../primitives/input/embedded-input-ui';
 import { HellPopover, HellPopoverTrigger } from '../../primitives/popover/popover';
 import { HellDatePicker } from '../../primitives/date-picker/date-picker';
 import { HELL_LABELS } from '../../core/labels';
@@ -51,6 +52,8 @@ import {
 const HELL_DATE_INPUT_ICONS = {
   faSolidCalendar,
 };
+
+const HELL_DATE_INPUT_FIELD_UI = HELL_EMBEDDED_INPUT_UI satisfies HellInputUi;
 
 let nextDateInputId = 0;
 
@@ -181,8 +184,8 @@ export function hellCoerceDateInputValue(value: Date | null | undefined): Date |
     <input
       #field
       hellInput
-      unstyled
       [size]="size()"
+      [ui]="fieldUi"
       type="text"
       data-slot="field"
       [invalid]="isInvalid()"
@@ -266,6 +269,7 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
   protected readonly isInvalid = () =>
     this.invalid() || this.invalidDraft() || this.formField.invalid() === true;
   protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
+  protected readonly fieldUi = HELL_DATE_INPUT_FIELD_UI;
   protected readonly pickerFocusedDate = signal<Date>(dateDayValue(new Date()) ?? new Date());
   protected readonly triggerAriaLabel = () => {
     const label = this.ariaLabel();

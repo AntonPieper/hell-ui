@@ -2,7 +2,14 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { HELL_FIELD_DIRECTIVES } from '../field/field';
-import { HellInput, HellNativeSelect, HellTextarea } from './input';
+import {
+  HellInput,
+  type HellInputUi,
+  HellNativeSelect,
+  type HellNativeSelectUi,
+  HellTextarea,
+  type HellTextareaUi,
+} from './input';
 
 @Component({
   imports: [HellInput, HellNativeSelect, HellTextarea, ...HELL_FIELD_DIRECTIVES],
@@ -31,9 +38,59 @@ import { HellInput, HellNativeSelect, HellTextarea } from './input';
 })
 class FieldControlHost {}
 
+@Component({
+  imports: [HellInput, HellNativeSelect, HellTextarea],
+  template: `
+    <input
+      id="styled-input"
+      hellInput
+      size="sm"
+      invalid
+      disabled
+      [ui]="inputUi"
+      aria-label="Styled input"
+    />
+    <select
+      id="styled-select"
+      hellNativeSelect
+      size="lg"
+      invalid
+      disabled
+      [ui]="selectUi"
+      aria-label="Styled select"
+    >
+      <option>Admin</option>
+    </select>
+    <textarea
+      id="styled-textarea"
+      hellTextarea
+      size="lg"
+      invalid
+      disabled
+      [ui]="textareaUi"
+      aria-label="Styled textarea"
+    ></textarea>
+  `,
+})
+class PartStyleHost {
+  protected readonly inputUi = {
+    root: 'rounded-hell-pill data-[size=sm]:px-hell-6 data-[size=sm]:text-sm',
+  } satisfies HellInputUi;
+
+  protected readonly selectUi = {
+    root: 'rounded-hell-pill border-hell-info bg-hell-info-soft',
+  } satisfies HellNativeSelectUi;
+
+  protected readonly textareaUi = {
+    root: 'rounded-hell-lg min-h-32 resize-none',
+  } satisfies HellTextareaUi;
+}
+
 describe('Hell input primitives', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [FieldControlHost] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [FieldControlHost, PartStyleHost],
+    }).compileComponents();
   });
 
   it('preserves explicit ids for every field control primitive', () => {
@@ -60,6 +117,53 @@ describe('Hell input primitives', () => {
 
     expect(fieldPart(fixture, 'input-error').id).toBe('input-error');
   });
+
+  it('exposes a root part style map for input, native select and textarea', () => {
+    const fixture = TestBed.createComponent(PartStyleHost);
+    fixture.detectChanges();
+
+    assertPartStyle(control(fixture, 'styled-input'), {
+      absentClass: 'hell-input',
+      mergedClasses: [
+        'data-[size=sm]:h-hell-control-sm',
+        'rounded-hell-pill',
+        'data-[size=sm]:px-hell-6',
+        'data-[size=sm]:text-sm',
+      ],
+      size: 'sm',
+    });
+    assertPartStyle(control(fixture, 'styled-select'), {
+      absentClass: 'hell-native-select',
+      mergedClasses: [
+        'data-[size=lg]:h-hell-control-lg',
+        'rounded-hell-pill',
+        'border-hell-info',
+        'bg-hell-info-soft',
+      ],
+      size: 'lg',
+    });
+    assertPartStyle(control(fixture, 'styled-textarea'), {
+      absentClass: 'hell-textarea',
+      mergedClasses: ['min-h-32', 'rounded-hell-lg', 'resize-none'],
+      size: 'lg',
+    });
+  });
+
+  it('preserves disabled and invalid host behavior through ng-primitives directives', () => {
+    const fixture = TestBed.createComponent(PartStyleHost);
+    fixture.detectChanges();
+
+    for (const id of ['styled-input', 'styled-select', 'styled-textarea']) {
+      const element = control(fixture, id) as
+        | HTMLInputElement
+        | HTMLSelectElement
+        | HTMLTextAreaElement;
+
+      expect(element.disabled, `${id}.disabled`).toBe(true);
+      expect(element.getAttribute('data-disabled'), `${id}.data-disabled`).toBe('');
+      expect(element.getAttribute('aria-invalid'), `${id}.aria-invalid`).toBe('true');
+    }
+  });
 });
 
 function assertFieldWiring(fixture: { nativeElement: HTMLElement }, prefix: string): void {
@@ -82,4 +186,21 @@ function fieldPart(fixture: { nativeElement: HTMLElement }, field: string): HTML
   const element = fixture.nativeElement.querySelector(`[data-field="${field}"]`);
   if (!(element instanceof HTMLElement)) throw new Error(`Expected [data-field="${field}"].`);
   return element;
+}
+
+function assertPartStyle(
+  element: HTMLElement,
+  options: {
+    readonly absentClass: string;
+    readonly mergedClasses: readonly string[];
+    readonly size: string;
+  },
+): void {
+  expect(element.getAttribute('data-slot')).toBe('root');
+  expect(element.getAttribute('data-size')).toBe(options.size);
+  expect(element.classList.contains(options.absentClass)).toBe(false);
+
+  for (const className of options.mergedClasses) {
+    expect(element.classList.contains(className), `${options.absentClass}.${className}`).toBe(true);
+  }
 }
