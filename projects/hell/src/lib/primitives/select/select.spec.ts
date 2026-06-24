@@ -90,11 +90,35 @@ class SelectBasicLabelledHost {
   readonly value = signal<string | null>(null);
 }
 
+const nativeGetAnimations = HTMLElement.prototype.getAnimations;
+
+beforeAll(() => {
+  if (!nativeGetAnimations) {
+    Object.defineProperty(HTMLElement.prototype, 'getAnimations', {
+      configurable: true,
+      value: () => [],
+    });
+  }
+});
+
+afterAll(() => {
+  if (!nativeGetAnimations) delete (HTMLElement.prototype as Partial<HTMLElement>).getAnimations;
+});
+
 describe('HellSelect', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SelectFormHost, SelectMultipleFormHost, SelectBasicFormHost, SelectBasicLabelledHost],
+      imports: [
+        SelectFormHost,
+        SelectMultipleFormHost,
+        SelectBasicFormHost,
+        SelectBasicLabelledHost,
+      ],
     }).compileComponents();
+  });
+
+  afterEach(() => {
+    cleanupPortaledTestElements('[hellSelectDropdown], [data-hell-select-test-outside]');
   });
 
   it('integrates with reactive forms without echoing programmatic writes', async () => {
@@ -103,8 +127,6 @@ describe('HellSelect', () => {
 
     const host = fixture.componentInstance;
     const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelect]');
-    const debug = fixture.debugElement.query(By.directive(HellSelect));
-    const selectInstance = debug.injector.get(HellSelect<string>);
 
     host.control.setValue('high');
     await fixture.whenStable();
@@ -121,17 +143,6 @@ describe('HellSelect', () => {
     fixture.detectChanges();
     expect(host.control.touched).toBe(false);
 
-    const fakeDropdown = document.createElement('div');
-    selectInstance.registerDropdown(fakeDropdown);
-
-    select.dispatchEvent(
-      new FocusEvent('focusout', {
-        bubbles: true,
-        relatedTarget: fakeDropdown,
-      }),
-    );
-    fixture.detectChanges();
-
     select.dispatchEvent(
       new FocusEvent('focusout', {
         bubbles: true,
@@ -142,13 +153,88 @@ describe('HellSelect', () => {
 
     expect(host.control.touched).toBe(true);
 
-    selectInstance.unregisterDropdown(fakeDropdown);
-
     host.control.disable();
     fixture.detectChanges();
 
     expect(select.getAttribute('data-disabled')).toBe('');
     expect(select.tabIndex).toBe(-1);
+  });
+
+  it('keeps the form untouched while focus moves through a real portaled dropdown', async () => {
+    const fixture = TestBed.createComponent(SelectFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelect]');
+    const outside = document.createElement('button');
+    outside.dataset['hellSelectTestOutside'] = '';
+    document.body.append(outside);
+
+    select.focus();
+    const dropdown = await openSelectDropdown(fixture, select);
+    const option = query<HTMLElement>(dropdown, '[hellSelectOption]');
+
+    option.focus();
+    select.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        relatedTarget: option,
+      }),
+    );
+    fixture.detectChanges();
+
+    expect(host.control.touched).toBe(false);
+
+    outside.focus();
+    option.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        relatedTarget: outside,
+      }),
+    );
+    fixture.detectChanges();
+
+    expect(host.control.touched).toBe(true);
+  });
+
+  it('treats a stale portaled dropdown as outside after reopening', async () => {
+    const fixture = TestBed.createComponent(SelectFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelect]');
+
+    select.focus();
+    const dropdown = await openSelectDropdown(fixture, select);
+    const staleOption = query<HTMLElement>(dropdown, '[hellSelectOption]');
+
+    select.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    await waitForDropdownRemoval(fixture);
+
+    const reopenedDropdown = await openSelectDropdown(fixture, select);
+    const liveOption = query<HTMLElement>(reopenedDropdown, '[hellSelectOption]');
+
+    select.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        relatedTarget: liveOption,
+      }),
+    );
+    fixture.detectChanges();
+
+    expect(host.control.touched).toBe(false);
+
+    select.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        relatedTarget: staleOption,
+      }),
+    );
+    fixture.detectChanges();
+
+    expect(host.control.touched).toBe(true);
   });
 
   it('integrates with reactive forms in multiple mode without echoing programmatic array writes', async () => {
@@ -194,7 +280,10 @@ describe('HellSelect', () => {
 
     const host = fixture.componentInstance;
     const preset = query<HTMLElement>(fixture.nativeElement, 'hell-select-basic');
-    const trigger = query<HTMLButtonElement>(fixture.nativeElement, 'hell-select-basic button[hellSelect]');
+    const trigger = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      'hell-select-basic button[hellSelect]',
+    );
 
     expect(preset.classList.contains('hell-select-basic')).toBe(true);
     expect(preset.classList.contains('hell-select')).toBe(false);
@@ -290,6 +379,97 @@ function accessibleName(root: HTMLElement, element: HTMLElement): string {
   }
 
   return element.getAttribute('aria-label') ?? element.textContent?.trim() ?? '';
+}
+
+async function waitForDropdown(fixture: {
+  detectChanges: () => void;
+  whenStable: () => Promise<unknown>;
+}): Promise<HTMLElement> {
+  const dropdown = await findDropdown(fixture, 1000);
+  if (dropdown) return dropdown;
+
+  throw new Error('Expected select dropdown.');
+}
+
+async function openSelectDropdown(
+  fixture: {
+    detectChanges: () => void;
+    whenStable: () => Promise<unknown>;
+  },
+  trigger: HTMLElement,
+): Promise<HTMLElement> {
+  const attempts = [
+    () => trigger.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true })),
+    () =>
+      trigger.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+      ),
+    () =>
+      trigger.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+      ),
+    () =>
+      trigger.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: ' ',
+          code: 'Space',
+          bubbles: true,
+          cancelable: true,
+        }),
+      ),
+  ];
+
+  for (const attempt of attempts) {
+    attempt();
+    const dropdown = await findDropdown(fixture, 250);
+    if (dropdown) return dropdown;
+  }
+
+  return waitForDropdown(fixture);
+}
+
+async function findDropdown(
+  fixture: {
+    detectChanges: () => void;
+    whenStable: () => Promise<unknown>;
+  },
+  timeoutMs: number,
+): Promise<HTMLElement | null> {
+  const timeout = Date.now() + timeoutMs;
+
+  while (Date.now() < timeout) {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const dropdown = document.querySelector<HTMLElement>('[hellSelectDropdown]');
+    if (dropdown) return dropdown;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  return null;
+}
+
+async function waitForDropdownRemoval(fixture: {
+  detectChanges: () => void;
+  whenStable: () => Promise<unknown>;
+}): Promise<void> {
+  const timeout = Date.now() + 1000;
+
+  while (Date.now() < timeout) {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    if (!document.querySelector('[hellSelectDropdown]')) return;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  throw new Error('Expected select dropdown to be removed.');
+}
+
+function cleanupPortaledTestElements(selector: string): void {
+  for (const element of document.querySelectorAll(selector)) {
+    element.remove();
+  }
 }
 
 function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {

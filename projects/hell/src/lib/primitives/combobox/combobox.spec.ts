@@ -73,7 +73,11 @@ class ComboboxBasicFormHost {
 
 @Component({
   imports: [HellComboboxBasic],
-  template: `<hell-combobox-basic aria-label="Choose a planet" [options]="options" [value]="value()" />`,
+  template: `<hell-combobox-basic
+    aria-label="Choose a planet"
+    [options]="options"
+    [value]="value()"
+  />`,
 })
 class ComboboxBasicValueHost {
   readonly options = ['Atlas', 'Nova'];
@@ -93,6 +97,21 @@ class ComboboxBasicValueHost {
 })
 class ComboboxBasicLabelsHost {}
 
+const nativeGetAnimations = HTMLElement.prototype.getAnimations;
+
+beforeAll(() => {
+  if (!nativeGetAnimations) {
+    Object.defineProperty(HTMLElement.prototype, 'getAnimations', {
+      configurable: true,
+      value: () => [],
+    });
+  }
+});
+
+afterAll(() => {
+  if (!nativeGetAnimations) delete (HTMLElement.prototype as Partial<HTMLElement>).getAnimations;
+});
+
 describe('HellCombobox', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -107,7 +126,7 @@ describe('HellCombobox', () => {
   });
 
   afterEach(() => {
-    document.body.replaceChildren();
+    cleanupPortaledTestElements('[hellComboboxDropdown], [data-hell-combobox-test-outside]');
   });
 
   it('integrates with reactive forms without echoing programmatic writes', async () => {
@@ -116,8 +135,6 @@ describe('HellCombobox', () => {
 
     const host = fixture.componentInstance;
     const combobox = query<HTMLElement>(fixture.nativeElement, '[hellCombobox]');
-    const debug = fixture.debugElement.query(By.directive(HellCombobox));
-    const comboboxInstance = debug.injector.get(HellCombobox<string>);
 
     host.control.setValue('nova');
     await fixture.whenStable();
@@ -134,17 +151,6 @@ describe('HellCombobox', () => {
     fixture.detectChanges();
     expect(host.control.touched).toBe(false);
 
-    const fakeDropdown = document.createElement('div');
-    comboboxInstance.registerDropdown(fakeDropdown);
-
-    combobox.dispatchEvent(
-      new FocusEvent('focusout', {
-        bubbles: true,
-        relatedTarget: fakeDropdown,
-      }),
-    );
-    fixture.detectChanges();
-
     combobox.dispatchEvent(
       new FocusEvent('focusout', {
         bubbles: true,
@@ -155,12 +161,89 @@ describe('HellCombobox', () => {
 
     expect(host.control.touched).toBe(true);
 
-    comboboxInstance.unregisterDropdown(fakeDropdown);
-
     host.control.disable();
     fixture.detectChanges();
 
     expect(combobox.getAttribute('data-disabled')).toBe('');
+  });
+
+  it('keeps the form untouched while focus moves through a real portaled dropdown', async () => {
+    const fixture = TestBed.createComponent(ComboboxFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+    const button = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellComboboxButton]');
+    const outside = document.createElement('button');
+    outside.dataset['hellComboboxTestOutside'] = '';
+    document.body.append(outside);
+
+    input.focus();
+    const dropdown = await openComboboxDropdown(fixture, input, button);
+    const option = query<HTMLElement>(dropdown, '[hellComboboxOption]');
+
+    option.focus();
+    input.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        relatedTarget: option,
+      }),
+    );
+    fixture.detectChanges();
+
+    expect(host.control.touched).toBe(false);
+
+    outside.focus();
+    option.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        relatedTarget: outside,
+      }),
+    );
+    fixture.detectChanges();
+
+    expect(host.control.touched).toBe(true);
+  });
+
+  it('treats a stale portaled dropdown as outside after reopening', async () => {
+    const fixture = TestBed.createComponent(ComboboxFormHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+    const button = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellComboboxButton]');
+
+    input.focus();
+    const dropdown = await openComboboxDropdown(fixture, input, button);
+    const staleOption = query<HTMLElement>(dropdown, '[hellComboboxOption]');
+
+    input.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    await waitForDropdownRemoval(fixture);
+
+    const reopenedDropdown = await openComboboxDropdown(fixture, input, button);
+    const liveOption = query<HTMLElement>(reopenedDropdown, '[hellComboboxOption]');
+
+    input.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        relatedTarget: liveOption,
+      }),
+    );
+    fixture.detectChanges();
+
+    expect(host.control.touched).toBe(false);
+
+    input.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        relatedTarget: staleOption,
+      }),
+    );
+    fixture.detectChanges();
+
+    expect(host.control.touched).toBe(true);
   });
 
   it('exposes APG combobox input semantics while closed', () => {
@@ -383,7 +466,49 @@ async function waitForDropdown(fixture: {
   detectChanges: () => void;
   whenStable: () => Promise<unknown>;
 }): Promise<HTMLElement> {
-  const timeout = Date.now() + 3000;
+  const dropdown = await findDropdown(fixture, 3000);
+  if (dropdown) return dropdown;
+
+  throw new Error('Expected combobox dropdown.');
+}
+
+async function openComboboxDropdown(
+  fixture: {
+    detectChanges: () => void;
+    whenStable: () => Promise<unknown>;
+  },
+  input: HTMLElement,
+  button: HTMLElement,
+): Promise<HTMLElement> {
+  const attempts = [
+    () => button.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true })),
+    () =>
+      input.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+      ),
+    () =>
+      input.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+      ),
+  ];
+
+  for (const attempt of attempts) {
+    attempt();
+    const dropdown = await findDropdown(fixture, 250);
+    if (dropdown) return dropdown;
+  }
+
+  return waitForDropdown(fixture);
+}
+
+async function findDropdown(
+  fixture: {
+    detectChanges: () => void;
+    whenStable: () => Promise<unknown>;
+  },
+  timeoutMs: number,
+): Promise<HTMLElement | null> {
+  const timeout = Date.now() + timeoutMs;
 
   while (Date.now() < timeout) {
     fixture.detectChanges();
@@ -394,11 +519,34 @@ async function waitForDropdown(fixture: {
     await new Promise((resolve) => setTimeout(resolve, 0));
   }
 
-  throw new Error('Expected combobox dropdown.');
+  return null;
+}
+
+async function waitForDropdownRemoval(fixture: {
+  detectChanges: () => void;
+  whenStable: () => Promise<unknown>;
+}): Promise<void> {
+  const timeout = Date.now() + 1000;
+
+  while (Date.now() < timeout) {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    if (!document.querySelector('[hellComboboxDropdown]')) return;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  throw new Error('Expected combobox dropdown to be removed.');
 }
 
 function query<T extends HTMLElement>(root: HTMLElement, selector: string): T {
   const element = root.querySelector<T>(selector);
   if (!element) throw new Error(`Expected ${selector}.`);
   return element;
+}
+
+function cleanupPortaledTestElements(selector: string): void {
+  for (const element of document.querySelectorAll(selector)) {
+    element.remove();
+  }
 }

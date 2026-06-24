@@ -1,5 +1,6 @@
 import { DestroyRef } from '@angular/core';
 import {
+  hellContainsFloatingTarget,
   type HellFloatingScope,
   hellFloatingTargetNode,
   hellRegisterFloatingElement,
@@ -36,7 +37,7 @@ function isSafeRestoreFocusTarget(
 
 function isPotentialFocusTarget(target: HTMLElement): boolean {
   return target.matches(
-    'a[href], button, input, select, textarea, iframe, object, embed, area[href], [tabindex], [contenteditable]'
+    'a[href], button, input, select, textarea, iframe, object, embed, area[href], [tabindex], [contenteditable]',
   );
 }
 
@@ -322,17 +323,14 @@ export class HellFloatingDismissController {
   }
 
   private isInsideTarget(target: EventTarget | Node | null): boolean {
-    const node = hellFloatingTargetNode(target);
-    if (!node) return false;
-
-    const root = this.options.root?.();
-    if (root?.contains(node)) return true;
-
-    for (const element of this.options.inside?.() ?? []) {
-      if (element?.contains(node)) return true;
-    }
-
-    return this.options.scope?.containsFloatingTarget(node) ?? false;
+    return hellContainsFloatingTarget(
+      {
+        root: this.options.root,
+        inside: this.options.inside,
+        scope: this.options.scope,
+      },
+      target,
+    );
   }
 
   private isActive(): boolean {
