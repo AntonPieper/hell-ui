@@ -2942,9 +2942,36 @@ function checkNgpStateWriterContract() {
 
 function checkFloatingAdapterContract() {
   const coreApi = readFile(join(root, 'projects/hell/src/lib/public-api-core.ts'));
+  const popoverAdapterRelPath = 'projects/hell/src/lib/primitives/adapters/ngp-popover-close-adapter.ts';
+  const popoverAdapterSource = readFile(join(root, popoverAdapterRelPath));
+  const ngpPackage = parseJsonWithComments(readFile(join(root, 'node_modules/ng-primitives/package.json')));
+  const expectedPopoverAdapterVersion = `ng-primitives@${ngpPackage.version}`;
 
   if (!coreApi.includes("export * from './core/floating-element'")) {
     failures.push('Core Package Entry Point must export ./core/floating-element');
+  }
+
+  const popoverOverlayReachIns = walk(join(root, 'projects/hell/src/lib'))
+    .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts'))
+    .filter((file) => relPath(file) !== popoverAdapterRelPath)
+    .filter((file) => /\boverlay\s*\(\s*\)|\bupdateConfig\s*\(/.test(readFile(file)))
+    .map(relPath);
+  if (popoverOverlayReachIns.length) {
+    failures.push(
+      `Private ng-primitives popover overlay handling must stay quarantined in ${popoverAdapterRelPath}: ${popoverOverlayReachIns.join(', ')}`,
+    );
+  }
+
+  if (!popoverAdapterSource.includes(`HELL_NGP_POPOVER_CLOSE_ADAPTER_VERSION = '${expectedPopoverAdapterVersion}'`)) {
+    failures.push(
+      `ng-primitives popover close adapter version must match installed ${expectedPopoverAdapterVersion}`,
+    );
+  }
+
+  if (!popoverAdapterSource.includes('NG0953')) {
+    failures.push(
+      'ng-primitives popover close adapter must document the destroyed OutputRef warning it guards.',
+    );
   }
 }
 

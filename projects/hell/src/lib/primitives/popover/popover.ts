@@ -1,9 +1,10 @@
-import { DestroyRef, Directive, effect, inject } from '@angular/core';
+import { DestroyRef, Directive, inject } from '@angular/core';
 import type { FocusOrigin } from '@angular/cdk/a11y';
 import { NgpPopover, NgpPopoverTrigger } from 'ng-primitives/popover';
 import { HellStyleable } from '../../core/styleable';
 import { hellRegisterFloatingHost } from '../../core/floating-scope';
 import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactive-disabled';
+import { hellConnectNgpPopoverCloseAdapter } from '../adapters/ngp-popover-close-adapter';
 
 /**
  * Trigger for an `ng-template` popover. Bind `[hellPopoverTrigger]="template"`
@@ -41,29 +42,10 @@ import { HellNativeInteractiveDisabledGuard } from '../../core/native-interactiv
 })
 export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
   protected readonly trigger = inject(NgpPopoverTrigger);
-  private readonly destroyRef = inject(DestroyRef);
-  private destroyed = false;
 
   constructor() {
     super();
-
-    this.destroyRef.onDestroy(() => {
-      this.destroyed = true;
-    });
-
-    effect(() => this.configureOverlayClose(this.trigger.overlay()));
-  }
-
-  private configureOverlayClose(overlay: unknown): void {
-    if (!hasPopoverOverlayConfigUpdater(overlay)) return;
-
-    overlay.updateConfig({
-      onClose: () => {
-        if (!this.destroyed) {
-          this.trigger.openChange.emit(false);
-        }
-      },
-    });
+    hellConnectNgpPopoverCloseAdapter(this.trigger, inject(DestroyRef));
   }
 
   show(): Promise<void> {
@@ -73,24 +55,6 @@ export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
   hide(origin?: FocusOrigin): Promise<void> {
     return this.trigger.hide(origin);
   }
-}
-
-interface HellPopoverOverlayConfig {
-  onClose?: () => void;
-}
-
-interface HellPopoverOverlayConfigUpdater {
-  updateConfig(config: HellPopoverOverlayConfig): void;
-}
-
-function hasPopoverOverlayConfigUpdater(
-  overlay: unknown,
-): overlay is HellPopoverOverlayConfigUpdater {
-  return (
-    !!overlay &&
-    (typeof overlay === 'object' || typeof overlay === 'function') &&
-    typeof (overlay as { updateConfig?: unknown }).updateConfig === 'function'
-  );
 }
 
 /**
