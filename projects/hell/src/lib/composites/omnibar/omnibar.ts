@@ -12,6 +12,7 @@ import {
   DestroyRef,
   Directive,
   ElementRef,
+  NgZone,
   TemplateRef,
   ViewChild,
   booleanAttribute,
@@ -205,6 +206,7 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
       [cdkConnectedOverlayViewportMargin]="8"
       [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
       [cdkConnectedOverlayPanelClass]="'hell-omnibar-overlay-pane'"
+      (attach)="onOverlayAttach()"
       (detach)="onOverlayDetach()"
       (positionChange)="onOverlayPositionChange()"
       (overlayOutsideClick)="onOverlayOutsideClick($event)"
@@ -256,6 +258,7 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
 export class HellOmnibar extends HellStyleable implements HellFloatingScope {
   protected readonly labels = inject(HELL_LABELS);
   private readonly overlay = inject(Overlay);
+  private readonly ngZone = inject(NgZone);
 
   /* ── Inputs ────────────────────────────────────────────────────────── */
 
@@ -357,6 +360,8 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
 
   /* ── View refs ─────────────────────────────────────────────────────── */
 
+  @ViewChild(CdkConnectedOverlay) private connectedOverlay?: CdkConnectedOverlay;
+  @ViewChild('control', { static: true }) private controlRef?: ElementRef<HTMLElement>;
   @ViewChild('input', { static: true }) private inputRef?: ElementRef<HTMLInputElement>;
   @ViewChild('panel') private set panelRef(ref: ElementRef<HTMLElement> | undefined) {
     const next = ref?.nativeElement ?? null;
@@ -381,6 +386,8 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     if (next) this.floatingScope.registerFloatingElement(next);
   }
   private floatingOutletElement: HTMLElement | null = null;
+  private overlayGeometryCleanup: VoidFunction | null = null;
+  private overlayGeometryFrame: number | null = null;
 
   constructor() {
     super();
@@ -390,11 +397,17 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
       this.runtime.items().length;
       this.runtime.resetActive();
     });
-    effect(() => {
+    effect((onCleanup) => {
       const open = this.isOpen();
       const size = this.size();
+      const minPanelWidth = this.minPanelWidth();
       void size;
-      if (open) queueMicrotask(() => this.syncOverlayPanelStyles());
+      void minPanelWidth;
+      if (!open) return;
+
+      this.startOverlayGeometryTracking();
+      queueMicrotask(() => this.syncOverlayGeometry());
+      onCleanup(() => this.stopOverlayGeometryTracking());
     });
     effect(() => {
       const items = this.searchItems();
@@ -432,6 +445,7 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     this.installHotkey();
     this.floatingFocusDismissal.connect(this.destroyRef);
     this.destroyRef.onDestroy(() => {
+      this.stopOverlayGeometryTracking();
       this.unregisterOverlayPanel();
       this.unregisterFloatingOutlet();
     });
@@ -575,7 +589,12 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     this.close();
   }
 
+  protected onOverlayAttach(): void {
+    this.syncOverlayGeometry();
+  }
+
   protected onOverlayDetach(): void {
+    this.stopOverlayGeometryTracking();
     this.unregisterOverlayPanel();
   }
 
@@ -658,6 +677,64 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
     const action = position === 'first' ? actions[0] : actions[actions.length - 1];
     action?.focus();
     return action !== undefined;
+  }
+
+  private startOverlayGeometryTracking(): void {
+    if (this.overlayGeometryCleanup) return;
+
+    const doc = this.host.nativeElement.ownerDocument;
+    const win = doc.defaultView;
+    const sync = () => this.scheduleOverlayGeometrySync();
+
+    this.ngZone.runOutsideAngular(() => {
+      doc.addEventListener('scroll', sync, true);
+      win?.addEventListener('resize', sync);
+    });
+
+    this.overlayGeometryCleanup = () => {
+      doc.removeEventListener('scroll', sync, true);
+      win?.removeEventListener('resize', sync);
+
+      if (this.overlayGeometryFrame !== null && win) {
+        win.cancelAnimationFrame(this.overlayGeometryFrame);
+      }
+      this.overlayGeometryFrame = null;
+    };
+  }
+
+  private stopOverlayGeometryTracking(): void {
+    this.overlayGeometryCleanup?.();
+    this.overlayGeometryCleanup = null;
+  }
+
+  private scheduleOverlayGeometrySync(): void {
+    if (!this.isOpen()) return;
+
+    const win = this.host.nativeElement.ownerDocument.defaultView;
+    if (!win) {
+      this.syncOverlayGeometry();
+      return;
+    }
+
+    if (this.overlayGeometryFrame !== null) return;
+    this.overlayGeometryFrame = win.requestAnimationFrame(() => {
+      this.overlayGeometryFrame = null;
+      this.syncOverlayGeometry();
+    });
+  }
+
+  private syncOverlayGeometry(): void {
+    this.syncOverlayPanelStyles();
+
+    const overlayRef = this.connectedOverlay?.overlayRef;
+    if (!overlayRef?.hasAttached()) return;
+
+    const width = this.controlRef?.nativeElement.getBoundingClientRect().width;
+    overlayRef.updateSize({
+      width,
+      minWidth: this.minPanelWidth(),
+    });
+    overlayRef.updatePosition();
   }
 
   private syncOverlayPanelStyles(): void {
