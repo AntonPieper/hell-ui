@@ -153,9 +153,11 @@ test.describe('table docs regressions', () => {
     await expect(shell.getByRole('button', { name: 'Filters' }).first()).toBeVisible();
     await expect(shell.getByRole('button', { name: 'More table actions' })).toBeVisible();
     await expect(shell.locator('button.hell-table-sort-trigger')).not.toHaveCount(0);
-    await expect(shell.getByRole('row', { name: /Ada Lovelace/ })).toHaveAttribute(
+    await expect(shell.getByRole('row', { name: /Ada Lovelace/ })).toHaveClass(
+      /bg-hell-primary-soft/,
+    );
+    await expect(shell.getByRole('row', { name: /Ada Lovelace/ })).not.toHaveAttribute(
       'data-selected',
-      'true',
     );
 
     await expect(nameHeader).toHaveAttribute('aria-sort', 'ascending');
@@ -200,9 +202,11 @@ test.describe('table docs regressions', () => {
 
     await shell.getByRole('button', { name: 'Open Grace Hopper' }).click();
     await expect(shell.getByRole('button', { name: 'Open Grace Hopper' })).toContainText('Open');
-    await expect(shell.getByRole('row', { name: /Grace Hopper/ })).toHaveAttribute(
+    await expect(shell.getByRole('row', { name: /Grace Hopper/ })).toHaveClass(
+      /bg-hell-primary-soft/,
+    );
+    await expect(shell.getByRole('row', { name: /Grace Hopper/ })).not.toHaveAttribute(
       'data-selected',
-      'true',
     );
     await expect(example.getByTestId('table-detail-pane')).toContainText('Grace Hopper');
 
@@ -271,9 +275,11 @@ test.describe('table docs regressions', () => {
     await expect(virtual.locator('[data-hell-table-virtual-body="true"]')).toHaveCount(1);
     await expect(virtual.locator('[data-hell-table-virtual-row="true"]')).not.toHaveCount(0);
     await expect(virtual.locator('[data-hell-table-shell-footer]')).toContainText('36 visible');
-    await expect(virtual.getByRole('row', { name: /Person 1 Admin/ }).first()).toHaveAttribute(
+    await expect(virtual.getByRole('row', { name: /Person 1 Admin/ }).first()).toHaveClass(
+      /bg-hell-primary-soft/,
+    );
+    await expect(virtual.getByRole('row', { name: /Person 1 Admin/ }).first()).not.toHaveAttribute(
       'data-selected',
-      'true',
     );
     expect(await virtual.locator('[data-hell-table-virtual-row-kind="row"]').count()).toBeLessThan(
       36,

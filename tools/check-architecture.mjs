@@ -2598,6 +2598,19 @@ function checkTableAdapterBoundaryContract() {
       );
     }
   }
+
+  const forbiddenRowSelectionShortcuts = [
+    { label: 'data-selected', pattern: /data-selected/ },
+    { label: 'aria-selected', pattern: /aria-selected/ },
+    { label: 'row.getIsSelected()', pattern: /\bgetIsSelected\s*\(/ },
+  ];
+  for (const shortcut of forbiddenRowSelectionShortcuts) {
+    if (shortcut.pattern.test(tanStackShellSource)) {
+      failures.push(
+        `TanStack shell must not reflect row selection semantics with ${shortcut.label}; selected visuals belong in caller rowClass passthrough.`,
+      );
+    }
+  }
 }
 
 function checkTableSemanticDefaultGuardContract() {
