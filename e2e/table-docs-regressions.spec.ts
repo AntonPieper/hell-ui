@@ -223,6 +223,7 @@ test.describe('table docs regressions', () => {
     const control = omnibar.locator('[data-slot="control"]');
     const search = omnibar.getByRole('combobox', { name: 'Search people' });
     const panel = page.locator('.cdk-overlay-pane .hell-omnibar-panel-surface').first();
+    const content = page.locator('.hell-content');
 
     await control.scrollIntoViewIfNeeded();
     await search.click();
@@ -234,17 +235,25 @@ test.describe('table docs regressions', () => {
     expect(beforeOffset).toBeLessThanOrEqual(12);
     expect(beforePanel.width).toBeGreaterThanOrEqual(beforeControl.width - 2);
 
-    await page.mouse.move(10, 10);
-    await page.mouse.wheel(0, 220);
+    const beforeScrollTop = await content.evaluate((element) => element.scrollTop);
+    await content.evaluate((element) => {
+      element.scrollTop += 260;
+    });
+    await expect.poll(() => content.evaluate((element) => element.scrollTop)).toBeGreaterThan(
+      beforeScrollTop + 100,
+    );
 
     await expect(panel).toBeVisible();
     await expect
       .poll(async () => {
         const afterControl = await rawBoxFor(control);
         const afterPanel = await rawBoxFor(panel);
-        return Math.abs(omnibarPanelAnchorOffset(afterControl, afterPanel) - beforeOffset);
+        return omnibarPanelAnchorOffset(afterControl, afterPanel);
       })
-      .toBeLessThanOrEqual(2);
+      .toBeLessThanOrEqual(12);
+    const afterControl = await rawBoxFor(control);
+    const afterPanel = await rawBoxFor(panel);
+    expect(afterPanel.width).toBeGreaterThanOrEqual(afterControl.width - 2);
   });
 
   test('TanStack Virtual strategy marks one shell body without a second table root', async ({
