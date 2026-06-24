@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, computed, signal } from '@angular/core';
-import { HellDialpad } from '@hell-ui/angular/dialpad';
+import { HellDialpad, type HellDialpadUi } from '@hell-ui/angular/dialpad';
 import {
   HellToggleGroup,
   HellToggleGroupItem,
@@ -14,6 +14,7 @@ import {
     <div class="grid gap-4 md:grid-cols-[minmax(260px,300px)_minmax(220px,1fr)]">
       <div class="grid gap-3">
         <hell-dialpad
+          [ui]="dialpadUi"
           [disabled]="disabled()"
           [readOnly]="readOnly()"
           [invalid]="invalid()"
@@ -66,6 +67,13 @@ export class DialpadExampleExample {
   protected readonly disabled = computed(() => this.states().includes('disabled'));
   protected readonly readOnly = computed(() => this.states().includes('readonly'));
   protected readonly invalid = computed(() => this.states().includes('invalid'));
+  protected readonly dialpadUi = {
+    root: 'max-w-[320px]',
+    display: 'bg-hell-primary-soft',
+    numberInput: 'text-hell-primary',
+    keyButton: 'rounded-full',
+    callButton: 'rounded-full shadow-lg',
+  } satisfies HellDialpadUi;
 
   protected onDigit(d: string) {
     this.last.set(d);

@@ -20,17 +20,24 @@ const distPdfViewer = join(root, 'dist/hell-pdf-viewer');
 const keep = process.env.HELL_KEEP_PACKAGE_CONSUMER === '1';
 const packageConsumerArgs = process.argv.slice(2);
 const rawSelectedScenarioNames = parseScenarioSelection(packageConsumerArgs);
-const selectedScenarioNames = rawSelectedScenarioNames.filter((name) => !isPreflightScenarioName(name));
+const selectedScenarioNames = rawSelectedScenarioNames.filter(
+  (name) => !isPreflightScenarioName(name),
+);
 const preflightOnly = parsePreflightOnly(packageConsumerArgs, rawSelectedScenarioNames);
 const minimalDependencyMode = parseMinimalDependencyMode(packageConsumerArgs);
 const skipPackageBuild = parseSkipPackageBuild(packageConsumerArgs);
 const pnpmTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_TIMEOUT_MS, 240_000);
 const pnpmHeartbeatMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_HEARTBEAT_MS, 30_000);
-const pnpmPreflightTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_PREFLIGHT_TIMEOUT_MS, 30_000);
+const pnpmPreflightTimeoutMs = positiveNumber(
+  process.env.HELL_PACKAGE_CONSUMER_PREFLIGHT_TIMEOUT_MS,
+  30_000,
+);
 
 runPnpmPreflight(root);
 if (preflightOnly) {
-  console.log(`${packageConsumerLabel('preflight')} preflight passed; skipping package build and consumer scenarios`);
+  console.log(
+    `${packageConsumerLabel('preflight')} preflight passed; skipping package build and consumer scenarios`,
+  );
   process.exit(0);
 }
 
@@ -76,7 +83,9 @@ const devDeps = rootPackage.devDependencies ?? {};
 const sourcePackage = JSON.parse(readFileSync(join(root, 'projects/hell/package.json'), 'utf8'));
 const packagePeerDependencies = sourcePackage.peerDependencies ?? {};
 const packagePeerDependenciesMeta = sourcePackage.peerDependenciesMeta ?? {};
-const sourcePdfPackage = JSON.parse(readFileSync(join(root, 'projects/hell-pdf-viewer/package.json'), 'utf8'));
+const sourcePdfPackage = JSON.parse(
+  readFileSync(join(root, 'projects/hell-pdf-viewer/package.json'), 'utf8'),
+);
 const pdfPackagePeerDependencies = sourcePdfPackage.peerDependencies ?? {};
 const pdfPackagePeerDependenciesMeta = sourcePdfPackage.peerDependenciesMeta ?? {};
 
@@ -135,7 +144,12 @@ const peerGroupContracts = {
   },
   'table-tanstack-virtual': {
     tier: 'table-tanstack',
-    peers: [...corePeerGroup, ...stylePeerGroup, ...tanStackTablePeerGroup, ...tanStackVirtualPeerGroup],
+    peers: [
+      ...corePeerGroup,
+      ...stylePeerGroup,
+      ...tanStackTablePeerGroup,
+      ...tanStackVirtualPeerGroup,
+    ],
   },
   'audio-transcript': {
     tier: 'audio-transcript',
@@ -167,23 +181,14 @@ const behaviorUiWithoutFontAwesomeDeps = [
   'ng-primitives',
   '@ng-icons/core',
 ];
-const styledUiWithoutFontAwesomeDeps = [
-  ...behaviorUiWithoutFontAwesomeDeps,
-  'tailwindcss',
-];
-const styledUiDeps = [
-  ...styledUiWithoutFontAwesomeDeps,
-  '@ng-icons/font-awesome',
-];
+const styledUiWithoutFontAwesomeDeps = [...behaviorUiWithoutFontAwesomeDeps, 'tailwindcss'];
+const styledUiDeps = [...styledUiWithoutFontAwesomeDeps, '@ng-icons/font-awesome'];
 // The aggregate /primitives FESM includes dialog, and ng-primitives/dialog
 // currently imports @angular/router. Hell declares router as an optional peer
 // and only aggregate/dialog consumers should need it. Narrow primitive
 // entrypoints (for example /button) prove router-free consumption for consumers
 // that avoid the aggregate barrel.
-const primitivesDeps = [
-  ...styledUiDeps,
-  '@angular/router',
-];
+const primitivesDeps = [...styledUiDeps, '@angular/router'];
 const coreDeps = behaviorUiWithoutFontAwesomeDeps;
 const buttonStyledDeps = styledUiWithoutFontAwesomeDeps;
 const codeEditorDeps = [
@@ -195,15 +200,9 @@ const codeEditorDeps = [
   '@lezer/highlight',
 ];
 const testingDeps = coreDeps;
-const pdfViewerDeps = [
-  ...styledUiDeps,
-  'pdfjs-dist',
-];
+const pdfViewerDeps = [...styledUiDeps, 'pdfjs-dist'];
 const audioPlayerDeps = styledUiDeps;
-const tableTanStackDeps = [
-  ...styledUiWithoutFontAwesomeDeps,
-  '@tanstack/angular-table',
-];
+const tableTanStackDeps = [...styledUiWithoutFontAwesomeDeps, '@tanstack/angular-table'];
 const tableTanStackVirtualDeps = [
   ...styledUiWithoutFontAwesomeDeps,
   '@tanstack/angular-table',
@@ -253,7 +252,8 @@ const scenarios = [
   },
   {
     name: 'button',
-    description: 'narrow primitive button entry with primitive styles and without Font Awesome peer',
+    description:
+      'narrow primitive button entry with primitive styles and without Font Awesome peer',
     peerTier: 'primitive',
     peerGroup: 'primitive',
     dependencies: buttonStyledDeps,
@@ -451,11 +451,7 @@ function parseScenarioTokens(values, envOnly) {
   }
 
   return [
-    ...new Set(
-      raw
-        .flatMap((value) => value.split(',').map(normalizeScenarioName))
-        .filter(Boolean),
-    ),
+    ...new Set(raw.flatMap((value) => value.split(',').map(normalizeScenarioName)).filter(Boolean)),
   ];
 }
 
@@ -511,14 +507,18 @@ function assertPeerTierContracts(allScenarios) {
       .filter(([, meta]) => meta?.optional === true)
       .map(([name]) => name),
   );
-  const requiredPackagePeerNames = [...packagePeerNames].filter((name) => !optionalPeerNames.has(name));
+  const requiredPackagePeerNames = [...packagePeerNames].filter(
+    (name) => !optionalPeerNames.has(name),
+  );
 
   assertSameSet('core peer group', corePeerGroup, requiredPackagePeerNames);
 
   for (const [groupName, contract] of Object.entries(peerGroupContracts)) {
     const missingPeers = contract.peers.filter((peer) => !allPackagePeerNames.has(peer));
     if (missingPeers.length) {
-      fail(`Peer group ${groupName} references undeclared package peer(s): ${missingPeers.join(', ')}`);
+      fail(
+        `Peer group ${groupName} references undeclared package peer(s): ${missingPeers.join(', ')}`,
+      );
     }
   }
 
@@ -526,13 +526,16 @@ function assertPeerTierContracts(allScenarios) {
     fail('Main @hell-ui/angular package must not advertise pdfjs-dist after the PDF split');
   }
   for (const peer of codeEditorPeerGroup) {
-    if (!optionalPeerNames.has(peer)) fail(`Code editor peer ${peer} must remain optional in @hell-ui/angular`);
+    if (!optionalPeerNames.has(peer))
+      fail(`Code editor peer ${peer} must remain optional in @hell-ui/angular`);
   }
   for (const peer of tanStackTablePeerGroup) {
-    if (!optionalPeerNames.has(peer)) fail(`TanStack Table peer ${peer} must remain optional in @hell-ui/angular`);
+    if (!optionalPeerNames.has(peer))
+      fail(`TanStack Table peer ${peer} must remain optional in @hell-ui/angular`);
   }
   for (const peer of tanStackVirtualPeerGroup) {
-    if (!optionalPeerNames.has(peer)) fail(`TanStack Virtual peer ${peer} must remain optional in @hell-ui/angular`);
+    if (!optionalPeerNames.has(peer))
+      fail(`TanStack Virtual peer ${peer} must remain optional in @hell-ui/angular`);
   }
   if (pdfPackagePeerDependencies['pdfjs-dist'] !== deps['pdfjs-dist']) {
     fail(`PDF package must pin pdfjs-dist peer to workspace version ${deps['pdfjs-dist']}`);
@@ -546,7 +549,8 @@ function assertPeerTierContracts(allScenarios) {
 
   const coveredTiers = new Set(allScenarios.map((scenario) => scenario.peerTier));
   for (const tier of packageConsumerPeerTiers) {
-    if (!coveredTiers.has(tier)) fail(`Missing package-consumer scenario coverage for peer tier ${tier}`);
+    if (!coveredTiers.has(tier))
+      fail(`Missing package-consumer scenario coverage for peer tier ${tier}`);
   }
 
   for (const scenario of allScenarios) assertScenarioPeerGroup(scenario, allPackagePeerNames);
@@ -567,7 +571,9 @@ function assertScenarioPeerGroup(scenario, packagePeerNames) {
     );
   }
 
-  const actualPeers = scenario.dependencies.filter((dependency) => packagePeerNames.has(dependency));
+  const actualPeers = scenario.dependencies.filter((dependency) =>
+    packagePeerNames.has(dependency),
+  );
   assertSameSet(
     `scenario ${scenario.name} peer group ${scenario.peerGroup ?? scenario.peerTier}`,
     contract.peers,
@@ -589,9 +595,13 @@ function assertHeavyPeersAreIsolated(allScenarios) {
   for (const scenario of allScenarios) {
     if (!lightScenarioNames.has(scenario.name)) continue;
 
-    const unexpected = scenario.dependencies.filter((dependency) => heavyFeaturePeerGroup.includes(dependency));
+    const unexpected = scenario.dependencies.filter((dependency) =>
+      heavyFeaturePeerGroup.includes(dependency),
+    );
     if (unexpected.length) {
-      fail(`Scenario ${scenario.name} must not require heavy feature peer(s): ${unexpected.join(', ')}`);
+      fail(
+        `Scenario ${scenario.name} must not require heavy feature peer(s): ${unexpected.join(', ')}`,
+      );
     }
   }
 }
@@ -600,18 +610,28 @@ function assertTableAdapterPeersAreIsolated(allScenarios) {
   const tanStackScenario = allScenarios.find((scenario) => scenario.name === 'table-tanstack');
   if (!tanStackScenario) fail('Missing package-consumer table-tanstack scenario');
 
-  const virtualScenario = allScenarios.find((scenario) => scenario.name === 'table-tanstack-virtual');
+  const virtualScenario = allScenarios.find(
+    (scenario) => scenario.name === 'table-tanstack-virtual',
+  );
   if (!virtualScenario) fail('Missing package-consumer table-tanstack-virtual scenario');
 
   const tanStackPeers = tanStackScenario.dependencies.filter((dependency) =>
     tanStackTablePeerGroup.includes(dependency),
   );
-  assertSameSet('scenario table-tanstack TanStack Table peer group', tanStackTablePeerGroup, tanStackPeers);
+  assertSameSet(
+    'scenario table-tanstack TanStack Table peer group',
+    tanStackTablePeerGroup,
+    tanStackPeers,
+  );
 
   const virtualPeers = virtualScenario.dependencies.filter((dependency) =>
     tanStackVirtualPeerGroup.includes(dependency),
   );
-  assertSameSet('scenario table-tanstack-virtual TanStack Virtual peer group', tanStackVirtualPeerGroup, virtualPeers);
+  assertSameSet(
+    'scenario table-tanstack-virtual TanStack Virtual peer group',
+    tanStackVirtualPeerGroup,
+    virtualPeers,
+  );
 
   for (const scenario of allScenarios) {
     if (scenario.name !== 'table-tanstack' && scenario.name !== 'table-tanstack-virtual') {
@@ -619,7 +639,9 @@ function assertTableAdapterPeersAreIsolated(allScenarios) {
         tanStackTablePeerGroup.includes(dependency),
       );
       if (unexpectedTablePeers.length) {
-        fail(`Scenario ${scenario.name} must not require TanStack Table peer(s): ${unexpectedTablePeers.join(', ')}`);
+        fail(
+          `Scenario ${scenario.name} must not require TanStack Table peer(s): ${unexpectedTablePeers.join(', ')}`,
+        );
       }
     }
 
@@ -628,7 +650,9 @@ function assertTableAdapterPeersAreIsolated(allScenarios) {
         tanStackVirtualPeerGroup.includes(dependency),
       );
       if (unexpectedVirtualPeers.length) {
-        fail(`Scenario ${scenario.name} must not require TanStack Virtual peer(s): ${unexpectedVirtualPeers.join(', ')}`);
+        fail(
+          `Scenario ${scenario.name} must not require TanStack Virtual peer(s): ${unexpectedVirtualPeers.join(', ')}`,
+        );
       }
     }
   }
@@ -646,16 +670,25 @@ function assertCodeMirrorPeersAreIsolated(allScenarios) {
   for (const scenario of allScenarios) {
     if (scenario.name === 'code-editor') continue;
 
-    const unexpected = scenario.dependencies.filter((dependency) => codeEditorPeerGroup.includes(dependency));
+    const unexpected = scenario.dependencies.filter((dependency) =>
+      codeEditorPeerGroup.includes(dependency),
+    );
     if (unexpected.length) {
-      fail(`Scenario ${scenario.name} must not require CodeMirror peer(s): ${unexpected.join(', ')}`);
+      fail(
+        `Scenario ${scenario.name} must not require CodeMirror peer(s): ${unexpected.join(', ')}`,
+      );
     }
   }
 }
 
 function assertModernTableEntrypointContract(packageJson, distRoot) {
   const exportsMap = packageJson.exports ?? {};
-  for (const exportPath of ['./table', './table-tanstack', './table-tanstack/virtual', './styles/table']) {
+  for (const exportPath of [
+    './table',
+    './table-tanstack',
+    './table-tanstack/virtual',
+    './styles/table',
+  ]) {
     if (!exportsMap[exportPath]) fail(`Modern table package export is missing ${exportPath}`);
   }
 
@@ -685,7 +718,8 @@ function assertModernTableEntrypointContract(packageJson, distRoot) {
     'types/hell-ui-angular-features-data-table.d.ts',
     'types/hell-ui-angular-features-table-utilities.d.ts',
   ]) {
-    if (existsSync(join(distRoot, file))) fail(`Legacy table package artifact must be absent: ${file}`);
+    if (existsSync(join(distRoot, file)))
+      fail(`Legacy table package artifact must be absent: ${file}`);
   }
 }
 
@@ -715,7 +749,10 @@ function resolvePeerGroup(scenario) {
 function assertSameSet(label, expected, actual) {
   const expectedList = uniqueSorted(expected);
   const actualList = uniqueSorted(actual);
-  if (expectedList.length === actualList.length && expectedList.every((value, index) => value === actualList[index])) {
+  if (
+    expectedList.length === actualList.length &&
+    expectedList.every((value, index) => value === actualList[index])
+  ) {
     return;
   }
 
@@ -790,11 +827,10 @@ async function runConsumerScenarioGroup(group) {
   try {
     for (const scenario of group.scenarios) printScenarioContract(scenario, 'install');
     writeConsumerWorkspace(tempRoot, group.scenarios, group.dependencies);
-    await runPnpm([
-      'install',
-      '--strict-peer-dependencies',
-      '--ignore-scripts',
-    ], tempRoot, { scenarioName: groupName, printInstallDiagnostics: true });
+    await runPnpm(['install', '--strict-peer-dependencies', '--ignore-scripts'], tempRoot, {
+      scenarioName: groupName,
+      printInstallDiagnostics: true,
+    });
     assertForbiddenDependenciesNotInstalled(tempRoot, group);
 
     for (const scenario of group.scenarios) {
@@ -871,7 +907,10 @@ function writeConsumerWorkspace(workspace, scenarios, dependencies = unionDepend
   }
 
   writeJson(join(workspace, 'package.json'), packageJson);
-  writeFileSync(join(workspace, '.npmrc'), 'strict-peer-dependencies=true\nauto-install-peers=false\n');
+  writeFileSync(
+    join(workspace, '.npmrc'),
+    'strict-peer-dependencies=true\nauto-install-peers=false\n',
+  );
   writeJson(join(workspace, 'angular.json'), {
     $schema: './node_modules/@angular/cli/lib/config/schema.json',
     version: 1,
@@ -969,10 +1008,15 @@ function exactInstalledVersion(name) {
 function rootConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellStyleable, type HellSize } from '${packageName}';
+import { HellPartStyleable, HellStyleable, type HellRecipe, type HellSize, type HellUi } from '${packageName}';
 
 const size: HellSize = 'md';
+const recipe: HellRecipe<'root'> = { root: 'block' };
+const ui: HellUi<'root'> = { root: 'rounded-md' };
 void size;
+void recipe;
+void ui;
+void HellPartStyleable;
 void HellStyleable;
 
 @Component({
@@ -989,10 +1033,15 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function coreConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellStyleable, type HellSize } from '${packageName}/core';
+import { HellPartStyleable, HellStyleable, type HellRecipe, type HellSize, type HellUi } from '${packageName}/core';
 
 const size: HellSize = 'md';
+const recipe: HellRecipe<'root'> = { root: 'block' };
+const ui: HellUi<'root'> = { root: 'rounded-md' };
 void size;
+void recipe;
+void ui;
+void HellPartStyleable;
 void HellStyleable;
 
 @Component({
@@ -1073,19 +1122,26 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function compositesConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/composites';
+import { HELL_APP_SHELL_DIRECTIVES, HellDialpad, type HellDialpadUi } from '${packageName}/composites';
+
+const dialpadUi = {
+  root: 'max-w-[320px]',
+  keyButton: 'rounded-full',
+} satisfies HellDialpadUi;
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [...HELL_APP_SHELL_DIRECTIVES],
+  imports: [...HELL_APP_SHELL_DIRECTIVES, HellDialpad],
   template: \`
     <div hellAppShell>
       <header hellAppTopbar>
         <button hellSidenavToggle type="button"></button>
       </header>
       <nav hellAppSidenav>Navigation</nav>
-      <main hellAppContent>Content</main>
+      <main hellAppContent>
+        <hell-dialpad [ui]="dialpadUi" />
+      </main>
       <aside hellAppSecondary>
         <button hellSecondaryToggle type="button">Details</button>
         <div hellAppSecondaryBody>Secondary</div>
@@ -1093,7 +1149,9 @@ import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/composites';
     </div>
   \`,
 })
-class App {}
+class App {
+  protected readonly dialpadUi = dialpadUi;
+}
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
@@ -1567,7 +1625,12 @@ function runPnpmPreflight(cwd) {
     failPnpmPreflight('pnpm version is not a semver value', [`version: ${version}`]);
   }
 
-  const registry = requirePnpmPreflightValue(['config', 'get', 'registry'], cwd, env, 'registry config');
+  const registry = requirePnpmPreflightValue(
+    ['config', 'get', 'registry'],
+    cwd,
+    env,
+    'registry config',
+  );
   assertPnpmRegistry(registry);
 
   const store = requirePnpmPreflightValue(['store', 'path'], cwd, env, 'store path');
@@ -1650,7 +1713,10 @@ function assertWritablePnpmStore(store, cwd) {
   const storeDirectory = normalizePnpmPath(store, cwd);
   if (!storeDirectory) failPnpmPreflight('pnpm store path is empty');
 
-  const probe = join(storeDirectory, `.hell-package-consumer-preflight-${process.pid}-${Date.now()}`);
+  const probe = join(
+    storeDirectory,
+    `.hell-package-consumer-preflight-${process.pid}-${Date.now()}`,
+  );
   try {
     mkdirSync(storeDirectory, { recursive: true });
     writeFileSync(probe, 'ok\n');
@@ -1672,7 +1738,9 @@ function assertStrictPeerMode(strictPeerDependencies, autoInstallPeers) {
     ]);
   }
   if (packageManagerConfigBoolean(autoInstallPeers)) {
-    failPnpmPreflight('auto-install-peers must be false', [`auto-install-peers=${autoInstallPeers}`]);
+    failPnpmPreflight('auto-install-peers must be false', [
+      `auto-install-peers=${autoInstallPeers}`,
+    ]);
   }
 }
 
@@ -1712,7 +1780,8 @@ function runRootPnpm(args, cwd) {
     stdio: 'inherit',
   });
   if (result.error) fail(result.error.message);
-  if (result.status !== 0) fail(`${formatCommand('pnpm', commandArgs)} failed with ${result.status}`);
+  if (result.status !== 0)
+    fail(`${formatCommand('pnpm', commandArgs)} failed with ${result.status}`);
 }
 
 async function runPnpm(args, cwd, options = {}) {
@@ -1728,7 +1797,8 @@ async function runPnpmExpectingFailure(args, cwd, options = {}) {
   if (result.timedOut) fail(pnpmTimeoutMessage(command, cwd, diagnostics));
   if (result.error) fail(`Unable to start command: ${command}\n${result.error.message}`);
   if (result.signal) fail(`Command failed with signal ${result.signal}: ${command}`);
-  if (result.status === 0) fail(`Expected command to fail for negative scenario ${label}: ${command}`);
+  if (result.status === 0)
+    fail(`Expected command to fail for negative scenario ${label}: ${command}`);
   console.log(`${label} ok: command failed as expected with status ${result.status}: ${command}`);
 }
 
@@ -1793,7 +1863,9 @@ function spawnPnpm(args, cwd, env, label, command) {
       clearTimeout(timeout);
       if (killTimer) clearTimeout(killTimer);
       const verb = timedOut ? 'stopped' : 'finished';
-      console.log(`${label} ${verb} command after ${formatDuration(Date.now() - startedAt)}: ${command}`);
+      console.log(
+        `${label} ${verb} command after ${formatDuration(Date.now() - startedAt)}: ${command}`,
+      );
       resolve({ status, signal, error, timedOut });
     });
   });
@@ -1814,8 +1886,10 @@ function collectPnpmDiagnostics(cwd, env) {
   const store = normalizePnpmPath(readPnpmValue(['store', 'path'], cwd, env), cwd) ?? 'unknown';
   const registry = readPnpmValue(['config', 'get', 'registry'], cwd, env) ?? 'unknown';
   const version = readPnpmValue(['--version'], cwd, env) ?? 'unknown';
-  const strictPeerDependencies = readPnpmValue(['config', 'get', 'strict-peer-dependencies'], cwd, env) ?? 'unknown';
-  const autoInstallPeers = readPnpmValue(['config', 'get', 'auto-install-peers'], cwd, env) ?? 'unknown';
+  const strictPeerDependencies =
+    readPnpmValue(['config', 'get', 'strict-peer-dependencies'], cwd, env) ?? 'unknown';
+  const autoInstallPeers =
+    readPnpmValue(['config', 'get', 'auto-install-peers'], cwd, env) ?? 'unknown';
 
   return { store, registry, version, strictPeerDependencies, autoInstallPeers };
 }
@@ -1864,11 +1938,7 @@ function pnpmCommandArgs(args) {
 }
 
 function pnpmConfigCommandArgs(args) {
-  return [
-    '--config.strict-peer-dependencies=true',
-    '--config.auto-install-peers=false',
-    ...args,
-  ];
+  return ['--config.strict-peer-dependencies=true', '--config.auto-install-peers=false', ...args];
 }
 
 function formatCommand(command, args) {
