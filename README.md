@@ -98,7 +98,7 @@ Peer dependency tiers:
 | Tier | Entry points / scenarios | Peer group asserted |
 |---|---|---|
 | Core | `@hell-ui/angular`, `/core`, `/testing`; `root-core`, `core`, `testing` | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `ng-primitives`, `rxjs` |
-| Primitive | Narrow primitives such as `/button`; aggregate `/primitives`; `button-unstyled`, `button`, `primitives-css` | Core peers. Add `tailwindcss` when importing primitive CSS. Aggregate `/primitives` also asserts optional `@angular/router` and `@ng-icons/font-awesome` because dialog and icon-backed primitives are bundled in the aggregate FESM. |
+| Primitive | Narrow primitives such as `/button`; aggregate `/primitives`; `button-ui`, `button`, `primitives-css` | Core peers. Add `tailwindcss` when importing primitive CSS. Aggregate `/primitives` also asserts optional `@angular/router` and `@ng-icons/font-awesome` because dialog and icon-backed primitives are bundled in the aggregate FESM. |
 | Composite | `/composites` and narrow composite entry points such as `/app-shell` and `/audio-player`; `composites-css`, `app-shell`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Aggregate/icon-backed composites also assert optional `@ng-icons/font-awesome`. |
 | Audio transcript | `/features/audio-transcript`; `audio-transcript` | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled. |
 | Table primitives | `/table`; `table`, `no-legacy-alias` | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack Table, or TanStack Virtual peers. The negative scenario proves removed legacy table aliases and CSS aliases stay unavailable. |
@@ -150,14 +150,14 @@ in-package feature styles.
 
 ## Component Contract
 
-Public modules should expose behavior through directives, optional default host
-classes, `data-*` state attributes, `data-slot` part attributes, public CSS
-variables for supported visual overrides, and `unstyled` for opting out of Hell
-default host class styling.
+Public modules should expose behavior through directives, `data-*` state
+attributes, stable `data-slot` part attributes, and a Part Style Map for
+migrated styling surfaces. Components that have not migrated yet still use
+default host classes and `unstyled`.
 
 ```html
 <button hellButton variant="primary">Save</button>
-<button hellButton unstyled>Custom behavior-only button</button>
+<button hellButton [ui]="{ root: 'rounded-hell-pill' }">Custom button</button>
 
 <button hellSelect>
   <span hellSelectValue>Germany</span>

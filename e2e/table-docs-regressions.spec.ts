@@ -409,20 +409,24 @@ function omnibarPanelAnchorOffset(
 }
 
 test.describe('split-view docs regressions', () => {
-  test('master/detail list buttons use the compact ghost style from the built-in back button', async ({
+  test('master/detail list buttons use the compact ghost Button root recipe', async ({
     page,
   }) => {
     await page.goto('/components/split-view');
     await expect(page.getByRole('heading', { name: 'Split view', level: 1 })).toBeVisible();
 
     const ticketButtons = page.locator(
-      'app-split-view-master-detail-example [data-pane="primary"] button.hell-button',
+      'app-split-view-master-detail-example [data-pane="primary"] button[hellbutton][data-slot="master-item"]',
     );
     await expect(ticketButtons).toHaveCount(3);
 
     for (let index = 0; index < 3; index += 1) {
       await expect(ticketButtons.nth(index)).toHaveAttribute('data-variant', 'ghost');
       await expect(ticketButtons.nth(index)).toHaveAttribute('data-size', 'sm');
+      await expect(ticketButtons.nth(index)).not.toHaveClass(/(^|\s)hell-button(\s|$)/);
+      await expect(ticketButtons.nth(index)).toHaveClass(
+        /bg-\[var\(--hell-button-background,transparent\)\]/,
+      );
     }
   });
 });

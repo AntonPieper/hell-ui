@@ -70,6 +70,8 @@
     transform: rotate(180deg);
   }
 
+  /* HellButton's root-part recipe and the legacy .hell-button helper both
+     consume these color hooks for selected master/detail rows. */
   .hell-split-view [data-slot='master-item'][data-current='true'] {
     --hell-button-background: var(--color-hell-primary-soft);
     --hell-button-background-hover: var(--color-hell-surface-muted);

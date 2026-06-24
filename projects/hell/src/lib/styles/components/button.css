@@ -1,7 +1,245 @@
+@layer utilities {
+  [class~="inline-flex"] {
+    display: inline-flex;
+  }
+  [class~="h-auto"] {
+    height: auto;
+  }
+  [class~="h-hell-control-xs"] {
+    height: var(--spacing-hell-control-xs);
+  }
+  [class~="h-hell-control-sm"] {
+    height: var(--spacing-hell-control-sm);
+  }
+  [class~="h-hell-control-md"] {
+    height: var(--spacing-hell-control-md);
+  }
+  [class~="h-hell-control-lg"] {
+    height: var(--spacing-hell-control-lg);
+  }
+  [class~="h-hell-control-xl"] {
+    height: var(--spacing-hell-control-xl);
+  }
+  [class~="w-full"] {
+    width: 100%;
+  }
+  [class~="w-hell-control-xs"] {
+    width: var(--spacing-hell-control-xs);
+  }
+  [class~="w-hell-control-sm"] {
+    width: var(--spacing-hell-control-sm);
+  }
+  [class~="w-hell-control-md"] {
+    width: var(--spacing-hell-control-md);
+  }
+  [class~="w-hell-control-lg"] {
+    width: var(--spacing-hell-control-lg);
+  }
+  [class~="w-hell-control-xl"] {
+    width: var(--spacing-hell-control-xl);
+  }
+  [class~="cursor-pointer"] {
+    cursor: pointer;
+  }
+  [data-disabled][class~="data-disabled:cursor-not-allowed"] {
+    cursor: not-allowed;
+  }
+  [class~="select-none"] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  [class~="items-center"] {
+    align-items: center;
+  }
+  [class~="justify-center"] {
+    justify-content: center;
+  }
+  [class~="gap-hell-2"] {
+    gap: var(--spacing-hell-2);
+  }
+  [class~="whitespace-nowrap"] {
+    white-space: nowrap;
+  }
+  [class~="rounded-hell-md"] {
+    border-radius: var(--radius-hell-md);
+  }
+  [class~="rounded-hell-pill"] {
+    border-radius: var(--radius-hell-pill);
+  }
+  [class~="border"] {
+    border-width: 1px;
+  }
+  [class~="border-solid"] {
+    border-style: solid;
+  }
+  [class~="border-[color:var(--hell-button-border-color,transparent)]"] {
+    border-color: var(--hell-button-border-color, transparent);
+  }
+  [class~="border-[color:var(--hell-button-border-color,var(--color-hell-border))]"] {
+    border-color: var(--hell-button-border-color, var(--color-hell-border));
+  }
+  [class~="border-[color:var(--hell-button-border-color,var(--color-hell-primary))]"] {
+    border-color: var(--hell-button-border-color, var(--color-hell-primary));
+  }
+  [class~="border-[color:var(--hell-button-border-color,var(--color-hell-danger))]"] {
+    border-color: var(--hell-button-border-color, var(--color-hell-danger));
+  }
+  [class~="border-[color:var(--hell-button-border-color,var(--color-hell-success-strong))]"] {
+    border-color: var(--hell-button-border-color, var(--color-hell-success-strong));
+  }
+  [class~="bg-[var(--hell-button-background,transparent)]"] {
+    background-color: var(--hell-button-background, transparent);
+  }
+  [class~="bg-[var(--hell-button-background,var(--color-hell-surface-elevated))]"] {
+    background-color: var(--hell-button-background, var(--color-hell-surface-elevated));
+  }
+  [class~="bg-[var(--hell-button-background,var(--color-hell-primary))]"] {
+    background-color: var(--hell-button-background, var(--color-hell-primary));
+  }
+  [class~="bg-[var(--hell-button-background,var(--color-hell-primary-soft))]"] {
+    background-color: var(--hell-button-background, var(--color-hell-primary-soft));
+  }
+  [class~="bg-[var(--hell-button-background,var(--color-hell-danger))]"] {
+    background-color: var(--hell-button-background, var(--color-hell-danger));
+  }
+  [class~="bg-[var(--hell-button-background,var(--color-hell-success-strong))]"] {
+    background-color: var(--hell-button-background, var(--color-hell-success-strong));
+  }
+  [data-hover][class~="data-hover:bg-[var(--hell-button-background-hover,transparent)]"] {
+    background-color: var(--hell-button-background-hover, transparent);
+  }
+  [data-hover][class~="data-hover:bg-[var(--hell-button-background-hover,var(--color-hell-surface-muted))]"] {
+    background-color: var(--hell-button-background-hover, var(--color-hell-surface-muted));
+  }
+  [data-hover][class~="data-hover:bg-[var(--hell-button-background-hover,var(--color-hell-primary-hover))]"] {
+    background-color: var(--hell-button-background-hover, var(--color-hell-primary-hover));
+  }
+  [data-hover][class~="data-hover:bg-[var(--hell-button-background-hover,var(--color-hell-danger-hover))]"] {
+    background-color: var(--hell-button-background-hover, var(--color-hell-danger-hover));
+  }
+  [data-hover][class~="data-hover:bg-[var(--hell-button-background-hover,var(--color-hell-success-hover))]"] {
+    background-color: var(--hell-button-background-hover, var(--color-hell-success-hover));
+  }
+  [data-press][class~="data-press:bg-[var(--hell-button-background-active,transparent)]"] {
+    background-color: var(--hell-button-background-active, transparent);
+  }
+  [data-press][class~="data-press:bg-[var(--hell-button-background-active,var(--color-hell-surface-muted))]"] {
+    background-color: var(--hell-button-background-active, var(--color-hell-surface-muted));
+  }
+  [data-press][class~="data-press:bg-[var(--hell-button-background-active,var(--color-hell-primary-active))]"] {
+    background-color: var(--hell-button-background-active, var(--color-hell-primary-active));
+  }
+  [data-press][class~="data-press:bg-[var(--hell-button-background-active,var(--color-hell-danger-active))]"] {
+    background-color: var(--hell-button-background-active, var(--color-hell-danger-active));
+  }
+  [data-press][class~="data-press:bg-[var(--hell-button-background-active,var(--color-hell-success-active))]"] {
+    background-color: var(--hell-button-background-active, var(--color-hell-success-active));
+  }
+  [class~="p-0"] {
+    padding: calc(var(--spacing) * 0);
+  }
+  [class~="px-0"] {
+    padding-inline: calc(var(--spacing) * 0);
+  }
+  [class~="px-hell-3"] {
+    padding-inline: var(--spacing-hell-3);
+  }
+  [class~="px-hell-4"] {
+    padding-inline: var(--spacing-hell-4);
+  }
+  [class~="px-hell-5"] {
+    padding-inline: var(--spacing-hell-5);
+  }
+  [class~="px-hell-6"] {
+    padding-inline: var(--spacing-hell-6);
+  }
+  [class~="px-hell-7"] {
+    padding-inline: var(--spacing-hell-7);
+  }
+  [class~="font-[inherit]"] {
+    font-family: inherit;
+  }
+  [class~="text-xs"] {
+    font-size: var(--text-xs);
+    line-height: var(--text-xs--line-height);
+  }
+  [class~="text-sm"] {
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+  }
+  [class~="text-[13px]"] {
+    font-size: 13px;
+  }
+  [class~="text-[15px]"] {
+    font-size: 15px;
+  }
+  [class~="font-medium"] {
+    font-weight: var(--font-weight-medium);
+  }
+  [class~="leading-none"] {
+    line-height: 1;
+  }
+  [class~="text-[color:var(--hell-button-color,var(--color-hell-foreground))]"] {
+    color: var(--hell-button-color, var(--color-hell-foreground));
+  }
+  [class~="text-[color:var(--hell-button-color,var(--color-hell-primary))]"] {
+    color: var(--hell-button-color, var(--color-hell-primary));
+  }
+  [class~="text-[color:var(--hell-button-color,var(--color-hell-primary-foreground))]"] {
+    color: var(--hell-button-color, var(--color-hell-primary-foreground));
+  }
+  [class~="text-[color:var(--hell-button-color,var(--color-hell-primary-soft-foreground))]"] {
+    color: var(--hell-button-color, var(--color-hell-primary-soft-foreground));
+  }
+  [class~="text-[color:var(--hell-button-color,var(--color-hell-foreground-inverse))]"] {
+    color: var(--hell-button-color, var(--color-hell-foreground-inverse));
+  }
+  [class~="shadow-[var(--shadow-hell-xs)]"] {
+    box-shadow: var(--shadow-hell-xs);
+  }
+  [class~="shadow-none"] {
+    box-shadow: none;
+  }
+  [data-disabled][class~="data-disabled:shadow-none"] {
+    box-shadow: none;
+  }
+  [class~="transition-[background-color,border-color,color,box-shadow]"] {
+    transition-property: background-color, border-color, color, box-shadow;
+  }
+  [class~="duration-[var(--hell-duration-fast)]"] {
+    transition-duration: var(--hell-duration-fast);
+  }
+  [class~="ease-[var(--ease-hell-out)]"] {
+    transition-timing-function: var(--ease-hell-out);
+  }
+  [data-focus-visible][class~="data-focus-visible:outline-2"] {
+    outline-style: solid;
+    outline-width: 2px;
+  }
+  [data-focus-visible][class~="data-focus-visible:outline-hell-focus-ring"] {
+    outline-color: var(--color-hell-focus-ring);
+  }
+  [data-focus-visible][class~="data-focus-visible:outline-offset-1"] {
+    outline-offset: 1px;
+  }
+  [data-disabled][class~="data-disabled:opacity-50"] {
+    opacity: 0.5;
+  }
+  [data-disabled][class~="data-disabled:saturate-[0.65]"] {
+    filter: saturate(0.65);
+  }
+  [class~="underline"] {
+    text-decoration-line: underline;
+  }
+  [class~="underline-offset-[3px]"] {
+    text-underline-offset: 3px;
+  }
+}
+
 @layer components {
 
-  /* Button — supports variants, sizes, icon-only, block.
-     Reacts to NgpButton data-* (hover, press, focus-visible, disabled). */
+  /* Legacy button-like helper for primitives that have not migrated to Part
+     Style Map yet. HellButton no longer applies this class. */
 
   .hell-button {
       display: inline-flex;
@@ -51,8 +289,6 @@
         opacity: 0.5;
         box-shadow: none;
         filter: saturate(0.65);
-        /* Neutralise hover/press background swaps so disabled buttons
-           never light up under the pointer. */
         --_hell-btn-bg-hover: var(--_hell-btn-bg);
         --_hell-btn-bg-press: var(--_hell-btn-bg);
       }

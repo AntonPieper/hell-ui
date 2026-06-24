@@ -126,7 +126,7 @@ const packageConsumerPeerTiers = new Set([
 ]);
 const peerGroupContracts = {
   core: { tier: 'core', peers: corePeerGroup },
-  'primitive-unstyled': { tier: 'primitive', peers: corePeerGroup },
+  'primitive-ui': { tier: 'primitive', peers: corePeerGroup },
   primitive: { tier: 'primitive', peers: [...corePeerGroup, ...stylePeerGroup] },
   'primitive-aggregate': {
     tier: 'primitive',
@@ -241,13 +241,13 @@ const scenarios = [
     stylesCss: primitivesConsumerStylesCss(),
   },
   {
-    name: 'button-unstyled',
-    description: 'narrow primitive button entry without CSS or Tailwind peer',
+    name: 'button-ui',
+    description: 'narrow primitive button Part Style Map entry without CSS or Tailwind peer',
     peerTier: 'primitive',
-    peerGroup: 'primitive-unstyled',
+    peerGroup: 'primitive-ui',
     dependencies: coreDeps,
     forbiddenDependencies: tableAdapterPeerGroup,
-    mainTs: buttonUnstyledConsumerMainTs(),
+    mainTs: buttonUiConsumerMainTs(),
     stylesCss: '',
   },
   {
@@ -260,6 +260,12 @@ const scenarios = [
     forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: buttonConsumerMainTs(),
     stylesCss: primitivesConsumerStylesCss(),
+    cssIncludes: [
+      'background-color:var(--hell-button-background,var(--color-hell-surface-elevated))',
+      'background-color:var(--hell-button-background,var(--color-hell-primary))',
+      'background-color:var(--hell-button-background-hover,var(--color-hell-primary-hover))',
+      'transition-property:background-color,border-color,color,box-shadow',
+    ],
   },
   {
     name: 'composites-css',
@@ -585,7 +591,7 @@ function assertHeavyPeersAreIsolated(allScenarios) {
   const lightScenarioNames = new Set([
     'root-core',
     'core',
-    'button-unstyled',
+    'button-ui',
     'button',
     'table',
     'no-legacy-alias',
@@ -854,7 +860,48 @@ async function runConsumerScenarioBuild(tempRoot, scenario) {
   }
 
   await runPnpm(buildCommand, tempRoot, { scenarioName: scenario.name });
+  assertConsumerBuildCss(tempRoot, scenario);
   console.log(`[package-consumer:${scenario.name}] built ${scenario.description}`);
+}
+
+function assertConsumerBuildCss(workspace, scenario) {
+  if (!scenario.cssIncludes?.length) return;
+
+  const css = readConsumerBuildCss(workspace);
+  const normalizedCss = normalizeCssForAssertion(css);
+  for (const needle of scenario.cssIncludes) {
+    if (!normalizedCss.includes(normalizeCssForAssertion(needle))) {
+      fail(`Scenario ${scenario.name} built CSS is missing expected fragment: ${needle}`);
+    }
+  }
+
+  console.log(
+    `${packageConsumerLabel(scenario.name)} ok: built CSS contains Button recipe utilities`,
+  );
+}
+
+function readConsumerBuildCss(workspace) {
+  const distRoot = join(workspace, 'dist', 'consumer');
+  const files = existingFiles(distRoot).filter((file) => file.endsWith('.css'));
+  if (!files.length) fail(`Consumer build did not emit CSS under ${distRoot}`);
+  return files.map((file) => readFileSync(file, 'utf8')).join('\n');
+}
+
+function normalizeCssForAssertion(css) {
+  return css.replace(/\s+/g, '');
+}
+
+function existingFiles(rootPath) {
+  if (!existsSync(rootPath)) return [];
+
+  const results = [];
+  for (const entry of readdirSync(rootPath)) {
+    const fullPath = join(rootPath, entry);
+    const stat = statSync(fullPath);
+    if (stat.isDirectory()) results.push(...existingFiles(fullPath));
+    else if (stat.isFile()) results.push(fullPath);
+  }
+  return results;
 }
 
 function assertForbiddenDependenciesNotInstalled(workspace, group) {
@@ -1077,22 +1124,24 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
-function buttonUnstyledConsumerMainTs() {
+function buttonUiConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellButton } from '${packageName}/button';
+import { HellButton, type HellButtonUi } from '${packageName}/button';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [HellButton],
   template: \`
-    <button hellButton unstyled type="button">Save</button>
-    <a hellButton unstyled href="#details" [disabled]="disabled">Details</a>
+    <button hellButton type="button" [ui]="buttonUi">Save</button>
+    <a hellButton href="#details" [disabled]="disabled" [ui]="linkUi">Details</a>
   \`,
 })
 class App {
   protected readonly disabled = true;
+  protected readonly buttonUi = { root: 'rounded-hell-pill' } satisfies HellButtonUi;
+  protected readonly linkUi = { root: 'underline-offset-[5px]' } satisfies HellButtonUi;
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));

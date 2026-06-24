@@ -14,6 +14,10 @@ import { ButtonBlockExample } from './examples/block.example';
 import buttonBlockExampleCodeRaw from './examples/block.example.ts?raw' with {
   loader: 'text',
 };
+import { ButtonCustomizationExample } from './examples/customization.example';
+import buttonCustomizationExampleCodeRaw from './examples/customization.example.ts?raw' with {
+  loader: 'text',
+};
 import { ButtonIconOnlyExample } from './examples/icon-only.example';
 import buttonIconOnlyExampleCodeRaw from './examples/icon-only.example.ts?raw' with {
   loader: 'text',
@@ -52,6 +56,7 @@ const HD_BUTTON_PAGE_ICONS = {
     ButtonWithIconsExample,
     ButtonIconOnlyExample,
     ButtonBlockExample,
+    ButtonCustomizationExample,
   ],
   template: `
     <article class="hd-prose">
@@ -101,6 +106,19 @@ const HD_BUTTON_PAGE_ICONS = {
         <app-button-block-example />
       </hd-example-tabs>
 
+      <h2>Part style map</h2>
+      <p>
+        Pass <code>[ui]</code> with a <code>root</code> class string to refine the default
+        Tailwind recipe while keeping <code>NgpButton</code> behavior and Button state
+        attributes.
+      </p>
+      <hd-example-tabs
+        [code]="buttonCustomizationExampleCode"
+        previewClass="flex flex-wrap items-center gap-2"
+      >
+        <app-button-customization-example />
+      </hd-example-tabs>
+
       <h2>API</h2>
       <ul>
         <li>
@@ -111,7 +129,7 @@ const HD_BUTTON_PAGE_ICONS = {
         <li><code>iconOnly</code>: square button for a single icon</li>
         <li><code>block</code>: stretches to container width</li>
         <li><code>disabled</code>: native <code>disabled</code> on buttons, guarded <code>aria-disabled</code> on anchors</li>
-        <li><code>unstyled</code>: opt out of all styling, keep behaviour</li>
+        <li><code>ui</code>: part style map with a <code>root</code> public part</li>
       </ul>
 
       <h2>Do</h2>
@@ -124,7 +142,7 @@ const HD_BUTTON_PAGE_ICONS = {
       <h2>Don't</h2>
       <ul>
         <li>Don't put two <code>danger</code> buttons next to each other.</li>
-        <li>Don't override colours via class — use CSS variables instead.</li>
+        <li>Don't target private descendants; refine the <code>root</code> part instead.</li>
       </ul>
     </article>
   `,
@@ -135,4 +153,5 @@ export class ButtonPage {
   protected readonly buttonWithIconsExampleCode = buttonWithIconsExampleCodeRaw;
   protected readonly buttonIconOnlyExampleCode = buttonIconOnlyExampleCodeRaw;
   protected readonly buttonBlockExampleCode = buttonBlockExampleCodeRaw;
+  protected readonly buttonCustomizationExampleCode = buttonCustomizationExampleCodeRaw;
 }
