@@ -33,6 +33,12 @@ const apiReportEntrypoints = [
     reportFileName: 'hell-ui-angular-internal-hotkeys.api.md',
   },
   {
+    id: 'input',
+    specifier: '@hell-ui/angular/input',
+    mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular-input.d.ts',
+    reportFileName: 'hell-ui-angular-input.api.md',
+  },
+  {
     id: 'primitives',
     specifier: '@hell-ui/angular/primitives',
     mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular-primitives.d.ts',

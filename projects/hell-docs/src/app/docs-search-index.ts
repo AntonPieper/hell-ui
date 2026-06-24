@@ -290,6 +290,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'input states components/input/examples/states.example components/input hellInput disabled invalid',
   },
   {
+    title: 'Input: Customization',
+    path: '/components/input',
+    detail: 'components/input/examples/customization.example.ts',
+    terms:
+      'input customization components/input/examples/customization.example components/input hellInput hellNativeSelect hellTextarea ui HellInputUi HellNativeSelectUi HellTextareaUi data-slot root',
+  },
+  {
     title: 'Input: Textarea',
     path: '/components/input',
     detail: 'components/input/examples/textarea.example.ts',

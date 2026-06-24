@@ -351,15 +351,6 @@
     gap: var(--spacing-hell-2);
   }
 
-  .hell-tanstack-filter {
-    min-height: var(--spacing-hell-control-sm);
-    border: 1px solid var(--color-hell-border);
-    border-radius: var(--radius-hell-sm);
-    background-color: var(--color-hell-surface-elevated);
-    color: var(--color-hell-foreground);
-    font: inherit;
-  }
-
   .hell-tanstack-pagination [data-slot='page-size'] {
     display: inline-flex;
     align-items: center;
@@ -368,7 +359,6 @@
   }
 
   .hell-tanstack-pagination [data-slot='page-size-select'] {
-    --hell-native-select-width: auto;
     min-width: calc(var(--spacing) * 18);
   }
 
@@ -377,15 +367,6 @@
     min-width: 0;
     align-items: center;
     gap: var(--spacing-hell-2);
-  }
-
-  .hell-tanstack-filter {
-    min-width: min(18rem, 100%);
-    padding-inline: var(--spacing-hell-2);
-  }
-
-  .hell-tanstack-filter-search .hell-tanstack-filter {
-    min-width: calc(var(--spacing) * 44);
   }
 
   .hell-tanstack-table[data-hell-tanstack-virtual-rows='true'] .hell-table-shell-scrollport {
@@ -467,7 +448,6 @@
     }
 
     .hell-tanstack-pagination [data-slot='page-size-select'] {
-      --hell-native-select-height: var(--spacing-hell-control-md);
       min-width: calc(var(--spacing) * 20);
     }
   }

@@ -208,6 +208,8 @@ describe('HellPaginationStrip', () => {
 
     expect(buttonLabels(root)).toEqual(['Previous page', 'Next page']);
     expect(select.getAttribute('aria-label')).toBe('Page');
+    expect(select.getAttribute('data-slot')).toBe('jump-select');
+    expect(select.classList.contains('appearance-none')).toBe(true);
     expect(select.value).toBe('2');
     expect(root.textContent).toContain('of 5');
 

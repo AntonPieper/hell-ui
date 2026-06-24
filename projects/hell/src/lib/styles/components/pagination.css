@@ -61,7 +61,6 @@
   }
 
   .hell-pagination [data-slot='jump-select'] {
-    --hell-native-select-width: auto;
     min-width: calc(var(--spacing) * 18);
     max-width: calc(var(--spacing) * 26);
   }

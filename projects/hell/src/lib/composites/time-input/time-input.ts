@@ -30,7 +30,8 @@ import {
 } from 'ng-primitives/form-field';
 import { HellButton } from '../../primitives/button/button';
 import { HellIcon } from '../../primitives/icon/icon';
-import { HellInput } from '../../primitives/input/input';
+import { HellInput, type HellInputUi } from '../../primitives/input/input';
+import { HELL_EMBEDDED_INPUT_UI } from '../../primitives/input/embedded-input-ui';
 import { HellPopover, HellPopoverTrigger } from '../../primitives/popover/popover';
 import { HELL_LABELS } from '../../core/labels';
 import {
@@ -60,6 +61,8 @@ export interface HellTimeValue {
 const HELL_TIME_INPUT_ICONS = {
   faSolidClock,
 };
+
+const HELL_TIME_INPUT_FIELD_UI = HELL_EMBEDDED_INPUT_UI satisfies HellInputUi;
 
 let nextTimeInputId = 0;
 
@@ -228,8 +231,8 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
     <input
       #field
       hellInput
-      unstyled
       [size]="size()"
+      [ui]="fieldUi"
       [type]="nativeTimeInput ? 'time' : 'text'"
       data-slot="field"
       [attr.inputmode]="nativeTimeInput ? null : 'text'"
@@ -382,6 +385,7 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
   protected readonly invalidDraft = this.valueState.invalidDraft;
   protected readonly isInvalid = () => this.invalid() || this.invalidDraft();
   protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
+  protected readonly fieldUi = HELL_TIME_INPUT_FIELD_UI;
   protected readonly labels = inject(HELL_LABELS);
   private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
   private readonly formField =

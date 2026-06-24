@@ -14,6 +14,7 @@ import {
 
 import {
   HellTableStatus,
+  HellTanStackGlobalFilter,
   HellTanStackPagination,
   HellTanStackTable,
   HellTableShellCell,
@@ -164,10 +165,18 @@ class VirtualRowsHost {
   }));
 }
 
+@Component({
+  selector: 'hell-test-filter-host',
+  standalone: true,
+  imports: [HellTanStackGlobalFilter],
+  template: `<hell-tanstack-global-filter [table]="table" />`,
+})
+class FilterHost extends ShellHost {}
+
 describe('Hell TanStack table shell', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ShellHost, ConflictHost, MissingStatusHost, VirtualRowsHost],
+      imports: [ShellHost, ConflictHost, MissingStatusHost, VirtualRowsHost, FilterHost],
     }).compileComponents();
   });
 
@@ -227,6 +236,19 @@ describe('Hell TanStack table shell', () => {
 
     expect(fixture.componentInstance.pagination().pageIndex).toBe(1);
     expect(text(root)).toContain('Person Grace');
+  });
+
+  it('styles TanStack filter inputs through the HellInput ui pipeline', () => {
+    const fixture = TestBed.createComponent(FilterHost);
+    fixture.detectChanges();
+    const input = fixture.nativeElement.querySelector('input[hellInput]') as HTMLInputElement | null;
+
+    expect(input).not.toBeNull();
+    expect(input?.getAttribute('data-slot')).toBe('root');
+    expect(input?.classList.contains('hell-tanstack-filter')).toBe(false);
+    expect(input?.classList.contains('inline-flex')).toBe(true);
+    expect(input?.classList.contains('min-w-[calc(var(--spacing)*44)]')).toBe(true);
+    expect(input?.classList.contains('rounded-hell-sm')).toBe(true);
   });
 
   it('renders loading and error states from the single status value', () => {

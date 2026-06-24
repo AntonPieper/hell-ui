@@ -52,10 +52,8 @@ import dialpadExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
         <code>lowerGrid</code>, and <code>callButton</code>.
       </p>
       <p>
-        Dialpad temporarily renders native <code>&lt;button&gt;</code> and
-        <code>&lt;input&gt;</code> controls internally while <code>HellButton</code> and
-        <code>HellInput</code> still use the legacy styleable model. Revisit that bridge once those
-        primitives migrate to <code>HellPartStyleable</code>.
+        Dialpad temporarily renders native controls internally for its own public parts. Revisit
+        the button bridge once <code>HellButton</code> migrates to <code>HellPartStyleable</code>.
       </p>
 
       <h2>Keyboard</h2>

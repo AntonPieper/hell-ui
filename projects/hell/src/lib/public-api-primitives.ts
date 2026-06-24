@@ -27,3 +27,4 @@ export * from './primitives/breadcrumbs/breadcrumbs';
 export * from './primitives/icon/icon';
 export * from './primitives/pagination/pagination';
 export * from './primitives/date-picker/date-picker';
+export * from './core/styleable';

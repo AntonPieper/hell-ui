@@ -123,6 +123,7 @@ export const entrypointManifest = {
         packageDir: `${libraryRoot}/primitives`,
         publicApiPath: `${libraryRoot}/src/lib/public-api-primitives.ts`,
         entryFile: '../src/lib/public-api-primitives.ts',
+        extraExports: ["export * from './core/styleable';"],
       },
       entryTemplate: {
         specifier: `${packageName}/{slug}`,
@@ -162,6 +163,11 @@ export const entrypointManifest = {
         'pagination',
         'date-picker',
       ],
+      entryOverrides: {
+        input: {
+          extraExports: ["export * from './core/styleable';"],
+        },
+      },
     },
     {
       id: 'composites',
