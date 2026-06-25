@@ -217,7 +217,7 @@ function compareBudgetField(threshold, budget, field, errors) {
 
   if (Math.abs(policyBytes - angularBytes) > 0.1) {
     errors.push(
-      `Docs budget policy threshold ${threshold.type}.${field} (${threshold[field]}) must match angular.json (${budget[field]}).`,
+      `Docs budget policy threshold ${threshold.type}.${field} (${threshold[field]}) must match docs Angular config (${budget[field]}).`,
     );
   }
 }

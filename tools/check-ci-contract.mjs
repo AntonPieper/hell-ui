@@ -40,7 +40,7 @@ const requiredScripts = {
   'test:api-report': 'node tools/check-api-reports.mjs',
   'test:changelog': 'node tools/check-changelog.mjs',
   'api-report:update': 'node tools/check-api-reports.mjs --local',
-  'build:docs': 'node tools/setup-docs-hell-package-alias.mjs && ng build hell-docs && node tools/docs-bundle-budget-report.mjs --check --summary-only',
+  'build:docs': 'pnpm --filter hell-docs build && node tools/docs-bundle-budget-report.mjs --check --summary-only',
   'release:dry-run': 'node tools/release-dry-run.mjs',
   'production-ready:check': 'node tools/production-ready-check.mjs',
   'ci:test': 'node tools/run-ci-tests.mjs',
@@ -65,7 +65,7 @@ const requiredScripts = {
   'ci:build:docs': 'pnpm run build:lib && pnpm run build:docs',
   'ci:build:docs:prepared': 'pnpm run build:docs',
   'ci:ensure:build:lib': "sh -c 'test -f dist/hell/package.json && test -f dist/hell-pdf-viewer/package.json || pnpm run ci:build:lib'",
-  'ci:ensure:build:docs': "sh -c 'test -f dist/hell-docs/browser/index.html || test -f dist/hell-docs/index.html || (pnpm run ci:ensure:build:lib && pnpm run ci:build:docs:prepared)'",
+  'ci:ensure:build:docs': "sh -c 'test -f dist/hell-docs/browser/index.html || test -f dist/hell-docs/index.html || pnpm run ci:build:docs:prepared'",
   'ci:test:api-report': 'pnpm run build:lib && pnpm run test:api-report',
   'ci:test:api-report:prepared': 'pnpm run test:api-report',
   'ci:build': 'pnpm run build:lib && pnpm run build:docs && pnpm run test:api-report',
@@ -289,8 +289,7 @@ const fileChecks = [
   {
     path: 'playwright.config.ts',
     includes: [
-      'pnpm run ci:ensure:build:lib',
-      'pnpm exec ng serve hell-docs',
+      'pnpm --filter hell-docs exec ng serve hell-docs',
       'HELL_E2E_BASE_URL',
       'HELL_E2E_PROJECTS',
       'ciGroups',
@@ -318,7 +317,7 @@ const fileChecks = [
       'source map',
       'secret-bearing file',
       'test artifact or test source',
-      'generated docs package alias',
+      'workspace node_modules leak',
       'unexpected worker asset',
       'sideEffects must include **/*.css',
       'publishConfig.provenance',
@@ -330,7 +329,7 @@ const fileChecks = [
     includes: [
       'CHANGELOG.md',
       'docs/release/semver-policy.md',
-      'projects/hell/package.json',
+      'packages/angular/package.json',
       'internal beta',
       'public beta',
       'stable',
@@ -695,15 +694,15 @@ function checkNpmPublishWorkflow() {
 }
 
 function checkPublishedPackageMetadata() {
-  const path = 'projects/hell/package.json';
+  const path = 'packages/angular/package.json';
   if (!existsSync(path)) return;
 
   const packageJson = JSON.parse(readFileSync(path, 'utf8'));
   if (packageJson.repository?.url !== 'git+https://github.com/AntonPieper/hell-ui.git') {
     errors.push(`${path} repository.url must match the GitHub repository used for trusted publishing.`);
   }
-  if (packageJson.repository?.directory !== 'projects/hell') {
-    errors.push(`${path} repository.directory must be projects/hell.`);
+  if (packageJson.repository?.directory !== 'packages/angular') {
+    errors.push(`${path} repository.directory must be packages/angular.`);
   }
   if (packageJson.publishConfig?.registry !== 'https://registry.npmjs.org/') {
     errors.push(`${path} publishConfig.registry must be the public npm registry.`);
@@ -717,9 +716,10 @@ function checkPublishedPackageMetadata() {
 }
 
 function checkDocsBudgetPolicy() {
-  if (!existsSync('angular.json')) return;
+  const docsAngularJsonPath = 'apps/docs/angular.json';
+  if (!existsSync(docsAngularJsonPath)) return;
 
-  const angularJson = JSON.parse(readFileSync('angular.json', 'utf8'));
+  const angularJson = JSON.parse(readFileSync(docsAngularJsonPath, 'utf8'));
   const budgets =
     angularJson.projects?.['hell-docs']?.architect?.build?.configurations?.production?.budgets ?? [];
   const policyRead = readDocsBudgetPolicy();

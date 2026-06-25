@@ -1,5 +1,6 @@
 const packageName = '@hell-ui/angular';
-const libraryRoot = 'projects/hell';
+export const libraryRoot = 'packages/angular';
+export const sourcePackageCondition = '@heinrich/source';
 
 export const entrypointManifest = {
   root: {

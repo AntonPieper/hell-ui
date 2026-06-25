@@ -1,201 +1,20 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
-  "compileOnSave": false,
-  "compilerOptions": {
-    "strict": true,
-    "rootDir": ".",
-    "paths": {
-      "@hell-ui/angular": [
-        "./projects/hell/src/public-api.ts"
-      ],
-      "@hell-ui/angular/core": [
-        "./projects/hell/src/lib/public-api-core.ts"
-      ],
-      "@hell-ui/angular/internal/hotkeys": [
-        "./projects/hell/src/lib/public-api-internal-hotkeys.ts"
-      ],
-      "@hell-ui/angular/primitives": [
-        "./projects/hell/src/lib/public-api-primitives.ts"
-      ],
-      "@hell-ui/angular/composites": [
-        "./projects/hell/src/lib/public-api-composites.ts"
-      ],
-      "@hell-ui/angular/app-shell": [
-        "./projects/hell/src/lib/public-api-composite-app-shell.ts"
-      ],
-      "@hell-ui/angular/audio-player": [
-        "./projects/hell/src/lib/public-api-composite-audio-player.ts"
-      ],
-      "@hell-ui/angular/avatar-group": [
-        "./projects/hell/src/lib/public-api-composite-avatar-group.ts"
-      ],
-      "@hell-ui/angular/date-input": [
-        "./projects/hell/src/lib/public-api-composite-date-input.ts"
-      ],
-      "@hell-ui/angular/dialpad": [
-        "./projects/hell/src/lib/public-api-composite-dialpad.ts"
-      ],
-      "@hell-ui/angular/drop-zone": [
-        "./projects/hell/src/lib/public-api-composite-drop-zone.ts"
-      ],
-      "@hell-ui/angular/omnibar": [
-        "./projects/hell/src/lib/public-api-composite-omnibar.ts"
-      ],
-      "@hell-ui/angular/resizable": [
-        "./projects/hell/src/lib/public-api-composite-resizable.ts"
-      ],
-      "@hell-ui/angular/split-view": [
-        "./projects/hell/src/lib/public-api-composite-split-view.ts"
-      ],
-      "@hell-ui/angular/time-input": [
-        "./projects/hell/src/lib/public-api-composite-time-input.ts"
-      ],
-      "@hell-ui/angular/toast": [
-        "./projects/hell/src/lib/public-api-composite-toast.ts"
-      ],
-      "@hell-ui/angular/features/audio-transcript": [
-        "./projects/hell/src/lib/public-api-feature-audio-transcript.ts"
-      ],
-      "@hell-ui/angular/features/code-editor": [
-        "./projects/hell/src/lib/public-api-feature-code-editor.ts"
-      ],
-      "@hell-ui/angular/table": [
-        "./projects/hell/src/lib/public-api-table.ts"
-      ],
-      "@hell-ui/angular/table-tanstack": [
-        "./projects/hell/src/lib/public-api-table-tanstack.ts"
-      ],
-      "@hell-ui/angular/table-tanstack/virtual": [
-        "./projects/hell/src/lib/public-api-table-tanstack-virtual.ts"
-      ],
-      "@hell-ui/angular/testing": [
-        "./projects/hell/src/testing/public-api.ts"
-      ],
-      "@hell-ui/angular/accordion": [
-        "./projects/hell/src/lib/public-api-primitive-accordion.ts"
-      ],
-      "@hell-ui/angular/avatar": [
-        "./projects/hell/src/lib/public-api-primitive-avatar.ts"
-      ],
-      "@hell-ui/angular/breadcrumbs": [
-        "./projects/hell/src/lib/public-api-primitive-breadcrumbs.ts"
-      ],
-      "@hell-ui/angular/button": [
-        "./projects/hell/src/lib/public-api-primitive-button.ts"
-      ],
-      "@hell-ui/angular/card": [
-        "./projects/hell/src/lib/public-api-primitive-card.ts"
-      ],
-      "@hell-ui/angular/checkbox": [
-        "./projects/hell/src/lib/public-api-primitive-checkbox.ts"
-      ],
-      "@hell-ui/angular/combobox": [
-        "./projects/hell/src/lib/public-api-primitive-combobox.ts"
-      ],
-      "@hell-ui/angular/date-picker": [
-        "./projects/hell/src/lib/public-api-primitive-date-picker.ts"
-      ],
-      "@hell-ui/angular/dialog": [
-        "./projects/hell/src/lib/public-api-primitive-dialog.ts"
-      ],
-      "@hell-ui/angular/field": [
-        "./projects/hell/src/lib/public-api-primitive-field.ts"
-      ],
-      "@hell-ui/angular/flyout": [
-        "./projects/hell/src/lib/public-api-primitive-flyout.ts"
-      ],
-      "@hell-ui/angular/icon": [
-        "./projects/hell/src/lib/public-api-primitive-icon.ts"
-      ],
-      "@hell-ui/angular/input": [
-        "./projects/hell/src/lib/public-api-primitive-input.ts"
-      ],
-      "@hell-ui/angular/listbox": [
-        "./projects/hell/src/lib/public-api-primitive-listbox.ts"
-      ],
-      "@hell-ui/angular/menu": [
-        "./projects/hell/src/lib/public-api-primitive-menu.ts"
-      ],
-      "@hell-ui/angular/pagination": [
-        "./projects/hell/src/lib/public-api-primitive-pagination.ts"
-      ],
-      "@hell-ui/angular/popover": [
-        "./projects/hell/src/lib/public-api-primitive-popover.ts"
-      ],
-      "@hell-ui/angular/progress": [
-        "./projects/hell/src/lib/public-api-primitive-progress.ts"
-      ],
-      "@hell-ui/angular/radio": [
-        "./projects/hell/src/lib/public-api-primitive-radio.ts"
-      ],
-      "@hell-ui/angular/search": [
-        "./projects/hell/src/lib/public-api-primitive-search.ts"
-      ],
-      "@hell-ui/angular/select": [
-        "./projects/hell/src/lib/public-api-primitive-select.ts"
-      ],
-      "@hell-ui/angular/separator": [
-        "./projects/hell/src/lib/public-api-primitive-separator.ts"
-      ],
-      "@hell-ui/angular/skeleton": [
-        "./projects/hell/src/lib/public-api-primitive-skeleton.ts"
-      ],
-      "@hell-ui/angular/slider": [
-        "./projects/hell/src/lib/public-api-primitive-slider.ts"
-      ],
-      "@hell-ui/angular/switch": [
-        "./projects/hell/src/lib/public-api-primitive-switch.ts"
-      ],
-      "@hell-ui/angular/tabs": [
-        "./projects/hell/src/lib/public-api-primitive-tabs.ts"
-      ],
-      "@hell-ui/angular/tag": [
-        "./projects/hell/src/lib/public-api-primitive-tag.ts"
-      ],
-      "@hell-ui/angular/toggle": [
-        "./projects/hell/src/lib/public-api-primitive-toggle.ts"
-      ],
-      "@hell-ui/angular/tooltip": [
-        "./projects/hell/src/lib/public-api-primitive-tooltip.ts"
-      ],
-      "@hell-ui/pdf-viewer": [
-        "./projects/hell-pdf-viewer/src/public-api.ts"
-      ]
-    },
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "skipLibCheck": true,
-    "isolatedModules": true,
-    "experimentalDecorators": true,
-    "importHelpers": true,
-    "target": "ES2022",
-    "module": "preserve"
-  },
-  "angularCompilerOptions": {
-    "enableI18nLegacyMessageIdFormat": false,
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
-  },
   "files": [],
   "references": [
     {
-      "path": "./projects/hell/tsconfig.lib.json"
+      "path": "./packages/angular/tsconfig.lib.json"
     },
     {
-      "path": "./projects/hell/tsconfig.spec.json"
+      "path": "./packages/angular/tsconfig.spec.json"
     },
     {
-      "path": "./projects/hell-docs/tsconfig.app.json"
+      "path": "./apps/docs/tsconfig.app.json"
     },
     {
-      "path": "./projects/hell-pdf-viewer/tsconfig.lib.json"
+      "path": "./packages/pdf-viewer/tsconfig.lib.json"
     },
     {
-      "path": "./projects/hell-pdf-viewer/tsconfig.spec.json"
+      "path": "./packages/pdf-viewer/tsconfig.spec.json"
     }
   ]
 }

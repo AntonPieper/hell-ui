@@ -17,7 +17,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const options = parseArgs(process.argv.slice(2));
 const statsPath = resolveFromRoot(options.stats ?? 'dist/hell-docs/stats.json');
 const reportPath = resolveFromRoot(options.out ?? 'docs/release/docs-bundle-budget-diagnosis.md');
-const angularJsonPath = join(root, 'angular.json');
+const angularJsonPath = join(root, 'apps/docs/angular.json');
 const budgetPolicyPath = join(root, DOCS_BUDGET_POLICY_PATH);
 
 if (!existsSync(statsPath)) {
@@ -244,7 +244,7 @@ pnpm run build:docs
 pnpm run diagnose:docs-bundle
 ~~~
 
-\`build:docs\` enables Angular's \`statsJson\` option for the production docs app, which writes \`dist/hell-docs/stats.json\`. Local Angular builder schema documents that \`statsJson\` generates a \`stats.json\` file for esbuild analysis; Context7 \`/websites/angular_dev\` confirms \`ng build\` uses the application builder options from \`angular.json\` for app builds.
+\`build:docs\` enables Angular's \`statsJson\` option for the production docs app, which writes \`dist/hell-docs/stats.json\`. Local Angular builder schema documents that \`statsJson\` generates a \`stats.json\` file for esbuild analysis; Angular's CLI build docs confirm \`ng build\` uses the application builder options from \`apps/docs/angular.json\` for app builds.
 `;
 }
 
@@ -413,8 +413,8 @@ function traceOwners(file) {
 
 function ownerForEntryPoint(entryPoint) {
   if (!entryPoint) return null;
-  if (entryPoint === 'projects/hell-docs/src/main.ts') return 'Docs app shell bootstrap';
-  if (entryPoint === 'projects/hell-docs/src/app/docs-search-index.ts') return 'Docs search index (loaded on search open)';
+  if (entryPoint === 'apps/docs/src/main.ts') return 'Docs app shell bootstrap';
+  if (entryPoint === 'apps/docs/src/app/docs-search-index.ts') return 'Docs search index (loaded on search open)';
   if (entryPoint.includes('pdfjs-dist/')) return 'PDF viewer feature (`pdfjs-dist`)';
   if (entryPoint.includes('hell-ui-angular-features-pdf-viewer')) return 'PDF viewer feature entrypoint';
   if (entryPoint.includes('hell-ui-angular-features-code-editor')) return 'Code editor feature entrypoint';
@@ -456,11 +456,11 @@ function ownerFromInputs(output) {
 }
 
 function componentStyleOwner(output) {
-  const input = Object.keys(output.inputs ?? {}).find((path) => path.includes('/projects/hell-docs/'));
+  const input = Object.keys(output.inputs ?? {}).find((path) => path.includes('/apps/docs/'));
   if (!input) return 'Component style';
   const normalized = input.replace(/^angular:styles\/component:css;[^;]+;/, '');
-  const relativePath = normalized.includes('/projects/hell-docs/')
-    ? `projects/hell-docs/${normalized.split('/projects/hell-docs/')[1]}`
+  const relativePath = normalized.includes('/apps/docs/')
+    ? `apps/docs/${normalized.split('/apps/docs/')[1]}`
     : normalized;
   const owner = ownerForEntryPoint(relativePath);
   return owner ?? `\`${relativePath}\``;

@@ -75,8 +75,8 @@ export function findForbiddenPackedFileFailures(files) {
       pattern: /(^|\/)(?:__tests__|coverage|e2e|test-results)(?:\/|$)|\.(?:spec|test)\.[cm]?[jt]sx?$/i,
     },
     {
-      label: 'generated docs package alias',
-      pattern: /(^|\/)(?:projects\/hell-docs\/node_modules|node_modules\/@hell-ui\/angular|dist\/hell)(?:\/|$)/,
+      label: 'workspace node_modules leak',
+      pattern: /(^|\/)node_modules(?:\/|$)/,
     },
     {
       label: 'unexpected worker asset',
@@ -149,8 +149,8 @@ function checkPublishMetadata(packageJson, failures) {
 }
 
 function expectedRepositoryDirectory(packageName) {
-  if (packageName === splitPdfPackageName) return 'projects/hell-pdf-viewer';
-  return 'projects/hell';
+  if (packageName === splitPdfPackageName) return 'packages/pdf-viewer';
+  return 'packages/angular';
 }
 
 export function findPackageBoundaryFailures(packageJson, files) {

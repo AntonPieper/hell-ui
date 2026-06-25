@@ -86,7 +86,7 @@ mapped to command evidence and concrete evidence checks.
         {
           "type": "fileNotContains",
           "label": "accessibility matrix has no critical gaps",
-          "path": "projects/hell-docs/src/app/pages/accessibility/accessibility.page.ts",
+          "path": "apps/docs/src/app/pages/accessibility/accessibility.page.ts",
           "forbids": ["Critical gap", "criticalGap: true"]
         }
       ]
@@ -164,5 +164,5 @@ mapped to command evidence and concrete evidence checks.
 - Accessibility remains blocked while the matrix source contains `Critical gap` rows.
 - Local release evidence is untracked by design. Do not commit `test-results/`; rerun the commands for each release candidate.
 - Release dry-run JSON evidence must match the current product Git commit, be generated from a clean tracked tree, be newer than the current commit, and contain pass records for the required tasks.
-- Release dry-run fails when `projects/hell/package.json` has a package version without a matching `CHANGELOG.md` section.
+- Release dry-run fails when `packages/angular/package.json` has a package version without a matching `CHANGELOG.md` section.
 - This gate can prove evidence presence, freshness, and checklist honesty, but it is not a cryptographic attestation. CI/release workflow artifacts remain the authoritative evidence chain for a published package.

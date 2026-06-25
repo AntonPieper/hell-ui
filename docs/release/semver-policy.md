@@ -43,7 +43,7 @@ Hell UI uses `CHANGELOG.md` in Keep a Changelog shape:
 - Breaking changes get a dedicated `### Breaking changes` section with affected entrypoints, migration steps, and the first version carrying the break.
 - Release notes must keep alpha/internal-beta/public-beta/stable wording aligned with this policy and the production-readiness checklist.
 
-`pnpm release:dry-run -- --fast` and `pnpm release:dry-run -- --full` run `pnpm test:changelog`. That check reads the published package source manifest at `projects/hell/package.json` and fails if the current package version lacks a matching changelog section or this policy is missing its required stage definitions.
+`pnpm release:dry-run -- --fast` and `pnpm release:dry-run -- --full` run `pnpm test:changelog`. That check reads the published package source manifest at `packages/angular/package.json` and fails if the current package version lacks a matching changelog section or this policy is missing its required stage definitions.
 
 ## Promotion rules
 

@@ -37,7 +37,7 @@ drop-in owner for the current `HellFlyout` contract:
 | Angular Aria | Listbox/combobox/menu/grid keyboard and ARIA patterns; popup examples integrate with CDK Overlay. | It does not currently provide a general inline non-modal flyout/dismissible-layer primitive that preserves HellFlyout's boundary and close-policy semantics. |
 | ng-primitives popover/dialog | Overlay registry, dismiss guards, focus/overlay lifecycle for template-driven primitives. | `NgpPopoverTrigger` owns a `TemplateRef` overlay and dismisses against trigger/overlay/anchor. Adopting it would require converting the inline `hellFlyout` panel into an ng-primitives popover template and reconciling Hell's boundary/scope semantics. |
 
-The manual path is backed by focused unit coverage in `projects/hell/src/lib/primitives/flyout/flyout.spec.ts`:
+The manual path is backed by focused unit coverage in `packages/angular/src/lib/primitives/flyout/flyout.spec.ts`:
 
 - the configured `boundary` is inside for click and focus dismissal;
 - disabled outside-interaction and Escape close policies do not dismiss.
@@ -93,7 +93,7 @@ Rationale:
 
 Tests naming this seam:
 
-- `projects/hell/src/lib/composites/omnibar/omnibar.spec.ts` covers focus input → panel action, focus panel → nested registered menu surface, and focus nested surface → outside target close.
+- `packages/angular/src/lib/composites/omnibar/omnibar.spec.ts` covers focus input → panel action, focus panel → nested registered menu surface, and focus nested surface → outside target close.
 - `e2e/floating-dismissal.spec.ts` continues to cover the browser-level portaled omnibar panel focus path and true outside focus dismissal.
 
 ## Consequences
