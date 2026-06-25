@@ -56,7 +56,7 @@
               },
               {
                 "glob": "pdf.worker.mjs",
-                "input": "../../node_modules/pdfjs-dist/build",
+                "input": "node_modules/pdfjs-dist/build",
                 "output": "assets"
               },
               {
@@ -71,12 +71,12 @@
               },
               {
                 "glob": "pdf_viewer.css",
-                "input": "../../node_modules/pdfjs-dist/web",
+                "input": "node_modules/pdfjs-dist/web",
                 "output": "pdfjs"
               },
               {
                 "glob": "**/*",
-                "input": "../../node_modules/pdfjs-dist/web/images",
+                "input": "node_modules/pdfjs-dist/web/images",
                 "output": "pdfjs/images"
               }
             ],
@@ -87,6 +87,17 @@
           "configurations": {
             "production": {
               "conditions": ["@heinrich/source", "module", "production"],
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false,
+                  "removeSpecialComments": true
+                },
+                "fonts": {
+                  "inline": true
+                }
+              },
               "budgets": [
                 {
                   "type": "initial",

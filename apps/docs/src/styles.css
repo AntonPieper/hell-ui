@@ -3,7 +3,9 @@
 @import '@hell-ui/angular/styles/composites';
 @import '@hell-ui/angular/styles/table';
 
-@source "../../../packages/angular/src/lib/primitives/flyout/flyout.ts";
+@source "./app";
+@source "../../../packages/angular/src/lib";
+@source "../../../packages/pdf-viewer/src/lib";
 
 @layer components {
   .hd-prose {
