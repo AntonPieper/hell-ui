@@ -243,9 +243,9 @@ test.describe('table docs regressions', () => {
     await content.evaluate((element) => {
       element.scrollTop += 260;
     });
-    await expect.poll(() => content.evaluate((element) => element.scrollTop)).toBeGreaterThan(
-      beforeScrollTop + 100,
-    );
+    await expect
+      .poll(() => content.evaluate((element) => element.scrollTop))
+      .toBeGreaterThan(beforeScrollTop + 100);
 
     await expect(panel).toBeVisible();
     await expect
@@ -409,9 +409,7 @@ function omnibarPanelAnchorOffset(
 }
 
 test.describe('split-view docs regressions', () => {
-  test('master/detail list buttons use the compact ghost Button root recipe', async ({
-    page,
-  }) => {
+  test('master/detail list buttons use the compact ghost Button root recipe', async ({ page }) => {
     await page.goto('/components/split-view');
     await expect(page.getByRole('heading', { name: 'Split view', level: 1 })).toBeVisible();
 
@@ -424,9 +422,14 @@ test.describe('split-view docs regressions', () => {
       await expect(ticketButtons.nth(index)).toHaveAttribute('data-variant', 'ghost');
       await expect(ticketButtons.nth(index)).toHaveAttribute('data-size', 'sm');
       await expect(ticketButtons.nth(index)).not.toHaveClass(/(^|\s)hell-button(\s|$)/);
+      await expect(ticketButtons.nth(index)).toHaveClass(/(^|\s)bg-transparent(\s|$)/);
       await expect(ticketButtons.nth(index)).toHaveClass(
-        /bg-\[var\(--hell-button-background,transparent\)\]/,
+        /(^|\s)data-hover:bg-hell-surface-muted(\s|$)/,
       );
+      await expect(ticketButtons.nth(index)).toHaveClass(
+        /(^|\s)data-press:bg-hell-surface-muted(\s|$)/,
+      );
+      await expect(ticketButtons.nth(index)).toHaveClass(/(^|\s)shadow-none(\s|$)/);
     }
   });
 });

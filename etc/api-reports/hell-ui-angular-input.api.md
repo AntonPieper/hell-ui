@@ -11,9 +11,9 @@ import * as i2 from 'ng-primitives/textarea';
 // @public (undocumented)
 export class HellInput extends HellPartStyleable<HellInputPart> {
     // (undocumented)
-    readonly invalid: i0.InputSignalWithTransform<boolean, unknown>;
+    protected readonly defaultUiPart = "root";
     // (undocumented)
-    protected readonly mergePartClasses: (defaultClasses: string, consumerClasses: string | undefined) => string;
+    readonly invalid: i0.InputSignalWithTransform<boolean, unknown>;
     // (undocumented)
     protected readonly recipe: {
         root: string;
@@ -37,9 +37,9 @@ export type HellInputUi = HellUi<HellInputPart>;
 // @public (undocumented)
 export class HellNativeSelect extends HellPartStyleable<HellNativeSelectPart> {
     // (undocumented)
-    readonly invalid: i0.InputSignalWithTransform<boolean, unknown>;
+    protected readonly defaultUiPart = "root";
     // (undocumented)
-    protected readonly mergePartClasses: (defaultClasses: string, consumerClasses: string | undefined) => string;
+    readonly invalid: i0.InputSignalWithTransform<boolean, unknown>;
     // (undocumented)
     protected readonly recipe: {
         root: string;
@@ -61,14 +61,11 @@ export type HellNativeSelectPart = 'root';
 export type HellNativeSelectUi = HellUi<HellNativeSelectPart>;
 
 // @public
-export type HellPartClassMerger = (defaultClasses: string, consumerClasses: string | undefined) => string;
-
-// @public
 export abstract class HellPartStyleable<Part extends string> {
-    protected abstract readonly mergePartClasses: HellPartClassMerger;
+    protected abstract readonly defaultUiPart: Part;
     protected part(part: Part): string;
     protected abstract readonly recipe: HellRecipe<Part>;
-    ui: HellUi<Part>;
+    ui: HellUiInput<Part>;
     // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellPartStyleable<any>, never, never, { "ui": { "alias": "ui"; "required": false; }; }, {}, never, never, true, never>;
     // (undocumented)
@@ -90,9 +87,9 @@ export abstract class HellStyleable {
 // @public (undocumented)
 export class HellTextarea extends HellPartStyleable<HellTextareaPart> {
     // (undocumented)
-    readonly invalid: i0.InputSignalWithTransform<boolean, unknown>;
+    protected readonly defaultUiPart = "root";
     // (undocumented)
-    protected readonly mergePartClasses: (defaultClasses: string, consumerClasses: string | undefined) => string;
+    readonly invalid: i0.InputSignalWithTransform<boolean, unknown>;
     // (undocumented)
     protected readonly recipe: {
         root: string;
@@ -116,42 +113,45 @@ export type HellTextareaUi = HellUi<HellTextareaPart>;
 // @public
 export type HellUi<Part extends string> = Partial<Record<Part, string>>;
 
+// @public
+export type HellUiInput<Part extends string> = string | HellUi<Part> | null | undefined;
+
 // Warnings were encountered during analysis:
 //
 // types/hell-ui-angular-input.d.ts:24:5 - (ae-undocumented) Missing documentation for "ɵfac".
 // types/hell-ui-angular-input.d.ts:25:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-input.d.ts:42:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-input.d.ts:43:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-input.d.ts:46:1 - (ae-undocumented) Missing documentation for "HellInputPart".
-// types/hell-ui-angular-input.d.ts:47:1 - (ae-undocumented) Missing documentation for "HellInputUi".
-// types/hell-ui-angular-input.d.ts:48:1 - (ae-undocumented) Missing documentation for "HellNativeSelectPart".
-// types/hell-ui-angular-input.d.ts:49:1 - (ae-undocumented) Missing documentation for "HellNativeSelectUi".
-// types/hell-ui-angular-input.d.ts:50:1 - (ae-undocumented) Missing documentation for "HellTextareaPart".
-// types/hell-ui-angular-input.d.ts:51:1 - (ae-undocumented) Missing documentation for "HellTextareaUi".
-// types/hell-ui-angular-input.d.ts:52:1 - (ae-undocumented) Missing documentation for "HellInput".
-// types/hell-ui-angular-input.d.ts:53:5 - (ae-undocumented) Missing documentation for "recipe".
-// types/hell-ui-angular-input.d.ts:56:5 - (ae-undocumented) Missing documentation for "mergePartClasses".
-// types/hell-ui-angular-input.d.ts:57:5 - (ae-undocumented) Missing documentation for "size".
-// types/hell-ui-angular-input.d.ts:58:5 - (ae-undocumented) Missing documentation for "invalid".
-// types/hell-ui-angular-input.d.ts:59:5 - (ae-undocumented) Missing documentation for "slot".
-// types/hell-ui-angular-input.d.ts:60:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-input.d.ts:61:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-input.d.ts:63:1 - (ae-undocumented) Missing documentation for "HellNativeSelect".
-// types/hell-ui-angular-input.d.ts:64:5 - (ae-undocumented) Missing documentation for "recipe".
-// types/hell-ui-angular-input.d.ts:67:5 - (ae-undocumented) Missing documentation for "mergePartClasses".
-// types/hell-ui-angular-input.d.ts:68:5 - (ae-undocumented) Missing documentation for "size".
-// types/hell-ui-angular-input.d.ts:69:5 - (ae-undocumented) Missing documentation for "invalid".
-// types/hell-ui-angular-input.d.ts:70:5 - (ae-undocumented) Missing documentation for "slot".
-// types/hell-ui-angular-input.d.ts:71:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-input.d.ts:72:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-input.d.ts:74:1 - (ae-undocumented) Missing documentation for "HellTextarea".
-// types/hell-ui-angular-input.d.ts:75:5 - (ae-undocumented) Missing documentation for "recipe".
-// types/hell-ui-angular-input.d.ts:78:5 - (ae-undocumented) Missing documentation for "mergePartClasses".
-// types/hell-ui-angular-input.d.ts:79:5 - (ae-undocumented) Missing documentation for "size".
-// types/hell-ui-angular-input.d.ts:80:5 - (ae-undocumented) Missing documentation for "invalid".
-// types/hell-ui-angular-input.d.ts:81:5 - (ae-undocumented) Missing documentation for "slot".
-// types/hell-ui-angular-input.d.ts:82:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-input.d.ts:83:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-input.d.ts:43:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-input.d.ts:44:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-input.d.ts:47:1 - (ae-undocumented) Missing documentation for "HellInputPart".
+// types/hell-ui-angular-input.d.ts:48:1 - (ae-undocumented) Missing documentation for "HellInputUi".
+// types/hell-ui-angular-input.d.ts:49:1 - (ae-undocumented) Missing documentation for "HellNativeSelectPart".
+// types/hell-ui-angular-input.d.ts:50:1 - (ae-undocumented) Missing documentation for "HellNativeSelectUi".
+// types/hell-ui-angular-input.d.ts:51:1 - (ae-undocumented) Missing documentation for "HellTextareaPart".
+// types/hell-ui-angular-input.d.ts:52:1 - (ae-undocumented) Missing documentation for "HellTextareaUi".
+// types/hell-ui-angular-input.d.ts:53:1 - (ae-undocumented) Missing documentation for "HellInput".
+// types/hell-ui-angular-input.d.ts:54:5 - (ae-undocumented) Missing documentation for "recipe".
+// types/hell-ui-angular-input.d.ts:57:5 - (ae-undocumented) Missing documentation for "defaultUiPart".
+// types/hell-ui-angular-input.d.ts:58:5 - (ae-undocumented) Missing documentation for "size".
+// types/hell-ui-angular-input.d.ts:59:5 - (ae-undocumented) Missing documentation for "invalid".
+// types/hell-ui-angular-input.d.ts:60:5 - (ae-undocumented) Missing documentation for "slot".
+// types/hell-ui-angular-input.d.ts:61:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-input.d.ts:62:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-input.d.ts:64:1 - (ae-undocumented) Missing documentation for "HellNativeSelect".
+// types/hell-ui-angular-input.d.ts:65:5 - (ae-undocumented) Missing documentation for "recipe".
+// types/hell-ui-angular-input.d.ts:68:5 - (ae-undocumented) Missing documentation for "defaultUiPart".
+// types/hell-ui-angular-input.d.ts:69:5 - (ae-undocumented) Missing documentation for "size".
+// types/hell-ui-angular-input.d.ts:70:5 - (ae-undocumented) Missing documentation for "invalid".
+// types/hell-ui-angular-input.d.ts:71:5 - (ae-undocumented) Missing documentation for "slot".
+// types/hell-ui-angular-input.d.ts:72:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-input.d.ts:73:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-input.d.ts:75:1 - (ae-undocumented) Missing documentation for "HellTextarea".
+// types/hell-ui-angular-input.d.ts:76:5 - (ae-undocumented) Missing documentation for "recipe".
+// types/hell-ui-angular-input.d.ts:79:5 - (ae-undocumented) Missing documentation for "defaultUiPart".
+// types/hell-ui-angular-input.d.ts:80:5 - (ae-undocumented) Missing documentation for "size".
+// types/hell-ui-angular-input.d.ts:81:5 - (ae-undocumented) Missing documentation for "invalid".
+// types/hell-ui-angular-input.d.ts:82:5 - (ae-undocumented) Missing documentation for "slot".
+// types/hell-ui-angular-input.d.ts:83:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-input.d.ts:84:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

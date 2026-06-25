@@ -1,7 +1,6 @@
 import { Directive, ElementRef, booleanAttribute, inject, input } from '@angular/core';
 import { NgpInput } from 'ng-primitives/input';
 import { NgpTextarea } from 'ng-primitives/textarea';
-import { hellMergePartClasses } from '../../core/part-style-merge';
 import { HellPartStyleable, type HellRecipe, type HellUi } from '../../core/styleable';
 import { HellSize } from '../../core/types';
 
@@ -33,7 +32,9 @@ const HELL_TEXTAREA_RECIPE = {
 } satisfies HellRecipe<HellTextareaPart>;
 
 function hellInitialDataSlot(): string {
-  return inject<ElementRef<HTMLElement>>(ElementRef).nativeElement.getAttribute('data-slot') ?? 'root';
+  return (
+    inject<ElementRef<HTMLElement>>(ElementRef).nativeElement.getAttribute('data-slot') ?? 'root'
+  );
 }
 
 @Directive({
@@ -48,10 +49,7 @@ function hellInitialDataSlot(): string {
 })
 export class HellInput extends HellPartStyleable<HellInputPart> {
   protected readonly recipe = HELL_INPUT_RECIPE;
-  protected readonly mergePartClasses: (
-    defaultClasses: string,
-    consumerClasses: string | undefined,
-  ) => string = hellMergePartClasses;
+  protected readonly defaultUiPart = 'root';
 
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
@@ -70,10 +68,7 @@ export class HellInput extends HellPartStyleable<HellInputPart> {
 })
 export class HellNativeSelect extends HellPartStyleable<HellNativeSelectPart> {
   protected readonly recipe = HELL_NATIVE_SELECT_RECIPE;
-  protected readonly mergePartClasses: (
-    defaultClasses: string,
-    consumerClasses: string | undefined,
-  ) => string = hellMergePartClasses;
+  protected readonly defaultUiPart = 'root';
 
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
@@ -92,10 +87,7 @@ export class HellNativeSelect extends HellPartStyleable<HellNativeSelectPart> {
 })
 export class HellTextarea extends HellPartStyleable<HellTextareaPart> {
   protected readonly recipe = HELL_TEXTAREA_RECIPE;
-  protected readonly mergePartClasses: (
-    defaultClasses: string,
-    consumerClasses: string | undefined,
-  ) => string = hellMergePartClasses;
+  protected readonly defaultUiPart = 'root';
 
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });

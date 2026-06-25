@@ -35,6 +35,7 @@ export const entrypointManifest = {
       exports: [
         './core/types',
         './core/styleable',
+        './core/part-style-merge',
         './core/search',
         './core/labels',
         './core/floating-element',
@@ -91,11 +92,7 @@ export const entrypointManifest = {
       publicApiPath: `${libraryRoot}/src/lib/public-api-table-tanstack.ts`,
       entryFile: '../src/lib/public-api-table-tanstack.ts',
       exports: ['./table-tanstack/table-tanstack'],
-      header: [
-        '/**',
-        ' * @experimental Hell-styled TanStack Table shell entry point.',
-        ' */',
-      ],
+      header: ['/**', ' * @experimental Hell-styled TanStack Table shell entry point.', ' */'],
     },
     {
       id: 'table-tanstack-virtual',

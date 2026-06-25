@@ -108,9 +108,13 @@ const HD_BUTTON_PAGE_ICONS = {
 
       <h2>Part style map</h2>
       <p>
-        Pass <code>[ui]</code> with a <code>root</code> class string to refine the default
-        Tailwind recipe while keeping <code>NgpButton</code> behavior and Button state
-        attributes.
+        Pass <code>ui="..."</code> to refine the default <code>root</code> part while keeping
+        <code>NgpButton</code> behavior and Button state attributes. The equivalent explicit map
+        form is <code>[ui]="&#123; root: '...' &#125;"</code>.
+      </p>
+      <p>
+        Template <code>class</code> remains useful for layout hooks and non-conflicting classes, but
+        use <code>ui</code> for deterministic Tailwind utility overrides.
       </p>
       <hd-example-tabs
         [code]="buttonCustomizationExampleCode"
@@ -128,8 +132,13 @@ const HD_BUTTON_PAGE_ICONS = {
         <li><code>size</code>: <code>xs | sm | md | lg | xl</code></li>
         <li><code>iconOnly</code>: square button for a single icon</li>
         <li><code>block</code>: stretches to container width</li>
-        <li><code>disabled</code>: native <code>disabled</code> on buttons, guarded <code>aria-disabled</code> on anchors</li>
-        <li><code>ui</code>: part style map with a <code>root</code> public part</li>
+        <li>
+          <code>disabled</code>: native <code>disabled</code> on buttons, guarded
+          <code>aria-disabled</code> on anchors
+        </li>
+        <li>
+          <code>ui</code>: shorthand string or part style map for the <code>root</code> public part
+        </li>
       </ul>
 
       <h2>Do</h2>
@@ -137,12 +146,17 @@ const HD_BUTTON_PAGE_ICONS = {
         <li>Use <code>primary</code> sparingly — one per region.</li>
         <li>Use <code>ghost</code> for low-emphasis actions in toolbars.</li>
         <li>Always pair <code>iconOnly</code> with an <code>aria-label</code>.</li>
+        <li>
+          Use <code>ui</code> instead of conflicting <code>class</code> utilities for visual
+          refinements.
+        </li>
       </ul>
 
       <h2>Don't</h2>
       <ul>
         <li>Don't put two <code>danger</code> buttons next to each other.</li>
         <li>Don't target private descendants; refine the <code>root</code> part instead.</li>
+        <li>Don't rely on <code>class</code> order to beat recipe utilities.</li>
       </ul>
     </article>
   `,

@@ -70,6 +70,155 @@ const audioTranscriptRuntimeTerms = [
   { label: 'captureStream()', pattern: /\bcaptureStream\b/ },
 ];
 
+// HELL-134: this is the explicit not-yet-migrated allowlist for the legacy
+// Style Opt-Out base. Remove a symbol here as soon as it migrates to
+// HellPartStyleable; new public modules must not extend HellStyleable.
+const legacyStyleableAllowlist = new Set([
+  'HellAccordion',
+  'HellAccordionContent',
+  'HellAccordionItem',
+  'HellAccordionTrigger',
+  'HellAvatar',
+  'HellBadge',
+  'HellBreadcrumbEllipsis',
+  'HellBreadcrumbItem',
+  'HellBreadcrumbLink',
+  'HellBreadcrumbList',
+  'HellBreadcrumbPage',
+  'HellBreadcrumbSeparator',
+  'HellBreadcrumbs',
+  'HellCard',
+  'HellCardBody',
+  'HellCardFooter',
+  'HellCardHeader',
+  'HellCheckbox',
+  'HellNativeCheckbox',
+  'HellCombobox',
+  'HellComboboxBasic',
+  'HellComboboxButton',
+  'HellComboboxDropdown',
+  'HellComboboxEmpty',
+  'HellComboboxInput',
+  'HellComboboxOption',
+  'HellDatePicker',
+  'HellDateRangePicker',
+  'HellDialog',
+  'HellDialogDescription',
+  'HellDialogOverlay',
+  'HellDialogTitle',
+  'HellField',
+  'HellFieldDescription',
+  'HellFieldError',
+  'HellFieldLabel',
+  'HellFlyout',
+  'HellIcon',
+  'HellKbd',
+  'HellListbox',
+  'HellListboxHeader',
+  'HellListboxOption',
+  'HellListboxSection',
+  'HellMenu',
+  'HellMenuItem',
+  'HellMenuItemCheckbox',
+  'HellMenuItemIcon',
+  'HellMenuItemIndicator',
+  'HellMenuItemRadio',
+  'HellMenuItemTrailing',
+  'HellMenuLabel',
+  'HellMenuSection',
+  'HellMenuSeparator',
+  'HellPagination',
+  'HellPaginationButton',
+  'HellPaginationFirst',
+  'HellPaginationLast',
+  'HellPaginationNext',
+  'HellPaginationPrev',
+  'HellPaginationStrip',
+  'HellPopover',
+  'HellProgress',
+  'HellProgressBar',
+  'HellRadio',
+  'HellNativeRadio',
+  'HellNativeRadioGroup',
+  'HellRadioGroup',
+  'HellSearch',
+  'HellSearchClear',
+  'HellSelect',
+  'HellSelectBasic',
+  'HellSelectDropdown',
+  'HellSelectOption',
+  'HellSelectPlaceholder',
+  'HellSelectValue',
+  'HellSeparator',
+  'HellSkeleton',
+  'HellSlider',
+  'HellSpinner',
+  'HellSubmenuTrigger',
+  'HellNativeSwitch',
+  'HellSwitch',
+  'HellTab',
+  'HellTabList',
+  'HellTabPanel',
+  'HellTabset',
+  'HellTag',
+  'HellToggle',
+  'HellToggleGroup',
+  'HellToggleGroupItem',
+  'HellTooltip',
+  'HellAppContent',
+  'HellAppSecondary',
+  'HellAppSecondaryBody',
+  'HellAppShell',
+  'HellAppSidenav',
+  'HellAppTopbar',
+  'HellAudioPlayer',
+  'HellAvatarGroup',
+  'HellAvatarGroupItem',
+  'HellAvatarGroupOverflow',
+  'HellDateInput',
+  'HellDropZone',
+  'HellNavItem',
+  'HellNavItemIcon',
+  'HellNavItemLabel',
+  'HellNavItemTrailing',
+  'HellNavSection',
+  'HellNavSectionItems',
+  'HellNavSectionToggle',
+  'HellOmnibar',
+  'HellOmnibarAction',
+  'HellOmnibarActionsStrip',
+  'HellOmnibarChip',
+  'HellOmnibarChipRemove',
+  'HellOmnibarGroup',
+  'HellOmnibarGroupLabel',
+  'HellOmnibarItem',
+  'HellOmnibarItemIcon',
+  'HellOmnibarItemSubtext',
+  'HellOmnibarItemText',
+  'HellOmnibarItemTrailing',
+  'HellOmnibarPanel',
+  'HellResizable',
+  'HellResizableHandle',
+  'HellResizablePane',
+  'HellSplitView',
+  'HellTimeInput',
+  'HellToaster',
+  'HellCodeEditor',
+  'HellTable',
+  'HellTableBody',
+  'HellTableCell',
+  'HellTableResizeHandle',
+  'HellTableContainer',
+  'HellTableHead',
+  'HellTableHeaderCell',
+  'HellTableRow',
+  'HellTableRowAction',
+  'HellTableRowCheckbox',
+  'HellTableRowRadio',
+  'HellTableSelectionCell',
+  'HellTableSortTrigger',
+]);
+
 function main() {
   checkDocsExamples();
   checkDocsLazyRouteImportGraphContract();
@@ -1947,6 +2096,11 @@ function checkComponentContract() {
       publicStyleableModules.set(className, rel);
 
       if (moduleSource.includes('extends HellPartStyleable')) {
+        if (legacyStyleableAllowlist.has(className)) {
+          failures.push(
+            `${rel} ${className} migrated to HellPartStyleable but remains in the legacy HellStyleable allowlist`,
+          );
+        }
         if (!moduleSource.includes('part(') || !moduleSource.includes('recipe')) {
           failures.push(
             `${rel} ${className} extends HellPartStyleable but does not use the Part-Class Pipeline`,
@@ -1955,10 +2109,17 @@ function checkComponentContract() {
         if (moduleSource.includes('unstyled')) {
           failures.push(`${rel} ${className} extends HellPartStyleable but keeps Style Opt-Out`);
         }
-      } else if (!moduleSource.includes('!unstyled()')) {
-        failures.push(
-          `${rel} ${className} extends HellStyleable but does not gate default styling with Style Opt-Out`,
-        );
+      } else {
+        if (!legacyStyleableAllowlist.has(className)) {
+          failures.push(
+            `${rel} ${className} extends legacy HellStyleable but is not in the HELL-134 not-yet-migrated allowlist`,
+          );
+        }
+        if (!moduleSource.includes('!unstyled()')) {
+          failures.push(
+            `${rel} ${className} extends HellStyleable but does not gate default styling with Style Opt-Out`,
+          );
+        }
       }
     }
 
@@ -1998,6 +2159,14 @@ function checkComponentContract() {
     if (!publicStyleableModules.has(symbol)) {
       failures.push(
         `component-contract.spec.ts declares ${symbol}, but no exported styled Module was found`,
+      );
+    }
+  }
+
+  for (const symbol of legacyStyleableAllowlist) {
+    if (!publicStyleableModules.has(symbol)) {
+      failures.push(
+        `Legacy HellStyleable allowlist declares ${symbol}, but no exported styled Module was found; remove stale migrated/deleted symbols`,
       );
     }
   }

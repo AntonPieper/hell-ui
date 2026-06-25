@@ -100,6 +100,7 @@ const corePeerGroup = [
   'rxjs',
 ];
 const stylePeerGroup = ['tailwindcss'];
+const tailwindPostcssDevDeps = ['@tailwindcss/postcss', 'postcss'];
 const routerPeerGroup = ['@angular/router'];
 const fontAwesomePeerGroup = ['@ng-icons/font-awesome'];
 const codeEditorPeerGroup = [
@@ -259,11 +260,14 @@ const scenarios = [
     dependencies: buttonStyledDeps,
     forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: buttonConsumerMainTs(),
-    stylesCss: primitivesConsumerStylesCss(),
+    stylesCss: buttonConsumerStylesCss(),
     cssIncludes: [
-      'background-color:var(--hell-button-background,var(--color-hell-surface-elevated))',
-      'background-color:var(--hell-button-background,var(--color-hell-primary))',
-      'background-color:var(--hell-button-background-hover,var(--color-hell-primary-hover))',
+      'background-color:var(--color-hell-surface-elevated)',
+      'background-color:var(--color-hell-primary)',
+      'background-color:var(--color-hell-primary-hover)',
+      'border-radius:var(--radius-hell-pill)',
+      'box-shadow:var(--shadow-hell-lg)',
+      'text-underline-offset:5px',
       'transition-property:background-color,border-color,color,box-shadow',
     ],
   },
@@ -931,6 +935,7 @@ async function packBuiltPackage(distRoot, scenarioName) {
 
 function writeConsumerWorkspace(workspace, scenarios, dependencies = unionDependencies(scenarios)) {
   const scenario = scenarios[0];
+  const usesTailwindCss = dependencies.includes('tailwindcss');
   const packageJson = {
     name: `hell-package-consumer-${scenario.name}`,
     private: true,
@@ -945,6 +950,7 @@ function writeConsumerWorkspace(workspace, scenarios, dependencies = unionDepend
       '@angular/compiler-cli',
       '@emnapi/core',
       '@emnapi/runtime',
+      ...(usesTailwindCss ? tailwindPostcssDevDeps : []),
       'typescript',
     ]),
   };
@@ -958,6 +964,13 @@ function writeConsumerWorkspace(workspace, scenarios, dependencies = unionDepend
     join(workspace, '.npmrc'),
     'strict-peer-dependencies=true\nauto-install-peers=false\n',
   );
+  if (usesTailwindCss) {
+    writeJson(join(workspace, '.postcssrc.json'), {
+      plugins: {
+        '@tailwindcss/postcss': {},
+      },
+    });
+  }
   writeJson(join(workspace, 'angular.json'), {
     $schema: './node_modules/@angular/cli/lib/config/schema.json',
     version: 1,
@@ -1055,14 +1068,18 @@ function exactInstalledVersion(name) {
 function rootConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellPartStyleable, HellStyleable, type HellRecipe, type HellSize, type HellUi } from '${packageName}';
+import { HellPartStyleable, HellStyleable, hellTwMerge, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '${packageName}';
 
 const size: HellSize = 'md';
 const recipe: HellRecipe<'root'> = { root: 'block' };
 const ui: HellUi<'root'> = { root: 'rounded-md' };
+const uiInput: HellUiInput<'root'> = 'rounded-md';
+const merged = hellTwMerge('px-hell-4', 'px-hell-7');
 void size;
 void recipe;
 void ui;
+void uiInput;
+void merged;
 void HellPartStyleable;
 void HellStyleable;
 
@@ -1080,14 +1097,18 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function coreConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellPartStyleable, HellStyleable, type HellRecipe, type HellSize, type HellUi } from '${packageName}/core';
+import { HellPartStyleable, HellStyleable, hellTwMerge, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '${packageName}/core';
 
 const size: HellSize = 'md';
 const recipe: HellRecipe<'root'> = { root: 'block' };
 const ui: HellUi<'root'> = { root: 'rounded-md' };
+const uiInput: HellUiInput<'root'> = 'rounded-md';
+const merged = hellTwMerge('px-hell-4', 'px-hell-7');
 void size;
 void recipe;
 void ui;
+void uiInput;
+void merged;
 void HellPartStyleable;
 void HellStyleable;
 
@@ -1105,19 +1126,20 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function buttonConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellButton } from '${packageName}/button';
+import { HellButton, type HellButtonUi } from '${packageName}/button';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [HellButton],
   template: \`
-    <button hellButton type="button">Save</button>
-    <a hellButton href="#details" [disabled]="disabled">Details</a>
+    <button hellButton type="button" ui="rounded-hell-pill shadow-hell-lg">Save</button>
+    <a hellButton href="#details" [disabled]="disabled" [ui]="linkUi">Details</a>
   \`,
 })
 class App {
   protected readonly disabled = true;
+  protected readonly linkUi = { root: 'underline-offset-[5px]' } satisfies HellButtonUi;
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
@@ -1134,13 +1156,12 @@ import { HellButton, type HellButtonUi } from '${packageName}/button';
   standalone: true,
   imports: [HellButton],
   template: \`
-    <button hellButton type="button" [ui]="buttonUi">Save</button>
+    <button hellButton type="button" ui="rounded-hell-pill">Save</button>
     <a hellButton href="#details" [disabled]="disabled" [ui]="linkUi">Details</a>
   \`,
 })
 class App {
   protected readonly disabled = true;
-  protected readonly buttonUi = { root: 'rounded-hell-pill' } satisfies HellButtonUi;
   protected readonly linkUi = { root: 'underline-offset-[5px]' } satisfies HellButtonUi;
 }
 
@@ -1620,6 +1641,13 @@ function rootConsumerStylesCss() {
 function primitivesConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/styles/primitives";
+`;
+}
+
+function buttonConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/styles/primitives";
+@source "./main.ts";
 `;
 }
 

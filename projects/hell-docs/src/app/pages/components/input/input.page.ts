@@ -71,17 +71,17 @@ import inputTextareaExampleCodeRaw from './examples/textarea.example.ts?raw' wit
       <ul>
         <li>
           <code>hellInput</code>: <code>size</code> (<code>sm | md | lg</code>),
-          <code>invalid</code>, <code>disabled</code>, <code>ui</code> keyed by
+          <code>invalid</code>, <code>disabled</code>, <code>ui</code> shorthand or map keyed by
           <code>HellInputPart</code>
         </li>
         <li>
           <code>hellNativeSelect</code>: <code>size</code> (<code>sm | md | lg</code>),
-          <code>invalid</code>, <code>disabled</code>, <code>ui</code> keyed by
+          <code>invalid</code>, <code>disabled</code>, <code>ui</code> shorthand or map keyed by
           <code>HellNativeSelectPart</code>
         </li>
         <li>
           <code>hellTextarea</code>: <code>size</code> (<code>sm | md | lg</code>),
-          <code>invalid</code>, <code>disabled</code>, <code>ui</code> keyed by
+          <code>invalid</code>, <code>disabled</code>, <code>ui</code> shorthand or map keyed by
           <code>HellTextareaPart</code>
         </li>
       </ul>
@@ -89,8 +89,10 @@ import inputTextareaExampleCodeRaw from './examples/textarea.example.ts?raw' wit
       <h2>Parts</h2>
       <p>
         Each directive exposes one public part named <code>root</code> on the native control. The
-        rendered element carries <code>data-slot="root"</code>, and consumer classes passed through
-        <code>ui.root</code> merge with the built-in Tailwind recipe.
+        rendered element carries <code>data-slot="root"</code>. Use <code>ui="..."</code> for
+        root-part shorthand or <code>[ui]="&#123; root: '...' &#125;"</code> when an explicit map is
+        clearer. Template <code>class</code> stays additive for layout hooks, not for deterministic
+        Tailwind conflicts.
       </p>
 
       <h2>Do</h2>

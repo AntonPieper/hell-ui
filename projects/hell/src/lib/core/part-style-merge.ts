@@ -1,10 +1,11 @@
 import { extendTailwindMerge } from 'tailwind-merge';
 
-const hellTwMerge = extendTailwindMerge({
+/** Merge Tailwind classes with Hell design-token class groups. */
+export const hellTwMerge = extendTailwindMerge({
   extend: {
     theme: {
       radius: ['hell-xs', 'hell-sm', 'hell-md', 'hell-lg', 'hell-xl', 'hell-pill'],
-      shadow: ['hell-sm', 'hell-md', 'hell-lg'],
+      shadow: ['hell-xs', 'hell-sm', 'hell-md', 'hell-lg'],
       spacing: [
         'hell-1',
         'hell-2',
@@ -25,10 +26,3 @@ const hellTwMerge = extendTailwindMerge({
     },
   },
 });
-
-export function hellMergePartClasses(
-  defaultClasses: string,
-  consumerClasses: string | undefined,
-): string {
-  return hellTwMerge(defaultClasses, consumerClasses ?? '');
-}

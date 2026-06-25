@@ -9,7 +9,7 @@ Use this guide when moving an app from local/alpha Hell imports to the first bet
 1. Start from an Angular 21 app that satisfies `@angular/common`, `@angular/core`, `@angular/forms`, and `rxjs` peer ranges from [`projects/hell/package.json`](../../projects/hell/package.json).
 2. Install the smallest peer tier for the entry points and CSS you import.
 3. Replace root or kitchen-sink imports with narrow secondary entry points where possible.
-4. Import only the Hell CSS files you need. Migrated components such as Button use `[ui]` part style maps; components not yet migrated still support `unstyled`.
+4. Import only the Hell CSS files you need. Migrated components such as Button use `ui` Part Style Maps; components not yet migrated still support `unstyled`.
 5. Treat browser-only/heavy features as lazy, client-only, and beta/experimental unless their own docs say otherwise.
 6. Check the accessibility matrix and the production-readiness gate before making production claims.
 
@@ -19,19 +19,23 @@ Package peer metadata is package-wide. Some optional peers appear in the package
 
 A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`; install any missing core peers explicitly. Use `pnpm add` in consumer snippets below because the package-consumer proof uses pnpm strict-peer installs.
 
-| Consumer path | Install peers for this path | Entry points / CSS | Proof scenario |
-| --- | --- | --- | --- |
-| Root/core only | `@hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs` plus Angular app peers | `@hell-ui/angular`, `@hell-ui/angular/core`, `@hell-ui/angular/testing`; no Hell CSS required | [`root-core`, `core`, `testing`](../../tools/check-package-consumer.mjs) |
-| Button Part Style Map | Core peer group only | Narrow Button import plus `[ui]`; no Hell CSS/Tailwind required for compile-time behavior proof | [`button-ui`](../../tools/check-package-consumer.mjs) |
-| Styled narrow primitive | Core peer group plus `tailwindcss` | Narrow primitive import plus `@hell-ui/angular/styles/tokens` and primitive/component CSS | [`button`](../../tools/check-package-consumer.mjs) |
-| Aggregate primitives | Core peer group plus `tailwindcss`, `@angular/router`, `@ng-icons/font-awesome` | `@hell-ui/angular/primitives` plus primitive CSS. Router is needed because the aggregate includes dialog through `ng-primitives/dialog`; Font Awesome is needed because icon-backed primitives are bundled in the aggregate FESM. | [`primitives-css`](../../tools/check-package-consumer.mjs) |
-| Composites | Core peer group plus `tailwindcss`; add `@ng-icons/font-awesome` for aggregate/icon-backed composites | Prefer narrow composite entry points such as `@hell-ui/angular/app-shell` and `@hell-ui/angular/audio-player`; use `@hell-ui/angular/composites` only when you accept aggregate peers | [`app-shell`, `audio-player`, `composites-css`](../../tools/check-package-consumer.mjs) |
-| Audio transcript | Composite audio-player peer group; no CodeMirror or pdf.js peers | `@hell-ui/angular/audio-player` plus provider import from `@hell-ui/angular/features/audio-transcript`; use composite CSS, no feature CSS | [`audio-transcript`](../../tools/check-package-consumer.mjs) |
-| Table primitives | Core peer group plus `tailwindcss`; no optional table-engine peers | `@hell-ui/angular/table`; CSS from `@hell-ui/angular/styles/table`; removed table aliases stay unavailable | [`table`, `no-legacy-alias`](../../tools/check-package-consumer.mjs) |
-| TanStack table shell | Core peer group plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core` | `@hell-ui/angular/table-tanstack`; caller-owned TanStack Table remains the engine | [`table-tanstack`](../../tools/check-package-consumer.mjs) |
-| TanStack virtual row strategy | TanStack shell peer group plus optional `@tanstack/virtual-core` | `@hell-ui/angular/table-tanstack/virtual`; mounts on `hell-tanstack-table` and does not create a second table engine or root component | [`table-tanstack-virtual`](../../tools/check-package-consumer.mjs) |
-| Code editor | Core peer group plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, `@lezer/highlight` | Kept optional entry point `@hell-ui/angular/features/code-editor`; keep lazy/client-only when runtime risk matters | [`code-editor`](../../tools/check-package-consumer.mjs) |
-| PDF viewer | Core peer group plus `@hell-ui/pdf-viewer`, `tailwindcss`, `@ng-icons/font-awesome`, and the split package's pdf.js peer | `@hell-ui/pdf-viewer`; app must provide the pdf.js worker source | [`pdf-viewer`](../../tools/check-package-consumer.mjs) |
+| Consumer path                 | Install peers for this path                                                                                                                     | Entry points / CSS                                                                                                                                                                                                                | Proof scenario                                                                          |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Root/core only                | `@hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs` plus Angular app peers                        | `@hell-ui/angular`, `@hell-ui/angular/core`, `@hell-ui/angular/testing`; no Hell CSS required                                                                                                                                     | [`root-core`, `core`, `testing`](../../tools/check-package-consumer.mjs)                |
+| Button Part Style Map         | Core peer group only                                                                                                                            | Narrow Button import plus `ui`; no Hell CSS/Tailwind required for compile-time behavior proof                                                                                                                                     | [`button-ui`](../../tools/check-package-consumer.mjs)                                   |
+| Styled narrow primitive       | Core peer group plus `tailwindcss`                                                                                                              | Narrow primitive import plus `@hell-ui/angular/styles/tokens` and primitive/component CSS                                                                                                                                         | [`button`](../../tools/check-package-consumer.mjs)                                      |
+| Aggregate primitives          | Core peer group plus `tailwindcss`, `@angular/router`, `@ng-icons/font-awesome`                                                                 | `@hell-ui/angular/primitives` plus primitive CSS. Router is needed because the aggregate includes dialog through `ng-primitives/dialog`; Font Awesome is needed because icon-backed primitives are bundled in the aggregate FESM. | [`primitives-css`](../../tools/check-package-consumer.mjs)                              |
+| Composites                    | Core peer group plus `tailwindcss`; add `@ng-icons/font-awesome` for aggregate/icon-backed composites                                           | Prefer narrow composite entry points such as `@hell-ui/angular/app-shell` and `@hell-ui/angular/audio-player`; use `@hell-ui/angular/composites` only when you accept aggregate peers                                             | [`app-shell`, `audio-player`, `composites-css`](../../tools/check-package-consumer.mjs) |
+| Audio transcript              | Composite audio-player peer group; no CodeMirror or pdf.js peers                                                                                | `@hell-ui/angular/audio-player` plus provider import from `@hell-ui/angular/features/audio-transcript`; use composite CSS, no feature CSS                                                                                         | [`audio-transcript`](../../tools/check-package-consumer.mjs)                            |
+| Table primitives              | Core peer group plus `tailwindcss`; no optional table-engine peers                                                                              | `@hell-ui/angular/table`; CSS from `@hell-ui/angular/styles/table`; removed table aliases stay unavailable                                                                                                                        | [`table`, `no-legacy-alias`](../../tools/check-package-consumer.mjs)                    |
+| TanStack table shell          | Core peer group plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`                                          | `@hell-ui/angular/table-tanstack`; caller-owned TanStack Table remains the engine                                                                                                                                                 | [`table-tanstack`](../../tools/check-package-consumer.mjs)                              |
+| TanStack virtual row strategy | TanStack shell peer group plus optional `@tanstack/virtual-core`                                                                                | `@hell-ui/angular/table-tanstack/virtual`; mounts on `hell-tanstack-table` and does not create a second table engine or root component                                                                                            | [`table-tanstack-virtual`](../../tools/check-package-consumer.mjs)                      |
+| Code editor                   | Core peer group plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, `@lezer/highlight` | Kept optional entry point `@hell-ui/angular/features/code-editor`; keep lazy/client-only when runtime risk matters                                                                                                                | [`code-editor`](../../tools/check-package-consumer.mjs)                                 |
+| PDF viewer                    | Core peer group plus `@hell-ui/pdf-viewer`, `tailwindcss`, `@ng-icons/font-awesome`, and the split package's pdf.js peer                        | `@hell-ui/pdf-viewer`; app must provide the pdf.js worker source                                                                                                                                                                  | [`pdf-viewer`](../../tools/check-package-consumer.mjs)                                  |
+
+Styled examples also need the Tailwind v4 build plugin from
+`@tailwindcss/postcss` plus `postcss` in dev dependencies, with the same
+`.postcssrc.json` shown in the Getting Started guide.
 
 Examples:
 
@@ -41,6 +45,7 @@ pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons
 
 # Styled primitives. Proved by the button/primitives-css scenarios.
 pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss
+pnpm add -D @tailwindcss/postcss postcss
 
 # Audio transcript feature. Proved by the audio-transcript scenario.
 pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome ng-primitives rxjs tailwindcss
@@ -101,67 +106,67 @@ Use `@hell-ui/angular` for stable core exports only. Use `/primitives`, `/compos
 
 ## CSS imports
 
-Hell CSS entry points use Tailwind v4 theme features. Install `tailwindcss` whenever you import Hell CSS.
+Hell CSS entry points use Tailwind v4 theme features. Install `tailwindcss` and configure `@tailwindcss/postcss` whenever you import Hell CSS.
 
 Preferred narrow component imports:
 
 ```css
-@import "tailwindcss";
-@import "@hell-ui/angular/styles/tokens";
-@import "@hell-ui/angular/styles/components/button";
+@import 'tailwindcss';
+@import '@hell-ui/angular/styles/tokens';
+@import '@hell-ui/angular/styles/components/button';
 ```
 
 Use the primitive aggregate stylesheet instead when the app intentionally wants every primitive style in one import:
 
 ```css
-@import "tailwindcss";
-@import "@hell-ui/angular/styles/primitives";
+@import 'tailwindcss';
+@import '@hell-ui/angular/styles/primitives';
 ```
 
 Add only the feature CSS you import:
 
 ```css
-@import "@hell-ui/angular/styles/composites";
-@import "@hell-ui/angular/styles/table";
-@import "@hell-ui/angular/styles/features/code-editor";
-@import "@hell-ui/pdf-viewer/styles";
+@import '@hell-ui/angular/styles/composites';
+@import '@hell-ui/angular/styles/table';
+@import '@hell-ui/angular/styles/features/code-editor';
+@import '@hell-ui/pdf-viewer/styles';
 ```
 
 Avoid `@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` for production migration unless the app intentionally accepts every primitive, composite, CodeMirror, and table style in one bundle. PDF viewer styles come from `@hell-ui/pdf-viewer/styles`.
 
 ## Part Style Maps and Unstyled mode
 
-Button has migrated from Style Opt-Out to the Part Style Map API. Pass `[ui]`
+Button has migrated from Style Opt-Out to the Part Style Map API. Pass `ui`
 when you want to refine its public `root` part while keeping Hell behavior,
 state attributes, and accessibility wiring.
 
 ```html
-<button hellButton type="button" [ui]="{ root: 'rounded-hell-pill bg-hell-primary' }">
-  Save
-</button>
+<button hellButton type="button" ui="rounded-hell-pill bg-hell-primary">Save</button>
 ```
 
 Rules for migration:
 
 - Keep the directive import narrow, for example `@hell-ui/angular/button`.
 - Import Hell CSS when you want shipped default visuals.
-- Use `[ui]` for Button visual refinements instead of `unstyled`.
+- Use `ui="..."` for Button visual refinements instead of `unstyled`.
+- Use `[ui]="{ ... }"` for components with multiple public parts, such as Dialpad.
+- Use `class` for layout hooks and non-conflicting additions; use `ui` for deterministic Tailwind utility conflicts.
 - Continue to test the behavior and accessible name; styling APIs are not accessibility opt-outs.
 
-The [`button-ui`](../../tools/check-package-consumer.mjs) package-consumer scenario proves the typed Button `[ui]` path without Tailwind or Hell CSS. Other primitives that have not migrated yet still document `unstyled` locally.
+The [`button-ui`](../../tools/check-package-consumer.mjs) package-consumer scenario proves the typed Button `ui` path without Tailwind or Hell CSS. Other primitives that have not migrated yet still document `unstyled` locally.
 
 ## Heavy and browser-only features
 
 Treat these as deliberate opt-ins, not default UI kit imports.
 
-| Feature | First-beta guidance | Current status |
-| --- | --- | --- |
-| Table primitives and TanStack shell | Keep primitives behind `@hell-ui/angular/table`. Use `@hell-ui/angular/table-tanstack` for a Hell-styled shell around a caller-owned TanStack Table instance. Use `@hell-ui/angular/table-tanstack/virtual` only when the shell needs TanStack Virtual row math. | Beta primitives; TanStack shell and virtual row strategy are experimental. Legacy table feature aliases and unsupported table paths are removed before beta and the `no-legacy-alias` package-consumer scenario rejects them. |
-| Code editor | Keep behind the kept optional `@hell-ui/angular/features/code-editor` entry point; lazy-load or client-only load in SSR-sensitive apps; pass owner-document-aware setup where possible. | Experimental in package/source comments; HELL-054 locks the kept optional boundary and leaves stable API report promotion to policy. |
-| PDF viewer | Package path is `@hell-ui/pdf-viewer`; install the split package with its exact pdf.js peer and pass an app-owned worker source. | Experimental/browser-only split package. |
-| Audio speech transcript | Do not present `allowSpeechTranscript` as accessibility captions or timed text. Import `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript` only where the route/app deliberately opts into the browser transcript provider, and provide real captions/transcripts separately. | Experimental Chromium-only / best-effort; runtime is isolated behind the optional feature provider. |
-| Floating/flyout/omnibar dismissal | Use documented components, but avoid building product-critical guarantees on unreviewed dismissal internals. | Browser contracts exist for key paths; follow-up HELL-057/HELL-058 shrink remaining seams. |
-| Resize behavior | Treat split/table resizing as browser behavior requiring current browser evidence. | HELL-061 still owns browser resize contracts. |
+| Feature                             | First-beta guidance                                                                                                                                                                                                                                                                                        | Current status                                                                                                                                                                                                                |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Table primitives and TanStack shell | Keep primitives behind `@hell-ui/angular/table`. Use `@hell-ui/angular/table-tanstack` for a Hell-styled shell around a caller-owned TanStack Table instance. Use `@hell-ui/angular/table-tanstack/virtual` only when the shell needs TanStack Virtual row math.                                           | Beta primitives; TanStack shell and virtual row strategy are experimental. Legacy table feature aliases and unsupported table paths are removed before beta and the `no-legacy-alias` package-consumer scenario rejects them. |
+| Code editor                         | Keep behind the kept optional `@hell-ui/angular/features/code-editor` entry point; lazy-load or client-only load in SSR-sensitive apps; pass owner-document-aware setup where possible.                                                                                                                    | Experimental in package/source comments; HELL-054 locks the kept optional boundary and leaves stable API report promotion to policy.                                                                                          |
+| PDF viewer                          | Package path is `@hell-ui/pdf-viewer`; install the split package with its exact pdf.js peer and pass an app-owned worker source.                                                                                                                                                                           | Experimental/browser-only split package.                                                                                                                                                                                      |
+| Audio speech transcript             | Do not present `allowSpeechTranscript` as accessibility captions or timed text. Import `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript` only where the route/app deliberately opts into the browser transcript provider, and provide real captions/transcripts separately. | Experimental Chromium-only / best-effort; runtime is isolated behind the optional feature provider.                                                                                                                           |
+| Floating/flyout/omnibar dismissal   | Use documented components, but avoid building product-critical guarantees on unreviewed dismissal internals.                                                                                                                                                                                               | Browser contracts exist for key paths; follow-up HELL-057/HELL-058 shrink remaining seams.                                                                                                                                    |
+| Resize behavior                     | Treat split/table resizing as browser behavior requiring current browser evidence.                                                                                                                                                                                                                         | HELL-061 still owns browser resize contracts.                                                                                                                                                                                 |
 
 ## Known experimental and deprecated APIs
 
@@ -176,19 +181,19 @@ Known experimental/best-effort surfaces:
 
 Removed pre-beta table compatibility surfaces:
 
-| Removed surface | Replacement |
-| --- | --- |
-| old table feature entrypoints and unsupported adapter paths | `@hell-ui/angular/table` for primitives; `@hell-ui/angular/table-tanstack` for TanStack-owned table behavior |
-| `HELL_TABLE_DIRECTIVES`, `HELL_TABLE_UTILITY_DIRECTIVES` | `HELL_TABLE_UTILITIES_DIRECTIVES` from `@hell-ui/angular/table` |
+| Removed surface                                                                    | Replacement                                                                                                                          |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| old table feature entrypoints and unsupported adapter paths                        | `@hell-ui/angular/table` for primitives; `@hell-ui/angular/table-tanstack` for TanStack-owned table behavior                         |
+| `HELL_TABLE_DIRECTIVES`, `HELL_TABLE_UTILITY_DIRECTIVES`                           | `HELL_TABLE_UTILITIES_DIRECTIVES` from `@hell-ui/angular/table`                                                                      |
 | `HellTableRow.interactive` / `selectionSemantics` / `[selectable]` / `(rowSelect)` | `hellTableRowAction` for row actions; `hellTableRowCheckbox` / `hellTableRowRadio` inside `hellTableSelectionCell` for row selection |
 
 Known deprecated non-table compatibility surfaces to migrate away from:
 
-| Deprecated surface | Preferred replacement |
-| --- | --- |
-| `allowLiveCaptions` | `allowSpeechTranscript` plus `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript`, with the same best-effort warning |
-| `hellAudioSpeechSupported` from `@hell-ui/angular/audio-player` | `hellAudioSpeechSupported` from `@hell-ui/angular/features/audio-transcript` |
-| `hellCodeEditorSetup` | `hellCodeEditorSetupFactory(ownerDocument)` |
+| Deprecated surface                                              | Preferred replacement                                                                                                                            |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `allowLiveCaptions`                                             | `allowSpeechTranscript` plus `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript`, with the same best-effort warning |
+| `hellAudioSpeechSupported` from `@hell-ui/angular/audio-player` | `hellAudioSpeechSupported` from `@hell-ui/angular/features/audio-transcript`                                                                     |
+| `hellCodeEditorSetup`                                           | `hellCodeEditorSetupFactory(ownerDocument)`                                                                                                      |
 
 Experimental APIs may change or disappear between pre-1.0 releases. Deprecated aliases exist only to help alpha/internal-beta consumers migrate; removal needs a changelog and migration note.
 

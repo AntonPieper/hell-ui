@@ -25,15 +25,14 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
         pnpm is the only supported package manager for this repository. The checked-in pnpm lock
         backs CI and package-consumer tests with strict-peer installs. Package peer metadata is
         package-wide, so every package entry point expects the light UI stack: Angular
-        Forms/core/common, ng-primitives, @angular/cdk, <code>@floating-ui/dom</code>,
-        ng-icons core, and rxjs. If you import Hell styles, Tailwind is required via
-        <code>tailwindcss</code>. Feature peers are still only runtime-needed when you import
-        their feature entry points. Add
-        <code>@angular/router</code> only when you import Hell dialog or the aggregate
-        <code>@hell-ui/angular/primitives</code> entry point, because
+        Forms/core/common, ng-primitives, @angular/cdk, <code>@floating-ui/dom</code>, ng-icons
+        core, and rxjs. If you import Hell styles, Tailwind is required via
+        <code>tailwindcss</code>. Feature peers are still only runtime-needed when you import their
+        feature entry points. Add <code>@angular/router</code> only when you import Hell dialog or
+        the aggregate <code>@hell-ui/angular/primitives</code> entry point, because
         <code>ng-primitives/dialog</code> has a router peer. Add
-        <code>@ng-icons/font-awesome</code> only when you use icon-backed entries such as
-        pagination or date-picker.
+        <code>@ng-icons/font-awesome</code> only when you use icon-backed entries such as pagination
+        or date-picker.
       </p>
       <hd-code-block [code]="installCode" />
 
@@ -46,8 +45,8 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
 
       <h2>3. Import the styles</h2>
       <p>
-        Import Tailwind first, then the narrow Hell style entry points you need. The library
-        exposes Tailwind-facing CSS variables such as <code>bg-hell-surface</code>,
+        Import Tailwind first, then the narrow Hell style entry points you need. The library exposes
+        Tailwind-facing CSS variables such as <code>bg-hell-surface</code>,
         <code>text-hell-foreground</code>, and <code>border-hell-border</code>. The
         <code>@hell-ui/angular/styles/kitchen-sink</code> alias includes composites and feature
         styles such as CodeMirror and PDF viewer, so it is convenient for demos but not the
@@ -58,7 +57,8 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
       <h2>4. Configure built-in labels</h2>
       <p>
         Built-in ARIA labels default to English. Use <code>provideHellLabels</code> from
-        <code>@hell-ui/angular/core</code> at the application or feature boundary to localize shared labels.
+        <code>@hell-ui/angular/core</code> at the application or feature boundary to localize shared
+        labels.
       </p>
       <hd-code-block [code]="labelsCode" />
 
@@ -78,7 +78,7 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
         <li>
           Register icons close to the component that renders them with <code>provideIcons</code>.
         </li>
-        <li>Use <code>unstyled</code> when you need behavior without hell styling.</li>
+        <li>Use <code>ui</code> to refine migrated component recipes.</li>
         <li>Keep theme changes in CSS variables rather than component-specific overrides.</li>
       </ul>
     </article>
