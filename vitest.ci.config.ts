@@ -5,6 +5,7 @@ import { defineConfig } from 'vitest/config';
 const workspaceRoot = fileURLToPath(new URL('.', import.meta.url));
 const testResultsPath = resolve(workspaceRoot, 'test-results/vitest-junit.xml');
 const coveragePath = resolve(workspaceRoot, 'coverage');
+const testTimeoutMs = positiveNumber(process.env.HELL_UNIT_TEST_CASE_TIMEOUT_MS, 30_000);
 
 const reporters = [
   'default',
@@ -22,6 +23,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['projects/hell/src/test-setup.ts'],
     reporters,
+    testTimeout: testTimeoutMs,
     coverage: {
       enabled: true,
       provider: 'v8',
@@ -37,3 +39,8 @@ export default defineConfig({
     },
   },
 });
+
+function positiveNumber(raw: string | undefined, fallback: number): number {
+  const value = Number(raw);
+  return Number.isFinite(value) && value > 0 ? value : fallback;
+}

@@ -1,0 +1,222 @@
+[
+  {
+    "id": "date-input-desktop",
+    "path": "/components/date-input",
+    "width": 1280,
+    "height": 900,
+    "selector": "hell-date-input input[hellinput]",
+    "fullPath": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/date-input-desktop-full.png",
+    "focusPath": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/date-input-desktop-focus.png",
+    "consoleMessages": [
+      {
+        "type": "warning",
+        "text": "NG0912: Component ID generation collision detected. Components '_HellIcon' and '_HellIcon' with selector 'hell-icon' generated the same component ID. To fix this, you can change the selector of one of those components or add an extra host attribute to force a different ID. Find more at https://v21.angular.dev/errors/NG0912"
+      }
+    ],
+    "details": {
+      "title": "HellDocs",
+      "h1": "Date input",
+      "inputCount": 9,
+      "slots": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root"
+      ],
+      "legacyFieldSlots": 0,
+      "firstInput": {
+        "value": "2026-04-22",
+        "placeholder": "YYYY-MM-DD",
+        "ariaLabel": null,
+        "rect": {
+          "x": 354.03125,
+          "y": 363.578125,
+          "width": 162,
+          "height": 28,
+          "top": 363.578125,
+          "right": 516.03125,
+          "bottom": 391.578125,
+          "left": 354.03125
+        },
+        "styles": {
+          "minHeight": "auto",
+          "borderRadius": "6px",
+          "paddingInlineStart": "0px",
+          "borderColor": "rgb(227, 230, 236)",
+          "backgroundColor": "rgba(0, 0, 0, 0)"
+        }
+      }
+    },
+    "regionPath": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/date-input-desktop-region.png"
+  },
+  {
+    "id": "date-input-mobile",
+    "path": "/components/date-input",
+    "width": 390,
+    "height": 844,
+    "selector": "hell-date-input input[hellinput]",
+    "fullPath": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/date-input-mobile-full.png",
+    "focusPath": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/date-input-mobile-focus.png",
+    "consoleMessages": [
+      {
+        "type": "warning",
+        "text": "NG0912: Component ID generation collision detected. Components '_HellIcon' and '_HellIcon' with selector 'hell-icon' generated the same component ID. To fix this, you can change the selector of one of those components or add an extra host attribute to force a different ID. Find more at https://v21.angular.dev/errors/NG0912"
+      }
+    ],
+    "details": {
+      "title": "HellDocs",
+      "h1": "Date input",
+      "inputCount": 9,
+      "slots": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root"
+      ],
+      "legacyFieldSlots": 0,
+      "firstInput": {
+        "value": "2026-04-22",
+        "placeholder": "YYYY-MM-DD",
+        "ariaLabel": null,
+        "rect": {
+          "x": 32,
+          "y": 395.578125,
+          "width": 162,
+          "height": 28,
+          "top": 395.578125,
+          "right": 194,
+          "bottom": 423.578125,
+          "left": 32
+        },
+        "styles": {
+          "minHeight": "auto",
+          "borderRadius": "6px",
+          "paddingInlineStart": "0px",
+          "borderColor": "rgb(227, 230, 236)",
+          "backgroundColor": "rgba(0, 0, 0, 0)"
+        }
+      }
+    },
+    "regionPath": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/date-input-mobile-region.png"
+  },
+  {
+    "id": "time-input-desktop",
+    "path": "/components/time-input",
+    "width": 1280,
+    "height": 900,
+    "selector": "hell-time-input input[hellinput]",
+    "fullPath": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/time-input-desktop-full.png",
+    "focusPath": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/time-input-desktop-focus.png",
+    "consoleMessages": [
+      {
+        "type": "warning",
+        "text": "NG0912: Component ID generation collision detected. Components '_HellIcon' and '_HellIcon' with selector 'hell-icon' generated the same component ID. To fix this, you can change the selector of one of those components or add an extra host attribute to force a different ID. Find more at https://v21.angular.dev/errors/NG0912"
+      }
+    ],
+    "details": {
+      "title": "HellDocs",
+      "h1": "Time input",
+      "inputCount": 9,
+      "slots": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root"
+      ],
+      "legacyFieldSlots": 0,
+      "firstInput": {
+        "value": "14:30",
+        "placeholder": "HH:mm",
+        "ariaLabel": "Reminder time",
+        "rect": {
+          "x": 354.03125,
+          "y": 409.078125,
+          "width": 134,
+          "height": 28,
+          "top": 409.078125,
+          "right": 488.03125,
+          "bottom": 437.078125,
+          "left": 354.03125
+        },
+        "styles": {
+          "minHeight": "auto",
+          "borderRadius": "6px",
+          "paddingInlineStart": "0px",
+          "borderColor": "rgb(227, 230, 236)",
+          "backgroundColor": "rgba(0, 0, 0, 0)"
+        }
+      }
+    },
+    "regionPath": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/time-input-desktop-region.png"
+  },
+  {
+    "id": "time-input-mobile",
+    "path": "/components/time-input",
+    "width": 390,
+    "height": 844,
+    "selector": "hell-time-input input[hellinput]",
+    "fullPath": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/time-input-mobile-full.png",
+    "focusPath": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/time-input-mobile-focus.png",
+    "consoleMessages": [
+      {
+        "type": "warning",
+        "text": "NG0912: Component ID generation collision detected. Components '_HellIcon' and '_HellIcon' with selector 'hell-icon' generated the same component ID. To fix this, you can change the selector of one of those components or add an extra host attribute to force a different ID. Find more at https://v21.angular.dev/errors/NG0912"
+      }
+    ],
+    "details": {
+      "title": "HellDocs",
+      "h1": "Time input",
+      "inputCount": 9,
+      "slots": [
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root",
+        "root"
+      ],
+      "legacyFieldSlots": 0,
+      "firstInput": {
+        "value": "14:30",
+        "placeholder": "HH:mm",
+        "ariaLabel": "Reminder time",
+        "rect": {
+          "x": 32,
+          "y": 463.828125,
+          "width": 134,
+          "height": 28,
+          "top": 463.828125,
+          "right": 166,
+          "bottom": 491.828125,
+          "left": 32
+        },
+        "styles": {
+          "minHeight": "auto",
+          "borderRadius": "6px",
+          "paddingInlineStart": "0px",
+          "borderColor": "rgb(227, 230, 236)",
+          "backgroundColor": "rgba(0, 0, 0, 0)"
+        }
+      }
+    },
+    "regionPath": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/time-input-mobile-region.png"
+  }
+]

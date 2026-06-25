@@ -1,4 +1,4 @@
-import { Directive, ElementRef, booleanAttribute, inject, input } from '@angular/core';
+import { Directive, booleanAttribute, input } from '@angular/core';
 import { NgpInput } from 'ng-primitives/input';
 import { NgpTextarea } from 'ng-primitives/textarea';
 import { HellPartStyleable, type HellRecipe, type HellUi } from '../../core/styleable';
@@ -31,18 +31,12 @@ const HELL_TEXTAREA_RECIPE = {
   root: `block min-h-[calc(var(--spacing-hell-control-md)*2)] w-full resize-y rounded-hell-md border border-hell-border bg-hell-surface-elevated px-hell-4 py-hell-3 font-[inherit] text-[13px] leading-normal text-hell-foreground ${HELL_FORM_CONTROL_STATE_CLASSES} ${HELL_TEXT_CONTROL_PLACEHOLDER_CLASSES} data-[size=sm]:min-h-[calc(var(--spacing-hell-control-sm)*2)] data-[size=sm]:px-hell-3 data-[size=sm]:py-hell-2 data-[size=sm]:text-xs data-[size=lg]:min-h-[calc(var(--spacing-hell-control-lg)*2)] data-[size=lg]:px-hell-5 data-[size=lg]:py-hell-4 data-[size=lg]:text-sm`,
 } satisfies HellRecipe<HellTextareaPart>;
 
-function hellInitialDataSlot(): string {
-  return (
-    inject<ElementRef<HTMLElement>>(ElementRef).nativeElement.getAttribute('data-slot') ?? 'root'
-  );
-}
-
 @Directive({
   selector: 'input[hellInput]',
   hostDirectives: [{ directive: NgpInput, inputs: ['disabled', 'id'] }],
   host: {
     '[class]': "part('root')",
-    '[attr.data-slot]': 'slot',
+    'data-slot': 'root',
     '[attr.data-size]': 'size()',
     '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
@@ -53,7 +47,6 @@ export class HellInput extends HellPartStyleable<HellInputPart> {
 
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
-  protected readonly slot = hellInitialDataSlot();
 }
 
 @Directive({
@@ -61,7 +54,7 @@ export class HellInput extends HellPartStyleable<HellInputPart> {
   hostDirectives: [{ directive: NgpInput, inputs: ['disabled', 'id'] }],
   host: {
     '[class]': "part('root')",
-    '[attr.data-slot]': 'slot',
+    'data-slot': 'root',
     '[attr.data-size]': 'size()',
     '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
@@ -72,7 +65,6 @@ export class HellNativeSelect extends HellPartStyleable<HellNativeSelectPart> {
 
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
-  protected readonly slot = hellInitialDataSlot();
 }
 
 @Directive({
@@ -80,7 +72,7 @@ export class HellNativeSelect extends HellPartStyleable<HellNativeSelectPart> {
   hostDirectives: [{ directive: NgpTextarea, inputs: ['disabled', 'id'] }],
   host: {
     '[class]': "part('root')",
-    '[attr.data-slot]': 'slot',
+    'data-slot': 'root',
     '[attr.data-size]': 'size()',
     '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
@@ -91,5 +83,4 @@ export class HellTextarea extends HellPartStyleable<HellTextareaPart> {
 
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
-  protected readonly slot = hellInitialDataSlot();
 }

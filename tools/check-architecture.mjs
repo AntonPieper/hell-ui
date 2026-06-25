@@ -219,6 +219,64 @@ const legacyStyleableAllowlist = new Set([
   'HellTableSortTrigger',
 ]);
 
+const migratedPartStyleMapModules = [
+  {
+    className: 'HellButton',
+    partType: 'HellButtonPart',
+    uiType: 'HellButtonUi',
+    slug: 'button',
+    sourcePath: 'projects/hell/src/lib/primitives/button/button.ts',
+    publicApiPath: 'projects/hell/src/lib/public-api-primitive-button.ts',
+    apiReportFiles: ['hell-ui-angular-primitives.api.md'],
+    legacyClass: 'hell-button',
+    componentVariablePrefix: '--hell-button-',
+  },
+  {
+    className: 'HellInput',
+    partType: 'HellInputPart',
+    uiType: 'HellInputUi',
+    slug: 'input',
+    sourcePath: 'projects/hell/src/lib/primitives/input/input.ts',
+    publicApiPath: 'projects/hell/src/lib/public-api-primitive-input.ts',
+    apiReportFiles: ['hell-ui-angular-input.api.md', 'hell-ui-angular-primitives.api.md'],
+    legacyClass: 'hell-input',
+    componentVariablePrefix: '--hell-input-',
+  },
+  {
+    className: 'HellNativeSelect',
+    partType: 'HellNativeSelectPart',
+    uiType: 'HellNativeSelectUi',
+    slug: 'input',
+    sourcePath: 'projects/hell/src/lib/primitives/input/input.ts',
+    publicApiPath: 'projects/hell/src/lib/public-api-primitive-input.ts',
+    apiReportFiles: ['hell-ui-angular-input.api.md', 'hell-ui-angular-primitives.api.md'],
+    legacyClass: 'hell-native-select',
+    componentVariablePrefix: '--hell-native-select-',
+  },
+  {
+    className: 'HellTextarea',
+    partType: 'HellTextareaPart',
+    uiType: 'HellTextareaUi',
+    slug: 'input',
+    sourcePath: 'projects/hell/src/lib/primitives/input/input.ts',
+    publicApiPath: 'projects/hell/src/lib/public-api-primitive-input.ts',
+    apiReportFiles: ['hell-ui-angular-input.api.md', 'hell-ui-angular-primitives.api.md'],
+    legacyClass: 'hell-textarea',
+    componentVariablePrefix: '--hell-textarea-',
+  },
+  {
+    className: 'HellDialpad',
+    partType: 'HellDialpadPart',
+    uiType: 'HellDialpadUi',
+    slug: 'dialpad',
+    sourcePath: 'projects/hell/src/lib/composites/dialpad/dialpad.ts',
+    publicApiPath: 'projects/hell/src/lib/public-api-composite-dialpad.ts',
+    apiReportFiles: ['hell-ui-angular-dialpad.api.md'],
+    legacyClass: 'hell-dialpad',
+    componentVariablePrefix: '--hell-dialpad-',
+  },
+];
+
 function main() {
   checkDocsExamples();
   checkDocsLazyRouteImportGraphContract();
@@ -238,6 +296,7 @@ function main() {
   checkAppShellBreakpointContract();
   checkBehaviorSentinelContract();
   checkComponentContract();
+  checkPartStyleMapContract();
   checkLabelContract();
   checkCodeEditorRuntimeContract();
   checkExperimentalFeatureContract();
@@ -2170,6 +2229,377 @@ function checkComponentContract() {
       );
     }
   }
+}
+
+function checkPartStyleMapContract() {
+  const styleableSource = readFile(join(root, 'projects/hell/src/lib/core/styleable.ts'));
+  const styleableCompact = compactSource(styleableSource);
+  const mergeSource = readFile(join(root, 'projects/hell/src/lib/core/part-style-merge.ts'));
+  const packageConsumer = readFile(join(root, 'tools/check-package-consumer.mjs'));
+  const releaseDryRun = readFile(join(root, 'tools/release-dry-run.mjs'));
+  const productionReadyCheck = readFile(join(root, 'tools/production-ready-check.mjs'));
+  const entrypointManifestSource = readFile(join(root, 'tools/entrypoint-manifest.mjs'));
+
+  for (const symbol of ['HellUi', 'HellUiInput', 'HellRecipe', 'HellPartStyleable']) {
+    if (
+      !styleableSource.includes(
+        `export ${symbol === 'HellPartStyleable' ? 'abstract class' : 'type'} ${symbol}`,
+      )
+    ) {
+      failures.push(`Part Style Map core contract must export ${symbol}`);
+    }
+  }
+  if (
+    !/export\s+type\s+HellUiInput<Part extends string>\s*=\s*string\s*\|\s*HellUi<Part>\s*\|\s*null\s*\|\s*undefined/.test(
+      styleableCompact,
+    )
+  ) {
+    failures.push('HellUiInput must keep the string/default-part shorthand shape');
+  }
+  if (!/@Input\(\{\s*alias:\s*['"]ui['"]\s*\}\)\s+ui:\s+HellUiInput<Part>/.test(styleableCompact)) {
+    failures.push('HellPartStyleable must own the public [ui] input');
+  }
+  if (!styleableSource.includes('protected abstract readonly defaultUiPart: Part')) {
+    failures.push('HellPartStyleable must own a default public part for string shorthand');
+  }
+  if (!styleableSource.includes('hellTwMerge(this.recipe[part], this.uiClassForPart(part))')) {
+    failures.push('HellPartStyleable must use the configured hellTwMerge Part-Class Pipeline');
+  }
+  if (
+    !mergeSource.includes('extendTailwindMerge') ||
+    !mergeSource.includes('export const hellTwMerge')
+  ) {
+    failures.push('Configured hellTwMerge must be built with tailwind-merge extendTailwindMerge');
+  }
+
+  const rootApiReport = readApiReport('hell-ui-angular.api.md');
+  const coreApiReport = readApiReport('hell-ui-angular-core.api.md');
+  for (const symbol of [
+    'HellUi',
+    'HellUiInput',
+    'HellRecipe',
+    'HellPartStyleable',
+    'hellTwMerge',
+  ]) {
+    if (!rootApiReport.includes(symbol)) {
+      failures.push(`Root API report must cover Part Style Map core export ${symbol}`);
+    }
+    if (!coreApiReport.includes(symbol)) {
+      failures.push(`Core API report must cover Part Style Map core export ${symbol}`);
+    }
+  }
+
+  for (const module of migratedPartStyleMapModules) {
+    checkMigratedPartStyleMapModule(module, entrypointManifestSource);
+  }
+  checkLegacyPartStyleCompatibilityHelpers();
+
+  if (packageConsumer.includes('button-unstyled')) {
+    failures.push('Package-consumer scenarios must use button-ui, not legacy button-unstyled');
+  }
+  if (!packageConsumer.includes("name: 'button-ui'")) {
+    failures.push('Package-consumer scenarios must include button-ui for ui shorthand without CSS');
+  }
+  if (!packageConsumer.includes("name: 'button'")) {
+    failures.push('Package-consumer scenarios must include styled button for compiled CSS proof');
+  }
+  if (!packageConsumer.includes('ui="') || !packageConsumer.includes('[ui]="')) {
+    failures.push(
+      'Package-consumer scenarios must compile ui string shorthand and part-map inputs',
+    );
+  }
+  if (!packageConsumer.includes('--color-hell-primary:#3452ff')) {
+    failures.push('Package-consumer button scenario must prove semantic token runtime theming');
+  }
+  if (functionBody(packageConsumer, 'buttonConsumerStylesCss')?.includes('@source')) {
+    failures.push(
+      'Button package-consumer CSS must prove shipped compiled CSS without consumer @source scanning',
+    );
+  }
+  if (
+    !packageConsumer.includes('HELL_PACKAGE_CONSUMER_RUNTIME_STYLE_CHECK') ||
+    !packageConsumer.includes('runtimeStyleAssertions') ||
+    !releaseDryRun.includes('HELL_PACKAGE_CONSUMER_RUNTIME_STYLE_CHECK')
+  ) {
+    failures.push(
+      'Full release dry-run package-consumer evidence must compute semantic token runtime styles',
+    );
+  }
+  if (
+    !packageConsumer.includes(
+      'built CSS contains Button recipe utilities and semantic token overrides',
+    )
+  ) {
+    failures.push('Package-consumer CSS assertion must name the Part Style Map compiled-CSS proof');
+  }
+  if (
+    !releaseDryRun.includes("'button-ui'") ||
+    !releaseDryRun.includes("'button'") ||
+    releaseDryRun.includes('button-unstyled')
+  ) {
+    failures.push(
+      'Release dry-run must include button-ui and styled button, and must not reference button-unstyled',
+    );
+  }
+  if (!productionReadyCheck.includes("'button-ui'") || !productionReadyCheck.includes("'button'")) {
+    failures.push('Production-readiness package-consumer gate must require button-ui and button');
+  }
+
+  const migrationGuide = readFile(join(root, 'docs/release/first-beta-consumer-guide.md'));
+  const readme = readFile(join(root, 'README.md'));
+  const requiredMigrationGuideTerms = [
+    'Part Style Maps replace Style Opt-Out',
+    'HellButton',
+    'HellInput',
+    'HellNativeSelect',
+    'HellTextarea',
+    'HellDialpad',
+    'ui="..."',
+    '[ui]="{ ... }"',
+    'class',
+    'MUST replace',
+    'legacyStyleableAllowlist',
+    'consumer',
+    '@source',
+  ];
+  for (const term of requiredMigrationGuideTerms) {
+    if (!migrationGuide.includes(term)) {
+      failures.push(`First beta migration guide must document Part Style Map policy term: ${term}`);
+    }
+  }
+  if (!readme.includes('legacyStyleableAllowlist') || !readme.includes('MUST replace')) {
+    failures.push(
+      'README Component Contract must point to the not-yet-migrated allowlist with MUST replace wording',
+    );
+  }
+}
+
+function checkMigratedPartStyleMapModule(module, entrypointManifestSource) {
+  const source = readFile(join(root, module.sourcePath));
+  const rel = module.sourcePath;
+  const partNames = literalUnionMembers(source, module.partType);
+  const moduleInfo = decoratedClassModules(source).find(
+    (candidate) => candidate.className === module.className,
+  );
+
+  if (!partNames.length) {
+    failures.push(`${rel} must export literal union ${module.partType}`);
+  }
+  if (!source.includes(`export type ${module.uiType} = HellUi<${module.partType}>`)) {
+    failures.push(`${rel} must export ${module.uiType} = HellUi<${module.partType}>`);
+  }
+  if (!moduleInfo) {
+    failures.push(`${rel} must export decorated class ${module.className}`);
+    return;
+  }
+
+  const moduleSource = moduleInfo.moduleSource;
+  if (!moduleInfo.classSource.includes(`extends HellPartStyleable<${module.partType}>`)) {
+    failures.push(`${rel} ${module.className} must extend HellPartStyleable<${module.partType}>`);
+  }
+  if (/\bHellStyleable\b/.test(moduleSource)) {
+    failures.push(`${rel} ${module.className} must not keep legacy HellStyleable`);
+  }
+  if (moduleSource.includes('unstyled')) {
+    failures.push(`${rel} ${module.className} must not keep Style Opt-Out`);
+  }
+  if (!moduleSource.includes("part('") || !moduleSource.includes('recipe')) {
+    failures.push(
+      `${rel} ${module.className} must use the Part-Class Pipeline for rendered classes`,
+    );
+  }
+  if (
+    !source.includes(`satisfies HellRecipe<${module.partType}>`) &&
+    !moduleSource.includes(`HellRecipe<${module.partType}>`)
+  ) {
+    failures.push(`${rel} must type its default recipe as HellRecipe<${module.partType}>`);
+  }
+
+  const defaultUiPart = /defaultUiPart\s*=\s*['"]([^'"]+)['"]/.exec(moduleSource)?.[1];
+  if (!defaultUiPart) {
+    failures.push(`${rel} ${module.className} must declare defaultUiPart for ui string shorthand`);
+  } else if (!partNames.includes(defaultUiPart)) {
+    failures.push(
+      `${rel} ${module.className} defaultUiPart "${defaultUiPart}" is not in ${module.partType}`,
+    );
+  }
+
+  if (/['"]\[attr\.data-slot\]['"]\s*:/.test(moduleSource)) {
+    failures.push(
+      `${rel} ${module.className} must not compute data-slot dynamically; it must match public parts`,
+    );
+  }
+  const literalSlots = literalDataSlots(moduleSource);
+  for (const slot of literalSlots) {
+    if (!partNames.includes(slot)) {
+      failures.push(
+        `${rel} ${module.className} renders data-slot="${slot}" outside ${module.partType}`,
+      );
+    }
+  }
+  for (const part of partNames) {
+    if (!literalSlots.includes(part)) {
+      failures.push(`${rel} ${module.className} public part "${part}" has no matching data-slot`);
+    }
+  }
+
+  const forbiddenPatterns = [
+    ['[ui].class', /\bui\s*\.\s*class\b|\[ui\]\.class/],
+    ['omit map', /\bomit\b/i],
+    ['public visual layers', /\b(?:visualLayers?|layers?)\b/],
+    [
+      'component-local merge helper',
+      /\b(?:HellPartClassMerger|mergePartClasses|clsx|cva|tailwindVariants|twMerge|cn\()/,
+    ],
+    ['behavior sentinel in recipe classes', /\bdata-\[(?:action|key|value|role|control)[^\]]*\]/],
+  ];
+  for (const [label, pattern] of forbiddenPatterns) {
+    if (pattern.test(moduleSource)) {
+      failures.push(`${rel} ${module.className} must not expose ${label}`);
+    }
+  }
+  if (module.legacyClass && legacyClassAppliedPattern(module.legacyClass).test(moduleSource)) {
+    failures.push(
+      `${rel} ${module.className} must not apply legacy .${module.legacyClass} default styling`,
+    );
+  }
+  if (module.componentVariablePrefix && moduleSource.includes(module.componentVariablePrefix)) {
+    failures.push(
+      `${rel} ${module.className} must not introduce component-specific theme variables`,
+    );
+  }
+  for (const offender of componentVariablePrefixOffenders(module)) {
+    failures.push(
+      `${offender.file}:${offender.line} must not expose migrated ${module.className} component-specific theme variable prefix ${module.componentVariablePrefix}`,
+    );
+  }
+
+  const publicApi = readFile(join(root, module.publicApiPath));
+  const expectedExport = module.sourcePath
+    .replace(/^projects\/hell\/src\/lib\//, './')
+    .replace(/\.ts$/, '');
+  if (!publicApi.includes(expectedExport)) {
+    failures.push(`${module.publicApiPath} must export ${expectedExport}`);
+  }
+  if (!entrypointManifestSource.includes(`'${module.slug}'`)) {
+    failures.push(`Entrypoint manifest must include ${module.slug} for ${module.className}`);
+  }
+
+  for (const reportFile of module.apiReportFiles) {
+    const report = readApiReport(reportFile);
+    for (const symbol of [module.className, module.partType, module.uiType]) {
+      if (!report.includes(symbol)) {
+        failures.push(`${reportFile} must cover migrated Part Style Map export ${symbol}`);
+      }
+    }
+  }
+}
+
+function checkLegacyPartStyleCompatibilityHelpers() {
+  const buttonCssPath = join(root, 'projects/hell/src/lib/styles/components/button.css');
+  const buttonCss = readFile(buttonCssPath);
+  if (
+    !buttonCss.includes('Legacy button-like helper') ||
+    !buttonCss.includes('not migrated to Part') ||
+    !buttonCss.includes('`ui` Part Style Map input')
+  ) {
+    failures.push(
+      'Legacy .hell-button CSS helper must document that migrated Button customization belongs to ui',
+    );
+  }
+
+  const sourceFiles = walk(join(root, 'projects/hell/src/lib')).filter(
+    (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'),
+  );
+  for (const file of sourceFiles) {
+    const rel = file.slice(root.length + 1);
+    for (const module of decoratedClassModules(readFile(file))) {
+      if (!legacyClassAppliedPattern('hell-button').test(module.moduleSource)) continue;
+      if (!legacyStyleableAllowlist.has(module.className)) {
+        failures.push(
+          `${rel} ${module.className} applies legacy .hell-button outside legacyStyleableAllowlist`,
+        );
+      }
+    }
+  }
+}
+
+function componentVariablePrefixOffenders(module) {
+  if (!module.componentVariablePrefix) return [];
+
+  const files = walk(join(root, 'projects/hell/src/lib')).filter(
+    (file) =>
+      (file.endsWith('.ts') || file.endsWith('.css')) &&
+      !file.endsWith('.spec.ts') &&
+      !file.endsWith('.d.ts'),
+  );
+  const offenders = [];
+  for (const file of files) {
+    const source = readFile(file);
+    if (!source.includes(module.componentVariablePrefix)) continue;
+    const rel = file.slice(root.length + 1);
+    for (const [index, line] of source.split(/\r?\n/).entries()) {
+      if (line.includes(module.componentVariablePrefix)) {
+        offenders.push({ file: rel, line: index + 1 });
+      }
+    }
+  }
+  return offenders;
+}
+
+function literalUnionMembers(source, typeName) {
+  const match = new RegExp(`export\\s+type\\s+${typeName}\\s*=([\\s\\S]*?);`).exec(source);
+  if (!match) return [];
+
+  return [...match[1].matchAll(/['"]([^'"]+)['"]/g)].map((candidate) => candidate[1]);
+}
+
+function literalDataSlots(source) {
+  const patterns = [
+    /\bdata-slot\s*=\s*"([^"]+)"/g,
+    /\bdata-slot\s*=\s*'([^']+)'/g,
+    /['"]data-slot['"]\s*:\s*['"]([^'"]+)['"]/g,
+  ];
+  return [
+    ...new Set(
+      patterns.flatMap((pattern) => [...source.matchAll(pattern)].map((candidate) => candidate[1])),
+    ),
+  ];
+}
+
+function functionBody(source, name) {
+  const start = source.indexOf(`function ${name}(`);
+  if (start === -1) return null;
+
+  const open = source.indexOf('{', start);
+  if (open === -1) return null;
+
+  let depth = 0;
+  for (let index = open; index < source.length; index += 1) {
+    const char = source[index];
+    if (char === '{') depth += 1;
+    else if (char === '}') {
+      depth -= 1;
+      if (depth === 0) return source.slice(open, index + 1);
+    }
+  }
+
+  return null;
+}
+
+function readApiReport(fileName) {
+  return readFile(join(root, 'etc/api-reports', fileName));
+}
+
+function legacyClassAppliedPattern(className) {
+  const escaped = escapeRegExp(className);
+  return new RegExp(
+    `\\[class\\.${escaped}\\]|class\\s*=\\s*["'][^"']*\\b${escaped}\\b|classList\\.add\\(\\s*["']${escaped}["']`,
+  );
+}
+
+function compactSource(source) {
+  return source.replace(/\s+/g, ' ').trim();
 }
 
 function checkLabelContract() {

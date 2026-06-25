@@ -9,7 +9,7 @@ Use this guide when moving an app from local/alpha Hell imports to the first bet
 1. Start from an Angular 21 app that satisfies `@angular/common`, `@angular/core`, `@angular/forms`, and `rxjs` peer ranges from [`projects/hell/package.json`](../../projects/hell/package.json).
 2. Install the smallest peer tier for the entry points and CSS you import.
 3. Replace root or kitchen-sink imports with narrow secondary entry points where possible.
-4. Import only the Hell CSS files you need. Migrated components such as Button use `ui` Part Style Maps; components not yet migrated still support `unstyled`.
+4. Import only the Hell CSS files you need. Migrated components use `ui` Part Style Maps; components not yet migrated are tracked in the legacy allowlist and MUST replace `unstyled`.
 5. Treat browser-only/heavy features as lazy, client-only, and beta/experimental unless their own docs say otherwise.
 6. Check the accessibility matrix and the production-readiness gate before making production claims.
 
@@ -134,26 +134,48 @@ Add only the feature CSS you import:
 
 Avoid `@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` for production migration unless the app intentionally accepts every primitive, composite, CodeMirror, and table style in one bundle. PDF viewer styles come from `@hell-ui/pdf-viewer/styles`.
 
-## Part Style Maps and Unstyled mode
+Hell's migrated component defaults are compiled into the shipped CSS entry
+points. Consumers do not need to add Tailwind `@source` scanning for
+`node_modules/@hell-ui/angular` to receive those defaults. If an app invents
+its own Tailwind classes in `ui`, those classes still belong to the app's own
+Tailwind content/source pipeline.
 
-Button has migrated from Style Opt-Out to the Part Style Map API. Pass `ui`
-when you want to refine its public `root` part while keeping Hell behavior,
-state attributes, and accessibility wiring.
+## Part Style Maps replace Style Opt-Out
+
+`HellButton`, `HellInput`, `HellNativeSelect`, `HellTextarea`, and
+`HellDialpad` have migrated from Style Opt-Out to the Part Style Map API. Pass
+`ui` when you want to refine public parts while keeping Hell behavior, state
+attributes, and accessibility wiring.
 
 ```html
 <button hellButton type="button" ui="rounded-hell-pill bg-hell-primary">Save</button>
+<input hellInput ui="rounded-hell-pill px-hell-5" aria-label="Search" />
+<hell-dialpad [ui]="{ keyButton: 'rounded-hell-pill', callButton: 'bg-hell-success-strong' }" />
 ```
 
 Rules for migration:
 
-- Keep the directive import narrow, for example `@hell-ui/angular/button`.
-- Import Hell CSS when you want shipped default visuals.
-- Use `ui="..."` for Button visual refinements instead of `unstyled`.
+- Keep the directive import narrow, for example `@hell-ui/angular/button`,
+  `@hell-ui/angular/input`, or `@hell-ui/angular/dialpad`.
+- Import Hell CSS when you want shipped default visuals; the `button`
+  package-consumer scenario proves those recipe utilities ship without consumer
+  `@source` scanning.
+- Use `ui="..."` for single-root directives such as Button and Input.
 - Use `[ui]="{ ... }"` for components with multiple public parts, such as Dialpad.
-- Use `class` for layout hooks and non-conflicting additions; use `ui` for deterministic Tailwind utility conflicts.
+- Use `class` for layout hooks and non-conflicting additions only; use `ui` for deterministic Tailwind utility conflicts because template class order is outside the Part-Class Pipeline.
 - Continue to test the behavior and accessible name; styling APIs are not accessibility opt-outs.
 
-The [`button-ui`](../../tools/check-package-consumer.mjs) package-consumer scenario proves the typed Button `ui` path without Tailwind or Hell CSS. Other primitives that have not migrated yet still document `unstyled` locally.
+The [`button-ui`](../../tools/check-package-consumer.mjs) package-consumer
+scenario proves the typed Button `ui` path without Tailwind or Hell CSS. The
+styled [`button`](../../tools/check-package-consumer.mjs) scenario proves
+compiled Button recipe CSS, semantic token runtime theming, and no consumer
+`@source` scanning for Hell defaults.
+
+The not-yet-migrated list is machine-tracked as `legacyStyleableAllowlist` in
+[`tools/check-architecture.mjs`](../../tools/check-architecture.mjs). Every
+symbol in that allowlist is legacy compatibility only and MUST replace
+`unstyled` with a Part Style Map before that component can be promoted as a
+migrated styling surface.
 
 ## Heavy and browser-only features
 

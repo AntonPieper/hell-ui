@@ -13,6 +13,7 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 - HELL-051: Added this changelog, the alpha-to-beta SemVer policy, and a release dry-run guard that fails when the current package version has no changelog entry.
 - HELL-052: Added the [first-beta consumer migration guide](docs/release/first-beta-consumer-guide.md) covering peer tiers, import paths, CSS imports, unstyled mode, heavy features, experimental APIs, and production-readiness gaps.
+- HELL-133: Added global Part Style Map architecture, API/report, package-consumer, and migration-guide gates for migrated Button, Input, and Dialpad styling contracts.
 
 ## [0.1.0] - 2026-06-03
 

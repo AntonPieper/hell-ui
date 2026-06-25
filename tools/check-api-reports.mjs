@@ -39,6 +39,12 @@ const apiReportEntrypoints = [
     reportFileName: 'hell-ui-angular-input.api.md',
   },
   {
+    id: 'dialpad',
+    specifier: '@hell-ui/angular/dialpad',
+    mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular-dialpad.d.ts',
+    reportFileName: 'hell-ui-angular-dialpad.api.md',
+  },
+  {
     id: 'primitives',
     specifier: '@hell-ui/angular/primitives',
     mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular-primitives.d.ts',
@@ -94,15 +100,21 @@ if (failed) {
   process.exit(1);
 }
 
-console.log(`[api-report] ${localBuild ? 'updated' : 'current'}: ${apiReportEntrypoints.length} entrypoints.`);
+console.log(
+  `[api-report] ${localBuild ? 'updated' : 'current'}: ${apiReportEntrypoints.length} entrypoints.`,
+);
 
 function requiredBuildInputs() {
-  return [packageJsonFullPath, ...apiReportEntrypoints.map((entrypoint) => mainEntryPointPath(entrypoint))];
+  return [
+    packageJsonFullPath,
+    ...apiReportEntrypoints.map((entrypoint) => mainEntryPointPath(entrypoint)),
+  ];
 }
 
 function apiExtractorConfig(entrypoint) {
   return {
-    $schema: 'https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json',
+    $schema:
+      'https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json',
     projectFolder: root,
     mainEntryPointFilePath: mainEntryPointPath(entrypoint),
     compiler: {

@@ -1,4 +1,5 @@
 import { spawn, spawnSync } from 'node:child_process';
+import { createServer } from 'node:http';
 import {
   existsSync,
   mkdirSync,
@@ -9,7 +10,7 @@ import {
   statSync,
   writeFileSync,
 } from 'node:fs';
-import { dirname, isAbsolute, join } from 'node:path';
+import { basename, dirname, extname, isAbsolute, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { auditPackedPackage } from './package-pack-audit.mjs';
@@ -28,6 +29,7 @@ const minimalDependencyMode = parseMinimalDependencyMode(packageConsumerArgs);
 const skipPackageBuild = parseSkipPackageBuild(packageConsumerArgs);
 const pnpmTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_TIMEOUT_MS, 240_000);
 const pnpmHeartbeatMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_HEARTBEAT_MS, 30_000);
+const runtimeStyleCheck = process.env.HELL_PACKAGE_CONSUMER_RUNTIME_STYLE_CHECK === '1';
 const pnpmPreflightTimeoutMs = positiveNumber(
   process.env.HELL_PACKAGE_CONSUMER_PREFLIGHT_TIMEOUT_MS,
   30_000,
@@ -262,13 +264,22 @@ const scenarios = [
     mainTs: buttonConsumerMainTs(),
     stylesCss: buttonConsumerStylesCss(),
     cssIncludes: [
+      '--color-hell-primary:#3452ff',
       'background-color:var(--color-hell-surface-elevated)',
       'background-color:var(--color-hell-primary)',
       'background-color:var(--color-hell-primary-hover)',
-      'border-radius:var(--radius-hell-pill)',
-      'box-shadow:var(--shadow-hell-lg)',
-      'text-underline-offset:5px',
+      'border-radius:var(--radius-hell-md)',
+      'box-shadow:var(--shadow-hell-xs)',
+      'text-underline-offset:3px',
       'transition-property:background-color,border-color,color,box-shadow',
+    ],
+    runtimeStyleAssertions: [
+      {
+        label: 'semantic primary token override',
+        selector: '[data-test-id="primary-link"]',
+        property: 'color',
+        expected: 'rgb(52, 82, 255)',
+      },
     ],
   },
   {
@@ -865,6 +876,7 @@ async function runConsumerScenarioBuild(tempRoot, scenario) {
 
   await runPnpm(buildCommand, tempRoot, { scenarioName: scenario.name });
   assertConsumerBuildCss(tempRoot, scenario);
+  await assertConsumerRuntimeStyles(tempRoot, scenario);
   console.log(`[package-consumer:${scenario.name}] built ${scenario.description}`);
 }
 
@@ -880,7 +892,58 @@ function assertConsumerBuildCss(workspace, scenario) {
   }
 
   console.log(
-    `${packageConsumerLabel(scenario.name)} ok: built CSS contains Button recipe utilities`,
+    `${packageConsumerLabel(scenario.name)} ok: built CSS contains Button recipe utilities and semantic token overrides`,
+  );
+}
+
+async function assertConsumerRuntimeStyles(workspace, scenario) {
+  if (!runtimeStyleCheck || !scenario.runtimeStyleAssertions?.length) return;
+
+  let chromium;
+  try {
+    ({ chromium } = await import('@playwright/test'));
+  } catch (error) {
+    fail(
+      `Scenario ${scenario.name} runtime style check requires @playwright/test: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+
+  const browserRoot = consumerBrowserBuildRoot(workspace);
+  const server = await startStaticServer(browserRoot);
+  let browser;
+  try {
+    browser = await chromium.launch();
+    const page = await browser.newPage();
+    await page.goto(server.url, { waitUntil: 'networkidle' });
+
+    for (const assertion of scenario.runtimeStyleAssertions) {
+      const locator = page.locator(assertion.selector);
+      await locator.waitFor({ state: 'visible' });
+      const actual = await locator.evaluate(
+        (element, property) => getComputedStyle(element).getPropertyValue(property).trim(),
+        assertion.property,
+      );
+      if (actual !== assertion.expected) {
+        fail(
+          `Scenario ${scenario.name} runtime ${assertion.label} expected ${assertion.property}=${assertion.expected}, got ${actual}`,
+        );
+      }
+    }
+  } catch (error) {
+    fail(
+      `Scenario ${scenario.name} runtime style check failed: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  } finally {
+    if (browser) await browser.close();
+    await server.close();
+  }
+
+  console.log(
+    `${packageConsumerLabel(scenario.name)} ok: runtime computed styles resolve semantic token overrides`,
   );
 }
 
@@ -893,6 +956,68 @@ function readConsumerBuildCss(workspace) {
 
 function normalizeCssForAssertion(css) {
   return css.replace(/\s+/g, '');
+}
+
+function consumerBrowserBuildRoot(workspace) {
+  const distRoot = join(workspace, 'dist', 'consumer');
+  const indexPath = existingFiles(distRoot).find((file) => basename(file) === 'index.html');
+  if (!indexPath) fail(`Consumer build did not emit index.html under ${distRoot}`);
+  return dirname(indexPath);
+}
+
+function startStaticServer(staticRoot) {
+  const absoluteRoot = resolve(staticRoot);
+  const server = createServer((request, response) => {
+    const url = new URL(request.url ?? '/', 'http://127.0.0.1');
+    const requestedPath = decodeURIComponent(url.pathname);
+    const target =
+      requestedPath === '/'
+        ? join(absoluteRoot, 'index.html')
+        : resolve(absoluteRoot, `.${requestedPath}`);
+    const filePath =
+      target.startsWith(absoluteRoot) && existsSync(target) && statSync(target).isFile()
+        ? target
+        : join(absoluteRoot, 'index.html');
+
+    response.writeHead(200, { 'content-type': staticContentType(filePath) });
+    response.end(readFileSync(filePath));
+  });
+
+  return new Promise((resolveServer, reject) => {
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', () => {
+      server.off('error', reject);
+      const address = server.address();
+      if (!address || typeof address === 'string') {
+        reject(new Error('Static server did not expose a TCP address.'));
+        return;
+      }
+      resolveServer({
+        url: `http://127.0.0.1:${address.port}/`,
+        close: () =>
+          new Promise((resolveClose) => {
+            server.close(() => resolveClose());
+          }),
+      });
+    });
+  });
+}
+
+function staticContentType(filePath) {
+  switch (extname(filePath)) {
+    case '.css':
+      return 'text/css; charset=utf-8';
+    case '.html':
+      return 'text/html; charset=utf-8';
+    case '.js':
+      return 'text/javascript; charset=utf-8';
+    case '.json':
+      return 'application/json; charset=utf-8';
+    case '.svg':
+      return 'image/svg+xml';
+    default:
+      return 'application/octet-stream';
+  }
 }
 
 function existingFiles(rootPath) {
@@ -1133,13 +1258,13 @@ import { HellButton, type HellButtonUi } from '${packageName}/button';
   standalone: true,
   imports: [HellButton],
   template: \`
-    <button hellButton type="button" ui="rounded-hell-pill shadow-hell-lg">Save</button>
-    <a hellButton href="#details" [disabled]="disabled" [ui]="linkUi">Details</a>
+    <button hellButton type="button" ui="bg-hell-danger border-hell-danger">Save</button>
+    <a hellButton href="#details" variant="link" data-test-id="primary-link" [disabled]="disabled" [ui]="linkUi">Details</a>
   \`,
 })
 class App {
   protected readonly disabled = true;
-  protected readonly linkUi = { root: 'underline-offset-[5px]' } satisfies HellButtonUi;
+  protected readonly linkUi = { root: 'text-hell-primary underline-offset-[3px]' } satisfies HellButtonUi;
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
@@ -1647,7 +1772,7 @@ function primitivesConsumerStylesCss() {
 function buttonConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/styles/primitives";
-@source "./main.ts";
+:root { --color-hell-primary:#3452ff; }
 `;
 }
 
