@@ -48,11 +48,7 @@ pnpm production-ready:check
     {
       "category": "api",
       "title": "API report proof for stable entry points",
-      "sliceIds": [
-        "HELL-025",
-        "HELL-026",
-        "HELL-051"
-      ],
+      "sliceIds": ["HELL-025", "HELL-026", "HELL-051"],
       "commandEvidence": [
         "pnpm build:lib",
         "pnpm test:api-report",
@@ -97,10 +93,7 @@ pnpm production-ready:check
         "HELL-043",
         "HELL-061"
       ],
-      "commandEvidence": [
-        "pnpm e2e",
-        "pnpm release:dry-run -- --full"
-      ],
+      "commandEvidence": ["pnpm e2e", "pnpm release:dry-run -- --full"],
       "evidenceChecks": [
         {
           "type": "playwrightJsonReport",
@@ -113,23 +106,14 @@ pnpm production-ready:check
           "type": "fileNotContains",
           "label": "accessibility matrix has no critical gaps",
           "path": "projects/hell-docs/src/app/pages/accessibility/accessibility.page.ts",
-          "forbids": [
-            "Critical gap",
-            "criticalGap: true"
-          ]
+          "forbids": ["Critical gap", "criticalGap: true"]
         }
       ]
     },
     {
       "category": "docs-budgets",
       "title": "Docs budget policy and current diagnosis proof",
-      "sliceIds": [
-        "HELL-019",
-        "HELL-030",
-        "HELL-031",
-        "HELL-032",
-        "HELL-050"
-      ],
+      "sliceIds": ["HELL-019", "HELL-030", "HELL-031", "HELL-032", "HELL-050"],
       "commandEvidence": [
         "pnpm build:docs",
         "pnpm diagnose:docs-bundle",
@@ -157,11 +141,7 @@ pnpm production-ready:check
     {
       "category": "pack-audit",
       "title": "pnpm pack contents and APF audit proof",
-      "sliceIds": [
-        "HELL-023",
-        "HELL-024",
-        "HELL-053"
-      ],
+      "sliceIds": ["HELL-023", "HELL-024", "HELL-053"],
       "commandEvidence": [
         "pnpm build:lib",
         "pnpm test:package-pack",
@@ -177,16 +157,8 @@ pnpm production-ready:check
     {
       "category": "release-dry-run",
       "title": "Full release-candidate dry-run evidence",
-      "sliceIds": [
-        "HELL-027",
-        "HELL-028",
-        "HELL-049",
-        "HELL-051",
-        "HELL-052"
-      ],
-      "commandEvidence": [
-        "pnpm release:dry-run -- --full"
-      ],
+      "sliceIds": ["HELL-027", "HELL-028", "HELL-049", "HELL-051", "HELL-052"],
+      "commandEvidence": ["pnpm release:dry-run -- --full"],
       "evidenceChecks": [
         {
           "type": "releaseDryRunEvidence",
@@ -200,14 +172,14 @@ pnpm production-ready:check
 
 ## Human checklist
 
-| Blocker category | Slice IDs | Required command evidence | What blocks the production-ready claim |
-| --- | --- | --- | --- |
-| Package-consumer | HELL-012, HELL-020, HELL-021, HELL-022, HELL-023, HELL-024, HELL-055, HELL-081, HELL-129 | `pnpm test:package-consumer -- --minimal-deps`; `pnpm release:dry-run -- --full` | Full release JSON evidence must show selected strict-peer consumer scenarios passing (`root-core`, `button-ui`, `primitives-css`, `audio-player`, `audio-transcript`, `table`, `table-tanstack`, `table-tanstack-virtual`, `no-legacy-alias`, `code-editor`). |
-| API | HELL-025, HELL-026, HELL-051 | `pnpm build:lib`; `pnpm test:api-report`; `pnpm release:dry-run -- --full` | Stable API reports must exist and the full release dry-run must pass the API report task. HELL-051 still owns semver/changelog policy before public beta. |
-| Accessibility | HELL-038, HELL-039, HELL-040, HELL-041, HELL-042, HELL-043, HELL-061 | `pnpm e2e`; `pnpm release:dry-run -- --full` | `test-results/playwright-report.json` must report zero unexpected results for every `e2e/*.spec.ts` file across chromium, firefox, and webkit on the current commit; the accessibility matrix must not contain `Critical gap` or `criticalGap: true` rows. Current critical gaps keep Hell UI internal beta. |
-| Docs budgets | HELL-019, HELL-030, HELL-031, HELL-032, HELL-050 | `pnpm build:docs`; `pnpm diagnose:docs-bundle`; `pnpm release:dry-run -- --full` | The budget diagnosis must classify warnings as accepted or regression, and the full release dry-run must pass docs build. HELL-050 owns the remaining eager-import audit. |
-| Pack audit | HELL-023, HELL-024, HELL-053 | `pnpm build:lib`; `pnpm test:package-pack`; `pnpm release:dry-run -- --full` | Full release JSON evidence must show the pack audit passing before production language. HELL-053 still owns PDF package split risk before beta. |
-| Release dry-run | HELL-027, HELL-028, HELL-049, HELL-051, HELL-052 | `pnpm release:dry-run -- --full` | The latest full release-candidate JSON evidence must pass every dry-run task, including the changelog entry check for the current package version. |
+| Blocker category | Slice IDs                                                                                | Required command evidence                                                        | What blocks the production-ready claim                                                                                                                                                                                                                                                                       |
+| ---------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Package-consumer | HELL-012, HELL-020, HELL-021, HELL-022, HELL-023, HELL-024, HELL-055, HELL-081, HELL-129 | `pnpm test:package-consumer -- --minimal-deps`; `pnpm release:dry-run -- --full` | Full release JSON evidence must show selected strict-peer consumer scenarios passing (`root-core`, `button-ui`, `button`, `primitives-css`, `audio-player`, `audio-transcript`, `table`, `table-tanstack`, `table-tanstack-virtual`, `no-legacy-alias`, `code-editor`).                                      |
+| API              | HELL-025, HELL-026, HELL-051                                                             | `pnpm build:lib`; `pnpm test:api-report`; `pnpm release:dry-run -- --full`       | Stable API reports must exist and the full release dry-run must pass the API report task. HELL-051 still owns semver/changelog policy before public beta.                                                                                                                                                    |
+| Accessibility    | HELL-038, HELL-039, HELL-040, HELL-041, HELL-042, HELL-043, HELL-061                     | `pnpm e2e`; `pnpm release:dry-run -- --full`                                     | `test-results/playwright-report.json` must report zero unexpected results for every `e2e/*.spec.ts` file across chromium, firefox, and webkit on the current commit; the accessibility matrix must not contain `Critical gap` or `criticalGap: true` rows. Current critical gaps keep Hell UI internal beta. |
+| Docs budgets     | HELL-019, HELL-030, HELL-031, HELL-032, HELL-050                                         | `pnpm build:docs`; `pnpm diagnose:docs-bundle`; `pnpm release:dry-run -- --full` | The budget diagnosis must classify warnings as accepted or regression, and the full release dry-run must pass docs build. HELL-050 owns the remaining eager-import audit.                                                                                                                                    |
+| Pack audit       | HELL-023, HELL-024, HELL-053                                                             | `pnpm build:lib`; `pnpm test:package-pack`; `pnpm release:dry-run -- --full`     | Full release JSON evidence must show the pack audit passing before production language. HELL-053 still owns PDF package split risk before beta.                                                                                                                                                              |
+| Release dry-run  | HELL-027, HELL-028, HELL-049, HELL-051, HELL-052                                         | `pnpm release:dry-run -- --full`                                                 | The latest full release-candidate JSON evidence must pass every dry-run task, including the changelog entry check for the current package version.                                                                                                                                                           |
 
 ## Current blocker notes
 

@@ -155,7 +155,10 @@ in-package feature styles.
 Public modules should expose behavior through directives, `data-*` state
 attributes, stable `data-slot` part attributes, and a Part Style Map for
 migrated styling surfaces. Components that have not migrated yet still use
-default host classes and `unstyled`.
+default host classes and `unstyled`, but that list is compatibility debt:
+`legacyStyleableAllowlist` in `tools/check-architecture.mjs` is the machine
+track, and every symbol there MUST replace `unstyled` with a Part Style Map
+before the component is treated as a migrated styling surface.
 
 ```html
 <button hellButton variant="primary">Save</button>

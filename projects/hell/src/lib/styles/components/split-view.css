@@ -70,13 +70,12 @@
     transform: rotate(180deg);
   }
 
-  /* Legacy .hell-button helper hook for not-yet-migrated split navigation.
-     HellButton's Part Style Map recipe no longer consumes --hell-button-* vars. */
+  /* Legacy .hell-button helper hook for not-yet-migrated split navigation. */
   .hell-split-view [data-slot='master-item'][data-current='true'] {
-    --hell-button-background: var(--color-hell-primary-soft);
-    --hell-button-background-hover: var(--color-hell-surface-muted);
-    --hell-button-border-color: var(--color-hell-border);
-    --hell-button-color: var(--color-hell-primary-soft-foreground);
+    --_hell-btn-bg: var(--color-hell-primary-soft);
+    --_hell-btn-bg-hover: var(--color-hell-surface-muted);
+    --_hell-btn-border: var(--color-hell-border);
+    --_hell-btn-fg: var(--color-hell-primary-soft-foreground);
   }
 
   .hell-split-view[data-compact='true'] [data-pane='detail'] {

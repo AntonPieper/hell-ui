@@ -234,7 +234,6 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
       [size]="size()"
       [ui]="fieldUi"
       [type]="nativeTimeInput ? 'time' : 'text'"
-      data-slot="field"
       [attr.inputmode]="nativeTimeInput ? null : 'text'"
       [attr.min]="nativeTimeInput ? '00:00' : null"
       [attr.max]="nativeTimeInput ? (seconds() ? '23:59:59' : '23:59') : null"

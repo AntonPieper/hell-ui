@@ -187,7 +187,6 @@ export function hellCoerceDateInputValue(value: Date | null | undefined): Date |
       [size]="size()"
       [ui]="fieldUi"
       type="text"
-      data-slot="field"
       [invalid]="isInvalid()"
       [id]="inputId()"
       [attr.name]="name()"

@@ -37,13 +37,13 @@
       background-color: var(--color-hell-surface-subtle);
       border-color: var(--color-hell-border);
       cursor: not-allowed;
-      & [data-slot='field'] {
+      & input[hellinput] {
         color: var(--color-hell-foreground-muted);
       }
     }
   }
 
-  .hell-date-input [data-slot='field'] {
+  .hell-date-input input[hellinput] {
     flex: 1 1 auto;
     min-width: 0;
     height: var(--spacing-hell-control-md);

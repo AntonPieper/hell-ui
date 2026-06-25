@@ -17,6 +17,7 @@ const requiredCategories = [
 const requiredReleaseScenarios = [
   'root-core',
   'button-ui',
+  'button',
   'primitives-css',
   'audio-player',
   'audio-transcript',
@@ -54,7 +55,16 @@ const releaseTasksByCategory = {
 };
 const checklistContracts = {
   'package-consumer': {
-    sliceIds: ['HELL-012', 'HELL-020', 'HELL-021', 'HELL-022', 'HELL-023', 'HELL-024', 'HELL-055', 'HELL-081'],
+    sliceIds: [
+      'HELL-012',
+      'HELL-020',
+      'HELL-021',
+      'HELL-022',
+      'HELL-023',
+      'HELL-024',
+      'HELL-055',
+      'HELL-081',
+    ],
     commands: ['pnpm test:package-consumer -- --minimal-deps', 'pnpm release:dry-run -- --full'],
     checkTypes: ['releaseDryRunEvidence'],
   },
@@ -103,7 +113,9 @@ const checklist = readChecklistGate();
 validateChecklistGate(checklist);
 const gitState = currentTrackedGitChangesState();
 if (gitState !== 'clean') {
-  failures.push(`Current tracked git tree must be clean before a production-ready claim; found ${gitState}.`);
+  failures.push(
+    `Current tracked git tree must be clean before a production-ready claim; found ${gitState}.`,
+  );
 }
 const blockers = Array.isArray(checklist.blockers) ? checklist.blockers : [];
 
@@ -256,18 +268,26 @@ function validateRequiredCheckDetails(category, checks) {
   if (category === 'accessibility') {
     const playwrightCheck = checks.find((check) => check?.type === 'playwrightJsonReport');
     if (playwrightCheck?.path !== 'test-results/playwright-report.json') {
-      failures.push('accessibility Playwright evidence must use test-results/playwright-report.json.');
+      failures.push(
+        'accessibility Playwright evidence must use test-results/playwright-report.json.',
+      );
     }
     if (playwrightCheck?.modifiedAfterCurrentGitCommit !== true) {
-      failures.push('accessibility Playwright evidence must require modifiedAfterCurrentGitCommit: true.');
+      failures.push(
+        'accessibility Playwright evidence must require modifiedAfterCurrentGitCommit: true.',
+      );
     }
     if (playwrightCheck?.allE2eSpecs !== true) {
       failures.push('accessibility Playwright evidence must require allE2eSpecs: true.');
     }
 
     const matrixCheck = checks.find((check) => check?.type === 'fileNotContains');
-    if (matrixCheck?.path !== 'projects/hell-docs/src/app/pages/accessibility/accessibility.page.ts') {
-      failures.push('accessibility matrix check must target projects/hell-docs/src/app/pages/accessibility/accessibility.page.ts.');
+    if (
+      matrixCheck?.path !== 'projects/hell-docs/src/app/pages/accessibility/accessibility.page.ts'
+    ) {
+      failures.push(
+        'accessibility matrix check must target projects/hell-docs/src/app/pages/accessibility/accessibility.page.ts.',
+      );
     }
     for (const forbidden of ['Critical gap', 'criticalGap: true']) {
       if (!matrixCheck?.forbids?.includes(forbidden)) {
@@ -282,7 +302,9 @@ function validateRequiredCheckDetails(category, checks) {
       failures.push('docs-budgets must check docs/release/docs-bundle-budget-diagnosis.md.');
     }
     if (diagnosisCheck?.modifiedAfterCurrentGitCommit !== true) {
-      failures.push('docs-budgets diagnosis evidence must require modifiedAfterCurrentGitCommit: true.');
+      failures.push(
+        'docs-budgets diagnosis evidence must require modifiedAfterCurrentGitCommit: true.',
+      );
     }
   }
 }
@@ -296,9 +318,14 @@ function runEvidenceCheck(blocker, check) {
   }
 
   if (check.type === 'releaseDryRunEvidence') {
-    const files = latestMatchingFiles('test-results/release-evidence', 'release-dry-run-*-full.json');
+    const files = latestMatchingFiles(
+      'test-results/release-evidence',
+      'release-dry-run-*-full.json',
+    );
     if (!files.length) {
-      return [`${label} missing; no file matches test-results/release-evidence/release-dry-run-*-full.json`];
+      return [
+        `${label} missing; no file matches test-results/release-evidence/release-dry-run-*-full.json`,
+      ];
     }
     return releaseDryRunEvidenceErrors(label, files[0].path, blocker.category, files[0]);
   }
@@ -309,7 +336,11 @@ function runEvidenceCheck(blocker, check) {
     return playwrightJsonReportErrors(label, path, check);
   }
 
-  if (check.type === 'fileContains' || check.type === 'fileNotContains' || check.type === 'fileExists') {
+  if (
+    check.type === 'fileContains' ||
+    check.type === 'fileNotContains' ||
+    check.type === 'fileExists'
+  ) {
     const path = resolveFromRoot(check.path);
     if (!existsSync(path)) {
       return [`${label} missing file: ${relativeToRoot(path)}`];
@@ -349,9 +380,12 @@ function releaseDryRunEvidenceErrors(label, path, category, fileMeta) {
     return [...errors, `${label} in ${relativeToRoot(path)} is not valid JSON: ${error.message}`];
   }
 
-  if (evidence.version !== 1) errors.push(`${label} in ${relativeToRoot(path)} must use evidence version 1.`);
-  if (evidence.mode !== 'full') errors.push(`${label} in ${relativeToRoot(path)} must be a full dry-run.`);
-  if (evidence.exitCode !== 0) errors.push(`${label} in ${relativeToRoot(path)} must have exitCode 0.`);
+  if (evidence.version !== 1)
+    errors.push(`${label} in ${relativeToRoot(path)} must use evidence version 1.`);
+  if (evidence.mode !== 'full')
+    errors.push(`${label} in ${relativeToRoot(path)} must be a full dry-run.`);
+  if (evidence.exitCode !== 0)
+    errors.push(`${label} in ${relativeToRoot(path)} must have exitCode 0.`);
 
   const commit = currentGitCommit();
   if (!commit) errors.push(`${label} could not read current git commit.`);
@@ -360,12 +394,16 @@ function releaseDryRunEvidenceErrors(label, path, category, fileMeta) {
   }
 
   if (evidence.git?.trackedChanges !== 'clean') {
-    errors.push(`${label} in ${relativeToRoot(path)} must be generated from a clean tracked git tree.`);
+    errors.push(
+      `${label} in ${relativeToRoot(path)} must be generated from a clean tracked git tree.`,
+    );
   }
 
   for (const scenario of requiredReleaseScenarios) {
     if (!evidence.selectedConsumerScenarios?.includes(scenario)) {
-      errors.push(`${label} in ${relativeToRoot(path)} must include package-consumer scenario ${scenario}.`);
+      errors.push(
+        `${label} in ${relativeToRoot(path)} must include package-consumer scenario ${scenario}.`,
+      );
     }
   }
 
@@ -376,8 +414,10 @@ function releaseDryRunEvidenceErrors(label, path, category, fileMeta) {
       errors.push(`${label} in ${relativeToRoot(path)} must include release task ${taskName}.`);
       continue;
     }
-    if (task.skipped) errors.push(`${label} in ${relativeToRoot(path)} must not skip release task ${taskName}.`);
-    if (task.status !== 0) errors.push(`${label} in ${relativeToRoot(path)} release task ${taskName} must pass.`);
+    if (task.skipped)
+      errors.push(`${label} in ${relativeToRoot(path)} must not skip release task ${taskName}.`);
+    if (task.status !== 0)
+      errors.push(`${label} in ${relativeToRoot(path)} release task ${taskName} must pass.`);
   }
 
   return errors;
@@ -394,7 +434,9 @@ function contentErrors(label, path, content, check, fileMeta) {
 
   for (const forbidden of check.forbids ?? []) {
     if (content.includes(forbidden)) {
-      errors.push(`${label} in ${relativeToRoot(path)} must not include ${JSON.stringify(forbidden)}.`);
+      errors.push(
+        `${label} in ${relativeToRoot(path)} must not include ${JSON.stringify(forbidden)}.`,
+      );
     }
   }
 
@@ -407,7 +449,9 @@ function contentErrors(label, path, content, check, fileMeta) {
   }
 
   if (check.cleanGit && !content.includes('Git tracked changes: clean')) {
-    errors.push(`${label} in ${relativeToRoot(path)} must be generated from a clean tracked git tree.`);
+    errors.push(
+      `${label} in ${relativeToRoot(path)} must be generated from a clean tracked git tree.`,
+    );
   }
 
   errors.push(...freshnessErrors(label, fileMeta, check));
@@ -428,7 +472,9 @@ function playwrightJsonReportErrors(label, path, check) {
   if (!Number.isFinite(unexpected)) {
     errors.push(`${label} in ${relativeToRoot(path)} must include stats.unexpected.`);
   } else if (unexpected !== 0) {
-    errors.push(`${label} in ${relativeToRoot(path)} reports ${unexpected} unexpected test result(s).`);
+    errors.push(
+      `${label} in ${relativeToRoot(path)} reports ${unexpected} unexpected test result(s).`,
+    );
   }
 
   const reportErrors = Array.isArray(report.errors) ? report.errors.length : 0;
@@ -447,7 +493,9 @@ function playwrightJsonReportErrors(label, path, check) {
     }
     for (const project of requiredPlaywrightProjects) {
       if (!projectsForSpec.has(project)) {
-        errors.push(`${label} in ${relativeToRoot(path)} must include ${specFile} for Playwright project ${project}.`);
+        errors.push(
+          `${label} in ${relativeToRoot(path)} must include ${specFile} for Playwright project ${project}.`,
+        );
       }
     }
   }

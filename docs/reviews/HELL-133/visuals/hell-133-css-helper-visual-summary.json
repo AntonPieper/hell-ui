@@ -1,0 +1,1306 @@
+{
+  "generatedAt": "2026-06-25T09:45:12.636Z",
+  "logs": [
+    {
+      "viewport": "desktop",
+      "type": "warning",
+      "text": "NG0912: Component ID generation collision detected. Components '_HellIcon' and '_HellIcon' with selector 'hell-icon' generated the same component ID. To fix this, you can change the selector of one of those components or add an extra host attribute to force a different ID. Find more at https://v21.angular.dev/errors/NG0912",
+      "url": "http://127.0.0.1:4301/components/split-view"
+    },
+    {
+      "viewport": "mobile",
+      "type": "warning",
+      "text": "NG0912: Component ID generation collision detected. Components '_HellIcon' and '_HellIcon' with selector 'hell-icon' generated the same component ID. To fix this, you can change the selector of one of those components or add an extra host attribute to force a different ID. Find more at https://v21.angular.dev/errors/NG0912",
+      "url": "http://127.0.0.1:4301/components/split-view"
+    }
+  ],
+  "checks": [
+    {
+      "route": "toggle",
+      "viewport": "desktop",
+      "full": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/toggle-desktop-full.png",
+      "region": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/toggle-desktop-region.png",
+      "clip": {
+        "x": 329,
+        "y": 542,
+        "width": 237,
+        "height": 84
+      },
+      "pageInfo": {
+        "title": "HellDocs",
+        "h1": "Toggle",
+        "url": "http://127.0.0.1:4301/components/toggle",
+        "targetCount": 2,
+        "targetRect": {
+          "x": 353,
+          "y": 566,
+          "width": 189,
+          "height": 36
+        },
+        "legacyButtons": [
+          {
+            "text": "B",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 353.03125,
+              "y": 372.328125,
+              "width": 42.9375,
+              "height": 34
+            }
+          },
+          {
+            "text": "I",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 402.96875,
+              "y": 372.328125,
+              "width": 37.640625,
+              "height": 34
+            }
+          },
+          {
+            "text": "U",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 447.609375,
+              "y": 372.328125,
+              "width": 43.625,
+              "height": 34
+            }
+          },
+          {
+            "text": "Left",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgb(238, 240, 243)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(49, 58, 70)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 357.03125,
+              "y": 570.40625,
+              "width": 50.296875,
+              "height": 28
+            }
+          },
+          {
+            "text": "Center",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 409.328125,
+              "y": 570.40625,
+              "width": 67.890625,
+              "height": 28
+            }
+          },
+          {
+            "text": "Right",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 479.21875,
+              "y": 570.40625,
+              "width": 58.546875,
+              "height": 28
+            }
+          },
+          {
+            "text": "Bold",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgb(238, 240, 243)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(49, 58, 70)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 357.03125,
+              "y": 800.484375,
+              "width": 53.828125,
+              "height": 28
+            }
+          },
+          {
+            "text": "Italic",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 412.859375,
+              "y": 800.484375,
+              "width": 55.78125,
+              "height": 28
+            }
+          },
+          {
+            "text": "Underline",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 470.640625,
+              "y": 800.484375,
+              "width": 85.859375,
+              "height": 28
+            }
+          },
+          {
+            "text": "Disabled",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 353.03125,
+              "y": 1026.5625,
+              "width": 87.953125,
+              "height": 34
+            }
+          },
+          {
+            "text": "A",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 451.984375,
+              "y": 1030.5625,
+              "width": 34.9375,
+              "height": 28
+            }
+          },
+          {
+            "text": "B",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 488.921875,
+              "y": 1030.5625,
+              "width": 34.640625,
+              "height": 28
+            }
+          }
+        ],
+        "bodyOverflowX": false,
+        "bodySize": {
+          "width": 1280,
+          "height": 900
+        },
+        "overlaps": [
+          {
+            "a": "<div data-slot=\"control\" hellsearch=\"\" cdkoverlayorigin=\"\" data-empty=\"\" class=\"hell-search\"><hell-i",
+            "b": "<div data-slot=\"input-wrap\"><input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" sp",
+            "area": 11303
+          },
+          {
+            "a": "<div data-slot=\"control\" hellsearch=\"\" cdkoverlayorigin=\"\" data-empty=\"\" class=\"hell-search\"><hell-i",
+            "b": "<input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" spellcheck=\"false\" role=\"combo",
+            "area": 7064
+          },
+          {
+            "a": "<div data-slot=\"input-wrap\"><input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" sp",
+            "b": "<input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" spellcheck=\"false\" role=\"combo",
+            "area": 7064
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" href=\"/\" data-slot=\"nav-item\" class=\"hell-nav-item\"><hel",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" href=\"/\" data-slot=\"nav-item\" class=\"hell-nav-item\"><hel",
+            "b": "<span hellnavitemlabel=\"\" data-slot=\"nav-label\" class=\"hell-nav-label\">Overview</span>",
+            "area": 3010
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" href=\"/getting-started\" data-slot=\"nav-item\" class=\"hell",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" href=\"/getting-started\" data-slot=\"nav-item\" class=\"hell",
+            "b": "<span hellnavitemlabel=\"\" data-slot=\"nav-label\" class=\"hell-nav-label\">Getting started</span>",
+            "area": 3010
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" href=\"/theming\" data-slot=\"nav-item\" class=\"hell-nav-ite",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          }
+        ]
+      }
+    },
+    {
+      "route": "split-view",
+      "viewport": "desktop",
+      "full": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/split-view-desktop-full.png",
+      "region": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/split-view-desktop-region.png",
+      "clip": {
+        "x": 256,
+        "y": 299,
+        "width": 779,
+        "height": 400
+      },
+      "pageInfo": {
+        "title": "HellDocs",
+        "h1": "Split view",
+        "url": "http://127.0.0.1:4301/components/split-view",
+        "targetCount": 1,
+        "targetRect": {
+          "x": 276.5,
+          "y": 319.828125,
+          "width": 739,
+          "height": 360
+        },
+        "legacyButtons": [
+          {
+            "text": "",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 948.5,
+              "y": 326.828125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 980.5,
+              "y": 326.828125,
+              "width": 28,
+              "height": 28
+            }
+          }
+        ],
+        "bodyOverflowX": false,
+        "bodySize": {
+          "width": 1280,
+          "height": 900
+        },
+        "overlaps": [
+          {
+            "a": "<div data-slot=\"control\" hellsearch=\"\" cdkoverlayorigin=\"\" data-empty=\"\" class=\"hell-search\"><hell-i",
+            "b": "<div data-slot=\"input-wrap\"><input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" sp",
+            "area": 11303
+          },
+          {
+            "a": "<div data-slot=\"control\" hellsearch=\"\" cdkoverlayorigin=\"\" data-empty=\"\" class=\"hell-search\"><hell-i",
+            "b": "<input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" spellcheck=\"false\" role=\"combo",
+            "area": 7064
+          },
+          {
+            "a": "<div data-slot=\"input-wrap\"><input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" sp",
+            "b": "<input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" spellcheck=\"false\" role=\"combo",
+            "area": 7064
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" href=\"/\" data-slot=\"nav-item\" class=\"hell-nav-item\"><hel",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" href=\"/\" data-slot=\"nav-item\" class=\"hell-nav-item\"><hel",
+            "b": "<span hellnavitemlabel=\"\" data-slot=\"nav-label\" class=\"hell-nav-label\">Overview</span>",
+            "area": 3010
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" href=\"/getting-started\" data-slot=\"nav-item\" class=\"hell",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" href=\"/getting-started\" data-slot=\"nav-item\" class=\"hell",
+            "b": "<span hellnavitemlabel=\"\" data-slot=\"nav-label\" class=\"hell-nav-label\">Getting started</span>",
+            "area": 3010
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" href=\"/theming\" data-slot=\"nav-item\" class=\"hell-nav-ite",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          }
+        ]
+      }
+    },
+    {
+      "route": "pagination",
+      "viewport": "desktop",
+      "full": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/pagination-desktop-full.png",
+      "region": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/pagination-desktop-region.png",
+      "clip": {
+        "x": 333,
+        "y": 322,
+        "width": 320,
+        "height": 68
+      },
+      "pageInfo": {
+        "title": "HellDocs",
+        "h1": "Pagination",
+        "url": "http://127.0.0.1:4301/components/pagination",
+        "targetCount": 4,
+        "targetRect": {
+          "x": 353.03125,
+          "y": 342.578125,
+          "width": 280,
+          "height": 28
+        },
+        "legacyButtons": [
+          {
+            "text": "«",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 353.03125,
+              "y": 342.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "‹",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 384.53125,
+              "y": 342.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "1",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 416.03125,
+              "y": 342.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "2",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 447.53125,
+              "y": 342.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "3",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgb(49, 58, 70)",
+            "borderColor": "rgb(49, 58, 70)",
+            "color": "rgb(255, 255, 255)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 479.03125,
+              "y": 342.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "4",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 510.53125,
+              "y": 342.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "5",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 542.03125,
+              "y": 342.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "›",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 573.53125,
+              "y": 342.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "»",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 605.03125,
+              "y": 342.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "«",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 353.03125,
+              "y": 557.65625,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "‹",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 384.53125,
+              "y": 557.65625,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "4",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 416.03125,
+              "y": 557.65625,
+              "width": 28,
+              "height": 28
+            }
+          }
+        ],
+        "bodyOverflowX": false,
+        "bodySize": {
+          "width": 1280,
+          "height": 900
+        },
+        "overlaps": [
+          {
+            "a": "<div data-slot=\"control\" hellsearch=\"\" cdkoverlayorigin=\"\" data-empty=\"\" class=\"hell-search\"><hell-i",
+            "b": "<div data-slot=\"input-wrap\"><input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" sp",
+            "area": 11303
+          },
+          {
+            "a": "<div data-slot=\"control\" hellsearch=\"\" cdkoverlayorigin=\"\" data-empty=\"\" class=\"hell-search\"><hell-i",
+            "b": "<input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" spellcheck=\"false\" role=\"combo",
+            "area": 7064
+          },
+          {
+            "a": "<div data-slot=\"input-wrap\"><input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" sp",
+            "b": "<input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" spellcheck=\"false\" role=\"combo",
+            "area": 7064
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" href=\"/\" data-slot=\"nav-item\" class=\"hell-nav-item\"><hel",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" href=\"/\" data-slot=\"nav-item\" class=\"hell-nav-item\"><hel",
+            "b": "<span hellnavitemlabel=\"\" data-slot=\"nav-label\" class=\"hell-nav-label\">Overview</span>",
+            "area": 3010
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" href=\"/getting-started\" data-slot=\"nav-item\" class=\"hell",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" href=\"/getting-started\" data-slot=\"nav-item\" class=\"hell",
+            "b": "<span hellnavitemlabel=\"\" data-slot=\"nav-label\" class=\"hell-nav-label\">Getting started</span>",
+            "area": 3010
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" href=\"/theming\" data-slot=\"nav-item\" class=\"hell-nav-ite",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          }
+        ]
+      }
+    },
+    {
+      "route": "toggle",
+      "viewport": "mobile",
+      "full": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/toggle-mobile-full.png",
+      "region": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/toggle-mobile-region.png",
+      "clip": {
+        "x": 7,
+        "y": 631,
+        "width": 237,
+        "height": 84
+      },
+      "pageInfo": {
+        "title": "HellDocs",
+        "h1": "Toggle",
+        "url": "http://127.0.0.1:4301/components/toggle",
+        "targetCount": 2,
+        "targetRect": {
+          "x": 31,
+          "y": 655,
+          "width": 189,
+          "height": 36
+        },
+        "legacyButtons": [
+          {
+            "text": "B",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 31,
+              "y": 449.828125,
+              "width": 42.9375,
+              "height": 34
+            }
+          },
+          {
+            "text": "I",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 80.9375,
+              "y": 449.828125,
+              "width": 37.640625,
+              "height": 34
+            }
+          },
+          {
+            "text": "U",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 125.578125,
+              "y": 449.828125,
+              "width": 43.625,
+              "height": 34
+            }
+          },
+          {
+            "text": "Left",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgb(238, 240, 243)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(49, 58, 70)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 35,
+              "y": 659.65625,
+              "width": 50.296875,
+              "height": 28
+            }
+          },
+          {
+            "text": "Center",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 87.296875,
+              "y": 659.65625,
+              "width": 67.890625,
+              "height": 28
+            }
+          },
+          {
+            "text": "Right",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 157.1875,
+              "y": 659.65625,
+              "width": 58.546875,
+              "height": 28
+            }
+          },
+          {
+            "text": "Bold",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgb(238, 240, 243)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(49, 58, 70)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 35,
+              "y": 878.734375,
+              "width": 53.828125,
+              "height": 28
+            }
+          },
+          {
+            "text": "Italic",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 90.828125,
+              "y": 878.734375,
+              "width": 55.78125,
+              "height": 28
+            }
+          },
+          {
+            "text": "Underline",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 148.609375,
+              "y": 878.734375,
+              "width": 85.859375,
+              "height": 28
+            }
+          },
+          {
+            "text": "Disabled",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 31,
+              "y": 1093.8125,
+              "width": 87.953125,
+              "height": 34
+            }
+          },
+          {
+            "text": "A",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 129.953125,
+              "y": 1097.8125,
+              "width": 34.9375,
+              "height": 28
+            }
+          },
+          {
+            "text": "B",
+            "tag": "button",
+            "className": "hell-button hell-toggle",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 166.890625,
+              "y": 1097.8125,
+              "width": 34.640625,
+              "height": 28
+            }
+          }
+        ],
+        "bodyOverflowX": false,
+        "bodySize": {
+          "width": 390,
+          "height": 844
+        },
+        "overlaps": [
+          {
+            "a": "<div data-slot=\"control\" hellsearch=\"\" cdkoverlayorigin=\"\" data-empty=\"\" class=\"hell-search\"><hell-i",
+            "b": "<div data-slot=\"input-wrap\"><input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" sp",
+            "area": 2868
+          },
+          {
+            "a": "<div data-slot=\"control\" hellsearch=\"\" cdkoverlayorigin=\"\" data-empty=\"\" class=\"hell-search\"><hell-i",
+            "b": "<input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" spellcheck=\"false\" role=\"combo",
+            "area": 1793
+          },
+          {
+            "a": "<div data-slot=\"input-wrap\"><input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" sp",
+            "b": "<input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" spellcheck=\"false\" role=\"combo",
+            "area": 1793
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" title=\"Overview\" href=\"/\" data-slot=\"nav-item\" class=\"he",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" title=\"Getting started\" href=\"/getting-started\" data-slo",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" title=\"Theming\" href=\"/theming\" data-slot=\"nav-item\" cla",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" title=\"Accessibility matrix\" href=\"/accessibility\" data-",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<div hellnavsection=\"\" data-slot=\"nav-section\" class=\"hell-nav-section\"><button type=\"button\" hellna",
+            "b": "<div hellnavsectionitems=\"\" data-slot=\"nav-section-items\" class=\"hell-nav-section-items\"><a hellnavi",
+            "area": 191511
+          }
+        ]
+      }
+    },
+    {
+      "route": "split-view",
+      "viewport": "mobile",
+      "full": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/split-view-mobile-full.png",
+      "region": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/split-view-mobile-region.png",
+      "clip": {
+        "x": 11,
+        "y": 331,
+        "width": 368,
+        "height": 400
+      },
+      "pageInfo": {
+        "title": "HellDocs",
+        "h1": "Split view",
+        "url": "http://127.0.0.1:4301/components/split-view",
+        "targetCount": 1,
+        "targetRect": {
+          "x": 31,
+          "y": 351.828125,
+          "width": 328,
+          "height": 360
+        },
+        "legacyButtons": [],
+        "bodyOverflowX": false,
+        "bodySize": {
+          "width": 390,
+          "height": 844
+        },
+        "overlaps": [
+          {
+            "a": "<div data-slot=\"control\" hellsearch=\"\" cdkoverlayorigin=\"\" data-empty=\"\" class=\"hell-search\"><hell-i",
+            "b": "<div data-slot=\"input-wrap\"><input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" sp",
+            "area": 2868
+          },
+          {
+            "a": "<div data-slot=\"control\" hellsearch=\"\" cdkoverlayorigin=\"\" data-empty=\"\" class=\"hell-search\"><hell-i",
+            "b": "<input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" spellcheck=\"false\" role=\"combo",
+            "area": 1793
+          },
+          {
+            "a": "<div data-slot=\"input-wrap\"><input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" sp",
+            "b": "<input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" spellcheck=\"false\" role=\"combo",
+            "area": 1793
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" title=\"Overview\" href=\"/\" data-slot=\"nav-item\" class=\"he",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" title=\"Getting started\" href=\"/getting-started\" data-slo",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" title=\"Theming\" href=\"/theming\" data-slot=\"nav-item\" cla",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" title=\"Accessibility matrix\" href=\"/accessibility\" data-",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<div hellnavsection=\"\" data-slot=\"nav-section\" class=\"hell-nav-section\"><button type=\"button\" hellna",
+            "b": "<div hellnavsectionitems=\"\" data-slot=\"nav-section-items\" class=\"hell-nav-section-items\"><a hellnavi",
+            "area": 191511
+          }
+        ]
+      }
+    },
+    {
+      "route": "pagination",
+      "viewport": "mobile",
+      "full": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/pagination-mobile-full.png",
+      "region": "/Users/apieper/dev/hell-ui-hell-133/projects/hell/docs/reviews/HELL-133/visuals/pagination-mobile-region.png",
+      "clip": {
+        "x": 11,
+        "y": 354,
+        "width": 320,
+        "height": 68
+      },
+      "pageInfo": {
+        "title": "HellDocs",
+        "h1": "Pagination",
+        "url": "http://127.0.0.1:4301/components/pagination",
+        "targetCount": 4,
+        "targetRect": {
+          "x": 31,
+          "y": 374.578125,
+          "width": 280,
+          "height": 28
+        },
+        "legacyButtons": [
+          {
+            "text": "«",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 31,
+              "y": 374.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "‹",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 62.5,
+              "y": 374.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "1",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 94,
+              "y": 374.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "2",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 125.5,
+              "y": 374.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "3",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgb(49, 58, 70)",
+            "borderColor": "rgb(49, 58, 70)",
+            "color": "rgb(255, 255, 255)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 157,
+              "y": 374.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "4",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 188.5,
+              "y": 374.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "5",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 220,
+              "y": 374.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "›",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 251.5,
+              "y": 374.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "»",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 283,
+              "y": 374.578125,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "«",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 31,
+              "y": 629.40625,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "‹",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 62.5,
+              "y": 629.40625,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "text": "4",
+            "tag": "button",
+            "className": "hell-button hell-pagination-item",
+            "dataSlot": null,
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(28, 34, 42)",
+            "privateBackground": "transparent",
+            "publicBackground": "",
+            "rect": {
+              "x": 94,
+              "y": 629.40625,
+              "width": 28,
+              "height": 28
+            }
+          }
+        ],
+        "bodyOverflowX": false,
+        "bodySize": {
+          "width": 390,
+          "height": 844
+        },
+        "overlaps": [
+          {
+            "a": "<div data-slot=\"control\" hellsearch=\"\" cdkoverlayorigin=\"\" data-empty=\"\" class=\"hell-search\"><hell-i",
+            "b": "<div data-slot=\"input-wrap\"><input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" sp",
+            "area": 2868
+          },
+          {
+            "a": "<div data-slot=\"control\" hellsearch=\"\" cdkoverlayorigin=\"\" data-empty=\"\" class=\"hell-search\"><hell-i",
+            "b": "<input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" spellcheck=\"false\" role=\"combo",
+            "area": 1793
+          },
+          {
+            "a": "<div data-slot=\"input-wrap\"><input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" sp",
+            "b": "<input ngpinput=\"\" data-slot=\"input\" type=\"search\" autocomplete=\"off\" spellcheck=\"false\" role=\"combo",
+            "area": 1793
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" title=\"Overview\" href=\"/\" data-slot=\"nav-item\" class=\"he",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" title=\"Getting started\" href=\"/getting-started\" data-slo",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" title=\"Theming\" href=\"/theming\" data-slot=\"nav-item\" cla",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<a hellnavitem=\"\" routerlinkactive=\"active\" title=\"Accessibility matrix\" href=\"/accessibility\" data-",
+            "b": "<hell-icon hellnavitemicon=\"\" size=\"14px\" aria-hidden=\"true\" class=\"hell-icon hell-nav-icon\" data-sl",
+            "area": 196
+          },
+          {
+            "a": "<div hellnavsection=\"\" data-slot=\"nav-section\" class=\"hell-nav-section\"><button type=\"button\" hellna",
+            "b": "<div hellnavsectionitems=\"\" data-slot=\"nav-section-items\" class=\"hell-nav-section-items\"><a hellnavi",
+            "area": 191511
+          }
+        ]
+      }
+    }
+  ]
+}

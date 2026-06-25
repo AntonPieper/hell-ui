@@ -7,22 +7,20 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const rawArgs = process.argv.slice(2);
 const mode = parseMode(rawArgs);
-const selectedConsumerScenarios = parseList(
-  process.env.HELL_RELEASE_DRY_RUN_CONSUMER_SCENARIOS,
-  [
-    'root-core',
-    'button-ui',
-    'primitives-css',
-    'audio-player',
-    'audio-transcript',
-    'table',
-    'table-tanstack',
-    'table-tanstack-virtual',
-    'no-legacy-alias',
-    'code-editor',
-    'pdf-viewer',
-  ],
-);
+const selectedConsumerScenarios = parseList(process.env.HELL_RELEASE_DRY_RUN_CONSUMER_SCENARIOS, [
+  'root-core',
+  'button-ui',
+  'button',
+  'primitives-css',
+  'audio-player',
+  'audio-transcript',
+  'table',
+  'table-tanstack',
+  'table-tanstack-virtual',
+  'no-legacy-alias',
+  'code-editor',
+  'pdf-viewer',
+]);
 const startedAt = new Date();
 const logPath = releaseEvidenceLogPath(mode, startedAt);
 const evidenceJsonPath = logPath.replace(/\.log$/, '.json');
@@ -30,9 +28,7 @@ const gitCommit = gitOutput(['rev-parse', 'HEAD']) ?? 'unknown';
 const gitTrackedChanges = gitTrackedChangesState();
 const log = createWriteStream(logPath, { flags: 'wx' });
 
-const tasks = mode === 'full'
-  ? fullTasks(selectedConsumerScenarios)
-  : fastTasks();
+const tasks = mode === 'full' ? fullTasks(selectedConsumerScenarios) : fastTasks();
 const results = [];
 
 writeHeader();
@@ -51,7 +47,9 @@ try {
 } catch (error) {
   fatalError = error;
   exitCode = 1;
-  writeLog(`\nFatal error: ${error instanceof Error ? error.stack ?? error.message : String(error)}\n`);
+  writeLog(
+    `\nFatal error: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}\n`,
+  );
 } finally {
   writeSummary();
   writeEvidenceJson();
@@ -63,9 +61,13 @@ if (fatalError) {
 }
 
 if (exitCode === 0) {
-  console.log(`\n[release-dry-run] ${mode} passed. Evidence: ${relative(process.cwd(), logPath)}; ${relative(process.cwd(), evidenceJsonPath)}`);
+  console.log(
+    `\n[release-dry-run] ${mode} passed. Evidence: ${relative(process.cwd(), logPath)}; ${relative(process.cwd(), evidenceJsonPath)}`,
+  );
 } else {
-  console.error(`\n[release-dry-run] ${mode} failed. Evidence: ${relative(process.cwd(), logPath)}; ${relative(process.cwd(), evidenceJsonPath)}`);
+  console.error(
+    `\n[release-dry-run] ${mode} failed. Evidence: ${relative(process.cwd(), logPath)}; ${relative(process.cwd(), evidenceJsonPath)}`,
+  );
 }
 
 process.exit(exitCode);
@@ -118,7 +120,9 @@ function parseList(value, fallback) {
 function releaseEvidenceLogPath(selectedMode, date) {
   const rawLogDir = process.env.HELL_RELEASE_DRY_RUN_LOG_DIR;
   const logDir = rawLogDir
-    ? (isAbsolute(rawLogDir) ? rawLogDir : resolve(root, rawLogDir))
+    ? isAbsolute(rawLogDir)
+      ? rawLogDir
+      : resolve(root, rawLogDir)
     : join(root, 'test-results/release-evidence');
   mkdirSync(logDir, { recursive: true });
 
@@ -132,7 +136,12 @@ function fastTasks() {
     packageTask('lint', ['run', 'lint']),
     packageTask('architecture', ['run', 'test:architecture']),
     packageTask('ci contract', ['run', 'test:ci-contract']),
-    packageTask('package-consumer pnpm preflight', ['run', 'test:package-consumer', '--', '--preflight']),
+    packageTask('package-consumer pnpm preflight', [
+      'run',
+      'test:package-consumer',
+      '--',
+      '--preflight',
+    ]),
     packageTask('build lib', ['run', 'build:lib']),
     packageTask('pack audit', ['run', 'test:package-pack']),
     packageTask('api report', ['run', 'test:api-report']),
@@ -145,13 +154,24 @@ function fullTasks(scenarios) {
     packageTask('lint', ['run', 'lint']),
     packageTask('architecture', ['run', 'test:architecture']),
     packageTask('ci contract', ['run', 'test:ci-contract']),
-    packageTask('unit', ['run', 'test:unit']),
+    packageTask('unit', ['run', 'test:unit'], {
+      env: {
+        HELL_UNIT_TEST_TIMEOUT_MS: process.env.HELL_UNIT_TEST_TIMEOUT_MS ?? '600000',
+      },
+    }),
     packageTask('build lib', ['run', 'build:lib']),
     packageTask('pack audit', ['run', 'test:package-pack']),
     packageTask(
       'selected package-consumer scenarios',
       ['run', 'test:package-consumer', '--', '--minimal-deps', '--scenarios', scenarios.join(',')],
-      { env: { HELL_PACKAGE_CONSUMER_TIMEOUT_MS: process.env.HELL_PACKAGE_CONSUMER_TIMEOUT_MS ?? '600000' } },
+      {
+        env: {
+          HELL_PACKAGE_CONSUMER_RUNTIME_STYLE_CHECK:
+            process.env.HELL_PACKAGE_CONSUMER_RUNTIME_STYLE_CHECK ?? '1',
+          HELL_PACKAGE_CONSUMER_TIMEOUT_MS:
+            process.env.HELL_PACKAGE_CONSUMER_TIMEOUT_MS ?? '600000',
+        },
+      },
     ),
     packageTask('api report', ['run', 'test:api-report']),
     packageTask('docs build', ['run', 'build:docs']),
@@ -193,7 +213,9 @@ async function runTask(task) {
   writeLog(`Command: ${commandLine}\n`);
   const envEntries = Object.entries(task.env);
   if (envEntries.length > 0) {
-    writeLog(`Environment overrides: ${envEntries.map(([key, value]) => `${key}=${value}`).join(' ')}\n`);
+    writeLog(
+      `Environment overrides: ${envEntries.map(([key, value]) => `${key}=${value}`).join(' ')}\n`,
+    );
   }
   writeLog('\n```text\n');
 
@@ -241,7 +263,9 @@ function writeSummary() {
   writeLog(`Finished: ${finishedAt.toISOString()}\n`);
   writeLog(`Exit: ${exitCode}\n`);
   for (const result of results) {
-    writeLog(`- ${result.status === 0 ? 'PASS' : 'FAIL'} ${result.name} (${(result.durationMs / 1000).toFixed(1)}s)\n`);
+    writeLog(
+      `- ${result.status === 0 ? 'PASS' : 'FAIL'} ${result.name} (${(result.durationMs / 1000).toFixed(1)}s)\n`,
+    );
   }
   const skipped = tasks.slice(results.length);
   for (const task of skipped) {
