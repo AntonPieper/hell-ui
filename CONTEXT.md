@@ -32,16 +32,24 @@ A named, stable element or region in a Hell module's owned structure that consum
 _Avoid_: Private element, arbitrary descendant.
 
 **Part Style Map**
-The future shared contract that lets consumers refine a Hell module's named Public Parts with Tailwind classes. In code, this is the `HellUi<Part>` shape: a partial map from component-local Public Part names to class strings.
-_Avoid_: Style Opt-Out, unstyled mode, class override object, omit map, visual layers.
+The shared contract that lets consumers refine a Hell module's named Public Parts with Tailwind classes. In code, this is the `HellUiInput<Part>` shape: either a shorthand class string for the module's default Public Part or a `HellUi<Part>` map from component-local Public Part names to class strings.
+_Avoid_: Style Opt-Out, unstyled mode, class override object, omit map, visual layers, template class override path.
 
 **Part Recipe**
 The component-owned default Tailwind class map for its Public Parts. It is the default half of the Part-Class Pipeline and is not a consumer schema.
 _Avoid_: Legacy `.hell-*` CSS styling model, global recipe taxonomy.
 
 **Part-Class Pipeline**
-The single class computation path for one Public Part: default recipe classes plus the consumer's matching Part Style Map entry, merged deterministically.
+The single class computation path for one Public Part: default recipe classes plus the consumer's matching Part Style Map entry, merged deterministically by Hell's configured Tailwind merge.
 _Avoid_: Multiple late class override channels.
+
+**Semantic Theme Token**
+A public Hell CSS/Tailwind variable that represents a reusable design value such as primary color, border, foreground, or elevated surface. Runtime themes should override Semantic Theme Tokens rather than component-specific variable families.
+_Avoid_: Button-only theme variable, component-specific public color variable.
+
+**Additive Class Hook**
+Template `class` values used for layout hooks, test hooks, and non-conflicting classes outside the Part-Class Pipeline. It is not the deterministic override path for conflicting Tailwind recipe utilities.
+_Avoid_: Part Style Map, class override API.
 
 **Customization Surface**
 The consumer-facing Interface for changing a hell module's behavior, styling, and policy without forking or fighting the library. A good Customization Surface exposes the underlying settings consumers naturally want to adjust rather than mode switches or booleans that apply bundled presets.
