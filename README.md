@@ -69,6 +69,7 @@ though they are only runtime-needed when importing their feature entry points:
 
 ```bash
 pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs tailwindcss
+pnpm add -D @tailwindcss/postcss postcss
 # add @ng-icons/font-awesome when you use icon-backed entries such as pagination or date-picker
 ```
 
@@ -95,43 +96,44 @@ Peer dependency tiers:
 > install it when importing Hell dialog or the aggregate `/primitives` entry point.
 > Package-consumer scenarios assert these groups with strict peer installs.
 
-| Tier | Entry points / scenarios | Peer group asserted |
-|---|---|---|
-| Core | `@hell-ui/angular`, `/core`, `/testing`; `root-core`, `core`, `testing` | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `ng-primitives`, `rxjs` |
-| Primitive | Narrow primitives such as `/button`; aggregate `/primitives`; `button-ui`, `button`, `primitives-css` | Core peers. Add `tailwindcss` when importing primitive CSS. Aggregate `/primitives` also asserts optional `@angular/router` and `@ng-icons/font-awesome` because dialog and icon-backed primitives are bundled in the aggregate FESM. |
-| Composite | `/composites` and narrow composite entry points such as `/app-shell` and `/audio-player`; `composites-css`, `app-shell`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Aggregate/icon-backed composites also assert optional `@ng-icons/font-awesome`. |
-| Audio transcript | `/features/audio-transcript`; `audio-transcript` | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled. |
-| Table primitives | `/table`; `table`, `no-legacy-alias` | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack Table, or TanStack Virtual peers. The negative scenario proves removed legacy table aliases and CSS aliases stay unavailable. |
-| TanStack table shell | `/table-tanstack`; `table-tanstack` | Core peers plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`. Root, button, and `/table` scenarios prove TanStack Table is not installed unless this shell is imported. |
-| TanStack virtual row strategy | `/table-tanstack/virtual`; `table-tanstack-virtual` | Same shell peers plus optional `@tanstack/virtual-core`. The strategy mounts on `hell-tanstack-table`; it is not a separate table engine or root component. |
-| Code editor | `/features/code-editor`; `code-editor` | Core peers plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight`. |
-| PDF viewer | `@hell-ui/pdf-viewer`; `pdf-viewer` | Separate package. Install the core peer group plus `@hell-ui/pdf-viewer`, `tailwindcss`, `@ng-icons/font-awesome`, and the package's pdf.js peer. |
+| Tier                          | Entry points / scenarios                                                                                                                | Peer group asserted                                                                                                                                                                                                                   |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Core                          | `@hell-ui/angular`, `/core`, `/testing`; `root-core`, `core`, `testing`                                                                 | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `ng-primitives`, `rxjs`                                                                                                   |
+| Primitive                     | Narrow primitives such as `/button`; aggregate `/primitives`; `button-ui`, `button`, `primitives-css`                                   | Core peers. Add `tailwindcss` when importing primitive CSS. Aggregate `/primitives` also asserts optional `@angular/router` and `@ng-icons/font-awesome` because dialog and icon-backed primitives are bundled in the aggregate FESM. |
+| Composite                     | `/composites` and narrow composite entry points such as `/app-shell` and `/audio-player`; `composites-css`, `app-shell`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Aggregate/icon-backed composites also assert optional `@ng-icons/font-awesome`.                                                                                                      |
+| Audio transcript              | `/features/audio-transcript`; `audio-transcript`                                                                                        | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled.                                             |
+| Table primitives              | `/table`; `table`, `no-legacy-alias`                                                                                                    | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack Table, or TanStack Virtual peers. The negative scenario proves removed legacy table aliases and CSS aliases stay unavailable.                    |
+| TanStack table shell          | `/table-tanstack`; `table-tanstack`                                                                                                     | Core peers plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`. Root, button, and `/table` scenarios prove TanStack Table is not installed unless this shell is imported.                          |
+| TanStack virtual row strategy | `/table-tanstack/virtual`; `table-tanstack-virtual`                                                                                     | Same shell peers plus optional `@tanstack/virtual-core`. The strategy mounts on `hell-tanstack-table`; it is not a separate table engine or root component.                                                                           |
+| Code editor                   | `/features/code-editor`; `code-editor`                                                                                                  | Core peers plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight`.                                                                                       |
+| PDF viewer                    | `@hell-ui/pdf-viewer`; `pdf-viewer`                                                                                                     | Separate package. Install the core peer group plus `@hell-ui/pdf-viewer`, `tailwindcss`, `@ng-icons/font-awesome`, and the package's pdf.js peer.                                                                                     |
 
 CodeMirror, TanStack Table, and TanStack Virtual peers remain optional and are not required by root, button, table, audio-player, audio-transcript, composite, or PDF package-consumer scenarios. `@hell-ui/angular/features/code-editor` is a kept optional entry point; keep live editor surfaces lazy/client-only when SSR, hydration, or third-party runtime risk matters. TanStack Table is isolated behind `@hell-ui/angular/table-tanstack`, and TanStack Virtual is isolated behind `@hell-ui/angular/table-tanstack/virtual`. pdf.js belongs to `@hell-ui/pdf-viewer`, not `@hell-ui/angular`. The audio transcript runtime is isolated behind `@hell-ui/angular/features/audio-transcript` and has no CodeMirror/pdf.js peers.
 
 ## Public API Tiers
 
-| Tier | Stability | Entry points | Compatibility |
-|---|---|---|---|
-| Primitives | Stable | `@hell-ui/angular/primitives` | SSR-compatible |
-| Composites | Beta | `@hell-ui/angular/composites` and narrow composite entry points such as `@hell-ui/angular/app-shell` | Browser DOM + `document`/`window`/global listeners |
-| Table primitives | Beta | `@hell-ui/angular/table` | Uses `ResizeObserver`; browser-first |
-| TanStack table shell | Experimental | `@hell-ui/angular/table-tanstack`, `@hell-ui/angular/table-tanstack/virtual` | Caller-owned TanStack Table remains the engine; Hell owns shell chrome, styling, projection regions, status views, controls, and the optional TanStack Virtual body strategy |
-| Code editor | Beta/optional peer; excluded from stable API reports until policy promotion | `@hell-ui/angular/features/code-editor` | Needs `window` + `document`; keep lazy/client-only when runtime risk matters |
-| PDF viewer | Experimental split package | `@hell-ui/pdf-viewer` | Browser-only app surface/recipe owned outside `@hell-ui/angular` |
-| Testing harnesses | Beta/test-only | `@hell-ui/angular/testing` | CDK component harnesses for consumer and library tests |
-| Speech transcript | Experimental/best-effort (feature opt-in) | `@hell-ui/angular/features/audio-transcript` provider plus `allowSpeechTranscript` / deprecated `allowLiveCaptions` on `@hell-ui/angular/audio-player` or `/composites`; import `hellAudioSpeechSupported` from the feature entrypoint | Browser-only; uses `navigator` + `SpeechRecognition` + `captureStream`; best-effort only, not accessibility-grade captions/timed text |
+| Tier                 | Stability                                                                   | Entry points                                                                                                                                                                                                                           | Compatibility                                                                                                                                                                |
+| -------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primitives           | Stable                                                                      | `@hell-ui/angular/primitives`                                                                                                                                                                                                          | SSR-compatible                                                                                                                                                               |
+| Composites           | Beta                                                                        | `@hell-ui/angular/composites` and narrow composite entry points such as `@hell-ui/angular/app-shell`                                                                                                                                   | Browser DOM + `document`/`window`/global listeners                                                                                                                           |
+| Table primitives     | Beta                                                                        | `@hell-ui/angular/table`                                                                                                                                                                                                               | Uses `ResizeObserver`; browser-first                                                                                                                                         |
+| TanStack table shell | Experimental                                                                | `@hell-ui/angular/table-tanstack`, `@hell-ui/angular/table-tanstack/virtual`                                                                                                                                                           | Caller-owned TanStack Table remains the engine; Hell owns shell chrome, styling, projection regions, status views, controls, and the optional TanStack Virtual body strategy |
+| Code editor          | Beta/optional peer; excluded from stable API reports until policy promotion | `@hell-ui/angular/features/code-editor`                                                                                                                                                                                                | Needs `window` + `document`; keep lazy/client-only when runtime risk matters                                                                                                 |
+| PDF viewer           | Experimental split package                                                  | `@hell-ui/pdf-viewer`                                                                                                                                                                                                                  | Browser-only app surface/recipe owned outside `@hell-ui/angular`                                                                                                             |
+| Testing harnesses    | Beta/test-only                                                              | `@hell-ui/angular/testing`                                                                                                                                                                                                             | CDK component harnesses for consumer and library tests                                                                                                                       |
+| Speech transcript    | Experimental/best-effort (feature opt-in)                                   | `@hell-ui/angular/features/audio-transcript` provider plus `allowSpeechTranscript` / deprecated `allowLiveCaptions` on `@hell-ui/angular/audio-player` or `/composites`; import `hellAudioSpeechSupported` from the feature entrypoint | Browser-only; uses `navigator` + `SpeechRecognition` + `captureStream`; best-effort only, not accessibility-grade captions/timed text                                        |
 
 ## Styles
 
-Hell's shipped CSS uses Tailwind v4 theme features, so Tailwind is required
-whenever an app imports Hell style entry points. Prefer fine-grained imports for
-production:
+Hell's shipped CSS uses Tailwind v4 theme features, so Tailwind and the
+Tailwind v4 PostCSS plugin are required whenever an app imports Hell style
+entry points. Add a workspace `.postcssrc.json` with `@tailwindcss/postcss`,
+then prefer fine-grained imports for production:
 
 ```css
-@import "tailwindcss";
-@import "@hell-ui/angular/styles/tokens";
-@import "@hell-ui/angular/styles/primitives";
+@import 'tailwindcss';
+@import '@hell-ui/angular/styles/tokens';
+@import '@hell-ui/angular/styles/primitives';
 ```
 
 `@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` are
@@ -140,12 +142,12 @@ styles such as CodeMirror. Use them only when the app intentionally accepts all
 in-package feature styles.
 
 ```css
-@import "@hell-ui/angular/styles/tokens";
-@import "@hell-ui/angular/styles/primitives";
-@import "@hell-ui/angular/styles/composites";
-@import "@hell-ui/angular/styles/table";
-@import "@hell-ui/angular/styles/features/code-editor";
-@import "@hell-ui/angular/styles/components/button";
+@import '@hell-ui/angular/styles/tokens';
+@import '@hell-ui/angular/styles/primitives';
+@import '@hell-ui/angular/styles/composites';
+@import '@hell-ui/angular/styles/table';
+@import '@hell-ui/angular/styles/features/code-editor';
+@import '@hell-ui/angular/styles/components/button';
 ```
 
 ## Component Contract
@@ -157,7 +159,7 @@ default host classes and `unstyled`.
 
 ```html
 <button hellButton variant="primary">Save</button>
-<button hellButton [ui]="{ root: 'rounded-hell-pill' }">Custom button</button>
+<button hellButton ui="rounded-hell-pill">Custom button</button>
 
 <button hellSelect>
   <span hellSelectValue>Germany</span>

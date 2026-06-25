@@ -32,8 +32,8 @@ import { HellButton } from '@hell-ui/angular/button';
         <li>
           Delegate behavior and accessibility to a primitive layer instead of reimplementing it.
         </li>
-        <li>Expose an <code>unstyled</code> input everywhere styling should be optional.</li>
-        <li>Use CSS custom properties and <code>data-hell-theme</code> for theming.</li>
+        <li>Expose Part Style Maps for migrated styling surfaces.</li>
+        <li>Use semantic CSS custom properties and <code>data-hell-theme</code> for theming.</li>
       </ul>
 
       <h2>Architecture</h2>
@@ -47,8 +47,8 @@ import { HellButton } from '@hell-ui/angular/button';
           shell and date input.
         </li>
         <li>
-          <strong>Features</strong> sit behind optional stacks such as CodeMirror or PDF.js for heavier
-          runtime surfaces.
+          <strong>Features</strong> sit behind optional stacks such as CodeMirror or PDF.js for
+          heavier runtime surfaces.
         </li>
       </ul>
 

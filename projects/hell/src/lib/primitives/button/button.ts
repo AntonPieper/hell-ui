@@ -1,12 +1,6 @@
 import { Directive, ElementRef, booleanAttribute, inject, input } from '@angular/core';
 import { NgpButton, injectButtonState } from 'ng-primitives/button';
-import { hellMergePartClasses } from '../../core/part-style-merge';
-import {
-  HellPartStyleable,
-  type HellPartClassMerger,
-  type HellRecipe,
-  type HellUi,
-} from '../../core/styleable';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '../../core/styleable';
 import { HellButtonVariant, HellSize } from '../../core/types';
 
 export type HellButtonPart = 'root';
@@ -14,23 +8,21 @@ export type HellButtonPart = 'root';
 export type HellButtonUi = HellUi<HellButtonPart>;
 
 const HELL_BUTTON_BASE_RECIPE =
-  'inline-flex h-hell-control-md cursor-pointer select-none items-center justify-center gap-hell-2 whitespace-nowrap rounded-hell-md border border-solid px-hell-5 font-[inherit] text-[13px] font-medium leading-none shadow-[var(--shadow-hell-xs)] transition-[background-color,border-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1 data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:shadow-none data-disabled:saturate-[0.65]';
+  'inline-flex cursor-pointer select-none items-center justify-center gap-hell-2 whitespace-nowrap rounded-hell-md border border-solid font-[inherit] font-medium leading-none shadow-hell-xs transition-[background-color,border-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-1 data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:shadow-none data-disabled:saturate-[0.65]';
 
 const HELL_BUTTON_VARIANT_RECIPE: Record<HellButtonVariant, string> = {
   default:
-    'border-[color:var(--hell-button-border-color,var(--color-hell-border))] bg-[var(--hell-button-background,var(--color-hell-surface-elevated))] text-[color:var(--hell-button-color,var(--color-hell-foreground))] data-hover:bg-[var(--hell-button-background-hover,var(--color-hell-surface-muted))] data-press:bg-[var(--hell-button-background-active,var(--color-hell-surface-muted))]',
+    'border-hell-border bg-hell-surface-elevated text-hell-foreground data-hover:bg-hell-surface-muted data-press:bg-hell-surface-muted',
   primary:
-    'border-[color:var(--hell-button-border-color,var(--color-hell-primary))] bg-[var(--hell-button-background,var(--color-hell-primary))] text-[color:var(--hell-button-color,var(--color-hell-primary-foreground))] data-hover:bg-[var(--hell-button-background-hover,var(--color-hell-primary-hover))] data-press:bg-[var(--hell-button-background-active,var(--color-hell-primary-active))]',
-  soft:
-    'border-[color:var(--hell-button-border-color,transparent)] bg-[var(--hell-button-background,var(--color-hell-primary-soft))] text-[color:var(--hell-button-color,var(--color-hell-primary-soft-foreground))] shadow-none data-hover:bg-[var(--hell-button-background-hover,var(--color-hell-surface-muted))] data-press:bg-[var(--hell-button-background-active,var(--color-hell-surface-muted))]',
+    'border-hell-primary bg-hell-primary text-hell-primary-foreground data-hover:bg-hell-primary-hover data-press:bg-hell-primary-active',
+  soft: 'border-transparent bg-hell-primary-soft text-hell-primary-soft-foreground shadow-none data-hover:bg-hell-surface-muted data-press:bg-hell-surface-muted',
   ghost:
-    'border-[color:var(--hell-button-border-color,transparent)] bg-[var(--hell-button-background,transparent)] text-[color:var(--hell-button-color,var(--color-hell-foreground))] shadow-none data-hover:bg-[var(--hell-button-background-hover,var(--color-hell-surface-muted))] data-press:bg-[var(--hell-button-background-active,var(--color-hell-surface-muted))]',
-  link:
-    'h-auto border-[color:var(--hell-button-border-color,transparent)] bg-[var(--hell-button-background,transparent)] p-0 text-[color:var(--hell-button-color,var(--color-hell-primary))] underline underline-offset-[3px] shadow-none data-hover:bg-[var(--hell-button-background-hover,transparent)] data-press:bg-[var(--hell-button-background-active,transparent)]',
+    'border-transparent bg-transparent text-hell-foreground shadow-none data-hover:bg-hell-surface-muted data-press:bg-hell-surface-muted',
+  link: 'h-auto border-transparent bg-transparent p-0 text-hell-primary underline underline-offset-[3px] shadow-none data-hover:bg-transparent data-press:bg-transparent',
   danger:
-    'border-[color:var(--hell-button-border-color,var(--color-hell-danger))] bg-[var(--hell-button-background,var(--color-hell-danger))] text-[color:var(--hell-button-color,var(--color-hell-foreground-inverse))] data-hover:bg-[var(--hell-button-background-hover,var(--color-hell-danger-hover))] data-press:bg-[var(--hell-button-background-active,var(--color-hell-danger-active))]',
+    'border-hell-danger bg-hell-danger text-hell-foreground-inverse data-hover:bg-hell-danger-hover data-press:bg-hell-danger-active',
   success:
-    'border-[color:var(--hell-button-border-color,var(--color-hell-success-strong))] bg-[var(--hell-button-background,var(--color-hell-success-strong))] text-[color:var(--hell-button-color,var(--color-hell-foreground-inverse))] data-hover:bg-[var(--hell-button-background-hover,var(--color-hell-success-hover))] data-press:bg-[var(--hell-button-background-active,var(--color-hell-success-active))]',
+    'border-hell-success-strong bg-hell-success-strong text-hell-foreground-inverse data-hover:bg-hell-success-hover data-press:bg-hell-success-active',
 };
 
 const HELL_BUTTON_SIZE_RECIPE: Record<HellSize, string> = {
@@ -85,12 +77,11 @@ export class HellButton extends HellPartStyleable<HellButtonPart> {
   readonly size = input<HellSize>('md');
   readonly iconOnly = input(false, { transform: booleanAttribute });
   readonly block = input(false, { transform: booleanAttribute });
+  protected readonly defaultUiPart = 'root';
 
   protected get recipe(): HellRecipe<HellButtonPart> {
     return { root: this.rootRecipe() };
   }
-
-  protected readonly mergePartClasses: HellPartClassMerger = hellMergePartClasses;
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly buttonState = injectButtonState();
@@ -129,8 +120,8 @@ export class HellButton extends HellPartStyleable<HellButtonPart> {
     const size = this.size();
     const classes = [
       HELL_BUTTON_BASE_RECIPE,
-      HELL_BUTTON_VARIANT_RECIPE[this.variant()],
       HELL_BUTTON_SIZE_RECIPE[size],
+      HELL_BUTTON_VARIANT_RECIPE[this.variant()],
     ];
 
     if (this.iconOnly()) classes.push(HELL_BUTTON_ICON_ONLY_RECIPE[size]);

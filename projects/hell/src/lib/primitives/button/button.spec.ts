@@ -12,13 +12,23 @@ import { HellButton, type HellButtonUi } from './button';
     <button id="styled" hellButton variant="primary" size="sm" iconOnly block type="button">
       Styled
     </button>
-    <button id="custom" hellButton [ui]="customUi" type="button">Custom</button>
+    <button
+      id="custom-string"
+      hellButton
+      ui="bg-hell-danger px-hell-7 shadow-hell-lg data-hover:bg-hell-danger-hover"
+      type="button"
+    >
+      Custom string
+    </button>
+    <button id="custom-map" hellButton [ui]="customUi" type="button">Custom map</button>
+    <button id="class-hook" hellButton class="mt-4 bg-hell-danger" type="button">Class hook</button>
+    <button id="link" hellButton variant="link" size="lg" type="button">Link</button>
   `,
 })
 class ButtonHost {
   readonly disabled = signal(false);
   readonly customUi = {
-    root: 'bg-hell-danger px-hell-7 data-hover:bg-hell-danger-hover',
+    root: 'bg-hell-danger px-hell-7 shadow-hell-lg data-hover:bg-hell-danger-hover',
   } satisfies HellButtonUi;
 }
 
@@ -44,9 +54,7 @@ describe('HellButton', () => {
     expect(button.getAttribute('data-slot')).toBe('root');
     expect(button.classList.contains('hell-button')).toBe(false);
     expect(button.className).toContain('inline-flex');
-    expect(button.className).toContain(
-      'bg-[var(--hell-button-background,var(--color-hell-primary))]',
-    );
+    expect(button.className).toContain('bg-hell-primary');
     expect(button.className).toContain('h-hell-control-sm');
     expect(button.className).toContain('px-0');
     expect(button.className).toContain('w-full');
@@ -56,20 +64,56 @@ describe('HellButton', () => {
     expect(button.getAttribute('data-block')).toBe('');
   });
 
-  it('merges consumer root classes through the Part Style Map', () => {
+  it('uses string ui shorthand for the root part with deterministic precedence', () => {
     const fixture = TestBed.createComponent(ButtonHost);
     fixture.detectChanges();
 
-    const button = query<HTMLButtonElement>(fixture.nativeElement, '#custom');
+    const button = query<HTMLButtonElement>(fixture.nativeElement, '#custom-string');
     const classes = button.className.split(/\s+/);
 
     expect(button.className).toContain('bg-hell-danger');
     expect(button.className).toContain('px-hell-7');
+    expect(button.className).toContain('shadow-hell-lg');
     expect(button.className).toContain('data-hover:bg-hell-danger-hover');
-    expect(classes).not.toContain(
-      'bg-[var(--hell-button-background,var(--color-hell-surface-elevated))]',
-    );
+    expect(classes).not.toContain('bg-hell-surface-elevated');
     expect(classes).not.toContain('px-hell-5');
+    expect(classes).not.toContain('shadow-hell-xs');
+  });
+
+  it('keeps explicit root part maps for typed consumers', () => {
+    const fixture = TestBed.createComponent(ButtonHost);
+    fixture.detectChanges();
+
+    const button = query<HTMLButtonElement>(fixture.nativeElement, '#custom-map');
+
+    expect(button.className).toContain('bg-hell-danger');
+    expect(button.className).toContain('px-hell-7');
+    expect(button.className).toContain('shadow-hell-lg');
+    expect(button.className).toContain('data-hover:bg-hell-danger-hover');
+  });
+
+  it('keeps template class additive but outside the Tailwind merge path', () => {
+    const fixture = TestBed.createComponent(ButtonHost);
+    fixture.detectChanges();
+
+    const button = query<HTMLButtonElement>(fixture.nativeElement, '#class-hook');
+
+    expect(button.className).toContain('mt-4');
+    expect(button.className).toContain('bg-hell-danger');
+    expect(button.className).toContain('bg-hell-surface-elevated');
+  });
+
+  it('lets the link variant own sizing after semantic size recipes', () => {
+    const fixture = TestBed.createComponent(ButtonHost);
+    fixture.detectChanges();
+
+    const link = query<HTMLButtonElement>(fixture.nativeElement, '#link');
+    const classes = link.className.split(/\s+/);
+
+    expect(classes).toContain('h-auto');
+    expect(classes).toContain('p-0');
+    expect(classes).not.toContain('h-hell-control-lg');
+    expect(classes).not.toContain('px-hell-6');
   });
 
   it('keeps anchor disabled semantics explicit', () => {
@@ -88,11 +132,18 @@ describe('HellButton', () => {
     fixture.detectChanges();
 
     const disabledClick = new MouseEvent('click', { bubbles: true, cancelable: true });
+    const disabledEnter = new KeyboardEvent('keydown', {
+      key: 'Enter',
+      bubbles: true,
+      cancelable: true,
+    });
 
     expect(anchor.getAttribute('aria-disabled')).toBe('true');
     expect(anchor.getAttribute('tabindex')).toBe('-1');
     expect(anchor.dispatchEvent(disabledClick)).toBe(false);
     expect(disabledClick.defaultPrevented).toBe(true);
+    expect(anchor.dispatchEvent(disabledEnter)).toBe(false);
+    expect(disabledEnter.defaultPrevented).toBe(true);
   });
 
   it('keeps native disabled for button hosts', () => {

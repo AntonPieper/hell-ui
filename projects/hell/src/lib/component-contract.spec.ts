@@ -474,9 +474,7 @@ describe('Hell Component Contract', () => {
     expect(styled.getAttribute('data-size')).toBe('sm');
     expect(styled.getAttribute('data-icon-only')).toBe('');
     expect(styled.getAttribute('data-block')).toBe('');
-    expect(styled.className).toContain(
-      'bg-[var(--hell-button-background,var(--color-hell-primary))]',
-    );
+    expect(styled.className).toContain('bg-hell-primary');
     expect(styled.className).toContain('w-full');
 
     const custom = query(fixture.nativeElement, '#custom-button');

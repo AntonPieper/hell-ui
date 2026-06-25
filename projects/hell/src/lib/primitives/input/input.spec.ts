@@ -50,6 +50,12 @@ class FieldControlHost {}
       [ui]="inputUi"
       aria-label="Styled input"
     />
+    <input
+      id="shorthand-input"
+      hellInput
+      ui="rounded-hell-pill px-hell-6"
+      aria-label="Shorthand input"
+    />
     <select
       id="styled-select"
       hellNativeSelect
@@ -132,6 +138,12 @@ describe('Hell input primitives', () => {
       ],
       size: 'sm',
     });
+    assertPartStyle(control(fixture, 'shorthand-input'), {
+      absentClass: 'hell-input',
+      mergedClasses: ['rounded-hell-pill', 'px-hell-6'],
+      size: 'md',
+    });
+    expect(control(fixture, 'shorthand-input').classList.contains('px-hell-4')).toBe(false);
     assertPartStyle(control(fixture, 'styled-select'), {
       absentClass: 'hell-native-select',
       mergedClasses: [

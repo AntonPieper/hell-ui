@@ -36,7 +36,8 @@ import dialpadExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
         </li>
         <li>
           <code>ui</code>: part style map keyed by <code>HellDialpadPart</code>; consumer classes
-          merge with Dialpad's Tailwind recipe.
+          merge with Dialpad's Tailwind recipe. Use <code>[ui]="&#123; ... &#125;"</code> for
+          Dialpad's multiple public parts.
         </li>
         <li><code>(digit)</code>: emits the pressed key</li>
         <li><code>(valueChange)</code>: emits the running number</li>
@@ -52,8 +53,8 @@ import dialpadExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
         <code>lowerGrid</code>, and <code>callButton</code>.
       </p>
       <p>
-        Dialpad temporarily renders native controls internally for its own public parts. Revisit
-        the button bridge once <code>HellButton</code> migrates to <code>HellPartStyleable</code>.
+        Dialpad renders native controls internally so each action can expose a dedicated public part
+        instead of inheriting Button's single <code>root</code> part.
       </p>
 
       <h2>Keyboard</h2>
