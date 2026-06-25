@@ -1,38 +1,79 @@
 ---
 name: hell-ui
-description: "Guides work in the hell Angular UI library: primitives, composites, features, styling, docs, exports, and tests. Use when editing projects/hell or projects/hell-docs, adding hell components/directives, changing component CSS/tokens/layout, integrating ng-primitives, or documenting hell APIs."
+description: "Guides direct work in the hell Angular UI library: primitives, composites, features, styling, docs, exports, tests, reviews, and commits. Use when editing this repo's projects/hell, projects/hell-docs, projects/hell-pdf-viewer, docs, tools, or release gates."
 ---
 
 # hell UI
 
-## Quick Start
+## First Read
 
-1. Read nearest matching files before editing.
-   - Primitive: `button`, `input`, `tabs`, `menu`, `select`, `combobox`, `search`
-   - Composite: `app-shell`, `date-input`, `time-input`, `resizable`, `split-view`, `toast`, `omnibar`
-   - Feature: `data-table`, `pdf-viewer`, `code-editor`
-2. Search local hell APIs before inventing: `rg "hell[A-Z]|HELL_.*_DIRECTIVES|Ngp" projects/hell/src/lib`.
-3. Look up ng-primitives before implementing behavior. Use `ngp-mcp` first; use Context7 for Angular/ng-primitives or other library APIs; use web only as fallback.
-4. Reuse existing hell components/directives. If a tiny generalization makes a local primitive/composite reusable, improve that instead of duplicating behavior.
-5. Find first-principles root causes and fix them, not just symptoms.
+1. Read `AGENTS.md`, `CONTEXT.md`, and `docs/agents/domain.md`.
+2. Read ADRs or architecture docs that touch the area you are changing:
+   `docs/adr/`, `docs/architecture/`, and `docs/release/`.
+3. Read nearest matching source files before editing.
+   - Primitive: `button`, `input`, `tabs`, `menu`, `select`, `combobox`, `search`, `table`
+   - Composite: `app-shell`, `date-input`, `time-input`, `resizable`, `split-view`, `toast`, `omnibar`, `audio-player`
+   - Feature/package: `code-editor`, `audio-transcript`, `table-tanstack`, `hell-pdf-viewer`
+4. Search local hell APIs before inventing:
+   `rg "hell[A-Z]|HELL_.*_DIRECTIVES|Ngp" projects/hell/src/lib`.
+5. Use configured docs/MCP before relying on current Angular, ng-primitives, CDK,
+   CodeMirror, pdf.js, TanStack, Playwright, pnpm, or Vercel API details.
+6. Reuse existing hell components/directives. If a small generalization makes a
+   local primitive or composite reusable, improve that instead of duplicating.
 
-If spawning subagents, tell them to use the available `caveman` skill.
+Read [references/REFERENCE.md](references/REFERENCE.md) for architecture,
+styling, docs, validation, review, commit, and debugging detail when the task
+touches those areas.
 
-## Non-Negotiables
+## Working Rules
 
-- Never fix styling through `class="..."`, ad hoc `[class...]`, `ngClass`, `style="..."`, visual `[style.*]`, `style.setProperty(...)`, or `classList`.
-- Style through data attributes and CSS custom properties. CSS/Tailwind reacts to those.
-- Every styled library part exposes `unstyled`; default host class is gated with `!unstyled()`.
-- Library defaults live in `projects/hell/src/lib/styles/components/<name>.css` and are imported by `styles/hell.css`.
-- Consumer templates stay owned by consumers when that flexibility outweighs wrapper boilerplate.
-- Every component/directive gets docs: page, examples, route, nav, and search seeds.
+- Work on one vertical task. Use GitHub Issues when multi-session tracking is
+  useful; do not recreate the deprecated meta board.
+- Keep public API, secondary entrypoints, package-consumer scenarios, API
+  reports, docs, and architecture checks in sync when public surface changes.
+- Prefer deleting bespoke infrastructure over adding wrappers.
+- Do not mutate private third-party state unless an ADR explicitly blesses the
+  seam and the guard/tests stay current.
+- For docs/UI/CSS/component-appearance work, verify a live docs route with
+  browser tooling before handoff. Capture whole-page and zoomed affected-region
+  evidence when visuals changed.
+- Use subagents only when the user explicitly asks for them. Give each subagent
+  one bounded question or disjoint write scope, and tell it not to revert edits
+  made by others.
 
-## Workflows
+## Styling Contract
 
-- Add primitive/composite/feature code under the matching `projects/hell/src/lib/{primitives,composites,features}/<slug>` folder.
-- Export public APIs from `projects/hell/src/public-api.ts`; use `HELL_<NAME>_DIRECTIVES` arrays for multi-part APIs.
-- Add docs under `projects/hell-docs/src/app/pages/components/<slug>` with `.example.ts` files imported live and as raw `?raw` source.
-- Add docs route in `app.routes.ts`, nav item in `App.sections`, and `HD_DOCS_EXAMPLES`/`HD_DOCS_CODE_USAGES` entries.
-- Validate with `pnpm build:lib`, targeted `pnpm test`, and `pnpm build:docs` when docs change.
+- Do not patch library visuals through ad hoc template classes, `ngClass`,
+  inline styles, visual `[style.*]`, `style.setProperty(...)`, or `classList`.
+- Style library defaults through Part Style Maps, data attributes, CSS custom
+  properties, semantic tokens, and component CSS under
+  `projects/hell/src/lib/styles/components/`.
+- Migrated components use Part Style Maps as the deterministic customization
+  path. Do not add new `unstyled`-first APIs for migrated surfaces.
+- Consumer templates stay owned by consumers when that flexibility outweighs
+  wrapper boilerplate.
+- Every public component/directive gets docs: page, examples, route, nav, and
+  search seeds.
 
-Read [references/REFERENCE.md](references/REFERENCE.md) for architecture, styling, docs, validation, and debugging detail when the task touches those areas.
+## Validation
+
+Use the narrowest validation that proves the change, then widen before commit:
+
+- Static/code: `pnpm run lint`, `pnpm run test:architecture`,
+  `pnpm run test:ci-contract`
+- Unit behavior: `pnpm run test:unit`
+- Library packages: `pnpm run build:lib`, `pnpm run test:api-report`,
+  `pnpm run test:package-pack`
+- Docs/UI: `pnpm run build:docs`, focused `pnpm run e2e`
+- Consumer/release: `pnpm run test:package-consumer`,
+  `pnpm run release:dry-run:fast`
+
+## Before Commit
+
+- Inspect `git status` and `git diff`.
+- Confirm the diff is atomic. Split unrelated edits before committing.
+- Run the validation ladder appropriate to the diff.
+- Ask for a fresh-context review when code or public behavior changed.
+- Use a conventional message such as `fix(scope): ...`,
+  `refactor(scope): ...`, `test(scope): ...`, `docs(scope): ...`, or
+  `chore(scope): ...`. Keep the body terse: what changed, why, validation.
