@@ -232,9 +232,9 @@ ${renderComponentStyleTable(componentStyles.slice(0, 8))}
 | --- | --- | --- | --- |
 | Initial bundle exceeds 500 kB by ${formatBytes(initialWarningOverage)} | Static imports from \`main\` pull router/runtime plus docs-shell controls; \`styles.css\` globally imports Tailwind and \`@hell-ui/angular/styles/composites\`. Top chunks: ${initialChunks.slice(0, 5).map((row) => `\`${row.file}\``).join(', ')}. | Docs shell / global styles | ${renderInitialBudgetFollowUp()} |
 ${renderPdfViewerStyleRow(pdfViewerStyleWarnings)}
-| PDF lazy weight is large even when initial bundle is protected | \`pdfjs-dist/build/pdf.mjs\`, \`pdfjs-dist/web/pdf_viewer.mjs\`, and \`hell-ui-pdf-viewer.mjs\` are the top PDF lazy inputs. | PDF viewer split package | HELL-031 keeps the docs page lazy/isolated; HELL-053 keeps PDF outside the core package. |
-| Code editor lazy chunks stay behind lazy docs boundaries | CodeMirror and Lezer packages dominate the code editor route and shared docs code-viewer lazy chunks; this is expected feature weight, not initial shell weight. | Code editor feature / docs code previews | HELL-054 locks CodeMirror as a kept optional entrypoint; HELL-087 keeps shared docs code previews dynamically imported instead of part of the docs shell. |
-| Table docs lazy chunk carries demo/raw source cost | \`table-page\` includes live examples plus \`?raw\` source text and TanStack table shell examples. | Table docs | HELL-129 keeps table examples behind the lazy docs route and verifies the supported \`/table\` plus \`/table-tanstack\` paths. |
+| PDF lazy weight is large even when initial bundle is protected | \`pdfjs-dist/build/pdf.mjs\`, \`pdfjs-dist/web/pdf_viewer.mjs\`, and \`hell-ui-pdf-viewer.mjs\` are the top PDF lazy inputs. | PDF viewer split package | Keep the docs page lazy/isolated and keep PDF outside the core package. |
+| Code editor lazy chunks stay behind lazy docs boundaries | CodeMirror and Lezer packages dominate the code editor route and shared docs code-viewer lazy chunks; this is expected feature weight, not initial shell weight. | Code editor feature / docs code previews | Keep CodeMirror behind its optional entrypoint and keep shared docs code previews dynamically imported instead of part of the docs shell. |
+| Table docs lazy chunk carries demo/raw source cost | \`table-page\` includes live examples plus \`?raw\` source text and TanStack table shell examples. | Table docs | Keep table examples behind the lazy docs route and verify the supported \`/table\` plus \`/table-tanstack\` paths. |
 
 ## Reproduce
 
@@ -251,11 +251,10 @@ pnpm run diagnose:docs-bundle
 function renderHeader() {
   return `# Docs bundle budget diagnosis
 
-- Slice: HELL-030 diagnosis; HELL-031 remediation; HELL-032 policy classification
 - Source stats: \`${relative(root, statsPath)}\`
 - Budget policy: \`${relative(root, budgetPolicyPath)}\`
 - Report generator: \`tools/docs-bundle-budget-report.mjs\`
-- Scope: diagnosis plus current remediation status; HELL-050 guards docs route imports, HELL-087 guards shared docs code-preview lazy loading, and remaining split/import work stays in HELL-053, HELL-054, and HELL-056.`;
+- Scope: diagnosis plus current remediation status for docs budgets, lazy route imports, shared docs code previews, and feature split boundaries.`;
 }
 
 function budgetStatusFor(type) {
@@ -298,7 +297,7 @@ function renderBudgetPolicySection() {
 function renderInitialBudgetFollowUp() {
   const status = budgetStatusFor('initial');
   if (status?.state === 'accepted') {
-    return `Accepted by the docs budget policy (${status.acceptedWarning.followUp}); HELL-050 guards future eager imports across docs route boundaries, and any undocumented new warning is a regression.`;
+    return `Accepted by the docs budget policy (${status.acceptedWarning.followUp}); the architecture guard blocks future eager imports across docs route boundaries, and any undocumented new warning is a regression.`;
   }
   return 'Undocumented budget warning; fix the eager import/CSS regression or document a narrow accepted warning with owner and follow-up.';
 }
@@ -326,10 +325,10 @@ function budgetLabel(type) {
 
 function renderPdfViewerStyleRow(pdfViewerStyleWarnings) {
   if (pdfViewerStyleWarnings.length > 0) {
-    return `| \`pdf-viewer.page.ts\` component style exceeds 4 kB | \`pdf-viewer.page.ts\` inline component style imports the PDF viewer stylesheet; stats emits ${pdfViewerStyleWarnings.map((row) => `\`${row.file}\` at ${formatBytes(row.bytes)}`).join(', ')}. | PDF viewer docs page | HELL-031 reduces the PDF docs style cost, moves it behind a documented lazy/global boundary, or records an intentional budget raise. |`;
+    return `| \`pdf-viewer.page.ts\` component style exceeds 4 kB | \`pdf-viewer.page.ts\` inline component style imports the PDF viewer stylesheet; stats emits ${pdfViewerStyleWarnings.map((row) => `\`${row.file}\` at ${formatBytes(row.bytes)}`).join(', ')}. | PDF viewer docs page | Reduce the PDF docs style cost, move it behind a documented lazy/global boundary, or record an intentional budget raise. |`;
   }
 
-  return '| PDF viewer docs style is isolated from component-style budget | No pdf-viewer component style chunk exceeds the 4 kB warning budget; the docs page serves `@hell-ui/pdf-viewer/styles` as a copied lazy asset instead of an Angular component style. | PDF viewer docs page | HELL-031 keeps the lazy boundary; docs budget policy keeps component-style warnings unaccepted unless explicitly documented. |';
+  return '| PDF viewer docs style is isolated from component-style budget | No pdf-viewer component style chunk exceeds the 4 kB warning budget; the docs page serves `@hell-ui/pdf-viewer/styles` as a copied lazy asset instead of an Angular component style. | PDF viewer docs page | Keep the lazy boundary; docs budget policy keeps component-style warnings unaccepted unless explicitly documented. |';
 }
 
 function renderChunkTable(rows, mode) {

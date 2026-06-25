@@ -7,7 +7,7 @@ Hell UI follows SemVer 2.0.0, but the compatibility promise depends on the relea
 | Stage | Version shape | Audience | SemVer promise |
 | --- | --- | --- | --- |
 | Alpha | `0.x.y-alpha.n` or unreleased local builds | Maintainers and throwaway prototypes | No compatibility promise. Any API, CSS token, peer tier, import path, behavior, or docs contract may change in any release. Changelog entries still call out known breaking changes so internal consumers can rebase deliberately. |
-| Internal beta | `0.x.y` while access is controlled | Maintainer-owned apps and trusted design partners | Patch releases should avoid intentional breaks to documented stable APIs, but minor releases may still break beta or experimental entrypoints. Stable entrypoint breaks require a changelog `Breaking changes` note, migration guidance, and a slice/review trail. Consumers should pin exact or `~` ranges. |
+| Internal beta | `0.x.y` while access is controlled | Maintainer-owned apps and trusted design partners | Patch releases should avoid intentional breaks to documented stable APIs, but minor releases may still break beta or experimental entrypoints. Stable entrypoint breaks require a changelog `Breaking changes` note, migration guidance, and review evidence. Consumers should pin exact or `~` ranges. |
 | Public beta | `0.x.y-beta.n` or a clearly announced `0.x.y` public beta | External pilot consumers | Patch releases must be bugfix-only for documented stable and beta APIs. Minor releases may contain breaking changes only when the changelog and migration guide name the affected entrypoints, peer tiers, CSS imports, and deprecation/removal path. Deprecated APIs should survive at least one public-beta minor where practical. |
 | Stable | `1.0.0` and later | General production consumers | Standard SemVer applies. Patch releases fix bugs without intentional breaking changes. Minor releases add compatible APIs. Major releases carry breaking changes and migration notes. Deprecated stable APIs should normally survive at least one minor before removal. |
 
@@ -38,7 +38,8 @@ Hell UI uses `CHANGELOG.md` in Keep a Changelog shape:
 
 - `## [Unreleased]` collects work after the current package version.
 - Each package version must have `## [x.y.z] - YYYY-MM-DD` before a release tag or publish.
-- Each entry cites the HELL slice IDs that explain the change.
+- Each version section cites the issue, pull request, or local evidence that
+  explains the change.
 - Breaking changes get a dedicated `### Breaking changes` section with affected entrypoints, migration steps, and the first version carrying the break.
 - Release notes must keep alpha/internal-beta/public-beta/stable wording aligned with this policy and the production-readiness checklist.
 
@@ -52,4 +53,5 @@ A stage promotion is a release-management decision, not just a version bump.
 - Internal beta → public beta: production-readiness checklist has no critical blockers, migration guide exists, and release dry-run evidence is fresh.
 - Public beta → stable: stable API reports, docs, accessibility evidence, package-consumer scenarios, pack audit, trusted publishing, and changelog/migration history have held through at least one public beta cycle.
 
-If evidence invalidates these promises, update this policy and the slice board in the same reviewed slice instead of silently weakening the contract.
+If evidence invalidates these promises, update this policy and the release
+evidence in the same reviewed change instead of silently weakening the contract.

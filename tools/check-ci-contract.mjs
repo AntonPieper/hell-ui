@@ -381,8 +381,8 @@ const fileChecks = [
     includes: [
       'Keep a Changelog',
       'docs/release/semver-policy.md',
-      'HELL-023',
-      'HELL-049',
+      'production-readiness checklist',
+      'package-consumer',
     ],
   },
   {
@@ -426,7 +426,7 @@ const fileChecks = [
       'acceptedMaximum',
       'accepted warning',
       'regression',
-      'HELL-050',
+      'lazy-route import graph guard',
     ],
   },
   {

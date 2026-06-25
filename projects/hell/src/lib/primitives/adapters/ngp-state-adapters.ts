@@ -7,8 +7,8 @@ import type { NgpSelect } from 'ng-primitives/select';
 /**
  * Internal compatibility seam for ng-primitives form-control state sync.
  *
- * HELL-035 decision: this is a deliberate version-bound State-channel seam for
- * `ng-primitives@0.117.2`, not an ad hoc primitive-instance state escape hatch.
+ * Deliberate version-bound State-channel seam for `ng-primitives@0.117.2`, not
+ * an ad hoc primitive-instance state escape hatch.
  * Context7 documents state providers as the programmatic-control seam, and the
  * installed `ng-primitives@0.117.2` typings/source expose select, combobox, and
  * radio-group value/disabled state as typed public `State<T>` channels while the
@@ -18,7 +18,7 @@ import type { NgpSelect } from 'ng-primitives/select';
  * Keep `ng-primitives` pinned while this fallback exists. Upgrade/removal path:
  * rerun `docs/adr/ng-primitives-state-adapter.md` for the target version, keep
  * preferring public setters when they exist, and remove the State-channel
- * fallback in a follow-up slice once select, combobox, and radio group all have
+ * fallback once select, combobox, and radio group all have
  * public value + disabled setters that support silent CVA writes, and roving
  * focus has a public non-focusing active-item setter.
  *

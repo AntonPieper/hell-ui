@@ -2,11 +2,12 @@
 
 - Status: Accepted
 - Date: 2026-06-03
-- Slice: HELL-047
 
 ## Context
 
-HELL-036 marked `hotkeys` as a manual-runtime risk because document-level keyboard listeners can steal consuming-app shortcuts, intercept editable fields, leak after component destroy, or cause multiple Hell instances to respond to one key.
+Document-level keyboard listeners can steal consuming-app shortcuts, intercept
+editable fields, leak after component destroy, or cause multiple Hell instances
+to respond to one key.
 
 Current local implementation evidence:
 
@@ -19,7 +20,7 @@ Sources checked:
 
 - Angular CLI MCP was attempted first but failed to connect in this environment with `spawn node ENOENT`.
 - Context7 `/websites/angular_dev` confirmed `DestroyRef.onDestroy` registers cleanup callbacks and returns an unregister function, and Angular's `DOCUMENT` token is the DI path for the rendering document.
-- Local Angular 21.2.13 package/tests remain the executable source of truth for this slice.
+- Local Angular 21.2.13 package/tests remain the executable source of truth.
 
 ## Decision
 
@@ -56,8 +57,8 @@ This is not permission to grow a global shortcut framework. If Hell needs scopes
 
 ## Consequences
 
-- HELL-047 closes the hotkey ownership question with a keep-narrow decision.
 - `HellOmnibar` now registers its document listener only while `hotkey` is non-null.
 - `HellGlobalKeydownService` ignores already-prevented keydowns and uses one-shot cleanup for manual unregister and destroy cleanup.
 - Unit tests cover opt-in/opt-out listener registration, editable targets, modifier matching, cleanup, app shortcut preemption, and multi-instance isolation.
-- HELL-048 still owns the broader static SSR/browser-safety audit for direct globals outside allowed seams.
+- `docs/architecture/browser-global-seams.md` owns the broader static
+  SSR/browser-safety audit for direct globals outside allowed seams.

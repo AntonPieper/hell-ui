@@ -21,7 +21,6 @@ const allowedDocsLazyRouteCrossImports = [
   {
     from: 'projects/hell-docs/src/app/pages/components/flyout/flyout.page.ts',
     to: 'projects/hell-docs/src/app/pages/testing/floating-dismissal-harness.page.ts',
-    owner: 'HELL-040/HELL-057',
     rationale:
       'Flyout exposes the query-param-only floating dismissal browser harness; it is deliberately bundled only with the lazy flyout route, not the docs shell.',
   },
@@ -70,9 +69,9 @@ const audioTranscriptRuntimeTerms = [
   { label: 'captureStream()', pattern: /\bcaptureStream\b/ },
 ];
 
-// HELL-134: this is the explicit not-yet-migrated allowlist for the legacy
-// Style Opt-Out base. Remove a symbol here as soon as it migrates to
-// HellPartStyleable; new public modules must not extend HellStyleable.
+// Explicit not-yet-migrated allowlist for the legacy Style Opt-Out base.
+// Remove a symbol here as soon as it migrates to HellPartStyleable; new public
+// modules must not extend HellStyleable.
 const legacyStyleableAllowlist = new Set([
   'HellAccordion',
   'HellAccordionContent',
@@ -543,7 +542,6 @@ function checkDocsExampleImportBoundaryDocs(docPath) {
     const missingAllowanceParts = [
       allowance.from,
       allowance.to,
-      allowance.owner,
       allowance.rationale,
     ].filter((part) => !docs.includes(part));
     if (missingAllowanceParts.length) {
@@ -2171,7 +2169,7 @@ function checkComponentContract() {
       } else {
         if (!legacyStyleableAllowlist.has(className)) {
           failures.push(
-            `${rel} ${className} extends legacy HellStyleable but is not in the HELL-134 not-yet-migrated allowlist`,
+            `${rel} ${className} extends legacy HellStyleable but is not in the not-yet-migrated allowlist`,
           );
         }
         if (!moduleSource.includes('!unstyled()')) {
@@ -3971,7 +3969,6 @@ const allowedBrowserGlobalSeams = [
     id: 'audio-transcript-window-probe',
     file: 'projects/hell/src/lib/features/audio-transcript/audio-transcript.ts',
     globals: ['window'],
-    owner: 'HELL-055',
     lines: [
       "if (typeof window === 'undefined') return null;",
       'const w = window as unknown as {',
@@ -3982,7 +3979,6 @@ const allowedBrowserGlobalSeams = [
     id: 'resizable-pane-resize-observer',
     file: 'projects/hell/src/lib/composites/resizable/resizable.ts',
     globals: ['ResizeObserver'],
-    owner: 'HELL-061',
     lines: [
       "if (typeof ResizeObserver === 'undefined') return;",
       'const observer = new ResizeObserver(() => this.fitPanesToAvailableSize());',
@@ -3992,7 +3988,6 @@ const allowedBrowserGlobalSeams = [
     id: 'split-view-resize-observer',
     file: 'projects/hell/src/lib/composites/split-view/split-view.ts',
     globals: ['ResizeObserver'],
-    owner: 'HELL-048',
     lines: [
       "if (typeof ResizeObserver === 'undefined') return;",
       'const observer = new ResizeObserver((entries) => {',
@@ -4002,7 +3997,6 @@ const allowedBrowserGlobalSeams = [
     id: 'toast-viewport-resize-observer',
     file: 'projects/hell/src/lib/composites/toast/toast.ts',
     globals: ['ResizeObserver'],
-    owner: 'HELL-048',
     lines: [
       "if (this.destroyed || typeof ResizeObserver === 'undefined') return;",
       'this.ro = new ResizeObserver((entries) => {',
@@ -4012,14 +4006,12 @@ const allowedBrowserGlobalSeams = [
     id: 'floating-dismissal-document-fallback',
     file: 'projects/hell/src/lib/core/floating-dismissal.ts',
     globals: ['document'],
-    owner: 'HELL-057',
     lines: ["return typeof document === 'undefined' ? null : document;"],
   },
   {
     id: 'floating-scope-resize-observer',
     file: 'projects/hell/src/lib/core/floating-scope.ts',
     globals: ['ResizeObserver'],
-    owner: 'HELL-048',
     lines: [
       "if (typeof ResizeObserver === 'undefined') return;",
       'this.resizeObserver = new ResizeObserver(this.syncScope);',
@@ -4029,7 +4021,6 @@ const allowedBrowserGlobalSeams = [
     id: 'code-editor-legacy-document-setup',
     file: 'projects/hell/src/lib/features/code-editor/code-editor.runtime.ts',
     globals: ['document'],
-    owner: 'HELL-054',
     lines: ["typeof document === 'undefined' ? [] : hellCodeEditorSetupFactory(document);"],
   },
 ];
@@ -4051,7 +4042,6 @@ function checkBrowserGlobalContract() {
       const missingDocParts = [
         seam.id,
         seam.file,
-        seam.owner,
         ...seam.globals.map((global) => `\`${global}\``),
       ].filter((part) => !docs.includes(part));
       if (missingDocParts.length) {
@@ -4096,7 +4086,7 @@ function checkBrowserGlobalContract() {
     }
 
     failures.push(
-      `Browser Global Contract ${hit.file}:${hit.line} uses direct ${hit.global}; move it behind an allowed browser seam or add a documented follow-up slice before allowlisting it`,
+      `Browser Global Contract ${hit.file}:${hit.line} uses direct ${hit.global}; move it behind an allowed browser seam or add a documented follow-up before allowlisting it`,
     );
   }
 

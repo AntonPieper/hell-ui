@@ -28,7 +28,7 @@ touches those areas.
 ## Working Rules
 
 - Work on one vertical task. Use GitHub Issues when multi-session tracking is
-  useful; do not recreate the deprecated meta board.
+  useful.
 - Keep public API, secondary entrypoints, package-consumer scenarios, API
   reports, docs, and architecture checks in sync when public surface changes.
 - Prefer deleting bespoke infrastructure over adding wrappers.

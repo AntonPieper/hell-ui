@@ -1,6 +1,6 @@
 # Domain Docs
 
-How engineering skills should consume this repo's domain documentation when
+How engineering workflows should consume this repo's domain documentation when
 exploring the codebase.
 
 ## Layout
@@ -25,9 +25,8 @@ This repo uses a single-context layout:
 - Relevant architecture or release docs under `docs/architecture/` and
   `docs/release/` when the touched area is covered there.
 
-If a referenced file does not exist, proceed silently. The domain-modeling flow
-creates new glossary entries and ADRs lazily when terms or decisions actually
-get resolved.
+If a referenced file is missing, note that briefly and continue with available
+evidence. Do not invent glossary entries or ADRs to fill the gap.
 
 ## Use the glossary vocabulary
 
@@ -35,9 +34,9 @@ When output names a domain concept in an issue title, refactor proposal,
 hypothesis, test name, or review finding, use the term as defined in
 `CONTEXT.md`. Do not drift to synonyms the glossary explicitly avoids.
 
-If the concept you need is missing from the glossary, either you are inventing a
-term the project does not use, or there is a real gap to resolve with
-domain-modeling.
+If a needed concept is missing from the glossary, either avoid introducing that
+term, update `CONTEXT.md` once the term is resolved, open an ADR for a real
+architecture decision, or ask the user to resolve the ambiguity.
 
 ## Flag ADR conflicts
 

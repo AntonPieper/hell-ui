@@ -43,23 +43,13 @@ The docs app accessibility matrix at `/accessibility` lists role patterns,
 keyboard coverage, axe/ARIA/browser-test evidence, and known gaps for every
 public primitive, composite, and feature. The release checklist in
 `docs/release/production-readiness-checklist.md` maps package-consumer, API,
-a11y, docs budget, pack audit, and release dry-run blockers to slice IDs and
-command evidence. Read the [first-beta consumer migration guide](docs/release/first-beta-consumer-guide.md)
+a11y, docs budget, pack audit, and release dry-run blockers to command
+evidence. Read the [first-beta consumer migration guide](docs/release/first-beta-consumer-guide.md)
 before external pilot installs.
 
 The contributor workspace is pnpm-only and CI-backed by `pnpm-lock.yaml`.
 Use `pnpm install --frozen-lockfile` for reproducible CI installs; package-consumer
 scenarios verify pnpm strict-peer installs for applications consuming `@hell-ui/angular`.
-
-### Unit test parallelism
-
-`pnpm test` and `pnpm ci:test` use Vitest's default worker pool and are the
-supported CI path. In constrained meta/agent containers, prefer the meta root
-`pnpm run hell:test:unit` command; it defaults `VITEST_MAX_WORKERS` to `1` and disables
-coverage so the suite runs serially with less worker pressure. Use the meta
-root `pnpm run hell:test:unit:parallel` command only when reproducing CI worker
-scheduling from that constrained environment. The serial and parallel commands
-are intentionally not equivalent defaults.
 
 ## Package Imports
 

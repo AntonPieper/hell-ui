@@ -14,9 +14,7 @@ pnpm run ci:verify
 `ci:test` owns unit test, architecture, report, coverage, and contract checks.
 Unit tests run through `test:unit` with Vitest's default worker pool and coverage
 thresholds enabled; CI adapters should not clamp `VITEST_MAX_WORKERS` unless a
-provider-specific incident is being debugged. The meta root serial command
-(`pnpm run hell:test:unit`) is the default for constrained local/agent containers,
-not the CI contract.
+provider-specific incident is being debugged.
 
 Adapters publish these shared artifacts:
 

@@ -24,10 +24,10 @@ Do not feed external PRs into the triage queue unless this file is deliberately
 updated. Collaborator PRs should be reviewed as pull requests, not treated as
 incoming feature requests.
 
-## When a skill says "publish to the issue tracker"
+## When a workflow says "publish to the issue tracker"
 
 Create a GitHub issue.
 
-## When a skill says "fetch the relevant ticket"
+## When a workflow says "fetch the relevant ticket"
 
 Run `gh issue view <number> --comments`.

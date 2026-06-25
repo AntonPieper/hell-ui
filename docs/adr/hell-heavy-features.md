@@ -2,7 +2,6 @@
 
 - Status: Accepted
 - Date: 2026-05-28
-- Slice: HELL-029
 
 ## Context
 
@@ -13,7 +12,7 @@ Current local evidence:
 - `@hell-ui/angular` root is core-only (`projects/hell/src/public-api.ts`).
 - Package peer metadata is package-wide (`projects/hell/package.json`), so optional feature peers still appear in the main package metadata.
 - Package-consumer peer tiers are asserted with strict installs in `tools/check-package-consumer.mjs`.
-- `audio-player` is exported by the composites aggregate and narrow `@hell-ui/angular/audio-player` entrypoint; the speech transcript path has no npm peer but does carry Web Speech / media-capture runtime risk. HELL-055 isolates that runtime behind `@hell-ui/angular/features/audio-transcript` and `provideHellAudioTranscript()`.
+- `audio-player` is exported by the composites aggregate and narrow `@hell-ui/angular/audio-player` entrypoint; the speech transcript path has no npm peer but does carry Web Speech / media-capture runtime risk. That runtime is isolated behind `@hell-ui/angular/features/audio-transcript` and `provideHellAudioTranscript()`.
 
 ## Decision
 
@@ -22,7 +21,7 @@ Use a hybrid boundary:
 1. Keep `@hell-ui/angular` root/core/primitives/composites light.
 2. Split the PDF viewer out of `@hell-ui/angular` into a separate Angular package before public beta.
 3. Keep CodeMirror as an in-package optional feature entrypoint: `@hell-ui/angular/features/code-editor`.
-4. Superseded by HELL-122: replace the old table feature boundary with exactly two paths: `@hell-ui/angular/table` for primitives and `@hell-ui/angular/table-tanstack` for a Hell-styled shell around a caller-owned TanStack `Table<T>`. Remove `@hell-ui/angular/data-table`, separate virtual table entrypoints, and CDK table skins before beta because there are no consumers yet.
+4. Use exactly two table paths: `@hell-ui/angular/table` for primitives and `@hell-ui/angular/table-tanstack` for a Hell-styled shell around a caller-owned TanStack `Table<T>`. Remove `@hell-ui/angular/data-table`, separate virtual table entrypoints, and CDK table skins before beta because there are no consumers yet.
 5. Keep the base audio player in package, but isolate speech transcript behind an explicit optional feature/adapter entrypoint so normal audio-player/composite consumers do not load or own the Web Speech runtime.
 
 ## Options compared
@@ -63,17 +62,9 @@ Costs:
 | PDF viewer | `pdf-viewer` package-consumer scenario requires the core group, `tailwindcss`, `@ng-icons/font-awesome`, and exact `pdfjs-dist@5.6.205`; the app supplies a worker source. | `pdfjs-dist` remains an optional peer in `@hell-ui/angular` metadata even though root/button do not install it. PDF runtime owns pdf.js viewer imports, workers, printing, downloads, global quirks, and browser-only assumptions. | Main package drops the pdf.js peer and PDF feature entrypoint; new package owns `pdfjs-dist`, worker docs, package-consumer scenario, and lifecycle risk. | Split to a separate Angular package. |
 | CodeMirror | `code-editor` scenario requires the core group, `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight`. Root/button scenarios are asserted to exclude heavy feature peers. | Optional CodeMirror peers remain visible in main metadata, but the feature is a small wrapper over caller-supplied CodeMirror extensions and has an established narrow entrypoint. | Removes CodeMirror peer names from core metadata but adds package overhead for a comparatively narrow editor shell. | Keep as optional entrypoint, guarded by consumer/architecture checks. |
 | Audio transcript | `audio-player` and `audio-transcript` package-consumer scenarios prove the base player and opt-in provider peer groups; neither uses CodeMirror or pdf.js peers. Docs/API mark speech transcript experimental; runtime uses `SpeechRecognition`, `webkitSpeechRecognition`, and `HTMLMediaElement.captureStream()` only inside `@hell-ui/angular/features/audio-transcript`. | No extra npm peer impact, and the transcript runtime no longer travels with audio-player/composites unless the provider is imported. | A separate package would be mostly packaging overhead because there is no third-party peer to isolate. | Keep in package behind the explicit optional feature/provider entrypoint. |
-| Table shell | Existing `table-utilities`, `data-table`, `table-virtual`, and `table-cdk` scenarios are historical. HELL-122 requires new scenarios for primitive `/table` and TanStack-shell `/table-tanstack`. | Primitive table styling remains compact business UI. TanStack-owned dynamic table behavior stays behind the TanStack shell path, and TanStack Virtual stays isolated to its optional body strategy. | A separate package is not needed for primitives or the TanStack shell, but package-consumer gates must prove TanStack/Virtual peers do not leak into `/table` or root. | Replace old feature boundary with `/table` plus `/table-tanstack`; remove unsupported paths before beta. |
+| Table shell | Primitive `/table` and TanStack-shell `/table-tanstack` package-consumer scenarios prove the supported paths. | Primitive table styling remains compact business UI. TanStack-owned dynamic table behavior stays behind the TanStack shell path, and TanStack Virtual stays isolated to its optional body strategy. | A separate package is not needed for primitives or the TanStack shell, but package-consumer gates must prove TanStack/Virtual peers do not leak into `/table` or root. | Use `/table` plus `/table-tanstack`; reject unsupported paths before beta. |
 
 Root, core, and button package-consumer scenarios must continue to exclude `@codemirror/*`, `@lezer/highlight`, and `pdfjs-dist`. This is currently asserted by `assertHeavyPeersAreIsolated()` in the package-consumer runner.
-
-## Follow-up slices
-
-- HELL-053 — split PDF viewer into its own Angular package.
-- HELL-054 — lock CodeMirror as a kept optional entrypoint.
-- HELL-055 — isolate speech transcript behind an optional feature entrypoint.
-- HELL-056 and HELL-063 — historical table slices, superseded by HELL-122 and HELL-123.
-- HELL-123 — parent for the TanStack table shell replacement slices HELL-124 through HELL-129.
 
 ## Consequences
 

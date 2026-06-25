@@ -76,8 +76,8 @@ const HELL_DIALPAD_RECIPE = {
     'inline-flex h-[44px] w-full cursor-pointer items-center justify-center gap-hell-2 rounded-hell-md border border-hell-primary bg-hell-primary px-hell-6 font-[inherit] text-sm font-medium leading-none text-hell-primary-foreground shadow-sm transition hover:bg-hell-primary-hover active:scale-[0.98] active:bg-hell-primary-active data-active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1 disabled:cursor-not-allowed disabled:bg-hell-primary disabled:opacity-50 disabled:shadow-none',
 } satisfies HellRecipe<HellDialpadPart>;
 
-// HELL-134: Dialpad keeps native controls so each public part can expose
-// dedicated Part Style Map classes without inheriting Button's single root part.
+// Dialpad keeps native controls so each public part can expose dedicated Part
+// Style Map classes without inheriting Button's single root part.
 
 /**
  * Telephony dialpad. Emits `(digit)` whenever a key is pressed and maintains

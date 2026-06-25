@@ -1,16 +1,8 @@
 # AGENTS.md
 
-This repository is the active hell-ui workbench. The old `hell-ui-meta`
-repository is historical orchestration context, not the place future product
-work should be planned or validated.
-
 ## Durable repository facts
 
-- The Angular workspace lives here. Work from this repository root, not through
-  the deprecated parent meta repository.
 - Use pnpm only. Do not add npm fallback commands or lockfiles.
-- The canonical project skill is `.agents/skills/hell-ui`. Keep project-local
-  skills lean; generic behavior belongs in user-level skills, not this repo.
 - Use GitHub Issues for work tracking when a ticket is useful. See
   `docs/agents/issue-tracker.md`.
 - Use the triage labels in `docs/agents/triage-labels.md`.
@@ -27,17 +19,17 @@ work should be planned or validated.
 - Do not commit or package `node_modules`, `dist`, coverage, Playwright reports,
   test output, local review logs, or AppleDouble `._*` sidecars.
 
-## Agent skills
+## Workflow Docs
 
 ### Issue tracker
 
-Issues and PRDs live in GitHub Issues for `AntonPieper/hell-ui`; external PRs
-are not a triage request surface by default. See
+Issues and PRDs live in GitHub Issues for `AntonPieper/hell-ui`; external pull
+requests are reviewed as pull requests, not triaged as requests. See
 `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
-Use the default triage skill labels: `needs-triage`, `needs-info`,
+Use these GitHub triage labels: `needs-triage`, `needs-info`,
 `ready-for-agent`, `ready-for-human`, and `wontfix`. See
 `docs/agents/triage-labels.md`.
 

@@ -1,8 +1,9 @@
 # Keyboard navigation matrix: menu, select, combobox
 
-- Slice: HELL-039
 - Date: 2026-05-29
-- Evidence sources: `ng-primitives@0.117.2` local source after `pnpm install`, Hell docs examples under `projects/hell-docs/src/app/pages/components/{menu,select,combobox}`, and browser coverage in `e2e/menu-select-combobox-keyboard.spec.ts`.
+- Evidence sources: `ng-primitives@0.117.2`, Hell docs examples under
+  `projects/hell-docs/src/app/pages/components/{menu,select,combobox}`, and
+  browser coverage in `e2e/menu-select-combobox-keyboard.spec.ts`.
 
 | Component | Pattern followed | Focus model | Covered keyboard contract | Disabled-item contract |
 | --- | --- | --- | --- | --- |

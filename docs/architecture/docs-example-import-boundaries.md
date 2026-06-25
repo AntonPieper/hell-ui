@@ -1,7 +1,6 @@
 # Docs example import boundaries
 
 - ID: docs-example-import-boundaries
-- Slice: HELL-050; HELL-087 docs code preview exception
 - Enforced by: `pnpm run test:architecture` (`tools/check-architecture.mjs`, `checkDocsLazyRouteImportGraphContract()`)
 - Source of truth: `projects/hell-docs/src/app/docs-catalog.ts`
 
@@ -27,8 +26,8 @@ When the architecture check fails, it lists the page/example import edge that cr
 
 ## Allowed cross-boundary page imports
 
-| From                                                                | To                                                                            | Owner             | Rationale                                                                                                                                               |
-| ------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `projects/hell-docs/src/app/pages/components/flyout/flyout.page.ts` | `projects/hell-docs/src/app/pages/testing/floating-dismissal-harness.page.ts` | HELL-040/HELL-057 | Flyout exposes the query-param-only floating dismissal browser harness; it is deliberately bundled only with the lazy flyout route, not the docs shell. |
+| From                                                                | To                                                                            | Rationale                                                                                                                                               |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `projects/hell-docs/src/app/pages/components/flyout/flyout.page.ts` | `projects/hell-docs/src/app/pages/testing/floating-dismissal-harness.page.ts` | Flyout exposes the query-param-only floating dismissal browser harness; it is deliberately bundled only with the lazy flyout route, not the docs shell. |
 
 No other page-to-page or example-to-other-page imports are allowed. Future test harnesses should either live under the routed page that owns them or be promoted to `projects/hell-docs/src/app/shared/` if more than one lazy route needs them.

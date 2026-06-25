@@ -2,11 +2,16 @@
 
 - Status: Accepted
 - Date: 2026-06-19
-- Supersedes: `docs/adr/composable-table-architecture.md` / HELL-062 table-layer decision
 
 ## Context
 
-HELL-062 replaced the old table-utilities-only boundary with five composable table layers: table primitives, simple data table, TanStack adapter, TanStack Virtual adapter, and CDK skin. That direction now overreaches Hell's product boundary. A first-party data-table renderer, normalized Hell table model, shared table state channels, CDK table adapter, and separate virtual table entry point would make Hell a worse custom data-table library instead of a component system that composes with the best table engine.
+A previous table direction had too many composable table layers: table
+primitives, a simple data table, a TanStack adapter, a TanStack Virtual adapter,
+and a CDK skin. That overreaches Hell's product boundary. A first-party
+data-table renderer, normalized Hell table model, shared table state channels,
+CDK table adapter, and separate virtual table entry point would make Hell a
+worse custom data-table library instead of a component system that composes with
+the best table engine.
 
 TanStack Table remains the intended table engine. Its Angular adapter and feature APIs own table instances, columns, rows, sorting, filtering, pagination, selection, pinning, sizing, virtualization integration, and table state. Hell should make TanStack tables feel excellent in Hell UI without translating TanStack into a competing Hell table engine.
 

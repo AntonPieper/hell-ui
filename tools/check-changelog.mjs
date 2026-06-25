@@ -40,8 +40,10 @@ if (changelog) {
       if (!/^[-*] /m.test(section)) {
         errors.push(`${changelogPath} section ${currentVersion} must include at least one bullet.`);
       }
-      if (!/\bHELL-\d{3}\b/.test(section)) {
-        errors.push(`${changelogPath} section ${currentVersion} must cite at least one HELL slice ID.`);
+      if (!hasEvidenceCitation(section)) {
+        errors.push(
+          `${changelogPath} section ${currentVersion} must cite an issue, pull request, or local evidence path.`,
+        );
       }
     }
   }
@@ -133,3 +135,14 @@ function escapeRegExp(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function hasEvidenceCitation(section) {
+  const localPath =
+    '(?:CHANGELOG\\.md|README\\.md|docs\\/[^\\s`)]+|tools\\/[^\\s`)]+|projects\\/[^\\s`)]+|e2e\\/[^\\s`)]+)';
+  const patterns = [
+    /(?:^|\s)#\d+\b/,
+    /https:\/\/github\.com\/[^\s)]+\/(?:issues|pull)\/\d+\b/,
+    new RegExp(`\`${localPath}\``),
+    new RegExp(`\\]\\(${localPath}\\)`),
+  ];
+  return patterns.some((pattern) => pattern.test(section));
+}

@@ -1,23 +1,22 @@
 # Docs bundle budget diagnosis
 
-- Slice: HELL-030 diagnosis; HELL-031 remediation; HELL-032 policy classification
 - Source stats: `dist/hell-docs/stats.json`
 - Budget policy: `docs/release/docs-budget-policy.md`
 - Report generator: `tools/docs-bundle-budget-report.mjs`
-- Scope: diagnosis plus current remediation status; HELL-050 guards docs route imports, HELL-087 guards shared docs code-preview lazy loading, and remaining split/import work stays in HELL-053, HELL-054, and HELL-056.
+- Scope: diagnosis plus current remediation status for docs budgets, lazy route imports, shared docs code previews, and feature split boundaries.
 
 ## Budget status
 
 | Budget | Current | Warning | Error | Status |
 | --- | ---: | ---: | ---: | --- |
-| Initial bundle | 868.35 kB | 500.00 kB | 1050.00 kB | accepted warning: 368.35 kB over; accepted ceiling: 870.00 kB; owner: Docs shell / global styles; follow-up: HELL-050 static guard |
+| Initial bundle | 868.35 kB | 500.00 kB | 1050.00 kB | accepted warning: 368.35 kB over; accepted ceiling: 870.00 kB; owner: Docs shell / global styles; follow-up: lazy-route import graph guard |
 | Any component style | 1.35 kB largest | 4.00 kB | 8.00 kB | within warning budget |
 
 ## Budget policy
 
 - Policy source: `docs/release/docs-budget-policy.md`
 - Policy check: ok
-- Accepted current warnings: Initial bundle (HELL-050 static guard)
+- Accepted current warnings: Initial bundle (lazy-route import graph guard)
 - Regression budget warnings: none
 
 ## Largest initial chunks
@@ -72,11 +71,11 @@ Lazy owner summary: the largest lazy chunks are correctly behind feature/page bo
 
 | Warning / risk | Root cause from stats | Owner | Follow-up fix |
 | --- | --- | --- | --- |
-| Initial bundle exceeds 500 kB by 368.35 kB | Static imports from `main` pull router/runtime plus docs-shell controls; `styles.css` globally imports Tailwind and `@hell-ui/angular/styles/composites`. Top chunks: `styles-TK7NH2WW.css`, `chunk-Z73P3WKV.js`, `chunk-T3VUZJMU.js`, `chunk-72ZGZXTX.js`, `chunk-3AIJHNZJ.js`. | Docs shell / global styles | Accepted by the docs budget policy (HELL-050 static guard); HELL-050 guards future eager imports across docs route boundaries, and any undocumented new warning is a regression. |
-| PDF viewer docs style is isolated from component-style budget | No pdf-viewer component style chunk exceeds the 4 kB warning budget; the docs page serves `@hell-ui/pdf-viewer/styles` as a copied lazy asset instead of an Angular component style. | PDF viewer docs page | HELL-031 keeps the lazy boundary; docs budget policy keeps component-style warnings unaccepted unless explicitly documented. |
-| PDF lazy weight is large even when initial bundle is protected | `pdfjs-dist/build/pdf.mjs`, `pdfjs-dist/web/pdf_viewer.mjs`, and `hell-ui-pdf-viewer.mjs` are the top PDF lazy inputs. | PDF viewer split package | HELL-031 keeps the docs page lazy/isolated; HELL-053 keeps PDF outside the core package. |
-| Code editor lazy chunks stay behind lazy docs boundaries | CodeMirror and Lezer packages dominate the code editor route and shared docs code-viewer lazy chunks; this is expected feature weight, not initial shell weight. | Code editor feature / docs code previews | HELL-054 locks CodeMirror as a kept optional entrypoint; HELL-087 keeps shared docs code previews dynamically imported instead of part of the docs shell. |
-| Table docs lazy chunk carries demo/raw source cost | `table-page` includes live examples plus `?raw` source text and TanStack table shell examples. | Table docs | HELL-129 keeps table examples behind the lazy docs route and verifies the supported `/table` plus `/table-tanstack` paths. |
+| Initial bundle exceeds 500 kB by 368.35 kB | Static imports from `main` pull router/runtime plus docs-shell controls; `styles.css` globally imports Tailwind and `@hell-ui/angular/styles/composites`. Top chunks: `styles-TK7NH2WW.css`, `chunk-Z73P3WKV.js`, `chunk-T3VUZJMU.js`, `chunk-72ZGZXTX.js`, `chunk-3AIJHNZJ.js`. | Docs shell / global styles | Accepted by the docs budget policy (lazy-route import graph guard); the architecture guard blocks future eager imports across docs route boundaries, and any undocumented new warning is a regression. |
+| PDF viewer docs style is isolated from component-style budget | No pdf-viewer component style chunk exceeds the 4 kB warning budget; the docs page serves `@hell-ui/pdf-viewer/styles` as a copied lazy asset instead of an Angular component style. | PDF viewer docs page | Keep the lazy boundary; docs budget policy keeps component-style warnings unaccepted unless explicitly documented. |
+| PDF lazy weight is large even when initial bundle is protected | `pdfjs-dist/build/pdf.mjs`, `pdfjs-dist/web/pdf_viewer.mjs`, and `hell-ui-pdf-viewer.mjs` are the top PDF lazy inputs. | PDF viewer split package | Keep the docs page lazy/isolated and keep PDF outside the core package. |
+| Code editor lazy chunks stay behind lazy docs boundaries | CodeMirror and Lezer packages dominate the code editor route and shared docs code-viewer lazy chunks; this is expected feature weight, not initial shell weight. | Code editor feature / docs code previews | Keep CodeMirror behind its optional entrypoint and keep shared docs code previews dynamically imported instead of part of the docs shell. |
+| Table docs lazy chunk carries demo/raw source cost | `table-page` includes live examples plus `?raw` source text and TanStack table shell examples. | Table docs | Keep table examples behind the lazy docs route and verify the supported `/table` plus `/table-tanstack` paths. |
 
 ## Reproduce
 

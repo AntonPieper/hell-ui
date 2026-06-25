@@ -2,11 +2,13 @@
 
 - Status: Accepted
 - Date: 2026-05-29
-- Slice: HELL-033, HELL-035
 
 ## Context
 
-Hell wraps Angular Primitives/ng-primitives select, combobox, and radio group primitives as Angular form controls. HELL-013 centralized the form-state write path in `ngp-state-adapters.ts` because the wrapper `ControlValueAccessor` implementations need to sync `writeValue` and disabled state without pretending that private primitive instance fields are a public API.
+Hell wraps Angular Primitives/ng-primitives select, combobox, and radio group
+primitives as Angular form controls. The wrapper `ControlValueAccessor`
+implementations need to sync `writeValue` and disabled state without pretending
+that private primitive instance fields are a public API.
 
 The recheck had to answer one narrow question: can Hell now remove that adapter and call public value/disabled setters, or does it still need a guarded state-provider seam?
 
@@ -35,11 +37,19 @@ The general `ng-primitives/state` API supports the adapter model: `State<T>` map
 
 Keep the adapter with guard.
 
-HELL-035 explicitly accepts the version-bound `State<T>` channel seam for `ng-primitives@0.117.2`. This is not a claim that select, combobox, or radio group have complete public CVA setters; it is a deliberate internal compatibility seam over the documented state-provider API until those setters exist.
+This ADR accepts the version-bound `State<T>` channel seam for
+`ng-primitives@0.117.2`. This is not a claim that select, combobox, or radio
+group have complete public CVA setters; it is a deliberate internal
+compatibility seam over the documented state-provider API until those setters
+exist.
 
 Hell will not remove `ngp-state-adapters.ts` now because current public APIs still do not provide complete value + disabled setters or equivalent CVA sync hooks for all three primitives. The adapter may continue to prefer future `setValue(value, { emit: false })` and `setDisabled(boolean)` methods if ng-primitives adds them, but the current supported path remains the injected `State<T>.value` and `State<T>.disabled` writable channels.
 
-The package pin remains intentional: both the workspace dependency and published peer dependency stay pinned to `ng-primitives@0.117.2` while Hell depends on this channel shape. Do not open an upstream-change slice yet. The documented state-provider seam is public enough for guarded internal use, and HELL-034/HELL-035 make Hell's version-bound reliance explicit, tested, and architecture-guarded.
+The package pin remains intentional: both the workspace dependency and published
+peer dependency stay pinned to `ng-primitives@0.117.2` while Hell depends on this
+channel shape. The documented state-provider seam is public enough for guarded
+internal use, and the version-bound reliance is explicit, tested, and
+architecture-guarded.
 
 ## Guardrails
 
@@ -48,17 +58,11 @@ The package pin remains intentional: both the workspace dependency and published
 - The architecture guard rejects direct `State<T>.value.set(...)`, `State<T>.disabled.set(...)`, indexed state-channel writes, retired private bridge tokens, and direct primitive-instance `.state` access outside the adapter seam.
 - The adapter is internal-only and must not be re-exported from the adapters barrel.
 
-## Slice closure
-
-Chosen path: **keep with guard**.
-
-- HELL-034 added explicit adapter contract tests for the fallback path and useful drift errors.
-- HELL-035 blessed the version-bound adapter seam in this ADR and tightened the architecture guard.
-- The next removal opportunity is a future ng-primitives upgrade that exposes public select, combobox, and radio-group value + disabled setters with a silent CVA write option.
-
 ## Consequences
 
 - `ng-primitives@0.117.2` stays intentionally pinned while Hell depends on the `State<T>` channel shape.
 - Any ng-primitives upgrade must rerun this ADR check against the upgraded typings/docs before changing the pin.
 - The architecture guard must continue to reject ad hoc ng-primitives state writes outside the adapter, including typed direct channel writes.
-- If a future ng-primitives release adds public select/combobox/radio value and disabled setters with a silent-update option, Hell should remove the fallback state-channel writes in a new slice.
+- If a future ng-primitives release adds public select/combobox/radio value and
+  disabled setters with a silent-update option, Hell should remove the fallback
+  state-channel writes.

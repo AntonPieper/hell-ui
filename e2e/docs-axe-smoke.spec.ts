@@ -258,7 +258,7 @@ function formatAxeViolations(target: DocsAxeTarget, violations: readonly AxeViol
 
   return [
     `Axe WCAG smoke violations for ${target.name} docs example (${target.path}).`,
-    'Known exceptions are not suppressed here; add an inline rationale plus follow-up HELL slice before excluding a rule or node.',
+    'Known exceptions are not suppressed here; add an inline rationale plus a tracked follow-up before excluding a rule or node.',
     details,
   ].join('\n\n');
 }

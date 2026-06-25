@@ -47,17 +47,36 @@ Required behavior, accessibility, state attributes, geometry, measurement, porta
 
 For tables, do not add callback-valued entries to generic `HellUi` v1. Start with static part maps plus stable `data-slot` and `data-*` state selectors; add table-specific callback-valued entries only later if state attributes cannot express the required styling without turning Hell into a table DSL.
 
-Use `HellDialpad` as the first implementation slice for the Part Style Map model. It has meaningful component-owned structure and enough Public Parts to test the model without taking on the higher-risk table, PDF viewer, toast, or omnibar surfaces first.
+`HellDialpad` was the first implementation target for the Part Style Map model.
+`HellButton` and `HellInput` have also migrated. Larger surfaces such as table,
+PDF viewer, toast, and omnibar still need separate evidence before adopting the
+same API.
 
-For the Dialpad slice, the exported `HellDialpadPart` names are the source of truth for the public anatomy, and rendered `data-slot` values should match those names. Prefer ergonomic camelCase public names such as `numberInput`, `clearButton`, `backspaceButton`, and `callButton` over preserving terse historical slot values such as `number`, `clear`, `back`, or `call`.
+For Dialpad, the exported `HellDialpadPart` names are the source of truth for
+the public anatomy, and rendered `data-slot` values should match those names.
+Prefer ergonomic camelCase public names such as `numberInput`, `clearButton`,
+`backspaceButton`, and `callButton` over terse slot values such as `number`,
+`clear`, `back`, or `call`.
 
-Keep the first Dialpad slice focused on proving the component model: introduce `HellPartStyleable`, migrate Dialpad to part recipes and `[ui]`, rename Dialpad public slots, update Dialpad tests/docs, and run narrow validation. Do not require package-consumer, global architecture guard, API-report expansion, or full `unstyled` removal gates in that prototype slice; create follow-up slices for those global enforcement paths.
+Keep each migration focused on its component model: part recipes, `[ui]`, public
+slot names, tests/docs, and narrow validation. Package-consumer, global
+architecture guard, API-report expansion, and full `unstyled` removal gates
+belong to broader enforcement work.
 
-Migrated components should drop `unstyled` immediately. The Dialpad slice should not keep an `unstyled` compatibility input on `HellDialpad`. Do not migrate `HellButton` or `HellInput` in the first Dialpad prototype slice; they are central primitives and need their own focused migrations. Dialpad should prove its own Part Style Map without pulling those shared primitives into the same slice.
+Migrated components should drop `unstyled` immediately. Dialpad, Button, and
+Input do not keep `unstyled` compatibility inputs.
 
-For the Dialpad prototype, internal controls may use native `<button>` and `<input>` elements styled through Dialpad-owned Public Parts instead of `HellButton` and `HellInput`. This is a temporary bridge, not a new permanent primitive boundary. The implementation must mark the native-control bridge with code comments and docs notes saying it must be revisited once `HellButton` and `HellInput` migrate to `HellPartStyleable`.
+Dialpad internal controls may use native `<button>` and `<input>` elements
+styled through Dialpad-owned Public Parts instead of `HellButton` and
+`HellInput`. This is an intentional anatomy choice so Dialpad can expose
+multiple dialpad-specific parts without inheriting Button or Input's single-root
+part contract.
 
-After the Dialpad, Button, and Input migration slices, the global gate slice should wait for a follow-up cleanup slice that resolves implementation feedback: remove or allowlist remaining `HellStyleable` use, add `HellUiInput` shorthand, replace per-component merge callbacks with direct `hellTwMerge` use in `HellPartStyleable`, remove button-specific variable fallbacks unless justified, and document the `class` caveat. That cleanup is a prerequisite for enforcing global architecture gates.
+Before enforcing global Part Style Map gates, resolve implementation feedback:
+remove or allowlist remaining `HellStyleable` use, add `HellUiInput` shorthand,
+replace per-component merge callbacks with direct `hellTwMerge` use in
+`HellPartStyleable`, remove button-specific variable fallbacks unless justified,
+and document the `class` caveat.
 
 ## Consequences
 
@@ -74,9 +93,14 @@ After the Dialpad, Button, and Input migration slices, the global gate slice sho
 - The packaging plan must prove those recipe classes are available through shipped CSS entrypoints without relying on removed legacy CSS classes or consumer-side source scanning.
 - Complex components should expose enough Public Parts that consumers can refine styling without rebuilding component-owned structure.
 - `HellUi` v1 remains a string map. Dynamic row/cell styling belongs to stable state attributes first, and table-specific extensions only if evidence requires them.
-- The first implementation slice should prototype the full model on `HellDialpad` before broader migration.
-- The Dialpad slice should rename its public `data-slot` values to match `HellDialpadPart`; existing tests/docs should migrate to the new names rather than preserve legacy slot aliases.
-- The Dialpad slice should stay local to implementation, Dialpad docs/tests, and narrow validation; global gates belong to follow-up slices.
-- Migrated components drop `unstyled`; the Dialpad slice should not migrate central primitives such as `HellButton` and `HellInput`.
-- Dialpad's native internal button/input bridge must be explicitly marked temporary in code and docs, with follow-up replacement when Button/Input migrate.
+- Dialpad, Button, and Input are migrated examples of the model.
+- Dialpad should rename its public `data-slot` values to match
+  `HellDialpadPart`; existing tests/docs should migrate to the new names rather
+  than preserve legacy slot aliases.
+- Component migration should stay local to implementation, docs/tests, and
+  narrow validation; global gates belong to broader enforcement work.
+- Migrated components drop `unstyled`; do not add compatibility inputs for new
+  Part Style Map surfaces.
+- Dialpad's native internal button/input controls are a component-specific public
+  anatomy choice, independent of Button/Input migration status.
 - Global gates should run only after the post-migration cleanup proves the Part Style Map API is the stable shape to enforce.

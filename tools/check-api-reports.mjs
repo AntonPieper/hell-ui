@@ -147,7 +147,7 @@ function apiExtractorConfig(entrypoint) {
           logLevel: 'warning',
           addToApiReportFile: true,
         },
-        // HELL-026 will add formal stability tags. Until then, API reports track shape only.
+        // Formal stability tags are checked separately; API reports track shape here.
         'ae-missing-release-tag': {
           logLevel: 'none',
         },
