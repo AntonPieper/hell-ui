@@ -2,7 +2,7 @@
 
 - Enforced by: `pnpm run test:architecture`
   (`tools/check-architecture.mjs`, `checkBrowserGlobalContract()`)
-- Scope: production TypeScript under `projects/hell/src/lib`; specs,
+- Scope: production TypeScript under `packages/angular/src/lib`; specs,
   declarations, and the PDF worker file are excluded.
 
 ## Rule
@@ -31,13 +31,13 @@ A new direct global must do one of these in the same change:
 
 | Seam ID | File | Globals | Status | Rationale |
 | --- | --- | --- | --- | --- |
-| audio-transcript-window-probe | `projects/hell/src/lib/features/audio-transcript/audio-transcript.ts` | `window` | Accepted optional feature seam | The speech-transcript provider probes `SpeechRecognition`/`webkitSpeechRecognition` only after a `typeof window` guard and is imported from `@hell-ui/angular/features/audio-transcript`, not the base audio-player/composites paths. |
-| resizable-pane-resize-observer | `projects/hell/src/lib/composites/resizable/resizable.ts` | `ResizeObserver` | Browser-contract follow-up | Split-pane resize observes rendered panes after view init and disconnects on teardown; the kept resize behavior still needs current browser evidence before production-ready language. |
-| split-view-resize-observer | `projects/hell/src/lib/composites/split-view/split-view.ts` | `ResizeObserver` | Accepted component seam | Split-view observes only its rendered host after view init, guards missing `ResizeObserver`, and disconnects through `DestroyRef`; no module-import browser access is allowed. |
-| toast-viewport-resize-observer | `projects/hell/src/lib/composites/toast/toast.ts` | `ResizeObserver` | Accepted component seam | Toast viewport collapse logic needs rendered viewport dimensions, is guarded for non-browser runtimes, and disconnects on destroy. |
-| floating-dismissal-document-fallback | `projects/hell/src/lib/core/floating-dismissal.ts` | `document` | Accepted flyout/core fallback | Floating dismissal is a pure controller usable outside Angular DI, so it has a guarded fallback when no owner document is passed. Omnibar passes an owner document for its focus-only rule. |
-| floating-scope-resize-observer | `projects/hell/src/lib/core/floating-scope.ts` | `ResizeObserver` | Accepted core seam | Floating scope is the documented owner for portaled-surface CSS variable sync; it guards observer creation and disconnects listeners/observer on teardown. |
-| code-editor-legacy-document-setup | `projects/hell/src/lib/features/code-editor/code-editor.runtime.ts` | `document` | Provisional compatibility seam | The deprecated `hellCodeEditorSetup` compatibility constant guards `document` on import and points consumers at `hellCodeEditorSetupFactory(ownerDocument)`. Keep CodeMirror client-only and narrow. |
+| audio-transcript-window-probe | `packages/angular/src/lib/features/audio-transcript/audio-transcript.ts` | `window` | Accepted optional feature seam | The speech-transcript provider probes `SpeechRecognition`/`webkitSpeechRecognition` only after a `typeof window` guard and is imported from `@hell-ui/angular/features/audio-transcript`, not the base audio-player/composites paths. |
+| resizable-pane-resize-observer | `packages/angular/src/lib/composites/resizable/resizable.ts` | `ResizeObserver` | Browser-contract follow-up | Split-pane resize observes rendered panes after view init and disconnects on teardown; the kept resize behavior still needs current browser evidence before production-ready language. |
+| split-view-resize-observer | `packages/angular/src/lib/composites/split-view/split-view.ts` | `ResizeObserver` | Accepted component seam | Split-view observes only its rendered host after view init, guards missing `ResizeObserver`, and disconnects through `DestroyRef`; no module-import browser access is allowed. |
+| toast-viewport-resize-observer | `packages/angular/src/lib/composites/toast/toast.ts` | `ResizeObserver` | Accepted component seam | Toast viewport collapse logic needs rendered viewport dimensions, is guarded for non-browser runtimes, and disconnects on destroy. |
+| floating-dismissal-document-fallback | `packages/angular/src/lib/core/floating-dismissal.ts` | `document` | Accepted flyout/core fallback | Floating dismissal is a pure controller usable outside Angular DI, so it has a guarded fallback when no owner document is passed. Omnibar passes an owner document for its focus-only rule. |
+| floating-scope-resize-observer | `packages/angular/src/lib/core/floating-scope.ts` | `ResizeObserver` | Accepted core seam | Floating scope is the documented owner for portaled-surface CSS variable sync; it guards observer creation and disconnects listeners/observer on teardown. |
+| code-editor-legacy-document-setup | `packages/angular/src/lib/features/code-editor/code-editor.runtime.ts` | `document` | Provisional compatibility seam | The deprecated `hellCodeEditorSetup` compatibility constant guards `document` on import and points consumers at `hellCodeEditorSetupFactory(ownerDocument)`. Keep CodeMirror client-only and narrow. |
 
 Provisional rows are not permanent waivers. If a seam changes scope, update
 this document and the architecture allowlist in the same commit.

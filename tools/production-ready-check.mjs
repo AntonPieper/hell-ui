@@ -253,10 +253,10 @@ function validateRequiredCheckDetails(category, checks) {
 
     const matrixCheck = checks.find((check) => check?.type === 'fileNotContains');
     if (
-      matrixCheck?.path !== 'projects/hell-docs/src/app/pages/accessibility/accessibility.page.ts'
+      matrixCheck?.path !== 'apps/docs/src/app/pages/accessibility/accessibility.page.ts'
     ) {
       failures.push(
-        'accessibility matrix check must target projects/hell-docs/src/app/pages/accessibility/accessibility.page.ts.',
+        'accessibility matrix check must target apps/docs/src/app/pages/accessibility/accessibility.page.ts.',
       );
     }
     for (const forbidden of ['Critical gap', 'criticalGap: true']) {

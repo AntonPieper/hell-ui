@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const packageManifestPath = 'projects/hell/package.json';
+const packageManifestPath = 'packages/angular/package.json';
 const changelogPath = 'CHANGELOG.md';
 const semverPolicyPath = 'docs/release/semver-policy.md';
 const requiredPolicyTerms = ['alpha', 'internal beta', 'public beta', 'stable', 'SemVer', 'CHANGELOG.md'];

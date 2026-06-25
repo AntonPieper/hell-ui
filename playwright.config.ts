@@ -5,7 +5,7 @@ const externalBaseUrl = process.env.HELL_E2E_BASE_URL;
 const baseURL = externalBaseUrl ?? `http://127.0.0.1:${port}`;
 const webServerCommand =
   process.env.HELL_E2E_WEB_SERVER_COMMAND ??
-  `pnpm run ci:ensure:build:lib && node tools/setup-docs-hell-package-alias.mjs && pnpm exec ng serve hell-docs --configuration production --host 127.0.0.1 --port ${port}`;
+  `pnpm --filter hell-docs exec ng serve hell-docs --configuration production --host 127.0.0.1 --port ${port}`;
 
 const browserProjects = [
   {

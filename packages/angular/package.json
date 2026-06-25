@@ -1,0 +1,314 @@
+{
+  "name": "@hell-ui/angular",
+  "version": "0.1.0",
+  "description": "Heinrich Element Library — opinionated Angular component set built on ng-primitives + Tailwind v4.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AntonPieper/hell-ui.git",
+    "directory": "packages/angular"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public",
+    "provenance": true
+  },
+  "files": [
+    "README.md",
+    "package.json",
+    "**/package.json",
+    "fesm2022/*.mjs",
+    "types/*.d.ts",
+    "styles/**/*.css",
+    "assets/**"
+  ],
+  "exports": {
+    "./styles": {
+      "@heinrich/source": "./src/lib/styles/hell.css",
+      "style": "./src/lib/styles/hell.css",
+      "default": "./src/lib/styles/hell.css"
+    },
+    "./styles/tokens": {
+      "@heinrich/source": "./src/lib/styles/tokens.css",
+      "style": "./src/lib/styles/tokens.css",
+      "default": "./src/lib/styles/tokens.css"
+    },
+    "./styles/primitives": {
+      "@heinrich/source": "./src/lib/styles/primitives.css",
+      "style": "./src/lib/styles/primitives.css",
+      "default": "./src/lib/styles/primitives.css"
+    },
+    "./styles/composites": {
+      "@heinrich/source": "./src/lib/styles/composites.css",
+      "style": "./src/lib/styles/composites.css",
+      "default": "./src/lib/styles/composites.css"
+    },
+    "./styles/table": {
+      "@heinrich/source": "./src/lib/styles/table.css",
+      "style": "./src/lib/styles/table.css",
+      "default": "./src/lib/styles/table.css"
+    },
+    "./styles/features/code-editor": {
+      "@heinrich/source": "./src/lib/styles/features/code-editor.css",
+      "style": "./src/lib/styles/features/code-editor.css",
+      "default": "./src/lib/styles/features/code-editor.css"
+    },
+    "./styles/kitchen-sink": {
+      "@heinrich/source": "./src/lib/styles/hell.css",
+      "style": "./src/lib/styles/hell.css",
+      "default": "./src/lib/styles/hell.css"
+    },
+    "./styles/components/*": {
+      "@heinrich/source": "./src/lib/styles/components/*.css",
+      "style": "./src/lib/styles/components/*.css",
+      "default": "./src/lib/styles/components/*.css"
+    },
+    ".": {
+      "@heinrich/source": "./src/public-api.ts"
+    },
+    "./core": {
+      "@heinrich/source": "./src/lib/public-api-core.ts"
+    },
+    "./internal/hotkeys": {
+      "@heinrich/source": "./src/lib/public-api-internal-hotkeys.ts"
+    },
+    "./testing": {
+      "@heinrich/source": "./src/testing/public-api.ts"
+    },
+    "./table": {
+      "@heinrich/source": "./src/lib/public-api-table.ts"
+    },
+    "./table-tanstack": {
+      "@heinrich/source": "./src/lib/public-api-table-tanstack.ts"
+    },
+    "./table-tanstack/virtual": {
+      "@heinrich/source": "./src/lib/public-api-table-tanstack-virtual.ts"
+    },
+    "./primitives": {
+      "@heinrich/source": "./src/lib/public-api-primitives.ts"
+    },
+    "./composites": {
+      "@heinrich/source": "./src/lib/public-api-composites.ts"
+    },
+    "./button": {
+      "@heinrich/source": "./src/lib/public-api-primitive-button.ts"
+    },
+    "./card": {
+      "@heinrich/source": "./src/lib/public-api-primitive-card.ts"
+    },
+    "./separator": {
+      "@heinrich/source": "./src/lib/public-api-primitive-separator.ts"
+    },
+    "./tag": {
+      "@heinrich/source": "./src/lib/public-api-primitive-tag.ts"
+    },
+    "./avatar": {
+      "@heinrich/source": "./src/lib/public-api-primitive-avatar.ts"
+    },
+    "./input": {
+      "@heinrich/source": "./src/lib/public-api-primitive-input.ts"
+    },
+    "./search": {
+      "@heinrich/source": "./src/lib/public-api-primitive-search.ts"
+    },
+    "./listbox": {
+      "@heinrich/source": "./src/lib/public-api-primitive-listbox.ts"
+    },
+    "./field": {
+      "@heinrich/source": "./src/lib/public-api-primitive-field.ts"
+    },
+    "./checkbox": {
+      "@heinrich/source": "./src/lib/public-api-primitive-checkbox.ts"
+    },
+    "./switch": {
+      "@heinrich/source": "./src/lib/public-api-primitive-switch.ts"
+    },
+    "./radio": {
+      "@heinrich/source": "./src/lib/public-api-primitive-radio.ts"
+    },
+    "./toggle": {
+      "@heinrich/source": "./src/lib/public-api-primitive-toggle.ts"
+    },
+    "./tabs": {
+      "@heinrich/source": "./src/lib/public-api-primitive-tabs.ts"
+    },
+    "./accordion": {
+      "@heinrich/source": "./src/lib/public-api-primitive-accordion.ts"
+    },
+    "./dialog": {
+      "@heinrich/source": "./src/lib/public-api-primitive-dialog.ts"
+    },
+    "./popover": {
+      "@heinrich/source": "./src/lib/public-api-primitive-popover.ts"
+    },
+    "./flyout": {
+      "@heinrich/source": "./src/lib/public-api-primitive-flyout.ts"
+    },
+    "./tooltip": {
+      "@heinrich/source": "./src/lib/public-api-primitive-tooltip.ts"
+    },
+    "./menu": {
+      "@heinrich/source": "./src/lib/public-api-primitive-menu.ts"
+    },
+    "./combobox": {
+      "@heinrich/source": "./src/lib/public-api-primitive-combobox.ts"
+    },
+    "./select": {
+      "@heinrich/source": "./src/lib/public-api-primitive-select.ts"
+    },
+    "./progress": {
+      "@heinrich/source": "./src/lib/public-api-primitive-progress.ts"
+    },
+    "./slider": {
+      "@heinrich/source": "./src/lib/public-api-primitive-slider.ts"
+    },
+    "./skeleton": {
+      "@heinrich/source": "./src/lib/public-api-primitive-skeleton.ts"
+    },
+    "./breadcrumbs": {
+      "@heinrich/source": "./src/lib/public-api-primitive-breadcrumbs.ts"
+    },
+    "./icon": {
+      "@heinrich/source": "./src/lib/public-api-primitive-icon.ts"
+    },
+    "./pagination": {
+      "@heinrich/source": "./src/lib/public-api-primitive-pagination.ts"
+    },
+    "./date-picker": {
+      "@heinrich/source": "./src/lib/public-api-primitive-date-picker.ts"
+    },
+    "./date-input": {
+      "@heinrich/source": "./src/lib/public-api-composite-date-input.ts"
+    },
+    "./time-input": {
+      "@heinrich/source": "./src/lib/public-api-composite-time-input.ts"
+    },
+    "./avatar-group": {
+      "@heinrich/source": "./src/lib/public-api-composite-avatar-group.ts"
+    },
+    "./dialpad": {
+      "@heinrich/source": "./src/lib/public-api-composite-dialpad.ts"
+    },
+    "./drop-zone": {
+      "@heinrich/source": "./src/lib/public-api-composite-drop-zone.ts"
+    },
+    "./audio-player": {
+      "@heinrich/source": "./src/lib/public-api-composite-audio-player.ts"
+    },
+    "./resizable": {
+      "@heinrich/source": "./src/lib/public-api-composite-resizable.ts"
+    },
+    "./split-view": {
+      "@heinrich/source": "./src/lib/public-api-composite-split-view.ts"
+    },
+    "./app-shell": {
+      "@heinrich/source": "./src/lib/public-api-composite-app-shell.ts"
+    },
+    "./toast": {
+      "@heinrich/source": "./src/lib/public-api-composite-toast.ts"
+    },
+    "./omnibar": {
+      "@heinrich/source": "./src/lib/public-api-composite-omnibar.ts"
+    },
+    "./features/audio-transcript": {
+      "@heinrich/source": "./src/lib/public-api-feature-audio-transcript.ts"
+    },
+    "./features/code-editor": {
+      "@heinrich/source": "./src/lib/public-api-feature-code-editor.ts"
+    }
+  },
+  "peerDependencies": {
+    "@angular/cdk": "^21.2.0",
+    "@angular/common": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "@floating-ui/dom": "^1.7.6",
+    "@tanstack/angular-table": "^8.21.4",
+    "@tanstack/virtual-core": "^3.17.0",
+    "ng-primitives": "0.117.2",
+    "@ng-icons/core": "^33.0.0",
+    "@ng-icons/font-awesome": "^33.0.0",
+    "rxjs": "^7.8.0",
+    "tailwindcss": "^4.0.0",
+    "@codemirror/view": "^6.0.0",
+    "@codemirror/state": "^6.0.0",
+    "@codemirror/commands": "^6.0.0",
+    "@codemirror/language": "^6.0.0",
+    "@lezer/highlight": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "tailwindcss": {
+      "optional": true
+    },
+    "@angular/router": {
+      "optional": true
+    },
+    "@ng-icons/font-awesome": {
+      "optional": true
+    },
+    "@tanstack/angular-table": {
+      "optional": true
+    },
+    "@tanstack/virtual-core": {
+      "optional": true
+    },
+    "@codemirror/commands": {
+      "optional": true
+    },
+    "@codemirror/language": {
+      "optional": true
+    },
+    "@codemirror/state": {
+      "optional": true
+    },
+    "@codemirror/view": {
+      "optional": true
+    },
+    "@lezer/highlight": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "tailwind-merge": "catalog:",
+    "tslib": "catalog:"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "build": "ng build hell && node ../../tools/finalize-dist-package.mjs ../../dist/hell",
+    "build:development": "ng build hell --configuration development && node ../../tools/finalize-dist-package.mjs ../../dist/hell",
+    "watch": "ng build hell --watch --configuration development",
+    "test": "ng test hell"
+  },
+  "devDependencies": {
+    "@angular/build": "catalog:",
+    "@angular/cdk": "catalog:",
+    "@angular/cli": "catalog:",
+    "@angular/common": "catalog:",
+    "@angular/compiler": "catalog:",
+    "@angular/compiler-cli": "catalog:",
+    "@angular/core": "catalog:",
+    "@angular/forms": "catalog:",
+    "@angular/platform-browser": "catalog:",
+    "@angular/router": "catalog:",
+    "@codemirror/commands": "catalog:",
+    "@codemirror/language": "catalog:",
+    "@codemirror/state": "catalog:",
+    "@codemirror/view": "catalog:",
+    "@floating-ui/dom": "catalog:",
+    "@lezer/highlight": "catalog:",
+    "@ng-icons/core": "catalog:",
+    "@ng-icons/font-awesome": "catalog:",
+    "@tanstack/angular-table": "catalog:",
+    "@tanstack/virtual-core": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "jsdom": "catalog:",
+    "ng-packagr": "catalog:",
+    "ng-primitives": "catalog:",
+    "rxjs": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

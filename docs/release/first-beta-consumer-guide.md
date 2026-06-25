@@ -9,7 +9,7 @@ Use this guide when moving an app from local/alpha Hell imports to the first bet
 
 ## Quick path
 
-1. Start from an Angular 21 app that satisfies `@angular/common`, `@angular/core`, `@angular/forms`, and `rxjs` peer ranges from [`projects/hell/package.json`](../../projects/hell/package.json).
+1. Start from an Angular 21 app that satisfies `@angular/common`, `@angular/core`, `@angular/forms`, and `rxjs` peer ranges from [`packages/angular/package.json`](../../packages/angular/package.json).
 2. Install the smallest peer tier for the entry points and CSS you import.
 3. Replace root or kitchen-sink imports with narrow secondary entry points where possible.
 4. Import only the Hell CSS files you need. Migrated components use `ui` Part Style Maps; components not yet migrated are tracked in the legacy allowlist and MUST replace `unstyled`.
@@ -235,7 +235,7 @@ Current support is evidence-based and not a production guarantee.
 
 Current browser evidence is tracked through Playwright. The production-ready gate requires `test-results/playwright-report.json` to pass every `e2e/*.spec.ts` file across chromium, firefox, and webkit on the current commit. Until that gate passes, treat browser support as scenario evidence rather than a general browser-support guarantee.
 
-Accessibility support lives in the docs app accessibility matrix source at [`projects/hell-docs/src/app/pages/accessibility/accessibility.page.ts`](../../projects/hell-docs/src/app/pages/accessibility/accessibility.page.ts). The matrix tracks role pattern, keyboard coverage, axe/ARIA/browser-test coverage, and known gaps per public surface.
+Accessibility support lives in the docs app accessibility matrix source at [`apps/docs/src/app/pages/accessibility/accessibility.page.ts`](../../apps/docs/src/app/pages/accessibility/accessibility.page.ts). The matrix tracks role pattern, keyboard coverage, axe/ARIA/browser-test coverage, and known gaps per public surface.
 
 Current not-production-ready gaps until the production-readiness gate passes:
 

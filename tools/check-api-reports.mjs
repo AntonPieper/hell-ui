@@ -9,7 +9,6 @@ const { Extractor, ExtractorConfig } = require('@microsoft/api-extractor');
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const reportFolder = join(root, 'etc/api-reports');
 const reportTempFolder = join(root, 'tmp/api-reports');
-const tsconfigFilePath = join(root, 'tsconfig.json');
 const packageJsonFullPath = join(root, 'dist/hell/package.json');
 const localBuild = process.argv.includes('--local') || process.argv.includes('--update');
 
@@ -118,7 +117,7 @@ function apiExtractorConfig(entrypoint) {
     projectFolder: root,
     mainEntryPointFilePath: mainEntryPointPath(entrypoint),
     compiler: {
-      tsconfigFilePath,
+      overrideTsconfig: apiExtractorTsconfig(entrypoint),
     },
     apiReport: {
       enabled: true,
@@ -161,6 +160,31 @@ function apiExtractorConfig(entrypoint) {
         },
       },
     },
+  };
+}
+
+function apiExtractorTsconfig(entrypoint) {
+  return {
+    compilerOptions: {
+      strict: true,
+      rootDir: '.',
+      moduleResolution: 'bundler',
+      noImplicitOverride: true,
+      noPropertyAccessFromIndexSignature: true,
+      noImplicitReturns: true,
+      noFallthroughCasesInSwitch: true,
+      skipLibCheck: true,
+      isolatedModules: true,
+      experimentalDecorators: true,
+      importHelpers: true,
+      target: 'ES2022',
+      module: 'preserve',
+      baseUrl: root,
+      paths: {
+        '*': ['packages/angular/node_modules/*', 'packages/pdf-viewer/node_modules/*'],
+      },
+    },
+    files: [mainEntryPointPath(entrypoint)],
   };
 }
 

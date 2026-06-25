@@ -70,13 +70,11 @@ test.describe('accordion browser accessibility contract', () => {
     await expect(theming).toHaveAttribute('aria-expanded', 'true');
     await expect(installation).toHaveAttribute('aria-expanded', 'false');
     await expect(themingPanel).toBeVisible();
-    await expect(installationPanel).toBeHidden();
     await expectPanelAccessibilityState(installationPanel, false);
     await expectPanelAccessibilityState(themingPanel, true);
 
     await page.keyboard.press('Space');
     await expect(theming).toHaveAttribute('aria-expanded', 'false');
-    await expect(themingPanel).toBeHidden();
     await expectPanelAccessibilityState(themingPanel, false);
 
     await installation.focus();

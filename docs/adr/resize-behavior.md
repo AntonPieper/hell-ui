@@ -13,8 +13,8 @@ table-shell boundary.
 
 Current local implementation evidence:
 
-- `projects/hell/src/lib/core/resize-behavior.ts` owns a small, framework-agnostic adjacent-pair resize model: min-size clamping, total-preserving deltas, horizontal/vertical coordinates, RTL horizontal inversion, arrow/Home/End key intents, pointer capture/listeners, commit callbacks, and dynamic pair lookup.
-- `projects/hell/src/lib/composites/resizable/resizable.ts` uses that shared runtime for flex split panes. A handle lives between sibling panes, exposes `role="separator"`, `aria-orientation`, `aria-valuemin/max/now`, `aria-controls`, pointer drag, and keyboard resize.
+- `packages/angular/src/lib/core/resize-behavior.ts` owns a small, framework-agnostic adjacent-pair resize model: min-size clamping, total-preserving deltas, horizontal/vertical coordinates, RTL horizontal inversion, arrow/Home/End key intents, pointer capture/listeners, commit callbacks, and dynamic pair lookup.
+- `packages/angular/src/lib/composites/resizable/resizable.ts` uses that shared runtime for flex split panes. A handle lives between sibling panes, exposes `role="separator"`, `aria-orientation`, `aria-valuemin/max/now`, `aria-controls`, pointer drag, and keyboard resize.
 - Table resize uses the same runtime for adjacent header/cell pairs through the
   `hellTableResizeHandle` primitive.
 - Existing unit tests cover math, RTL key/pointer semantics, pointer lifecycle, keyboard commit, resizable pane redistribution, table adjacent-column keyboard/pointer resizing, disabled-last-column behavior, ARIA attributes, and sort/resizer interaction separation.

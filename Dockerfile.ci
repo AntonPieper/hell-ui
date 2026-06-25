@@ -9,8 +9,10 @@ ENV CI=true \
     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 RUN corepack enable
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml angular.json tsconfig.json ./
-COPY projects/hell/package.json projects/hell/package.json
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json tsconfig.base.json .npmrc ./
+COPY apps/docs/package.json apps/docs/package.json
+COPY packages/angular/package.json packages/angular/package.json
+COPY packages/pdf-viewer/package.json packages/pdf-viewer/package.json
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store pnpm run ci:install
 
 FROM deps AS source

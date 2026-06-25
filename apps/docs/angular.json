@@ -1,37 +1,10 @@
 {
-  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "$schema": "../../node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
     "analytics": false
   },
-  "newProjectRoot": "projects",
   "projects": {
-    "hell": {
-      "projectType": "library",
-      "root": "projects/hell",
-      "sourceRoot": "projects/hell/src",
-      "prefix": "hell",
-      "architect": {
-        "build": {
-          "builder": "@angular/build:ng-packagr",
-          "configurations": {
-            "production": {
-              "tsConfig": "projects/hell/tsconfig.lib.prod.json"
-            },
-            "development": {
-              "tsConfig": "projects/hell/tsconfig.lib.json"
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "test": {
-          "builder": "@angular/build:unit-test",
-          "options": {
-            "tsConfig": "projects/hell/tsconfig.spec.json"
-          }
-        }
-      }
-    },
     "hell-docs": {
       "projectType": "application",
       "schematics": {
@@ -60,23 +33,25 @@
           "skipTests": true
         }
       },
-      "root": "projects/hell-docs",
-      "sourceRoot": "projects/hell-docs/src",
+      "root": ".",
+      "sourceRoot": "src",
       "prefix": "hd",
       "architect": {
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "browser": "projects/hell-docs/src/main.ts",
-            "tsConfig": "projects/hell-docs/tsconfig.app.json",
+            "browser": "src/main.ts",
+            "outputPath": "../../dist/hell-docs",
+            "tsConfig": "tsconfig.app.json",
+            "conditions": ["@heinrich/source", "module"],
             "assets": [
               {
                 "glob": "**/*",
-                "input": "projects/hell-docs/public"
+                "input": "public"
               },
               {
                 "glob": "**/*",
-                "input": "projects/hell/assets",
+                "input": "../../packages/angular/assets",
                 "output": "assets"
               },
               {
@@ -86,12 +61,12 @@
               },
               {
                 "glob": "pdf-viewer.css",
-                "input": "dist/hell-pdf-viewer/styles",
+                "input": "../../packages/pdf-viewer/src/lib/styles",
                 "output": "hell-ui/pdf-viewer/styles"
               },
               {
                 "glob": "pdf-viewer.css",
-                "input": "dist/hell-pdf-viewer/styles/components",
+                "input": "../../packages/pdf-viewer/src/lib/styles/components",
                 "output": "hell-ui/pdf-viewer/styles/components"
               },
               {
@@ -106,11 +81,23 @@
               }
             ],
             "styles": [
-              "projects/hell-docs/src/styles.css"
+              "src/styles.css"
             ]
           },
           "configurations": {
             "production": {
+              "conditions": ["@heinrich/source", "module", "production"],
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false,
+                  "removeSpecialComments": true
+                },
+                "fonts": {
+                  "inline": true
+                }
+              },
               "budgets": [
                 {
                   "type": "initial",
@@ -127,6 +114,7 @@
               "statsJson": true
             },
             "development": {
+              "conditions": ["@heinrich/source", "module", "development"],
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
@@ -136,6 +124,11 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "prebundle": {
+              "exclude": ["@hell-ui/angular", "@hell-ui/pdf-viewer"]
+            }
+          },
           "configurations": {
             "production": {
               "buildTarget": "hell-docs:build:production"
@@ -145,32 +138,6 @@
             }
           },
           "defaultConfiguration": "development"
-        }
-      }
-    },
-    "hell-pdf-viewer": {
-      "projectType": "library",
-      "root": "projects/hell-pdf-viewer",
-      "sourceRoot": "projects/hell-pdf-viewer/src",
-      "prefix": "hell",
-      "architect": {
-        "build": {
-          "builder": "@angular/build:ng-packagr",
-          "configurations": {
-            "production": {
-              "tsConfig": "projects/hell-pdf-viewer/tsconfig.lib.prod.json"
-            },
-            "development": {
-              "tsConfig": "projects/hell-pdf-viewer/tsconfig.lib.json"
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "test": {
-          "builder": "@angular/build:unit-test",
-          "options": {
-            "tsConfig": "projects/hell-pdf-viewer/tsconfig.spec.json"
-          }
         }
       }
     }

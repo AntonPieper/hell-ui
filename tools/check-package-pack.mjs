@@ -37,7 +37,7 @@ function runForbiddenFileAuditSelfTest() {
     ['source map', ['fesm2022/hell-ui-angular.mjs.map']],
     ['secret-bearing file', ['.env.production']],
     ['test artifact or test source', ['src/button.spec.ts']],
-    ['generated docs package alias', ['projects/hell-docs/node_modules/@hell-ui/angular/package.json']],
+    ['workspace node_modules leak', ['apps/docs/node_modules/@hell-ui/angular/package.json']],
     ['unexpected worker asset', ['assets/pdf.worker.min.mjs']],
   ];
 

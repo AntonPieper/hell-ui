@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="projects/hell/assets/hell-ui-logo.svg" alt="Hell UI logo" width="96" />
+  <img src="packages/angular/assets/hell-ui-logo.svg" alt="Hell UI logo" width="96" />
 </p>
 
 # Hell UI

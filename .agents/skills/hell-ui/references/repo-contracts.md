@@ -5,9 +5,10 @@ work.
 
 ## Architecture
 
-- Workspace shape: `projects/hell` is the Angular library,
-  `projects/hell-docs` is the docs app, and `projects/hell-pdf-viewer` owns the
-  split PDF package.
+- Workspace shape: `packages/angular` is the Angular library,
+  `apps/docs` is the docs app, and `packages/pdf-viewer` owns the split PDF
+  package. The root package orchestrates through pnpm filters; app/package
+  workspaces own their local `angular.json` files.
 - Root `@hell-ui/angular` stays light and core-only. Primitives, composites,
   table primitives, TanStack shell, optional features, and PDF use narrow
   entrypoints.
@@ -16,7 +17,7 @@ work.
   `pnpm run test:architecture` catch stale public API files, `ng-package.json`,
   `tsconfig` paths, light-root drift, and removed legacy table aliases.
 - Package peer metadata is package-wide. Optional peers in
-  `projects/hell/package.json` are not runtime-leak evidence; peer isolation
+  `packages/angular/package.json` are not runtime-leak evidence; peer isolation
   claims need package-consumer proof.
 - API reports are a stability policy, not every entrypoint by default. Check
   `tools/check-api-reports.mjs` before adding or updating baselines.

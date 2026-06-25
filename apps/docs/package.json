@@ -1,0 +1,41 @@
+{
+  "name": "hell-docs",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "ng serve hell-docs",
+    "build": "ng build hell-docs"
+  },
+  "dependencies": {
+    "@hell-ui/angular": "workspace:*",
+    "@hell-ui/pdf-viewer": "workspace:*",
+    "@angular/cdk": "catalog:",
+    "@angular/common": "catalog:",
+    "@angular/compiler": "catalog:",
+    "@angular/core": "catalog:",
+    "@angular/forms": "catalog:",
+    "@angular/platform-browser": "catalog:",
+    "@angular/router": "catalog:",
+    "@codemirror/lang-javascript": "catalog:",
+    "@codemirror/state": "catalog:",
+    "@codemirror/view": "catalog:",
+    "@floating-ui/dom": "catalog:",
+    "@lezer/highlight": "catalog:",
+    "@ng-icons/core": "catalog:",
+    "@ng-icons/font-awesome": "catalog:",
+    "@tanstack/angular-table": "catalog:",
+    "@tanstack/virtual-core": "catalog:",
+    "ng-primitives": "catalog:",
+    "pdfjs-dist": "catalog:",
+    "rxjs": "catalog:",
+    "tailwindcss": "catalog:",
+    "tslib": "catalog:"
+  },
+  "devDependencies": {
+    "@angular/build": "catalog:",
+    "@angular/cli": "catalog:",
+    "@angular/compiler-cli": "catalog:",
+    "@tailwindcss/postcss": "catalog:",
+    "postcss": "catalog:"
+  }
+}

@@ -6,10 +6,11 @@ import { fileURLToPath } from 'node:url';
 import {
   entrypointPublicApiFiles,
   entrypointSourceGroups,
-  entrypointTsconfigPaths,
+  libraryRoot,
   renderNgPackageFile,
   renderPublicApiFile,
   secondaryPackageEntrypoints,
+  sourcePackageCondition,
 } from './entrypoint-manifest.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -19,8 +20,8 @@ const docsExampleImportBoundaryDocPath = 'docs/architecture/docs-example-import-
 
 const allowedDocsLazyRouteCrossImports = [
   {
-    from: 'projects/hell-docs/src/app/pages/components/flyout/flyout.page.ts',
-    to: 'projects/hell-docs/src/app/pages/testing/floating-dismissal-harness.page.ts',
+    from: 'apps/docs/src/app/pages/components/flyout/flyout.page.ts',
+    to: 'apps/docs/src/app/pages/testing/floating-dismissal-harness.page.ts',
     rationale:
       'Flyout exposes the query-param-only floating dismissal browser harness; it is deliberately bundled only with the lazy flyout route, not the docs shell.',
   },
@@ -61,7 +62,7 @@ const docsHeavyLazyRoutePolicies = [
 ];
 
 const codeEditorEntrypointSpecifier = '@hell-ui/angular/features/code-editor';
-const docsCodePreviewLazyWrapperPath = 'projects/hell-docs/src/app/shared/docs-code-viewer.ts';
+const docsCodePreviewLazyWrapperPath = 'apps/docs/src/app/shared/docs-code-viewer.ts';
 const codeMirrorPackageSpecifierPrefixes = ['@codemirror/', '@lezer/'];
 const audioTranscriptEntrypointSpecifier = '@hell-ui/angular/features/audio-transcript';
 const audioTranscriptRuntimeTerms = [
@@ -224,8 +225,8 @@ const migratedPartStyleMapModules = [
     partType: 'HellButtonPart',
     uiType: 'HellButtonUi',
     slug: 'button',
-    sourcePath: 'projects/hell/src/lib/primitives/button/button.ts',
-    publicApiPath: 'projects/hell/src/lib/public-api-primitive-button.ts',
+    sourcePath: 'packages/angular/src/lib/primitives/button/button.ts',
+    publicApiPath: 'packages/angular/src/lib/public-api-primitive-button.ts',
     apiReportFiles: ['hell-ui-angular-primitives.api.md'],
     legacyClass: 'hell-button',
     componentVariablePrefix: '--hell-button-',
@@ -235,8 +236,8 @@ const migratedPartStyleMapModules = [
     partType: 'HellInputPart',
     uiType: 'HellInputUi',
     slug: 'input',
-    sourcePath: 'projects/hell/src/lib/primitives/input/input.ts',
-    publicApiPath: 'projects/hell/src/lib/public-api-primitive-input.ts',
+    sourcePath: 'packages/angular/src/lib/primitives/input/input.ts',
+    publicApiPath: 'packages/angular/src/lib/public-api-primitive-input.ts',
     apiReportFiles: ['hell-ui-angular-input.api.md', 'hell-ui-angular-primitives.api.md'],
     legacyClass: 'hell-input',
     componentVariablePrefix: '--hell-input-',
@@ -246,8 +247,8 @@ const migratedPartStyleMapModules = [
     partType: 'HellNativeSelectPart',
     uiType: 'HellNativeSelectUi',
     slug: 'input',
-    sourcePath: 'projects/hell/src/lib/primitives/input/input.ts',
-    publicApiPath: 'projects/hell/src/lib/public-api-primitive-input.ts',
+    sourcePath: 'packages/angular/src/lib/primitives/input/input.ts',
+    publicApiPath: 'packages/angular/src/lib/public-api-primitive-input.ts',
     apiReportFiles: ['hell-ui-angular-input.api.md', 'hell-ui-angular-primitives.api.md'],
     legacyClass: 'hell-native-select',
     componentVariablePrefix: '--hell-native-select-',
@@ -257,8 +258,8 @@ const migratedPartStyleMapModules = [
     partType: 'HellTextareaPart',
     uiType: 'HellTextareaUi',
     slug: 'input',
-    sourcePath: 'projects/hell/src/lib/primitives/input/input.ts',
-    publicApiPath: 'projects/hell/src/lib/public-api-primitive-input.ts',
+    sourcePath: 'packages/angular/src/lib/primitives/input/input.ts',
+    publicApiPath: 'packages/angular/src/lib/public-api-primitive-input.ts',
     apiReportFiles: ['hell-ui-angular-input.api.md', 'hell-ui-angular-primitives.api.md'],
     legacyClass: 'hell-textarea',
     componentVariablePrefix: '--hell-textarea-',
@@ -268,8 +269,8 @@ const migratedPartStyleMapModules = [
     partType: 'HellDialpadPart',
     uiType: 'HellDialpadUi',
     slug: 'dialpad',
-    sourcePath: 'projects/hell/src/lib/composites/dialpad/dialpad.ts',
-    publicApiPath: 'projects/hell/src/lib/public-api-composite-dialpad.ts',
+    sourcePath: 'packages/angular/src/lib/composites/dialpad/dialpad.ts',
+    publicApiPath: 'packages/angular/src/lib/public-api-composite-dialpad.ts',
     apiReportFiles: ['hell-ui-angular-dialpad.api.md'],
     legacyClass: 'hell-dialpad',
     componentVariablePrefix: '--hell-dialpad-',
@@ -327,14 +328,14 @@ function main() {
 }
 
 function checkDocsExamples() {
-  const catalogPath = join(root, 'projects/hell-docs/src/app/docs-catalog.ts');
-  const searchIndexPath = join(root, 'projects/hell-docs/src/app/docs-search-index.ts');
+  const catalogPath = join(root, 'apps/docs/src/app/docs-catalog.ts');
+  const searchIndexPath = join(root, 'apps/docs/src/app/docs-search-index.ts');
   const catalog = readFile(catalogPath);
   const searchIndex = readFile(searchIndexPath);
   const routePaths = catalogRoutePaths(catalog);
   const examples = docsSearchIndexSeeds(searchIndex, 'HD_DOCS_EXAMPLES');
   const usages = docsSearchIndexSeeds(searchIndex, 'HD_DOCS_CODE_USAGES');
-  const pagesRoot = join(root, 'projects/hell-docs/src/app/pages');
+  const pagesRoot = join(root, 'apps/docs/src/app/pages');
 
   checkDocsCatalogExampleSeam(catalog);
 
@@ -404,7 +405,7 @@ function checkDocsExamples() {
 }
 
 function checkDocsLazyRouteImportGraphContract() {
-  const docsRoot = join(root, 'projects/hell-docs/src/app');
+  const docsRoot = join(root, 'apps/docs/src/app');
   const pagesRoot = join(docsRoot, 'pages');
   const catalogPath = join(docsRoot, 'docs-catalog.ts');
   const docPath = join(root, docsExampleImportBoundaryDocPath);
@@ -419,7 +420,7 @@ function checkDocsLazyRouteImportGraphContract() {
     );
     if (!routeEntry) {
       failures.push(
-        `Docs Lazy Route Import Graph policy ${policy.id} must be backed by lazy route ${policy.routePath} in projects/hell-docs/src/app/docs-catalog.ts`,
+        `Docs Lazy Route Import Graph policy ${policy.id} must be backed by lazy route ${policy.routePath} in apps/docs/src/app/docs-catalog.ts`,
       );
     }
   }
@@ -442,7 +443,7 @@ function checkDocsLazyRouteImportGraphContract() {
     if (!isWithinDirectory(importHit.file, pagesRoot)) {
       failures.push(
         `Docs Lazy Route Import Graph ${fromRel}:${importHit.line} imports ${importHit.specifier} -> ${toRel}; ` +
-          'docs shell/shared/search files must not eagerly reference lazy page or example code. Move shared code to projects/hell-docs/src/app/shared or add a documented narrow allowance.',
+          'docs shell/shared/search files must not eagerly reference lazy page or example code. Move shared code to apps/docs/src/app/shared or add a documented narrow allowance.',
       );
       continue;
     }
@@ -459,7 +460,7 @@ function checkDocsLazyRouteImportGraphContract() {
 
     failures.push(
       `Docs Lazy Route Import Graph ${fromRel}:${importHit.line} imports ${importHit.specifier} -> ${toRel}; ` +
-        `${fromBoundary.label} must not eagerly reference ${toBoundary.label}. Move shared code to projects/hell-docs/src/app/shared or add a documented narrow allowance.`,
+        `${fromBoundary.label} must not eagerly reference ${toBoundary.label}. Move shared code to apps/docs/src/app/shared or add a documented narrow allowance.`,
     );
   }
 
@@ -513,9 +514,9 @@ function checkDocsExampleImportBoundaryDocs(docPath) {
   const requiredParts = [
     'docs-example-import-boundaries',
     'tools/check-architecture.mjs',
-    'projects/hell-docs/src/app/docs-catalog.ts',
-    'projects/hell-docs/src/app/pages/<route>/examples/',
-    'projects/hell-docs/src/app/shared/',
+    'apps/docs/src/app/docs-catalog.ts',
+    'apps/docs/src/app/pages/<route>/examples/',
+    'apps/docs/src/app/shared/',
   ];
   for (const part of requiredParts) {
     if (!docs.includes(part)) {
@@ -891,7 +892,7 @@ function docsExampleCodeOnly(source) {
 }
 
 function checkDocsRootImportContract() {
-  const docsRoot = join(root, 'projects/hell-docs/src/app');
+  const docsRoot = join(root, 'apps/docs/src/app');
   const docsFiles = walk(docsRoot).filter((file) => file.endsWith('.ts'));
 
   for (const file of docsFiles) {
@@ -911,9 +912,9 @@ function checkDocsRootImportContract() {
 
 function checkDocsShellNarrowEntrypointContract() {
   const shellFiles = [
-    'projects/hell-docs/src/app/app.ts',
-    'projects/hell-docs/src/app/shared/code-block.ts',
-    'projects/hell-docs/src/app/shared/example-tabs.ts',
+    'apps/docs/src/app/app.ts',
+    'apps/docs/src/app/shared/code-block.ts',
+    'apps/docs/src/app/shared/example-tabs.ts',
   ];
 
   for (const file of shellFiles) {
@@ -934,13 +935,13 @@ function checkDocsShellNarrowEntrypointContract() {
 
 function checkDocsCodeEditorIsolationContract() {
   const directSharedFiles = [
-    'projects/hell-docs/src/app/shared/code-block.ts',
-    'projects/hell-docs/src/app/shared/example-tabs.ts',
-    'projects/hell-docs/src/app/shared/code-tools.ts',
+    'apps/docs/src/app/shared/code-block.ts',
+    'apps/docs/src/app/shared/example-tabs.ts',
+    'apps/docs/src/app/shared/code-tools.ts',
   ];
   const deferredSharedFiles = [
-    'projects/hell-docs/src/app/shared/code-block.ts',
-    'projects/hell-docs/src/app/shared/example-tabs.ts',
+    'apps/docs/src/app/shared/code-block.ts',
+    'apps/docs/src/app/shared/example-tabs.ts',
   ];
 
   for (const file of directSharedFiles) {
@@ -999,7 +1000,7 @@ function checkDocsCodeEditorIsolationContract() {
     }
   }
 
-  const docsPagesRoot = join(root, 'projects/hell-docs/src/app/pages');
+  const docsPagesRoot = join(root, 'apps/docs/src/app/pages');
   const docsPages = walk(docsPagesRoot).filter((file) => file.endsWith('.ts'));
   for (const file of docsPages) {
     if (file.includes('/components/code-editor/')) continue;
@@ -1020,14 +1021,14 @@ function checkDocsCodeEditorIsolationContract() {
 function checkDocsPdfViewerIsolationContract() {
   const heavyImports = ['@hell-ui/pdf-viewer', 'pdfjs-dist'];
   const globalDocsFiles = [
-    'projects/hell-docs/src/app/app.routes.ts',
-    'projects/hell-docs/src/app/docs-catalog.ts',
-    'projects/hell-docs/src/app/docs-search-index.ts',
+    'apps/docs/src/app/app.routes.ts',
+    'apps/docs/src/app/docs-catalog.ts',
+    'apps/docs/src/app/docs-search-index.ts',
   ];
   const sharedFiles = [
-    'projects/hell-docs/src/app/shared/code-block.ts',
-    'projects/hell-docs/src/app/shared/example-tabs.ts',
-    'projects/hell-docs/src/app/shared/code-tools.ts',
+    'apps/docs/src/app/shared/code-block.ts',
+    'apps/docs/src/app/shared/example-tabs.ts',
+    'apps/docs/src/app/shared/code-tools.ts',
   ];
 
   for (const file of globalDocsFiles) {
@@ -1068,7 +1069,7 @@ function checkDocsPdfViewerIsolationContract() {
     }
   }
 
-  const docsPagesRoot = join(root, 'projects/hell-docs/src/app/pages');
+  const docsPagesRoot = join(root, 'apps/docs/src/app/pages');
   const docsPages = walk(docsPagesRoot).filter((file) => file.endsWith('.ts'));
   for (const file of docsPages) {
     if (file.includes('/components/pdf-viewer/')) continue;
@@ -1083,7 +1084,7 @@ function checkDocsPdfViewerIsolationContract() {
 
   const pdfViewerPagePath = join(
     root,
-    'projects/hell-docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts',
+    'apps/docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts',
   );
   const pdfViewerPage = readFile(pdfViewerPagePath);
   if (
@@ -1142,7 +1143,7 @@ function checkPackageEntryPoints() {
   );
   if (disallowedRootExports.length) {
     failures.push(
-      `Light Root Entry Point exports composites/features from projects/hell/src/public-api.ts: ${disallowedRootExports.join(', ')}`,
+      `Light Root Entry Point exports composites/features from packages/angular/src/public-api.ts: ${disallowedRootExports.join(', ')}`,
     );
   }
 
@@ -1169,16 +1170,26 @@ function checkPackageEntryPoints() {
   }
 
   const tsconfig = parseJsonWithComments(readFile(join(root, 'tsconfig.json')));
-  const paths = tsconfig.compilerOptions?.paths ?? {};
-  const expectedPaths = Object.fromEntries(
-    entrypointTsconfigPaths().map((entrypoint) => [entrypoint.specifier, entrypoint.path]),
-  );
+  if (tsconfig.compilerOptions?.paths) {
+    failures.push(
+      'Root tsconfig.json must not define Hell package path aliases; package exports with @heinrich/source are the local source-resolution contract',
+    );
+  }
 
-  for (const [entryPoint, expectedPath] of Object.entries(expectedPaths)) {
-    const actual = paths[entryPoint]?.[0];
-    if (actual !== expectedPath) {
+  const tsconfigBase = parseJsonWithComments(readFile(join(root, 'tsconfig.base.json')));
+  const customConditions = tsconfigBase.compilerOptions?.customConditions ?? [];
+  if (!customConditions.includes(sourcePackageCondition)) {
+    failures.push(`tsconfig.base.json must include custom condition ${sourcePackageCondition}`);
+  }
+
+  const packageJson = parseJsonWithComments(readFile(join(root, 'packages/angular/package.json')));
+  const packageExports = packageJson.exports ?? {};
+  for (const entrypoint of publicApiFiles) {
+    const exportPath = packageExportPath(entrypoint.specifier);
+    const expectedSource = `./${relative(libraryRoot, entrypoint.publicApiPath)}`;
+    if (packageExports[exportPath]?.[sourcePackageCondition] !== expectedSource) {
       failures.push(
-        `Package Entry Point ${entryPoint} maps to ${actual ?? 'nothing'}, expected ${expectedPath}`,
+        `Package Entry Point ${entrypoint.specifier} export ${exportPath} must resolve ${sourcePackageCondition} to ${expectedSource}`,
       );
     }
   }
@@ -1199,18 +1210,11 @@ function checkPackageEntryPoints() {
     '@hell-ui/angular/features/data-table',
     '@hell-ui/angular/features/table-utilities',
   ]) {
-    if (manifestSpecifiers.has(specifier) || paths[specifier]) {
+    if (manifestSpecifiers.has(specifier) || packageExports[packageExportPath(specifier)]) {
       failures.push(
-        `Legacy table entry point must be removed from manifest/tsconfig: ${specifier}`,
+        `Legacy table entry point must be removed from manifest/package exports: ${specifier}`,
       );
     }
-  }
-
-  const legacyPaths = Object.keys(paths).filter((entryPoint) => entryPoint.startsWith('hell'));
-  if (legacyPaths.length) {
-    failures.push(
-      `Package Identity still exposes legacy alias paths in tsconfig.json: ${legacyPaths.join(', ')}`,
-    );
   }
 
   const packagePaths = secondaryPackageEntrypoints().map((entrypoint) => entrypoint.packagePath);
@@ -1226,7 +1230,7 @@ function checkPackageEntryPoints() {
 }
 
 function checkCodeMirrorEntrypointIsolationContract() {
-  const codeEditorPublicApiPath = 'projects/hell/src/lib/public-api-feature-code-editor.ts';
+  const codeEditorPublicApiPath = 'packages/angular/src/lib/public-api-feature-code-editor.ts';
   const codeEditorPublicApi = readFile(join(root, codeEditorPublicApiPath));
   if (!codeEditorPublicApi.includes('Kept optional CodeMirror feature entry point')) {
     failures.push(
@@ -1240,22 +1244,22 @@ function checkCodeMirrorEntrypointIsolationContract() {
   }
 
   const rootCorePaths = [
-    'projects/hell/src/public-api.ts',
-    'projects/hell/src/lib/public-api-core.ts',
-    ...productionTsFilesUnder('projects/hell/src/lib/core'),
+    'packages/angular/src/public-api.ts',
+    'packages/angular/src/lib/public-api-core.ts',
+    ...productionTsFilesUnder('packages/angular/src/lib/core'),
   ];
   const compositePaths = [
-    'projects/hell/src/lib/public-api-composites.ts',
+    'packages/angular/src/lib/public-api-composites.ts',
     ...entrypointPublicApiFiles()
       .filter((entrypoint) => entrypoint.group === 'composites')
       .map((entrypoint) => entrypoint.publicApiPath),
-    ...productionTsFilesUnder('projects/hell/src/lib/composites'),
+    ...productionTsFilesUnder('packages/angular/src/lib/composites'),
   ];
   const nonCodeEditorFeaturePaths = [
     ...entrypointPublicApiFiles()
       .filter((entrypoint) => entrypoint.group === 'features' && entrypoint.slug !== 'code-editor')
       .map((entrypoint) => entrypoint.publicApiPath),
-    ...productionTsFilesUnder('projects/hell/src/lib/features').filter(
+    ...productionTsFilesUnder('packages/angular/src/lib/features').filter(
       (file) => !file.includes('/features/code-editor/'),
     ),
   ];
@@ -1306,7 +1310,7 @@ function isCodeMirrorBoundarySpecifier(specifier) {
 
 function checkAudioTranscriptEntrypointIsolationContract() {
   const audioTranscriptPublicApiPath =
-    'projects/hell/src/lib/public-api-feature-audio-transcript.ts';
+    'packages/angular/src/lib/public-api-feature-audio-transcript.ts';
   const audioTranscriptPublicApi = readFile(join(root, audioTranscriptPublicApiPath));
   if (!/@experimental\b/.test(audioTranscriptPublicApi)) {
     failures.push(
@@ -1320,7 +1324,7 @@ function checkAudioTranscriptEntrypointIsolationContract() {
   }
 
   const audioTranscriptSourcePath =
-    'projects/hell/src/lib/features/audio-transcript/audio-transcript.ts';
+    'packages/angular/src/lib/features/audio-transcript/audio-transcript.ts';
   const audioTranscriptSource = readFile(join(root, audioTranscriptSourcePath));
   for (const symbol of [
     'provideHellAudioTranscript',
@@ -1333,9 +1337,9 @@ function checkAudioTranscriptEntrypointIsolationContract() {
   }
 
   const libraryProductionPaths = [
-    'projects/hell/src/public-api.ts',
+    'packages/angular/src/public-api.ts',
     ...entrypointPublicApiFiles().map((entrypoint) => entrypoint.publicApiPath),
-    ...productionTsFilesUnder('projects/hell/src/lib'),
+    ...productionTsFilesUnder('packages/angular/src/lib'),
   ];
 
   for (const rel of [...new Set(libraryProductionPaths)].sort()) {
@@ -1367,7 +1371,7 @@ function checkAudioTranscriptEntrypointIsolationContract() {
 
 function isAudioTranscriptFeatureSeamPath(rel) {
   return (
-    rel === 'projects/hell/src/lib/public-api-feature-audio-transcript.ts' ||
+    rel === 'packages/angular/src/lib/public-api-feature-audio-transcript.ts' ||
     rel.includes('/features/audio-transcript/')
   );
 }
@@ -1432,7 +1436,7 @@ function checkApiReportContract() {
 }
 
 function checkApiStabilityContract() {
-  const readme = readFile(join(root, 'projects/hell/README.md'));
+  const readme = readFile(join(root, 'packages/angular/README.md'));
   const requiredPolicyText = [
     '### Stability category policy',
     '`Stable`',
@@ -1448,15 +1452,15 @@ function checkApiStabilityContract() {
   const experimentalEntrypoints = [
     {
       name: 'Code editor',
-      publicApiPath: 'projects/hell/src/lib/public-api-feature-code-editor.ts',
-      sourcePath: 'projects/hell/src/lib/features/code-editor/code-editor.ts',
-      docsPath: 'projects/hell-docs/src/app/pages/components/code-editor/code-editor.page.ts',
+      publicApiPath: 'packages/angular/src/lib/public-api-feature-code-editor.ts',
+      sourcePath: 'packages/angular/src/lib/features/code-editor/code-editor.ts',
+      docsPath: 'apps/docs/src/app/pages/components/code-editor/code-editor.page.ts',
     },
     {
       name: 'PDF viewer',
-      publicApiPath: 'projects/hell-pdf-viewer/src/public-api.ts',
-      sourcePath: 'projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts',
-      docsPath: 'projects/hell-docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts',
+      publicApiPath: 'packages/pdf-viewer/src/public-api.ts',
+      sourcePath: 'packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts',
+      docsPath: 'apps/docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts',
     },
   ];
 
@@ -1482,12 +1486,12 @@ function checkApiStabilityContract() {
   const tableEntrypointStatuses = [
     {
       name: 'Table primitives',
-      publicApiPath: 'projects/hell/src/lib/public-api-table.ts',
+      publicApiPath: 'packages/angular/src/lib/public-api-table.ts',
       tag: 'beta',
     },
     {
       name: 'TanStack Table shell',
-      publicApiPath: 'projects/hell/src/lib/public-api-table-tanstack.ts',
+      publicApiPath: 'packages/angular/src/lib/public-api-table-tanstack.ts',
       tag: 'experimental',
     },
   ];
@@ -1502,34 +1506,34 @@ function checkApiStabilityContract() {
   }
 
   const experimentalApiSymbols = [
-    ['projects/hell/src/lib/features/code-editor/code-editor.ts', 'HellCodeEditorRuntimeFactory'],
+    ['packages/angular/src/lib/features/code-editor/code-editor.ts', 'HellCodeEditorRuntimeFactory'],
     [
-      'projects/hell/src/lib/features/code-editor/code-editor.ts',
+      'packages/angular/src/lib/features/code-editor/code-editor.ts',
       'HELL_CODE_EDITOR_RUNTIME_FACTORY',
     ],
-    ['projects/hell/src/lib/features/code-editor/code-editor.ts', 'HellCodeEditor'],
+    ['packages/angular/src/lib/features/code-editor/code-editor.ts', 'HellCodeEditor'],
     [
-      'projects/hell/src/lib/features/code-editor/code-editor.runtime.ts',
+      'packages/angular/src/lib/features/code-editor/code-editor.runtime.ts',
       'HellCodeEditorRuntimeAccessibilityOptions',
     ],
     [
-      'projects/hell/src/lib/features/code-editor/code-editor.runtime.ts',
+      'packages/angular/src/lib/features/code-editor/code-editor.runtime.ts',
       'HellCodeEditorRuntimeOptions',
     ],
     [
-      'projects/hell/src/lib/features/code-editor/code-editor.runtime.ts',
+      'packages/angular/src/lib/features/code-editor/code-editor.runtime.ts',
       'HellCodeEditorRuntimePort',
     ],
     [
-      'projects/hell/src/lib/features/code-editor/code-editor.runtime.ts',
+      'packages/angular/src/lib/features/code-editor/code-editor.runtime.ts',
       'hellCodeEditorSetupFactory',
     ],
-    ['projects/hell/src/lib/features/code-editor/code-editor.runtime.ts', 'hellCodeEditorSetup'],
-    ['projects/hell/src/lib/features/code-editor/code-editor.runtime.ts', 'hellCodeEditorTheme'],
-    ['projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts', 'HellPdfRuntimeFactory'],
-    ['projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts', 'HELL_PDF_RUNTIME_FACTORY'],
-    ['projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts', 'HellPdfViewer'],
-    ['projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.adapter.ts', 'HellPdfWorkerSource'],
+    ['packages/angular/src/lib/features/code-editor/code-editor.runtime.ts', 'hellCodeEditorSetup'],
+    ['packages/angular/src/lib/features/code-editor/code-editor.runtime.ts', 'hellCodeEditorTheme'],
+    ['packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts', 'HellPdfRuntimeFactory'],
+    ['packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts', 'HELL_PDF_RUNTIME_FACTORY'],
+    ['packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts', 'HellPdfViewer'],
+    ['packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.adapter.ts', 'HellPdfWorkerSource'],
   ];
   for (const [sourcePath, symbol] of experimentalApiSymbols) {
     const source = readFile(join(root, sourcePath));
@@ -1539,7 +1543,7 @@ function checkApiStabilityContract() {
   }
 
   const tableUtilitiesSource = readFile(
-    join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'),
+    join(root, 'packages/angular/src/lib/features/table-utilities/table-utilities.ts'),
   );
   for (const removed of [
     'HELL_TABLE_UTILITY_DIRECTIVES',
@@ -1555,21 +1559,21 @@ function checkApiStabilityContract() {
   }
 
   const audioSource = readFile(
-    join(root, 'projects/hell/src/lib/composites/audio-player/audio-player.ts'),
+    join(root, 'packages/angular/src/lib/composites/audio-player/audio-player.ts'),
   );
   if (!hasTaggedApiSymbol(audioSource, 'deprecated', 'allowLiveCaptions')) {
     failures.push('allowLiveCaptions compatibility alias must carry @deprecated API JSDoc');
   }
 
   const codeEditorRuntimeSource = readFile(
-    join(root, 'projects/hell/src/lib/features/code-editor/code-editor.runtime.ts'),
+    join(root, 'packages/angular/src/lib/features/code-editor/code-editor.runtime.ts'),
   );
   if (!hasTaggedApiSymbol(codeEditorRuntimeSource, 'deprecated', 'hellCodeEditorSetup')) {
     failures.push('hellCodeEditorSetup compatibility alias must carry @deprecated API JSDoc');
   }
 
   const audioDocs = readFile(
-    join(root, 'projects/hell-docs/src/app/pages/components/audio-player/audio-player.page.ts'),
+    join(root, 'apps/docs/src/app/pages/components/audio-player/audio-player.page.ts'),
   );
   if (!/allowLiveCaptions[\s\S]{0,200}deprecated compatibility alias/i.test(audioDocs)) {
     failures.push(
@@ -1578,7 +1582,7 @@ function checkApiStabilityContract() {
   }
 
   const codeEditorDocs = readFile(
-    join(root, 'projects/hell-docs/src/app/pages/components/code-editor/code-editor.page.ts'),
+    join(root, 'apps/docs/src/app/pages/components/code-editor/code-editor.page.ts'),
   );
   if (
     !/hellCodeEditorSetup[\s\S]{0,200}deprecated browser-global legacy compatibility/i.test(
@@ -1649,9 +1653,14 @@ function resolvePublicExportPath(publicApiPath, exportPath) {
   return join(dirname(publicApiPath), exportPath).replaceAll('\\', '/');
 }
 
+function packageExportPath(specifier) {
+  const packageName = '@hell-ui/angular';
+  return specifier === packageName ? '.' : `.${specifier.slice(packageName.length)}`;
+}
+
 function checkPackageDependencyContract() {
-  const packageJson = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
-  const workspacePackageJson = parseJsonWithComments(readFile(join(root, 'package.json')));
+  const packageJson = parseJsonWithComments(readFile(join(root, 'packages/angular/package.json')));
+  const workspaceCatalog = readWorkspaceCatalog();
   const optionalDependencies = Object.keys(packageJson.optionalDependencies ?? {});
   if (optionalDependencies.length) {
     failures.push(
@@ -1659,7 +1668,7 @@ function checkPackageDependencyContract() {
     );
   }
 
-  const sourceRoot = join(root, 'projects/hell/src/lib');
+  const sourceRoot = join(root, 'packages/angular/src/lib');
   const sourceFiles = walk(sourceRoot).filter(
     (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'),
   );
@@ -1825,7 +1834,7 @@ function checkPackageDependencyContract() {
 
   const tanStackImportOffenders = sourceFiles
     .filter((file) => !relPath(file).includes('/table-tanstack/'))
-    .filter((file) => relPath(file) !== 'projects/hell/src/lib/public-api-table-tanstack.ts')
+    .filter((file) => relPath(file) !== 'packages/angular/src/lib/public-api-table-tanstack.ts')
     .filter((file) => readFile(file).includes('@tanstack/angular-table'))
     .map(relPath);
   if (tanStackImportOffenders.length) {
@@ -1850,10 +1859,10 @@ function checkPackageDependencyContract() {
     );
   }
 
-  checkPdfViewerPackageDependencyContract(workspacePackageJson);
+  checkPdfViewerPackageDependencyContract(workspaceCatalog);
 
   const rootNgPackage = parseJsonWithComments(
-    readFile(join(root, 'projects/hell/ng-package.json')),
+    readFile(join(root, 'packages/angular/ng-package.json')),
   );
   if (JSON.stringify(rootNgPackage.assets ?? []).includes('pdf.worker')) {
     failures.push(
@@ -1862,11 +1871,11 @@ function checkPackageDependencyContract() {
   }
 }
 
-function checkPdfViewerPackageDependencyContract(workspacePackageJson) {
+function checkPdfViewerPackageDependencyContract(workspaceCatalog) {
   const packageJson = parseJsonWithComments(
-    readFile(join(root, 'projects/hell-pdf-viewer/package.json')),
+    readFile(join(root, 'packages/pdf-viewer/package.json')),
   );
-  const mainPackageJson = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
+  const mainPackageJson = parseJsonWithComments(readFile(join(root, 'packages/angular/package.json')));
   const optionalDependencies = Object.keys(packageJson.optionalDependencies ?? {});
   if (optionalDependencies.length) {
     failures.push(
@@ -1874,7 +1883,7 @@ function checkPdfViewerPackageDependencyContract(workspacePackageJson) {
     );
   }
 
-  const sourceRoot = join(root, 'projects/hell-pdf-viewer/src/lib');
+  const sourceRoot = join(root, 'packages/pdf-viewer/src/lib');
   const sourceFiles = walk(sourceRoot).filter(
     (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'),
   );
@@ -1908,9 +1917,9 @@ function checkPdfViewerPackageDependencyContract(workspacePackageJson) {
       failures.push(`PDF package dependency contract must keep ${peer} required`);
     }
   }
-  if (peerDependencies['pdfjs-dist'] !== workspacePackageJson.dependencies?.['pdfjs-dist']) {
+  if (peerDependencies['pdfjs-dist'] !== workspaceCatalog['pdfjs-dist']) {
     failures.push(
-      `PDF package dependency contract must pin pdfjs-dist peer to workspace version ${workspacePackageJson.dependencies?.['pdfjs-dist']}`,
+      `PDF package dependency contract must pin pdfjs-dist peer to workspace catalog version ${workspaceCatalog['pdfjs-dist']}`,
     );
   }
   if (peerDependencies['@hell-ui/angular'] !== mainPackageJson.version) {
@@ -1933,21 +1942,32 @@ function checkPdfViewerPackageDependencyContract(workspacePackageJson) {
 
   const packageExports = packageJson.exports ?? {};
   for (const exportPath of ['./styles', './styles/pdf-viewer', './styles/components/pdf-viewer']) {
-    if (!packageExports[exportPath]?.style) {
+    const styleExport = packageExports[exportPath];
+    if (!styleExport?.style) {
       failures.push(
-        `PDF package style export ${exportPath} is missing from projects/hell-pdf-viewer/package.json`,
+        `PDF package style export ${exportPath} is missing from packages/pdf-viewer/package.json`,
       );
+      continue;
+    }
+    if (styleExport[sourcePackageCondition] !== styleExport.style) {
+      failures.push(
+        `PDF package style export ${exportPath} must use the same local source CSS path for style and ${sourcePackageCondition}`,
+      );
+    }
+    const sourceStylePath = packageStylePathToSourcePath(styleExport.style);
+    if (!existsSync(join(root, 'packages/pdf-viewer', sourceStylePath))) {
+      failures.push(`PDF package style export ${exportPath} points at missing ${styleExport.style}`);
     }
   }
   const ngPackage = parseJsonWithComments(
-    readFile(join(root, 'projects/hell-pdf-viewer/ng-package.json')),
+    readFile(join(root, 'packages/pdf-viewer/ng-package.json')),
   );
   if (JSON.stringify(ngPackage.assets ?? []).includes('pdf.worker')) {
     failures.push(
       'PDF package must document worker setup instead of copying pdf.worker.mjs into the package tarball',
     );
   }
-  const readme = readFile(join(root, 'projects/hell-pdf-viewer/README.md'));
+  const readme = readFile(join(root, 'packages/pdf-viewer/README.md'));
   for (const text of [
     'pdfjs-dist@5.6.205',
     'pdf.worker.mjs',
@@ -1960,7 +1980,7 @@ function checkPdfViewerPackageDependencyContract(workspacePackageJson) {
 }
 
 function checkStyleEntryPoints() {
-  const packageJson = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
+  const packageJson = parseJsonWithComments(readFile(join(root, 'packages/angular/package.json')));
   const exportsMap = packageJson.exports ?? {};
   const features = featureDirectories();
   const stylelessFeatures = new Set(['audio-transcript']);
@@ -1975,16 +1995,23 @@ function checkStyleEntryPoints() {
   ];
 
   for (const exportPath of expectedStyleExports) {
-    const style = exportsMap[exportPath]?.style;
+    const styleExport = exportsMap[exportPath];
+    const style = styleExport?.style;
     if (!style) {
       failures.push(
-        `Style Package Entry Point ${exportPath} is missing from projects/hell/package.json`,
+        `Style Package Entry Point ${exportPath} is missing from packages/angular/package.json`,
       );
       continue;
     }
 
-    const sourceStylePath = style.replace(/^\.\/styles/, 'src/lib/styles');
-    if (!existsSync(join(root, 'projects/hell', sourceStylePath))) {
+    if (styleExport[sourcePackageCondition] !== style) {
+      failures.push(
+        `Style Package Entry Point ${exportPath} must use the same local source CSS path for style and ${sourcePackageCondition}`,
+      );
+    }
+
+    const sourceStylePath = packageStylePathToSourcePath(style);
+    if (!existsSync(join(root, 'packages/angular', sourceStylePath))) {
       failures.push(`Style Package Entry Point ${exportPath} points at missing ${style}`);
     }
   }
@@ -1995,17 +2022,17 @@ function checkStyleEntryPoints() {
     }
   }
   for (const relPath of [
-    'projects/hell/src/lib/styles/features/data-table.css',
-    'projects/hell/src/lib/styles/features/table-utilities.css',
-    'projects/hell/src/lib/styles/components/data-table.css',
-    'projects/hell/src/lib/styles/components/table-utilities.css',
-    'projects/hell/src/lib/styles/components/table-renderer.css',
+    'packages/angular/src/lib/styles/features/data-table.css',
+    'packages/angular/src/lib/styles/features/table-utilities.css',
+    'packages/angular/src/lib/styles/components/data-table.css',
+    'packages/angular/src/lib/styles/components/table-utilities.css',
+    'packages/angular/src/lib/styles/components/table-renderer.css',
   ]) {
     if (existsSync(join(root, relPath)))
       failures.push(`Legacy table CSS alias file must be removed: ${relPath}`);
   }
 
-  const allStyles = readFile(join(root, 'projects/hell/src/lib/styles/hell.css'));
+  const allStyles = readFile(join(root, 'packages/angular/src/lib/styles/hell.css'));
   if (!allStyles.includes('./table.css')) {
     failures.push('All-in style entry point is missing table CSS import');
   }
@@ -2015,7 +2042,7 @@ function checkStyleEntryPoints() {
     }
   }
 
-  const featureStyleDir = join(root, 'projects/hell/src/lib/styles/features');
+  const featureStyleDir = join(root, 'packages/angular/src/lib/styles/features');
   for (const file of readdirSync(featureStyleDir).filter((name) => name.endsWith('.css'))) {
     const feature = basename(file, '.css');
     const source = readFile(join(featureStyleDir, file));
@@ -2026,8 +2053,18 @@ function checkStyleEntryPoints() {
   }
 }
 
+function packageStylePathToSourcePath(packageStylePath) {
+  if (packageStylePath.startsWith('./src/lib/styles/')) {
+    return packageStylePath.slice(2);
+  }
+  if (packageStylePath.startsWith('./styles/')) {
+    return packageStylePath.replace(/^\.\/styles/, 'src/lib/styles');
+  }
+  return packageStylePath;
+}
+
 function checkNgClassCustomizationContract() {
-  const sourceRoot = join(root, 'projects/hell/src/lib');
+  const sourceRoot = join(root, 'packages/angular/src/lib');
   const files = walk(sourceRoot).filter(
     (file) =>
       file.endsWith('.ts') &&
@@ -2052,7 +2089,7 @@ function checkNgClassCustomizationContract() {
 }
 
 function checkAngularHostMetadataContract() {
-  const sourceRoot = join(root, 'projects/hell/src/lib');
+  const sourceRoot = join(root, 'packages/angular/src/lib');
   const files = walk(sourceRoot).filter(
     (file) =>
       file.endsWith('.ts') &&
@@ -2072,7 +2109,7 @@ function checkAngularHostMetadataContract() {
 }
 
 function checkBehaviorSentinelContract() {
-  const sourceRoot = join(root, 'projects/hell/src/lib');
+  const sourceRoot = join(root, 'packages/angular/src/lib');
   const files = walk(sourceRoot).filter(
     (file) =>
       file.endsWith('.ts') &&
@@ -2099,9 +2136,9 @@ function checkBehaviorSentinelContract() {
 
 function checkAppShellBreakpointContract() {
   const shellSource = readFile(
-    join(root, 'projects/hell/src/lib/composites/app-shell/app-shell.ts'),
+    join(root, 'packages/angular/src/lib/composites/app-shell/app-shell.ts'),
   );
-  const shellStyles = readFile(join(root, 'projects/hell/src/lib/styles/components/app-shell.css'));
+  const shellStyles = readFile(join(root, 'packages/angular/src/lib/styles/components/app-shell.css'));
   const desktopMin = Number(
     /HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX\s*=\s*(\d+)/.exec(shellSource)?.[1],
   );
@@ -2129,7 +2166,7 @@ function checkAppShellBreakpointContract() {
 }
 
 function checkComponentContract() {
-  const sourceRoot = join(root, 'projects/hell/src/lib');
+  const sourceRoot = join(root, 'packages/angular/src/lib');
   const files = walk(sourceRoot).filter(
     (file) =>
       file.endsWith('.ts') &&
@@ -2192,7 +2229,7 @@ function checkComponentContract() {
     }
   }
 
-  const contractSpec = readFile(join(root, 'projects/hell/src/lib/component-contract.spec.ts'));
+  const contractSpec = readFile(join(root, 'packages/angular/src/lib/component-contract.spec.ts'));
   const manifestSymbols = [...contractSpec.matchAll(/symbol:\s*'([A-Za-z0-9_]+)'/g)].map(
     (match) => match[1],
   );
@@ -2230,9 +2267,9 @@ function checkComponentContract() {
 }
 
 function checkPartStyleMapContract() {
-  const styleableSource = readFile(join(root, 'projects/hell/src/lib/core/styleable.ts'));
+  const styleableSource = readFile(join(root, 'packages/angular/src/lib/core/styleable.ts'));
   const styleableCompact = compactSource(styleableSource);
-  const mergeSource = readFile(join(root, 'projects/hell/src/lib/core/part-style-merge.ts'));
+  const mergeSource = readFile(join(root, 'packages/angular/src/lib/core/part-style-merge.ts'));
   const packageConsumer = readFile(join(root, 'tools/check-package-consumer.mjs'));
   const releaseDryRun = readFile(join(root, 'tools/release-dry-run.mjs'));
   const productionReadyCheck = readFile(join(root, 'tools/production-ready-check.mjs'));
@@ -2473,9 +2510,9 @@ function checkMigratedPartStyleMapModule(module, entrypointManifestSource) {
   }
 
   const publicApi = readFile(join(root, module.publicApiPath));
-  const expectedExport = module.sourcePath
-    .replace(/^projects\/hell\/src\/lib\//, './')
-    .replace(/\.ts$/, '');
+  const expectedExport = `./${relative(dirname(module.publicApiPath), module.sourcePath)
+    .replace(/\.ts$/, '')
+    .replaceAll('\\', '/')}`;
   if (!publicApi.includes(expectedExport)) {
     failures.push(`${module.publicApiPath} must export ${expectedExport}`);
   }
@@ -2494,7 +2531,7 @@ function checkMigratedPartStyleMapModule(module, entrypointManifestSource) {
 }
 
 function checkLegacyPartStyleCompatibilityHelpers() {
-  const buttonCssPath = join(root, 'projects/hell/src/lib/styles/components/button.css');
+  const buttonCssPath = join(root, 'packages/angular/src/lib/styles/components/button.css');
   const buttonCss = readFile(buttonCssPath);
   if (
     !buttonCss.includes('Legacy button-like helper') ||
@@ -2506,7 +2543,7 @@ function checkLegacyPartStyleCompatibilityHelpers() {
     );
   }
 
-  const sourceFiles = walk(join(root, 'projects/hell/src/lib')).filter(
+  const sourceFiles = walk(join(root, 'packages/angular/src/lib')).filter(
     (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'),
   );
   for (const file of sourceFiles) {
@@ -2525,7 +2562,7 @@ function checkLegacyPartStyleCompatibilityHelpers() {
 function componentVariablePrefixOffenders(module) {
   if (!module.componentVariablePrefix) return [];
 
-  const files = walk(join(root, 'projects/hell/src/lib')).filter(
+  const files = walk(join(root, 'packages/angular/src/lib')).filter(
     (file) =>
       (file.endsWith('.ts') || file.endsWith('.css')) &&
       !file.endsWith('.spec.ts') &&
@@ -2601,38 +2638,38 @@ function compactSource(source) {
 }
 
 function checkLabelContract() {
-  const labelsSource = readFile(join(root, 'projects/hell/src/lib/core/labels.ts'));
+  const labelsSource = readFile(join(root, 'packages/angular/src/lib/core/labels.ts'));
   for (const symbol of ['HELL_LABELS', 'HELL_DEFAULT_LABELS', 'provideHellLabels']) {
     if (!labelsSource.includes(symbol)) failures.push(`Label Contract is missing ${symbol}`);
   }
 
-  const rootApi = readFile(join(root, 'projects/hell/src/public-api.ts'));
-  const coreApi = readFile(join(root, 'projects/hell/src/lib/public-api-core.ts'));
+  const rootApi = readFile(join(root, 'packages/angular/src/public-api.ts'));
+  const coreApi = readFile(join(root, 'packages/angular/src/lib/public-api-core.ts'));
   const rootApiExportsCoreAggregate =
     rootApi.includes('./lib/public-api-core') || rootApi.includes('./public-api-core');
 
   for (const [api, source] of [
-    ['projects/hell/src/public-api.ts', rootApi],
-    ['projects/hell/src/lib/public-api-core.ts', coreApi],
+    ['packages/angular/src/public-api.ts', rootApi],
+    ['packages/angular/src/lib/public-api-core.ts', coreApi],
   ]) {
     const sourceExportsLabelContract =
       source.includes('./lib/core/labels') ||
       source.includes('./core/labels') ||
-      (api === 'projects/hell/src/public-api.ts' && rootApiExportsCoreAggregate);
+      (api === 'packages/angular/src/public-api.ts' && rootApiExportsCoreAggregate);
     if (!sourceExportsLabelContract) {
       failures.push(`Label Contract is not exported from ${api}`);
     }
   }
 
   const spinnerSource = readFile(
-    join(root, 'projects/hell/src/lib/primitives/skeleton/skeleton.ts'),
+    join(root, 'packages/angular/src/lib/primitives/skeleton/skeleton.ts'),
   );
   if (!spinnerSource.includes('HELL_LABELS') || spinnerSource.includes("'aria-label': 'Loading'")) {
     failures.push('HellSpinner must read its default aria-label from the Label Contract');
   }
 
   const paginationSource = readFile(
-    join(root, 'projects/hell/src/lib/primitives/pagination/pagination.ts'),
+    join(root, 'packages/angular/src/lib/primitives/pagination/pagination.ts'),
   );
   for (const hardcoded of [
     'aria-label="First page"',
@@ -2646,31 +2683,31 @@ function checkLabelContract() {
 
   const labelConsumers = [
     [
-      'projects/hell/src/lib/composites/app-shell/app-shell.ts',
+      'packages/angular/src/lib/composites/app-shell/app-shell.ts',
       ['Expand sidebar', 'Collapse sidebar'],
     ],
     [
-      'projects/hell/src/lib/composites/audio-player/audio-player.ts',
+      'packages/angular/src/lib/composites/audio-player/audio-player.ts',
       ['Show live captions', 'Copy transcript', '>Live<', '>Paused<'],
     ],
-    ['projects/hell/src/lib/primitives/breadcrumbs/breadcrumbs.ts', ['Show hidden navigation']],
-    ['projects/hell/src/lib/composites/date-input/date-input.ts', ['Choose date']],
-    ['projects/hell/src/lib/composites/resizable/resizable.ts', ['Resize panels']],
+    ['packages/angular/src/lib/primitives/breadcrumbs/breadcrumbs.ts', ['Show hidden navigation']],
+    ['packages/angular/src/lib/composites/date-input/date-input.ts', ['Choose date']],
+    ['packages/angular/src/lib/composites/resizable/resizable.ts', ['Resize panels']],
     [
-      'projects/hell/src/lib/composites/time-input/time-input.ts',
+      'packages/angular/src/lib/composites/time-input/time-input.ts',
       ['Choose time', 'Subtract 5 minutes'],
     ],
     [
-      'projects/hell/src/lib/composites/toast/toast.ts',
+      'packages/angular/src/lib/composites/toast/toast.ts',
       ['aria-label="Notifications"', 'aria-label="Dismiss"'],
     ],
-    ['projects/hell/src/lib/features/table-utilities/table-utilities.ts', ['Resize column']],
+    ['packages/angular/src/lib/features/table-utilities/table-utilities.ts', ['Resize column']],
     [
-      'projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.html',
+      'packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.html',
       ['Find in document', 'Zoom level'],
     ],
     [
-      'projects/hell/src/lib/primitives/date-picker/date-picker.ts',
+      'packages/angular/src/lib/primitives/date-picker/date-picker.ts',
       ['Previous year', 'Previous month'],
     ],
   ];
@@ -2734,7 +2771,7 @@ function decoratedClassModules(source) {
 
 function checkCodeEditorRuntimeContract() {
   const source = readFile(
-    join(root, 'projects/hell/src/lib/features/code-editor/code-editor.runtime.ts'),
+    join(root, 'packages/angular/src/lib/features/code-editor/code-editor.runtime.ts'),
   );
 
   if (source.includes('innerHTML')) {
@@ -2748,7 +2785,7 @@ function checkCodeEditorRuntimeContract() {
 
 function checkExperimentalFeatureContract() {
   const audioSource = readFile(
-    join(root, 'projects/hell/src/lib/composites/audio-player/audio-player.ts'),
+    join(root, 'packages/angular/src/lib/composites/audio-player/audio-player.ts'),
   );
   if (!/allowSpeechTranscript\s*=\s*input\(false/.test(audioSource)) {
     failures.push('Audio speech transcript must remain explicitly opt-in while experimental');
@@ -2763,7 +2800,7 @@ function checkExperimentalFeatureContract() {
   }
 
   const audioDocs = readFile(
-    join(root, 'projects/hell-docs/src/app/pages/components/audio-player/audio-player.page.ts'),
+    join(root, 'apps/docs/src/app/pages/components/audio-player/audio-player.page.ts'),
   );
   if (
     !/speech transcript is experimental/i.test(audioDocs) ||
@@ -2773,13 +2810,13 @@ function checkExperimentalFeatureContract() {
   }
 
   const pdfSource = readFile(
-    join(root, 'projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts'),
+    join(root, 'packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts'),
   );
   if (!pdfSource.includes('@experimental This feature wraps pdf.js')) {
     failures.push('HellPdfViewer must mark the pdf.js wrapper experimental in its public JSDoc');
   }
 
-  const pdfFeatureApi = readFile(join(root, 'projects/hell-pdf-viewer/src/public-api.ts'));
+  const pdfFeatureApi = readFile(join(root, 'packages/pdf-viewer/src/public-api.ts'));
   if (!/HellPdfWorkerSource/.test(pdfFeatureApi)) {
     failures.push(
       'PDF Viewer package entry point must export the public HellPdfWorkerSource worker input type',
@@ -2787,7 +2824,7 @@ function checkExperimentalFeatureContract() {
   }
 
   const pdfDocs = readFile(
-    join(root, 'projects/hell-docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts'),
+    join(root, 'apps/docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts'),
   );
   if (!/PDF viewer is experimental/.test(pdfDocs)) {
     failures.push('PDF Viewer docs must disclose experimental status');
@@ -2799,16 +2836,16 @@ function checkExperimentalFeatureContract() {
 
 function checkFormsContract() {
   const cvaModules = [
-    ['projects/hell/src/lib/primitives/checkbox/checkbox.ts', 'HellCheckbox'],
-    ['projects/hell/src/lib/primitives/switch/switch.ts', 'HellSwitch'],
-    ['projects/hell/src/lib/primitives/radio/radio.ts', 'HellRadioGroup'],
-    ['projects/hell/src/lib/primitives/select/select.ts', 'HellSelect'],
-    ['projects/hell/src/lib/primitives/combobox/combobox.ts', 'HellCombobox'],
-    ['projects/hell/src/lib/primitives/slider/slider.ts', 'HellSlider'],
-    ['projects/hell/src/lib/primitives/toggle/toggle.ts', 'HellToggleGroup'],
-    ['projects/hell/src/lib/composites/date-input/date-input.ts', 'HellDateInput'],
-    ['projects/hell/src/lib/composites/time-input/time-input.ts', 'HellTimeInput'],
-    ['projects/hell/src/lib/features/code-editor/code-editor.ts', 'HellCodeEditor'],
+    ['packages/angular/src/lib/primitives/checkbox/checkbox.ts', 'HellCheckbox'],
+    ['packages/angular/src/lib/primitives/switch/switch.ts', 'HellSwitch'],
+    ['packages/angular/src/lib/primitives/radio/radio.ts', 'HellRadioGroup'],
+    ['packages/angular/src/lib/primitives/select/select.ts', 'HellSelect'],
+    ['packages/angular/src/lib/primitives/combobox/combobox.ts', 'HellCombobox'],
+    ['packages/angular/src/lib/primitives/slider/slider.ts', 'HellSlider'],
+    ['packages/angular/src/lib/primitives/toggle/toggle.ts', 'HellToggleGroup'],
+    ['packages/angular/src/lib/composites/date-input/date-input.ts', 'HellDateInput'],
+    ['packages/angular/src/lib/composites/time-input/time-input.ts', 'HellTimeInput'],
+    ['packages/angular/src/lib/features/code-editor/code-editor.ts', 'HellCodeEditor'],
   ];
 
   for (const [file, className] of cvaModules) {
@@ -2825,13 +2862,13 @@ function checkFormsContract() {
 function checkDateTimeAdapterContract() {
   const checks = [
     {
-      sourcePath: 'projects/hell/src/lib/composites/date-input/date-input.ts',
-      docsPath: 'projects/hell-docs/src/app/pages/components/date-input/date-input.page.ts',
+      sourcePath: 'packages/angular/src/lib/composites/date-input/date-input.ts',
+      docsPath: 'apps/docs/src/app/pages/components/date-input/date-input.page.ts',
       tokens: ['HELL_DATE_INPUT_ADAPTER', 'provideHellDateInputAdapter', 'HellDateInputAdapter'],
     },
     {
-      sourcePath: 'projects/hell/src/lib/composites/time-input/time-input.ts',
-      docsPath: 'projects/hell-docs/src/app/pages/components/time-input/time-input.page.ts',
+      sourcePath: 'packages/angular/src/lib/composites/time-input/time-input.ts',
+      docsPath: 'apps/docs/src/app/pages/components/time-input/time-input.page.ts',
       tokens: ['HELL_TIME_INPUT_ADAPTER', 'provideHellTimeInputAdapter', 'HellTimeInputAdapter'],
     },
   ];
@@ -2847,13 +2884,13 @@ function checkDateTimeAdapterContract() {
 }
 
 function checkSearchContract() {
-  const source = readFile(join(root, 'projects/hell/src/lib/core/search.ts'));
+  const source = readFile(join(root, 'packages/angular/src/lib/core/search.ts'));
   for (const symbol of ['HELL_SEARCH_RANKER', 'provideHellSearchRanker', 'hellRankLocalSearch']) {
     if (!source.includes(symbol)) failures.push(`Search Core is missing ${symbol}`);
   }
 
   const docs = readFile(
-    join(root, 'projects/hell-docs/src/app/pages/components/omnibar/omnibar.page.ts'),
+    join(root, 'apps/docs/src/app/pages/components/omnibar/omnibar.page.ts'),
   );
   if (!docs.includes('provideHellSearchRanker') || !docs.includes('Fuse.js')) {
     failures.push(
@@ -2863,7 +2900,7 @@ function checkSearchContract() {
 }
 
 function checkHotkeyContract() {
-  const hotkeySource = readFile(join(root, 'projects/hell/src/lib/core/hotkeys.ts'));
+  const hotkeySource = readFile(join(root, 'packages/angular/src/lib/core/hotkeys.ts'));
   if (!hotkeySource.includes('HellGlobalKeydownService')) {
     failures.push('Core must provide a shared global keydown listener service');
   }
@@ -2871,7 +2908,7 @@ function checkHotkeyContract() {
     failures.push('Core must provide a shared global pointer listener service');
   }
 
-  const coreApi = readFile(join(root, 'projects/hell/src/lib/public-api-core.ts'));
+  const coreApi = readFile(join(root, 'packages/angular/src/lib/public-api-core.ts'));
   if (coreApi.includes('./core/hotkeys')) {
     failures.push('Core Package Entry Point must keep hotkey listener internals private');
   }
@@ -2888,7 +2925,7 @@ function checkHotkeyContract() {
     ['Core Package Entry Point', coreApi],
     [
       'Omnibar Package Entry Point',
-      readFile(join(root, 'projects/hell/src/lib/composites/omnibar/omnibar.ts')),
+      readFile(join(root, 'packages/angular/src/lib/composites/omnibar/omnibar.ts')),
     ],
   ];
   for (const [label, source] of publicHotkeySurfaces) {
@@ -2899,7 +2936,7 @@ function checkHotkeyContract() {
   }
 
   const internalHotkeysApi = readFile(
-    join(root, 'projects/hell/src/lib/public-api-internal-hotkeys.ts'),
+    join(root, 'packages/angular/src/lib/public-api-internal-hotkeys.ts'),
   );
   const internalHotkeyExports = exportedSymbolNames(internalHotkeysApi);
   const allowedInternalHotkeyExports = new Set([
@@ -2926,13 +2963,13 @@ function checkHotkeyContract() {
     );
   }
 
-  const omnibarSource = readFile(join(root, 'projects/hell/src/lib/composites/omnibar/omnibar.ts'));
+  const omnibarSource = readFile(join(root, 'packages/angular/src/lib/composites/omnibar/omnibar.ts'));
   if (omnibarSource.includes('document.addEventListener')) {
     failures.push('HellOmnibar must register global hotkeys through HellGlobalKeydownService');
   }
 
   const pdfSource = readFile(
-    join(root, 'projects/hell-pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts'),
+    join(root, 'packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts'),
   );
   if (pdfSource.includes('window:keydown') || pdfSource.includes('window:pointerdown')) {
     failures.push('HellPdfViewer must register global shortcuts through shared listener services');
@@ -2940,7 +2977,7 @@ function checkHotkeyContract() {
 }
 
 function checkNativeButtonSelectorContract() {
-  const sourceRoot = join(root, 'projects/hell/src/lib');
+  const sourceRoot = join(root, 'packages/angular/src/lib');
   const files = walk(sourceRoot).filter(
     (file) =>
       file.endsWith('.ts') &&
@@ -2980,7 +3017,7 @@ function checkInteractiveTriggerSelectorContract() {
     'hellMenuTrigger',
     'hellFlyoutTrigger',
   ]);
-  const sourceRoot = join(root, 'projects/hell/src/lib');
+  const sourceRoot = join(root, 'packages/angular/src/lib');
   const files = walk(sourceRoot).filter(
     (file) =>
       file.endsWith('.ts') &&
@@ -3014,7 +3051,7 @@ function checkInteractiveTriggerSelectorContract() {
 
 function checkTableUtilityContract() {
   const source = readFile(
-    join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'),
+    join(root, 'packages/angular/src/lib/features/table-utilities/table-utilities.ts'),
   );
   if (!source.includes('HELL_TABLE_UTILITIES_DIRECTIVES')) {
     failures.push(
@@ -3062,21 +3099,21 @@ function checkTableUtilityContract() {
     failures.push('HellTableRow interactive legacy input must be removed');
   }
 
-  const tableHarness = readFile(join(root, 'projects/hell/src/testing/table-harness.ts'));
+  const tableHarness = readFile(join(root, 'packages/angular/src/testing/table-harness.ts'));
   if (/\binteractive\?\s*:|\bisInteractive\b/.test(tableHarness)) {
     failures.push('Testing table harness must not expose interactive legacy row aliases');
   }
 
-  const tableFacade = readFile(join(root, 'projects/hell/src/lib/table/table.ts'));
+  const tableFacade = readFile(join(root, 'packages/angular/src/lib/table/table.ts'));
   if (!tableFacade.includes('../features/table-utilities/table-utilities')) {
     failures.push('Modern @hell-ui/angular/table facade must own the table utilities export');
   }
 
   const docs = readFile(
-    join(root, 'projects/hell-docs/src/app/pages/components/table/table.page.ts'),
+    join(root, 'apps/docs/src/app/pages/components/table/table.page.ts'),
   );
-  const docsRoot = join(root, 'projects/hell-docs/src/app');
-  const docsGlobalStyles = readFile(join(root, 'projects/hell-docs/src/styles.css'));
+  const docsRoot = join(root, 'apps/docs/src/app');
+  const docsGlobalStyles = readFile(join(root, 'apps/docs/src/styles.css'));
   if (!docsGlobalStyles.includes("@import '@hell-ui/angular/styles/table';")) {
     failures.push(
       'Docs app must load table CSS from the global stylesheet so production routes are styled',
@@ -3097,7 +3134,7 @@ function checkTableUtilityContract() {
     );
   }
   const tableStyleSource = readFile(
-    join(root, 'projects/hell/src/lib/styles/components/table.css'),
+    join(root, 'packages/angular/src/lib/styles/components/table.css'),
   );
   for (const forbidden of [
     'button.hell-table-row-action:not(.hell-button)',
@@ -3143,7 +3180,7 @@ function checkTableUtilityContract() {
 function checkTableSemanticsContract() {
   const tableSourcePath = join(
     root,
-    'projects/hell/src/lib/features/table-utilities/table-utilities.ts',
+    'packages/angular/src/lib/features/table-utilities/table-utilities.ts',
   );
   const tableSource = readFile(tableSourcePath);
   const tableModule = decoratedClassModules(tableSource).find(
@@ -3190,17 +3227,17 @@ function checkTableSemanticsContract() {
 
   for (const [specPath, required] of [
     [
-      'projects/hell/src/lib/table/table.spec.ts',
+      'packages/angular/src/lib/table/table.spec.ts',
       'uses native table markup without adding redundant ARIA or row-as-button behavior',
     ],
-    ['projects/hell/src/lib/table/table.spec.ts', "native-root').getAttribute('role')).toBeNull()"],
-    ['projects/hell/src/lib/table/table.spec.ts', "native-cell').getAttribute('role')).toBeNull()"],
+    ['packages/angular/src/lib/table/table.spec.ts', "native-root').getAttribute('role')).toBeNull()"],
+    ['packages/angular/src/lib/table/table.spec.ts', "native-cell').getAttribute('role')).toBeNull()"],
     [
-      'projects/hell/src/lib/table/table.spec.ts',
+      'packages/angular/src/lib/table/table.spec.ts',
       "native-root').hasAttribute('tabindex')).toBe(false)",
     ],
     [
-      'projects/hell/src/lib/table/table.spec.ts',
+      'packages/angular/src/lib/table/table.spec.ts',
       "native-root').hasAttribute('aria-activedescendant')).toBe(false)",
     ],
   ]) {
@@ -3226,7 +3263,7 @@ function checkTableSemanticsContract() {
 function checkTableSortTriggerContract() {
   const tableSourcePath = join(
     root,
-    'projects/hell/src/lib/features/table-utilities/table-utilities.ts',
+    'packages/angular/src/lib/features/table-utilities/table-utilities.ts',
   );
   const tableSource = readFile(tableSourcePath);
   const headerModule = decoratedClassModules(tableSource).find(
@@ -3260,7 +3297,7 @@ function checkTableSortTriggerContract() {
     failures.push('Legacy hellTableSortButton API must not remain in table utilities');
   }
 
-  const docsRoot = join(root, 'projects/hell-docs/src/app/pages/components/table');
+  const docsRoot = join(root, 'apps/docs/src/app/pages/components/table');
   const docsFiles = walk(docsRoot).filter((file) => file.endsWith('.ts'));
   for (const file of docsFiles) {
     const source = readFile(file);
@@ -3279,7 +3316,7 @@ function checkTableSortTriggerContract() {
 function checkTableResizeHandleContract() {
   const tableSourcePath = join(
     root,
-    'projects/hell/src/lib/features/table-utilities/table-utilities.ts',
+    'packages/angular/src/lib/features/table-utilities/table-utilities.ts',
   );
   const tableSource = readFile(tableSourcePath);
 
@@ -3305,7 +3342,7 @@ function checkTableResizeHandleContract() {
     failures.push('Legacy hellTableColumnResizer API must not remain in table utilities');
   }
 
-  const styleSource = readFile(join(root, 'projects/hell/src/lib/styles/components/table.css'));
+  const styleSource = readFile(join(root, 'packages/angular/src/lib/styles/components/table.css'));
   if (!styleSource.includes('.hell-table-resize-handle')) {
     failures.push('Table resize handle styles must use hell-table-resize-handle class');
   }
@@ -3313,7 +3350,7 @@ function checkTableResizeHandleContract() {
     failures.push('Legacy hell-table-column-resizer class must be removed from table styles');
   }
 
-  const tableHarness = readFile(join(root, 'projects/hell/src/testing/table-harness.ts'));
+  const tableHarness = readFile(join(root, 'packages/angular/src/testing/table-harness.ts'));
   if (
     !tableHarness.includes('HellTableResizeHandleHarness') ||
     !tableHarness.includes('getResizeHandle')
@@ -3326,7 +3363,7 @@ function checkTableResizeHandleContract() {
     failures.push('Testing table harness must not expose legacy column-resizer APIs');
   }
 
-  const docsRoot = join(root, 'projects/hell-docs/src/app');
+  const docsRoot = join(root, 'apps/docs/src/app');
   const docsOffenders = walk(docsRoot)
     .filter((file) => /\.(?:ts|html|md)$/.test(file))
     .filter((file) => {
@@ -3357,22 +3394,22 @@ function checkTableLegacyRemovalContract() {
     '@hell-ui/angular/styles/features/table-utilities',
   ];
   const legacyEntrypointFiles = [
-    'projects/hell/features/data-table/ng-package.json',
-    'projects/hell/features/table-utilities/ng-package.json',
-    'projects/hell/src/lib/public-api-feature-data-table.ts',
-    'projects/hell/src/lib/public-api-feature-table-utilities.ts',
+    'packages/angular/features/data-table/ng-package.json',
+    'packages/angular/features/table-utilities/ng-package.json',
+    'packages/angular/src/lib/public-api-feature-data-table.ts',
+    'packages/angular/src/lib/public-api-feature-table-utilities.ts',
   ];
   const legacyStyleFiles = [
-    'projects/hell/src/lib/styles/features/data-table.css',
-    'projects/hell/src/lib/styles/features/table-utilities.css',
-    'projects/hell/src/lib/styles/components/data-table.css',
-    'projects/hell/src/lib/styles/components/table-utilities.css',
+    'packages/angular/src/lib/styles/features/data-table.css',
+    'packages/angular/src/lib/styles/features/table-utilities.css',
+    'packages/angular/src/lib/styles/components/data-table.css',
+    'packages/angular/src/lib/styles/components/table-utilities.css',
   ];
 
   const manifestSpecifiers = new Set(
     entrypointPublicApiFiles().map((entrypoint) => entrypoint.specifier),
   );
-  const packageJson = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
+  const packageJson = parseJsonWithComments(readFile(join(root, 'packages/angular/package.json')));
   const tsconfig = parseJsonWithComments(readFile(join(root, 'tsconfig.json')));
   const tsconfigPaths = tsconfig.compilerOptions?.paths ?? {};
   const exportsMap = packageJson.exports ?? {};
@@ -3403,7 +3440,7 @@ function checkTableLegacyRemovalContract() {
       failures.push(`Legacy table alias file must be removed: ${rel}`);
   }
 
-  const importRoots = ['projects/hell/src', 'projects/hell-docs/src/app'];
+  const importRoots = ['packages/angular/src', 'apps/docs/src/app'];
   const legacyModuleSpecifiers = [...legacyEntrypointSpecifiers, ...legacyStyleSpecifiers];
   const importFiles = importRoots
     .flatMap((rel) => walk(join(root, rel)))
@@ -3420,7 +3457,7 @@ function checkTableLegacyRemovalContract() {
     }
   }
 
-  const productionFiles = walk(join(root, 'projects/hell/src')).filter(
+  const productionFiles = walk(join(root, 'packages/angular/src')).filter(
     (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'),
   );
   const legacySymbols = [
@@ -3447,7 +3484,7 @@ function checkTableLegacyRemovalContract() {
   }
 
   const tableSource = readFile(
-    join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'),
+    join(root, 'packages/angular/src/lib/features/table-utilities/table-utilities.ts'),
   );
   const rowModule = decoratedClassModules(tableSource).find(
     (module) => module.className === 'HellTableRow',
@@ -3463,8 +3500,8 @@ function checkTableLegacyRemovalContract() {
   }
 
   const styleEntrypointSources = [
-    'projects/hell/src/lib/styles/hell.css',
-    'projects/hell/src/lib/styles/table.css',
+    'packages/angular/src/lib/styles/hell.css',
+    'packages/angular/src/lib/styles/table.css',
   ];
   for (const rel of styleEntrypointSources) {
     const source = readFile(join(root, rel));
@@ -3480,14 +3517,14 @@ function checkTableLegacyRemovalContract() {
 
 function checkTableAdapterBoundaryContract() {
   const coreTableBoundaryDirs = [
-    'projects/hell/src/lib/features/table-utilities',
-    'projects/hell/src/lib/table',
+    'packages/angular/src/lib/features/table-utilities',
+    'packages/angular/src/lib/table',
   ];
   const coreTableBoundaryFiles = [
     ...coreTableBoundaryDirs.flatMap((rel) => walk(join(root, rel))),
-    join(root, 'projects/hell/src/lib/public-api-table.ts'),
+    join(root, 'packages/angular/src/lib/public-api-table.ts'),
   ].filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'));
-  const adapterDirs = ['projects/hell/src/lib/table-tanstack'];
+  const adapterDirs = ['packages/angular/src/lib/table-tanstack'];
   const adapterFiles = adapterDirs
     .flatMap((rel) => walk(join(root, rel)))
     .filter(
@@ -3498,12 +3535,12 @@ function checkTableAdapterBoundaryContract() {
       label: 'TanStack Table',
       matches: (specifier) =>
         specifier.startsWith('@tanstack/angular-table') || specifier.startsWith('@tanstack/table'),
-      allowedDir: 'projects/hell/src/lib/table-tanstack',
+      allowedDir: 'packages/angular/src/lib/table-tanstack',
     },
     {
       label: 'TanStack Virtual',
       matches: (specifier) => specifier.startsWith('@tanstack/virtual'),
-      allowedDir: 'projects/hell/src/lib/table-tanstack/virtual',
+      allowedDir: 'packages/angular/src/lib/table-tanstack/virtual',
     },
     {
       label: 'Angular CDK table adapter',
@@ -3540,7 +3577,7 @@ function checkTableAdapterBoundaryContract() {
   }
 
   const tanStackShellSource = readFile(
-    join(root, 'projects/hell/src/lib/table-tanstack/table-tanstack.ts'),
+    join(root, 'packages/angular/src/lib/table-tanstack/table-tanstack.ts'),
   );
   const publicLookingBodyConnectorBindings = [
     'hellTanStackBodyScrollport',
@@ -3577,7 +3614,7 @@ function checkTableAdapterBoundaryContract() {
 
 function checkTableSemanticDefaultGuardContract() {
   const tableSource = readFile(
-    join(root, 'projects/hell/src/lib/features/table-utilities/table-utilities.ts'),
+    join(root, 'packages/angular/src/lib/features/table-utilities/table-utilities.ts'),
   );
   const modules = new Map(
     decoratedClassModules(tableSource).map((module) => [module.className, module]),
@@ -3642,32 +3679,32 @@ function checkTableSemanticDefaultGuardContract() {
 function checkFloatingRegistrationContract() {
   const floatingSurfaces = [
     {
-      file: 'projects/hell/src/lib/primitives/popover/popover.ts',
+      file: 'packages/angular/src/lib/primitives/popover/popover.ts',
       className: 'HellPopover',
       registration: /hellRegisterFloatingHost\(\);/,
     },
     {
-      file: 'projects/hell/src/lib/primitives/tooltip/tooltip.ts',
+      file: 'packages/angular/src/lib/primitives/tooltip/tooltip.ts',
       className: 'HellTooltip',
       registration: /hellRegisterFloatingHost\(\);/,
     },
     {
-      file: 'projects/hell/src/lib/primitives/menu/menu.ts',
+      file: 'packages/angular/src/lib/primitives/menu/menu.ts',
       className: 'HellMenu',
       registration: /hellRegisterFloatingHost\(\);/,
     },
     {
-      file: 'projects/hell/src/lib/primitives/select/select.ts',
+      file: 'packages/angular/src/lib/primitives/select/select.ts',
       className: 'HellSelectDropdown',
       registration: /hellRegisterFloatingHost\(\);/,
     },
     {
-      file: 'projects/hell/src/lib/primitives/combobox/combobox.ts',
+      file: 'packages/angular/src/lib/primitives/combobox/combobox.ts',
       className: 'HellComboboxDropdown',
       registration: /hellRegisterFloatingHost\(\);/,
     },
     {
-      file: 'projects/hell/src/lib/primitives/flyout/flyout.ts',
+      file: 'packages/angular/src/lib/primitives/flyout/flyout.ts',
       className: 'HellFlyout',
       registration: /new\s+HellFloatingInteractionController[\s\S]*?scope:\s*this\.floatingScope/,
     },
@@ -3689,11 +3726,11 @@ function checkFloatingRegistrationContract() {
 
   const touchedContainmentOwners = [
     {
-      file: 'projects/hell/src/lib/primitives/select/select.ts',
+      file: 'packages/angular/src/lib/primitives/select/select.ts',
       className: 'HellSelect',
     },
     {
-      file: 'projects/hell/src/lib/primitives/combobox/combobox.ts',
+      file: 'packages/angular/src/lib/primitives/combobox/combobox.ts',
       className: 'HellCombobox',
     },
   ];
@@ -3725,23 +3762,23 @@ function checkFloatingRegistrationContract() {
 }
 
 function checkNgpStateWriterContract() {
-  const adapterRelPath = 'projects/hell/src/lib/primitives/adapters/ngp-state-adapters.ts';
+  const adapterRelPath = 'packages/angular/src/lib/primitives/adapters/ngp-state-adapters.ts';
   const adapterPath = join(root, adapterRelPath);
   const adapterSource = readFile(adapterPath);
   const ngpPackage = parseJsonWithComments(
-    readFile(join(root, 'node_modules/ng-primitives/package.json')),
+    readFile(join(root, 'packages/angular/node_modules/ng-primitives/package.json')),
   );
-  const workspacePackage = parseJsonWithComments(readFile(join(root, 'package.json')));
-  const libraryPackage = parseJsonWithComments(readFile(join(root, 'projects/hell/package.json')));
+  const workspaceCatalog = readWorkspaceCatalog();
+  const libraryPackage = parseJsonWithComments(readFile(join(root, 'packages/angular/package.json')));
   const expectedVersion = `ng-primitives@${ngpPackage.version}`;
 
   if (!adapterSource.includes(`HELL_NGP_STATE_WRITER_VERSION = '${expectedVersion}'`)) {
     failures.push(`ng-primitives state writer version must match installed ${expectedVersion}`);
   }
 
-  if (workspacePackage.dependencies?.['ng-primitives'] !== ngpPackage.version) {
+  if (workspaceCatalog['ng-primitives'] !== ngpPackage.version) {
     failures.push(
-      `workspace ng-primitives dependency must be pinned to ${ngpPackage.version} while the state writer fallback is version-bound`,
+      `workspace ng-primitives catalog entry must be pinned to ${ngpPackage.version} while the state writer fallback is version-bound`,
     );
   }
 
@@ -3753,10 +3790,10 @@ function checkNgpStateWriterContract() {
 
   const allowedBridgeFiles = new Set([
     adapterRelPath,
-    'projects/hell/src/lib/primitives/adapters/ngp-state-adapters.spec.ts',
-    'projects/hell/src/lib/primitives/select/select.ts',
-    'projects/hell/src/lib/primitives/combobox/combobox.ts',
-    'projects/hell/src/lib/primitives/radio/radio.ts',
+    'packages/angular/src/lib/primitives/adapters/ngp-state-adapters.spec.ts',
+    'packages/angular/src/lib/primitives/select/select.ts',
+    'packages/angular/src/lib/primitives/combobox/combobox.ts',
+    'packages/angular/src/lib/primitives/radio/radio.ts',
   ]);
   const stateWriterTokens = [
     'HELL_NGP_STATE_WRITER_VERSION',
@@ -3845,7 +3882,7 @@ function checkNgpStateWriterContract() {
     'State<NgpRadioGroup',
     'NgpRovingFocusGroupState',
   ];
-  const sourceFiles = walk(join(root, 'projects/hell/src/lib')).filter((file) =>
+  const sourceFiles = walk(join(root, 'packages/angular/src/lib')).filter((file) =>
     file.endsWith('.ts'),
   );
 
@@ -3899,7 +3936,7 @@ function checkNgpStateWriterContract() {
   }
 
   const adaptersBarrel = readFile(
-    join(root, 'projects/hell/src/lib/primitives/adapters/adapters.ts'),
+    join(root, 'packages/angular/src/lib/primitives/adapters/adapters.ts'),
   );
   if (
     /export\s+\*\s+from/.test(adaptersBarrel) ||
@@ -3922,12 +3959,12 @@ function checkNgpStateWriterContract() {
 }
 
 function checkFloatingAdapterContract() {
-  const coreApi = readFile(join(root, 'projects/hell/src/lib/public-api-core.ts'));
+  const coreApi = readFile(join(root, 'packages/angular/src/lib/public-api-core.ts'));
   const popoverAdapterRelPath =
-    'projects/hell/src/lib/primitives/adapters/ngp-popover-close-adapter.ts';
+    'packages/angular/src/lib/primitives/adapters/ngp-popover-close-adapter.ts';
   const popoverAdapterSource = readFile(join(root, popoverAdapterRelPath));
   const ngpPackage = parseJsonWithComments(
-    readFile(join(root, 'node_modules/ng-primitives/package.json')),
+    readFile(join(root, 'packages/angular/node_modules/ng-primitives/package.json')),
   );
   const expectedPopoverAdapterVersion = `ng-primitives@${ngpPackage.version}`;
 
@@ -3935,7 +3972,7 @@ function checkFloatingAdapterContract() {
     failures.push('Core Package Entry Point must export ./core/floating-element');
   }
 
-  const popoverOverlayReachIns = walk(join(root, 'projects/hell/src/lib'))
+  const popoverOverlayReachIns = walk(join(root, 'packages/angular/src/lib'))
     .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts'))
     .filter((file) => relPath(file) !== popoverAdapterRelPath)
     .filter((file) => /\boverlay\s*\(\s*\)|\bupdateConfig\s*\(/.test(readFile(file)))
@@ -3967,7 +4004,7 @@ const browserGlobalSeamDocPath = 'docs/architecture/browser-global-seams.md';
 const allowedBrowserGlobalSeams = [
   {
     id: 'audio-transcript-window-probe',
-    file: 'projects/hell/src/lib/features/audio-transcript/audio-transcript.ts',
+    file: 'packages/angular/src/lib/features/audio-transcript/audio-transcript.ts',
     globals: ['window'],
     lines: [
       "if (typeof window === 'undefined') return null;",
@@ -3977,7 +4014,7 @@ const allowedBrowserGlobalSeams = [
   },
   {
     id: 'resizable-pane-resize-observer',
-    file: 'projects/hell/src/lib/composites/resizable/resizable.ts',
+    file: 'packages/angular/src/lib/composites/resizable/resizable.ts',
     globals: ['ResizeObserver'],
     lines: [
       "if (typeof ResizeObserver === 'undefined') return;",
@@ -3986,7 +4023,7 @@ const allowedBrowserGlobalSeams = [
   },
   {
     id: 'split-view-resize-observer',
-    file: 'projects/hell/src/lib/composites/split-view/split-view.ts',
+    file: 'packages/angular/src/lib/composites/split-view/split-view.ts',
     globals: ['ResizeObserver'],
     lines: [
       "if (typeof ResizeObserver === 'undefined') return;",
@@ -3995,7 +4032,7 @@ const allowedBrowserGlobalSeams = [
   },
   {
     id: 'toast-viewport-resize-observer',
-    file: 'projects/hell/src/lib/composites/toast/toast.ts',
+    file: 'packages/angular/src/lib/composites/toast/toast.ts',
     globals: ['ResizeObserver'],
     lines: [
       "if (this.destroyed || typeof ResizeObserver === 'undefined') return;",
@@ -4004,13 +4041,13 @@ const allowedBrowserGlobalSeams = [
   },
   {
     id: 'floating-dismissal-document-fallback',
-    file: 'projects/hell/src/lib/core/floating-dismissal.ts',
+    file: 'packages/angular/src/lib/core/floating-dismissal.ts',
     globals: ['document'],
     lines: ["return typeof document === 'undefined' ? null : document;"],
   },
   {
     id: 'floating-scope-resize-observer',
-    file: 'projects/hell/src/lib/core/floating-scope.ts',
+    file: 'packages/angular/src/lib/core/floating-scope.ts',
     globals: ['ResizeObserver'],
     lines: [
       "if (typeof ResizeObserver === 'undefined') return;",
@@ -4019,7 +4056,7 @@ const allowedBrowserGlobalSeams = [
   },
   {
     id: 'code-editor-legacy-document-setup',
-    file: 'projects/hell/src/lib/features/code-editor/code-editor.runtime.ts',
+    file: 'packages/angular/src/lib/features/code-editor/code-editor.runtime.ts',
     globals: ['document'],
     lines: ["typeof document === 'undefined' ? [] : hellCodeEditorSetupFactory(document);"],
   },
@@ -4052,7 +4089,7 @@ function checkBrowserGlobalContract() {
     }
   }
 
-  const sourceRoot = join(root, 'projects/hell/src/lib');
+  const sourceRoot = join(root, 'packages/angular/src/lib');
   const sourceFiles = walk(sourceRoot).filter(
     (file) =>
       file.endsWith('.ts') &&
@@ -4272,11 +4309,11 @@ function packageNameFromSpecifier(specifier) {
 
 function pagePathForRoute(routePath) {
   if (routePath === '/') {
-    return join(root, 'projects/hell-docs/src/app/pages/overview/overview.page.ts');
+    return join(root, 'apps/docs/src/app/pages/overview/overview.page.ts');
   }
 
   const route = routePath.replace(/^\//, '');
-  return join(root, 'projects/hell-docs/src/app/pages', route, `${basename(route)}.page.ts`);
+  return join(root, 'apps/docs/src/app/pages', route, `${basename(route)}.page.ts`);
 }
 
 function exportPaths(source) {
@@ -4385,19 +4422,35 @@ function readFile(path) {
   return readFileSync(path, 'utf8');
 }
 
+function readWorkspaceCatalog() {
+  const source = readFile(join(root, 'pnpm-workspace.yaml'));
+  const catalog = {};
+  let inCatalog = false;
+
+  for (const line of source.split(/\r?\n/)) {
+    if (/^\S/.test(line)) inCatalog = line === 'catalog:';
+    if (!inCatalog || !line.startsWith('  ')) continue;
+
+    const match = line.match(/^\s+(['"]?)([^'":]+)\1:\s+(['"]?)([^'"]+)\3\s*$/);
+    if (match) catalog[match[2]] = match[4];
+  }
+
+  return catalog;
+}
+
 function primitiveDirectories() {
-  return childDirectories(join(root, 'projects/hell/src/lib/primitives')).filter(
+  return childDirectories(join(root, 'packages/angular/src/lib/primitives')).filter(
     (primitive) => primitive !== 'adapters',
   );
 }
 
 function compositeDirectories() {
-  return childDirectories(join(root, 'projects/hell/src/lib/composites'));
+  return childDirectories(join(root, 'packages/angular/src/lib/composites'));
 }
 
 function featureDirectories() {
   const internalFeatureDirs = new Set(['assets', 'table-utilities']);
-  return childDirectories(join(root, 'projects/hell/src/lib/features')).filter(
+  return childDirectories(join(root, 'packages/angular/src/lib/features')).filter(
     (feature) => !internalFeatureDirs.has(feature),
   );
 }

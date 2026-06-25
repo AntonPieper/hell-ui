@@ -4,9 +4,9 @@ The docs app budgets are warning gates, not permanent wallpaper. If a build warn
 
 Source of truth:
 
-- Threshold enforcement lives in `angular.json` under `hell-docs` production budgets.
+- Threshold enforcement lives in `apps/docs/angular.json` under `hell-docs` production budgets.
 - Owner/rationale and accepted warnings live in this document.
-- `tools/check-ci-contract.mjs` fails when a configured threshold is missing an owner/rationale here or diverges from `angular.json`.
+- `tools/check-ci-contract.mjs` fails when a configured threshold is missing an owner/rationale here or diverges from `apps/docs/angular.json`.
 - `tools/docs-bundle-budget-report.mjs --check` classifies current docs build budget status as **accepted** or **regression** after `build:docs` writes `dist/hell-docs/stats.json`.
 
 ```json docs-budget-policy

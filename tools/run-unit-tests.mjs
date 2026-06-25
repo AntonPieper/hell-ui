@@ -22,18 +22,21 @@ rmSync(junitPath, { force: true });
 rmSync(coverageDir, { force: true, recursive: true });
 mkdirSync(testResultsDir, { recursive: true });
 
-const ng = resolveNgBinary();
 const args = [
+  '--filter',
+  '@hell-ui/angular',
+  'exec',
+  'ng',
   'test',
   'hell',
   '--watch=false',
   '--progress=false',
   '--runner-config',
-  'vitest.ci.config.ts',
+  '../../vitest.ci.config.ts',
   ...process.argv.slice(2),
 ];
 
-const child = spawn(ng, args, {
+const child = spawn('pnpm', args, {
   cwd: root,
   env: { ...process.env, CI: 'true' },
   shell: process.platform === 'win32',
@@ -208,11 +211,6 @@ function readXmlNumber(tag, name) {
   const raw = tag.match(new RegExp(`${name}="([^"]*)"`))?.[1];
   const value = Number(raw);
   return Number.isFinite(value) ? value : 0;
-}
-
-function resolveNgBinary() {
-  const binary = join(root, 'node_modules', '.bin', process.platform === 'win32' ? 'ng.cmd' : 'ng');
-  return existsSync(binary) ? binary : 'ng';
 }
 
 function positiveNumber(raw, fallback) {

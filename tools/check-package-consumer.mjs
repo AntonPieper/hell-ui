@@ -80,13 +80,14 @@ try {
 }
 
 const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-const deps = rootPackage.dependencies ?? {};
-const devDeps = rootPackage.devDependencies ?? {};
-const sourcePackage = JSON.parse(readFileSync(join(root, 'projects/hell/package.json'), 'utf8'));
+const workspaceCatalog = readWorkspaceCatalog();
+const deps = { ...(rootPackage.dependencies ?? {}), ...workspaceCatalog };
+const devDeps = { ...(rootPackage.devDependencies ?? {}), ...workspaceCatalog };
+const sourcePackage = JSON.parse(readFileSync(join(root, 'packages/angular/package.json'), 'utf8'));
 const packagePeerDependencies = sourcePackage.peerDependencies ?? {};
 const packagePeerDependenciesMeta = sourcePackage.peerDependenciesMeta ?? {};
 const sourcePdfPackage = JSON.parse(
-  readFileSync(join(root, 'projects/hell-pdf-viewer/package.json'), 'utf8'),
+  readFileSync(join(root, 'packages/pdf-viewer/package.json'), 'utf8'),
 );
 const pdfPackagePeerDependencies = sourcePdfPackage.peerDependencies ?? {};
 const pdfPackagePeerDependenciesMeta = sourcePdfPackage.peerDependenciesMeta ?? {};
@@ -745,7 +746,7 @@ function assertModernTableEntrypointContract(packageJson, distRoot) {
 }
 
 function assertDocsAvoidLegacyTableEntrypoints() {
-  const docsRoot = join(root, 'projects/hell-docs/src/app');
+  const docsRoot = join(root, 'apps/docs/src/app');
   const offenders = walkFiles(docsRoot)
     .filter((file) => /\.(?:ts|html|md)$/.test(file))
     .filter((file) =>
@@ -1176,10 +1177,27 @@ function pickDeps(source, names) {
   const picked = {};
   for (const name of names) {
     const version = source[name] ?? deps[name] ?? devDeps[name];
-    if (!version) fail(`Root package.json missing dependency ${name}`);
+    if (!version) fail(`Workspace catalog missing dependency ${name}`);
     picked[name] = exactInstalledVersion(name) ?? version;
   }
   return picked;
+}
+
+function readWorkspaceCatalog() {
+  const workspacePath = join(root, 'pnpm-workspace.yaml');
+  const source = readFileSync(workspacePath, 'utf8');
+  const catalog = {};
+  let inCatalog = false;
+
+  for (const line of source.split(/\r?\n/)) {
+    if (/^\S/.test(line)) inCatalog = line === 'catalog:';
+    if (!inCatalog || !line.startsWith('  ')) continue;
+
+    const match = line.match(/^\s+(['"]?)([^'":]+)\1:\s+(['"]?)([^'"]+)\3\s*$/);
+    if (match) catalog[match[2]] = match[4];
+  }
+
+  return catalog;
 }
 
 function exactInstalledVersion(name) {
