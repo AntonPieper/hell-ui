@@ -4,6 +4,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "../../out-tsc/spec",
+    "paths": {
+      "@hell-ui/angular/table-tanstack": [
+        "./src/lib/public-api-table-tanstack.ts"
+      ]
+    },
     "types": [
       "vitest/globals"
     ]
