@@ -53,13 +53,7 @@ function finalizeExportValue(exportValue) {
 
 function finalizeStylePath(path) {
   if (typeof path !== 'string') return path;
-  return path
-    .replace(/^\.\/src\/lib\/styles/, './styles')
-    .replace(/^\.\/src\/lib\/primitives/, './primitives')
-    .replace(/^\.\/src\/lib\/composites/, './composites')
-    .replace(/^\.\/src\/lib\/features/, './features')
-    .replace(/^\.\/src\/lib\/table/, './table')
-    .replace(/^\.\/src\/lib\/pdf-viewer/, './pdf-viewer');
+  return path.replace(/^\.\/src\/lib\/pdf-viewer/, './pdf-viewer');
 }
 
 function sourceExportPaths(exportsMap) {

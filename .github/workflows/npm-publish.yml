@@ -1,4 +1,4 @@
-name: Publish npm package
+name: Publish npm packages
 
 on:
   push:
@@ -52,7 +52,7 @@ jobs:
           retention-days: 30
 
   build-package:
-    name: Build audited package
+    name: Build audited packages
     needs: release-dry-run
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -73,18 +73,19 @@ jobs:
       - name: Install
         run: pnpm run ci:install
 
-      - name: Build package
+      - name: Build packages
         run: pnpm run build:lib
 
       - name: Audit package contents
         run: pnpm run test:package-pack
 
-      - name: Pack audited package
+      - name: Pack audited packages
         run: |
           mkdir -p release-package
           pnpm --dir ./dist/hell pack --pack-destination ../../release-package
+          pnpm --dir ./dist/hell-pdf-viewer pack --pack-destination ../../release-package
 
-      - name: Upload package tarball
+      - name: Upload package tarballs
         uses: actions/upload-artifact@v4
         with:
           name: release-package
@@ -109,7 +110,7 @@ jobs:
           name: release-dry-run-evidence
           path: release-dry-run-evidence
 
-      - name: Download package tarball
+      - name: Download package tarballs
         uses: actions/download-artifact@v4
         with:
           name: release-package
@@ -135,18 +136,45 @@ jobs:
           summary_exit="$(awk '/^## Summary$/{in_summary=1; next} in_summary && /^Exit: /{print $2; exit}' "$evidence")"
           test "$summary_exit" = "0"
 
-      - name: Verify package tarball and tag
+      - name: Verify package tarballs and tag
         run: |
           set -euo pipefail
           tarball_count="$(find release-package -type f -name '*.tgz' | wc -l | tr -d ' ')"
-          test "$tarball_count" = "1"
-          tarball="$(find release-package -type f -name '*.tgz' -print -quit)"
-          package_version="$(tar -xOf "$tarball" package/package.json | node -e "let data = ''; process.stdin.on('data', (chunk) => data += chunk); process.stdin.on('end', () => console.log(JSON.parse(data).version));")"
-          test "${GITHUB_REF_NAME}" = "v${package_version}" || {
-            echo "Tag ${GITHUB_REF_NAME} must match @hell-ui/angular version v${package_version}."
-            exit 1
-          }
-          echo "HELL_RELEASE_TARBALL=$tarball" >> "$GITHUB_ENV"
+          test "$tarball_count" = "2"
 
-      - name: Publish @hell-ui/angular
-        run: pnpm publish "$HELL_RELEASE_TARBALL" --access public --provenance --no-git-checks
+          seen_angular=0
+          seen_pdf=0
+          {
+            echo 'HELL_RELEASE_TARBALLS<<EOF'
+            find release-package -type f -name '*.tgz' | sort
+            echo 'EOF'
+          } >> "$GITHUB_ENV"
+
+          while IFS= read -r tarball; do
+            package_name="$(tar -xOf "$tarball" package/package.json | node -e "let data = ''; process.stdin.on('data', (chunk) => data += chunk); process.stdin.on('end', () => console.log(JSON.parse(data).name));")"
+            package_version="$(tar -xOf "$tarball" package/package.json | node -e "let data = ''; process.stdin.on('data', (chunk) => data += chunk); process.stdin.on('end', () => console.log(JSON.parse(data).version));")"
+            test "${GITHUB_REF_NAME}" = "v${package_version}" || {
+              echo "Tag ${GITHUB_REF_NAME} must match ${package_name} version v${package_version}."
+              exit 1
+            }
+            case "$package_name" in
+              '@hell-ui/angular') seen_angular=1 ;;
+              '@hell-ui/pdf-viewer') seen_pdf=1 ;;
+              *)
+                echo "Unexpected release tarball package: ${package_name}."
+                exit 1
+                ;;
+            esac
+          done < <(find release-package -type f -name '*.tgz' | sort)
+
+          test "$seen_angular" = "1"
+          test "$seen_pdf" = "1"
+
+      - name: Publish npm packages
+        run: |
+          set -euo pipefail
+          while IFS= read -r tarball; do
+            package_name="$(tar -xOf "$tarball" package/package.json | node -e "let data = ''; process.stdin.on('data', (chunk) => data += chunk); process.stdin.on('end', () => console.log(JSON.parse(data).name));")"
+            echo "Publishing ${package_name}"
+            pnpm publish "$tarball" --access public --provenance --no-git-checks
+          done <<< "$HELL_RELEASE_TARBALLS"
