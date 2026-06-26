@@ -61,13 +61,8 @@
               },
               {
                 "glob": "pdf-viewer.css",
-                "input": "../../packages/pdf-viewer/src/lib/styles",
+                "input": "../../packages/pdf-viewer/src/lib/pdf-viewer",
                 "output": "hell-ui/pdf-viewer/styles"
-              },
-              {
-                "glob": "pdf-viewer.css",
-                "input": "../../packages/pdf-viewer/src/lib/styles/components",
-                "output": "hell-ui/pdf-viewer/styles/components"
               },
               {
                 "glob": "pdf_viewer.css",

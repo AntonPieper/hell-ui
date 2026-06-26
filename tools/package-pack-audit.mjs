@@ -120,6 +120,11 @@ function checkApfPackageJson(packageJson, fileSet, distRoot, failures) {
   for (const [key, exportValue] of Object.entries(exportsMap)) {
     if (key === './package.json' || expectedCodeExports.has(key)) continue;
 
+    if (key === './styles/kitchen-sink' || key.startsWith('./styles/components/')) {
+      failures.push(`APF exports must not include legacy style export ${key}`);
+      continue;
+    }
+
     if (isStyleExport(exportValue)) {
       checkStyleExport(key, exportValue, fileSet, failures);
       continue;

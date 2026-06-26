@@ -19,6 +19,13 @@
     "fesm2022/*.mjs",
     "types/*.d.ts",
     "styles/**/*.css",
+    "primitives/**/*.css",
+    "composites/**/*.css",
+    "features/**/*.css",
+    "table/**/*.css",
+    "primitives/button/button.ts",
+    "primitives/input/input.ts",
+    "composites/dialpad/dialpad.ts",
     "assets/**"
   ],
   "exports": {
@@ -51,16 +58,6 @@
       "@heinrich/source": "./src/lib/styles/features/code-editor.css",
       "style": "./src/lib/styles/features/code-editor.css",
       "default": "./src/lib/styles/features/code-editor.css"
-    },
-    "./styles/kitchen-sink": {
-      "@heinrich/source": "./src/lib/styles/hell.css",
-      "style": "./src/lib/styles/hell.css",
-      "default": "./src/lib/styles/hell.css"
-    },
-    "./styles/components/*": {
-      "@heinrich/source": "./src/lib/styles/components/*.css",
-      "style": "./src/lib/styles/components/*.css",
-      "default": "./src/lib/styles/components/*.css"
     },
     ".": {
       "@heinrich/source": "./src/public-api.ts"

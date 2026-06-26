@@ -1,2 +1,2 @@
 /* Input, native select, and textarea defaults are Tailwind utility recipes. */
-@source "../../fesm2022/hell-ui-angular-input.mjs";
+@source "./input.ts";

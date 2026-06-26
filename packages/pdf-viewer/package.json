@@ -17,23 +17,18 @@
     "package.json",
     "fesm2022/*.mjs",
     "types/*.d.ts",
-    "styles/**/*.css"
+    "pdf-viewer/**/*.css"
   ],
   "exports": {
     "./styles": {
-      "@heinrich/source": "./src/lib/styles/pdf-viewer.css",
-      "style": "./src/lib/styles/pdf-viewer.css",
-      "default": "./src/lib/styles/pdf-viewer.css"
+      "@heinrich/source": "./src/lib/pdf-viewer/pdf-viewer.css",
+      "style": "./src/lib/pdf-viewer/pdf-viewer.css",
+      "default": "./src/lib/pdf-viewer/pdf-viewer.css"
     },
     "./styles/pdf-viewer": {
-      "@heinrich/source": "./src/lib/styles/pdf-viewer.css",
-      "style": "./src/lib/styles/pdf-viewer.css",
-      "default": "./src/lib/styles/pdf-viewer.css"
-    },
-    "./styles/components/pdf-viewer": {
-      "@heinrich/source": "./src/lib/styles/components/pdf-viewer.css",
-      "style": "./src/lib/styles/components/pdf-viewer.css",
-      "default": "./src/lib/styles/components/pdf-viewer.css"
+      "@heinrich/source": "./src/lib/pdf-viewer/pdf-viewer.css",
+      "style": "./src/lib/pdf-viewer/pdf-viewer.css",
+      "default": "./src/lib/pdf-viewer/pdf-viewer.css"
     },
     ".": {
       "@heinrich/source": "./src/public-api.ts"

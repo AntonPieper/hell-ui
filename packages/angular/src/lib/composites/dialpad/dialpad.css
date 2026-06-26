@@ -1,2 +1,2 @@
 /* Dialpad default visuals are Tailwind utility recipes in the component. */
-@source "../../fesm2022/hell-ui-angular-dialpad.mjs";
+@source "./dialpad.ts";

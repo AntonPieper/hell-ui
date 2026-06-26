@@ -1,5 +1,5 @@
 /* Button root-part defaults are Tailwind utility recipes in the directive. */
-@source "../../fesm2022/hell-ui-angular-button.mjs";
+@source "./button.ts";
 
 @layer components {
   /* Legacy button-like helper for primitives that have not migrated to Part

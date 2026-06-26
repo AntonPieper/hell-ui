@@ -4,8 +4,6 @@
 @import '@hell-ui/angular/styles/table';
 
 @source "./app";
-@source "../../../packages/angular/src/lib";
-@source "../../../packages/pdf-viewer/src/lib";
 
 @layer components {
   .hd-prose {

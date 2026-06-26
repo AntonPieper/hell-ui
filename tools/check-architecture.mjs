@@ -1941,7 +1941,7 @@ function checkPdfViewerPackageDependencyContract(workspaceCatalog) {
   }
 
   const packageExports = packageJson.exports ?? {};
-  for (const exportPath of ['./styles', './styles/pdf-viewer', './styles/components/pdf-viewer']) {
+  for (const exportPath of ['./styles', './styles/pdf-viewer']) {
     const styleExport = packageExports[exportPath];
     if (!styleExport?.style) {
       failures.push(
@@ -1957,6 +1957,19 @@ function checkPdfViewerPackageDependencyContract(workspaceCatalog) {
     const sourceStylePath = packageStylePathToSourcePath(styleExport.style);
     if (!existsSync(join(root, 'packages/pdf-viewer', sourceStylePath))) {
       failures.push(`PDF package style export ${exportPath} points at missing ${styleExport.style}`);
+    }
+  }
+  for (const exportPath of Object.keys(packageExports)) {
+    if (exportPath.startsWith('./styles/components/')) {
+      failures.push(`PDF package must not export legacy component style path ${exportPath}`);
+    }
+  }
+  for (const relPath of [
+    'packages/pdf-viewer/src/lib/styles/pdf-viewer.css',
+    'packages/pdf-viewer/src/lib/styles/components/pdf-viewer.css',
+  ]) {
+    if (existsSync(join(root, relPath))) {
+      failures.push(`PDF viewer CSS must be co-located; remove central style file: ${relPath}`);
     }
   }
   const ngPackage = parseJsonWithComments(
@@ -1982,6 +1995,14 @@ function checkPdfViewerPackageDependencyContract(workspaceCatalog) {
 function checkStyleEntryPoints() {
   const packageJson = parseJsonWithComments(readFile(join(root, 'packages/angular/package.json')));
   const exportsMap = packageJson.exports ?? {};
+  if (exportsMap['./styles/kitchen-sink']) {
+    failures.push('Legacy kitchen-sink CSS package export must be removed');
+  }
+  for (const exportPath of Object.keys(exportsMap)) {
+    if (exportPath.startsWith('./styles/components/')) {
+      failures.push(`Component CSS must not keep legacy package export ${exportPath}`);
+    }
+  }
   const features = featureDirectories();
   const stylelessFeatures = new Set(['audio-transcript']);
   const styledFeatures = features.filter((feature) => !stylelessFeatures.has(feature));
@@ -2032,6 +2053,18 @@ function checkStyleEntryPoints() {
       failures.push(`Legacy table CSS alias file must be removed: ${relPath}`);
   }
 
+  const componentStyleDir = join(root, 'packages/angular/src/lib/styles/components');
+  if (existsSync(componentStyleDir)) {
+    const componentStyleFiles = readdirSync(componentStyleDir).filter((name) =>
+      name.endsWith('.css'),
+    );
+    if (componentStyleFiles.length) {
+      failures.push(
+        `Component CSS must be co-located; remove central style component files: ${componentStyleFiles.join(', ')}`,
+      );
+    }
+  }
+
   const allStyles = readFile(join(root, 'packages/angular/src/lib/styles/hell.css'));
   if (!allStyles.includes('./table.css')) {
     failures.push('All-in style entry point is missing table CSS import');
@@ -2046,7 +2079,7 @@ function checkStyleEntryPoints() {
   for (const file of readdirSync(featureStyleDir).filter((name) => name.endsWith('.css'))) {
     const feature = basename(file, '.css');
     const source = readFile(join(featureStyleDir, file));
-    const expectedImport = `../components/${feature}.css`;
+    const expectedImport = `../../features/${feature}/${feature}.css`;
     if (!source.includes(expectedImport)) {
       failures.push(`Feature style entry point ${file} must import ${expectedImport}`);
     }
@@ -2138,7 +2171,7 @@ function checkAppShellBreakpointContract() {
   const shellSource = readFile(
     join(root, 'packages/angular/src/lib/composites/app-shell/app-shell.ts'),
   );
-  const shellStyles = readFile(join(root, 'packages/angular/src/lib/styles/components/app-shell.css'));
+  const shellStyles = readFile(join(root, 'packages/angular/src/lib/composites/app-shell/app-shell.css'));
   const desktopMin = Number(
     /HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX\s*=\s*(\d+)/.exec(shellSource)?.[1],
   );
@@ -2531,7 +2564,7 @@ function checkMigratedPartStyleMapModule(module, entrypointManifestSource) {
 }
 
 function checkLegacyPartStyleCompatibilityHelpers() {
-  const buttonCssPath = join(root, 'packages/angular/src/lib/styles/components/button.css');
+  const buttonCssPath = join(root, 'packages/angular/src/lib/primitives/button/button.css');
   const buttonCss = readFile(buttonCssPath);
   if (
     !buttonCss.includes('Legacy button-like helper') ||
@@ -3134,7 +3167,7 @@ function checkTableUtilityContract() {
     );
   }
   const tableStyleSource = readFile(
-    join(root, 'packages/angular/src/lib/styles/components/table.css'),
+    join(root, 'packages/angular/src/lib/table/table.css'),
   );
   for (const forbidden of [
     'button.hell-table-row-action:not(.hell-button)',
@@ -3342,7 +3375,7 @@ function checkTableResizeHandleContract() {
     failures.push('Legacy hellTableColumnResizer API must not remain in table utilities');
   }
 
-  const styleSource = readFile(join(root, 'packages/angular/src/lib/styles/components/table.css'));
+  const styleSource = readFile(join(root, 'packages/angular/src/lib/table/table.css'));
   if (!styleSource.includes('.hell-table-resize-handle')) {
     failures.push('Table resize handle styles must use hell-table-resize-handle class');
   }
