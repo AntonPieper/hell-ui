@@ -15,6 +15,7 @@ const requiredFiles = [
   'tools/run-ci-tests.mjs',
   'tools/run-unit-tests.mjs',
   'tools/ci/nginx-spa.conf',
+  'tools/ci/README.md',
   'tools/check-package-consumer.mjs',
   'tools/check-package-pack.mjs',
   'tools/check-api-reports.mjs',
@@ -48,7 +49,7 @@ const requiredScripts = {
   'ci:playwright:chromium': 'pnpm exec playwright install --with-deps chromium',
   'ci:playwright:firefox': 'pnpm exec playwright install --with-deps firefox',
   'ci:playwright:webkit': 'pnpm exec playwright install --with-deps webkit',
-  'ci:test:unit': 'pnpm run test:unit && node tools/ci-summary.mjs',
+  'ci:test:unit': 'node tools/run-unit-tests.mjs --ci-summary',
   'ci:test:static': 'pnpm run lint && pnpm run test:architecture && pnpm run test:ci-contract',
   'ci:test:e2e': 'pnpm exec playwright test',
   'ci:test:package-consumer': 'pnpm run test:package-consumer -- --minimal-deps',
@@ -226,6 +227,8 @@ const adapterChecks = [
       'pnpm run ci:test:static',
       'pnpm run ci:test:unit',
       'HELL_PACKAGE_CONSUMER_SCENARIOS="${PACKAGE_CONSUMER_SCENARIOS}" pnpm run ci:test:package-consumer',
+      'PACKAGE_CONSUMER_SCENARIOS: primitive-icons-css,button-ui',
+      'PACKAGE_CONSUMER_SCENARIOS: composite-css,app-shell',
       'pnpm run ci:ensure:build:lib',
       'pnpm run ci:ensure:build:docs',
       'needs:',
@@ -264,13 +267,65 @@ const fileChecks = [
   {
     path: 'vitest.ci.config.ts',
     includes: [
+      "const testResultsPath = resolve(workspaceRoot, 'test-results/vitest-junit.xml');",
+      "const coveragePath = resolve(workspaceRoot, 'coverage');",
+      "const testTimeoutMs = positiveNumber(process.env.HELL_UNIT_TEST_CASE_TIMEOUT_MS, 30_000);",
+      "const junitReporter = ['junit', { outputFile: testResultsPath, suiteName: 'hell unit tests' }] as const;",
+      "'default'",
       "'hanging-process'",
+      "'github-actions'",
+      'reporter: [\'text\', \'json-summary\', \'html\', \'lcov\', \'cobertura\']',
+      'reportOnFailure: true',
     ],
   },
   {
     path: 'tools/run-ci-tests.mjs',
     includes: [
+      "const artifactDirs = ['test-results', 'coverage'];",
+      'rmSync(path, { force: true, recursive: true });',
       "args: ['run', 'test:package-consumer', '--', '--minimal-deps']",
+      "env: { ...process.env, CI: 'true' }",
+      "spawnSync('node', ['tools/ci-summary.mjs']",
+      'summary.error',
+      'summary.signal',
+      'summary.status !== 0',
+    ],
+  },
+  {
+    path: 'tools/run-unit-tests.mjs',
+    includes: [
+      "const junitPath = join(testResultsDir, 'vitest-junit.xml');",
+      "const markdownSummaryPath = join(testResultsDir, 'summary.md');",
+      "const coverageSummaryPath = join(coverageDir, 'coverage-summary.json');",
+      "const coberturaPath = join(coverageDir, 'cobertura-coverage.xml');",
+      'const writeCiSummary = rawArgs.includes(\'--ci-summary\');',
+      'process.env.HELL_UNIT_TEST_TIMEOUT_MS, 180_000',
+      'rmSync(junitPath, { force: true });',
+      'rmSync(markdownSummaryPath, { force: true });',
+      'rmSync(coverageDir, { force: true, recursive: true });',
+      'finish(unitExitCode)',
+      "spawnSync('node', ['tools/ci-summary.mjs']",
+      'inspectJUnitReport',
+      'inspectCoverageArtifacts',
+      'coverage summary is stale from a previous run',
+      'Cobertura report is stale from a previous run',
+      'Cobertura report is malformed',
+      'coverageMeetsThresholds',
+    ],
+  },
+  {
+    path: 'tools/ci-summary.mjs',
+    includes: [
+      "const junitPath = join(root, 'test-results/vitest-junit.xml');",
+      "const coverageSummaryPath = join(root, 'coverage/coverage-summary.json');",
+      "const markdownPath = join(root, 'test-results/summary.md');",
+      'const summaryStartedAt = Date.now();',
+      'rmSync(markdownPath, { force: true });',
+      'writeFileSync(markdownPath, markdown);',
+      'validateMarkdownSummary',
+      'Could not parse coverage summary',
+      'Markdown summary is stale from a previous run',
+      'process.env.GITHUB_STEP_SUMMARY',
     ],
   },
   {
@@ -285,7 +340,32 @@ const fileChecks = [
     path: 'tools/ci/nginx-spa.conf',
     includes: [
       'default_type application/javascript;',
+      'location ~* \\.(?:css|js|json|map|wasm|png|jpg|jpeg|gif|svg|webp|avif|ico|woff2?)$',
+      'wasm',
+      'webp',
+      'avif',
+      'try_files $uri =404;',
       'try_files $uri $uri/ /index.html;',
+    ],
+  },
+  {
+    path: 'tools/ci/README.md',
+    includes: [
+      'test-results/vitest-junit.xml',
+      'test-results/summary.md',
+      'coverage/cobertura-coverage.xml',
+      'coverage/coverage-summary.json',
+      'test-results/playwright-report.json',
+      'test-results/playwright-html/',
+      'test-results/playwright/',
+      'HELL_UNIT_TEST_TIMEOUT_MS',
+      'HELL_UNIT_TEST_CASE_TIMEOUT_MS',
+      'github-actions',
+      'cobertura',
+      'missing, empty, stale, malformed',
+      'require a POSIX shell',
+      '`dist/` is a build artifact, not a broad mutable cache',
+      'returns 404 for missing static assets',
     ],
   },
   {
@@ -299,7 +379,9 @@ const fileChecks = [
       'docs-smoke-surfaces',
       'table-resize',
       'retries: process.env.CI ? 1 : 0',
+      "['html', { open: 'never', outputFolder: 'test-results/playwright-html' }]",
       "['json', { outputFile: 'test-results/playwright-report.json' }]",
+      "outputDir: 'test-results/playwright'",
     ],
   },
   {
@@ -520,6 +602,8 @@ for (const check of fileChecks) {
 checkRemovedBrittleCiHelpers();
 checkSemanticE2eGroups();
 checkPackageConsumerPackAuditOrder();
+checkProviderPackageConsumerScenarios();
+checkGitLabDistCachePolicy();
 checkNpmPublishWorkflow();
 checkPublishedPackageMetadata();
 checkDocsBudgetPolicy();
@@ -649,6 +733,55 @@ function checkPackageConsumerPackAuditOrder() {
 
   if (auditIndex > consumerScenarioIndex) {
     errors.push('package-consumer must run package pack audit before consumer install/build scenarios');
+  }
+}
+
+function checkProviderPackageConsumerScenarios() {
+  const knownScenarios = readPackageConsumerScenarioNames();
+  for (const path of ['.github/workflows/ci.yml', '.gitlab-ci.yml']) {
+    if (!existsSync(path)) continue;
+
+    const content = readFileSync(path, 'utf8');
+    const scenarioLists = [
+      ...content.matchAll(/\bscenarios:\s*([a-z0-9-]+(?:,[a-z0-9-]+)*)/g),
+      ...content.matchAll(/\bPACKAGE_CONSUMER_SCENARIOS:\s*([a-z0-9-]+(?:,[a-z0-9-]+)*)/g),
+    ];
+
+    for (const match of scenarioLists) {
+      const selected = match[1].split(',').map((name) => name.trim()).filter(Boolean);
+      for (const name of selected) {
+        if (!knownScenarios.has(name)) {
+          errors.push(`${path} references unknown package-consumer scenario ${name}.`);
+        }
+      }
+    }
+  }
+}
+
+function readPackageConsumerScenarioNames() {
+  const content = readFileSync('tools/check-package-consumer.mjs', 'utf8');
+  const names = new Set();
+
+  for (const match of content.matchAll(/\bname:\s*'([^']+)'/g)) {
+    names.add(match[1]);
+  }
+
+  for (const match of content.matchAll(/\baliases:\s*\[([^\]]*)\]/g)) {
+    for (const alias of match[1].matchAll(/'([^']+)'/g)) {
+      names.add(alias[1]);
+    }
+  }
+
+  return names;
+}
+
+function checkGitLabDistCachePolicy() {
+  const path = '.gitlab-ci.yml';
+  if (!existsSync(path)) return;
+
+  const defaultBlock = readFileSync(path, 'utf8').split('\nstatic:')[0] ?? '';
+  if (/^\s+-\s+dist\/\s*$/m.test(defaultBlock)) {
+    errors.push(`${path} default cache must not store dist/; build output must come from artifacts or content-addressed restores.`);
   }
 }
 

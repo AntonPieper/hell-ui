@@ -6,11 +6,12 @@ const workspaceRoot = fileURLToPath(new URL('.', import.meta.url));
 const testResultsPath = resolve(workspaceRoot, 'test-results/vitest-junit.xml');
 const coveragePath = resolve(workspaceRoot, 'coverage');
 const testTimeoutMs = positiveNumber(process.env.HELL_UNIT_TEST_CASE_TIMEOUT_MS, 30_000);
+const junitReporter = ['junit', { outputFile: testResultsPath, suiteName: 'hell unit tests' }] as const;
 
 const reporters = [
   'default',
   'hanging-process',
-  ['junit', { outputFile: testResultsPath, suiteName: 'hell unit tests' }],
+  junitReporter,
 ];
 
 if (process.env.GITHUB_ACTIONS === 'true') {
