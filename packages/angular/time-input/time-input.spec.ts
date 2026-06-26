@@ -154,6 +154,10 @@ describe('HellTimeInput', () => {
   });
 
   afterEach(() => {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active !== document.body) {
+      active.blur();
+    }
     document.body.replaceChildren();
   });
 
