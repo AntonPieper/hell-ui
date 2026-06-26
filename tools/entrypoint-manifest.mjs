@@ -1,8 +1,8 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const packageName = '@hell-ui/angular';
+export const packageName = '@hell-ui/angular';
 export const libraryRoot = 'packages/angular';
 export const sourcePackageCondition = '@heinrich/source';
 export const entrypointMetadataFileName = 'hell-entrypoint.json';
@@ -58,6 +58,61 @@ export function entrypointTsconfigPaths() {
     specifier: entrypoint.specifier,
     path: `./${entrypoint.publicApiPath}`,
   }));
+}
+
+export function entrypointPackageExports() {
+  return Object.fromEntries(
+    entrypointPublicApiFiles().map((entrypoint) => [
+      packageExportPath(entrypoint.specifier),
+      {
+        [sourcePackageCondition]: `./${relativeToLibrary(entrypoint.publicApiPath)}`,
+      },
+    ]),
+  );
+}
+
+export function entrypointStyleExports() {
+  return [
+    { exportPath: './tokens.css', sourcePath: './tokens.css' },
+    ...entrypointManifest.entries
+      .map((entrypoint) => {
+        const sourcePath = `./${relativeToLibrary(`${entrypoint.packageDir}/styles.css`)}`;
+        return {
+          entrypoint,
+          exportPath: `${packageExportPath(entrypoint.specifier)}/styles.css`,
+          sourcePath,
+        };
+      })
+      .filter((styleEntry) => existsSync(join(root, libraryRoot, styleEntry.sourcePath.slice(2)))),
+  ];
+}
+
+export function entrypointPackageStyleExports() {
+  return Object.fromEntries(
+    entrypointStyleExports().map((styleEntry) => [
+      styleEntry.exportPath,
+      {
+        [sourcePackageCondition]: styleEntry.sourcePath,
+        style: styleEntry.sourcePath,
+        default: styleEntry.sourcePath,
+      },
+    ]),
+  );
+}
+
+export function renderPackageJsonExports() {
+  return {
+    ...entrypointPackageExports(),
+    ...entrypointPackageStyleExports(),
+  };
+}
+
+export function renderPackageJsonFile(packageJson) {
+  return `${JSON.stringify({ ...packageJson, exports: renderPackageJsonExports() }, null, 2)}\n`;
+}
+
+export function packageExportPath(specifier) {
+  return specifier === packageName ? '.' : `.${specifier.slice(packageName.length)}`;
 }
 
 export function componentEntrypoints() {
@@ -199,6 +254,10 @@ function compareEntrypoints(a, b) {
 
 function categoryRank(category) {
   return categorySort.get(category) ?? Number.MAX_SAFE_INTEGER;
+}
+
+function relativeToLibrary(path) {
+  return relative(libraryRoot, path).split(sep).join('/');
 }
 
 function toRepoPath(path) {

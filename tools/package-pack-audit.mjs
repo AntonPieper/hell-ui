@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { entrypointPublicApiFiles } from './entrypoint-manifest.mjs';
+import { entrypointPublicApiFiles, entrypointStyleExports } from './entrypoint-manifest.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const defaultDistRoot = join(root, 'dist/hell');
@@ -117,8 +117,19 @@ function checkApfPackageJson(packageJson, fileSet, distRoot, failures) {
     checkCodeExport(key, exportsMap[key], fileSet, distRoot, failures);
   }
 
+  const expectedStyleExports = expectedStyleExportTargets(packageJson.name);
+  for (const [key, expectedTarget] of expectedStyleExports) {
+    checkStyleExport(key, exportsMap[key], fileSet, failures, { expectedTarget });
+  }
+  const expectedStyleExportKeys = new Set(expectedStyleExports.keys());
+
   for (const [key, exportValue] of Object.entries(exportsMap)) {
-    if (key === './package.json' || expectedCodeExports.has(key)) continue;
+    if (
+      key === './package.json' ||
+      expectedCodeExports.has(key) ||
+      expectedStyleExportKeys.has(key)
+    )
+      continue;
 
     if (packageJson.name === '@hell-ui/angular' && (key === './styles' || key.startsWith('./styles/'))) {
       failures.push(`@hell-ui/angular must not include legacy category style export ${key}`);
@@ -126,6 +137,11 @@ function checkApfPackageJson(packageJson, fileSet, distRoot, failures) {
     }
 
     if (isStyleExport(exportValue)) {
+      if (packageJson.name === '@hell-ui/angular') {
+        failures.push(`@hell-ui/angular must not include non-manifest style export ${key}`);
+        continue;
+      }
+
       checkStyleExport(key, exportValue, fileSet, failures);
       continue;
     }
@@ -220,6 +236,13 @@ function expectedCodeExportKeys(packageName) {
   );
 }
 
+function expectedStyleExportTargets(packageName) {
+  if (packageName !== '@hell-ui/angular') return new Map();
+  return new Map(
+    entrypointStyleExports().map((entrypoint) => [entrypoint.exportPath, entrypoint.sourcePath]),
+  );
+}
+
 function checkCodeExport(key, exportValue, fileSet, distRoot, failures) {
   if (!exportValue || typeof exportValue !== 'object' || Array.isArray(exportValue)) {
     failures.push(`APF code export ${key} must be an object with types/default conditions`);
@@ -282,9 +305,17 @@ function isStyleExport(exportValue) {
   return !!exportValue && typeof exportValue === 'object' && !Array.isArray(exportValue) && 'style' in exportValue;
 }
 
-function checkStyleExport(key, exportValue, fileSet, failures) {
+function checkStyleExport(key, exportValue, fileSet, failures, { expectedTarget = null } = {}) {
   for (const condition of ['style', 'default']) {
-    const target = normalizeExportTarget(exportValue[condition]);
+    const rawTarget = exportValue?.[condition];
+    if (expectedTarget && rawTarget !== expectedTarget) {
+      failures.push(
+        `Style export ${key}.${condition} must point at ${expectedTarget}; found ${rawTarget ?? 'missing'}`,
+      );
+      continue;
+    }
+
+    const target = normalizeExportTarget(rawTarget);
     if (!target) {
       failures.push(`Style export ${key}.${condition} must point at a CSS file`);
       continue;

@@ -4,7 +4,9 @@ import { fileURLToPath } from 'node:url';
 
 import {
   entrypointPublicApiFiles,
+  libraryRoot,
   renderNgPackageFile,
+  renderPackageJsonFile,
   renderPublicApiFile,
   secondaryPackageEntrypoints,
 } from './entrypoint-manifest.mjs';
@@ -21,6 +23,12 @@ for (const entrypoint of entrypointPublicApiFiles()) {
 for (const entrypoint of secondaryPackageEntrypoints()) {
   writeOrCheck(entrypoint.packagePath, renderNgPackageFile(entrypoint));
 }
+
+const angularPackageJsonPath = `${libraryRoot}/package.json`;
+writeOrCheck(
+  angularPackageJsonPath,
+  renderPackageJsonFile(JSON.parse(readFileSync(join(root, angularPackageJsonPath), 'utf8'))),
+);
 
 if (stale.length) {
   console.error(`Entrypoint generated files are stale:\n${stale.map((path) => `- ${path}`).join('\n')}`);
