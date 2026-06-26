@@ -7,8 +7,11 @@ import {
   entrypointCategories,
   entrypointMetadataFileName,
   entrypointPublicApiFiles,
+  entrypointStyleExports,
   libraryRoot,
+  packageExportPath,
   renderNgPackageFile,
+  renderPackageJsonExports,
   renderPublicApiFile,
   secondaryPackageEntrypoints,
   sourcePackageCondition,
@@ -225,7 +228,7 @@ const migratedPartStyleMapModules = [
     className: 'HellButton',
     partType: 'HellButtonPart',
     uiType: 'HellButtonUi',
-    slug: 'button',
+    entrypointId: 'button',
     sourcePath: 'packages/angular/button/button.ts',
     publicApiPath: 'packages/angular/button/public-api.ts',
     apiReportFiles: [],
@@ -236,7 +239,7 @@ const migratedPartStyleMapModules = [
     className: 'HellInput',
     partType: 'HellInputPart',
     uiType: 'HellInputUi',
-    slug: 'input',
+    entrypointId: 'input',
     sourcePath: 'packages/angular/input/input.ts',
     publicApiPath: 'packages/angular/input/public-api.ts',
     apiReportFiles: ['hell-ui-angular-input.api.md'],
@@ -247,7 +250,7 @@ const migratedPartStyleMapModules = [
     className: 'HellNativeSelect',
     partType: 'HellNativeSelectPart',
     uiType: 'HellNativeSelectUi',
-    slug: 'input',
+    entrypointId: 'input',
     sourcePath: 'packages/angular/input/input.ts',
     publicApiPath: 'packages/angular/input/public-api.ts',
     apiReportFiles: ['hell-ui-angular-input.api.md'],
@@ -258,7 +261,7 @@ const migratedPartStyleMapModules = [
     className: 'HellTextarea',
     partType: 'HellTextareaPart',
     uiType: 'HellTextareaUi',
-    slug: 'input',
+    entrypointId: 'input',
     sourcePath: 'packages/angular/input/input.ts',
     publicApiPath: 'packages/angular/input/public-api.ts',
     apiReportFiles: ['hell-ui-angular-input.api.md'],
@@ -269,7 +272,7 @@ const migratedPartStyleMapModules = [
     className: 'HellDialpad',
     partType: 'HellDialpadPart',
     uiType: 'HellDialpadUi',
-    slug: 'dialpad',
+    entrypointId: 'dialpad',
     sourcePath: 'packages/angular/dialpad/dialpad.ts',
     publicApiPath: 'packages/angular/dialpad/public-api.ts',
     apiReportFiles: ['hell-ui-angular-dialpad.api.md'],
@@ -1187,6 +1190,13 @@ function checkPackageEntryPoints() {
 
   const packageJson = parseJsonWithComments(readFile(join(root, 'packages/angular/package.json')));
   const packageExports = packageJson.exports ?? {};
+  const expectedPackageExports = renderPackageJsonExports();
+  if (JSON.stringify(packageExports) !== JSON.stringify(expectedPackageExports)) {
+    failures.push(
+      'Package Entry Point exports in packages/angular/package.json are stale (run pnpm run generate:entrypoints)',
+    );
+  }
+
   const angularWorkspace = parseJsonWithComments(readFile(join(root, 'packages/angular/angular.json')));
   const angularSourceRoot = angularWorkspace.projects?.hell?.sourceRoot;
   if (angularSourceRoot !== '.') {
@@ -1196,7 +1206,7 @@ function checkPackageEntryPoints() {
   }
   for (const entrypoint of publicApiFiles) {
     const exportPath = packageExportPath(entrypoint.specifier);
-    const expectedSource = `./${relative(libraryRoot, entrypoint.publicApiPath)}`;
+    const expectedSource = expectedPackageExports[exportPath]?.[sourcePackageCondition];
     if (packageExports[exportPath]?.[sourcePackageCondition] !== expectedSource) {
       failures.push(
         `Package Entry Point ${entrypoint.specifier} export ${exportPath} must resolve ${sourcePackageCondition} to ${expectedSource}`,
@@ -1255,32 +1265,28 @@ function checkCodeMirrorEntrypointIsolationContract() {
     );
   }
 
-  const rootCorePaths = [
-    'packages/angular/public-api.ts',
-    'packages/angular/core/public-api.ts',
-    ...productionTsFilesUnder('packages/angular/core'),
-  ];
-  const compositePaths = [
+  const codeEditorEntrypoint = entrypointPublicApiFiles().find(
+    (entrypoint) => entrypoint.specifier === codeEditorEntrypointSpecifier,
+  );
+  if (!codeEditorEntrypoint) {
+    failures.push(`Entrypoint metadata is missing ${codeEditorEntrypointSpecifier}`);
+    return;
+  }
+  if (codeEditorEntrypoint.category !== entrypointCategories.FEATURE) {
+    failures.push(`${codeEditorEntrypointSpecifier} must be categorized as a feature entry point`);
+  }
+
+  const nonCodeEditorEntrypointPaths = [
     ...entrypointPublicApiFiles()
-      .filter((entrypoint) => entrypoint.group === 'composites')
+      .filter((entrypoint) => entrypoint.specifier !== codeEditorEntrypointSpecifier)
       .map((entrypoint) => entrypoint.publicApiPath),
-    ...entrypointPublicApiFiles()
-      .filter((entrypoint) => entrypoint.group === 'composites')
-      .flatMap((entrypoint) => productionTsFilesUnder(entrypoint.packageDir)),
-  ];
-  const nonCodeEditorFeaturePaths = [
-    ...entrypointPublicApiFiles()
-      .filter((entrypoint) => entrypoint.group === 'features' && entrypoint.slug !== 'code-editor')
-      .map((entrypoint) => entrypoint.publicApiPath),
-    ...productionTsFilesUnder('packages/angular/features').filter(
-      (file) => !file.includes('/features/code-editor/'),
+    ...libraryProductionTsFiles().filter(
+      (file) => !isEntrypointSourcePath(file, codeEditorEntrypoint),
     ),
   ];
 
   const boundaries = [
-    { label: 'root/core', paths: rootCorePaths },
-    { label: 'composites', paths: compositePaths },
-    { label: 'non-code-editor feature', paths: nonCodeEditorFeaturePaths },
+    { label: 'non-code-editor package entrypoint', paths: nonCodeEditorEntrypointPaths },
   ];
 
   for (const boundary of boundaries) {
@@ -1323,6 +1329,10 @@ function libraryProductionTsFiles() {
   return libraryPackageFiles()
     .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'))
     .map(relPath);
+}
+
+function isEntrypointSourcePath(relPath, entrypoint) {
+  return relPath === entrypoint.publicApiPath || relPath.startsWith(`${entrypoint.packageDir}/`);
 }
 
 function isCodeMirrorBoundarySpecifier(specifier) {
@@ -1677,11 +1687,6 @@ function resolvePublicExportPath(publicApiPath, exportPath) {
   return join(dirname(publicApiPath), exportPath).replaceAll('\\', '/');
 }
 
-function packageExportPath(specifier) {
-  const packageName = '@hell-ui/angular';
-  return specifier === packageName ? '.' : `.${specifier.slice(packageName.length)}`;
-}
-
 function checkPackageDependencyContract() {
   const packageJson = parseJsonWithComments(readFile(join(root, 'packages/angular/package.json')));
   const workspaceCatalog = readWorkspaceCatalog();
@@ -2022,18 +2027,7 @@ function checkStyleEntryPoints() {
     }
   }
 
-  const expectedStyleExports = [
-    { exportPath: './tokens.css', sourcePath: './tokens.css' },
-    ...secondaryPackageEntrypoints()
-      .map((entrypoint) => {
-        const relStylePath = `${relative(libraryRoot, entrypoint.packageDir)}/styles.css`;
-        return {
-          exportPath: `${packageExportPath(entrypoint.specifier)}/styles.css`,
-          sourcePath: `./${relStylePath}`,
-        };
-      })
-      .filter((styleEntry) => existsSync(join(root, libraryRoot, styleEntry.sourcePath.slice(2)))),
-  ];
+  const expectedStyleExports = entrypointStyleExports();
 
   for (const { exportPath, sourcePath } of expectedStyleExports) {
     const styleExport = exportsMap[exportPath];
@@ -2518,7 +2512,9 @@ function checkMigratedPartStyleMapModule(module, entrypointPackageDirs) {
     failures.push(`${module.publicApiPath} must export ${expectedExport}`);
   }
   if (!entrypointPackageDirs.has(dirname(module.publicApiPath))) {
-    failures.push(`Entrypoint metadata must include ${module.slug} for ${module.className}`);
+    failures.push(
+      `Entrypoint metadata must include ${module.entrypointId} for ${module.className}`,
+    );
   }
 
   for (const reportFile of module.apiReportFiles) {
