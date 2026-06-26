@@ -20,6 +20,7 @@ const distHell = join(root, 'dist/hell');
 const distPdfViewer = join(root, 'dist/hell-pdf-viewer');
 const keep = process.env.HELL_KEEP_PACKAGE_CONSUMER === '1';
 const packageConsumerArgs = process.argv.slice(2);
+const catalogOnly = parseCatalogOnly(packageConsumerArgs);
 const rawSelectedScenarioNames = parseScenarioSelection(packageConsumerArgs);
 const selectedScenarioNames = rawSelectedScenarioNames.filter(
   (name) => !isPreflightScenarioName(name),
@@ -27,70 +28,13 @@ const selectedScenarioNames = rawSelectedScenarioNames.filter(
 const preflightOnly = parsePreflightOnly(packageConsumerArgs, rawSelectedScenarioNames);
 const minimalDependencyMode = parseMinimalDependencyMode(packageConsumerArgs);
 const skipPackageBuild = parseSkipPackageBuild(packageConsumerArgs);
-const pnpmTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_TIMEOUT_MS, 240_000);
+const pnpmTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_TIMEOUT_MS, 600_000);
 const pnpmHeartbeatMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_HEARTBEAT_MS, 30_000);
 const runtimeStyleCheck = process.env.HELL_PACKAGE_CONSUMER_RUNTIME_STYLE_CHECK === '1';
 const pnpmPreflightTimeoutMs = positiveNumber(
   process.env.HELL_PACKAGE_CONSUMER_PREFLIGHT_TIMEOUT_MS,
   30_000,
 );
-
-runPnpmPreflight(root);
-if (preflightOnly) {
-  console.log(
-    `${packageConsumerLabel('preflight')} preflight passed; skipping package build and consumer scenarios`,
-  );
-  process.exit(0);
-}
-
-if (skipPackageBuild) {
-  console.log('[package-consumer] using prebuilt packages from dist; skipping build:lib');
-} else {
-  runRootPnpm(['run', 'build:lib'], root);
-}
-
-if (!existsSync(join(distHell, 'package.json'))) {
-  fail(`Built package missing: ${distHell}`);
-}
-if (!existsSync(join(distPdfViewer, 'package.json'))) {
-  fail(`Built package missing: ${distPdfViewer}`);
-}
-
-const distPackageJson = JSON.parse(readFileSync(join(distHell, 'package.json'), 'utf8'));
-const packageName = distPackageJson.name;
-if (!packageName) {
-  fail('Built package.json is missing name');
-}
-const distPdfPackageJson = JSON.parse(readFileSync(join(distPdfViewer, 'package.json'), 'utf8'));
-const pdfPackageName = distPdfPackageJson.name;
-if (!pdfPackageName) {
-  fail('Built PDF package.json is missing name');
-}
-
-assertModernTableEntrypointContract(distPackageJson, distHell);
-assertDocsAvoidLegacyTableEntrypoints();
-
-const packedHell = await packBuiltPackage(distHell, 'pack-core');
-const packedPdfViewer = await packBuiltPackage(distPdfViewer, 'pack-pdf-viewer');
-try {
-  auditPackedPackage({ distRoot: distHell, tarball: packedHell.tarball });
-  auditPackedPackage({ distRoot: distPdfViewer, tarball: packedPdfViewer.tarball });
-} catch (error) {
-  fail(error instanceof Error ? error.message : String(error));
-}
-
-const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-const workspaceCatalog = readWorkspaceCatalog();
-const deps = { ...(rootPackage.dependencies ?? {}), ...workspaceCatalog };
-const devDeps = { ...(rootPackage.devDependencies ?? {}), ...workspaceCatalog };
-const sourcePackage = JSON.parse(readFileSync(join(root, 'packages/angular/package.json'), 'utf8'));
-const packagePeerDependencies = sourcePackage.peerDependencies ?? {};
-const packagePeerDependenciesMeta = sourcePackage.peerDependenciesMeta ?? {};
-const sourcePdfPackage = JSON.parse(
-  readFileSync(join(root, 'packages/pdf-viewer/package.json'), 'utf8'),
-);
-const pdfPackagePeerDependencies = sourcePdfPackage.peerDependencies ?? {};
-const pdfPackagePeerDependenciesMeta = sourcePdfPackage.peerDependenciesMeta ?? {};
 
 const corePeerGroup = [
   '@angular/cdk',
@@ -207,57 +151,115 @@ const tableTanStackVirtualDeps = [
   '@tanstack/virtual-core',
 ];
 
-const scenarios = [
+const requiredScenarioCoverageAreas = new Set([
+  'root-core',
+  'testing',
+  'no-css-primitives',
+  'styled-primitives',
+  'composites',
+  'audio-transcript',
+  'table-primitives',
+  'tanstack-table',
+  'tanstack-virtual',
+  'code-editor',
+  'split-pdf-viewer',
+  'removed-legacy-aliases',
+]);
+
+const packageConsumerCiGroups = [
+  { name: 'core', scenarios: ['root-core', 'core', 'testing'] },
+  { name: 'primitive-foundations', scenarios: ['primitive-icons-css', 'button-ui'] },
+  { name: 'button', scenarios: ['button'] },
+  { name: 'composite-foundations', scenarios: ['composite-css', 'app-shell'] },
+  { name: 'audio', scenarios: ['audio-player', 'audio-transcript'] },
+  { name: 'features', scenarios: ['code-editor', 'pdf-viewer'] },
+  { name: 'table-core', scenarios: ['table', 'no-legacy-alias'] },
+  { name: 'table-tanstack-virtual', scenarios: ['table-tanstack', 'table-tanstack-virtual'] },
+];
+
+const packageConsumerScriptGroups = [
+  { name: 'core', scenarios: ['root-core', 'core', 'testing'] },
+  { name: 'primitives', scenarios: ['primitive-icons-css', 'button-ui', 'button'] },
+  { name: 'composites', scenarios: ['composite-css', 'app-shell', 'audio-player', 'audio-transcript'] },
+  { name: 'features', scenarios: ['code-editor', 'pdf-viewer'] },
+  { name: 'tables', scenarios: ['table', 'table-tanstack', 'table-tanstack-virtual', 'no-legacy-alias'] },
+  { name: 'code-editor', scenarios: ['code-editor'] },
+  { name: 'pdf-viewer', scenarios: ['pdf-viewer'] },
+  { name: 'table-core', scenarios: ['table', 'no-legacy-alias'] },
+  { name: 'table-adapters', scenarios: ['table-tanstack', 'table-tanstack-virtual'] },
+];
+
+const packageConsumerReleaseScenarios = [
+  'root-core',
+  'button-ui',
+  'button',
+  'primitive-icons-css',
+  'audio-player',
+  'audio-transcript',
+  'table',
+  'table-tanstack',
+  'table-tanstack-virtual',
+  'no-legacy-alias',
+  'code-editor',
+  'pdf-viewer',
+];
+
+const packageConsumerScenarioCatalog = [
   {
     name: 'root-core',
     aliases: ['root'],
     description: 'root entry core-only with package-wide light peers',
+    coverage: ['root-core'],
     peerTier: 'core',
     peerGroup: 'core',
     dependencies: coreDeps,
     forbiddenDependencies: tableAdapterPeerGroup,
-    mainTs: rootConsumerMainTs(),
-    stylesCss: '',
+    mainTs: rootConsumerMainTs,
+    stylesCss: emptyConsumerStylesCss,
   },
   {
     name: 'core',
     description: 'core entry with package-wide light peers',
+    coverage: ['root-core'],
     peerTier: 'core',
     peerGroup: 'core',
     dependencies: coreDeps,
-    mainTs: coreConsumerMainTs(),
-    stylesCss: '',
+    mainTs: coreConsumerMainTs,
+    stylesCss: emptyConsumerStylesCss,
   },
   {
     name: 'primitive-icons-css',
     aliases: ['primitives'],
     description: 'narrow icon-backed primitive entries with entrypoint CSS',
+    coverage: ['styled-primitives'],
     peerTier: 'primitive',
     peerGroup: 'primitive-icons',
     dependencies: styledUiDeps,
-    mainTs: primitivesConsumerMainTs(),
-    stylesCss: primitivesConsumerStylesCss(),
+    mainTs: primitivesConsumerMainTs,
+    stylesCss: primitivesConsumerStylesCss,
   },
   {
     name: 'button-ui',
     description: 'narrow primitive button Part Style Map entry without CSS or Tailwind peer',
+    coverage: ['no-css-primitives'],
     peerTier: 'primitive',
     peerGroup: 'primitive-ui',
     dependencies: coreDeps,
     forbiddenDependencies: tableAdapterPeerGroup,
-    mainTs: buttonUiConsumerMainTs(),
-    stylesCss: '',
+    mainTs: buttonUiConsumerMainTs,
+    stylesCss: emptyConsumerStylesCss,
   },
   {
     name: 'button',
     description:
       'narrow primitive button entry with primitive styles and without Font Awesome peer',
+    coverage: ['styled-primitives'],
     peerTier: 'primitive',
     peerGroup: 'primitive',
     dependencies: buttonStyledDeps,
     forbiddenDependencies: tableAdapterPeerGroup,
-    mainTs: buttonConsumerMainTs(),
-    stylesCss: buttonConsumerStylesCss(),
+    mainTs: buttonConsumerMainTs,
+    stylesCss: buttonConsumerStylesCss,
     cssIncludes: [
       '--color-hell-primary:#3452ff',
       'background-color:var(--color-hell-surface-elevated)',
@@ -282,108 +284,192 @@ const scenarios = [
     name: 'composite-css',
     aliases: ['composites'],
     description: 'narrow composite entries with entrypoint CSS and icon-backed peers',
+    coverage: ['composites'],
     peerTier: 'composite',
     peerGroup: 'composite-icons',
     dependencies: styledUiDeps,
-    mainTs: compositesConsumerMainTs(),
-    stylesCss: appShellConsumerStylesCss(),
+    mainTs: compositesConsumerMainTs,
+    stylesCss: appShellConsumerStylesCss,
   },
   {
     name: 'app-shell',
     description: 'narrow app-shell composite entry without Font Awesome or feature peers',
+    coverage: ['composites'],
     peerTier: 'composite',
     peerGroup: 'composite',
     dependencies: styledUiWithoutFontAwesomeDeps,
-    mainTs: appShellConsumerMainTs(),
-    stylesCss: audioPlayerConsumerStylesCss(),
+    mainTs: appShellConsumerMainTs,
+    stylesCss: audioPlayerConsumerStylesCss,
   },
   {
     name: 'audio-player',
     description: 'narrow audio-player composite without transcript feature provider',
+    coverage: ['composites'],
     peerTier: 'composite',
     peerGroup: 'composite-icons',
     dependencies: audioPlayerDeps,
-    mainTs: audioPlayerConsumerMainTs(),
-    stylesCss: audioPlayerConsumerStylesCss(),
+    mainTs: audioPlayerConsumerMainTs,
+    stylesCss: audioPlayerConsumerStylesCss,
   },
   {
     name: 'audio-transcript',
     description: 'audio transcript feature provider opt-in without CodeMirror or pdf.js peers',
+    coverage: ['audio-transcript'],
     peerTier: 'audio-transcript',
     peerGroup: 'audio-transcript',
     dependencies: audioPlayerDeps,
-    mainTs: audioTranscriptConsumerMainTs(),
-    stylesCss: audioPlayerConsumerStylesCss(),
+    mainTs: audioTranscriptConsumerMainTs,
+    stylesCss: audioPlayerConsumerStylesCss,
   },
   {
     name: 'testing',
     description: 'testing entry with package-wide light peers',
+    coverage: ['testing'],
     peerTier: 'core',
     peerGroup: 'core',
     dependencies: testingDeps,
-    mainTs: testingConsumerMainTs(),
-    stylesCss: '',
+    mainTs: testingConsumerMainTs,
+    stylesCss: emptyConsumerStylesCss,
   },
   {
     name: 'code-editor',
     description: 'code-editor feature with styled peers and CodeMirror peers',
+    coverage: ['code-editor'],
     peerTier: 'code-editor',
     peerGroup: 'code-editor',
     dependencies: codeEditorDeps,
-    mainTs: codeEditorConsumerMainTs(),
-    stylesCss: codeEditorConsumerStylesCss(),
+    mainTs: codeEditorConsumerMainTs,
+    stylesCss: codeEditorConsumerStylesCss,
   },
   {
     name: 'table',
     description: 'table primitives without Font Awesome peer',
+    coverage: ['table-primitives'],
     peerTier: 'table',
     peerGroup: 'table',
     dependencies: styledUiWithoutFontAwesomeDeps,
     forbiddenDependencies: tableAdapterPeerGroup,
-    mainTs: tableConsumerMainTs(),
-    stylesCss: tableConsumerStylesCss(),
+    mainTs: tableConsumerMainTs,
+    stylesCss: tableConsumerStylesCss,
   },
   {
     name: 'table-tanstack',
     description: 'Hell-styled TanStack Table shell with strict optional table peer',
+    coverage: ['tanstack-table'],
     peerTier: 'table-tanstack',
     peerGroup: 'table-tanstack',
     dependencies: tableTanStackDeps,
     forbiddenDependencies: tanStackVirtualPeerGroup,
-    mainTs: tableTanStackConsumerMainTs(),
-    stylesCss: tableTanStackConsumerStylesCss(),
+    mainTs: tableTanStackConsumerMainTs,
+    stylesCss: tableTanStackConsumerStylesCss,
   },
   {
     name: 'table-tanstack-virtual',
     description: 'Hell-styled TanStack Table shell with optional TanStack Virtual body strategy',
+    coverage: ['tanstack-virtual'],
     peerTier: 'table-tanstack',
     peerGroup: 'table-tanstack-virtual',
     dependencies: tableTanStackVirtualDeps,
-    mainTs: tableTanStackVirtualConsumerMainTs(),
-    stylesCss: tableTanStackConsumerStylesCss(),
+    mainTs: tableTanStackVirtualConsumerMainTs,
+    stylesCss: tableTanStackConsumerStylesCss,
   },
   {
     name: 'no-legacy-alias',
     description: 'negative check that removed legacy aliases cannot compile',
+    coverage: ['removed-legacy-aliases'],
     peerTier: 'table',
     peerGroup: 'table',
     dependencies: styledUiWithoutFontAwesomeDeps,
     forbiddenDependencies: tableAdapterPeerGroup,
-    mainTs: noLegacyTableAliasConsumerMainTs(),
-    stylesCss: noLegacyTableAliasConsumerStylesCss(),
+    mainTs: noLegacyTableAliasConsumerMainTs,
+    stylesCss: noLegacyTableAliasConsumerStylesCss,
     expectBuildFailure: true,
+    expectedFailureIncludes: [
+      '@hell-ui/angular/data-table',
+      '@hell-ui/angular/features/data-table',
+      '@hell-ui/angular/features/table-utilities',
+      '@hell-ui/angular/table-cdk',
+      '@hell-ui/angular/table-virtual',
+      '@hell-ui/angular/primitives',
+      '@hell-ui/angular/composites',
+      './styles/kitchen-sink',
+    ],
   },
   {
     name: 'pdf-viewer',
     description: 'split pdf-viewer package with pdfjs and light UI peers',
+    coverage: ['split-pdf-viewer'],
     peerTier: 'pdf-viewer',
     peerGroup: 'pdf-viewer',
     installPdfPackage: true,
     dependencies: pdfViewerDeps,
-    mainTs: pdfViewerConsumerMainTs(),
-    stylesCss: pdfViewerConsumerStylesCss(),
+    mainTs: pdfViewerConsumerMainTs,
+    stylesCss: pdfViewerConsumerStylesCss,
   },
 ];
+
+if (catalogOnly) {
+  process.stdout.write(`${JSON.stringify(packageConsumerCatalogContract(), null, 2)}\n`);
+  process.exit(0);
+}
+
+runPnpmPreflight(root);
+if (preflightOnly) {
+  console.log(
+    `${packageConsumerLabel('preflight')} preflight passed; skipping package build and consumer scenarios`,
+  );
+  process.exit(0);
+}
+
+if (skipPackageBuild) {
+  console.log('[package-consumer] using prebuilt packages from dist; skipping build:lib');
+} else {
+  runRootPnpm(['run', 'build:lib'], root);
+}
+
+if (!existsSync(join(distHell, 'package.json'))) {
+  fail(`Built package missing: ${distHell}`);
+}
+if (!existsSync(join(distPdfViewer, 'package.json'))) {
+  fail(`Built package missing: ${distPdfViewer}`);
+}
+
+const distPackageJson = JSON.parse(readFileSync(join(distHell, 'package.json'), 'utf8'));
+const packageName = distPackageJson.name;
+if (!packageName) {
+  fail('Built package.json is missing name');
+}
+const distPdfPackageJson = JSON.parse(readFileSync(join(distPdfViewer, 'package.json'), 'utf8'));
+const pdfPackageName = distPdfPackageJson.name;
+if (!pdfPackageName) {
+  fail('Built PDF package.json is missing name');
+}
+
+assertModernTableEntrypointContract(distPackageJson, distHell);
+assertDocsAvoidLegacyTableEntrypoints();
+
+const packedHell = await packBuiltPackage(distHell, 'pack-core');
+const packedPdfViewer = await packBuiltPackage(distPdfViewer, 'pack-pdf-viewer');
+try {
+  auditPackedPackage({ distRoot: distHell, tarball: packedHell.tarball });
+  auditPackedPackage({ distRoot: distPdfViewer, tarball: packedPdfViewer.tarball });
+} catch (error) {
+  fail(error instanceof Error ? error.message : String(error));
+}
+
+const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+const workspaceCatalog = readWorkspaceCatalog();
+const deps = { ...(rootPackage.dependencies ?? {}), ...workspaceCatalog };
+const devDeps = { ...(rootPackage.devDependencies ?? {}), ...workspaceCatalog };
+const sourcePackage = JSON.parse(readFileSync(join(root, 'packages/angular/package.json'), 'utf8'));
+const packagePeerDependencies = sourcePackage.peerDependencies ?? {};
+const packagePeerDependenciesMeta = sourcePackage.peerDependenciesMeta ?? {};
+const sourcePdfPackage = JSON.parse(
+  readFileSync(join(root, 'packages/pdf-viewer/package.json'), 'utf8'),
+);
+const pdfPackagePeerDependencies = sourcePdfPackage.peerDependencies ?? {};
+const pdfPackagePeerDependenciesMeta = sourcePdfPackage.peerDependenciesMeta ?? {};
+const scenarios = materializeScenarios(packageConsumerScenarioCatalog);
 
 assertPeerTierContracts(scenarios);
 
@@ -419,6 +505,10 @@ function parseMinimalDependencyMode(args) {
   if (envMode === '1' || envMode === 'true') return true;
 
   return args.some((arg) => arg === '--minimal-deps' || arg === '--group-by-deps');
+}
+
+function parseCatalogOnly(args) {
+  return args.some((arg) => arg === '--catalog-json' || arg === '--print-catalog-json');
 }
 
 function parseSkipPackageBuild(args) {
@@ -474,6 +564,89 @@ function parseScenarioTokens(values, envOnly) {
 
 function normalizeScenarioName(value) {
   return value.trim().toLowerCase();
+}
+
+function packageConsumerCatalogContract() {
+  const scenarioContracts = packageConsumerScenarioCatalog.map(scenarioCatalogRecord);
+  return {
+    scenarios: scenarioContracts,
+    peerTiers: [...packageConsumerPeerTiers],
+    peerGroups: Object.fromEntries(
+      Object.entries(peerGroupContracts).map(([name, contract]) => [
+        name,
+        { tier: contract.tier, peers: [...contract.peers] },
+      ]),
+    ),
+    coverageAreas: [...requiredScenarioCoverageAreas],
+    ciGroups: packageConsumerCiGroups.map(scenarioGroupRecord),
+    scriptGroups: packageConsumerScriptGroups.map(scenarioGroupRecord),
+    releaseScenarios: [...packageConsumerReleaseScenarios],
+    strictPeerGroups: packageConsumerStrictPeerGroups(scenarioContracts),
+  };
+}
+
+function scenarioCatalogRecord(scenario) {
+  return {
+    name: scenario.name,
+    aliases: [...(scenario.aliases ?? [])],
+    description: scenario.description,
+    coverage: [...(scenario.coverage ?? [])],
+    peerTier: scenario.peerTier,
+    peerGroup: scenario.peerGroup,
+    dependencies: [...scenario.dependencies],
+    forbiddenDependencies: [...(scenario.forbiddenDependencies ?? [])],
+    expectedFailureIncludes: [...(scenario.expectedFailureIncludes ?? [])],
+    expectBuildFailure: scenario.expectBuildFailure === true,
+    installPdfPackage: scenario.installPdfPackage === true,
+  };
+}
+
+function scenarioGroupRecord(group) {
+  return {
+    name: group.name,
+    scenarios: [...group.scenarios],
+  };
+}
+
+function packageConsumerStrictPeerGroups(scenarioContracts) {
+  const groups = new Map();
+  for (const scenario of scenarioContracts) {
+    const key = uniqueSorted(scenario.dependencies).join('\0');
+    const group = groups.get(key) ?? {
+      dependencies: uniqueSorted(scenario.dependencies),
+      scenarios: [],
+      peerGroups: [],
+    };
+    group.scenarios.push(scenario.name);
+    group.peerGroups.push(scenario.peerGroup);
+    groups.set(key, group);
+  }
+
+  return [...groups.values()].map((group, index) => ({
+    name: `strict-peer-${index + 1}`,
+    scenarios: group.scenarios,
+    peerGroups: uniqueSorted(group.peerGroups),
+    dependencies: group.dependencies,
+  }));
+}
+
+function materializeScenarios(catalog) {
+  return catalog.map((scenario) => ({
+    ...scenario,
+    aliases: [...(scenario.aliases ?? [])],
+    coverage: [...(scenario.coverage ?? [])],
+    dependencies: [...scenario.dependencies],
+    forbiddenDependencies: [...(scenario.forbiddenDependencies ?? [])],
+    cssIncludes: scenario.cssIncludes ? [...scenario.cssIncludes] : undefined,
+    expectedFailureIncludes: scenario.expectedFailureIncludes
+      ? [...scenario.expectedFailureIncludes]
+      : undefined,
+    runtimeStyleAssertions: scenario.runtimeStyleAssertions
+      ? scenario.runtimeStyleAssertions.map((assertion) => ({ ...assertion }))
+      : undefined,
+    mainTs: scenario.mainTs(),
+    stylesCss: scenario.stylesCss(),
+  }));
 }
 
 function selectScenarios(allScenarios, selectedNames) {
@@ -570,6 +743,7 @@ function assertPeerTierContracts(allScenarios) {
       fail(`Missing package-consumer scenario coverage for peer tier ${tier}`);
   }
 
+  assertScenarioCatalogCoverage(allScenarios);
   for (const scenario of allScenarios) assertScenarioPeerGroup(scenario, allPackagePeerNames);
   assertHeavyPeersAreIsolated(allScenarios);
   assertCodeMirrorPeersAreIsolated(allScenarios);
@@ -596,6 +770,81 @@ function assertScenarioPeerGroup(scenario, packagePeerNames) {
     contract.peers,
     actualPeers,
   );
+}
+
+function assertScenarioCatalogCoverage(allScenarios) {
+  scenarioLookup(allScenarios);
+
+  const scenarioNames = new Set(allScenarios.map((scenario) => scenario.name));
+  const coveredAreas = new Set();
+  const coveredPeerGroups = new Set();
+
+  for (const scenario of allScenarios) {
+    for (const area of scenario.coverage ?? []) {
+      if (!requiredScenarioCoverageAreas.has(area)) {
+        fail(`Scenario ${scenario.name} references unknown coverage area ${area}`);
+      }
+      coveredAreas.add(area);
+    }
+    coveredPeerGroups.add(scenario.peerGroup ?? scenario.peerTier);
+  }
+
+  for (const area of requiredScenarioCoverageAreas) {
+    if (!coveredAreas.has(area)) fail(`Missing package-consumer coverage area ${area}`);
+  }
+
+  for (const groupName of Object.keys(peerGroupContracts)) {
+    if (!coveredPeerGroups.has(groupName)) {
+      fail(`Missing package-consumer scenario coverage for peer group ${groupName}`);
+    }
+  }
+
+  assertScenarioGroupsReferenceKnownScenarios('CI package-consumer group', packageConsumerCiGroups, scenarioNames);
+  assertScenarioGroupsReferenceKnownScenarios(
+    'package.json package-consumer script group',
+    packageConsumerScriptGroups,
+    scenarioNames,
+  );
+  assertScenarioNamesReferenceKnownScenarios(
+    'release package-consumer scenario',
+    packageConsumerReleaseScenarios,
+    scenarioNames,
+  );
+  assertScenarioGroupsCoverAllOnce('CI package-consumer group', packageConsumerCiGroups, scenarioNames);
+}
+
+function assertScenarioGroupsReferenceKnownScenarios(label, groups, scenarioNames) {
+  const groupNames = new Set();
+  for (const group of groups) {
+    if (groupNames.has(group.name)) fail(`Duplicate ${label} name ${group.name}`);
+    groupNames.add(group.name);
+    assertScenarioNamesReferenceKnownScenarios(
+      `${label} ${group.name}`,
+      group.scenarios,
+      scenarioNames,
+    );
+  }
+}
+
+function assertScenarioNamesReferenceKnownScenarios(label, names, scenarioNames) {
+  for (const name of names) {
+    if (!scenarioNames.has(name)) fail(`${label} references unknown scenario ${name}`);
+  }
+}
+
+function assertScenarioGroupsCoverAllOnce(label, groups, scenarioNames) {
+  const seen = new Map();
+  for (const group of groups) {
+    for (const scenario of group.scenarios) {
+      const previous = seen.get(scenario);
+      if (previous) fail(`${label} ${scenario} appears in both ${previous} and ${group.name}`);
+      seen.set(scenario, group.name);
+    }
+  }
+
+  for (const scenario of scenarioNames) {
+    if (!seen.has(scenario)) fail(`${label} coverage is missing scenario ${scenario}`);
+  }
 }
 
 function assertHeavyPeersAreIsolated(allScenarios) {
@@ -873,7 +1122,10 @@ async function runConsumerScenarioBuild(tempRoot, scenario) {
 
   const buildCommand = ['exec', '--', 'ng', 'build', 'consumer', '--configuration', 'production'];
   if (scenario.expectBuildFailure) {
-    await runPnpmExpectingFailure(buildCommand, tempRoot, { scenarioName: scenario.name });
+    await runPnpmExpectingFailure(buildCommand, tempRoot, {
+      expectedOutputIncludes: scenario.expectedFailureIncludes ?? [],
+      scenarioName: scenario.name,
+    });
     console.log(`[package-consumer:${scenario.name}] rejected ${scenario.description}`);
     return;
   }
@@ -1786,10 +2038,8 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
-function rootConsumerStylesCss() {
-  return `@import "tailwindcss";
-@import "${packageName}/styles";
-`;
+function emptyConsumerStylesCss() {
+  return '';
 }
 
 function primitivesConsumerStylesCss() {
@@ -2061,12 +2311,16 @@ async function runPnpm(args, cwd, options = {}) {
 }
 
 async function runPnpmExpectingFailure(args, cwd, options = {}) {
-  const { command, diagnostics, label, result } = await runPnpmCommand(args, cwd, options);
+  const { command, diagnostics, label, result } = await runPnpmCommand(args, cwd, {
+    ...options,
+    captureOutput: true,
+  });
   if (result.timedOut) fail(pnpmTimeoutMessage(command, cwd, diagnostics));
   if (result.error) fail(`Unable to start command: ${command}\n${result.error.message}`);
   if (result.signal) fail(`Command failed with signal ${result.signal}: ${command}`);
   if (result.status === 0)
     fail(`Expected command to fail for negative scenario ${label}: ${command}`);
+  assertExpectedFailureOutput(label, result, options.expectedOutputIncludes ?? []);
   console.log(`${label} ok: command failed as expected with status ${result.status}: ${command}`);
 }
 
@@ -2084,11 +2338,25 @@ async function runPnpmCommand(args, cwd, options = {}) {
     printPnpmInstallDiagnostics(label, scenarioName, cwd, diagnostics);
   }
 
-  const result = await spawnPnpm(commandArgs, cwd, env, label, command);
+  const result = await spawnPnpm(commandArgs, cwd, env, label, command, {
+    captureOutput: options.captureOutput === true,
+  });
   return { command, diagnostics, label, result };
 }
 
-function spawnPnpm(args, cwd, env, label, command) {
+function assertExpectedFailureOutput(label, result, expectedOutputIncludes) {
+  if (!expectedOutputIncludes.length) return;
+
+  const output = `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
+  const missing = expectedOutputIncludes.filter((needle) => !output.includes(needle));
+  if (missing.length) {
+    fail(`${label} failure output is missing expected fragment(s): ${missing.join(', ')}`);
+  }
+
+  console.log(`${label} ok: failure output mentions ${expectedOutputIncludes.join(', ')}`);
+}
+
+function spawnPnpm(args, cwd, env, label, command, options = {}) {
   return new Promise((resolve) => {
     const startedAt = Date.now();
     const child = spawn('pnpm', args, {
@@ -2100,6 +2368,8 @@ function spawnPnpm(args, cwd, env, label, command) {
     let error = null;
     let timedOut = false;
     let killTimer = null;
+    let stdout = '';
+    let stderr = '';
 
     const heartbeat = setInterval(() => {
       console.log(
@@ -2121,8 +2391,16 @@ function spawnPnpm(args, cwd, env, label, command) {
     }, pnpmTimeoutMs);
     timeout.unref();
 
-    child.stdout?.on('data', (chunk) => process.stdout.write(chunk));
-    child.stderr?.on('data', (chunk) => process.stderr.write(chunk));
+    child.stdout?.on('data', (chunk) => {
+      const value = chunk.toString();
+      if (options.captureOutput) stdout += value;
+      process.stdout.write(chunk);
+    });
+    child.stderr?.on('data', (chunk) => {
+      const value = chunk.toString();
+      if (options.captureOutput) stderr += value;
+      process.stderr.write(chunk);
+    });
     child.on('error', (caught) => {
       error = caught;
     });
@@ -2134,7 +2412,7 @@ function spawnPnpm(args, cwd, env, label, command) {
       console.log(
         `${label} ${verb} command after ${formatDuration(Date.now() - startedAt)}: ${command}`,
       );
-      resolve({ status, signal, error, timedOut });
+      resolve({ status, signal, error, timedOut, stdout, stderr });
     });
   });
 }
