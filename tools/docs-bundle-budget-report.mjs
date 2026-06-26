@@ -7,6 +7,7 @@ import {
   blockingDocsBudgetMessages,
   classifyDocsBudget,
   DOCS_BUDGET_POLICY_PATH,
+  docsBudgetLabel,
   formatBytes,
   parseBudgetSize,
   readDocsBudgetPolicy,
@@ -69,12 +70,22 @@ const blockingBudgetMessages = [
 const reverseImporters = buildReverseImporters(outputs);
 
 const report = renderReport();
+const reportExists = existsSync(reportPath);
+const reportMatchesCurrentStats = reportExists && readFileSync(reportPath, 'utf8') === report;
 if (!options.summaryOnly) {
   mkdirSync(dirname(reportPath), { recursive: true });
   writeFileSync(reportPath, report);
   console.log(`Wrote ${relative(root, reportPath)}`);
 }
 printBudgetSummary();
+
+if (options.check) {
+  if (options.verifyOutput && !reportMatchesCurrentStats) {
+    blockingBudgetMessages.push(
+      `${relative(root, reportPath)} is missing or stale for ${relative(root, statsPath)}. Run pnpm run diagnose:docs-bundle.`,
+    );
+  }
+}
 
 if (options.check && blockingBudgetMessages.length > 0) {
   console.error('Docs budget policy failed:');
@@ -100,6 +111,10 @@ function parseArgs(args) {
       parsed.summaryOnly = true;
       continue;
     }
+    if (arg === '--verify-output') {
+      parsed.verifyOutput = true;
+      continue;
+    }
     if (arg === '--stats' || arg === '--out') {
       const value = args[index + 1];
       if (!value) {
@@ -119,9 +134,9 @@ function parseArgs(args) {
 }
 
 function printUsage() {
-  console.log(`Usage: node tools/docs-bundle-budget-report.mjs [--check] [--summary-only] [--stats dist/hell-docs/stats.json] [--out docs/release/docs-bundle-budget-diagnosis.md]
+  console.log(`Usage: node tools/docs-bundle-budget-report.mjs [--check] [--summary-only] [--verify-output] [--stats dist/hell-docs/stats.json] [--out docs/release/docs-bundle-budget-diagnosis.md]
 
-Reads Angular's esbuild stats.json for the docs app, classifies accepted budget warnings vs regressions, and writes a bundle-budget diagnosis report unless --summary-only is used.`);
+Reads Angular's esbuild stats.json for the docs app, classifies accepted budget warnings vs regressions, and writes a bundle-budget diagnosis report unless --summary-only is used. Use --verify-output with --check to fail when the tracked diagnosis does not match the current stats.`);
 }
 
 function resolveFromRoot(path) {
@@ -210,6 +225,8 @@ function renderReport() {
 
 ${renderBudgetPolicySection()}
 
+${renderAcceptedWarningDetails()}
+
 ## Largest initial chunks
 
 ${renderChunkTable(initialChunks.slice(0, 12), 'initial')}
@@ -297,9 +314,32 @@ function renderBudgetPolicySection() {
 function renderInitialBudgetFollowUp() {
   const status = budgetStatusFor('initial');
   if (status?.state === 'accepted') {
-    return `Accepted by the docs budget policy (${status.acceptedWarning.followUp}); the architecture guard blocks future eager imports across docs route boundaries, and any undocumented new warning is a regression.`;
+    return `Accepted by the docs budget policy (${status.acceptedWarning.followUp}; expires when: ${status.acceptedWarning.expiresWhen}); the architecture guard blocks future eager imports across docs route boundaries, and any undocumented new warning is a regression.`;
   }
   return 'Undocumented budget warning; fix the eager import/CSS regression or document a narrow accepted warning with owner and follow-up.';
+}
+
+function renderAcceptedWarningDetails() {
+  const accepted = budgetStatuses.filter((status) => status.state === 'accepted');
+  if (accepted.length === 0) {
+    return `## Accepted warning details
+
+No current docs budget warning is accepted by policy.`;
+  }
+
+  const header =
+    '| Budget | Current | Accepted ceiling | Owner | Rationale | Evidence | Follow-up | Expiry |\n| --- | ---: | ---: | --- | --- | --- | --- | --- |';
+  const rows = accepted
+    .map((status) => {
+      const warning = status.acceptedWarning;
+      return `| ${budgetLabel(status.type)} | ${formatBytes(status.currentBytes)} | ${formatBytes(status.acceptedMaximumBytes)} | ${warning.owner} | ${warning.rationale} | \`${warning.evidence}\` | ${warning.followUp} | ${warning.expiresWhen} |`;
+    })
+    .join('\n');
+
+  return `## Accepted warning details
+
+${header}
+${rows}`;
 }
 
 function printBudgetSummary() {
@@ -318,9 +358,7 @@ function printBudgetSummary() {
 }
 
 function budgetLabel(type) {
-  if (type === 'initial') return 'Initial bundle';
-  if (type === 'anyComponentStyle') return 'Any component style';
-  return type;
+  return docsBudgetLabel(type);
 }
 
 function renderPdfViewerStyleRow(pdfViewerStyleWarnings) {
@@ -414,8 +452,11 @@ function traceOwners(file) {
 function ownerForEntryPoint(entryPoint) {
   if (!entryPoint) return null;
   if (entryPoint === 'apps/docs/src/main.ts') return 'Docs app shell bootstrap';
+  if (entryPoint === 'src/main.ts') return 'Docs app shell bootstrap';
   if (entryPoint === 'apps/docs/src/app/docs-search-index.ts') return 'Docs search index (loaded on search open)';
+  if (entryPoint === 'src/app/docs-search-index.ts') return 'Docs search index (loaded on search open)';
   if (entryPoint.includes('pdfjs-dist/')) return 'PDF viewer feature (`pdfjs-dist`)';
+  if (entryPoint.includes('hell-ui-pdf-viewer')) return 'PDF viewer split package';
   if (entryPoint.includes('hell-ui-angular-features-pdf-viewer')) return 'PDF viewer feature entrypoint';
   if (entryPoint.includes('hell-ui-angular-features-code-editor')) return 'Code editor feature entrypoint';
   if (entryPoint.includes('hell-ui-angular-features-audio-transcript')) return 'Audio transcript feature entrypoint';
@@ -423,7 +464,7 @@ function ownerForEntryPoint(entryPoint) {
   if (entryPoint.includes('hell-ui-angular-audio-player')) return 'Audio player composite entrypoint';
 
   const componentPageMatch = entryPoint.match(
-    /^projects\/hell-docs\/src\/app\/pages\/components\/([^/]+)\//,
+    /^(?:projects\/hell-docs\/src|apps\/docs\/src|src)\/app\/pages\/components\/([^/]+)\//,
   );
   if (componentPageMatch) {
     const slug = componentPageMatch[1];
@@ -431,7 +472,7 @@ function ownerForEntryPoint(entryPoint) {
     return `${titleFromSlug(slug)} docs page (\`/components/${slug}\`)`;
   }
 
-  const guidePageMatch = entryPoint.match(/^projects\/hell-docs\/src\/app\/pages\/([^/]+)\//);
+  const guidePageMatch = entryPoint.match(/^(?:projects\/hell-docs\/src|apps\/docs\/src|src)\/app\/pages\/([^/]+)\//);
   if (guidePageMatch) {
     const slug = guidePageMatch[1];
     return `${titleFromSlug(slug)} guide page`;
@@ -442,11 +483,13 @@ function ownerForEntryPoint(entryPoint) {
 
 function ownerFromInputs(output) {
   const paths = Object.keys(output.inputs ?? {});
+  const pageOwners = new Set(paths.map((path) => ownerForEntryPoint(path)).filter(Boolean));
+  if (pageOwners.size > 0) return [...pageOwners].slice(0, 3).join('<br>');
   if (paths.some((path) => path.includes('pdfjs-dist'))) return 'PDF viewer feature';
   if (paths.some((path) => path.includes('@codemirror') || path.includes('@lezer'))) {
     return 'Code editor feature';
   }
-  if (paths.some((path) => path.includes('hell-ui-angular-table'))) {
+  if (paths.some((path) => path.includes('hell-ui-angular-table') || path.includes('/packages/angular/table'))) {
     return 'Table primitives';
   }
   if (paths.some((path) => path.includes('hell-ui-angular-audio-player'))) {
