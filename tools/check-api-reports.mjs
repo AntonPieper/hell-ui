@@ -44,12 +44,6 @@ const apiReportEntrypoints = [
     reportFileName: 'hell-ui-angular-dialpad.api.md',
   },
   {
-    id: 'primitives',
-    specifier: '@hell-ui/angular/primitives',
-    mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular-primitives.d.ts',
-    reportFileName: 'hell-ui-angular-primitives.api.md',
-  },
-  {
     id: 'testing',
     specifier: '@hell-ui/angular/testing',
     mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular-testing.d.ts',

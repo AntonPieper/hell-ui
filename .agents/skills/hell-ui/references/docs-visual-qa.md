@@ -14,12 +14,12 @@ or browser verification.
 - Import examples twice in page files: the live component and the same file raw
   via `?raw` with `with { loader: 'text' }`.
 - Render examples through `ExampleTabs`; use `previewClass` for preview layout.
-- Register pages in `projects/hell-docs/src/app/docs-catalog.ts`. Page search
+- Register pages in `apps/docs/src/app/docs-catalog.ts`. Page search
   auto-seeds from nav, so missing nav means missing page search result.
-- Add example/search seeds in `projects/hell-docs/src/app/docs-search-index.ts`
+- Add example/search seeds in `apps/docs/src/app/docs-search-index.ts`
   with `title`, `path`, `section`, `detail`, and `terms`.
 - Keep each page's live examples and raw `?raw` imports inside that lazy route's
-  page boundary. Move shared docs widgets to `projects/hell-docs/src/app/shared/`.
+  page boundary. Move shared docs widgets to `apps/docs/src/app/shared/`.
 - Read `docs/architecture/docs-example-import-boundaries.md` before moving
   examples, heavy docs routes, or shared docs code. Search metadata must not
   import example implementations.

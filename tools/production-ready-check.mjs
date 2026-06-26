@@ -18,7 +18,7 @@ const requiredReleaseScenarios = [
   'root-core',
   'button-ui',
   'button',
-  'primitives-css',
+  'primitive-icons-css',
   'audio-player',
   'audio-transcript',
   'table',
@@ -31,7 +31,8 @@ const requiredPlaywrightProjects = ['chromium', 'firefox', 'webkit'];
 const requiredApiReportPaths = [
   'etc/api-reports/hell-ui-angular.api.md',
   'etc/api-reports/hell-ui-angular-core.api.md',
-  'etc/api-reports/hell-ui-angular-primitives.api.md',
+  'etc/api-reports/hell-ui-angular-input.api.md',
+  'etc/api-reports/hell-ui-angular-dialpad.api.md',
   'etc/api-reports/hell-ui-angular-testing.api.md',
 ];
 const requiredFullReleaseTasks = [

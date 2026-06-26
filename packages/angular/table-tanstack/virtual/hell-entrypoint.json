@@ -1,0 +1,11 @@
+{
+  "category": "tanstack-table-body-strategy",
+  "exports": [
+    "./virtual-rows"
+  ],
+  "header": [
+    "/**",
+    " * @experimental Optional TanStack Virtual row strategy for the Hell TanStack Table shell.",
+    " */"
+  ]
+}

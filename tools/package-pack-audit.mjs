@@ -120,8 +120,8 @@ function checkApfPackageJson(packageJson, fileSet, distRoot, failures) {
   for (const [key, exportValue] of Object.entries(exportsMap)) {
     if (key === './package.json' || expectedCodeExports.has(key)) continue;
 
-    if (key === './styles/kitchen-sink' || key.startsWith('./styles/components/')) {
-      failures.push(`APF exports must not include legacy style export ${key}`);
+    if (packageJson.name === '@hell-ui/angular' && (key === './styles' || key.startsWith('./styles/'))) {
+      failures.push(`@hell-ui/angular must not include legacy category style export ${key}`);
       continue;
     }
 

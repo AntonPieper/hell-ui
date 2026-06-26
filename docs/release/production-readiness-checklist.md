@@ -57,8 +57,13 @@ mapped to command evidence and concrete evidence checks.
         },
         {
           "type": "fileExists",
-          "label": "primitives API report is committed",
-          "path": "etc/api-reports/hell-ui-angular-primitives.api.md"
+          "label": "input API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-input.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "dialpad API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-dialpad.api.md"
         },
         {
           "type": "fileExists",
@@ -152,7 +157,7 @@ mapped to command evidence and concrete evidence checks.
 
 | Blocker category | Required command evidence                                                        | What blocks the production-ready claim                                                                                                                                                                                                                                                                       |
 | ---------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Package-consumer | `pnpm test:package-consumer -- --minimal-deps`; `pnpm release:dry-run -- --full` | Full release JSON evidence must show selected strict-peer consumer scenarios passing (`root-core`, `button-ui`, `button`, `primitives-css`, `audio-player`, `audio-transcript`, `table`, `table-tanstack`, `table-tanstack-virtual`, `no-legacy-alias`, `code-editor`).                                      |
+| Package-consumer | `pnpm test:package-consumer -- --minimal-deps`; `pnpm release:dry-run -- --full` | Full release JSON evidence must show selected strict-peer consumer scenarios passing (`root-core`, `button-ui`, `button`, `primitive-icons-css`, `audio-player`, `audio-transcript`, `table`, `table-tanstack`, `table-tanstack-virtual`, `no-legacy-alias`, `code-editor`).                                 |
 | API              | `pnpm build:lib`; `pnpm test:api-report`; `pnpm release:dry-run -- --full`       | Stable API reports must exist and the full release dry-run must pass the API report task.                                                                                                                                                                                                                    |
 | Accessibility    | `pnpm e2e`; `pnpm release:dry-run -- --full`                                     | `test-results/playwright-report.json` must report zero unexpected results for every `e2e/*.spec.ts` file across chromium, firefox, and webkit on the current commit; the accessibility matrix must not contain `Critical gap` or `criticalGap: true` rows. Current critical gaps keep Hell UI internal beta. |
 | Docs budgets     | `pnpm build:docs`; `pnpm diagnose:docs-bundle`; `pnpm release:dry-run -- --full` | The budget diagnosis must classify warnings as accepted or regression, and the full release dry-run must pass docs build.                                                                                                                                                                                    |

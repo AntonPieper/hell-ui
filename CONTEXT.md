@@ -8,7 +8,10 @@ hell is a compact Angular component system for dense business applications. It f
 A directive-first module whose Interface is behavior, accessibility, and state attributes while consumers own DOM structure and visual styling.
 
 **Styled Primitive**
-A Behavior Primitive plus default Tailwind part classes, data attributes, and public CSS variables. Consumers can use a Part Style Map to refine named public parts while preserving behavior.
+A low-level UI module whose public value is behavior, accessibility, state attributes, optional default Tailwind part classes, and public CSS variables. It may be directive-first or own a small template when that template is still primitive infrastructure rather than a higher-level workflow. Consumers can use a Part Style Map to refine named public parts while preserving behavior.
+
+**Mixed Entry Point**
+A Package Entry Point whose public surface contains both primitive behavior and small convenience structure, but does not rise to a Composite workflow. Mixed Entry Points keep their import-path identity and are classified through manifest metadata rather than filesystem category folders.
 
 **Composite**
 A module that combines multiple primitives into a higher-level experience. A Composite may own some DOM structure when that structure is part of the leverage it provides, but its docs should name the owned parts and the escape hatches.
@@ -19,6 +22,9 @@ _Avoid_: Column visibility selector, table column picker.
 
 **Feature**
 A heavier module with optional dependencies, runtime setup, or large styling. Features stay behind feature-specific Package Entry Points and feature-specific CSS imports.
+
+**Module Category**
+Entrypoint-owned metadata describing a Package Entry Point's architectural role, stored in that entrypoint's `hell-entrypoint.json` sidecar. Examples include `styled-primitive`, `mixed-entrypoint`, `composite`, `feature`, `table-primitives`, `tanstack-table-shell`, or `tanstack-table-body-strategy`. Module Category is not a public import segment and should not create aggregate TypeScript or CSS convenience paths.
 
 **Component Contract**
 The shared Interface expected from public Hell modules: behavior directives, stable public parts for owned structure, data-state/data-size/data-variant attributes for stateful styling, public CSS variables for supported visual values, and a Part Style Map for visual customization.
@@ -79,10 +85,19 @@ The docs app source of truth for pages, navigation, routes, icons, sections, and
 A live Angular example plus its raw source code, preview options, and search metadata.
 
 **Package Entry Point**
-A public import path exposed by the `hell` package, including the root entry point and secondary entry points such as primitives, composites, core, and feature-specific imports.
+A public import path exposed by the `hell` package, including the root entry point and secondary entry points such as `@hell-ui/angular/button`, `@hell-ui/angular/app-shell`, `@hell-ui/angular/table`, and `@hell-ui/angular/features/code-editor`.
+
+**Entrypoint Source Directory**
+The source directory that matches a Package Entry Point's import path. For example, `@hell-ui/angular/button` lives in `packages/angular/button`, while `@hell-ui/angular/features/code-editor` lives in `packages/angular/features/code-editor`. This import-path-first layout is the discoverability rule; Module Category stays in the entrypoint sidecar and does not create `primitives` or `composites` source buckets.
+
+**Entrypoint-Scoped Stylesheet**
+The CSS file exported for one Package Entry Point, always addressed as that entry point plus `/styles.css`, such as `@hell-ui/angular/button/styles.css` or `@hell-ui/angular/features/code-editor/styles.css`. Category-level style paths are not public package contracts.
+
+**Shared Style Substrate**
+The package-level CSS substrate shared by entrypoint-scoped styles. In `@hell-ui/angular`, this is `@hell-ui/angular/tokens.css`; it may be imported once before concrete entrypoint styles but must not become a category aggregate.
 
 **Light Root Entry Point**
-The Package Entry Point policy where the root `@hell-ui/angular` export stays constrained to stable core only; primitives stay behind `/primitives` and narrow primitive entry points, while composites, features, and heavier runtime surfaces stay behind secondary entry points.
+The Package Entry Point policy where the root `@hell-ui/angular` export stays constrained to stable core only; UI surfaces stay behind narrow import-path entry points, while features and heavier runtime surfaces stay behind secondary entry points.
 
 **Floating Dismissal**
 The listener-driven part of a Floating Interaction that decides when outside pointer, outside focus, Escape, or caller-defined events should close a surface. The low-level module has no hidden default and does not depend on a closed reason enum. Each primitive or Composite composes explicit pure matcher dismissal rules such as library-provided `hellOutsideClick` rules or caller-defined rules. A rule returns a fixed dismiss decision or no match; composition functions such as `hellDismissOn`, `hellGuardDismiss`, and `hellWithDismissEffect` return the same rule type. The core module consumes only fixed decision effects such as preventDefault, stopPropagation, or focus restoration; it does not consume generic caller-defined cause shapes.

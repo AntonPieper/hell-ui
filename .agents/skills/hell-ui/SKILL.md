@@ -16,7 +16,7 @@ Complete this gate before editing:
 2. Identify touched source, docs, tests, exports, package entrypoints, and
    architecture guards with file search.
 3. Search for existing Hell APIs and precedent before inventing:
-   `rg "Hell[A-Z]|hell[A-Z]|HELL_.*_DIRECTIVES|Ngp|HellUi|PartStyle|data-slot" projects/hell/src projects/hell-docs/src`.
+   `rg "Hell[A-Z]|hell[A-Z]|HELL_.*_DIRECTIVES|Ngp|HellUi|PartStyle|data-slot" packages/angular apps/docs/src`.
 4. Open the matching branch reference below before editing or reviewing that
    branch.
 5. Use configured docs/MCP before relying on current Angular, ng-primitives,

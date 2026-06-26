@@ -1,5 +1,5 @@
 {
   "lib": {
-    "entryFile": "../src/lib/public-api-table.ts"
+    "entryFile": "public-api.ts"
   }
 }

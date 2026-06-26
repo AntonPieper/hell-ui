@@ -33,16 +33,22 @@ export class HellGlobalPointerdownService {
     static ɵprov: i0.ɵɵInjectableDeclaration<HellGlobalPointerdownService>;
 }
 
+// @public
+export function hellShouldHandleGlobalHotkey(event: KeyboardEvent, combo: string, target?: EventTarget | null): boolean;
+
+// @public
+export function matchHotkey(event: KeyboardEvent, combo: string): boolean;
+
 // Warnings were encountered during analysis:
 //
 // types/hell-ui-angular-internal-hotkeys.d.ts:4:1 - (ae-undocumented) Missing documentation for "HellGlobalKeydownHandler".
 // types/hell-ui-angular-internal-hotkeys.d.ts:5:1 - (ae-undocumented) Missing documentation for "HellGlobalPointerdownHandler".
-// types/hell-ui-angular-internal-hotkeys.d.ts:13:5 - (ae-undocumented) Missing documentation for "register".
-// types/hell-ui-angular-internal-hotkeys.d.ts:14:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-internal-hotkeys.d.ts:15:5 - (ae-undocumented) Missing documentation for "ɵprov".
-// types/hell-ui-angular-internal-hotkeys.d.ts:20:5 - (ae-undocumented) Missing documentation for "register".
-// types/hell-ui-angular-internal-hotkeys.d.ts:21:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-internal-hotkeys.d.ts:22:5 - (ae-undocumented) Missing documentation for "ɵprov".
+// types/hell-ui-angular-internal-hotkeys.d.ts:25:5 - (ae-undocumented) Missing documentation for "register".
+// types/hell-ui-angular-internal-hotkeys.d.ts:26:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-internal-hotkeys.d.ts:27:5 - (ae-undocumented) Missing documentation for "ɵprov".
+// types/hell-ui-angular-internal-hotkeys.d.ts:32:5 - (ae-undocumented) Missing documentation for "register".
+// types/hell-ui-angular-internal-hotkeys.d.ts:33:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-internal-hotkeys.d.ts:34:5 - (ae-undocumented) Missing documentation for "ɵprov".
 
 // (No @packageDocumentation comment for this package)
 

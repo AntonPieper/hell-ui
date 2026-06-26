@@ -1,0 +1,9 @@
+{
+  "category": "internal",
+  "header": [
+    "/**",
+    " * @internal Shared listener owner for Hell-owned packages only.",
+    " * Not a consumer shortcut API.",
+    " */"
+  ]
+}

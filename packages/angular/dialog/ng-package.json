@@ -1,5 +1,5 @@
 {
   "lib": {
-    "entryFile": "../src/lib/public-api-primitive-dialog.ts"
+    "entryFile": "public-api.ts"
   }
 }

@@ -28,7 +28,7 @@ protected readonly pdfWorker: HellPdfWorkerSource = '/assets/pdf.worker.mjs';
 
 ```css
 @import "tailwindcss";
-@import "@hell-ui/angular/styles/tokens";
+@import "@hell-ui/angular/tokens.css";
 @import "@hell-ui/pdf-viewer/styles";
 @import "pdfjs-dist/web/pdf_viewer.css";
 ```

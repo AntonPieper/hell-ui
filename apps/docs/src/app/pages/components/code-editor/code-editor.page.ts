@@ -16,7 +16,7 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
   encapsulation: ViewEncapsulation.None,
   styles: [
     `
-      @import '@hell-ui/angular/styles/features/code-editor';
+      @import '@hell-ui/angular/features/code-editor/styles.css';
     `,
   ],
   imports: [ExampleTabs, EditorDemo, CodeBlock, CodeViewerDemo],

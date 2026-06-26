@@ -1,0 +1,8 @@
+{
+  "category": "table-primitives",
+  "header": [
+    "/**",
+    " * @beta Table primitive entry point for semantic native-table utilities.",
+    " */"
+  ]
+}

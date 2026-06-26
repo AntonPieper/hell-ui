@@ -11,7 +11,7 @@ to respond to one key.
 
 Current local implementation evidence:
 
-- `packages/angular/src/lib/core/hotkeys.ts` centralizes document-level `keydown` and `pointerdown` listener ownership behind Angular `DOCUMENT` injection and caller-provided `DestroyRef` cleanup.
+- `packages/angular/internal/hotkeys/hotkeys.ts` centralizes document-level `keydown` and `pointerdown` listener ownership behind Angular `DOCUMENT` injection and caller-provided `DestroyRef` cleanup.
 - `HellOmnibar` exposes an optional `hotkey` input. The default is `null`; when configured, it can open the command palette from a document-level shortcut.
 - `HellPdfViewer` exposes `globalShortcuts`. The default is `false`; host-level shortcuts still work from the focused viewer without a document listener.
 - PDF global shortcuts are scoped to a viewer that has focus, pointer activity, or selection inside it. Omnibar bare shortcuts avoid stealing from other editable targets.

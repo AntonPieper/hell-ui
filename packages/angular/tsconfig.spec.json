@@ -1,12 +1,13 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "../../out-tsc/spec",
     "paths": {
-      "@hell-ui/angular/table-tanstack": [
-        "./src/lib/public-api-table-tanstack.ts"
+      "@hell-ui/angular": [
+        "./public-api.ts"
+      ],
+      "@hell-ui/angular/*": [
+        "./*/public-api.ts"
       ]
     },
     "types": [
@@ -14,7 +15,10 @@
     ]
   },
   "include": [
-    "src/**/*.d.ts",
-    "src/**/*.spec.ts"
+    "**/*.d.ts",
+    "**/*.spec.ts"
+  ],
+  "exclude": [
+    "node_modules/**"
   ]
 }

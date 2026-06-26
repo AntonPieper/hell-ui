@@ -43,8 +43,8 @@ Angular Package Format artifacts.
   root scripts delegating through pnpm filters.
 - Architecture, CI-contract, package-consumer, release, and docs tooling must
   stop assuming `projects/*` source roots.
-- Generated entrypoint manifests remain the source of truth for
-  `@hell-ui/angular` public entrypoints, but their package paths now live under
-  `packages/angular`.
+- `@hell-ui/angular` entrypoint metadata now lives with each entrypoint under
+  `packages/angular` as `hell-entrypoint.json`; generated manifests are derived
+  from those sidecars.
 - The split PDF package remains first-class as `packages/pdf-viewer`; it is not
   folded back into `@hell-ui/angular`.

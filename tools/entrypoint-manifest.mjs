@@ -1,254 +1,53 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { basename, dirname, join, relative, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 const packageName = '@hell-ui/angular';
 export const libraryRoot = 'packages/angular';
 export const sourcePackageCondition = '@heinrich/source';
+export const entrypointMetadataFileName = 'hell-entrypoint.json';
 
-export const entrypointManifest = {
-  root: {
-    id: 'root',
-    specifier: packageName,
-    publicApiPath: `${libraryRoot}/src/public-api.ts`,
-    exports: ['./lib/public-api-core'],
-    header: [
-      '/*',
-      ' * Public API Surface of @hell-ui/angular — Heinrich Element Library',
-      ' */',
-      '',
-      '// The root entry point is intentionally lightweight/core-only.',
-    ],
-    footer: [
-      '// Primitives remain available through @hell-ui/angular/primitives and narrow',
-      '// primitive entry points such as @hell-ui/angular/button.',
-      '// Composites and optional features are available through entry points:',
-      '// - @hell-ui/angular/composites',
-      '// - @hell-ui/angular/table (table primitives)',
-      '// - @hell-ui/angular/table-tanstack (Hell-styled TanStack Table shell)',
-      '// - @hell-ui/angular/features/code-editor (kept optional CodeMirror entry point),',
-      '//   @hell-ui/angular/features/audio-transcript (optional audio transcript provider)',
-    ],
-  },
-  explicit: [
-    {
-      id: 'core',
-      specifier: `${packageName}/core`,
-      packageDir: `${libraryRoot}/core`,
-      publicApiPath: `${libraryRoot}/src/lib/public-api-core.ts`,
-      entryFile: '../src/lib/public-api-core.ts',
-      exports: [
-        './core/types',
-        './core/styleable',
-        './core/part-style-merge',
-        './core/search',
-        './core/labels',
-        './core/floating-element',
-      ],
-    },
-    {
-      id: 'internal:hotkeys',
-      specifier: `${packageName}/internal/hotkeys`,
-      packageDir: `${libraryRoot}/internal/hotkeys`,
-      publicApiPath: `${libraryRoot}/src/lib/public-api-internal-hotkeys.ts`,
-      entryFile: '../../src/lib/public-api-internal-hotkeys.ts',
-      exports: [],
-      extraExports: [
-        "export { HellGlobalKeydownService, HellGlobalPointerdownService } from './core/hotkeys';",
-        "export type { HellGlobalKeydownHandler, HellGlobalPointerdownHandler } from './core/hotkeys';",
-      ],
-      header: [
-        '/**',
-        ' * @internal Shared listener owner for Hell-owned packages only.',
-        ' * Not a consumer shortcut API.',
-        ' */',
-      ],
-    },
-    {
-      id: 'testing',
-      specifier: `${packageName}/testing`,
-      packageDir: `${libraryRoot}/testing`,
-      publicApiPath: `${libraryRoot}/src/testing/public-api.ts`,
-      entryFile: '../src/testing/public-api.ts',
-      exports: [
-        './button-harness',
-        './dialog-harness',
-        './interactive-harnesses',
-        './table-harness',
-      ],
-    },
-    {
-      id: 'table',
-      specifier: `${packageName}/table`,
-      packageDir: `${libraryRoot}/table`,
-      publicApiPath: `${libraryRoot}/src/lib/public-api-table.ts`,
-      entryFile: '../src/lib/public-api-table.ts',
-      exports: ['./table/table'],
-      header: [
-        '/**',
-        ' * @beta Table primitive entry point for semantic native-table utilities.',
-        ' */',
-      ],
-    },
-    {
-      id: 'table-tanstack',
-      specifier: `${packageName}/table-tanstack`,
-      packageDir: `${libraryRoot}/table-tanstack`,
-      publicApiPath: `${libraryRoot}/src/lib/public-api-table-tanstack.ts`,
-      entryFile: '../src/lib/public-api-table-tanstack.ts',
-      exports: ['./table-tanstack/table-tanstack'],
-      header: ['/**', ' * @experimental Hell-styled TanStack Table shell entry point.', ' */'],
-    },
-    {
-      id: 'table-tanstack-virtual',
-      specifier: `${packageName}/table-tanstack/virtual`,
-      packageDir: `${libraryRoot}/table-tanstack/virtual`,
-      publicApiPath: `${libraryRoot}/src/lib/public-api-table-tanstack-virtual.ts`,
-      entryFile: '../../src/lib/public-api-table-tanstack-virtual.ts',
-      exports: ['./table-tanstack/virtual/virtual-rows'],
-      header: [
-        '/**',
-        ' * @experimental Optional TanStack Virtual row strategy for the Hell TanStack Table shell.',
-        ' */',
-      ],
-    },
-  ],
-  groups: [
-    {
-      id: 'primitives',
-      singular: 'primitive',
-      sourceDir: `${libraryRoot}/src/lib/primitives`,
-      internalDirectories: ['adapters'],
-      aggregate: {
-        id: 'primitives',
-        specifier: `${packageName}/primitives`,
-        packageDir: `${libraryRoot}/primitives`,
-        publicApiPath: `${libraryRoot}/src/lib/public-api-primitives.ts`,
-        entryFile: '../src/lib/public-api-primitives.ts',
-        extraExports: ["export * from './core/styleable';"],
-      },
-      entryTemplate: {
-        specifier: `${packageName}/{slug}`,
-        packageDir: `${libraryRoot}/{slug}`,
-        publicApiPath: `${libraryRoot}/src/lib/public-api-primitive-{slug}.ts`,
-        entryFile: '../src/lib/public-api-primitive-{slug}.ts',
-        exportPath: './primitives/{slug}/{slug}',
-      },
-      entries: [
-        'button',
-        'card',
-        'separator',
-        'tag',
-        'avatar',
-        'input',
-        'search',
-        'listbox',
-        'field',
-        'checkbox',
-        'switch',
-        'radio',
-        'toggle',
-        'tabs',
-        'accordion',
-        'dialog',
-        'popover',
-        'flyout',
-        'tooltip',
-        'menu',
-        'combobox',
-        'select',
-        'progress',
-        'slider',
-        'skeleton',
-        'breadcrumbs',
-        'icon',
-        'pagination',
-        'date-picker',
-      ],
-      entryOverrides: {
-        input: {
-          extraExports: ["export * from './core/styleable';"],
-        },
-      },
-    },
-    {
-      id: 'composites',
-      singular: 'composite',
-      sourceDir: `${libraryRoot}/src/lib/composites`,
-      internalDirectories: [],
-      aggregate: {
-        id: 'composites',
-        specifier: `${packageName}/composites`,
-        packageDir: `${libraryRoot}/composites`,
-        publicApiPath: `${libraryRoot}/src/lib/public-api-composites.ts`,
-        entryFile: '../src/lib/public-api-composites.ts',
-      },
-      entryTemplate: {
-        specifier: `${packageName}/{slug}`,
-        packageDir: `${libraryRoot}/{slug}`,
-        publicApiPath: `${libraryRoot}/src/lib/public-api-composite-{slug}.ts`,
-        entryFile: '../src/lib/public-api-composite-{slug}.ts',
-        exportPath: './composites/{slug}/{slug}',
-      },
-      entries: [
-        'date-input',
-        'time-input',
-        'avatar-group',
-        'dialpad',
-        'drop-zone',
-        'audio-player',
-        'resizable',
-        'split-view',
-        'app-shell',
-        'toast',
-        'omnibar',
-      ],
-    },
-    {
-      id: 'features',
-      singular: 'feature',
-      sourceDir: `${libraryRoot}/src/lib/features`,
-      internalDirectories: ['assets', 'table-utilities'],
-      entryTemplate: {
-        specifier: `${packageName}/features/{slug}`,
-        packageDir: `${libraryRoot}/features/{slug}`,
-        publicApiPath: `${libraryRoot}/src/lib/public-api-feature-{slug}.ts`,
-        entryFile: '../../src/lib/public-api-feature-{slug}.ts',
-        exportPath: './features/{slug}/{slug}',
-      },
-      entryOverrides: {
-        'audio-transcript': {
-          header: [
-            '/**',
-            ' * @experimental Optional browser transcript provider for @hell-ui/angular/audio-player.',
-            ' * Import only where best-effort transcript capture is deliberately enabled.',
-            ' */',
-          ],
-        },
-        'code-editor': {
-          header: [
-            '/**',
-            ' * @experimental Kept optional CodeMirror feature entry point. Keep behind lazy/client-only browser boundaries.',
-            ' */',
-          ],
-        },
-      },
-      entries: ['audio-transcript', 'code-editor'],
-    },
-  ],
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const libraryRootPath = join(root, libraryRoot);
+
+export const entrypointCategories = {
+  ROOT: 'root',
+  CORE: 'core',
+  INTERNAL: 'internal',
+  TESTING: 'testing',
+  STYLED_PRIMITIVE: 'styled-primitive',
+  MIXED_ENTRYPOINT: 'mixed-entrypoint',
+  COMPOSITE: 'composite',
+  FEATURE: 'feature',
+  TABLE_PRIMITIVES: 'table-primitives',
+  TANSTACK_TABLE_SHELL: 'tanstack-table-shell',
+  TANSTACK_TABLE_BODY_STRATEGY: 'tanstack-table-body-strategy',
 };
 
+const categorySort = new Map(
+  [
+    entrypointCategories.ROOT,
+    entrypointCategories.CORE,
+    entrypointCategories.INTERNAL,
+    entrypointCategories.TESTING,
+    entrypointCategories.TABLE_PRIMITIVES,
+    entrypointCategories.TANSTACK_TABLE_SHELL,
+    entrypointCategories.TANSTACK_TABLE_BODY_STRATEGY,
+    entrypointCategories.STYLED_PRIMITIVE,
+    entrypointCategories.MIXED_ENTRYPOINT,
+    entrypointCategories.COMPOSITE,
+    entrypointCategories.FEATURE,
+  ].map((category, index) => [category, index]),
+);
+
+export const entrypointManifest = readEntrypointManifest();
+
 export function entrypointPublicApiFiles() {
-  return [
-    entrypointManifest.root,
-    ...entrypointManifest.explicit,
-    ...aggregateEntrypoints(),
-    ...individualEntrypoints(),
-  ];
+  return [entrypointManifest.root, ...entrypointManifest.entries];
 }
 
 export function secondaryPackageEntrypoints() {
-  return [
-    ...entrypointManifest.explicit,
-    ...aggregateEntrypoints(),
-    ...individualEntrypoints(),
-  ].map((entrypoint) => ({
+  return entrypointManifest.entries.map((entrypoint) => ({
     ...entrypoint,
     packagePath: `${entrypoint.packageDir}/ng-package.json`,
   }));
@@ -261,13 +60,18 @@ export function entrypointTsconfigPaths() {
   }));
 }
 
-export function entrypointSourceGroups() {
-  return entrypointManifest.groups.map((group) => ({
-    id: group.id,
-    sourceDir: group.sourceDir,
-    internalDirectories: [...group.internalDirectories],
-    entries: [...group.entries],
-  }));
+export function componentEntrypoints() {
+  return entrypointManifest.entries.filter((entrypoint) =>
+    [
+      entrypointCategories.STYLED_PRIMITIVE,
+      entrypointCategories.MIXED_ENTRYPOINT,
+      entrypointCategories.COMPOSITE,
+      entrypointCategories.FEATURE,
+      entrypointCategories.TABLE_PRIMITIVES,
+      entrypointCategories.TANSTACK_TABLE_SHELL,
+      entrypointCategories.TANSTACK_TABLE_BODY_STRATEGY,
+    ].includes(entrypoint.category),
+  );
 }
 
 export function renderPublicApiFile(entrypoint) {
@@ -289,36 +93,114 @@ export function renderNgPackageFile(entrypoint) {
   return `${JSON.stringify({ lib: { entryFile: entrypoint.entryFile } }, null, 2)}\n`;
 }
 
-function aggregateEntrypoints() {
-  return entrypointManifest.groups
-    .filter((group) => group.aggregate)
-    .map((group) => ({
-      ...group.aggregate,
-      exports: group.entries.map((slug) => interpolate(group.entryTemplate.exportPath, slug)),
-    }));
-}
-
-function individualEntrypoints() {
-  return entrypointManifest.groups.flatMap((group) =>
-    group.entries.map((slug) => {
-      const override = group.entryOverrides?.[slug] ?? {};
-      return {
-        id: `${group.singular}:${slug}`,
-        slug,
-        group: group.id,
-        specifier: interpolate(group.entryTemplate.specifier, slug),
-        packageDir: interpolate(group.entryTemplate.packageDir, slug),
-        publicApiPath: interpolate(group.entryTemplate.publicApiPath, slug),
-        entryFile: interpolate(group.entryTemplate.entryFile, slug),
-        exports: override.exports ?? [interpolate(group.entryTemplate.exportPath, slug)],
-        header: override.header,
-        footer: override.footer,
-        extraExports: override.extraExports,
-      };
-    }),
+function readEntrypointManifest() {
+  const entries = discoverEntrypointMetadataFiles().map(readEntrypointMetadataFile);
+  const rootEntries = entries.filter(
+    (entrypoint) => entrypoint.category === entrypointCategories.ROOT,
   );
+  if (rootEntries.length !== 1) {
+    throw new Error(
+      `Expected exactly one ${entrypointMetadataFileName} with category "${entrypointCategories.ROOT}" in ${libraryRoot}; found ${rootEntries.length}`,
+    );
+  }
+  const [rootEntry] = rootEntries;
+
+  const secondaryEntries = entries
+    .filter((entrypoint) => entrypoint !== rootEntry)
+    .sort(compareEntrypoints);
+
+  return { root: rootEntry, entries: secondaryEntries };
 }
 
-function interpolate(template, slug) {
-  return template.replaceAll('{slug}', slug);
+function discoverEntrypointMetadataFiles() {
+  const files = [];
+  visit(libraryRootPath);
+  return files.sort();
+
+  function visit(directory) {
+    for (const dirent of readdirSync(directory, { withFileTypes: true })) {
+      const path = join(directory, dirent.name);
+      if (dirent.isDirectory()) {
+        visit(path);
+        continue;
+      }
+      if (dirent.isFile() && dirent.name === entrypointMetadataFileName) {
+        files.push(path);
+      }
+    }
+  }
+}
+
+function readEntrypointMetadataFile(path) {
+  const metadata = JSON.parse(readFileSync(path, 'utf8'));
+  assertKnownMetadataKeys(path, metadata);
+  const packageDir = toRepoPath(dirname(path));
+  const relPackageDir = packageDir.slice(libraryRoot.length).replace(/^\//, '');
+  const category = metadata.category;
+  const validCategories = new Set(Object.values(entrypointCategories));
+  if (!validCategories.has(category)) {
+    throw new Error(
+      `${relative(root, path)} must declare category as one of ${[...validCategories].join(', ')}`,
+    );
+  }
+
+  return {
+    id: relPackageDir || 'root',
+    category,
+    specifier: relPackageDir ? `${packageName}/${relPackageDir}` : packageName,
+    packageDir,
+    metadataPath: toRepoPath(path),
+    publicApiPath: `${packageDir}/public-api.ts`,
+    entryFile: stringValue(path, metadata, 'entryFile') ?? 'public-api.ts',
+    exports: stringArray(path, metadata, 'exports') ?? defaultExports(packageDir, category),
+    header: stringArray(path, metadata, 'header'),
+    footer: stringArray(path, metadata, 'footer'),
+    extraExports: stringArray(path, metadata, 'extraExports'),
+  };
+}
+
+function assertKnownMetadataKeys(path, metadata) {
+  const allowed = new Set(['category', 'entryFile', 'exports', 'header', 'footer', 'extraExports']);
+  for (const key of Object.keys(metadata)) {
+    if (!allowed.has(key)) {
+      throw new Error(`${relative(root, path)} declares unknown entrypoint metadata key "${key}"`);
+    }
+  }
+}
+
+function stringValue(path, metadata, key) {
+  const value = metadata[key];
+  if (value === undefined) return undefined;
+  if (typeof value !== 'string') {
+    throw new Error(`${relative(root, path)} metadata key "${key}" must be a string`);
+  }
+  return value;
+}
+
+function stringArray(path, metadata, key) {
+  const value = metadata[key];
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || value.some((item) => typeof item !== 'string')) {
+    throw new Error(`${relative(root, path)} metadata key "${key}" must be an array of strings`);
+  }
+  return value;
+}
+
+function defaultExports(packageDir, category) {
+  if (category === entrypointCategories.ROOT) return [];
+  return [`./${basename(packageDir)}`];
+}
+
+function compareEntrypoints(a, b) {
+  const categoryDelta = categoryRank(a.category) - categoryRank(b.category);
+  if (categoryDelta) return categoryDelta;
+  return a.packageDir.localeCompare(b.packageDir);
+}
+
+function categoryRank(category) {
+  return categorySort.get(category) ?? Number.MAX_SAFE_INTEGER;
+}
+
+function toRepoPath(path) {
+  return relative(root, path).split(sep).join('/');
 }

@@ -26,11 +26,11 @@ A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`;
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | Root/core only                | `@hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs` plus Angular app peers                        | `@hell-ui/angular`, `@hell-ui/angular/core`, `@hell-ui/angular/testing`; no Hell CSS required                                                                                                                                     | [`root-core`, `core`, `testing`](../../tools/check-package-consumer.mjs)                |
 | Button Part Style Map         | Core peer group only                                                                                                                            | Narrow Button import plus `ui`; no Hell CSS/Tailwind required for compile-time behavior proof                                                                                                                                     | [`button-ui`](../../tools/check-package-consumer.mjs)                                   |
-| Styled narrow primitive       | Core peer group plus `tailwindcss`                                                                                                              | Narrow primitive import plus `@hell-ui/angular/styles/tokens` and primitive/component CSS                                                                                                                                         | [`button`](../../tools/check-package-consumer.mjs)                                      |
-| Aggregate primitives          | Core peer group plus `tailwindcss`, `@angular/router`, `@ng-icons/font-awesome`                                                                 | `@hell-ui/angular/primitives` plus primitive CSS. Router is needed because the aggregate includes dialog through `ng-primitives/dialog`; Font Awesome is needed because icon-backed primitives are bundled in the aggregate FESM. | [`primitives-css`](../../tools/check-package-consumer.mjs)                              |
-| Composites                    | Core peer group plus `tailwindcss`; add `@ng-icons/font-awesome` for aggregate/icon-backed composites                                           | Prefer narrow composite entry points such as `@hell-ui/angular/app-shell` and `@hell-ui/angular/audio-player`; use `@hell-ui/angular/composites` only when you accept aggregate peers                                             | [`app-shell`, `audio-player`, `composites-css`](../../tools/check-package-consumer.mjs) |
+| Styled narrow primitive       | Core peer group plus `tailwindcss`                                                                                                              | Narrow primitive import plus `@hell-ui/angular/tokens.css` and each imported entry point's `styles.css`                                                                                                                           | [`button`](../../tools/check-package-consumer.mjs)                                      |
+| Icon-backed primitive mix     | Core peer group plus `tailwindcss`, `@ng-icons/font-awesome`                                                                                    | Narrow primitive imports such as `@hell-ui/angular/button`, `@hell-ui/angular/icon`, and `@hell-ui/angular/input`; no aggregate primitive path                                                                                    | [`primitive-icons-css`](../../tools/check-package-consumer.mjs)                         |
+| Composites                    | Core peer group plus `tailwindcss`; add `@ng-icons/font-awesome` for icon-backed composites                                                    | Narrow composite entry points such as `@hell-ui/angular/app-shell` and `@hell-ui/angular/audio-player`, plus explicit entrypoint CSS                                                                                            | [`app-shell`, `audio-player`, `composite-css`](../../tools/check-package-consumer.mjs)  |
 | Audio transcript              | Composite audio-player peer group; no CodeMirror or pdf.js peers                                                                                | `@hell-ui/angular/audio-player` plus provider import from `@hell-ui/angular/features/audio-transcript`; use composite CSS, no feature CSS                                                                                         | [`audio-transcript`](../../tools/check-package-consumer.mjs)                            |
-| Table primitives              | Core peer group plus `tailwindcss`; no optional table-engine peers                                                                              | `@hell-ui/angular/table`; CSS from `@hell-ui/angular/styles/table`; removed table aliases stay unavailable                                                                                                                        | [`table`, `no-legacy-alias`](../../tools/check-package-consumer.mjs)                    |
+| Table primitives              | Core peer group plus `tailwindcss`; no optional table-engine peers                                                                              | `@hell-ui/angular/table`; CSS from `@hell-ui/angular/table/styles.css`; removed table aliases stay unavailable                                                                                                                    | [`table`, `no-legacy-alias`](../../tools/check-package-consumer.mjs)                    |
 | TanStack table shell          | Core peer group plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`                                          | `@hell-ui/angular/table-tanstack`; caller-owned TanStack Table remains the engine                                                                                                                                                 | [`table-tanstack`](../../tools/check-package-consumer.mjs)                              |
 | TanStack virtual row strategy | TanStack shell peer group plus optional `@tanstack/virtual-core`                                                                                | `@hell-ui/angular/table-tanstack/virtual`; mounts on `hell-tanstack-table` and does not create a second table engine or root component                                                                                            | [`table-tanstack-virtual`](../../tools/check-package-consumer.mjs)                      |
 | Code editor                   | Core peer group plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, `@lezer/highlight` | Kept optional entry point `@hell-ui/angular/features/code-editor`; keep lazy/client-only when runtime risk matters                                                                                                                | [`code-editor`](../../tools/check-package-consumer.mjs)                                 |
@@ -46,7 +46,7 @@ Examples:
 # Button Part Style Map. Proved by the button-ui scenario.
 pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs
 
-# Styled primitives. Proved by the button/primitives-css scenarios.
+# Styled primitives. Proved by the button/primitive-icons-css scenarios.
 pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss
 pnpm add -D @tailwindcss/postcss postcss
 
@@ -73,7 +73,7 @@ Maintainers can rerun a proof path from the product workspace:
 
 ```bash
 HELL_PACKAGE_CONSUMER_SCENARIOS=button-ui pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=primitives-css pnpm test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=primitive-icons-css pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=audio-player pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=audio-transcript pnpm test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=table,no-legacy-alias pnpm test:package-consumer -- --minimal-deps
@@ -100,12 +100,13 @@ import { HellButtonHarness } from '@hell-ui/angular/testing';
 Avoid broad imports when a narrow path exists:
 
 ```ts
-// Valid, but broader than the matching narrow entry points. Use only when you intentionally accept aggregate peers.
-import { HellButton, HellInput } from '@hell-ui/angular/primitives';
-import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/composites';
+// Removed aggregate paths. Import each surface from its import-path entry point instead.
+import { HellButton } from '@hell-ui/angular/button';
+import { HellInput } from '@hell-ui/angular/input';
+import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
 ```
 
-Use `@hell-ui/angular` for stable core exports only. Use `/primitives`, `/composites`, `/table`, `/table-tanstack`, `/features/*`, and narrow component entry points for UI surfaces.
+Use `@hell-ui/angular` for stable core exports only. Use `/table`, `/table-tanstack`, `/features/*`, and narrow component entry points for UI surfaces.
 
 ## CSS imports
 
@@ -115,20 +116,21 @@ Preferred primitive imports:
 
 ```css
 @import 'tailwindcss';
-@import '@hell-ui/angular/styles/tokens';
-@import '@hell-ui/angular/styles/primitives';
+@import '@hell-ui/angular/tokens.css';
+@import '@hell-ui/angular/button/styles.css';
+@import '@hell-ui/angular/input/styles.css';
 ```
 
-For a primitive-only app, that is enough. Add only the extra aggregate or feature CSS needed by the entry points the app imports:
+Add only the extra entrypoint CSS needed by the entry points the app imports:
 
 ```css
-@import '@hell-ui/angular/styles/composites';
-@import '@hell-ui/angular/styles/table';
-@import '@hell-ui/angular/styles/features/code-editor';
+@import '@hell-ui/angular/app-shell/styles.css';
+@import '@hell-ui/angular/table/styles.css';
+@import '@hell-ui/angular/features/code-editor/styles.css';
 @import '@hell-ui/pdf-viewer/styles';
 ```
 
-Avoid `@hell-ui/angular/styles` for production migration unless the app intentionally accepts every primitive, composite, CodeMirror, and table style in one bundle. PDF viewer styles come from `@hell-ui/pdf-viewer/styles`.
+Avoid old category-level style imports; CSS follows the same import-path-first rule as TypeScript. PDF viewer styles come from `@hell-ui/pdf-viewer/styles`.
 
 Hell's migrated component defaults are compiled into the shipped CSS entry
 points. Consumers do not need to add Tailwind `@source` scanning for

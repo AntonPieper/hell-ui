@@ -12,10 +12,10 @@ work.
 - Root `@hell-ui/angular` stays light and core-only. Primitives, composites,
   table primitives, TanStack shell, optional features, and PDF use narrow
   entrypoints.
-- Public entrypoints are manifest-driven. Edit
-  `tools/entrypoint-manifest.mjs`, regenerate manifests, and let
+- Public entrypoints are entrypoint-sidecar-driven. Edit the entrypoint's local
+  `hell-entrypoint.json`, regenerate manifests, and let
   `pnpm run test:architecture` catch stale public API files, `ng-package.json`,
-  `tsconfig` paths, light-root drift, and removed legacy table aliases.
+  missing sidecars, light-root drift, and removed legacy table aliases.
 - Package peer metadata is package-wide. Optional peers in
   `packages/angular/package.json` are not runtime-leak evidence; peer isolation
   claims need package-consumer proof.

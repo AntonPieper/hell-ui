@@ -28,9 +28,8 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
         Forms/core/common, ng-primitives, @angular/cdk, <code>@floating-ui/dom</code>, ng-icons
         core, and rxjs. If you import Hell styles, Tailwind is required via
         <code>tailwindcss</code>. Feature peers are still only runtime-needed when you import their
-        feature entry points. Add <code>@angular/router</code> only when you import Hell dialog or
-        the aggregate <code>@hell-ui/angular/primitives</code> entry point, because
-        <code>ng-primitives/dialog</code> has a router peer. Add
+        feature entry points. Add <code>@angular/router</code> only when you import Hell dialog,
+        because <code>ng-primitives/dialog</code> has a router peer. Add
         <code>@ng-icons/font-awesome</code> only when you use icon-backed entries such as pagination
         or date-picker.
       </p>
@@ -47,9 +46,8 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
       <p>
         Import Tailwind first, then the narrow Hell style entry points you need. The library exposes
         Tailwind-facing CSS variables such as <code>bg-hell-surface</code>,
-        <code>text-hell-foreground</code>, and <code>border-hell-border</code>. The broad
-        <code>@hell-ui/angular/styles</code> entry point includes composites and feature styles such
-        as CodeMirror, so it is convenient for demos but not the production default.
+        <code>text-hell-foreground</code>, and <code>border-hell-border</code>. CSS follows
+        import paths: shared tokens first, then each component or feature stylesheet you use.
       </p>
       <hd-code-block [code]="stylesCode" />
 

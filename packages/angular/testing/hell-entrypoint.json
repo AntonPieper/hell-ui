@@ -1,0 +1,9 @@
+{
+  "category": "testing",
+  "exports": [
+    "./button-harness",
+    "./dialog-harness",
+    "./interactive-harnesses",
+    "./table-harness"
+  ]
+}

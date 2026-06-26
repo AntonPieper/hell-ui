@@ -1,0 +1,13 @@
+{
+  "category": "internal",
+  "exports": [
+    "./ngp-state-adapters",
+    "./ngp-popover-close-adapter"
+  ],
+  "header": [
+    "/**",
+    " * @internal Version-bound ng-primitives compatibility adapters.",
+    " * Not a consumer shortcut API.",
+    " */"
+  ]
+}

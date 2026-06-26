@@ -23,12 +23,12 @@ for (const entrypoint of secondaryPackageEntrypoints()) {
 }
 
 if (stale.length) {
-  console.error(`Entrypoint manifest generated files are stale:\n${stale.map((path) => `- ${path}`).join('\n')}`);
+  console.error(`Entrypoint generated files are stale:\n${stale.map((path) => `- ${path}`).join('\n')}`);
   process.exitCode = 1;
 } else if (checkOnly) {
-  console.log('Entrypoint manifest generated files are current.');
+  console.log('Entrypoint generated files are current.');
 } else {
-  console.log(`Entrypoint manifest generated files updated (${changed} changed).`);
+  console.log(`Entrypoint generated files updated (${changed} changed).`);
 }
 
 function writeOrCheck(relativePath, expected) {

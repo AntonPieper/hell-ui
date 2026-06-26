@@ -11,7 +11,7 @@ const selectedConsumerScenarios = parseList(process.env.HELL_RELEASE_DRY_RUN_CON
   'root-core',
   'button-ui',
   'button',
-  'primitives-css',
+  'primitive-icons-css',
   'audio-player',
   'audio-transcript',
   'table',

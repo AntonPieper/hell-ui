@@ -19,7 +19,10 @@ Hell exposes:
 - Features: heavier modules behind feature-specific entry points.
 
 The root package `@hell-ui/angular` export is limited to stable core only.
-Primitives live behind `/primitives` and narrow primitive entry points. Composites live behind `/composites` and narrow composite entry points; kept features remain behind scoped entry points. The PDF viewer lives in the separate `@hell-ui/pdf-viewer` package.
+UI surfaces live behind narrow import-path entry points such as `/button`,
+`/select`, `/app-shell`, and `/features/code-editor`; kept features remain
+behind scoped entry points. The PDF viewer lives in the separate
+`@hell-ui/pdf-viewer` package.
 
 ## Install
 
@@ -30,7 +33,7 @@ pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui
 
 Feature peers remain optional at runtime, but package peer metadata is package-wide: install the core peer group for any package entry point, then add tier peers only for entry points and styles you import. A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`; install any missing peers explicitly.
 
-`@floating-ui/dom` is required by `ng-primitives`; install it explicitly with the primitive stack. `@angular/router` is an optional peer only for `ng-primitives/dialog`; install it when importing Hell dialog or the aggregate `/primitives` entry point.
+`@floating-ui/dom` is required by `ng-primitives`; install it explicitly with the primitive stack. `@angular/router` is an optional peer only for `ng-primitives/dialog`; install it when importing Hell dialog.
 
 ### Peer dependency tiers
 
@@ -39,8 +42,8 @@ Package-consumer scenarios assert these peer groups with strict peer installs. C
 | Tier | Entry points / scenarios | Peer group asserted |
 | --- | --- | --- |
 | Core | `@hell-ui/angular`, `/core`, `/testing`; `root-core`, `core`, `testing` | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `ng-primitives`, `rxjs` |
-| Primitive | Narrow primitives such as `/button`; aggregate `/primitives`; `button-ui`, `button`, `primitives-css` | Core peers. Add `tailwindcss` when importing primitive CSS. Aggregate `/primitives` also asserts optional `@angular/router` and `@ng-icons/font-awesome` because dialog and icon-backed primitives are bundled in the aggregate FESM. |
-| Composite | `/composites` and narrow composite entry points such as `/app-shell` and `/audio-player`; `composites-css`, `app-shell`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Aggregate/icon-backed composites also assert optional `@ng-icons/font-awesome`. |
+| Primitive | Narrow primitives such as `/button`, `/select`, and `/icon`; `button-ui`, `button`, `primitive-icons-css` | Core peers. Add `tailwindcss` when importing primitive CSS; add `@ng-icons/font-awesome` for icon-backed entries. |
+| Composite | Narrow composite entry points such as `/app-shell` and `/audio-player`; `composite-css`, `app-shell`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Icon-backed composites also assert optional `@ng-icons/font-awesome`. |
 | Audio transcript | `/features/audio-transcript`; `audio-transcript` | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled. |
 | Table primitives | `/table`; `table`, `no-legacy-alias` | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack Table, or TanStack Virtual peers. The negative scenario proves removed legacy table aliases and CSS aliases stay unavailable. |
 | TanStack table shell | `/table-tanstack`; `table-tanstack` | Core peers plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`. Root, button, and `/table` scenarios prove TanStack Table is not installed unless this shell is imported. |
@@ -59,15 +62,15 @@ Every exported API belongs to one documented category:
 - `Beta`: public but still pre-1.0. Shape changes require release notes and migration guidance, but are not promoted as final stable contracts.
 - `Experimental`: importable app surface for heavier/browser-specific features. API comments or generated entry-point comments must include `@experimental`, docs must disclose the risk, and apps should isolate the import behind lazy/client-only boundaries when applicable.
 - `Deprecated`: compatibility alias with a preferred replacement. API comments must include `@deprecated`, docs must name the replacement, and removal needs an explicit release decision.
-- `Internal`: implementation detail, not a consumer import path. Public API files must not export from `/internal/`, `/adapters/`, or manifest-declared internal directories unless the architecture allowlist names the exception and rationale.
+- `Internal`: implementation detail, not a consumer import path. Public API files must not export from `/internal/`, `/adapters/`, or metadata-declared internal directories unless the architecture allowlist names the exception and rationale.
 
-The stable API report set currently covers `@hell-ui/angular`, `@hell-ui/angular/core`, `@hell-ui/angular/primitives`, and `@hell-ui/angular/testing`.
+The stable API report set currently covers `@hell-ui/angular`, `@hell-ui/angular/core`, `@hell-ui/angular/input`, `@hell-ui/angular/dialpad`, and `@hell-ui/angular/testing`.
 
 | Surface | Category | Browser/SSR notes |
 |---|---|---|
 | Root/core (`@hell-ui/angular`, `/core`) | Stable | Lightweight contracts; no composite or heavy feature exports |
-| Primitives (`@hell-ui/angular/primitives`, narrow primitive entry points) | Stable | SSR-safe unless a primitive's own docs say otherwise |
-| Composites (`@hell-ui/angular/composites`, narrow composite entry points) | Beta | Browser-first surfaces can use `window`/`document` and global listeners for overlays |
+| Primitives (narrow primitive entry points) | Stable | SSR-safe unless a primitive's own docs say otherwise |
+| Composites (narrow composite entry points) | Beta | Browser-first surfaces can use `window`/`document` and global listeners for overlays |
 | Table primitives (`@hell-ui/angular/table`) | Beta | Optional peer; uses `ResizeObserver` for table sizing |
 | TanStack table shell (`@hell-ui/angular/table-tanstack`, `/table-tanstack/virtual`) | Experimental | Caller-owned TanStack Table remains the engine; Hell owns shell chrome, styling, projection regions, status views, controls, and the optional TanStack Virtual body strategy |
 | Code editor (`@hell-ui/angular/features/code-editor`) | Experimental | Browser-only CodeMirror runtime: `window`/`document` interactions |
@@ -85,7 +88,7 @@ Prefer the narrowest entry point that contains the API you use:
 
 ```ts
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/primitives';
+import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 import { HellButtonHarness } from '@hell-ui/angular/testing';
@@ -97,21 +100,20 @@ Hell style entry points require Tailwind v4. Prefer fine-grained imports for pro
 
 ```css
 @import "tailwindcss";
-@import "@hell-ui/angular/styles/tokens";
-@import "@hell-ui/angular/styles/primitives";
+@import "@hell-ui/angular/tokens.css";
+@import "@hell-ui/angular/button/styles.css";
 ```
 
-For broader loading:
+Add only the extra entrypoint styles the app imports:
 
 ```css
-@import "@hell-ui/angular/styles/tokens";
-@import "@hell-ui/angular/styles/primitives";
-@import "@hell-ui/angular/styles/composites";
-@import "@hell-ui/angular/styles/features/code-editor";
-@import "@hell-ui/angular/styles/table";
+@import "@hell-ui/angular/tokens.css";
+@import "@hell-ui/angular/app-shell/styles.css";
+@import "@hell-ui/angular/table/styles.css";
+@import "@hell-ui/angular/features/code-editor/styles.css";
 ```
 
-`@hell-ui/angular/styles` includes primitives, composites, and kept in-package feature styles such as CodeMirror. Use it only when the app intentionally accepts all in-package feature styles.
+Old category-level style paths are not public package contracts.
 
 ## Part Style Maps
 

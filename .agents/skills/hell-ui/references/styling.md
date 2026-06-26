@@ -7,7 +7,8 @@ tokens, themes, or design polish.
 
 - Library visuals flow through Part Style Maps, Public Parts with `data-slot`,
   `data-*` state, semantic theme tokens, CSS custom properties, and component
-  CSS under `projects/hell/src/lib/styles/components/`.
+  CSS colocated with import-path-first entry points such as
+  `packages/angular/button/styles.css`.
 - Runtime theming targets semantic Hell tokens such as `--color-hell-*`,
   `--spacing-hell-*`, `--radius-hell-*`, and `--shadow-hell-*`.
   Component-specific public `--hell-*` vars need a documented scoped-theming,
@@ -21,8 +22,8 @@ tokens, themes, or design polish.
 
 ## Part Style Maps
 
-- Start at `projects/hell/src/lib/core/styleable.ts` and
-  `projects/hell/src/lib/core/part-style-merge.ts`.
+- Start at `packages/angular/core/styleable.ts` and
+  `packages/angular/core/part-style-merge.ts`.
 - Export each migrated component's part union and concrete UI type.
 - Use shared `HellUiInput`, `HellRecipe`, `HellPartStyleable`, and configured
   `hellTwMerge`; do not create per-component merge helpers, `clsx`, `cva`,
