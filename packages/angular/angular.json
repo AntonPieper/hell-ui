@@ -8,7 +8,7 @@
     "hell": {
       "projectType": "library",
       "root": ".",
-      "sourceRoot": "src",
+      "sourceRoot": ".",
       "prefix": "hell",
       "architect": {
         "build": {

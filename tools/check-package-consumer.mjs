@@ -132,9 +132,9 @@ const peerGroupContracts = {
   core: { tier: 'core', peers: corePeerGroup },
   'primitive-ui': { tier: 'primitive', peers: corePeerGroup },
   primitive: { tier: 'primitive', peers: [...corePeerGroup, ...stylePeerGroup] },
-  'primitive-aggregate': {
+  'primitive-icons': {
     tier: 'primitive',
-    peers: [...corePeerGroup, ...stylePeerGroup, ...routerPeerGroup, ...fontAwesomePeerGroup],
+    peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup],
   },
   composite: { tier: 'composite', peers: [...corePeerGroup, ...stylePeerGroup] },
   'composite-icons': {
@@ -187,12 +187,6 @@ const behaviorUiWithoutFontAwesomeDeps = [
 ];
 const styledUiWithoutFontAwesomeDeps = [...behaviorUiWithoutFontAwesomeDeps, 'tailwindcss'];
 const styledUiDeps = [...styledUiWithoutFontAwesomeDeps, '@ng-icons/font-awesome'];
-// The aggregate /primitives FESM includes dialog, and ng-primitives/dialog
-// currently imports @angular/router. Hell declares router as an optional peer
-// and only aggregate/dialog consumers should need it. Narrow primitive
-// entrypoints (for example /button) prove router-free consumption for consumers
-// that avoid the aggregate barrel.
-const primitivesDeps = [...styledUiDeps, '@angular/router'];
 const coreDeps = behaviorUiWithoutFontAwesomeDeps;
 const buttonStyledDeps = styledUiWithoutFontAwesomeDeps;
 const codeEditorDeps = [
@@ -235,12 +229,12 @@ const scenarios = [
     stylesCss: '',
   },
   {
-    name: 'primitives-css',
+    name: 'primitive-icons-css',
     aliases: ['primitives'],
-    description: 'primitives entry with primitive CSS and aggregate primitive peers',
+    description: 'narrow icon-backed primitive entries with entrypoint CSS',
     peerTier: 'primitive',
-    peerGroup: 'primitive-aggregate',
-    dependencies: primitivesDeps,
+    peerGroup: 'primitive-icons',
+    dependencies: styledUiDeps,
     mainTs: primitivesConsumerMainTs(),
     stylesCss: primitivesConsumerStylesCss(),
   },
@@ -270,7 +264,8 @@ const scenarios = [
       'background-color:var(--color-hell-primary)',
       'background-color:var(--color-hell-primary-hover)',
       'border-radius:var(--radius-hell-md)',
-      'box-shadow:var(--shadow-hell-xs)',
+      '--_hell-btn-shadow:var(--shadow-hell-xs)',
+      'box-shadow:var(--_hell-btn-shadow)',
       'text-underline-offset:3px',
       'transition-property:background-color,border-color,color,box-shadow',
     ],
@@ -284,14 +279,14 @@ const scenarios = [
     ],
   },
   {
-    name: 'composites-css',
+    name: 'composite-css',
     aliases: ['composites'],
-    description: 'composites entry with composite CSS and icon-backed composite peers',
+    description: 'narrow composite entries with entrypoint CSS and icon-backed peers',
     peerTier: 'composite',
     peerGroup: 'composite-icons',
     dependencies: styledUiDeps,
     mainTs: compositesConsumerMainTs(),
-    stylesCss: compositesConsumerStylesCss(),
+    stylesCss: appShellConsumerStylesCss(),
   },
   {
     name: 'app-shell',
@@ -300,7 +295,7 @@ const scenarios = [
     peerGroup: 'composite',
     dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: appShellConsumerMainTs(),
-    stylesCss: compositesConsumerStylesCss(),
+    stylesCss: audioPlayerConsumerStylesCss(),
   },
   {
     name: 'audio-player',
@@ -309,7 +304,7 @@ const scenarios = [
     peerGroup: 'composite-icons',
     dependencies: audioPlayerDeps,
     mainTs: audioPlayerConsumerMainTs(),
-    stylesCss: compositesConsumerStylesCss(),
+    stylesCss: audioPlayerConsumerStylesCss(),
   },
   {
     name: 'audio-transcript',
@@ -318,7 +313,7 @@ const scenarios = [
     peerGroup: 'audio-transcript',
     dependencies: audioPlayerDeps,
     mainTs: audioTranscriptConsumerMainTs(),
-    stylesCss: compositesConsumerStylesCss(),
+    stylesCss: audioPlayerConsumerStylesCss(),
   },
   {
     name: 'testing',
@@ -356,7 +351,7 @@ const scenarios = [
     dependencies: tableTanStackDeps,
     forbiddenDependencies: tanStackVirtualPeerGroup,
     mainTs: tableTanStackConsumerMainTs(),
-    stylesCss: tableConsumerStylesCss(),
+    stylesCss: tableTanStackConsumerStylesCss(),
   },
   {
     name: 'table-tanstack-virtual',
@@ -365,7 +360,7 @@ const scenarios = [
     peerGroup: 'table-tanstack-virtual',
     dependencies: tableTanStackVirtualDeps,
     mainTs: tableTanStackVirtualConsumerMainTs(),
-    stylesCss: tableConsumerStylesCss(),
+    stylesCss: tableTanStackConsumerStylesCss(),
   },
   {
     name: 'no-legacy-alias',
@@ -709,12 +704,20 @@ function assertModernTableEntrypointContract(packageJson, distRoot) {
     './table',
     './table-tanstack',
     './table-tanstack/virtual',
-    './styles/table',
+    './table/styles.css',
+    './table-tanstack/styles.css',
   ]) {
     if (!exportsMap[exportPath]) fail(`Modern table package export is missing ${exportPath}`);
   }
 
   for (const exportPath of [
+    './primitives',
+    './composites',
+    './styles',
+    './styles/tokens',
+    './styles/primitives',
+    './styles/composites',
+    './styles/table',
     './data-table',
     './table-virtual',
     './table-cdk',
@@ -1315,14 +1318,17 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function primitivesConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellButton, HellInput } from '${packageName}/primitives';
+import { HellButton } from '${packageName}/button';
+import { HellIcon } from '${packageName}/icon';
+import { HellInput } from '${packageName}/input';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [HellButton, HellInput],
+  imports: [HellButton, HellIcon, HellInput],
   template: \`
     <button hellButton type="button">Save</button>
+    <hell-icon name="faSolidCheck" aria-hidden="true" />
     <input hellInput aria-label="Name" />
   \`,
 })
@@ -1335,7 +1341,8 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function compositesConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_APP_SHELL_DIRECTIVES, HellDialpad, type HellDialpadUi } from '${packageName}/composites';
+import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/app-shell';
+import { HellDialpad, type HellDialpadUi } from '${packageName}/dialpad';
 
 const dialpadUi = {
   root: 'max-w-[320px]',
@@ -1734,6 +1741,8 @@ import { HELL_TABLE_DIRECTIVES } from '${packageName}/features/data-table';
 import { HELL_TABLE_UTILITY_DIRECTIVES } from '${packageName}/features/table-utilities';
 import { REMOVED_TABLE_CDK } from '${packageName}/table-cdk';
 import { REMOVED_TABLE_VIRTUAL } from '${packageName}/table-virtual';
+import { REMOVED_PRIMITIVES } from '${packageName}/primitives';
+import { REMOVED_COMPOSITES } from '${packageName}/composites';
 
 const removedTableAliases = [
   HELL_TABLE_DIRECTIVES,
@@ -1741,6 +1750,8 @@ const removedTableAliases = [
   REMOVED_DATA_TABLE,
   REMOVED_TABLE_CDK,
   REMOVED_TABLE_VIRTUAL,
+  REMOVED_PRIMITIVES,
+  REMOVED_COMPOSITES,
 ];
 
 @Component({
@@ -1783,40 +1794,71 @@ function rootConsumerStylesCss() {
 
 function primitivesConsumerStylesCss() {
   return `@import "tailwindcss";
-@import "${packageName}/styles/primitives";
+@import "${packageName}/tokens.css";
+@import "${packageName}/button/styles.css";
+@import "${packageName}/icon/styles.css";
+@import "${packageName}/input/styles.css";
 `;
 }
 
 function buttonConsumerStylesCss() {
   return `@import "tailwindcss";
-@import "${packageName}/styles/primitives";
+@import "${packageName}/tokens.css";
+@import "${packageName}/button/styles.css";
 :root { --color-hell-primary:#3452ff; }
 `;
 }
 
-function compositesConsumerStylesCss() {
+function appShellConsumerStylesCss() {
   return `@import "tailwindcss";
-@import "${packageName}/styles/composites";
+@import "${packageName}/tokens.css";
+@import "${packageName}/icon/styles.css";
+@import "${packageName}/app-shell/styles.css";
+`;
+}
+
+function audioPlayerConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/button/styles.css";
+@import "${packageName}/flyout/styles.css";
+@import "${packageName}/icon/styles.css";
+@import "${packageName}/slider/styles.css";
+@import "${packageName}/audio-player/styles.css";
 `;
 }
 
 function codeEditorConsumerStylesCss() {
   return `@import "tailwindcss";
-@import "${packageName}/styles/tokens";
-@import "${packageName}/styles/features/code-editor";
+@import "${packageName}/tokens.css";
+@import "${packageName}/features/code-editor/styles.css";
 `;
 }
 
 function tableConsumerStylesCss() {
   return `@import "tailwindcss";
-@import "${packageName}/styles/tokens";
-@import "${packageName}/styles/table";
+@import "${packageName}/tokens.css";
+@import "${packageName}/button/styles.css";
+@import "${packageName}/checkbox/styles.css";
+@import "${packageName}/radio/styles.css";
+@import "${packageName}/table/styles.css";
+`;
+}
+
+function tableTanStackConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/button/styles.css";
+@import "${packageName}/checkbox/styles.css";
+@import "${packageName}/input/styles.css";
+@import "${packageName}/radio/styles.css";
+@import "${packageName}/table-tanstack/styles.css";
 `;
 }
 
 function pdfViewerConsumerStylesCss() {
   return `@import "tailwindcss";
-@import "${packageName}/styles/tokens";
+@import "${packageName}/tokens.css";
 @import "${pdfPackageName}/styles";
 `;
 }
@@ -1829,6 +1871,10 @@ function noLegacyTableAliasConsumerStylesCss() {
 @import "${packageName}/styles/features/data-table";
 @import "${packageName}/styles/features/table-utilities";
 @import "${packageName}/styles/components/table-renderer";
+@import "${packageName}/styles/primitives";
+@import "${packageName}/styles/composites";
+@import "${packageName}/styles/table";
+@import "${packageName}/styles/tokens";
 `;
 }
 

@@ -1,5 +1,5 @@
 {
   "lib": {
-    "entryFile": "../../src/lib/public-api-feature-audio-transcript.ts"
+    "entryFile": "public-api.ts"
   }
 }

@@ -9,7 +9,7 @@ Hell should remain a compact Angular design-system package, not a grab bag of ap
 
 Current local evidence:
 
-- `@hell-ui/angular` root is core-only (`packages/angular/src/public-api.ts`).
+- `@hell-ui/angular` root is core-only (`packages/angular/public-api.ts`).
 - Package peer metadata is package-wide (`packages/angular/package.json`), so optional feature peers still appear in the main package metadata.
 - Package-consumer peer tiers are asserted with strict installs in `tools/check-package-consumer.mjs`.
 - `audio-player` is exported by the composites aggregate and narrow `@hell-ui/angular/audio-player` entrypoint; the speech transcript path has no npm peer but does carry Web Speech / media-capture runtime risk. That runtime is isolated behind `@hell-ui/angular/features/audio-transcript` and `provideHellAudioTranscript()`.

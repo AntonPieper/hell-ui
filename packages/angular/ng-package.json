@@ -1,47 +1,44 @@
 {
   "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
   "dest": "../../dist/hell",
-  "allowedNonPeerDependencies": ["tailwind-merge"],
+  "allowedNonPeerDependencies": [
+    "tailwind-merge"
+  ],
   "assets": [
     {
-      "glob": "**/*.css",
-      "input": "src/lib/styles",
-      "output": "styles"
+      "glob": "tokens.css",
+      "input": ".",
+      "output": "."
     },
     {
-      "glob": "**/*.css",
-      "input": "src/lib/primitives",
-      "output": "primitives"
+      "glob": "*/styles.css",
+      "input": ".",
+      "output": "."
     },
     {
-      "glob": "**/*.css",
-      "input": "src/lib/composites",
-      "output": "composites"
+      "glob": "features/*/styles.css",
+      "input": ".",
+      "output": "."
     },
     {
-      "glob": "**/*.css",
-      "input": "src/lib/features",
-      "output": "features"
-    },
-    {
-      "glob": "**/*.css",
-      "input": "src/lib/table",
-      "output": "table"
+      "glob": "internal/*/styles.css",
+      "input": ".",
+      "output": "."
     },
     {
       "glob": "button.ts",
-      "input": "src/lib/primitives/button",
-      "output": "primitives/button"
+      "input": "button",
+      "output": "button"
     },
     {
       "glob": "input.ts",
-      "input": "src/lib/primitives/input",
-      "output": "primitives/input"
+      "input": "input",
+      "output": "input"
     },
     {
       "glob": "dialpad.ts",
-      "input": "src/lib/composites/dialpad",
-      "output": "composites/dialpad"
+      "input": "dialpad",
+      "output": "dialpad"
     },
     {
       "glob": "hell-ui-logo.svg",
@@ -50,6 +47,6 @@
     }
   ],
   "lib": {
-    "entryFile": "src/public-api.ts"
+    "entryFile": "public-api.ts"
   }
 }

@@ -12,10 +12,11 @@ This repo uses a single-context layout:
 |-- CONTEXT.md
 |-- docs/
 |   `-- adr/
-`-- projects/
-    |-- hell/
-    |-- hell-docs/
-    `-- hell-pdf-viewer/
+|-- apps/
+|   `-- docs/
+`-- packages/
+    |-- angular/
+    `-- pdf-viewer/
 ```
 
 ## Before exploring, read these

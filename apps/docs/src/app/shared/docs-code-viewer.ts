@@ -16,7 +16,7 @@ type DocsCodeViewerVariant = 'example' | 'block';
   encapsulation: ViewEncapsulation.None,
   styles: [
     `
-      @import '@hell-ui/angular/styles/features/code-editor';
+      @import '@hell-ui/angular/features/code-editor/styles.css';
 
       .hd-code-viewer.hell-code-viewer {
         border-top-left-radius: 0;

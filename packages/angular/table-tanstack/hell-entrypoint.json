@@ -1,0 +1,8 @@
+{
+  "category": "tanstack-table-shell",
+  "header": [
+    "/**",
+    " * @experimental Hell-styled TanStack Table shell entry point.",
+    " */"
+  ]
+}

@@ -1,5 +1,5 @@
 {
   "lib": {
-    "entryFile": "../src/lib/public-api-primitive-checkbox.ts"
+    "entryFile": "public-api.ts"
   }
 }

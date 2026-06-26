@@ -21,7 +21,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: [resolve(workspaceRoot, 'packages/angular/src/test-setup.ts')],
+    setupFiles: [resolve(workspaceRoot, 'packages/angular/test-setup.ts')],
     reporters,
     testTimeout: testTimeoutMs,
     coverage: {

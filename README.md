@@ -8,8 +8,8 @@ Hell UI is a compact Angular component system for dense business applications.
 It favors directive-first primitives, optional styled primitives, opinionated
 composites, and heavier features behind feature-specific entry points or split packages.
 The root `@hell-ui/angular` export is intentionally scoped to stable core only;
-primitives remain available through `/primitives` and narrow primitive entry
-points. Composites and kept features are intended for secondary entry points; the PDF viewer lives in `@hell-ui/pdf-viewer`.
+UI surfaces are available through narrow import-path entry points such as
+`/button`, `/select`, `/app-shell`, and `/features/code-editor`; the PDF viewer lives in `@hell-ui/pdf-viewer`.
 
 ## Workspace
 
@@ -67,7 +67,7 @@ Prefer the narrowest entry point that contains the API you use:
 
 ```ts
 import { HellButton } from '@hell-ui/angular/button';
-import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/primitives';
+import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 import { HellButtonHarness } from '@hell-ui/angular/testing';
@@ -83,14 +83,14 @@ Peer dependency tiers:
 >
 > `@floating-ui/dom` is required by `ng-primitives` (not by Hell directly).
 > `@angular/router` is an optional peer only for `ng-primitives/dialog` consumers;
-> install it when importing Hell dialog or the aggregate `/primitives` entry point.
+> install it when importing Hell dialog.
 > Package-consumer scenarios assert these groups with strict peer installs.
 
 | Tier                          | Entry points / scenarios                                                                                                                | Peer group asserted                                                                                                                                                                                                                   |
 | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Core                          | `@hell-ui/angular`, `/core`, `/testing`; `root-core`, `core`, `testing`                                                                 | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `ng-primitives`, `rxjs`                                                                                                   |
-| Primitive                     | Narrow primitives such as `/button`; aggregate `/primitives`; `button-ui`, `button`, `primitives-css`                                   | Core peers. Add `tailwindcss` when importing primitive CSS. Aggregate `/primitives` also asserts optional `@angular/router` and `@ng-icons/font-awesome` because dialog and icon-backed primitives are bundled in the aggregate FESM. |
-| Composite                     | `/composites` and narrow composite entry points such as `/app-shell` and `/audio-player`; `composites-css`, `app-shell`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Aggregate/icon-backed composites also assert optional `@ng-icons/font-awesome`.                                                                                                      |
+| Primitive                     | Narrow primitives such as `/button`, `/select`, and `/icon`; `button-ui`, `button`, `primitive-icons-css`                              | Core peers. Add `tailwindcss` when importing primitive CSS; add `@ng-icons/font-awesome` for icon-backed entries.                                                                                                                    |
+| Composite                     | Narrow composite entry points such as `/app-shell` and `/audio-player`; `composite-css`, `app-shell`, `audio-player`                   | Core peers plus `tailwindcss` for composite CSS. Icon-backed composites also assert optional `@ng-icons/font-awesome`.                                                                                                                |
 | Audio transcript              | `/features/audio-transcript`; `audio-transcript`                                                                                        | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled.                                             |
 | Table primitives              | `/table`; `table`, `no-legacy-alias`                                                                                                    | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack Table, or TanStack Virtual peers. The negative scenario proves removed legacy table aliases and CSS aliases stay unavailable.                    |
 | TanStack table shell          | `/table-tanstack`; `table-tanstack`                                                                                                     | Core peers plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`. Root, button, and `/table` scenarios prove TanStack Table is not installed unless this shell is imported.                          |
@@ -104,14 +104,14 @@ CodeMirror, TanStack Table, and TanStack Virtual peers remain optional and are n
 
 | Tier                 | Stability                                                                   | Entry points                                                                                                                                                                                                                           | Compatibility                                                                                                                                                                |
 | -------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Primitives           | Stable                                                                      | `@hell-ui/angular/primitives`                                                                                                                                                                                                          | SSR-compatible                                                                                                                                                               |
-| Composites           | Beta                                                                        | `@hell-ui/angular/composites` and narrow composite entry points such as `@hell-ui/angular/app-shell`                                                                                                                                   | Browser DOM + `document`/`window`/global listeners                                                                                                                           |
+| Primitives           | Stable                                                                      | Narrow entry points such as `@hell-ui/angular/button` and `@hell-ui/angular/select`                                                                                                                                                    | SSR-compatible unless an entry point's own docs say otherwise                                                                                                                |
+| Composites           | Beta                                                                        | Narrow entry points such as `@hell-ui/angular/app-shell` and `@hell-ui/angular/audio-player`                                                                                                                                           | Browser DOM + `document`/`window`/global listeners                                                                                                                           |
 | Table primitives     | Beta                                                                        | `@hell-ui/angular/table`                                                                                                                                                                                                               | Uses `ResizeObserver`; browser-first                                                                                                                                         |
 | TanStack table shell | Experimental                                                                | `@hell-ui/angular/table-tanstack`, `@hell-ui/angular/table-tanstack/virtual`                                                                                                                                                           | Caller-owned TanStack Table remains the engine; Hell owns shell chrome, styling, projection regions, status views, controls, and the optional TanStack Virtual body strategy |
 | Code editor          | Beta/optional peer; excluded from stable API reports until policy promotion | `@hell-ui/angular/features/code-editor`                                                                                                                                                                                                | Needs `window` + `document`; keep lazy/client-only when runtime risk matters                                                                                                 |
 | PDF viewer           | Experimental split package                                                  | `@hell-ui/pdf-viewer`                                                                                                                                                                                                                  | Browser-only app surface/recipe owned outside `@hell-ui/angular`                                                                                                             |
 | Testing harnesses    | Beta/test-only                                                              | `@hell-ui/angular/testing`                                                                                                                                                                                                             | CDK component harnesses for consumer and library tests                                                                                                                       |
-| Speech transcript    | Experimental/best-effort (feature opt-in)                                   | `@hell-ui/angular/features/audio-transcript` provider plus `allowSpeechTranscript` / deprecated `allowLiveCaptions` on `@hell-ui/angular/audio-player` or `/composites`; import `hellAudioSpeechSupported` from the feature entrypoint | Browser-only; uses `navigator` + `SpeechRecognition` + `captureStream`; best-effort only, not accessibility-grade captions/timed text                                        |
+| Speech transcript    | Experimental/best-effort (feature opt-in)                                   | `@hell-ui/angular/features/audio-transcript` provider plus `allowSpeechTranscript` / deprecated `allowLiveCaptions` on `@hell-ui/angular/audio-player`; import `hellAudioSpeechSupported` from the feature entrypoint                 | Browser-only; uses `navigator` + `SpeechRecognition` + `captureStream`; best-effort only, not accessibility-grade captions/timed text                                        |
 
 ## Styles
 
@@ -122,22 +122,19 @@ then prefer fine-grained imports for production:
 
 ```css
 @import 'tailwindcss';
-@import '@hell-ui/angular/styles/tokens';
-@import '@hell-ui/angular/styles/primitives';
+@import '@hell-ui/angular/tokens.css';
+@import '@hell-ui/angular/button/styles.css';
+@import '@hell-ui/angular/input/styles.css';
 ```
 
-`@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` are
-kitchen-sink/legacy aliases: primitives, composites, and kept in-package feature
-styles such as CodeMirror. Use them only when the app intentionally accepts all
-in-package feature styles.
+CSS follows the same import-path-first rule as TypeScript: import shared tokens
+once, then import each entry point's `styles.css`.
 
 ```css
-@import '@hell-ui/angular/styles/tokens';
-@import '@hell-ui/angular/styles/primitives';
-@import '@hell-ui/angular/styles/composites';
-@import '@hell-ui/angular/styles/table';
-@import '@hell-ui/angular/styles/features/code-editor';
-@import '@hell-ui/angular/styles/components/button';
+@import '@hell-ui/angular/tokens.css';
+@import '@hell-ui/angular/app-shell/styles.css';
+@import '@hell-ui/angular/table/styles.css';
+@import '@hell-ui/angular/features/code-editor/styles.css';
 ```
 
 ## Component Contract

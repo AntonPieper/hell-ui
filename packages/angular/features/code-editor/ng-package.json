@@ -1,5 +1,5 @@
 {
   "lib": {
-    "entryFile": "../../src/lib/public-api-feature-code-editor.ts"
+    "entryFile": "public-api.ts"
   }
 }

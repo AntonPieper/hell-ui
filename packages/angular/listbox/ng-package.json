@@ -1,5 +1,5 @@
 {
   "lib": {
-    "entryFile": "../src/lib/public-api-primitive-listbox.ts"
+    "entryFile": "public-api.ts"
   }
 }

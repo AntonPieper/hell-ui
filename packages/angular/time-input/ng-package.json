@@ -1,5 +1,5 @@
 {
   "lib": {
-    "entryFile": "../src/lib/public-api-composite-time-input.ts"
+    "entryFile": "public-api.ts"
   }
 }

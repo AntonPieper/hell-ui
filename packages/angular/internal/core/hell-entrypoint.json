@@ -1,0 +1,21 @@
+{
+  "category": "internal",
+  "exports": [
+    "./control-value-accessor",
+    "./controlled-value-state",
+    "./dom",
+    "./floating-dismissal",
+    "./floating-scope",
+    "./form-field-idrefs",
+    "./idrefs",
+    "./native-interactive-disabled",
+    "./resize-behavior",
+    "./typed-value-input"
+  ],
+  "header": [
+    "/**",
+    " * @internal Shared implementation helpers for Hell-owned entry points only.",
+    " * Not a consumer shortcut API.",
+    " */"
+  ]
+}

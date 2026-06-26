@@ -1,0 +1,12 @@
+{
+  "category": "internal",
+  "exports": [
+    "./embedded-input-ui"
+  ],
+  "header": [
+    "/**",
+    " * @internal Shared input presentation hooks for Hell-owned composites only.",
+    " * Not a consumer shortcut API.",
+    " */"
+  ]
+}

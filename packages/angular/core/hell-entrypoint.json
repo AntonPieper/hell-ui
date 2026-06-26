@@ -1,0 +1,11 @@
+{
+  "category": "core",
+  "exports": [
+    "./types",
+    "./styleable",
+    "./part-style-merge",
+    "./search",
+    "./labels",
+    "./floating-element"
+  ]
+}

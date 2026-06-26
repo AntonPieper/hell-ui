@@ -1,0 +1,12 @@
+{
+  "category": "internal",
+  "exports": [
+    "./audio-transcript-runtime"
+  ],
+  "header": [
+    "/**",
+    " * @internal Audio transcript runtime bridge shared by Hell-owned entry points only.",
+    " * Not a consumer shortcut API.",
+    " */"
+  ]
+}

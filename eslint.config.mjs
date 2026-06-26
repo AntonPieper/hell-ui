@@ -28,7 +28,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['packages/angular/src/**/*.ts'],
+    files: ['packages/angular/**/*.ts'],
     rules: {
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
