@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 
 import {
@@ -5,6 +6,9 @@ import {
   readDocsBudgetPolicy,
   validateDocsBudgetPolicy,
 } from './docs-budget-policy.mjs';
+
+const errors = [];
+const packageConsumerContract = readPackageConsumerContract();
 
 const requiredFiles = [
   '.github/workflows/ci.yml',
@@ -53,15 +57,7 @@ const requiredScripts = {
   'ci:test:static': 'pnpm run lint && pnpm run test:architecture && pnpm run test:ci-contract',
   'ci:test:e2e': 'pnpm exec playwright test',
   'ci:test:package-consumer': 'pnpm run test:package-consumer -- --minimal-deps',
-  'ci:test:package-consumer:core': 'HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing pnpm run ci:test:package-consumer',
-  'ci:test:package-consumer:primitives': 'HELL_PACKAGE_CONSUMER_SCENARIOS=primitive-icons-css,button-ui,button pnpm run ci:test:package-consumer',
-  'ci:test:package-consumer:composites': 'HELL_PACKAGE_CONSUMER_SCENARIOS=composite-css,app-shell,audio-player,audio-transcript pnpm run ci:test:package-consumer',
-  'ci:test:package-consumer:features': 'HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor,pdf-viewer pnpm run ci:test:package-consumer',
-  'ci:test:package-consumer:tables': 'HELL_PACKAGE_CONSUMER_SCENARIOS=table,table-tanstack,table-tanstack-virtual,no-legacy-alias pnpm run ci:test:package-consumer',
-  'ci:test:package-consumer:code-editor': 'HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor pnpm run ci:test:package-consumer',
-  'ci:test:package-consumer:pdf-viewer': 'HELL_PACKAGE_CONSUMER_SCENARIOS=pdf-viewer pnpm run ci:test:package-consumer',
-  'ci:test:package-consumer:table-core': 'HELL_PACKAGE_CONSUMER_SCENARIOS=table,no-legacy-alias pnpm run ci:test:package-consumer',
-  'ci:test:package-consumer:table-adapters': 'HELL_PACKAGE_CONSUMER_SCENARIOS=table-tanstack,table-tanstack-virtual pnpm run ci:test:package-consumer',
+  ...packageConsumerScriptCommands(packageConsumerContract),
   'ci:build:lib': 'pnpm run build:lib',
   'ci:build:docs': 'pnpm run build:lib && pnpm run build:docs',
   'ci:build:docs:prepared': 'pnpm run build:docs',
@@ -72,6 +68,53 @@ const requiredScripts = {
   'ci:build': 'pnpm run build:lib && pnpm run build:docs && pnpm run test:api-report',
   'ci:verify': 'pnpm run ci:test && pnpm run ci:build',
 };
+
+function readPackageConsumerContract() {
+  const result = spawnSync(process.execPath, ['tools/check-package-consumer.mjs', '--catalog-json'], {
+    encoding: 'utf8',
+  });
+  if (result.error) {
+    errors.push(`Unable to read package-consumer catalog: ${result.error.message}`);
+    return emptyPackageConsumerContract();
+  }
+  if (result.status !== 0) {
+    errors.push(
+      `Unable to read package-consumer catalog: ${result.stderr || result.stdout || `exit ${result.status}`}`,
+    );
+    return emptyPackageConsumerContract();
+  }
+
+  try {
+    return JSON.parse(result.stdout);
+  } catch (error) {
+    errors.push(
+      `Unable to parse package-consumer catalog JSON: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+    return emptyPackageConsumerContract();
+  }
+}
+
+function emptyPackageConsumerContract() {
+  return {
+    scenarios: [],
+    peerGroups: {},
+    ciGroups: [],
+    scriptGroups: [],
+    releaseScenarios: [],
+    strictPeerGroups: [],
+  };
+}
+
+function packageConsumerScriptCommands(contract) {
+  return Object.fromEntries(
+    contract.scriptGroups.map((group) => [
+      `ci:test:package-consumer:${group.name}`,
+      `HELL_PACKAGE_CONSUMER_SCENARIOS=${group.scenarios.join(',')} pnpm run ci:test:package-consumer`,
+    ]),
+  );
+}
 
 const e2eBrowsers = ['chromium', 'firefox', 'webkit'];
 const e2eGroups = [
@@ -162,12 +205,6 @@ const adapterChecks = [
       'docker run --rm --network host',
       'strategy:',
       'needs: build',
-      'scenario: core',
-      'scenarios: root-core,core,testing',
-      'scenarios: primitive-icons-css,button-ui',
-      'scenarios: composite-css,app-shell',
-      'scenario: audio',
-      'scenario: table-tanstack-virtual',
       'group:',
       '          - aria-snapshots-foundations',
       '          - aria-snapshots-overlays-data',
@@ -221,8 +258,6 @@ const adapterChecks = [
       'PACKAGE_CONSUMER_SCENARIOS',
       'PLAYWRIGHT_GROUP',
       'HELL_PACKAGE_CONSUMER_SKIP_BUILD',
-      'PACKAGE_CONSUMER_GROUP: audio',
-      'PACKAGE_CONSUMER_GROUP: table-tanstack-virtual',
       'HELL_E2E_PROJECTS: ci',
       'pnpm run ci:test:static',
       'pnpm run ci:test:unit',
@@ -540,8 +575,6 @@ const adapterForbiddenPatterns = [
   { pattern: /ci:playwright:cached/, message: 'CI adapters must use official Playwright install commands when caching browsers.' },
 ];
 
-const errors = [];
-
 for (const path of requiredFiles) {
   if (!existsSync(path)) {
     errors.push(`Missing ${path}`);
@@ -600,6 +633,7 @@ for (const check of fileChecks) {
 }
 
 checkRemovedBrittleCiHelpers();
+checkPackageConsumerCatalogDrift();
 checkSemanticE2eGroups();
 checkPackageConsumerPackAuditOrder();
 checkProviderPackageConsumerScenarios();
@@ -607,6 +641,273 @@ checkGitLabDistCachePolicy();
 checkNpmPublishWorkflow();
 checkPublishedPackageMetadata();
 checkDocsBudgetPolicy();
+
+function checkPackageConsumerCatalogDrift() {
+  const scenarioNames = new Set(packageConsumerContract.scenarios.map((scenario) => scenario.name));
+  const peerGroupNames = new Set(Object.keys(packageConsumerContract.peerGroups));
+  const scenarioPeerGroups = new Set();
+
+  for (const scenario of packageConsumerContract.scenarios) {
+    if (!peerGroupNames.has(scenario.peerGroup)) {
+      errors.push(`Package-consumer scenario ${scenario.name} references unknown peer group ${scenario.peerGroup}.`);
+    }
+    scenarioPeerGroups.add(scenario.peerGroup);
+  }
+
+  for (const peerGroup of peerGroupNames) {
+    if (!scenarioPeerGroups.has(peerGroup)) {
+      errors.push(`Package-consumer catalog must cover peer group ${peerGroup}.`);
+    }
+  }
+
+  assertScenarioGroupsReferenceKnownScenarios(
+    'package-consumer catalog CI group',
+    packageConsumerContract.ciGroups,
+    scenarioNames,
+  );
+  assertScenarioGroupsCoverAllOnce(
+    'package-consumer catalog CI group',
+    packageConsumerContract.ciGroups,
+    scenarioNames,
+  );
+  assertScenarioGroupsReferenceKnownScenarios(
+    'package-consumer catalog script group',
+    packageConsumerContract.scriptGroups,
+    scenarioNames,
+  );
+  assertScenarioListReferencesKnownScenarios(
+    'package-consumer catalog release scenario',
+    packageConsumerContract.releaseScenarios,
+    scenarioNames,
+  );
+  assertStrictPeerGroupsCoverScenarios(packageConsumerContract.strictPeerGroups, scenarioNames);
+
+  assertScenarioGroupsEqual(
+    'GitHub Actions package-consumer matrix',
+    readGithubPackageConsumerGroups(),
+    packageConsumerContract.ciGroups,
+  );
+  assertScenarioGroupsEqual(
+    'GitLab package-consumer matrix',
+    readGitlabPackageConsumerGroups(),
+    packageConsumerContract.ciGroups,
+  );
+  assertScenarioListEqual(
+    'tools/release-dry-run.mjs default package-consumer scenarios',
+    readJsStringArrayAfterMarker(
+      'tools/release-dry-run.mjs',
+      'const selectedConsumerScenarios = parseList',
+    ),
+    packageConsumerContract.releaseScenarios,
+  );
+  assertScenarioListEqual(
+    'tools/production-ready-check.mjs required release scenarios',
+    readJsStringArrayAfterMarker(
+      'tools/production-ready-check.mjs',
+      'const requiredReleaseScenarios =',
+    ),
+    packageConsumerContract.releaseScenarios,
+  );
+}
+
+function readGithubPackageConsumerGroups() {
+  const path = '.github/workflows/ci.yml';
+  if (!existsSync(path)) return [];
+
+  const jobBlock = yamlJobBlock(readFileSync(path, 'utf8'), 'package-consumer');
+  const groups = [];
+  let current = null;
+
+  for (const line of jobBlock.split(/\r?\n/)) {
+    const groupMatch = line.match(/^\s*-\s+scenario:\s*([^#\s]+)/);
+    if (groupMatch) {
+      if (current) groups.push(current);
+      current = { name: groupMatch[1], scenarios: [] };
+      continue;
+    }
+
+    const scenariosMatch = line.match(/^\s+scenarios:\s*([^#]+?)\s*$/);
+    if (current && scenariosMatch) {
+      current.scenarios = parseScenarioCsv(scenariosMatch[1]);
+    }
+  }
+
+  if (current) groups.push(current);
+  return groups;
+}
+
+function readGitlabPackageConsumerGroups() {
+  const path = '.gitlab-ci.yml';
+  if (!existsSync(path)) return [];
+
+  const groups = [];
+  let current = null;
+  for (const line of readFileSync(path, 'utf8').split(/\r?\n/)) {
+    const groupMatch = line.match(/^\s*-\s+PACKAGE_CONSUMER_GROUP:\s*([^#\s]+)/);
+    if (groupMatch) {
+      if (current) groups.push(current);
+      current = { name: groupMatch[1], scenarios: [] };
+      continue;
+    }
+
+    const scenariosMatch = line.match(/^\s+PACKAGE_CONSUMER_SCENARIOS:\s*([^#]+?)\s*$/);
+    if (current && scenariosMatch) {
+      current.scenarios = parseScenarioCsv(scenariosMatch[1]);
+    }
+  }
+
+  if (current) groups.push(current);
+  return groups;
+}
+
+function yamlJobBlock(content, jobName) {
+  const lines = content.split(/\r?\n/);
+  const start = lines.findIndex((line) => line === `  ${jobName}:`);
+  if (start === -1) {
+    errors.push(`GitHub Actions workflow must define ${jobName} job.`);
+    return '';
+  }
+
+  let end = lines.length;
+  for (let index = start + 1; index < lines.length; index += 1) {
+    if (/^  [A-Za-z0-9_-]+:\s*$/.test(lines[index])) {
+      end = index;
+      break;
+    }
+  }
+
+  return lines.slice(start, end).join('\n');
+}
+
+function assertScenarioGroupsEqual(label, actualGroups, expectedGroups) {
+  const actualByName = new Map();
+  const expectedByName = new Map(expectedGroups.map((group) => [group.name, group]));
+
+  for (const actual of actualGroups) {
+    if (actualByName.has(actual.name)) {
+      errors.push(`${label} must not duplicate group ${actual.name}.`);
+      continue;
+    }
+    actualByName.set(actual.name, actual);
+  }
+
+  for (const expected of expectedGroups) {
+    const actual = actualByName.get(expected.name);
+    if (!actual) {
+      errors.push(`${label} must include group ${expected.name}.`);
+      continue;
+    }
+
+    assertScenarioListEqual(`${label} group ${expected.name}`, actual.scenarios, expected.scenarios);
+  }
+
+  for (const actual of actualGroups) {
+    if (!expectedByName.has(actual.name)) {
+      errors.push(`${label} must not include unknown group ${actual.name}.`);
+    }
+  }
+}
+
+function assertScenarioGroupsReferenceKnownScenarios(label, groups, scenarioNames) {
+  const groupNames = new Set();
+  for (const group of groups) {
+    if (groupNames.has(group.name)) {
+      errors.push(`${label} must not duplicate group ${group.name}.`);
+    }
+    groupNames.add(group.name);
+    assertScenarioListReferencesKnownScenarios(`${label} ${group.name}`, group.scenarios, scenarioNames);
+  }
+}
+
+function assertScenarioGroupsCoverAllOnce(label, groups, scenarioNames) {
+  const seen = new Map();
+  for (const group of groups) {
+    for (const scenario of group.scenarios) {
+      const previousGroup = seen.get(scenario);
+      if (previousGroup) {
+        errors.push(`${label} must not list ${scenario} in both ${previousGroup} and ${group.name}.`);
+      }
+      seen.set(scenario, group.name);
+    }
+  }
+
+  for (const scenario of scenarioNames) {
+    if (!seen.has(scenario)) {
+      errors.push(`${label} must include scenario ${scenario}.`);
+    }
+  }
+}
+
+function assertStrictPeerGroupsCoverScenarios(strictPeerGroups, scenarioNames) {
+  const seen = new Set();
+  for (const group of strictPeerGroups) {
+    if (!Array.isArray(group.peerGroups) || group.peerGroups.length === 0) {
+      errors.push(`Package-consumer strict peer group ${group.name} must name peer groups.`);
+    }
+    assertScenarioListReferencesKnownScenarios(
+      `package-consumer strict peer group ${group.name}`,
+      group.scenarios,
+      scenarioNames,
+    );
+    for (const scenario of group.scenarios) seen.add(scenario);
+  }
+
+  for (const scenario of scenarioNames) {
+    if (!seen.has(scenario)) {
+      errors.push(`Package-consumer strict peer groups must include scenario ${scenario}.`);
+    }
+  }
+}
+
+function assertScenarioListReferencesKnownScenarios(label, names, scenarioNames) {
+  for (const name of names) {
+    if (!scenarioNames.has(name)) {
+      errors.push(`${label} references unknown package-consumer scenario ${name}.`);
+    }
+  }
+}
+
+function assertScenarioListEqual(label, actual, expected) {
+  if (
+    actual.length === expected.length &&
+    actual.every((value, index) => value === expected[index])
+  ) {
+    return;
+  }
+
+  errors.push(`${label} must be ${formatList(expected)}; found ${formatList(actual)}.`);
+}
+
+function readJsStringArrayAfterMarker(path, marker) {
+  if (!existsSync(path)) return [];
+
+  const content = readFileSync(path, 'utf8');
+  const markerIndex = content.indexOf(marker);
+  if (markerIndex === -1) {
+    errors.push(`${path} must include ${marker}.`);
+    return [];
+  }
+
+  const arrayStart = content.indexOf('[', markerIndex);
+  const arrayEnd = content.indexOf(']', arrayStart);
+  if (arrayStart === -1 || arrayEnd === -1) {
+    errors.push(`${path} must include a string array after ${marker}.`);
+    return [];
+  }
+
+  return [...content.slice(arrayStart, arrayEnd).matchAll(/'([^']+)'/g)].map((match) => match[1]);
+}
+
+function parseScenarioCsv(value) {
+  return value
+    .split(',')
+    .map((scenario) => scenario.trim())
+    .filter(Boolean);
+}
+
+function formatList(values) {
+  return values.length ? values.join(',') : '(none)';
+}
 
 function checkRemovedBrittleCiHelpers() {
   for (const path of ['tools/serve-built-docs.mjs', 'tools/install-playwright-webkit-deps.sh']) {
@@ -716,23 +1017,42 @@ function checkPackageConsumerPackAuditOrder() {
   if (!existsSync(path)) return;
 
   const content = readFileSync(path, 'utf8');
-  const auditIndex = content.indexOf(
+  const packHellIndex = content.indexOf("packBuiltPackage(distHell, 'pack-core')");
+  const packPdfViewerIndex = content.indexOf("packBuiltPackage(distPdfViewer, 'pack-pdf-viewer')");
+  const auditMarkers = [
     'auditPackedPackage({ distRoot: distHell, tarball: packedHell.tarball });',
-  );
+    'auditPackedPackage({ distRoot: distPdfViewer, tarball: packedPdfViewer.tarball });',
+  ];
+  const auditIndexes = auditMarkers.map((marker) => content.indexOf(marker));
+  const selectScenariosIndex = content.indexOf('const enabledScenarios = selectScenarios');
   const consumerScenarioIndex = content.indexOf('await runConsumerScenarioGroup(group);');
 
-  if (auditIndex === -1) {
-    errors.push('package-consumer must run the package pack audit after pnpm pack');
+  if (packHellIndex === -1 || packPdfViewerIndex === -1) {
+    errors.push('package-consumer must pack both @hell-ui/angular and @hell-ui/pdf-viewer before audit');
     return;
   }
 
-  if (consumerScenarioIndex === -1) {
-    errors.push('package-consumer scenario loop marker is missing');
+  for (const [index, auditIndex] of auditIndexes.entries()) {
+    if (auditIndex === -1) {
+      errors.push(`package-consumer must run package pack audit marker: ${auditMarkers[index]}`);
+      return;
+    }
+
+    const packIndex = index === 0 ? packHellIndex : packPdfViewerIndex;
+    if (packIndex > auditIndex) {
+      errors.push('package-consumer must run package pack audit after pnpm pack');
+    }
+  }
+
+  if (selectScenariosIndex === -1 || consumerScenarioIndex === -1) {
+    errors.push('package-consumer scenario selection or loop marker is missing');
     return;
   }
 
-  if (auditIndex > consumerScenarioIndex) {
-    errors.push('package-consumer must run package pack audit before consumer install/build scenarios');
+  for (const auditIndex of auditIndexes) {
+    if (auditIndex > selectScenariosIndex || auditIndex > consumerScenarioIndex) {
+      errors.push('package-consumer must run package pack audit before consumer install/build scenarios');
+    }
   }
 }
 

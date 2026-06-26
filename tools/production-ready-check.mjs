@@ -26,6 +26,7 @@ const requiredReleaseScenarios = [
   'table-tanstack-virtual',
   'no-legacy-alias',
   'code-editor',
+  'pdf-viewer',
 ];
 const requiredPlaywrightProjects = ['chromium', 'firefox', 'webkit'];
 const requiredApiReportPaths = [
