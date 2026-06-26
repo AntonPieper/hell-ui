@@ -19,7 +19,7 @@ Source of truth:
       "maximumWarning": "500kB",
       "maximumError": "1.05MB",
       "owner": "Docs shell / global styles",
-      "rationale": "Keep the docs shell honest while the alpha docs still carry Angular runtime/router, global Tailwind, Hell composite CSS, app-shell/search/menu/select navigation UI, and the top-level icon registry.",
+      "rationale": "Keep the docs shell honest while the internal-beta docs still carry Angular runtime/router, global Tailwind, Hell composite CSS, app-shell/search/menu/select navigation UI, and the top-level icon registry.",
       "regressionMeaning": "A warning beyond the accepted shell overage means new eager docs code, global CSS, or a dependency leaked into the initial route boundary."
     },
     {
@@ -36,7 +36,7 @@ Source of truth:
       "type": "initial",
       "acceptedMaximum": "870kB",
       "owner": "Docs shell / global styles",
-      "rationale": "The current warning is the accepted alpha docs-shell baseline: Angular runtime/router, global Tailwind, Hell composite/table CSS, app-shell/search/menu/select navigation UI, top-level icons, Button recipe utilities, and tailwind-merge. Heavy feature examples and raw source previews stay behind lazy docs route boundaries. This acceptance is not permission for unrelated eager imports.",
+      "rationale": "The current warning is the accepted internal-beta docs-shell baseline: Angular runtime/router, global Tailwind, Hell composite/table CSS, app-shell/search/menu/select navigation UI, top-level icons, Button recipe utilities, and tailwind-merge. Heavy feature examples and raw source previews stay behind lazy docs route boundaries. This acceptance is not permission for unrelated eager imports.",
       "evidence": "docs/release/docs-bundle-budget-diagnosis.md",
       "followUp": "lazy-route import graph guard",
       "expiresWhen": "Any build that exceeds the accepted ceiling, reaches the initial maximumError threshold, or reopens the production-readiness budget decision."
@@ -49,13 +49,13 @@ Source of truth:
 
 | Budget | Warning | Error | Owner | Rationale | Regression meaning |
 | --- | ---: | ---: | --- | --- | --- |
-| Initial bundle | 500kB | 1.05MB | Docs shell / global styles | Keep the docs shell honest while the alpha docs still carry Angular runtime/router, global Tailwind, Hell composite CSS, app-shell/search/menu/select navigation UI, and the top-level icon registry. | A warning beyond the accepted shell overage means new eager docs code, global CSS, or a dependency leaked into the initial route boundary. |
+| Initial bundle | 500kB | 1.05MB | Docs shell / global styles | Keep the docs shell honest while the internal-beta docs still carry Angular runtime/router, global Tailwind, Hell composite CSS, app-shell/search/menu/select navigation UI, and the top-level icon registry. | A warning beyond the accepted shell overage means new eager docs code, global CSS, or a dependency leaked into the initial route boundary. |
 | Any component style | 4kB | 8kB | Individual docs page owner | Component/page styles should stay small enough to review locally; heavy feature CSS must be loaded as documented lazy/global assets instead of hiding inside component styles. | Any component-style warning is a regression unless this file adds a narrow, time-boxed accepted warning with owner and follow-up. |
 
 ## Accepted current warnings
 
 | Budget | Accepted ceiling | Owner | Rationale | Evidence | Follow-up | Expiry |
 | --- | ---: | --- | --- | --- | --- | --- |
-| Initial bundle | 870kB | Docs shell / global styles | The current warning is the accepted alpha docs-shell baseline: Angular runtime/router, global Tailwind, Hell composite/table CSS, app-shell/search/menu/select navigation UI, top-level icons, Button recipe utilities, and tailwind-merge. Heavy feature examples and raw source previews stay behind lazy docs route boundaries. This acceptance is not permission for unrelated eager imports. | docs/release/docs-bundle-budget-diagnosis.md | lazy-route import graph guard | Any build that exceeds the accepted ceiling, reaches the initial maximumError threshold, or reopens the production-readiness budget decision. |
+| Initial bundle | 870kB | Docs shell / global styles | The current warning is the accepted internal-beta docs-shell baseline: Angular runtime/router, global Tailwind, Hell composite/table CSS, app-shell/search/menu/select navigation UI, top-level icons, Button recipe utilities, and tailwind-merge. Heavy feature examples and raw source previews stay behind lazy docs route boundaries. This acceptance is not permission for unrelated eager imports. | docs/release/docs-bundle-budget-diagnosis.md | lazy-route import graph guard | Any build that exceeds the accepted ceiling, reaches the initial maximumError threshold, or reopens the production-readiness budget decision. |
 
 No `anyComponentStyle` warning is accepted. If one appears, treat it as a regression until this policy records a specific owner, rationale, evidence, and follow-up.

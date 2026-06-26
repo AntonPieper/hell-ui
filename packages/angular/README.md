@@ -64,12 +64,17 @@ Every exported API belongs to one documented category:
 - `Deprecated`: compatibility alias with a preferred replacement. API comments must include `@deprecated`, docs must name the replacement, and removal needs an explicit release decision.
 - `Internal`: implementation detail, not a consumer import path. Public API files must not export from `/internal/`, `/adapters/`, or metadata-declared internal directories unless the architecture allowlist names the exception and rationale.
 
-The stable API report set currently covers `@hell-ui/angular`, `@hell-ui/angular/core`, `@hell-ui/angular/input`, `@hell-ui/angular/dialpad`, and `@hell-ui/angular/testing`.
+The API report gate currently covers stable entry points
+`@hell-ui/angular`, `@hell-ui/angular/core`, `@hell-ui/angular/input`,
+`@hell-ui/angular/dialpad`, and `@hell-ui/angular/testing`, plus one documented
+internal exception: `@hell-ui/angular/internal/hotkeys` is tracked to guard
+accidental shape drift, but it is not promoted to Stable.
 
 | Surface | Category | Browser/SSR notes |
 |---|---|---|
 | Root/core (`@hell-ui/angular`, `/core`) | Stable | Lightweight contracts; no composite or heavy feature exports |
-| Primitives (narrow primitive entry points) | Stable | SSR-safe unless a primitive's own docs say otherwise |
+| Report-guarded primitives (`/input`, `/dialpad`) | Stable | SSR-safe unless a primitive's own docs say otherwise |
+| Other narrow primitive entry points | Beta until promoted into the API report policy | SSR-safe unless a primitive's own docs say otherwise |
 | Composites (narrow composite entry points) | Beta | Browser-first surfaces can use `window`/`document` and global listeners for overlays |
 | Table primitives (`@hell-ui/angular/table`) | Beta | Optional peer; uses `ResizeObserver` for table sizing |
 | TanStack table shell (`@hell-ui/angular/table-tanstack`, `/table-tanstack/virtual`) | Experimental | Caller-owned TanStack Table remains the engine; Hell owns shell chrome, styling, projection regions, status views, controls, and the optional TanStack Virtual body strategy |

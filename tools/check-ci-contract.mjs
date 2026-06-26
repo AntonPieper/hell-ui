@@ -8,6 +8,7 @@ import {
   validateDocsBudgetPolicy,
   validateDocsBudgetPolicyMarkdown,
 } from './docs-budget-policy.mjs';
+import { releaseCandidateConsumerScenarioNames } from './release-evidence-policy.mjs';
 
 const errors = [];
 const packageConsumerContract = readPackageConsumerContract();
@@ -26,6 +27,7 @@ const requiredFiles = [
   'tools/check-package-pack.mjs',
   'tools/check-api-reports.mjs',
   'tools/check-changelog.mjs',
+  'tools/release-evidence-policy.mjs',
   'tools/release-dry-run.mjs',
   'tools/production-ready-check.mjs',
   'tools/package-pack-audit.mjs',
@@ -35,6 +37,7 @@ const requiredFiles = [
   'CHANGELOG.md',
   'docs/release/npm-publishing.md',
   'docs/release/semver-policy.md',
+  'docs/release/release-evidence-policy.md',
   'docs/release/production-readiness-checklist.md',
   'docs/release/docs-budget-policy.md',
   'docs/release/docs-bundle-budget-diagnosis.md',
@@ -426,13 +429,41 @@ const fileChecks = [
   {
     path: 'tools/check-api-reports.mjs',
     includes: [
-      '@hell-ui/angular/core',
-      '@hell-ui/angular/input',
-      '@hell-ui/angular/dialpad',
-      '@hell-ui/angular/testing',
+      'apiReportEntrypoints',
       'localBuild',
       'reportFolder',
       'reportTempFolder',
+    ],
+  },
+  {
+    path: 'tools/release-evidence-policy.mjs',
+    includes: [
+      'releaseCandidateConsumerScenarios',
+      'root-core',
+      'core',
+      'testing',
+      'button-ui',
+      'button',
+      'primitive-icons-css',
+      'composite-css',
+      'app-shell',
+      'audio-player',
+      'audio-transcript',
+      'table',
+      'table-tanstack',
+      'table-tanstack-virtual',
+      'no-legacy-alias',
+      'code-editor',
+      'pdf-viewer',
+      'apiReportEntrypoints',
+      '@hell-ui/angular/core',
+      '@hell-ui/angular/internal/hotkeys',
+      '@hell-ui/angular/input',
+      '@hell-ui/angular/dialpad',
+      '@hell-ui/angular/testing',
+      'hell-ui-angular-internal-hotkeys.api.md',
+      'internal-report-exception',
+      'requiredFullReleaseTasks',
     ],
   },
   {
@@ -456,12 +487,11 @@ const fileChecks = [
   {
     path: 'tools/check-changelog.mjs',
     includes: [
-      'CHANGELOG.md',
-      'docs/release/semver-policy.md',
-      'packages/angular/package.json',
-      'internal beta',
-      'public beta',
-      'stable',
+      'changelogPath',
+      'semverPolicyPath',
+      'packageManifestPath',
+      'changelogRequiredPolicyTerms',
+      'releaseEvidencePolicyDocPath',
     ],
   },
   {
@@ -469,7 +499,7 @@ const fileChecks = [
     includes: [
       '--fast',
       '--full',
-      'test-results/release-evidence',
+      'releaseEvidenceDirectory',
       'Git commit:',
       'Git tracked changes:',
       'test:architecture',
@@ -487,7 +517,7 @@ const fileChecks = [
     path: 'tools/production-ready-check.mjs',
     includes: [
       'production-readiness-gate',
-      'internal-beta-until-gate-passes',
+      'productionReadinessStatus',
       'package-consumer',
       'api',
       'accessibility',
@@ -496,6 +526,7 @@ const fileChecks = [
       'release-dry-run',
       'test-results/release-evidence',
       'releaseDryRunEvidence',
+      'requiredScenarios',
       'playwrightJsonReport',
       'allE2eSpecs',
       'requiredPlaywrightProjects',
@@ -527,6 +558,19 @@ const fileChecks = [
     ],
   },
   {
+    path: 'docs/release/release-evidence-policy.md',
+    includes: [
+      'Release-candidate package-consumer scenarios',
+      'PDF viewer split-package exception',
+      'Internal hotkeys API report exception',
+      'tools/release-evidence-policy.mjs',
+      'production-readiness checklist',
+      'pdf-viewer',
+      '@hell-ui/angular/internal/hotkeys',
+      'hell-ui-angular-internal-hotkeys.api.md',
+    ],
+  },
+  {
     path: 'docs/release/production-readiness-checklist.md',
     includes: [
       'production-readiness-gate',
@@ -539,6 +583,9 @@ const fileChecks = [
       'release-dry-run',
       'test-results/playwright-report.json',
       'releaseDryRunEvidence',
+      'requiredScenarios',
+      'pdf-viewer',
+      'hell-ui-angular-internal-hotkeys.api.md',
       'allE2eSpecs',
       'modifiedAfterCurrentGitCommit',
       'clean tracked tree',
@@ -564,6 +611,7 @@ const fileChecks = [
     includes: [
       'npm trusted publishing',
       'AntonPieper',
+      '@hell-ui/pdf-viewer',
       'npm-publish.yml',
       'npm-publish',
       'Require two-factor authentication and disallow tokens',
@@ -706,21 +754,20 @@ function checkPackageConsumerCatalogDrift() {
     packageConsumerContract.ciGroups,
   );
   assertScenarioListEqual(
-    'tools/release-dry-run.mjs default package-consumer scenarios',
-    readJsStringArrayAfterMarker(
-      'tools/release-dry-run.mjs',
-      'const selectedConsumerScenarios = parseList',
-    ),
+    'tools/release-evidence-policy.mjs release package-consumer scenarios',
+    releaseCandidateConsumerScenarioNames,
     packageConsumerContract.releaseScenarios,
   );
-  assertScenarioListEqual(
-    'tools/production-ready-check.mjs required release scenarios',
-    readJsStringArrayAfterMarker(
-      'tools/production-ready-check.mjs',
-      'const requiredReleaseScenarios =',
-    ),
-    packageConsumerContract.releaseScenarios,
-  );
+  if (!readFileSync('tools/release-dry-run.mjs', 'utf8').includes('releaseCandidateConsumerScenarioNames')) {
+    errors.push('tools/release-dry-run.mjs must use releaseCandidateConsumerScenarioNames.');
+  }
+  if (
+    !readFileSync('tools/production-ready-check.mjs', 'utf8').includes(
+      'releaseCandidateConsumerScenarioNames',
+    )
+  ) {
+    errors.push('tools/production-ready-check.mjs must use releaseCandidateConsumerScenarioNames.');
+  }
 }
 
 function readGithubPackageConsumerGroups() {

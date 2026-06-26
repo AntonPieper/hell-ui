@@ -3,24 +3,18 @@ import { spawn, spawnSync } from 'node:child_process';
 import { createWriteStream, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  releaseCandidateConsumerScenarioNames,
+  releaseEvidenceDirectory,
+} from './release-evidence-policy.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const rawArgs = process.argv.slice(2);
 const mode = parseMode(rawArgs);
-const selectedConsumerScenarios = parseList(process.env.HELL_RELEASE_DRY_RUN_CONSUMER_SCENARIOS, [
-  'root-core',
-  'button-ui',
-  'button',
-  'primitive-icons-css',
-  'audio-player',
-  'audio-transcript',
-  'table',
-  'table-tanstack',
-  'table-tanstack-virtual',
-  'no-legacy-alias',
-  'code-editor',
-  'pdf-viewer',
-]);
+const selectedConsumerScenarios = parseList(
+  process.env.HELL_RELEASE_DRY_RUN_CONSUMER_SCENARIOS,
+  releaseCandidateConsumerScenarioNames,
+);
 const startedAt = new Date();
 const logPath = releaseEvidenceLogPath(mode, startedAt);
 const evidenceJsonPath = logPath.replace(/\.log$/, '.json');
@@ -123,7 +117,7 @@ function releaseEvidenceLogPath(selectedMode, date) {
     ? isAbsolute(rawLogDir)
       ? rawLogDir
       : resolve(root, rawLogDir)
-    : join(root, 'test-results/release-evidence');
+    : join(root, releaseEvidenceDirectory);
   mkdirSync(logDir, { recursive: true });
 
   const stamp = date.toISOString().replace(/[:.]/g, '-');

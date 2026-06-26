@@ -1424,6 +1424,7 @@ function isAudioTranscriptFeatureSpecifier(specifier) {
 function checkApiReportContract() {
   const packageJson = parseJsonWithComments(readFile(join(root, 'package.json')));
   const script = readFile(join(root, 'tools/check-api-reports.mjs'));
+  const policy = readFile(join(root, 'tools/release-evidence-policy.mjs'));
   const expectedEntrypoints = [
     ['@hell-ui/angular', 'hell-ui-angular.api.md'],
     ['@hell-ui/angular/core', 'hell-ui-angular-core.api.md'],
@@ -1448,13 +1449,16 @@ function checkApiReportContract() {
   if (!packageJson.scripts?.['ci:build']?.includes('pnpm run test:api-report')) {
     failures.push('API Report contract must run from ci:build after the library package is built');
   }
+  if (!script.includes('apiReportEntrypoints')) {
+    failures.push('API Report script must use the shared release evidence policy membership');
+  }
 
   for (const [specifier, reportFileName] of expectedEntrypoints) {
-    if (!script.includes(specifier)) {
-      failures.push(`API Report script is missing stable entry point ${specifier}`);
+    if (!policy.includes(specifier)) {
+      failures.push(`API Report policy is missing stable entry point ${specifier}`);
     }
-    if (!script.includes(reportFileName)) {
-      failures.push(`API Report script is missing report file ${reportFileName}`);
+    if (!policy.includes(reportFileName)) {
+      failures.push(`API Report policy is missing report file ${reportFileName}`);
     }
 
     const reportPath = join(root, 'etc/api-reports', reportFileName);
@@ -1464,7 +1468,7 @@ function checkApiReportContract() {
   }
 
   for (const forbidden of forbiddenExperimentalApiReports) {
-    if (script.includes(forbidden)) {
+    if (policy.includes(forbidden) || script.includes(forbidden)) {
       failures.push(
         `API Report contract must keep Code Editor out of stable API reports until API report policy deliberately promotes it: ${forbidden}`,
       );
@@ -2266,6 +2270,10 @@ function checkPartStyleMapContract() {
   const packageConsumer = readFile(join(root, 'tools/check-package-consumer.mjs'));
   const releaseDryRun = readFile(join(root, 'tools/release-dry-run.mjs'));
   const productionReadyCheck = readFile(join(root, 'tools/production-ready-check.mjs'));
+  const releaseEvidencePolicy = readFile(join(root, 'tools/release-evidence-policy.mjs'));
+  const productionReadinessChecklist = readFile(
+    join(root, 'docs/release/production-readiness-checklist.md'),
+  );
   const entrypointPackageDirs = new Set(
     entrypointPublicApiFiles().map((entrypoint) => entrypoint.packageDir),
   );
@@ -2363,15 +2371,20 @@ function checkPartStyleMapContract() {
     failures.push('Package-consumer CSS assertion must name the Part Style Map compiled-CSS proof');
   }
   if (
-    !releaseDryRun.includes("'button-ui'") ||
-    !releaseDryRun.includes("'button'") ||
-    releaseDryRun.includes('button-unstyled')
+    !releaseDryRun.includes('releaseCandidateConsumerScenarioNames') ||
+    !releaseEvidencePolicy.includes("'button-ui'") ||
+    !releaseEvidencePolicy.includes("'button'") ||
+    releaseEvidencePolicy.includes('button-unstyled')
   ) {
     failures.push(
       'Release dry-run must include button-ui and styled button, and must not reference button-unstyled',
     );
   }
-  if (!productionReadyCheck.includes("'button-ui'") || !productionReadyCheck.includes("'button'")) {
+  if (
+    !productionReadyCheck.includes('releaseCandidateConsumerScenarioNames') ||
+    !productionReadinessChecklist.includes('"button-ui"') ||
+    !productionReadinessChecklist.includes('"button"')
+  ) {
     failures.push('Production-readiness package-consumer gate must require button-ui and button');
   }
 

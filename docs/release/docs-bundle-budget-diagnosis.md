@@ -23,7 +23,7 @@
 
 | Budget | Current | Accepted ceiling | Owner | Rationale | Evidence | Follow-up | Expiry |
 | --- | ---: | ---: | --- | --- | --- | --- | --- |
-| Initial bundle | 861.76 kB | 870.00 kB | Docs shell / global styles | The current warning is the accepted alpha docs-shell baseline: Angular runtime/router, global Tailwind, Hell composite/table CSS, app-shell/search/menu/select navigation UI, top-level icons, Button recipe utilities, and tailwind-merge. Heavy feature examples and raw source previews stay behind lazy docs route boundaries. This acceptance is not permission for unrelated eager imports. | `docs/release/docs-bundle-budget-diagnosis.md` | lazy-route import graph guard | Any build that exceeds the accepted ceiling, reaches the initial maximumError threshold, or reopens the production-readiness budget decision. |
+| Initial bundle | 861.76 kB | 870.00 kB | Docs shell / global styles | The current warning is the accepted internal-beta docs-shell baseline: Angular runtime/router, global Tailwind, Hell composite/table CSS, app-shell/search/menu/select navigation UI, top-level icons, Button recipe utilities, and tailwind-merge. Heavy feature examples and raw source previews stay behind lazy docs route boundaries. This acceptance is not permission for unrelated eager imports. | `docs/release/docs-bundle-budget-diagnosis.md` | lazy-route import graph guard | Any build that exceeds the accepted ceiling, reaches the initial maximumError threshold, or reopens the production-readiness budget decision. |
 
 ## Largest initial chunks
 
