@@ -1,47 +1,80 @@
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const junitPath = 'test-results/vitest-junit.xml';
-const coverageSummaryPath = 'coverage/coverage-summary.json';
-const markdownPath = 'test-results/summary.md';
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const junitPath = join(root, 'test-results/vitest-junit.xml');
+const coverageSummaryPath = join(root, 'coverage/coverage-summary.json');
+const markdownPath = join(root, 'test-results/summary.md');
+const summaryStartedAt = Date.now();
+const readErrors = [];
 
 function readJunitSummary() {
-  if (!existsSync(junitPath)) {
+  try {
+    if (!existsSync(junitPath)) {
+      return null;
+    }
+
+    const stats = statSync(junitPath);
+    if (stats.size === 0) {
+      return null;
+    }
+
+    const xml = readFileSync(junitPath, 'utf8');
+    const summaryTag = xml.match(/<testsuites\b[^>]*>/)?.[0] ?? xml.match(/<testsuite\b[^>]*>/)?.[0];
+
+    if (!summaryTag) {
+      return null;
+    }
+
+    const attr = (name) => {
+      const value = summaryTag.match(new RegExp(`${name}="([^"]*)"`))?.[1];
+      return value === undefined ? null : Number(value);
+    };
+    const sumSuiteAttr = (name) =>
+      [...xml.matchAll(/<testsuite\b[^>]*>/g)].reduce((total, [tag]) => {
+        const value = tag.match(new RegExp(`${name}="([^"]*)"`))?.[1];
+        return total + (value === undefined ? 0 : Number(value));
+      }, 0);
+
+    return {
+      tests: attr('tests'),
+      failures: attr('failures'),
+      errors: attr('errors'),
+      skipped: attr('skipped') ?? sumSuiteAttr('skipped'),
+      time: attr('time'),
+    };
+  } catch (error) {
+    readErrors.push(`Could not read JUnit report at ${junitPath}: ${errorMessage(error)}`);
     return null;
   }
-
-  const xml = readFileSync(junitPath, 'utf8');
-  const summaryTag = xml.match(/<testsuites\b[^>]*>/)?.[0] ?? xml.match(/<testsuite\b[^>]*>/)?.[0];
-
-  if (!summaryTag) {
-    return null;
-  }
-
-  const attr = (name) => {
-    const value = summaryTag.match(new RegExp(`${name}="([^"]*)"`))?.[1];
-    return value === undefined ? null : Number(value);
-  };
-  const sumSuiteAttr = (name) =>
-    [...xml.matchAll(/<testsuite\b[^>]*>/g)].reduce((total, [tag]) => {
-      const value = tag.match(new RegExp(`${name}="([^"]*)"`))?.[1];
-      return total + (value === undefined ? 0 : Number(value));
-    }, 0);
-
-  return {
-    tests: attr('tests'),
-    failures: attr('failures'),
-    errors: attr('errors'),
-    skipped: attr('skipped') ?? sumSuiteAttr('skipped'),
-    time: attr('time'),
-  };
 }
 
 function readCoverageSummary() {
-  if (!existsSync(coverageSummaryPath)) {
+  try {
+    if (!existsSync(coverageSummaryPath)) {
+      return null;
+    }
+
+    const stats = statSync(coverageSummaryPath);
+    if (stats.size === 0) {
+      return null;
+    }
+
+    const summary = JSON.parse(readFileSync(coverageSummaryPath, 'utf8'));
+    return summary.total;
+  } catch (error) {
+    readErrors.push(`Could not parse coverage summary at ${coverageSummaryPath}: ${errorMessage(error)}`);
     return null;
   }
-
-  const summary = JSON.parse(readFileSync(coverageSummaryPath, 'utf8'));
-  return summary.total;
 }
 
 function formatNumber(value) {
@@ -78,8 +111,10 @@ const markdown = [
   '',
 ].join('\n');
 
-mkdirSync('test-results', { recursive: true });
+mkdirSync(join(root, 'test-results'), { recursive: true });
+rmSync(markdownPath, { force: true });
 writeFileSync(markdownPath, markdown);
+errors.push(...validateMarkdownSummary(markdown));
 
 if (process.env.GITHUB_STEP_SUMMARY) {
   appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown);
@@ -96,7 +131,7 @@ if (errors.length) {
 }
 
 function validateSummary(junit, coverage) {
-  const errors = [];
+  const errors = [...readErrors];
   if (!junit) {
     errors.push(`Missing or malformed JUnit report at ${junitPath}`);
   } else {
@@ -112,6 +147,39 @@ function validateSummary(junit, coverage) {
       if (!Number.isFinite(coverage[field]?.pct)) {
         errors.push(`Coverage summary field ${field}.pct is missing`);
       }
+    }
+  }
+
+  return errors;
+}
+
+function errorMessage(error) {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function validateMarkdownSummary(markdown) {
+  const errors = [];
+  if (!existsSync(markdownPath)) {
+    errors.push(`Markdown summary was not written at ${markdownPath}`);
+    return errors;
+  }
+
+  const stats = statSync(markdownPath);
+  if (stats.mtimeMs < summaryStartedAt) {
+    errors.push(`Markdown summary is stale from a previous run at ${markdownPath}`);
+  }
+  if (stats.size === 0) {
+    errors.push(`Markdown summary is empty at ${markdownPath}`);
+  }
+
+  const written = readFileSync(markdownPath, 'utf8');
+  if (written !== markdown) {
+    errors.push(`Markdown summary content changed while writing ${markdownPath}`);
+  }
+
+  for (const label of ['Tests', 'Failures', 'Errors', 'Skipped', 'Line coverage']) {
+    if (!written.includes(`| ${label} |`)) {
+      errors.push(`Markdown summary is missing ${label}`);
     }
   }
 

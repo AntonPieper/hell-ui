@@ -32,7 +32,7 @@
     "ci:playwright:chromium": "pnpm exec playwright install --with-deps chromium",
     "ci:playwright:firefox": "pnpm exec playwright install --with-deps firefox",
     "ci:playwright:webkit": "pnpm exec playwright install --with-deps webkit",
-    "ci:test:unit": "pnpm run test:unit && node tools/ci-summary.mjs",
+    "ci:test:unit": "node tools/run-unit-tests.mjs --ci-summary",
     "ci:test:static": "pnpm run lint && pnpm run test:architecture && pnpm run test:ci-contract",
     "ci:test:e2e": "pnpm exec playwright test",
     "ci:test:package-consumer": "pnpm run test:package-consumer -- --minimal-deps",

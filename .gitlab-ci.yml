@@ -21,7 +21,6 @@ default:
     paths:
       - .pnpm-store/
       - .angular/cache/
-      - dist/
 
 static:
   stage: validate
@@ -55,11 +54,11 @@ package-consumer:
       - PACKAGE_CONSUMER_GROUP: core
         PACKAGE_CONSUMER_SCENARIOS: root-core,core,testing
       - PACKAGE_CONSUMER_GROUP: primitive-foundations
-        PACKAGE_CONSUMER_SCENARIOS: primitives-css,button-unstyled
+        PACKAGE_CONSUMER_SCENARIOS: primitive-icons-css,button-ui
       - PACKAGE_CONSUMER_GROUP: button
         PACKAGE_CONSUMER_SCENARIOS: button
       - PACKAGE_CONSUMER_GROUP: composite-foundations
-        PACKAGE_CONSUMER_SCENARIOS: composites-css,app-shell
+        PACKAGE_CONSUMER_SCENARIOS: composite-css,app-shell
       - PACKAGE_CONSUMER_GROUP: audio
         PACKAGE_CONSUMER_SCENARIOS: audio-player,audio-transcript
       - PACKAGE_CONSUMER_GROUP: features

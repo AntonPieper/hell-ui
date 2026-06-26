@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,10 +7,15 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const testResultsDir = join(root, 'test-results');
 const coverageDir = join(root, 'coverage');
 const junitPath = join(testResultsDir, 'vitest-junit.xml');
+const markdownSummaryPath = join(testResultsDir, 'summary.md');
 const coverageSummaryPath = join(coverageDir, 'coverage-summary.json');
+const coberturaPath = join(coverageDir, 'cobertura-coverage.xml');
 const timeoutMs = positiveNumber(process.env.HELL_UNIT_TEST_TIMEOUT_MS, 180_000);
 const startedAt = Date.now();
-const coverageRequired = !process.argv.slice(2).some((arg) => arg === '--coverage=false');
+const rawArgs = process.argv.slice(2);
+const writeCiSummary = rawArgs.includes('--ci-summary');
+const testArgs = rawArgs.filter((arg) => arg !== '--ci-summary');
+const coverageRequired = !testArgs.some((arg) => arg === '--coverage=false');
 const coverageThresholds = {
   statements: 75,
   branches: 70,
@@ -19,6 +24,7 @@ const coverageThresholds = {
 };
 
 rmSync(junitPath, { force: true });
+rmSync(markdownSummaryPath, { force: true });
 rmSync(coverageDir, { force: true, recursive: true });
 mkdirSync(testResultsDir, { recursive: true });
 
@@ -33,7 +39,7 @@ const args = [
   '--progress=false',
   '--runner-config',
   '../../vitest.ci.config.ts',
-  ...process.argv.slice(2),
+  ...testArgs,
 ];
 
 const child = spawn('pnpm', args, {
@@ -57,50 +63,65 @@ const result = await waitForClose(child);
 clearTimeout(timeout);
 
 const reportStatus = inspectJUnitReport();
+const coverageStatus = inspectCoverageArtifacts();
+
+if (result.error) {
+  console.error(`[unit] Angular/Vitest failed to start: ${result.error.message}`);
+  printJUnitDiagnostic(reportStatus);
+  if (coverageRequired) printCoverageDiagnostic(coverageStatus);
+  printOpenHandleHint();
+  finish(1);
+}
 
 if (timedOut) {
   console.error(`[unit] timed out after ${timeoutMs}ms`);
   printJUnitDiagnostic(reportStatus);
+  if (coverageRequired) printCoverageDiagnostic(coverageStatus);
   printOpenHandleHint();
-  process.exit(1);
+  finish(1);
 }
 
-const coverage = readCoverageSummary();
 if (!reportStatus.ok) {
   printJUnitDiagnostic(reportStatus);
   printOpenHandleHint();
-  process.exit(1);
+  finish(1);
+}
+
+if (coverageRequired && !coverageStatus.ok) {
+  printCoverageDiagnostic(coverageStatus);
+  finish(1);
 }
 
 const report = reportStatus.report;
+const coverage = coverageStatus.summary;
 
 if (report.tests <= 0) {
   console.error('[unit] JUnit report contains no tests.');
-  process.exit(1);
+  finish(1);
 }
 
 if (report.failures > 0 || report.errors > 0) {
   console.error(
     `[unit] JUnit reported ${report.failures} failures and ${report.errors} errors.`,
   );
-  process.exit(1);
+  finish(1);
 }
 
 if (coverageRequired && !coverageMeetsThresholds(coverage)) {
   console.error('[unit] coverage summary is missing or below configured thresholds.');
-  process.exit(1);
+  finish(1);
 }
 
 if (result.signal) {
   console.error(`[unit] Angular/Vitest exited via ${result.signal}.`);
-  process.exit(1);
+  finish(1);
 }
 
 if (result.code !== 0) {
-  process.exit(result.code ?? 1);
+  finish(result.code ?? 1);
 }
 
-process.exit(0);
+finish(0);
 
 function forwardOutput(chunk, stream) {
   stream.write(chunk);
@@ -116,8 +137,34 @@ function terminate(signal) {
 
 function waitForClose(processRef) {
   return new Promise((resolve) => {
-    processRef.on('close', (code, signal) => resolve({ code, signal }));
+    processRef.on('error', (error) => resolve({ code: null, signal: null, error }));
+    processRef.on('close', (code, signal) => resolve({ code, signal, error: null }));
   });
+}
+
+function finish(unitExitCode) {
+  const summaryExitCode = writeCiSummary ? runCiSummary() : 0;
+  process.exit(unitExitCode === 0 ? summaryExitCode : unitExitCode);
+}
+
+function runCiSummary() {
+  const summary = spawnSync('node', ['tools/ci-summary.mjs'], {
+    cwd: root,
+    shell: process.platform === 'win32',
+    stdio: 'inherit',
+  });
+
+  if (summary.error) {
+    console.error(`[unit] CI summary failed to start: ${summary.error.message}`);
+    return 1;
+  }
+
+  if (summary.signal) {
+    console.error(`[unit] CI summary exited via ${summary.signal}.`);
+    return 1;
+  }
+
+  return summary.status ?? 1;
 }
 
 function inspectJUnitReport() {
@@ -178,15 +225,86 @@ function printOpenHandleHint() {
   );
 }
 
-function readCoverageSummary() {
-  if (!existsSync(coverageSummaryPath)) return null;
+function inspectCoverageArtifacts() {
+  const errors = [];
+  const summary = readCoverageSummary(errors);
+  inspectCoberturaReport(errors);
+
+  return {
+    ok: errors.length === 0,
+    errors,
+    summary,
+  };
+}
+
+function readCoverageSummary(errors) {
+  if (!existsSync(coverageSummaryPath)) {
+    errors.push(`coverage summary was not written at ${coverageSummaryPath}`);
+    return null;
+  }
 
   try {
     const stats = statSync(coverageSummaryPath);
-    if (stats.mtimeMs < startedAt || stats.size === 0) return null;
-    return JSON.parse(readFileSync(coverageSummaryPath, 'utf8'));
-  } catch {
+    if (stats.mtimeMs < startedAt) {
+      errors.push(`coverage summary is stale from a previous run at ${coverageSummaryPath}`);
+      return null;
+    }
+    if (stats.size === 0) {
+      errors.push(`coverage summary is empty at ${coverageSummaryPath}`);
+      return null;
+    }
+
+    const summary = JSON.parse(readFileSync(coverageSummaryPath, 'utf8'));
+    if (!summary?.total) {
+      errors.push(`coverage summary has no total coverage block at ${coverageSummaryPath}`);
+      return null;
+    }
+    return summary;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    errors.push(`could not read coverage summary at ${coverageSummaryPath}: ${message}`);
     return null;
+  }
+}
+
+function inspectCoberturaReport(errors) {
+  if (!existsSync(coberturaPath)) {
+    errors.push(`Cobertura report was not written at ${coberturaPath}`);
+    return;
+  }
+
+  try {
+    const stats = statSync(coberturaPath);
+    if (stats.mtimeMs < startedAt) {
+      errors.push(`Cobertura report is stale from a previous run at ${coberturaPath}`);
+      return;
+    }
+    if (stats.size === 0) {
+      errors.push(`Cobertura report is empty at ${coberturaPath}`);
+      return;
+    }
+
+    const xml = readFileSync(coberturaPath, 'utf8');
+    if (!/<coverage\b/.test(xml) || !xml.includes('</coverage>')) {
+      errors.push(`Cobertura report is malformed at ${coberturaPath}`);
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    errors.push(`could not read Cobertura report at ${coberturaPath}: ${message}`);
+  }
+}
+
+function printCoverageDiagnostic(status) {
+  if (status.ok) {
+    console.error(
+      `[unit] coverage reports are complete at ${coverageSummaryPath} and ${coberturaPath}.`,
+    );
+    return;
+  }
+
+  console.error('[unit] coverage reports are missing or incomplete:');
+  for (const error of status.errors) {
+    console.error(`- ${error}`);
   }
 }
 

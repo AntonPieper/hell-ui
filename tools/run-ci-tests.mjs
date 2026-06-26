@@ -1,9 +1,9 @@
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, rmSync } from 'node:fs';
 
-const reports = ['test-results', 'coverage'];
+const artifactDirs = ['test-results', 'coverage'];
 
-for (const path of reports) {
+for (const path of artifactDirs) {
   rmSync(path, { force: true, recursive: true });
 }
 
@@ -41,6 +41,7 @@ let failed = false;
 for (const task of tasks) {
   console.log(`\n[ci] ${task.name}`);
   const result = spawnSync('pnpm', task.args, {
+    env: { ...process.env, CI: 'true' },
     shell: process.platform === 'win32',
     stdio: 'inherit',
   });
@@ -57,11 +58,22 @@ for (const task of tasks) {
 }
 
 const summary = spawnSync('node', ['tools/ci-summary.mjs'], {
+  env: { ...process.env, CI: 'true' },
   shell: process.platform === 'win32',
   stdio: 'inherit',
 });
 
-if (!failed && summary.status !== 0) {
+if (summary.error) {
+  console.error(`[ci] summary failed to start: ${summary.error.message}`);
+  failed = true;
+}
+
+if (summary.signal) {
+  console.error(`[ci] summary exited via ${summary.signal}.`);
+  failed = true;
+}
+
+if (summary.status !== 0) {
   failed = true;
 }
 
