@@ -47,10 +47,9 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
       <p>
         Import Tailwind first, then the narrow Hell style entry points you need. The library exposes
         Tailwind-facing CSS variables such as <code>bg-hell-surface</code>,
-        <code>text-hell-foreground</code>, and <code>border-hell-border</code>. The
-        <code>@hell-ui/angular/styles/kitchen-sink</code> alias includes composites and feature
-        styles such as CodeMirror and PDF viewer, so it is convenient for demos but not the
-        production default.
+        <code>text-hell-foreground</code>, and <code>border-hell-border</code>. The broad
+        <code>@hell-ui/angular/styles</code> entry point includes composites and feature styles such
+        as CodeMirror, so it is convenient for demos but not the production default.
       </p>
       <hd-code-block [code]="stylesCode" />
 

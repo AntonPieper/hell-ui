@@ -109,10 +109,9 @@ For broader loading:
 @import "@hell-ui/angular/styles/composites";
 @import "@hell-ui/angular/styles/features/code-editor";
 @import "@hell-ui/angular/styles/table";
-@import "@hell-ui/angular/styles/components/button";
 ```
 
-`@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` are legacy kitchen-sink aliases that include primitives, composites, and kept in-package feature styles such as CodeMirror. Use them only when the app intentionally accepts all in-package feature styles.
+`@hell-ui/angular/styles` includes primitives, composites, and kept in-package feature styles such as CodeMirror. Use it only when the app intentionally accepts all in-package feature styles.
 
 ## Part Style Maps
 

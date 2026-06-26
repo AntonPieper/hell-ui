@@ -111,22 +111,15 @@ Use `@hell-ui/angular` for stable core exports only. Use `/primitives`, `/compos
 
 Hell CSS entry points use Tailwind v4 theme features. Install `tailwindcss` and configure `@tailwindcss/postcss` whenever you import Hell CSS.
 
-Preferred narrow component imports:
+Preferred primitive imports:
 
 ```css
 @import 'tailwindcss';
 @import '@hell-ui/angular/styles/tokens';
-@import '@hell-ui/angular/styles/components/button';
-```
-
-Use the primitive aggregate stylesheet instead when the app intentionally wants every primitive style in one import:
-
-```css
-@import 'tailwindcss';
 @import '@hell-ui/angular/styles/primitives';
 ```
 
-Add only the feature CSS you import:
+For a primitive-only app, that is enough. Add only the extra aggregate or feature CSS needed by the entry points the app imports:
 
 ```css
 @import '@hell-ui/angular/styles/composites';
@@ -135,7 +128,7 @@ Add only the feature CSS you import:
 @import '@hell-ui/pdf-viewer/styles';
 ```
 
-Avoid `@hell-ui/angular/styles` and `@hell-ui/angular/styles/kitchen-sink` for production migration unless the app intentionally accepts every primitive, composite, CodeMirror, and table style in one bundle. PDF viewer styles come from `@hell-ui/pdf-viewer/styles`.
+Avoid `@hell-ui/angular/styles` for production migration unless the app intentionally accepts every primitive, composite, CodeMirror, and table style in one bundle. PDF viewer styles come from `@hell-ui/pdf-viewer/styles`.
 
 Hell's migrated component defaults are compiled into the shipped CSS entry
 points. Consumers do not need to add Tailwind `@source` scanning for

@@ -369,7 +369,7 @@ const scenarios = [
   },
   {
     name: 'no-legacy-alias',
-    description: 'negative check that removed table aliases cannot compile',
+    description: 'negative check that removed legacy aliases cannot compile',
     peerTier: 'table',
     peerGroup: 'table',
     dependencies: styledUiWithoutFontAwesomeDeps,
@@ -1823,6 +1823,8 @@ function pdfViewerConsumerStylesCss() {
 
 function noLegacyTableAliasConsumerStylesCss() {
   return `@import "tailwindcss";
+@import "${packageName}/styles/kitchen-sink";
+@import "${packageName}/styles/components/button";
 @import "${packageName}/styles/components/data-table";
 @import "${packageName}/styles/features/data-table";
 @import "${packageName}/styles/features/table-utilities";

@@ -6,14 +6,14 @@
 
 @import './primitives.css';
 
-@import './components/avatar-group.css';
-@import './components/date-input.css';
-@import './components/time-input.css';
-@import './components/app-shell.css';
-@import './components/resizable.css';
-@import './components/split-view.css';
-@import './components/audio-player.css';
-@import './components/drop-zone.css';
-@import './components/dialpad.css';
-@import './components/toast.css';
-@import './components/omnibar.css';
+@import '../composites/avatar-group/avatar-group.css';
+@import '../composites/date-input/date-input.css';
+@import '../composites/time-input/time-input.css';
+@import '../composites/app-shell/app-shell.css';
+@import '../composites/resizable/resizable.css';
+@import '../composites/split-view/split-view.css';
+@import '../composites/audio-player/audio-player.css';
+@import '../composites/drop-zone/drop-zone.css';
+@import '../composites/dialpad/dialpad.css';
+@import '../composites/toast/toast.css';
+@import '../composites/omnibar/omnibar.css';

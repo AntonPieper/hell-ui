@@ -9,6 +9,41 @@
       "output": "styles"
     },
     {
+      "glob": "**/*.css",
+      "input": "src/lib/primitives",
+      "output": "primitives"
+    },
+    {
+      "glob": "**/*.css",
+      "input": "src/lib/composites",
+      "output": "composites"
+    },
+    {
+      "glob": "**/*.css",
+      "input": "src/lib/features",
+      "output": "features"
+    },
+    {
+      "glob": "**/*.css",
+      "input": "src/lib/table",
+      "output": "table"
+    },
+    {
+      "glob": "button.ts",
+      "input": "src/lib/primitives/button",
+      "output": "primitives/button"
+    },
+    {
+      "glob": "input.ts",
+      "input": "src/lib/primitives/input",
+      "output": "primitives/input"
+    },
+    {
+      "glob": "dialpad.ts",
+      "input": "src/lib/composites/dialpad",
+      "output": "composites/dialpad"
+    },
+    {
       "glob": "hell-ui-logo.svg",
       "input": "assets",
       "output": "assets"

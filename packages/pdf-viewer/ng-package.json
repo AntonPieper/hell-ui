@@ -4,8 +4,8 @@
   "assets": [
     {
       "glob": "**/*.css",
-      "input": "src/lib/styles",
-      "output": "styles"
+      "input": "src/lib/pdf-viewer",
+      "output": "pdf-viewer"
     }
   ],
   "lib": {
