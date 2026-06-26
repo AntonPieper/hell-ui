@@ -30,22 +30,23 @@ Trusted publishing works only when the npm trusted-publisher record exactly matc
 The release workflow lives at `.github/workflows/npm-publish.yml` in this repository.
 
 - Tag pushes matching `v*.*.*` run the full release dry-run first.
+- The release publishes both `@hell-ui/angular` and `@hell-ui/pdf-viewer`; both packages must share the tagged version.
 - The dry-run job uploads `test-results/release-evidence/` as the `release-dry-run-evidence` artifact.
-- A separate no-OIDC `build-package` job rebuilds, pack-audits, and uploads one package tarball as `release-package`.
+- A separate no-OIDC `build-package` job rebuilds, pack-audits, and uploads both package tarballs as `release-package`.
 - The publish job has `needs: [release-dry-run, build-package]`, downloads both artifacts, and refuses to publish without a passing summary exit in the dry-run log.
 - The publish job has `permissions.id-token: write` and `permissions.contents: read` so the npm registry can mint the short-lived OIDC credential for `pnpm publish`.
 - Normal publish does not set `NPM_TOKEN` or `NODE_AUTH_TOKEN`. Trusted publishing authenticates the publish command directly.
 - The job runs on `ubuntu-latest` with Node 24 and the pinned pnpm version so trusted publishing and provenance are available.
-- The OIDC-enabled publish job does not install dependencies, build, or run package scripts; it only verifies the downloaded artifacts and runs `pnpm publish "$HELL_RELEASE_TARBALL" --access public --provenance --no-git-checks`.
+- The OIDC-enabled publish job does not install dependencies, build, or run package scripts; it only verifies the downloaded artifacts and runs `pnpm publish "$tarball" --access public --provenance --no-git-checks` for each audited package tarball.
 
 `workflow_dispatch` is evidence-only. To publish, create a protected tag whose name matches the package version, for example `v0.1.0`.
 
 ## Release steps
 
-1. Update `packages/angular/package.json` version in a release-prep change.
+1. Update `packages/angular/package.json` and `packages/pdf-viewer/package.json` versions in a release-prep change.
 2. Run `pnpm release:dry-run -- --full` locally or wait for the release workflow dry-run evidence.
 3. Create and push a protected tag: `git tag v<version>` then `git push origin v<version>`.
 4. Approve the `npm-publish` GitHub environment deployment.
-5. After publish, verify the npm package page shows provenance and that the GitHub Actions run contains both `release-dry-run-evidence` and `release-package` artifacts.
+5. After publish, verify both npm package pages show provenance and that the GitHub Actions run contains both `release-dry-run-evidence` and `release-package` artifacts.
 
 If future private install dependencies are introduced, use a read-only install token only for the install step. Do not use a publish token for the normal release path.

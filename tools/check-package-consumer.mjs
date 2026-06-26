@@ -13,7 +13,14 @@ import {
 import { basename, dirname, extname, isAbsolute, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { auditPackedPackage } from './package-pack-audit.mjs';
+import {
+  auditPackedPackage,
+  heavyFeaturePeerGroup,
+  packageConsumerPeerTiers,
+  packagePeerGroups,
+  peerGroupContracts,
+  tableAdapterPeerGroup,
+} from './package-pack-audit.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const distHell = join(root, 'dist/hell');
@@ -36,82 +43,7 @@ const pnpmPreflightTimeoutMs = positiveNumber(
   30_000,
 );
 
-const corePeerGroup = [
-  '@angular/cdk',
-  '@angular/common',
-  '@angular/core',
-  '@angular/forms',
-  '@floating-ui/dom',
-  '@ng-icons/core',
-  'ng-primitives',
-  'rxjs',
-];
-const stylePeerGroup = ['tailwindcss'];
 const tailwindPostcssDevDeps = ['@tailwindcss/postcss', 'postcss'];
-const routerPeerGroup = ['@angular/router'];
-const fontAwesomePeerGroup = ['@ng-icons/font-awesome'];
-const codeEditorPeerGroup = [
-  '@codemirror/commands',
-  '@codemirror/language',
-  '@codemirror/state',
-  '@codemirror/view',
-  '@lezer/highlight',
-];
-const pdfViewerPeerGroup = ['pdfjs-dist'];
-const tanStackTablePeerGroup = ['@tanstack/angular-table'];
-const tanStackVirtualPeerGroup = ['@tanstack/virtual-core'];
-const tableAdapterPeerGroup = [...tanStackTablePeerGroup, ...tanStackVirtualPeerGroup];
-const heavyFeaturePeerGroup = [...codeEditorPeerGroup, ...pdfViewerPeerGroup];
-const packageConsumerPeerTiers = new Set([
-  'core',
-  'primitive',
-  'composite',
-  'table',
-  'table-tanstack',
-  'audio-transcript',
-  'code-editor',
-  'pdf-viewer',
-]);
-const peerGroupContracts = {
-  core: { tier: 'core', peers: corePeerGroup },
-  'primitive-ui': { tier: 'primitive', peers: corePeerGroup },
-  primitive: { tier: 'primitive', peers: [...corePeerGroup, ...stylePeerGroup] },
-  'primitive-icons': {
-    tier: 'primitive',
-    peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup],
-  },
-  composite: { tier: 'composite', peers: [...corePeerGroup, ...stylePeerGroup] },
-  'composite-icons': {
-    tier: 'composite',
-    peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup],
-  },
-  table: { tier: 'table', peers: [...corePeerGroup, ...stylePeerGroup] },
-  'table-tanstack': {
-    tier: 'table-tanstack',
-    peers: [...corePeerGroup, ...stylePeerGroup, ...tanStackTablePeerGroup],
-  },
-  'table-tanstack-virtual': {
-    tier: 'table-tanstack',
-    peers: [
-      ...corePeerGroup,
-      ...stylePeerGroup,
-      ...tanStackTablePeerGroup,
-      ...tanStackVirtualPeerGroup,
-    ],
-  },
-  'audio-transcript': {
-    tier: 'audio-transcript',
-    peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup],
-  },
-  'code-editor': {
-    tier: 'code-editor',
-    peers: [...corePeerGroup, ...stylePeerGroup, ...codeEditorPeerGroup],
-  },
-  'pdf-viewer': {
-    tier: 'pdf-viewer',
-    peers: [...corePeerGroup, ...stylePeerGroup, ...fontAwesomePeerGroup, ...pdfViewerPeerGroup],
-  },
-};
 
 const angularAppDeps = [
   '@angular/common',
@@ -359,7 +291,7 @@ const packageConsumerScenarioCatalog = [
     peerTier: 'table-tanstack',
     peerGroup: 'table-tanstack',
     dependencies: tableTanStackDeps,
-    forbiddenDependencies: tanStackVirtualPeerGroup,
+    forbiddenDependencies: packagePeerGroups.tanStackVirtual,
     mainTs: tableTanStackConsumerMainTs,
     stylesCss: tableTanStackConsumerStylesCss,
   },
@@ -445,14 +377,13 @@ if (!pdfPackageName) {
   fail('Built PDF package.json is missing name');
 }
 
-assertModernTableEntrypointContract(distPackageJson, distHell);
 assertDocsAvoidLegacyTableEntrypoints();
 
 const packedHell = await packBuiltPackage(distHell, 'pack-core');
 const packedPdfViewer = await packBuiltPackage(distPdfViewer, 'pack-pdf-viewer');
 try {
-  auditPackedPackage({ distRoot: distHell, tarball: packedHell.tarball });
-  auditPackedPackage({ distRoot: distPdfViewer, tarball: packedPdfViewer.tarball });
+  auditPackedPackage({ tarball: packedHell.tarball });
+  auditPackedPackage({ tarball: packedPdfViewer.tarball });
 } catch (error) {
   fail(error instanceof Error ? error.message : String(error));
 }
@@ -461,14 +392,6 @@ const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
 const workspaceCatalog = readWorkspaceCatalog();
 const deps = { ...(rootPackage.dependencies ?? {}), ...workspaceCatalog };
 const devDeps = { ...(rootPackage.devDependencies ?? {}), ...workspaceCatalog };
-const sourcePackage = JSON.parse(readFileSync(join(root, 'packages/angular/package.json'), 'utf8'));
-const packagePeerDependencies = sourcePackage.peerDependencies ?? {};
-const packagePeerDependenciesMeta = sourcePackage.peerDependenciesMeta ?? {};
-const sourcePdfPackage = JSON.parse(
-  readFileSync(join(root, 'packages/pdf-viewer/package.json'), 'utf8'),
-);
-const pdfPackagePeerDependencies = sourcePdfPackage.peerDependencies ?? {};
-const pdfPackagePeerDependenciesMeta = sourcePdfPackage.peerDependenciesMeta ?? {};
 const scenarios = materializeScenarios(packageConsumerScenarioCatalog);
 
 assertPeerTierContracts(scenarios);
@@ -684,58 +607,9 @@ function scenarioLookup(allScenarios) {
 }
 
 function assertPeerTierContracts(allScenarios) {
-  const packagePeerNames = new Set(Object.keys(packagePeerDependencies));
-  const pdfPackagePeerNames = new Set(Object.keys(pdfPackagePeerDependencies));
-  const allPackagePeerNames = new Set([...packagePeerNames, ...pdfPackagePeerNames]);
-  const optionalPeerNames = new Set(
-    Object.entries(packagePeerDependenciesMeta)
-      .filter(([, meta]) => meta?.optional === true)
-      .map(([name]) => name),
+  const allPackagePeerNames = new Set(
+    Object.values(peerGroupContracts).flatMap((contract) => contract.peers),
   );
-  const pdfOptionalPeerNames = new Set(
-    Object.entries(pdfPackagePeerDependenciesMeta)
-      .filter(([, meta]) => meta?.optional === true)
-      .map(([name]) => name),
-  );
-  const requiredPackagePeerNames = [...packagePeerNames].filter(
-    (name) => !optionalPeerNames.has(name),
-  );
-
-  assertSameSet('core peer group', corePeerGroup, requiredPackagePeerNames);
-
-  for (const [groupName, contract] of Object.entries(peerGroupContracts)) {
-    const missingPeers = contract.peers.filter((peer) => !allPackagePeerNames.has(peer));
-    if (missingPeers.length) {
-      fail(
-        `Peer group ${groupName} references undeclared package peer(s): ${missingPeers.join(', ')}`,
-      );
-    }
-  }
-
-  if (packagePeerNames.has('pdfjs-dist') || optionalPeerNames.has('pdfjs-dist')) {
-    fail('Main @hell-ui/angular package must not advertise pdfjs-dist after the PDF split');
-  }
-  for (const peer of codeEditorPeerGroup) {
-    if (!optionalPeerNames.has(peer))
-      fail(`Code editor peer ${peer} must remain optional in @hell-ui/angular`);
-  }
-  for (const peer of tanStackTablePeerGroup) {
-    if (!optionalPeerNames.has(peer))
-      fail(`TanStack Table peer ${peer} must remain optional in @hell-ui/angular`);
-  }
-  for (const peer of tanStackVirtualPeerGroup) {
-    if (!optionalPeerNames.has(peer))
-      fail(`TanStack Virtual peer ${peer} must remain optional in @hell-ui/angular`);
-  }
-  if (pdfPackagePeerDependencies['pdfjs-dist'] !== deps['pdfjs-dist']) {
-    fail(`PDF package must pin pdfjs-dist peer to workspace version ${deps['pdfjs-dist']}`);
-  }
-  if (pdfOptionalPeerNames.has('pdfjs-dist')) {
-    fail('PDF package pdfjs-dist peer must be required, not optional');
-  }
-  if (pdfPackagePeerDependencies[packageName] !== distPackageJson.version) {
-    fail(`PDF package must peer ${packageName}@${distPackageJson.version}`);
-  }
 
   const coveredTiers = new Set(allScenarios.map((scenario) => scenario.peerTier));
   for (const tier of packageConsumerPeerTiers) {
@@ -882,27 +756,27 @@ function assertTableAdapterPeersAreIsolated(allScenarios) {
   if (!virtualScenario) fail('Missing package-consumer table-tanstack-virtual scenario');
 
   const tanStackPeers = tanStackScenario.dependencies.filter((dependency) =>
-    tanStackTablePeerGroup.includes(dependency),
+    packagePeerGroups.tanStackTable.includes(dependency),
   );
   assertSameSet(
     'scenario table-tanstack TanStack Table peer group',
-    tanStackTablePeerGroup,
+    packagePeerGroups.tanStackTable,
     tanStackPeers,
   );
 
   const virtualPeers = virtualScenario.dependencies.filter((dependency) =>
-    tanStackVirtualPeerGroup.includes(dependency),
+    packagePeerGroups.tanStackVirtual.includes(dependency),
   );
   assertSameSet(
     'scenario table-tanstack-virtual TanStack Virtual peer group',
-    tanStackVirtualPeerGroup,
+    packagePeerGroups.tanStackVirtual,
     virtualPeers,
   );
 
   for (const scenario of allScenarios) {
     if (scenario.name !== 'table-tanstack' && scenario.name !== 'table-tanstack-virtual') {
       const unexpectedTablePeers = scenario.dependencies.filter((dependency) =>
-        tanStackTablePeerGroup.includes(dependency),
+        packagePeerGroups.tanStackTable.includes(dependency),
       );
       if (unexpectedTablePeers.length) {
         fail(
@@ -913,7 +787,7 @@ function assertTableAdapterPeersAreIsolated(allScenarios) {
 
     if (scenario.name !== 'table-tanstack-virtual') {
       const unexpectedVirtualPeers = scenario.dependencies.filter((dependency) =>
-        tanStackVirtualPeerGroup.includes(dependency),
+        packagePeerGroups.tanStackVirtual.includes(dependency),
       );
       if (unexpectedVirtualPeers.length) {
         fail(
@@ -929,71 +803,21 @@ function assertCodeMirrorPeersAreIsolated(allScenarios) {
   if (!codeEditorScenario) fail('Missing package-consumer code-editor scenario');
 
   const codeEditorPeers = codeEditorScenario.dependencies.filter((dependency) =>
-    codeEditorPeerGroup.includes(dependency),
+    packagePeerGroups.codeEditor.includes(dependency),
   );
-  assertSameSet('scenario code-editor CodeMirror peer group', codeEditorPeerGroup, codeEditorPeers);
+  assertSameSet('scenario code-editor CodeMirror peer group', packagePeerGroups.codeEditor, codeEditorPeers);
 
   for (const scenario of allScenarios) {
     if (scenario.name === 'code-editor') continue;
 
     const unexpected = scenario.dependencies.filter((dependency) =>
-      codeEditorPeerGroup.includes(dependency),
+      packagePeerGroups.codeEditor.includes(dependency),
     );
     if (unexpected.length) {
       fail(
         `Scenario ${scenario.name} must not require CodeMirror peer(s): ${unexpected.join(', ')}`,
       );
     }
-  }
-}
-
-function assertModernTableEntrypointContract(packageJson, distRoot) {
-  const exportsMap = packageJson.exports ?? {};
-  for (const exportPath of [
-    './table',
-    './table-tanstack',
-    './table-tanstack/virtual',
-    './table/styles.css',
-    './table-tanstack/styles.css',
-  ]) {
-    if (!exportsMap[exportPath]) fail(`Modern table package export is missing ${exportPath}`);
-  }
-
-  for (const exportPath of [
-    './primitives',
-    './composites',
-    './styles',
-    './styles/tokens',
-    './styles/primitives',
-    './styles/composites',
-    './styles/table',
-    './data-table',
-    './table-virtual',
-    './table-cdk',
-    './features/data-table',
-    './features/table-utilities',
-    './styles/features/data-table',
-    './styles/features/table-utilities',
-  ]) {
-    if (exportsMap[exportPath]) fail(`Legacy table package export must be removed: ${exportPath}`);
-  }
-
-  for (const file of [
-    'features/data-table/package.json',
-    'features/table-utilities/package.json',
-    'data-table/package.json',
-    'table-virtual/package.json',
-    'table-cdk/package.json',
-    'styles/features/data-table.css',
-    'styles/features/table-utilities.css',
-    'styles/components/data-table.css',
-    'styles/components/table-utilities.css',
-    'styles/components/table-renderer.css',
-    'types/hell-ui-angular-features-data-table.d.ts',
-    'types/hell-ui-angular-features-table-utilities.d.ts',
-  ]) {
-    if (existsSync(join(distRoot, file)))
-      fail(`Legacy table package artifact must be absent: ${file}`);
   }
 }
 

@@ -264,6 +264,7 @@ const adapterChecks = [
       'HELL_PACKAGE_CONSUMER_SCENARIOS="${PACKAGE_CONSUMER_SCENARIOS}" pnpm run ci:test:package-consumer',
       'PACKAGE_CONSUMER_SCENARIOS: primitive-icons-css,button-ui',
       'PACKAGE_CONSUMER_SCENARIOS: composite-css,app-shell',
+      'PACKAGE_CONSUMER_SCENARIOS: code-editor,pdf-viewer',
       'pnpm run ci:ensure:build:lib',
       'pnpm run ci:ensure:build:docs',
       'needs:',
@@ -442,6 +443,11 @@ const fileChecks = [
       'sideEffects must include **/*.css',
       'publishConfig.provenance',
       'Secondary entry point',
+      '@hell-ui/angular peerDependencies',
+      '@hell-ui/pdf-viewer peerDependencies',
+      '@hell-ui/pdf-viewer must pin pdfjs-dist peer',
+      'legacy table alias files',
+      'Package pack audit self-test',
     ],
   },
   {
@@ -492,6 +498,7 @@ const fileChecks = [
       'requiredPlaywrightProjects',
       'requiredApiReportPaths',
       'requiredFullReleaseTasks',
+      'pdf-viewer',
       'modifiedAfterCurrentGitCommit',
     ],
   },
@@ -534,6 +541,7 @@ const fileChecks = [
       'clean tracked tree',
       'Critical gap',
       'criticalGap: true',
+      'pdf-viewer',
     ],
   },
   {
@@ -558,6 +566,8 @@ const fileChecks = [
       'Require two-factor authentication and disallow tokens',
       'release-dry-run-evidence',
       'id-token: write',
+      '@hell-ui/pdf-viewer',
+      'both package tarballs',
     ],
   },
 ];
@@ -1020,8 +1030,8 @@ function checkPackageConsumerPackAuditOrder() {
   const packHellIndex = content.indexOf("packBuiltPackage(distHell, 'pack-core')");
   const packPdfViewerIndex = content.indexOf("packBuiltPackage(distPdfViewer, 'pack-pdf-viewer')");
   const auditMarkers = [
-    'auditPackedPackage({ distRoot: distHell, tarball: packedHell.tarball });',
-    'auditPackedPackage({ distRoot: distPdfViewer, tarball: packedPdfViewer.tarball });',
+    'auditPackedPackage({ tarball: packedHell.tarball });',
+    'auditPackedPackage({ tarball: packedPdfViewer.tarball });',
   ];
   const auditIndexes = auditMarkers.map((marker) => content.indexOf(marker));
   const selectScenariosIndex = content.indexOf('const enabledScenarios = selectScenarios');
@@ -1121,7 +1131,12 @@ function checkNpmPublishWorkflow() {
     'pnpm run release:dry-run -- --full',
     'pnpm run test:package-pack',
     'pnpm --dir ./dist/hell pack --pack-destination ../../release-package',
-    'pnpm publish "$HELL_RELEASE_TARBALL" --access public --provenance --no-git-checks',
+    'pnpm --dir ./dist/hell-pdf-viewer pack --pack-destination ../../release-package',
+    'test "$tarball_count" = "2"',
+    '@hell-ui/angular',
+    '@hell-ui/pdf-viewer',
+    'HELL_RELEASE_TARBALLS',
+    'pnpm publish "$tarball" --access public --provenance --no-git-checks',
   ];
 
   for (const expected of required) {
@@ -1150,24 +1165,28 @@ function checkNpmPublishWorkflow() {
 }
 
 function checkPublishedPackageMetadata() {
-  const path = 'packages/angular/package.json';
-  if (!existsSync(path)) return;
+  for (const [path, directory] of [
+    ['packages/angular/package.json', 'packages/angular'],
+    ['packages/pdf-viewer/package.json', 'packages/pdf-viewer'],
+  ]) {
+    if (!existsSync(path)) continue;
 
-  const packageJson = JSON.parse(readFileSync(path, 'utf8'));
-  if (packageJson.repository?.url !== 'git+https://github.com/AntonPieper/hell-ui.git') {
-    errors.push(`${path} repository.url must match the GitHub repository used for trusted publishing.`);
-  }
-  if (packageJson.repository?.directory !== 'packages/angular') {
-    errors.push(`${path} repository.directory must be packages/angular.`);
-  }
-  if (packageJson.publishConfig?.registry !== 'https://registry.npmjs.org/') {
-    errors.push(`${path} publishConfig.registry must be the public npm registry.`);
-  }
-  if (packageJson.publishConfig?.access !== 'public') {
-    errors.push(`${path} publishConfig.access must be public.`);
-  }
-  if (packageJson.publishConfig?.provenance !== true) {
-    errors.push(`${path} publishConfig.provenance must be true.`);
+    const packageJson = JSON.parse(readFileSync(path, 'utf8'));
+    if (packageJson.repository?.url !== 'git+https://github.com/AntonPieper/hell-ui.git') {
+      errors.push(`${path} repository.url must match the GitHub repository used for trusted publishing.`);
+    }
+    if (packageJson.repository?.directory !== directory) {
+      errors.push(`${path} repository.directory must be ${directory}.`);
+    }
+    if (packageJson.publishConfig?.registry !== 'https://registry.npmjs.org/') {
+      errors.push(`${path} publishConfig.registry must be the public npm registry.`);
+    }
+    if (packageJson.publishConfig?.access !== 'public') {
+      errors.push(`${path} publishConfig.access must be public.`);
+    }
+    if (packageJson.publishConfig?.provenance !== true) {
+      errors.push(`${path} publishConfig.provenance must be true.`);
+    }
   }
 }
 
