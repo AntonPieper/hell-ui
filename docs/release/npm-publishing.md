@@ -1,10 +1,13 @@
 # npm trusted publishing
 
-Hell UI publishes `@hell-ui/angular` from the public `AntonPieper/hell-ui` GitHub repository with npm trusted publishing. Normal releases must not use a long-lived publish token.
+Hell UI publishes `@hell-ui/angular` and the split `@hell-ui/pdf-viewer`
+package from the public `AntonPieper/hell-ui` GitHub repository with npm
+trusted publishing. Normal releases must not use a long-lived publish token.
 
 ## npm package settings
 
-Configure these settings on npm before the first automated publish:
+Configure these settings on npm for both `@hell-ui/angular` and
+`@hell-ui/pdf-viewer` before the first automated publish:
 
 1. Open the `@hell-ui/angular` package on npm and add a trusted publisher.
 2. Provider: GitHub Actions.
@@ -15,10 +18,11 @@ Configure these settings on npm before the first automated publish:
 7. Publish command: `pnpm publish`.
 8. Under package settings → publishing access, choose **Require two-factor authentication and disallow tokens**.
 
-The package manifest must keep these publish-time fields:
+Both package manifests must keep these publish-time fields:
 
 - `repository.url`: `git+https://github.com/AntonPieper/hell-ui.git`.
-- `repository.directory`: `packages/angular`.
+- `repository.directory`: the matching source package directory
+  (`packages/angular` or `packages/pdf-viewer`).
 - `publishConfig.registry`: `https://registry.npmjs.org/`.
 - `publishConfig.access`: `public`.
 - `publishConfig.provenance`: `true`.
@@ -44,7 +48,7 @@ The release workflow lives at `.github/workflows/npm-publish.yml` in this reposi
 ## Release steps
 
 1. Update `packages/angular/package.json` and `packages/pdf-viewer/package.json` versions in a release-prep change.
-2. Run `pnpm release:dry-run -- --full` locally or wait for the release workflow dry-run evidence.
+2. Run `pnpm release:dry-run -- --full` locally or wait for the release workflow dry-run evidence. The required scenario and API report membership is defined in [`docs/release/release-evidence-policy.md`](release-evidence-policy.md).
 3. Create and push a protected tag: `git tag v<version>` then `git push origin v<version>`.
 4. Approve the `npm-publish` GitHub environment deployment.
 5. After publish, verify both npm package pages show provenance and that the GitHub Actions run contains both `release-dry-run-evidence` and `release-package` artifacts.

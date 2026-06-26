@@ -21,6 +21,7 @@ import {
   peerGroupContracts,
   tableAdapterPeerGroup,
 } from './package-pack-audit.mjs';
+import { releaseCandidateConsumerScenarioNames } from './release-evidence-policy.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const distHell = join(root, 'dist/hell');
@@ -121,20 +122,7 @@ const packageConsumerScriptGroups = [
   { name: 'table-adapters', scenarios: ['table-tanstack', 'table-tanstack-virtual'] },
 ];
 
-const packageConsumerReleaseScenarios = [
-  'root-core',
-  'button-ui',
-  'button',
-  'primitive-icons-css',
-  'audio-player',
-  'audio-transcript',
-  'table',
-  'table-tanstack',
-  'table-tanstack-virtual',
-  'no-legacy-alias',
-  'code-editor',
-  'pdf-viewer',
-];
+const packageConsumerReleaseScenarios = releaseCandidateConsumerScenarioNames;
 
 const packageConsumerScenarioCatalog = [
   {

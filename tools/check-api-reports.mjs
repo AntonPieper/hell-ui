@@ -2,6 +2,7 @@ import { createRequire } from 'node:module';
 import { existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { apiReportEntrypoints } from './release-evidence-policy.mjs';
 
 const require = createRequire(import.meta.url);
 const { Extractor, ExtractorConfig } = require('@microsoft/api-extractor');
@@ -11,45 +12,6 @@ const reportFolder = join(root, 'etc/api-reports');
 const reportTempFolder = join(root, 'tmp/api-reports');
 const packageJsonFullPath = join(root, 'dist/hell/package.json');
 const localBuild = process.argv.includes('--local') || process.argv.includes('--update');
-
-const apiReportEntrypoints = [
-  {
-    id: 'root',
-    specifier: '@hell-ui/angular',
-    mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular.d.ts',
-    reportFileName: 'hell-ui-angular.api.md',
-  },
-  {
-    id: 'core',
-    specifier: '@hell-ui/angular/core',
-    mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular-core.d.ts',
-    reportFileName: 'hell-ui-angular-core.api.md',
-  },
-  {
-    id: 'internal-hotkeys',
-    specifier: '@hell-ui/angular/internal/hotkeys',
-    mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular-internal-hotkeys.d.ts',
-    reportFileName: 'hell-ui-angular-internal-hotkeys.api.md',
-  },
-  {
-    id: 'input',
-    specifier: '@hell-ui/angular/input',
-    mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular-input.d.ts',
-    reportFileName: 'hell-ui-angular-input.api.md',
-  },
-  {
-    id: 'dialpad',
-    specifier: '@hell-ui/angular/dialpad',
-    mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular-dialpad.d.ts',
-    reportFileName: 'hell-ui-angular-dialpad.api.md',
-  },
-  {
-    id: 'testing',
-    specifier: '@hell-ui/angular/testing',
-    mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular-testing.d.ts',
-    reportFileName: 'hell-ui-angular-testing.api.md',
-  },
-];
 
 const missingInputs = requiredBuildInputs().filter((path) => !existsSync(path));
 if (missingInputs.length) {

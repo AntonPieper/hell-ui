@@ -20,6 +20,12 @@ Use this guide when moving an app from local/alpha Hell imports to the first bet
 
 Package peer metadata is package-wide. Some optional peers appear in the package manifest even when they are only required by a kept feature entry point. The PDF viewer is now split into `@hell-ui/pdf-viewer`, so `@hell-ui/angular` no longer advertises pdf.js. The package-consumer runner proves the actual strict-peer install groups in [`tools/check-package-consumer.mjs`](../../tools/check-package-consumer.mjs).
 
+Release-candidate evidence uses the scenario set in
+[`docs/release/release-evidence-policy.md`](release-evidence-policy.md). The
+`pdf-viewer` scenario is an explicit split-package evidence exception: it proves
+`@hell-ui/pdf-viewer` with its exact pdf.js peer as part of the release train,
+but it does not put pdf.js back into `@hell-ui/angular` peer metadata.
+
 A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`; install any missing core peers explicitly. Use `pnpm add` in consumer snippets below because the package-consumer proof uses pnpm strict-peer installs.
 
 | Consumer path                 | Install peers for this path                                                                                                                     | Entry points / CSS                                                                                                                                                                                                                | Proof scenario                                                                          |
@@ -72,15 +78,13 @@ pnpm add @hell-ui/angular @hell-ui/pdf-viewer @angular/forms @angular/cdk @float
 Maintainers can rerun a proof path from the product workspace:
 
 ```bash
-HELL_PACKAGE_CONSUMER_SCENARIOS=button-ui pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=primitive-icons-css pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=audio-player pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=audio-transcript pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=table,no-legacy-alias pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=table-tanstack pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=table-tanstack-virtual pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor pnpm test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=pdf-viewer pnpm test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing,button-ui,button,primitive-icons-css,composite-css,app-shell,audio-player,audio-transcript,table,table-tanstack,table-tanstack-virtual,no-legacy-alias,code-editor,pdf-viewer pnpm run test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing pnpm run test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=button-ui,button,primitive-icons-css pnpm run test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=composite-css,app-shell,audio-player,audio-transcript pnpm run test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=table,no-legacy-alias,table-tanstack,table-tanstack-virtual pnpm run test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor pnpm run test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=pdf-viewer pnpm run test:package-consumer -- --minimal-deps
 ```
 
 ## Root imports versus narrow imports
@@ -221,7 +225,7 @@ Experimental APIs may change or disappear between pre-1.0 releases. Deprecated a
 
 Current support is evidence-based and not a production guarantee.
 
-- Root/core and stable primitives are the safest SSR import paths. Primitive docs may still name component-specific browser behavior.
+- Root/core and API-report guarded primitives are the safest SSR import paths. Primitive docs may still name component-specific browser behavior.
 - Composites are browser-first and may use `document`, `window`, or global listeners for overlays, hotkeys, portals, and dismissal.
 - Table primitives use `ResizeObserver`.
 - Code editor needs browser `window`/`document` through CodeMirror.
@@ -235,7 +239,7 @@ Accessibility support lives in the docs app accessibility matrix source at [`app
 Current not-production-ready gaps until the production-readiness gate passes:
 
 - Critical accessibility gaps still block a production-ready claim for several public surfaces, including omnibar.
-- Full release-candidate evidence must prove package-consumer, API report, accessibility/browser, docs budget, pack audit, and release dry-run tasks on the current commit.
+- Full release-candidate evidence must prove the package-consumer scenario set, API report membership, accessibility/browser, docs budget, pack audit, and release dry-run tasks from [`docs/release/release-evidence-policy.md`](release-evidence-policy.md) on the current commit.
 - Local `test-results/` evidence is intentionally untracked; rerun the commands for each release candidate instead of relying on stale artifacts.
 
 Before telling external consumers that Hell UI is production-ready, run:

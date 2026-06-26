@@ -2,6 +2,10 @@
 
 Experimental Angular PDF viewer package for Hell UI. This package owns the PDF viewer component, PDF viewer CSS, and the exact `pdfjs-dist@5.6.205` peer so the core `@hell-ui/angular` package stays free of pdf.js metadata.
 
+The Hell UI release evidence policy keeps a `pdf-viewer` package-consumer
+scenario for this split package. That scenario proves this package as part of
+the release train; it does not make pdf.js a peer of `@hell-ui/angular`.
+
 ## Install
 
 ```bash

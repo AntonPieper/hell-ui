@@ -3,9 +3,18 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  productionReadinessChecklistPath,
+  productionReadinessStatus,
+  releaseCandidateConsumerScenarioNames,
+  releaseEvidenceDirectory,
+  releaseTasksByCategory,
+  requiredApiReportPaths,
+  requiredFullReleaseTasks,
+} from './release-evidence-policy.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const checklistPath = join(root, 'docs/release/production-readiness-checklist.md');
+const checklistPath = join(root, productionReadinessChecklistPath);
 const requiredCategories = [
   'package-consumer',
   'api',
@@ -14,47 +23,8 @@ const requiredCategories = [
   'pack-audit',
   'release-dry-run',
 ];
-const requiredReleaseScenarios = [
-  'root-core',
-  'button-ui',
-  'button',
-  'primitive-icons-css',
-  'audio-player',
-  'audio-transcript',
-  'table',
-  'table-tanstack',
-  'table-tanstack-virtual',
-  'no-legacy-alias',
-  'code-editor',
-  'pdf-viewer',
-];
+const splitPackageEvidenceScenario = 'pdf-viewer';
 const requiredPlaywrightProjects = ['chromium', 'firefox', 'webkit'];
-const requiredApiReportPaths = [
-  'etc/api-reports/hell-ui-angular.api.md',
-  'etc/api-reports/hell-ui-angular-core.api.md',
-  'etc/api-reports/hell-ui-angular-input.api.md',
-  'etc/api-reports/hell-ui-angular-dialpad.api.md',
-  'etc/api-reports/hell-ui-angular-testing.api.md',
-];
-const requiredFullReleaseTasks = [
-  'changelog entry',
-  'lint',
-  'architecture',
-  'ci contract',
-  'unit',
-  'build lib',
-  'pack audit',
-  'selected package-consumer scenarios',
-  'api report',
-  'docs build',
-];
-const releaseTasksByCategory = {
-  'package-consumer': ['selected package-consumer scenarios'],
-  api: ['api report'],
-  'docs-budgets': ['docs build'],
-  'pack-audit': ['pack audit'],
-  'release-dry-run': requiredFullReleaseTasks,
-};
 const checklistContracts = {
   'package-consumer': {
     commands: ['pnpm test:package-consumer -- --minimal-deps', 'pnpm release:dry-run -- --full'],
@@ -164,8 +134,8 @@ function validateChecklistGate(checklist) {
     failures.push('production-readiness-gate version must be 1.');
   }
 
-  if (checklist.status !== 'internal-beta-until-gate-passes') {
-    failures.push('production-readiness-gate status must be internal-beta-until-gate-passes.');
+  if (checklist.status !== productionReadinessStatus) {
+    failures.push(`production-readiness-gate status must be ${productionReadinessStatus}.`);
   }
 
   if (!Array.isArray(checklist.blockers)) {
@@ -237,6 +207,33 @@ function validateRequiredCheckDetails(category, checks) {
     }
   }
 
+  if (category === 'package-consumer') {
+    if (!releaseCandidateConsumerScenarioNames.includes(splitPackageEvidenceScenario)) {
+      failures.push(
+        `package-consumer release evidence policy must include ${splitPackageEvidenceScenario}.`,
+      );
+    }
+
+    const scenarioCheck = checks.find((check) => check?.type === 'releaseDryRunEvidence');
+    const listedScenarios = scenarioCheck?.requiredScenarios;
+    if (!Array.isArray(listedScenarios)) {
+      failures.push('package-consumer release evidence must list requiredScenarios.');
+    } else {
+      const missing = releaseCandidateConsumerScenarioNames.filter(
+        (scenario) => !listedScenarios.includes(scenario),
+      );
+      const extra = listedScenarios.filter(
+        (scenario) => !releaseCandidateConsumerScenarioNames.includes(scenario),
+      );
+      for (const scenario of missing) {
+        failures.push(`package-consumer must require scenario ${scenario}.`);
+      }
+      for (const scenario of extra) {
+        failures.push(`package-consumer lists unknown release scenario ${scenario}.`);
+      }
+    }
+  }
+
   if (category === 'accessibility') {
     const playwrightCheck = checks.find((check) => check?.type === 'playwrightJsonReport');
     if (playwrightCheck?.path !== 'test-results/playwright-report.json') {
@@ -291,12 +288,12 @@ function runEvidenceCheck(blocker, check) {
 
   if (check.type === 'releaseDryRunEvidence') {
     const files = latestMatchingFiles(
-      'test-results/release-evidence',
+      releaseEvidenceDirectory,
       'release-dry-run-*-full.json',
     );
     if (!files.length) {
       return [
-        `${label} missing; no file matches test-results/release-evidence/release-dry-run-*-full.json`,
+        `${label} missing; no file matches ${releaseEvidenceDirectory}/release-dry-run-*-full.json`,
       ];
     }
     return releaseDryRunEvidenceErrors(label, files[0].path, blocker.category, files[0]);
@@ -371,7 +368,7 @@ function releaseDryRunEvidenceErrors(label, path, category, fileMeta) {
     );
   }
 
-  for (const scenario of requiredReleaseScenarios) {
+  for (const scenario of releaseCandidateConsumerScenarioNames) {
     if (!evidence.selectedConsumerScenarios?.includes(scenario)) {
       errors.push(
         `${label} in ${relativeToRoot(path)} must include package-consumer scenario ${scenario}.`,
