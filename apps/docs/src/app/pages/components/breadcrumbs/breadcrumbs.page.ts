@@ -99,6 +99,10 @@ import breadcrumbsWithIconsExampleCodeRaw from './examples/with-icons.example.ts
           override with content
         </li>
         <li><code>[hellBreadcrumbEllipsis]</code> — collapsed middle indicator for long trails</li>
+        <li>
+          Each breadcrumb directive accepts
+          <code>ui</code>: string or <code>{{ '{' }} root: string {{ '}' }}</code> map.
+        </li>
         <li>Import the bundle via <code>HELL_BREADCRUMBS_DIRECTIVES</code>.</li>
       </ul>
 
