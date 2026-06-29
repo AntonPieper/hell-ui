@@ -2,8 +2,20 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { HellButton, type HellButtonUi } from '@hell-ui/angular/button';
-import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import {
+  HELL_CARD_DIRECTIVES,
+  type HellCardBodyUi,
+  type HellCardFooterUi,
+  type HellCardHeaderUi,
+  type HellCardUi,
+} from '@hell-ui/angular/card';
+import {
+  HELL_FIELD_DIRECTIVES,
+  type HellFieldDescriptionUi,
+  type HellFieldErrorUi,
+  type HellFieldLabelUi,
+  type HellFieldUi,
+} from '@hell-ui/angular/field';
 import { HellAvatar } from '@hell-ui/angular/avatar';
 import { HellInput, HellNativeSelect, HellTextarea } from '@hell-ui/angular/input';
 import { HellBadge, HellKbd, HellTag } from '@hell-ui/angular/tag';
@@ -217,22 +229,25 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
 
     <hell-avatar id="avatar" fallback="AP" size="sm" shape="square" />
 
-    <div id="card" hellCard [elevation]="2">
-      <div id="card-header" hellCardHeader>Header</div>
-      <div id="card-body" hellCardBody>Body</div>
-      <div id="card-footer" hellCardFooter>Footer</div>
+    <div id="card" hellCard [elevation]="2" [ui]="cardUi">
+      <div id="card-header" hellCardHeader [ui]="cardHeaderUi">Header</div>
+      <div id="card-body" hellCardBody [ui]="cardBodyUi">Body</div>
+      <div id="card-footer" hellCardFooter [ui]="cardFooterUi">Footer</div>
     </div>
-    <div id="unstyled-card" hellCard unstyled [elevation]="3"></div>
 
     <span id="tag" hellTag variant="success">Ready</span>
     <span id="badge" hellBadge>3</span>
     <kbd id="kbd" hellKbd>K</kbd>
 
-    <div id="field" hellField orientation="horizontal">
-      <label data-contract="field-label" hellFieldLabel for="field-control">Name</label>
+    <div id="field" hellField orientation="horizontal" [ui]="fieldUi">
+      <label data-contract="field-label" hellFieldLabel for="field-control" [ui]="fieldLabelUi">
+        Name
+      </label>
       <input id="field-control" />
-      <div data-contract="field-description" hellFieldDescription>Human-readable name</div>
-      <div data-contract="field-error" hellFieldError>Required</div>
+      <div data-contract="field-description" hellFieldDescription [ui]="fieldDescriptionUi">
+        Human-readable name
+      </div>
+      <div data-contract="field-error" hellFieldError [ui]="fieldErrorUi">Required</div>
     </div>
 
     <button data-contract="select" hellSelect type="button">
@@ -291,6 +306,38 @@ class ContractHost {
   readonly buttonUi = {
     root: 'rounded-hell-pill bg-hell-danger',
   } satisfies HellButtonUi;
+
+  readonly cardUi = {
+    root: 'rounded-hell-pill shadow-hell-lg',
+  } satisfies HellCardUi;
+
+  readonly cardHeaderUi = {
+    root: 'px-hell-2',
+  } satisfies HellCardHeaderUi;
+
+  readonly cardBodyUi = {
+    root: 'p-hell-2',
+  } satisfies HellCardBodyUi;
+
+  readonly cardFooterUi = {
+    root: 'justify-start',
+  } satisfies HellCardFooterUi;
+
+  readonly fieldUi = {
+    root: 'gap-hell-6',
+  } satisfies HellFieldUi;
+
+  readonly fieldLabelUi = {
+    root: 'text-sm',
+  } satisfies HellFieldLabelUi;
+
+  readonly fieldDescriptionUi = {
+    root: 'text-hell-danger',
+  } satisfies HellFieldDescriptionUi;
+
+  readonly fieldErrorUi = {
+    root: 'text-hell-foreground',
+  } satisfies HellFieldErrorUi;
 }
 
 const STYLEABLE_CASES: readonly ContractCase[] = [
@@ -318,10 +365,30 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
     className: 'inline-flex',
     attrs: { 'data-slot': 'root', 'data-size': 'sm', 'data-shape': 'square' },
   },
-  { id: 'card', module: 'HellCard', className: 'hell-card', attrs: { 'data-elevation': '2' } },
-  { id: 'card-header', module: 'HellCardHeader', className: 'hell-card-header' },
-  { id: 'card-body', module: 'HellCardBody', className: 'hell-card-body' },
-  { id: 'card-footer', module: 'HellCardFooter', className: 'hell-card-footer' },
+  {
+    id: 'card',
+    module: 'HellCard',
+    className: 'flex',
+    attrs: { 'data-slot': 'root', 'data-elevation': '2' },
+  },
+  {
+    id: 'card-header',
+    module: 'HellCardHeader',
+    className: 'items-center',
+    attrs: { 'data-slot': 'root' },
+  },
+  {
+    id: 'card-body',
+    module: 'HellCardBody',
+    className: 'flex-auto',
+    attrs: { 'data-slot': 'root' },
+  },
+  {
+    id: 'card-footer',
+    module: 'HellCardFooter',
+    className: 'justify-start',
+    attrs: { 'data-slot': 'root' },
+  },
   {
     id: 'tag',
     module: 'HellTag',
@@ -343,16 +410,27 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
   {
     id: 'field',
     module: 'HellField',
-    className: 'hell-field',
-    attrs: { 'data-orientation': 'horizontal' },
+    className: 'gap-hell-6',
+    attrs: { 'data-slot': 'root', 'data-orientation': 'horizontal' },
   },
-  { id: 'field-label', module: 'HellFieldLabel', className: 'hell-field-label' },
+  {
+    id: 'field-label',
+    module: 'HellFieldLabel',
+    className: 'text-sm',
+    attrs: { 'data-slot': 'root' },
+  },
   {
     id: 'field-description',
     module: 'HellFieldDescription',
-    className: 'hell-field-description',
+    className: 'text-hell-danger',
+    attrs: { 'data-slot': 'root', 'data-orientation': 'horizontal' },
   },
-  { id: 'field-error', module: 'HellFieldError', className: 'hell-field-error' },
+  {
+    id: 'field-error',
+    module: 'HellFieldError',
+    className: 'text-hell-foreground',
+    attrs: { 'data-slot': 'root', 'data-orientation': 'horizontal' },
+  },
   { id: 'select', module: 'HellSelect', className: 'hell-select' },
   {
     id: 'nav-item',
@@ -449,12 +527,6 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
 ];
 
 const STYLE_OPT_OUT_CASES: readonly ContractCase[] = [
-  {
-    id: 'unstyled-card',
-    module: 'HellCard',
-    className: 'hell-card',
-    attrs: { 'data-elevation': '3' },
-  },
   { id: 'unstyled-nav-item', module: 'HellNavItem', className: 'hell-nav-item' },
 ];
 
@@ -497,6 +569,45 @@ describe('Hell Component Contract', () => {
     expect(custom.getAttribute('data-slot')).toBe('root');
     expect(custom.className).toContain('rounded-hell-pill');
     expect(custom.className).toContain('bg-hell-danger');
+
+    const card = query(fixture.nativeElement, '#card');
+    expect(card.classList.contains('hell-card')).toBe(false);
+    expect(card.getAttribute('data-slot')).toBe('root');
+    expect(card.className).toContain('rounded-hell-pill');
+    expect(card.className).not.toContain('rounded-hell-lg');
+    expect(card.className).toContain('shadow-hell-lg');
+    expect(card.className).not.toContain('shadow-hell-xs');
+
+    const cardHeader = query(fixture.nativeElement, '#card-header');
+    const cardBody = query(fixture.nativeElement, '#card-body');
+    const cardFooter = query(fixture.nativeElement, '#card-footer');
+    expect(cardHeader.classList.contains('hell-card-header')).toBe(false);
+    expect(cardHeader.className).toContain('px-hell-2');
+    expect(cardHeader.className).not.toContain('px-hell-6');
+    expect(cardBody.classList.contains('hell-card-body')).toBe(false);
+    expect(cardBody.className).toContain('p-hell-2');
+    expect(cardBody.className).not.toContain('p-hell-6');
+    expect(cardFooter.classList.contains('hell-card-footer')).toBe(false);
+    expect(cardFooter.className).toContain('justify-start');
+    expect(cardFooter.className).not.toContain('justify-end');
+
+    const field = query(fixture.nativeElement, '#field');
+    const fieldLabel = query(fixture.nativeElement, '[data-contract="field-label"]');
+    const fieldDescription = query(fixture.nativeElement, '[data-contract="field-description"]');
+    const fieldError = query(fixture.nativeElement, '[data-contract="field-error"]');
+    expect(field.classList.contains('hell-field')).toBe(false);
+    expect(field.getAttribute('data-slot')).toBe('root');
+    expect(field.className).toContain('gap-hell-6');
+    expect(field.className).not.toContain('gap-hell-2');
+    expect(fieldLabel.classList.contains('hell-field-label')).toBe(false);
+    expect(fieldLabel.className).toContain('text-sm');
+    expect(fieldLabel.className).not.toContain('text-xs');
+    expect(fieldDescription.classList.contains('hell-field-description')).toBe(false);
+    expect(fieldDescription.className).toContain('text-hell-danger');
+    expect(fieldDescription.className).not.toContain('text-hell-foreground-muted');
+    expect(fieldError.classList.contains('hell-field-error')).toBe(false);
+    expect(fieldError.className).toContain('text-hell-foreground');
+    expect(fieldError.className).not.toContain('text-hell-danger');
   });
 
   it('keeps state attributes while Style Opt-Out removes default classes', () => {

@@ -50,8 +50,15 @@ import cardWithoutHeaderExampleCodeRaw from './examples/without-header.example.t
 
       <h2>API</h2>
       <ul>
-        <li><code>elevation</code>: <code>0 | 1 | 2 | 3</code></li>
-        <li><code>unstyled</code>: opt out of all styling</li>
+        <li>
+          <code>hellCard</code>: <code>elevation</code> plus <code>ui</code> shorthand or map
+          keyed by <code>root</code>.
+        </li>
+        <li>
+          <code>hellCardHeader</code>, <code>hellCardBody</code>,
+          <code>hellCardFooter</code>: each exposes its own local <code>root</code>
+          <code>ui</code> part.
+        </li>
       </ul>
 
       <h2>Do</h2>

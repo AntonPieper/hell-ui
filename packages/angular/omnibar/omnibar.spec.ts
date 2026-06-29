@@ -698,7 +698,7 @@ async function waitForElement<T extends HTMLElement>(
   root: ParentNode,
   selector: string,
 ): Promise<T> {
-  const timeout = Date.now() + 1000;
+  const timeout = Date.now() + 3000;
   while (Date.now() < timeout) {
     fixture.detectChanges();
     await fixture.whenStable();

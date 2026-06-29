@@ -10,8 +10,12 @@ const angularPackageName = '@hell-ui/angular';
 export const splitPdfPackageName = '@hell-ui/pdf-viewer';
 
 const angularRecipeSourceFiles = [
+  'accordion/accordion.ts',
   'button/button.ts',
+  'card/card.ts',
+  'field/field.ts',
   'input/input.ts',
+  'tabs/tabs.ts',
   'dialpad/dialpad.ts',
   'date-input/date-input.ts',
   'date-picker/date-picker.ts',

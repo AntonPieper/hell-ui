@@ -42,10 +42,16 @@ import accordionSingleCollapsibleExampleCodeRaw from './examples/single-collapsi
         <li>
           <code>hellAccordion</code>: <code>value</code>, <code>valueChange</code>,
           <code>type</code>, <code>collapsible</code>, <code>disabled</code>,
-          <code>orientation</code>
+          <code>orientation</code>, <code>ui</code>
         </li>
-        <li><code>hellAccordionItem</code>: <code>value</code>, <code>disabled</code></li>
-        <li><code>hellAccordionTrigger</code>, <code>hellAccordionContent</code></li>
+        <li>
+          <code>hellAccordionItem</code>: <code>value</code>, <code>disabled</code>,
+          <code>ui</code>.
+        </li>
+        <li>
+          <code>hellAccordionTrigger</code>, <code>hellAccordionContent</code>: local
+          <code>root</code> <code>ui</code>.
+        </li>
       </ul>
 
       <h2>Do</h2>

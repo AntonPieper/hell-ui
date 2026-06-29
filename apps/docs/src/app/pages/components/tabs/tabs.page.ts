@@ -41,10 +41,11 @@ import tabsVerticalExampleCodeRaw from './examples/vertical.example.ts?raw' with
       <ul>
         <li>
           <code>hellTabset</code>: <code>value</code>, <code>valueChange</code>,
-          <code>orientation</code>, <code>activateOnFocus</code>
+          <code>orientation</code>, <code>activateOnFocus</code>, <code>ui</code>
         </li>
-        <li><code>hellTab</code>: <code>value</code>, <code>disabled</code></li>
-        <li><code>hellTabPanel</code>: <code>value</code></li>
+        <li><code>hellTabList</code>: local <code>root</code> <code>ui</code>.</li>
+        <li><code>hellTab</code>: <code>value</code>, <code>disabled</code>, <code>ui</code>.</li>
+        <li><code>hellTabPanel</code>: <code>value</code>, <code>ui</code>.</li>
       </ul>
 
       <h2>Do</h2>

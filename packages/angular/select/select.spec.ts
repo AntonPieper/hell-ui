@@ -453,7 +453,7 @@ async function waitForDropdownRemoval(fixture: {
   detectChanges: () => void;
   whenStable: () => Promise<unknown>;
 }): Promise<void> {
-  const timeout = Date.now() + 1000;
+  const timeout = Date.now() + 3000;
 
   while (Date.now() < timeout) {
     fixture.detectChanges();

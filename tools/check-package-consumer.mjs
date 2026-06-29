@@ -162,6 +162,10 @@ const packageConsumerScenarioCatalog = [
       'background-color:var(--color-hell-primary-soft)',
       'border-style:dashed',
       'animation:hell-shimmer 1.6s linear infinite',
+      'border-radius:var(--radius-hell-lg)',
+      'flex-basis:100%',
+      'min-width:200px',
+      'transition-property:height',
     ],
   },
   {
@@ -966,7 +970,7 @@ function assertConsumerBuildCss(workspace, scenario) {
   }
 
   console.log(
-    `${packageConsumerLabel(scenario.name)} ok: built CSS contains Part Style Map recipe utilities and semantic token overrides`,
+    `${packageConsumerLabel(scenario.name)} ok: built CSS contains Part Style Map compiled-CSS proof and semantic token output`,
   );
 }
 
@@ -1388,6 +1392,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function primitivesConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
+import { HELL_ACCORDION_DIRECTIVES, type HellAccordionTriggerUi } from '${packageName}/accordion';
 import { HellAvatar, type HellAvatarPart, type HellAvatarUi } from '${packageName}/avatar';
 import {
   HELL_BREADCRUMBS_DIRECTIVES,
@@ -1400,7 +1405,9 @@ import {
   type HellBreadcrumbsUi,
 } from '${packageName}/breadcrumbs';
 import { HellButton, type HellButtonUi } from '${packageName}/button';
+import { HELL_CARD_DIRECTIVES, type HellCardHeaderUi } from '${packageName}/card';
 import { HellDropZone, type HellDropZonePart, type HellDropZoneUi } from '${packageName}/drop-zone';
+import { HELL_FIELD_DIRECTIVES } from '${packageName}/field';
 import { HellIcon, type HellIconPart, type HellIconUi } from '${packageName}/icon';
 import { HellInput, type HellInputUi } from '${packageName}/input';
 import { HellProgress, HellProgressBar, type HellProgressBarUi, type HellProgressUi } from '${packageName}/progress';
@@ -1420,6 +1427,7 @@ import {
   HellTag,
   type HellTagUi,
 } from '${packageName}/tag';
+import { HELL_TABS_DIRECTIVES, type HellTabUi } from '${packageName}/tabs';
 
 type PrimitiveRootPart = HellAvatarPart | HellDropZonePart | HellIconPart;
 
@@ -1429,10 +1437,13 @@ const primitiveRootPart: PrimitiveRootPart = 'root';
   selector: 'app-root',
   standalone: true,
   imports: [
+    ...HELL_ACCORDION_DIRECTIVES,
     HellAvatar,
     ...HELL_BREADCRUMBS_DIRECTIVES,
     HellButton,
+    ...HELL_CARD_DIRECTIVES,
     HellDropZone,
+    ...HELL_FIELD_DIRECTIVES,
     HellIcon,
     HellInput,
     HellProgress,
@@ -1445,6 +1456,7 @@ const primitiveRootPart: PrimitiveRootPart = 'root';
     HellBadge,
     HellKbd,
     HellTag,
+    ...HELL_TABS_DIRECTIVES,
   ],
   template: \`
     <button hellButton type="button" [ui]="buttonUi">Save</button>
@@ -1485,9 +1497,39 @@ const primitiveRootPart: PrimitiveRootPart = 'root';
     </div>
 
     <div hellDropzone [ui]="dropZoneUi">Drop files</div>
+
+    <section hellCard ui="shadow-none">
+      <header hellCardHeader [ui]="cardHeaderUi">Account</header>
+      <div hellCardBody>
+        <div hellField orientation="horizontal">
+          <label hellFieldLabel>Name</label>
+          <input hellInput aria-label="Card name" />
+          <p hellFieldDescription>Shown to collaborators.</p>
+        </div>
+        <div hellTabset value="overview">
+          <div hellTabList>
+            <button hellTab value="overview" [ui]="activeTabUi">Overview</button>
+            <button hellTab value="settings">Settings</button>
+          </div>
+          <div hellTabPanel value="overview">Overview content</div>
+          <div hellTabPanel value="settings">Settings content</div>
+        </div>
+        <div hellAccordion type="single" value="details">
+          <div hellAccordionItem value="details">
+            <button hellAccordionTrigger [ui]="accordionTriggerUi">Details</button>
+            <div hellAccordionContent>Details content</div>
+          </div>
+        </div>
+      </div>
+      <footer hellCardFooter>Ready</footer>
+    </section>
   \`,
 })
 class App {
+  protected readonly accordionTriggerUi = {
+    root: 'bg-hell-surface-subtle',
+  } satisfies HellAccordionTriggerUi;
+  protected readonly activeTabUi = { root: 'text-hell-primary' } satisfies HellTabUi;
   protected readonly primitiveRootPart = primitiveRootPart;
   protected readonly avatarUi = { root: 'bg-hell-info-soft' } satisfies HellAvatarUi;
   protected readonly badgeUi = { root: 'bg-hell-info' } satisfies HellBadgeUi;
@@ -1499,6 +1541,7 @@ class App {
   protected readonly breadcrumbSeparatorUi = { root: 'text-hell-info' } satisfies HellBreadcrumbSeparatorUi;
   protected readonly breadcrumbsUi = { root: 'text-hell-info' } satisfies HellBreadcrumbsUi;
   protected readonly buttonUi = { root: 'bg-hell-info' } satisfies HellButtonUi;
+  protected readonly cardHeaderUi = { root: 'items-start' } satisfies HellCardHeaderUi;
   protected readonly dropZoneUi = { root: 'border-hell-info' } satisfies HellDropZoneUi;
   protected readonly iconUi = { root: 'text-hell-info' } satisfies HellIconUi;
   protected readonly inputUi = { root: 'border-hell-info' } satisfies HellInputUi;
@@ -1990,7 +2033,10 @@ function emptyConsumerStylesCss() {
 function primitivesConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/tokens.css";
+@import "${packageName}/accordion/styles.css";
 @import "${packageName}/button/styles.css";
+@import "${packageName}/card/styles.css";
+@import "${packageName}/field/styles.css";
 @import "${packageName}/icon/styles.css";
 @import "${packageName}/input/styles.css";
 @import "${packageName}/avatar/styles.css";
@@ -2000,6 +2046,7 @@ function primitivesConsumerStylesCss() {
 @import "${packageName}/separator/styles.css";
 @import "${packageName}/skeleton/styles.css";
 @import "${packageName}/tag/styles.css";
+@import "${packageName}/tabs/styles.css";
 `;
 }
 

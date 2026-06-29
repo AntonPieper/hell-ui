@@ -659,7 +659,7 @@ body {
   backdrop-filter: blur(0);
 }
 
-[data-hell-skin="glass"] .hell-card,
+[data-hell-skin="glass"] [hellCard][data-slot='root'],
 [data-hell-skin="glass"] .hell-popover,
 [data-hell-skin="glass"] .hell-menu,
 [data-hell-skin="glass"] .hell-dialog,
