@@ -65,6 +65,7 @@ import dropZoneNativeInputExampleCodeRaw from './examples/native-input.example.t
           <code>id</code> of an input to use for file picking
         </li>
         <li><code>(files)</code>: emits picked or dropped files</li>
+        <li><code>ui</code>: string or <code>{{ '{' }} root: string {{ '}' }}</code> map</li>
       </ul>
 
       <h2>Do</h2>

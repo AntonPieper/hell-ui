@@ -1,4 +1,4 @@
-import { HellStyleable } from '@hell-ui/angular/core';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
 import {
   Directive,
   ElementRef,
@@ -10,6 +10,13 @@ import {
   output,
   signal,
 } from '@angular/core';
+
+export type HellDropZonePart = 'root';
+export type HellDropZoneUi = HellUi<HellDropZonePart>;
+
+const HELL_DROP_ZONE_RECIPE = {
+  root: 'flex min-h-[140px] cursor-pointer flex-col items-center justify-center gap-hell-3 rounded-lg border-[1.5px] border-dashed border-hell-border-strong bg-hell-surface-subtle p-hell-7 text-center text-hell-foreground-muted transition-[background-color,border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-active:border-hell-primary data-active:bg-hell-primary-soft data-active:text-hell-primary data-[dragover]:border-hell-primary data-[dragover]:bg-hell-primary-soft data-[dragover]:text-hell-primary data-disabled:cursor-not-allowed data-disabled:opacity-60',
+} satisfies HellRecipe<HellDropZonePart>;
 
 function hellFileMatchesAccept(file: File, accept: string | null): boolean {
   const tokens = accept
@@ -43,7 +50,8 @@ function hellFileMatchesAccept(file: File, accept: string | null): boolean {
 @Directive({
   selector: '[hellDropzone]',
   host: {
-    '[class.hell-dropzone]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-active]': 'active() && !disabled() ? "true" : null',
     '[attr.data-disabled]': 'disabled() ? "true" : null',
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
@@ -58,7 +66,10 @@ function hellFileMatchesAccept(file: File, accept: string | null): boolean {
     '(drop)': 'onDrop($event)',
   },
 })
-export class HellDropZone extends HellStyleable implements OnDestroy {
+export class HellDropZone extends HellPartStyleable<HellDropZonePart> implements OnDestroy {
+  protected readonly recipe = HELL_DROP_ZONE_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly multiple = input(true, { transform: booleanAttribute });
   readonly accept = input<string | null>(null);
