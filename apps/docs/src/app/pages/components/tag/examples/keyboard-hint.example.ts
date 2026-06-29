@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellBadge, HellKbd, HellTag } from '@hell-ui/angular/tag';
+import { HellKbd } from '@hell-ui/angular/tag';
 
 @Component({
   selector: 'app-tag-keyboard-hint-example',

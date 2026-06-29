@@ -322,9 +322,24 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
   { id: 'card-header', module: 'HellCardHeader', className: 'hell-card-header' },
   { id: 'card-body', module: 'HellCardBody', className: 'hell-card-body' },
   { id: 'card-footer', module: 'HellCardFooter', className: 'hell-card-footer' },
-  { id: 'tag', module: 'HellTag', className: 'hell-tag', attrs: { 'data-variant': 'success' } },
-  { id: 'badge', module: 'HellBadge', className: 'hell-badge' },
-  { id: 'kbd', module: 'HellKbd', className: 'hell-kbd' },
+  {
+    id: 'tag',
+    module: 'HellTag',
+    className: 'inline-flex',
+    attrs: { 'data-slot': 'root', 'data-variant': 'success' },
+  },
+  {
+    id: 'badge',
+    module: 'HellBadge',
+    className: 'min-w-hell-4',
+    attrs: { 'data-slot': 'root' },
+  },
+  {
+    id: 'kbd',
+    module: 'HellKbd',
+    className: 'font-mono',
+    attrs: { 'data-slot': 'root' },
+  },
   {
     id: 'field',
     module: 'HellField',
