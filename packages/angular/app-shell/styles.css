@@ -133,58 +133,6 @@
     border-right: 1px solid var(--color-hell-border);
     grid-area: sidenav;
     transition: width var(--hell-duration-base) var(--ease-hell-out);
-    & [hellNavItem][data-slot='root'] {
-      display: flex;
-      cursor: pointer;
-      align-items: center;
-      gap: var(--spacing-hell-3);
-      border-radius: var(--radius-md);
-      padding-inline: calc(var(--spacing) * 3);
-      padding-block: calc(var(--spacing) * 2);
-      font-size: 0.875rem;
-      line-height: calc(var(--spacing) * 5);
-      white-space: nowrap;
-      color: var(--color-hell-foreground-muted);
-      text-decoration-line: none;
-      transition:
-        background var(--hell-duration-fast) var(--ease-hell-out),
-        color var(--hell-duration-fast) var(--ease-hell-out);
-    }
-    & [hellNavItem][data-slot='root'] > hell-icon,
-    & [hellNavItem][data-slot='root'] > [hellNavItemIcon][data-slot='root'] {
-      display: inline-flex;
-      flex: 0 0 auto;
-      align-items: center;
-      justify-content: center;
-      color: var(--color-hell-foreground-subtle);
-      transition: color var(--hell-duration-fast) var(--ease-hell-out);
-    }
-    & [hellNavItem][data-slot='root'] > [hellNavItemLabel][data-slot='root'] {
-      flex: 1 1 auto;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      transition: opacity var(--hell-duration-fast) var(--ease-hell-out);
-    }
-    & [hellNavItem][data-slot='root']:hover {
-      background-color: var(--color-hell-surface-subtle);
-      color: var(--color-hell-foreground);
-    }
-    & [hellNavItem][data-slot='root']:hover > hell-icon,
-    & [hellNavItem][data-slot='root']:hover > [hellNavItemIcon][data-slot='root'] {
-      color: var(--color-hell-foreground);
-    }
-    & [hellNavItem][data-slot='root'][data-active='true'],
-    & [hellNavItem][data-slot='root'][aria-current='page'] {
-      background-color: var(--color-hell-primary-soft);
-      font-weight: var(--font-weight-semibold);
-      color: var(--color-hell-primary);
-    }
-    & [hellNavItem][data-slot='root'][data-active='true'] > hell-icon,
-    & [hellNavItem][data-slot='root'][data-active='true'] > [hellNavItemIcon][data-slot='root'],
-    & [hellNavItem][data-slot='root'][aria-current='page'] > hell-icon,
-    & [hellNavItem][data-slot='root'][aria-current='page'] > [hellNavItemIcon][data-slot='root'] {
-      color: var(--color-hell-primary);
-    }
     &[data-collapsed='true'] {
       & [hellNavItem][data-slot='root'] {
         justify-content: center;
