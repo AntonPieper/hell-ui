@@ -315,8 +315,8 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
   {
     id: 'avatar',
     module: 'HellAvatar',
-    className: 'hell-avatar',
-    attrs: { 'data-size': 'sm', 'data-shape': 'square' },
+    className: 'inline-flex',
+    attrs: { 'data-slot': 'root', 'data-size': 'sm', 'data-shape': 'square' },
   },
   { id: 'card', module: 'HellCard', className: 'hell-card', attrs: { 'data-elevation': '2' } },
   { id: 'card-header', module: 'HellCardHeader', className: 'hell-card-header' },

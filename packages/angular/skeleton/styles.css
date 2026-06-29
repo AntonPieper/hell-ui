@@ -1,116 +1,62 @@
-@layer components {
-  /* Skeleton — loading shape placeholder. */
-  .hell-skeleton {
-    display: block;
-    height: var(--_hell-skeleton-height, 14px);
-    min-height: calc(var(--spacing) * 3);
-    width: var(--_hell-skeleton-width, 100%);
-    border-radius: var(--radius-sm);
-    background-color: var(--color-hell-surface-muted);
-    background-image: linear-gradient(
-      90deg,
-      transparent 0%,
-      color-mix(in oklab, var(--color-hell-surface) 70%, transparent) 50%,
-      transparent 100%
-    );
-    background-size: 200% 100%;
-    background-repeat: no-repeat;
-    animation: hell-shimmer 1.6s infinite linear;
+/* Skeleton and Spinner defaults are Tailwind utility recipes. */
+@source "./skeleton.ts";
 
-    &[data-shape='circle'] {
-      border-radius: 999px;
-    }
-    &[data-shape='rect'] {
-      border-radius: var(--radius-hell-md);
-    }
+@layer components {
+  [hellSpinner][data-slot='root'][data-variant='ring'] {
+    width: 1em;
+    height: 1em;
+    border-radius: 50%;
+    border-style: solid;
+    border-width: max(2px, 0.12em);
+    border-color: var(--_hell-spinner-track);
+    border-top-color: currentColor;
+    animation: hell-spin 0.7s linear infinite;
   }
 
-  /* Spinner — indeterminate loader. Variants share a single host class
-     and react via [data-variant] / [data-size]. Size scales `font-size`,
-     so the spinner can also be sized via Tailwind text-* utilities. */
-  .hell-spinner {
-    display: inline-block;
-    flex: 0 0 auto;
-    color: currentColor;
-    line-height: 0;
-    --_hell-spinner-track: color-mix(in oklab, currentColor 18%, transparent);
+  [hellSpinner][data-slot='root'][data-variant='dots'] {
+    position: relative;
+    width: 1.45em;
+    height: 0.72em;
+    --_hell-dot-size: 0.34em;
+    --_hell-dot-mid: 0.55em;
+    --_hell-dot-end: 1.1em;
+    --_hell-dot-lift: -0.24em;
+    --_hell-dot-drop: 0.24em;
+  }
 
-    &[data-size='xs'] {
-      font-size: 12px;
-    }
-    &[data-size='sm'] {
-      font-size: 16px;
-    }
-    &[data-size='md'] {
-      font-size: 20px;
-    }
-    &[data-size='lg'] {
-      font-size: 28px;
-    }
-    &[data-size='xl'] {
-      font-size: 40px;
-    }
+  [hellSpinner][data-slot='root'][data-variant='dots']::before {
+    content: '';
+    position: absolute;
+    bottom: 0.04em;
+    left: 0;
+    width: var(--_hell-dot-size);
+    height: var(--_hell-dot-size);
+    border-radius: 999px;
+    background-color: currentColor;
+    box-shadow:
+      var(--_hell-dot-mid) 0 0 0 currentColor,
+      var(--_hell-dot-end) 0 0 0 currentColor;
+    will-change: transform, box-shadow;
+    animation: hell-dots 0.95s infinite ease-in-out;
+  }
 
-    /* Ring — default two-tone rotating border. */
-    &[data-variant='ring'] {
-      width: 1em;
-      height: 1em;
-      border-radius: 50%;
-      border-style: solid;
-      border-width: max(2px, 0.12em);
-      border-color: var(--_hell-spinner-track);
-      border-top-color: currentColor;
-      animation: hell-spin 0.7s linear infinite;
-    }
+  [hellSpinner][data-slot='root'][data-variant='bars'] {
+    width: 1em;
+    height: 1em;
+    --_hell-bar-w: 0.18em;
+    background:
+      linear-gradient(currentColor, currentColor) 0% 50% / var(--_hell-bar-w) 100% no-repeat,
+      linear-gradient(currentColor, currentColor) 50% 50% / var(--_hell-bar-w) 100% no-repeat,
+      linear-gradient(currentColor, currentColor) 100% 50% / var(--_hell-bar-w) 100% no-repeat;
+    animation: hell-bars 1s infinite ease-in-out;
+  }
 
-    /* Dots — three bouncing dots, no extra DOM. */
-    &[data-variant='dots'] {
-      position: relative;
-      width: 1.45em;
-      height: 0.72em;
-      --_hell-dot-size: 0.34em;
-      --_hell-dot-mid: 0.55em;
-      --_hell-dot-end: 1.1em;
-      --_hell-dot-lift: -0.24em;
-      --_hell-dot-drop: 0.24em;
-    }
-
-    &[data-variant='dots']::before {
-      content: '';
-      position: absolute;
-      bottom: 0.04em;
-      left: 0;
-      width: var(--_hell-dot-size);
-      height: var(--_hell-dot-size);
-      border-radius: 999px;
-      background-color: currentColor;
-      box-shadow:
-        var(--_hell-dot-mid) 0 0 0 currentColor,
-        var(--_hell-dot-end) 0 0 0 currentColor;
-      will-change: transform, box-shadow;
-      animation: hell-dots 0.95s infinite ease-in-out;
-    }
-
-    /* Bars — three vertical bars (audio-meter style). */
-    &[data-variant='bars'] {
-      width: 1em;
-      height: 1em;
-      --_hell-bar-w: 0.18em;
-      background:
-        linear-gradient(currentColor, currentColor) 0% 50% / var(--_hell-bar-w) 100% no-repeat,
-        linear-gradient(currentColor, currentColor) 50% 50% / var(--_hell-bar-w) 100% no-repeat,
-        linear-gradient(currentColor, currentColor) 100% 50% / var(--_hell-bar-w) 100% no-repeat;
-      animation: hell-bars 1s infinite ease-in-out;
-    }
-
-    /* Pulse — single soft pulsing dot, low-emphasis. */
-    &[data-variant='pulse'] {
-      width: 1em;
-      height: 1em;
-      border-radius: 50%;
-      background-color: currentColor;
-      animation: hell-pulse 1.2s infinite ease-in-out;
-    }
+  [hellSpinner][data-slot='root'][data-variant='pulse'] {
+    width: 1em;
+    height: 1em;
+    border-radius: 50%;
+    background-color: currentColor;
+    animation: hell-pulse 1.2s infinite ease-in-out;
   }
 }
 

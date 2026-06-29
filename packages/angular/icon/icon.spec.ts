@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCircleInfo } from '@ng-icons/font-awesome/solid';
 
-import { HellIcon } from './icon';
+import { HellIcon, type HellIconUi } from './icon';
 
 @Component({
   imports: [HellIcon],
@@ -18,6 +18,28 @@ class DecorativeIconHost {}
   template: `<hell-icon name="faSolidCircleInfo" decorative="false" aria-label="More information" />`,
 })
 class LabelledIconHost {}
+
+@Component({
+  imports: [HellIcon],
+  providers: [provideIcons({ faSolidCircleInfo })],
+  template: `
+    <hell-icon
+      id="icon-string"
+      name="faSolidCircleInfo"
+      decorative="false"
+      aria-label="Info"
+      size="20px"
+      color="red"
+      ui="flex text-hell-danger"
+    />
+    <hell-icon id="icon-map" name="faSolidCircleInfo" [ui]="iconUi" />
+  `,
+})
+class PartStyleIconHost {
+  readonly iconUi = {
+    root: 'text-hell-info',
+  } satisfies HellIconUi;
+}
 
 describe('HellIcon', () => {
   it('hides decorative icons from assistive technology by default', async () => {
@@ -44,6 +66,36 @@ describe('HellIcon', () => {
     expect(icon.getAttribute('role')).toBe('img');
     expect(icon.getAttribute('aria-label')).toBe('More information');
     expect(innerIcon.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('applies string shorthand to the icon root while preserving image semantics', async () => {
+    const fixture = TestBed.createComponent(PartStyleIconHost);
+    await settle(fixture);
+
+    const icon = query<HTMLElement>(fixture.nativeElement, '#icon-string');
+    const classes = icon.className.split(/\s+/);
+
+    expect(icon.getAttribute('data-slot')).toBe('root');
+    expect(icon.getAttribute('aria-hidden')).toBeNull();
+    expect(icon.getAttribute('role')).toBe('img');
+    expect(icon.getAttribute('aria-label')).toBe('Info');
+    expect(icon.style.getPropertyValue('--ng-icon__size')).toBe('20px');
+    expect(icon.style.getPropertyValue('--_hell-icon-color')).toBe('red');
+    expect(classes).toContain('flex');
+    expect(classes).toContain('text-hell-danger');
+    expect(classes).not.toContain('inline-flex');
+    expect(classes).not.toContain('text-[var(--_hell-icon-color,currentColor)]');
+    expect(icon.classList.contains('hell-icon')).toBe(false);
+  });
+
+  it('applies object maps to the icon root', async () => {
+    const fixture = TestBed.createComponent(PartStyleIconHost);
+    await settle(fixture);
+
+    const icon = query<HTMLElement>(fixture.nativeElement, '#icon-map');
+
+    expect(icon.getAttribute('data-slot')).toBe('root');
+    expect(icon.className).toContain('text-hell-info');
   });
 });
 

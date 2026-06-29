@@ -71,7 +71,7 @@ import skeletonTextLinesExampleCodeRaw from './examples/text-lines.example.ts?ra
           <code>100% / 14px</code>). Tailwind utilities work too.
         </li>
         <li><code>shape</code>: <code>text | circle | rect</code></li>
-        <li><code>unstyled</code>: opt out of all styling</li>
+        <li><code>ui</code>: string or <code>{{ '{' }} root: string {{ '}' }}</code> map</li>
       </ul>
 
       <h2>Do</h2>

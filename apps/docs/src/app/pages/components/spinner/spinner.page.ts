@@ -83,7 +83,7 @@ import spinnerVariantsExampleCodeRaw from './examples/variants.example.ts?raw' w
       <ul>
         <li><code>variant</code>: <code>ring | dots | bars | pulse</code></li>
         <li><code>size</code>: <code>xs | sm | md | lg | xl</code></li>
-        <li><code>unstyled</code>: opt out of the host class</li>
+        <li><code>ui</code>: string or <code>{{ '{' }} root: string {{ '}' }}</code> map</li>
       </ul>
 
       <h2>Do</h2>

@@ -1,52 +1,10 @@
+/* Avatar root defaults are Tailwind utility recipes. */
+@source "./avatar.ts";
+
 @layer components {
-
-  /* Avatar. */
-
-  .hell-avatar {
-      position: relative;
-      display: inline-flex;
-      height: var(--_hell-av-size);
-      width: var(--_hell-av-size);
-      flex-shrink: 0;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      border-radius: calc(infinity * 1px);
-      border-style: solid;
-      border-width: 2px;
-      border-color: var(--color-hell-surface-elevated);
-      background-color: var(--color-hell-primary-soft);
-      font-size: calc(var(--_hell-av-size) * 0.4);
-      font-weight: var(--font-weight-semibold);
-      letter-spacing: 0.02em;
-      color: var(--color-hell-primary-soft-foreground);
-      -webkit-user-select: none;
-      user-select: none;
-      transition: border-color var(--hell-duration-fast) var(--ease-hell-out);
-      --_hell-av-size: 32px;
-      & > img {
-        height: 100%;
-        width: 100%;
-        object-fit: cover;
-      }
-      &[data-size='xs'] {
-        --_hell-av-size: 20px;
-      }
-      &[data-size='sm'] {
-        --_hell-av-size: 26px;
-      }
-      &[data-size='md'] {
-        --_hell-av-size: 32px;
-      }
-      &[data-size='lg'] {
-        --_hell-av-size: 40px;
-      }
-      &[data-size='xl'] {
-        --_hell-av-size: 56px;
-      }
-      &[data-shape='square'] {
-        border-radius: var(--radius-md);
-      }
-    }
-
+  hell-avatar[data-slot='root'] > img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
 }

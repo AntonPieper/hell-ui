@@ -1,6 +1,13 @@
 import { Component, ChangeDetectionStrategy, booleanAttribute, input } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
-import { HellStyleable } from '@hell-ui/angular/core';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+
+export type HellIconPart = 'root';
+export type HellIconUi = HellUi<HellIconPart>;
+
+const HELL_ICON_RECIPE = {
+  root: 'inline-flex text-[var(--_hell-icon-color,currentColor)] leading-none',
+} satisfies HellRecipe<HellIconPart>;
 
 /**
  * Thin styled wrapper around `<ng-icon>` from `@ng-icons/core`.
@@ -18,7 +25,8 @@ import { HellStyleable } from '@hell-ui/angular/core';
   imports: [NgIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    '[class.hell-icon]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[style.--ng-icon__size]': 'size()',
     '[style.--_hell-icon-color]': 'color()',
     '[attr.aria-hidden]': 'decorative() ? "true" : null',
@@ -27,7 +35,10 @@ import { HellStyleable } from '@hell-ui/angular/core';
   },
   template: `<ng-icon [name]="name()" aria-hidden="true" />`,
 })
-export class HellIcon extends HellStyleable {
+export class HellIcon extends HellPartStyleable<HellIconPart> {
+  protected readonly recipe = HELL_ICON_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly name = input.required<string>();
   readonly size = input<string>('1em');
   readonly color = input<string | null>(null);
