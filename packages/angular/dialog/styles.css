@@ -23,11 +23,16 @@
 
   .hell-dialog {
     display: flex;
+    min-width: calc(var(--spacing) * 0);
     width: 100%;
-    flex-direction: column;
-    box-shadow: var(--shadow-hell-overlay);
     max-width: 480px;
     max-height: min(90vh, 100%);
+    flex-direction: column;
+    overflow: clip;
+    border: 1px solid var(--color-hell-border);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-hell-surface-elevated);
+    box-shadow: var(--shadow-hell-overlay);
     outline: none;
     animation: hell-dialog-in var(--hell-duration-base) var(--ease-hell-out);
     &[data-size='sm'] {

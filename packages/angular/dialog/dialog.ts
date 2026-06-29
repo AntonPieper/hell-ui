@@ -200,8 +200,6 @@ export class HellDialogScope {}
   hostDirectives: [NgpDialog],
   host: {
     '[class.hell-dialog]': '!unstyled()',
-    '[class.hell-card]': '!unstyled()',
-    '[attr.data-elevation]': '!unstyled() ? "3" : null',
     '[attr.data-size]': 'size()',
   },
 })
