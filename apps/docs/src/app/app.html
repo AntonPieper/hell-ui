@@ -259,6 +259,7 @@
                 hellNavItem
                 [routerLink]="item.path"
                 routerLinkActive="active"
+                ariaCurrentWhenActive="page"
                 [routerLinkActiveOptions]="{ exact: !!item.exact }"
                 [attr.title]="shell.isSidenavCollapsed() ? item.label : null"
                 (click)="shell.closeMobilePanels()"
@@ -275,6 +276,7 @@
             hellNavItem
             [routerLink]="item.path"
             routerLinkActive="active"
+            ariaCurrentWhenActive="page"
             [routerLinkActiveOptions]="{ exact: !!item.exact }"
             [attr.title]="shell.isSidenavCollapsed() ? item.label : null"
             (click)="shell.closeMobilePanels()"

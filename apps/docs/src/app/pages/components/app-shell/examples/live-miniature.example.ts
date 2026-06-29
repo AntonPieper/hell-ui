@@ -26,13 +26,13 @@ const HD_APP_SHELL_PAGE_ICONS = {
   imports: [...HELL_APP_SHELL_DIRECTIVES, HellButton, HellIcon],
   providers: [provideIcons(HD_APP_SHELL_PAGE_ICONS)],
   template: `
-    <div hellAppShell class="h-96 overflow-hidden rounded-lg border border-hell-border">
-      <header hellAppTopbar class="hd-surface-elevated">
+    <div hellAppShell ui="h-96 overflow-hidden rounded-lg border border-hell-border">
+      <header hellAppTopbar ui="hd-surface-elevated">
         <button hellSidenavToggle appearance="shell" type="button"></button>
         <strong>Acme Console</strong>
       </header>
 
-      <nav hellAppSidenav class="hd-surface-elevated">
+      <nav hellAppSidenav ui="hd-surface-elevated">
         <a hellNavItem href="#" aria-current="page" (click)="$event.preventDefault()">
           <hell-icon hellNavItemIcon name="faSolidGauge" size="14px" />
           <span hellNavItemLabel>Dashboard</span>
@@ -73,7 +73,7 @@ const HD_APP_SHELL_PAGE_ICONS = {
         </div>
       </main>
 
-      <aside hellAppSecondary class="hd-surface-subtle">
+      <aside hellAppSecondary ui="hd-surface-subtle">
         <button hellSecondaryToggle appearance="rail" type="button"></button>
         <div hellAppSecondaryBody>
           <button hellSecondaryToggle appearance="header" type="button">Activity</button>

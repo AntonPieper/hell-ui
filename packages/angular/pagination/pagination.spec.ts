@@ -4,10 +4,19 @@ import { TestBed } from '@angular/core/testing';
 import { provideHellLabels } from '@hell-ui/angular/core';
 import {
   HellPagination,
+  HellPaginationButton,
   HellPaginationFirst,
+  HellPaginationLast,
   HellPaginationNext,
+  HellPaginationPrev,
   HellPaginationStrip,
+  type HellPaginationButtonUi,
+  type HellPaginationFirstUi,
+  type HellPaginationLastUi,
   type HellPaginationMode,
+  type HellPaginationNextUi,
+  type HellPaginationPrevUi,
+  type HellPaginationStripUi,
 } from './pagination';
 
 @Component({
@@ -87,6 +96,68 @@ class PaginationExplicitDisabledHost {}
 })
 class LocalizedPaginationHost {}
 
+@Component({
+  imports: [
+    HellPagination,
+    HellPaginationFirst,
+    HellPaginationPrev,
+    HellPaginationButton,
+    HellPaginationNext,
+    HellPaginationLast,
+    HellPaginationStrip,
+  ],
+  template: `
+    <nav
+      id="ui-root"
+      hellPagination
+      ui="gap-hell-4 bg-hell-surface-muted"
+      [page]="page()"
+      [pageCount]="pageCount()"
+      (pageChange)="pageEvents.push($event)"
+    >
+      <button id="ui-first" hellPaginationFirst type="button" [ui]="firstUi">First</button>
+      <button id="ui-prev" hellPaginationPrev type="button" [ui]="prevUi">Prev</button>
+      <button id="ui-page" hellPaginationButton type="button" [page]="2" [ui]="buttonUi">
+        2
+      </button>
+      <button id="ui-next" hellPaginationNext type="button" [ui]="nextUi">Next</button>
+      <button id="ui-last" hellPaginationLast type="button" [ui]="lastUi">Last</button>
+    </nav>
+
+    <hell-pagination
+      id="ui-strip"
+      mode="jump"
+      [page]="2"
+      [pageCount]="pageCount()"
+      [ui]="stripUi"
+    />
+  `,
+})
+class PaginationUiHost {
+  readonly page = signal(2);
+  readonly pageCount = signal(4);
+  readonly pageEvents: number[] = [];
+  protected readonly firstUi = 'bg-hell-danger px-hell-7' satisfies HellPaginationFirstUi['root'];
+  protected readonly prevUi = {
+    root: 'bg-hell-surface-muted px-hell-6',
+  } satisfies HellPaginationPrevUi;
+  protected readonly buttonUi = {
+    root: 'rounded-hell-pill bg-hell-primary px-hell-8',
+  } satisfies HellPaginationButtonUi;
+  protected readonly nextUi = {
+    root: 'border-hell-danger px-hell-5',
+  } satisfies HellPaginationNextUi;
+  protected readonly lastUi = {
+    root: 'bg-hell-danger px-hell-7',
+  } satisfies HellPaginationLastUi;
+  protected readonly stripUi = {
+    root: 'gap-hell-4 bg-hell-surface-muted',
+    controlGlyph: 'text-hell-danger text-lg',
+    jump: 'gap-hell-4 text-hell-danger',
+    jumpSelect: 'min-w-[calc(var(--spacing)*24)]',
+  } satisfies HellPaginationStripUi;
+}
+
 describe('HellPaginationStrip', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -96,6 +167,7 @@ describe('HellPaginationStrip', () => {
         PaginationAnchorHost,
         PaginationExplicitDisabledHost,
         LocalizedPaginationHost,
+        PaginationUiHost,
       ],
     }).compileComponents();
   });
@@ -208,7 +280,8 @@ describe('HellPaginationStrip', () => {
 
     expect(buttonLabels(root)).toEqual(['Previous page', 'Next page']);
     expect(select.getAttribute('aria-label')).toBe('Page');
-    expect(select.getAttribute('data-slot')).toBe('jump-select');
+    expect(select.getAttribute('data-slot')).toBe('jumpSelect');
+    expect(root.querySelector('[data-slot="jumpSelect"]')).toBeInstanceOf(HTMLElement);
     expect(select.classList.contains('appearance-none')).toBe(true);
     expect(select.value).toBe('2');
     expect(root.textContent).toContain('of 5');
@@ -237,6 +310,58 @@ describe('HellPaginationStrip', () => {
 
     expect(fixture.componentInstance.pageEvents).toEqual([8, 7]);
   });
+
+  it('merges pagination ui classes through local roots and strip anatomy parts', () => {
+    const fixture = TestBed.createComponent(PaginationUiHost);
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    const pagination = query(root, '#ui-root');
+    const first = query(root, '#ui-first');
+    const prev = query(root, '#ui-prev');
+    const numbered = query(root, '#ui-page');
+    const next = query(root, '#ui-next');
+    const last = query(root, '#ui-last');
+    const strip = query(root, '#ui-strip');
+    const stripGlyph = query(strip, '[data-slot="controlGlyph"]');
+    const jump = query(strip, '[data-slot="jump"]');
+    const jumpSelect = query(strip, '[data-slot="jumpSelect"]') as HTMLSelectElement;
+
+    expect(pagination.classList.contains('hell-pagination')).toBe(false);
+    expect(pagination.getAttribute('data-slot')).toBe('root');
+    expect(pagination.className).toContain('gap-hell-4');
+    expect(pagination.className).not.toContain('gap-hell-1');
+
+    for (const control of [first, prev, numbered, next, last]) {
+      expect(control.classList.contains('hell-button')).toBe(false);
+      expect(control.classList.contains('hell-pagination-item')).toBe(false);
+      expect(control.getAttribute('data-slot')).toBe('root');
+      expect(control.getAttribute('data-variant')).toBe('ghost');
+      expect(control.getAttribute('data-icon-only')).toBe('');
+    }
+
+    expect(first.className).toContain('bg-hell-danger');
+    expect(first.className).toContain('px-hell-7');
+    expect(prev.className).toContain('bg-hell-surface-muted');
+    expect(prev.className).toContain('px-hell-6');
+    expect(numbered.className).toContain('rounded-hell-pill');
+    expect(numbered.className).toContain('px-hell-8');
+    expect(next.className).toContain('border-hell-danger');
+    expect(next.className).toContain('px-hell-5');
+    expect(last.className).toContain('bg-hell-danger');
+    expect(last.className).toContain('px-hell-7');
+
+    expect(strip.classList.contains('hell-pagination')).toBe(false);
+    expect(strip.getAttribute('data-slot')).toBe('root');
+    expect(strip.getAttribute('data-mode')).toBe('jump');
+    expect(strip.className).toContain('gap-hell-4');
+    expect(jump.className).toContain('text-hell-danger');
+    expect(jump.className).toContain('gap-hell-4');
+    expect(jumpSelect.tagName).toBe('SELECT');
+    expect(jumpSelect.className).toContain('min-w-[calc(var(--spacing)*24)]');
+    expect(jumpSelect.className).toContain('h-hell-control-sm');
+    expect(stripGlyph.className).toContain('text-hell-danger');
+  });
 });
 
 function pageButtonLabels(root: HTMLElement): string[] {
@@ -259,4 +384,10 @@ function buttonLabels(root: HTMLElement): string[] {
 
 function dispatchKey(element: HTMLElement, key: string): void {
   element.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+}
+
+function query(root: HTMLElement, selector: string): HTMLElement {
+  const element = root.querySelector(selector);
+  if (!(element instanceof HTMLElement)) throw new Error(`Expected ${selector}.`);
+  return element;
 }

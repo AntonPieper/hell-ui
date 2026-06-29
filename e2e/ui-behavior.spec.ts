@@ -559,8 +559,8 @@ test.describe('Hell UI browser behavior', () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/components/app-shell');
 
-    const shell = page.locator('hd-root > .hell-shell');
-    const secondary = page.locator('hd-root > .hell-shell > .hd-docs-secondary');
+    const shell = page.locator('hd-root > [hellAppShell][data-slot="root"]');
+    const secondary = shell.locator('> [hellAppSecondary][data-slot="root"]');
     const rail = secondary.locator('[data-hell-secondary-toggle="rail"]');
     const header = secondary.locator('[data-hell-secondary-toggle="header"]');
 
@@ -647,11 +647,15 @@ test.describe('Hell UI browser behavior', () => {
     ).toBeVisible();
 
     await firstExample.getByRole('tab', { name: 'Preview' }).click();
-    const primitiveTable = page.locator('app-table-primitive-example .hell-table-container').first();
+    const primitiveTable = page
+      .locator('app-table-primitive-example [hellTableContainer][data-slot="root"]')
+      .first();
     await expect(primitiveTable).toBeVisible();
     await expect(primitiveTable).toHaveCSS('display', 'flex');
     await expect(primitiveTable).toHaveCSS('border-top-width', '1px');
-    await expect(page.locator('app-table-primitive-example table.hell-table').first()).toBeVisible();
+    await expect(
+      page.locator('app-table-primitive-example table[data-hell-table-root][data-slot="root"]').first(),
+    ).toBeVisible();
 
     const tanstackShell = page.locator('app-table-tanstack-shell-example hell-tanstack-table').first();
     await expect(tanstackShell).toBeVisible();
@@ -671,8 +675,8 @@ test.describe('Hell UI browser behavior', () => {
     expect(Math.abs(thumbCenterX - trackCenterX)).toBeLessThanOrEqual(1);
 
     await page.goto('/accessibility');
-    await expect(page.locator('.hd-a11y-table-wrap.hell-table-container')).toBeVisible();
-    await expect(page.locator('table.hd-a11y-table.hell-table')).toBeVisible();
+    await expect(page.locator('.hd-a11y-table-wrap[hellTableContainer][data-slot="root"]')).toBeVisible();
+    await expect(page.locator('table.hd-a11y-table[data-hell-table-root][data-slot="root"]')).toBeVisible();
   });
 
   test('shared docs code tabs use the read-only Hell code viewer with copy and focus semantics', async ({

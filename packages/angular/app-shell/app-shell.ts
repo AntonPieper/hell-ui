@@ -1,6 +1,6 @@
 import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
 import { isElementLike } from '@hell-ui/angular/internal/core';
-import { HellStyleable } from '@hell-ui/angular/core';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
 import { DOCUMENT } from '@angular/common';
 import { FocusTrap, FocusTrapFactory, InteractivityChecker } from '@angular/cdk/a11y';
 import {
@@ -27,6 +27,115 @@ export const HELL_APP_SHELL_MOBILE_MEDIA = `(max-width: ${HELL_APP_SHELL_MOBILE_
 let nextAppShellId = 0;
 
 type HellAppShellMobilePanel = 'sidenav' | 'secondary';
+
+export type HellAppShellPart = 'root';
+export type HellAppShellUi = HellUi<HellAppShellPart>;
+
+export type HellAppTopbarPart = 'root';
+export type HellAppTopbarUi = HellUi<HellAppTopbarPart>;
+
+export type HellAppSidenavPart = 'root';
+export type HellAppSidenavUi = HellUi<HellAppSidenavPart>;
+
+export type HellNavItemPart = 'root';
+export type HellNavItemUi = HellUi<HellNavItemPart>;
+
+export type HellNavItemIconPart = 'root';
+export type HellNavItemIconUi = HellUi<HellNavItemIconPart>;
+
+export type HellNavItemLabelPart = 'root';
+export type HellNavItemLabelUi = HellUi<HellNavItemLabelPart>;
+
+export type HellNavItemTrailingPart = 'root';
+export type HellNavItemTrailingUi = HellUi<HellNavItemTrailingPart>;
+
+export type HellNavSectionPart = 'root';
+export type HellNavSectionUi = HellUi<HellNavSectionPart>;
+
+export type HellNavSectionTogglePart = 'root';
+export type HellNavSectionToggleUi = HellUi<HellNavSectionTogglePart>;
+
+export type HellNavSectionItemsPart = 'root';
+export type HellNavSectionItemsUi = HellUi<HellNavSectionItemsPart>;
+
+export type HellAppContentPart = 'root';
+export type HellAppContentUi = HellUi<HellAppContentPart>;
+
+export type HellSidenavTogglePart = 'root';
+export type HellSidenavToggleUi = HellUi<HellSidenavTogglePart>;
+
+export type HellSecondaryTogglePart = 'root';
+export type HellSecondaryToggleUi = HellUi<HellSecondaryTogglePart>;
+
+export type HellAppSecondaryPart = 'root';
+export type HellAppSecondaryUi = HellUi<HellAppSecondaryPart>;
+
+export type HellAppSecondaryBodyPart = 'root';
+export type HellAppSecondaryBodyUi = HellUi<HellAppSecondaryBodyPart>;
+
+const HELL_APP_SHELL_RECIPE = {
+  root: 'bg-hell-surface text-hell-foreground',
+} satisfies HellRecipe<HellAppShellPart>;
+
+const HELL_APP_TOPBAR_RECIPE = {
+  root: 'gap-hell-3 border-hell-border bg-hell-surface-elevated pe-hell-4',
+} satisfies HellRecipe<HellAppTopbarPart>;
+
+const HELL_APP_SIDENAV_RECIPE = {
+  root: 'gap-0.5 border-hell-border bg-hell-surface-elevated p-hell-3',
+} satisfies HellRecipe<HellAppSidenavPart>;
+
+const HELL_NAV_ITEM_RECIPE = {
+  root: 'gap-hell-3 rounded-md px-3 py-2 text-hell-foreground-muted hover:bg-hell-surface-subtle hover:text-hell-foreground data-[active=true]:bg-hell-primary-soft data-[active=true]:text-hell-primary aria-[current=page]:bg-hell-primary-soft aria-[current=page]:font-semibold aria-[current=page]:text-hell-primary',
+} satisfies HellRecipe<HellNavItemPart>;
+
+const HELL_NAV_ITEM_ICON_RECIPE = {
+  root: 'w-4 text-hell-foreground-subtle',
+} satisfies HellRecipe<HellNavItemIconPart>;
+
+const HELL_NAV_ITEM_LABEL_RECIPE = {
+  root: 'text-ellipsis',
+} satisfies HellRecipe<HellNavItemLabelPart>;
+
+const HELL_NAV_ITEM_TRAILING_RECIPE = {
+  root: 'text-hell-foreground-subtle',
+} satisfies HellRecipe<HellNavItemTrailingPart>;
+
+const HELL_NAV_SECTION_RECIPE = {
+  root: 'flex flex-col',
+} satisfies HellRecipe<HellNavSectionPart>;
+
+const HELL_NAV_SECTION_TOGGLE_RECIPE = {
+  root: 'gap-hell-2 rounded-hell-sm px-3 py-1.5 text-hell-foreground-subtle hover:bg-hell-surface-subtle hover:text-hell-foreground focus-visible:outline-hell-focus-ring',
+} satisfies HellRecipe<HellNavSectionTogglePart>;
+
+const HELL_NAV_SECTION_ITEMS_RECIPE = {
+  root: 'gap-0.5',
+} satisfies HellRecipe<HellNavSectionItemsPart>;
+
+const HELL_APP_CONTENT_RECIPE = {
+  root: 'bg-hell-surface-subtle p-hell-6',
+} satisfies HellRecipe<HellAppContentPart>;
+
+const HELL_SIDENAV_TOGGLE_SHELL_RECIPE = {
+  root: 'text-hell-foreground-muted hover:text-hell-foreground',
+} satisfies HellRecipe<HellSidenavTogglePart>;
+
+const HELL_SECONDARY_TOGGLE_HEADER_RECIPE = {
+  root: 'gap-hell-2 border-hell-border px-hell-4 py-hell-3 text-hell-foreground-subtle hover:bg-hell-surface-subtle hover:text-hell-foreground focus-visible:outline-hell-focus-ring',
+} satisfies HellRecipe<HellSecondaryTogglePart>;
+
+const HELL_SECONDARY_TOGGLE_RAIL_RECIPE = {
+  root: 'text-hell-foreground-subtle hover:bg-hell-surface-subtle hover:text-hell-primary',
+} satisfies HellRecipe<HellSecondaryTogglePart>;
+
+const HELL_APP_SECONDARY_RECIPE = {
+  root: 'border-hell-border bg-hell-surface-elevated',
+} satisfies HellRecipe<HellAppSecondaryPart>;
+
+const HELL_APP_SECONDARY_BODY_RECIPE = {
+  root: 'opacity-100',
+} satisfies HellRecipe<HellAppSecondaryBodyPart>;
 
 /**
  * Application shell — top bar + collapsible sidenav + main content + optional
@@ -56,7 +165,8 @@ type HellAppShellMobilePanel = 'sidenav' | 'secondary';
   selector: '[hellAppShell]',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    '[class.hell-shell]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-sidenav-collapsed]': 'isSidenavCollapsed() ? "true" : null',
     '[attr.data-secondary-hidden]': 'isSecondaryHidden() ? "true" : null',
     '[attr.data-mobile-layout]': 'isMobileLayout() ? "true" : null',
@@ -68,7 +178,10 @@ type HellAppShellMobilePanel = 'sidenav' | 'secondary';
   template: '<ng-content></ng-content>',
   exportAs: 'hellAppShell',
 })
-export class HellAppShell extends HellStyleable implements OnDestroy {
+export class HellAppShell extends HellPartStyleable<HellAppShellPart> implements OnDestroy {
+  protected readonly recipe = HELL_APP_SHELL_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly sidenavCollapsed = input<boolean | null, boolean | string | null | undefined>(null, {
     transform: nullableBooleanAttribute,
   });
@@ -380,14 +493,18 @@ export class HellAppShell extends HellStyleable implements OnDestroy {
 
 @Directive({
   selector: '[hellAppTopbar]',
-  host: { '[class.hell-topbar]': '!unstyled()' },
+  host: { '[class]': "part('root')", 'data-slot': 'root' },
 })
-export class HellAppTopbar extends HellStyleable {}
+export class HellAppTopbar extends HellPartStyleable<HellAppTopbarPart> {
+  protected readonly recipe = HELL_APP_TOPBAR_RECIPE;
+  protected readonly defaultUiPart = 'root';
+}
 
 @Directive({
   selector: '[hellAppSidenav]',
   host: {
-    '[class.hell-sidenav]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.id]': 'panelId()',
     '[attr.data-hell-app-shell-panel]': '"sidenav"',
     '[attr.data-collapsed]': 'isCollapsed() ? "true" : null',
@@ -396,7 +513,10 @@ export class HellAppTopbar extends HellStyleable {}
     '[attr.inert]': 'isMobileHidden() ? "" : null',
   },
 })
-export class HellAppSidenav extends HellStyleable {
+export class HellAppSidenav extends HellPartStyleable<HellAppSidenavPart> {
+  protected readonly recipe = HELL_APP_SIDENAV_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   /** Optional override; if omitted, follows the parent shell. */
   readonly collapsed = input<boolean | null, boolean | string | null | undefined>(null, {
     transform: (v) => (v == null ? null : booleanAttribute(v)),
@@ -420,51 +540,66 @@ export class HellAppSidenav extends HellStyleable {
 @Directive({
   selector: '[hellNavItem]',
   host: {
-    '[class.hell-nav-item]': '!unstyled()',
-    '[attr.data-slot]': '"nav-item"',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-active]': 'active() ? "true" : null',
   },
 })
-export class HellNavItem extends HellStyleable {
+export class HellNavItem extends HellPartStyleable<HellNavItemPart> {
+  protected readonly recipe = HELL_NAV_ITEM_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly active = input(false, { transform: booleanAttribute });
 }
 
 @Directive({
   selector: '[hellNavItemIcon]',
   host: {
-    '[class.hell-nav-icon]': '!unstyled()',
-    '[attr.data-slot]': '"nav-icon"',
+    '[class]': "part('root')",
+    'data-slot': 'root',
   },
 })
-export class HellNavItemIcon extends HellStyleable {}
+export class HellNavItemIcon extends HellPartStyleable<HellNavItemIconPart> {
+  protected readonly recipe = HELL_NAV_ITEM_ICON_RECIPE;
+  protected readonly defaultUiPart = 'root';
+}
 
 @Directive({
   selector: '[hellNavItemLabel]',
   host: {
-    '[class.hell-nav-label]': '!unstyled()',
-    '[attr.data-slot]': '"nav-label"',
+    '[class]': "part('root')",
+    'data-slot': 'root',
   },
 })
-export class HellNavItemLabel extends HellStyleable {}
+export class HellNavItemLabel extends HellPartStyleable<HellNavItemLabelPart> {
+  protected readonly recipe = HELL_NAV_ITEM_LABEL_RECIPE;
+  protected readonly defaultUiPart = 'root';
+}
 
 @Directive({
   selector: '[hellNavItemTrailing]',
   host: {
-    '[class.hell-nav-trailing]': '!unstyled()',
-    '[attr.data-slot]': '"nav-trailing"',
+    '[class]': "part('root')",
+    'data-slot': 'root',
   },
 })
-export class HellNavItemTrailing extends HellStyleable {}
+export class HellNavItemTrailing extends HellPartStyleable<HellNavItemTrailingPart> {
+  protected readonly recipe = HELL_NAV_ITEM_TRAILING_RECIPE;
+  protected readonly defaultUiPart = 'root';
+}
 
 @Directive({
   selector: '[hellNavSection]',
   host: {
-    '[class.hell-nav-section]': '!unstyled()',
-    '[attr.data-slot]': '"nav-section"',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-collapsed]': 'isCollapsed() ? "true" : null',
   },
 })
-export class HellNavSection extends HellStyleable {
+export class HellNavSection extends HellPartStyleable<HellNavSectionPart> {
+  protected readonly recipe = HELL_NAV_SECTION_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly collapsed = input<boolean | null, boolean | string | null | undefined>(null, {
     transform: (v) => (v == null ? null : booleanAttribute(v)),
   });
@@ -485,13 +620,15 @@ export class HellNavSection extends HellStyleable {
   selector: 'button[hellNavSectionToggle]',
   host: {
     type: 'button',
-    '[class.hell-nav-section-toggle]': '!unstyled()',
-    '[attr.data-slot]': '"nav-section-toggle"',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.aria-expanded]': '!section.isCollapsed()',
     '(click)': 'toggle()',
   },
 })
-export class HellNavSectionToggle extends HellStyleable {
+export class HellNavSectionToggle extends HellPartStyleable<HellNavSectionTogglePart> {
+  protected readonly recipe = HELL_NAV_SECTION_TOGGLE_RECIPE;
+  protected readonly defaultUiPart = 'root';
   protected readonly section = inject(HellNavSection);
 
   protected toggle() {
@@ -502,13 +639,15 @@ export class HellNavSectionToggle extends HellStyleable {
 @Directive({
   selector: '[hellNavSectionItems]',
   host: {
-    '[class.hell-nav-section-items]': '!unstyled()',
-    '[attr.data-slot]': '"nav-section-items"',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.aria-hidden]': 'isHidden() ? "true" : null',
     '[attr.inert]': 'isHidden() ? "" : null',
   },
 })
-export class HellNavSectionItems extends HellStyleable {
+export class HellNavSectionItems extends HellPartStyleable<HellNavSectionItemsPart> {
+  protected readonly recipe = HELL_NAV_SECTION_ITEMS_RECIPE;
+  protected readonly defaultUiPart = 'root';
   protected readonly section = inject(HellNavSection);
   private readonly sidenav = inject(HellAppSidenav, { optional: true });
 
@@ -519,14 +658,18 @@ export class HellNavSectionItems extends HellStyleable {
 @Directive({
   selector: '[hellAppContent]',
   host: {
-    '[class.hell-content]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[style.--hell-app-content-max-width]': 'maxWidthValue()',
     /** Dialogs scoped here render only over the content area. */
     '[attr.data-hell-dialog-scope-root]': '"true"',
     '[attr.data-dialog-root]': '"true"',
   },
 })
-export class HellAppContent extends HellStyleable {
+export class HellAppContent extends HellPartStyleable<HellAppContentPart> {
+  protected readonly recipe = HELL_APP_CONTENT_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly maxWidth = input<string | number | null>(null);
 
   protected readonly maxWidthValue = computed(() => {
@@ -543,6 +686,8 @@ export class HellAppContent extends HellStyleable {
 @Directive({
   selector: 'button[hellSidenavToggle]',
   host: {
+    '[class]': "part('root')",
+    'data-slot': 'root',
     type: 'button',
     '(click)': 'toggle()',
     '[attr.aria-expanded]': '!collapsed()',
@@ -553,8 +698,12 @@ export class HellAppContent extends HellStyleable {
     '[attr.data-hell-sidenav-toggle]': 'appearance() === "plain" ? null : appearance()',
   },
 })
-export class HellSidenavToggle {
+export class HellSidenavToggle extends HellPartStyleable<HellSidenavTogglePart> {
   readonly appearance = input<'plain' | 'shell'>('plain');
+  protected readonly defaultUiPart = 'root';
+  protected get recipe(): HellRecipe<HellSidenavTogglePart> {
+    return this.appearance() === 'shell' ? HELL_SIDENAV_TOGGLE_SHELL_RECIPE : { root: '' };
+  }
   protected readonly labels = inject<HellLabels>(HELL_LABELS);
   protected readonly shell = inject(HellAppShell);
   protected readonly collapsed = () => this.shell.isSidenavCollapsed();
@@ -567,6 +716,8 @@ export class HellSidenavToggle {
 @Directive({
   selector: 'button[hellSecondaryToggle]',
   host: {
+    '[class]': "part('root')",
+    'data-slot': 'root',
     type: 'button',
     '(click)': 'toggle()',
     '[attr.aria-expanded]': '!hidden()',
@@ -577,8 +728,14 @@ export class HellSidenavToggle {
     '[attr.data-hell-secondary-toggle]': 'appearance() === "plain" ? null : appearance()',
   },
 })
-export class HellSecondaryToggle {
+export class HellSecondaryToggle extends HellPartStyleable<HellSecondaryTogglePart> {
   readonly appearance = input<'plain' | 'header' | 'rail'>('plain');
+  protected readonly defaultUiPart = 'root';
+  protected get recipe(): HellRecipe<HellSecondaryTogglePart> {
+    if (this.appearance() === 'header') return HELL_SECONDARY_TOGGLE_HEADER_RECIPE;
+    if (this.appearance() === 'rail') return HELL_SECONDARY_TOGGLE_RAIL_RECIPE;
+    return { root: '' };
+  }
   protected readonly labels = inject<HellLabels>(HELL_LABELS);
   protected readonly shell = inject(HellAppShell);
   protected readonly hidden = () => this.shell.isSecondaryHidden();
@@ -590,14 +747,18 @@ export class HellSecondaryToggle {
 @Directive({
   selector: '[hellAppSecondary]',
   host: {
-    '[class.hell-secondary]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.id]': 'panelId()',
     '[attr.data-hell-app-shell-panel]': '"secondary"',
     '[attr.data-hidden]': 'isHidden() ? "true" : null',
     '[attr.data-mobile-hidden]': 'isMobileHidden() ? "true" : null',
   },
 })
-export class HellAppSecondary extends HellStyleable {
+export class HellAppSecondary extends HellPartStyleable<HellAppSecondaryPart> {
+  protected readonly recipe = HELL_APP_SECONDARY_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly hidden = input<boolean | null, boolean | string | null | undefined>(null, {
     transform: (v) => (v == null ? null : booleanAttribute(v)),
   });
@@ -620,12 +781,15 @@ export class HellAppSecondary extends HellStyleable {
 @Directive({
   selector: '[hellAppSecondaryBody]',
   host: {
-    '[class.hell-secondary-body]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.aria-hidden]': 'secondary.isHidden() ? "true" : null',
     '[attr.inert]': 'secondary.isHidden() ? "" : null',
   },
 })
-export class HellAppSecondaryBody extends HellStyleable {
+export class HellAppSecondaryBody extends HellPartStyleable<HellAppSecondaryBodyPart> {
+  protected readonly recipe = HELL_APP_SECONDARY_BODY_RECIPE;
+  protected readonly defaultUiPart = 'root';
   readonly secondary = inject(HellAppSecondary);
 }
 

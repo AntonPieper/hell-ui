@@ -15,7 +15,13 @@ import {
   numberAttribute,
   signal,
 } from '@angular/core';
-import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
+import {
+  type HellLabels,
+  HELL_LABELS,
+  HellPartStyleable,
+  type HellRecipe,
+  type HellUi,
+} from '@hell-ui/angular/core';
 import {
   HellResizePairInteractionController,
   hellFitResizeSizesToTotal,
@@ -24,7 +30,29 @@ import {
 } from '@hell-ui/angular/internal/core';
 import { isDocumentPositionFollowing } from '@hell-ui/angular/internal/core';
 import { HellOrientation } from '@hell-ui/angular/core';
-import { HellStyleable } from '@hell-ui/angular/core';
+
+export type HellResizablePart = 'root';
+export type HellResizableUi = HellUi<HellResizablePart>;
+
+export type HellResizablePanePart = 'root';
+export type HellResizablePaneUi = HellUi<HellResizablePanePart>;
+
+export type HellResizableHandlePart = 'root' | 'grip';
+export type HellResizableHandleUi = HellUi<HellResizableHandlePart>;
+
+const HELL_RESIZABLE_RECIPE = {
+  root: 'flex h-full w-full',
+} satisfies HellRecipe<HellResizablePart>;
+
+const HELL_RESIZABLE_PANE_RECIPE = {
+  root: 'min-h-0 min-w-0 overflow-auto',
+} satisfies HellRecipe<HellResizablePanePart>;
+
+const HELL_RESIZABLE_HANDLE_RECIPE = {
+  root: 'flex bg-transparent',
+  grip: '',
+} satisfies HellRecipe<HellResizableHandlePart>;
+
 function hellElementDirection(element: HTMLElement): HellResizeDirection {
   return element.ownerDocument.defaultView?.getComputedStyle(element).direction === 'rtl'
     ? 'rtl'
@@ -54,12 +82,16 @@ function hellAriaControlsValue(
 @Directive({
   selector: '[hellResizable]',
   host: {
-    '[class.hell-resizable]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-orientation]': 'orientation()',
   },
   exportAs: 'hellResizable',
 })
-export class HellResizable extends HellStyleable implements AfterContentInit {
+export class HellResizable extends HellPartStyleable<HellResizablePart> implements AfterContentInit {
+  protected readonly recipe = HELL_RESIZABLE_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly orientation = input<HellOrientation>('horizontal');
   /** When false, container resizes do not rebalance panes after user sizing. */
   readonly rescaleOnResize = input(true, { transform: booleanAttribute });
@@ -68,6 +100,7 @@ export class HellResizable extends HellStyleable implements AfterContentInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly constrained = signal(false);
   private userSized = false;
+  private resizeFrame = 0;
 
   // Populated by panes during ngOnInit. Order corresponds to DOM order.
   private readonly panes: HellResizablePane[] = [];
@@ -76,9 +109,12 @@ export class HellResizable extends HellStyleable implements AfterContentInit {
     super();
     if (typeof ResizeObserver === 'undefined') return;
 
-    const observer = new ResizeObserver(() => this.fitPanesToAvailableSize());
+    const observer = new ResizeObserver(() => this.scheduleFitPanesToAvailableSize());
     observer.observe(this.host);
-    this.destroyRef.onDestroy(() => observer.disconnect());
+    this.destroyRef.onDestroy(() => {
+      observer.disconnect();
+      this.cancelScheduledFit();
+    });
   }
 
   /** Child/advanced integration hook; panes register themselves on init. */
@@ -123,7 +159,7 @@ export class HellResizable extends HellStyleable implements AfterContentInit {
     const total = horizontal ? this.host.clientWidth : this.host.clientHeight;
     let handlesSize = 0;
     const handles = (this.host as HTMLElement).querySelectorAll(
-      ':scope > [hellResizableHandle], :scope > .hell-resizable-handle',
+      ':scope > [hellResizableHandle][data-slot="root"]',
     ) as NodeListOf<HTMLElement>;
     handles.forEach((h: HTMLElement) => {
       handlesSize += horizontal ? h.offsetWidth : h.offsetHeight;
@@ -184,16 +220,44 @@ export class HellResizable extends HellStyleable implements AfterContentInit {
     }
     for (let i = 0; i < panes.length; i++) panes[i].setSize(fitted[i]);
   }
+
+  private scheduleFitPanesToAvailableSize(): void {
+    const view = this.host.ownerDocument.defaultView;
+    if (!view?.requestAnimationFrame) {
+      queueMicrotask(() => this.fitPanesToAvailableSize());
+      return;
+    }
+    if (this.resizeFrame) return;
+    this.resizeFrame = view.requestAnimationFrame(() => {
+      this.resizeFrame = 0;
+      this.fitPanesToAvailableSize();
+    });
+  }
+
+  private cancelScheduledFit(): void {
+    const view = this.host.ownerDocument.defaultView;
+    if (this.resizeFrame && view?.cancelAnimationFrame) {
+      view.cancelAnimationFrame(this.resizeFrame);
+    }
+    this.resizeFrame = 0;
+  }
 }
 
 @Directive({
   selector: '[hellResizablePane]',
   host: {
-    '[class.hell-resizable-pane]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-orientation]': 'orientation()',
   },
 })
-export class HellResizablePane extends HellStyleable implements OnDestroy {
+export class HellResizablePane
+  extends HellPartStyleable<HellResizablePanePart>
+  implements OnDestroy
+{
+  protected readonly recipe = HELL_RESIZABLE_PANE_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   /** Initial flex grow factor — used until the user starts dragging. */
   readonly initialFlex = input(1, { transform: numberAttribute });
   /** Minimum pane size in pixels. */
@@ -271,7 +335,8 @@ export class HellResizablePane extends HellStyleable implements OnDestroy {
   selector: '[hellResizableHandle]',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    '[class.hell-resizable-handle]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-active]': 'dragging() ? "true" : null',
     '[attr.data-appearance]': 'appearance()',
     '[attr.aria-orientation]':
@@ -287,9 +352,15 @@ export class HellResizablePane extends HellStyleable implements OnDestroy {
     '(pointerdown)': 'onPointerDown($event)',
     '(keydown)': 'onKey($event)',
   },
-  template: '<span data-slot="grip" aria-hidden="true"></span>',
+  template: '<span data-slot="grip" [class]="part(\'grip\')" aria-hidden="true"></span>',
 })
-export class HellResizableHandle extends HellStyleable implements AfterViewInit, OnDestroy {
+export class HellResizableHandle
+  extends HellPartStyleable<HellResizableHandlePart>
+  implements AfterViewInit, OnDestroy
+{
+  protected readonly recipe = HELL_RESIZABLE_HANDLE_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   /**
    * Visual treatment for the handle.
    * - `line`  (default) — minimal hairline that thickens on hover.

@@ -92,6 +92,12 @@ import paginationJumpExampleCodeRaw from './examples/jump.example.ts?raw' with {
         </li>
         <li><code>siblingCount</code>: numbered buttons shown either side of current.</li>
         <li><code>disabled</code>: disable all controls.</li>
+        <li>
+          <code>ui</code>: customize the ready-made strip parts
+          <code>root</code>, <code>controlGlyph</code>, <code>status</code>, <code>jump</code>,
+          <code>jumpLabel</code>, <code>jumpSelect</code>, and <code>jumpTotal</code>. Composed
+          <code>[hellPagination*]</code> controls each expose a local <code>root</code> part.
+        </li>
       </ul>
 
       <h2>Do</h2>

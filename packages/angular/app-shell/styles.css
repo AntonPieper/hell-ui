@@ -1,5 +1,8 @@
 @import '../internal/overlay/styles.css';
 
+/* App shell and nav default visuals are Tailwind utility recipes in the directives. */
+@source "./app-shell.ts";
+
 @layer components {
   /*
    * App-shell layout — single CSS grid for topbar / sidenav / content / secondary.
@@ -14,7 +17,7 @@
    * transitions, so collapse/hide animations are CSS-only.
    */
 
-  .hell-shell {
+  [hellAppShell][data-slot='root'] {
     position: relative;
     display: grid;
     height: 100vh;
@@ -45,7 +48,7 @@
     }
   }
 
-  .hell-topbar {
+  [hellAppTopbar][data-slot='root'] {
     z-index: 20;
     display: flex;
     min-width: calc(var(--spacing) * 0);
@@ -68,8 +71,7 @@
    * lines up dead-centre with the collapsed nav-item icons beneath it.
    */
 
-  .hell-shell-toggle,
-  [data-hell-sidenav-toggle='shell'] {
+  [hellSidenavToggle][data-slot='root'][data-hell-sidenav-toggle='shell'] {
     position: relative;
     display: inline-flex;
     flex: 0 0 var(--hell-app-sidenav-collapsed-width);
@@ -118,7 +120,7 @@
     }
   }
 
-  .hell-sidenav {
+  [hellAppSidenav][data-slot='root'] {
     display: flex;
     min-height: calc(var(--spacing) * 0);
     min-width: calc(var(--spacing) * 0);
@@ -131,79 +133,25 @@
     border-right: 1px solid var(--color-hell-border);
     grid-area: sidenav;
     transition: width var(--hell-duration-base) var(--ease-hell-out);
-    & .hell-nav-item {
-      display: flex;
-      cursor: pointer;
-      align-items: center;
-      gap: var(--spacing-hell-3);
-      border-radius: var(--radius-md);
-      padding-inline: calc(var(--spacing) * 3);
-      padding-block: calc(var(--spacing) * 2);
-      font-size: 0.875rem;
-      line-height: calc(var(--spacing) * 5);
-      white-space: nowrap;
-      color: var(--color-hell-foreground-muted);
-      text-decoration-line: none;
-      transition:
-        background var(--hell-duration-fast) var(--ease-hell-out),
-        color var(--hell-duration-fast) var(--ease-hell-out);
-    }
-    & .hell-nav-item > hell-icon,
-    & .hell-nav-item > .hell-nav-icon {
-      display: inline-flex;
-      flex: 0 0 auto;
-      align-items: center;
-      justify-content: center;
-      color: var(--color-hell-foreground-subtle);
-      transition: color var(--hell-duration-fast) var(--ease-hell-out);
-    }
-    & .hell-nav-item > .hell-nav-label {
-      flex: 1 1 auto;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      transition: opacity var(--hell-duration-fast) var(--ease-hell-out);
-    }
-    & .hell-nav-item:hover {
-      background-color: var(--color-hell-surface-subtle);
-      color: var(--color-hell-foreground);
-    }
-    & .hell-nav-item:hover > hell-icon,
-    & .hell-nav-item:hover > .hell-nav-icon {
-      color: var(--color-hell-foreground);
-    }
-    & .hell-nav-item[data-active='true'],
-    & .hell-nav-item[aria-current='page'],
-    & .hell-nav-item.active {
-      background-color: var(--color-hell-primary-soft);
-      font-weight: var(--font-weight-semibold);
-      color: var(--color-hell-primary);
-    }
-    & .hell-nav-item[data-active='true'] > hell-icon,
-    & .hell-nav-item[data-active='true'] > .hell-nav-icon,
-    & .hell-nav-item[aria-current='page'] > hell-icon,
-    & .hell-nav-item[aria-current='page'] > .hell-nav-icon,
-    & .hell-nav-item.active > hell-icon,
-    & .hell-nav-item.active > .hell-nav-icon {
-      color: var(--color-hell-primary);
-    }
     &[data-collapsed='true'] {
-      & .hell-nav-item {
+      & [hellNavItem][data-slot='root'] {
         justify-content: center;
         padding-inline: calc(var(--spacing) * 0);
       }
-      & .hell-nav-item > .hell-nav-label,
-      & .hell-nav-item > .hell-nav-trailing {
+      & [hellNavItem][data-slot='root'] > [hellNavItemLabel][data-slot='root'],
+      & [hellNavItem][data-slot='root'] > [hellNavItemTrailing][data-slot='root'] {
         display: none;
       }
       /* Free-text headings still disappear in rail mode. Collapsible
             section toggles get replaced by a divider drawn by
-            `.hell-nav-section::before`, so we only hide the button itself. */
-      & .hell-nav-section-toggle {
+            `[hellNavSection][data-slot='root']::before`, so we only hide the button itself. */
+      & [hellNavSectionToggle][data-slot='root'] {
         display: none;
       }
       /* Auto-expand collapsed sections so all items remain reachable when
            the rail is in icon-only mode. */
-      & .hell-nav-section[data-collapsed='true'] > .hell-nav-section-items {
+      & [hellNavSection][data-slot='root'][data-collapsed='true']
+        > [hellNavSectionItems][data-slot='root'] {
         max-height: 2000px;
         visibility: visible;
         opacity: 1;
@@ -212,7 +160,7 @@
     }
   }
 
-  .hell-content {
+  [hellAppContent][data-slot='root'] {
     --hell-app-content-max-width: 1760px;
 
     position: relative;
@@ -227,17 +175,17 @@
     grid-area: content;
   }
 
-  .hell-content > router-outlet {
+  [hellAppContent][data-slot='root'] > router-outlet {
     display: contents;
   }
 
-  .hell-content > :not(router-outlet) {
+  [hellAppContent][data-slot='root'] > :not(router-outlet) {
     display: block;
     width: min(100%, var(--hell-app-content-max-width));
     margin-inline: auto;
   }
 
-  .hell-secondary {
+  [hellAppSecondary][data-slot='root'] {
     position: relative;
     display: flex;
     min-height: calc(var(--spacing) * 0);
@@ -256,7 +204,7 @@
    * special-case a child class when the panel is collapsed.
    */
 
-  .hell-secondary-body {
+  [hellAppSecondaryBody][data-slot='root'] {
     display: flex;
     min-height: calc(var(--spacing) * 0);
     min-width: calc(var(--spacing) * 0);
@@ -281,8 +229,7 @@
    * reads as a panel collapse affordance, not a nav/link affordance.
    */
 
-  .hell-secondary-header,
-  [data-hell-secondary-toggle='header'] {
+  [hellSecondaryToggle][data-slot='root'][data-hell-secondary-toggle='header'] {
     display: flex;
     width: 100%;
     align-items: center;
@@ -342,8 +289,7 @@
    *               └─┘
    */
 
-  .hell-secondary-rail,
-  [data-hell-secondary-toggle='rail'] {
+  [hellSecondaryToggle][data-slot='root'][data-hell-secondary-toggle='rail'] {
     display: none;
     [data-hidden='true'] > & {
       pointer-events: auto;
@@ -391,7 +337,7 @@
 
   /* Reusable nav-item styling used outside sidenav (e.g. composite menus). */
 
-  .hell-nav-item {
+  [hellNavItem][data-slot='root'] {
     display: flex;
     cursor: pointer;
     align-items: center;
@@ -408,18 +354,18 @@
       color: var(--color-hell-foreground);
     }
     &[data-active='true'],
-    &.active {
+    &[aria-current='page'] {
       background-color: var(--color-hell-primary-soft);
       color: var(--color-hell-primary);
     }
-    > .hell-nav-icon {
+    > [hellNavItemIcon][data-slot='root'] {
       display: inline-flex;
       width: calc(var(--spacing) * 4);
       flex-shrink: 0;
       align-items: center;
       justify-content: center;
     }
-    > .hell-nav-label {
+    > [hellNavItemLabel][data-slot='root'] {
       flex: 1;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -442,14 +388,14 @@
    * `[data-collapsed='true']` above.
    */
 
-  .hell-nav-section {
+  [hellNavSection][data-slot='root'] {
     display: flex;
     flex-direction: column;
     &::before {
       content: '';
       display: none;
     }
-    .hell-sidenav[data-collapsed='true'] &::before {
+    [hellAppSidenav][data-slot='root'][data-collapsed='true'] &::before {
       display: block;
       height: 1px;
       margin-block: calc(var(--spacing) * 2);
@@ -458,7 +404,7 @@
     }
   }
 
-  .hell-nav-section-toggle {
+  [hellNavSectionToggle][data-slot='root'] {
     display: flex;
     width: 100%;
     align-items: center;
@@ -500,12 +446,12 @@
       outline: 2px solid var(--color-hell-focus-ring);
       outline-offset: 1px;
     }
-    .hell-nav-section[data-collapsed='true'] > &::after {
+    [hellNavSection][data-slot='root'][data-collapsed='true'] > &::after {
       transform: rotate(-90deg);
     }
   }
 
-  .hell-nav-section-items {
+  [hellNavSectionItems][data-slot='root'] {
     display: flex;
     flex-direction: column;
     gap: calc(var(--spacing) * 0.5);
@@ -518,7 +464,7 @@
       max-height var(--hell-duration-base) var(--ease-hell-out),
       opacity var(--hell-duration-fast) var(--ease-hell-out),
       visibility var(--hell-duration-fast) var(--ease-hell-out);
-    .hell-nav-section[data-collapsed='true'] > & {
+    [hellNavSection][data-slot='root'][data-collapsed='true'] > & {
       max-height: 0;
       visibility: hidden;
       opacity: 0;
@@ -527,7 +473,7 @@
   }
 
   @media (max-width: 767px) {
-    .hell-shell {
+    [hellAppShell][data-slot='root'] {
       height: 100dvh;
       grid-template-columns: minmax(0, 1fr);
       grid-template-rows: var(--hell-app-topbar-height) minmax(0, 1fr);
@@ -555,7 +501,7 @@
       }
     }
 
-    .hell-topbar {
+    [hellAppTopbar][data-slot='root'] {
       z-index: 40;
       min-width: calc(var(--spacing) * 0);
       gap: var(--spacing-hell-2);
@@ -563,12 +509,11 @@
       padding-inline-end: var(--spacing-hell-2);
     }
 
-    .hell-shell-toggle,
-    [data-hell-sidenav-toggle='shell'] {
+    [hellSidenavToggle][data-slot='root'][data-hell-sidenav-toggle='shell'] {
       flex-basis: var(--hell-app-topbar-height);
     }
 
-    .hell-sidenav {
+    [hellAppSidenav][data-slot='root'] {
       position: absolute;
       grid-area: 1 / 1 / -1 / -1;
       top: var(--hell-app-topbar-height);
@@ -588,19 +533,19 @@
         visibility var(--hell-duration-base) var(--ease-hell-out);
     }
 
-    .hell-shell:not([data-sidenav-collapsed='true']) > .hell-sidenav {
+    [hellAppShell][data-slot='root']:not([data-sidenav-collapsed='true']) > [hellAppSidenav][data-slot='root'] {
       visibility: visible;
       pointer-events: auto;
       opacity: 1;
       transform: translateX(0);
     }
 
-    .hell-content {
+    [hellAppContent][data-slot='root'] {
       padding: var(--spacing-hell-4);
       grid-area: content;
     }
 
-    .hell-secondary {
+    [hellAppSecondary][data-slot='root'] {
       z-index: var(--hell-z-app-drawer);
       grid-area: content;
       place-self: stretch end;
@@ -612,12 +557,13 @@
         box-shadow var(--hell-duration-base) var(--ease-hell-out);
     }
 
-    .hell-secondary[data-hidden='true'] > .hell-secondary-rail,
-    .hell-secondary[data-hidden='true'] > [data-hell-secondary-toggle='rail'] {
+    [hellAppSecondary][data-slot='root'][data-hidden='true']
+      > [hellSecondaryToggle][data-slot='root'][data-hell-secondary-toggle='rail'] {
       inset: 0;
     }
 
-    .hell-shell:not([data-secondary-hidden='true']) > .hell-secondary {
+    [hellAppShell][data-slot='root']:not([data-secondary-hidden='true'])
+      > [hellAppSecondary][data-slot='root'] {
       width: min(var(--hell-app-secondary-width), calc(100vw - var(--spacing-hell-8)));
       box-shadow: var(--shadow-hell-overlay);
     }

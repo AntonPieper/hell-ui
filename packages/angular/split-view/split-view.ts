@@ -25,8 +25,28 @@ import {
   HellPaginationNext,
   HellPaginationPrev,
 } from '@hell-ui/angular/pagination';
-import { HellStyleable } from '@hell-ui/angular/core';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
 import { HellResizable, HellResizableHandle, HellResizablePane } from '@hell-ui/angular/resizable';
+
+export type HellSplitViewPart =
+  | 'root'
+  | 'resizable'
+  | 'screen'
+  | 'pane'
+  | 'compactHeader'
+  | 'detailHeader'
+  | 'itemNavigation';
+export type HellSplitViewUi = HellUi<HellSplitViewPart>;
+
+const HELL_SPLIT_VIEW_RECIPE = {
+  root: 'h-full w-full',
+  resizable: 'h-full w-full',
+  screen: 'flex h-full w-full flex-col',
+  pane: 'flex min-h-0 min-w-0 flex-col overflow-hidden',
+  compactHeader: 'gap-hell-2 border-hell-border bg-hell-surface-subtle p-hell-2',
+  detailHeader: 'gap-hell-2 border-hell-border bg-hell-surface-subtle p-hell-2',
+  itemNavigation: 'gap-hell-1',
+} satisfies HellRecipe<HellSplitViewPart>;
 
 /** Primary pane template for `hell-split-view`; receives `{ compact, detailOpen }`. */
 @Directive({
@@ -67,7 +87,8 @@ export class HellSplitDetail {
   schemas: [NO_ERRORS_SCHEMA],
   providers: [provideIcons({ faSolidArrowLeft })],
   host: {
-    '[class.hell-split-view]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-compact]': 'isCompact() ? "true" : null',
     '[attr.data-detail-open]': 'detailOpen() ? "true" : null',
     '[attr.data-framed]': 'framed() ? "true" : null',
@@ -77,51 +98,56 @@ export class HellSplitDetail {
     <ng-template #itemNavigationControls>
       @if (itemNavigation()) {
         <nav
-          hellPagination
-          data-slot="item-navigation"
-          [page]="itemNavigationPage()"
-          [pageCount]="itemNavigationPageCount()"
+          data-slot="itemNavigation"
+          [class]="part('itemNavigation')"
           [attr.aria-label]="itemNavigationLabel()"
-          (pageChange)="goToItemPage($any($event))"
         >
-          <button
-            hellPaginationPrev
-            type="button"
-            [disabled]="previousItemDisabled()"
-            [attr.aria-label]="previousItemLabel()"
+          <div
+            hellPagination
+            [ui]="part('itemNavigation')"
+            [page]="itemNavigationPage()"
+            [pageCount]="itemNavigationPageCount()"
+            (pageChange)="goToItemPage($any($event))"
           >
-            <hell-icon [name]="'faSolidArrowLeft'" size="12px" />
-          </button>
-          <button
-            hellPaginationNext
-            type="button"
-            [disabled]="nextItemDisabled()"
-            [attr.aria-label]="nextItemLabel()"
-          >
-            <hell-icon data-direction="next" [name]="'faSolidArrowLeft'" size="12px" />
-          </button>
+            <button
+              hellPaginationPrev
+              type="button"
+              [disabled]="previousItemDisabled()"
+              [attr.aria-label]="previousItemLabel()"
+            >
+              <hell-icon [name]="'faSolidArrowLeft'" size="12px" />
+            </button>
+            <button
+              hellPaginationNext
+              type="button"
+              [disabled]="nextItemDisabled()"
+              [attr.aria-label]="nextItemLabel()"
+            >
+              <hell-icon data-direction="next" [name]="'faSolidArrowLeft'" size="12px" />
+            </button>
+          </div>
         </nav>
       }
     </ng-template>
 
     @if (isCompact()) {
-      <div data-slot="screen">
+      <div data-slot="screen" [class]="part('screen')">
         @if (detailOpen()) {
-          <div data-slot="compact-header">
+          <div data-slot="compactHeader" [class]="part('compactHeader')">
             <button hellButton variant="ghost" size="sm" type="button" (click)="closeDetail()">
               <hell-icon [name]="'faSolidArrowLeft'" size="13px" />
               <span>{{ backLabel() }}</span>
             </button>
             <ng-container [ngTemplateOutlet]="itemNavigationControls" />
           </div>
-          <div data-slot="pane" data-pane="detail">
+          <div data-slot="pane" [class]="part('pane')" data-pane="detail">
             <ng-container
               [ngTemplateOutlet]="detailTemplate()?.template ?? null"
               [ngTemplateOutletContext]="templateContext()"
             />
           </div>
         } @else {
-          <div data-slot="pane" data-pane="primary">
+          <div data-slot="pane" [class]="part('pane')" data-pane="primary">
             <ng-container
               [ngTemplateOutlet]="primaryTemplate()?.template ?? null"
               [ngTemplateOutletContext]="templateContext()"
@@ -130,42 +156,49 @@ export class HellSplitDetail {
         }
       </div>
     } @else {
-      <div hellResizable orientation="horizontal" data-slot="resizable">
-        <div
-          hellResizablePane
-          data-slot="pane"
-          data-pane="primary"
-          [initialFlex]="primaryFlex()"
-          [minSize]="primaryMinSize()"
-        >
-          <ng-container
-            [ngTemplateOutlet]="primaryTemplate()?.template ?? null"
-            [ngTemplateOutletContext]="templateContext()"
-          />
-        </div>
-        <div hellResizableHandle appearance="grip"></div>
-        <div
-          hellResizablePane
-          data-slot="pane"
-          data-pane="detail"
-          [initialFlex]="detailFlex()"
-          [minSize]="detailMinSize()"
-        >
-          @if (itemNavigation()) {
-            <div data-slot="detail-header">
-              <ng-container [ngTemplateOutlet]="itemNavigationControls" />
+      <div data-slot="resizable" [class]="part('resizable')">
+        <div hellResizable orientation="horizontal">
+          <div
+            hellResizablePane
+            ui="overflow-hidden"
+            [initialFlex]="primaryFlex()"
+            [minSize]="primaryMinSize()"
+          >
+            <div data-slot="pane" [class]="part('pane')" data-pane="primary">
+              <ng-container
+                [ngTemplateOutlet]="primaryTemplate()?.template ?? null"
+                [ngTemplateOutletContext]="templateContext()"
+              />
             </div>
-          }
-          <ng-container
-            [ngTemplateOutlet]="detailTemplate()?.template ?? null"
-            [ngTemplateOutletContext]="templateContext()"
-          />
+          </div>
+          <div hellResizableHandle appearance="grip"></div>
+          <div
+            hellResizablePane
+            ui="overflow-hidden"
+            [initialFlex]="detailFlex()"
+            [minSize]="detailMinSize()"
+          >
+            <div data-slot="pane" [class]="part('pane')" data-pane="detail">
+              @if (itemNavigation()) {
+                <div data-slot="detailHeader" [class]="part('detailHeader')">
+                  <ng-container [ngTemplateOutlet]="itemNavigationControls" />
+                </div>
+              }
+              <ng-container
+                [ngTemplateOutlet]="detailTemplate()?.template ?? null"
+                [ngTemplateOutletContext]="templateContext()"
+              />
+            </div>
+          </div>
         </div>
       </div>
     }
   `,
 })
-export class HellSplitView extends HellStyleable {
+export class HellSplitView extends HellPartStyleable<HellSplitViewPart> {
+  protected readonly recipe = HELL_SPLIT_VIEW_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly compactBelow = input(720, { transform: numberAttribute });
   readonly detailOpen = input(false, { transform: booleanAttribute });
   readonly framed = input(false, { transform: booleanAttribute });

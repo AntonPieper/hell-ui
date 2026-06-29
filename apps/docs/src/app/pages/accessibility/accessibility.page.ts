@@ -608,8 +608,8 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
         width: 15%;
       }
 
-      .hd-a11y-table .hell-table-header-cell,
-      .hd-a11y-table .hell-table-cell {
+      .hd-a11y-table [data-hell-table-header-cell][data-slot='root'],
+      .hd-a11y-table [data-hell-table-cell][data-slot='root'] {
         vertical-align: top;
         padding: var(--spacing-hell-3);
         overflow: visible;

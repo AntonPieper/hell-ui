@@ -101,11 +101,11 @@ jobs:
           - scenario: core
             scenarios: root-core,core,testing
           - scenario: primitive-foundations
-            scenarios: primitive-icons-css,button-ui
+            scenarios: primitive-icons-css,button-ui,pagination
           - scenario: button
             scenarios: button
           - scenario: composite-foundations
-            scenarios: composite-css,app-shell
+            scenarios: composite-css,app-shell,resizable,split-view
           - scenario: audio
             scenarios: audio-player,audio-transcript
           - scenario: features

@@ -2,7 +2,11 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { provideHellLabels } from '@hell-ui/angular/core';
-import { HELL_RESIZABLE_DIRECTIVES } from './resizable';
+import {
+  HELL_RESIZABLE_DIRECTIVES,
+  type HellResizableHandleUi,
+  type HellResizablePaneUi,
+} from './resizable';
 
 @Component({
   imports: [...HELL_RESIZABLE_DIRECTIVES],
@@ -31,6 +35,24 @@ class ResizableHost {}
 })
 class ResizableLabelContractHost {}
 
+@Component({
+  imports: [...HELL_RESIZABLE_DIRECTIVES],
+  template: `
+    <div id="ui-group" hellResizable orientation="vertical" ui="h-[360px] bg-hell-surface-muted">
+      <section id="ui-pane-a" hellResizablePane [ui]="paneUi" [minSize]="40">A</section>
+      <div id="ui-handle" hellResizableHandle appearance="grip" [ui]="handleUi"></div>
+      <section id="ui-pane-b" hellResizablePane [ui]="paneUi" [minSize]="40">B</section>
+    </div>
+  `,
+})
+class ResizableUiHost {
+  readonly paneUi = { root: 'overflow-hidden bg-hell-danger' } satisfies HellResizablePaneUi;
+  readonly handleUi = {
+    root: 'bg-hell-danger flex-none',
+    grip: 'bg-hell-primary',
+  } satisfies HellResizableHandleUi;
+}
+
 describe('HellResizable', () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -38,8 +60,36 @@ describe('HellResizable', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ResizableHost, ResizableLabelContractHost],
+      imports: [ResizableHost, ResizableLabelContractHost, ResizableUiHost],
     }).compileComponents();
+  });
+
+  it('merges resizable ui classes through local root parts without changing state attributes', () => {
+    const fixture = TestBed.createComponent(ResizableUiHost);
+    fixture.detectChanges();
+
+    const group = byId(fixture.nativeElement, 'ui-group');
+    const pane = byId(fixture.nativeElement, 'ui-pane-a');
+    const handle = byId(fixture.nativeElement, 'ui-handle');
+    const grip = query(handle, '[data-slot="grip"]');
+
+    expect(group.getAttribute('data-slot')).toBe('root');
+    expect(group.getAttribute('data-orientation')).toBe('vertical');
+    expect(group.className).toContain('h-[360px]');
+    expect(group.className).not.toContain('h-full');
+    expect(group.className).toContain('bg-hell-surface-muted');
+
+    expect(pane.getAttribute('data-slot')).toBe('root');
+    expect(pane.getAttribute('data-orientation')).toBe('vertical');
+    expect(pane.className).toContain('overflow-hidden');
+    expect(pane.className).not.toContain('overflow-auto');
+
+    expect(handle.getAttribute('data-slot')).toBe('root');
+    expect(handle.getAttribute('data-appearance')).toBe('grip');
+    expect(handle.getAttribute('aria-orientation')).toBe('horizontal');
+    expect(handle.className).toContain('bg-hell-danger');
+    expect(handle.className).toContain('flex-none');
+    expect(grip.className).toContain('bg-hell-primary');
   });
 
   it('resizes only the panes adjacent to the active handle', () => {
@@ -146,6 +196,12 @@ describe('HellResizable', () => {
 function byId(root: HTMLElement, id: string): HTMLElement {
   const element = root.querySelector(`#${id}`);
   if (!(element instanceof HTMLElement)) throw new Error(`Expected #${id}.`);
+  return element;
+}
+
+function query(root: HTMLElement, selector: string): HTMLElement {
+  const element = root.querySelector(selector);
+  if (!(element instanceof HTMLElement)) throw new Error(`Expected ${selector}.`);
   return element;
 }
 

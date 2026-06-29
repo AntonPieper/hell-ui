@@ -48,6 +48,10 @@ const HD_APP_SHELL_PAGE_ICONS = {
         data attributes — collapse and hide animate purely in CSS.
       </p>
       <p>
+        Each shell and nav directive exposes a local <code>root</code> Part Style Map, so use
+        <code>ui</code> when refining the default chrome.
+      </p>
+      <p>
         On mobile, opening either drawer captures focus in the active drawer and restores it to the
         opener when the drawer closes.
       </p>
@@ -110,7 +114,7 @@ const HD_APP_SHELL_PAGE_ICONS = {
         </li>
         <li>
           Sidenav grouping: <code>hellNavSection</code> + <code>hellNavSectionToggle</code> +
-          <code>hellNavSectionItems</code> for collapsible sections. The section owns classes,
+          <code>hellNavSectionItems</code> for collapsible sections. The section owns root parts,
           collapse attributes, toggle state, and <code>aria-expanded</code>; bind
           <code>[collapsed]</code> / <code>(collapsedChange)</code> only when parent state must persist.
         </li>

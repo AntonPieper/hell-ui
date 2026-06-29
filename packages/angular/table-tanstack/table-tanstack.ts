@@ -29,7 +29,7 @@ import {
   type Table,
 } from '@tanstack/angular-table';
 import { HellButton } from '@hell-ui/angular/button';
-import { HellTableSortTrigger } from '@hell-ui/angular/table';
+import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 import { HellInput, HellNativeSelect, type HellInputUi } from '@hell-ui/angular/input';
 import { HellPaginationStrip } from '@hell-ui/angular/pagination';
 import { HELL_SEARCH_DIRECTIVES } from '@hell-ui/angular/search';
@@ -357,7 +357,7 @@ interface HellColumnMeta {
   imports: [
     CommonModule,
     FlexRenderDirective,
-    HellTableSortTrigger,
+    ...HELL_TABLE_UTILITIES_DIRECTIVES,
     ɵHellTanStackBodyScrollportConnector,
     ɵHellTanStackBodyConnector,
     ɵHellTanStackBodyItemConnector,
@@ -380,7 +380,8 @@ interface HellColumnMeta {
       [hellTanStackInternalBodyScrollport]="bodyStrategyBridge()"
     >
       <table
-        class="hell-table hell-table-shell-table"
+        hellTableRoot
+        class="hell-table-shell-table"
         data-hell-table-shell-table
         [style.--hell-table-total-size.px]="tableTotalSize()"
       >
@@ -389,20 +390,20 @@ interface HellColumnMeta {
             <col [style.width.px]="columnSize(column)" />
           }
         </colgroup>
-        <thead class="hell-table-head" data-hell-table-shell-head>
+        <thead hellTableHeader data-hell-table-shell-head>
           @for (headerGroup of table().getHeaderGroups(); track headerGroup.id) {
-            <tr class="hell-table-row" data-hell-table-shell-header-row>
+            <tr hellTableRow data-hell-table-shell-header-row>
               @for (header of headerGroup.headers; track header.id) {
                 <th
-                  [attr.class]="headerClass(header)"
+                  hellTableHeaderCell
+                  [ui]="headerClass(header)"
                   [attr.colspan]="header.colSpan"
-                  [attr.data-column-id]="header.column.id"
+                  [columnId]="header.column.id"
                   [attr.data-pinned]="pinnedSide(header.column)"
                   [attr.data-pinned-last]="pinnedLast(header.column)"
                   [attr.data-pinned-first]="pinnedFirst(header.column)"
-                  [attr.data-sortable]="header.column.getCanSort() ? 'true' : null"
-                  [attr.data-sort]="sortState(header)"
-                  [attr.aria-sort]="ariaSort(header)"
+                  [sortable]="header.column.getCanSort()"
+                  [sort]="sortState(header)"
                   [style.--hell-table-pinned-start.px]="pinnedStart(header.column)"
                   [style.--hell-table-pinned-after.px]="pinnedAfter(header.column)"
                 >
@@ -450,14 +451,14 @@ interface HellColumnMeta {
         </thead>
 
         <tbody
-          class="hell-table-body"
+          hellTableBody
           data-hell-table-shell-body
           [hellTanStackInternalBody]="bodyStrategyBridge()"
         >
           @switch (displayState()) {
             @case ('loading') {
-              <tr class="hell-table-row" data-hell-table-shell-status-row>
-                <td class="hell-table-cell" [attr.colspan]="visibleColumnCount()">
+              <tr hellTableRow data-hell-table-shell-status-row>
+                <td hellTableCell [attr.colspan]="visibleColumnCount()">
                   <ng-container [ngTemplateOutlet]="loadingTemplate()?.template ?? null" />
                   @if (!loadingTemplate()) {
                     <ng-container
@@ -471,8 +472,8 @@ interface HellColumnMeta {
               </tr>
             }
             @case ('error') {
-              <tr class="hell-table-row" data-hell-table-shell-status-row>
-                <td class="hell-table-cell" [attr.colspan]="visibleColumnCount()">
+              <tr hellTableRow data-hell-table-shell-status-row>
+                <td hellTableCell [attr.colspan]="visibleColumnCount()">
                   <ng-container
                     [ngTemplateOutlet]="errorTemplate()?.template ?? null"
                     [ngTemplateOutletContext]="errorContext()"
@@ -489,8 +490,8 @@ interface HellColumnMeta {
               </tr>
             }
             @case ('empty') {
-              <tr class="hell-table-row" data-hell-table-shell-status-row>
-                <td class="hell-table-cell" [attr.colspan]="visibleColumnCount()">
+              <tr hellTableRow data-hell-table-shell-status-row>
+                <td hellTableCell [attr.colspan]="visibleColumnCount()">
                   <ng-container [ngTemplateOutlet]="emptyTemplate()?.template ?? null" />
                   @if (!emptyTemplate()) {
                     <ng-container
@@ -507,13 +508,14 @@ interface HellColumnMeta {
               @for (item of bodyItems(); track item.key) {
                 @if (item.kind === 'expanded') {
                   <tr
-                    class="hell-table-row"
+                    hellTableRow
                     data-hell-table-shell-expanded-row
                     [hellTanStackInternalBodyItemConnector]="bodyStrategyBridge()"
                     [hellTanStackInternalBodyItem]="bodyItemBridge(item)"
                   >
                     <td
-                      class="hell-table-cell hell-table-shell-expanded-cell"
+                      hellTableCell
+                      class="hell-table-shell-expanded-cell"
                       data-hell-table-shell-expanded-cell
                       [attr.colspan]="visibleColumnCount()"
                     >
@@ -527,14 +529,16 @@ interface HellColumnMeta {
                   </tr>
                 } @else {
                   <tr
-                    [attr.class]="rowClassValue(item.row)"
+                    hellTableRow
+                    [ui]="rowClassValue(item.row)"
                     data-hell-table-shell-row
                     [hellTanStackInternalBodyItemConnector]="bodyStrategyBridge()"
                     [hellTanStackInternalBodyItem]="bodyItemBridge(item)"
                   >
                     @for (cell of item.row.getVisibleCells(); track cell.id) {
                       <td
-                        [attr.class]="cellClass(cell)"
+                        hellTableCell
+                        [ui]="cellClass(cell)"
                         [attr.data-column-id]="cell.column.id"
                         [attr.data-pinned]="pinnedSide(cell.column)"
                         [attr.data-pinned-last]="pinnedLast(cell.column)"
@@ -571,12 +575,13 @@ interface HellColumnMeta {
         </tbody>
 
         @if (hasFooters()) {
-          <tfoot class="hell-table-footer" data-hell-table-shell-foot>
+          <tfoot data-hell-table-shell-foot>
             @for (footerGroup of table().getFooterGroups(); track footerGroup.id) {
-              <tr class="hell-table-row" data-hell-table-shell-footer-row>
+              <tr hellTableRow data-hell-table-shell-footer-row>
                 @for (footer of footerGroup.headers; track footer.id) {
                   <td
-                    [attr.class]="footerClass(footer)"
+                    hellTableCell
+                    [ui]="footerClass(footer)"
                     [attr.colspan]="footer.colSpan"
                     [attr.data-column-id]="footer.column.id"
                     [attr.data-pinned]="pinnedSide(footer.column)"
@@ -809,44 +814,25 @@ export class HellTanStackTable<TData extends RowData = RowData> {
   }
 
   protected headerClass(header: Header<TData, unknown>): string {
-    return classValue([
-      'hell-table-header-cell',
-      classValue((header.column.columnDef.meta as HellColumnMeta | undefined)?.hell?.headerClass),
-    ]);
+    return classValue((header.column.columnDef.meta as HellColumnMeta | undefined)?.hell?.headerClass);
   }
 
   protected cellClass(cell: Cell<TData, unknown>): string {
-    return classValue([
-      'hell-table-cell',
-      classValue((cell.column.columnDef.meta as HellColumnMeta | undefined)?.hell?.cellClass),
-    ]);
+    return classValue((cell.column.columnDef.meta as HellColumnMeta | undefined)?.hell?.cellClass);
   }
 
   protected footerClass(header: Header<TData, unknown>): string {
-    return classValue([
-      'hell-table-cell',
-      classValue((header.column.columnDef.meta as HellColumnMeta | undefined)?.hell?.footerClass),
-    ]);
+    return classValue((header.column.columnDef.meta as HellColumnMeta | undefined)?.hell?.footerClass);
   }
 
   protected rowClassValue(row: Row<TData>): string {
     const value = this.rowClass();
-    return classValue([
-      'hell-table-row',
-      classValue(typeof value === 'function' ? value(row) : value),
-    ]);
+    return classValue(typeof value === 'function' ? value(row) : value);
   }
 
   protected sortState(header: Header<TData, unknown>): 'asc' | 'desc' | null {
     const sorted = header.column.getIsSorted();
     return sorted === 'asc' || sorted === 'desc' ? sorted : null;
-  }
-
-  protected ariaSort(header: Header<TData, unknown>): 'ascending' | 'descending' | null {
-    const sort = this.sortState(header);
-    if (sort === 'asc') return 'ascending';
-    if (sort === 'desc') return 'descending';
-    return null;
   }
 
   protected sortButtonLabel(header: Header<TData, unknown>): string {

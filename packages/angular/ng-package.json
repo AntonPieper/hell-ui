@@ -76,6 +76,31 @@
       "output": "time-input"
     },
     {
+      "glob": "app-shell.ts",
+      "input": "app-shell",
+      "output": "app-shell"
+    },
+    {
+      "glob": "resizable.ts",
+      "input": "resizable",
+      "output": "resizable"
+    },
+    {
+      "glob": "split-view.ts",
+      "input": "split-view",
+      "output": "split-view"
+    },
+    {
+      "glob": "pagination.ts",
+      "input": "pagination",
+      "output": "pagination"
+    },
+    {
+      "glob": "table-utilities.ts",
+      "input": "table",
+      "output": "table"
+    },
+    {
       "glob": "avatar.ts",
       "input": "avatar",
       "output": "avatar"

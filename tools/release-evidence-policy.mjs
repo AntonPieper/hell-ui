@@ -42,12 +42,24 @@ export const releaseCandidateConsumerScenarios = [
     rationale: 'Icon-backed primitive CSS stays isolated to narrow primitive imports.',
   },
   {
+    name: 'pagination',
+    rationale: 'Pagination Part Style Map controls ship through the narrow primitive entrypoint.',
+  },
+  {
     name: 'composite-css',
     rationale: 'Composite CSS stays behind narrow composite entrypoints.',
   },
   {
     name: 'app-shell',
     rationale: 'App Shell composite remains installable without feature peers.',
+  },
+  {
+    name: 'resizable',
+    rationale: 'Resizable composite Part Style Map roots ship through the narrow entrypoint.',
+  },
+  {
+    name: 'split-view',
+    rationale: 'Split View owned anatomy and icon-backed navigation ship through the narrow entrypoint.',
   },
   {
     name: 'audio-player',

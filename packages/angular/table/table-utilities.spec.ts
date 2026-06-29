@@ -6,6 +6,7 @@ import { HellButton } from '@hell-ui/angular/button';
 import { HellInput } from '@hell-ui/angular/input';
 import {
   HELL_TABLE_UTILITIES_DIRECTIVES,
+  type HellTableResizeHandleUi,
   type HellTableResizeAdapter,
   type HellTableResizeEvent,
   type HellTableResizeItem,
@@ -134,6 +135,86 @@ class TableUtilitiesHost {
     this.radioEvents.push(checked);
     this.radioSelected.set(checked);
   }
+}
+
+@Component({
+  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  template: `
+    <div id="ui-container" hellTableContainer ui="bg-hell-surface-muted rounded-hell-lg">
+      <table id="ui-table" hellTableRoot ui="text-sm">
+        <thead id="ui-head" hellTableHeader ui="bg-hell-danger">
+          <tr id="ui-row" hellTableRow ui="bg-hell-primary-soft" active selected>
+            <th
+              id="ui-select-header"
+              hellTableHeaderCell
+              hellTableSelectionCell
+              ui="px-hell-7"
+            >
+              <input
+                id="ui-checkbox"
+                hellTableRowCheckbox
+                type="checkbox"
+                ui="border-hell-danger"
+              />
+            </th>
+            <th
+              id="ui-header"
+              hellTableHeaderCell
+              columnId="ui-name"
+              sortable
+              sort="desc"
+              ui="bg-hell-danger"
+            >
+              <button id="ui-sort" hellTableSortTrigger type="button" ui="text-hell-danger">
+                Name
+              </button>
+              <button id="ui-resize" hellTableResizeHandle [ui]="resizeHandleUi"></button>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="ui-body" hellTableBody ui="bg-hell-surface-muted">
+          <tr hellTableRow>
+            <td id="ui-cell" hellTableCell hellTableSelectionCell ui="text-hell-danger px-hell-7">
+              <input id="ui-radio" hellTableRowRadio type="radio" ui="border-hell-danger" />
+              <button id="ui-action" hellTableRowAction ui="text-hell-danger" type="button">
+                Open
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `,
+})
+class TableUtilitiesUiHost {
+  readonly resizeHandleUi = {
+    root: 'w-hell-6',
+    grip: 'bg-hell-danger',
+  } satisfies HellTableResizeHandleUi;
+}
+
+@Component({
+  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  template: `
+    <table>
+      <tbody>
+        <tr>
+          <td
+            id="stacked-cell"
+            class="px-hell-3 text-hell-danger"
+            hellTableCell
+            hellTableSelectionCell
+            [ui]="cellUi()"
+          >
+            Ada
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  `,
+})
+class TableUtilitiesStackedUiHost {
+  readonly cellUi = signal('');
 }
 
 @Component({
@@ -279,6 +360,8 @@ describe('Hell table utilities directives', () => {
     await TestBed.configureTestingModule({
       imports: [
         TableUtilitiesHost,
+        TableUtilitiesUiHost,
+        TableUtilitiesStackedUiHost,
         TableUtilitiesResizerAriaOverrideHost,
         TableUtilitiesLocalizedLabelHost,
         TableUtilitiesSortableAriaHost,
@@ -336,8 +419,12 @@ describe('Hell table utilities directives', () => {
     expect(radio.checked).toBe(false);
     expect(selectAll.indeterminate).toBe(true);
     expect(selectAll.getAttribute('data-indeterminate')).toBe('');
-    expect(checkbox.classList.contains('hell-checkbox')).toBe(true);
-    expect(radio.classList.contains('hell-radio')).toBe(true);
+    expect(checkbox.classList.contains('hell-checkbox')).toBe(false);
+    expect(radio.classList.contains('hell-radio')).toBe(false);
+    expect(checkbox.classList.contains('hell-table-row-checkbox')).toBe(false);
+    expect(radio.classList.contains('hell-table-row-radio')).toBe(false);
+    expect(checkbox.getAttribute('data-slot')).toBe('root');
+    expect(radio.getAttribute('data-slot')).toBe('root');
     expect(
       byId<HTMLElement>(fixture.nativeElement, 'row-checkbox').getAttribute(
         'data-hell-table-row-checkbox',
@@ -388,6 +475,78 @@ describe('Hell table utilities directives', () => {
         'data-hell-row-ignore',
       ),
     ).toBe('');
+  });
+
+  it('applies table Part Style Map ui while preserving composable data hooks', () => {
+    const fixture = TestBed.createComponent(TableUtilitiesUiHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+
+    const ids = [
+      ['ui-container', 'hell-table-container', 'data-loading'],
+      ['ui-table', 'hell-table', 'data-hell-table-root'],
+      ['ui-head', 'hell-table-head', 'data-hell-table-header'],
+      ['ui-body', 'hell-table-body', 'data-hell-table-body'],
+      ['ui-row', 'hell-table-row', 'data-hell-table-row'],
+      ['ui-select-header', 'hell-table-header-cell', 'data-hell-table-header-cell'],
+      ['ui-header', 'hell-table-header-cell', 'data-hell-table-header-cell'],
+      ['ui-cell', 'hell-table-cell', 'data-hell-table-cell'],
+      ['ui-checkbox', 'hell-table-row-checkbox', 'data-hell-table-row-checkbox'],
+      ['ui-radio', 'hell-table-row-radio', 'data-hell-table-row-radio'],
+      ['ui-action', 'hell-table-row-action', 'data-hell-table-row-action'],
+      ['ui-sort', 'hell-table-sort-trigger', 'data-hell-table-sort-trigger'],
+      ['ui-resize', 'hell-table-resize-handle', 'data-hell-table-resize-handle'],
+    ] as const;
+
+    for (const [id, legacyClass, dataAttribute] of ids) {
+      const element = byId<HTMLElement>(root, id);
+      expect(element.classList.contains(legacyClass), id).toBe(false);
+      expect(element.getAttribute('data-slot'), id).toBe('root');
+      if (dataAttribute !== 'data-loading') {
+        expect(element.getAttribute(dataAttribute), id).toBe('');
+      }
+    }
+
+    expect(byId<HTMLElement>(root, 'ui-container').className).toContain('rounded-hell-lg');
+    expect(byId<HTMLElement>(root, 'ui-table').className).toContain('text-sm');
+    expect(byId<HTMLElement>(root, 'ui-head').className).toContain('bg-hell-danger');
+    expect(byId<HTMLElement>(root, 'ui-body').className).toContain('bg-hell-surface-muted');
+    expect(byId<HTMLElement>(root, 'ui-row').className).toContain('bg-hell-primary-soft');
+    expect(byId<HTMLElement>(root, 'ui-row').getAttribute('data-active')).toBe('true');
+    expect(byId<HTMLElement>(root, 'ui-row').getAttribute('data-selected')).toBe('true');
+    expect(byId<HTMLElement>(root, 'ui-select-header').className).toContain('px-hell-7');
+    expect(byId<HTMLElement>(root, 'ui-select-header').getAttribute('data-hell-table-selection-cell')).toBe('');
+    expect(byId<HTMLElement>(root, 'ui-header').className).toContain('bg-hell-danger');
+    expect(byId<HTMLElement>(root, 'ui-header').getAttribute('aria-sort')).toBe('descending');
+    expect(byId<HTMLElement>(root, 'ui-cell').className).toContain('text-hell-danger');
+    expect(byId<HTMLElement>(root, 'ui-cell').className).toContain('px-hell-7');
+    expect(byId<HTMLElement>(root, 'ui-cell').getAttribute('data-hell-table-selection-cell')).toBe('');
+    expect(byId<HTMLElement>(root, 'ui-checkbox').className).toContain('border-hell-danger');
+    expect(byId<HTMLElement>(root, 'ui-radio').className).toContain('border-hell-danger');
+    expect(byId<HTMLElement>(root, 'ui-action').className).toContain('text-hell-danger');
+    expect(byId<HTMLElement>(root, 'ui-sort').className).toContain('text-hell-danger');
+    expect(byId<HTMLElement>(root, 'ui-resize').className).toContain('w-hell-6');
+    expect(byId<HTMLElement>(root, 'ui-resize').querySelector('[data-slot="grip"]')?.className)
+      .toContain('bg-hell-danger');
+  });
+
+  it('preserves non-owned classes when stacked table directives update classes', () => {
+    const fixture = TestBed.createComponent(TableUtilitiesStackedUiHost);
+    fixture.detectChanges();
+
+    const stackedCell = byId<HTMLTableCellElement>(fixture.nativeElement, 'stacked-cell');
+    expect(stackedCell.className).toContain('px-hell-3');
+    expect(stackedCell.className).toContain('text-hell-danger');
+
+    fixture.componentInstance.cellUi.set('px-hell-7 text-hell-primary');
+    fixture.detectChanges();
+
+    expect(stackedCell.className).toContain('px-hell-7');
+    expect(stackedCell.className).toContain('text-hell-primary');
+    expect(stackedCell.className).toContain('px-hell-3');
+    expect(stackedCell.className).toContain('text-hell-danger');
+    expect(stackedCell.getAttribute('data-hell-table-cell')).toBe('');
+    expect(stackedCell.getAttribute('data-hell-table-selection-cell')).toBe('');
   });
 
   it('disables the sort trigger when its header is not sortable', () => {

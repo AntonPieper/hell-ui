@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { HELL_SPLIT_VIEW_DIRECTIVES } from '@hell-ui/angular/split-view';
-import { HellButton } from '@hell-ui/angular/button';
+import { HellButton, type HellButtonUi } from '@hell-ui/angular/button';
 
 interface Ticket {
   readonly id: string;
@@ -48,10 +48,9 @@ const TICKETS: readonly Ticket[] = [
                 size="sm"
                 block
                 variant="ghost"
-                class="justify-start"
+                [ui]="ticketButtonUi"
                 type="button"
                 [attr.aria-current]="ticket.id === selectedId() ? 'true' : null"
-                data-slot="master-item"
                 [attr.data-current]="ticket.id === selectedId() ? 'true' : null"
                 (click)="select(ticket.id)"
               >
@@ -98,6 +97,9 @@ export class SplitViewMasterDetailExample {
   protected readonly tickets = TICKETS;
   protected readonly selectedId = signal(TICKETS[0].id);
   protected readonly detailOpen = signal(false);
+  protected readonly ticketButtonUi = {
+    root: 'justify-start data-[current=true]:border-hell-border data-[current=true]:bg-hell-primary-soft data-[current=true]:text-hell-primary-soft-foreground',
+  } satisfies HellButtonUi;
   protected readonly selectedIndex = computed(() =>
     Math.max(
       0,

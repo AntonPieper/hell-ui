@@ -11,7 +11,7 @@
   /* Shared backdrop treatment for modal-ish overlays. Keep app-shell mobile
      drawer scrims and dialog overlays visually aligned here. */
   .hell-backdrop,
-  .hell-shell::before {
+  [hellAppShell][data-slot='root']::before {
     background-color: var(--color-hell-overlay);
     -webkit-backdrop-filter: blur(2px);
     backdrop-filter: blur(2px);

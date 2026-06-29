@@ -101,9 +101,12 @@ const requiredScenarioCoverageAreas = new Set([
 
 const packageConsumerCiGroups = [
   { name: 'core', scenarios: ['root-core', 'core', 'testing'] },
-  { name: 'primitive-foundations', scenarios: ['primitive-icons-css', 'button-ui'] },
+  { name: 'primitive-foundations', scenarios: ['primitive-icons-css', 'button-ui', 'pagination'] },
   { name: 'button', scenarios: ['button'] },
-  { name: 'composite-foundations', scenarios: ['composite-css', 'app-shell'] },
+  {
+    name: 'composite-foundations',
+    scenarios: ['composite-css', 'app-shell', 'resizable', 'split-view'],
+  },
   { name: 'audio', scenarios: ['audio-player', 'audio-transcript'] },
   { name: 'features', scenarios: ['code-editor', 'pdf-viewer'] },
   { name: 'table-core', scenarios: ['table', 'no-legacy-alias'] },
@@ -112,8 +115,18 @@ const packageConsumerCiGroups = [
 
 const packageConsumerScriptGroups = [
   { name: 'core', scenarios: ['root-core', 'core', 'testing'] },
-  { name: 'primitives', scenarios: ['primitive-icons-css', 'button-ui', 'button'] },
-  { name: 'composites', scenarios: ['composite-css', 'app-shell', 'audio-player', 'audio-transcript'] },
+  { name: 'primitives', scenarios: ['primitive-icons-css', 'button-ui', 'button', 'pagination'] },
+  {
+    name: 'composites',
+    scenarios: [
+      'composite-css',
+      'app-shell',
+      'resizable',
+      'split-view',
+      'audio-player',
+      'audio-transcript',
+    ],
+  },
   { name: 'features', scenarios: ['code-editor', 'pdf-viewer'] },
   { name: 'tables', scenarios: ['table', 'table-tanstack', 'table-tanstack-virtual', 'no-legacy-alias'] },
   { name: 'code-editor', scenarios: ['code-editor'] },
@@ -211,6 +224,25 @@ const packageConsumerScenarioCatalog = [
     ],
   },
   {
+    name: 'pagination',
+    description: 'narrow pagination primitive entry with Part Style Map controls',
+    coverage: ['styled-primitives'],
+    peerTier: 'primitive',
+    peerGroup: 'primitive',
+    dependencies: buttonStyledDeps,
+    forbiddenDependencies: tableAdapterPeerGroup,
+    mainTs: paginationConsumerMainTs,
+    stylesCss: paginationConsumerStylesCss,
+    cssIncludes: [
+      'min-width:calc(var(--spacing)*18)',
+      'max-width:calc(var(--spacing)*26)',
+      'appearance:none',
+      'background-repeat:no-repeat',
+      'transition-property:background-color,border-color,color,box-shadow',
+      'background-color:var(--color-hell-primary)',
+    ],
+  },
+  {
     name: 'composite-css',
     aliases: ['composites'],
     description: 'narrow composite entries with entrypoint CSS and icon-backed peers',
@@ -229,7 +261,45 @@ const packageConsumerScenarioCatalog = [
     peerGroup: 'composite',
     dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: appShellConsumerMainTs,
-    stylesCss: audioPlayerConsumerStylesCss,
+    stylesCss: appShellConsumerStylesCss,
+    cssIncludes: [
+      'grid-template-columns:var(--hell-app-sidenav-width) 1fr var(--hell-app-secondary-width)',
+      'grid-template-rows:var(--hell-app-topbar-height) 1fr',
+      'background-color:var(--color-hell-surface)',
+      'width:min(var(--hell-app-secondary-width),calc(100vw - var(--spacing-hell-8)))',
+    ],
+  },
+  {
+    name: 'resizable',
+    description: 'narrow resizable composite entry with Part Style Map roots',
+    coverage: ['composites'],
+    peerTier: 'composite',
+    peerGroup: 'composite',
+    dependencies: styledUiWithoutFontAwesomeDeps,
+    mainTs: resizableConsumerMainTs,
+    stylesCss: resizableConsumerStylesCss,
+    cssIncludes: [
+      'flex:var(--_hell-resizable-pane-flex,var(--hell-pane-flex,1) 1 0)',
+      'overflow:auto',
+      'cursor:col-resize',
+      'background-color:transparent',
+    ],
+  },
+  {
+    name: 'split-view',
+    description: 'narrow split-view composite entry with owned Part Style Map anatomy',
+    coverage: ['composites'],
+    peerTier: 'composite',
+    peerGroup: 'composite-icons',
+    dependencies: styledUiDeps,
+    mainTs: splitViewConsumerMainTs,
+    stylesCss: splitViewConsumerStylesCss,
+    cssIncludes: [
+      'height:var(--hell-split-view-height,100%)',
+      'overflow:hidden',
+      'border-radius:var(--radius-hell-md)',
+      'transform:rotate(180deg)',
+    ],
   },
   {
     name: 'audio-player',
@@ -281,6 +351,14 @@ const packageConsumerScenarioCatalog = [
     forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: tableConsumerMainTs,
     stylesCss: tableConsumerStylesCss,
+    cssIncludes: [
+      'table-layout:fixed',
+      'border-spacing:var(--tw-border-spacing-x)var(--tw-border-spacing-y)',
+      'background-color:var(--color-hell-surface-elevated)',
+      'text-overflow:ellipsis',
+      'cursor:col-resize',
+      'width:44px',
+    ],
   },
   {
     name: 'table-tanstack',
@@ -1389,6 +1467,42 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
+function paginationConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HELL_PAGINATION_DIRECTIVES, type HellPaginationButtonUi, type HellPaginationStripUi } from '${packageName}/pagination';
+
+const stripUi = {
+  root: 'gap-hell-4',
+  jumpSelect: 'min-w-[calc(var(--spacing)*24)]',
+} satisfies HellPaginationStripUi;
+
+const pageButtonUi = {
+  root: 'rounded-hell-pill bg-hell-primary',
+} satisfies HellPaginationButtonUi;
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [...HELL_PAGINATION_DIRECTIVES],
+  template: \`
+    <hell-pagination mode="jump" [page]="2" [pageCount]="6" [ui]="stripUi" />
+    <nav hellPagination [page]="1" [pageCount]="3" ui="gap-hell-4">
+      <button hellPaginationPrev type="button">Previous</button>
+      <button hellPaginationButton type="button" [page]="2" [ui]="pageButtonUi">2</button>
+      <button hellPaginationNext type="button" ui="text-hell-danger">Next</button>
+    </nav>
+  \`,
+})
+class App {
+  protected readonly stripUi = stripUi;
+  protected readonly pageButtonUi = pageButtonUi;
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
 function primitivesConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -1586,9 +1700,9 @@ const dialpadUi = {
     HellTimeInput,
   ],
   template: \`
-    <div hellAppShell>
+    <div hellAppShell ui="bg-hell-surface-muted">
       <header hellAppTopbar>
-        <button hellSidenavToggle type="button"></button>
+        <button hellSidenavToggle appearance="shell" type="button" ui="text-hell-primary"></button>
       </header>
       <nav hellAppSidenav>Navigation</nav>
       <main hellAppContent>
@@ -1627,9 +1741,9 @@ import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/app-shell';
   standalone: true,
   imports: [...HELL_APP_SHELL_DIRECTIVES],
   template: \`
-    <div hellAppShell>
+    <div hellAppShell ui="bg-hell-surface-muted">
       <header hellAppTopbar>
-        <button hellSidenavToggle type="button"></button>
+        <button hellSidenavToggle appearance="shell" type="button" ui="text-hell-primary"></button>
       </header>
       <nav hellAppSidenav>Navigation</nav>
       <main hellAppContent>Content</main>
@@ -1641,6 +1755,75 @@ import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/app-shell';
   \`,
 })
 class App {}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function resizableConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HELL_RESIZABLE_DIRECTIVES, type HellResizableHandleUi, type HellResizablePaneUi } from '${packageName}/resizable';
+
+const paneUi = {
+  root: 'hd-surface-elevated p-4 overflow-hidden',
+} satisfies HellResizablePaneUi;
+
+const handleUi = {
+  root: 'bg-hell-surface-muted',
+  grip: 'bg-hell-primary',
+} satisfies HellResizableHandleUi;
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [...HELL_RESIZABLE_DIRECTIVES],
+  template: \`
+    <div hellResizable orientation="horizontal" ui="h-[240px]">
+      <section hellResizablePane [initialFlex]="2" [ui]="paneUi">Left</section>
+      <div hellResizableHandle appearance="grip" [ui]="handleUi"></div>
+      <section hellResizablePane [initialFlex]="3" ui="hd-surface-subtle p-4">Right</section>
+    </div>
+  \`,
+})
+class App {
+  protected readonly paneUi = paneUi;
+  protected readonly handleUi = handleUi;
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
+function splitViewConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HELL_SPLIT_VIEW_DIRECTIVES, type HellSplitViewUi } from '${packageName}/split-view';
+
+const splitViewUi = {
+  root: 'h-[320px]',
+  pane: 'overflow-auto',
+  itemNavigation: 'gap-hell-3',
+} satisfies HellSplitViewUi;
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [...HELL_SPLIT_VIEW_DIRECTIVES],
+  template: \`
+    <hell-split-view [compactBelow]="0" itemNavigation [ui]="splitViewUi">
+      <ng-template hellSplitPrimary>
+        <section>Primary</section>
+      </ng-template>
+      <ng-template hellSplitDetail>
+        <section>Detail</section>
+      </ng-template>
+    </hell-split-view>
+  \`,
+})
+class App {
+  protected readonly splitViewUi = splitViewUi;
+}
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
@@ -1739,21 +1922,28 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function tableConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_TABLE_UTILITIES_DIRECTIVES, HellTableRowIgnore } from '${packageName}/table';
+import {
+  HELL_TABLE_UTILITIES_DIRECTIVES,
+  HellTableRowIgnore,
+  type HellTableResizeHandleUi,
+} from '${packageName}/table';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [...HELL_TABLE_UTILITIES_DIRECTIVES, HellTableRowIgnore],
   template: \`
-    <div hellTableContainer>
-      <table hellTableRoot>
+    <div hellTableContainer ui="bg-hell-surface-muted">
+      <table hellTableRoot ui="text-sm">
         <thead hellTableHeader>
           <tr hellTableRow>
             <th hellTableHeaderCell hellTableSelectionCell>
               <input hellTableRowCheckbox type="checkbox" aria-label="Select all" />
             </th>
-            <th hellTableHeaderCell columnId="name">Name</th>
+            <th hellTableHeaderCell columnId="name">
+              Name
+              <button hellTableResizeHandle [ui]="resizeHandleUi"></button>
+            </th>
             <th hellTableHeaderCell columnId="role">Role</th>
           </tr>
         </thead>
@@ -1773,7 +1963,12 @@ import { HELL_TABLE_UTILITIES_DIRECTIVES, HellTableRowIgnore } from '${packageNa
     </div>
   \`,
 })
-class App {}
+class App {
+  protected readonly resizeHandleUi = {
+    root: 'w-hell-6',
+    grip: 'bg-hell-danger',
+  } satisfies HellTableResizeHandleUi;
+}
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
@@ -2058,6 +2253,13 @@ function buttonConsumerStylesCss() {
 `;
 }
 
+function paginationConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/pagination/styles.css";
+`;
+}
+
 function appShellConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/tokens.css";
@@ -2066,6 +2268,24 @@ function appShellConsumerStylesCss() {
 @import "${packageName}/date-input/styles.css";
 @import "${packageName}/date-picker/styles.css";
 @import "${packageName}/time-input/styles.css";
+`;
+}
+
+function resizableConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/resizable/styles.css";
+`;
+}
+
+function splitViewConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/button/styles.css";
+@import "${packageName}/icon/styles.css";
+@import "${packageName}/pagination/styles.css";
+@import "${packageName}/resizable/styles.css";
+@import "${packageName}/split-view/styles.css";
 `;
 }
 

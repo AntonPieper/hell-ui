@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { hellTableInferredRoleForHost } from './table-role-inference';
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from './table';
+import { HELL_TABLE_UTILITIES_DIRECTIVES, type HellTableResizeHandleUi } from './table';
 
 @Component({
   standalone: true,
@@ -70,14 +70,24 @@ class ExplicitRoleTablePrimitiveHost {}
   standalone: true,
   imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
   template: `
-    <div id="unstyled-root" hellTableRoot unstyled>
-      <div id="unstyled-row" hellTableRow unstyled>
-        <div id="unstyled-cell" hellTableCell unstyled>Ada</div>
+    <div id="ui-root" hellTableRoot ui="bg-hell-surface-muted">
+      <div id="ui-row" hellTableRow ui="bg-hell-primary-soft" active>
+        <div id="ui-cell" hellTableCell hellTableSelectionCell ui="text-hell-danger px-hell-7">
+          Ada
+          <button id="ui-action" hellTableRowAction ui="text-hell-danger">Open</button>
+          <input id="ui-checkbox" hellTableRowCheckbox type="checkbox" ui="border-hell-danger" />
+          <button id="ui-resizer" hellTableResizeHandle [ui]="resizeHandleUi"></button>
+        </div>
       </div>
     </div>
   `,
 })
-class UnstyledTablePrimitiveHost {}
+class UiTablePrimitiveHost {
+  readonly resizeHandleUi = {
+    root: 'w-hell-6',
+    grip: 'bg-hell-danger',
+  } satisfies HellTableResizeHandleUi;
+}
 
 describe('host-agnostic Hell table primitives', () => {
   beforeEach(async () => {
@@ -86,7 +96,7 @@ describe('host-agnostic Hell table primitives', () => {
         NativeTablePrimitiveHost,
         InferredRoleTablePrimitiveHost,
         ExplicitRoleTablePrimitiveHost,
-        UnstyledTablePrimitiveHost,
+        UiTablePrimitiveHost,
       ],
     }).compileComponents();
   });
@@ -115,16 +125,16 @@ describe('host-agnostic Hell table primitives', () => {
     expect(byId(root, 'native-row').hasAttribute('aria-selected')).toBe(false);
     expect(byId(root, 'native-row').hasAttribute('data-interactive')).toBe(false);
 
-    expectClassAndData(byId(root, 'native-root'), 'hell-table', 'data-hell-table-root');
-    expectClassAndData(byId(root, 'native-header'), 'hell-table-head', 'data-hell-table-header');
-    expectClassAndData(byId(root, 'native-body'), 'hell-table-body', 'data-hell-table-body');
-    expectClassAndData(byId(root, 'native-row'), 'hell-table-row', 'data-hell-table-row');
-    expectClassAndData(
+    expectPartAndData(byId(root, 'native-root'), 'hell-table', 'data-hell-table-root');
+    expectPartAndData(byId(root, 'native-header'), 'hell-table-head', 'data-hell-table-header');
+    expectPartAndData(byId(root, 'native-body'), 'hell-table-body', 'data-hell-table-body');
+    expectPartAndData(byId(root, 'native-row'), 'hell-table-row', 'data-hell-table-row');
+    expectPartAndData(
       byId(root, 'native-header-cell'),
       'hell-table-header-cell',
       'data-hell-table-header-cell',
     );
-    expectClassAndData(byId(root, 'native-cell'), 'hell-table-cell', 'data-hell-table-cell');
+    expectPartAndData(byId(root, 'native-cell'), 'hell-table-cell', 'data-hell-table-cell');
 
     expect(byId(root, 'native-root').getAttribute('data-content-width')).toBe('true');
     expect(byId(root, 'native-row').getAttribute('data-active')).toBe('true');
@@ -133,7 +143,9 @@ describe('host-agnostic Hell table primitives', () => {
     expect(byId(root, 'sort').getAttribute('type')).toBe('button');
     expect(byId(root, 'edit-row').getAttribute('type')).toBe('button');
     expect(byId(root, 'select-header').getAttribute('data-hell-table-selection-cell')).toBe('');
+    expect(byId(root, 'select-header').classList.contains('hell-table-selection-cell')).toBe(false);
     expect(byId(root, 'select-row').getAttribute('data-hell-table-row-radio')).toBe('');
+    expect(byId(root, 'select-row').classList.contains('hell-table-row-radio')).toBe(false);
     expect(byId(root, 'native-cell').getAttribute('data-align')).toBe('end');
     expect(byId(root, 'native-cell').getAttribute('data-space')).toBe('empty');
   });
@@ -162,16 +174,43 @@ describe('host-agnostic Hell table primitives', () => {
     expect(byId(root, 'explicit-cell').getAttribute('role')).toBe('gridcell');
   });
 
-  it('keeps data attributes in unstyled mode without Hell classes', () => {
-    const fixture = TestBed.createComponent(UnstyledTablePrimitiveHost);
+  it('keeps data attributes and applies ui through root parts without legacy classes', () => {
+    const fixture = TestBed.createComponent(UiTablePrimitiveHost);
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
 
-    expectUnstyledPrimitive(byId(root, 'unstyled-root'), 'hell-table', 'data-hell-table-root');
-    expectUnstyledPrimitive(byId(root, 'unstyled-row'), 'hell-table-row', 'data-hell-table-row');
-    expectUnstyledPrimitive(byId(root, 'unstyled-cell'), 'hell-table-cell', 'data-hell-table-cell');
-    expect(byId(root, 'unstyled-root').getAttribute('role')).toBe('table');
-    expect(byId(root, 'unstyled-cell').getAttribute('role')).toBe('cell');
+    expectPartAndData(byId(root, 'ui-root'), 'hell-table', 'data-hell-table-root');
+    expectPartAndData(byId(root, 'ui-row'), 'hell-table-row', 'data-hell-table-row');
+    expectPartAndData(byId(root, 'ui-cell'), 'hell-table-cell', 'data-hell-table-cell');
+    expectPartAndData(
+      byId(root, 'ui-action'),
+      'hell-table-row-action',
+      'data-hell-table-row-action',
+    );
+    expectPartAndData(
+      byId(root, 'ui-checkbox'),
+      'hell-table-row-checkbox',
+      'data-hell-table-row-checkbox',
+    );
+    expectPartAndData(
+      byId(root, 'ui-resizer'),
+      'hell-table-resize-handle',
+      'data-hell-table-resize-handle',
+    );
+
+    expect(byId(root, 'ui-root').className).toContain('bg-hell-surface-muted');
+    expect(byId(root, 'ui-row').className).toContain('bg-hell-primary-soft');
+    expect(byId(root, 'ui-cell').className).toContain('text-hell-danger');
+    expect(byId(root, 'ui-cell').className).toContain('px-hell-7');
+    expect(byId(root, 'ui-cell').getAttribute('data-hell-table-selection-cell')).toBe('');
+    expect(byId(root, 'ui-action').className).toContain('text-hell-danger');
+    expect(byId(root, 'ui-checkbox').className).toContain('border-hell-danger');
+    expect(byId(root, 'ui-resizer').className).toContain('w-hell-6');
+    expect(byId(root, 'ui-resizer').querySelector('[data-slot="grip"]')?.className).toContain(
+      'bg-hell-danger',
+    );
+    expect(byId(root, 'ui-root').getAttribute('role')).toBe('table');
+    expect(byId(root, 'ui-cell').getAttribute('role')).toBe('cell');
   });
 
   it('keeps role inference safe for SSR-like hosts with minimal DOM shape', () => {
@@ -192,16 +231,8 @@ function byId(root: HTMLElement, id: string): HTMLElement {
   return element;
 }
 
-function expectClassAndData(element: HTMLElement, className: string, dataAttribute: string): void {
-  expect(element.classList.contains(className), `${element.id}.${className}`).toBe(true);
-  expect(element.getAttribute(dataAttribute), `${element.id}.${dataAttribute}`).toBe('');
-}
-
-function expectUnstyledPrimitive(
-  element: HTMLElement,
-  className: string,
-  dataAttribute: string,
-): void {
+function expectPartAndData(element: HTMLElement, className: string, dataAttribute: string): void {
   expect(element.classList.contains(className), `${element.id}.${className}`).toBe(false);
+  expect(element.getAttribute('data-slot'), `${element.id}.data-slot`).toBe('root');
   expect(element.getAttribute(dataAttribute), `${element.id}.${dataAttribute}`).toBe('');
 }

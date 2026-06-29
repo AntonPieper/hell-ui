@@ -20,8 +20,19 @@ import { HellAvatar } from '@hell-ui/angular/avatar';
 import { HellInput, HellNativeSelect, HellTextarea } from '@hell-ui/angular/input';
 import { HellBadge, HellKbd, HellTag } from '@hell-ui/angular/tag';
 import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
+import { HELL_PAGINATION_DIRECTIVES, type HellPaginationStripUi } from '@hell-ui/angular/pagination';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
+import {
+  HELL_TABLE_UTILITIES_DIRECTIVES,
+  type HellTableResizeHandleUi,
+  type HellTableUi,
+} from '@hell-ui/angular/table';
+import {
+  HELL_RESIZABLE_DIRECTIVES,
+  type HellResizableHandleUi,
+  type HellResizablePaneUi,
+} from '@hell-ui/angular/resizable';
+import { HELL_SPLIT_VIEW_DIRECTIVES, type HellSplitViewUi } from '@hell-ui/angular/split-view';
 
 interface ContractCase {
   readonly id: string;
@@ -101,13 +112,13 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellMenuSection', area: 'primitive', coverage: 'static' },
   { symbol: 'HellMenuSeparator', area: 'primitive', coverage: 'static' },
   { symbol: 'HellNativeSelect', area: 'primitive', coverage: 'dom' },
-  { symbol: 'HellPagination', area: 'primitive', coverage: 'static' },
-  { symbol: 'HellPaginationButton', area: 'primitive', coverage: 'static' },
-  { symbol: 'HellPaginationFirst', area: 'primitive', coverage: 'static' },
-  { symbol: 'HellPaginationLast', area: 'primitive', coverage: 'static' },
-  { symbol: 'HellPaginationNext', area: 'primitive', coverage: 'static' },
-  { symbol: 'HellPaginationPrev', area: 'primitive', coverage: 'static' },
-  { symbol: 'HellPaginationStrip', area: 'primitive', coverage: 'static' },
+  { symbol: 'HellPagination', area: 'primitive', coverage: 'dom' },
+  { symbol: 'HellPaginationButton', area: 'primitive', coverage: 'dom' },
+  { symbol: 'HellPaginationFirst', area: 'primitive', coverage: 'dom' },
+  { symbol: 'HellPaginationLast', area: 'primitive', coverage: 'dom' },
+  { symbol: 'HellPaginationNext', area: 'primitive', coverage: 'dom' },
+  { symbol: 'HellPaginationPrev', area: 'primitive', coverage: 'dom' },
+  { symbol: 'HellPaginationStrip', area: 'primitive', coverage: 'dom' },
   { symbol: 'HellPopover', area: 'primitive', coverage: 'static' },
   { symbol: 'HellProgress', area: 'primitive', coverage: 'static' },
   { symbol: 'HellProgressBar', area: 'primitive', coverage: 'static' },
@@ -160,6 +171,8 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellNavSection', area: 'composite', coverage: 'dom' },
   { symbol: 'HellNavSectionItems', area: 'composite', coverage: 'dom' },
   { symbol: 'HellNavSectionToggle', area: 'composite', coverage: 'dom' },
+  { symbol: 'HellSecondaryToggle', area: 'composite', coverage: 'static' },
+  { symbol: 'HellSidenavToggle', area: 'composite', coverage: 'static' },
   { symbol: 'HellOmnibar', area: 'composite', coverage: 'static' },
   { symbol: 'HellOmnibarAction', area: 'composite', coverage: 'static' },
   { symbol: 'HellOmnibarActionsStrip', area: 'composite', coverage: 'static' },
@@ -173,10 +186,10 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellOmnibarItemText', area: 'composite', coverage: 'static' },
   { symbol: 'HellOmnibarItemTrailing', area: 'composite', coverage: 'static' },
   { symbol: 'HellOmnibarPanel', area: 'composite', coverage: 'static' },
-  { symbol: 'HellResizable', area: 'composite', coverage: 'static' },
-  { symbol: 'HellResizableHandle', area: 'composite', coverage: 'static' },
-  { symbol: 'HellResizablePane', area: 'composite', coverage: 'static' },
-  { symbol: 'HellSplitView', area: 'composite', coverage: 'static' },
+  { symbol: 'HellResizable', area: 'composite', coverage: 'dom' },
+  { symbol: 'HellResizableHandle', area: 'composite', coverage: 'dom' },
+  { symbol: 'HellResizablePane', area: 'composite', coverage: 'dom' },
+  { symbol: 'HellSplitView', area: 'composite', coverage: 'dom' },
   { symbol: 'HellTimeInput', area: 'composite', coverage: 'static' },
   { symbol: 'HellToaster', area: 'composite', coverage: 'static' },
   { symbol: 'HellCodeEditor', area: 'feature', coverage: 'static' },
@@ -212,7 +225,10 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
     ...HELL_CARD_DIRECTIVES,
     ...HELL_FIELD_DIRECTIVES,
     ...HELL_SELECT_DIRECTIVES,
+    ...HELL_PAGINATION_DIRECTIVES,
     ...HELL_APP_SHELL_DIRECTIVES,
+    ...HELL_RESIZABLE_DIRECTIVES,
+    ...HELL_SPLIT_VIEW_DIRECTIVES,
     ...HELL_TABLE_UTILITIES_DIRECTIVES,
   ],
   template: `
@@ -255,14 +271,33 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
       <span hellSelectPlaceholder>Choose country</span>
     </button>
 
+    <nav id="pagination" hellPagination ui="gap-hell-4" [page]="1" [pageCount]="3">
+      <button id="pagination-first" hellPaginationFirst type="button" ui="bg-hell-danger px-hell-7">
+        First
+      </button>
+      <button id="pagination-prev" hellPaginationPrev type="button">Previous</button>
+      <button id="pagination-page" hellPaginationButton type="button" [page]="2" aria-label="Page 2">
+        2
+      </button>
+      <button id="pagination-next" hellPaginationNext type="button">Next</button>
+      <button id="pagination-last" hellPaginationLast type="button">Last</button>
+    </nav>
+    <hell-pagination
+      id="pagination-strip"
+      mode="jump"
+      [page]="2"
+      [pageCount]="4"
+      [ui]="paginationStripUi"
+    />
+
     <nav hellAppSidenav>
       <a id="nav-item" hellNavItem active href="#">
         <span hellNavItemIcon aria-hidden="true"></span>
         <span hellNavItemLabel>Dashboard</span>
         <span hellNavItemTrailing>3</span>
       </a>
-      <a id="unstyled-nav-item" hellNavItem unstyled href="#">
-        <span hellNavItemLabel unstyled>Raw</span>
+      <a id="custom-nav-item" hellNavItem ui="bg-hell-danger px-hell-7" href="#">
+        <span hellNavItemLabel>Raw</span>
       </a>
       <div id="nav-section" hellNavSection>
         <button id="nav-section-toggle" hellNavSectionToggle type="button">Settings</button>
@@ -272,27 +307,73 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
       </div>
     </nav>
 
-    <div id="table-container" hellTableContainer busy>
-      <table id="table" hellTableRoot contentWidth>
-        <thead id="table-head" hellTableHeader>
-          <tr id="table-row" hellTableRow active selected>
-            <th id="table-selection-header" hellTableHeaderCell hellTableSelectionCell>
-              <input id="table-row-checkbox" hellTableRowCheckbox type="checkbox" checked />
+    <div id="resizable" hellResizable orientation="vertical" ui="h-[360px] bg-hell-surface-muted">
+      <section id="resizable-pane-a" hellResizablePane [ui]="resizablePaneUi" [minSize]="40">
+        A
+      </section>
+      <div
+        id="resizable-handle"
+        hellResizableHandle
+        appearance="grip"
+        [ui]="resizableHandleUi"
+      ></div>
+      <section id="resizable-pane-b" hellResizablePane [minSize]="40">B</section>
+    </div>
+
+    <hell-split-view
+      id="split-view"
+      [compactBelow]="0"
+      itemNavigation
+      framed
+      [ui]="splitViewUi"
+    >
+      <ng-template hellSplitPrimary>
+        <section>Primary</section>
+      </ng-template>
+      <ng-template hellSplitDetail>
+        <section>Detail</section>
+      </ng-template>
+    </hell-split-view>
+
+    <div id="table-container" hellTableContainer busy ui="bg-hell-surface-muted">
+      <table id="table" hellTableRoot contentWidth [ui]="tableUi">
+        <thead id="table-head" hellTableHeader ui="bg-hell-danger">
+          <tr id="table-row" hellTableRow active selected ui="bg-hell-primary-soft">
+            <th id="table-selection-header" hellTableHeaderCell hellTableSelectionCell ui="px-hell-7">
+              <input
+                id="table-row-checkbox"
+                hellTableRowCheckbox
+                type="checkbox"
+                checked
+                ui="border-hell-danger"
+              />
             </th>
-            <th id="table-header-cell" hellTableHeaderCell columnId="name" sortable sort="asc">
-              <button id="table-sort-trigger" hellTableSortTrigger type="button">Name</button>
-              <button id="table-resizer" hellTableResizeHandle></button>
+            <th
+              id="table-header-cell"
+              hellTableHeaderCell
+              columnId="name"
+              sortable
+              sort="asc"
+              ui="bg-hell-danger"
+            >
+              <button id="table-sort-trigger" hellTableSortTrigger type="button" ui="text-hell-danger">
+                Name
+              </button>
+              <button id="table-resizer" hellTableResizeHandle [ui]="tableResizeHandleUi"></button>
             </th>
             <th hellTableHeaderCell columnId="role">Role</th>
-            <td id="table-cell" hellTableCell align="end" space="empty">
+            <td id="table-cell" hellTableCell align="end" space="empty" ui="text-hell-danger">
               Ada
-              <button id="table-row-action" hellTableRowAction type="button">Open</button>
+              <button id="table-row-action" hellTableRowAction type="button" ui="text-hell-danger">
+                Open
+              </button>
               <input
                 id="table-row-radio"
                 hellTableRowRadio
                 type="radio"
                 name="table-radio"
                 checked
+                ui="border-hell-danger"
               />
             </td>
           </tr>
@@ -338,6 +419,34 @@ class ContractHost {
   readonly fieldErrorUi = {
     root: 'text-hell-foreground',
   } satisfies HellFieldErrorUi;
+
+  readonly resizablePaneUi = {
+    root: 'overflow-hidden bg-hell-danger',
+  } satisfies HellResizablePaneUi;
+
+  readonly resizableHandleUi = {
+    root: 'bg-hell-danger flex-none',
+    grip: 'bg-hell-primary',
+  } satisfies HellResizableHandleUi;
+  readonly splitViewUi = {
+    root: 'h-[420px] bg-hell-surface-muted',
+    resizable: 'h-[410px] bg-hell-danger',
+    pane: 'overflow-auto bg-hell-surface-subtle',
+    detailHeader: 'bg-hell-danger p-hell-3',
+    itemNavigation: 'gap-hell-3',
+  } satisfies HellSplitViewUi;
+  readonly paginationStripUi = {
+    root: 'gap-hell-4 bg-hell-surface-muted',
+    jump: 'text-hell-danger',
+    jumpSelect: 'min-w-[calc(var(--spacing)*24)]',
+  } satisfies HellPaginationStripUi;
+  readonly tableUi = {
+    root: 'text-sm bg-hell-surface-muted',
+  } satisfies HellTableUi;
+  readonly tableResizeHandleUi = {
+    root: 'w-hell-6',
+    grip: 'bg-hell-danger',
+  } satisfies HellTableResizeHandleUi;
 }
 
 const STYLEABLE_CASES: readonly ContractCase[] = [
@@ -432,103 +541,9 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
     attrs: { 'data-slot': 'root', 'data-orientation': 'horizontal' },
   },
   { id: 'select', module: 'HellSelect', className: 'hell-select' },
-  {
-    id: 'nav-item',
-    module: 'HellNavItem',
-    className: 'hell-nav-item',
-    attrs: { 'data-slot': 'nav-item' },
-  },
-  {
-    id: 'nav-section',
-    module: 'HellNavSection',
-    className: 'hell-nav-section',
-    attrs: { 'data-slot': 'nav-section' },
-  },
-  {
-    id: 'nav-section-toggle',
-    module: 'HellNavSectionToggle',
-    className: 'hell-nav-section-toggle',
-    attrs: { 'data-slot': 'nav-section-toggle', 'aria-expanded': 'true' },
-  },
-  {
-    id: 'nav-section-items',
-    module: 'HellNavSectionItems',
-    className: 'hell-nav-section-items',
-    attrs: { 'data-slot': 'nav-section-items' },
-  },
-  {
-    id: 'table-container',
-    module: 'HellTableContainer',
-    className: 'hell-table-container',
-    attrs: { 'aria-busy': 'true' },
-  },
-  {
-    id: 'table',
-    module: 'HellTable',
-    className: 'hell-table',
-    attrs: { 'data-content-width': 'true' },
-  },
-  { id: 'table-head', module: 'HellTableHead', className: 'hell-table-head' },
-  { id: 'table-body', module: 'HellTableBody', className: 'hell-table-body' },
-  {
-    id: 'table-row',
-    module: 'HellTableRow',
-    className: 'hell-table-row',
-    attrs: { 'data-active': 'true', 'data-selected': 'true' },
-  },
-  {
-    id: 'table-selection-header',
-    module: 'HellTableSelectionCell',
-    className: 'hell-table-selection-cell',
-    attrs: { 'data-hell-table-selection-cell': '' },
-  },
-  {
-    id: 'table-header-cell',
-    module: 'HellTableHeaderCell',
-    className: 'hell-table-header-cell',
-    attrs: { 'data-sort': 'asc', 'aria-sort': 'ascending', 'data-sortable': 'true' },
-  },
-  {
-    id: 'table-sort-trigger',
-    module: 'HellTableSortTrigger',
-    className: 'hell-table-sort-trigger',
-    attrs: { type: 'button' },
-  },
-  {
-    id: 'table-row-checkbox',
-    module: 'HellTableRowCheckbox',
-    className: 'hell-table-row-checkbox',
-    attrs: { type: 'checkbox', 'data-hell-table-row-checkbox': '' },
-  },
-  {
-    id: 'table-row-action',
-    module: 'HellTableRowAction',
-    className: 'hell-table-row-action',
-    attrs: { type: 'button', 'data-hell-table-row-action': '' },
-  },
-  {
-    id: 'table-row-radio',
-    module: 'HellTableRowRadio',
-    className: 'hell-table-row-radio',
-    attrs: { type: 'radio', 'data-hell-table-row-radio': '' },
-  },
-  {
-    id: 'table-cell',
-    module: 'HellTableCell',
-    className: 'hell-table-cell',
-    attrs: { 'data-align': 'end', 'data-space': 'empty' },
-  },
-  {
-    id: 'table-resizer',
-    module: 'HellTableResizeHandle',
-    className: 'hell-table-resize-handle',
-    attrs: { role: 'separator' },
-  },
 ];
 
-const STYLE_OPT_OUT_CASES: readonly ContractCase[] = [
-  { id: 'unstyled-nav-item', module: 'HellNavItem', className: 'hell-nav-item' },
-];
+const STYLE_OPT_OUT_CASES: readonly ContractCase[] = [];
 
 describe('Hell Component Contract', () => {
   beforeEach(async () => {
@@ -639,18 +654,189 @@ describe('Hell Component Contract', () => {
     const icon = item.querySelector('[hellNavItemIcon]') as HTMLElement;
     const label = item.querySelector('[hellNavItemLabel]') as HTMLElement;
     const trailing = item.querySelector('[hellNavItemTrailing]') as HTMLElement;
-    const unstyled = fixture.nativeElement.querySelector('#unstyled-nav-item') as HTMLAnchorElement;
+    const custom = fixture.nativeElement.querySelector('#custom-nav-item') as HTMLAnchorElement;
+    const section = fixture.nativeElement.querySelector('#nav-section') as HTMLElement;
+    const sectionToggle = fixture.nativeElement.querySelector(
+      '#nav-section-toggle',
+    ) as HTMLButtonElement;
+    const sectionItems = fixture.nativeElement.querySelector('#nav-section-items') as HTMLElement;
 
-    expect(item.classList.contains('hell-nav-item')).toBe(true);
-    expect(item.getAttribute('data-slot')).toBe('nav-item');
+    expect(item.classList.contains('hell-nav-item')).toBe(false);
+    expect(item.getAttribute('data-slot')).toBe('root');
     expect(item.getAttribute('data-active')).toBe('true');
-    expect(icon.classList.contains('hell-nav-icon')).toBe(true);
-    expect(icon.getAttribute('data-slot')).toBe('nav-icon');
-    expect(label.classList.contains('hell-nav-label')).toBe(true);
-    expect(label.getAttribute('data-slot')).toBe('nav-label');
-    expect(trailing.classList.contains('hell-nav-trailing')).toBe(true);
-    expect(trailing.getAttribute('data-slot')).toBe('nav-trailing');
-    expect(unstyled.classList.contains('hell-nav-item')).toBe(false);
+    expect(icon.classList.contains('hell-nav-icon')).toBe(false);
+    expect(icon.getAttribute('data-slot')).toBe('root');
+    expect(label.classList.contains('hell-nav-label')).toBe(false);
+    expect(label.getAttribute('data-slot')).toBe('root');
+    expect(trailing.classList.contains('hell-nav-trailing')).toBe(false);
+    expect(trailing.getAttribute('data-slot')).toBe('root');
+    expect(custom.className).toContain('bg-hell-danger');
+    expect(custom.className).toContain('px-hell-7');
+    expect(custom.className).not.toContain('px-3');
+    expect(section.getAttribute('data-slot')).toBe('root');
+    expect(sectionToggle.getAttribute('data-slot')).toBe('root');
+    expect(sectionToggle.getAttribute('aria-expanded')).toBe('true');
+    expect(sectionItems.getAttribute('data-slot')).toBe('root');
+  });
+
+  it('exposes resizable as local root parts with resize state attributes intact', () => {
+    const fixture = TestBed.createComponent(ContractHost);
+    fixture.detectChanges();
+
+    const group = query(fixture.nativeElement, '#resizable');
+    const pane = query(fixture.nativeElement, '#resizable-pane-a');
+    const handle = query(fixture.nativeElement, '#resizable-handle');
+    const grip = query(handle, '[data-slot="grip"]');
+
+    expect(group.classList.contains('hell-resizable')).toBe(false);
+    expect(group.getAttribute('data-slot')).toBe('root');
+    expect(group.getAttribute('data-orientation')).toBe('vertical');
+    expect(group.className).toContain('h-[360px]');
+    expect(group.className).not.toContain('h-full');
+
+    expect(pane.classList.contains('hell-resizable-pane')).toBe(false);
+    expect(pane.getAttribute('data-slot')).toBe('root');
+    expect(pane.getAttribute('data-orientation')).toBe('vertical');
+    expect(pane.className).toContain('overflow-hidden');
+    expect(pane.className).not.toContain('overflow-auto');
+
+    expect(handle.classList.contains('hell-resizable-handle')).toBe(false);
+    expect(handle.getAttribute('data-slot')).toBe('root');
+    expect(handle.getAttribute('data-appearance')).toBe('grip');
+    expect(handle.getAttribute('role')).toBe('separator');
+    expect(handle.getAttribute('aria-orientation')).toBe('horizontal');
+    expect(handle.getAttribute('tabindex')).toBe('0');
+    expect(handle.className).toContain('bg-hell-danger');
+    expect(grip.className).toContain('bg-hell-primary');
+  });
+
+  it('exposes pagination local roots and strip anatomy through Part Style Maps', () => {
+    const fixture = TestBed.createComponent(ContractHost);
+    fixture.detectChanges();
+
+    const pagination = query(fixture.nativeElement, '#pagination');
+    const first = query(fixture.nativeElement, '#pagination-first');
+    const prev = query(fixture.nativeElement, '#pagination-prev');
+    const numbered = query(fixture.nativeElement, '#pagination-page');
+    const next = query(fixture.nativeElement, '#pagination-next');
+    const last = query(fixture.nativeElement, '#pagination-last');
+    const strip = query(fixture.nativeElement, '#pagination-strip');
+    const jump = query(strip, '[data-slot="jump"]');
+    const jumpSelect = query<HTMLSelectElement>(strip, '[data-slot="jumpSelect"]');
+
+    expect(pagination.classList.contains('hell-pagination')).toBe(false);
+    expect(pagination.getAttribute('data-slot')).toBe('root');
+    expect(pagination.className).toContain('gap-hell-4');
+
+    for (const control of [first, prev, numbered, next, last]) {
+      expect(control.classList.contains('hell-button')).toBe(false);
+      expect(control.classList.contains('hell-pagination-item')).toBe(false);
+      expect(control.getAttribute('data-slot')).toBe('root');
+      expect(control.getAttribute('data-variant')).toBe('ghost');
+      expect(control.getAttribute('data-icon-only')).toBe('');
+    }
+
+    expect(first.className).toContain('bg-hell-danger');
+    expect(first.className).toContain('px-hell-7');
+    expect(numbered.getAttribute('aria-label')).toBe('Page 2');
+    expect(strip.classList.contains('hell-pagination')).toBe(false);
+    expect(strip.getAttribute('data-slot')).toBe('root');
+    expect(strip.getAttribute('data-mode')).toBe('jump');
+    expect(jump.className).toContain('text-hell-danger');
+    expect(jumpSelect.tagName).toBe('SELECT');
+    expect(jumpSelect.className).toContain('min-w-[calc(var(--spacing)*24)]');
+    expect(jumpSelect.className).toContain('h-hell-control-sm');
+  });
+
+  it('exposes table primitive roots and resize anatomy through Part Style Maps', () => {
+    const fixture = TestBed.createComponent(ContractHost);
+    fixture.detectChanges();
+
+    const container = query(fixture.nativeElement, '#table-container');
+    const table = query(fixture.nativeElement, '#table');
+    const head = query(fixture.nativeElement, '#table-head');
+    const body = query(fixture.nativeElement, '#table-body');
+    const row = query(fixture.nativeElement, '#table-row');
+    const selectionHeader = query(fixture.nativeElement, '#table-selection-header');
+    const checkbox = query(fixture.nativeElement, '#table-row-checkbox');
+    const headerCell = query(fixture.nativeElement, '#table-header-cell');
+    const sortTrigger = query(fixture.nativeElement, '#table-sort-trigger');
+    const action = query(fixture.nativeElement, '#table-row-action');
+    const radio = query(fixture.nativeElement, '#table-row-radio');
+    const cell = query(fixture.nativeElement, '#table-cell');
+    const resizer = query(fixture.nativeElement, '#table-resizer');
+    const grip = query(resizer, '[data-slot="grip"]');
+
+    for (const [element, legacyClass] of [
+      [container, 'hell-table-container'],
+      [table, 'hell-table'],
+      [head, 'hell-table-head'],
+      [body, 'hell-table-body'],
+      [row, 'hell-table-row'],
+      [selectionHeader, 'hell-table-selection-cell'],
+      [selectionHeader, 'hell-table-header-cell'],
+      [checkbox, 'hell-table-row-checkbox'],
+      [headerCell, 'hell-table-header-cell'],
+      [sortTrigger, 'hell-table-sort-trigger'],
+      [action, 'hell-table-row-action'],
+      [radio, 'hell-table-row-radio'],
+      [cell, 'hell-table-cell'],
+      [resizer, 'hell-table-resize-handle'],
+    ] as const) {
+      expect(element.classList.contains(legacyClass), legacyClass).toBe(false);
+      expect(element.getAttribute('data-slot'), legacyClass).toBe('root');
+    }
+
+    expect(container.getAttribute('aria-busy')).toBe('true');
+    expect(container.className).toContain('bg-hell-surface-muted');
+    expect(table.getAttribute('data-content-width')).toBe('true');
+    expect(table.className).toContain('text-sm');
+    expect(head.className).toContain('bg-hell-danger');
+    expect(row.getAttribute('data-active')).toBe('true');
+    expect(row.getAttribute('data-selected')).toBe('true');
+    expect(row.className).toContain('bg-hell-primary-soft');
+    expect(selectionHeader.getAttribute('data-hell-table-selection-cell')).toBe('');
+    expect(selectionHeader.className).toContain('px-hell-7');
+    expect(checkbox.className).toContain('border-hell-danger');
+    expect(headerCell.getAttribute('data-sort')).toBe('asc');
+    expect(headerCell.getAttribute('aria-sort')).toBe('ascending');
+    expect(headerCell.getAttribute('data-sortable')).toBe('true');
+    expect(headerCell.className).toContain('bg-hell-danger');
+    expect(sortTrigger.getAttribute('type')).toBe('button');
+    expect(sortTrigger.className).toContain('text-hell-danger');
+    expect(action.getAttribute('type')).toBe('button');
+    expect(action.className).toContain('text-hell-danger');
+    expect(radio.className).toContain('border-hell-danger');
+    expect(cell.getAttribute('data-align')).toBe('end');
+    expect(cell.getAttribute('data-space')).toBe('empty');
+    expect(cell.className).toContain('text-hell-danger');
+    expect(resizer.getAttribute('role')).toBe('separator');
+    expect(resizer.className).toContain('w-hell-6');
+    expect(grip.className).toContain('bg-hell-danger');
+  });
+
+  it('exposes split view owned anatomy through flat camelCase parts', () => {
+    const fixture = TestBed.createComponent(ContractHost);
+    fixture.detectChanges();
+
+    const splitView = query(fixture.nativeElement, '#split-view');
+    const resizable = query(fixture.nativeElement, '#split-view [data-slot="resizable"]');
+    const pane = query(fixture.nativeElement, '#split-view [data-slot="pane"][data-pane="primary"]');
+    const detailHeader = query(fixture.nativeElement, '#split-view [data-slot="detailHeader"]');
+    const itemNavigation = query(
+      fixture.nativeElement,
+      '#split-view [data-slot="itemNavigation"]',
+    );
+
+    expect(splitView.classList.contains('hell-split-view')).toBe(false);
+    expect(splitView.getAttribute('data-slot')).toBe('root');
+    expect(splitView.getAttribute('data-framed')).toBe('true');
+    expect(splitView.className).toContain('h-[420px]');
+    expect(splitView.className).not.toContain('h-full');
+    expect(resizable.className).toContain('h-[410px]');
+    expect(pane.className).toContain('overflow-auto');
+    expect(detailHeader.className).toContain('bg-hell-danger');
+    expect(itemNavigation.className).toContain('gap-hell-3');
   });
 });
 

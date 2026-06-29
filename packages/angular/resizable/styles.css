@@ -1,7 +1,9 @@
+@source "./resizable.ts";
+
 @layer components {
   /* Resizable splitter — pane / handle. */
 
-  .hell-resizable {
+  [hellResizable][data-slot='root'] {
     display: flex;
     height: 100%;
     min-height: calc(var(--spacing) * 0);
@@ -11,7 +13,7 @@
     }
   }
 
-  .hell-resizable-pane {
+  [hellResizablePane][data-slot='root'] {
     min-height: calc(var(--spacing) * 0);
     min-width: calc(var(--spacing) * 0);
     flex: var(--_hell-resizable-pane-flex, var(--hell-pane-flex, 1) 1 0);
@@ -24,7 +26,7 @@
     }
   }
 
-  .hell-resizable-handle {
+  [hellResizableHandle][data-slot='root'] {
     position: relative;
     display: flex;
     align-items: center;
@@ -42,11 +44,11 @@
     }
   }
 
-  [data-orientation='vertical'] > .hell-resizable-handle {
+  [data-orientation='vertical'] > [hellResizableHandle][data-slot='root'] {
     cursor: row-resize;
   }
 
-  .hell-resizable-handle [data-slot='grip'] {
+  [hellResizableHandle][data-slot='root'] [data-slot='grip'] {
     display: block;
     transition:
       background-color var(--hell-duration-fast) var(--ease-hell-out),
@@ -55,57 +57,60 @@
   }
 
   /* Default appearance — `line`: hairline that thickens on hover/drag. */
-  .hell-resizable-handle[data-appearance='line'] [data-slot='grip'] {
+  [hellResizableHandle][data-slot='root'][data-appearance='line'] [data-slot='grip'] {
     width: 1px;
     height: 100%;
     background-color: var(--color-hell-border);
   }
   [data-orientation='vertical']
-    > .hell-resizable-handle[data-appearance='line']
+    > [hellResizableHandle][data-slot='root'][data-appearance='line']
     [data-slot='grip'] {
     width: 100%;
     height: 1px;
   }
-  .hell-resizable-handle[data-appearance='line']:hover [data-slot='grip'],
-  .hell-resizable-handle[data-appearance='line'][data-active='true'] [data-slot='grip'] {
+  [hellResizableHandle][data-slot='root'][data-appearance='line']:hover
+    [data-slot='grip'],
+  [hellResizableHandle][data-slot='root'][data-appearance='line'][data-active='true']
+    [data-slot='grip'] {
     background-color: var(--color-hell-primary);
     width: 2px;
   }
   [data-orientation='vertical']
-    > .hell-resizable-handle[data-appearance='line']:hover
+    > [hellResizableHandle][data-slot='root'][data-appearance='line']:hover
     [data-slot='grip'],
   [data-orientation='vertical']
-    > .hell-resizable-handle[data-appearance='line'][data-active='true']
+    > [hellResizableHandle][data-slot='root'][data-appearance='line'][data-active='true']
     [data-slot='grip'] {
     width: 100%;
     height: 2px;
   }
 
   /* `grip` appearance — pill with three-dot indicator. High affordance. */
-  .hell-resizable-handle[data-appearance='grip'] {
+  [hellResizableHandle][data-slot='root'][data-appearance='grip'] {
     flex-basis: 14px;
     background-color: var(--color-hell-surface-subtle);
     border-inline: 1px solid var(--color-hell-border);
   }
   @media (pointer: coarse) {
-    .hell-resizable-handle {
+    [hellResizableHandle][data-slot='root'] {
       flex-basis: 14px;
     }
-    .hell-resizable-handle[data-appearance='grip'] {
+    [hellResizableHandle][data-slot='root'][data-appearance='grip'] {
       flex-basis: 18px;
     }
   }
-  [data-orientation='vertical'] > .hell-resizable-handle[data-appearance='grip'] {
+  [data-orientation='vertical'] > [hellResizableHandle][data-slot='root'][data-appearance='grip'] {
     flex-basis: 14px;
     border-inline: 0;
     border-block: 1px solid var(--color-hell-border);
   }
   @media (pointer: coarse) {
-    [data-orientation='vertical'] > .hell-resizable-handle[data-appearance='grip'] {
+    [data-orientation='vertical']
+      > [hellResizableHandle][data-slot='root'][data-appearance='grip'] {
       flex-basis: 18px;
     }
   }
-  .hell-resizable-handle[data-appearance='grip'] [data-slot='grip'] {
+  [hellResizableHandle][data-slot='root'][data-appearance='grip'] [data-slot='grip'] {
     width: 4px;
     height: calc(var(--spacing) * 8);
     border-radius: var(--radius-hell-pill);
@@ -118,19 +123,21 @@
     background-repeat: repeat-y;
   }
   [data-orientation='vertical']
-    > .hell-resizable-handle[data-appearance='grip']
+    > [hellResizableHandle][data-slot='root'][data-appearance='grip']
     [data-slot='grip'] {
     width: calc(var(--spacing) * 8);
     height: 4px;
     background-size: 33.333% 100%;
     background-repeat: repeat-x;
   }
-  .hell-resizable-handle[data-appearance='grip']:hover,
-  .hell-resizable-handle[data-appearance='grip'][data-active='true'] {
+  [hellResizableHandle][data-slot='root'][data-appearance='grip']:hover,
+  [hellResizableHandle][data-slot='root'][data-appearance='grip'][data-active='true'] {
     background-color: var(--color-hell-surface-muted);
   }
-  .hell-resizable-handle[data-appearance='grip']:hover [data-slot='grip'],
-  .hell-resizable-handle[data-appearance='grip'][data-active='true'] [data-slot='grip'] {
+  [hellResizableHandle][data-slot='root'][data-appearance='grip']:hover
+    [data-slot='grip'],
+  [hellResizableHandle][data-slot='root'][data-appearance='grip'][data-active='true']
+    [data-slot='grip'] {
     background-image: radial-gradient(
       circle 1.6px at 50% 50%,
       var(--color-hell-primary) 99%,

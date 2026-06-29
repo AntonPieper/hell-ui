@@ -82,12 +82,17 @@ import resizableVerticalSplitExampleCodeRaw from './examples/vertical-split.exam
       <ul>
         <li>
           <code>hellResizable</code>: <code>orientation</code> (<code>horizontal | vertical</code>),
-          <code>rescaleOnResize</code>
+          <code>rescaleOnResize</code>, local <code>root</code> Part Style Map via
+          <code>ui</code>
         </li>
-        <li><code>hellResizablePane</code>: <code>initialFlex</code>, <code>minSize</code> (px)</li>
+        <li>
+          <code>hellResizablePane</code>: <code>initialFlex</code>, <code>minSize</code> (px),
+          local <code>root</code> Part Style Map via <code>ui</code>
+        </li>
         <li>
           <code>hellResizableHandle</code>: <code>appearance</code> (<code>line | grip</code>) —
-          place between two panes; optional <code>aria-controls</code> for controlled pane IDs.
+          place between two panes; optional <code>aria-controls</code> for controlled pane IDs;
+          local <code>root</code> Part Style Map via <code>ui</code>.
         </li>
       </ul>
 
