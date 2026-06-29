@@ -1,7 +1,7 @@
 /* Date picker default visuals are Tailwind utility recipes in the component. */
 @source "./date-picker.ts";
 
-@layer components {
+@layer utilities {
   hell-date-range-picker[data-slot='root'][data-range-complete]
     [data-slot='dateButton'][data-range-start]:not([data-range-end]) {
     border-radius: 0.25rem 0 0 0.25rem;

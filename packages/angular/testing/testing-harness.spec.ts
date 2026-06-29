@@ -340,6 +340,10 @@ describe('hell testing harness entrypoint', () => {
     }).compileComponents();
   });
 
+  afterEach(() => {
+    document.body.replaceChildren();
+  });
+
   it('finds button harnesses by directive selector', async () => {
     const fixture = TestBed.createComponent(ButtonHarnessHost);
     fixture.detectChanges();

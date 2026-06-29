@@ -90,7 +90,9 @@ test.describe('date input accessibility contract', () => {
     const trigger = dateInputHost(input).getByRole('button', { name: 'Choose date' });
 
     await trigger.click();
-    const popover = page.locator('.hell-popover');
+    const popover = page.locator('[data-slot="pickerPanel"]', {
+      has: page.getByRole('grid'),
+    });
     await expect(popover).toBeVisible();
     await expect(popover.getByRole('grid', { name: 'June 2026' })).toBeVisible();
     await expectPickerLayoutAligned(popover.locator('hell-date-picker'));
@@ -113,7 +115,9 @@ test.describe('date input accessibility contract', () => {
     await expect(input).toBeFocused();
 
     await trigger.click();
-    const reopened = page.locator('.hell-popover');
+    const reopened = page.locator('[data-slot="pickerPanel"]', {
+      has: page.getByRole('grid'),
+    });
     await expect(reopened).toBeVisible();
     await expect(reopened.getByRole('grid', { name: 'June 2026' })).toBeVisible();
     await page.keyboard.press('Escape');

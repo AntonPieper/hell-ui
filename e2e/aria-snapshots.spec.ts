@@ -142,7 +142,7 @@ test.describe('public docs aria snapshots', () => {
 
     const departure = example.getByRole('textbox', { name: 'Departure' });
     await departure.locator('xpath=..').getByRole('button', { name: 'Choose date' }).click();
-    const popover = page.locator('.hell-popover', {
+    const popover = page.locator('[data-slot="pickerPanel"]', {
       has: page.getByRole('grid'),
     });
     await expect(popover).toBeVisible();

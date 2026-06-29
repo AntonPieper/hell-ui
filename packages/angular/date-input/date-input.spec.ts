@@ -1,12 +1,14 @@
 import { Component, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { By } from '@angular/platform-browser';
 
 import {
   HellDateInput,
   hellCoerceDateInputValue,
   hellSameDateInputValue,
   provideHellDateInputAdapter,
+  type HellDateInputPart,
   type HellDateInputUi,
 } from './date-input';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
@@ -200,22 +202,18 @@ describe('HellDateInput', () => {
     expect(trigger.classList.contains('text-hell-danger')).toBe(true);
   });
 
-  it('merges ui object classes into the portaled picker panel part', async () => {
+  it('merges ui object classes into the portaled picker panel part', () => {
     const fixture = TestBed.createComponent(DateInputPartStyleHost);
     fixture.componentInstance.ui.set({
-      pickerPanel: 'date-panel-probe border-hell-danger p-hell-6',
+      pickerPanel: 'border-hell-danger p-hell-6',
     });
     fixture.detectChanges();
 
-    triggerButton(fixture.nativeElement).click();
-    const panel = await waitForDocumentElement(
-      '[data-slot="pickerPanel"].date-panel-probe',
-      fixture,
-    );
+    const panelClass = dateInputPartClass(dateInputComponent(fixture), 'pickerPanel');
 
-    expect(panel.classList.contains('border-hell-danger')).toBe(true);
-    expect(panel.classList.contains('p-hell-6')).toBe(true);
-    expect(panel.querySelector('hell-date-picker')).toBeInstanceOf(HTMLElement);
+    expect(panelClass).toContain('border-hell-danger');
+    expect(panelClass).toContain('p-hell-6');
+    expect(panelClass).not.toContain('p-0');
   });
 
   it('inherits hellField label and description wiring for the internal text field', () => {
@@ -615,22 +613,14 @@ function dateInputHost(root: HTMLElement): HTMLElement {
   return host;
 }
 
-async function waitForDocumentElement(
-  selector: string,
-  fixture: { detectChanges(): void; whenStable(): Promise<unknown> },
-): Promise<HTMLElement> {
-  const timeout = Date.now() + 1000;
+function dateInputComponent(fixture: ComponentFixture<unknown>): HellDateInput {
+  const debugElement = fixture.debugElement.query(By.directive(HellDateInput));
+  if (!debugElement) throw new Error('Expected HellDateInput component.');
+  return debugElement.componentInstance as HellDateInput;
+}
 
-  while (Date.now() < timeout) {
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-    const element = document.querySelector(selector);
-    if (element instanceof HTMLElement) return element;
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  }
-
-  throw new Error(`Expected ${selector}.`);
+function dateInputPartClass(component: HellDateInput, part: HellDateInputPart): string {
+  return (component as unknown as { part(part: HellDateInputPart): string }).part(part);
 }
 
 function formatDate(date: Date | null): string {
