@@ -196,6 +196,30 @@ class TableUtilitiesUiHost {
 @Component({
   imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
   template: `
+    <table>
+      <tbody>
+        <tr>
+          <td
+            id="stacked-cell"
+            class="px-hell-3 text-hell-danger"
+            hellTableCell
+            hellTableSelectionCell
+            [ui]="cellUi()"
+          >
+            Ada
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  `,
+})
+class TableUtilitiesStackedUiHost {
+  readonly cellUi = signal('');
+}
+
+@Component({
+  imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
+  template: `
     <table hellTable>
       <thead hellTableHead>
         <tr>
@@ -337,6 +361,7 @@ describe('Hell table utilities directives', () => {
       imports: [
         TableUtilitiesHost,
         TableUtilitiesUiHost,
+        TableUtilitiesStackedUiHost,
         TableUtilitiesResizerAriaOverrideHost,
         TableUtilitiesLocalizedLabelHost,
         TableUtilitiesSortableAriaHost,
@@ -503,6 +528,25 @@ describe('Hell table utilities directives', () => {
     expect(byId<HTMLElement>(root, 'ui-resize').className).toContain('w-hell-6');
     expect(byId<HTMLElement>(root, 'ui-resize').querySelector('[data-slot="grip"]')?.className)
       .toContain('bg-hell-danger');
+  });
+
+  it('preserves non-owned classes when stacked table directives update classes', () => {
+    const fixture = TestBed.createComponent(TableUtilitiesStackedUiHost);
+    fixture.detectChanges();
+
+    const stackedCell = byId<HTMLTableCellElement>(fixture.nativeElement, 'stacked-cell');
+    expect(stackedCell.className).toContain('px-hell-3');
+    expect(stackedCell.className).toContain('text-hell-danger');
+
+    fixture.componentInstance.cellUi.set('px-hell-7 text-hell-primary');
+    fixture.detectChanges();
+
+    expect(stackedCell.className).toContain('px-hell-7');
+    expect(stackedCell.className).toContain('text-hell-primary');
+    expect(stackedCell.className).toContain('px-hell-3');
+    expect(stackedCell.className).toContain('text-hell-danger');
+    expect(stackedCell.getAttribute('data-hell-table-cell')).toBe('');
+    expect(stackedCell.getAttribute('data-hell-table-selection-cell')).toBe('');
   });
 
   it('disables the sort trigger when its header is not sortable', () => {

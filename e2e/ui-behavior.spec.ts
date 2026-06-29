@@ -559,8 +559,8 @@ test.describe('Hell UI browser behavior', () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/components/app-shell');
 
-    const shell = page.locator('hd-root > .hell-shell');
-    const secondary = page.locator('hd-root > .hell-shell > .hd-docs-secondary');
+    const shell = page.locator('hd-root > [hellAppShell][data-slot="root"]');
+    const secondary = shell.locator('> [hellAppSecondary][data-slot="root"]');
     const rail = secondary.locator('[data-hell-secondary-toggle="rail"]');
     const header = secondary.locator('[data-hell-secondary-toggle="header"]');
 

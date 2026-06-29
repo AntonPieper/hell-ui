@@ -280,7 +280,7 @@ describe('HellPaginationStrip', () => {
 
     expect(buttonLabels(root)).toEqual(['Previous page', 'Next page']);
     expect(select.getAttribute('aria-label')).toBe('Page');
-    expect(select.getAttribute('data-slot')).toBe('root');
+    expect(select.getAttribute('data-slot')).toBe('jumpSelect');
     expect(root.querySelector('[data-slot="jumpSelect"]')).toBeInstanceOf(HTMLElement);
     expect(select.classList.contains('appearance-none')).toBe(true);
     expect(select.value).toBe('2');
@@ -325,7 +325,7 @@ describe('HellPaginationStrip', () => {
     const strip = query(root, '#ui-strip');
     const stripGlyph = query(strip, '[data-slot="controlGlyph"]');
     const jump = query(strip, '[data-slot="jump"]');
-    const jumpSelect = query(strip, '[data-slot="jumpSelect"]');
+    const jumpSelect = query(strip, '[data-slot="jumpSelect"]') as HTMLSelectElement;
 
     expect(pagination.classList.contains('hell-pagination')).toBe(false);
     expect(pagination.getAttribute('data-slot')).toBe('root');
@@ -357,7 +357,9 @@ describe('HellPaginationStrip', () => {
     expect(strip.className).toContain('gap-hell-4');
     expect(jump.className).toContain('text-hell-danger');
     expect(jump.className).toContain('gap-hell-4');
+    expect(jumpSelect.tagName).toBe('SELECT');
     expect(jumpSelect.className).toContain('min-w-[calc(var(--spacing)*24)]');
+    expect(jumpSelect.className).toContain('h-hell-control-sm');
     expect(stripGlyph.className).toContain('text-hell-danger');
   });
 });

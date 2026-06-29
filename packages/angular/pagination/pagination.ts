@@ -16,7 +16,7 @@ import {
   NgpPaginationPrevious,
   injectPaginationState,
 } from 'ng-primitives/pagination';
-import { HellNativeSelect } from '@hell-ui/angular/input';
+import { HellNativeSelect, type HellNativeSelectUi } from '@hell-ui/angular/input';
 import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
 import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
 
@@ -344,20 +344,20 @@ export class HellPaginationButton extends HellPartStyleable<HellPaginationButton
     @if (mode() === 'jump' && pageCount() > 0) {
       <label data-slot="jump" [class]="part('jump')">
         <span data-slot="jumpLabel" [class]="part('jumpLabel')">{{ pageJumpLabel() }}</span>
-        <span data-slot="jumpSelect" [class]="part('jumpSelect')">
-          <select
-            hellNativeSelect
-            size="sm"
-            [attr.aria-label]="pageJumpLabel()"
-            [value]="currentPage()"
-            [disabled]="paginationDisabled() || pageCount() < 2"
-            (change)="goToSelectedPage($event)"
-          >
-            @for (p of pageOptions(); track trackPage($index, p)) {
-              <option [value]="p" [selected]="p === currentPage()">{{ p }}</option>
-            }
-          </select>
-        </span>
+        <select
+          hellNativeSelect
+          data-slot="jumpSelect"
+          size="sm"
+          [ui]="jumpSelectUi()"
+          [attr.aria-label]="pageJumpLabel()"
+          [value]="currentPage()"
+          [disabled]="paginationDisabled() || pageCount() < 2"
+          (change)="goToSelectedPage($event)"
+        >
+          @for (p of pageOptions(); track trackPage($index, p)) {
+            <option [value]="p" [selected]="p === currentPage()">{{ p }}</option>
+          }
+        </select>
         <span data-slot="jumpTotal" [class]="part('jumpTotal')">{{ pageTotalLabel() }}</span>
       </label>
     }
@@ -434,6 +434,10 @@ export class HellPaginationStrip extends HellPartStyleable<HellPaginationStripPa
 
   protected pageTotalLabel(): string {
     return this.labels.pagination.pageTotal?.(this.pageCount()) ?? `of ${this.pageCount()}`;
+  }
+
+  protected jumpSelectUi(): HellNativeSelectUi {
+    return { root: this.part('jumpSelect') };
   }
 
   protected goToSelectedPage(event: Event): void {

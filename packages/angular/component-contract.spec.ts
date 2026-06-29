@@ -719,8 +719,7 @@ describe('Hell Component Contract', () => {
     const last = query(fixture.nativeElement, '#pagination-last');
     const strip = query(fixture.nativeElement, '#pagination-strip');
     const jump = query(strip, '[data-slot="jump"]');
-    const jumpSelect = query(strip, '[data-slot="jumpSelect"]');
-    const select = query<HTMLSelectElement>(strip, 'select[hellNativeSelect]');
+    const jumpSelect = query<HTMLSelectElement>(strip, '[data-slot="jumpSelect"]');
 
     expect(pagination.classList.contains('hell-pagination')).toBe(false);
     expect(pagination.getAttribute('data-slot')).toBe('root');
@@ -741,8 +740,9 @@ describe('Hell Component Contract', () => {
     expect(strip.getAttribute('data-slot')).toBe('root');
     expect(strip.getAttribute('data-mode')).toBe('jump');
     expect(jump.className).toContain('text-hell-danger');
+    expect(jumpSelect.tagName).toBe('SELECT');
     expect(jumpSelect.className).toContain('min-w-[calc(var(--spacing)*24)]');
-    expect(select.getAttribute('data-slot')).toBe('root');
+    expect(jumpSelect.className).toContain('h-hell-control-sm');
   });
 
   it('exposes table primitive roots and resize anatomy through Part Style Maps', () => {

@@ -162,20 +162,64 @@ const HELL_TABLE_RESIZE_HANDLE_RECIPE = {
 
 class HellTablePartClassSync {
   private readonly applied = new Set<string>();
+  private readonly registry: HellTablePartClassRegistry;
 
-  constructor(private readonly host: HTMLElement) {}
+  constructor(host: HTMLElement) {
+    this.registry = hellTablePartClassRegistryFor(host);
+  }
 
   apply(className: string): void {
+    this.registry.apply(this, this.applied, className);
+  }
+}
+
+class HellTablePartClassRegistry {
+  private readonly preserved: Set<string>;
+  private readonly ownersByToken = new Map<string, Set<HellTablePartClassSync>>();
+
+  constructor(private readonly host: HTMLElement) {
+    this.preserved = new Set(host.className.split(/\s+/).filter(Boolean));
+  }
+
+  apply(owner: HellTablePartClassSync, applied: Set<string>, className: string): void {
     const next = new Set(className.split(/\s+/).filter(Boolean));
-    for (const token of this.applied) {
-      if (!next.has(token)) this.host.classList.remove(token);
+    for (const token of applied) {
+      if (!next.has(token)) this.remove(owner, token);
     }
     for (const token of next) {
-      if (!this.applied.has(token)) this.host.classList.add(token);
+      if (!applied.has(token)) this.add(owner, token);
     }
-    this.applied.clear();
-    for (const token of next) this.applied.add(token);
+    applied.clear();
+    for (const token of next) applied.add(token);
   }
+
+  private add(owner: HellTablePartClassSync, token: string): void {
+    const owners = this.ownersByToken.get(token) ?? new Set<HellTablePartClassSync>();
+    owners.add(owner);
+    this.ownersByToken.set(token, owners);
+    this.host.classList.add(token);
+  }
+
+  private remove(owner: HellTablePartClassSync, token: string): void {
+    const owners = this.ownersByToken.get(token);
+    if (!owners) return;
+    owners.delete(owner);
+    if (owners.size > 0) return;
+
+    this.ownersByToken.delete(token);
+    if (!this.preserved.has(token)) this.host.classList.remove(token);
+  }
+}
+
+const HELL_TABLE_PART_CLASS_REGISTRIES = new WeakMap<HTMLElement, HellTablePartClassRegistry>();
+
+function hellTablePartClassRegistryFor(host: HTMLElement): HellTablePartClassRegistry {
+  const existing = HELL_TABLE_PART_CLASS_REGISTRIES.get(host);
+  if (existing) return existing;
+
+  const registry = new HellTablePartClassRegistry(host);
+  HELL_TABLE_PART_CLASS_REGISTRIES.set(host, registry);
+  return registry;
 }
 
 function injectHellTablePartClassSync(): HellTablePartClassSync {
