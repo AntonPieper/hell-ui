@@ -160,6 +160,8 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellNavSection', area: 'composite', coverage: 'dom' },
   { symbol: 'HellNavSectionItems', area: 'composite', coverage: 'dom' },
   { symbol: 'HellNavSectionToggle', area: 'composite', coverage: 'dom' },
+  { symbol: 'HellSecondaryToggle', area: 'composite', coverage: 'static' },
+  { symbol: 'HellSidenavToggle', area: 'composite', coverage: 'static' },
   { symbol: 'HellOmnibar', area: 'composite', coverage: 'static' },
   { symbol: 'HellOmnibarAction', area: 'composite', coverage: 'static' },
   { symbol: 'HellOmnibarActionsStrip', area: 'composite', coverage: 'static' },
@@ -261,8 +263,8 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
         <span hellNavItemLabel>Dashboard</span>
         <span hellNavItemTrailing>3</span>
       </a>
-      <a id="unstyled-nav-item" hellNavItem unstyled href="#">
-        <span hellNavItemLabel unstyled>Raw</span>
+      <a id="custom-nav-item" hellNavItem ui="bg-hell-danger px-hell-7" href="#">
+        <span hellNavItemLabel>Raw</span>
       </a>
       <div id="nav-section" hellNavSection>
         <button id="nav-section-toggle" hellNavSectionToggle type="button">Settings</button>
@@ -433,30 +435,6 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
   },
   { id: 'select', module: 'HellSelect', className: 'hell-select' },
   {
-    id: 'nav-item',
-    module: 'HellNavItem',
-    className: 'hell-nav-item',
-    attrs: { 'data-slot': 'nav-item' },
-  },
-  {
-    id: 'nav-section',
-    module: 'HellNavSection',
-    className: 'hell-nav-section',
-    attrs: { 'data-slot': 'nav-section' },
-  },
-  {
-    id: 'nav-section-toggle',
-    module: 'HellNavSectionToggle',
-    className: 'hell-nav-section-toggle',
-    attrs: { 'data-slot': 'nav-section-toggle', 'aria-expanded': 'true' },
-  },
-  {
-    id: 'nav-section-items',
-    module: 'HellNavSectionItems',
-    className: 'hell-nav-section-items',
-    attrs: { 'data-slot': 'nav-section-items' },
-  },
-  {
     id: 'table-container',
     module: 'HellTableContainer',
     className: 'hell-table-container',
@@ -526,9 +504,7 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
   },
 ];
 
-const STYLE_OPT_OUT_CASES: readonly ContractCase[] = [
-  { id: 'unstyled-nav-item', module: 'HellNavItem', className: 'hell-nav-item' },
-];
+const STYLE_OPT_OUT_CASES: readonly ContractCase[] = [];
 
 describe('Hell Component Contract', () => {
   beforeEach(async () => {
@@ -639,18 +615,29 @@ describe('Hell Component Contract', () => {
     const icon = item.querySelector('[hellNavItemIcon]') as HTMLElement;
     const label = item.querySelector('[hellNavItemLabel]') as HTMLElement;
     const trailing = item.querySelector('[hellNavItemTrailing]') as HTMLElement;
-    const unstyled = fixture.nativeElement.querySelector('#unstyled-nav-item') as HTMLAnchorElement;
+    const custom = fixture.nativeElement.querySelector('#custom-nav-item') as HTMLAnchorElement;
+    const section = fixture.nativeElement.querySelector('#nav-section') as HTMLElement;
+    const sectionToggle = fixture.nativeElement.querySelector(
+      '#nav-section-toggle',
+    ) as HTMLButtonElement;
+    const sectionItems = fixture.nativeElement.querySelector('#nav-section-items') as HTMLElement;
 
-    expect(item.classList.contains('hell-nav-item')).toBe(true);
-    expect(item.getAttribute('data-slot')).toBe('nav-item');
+    expect(item.classList.contains('hell-nav-item')).toBe(false);
+    expect(item.getAttribute('data-slot')).toBe('root');
     expect(item.getAttribute('data-active')).toBe('true');
-    expect(icon.classList.contains('hell-nav-icon')).toBe(true);
-    expect(icon.getAttribute('data-slot')).toBe('nav-icon');
-    expect(label.classList.contains('hell-nav-label')).toBe(true);
-    expect(label.getAttribute('data-slot')).toBe('nav-label');
-    expect(trailing.classList.contains('hell-nav-trailing')).toBe(true);
-    expect(trailing.getAttribute('data-slot')).toBe('nav-trailing');
-    expect(unstyled.classList.contains('hell-nav-item')).toBe(false);
+    expect(icon.classList.contains('hell-nav-icon')).toBe(false);
+    expect(icon.getAttribute('data-slot')).toBe('root');
+    expect(label.classList.contains('hell-nav-label')).toBe(false);
+    expect(label.getAttribute('data-slot')).toBe('root');
+    expect(trailing.classList.contains('hell-nav-trailing')).toBe(false);
+    expect(trailing.getAttribute('data-slot')).toBe('root');
+    expect(custom.className).toContain('bg-hell-danger');
+    expect(custom.className).toContain('px-hell-7');
+    expect(custom.className).not.toContain('px-3');
+    expect(section.getAttribute('data-slot')).toBe('root');
+    expect(sectionToggle.getAttribute('data-slot')).toBe('root');
+    expect(sectionToggle.getAttribute('aria-expanded')).toBe('true');
+    expect(sectionItems.getAttribute('data-slot')).toBe('root');
   });
 });
 

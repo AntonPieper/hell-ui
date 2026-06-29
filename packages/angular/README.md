@@ -126,14 +126,20 @@ Migrated primitives and composites support typed Part Style Maps. Pass `[ui]`
 with a `root` class string to refine a single-host directive recipe while
 keeping behavior, accessibility, and state attributes. Directive-suite children,
 such as `hellCardHeader` or `hellAccordionTrigger`, expose their own local
-`root` `ui` contract. Primitives that have not migrated yet still document
-`unstyled` locally.
+`root` `ui` contract. App Shell/nav directives follow the same local-root rule:
+style each directive through its own `ui`. Primitives that have not migrated yet
+still document `unstyled` locally.
 
 ```html
 <button hellButton variant="primary">Save</button>
 <button hellButton [ui]="{ root: 'rounded-hell-pill bg-hell-primary' }">Save</button>
 <div hellCard [ui]="{ root: 'rounded-hell-xl' }">
   <div hellCardBody>Card body</div>
+</div>
+<div hellAppShell ui="bg-hell-surface-muted">
+  <header hellAppTopbar>
+    <button hellSidenavToggle appearance="shell" type="button"></button>
+  </header>
 </div>
 ```
 

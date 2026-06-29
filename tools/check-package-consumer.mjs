@@ -1586,9 +1586,9 @@ const dialpadUi = {
     HellTimeInput,
   ],
   template: \`
-    <div hellAppShell>
+    <div hellAppShell ui="bg-hell-surface-muted">
       <header hellAppTopbar>
-        <button hellSidenavToggle type="button"></button>
+        <button hellSidenavToggle appearance="shell" type="button" ui="text-hell-primary"></button>
       </header>
       <nav hellAppSidenav>Navigation</nav>
       <main hellAppContent>
@@ -1627,9 +1627,9 @@ import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/app-shell';
   standalone: true,
   imports: [...HELL_APP_SHELL_DIRECTIVES],
   template: \`
-    <div hellAppShell>
+    <div hellAppShell ui="bg-hell-surface-muted">
       <header hellAppTopbar>
-        <button hellSidenavToggle type="button"></button>
+        <button hellSidenavToggle appearance="shell" type="button" ui="text-hell-primary"></button>
       </header>
       <nav hellAppSidenav>Navigation</nav>
       <main hellAppContent>Content</main>

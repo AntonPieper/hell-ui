@@ -145,17 +145,21 @@ Tailwind content/source pipeline.
 ## Part Style Maps replace Style Opt-Out
 
 `HellButton`, `HellInput`, `HellNativeSelect`, `HellTextarea`, `HellDialpad`,
-`HellDateInput`, `HellTimeInput`, `HellDatePicker`, `HellDateRangePicker`, and
-the first directive-suite batch (`HellCard`, `HellField`, `HellTabset`, and
-`HellAccordion` families) have migrated from Style Opt-Out to the Part Style Map
-API. Pass `ui` when you want to refine public parts while keeping Hell behavior,
-state attributes, and accessibility wiring.
+`HellDateInput`, `HellTimeInput`, `HellDatePicker`, `HellDateRangePicker`, the
+first directive-suite batch (`HellCard`, `HellField`, `HellTabset`, and
+`HellAccordion` families), and the App Shell/nav directives have migrated from
+Style Opt-Out to the Part Style Map API. Pass `ui` when you want to refine
+public parts while keeping Hell behavior, state attributes, and accessibility
+wiring.
 
 ```html
 <button hellButton type="button" ui="rounded-hell-pill bg-hell-primary">Save</button>
 <input hellInput ui="rounded-hell-pill px-hell-5" aria-label="Search" />
 <div hellCard [ui]="{ root: 'rounded-hell-xl' }">
   <div hellCardBody [ui]="{ root: 'p-hell-8' }">Card body</div>
+</div>
+<div hellAppShell ui="bg-hell-surface-muted">
+  <nav hellAppSidenav ui="bg-hell-surface-elevated"></nav>
 </div>
 <hell-dialpad [ui]="{ keyButton: 'rounded-hell-pill', callButton: 'bg-hell-success-strong' }" />
 <hell-date-input [ui]="{ input: 'tabular-nums', pickerPanel: 'shadow-hell-lg' }" />
@@ -165,14 +169,14 @@ Rules for migration:
 
 - Keep the directive import narrow, for example `@hell-ui/angular/button`,
   `@hell-ui/angular/input`, `@hell-ui/angular/card`, or
-  `@hell-ui/angular/dialpad`.
+  `@hell-ui/angular/app-shell`.
 - Import Hell CSS when you want shipped default visuals; the `primitive-icons-css`
-  package-consumer scenario proves the primitive and first directive-suite recipe
-  utilities ship without consumer `@source` scanning.
+  package-consumer scenario proves the primitive, first directive-suite, and App
+  Shell recipe utilities ship without consumer `@source` scanning.
 - Use `ui="..."` for single-root directives such as Button, Input, Card, Field,
-  Tabs, and Accordion directives.
-- Use each projected child directive's local `ui`; a Card, Field, Tabs, or
-  Accordion root does not style its children remotely.
+  Tabs, Accordion, and App Shell/nav directives.
+- Use each projected child directive's local `ui`; a Card, Field, Tabs,
+  Accordion, or App Shell root does not style its children remotely.
 - Use `[ui]="{ ... }"` for owned-anatomy components with multiple public parts,
   such as Dialpad.
 - Use `class` for layout hooks and non-conflicting additions only; use `ui` for deterministic Tailwind utility conflicts because template class order is outside the Part-Class Pipeline.
