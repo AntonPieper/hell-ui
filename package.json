@@ -38,7 +38,7 @@
     "ci:test:package-consumer": "pnpm run test:package-consumer -- --minimal-deps",
     "ci:test:package-consumer:core": "HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing pnpm run ci:test:package-consumer",
     "ci:test:package-consumer:primitives": "HELL_PACKAGE_CONSUMER_SCENARIOS=primitive-icons-css,button-ui,button pnpm run ci:test:package-consumer",
-    "ci:test:package-consumer:composites": "HELL_PACKAGE_CONSUMER_SCENARIOS=composite-css,app-shell,resizable,audio-player,audio-transcript pnpm run ci:test:package-consumer",
+    "ci:test:package-consumer:composites": "HELL_PACKAGE_CONSUMER_SCENARIOS=composite-css,app-shell,resizable,split-view,audio-player,audio-transcript pnpm run ci:test:package-consumer",
     "ci:test:package-consumer:features": "HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor,pdf-viewer pnpm run ci:test:package-consumer",
     "ci:test:package-consumer:tables": "HELL_PACKAGE_CONSUMER_SCENARIOS=table,table-tanstack,table-tanstack-virtual,no-legacy-alias pnpm run ci:test:package-consumer",
     "ci:test:package-consumer:code-editor": "HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor pnpm run ci:test:package-consumer",

@@ -103,7 +103,10 @@ const packageConsumerCiGroups = [
   { name: 'core', scenarios: ['root-core', 'core', 'testing'] },
   { name: 'primitive-foundations', scenarios: ['primitive-icons-css', 'button-ui'] },
   { name: 'button', scenarios: ['button'] },
-  { name: 'composite-foundations', scenarios: ['composite-css', 'app-shell', 'resizable'] },
+  {
+    name: 'composite-foundations',
+    scenarios: ['composite-css', 'app-shell', 'resizable', 'split-view'],
+  },
   { name: 'audio', scenarios: ['audio-player', 'audio-transcript'] },
   { name: 'features', scenarios: ['code-editor', 'pdf-viewer'] },
   { name: 'table-core', scenarios: ['table', 'no-legacy-alias'] },
@@ -115,7 +118,14 @@ const packageConsumerScriptGroups = [
   { name: 'primitives', scenarios: ['primitive-icons-css', 'button-ui', 'button'] },
   {
     name: 'composites',
-    scenarios: ['composite-css', 'app-shell', 'resizable', 'audio-player', 'audio-transcript'],
+    scenarios: [
+      'composite-css',
+      'app-shell',
+      'resizable',
+      'split-view',
+      'audio-player',
+      'audio-transcript',
+    ],
   },
   { name: 'features', scenarios: ['code-editor', 'pdf-viewer'] },
   { name: 'tables', scenarios: ['table', 'table-tanstack', 'table-tanstack-virtual', 'no-legacy-alias'] },
@@ -243,6 +253,16 @@ const packageConsumerScenarioCatalog = [
     dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: resizableConsumerMainTs,
     stylesCss: resizableConsumerStylesCss,
+  },
+  {
+    name: 'split-view',
+    description: 'narrow split-view composite entry with owned Part Style Map anatomy',
+    coverage: ['composites'],
+    peerTier: 'composite',
+    peerGroup: 'composite-icons',
+    dependencies: styledUiDeps,
+    mainTs: splitViewConsumerMainTs,
+    stylesCss: splitViewConsumerStylesCss,
   },
   {
     name: 'audio-player',
@@ -1688,6 +1708,40 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
+function splitViewConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HELL_SPLIT_VIEW_DIRECTIVES, type HellSplitViewUi } from '${packageName}/split-view';
+
+const splitViewUi = {
+  root: 'h-[320px]',
+  pane: 'overflow-auto',
+  itemNavigation: 'gap-hell-3',
+} satisfies HellSplitViewUi;
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [...HELL_SPLIT_VIEW_DIRECTIVES],
+  template: \`
+    <hell-split-view [compactBelow]="0" itemNavigation [ui]="splitViewUi">
+      <ng-template hellSplitPrimary>
+        <section>Primary</section>
+      </ng-template>
+      <ng-template hellSplitDetail>
+        <section>Detail</section>
+      </ng-template>
+    </hell-split-view>
+  \`,
+})
+class App {
+  protected readonly splitViewUi = splitViewUi;
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
 function audioPlayerConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -2115,6 +2169,17 @@ function resizableConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/tokens.css";
 @import "${packageName}/resizable/styles.css";
+`;
+}
+
+function splitViewConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/button/styles.css";
+@import "${packageName}/icon/styles.css";
+@import "${packageName}/pagination/styles.css";
+@import "${packageName}/resizable/styles.css";
+@import "${packageName}/split-view/styles.css";
 `;
 }
 

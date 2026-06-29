@@ -27,6 +27,7 @@ import {
   type HellResizableHandleUi,
   type HellResizablePaneUi,
 } from '@hell-ui/angular/resizable';
+import { HELL_SPLIT_VIEW_DIRECTIVES, type HellSplitViewUi } from '@hell-ui/angular/split-view';
 
 interface ContractCase {
   readonly id: string;
@@ -183,7 +184,7 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellResizable', area: 'composite', coverage: 'dom' },
   { symbol: 'HellResizableHandle', area: 'composite', coverage: 'dom' },
   { symbol: 'HellResizablePane', area: 'composite', coverage: 'dom' },
-  { symbol: 'HellSplitView', area: 'composite', coverage: 'static' },
+  { symbol: 'HellSplitView', area: 'composite', coverage: 'dom' },
   { symbol: 'HellTimeInput', area: 'composite', coverage: 'static' },
   { symbol: 'HellToaster', area: 'composite', coverage: 'static' },
   { symbol: 'HellCodeEditor', area: 'feature', coverage: 'static' },
@@ -221,6 +222,7 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
     ...HELL_SELECT_DIRECTIVES,
     ...HELL_APP_SHELL_DIRECTIVES,
     ...HELL_RESIZABLE_DIRECTIVES,
+    ...HELL_SPLIT_VIEW_DIRECTIVES,
     ...HELL_TABLE_UTILITIES_DIRECTIVES,
   ],
   template: `
@@ -292,6 +294,21 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
       ></div>
       <section id="resizable-pane-b" hellResizablePane [minSize]="40">B</section>
     </div>
+
+    <hell-split-view
+      id="split-view"
+      [compactBelow]="0"
+      itemNavigation
+      framed
+      [ui]="splitViewUi"
+    >
+      <ng-template hellSplitPrimary>
+        <section>Primary</section>
+      </ng-template>
+      <ng-template hellSplitDetail>
+        <section>Detail</section>
+      </ng-template>
+    </hell-split-view>
 
     <div id="table-container" hellTableContainer busy>
       <table id="table" hellTableRoot contentWidth>
@@ -367,6 +384,13 @@ class ContractHost {
   readonly resizableHandleUi = {
     root: 'bg-hell-danger flex-none',
   } satisfies HellResizableHandleUi;
+  readonly splitViewUi = {
+    root: 'h-[420px] bg-hell-surface-muted',
+    resizable: 'h-[410px] bg-hell-danger',
+    pane: 'overflow-auto bg-hell-surface-subtle',
+    detailHeader: 'bg-hell-danger p-hell-3',
+    itemNavigation: 'gap-hell-3',
+  } satisfies HellSplitViewUi;
 }
 
 const STYLEABLE_CASES: readonly ContractCase[] = [
@@ -694,6 +718,30 @@ describe('Hell Component Contract', () => {
     expect(handle.getAttribute('aria-orientation')).toBe('horizontal');
     expect(handle.getAttribute('tabindex')).toBe('0');
     expect(handle.className).toContain('bg-hell-danger');
+  });
+
+  it('exposes split view owned anatomy through flat camelCase parts', () => {
+    const fixture = TestBed.createComponent(ContractHost);
+    fixture.detectChanges();
+
+    const splitView = query(fixture.nativeElement, '#split-view');
+    const resizable = query(fixture.nativeElement, '#split-view [data-slot="resizable"]');
+    const pane = query(fixture.nativeElement, '#split-view [data-slot="pane"][data-pane="primary"]');
+    const detailHeader = query(fixture.nativeElement, '#split-view [data-slot="detailHeader"]');
+    const itemNavigation = query(
+      fixture.nativeElement,
+      '#split-view [data-slot="itemNavigation"]',
+    );
+
+    expect(splitView.classList.contains('hell-split-view')).toBe(false);
+    expect(splitView.getAttribute('data-slot')).toBe('root');
+    expect(splitView.getAttribute('data-framed')).toBe('true');
+    expect(splitView.className).toContain('h-[420px]');
+    expect(splitView.className).not.toContain('h-full');
+    expect(resizable.className).toContain('h-[410px]');
+    expect(pane.className).toContain('overflow-auto');
+    expect(detailHeader.className).toContain('bg-hell-danger');
+    expect(itemNavigation.className).toContain('gap-hell-3');
   });
 });
 

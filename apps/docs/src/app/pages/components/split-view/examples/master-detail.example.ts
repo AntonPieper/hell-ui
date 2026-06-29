@@ -51,7 +51,7 @@ const TICKETS: readonly Ticket[] = [
                 class="justify-start"
                 type="button"
                 [attr.aria-current]="ticket.id === selectedId() ? 'true' : null"
-                data-slot="master-item"
+                data-hell-split-master-item
                 [attr.data-current]="ticket.id === selectedId() ? 'true' : null"
                 (click)="select(ticket.id)"
               >

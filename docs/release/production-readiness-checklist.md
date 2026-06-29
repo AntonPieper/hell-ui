@@ -43,6 +43,7 @@ mapped to command evidence and concrete evidence checks.
             "composite-css",
             "app-shell",
             "resizable",
+            "split-view",
             "audio-player",
             "audio-transcript",
             "table",

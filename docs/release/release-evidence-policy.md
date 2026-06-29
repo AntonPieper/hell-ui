@@ -26,6 +26,7 @@ individual proof paths, but release evidence treats the set as one gate.
 | `composite-css` | Composite CSS stays behind narrow composite entrypoints. |
 | `app-shell` | App Shell composite remains installable without feature peers. |
 | `resizable` | Resizable composite Part Style Map roots ship through the narrow entrypoint. |
+| `split-view` | Split View owned anatomy and icon-backed navigation ship through the narrow entrypoint. |
 | `audio-player` | Base audio player stays separate from transcript runtime peers. |
 | `audio-transcript` | Speech transcript is explicit opt-in and does not pull CodeMirror or pdf.js. |
 | `table` | Table primitives stay free of TanStack and heavy feature peers. |

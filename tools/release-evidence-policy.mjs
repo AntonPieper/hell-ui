@@ -54,6 +54,10 @@ export const releaseCandidateConsumerScenarios = [
     rationale: 'Resizable composite Part Style Map roots ship through the narrow entrypoint.',
   },
   {
+    name: 'split-view',
+    rationale: 'Split View owned anatomy and icon-backed navigation ship through the narrow entrypoint.',
+  },
+  {
     name: 'audio-player',
     rationale: 'Base audio player stays separate from transcript runtime peers.',
   },

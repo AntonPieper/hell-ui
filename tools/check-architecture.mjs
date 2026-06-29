@@ -149,7 +149,6 @@ const legacyStyleableAllowlist = new Set([
   'HellOmnibarItemText',
   'HellOmnibarItemTrailing',
   'HellOmnibarPanel',
-  'HellSplitView',
   'HellToaster',
   'HellCodeEditor',
   'HellTable',
@@ -830,6 +829,16 @@ const migratedPartStyleMapModules = [
     publicApiPath: 'packages/angular/resizable/public-api.ts',
     apiReportFiles: [],
     legacyClass: 'hell-resizable-handle',
+  },
+  {
+    className: 'HellSplitView',
+    partType: 'HellSplitViewPart',
+    uiType: 'HellSplitViewUi',
+    entrypointId: 'split-view',
+    sourcePath: 'packages/angular/split-view/split-view.ts',
+    publicApiPath: 'packages/angular/split-view/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-split-view',
   },
 ];
 

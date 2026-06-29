@@ -43,7 +43,7 @@ Package-consumer scenarios assert these peer groups with strict peer installs. C
 | --- | --- | --- |
 | Core | `@hell-ui/angular`, `/core`, `/testing`; `root-core`, `core`, `testing` | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `ng-primitives`, `rxjs` |
 | Primitive | Narrow primitives such as `/button`, `/select`, and `/icon`; `button-ui`, `button`, `primitive-icons-css` | Core peers. Add `tailwindcss` when importing primitive CSS; add `@ng-icons/font-awesome` for icon-backed entries. |
-| Composite | Narrow composite entry points such as `/app-shell`, `/resizable`, and `/audio-player`; `composite-css`, `app-shell`, `resizable`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Icon-backed composites also assert optional `@ng-icons/font-awesome`. |
+| Composite | Narrow composite entry points such as `/app-shell`, `/resizable`, `/split-view`, and `/audio-player`; `composite-css`, `app-shell`, `resizable`, `split-view`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Icon-backed composites also assert optional `@ng-icons/font-awesome`. |
 | Audio transcript | `/features/audio-transcript`; `audio-transcript` | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled. |
 | Table primitives | `/table`; `table`, `no-legacy-alias` | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack Table, or TanStack Virtual peers. The negative scenario proves removed legacy table aliases and CSS aliases stay unavailable. |
 | TanStack table shell | `/table-tanstack`; `table-tanstack` | Core peers plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`. Root, button, and `/table` scenarios prove TanStack Table is not installed unless this shell is imported. |
@@ -96,6 +96,7 @@ import { HellButton } from '@hell-ui/angular/button';
 import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
 import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
+import { HELL_SPLIT_VIEW_DIRECTIVES } from '@hell-ui/angular/split-view';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 import { HellButtonHarness } from '@hell-ui/angular/testing';
 ```
@@ -116,6 +117,7 @@ Add only the extra entrypoint styles the app imports:
 @import "@hell-ui/angular/tokens.css";
 @import "@hell-ui/angular/app-shell/styles.css";
 @import "@hell-ui/angular/resizable/styles.css";
+@import "@hell-ui/angular/split-view/styles.css";
 @import "@hell-ui/angular/table/styles.css";
 @import "@hell-ui/angular/features/code-editor/styles.css";
 ```
@@ -130,8 +132,9 @@ keeping behavior, accessibility, and state attributes. Directive-suite children,
 such as `hellCardHeader` or `hellAccordionTrigger`, expose their own local
 `root` `ui` contract. App Shell/nav directives follow the same local-root rule:
 style each directive through its own `ui`. Resizable directives follow that
-local-root rule as well. Primitives that have not migrated yet still document
-`unstyled` locally.
+local-root rule as well. Split View exposes a flat owned-anatomy map for parts
+such as `pane`, `compactHeader`, and `itemNavigation`. Primitives that have not
+migrated yet still document `unstyled` locally.
 
 ```html
 <button hellButton variant="primary">Save</button>
@@ -149,6 +152,10 @@ local-root rule as well. Primitives that have not migrated yet still document
   <div hellResizableHandle appearance="grip" ui="bg-hell-surface-muted"></div>
   <section hellResizablePane ui="hd-surface-subtle p-4">Right</section>
 </div>
+<hell-split-view [ui]="{ pane: 'overflow-auto', itemNavigation: 'gap-hell-3' }">
+  <ng-template hellSplitPrimary>Primary</ng-template>
+  <ng-template hellSplitDetail>Detail</ng-template>
+</hell-split-view>
 ```
 
 ## Customization

@@ -47,7 +47,9 @@ import splitViewMasterDetailExampleCodeRaw from './examples/master-detail.exampl
           <li>
             <code>framed</code>, <code>height</code>, <code>backLabel</code>,
             <code>itemNavigationLabel</code>, <code>previousItemLabel</code>,
-            <code>nextItemLabel</code>, <code>unstyled</code>.
+            <code>nextItemLabel</code>, and flat Part Style Map keys such as
+            <code>resizable</code>, <code>pane</code>, <code>compactHeader</code>, and
+            <code>itemNavigation</code> via <code>ui</code>.
           </li>
         </ul>
 
