@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { HellNativeSwitch, HellSwitch } from './switch';
+import { HellNativeSwitch, type HellNativeSwitchUi, HellSwitch, type HellSwitchUi } from './switch';
 
 @Component({
   imports: [HellSwitch],
@@ -85,10 +85,48 @@ class NativeSwitchFormHost {
   readonly checkedEvents: boolean[] = [];
 }
 
+@Component({
+  imports: [HellNativeSwitch, HellSwitch],
+  template: `
+    <button id="custom-switch" hellSwitch [checked]="true" [ui]="switchUi"></button>
+    <input
+      id="native-switch"
+      type="checkbox"
+      hellNativeSwitch
+      checked
+      required
+      ui="w-[44px] bg-hell-danger"
+    />
+    <input
+      id="native-map-switch"
+      type="checkbox"
+      hellNativeSwitch
+      checked
+      [ui]="nativeSwitchUi"
+    />
+  `,
+})
+class SwitchPartStyleHost {
+  protected readonly switchUi = {
+    root: 'w-[44px] bg-hell-danger',
+    thumb: 'size-hell-6 bg-hell-danger-soft',
+  } satisfies HellSwitchUi;
+
+  protected readonly nativeSwitchUi = {
+    root: 'w-[44px] bg-hell-danger',
+  } satisfies HellNativeSwitchUi;
+}
+
 describe('HellSwitch', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SwitchHost, LabelledSwitchHost, SwitchFormHost, NativeSwitchFormHost],
+      imports: [
+        SwitchHost,
+        LabelledSwitchHost,
+        SwitchFormHost,
+        NativeSwitchFormHost,
+        SwitchPartStyleHost,
+      ],
     }).compileComponents();
   });
 
@@ -99,10 +137,10 @@ describe('HellSwitch', () => {
     const sw = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSwitch]');
 
     expect(sw.type).toBe('button');
-    expect(sw.classList.contains('hell-switch')).toBe(true);
+    expect(sw.getAttribute('data-slot')).toBe('root');
     expect(sw.getAttribute('role')).toBe('switch');
     expect(sw.getAttribute('aria-checked')).toBe('false');
-    expect(sw.querySelector('[ngpswitchthumb]')).not.toBeNull();
+    expect(sw.querySelector('[ngpswitchthumb]')?.getAttribute('data-slot')).toBe('thumb');
 
     sw.click();
     fixture.detectChanges();
@@ -186,7 +224,7 @@ describe('HellSwitch', () => {
 
     expect(sw.type).toBe('checkbox');
     expect(sw.getAttribute('role')).toBe('switch');
-    expect(sw.classList.contains('hell-switch')).toBe(true);
+    expect(sw.getAttribute('data-slot')).toBe('root');
     expect(sw.hasAttribute('required')).toBe(false);
     expect(sw.getAttribute('aria-required')).toBeNull();
 
@@ -204,6 +242,41 @@ describe('HellSwitch', () => {
 
     expect(host.control.value).toBe(false);
     expect(host.checkedEvents).toEqual([false]);
+  });
+
+  it('uses part style maps for custom and native switch controls', () => {
+    const fixture = TestBed.createComponent(SwitchPartStyleHost);
+    fixture.detectChanges();
+
+    const sw = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSwitch]');
+    const thumb = sw.querySelector<HTMLElement>('[data-slot="thumb"]');
+    const native = query<HTMLInputElement>(fixture.nativeElement, 'input[hellNativeSwitch]');
+    const nativeMap = query<HTMLInputElement>(fixture.nativeElement, '#native-map-switch');
+
+    expect(sw.getAttribute('data-slot')).toBe('root');
+    expect(sw.classList.contains('hell-switch')).toBe(false);
+    expect(sw.classList.contains('w-[44px]')).toBe(true);
+    expect(sw.classList.contains('bg-hell-danger')).toBe(true);
+    expect(sw.classList.contains('bg-hell-border-strong')).toBe(false);
+    expect(sw.getAttribute('aria-checked')).toBe('true');
+
+    expect(thumb).toBeInstanceOf(HTMLElement);
+    expect(thumb?.classList.contains('size-hell-6')).toBe(true);
+    expect(thumb?.classList.contains('size-hell-5')).toBe(false);
+    expect(thumb?.classList.contains('bg-hell-danger-soft')).toBe(true);
+
+    expect(native.getAttribute('data-slot')).toBe('root');
+    expect(native.classList.contains('hell-switch')).toBe(false);
+    expect(native.classList.contains('w-[44px]')).toBe(true);
+    expect(native.classList.contains('bg-hell-danger')).toBe(true);
+    expect(native.classList.contains('bg-hell-border-strong')).toBe(false);
+    expect(native.getAttribute('data-required')).toBe('true');
+    expect(native.getAttribute('aria-required')).toBe('true');
+
+    expect(nativeMap.getAttribute('data-slot')).toBe('root');
+    expect(nativeMap.classList.contains('w-[44px]')).toBe(true);
+    expect(nativeMap.classList.contains('bg-hell-danger')).toBe(true);
+    expect(nativeMap.classList.contains('bg-hell-border-strong')).toBe(false);
   });
 });
 
