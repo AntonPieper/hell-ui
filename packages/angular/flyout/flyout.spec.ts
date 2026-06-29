@@ -10,7 +10,7 @@ import { HellFlyout, HellFlyoutTrigger } from './flyout';
     <button hellFlyoutTrigger #trigger="hellFlyoutTrigger" type="button">Toggle</button>
 
     @if (trigger.open()) {
-      <div [hellFlyout]="trigger">Panel</div>
+      <div [hellFlyout]="trigger" ui="rounded-hell-pill p-hell-4">Panel</div>
     }
   `,
 })
@@ -226,6 +226,10 @@ describe('HellFlyout outside interaction', () => {
     const panel = query<HTMLElement>(fixture.nativeElement, '[role="dialog"]');
     await waitFor(() => panel.style.getPropertyValue('--hell-flyout-x') !== '');
 
+    expect(panel.getAttribute('data-slot')).toBe('root');
+    expect(panel.className).toContain('rounded-hell-pill');
+    expect(panel.className).not.toContain('rounded-hell-md');
+    expect(panel.className).toContain('p-hell-4');
     expect(panel.getAttribute('data-placement')).toBe('bottom-start');
     expect(panel.style.getPropertyValue('--hell-flyout-x')).toMatch(/px$/);
     expect(panel.style.getPropertyValue('--hell-flyout-y')).toMatch(/px$/);

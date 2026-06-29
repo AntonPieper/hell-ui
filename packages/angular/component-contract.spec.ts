@@ -540,7 +540,104 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
     className: 'text-hell-foreground',
     attrs: { 'data-slot': 'root', 'data-orientation': 'horizontal' },
   },
-  { id: 'select', module: 'HellSelect', className: 'hell-select' },
+  {
+    id: 'select',
+    module: 'HellSelect',
+    className: 'inline-flex',
+    attrs: { 'data-slot': 'root' },
+  },
+  {
+    id: 'nav-item',
+    module: 'HellNavItem',
+    className: 'hell-nav-item',
+    attrs: { 'data-slot': 'nav-item' },
+  },
+  {
+    id: 'nav-section',
+    module: 'HellNavSection',
+    className: 'hell-nav-section',
+    attrs: { 'data-slot': 'nav-section' },
+  },
+  {
+    id: 'nav-section-toggle',
+    module: 'HellNavSectionToggle',
+    className: 'hell-nav-section-toggle',
+    attrs: { 'data-slot': 'nav-section-toggle', 'aria-expanded': 'true' },
+  },
+  {
+    id: 'nav-section-items',
+    module: 'HellNavSectionItems',
+    className: 'hell-nav-section-items',
+    attrs: { 'data-slot': 'nav-section-items' },
+  },
+  {
+    id: 'table-container',
+    module: 'HellTableContainer',
+    className: 'hell-table-container',
+    attrs: { 'aria-busy': 'true' },
+  },
+  {
+    id: 'table',
+    module: 'HellTable',
+    className: 'hell-table',
+    attrs: { 'data-content-width': 'true' },
+  },
+  { id: 'table-head', module: 'HellTableHead', className: 'hell-table-head' },
+  { id: 'table-body', module: 'HellTableBody', className: 'hell-table-body' },
+  {
+    id: 'table-row',
+    module: 'HellTableRow',
+    className: 'hell-table-row',
+    attrs: { 'data-active': 'true', 'data-selected': 'true' },
+  },
+  {
+    id: 'table-selection-header',
+    module: 'HellTableSelectionCell',
+    className: 'hell-table-selection-cell',
+    attrs: { 'data-hell-table-selection-cell': '' },
+  },
+  {
+    id: 'table-header-cell',
+    module: 'HellTableHeaderCell',
+    className: 'hell-table-header-cell',
+    attrs: { 'data-sort': 'asc', 'aria-sort': 'ascending', 'data-sortable': 'true' },
+  },
+  {
+    id: 'table-sort-trigger',
+    module: 'HellTableSortTrigger',
+    className: 'hell-table-sort-trigger',
+    attrs: { type: 'button' },
+  },
+  {
+    id: 'table-row-checkbox',
+    module: 'HellTableRowCheckbox',
+    className: 'hell-table-row-checkbox',
+    attrs: { type: 'checkbox', 'data-hell-table-row-checkbox': '' },
+  },
+  {
+    id: 'table-row-action',
+    module: 'HellTableRowAction',
+    className: 'hell-table-row-action',
+    attrs: { type: 'button', 'data-hell-table-row-action': '' },
+  },
+  {
+    id: 'table-row-radio',
+    module: 'HellTableRowRadio',
+    className: 'hell-table-row-radio',
+    attrs: { type: 'radio', 'data-hell-table-row-radio': '' },
+  },
+  {
+    id: 'table-cell',
+    module: 'HellTableCell',
+    className: 'hell-table-cell',
+    attrs: { 'data-align': 'end', 'data-space': 'empty' },
+  },
+  {
+    id: 'table-resizer',
+    module: 'HellTableResizeHandle',
+    className: 'hell-table-resize-handle',
+    attrs: { role: 'separator' },
+  },
 ];
 
 const STYLE_OPT_OUT_CASES: readonly ContractCase[] = [];
@@ -637,13 +734,16 @@ describe('Hell Component Contract', () => {
     const fixture = TestBed.createComponent(ContractHost);
     fixture.detectChanges();
 
-    const select = fixture.nativeElement.querySelector('.hell-select') as HTMLButtonElement;
-    const value = select.querySelector('.hell-select-value') as HTMLElement;
-    const placeholder = select.querySelector('.hell-select-placeholder') as HTMLElement;
+    const select = fixture.nativeElement.querySelector('[hellSelect]') as HTMLButtonElement;
+    const value = select.querySelector('[hellSelectValue]') as HTMLElement;
+    const placeholder = select.querySelector('[hellSelectPlaceholder]') as HTMLElement;
 
-    expect(select.classList.contains('hell-select')).toBe(true);
-    expect(value.classList.contains('hell-select-value')).toBe(true);
-    expect(placeholder.classList.contains('hell-select-placeholder')).toBe(true);
+    expect(select.getAttribute('data-slot')).toBe('root');
+    expect(select.className).toContain('inline-flex');
+    expect(value.getAttribute('data-slot')).toBe('root');
+    expect(value.className).toContain('text-ellipsis');
+    expect(placeholder.getAttribute('data-slot')).toBe('root');
+    expect(placeholder.className).toContain('text-hell-foreground-muted');
   });
 
   it('exposes app shell nav as explicit parts instead of raw descendant styling', () => {

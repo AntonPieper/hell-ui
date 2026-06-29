@@ -42,9 +42,10 @@ import tooltipHoverableExampleCodeRaw from './examples/hoverable.example.ts?raw'
 
       <h2>API</h2>
       <ul>
-        <li><code>placement</code>, <code>offset</code></li>
+        <li><code>placement</code>, <code>offset</code>, <code>container</code></li>
         <li><code>showDelay</code>, <code>hideDelay</code> (ms)</li>
         <li><code>disabled</code>, <code>showOnOverflow</code>, <code>hoverableContent</code></li>
+        <li><code>ui</code>: Part Style Map for the tooltip surface's local <code>root</code> part. The surface renders <code>data-slot="root"</code>.</li>
       </ul>
 
       <h2>Do</h2>

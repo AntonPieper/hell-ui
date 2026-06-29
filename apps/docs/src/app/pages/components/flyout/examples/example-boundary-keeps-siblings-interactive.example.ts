@@ -73,7 +73,7 @@ import { HellInput } from '@hell-ui/angular/input';
       flex-wrap: wrap;
     }
     .hd-flyout-panel {
-      --hell-flyout-max-inline-size: 320px;
+      max-inline-size: 320px;
       padding: var(--spacing-hell-4);
       display: grid;
       gap: var(--spacing-hell-3);

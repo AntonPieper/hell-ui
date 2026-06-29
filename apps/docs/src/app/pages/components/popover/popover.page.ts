@@ -30,6 +30,7 @@ import popoverExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
         <li><code>placement</code>, <code>offset</code>, <code>flip</code></li>
         <li><code>closeOnEscape</code>, <code>closeOnOutsideClick</code>, <code>disabled</code></li>
         <li><code>(openChange)</code>: emits when opened or closed</li>
+        <li><code>ui</code>: Part Style Map for the popover surface's local <code>root</code> part. The surface renders <code>data-slot="root"</code>.</li>
       </ul>
 
       <h2>Do</h2>

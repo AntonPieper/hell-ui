@@ -171,7 +171,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/combobox',
     detail: 'components/combobox/examples/basic.example.ts',
     terms:
-      'combobox basic components/combobox/examples/basic.example components/combobox hellCombobox hellComboboxInput hellComboboxOption',
+      'combobox basic components/combobox/examples/basic.example components/combobox hellCombobox hellComboboxInput hellComboboxOption ui data-slot root',
   },
   {
     title: 'Combobox: Multiple',
@@ -185,7 +185,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/combobox',
     detail: 'components/combobox/examples/basic-preset.example.ts',
     terms:
-      'combobox preset components/combobox/examples/basic-preset.example components/combobox hell-combobox-basic',
+      'combobox preset components/combobox/examples/basic-preset.example components/combobox hell-combobox-basic HellComboboxBasic ui data-slot root',
   },
   {
     title: 'Date Picker: Bounded',
@@ -248,7 +248,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/flyout',
     detail: 'components/flyout/examples/example-boundary-keeps-siblings-interactive.example.ts',
     terms:
-      'flyout example-boundary-keeps-siblings-interactive components/flyout/examples/example-boundary-keeps-siblings-interactive.example components/flyout hellFlyout hellFlyoutTrigger boundary',
+      'flyout example-boundary-keeps-siblings-interactive components/flyout/examples/example-boundary-keeps-siblings-interactive.example components/flyout hellFlyout hellFlyoutTrigger boundary ui data-slot root',
   },
   {
     title: 'Icon: Example',
@@ -308,21 +308,21 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/listbox',
     detail: 'components/listbox/examples/basic.example.ts',
     terms:
-      'listbox basic components/listbox/examples/basic.example components/listbox HELL_LISTBOX_DIRECTIVES hellListbox hellListboxOption hellListboxHeader valueChange option',
+      'listbox basic components/listbox/examples/basic.example components/listbox HELL_LISTBOX_DIRECTIVES hellListbox hellListboxOption hellListboxHeader valueChange option ui data-slot root',
   },
   {
     title: 'Menu: Basic',
     path: '/components/menu',
     detail: 'components/menu/examples/basic.example.ts',
     terms:
-      'menu basic components/menu/examples/basic.example components/menu hellMenu hellMenuTrigger hellMenuItem',
+      'menu basic components/menu/examples/basic.example components/menu hellMenu hellMenuTrigger hellMenuItem ui data-slot root',
   },
   {
     title: 'Menu: With Icons Sections Submenus',
     path: '/components/menu',
     detail: 'components/menu/examples/with-icons-sections-submenus.example.ts',
     terms:
-      'menu with-icons-sections-submenus components/menu/examples/with-icons-sections-submenus.example components/menu hellMenu hellSubmenuTrigger hellMenuSection',
+      'menu with-icons-sections-submenus components/menu/examples/with-icons-sections-submenus.example components/menu hellMenu hellSubmenuTrigger hellMenuSection ui data-slot root',
   },
   {
     title: 'Pagination: Basic',
@@ -357,7 +357,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/popover',
     detail: 'components/popover/examples/example.example.ts',
     terms:
-      'popover example components/popover/examples/example.example components/popover hellPopover hellPopoverTrigger',
+      'popover example components/popover/examples/example.example components/popover hellPopover hellPopoverTrigger ui data-slot root',
   },
   {
     title: 'Progress: Examples',
@@ -406,14 +406,14 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/select',
     detail: 'components/select/examples/basic.example.ts',
     terms:
-      'select basic components/select/examples/basic.example components/select hellSelect hellSelectOption hellSelectDropdown',
+      'select basic components/select/examples/basic.example components/select hellSelect hellSelectOption hellSelectDropdown ui data-slot root',
   },
   {
     title: 'Select: Preset',
     path: '/components/select',
     detail: 'components/select/examples/basic-preset.example.ts',
     terms:
-      'select preset components/select/examples/basic-preset.example components/select hell-select-basic',
+      'select preset components/select/examples/basic-preset.example components/select hell-select-basic HellSelectBasic ui data-slot root',
   },
   {
     title: 'Separator: Flush Inside A Card',

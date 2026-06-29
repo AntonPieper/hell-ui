@@ -145,7 +145,7 @@ test.describe('omnibar accessibility contract', () => {
     await expect(menu).toBeVisible();
 
     const stack = await page.evaluate(() => {
-      const menu = document.querySelector<HTMLElement>('.hell-menu');
+      const menu = document.querySelector<HTMLElement>('[hellMenu][data-slot="root"]');
       const pane = document.querySelector<HTMLElement>('.hell-omnibar-overlay-pane');
       if (!menu || !pane) throw new Error('Expected omnibar menu and pane.');
 
@@ -154,7 +154,7 @@ test.describe('omnibar accessibility contract', () => {
       return {
         menuZ: Number(getComputedStyle(menu).zIndex),
         paneZ: Number(getComputedStyle(pane).zIndex),
-        topIsMenu: Boolean(target?.closest('.hell-menu')),
+        topIsMenu: Boolean(target?.closest('[hellMenu][data-slot="root"]')),
       };
     });
 

@@ -57,7 +57,8 @@ import comboboxBasicPresetExampleCodeRaw from './examples/basic-preset.example.t
       <ul>
         <li>
           <code>&lt;hell-combobox-basic&gt;</code>: compact preset that composes input+button+
-          portal+options and applies common display filtering.
+          portal+options and applies common display filtering. Accepts <code>ui</code> for its
+          host <code>root</code> part.
         </li>
         <li>
           <code>[hellCombobox]</code>: container.
@@ -85,6 +86,7 @@ import comboboxBasicPresetExampleCodeRaw from './examples/basic-preset.example.t
         <li>
           <code>[hellComboboxEmpty]</code>: placeholder slot for the no-results state.
         </li>
+        <li><code>ui</code>: Part Style Map for each styled directive's local <code>root</code> part. Rendered parts expose <code>data-slot="root"</code>.</li>
       </ul>
 
       <h2>Do</h2>

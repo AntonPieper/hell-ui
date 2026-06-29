@@ -312,7 +312,7 @@
     }
   }
 
-  .hd-palette-select .hell-select-value {
+  .hd-palette-select [hellSelectValue][data-slot='root'] {
     font-weight: 500;
   }
 

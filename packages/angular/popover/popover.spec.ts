@@ -20,7 +20,7 @@ beforeAll(() => {
   imports: [HellPopover, HellPopoverTrigger],
   template: `
     <ng-template #popover>
-      <div hellPopover>Popover</div>
+      <div hellPopover ui="rounded-hell-pill bg-hell-primary">Popover</div>
     </ng-template>
     <a
       id="enabled-anchor"
@@ -92,7 +92,7 @@ describe('HellPopoverTrigger', () => {
   });
 
   afterEach(() => {
-    document.body.replaceChildren();
+    cleanupPortaledTestElements('[hellPopover]');
   });
 
   it('opens from enabled anchors without leaving default navigation', async () => {
@@ -110,6 +110,11 @@ describe('HellPopoverTrigger', () => {
     await waitForPopoverTriggerOpen(fixture, anchor);
     await waitForPopoverOpenEvent(fixture);
 
+    const popover = query<HTMLElement>(container, '[hellPopover]');
+    expect(popover.getAttribute('data-slot')).toBe('root');
+    expect(popover.className).toContain('rounded-hell-pill');
+    expect(popover.className).not.toContain('rounded-hell-md');
+    expect(popover.className).toContain('bg-hell-primary');
     expect(container.textContent).toContain('Popover');
 
     const closeClick = new MouseEvent('click', { bubbles: true, cancelable: true });
@@ -348,4 +353,10 @@ function query<T extends HTMLElement>(root: ParentNode, selector: string): T {
   const element = root.querySelector<T>(selector);
   if (!element) throw new Error(`Expected ${selector}.`);
   return element;
+}
+
+function cleanupPortaledTestElements(selector: string): void {
+  for (const element of Array.from(document.body.querySelectorAll(selector))) {
+    element.remove();
+  }
 }

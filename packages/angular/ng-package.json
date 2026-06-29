@@ -61,6 +61,41 @@
       "output": "dialpad"
     },
     {
+      "glob": "menu.ts",
+      "input": "menu",
+      "output": "menu"
+    },
+    {
+      "glob": "listbox.ts",
+      "input": "listbox",
+      "output": "listbox"
+    },
+    {
+      "glob": "popover.ts",
+      "input": "popover",
+      "output": "popover"
+    },
+    {
+      "glob": "tooltip.ts",
+      "input": "tooltip",
+      "output": "tooltip"
+    },
+    {
+      "glob": "flyout.ts",
+      "input": "flyout",
+      "output": "flyout"
+    },
+    {
+      "glob": "select.ts",
+      "input": "select",
+      "output": "select"
+    },
+    {
+      "glob": "combobox.ts",
+      "input": "combobox",
+      "output": "combobox"
+    },
+    {
       "glob": "date-input.ts",
       "input": "date-input",
       "output": "date-input"

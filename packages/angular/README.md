@@ -166,13 +166,17 @@ AudioPlayer, Omnibar, and CodeEditor expose flat owned-anatomy maps through
 
 ## Customization
 
-Hell uses semantic tokens and supported component variables:
+Hell uses semantic tokens plus Part Style Maps for migrated styling surfaces:
 
-```css
-.danger-zone {
-  --hell-select-width: auto;
-  --hell-select-indicator-display: none;
-}
+```html
+<button
+  hellSelect
+  ui="min-w-64 rounded-hell-pill"
+  [value]="country()"
+  (valueChange)="country.set($event)"
+>
+  <span hellSelectValue [ui]="{ root: 'font-semibold' }">{{ country() }}</span>
+</button>
 ```
 
 ## Headless Composition

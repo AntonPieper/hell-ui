@@ -1,158 +1,36 @@
+/* Combobox defaults are Tailwind utility recipes in the directives. */
+@source "./combobox.ts";
+
 @layer components {
+  [hellComboboxButton][data-slot='root']::after {
+    content: '';
+    display: block;
+    width: 10px;
+    height: 10px;
+    background-color: currentColor;
+    mask-image: var(--hell-icon-chevron-down);
+    -webkit-mask-image: var(--hell-icon-chevron-down);
+    mask-size: contain;
+    -webkit-mask-size: contain;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-position: center;
+    transition: rotate var(--hell-duration-fast) var(--ease-hell-out);
+  }
 
-  /* Combobox — single-selection input/button with floating dropdown.
-     Composed of ng-primitives directives, but the layout intentionally
-     mirrors `.hell-input` and `.hell-menu` so it slots into existing forms
-     and overflow surfaces without retraining the eye. */
+  [hellCombobox][data-slot='root'][data-open] [hellComboboxButton][data-slot='root']::after {
+    rotate: 180deg;
+  }
+}
 
-  .hell-combobox {
-      display: inline-flex;
-      align-items: center;
-      width: var(--hell-combobox-width, 100%);
-      gap: 0;
-      height: var(--hell-combobox-height, var(--spacing-hell-control-md));
-      padding-inline-start: var(--hell-combobox-padding-inline, var(--spacing-hell-4));
-      padding-inline-end: 0;
-      font-size: var(--hell-combobox-font-size, 13px);
-      font-family: inherit;
-      color: var(--hell-combobox-color, var(--color-hell-foreground));
-      background-color: var(--hell-combobox-background, var(--color-hell-surface-elevated));
-      border-style: solid;
-      border-width: 1px;
-      border-color: var(--hell-combobox-border-color, var(--color-hell-border));
-      border-radius: var(--hell-combobox-radius, var(--radius-md));
-      outline: none;
-      cursor: text;
-      transition:
-        border-color var(--hell-duration-fast) var(--ease-hell-out),
-        box-shadow var(--hell-duration-fast) var(--ease-hell-out);
-      &[data-hover]:not([data-focus]) {
-        border-color: var(--color-hell-border-strong);
-      }
-      &[data-focus] {
-        border-color: var(--color-hell-border-focus);
-        box-shadow: 0 0 0 3px var(--color-hell-focus-ring);
-      }
-      &[data-disabled] {
-        cursor: not-allowed;
-        background-color: var(--color-hell-surface-subtle);
-        color: var(--color-hell-foreground-muted);
-      }
-      &[data-invalid] {
-        border-color: var(--color-hell-danger);
-      }
-    }
-
-  .hell-combobox-input {
-      flex: 1 1 auto;
-      min-width: 0;
-      height: 100%;
-      padding: 0;
-      font-size: inherit;
-      font-family: inherit;
-      color: inherit;
-      background: transparent;
-      border: 0;
-      outline: none;
-      &::placeholder {
-        color: var(--color-hell-foreground-muted);
-      }
-    }
-
-  .hell-combobox-button {
-      flex-shrink: 0;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: var(--spacing-hell-control-md);
-      height: 100%;
-      padding: 0;
-      color: var(--color-hell-foreground-muted);
-      background: transparent;
-      border: 0;
-      border-inline-start: 1px solid transparent;
-      border-start-end-radius: inherit;
-      border-end-end-radius: inherit;
-      cursor: pointer;
-      outline: none;
-      &::after {
-        content: '';
-        display: var(--hell-combobox-indicator-display, block);
-        width: var(--hell-combobox-indicator-size, 10px);
-        height: var(--hell-combobox-indicator-size, 10px);
-        background-color: currentColor;
-        mask-image: var(--hell-combobox-indicator-icon, var(--hell-icon-chevron-down));
-        -webkit-mask-image: var(--hell-combobox-indicator-icon, var(--hell-icon-chevron-down));
-        mask-size: contain;
-        -webkit-mask-size: contain;
-        mask-repeat: no-repeat;
-        -webkit-mask-repeat: no-repeat;
-        mask-position: center;
-        -webkit-mask-position: center;
-        transition: rotate var(--hell-duration-fast) var(--ease-hell-out);
-      }
-      &[data-hover] { color: var(--color-hell-foreground); }
-    }
-
-  .hell-combobox[data-open] .hell-combobox-button::after {
-      rotate: 180deg;
-    }
-
-  .hell-combobox-dropdown {
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      width: var(--hell-combobox-dropdown-width, var(--ngp-combobox-width, var(--ngp-combobox-input-width, 220px)));
-      max-height: var(--hell-combobox-dropdown-max-height, min(320px, var(--ngp-combobox-available-height, 320px)));
-      overflow-y: auto;
-      background-color: var(--hell-combobox-dropdown-background, var(--color-hell-surface-elevated));
-      border-style: solid;
-      border-width: 1px;
-      border-color: var(--hell-combobox-dropdown-border-color, var(--color-hell-border));
-      border-radius: var(--hell-combobox-dropdown-radius, var(--radius-md));
-      box-shadow: var(--hell-combobox-dropdown-shadow, var(--shadow-hell-lg));
-      padding: var(--spacing-hell-2);
-      gap: 1px;
-      outline: none;
-      transform-origin: var(--ngp-combobox-transform-origin, top);
-      animation: hell-pop-in var(--hell-duration-fast) var(--ease-hell-out);
-    }
-
-  .hell-combobox-option {
-      display: flex;
-      cursor: pointer;
-      align-items: center;
-      gap: var(--spacing-hell-3);
-      padding-inline: calc(var(--spacing) * 2.5);
-      padding-block: calc(var(--spacing) * 1.5);
-      font-size: 13px;
-      color: var(--color-hell-foreground);
-      background-color: transparent;
-      border-radius: var(--radius-sm);
-      outline: none;
-      &[data-active] {
-        background-color: var(--color-hell-surface-muted);
-      }
-      &[data-selected] {
-        color: var(--color-hell-primary-soft-foreground);
-        background-color: var(--color-hell-primary-soft);
-        font-weight: var(--font-weight-medium);
-      }
-      &[data-selected][data-active] {
-        background-color: color-mix(in oklab, var(--color-hell-primary) 18%, var(--color-hell-surface-muted));
-      }
-      &[data-disabled] {
-        cursor: not-allowed;
-        color: var(--color-hell-foreground-muted);
-        background-color: var(--color-hell-surface-subtle);
-      }
-    }
-
-  .hell-combobox-empty {
-      padding-inline: calc(var(--spacing) * 2.5);
-      padding-block: calc(var(--spacing) * 2);
-      font-size: 12px;
-      color: var(--color-hell-foreground-subtle);
-    }
-
+@keyframes hell-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
