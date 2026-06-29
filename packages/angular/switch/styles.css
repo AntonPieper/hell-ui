@@ -1,3 +1,6 @@
+/* Switch defaults are Tailwind utility recipes in the directive/component. */
+@source "./switch.ts";
+
 @layer components {
   :where(label:has(> [hellSwitch][data-slot='root']:not([data-disabled], :disabled))),
   :where(label:has(> input[hellNativeSwitch][data-slot='root']:not([data-disabled], :disabled))) {

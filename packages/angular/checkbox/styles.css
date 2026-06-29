@@ -1,3 +1,6 @@
+/* Checkbox defaults are Tailwind utility recipes in the directives. */
+@source "./checkbox.ts";
+
 @layer components {
   :where(label:has(> [hellCheckbox][data-slot='root']:not([data-disabled], :disabled))),
   :where(label:has(> input[hellNativeCheckbox][data-slot='root']:not([data-disabled], :disabled))) {

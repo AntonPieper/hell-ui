@@ -1,3 +1,6 @@
+/* Radio defaults are Tailwind utility recipes in the directives. */
+@source "./radio.ts";
+
 @layer components {
   input[hellNativeRadio][data-slot='root'] {
     -webkit-appearance: none;
