@@ -54,7 +54,7 @@ package-consumer:
       - PACKAGE_CONSUMER_GROUP: core
         PACKAGE_CONSUMER_SCENARIOS: root-core,core,testing
       - PACKAGE_CONSUMER_GROUP: primitive-foundations
-        PACKAGE_CONSUMER_SCENARIOS: primitive-icons-css,button-ui
+        PACKAGE_CONSUMER_SCENARIOS: primitive-icons-css,button-ui,pagination
       - PACKAGE_CONSUMER_GROUP: button
         PACKAGE_CONSUMER_SCENARIOS: button
       - PACKAGE_CONSUMER_GROUP: composite-foundations

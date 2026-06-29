@@ -42,6 +42,10 @@ export const releaseCandidateConsumerScenarios = [
     rationale: 'Icon-backed primitive CSS stays isolated to narrow primitive imports.',
   },
   {
+    name: 'pagination',
+    rationale: 'Pagination Part Style Map controls ship through the narrow primitive entrypoint.',
+  },
+  {
     name: 'composite-css',
     rationale: 'Composite CSS stays behind narrow composite entrypoints.',
   },

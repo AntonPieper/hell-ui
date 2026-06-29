@@ -101,7 +101,7 @@ const requiredScenarioCoverageAreas = new Set([
 
 const packageConsumerCiGroups = [
   { name: 'core', scenarios: ['root-core', 'core', 'testing'] },
-  { name: 'primitive-foundations', scenarios: ['primitive-icons-css', 'button-ui'] },
+  { name: 'primitive-foundations', scenarios: ['primitive-icons-css', 'button-ui', 'pagination'] },
   { name: 'button', scenarios: ['button'] },
   {
     name: 'composite-foundations',
@@ -115,7 +115,7 @@ const packageConsumerCiGroups = [
 
 const packageConsumerScriptGroups = [
   { name: 'core', scenarios: ['root-core', 'core', 'testing'] },
-  { name: 'primitives', scenarios: ['primitive-icons-css', 'button-ui', 'button'] },
+  { name: 'primitives', scenarios: ['primitive-icons-css', 'button-ui', 'button', 'pagination'] },
   {
     name: 'composites',
     scenarios: [
@@ -222,6 +222,17 @@ const packageConsumerScenarioCatalog = [
         expected: 'rgb(52, 82, 255)',
       },
     ],
+  },
+  {
+    name: 'pagination',
+    description: 'narrow pagination primitive entry with Part Style Map controls',
+    coverage: ['styled-primitives'],
+    peerTier: 'primitive',
+    peerGroup: 'primitive',
+    dependencies: buttonStyledDeps,
+    forbiddenDependencies: tableAdapterPeerGroup,
+    mainTs: paginationConsumerMainTs,
+    stylesCss: paginationConsumerStylesCss,
   },
   {
     name: 'composite-css',
@@ -1422,6 +1433,42 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
+function paginationConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HELL_PAGINATION_DIRECTIVES, type HellPaginationButtonUi, type HellPaginationStripUi } from '${packageName}/pagination';
+
+const stripUi = {
+  root: 'gap-hell-4',
+  jumpSelect: 'min-w-[calc(var(--spacing)*24)]',
+} satisfies HellPaginationStripUi;
+
+const pageButtonUi = {
+  root: 'rounded-hell-pill bg-hell-primary',
+} satisfies HellPaginationButtonUi;
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [...HELL_PAGINATION_DIRECTIVES],
+  template: \`
+    <hell-pagination mode="jump" [page]="2" [pageCount]="6" [ui]="stripUi" />
+    <nav hellPagination [page]="1" [pageCount]="3" ui="gap-hell-4">
+      <button hellPaginationPrev type="button">Previous</button>
+      <button hellPaginationButton type="button" [page]="2" [ui]="pageButtonUi">2</button>
+      <button hellPaginationNext type="button" ui="text-hell-danger">Next</button>
+    </nav>
+  \`,
+})
+class App {
+  protected readonly stripUi = stripUi;
+  protected readonly pageButtonUi = pageButtonUi;
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
 function primitivesConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -2151,6 +2198,14 @@ function buttonConsumerStylesCss() {
 @import "${packageName}/tokens.css";
 @import "${packageName}/button/styles.css";
 :root { --color-hell-primary:#3452ff; }
+`;
+}
+
+function paginationConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/input/styles.css";
+@import "${packageName}/pagination/styles.css";
 `;
 }
 

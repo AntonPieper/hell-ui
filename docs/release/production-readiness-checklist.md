@@ -40,6 +40,7 @@ mapped to command evidence and concrete evidence checks.
             "button-ui",
             "button",
             "primitive-icons-css",
+            "pagination",
             "composite-css",
             "app-shell",
             "resizable",

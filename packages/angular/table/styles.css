@@ -431,16 +431,23 @@
       gap: var(--spacing-hell-3);
     }
 
-    .hell-tanstack-pagination .hell-pagination {
+    .hell-tanstack-pagination hell-pagination[data-slot='root'] {
       flex: 1 1 100%;
       gap: var(--spacing-hell-2);
     }
 
-    .hell-tanstack-pagination .hell-pagination-item {
-      --_hell-btn-height: var(--spacing-hell-control-md);
-      --_hell-btn-px: 0;
+    .hell-tanstack-pagination
+      :is(
+        button[hellPaginationFirst],
+        button[hellPaginationPrev],
+        button[hellPaginationButton],
+        button[hellPaginationNext],
+        button[hellPaginationLast]
+      )[data-slot='root'] {
+      height: var(--spacing-hell-control-md);
       width: var(--spacing-hell-control-md);
       min-width: var(--spacing-hell-control-md);
+      padding-inline: 0;
     }
 
     .hell-tanstack-pagination [data-slot='page-size'] {

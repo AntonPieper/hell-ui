@@ -98,30 +98,34 @@ export class HellSplitDetail {
     <ng-template #itemNavigationControls>
       @if (itemNavigation()) {
         <nav
-          hellPagination
           data-slot="itemNavigation"
           [class]="part('itemNavigation')"
-          [page]="itemNavigationPage()"
-          [pageCount]="itemNavigationPageCount()"
           [attr.aria-label]="itemNavigationLabel()"
-          (pageChange)="goToItemPage($any($event))"
         >
-          <button
-            hellPaginationPrev
-            type="button"
-            [disabled]="previousItemDisabled()"
-            [attr.aria-label]="previousItemLabel()"
+          <div
+            hellPagination
+            [ui]="part('itemNavigation')"
+            [page]="itemNavigationPage()"
+            [pageCount]="itemNavigationPageCount()"
+            (pageChange)="goToItemPage($any($event))"
           >
-            <hell-icon [name]="'faSolidArrowLeft'" size="12px" />
-          </button>
-          <button
-            hellPaginationNext
-            type="button"
-            [disabled]="nextItemDisabled()"
-            [attr.aria-label]="nextItemLabel()"
-          >
-            <hell-icon data-direction="next" [name]="'faSolidArrowLeft'" size="12px" />
-          </button>
+            <button
+              hellPaginationPrev
+              type="button"
+              [disabled]="previousItemDisabled()"
+              [attr.aria-label]="previousItemLabel()"
+            >
+              <hell-icon [name]="'faSolidArrowLeft'" size="12px" />
+            </button>
+            <button
+              hellPaginationNext
+              type="button"
+              [disabled]="nextItemDisabled()"
+              [attr.aria-label]="nextItemLabel()"
+            >
+              <hell-icon data-direction="next" [name]="'faSolidArrowLeft'" size="12px" />
+            </button>
+          </div>
         </nav>
       }
     </ng-template>

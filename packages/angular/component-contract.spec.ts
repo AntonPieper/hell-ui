@@ -20,6 +20,7 @@ import { HellAvatar } from '@hell-ui/angular/avatar';
 import { HellInput, HellNativeSelect, HellTextarea } from '@hell-ui/angular/input';
 import { HellBadge, HellKbd, HellTag } from '@hell-ui/angular/tag';
 import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
+import { HELL_PAGINATION_DIRECTIVES, type HellPaginationStripUi } from '@hell-ui/angular/pagination';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 import {
@@ -107,13 +108,13 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellMenuSection', area: 'primitive', coverage: 'static' },
   { symbol: 'HellMenuSeparator', area: 'primitive', coverage: 'static' },
   { symbol: 'HellNativeSelect', area: 'primitive', coverage: 'dom' },
-  { symbol: 'HellPagination', area: 'primitive', coverage: 'static' },
-  { symbol: 'HellPaginationButton', area: 'primitive', coverage: 'static' },
-  { symbol: 'HellPaginationFirst', area: 'primitive', coverage: 'static' },
-  { symbol: 'HellPaginationLast', area: 'primitive', coverage: 'static' },
-  { symbol: 'HellPaginationNext', area: 'primitive', coverage: 'static' },
-  { symbol: 'HellPaginationPrev', area: 'primitive', coverage: 'static' },
-  { symbol: 'HellPaginationStrip', area: 'primitive', coverage: 'static' },
+  { symbol: 'HellPagination', area: 'primitive', coverage: 'dom' },
+  { symbol: 'HellPaginationButton', area: 'primitive', coverage: 'dom' },
+  { symbol: 'HellPaginationFirst', area: 'primitive', coverage: 'dom' },
+  { symbol: 'HellPaginationLast', area: 'primitive', coverage: 'dom' },
+  { symbol: 'HellPaginationNext', area: 'primitive', coverage: 'dom' },
+  { symbol: 'HellPaginationPrev', area: 'primitive', coverage: 'dom' },
+  { symbol: 'HellPaginationStrip', area: 'primitive', coverage: 'dom' },
   { symbol: 'HellPopover', area: 'primitive', coverage: 'static' },
   { symbol: 'HellProgress', area: 'primitive', coverage: 'static' },
   { symbol: 'HellProgressBar', area: 'primitive', coverage: 'static' },
@@ -220,6 +221,7 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
     ...HELL_CARD_DIRECTIVES,
     ...HELL_FIELD_DIRECTIVES,
     ...HELL_SELECT_DIRECTIVES,
+    ...HELL_PAGINATION_DIRECTIVES,
     ...HELL_APP_SHELL_DIRECTIVES,
     ...HELL_RESIZABLE_DIRECTIVES,
     ...HELL_SPLIT_VIEW_DIRECTIVES,
@@ -264,6 +266,25 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
       <span hellSelectValue>Germany</span>
       <span hellSelectPlaceholder>Choose country</span>
     </button>
+
+    <nav id="pagination" hellPagination ui="gap-hell-4" [page]="1" [pageCount]="3">
+      <button id="pagination-first" hellPaginationFirst type="button" ui="bg-hell-danger px-hell-7">
+        First
+      </button>
+      <button id="pagination-prev" hellPaginationPrev type="button">Previous</button>
+      <button id="pagination-page" hellPaginationButton type="button" [page]="2" aria-label="Page 2">
+        2
+      </button>
+      <button id="pagination-next" hellPaginationNext type="button">Next</button>
+      <button id="pagination-last" hellPaginationLast type="button">Last</button>
+    </nav>
+    <hell-pagination
+      id="pagination-strip"
+      mode="jump"
+      [page]="2"
+      [pageCount]="4"
+      [ui]="paginationStripUi"
+    />
 
     <nav hellAppSidenav>
       <a id="nav-item" hellNavItem active href="#">
@@ -391,6 +412,11 @@ class ContractHost {
     detailHeader: 'bg-hell-danger p-hell-3',
     itemNavigation: 'gap-hell-3',
   } satisfies HellSplitViewUi;
+  readonly paginationStripUi = {
+    root: 'gap-hell-4 bg-hell-surface-muted',
+    jump: 'text-hell-danger',
+    jumpSelect: 'min-w-[calc(var(--spacing)*24)]',
+  } satisfies HellPaginationStripUi;
 }
 
 const STYLEABLE_CASES: readonly ContractCase[] = [
@@ -718,6 +744,44 @@ describe('Hell Component Contract', () => {
     expect(handle.getAttribute('aria-orientation')).toBe('horizontal');
     expect(handle.getAttribute('tabindex')).toBe('0');
     expect(handle.className).toContain('bg-hell-danger');
+  });
+
+  it('exposes pagination local roots and strip anatomy through Part Style Maps', () => {
+    const fixture = TestBed.createComponent(ContractHost);
+    fixture.detectChanges();
+
+    const pagination = query(fixture.nativeElement, '#pagination');
+    const first = query(fixture.nativeElement, '#pagination-first');
+    const prev = query(fixture.nativeElement, '#pagination-prev');
+    const numbered = query(fixture.nativeElement, '#pagination-page');
+    const next = query(fixture.nativeElement, '#pagination-next');
+    const last = query(fixture.nativeElement, '#pagination-last');
+    const strip = query(fixture.nativeElement, '#pagination-strip');
+    const jump = query(strip, '[data-slot="jump"]');
+    const jumpSelect = query(strip, '[data-slot="jumpSelect"]');
+    const select = query<HTMLSelectElement>(strip, 'select[hellNativeSelect]');
+
+    expect(pagination.classList.contains('hell-pagination')).toBe(false);
+    expect(pagination.getAttribute('data-slot')).toBe('root');
+    expect(pagination.className).toContain('gap-hell-4');
+
+    for (const control of [first, prev, numbered, next, last]) {
+      expect(control.classList.contains('hell-button')).toBe(false);
+      expect(control.classList.contains('hell-pagination-item')).toBe(false);
+      expect(control.getAttribute('data-slot')).toBe('root');
+      expect(control.getAttribute('data-variant')).toBe('ghost');
+      expect(control.getAttribute('data-icon-only')).toBe('');
+    }
+
+    expect(first.className).toContain('bg-hell-danger');
+    expect(first.className).toContain('px-hell-7');
+    expect(numbered.getAttribute('aria-label')).toBe('Page 2');
+    expect(strip.classList.contains('hell-pagination')).toBe(false);
+    expect(strip.getAttribute('data-slot')).toBe('root');
+    expect(strip.getAttribute('data-mode')).toBe('jump');
+    expect(jump.className).toContain('text-hell-danger');
+    expect(jumpSelect.className).toContain('min-w-[calc(var(--spacing)*24)]');
+    expect(select.getAttribute('data-slot')).toBe('root');
   });
 
   it('exposes split view owned anatomy through flat camelCase parts', () => {
