@@ -166,9 +166,9 @@ Rules for migration:
 - Keep the directive import narrow, for example `@hell-ui/angular/button`,
   `@hell-ui/angular/input`, `@hell-ui/angular/card`, or
   `@hell-ui/angular/dialpad`.
-- Import Hell CSS when you want shipped default visuals; the `button`
-  package-consumer scenario proves those recipe utilities ship without consumer
-  `@source` scanning.
+- Import Hell CSS when you want shipped default visuals; the `primitive-icons-css`
+  package-consumer scenario proves the primitive and first directive-suite recipe
+  utilities ship without consumer `@source` scanning.
 - Use `ui="..."` for single-root directives such as Button, Input, Card, Field,
   Tabs, and Accordion directives.
 - Use each projected child directive's local `ui`; a Card, Field, Tabs, or
@@ -181,7 +181,9 @@ Rules for migration:
 The [`button-ui`](../../tools/check-package-consumer.mjs) package-consumer
 scenario proves the typed Button `ui` path without Tailwind or Hell CSS. The
 styled [`button`](../../tools/check-package-consumer.mjs) scenario proves
-compiled Button recipe CSS, semantic token runtime theming, and no consumer
+compiled Button recipe CSS and semantic token runtime theming. The
+[`primitive-icons-css`](../../tools/check-package-consumer.mjs) scenario proves
+the primitive and first directive-suite recipe CSS ships without consumer
 `@source` scanning for Hell defaults.
 
 The not-yet-migrated list is machine-tracked as `legacyStyleableAllowlist` in
