@@ -22,7 +22,11 @@ import { HellBadge, HellKbd, HellTag } from '@hell-ui/angular/tag';
 import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 import { HELL_PAGINATION_DIRECTIVES, type HellPaginationStripUi } from '@hell-ui/angular/pagination';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
-import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
+import {
+  HELL_TABLE_UTILITIES_DIRECTIVES,
+  type HellTableResizeHandleUi,
+  type HellTableUi,
+} from '@hell-ui/angular/table';
 import {
   HELL_RESIZABLE_DIRECTIVES,
   type HellResizableHandleUi,
@@ -331,27 +335,45 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
       </ng-template>
     </hell-split-view>
 
-    <div id="table-container" hellTableContainer busy>
-      <table id="table" hellTableRoot contentWidth>
-        <thead id="table-head" hellTableHeader>
-          <tr id="table-row" hellTableRow active selected>
-            <th id="table-selection-header" hellTableHeaderCell hellTableSelectionCell>
-              <input id="table-row-checkbox" hellTableRowCheckbox type="checkbox" checked />
+    <div id="table-container" hellTableContainer busy ui="bg-hell-surface-muted">
+      <table id="table" hellTableRoot contentWidth [ui]="tableUi">
+        <thead id="table-head" hellTableHeader ui="bg-hell-danger">
+          <tr id="table-row" hellTableRow active selected ui="bg-hell-primary-soft">
+            <th id="table-selection-header" hellTableHeaderCell hellTableSelectionCell ui="px-hell-7">
+              <input
+                id="table-row-checkbox"
+                hellTableRowCheckbox
+                type="checkbox"
+                checked
+                ui="border-hell-danger"
+              />
             </th>
-            <th id="table-header-cell" hellTableHeaderCell columnId="name" sortable sort="asc">
-              <button id="table-sort-trigger" hellTableSortTrigger type="button">Name</button>
-              <button id="table-resizer" hellTableResizeHandle></button>
+            <th
+              id="table-header-cell"
+              hellTableHeaderCell
+              columnId="name"
+              sortable
+              sort="asc"
+              ui="bg-hell-danger"
+            >
+              <button id="table-sort-trigger" hellTableSortTrigger type="button" ui="text-hell-danger">
+                Name
+              </button>
+              <button id="table-resizer" hellTableResizeHandle [ui]="tableResizeHandleUi"></button>
             </th>
             <th hellTableHeaderCell columnId="role">Role</th>
-            <td id="table-cell" hellTableCell align="end" space="empty">
+            <td id="table-cell" hellTableCell align="end" space="empty" ui="text-hell-danger">
               Ada
-              <button id="table-row-action" hellTableRowAction type="button">Open</button>
+              <button id="table-row-action" hellTableRowAction type="button" ui="text-hell-danger">
+                Open
+              </button>
               <input
                 id="table-row-radio"
                 hellTableRowRadio
                 type="radio"
                 name="table-radio"
                 checked
+                ui="border-hell-danger"
               />
             </td>
           </tr>
@@ -417,6 +439,13 @@ class ContractHost {
     jump: 'text-hell-danger',
     jumpSelect: 'min-w-[calc(var(--spacing)*24)]',
   } satisfies HellPaginationStripUi;
+  readonly tableUi = {
+    root: 'text-sm bg-hell-surface-muted',
+  } satisfies HellTableUi;
+  readonly tableResizeHandleUi = {
+    root: 'w-hell-6',
+    grip: 'bg-hell-danger',
+  } satisfies HellTableResizeHandleUi;
 }
 
 const STYLEABLE_CASES: readonly ContractCase[] = [
@@ -511,74 +540,6 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
     attrs: { 'data-slot': 'root', 'data-orientation': 'horizontal' },
   },
   { id: 'select', module: 'HellSelect', className: 'hell-select' },
-  {
-    id: 'table-container',
-    module: 'HellTableContainer',
-    className: 'hell-table-container',
-    attrs: { 'aria-busy': 'true' },
-  },
-  {
-    id: 'table',
-    module: 'HellTable',
-    className: 'hell-table',
-    attrs: { 'data-content-width': 'true' },
-  },
-  { id: 'table-head', module: 'HellTableHead', className: 'hell-table-head' },
-  { id: 'table-body', module: 'HellTableBody', className: 'hell-table-body' },
-  {
-    id: 'table-row',
-    module: 'HellTableRow',
-    className: 'hell-table-row',
-    attrs: { 'data-active': 'true', 'data-selected': 'true' },
-  },
-  {
-    id: 'table-selection-header',
-    module: 'HellTableSelectionCell',
-    className: 'hell-table-selection-cell',
-    attrs: { 'data-hell-table-selection-cell': '' },
-  },
-  {
-    id: 'table-header-cell',
-    module: 'HellTableHeaderCell',
-    className: 'hell-table-header-cell',
-    attrs: { 'data-sort': 'asc', 'aria-sort': 'ascending', 'data-sortable': 'true' },
-  },
-  {
-    id: 'table-sort-trigger',
-    module: 'HellTableSortTrigger',
-    className: 'hell-table-sort-trigger',
-    attrs: { type: 'button' },
-  },
-  {
-    id: 'table-row-checkbox',
-    module: 'HellTableRowCheckbox',
-    className: 'hell-table-row-checkbox',
-    attrs: { type: 'checkbox', 'data-hell-table-row-checkbox': '' },
-  },
-  {
-    id: 'table-row-action',
-    module: 'HellTableRowAction',
-    className: 'hell-table-row-action',
-    attrs: { type: 'button', 'data-hell-table-row-action': '' },
-  },
-  {
-    id: 'table-row-radio',
-    module: 'HellTableRowRadio',
-    className: 'hell-table-row-radio',
-    attrs: { type: 'radio', 'data-hell-table-row-radio': '' },
-  },
-  {
-    id: 'table-cell',
-    module: 'HellTableCell',
-    className: 'hell-table-cell',
-    attrs: { 'data-align': 'end', 'data-space': 'empty' },
-  },
-  {
-    id: 'table-resizer',
-    module: 'HellTableResizeHandle',
-    className: 'hell-table-resize-handle',
-    attrs: { role: 'separator' },
-  },
 ];
 
 const STYLE_OPT_OUT_CASES: readonly ContractCase[] = [];
@@ -782,6 +743,73 @@ describe('Hell Component Contract', () => {
     expect(jump.className).toContain('text-hell-danger');
     expect(jumpSelect.className).toContain('min-w-[calc(var(--spacing)*24)]');
     expect(select.getAttribute('data-slot')).toBe('root');
+  });
+
+  it('exposes table primitive roots and resize anatomy through Part Style Maps', () => {
+    const fixture = TestBed.createComponent(ContractHost);
+    fixture.detectChanges();
+
+    const container = query(fixture.nativeElement, '#table-container');
+    const table = query(fixture.nativeElement, '#table');
+    const head = query(fixture.nativeElement, '#table-head');
+    const body = query(fixture.nativeElement, '#table-body');
+    const row = query(fixture.nativeElement, '#table-row');
+    const selectionHeader = query(fixture.nativeElement, '#table-selection-header');
+    const checkbox = query(fixture.nativeElement, '#table-row-checkbox');
+    const headerCell = query(fixture.nativeElement, '#table-header-cell');
+    const sortTrigger = query(fixture.nativeElement, '#table-sort-trigger');
+    const action = query(fixture.nativeElement, '#table-row-action');
+    const radio = query(fixture.nativeElement, '#table-row-radio');
+    const cell = query(fixture.nativeElement, '#table-cell');
+    const resizer = query(fixture.nativeElement, '#table-resizer');
+    const grip = query(resizer, '[data-slot="grip"]');
+
+    for (const [element, legacyClass] of [
+      [container, 'hell-table-container'],
+      [table, 'hell-table'],
+      [head, 'hell-table-head'],
+      [body, 'hell-table-body'],
+      [row, 'hell-table-row'],
+      [selectionHeader, 'hell-table-selection-cell'],
+      [selectionHeader, 'hell-table-header-cell'],
+      [checkbox, 'hell-table-row-checkbox'],
+      [headerCell, 'hell-table-header-cell'],
+      [sortTrigger, 'hell-table-sort-trigger'],
+      [action, 'hell-table-row-action'],
+      [radio, 'hell-table-row-radio'],
+      [cell, 'hell-table-cell'],
+      [resizer, 'hell-table-resize-handle'],
+    ] as const) {
+      expect(element.classList.contains(legacyClass), legacyClass).toBe(false);
+      expect(element.getAttribute('data-slot'), legacyClass).toBe('root');
+    }
+
+    expect(container.getAttribute('aria-busy')).toBe('true');
+    expect(container.className).toContain('bg-hell-surface-muted');
+    expect(table.getAttribute('data-content-width')).toBe('true');
+    expect(table.className).toContain('text-sm');
+    expect(head.className).toContain('bg-hell-danger');
+    expect(row.getAttribute('data-active')).toBe('true');
+    expect(row.getAttribute('data-selected')).toBe('true');
+    expect(row.className).toContain('bg-hell-primary-soft');
+    expect(selectionHeader.getAttribute('data-hell-table-selection-cell')).toBe('');
+    expect(selectionHeader.className).toContain('px-hell-7');
+    expect(checkbox.className).toContain('border-hell-danger');
+    expect(headerCell.getAttribute('data-sort')).toBe('asc');
+    expect(headerCell.getAttribute('aria-sort')).toBe('ascending');
+    expect(headerCell.getAttribute('data-sortable')).toBe('true');
+    expect(headerCell.className).toContain('bg-hell-danger');
+    expect(sortTrigger.getAttribute('type')).toBe('button');
+    expect(sortTrigger.className).toContain('text-hell-danger');
+    expect(action.getAttribute('type')).toBe('button');
+    expect(action.className).toContain('text-hell-danger');
+    expect(radio.className).toContain('border-hell-danger');
+    expect(cell.getAttribute('data-align')).toBe('end');
+    expect(cell.getAttribute('data-space')).toBe('empty');
+    expect(cell.className).toContain('text-hell-danger');
+    expect(resizer.getAttribute('role')).toBe('separator');
+    expect(resizer.className).toContain('w-hell-6');
+    expect(grip.className).toContain('bg-hell-danger');
   });
 
   it('exposes split view owned anatomy through flat camelCase parts', () => {

@@ -1,5 +1,6 @@
 {
   "category": "table-primitives",
+  "exports": ["./table", "./table-utilities"],
   "header": [
     "/**",
     " * @beta Table primitive entry point for semantic native-table utilities.",

@@ -144,19 +144,6 @@ const legacyStyleableAllowlist = new Set([
   'HellOmnibarPanel',
   'HellToaster',
   'HellCodeEditor',
-  'HellTable',
-  'HellTableBody',
-  'HellTableCell',
-  'HellTableResizeHandle',
-  'HellTableContainer',
-  'HellTableHead',
-  'HellTableHeaderCell',
-  'HellTableRow',
-  'HellTableRowAction',
-  'HellTableRowCheckbox',
-  'HellTableRowRadio',
-  'HellTableSelectionCell',
-  'HellTableSortTrigger',
 ]);
 
 const migratedPartStyleMapModules = [
@@ -901,6 +888,136 @@ const migratedPartStyleMapModules = [
     publicApiPath: 'packages/angular/split-view/public-api.ts',
     apiReportFiles: [],
     legacyClass: 'hell-split-view',
+  },
+  {
+    className: 'HellTableContainer',
+    partType: 'HellTableContainerPart',
+    uiType: 'HellTableContainerUi',
+    entrypointId: 'table',
+    sourcePath: 'packages/angular/table/table-utilities.ts',
+    publicApiPath: 'packages/angular/table/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-table-container',
+  },
+  {
+    className: 'HellTable',
+    partType: 'HellTablePart',
+    uiType: 'HellTableUi',
+    entrypointId: 'table',
+    sourcePath: 'packages/angular/table/table-utilities.ts',
+    publicApiPath: 'packages/angular/table/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-table',
+  },
+  {
+    className: 'HellTableHead',
+    partType: 'HellTableHeadPart',
+    uiType: 'HellTableHeadUi',
+    entrypointId: 'table',
+    sourcePath: 'packages/angular/table/table-utilities.ts',
+    publicApiPath: 'packages/angular/table/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-table-head',
+  },
+  {
+    className: 'HellTableBody',
+    partType: 'HellTableBodyPart',
+    uiType: 'HellTableBodyUi',
+    entrypointId: 'table',
+    sourcePath: 'packages/angular/table/table-utilities.ts',
+    publicApiPath: 'packages/angular/table/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-table-body',
+  },
+  {
+    className: 'HellTableRow',
+    partType: 'HellTableRowPart',
+    uiType: 'HellTableRowUi',
+    entrypointId: 'table',
+    sourcePath: 'packages/angular/table/table-utilities.ts',
+    publicApiPath: 'packages/angular/table/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-table-row',
+  },
+  {
+    className: 'HellTableRowAction',
+    partType: 'HellTableRowActionPart',
+    uiType: 'HellTableRowActionUi',
+    entrypointId: 'table',
+    sourcePath: 'packages/angular/table/table-utilities.ts',
+    publicApiPath: 'packages/angular/table/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-table-row-action',
+  },
+  {
+    className: 'HellTableSelectionCell',
+    partType: 'HellTableSelectionCellPart',
+    uiType: 'HellTableSelectionCellUi',
+    entrypointId: 'table',
+    sourcePath: 'packages/angular/table/table-utilities.ts',
+    publicApiPath: 'packages/angular/table/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-table-selection-cell',
+  },
+  {
+    className: 'HellTableRowCheckbox',
+    partType: 'HellTableRowCheckboxPart',
+    uiType: 'HellTableRowCheckboxUi',
+    entrypointId: 'table',
+    sourcePath: 'packages/angular/table/table-utilities.ts',
+    publicApiPath: 'packages/angular/table/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-table-row-checkbox',
+  },
+  {
+    className: 'HellTableRowRadio',
+    partType: 'HellTableRowRadioPart',
+    uiType: 'HellTableRowRadioUi',
+    entrypointId: 'table',
+    sourcePath: 'packages/angular/table/table-utilities.ts',
+    publicApiPath: 'packages/angular/table/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-table-row-radio',
+  },
+  {
+    className: 'HellTableHeaderCell',
+    partType: 'HellTableHeaderCellPart',
+    uiType: 'HellTableHeaderCellUi',
+    entrypointId: 'table',
+    sourcePath: 'packages/angular/table/table-utilities.ts',
+    publicApiPath: 'packages/angular/table/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-table-header-cell',
+  },
+  {
+    className: 'HellTableSortTrigger',
+    partType: 'HellTableSortTriggerPart',
+    uiType: 'HellTableSortTriggerUi',
+    entrypointId: 'table',
+    sourcePath: 'packages/angular/table/table-utilities.ts',
+    publicApiPath: 'packages/angular/table/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-table-sort-trigger',
+  },
+  {
+    className: 'HellTableCell',
+    partType: 'HellTableCellPart',
+    uiType: 'HellTableCellUi',
+    entrypointId: 'table',
+    sourcePath: 'packages/angular/table/table-utilities.ts',
+    publicApiPath: 'packages/angular/table/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-table-cell',
+  },
+  {
+    className: 'HellTableResizeHandle',
+    partType: 'HellTableResizeHandlePart',
+    uiType: 'HellTableResizeHandleUi',
+    entrypointId: 'table',
+    sourcePath: 'packages/angular/table/table-utilities.ts',
+    publicApiPath: 'packages/angular/table/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-table-resize-handle',
   },
 ];
 
@@ -4018,8 +4135,8 @@ function checkTableResizeHandleContract() {
   }
 
   const styleSource = readFile(join(root, 'packages/angular/table/styles.css'));
-  if (!styleSource.includes('.hell-table-resize-handle')) {
-    failures.push('Table resize handle styles must use hell-table-resize-handle class');
+  if (!styleSource.includes("[hellTableResizeHandle][data-slot='root']")) {
+    failures.push('Table resize handle styles must use hellTableResizeHandle root part selectors');
   }
   if (/hell-table-column-resizer/.test(styleSource)) {
     failures.push('Legacy hell-table-column-resizer class must be removed from table styles');
@@ -4315,13 +4432,28 @@ function checkTableSemanticDefaultGuardContract() {
     }
   }
 
+  const passiveRoleNativeConstants = new Map([
+    ['HellTableHead', 'HELL_TABLE_HEADER_NATIVE_ELEMENTS'],
+    ['HellTableBody', 'HELL_TABLE_BODY_NATIVE_ELEMENTS'],
+    ['HellTableRow', 'HELL_TABLE_ROW_NATIVE_ELEMENTS'],
+    ['HellTableHeaderCell', 'HELL_TABLE_HEADER_CELL_NATIVE_ELEMENTS'],
+    ['HellTableCell', 'HELL_TABLE_CELL_NATIVE_ELEMENTS'],
+  ]);
+
   for (const [className, role] of passiveRoleModules) {
     const module = modules.get(className);
     if (!module) {
       failures.push(`Table semantic default guard could not inspect ${className}`);
       continue;
     }
-    if (!module.moduleSource.includes(`protected override readonly inferredRole = '${role}'`)) {
+    const nativeConstant = passiveRoleNativeConstants.get(className);
+    const roleSupportPattern = new RegExp(
+      `injectHellTableRoleSupport\\(\\s*${nativeConstant}\\s*,\\s*['"]${role}['"]\\s*,?\\s*\\)`,
+    );
+    if (
+      !module.moduleSource.includes(`protected override readonly inferredRole = '${role}'`) &&
+      !roleSupportPattern.test(module.moduleSource)
+    ) {
       failures.push(`${className} must keep passive inferred role ${role}`);
     }
     for (const forbidden of ['isGridMode', 'gridRole', 'aria-activedescendant']) {

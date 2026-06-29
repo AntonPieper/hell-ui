@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidFolderOpen } from '@ng-icons/font-awesome/solid';
-import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 
@@ -20,7 +19,7 @@ const people: readonly Person[] = [
 @Component({
   selector: 'app-table-primitive-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellIcon, ...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [HellIcon, ...HELL_TABLE_UTILITIES_DIRECTIVES],
   providers: [provideIcons({ faSolidFolderOpen })],
   template: `
     <div hellTableContainer data-testid="primitive-table">
@@ -71,10 +70,7 @@ const people: readonly Person[] = [
               <td hellTableCell>{{ person.role }}</td>
               <td hellTableCell>
                 <button
-                  hellButton
                   hellTableRowAction
-                  size="xs"
-                  variant="ghost"
                   type="button"
                   [attr.aria-label]="'Open ' + person.name"
                   (click)="activeId.set(person.id)"

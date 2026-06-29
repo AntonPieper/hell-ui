@@ -57,7 +57,7 @@ test.describe('table docs regressions', () => {
     await gotoTableDocs(page);
 
     const primitive = page.locator('app-table-primitive-example');
-    const frame = primitive.locator('.hell-table-container');
+    const frame = primitive.locator('[hellTableContainer][data-slot="root"]');
     const action = primitive.getByRole('button', { name: 'Open Ada Lovelace' });
     await expect(action).toBeVisible();
     await expect(action).toContainText('Open');
@@ -98,20 +98,20 @@ test.describe('table docs regressions', () => {
     }[] = [
       {
         host: 'app-table-primitive-example',
-        header: '.hell-table-header-cell',
-        cell: '.hell-table-cell',
+        header: '[data-hell-table-header-cell][data-slot="root"]',
+        cell: '[data-hell-table-cell][data-slot="root"]',
         cellIndex: 1,
       },
       {
         host: 'app-table-tanstack-shell-example',
-        header: '.hell-table-header-cell',
-        cell: '.hell-table-cell',
+        header: '[data-hell-table-header-cell][data-slot="root"]',
+        cell: '[data-hell-table-cell][data-slot="root"]',
         cellIndex: 1,
       },
       {
         host: 'app-table-tanstack-virtual-example',
-        header: '.hell-table-header-cell',
-        cell: '.hell-table-cell',
+        header: '[data-hell-table-header-cell][data-slot="root"]',
+        cell: '[data-hell-table-cell][data-slot="root"]',
         cellIndex: 1,
       },
     ];
@@ -152,7 +152,7 @@ test.describe('table docs regressions', () => {
     await expect(shell.locator('[data-hell-table-shell-footer]')).toContainText('server rows');
     await expect(shell.getByRole('button', { name: 'Filters' }).first()).toBeVisible();
     await expect(shell.getByRole('button', { name: 'More table actions' })).toBeVisible();
-    await expect(shell.locator('button.hell-table-sort-trigger')).not.toHaveCount(0);
+    await expect(shell.locator('button[hellTableSortTrigger][data-slot="root"]')).not.toHaveCount(0);
     await expect(shell.getByRole('row', { name: /Ada Lovelace/ })).toHaveClass(
       /bg-hell-primary-soft/,
     );
@@ -227,7 +227,7 @@ test.describe('table docs regressions', () => {
     const control = omnibar.locator('[data-slot="control"]');
     const search = omnibar.getByRole('combobox', { name: 'Search people' });
     const panel = page.locator('.cdk-overlay-pane .hell-omnibar-panel-surface').first();
-    const content = page.locator('.hell-content');
+    const content = page.locator('[hellAppContent][data-slot="root"]');
 
     await control.scrollIntoViewIfNeeded();
     await search.click();
@@ -335,10 +335,16 @@ test.describe('table docs regressions', () => {
       )
       .toBe(true);
     await page.setViewportSize({ width: 390, height: 900 });
-    const resizedRoleHeader = await boxFor(virtual.locator('th[data-column-id="role"]'));
-    const resizedRoleCell = await boxFor(personOneRow.locator('td[data-column-id="role"]'));
-    expect(Math.abs(resizedRoleCell.x - resizedRoleHeader.x)).toBeLessThanOrEqual(1);
-    expect(Math.abs(resizedRoleCell.width - resizedRoleHeader.width)).toBeLessThanOrEqual(1);
+    await expect
+      .poll(async () => {
+        const resizedRoleHeader = await boxFor(virtual.locator('th[data-column-id="role"]'));
+        const resizedRoleCell = await boxFor(personOneRow.locator('td[data-column-id="role"]'));
+        return Math.max(
+          Math.abs(resizedRoleCell.x - resizedRoleHeader.x),
+          Math.abs(resizedRoleCell.width - resizedRoleHeader.width),
+        );
+      })
+      .toBeLessThanOrEqual(1);
   });
 
   test('TanStack shell preserves pagination controls after compact split-view back', async ({
@@ -358,8 +364,10 @@ test.describe('table docs regressions', () => {
     await shell.getByRole('button', { name: 'Open Ada Lovelace' }).click();
     const previous = example.getByRole('button', { name: 'Previous person' });
     const next = example.getByRole('button', { name: 'Next person' });
-    await expect(previous).toHaveClass(/hell-pagination-item/);
-    await expect(next).toHaveClass(/hell-pagination-item/);
+    await expect(previous).toHaveAttribute('data-slot', 'root');
+    await expect(next).toHaveAttribute('data-slot', 'root');
+    await expect(previous).not.toHaveClass(/(^|\s)hell-pagination-item(\s|$)/);
+    await expect(next).not.toHaveClass(/(^|\s)hell-pagination-item(\s|$)/);
     await expect(previous).toBeDisabled();
     await expect(next).toBeEnabled();
 
@@ -414,7 +422,7 @@ test.describe('split-view docs regressions', () => {
     await expect(page.getByRole('heading', { name: 'Split view', level: 1 })).toBeVisible();
 
     const ticketButtons = page.locator(
-      'app-split-view-master-detail-example [data-pane="primary"] button[hellbutton][data-slot="master-item"]',
+      'app-split-view-master-detail-example [data-pane="primary"] button[hellbutton][data-hell-split-master-item][data-slot="root"]',
     );
     await expect(ticketButtons).toHaveCount(3);
 

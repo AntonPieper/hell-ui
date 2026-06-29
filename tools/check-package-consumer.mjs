@@ -1882,21 +1882,28 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function tableConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_TABLE_UTILITIES_DIRECTIVES, HellTableRowIgnore } from '${packageName}/table';
+import {
+  HELL_TABLE_UTILITIES_DIRECTIVES,
+  HellTableRowIgnore,
+  type HellTableResizeHandleUi,
+} from '${packageName}/table';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [...HELL_TABLE_UTILITIES_DIRECTIVES, HellTableRowIgnore],
   template: \`
-    <div hellTableContainer>
-      <table hellTableRoot>
+    <div hellTableContainer ui="bg-hell-surface-muted">
+      <table hellTableRoot ui="text-sm">
         <thead hellTableHeader>
           <tr hellTableRow>
             <th hellTableHeaderCell hellTableSelectionCell>
               <input hellTableRowCheckbox type="checkbox" aria-label="Select all" />
             </th>
-            <th hellTableHeaderCell columnId="name">Name</th>
+            <th hellTableHeaderCell columnId="name">
+              Name
+              <button hellTableResizeHandle [ui]="resizeHandleUi"></button>
+            </th>
             <th hellTableHeaderCell columnId="role">Role</th>
           </tr>
         </thead>
@@ -1916,7 +1923,12 @@ import { HELL_TABLE_UTILITIES_DIRECTIVES, HellTableRowIgnore } from '${packageNa
     </div>
   \`,
 })
-class App {}
+class App {
+  protected readonly resizeHandleUi = {
+    root: 'w-hell-6',
+    grip: 'bg-hell-danger',
+  } satisfies HellTableResizeHandleUi;
+}
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
