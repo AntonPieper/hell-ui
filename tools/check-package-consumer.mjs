@@ -1406,7 +1406,10 @@ function compositesConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/app-shell';
+import { HellDateInput } from '${packageName}/date-input';
+import { HellDatePicker, HellDateRangePicker } from '${packageName}/date-picker';
 import { HellDialpad, type HellDialpadUi } from '${packageName}/dialpad';
+import { HellTimeInput, type HellTimeValue } from '${packageName}/time-input';
 
 const dialpadUi = {
   root: 'max-w-[320px]',
@@ -1416,7 +1419,14 @@ const dialpadUi = {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [...HELL_APP_SHELL_DIRECTIVES, HellDialpad],
+  imports: [
+    ...HELL_APP_SHELL_DIRECTIVES,
+    HellDateInput,
+    HellDatePicker,
+    HellDateRangePicker,
+    HellDialpad,
+    HellTimeInput,
+  ],
   template: \`
     <div hellAppShell>
       <header hellAppTopbar>
@@ -1424,6 +1434,10 @@ const dialpadUi = {
       </header>
       <nav hellAppSidenav>Navigation</nav>
       <main hellAppContent>
+        <hell-date-input aria-label="Ship date" [date]="date" />
+        <hell-time-input aria-label="Ship time" [value]="time" />
+        <hell-date-picker [date]="date" />
+        <hell-date-range-picker [startDate]="rangeStart" [endDate]="rangeEnd" />
         <hell-dialpad [ui]="dialpadUi" />
       </main>
       <aside hellAppSecondary>
@@ -1434,6 +1448,10 @@ const dialpadUi = {
   \`,
 })
 class App {
+  protected readonly date = new Date(2026, 3, 22);
+  protected readonly rangeStart = new Date(2026, 3, 5);
+  protected readonly rangeEnd = new Date(2026, 3, 12);
+  protected readonly time: HellTimeValue = { hour: 9, minute: 30, second: 0 };
   protected readonly dialpadUi = dialpadUi;
 }
 
@@ -1876,6 +1894,9 @@ function appShellConsumerStylesCss() {
 @import "${packageName}/tokens.css";
 @import "${packageName}/icon/styles.css";
 @import "${packageName}/app-shell/styles.css";
+@import "${packageName}/date-input/styles.css";
+@import "${packageName}/date-picker/styles.css";
+@import "${packageName}/time-input/styles.css";
 `;
 }
 

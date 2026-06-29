@@ -84,11 +84,18 @@ import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
         <li><code>invalid</code>, <code>disabled</code></li>
         <li><code>placeholder</code>, <code>aria-label</code></li>
         <li>
+          <code>ui</code>: Part Style Map for <code>root</code>, <code>input</code>,
+          <code>trigger</code>, <code>triggerIcon</code>, <code>pickerPanel</code>,
+          <code>pickerHeader</code>, <code>pickerReadout</code>, <code>pickerUnits</code>,
+          <code>pickerUnit</code>, <code>pickerUnitLabel</code>, <code>pickerUnitControl</code>,
+          <code>pickerUnitValue</code>, <code>pickerUnitStep</code>, <code>minutePresets</code>,
+          and <code>minutePreset</code>. String shorthand styles <code>root</code>.
+        </li>
+        <li>
           <code>provideHellTimeInputAdapter</code>: replace the default native-compatible
           parse/format policy. Custom adapters keep the field in text mode so product-specific
           shortcuts and locale masks can own their draft behavior.
         </li>
-        <li><code>unstyled</code></li>
       </ul>
 
       <h2>Adapter contract</h2>

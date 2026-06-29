@@ -408,6 +408,9 @@ function expectedPackageFiles(packageName) {
       'button/button.ts',
       'input/input.ts',
       'dialpad/dialpad.ts',
+      'date-input/date-input.ts',
+      'date-picker/date-picker.ts',
+      'time-input/time-input.ts',
       'assets/**',
     ];
   }
@@ -798,7 +801,15 @@ function checkPackedFileAccounting(packageJson, tarball, files, fileSet, failure
 
 function expectedExplicitPackedFiles(packageName) {
   if (packageName === angularPackageName) {
-    return ['button/button.ts', 'input/input.ts', 'dialpad/dialpad.ts', 'assets/hell-ui-logo.svg'];
+    return [
+      'button/button.ts',
+      'input/input.ts',
+      'dialpad/dialpad.ts',
+      'date-input/date-input.ts',
+      'date-picker/date-picker.ts',
+      'time-input/time-input.ts',
+      'assets/hell-ui-logo.svg',
+    ];
   }
   return [];
 }
@@ -838,6 +849,21 @@ function addCssImportClosure(tarball, allowed, fileSet, failures) {
         queue.push(target);
       }
     }
+
+    for (const specifier of cssSourceSpecifiers(source)) {
+      if (!specifier.startsWith('.')) continue;
+
+      const target = posix.normalize(posix.join(posix.dirname(cssFile), specifier));
+      if (target.startsWith('../') || target.startsWith('/')) {
+        failures.push(`Packed CSS file ${cssFile} sources path outside package: ${specifier}`);
+        continue;
+      }
+      if (!fileSet.has(target)) {
+        failures.push(`Packed CSS file ${cssFile} sources missing file ${target}`);
+        continue;
+      }
+      allowed.add(target);
+    }
   }
 }
 
@@ -845,6 +871,10 @@ function cssImportSpecifiers(source) {
   return [...source.matchAll(/@import\s+(?:url\()?['"]([^'")]+)['"]\)?/g)].map(
     (match) => match[1],
   );
+}
+
+function cssSourceSpecifiers(source) {
+  return [...source.matchAll(/@source\s+['"]([^'"]+)['"]/g)].map((match) => match[1]);
 }
 
 function assertSameSet(label, expected, actual, failures) {

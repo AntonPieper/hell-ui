@@ -1,141 +1,19 @@
-@layer components {
-  /* Date picker — calendar grid surface. NgpDatePickerDateButton sets
-     [data-today], [data-selected], [data-outside-month], [data-disabled]. */
+/* Date picker default visuals are Tailwind utility recipes in the component. */
+@source "./date-picker.ts";
 
-  .hell-date-picker {
-    --_nav: calc(var(--spacing-hell-control-sm) * 2 + var(--spacing-hell-1));
-    --_range: var(--color-hell-primary-soft);
-    --_width: calc(8rem + var(--_nav) * 2 + var(--spacing-hell-2) * 2);
-
-    display: inline-block;
-    width: var(--_width);
-    background: var(--color-hell-surface-elevated);
-    border: 1px solid var(--color-hell-border);
-    border-radius: var(--radius-md);
-    padding: var(--spacing-hell-3);
-    box-shadow: var(--shadow-hell-sm);
+@layer utilities {
+  hell-date-range-picker[data-slot='root'][data-range-complete]
+    [data-slot='dateButton'][data-range-start]:not([data-range-end]) {
+    border-radius: 0.25rem 0 0 0.25rem;
   }
 
-  .hell-date-picker-header {
-    display: grid;
-    grid-template-columns: var(--_nav) minmax(0, 1fr) var(--_nav);
-    align-items: center;
-    gap: var(--spacing-hell-2);
-    margin-bottom: var(--spacing-hell-2);
+  hell-date-range-picker[data-slot='root'][data-range-complete]
+    [data-slot='dateButton'][data-range-end]:not([data-range-start]) {
+    border-radius: 0 0.25rem 0.25rem 0;
   }
 
-  .hell-date-picker-nav {
-    display: inline-flex;
-    gap: var(--spacing-hell-1);
+  hell-date-range-picker[data-slot='root'][data-range-complete]
+    [data-slot='dateButton'][data-range-between]:not([data-range-start], [data-range-end]) {
+    border-radius: 0;
   }
-
-  .hell-date-picker .hell-date-picker-label {
-    font-size: 13px;
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-hell-foreground);
-    margin: 0;
-    line-height: var(--spacing-hell-control-sm);
-    text-align: center;
-    white-space: nowrap;
-  }
-
-  .hell-date-picker-grid {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 var(--spacing-hell-1);
-    table-layout: fixed;
-    & th {
-      font-size: 11px;
-      font-weight: var(--font-weight-semibold);
-      height: calc(var(--spacing) * 6);
-      padding: 0;
-      color: var(--color-hell-foreground-subtle);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    & td {
-      padding: 0;
-      text-align: center;
-    }
-    & button {
-      appearance: none;
-      width: 100%;
-      height: auto;
-      aspect-ratio: 1;
-      display: grid;
-      place-items: center;
-      padding: 0;
-      border-radius: 0.25rem;
-      background: transparent;
-      border: 0;
-      color: var(--color-hell-foreground);
-      font-family: inherit;
-      font-size: var(--text-xs);
-      cursor: pointer;
-      transition:
-        background var(--hell-duration-fast) var(--ease-hell-out),
-        color var(--hell-duration-fast) var(--ease-hell-out);
-      &[data-today]:not([data-selected]) {
-        color: var(--color-hell-primary);
-        font-weight: var(--font-weight-semibold);
-        box-shadow: inset 0 0 0 1px var(--_range);
-      }
-      &[data-hover]:not([data-disabled]):not([data-selected]) {
-        background: var(--color-hell-surface-subtle);
-      }
-      &[data-focus-visible] {
-        outline: 2px solid var(--color-hell-focus-ring);
-        outline-offset: 1px;
-      }
-      &[data-press]:not([data-disabled]):not([data-selected]) {
-        background: var(--color-hell-surface-muted);
-      }
-      &[data-outside-month] {
-        color: var(--color-hell-foreground-muted);
-      }
-      &[data-selected] {
-        background: var(--color-hell-primary);
-        background-color: var(--color-hell-primary);
-        color: var(--color-hell-primary-foreground);
-        transition: color var(--hell-duration-fast) var(--ease-hell-out);
-      }
-      &[data-disabled] {
-        cursor: not-allowed;
-        color: var(--color-hell-foreground-subtle);
-        opacity: 0.4;
-      }
-      &[data-range-start],
-      &[data-range-end] {
-        background: var(--color-hell-primary);
-        background-color: var(--color-hell-primary);
-        color: var(--color-hell-primary-foreground);
-        transition: color var(--hell-duration-fast) var(--ease-hell-out);
-      }
-      &[data-range-start][data-disabled],
-      &[data-range-end][data-disabled] {
-        color: var(--color-hell-foreground-subtle);
-      }
-    }
-  }
-
-  .hell-date-picker[data-range-complete] {
-    & [data-range-start]:not([data-range-end]) {
-      border-radius: 0.25rem 0 0 0.25rem;
-    }
-
-    & [data-range-end]:not([data-range-start]) {
-      border-radius: 0 0.25rem 0.25rem 0;
-    }
-
-    & [data-range-between]:not([data-range-start], [data-range-end]) {
-      background: var(--_range);
-      background-color: var(--_range);
-      color: var(--color-hell-primary-soft-foreground);
-      border-radius: 0;
-      transition: color var(--hell-duration-fast) var(--ease-hell-out);
-    }
-  }
-
-  /* Date / time input styles live in their own files now (date-input.css /
-     time-input.css) — see hell.css imports. */
 }

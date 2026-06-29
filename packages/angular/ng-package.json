@@ -41,6 +41,21 @@
       "output": "dialpad"
     },
     {
+      "glob": "date-input.ts",
+      "input": "date-input",
+      "output": "date-input"
+    },
+    {
+      "glob": "date-picker.ts",
+      "input": "date-picker",
+      "output": "date-picker"
+    },
+    {
+      "glob": "time-input.ts",
+      "input": "time-input",
+      "output": "time-input"
+    },
+    {
       "glob": "hell-ui-logo.svg",
       "input": "assets",
       "output": "assets"

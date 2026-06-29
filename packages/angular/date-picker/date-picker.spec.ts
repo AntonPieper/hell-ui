@@ -1,7 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellDatePicker, HellDateRangePicker } from './date-picker';
+import {
+  HellDatePicker,
+  HellDateRangePicker,
+  type HellDatePickerUi,
+  type HellDateRangePickerUi,
+} from './date-picker';
 
 @Component({
   imports: [HellDatePicker],
@@ -13,6 +18,7 @@ import { HellDatePicker, HellDateRangePicker } from './date-picker';
       [disabled]="disabled()"
       [locale]="locale()"
       [firstDayOfWeek]="firstDayOfWeek()"
+      [ui]="ui()"
       (dateChange)="dates.push($event)"
     />
   `,
@@ -24,16 +30,24 @@ class DatePickerHost {
   readonly min = signal<Date | undefined>(undefined);
   readonly max = signal<Date | undefined>(undefined);
   readonly disabled = signal(false);
+  readonly ui = signal<string | HellDatePickerUi | undefined>(undefined);
   readonly dates: Array<Date | undefined> = [];
 }
 
 @Component({
   imports: [HellDateRangePicker],
-  template: ` <hell-date-range-picker [startDate]="startDate()" [endDate]="endDate()" /> `,
+  template: `
+    <hell-date-range-picker
+      [startDate]="startDate()"
+      [endDate]="endDate()"
+      [ui]="ui()"
+    />
+  `,
 })
 class DateRangePickerHost {
   readonly startDate = signal<Date | undefined>(new Date(2026, 10, 24));
   readonly endDate = signal<Date | undefined>(new Date(2027, 0, 2));
+  readonly ui = signal<string | HellDateRangePickerUi | undefined>(undefined);
 }
 
 describe('HellDatePicker', () => {
@@ -65,6 +79,36 @@ describe('HellDatePicker', () => {
       'samedi',
       'dimanche',
     ]);
+  });
+
+  it('merges ui classes into root, navigation, label, and repeated date button parts', () => {
+    vi.setSystemTime(new Date(2026, 3, 30));
+    const fixture = TestBed.createComponent(DatePickerHost);
+    fixture.componentInstance.ui.set({
+      root: 'w-[22rem] border-hell-danger',
+      navButton: 'bg-hell-surface-subtle text-hell-danger',
+      label: 'text-hell-danger',
+      dateButton: 'rounded-hell-pill text-lg',
+    });
+    fixture.detectChanges();
+
+    const picker = datePicker(fixture.nativeElement);
+    const navButton = button(fixture.nativeElement, 'Previous year');
+    const firstDateButton = dateButtons(fixture.nativeElement)[0];
+
+    expect(picker.getAttribute('data-slot')).toBe('root');
+    expect(picker.classList.contains('w-[22rem]')).toBe(true);
+    expect(picker.classList.contains('border-hell-danger')).toBe(true);
+    expect(picker.classList.contains('border-hell-border')).toBe(false);
+    expect(labelElement(fixture.nativeElement).getAttribute('data-slot')).toBe('label');
+    expect(labelElement(fixture.nativeElement).classList.contains('text-hell-danger')).toBe(true);
+    expect(navButton.getAttribute('data-slot')).toBe('navButton');
+    expect(navButton.getAttribute('data-direction')).toBe('previous');
+    expect(navButton.getAttribute('data-step')).toBe('year');
+    expect(navButton.classList.contains('bg-hell-surface-subtle')).toBe(true);
+    expect(firstDateButton.getAttribute('data-slot')).toBe('dateButton');
+    expect(firstDateButton.classList.contains('rounded-hell-pill')).toBe(true);
+    expect(firstDateButton.classList.contains('text-lg')).toBe(true);
   });
 
   it('moves the focused month by one year with previous and next year buttons', () => {
@@ -112,9 +156,12 @@ describe('HellDatePicker', () => {
   it('marks date ranges complete independently of the focused month', () => {
     vi.setSystemTime(new Date(2026, 3, 22));
     const fixture = TestBed.createComponent(DateRangePickerHost);
+    fixture.componentInstance.ui.set('w-[23rem] border-hell-danger');
     fixture.detectChanges();
 
     const picker = rangePicker(fixture.nativeElement);
+    expect(picker.getAttribute('data-slot')).toBe('root');
+    expect(picker.classList.contains('w-[23rem]')).toBe(true);
     expect(label(fixture.nativeElement)).toBe('April 2026');
     expect(picker.getAttribute('data-range-complete')).toBe('');
 
@@ -126,9 +173,14 @@ describe('HellDatePicker', () => {
 });
 
 function label(root: HTMLElement): string {
+  const element = labelElement(root);
+  return element.textContent?.trim() ?? '';
+}
+
+function labelElement(root: HTMLElement): HTMLElement {
   const element = root.querySelector('h2');
   if (!(element instanceof HTMLElement)) throw new Error('Expected date picker label.');
-  return element.textContent?.trim() ?? '';
+  return element;
 }
 
 function weekdayHeaders(root: HTMLElement): { abbr: string; text: string }[] {
@@ -147,6 +199,20 @@ function grid(root: HTMLElement): HTMLTableElement {
 function button(root: HTMLElement, ariaLabel: string): HTMLButtonElement {
   const element = root.querySelector(`button[aria-label="${ariaLabel}"]`);
   if (!(element instanceof HTMLButtonElement)) throw new Error(`Expected ${ariaLabel} button.`);
+  return element;
+}
+
+function dateButtons(root: HTMLElement): HTMLButtonElement[] {
+  const buttons = [...root.querySelectorAll('button[ngpDatePickerDateButton]')];
+  if (!buttons.every((button) => button instanceof HTMLButtonElement)) {
+    throw new Error('Expected date buttons.');
+  }
+  return buttons;
+}
+
+function datePicker(root: HTMLElement): HTMLElement {
+  const element = root.querySelector('hell-date-picker');
+  if (!(element instanceof HTMLElement)) throw new Error('Expected date picker.');
   return element;
 }
 

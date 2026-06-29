@@ -90,7 +90,9 @@ test.describe('date input accessibility contract', () => {
     const trigger = dateInputHost(input).getByRole('button', { name: 'Choose date' });
 
     await trigger.click();
-    const popover = page.locator('.hell-popover');
+    const popover = page.locator('[data-slot="pickerPanel"]', {
+      has: page.getByRole('grid'),
+    });
     await expect(popover).toBeVisible();
     await expect(popover.getByRole('grid', { name: 'June 2026' })).toBeVisible();
     await expectPickerLayoutAligned(popover.locator('hell-date-picker'));
@@ -113,7 +115,9 @@ test.describe('date input accessibility contract', () => {
     await expect(input).toBeFocused();
 
     await trigger.click();
-    const reopened = page.locator('.hell-popover');
+    const reopened = page.locator('[data-slot="pickerPanel"]', {
+      has: page.getByRole('grid'),
+    });
     await expect(reopened).toBeVisible();
     await expect(reopened.getByRole('grid', { name: 'June 2026' })).toBeVisible();
     await page.keyboard.press('Escape');
@@ -141,9 +145,9 @@ function dateInputHost(input: Locator): Locator {
 }
 
 async function expectPickerLayoutAligned(picker: Locator): Promise<void> {
-  const header = await requiredBox(picker.locator('.hell-date-picker-header'), 'picker header');
-  const grid = await requiredBox(picker.locator('.hell-date-picker-grid'), 'picker grid');
-  const label = await requiredBox(picker.locator('.hell-date-picker-label'), 'picker label');
+  const header = await requiredBox(picker.locator('[data-slot="header"]'), 'picker header');
+  const grid = await requiredBox(picker.locator('[data-slot="grid"]'), 'picker grid');
+  const label = await requiredBox(picker.locator('[data-slot="label"]'), 'picker label');
   const previousMonth = await requiredBox(
     picker.getByRole('button', { name: 'Previous month' }),
     'previous month button',

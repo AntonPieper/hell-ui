@@ -3,6 +3,7 @@ import {
   Component,
   NO_ERRORS_SCHEMA,
   type ElementRef,
+  computed,
   effect,
   InjectionToken,
   type Provider,
@@ -26,14 +27,12 @@ import {
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCalendar } from '@ng-icons/font-awesome/solid';
 import {
+  NgpFormControl,
   injectFormFieldState,
   ngpFormField,
   provideFormFieldState,
 } from 'ng-primitives/form-field';
-import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HellInput, type HellInputUi } from '@hell-ui/angular/input';
-import { HELL_EMBEDDED_INPUT_UI } from '@hell-ui/angular/internal/input';
 import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
 import { HellDatePicker } from '@hell-ui/angular/date-picker';
 import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
@@ -42,7 +41,7 @@ import {
   hellSyncFormFieldLabels,
 } from '@hell-ui/angular/internal/core';
 import type { HellSize } from '@hell-ui/angular/core';
-import { HellStyleable } from '@hell-ui/angular/core';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
 import {
   HellTypedValueInputState,
   type HellTypedValueParseResult,
@@ -54,9 +53,21 @@ const HELL_DATE_INPUT_ICONS = {
   faSolidCalendar,
 };
 
-const HELL_DATE_INPUT_FIELD_UI = HELL_EMBEDDED_INPUT_UI satisfies HellInputUi;
-
 let nextDateInputId = 0;
+
+export type HellDateInputPart = 'root' | 'input' | 'trigger' | 'triggerIcon' | 'pickerPanel';
+
+export type HellDateInputUi = HellUi<HellDateInputPart>;
+
+const HELL_DATE_INPUT_RECIPE = {
+  root: 'relative inline-flex w-full max-w-56 min-w-40 items-stretch rounded-hell-md border border-hell-border bg-hell-surface-elevated transition-[background-color,border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out hover:border-hell-border-strong focus-within:border-hell-border-focus focus-within:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] data-[invalid=true]:border-hell-danger data-[disabled=true]:cursor-not-allowed data-[disabled=true]:border-hell-border data-[disabled=true]:bg-hell-surface-subtle',
+  input:
+    'h-hell-control-md min-w-0 flex-1 rounded-hell-md border-0 bg-transparent px-hell-3 py-0 font-[inherit] text-[13px] text-hell-foreground tabular-nums outline-none placeholder:text-hell-foreground-subtle disabled:cursor-not-allowed disabled:text-hell-foreground-muted data-[size=sm]:h-hell-control-sm data-[size=sm]:text-xs data-[size=lg]:h-hell-control-lg data-[size=lg]:text-sm',
+  trigger:
+    'me-hell-1 inline-flex h-hell-control-sm w-hell-control-sm flex-none cursor-pointer items-center justify-center self-center rounded-hell-md border border-transparent bg-transparent p-0 text-hell-foreground-subtle transition-[background-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+  triggerIcon: 'size-hell-4',
+  pickerPanel: 'block rounded-hell-md bg-transparent p-0 shadow-none',
+} satisfies HellRecipe<HellDateInputPart>;
 
 export type HellDateInputParseResult = HellTypedValueParseResult<Date>;
 
@@ -160,7 +171,7 @@ export function hellCoerceDateInputValue(value: Date | null | undefined): Date |
 @Component({
   selector: 'hell-date-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellIcon, HellInput, HellPopover, HellPopoverTrigger, HellDatePicker],
+  imports: [NgpFormControl, HellIcon, HellPopover, HellPopoverTrigger, HellDatePicker],
   schemas: [NO_ERRORS_SCHEMA],
   viewProviders: [provideFormFieldState()],
   providers: [
@@ -177,7 +188,8 @@ export function hellCoerceDateInputValue(value: Date | null | undefined): Date |
     },
   ],
   host: {
-    '[class.hell-date-input]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-size]': 'size()',
     '[attr.data-invalid]': 'isInvalid() ? "true" : null',
     '[attr.data-disabled]': 'isDisabled() ? "true" : null',
@@ -185,15 +197,18 @@ export function hellCoerceDateInputValue(value: Date | null | undefined): Date |
   template: `
     <input
       #field
-      hellInput
-      [size]="size()"
-      [ui]="fieldUi"
+      ngpFormControl
+      data-slot="input"
+      [class]="part('input')"
       type="text"
-      [invalid]="isInvalid()"
+      [attr.data-size]="size()"
+      [attr.data-invalid]="isInvalid() ? 'true' : null"
       [id]="inputId()"
       [attr.name]="name()"
       [attr.aria-invalid]="isInvalid() ? 'true' : null"
       [attr.aria-label]="ariaLabel()"
+      [attr.aria-describedby]="fieldAriaDescribedby()"
+      [attr.aria-labelledby]="fieldAriaLabelledby()"
       [disabled]="isDisabled()"
       [placeholder]="placeholder()"
       [value]="display()"
@@ -203,22 +218,21 @@ export function hellCoerceDateInputValue(value: Date | null | undefined): Date |
     />
     <button
       #calendarTrigger="hellPopoverTrigger"
-      hellButton
-      variant="ghost"
-      size="sm"
-      iconOnly
       type="button"
       data-slot="trigger"
+      [class]="part('trigger')"
       [hellPopoverTrigger]="cal"
       placement="bottom-end"
       [disabled]="isDisabled()"
+      [attr.data-size]="size()"
+      [attr.data-disabled]="isDisabled() ? 'true' : null"
       [attr.aria-label]="triggerAriaLabel()"
     >
-      <hell-icon name="faSolidCalendar" />
+      <hell-icon data-slot="triggerIcon" [class]="part('triggerIcon')" name="faSolidCalendar" />
     </button>
 
     <ng-template #cal>
-      <div hellPopover>
+      <div hellPopover data-slot="pickerPanel" [class]="part('pickerPanel')">
         <hell-date-picker
           [date]="current() ?? undefined"
           [focusedDate]="pickerFocusedDate()"
@@ -232,7 +246,13 @@ export function hellCoerceDateInputValue(value: Date | null | undefined): Date |
     </ng-template>
   `,
 })
-export class HellDateInput extends HellStyleable implements ControlValueAccessor, Validator {
+export class HellDateInput
+  extends HellPartStyleable<HellDateInputPart>
+  implements ControlValueAccessor, Validator
+{
+  protected readonly recipe = HELL_DATE_INPUT_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
@@ -270,7 +290,12 @@ export class HellDateInput extends HellStyleable implements ControlValueAccessor
   protected readonly isInvalid = () =>
     this.invalid() || this.invalidDraft() || this.formField.invalid() === true;
   protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
-  protected readonly fieldUi = HELL_DATE_INPUT_FIELD_UI;
+  protected readonly fieldAriaDescribedby = computed(
+    () => this.formField.descriptions().join(' ') || null,
+  );
+  protected readonly fieldAriaLabelledby = computed(
+    () => this.formField.labels().join(' ') || null,
+  );
   protected readonly pickerFocusedDate = signal<Date>(dateDayValue(new Date()) ?? new Date());
   protected readonly triggerAriaLabel = () => {
     const label = this.ariaLabel();

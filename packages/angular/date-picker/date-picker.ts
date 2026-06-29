@@ -2,8 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   Directive,
-  ElementRef,
-  Renderer2,
   computed,
   effect,
   inject,
@@ -31,10 +29,9 @@ import {
   injectDateRangePickerState,
 } from 'ng-primitives/date-picker';
 import { injectButtonState } from 'ng-primitives/button';
-import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
-import { HellStyleable } from '@hell-ui/angular/core';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
 
 const HELL_DATE_PICKER_ICONS = {
   faSolidAnglesLeft,
@@ -42,6 +39,52 @@ const HELL_DATE_PICKER_ICONS = {
   faSolidChevronLeft,
   faSolidChevronRight,
 };
+
+export type HellDatePickerPart =
+  | 'root'
+  | 'header'
+  | 'nav'
+  | 'navButton'
+  | 'label'
+  | 'grid'
+  | 'weekdayHeader'
+  | 'cell'
+  | 'dateButton';
+
+export type HellDatePickerUi = HellUi<HellDatePickerPart>;
+
+export type HellDateRangePickerPart =
+  | 'root'
+  | 'header'
+  | 'nav'
+  | 'navButton'
+  | 'label'
+  | 'grid'
+  | 'weekdayHeader'
+  | 'cell'
+  | 'dateButton';
+
+export type HellDateRangePickerUi = HellUi<HellDateRangePickerPart>;
+
+const HELL_DATE_PICKER_RECIPE = {
+  root: 'inline-block w-[17.5rem] rounded-hell-md border border-hell-border bg-hell-surface-elevated p-hell-3 shadow-hell-sm',
+  header:
+    'mb-hell-2 grid grid-cols-[calc(var(--spacing-hell-control-sm)*2+var(--spacing-hell-1))_minmax(0,1fr)_calc(var(--spacing-hell-control-sm)*2+var(--spacing-hell-1))] items-center gap-hell-2',
+  nav: 'inline-flex gap-hell-1',
+  navButton:
+    'inline-flex h-hell-control-sm w-hell-control-sm cursor-pointer items-center justify-center rounded-hell-md border border-transparent bg-transparent p-0 text-hell-foreground transition-[background-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-muted focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 data-disabled:pointer-events-none data-disabled:cursor-not-allowed data-disabled:opacity-50',
+  label:
+    'm-0 min-w-0 text-center text-[13px] font-semibold leading-[var(--spacing-hell-control-sm)] text-hell-foreground whitespace-nowrap',
+  grid: 'w-full table-fixed border-separate border-spacing-y-hell-1',
+  weekdayHeader:
+    'h-6 p-0 text-[11px] font-semibold tracking-normal text-hell-foreground-subtle uppercase',
+  cell: 'p-0 text-center',
+  dateButton:
+    'grid aspect-square h-auto w-full cursor-pointer appearance-none place-items-center rounded-hell-sm border-0 bg-transparent p-0 font-[inherit] text-xs text-hell-foreground transition-[background-color,color] duration-[var(--hell-duration-fast)] ease-hell-out data-[today]:font-semibold data-[today]:text-hell-primary data-[today]:shadow-[inset_0_0_0_1px_var(--color-hell-primary-soft)] data-[hover]:bg-hell-surface-subtle data-[press]:bg-hell-surface-muted data-[outside-month]:text-hell-foreground-muted data-[selected]:bg-hell-primary data-[selected]:text-hell-primary-foreground data-[selected]:shadow-none data-[disabled]:cursor-not-allowed data-[disabled]:text-hell-foreground-subtle data-[disabled]:opacity-40 data-[range-start]:bg-hell-primary data-[range-start]:text-hell-primary-foreground data-[range-start]:shadow-none data-[range-end]:bg-hell-primary data-[range-end]:text-hell-primary-foreground data-[range-end]:shadow-none data-[range-between]:bg-hell-primary-soft data-[range-between]:text-hell-primary-soft-foreground data-[focus-visible]:outline-2 data-[focus-visible]:outline-hell-focus-ring data-[focus-visible]:outline-offset-1',
+} satisfies HellRecipe<HellDatePickerPart>;
+
+const HELL_DATE_RANGE_PICKER_RECIPE: HellRecipe<HellDateRangePickerPart> =
+  HELL_DATE_PICKER_RECIPE;
 
 function hellShiftDateByMonths(date: Date, months: number): Date {
   const targetYear = date.getFullYear();
@@ -154,43 +197,89 @@ export class HellDatePickerNextYear {
 }
 
 const PICKER_TEMPLATE = `
-  <div class="hell-date-picker-header">
-    <div class="hell-date-picker-nav">
-      <button hellButton variant="ghost" size="sm" iconOnly type="button" hellDatePickerPreviousYear>
+  <div data-slot="header" [class]="part('header')">
+    <div data-slot="nav" [class]="part('nav')" data-direction="previous">
+      <button
+        data-slot="navButton"
+        data-direction="previous"
+        data-step="year"
+        [class]="part('navButton')"
+        type="button"
+        hellDatePickerPreviousYear
+      >
         <hell-icon name="faSolidAnglesLeft" />
       </button>
-      <button hellButton variant="ghost" size="sm" iconOnly type="button"
-              ngpDatePickerPreviousMonth [attr.aria-label]="labels.datePicker.previousMonth">
+      <button
+        data-slot="navButton"
+        data-direction="previous"
+        data-step="month"
+        [class]="part('navButton')"
+        type="button"
+        ngpDatePickerPreviousMonth
+        [attr.aria-label]="labels.datePicker.previousMonth"
+      >
         <hell-icon name="faSolidChevronLeft" />
       </button>
     </div>
-    <h2 ngpDatePickerLabel class="hell-date-picker-label">{{ label() }}</h2>
-    <div class="hell-date-picker-nav">
-      <button hellButton variant="ghost" size="sm" iconOnly type="button"
-              ngpDatePickerNextMonth [attr.aria-label]="labels.datePicker.nextMonth">
+    <h2 ngpDatePickerLabel data-slot="label" [class]="part('label')">{{ label() }}</h2>
+    <div data-slot="nav" [class]="part('nav')" data-direction="next">
+      <button
+        data-slot="navButton"
+        data-direction="next"
+        data-step="month"
+        [class]="part('navButton')"
+        type="button"
+        ngpDatePickerNextMonth
+        [attr.aria-label]="labels.datePicker.nextMonth"
+      >
         <hell-icon name="faSolidChevronRight" />
       </button>
-      <button hellButton variant="ghost" size="sm" iconOnly type="button" hellDatePickerNextYear>
+      <button
+        data-slot="navButton"
+        data-direction="next"
+        data-step="year"
+        [class]="part('navButton')"
+        type="button"
+        hellDatePickerNextYear
+      >
         <hell-icon name="faSolidAnglesRight" />
       </button>
     </div>
   </div>
   <table
     ngpDatePickerGrid
-    class="hell-date-picker-grid"
+    data-slot="grid"
+    [class]="part('grid')"
     [attr.aria-label]="label()"
   >
     <thead>
       <tr>
         @for (weekday of weekdayLabels(); track weekday.abbr) {
-          <th scope="col" [attr.abbr]="weekday.abbr">{{ weekday.narrow }}</th>
+          <th
+            data-slot="weekdayHeader"
+            [class]="part('weekdayHeader')"
+            scope="col"
+            [attr.abbr]="weekday.abbr"
+          >
+            {{ weekday.narrow }}
+          </th>
         }
       </tr>
     </thead>
     <tbody>
       <tr *ngpDatePickerRowRender>
-        <td *ngpDatePickerCellRender="let date" ngpDatePickerCell>
-          <button ngpDatePickerDateButton type="button">
+        <td
+          *ngpDatePickerCellRender="let date"
+          ngpDatePickerCell
+          data-slot="cell"
+          [class]="part('cell')"
+        >
+          <button
+            ngpDatePickerDateButton
+            data-slot="dateButton"
+            [class]="part('dateButton')"
+            type="button"
+          >
             {{ date.getDate() }}
           </button>
         </td>
@@ -233,7 +322,6 @@ function formatWeekdayLabels(locale: string | null, firstDayOfWeek: number): Hel
 }
 
 const PICKER_IMPORTS = [
-  HellButton,
   HellIcon,
   NgpDatePickerLabel,
   NgpDatePickerNextMonth,
@@ -274,10 +362,16 @@ const PICKER_IMPORTS = [
     },
   ],
   imports: [...PICKER_IMPORTS],
-  host: { '[class.hell-date-picker]': '!unstyled()' },
+  host: {
+    '[class]': "part('root')",
+    'data-slot': 'root',
+  },
   template: PICKER_TEMPLATE,
 })
-export class HellDatePicker extends HellStyleable {
+export class HellDatePicker extends HellPartStyleable<HellDatePickerPart> {
+  protected readonly recipe = HELL_DATE_PICKER_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly locale = input<string | null>(null);
 
   protected readonly labels = inject<HellLabels>(HELL_LABELS);
@@ -321,28 +415,24 @@ export class HellDatePicker extends HellStyleable {
   ],
   imports: [...PICKER_IMPORTS],
   host: {
-    '[class.hell-date-picker]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-range]': '"true"',
+    '[attr.data-range-complete]': 'rangeComplete() ? "" : null',
   },
   template: PICKER_TEMPLATE,
 })
-export class HellDateRangePicker extends HellStyleable {
+export class HellDateRangePicker extends HellPartStyleable<HellDateRangePickerPart> {
+  protected readonly recipe: HellRecipe<HellDateRangePickerPart> = HELL_DATE_RANGE_PICKER_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly locale = input<string | null>(null);
 
   protected readonly labels = inject<HellLabels>(HELL_LABELS);
   private readonly state = injectDateRangePickerState<Date>();
-  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly renderer = inject(Renderer2);
-  private readonly rangeCompletionState = effect(() => {
-    const complete = Boolean(this.state().startDate() && this.state().endDate());
-    const element = this.elementRef.nativeElement;
-
-    if (complete) {
-      this.renderer.setAttribute(element, 'data-range-complete', '');
-    } else {
-      this.renderer.removeAttribute(element, 'data-range-complete');
-    }
-  });
+  protected readonly rangeComplete = computed(() =>
+    Boolean(this.state().startDate() && this.state().endDate()),
+  );
 
   protected readonly label = computed(() =>
     formatMonthLabel(this.state().focusedDate(), this.locale()),

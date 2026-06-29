@@ -294,7 +294,7 @@ export class HellSliderHarness extends ComponentHarness {
 export class HellDatePickerHarness extends ComponentHarness {
   static hostSelector = 'hell-date-picker, hell-date-range-picker';
   async getLabel(): Promise<string> {
-    return (await this.locatorFor('.hell-date-picker-label')()).text();
+    return (await this.locatorFor('[data-slot="label"]')()).text();
   }
   async getDateButtons(): Promise<HellDatePickerDateButtonHarness[]> {
     return this.locatorForAll(HellDatePickerDateButtonHarness)();
@@ -313,10 +313,10 @@ export class HellDatePickerDateButtonHarness extends ComponentHarness {
 export class HellDateInputHarness extends ComponentHarness {
   static hostSelector = 'hell-date-input';
   async getInputValue(): Promise<string> {
-    return (await this.locatorFor('input[hellInput]')()).getProperty<string>('value');
+    return (await this.locatorFor('input[data-slot="input"]')()).getProperty<string>('value');
   }
   async setInputValue(value: string): Promise<void> {
-    await (await this.locatorFor('input[hellInput]')()).setInputValue(value);
+    await (await this.locatorFor('input[data-slot="input"]')()).setInputValue(value);
   }
   async openPicker(): Promise<void> {
     await (await this.locatorFor('button[data-slot="trigger"]')()).click();
@@ -328,10 +328,10 @@ export class HellDateInputHarness extends ComponentHarness {
 export class HellTimeInputHarness extends ComponentHarness {
   static hostSelector = 'hell-time-input';
   async getInputValue(): Promise<string> {
-    return (await this.locatorFor('input[hellInput]')()).getProperty<string>('value');
+    return (await this.locatorFor('input[data-slot="input"]')()).getProperty<string>('value');
   }
   async setInputValue(value: string): Promise<void> {
-    await (await this.locatorFor('input[hellInput]')()).setInputValue(value);
+    await (await this.locatorFor('input[data-slot="input"]')()).setInputValue(value);
   }
   async openPicker(): Promise<void> {
     await (await this.locatorFor('button[data-slot="trigger"]')()).click();
