@@ -696,3 +696,22 @@ function timeInputHost(root: HTMLElement): HTMLElement {
 function timeInputPartClass(component: HellTimeInput, part: HellTimeInputPart): string {
   return timeInputProbe(component).part(part);
 }
+
+async function waitForPickerSpinbutton(
+  fixture: ComponentFixture<unknown>,
+  unit: HellTimeUnit,
+): Promise<HTMLElement> {
+  const selector = `[data-slot="picker-unit"][data-unit="${unit}"] [role="spinbutton"]`;
+  const timeout = Date.now() + 3000;
+
+  while (Date.now() < timeout) {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const spinbutton = document.querySelector<HTMLElement>(selector);
+    if (spinbutton) return spinbutton;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  throw new Error(`Expected ${selector}.`);
+}
