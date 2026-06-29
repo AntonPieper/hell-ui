@@ -185,7 +185,7 @@ class NativeRadioFormHost {
         name="mode"
         checked
         required
-        ui="border-hell-danger size-hell-5"
+        ui="border-hell-danger size-hell-6"
       />
     </div>
   `,
@@ -482,8 +482,8 @@ describe('HellRadio', () => {
     expect(native.getAttribute('data-slot')).toBe('root');
     expect(native.classList.contains('hell-radio')).toBe(false);
     expect(native.classList.contains('border-hell-danger')).toBe(true);
-    expect(native.classList.contains('size-hell-5')).toBe(true);
-    expect(native.classList.contains('size-hell-4')).toBe(false);
+    expect(native.classList.contains('size-hell-6')).toBe(true);
+    expect(native.classList.contains('size-hell-5')).toBe(false);
     expect(native.getAttribute('data-required')).toBe('true');
     expect(native.getAttribute('aria-required')).toBe('true');
   });

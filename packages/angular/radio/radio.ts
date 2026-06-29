@@ -69,7 +69,7 @@ const HELL_RADIO_RECIPE = {
 } satisfies HellRecipe<HellRadioPart>;
 
 const HELL_NATIVE_RADIO_RECIPE = {
-  root: 'relative inline-flex size-hell-4 cursor-pointer appearance-none items-center justify-center rounded-hell-pill border border-solid border-hell-border-strong bg-hell-surface-elevated p-0 m-0 text-hell-primary-foreground transition-[border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] checked:border-hell-primary focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+  root: 'relative inline-flex size-hell-5 cursor-pointer appearance-none items-center justify-center rounded-hell-pill border border-solid border-hell-border-strong bg-hell-surface-elevated p-0 m-0 text-hell-primary-foreground transition-[border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] checked:border-hell-primary focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
 } satisfies HellRecipe<HellNativeRadioPart>;
 
 type HellRadioRovingRegistration = {

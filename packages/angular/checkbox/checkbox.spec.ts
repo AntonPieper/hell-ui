@@ -135,7 +135,7 @@ class NativeCheckboxFormHost {
 class CheckboxPartStyleHost {
   readonly indeterminate = signal(false);
   protected readonly nativeUi = {
-    root: 'border-hell-danger size-hell-5',
+    root: 'border-hell-danger size-hell-6',
   } satisfies HellNativeCheckboxUi;
   protected readonly customUi = {
     root: 'bg-hell-danger size-hell-6 rounded-hell-pill',
@@ -300,20 +300,20 @@ describe('HellCheckbox', () => {
     expect(custom.classList.contains('bg-hell-danger')).toBe(true);
     expect(custom.classList.contains('size-hell-6')).toBe(true);
     expect(custom.classList.contains('rounded-hell-pill')).toBe(true);
-    expect(custom.classList.contains('size-hell-4')).toBe(false);
+    expect(custom.classList.contains('size-hell-5')).toBe(false);
 
     expect(customMap.getAttribute('data-slot')).toBe('root');
     expect(customMap.classList.contains('bg-hell-danger')).toBe(true);
     expect(customMap.classList.contains('size-hell-6')).toBe(true);
-    expect(customMap.classList.contains('size-hell-4')).toBe(false);
+    expect(customMap.classList.contains('size-hell-5')).toBe(false);
 
     expect(native.tagName).toBe('INPUT');
     expect(native.type).toBe('checkbox');
     expect(native.getAttribute('data-slot')).toBe('root');
     expect(native.classList.contains('hell-checkbox')).toBe(false);
     expect(native.classList.contains('border-hell-danger')).toBe(true);
-    expect(native.classList.contains('size-hell-5')).toBe(true);
-    expect(native.classList.contains('size-hell-4')).toBe(false);
+    expect(native.classList.contains('size-hell-6')).toBe(true);
+    expect(native.classList.contains('size-hell-5')).toBe(false);
     expect(native.getAttribute('aria-required')).toBe('true');
     expect(native.getAttribute('required')).toBe('');
   });
