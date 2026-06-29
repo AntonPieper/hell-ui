@@ -34,11 +34,14 @@ The legacy all-or-nothing contract that lets consumers keep a Hell module's beha
 _Avoid_: Future customization surface, part style map.
 
 **Public Part**
-A named, stable element or region in a Hell module's owned structure that consumers may refine through the module's Part Style Map. Public Parts are represented in DOM with `data-slot`, and the `data-slot` value should match the public part name unless a component documents an exception; unknown internal DOM is not part of the component contract.
+A named, stable element or region in a Hell module's owned structure that consumers may refine through the module's Part Style Map. Public Parts are represented in DOM with `data-slot`, and the `data-slot` value should match the public part name unless a component documents an exception. Owned-anatomy composites use canonical camelCase Public Part names in both TypeScript and `data-slot`, for example `inputWrap` rather than `input-wrap`. Unknown internal DOM is not part of the component contract.
+Public Parts are reserved for meaningful styling surfaces such as roots, panels, controls, content regions, repeated item surfaces, first-class glyphs, and status regions; scaffolding for control flow, measurement, overlay anchoring, focus sentinels, or incidental layout is private unless consumers have a real styling need.
+Single-host public directives use `root` as their sole Public Part; the directive name supplies semantic identity, while multi-part owned-anatomy components use semantic part names inside their root Part Style Map.
 _Avoid_: Private element, arbitrary descendant.
 
 **Part Style Map**
 The shared contract that lets consumers refine a Hell module's named Public Parts with Tailwind classes. In code, this is the `HellUiInput<Part>` shape: either a shorthand class string for the module's default Public Part or a `HellUi<Part>` map from component-local Public Part names to class strings.
+For directive suites and Composites with projected children, a Part Style Map only styles the DOM owned by the directive or component that exposes it; projected child directives expose their own Part Style Maps.
 _Avoid_: Style Opt-Out, unstyled mode, class override object, omit map, visual layers, template class override path.
 
 **Part Recipe**

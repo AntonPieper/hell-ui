@@ -236,9 +236,9 @@ export abstract class HellPartStyleable<Part extends string> {
     protected abstract readonly defaultUiPart: Part;
     protected part(part: Part): string;
     protected abstract readonly recipe: HellRecipe<Part>;
-    ui: HellUiInput<Part>;
+    readonly ui: i0.InputSignal<HellUiInput<Part>>;
     // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellPartStyleable<any>, never, never, { "ui": { "alias": "ui"; "required": false; }; }, {}, never, never, true, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellPartStyleable<any>, never, never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellPartStyleable<any>, never>;
 }

@@ -61,24 +61,15 @@ export abstract class HellPartStyleable<Part extends string> {
     protected abstract readonly defaultUiPart: Part;
     protected part(part: Part): string;
     protected abstract readonly recipe: HellRecipe<Part>;
-    ui: HellUiInput<Part>;
+    readonly ui: i0.InputSignal<HellUiInput<Part>>;
     // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellPartStyleable<any>, never, never, { "ui": { "alias": "ui"; "required": false; }; }, {}, never, never, true, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellPartStyleable<any>, never, never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellPartStyleable<any>, never>;
 }
 
 // @public
 export type HellRecipe<Part extends string> = Readonly<Record<Part, string>>;
-
-// @public
-export abstract class HellStyleable {
-    readonly unstyled: i0.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellStyleable, never, never, { "unstyled": { "alias": "unstyled"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellStyleable, never>;
-}
 
 // @public (undocumented)
 export class HellTextarea extends HellPartStyleable<HellTextareaPart> {
@@ -112,8 +103,6 @@ export type HellUiInput<Part extends string> = string | HellUi<Part> | null | un
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-angular-core.d.ts:31:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-core.d.ts:32:5 - (ae-undocumented) Missing documentation for "ɵdir".
 // types/hell-ui-angular-core.d.ts:50:5 - (ae-undocumented) Missing documentation for "ɵfac".
 // types/hell-ui-angular-core.d.ts:51:5 - (ae-undocumented) Missing documentation for "ɵdir".
 // types/hell-ui-angular-input.d.ts:7:1 - (ae-undocumented) Missing documentation for "HellInputPart".

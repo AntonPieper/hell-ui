@@ -2294,8 +2294,21 @@ function checkPartStyleMapContract() {
   ) {
     failures.push('HellUiInput must keep the string/default-part shorthand shape');
   }
-  if (!/@Input\(\{\s*alias:\s*['"]ui['"]\s*\}\)\s+ui:\s+HellUiInput<Part>/.test(styleableCompact)) {
-    failures.push('HellPartStyleable must own the public [ui] input');
+  if (
+    !/readonly\s+ui\s*=\s*input<\s*HellUiInput<Part>\s*>\(\s*undefined\s*,\s*\{\s*alias:\s*['"]ui['"]\s*\}\s*\)/.test(
+      styleableCompact,
+    )
+  ) {
+    failures.push('HellPartStyleable must own the public [ui] signal input');
+  }
+  if (/@Input\(\{\s*alias:\s*['"]ui['"]/.test(styleableCompact)) {
+    failures.push('HellPartStyleable must not keep a decorator-based [ui] compatibility input');
+  }
+  if (/\b(?:set\s+ui|uiSignal)\b/.test(styleableCompact)) {
+    failures.push('HellPartStyleable must not keep a parallel ui compatibility path');
+  }
+  if (!styleableSource.includes('const ui = this.ui()')) {
+    failures.push('HellPartStyleable must read ui through its signal input');
   }
   if (!styleableSource.includes('protected abstract readonly defaultUiPart: Part')) {
     failures.push('HellPartStyleable must own a default public part for string shorthand');
@@ -2324,6 +2337,21 @@ function checkPartStyleMapContract() {
     }
     if (!coreApiReport.includes(symbol)) {
       failures.push(`Core API report must cover Part Style Map core export ${symbol}`);
+    }
+  }
+  for (const [label, report] of [
+    ['Root', rootApiReport],
+    ['Core', coreApiReport],
+  ]) {
+    if (!report.includes('readonly ui: i0.InputSignal<HellUiInput<Part>>')) {
+      failures.push(`${label} API report must expose HellPartStyleable.ui as an InputSignal`);
+    }
+    if (
+      !report.includes(
+        '"ui": { "alias": "ui"; "required": false; "isSignal": true; }',
+      )
+    ) {
+      failures.push(`${label} API report must expose HellPartStyleable ui metadata as signal input`);
     }
   }
 
@@ -2518,6 +2546,11 @@ function checkMigratedPartStyleMapModule(module, entrypointPackageDirs) {
   }
 
   const publicApi = readFile(join(root, module.publicApiPath));
+  if (/\bHellStyleable\b/.test(publicApi)) {
+    failures.push(
+      `${module.publicApiPath} must not re-export legacy HellStyleable for migrated ${module.className}`,
+    );
+  }
   const expectedExport = `./${relative(dirname(module.publicApiPath), module.sourcePath)
     .replace(/\.ts$/, '')
     .replaceAll('\\', '/')}`;
@@ -2532,6 +2565,14 @@ function checkMigratedPartStyleMapModule(module, entrypointPackageDirs) {
 
   for (const reportFile of module.apiReportFiles) {
     const report = readApiReport(reportFile);
+    if (
+      report.includes('export abstract class HellStyleable') ||
+      report.includes('readonly unstyled:')
+    ) {
+      failures.push(
+        `${reportFile} must not expose legacy HellStyleable for migrated ${module.className}`,
+      );
+    }
     for (const symbol of [module.className, module.partType, module.uiType]) {
       if (!report.includes(symbol)) {
         failures.push(`${reportFile} must cover migrated Part Style Map export ${symbol}`);

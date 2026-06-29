@@ -27,17 +27,75 @@ export type HellRecipe<Part extends string> = Readonly<Record<Part, string>>;
 
 Every public component that exposes `[ui]` should export its part union and concrete UI type, for example `HellDialpadPart` and `HellDialpadUi = HellUi<HellDialpadPart>`. Migrated components should extend a shared `HellPartStyleable<Part>` base that owns the `[ui]` input, the abstract recipe contract, and the `part()` merge pipeline. `HellPartStyleable` owns the default Public Part for string shorthand, so single-root directives can use `ui="px-0"` while multi-part components can use `[ui]="{ header: 'px-6' }"`.
 
+`HellPartStyleable.ui` is a signal input. The public Angular binding remains
+`[ui]`, while subclasses and core helpers read it as `this.ui()`. Do not carry a
+class-property compatibility layer such as a setter, `uiSignal`, or a parallel
+legacy field; the migration point is the switch to the signal-native contract.
+
+A Part Style Map describes only the DOM owned by the directive or component
+that exposes it. For directive suites and Composites with projected children,
+the root `[ui]` map must not style child directives remotely; each projected
+public child directive exposes its own narrow `[ui]` contract. Owned-anatomy
+components such as Dialpad may expose multiple Public Parts from the root
+because those parts are rendered by the root component itself.
+
+Single-host public directives use `root` as their sole Public Part. Semantic
+identity belongs to the directive name and exported UI type, such as
+`HellMenuItemUi` or `HellCardHeaderUi`, while the local part remains `root`.
+Semantic part names such as `item`, `option`, or `header` belong inside
+multi-part owned-anatomy component maps where one root exposes several Public
+Parts.
+
+Owned-anatomy Composites expose a flat component-owned Part Style Map rather
+than nested passthrough maps for internal primitives. A Composite may render
+`HellButton`, `HellInput`, native elements, or ng-primitives internally, but its
+consumer styling contract is named after the Composite's own anatomy, such as
+`trigger`, `input`, `panel`, `clearButton`, `item`, or `captionToggle`, not
+`buttonUi`, `inputUi`, or `popoverUi`.
+
 The part-class pipeline should call one configured `hellTwMerge`, built with `tailwind-merge` and extended for Hell theme token groups. Individual components should not hand-roll the input, a local merge callback, a `tailwind-merge` call, `clsx`, `cva`, `tailwind-variants`, or a custom `cn` helper for migrated part styling.
 
 Do not expose `[ui].class`, `omit`, or public visual layers. Do not preserve multiple public class override paths that merge late at a lower level.
 
 Template `class` remains valid as an additive hook for layout classes, test hooks, and non-conflicting classes, but it is not the deterministic Tailwind override path. Consumers should use `ui` for recipe utility conflicts because Angular combines template classes and directive host classes outside the part-class pipeline.
 
-Keep `data-slot` as the stable DOM marker for Public Parts. The TypeScript/domain language may call them Public Parts, but templates, tests, docs examples, and consumer selectors should continue to use `data-slot` rather than introducing `data-part`.
+Keep `data-slot` as the stable DOM marker for Public Parts. The TypeScript/domain language may call them Public Parts, but templates, tests, docs examples, and consumer selectors should continue to use `data-slot` rather than introducing `data-part`. For owned-anatomy composites, public part names are canonical camelCase names and rendered `data-slot` values should match those names, such as `inputWrap`, `ccToggle`, `dismissAll`, or `compactHeader`, instead of maintaining a parallel kebab-case DOM vocabulary.
+
+Do not expose every internal element as a Public Part. Public Parts are durable
+styling surfaces: roots, containers, panels, controls, content regions,
+repeated item surfaces, first-class icons or glyphs, and loading, empty, error,
+or status regions. Incidental wrappers for Angular control flow, measurement,
+overlay anchors, focus sentinels, or layout mechanics remain private unless
+there is a concrete consumer styling need.
 
 `unstyled` will be replaced, not carried forward as the destination API or compatibility alias. Because Hell is still internal beta, the overhaul may hard-break the existing `unstyled` public API when the Part Style Map is implemented, but the removal must land with API report updates, package-consumer coverage, docs migration guidance, and accessibility/browser tests that prove behavior remains intact.
 
 Default component visuals for migrated modules should move into Tailwind-based part recipes made of complete utility class strings. Hell should not preserve a parallel legacy `.hell-*` default styling model for migrated modules. CSS remains for Tailwind theme variables, token definitions, keyframes, and the narrow structural rules that cannot sensibly live as utility classes.
+
+For complex multi-part Composites, recipe strings and component CSS split
+responsibilities deliberately. Per-part default utility classes and
+consumer-overridable Tailwind conflicts belong in Part Recipes. Structural
+machinery and cross-part behavior may remain in component CSS, including
+pseudo-elements, keyframes, relational selectors, overlay pane hooks, CSS
+variable plumbing, measurement geometry, responsive structural rules, and
+browser-specific selectors. CSS for migrated modules should target stable
+`data-slot` and `data-*` attributes rather than legacy `.hell-*` class contracts
+where practical.
+
+Migrated modules should not keep legacy `.hell-*` classes as CSS scope hooks.
+When a migrated surface still needs component CSS, scope it through the
+component selector, directive attribute selector, stable `data-slot`, and
+`data-*` state attributes. Portaled surfaces may use a documented overlay pane
+hook when the pane itself is part of the rendered surface. Keeping `.hell-*` as
+"just CSS hooks" preserves the old styling contract in disguise and weakens
+`ui` as the canonical override path.
+
+Portaled owned DOM remains part of the owning component's Part Style Map.
+Portaling changes DOM location, not ownership. A portaled Public Part must still
+render through the owner recipe pipeline, for example `part('panel')`, and its
+`data-slot` value must match the exported part name. Overlay pane hooks remain
+allowed for CDK positioning or surface scoping, but they are not the consumer
+customization API.
 
 Runtime theming should flow through semantic Hell theme tokens such as `--color-hell-primary`, `--color-hell-border`, and `--color-hell-surface-elevated`. Component-specific public variables such as `--hell-button-background` should not be introduced unless a concrete scoped-theming need is documented; otherwise they create a second public theming API with unclear precedence against variants, `ui`, and global tokens.
 
@@ -46,6 +104,13 @@ Hell will ship compiled CSS for migrated component defaults. Consumer apps shoul
 Required behavior, accessibility, state attributes, geometry, measurement, portal registration, and lifecycle wiring remain internal requirements. They are not removable through the Part Style Map.
 
 For tables, do not add callback-valued entries to generic `HellUi` v1. Start with static part maps plus stable `data-slot` and `data-*` state selectors; add table-specific callback-valued entries only later if state attributes cannot express the required styling without turning Hell into a table DSL.
+
+Repeated owned elements share one static Public Part name in `HellUi` v1, such
+as `toast`, `item`, `keyButton`, or `option`. Do not add indexed keys,
+variant-suffixed keys, or callback-valued entries such as `item:3`,
+`toast:success`, or `(item) => string` to generic `HellUi`. Per-item styling
+should flow through stable `data-*` attributes, including existing state
+attributes and component-specific semantic state when needed.
 
 `HellDialpad` was the first implementation target for the Part Style Map model.
 `HellButton` and `HellInput` have also migrated. Larger surfaces such as table,
@@ -62,6 +127,29 @@ Keep each migration focused on its component model: part recipes, `[ui]`, public
 slot names, tests/docs, and narrow validation. Package-consumer, global
 architecture guard, API-report expansion, and full `unstyled` removal gates
 belong to broader enforcement work.
+
+Tests should prove the new public contract instead of memorializing the old
+one. Component-level tests for migrated modules should read as future-facing
+behavior: `[ui]` string shorthand, object maps, Tailwind conflict merging,
+state attributes, accessibility, and behavior stay intact. Do not add
+per-component tests whose main assertion is that `unstyled` is absent. Removal
+of the old Style Opt-Out contract is enforced once at package boundaries:
+contract/API checks for exported part and UI types plus signal-input `ui`,
+architecture guards that migrated modules do not extend `HellStyleable` or
+expose `unstyled`, and docs/package-consumer checks that consumers use `ui`.
+
+Organize larger migration batches by anatomy pattern, not by grabbing unrelated
+entrypoints together. Directive-suite Composites with single-host child
+directives should migrate separately from floating/list directive suites, and
+both should migrate separately from owned-anatomy Composites with real
+multi-part root maps. This keeps each implementation goal focused on one
+architecture rule and one validation shape.
+
+After the `HellPartStyleable.ui` signal-input foundation lands, migrate the
+directive-suite batch first: Card, Field, Tabs, and Accordion. This batch proves
+the projected-child and single-host directive rules before taking on floating
+surfaces or owned-anatomy Composites with portaled DOM, runtime state, and
+multi-part root maps.
 
 Migrated components should drop `unstyled` immediately. Dialpad, Button, and
 Input do not keep `unstyled` compatibility inputs.
@@ -85,22 +173,43 @@ and document the `class` caveat.
 - The migration must prove behavior-only usage through `[ui]` rather than a legacy boolean.
 - Every public `[ui]` component should export its part union type and `Hell<Component>Ui` type, backed by shared `HellUi`, `HellUiInput`, and `HellRecipe` core types.
 - `HellPartStyleable<Part>` is the migration base for components adopting `[ui]`; do not duplicate part-class merge code per component.
+- `HellPartStyleable.ui` is a signal input; subclasses read `this.ui()` and do
+  not keep a compatibility class-property path.
 - `ui` string shorthand belongs to a component's documented default Public Part; object-form `ui` remains the explicit multi-part map.
 - `class` is additive and not the deterministic Tailwind conflict override contract.
 - Public Parts should render with stable `data-slot` values; do not rename the DOM marker to `data-part`.
+- Owned-anatomy composite Public Parts should use canonical camelCase names in both exported TypeScript unions and rendered `data-slot` values.
+- Single-host public directives should use `root` as their sole part; semantic names belong to the directive/component type, not the lone part.
+- Owned-anatomy Composites should expose flat, Composite-owned Part Style Maps instead of nested `*Ui` passthroughs for internal primitives.
+- Public Parts should cover durable consumer styling surfaces, not every internal wrapper or measurement node.
 - Migrated component defaults must be represented as complete Tailwind utility strings so configured `hellTwMerge` can resolve conflicts deterministically in the single part-class pipeline.
+- Complex migrated Composites may keep structural and cross-part CSS; recipes own consumer-overridable per-part utility classes.
+- Migrated modules should not keep legacy `.hell-*` classes as CSS scope hooks;
+  component CSS should scope through selectors, `data-slot`, `data-*`, and
+  documented overlay pane hooks where needed.
+- Portaled owned DOM may be a Public Part of the owning component; overlay pane
+  hooks do not replace the Part-Class Pipeline.
 - Runtime theme changes should target semantic Hell theme tokens rather than component-specific public variable families.
 - The packaging plan must prove those recipe classes are available through shipped CSS entrypoints without relying on removed legacy CSS classes or consumer-side source scanning.
 - Complex components should expose enough Public Parts that consumers can refine styling without rebuilding component-owned structure.
 - `HellUi` v1 remains a string map. Dynamic row/cell styling belongs to stable state attributes first, and table-specific extensions only if evidence requires them.
+- Repeated owned elements share static Public Part names; indexed, variant-keyed,
+  or callback-valued generic `HellUi` entries are out of scope for v1.
 - Dialpad, Button, and Input are migrated examples of the model.
 - Dialpad should rename its public `data-slot` values to match
   `HellDialpadPart`; existing tests/docs should migrate to the new names rather
   than preserve legacy slot aliases.
 - Component migration should stay local to implementation, docs/tests, and
   narrow validation; global gates belong to broader enforcement work.
+- Component tests for migrated modules should prove the new `[ui]` public
+  contract; absence of `unstyled` belongs in architecture/API/docs and
+  package-consumer gates.
 - Migrated components drop `unstyled`; do not add compatibility inputs for new
   Part Style Map surfaces.
 - Dialpad's native internal button/input controls are a component-specific public
   anatomy choice, independent of Button/Input migration status.
 - Global gates should run only after the post-migration cleanup proves the Part Style Map API is the stable shape to enforce.
+- Larger migration batches should be grouped by anatomy pattern: directive-suite
+  Composites, floating/list directive suites, and owned-anatomy Composites.
+- After the signal-input foundation, migrate Card, Field, Tabs, and Accordion
+  first to prove the directive-suite anatomy rules.
