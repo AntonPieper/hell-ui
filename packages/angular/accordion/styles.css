@@ -36,6 +36,10 @@
     padding-inline: var(--spacing-hell-5);
   }
 
+  [hellAccordionContent][data-slot='root'] {
+    height: calc(var(--spacing) * 0);
+  }
+
   [hellAccordionContent][data-slot='root'] > *:last-child {
     padding-bottom: var(--spacing-hell-5);
   }

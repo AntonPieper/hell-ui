@@ -33,7 +33,7 @@ const HELL_ACCORDION_TRIGGER_RECIPE = {
 } satisfies HellRecipe<HellAccordionTriggerPart>;
 
 const HELL_ACCORDION_CONTENT_RECIPE = {
-  root: 'block h-0 overflow-hidden text-[13px] leading-[1.55] text-hell-foreground-muted transition-[height] duration-[var(--hell-duration-base)] ease-hell-out [interpolate-size:allow-keywords]',
+  root: 'block overflow-hidden text-[13px] leading-[1.55] text-hell-foreground-muted transition-[height] duration-[var(--hell-duration-base)] ease-hell-out [interpolate-size:allow-keywords]',
 } satisfies HellRecipe<HellAccordionContentPart>;
 
 @Directive({
