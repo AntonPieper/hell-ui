@@ -158,7 +158,6 @@ const legacyStyleableAllowlist = new Set([
   'HellAvatarGroup',
   'HellAvatarGroupItem',
   'HellAvatarGroupOverflow',
-  'HellDateInput',
   'HellNavItem',
   'HellNavItemIcon',
   'HellNavItemLabel',
