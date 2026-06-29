@@ -233,6 +233,12 @@ const packageConsumerScenarioCatalog = [
     forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: paginationConsumerMainTs,
     stylesCss: paginationConsumerStylesCss,
+    cssIncludes: [
+      'min-width:calc(var(--spacing)*18)',
+      'max-width:calc(var(--spacing)*26)',
+      'transition-property:background-color,border-color,color,box-shadow',
+      'background-color:var(--color-hell-primary)',
+    ],
   },
   {
     name: 'composite-css',
@@ -253,7 +259,13 @@ const packageConsumerScenarioCatalog = [
     peerGroup: 'composite',
     dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: appShellConsumerMainTs,
-    stylesCss: audioPlayerConsumerStylesCss,
+    stylesCss: appShellConsumerStylesCss,
+    cssIncludes: [
+      'grid-template-columns:var(--hell-app-sidenav-width) 1fr var(--hell-app-secondary-width)',
+      'grid-template-rows:var(--hell-app-topbar-height) 1fr',
+      'background-color:var(--color-hell-surface)',
+      'width:min(var(--hell-app-secondary-width),calc(100vw - var(--spacing-hell-8)))',
+    ],
   },
   {
     name: 'resizable',
@@ -264,6 +276,12 @@ const packageConsumerScenarioCatalog = [
     dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: resizableConsumerMainTs,
     stylesCss: resizableConsumerStylesCss,
+    cssIncludes: [
+      'flex:var(--_hell-resizable-pane-flex,var(--hell-pane-flex,1) 1 0)',
+      'overflow:auto',
+      'cursor:col-resize',
+      'background-color:transparent',
+    ],
   },
   {
     name: 'split-view',
@@ -274,6 +292,12 @@ const packageConsumerScenarioCatalog = [
     dependencies: styledUiDeps,
     mainTs: splitViewConsumerMainTs,
     stylesCss: splitViewConsumerStylesCss,
+    cssIncludes: [
+      'height:var(--hell-split-view-height,100%)',
+      'overflow:hidden',
+      'border-radius:var(--radius-hell-md)',
+      'transform:rotate(180deg)',
+    ],
   },
   {
     name: 'audio-player',
@@ -325,6 +349,14 @@ const packageConsumerScenarioCatalog = [
     forbiddenDependencies: tableAdapterPeerGroup,
     mainTs: tableConsumerMainTs,
     stylesCss: tableConsumerStylesCss,
+    cssIncludes: [
+      'table-layout:fixed',
+      'border-spacing:var(--tw-border-spacing-x)var(--tw-border-spacing-y)',
+      'background-color:var(--color-hell-surface-elevated)',
+      'text-overflow:ellipsis',
+      'cursor:col-resize',
+      'width:44px',
+    ],
   },
   {
     name: 'table-tanstack',
@@ -1729,11 +1761,16 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function resizableConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HELL_RESIZABLE_DIRECTIVES, type HellResizablePaneUi } from '${packageName}/resizable';
+import { HELL_RESIZABLE_DIRECTIVES, type HellResizableHandleUi, type HellResizablePaneUi } from '${packageName}/resizable';
 
 const paneUi = {
   root: 'hd-surface-elevated p-4 overflow-hidden',
 } satisfies HellResizablePaneUi;
+
+const handleUi = {
+  root: 'bg-hell-surface-muted',
+  grip: 'bg-hell-primary',
+} satisfies HellResizableHandleUi;
 
 @Component({
   selector: 'app-root',
@@ -1742,13 +1779,14 @@ const paneUi = {
   template: \`
     <div hellResizable orientation="horizontal" ui="h-[240px]">
       <section hellResizablePane [initialFlex]="2" [ui]="paneUi">Left</section>
-      <div hellResizableHandle appearance="grip" ui="bg-hell-surface-muted"></div>
+      <div hellResizableHandle appearance="grip" [ui]="handleUi"></div>
       <section hellResizablePane [initialFlex]="3" ui="hd-surface-subtle p-4">Right</section>
     </div>
   \`,
 })
 class App {
   protected readonly paneUi = paneUi;
+  protected readonly handleUi = handleUi;
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));

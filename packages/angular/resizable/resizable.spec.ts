@@ -47,7 +47,10 @@ class ResizableLabelContractHost {}
 })
 class ResizableUiHost {
   readonly paneUi = { root: 'overflow-hidden bg-hell-danger' } satisfies HellResizablePaneUi;
-  readonly handleUi = { root: 'bg-hell-danger flex-none' } satisfies HellResizableHandleUi;
+  readonly handleUi = {
+    root: 'bg-hell-danger flex-none',
+    grip: 'bg-hell-primary',
+  } satisfies HellResizableHandleUi;
 }
 
 describe('HellResizable', () => {
@@ -68,6 +71,7 @@ describe('HellResizable', () => {
     const group = byId(fixture.nativeElement, 'ui-group');
     const pane = byId(fixture.nativeElement, 'ui-pane-a');
     const handle = byId(fixture.nativeElement, 'ui-handle');
+    const grip = query(handle, '[data-slot="grip"]');
 
     expect(group.getAttribute('data-slot')).toBe('root');
     expect(group.getAttribute('data-orientation')).toBe('vertical');
@@ -85,6 +89,7 @@ describe('HellResizable', () => {
     expect(handle.getAttribute('aria-orientation')).toBe('horizontal');
     expect(handle.className).toContain('bg-hell-danger');
     expect(handle.className).toContain('flex-none');
+    expect(grip.className).toContain('bg-hell-primary');
   });
 
   it('resizes only the panes adjacent to the active handle', () => {
@@ -191,6 +196,12 @@ describe('HellResizable', () => {
 function byId(root: HTMLElement, id: string): HTMLElement {
   const element = root.querySelector(`#${id}`);
   if (!(element instanceof HTMLElement)) throw new Error(`Expected #${id}.`);
+  return element;
+}
+
+function query(root: HTMLElement, selector: string): HTMLElement {
+  const element = root.querySelector(selector);
+  if (!(element instanceof HTMLElement)) throw new Error(`Expected ${selector}.`);
   return element;
 }
 

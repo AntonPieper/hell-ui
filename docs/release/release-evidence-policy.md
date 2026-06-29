@@ -23,6 +23,7 @@ individual proof paths, but release evidence treats the set as one gate.
 | `button-ui` | Button Part Style Map compiles without Tailwind or Hell CSS. |
 | `button` | Styled Button CSS ships compiled recipe utilities and semantic tokens. |
 | `primitive-icons-css` | Icon-backed primitive CSS stays isolated to narrow primitive imports. |
+| `pagination` | Pagination Part Style Map controls ship through the narrow primitive entrypoint. |
 | `composite-css` | Composite CSS stays behind narrow composite entrypoints. |
 | `app-shell` | App Shell composite remains installable without feature peers. |
 | `resizable` | Resizable composite Part Style Map roots ship through the narrow entrypoint. |

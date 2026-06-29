@@ -72,14 +72,6 @@
     transform: rotate(180deg);
   }
 
-  /* Legacy .hell-button helper hook for not-yet-migrated split navigation. */
-  hell-split-view[data-slot='root'] [data-hell-split-master-item][data-current='true'] {
-    --_hell-btn-bg: var(--color-hell-primary-soft);
-    --_hell-btn-bg-hover: var(--color-hell-surface-muted);
-    --_hell-btn-border: var(--color-hell-border);
-    --_hell-btn-fg: var(--color-hell-primary-soft-foreground);
-  }
-
   hell-split-view[data-slot='root'][data-compact='true'] [data-pane='detail'] {
     background-color: var(--color-hell-surface);
   }

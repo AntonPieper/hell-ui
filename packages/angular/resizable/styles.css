@@ -48,7 +48,7 @@
     cursor: row-resize;
   }
 
-  [hellResizableHandle][data-slot='root'] [data-hell-resizable-grip] {
+  [hellResizableHandle][data-slot='root'] [data-slot='grip'] {
     display: block;
     transition:
       background-color var(--hell-duration-fast) var(--ease-hell-out),
@@ -57,30 +57,30 @@
   }
 
   /* Default appearance — `line`: hairline that thickens on hover/drag. */
-  [hellResizableHandle][data-slot='root'][data-appearance='line'] [data-hell-resizable-grip] {
+  [hellResizableHandle][data-slot='root'][data-appearance='line'] [data-slot='grip'] {
     width: 1px;
     height: 100%;
     background-color: var(--color-hell-border);
   }
   [data-orientation='vertical']
     > [hellResizableHandle][data-slot='root'][data-appearance='line']
-    [data-hell-resizable-grip] {
+    [data-slot='grip'] {
     width: 100%;
     height: 1px;
   }
   [hellResizableHandle][data-slot='root'][data-appearance='line']:hover
-    [data-hell-resizable-grip],
+    [data-slot='grip'],
   [hellResizableHandle][data-slot='root'][data-appearance='line'][data-active='true']
-    [data-hell-resizable-grip] {
+    [data-slot='grip'] {
     background-color: var(--color-hell-primary);
     width: 2px;
   }
   [data-orientation='vertical']
     > [hellResizableHandle][data-slot='root'][data-appearance='line']:hover
-    [data-hell-resizable-grip],
+    [data-slot='grip'],
   [data-orientation='vertical']
     > [hellResizableHandle][data-slot='root'][data-appearance='line'][data-active='true']
-    [data-hell-resizable-grip] {
+    [data-slot='grip'] {
     width: 100%;
     height: 2px;
   }
@@ -110,7 +110,7 @@
       flex-basis: 18px;
     }
   }
-  [hellResizableHandle][data-slot='root'][data-appearance='grip'] [data-hell-resizable-grip] {
+  [hellResizableHandle][data-slot='root'][data-appearance='grip'] [data-slot='grip'] {
     width: 4px;
     height: calc(var(--spacing) * 8);
     border-radius: var(--radius-hell-pill);
@@ -124,7 +124,7 @@
   }
   [data-orientation='vertical']
     > [hellResizableHandle][data-slot='root'][data-appearance='grip']
-    [data-hell-resizable-grip] {
+    [data-slot='grip'] {
     width: calc(var(--spacing) * 8);
     height: 4px;
     background-size: 33.333% 100%;
@@ -135,9 +135,9 @@
     background-color: var(--color-hell-surface-muted);
   }
   [hellResizableHandle][data-slot='root'][data-appearance='grip']:hover
-    [data-hell-resizable-grip],
+    [data-slot='grip'],
   [hellResizableHandle][data-slot='root'][data-appearance='grip'][data-active='true']
-    [data-hell-resizable-grip] {
+    [data-slot='grip'] {
     background-image: radial-gradient(
       circle 1.6px at 50% 50%,
       var(--color-hell-primary) 99%,

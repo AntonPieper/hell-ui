@@ -426,6 +426,7 @@ class ContractHost {
 
   readonly resizableHandleUi = {
     root: 'bg-hell-danger flex-none',
+    grip: 'bg-hell-primary',
   } satisfies HellResizableHandleUi;
   readonly splitViewUi = {
     root: 'h-[420px] bg-hell-surface-muted',
@@ -685,6 +686,7 @@ describe('Hell Component Contract', () => {
     const group = query(fixture.nativeElement, '#resizable');
     const pane = query(fixture.nativeElement, '#resizable-pane-a');
     const handle = query(fixture.nativeElement, '#resizable-handle');
+    const grip = query(handle, '[data-slot="grip"]');
 
     expect(group.classList.contains('hell-resizable')).toBe(false);
     expect(group.getAttribute('data-slot')).toBe('root');
@@ -705,6 +707,7 @@ describe('Hell Component Contract', () => {
     expect(handle.getAttribute('aria-orientation')).toBe('horizontal');
     expect(handle.getAttribute('tabindex')).toBe('0');
     expect(handle.className).toContain('bg-hell-danger');
+    expect(grip.className).toContain('bg-hell-primary');
   });
 
   it('exposes pagination local roots and strip anatomy through Part Style Maps', () => {

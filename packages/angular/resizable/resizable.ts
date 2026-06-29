@@ -37,7 +37,7 @@ export type HellResizableUi = HellUi<HellResizablePart>;
 export type HellResizablePanePart = 'root';
 export type HellResizablePaneUi = HellUi<HellResizablePanePart>;
 
-export type HellResizableHandlePart = 'root';
+export type HellResizableHandlePart = 'root' | 'grip';
 export type HellResizableHandleUi = HellUi<HellResizableHandlePart>;
 
 const HELL_RESIZABLE_RECIPE = {
@@ -50,6 +50,7 @@ const HELL_RESIZABLE_PANE_RECIPE = {
 
 const HELL_RESIZABLE_HANDLE_RECIPE = {
   root: 'flex bg-transparent',
+  grip: '',
 } satisfies HellRecipe<HellResizableHandlePart>;
 
 function hellElementDirection(element: HTMLElement): HellResizeDirection {
@@ -351,7 +352,7 @@ export class HellResizablePane
     '(pointerdown)': 'onPointerDown($event)',
     '(keydown)': 'onKey($event)',
   },
-  template: '<span data-hell-resizable-grip aria-hidden="true"></span>',
+  template: '<span data-slot="grip" [class]="part(\'grip\')" aria-hidden="true"></span>',
 })
 export class HellResizableHandle
   extends HellPartStyleable<HellResizableHandlePart>
