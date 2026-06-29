@@ -4,7 +4,7 @@
 @source "./flyout.ts";
 
 @layer components {
-  [hellFlyout][data-slot='root'] {
+  [data-hell-flyout][data-slot='root'] {
     top: var(--hell-flyout-y, 0);
     left: var(--hell-flyout-x, 0);
   }

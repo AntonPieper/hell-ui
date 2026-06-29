@@ -128,6 +128,7 @@ export class HellFlyoutTrigger extends HellNativeInteractiveDisabledGuard {
   host: {
     role: 'dialog',
     'aria-modal': 'false',
+    'data-hell-flyout': '',
     '[id]': 'trigger().panelId',
     '[attr.aria-label]': 'ariaLabel()',
     '[attr.aria-labelledby]': 'ariaLabelledby()',

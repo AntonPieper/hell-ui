@@ -145,7 +145,7 @@ const INITIAL_CLOSE_COUNTS: Record<HarnessLayer, number> = {
       padding: 2rem;
     }
 
-    [hellFlyout] {
+    [data-hell-flyout] {
       display: grid;
       gap: 0.5rem;
       width: max-content;
@@ -162,6 +162,10 @@ const INITIAL_CLOSE_COUNTS: Record<HarnessLayer, number> = {
       width: max-content;
       padding: 0.75rem;
       border: 1px dashed CanvasText;
+    }
+
+    [data-testid='outside-pointer-target'] {
+      margin-block-start: 8rem;
     }
   `,
 })

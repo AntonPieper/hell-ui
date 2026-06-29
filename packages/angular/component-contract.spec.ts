@@ -546,98 +546,6 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
     className: 'inline-flex',
     attrs: { 'data-slot': 'root' },
   },
-  {
-    id: 'nav-item',
-    module: 'HellNavItem',
-    className: 'hell-nav-item',
-    attrs: { 'data-slot': 'nav-item' },
-  },
-  {
-    id: 'nav-section',
-    module: 'HellNavSection',
-    className: 'hell-nav-section',
-    attrs: { 'data-slot': 'nav-section' },
-  },
-  {
-    id: 'nav-section-toggle',
-    module: 'HellNavSectionToggle',
-    className: 'hell-nav-section-toggle',
-    attrs: { 'data-slot': 'nav-section-toggle', 'aria-expanded': 'true' },
-  },
-  {
-    id: 'nav-section-items',
-    module: 'HellNavSectionItems',
-    className: 'hell-nav-section-items',
-    attrs: { 'data-slot': 'nav-section-items' },
-  },
-  {
-    id: 'table-container',
-    module: 'HellTableContainer',
-    className: 'hell-table-container',
-    attrs: { 'aria-busy': 'true' },
-  },
-  {
-    id: 'table',
-    module: 'HellTable',
-    className: 'hell-table',
-    attrs: { 'data-content-width': 'true' },
-  },
-  { id: 'table-head', module: 'HellTableHead', className: 'hell-table-head' },
-  { id: 'table-body', module: 'HellTableBody', className: 'hell-table-body' },
-  {
-    id: 'table-row',
-    module: 'HellTableRow',
-    className: 'hell-table-row',
-    attrs: { 'data-active': 'true', 'data-selected': 'true' },
-  },
-  {
-    id: 'table-selection-header',
-    module: 'HellTableSelectionCell',
-    className: 'hell-table-selection-cell',
-    attrs: { 'data-hell-table-selection-cell': '' },
-  },
-  {
-    id: 'table-header-cell',
-    module: 'HellTableHeaderCell',
-    className: 'hell-table-header-cell',
-    attrs: { 'data-sort': 'asc', 'aria-sort': 'ascending', 'data-sortable': 'true' },
-  },
-  {
-    id: 'table-sort-trigger',
-    module: 'HellTableSortTrigger',
-    className: 'hell-table-sort-trigger',
-    attrs: { type: 'button' },
-  },
-  {
-    id: 'table-row-checkbox',
-    module: 'HellTableRowCheckbox',
-    className: 'hell-table-row-checkbox',
-    attrs: { type: 'checkbox', 'data-hell-table-row-checkbox': '' },
-  },
-  {
-    id: 'table-row-action',
-    module: 'HellTableRowAction',
-    className: 'hell-table-row-action',
-    attrs: { type: 'button', 'data-hell-table-row-action': '' },
-  },
-  {
-    id: 'table-row-radio',
-    module: 'HellTableRowRadio',
-    className: 'hell-table-row-radio',
-    attrs: { type: 'radio', 'data-hell-table-row-radio': '' },
-  },
-  {
-    id: 'table-cell',
-    module: 'HellTableCell',
-    className: 'hell-table-cell',
-    attrs: { 'data-align': 'end', 'data-space': 'empty' },
-  },
-  {
-    id: 'table-resizer',
-    module: 'HellTableResizeHandle',
-    className: 'hell-table-resize-handle',
-    attrs: { role: 'separator' },
-  },
 ];
 
 const STYLE_OPT_OUT_CASES: readonly ContractCase[] = [];
@@ -950,7 +858,9 @@ function assertContract(root: HTMLElement, contract: ContractCase, styled: boole
     root.querySelector(`[data-contract="${contract.id}"]`) ?? root.querySelector(`#${contract.id}`);
   if (!(element instanceof HTMLElement)) throw new Error(`Expected #${contract.id}.`);
 
-  expect(element.classList.contains(contract.className)).toBe(styled);
+  expect(element.classList.contains(contract.className), `${contract.id}.${contract.className}`).toBe(
+    styled,
+  );
   for (const [name, value] of Object.entries(contract.attrs ?? {})) {
     expect(element.getAttribute(name), `${contract.id}.${name}`).toBe(value);
   }

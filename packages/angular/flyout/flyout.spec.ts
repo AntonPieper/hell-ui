@@ -227,6 +227,7 @@ describe('HellFlyout outside interaction', () => {
     await waitFor(() => panel.style.getPropertyValue('--hell-flyout-x') !== '');
 
     expect(panel.getAttribute('data-slot')).toBe('root');
+    expect(panel.hasAttribute('data-hell-flyout')).toBe(true);
     expect(panel.className).toContain('rounded-hell-pill');
     expect(panel.className).not.toContain('rounded-hell-md');
     expect(panel.className).toContain('p-hell-4');

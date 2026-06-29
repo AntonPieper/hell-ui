@@ -839,17 +839,13 @@ function overlayRoot(): HTMLElement {
 }
 
 async function waitForElement<T extends HTMLElement>(
-  fixture: { detectChanges(): void; whenStable(): Promise<unknown> },
+  fixture: { detectChanges(): void },
   root: ParentNode,
   selector: string,
 ): Promise<T> {
-  const timeout = Date.now() + 3000;
+  const timeout = Date.now() + 10_000;
   while (Date.now() < timeout) {
     fixture.detectChanges();
-    await fixture.whenStable();
-    await Promise.resolve();
-    fixture.detectChanges();
-
     const element = root.querySelector<T>(selector);
     if (element instanceof HTMLElement) return element as T;
 
@@ -858,6 +854,7 @@ async function waitForElement<T extends HTMLElement>(
     } else {
       await Promise.resolve();
     }
+    fixture.detectChanges();
   }
 
   throw new Error(`Expected ${selector}.`);

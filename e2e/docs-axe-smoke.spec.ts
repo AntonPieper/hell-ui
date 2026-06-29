@@ -74,7 +74,7 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'flyout',
     path: '/components/flyout',
     heading: 'Flyout',
-    include: ['main', '[hellFlyout][data-slot="root"]'],
+    include: ['main', '[data-hell-flyout][data-slot="root"]'],
     prepare: async (page) => {
       await page.getByRole('button', { name: 'Show flyout' }).click();
       await expect(page.getByRole('dialog', { name: 'Anchored, non-modal' })).toBeVisible();
@@ -204,7 +204,7 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'time input docs example',
     path: '/components/time-input',
     heading: 'Time input',
-    include: ['main', '[hellPopover][data-slot="root"]'],
+    include: ['main', '[data-slot="pickerPanel"]'],
     prepare: async (page) => {
       await page.getByRole('button', { name: 'Choose time for Reminder time' }).first().click();
       await expect(page.getByRole('spinbutton', { name: 'Hours' })).toBeVisible();
