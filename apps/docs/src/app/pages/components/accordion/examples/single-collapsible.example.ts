@@ -1,12 +1,15 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_ACCORDION_DIRECTIVES } from '@hell-ui/angular/accordion';
+import {
+  HELL_ACCORDION_DIRECTIVES,
+  type HellAccordionUi,
+} from '@hell-ui/angular/accordion';
 
 @Component({
   selector: 'app-accordion-single-collapsible-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [...HELL_ACCORDION_DIRECTIVES],
   template: `
-    <div hellAccordion type="single" collapsible value="install">
+    <div hellAccordion type="single" collapsible value="install" [ui]="accordionUi">
       <div hellAccordionItem value="install">
         <h3 class="m-0">
           <button hellAccordionTrigger type="button">Installation</button>
@@ -43,4 +46,8 @@ import { HELL_ACCORDION_DIRECTIVES } from '@hell-ui/angular/accordion';
     </div>
   `,
 })
-export class AccordionSingleCollapsibleExample {}
+export class AccordionSingleCollapsibleExample {
+  protected readonly accordionUi = {
+    root: 'rounded-hell-lg',
+  } satisfies HellAccordionUi;
+}

@@ -122,14 +122,19 @@ Old category-level style paths are not public package contracts.
 
 ## Part Style Maps
 
-Button supports a typed Part Style Map. Pass `[ui]` with a `root` class string
-to refine the default recipe while keeping behavior, accessibility, and state
-attributes. Primitives that have not migrated yet still document `unstyled`
-locally.
+Migrated primitives and composites support typed Part Style Maps. Pass `[ui]`
+with a `root` class string to refine a single-host directive recipe while
+keeping behavior, accessibility, and state attributes. Directive-suite children,
+such as `hellCardHeader` or `hellAccordionTrigger`, expose their own local
+`root` `ui` contract. Primitives that have not migrated yet still document
+`unstyled` locally.
 
 ```html
 <button hellButton variant="primary">Save</button>
 <button hellButton [ui]="{ root: 'rounded-hell-pill bg-hell-primary' }">Save</button>
+<div hellCard [ui]="{ root: 'rounded-hell-xl' }">
+  <div hellCardBody>Card body</div>
+</div>
 ```
 
 ## Customization

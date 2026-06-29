@@ -47,14 +47,21 @@ import fieldVerticalDefaultExampleCodeRaw from './examples/vertical-default.exam
       <ul>
         <li>
           <code>hellField</code>: wrapper. <code>orientation</code> is
-          <code>vertical | horizontal</code>; <code>unstyled</code> opts out of spacing.
+          <code>vertical | horizontal</code>; <code>ui</code> refines the local
+          <code>root</code> part.
         </li>
         <li>
           <code>hellFieldLabel</code>: visible label, auto-linked to the control. Clicking it
-          focuses or toggles the control.
+          focuses or toggles the control. Exposes local <code>root</code> <code>ui</code>.
         </li>
-        <li><code>hellFieldDescription</code>: neutral helper text announced by assistive tech.</li>
-        <li><code>hellFieldError</code>: error text announced by assistive tech when present.</li>
+        <li>
+          <code>hellFieldDescription</code>: neutral helper text announced by assistive tech.
+          Exposes local <code>root</code> <code>ui</code>.
+        </li>
+        <li>
+          <code>hellFieldError</code>: error text announced by assistive tech when present.
+          Exposes local <code>root</code> <code>ui</code>.
+        </li>
         <li>Import the bundle via <code>HELL_FIELD_DIRECTIVES</code>.</li>
       </ul>
 
