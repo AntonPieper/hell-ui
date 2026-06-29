@@ -65,7 +65,7 @@ import separatorVerticalExampleCodeRaw from './examples/vertical.example.ts?raw'
           <code>spacing</code>: <code>none | xs | sm | md | lg | xl</code> — symmetric margin on the
           main axis
         </li>
-        <li><code>unstyled</code></li>
+        <li><code>ui</code>: string shorthand or <code>&#123; root: '...' &#125;</code></li>
       </ul>
 
       <h2>Best practice</h2>
