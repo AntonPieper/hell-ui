@@ -1,2 +1,3 @@
-/* Pagination defaults are Tailwind utility recipes in the directives. */
+/* Pagination defaults and its internal jump select are Tailwind utility recipes. */
 @source "./pagination.ts";
+@source "../input/input.ts";

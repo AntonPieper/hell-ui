@@ -236,6 +236,8 @@ const packageConsumerScenarioCatalog = [
     cssIncludes: [
       'min-width:calc(var(--spacing)*18)',
       'max-width:calc(var(--spacing)*26)',
+      'appearance:none',
+      'background-repeat:no-repeat',
       'transition-property:background-color,border-color,color,box-shadow',
       'background-color:var(--color-hell-primary)',
     ],
@@ -2254,7 +2256,6 @@ function buttonConsumerStylesCss() {
 function paginationConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/tokens.css";
-@import "${packageName}/input/styles.css";
 @import "${packageName}/pagination/styles.css";
 `;
 }

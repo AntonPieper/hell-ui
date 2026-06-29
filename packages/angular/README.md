@@ -28,7 +28,7 @@ behind scoped entry points. The PDF viewer lives in the separate
 
 ```bash
 pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs tailwindcss
-# add @ng-icons/font-awesome when you use icon-backed entries such as pagination or date-picker
+# add @ng-icons/font-awesome when you use icon-backed entries such as date-picker
 ```
 
 Feature peers remain optional at runtime, but package peer metadata is package-wide: install the core peer group for any package entry point, then add tier peers only for entry points and styles you import. A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`; install any missing peers explicitly.
@@ -42,7 +42,7 @@ Package-consumer scenarios assert these peer groups with strict peer installs. C
 | Tier | Entry points / scenarios | Peer group asserted |
 | --- | --- | --- |
 | Core | `@hell-ui/angular`, `/core`, `/testing`; `root-core`, `core`, `testing` | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `ng-primitives`, `rxjs` |
-| Primitive | Narrow primitives such as `/button`, `/select`, and `/icon`; `button-ui`, `button`, `primitive-icons-css` | Core peers. Add `tailwindcss` when importing primitive CSS; add `@ng-icons/font-awesome` for icon-backed entries. |
+| Primitive | Narrow primitives such as `/button`, `/pagination`, `/select`, and `/icon`; `button-ui`, `button`, `pagination`, `primitive-icons-css` | Core peers. Add `tailwindcss` when importing primitive CSS; add `@ng-icons/font-awesome` for icon-backed entries. |
 | Composite | Narrow composite entry points such as `/app-shell`, `/resizable`, `/split-view`, and `/audio-player`; `composite-css`, `app-shell`, `resizable`, `split-view`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Icon-backed composites also assert optional `@ng-icons/font-awesome`. |
 | Audio transcript | `/features/audio-transcript`; `audio-transcript` | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled. |
 | Table primitives | `/table`; `table`, `no-legacy-alias` | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack Table, or TanStack Virtual peers. The negative scenario proves removed legacy table aliases and CSS aliases stay unavailable. |
