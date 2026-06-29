@@ -78,15 +78,6 @@ const audioTranscriptRuntimeTerms = [
 // Remove a symbol here as soon as it migrates to HellPartStyleable; new public
 // modules must not extend HellStyleable.
 const legacyStyleableAllowlist = new Set([
-  'HellAvatar',
-  'HellBadge',
-  'HellBreadcrumbEllipsis',
-  'HellBreadcrumbItem',
-  'HellBreadcrumbLink',
-  'HellBreadcrumbList',
-  'HellBreadcrumbPage',
-  'HellBreadcrumbSeparator',
-  'HellBreadcrumbs',
   'HellCheckbox',
   'HellNativeCheckbox',
   'HellCombobox',
@@ -137,7 +128,6 @@ const legacyStyleableAllowlist = new Set([
   'HellSubmenuTrigger',
   'HellNativeSwitch',
   'HellSwitch',
-  'HellTag',
   'HellToggle',
   'HellToggleGroup',
   'HellToggleGroupItem',
