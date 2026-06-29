@@ -26,14 +26,34 @@
       "output": "."
     },
     {
+      "glob": "accordion.ts",
+      "input": "accordion",
+      "output": "accordion"
+    },
+    {
       "glob": "button.ts",
       "input": "button",
       "output": "button"
     },
     {
+      "glob": "card.ts",
+      "input": "card",
+      "output": "card"
+    },
+    {
+      "glob": "field.ts",
+      "input": "field",
+      "output": "field"
+    },
+    {
       "glob": "input.ts",
       "input": "input",
       "output": "input"
+    },
+    {
+      "glob": "tabs.ts",
+      "input": "tabs",
+      "output": "tabs"
     },
     {
       "glob": "dialpad.ts",

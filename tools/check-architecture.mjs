@@ -2793,7 +2793,7 @@ function checkPartStyleMapContract() {
   }
   if (
     !packageConsumer.includes(
-      'built CSS contains Part Style Map recipe utilities and semantic token overrides',
+      'built CSS contains Part Style Map compiled-CSS proof and semantic token output',
     )
   ) {
     failures.push('Package-consumer CSS assertion must name the Part Style Map compiled-CSS proof');
