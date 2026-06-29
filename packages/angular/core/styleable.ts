@@ -1,4 +1,4 @@
-import { booleanAttribute, Directive, Input, input } from '@angular/core';
+import { booleanAttribute, Directive, input } from '@angular/core';
 import { hellTwMerge } from './part-style-merge';
 
 /** Consumer-provided Tailwind class refinements keyed by a component's public parts. */
@@ -38,7 +38,7 @@ export abstract class HellStyleable {
 @Directive()
 export abstract class HellPartStyleable<Part extends string> {
   /** Tailwind class refinements for public parts. */
-  @Input({ alias: 'ui' }) ui: HellUiInput<Part> = undefined;
+  readonly ui = input<HellUiInput<Part>>(undefined, { alias: 'ui' });
 
   /** Component-owned default classes for every public part. */
   protected abstract readonly recipe: HellRecipe<Part>;
@@ -52,7 +52,7 @@ export abstract class HellPartStyleable<Part extends string> {
   }
 
   private uiClassForPart(part: Part): string | undefined {
-    const ui = this.ui;
+    const ui = this.ui();
 
     if (!ui) return undefined;
     if (typeof ui === 'string') return part === this.defaultUiPart ? ui : undefined;

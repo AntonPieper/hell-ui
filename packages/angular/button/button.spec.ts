@@ -1,7 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, type InputSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import type { HellUiInput } from '@hell-ui/angular/core';
 
-import { HellButton, type HellButtonUi } from './button';
+import { HellButton, type HellButtonPart, type HellButtonUi } from './button';
 
 @Component({
   imports: [HellButton],
@@ -21,6 +23,7 @@ import { HellButton, type HellButtonUi } from './button';
       Custom string
     </button>
     <button id="custom-map" hellButton [ui]="customUi" type="button">Custom map</button>
+    <button id="dynamic-map" hellButton [ui]="dynamicUi()" type="button">Dynamic map</button>
     <button id="class-hook" hellButton class="mt-4 bg-hell-danger" type="button">Class hook</button>
     <button id="link" hellButton variant="link" size="lg" type="button">Link</button>
   `,
@@ -30,6 +33,9 @@ class ButtonHost {
   readonly customUi = {
     root: 'bg-hell-danger px-hell-7 shadow-hell-lg data-hover:bg-hell-danger-hover',
   } satisfies HellButtonUi;
+  readonly dynamicUi = signal<HellButtonUi>({
+    root: 'bg-hell-danger px-hell-7',
+  });
 }
 
 describe('HellButton', () => {
@@ -90,6 +96,38 @@ describe('HellButton', () => {
     expect(button.className).toContain('px-hell-7');
     expect(button.className).toContain('shadow-hell-lg');
     expect(button.className).toContain('data-hover:bg-hell-danger-hover');
+  });
+
+  it('exposes ui as a signal input on migrated components', () => {
+    const fixture = TestBed.createComponent(ButtonHost);
+    fixture.detectChanges();
+
+    const button = fixture.debugElement.query(By.css('#custom-map')).injector.get(HellButton);
+    const ui: InputSignal<HellUiInput<HellButtonPart>> = button.ui;
+
+    expect(ui()).toBe(fixture.componentInstance.customUi);
+  });
+
+  it('reacts to ui signal input updates through the public binding', () => {
+    const fixture = TestBed.createComponent(ButtonHost);
+    fixture.detectChanges();
+
+    const button = query<HTMLButtonElement>(fixture.nativeElement, '#dynamic-map');
+
+    expect(button.className).toContain('bg-hell-danger');
+    expect(button.className).toContain('px-hell-7');
+
+    fixture.componentInstance.dynamicUi.set({
+      root: 'bg-hell-success-strong px-hell-3',
+    });
+    fixture.detectChanges();
+
+    const classes = button.className.split(/\s+/);
+
+    expect(classes).toContain('bg-hell-success-strong');
+    expect(classes).toContain('px-hell-3');
+    expect(classes).not.toContain('bg-hell-danger');
+    expect(classes).not.toContain('px-hell-7');
   });
 
   it('keeps template class additive but outside the Tailwind merge path', () => {
