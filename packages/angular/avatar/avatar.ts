@@ -7,7 +7,7 @@ export type HellAvatarPart = 'root';
 export type HellAvatarUi = HellUi<HellAvatarPart>;
 
 const HELL_AVATAR_RECIPE = {
-  root: 'relative inline-flex shrink-0 select-none items-center justify-center overflow-hidden rounded-full border-2 border-solid border-hell-surface-elevated bg-hell-primary-soft font-semibold tracking-[0.02em] text-hell-primary-soft-foreground transition-[border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] [--_hell-av-size:32px] h-[var(--_hell-av-size)] w-[var(--_hell-av-size)] text-[calc(var(--_hell-av-size)*0.4)] data-[size=xs]:[--_hell-av-size:20px] data-[size=sm]:[--_hell-av-size:26px] data-[size=md]:[--_hell-av-size:32px] data-[size=lg]:[--_hell-av-size:40px] data-[size=xl]:[--_hell-av-size:56px] data-[shape=square]:rounded-hell-md',
+  root: 'relative inline-flex shrink-0 select-none items-center justify-center overflow-hidden rounded-full border-2 border-solid border-[color:var(--_hell-avatar-border,var(--color-hell-surface-elevated))] bg-hell-primary-soft font-semibold tracking-[0.02em] text-hell-primary-soft-foreground transition-[border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] [--_hell-av-size:32px] h-[var(--_hell-av-size)] w-[var(--_hell-av-size)] text-[calc(var(--_hell-av-size)*0.4)] data-[size=xs]:[--_hell-av-size:20px] data-[size=sm]:[--_hell-av-size:26px] data-[size=md]:[--_hell-av-size:32px] data-[size=lg]:[--_hell-av-size:40px] data-[size=xl]:[--_hell-av-size:56px] data-[shape=square]:rounded-hell-md',
 } satisfies HellRecipe<HellAvatarPart>;
 
 /**

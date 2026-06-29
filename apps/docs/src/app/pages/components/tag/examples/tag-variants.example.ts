@@ -14,7 +14,7 @@ import { HellTag } from '@hell-ui/angular/tag';
     <span
       hellTag
       variant="danger"
-      ui="bg-hell-danger text-hell-foreground-inverse"
+      [ui]="'bg-hell-danger text-hell-foreground-inverse'"
     >
       danger
     </span>

@@ -13,7 +13,7 @@ import { HellAvatar, type HellAvatarUi } from './avatar';
       alt="Ada Picture"
       size="lg"
       shape="square"
-      ui="bg-hell-danger h-hell-10 w-hell-10"
+      ui="bg-hell-danger border-hell-danger h-hell-10 w-hell-10"
     />
     <hell-avatar id="avatar-map" fallback="MP" [ui]="avatarUi" />
   `,
@@ -44,9 +44,13 @@ describe('HellAvatar Part Style Map', () => {
     expect(image?.getAttribute('alt')).toBe('Ada Picture');
     expect(avatar.textContent?.trim()).toBe('AP');
     expect(classes).toContain('bg-hell-danger');
+    expect(classes).toContain('border-hell-danger');
     expect(classes).toContain('h-hell-10');
     expect(classes).toContain('w-hell-10');
     expect(classes).not.toContain('bg-hell-primary-soft');
+    expect(classes).not.toContain(
+      'border-[color:var(--_hell-avatar-border,var(--color-hell-surface-elevated))]',
+    );
     expect(classes).not.toContain('h-[var(--_hell-av-size)]');
     expect(classes).not.toContain('w-[var(--_hell-av-size)]');
     expect(avatar.classList.contains('hell-avatar')).toBe(false);

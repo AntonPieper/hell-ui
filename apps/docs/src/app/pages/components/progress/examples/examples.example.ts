@@ -22,8 +22,8 @@ import { HellProgress, HellProgressBar } from '@hell-ui/angular/progress';
 
     <div class="grid gap-1">
       <span class="text-sm font-medium">Media processing</span>
-      <div hellProgress aria-label="Media processing" [value]="66" ui="h-hell-3">
-        <div hellProgressBar ui="bg-hell-info"></div>
+      <div hellProgress aria-label="Media processing" [value]="66" [ui]="'h-hell-3'">
+        <div hellProgressBar [ui]="'bg-hell-info'"></div>
       </div>
     </div>
 

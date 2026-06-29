@@ -66,11 +66,11 @@
     &[data-selected] {
       --_hell-avatar-group-ring-color: var(--color-hell-primary);
     }
-    &[data-selected]:is(.hell-avatar),
-    &[data-selected] > .hell-avatar {
-      border-color: var(--_hell-avatar-group-ring-color);
+    &[data-selected]:is(hell-avatar[data-slot='root']),
+    &[data-selected] > hell-avatar[data-slot='root'] {
+      --_hell-avatar-border: var(--_hell-avatar-group-ring-color);
     }
-    &[data-selected]:not(.hell-avatar):not(:has(> .hell-avatar)) {
+    &[data-selected]:not(hell-avatar[data-slot='root']):not(:has(> hell-avatar[data-slot='root'])) {
       box-shadow: 0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-ring-color);
     }
     &:focus-visible {
