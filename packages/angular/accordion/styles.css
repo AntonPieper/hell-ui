@@ -1,79 +1,22 @@
+/* Accordion directive defaults are Tailwind utility recipes. */
+@source "./accordion.ts";
+
 @layer components {
+  button[hellAccordionTrigger][data-slot='root']::after {
+    height: calc(var(--spacing) * 3.5);
+    width: calc(var(--spacing) * 3.5);
+    flex: 0 0 auto;
+    background-color: currentcolor;
+    color: var(--color-hell-foreground-muted);
+    content: '';
+    -webkit-mask: var(--hell-icon-chevron-down) center/contain no-repeat;
+    mask: var(--hell-icon-chevron-down) center/contain no-repeat;
+    transition: transform var(--hell-duration-base) var(--ease-hell-out);
+  }
 
-  /* Accordion — NgpAccordionItem/Trigger/Content set [data-open] when expanded. */
-
-  .hell-accordion {
-      display: flex;
-      flex-direction: column;
-      overflow: clip;
-      border-style: solid;
-      border-width: 1px;
-      border-color: var(--color-hell-border);
-      border-radius: var(--radius-md);
-      background-color: var(--color-hell-surface-elevated);
-    }
-
-  .hell-accordion-item {
-      border-bottom: 1px solid var(--color-hell-border);
-      &:last-child {
-        border-style: solid;
-        border-width: 0px;
-      }
-    }
-
-  .hell-accordion-trigger {
-      display: flex;
-      width: 100%;
-      cursor: pointer;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--spacing-hell-4);
-      border-style: solid;
-      border-width: 0px;
-      background-color: transparent;
-      padding-inline: var(--spacing-hell-5);
-      padding-block: var(--spacing-hell-4);
-      text-align: start;
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: var(--font-weight-semibold);
-      color: var(--color-hell-foreground);
-      transition: background-color var(--hell-duration-fast) var(--ease-hell-out);
-      &[data-hover] {
-        background-color: var(--color-hell-surface-subtle);
-      }
-      &[data-focus-visible] {
-        outline: 2px solid var(--color-hell-focus-ring);
-        outline-offset: calc(2px * -1);
-      }
-      &::after {
-        height: calc(var(--spacing) * 3.5);
-        width: calc(var(--spacing) * 3.5);
-        flex: 0 0 auto;
-        background-color: currentcolor;
-        color: var(--color-hell-foreground-muted);
-        content: '';
-        -webkit-mask: var(--hell-icon-chevron-down) center/contain no-repeat;
-        mask: var(--hell-icon-chevron-down) center/contain no-repeat;
-        transition: transform var(--hell-duration-base) var(--ease-hell-out);
-      }
-      &[data-open]::after {
-        transform: rotate(180deg);
-      }
-      & > .hell-accordion-chevron {
-        transition: transform var(--hell-duration-base) var(--ease-hell-out);
-      }
-      &[data-open] > .hell-accordion-chevron {
-        transform: rotate(180deg);
-      }
-    }
-
-  .hell-accordion-chevron {
-      display: inline-block;
-      height: calc(var(--spacing) * 3.5);
-      width: calc(var(--spacing) * 3.5);
-      color: var(--color-hell-foreground-muted);
-    }
+  button[hellAccordionTrigger][data-slot='root'][data-open]::after {
+    transform: rotate(180deg);
+  }
 
   /*
    * Animation strategy:
@@ -89,28 +32,20 @@
    *     ng-primitives sets `height: auto` instead of a pixel value.
    */
 
-  .hell-accordion-content {
-      display: block;
-      height: calc(var(--spacing) * 0);
-      overflow: hidden;
-      font-size: 13px;
-      line-height: 1.55;
-      color: var(--color-hell-foreground-muted);
-      interpolate-size: allow-keywords;
-      transition: height var(--hell-duration-base) var(--ease-hell-out);
-      > * {
-        padding-inline: var(--spacing-hell-5);
-      }
-      > *:last-child {
-        padding-bottom: var(--spacing-hell-5);
-      }
-      &[data-open] {
-        height: var(--ngp-accordion-content-height,auto);
-      }
-      &[hidden] {
-        display: block;
-        height: calc(var(--spacing) * 0);
-      }
-    }
+  [hellAccordionContent][data-slot='root'] > * {
+    padding-inline: var(--spacing-hell-5);
+  }
 
+  [hellAccordionContent][data-slot='root'] > *:last-child {
+    padding-bottom: var(--spacing-hell-5);
+  }
+
+  [hellAccordionContent][data-slot='root'][data-open] {
+    height: var(--ngp-accordion-content-height, auto);
+  }
+
+  [hellAccordionContent][data-slot='root'][hidden] {
+    display: block;
+    height: calc(var(--spacing) * 0);
+  }
 }

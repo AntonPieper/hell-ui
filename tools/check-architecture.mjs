@@ -78,10 +78,6 @@ const audioTranscriptRuntimeTerms = [
 // Remove a symbol here as soon as it migrates to HellPartStyleable; new public
 // modules must not extend HellStyleable.
 const legacyStyleableAllowlist = new Set([
-  'HellAccordion',
-  'HellAccordionContent',
-  'HellAccordionItem',
-  'HellAccordionTrigger',
   'HellAvatar',
   'HellBadge',
   'HellBreadcrumbEllipsis',
@@ -198,6 +194,50 @@ const legacyStyleableAllowlist = new Set([
 ]);
 
 const migratedPartStyleMapModules = [
+  {
+    className: 'HellAccordion',
+    partType: 'HellAccordionPart',
+    uiType: 'HellAccordionUi',
+    entrypointId: 'accordion',
+    sourcePath: 'packages/angular/accordion/accordion.ts',
+    publicApiPath: 'packages/angular/accordion/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-accordion',
+    componentVariablePrefix: '--hell-accordion-',
+  },
+  {
+    className: 'HellAccordionItem',
+    partType: 'HellAccordionItemPart',
+    uiType: 'HellAccordionItemUi',
+    entrypointId: 'accordion',
+    sourcePath: 'packages/angular/accordion/accordion.ts',
+    publicApiPath: 'packages/angular/accordion/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-accordion-item',
+    componentVariablePrefix: '--hell-accordion-item-',
+  },
+  {
+    className: 'HellAccordionTrigger',
+    partType: 'HellAccordionTriggerPart',
+    uiType: 'HellAccordionTriggerUi',
+    entrypointId: 'accordion',
+    sourcePath: 'packages/angular/accordion/accordion.ts',
+    publicApiPath: 'packages/angular/accordion/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-accordion-trigger',
+    componentVariablePrefix: '--hell-accordion-trigger-',
+  },
+  {
+    className: 'HellAccordionContent',
+    partType: 'HellAccordionContentPart',
+    uiType: 'HellAccordionContentUi',
+    entrypointId: 'accordion',
+    sourcePath: 'packages/angular/accordion/accordion.ts',
+    publicApiPath: 'packages/angular/accordion/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-accordion-content',
+    componentVariablePrefix: '--hell-accordion-content-',
+  },
   {
     className: 'HellButton',
     partType: 'HellButtonPart',
