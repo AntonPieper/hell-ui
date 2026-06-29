@@ -99,6 +99,7 @@ export class HellResizable extends HellPartStyleable<HellResizablePart> implemen
   private readonly destroyRef = inject(DestroyRef);
   private readonly constrained = signal(false);
   private userSized = false;
+  private resizeFrame = 0;
 
   // Populated by panes during ngOnInit. Order corresponds to DOM order.
   private readonly panes: HellResizablePane[] = [];
@@ -107,9 +108,12 @@ export class HellResizable extends HellPartStyleable<HellResizablePart> implemen
     super();
     if (typeof ResizeObserver === 'undefined') return;
 
-    const observer = new ResizeObserver(() => this.fitPanesToAvailableSize());
+    const observer = new ResizeObserver(() => this.scheduleFitPanesToAvailableSize());
     observer.observe(this.host);
-    this.destroyRef.onDestroy(() => observer.disconnect());
+    this.destroyRef.onDestroy(() => {
+      observer.disconnect();
+      this.cancelScheduledFit();
+    });
   }
 
   /** Child/advanced integration hook; panes register themselves on init. */
@@ -214,6 +218,27 @@ export class HellResizable extends HellPartStyleable<HellResizablePart> implemen
       panes[i].setEffectiveMinSize(effectiveMin);
     }
     for (let i = 0; i < panes.length; i++) panes[i].setSize(fitted[i]);
+  }
+
+  private scheduleFitPanesToAvailableSize(): void {
+    const view = this.host.ownerDocument.defaultView;
+    if (!view?.requestAnimationFrame) {
+      queueMicrotask(() => this.fitPanesToAvailableSize());
+      return;
+    }
+    if (this.resizeFrame) return;
+    this.resizeFrame = view.requestAnimationFrame(() => {
+      this.resizeFrame = 0;
+      this.fitPanesToAvailableSize();
+    });
+  }
+
+  private cancelScheduledFit(): void {
+    const view = this.host.ownerDocument.defaultView;
+    if (this.resizeFrame && view?.cancelAnimationFrame) {
+      view.cancelAnimationFrame(this.resizeFrame);
+    }
+    this.resizeFrame = 0;
   }
 }
 

@@ -4822,7 +4822,7 @@ const allowedBrowserGlobalSeams = [
     globals: ['ResizeObserver'],
     lines: [
       "if (typeof ResizeObserver === 'undefined') return;",
-      'const observer = new ResizeObserver(() => this.fitPanesToAvailableSize());',
+      'const observer = new ResizeObserver(() => this.scheduleFitPanesToAvailableSize());',
     ],
   },
   {
