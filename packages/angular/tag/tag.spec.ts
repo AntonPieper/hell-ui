@@ -57,8 +57,9 @@ describe('Tag, Badge, and Kbd Part Style Maps', () => {
     expect(classes).toContain('bg-hell-danger');
     expect(classes).toContain('px-hell-4');
     expect(classes).toContain('text-hell-foreground-inverse');
-    expect(classes).not.toContain('bg-hell-surface-muted');
+    expect(classes).not.toContain('bg-[var(--_hell-tag-bg)]');
     expect(classes).not.toContain('px-hell-2');
+    expect(classes).not.toContain('text-[var(--_hell-tag-fg)]');
     expect(tag.classList.contains('hell-tag')).toBe(false);
   });
 
