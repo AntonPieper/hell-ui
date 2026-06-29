@@ -144,15 +144,17 @@ Tailwind content/source pipeline.
 
 ## Part Style Maps replace Style Opt-Out
 
-`HellButton`, `HellInput`, `HellNativeSelect`, `HellTextarea`, and
-`HellDialpad` have migrated from Style Opt-Out to the Part Style Map API. Pass
-`ui` when you want to refine public parts while keeping Hell behavior, state
-attributes, and accessibility wiring.
+`HellButton`, `HellInput`, `HellNativeSelect`, `HellTextarea`, `HellDialpad`,
+`HellDateInput`, `HellTimeInput`, `HellDatePicker`, and
+`HellDateRangePicker` have migrated from Style Opt-Out to the Part Style Map
+API. Pass `ui` when you want to refine public parts while keeping Hell
+behavior, state attributes, and accessibility wiring.
 
 ```html
 <button hellButton type="button" ui="rounded-hell-pill bg-hell-primary">Save</button>
 <input hellInput ui="rounded-hell-pill px-hell-5" aria-label="Search" />
 <hell-dialpad [ui]="{ keyButton: 'rounded-hell-pill', callButton: 'bg-hell-success-strong' }" />
+<hell-date-input [ui]="{ input: 'tabular-nums', pickerPanel: 'shadow-hell-lg' }" />
 ```
 
 Rules for migration:

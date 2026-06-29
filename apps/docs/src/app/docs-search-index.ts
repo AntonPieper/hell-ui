@@ -206,7 +206,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/date-picker',
     detail: 'components/date-picker/examples/range.example.ts',
     terms:
-      'date-picker range components/date-picker/examples/range.example components/date-picker hell-date-picker range ui HellDateRangePickerUi dateButton data-range data-slot',
+      'date-picker range components/date-picker/examples/range.example components/date-picker hell-date-range-picker range ui HellDateRangePickerUi dateButton data-range data-slot',
   },
   {
     title: 'Date Picker: Single Date',

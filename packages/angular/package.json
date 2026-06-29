@@ -22,6 +22,9 @@
     "button/button.ts",
     "input/input.ts",
     "dialpad/dialpad.ts",
+    "date-input/date-input.ts",
+    "date-picker/date-picker.ts",
+    "time-input/time-input.ts",
     "assets/**"
   ],
   "exports": {

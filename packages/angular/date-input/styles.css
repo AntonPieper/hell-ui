@@ -1,2 +1,3 @@
 /* Date input default visuals are Tailwind utility recipes in the component. */
 @source "./date-input.ts";
+@source "../date-picker/date-picker.ts";
