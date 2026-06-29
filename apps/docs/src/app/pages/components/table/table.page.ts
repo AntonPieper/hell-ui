@@ -50,6 +50,11 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
             styling hooks, sortable header triggers, resize handles, active/selected row visuals, or
             native selection controls. The primitives do not create a table model or data renderer.
           </p>
+          <p>
+            Each primitive accepts <code>ui</code> for its local <code>root</code> part, while
+            <code>hellTableResizeHandle</code> also exposes <code>grip</code>. Repeated rows, cells,
+            and actions keep static parts and publish state through data attributes.
+          </p>
         </div>
 
         <hd-example-tabs class="hd-doc-wide" [code]="tablePrimitiveExampleCode">
@@ -117,6 +122,11 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
           <ul>
             <li>
               <code>HELL_TABLE_UTILITIES_DIRECTIVES</code>: native table primitive import list.
+            </li>
+            <li>
+              <code>ui</code>: Part Style Map input on table primitives; most expose
+              <code>root</code>, and <code>hellTableResizeHandle</code> exposes
+              <code>root</code> plus <code>grip</code>.
             </li>
             <li><code>hell-tanstack-table</code>: shell for a caller-owned TanStack table.</li>
             <li><code>hellTableShellToolbar</code>: repeatable projected toolbar region.</li>

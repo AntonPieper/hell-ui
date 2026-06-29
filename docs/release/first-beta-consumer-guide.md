@@ -142,21 +142,23 @@ Add only the extra entrypoint CSS needed by the entry points the app imports:
 
 Avoid old category-level style imports; CSS follows the same import-path-first rule as TypeScript. PDF viewer styles come from `@hell-ui/pdf-viewer/styles`.
 
-Hell's migrated component defaults are compiled into the shipped CSS entry
-points. Consumers do not need to add Tailwind `@source` scanning for
-`node_modules/@hell-ui/angular` to receive those defaults. If an app invents
-its own Tailwind classes in `ui`, those classes still belong to the app's own
-Tailwind content/source pipeline.
+Hell's CSS entry points carry the Tailwind source anchors needed by the package
+build, and the package-consumer matrix verifies consumers can import those
+shipped CSS files without adding `node_modules/@hell-ui/angular` to their own
+Tailwind `@source` scanning. If an app invents its own Tailwind classes in
+`ui`, those classes still belong to the app's own Tailwind content/source
+pipeline.
 
 ## Part Style Maps replace Style Opt-Out
 
 `HellButton`, `HellInput`, `HellNativeSelect`, `HellTextarea`, `HellDialpad`,
 `HellDateInput`, `HellTimeInput`, `HellDatePicker`, `HellDateRangePicker`, the
 first directive-suite batch (`HellCard`, `HellField`, `HellTabset`, and
-`HellAccordion` families), the App Shell/nav directives, and Resizable
-directives have migrated from Style Opt-Out to the Part Style Map API. Pass
-`ui` when you want to refine public parts while keeping Hell behavior, state
-attributes, and accessibility wiring.
+`HellAccordion` families), the App Shell/nav directives, Resizable directives,
+Pagination/PaginationStrip, and Table primitives have migrated from
+Style Opt-Out to the Part Style Map API. Pass `ui` when you want to refine
+public parts while keeping Hell behavior, state attributes, and accessibility
+wiring.
 
 Split View also exposes flat owned parts such as `pane`, `compactHeader`, and
 `itemNavigation`.
@@ -186,18 +188,21 @@ Split View also exposes flat owned parts such as `pane`, `compactHeader`, and
 Rules for migration:
 
 - Keep the directive import narrow, for example `@hell-ui/angular/button`,
-  `@hell-ui/angular/input`, `@hell-ui/angular/card`, or
-  `@hell-ui/angular/split-view`.
-- Import Hell CSS when you want shipped default visuals; the `primitive-icons-css`
-  package-consumer scenario proves the primitive, first directive-suite, App
-  Shell, Resizable, and Split View recipe utilities ship without consumer
-  `@source` scanning.
+  `@hell-ui/angular/input`, `@hell-ui/angular/card`,
+  `@hell-ui/angular/app-shell`, `@hell-ui/angular/resizable`,
+  `@hell-ui/angular/split-view`, `@hell-ui/angular/pagination`, or
+  `@hell-ui/angular/table`.
+- Import Hell CSS when you want shipped default visuals; package-consumer
+  scenarios assert representative compiled recipe utilities, and the broader
+  matrix verifies migrated CSS entry points are importable without consumer
+  `@source` scanning for Hell package files.
 - Use `ui="..."` for single-root directives such as Button, Input, Card, Field,
-  Tabs, Accordion, App Shell/nav, and Resizable directives.
+  Tabs, Accordion, App Shell/nav, Resizable, Pagination controls, and Table
+  primitive directives.
 - Use each projected child directive's local `ui`; a Card, Field, Tabs,
   Accordion, or App Shell root does not style its children remotely.
 - Use `[ui]="{ ... }"` for owned-anatomy components with multiple public parts,
-  such as Dialpad and Split View.
+  such as Dialpad, PaginationStrip, and Split View.
 - Use `class` for layout hooks and non-conflicting additions only; use `ui` for deterministic Tailwind utility conflicts because template class order is outside the Part-Class Pipeline.
 - Continue to test the behavior and accessible name; styling APIs are not accessibility opt-outs.
 
@@ -205,9 +210,11 @@ The [`button-ui`](../../tools/check-package-consumer.mjs) package-consumer
 scenario proves the typed Button `ui` path without Tailwind or Hell CSS. The
 styled [`button`](../../tools/check-package-consumer.mjs) scenario proves
 compiled Button recipe CSS and semantic token runtime theming. The
-[`primitive-icons-css`](../../tools/check-package-consumer.mjs) scenario proves
-the primitive and first directive-suite recipe CSS ships without consumer
-`@source` scanning for Hell defaults.
+[`primitive-icons-css`](../../tools/check-package-consumer.mjs),
+[`pagination`](../../tools/check-package-consumer.mjs),
+[`table`](../../tools/check-package-consumer.mjs), and composite scenarios widen
+that proof across migrated primitive, directive-suite, pagination, table, and
+layout CSS entry points.
 
 The not-yet-migrated list is machine-tracked as `legacyStyleableAllowlist` in
 [`tools/check-architecture.mjs`](../../tools/check-architecture.mjs). Every

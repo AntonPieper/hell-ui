@@ -22,9 +22,9 @@ const people: readonly Person[] = [
   imports: [HellIcon, ...HELL_TABLE_UTILITIES_DIRECTIVES],
   providers: [provideIcons({ faSolidFolderOpen })],
   template: `
-    <div hellTableContainer data-testid="primitive-table">
-      <table hellTableRoot>
-        <thead hellTableHeader>
+    <div hellTableContainer data-testid="primitive-table" ui="rounded-hell-lg">
+      <table hellTableRoot ui="text-sm">
+        <thead hellTableHeader ui="bg-hell-surface-muted">
           <tr hellTableRow>
             <th hellTableHeaderCell hellTableSelectionCell aria-label="Primary person"></th>
             <th
@@ -34,7 +34,7 @@ const people: readonly Person[] = [
               [sort]="sort().column === 'name' ? sort().direction : null"
               (sortToggle)="toggleSort('name')"
             >
-              <button hellTableSortTrigger type="button">Name</button>
+              <button hellTableSortTrigger type="button" ui="font-semibold">Name</button>
             </th>
             <th
               hellTableHeaderCell
@@ -43,7 +43,7 @@ const people: readonly Person[] = [
               [sort]="sort().column === 'role' ? sort().direction : null"
               (sortToggle)="toggleSort('role')"
             >
-              <button hellTableSortTrigger type="button">Role</button>
+              <button hellTableSortTrigger type="button" ui="font-semibold">Role</button>
             </th>
             <th hellTableHeaderCell>Action</th>
           </tr>
@@ -74,6 +74,7 @@ const people: readonly Person[] = [
                   type="button"
                   [attr.aria-label]="'Open ' + person.name"
                   (click)="activeId.set(person.id)"
+                  ui="text-hell-primary"
                 >
                   <hell-icon name="faSolidFolderOpen" />
                   <span>Open</span>
