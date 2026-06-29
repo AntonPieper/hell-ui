@@ -46,7 +46,7 @@
     }
   }
 
-  .hell-dialog .hell-card-header {
+  .hell-dialog [hellCardHeader][data-slot='root'] {
     align-items: flex-start;
   }
 
@@ -63,7 +63,7 @@
     margin: 4px 0 0;
   }
 
-  .hell-dialog .hell-card-body {
+  .hell-dialog [hellCardBody][data-slot='root'] {
     overflow: auto;
     font-size: 13px;
     color: var(--color-hell-foreground);
