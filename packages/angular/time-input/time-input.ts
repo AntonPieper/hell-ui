@@ -25,14 +25,12 @@ import {
 import { provideIcons } from '@ng-icons/core';
 import { faSolidClock } from '@ng-icons/font-awesome/solid';
 import {
+  NgpFormControl,
   injectFormFieldState,
   ngpFormField,
   provideFormFieldState,
 } from 'ng-primitives/form-field';
-import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { HellInput, type HellInputUi } from '@hell-ui/angular/input';
-import { HELL_EMBEDDED_INPUT_UI } from '@hell-ui/angular/internal/input';
 import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
 import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
 import {
@@ -40,7 +38,7 @@ import {
   hellSyncFormFieldLabels,
 } from '@hell-ui/angular/internal/core';
 import type { HellSize } from '@hell-ui/angular/core';
-import { HellStyleable } from '@hell-ui/angular/core';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
 import {
   HellTypedValueInputState,
   type HellTypedValueParseResult,
@@ -63,9 +61,51 @@ const HELL_TIME_INPUT_ICONS = {
   faSolidClock,
 };
 
-const HELL_TIME_INPUT_FIELD_UI = HELL_EMBEDDED_INPUT_UI satisfies HellInputUi;
-
 let nextTimeInputId = 0;
+
+export type HellTimeInputPart =
+  | 'root'
+  | 'input'
+  | 'trigger'
+  | 'triggerIcon'
+  | 'pickerPanel'
+  | 'pickerHeader'
+  | 'pickerReadout'
+  | 'pickerUnits'
+  | 'pickerUnit'
+  | 'pickerUnitLabel'
+  | 'pickerUnitControl'
+  | 'pickerUnitValue'
+  | 'pickerUnitStep'
+  | 'minutePresets'
+  | 'minutePreset';
+
+export type HellTimeInputUi = HellUi<HellTimeInputPart>;
+
+const HELL_TIME_INPUT_RECIPE = {
+  root: 'relative inline-flex w-full max-w-48 min-w-36 items-stretch rounded-hell-md border border-hell-border bg-hell-surface-elevated transition-[background-color,border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out hover:border-hell-border-strong focus-within:border-hell-border-focus focus-within:shadow-[0_0_0_3px_var(--color-hell-focus-ring)] data-[invalid=true]:border-hell-danger data-[disabled=true]:cursor-not-allowed data-[disabled=true]:border-hell-border data-[disabled=true]:bg-hell-surface-subtle',
+  input:
+    'h-hell-control-md min-w-0 flex-1 rounded-hell-md border-0 bg-transparent px-hell-3 py-0 font-[inherit] text-[13px] tracking-normal text-hell-foreground tabular-nums outline-none placeholder:text-hell-foreground-subtle disabled:cursor-not-allowed disabled:text-hell-foreground-muted data-[size=sm]:h-hell-control-sm data-[size=sm]:text-xs data-[size=lg]:h-hell-control-lg data-[size=lg]:text-sm',
+  trigger:
+    'me-hell-1 inline-flex h-hell-control-sm w-hell-control-sm flex-none cursor-pointer items-center justify-center self-center rounded-hell-md border border-transparent bg-transparent p-0 text-hell-foreground-muted transition-[background-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+  triggerIcon: 'size-hell-4',
+  pickerPanel:
+    'grid w-[min(20rem,calc(100vw-2rem))] gap-hell-2 rounded-hell-md border border-hell-border bg-hell-surface-elevated p-hell-3 text-[13px] text-hell-foreground shadow-hell-lg outline-none',
+  pickerHeader: 'flex min-h-hell-control-sm items-center justify-start',
+  pickerReadout: 'text-[22px] font-semibold leading-none tracking-normal text-hell-foreground tabular-nums',
+  pickerUnits: 'grid grid-cols-[repeat(auto-fit,minmax(5.5rem,1fr))] gap-hell-2',
+  pickerUnit: 'grid min-w-0 gap-hell-1',
+  pickerUnitLabel: 'text-[10px] font-semibold uppercase tracking-normal text-hell-foreground-muted',
+  pickerUnitControl:
+    'grid min-w-0 grid-cols-[minmax(0,1fr)_var(--spacing-hell-control-sm)_var(--spacing-hell-control-sm)] items-stretch overflow-hidden rounded-hell-sm border border-hell-border bg-hell-surface-elevated',
+  pickerUnitValue:
+    'inline-flex h-hell-control-sm min-w-0 cursor-pointer items-center justify-center border-0 border-e border-solid border-hell-border bg-transparent px-hell-2 font-[inherit] text-lg font-semibold text-hell-foreground tabular-nums focus-visible:outline-0 focus-visible:shadow-[inset_0_0_0_2px_var(--color-hell-primary-foreground),0_0_0_3px_var(--color-hell-focus-ring)]',
+  pickerUnitStep:
+    'h-hell-control-sm cursor-pointer border-0 bg-transparent font-[inherit] text-[13px] font-medium text-hell-foreground-muted transition-[background-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-subtle focus-visible:relative focus-visible:z-[1] focus-visible:outline-0 focus-visible:shadow-[inset_0_0_0_2px_var(--color-hell-border-focus),0_0_0_2px_var(--color-hell-focus-ring)]',
+  minutePresets: 'grid grid-cols-4 gap-hell-1',
+  minutePreset:
+    'h-hell-control-sm cursor-pointer rounded-hell-pill border border-hell-border bg-hell-surface-elevated font-[inherit] text-xs font-medium text-hell-foreground tabular-nums transition-[background-color,border-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-subtle focus-visible:relative focus-visible:z-[1] focus-visible:outline-0 focus-visible:shadow-[inset_0_0_0_2px_var(--color-hell-border-focus),0_0_0_2px_var(--color-hell-focus-ring)] data-[selected=true]:border-hell-primary data-[selected=true]:bg-hell-primary data-[selected=true]:text-hell-primary-foreground',
+} satisfies HellRecipe<HellTimeInputPart>;
 
 export interface HellTimeInputAdapterContext {
   readonly seconds: boolean;
@@ -207,7 +247,7 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
 @Component({
   selector: 'hell-time-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellIcon, HellInput, HellPopover, HellPopoverTrigger],
+  imports: [NgpFormControl, HellIcon, HellPopover, HellPopoverTrigger],
   schemas: [NO_ERRORS_SCHEMA],
   viewProviders: [provideFormFieldState()],
   providers: [
@@ -224,7 +264,8 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
     },
   ],
   host: {
-    '[class.hell-time-input]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-size]': 'size()',
     '[attr.data-invalid]': 'isInvalid() ? "true" : null',
     '[attr.data-disabled]': 'isDisabled() ? "true" : null',
@@ -232,10 +273,12 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
   template: `
     <input
       #field
-      hellInput
-      [size]="size()"
-      [ui]="fieldUi"
+      ngpFormControl
+      data-slot="input"
+      [class]="part('input')"
       [type]="nativeTimeInput ? 'time' : 'text'"
+      [attr.data-size]="size()"
+      [attr.data-invalid]="isInvalid() ? 'true' : null"
       [attr.inputmode]="nativeTimeInput ? null : 'text'"
       [attr.min]="nativeTimeInput ? '00:00' : null"
       [attr.max]="nativeTimeInput ? (seconds() ? '23:59:59' : '23:59') : null"
@@ -246,6 +289,8 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
       [attr.name]="name()"
       [attr.aria-invalid]="isInvalid() ? 'true' : null"
       [attr.aria-label]="ariaLabel()"
+      [attr.aria-describedby]="fieldAriaDescribedby()"
+      [attr.aria-labelledby]="fieldAriaLabelledby()"
       [disabled]="isDisabled()"
       [placeholder]="placeholder() ?? (seconds() ? 'HH:mm:ss' : 'HH:mm')"
       [value]="display()"
@@ -255,38 +300,46 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
       (keydown.enter)="commit(field.value, $event)"
     />
     <button
-      hellButton
-      variant="ghost"
-      size="sm"
-      iconOnly
       type="button"
       data-slot="trigger"
+      [class]="part('trigger')"
       [hellPopoverTrigger]="picker"
       placement="bottom-end"
       [shift]="pickerShift"
       [disabled]="isDisabled()"
+      [attr.data-size]="size()"
+      [attr.data-disabled]="isDisabled() ? 'true' : null"
       [attr.aria-label]="triggerAriaLabel()"
     >
-      <hell-icon name="faSolidClock" />
+      <hell-icon data-slot="triggerIcon" [class]="part('triggerIcon')" name="faSolidClock" />
     </button>
 
     <ng-template #picker>
-      <div hellPopover data-slot="picker">
-        <div data-slot="picker-header">
-          <span data-slot="picker-readout" [attr.aria-label]="selectedTimeLabel()">
+      <div hellPopover data-slot="pickerPanel" [class]="part('pickerPanel')">
+        <div data-slot="pickerHeader" [class]="part('pickerHeader')">
+          <span
+            data-slot="pickerReadout"
+            [class]="part('pickerReadout')"
+            [attr.aria-label]="selectedTimeLabel()"
+          >
             {{ format(current(), seconds()) }}
           </span>
         </div>
 
-        <div data-slot="picker-units">
+        <div data-slot="pickerUnits" [class]="part('pickerUnits')">
           @for (unit of visibleUnits(); track unit) {
-            <div data-slot="picker-unit" [attr.data-unit]="unit">
-              <span [id]="unitLabelId(unit)" data-slot="picker-unit-label">
+            <div data-slot="pickerUnit" [class]="part('pickerUnit')" [attr.data-unit]="unit">
+              <span
+                [id]="unitLabelId(unit)"
+                data-slot="pickerUnitLabel"
+                [class]="part('pickerUnitLabel')"
+              >
                 {{ unitLabel(unit) }}
               </span>
-              <div data-slot="picker-unit-control">
+              <div data-slot="pickerUnitControl" [class]="part('pickerUnitControl')">
                 <div
-                  data-slot="picker-unit-value"
+                  data-slot="pickerUnitValue"
+                  [class]="part('pickerUnitValue')"
                   role="spinbutton"
                   tabindex="0"
                   [attr.aria-labelledby]="unitLabelId(unit)"
@@ -300,7 +353,8 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
                 </div>
                 <button
                   type="button"
-                  data-slot="picker-unit-step"
+                  data-slot="pickerUnitStep"
+                  [class]="part('pickerUnitStep')"
                   (click)="stepUnit(unit, -1)"
                   [attr.aria-label]="decreaseUnitLabel(unit)"
                 >
@@ -308,7 +362,8 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
                 </button>
                 <button
                   type="button"
-                  data-slot="picker-unit-step"
+                  data-slot="pickerUnitStep"
+                  [class]="part('pickerUnitStep')"
                   (click)="stepUnit(unit, 1)"
                   [attr.aria-label]="increaseUnitLabel(unit)"
                 >
@@ -319,11 +374,17 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
           }
         </div>
 
-        <div data-slot="minute-presets" role="group" [attr.aria-label]="minutePresetsLabel()">
+        <div
+          data-slot="minutePresets"
+          [class]="part('minutePresets')"
+          role="group"
+          [attr.aria-label]="minutePresetsLabel()"
+        >
           @for (minute of minutePresets; track minute) {
             <button
               type="button"
-              data-slot="minute-preset"
+              data-slot="minutePreset"
+              [class]="part('minutePreset')"
               [attr.data-selected]="current().minute === minute ? 'true' : null"
               [attr.aria-pressed]="current().minute === minute ? 'true' : 'false'"
               [attr.aria-label]="minutePresetLabel(minute)"
@@ -337,7 +398,13 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
     </ng-template>
   `,
 })
-export class HellTimeInput extends HellStyleable implements ControlValueAccessor, Validator {
+export class HellTimeInput
+  extends HellPartStyleable<HellTimeInputPart>
+  implements ControlValueAccessor, Validator
+{
+  protected readonly recipe = HELL_TIME_INPUT_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
@@ -386,7 +453,12 @@ export class HellTimeInput extends HellStyleable implements ControlValueAccessor
   protected readonly invalidDraft = this.valueState.invalidDraft;
   protected readonly isInvalid = () => this.invalid() || this.invalidDraft();
   protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
-  protected readonly fieldUi = HELL_TIME_INPUT_FIELD_UI;
+  protected readonly fieldAriaDescribedby = computed(
+    () => this.formField.descriptions().join(' ') || null,
+  );
+  protected readonly fieldAriaLabelledby = computed(
+    () => this.formField.labels().join(' ') || null,
+  );
   protected readonly labels = inject<HellLabels>(HELL_LABELS);
   private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
   private readonly formField =

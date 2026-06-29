@@ -141,9 +141,9 @@ function dateInputHost(input: Locator): Locator {
 }
 
 async function expectPickerLayoutAligned(picker: Locator): Promise<void> {
-  const header = await requiredBox(picker.locator('.hell-date-picker-header'), 'picker header');
-  const grid = await requiredBox(picker.locator('.hell-date-picker-grid'), 'picker grid');
-  const label = await requiredBox(picker.locator('.hell-date-picker-label'), 'picker label');
+  const header = await requiredBox(picker.locator('[data-slot="header"]'), 'picker header');
+  const grid = await requiredBox(picker.locator('[data-slot="grid"]'), 'picker grid');
+  const label = await requiredBox(picker.locator('[data-slot="label"]'), 'picker label');
   const previousMonth = await requiredBox(
     picker.getByRole('button', { name: 'Previous month' }),
     'previous month button',

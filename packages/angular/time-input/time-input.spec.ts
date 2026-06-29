@@ -6,6 +6,7 @@ import {
   HellTimeInput,
   hellParseTimeInputText,
   provideHellTimeInputAdapter,
+  type HellTimeInputUi,
   type HellTimeValue,
 } from './time-input';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
@@ -36,6 +37,14 @@ class TimeInputHost {
   ariaDescribedby = 'start-time-help start-time-error';
   ariaLabelledby = 'start-time-label';
   values: Array<HellTimeValue | null> = [];
+}
+
+@Component({
+  imports: [HellTimeInput],
+  template: `<hell-time-input [ui]="ui()" aria-label="Styled time" />`,
+})
+class TimeInputPartStyleHost {
+  readonly ui = signal<string | HellTimeInputUi>('max-w-[18rem] border-hell-danger');
 }
 
 @Component({
@@ -143,6 +152,7 @@ describe('HellTimeInput', () => {
     await TestBed.configureTestingModule({
       imports: [
         TimeInputHost,
+        TimeInputPartStyleHost,
         TimeInputFieldHost,
         TimeInputFormHost,
         TimeInputBlurFormHost,
@@ -158,7 +168,6 @@ describe('HellTimeInput', () => {
     if (active instanceof HTMLElement && active !== document.body) {
       active.blur();
     }
-    document.body.replaceChildren();
   });
 
   it('forwards label and form attributes to the internal text field only', () => {
@@ -173,12 +182,70 @@ describe('HellTimeInput', () => {
     expect(input.getAttribute('aria-label')).toBe('Start time');
     expect(input.getAttribute('aria-describedby')).toBe('start-time-help start-time-error');
     expect(input.getAttribute('aria-labelledby')).toBe('start-time-label');
-    expect(input.getAttribute('data-slot')).toBe('root');
+    expect(input.getAttribute('data-slot')).toBe('input');
     expect(input.classList.contains('hell-input')).toBe(false);
-    expect(input.classList.contains('inline-flex')).toBe(true);
+    expect(input.classList.contains('flex-1')).toBe(true);
     expect(trigger.getAttribute('aria-label')).toBe('Choose time for Start time');
     expect(trigger.getAttribute('aria-describedby')).toBeNull();
     expect(trigger.getAttribute('aria-labelledby')).toBeNull();
+  });
+
+  it('merges ui shorthand classes into the root public part only', () => {
+    const fixture = TestBed.createComponent(TimeInputPartStyleHost);
+    fixture.detectChanges();
+
+    const root = timeInputHost(fixture.nativeElement);
+    const input = textInput(fixture.nativeElement);
+    const trigger = triggerButton(fixture.nativeElement);
+
+    expect(root.getAttribute('data-slot')).toBe('root');
+    expect(root.classList.contains('max-w-[18rem]')).toBe(true);
+    expect(root.classList.contains('border-hell-danger')).toBe(true);
+    expect(root.classList.contains('border-hell-border')).toBe(false);
+    expect(input.getAttribute('data-slot')).toBe('input');
+    expect(input.classList.contains('max-w-[18rem]')).toBe(false);
+    expect(trigger.getAttribute('data-slot')).toBe('trigger');
+    expect(trigger.classList.contains('max-w-[18rem]')).toBe(false);
+  });
+
+  it('merges ui object classes into owned input and trigger parts', () => {
+    const fixture = TestBed.createComponent(TimeInputPartStyleHost);
+    fixture.componentInstance.ui.set({
+      input: 'px-hell-6 text-lg',
+      trigger: 'bg-hell-surface-subtle text-hell-danger',
+    });
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    const trigger = triggerButton(fixture.nativeElement);
+
+    expect(input.classList.contains('px-hell-6')).toBe(true);
+    expect(input.classList.contains('px-hell-3')).toBe(false);
+    expect(input.classList.contains('text-lg')).toBe(true);
+    expect(trigger.classList.contains('bg-hell-surface-subtle')).toBe(true);
+    expect(trigger.classList.contains('text-hell-danger')).toBe(true);
+  });
+
+  it('merges ui object classes into portaled picker and repeated preset parts', async () => {
+    const fixture = TestBed.createComponent(TimeInputPartStyleHost);
+    fixture.componentInstance.ui.set({
+      pickerPanel: 'time-panel-probe border-hell-danger p-hell-6',
+      minutePreset: 'rounded-hell-md text-lg',
+    });
+    fixture.detectChanges();
+
+    triggerButton(fixture.nativeElement).click();
+    const panel = await waitForDocumentElement(
+      '[data-slot="pickerPanel"].time-panel-probe',
+      fixture,
+    );
+    const preset = panel.querySelector('[data-slot="minutePreset"]');
+
+    expect(panel.classList.contains('border-hell-danger')).toBe(true);
+    expect(panel.classList.contains('p-hell-6')).toBe(true);
+    expect(preset).toBeInstanceOf(HTMLElement);
+    expect(preset?.classList.contains('rounded-hell-md')).toBe(true);
+    expect(preset?.classList.contains('text-lg')).toBe(true);
   });
 
   it('inherits hellField label and description wiring for the internal text field', () => {
@@ -377,14 +444,14 @@ describe('HellTimeInput', () => {
     const hour = await waitForPickerSpinbutton(fixture, 'hour');
     const minute = await waitForPickerSpinbutton(fixture, 'minute');
     const second = await waitForPickerSpinbutton(fixture, 'second');
-    const picker = document.querySelector<HTMLElement>('[data-slot="picker"]');
-    const presets = document.querySelectorAll<HTMLButtonElement>('[data-slot="minute-preset"]');
+    const picker = document.querySelector<HTMLElement>('[data-slot="pickerPanel"]');
+    const presets = document.querySelectorAll<HTMLButtonElement>('[data-slot="minutePreset"]');
 
     expect(picker?.querySelectorAll('[role="spinbutton"]').length).toBe(3);
     expect(picker?.querySelector('[role="grid"]')).toBeNull();
     expect(
       picker
-        ?.querySelector('[data-slot="picker-unit-control"]')
+        ?.querySelector('[data-slot="pickerUnitControl"]')
         ?.firstElementChild?.getAttribute('role'),
     ).toBe('spinbutton');
     expect(hour.getAttribute('aria-valuemin')).toBe('0');
@@ -606,7 +673,7 @@ function dispatchPickerKey(spinbutton: HTMLElement, key: string): void {
 
 function minutePreset(minute: number): HTMLButtonElement {
   const preset = Array.from(
-    document.querySelectorAll<HTMLButtonElement>('[data-slot="minute-preset"]'),
+    document.querySelectorAll<HTMLButtonElement>('[data-slot="minutePreset"]'),
   ).find((button) => button.textContent?.trim() === minute.toString().padStart(2, '0'));
   if (!preset) throw new Error(`Expected minute preset ${minute}.`);
   return preset;
@@ -628,7 +695,7 @@ async function waitForPickerSpinbutton(
   fixture: ComponentFixture<unknown>,
   unit: HellTimeUnit,
 ): Promise<HTMLElement> {
-  const selector = `[data-slot="picker-unit"][data-unit="${unit}"] [role="spinbutton"]`;
+  const selector = `[data-slot="pickerUnit"][data-unit="${unit}"] [role="spinbutton"]`;
   const timeout = Date.now() + 1000;
 
   while (Date.now() < timeout) {
@@ -637,6 +704,24 @@ async function waitForPickerSpinbutton(
     fixture.detectChanges();
     const spinbutton = document.querySelector<HTMLElement>(selector);
     if (spinbutton) return spinbutton;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  throw new Error(`Expected ${selector}.`);
+}
+
+async function waitForDocumentElement(
+  selector: string,
+  fixture: ComponentFixture<unknown>,
+): Promise<HTMLElement> {
+  const timeout = Date.now() + 1000;
+
+  while (Date.now() < timeout) {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const element = document.querySelector(selector);
+    if (element instanceof HTMLElement) return element;
     await new Promise((resolve) => setTimeout(resolve, 0));
   }
 

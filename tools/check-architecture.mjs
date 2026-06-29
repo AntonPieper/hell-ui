@@ -104,8 +104,6 @@ const legacyStyleableAllowlist = new Set([
   'HellComboboxEmpty',
   'HellComboboxInput',
   'HellComboboxOption',
-  'HellDatePicker',
-  'HellDateRangePicker',
   'HellDialog',
   'HellDialogDescription',
   'HellDialogOverlay',
@@ -179,7 +177,6 @@ const legacyStyleableAllowlist = new Set([
   'HellAvatarGroup',
   'HellAvatarGroupItem',
   'HellAvatarGroupOverflow',
-  'HellDateInput',
   'HellDropZone',
   'HellNavItem',
   'HellNavItemIcon',
@@ -205,7 +202,6 @@ const legacyStyleableAllowlist = new Set([
   'HellResizableHandle',
   'HellResizablePane',
   'HellSplitView',
-  'HellTimeInput',
   'HellToaster',
   'HellCodeEditor',
   'HellTable',
@@ -278,6 +274,50 @@ const migratedPartStyleMapModules = [
     apiReportFiles: ['hell-ui-angular-dialpad.api.md'],
     legacyClass: 'hell-dialpad',
     componentVariablePrefix: '--hell-dialpad-',
+  },
+  {
+    className: 'HellDateInput',
+    partType: 'HellDateInputPart',
+    uiType: 'HellDateInputUi',
+    entrypointId: 'date-input',
+    sourcePath: 'packages/angular/date-input/date-input.ts',
+    publicApiPath: 'packages/angular/date-input/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-date-input',
+    componentVariablePrefix: '--hell-date-input-',
+  },
+  {
+    className: 'HellTimeInput',
+    partType: 'HellTimeInputPart',
+    uiType: 'HellTimeInputUi',
+    entrypointId: 'time-input',
+    sourcePath: 'packages/angular/time-input/time-input.ts',
+    publicApiPath: 'packages/angular/time-input/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-time-input',
+    componentVariablePrefix: '--hell-time-input-',
+  },
+  {
+    className: 'HellDatePicker',
+    partType: 'HellDatePickerPart',
+    uiType: 'HellDatePickerUi',
+    entrypointId: 'date-picker',
+    sourcePath: 'packages/angular/date-picker/date-picker.ts',
+    publicApiPath: 'packages/angular/date-picker/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-date-picker',
+    componentVariablePrefix: '--hell-date-picker-',
+  },
+  {
+    className: 'HellDateRangePicker',
+    partType: 'HellDateRangePickerPart',
+    uiType: 'HellDateRangePickerUi',
+    entrypointId: 'date-picker',
+    sourcePath: 'packages/angular/date-picker/date-picker.ts',
+    publicApiPath: 'packages/angular/date-picker/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-date-picker',
+    componentVariablePrefix: '--hell-date-picker-',
   },
 ];
 
@@ -2500,7 +2540,7 @@ function checkMigratedPartStyleMapModule(module, entrypointPackageDirs) {
       `${rel} ${module.className} must not compute data-slot dynamically; it must match public parts`,
     );
   }
-  const literalSlots = literalDataSlots(moduleSource);
+  const literalSlots = literalDataSlots(partStyleTemplateSource(source, moduleSource));
   for (const slot of literalSlots) {
     if (!partNames.includes(slot)) {
       failures.push(
@@ -2649,6 +2689,15 @@ function literalDataSlots(source) {
       patterns.flatMap((pattern) => [...source.matchAll(pattern)].map((candidate) => candidate[1])),
     ),
   ];
+}
+
+function partStyleTemplateSource(source, moduleSource) {
+  const templateRef = /template\s*:\s*([A-Za-z0-9_]+)/.exec(moduleSource)?.[1];
+  if (!templateRef) return moduleSource;
+
+  const pattern = new RegExp(`const\\s+${escapeRegExp(templateRef)}\\s*=\\s*\`([\\s\\S]*?)\`;`);
+  const template = pattern.exec(source)?.[1];
+  return template ? `${moduleSource}\n${template}` : moduleSource;
 }
 
 function functionBody(source, name) {

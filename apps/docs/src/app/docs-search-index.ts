@@ -192,28 +192,28 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/date-picker',
     detail: 'components/date-picker/examples/bounded.example.ts',
     terms:
-      'date-picker bounded components/date-picker/examples/bounded.example components/date-picker hell-date-picker min max',
+      'date-picker bounded components/date-picker/examples/bounded.example components/date-picker hell-date-picker min max ui HellDatePickerUi navButton dateButton data-slot',
   },
   {
     title: 'Date Picker: Disabled',
     path: '/components/date-picker',
     detail: 'components/date-picker/examples/disabled.example.ts',
     terms:
-      'date-picker disabled components/date-picker/examples/disabled.example components/date-picker hell-date-picker disabled',
+      'date-picker disabled components/date-picker/examples/disabled.example components/date-picker hell-date-picker disabled ui HellDatePickerUi data-slot',
   },
   {
     title: 'Date Picker: Range',
     path: '/components/date-picker',
     detail: 'components/date-picker/examples/range.example.ts',
     terms:
-      'date-picker range components/date-picker/examples/range.example components/date-picker hell-date-picker range',
+      'date-picker range components/date-picker/examples/range.example components/date-picker hell-date-picker range ui HellDateRangePickerUi dateButton data-range data-slot',
   },
   {
     title: 'Date Picker: Single Date',
     path: '/components/date-picker',
     detail: 'components/date-picker/examples/single-date.example.ts',
     terms:
-      'date-picker single-date components/date-picker/examples/single-date.example components/date-picker hell-date-picker',
+      'date-picker single-date components/date-picker/examples/single-date.example components/date-picker hell-date-picker ui HellDatePickerUi root header navButton label grid weekdayHeader cell dateButton data-slot',
   },
   {
     title: 'Dialog: Example',
@@ -698,28 +698,28 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/date-input',
     detail: 'components/date-input/examples/placeholders-and-labels.example.ts',
     terms:
-      'date-input placeholders-and-labels components/date-input/examples/placeholders-and-labels.example components/date-input hell-date-input',
+      'date-input placeholders-and-labels components/date-input/examples/placeholders-and-labels.example components/date-input hell-date-input ui HellDateInputUi input trigger pickerPanel data-slot',
   },
   {
     title: 'Date Input: Reactive Forms',
     path: '/components/date-input',
     detail: 'components/date-input/examples/reactive-forms.example.ts',
     terms:
-      'date-input reactive-forms components/date-input/examples/reactive-forms.example components/date-input hell-date-input formControl ReactiveFormsModule ControlValueAccessor Date null Angular Forms',
+      'date-input reactive-forms components/date-input/examples/reactive-forms.example components/date-input hell-date-input formControl ReactiveFormsModule ControlValueAccessor Date null Angular Forms ui HellDateInputUi',
   },
   {
     title: 'Date Input: Sizes',
     path: '/components/date-input',
     detail: 'components/date-input/examples/sizes.example.ts',
     terms:
-      'date-input sizes components/date-input/examples/sizes.example components/date-input hell-date-input size',
+      'date-input sizes components/date-input/examples/sizes.example components/date-input hell-date-input size ui HellDateInputUi root input trigger',
   },
   {
     title: 'Date Input: Text Input Calendar Popover',
     path: '/components/date-input',
     detail: 'components/date-input/examples/text-input-calendar-popover.example.ts',
     terms:
-      'date-input text-input-calendar-popover components/date-input/examples/text-input-calendar-popover.example components/date-input hell-date-input popover',
+      'date-input text-input-calendar-popover components/date-input/examples/text-input-calendar-popover.example components/date-input hell-date-input popover ui HellDateInputUi pickerPanel triggerIcon data-slot',
   },
   {
     title: 'Dialpad: Example',
@@ -810,28 +810,28 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/time-input',
     detail: 'components/time-input/examples/examples.example.ts',
     terms:
-      'time-input examples components/time-input/examples/examples.example components/time-input hell-time-input',
+      'time-input examples components/time-input/examples/examples.example components/time-input hell-time-input ui HellTimeInputUi pickerPanel pickerUnit minutePreset data-slot',
   },
   {
     title: 'Time Input: Reactive Forms',
     path: '/components/time-input',
     detail: 'components/time-input/examples/reactive-forms.example.ts',
     terms:
-      'time-input reactive-forms components/time-input/examples/reactive-forms.example components/time-input hell-time-input formControl ReactiveFormsModule ControlValueAccessor HellTimeValue null Angular Forms',
+      'time-input reactive-forms components/time-input/examples/reactive-forms.example components/time-input hell-time-input formControl ReactiveFormsModule ControlValueAccessor HellTimeValue null Angular Forms ui HellTimeInputUi',
   },
   {
     title: 'Time Input: Placeholder And Labels',
     path: '/components/time-input',
     detail: 'components/time-input/examples/placeholder-and-labels.example.ts',
     terms:
-      'time-input placeholder-and-labels components/time-input/examples/placeholder-and-labels.example components/time-input hell-time-input placeholder label',
+      'time-input placeholder-and-labels components/time-input/examples/placeholder-and-labels.example components/time-input hell-time-input placeholder label ui HellTimeInputUi input trigger',
   },
   {
     title: 'Time Input: Sizes',
     path: '/components/time-input',
     detail: 'components/time-input/examples/sizes.example.ts',
     terms:
-      'time-input sizes components/time-input/examples/sizes.example components/time-input hell-time-input size',
+      'time-input sizes components/time-input/examples/sizes.example components/time-input hell-time-input size ui HellTimeInputUi root input trigger',
   },
   {
     title: 'Toast: Action',
@@ -985,14 +985,14 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
     path: '/components/date-input',
     detail: 'provideHellDateInputAdapter, HELL_DATE_INPUT_ADAPTER',
     terms:
-      'date-input adapter provideHellDateInputAdapter HELL_DATE_INPUT_ADAPTER parse format locale temporal strict ISO YYYY-MM-DD',
+      'date-input adapter provideHellDateInputAdapter HELL_DATE_INPUT_ADAPTER parse format locale temporal strict ISO YYYY-MM-DD ui HellDateInputUi',
   },
   {
     title: 'Date input forms value',
     path: '/components/date-input',
     detail: 'ControlValueAccessor, formControl, Date | null',
     terms:
-      'date-input forms ControlValueAccessor formControl ReactiveFormsModule Angular Forms Date null native form submission validation',
+      'date-input forms ControlValueAccessor formControl ReactiveFormsModule Angular Forms Date null native form submission validation ui HellDateInputUi',
   },
   {
     title: 'Omnibar directives',
@@ -1020,14 +1020,14 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
     path: '/components/time-input',
     detail: 'provideHellTimeInputAdapter, HELL_TIME_INPUT_ADAPTER',
     terms:
-      'time-input adapter provideHellTimeInputAdapter HELL_TIME_INPUT_ADAPTER parse format locale shortcuts HellTimeValue',
+      'time-input adapter provideHellTimeInputAdapter HELL_TIME_INPUT_ADAPTER parse format locale shortcuts HellTimeValue ui HellTimeInputUi',
   },
   {
     title: 'Time input forms value',
     path: '/components/time-input',
     detail: 'ControlValueAccessor, formControl, HellTimeValue | null',
     terms:
-      'time-input forms ControlValueAccessor formControl ReactiveFormsModule Angular Forms HellTimeValue null native form submission validation',
+      'time-input forms ControlValueAccessor formControl ReactiveFormsModule Angular Forms HellTimeValue null native form submission validation ui HellTimeInputUi',
   },
   {
     title: 'Table directives',

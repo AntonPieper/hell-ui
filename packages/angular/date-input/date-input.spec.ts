@@ -7,6 +7,7 @@ import {
   hellCoerceDateInputValue,
   hellSameDateInputValue,
   provideHellDateInputAdapter,
+  type HellDateInputUi,
 } from './date-input';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 
@@ -38,6 +39,14 @@ class DateInputHost {
   ariaDescribedby = 'report-date-help report-date-error';
   ariaLabelledby = 'report-date-label';
   dates: Array<Date | null> = [];
+}
+
+@Component({
+  imports: [HellDateInput],
+  template: `<hell-date-input [ui]="ui()" aria-label="Styled date" />`,
+})
+class DateInputPartStyleHost {
+  readonly ui = signal<string | HellDateInputUi>('max-w-[20rem] border-hell-danger');
 }
 
 @Component({
@@ -125,6 +134,7 @@ describe('HellDateInput', () => {
     await TestBed.configureTestingModule({
       imports: [
         DateInputHost,
+        DateInputPartStyleHost,
         DateInputFieldHost,
         DateInputFormHost,
         DateInputBlurFormHost,
@@ -146,12 +156,66 @@ describe('HellDateInput', () => {
     expect(input.getAttribute('aria-label')).toBe('Report date');
     expect(input.getAttribute('aria-describedby')).toBe('report-date-help report-date-error');
     expect(input.getAttribute('aria-labelledby')).toBe('report-date-label');
-    expect(input.getAttribute('data-slot')).toBe('root');
+    expect(input.getAttribute('data-slot')).toBe('input');
     expect(input.classList.contains('hell-input')).toBe(false);
-    expect(input.classList.contains('inline-flex')).toBe(true);
+    expect(input.classList.contains('flex-1')).toBe(true);
     expect(trigger.getAttribute('aria-label')).toBe('Choose date for Report date');
     expect(trigger.getAttribute('aria-describedby')).toBeNull();
     expect(trigger.getAttribute('aria-labelledby')).toBeNull();
+  });
+
+  it('merges ui shorthand classes into the root public part only', () => {
+    const fixture = TestBed.createComponent(DateInputPartStyleHost);
+    fixture.detectChanges();
+
+    const root = dateInputHost(fixture.nativeElement);
+    const input = textInput(fixture.nativeElement);
+    const trigger = triggerButton(fixture.nativeElement);
+
+    expect(root.getAttribute('data-slot')).toBe('root');
+    expect(root.classList.contains('max-w-[20rem]')).toBe(true);
+    expect(root.classList.contains('border-hell-danger')).toBe(true);
+    expect(root.classList.contains('border-hell-border')).toBe(false);
+    expect(input.getAttribute('data-slot')).toBe('input');
+    expect(input.classList.contains('max-w-[20rem]')).toBe(false);
+    expect(trigger.getAttribute('data-slot')).toBe('trigger');
+    expect(trigger.classList.contains('max-w-[20rem]')).toBe(false);
+  });
+
+  it('merges ui object classes into owned input and trigger parts', () => {
+    const fixture = TestBed.createComponent(DateInputPartStyleHost);
+    fixture.componentInstance.ui.set({
+      input: 'px-hell-6 text-lg',
+      trigger: 'bg-hell-surface-subtle text-hell-danger',
+    });
+    fixture.detectChanges();
+
+    const input = textInput(fixture.nativeElement);
+    const trigger = triggerButton(fixture.nativeElement);
+
+    expect(input.classList.contains('px-hell-6')).toBe(true);
+    expect(input.classList.contains('px-hell-3')).toBe(false);
+    expect(input.classList.contains('text-lg')).toBe(true);
+    expect(trigger.classList.contains('bg-hell-surface-subtle')).toBe(true);
+    expect(trigger.classList.contains('text-hell-danger')).toBe(true);
+  });
+
+  it('merges ui object classes into the portaled picker panel part', async () => {
+    const fixture = TestBed.createComponent(DateInputPartStyleHost);
+    fixture.componentInstance.ui.set({
+      pickerPanel: 'date-panel-probe border-hell-danger p-hell-6',
+    });
+    fixture.detectChanges();
+
+    triggerButton(fixture.nativeElement).click();
+    const panel = await waitForDocumentElement(
+      '[data-slot="pickerPanel"].date-panel-probe',
+      fixture,
+    );
+
+    expect(panel.classList.contains('border-hell-danger')).toBe(true);
+    expect(panel.classList.contains('p-hell-6')).toBe(true);
+    expect(panel.querySelector('hell-date-picker')).toBeInstanceOf(HTMLElement);
   });
 
   it('inherits hellField label and description wiring for the internal text field', () => {
@@ -549,6 +613,24 @@ function dateInputHost(root: HTMLElement): HTMLElement {
   const host = root.querySelector('hell-date-input');
   if (!(host instanceof HTMLElement)) throw new Error('Expected date input host.');
   return host;
+}
+
+async function waitForDocumentElement(
+  selector: string,
+  fixture: { detectChanges(): void; whenStable(): Promise<unknown> },
+): Promise<HTMLElement> {
+  const timeout = Date.now() + 1000;
+
+  while (Date.now() < timeout) {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const element = document.querySelector(selector);
+    if (element instanceof HTMLElement) return element;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  throw new Error(`Expected ${selector}.`);
 }
 
 function formatDate(date: Date | null): string {

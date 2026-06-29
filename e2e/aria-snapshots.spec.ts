@@ -452,7 +452,7 @@ test.describe('public docs aria snapshots', () => {
 
     await page.getByRole('button', { name: 'Choose time for Reminder time' }).first().click();
     const picker = page
-      .locator('.hell-popover')
+      .locator('[data-slot="pickerPanel"]')
       .filter({ has: page.getByRole('spinbutton', { name: 'Hours' }) });
     await expect(picker).toBeVisible();
 

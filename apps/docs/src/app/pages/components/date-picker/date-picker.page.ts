@@ -85,7 +85,12 @@ import datePickerSingleDateExampleCodeRaw from './examples/single-date.example.t
         <li><code>locale</code>: BCP-47 locale for month and weekday labels.</li>
         <li><code>firstDayOfWeek</code>: <code>1</code> Monday through <code>7</code> Sunday.</li>
         <li><code>disabled</code>: disables navigation and day selection.</li>
-        <li><code>unstyled</code>: opt out of host styling.</li>
+        <li>
+          <code>ui</code>: Part Style Map for <code>root</code>, <code>header</code>,
+          <code>nav</code>, <code>navButton</code>, <code>label</code>, <code>grid</code>,
+          <code>weekdayHeader</code>, <code>cell</code>, and repeated <code>dateButton</code>.
+          String shorthand styles <code>root</code>.
+        </li>
       </ul>
 
       <h3><code>hell-date-range-picker</code></h3>
@@ -94,7 +99,8 @@ import datePickerSingleDateExampleCodeRaw from './examples/single-date.example.t
         <li><code>endDate</code>, <code>(endDateChange)</code>.</li>
         <li>
           <code>min</code>, <code>max</code>, <code>locale</code>, <code>firstDayOfWeek</code>,
-          <code>disabled</code>, <code>unstyled</code>.
+          <code>disabled</code>, and the same <code>ui</code> parts as
+          <code>hell-date-picker</code>.
         </li>
       </ul>
 

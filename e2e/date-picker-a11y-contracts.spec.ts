@@ -241,9 +241,9 @@ function cellForDay(picker: Locator, day: number): Locator {
 }
 
 async function expectPickerLayoutAligned(picker: Locator): Promise<void> {
-  const header = await requiredBox(picker.locator('.hell-date-picker-header'), 'picker header');
-  const grid = await requiredBox(picker.locator('.hell-date-picker-grid'), 'picker grid');
-  const label = await requiredBox(picker.locator('.hell-date-picker-label'), 'picker label');
+  const header = await requiredBox(picker.locator('[data-slot="header"]'), 'picker header');
+  const grid = await requiredBox(picker.locator('[data-slot="grid"]'), 'picker grid');
+  const label = await requiredBox(picker.locator('[data-slot="label"]'), 'picker label');
   const previousMonth = await requiredBox(
     picker.getByRole('button', { name: 'Previous month' }),
     'previous month button',
@@ -279,7 +279,7 @@ async function expectRangeDays(
 async function expectSquareRangeButtons(picker: Locator): Promise<void> {
   const geometry = await picker.evaluate((element) => {
     const buttons = Array.from(
-      element.querySelectorAll<HTMLElement>('.hell-date-picker-grid tbody button'),
+      element.querySelectorAll<HTMLElement>('[data-slot="grid"] tbody [data-slot="dateButton"]'),
     );
     const referenceButton =
       buttons.find(
@@ -431,7 +431,7 @@ async function expectStandaloneRangeButton(picker: Locator, day: number): Promis
     const referenceButton =
       Array.from(
         root.querySelectorAll<HTMLElement>(
-          '.hell-date-picker-grid tbody button:not([data-range-start]):not([data-range-between]):not([data-range-end])',
+          '[data-slot="grid"] tbody [data-slot="dateButton"]:not([data-range-start]):not([data-range-between]):not([data-range-end])',
         ),
       ).find((candidate) => !candidate.hasAttribute('data-outside-month')) ?? null;
     const referenceCell = referenceButton?.closest<HTMLTableCellElement>('td') ?? null;

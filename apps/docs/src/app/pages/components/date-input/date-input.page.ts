@@ -96,10 +96,14 @@ import dateInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
         </li>
         <li><code>aria-label</code>: accessible name for standalone usage.</li>
         <li>
+          <code>ui</code>: Part Style Map for <code>root</code>, <code>input</code>,
+          <code>trigger</code>, <code>triggerIcon</code>, and <code>pickerPanel</code>. String
+          shorthand styles <code>root</code>.
+        </li>
+        <li>
           <code>provideHellDateInputAdapter</code>: replace the default strict ISO parse/format
           policy at an application or feature boundary.
         </li>
-        <li><code>unstyled</code>: opt out of host styling.</li>
       </ul>
 
       <h2>Adapter contract</h2>
