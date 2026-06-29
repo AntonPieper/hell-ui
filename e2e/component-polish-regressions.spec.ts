@@ -11,7 +11,12 @@ async function boxFor(locator: Locator): Promise<{
   width: number;
   height: number;
 }> {
-  await locator.scrollIntoViewIfNeeded();
+  await locator.evaluate((element) => {
+    element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+  });
+  await locator.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())),
+  );
   const box = await locator.boundingBox();
   if (!box) throw new Error('Expected locator to have a bounding box.');
   return box;
@@ -138,7 +143,7 @@ test.describe('component visual polish regressions', () => {
     expect(colors.selected.backgroundColor).not.toBe(colors.group.backgroundColor);
     expect(colors.selected.borderColor).toBe(colors.unselected.borderColor);
     expect(colors.selected.color).not.toBe(colors.unselected.color);
-    expect(colors.selected.boxShadow).toBe('none');
+    expect(hasNoVisibleShadow(colors.selected.boxShadow)).toBe(true);
 
     await unselected.hover();
     await expect(unselected).not.toHaveAttribute('data-selected');
@@ -228,3 +233,13 @@ test.describe('component visual polish regressions', () => {
     await expect(trigger).toBeFocused();
   });
 });
+
+function hasNoVisibleShadow(boxShadow: string): boolean {
+  if (boxShadow === 'none') return true;
+
+  const transparentZeroShadow = 'rgba(0, 0, 0, 0) 0px 0px 0px 0px';
+  return boxShadow
+    .replaceAll(`${transparentZeroShadow}, `, '')
+    .replaceAll(transparentZeroShadow, '')
+    .trim() === '';
+}

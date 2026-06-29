@@ -49,6 +49,13 @@
     width: calc(var(--spacing) * 2);
   }
 
+  hell-slider[data-slot='root'][data-orientation='horizontal']
+    > [data-slot='track']
+    > [data-slot='range'] {
+    height: calc(var(--spacing) * 1.5);
+    translate: 0 -50%;
+  }
+
   hell-slider[data-slot='root'][data-orientation='vertical']
     > [data-slot='track']
     > [data-slot='range'] {
@@ -84,6 +91,8 @@
   }
 
   hell-slider[data-slot='root'] > [data-slot='thumb'] {
+    width: 18px;
+    height: 18px;
     --_hell-slider-thumb-ring-hover: var(--color-hell-primary);
     --_hell-slider-thumb-ring-press: var(--color-hell-primary);
     --_hell-slider-thumb-x: -50%;

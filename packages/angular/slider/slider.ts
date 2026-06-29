@@ -43,9 +43,9 @@ const HELL_SLIDER_RECIPE = {
   root: 'relative inline-flex h-hell-6 w-full cursor-pointer touch-none select-none items-center box-border [--_hell-slider-thumb-clearance:9px] data-disabled:pointer-events-none data-disabled:cursor-not-allowed data-disabled:opacity-50 data-[orientation=horizontal]:data-[size=sm]:h-hell-5 data-[orientation=horizontal]:data-[size=lg]:h-hell-7 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-[calc(var(--spacing)*24)] data-[orientation=vertical]:max-h-full data-[orientation=vertical]:w-hell-6 data-[orientation=vertical]:flex-col data-[orientation=vertical]:py-[var(--_hell-slider-thumb-clearance)] data-[size=sm]:[--_hell-slider-thumb-clearance:7px] data-[size=lg]:[--_hell-slider-thumb-clearance:11px] data-[orientation=vertical]:[--_hell-slider-thumb-clearance:7px]',
   track: 'relative min-h-0 min-w-0 flex-auto self-stretch bg-transparent',
   range:
-    'pointer-events-none absolute top-1/2 h-[calc(var(--spacing)*1.5)] -translate-y-1/2 rounded-hell-pill bg-hell-primary shadow-[inset_0_-1px_0_rgb(0_0_0_/_0.08)]',
+    'pointer-events-none absolute top-1/2 rounded-hell-pill bg-hell-primary shadow-[inset_0_-1px_0_rgb(0_0_0_/_0.08)]',
   thumb:
-    'absolute block size-[18px] cursor-grab rounded-hell-pill border border-solid border-hell-primary bg-white shadow-[0_1px_2px_rgb(0_0_0_/_0.15),0_0_0_0_var(--color-hell-primary)] outline-none transition-[scale,box-shadow,border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-press:cursor-grabbing',
+    'absolute block cursor-grab rounded-hell-pill border border-solid border-hell-primary bg-white shadow-[0_1px_2px_rgb(0_0_0_/_0.15),0_0_0_0_var(--color-hell-primary)] outline-none transition-[scale,box-shadow,border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-press:cursor-grabbing',
 } satisfies HellRecipe<HellSliderPart>;
 
 /**
