@@ -41,9 +41,9 @@ test.describe('component visual polish regressions', () => {
     await expect(verticalSliders).toHaveCount(2);
 
     for (const slider of await verticalSliders.all()) {
-      const track = slider.locator('.hell-slider-track');
-      const range = slider.locator('.hell-slider-range');
-      const thumb = slider.locator('.hell-slider-thumb');
+      const track = slider.locator('[data-slot="track"]');
+      const range = slider.locator('[data-slot="range"]');
+      const thumb = slider.locator('[data-slot="thumb"]');
 
       await expect(thumb).toHaveAttribute('aria-orientation', 'vertical');
 
@@ -84,8 +84,8 @@ test.describe('component visual polish regressions', () => {
     const horizontal = page
       .locator('app-slider-basic-example hell-slider[data-orientation="horizontal"]')
       .first();
-    const horizontalTrack = horizontal.locator('.hell-slider-track');
-    const horizontalThumb = horizontal.locator('.hell-slider-thumb');
+    const horizontalTrack = horizontal.locator('[data-slot="track"]');
+    const horizontalThumb = horizontal.locator('[data-slot="thumb"]');
     const horizontalBox = await boxFor(horizontal);
     const horizontalTrackBox = await boxFor(horizontalTrack);
     const horizontalThumbBox = await boxFor(horizontalThumb);
@@ -103,18 +103,20 @@ test.describe('component visual polish regressions', () => {
     await expect(example).toBeVisible();
     await example.scrollIntoViewIfNeeded();
 
-    const group = example.locator('.hell-toggle-group');
-    const selected = group.locator('.hell-toggle[data-selected]');
-    const unselected = group.locator('.hell-toggle:not([data-selected])').first();
+    const group = example.locator('[hellToggleGroup][data-slot="root"]');
+    const selected = group.locator('button[hellToggleGroupItem][data-slot="root"][data-selected]');
+    const unselected = group
+      .locator('button[hellToggleGroupItem][data-slot="root"]:not([data-selected])')
+      .first();
     await expect(selected).toHaveText('Left');
 
     const colors = await group.evaluate((element) => {
       const groupElement = element as HTMLElement;
       const selectedElement = groupElement.querySelector(
-        '.hell-toggle[data-selected]',
+        'button[hellToggleGroupItem][data-slot="root"][data-selected]',
       ) as HTMLElement | null;
       const unselectedElement = groupElement.querySelector(
-        '.hell-toggle:not([data-selected])',
+        'button[hellToggleGroupItem][data-slot="root"]:not([data-selected])',
       ) as HTMLElement | null;
       if (!selectedElement || !unselectedElement) throw new Error('Expected toggle items.');
       const snapshot = (target: HTMLElement) => {

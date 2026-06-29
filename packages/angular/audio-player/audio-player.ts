@@ -113,19 +113,20 @@ function parseIsoDateOnly(value: string): Date | null {
 
         <span data-slot="time">{{ format(currentTime()) }}</span>
 
-        <hell-slider
-          data-slot="seek"
-          size="sm"
-          grow
-          thumb="hover"
-          [value]="currentTime()"
-          [min]="0"
-          [max]="seekMax()"
-          [step]="0.1"
-          (valueChange)="onSeek($event)"
-          (keydown)="onSeekKey($event)"
-          [attr.aria-label]="labels.audioPlayer.seek"
-        />
+        <div data-slot="seek">
+          <hell-slider
+            size="sm"
+            grow
+            thumb="hover"
+            [value]="currentTime()"
+            [min]="0"
+            [max]="seekMax()"
+            [step]="0.1"
+            (valueChange)="onSeek($event)"
+            (keydown)="onSeekKey($event)"
+            [attr.aria-label]="labels.audioPlayer.seek"
+          />
+        </div>
 
         <span data-slot="time">{{ format(duration()) }}</span>
       </div>
@@ -142,16 +143,17 @@ function parseIsoDateOnly(value: string): Date | null {
           <hell-icon [name]="volumeIcon()" />
         </button>
 
-        <hell-slider
-          data-slot="volume"
-          size="sm"
-          [value]="volume() * 100"
-          [min]="0"
-          [max]="100"
-          [step]="1"
-          (valueChange)="onVolume($event)"
-          [attr.aria-label]="labels.audioPlayer.volume"
-        />
+        <div data-slot="volume">
+          <hell-slider
+            size="sm"
+            [value]="volume() * 100"
+            [min]="0"
+            [max]="100"
+            [step]="1"
+            (valueChange)="onVolume($event)"
+            [attr.aria-label]="labels.audioPlayer.volume"
+          />
+        </div>
 
         @if (speechTranscriptEnabled() && speechSupported()) {
           <button

@@ -664,8 +664,8 @@ test.describe('Hell UI browser behavior', () => {
 
     await page.goto('/components/slider');
     const verticalSlider = page.locator('hell-slider[data-orientation="vertical"]').first();
-    const verticalTrack = verticalSlider.locator('.hell-slider-track');
-    const verticalThumb = verticalSlider.locator('.hell-slider-thumb');
+    const verticalTrack = verticalSlider.locator('[data-slot="track"]');
+    const verticalThumb = verticalSlider.locator('[data-slot="thumb"]');
     await expect(verticalThumb).toBeVisible();
     const trackBox = await verticalTrack.boundingBox();
     const thumbBox = await verticalThumb.boundingBox();

@@ -94,6 +94,11 @@ import sliderVerticalExampleCodeRaw from './examples/vertical.example.ts?raw' wi
         </li>
         <li><code>grow</code>: track expands on hover/focus/press for a tactile media-bar feel.</li>
         <li><code>disabled</code></li>
+        <li>
+          <code>ui</code>: string shorthand targets <code>root</code>; <code>HellSliderUi</code>
+          maps <code>root</code>, <code>track</code>, <code>range</code>, and
+          <code>thumb</code>.
+        </li>
       </ul>
 
       <h2>Do</h2>

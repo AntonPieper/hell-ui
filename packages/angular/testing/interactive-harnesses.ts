@@ -279,14 +279,14 @@ export class HellAccordionContentHarness extends ComponentHarness {
 export class HellSliderHarness extends ComponentHarness {
   static hostSelector = 'hell-slider';
   async getValue(): Promise<string | null> {
-    const thumb = await this.locatorFor('.hell-slider-thumb')();
+    const thumb = await this.locatorFor('[data-slot="thumb"]')();
     return (await thumb.getAttribute('aria-valuenow')) ?? (await thumb.getAttribute('data-value'));
   }
   async getDataSize(): Promise<string | null> {
     return (await this.host()).getAttribute('data-size');
   }
   async isDisabled(): Promise<boolean> {
-    const thumb = await this.locatorFor('.hell-slider-thumb')();
+    const thumb = await this.locatorFor('[data-slot="thumb"]')();
     return (await thumb.getAttribute('aria-disabled')) === 'true';
   }
 }

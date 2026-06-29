@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
-import { HellSlider } from './slider';
+import { HellSlider, type HellSliderUi } from './slider';
 
 @Component({
   imports: [HellSlider],
@@ -55,11 +55,62 @@ class SliderFormHost {
 })
 class SliderFieldHost {}
 
+@Component({
+  imports: [HellSlider],
+  template: `
+    <hell-slider
+      id="slider-string"
+      aria-label="String slider"
+      ui="h-hell-9 cursor-crosshair"
+      [value]="10"
+    />
+    <hell-slider id="slider-map" aria-label="Map slider" [ui]="ui" [value]="25" />
+  `,
+})
+class SliderUiHost {
+  readonly ui: HellSliderUi = {
+    root: 'h-hell-9 cursor-crosshair',
+    track: 'self-center bg-transparent',
+    range: 'h-hell-2 bg-hell-danger',
+    thumb: 'size-hell-6 border-hell-danger bg-hell-danger-soft',
+  };
+}
+
 describe('HellSlider', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SliderHost, SliderFormHost, SliderFieldHost],
+      imports: [SliderHost, SliderFormHost, SliderFieldHost, SliderUiHost],
     }).compileComponents();
+  });
+
+  it('merges ui string shorthand and object maps across public parts', () => {
+    const fixture = TestBed.createComponent(SliderUiHost);
+    fixture.detectChanges();
+
+    const stringSlider = fixture.nativeElement.querySelector('#slider-string') as HTMLElement;
+    const stringTrack = stringSlider.querySelector('[data-slot="track"]') as HTMLElement;
+    const mapSlider = fixture.nativeElement.querySelector('#slider-map') as HTMLElement;
+    const mapTrack = mapSlider.querySelector('[data-slot="track"]') as HTMLElement;
+    const mapRange = mapSlider.querySelector('[data-slot="range"]') as HTMLElement;
+    const mapThumb = mapSlider.querySelector('[data-slot="thumb"]') as HTMLElement;
+
+    expect(stringSlider.getAttribute('data-slot')).toBe('root');
+    expect(stringSlider.classList.contains('h-hell-9')).toBe(true);
+    expect(stringSlider.classList.contains('h-hell-6')).toBe(false);
+    expect(stringSlider.classList.contains('cursor-crosshair')).toBe(true);
+    expect(stringSlider.classList.contains('cursor-pointer')).toBe(false);
+    expect(stringTrack.classList.contains('self-center')).toBe(false);
+
+    expect(mapSlider.classList.contains('h-hell-9')).toBe(true);
+    expect(mapSlider.classList.contains('h-hell-6')).toBe(false);
+    expect(mapTrack.classList.contains('self-center')).toBe(true);
+    expect(mapTrack.classList.contains('self-stretch')).toBe(false);
+    expect(mapRange.classList.contains('bg-hell-danger')).toBe(true);
+    expect(mapRange.classList.contains('bg-hell-primary')).toBe(false);
+    expect(mapRange.classList.contains('h-hell-2')).toBe(true);
+    expect(mapThumb.classList.contains('size-hell-6')).toBe(true);
+    expect(mapThumb.classList.contains('size-[18px]')).toBe(false);
+    expect(mapThumb.classList.contains('border-hell-danger')).toBe(true);
   });
 
   it('redispatches track pointerdown to the thumb and clears active drag on pointerup', () => {
@@ -67,8 +118,8 @@ describe('HellSlider', () => {
     fixture.detectChanges();
 
     const slider = fixture.nativeElement.querySelector('hell-slider') as HTMLElement;
-    const track = slider.querySelector('.hell-slider-track') as HTMLElement;
-    const thumb = slider.querySelector('.hell-slider-thumb') as HTMLElement;
+    const track = slider.querySelector('[data-slot="track"]') as HTMLElement;
+    const thumb = slider.querySelector('[data-slot="thumb"]') as HTMLElement;
     const thumbPointerDown = vi.fn();
     thumb.addEventListener('pointerdown', thumbPointerDown);
 
@@ -100,8 +151,8 @@ describe('HellSlider', () => {
     fixture.detectChanges();
 
     const slider = fixture.nativeElement.querySelector('hell-slider') as HTMLElement;
-    const track = slider.querySelector('.hell-slider-track') as HTMLElement;
-    const thumb = slider.querySelector('.hell-slider-thumb') as HTMLElement;
+    const track = slider.querySelector('[data-slot="track"]') as HTMLElement;
+    const thumb = slider.querySelector('[data-slot="thumb"]') as HTMLElement;
     const ownerWindow = slider.ownerDocument.defaultView as Window & typeof globalThis;
     const OriginalOwnerPointerEvent = ownerWindow.PointerEvent;
     const constructed = vi.fn();
@@ -151,8 +202,8 @@ describe('HellSlider', () => {
     fixture.detectChanges();
 
     const slider = fixture.nativeElement.querySelector('hell-slider') as HTMLElement;
-    const track = slider.querySelector('.hell-slider-track') as HTMLElement;
-    const thumb = slider.querySelector('.hell-slider-thumb') as HTMLElement;
+    const track = slider.querySelector('[data-slot="track"]') as HTMLElement;
+    const thumb = slider.querySelector('[data-slot="thumb"]') as HTMLElement;
     const ownerWindow = slider.ownerDocument.defaultView as Window & typeof globalThis;
     const OriginalOwnerPointerEvent = ownerWindow.PointerEvent;
     const thumbPointerDown = vi.fn();
@@ -192,8 +243,8 @@ describe('HellSlider', () => {
     fixture.detectChanges();
 
     const slider = fixture.nativeElement.querySelector('hell-slider') as HTMLElement;
-    const track = slider.querySelector('.hell-slider-track') as HTMLElement;
-    const thumb = slider.querySelector('.hell-slider-thumb') as HTMLElement;
+    const track = slider.querySelector('[data-slot="track"]') as HTMLElement;
+    const thumb = slider.querySelector('[data-slot="thumb"]') as HTMLElement;
     const thumbPointerDown = vi.fn();
     const thumbDispatchSpy = vi.spyOn(thumb, 'dispatchEvent');
     thumb.addEventListener('pointerdown', thumbPointerDown);
@@ -223,8 +274,8 @@ describe('HellSlider', () => {
     fixture.detectChanges();
 
     const slider = fixture.nativeElement.querySelector('hell-slider') as HTMLElement;
-    const track = slider.querySelector('.hell-slider-track') as HTMLElement;
-    const thumb = slider.querySelector('.hell-slider-thumb') as HTMLElement;
+    const track = slider.querySelector('[data-slot="track"]') as HTMLElement;
+    const thumb = slider.querySelector('[data-slot="thumb"]') as HTMLElement;
     const thumbPointerDown = vi.fn();
     thumb.addEventListener('pointerdown', thumbPointerDown);
 
@@ -265,8 +316,8 @@ describe('HellSlider', () => {
     fixture.detectChanges();
 
     const slider = fixture.nativeElement.querySelector('hell-slider') as HTMLElement;
-    const track = slider.querySelector('.hell-slider-track') as HTMLElement;
-    const thumb = slider.querySelector('.hell-slider-thumb') as HTMLElement;
+    const track = slider.querySelector('[data-slot="track"]') as HTMLElement;
+    const thumb = slider.querySelector('[data-slot="thumb"]') as HTMLElement;
     const thumbDispatchSpy = vi.spyOn(thumb, 'dispatchEvent');
     thumb.remove();
 
@@ -292,7 +343,7 @@ describe('HellSlider', () => {
     fixture.detectChanges();
 
     const slider = fixture.nativeElement.querySelector('hell-slider') as HTMLElement;
-    const thumb = slider.querySelector('.hell-slider-thumb') as HTMLElement;
+    const thumb = slider.querySelector('[data-slot="thumb"]') as HTMLElement;
 
     expect(slider.getAttribute('data-thumb')).toBe('hover');
     expect(slider.getAttribute('data-grow')).toBe('true');
@@ -304,7 +355,7 @@ describe('HellSlider', () => {
     const fixture = TestBed.createComponent(SliderFieldHost);
     fixture.detectChanges();
 
-    const thumb = fixture.nativeElement.querySelector('.hell-slider-thumb') as HTMLElement;
+    const thumb = fixture.nativeElement.querySelector('[data-slot="thumb"]') as HTMLElement;
     const label = fixture.nativeElement.querySelector('label[hellFieldLabel]') as HTMLLabelElement;
     const description = fixture.nativeElement.querySelector(
       '[hellFieldDescription]',
@@ -329,7 +380,7 @@ describe('HellSlider', () => {
 
     const host = fixture.componentInstance;
     const slider = fixture.nativeElement.querySelector('hell-slider') as HTMLElement;
-    const thumb = slider.querySelector('.hell-slider-thumb') as HTMLElement;
+    const thumb = slider.querySelector('[data-slot="thumb"]') as HTMLElement;
 
     expect(thumb.getAttribute('aria-valuenow')).toBe('20');
 

@@ -26,10 +26,27 @@ import {
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
 import { hellUniqueIdRefs } from '@hell-ui/angular/internal/core';
-import { HellSize, type HellOrientation } from '@hell-ui/angular/core';
-import { HellStyleable } from '@hell-ui/angular/core';
+import {
+  HellPartStyleable,
+  type HellOrientation,
+  type HellRecipe,
+  type HellSize,
+  type HellUi,
+} from '@hell-ui/angular/core';
 
 let nextSliderId = 0;
+
+export type HellSliderPart = 'root' | 'track' | 'range' | 'thumb';
+export type HellSliderUi = HellUi<HellSliderPart>;
+
+const HELL_SLIDER_RECIPE = {
+  root: 'relative inline-flex h-hell-6 w-full cursor-pointer touch-none select-none items-center box-border [--_hell-slider-thumb-clearance:9px] data-disabled:pointer-events-none data-disabled:cursor-not-allowed data-disabled:opacity-50 data-[orientation=horizontal]:data-[size=sm]:h-hell-5 data-[orientation=horizontal]:data-[size=lg]:h-hell-7 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-[calc(var(--spacing)*24)] data-[orientation=vertical]:max-h-full data-[orientation=vertical]:w-hell-6 data-[orientation=vertical]:flex-col data-[orientation=vertical]:py-[var(--_hell-slider-thumb-clearance)] data-[size=sm]:[--_hell-slider-thumb-clearance:7px] data-[size=lg]:[--_hell-slider-thumb-clearance:11px] data-[orientation=vertical]:[--_hell-slider-thumb-clearance:7px]',
+  track: 'relative min-h-0 min-w-0 flex-auto self-stretch bg-transparent',
+  range:
+    'pointer-events-none absolute top-1/2 h-[calc(var(--spacing)*1.5)] -translate-y-1/2 rounded-hell-pill bg-hell-primary shadow-[inset_0_-1px_0_rgb(0_0_0_/_0.08)]',
+  thumb:
+    'absolute block size-[18px] cursor-grab rounded-hell-pill border border-solid border-hell-primary bg-white shadow-[0_1px_2px_rgb(0_0_0_/_0.15),0_0_0_0_var(--color-hell-primary)] outline-none transition-[scale,box-shadow,border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-press:cursor-grabbing',
+} satisfies HellRecipe<HellSliderPart>;
 
 /**
  * Single-value slider built on `ng-primitives/slider`. Drag the thumb,
@@ -51,7 +68,8 @@ let nextSliderId = 0;
     },
   ],
   host: {
-    '[class.hell-slider]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-size]': 'size()',
     '[attr.data-thumb]': 'thumb()',
     '[attr.data-grow]': 'grow() ? "true" : null',
@@ -61,17 +79,26 @@ let nextSliderId = 0;
     '(focusout)': 'markControlTouched()',
   },
   template: `
-    <div ngpSliderTrack class="hell-slider-track" (pointerdown)="continueAsDrag($event)">
-      <div ngpSliderRange class="hell-slider-range"></div>
+    <div
+      ngpSliderTrack
+      data-slot="track"
+      [class]="part('track')"
+      (pointerdown)="continueAsDrag($event)"
+    >
+      <div ngpSliderRange data-slot="range" [class]="part('range')"></div>
     </div>
     <div
       #thumb
       ngpSliderThumb
-      class="hell-slider-thumb"
+      data-slot="thumb"
+      [class]="part('thumb')"
     ></div>
   `,
 })
-export class HellSlider extends HellStyleable implements ControlValueAccessor {
+export class HellSlider extends HellPartStyleable<HellSliderPart> implements ControlValueAccessor {
+  protected readonly recipe = HELL_SLIDER_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly value = input(0, { transform: numberAttribute });
   readonly min = input(0, { transform: numberAttribute });
   readonly max = input(100, { transform: numberAttribute });
@@ -103,7 +130,7 @@ export class HellSlider extends HellStyleable implements ControlValueAccessor {
     externalDisabled: this.disabled,
     initialValue: 0,
   });
-  private readonly cva = new HellControlValueAccessorBridge<number>();
+  private readonly valueAccessor = new HellControlValueAccessorBridge<number>();
   private readonly destroyRef = inject(DestroyRef);
   private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
   private readonly hostAriaLabel = signal<string | null>(null);
@@ -128,7 +155,7 @@ export class HellSlider extends HellStyleable implements ControlValueAccessor {
     onValueChange: (value) => {
       this.controlledValue.acceptUserValue(value);
       this.valueChange.emit(value);
-      this.cva.emitValue(value);
+      this.valueAccessor.emitValue(value);
     },
   });
   private readonly thumbAriaLabel = computed(() => this.ariaLabel() ?? this.hostAriaLabel());
@@ -194,11 +221,11 @@ export class HellSlider extends HellStyleable implements ControlValueAccessor {
   }
 
   registerOnChange(fn: (value: number) => void): void {
-    this.cva.registerOnChange(fn);
+    this.valueAccessor.registerOnChange(fn);
   }
 
   registerOnTouched(fn: () => void): void {
-    this.cva.registerOnTouched(fn);
+    this.valueAccessor.registerOnTouched(fn);
   }
 
   setDisabledState(isDisabled: boolean): void {
@@ -272,7 +299,7 @@ export class HellSlider extends HellStyleable implements ControlValueAccessor {
   }
 
   protected markControlTouched(): void {
-    this.cva.markTouched();
+    this.valueAccessor.markTouched();
   }
 
   private coerceValue(value: number): number {
