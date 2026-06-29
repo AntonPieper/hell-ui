@@ -50,6 +50,10 @@ export const releaseCandidateConsumerScenarios = [
     rationale: 'App Shell composite remains installable without feature peers.',
   },
   {
+    name: 'resizable',
+    rationale: 'Resizable composite Part Style Map roots ship through the narrow entrypoint.',
+  },
+  {
     name: 'audio-player',
     rationale: 'Base audio player stays separate from transcript runtime peers.',
   },

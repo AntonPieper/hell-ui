@@ -42,6 +42,7 @@ mapped to command evidence and concrete evidence checks.
             "primitive-icons-css",
             "composite-css",
             "app-shell",
+            "resizable",
             "audio-player",
             "audio-transcript",
             "table",

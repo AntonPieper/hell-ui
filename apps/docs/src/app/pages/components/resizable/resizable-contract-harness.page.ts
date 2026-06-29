@@ -14,14 +14,14 @@ import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
         <div
           hellResizable
           orientation="horizontal"
-          class="h-[180px] max-w-[360px]"
+          ui="h-[180px] max-w-[360px]"
           data-testid="resizable-ltr-group"
         >
           <section
             id="resizable-ltr-before"
             hellResizablePane
             [minSize]="120"
-            class="hd-surface-elevated p-4"
+            ui="hd-surface-elevated p-4"
             data-testid="resizable-ltr-before"
           >
             Before pane
@@ -35,7 +35,7 @@ import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
             id="resizable-ltr-after"
             hellResizablePane
             [minSize]="120"
-            class="hd-surface-subtle p-4"
+            ui="hd-surface-subtle p-4"
             data-testid="resizable-ltr-after"
           >
             After pane
@@ -49,14 +49,14 @@ import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
           hellResizable
           orientation="horizontal"
           dir="rtl"
-          class="h-[180px] max-w-[360px]"
+          ui="h-[180px] max-w-[360px]"
           data-testid="resizable-rtl-group"
         >
           <section
             id="resizable-rtl-before"
             hellResizablePane
             [minSize]="120"
-            class="hd-surface-elevated p-4"
+            ui="hd-surface-elevated p-4"
             data-testid="resizable-rtl-before"
           >
             RTL before pane
@@ -70,7 +70,7 @@ import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
             id="resizable-rtl-after"
             hellResizablePane
             [minSize]="120"
-            class="hd-surface-subtle p-4"
+            ui="hd-surface-subtle p-4"
             data-testid="resizable-rtl-after"
           >
             RTL after pane

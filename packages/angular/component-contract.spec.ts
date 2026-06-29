@@ -22,6 +22,11 @@ import { HellBadge, HellKbd, HellTag } from '@hell-ui/angular/tag';
 import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
+import {
+  HELL_RESIZABLE_DIRECTIVES,
+  type HellResizableHandleUi,
+  type HellResizablePaneUi,
+} from '@hell-ui/angular/resizable';
 
 interface ContractCase {
   readonly id: string;
@@ -175,9 +180,9 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellOmnibarItemText', area: 'composite', coverage: 'static' },
   { symbol: 'HellOmnibarItemTrailing', area: 'composite', coverage: 'static' },
   { symbol: 'HellOmnibarPanel', area: 'composite', coverage: 'static' },
-  { symbol: 'HellResizable', area: 'composite', coverage: 'static' },
-  { symbol: 'HellResizableHandle', area: 'composite', coverage: 'static' },
-  { symbol: 'HellResizablePane', area: 'composite', coverage: 'static' },
+  { symbol: 'HellResizable', area: 'composite', coverage: 'dom' },
+  { symbol: 'HellResizableHandle', area: 'composite', coverage: 'dom' },
+  { symbol: 'HellResizablePane', area: 'composite', coverage: 'dom' },
   { symbol: 'HellSplitView', area: 'composite', coverage: 'static' },
   { symbol: 'HellTimeInput', area: 'composite', coverage: 'static' },
   { symbol: 'HellToaster', area: 'composite', coverage: 'static' },
@@ -215,6 +220,7 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
     ...HELL_FIELD_DIRECTIVES,
     ...HELL_SELECT_DIRECTIVES,
     ...HELL_APP_SHELL_DIRECTIVES,
+    ...HELL_RESIZABLE_DIRECTIVES,
     ...HELL_TABLE_UTILITIES_DIRECTIVES,
   ],
   template: `
@@ -273,6 +279,19 @@ const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
         </div>
       </div>
     </nav>
+
+    <div id="resizable" hellResizable orientation="vertical" ui="h-[360px] bg-hell-surface-muted">
+      <section id="resizable-pane-a" hellResizablePane [ui]="resizablePaneUi" [minSize]="40">
+        A
+      </section>
+      <div
+        id="resizable-handle"
+        hellResizableHandle
+        appearance="grip"
+        [ui]="resizableHandleUi"
+      ></div>
+      <section id="resizable-pane-b" hellResizablePane [minSize]="40">B</section>
+    </div>
 
     <div id="table-container" hellTableContainer busy>
       <table id="table" hellTableRoot contentWidth>
@@ -340,6 +359,14 @@ class ContractHost {
   readonly fieldErrorUi = {
     root: 'text-hell-foreground',
   } satisfies HellFieldErrorUi;
+
+  readonly resizablePaneUi = {
+    root: 'overflow-hidden bg-hell-danger',
+  } satisfies HellResizablePaneUi;
+
+  readonly resizableHandleUi = {
+    root: 'bg-hell-danger flex-none',
+  } satisfies HellResizableHandleUi;
 }
 
 const STYLEABLE_CASES: readonly ContractCase[] = [
@@ -638,6 +665,35 @@ describe('Hell Component Contract', () => {
     expect(sectionToggle.getAttribute('data-slot')).toBe('root');
     expect(sectionToggle.getAttribute('aria-expanded')).toBe('true');
     expect(sectionItems.getAttribute('data-slot')).toBe('root');
+  });
+
+  it('exposes resizable as local root parts with resize state attributes intact', () => {
+    const fixture = TestBed.createComponent(ContractHost);
+    fixture.detectChanges();
+
+    const group = query(fixture.nativeElement, '#resizable');
+    const pane = query(fixture.nativeElement, '#resizable-pane-a');
+    const handle = query(fixture.nativeElement, '#resizable-handle');
+
+    expect(group.classList.contains('hell-resizable')).toBe(false);
+    expect(group.getAttribute('data-slot')).toBe('root');
+    expect(group.getAttribute('data-orientation')).toBe('vertical');
+    expect(group.className).toContain('h-[360px]');
+    expect(group.className).not.toContain('h-full');
+
+    expect(pane.classList.contains('hell-resizable-pane')).toBe(false);
+    expect(pane.getAttribute('data-slot')).toBe('root');
+    expect(pane.getAttribute('data-orientation')).toBe('vertical');
+    expect(pane.className).toContain('overflow-hidden');
+    expect(pane.className).not.toContain('overflow-auto');
+
+    expect(handle.classList.contains('hell-resizable-handle')).toBe(false);
+    expect(handle.getAttribute('data-slot')).toBe('root');
+    expect(handle.getAttribute('data-appearance')).toBe('grip');
+    expect(handle.getAttribute('role')).toBe('separator');
+    expect(handle.getAttribute('aria-orientation')).toBe('horizontal');
+    expect(handle.getAttribute('tabindex')).toBe('0');
+    expect(handle.className).toContain('bg-hell-danger');
   });
 });
 

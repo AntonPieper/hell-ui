@@ -34,7 +34,7 @@ A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`;
 | Button Part Style Map         | Core peer group only                                                                                                                            | Narrow Button import plus `ui`; no Hell CSS/Tailwind required for compile-time behavior proof                                                                                                                                     | [`button-ui`](../../tools/check-package-consumer.mjs)                                   |
 | Styled narrow primitive       | Core peer group plus `tailwindcss`                                                                                                              | Narrow primitive import plus `@hell-ui/angular/tokens.css` and each imported entry point's `styles.css`                                                                                                                           | [`button`](../../tools/check-package-consumer.mjs)                                      |
 | Icon-backed primitive mix     | Core peer group plus `tailwindcss`, `@ng-icons/font-awesome`                                                                                    | Narrow primitive imports such as `@hell-ui/angular/button`, `@hell-ui/angular/icon`, and `@hell-ui/angular/input`; no aggregate primitive path                                                                                    | [`primitive-icons-css`](../../tools/check-package-consumer.mjs)                         |
-| Composites                    | Core peer group plus `tailwindcss`; add `@ng-icons/font-awesome` for icon-backed composites                                                    | Narrow composite entry points such as `@hell-ui/angular/app-shell` and `@hell-ui/angular/audio-player`, plus explicit entrypoint CSS                                                                                            | [`app-shell`, `audio-player`, `composite-css`](../../tools/check-package-consumer.mjs)  |
+| Composites                    | Core peer group plus `tailwindcss`; add `@ng-icons/font-awesome` for icon-backed composites                                                    | Narrow composite entry points such as `@hell-ui/angular/app-shell`, `@hell-ui/angular/resizable`, and `@hell-ui/angular/audio-player`, plus explicit entrypoint CSS                                                            | [`app-shell`, `resizable`, `audio-player`, `composite-css`](../../tools/check-package-consumer.mjs) |
 | Audio transcript              | Composite audio-player peer group; no CodeMirror or pdf.js peers                                                                                | `@hell-ui/angular/audio-player` plus provider import from `@hell-ui/angular/features/audio-transcript`; use composite CSS, no feature CSS                                                                                         | [`audio-transcript`](../../tools/check-package-consumer.mjs)                            |
 | Table primitives              | Core peer group plus `tailwindcss`; no optional table-engine peers                                                                              | `@hell-ui/angular/table`; CSS from `@hell-ui/angular/table/styles.css`; removed table aliases stay unavailable                                                                                                                    | [`table`, `no-legacy-alias`](../../tools/check-package-consumer.mjs)                    |
 | TanStack table shell          | Core peer group plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`                                          | `@hell-ui/angular/table-tanstack`; caller-owned TanStack Table remains the engine                                                                                                                                                 | [`table-tanstack`](../../tools/check-package-consumer.mjs)                              |
@@ -78,10 +78,10 @@ pnpm add @hell-ui/angular @hell-ui/pdf-viewer @angular/forms @angular/cdk @float
 Maintainers can rerun a proof path from the product workspace:
 
 ```bash
-HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing,button-ui,button,primitive-icons-css,composite-css,app-shell,audio-player,audio-transcript,table,table-tanstack,table-tanstack-virtual,no-legacy-alias,code-editor,pdf-viewer pnpm run test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing,button-ui,button,primitive-icons-css,composite-css,app-shell,resizable,audio-player,audio-transcript,table,table-tanstack,table-tanstack-virtual,no-legacy-alias,code-editor,pdf-viewer pnpm run test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=root-core,core,testing pnpm run test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=button-ui,button,primitive-icons-css pnpm run test:package-consumer -- --minimal-deps
-HELL_PACKAGE_CONSUMER_SCENARIOS=composite-css,app-shell,audio-player,audio-transcript pnpm run test:package-consumer -- --minimal-deps
+HELL_PACKAGE_CONSUMER_SCENARIOS=composite-css,app-shell,resizable,audio-player,audio-transcript pnpm run test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=table,no-legacy-alias,table-tanstack,table-tanstack-virtual pnpm run test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=code-editor pnpm run test:package-consumer -- --minimal-deps
 HELL_PACKAGE_CONSUMER_SCENARIOS=pdf-viewer pnpm run test:package-consumer -- --minimal-deps
@@ -97,6 +97,7 @@ Prefer:
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
+import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 import { HellButtonHarness } from '@hell-ui/angular/testing';
 ```
@@ -108,6 +109,7 @@ Avoid broad imports when a narrow path exists:
 import { HellButton } from '@hell-ui/angular/button';
 import { HellInput } from '@hell-ui/angular/input';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
+import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
 ```
 
 Use `@hell-ui/angular` for stable core exports only. Use `/table`, `/table-tanstack`, `/features/*`, and narrow component entry points for UI surfaces.
@@ -129,6 +131,7 @@ Add only the extra entrypoint CSS needed by the entry points the app imports:
 
 ```css
 @import '@hell-ui/angular/app-shell/styles.css';
+@import '@hell-ui/angular/resizable/styles.css';
 @import '@hell-ui/angular/table/styles.css';
 @import '@hell-ui/angular/features/code-editor/styles.css';
 @import '@hell-ui/pdf-viewer/styles';
@@ -147,10 +150,10 @@ Tailwind content/source pipeline.
 `HellButton`, `HellInput`, `HellNativeSelect`, `HellTextarea`, `HellDialpad`,
 `HellDateInput`, `HellTimeInput`, `HellDatePicker`, `HellDateRangePicker`, the
 first directive-suite batch (`HellCard`, `HellField`, `HellTabset`, and
-`HellAccordion` families), and the App Shell/nav directives have migrated from
-Style Opt-Out to the Part Style Map API. Pass `ui` when you want to refine
-public parts while keeping Hell behavior, state attributes, and accessibility
-wiring.
+`HellAccordion` families), the App Shell/nav directives, and Resizable
+directives have migrated from Style Opt-Out to the Part Style Map API. Pass
+`ui` when you want to refine public parts while keeping Hell behavior, state
+attributes, and accessibility wiring.
 
 ```html
 <button hellButton type="button" ui="rounded-hell-pill bg-hell-primary">Save</button>
@@ -161,6 +164,11 @@ wiring.
 <div hellAppShell ui="bg-hell-surface-muted">
   <nav hellAppSidenav ui="bg-hell-surface-elevated"></nav>
 </div>
+<div hellResizable orientation="horizontal" ui="h-[240px]">
+  <section hellResizablePane ui="hd-surface-elevated p-4">Left</section>
+  <div hellResizableHandle appearance="grip" ui="bg-hell-surface-muted"></div>
+  <section hellResizablePane ui="hd-surface-subtle p-4">Right</section>
+</div>
 <hell-dialpad [ui]="{ keyButton: 'rounded-hell-pill', callButton: 'bg-hell-success-strong' }" />
 <hell-date-input [ui]="{ input: 'tabular-nums', pickerPanel: 'shadow-hell-lg' }" />
 ```
@@ -169,12 +177,13 @@ Rules for migration:
 
 - Keep the directive import narrow, for example `@hell-ui/angular/button`,
   `@hell-ui/angular/input`, `@hell-ui/angular/card`, or
-  `@hell-ui/angular/app-shell`.
+  `@hell-ui/angular/resizable`.
 - Import Hell CSS when you want shipped default visuals; the `primitive-icons-css`
-  package-consumer scenario proves the primitive, first directive-suite, and App
-  Shell recipe utilities ship without consumer `@source` scanning.
+  package-consumer scenario proves the primitive, first directive-suite, App
+  Shell, and Resizable recipe utilities ship without consumer `@source`
+  scanning.
 - Use `ui="..."` for single-root directives such as Button, Input, Card, Field,
-  Tabs, Accordion, and App Shell/nav directives.
+  Tabs, Accordion, App Shell/nav, and Resizable directives.
 - Use each projected child directive's local `ui`; a Card, Field, Tabs,
   Accordion, or App Shell root does not style its children remotely.
 - Use `[ui]="{ ... }"` for owned-anatomy components with multiple public parts,

@@ -103,7 +103,7 @@ const packageConsumerCiGroups = [
   { name: 'core', scenarios: ['root-core', 'core', 'testing'] },
   { name: 'primitive-foundations', scenarios: ['primitive-icons-css', 'button-ui'] },
   { name: 'button', scenarios: ['button'] },
-  { name: 'composite-foundations', scenarios: ['composite-css', 'app-shell'] },
+  { name: 'composite-foundations', scenarios: ['composite-css', 'app-shell', 'resizable'] },
   { name: 'audio', scenarios: ['audio-player', 'audio-transcript'] },
   { name: 'features', scenarios: ['code-editor', 'pdf-viewer'] },
   { name: 'table-core', scenarios: ['table', 'no-legacy-alias'] },
@@ -113,7 +113,10 @@ const packageConsumerCiGroups = [
 const packageConsumerScriptGroups = [
   { name: 'core', scenarios: ['root-core', 'core', 'testing'] },
   { name: 'primitives', scenarios: ['primitive-icons-css', 'button-ui', 'button'] },
-  { name: 'composites', scenarios: ['composite-css', 'app-shell', 'audio-player', 'audio-transcript'] },
+  {
+    name: 'composites',
+    scenarios: ['composite-css', 'app-shell', 'resizable', 'audio-player', 'audio-transcript'],
+  },
   { name: 'features', scenarios: ['code-editor', 'pdf-viewer'] },
   { name: 'tables', scenarios: ['table', 'table-tanstack', 'table-tanstack-virtual', 'no-legacy-alias'] },
   { name: 'code-editor', scenarios: ['code-editor'] },
@@ -230,6 +233,16 @@ const packageConsumerScenarioCatalog = [
     dependencies: styledUiWithoutFontAwesomeDeps,
     mainTs: appShellConsumerMainTs,
     stylesCss: audioPlayerConsumerStylesCss,
+  },
+  {
+    name: 'resizable',
+    description: 'narrow resizable composite entry with Part Style Map roots',
+    coverage: ['composites'],
+    peerTier: 'composite',
+    peerGroup: 'composite',
+    dependencies: styledUiWithoutFontAwesomeDeps,
+    mainTs: resizableConsumerMainTs,
+    stylesCss: resizableConsumerStylesCss,
   },
   {
     name: 'audio-player',
@@ -1646,6 +1659,35 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
+function resizableConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HELL_RESIZABLE_DIRECTIVES, type HellResizablePaneUi } from '${packageName}/resizable';
+
+const paneUi = {
+  root: 'hd-surface-elevated p-4 overflow-hidden',
+} satisfies HellResizablePaneUi;
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [...HELL_RESIZABLE_DIRECTIVES],
+  template: \`
+    <div hellResizable orientation="horizontal" ui="h-[240px]">
+      <section hellResizablePane [initialFlex]="2" [ui]="paneUi">Left</section>
+      <div hellResizableHandle appearance="grip" ui="bg-hell-surface-muted"></div>
+      <section hellResizablePane [initialFlex]="3" ui="hd-surface-subtle p-4">Right</section>
+    </div>
+  \`,
+})
+class App {
+  protected readonly paneUi = paneUi;
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
 function audioPlayerConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -2066,6 +2108,13 @@ function appShellConsumerStylesCss() {
 @import "${packageName}/date-input/styles.css";
 @import "${packageName}/date-picker/styles.css";
 @import "${packageName}/time-input/styles.css";
+`;
+}
+
+function resizableConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/resizable/styles.css";
 `;
 }
 

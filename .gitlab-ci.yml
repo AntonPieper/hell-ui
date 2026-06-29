@@ -58,7 +58,7 @@ package-consumer:
       - PACKAGE_CONSUMER_GROUP: button
         PACKAGE_CONSUMER_SCENARIOS: button
       - PACKAGE_CONSUMER_GROUP: composite-foundations
-        PACKAGE_CONSUMER_SCENARIOS: composite-css,app-shell
+        PACKAGE_CONSUMER_SCENARIOS: composite-css,app-shell,resizable
       - PACKAGE_CONSUMER_GROUP: audio
         PACKAGE_CONSUMER_SCENARIOS: audio-player,audio-transcript
       - PACKAGE_CONSUMER_GROUP: features

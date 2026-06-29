@@ -6,10 +6,10 @@ import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [...HELL_RESIZABLE_DIRECTIVES],
   template: `
-    <div hellResizable orientation="vertical" class="flex h-[280px] flex-col">
-      <div hellResizablePane [initialFlex]="2" class="hd-surface-elevated p-4">Top pane</div>
+    <div hellResizable orientation="vertical" ui="h-[280px]">
+      <div hellResizablePane [initialFlex]="2" ui="hd-surface-elevated p-4">Top pane</div>
       <div hellResizableHandle></div>
-      <div hellResizablePane [initialFlex]="1" class="hd-surface-subtle p-4">Bottom pane</div>
+      <div hellResizablePane [initialFlex]="1" ui="hd-surface-subtle p-4">Bottom pane</div>
     </div>
   `,
 })

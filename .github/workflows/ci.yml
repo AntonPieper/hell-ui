@@ -105,7 +105,7 @@ jobs:
           - scenario: button
             scenarios: button
           - scenario: composite-foundations
-            scenarios: composite-css,app-shell
+            scenarios: composite-css,app-shell,resizable
           - scenario: audio
             scenarios: audio-player,audio-transcript
           - scenario: features
