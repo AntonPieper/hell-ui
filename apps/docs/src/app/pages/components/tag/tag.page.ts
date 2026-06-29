@@ -41,6 +41,7 @@ import tagTagVariantsExampleCodeRaw from './examples/tag-variants.example.ts?raw
           <code>hellTag variant</code>:
           <code>default | primary | info | success | warning | danger</code>
         </li>
+        <li><code>ui</code>: string shorthand or <code>&#123; root: '...' &#125;</code></li>
         <li><code>hellBadge</code>: small numeric counter</li>
         <li><code>hellKbd</code>: keyboard key indicator</li>
       </ul>

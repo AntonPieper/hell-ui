@@ -1,11 +1,2 @@
-@layer components {
-
-  /* Icon host wrapper. */
-
-  .hell-icon {
-      display: inline-flex;
-      line-height: 1;
-      color: var(--_hell-icon-color,currentColor);
-    }
-
-}
+/* Icon defaults are Tailwind utility recipes. */
+@source "./icon.ts";

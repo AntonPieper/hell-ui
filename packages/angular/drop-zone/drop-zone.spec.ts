@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellDropZone } from './drop-zone';
+import { HellDropZone, type HellDropZoneUi } from './drop-zone';
 
 @Component({
   imports: [HellDropZone],
@@ -95,6 +95,31 @@ class DropZoneHostWithDynamicNativeInput {
   readonly drops: File[][] = [];
 }
 
+@Component({
+  imports: [HellDropZone],
+  template: `
+    <div
+      id="drop-string"
+      hellDropzone
+      [disabled]="disabled()"
+      ui="grid min-h-hell-10 border-hell-danger bg-hell-danger text-hell-foreground-inverse"
+      (files)="drops.push($event)"
+    >
+      Upload files
+    </div>
+
+    <div id="drop-map" hellDropzone [ui]="dropZoneUi">Upload files</div>
+  `,
+})
+class DropZonePartStyleHost {
+  readonly disabled = signal(false);
+  readonly drops: File[][] = [];
+
+  readonly dropZoneUi = {
+    root: 'grid min-h-hell-8 border-hell-info bg-hell-info-soft text-hell-info-strong',
+  } satisfies HellDropZoneUi;
+}
+
 describe('HellDropZone', () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -107,8 +132,59 @@ describe('HellDropZone', () => {
         DropZoneHostWithNativeInput,
         DropZoneHostWithNativeInputId,
         DropZoneHostWithDynamicNativeInput,
+        DropZonePartStyleHost,
       ],
     }).compileComponents();
+  });
+
+  it('applies string shorthand through hellTwMerge while preserving host behavior', () => {
+    const fixture = TestBed.createComponent(DropZonePartStyleHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const zone = byId(fixture.nativeElement, 'drop-string');
+    const classes = zone.className.split(/\s+/);
+
+    expect(zone.getAttribute('data-slot')).toBe('root');
+    expect(zone.getAttribute('role')).toBe('button');
+    expect(zone.getAttribute('tabindex')).toBe('0');
+    expect(zone.classList.contains('hell-dropzone')).toBe(false);
+    expect(classes).toContain('grid');
+    expect(classes).toContain('min-h-hell-10');
+    expect(classes).toContain('border-hell-danger');
+    expect(classes).toContain('bg-hell-danger');
+    expect(classes).not.toContain('flex');
+    expect(classes).not.toContain('min-h-[140px]');
+    expect(classes).not.toContain('border-hell-border-strong');
+    expect(classes).not.toContain('bg-hell-surface-subtle');
+
+    const over = dragEvent('dragover');
+    zone.dispatchEvent(over);
+    fixture.detectChanges();
+
+    expect(over.defaultPrevented).toBe(true);
+    expect(zone.getAttribute('data-active')).toBe('true');
+
+    host.disabled.set(true);
+    fixture.detectChanges();
+
+    expect(zone.getAttribute('data-disabled')).toBe('true');
+    expect(zone.getAttribute('aria-disabled')).toBe('true');
+    expect(zone.getAttribute('tabindex')).toBe('-1');
+  });
+
+  it('applies object maps to the DropZone root', () => {
+    const fixture = TestBed.createComponent(DropZonePartStyleHost);
+    fixture.detectChanges();
+
+    const zone = byId(fixture.nativeElement, 'drop-map');
+
+    expect(zone.getAttribute('data-slot')).toBe('root');
+    expect(zone.className).toContain('grid');
+    expect(zone.className).toContain('min-h-hell-8');
+    expect(zone.className).toContain('border-hell-info');
+    expect(zone.className).toContain('bg-hell-info-soft');
+    expect(zone.className).toContain('text-hell-info-strong');
   });
 
   it('creates a hidden file input on click with the configured picker options', () => {
@@ -490,6 +566,12 @@ function dropZone(root: HTMLElement): HTMLElement {
   const zone = root.querySelector('[hellDropzone]');
   if (!(zone instanceof HTMLElement)) throw new Error('Expected drop zone.');
   return zone;
+}
+
+function byId<T extends HTMLElement>(root: HTMLElement, id: string): T {
+  const element = root.querySelector(`#${id}`);
+  if (!(element instanceof HTMLElement)) throw new Error(`Expected #${id}.`);
+  return element as T;
 }
 
 function fileInput(zone: HTMLElement): HTMLInputElement {

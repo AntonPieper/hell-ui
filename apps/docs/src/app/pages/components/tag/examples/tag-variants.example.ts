@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellBadge, HellKbd, HellTag } from '@hell-ui/angular/tag';
+import { HellTag } from '@hell-ui/angular/tag';
 
 @Component({
   selector: 'app-tag-tag-variants-example',
@@ -11,7 +11,13 @@ import { HellBadge, HellKbd, HellTag } from '@hell-ui/angular/tag';
     <span hellTag variant="info">info</span>
     <span hellTag variant="success">success</span>
     <span hellTag variant="warning">warning</span>
-    <span hellTag variant="danger">danger</span>
+    <span
+      hellTag
+      variant="danger"
+      [ui]="'bg-hell-danger text-hell-foreground-inverse'"
+    >
+      danger
+    </span>
   `,
 })
 export class TagTagVariantsExample {}

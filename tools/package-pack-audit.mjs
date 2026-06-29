@@ -9,6 +9,23 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const angularPackageName = '@hell-ui/angular';
 export const splitPdfPackageName = '@hell-ui/pdf-viewer';
 
+const angularRecipeSourceFiles = [
+  'button/button.ts',
+  'input/input.ts',
+  'dialpad/dialpad.ts',
+  'date-input/date-input.ts',
+  'date-picker/date-picker.ts',
+  'time-input/time-input.ts',
+  'avatar/avatar.ts',
+  'breadcrumbs/breadcrumbs.ts',
+  'drop-zone/drop-zone.ts',
+  'icon/icon.ts',
+  'progress/progress.ts',
+  'separator/separator.ts',
+  'skeleton/skeleton.ts',
+  'tag/tag.ts',
+];
+
 export const packagePeerGroups = Object.freeze({
   core: Object.freeze([
     '@angular/cdk',
@@ -405,12 +422,7 @@ function expectedPackageFiles(packageName) {
       'fesm2022/*.mjs',
       'types/*.d.ts',
       '**/*.css',
-      'button/button.ts',
-      'input/input.ts',
-      'dialpad/dialpad.ts',
-      'date-input/date-input.ts',
-      'date-picker/date-picker.ts',
-      'time-input/time-input.ts',
+      ...angularRecipeSourceFiles,
       'assets/**',
     ];
   }
@@ -801,15 +813,7 @@ function checkPackedFileAccounting(packageJson, tarball, files, fileSet, failure
 
 function expectedExplicitPackedFiles(packageName) {
   if (packageName === angularPackageName) {
-    return [
-      'button/button.ts',
-      'input/input.ts',
-      'dialpad/dialpad.ts',
-      'date-input/date-input.ts',
-      'date-picker/date-picker.ts',
-      'time-input/time-input.ts',
-      'assets/hell-ui-logo.svg',
-    ];
+    return [...angularRecipeSourceFiles, 'assets/hell-ui-logo.svg'];
   }
   return [];
 }

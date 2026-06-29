@@ -45,6 +45,7 @@ import avatarWithImageExampleCodeRaw from './examples/with-image.example.ts?raw'
         <li><code>image</code>, <code>fallback</code>, <code>alt</code></li>
         <li><code>size</code>: <code>xs | sm | md | lg | xl</code></li>
         <li><code>shape</code>: <code>round | square</code></li>
+        <li><code>ui</code>: string or <code>{{ '{' }} root: string {{ '}' }}</code> map</li>
       </ul>
 
       <h2>Do</h2>

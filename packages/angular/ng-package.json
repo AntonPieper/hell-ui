@@ -56,6 +56,46 @@
       "output": "time-input"
     },
     {
+      "glob": "avatar.ts",
+      "input": "avatar",
+      "output": "avatar"
+    },
+    {
+      "glob": "breadcrumbs.ts",
+      "input": "breadcrumbs",
+      "output": "breadcrumbs"
+    },
+    {
+      "glob": "drop-zone.ts",
+      "input": "drop-zone",
+      "output": "drop-zone"
+    },
+    {
+      "glob": "icon.ts",
+      "input": "icon",
+      "output": "icon"
+    },
+    {
+      "glob": "progress.ts",
+      "input": "progress",
+      "output": "progress"
+    },
+    {
+      "glob": "separator.ts",
+      "input": "separator",
+      "output": "separator"
+    },
+    {
+      "glob": "skeleton.ts",
+      "input": "skeleton",
+      "output": "skeleton"
+    },
+    {
+      "glob": "tag.ts",
+      "input": "tag",
+      "output": "tag"
+    },
+    {
       "glob": "hell-ui-logo.svg",
       "input": "assets",
       "output": "assets"

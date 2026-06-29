@@ -27,7 +27,7 @@ import searchBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
       <ul>
         <li><code>hellSearch</code>: marks the search root.</li>
         <li><code>hellSearchClear</code>: native button clear control that composes with the search root.</li>
-        <li><code>unstyled</code>: opt out of host styling.</li>
+        <li><code>ui</code>: string or <code>{{ '{' }} root: string {{ '}' }}</code> map.</li>
       </ul>
 
       <h2>Do</h2>

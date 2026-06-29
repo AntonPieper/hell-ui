@@ -6,6 +6,7 @@ const workspaceRoot = fileURLToPath(new URL('.', import.meta.url));
 const testResultsPath = resolve(workspaceRoot, 'test-results/vitest-junit.xml');
 const coveragePath = resolve(workspaceRoot, 'coverage');
 const testTimeoutMs = positiveNumber(process.env.HELL_UNIT_TEST_CASE_TIMEOUT_MS, 30_000);
+const maxWorkers = optionalPositiveNumber(process.env.HELL_UNIT_TEST_MAX_WORKERS);
 const junitReporter = ['junit', { outputFile: testResultsPath, suiteName: 'hell unit tests' }] as const;
 
 const reporters = [
@@ -25,6 +26,7 @@ export default defineConfig({
     setupFiles: [resolve(workspaceRoot, 'packages/angular/test-setup.ts')],
     reporters,
     testTimeout: testTimeoutMs,
+    ...(maxWorkers ? { maxWorkers } : {}),
     coverage: {
       enabled: true,
       provider: 'v8',
@@ -44,4 +46,9 @@ export default defineConfig({
 function positiveNumber(raw: string | undefined, fallback: number): number {
   const value = Number(raw);
   return Number.isFinite(value) && value > 0 ? value : fallback;
+}
+
+function optionalPositiveNumber(raw: string | undefined): number | undefined {
+  const value = Number(raw);
+  return Number.isFinite(value) && value > 0 ? value : undefined;
 }

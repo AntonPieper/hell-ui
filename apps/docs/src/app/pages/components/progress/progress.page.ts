@@ -39,6 +39,7 @@ import progressInteractiveExampleCodeRaw from './examples/interactive.example.ts
           <code>aria-labelledby</code>.
         </li>
         <li><code>hellProgressBar</code>: the visual fill — apply on a child element</li>
+        <li><code>ui</code>: string shorthand or <code>&#123; root: '...' &#125;</code> on either directive</li>
       </ul>
 
       <h2>Do</h2>

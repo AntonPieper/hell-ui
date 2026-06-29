@@ -82,6 +82,7 @@ const HD_ICON_PAGE_ICONS = {
           tech
         </li>
         <li><code>aria-label</code>: required when <code>decorative="false"</code></li>
+        <li><code>ui</code>: string or <code>{{ '{' }} root: string {{ '}' }}</code> map</li>
       </ul>
 
       <h2>Registering icons</h2>

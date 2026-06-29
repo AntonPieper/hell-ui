@@ -1,19 +1,30 @@
 import { Directive, input } from '@angular/core';
 import { NgpSeparator } from 'ng-primitives/separator';
 import type { HellOrientation, HellSize } from '@hell-ui/angular/core';
-import { HellStyleable } from '@hell-ui/angular/core';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+
+export type HellSeparatorPart = 'root';
+export type HellSeparatorUi = HellUi<HellSeparatorPart>;
+
+const HELL_SEPARATOR_RECIPE = {
+  root: 'block shrink-0 border-0 bg-hell-border data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[spacing=none]:m-0 data-[orientation=horizontal]:data-[spacing=xs]:my-hell-1 data-[orientation=horizontal]:data-[spacing=sm]:my-hell-2 data-[orientation=horizontal]:data-[spacing=md]:my-hell-4 data-[orientation=horizontal]:data-[spacing=lg]:my-hell-6 data-[orientation=horizontal]:data-[spacing=xl]:my-hell-8 data-[orientation=vertical]:data-[spacing=xs]:mx-hell-1 data-[orientation=vertical]:data-[spacing=sm]:mx-hell-2 data-[orientation=vertical]:data-[spacing=md]:mx-hell-4 data-[orientation=vertical]:data-[spacing=lg]:mx-hell-6 data-[orientation=vertical]:data-[spacing=xl]:mx-hell-8',
+} satisfies HellRecipe<HellSeparatorPart>;
 
 @Directive({
   selector: '[hellSeparator]',
   hostDirectives: [{ directive: NgpSeparator, inputs: ['ngpSeparatorOrientation:orientation'] }],
   host: {
-    '[class.hell-separator]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-orientation]': 'orientation()',
     '[attr.data-spacing]': 'spacing()',
     '[attr.role]': '"separator"',
   },
 })
-export class HellSeparator extends HellStyleable {
+export class HellSeparator extends HellPartStyleable<HellSeparatorPart> {
+  protected readonly recipe = HELL_SEPARATOR_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly orientation = input<HellOrientation>('horizontal');
   /**
    * Symmetric margin around the separator on its main axis.
