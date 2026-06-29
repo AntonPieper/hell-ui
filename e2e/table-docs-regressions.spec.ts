@@ -422,9 +422,18 @@ test.describe('split-view docs regressions', () => {
     await expect(page.getByRole('heading', { name: 'Split view', level: 1 })).toBeVisible();
 
     const ticketButtons = page.locator(
-      'app-split-view-master-detail-example [data-pane="primary"] button[hellbutton][data-hell-split-master-item][data-slot="root"]',
+      'app-split-view-master-detail-example [data-pane="primary"] button[hellbutton][data-slot="root"]',
     );
     await expect(ticketButtons).toHaveCount(3);
+    await expect(
+      page.locator(
+        'app-split-view-master-detail-example [data-pane="primary"] [data-hell-split-master-item]',
+      ),
+    ).toHaveCount(0);
+    await expect(ticketButtons.filter({ hasText: 'T-104' })).toHaveAttribute(
+      'data-current',
+      'true',
+    );
 
     for (let index = 0; index < 3; index += 1) {
       await expect(ticketButtons.nth(index)).toHaveAttribute('data-variant', 'ghost');

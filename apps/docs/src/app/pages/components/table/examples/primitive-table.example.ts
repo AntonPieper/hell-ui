@@ -23,7 +23,7 @@ const people: readonly Person[] = [
   providers: [provideIcons({ faSolidFolderOpen })],
   template: `
     <div hellTableContainer data-testid="primitive-table" ui="rounded-hell-lg">
-      <table hellTableRoot ui="text-sm">
+      <table hellTableRoot>
         <thead hellTableHeader ui="bg-hell-surface-muted">
           <tr hellTableRow>
             <th hellTableHeaderCell hellTableSelectionCell aria-label="Primary person"></th>
