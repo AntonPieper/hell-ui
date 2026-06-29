@@ -150,13 +150,19 @@ const packageConsumerScenarioCatalog = [
   {
     name: 'primitive-icons-css',
     aliases: ['primitives'],
-    description: 'narrow icon-backed primitive entries with entrypoint CSS',
+    description: 'narrow styled primitive entries with entrypoint CSS and Part Style Maps',
     coverage: ['styled-primitives'],
     peerTier: 'primitive',
     peerGroup: 'primitive-icons',
     dependencies: styledUiDeps,
     mainTs: primitivesConsumerMainTs,
     stylesCss: primitivesConsumerStylesCss,
+    cssIncludes: [
+      'background-color:var(--color-hell-surface-muted)',
+      'background-color:var(--color-hell-primary-soft)',
+      'border-style:dashed',
+      'animation:hell-shimmer 1.6s linear infinite',
+    ],
   },
   {
     name: 'button-ui',
@@ -960,7 +966,7 @@ function assertConsumerBuildCss(workspace, scenario) {
   }
 
   console.log(
-    `${packageConsumerLabel(scenario.name)} ok: built CSS contains Button recipe utilities and semantic token overrides`,
+    `${packageConsumerLabel(scenario.name)} ok: built CSS contains Part Style Map recipe utilities and semantic token overrides`,
   );
 }
 
@@ -1382,21 +1388,130 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function primitivesConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellButton } from '${packageName}/button';
-import { HellIcon } from '${packageName}/icon';
-import { HellInput } from '${packageName}/input';
+import { HellAvatar, type HellAvatarPart, type HellAvatarUi } from '${packageName}/avatar';
+import {
+  HELL_BREADCRUMBS_DIRECTIVES,
+  type HellBreadcrumbEllipsisUi,
+  type HellBreadcrumbItemUi,
+  type HellBreadcrumbLinkUi,
+  type HellBreadcrumbListUi,
+  type HellBreadcrumbPageUi,
+  type HellBreadcrumbSeparatorUi,
+  type HellBreadcrumbsUi,
+} from '${packageName}/breadcrumbs';
+import { HellButton, type HellButtonUi } from '${packageName}/button';
+import { HellDropZone, type HellDropZonePart, type HellDropZoneUi } from '${packageName}/drop-zone';
+import { HellIcon, type HellIconPart, type HellIconUi } from '${packageName}/icon';
+import { HellInput, type HellInputUi } from '${packageName}/input';
+import { HellProgress, HellProgressBar, type HellProgressBarUi, type HellProgressUi } from '${packageName}/progress';
+import { HellSearch, HellSearchClear, type HellSearchClearUi, type HellSearchUi } from '${packageName}/search';
+import { HellSeparator, type HellSeparatorUi } from '${packageName}/separator';
+import {
+  HellSkeleton,
+  HellSpinner,
+  type HellSkeletonUi,
+  type HellSpinnerUi,
+} from '${packageName}/skeleton';
+import {
+  HellBadge,
+  type HellBadgeUi,
+  HellKbd,
+  type HellKbdUi,
+  HellTag,
+  type HellTagUi,
+} from '${packageName}/tag';
+
+type PrimitiveRootPart = HellAvatarPart | HellDropZonePart | HellIconPart;
+
+const primitiveRootPart: PrimitiveRootPart = 'root';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [HellButton, HellIcon, HellInput],
+  imports: [
+    HellAvatar,
+    ...HELL_BREADCRUMBS_DIRECTIVES,
+    HellButton,
+    HellDropZone,
+    HellIcon,
+    HellInput,
+    HellProgress,
+    HellProgressBar,
+    HellSearch,
+    HellSearchClear,
+    HellSeparator,
+    HellSkeleton,
+    HellSpinner,
+    HellBadge,
+    HellKbd,
+    HellTag,
+  ],
   template: \`
-    <button hellButton type="button">Save</button>
-    <hell-icon name="faSolidCheck" aria-hidden="true" />
-    <input hellInput aria-label="Name" />
+    <button hellButton type="button" [ui]="buttonUi">Save</button>
+    <hell-icon name="faSolidCheck" aria-hidden="true" [ui]="iconUi" />
+    <input hellInput aria-label="Name" [ui]="inputUi" />
+
+    <span hellTag [ui]="tagUi">Ready</span>
+    <span hellBadge [ui]="badgeUi">3</span>
+    <kbd hellKbd [ui]="kbdUi">K</kbd>
+
+    <div hellSeparator [ui]="separatorUi"></div>
+    <div hellProgress [ui]="progressUi">
+      <div hellProgressBar [ui]="progressBarUi"></div>
+    </div>
+
+    <div hellSkeleton [ui]="skeletonUi"></div>
+    <span hellSpinner [ui]="spinnerUi"></span>
+    <hell-avatar fallback="AP" [ui]="avatarUi" />
+
+    <nav hellBreadcrumbs [ui]="breadcrumbsUi">
+      <ol hellBreadcrumbList [ui]="breadcrumbListUi">
+        <li hellBreadcrumbItem [ui]="breadcrumbItemUi">
+          <a hellBreadcrumbLink href="#" [ui]="breadcrumbLinkUi">Home</a>
+        </li>
+        <li hellBreadcrumbSeparator [ui]="breadcrumbSeparatorUi"></li>
+        <li hellBreadcrumbItem>
+          <span hellBreadcrumbPage [ui]="breadcrumbPageUi">Current</span>
+        </li>
+        <li>
+          <button hellBreadcrumbEllipsis [ui]="breadcrumbEllipsisUi"></button>
+        </li>
+      </ol>
+    </nav>
+
+    <div hellSearch [ui]="searchUi">
+      <input hellInput type="search" aria-label="Search" />
+      <button hellSearchClear [ui]="searchClearUi">Clear</button>
+    </div>
+
+    <div hellDropzone [ui]="dropZoneUi">Drop files</div>
   \`,
 })
-class App {}
+class App {
+  protected readonly primitiveRootPart = primitiveRootPart;
+  protected readonly avatarUi = { root: 'bg-hell-info-soft' } satisfies HellAvatarUi;
+  protected readonly badgeUi = { root: 'bg-hell-info' } satisfies HellBadgeUi;
+  protected readonly breadcrumbEllipsisUi = { root: 'text-hell-info' } satisfies HellBreadcrumbEllipsisUi;
+  protected readonly breadcrumbItemUi = { root: 'gap-hell-2' } satisfies HellBreadcrumbItemUi;
+  protected readonly breadcrumbLinkUi = { root: 'text-hell-info' } satisfies HellBreadcrumbLinkUi;
+  protected readonly breadcrumbListUi = { root: 'gap-hell-2' } satisfies HellBreadcrumbListUi;
+  protected readonly breadcrumbPageUi = { root: 'text-hell-info-strong' } satisfies HellBreadcrumbPageUi;
+  protected readonly breadcrumbSeparatorUi = { root: 'text-hell-info' } satisfies HellBreadcrumbSeparatorUi;
+  protected readonly breadcrumbsUi = { root: 'text-hell-info' } satisfies HellBreadcrumbsUi;
+  protected readonly buttonUi = { root: 'bg-hell-info' } satisfies HellButtonUi;
+  protected readonly dropZoneUi = { root: 'border-hell-info' } satisfies HellDropZoneUi;
+  protected readonly iconUi = { root: 'text-hell-info' } satisfies HellIconUi;
+  protected readonly inputUi = { root: 'border-hell-info' } satisfies HellInputUi;
+  protected readonly kbdUi = { root: 'border-hell-info' } satisfies HellKbdUi;
+  protected readonly progressBarUi = { root: 'bg-hell-info' } satisfies HellProgressBarUi;
+  protected readonly progressUi = { root: 'bg-hell-info-soft' } satisfies HellProgressUi;
+  protected readonly searchClearUi = { root: 'text-hell-info' } satisfies HellSearchClearUi;
+  protected readonly searchUi = { root: 'grid gap-hell-2' } satisfies HellSearchUi;
+  protected readonly separatorUi = { root: 'bg-hell-info' } satisfies HellSeparatorUi;
+  protected readonly skeletonUi = { root: 'bg-hell-info-soft' } satisfies HellSkeletonUi;
+  protected readonly spinnerUi = { root: 'text-hell-info' } satisfies HellSpinnerUi;
+  protected readonly tagUi = { root: 'bg-hell-info-soft' } satisfies HellTagUi;
+}
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
@@ -1878,6 +1993,13 @@ function primitivesConsumerStylesCss() {
 @import "${packageName}/button/styles.css";
 @import "${packageName}/icon/styles.css";
 @import "${packageName}/input/styles.css";
+@import "${packageName}/avatar/styles.css";
+@import "${packageName}/breadcrumbs/styles.css";
+@import "${packageName}/drop-zone/styles.css";
+@import "${packageName}/progress/styles.css";
+@import "${packageName}/separator/styles.css";
+@import "${packageName}/skeleton/styles.css";
+@import "${packageName}/tag/styles.css";
 `;
 }
 

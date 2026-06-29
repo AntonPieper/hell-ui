@@ -2624,7 +2624,7 @@ function checkPartStyleMapContract() {
   }
   if (
     !packageConsumer.includes(
-      'built CSS contains Button recipe utilities and semantic token overrides',
+      'built CSS contains Part Style Map recipe utilities and semantic token overrides',
     )
   ) {
     failures.push('Package-consumer CSS assertion must name the Part Style Map compiled-CSS proof');
