@@ -2,7 +2,15 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { HellNativeRadio, HellNativeRadioGroup, HellRadio, HellRadioGroup } from './radio';
+import {
+  HellNativeRadio,
+  HellNativeRadioGroup,
+  type HellNativeRadioGroupUi,
+  HellRadio,
+  HellRadioGroup,
+  type HellRadioGroupUi,
+  type HellRadioUi,
+} from './radio';
 
 @Component({
   selector: 'hell-radio-host',
@@ -136,6 +144,65 @@ class NativeRadioFormHost {
   readonly control = new FormControl<string | null>(null);
 }
 
+@Component({
+  selector: 'hell-radio-part-style-host',
+  imports: [HellNativeRadio, HellNativeRadioGroup, HellRadio, HellRadioGroup],
+  template: `
+    <div
+      id="custom-group"
+      hellRadioGroup
+      aria-label="Mode"
+      orientation="horizontal"
+      ui="gap-hell-6"
+      [value]="value()"
+    >
+      <button id="custom-radio" hellRadio type="button" value="a" [ui]="radioUi">A</button>
+      <button hellRadio type="button" value="b" disabled>B</button>
+    </div>
+
+    <div
+      id="custom-map-group"
+      hellRadioGroup
+      aria-label="Object mode"
+      orientation="horizontal"
+      [ui]="groupUi"
+      value="a"
+    >
+      <button hellRadio type="button" value="a">A</button>
+    </div>
+
+    <div
+      id="native-group"
+      hellNativeRadioGroup
+      aria-label="Native mode"
+      orientation="horizontal"
+      [ui]="nativeGroupUi"
+    >
+      <input
+        id="native-radio"
+        type="radio"
+        hellNativeRadio
+        name="mode"
+        checked
+        required
+        ui="border-hell-danger size-hell-5"
+      />
+    </div>
+  `,
+})
+class RadioPartStyleHost {
+  readonly value = signal('a');
+  protected readonly radioUi = {
+    root: 'gap-hell-5 text-hell-danger',
+  } satisfies HellRadioUi;
+  protected readonly groupUi = {
+    root: 'gap-hell-6',
+  } satisfies HellRadioGroupUi;
+  protected readonly nativeGroupUi = {
+    root: 'gap-hell-5',
+  } satisfies HellNativeRadioGroupUi;
+}
+
 describe('HellRadio', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -148,6 +215,7 @@ describe('HellRadio', () => {
         RadioCheckedTabStopHost,
         RadioItemDisabledHost,
         NativeRadioFormHost,
+        RadioPartStyleHost,
       ],
     }).compileComponents();
   });
@@ -161,12 +229,13 @@ describe('HellRadio', () => {
       'button[hellRadio]',
     );
 
-    expect(group.classList.contains('hell-radio-group')).toBe(true);
+    expect(group.getAttribute('data-slot')).toBe('root');
     expect(group.getAttribute('role')).toBe('radiogroup');
     expect(group.getAttribute('data-orientation')).toBe('horizontal');
     expect(group.getAttribute('aria-required')).toBe(null);
     expect(group.getAttribute('data-required')).toBe(null);
     expect(items[0].type).toBe('button');
+    expect(items[0].getAttribute('data-slot')).toBe('root');
     expect(items[0].getAttribute('role')).toBe('radio');
     expect(items[0].getAttribute('aria-checked')).toBe('true');
     expect(items[1].getAttribute('aria-checked')).toBe('false');
@@ -367,6 +436,58 @@ describe('HellRadio', () => {
     expect(second.hasAttribute('disabled')).toBe(false);
   });
 
+  it('uses root part style maps for custom and native radio controls', () => {
+    const fixture = TestBed.createComponent(RadioPartStyleHost);
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    const groups = root.querySelectorAll<HTMLElement>('[hellRadioGroup]');
+    const customRadios = root.querySelectorAll<HTMLButtonElement>('button[hellRadio]');
+    const nativeGroup = query<HTMLElement>(root, '[hellNativeRadioGroup]');
+    const native = query<HTMLInputElement>(root, 'input[hellNativeRadio]');
+    const group = groups[0];
+    const customMapGroup = groups[1];
+    const custom = customRadios[0];
+    const disabled = customRadios[1];
+
+    expect(group).toBeInstanceOf(HTMLElement);
+    expect(customMapGroup).toBeInstanceOf(HTMLElement);
+    expect(custom).toBeInstanceOf(HTMLButtonElement);
+    expect(disabled).toBeInstanceOf(HTMLButtonElement);
+
+    expect(group.getAttribute('data-slot')).toBe('root');
+    expect(group.classList.contains('hell-radio-group')).toBe(false);
+    expect(group.classList.contains('gap-hell-6')).toBe(true);
+    expect(group.classList.contains('gap-hell-3')).toBe(false);
+
+    expect(customMapGroup.getAttribute('data-slot')).toBe('root');
+    expect(customMapGroup.classList.contains('gap-hell-6')).toBe(true);
+    expect(customMapGroup.classList.contains('gap-hell-3')).toBe(false);
+
+    expect(custom.getAttribute('data-slot')).toBe('root');
+    expect(custom.classList.contains('hell-radio')).toBe(false);
+    expect(custom.classList.contains('gap-hell-5')).toBe(true);
+    expect(custom.classList.contains('gap-hell-3')).toBe(false);
+    expect(custom.classList.contains('text-hell-danger')).toBe(true);
+    expect(custom.getAttribute('aria-checked')).toBe('true');
+
+    expect(disabled.getAttribute('data-slot')).toBe('root');
+    expect(disabled.getAttribute('data-disabled')).toBe('');
+    expect(disabled.getAttribute('aria-disabled')).toBe('true');
+
+    expect(nativeGroup.getAttribute('data-slot')).toBe('root');
+    expect(nativeGroup.classList.contains('hell-radio-group')).toBe(false);
+    expect(nativeGroup.classList.contains('gap-hell-5')).toBe(true);
+
+    expect(native.getAttribute('data-slot')).toBe('root');
+    expect(native.classList.contains('hell-radio')).toBe(false);
+    expect(native.classList.contains('border-hell-danger')).toBe(true);
+    expect(native.classList.contains('size-hell-5')).toBe(true);
+    expect(native.classList.contains('size-hell-4')).toBe(false);
+    expect(native.getAttribute('data-required')).toBe('true');
+    expect(native.getAttribute('aria-required')).toBe('true');
+  });
+
   it('offers native radio inputs with built-in form semantics', () => {
     const fixture = TestBed.createComponent(NativeRadioFormHost);
     fixture.detectChanges();
@@ -377,10 +498,10 @@ describe('HellRadio', () => {
       'input[hellNativeRadio]',
     );
 
-    expect(group.classList.contains('hell-radio-group')).toBe(true);
+    expect(group.getAttribute('data-slot')).toBe('root');
     expect(group.getAttribute('data-orientation')).toBe('horizontal');
     expect(radios[0].type).toBe('radio');
-    expect(radios[0].classList.contains('hell-radio')).toBe(true);
+    expect(radios[0].getAttribute('data-slot')).toBe('root');
 
     host.control.setValue('b');
     fixture.detectChanges();

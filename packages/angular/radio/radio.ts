@@ -37,8 +37,40 @@ import {
 } from '@hell-ui/angular/internal/ng-primitives';
 import { containsNode } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
-import { HellOrientation } from '@hell-ui/angular/core';
-import { HellStyleable } from '@hell-ui/angular/core';
+import {
+  HellOrientation,
+  HellPartStyleable,
+  type HellRecipe,
+  type HellUi,
+} from '@hell-ui/angular/core';
+
+export type HellRadioGroupPart = 'root';
+export type HellRadioGroupUi = HellUi<HellRadioGroupPart>;
+
+export type HellRadioPart = 'root';
+export type HellRadioUi = HellUi<HellRadioPart>;
+
+export type HellNativeRadioGroupPart = 'root';
+export type HellNativeRadioGroupUi = HellUi<HellNativeRadioGroupPart>;
+
+export type HellNativeRadioPart = 'root';
+export type HellNativeRadioUi = HellUi<HellNativeRadioPart>;
+
+const HELL_RADIO_GROUP_RECIPE = {
+  root: 'inline-flex flex-col gap-hell-3 data-[orientation=horizontal]:flex-row',
+} satisfies HellRecipe<HellRadioGroupPart>;
+
+const HELL_NATIVE_RADIO_GROUP_RECIPE = {
+  root: 'inline-flex flex-col gap-hell-3 data-[orientation=horizontal]:flex-row',
+} satisfies HellRecipe<HellNativeRadioGroupPart>;
+
+const HELL_RADIO_RECIPE = {
+  root: 'inline-flex cursor-pointer items-center gap-hell-3 rounded-hell-sm border-0 bg-transparent p-0 font-[inherit] text-[13px] text-hell-foreground data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-2',
+} satisfies HellRecipe<HellRadioPart>;
+
+const HELL_NATIVE_RADIO_RECIPE = {
+  root: 'relative inline-flex size-hell-4 cursor-pointer appearance-none items-center justify-center rounded-hell-pill border border-solid border-hell-border-strong bg-hell-surface-elevated p-0 m-0 text-hell-primary-foreground transition-[border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] checked:border-hell-primary focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+} satisfies HellRecipe<HellNativeRadioPart>;
 
 type HellRadioRovingRegistration = {
   readonly element: HTMLButtonElement;
@@ -87,7 +119,8 @@ class HellRadioRovingRegistry {
     },
   ],
   host: {
-    '[class.hell-radio-group]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-orientation]': 'orientation()',
     '[attr.aria-required]': 'required() ? "true" : null',
     '[attr.data-required]': 'required() ? "true" : null',
@@ -95,9 +128,12 @@ class HellRadioRovingRegistry {
   },
 })
 export class HellRadioGroup<T = unknown>
-  extends HellStyleable
+  extends HellPartStyleable<HellRadioGroupPart>
   implements ControlValueAccessor, Validator
 {
+  protected readonly recipe = HELL_RADIO_GROUP_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly orientation = input<HellOrientation>('vertical');
   readonly required = input(false, { transform: booleanAttribute });
 
@@ -107,7 +143,7 @@ export class HellRadioGroup<T = unknown>
   private readonly rovingRegistry = inject(HellRadioRovingRegistry);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly cva = new HellControlValueAccessorBridge<T | null>();
+  private readonly valueAccessor = new HellControlValueAccessorBridge<T | null>();
   private onValidatorChange: () => void = () => {};
   private readonly disabled = computed(() => this.groupState().disabled());
 
@@ -127,7 +163,7 @@ export class HellRadioGroup<T = unknown>
     });
 
     const valueSub = this.group.valueChange.subscribe((value) => {
-      this.cva.emitValue(value);
+      this.valueAccessor.emitValue(value);
     });
     this.destroyRef.onDestroy(() => valueSub.unsubscribe());
 
@@ -144,11 +180,11 @@ export class HellRadioGroup<T = unknown>
   }
 
   registerOnChange(fn: (value: T | null) => void): void {
-    this.cva.registerOnChange(fn);
+    this.valueAccessor.registerOnChange(fn);
   }
 
   registerOnTouched(fn: () => void): void {
-    this.cva.registerOnTouched(fn);
+    this.valueAccessor.registerOnTouched(fn);
   }
 
   registerOnValidatorChange(fn: () => void): void {
@@ -173,7 +209,7 @@ export class HellRadioGroup<T = unknown>
   protected onFocusOut(event: FocusEvent): void {
     const next = event.relatedTarget;
     if (!containsNode(this.host.nativeElement, next)) {
-      this.cva.markTouched();
+      this.valueAccessor.markTouched();
     }
   }
 
@@ -272,13 +308,17 @@ export class HellRadioGroup<T = unknown>
     },
   ],
   host: {
-    '[class.hell-radio]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.disabled]': 'isDisabled() ? "" : null',
     '[attr.aria-disabled]': 'isDisabled() ? "true" : null',
     type: 'button',
   },
 })
-export class HellRadio extends HellStyleable {
+export class HellRadio extends HellPartStyleable<HellRadioPart> {
+  protected readonly recipe = HELL_RADIO_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   private readonly groupState = injectRadioGroupState<unknown>();
   private readonly rovingRegistry = inject(HellRadioRovingRegistry);
   private readonly radioItem = inject(NgpRadioItem<unknown>);
@@ -321,19 +361,24 @@ export class HellRadio extends HellStyleable {
 @Directive({
   selector: '[hellNativeRadioGroup]',
   host: {
-    '[class.hell-radio-group]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-orientation]': 'orientation()',
     role: 'radiogroup',
   },
 })
-export class HellNativeRadioGroup extends HellStyleable {
+export class HellNativeRadioGroup extends HellPartStyleable<HellNativeRadioGroupPart> {
+  protected readonly recipe = HELL_NATIVE_RADIO_GROUP_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly orientation = input<HellOrientation>('vertical');
 }
 
 @Directive({
   selector: 'input[type="radio"][hellNativeRadio]',
   host: {
-    '[class.hell-radio]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.type]': '"radio"',
     '[attr.required]': 'required() ? "" : null',
     '[attr.aria-required]': 'required() ? "true" : null',
@@ -341,7 +386,10 @@ export class HellNativeRadioGroup extends HellStyleable {
     '(change)': 'onChange()',
   },
 })
-export class HellNativeRadio extends HellStyleable {
+export class HellNativeRadio extends HellPartStyleable<HellNativeRadioPart> {
+  protected readonly recipe = HELL_NATIVE_RADIO_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly required = input(false, { alias: 'required', transform: booleanAttribute });
 
   readonly checkedChange = output<boolean>();

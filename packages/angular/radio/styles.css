@@ -1,75 +1,26 @@
 @layer components {
+  input[hellNativeRadio][data-slot='root'] {
+    -webkit-appearance: none;
+  }
 
-  /* Radio — `hellRadio` is the clickable button (label + indicator).
-     The visual radio dot is the [ngpRadioIndicator] child element. */
+  input[hellNativeRadio][data-slot='root']::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    margin-inline: auto;
+    background: var(--color-hell-primary);
+    border-radius: var(--radius-hell-pill);
+    transform: scale(0);
+    transition: transform var(--hell-duration-fast) var(--ease-hell-out);
+  }
 
-  .hell-radio-group {
-      display: inline-flex;
-      flex-direction: column;
-      gap: calc(var(--spacing) * 3);
-      &[data-orientation="horizontal"] {
-        flex-direction: row;
-      }
-    }
-
-  .hell-radio {
-      display: inline-flex;
-      cursor: pointer;
-      align-items: center;
-      gap: var(--spacing-hell-3);
-      background-color: transparent;
-      border-style: solid;
-      border-width: 0px;
-      padding: calc(var(--spacing) * 0);
-      font-size: 13px;
-      color: var(--color-hell-foreground);
-      font-family: inherit;
-      &[data-disabled], &:disabled {
-        cursor: not-allowed;
-        opacity: 50%;
-      }
-      &[data-focus-visible] {
-        outline: 2px solid var(--color-hell-focus-ring);
-        outline-offset: 2px;
-        border-radius: 0.25rem;
-      }
-
-      &[type='radio'] {
-        width: 16px;
-        height: 16px;
-        padding: 0;
-        appearance: none;
-        -webkit-appearance: none;
-        border-style: solid;
-        border-width: 1px;
-        border-color: var(--color-hell-border-strong);
-        border-radius: var(--radius-hell-pill);
-        background: var(--color-hell-surface-elevated);
-        color: var(--color-hell-primary-foreground);
-        box-shadow: none;
-
-        &::before {
-          content: '';
-          width: 8px;
-          height: 8px;
-          margin-inline: auto;
-          background: var(--color-hell-primary);
-          border-radius: var(--radius-hell-pill);
-          transform: scale(0);
-          transition: transform var(--hell-duration-fast) var(--ease-hell-out);
-        }
-      }
-
-      &[type='radio']:checked::before {
-        transform: scale(1);
-      }
-    }
-
+  input[hellNativeRadio][data-slot='root']:checked::before {
+    transform: scale(1);
+  }
 }
 
 /* Style the indicator span; ng-primitives toggles its own [data-checked]
    when the parent radio is selected. */
-
 [ngpRadioIndicator] {
   display: inline-flex;
   align-items: center;
@@ -84,7 +35,7 @@
 }
 
 [ngpRadioIndicator]::after {
-  content: "";
+  content: '';
   width: 8px;
   height: 8px;
   border-radius: 999px;
@@ -97,6 +48,10 @@
   border-color: var(--color-hell-primary);
 }
 
-[ngpRadioIndicator][data-checked]::after { transform: scale(1); }
+[ngpRadioIndicator][data-checked]::after {
+  transform: scale(1);
+}
 
-[hellRadio][data-hover] [ngpRadioIndicator] { border-color: var(--color-hell-primary); }
+[hellRadio][data-hover] [ngpRadioIndicator] {
+  border-color: var(--color-hell-primary);
+}
