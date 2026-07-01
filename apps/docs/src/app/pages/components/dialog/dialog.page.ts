@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HELL_DIALOG_DIRECTIVES } from '@hell-ui/angular/dialog';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { useLazyGlobalStyleLink } from '../../../shared/lazy-global-style';
 import { DialogExampleExample } from './examples/example.example';
 import dialogExampleExampleCodeRaw from './examples/example.example.ts?raw' with {
   loader: 'text',
@@ -119,6 +120,11 @@ import dialogUnstyledExampleCodeRaw from './examples/unstyled.example.ts?raw' wi
   `,
 })
 export class DialogPage {
+  private readonly _dialogStyles = useLazyGlobalStyleLink(
+    'hell-docs-dialog-styles',
+    'hell-ui/dialog/styles.css',
+  );
+
   protected readonly dialogExampleExampleCode = dialogExampleExampleCodeRaw;
   protected readonly dialogScopedToAppShellContentExampleCode =
     dialogScopedToAppShellContentExampleCodeRaw;

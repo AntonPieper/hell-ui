@@ -3,7 +3,6 @@
 @import '@hell-ui/angular/tokens.css';
 @import '@hell-ui/angular/accordion/styles.css';
 @import '@hell-ui/angular/app-shell/styles.css';
-@import '@hell-ui/angular/audio-player/styles.css';
 @import '@hell-ui/angular/avatar-group/styles.css';
 @import '@hell-ui/angular/avatar/styles.css';
 @import '@hell-ui/angular/breadcrumbs/styles.css';
@@ -13,7 +12,6 @@
 @import '@hell-ui/angular/combobox/styles.css';
 @import '@hell-ui/angular/date-input/styles.css';
 @import '@hell-ui/angular/date-picker/styles.css';
-@import '@hell-ui/angular/dialog/styles.css';
 @import '@hell-ui/angular/dialpad/styles.css';
 @import '@hell-ui/angular/drop-zone/styles.css';
 @import '@hell-ui/angular/field/styles.css';

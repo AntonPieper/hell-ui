@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { useLazyGlobalStyleLink } from '../../../shared/lazy-global-style';
 import { AudioPlayerSpeechTranscriptExample } from './examples/speech-transcript.example';
 import audioPlayerSpeechTranscriptExampleCodeRaw from './examples/speech-transcript.example.ts?raw' with {
   loader: 'text',
@@ -150,6 +151,11 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
   `,
 })
 export class AudioPlayerPage {
+  private readonly _audioPlayerStyles = useLazyGlobalStyleLink(
+    'hell-docs-audio-player-styles',
+    'hell-ui/audio-player/styles.css',
+  );
+
   protected readonly audioPlayerWithTitleAndDateExampleCode =
     audioPlayerWithTitleAndDateExampleCodeRaw;
   protected readonly audioPlayerUntitledControlsOnlyExampleCode =
