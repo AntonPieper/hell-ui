@@ -88,7 +88,7 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
         </li>
         <li>
           <code>ui</code>: Part Style Map overrides for the <code>root</code> and
-          <code>editor</code> parts.
+          <code>editor</code> parts via <code>HellCodeEditorUi</code>.
         </li>
         <li>
           <code>hellCodeEditorSetupFactory(document)</code>: preferred setup export when an app

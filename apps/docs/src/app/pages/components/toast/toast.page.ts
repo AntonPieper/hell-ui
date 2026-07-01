@@ -135,7 +135,7 @@ import toastVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
         <li><code>maxVisible</code>: number of cards visible before overflow collapse.</li>
         <li>
           <code>ui</code>: Part Style Map overrides for root, viewport, toast body, actions, and
-          toolbar parts.
+          toolbar parts via <code>HellToasterUi</code>.
         </li>
       </ul>
 

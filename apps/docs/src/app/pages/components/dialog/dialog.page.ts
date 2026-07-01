@@ -88,7 +88,8 @@ import dialogScopedToAppShellContentExampleCodeRaw from './examples/scoped-to-ap
         <li><code>hellDialogScope</code>: marks a custom overlay bounding region.</li>
         <li>
           <code>ui</code>: Part Style Map overrides for the overlay, panel, title, and description
-          root parts.
+          root parts via <code>HellDialogOverlayUi</code>, <code>HellDialogUi</code>,
+          <code>HellDialogTitleUi</code>, and <code>HellDialogDescriptionUi</code>.
         </li>
       </ul>
 
