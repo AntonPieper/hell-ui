@@ -687,7 +687,7 @@ test.describe('Hell UI browser behavior', () => {
 
     const themeSelect = page.getByRole('combobox', { name: 'Theme' });
     await themeSelect.click();
-    const themeDropdown = page.locator('.hd-palette-dropdown');
+    const themeDropdown = page.locator('.hd-theme-dropdown');
     await expect(themeDropdown).toBeVisible();
     await expect(themeDropdown).toHaveCSS('z-index', '1000');
 

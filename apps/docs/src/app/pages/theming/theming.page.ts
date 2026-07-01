@@ -11,6 +11,9 @@ import themeAttributeCodeRaw from './examples/theme-attribute.example.html?raw' 
 import tokenOverrideCodeRaw from './examples/token-override.example.css?raw' with {
   loader: 'text',
 };
+import themeAdapterCodeRaw from './examples/theme-adapter.example.css?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-theming',
@@ -56,6 +59,15 @@ import tokenOverrideCodeRaw from './examples/token-override.example.css?raw' wit
         weights are reclassified or expanded.
       </p>
 
+      <h2>Theme adapters</h2>
+      <p>
+        Tokens define theme-wide primitives only. Skin-specific component decisions live in optional
+        adapter stylesheets such as <code>@hell-ui/angular/themes/glass.css</code>. Import an
+        adapter after the entrypoint CSS it adapts; components not covered by that adapter keep their
+        default recipes.
+      </p>
+      <hd-code-block [code]="themeAdapterCode" />
+
       <h2>Light vs dark</h2>
       <p>
         The docs app defaults to the system color scheme. To force a theme, set
@@ -81,7 +93,7 @@ import tokenOverrideCodeRaw from './examples/token-override.example.css?raw' wit
         <li>Use semantic tokens in component CSS and app overrides.</li>
         <li>Keep radii small; hell uses 2px to 12px with 6px as the default control shape.</li>
         <li>Use elevation sparingly; borders and tonal layers carry most hierarchy.</li>
-        <li>Set theme state once near the root. Do not toggle classes per component.</li>
+        <li>Set theme and skin attributes once near the root. Do not toggle classes per component.</li>
       </ul>
     </article>
   `,
@@ -89,5 +101,6 @@ import tokenOverrideCodeRaw from './examples/token-override.example.css?raw' wit
 export class ThemingPage {
   protected readonly themeAttributeCode = themeAttributeCodeRaw;
   protected readonly tokenOverrideCode = tokenOverrideCodeRaw;
+  protected readonly themeAdapterCode = themeAdapterCodeRaw;
   protected readonly scopedThemeDemoCode = scopedThemeDemoCodeRaw;
 }

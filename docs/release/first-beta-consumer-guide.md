@@ -140,6 +140,17 @@ Add only the extra entrypoint CSS needed by the entry points the app imports:
 @import '@hell-ui/pdf-viewer/styles';
 ```
 
+Optional Theme Adapter Stylesheets are imported after the component CSS they
+adapt. They are partial by design; unsupported components keep their default
+entrypoint styles.
+
+```css
+@import '@hell-ui/angular/card/styles.css';
+@import '@hell-ui/angular/dialog/styles.css';
+@import '@hell-ui/angular/menu/styles.css';
+@import '@hell-ui/angular/themes/glass.css';
+```
+
 Avoid old category-level style imports; CSS follows the same import-path-first rule as TypeScript. PDF viewer styles come from `@hell-ui/pdf-viewer/styles`.
 
 Hell's CSS entry points carry the Tailwind source anchors needed by the package

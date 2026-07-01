@@ -7,6 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { provideIcons } from '@ng-icons/core';
 import {
@@ -136,19 +137,8 @@ const HD_APP_ICONS = {
 };
 
 type ThemePreference = 'system' | 'light' | 'dark';
-type Palette = 'slate' | 'indigo' | 'emerald' | 'rose' | 'amber' | 'violet';
-type Skin =
-  | 'default'
-  | 'brutalist'
-  | 'soft'
-  | 'compact'
-  | 'mono'
-  | 'editorial'
-  | 'glass'
-  | 'high-contrast'
-  | 'playful'
-  | 'newspaper'
-  | 'aurora';
+type Palette = 'slate' | 'indigo' | 'emerald' | 'violet';
+type Skin = 'default' | 'glass' | 'high-contrast' | 'newspaper' | 'aurora' | 'compact-mono';
 
 interface ThemeOption {
   readonly id: string;
@@ -158,17 +148,14 @@ interface ThemeOption {
   readonly skin: Skin;
   readonly swatchLight: string;
   readonly swatchDark: string;
+  readonly adapterHref?: string;
 }
 
 const HD_THEME_STORAGE_KEY = 'hell-docs-theme';
-const HD_PALETTE_STORAGE_KEY = 'hell-docs-theme-id';
+const HD_THEME_ID_STORAGE_KEY = 'hell-docs-theme-id';
 const HD_THEME_ORDER: readonly ThemePreference[] = ['system', 'light', 'dark'];
 
-/** Curated themes shown in the topbar combobox. The first six are pure
- *  palette swaps (skin = default) so devs can compare colour systems against
- *  a stable layout. The remaining five flip the skin axis and pair it with a
- *  palette that flatters the aesthetic — the goal is showing how far the
- *  token system bends without rewriting components. */
+/** Curated themes shown in the topbar Docs Theme Picker. */
 const HD_THEMES: readonly ThemeOption[] = [
   {
     id: 'slate',
@@ -179,14 +166,6 @@ const HD_THEMES: readonly ThemeOption[] = [
     swatchDark: '#b8c4dc',
   },
   {
-    id: 'indigo',
-    label: 'Indigo',
-    palette: 'indigo',
-    skin: 'default',
-    swatchLight: '#4f46e5',
-    swatchDark: '#a5b4fc',
-  },
-  {
     id: 'emerald',
     label: 'Emerald',
     palette: 'emerald',
@@ -195,118 +174,54 @@ const HD_THEMES: readonly ThemeOption[] = [
     swatchDark: '#6ee7b7',
   },
   {
-    id: 'rose',
-    label: 'Rose',
-    palette: 'rose',
-    skin: 'default',
-    swatchLight: '#be185d',
-    swatchDark: '#fda4af',
-  },
-  {
-    id: 'amber',
-    label: 'Amber',
-    palette: 'amber',
-    skin: 'default',
-    swatchLight: '#b45309',
-    swatchDark: '#fcd34d',
-  },
-  {
-    id: 'violet',
-    label: 'Violet',
-    palette: 'violet',
-    skin: 'default',
-    swatchLight: '#7c3aed',
-    swatchDark: '#c4b5fd',
-  },
-  {
-    id: 'brutalist',
-    label: 'Brutalist',
-    tag: 'skin',
-    palette: 'slate',
-    skin: 'brutalist',
-    swatchLight: '#0f141c',
-    swatchDark: '#e8ecf3',
-  },
-  {
-    id: 'soft',
-    label: 'Soft',
-    tag: 'skin',
-    palette: 'indigo',
-    skin: 'soft',
-    swatchLight: '#4f46e5',
-    swatchDark: '#a5b4fc',
-  },
-  {
-    id: 'compact',
-    label: 'Compact',
-    tag: 'skin',
-    palette: 'slate',
-    skin: 'compact',
-    swatchLight: '#313a46',
-    swatchDark: '#b8c4dc',
-  },
-  {
-    id: 'mono',
-    label: 'Mono',
-    tag: 'skin',
-    palette: 'emerald',
-    skin: 'mono',
-    swatchLight: '#047857',
-    swatchDark: '#6ee7b7',
-  },
-  {
-    id: 'editorial',
-    label: 'Editorial',
-    tag: 'skin',
-    palette: 'violet',
-    skin: 'editorial',
-    swatchLight: '#7c3aed',
-    swatchDark: '#c4b5fd',
-  },
-  {
     id: 'glass',
     label: 'Glass',
-    tag: 'skin',
+    tag: 'adapter',
     palette: 'indigo',
     skin: 'glass',
     swatchLight: '#4f46e5',
     swatchDark: '#a5b4fc',
-  },
-  {
-    id: 'high-contrast',
-    label: 'High contrast',
-    tag: 'a11y',
-    palette: 'slate',
-    skin: 'high-contrast',
-    swatchLight: '#0f141c',
-    swatchDark: '#e8ecf3',
-  },
-  {
-    id: 'playful',
-    label: 'Playful',
-    tag: 'skin',
-    palette: 'rose',
-    skin: 'playful',
-    swatchLight: '#be185d',
-    swatchDark: '#fda4af',
-  },
-  {
-    id: 'newspaper',
-    label: 'Newspaper',
-    tag: 'skin',
-    palette: 'slate',
-    skin: 'newspaper',
-    swatchLight: '#0f141c',
-    swatchDark: '#e8ecf3',
+    adapterHref: 'hell-ui/themes/glass.css',
   },
   {
     id: 'aurora',
     label: 'Aurora',
-    tag: 'skin',
+    tag: 'adapter',
     palette: 'violet',
     skin: 'aurora',
     swatchLight: '#7c3aed',
     swatchDark: '#c4b5fd',
+    adapterHref: 'hell-ui/themes/aurora.css',
+  },
+  {
+    id: 'newspaper',
+    label: 'Newspaper',
+    tag: 'adapter',
+    palette: 'slate',
+    skin: 'newspaper',
+    swatchLight: '#0f141c',
+    swatchDark: '#e8ecf3',
+    adapterHref: 'hell-ui/themes/newspaper.css',
+  },
+  {
+    id: 'high-contrast',
+    label: 'High contrast',
+    tag: 'adapter',
+    palette: 'slate',
+    skin: 'high-contrast',
+    swatchLight: '#0f141c',
+    swatchDark: '#e8ecf3',
+    adapterHref: 'hell-ui/themes/high-contrast.css',
+  },
+  {
+    id: 'compact-mono',
+    label: 'Compact mono',
+    tag: 'adapter',
+    palette: 'emerald',
+    skin: 'compact-mono',
+    swatchLight: '#047857',
+    swatchDark: '#6ee7b7',
+    adapterHref: 'hell-ui/themes/compact-mono.css',
   },
 ];
 
@@ -348,6 +263,7 @@ export class App {
     'hell-ui/toast/styles.css',
   );
   private readonly destroyRef = inject(DestroyRef);
+  private readonly documentRef = inject(DOCUMENT);
   private readonly router = inject(Router);
   private readonly systemScheme = this.getSystemScheme();
 
@@ -364,7 +280,7 @@ export class App {
   protected readonly currentTheme = computed<ThemeOption>(
     () => HD_THEMES.find((t) => t.id === this.themeId()) ?? HD_THEMES[0],
   );
-  protected readonly currentPaletteSwatch = computed(() => {
+  protected readonly currentThemeSwatch = computed(() => {
     const option = this.currentTheme();
     return this.resolvedTheme() === 'dark' ? option.swatchDark : option.swatchLight;
   });
@@ -474,7 +390,7 @@ export class App {
     this.writeThemePreference(next);
   }
 
-  protected onPaletteChange(value: string | null): void {
+  protected onThemeChange(value: string | null): void {
     if (!value) return;
     if (!HD_THEMES.some((t) => t.id === value)) return;
     this.themeId.set(value);
@@ -567,13 +483,13 @@ export class App {
 
   private readThemeId(): string {
     if (typeof localStorage === 'undefined') return 'slate';
-    const stored = localStorage.getItem(HD_PALETTE_STORAGE_KEY);
+    const stored = localStorage.getItem(HD_THEME_ID_STORAGE_KEY);
     return stored && HD_THEMES.some((t) => t.id === stored) ? stored : 'slate';
   }
 
   private writeThemeId(value: string): void {
     if (typeof localStorage === 'undefined') return;
-    localStorage.setItem(HD_PALETTE_STORAGE_KEY, value);
+    localStorage.setItem(HD_THEME_ID_STORAGE_KEY, value);
   }
 
   private applyTheme(theme: 'light' | 'dark'): void {
@@ -584,11 +500,25 @@ export class App {
 
   private applyThemeOption(option: ThemeOption): void {
     if (typeof document === 'undefined') return;
+    this.loadThemeAdapter(option);
     document.documentElement.dataset['hellPalette'] = option.palette;
     if (option.skin === 'default') {
       delete document.documentElement.dataset['hellSkin'];
     } else {
       document.documentElement.dataset['hellSkin'] = option.skin;
     }
+  }
+
+  private loadThemeAdapter(option: ThemeOption): void {
+    if (!option.adapterHref) return;
+
+    const id = `hell-docs-theme-adapter-${option.id}`;
+    if (this.documentRef.getElementById(id)) return;
+
+    const link = this.documentRef.createElement('link');
+    link.id = id;
+    link.rel = 'stylesheet';
+    link.href = new URL(option.adapterHref, this.documentRef.baseURI).toString();
+    this.documentRef.head.appendChild(link);
   }
 }

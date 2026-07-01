@@ -26,7 +26,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/theming',
     detail: 'theming/examples/scoped-theme-demo.example.ts',
     terms:
-      'theming scoped-theme-demo theming/examples/scoped-theme-demo.example theming data-hell-theme data-hell-palette tokens',
+      'theming scoped-theme-demo theming/examples/scoped-theme-demo.example theming data-hell-theme data-hell-palette data-hell-skin tokens theme adapter stylesheets glass high contrast aurora newspaper compact mono',
   },
   {
     title: 'Accordion: Multiple',

@@ -1,0 +1,38 @@
+/* Theme adapter: Glass
+ *
+ * Coverage: Card, Dialog, Popover, Menu, Select, Combobox, and Flyout
+ * floating surfaces. Components not listed here intentionally fall back to
+ * their default entrypoint styles.
+ */
+
+@layer components {
+  [data-hell-skin="glass"]
+    :is(
+      [hellCard],
+      [hellDialog],
+      [hellPopover],
+      [hellMenu],
+      [hellComboboxDropdown],
+      [hellSelectDropdown],
+      [data-hell-flyout]
+    )[data-slot='root'] {
+    border-color: color-mix(in oklab, var(--color-hell-foreground) 16%, transparent);
+    background-color: color-mix(in oklab, var(--color-hell-surface-elevated) 84%, transparent);
+    box-shadow: var(--shadow-hell-lg);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  [data-hell-skin="glass"] [hellDialogOverlay][data-slot='root'] {
+    background-color: color-mix(in oklab, var(--color-hell-overlay) 74%, transparent);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  [data-hell-skin="glass"]
+    :is([hellSelectOption], [hellComboboxOption])[data-slot='root'][data-active],
+  [data-hell-skin="glass"]
+    :is([hellMenuItem], [hellMenuItemCheckbox], [hellMenuItemRadio])[data-slot='root'][data-hover]::before {
+    background-color: color-mix(in oklab, var(--color-hell-primary) 14%, transparent);
+  }
+}
