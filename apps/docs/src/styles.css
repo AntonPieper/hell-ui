@@ -309,10 +309,6 @@
     box-shadow: inset 0 0 0 1px color-mix(in oklab, white 16%, transparent);
   }
 
-  .hd-palette-dropdown {
-    width: 200px;
-  }
-
   .hd-palette-option {
     display: flex;
     align-items: center;
@@ -464,6 +460,10 @@
   height: 28px;
 }
 
+.hd-palette-dropdown {
+  width: 224px;
+}
+
 @media (max-width: 640px) {
   .hd-brand-tag,
   .hd-topbar-link {
@@ -487,7 +487,17 @@
 
   .hd-palette-select {
     justify-content: center;
-    width: 28px;
+    width: 36px;
+    height: 36px;
     padding-inline: 0;
+  }
+
+  .hd-palette-dropdown {
+    width: min(304px, calc(100vw - 16px));
+    max-height: min(70vh, 420px);
+  }
+
+  .hd-palette-option {
+    min-height: 40px;
   }
 }
