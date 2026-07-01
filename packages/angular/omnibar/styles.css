@@ -1,5 +1,8 @@
 @import '../internal/overlay/styles.css';
 
+/* Omnibar default visuals are Tailwind utility recipes in the directives. */
+@source "./omnibar.ts";
+
 @layer components {
   /* Omnibar — command-palette searchbox with configurable actions strip
      and grouped result panel. The host owns the control row; the dropdown
@@ -26,7 +29,7 @@
     --hell-omnibar-height: var(--spacing-hell-control-md);
     --hell-omnibar-font: 13px;
     --hell-omnibar-padding-x: var(--spacing-hell-4);
-    --hell-omnibar-panel-bg: var(--color-hell-surface-elevated);
+    --hell-omnibar-panel-bg: var(--color-hell-surface);
     --hell-omnibar-panel-radius: var(--radius-md);
     --hell-omnibar-panel-shadow: var(--shadow-hell-lg);
     --hell-omnibar-panel-max-height: 380px;
@@ -236,7 +239,7 @@
     max-height: var(--hell-omnibar-panel-max-height);
     display: flex;
     flex-direction: column;
-    background-color: var(--hell-omnibar-panel-bg);
+    background-color: var(--hell-omnibar-panel-bg, var(--color-hell-surface));
     border: 1px solid var(--color-hell-border);
     border-radius: var(--hell-omnibar-panel-radius);
     box-shadow: var(--hell-omnibar-panel-shadow);

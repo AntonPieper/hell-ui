@@ -1,3 +1,6 @@
+/* Toast default visuals are Tailwind utility recipes in the component. */
+@source "./toast.ts";
+
 @layer components {
   /* Toaster — sonner-style stacked toast container.
    *

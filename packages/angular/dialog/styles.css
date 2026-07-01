@@ -1,5 +1,8 @@
 @import '../internal/overlay/styles.css';
 
+/* Dialog default visuals are Tailwind utility recipes in the directives. */
+@source "./dialog.ts";
+
 @layer components {
   /* Dialog structural rules that stay outside consumer-overridable recipes. */
 

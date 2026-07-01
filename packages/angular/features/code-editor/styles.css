@@ -1,3 +1,6 @@
+/* Code editor default visuals are Tailwind utility recipes in the component. */
+@source "./code-editor.ts";
+
 @layer components {
   /* Code editor / viewer (CodeMirror 6). Host owns shell; CM theme owns internals. */
 

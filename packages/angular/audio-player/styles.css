@@ -1,3 +1,6 @@
+/* Audio player default visuals are Tailwind utility recipes in the component. */
+@source "./audio-player.ts";
+
 @layer components {
   /* Audio player. */
 
