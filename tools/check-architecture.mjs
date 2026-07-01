@@ -3690,6 +3690,7 @@ function checkPartStyleMapContract() {
   for (const module of migratedPartStyleMapModules) {
     checkMigratedPartStyleMapModule(module, entrypointPackageDirs);
   }
+  checkBasicFloatingListStructuralAffordances();
   checkLegacyPartStyleCompatibilityHelpers();
 
   if (packageConsumer.includes('button-unstyled')) {
@@ -3937,6 +3938,32 @@ function checkLegacyPartStyleCompatibilityHelpers() {
         );
       }
     }
+  }
+}
+
+function checkBasicFloatingListStructuralAffordances() {
+  const selectStyles = readFile(join(root, 'packages/angular/select/styles.css'));
+  if (
+    !selectStyles.includes("hell-select-basic [hellSelect][data-slot='trigger']::after") ||
+    !selectStyles.includes("hell-select-basic [hellSelect][data-slot='trigger'][data-open]::after")
+  ) {
+    failures.push(
+      'SelectBasic trigger part must keep the shipped select chevron structural CSS',
+    );
+  }
+
+  const comboboxStyles = readFile(join(root, 'packages/angular/combobox/styles.css'));
+  if (
+    !comboboxStyles.includes(
+      "hell-combobox-basic [hellComboboxButton][data-slot='button']::after",
+    ) ||
+    !comboboxStyles.includes(
+      "hell-combobox-basic [hellCombobox][data-slot='control'][data-open] [hellComboboxButton][data-slot='button']::after",
+    )
+  ) {
+    failures.push(
+      'ComboboxBasic button part must keep the shipped combobox chevron structural CSS',
+    );
   }
 }
 

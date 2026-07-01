@@ -4,7 +4,8 @@
 @source "./select.ts";
 
 @layer components {
-  [hellSelect][data-slot='root']::after {
+  [hellSelect][data-slot='root']::after,
+  hell-select-basic [hellSelect][data-slot='trigger']::after {
     content: '';
     display: block;
     flex-shrink: 0;
@@ -23,7 +24,8 @@
     transition: rotate var(--hell-duration-fast) var(--ease-hell-out);
   }
 
-  [hellSelect][data-slot='root'][data-open]::after {
+  [hellSelect][data-slot='root'][data-open]::after,
+  hell-select-basic [hellSelect][data-slot='trigger'][data-open]::after {
     rotate: 180deg;
     background-color: var(--color-hell-foreground);
   }

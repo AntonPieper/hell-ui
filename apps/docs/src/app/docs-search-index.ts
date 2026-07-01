@@ -615,21 +615,21 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/tooltip',
     detail: 'components/tooltip/examples/example.example.ts',
     terms:
-      'tooltip example components/tooltip/examples/example.example components/tooltip hellTooltip hellTooltipTrigger',
+      'tooltip example components/tooltip/examples/example.example components/tooltip hellTooltip hellTooltipTrigger ui Part Style Map data-slot root',
   },
   {
     title: 'Tooltip: With Delay',
     path: '/components/tooltip',
     detail: 'components/tooltip/examples/with-delay.example.ts',
     terms:
-      'tooltip with-delay components/tooltip/examples/with-delay.example components/tooltip hellTooltip delay',
+      'tooltip with-delay components/tooltip/examples/with-delay.example components/tooltip hellTooltip delay ui Part Style Map data-slot root',
   },
   {
     title: 'Tooltip: Hoverable',
     path: '/components/tooltip',
     detail: 'components/tooltip/examples/hoverable.example.ts',
     terms:
-      'tooltip hoverable components/tooltip/examples/hoverable.example components/tooltip hellTooltip hoverableContent',
+      'tooltip hoverable components/tooltip/examples/hoverable.example components/tooltip hellTooltip hoverableContent ui Part Style Map data-slot root',
   },
   {
     title: 'App Shell: Live Miniature',

@@ -2,7 +2,8 @@
 @source "./combobox.ts";
 
 @layer components {
-  [hellComboboxButton][data-slot='root']::after {
+  [hellComboboxButton][data-slot='root']::after,
+  hell-combobox-basic [hellComboboxButton][data-slot='button']::after {
     content: '';
     display: block;
     width: 10px;
@@ -19,7 +20,8 @@
     transition: rotate var(--hell-duration-fast) var(--ease-hell-out);
   }
 
-  [hellCombobox][data-slot='root'][data-open] [hellComboboxButton][data-slot='root']::after {
+  [hellCombobox][data-slot='root'][data-open] [hellComboboxButton][data-slot='root']::after,
+  hell-combobox-basic [hellCombobox][data-slot='control'][data-open] [hellComboboxButton][data-slot='button']::after {
     rotate: 180deg;
   }
 }
