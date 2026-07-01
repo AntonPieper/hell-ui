@@ -118,6 +118,15 @@ export const peerGroupContracts = Object.freeze({
       ...packagePeerGroups.fontAwesome,
     ],
   },
+  'composite-icons-router': {
+    tier: 'composite',
+    peers: [
+      ...packagePeerGroups.core,
+      ...packagePeerGroups.style,
+      ...packagePeerGroups.router,
+      ...packagePeerGroups.fontAwesome,
+    ],
+  },
   table: { tier: 'table', peers: [...packagePeerGroups.core, ...packagePeerGroups.style] },
   'table-tanstack': {
     tier: 'table-tanstack',

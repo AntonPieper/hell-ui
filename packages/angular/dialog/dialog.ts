@@ -11,6 +11,7 @@ import {
   input,
   output,
 } from '@angular/core';
+import { FocusMonitor, InteractivityChecker } from '@angular/cdk/a11y';
 import {
   NgpDialog,
   NgpDialogManager,
@@ -234,6 +235,7 @@ export class HellDialogScope {}
     'data-slot': 'root',
     '[attr.data-elevation]': '"3"',
     '[attr.data-size]': 'size()',
+    '(keydown.tab)': 'onTabKeydown($event)',
   },
 })
 export class HellDialog extends HellPartStyleable<HellDialogPart> {
@@ -241,6 +243,67 @@ export class HellDialog extends HellPartStyleable<HellDialogPart> {
   protected readonly defaultUiPart = 'root';
 
   readonly size = input<HellSize>('md');
+
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly focusMonitor = inject(FocusMonitor);
+  private readonly interactivityChecker = inject(InteractivityChecker);
+
+  protected onTabKeydown(event: Event): void {
+    const keyboardEvent = event as KeyboardEvent;
+    if (
+      keyboardEvent.defaultPrevented ||
+      keyboardEvent.altKey ||
+      keyboardEvent.ctrlKey ||
+      keyboardEvent.metaKey
+    )
+      return;
+
+    const host = this.element.nativeElement;
+    const active = host.ownerDocument.activeElement;
+    if (active instanceof HTMLElement && !host.contains(active)) return;
+
+    const candidates = this.focusableCandidates(host);
+    if (!candidates.length) {
+      event.preventDefault();
+      this.focusMonitor.focusVia(host, 'keyboard', { preventScroll: true });
+      return;
+    }
+
+    const currentIndex = active instanceof HTMLElement ? candidates.indexOf(active) : -1;
+    const nextIndex = keyboardEvent.shiftKey
+      ? currentIndex <= 0
+        ? candidates.length - 1
+        : currentIndex - 1
+      : currentIndex < 0 || currentIndex === candidates.length - 1
+        ? 0
+        : currentIndex + 1;
+
+    event.preventDefault();
+    this.focusMonitor.focusVia(candidates[nextIndex], 'keyboard', { preventScroll: true });
+  }
+
+  private focusableCandidates(host: HTMLElement): HTMLElement[] {
+    const candidates = host.querySelectorAll<HTMLElement>(
+      [
+        'button',
+        '[href]',
+        'input',
+        'select',
+        'textarea',
+        'summary',
+        '[tabindex]',
+      ].join(','),
+    );
+
+    return Array.from(candidates).filter((candidate) => {
+      if (candidate === host || candidate.tabIndex < 0) return false;
+      if (candidate.closest('[inert], [aria-hidden="true"]')) return false;
+      return (
+        this.interactivityChecker.isFocusable(candidate) &&
+        this.interactivityChecker.isVisible(candidate)
+      );
+    });
+  }
 }
 
 @Directive({

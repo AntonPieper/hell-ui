@@ -3,14 +3,16 @@
 /* Dialog default visuals are Tailwind utility recipes in the directives. */
 @source "./dialog.ts";
 
-@layer components {
-  /* Dialog structural rules that stay outside consumer-overridable recipes. */
-
+@layer utilities {
   [hellDialogOverlay][data-slot='root'][data-scoped='true'] {
     z-index: var(--hell-z-dialog-scoped);
     inset: var(--hell-dialog-scope-top, 0) var(--hell-dialog-scope-right, 0)
       var(--hell-dialog-scope-bottom, 0) var(--hell-dialog-scope-left, 0);
   }
+}
+
+@layer components {
+  /* Dialog structural rules that stay outside consumer-overridable recipes. */
 
   [hellDialog][data-slot='root'] [hellCardHeader][data-slot='root'] {
     align-items: flex-start;

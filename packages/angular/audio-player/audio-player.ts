@@ -173,7 +173,9 @@ function parseIsoDateOnly(value: string): Date | null {
           <hell-icon [name]="playing() ? 'faSolidPause' : 'faSolidPlay'" />
         </button>
 
-        <span data-slot="time" [class]="part('time')">{{ format(currentTime()) }}</span>
+        <span data-slot="time" data-time="elapsed" [class]="part('time')">
+          {{ format(currentTime()) }}
+        </span>
 
         <hell-slider
           data-slot="seek"
@@ -190,7 +192,9 @@ function parseIsoDateOnly(value: string): Date | null {
           [attr.aria-label]="labels.audioPlayer.seek"
         />
 
-        <span data-slot="time" [class]="part('time')">{{ format(duration()) }}</span>
+        <span data-slot="time" data-time="duration" [class]="part('time')">
+          {{ format(duration()) }}
+        </span>
       </div>
 
       <div data-slot="actions" [class]="part('actions')">

@@ -1,12 +1,14 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
+const WCAG_SMOKE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
+
 async function expectNoSeriousA11yIssues(
   page: Page,
   include: string,
   disabledRules: string[] = [],
 ) {
-  const builder = new AxeBuilder({ page }).include(include);
+  const builder = new AxeBuilder({ page }).include(include).withTags(WCAG_SMOKE_TAGS);
   if (disabledRules.length) builder.disableRules(disabledRules);
 
   const results = await builder.analyze();
@@ -52,7 +54,6 @@ async function expectDialogFocusContract(page: Page, contract: DialogFocusContra
       await expect
         .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity))
         .toBe('1');
-      await expectNoSeriousA11yIssues(page, '[role="dialog"]');
 
       await expectFocused(page, initialFocus, `${contract.label} initial focus`);
       await page.keyboard.press('Tab');

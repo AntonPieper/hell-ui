@@ -76,6 +76,52 @@
     }
   }
 
+  hell-toaster[data-slot='root'] [data-slot='list'] {
+    position: relative;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 64px;
+    pointer-events: auto;
+  }
+
+  hell-toaster[data-slot='root'] [data-slot='toolbar'] {
+    position: absolute;
+    z-index: 4;
+    display: flex;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(4px) scale(0.98);
+    transition:
+      opacity var(--hell-duration-fast) var(--ease-hell-out),
+      transform var(--hell-duration-fast) var(--ease-hell-out);
+  }
+
+  hell-toaster[data-slot='root'][data-position^='bottom'] [data-slot='toolbar'] {
+    bottom: calc(100% + 8px);
+  }
+
+  hell-toaster[data-slot='root'][data-position^='top'] [data-slot='toolbar'] {
+    top: calc(100% + 8px);
+  }
+
+  hell-toaster[data-slot='root'][data-position$='right'] [data-slot='toolbar'] {
+    right: 0;
+  }
+
+  hell-toaster[data-slot='root'][data-position$='left'] [data-slot='toolbar'] {
+    left: 0;
+  }
+
+  hell-toaster[data-slot='root'][data-position$='center'] [data-slot='toolbar'] {
+    left: 50%;
+    transform: translateX(-50%) translateY(4px) scale(0.98);
+  }
+
+}
+
+@layer utilities {
   hell-toaster[data-slot='root'][data-expanded='true'] [data-slot='viewport'] {
     box-sizing: border-box;
     height: var(
@@ -101,57 +147,14 @@
     }
   }
 
-  hell-toaster[data-slot='root'] [data-slot='list'] {
-    position: relative;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 64px;
-    pointer-events: auto;
-  }
-
   hell-toaster[data-slot='root'][data-expanded='true'] [data-slot='list'] {
     height: var(--hell-toast-stack-h, 64px);
-  }
-
-  hell-toaster[data-slot='root'] [data-slot='toolbar'] {
-    position: absolute;
-    z-index: 4;
-    display: flex;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(4px) scale(0.98);
-    transition:
-      opacity var(--hell-duration-fast) var(--ease-hell-out),
-      transform var(--hell-duration-fast) var(--ease-hell-out);
   }
 
   hell-toaster[data-slot='root'][data-expanded='true'] [data-slot='toolbar'] {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0) scale(1);
-  }
-
-  hell-toaster[data-slot='root'][data-position^='bottom'] [data-slot='toolbar'] {
-    bottom: calc(100% + 8px);
-  }
-
-  hell-toaster[data-slot='root'][data-position^='top'] [data-slot='toolbar'] {
-    top: calc(100% + 8px);
-  }
-
-  hell-toaster[data-slot='root'][data-position$='right'] [data-slot='toolbar'] {
-    right: 0;
-  }
-
-  hell-toaster[data-slot='root'][data-position$='left'] [data-slot='toolbar'] {
-    left: 0;
-  }
-
-  hell-toaster[data-slot='root'][data-position$='center'] [data-slot='toolbar'] {
-    left: 50%;
-    transform: translateX(-50%) translateY(4px) scale(0.98);
   }
 
   hell-toaster[data-slot='root'][data-expanded='true'][data-position$='center'] [data-slot='toolbar'] {

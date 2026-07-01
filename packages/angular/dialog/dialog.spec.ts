@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { InteractivityChecker } from '@angular/cdk/a11y';
 import { NgpDialogManager } from 'ng-primitives/dialog';
 
 import {
@@ -220,6 +221,7 @@ describe('HellDialogTrigger scoped overlays', () => {
   afterEach(async () => {
     await Promise.all(TestBed.inject(NgpDialogManager).openDialogs.map((dialog) => dialog.hideImmediate()));
     document.body.replaceChildren();
+    vi.restoreAllMocks();
   });
 
   it('keeps dialogs open when closeOnOutsideClick is false', async () => {
@@ -345,6 +347,33 @@ describe('HellDialogTrigger scoped overlays', () => {
     await settle(fixture);
 
     expect(document.activeElement).toBe(trigger);
+  });
+
+  it('advances Tab through focusable dialog controls even when the browser skips button tabbing', async () => {
+    const fixture = TestBed.createComponent(DialogClosedResultHost);
+    await settle(fixture);
+
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-result').click();
+    await settle(fixture);
+
+    const first = query<HTMLButtonElement>(document.body, '#result-close');
+    const second = query<HTMLButtonElement>(document.body, '#result-close-empty');
+    mockVisible(first);
+    mockVisible(second);
+    const interactivityChecker = TestBed.inject(InteractivityChecker);
+    vi.spyOn(interactivityChecker, 'isFocusable').mockReturnValue(true);
+    vi.spyOn(interactivityChecker, 'isVisible').mockReturnValue(true);
+
+    first.focus();
+    const forward = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      bubbles: true,
+      cancelable: true,
+    });
+
+    expect(first.dispatchEvent(forward)).toBe(false);
+    expect(forward.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(second);
   });
 
   it('passes dialog data from the trigger input to template context', async () => {
@@ -490,6 +519,11 @@ function mockRect(
         toJSON: () => undefined,
       }) as DOMRect,
   });
+}
+
+function mockVisible(element: HTMLElement): void {
+  Object.defineProperty(element, 'offsetWidth', { configurable: true, value: 80 });
+  Object.defineProperty(element, 'offsetHeight', { configurable: true, value: 24 });
 }
 
 function expectVar(element: HTMLElement, name: string, value: string): void {

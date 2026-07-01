@@ -154,6 +154,9 @@ describe('HellAudioPlayer', () => {
     const transport = root.querySelector('[data-slot="transport"]') as HTMLElement;
     expect(transport.className).toContain('gap-hell-4');
 
+    const times = Array.from(root.querySelectorAll<HTMLElement>('[data-slot="time"]'));
+    expect(times.map((time) => time.dataset['time'])).toEqual(['elapsed', 'duration']);
+
     const captionToggle = root.querySelector('[data-slot="captionToggle"]') as HTMLButtonElement;
     expect(captionToggle.className).toContain('text-hell-danger');
 
