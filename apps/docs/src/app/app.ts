@@ -87,6 +87,7 @@ import {
   type DocsSearchItem,
   type DocsSearchKindFilter,
 } from './docs-catalog';
+import { useLazyGlobalStyleLink } from './shared/lazy-global-style';
 
 const HD_APP_ICONS = {
   faSolidArrowRight,
@@ -342,6 +343,10 @@ const HD_THEMES: readonly ThemeOption[] = [
   templateUrl: './app.html',
 })
 export class App {
+  private readonly _toastStyles = useLazyGlobalStyleLink(
+    'hell-docs-toast-styles',
+    'hell-ui/toast/styles.css',
+  );
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly systemScheme = this.getSystemScheme();

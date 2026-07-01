@@ -26,7 +26,7 @@ import { HellFlyout, HellFlyoutTrigger } from '@hell-ui/angular/flyout';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellSlider } from '@hell-ui/angular/slider';
 import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
-import { HellStyleable } from '@hell-ui/angular/core';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
 import { HellAudioRuntime, hellHtmlAudioElementAdapter } from './audio-player.runtime';
 import {
   HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY,
@@ -34,6 +34,66 @@ import {
   type HellAudioTranscriptRuntimeFactory,
 } from '@hell-ui/angular/internal/audio-transcript';
 export { hellAudioSpeechSupported } from '@hell-ui/angular/internal/audio-transcript';
+
+export type HellAudioPlayerPart =
+  | 'root'
+  | 'meta'
+  | 'title'
+  | 'date'
+  | 'controls'
+  | 'transport'
+  | 'playButton'
+  | 'time'
+  | 'seek'
+  | 'actions'
+  | 'muteButton'
+  | 'volume'
+  | 'captionToggle'
+  | 'downloadButton'
+  | 'captions'
+  | 'captionsBar'
+  | 'captionsStatus'
+  | 'captionsDot'
+  | 'captionsActions'
+  | 'captionAction'
+  | 'captionsBody'
+  | 'captionsError'
+  | 'captionsInterim'
+  | 'captionsEmpty';
+
+export type HellAudioPlayerUi = HellUi<HellAudioPlayerPart>;
+
+const HELL_AUDIO_PLAYER_RECIPE = {
+  root: 'relative flex min-w-0 w-full max-w-[var(--hell-audio-max-width,none)] flex-col gap-hell-2 rounded-hell-md border border-hell-border bg-hell-surface-elevated px-hell-4 py-hell-3 text-xs leading-normal text-hell-foreground max-[480px]:px-hell-3',
+  meta: 'flex min-w-0 items-baseline justify-between gap-hell-3 text-xs leading-normal max-[480px]:flex-col max-[480px]:items-start max-[480px]:gap-hell-1',
+  title:
+    'min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-semibold text-hell-foreground',
+  date: 'shrink-0 text-hell-foreground-muted tabular-nums max-[480px]:whitespace-nowrap',
+  controls: 'flex min-w-0 w-full flex-wrap items-center gap-hell-2',
+  transport: 'flex min-w-0 flex-1 items-center gap-hell-2 max-[480px]:basis-full',
+  playButton: '',
+  time: 'min-w-[5ch] text-center text-hell-foreground-muted tabular-nums',
+  seek: 'min-w-20 flex-1',
+  actions: 'ms-auto flex min-w-0 items-center gap-hell-2 max-[480px]:ms-0 max-[480px]:basis-full',
+  muteButton: '',
+  volume: 'flex-[0_1_4.5rem]',
+  captionToggle:
+    'data-[active=true]:bg-[color-mix(in_oklab,var(--color-hell-primary)_12%,transparent)] data-[active=true]:text-hell-primary',
+  downloadButton: '',
+  captions:
+    'absolute inset-x-0 top-full z-5 mt-hell-2 flex origin-top flex-col gap-hell-2 rounded-hell-md border border-hell-border bg-hell-surface-elevated px-hell-3 py-hell-2 shadow-[0_1px_2px_rgb(0_0_0_/_0.04),0_12px_28px_-16px_rgb(0_0_0_/_0.25)] animate-[hell-audio-captions-in_200ms_var(--ease-hell-out,ease)]',
+  captionsBar: 'flex items-center justify-between gap-hell-3',
+  captionsStatus:
+    'inline-flex items-center gap-hell-2 text-xs font-semibold uppercase tracking-[0.04em] text-hell-foreground-muted',
+  captionsDot: 'inline-block h-1.5 w-1.5 rounded-full bg-hell-foreground-muted',
+  captionsActions: 'inline-flex items-center gap-hell-1',
+  captionAction: '',
+  captionsBody:
+    'max-h-36 overflow-auto rounded-hell-sm bg-hell-surface px-hell-3 py-hell-2 text-sm leading-[1.55] text-hell-foreground',
+  captionsError: 'm-0 text-sm text-hell-danger',
+  captionsInterim: 'text-hell-foreground-muted italic',
+  captionsEmpty: 'text-xs text-hell-foreground-muted',
+} satisfies HellRecipe<HellAudioPlayerPart>;
 
 const HELL_AUDIO_PLAYER_ICONS = {
   faSolidClosedCaptioning,
@@ -72,7 +132,7 @@ function parseIsoDateOnly(value: string): Date | null {
   imports: [HellButton, HellFlyout, HellFlyoutTrigger, HellIcon, HellSlider],
   providers: [provideIcons(HELL_AUDIO_PLAYER_ICONS)],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '[class.hell-audio]': '!unstyled()' },
+  host: { '[class]': "part('root')", 'data-slot': 'root' },
   template: `
     <audio
       #audio
@@ -88,21 +148,23 @@ function parseIsoDateOnly(value: string): Date | null {
     ></audio>
 
     @if (title() || resolvedDate()) {
-      <div data-slot="meta">
+      <div data-slot="meta" [class]="part('meta')">
         @if (title(); as t) {
-          <span data-slot="title" [attr.title]="t">{{ t }}</span>
+          <span data-slot="title" [class]="part('title')" [attr.title]="t">{{ t }}</span>
         }
         @if (resolvedDate()) {
-          <span data-slot="date">{{ resolvedDate() }}</span>
+          <span data-slot="date" [class]="part('date')">{{ resolvedDate() }}</span>
         }
       </div>
     }
 
-    <div data-slot="controls">
-      <div class="hell-a-g" data-slot="transport">
+    <div data-slot="controls" [class]="part('controls')">
+      <div data-slot="transport" [class]="part('transport')">
         <button
           hellButton
           variant="ghost"
+          [ui]="part('playButton')"
+          data-slot="playButton"
           [iconOnly]="true"
           type="button"
           [attr.aria-label]="playing() ? labels.audioPlayer.pause : labels.audioPlayer.play"
@@ -111,30 +173,36 @@ function parseIsoDateOnly(value: string): Date | null {
           <hell-icon [name]="playing() ? 'faSolidPause' : 'faSolidPlay'" />
         </button>
 
-        <span data-slot="time">{{ format(currentTime()) }}</span>
+        <span data-slot="time" data-time="elapsed" [class]="part('time')">
+          {{ format(currentTime()) }}
+        </span>
 
-        <div data-slot="seek">
-          <hell-slider
-            size="sm"
-            grow
-            thumb="hover"
-            [value]="currentTime()"
-            [min]="0"
-            [max]="seekMax()"
-            [step]="0.1"
-            (valueChange)="onSeek($event)"
-            (keydown)="onSeekKey($event)"
-            [attr.aria-label]="labels.audioPlayer.seek"
-          />
-        </div>
+        <hell-slider
+          data-slot="seek"
+          [class]="part('seek')"
+          size="sm"
+          grow
+          thumb="hover"
+          [value]="currentTime()"
+          [min]="0"
+          [max]="seekMax()"
+          [step]="0.1"
+          (valueChange)="onSeek($event)"
+          (keydown)="onSeekKey($event)"
+          [attr.aria-label]="labels.audioPlayer.seek"
+        />
 
-        <span data-slot="time">{{ format(duration()) }}</span>
+        <span data-slot="time" data-time="duration" [class]="part('time')">
+          {{ format(duration()) }}
+        </span>
       </div>
 
-      <div class="hell-a-g" data-slot="actions">
+      <div data-slot="actions" [class]="part('actions')">
         <button
           hellButton
           variant="ghost"
+          [ui]="part('muteButton')"
+          data-slot="muteButton"
           [iconOnly]="true"
           type="button"
           [attr.aria-label]="muted() ? labels.audioPlayer.unmute : labels.audioPlayer.mute"
@@ -143,17 +211,17 @@ function parseIsoDateOnly(value: string): Date | null {
           <hell-icon [name]="volumeIcon()" />
         </button>
 
-        <div data-slot="volume">
-          <hell-slider
-            size="sm"
-            [value]="volume() * 100"
-            [min]="0"
-            [max]="100"
-            [step]="1"
-            (valueChange)="onVolume($event)"
-            [attr.aria-label]="labels.audioPlayer.volume"
-          />
-        </div>
+        <hell-slider
+          data-slot="volume"
+          [class]="part('volume')"
+          size="sm"
+          [value]="volume() * 100"
+          [min]="0"
+          [max]="100"
+          [step]="1"
+          (valueChange)="onVolume($event)"
+          [attr.aria-label]="labels.audioPlayer.volume"
+        />
 
         @if (speechTranscriptEnabled() && speechSupported()) {
           <button
@@ -161,9 +229,10 @@ function parseIsoDateOnly(value: string): Date | null {
             hellFlyoutTrigger
             #ccTrigger="hellFlyoutTrigger"
             variant="ghost"
+            [ui]="part('captionToggle')"
             [iconOnly]="true"
             type="button"
-            data-slot="cc-toggle"
+            data-slot="captionToggle"
             [attr.aria-pressed]="captions()"
             [attr.aria-label]="
               captions() ? labels.audioPlayer.hideLiveCaptions : labels.audioPlayer.showLiveCaptions
@@ -179,6 +248,8 @@ function parseIsoDateOnly(value: string): Date | null {
           <a
             hellButton
             variant="ghost"
+            [ui]="part('downloadButton')"
+            data-slot="downloadButton"
             [iconOnly]="true"
             [href]="src()"
             [download]="downloadName()"
@@ -197,12 +268,13 @@ function parseIsoDateOnly(value: string): Date | null {
         [hellFlyout]="ccTriggerInstance"
         [boundary]="hostElement"
         data-slot="captions"
+        [class]="part('captions')"
         [aria-label]="speechTranscriptLabel"
         [attr.data-state]="transcribing() ? 'live' : 'idle'"
       >
-        <header data-slot="captions-bar">
-          <span data-slot="captions-status">
-            <span data-slot="captions-dot" aria-hidden="true"></span>
+        <header data-slot="captionsBar" [class]="part('captionsBar')">
+          <span data-slot="captionsStatus" [class]="part('captionsStatus')">
+            <span data-slot="captionsDot" [class]="part('captionsDot')" aria-hidden="true"></span>
             @if (error()) {
               {{ labels.audioPlayer.errorStatus }}
             } @else if (transcribing()) {
@@ -212,12 +284,15 @@ function parseIsoDateOnly(value: string): Date | null {
             }
           </span>
 
-          <div data-slot="captions-actions">
+          <div data-slot="captionsActions" [class]="part('captionsActions')">
             <button
               hellButton
               size="sm"
               variant="ghost"
+              [ui]="part('captionAction')"
               type="button"
+              data-slot="captionAction"
+              data-action="rate"
               [attr.aria-label]="labels.audioPlayer.playbackSpeed(playbackRate())"
               (click)="cyclePlaybackRate()"
             >
@@ -229,7 +304,10 @@ function parseIsoDateOnly(value: string): Date | null {
                 hellButton
                 size="sm"
                 variant="ghost"
+                [ui]="part('captionAction')"
                 type="button"
+                data-slot="captionAction"
+                data-action="copy"
                 [attr.aria-label]="labels.audioPlayer.copyTranscript"
                 (click)="copyTranscript()"
               >
@@ -240,7 +318,10 @@ function parseIsoDateOnly(value: string): Date | null {
                 hellButton
                 size="sm"
                 variant="ghost"
+                [ui]="part('captionAction')"
                 type="button"
+                data-slot="captionAction"
+                data-action="clear"
                 [attr.aria-label]="labels.audioPlayer.clearTranscript"
                 (click)="clearTranscript()"
               >
@@ -250,31 +331,46 @@ function parseIsoDateOnly(value: string): Date | null {
           </div>
         </header>
 
-        <div #captionScroll data-slot="captions-body" aria-live="polite" aria-atomic="false">
+        <div
+          #captionScroll
+          data-slot="captionsBody"
+          [class]="part('captionsBody')"
+          aria-live="polite"
+          aria-atomic="false"
+        >
           @if (error(); as err) {
-            <p data-slot="captions-error">{{ err }}</p>
+            <p data-slot="captionsError" [class]="part('captionsError')">{{ err }}</p>
           } @else if (transcript() || interim()) {
             <p>
               <span>{{ transcript() }}</span>
               @if (interim(); as i) {
-                <span data-slot="captions-interim"> {{ i }}</span>
+                <span data-slot="captionsInterim" [class]="part('captionsInterim')">
+                  {{ i }}
+                </span>
               }
             </p>
           } @else if (transcribing()) {
-            <p data-slot="captions-empty">{{ labels.audioPlayer.listening }}</p>
+            <p data-slot="captionsEmpty" [class]="part('captionsEmpty')">
+              {{ labels.audioPlayer.listening }}
+            </p>
           } @else {
-            <p data-slot="captions-empty">{{ labels.audioPlayer.pressPlayForCaptions }}</p>
+            <p data-slot="captionsEmpty" [class]="part('captionsEmpty')">
+              {{ labels.audioPlayer.pressPlayForCaptions }}
+            </p>
           }
         </div>
       </section>
     }
   `,
 })
-export class HellAudioPlayer extends HellStyleable {
+export class HellAudioPlayer extends HellPartStyleable<HellAudioPlayerPart> {
+  protected readonly recipe = HELL_AUDIO_PLAYER_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly src = input.required<string>();
   /**
    * CORS mode forwarded to the native audio element. Defaults to `anonymous`.
-   * Set to `null` to omit the `crossorigin` attribute. Remote speech transcript
+   * Set to `null` to leave off the `crossorigin` attribute. Remote speech transcript
    * capture depends on media CORS headers plus browser media-capture support.
    */
   readonly crossOrigin = input<'anonymous' | 'use-credentials' | null>('anonymous', {

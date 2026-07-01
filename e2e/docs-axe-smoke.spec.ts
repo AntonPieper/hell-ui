@@ -54,7 +54,7 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'dialog',
     path: '/components/dialog',
     heading: 'Dialog',
-    include: ['.hell-dialog'],
+    include: ['[role="dialog"][data-slot="root"]'],
     prepare: async (page) => {
       await page.getByRole('button', { name: 'Publish article' }).click();
       const dialog = page.getByRole('dialog', { name: 'Publish this article?' });
@@ -168,7 +168,7 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'omnibar',
     path: '/components/omnibar',
     heading: 'Omnibar',
-    include: ['main', '.hell-omnibar-panel-surface'],
+    include: ['main', '.hell-omnibar-overlay-pane [data-slot="panel"]'],
     prepare: async (page) => {
       const input = page.getByRole('combobox', { name: 'Search people' });
       await input.fill('user');

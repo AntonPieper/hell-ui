@@ -1,8 +1,9 @@
-import type { TemplateRef } from '@angular/core';
+import { Component, signal, type TemplateRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 
-import { HellToastService, HellToaster } from './toast';
+import type { HellUiInput } from '@hell-ui/angular/core';
+import { HellToastService, HellToaster, type HellToasterPart, type HellToasterUi } from './toast';
 import {
   hellToastFrontDistance,
   hellToastOffsetPx,
@@ -18,6 +19,22 @@ const liveAnnounce = vi.fn();
 const announcementService = {
   announce: liveAnnounce,
 };
+
+@Component({
+  imports: [HellToaster],
+  template: `<hell-toaster position="top-center" [maxVisible]="2" [ui]="ui()" />`,
+})
+class ToasterPartStyleHost {
+  readonly objectUi = {
+    root: 'w-[420px]',
+    toast: 'rounded-none border-hell-danger',
+    action: 'bg-hell-danger text-hell-foreground-inverse',
+    close: 'text-hell-danger',
+    dismissAll: 'bg-hell-danger text-hell-foreground-inverse',
+  } satisfies HellToasterUi;
+
+  readonly ui = signal<HellUiInput<HellToasterPart>>('static');
+}
 
 describe('Toast Stack', () => {
   it('computes front distance, offset, overflow, and exit snapshots from stack data', () => {
@@ -251,7 +268,7 @@ describe('HellToastService', () => {
 describe('HellToaster', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HellToaster],
+      imports: [HellToaster, ToasterPartStyleHost],
       providers: [{ provide: LiveAnnouncer, useValue: announcementService }],
     }).compileComponents();
   });
@@ -294,7 +311,7 @@ describe('HellToaster', () => {
     const region = fixture.nativeElement.querySelector('[data-slot="region"]') as HTMLElement;
     const viewport = fixture.nativeElement.querySelector('[data-slot="viewport"]') as HTMLElement;
     const dismissAll = fixture.nativeElement.querySelector(
-      '[data-slot="dismiss-all"]',
+      '[data-slot="dismissAll"]',
     ) as HTMLButtonElement;
 
     expect(viewport.getAttribute('aria-label')).toBe('Notification stack');
@@ -308,6 +325,44 @@ describe('HellToaster', () => {
 
     expect(fixture.nativeElement.getAttribute('data-expanded')).toBe('true');
     expect(dismissAll.getAttribute('tabindex')).toBeNull();
+  });
+
+  it('applies Part Style Map shorthand and object classes to owned stack parts', () => {
+    const fixture = TestBed.createComponent(ToasterPartStyleHost);
+    const host = fixture.componentInstance;
+    const svc = TestBed.inject(HellToastService);
+    const onAction = vi.fn();
+    fixture.detectChanges();
+
+    svc.success('One', { duration: 0 });
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement.querySelector('hell-toaster') as HTMLElement;
+    expect(root.getAttribute('data-slot')).toBe('root');
+    expect(root.className).toContain('static');
+    expect(root.className).not.toContain('fixed');
+
+    host.ui.set(host.objectUi);
+    svc.info('Two', {
+      duration: 0,
+      action: { label: 'Undo', onClick: onAction },
+    });
+    fixture.detectChanges();
+
+    const toast = fixture.nativeElement.querySelector('[data-slot="toast"]') as HTMLElement;
+    const action = fixture.nativeElement.querySelector('[data-slot="action"]') as HTMLButtonElement;
+    const close = fixture.nativeElement.querySelector('[data-slot="close"]') as HTMLButtonElement;
+    const dismissAll = fixture.nativeElement.querySelector(
+      '[data-slot="dismissAll"]',
+    ) as HTMLButtonElement;
+
+    expect(root.className).toContain('w-[420px]');
+    expect(toast.className).toContain('rounded-none');
+    expect(toast.className).toContain('border-hell-danger');
+    expect(toast.className).not.toContain('rounded-hell-lg');
+    expect(action.className).toContain('bg-hell-danger');
+    expect(close.className).toContain('text-hell-danger');
+    expect(dismissAll.className).toContain('bg-hell-danger');
   });
 
   it('keeps collapsed overflow toast controls out of the tab order until expansion', () => {

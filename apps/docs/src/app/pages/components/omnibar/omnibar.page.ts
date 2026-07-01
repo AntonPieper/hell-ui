@@ -38,9 +38,11 @@ import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts
         <li><code>submit</code>, <code>openChange</code>, <code>searchResultsChange</code>, <code>searchError</code>.</li>
         <li>Slots: <code>hellOmnibarLeading</code>, <code>hellOmnibarTrailing</code>, <code>hellOmnibarActions</code>, groups, items, chips, and footer content.</li>
         <li>
-          Panel styling: use <code>data-slot="panel"</code> and theme via
-          <code>--hell-omnibar-panel-bg</code>,
-          <code>--hell-omnibar-panel-radius</code>,
+          <code>ui</code>: root Part Style Map overrides via <code>HellOmnibarUi</code>.
+          Panel and child directives expose their own UI types, including
+          <code>HellOmnibarPanelUi</code>, <code>HellOmnibarItemUi</code>, and
+          <code>HellOmnibarActionUi</code>. Theme geometry/surface variables use
+          <code>--hell-omnibar-panel-bg</code>, <code>--hell-omnibar-panel-radius</code>,
           <code>--hell-omnibar-panel-shadow</code>, and
           <code>--hell-omnibar-panel-max-height</code>.
         </li>

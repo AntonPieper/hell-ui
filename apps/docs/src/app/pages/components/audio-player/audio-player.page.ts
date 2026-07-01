@@ -76,6 +76,11 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
         <li><code>downloadName</code>: filename for the download link</li>
         <li><code>allowDownload</code>: show / hide download button (default <code>true</code>)</li>
         <li>
+          <code>ui</code>: Part Style Map overrides for root, metadata, controls, transport,
+          sliders, action buttons, time labels, and transcript/caption regions via
+          <code>HellAudioPlayerUi</code>.
+        </li>
+        <li>
           <code>crossOrigin</code> / <code>crossorigin</code>: forwarded to the native audio
           element. Defaults to <code>anonymous</code>; use <code>use-credentials</code> only
           when the media server is configured for credentialed CORS, or <code>null</code> to omit

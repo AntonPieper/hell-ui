@@ -21,6 +21,11 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `ToggleGroup`, `ToggleGroupItem`, and `Slider`; replace `unstyled` styling
   opt-outs with `ui` string shorthand or part maps and import the corresponding
   entrypoint CSS for default visuals.
+- Removed the Style Opt-Out `unstyled` input from Dialog, Toast, AudioPlayer,
+  Omnibar, and CodeEditor as those surfaces move to typed Part Style Maps. Use
+  each component's `ui` input and exported `Hell*Ui` type to customize public
+  parts while keeping runtime ownership, portals, focus, media, search, and
+  form contracts intact.
 
 ### Added
 

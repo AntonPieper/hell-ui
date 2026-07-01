@@ -1,7 +1,10 @@
+/* Audio player default visuals are Tailwind utility recipes in the component. */
+@source "./audio-player.ts";
+
 @layer components {
   /* Audio player. */
 
-  .hell-audio {
+  hell-audio-player[data-slot='root'] {
     position: relative;
     display: flex;
     min-width: calc(var(--spacing) * 0);
@@ -21,7 +24,7 @@
     color: var(--color-hell-foreground);
   }
 
-  .hell-audio [data-slot='meta'] {
+  hell-audio-player[data-slot='root'] [data-slot='meta'] {
     display: flex;
     min-width: calc(var(--spacing) * 0);
     align-items: baseline;
@@ -31,7 +34,7 @@
     line-height: var(--text-xs--line-height);
   }
 
-  .hell-audio [data-slot='title'] {
+  hell-audio-player[data-slot='root'] [data-slot='title'] {
     min-width: calc(var(--spacing) * 0);
     flex: 1 1 auto;
     overflow: hidden;
@@ -42,13 +45,13 @@
     color: var(--color-hell-foreground);
   }
 
-  .hell-audio [data-slot='date'] {
+  hell-audio-player[data-slot='root'] [data-slot='date'] {
     flex-shrink: 0;
     color: var(--color-hell-foreground-muted);
     font-variant-numeric: tabular-nums;
   }
 
-  .hell-audio [data-slot='controls'] {
+  hell-audio-player[data-slot='root'] [data-slot='controls'] {
     display: flex;
     min-width: 0;
     width: 100%;
@@ -57,22 +60,23 @@
     gap: var(--spacing-hell-2);
   }
 
-  .hell-a-g {
+  hell-audio-player[data-slot='root'] [data-slot='transport'],
+  hell-audio-player[data-slot='root'] [data-slot='actions'] {
     display: flex;
     min-width: 0;
     align-items: center;
     gap: var(--spacing-hell-2);
   }
 
-  .hell-a-g:first-child {
+  hell-audio-player[data-slot='root'] [data-slot='transport'] {
     flex: 1;
   }
 
-  .hell-a-g:last-child {
+  hell-audio-player[data-slot='root'] [data-slot='actions'] {
     margin-inline-start: auto;
   }
 
-  .hell-audio [data-slot='time'] {
+  hell-audio-player[data-slot='root'] [data-slot='time'] {
     min-width: 5ch;
     text-align: center;
     color: var(--color-hell-foreground-muted);
@@ -80,16 +84,16 @@
   }
 
   /* Seek bar — built on hell-slider with grow + thumb-on-hover variant. */
-  .hell-audio [data-slot='seek'] {
+  hell-audio-player[data-slot='root'] [data-slot='seek'] {
     flex: 1;
     min-width: 5rem;
   }
 
-  .hell-audio [data-slot='volume'] {
+  hell-audio-player[data-slot='root'] [data-slot='volume'] {
     flex: 0 1 4.5rem;
   }
 
-  .hell-audio [data-slot='cc-toggle'][data-active='true'] {
+  hell-audio-player[data-slot='root'] [data-slot='captionToggle'][data-active='true'] {
     color: var(--color-hell-primary);
     background-color: color-mix(in oklab, var(--color-hell-primary) 12%, transparent);
   }
@@ -100,7 +104,7 @@
    * The player itself is `position: relative`, so the panel anchors to its
    * inline edges and floats above following layout content.
    */
-  .hell-audio [data-slot='captions'] {
+  hell-audio-player[data-slot='root'] [data-slot='captions'] {
     position: absolute;
     inset-inline: calc(var(--spacing) * 0);
     top: 100%;
@@ -131,14 +135,14 @@
     }
   }
 
-  .hell-audio [data-slot='captions-bar'] {
+  hell-audio-player[data-slot='root'] [data-slot='captionsBar'] {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-hell-3);
   }
 
-  .hell-audio [data-slot='captions-status'] {
+  hell-audio-player[data-slot='root'] [data-slot='captionsStatus'] {
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-hell-2);
@@ -149,7 +153,7 @@
     color: var(--color-hell-foreground-muted);
   }
 
-  .hell-audio [data-slot='captions-dot'] {
+  hell-audio-player[data-slot='root'] [data-slot='captionsDot'] {
     display: inline-block;
     width: calc(var(--spacing) * 1.5);
     height: calc(var(--spacing) * 1.5);
@@ -157,11 +161,11 @@
     background-color: var(--color-hell-foreground-muted);
   }
 
-  .hell-audio [data-slot='captions'][data-state='live'] {
-    & [data-slot='captions-status'] {
+  hell-audio-player[data-slot='root'] [data-slot='captions'][data-state='live'] {
+    & [data-slot='captionsStatus'] {
       color: var(--color-hell-primary);
     }
-    & [data-slot='captions-dot'] {
+    & [data-slot='captionsDot'] {
       background-color: var(--color-hell-primary);
       box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-hell-primary) 60%, transparent);
       animation: hell-audio-captions-pulse 1.6s ease-out infinite;
@@ -177,13 +181,13 @@
     }
   }
 
-  .hell-audio [data-slot='captions-actions'] {
+  hell-audio-player[data-slot='root'] [data-slot='captionsActions'] {
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-hell-1);
   }
 
-  .hell-audio [data-slot='captions-body'] {
+  hell-audio-player[data-slot='root'] [data-slot='captionsBody'] {
     max-height: calc(var(--spacing) * 36);
     overflow: auto;
     border-radius: var(--radius-sm);
@@ -198,42 +202,43 @@
     }
   }
 
-  .hell-audio [data-slot='captions-interim'] {
+  hell-audio-player[data-slot='root'] [data-slot='captionsInterim'] {
     color: var(--color-hell-foreground-muted);
     font-style: italic;
   }
 
-  .hell-audio [data-slot='captions-empty'] {
+  hell-audio-player[data-slot='root'] [data-slot='captionsEmpty'] {
     color: var(--color-hell-foreground-muted);
     font-size: var(--text-xs);
   }
 
-  .hell-audio [data-slot='captions-error'] {
+  hell-audio-player[data-slot='root'] [data-slot='captionsError'] {
     margin: 0;
     color: var(--color-hell-danger, var(--color-hell-foreground));
     font-size: var(--text-sm);
   }
 
   @media (max-width: 480px) {
-    .hell-audio {
+    hell-audio-player[data-slot='root'] {
       padding-inline: var(--spacing-hell-3);
     }
 
-    .hell-audio [data-slot='meta'] {
+    hell-audio-player[data-slot='root'] [data-slot='meta'] {
       align-items: flex-start;
       flex-direction: column;
       gap: var(--spacing-hell-1);
     }
 
-    .hell-audio [data-slot='date'] {
+    hell-audio-player[data-slot='root'] [data-slot='date'] {
       white-space: nowrap;
     }
 
-    .hell-a-g {
+    hell-audio-player[data-slot='root'] [data-slot='transport'],
+    hell-audio-player[data-slot='root'] [data-slot='actions'] {
       flex-basis: 100%;
     }
 
-    .hell-a-g:last-child {
+    hell-audio-player[data-slot='root'] [data-slot='actions'] {
       margin-inline-start: 0;
     }
   }

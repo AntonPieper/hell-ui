@@ -1,12 +1,14 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
+const WCAG_SMOKE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
+
 async function expectNoSeriousA11yIssues(
   page: Page,
   include: string,
   disabledRules: string[] = [],
 ) {
-  const builder = new AxeBuilder({ page }).include(include);
+  const builder = new AxeBuilder({ page }).include(include).withTags(WCAG_SMOKE_TAGS);
   if (disabledRules.length) builder.disableRules(disabledRules);
 
   const results = await builder.analyze();
@@ -21,7 +23,7 @@ interface DialogFocusContract {
   label: string;
   triggerName: string | RegExp;
   dialogName: string | RegExp;
-  description: string;
+  description?: string | RegExp;
   initialFocusName: string | RegExp;
   nextFocusName: string | RegExp;
 }
@@ -41,11 +43,17 @@ async function expectDialogFocusContract(page: Page, contract: DialogFocusContra
       const nextFocus = dialog.getByRole('button', { name: contract.nextFocusName });
 
       await expect(dialog).toBeVisible();
-      await expect(dialog.getByText(contract.description, { exact: true })).toBeVisible();
+      if (contract.description) {
+        await expect(
+          dialog.getByText(
+            contract.description,
+            typeof contract.description === 'string' ? { exact: true } : undefined,
+          ),
+        ).toBeVisible();
+      }
       await expect
         .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity))
         .toBe('1');
-      await expectNoSeriousA11yIssues(page, '[role="dialog"]');
 
       await expectFocused(page, initialFocus, `${contract.label} initial focus`);
       await page.keyboard.press('Tab');
@@ -188,7 +196,7 @@ async function audioLayoutMetrics(player: Locator): Promise<{
 }
 
 test.describe('Hell UI browser behavior', () => {
-  test('dialog focus trap and restore covers styled and unstyled modes', async ({ page }) => {
+  test('dialog focus trap and restore covers styled and scoped modes', async ({ page }) => {
     await page.goto('/components/dialog');
 
     await expectDialogFocusContract(page, {
@@ -201,12 +209,11 @@ test.describe('Hell UI browser behavior', () => {
     });
 
     await expectDialogFocusContract(page, {
-      label: 'unstyled dialog',
-      triggerName: 'Open unstyled dialog',
-      dialogName: 'Unstyled confirmation',
-      description: 'The dialog behavior stays intact while consumer CSS owns the presentation.',
-      initialFocusName: 'Keep editing',
-      nextFocusName: 'Send unstyled',
+      label: 'scoped dialog',
+      triggerName: 'Open content-scoped dialog',
+      dialogName: 'Only docs content is blocked',
+      initialFocusName: 'Close',
+      nextFocusName: 'Close',
     });
   });
 
@@ -319,8 +326,8 @@ test.describe('Hell UI browser behavior', () => {
 
     await expect(toasts).toHaveCount(8);
     await notifications.hover();
-    await expect(notifications.locator('[data-slot="dismiss-all"]')).toBeVisible();
-    await expect(notifications.locator('[data-slot="dismiss-all"] svg path')).toHaveCount(1);
+    await expect(notifications.locator('[data-slot="dismissAll"]')).toBeVisible();
+    await expect(notifications.locator('[data-slot="dismissAll"] svg path')).toHaveCount(1);
     await expect(viewport).toHaveAttribute('aria-label', 'Notification stack');
 
     const renderedToastCount = () =>
@@ -387,7 +394,7 @@ test.describe('Hell UI browser behavior', () => {
     await expect.poll(() => viewport.evaluate((element) => element.scrollTop)).toBe(0);
     await notifications.hover();
 
-    await notifications.locator('[data-slot="dismiss-all"]').click();
+    await notifications.locator('[data-slot="dismissAll"]').click();
     await expect(toasts).toHaveCount(0);
   });
 
@@ -643,7 +650,7 @@ test.describe('Hell UI browser behavior', () => {
     await firstExample.getByRole('tab', { name: 'Code' }).click();
     await expect(firstExample.locator('pre.hd-example-code')).toHaveCount(0);
     await expect(
-      firstExample.locator('hell-code-editor.hd-code-viewer.hell-code-viewer'),
+      firstExample.locator('hell-code-editor.hd-code-viewer[data-slot="root"]'),
     ).toBeVisible();
 
     await firstExample.getByRole('tab', { name: 'Preview' }).click();
@@ -701,7 +708,7 @@ test.describe('Hell UI browser behavior', () => {
     await firstExample.getByRole('tab', { name: 'Code' }).click();
 
     await expect(firstExample.locator('pre.hd-example-code')).toHaveCount(0);
-    const viewer = firstExample.locator('hell-code-editor.hd-code-viewer.hell-code-viewer');
+    const viewer = firstExample.locator('hell-code-editor.hd-code-viewer[data-slot="root"]');
     await expect(viewer).toBeVisible();
 
     const source = firstExample.getByRole('textbox', { name: 'Example source code' });

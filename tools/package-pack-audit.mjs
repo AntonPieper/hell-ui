@@ -19,8 +19,10 @@ const angularRecipeSourceFiles = [
   'dialpad/dialpad.ts',
   'date-input/date-input.ts',
   'date-picker/date-picker.ts',
+  'dialog/dialog.ts',
   'time-input/time-input.ts',
   'app-shell/app-shell.ts',
+  'audio-player/audio-player.ts',
   'resizable/resizable.ts',
   'split-view/split-view.ts',
   'pagination/pagination.ts',
@@ -38,6 +40,9 @@ const angularRecipeSourceFiles = [
   'switch/switch.ts',
   'tag/tag.ts',
   'toggle/toggle.ts',
+  'omnibar/omnibar.ts',
+  'toast/toast.ts',
+  'features/code-editor/code-editor.ts',
 ];
 
 export const packagePeerGroups = Object.freeze({
@@ -110,6 +115,15 @@ export const peerGroupContracts = Object.freeze({
     peers: [
       ...packagePeerGroups.core,
       ...packagePeerGroups.style,
+      ...packagePeerGroups.fontAwesome,
+    ],
+  },
+  'composite-icons-router': {
+    tier: 'composite',
+    peers: [
+      ...packagePeerGroups.core,
+      ...packagePeerGroups.style,
+      ...packagePeerGroups.router,
       ...packagePeerGroups.fontAwesome,
     ],
   },

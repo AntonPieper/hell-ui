@@ -1,7 +1,8 @@
-import { signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HellAudioPlayer } from './audio-player';
+import type { HellUiInput } from '@hell-ui/angular/core';
+import { HellAudioPlayer, type HellAudioPlayerPart, type HellAudioPlayerUi } from './audio-player';
 import {
   HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY,
   type HellAudioTranscriptRuntime,
@@ -34,6 +35,31 @@ class FakeTranscriptRuntime implements HellAudioTranscriptRuntime {
   setRecognizing(value: boolean): void {
     this.recognizing = value;
   }
+}
+
+@Component({
+  imports: [HellAudioPlayer],
+  template: `
+    <hell-audio-player
+      src="/test-audio.mp3"
+      title="Daily standup"
+      date="2026-06-29"
+      allowSpeechTranscript
+      [ui]="ui()"
+    />
+  `,
+})
+class AudioPlayerPartStyleHost {
+  readonly objectUi = {
+    root: 'max-w-[420px] rounded-none',
+    transport: 'gap-hell-4',
+    captionToggle: 'text-hell-danger',
+    captions: 'rounded-none border-hell-danger',
+    captionsStatus: 'text-hell-danger',
+    captionsBody: 'bg-hell-surface-muted',
+    captionsEmpty: 'text-hell-danger',
+  } satisfies HellAudioPlayerUi;
+  readonly ui = signal<HellUiInput<HellAudioPlayerPart>>('max-w-[360px]');
 }
 
 describe('HellAudioPlayer', () => {
@@ -99,12 +125,65 @@ describe('HellAudioPlayer', () => {
     expect(audio.hasAttribute('crossorigin')).toBe(false);
   });
 
+  it('applies Part Style Map shorthand and object classes to controls and captions', async () => {
+    const transcriptRuntime = new FakeTranscriptRuntime();
+    await TestBed.configureTestingModule({
+      imports: [AudioPlayerPartStyleHost],
+      providers: [
+        {
+          provide: HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY,
+          useValue: () => transcriptRuntime,
+        },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(AudioPlayerPartStyleHost);
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement.querySelector('hell-audio-player') as HTMLElement;
+    expect(root.getAttribute('data-slot')).toBe('root');
+    expect(root.className).toContain('max-w-[360px]');
+
+    fixture.componentInstance.ui.set(fixture.componentInstance.objectUi);
+    fixture.detectChanges();
+
+    expect(root.className).toContain('max-w-[420px]');
+    expect(root.className).toContain('rounded-none');
+    expect(root.className).not.toContain('rounded-hell-md');
+
+    const transport = root.querySelector('[data-slot="transport"]') as HTMLElement;
+    expect(transport.className).toContain('gap-hell-4');
+
+    const times = Array.from(root.querySelectorAll<HTMLElement>('[data-slot="time"]'));
+    expect(times.map((time) => time.dataset['time'])).toEqual(['elapsed', 'duration']);
+
+    const captionToggle = root.querySelector('[data-slot="captionToggle"]') as HTMLButtonElement;
+    expect(captionToggle.className).toContain('text-hell-danger');
+
+    captionToggle.click();
+    fixture.detectChanges();
+
+    const captions = root.querySelector('[data-slot="captions"]') as HTMLElement;
+    expect(captions.getAttribute('role')).toBe('dialog');
+    expect(captions.className).toContain('rounded-none');
+    expect(captions.className).toContain('border-hell-danger');
+    expect(captions.querySelector('[data-slot="captionsStatus"]')?.className).toContain(
+      'text-hell-danger',
+    );
+    expect(captions.querySelector('[data-slot="captionsBody"]')?.className).toContain(
+      'bg-hell-surface-muted',
+    );
+    expect(captions.querySelector('[data-slot="captionsEmpty"]')?.className).toContain(
+      'text-hell-danger',
+    );
+  });
+
   it('does not start playback when the speech transcript is toggled while paused', async () => {
     const { fixture, component } = await createPlayer();
     const playSpy = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
 
     const transcriptButton = fixture.nativeElement.querySelector(
-      '[data-slot="cc-toggle"]',
+      '[data-slot="captionToggle"]',
     ) as HTMLButtonElement;
 
     transcriptButton.click();
@@ -121,7 +200,7 @@ describe('HellAudioPlayer', () => {
     const { fixture, component } = await createPlayer();
 
     const transcriptButton = fixture.nativeElement.querySelector(
-      '[data-slot="cc-toggle"]',
+      '[data-slot="captionToggle"]',
     ) as HTMLButtonElement;
     transcriptButton.click();
     fixture.detectChanges();
@@ -153,26 +232,26 @@ describe('HellAudioPlayer', () => {
     fixture.componentRef.setInput('src', '/test-audio.mp3');
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('[data-slot="cc-toggle"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-slot="captionToggle"]')).toBeNull();
   });
 
   it('hides the transcript toggle without the optional feature provider', async () => {
     const { fixture } = await createPlayer({ provideTranscript: false });
 
-    expect(fixture.nativeElement.querySelector('[data-slot="cc-toggle"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-slot="captionToggle"]')).toBeNull();
   });
 
   it('hides the transcript toggle when speech transcripts are disabled', async () => {
     const { fixture } = await createPlayer();
 
-    expect(fixture.nativeElement.querySelector('[data-slot="cc-toggle"]')).toBeInstanceOf(
+    expect(fixture.nativeElement.querySelector('[data-slot="captionToggle"]')).toBeInstanceOf(
       HTMLButtonElement,
     );
 
     fixture.componentRef.setInput('allowSpeechTranscript', false);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('[data-slot="cc-toggle"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-slot="captionToggle"]')).toBeNull();
   });
 
   it('keeps allowLiveCaptions as a compatibility alias through the optional provider', async () => {
@@ -190,7 +269,7 @@ describe('HellAudioPlayer', () => {
     fixture.componentRef.setInput('allowLiveCaptions', true);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('[data-slot="cc-toggle"]')).toBeInstanceOf(
+    expect(fixture.nativeElement.querySelector('[data-slot="captionToggle"]')).toBeInstanceOf(
       HTMLButtonElement,
     );
   });
@@ -249,7 +328,7 @@ describe('HellAudioPlayer', () => {
     component.error.set('Speech error: network');
     fixture.detectChanges();
 
-    const track = fixture.nativeElement.querySelector('[data-slot="seek"] hell-slider') as HTMLElement;
+    const track = fixture.nativeElement.querySelector('[data-slot="seek"]') as HTMLElement;
     track.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     fixture.detectChanges();
 

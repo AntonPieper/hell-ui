@@ -226,7 +226,7 @@ test.describe('table docs regressions', () => {
     const omnibar = shell.locator('hell-omnibar');
     const control = omnibar.locator('[data-slot="control"]');
     const search = omnibar.getByRole('combobox', { name: 'Search people' });
-    const panel = page.locator('.cdk-overlay-pane .hell-omnibar-panel-surface').first();
+    const panel = page.locator('.hell-omnibar-overlay-pane [data-slot="panel"]').first();
     const content = page.locator('[hellAppContent][data-slot="root"]');
 
     await control.scrollIntoViewIfNeeded();

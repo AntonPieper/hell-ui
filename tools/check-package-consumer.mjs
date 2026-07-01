@@ -1,4 +1,5 @@
 import { spawn, spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { createServer } from 'node:http';
 import {
   existsSync,
@@ -64,6 +65,7 @@ const behaviorUiWithoutFontAwesomeDeps = [
 ];
 const styledUiWithoutFontAwesomeDeps = [...behaviorUiWithoutFontAwesomeDeps, 'tailwindcss'];
 const styledUiDeps = [...styledUiWithoutFontAwesomeDeps, '@ng-icons/font-awesome'];
+const styledUiRouterDeps = [...styledUiDeps, '@angular/router'];
 const coreDeps = behaviorUiWithoutFontAwesomeDeps;
 const buttonStyledDeps = styledUiWithoutFontAwesomeDeps;
 const codeEditorDeps = [
@@ -248,10 +250,19 @@ const packageConsumerScenarioCatalog = [
     description: 'narrow composite entries with entrypoint CSS and icon-backed peers',
     coverage: ['composites'],
     peerTier: 'composite',
-    peerGroup: 'composite-icons',
-    dependencies: styledUiDeps,
+    peerGroup: 'composite-icons-router',
+    dependencies: styledUiRouterDeps,
     mainTs: compositesConsumerMainTs,
-    stylesCss: appShellConsumerStylesCss,
+    stylesCss: compositesConsumerStylesCss,
+    cssIncludes: [
+      '.max-w-\\[480px\\]{max-width:480px}',
+      '.backdrop-blur-\\[2px\\]{--tw-backdrop-blur: blur(2px)',
+      'z-index:var(--hell-z-dialog-scoped)',
+      '.me-\\[-4px\\]{margin-inline-end:-4px}',
+      '.scale-\\[0\\.98\\]{scale:.98}',
+      '.text-\\[10px\\]{font-size:10px}',
+      'animation:hell-shimmer',
+    ],
   },
   {
     name: 'app-shell',
@@ -310,6 +321,12 @@ const packageConsumerScenarioCatalog = [
     dependencies: audioPlayerDeps,
     mainTs: audioPlayerConsumerMainTs,
     stylesCss: audioPlayerConsumerStylesCss,
+    cssIncludes: [
+      '.max-w-\\[var\\(--hell-audio-max-width\\,none\\)\\]{max-width:var(--hell-audio-max-width,none)}',
+      '.flex-\\[0_1_4\\.5rem\\]{flex:0 1 4.5rem}',
+      '.tracking-\\[0\\.04em\\]{--tw-tracking: .04em;letter-spacing:.04em}',
+      '.animate-\\[hell-audio-captions-in_200ms_var\\(--ease-hell-out\\,ease\\)\\]{animation:hell-audio-captions-in .2s var(--ease-hell-out,ease)}',
+    ],
   },
   {
     name: 'audio-transcript',
@@ -340,6 +357,11 @@ const packageConsumerScenarioCatalog = [
     dependencies: codeEditorDeps,
     mainTs: codeEditorConsumerMainTs,
     stylesCss: codeEditorConsumerStylesCss,
+    cssIncludes: [
+      'background-image:linear-gradient(180deg,color-mix(in oklab,var(--color-hell-surface-subtle) 94%,white),var(--color-hell-surface-subtle))',
+      '.min-h-\\[inherit\\]{min-height:inherit}',
+      '.data-\\[readonly\\=true\\]\\:bg-hell-surface-subtle[data-readonly=true]',
+    ],
   },
   {
     name: 'table',
@@ -996,7 +1018,7 @@ function formatList(values) {
 
 async function runConsumerScenarioGroup(group) {
   const groupName = group.scenarios.map((scenario) => scenario.name).join('-');
-  const tempRoot = mkdtempSync(join(tmpdir(), `hell-package-consumer-${groupName}-`));
+  const tempRoot = mkdtempSync(join(tmpdir(), packageConsumerTempPrefix(groupName, group)));
 
   try {
     for (const scenario of group.scenarios) printScenarioContract(scenario, 'install');
@@ -1014,6 +1036,13 @@ async function runConsumerScenarioGroup(group) {
     if (keep) console.log(`[package-consumer:${groupName}] kept ${tempRoot}`);
     else rmSync(tempRoot, { force: true, recursive: true });
   }
+}
+
+function packageConsumerTempPrefix(groupName, group) {
+  const hash = createHash('sha256').update(groupName).digest('hex').slice(0, 10);
+  const label =
+    group.scenarios.length === 1 ? group.scenarios[0].name : `group-${group.scenarios.length}`;
+  return `hell-package-consumer-${label}-${hash}-`;
 }
 
 async function runConsumerScenarioBuild(tempRoot, scenario) {
@@ -1722,29 +1751,41 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 }
 
 function compositesConsumerMainTs() {
-  return `import { Component } from '@angular/core';
+  return `import { Component, inject } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { HELL_APP_SHELL_DIRECTIVES } from '${packageName}/app-shell';
 import { HellDateInput } from '${packageName}/date-input';
 import { HellDatePicker, HellDateRangePicker } from '${packageName}/date-picker';
+import { HELL_DIALOG_DIRECTIVES, type HellDialogOverlayUi, type HellDialogUi } from '${packageName}/dialog';
 import { HellDialpad, type HellDialpadUi } from '${packageName}/dialpad';
+import { HELL_OMNIBAR_DIRECTIVES, type HellOmnibarUi } from '${packageName}/omnibar';
 import { HellTimeInput, type HellTimeValue } from '${packageName}/time-input';
+import { HellToaster, HellToastService, type HellToasterUi } from '${packageName}/toast';
+import { type HellSearchField } from '${packageName}/core';
 
 const dialpadUi = {
   root: 'max-w-[320px]',
   keyButton: 'rounded-full',
 } satisfies HellDialpadUi;
 
+interface SearchItem {
+  readonly label: string;
+  readonly section: string;
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
     ...HELL_APP_SHELL_DIRECTIVES,
+    ...HELL_DIALOG_DIRECTIVES,
+    ...HELL_OMNIBAR_DIRECTIVES,
     HellDateInput,
     HellDatePicker,
     HellDateRangePicker,
     HellDialpad,
     HellTimeInput,
+    HellToaster,
   ],
   template: \`
     <div hellAppShell ui="bg-hell-surface-muted">
@@ -1753,6 +1794,39 @@ const dialpadUi = {
       </header>
       <nav hellAppSidenav>Navigation</nav>
       <main hellAppContent>
+        <button type="button" [hellDialogTrigger]="dialog">Open dialog</button>
+        <ng-template #dialog>
+          <div hellDialogOverlay scoped [ui]="dialogOverlayUi">
+            <section hellDialog [ui]="dialogUi">
+              <h2 hellDialogTitle>Package consumer dialog</h2>
+              <p hellDialogDescription>Dialog recipe classes compile in consumers.</p>
+            </section>
+          </div>
+        </ng-template>
+
+        <hell-omnibar
+          ariaLabel="Search package consumer"
+          placeholder="Search"
+          [searchItems]="searchItems"
+          [searchFields]="searchFields"
+          [ui]="omnibarUi"
+        >
+          <div hellOmnibarGroup label="Docs">
+            @for (result of searchResults(); track result.item.label) {
+              <button hellOmnibarItem type="button" [value]="result.item">
+                <span hellOmnibarItemText>
+                  {{ result.item.label }}
+                  <span hellOmnibarItemSubtext>{{ result.item.section }}</span>
+                </span>
+                <span hellOmnibarItemTrailing>docs</span>
+              </button>
+            }
+          </div>
+        </hell-omnibar>
+
+        <button type="button" (click)="showToast()">Show toast</button>
+        <hell-toaster [ui]="toasterUi" />
+
         <hell-date-input aria-label="Ship date" [date]="date" />
         <hell-time-input aria-label="Ship time" [value]="time" />
         <hell-date-picker [date]="date" />
@@ -1767,11 +1841,33 @@ const dialpadUi = {
   \`,
 })
 class App {
+  private readonly toast = inject(HellToastService);
   protected readonly date = new Date(2026, 3, 22);
   protected readonly rangeStart = new Date(2026, 3, 5);
   protected readonly rangeEnd = new Date(2026, 3, 12);
   protected readonly time: HellTimeValue = { hour: 9, minute: 30, second: 0 };
   protected readonly dialpadUi = dialpadUi;
+  protected readonly dialogOverlayUi = { root: 'p-hell-4' } satisfies HellDialogOverlayUi;
+  protected readonly dialogUi = { root: 'max-w-[520px]' } satisfies HellDialogUi;
+  protected readonly omnibarUi = { root: 'max-w-[360px]' } satisfies HellOmnibarUi;
+  protected readonly toasterUi = { toast: 'ring-1 ring-hell-border' } satisfies HellToasterUi;
+  protected readonly searchItems: readonly SearchItem[] = [
+    { label: 'Dialog', section: 'Feedback' },
+    { label: 'Toast', section: 'Feedback' },
+    { label: 'Omnibar', section: 'Search' },
+  ];
+  protected readonly searchFields: readonly HellSearchField<SearchItem>[] = [
+    { name: 'label', weight: 4, get: (item) => item.label },
+    { name: 'section', weight: 1, get: (item) => item.section },
+  ];
+
+  protected searchResults() {
+    return this.searchItems.map((item) => ({ item, score: 1 }));
+  }
+
+  protected showToast(): void {
+    this.toast.success('Package consumer toast');
+  }
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
@@ -2320,6 +2416,20 @@ function appShellConsumerStylesCss() {
 @import "${packageName}/date-input/styles.css";
 @import "${packageName}/date-picker/styles.css";
 @import "${packageName}/time-input/styles.css";
+`;
+}
+
+function compositesConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/icon/styles.css";
+@import "${packageName}/app-shell/styles.css";
+@import "${packageName}/date-input/styles.css";
+@import "${packageName}/date-picker/styles.css";
+@import "${packageName}/dialog/styles.css";
+@import "${packageName}/omnibar/styles.css";
+@import "${packageName}/time-input/styles.css";
+@import "${packageName}/toast/styles.css";
 `;
 }
 

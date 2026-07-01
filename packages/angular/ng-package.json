@@ -71,6 +71,11 @@
       "output": "date-picker"
     },
     {
+      "glob": "dialog.ts",
+      "input": "dialog",
+      "output": "dialog"
+    },
+    {
       "glob": "time-input.ts",
       "input": "time-input",
       "output": "time-input"
@@ -79,6 +84,11 @@
       "glob": "app-shell.ts",
       "input": "app-shell",
       "output": "app-shell"
+    },
+    {
+      "glob": "audio-player.ts",
+      "input": "audio-player",
+      "output": "audio-player"
     },
     {
       "glob": "resizable.ts",
@@ -164,6 +174,21 @@
       "glob": "toggle.ts",
       "input": "toggle",
       "output": "toggle"
+    },
+    {
+      "glob": "omnibar.ts",
+      "input": "omnibar",
+      "output": "omnibar"
+    },
+    {
+      "glob": "toast.ts",
+      "input": "toast",
+      "output": "toast"
+    },
+    {
+      "glob": "code-editor.ts",
+      "input": "features/code-editor",
+      "output": "features/code-editor"
     },
     {
       "glob": "hell-ui-logo.svg",

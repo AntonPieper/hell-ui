@@ -16,7 +16,7 @@ import {
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { NgTemplateOutlet } from '@angular/common';
 import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
-import { HellStyleable } from '@hell-ui/angular/core';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
 import {
   hellToastFrontDistance,
   hellToastHeightPx,
@@ -39,6 +39,45 @@ export type HellToastPosition =
   | 'bottom-left'
   | 'bottom-center'
   | 'bottom-right';
+
+export type HellToasterPart =
+  | 'root'
+  | 'region'
+  | 'viewport'
+  | 'list'
+  | 'toast'
+  | 'glyph'
+  | 'body'
+  | 'title'
+  | 'description'
+  | 'action'
+  | 'close'
+  | 'toolbar'
+  | 'dismissAll';
+
+export type HellToasterUi = HellUi<HellToasterPart>;
+
+const HELL_TOASTER_RECIPE = {
+  root: 'fixed z-[9999] pointer-events-none w-[var(--hell-toaster-w)] max-w-[calc(100vw-32px)] [--hell-toaster-w:360px] [--hell-toaster-gap:12px] [--hell-toaster-peek:14px] [--hell-toaster-scale-step:0.06] [--hell-toaster-viewport-max-h:min(420px,calc(100vh-104px))] [--hell-toast-dir:-1] [--hell-toast-origin:bottom_center]',
+  region: 'relative block pointer-events-auto',
+  viewport:
+    'relative h-16 min-h-16 w-full overflow-visible overscroll-contain pointer-events-auto outline-none transition-[height] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-8',
+  list: 'relative m-0 h-16 w-full list-none p-0 pointer-events-auto',
+  toast:
+    'absolute left-0 right-0 grid grid-cols-[auto_1fr_auto_auto] items-start gap-hell-3 rounded-hell-lg border border-hell-border bg-hell-surface-elevated p-hell-4 text-[13px] leading-[1.4] text-hell-foreground shadow-hell-lg pointer-events-auto transition-[transform,opacity,box-shadow] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] will-change-[transform,opacity]',
+  glyph: 'mt-px h-[18px] w-[18px] flex-none text-[var(--hell-toast-glyph)]',
+  body: 'min-w-0',
+  title: 'break-words text-[13px] font-semibold text-hell-foreground',
+  description: 'mt-0.5 break-words text-[12.5px] text-hell-foreground-muted',
+  action:
+    'appearance-none whitespace-nowrap rounded-hell-sm border border-hell-border-strong bg-hell-surface px-2.5 py-1 text-xs font-semibold text-hell-foreground transition-[background-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:bg-hell-surface-muted active:bg-hell-surface-subtle focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2',
+  close:
+    '-my-0.5 -ms-0 me-[-4px] inline-flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-hell-sm border-0 bg-transparent text-hell-foreground-subtle transition-[color,background-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1',
+  toolbar:
+    'absolute z-4 flex opacity-0 pointer-events-none translate-y-1 scale-[0.98] transition-[opacity,transform] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)]',
+  dismissAll:
+    'inline-flex cursor-pointer items-center gap-hell-2 whitespace-nowrap rounded-hell-sm border border-hell-border bg-hell-surface-elevated px-2.5 py-[7px] text-xs font-semibold leading-none text-hell-foreground no-underline shadow-hell-md transition-[border-color,background-color,color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:border-hell-border-strong hover:bg-hell-surface-elevated active:bg-hell-surface-muted focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2',
+} satisfies HellRecipe<HellToasterPart>;
 
 export interface HellToastAction {
   label: string;
@@ -270,7 +309,8 @@ export class HellToastTemplate {}
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgTemplateOutlet],
   host: {
-    '[class.hell-toaster]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-position]': 'position()',
     '[attr.data-expanded]': 'expanded() ? "true" : null',
     '[attr.data-scrollable]': 'isScrollable() ? "true" : null',
@@ -280,6 +320,7 @@ export class HellToastTemplate {}
       <!-- Visual grouping only; announcements use Angular CDK LiveAnnouncer. -->
       <section
         data-slot="region"
+        [class]="part('region')"
         role="region"
         [attr.aria-label]="labels.toast.notifications"
         [style.--hell-toast-stack-h]="stackHeightPx()"
@@ -292,14 +333,16 @@ export class HellToastTemplate {}
       >
         <div
           data-slot="viewport"
+          [class]="part('viewport')"
           [attr.tabindex]="isScrollable() ? 0 : null"
           [attr.aria-label]="isScrollable() ? labels.toast.stack : null"
           (scroll)="onViewportScroll($event)"
         >
-          <ol data-slot="list">
+          <ol data-slot="list" [class]="part('list')">
             @for (t of svc.toasts(); track t.id; let i = $index) {
               <li
                 data-slot="toast"
+                [class]="part('toast')"
                 [attr.data-variant]="t.variant"
                 [attr.data-state]="t.removing ? 'closed' : 'open'"
                 [attr.data-front]="frontDistance(t)"
@@ -315,7 +358,7 @@ export class HellToastTemplate {}
                 [style.--hell-toast-edge-progress]="edgeProgress(t)"
                 [style.--hell-toast-edge-opacity]="edgeOpacity(t)"
               >
-                <div data-slot="glyph" aria-hidden="true">
+                <div data-slot="glyph" [class]="part('glyph')" aria-hidden="true">
                   @switch (t.variant) {
                     @case ('success') {
                       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
@@ -349,7 +392,7 @@ export class HellToastTemplate {}
                   }
                 </div>
 
-                <div data-slot="body">
+                <div data-slot="body" [class]="part('body')">
                   @if (t.template) {
                     <ng-container
                       [ngTemplateOutlet]="t.template"
@@ -357,10 +400,12 @@ export class HellToastTemplate {}
                     />
                   } @else {
                     @if (t.title) {
-                      <div data-slot="title">{{ t.title }}</div>
+                      <div data-slot="title" [class]="part('title')">{{ t.title }}</div>
                     }
                     @if (t.description) {
-                      <div data-slot="description">{{ t.description }}</div>
+                      <div data-slot="description" [class]="part('description')">
+                        {{ t.description }}
+                      </div>
                     }
                   }
                 </div>
@@ -369,6 +414,7 @@ export class HellToastTemplate {}
                   <button
                     type="button"
                     data-slot="action"
+                    [class]="part('action')"
                     [attr.tabindex]="toastControlTabIndex(t)"
                     (click)="t.action!.onClick(() => svc.dismiss(t.id))"
                   >
@@ -380,6 +426,7 @@ export class HellToastTemplate {}
                   <button
                     type="button"
                     data-slot="close"
+                    [class]="part('close')"
                     [attr.aria-label]="labels.toast.dismiss"
                     [attr.tabindex]="toastControlTabIndex(t)"
                     (click)="svc.dismiss(t.id)"
@@ -394,10 +441,11 @@ export class HellToastTemplate {}
           </ol>
         </div>
         @if (showDismissAll()) {
-          <div data-slot="toolbar">
+          <div data-slot="toolbar" [class]="part('toolbar')">
             <button
               type="button"
-              data-slot="dismiss-all"
+              data-slot="dismissAll"
+              [class]="part('dismissAll')"
               [attr.aria-label]="labels.toast.dismissAll"
               [attr.tabindex]="expanded() ? null : -1"
               (click)="svc.dismissAll()"
@@ -419,7 +467,10 @@ export class HellToastTemplate {}
     }
   `,
 })
-export class HellToaster extends HellStyleable {
+export class HellToaster extends HellPartStyleable<HellToasterPart> {
+  protected readonly recipe = HELL_TOASTER_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly svc = inject(HellToastService);
   protected readonly labels = inject<HellLabels>(HELL_LABELS);
   private readonly host: HTMLElement = inject(ElementRef).nativeElement;

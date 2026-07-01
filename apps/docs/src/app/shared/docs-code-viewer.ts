@@ -18,17 +18,17 @@ type DocsCodeViewerVariant = 'example' | 'block';
     `
       @import '@hell-ui/angular/features/code-editor/styles.css';
 
-      .hd-code-viewer.hell-code-viewer {
+      .hd-code-viewer[data-slot='root'] {
         border-top-left-radius: 0;
         border-top-right-radius: 0;
       }
 
-      .hd-example-code.hell-code-viewer > .cm-editor,
-      .hd-example-code.hell-code-viewer .cm-scroller {
+      .hd-example-code[data-slot='root'] > [data-slot='editor'] > .cm-editor,
+      .hd-example-code[data-slot='root'] [data-slot='editor'] .cm-scroller {
         min-height: 160px;
       }
 
-      .hd-code-viewer.hell-code-viewer .cm-scroller {
+      .hd-code-viewer[data-slot='root'] [data-slot='editor'] .cm-scroller {
         max-height: min(68vh, 560px);
         overflow: auto;
       }

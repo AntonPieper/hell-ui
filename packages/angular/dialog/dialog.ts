@@ -11,6 +11,7 @@ import {
   input,
   output,
 } from '@angular/core';
+import { FocusMonitor, InteractivityChecker } from '@angular/cdk/a11y';
 import {
   NgpDialog,
   NgpDialogManager,
@@ -27,13 +28,41 @@ import {
 } from 'ng-primitives/portal';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { HellSize } from '@hell-ui/angular/core';
-import { HellStyleable } from '@hell-ui/angular/core';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
 import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
 import {
   HELL_DIALOG_SCOPE_ROOT,
   HellDialogScopedOverlayAdapter,
   hellFindDialogScopeRoot,
 } from './dialog-scope';
+
+export type HellDialogOverlayPart = 'root';
+export type HellDialogOverlayUi = HellUi<HellDialogOverlayPart>;
+
+export type HellDialogPart = 'root';
+export type HellDialogUi = HellUi<HellDialogPart>;
+
+export type HellDialogTitlePart = 'root';
+export type HellDialogTitleUi = HellUi<HellDialogTitlePart>;
+
+export type HellDialogDescriptionPart = 'root';
+export type HellDialogDescriptionUi = HellUi<HellDialogDescriptionPart>;
+
+const HELL_DIALOG_OVERLAY_RECIPE = {
+  root: 'fixed inset-0 z-[var(--hell-z-dialog)] box-border flex items-center justify-center overflow-auto overscroll-contain bg-hell-overlay p-hell-6 backdrop-blur-[2px] animate-[hell-backdrop-in_var(--hell-duration-base)_var(--ease-hell-out)]',
+} satisfies HellRecipe<HellDialogOverlayPart>;
+
+const HELL_DIALOG_RECIPE = {
+  root: 'flex max-h-[min(90vh,100%)] w-full max-w-[480px] flex-col overflow-hidden rounded-hell-lg border border-hell-border bg-hell-surface-elevated text-hell-foreground shadow-[var(--shadow-hell-overlay)] outline-none animate-[hell-dialog-in_var(--hell-duration-base)_var(--ease-hell-out)] data-[size=sm]:max-w-[380px] data-[size=lg]:max-w-[720px] data-[size=xl]:max-w-[960px]',
+} satisfies HellRecipe<HellDialogPart>;
+
+const HELL_DIALOG_TITLE_RECIPE = {
+  root: 'm-0 text-[15px] font-semibold text-hell-foreground',
+} satisfies HellRecipe<HellDialogTitlePart>;
+
+const HELL_DIALOG_DESCRIPTION_RECIPE = {
+  root: 'mt-hell-1 mb-0 text-[13px] text-hell-foreground-muted',
+} satisfies HellRecipe<HellDialogDescriptionPart>;
 
 export interface HellDialogTemplateContext<TData = unknown, TResult = unknown> {
   readonly $implicit: NgpDialogRef<TData, TResult>;
@@ -139,12 +168,15 @@ function optionalDismissGuardAttribute<T>(
   selector: '[hellDialogOverlay]',
   hostDirectives: [NgpDialogOverlay],
   host: {
-    '[class.hell-dialog-overlay]': '!unstyled()',
-    '[class.hell-backdrop]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-scoped]': 'scoped() ? "true" : null',
   },
 })
-export class HellDialogOverlay extends HellStyleable {
+export class HellDialogOverlay extends HellPartStyleable<HellDialogOverlayPart> {
+  protected readonly recipe = HELL_DIALOG_OVERLAY_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   /** When true, overlay reads bounds from nearest dialog root captured by
    *  opening trigger. If none exists, it falls back to viewport. */
   readonly scoped = input(false, { transform: booleanAttribute });
@@ -199,27 +231,100 @@ export class HellDialogScope {}
   selector: '[hellDialog]',
   hostDirectives: [NgpDialog],
   host: {
-    '[class.hell-dialog]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
+    '[attr.data-elevation]': '"3"',
     '[attr.data-size]': 'size()',
+    '(keydown.tab)': 'onTabKeydown($event)',
   },
 })
-export class HellDialog extends HellStyleable {
+export class HellDialog extends HellPartStyleable<HellDialogPart> {
+  protected readonly recipe = HELL_DIALOG_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly size = input<HellSize>('md');
+
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly focusMonitor = inject(FocusMonitor);
+  private readonly interactivityChecker = inject(InteractivityChecker);
+
+  protected onTabKeydown(event: Event): void {
+    const keyboardEvent = event as KeyboardEvent;
+    if (
+      keyboardEvent.defaultPrevented ||
+      keyboardEvent.altKey ||
+      keyboardEvent.ctrlKey ||
+      keyboardEvent.metaKey
+    )
+      return;
+
+    const host = this.element.nativeElement;
+    const active = host.ownerDocument.activeElement;
+    if (active instanceof HTMLElement && !host.contains(active)) return;
+
+    const candidates = this.focusableCandidates(host);
+    if (!candidates.length) {
+      event.preventDefault();
+      this.focusMonitor.focusVia(host, 'keyboard', { preventScroll: true });
+      return;
+    }
+
+    const currentIndex = active instanceof HTMLElement ? candidates.indexOf(active) : -1;
+    const nextIndex = keyboardEvent.shiftKey
+      ? currentIndex <= 0
+        ? candidates.length - 1
+        : currentIndex - 1
+      : currentIndex < 0 || currentIndex === candidates.length - 1
+        ? 0
+        : currentIndex + 1;
+
+    event.preventDefault();
+    this.focusMonitor.focusVia(candidates[nextIndex], 'keyboard', { preventScroll: true });
+  }
+
+  private focusableCandidates(host: HTMLElement): HTMLElement[] {
+    const candidates = host.querySelectorAll<HTMLElement>(
+      [
+        'button',
+        '[href]',
+        'input',
+        'select',
+        'textarea',
+        'summary',
+        '[tabindex]',
+      ].join(','),
+    );
+
+    return Array.from(candidates).filter((candidate) => {
+      if (candidate === host || candidate.tabIndex < 0) return false;
+      if (candidate.closest('[inert], [aria-hidden="true"]')) return false;
+      return (
+        this.interactivityChecker.isFocusable(candidate) &&
+        this.interactivityChecker.isVisible(candidate)
+      );
+    });
+  }
 }
 
 @Directive({
   selector: '[hellDialogTitle]',
   hostDirectives: [NgpDialogTitle],
-  host: { '[class.hell-dialog-title]': '!unstyled()' },
+  host: { '[class]': "part('root')", 'data-slot': 'root' },
 })
-export class HellDialogTitle extends HellStyleable {}
+export class HellDialogTitle extends HellPartStyleable<HellDialogTitlePart> {
+  protected readonly recipe = HELL_DIALOG_TITLE_RECIPE;
+  protected readonly defaultUiPart = 'root';
+}
 
 @Directive({
   selector: '[hellDialogDescription]',
   hostDirectives: [NgpDialogDescription],
-  host: { '[class.hell-dialog-description]': '!unstyled()' },
+  host: { '[class]': "part('root')", 'data-slot': 'root' },
 })
-export class HellDialogDescription extends HellStyleable {}
+export class HellDialogDescription extends HellPartStyleable<HellDialogDescriptionPart> {
+  protected readonly recipe = HELL_DIALOG_DESCRIPTION_RECIPE;
+  protected readonly defaultUiPart = 'root';
+}
 
 export const HELL_DIALOG_DIRECTIVES = [
   HellDialogTrigger,

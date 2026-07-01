@@ -3,7 +3,13 @@ import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import type { Extension } from '@codemirror/state';
 
-import { HELL_CODE_EDITOR_RUNTIME_FACTORY, HellCodeEditor } from './code-editor';
+import type { HellUiInput } from '@hell-ui/angular/core';
+import {
+  HELL_CODE_EDITOR_RUNTIME_FACTORY,
+  HellCodeEditor,
+  type HellCodeEditorPart,
+  type HellCodeEditorUi,
+} from './code-editor';
 import type {
   HellCodeEditorRuntimeAccessibilityOptions,
   HellCodeEditorRuntimeOptions,
@@ -46,12 +52,18 @@ class FakeCodeEditorRuntime implements HellCodeEditorRuntimePort {
     [value]="value()"
     [readOnly]="readOnly()"
     [ariaLabel]="ariaLabel()"
+    [ui]="ui()"
   />`,
 })
 class CodeEditorHost {
   readonly value = signal('alpha');
   readonly readOnly = signal(false);
   readonly ariaLabel = signal('Example source code');
+  readonly objectUi = {
+    root: 'max-h-[24rem] rounded-none',
+    editor: 'min-h-[12rem]',
+  } satisfies HellCodeEditorUi;
+  readonly ui = signal<HellUiInput<HellCodeEditorPart>>('max-h-[16rem]');
 }
 
 @Component({
@@ -111,6 +123,29 @@ describe('HellCodeEditor', () => {
     fixture.destroy();
 
     expect(runtime?.destroyed).toBe(true);
+  });
+
+  it('applies Part Style Map shorthand and object classes to the shell and editor host', async () => {
+    const fixture = TestBed.createComponent(CodeEditorHost);
+
+    await settle(fixture);
+
+    const root = fixture.nativeElement.querySelector('hell-code-editor') as HTMLElement;
+    const editor = root.querySelector('[data-slot="editor"]') as HTMLElement;
+
+    expect(root.getAttribute('data-slot')).toBe('root');
+    expect(root.className).toContain('max-h-[16rem]');
+    expect(editor.className).toContain('h-full');
+
+    fixture.componentInstance.ui.set(fixture.componentInstance.objectUi);
+    fixture.componentInstance.readOnly.set(true);
+    await settle(fixture);
+
+    expect(root.className).toContain('max-h-[24rem]');
+    expect(root.className).toContain('rounded-none');
+    expect(root.className).not.toContain('rounded-hell-md');
+    expect(root.getAttribute('data-readonly')).toBe('true');
+    expect(editor.className).toContain('min-h-[12rem]');
   });
 
   it('integrates with reactive forms without echoing programmatic writes', async () => {

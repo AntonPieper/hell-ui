@@ -1,4 +1,8 @@
 @import '../internal/overlay/styles.css';
+@import '../skeleton/styles.css';
+
+/* Omnibar default visuals are Tailwind utility recipes in the directives. */
+@source "./omnibar.ts";
 
 @layer components {
   /* Omnibar — command-palette searchbox with configurable actions strip
@@ -19,14 +23,14 @@
        --hell-omnibar-panel-max-height - dropdown max-height
    */
 
-  .hell-omnibar {
+  hell-omnibar[data-slot='root'] {
     --hell-omnibar-bg: var(--color-hell-surface-elevated);
     --hell-omnibar-border: var(--color-hell-border);
     --hell-omnibar-radius: var(--radius-md);
     --hell-omnibar-height: var(--spacing-hell-control-md);
     --hell-omnibar-font: 13px;
     --hell-omnibar-padding-x: var(--spacing-hell-4);
-    --hell-omnibar-panel-bg: var(--color-hell-surface-elevated);
+    --hell-omnibar-panel-bg: var(--color-hell-surface);
     --hell-omnibar-panel-radius: var(--radius-md);
     --hell-omnibar-panel-shadow: var(--shadow-hell-lg);
     --hell-omnibar-panel-max-height: 380px;
@@ -36,19 +40,19 @@
     position: relative;
   }
 
-  .hell-omnibar[data-size='sm'] {
+  hell-omnibar[data-slot='root'][data-size='sm'] {
     --hell-omnibar-height: var(--spacing-hell-control-sm);
     --hell-omnibar-font: 12px;
     --hell-omnibar-padding-x: var(--spacing-hell-3);
   }
 
-  .hell-omnibar[data-size='lg'] {
+  hell-omnibar[data-slot='root'][data-size='lg'] {
     --hell-omnibar-height: var(--spacing-hell-control-lg);
     --hell-omnibar-font: 14px;
     --hell-omnibar-padding-x: var(--spacing-hell-5);
   }
 
-  .hell-omnibar [data-slot='control'] {
+  hell-omnibar[data-slot='root'] [data-slot='control'] {
     display: inline-flex;
     width: 100%;
     align-items: center;
@@ -66,16 +70,16 @@
       box-shadow var(--hell-duration-fast) var(--ease-hell-out);
   }
 
-  .hell-omnibar:focus-within > [data-slot='control'] {
+  hell-omnibar[data-slot='root']:focus-within > [data-slot='control'] {
     border-color: var(--color-hell-border-focus);
     box-shadow: 0 0 0 3px var(--color-hell-focus-ring);
   }
 
-  .hell-omnibar[data-open='true'] > [data-slot='control'] {
+  hell-omnibar[data-slot='root'][data-open='true'] > [data-slot='control'] {
     border-color: var(--color-hell-border-focus);
   }
 
-  .hell-omnibar [data-slot='input-wrap'] {
+  hell-omnibar[data-slot='root'] [data-slot='inputWrap'] {
     position: relative;
     flex: 1 1 auto;
     min-width: 0;
@@ -85,7 +89,7 @@
     align-items: center;
   }
 
-  .hell-omnibar [data-slot='input'] {
+  hell-omnibar[data-slot='root'] [data-slot='input'] {
     font: inherit;
     line-height: var(--hell-omnibar-height);
     height: 100%;
@@ -101,7 +105,7 @@
     font-family: inherit;
   }
 
-  .hell-omnibar-chip {
+  [hellOmnibarChip][data-slot='root'] {
     display: inline-flex;
     align-items: center;
     gap: calc(var(--spacing) * 1);
@@ -117,7 +121,7 @@
     white-space: nowrap;
   }
 
-  .hell-omnibar-chip-remove {
+  button[hellOmnibarChipRemove][data-slot='root'] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -132,29 +136,29 @@
     outline: none;
   }
 
-  .hell-omnibar-chip-remove:hover,
-  .hell-omnibar-chip-remove:focus-visible {
+  button[hellOmnibarChipRemove][data-slot='root']:hover,
+  button[hellOmnibarChipRemove][data-slot='root']:focus-visible {
     color: var(--color-hell-foreground);
     background-color: var(--color-hell-surface-subtle);
   }
 
-  .hell-omnibar [data-slot='input']::-webkit-search-decoration,
-  .hell-omnibar [data-slot='input']::-webkit-search-cancel-button,
-  .hell-omnibar [data-slot='input']::-webkit-search-results-button,
-  .hell-omnibar [data-slot='input']::-webkit-search-results-decoration {
+  hell-omnibar[data-slot='root'] [data-slot='input']::-webkit-search-decoration,
+  hell-omnibar[data-slot='root'] [data-slot='input']::-webkit-search-cancel-button,
+  hell-omnibar[data-slot='root'] [data-slot='input']::-webkit-search-results-button,
+  hell-omnibar[data-slot='root'] [data-slot='input']::-webkit-search-results-decoration {
     display: none;
   }
 
-  .hell-omnibar [data-slot='input']::placeholder {
+  hell-omnibar[data-slot='root'] [data-slot='input']::placeholder {
     color: var(--color-hell-foreground-subtle);
   }
 
-  .hell-omnibar [data-slot='input']:disabled {
+  hell-omnibar[data-slot='root'] [data-slot='input']:disabled {
     color: var(--color-hell-foreground-muted);
     cursor: not-allowed;
   }
 
-  .hell-omnibar [data-slot='clear'] {
+  hell-omnibar[data-slot='root'] [data-slot='clear'] {
     position: relative;
     display: inline-flex;
     flex: 0 0 auto;
@@ -170,12 +174,12 @@
     outline: none;
   }
 
-  .hell-omnibar [data-slot='clear'][data-empty] {
+  hell-omnibar[data-slot='root'] [data-slot='clear'][data-empty] {
     display: none;
   }
 
-  .hell-omnibar [data-slot='clear']::before,
-  .hell-omnibar [data-slot='clear']::after {
+  hell-omnibar[data-slot='root'] [data-slot='clear']::before,
+  hell-omnibar[data-slot='root'] [data-slot='clear']::after {
     content: '';
     position: absolute;
     width: 9px;
@@ -184,16 +188,16 @@
     background-color: currentColor;
   }
 
-  .hell-omnibar [data-slot='clear']::before {
+  hell-omnibar[data-slot='root'] [data-slot='clear']::before {
     rotate: 45deg;
   }
 
-  .hell-omnibar [data-slot='clear']::after {
+  hell-omnibar[data-slot='root'] [data-slot='clear']::after {
     rotate: -45deg;
   }
 
-  .hell-omnibar [data-slot='clear']:hover,
-  .hell-omnibar [data-slot='clear']:focus-visible {
+  hell-omnibar[data-slot='root'] [data-slot='clear']:hover,
+  hell-omnibar[data-slot='root'] [data-slot='clear']:focus-visible {
     color: var(--color-hell-foreground);
     background-color: var(--color-hell-surface-muted);
   }
@@ -231,12 +235,12 @@
      root-level omnibar CSS variables onto this portaled surface so scoped
      theming still works even though CDK renders outside the host element. */
 
-  .hell-omnibar-panel-surface {
+  .hell-omnibar-overlay-pane [data-slot='panel'] {
     width: 100%;
     max-height: var(--hell-omnibar-panel-max-height);
     display: flex;
     flex-direction: column;
-    background-color: var(--hell-omnibar-panel-bg);
+    background-color: var(--hell-omnibar-panel-bg, var(--color-hell-surface));
     border: 1px solid var(--color-hell-border);
     border-radius: var(--hell-omnibar-panel-radius);
     box-shadow: var(--hell-omnibar-panel-shadow);
@@ -244,7 +248,7 @@
     animation: hell-pop-in var(--hell-duration-fast) var(--ease-hell-out);
   }
 
-  .hell-omnibar-panel-surface [data-slot='actions'] {
+  .hell-omnibar-overlay-pane [data-slot='panel'] [data-slot='actions'] {
     display: flex;
     align-items: center;
     gap: var(--spacing-hell-1);
@@ -253,11 +257,11 @@
     background-color: var(--color-hell-surface-subtle);
   }
 
-  .hell-omnibar-panel-surface [data-slot='actions'][data-empty='true'] {
+  .hell-omnibar-overlay-pane [data-slot='panel'] [data-slot='actions'][data-empty='true'] {
     display: none;
   }
 
-  .hell-omnibar-action {
+  button[hellOmnibarAction][data-slot='root'] {
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-hell-1);
@@ -277,23 +281,23 @@
       border-color var(--hell-duration-fast) var(--ease-hell-out);
   }
 
-  .hell-omnibar-action:hover,
-  .hell-omnibar-action:focus-visible {
+  button[hellOmnibarAction][data-slot='root']:hover,
+  button[hellOmnibarAction][data-slot='root']:focus-visible {
     color: var(--color-hell-foreground);
     background-color: var(--color-hell-surface-muted);
   }
 
-  .hell-omnibar-action[data-active='true'] {
+  button[hellOmnibarAction][data-slot='root'][data-active='true'] {
     color: var(--color-hell-primary);
     background-color: var(--color-hell-primary-soft);
     border-color: color-mix(in oklab, var(--color-hell-primary) 16%, transparent);
   }
 
-  .hell-omnibar-action:focus-visible {
+  button[hellOmnibarAction][data-slot='root']:focus-visible {
     box-shadow: 0 0 0 2px var(--color-hell-focus-ring);
   }
 
-  .hell-omnibar-panel-surface [data-slot='results'] {
+  .hell-omnibar-overlay-pane [data-slot='panel'] [data-slot='results'] {
     flex: 1 1 auto;
     overflow-y: auto;
     padding: var(--spacing-hell-2);
@@ -302,14 +306,14 @@
     gap: var(--spacing-hell-1);
   }
 
-  .hell-omnibar-panel-surface [data-slot='loading'] {
+  .hell-omnibar-overlay-pane [data-slot='panel'] [data-slot='loading'] {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-hell-2);
     padding: calc(var(--spacing) * 1);
   }
 
-  .hell-omnibar-panel-surface [data-slot='skeleton-row'] {
+  .hell-omnibar-overlay-pane [data-slot='panel'] [data-slot='skeletonRow'] {
     display: flex;
     align-items: center;
     gap: var(--spacing-hell-3);
@@ -317,7 +321,7 @@
     padding-block: calc(var(--spacing) * 1.5);
   }
 
-  .hell-omnibar-panel-surface [data-slot='skeleton-text'] {
+  .hell-omnibar-overlay-pane [data-slot='panel'] [data-slot='skeletonText'] {
     display: flex;
     min-width: 0;
     flex: 1 1 auto;
@@ -325,19 +329,19 @@
     gap: calc(var(--spacing) * 1);
   }
 
-  .hell-omnibar-group {
+  [hellOmnibarGroup][data-slot='root'] {
     display: flex;
     flex-direction: column;
     gap: 1px;
   }
 
-  .hell-omnibar-group + .hell-omnibar-group {
+  [hellOmnibarGroup][data-slot='root'] + [hellOmnibarGroup][data-slot='root'] {
     margin-top: var(--spacing-hell-2);
     padding-top: var(--spacing-hell-2);
     border-top: 1px solid var(--color-hell-border);
   }
 
-  .hell-omnibar-group-label {
+  [hellOmnibarGroupLabel][data-slot='root'] {
     font-size: 10px;
     font-weight: var(--font-weight-semibold);
     text-transform: uppercase;
@@ -347,7 +351,7 @@
     padding-block: calc(var(--spacing) * 1);
   }
 
-  .hell-omnibar-item {
+  button[hellOmnibarItem][data-slot='root'] {
     display: flex;
     align-items: center;
     gap: var(--spacing-hell-3);
@@ -365,15 +369,15 @@
     width: 100%;
   }
 
-  .hell-omnibar-item[data-active='true'] {
+  button[hellOmnibarItem][data-slot='root'][data-active='true'] {
     background-color: var(--color-hell-surface-muted);
   }
 
-  .hell-omnibar-item:focus-visible {
+  button[hellOmnibarItem][data-slot='root']:focus-visible {
     box-shadow: 0 0 0 2px var(--color-hell-focus-ring);
   }
 
-  .hell-omnibar-item-icon {
+  [hellOmnibarItemIcon][data-slot='root'] {
     flex-shrink: 0;
     display: inline-flex;
     align-items: center;
@@ -382,11 +386,12 @@
     color: var(--color-hell-foreground-subtle);
   }
 
-  .hell-omnibar-item[data-active='true'] .hell-omnibar-item-icon {
+  button[hellOmnibarItem][data-slot='root'][data-active='true']
+    [hellOmnibarItemIcon][data-slot='root'] {
     color: var(--color-hell-foreground);
   }
 
-  .hell-omnibar-item-text {
+  [hellOmnibarItemText][data-slot='root'] {
     flex: 1 1 auto;
     min-width: 0;
     display: inline-flex;
@@ -395,18 +400,18 @@
     overflow: hidden;
   }
 
-  .hell-omnibar-item-text > * {
+  [hellOmnibarItemText][data-slot='root'] > * {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .hell-omnibar-item-subtext {
+  [hellOmnibarItemSubtext][data-slot='root'] {
     font-size: 11px;
     color: var(--color-hell-foreground-muted);
   }
 
-  .hell-omnibar-item-trailing {
+  [hellOmnibarItemTrailing][data-slot='root'] {
     margin-inline-start: auto;
     display: inline-flex;
     align-items: center;
@@ -415,7 +420,7 @@
     color: var(--color-hell-foreground-muted);
   }
 
-  .hell-omnibar-panel-surface [data-slot='empty'] {
+  .hell-omnibar-overlay-pane [data-slot='panel'] [data-slot='empty'] {
     padding: var(--spacing-hell-4);
     text-align: center;
     font-size: 12px;
