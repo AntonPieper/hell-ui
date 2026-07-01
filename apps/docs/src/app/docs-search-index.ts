@@ -322,7 +322,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/menu',
     detail: 'components/menu/examples/with-icons-sections-submenus.example.ts',
     terms:
-      'menu with-icons-sections-submenus components/menu/examples/with-icons-sections-submenus.example components/menu hellMenu hellSubmenuTrigger hellMenuSection hellMenuItemCheckbox hellMenuItemIndicator HellMenuUi HellMenuItemUi HellSubmenuTriggerUi HellMenuItemCheckboxUi HellMenuItemIndicatorUi HellMenuSectionUi HellMenuLabelUi HellMenuItemIconUi HellMenuItemTrailingUi HellMenuSeparatorUi ui Part Style Map data-slot root',
+      'menu with-icons-sections-submenus components/menu/examples/with-icons-sections-submenus.example components/menu hellMenu hellSubmenuTrigger hellMenuSection hellMenuItemCheckbox hellMenuItemRadio hellMenuItemIndicator HellMenuUi HellMenuItemUi HellSubmenuTriggerUi HellMenuItemCheckboxUi HellMenuItemRadioUi HellMenuItemIndicatorUi HellMenuSectionUi HellMenuLabelUi HellMenuItemIconUi HellMenuItemTrailingUi HellMenuSeparatorUi ui Part Style Map data-slot root',
   },
   {
     title: 'Pagination: Basic',
