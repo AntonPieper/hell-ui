@@ -164,6 +164,35 @@ test.describe('component visual polish regressions', () => {
     expect(selectedHoverBackground).toBe(colors.selected.backgroundColor);
   });
 
+  test('disabled standalone toggle does not repaint or press on pointer interaction', async ({
+    page,
+  }) => {
+    await gotoDocsPage(page, '/components/toggle', 'Toggle');
+
+    const example = page.locator('app-toggle-disabled-example');
+    await expect(example).toBeVisible();
+    const disabledToggle = example.getByRole('button', { name: 'Disabled', exact: true });
+    await expect(disabledToggle).toBeDisabled();
+    await expect(disabledToggle).toHaveAttribute('data-disabled', '');
+
+    const idle = await visualState(disabledToggle);
+
+    await disabledToggle.hover();
+    const hovered = await visualState(disabledToggle);
+    expect(hovered.backgroundColor).toBe(idle.backgroundColor);
+    expect(hovered.borderColor).toBe(idle.borderColor);
+    expect(hovered.transform).toBe(idle.transform);
+
+    const box = await boxFor(disabledToggle);
+    await page.mouse.move(centerX(box), centerY(box));
+    await page.mouse.down();
+    const pressed = await visualState(disabledToggle);
+    await page.mouse.up();
+    expect(pressed.backgroundColor).toBe(idle.backgroundColor);
+    expect(pressed.borderColor).toBe(idle.borderColor);
+    expect(pressed.transform).toBe(idle.transform);
+  });
+
   test('avatar overflow trigger behaves like a group member and keeps menu keyboard access', async ({
     page,
   }) => {
@@ -247,4 +276,19 @@ function hasNoVisibleShadow(boxShadow: string): boolean {
     .replaceAll(`${transparentZeroShadow}, `, '')
     .replaceAll(transparentZeroShadow, '')
     .trim() === '';
+}
+
+async function visualState(locator: Locator): Promise<{
+  backgroundColor: string;
+  borderColor: string;
+  transform: string;
+}> {
+  return locator.evaluate((element) => {
+    const styles = getComputedStyle(element);
+    return {
+      backgroundColor: styles.backgroundColor,
+      borderColor: styles.borderColor,
+      transform: styles.transform,
+    };
+  });
 }

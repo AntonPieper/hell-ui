@@ -1520,19 +1520,23 @@ import {
 } from '${packageName}/breadcrumbs';
 import { HellButton, type HellButtonUi } from '${packageName}/button';
 import { HELL_CARD_DIRECTIVES, type HellCardHeaderUi } from '${packageName}/card';
+import { HellCheckbox, HellNativeCheckbox, type HellCheckboxUi, type HellNativeCheckboxUi } from '${packageName}/checkbox';
 import { HellDropZone, type HellDropZonePart, type HellDropZoneUi } from '${packageName}/drop-zone';
 import { HELL_FIELD_DIRECTIVES } from '${packageName}/field';
 import { HellIcon, type HellIconPart, type HellIconUi } from '${packageName}/icon';
 import { HellInput, type HellInputUi } from '${packageName}/input';
 import { HellProgress, HellProgressBar, type HellProgressBarUi, type HellProgressUi } from '${packageName}/progress';
+import { HellNativeRadio, HellNativeRadioGroup, HellRadio, HellRadioGroup, type HellNativeRadioGroupUi, type HellNativeRadioUi, type HellRadioGroupUi, type HellRadioUi } from '${packageName}/radio';
 import { HellSearch, HellSearchClear, type HellSearchClearUi, type HellSearchUi } from '${packageName}/search';
 import { HellSeparator, type HellSeparatorUi } from '${packageName}/separator';
+import { HellSlider, type HellSliderUi } from '${packageName}/slider';
 import {
   HellSkeleton,
   HellSpinner,
   type HellSkeletonUi,
   type HellSpinnerUi,
 } from '${packageName}/skeleton';
+import { HellSwitch, HellNativeSwitch, type HellNativeSwitchUi, type HellSwitchUi } from '${packageName}/switch';
 import {
   HellBadge,
   type HellBadgeUi,
@@ -1542,6 +1546,7 @@ import {
   type HellTagUi,
 } from '${packageName}/tag';
 import { HELL_TABS_DIRECTIVES, type HellTabUi } from '${packageName}/tabs';
+import { HellToggle, HellToggleGroup, HellToggleGroupItem, type HellToggleGroupItemUi, type HellToggleGroupUi, type HellToggleUi } from '${packageName}/toggle';
 
 type PrimitiveRootPart = HellAvatarPart | HellDropZonePart | HellIconPart;
 
@@ -1556,26 +1561,56 @@ const primitiveRootPart: PrimitiveRootPart = 'root';
     ...HELL_BREADCRUMBS_DIRECTIVES,
     HellButton,
     ...HELL_CARD_DIRECTIVES,
+    HellCheckbox,
+    HellNativeCheckbox,
     HellDropZone,
     ...HELL_FIELD_DIRECTIVES,
     HellIcon,
     HellInput,
     HellProgress,
     HellProgressBar,
+    HellRadioGroup,
+    HellRadio,
+    HellNativeRadioGroup,
+    HellNativeRadio,
     HellSearch,
     HellSearchClear,
     HellSeparator,
+    HellSlider,
     HellSkeleton,
     HellSpinner,
+    HellSwitch,
+    HellNativeSwitch,
     HellBadge,
     HellKbd,
     HellTag,
     ...HELL_TABS_DIRECTIVES,
+    HellToggle,
+    HellToggleGroup,
+    HellToggleGroupItem,
   ],
   template: \`
     <button hellButton type="button" [ui]="buttonUi">Save</button>
     <hell-icon name="faSolidCheck" aria-hidden="true" [ui]="iconUi" />
     <input hellInput aria-label="Name" [ui]="inputUi" />
+    <button hellCheckbox aria-label="Accepted" [checked]="true" [ui]="checkboxUi"></button>
+    <input type="checkbox" hellNativeCheckbox aria-label="Native accepted" [ui]="nativeCheckboxUi" checked />
+
+    <div hellRadioGroup value="email" [ui]="radioGroupUi">
+      <button hellRadio value="email" type="button" [ui]="radioUi">Email</button>
+      <button hellRadio value="sms" type="button">SMS</button>
+    </div>
+    <div hellNativeRadioGroup [ui]="nativeRadioGroupUi">
+      <input type="radio" hellNativeRadio name="native-contact" aria-label="Native email" value="email" [ui]="nativeRadioUi" checked />
+    </div>
+    <button hellSwitch aria-label="Notifications" [checked]="true" [ui]="switchUi"></button>
+    <input type="checkbox" hellNativeSwitch aria-label="Native switch" [ui]="nativeSwitchUi" checked />
+    <hell-slider aria-label="Volume" [value]="42" [ui]="sliderUi" />
+    <button hellToggle type="button" [selected]="true" [ui]="toggleUi">Bold</button>
+    <div hellToggleGroup type="single" [value]="['left']" [ui]="toggleGroupUi">
+      <button hellToggleGroupItem value="left" type="button" [ui]="toggleGroupItemUi">Left</button>
+      <button hellToggleGroupItem value="right" type="button">Right</button>
+    </div>
 
     <span hellTag [ui]="tagUi">Ready</span>
     <span hellBadge [ui]="badgeUi">3</span>
@@ -1656,18 +1691,30 @@ class App {
   protected readonly breadcrumbsUi = { root: 'text-hell-info' } satisfies HellBreadcrumbsUi;
   protected readonly buttonUi = { root: 'bg-hell-info' } satisfies HellButtonUi;
   protected readonly cardHeaderUi = { root: 'items-start' } satisfies HellCardHeaderUi;
+  protected readonly checkboxUi = { root: 'border-hell-info' } satisfies HellCheckboxUi;
   protected readonly dropZoneUi = { root: 'border-hell-info' } satisfies HellDropZoneUi;
   protected readonly iconUi = { root: 'text-hell-info' } satisfies HellIconUi;
   protected readonly inputUi = { root: 'border-hell-info' } satisfies HellInputUi;
   protected readonly kbdUi = { root: 'border-hell-info' } satisfies HellKbdUi;
+  protected readonly nativeCheckboxUi = { root: 'border-hell-info' } satisfies HellNativeCheckboxUi;
+  protected readonly nativeRadioGroupUi = { root: 'gap-hell-2' } satisfies HellNativeRadioGroupUi;
+  protected readonly nativeRadioUi = { root: 'border-hell-info' } satisfies HellNativeRadioUi;
+  protected readonly nativeSwitchUi = { root: 'bg-hell-info-soft' } satisfies HellNativeSwitchUi;
   protected readonly progressBarUi = { root: 'bg-hell-info' } satisfies HellProgressBarUi;
   protected readonly progressUi = { root: 'bg-hell-info-soft' } satisfies HellProgressUi;
+  protected readonly radioGroupUi = { root: 'gap-hell-2' } satisfies HellRadioGroupUi;
+  protected readonly radioUi = { root: 'text-hell-info' } satisfies HellRadioUi;
   protected readonly searchClearUi = { root: 'text-hell-info' } satisfies HellSearchClearUi;
   protected readonly searchUi = { root: 'grid gap-hell-2' } satisfies HellSearchUi;
   protected readonly separatorUi = { root: 'bg-hell-info' } satisfies HellSeparatorUi;
+  protected readonly sliderUi = { range: 'bg-hell-info', thumb: 'border-hell-info' } satisfies HellSliderUi;
   protected readonly skeletonUi = { root: 'bg-hell-info-soft' } satisfies HellSkeletonUi;
   protected readonly spinnerUi = { root: 'text-hell-info' } satisfies HellSpinnerUi;
+  protected readonly switchUi = { root: 'bg-hell-info-soft', thumb: 'shadow-none' } satisfies HellSwitchUi;
   protected readonly tagUi = { root: 'bg-hell-info-soft' } satisfies HellTagUi;
+  protected readonly toggleGroupItemUi = { root: 'text-hell-info' } satisfies HellToggleGroupItemUi;
+  protected readonly toggleGroupUi = { root: 'gap-hell-2' } satisfies HellToggleGroupUi;
+  protected readonly toggleUi = { root: 'text-hell-info' } satisfies HellToggleUi;
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
@@ -2236,12 +2283,17 @@ function primitivesConsumerStylesCss() {
 @import "${packageName}/input/styles.css";
 @import "${packageName}/avatar/styles.css";
 @import "${packageName}/breadcrumbs/styles.css";
+@import "${packageName}/checkbox/styles.css";
 @import "${packageName}/drop-zone/styles.css";
 @import "${packageName}/progress/styles.css";
+@import "${packageName}/radio/styles.css";
 @import "${packageName}/separator/styles.css";
+@import "${packageName}/slider/styles.css";
 @import "${packageName}/skeleton/styles.css";
+@import "${packageName}/switch/styles.css";
 @import "${packageName}/tag/styles.css";
 @import "${packageName}/tabs/styles.css";
+@import "${packageName}/toggle/styles.css";
 `;
 }
 

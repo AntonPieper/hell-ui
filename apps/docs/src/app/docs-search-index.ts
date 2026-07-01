@@ -157,14 +157,14 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/checkbox',
     detail: 'components/checkbox/examples/examples.example.ts',
     terms:
-      'checkbox examples components/checkbox/examples/examples.example components/checkbox hellCheckbox',
+      'checkbox examples components/checkbox/examples/examples.example components/checkbox hellCheckbox HellCheckboxUi ui part style map',
   },
   {
     title: 'Checkbox: Native',
     path: '/components/checkbox',
     detail: 'components/checkbox/examples/native.example.ts',
     terms:
-      'checkbox native components/checkbox/examples/native.example components/checkbox hellNativeCheckbox',
+      'checkbox native components/checkbox/examples/native.example components/checkbox hellNativeCheckbox HellNativeCheckboxUi ui part style map',
   },
   {
     title: 'Combobox: Basic',
@@ -385,21 +385,21 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/radio',
     detail: 'components/radio/examples/example.example.ts',
     terms:
-      'radio example components/radio/examples/example.example components/radio hellRadioGroup hellRadio',
+      'radio example components/radio/examples/example.example components/radio hellRadioGroup hellRadio HellRadioGroupUi HellRadioUi ui part style map',
   },
   {
     title: 'Radio: Horizontal',
     path: '/components/radio',
     detail: 'components/radio/examples/horizontal.example.ts',
     terms:
-      'radio horizontal components/radio/examples/horizontal.example components/radio hellRadioGroup hellRadio',
+      'radio horizontal components/radio/examples/horizontal.example components/radio hellRadioGroup hellRadio HellRadioGroupUi HellRadioUi ui part style map',
   },
   {
     title: 'Radio: Native',
     path: '/components/radio',
     detail: 'components/radio/examples/native.example.ts',
     terms:
-      'radio native components/radio/examples/native.example components/radio hellNativeRadio hellNativeRadioGroup',
+      'radio native components/radio/examples/native.example components/radio hellNativeRadio hellNativeRadioGroup HellNativeRadioUi HellNativeRadioGroupUi ui part style map',
   },
   {
     title: 'Search: Basic',
@@ -510,49 +510,50 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     title: 'Slider: Basic',
     path: '/components/slider',
     detail: 'components/slider/examples/basic.example.ts',
-    terms: 'slider basic components/slider/examples/basic.example components/slider hell-slider',
+    terms:
+      'slider basic components/slider/examples/basic.example components/slider hell-slider HellSliderUi ui part style map',
   },
   {
     title: 'Slider: Disabled',
     path: '/components/slider',
     detail: 'components/slider/examples/disabled.example.ts',
     terms:
-      'slider disabled components/slider/examples/disabled.example components/slider hell-slider disabled',
+      'slider disabled components/slider/examples/disabled.example components/slider hell-slider disabled HellSliderUi ui part style map',
   },
   {
     title: 'Slider: Hover Revealed Thumb',
     path: '/components/slider',
     detail: 'components/slider/examples/hover-revealed-thumb.example.ts',
     terms:
-      'slider hover-revealed-thumb components/slider/examples/hover-revealed-thumb.example components/slider hell-slider thumb',
+      'slider hover-revealed-thumb components/slider/examples/hover-revealed-thumb.example components/slider hell-slider thumb HellSliderUi ui part style map',
   },
   {
     title: 'Slider: Sizes',
     path: '/components/slider',
     detail: 'components/slider/examples/sizes.example.ts',
     terms:
-      'slider sizes components/slider/examples/sizes.example components/slider hell-slider size',
+      'slider sizes components/slider/examples/sizes.example components/slider hell-slider size HellSliderUi ui part style map',
   },
   {
     title: 'Slider: Vertical',
     path: '/components/slider',
     detail: 'components/slider/examples/vertical.example.ts',
     terms:
-      'slider vertical components/slider/examples/vertical.example components/slider hell-slider vertical',
+      'slider vertical components/slider/examples/vertical.example components/slider hell-slider vertical HellSliderUi ui part style map',
   },
   {
     title: 'Switch: Examples',
     path: '/components/switch',
     detail: 'components/switch/examples/examples.example.ts',
     terms:
-      'switch examples components/switch/examples/examples.example components/switch hellSwitch',
+      'switch examples components/switch/examples/examples.example components/switch hellSwitch HellSwitchUi ui part style map',
   },
   {
     title: 'Switch: Native',
     path: '/components/switch',
     detail: 'components/switch/examples/native.example.ts',
     terms:
-      'switch native components/switch/examples/native.example components/switch hellNativeSwitch',
+      'switch native components/switch/examples/native.example components/switch hellNativeSwitch HellNativeSwitchUi ui part style map',
   },
   {
     title: 'Tabs: Example',
@@ -593,28 +594,28 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/toggle',
     detail: 'components/toggle/examples/disabled.example.ts',
     terms:
-      'toggle disabled components/toggle/examples/disabled.example components/toggle hellToggle disabled',
+      'toggle disabled components/toggle/examples/disabled.example components/toggle hellToggle disabled HellToggleUi ui part style map',
   },
   {
     title: 'Toggle: Single Toggle',
     path: '/components/toggle',
     detail: 'components/toggle/examples/single-toggle.example.ts',
     terms:
-      'toggle single-toggle components/toggle/examples/single-toggle.example components/toggle hellToggle',
+      'toggle single-toggle components/toggle/examples/single-toggle.example components/toggle hellToggle HellToggleUi ui part style map',
   },
   {
     title: 'Toggle: Toggle Group Multiple',
     path: '/components/toggle',
     detail: 'components/toggle/examples/toggle-group-multiple.example.ts',
     terms:
-      'toggle toggle-group-multiple components/toggle/examples/toggle-group-multiple.example components/toggle hellToggleGroup multiple',
+      'toggle toggle-group-multiple components/toggle/examples/toggle-group-multiple.example components/toggle hellToggleGroup multiple HellToggleGroupUi HellToggleGroupItemUi ui part style map',
   },
   {
     title: 'Toggle: Toggle Group Single',
     path: '/components/toggle',
     detail: 'components/toggle/examples/toggle-group-single.example.ts',
     terms:
-      'toggle toggle-group-single components/toggle/examples/toggle-group-single.example components/toggle hellToggleGroup single',
+      'toggle toggle-group-single components/toggle/examples/toggle-group-single.example components/toggle hellToggleGroup single HellToggleGroupUi HellToggleGroupItemUi ui part style map',
   },
   {
     title: 'Tooltip: Example',
