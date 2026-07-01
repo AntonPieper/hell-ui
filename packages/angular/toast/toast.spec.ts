@@ -451,7 +451,13 @@ describe('HellToaster', () => {
     vi.advanceTimersByTime(999);
     expect(scrollTop).toBe(72);
 
-    const transitionEnd = new Event('transitionend') as TransitionEvent;
+    const toast = fixture.nativeElement.querySelector('[data-slot="toast"]') as HTMLElement;
+    const childTransitionEnd = new Event('transitionend', { bubbles: true }) as TransitionEvent;
+    Object.defineProperty(childTransitionEnd, 'propertyName', { value: 'transform' });
+    toast.dispatchEvent(childTransitionEnd);
+    expect(scrollTop).toBe(72);
+
+    const transitionEnd = new Event('transitionend', { bubbles: true }) as TransitionEvent;
     Object.defineProperty(transitionEnd, 'propertyName', { value: 'height' });
     viewport.dispatchEvent(transitionEnd);
 

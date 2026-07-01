@@ -61,7 +61,7 @@ const HELL_TOASTER_RECIPE = {
   root: 'fixed z-[9999] pointer-events-none w-[var(--hell-toaster-w)] max-w-[calc(100vw-32px)] [--hell-toaster-w:360px] [--hell-toaster-gap:12px] [--hell-toaster-peek:14px] [--hell-toaster-scale-step:0.06] [--hell-toaster-scrollbar-gutter:10px] [--hell-toaster-viewport-max-h:min(420px,calc(100vh-104px))] [--hell-toast-dir:-1] [--hell-toast-origin:bottom_center]',
   region: 'relative block pointer-events-auto',
   viewport:
-    'relative box-border h-16 w-full pe-[var(--hell-toaster-scrollbar-gutter)] overflow-visible [scrollbar-gutter:stable] transition-[height] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-8',
+    'relative box-border h-16 w-full pe-[var(--hell-toaster-scrollbar-gutter)] overflow-visible transition-[height] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-8',
   list: 'relative m-0 h-16 list-none p-0',
   toast:
     'absolute left-0 right-0 grid grid-cols-[auto_1fr_auto_auto] items-start gap-hell-3 rounded-hell-lg border border-hell-border bg-hell-surface-elevated p-hell-4 text-[13px] leading-[1.4] text-hell-foreground shadow-hell-lg pointer-events-auto transition-[transform,opacity,box-shadow] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)]',
@@ -691,10 +691,11 @@ export class HellToaster extends HellPartStyleable<HellToasterPart> {
     };
     const onTransitionEnd = (event: TransitionEvent) => {
       if (event.target !== viewport || event.propertyName !== 'height') return;
+      viewport.removeEventListener('transitionend', onTransitionEnd);
       finish();
     };
     if (this.viewportTransitionsHeight(viewport)) {
-      viewport.addEventListener('transitionend', onTransitionEnd, { once: true });
+      viewport.addEventListener('transitionend', onTransitionEnd);
       return;
     }
     this.collapseLayoutResetHandle = setTimeout(finish, 50);
