@@ -114,7 +114,7 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     rolePattern:
       'Modal dialog with title/description wiring, overlay, focus trap, Escape close, outside-click close, and focus restore.',
     keyboardCoverage:
-      'Browser contract covers initial focus, Tab/Shift+Tab wrap, Escape close, and trigger focus restore in styled and unstyled modes.',
+      'Browser contract covers initial focus, Tab/Shift+Tab wrap, Escape close, and trigger focus restore in styled and scoped modes.',
     automatedCoverage:
       'Axe docs smoke, ARIA snapshot, and browser focus-trap contract cover public examples.',
     knownGaps:

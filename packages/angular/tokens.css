@@ -662,7 +662,7 @@ body {
 [data-hell-skin="glass"] [hellCard][data-slot='root'],
 [data-hell-skin="glass"] .hell-popover,
 [data-hell-skin="glass"] .hell-menu,
-[data-hell-skin="glass"] .hell-dialog,
+[data-hell-skin="glass"] [hellDialog][data-slot='root'],
 [data-hell-skin="glass"] .hell-combobox-dropdown,
 [data-hell-skin="glass"] .hell-select-dropdown,
 [data-hell-skin="glass"] .hell-flyout {
