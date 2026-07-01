@@ -1,8 +1,7 @@
 @layer components {
   /* Code editor / viewer (CodeMirror 6). Host owns shell; CM theme owns internals. */
 
-  .hell-code,
-  .hell-code-viewer {
+  hell-code-editor[data-slot='root'] {
     display: block;
     overflow: hidden;
     color: var(--color-hell-foreground);
@@ -18,18 +17,18 @@
       border-color var(--hell-duration-fast) var(--ease-hell-out),
       box-shadow var(--hell-duration-fast) var(--ease-hell-out);
 
-    > .cm-editor {
+    > [data-slot='editor'] > .cm-editor {
       min-height: inherit;
       height: 100%;
       background: transparent;
     }
 
-    > .cm-editor.cm-focused {
+    > [data-slot='editor'] > .cm-editor.cm-focused {
       box-shadow: 0 0 0 3px var(--color-hell-focus-ring);
     }
   }
 
-  .hell-code-viewer {
+  hell-code-editor[data-slot='root'][data-readonly='true'] {
     background: var(--color-hell-surface-subtle);
   }
 }

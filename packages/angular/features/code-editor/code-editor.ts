@@ -16,7 +16,7 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { type Extension } from '@codemirror/state';
-import { HellStyleable } from '@hell-ui/angular/core';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
 import {
   HellCodeEditorRuntime,
   type HellCodeEditorRuntimeAccessibilityOptions,
@@ -29,6 +29,15 @@ export {
   hellCodeEditorSetupFactory,
   hellCodeEditorTheme,
 } from './code-editor.runtime';
+
+export type HellCodeEditorPart = 'root' | 'editor';
+
+export type HellCodeEditorUi = HellUi<HellCodeEditorPart>;
+
+const HELL_CODE_EDITOR_RECIPE = {
+  root: 'block overflow-hidden rounded-hell-md border border-hell-border bg-[linear-gradient(180deg,color-mix(in_oklab,var(--color-hell-surface-subtle)_94%,white),var(--color-hell-surface-subtle))] text-hell-foreground shadow-hell-xs transition-[border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-[readonly=true]:bg-hell-surface-subtle',
+  editor: 'h-full min-h-[inherit]',
+} satisfies HellRecipe<HellCodeEditorPart>;
 
 /**
  * Factory hook for replacing the browser CodeMirror runtime in tests or app-specific hosts.
@@ -67,12 +76,21 @@ export const HELL_CODE_EDITOR_RUNTIME_FACTORY = new InjectionToken<HellCodeEdito
     },
   ],
   host: {
-    '[class.hell-code]': '!unstyled() && !isReadOnly()',
-    '[class.hell-code-viewer]': '!unstyled() && isReadOnly()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
+    '[attr.data-readonly]': 'isReadOnly() ? "true" : null',
   },
-  template: '<div #host (focusout)="markTouched()"></div>',
+  template: `
+    <div #host data-slot="editor" [class]="part('editor')" (focusout)="markTouched()"></div>
+  `,
 })
-export class HellCodeEditor extends HellStyleable implements ControlValueAccessor {
+export class HellCodeEditor
+  extends HellPartStyleable<HellCodeEditorPart>
+  implements ControlValueAccessor
+{
+  protected readonly recipe = HELL_CODE_EDITOR_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   /** External document text. Updating it reconfigures the editor without echoing `valueChange`. */
   readonly value = input<string>('');
   /** Caller-owned CodeMirror extensions, including language support. */

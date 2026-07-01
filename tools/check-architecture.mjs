@@ -112,7 +112,6 @@ const legacyStyleableAllowlist = new Set([
   'HellAvatarGroup',
   'HellAvatarGroupItem',
   'HellAvatarGroupOverflow',
-  'HellCodeEditor',
 ]);
 
 const migratedPartStyleMapModules = [
@@ -668,6 +667,16 @@ const migratedPartStyleMapModules = [
     publicApiPath: 'packages/angular/omnibar/public-api.ts',
     apiReportFiles: [],
     legacyClass: 'hell-omnibar-action',
+  },
+  {
+    className: 'HellCodeEditor',
+    partType: 'HellCodeEditorPart',
+    uiType: 'HellCodeEditorUi',
+    entrypointId: 'code-editor',
+    sourcePath: 'packages/angular/features/code-editor/code-editor.ts',
+    publicApiPath: 'packages/angular/features/code-editor/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-code',
   },
   {
     className: 'HellDateInput',
