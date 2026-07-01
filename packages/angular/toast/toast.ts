@@ -61,10 +61,10 @@ const HELL_TOASTER_RECIPE = {
   root: 'fixed z-[9999] pointer-events-none w-[var(--hell-toaster-w)] max-w-[calc(100vw-32px)] [--hell-toaster-w:360px] [--hell-toaster-gap:12px] [--hell-toaster-peek:14px] [--hell-toaster-scale-step:0.06] [--hell-toaster-scrollbar-gutter:10px] [--hell-toaster-viewport-max-h:min(420px,calc(100vh-104px))] [--hell-toast-dir:-1] [--hell-toast-origin:bottom_center]',
   region: 'relative block pointer-events-auto',
   viewport:
-    'relative box-border h-16 min-h-16 w-full pe-[var(--hell-toaster-scrollbar-gutter)] overflow-visible overscroll-contain [scrollbar-gutter:stable] pointer-events-auto outline-none transition-[height] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-8',
-  list: 'relative m-0 h-16 w-full list-none p-0 pointer-events-auto',
+    'relative box-border h-16 w-full pe-[var(--hell-toaster-scrollbar-gutter)] overflow-visible [scrollbar-gutter:stable] transition-[height] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-8',
+  list: 'relative m-0 h-16 list-none p-0',
   toast:
-    'absolute left-0 right-0 grid grid-cols-[auto_1fr_auto_auto] items-start gap-hell-3 rounded-hell-lg border border-hell-border bg-hell-surface-elevated p-hell-4 text-[13px] leading-[1.4] text-hell-foreground shadow-hell-lg pointer-events-auto transition-[transform,opacity,box-shadow] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] will-change-[transform,opacity]',
+    'absolute left-0 right-0 grid grid-cols-[auto_1fr_auto_auto] items-start gap-hell-3 rounded-hell-lg border border-hell-border bg-hell-surface-elevated p-hell-4 text-[13px] leading-[1.4] text-hell-foreground shadow-hell-lg pointer-events-auto transition-[transform,opacity,box-shadow] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)]',
   glyph: 'mt-px h-[18px] w-[18px] flex-none text-[var(--hell-toast-glyph)]',
   body: 'min-w-0',
   title: 'break-words text-[13px] font-semibold text-hell-foreground',
@@ -78,8 +78,6 @@ const HELL_TOASTER_RECIPE = {
   dismissAll:
     'inline-flex cursor-pointer items-center gap-hell-2 whitespace-nowrap rounded-hell-sm border border-hell-border bg-hell-surface-elevated px-2.5 py-[7px] text-xs font-semibold leading-none text-hell-foreground no-underline shadow-hell-md transition-[border-color,background-color,color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:border-hell-border-strong hover:bg-hell-surface-elevated active:bg-hell-surface-muted focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2',
 } satisfies HellRecipe<HellToasterPart>;
-
-const TOAST_COLLAPSE_LAYOUT_RESET_MS = 240;
 
 export interface HellToastAction {
   label: string;
@@ -340,7 +338,16 @@ export class HellToastTemplate {}
           [attr.aria-label]="isScrollable() ? labels.toast.stack : null"
           (scroll)="onViewportScroll($event)"
         >
-          <ol data-slot="list" [class]="part('list')">
+          <ol
+            data-slot="list"
+            [class]="part('list')"
+            [attr.style]="
+              expanded()
+                ? null
+                : 'position:absolute;inset-inline:0 var(--hell-toaster-scrollbar-gutter);' +
+                  (position().startsWith('bottom') ? 'bottom:0' : 'top:0')
+            "
+          >
             @for (t of svc.toasts(); track t.id; let i = $index) {
               <li
                 data-slot="toast"
@@ -537,10 +544,7 @@ export class HellToaster extends HellPartStyleable<HellToasterPart> {
           clearTimeout(this.collapseHandle);
           this.collapseHandle = null;
         }
-        if (this.collapseLayoutResetHandle != null) {
-          clearTimeout(this.collapseLayoutResetHandle);
-          this.collapseLayoutResetHandle = null;
-        }
+        this.cancelCollapseLayoutReset();
         this.expanded.set(false);
       }
       const snap = hellToastSnapshotExits(list, this.heights(), this.exitSnapshot());
@@ -559,10 +563,7 @@ export class HellToaster extends HellPartStyleable<HellToasterPart> {
       clearTimeout(this.collapseHandle);
       this.collapseHandle = null;
     }
-    if (this.collapseLayoutResetHandle != null) {
-      clearTimeout(this.collapseLayoutResetHandle);
-      this.collapseLayoutResetHandle = null;
-    }
+    this.cancelCollapseLayoutReset();
     this.expanded.set(true);
     this.svc.pauseAll();
     this.scheduleViewportStateSync(!wasExpanded);
@@ -659,10 +660,7 @@ export class HellToaster extends HellPartStyleable<HellToasterPart> {
       clearTimeout(this.collapseHandle);
       this.collapseHandle = null;
     }
-    if (this.collapseLayoutResetHandle != null) {
-      clearTimeout(this.collapseLayoutResetHandle);
-      this.collapseLayoutResetHandle = null;
-    }
+    this.cancelCollapseLayoutReset();
     this.ro?.disconnect();
     this.ro = null;
   }
@@ -676,17 +674,44 @@ export class HellToaster extends HellPartStyleable<HellToasterPart> {
   }
 
   private scheduleCollapseLayoutReset(viewport: HTMLElement | null): void {
+    this.cancelCollapseLayoutReset();
+    if (!viewport) return;
+
+    let completed = false;
+    const finish = () => {
+      if (completed) return;
+      completed = true;
+      if (this.collapseLayoutResetHandle != null) {
+        clearTimeout(this.collapseLayoutResetHandle);
+        this.collapseLayoutResetHandle = null;
+      }
+      if (this.destroyed || this.expanded()) return;
+      viewport.scrollTop = 0;
+      this.syncViewportState(viewport);
+    };
+    const onTransitionEnd = (event: TransitionEvent) => {
+      if (event.target !== viewport || event.propertyName !== 'height') return;
+      finish();
+    };
+    if (this.viewportTransitionsHeight(viewport)) {
+      viewport.addEventListener('transitionend', onTransitionEnd, { once: true });
+      return;
+    }
+    this.collapseLayoutResetHandle = setTimeout(finish, 50);
+  }
+
+  private cancelCollapseLayoutReset(): void {
     if (this.collapseLayoutResetHandle != null) {
       clearTimeout(this.collapseLayoutResetHandle);
-    }
-    this.collapseLayoutResetHandle = setTimeout(() => {
       this.collapseLayoutResetHandle = null;
-      if (this.destroyed || this.expanded()) return;
-      if (viewport) {
-        viewport.scrollTop = 0;
-        this.syncViewportState(viewport);
-      }
-    }, TOAST_COLLAPSE_LAYOUT_RESET_MS);
+    }
+  }
+
+  private viewportTransitionsHeight(viewport: HTMLElement): boolean {
+    const win = viewport.ownerDocument.defaultView;
+    if (!win) return false;
+    const property = win.getComputedStyle(viewport).transitionProperty;
+    return property.includes('height') || property.includes('all');
   }
 
   private scheduleViewportStateSync(resetOrigin = false): void {

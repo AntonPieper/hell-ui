@@ -273,6 +273,10 @@ describe('HellToaster', () => {
     }).compileComponents();
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('does not render an empty hit area before any toasts exist', () => {
     const fixture = TestBed.createComponent(HellToaster);
     fixture.detectChanges();
@@ -295,6 +299,10 @@ describe('HellToaster', () => {
     expect(region.getAttribute('aria-atomic')).toBeNull();
     expect(list).toBeInstanceOf(HTMLOListElement);
     expect(list.querySelectorAll('[data-slot="toast"]')).toHaveLength(1);
+    expect(list.style.position).toBe('absolute');
+    expect(list.getAttribute('style')).toContain(
+      'inset-inline:0 var(--hell-toaster-scrollbar-gutter)',
+    );
   });
 
   it('renders a toaster-owned dismiss-all control and focusable scroll viewport for stacks', () => {
@@ -390,5 +398,63 @@ describe('HellToaster', () => {
 
     expect(overflowToast.getAttribute('aria-hidden')).toBeNull();
     expect(close.getAttribute('tabindex')).toBeNull();
+  });
+
+  it('waits for viewport height transition before resetting collapsed scroll', () => {
+    vi.useFakeTimers();
+    const fixture = TestBed.createComponent(HellToaster);
+    const svc = TestBed.inject(HellToastService);
+    fixture.detectChanges();
+
+    svc.success('One', { duration: 0 });
+    svc.success('Two', { duration: 0 });
+    svc.success('Three', { duration: 0 });
+    svc.success('Four', { duration: 0 });
+    fixture.detectChanges();
+
+    const region = fixture.nativeElement.querySelector('[data-slot="region"]') as HTMLElement;
+    const viewport = fixture.nativeElement.querySelector('[data-slot="viewport"]') as HTMLElement;
+    const win = viewport.ownerDocument.defaultView;
+    const getComputedStyle = win?.getComputedStyle.bind(win);
+    if (!win || !getComputedStyle) throw new Error('Expected window.getComputedStyle');
+    vi.spyOn(win, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+      const style = getComputedStyle(element, pseudoElement);
+      if (element === viewport) {
+        Object.defineProperties(style, {
+          transitionProperty: { configurable: true, value: 'height' },
+          transitionDuration: { configurable: true, value: '1s' },
+          transitionDelay: { configurable: true, value: '0s' },
+        });
+      }
+      return style;
+    });
+    let scrollTop = 0;
+    Object.defineProperty(viewport, 'scrollTop', {
+      configurable: true,
+      get: () => scrollTop,
+      set: (value: number) => {
+        scrollTop = value;
+      },
+    });
+
+    region.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    fixture.detectChanges();
+    vi.advanceTimersByTime(0);
+    expect(fixture.nativeElement.getAttribute('data-expanded')).toBe('true');
+    viewport.scrollTop = 72;
+
+    region.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+    vi.advanceTimersByTime(320);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.getAttribute('data-expanded')).toBeNull();
+    vi.advanceTimersByTime(999);
+    expect(scrollTop).toBe(72);
+
+    const transitionEnd = new Event('transitionend') as TransitionEvent;
+    Object.defineProperty(transitionEnd, 'propertyName', { value: 'height' });
+    viewport.dispatchEvent(transitionEnd);
+
+    expect(scrollTop).toBe(0);
   });
 });
