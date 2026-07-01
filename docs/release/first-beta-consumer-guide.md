@@ -153,13 +153,13 @@ pipeline.
 
 `HellButton`, `HellInput`, `HellNativeSelect`, `HellTextarea`, `HellDialpad`,
 `HellDateInput`, `HellTimeInput`, `HellDatePicker`, `HellDateRangePicker`,
-Checkbox/NativeCheckbox, Radio/NativeRadio, Switch/NativeSwitch,
-Toggle/ToggleGroup, Slider, the first directive-suite batch (`HellCard`,
-`HellField`, `HellTabset`, and `HellAccordion` families), the App Shell/nav
-directives, Resizable directives, Pagination/PaginationStrip, and Table
-primitives have migrated from Style Opt-Out to the Part Style Map API. Pass
-`ui` when you want to refine public parts while keeping Hell behavior, state
-attributes, and accessibility wiring.
+Checkbox/NativeCheckbox, RadioGroup/Radio/NativeRadioGroup/NativeRadio,
+Switch/NativeSwitch, Toggle/ToggleGroup/ToggleGroupItem, Slider, the first
+directive-suite batch (`HellCard`, `HellField`, `HellTabset`, and
+`HellAccordion` families), the App Shell/nav directives, Resizable directives,
+Pagination/PaginationStrip, and Table primitives have migrated from Style
+Opt-Out to the Part Style Map API. Pass `ui` when you want to refine public
+parts while keeping Hell behavior, state attributes, and accessibility wiring.
 
 Split View also exposes flat owned parts such as `pane`, `compactHeader`, and
 `itemNavigation`.
@@ -202,8 +202,8 @@ Rules for migration:
   `@source` scanning for Hell package files.
 - Use `ui="..."` for single-root directives such as Button, Input, Card, Field,
   Tabs, Accordion, App Shell/nav, Resizable, Checkbox, NativeCheckbox, Radio,
-  NativeRadio, NativeSwitch, Toggle, ToggleGroup, ToggleGroupItem, Pagination
-  controls, and Table primitive directives.
+  RadioGroup, NativeRadio, NativeRadioGroup, NativeSwitch, Toggle, ToggleGroup,
+  ToggleGroupItem, Pagination controls, and Table primitive directives.
 - Use each projected child directive's local `ui`; a Card, Field, Tabs,
   Accordion, or App Shell root does not style its children remotely.
 - Use `[ui]="{ ... }"` for owned-anatomy components with multiple public parts,
