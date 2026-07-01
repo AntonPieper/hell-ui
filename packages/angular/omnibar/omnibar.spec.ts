@@ -3,10 +3,26 @@ import { OverlayContainer } from '@angular/cdk/overlay';
 import { TestBed } from '@angular/core/testing';
 
 import { provideHellLabels } from '@hell-ui/angular/core';
-import { type HellSearchSource } from '@hell-ui/angular/core';
+import { type HellSearchSource, type HellUiInput } from '@hell-ui/angular/core';
 import { HellGlobalKeydownService, matchHotkey } from '@hell-ui/angular/internal/hotkeys';
 import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
-import { HELL_OMNIBAR_DIRECTIVES, type HellOmnibarSubmitEvent } from './omnibar';
+import {
+  HELL_OMNIBAR_DIRECTIVES,
+  type HellOmnibarActionUi,
+  type HellOmnibarActionsStripUi,
+  type HellOmnibarChipRemoveUi,
+  type HellOmnibarChipUi,
+  type HellOmnibarGroupLabelUi,
+  type HellOmnibarGroupUi,
+  type HellOmnibarItemIconUi,
+  type HellOmnibarItemSubtextUi,
+  type HellOmnibarItemTextUi,
+  type HellOmnibarItemTrailingUi,
+  type HellOmnibarItemUi,
+  type HellOmnibarPart,
+  type HellOmnibarSubmitEvent,
+  type HellOmnibarUi,
+} from './omnibar';
 
 @Component({
   imports: [...HELL_OMNIBAR_DIRECTIVES, ...HELL_MENU_DIRECTIVES],
@@ -133,6 +149,63 @@ class OmnibarOutsideEditableHost {
   readonly hotkey = signal('/');
 }
 
+@Component({
+  imports: [...HELL_OMNIBAR_DIRECTIVES],
+  template: `
+    <hell-omnibar [openOnFocus]="true" [ui]="ui()">
+      <span hellOmnibarLeading hellOmnibarChip [ui]="chipUi">
+        Token
+        <button
+          hellOmnibarChipRemove
+          type="button"
+          aria-label="Remove token"
+          [ui]="chipRemoveUi"
+        ></button>
+      </span>
+
+      <div hellOmnibarActions aria-label="Filters" [ui]="actionsStripUi">
+        <button hellOmnibarAction type="button" [pressed]="true" [ui]="actionUi">Filters</button>
+      </div>
+
+      <div hellOmnibarGroup label="Results" [ui]="groupUi">
+        <div hellOmnibarGroupLabel [ui]="groupLabelUi">Results</div>
+        <button hellOmnibarItem value="alpha" [ui]="itemUi">
+          <span hellOmnibarItemIcon [ui]="itemIconUi">A</span>
+          <span hellOmnibarItemText [ui]="itemTextUi">
+            <span>Alpha</span>
+            <span hellOmnibarItemSubtext [ui]="itemSubtextUi">Project</span>
+          </span>
+          <span hellOmnibarItemTrailing [ui]="itemTrailingUi">Enter</span>
+        </button>
+      </div>
+    </hell-omnibar>
+  `,
+})
+class OmnibarPartStyleHost {
+  readonly objectUi = {
+    root: 'max-w-[500px] rounded-none',
+    control: 'border-hell-danger',
+    inputWrap: 'basis-[12rem]',
+    input: 'text-hell-danger',
+    clear: 'text-hell-danger',
+    panel: 'rounded-none border-hell-danger',
+    actions: 'bg-hell-surface',
+    results: 'gap-hell-2',
+  } satisfies HellOmnibarUi;
+  readonly ui = signal<HellUiInput<HellOmnibarPart>>('max-w-[420px]');
+  readonly chipUi = { root: 'rounded-none border-hell-danger' } satisfies HellOmnibarChipUi;
+  readonly chipRemoveUi = { root: 'text-hell-danger' } satisfies HellOmnibarChipRemoveUi;
+  readonly actionsStripUi = { root: 'gap-hell-3' } satisfies HellOmnibarActionsStripUi;
+  readonly actionUi = { root: 'text-hell-danger' } satisfies HellOmnibarActionUi;
+  readonly groupUi = { root: 'gap-hell-2' } satisfies HellOmnibarGroupUi;
+  readonly groupLabelUi = { root: 'text-hell-danger' } satisfies HellOmnibarGroupLabelUi;
+  readonly itemUi = { root: 'rounded-none' } satisfies HellOmnibarItemUi;
+  readonly itemIconUi = { root: 'text-hell-danger' } satisfies HellOmnibarItemIconUi;
+  readonly itemTextUi = { root: 'gap-hell-2' } satisfies HellOmnibarItemTextUi;
+  readonly itemSubtextUi = { root: 'text-hell-danger' } satisfies HellOmnibarItemSubtextUi;
+  readonly itemTrailingUi = { root: 'text-hell-danger' } satisfies HellOmnibarItemTrailingUi;
+}
+
 describe('HellOmnibar interactions', () => {
   let scrollIntoViewDescriptor: PropertyDescriptor | undefined;
 
@@ -147,7 +220,7 @@ describe('HellOmnibar interactions', () => {
     });
 
     await TestBed.configureTestingModule({
-      imports: [OmnibarHost, OmnibarDisabledItemHost],
+      imports: [OmnibarHost, OmnibarDisabledItemHost, OmnibarPartStyleHost],
     }).compileComponents();
   });
 
@@ -201,7 +274,71 @@ describe('HellOmnibar interactions', () => {
     expect(query(overlayRoot(), '[data-contract="custom-loading"]').textContent).toContain(
       'Custom loading 2',
     );
-    expect(overlayRoot().querySelector('[data-slot="skeleton-row"]')).toBeNull();
+    expect(overlayRoot().querySelector('[data-slot="skeletonRow"]')).toBeNull();
+  });
+
+  it('applies Part Style Maps to the root, portaled panel, and projected directives', async () => {
+    const fixture = TestBed.createComponent(OmnibarPartStyleHost);
+    fixture.detectChanges();
+
+    const root = query<HTMLElement>(fixture.nativeElement, 'hell-omnibar');
+    expect(root.getAttribute('data-slot')).toBe('root');
+    expect(root.className).toContain('max-w-[420px]');
+
+    fixture.componentInstance.ui.set(fixture.componentInstance.objectUi);
+    fixture.detectChanges();
+
+    expect(root.className).toContain('max-w-[500px]');
+    expect(root.className).toContain('rounded-none');
+    expect(query<HTMLElement>(root, '[data-slot="control"]').className).toContain(
+      'border-hell-danger',
+    );
+    expect(query<HTMLElement>(root, '[data-slot="inputWrap"]').className).toContain(
+      'basis-[12rem]',
+    );
+    expect(query<HTMLInputElement>(root, '[data-slot="input"]').className).toContain(
+      'text-hell-danger',
+    );
+    expect(query<HTMLButtonElement>(root, '[data-slot="clear"]').className).toContain(
+      'text-hell-danger',
+    );
+    expect(query<HTMLElement>(root, '[hellOmnibarChip]').className).toContain('rounded-none');
+    expect(query<HTMLButtonElement>(root, '[hellOmnibarChipRemove]').className).toContain(
+      'text-hell-danger',
+    );
+
+    query<HTMLInputElement>(root, '[data-slot="input"]').dispatchEvent(new FocusEvent('focus'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const panel = query<HTMLElement>(overlayRoot(), '[data-slot="panel"]');
+    expect(panel.className).toContain('rounded-none');
+    expect(panel.className).toContain('border-hell-danger');
+    expect(query<HTMLElement>(panel, '[data-slot="actions"]').className).toContain(
+      'bg-hell-surface',
+    );
+    expect(query<HTMLElement>(panel, '[data-slot="results"]').className).toContain('gap-hell-2');
+    expect(query<HTMLElement>(panel, '[hellOmnibarActions]').className).toContain('gap-hell-3');
+    expect(query<HTMLButtonElement>(panel, '[hellOmnibarAction]').className).toContain(
+      'text-hell-danger',
+    );
+    expect(query<HTMLElement>(panel, '[hellOmnibarGroup]').className).toContain('gap-hell-2');
+    expect(query<HTMLElement>(panel, '[hellOmnibarGroupLabel]').className).toContain(
+      'text-hell-danger',
+    );
+    expect(query<HTMLButtonElement>(panel, '[hellOmnibarItem]').className).toContain(
+      'rounded-none',
+    );
+    expect(query<HTMLElement>(panel, '[hellOmnibarItemIcon]').className).toContain(
+      'text-hell-danger',
+    );
+    expect(query<HTMLElement>(panel, '[hellOmnibarItemText]').className).toContain('gap-hell-2');
+    expect(query<HTMLElement>(panel, '[hellOmnibarItemSubtext]').className).toContain(
+      'text-hell-danger',
+    );
+    expect(query<HTMLElement>(panel, '[hellOmnibarItemTrailing]').className).toContain(
+      'text-hell-danger',
+    );
   });
 
   it('moves active results with the keyboard and submits without closing when requested', () => {
@@ -464,7 +601,7 @@ describe('HellOmnibar interactions', () => {
 
     const panel = query(overlayRoot(), '[data-slot="panel"]');
     expect(fixture.nativeElement.contains(panel)).toBe(false);
-    expect(panel.classList).toContain('hell-omnibar-panel-surface');
+    expect(panel.getAttribute('data-slot')).toBe('panel');
     expect(panel.style.getPropertyValue('--hell-omnibar-panel-max-height')).toBe('123px');
   });
 

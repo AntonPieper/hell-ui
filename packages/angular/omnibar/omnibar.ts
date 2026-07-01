@@ -47,7 +47,7 @@ import {
   matchHotkey,
 } from '@hell-ui/angular/internal/hotkeys';
 import { HellOmnibarRuntime } from './omnibar.runtime';
-import { HellStyleable } from '@hell-ui/angular/core';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
 
 /**
  * Advanced contract implemented by omnibar item directives. Custom items can
@@ -111,6 +111,127 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
   },
 ];
 
+export type HellOmnibarPart =
+  | 'root'
+  | 'control'
+  | 'inputWrap'
+  | 'input'
+  | 'clear'
+  | 'panel'
+  | 'actions'
+  | 'results'
+  | 'loading'
+  | 'skeletonRow'
+  | 'skeletonText'
+  | 'empty';
+
+export type HellOmnibarUi = HellUi<HellOmnibarPart>;
+
+export type HellOmnibarPanelPart = 'root';
+export type HellOmnibarPanelUi = HellUi<HellOmnibarPanelPart>;
+
+export type HellOmnibarGroupPart = 'root';
+export type HellOmnibarGroupUi = HellUi<HellOmnibarGroupPart>;
+
+export type HellOmnibarGroupLabelPart = 'root';
+export type HellOmnibarGroupLabelUi = HellUi<HellOmnibarGroupLabelPart>;
+
+export type HellOmnibarItemPart = 'root';
+export type HellOmnibarItemUi = HellUi<HellOmnibarItemPart>;
+
+export type HellOmnibarItemIconPart = 'root';
+export type HellOmnibarItemIconUi = HellUi<HellOmnibarItemIconPart>;
+
+export type HellOmnibarItemTextPart = 'root';
+export type HellOmnibarItemTextUi = HellUi<HellOmnibarItemTextPart>;
+
+export type HellOmnibarItemSubtextPart = 'root';
+export type HellOmnibarItemSubtextUi = HellUi<HellOmnibarItemSubtextPart>;
+
+export type HellOmnibarItemTrailingPart = 'root';
+export type HellOmnibarItemTrailingUi = HellUi<HellOmnibarItemTrailingPart>;
+
+export type HellOmnibarChipPart = 'root';
+export type HellOmnibarChipUi = HellUi<HellOmnibarChipPart>;
+
+export type HellOmnibarChipRemovePart = 'root';
+export type HellOmnibarChipRemoveUi = HellUi<HellOmnibarChipRemovePart>;
+
+export type HellOmnibarActionsStripPart = 'root';
+export type HellOmnibarActionsStripUi = HellUi<HellOmnibarActionsStripPart>;
+
+export type HellOmnibarActionPart = 'root';
+export type HellOmnibarActionUi = HellUi<HellOmnibarActionPart>;
+
+const HELL_OMNIBAR_RECIPE = {
+  root: 'relative inline-flex w-full',
+  control:
+    'inline-flex min-h-[var(--hell-omnibar-height)] w-full items-center gap-hell-2 rounded-[var(--hell-omnibar-radius)] border border-[var(--hell-omnibar-border)] bg-[var(--hell-omnibar-bg)] px-[var(--hell-omnibar-padding-x)] py-0.5 text-[length:var(--hell-omnibar-font)] text-hell-foreground transition-[border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)]',
+  inputWrap:
+    'relative flex min-h-[calc(var(--hell-omnibar-height)_-_4px)] min-w-0 flex-1 items-center overflow-hidden',
+  input:
+    'relative h-full w-full border-0 bg-transparent p-0 font-[inherit] leading-[var(--hell-omnibar-height)] tracking-[inherit] text-hell-foreground caret-hell-primary outline-none disabled:cursor-not-allowed disabled:text-hell-foreground-muted',
+  clear:
+    'relative inline-flex h-[18px] w-[18px] flex-none cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-hell-foreground-subtle outline-none hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:bg-hell-surface-muted focus-visible:text-hell-foreground data-[empty]:hidden',
+  panel:
+    'flex max-h-[var(--hell-omnibar-panel-max-height)] w-full flex-col overflow-hidden rounded-[var(--hell-omnibar-panel-radius)] border border-hell-border bg-[var(--hell-omnibar-panel-bg)] shadow-[var(--hell-omnibar-panel-shadow)] animate-[hell-pop-in_var(--hell-duration-fast)_var(--ease-hell-out)]',
+  actions:
+    'flex items-center gap-hell-1 border-b border-hell-border bg-hell-surface-subtle p-hell-2 data-[empty=true]:hidden',
+  results: 'flex flex-1 flex-col gap-hell-1 overflow-y-auto p-hell-2',
+  loading: 'flex flex-col gap-hell-2 p-1',
+  skeletonRow: 'flex items-center gap-hell-3 px-1 py-1.5',
+  skeletonText: 'flex min-w-0 flex-1 flex-col gap-1',
+  empty: 'p-hell-4 text-center text-xs text-hell-foreground-muted',
+} satisfies HellRecipe<HellOmnibarPart>;
+
+const HELL_OMNIBAR_PANEL_RECIPE = {
+  root: '',
+} satisfies HellRecipe<HellOmnibarPanelPart>;
+
+const HELL_OMNIBAR_GROUP_RECIPE = {
+  root: 'flex flex-col gap-px',
+} satisfies HellRecipe<HellOmnibarGroupPart>;
+
+const HELL_OMNIBAR_GROUP_LABEL_RECIPE = {
+  root: 'px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-hell-foreground-muted',
+} satisfies HellRecipe<HellOmnibarGroupLabelPart>;
+
+const HELL_OMNIBAR_ITEM_RECIPE = {
+  root: 'flex w-full cursor-pointer items-center gap-hell-3 rounded-hell-sm border-0 bg-transparent px-2 py-1.5 text-start text-[13px] text-hell-foreground outline-none data-[active=true]:bg-hell-surface-muted focus-visible:shadow-[0_0_0_2px_var(--color-hell-focus-ring)]',
+} satisfies HellRecipe<HellOmnibarItemPart>;
+
+const HELL_OMNIBAR_ITEM_ICON_RECIPE = {
+  root: 'inline-flex w-4 shrink-0 items-center justify-center text-hell-foreground-subtle',
+} satisfies HellRecipe<HellOmnibarItemIconPart>;
+
+const HELL_OMNIBAR_ITEM_TEXT_RECIPE = {
+  root: 'flex min-w-0 flex-1 flex-col gap-px overflow-hidden [&>*]:overflow-hidden [&>*]:text-ellipsis [&>*]:whitespace-nowrap',
+} satisfies HellRecipe<HellOmnibarItemTextPart>;
+
+const HELL_OMNIBAR_ITEM_SUBTEXT_RECIPE = {
+  root: 'text-[11px] text-hell-foreground-muted',
+} satisfies HellRecipe<HellOmnibarItemSubtextPart>;
+
+const HELL_OMNIBAR_ITEM_TRAILING_RECIPE = {
+  root: 'ms-auto inline-flex items-center gap-1 text-[11px] text-hell-foreground-muted',
+} satisfies HellRecipe<HellOmnibarItemTrailingPart>;
+
+const HELL_OMNIBAR_CHIP_RECIPE = {
+  root: 'inline-flex min-h-[22px] max-w-[180px] items-center gap-1 whitespace-nowrap rounded-hell-sm border border-hell-border bg-hell-surface-muted ps-1.5 pe-0.5 text-[11px] leading-[1.2] text-hell-foreground',
+} satisfies HellRecipe<HellOmnibarChipPart>;
+
+const HELL_OMNIBAR_CHIP_REMOVE_RECIPE = {
+  root: 'inline-flex h-[18px] w-[18px] items-center justify-center rounded-hell-sm border-0 bg-transparent p-0 text-hell-foreground-subtle outline-none hover:bg-hell-surface-subtle hover:text-hell-foreground focus-visible:bg-hell-surface-subtle focus-visible:text-hell-foreground',
+} satisfies HellRecipe<HellOmnibarChipRemovePart>;
+
+const HELL_OMNIBAR_ACTIONS_STRIP_RECIPE = {
+  root: '',
+} satisfies HellRecipe<HellOmnibarActionsStripPart>;
+
+const HELL_OMNIBAR_ACTION_RECIPE = {
+  root: 'inline-flex h-hell-control-sm cursor-pointer items-center gap-hell-1 rounded-hell-sm border border-transparent bg-transparent px-hell-3 text-xs text-hell-foreground-muted outline-none transition-[background-color,color,border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:bg-hell-surface-muted focus-visible:text-hell-foreground focus-visible:shadow-[0_0_0_2px_var(--color-hell-focus-ring)] data-[active=true]:border-[color-mix(in_oklab,var(--color-hell-primary)_16%,transparent)] data-[active=true]:bg-hell-primary-soft data-[active=true]:text-hell-primary',
+} satisfies HellRecipe<HellOmnibarActionPart>;
+
 /**
  * Composite command palette searchbox with a debounced search service,
  * configurable actions strip, grouped results, and optional global hotkey.
@@ -145,19 +266,28 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
     { provide: HELL_FLOATING_SCOPE, useExisting: forwardRef(() => HellOmnibar) },
   ],
   host: {
-    '[class.hell-omnibar]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-open]': 'isOpen() ? "true" : null',
     '[attr.data-size]': 'size()',
     '[attr.data-empty]': 'isEmpty() ? "true" : null',
   },
   template: `
-    <div data-slot="control" hellSearch cdkOverlayOrigin #overlayOrigin="cdkOverlayOrigin" #control>
+    <div
+      data-slot="control"
+      [class]="part('control')"
+      hellSearch
+      cdkOverlayOrigin
+      #overlayOrigin="cdkOverlayOrigin"
+      #control
+    >
       <ng-content select="[hellOmnibarLeading]" />
-      <div data-slot="input-wrap" #wrap>
+      <div data-slot="inputWrap" [class]="part('inputWrap')" #wrap>
         <input
           #input
           ngpInput
           data-slot="input"
+          [class]="part('input')"
           type="search"
           [id]="inputId"
           [attr.role]="'combobox'"
@@ -183,6 +313,7 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
       <button
         hellSearchClear
         data-slot="clear"
+        [class]="part('clear')"
         type="button"
         [attr.aria-label]="labels.omnibar.clearSearch"
         [attr.data-empty]="value() ? null : ''"
@@ -215,21 +346,30 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
         #panel
         data-slot="panel"
         [id]="panelId + '-surface'"
-        [class.hell-omnibar-panel-surface]="!unstyled()"
+        [class]="part('panel')"
       >
-        <div data-slot="actions" [attr.data-empty]="!hasActions() ? 'true' : null">
+        <div
+          data-slot="actions"
+          [class]="part('actions')"
+          [attr.data-empty]="!hasActions() ? 'true' : null"
+        >
           <ng-content select="[hellOmnibarActions]" />
         </div>
-        <div data-slot="results" [id]="panelId" role="listbox">
+        <div data-slot="results" [class]="part('results')" [id]="panelId" role="listbox">
           @if (loading()) {
-            <div data-slot="loading" role="status" [attr.aria-label]="loadingMessage()">
+            <div
+              data-slot="loading"
+              [class]="part('loading')"
+              role="status"
+              [attr.aria-label]="loadingMessage()"
+            >
               @if (loadingTemplate(); as tpl) {
                 <ng-container *ngTemplateOutlet="tpl; context: loadingTemplateContext()" />
               } @else {
                 @for (row of skeletonRows(); track row) {
-                  <div data-slot="skeleton-row">
+                  <div data-slot="skeletonRow" [class]="part('skeletonRow')">
                     <div hellSkeleton shape="circle" width="18px" height="18px"></div>
-                    <div data-slot="skeleton-text">
+                    <div data-slot="skeletonText" [class]="part('skeletonText')">
                       <div hellSkeleton width="70%" height="12px"></div>
                       <div hellSkeleton width="46%" height="10px"></div>
                     </div>
@@ -243,7 +383,7 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
               @if (emptyTemplate(); as tpl) {
                 <ng-container *ngTemplateOutlet="tpl" />
               } @else {
-                <div data-slot="empty">{{ emptyMessage() }}</div>
+                <div data-slot="empty" [class]="part('empty')">{{ emptyMessage() }}</div>
               }
             }
           }
@@ -255,7 +395,9 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
   `,
   exportAs: 'hellOmnibar',
 })
-export class HellOmnibar extends HellStyleable implements HellFloatingScope {
+export class HellOmnibar extends HellPartStyleable<HellOmnibarPart> implements HellFloatingScope {
+  protected readonly recipe = HELL_OMNIBAR_RECIPE;
+  protected readonly defaultUiPart = 'root';
   protected readonly labels = inject<HellLabels>(HELL_LABELS);
   private readonly overlay = inject(Overlay);
   private readonly ngZone = inject(NgZone);
@@ -787,27 +929,36 @@ export class HellOmnibar extends HellStyleable implements HellFloatingScope {
 
 @Directive({
   selector: '[hellOmnibarPanel]',
-  host: { '[class.hell-omnibar-panel-content]': '!unstyled()' },
+  host: { '[class]': "part('root')", 'data-slot': 'root' },
 })
-export class HellOmnibarPanel extends HellStyleable {}
+export class HellOmnibarPanel extends HellPartStyleable<HellOmnibarPanelPart> {
+  protected readonly recipe = HELL_OMNIBAR_PANEL_RECIPE;
+  protected readonly defaultUiPart = 'root';
+}
 
 @Directive({
   selector: '[hellOmnibarGroup]',
   host: {
-    '[class.hell-omnibar-group]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     role: 'group',
     '[attr.aria-label]': 'label() || null',
   },
 })
-export class HellOmnibarGroup extends HellStyleable {
+export class HellOmnibarGroup extends HellPartStyleable<HellOmnibarGroupPart> {
+  protected readonly recipe = HELL_OMNIBAR_GROUP_RECIPE;
+  protected readonly defaultUiPart = 'root';
   readonly label = input<string>('');
 }
 
 @Directive({
   selector: '[hellOmnibarGroupLabel]',
-  host: { '[class.hell-omnibar-group-label]': '!unstyled()', role: 'presentation' },
+  host: { '[class]': "part('root')", 'data-slot': 'root', role: 'presentation' },
 })
-export class HellOmnibarGroupLabel extends HellStyleable {}
+export class HellOmnibarGroupLabel extends HellPartStyleable<HellOmnibarGroupLabelPart> {
+  protected readonly recipe = HELL_OMNIBAR_GROUP_LABEL_RECIPE;
+  protected readonly defaultUiPart = 'root';
+}
 
 /**
  * A selectable result row. `[value]` is the payload emitted via `(select)`
@@ -817,7 +968,8 @@ export class HellOmnibarGroupLabel extends HellStyleable {}
 @Directive({
   selector: 'button[hellOmnibarItem]',
   host: {
-    '[class.hell-omnibar-item]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[id]': 'itemId',
     role: 'option',
     type: 'button',
@@ -832,9 +984,12 @@ export class HellOmnibarGroupLabel extends HellStyleable {}
   },
 })
 export class HellOmnibarItem<T = unknown>
-  extends HellStyleable
+  extends HellPartStyleable<HellOmnibarItemPart>
   implements HellOmnibarRegisteredItem
 {
+  protected readonly recipe = HELL_OMNIBAR_ITEM_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly itemValue = input<T>(undefined as T, { alias: 'value' });
   readonly closeOnSelect = input(true, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
@@ -884,43 +1039,62 @@ export class HellOmnibarItem<T = unknown>
 
 @Directive({
   selector: '[hellOmnibarItemIcon]',
-  host: { '[class.hell-omnibar-item-icon]': '!unstyled()', 'aria-hidden': 'true' },
+  host: { '[class]': "part('root')", 'data-slot': 'root', 'aria-hidden': 'true' },
 })
-export class HellOmnibarItemIcon extends HellStyleable {}
+export class HellOmnibarItemIcon extends HellPartStyleable<HellOmnibarItemIconPart> {
+  protected readonly recipe = HELL_OMNIBAR_ITEM_ICON_RECIPE;
+  protected readonly defaultUiPart = 'root';
+}
 
 @Directive({
   selector: '[hellOmnibarItemText]',
-  host: { '[class.hell-omnibar-item-text]': '!unstyled()' },
+  host: { '[class]': "part('root')", 'data-slot': 'root' },
 })
-export class HellOmnibarItemText extends HellStyleable {}
+export class HellOmnibarItemText extends HellPartStyleable<HellOmnibarItemTextPart> {
+  protected readonly recipe = HELL_OMNIBAR_ITEM_TEXT_RECIPE;
+  protected readonly defaultUiPart = 'root';
+}
 
 @Directive({
   selector: '[hellOmnibarItemSubtext]',
-  host: { '[class.hell-omnibar-item-subtext]': '!unstyled()' },
+  host: { '[class]': "part('root')", 'data-slot': 'root' },
 })
-export class HellOmnibarItemSubtext extends HellStyleable {}
+export class HellOmnibarItemSubtext extends HellPartStyleable<HellOmnibarItemSubtextPart> {
+  protected readonly recipe = HELL_OMNIBAR_ITEM_SUBTEXT_RECIPE;
+  protected readonly defaultUiPart = 'root';
+}
 
 @Directive({
   selector: '[hellOmnibarItemTrailing]',
-  host: { '[class.hell-omnibar-item-trailing]': '!unstyled()' },
+  host: { '[class]': "part('root')", 'data-slot': 'root' },
 })
-export class HellOmnibarItemTrailing extends HellStyleable {}
+export class HellOmnibarItemTrailing extends HellPartStyleable<HellOmnibarItemTrailingPart> {
+  protected readonly recipe = HELL_OMNIBAR_ITEM_TRAILING_RECIPE;
+  protected readonly defaultUiPart = 'root';
+}
 
 @Directive({
   selector: '[hellOmnibarChip]',
-  host: { '[class.hell-omnibar-chip]': '!unstyled()' },
+  host: { '[class]': "part('root')", 'data-slot': 'root' },
 })
-export class HellOmnibarChip extends HellStyleable {}
+export class HellOmnibarChip extends HellPartStyleable<HellOmnibarChipPart> {
+  protected readonly recipe = HELL_OMNIBAR_CHIP_RECIPE;
+  protected readonly defaultUiPart = 'root';
+}
 
 @Directive({
   selector: 'button[hellOmnibarChipRemove]',
   host: {
-    '[class.hell-omnibar-chip-remove]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     type: 'button',
     '[attr.tabindex]': 'tabIndex()',
   },
 })
-export class HellOmnibarChipRemove extends HellStyleable {
+export class HellOmnibarChipRemove extends HellPartStyleable<HellOmnibarChipRemovePart> {
+  protected readonly recipe = HELL_OMNIBAR_CHIP_REMOVE_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   private readonly omnibar = inject(HellOmnibar, { optional: true });
 
   protected tabIndex(): -1 | null {
@@ -931,25 +1105,36 @@ export class HellOmnibarChipRemove extends HellStyleable {
 @Directive({
   selector: '[hellOmnibarActions]',
   host: {
-    '[class.hell-omnibar-actions-strip]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     role: 'toolbar',
     'aria-orientation': 'horizontal',
   },
 })
-export class HellOmnibarActionsStrip extends HellStyleable {}
+export class HellOmnibarActionsStrip extends HellPartStyleable<HellOmnibarActionsStripPart> {
+  protected readonly recipe = HELL_OMNIBAR_ACTIONS_STRIP_RECIPE;
+  protected readonly defaultUiPart = 'root';
+}
 
 /** Action button rendered in the actions strip. */
 @Directive({
   selector: 'button[hellOmnibarAction]',
   host: {
-    '[class.hell-omnibar-action]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     type: 'button',
     '[attr.tabindex]': 'tabIndex()',
     '[attr.data-active]': 'pressed() ? "true" : null',
     '(keydown)': 'onKeyDown($event)',
   },
 })
-export class HellOmnibarAction extends HellStyleable implements HellOmnibarRegisteredAction {
+export class HellOmnibarAction
+  extends HellPartStyleable<HellOmnibarActionPart>
+  implements HellOmnibarRegisteredAction
+{
+  protected readonly recipe = HELL_OMNIBAR_ACTION_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly pressed = input(false, { transform: booleanAttribute });
 
   private readonly host = inject(ElementRef<HTMLButtonElement>);
