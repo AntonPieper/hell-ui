@@ -327,9 +327,14 @@ test.describe('Hell UI browser behavior', () => {
 
     await expect(toasts).toHaveCount(8);
     await expect(frontToast).toBeVisible();
-    const collapsedFrontWidth = await frontToast.evaluate(
-      (element) => element.getBoundingClientRect().width,
-    );
+    await expect
+      .poll(() =>
+        viewport.evaluate((element) =>
+          Number.parseFloat(getComputedStyle(element).paddingInlineEnd),
+        ),
+      )
+      .toBeGreaterThanOrEqual(9);
+    const collapsedFrontWidth = await frontToast.evaluate((element) => element.offsetWidth);
 
     await notifications.hover();
     await expect(notifications.locator('[data-slot="dismissAll"]')).toBeVisible();
@@ -338,7 +343,7 @@ test.describe('Hell UI browser behavior', () => {
     await expect
       .poll(() =>
         frontToast.evaluate(
-          (element, width) => Math.abs(element.getBoundingClientRect().width - width),
+          (element, width) => Math.abs(element.offsetWidth - width),
           collapsedFrontWidth,
         ),
       )
@@ -355,8 +360,7 @@ test.describe('Hell UI browser behavior', () => {
         }).length;
       });
 
-    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(resolve)));
-    expect(await renderedToastCount()).toBeGreaterThanOrEqual(3);
+    await expect.poll(renderedToastCount).toBeGreaterThanOrEqual(3);
 
     await expect
       .poll(() =>
