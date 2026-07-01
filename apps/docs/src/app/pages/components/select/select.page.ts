@@ -5,11 +5,15 @@ import { SelectBasicExample } from './examples/basic.example';
 import selectBasicExampleCodeRaw from './examples/basic.example.ts?raw' with { loader: 'text' };
 import { SelectBasicPresetExample } from './examples/basic-preset.example';
 import selectBasicPresetExampleCodeRaw from './examples/basic-preset.example.ts?raw' with { loader: 'text' };
+import { SelectStylingExample } from './examples/styling.example';
+import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-select',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, ...HELL_SELECT_DIRECTIVES, ...HELL_SELECT_BASIC_DIRECTIVES, SelectBasicExample, SelectBasicPresetExample],
+  imports: [ExampleTabs, ...HELL_SELECT_DIRECTIVES, ...HELL_SELECT_BASIC_DIRECTIVES, SelectBasicExample, SelectBasicPresetExample, SelectStylingExample],
   template: `
     <article class="hd-prose">
       <h1>Select</h1>
@@ -34,6 +38,14 @@ import selectBasicPresetExampleCodeRaw from './examples/basic-preset.example.ts?
       <h2>Preset</h2>
       <hd-example-tabs [code]="selectBasicPresetExampleCode">
         <app-select-basic-preset-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        <code>hell-select-basic</code> is owned anatomy, so <code>HellSelectBasicUi</code> is a flat multi-part map: <code>trigger</code>, <code>value</code>, <code>placeholder</code>, <code>dropdown</code>, and <code>option</code>. The same part names appear in DOM as <code>data-slot</code> values.
+      </p>
+      <hd-example-tabs [code]="selectStylingExampleCode" previewClass="min-h-[220px]">
+        <app-select-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -89,4 +101,5 @@ import selectBasicPresetExampleCodeRaw from './examples/basic-preset.example.ts?
 export class SelectPage {
   protected readonly selectBasicExampleCode = selectBasicExampleCodeRaw;
   protected readonly selectBasicPresetExampleCode = selectBasicPresetExampleCodeRaw;
+  protected readonly selectStylingExampleCode = selectStylingExampleCodeRaw;
 }

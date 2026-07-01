@@ -4,11 +4,15 @@ import { SearchBasicExample } from './examples/basic.example';
 import searchBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
 };
+import { SearchStylingExample } from './examples/styling.example';
+import searchStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-search',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, SearchBasicExample],
+  imports: [ExampleTabs, SearchBasicExample, SearchStylingExample],
   template: `
     <article class="hd-prose">
       <h1>Search</h1>
@@ -21,6 +25,14 @@ import searchBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
       <h2>Basic</h2>
       <hd-example-tabs [code]="searchBasicExampleCode">
         <app-search-basic-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        The search wrapper, input, and clear affordance each keep their own narrow <code>ui</code> contract. Refine the part you own instead of styling through descendant selectors.
+      </p>
+      <hd-example-tabs [code]="searchStylingExampleCode">
+        <app-search-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -45,4 +57,5 @@ import searchBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
 })
 export class SearchPage {
   protected readonly searchBasicExampleCode = searchBasicExampleCodeRaw;
+  protected readonly searchStylingExampleCode = searchStylingExampleCodeRaw;
 }

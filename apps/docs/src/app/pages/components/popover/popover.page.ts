@@ -4,11 +4,15 @@ import { PopoverExampleExample } from './examples/example.example';
 import popoverExampleExampleCodeRaw from './examples/example.example.ts?raw' with {
   loader: 'text',
 };
+import { PopoverStylingExample } from './examples/styling.example';
+import popoverStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-popover',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, PopoverExampleExample],
+  imports: [ExampleTabs, PopoverExampleExample, PopoverStylingExample],
   template: `
     <article class="hd-prose">
       <h1>Popover</h1>
@@ -20,6 +24,14 @@ import popoverExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
       <h2>Example</h2>
       <hd-example-tabs [code]="popoverExampleExampleCode">
         <app-popover-example-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        The popover panel is its <code>root</code> Public Part — even though it renders in an overlay, it stays part of <code>HellPopoverUi</code>. Portaling changes DOM location, not ownership.
+      </p>
+      <hd-example-tabs [code]="popoverStylingExampleCode">
+        <app-popover-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -50,4 +62,5 @@ import popoverExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
 })
 export class PopoverPage {
   protected readonly popoverExampleExampleCode = popoverExampleExampleCodeRaw;
+  protected readonly popoverStylingExampleCode = popoverStylingExampleCodeRaw;
 }

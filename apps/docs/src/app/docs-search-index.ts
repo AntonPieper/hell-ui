@@ -63,6 +63,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'avatar with-image components/avatar/examples/with-image.example components/avatar hell-avatar',
   },
   {
+    title: 'Avatar: Styling',
+    path: '/components/avatar',
+    detail: 'components/avatar/examples/styling.example.ts',
+    terms:
+      'avatar styling components/avatar/examples/styling.example components/avatar hell-avatar ui Part Style Map data-slot root HellAvatarUi',
+  },
+  {
     title: 'Breadcrumbs: Custom Separator',
     path: '/components/breadcrumbs',
     detail: 'components/breadcrumbs/examples/custom-separator.example.ts',
@@ -89,6 +96,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     detail: 'components/breadcrumbs/examples/with-icons.example.ts',
     terms:
       'breadcrumbs with-icons components/breadcrumbs/examples/with-icons.example components/breadcrumbs hellBreadcrumbs hell-icon',
+  },
+  {
+    title: 'Breadcrumbs: Styling',
+    path: '/components/breadcrumbs',
+    detail: 'components/breadcrumbs/examples/styling.example.ts',
+    terms:
+      'breadcrumbs styling components/breadcrumbs/examples/styling.example components/breadcrumbs hellBreadcrumbs hellBreadcrumbLink hellBreadcrumbPage ui Part Style Map data-slot root HellBreadcrumbLinkUi HellBreadcrumbPageUi',
   },
   {
     title: 'Button: Block',
@@ -167,6 +181,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'checkbox native components/checkbox/examples/native.example components/checkbox hellNativeCheckbox HellNativeCheckboxUi ui part style map',
   },
   {
+    title: 'Checkbox: Styling',
+    path: '/components/checkbox',
+    detail: 'components/checkbox/examples/styling.example.ts',
+    terms:
+      'checkbox styling components/checkbox/examples/styling.example components/checkbox hellCheckbox ui Part Style Map data-slot root data-checked HellCheckboxUi',
+  },
+  {
     title: 'Combobox: Basic',
     path: '/components/combobox',
     detail: 'components/combobox/examples/basic.example.ts',
@@ -186,6 +207,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     detail: 'components/combobox/examples/basic-preset.example.ts',
     terms:
       'combobox preset components/combobox/examples/basic-preset.example components/combobox hell-combobox-basic HellComboboxBasic HellComboboxBasicUi ui Part Style Map data-slot root control input button dropdown option empty',
+  },
+  {
+    title: 'Combobox: Styling',
+    path: '/components/combobox',
+    detail: 'components/combobox/examples/styling.example.ts',
+    terms:
+      'combobox styling components/combobox/examples/styling.example components/combobox hell-combobox-basic ui Part Style Map data-slot control input dropdown option empty HellComboboxBasicUi HellComboboxBasicPart',
   },
   {
     title: 'Date Picker: Bounded',
@@ -216,6 +244,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'date-picker single-date components/date-picker/examples/single-date.example components/date-picker hell-date-picker ui HellDatePickerUi root header navButton label grid weekdayHeader cell dateButton data-slot',
   },
   {
+    title: 'Date Picker: Styling',
+    path: '/components/date-picker',
+    detail: 'components/date-picker/examples/styling.example.ts',
+    terms:
+      'date-picker styling components/date-picker/examples/styling.example components/date-picker hell-date-picker ui Part Style Map data-slot root label dateButton HellDatePickerUi HellDatePickerPart',
+  },
+  {
     title: 'Dialog: Example',
     path: '/components/dialog',
     detail: 'components/dialog/examples/example.example.ts',
@@ -228,6 +263,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     detail: 'components/dialog/examples/scoped-to-app-shell-content.example.ts',
     terms:
       'dialog scoped-to-app-shell-content components/dialog/examples/scoped-to-app-shell-content.example components/dialog hellDialogScope hellAppContent ui Part Style Map HellDialogUi HellDialogOverlayUi scoped overlay data-slot',
+  },
+  {
+    title: 'Dialog: Styling',
+    path: '/components/dialog',
+    detail: 'components/dialog/examples/styling.example.ts',
+    terms:
+      'dialog styling components/dialog/examples/styling.example components/dialog hellDialog hellDialogOverlay hellDialogTitle ui Part Style Map data-slot root HellDialogUi HellDialogOverlayUi',
   },
   {
     title: 'Field: Horizontal',
@@ -251,6 +293,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'flyout example-boundary-keeps-siblings-interactive components/flyout/examples/example-boundary-keeps-siblings-interactive.example components/flyout hellFlyout hellFlyoutTrigger boundary HellFlyoutUi ui Part Style Map data-slot root',
   },
   {
+    title: 'Flyout: Styling',
+    path: '/components/flyout',
+    detail: 'components/flyout/examples/styling.example.ts',
+    terms:
+      'flyout styling components/flyout/examples/styling.example components/flyout hellFlyout ui Part Style Map data-slot root HellFlyoutUi',
+  },
+  {
     title: 'Icon: Example',
     path: '/components/icon',
     detail: 'components/icon/examples/example.example.ts',
@@ -268,6 +317,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/icon',
     detail: 'components/icon/examples/sizes.example.ts',
     terms: 'icon sizes components/icon/examples/sizes.example components/icon hell-icon size',
+  },
+  {
+    title: 'Icon: Styling',
+    path: '/components/icon',
+    detail: 'components/icon/examples/styling.example.ts',
+    terms:
+      'icon styling components/icon/examples/styling.example components/icon hell-icon ui Part Style Map data-slot root HellIconUi',
   },
   {
     title: 'Input: Select',
@@ -311,6 +367,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'listbox basic components/listbox/examples/basic.example components/listbox HELL_LISTBOX_DIRECTIVES hellListbox hellListboxOption hellListboxHeader HellListboxUi HellListboxOptionUi HellListboxSectionUi HellListboxHeaderUi valueChange option ui Part Style Map data-slot root',
   },
   {
+    title: 'Listbox: Styling',
+    path: '/components/listbox',
+    detail: 'components/listbox/examples/styling.example.ts',
+    terms:
+      'listbox styling components/listbox/examples/styling.example components/listbox hellListbox hellListboxOption ui Part Style Map data-slot root data-active HellListboxUi HellListboxOptionUi',
+  },
+  {
     title: 'Menu: Basic',
     path: '/components/menu',
     detail: 'components/menu/examples/basic.example.ts',
@@ -323,6 +386,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     detail: 'components/menu/examples/with-icons-sections-submenus.example.ts',
     terms:
       'menu with-icons-sections-submenus components/menu/examples/with-icons-sections-submenus.example components/menu hellMenu hellSubmenuTrigger hellMenuSection hellMenuItemCheckbox hellMenuItemRadio hellMenuItemIndicator HellMenuUi HellMenuItemUi HellSubmenuTriggerUi HellMenuItemCheckboxUi HellMenuItemRadioUi HellMenuItemIndicatorUi HellMenuSectionUi HellMenuLabelUi HellMenuItemIconUi HellMenuItemTrailingUi HellMenuSeparatorUi ui Part Style Map data-slot root',
+  },
+  {
+    title: 'Menu: Styling',
+    path: '/components/menu',
+    detail: 'components/menu/examples/styling.example.ts',
+    terms:
+      'menu styling components/menu/examples/styling.example components/menu hellMenu hellMenuItem ui Part Style Map data-slot root data-active HellMenuUi HellMenuItemUi',
   },
   {
     title: 'Pagination: Basic',
@@ -353,11 +423,25 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'pagination jump select page jump components/pagination/examples/jump.example components/pagination hell-pagination mode',
   },
   {
+    title: 'Pagination: Styling',
+    path: '/components/pagination',
+    detail: 'components/pagination/examples/styling.example.ts',
+    terms:
+      'pagination styling components/pagination/examples/styling.example components/pagination hell-pagination ui Part Style Map data-slot root status HellPaginationStripUi HellPaginationStripPart',
+  },
+  {
     title: 'Popover: Example',
     path: '/components/popover',
     detail: 'components/popover/examples/example.example.ts',
     terms:
       'popover example components/popover/examples/example.example components/popover hellPopover hellPopoverTrigger HellPopoverUi ui Part Style Map data-slot root',
+  },
+  {
+    title: 'Popover: Styling',
+    path: '/components/popover',
+    detail: 'components/popover/examples/styling.example.ts',
+    terms:
+      'popover styling components/popover/examples/styling.example components/popover hellPopover ui Part Style Map data-slot root HellPopoverUi',
   },
   {
     title: 'Progress: Examples',
@@ -395,11 +479,25 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'radio native components/radio/examples/native.example components/radio hellNativeRadio hellNativeRadioGroup HellNativeRadioUi HellNativeRadioGroupUi ui part style map',
   },
   {
+    title: 'Radio: Styling',
+    path: '/components/radio',
+    detail: 'components/radio/examples/styling.example.ts',
+    terms:
+      'radio styling components/radio/examples/styling.example components/radio hellRadioGroup hellRadio ui Part Style Map data-slot root data-checked HellRadioUi',
+  },
+  {
     title: 'Search: Basic',
     path: '/components/search',
     detail: 'components/search/examples/basic.example.ts',
     terms:
       'search basic components/search/examples/basic.example components/search HELL_SEARCH_DIRECTIVES hellSearch hellSearchClear clear input local filtering',
+  },
+  {
+    title: 'Search: Styling',
+    path: '/components/search',
+    detail: 'components/search/examples/styling.example.ts',
+    terms:
+      'search styling components/search/examples/styling.example components/search hellSearch hellSearchClear hellInput ui Part Style Map data-slot root HellSearchUi HellSearchClearUi',
   },
   {
     title: 'Select: Basic',
@@ -414,6 +512,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     detail: 'components/select/examples/basic-preset.example.ts',
     terms:
       'select preset components/select/examples/basic-preset.example components/select hell-select-basic HellSelectBasic HellSelectBasicUi ui Part Style Map data-slot root trigger value placeholder dropdown option',
+  },
+  {
+    title: 'Select: Styling',
+    path: '/components/select',
+    detail: 'components/select/examples/styling.example.ts',
+    terms:
+      'select styling components/select/examples/styling.example components/select hell-select-basic ui Part Style Map data-slot trigger dropdown option HellSelectBasicUi HellSelectBasicPart',
   },
   {
     title: 'Separator: Flush Inside A Card',
@@ -444,6 +549,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'separator vertical components/separator/examples/vertical.example components/separator hellSeparator vertical',
   },
   {
+    title: 'Separator: Styling',
+    path: '/components/separator',
+    detail: 'components/separator/examples/styling.example.ts',
+    terms:
+      'separator styling components/separator/examples/styling.example components/separator hellSeparator ui Part Style Map data-slot root HellSeparatorUi',
+  },
+  {
     title: 'Skeleton: Avatar Lines',
     path: '/components/skeleton',
     detail: 'components/skeleton/examples/avatar-lines.example.ts',
@@ -472,6 +584,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'skeleton text-lines components/skeleton/examples/text-lines.example components/skeleton hellSkeleton text',
   },
   {
+    title: 'Skeleton: Styling',
+    path: '/components/skeleton',
+    detail: 'components/skeleton/examples/styling.example.ts',
+    terms:
+      'skeleton styling components/skeleton/examples/styling.example components/skeleton hellSkeleton ui Part Style Map data-slot root HellSkeletonUi',
+  },
+  {
     title: 'Spinner: Colour',
     path: '/components/spinner',
     detail: 'components/spinner/examples/colour.example.ts',
@@ -498,6 +617,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     detail: 'components/spinner/examples/variants.example.ts',
     terms:
       'spinner variants components/spinner/examples/variants.example components/spinner hellSpinner variant',
+  },
+  {
+    title: 'Spinner: Styling',
+    path: '/components/spinner',
+    detail: 'components/spinner/examples/styling.example.ts',
+    terms:
+      'spinner styling components/spinner/examples/styling.example components/spinner hellSpinner ui Part Style Map data-slot root HellSpinnerUi',
   },
   {
     title: 'Slider: Basic',
@@ -535,6 +661,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'slider vertical components/slider/examples/vertical.example components/slider hell-slider vertical HellSliderUi ui part style map',
   },
   {
+    title: 'Slider: Styling',
+    path: '/components/slider',
+    detail: 'components/slider/examples/styling.example.ts',
+    terms:
+      'slider styling components/slider/examples/styling.example components/slider hell-slider ui Part Style Map data-slot root track range thumb HellSliderPart HellSliderUi',
+  },
+  {
     title: 'Switch: Examples',
     path: '/components/switch',
     detail: 'components/switch/examples/examples.example.ts',
@@ -547,6 +680,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     detail: 'components/switch/examples/native.example.ts',
     terms:
       'switch native components/switch/examples/native.example components/switch hellNativeSwitch HellNativeSwitchUi ui part style map',
+  },
+  {
+    title: 'Switch: Styling',
+    path: '/components/switch',
+    detail: 'components/switch/examples/styling.example.ts',
+    terms:
+      'switch styling components/switch/examples/styling.example components/switch hellSwitch ui Part Style Map data-slot root thumb data-checked HellSwitchPart HellSwitchUi',
   },
   {
     title: 'Tabs: Example',
@@ -611,6 +751,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'toggle toggle-group-single components/toggle/examples/toggle-group-single.example components/toggle hellToggleGroup single HellToggleGroupUi HellToggleGroupItemUi ui part style map',
   },
   {
+    title: 'Toggle: Styling',
+    path: '/components/toggle',
+    detail: 'components/toggle/examples/styling.example.ts',
+    terms:
+      'toggle styling components/toggle/examples/styling.example components/toggle hellToggle ui Part Style Map data-slot root HellToggleUi',
+  },
+  {
     title: 'Tooltip: Example',
     path: '/components/tooltip',
     detail: 'components/tooltip/examples/example.example.ts',
@@ -630,6 +777,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     detail: 'components/tooltip/examples/hoverable.example.ts',
     terms:
       'tooltip hoverable components/tooltip/examples/hoverable.example components/tooltip hellTooltip hoverableContent HellTooltipUi ui Part Style Map data-slot root',
+  },
+  {
+    title: 'Tooltip: Styling',
+    path: '/components/tooltip',
+    detail: 'components/tooltip/examples/styling.example.ts',
+    terms:
+      'tooltip styling components/tooltip/examples/styling.example components/tooltip hellTooltip ui Part Style Map data-slot root HellTooltipUi',
   },
   {
     title: 'App Shell: Live Miniature',
@@ -665,6 +819,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     detail: 'components/audio-player/examples/with-title-and-date.example.ts',
     terms:
       'audio-player with-title-and-date components/audio-player/examples/with-title-and-date.example components/audio-player hell-audio-player ui Part Style Map HellAudioPlayerUi meta title date controls transport data-slot',
+  },
+  {
+    title: 'Audio Player: Styling',
+    path: '/components/audio-player',
+    detail: 'components/audio-player/examples/styling.example.ts',
+    terms:
+      'audio-player styling components/audio-player/examples/styling.example components/audio-player hell-audio-player ui Part Style Map data-slot root playButton title HellAudioPlayerUi HellAudioPlayerPart',
   },
   {
     title: 'Avatar Group: Basic',
@@ -716,6 +877,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'date-input text-input-calendar-popover components/date-input/examples/text-input-calendar-popover.example components/date-input hell-date-input popover ui HellDateInputUi pickerPanel triggerIcon data-slot',
   },
   {
+    title: 'Date Input: Styling',
+    path: '/components/date-input',
+    detail: 'components/date-input/examples/styling.example.ts',
+    terms:
+      'date-input styling components/date-input/examples/styling.example components/date-input hell-date-input ui Part Style Map data-slot root input trigger pickerPanel HellDateInputUi HellDateInputPart',
+  },
+  {
     title: 'Dialpad: Example',
     path: '/components/dialpad',
     detail: 'components/dialpad/examples/example.example.ts',
@@ -751,11 +919,25 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'drop-zone single-file-images-only components/drop-zone/examples/single-file-images-only.example components/drop-zone hellDropzone image accept',
   },
   {
+    title: 'Drop Zone: Styling',
+    path: '/components/drop-zone',
+    detail: 'components/drop-zone/examples/styling.example.ts',
+    terms:
+      'drop-zone styling components/drop-zone/examples/styling.example components/drop-zone hellDropzone ui Part Style Map data-slot root HellDropZoneUi',
+  },
+  {
     title: 'Omnibar: Async Search',
     path: '/components/omnibar',
     detail: 'components/omnibar/examples/async-search.example.ts',
     terms:
       'omnibar async-search components/omnibar/examples/async-search.example components/omnibar hell-omnibar HELL_OMNIBAR_DIRECTIVES command palette backend async search searchSource searchFields ranking debounce starter hotkey adapter search scope ui Part Style Map HellOmnibarUi panel actions results loading skeletonRow skeletonText empty data-slot',
+  },
+  {
+    title: 'Omnibar: Styling',
+    path: '/components/omnibar',
+    detail: 'components/omnibar/examples/styling.example.ts',
+    terms:
+      'omnibar styling components/omnibar/examples/styling.example components/omnibar hell-omnibar ui Part Style Map data-slot control inputWrap input panel HellOmnibarUi HellOmnibarPart',
   },
   {
     title: 'Resizable: Grip Handle 5',
@@ -828,6 +1010,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'time-input sizes components/time-input/examples/sizes.example components/time-input hell-time-input size ui HellTimeInputUi root input trigger',
   },
   {
+    title: 'Time Input: Styling',
+    path: '/components/time-input',
+    detail: 'components/time-input/examples/styling.example.ts',
+    terms:
+      'time-input styling components/time-input/examples/styling.example components/time-input hell-time-input ui Part Style Map data-slot root input trigger pickerPanel HellTimeInputUi HellTimeInputPart',
+  },
+  {
     title: 'Toast: Action',
     path: '/components/toast',
     detail: 'components/toast/examples/action.example.ts',
@@ -868,6 +1057,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     detail: 'components/code-editor/examples/editor-demo.example.ts',
     terms:
       'code-editor editor-demo components/code-editor/examples/editor-demo.example components/code-editor hell-code-editor CodeMirror ui Part Style Map HellCodeEditorUi root editor value readOnly data-readonly data-slot',
+  },
+  {
+    title: 'Code Editor: Styling',
+    path: '/components/code-editor',
+    detail: 'components/code-editor/examples/styling.example.ts',
+    terms:
+      'code-editor styling components/code-editor/examples/styling.example components/code-editor hell-code-editor ui Part Style Map data-slot root editor HellCodeEditorUi HellCodeEditorPart',
   },
   {
     title: 'Table: Primitive Table',

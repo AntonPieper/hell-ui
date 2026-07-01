@@ -15,6 +15,10 @@ import { MenuWithIconsSectionsSubmenusExample } from './examples/with-icons-sect
 import menuWithIconsSectionsSubmenusExampleCodeRaw from './examples/with-icons-sections-submenus.example.ts?raw' with {
   loader: 'text',
 };
+import { MenuStylingExample } from './examples/styling.example';
+import menuStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 const HD_MENU_PAGE_ICONS = {
   faSolidClock,
@@ -32,7 +36,7 @@ const HD_MENU_PAGE_ICONS = {
     ExampleTabs,
     ...HELL_MENU_DIRECTIVES,
     MenuBasicExample,
-    MenuWithIconsSectionsSubmenusExample,
+    MenuWithIconsSectionsSubmenusExample, MenuStylingExample,
   ],
   template: `
     <article class="hd-prose">
@@ -52,6 +56,14 @@ const HD_MENU_PAGE_ICONS = {
       <h2>With icons, sections &amp; submenus</h2>
       <hd-example-tabs [code]="menuWithIconsSectionsSubmenusExampleCode">
         <app-menu-with-icons-sections-submenus-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        The menu panel and each item expose their own <code>root</code> Public Part (<code>HellMenuUi</code>, <code>HellMenuItemUi</code>). Use state attributes such as <code>data-active</code> for highlight styling instead of hover-only CSS.
+      </p>
+      <hd-example-tabs [code]="menuStylingExampleCode">
+        <app-menu-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -99,4 +111,5 @@ export class MenuPage {
   protected readonly menuBasicExampleCode = menuBasicExampleCodeRaw;
   protected readonly menuWithIconsSectionsSubmenusExampleCode =
     menuWithIconsSectionsSubmenusExampleCodeRaw;
+  protected readonly menuStylingExampleCode = menuStylingExampleCodeRaw;
 }

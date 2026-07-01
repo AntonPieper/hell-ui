@@ -4,11 +4,15 @@ import { ListboxBasicExample } from './examples/basic.example';
 import listboxBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
 };
+import { ListboxStylingExample } from './examples/styling.example';
+import listboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-listbox',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, ListboxBasicExample],
+  imports: [ExampleTabs, ListboxBasicExample, ListboxStylingExample],
   template: `
     <article class="hd-prose">
       <h1>Listbox</h1>
@@ -20,6 +24,14 @@ import listboxBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
       <h2>Basic</h2>
       <hd-example-tabs [code]="listboxBasicExampleCode">
         <app-listbox-basic-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        Listbox and options expose their own <code>root</code> Public Parts (<code>HellListboxUi</code>, <code>HellListboxOptionUi</code>). Per-option emphasis belongs on the option's own <code>ui</code>, combined with <code>data-active</code> state utilities.
+      </p>
+      <hd-example-tabs [code]="listboxStylingExampleCode">
+        <app-listbox-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -46,4 +58,5 @@ import listboxBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
 })
 export class ListboxPage {
   protected readonly listboxBasicExampleCode = listboxBasicExampleCodeRaw;
+  protected readonly listboxStylingExampleCode = listboxStylingExampleCodeRaw;
 }

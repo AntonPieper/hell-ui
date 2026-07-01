@@ -16,6 +16,10 @@ import { SeparatorVerticalExample } from './examples/vertical.example';
 import separatorVerticalExampleCodeRaw from './examples/vertical.example.ts?raw' with {
   loader: 'text',
 };
+import { SeparatorStylingExample } from './examples/styling.example';
+import separatorStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-separator',
@@ -25,7 +29,7 @@ import separatorVerticalExampleCodeRaw from './examples/vertical.example.ts?raw'
     SeparatorHorizontalExample,
     SeparatorSpacingOptionsExample,
     SeparatorVerticalExample,
-    SeparatorFlushInsideACardExample,
+    SeparatorFlushInsideACardExample, SeparatorStylingExample,
   ],
   template: `
     <article class="hd-prose">
@@ -56,6 +60,14 @@ import separatorVerticalExampleCodeRaw from './examples/vertical.example.ts?raw'
       <h2>Flush (inside a card)</h2>
       <hd-example-tabs [code]="separatorFlushInsideACardExampleCode">
         <app-separator-flush-inside-a-card-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        <code>HellSeparatorUi</code> refines the separator's <code>root</code> Public Part. Conflicting height and background utilities deterministically replace the recipe's hairline defaults.
+      </p>
+      <hd-example-tabs [code]="separatorStylingExampleCode" previewClass="grid max-w-md gap-2">
+        <app-separator-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -101,4 +113,5 @@ export class SeparatorPage {
   protected readonly separatorSpacingOptionsExampleCode = separatorSpacingOptionsExampleCodeRaw;
   protected readonly separatorVerticalExampleCode = separatorVerticalExampleCodeRaw;
   protected readonly separatorFlushInsideACardExampleCode = separatorFlushInsideACardExampleCodeRaw;
+  protected readonly separatorStylingExampleCode = separatorStylingExampleCodeRaw;
 }

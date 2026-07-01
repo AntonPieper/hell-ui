@@ -5,11 +5,15 @@ import { OmnibarAsyncSearchExample } from './examples/async-search.example';
 import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts?raw' with {
   loader: 'text',
 };
+import { OmnibarStylingExample } from './examples/styling.example';
+import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-omnibar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CodeBlock, ExampleTabs, OmnibarAsyncSearchExample],
+  imports: [CodeBlock, ExampleTabs, OmnibarAsyncSearchExample, OmnibarStylingExample],
   template: `
     <article class="hd-prose">
       <h1>Omnibar</h1>
@@ -23,6 +27,14 @@ import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts
       <h2>Async search</h2>
       <hd-example-tabs [code]="omnibarAsyncSearchExampleCode">
         <app-omnibar-async-search-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        <code>HellOmnibarPart</code> uses canonical camelCase names such as <code>inputWrap</code> that match the rendered <code>data-slot</code> values. Projected children like items and groups expose their own <code>ui</code> contracts.
+      </p>
+      <hd-example-tabs [code]="omnibarStylingExampleCode" previewClass="min-h-[200px]">
+        <app-omnibar-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -98,4 +110,5 @@ provideHellSearchRanker((items, request) => {
 
   return ranked.map((result) => ({ item: result.item, score: result.score }));
 });`;
+  protected readonly omnibarStylingExampleCode = omnibarStylingExampleCodeRaw;
 }

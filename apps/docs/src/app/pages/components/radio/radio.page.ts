@@ -12,11 +12,15 @@ import { RadioNativeExample } from './examples/native.example';
 import radioNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
   loader: 'text',
 };
+import { RadioStylingExample } from './examples/styling.example';
+import radioStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-radio',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, RadioExampleExample, RadioHorizontalExample, RadioNativeExample],
+  imports: [ExampleTabs, RadioExampleExample, RadioHorizontalExample, RadioNativeExample, RadioStylingExample],
   template: `
     <article class="hd-prose">
       <h1>Radio</h1>
@@ -41,6 +45,14 @@ import radioNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
       <h2>Native path</h2>
       <hd-example-tabs [code]="radioNativeExampleCode">
         <app-radio-native-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        <code>HellRadioUi</code> refines each radio's <code>root</code> Public Part. State attributes such as <code>data-checked</code> let <code>ui</code> express selected styling without touching the indicator internals.
+      </p>
+      <hd-example-tabs [code]="radioStylingExampleCode">
+        <app-radio-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -84,4 +96,5 @@ export class RadioPage {
   protected readonly radioExampleExampleCode = radioExampleExampleCodeRaw;
   protected readonly radioHorizontalExampleCode = radioHorizontalExampleCodeRaw;
   protected readonly radioNativeExampleCode = radioNativeExampleCodeRaw;
+  protected readonly radioStylingExampleCode = radioStylingExampleCodeRaw;
 }

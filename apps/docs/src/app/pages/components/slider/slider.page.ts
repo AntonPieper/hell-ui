@@ -20,6 +20,10 @@ import { SliderVerticalExample } from './examples/vertical.example';
 import sliderVerticalExampleCodeRaw from './examples/vertical.example.ts?raw' with {
   loader: 'text',
 };
+import { SliderStylingExample } from './examples/styling.example';
+import sliderStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-slider',
@@ -30,7 +34,7 @@ import sliderVerticalExampleCodeRaw from './examples/vertical.example.ts?raw' wi
     SliderSizesExample,
     SliderHoverRevealedThumbExample,
     SliderVerticalExample,
-    SliderDisabledExample,
+    SliderDisabledExample, SliderStylingExample,
   ],
   template: `
     <article class="hd-prose">
@@ -76,6 +80,14 @@ import sliderVerticalExampleCodeRaw from './examples/vertical.example.ts?raw' wi
       <h2>Disabled</h2>
       <hd-example-tabs [code]="sliderDisabledExampleCode" previewClass="max-w-md">
         <app-slider-disabled-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        Slider is a multi-part component: <code>HellSliderPart</code> is <code>root | track | range | thumb</code>. The <code>[ui]</code> map targets each named Public Part; matching <code>data-slot</code> attributes mark them in the DOM.
+      </p>
+      <hd-example-tabs [code]="sliderStylingExampleCode" previewClass="flex max-w-md items-center gap-4">
+        <app-slider-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -125,4 +137,5 @@ export class SliderPage {
   protected readonly sliderHoverRevealedThumbExampleCode = sliderHoverRevealedThumbExampleCodeRaw;
   protected readonly sliderVerticalExampleCode = sliderVerticalExampleCodeRaw;
   protected readonly sliderDisabledExampleCode = sliderDisabledExampleCodeRaw;
+  protected readonly sliderStylingExampleCode = sliderStylingExampleCodeRaw;
 }

@@ -12,11 +12,15 @@ import { AvatarWithImageExample } from './examples/with-image.example';
 import avatarWithImageExampleCodeRaw from './examples/with-image.example.ts?raw' with {
   loader: 'text',
 };
+import { AvatarStylingExample } from './examples/styling.example';
+import avatarStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-avatar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, AvatarSizesExample, AvatarWithImageExample, AvatarSquareShapeExample],
+  imports: [ExampleTabs, AvatarSizesExample, AvatarWithImageExample, AvatarSquareShapeExample, AvatarStylingExample],
   template: `
     <article class="hd-prose">
       <h1>Avatar</h1>
@@ -38,6 +42,14 @@ import avatarWithImageExampleCodeRaw from './examples/with-image.example.ts?raw'
       <h2>Square shape</h2>
       <hd-example-tabs [code]="avatarSquareShapeExampleCode" previewClass="flex gap-3">
         <app-avatar-square-shape-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        Refine the avatar's <code>root</code> Public Part with <code>ui</code>. <code>HellAvatarUi</code> merges your Tailwind classes into the default Part Recipe through one deterministic pipeline, so conflicting utilities reliably win.
+      </p>
+      <hd-example-tabs [code]="avatarStylingExampleCode" previewClass="flex items-center gap-3">
+        <app-avatar-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -67,4 +79,5 @@ export class AvatarPage {
   protected readonly avatarSizesExampleCode = avatarSizesExampleCodeRaw;
   protected readonly avatarWithImageExampleCode = avatarWithImageExampleCodeRaw;
   protected readonly avatarSquareShapeExampleCode = avatarSquareShapeExampleCodeRaw;
+  protected readonly avatarStylingExampleCode = avatarStylingExampleCodeRaw;
 }

@@ -16,6 +16,10 @@ import { DatePickerSingleDateExample } from './examples/single-date.example';
 import datePickerSingleDateExampleCodeRaw from './examples/single-date.example.ts?raw' with {
   loader: 'text'
 };
+import { DatePickerStylingExample } from './examples/styling.example';
+import datePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-date-picker',
@@ -25,7 +29,7 @@ import datePickerSingleDateExampleCodeRaw from './examples/single-date.example.t
     DatePickerSingleDateExample,
     DatePickerBoundedExample,
     DatePickerRangeExample,
-    DatePickerDisabledExample,
+    DatePickerDisabledExample, DatePickerStylingExample,
   ],
   template: `
     <article class="hd-prose">
@@ -76,6 +80,14 @@ import datePickerSingleDateExampleCodeRaw from './examples/single-date.example.t
         <app-date-picker-disabled-example />
       </hd-example-tabs>
 
+      <h2>Part style map</h2>
+      <p>
+        <code>HellDatePickerPart</code> names the calendar anatomy: <code>header</code>, <code>nav</code>, <code>label</code>, <code>grid</code>, <code>cell</code>, and <code>dateButton</code>. Selected and today states stay expressed through <code>data-*</code> attributes.
+      </p>
+      <hd-example-tabs [code]="datePickerStylingExampleCode">
+        <app-date-picker-styling-example />
+      </hd-example-tabs>
+
       <h2>API</h2>
       <h3><code>hell-date-picker</code></h3>
       <ul>
@@ -124,4 +136,5 @@ export class DatePickerPage {
   protected readonly datePickerBoundedExampleCode = datePickerBoundedExampleCodeRaw;
   protected readonly datePickerRangeExampleCode = datePickerRangeExampleCodeRaw;
   protected readonly datePickerDisabledExampleCode = datePickerDisabledExampleCodeRaw;
+  protected readonly datePickerStylingExampleCode = datePickerStylingExampleCodeRaw;
 }

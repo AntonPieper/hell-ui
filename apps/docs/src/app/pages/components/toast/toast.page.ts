@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { CodeBlock } from '../../../shared/code-block';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { ToastActionExample } from './examples/action.example';
 import toastActionExampleCodeRaw from './examples/action.example.ts?raw' with {
@@ -21,6 +22,7 @@ import toastVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
   selector: 'hd-toast',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CodeBlock,
     ExampleTabs,
     ToastVariantsExample,
     ToastActionExample,
@@ -88,6 +90,22 @@ import toastVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
       <hd-example-tabs [code]="toastStackingExampleCode">
         <app-toast-stacking-example />
       </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        <code>HellToasterPart</code> names the stack anatomy — <code>toast</code>,
+        <code>glyph</code>, <code>title</code>, <code>description</code>, <code>action</code>,
+        <code>close</code>, <code>toolbar</code>, and <code>dismissAll</code> — with matching
+        <code>data-slot</code> markers on every rendered toast. Because an app renders exactly one
+        global toaster (this docs app included), pass <code>[ui]</code> where that single
+        <code>&lt;hell-toaster /&gt;</code> lives:
+      </p>
+      <hd-code-block [code]="toasterStylingCode" />
+      <p>
+        Repeated toasts share the static <code>toast</code> part name; per-variant emphasis flows
+        through <code>data-*</code> state attributes rather than indexed or variant-suffixed part
+        keys.
+      </p>
 
       <h2>API</h2>
       <h3><code>HellToastService</code></h3>
@@ -160,4 +178,14 @@ export class ToastPage {
   protected readonly toastPersistentCustomContentExampleCode =
     toastPersistentCustomContentExampleCodeRaw;
   protected readonly toastStackingExampleCode = toastStackingExampleCodeRaw;
+  protected readonly toasterStylingCode = `<hell-toaster
+  position="bottom-right"
+  [ui]="{
+    toast: 'border-hell-primary bg-hell-surface-elevated',
+    title: 'text-hell-primary',
+    close: 'data-hover:text-hell-danger',
+    dismissAll: 'font-semibold',
+  }"
+/>
+`;
 }

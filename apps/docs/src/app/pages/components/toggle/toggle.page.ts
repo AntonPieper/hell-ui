@@ -16,6 +16,10 @@ import { ToggleToggleGroupSingleExample } from './examples/toggle-group-single.e
 import toggleToggleGroupSingleExampleCodeRaw from './examples/toggle-group-single.example.ts?raw' with {
   loader: 'text',
 };
+import { ToggleStylingExample } from './examples/styling.example';
+import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-toggle',
@@ -25,7 +29,7 @@ import toggleToggleGroupSingleExampleCodeRaw from './examples/toggle-group-singl
     ToggleSingleToggleExample,
     ToggleToggleGroupSingleExample,
     ToggleToggleGroupMultipleExample,
-    ToggleDisabledExample,
+    ToggleDisabledExample, ToggleStylingExample,
   ],
   template: `
     <article class="hd-prose">
@@ -58,6 +62,14 @@ import toggleToggleGroupSingleExampleCodeRaw from './examples/toggle-group-singl
       <h2>Disabled</h2>
       <hd-example-tabs [code]="toggleDisabledExampleCode" previewClass="flex gap-2">
         <app-toggle-disabled-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        <code>HellToggleUi</code> refines the toggle's <code>root</code> Public Part. The string shorthand and the explicit map are equivalent for single-part directives.
+      </p>
+      <hd-example-tabs [code]="toggleStylingExampleCode" previewClass="flex flex-wrap items-center gap-2">
+        <app-toggle-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -98,4 +110,5 @@ export class TogglePage {
   protected readonly toggleToggleGroupSingleExampleCode = toggleToggleGroupSingleExampleCodeRaw;
   protected readonly toggleToggleGroupMultipleExampleCode = toggleToggleGroupMultipleExampleCodeRaw;
   protected readonly toggleDisabledExampleCode = toggleDisabledExampleCodeRaw;
+  protected readonly toggleStylingExampleCode = toggleStylingExampleCodeRaw;
 }

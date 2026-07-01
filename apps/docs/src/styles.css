@@ -39,12 +39,11 @@
 @import '@hell-ui/angular/tabs/styles.css';
 @import '@hell-ui/angular/tag/styles.css';
 @import '@hell-ui/angular/time-input/styles.css';
+@import '@hell-ui/angular/toast/styles.css';
 @import '@hell-ui/angular/toggle/styles.css';
 @import '@hell-ui/angular/tooltip/styles.css';
 
 @source "./app";
-/* Toast structural CSS is lazy-linked; keep its Part Recipe utilities in the docs build. */
-@source "../../../packages/angular/toast/toast.ts";
 
 @layer components {
   .hd-prose {

@@ -17,6 +17,10 @@ import { SpinnerVariantsExample } from './examples/variants.example';
 import spinnerVariantsExampleCodeRaw from './examples/variants.example.ts?raw' with {
   loader: 'text',
 };
+import { SpinnerStylingExample } from './examples/styling.example';
+import spinnerStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-spinner',
@@ -27,7 +31,7 @@ import spinnerVariantsExampleCodeRaw from './examples/variants.example.ts?raw' w
     SpinnerVariantsExample,
     SpinnerSizesExample,
     SpinnerColourExample,
-    SpinnerInsideAButtonExample,
+    SpinnerInsideAButtonExample, SpinnerStylingExample,
   ],
   template: `
     <article class="hd-prose">
@@ -79,6 +83,14 @@ import spinnerVariantsExampleCodeRaw from './examples/variants.example.ts?raw' w
         <app-spinner-inside-a-button-example />
       </hd-example-tabs>
 
+      <h2>Part style map</h2>
+      <p>
+        <code>HellSpinnerUi</code> refines the spinner's <code>root</code> Public Part. The recipe sets font-size per <code>size</code> variant; a conflicting <code>ui</code> font-size wins through the Part-Class Pipeline.
+      </p>
+      <hd-example-tabs [code]="spinnerStylingExampleCode" previewClass="flex items-center gap-4">
+        <app-spinner-styling-example />
+      </hd-example-tabs>
+
       <h2>API</h2>
       <ul>
         <li><code>variant</code>: <code>ring | dots | bars | pulse</code></li>
@@ -113,4 +125,5 @@ export class SpinnerPage {
   protected readonly spinnerSizesExampleCode = spinnerSizesExampleCodeRaw;
   protected readonly spinnerColourExampleCode = spinnerColourExampleCodeRaw;
   protected readonly spinnerInsideAButtonExampleCode = spinnerInsideAButtonExampleCodeRaw;
+  protected readonly spinnerStylingExampleCode = spinnerStylingExampleCodeRaw;
 }

@@ -16,6 +16,10 @@ import { PaginationJumpExample } from './examples/jump.example';
 import paginationJumpExampleCodeRaw from './examples/jump.example.ts?raw' with {
   loader: 'text',
 };
+import { PaginationStylingExample } from './examples/styling.example';
+import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-pagination',
@@ -25,7 +29,7 @@ import paginationJumpExampleCodeRaw from './examples/jump.example.ts?raw' with {
     PaginationBasicExample,
     PaginationLargerWindowExample,
     PaginationPreviousNextExample,
-    PaginationJumpExample,
+    PaginationJumpExample, PaginationStylingExample,
   ],
   template: `
     <article class="hd-prose">
@@ -80,6 +84,14 @@ import paginationJumpExampleCodeRaw from './examples/jump.example.ts?raw' with {
         <app-pagination-jump-example />
       </hd-example-tabs>
 
+      <h2>Part style map</h2>
+      <p>
+        <code>HellPaginationStripUi</code> names the strip's owned anatomy — <code>root</code>, <code>status</code>, and the jump controls — so density and emphasis changes stay declarative.
+      </p>
+      <hd-example-tabs [code]="paginationStylingExampleCode" previewClass="flex items-center gap-3">
+        <app-pagination-styling-example />
+      </hd-example-tabs>
+
       <h2>API</h2>
       <ul>
         <li>
@@ -120,4 +132,5 @@ export class PaginationPage {
   protected readonly paginationLargerWindowExampleCode = paginationLargerWindowExampleCodeRaw;
   protected readonly paginationPreviousNextExampleCode = paginationPreviousNextExampleCodeRaw;
   protected readonly paginationJumpExampleCode = paginationJumpExampleCodeRaw;
+  protected readonly paginationStylingExampleCode = paginationStylingExampleCodeRaw;
 }

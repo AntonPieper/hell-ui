@@ -12,6 +12,10 @@ import { AudioPlayerWithTitleAndDateExample } from './examples/with-title-and-da
 import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and-date.example.ts?raw' with {
   loader: 'text',
 };
+import { AudioPlayerStylingExample } from './examples/styling.example';
+import audioPlayerStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-audio-player',
@@ -20,7 +24,7 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
     ExampleTabs,
     AudioPlayerWithTitleAndDateExample,
     AudioPlayerUntitledControlsOnlyExample,
-    AudioPlayerSpeechTranscriptExample,
+    AudioPlayerSpeechTranscriptExample, AudioPlayerStylingExample,
   ],
   template: `
     <article class="hd-prose">
@@ -66,6 +70,14 @@ import audioPlayerWithTitleAndDateExampleCodeRaw from './examples/with-title-and
       </p>
       <hd-example-tabs [code]="audioPlayerSpeechTranscriptExampleCode">
         <app-audio-player-speech-transcript-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        The audio player is an owned-anatomy Composite: <code>HellAudioPlayerUi</code> names player-owned parts such as <code>playButton</code>, <code>seek</code>, and <code>title</code> — not the internals of the primitives it happens to render.
+      </p>
+      <hd-example-tabs [code]="audioPlayerStylingExampleCode" previewClass="grid gap-3">
+        <app-audio-player-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -160,4 +172,5 @@ export class AudioPlayerPage {
   protected readonly audioPlayerUntitledControlsOnlyExampleCode =
     audioPlayerUntitledControlsOnlyExampleCodeRaw;
   protected readonly audioPlayerSpeechTranscriptExampleCode = audioPlayerSpeechTranscriptExampleCodeRaw;
+  protected readonly audioPlayerStylingExampleCode = audioPlayerStylingExampleCodeRaw;
 }

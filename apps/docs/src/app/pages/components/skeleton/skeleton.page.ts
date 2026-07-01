@@ -17,6 +17,10 @@ import { SkeletonTextLinesExample } from './examples/text-lines.example';
 import skeletonTextLinesExampleCodeRaw from './examples/text-lines.example.ts?raw' with {
   loader: 'text',
 };
+import { SkeletonStylingExample } from './examples/styling.example';
+import skeletonStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-skeleton',
@@ -27,7 +31,7 @@ import skeletonTextLinesExampleCodeRaw from './examples/text-lines.example.ts?ra
     SkeletonTextLinesExample,
     SkeletonAvatarLinesExample,
     SkeletonCardPlaceholderExample,
-    SkeletonShapesExample,
+    SkeletonShapesExample, SkeletonStylingExample,
   ],
   template: `
     <article class="hd-prose">
@@ -62,6 +66,14 @@ import skeletonTextLinesExampleCodeRaw from './examples/text-lines.example.ts?ra
       <h2>Shapes</h2>
       <hd-example-tabs [code]="skeletonShapesExampleCode" previewClass="flex items-center gap-4">
         <app-skeleton-shapes-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        Keep <code>class</code> for sizing placement (the Additive Class Hook) and use <code>ui</code> — <code>HellSkeletonUi</code> — for visual overrides such as radius and shimmer surface.
+      </p>
+      <hd-example-tabs [code]="skeletonStylingExampleCode" previewClass="grid max-w-md gap-3">
+        <app-skeleton-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -99,4 +111,5 @@ export class SkeletonPage {
   protected readonly skeletonAvatarLinesExampleCode = skeletonAvatarLinesExampleCodeRaw;
   protected readonly skeletonCardPlaceholderExampleCode = skeletonCardPlaceholderExampleCodeRaw;
   protected readonly skeletonShapesExampleCode = skeletonShapesExampleCodeRaw;
+  protected readonly skeletonStylingExampleCode = skeletonStylingExampleCodeRaw;
 }

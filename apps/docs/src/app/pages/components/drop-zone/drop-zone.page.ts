@@ -16,6 +16,10 @@ import { DropZoneNativeInputExample } from './examples/native-input.example';
 import dropZoneNativeInputExampleCodeRaw from './examples/native-input.example.ts?raw' with {
   loader: 'text',
 };
+import { DropZoneStylingExample } from './examples/styling.example';
+import dropZoneStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 @Component({
   selector: 'hd-drop-zone',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,7 +28,7 @@ import dropZoneNativeInputExampleCodeRaw from './examples/native-input.example.t
     DropZoneExampleExample,
     DropZoneNativeInputExample,
     DropZoneSingleFileImagesOnlyExample,
-    DropZoneDisabledExample,
+    DropZoneDisabledExample, DropZoneStylingExample,
   ],
   template: `
     <article class="hd-prose">
@@ -52,6 +56,14 @@ import dropZoneNativeInputExampleCodeRaw from './examples/native-input.example.t
       <h2>Disabled</h2>
       <hd-example-tabs [code]="dropZoneDisabledExampleCode">
         <app-drop-zone-disabled-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        <code>HellDropZoneUi</code> refines the drop zone's <code>root</code> Public Part. Conflicting border and surface utilities replace the recipe defaults while drag, keyboard, and file behavior stay intact.
+      </p>
+      <hd-example-tabs [code]="dropZoneStylingExampleCode" previewClass="grid max-w-md gap-3">
+        <app-drop-zone-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -89,4 +101,5 @@ export class DropZonePage {
     dropZoneSingleFileImagesOnlyExampleCodeRaw;
   protected readonly dropZoneNativeInputExampleCode = dropZoneNativeInputExampleCodeRaw;
   protected readonly dropZoneDisabledExampleCode = dropZoneDisabledExampleCodeRaw;
+  protected readonly dropZoneStylingExampleCode = dropZoneStylingExampleCodeRaw;
 }

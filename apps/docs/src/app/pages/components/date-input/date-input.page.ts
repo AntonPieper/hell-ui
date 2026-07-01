@@ -18,6 +18,10 @@ import { DateInputReactiveFormsExample } from './examples/reactive-forms.example
 import dateInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.example.ts?raw' with {
   loader: 'text',
 };
+import { DateInputStylingExample } from './examples/styling.example';
+import dateInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-date-input',
@@ -29,7 +33,7 @@ import dateInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
     DateInputTextInputCalendarPopoverExample,
     DateInputReactiveFormsExample,
     DateInputSizesExample,
-    DateInputPlaceholdersAndLabelsExample,
+    DateInputPlaceholdersAndLabelsExample, DateInputStylingExample,
   ],
   template: `
     <article class="hd-prose">
@@ -68,6 +72,14 @@ import dateInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
         previewClass="grid gap-3 max-w-md"
       >
         <app-date-input-placeholders-and-labels-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        <code>HellDateInputPart</code> covers <code>root</code>, <code>input</code>, <code>trigger</code>, <code>triggerIcon</code>, and <code>pickerPanel</code>. The picker panel keeps its part identity even though it renders in an overlay.
+      </p>
+      <hd-example-tabs [code]="dateInputStylingExampleCode" previewClass="min-h-[120px]">
+        <app-date-input-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -138,4 +150,5 @@ export class DateInputPage {
   protected readonly dateInputSizesExampleCode = dateInputSizesExampleCodeRaw;
   protected readonly dateInputPlaceholdersAndLabelsExampleCode =
     dateInputPlaceholdersAndLabelsExampleCodeRaw;
+  protected readonly dateInputStylingExampleCode = dateInputStylingExampleCodeRaw;
 }

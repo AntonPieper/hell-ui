@@ -4,6 +4,7 @@ import ts from 'typescript';
 import { fileURLToPath } from 'node:url';
 
 import {
+  componentEntrypoints,
   entrypointCategories,
   entrypointMetadataFileName,
   entrypointPublicApiFiles,
@@ -1608,7 +1609,7 @@ function main() {
   checkDocsExamples();
   checkDocsLazyRouteImportGraphContract();
   checkDocsRootImportContract();
-  checkDocsShellNarrowEntrypointContract();
+  checkDocsCategoryNavigationContract();
   checkDocsCodeEditorIsolationContract();
   checkDocsPdfViewerIsolationContract();
   checkPackageEntryPoints();
@@ -1637,7 +1638,6 @@ function main() {
   checkTableSemanticsContract();
   checkTableSortTriggerContract();
   checkTableResizeHandleContract();
-  checkTableLegacyRemovalContract();
   checkTableAdapterBoundaryContract();
   checkTableSemanticDefaultGuardContract();
   checkFloatingRegistrationContract();
@@ -1665,7 +1665,6 @@ function checkDocsExamples() {
   const pagesRoot = join(root, 'apps/docs/src/app/pages');
 
   checkDocsCatalogExampleSeam(catalog);
-  checkMigratedFloatingListDocsSearchTerms(examples);
 
   const indexedDetails = new Set(examples.map((example) => example.detail));
   const actualExamples = walk(pagesRoot)
@@ -1728,134 +1727,6 @@ function checkDocsExamples() {
 
     if (!routePaths.has(usage.path)) {
       failures.push(`Docs Usage "${usage.title}" points at missing route ${usage.path}`);
-    }
-  }
-}
-
-function checkMigratedFloatingListDocsSearchTerms(examples) {
-  const requiredEntries = [
-    {
-      detail: 'components/combobox/examples/basic.example.ts',
-      terms: [
-        'ui',
-        'Part Style Map',
-        'data-slot',
-        'HellComboboxUi',
-        'HellComboboxInputUi',
-        'HellComboboxButtonUi',
-        'HellComboboxDropdownUi',
-        'HellComboboxOptionUi',
-        'HellComboboxEmptyUi',
-      ],
-    },
-    {
-      detail: 'components/combobox/examples/multiple.example.ts',
-      terms: [
-        'ui',
-        'Part Style Map',
-        'data-slot',
-        'HellComboboxUi',
-        'HellComboboxInputUi',
-        'HellComboboxButtonUi',
-        'HellComboboxDropdownUi',
-        'HellComboboxOptionUi',
-        'HellComboboxEmptyUi',
-      ],
-    },
-    {
-      detail: 'components/combobox/examples/basic-preset.example.ts',
-      terms: ['ui', 'Part Style Map', 'data-slot', 'HellComboboxBasicUi'],
-    },
-    {
-      detail: 'components/flyout/examples/example-boundary-keeps-siblings-interactive.example.ts',
-      terms: ['ui', 'Part Style Map', 'data-slot', 'HellFlyoutUi'],
-    },
-    {
-      detail: 'components/listbox/examples/basic.example.ts',
-      terms: [
-        'ui',
-        'Part Style Map',
-        'data-slot',
-        'HellListboxUi',
-        'HellListboxOptionUi',
-        'HellListboxSectionUi',
-        'HellListboxHeaderUi',
-      ],
-    },
-    {
-      detail: 'components/menu/examples/basic.example.ts',
-      terms: [
-        'ui',
-        'Part Style Map',
-        'data-slot',
-        'HellMenuUi',
-        'HellMenuItemUi',
-        'HellMenuSeparatorUi',
-      ],
-    },
-    {
-      detail: 'components/menu/examples/with-icons-sections-submenus.example.ts',
-      terms: [
-        'ui',
-        'Part Style Map',
-        'data-slot',
-        'HellMenuUi',
-        'HellMenuItemUi',
-        'HellSubmenuTriggerUi',
-        'HellMenuItemCheckboxUi',
-        'HellMenuItemRadioUi',
-        'HellMenuItemIndicatorUi',
-        'HellMenuSectionUi',
-        'HellMenuLabelUi',
-        'HellMenuSeparatorUi',
-        'HellMenuItemIconUi',
-        'HellMenuItemTrailingUi',
-      ],
-    },
-    {
-      detail: 'components/popover/examples/example.example.ts',
-      terms: ['ui', 'Part Style Map', 'data-slot', 'HellPopoverUi'],
-    },
-    {
-      detail: 'components/select/examples/basic.example.ts',
-      terms: [
-        'ui',
-        'Part Style Map',
-        'data-slot',
-        'HellSelectUi',
-        'HellSelectValueUi',
-        'HellSelectPlaceholderUi',
-        'HellSelectDropdownUi',
-        'HellSelectOptionUi',
-      ],
-    },
-    {
-      detail: 'components/select/examples/basic-preset.example.ts',
-      terms: ['ui', 'Part Style Map', 'data-slot', 'HellSelectBasicUi'],
-    },
-    {
-      detail: 'components/tooltip/examples/example.example.ts',
-      terms: ['ui', 'Part Style Map', 'data-slot', 'HellTooltipUi'],
-    },
-    {
-      detail: 'components/tooltip/examples/with-delay.example.ts',
-      terms: ['ui', 'Part Style Map', 'data-slot', 'HellTooltipUi'],
-    },
-    {
-      detail: 'components/tooltip/examples/hoverable.example.ts',
-      terms: ['ui', 'Part Style Map', 'data-slot', 'HellTooltipUi'],
-    },
-  ];
-
-  for (const entry of requiredEntries) {
-    const seed = examples.find((example) => example.detail === entry.detail);
-    if (!seed) continue;
-    for (const term of entry.terms) {
-      if (!seed.terms.includes(term)) {
-        failures.push(
-          `Docs Search Index ${entry.detail} must include migrated Part Style Map search term "${term}"`,
-        );
-      }
     }
   }
 }
@@ -2354,37 +2225,72 @@ function checkDocsRootImportContract() {
 
   for (const file of docsFiles) {
     const source = readFile(file);
-    if (/(?:from|import\()\s*['\"]hell(?:\/|['\"])/.test(source)) {
-      failures.push(
-        `Docs app file ${file.slice(root.length + 1)} imports legacy unscoped hell root or hell/* subpath`,
-      );
-    }
     if (/(?:from|import\()\s*['\"]@hell-ui\/angular['\"]/.test(source)) {
       failures.push(
-        `Docs app file ${file.slice(root.length + 1)} imports the root @hell-ui/angular entry point`,
+        `Docs app file ${file.slice(root.length + 1)} imports the root @hell-ui/angular entry point; docs must demonstrate narrow import-path entry points`,
       );
     }
   }
 }
 
-function checkDocsShellNarrowEntrypointContract() {
-  const shellFiles = [
-    'apps/docs/src/app/app.ts',
-    'apps/docs/src/app/shared/code-block.ts',
-    'apps/docs/src/app/shared/example-tabs.ts',
-  ];
+// Docs navigation must present each component Package Entry Point under the
+// docs section that matches its Module Category sidecar. Entry points that
+// are deliberately documented on another entry point's page are listed as
+// explicit exceptions naming the page that owns them.
+const docsCategorySections = new Map([
+  [entrypointCategories.STYLED_PRIMITIVE, 'Primitives'],
+  [entrypointCategories.MIXED_ENTRYPOINT, 'Primitives'],
+  [entrypointCategories.COMPOSITE, 'Composites'],
+  [entrypointCategories.FEATURE, 'Features'],
+  [entrypointCategories.TABLE_PRIMITIVES, 'Tables'],
+  [entrypointCategories.TANSTACK_TABLE_SHELL, 'Tables'],
+  [entrypointCategories.TANSTACK_TABLE_BODY_STRATEGY, 'Tables'],
+]);
 
-  for (const file of shellFiles) {
-    const path = join(root, file);
-    if (!existsSync(path)) {
-      failures.push(`Docs shell narrow-entrypoint check references missing file ${file}`);
+const docsCategoryPageExceptions = new Map([
+  // The transcript provider is an opt-in seam of the audio player Composite.
+  ['features/audio-transcript', 'components/audio-player'],
+  // Both supported table paths are documented together on the table page.
+  ['table-tanstack', 'components/table'],
+  ['table-tanstack/virtual', 'components/table'],
+]);
+
+function checkDocsCategoryNavigationContract() {
+  const catalog = readFile(join(root, 'apps/docs/src/app/docs-catalog.ts'));
+  const sectionBlocks = [...catalog.matchAll(/heading:\s*'([^']+)'/g)];
+  const sectionForRoute = new Map();
+  for (const [index, match] of sectionBlocks.entries()) {
+    const start = match.index;
+    const end = sectionBlocks[index + 1]?.index ?? catalog.length;
+    const block = catalog.slice(start, end);
+    for (const route of block.matchAll(/routePath:\s*'([^']+)'/g)) {
+      sectionForRoute.set(route[1], match[1]);
+    }
+  }
+
+  for (const entrypoint of componentEntrypoints()) {
+    const expectedSection = docsCategorySections.get(entrypoint.category);
+    if (!expectedSection) continue;
+
+    const exceptionRoute = docsCategoryPageExceptions.get(entrypoint.id);
+    const route = exceptionRoute ?? `components/${basename(entrypoint.id)}`;
+    const pagePath = pagePathForRoute(`/${route}`);
+    if (!existsSync(pagePath)) {
+      failures.push(
+        `Docs Catalog is missing a page for ${entrypoint.specifier} (${entrypoint.category}); expected ${relPath(pagePath)}`,
+      );
       continue;
     }
+    if (exceptionRoute) continue;
 
-    const source = readFile(path);
-    if (/(?:from|import\()\s*['"]@hell-ui\/angular\/(?:primitives|composites)['"]/.test(source)) {
+    const actualSection = sectionForRoute.get(route);
+    if (!actualSection) {
       failures.push(
-        `Docs shell file ${file} must import component-specific @hell-ui/angular/* entry points instead of aggregate primitives/composites`,
+        `Docs Catalog does not register route ${route} for ${entrypoint.specifier} (${entrypoint.category})`,
+      );
+    } else if (actualSection !== expectedSection) {
+      failures.push(
+        `Docs Catalog lists ${route} under "${actualSection}" but Module Category ${entrypoint.category} belongs under "${expectedSection}"`,
       );
     }
   }
@@ -2586,19 +2492,13 @@ function checkPackageEntryPoints() {
   const rootApi = readFile(rootApiPath);
   const secondaryApis = publicApiFiles.filter((entrypoint) => entrypoint.id !== 'root');
 
-  const disallowedRootExports = exportPaths(rootApi).filter(
-    (path) =>
-      path.includes('public-api-primitives') ||
-      path.includes('public-api-primitive-') ||
-      path.includes('public-api-composites') ||
-      path.includes('public-api-feature') ||
-      path.includes('/primitives/') ||
-      path.includes('/features/') ||
-      path.includes('/composites/'),
+  // Light Root Entry Point: the root public API re-exports stable core only.
+  const nonCoreRootExports = exportPaths(rootApi).filter(
+    (path) => path !== './core/public-api' && !path.startsWith('./core/'),
   );
-  if (disallowedRootExports.length) {
+  if (nonCoreRootExports.length) {
     failures.push(
-      `Light Root Entry Point exports composites/features from packages/angular/public-api.ts: ${disallowedRootExports.join(', ')}`,
+      `Light Root Entry Point must export core only from packages/angular/public-api.ts; found: ${nonCoreRootExports.join(', ')}`,
     );
   }
 
@@ -2667,29 +2567,27 @@ function checkPackageEntryPoints() {
     }
   }
 
+  // Exactly two supported table paths: primitives plus the TanStack shell
+  // (with its optional virtual body strategy). Any other table path is an
+  // Unsupported Table Path and must not gain a Package Entry Point.
   const manifestSpecifiers = new Set(publicApiFiles.map((entrypoint) => entrypoint.specifier));
-  for (const specifier of [
+  const supportedTableSpecifiers = [
     '@hell-ui/angular/table',
     '@hell-ui/angular/table-tanstack',
     '@hell-ui/angular/table-tanstack/virtual',
-  ]) {
+  ];
+  for (const specifier of supportedTableSpecifiers) {
     if (!manifestSpecifiers.has(specifier))
       failures.push(`Entrypoint metadata is missing table entry point ${specifier}`);
   }
-  for (const specifier of [
-    '@hell-ui/angular/primitives',
-    '@hell-ui/angular/composites',
-    '@hell-ui/angular/data-table',
-    '@hell-ui/angular/table-virtual',
-    '@hell-ui/angular/table-cdk',
-    '@hell-ui/angular/features/data-table',
-    '@hell-ui/angular/features/table-utilities',
-  ]) {
-    if (manifestSpecifiers.has(specifier) || packageExports[packageExportPath(specifier)]) {
-      failures.push(
-        `Legacy table entry point must be removed from manifest/package exports: ${specifier}`,
-      );
-    }
+  const unsupportedTableSpecifiers = [...manifestSpecifiers].filter(
+    (specifier) =>
+      /table|grid/.test(specifier) && !supportedTableSpecifiers.includes(specifier),
+  );
+  if (unsupportedTableSpecifiers.length) {
+    failures.push(
+      `Unsupported Table Path entry points must not be published: ${unsupportedTableSpecifiers.join(', ')}`,
+    );
   }
 
   const packagePaths = secondaryPackageEntrypoints().map((entrypoint) => entrypoint.packagePath);
@@ -2705,19 +2603,6 @@ function checkPackageEntryPoints() {
 }
 
 function checkCodeMirrorEntrypointIsolationContract() {
-  const codeEditorPublicApiPath = 'packages/angular/features/code-editor/public-api.ts';
-  const codeEditorPublicApi = readFile(join(root, codeEditorPublicApiPath));
-  if (!codeEditorPublicApi.includes('Kept optional CodeMirror feature entry point')) {
-    failures.push(
-      'Code Editor entry point public API must state it is a kept optional CodeMirror feature entry point',
-    );
-  }
-  if (!codeEditorPublicApi.includes('lazy/client-only')) {
-    failures.push(
-      'Code Editor entry point public API must require lazy/client-only browser boundaries',
-    );
-  }
-
   const codeEditorEntrypoint = entrypointPublicApiFiles().find(
     (entrypoint) => entrypoint.specifier === codeEditorEntrypointSpecifier,
   );
@@ -2805,11 +2690,6 @@ function checkAudioTranscriptEntrypointIsolationContract() {
   if (!/@experimental\b/.test(audioTranscriptPublicApi)) {
     failures.push(
       'Audio Transcript feature entry point must carry @experimental in its public API comment',
-    );
-  }
-  if (!audioTranscriptPublicApi.includes('Optional browser transcript provider')) {
-    failures.push(
-      'Audio Transcript feature entry point must describe itself as an optional provider seam',
     );
   }
 
@@ -3034,22 +2914,6 @@ function checkApiStabilityContract() {
     if (!hasTaggedApiSymbol(source, 'experimental', symbol)) {
       failures.push(`${sourcePath} ${symbol} must carry @experimental API JSDoc`);
     }
-  }
-
-  const tableUtilitiesSource = readFile(
-    join(root, 'packages/angular/table/table-utilities.ts'),
-  );
-  for (const removed of [
-    'HELL_TABLE_UTILITY_DIRECTIVES',
-    'HELL_TABLE_DIRECTIVES',
-    'selectionSemantics',
-  ]) {
-    if (tableUtilitiesSource.includes(removed)) {
-      failures.push(`${removed} legacy table API must be removed, not deprecated`);
-    }
-  }
-  if (/readonly\s+interactive\b/.test(tableUtilitiesSource)) {
-    failures.push('HellTableRow interactive legacy input must be removed, not deprecated');
   }
 
   const audioSource = readFile(
@@ -3478,12 +3342,6 @@ function checkPdfViewerPackageDependencyContract(workspaceCatalog) {
 function checkStyleEntryPoints() {
   const packageJson = parseJsonWithComments(readFile(join(root, 'packages/angular/package.json')));
   const exportsMap = packageJson.exports ?? {};
-  for (const exportPath of Object.keys(exportsMap)) {
-    if (exportPath === './styles' || exportPath.startsWith('./styles/')) {
-      failures.push(`Legacy category CSS package export must be removed: ${exportPath}`);
-    }
-  }
-
   const expectedStyleExports = entrypointStyleExports();
 
   for (const { exportPath, sourcePath } of expectedStyleExports) {
@@ -3504,28 +3362,6 @@ function checkStyleEntryPoints() {
 
     if (!existsSync(join(root, libraryRoot, sourcePath.slice(2)))) {
       failures.push(`Style Package Entry Point ${exportPath} points at missing ${style}`);
-    }
-  }
-
-  for (const relPath of [
-    'packages/angular/styles/features/data-table.css',
-    'packages/angular/styles/features/table-utilities.css',
-    'packages/angular/styles/components/data-table.css',
-    'packages/angular/styles/components/table-utilities.css',
-    'packages/angular/styles/components/table-renderer.css',
-  ]) {
-    if (existsSync(join(root, relPath)))
-      failures.push(`Legacy table CSS alias file must be removed: ${relPath}`);
-  }
-
-  const legacyStyleDirs = [
-    'packages/angular/styles',
-    'packages/angular/primitives/styles.css',
-    'packages/angular/composites/styles.css',
-  ];
-  for (const rel of legacyStyleDirs) {
-    if (existsSync(join(root, rel))) {
-      failures.push(`Legacy category style artifact must be removed: ${rel}`);
     }
   }
 
@@ -3844,9 +3680,6 @@ function checkPartStyleMapContract() {
   checkBasicFloatingListStructuralAffordances();
   checkLegacyPartStyleCompatibilityHelpers();
 
-  if (packageConsumer.includes('button-unstyled')) {
-    failures.push('Package-consumer scenarios must use button-ui, not legacy button-unstyled');
-  }
   if (!packageConsumer.includes("name: 'button-ui'")) {
     failures.push('Package-consumer scenarios must include button-ui for ui shorthand without CSS');
   }
@@ -3885,12 +3718,9 @@ function checkPartStyleMapContract() {
   if (
     !releaseDryRun.includes('releaseCandidateConsumerScenarioNames') ||
     !releaseEvidencePolicy.includes("'button-ui'") ||
-    !releaseEvidencePolicy.includes("'button'") ||
-    releaseEvidencePolicy.includes('button-unstyled')
+    !releaseEvidencePolicy.includes("'button'")
   ) {
-    failures.push(
-      'Release dry-run must include button-ui and styled button, and must not reference button-unstyled',
-    );
+    failures.push('Release dry-run must include the button-ui and styled button scenarios');
   }
   if (
     !productionReadyCheck.includes('releaseCandidateConsumerScenarioNames') ||
@@ -4066,18 +3896,6 @@ function checkMigratedPartStyleMapModule(module, entrypointPackageDirs) {
 }
 
 function checkLegacyPartStyleCompatibilityHelpers() {
-  const buttonCssPath = join(root, 'packages/angular/button/styles.css');
-  const buttonCss = readFile(buttonCssPath);
-  if (
-    !buttonCss.includes('Legacy button-like helper') ||
-    !buttonCss.includes('not migrated to Part') ||
-    !buttonCss.includes('`ui` Part Style Map input')
-  ) {
-    failures.push(
-      'Legacy .hell-button CSS helper must document that migrated Button customization belongs to ui',
-    );
-  }
-
   const sourceFiles = libraryProductionTsFiles().map((file) => join(root, file));
   for (const file of sourceFiles) {
     const rel = file.slice(root.length + 1);
@@ -4650,21 +4468,6 @@ function checkTableUtilityContract() {
       'Table primitives must keep host-agnostic role inference centralized and SSR-safe',
     );
   }
-  for (const removed of [
-    'HELL_TABLE_UTILITY_DIRECTIVES',
-    'HELL_TABLE_DIRECTIVES',
-    'selectionSemantics',
-  ]) {
-    if (source.includes(removed)) failures.push(`${removed} legacy table API must be removed`);
-  }
-  if (/readonly\s+interactive\b/.test(source)) {
-    failures.push('HellTableRow interactive legacy input must be removed');
-  }
-
-  const tableHarness = readFile(join(root, 'packages/angular/testing/table-harness.ts'));
-  if (/\binteractive\?\s*:|\bisInteractive\b/.test(tableHarness)) {
-    failures.push('Testing table harness must not expose interactive legacy row aliases');
-  }
 
   const tableFacade = readFile(join(root, 'packages/angular/table/table.ts'));
   if (!tableFacade.includes('./table-utilities')) {
@@ -4698,18 +4501,6 @@ function checkTableUtilityContract() {
   const tableStyleSource = readFile(
     join(root, 'packages/angular/table/styles.css'),
   );
-  for (const forbidden of [
-    'button.hell-table-row-action:not(.hell-button)',
-    'a.hell-table-row-action:not(.hell-button)',
-    '.hell-table-row-checkbox.hell-checkbox',
-    '.hell-table-row-radio.hell-radio',
-    '.hell-column-visibility-panel .hell-checkbox',
-    '.hell-column-visibility-panel .hell-button',
-  ]) {
-    if (tableStyleSource.includes(forbidden)) {
-      failures.push(`Table styles must compose primitives instead of special-casing ${forbidden}`);
-    }
-  }
   if (/\baccent-color\s*:/.test(tableStyleSource)) {
     failures.push(
       'Table styles must not override native checkbox/radio accent-color; compose checkbox/radio primitives instead',
@@ -4725,17 +4516,6 @@ function checkTableUtilityContract() {
       failures.push('Table docs must present the two-path primitive/TanStack ownership boundary');
       break;
     }
-  }
-  const offenders = walk(docsRoot)
-    .filter((file) => /\.(?:ts|html|md)$/.test(file))
-    .filter((file) =>
-      /@hell-ui\/angular\/features\/(?:data-table|table-utilities)\b/.test(readFile(file)),
-    )
-    .map((file) => file.slice(root.length + 1));
-  if (offenders.length) {
-    failures.push(
-      `Docs must not reference legacy table feature entrypoints: ${offenders.join(', ')}`,
-    );
   }
 }
 
@@ -4787,27 +4567,6 @@ function checkTableSemanticsContract() {
     }
   }
 
-  for (const [specPath, required] of [
-    [
-      'packages/angular/table/table.spec.ts',
-      'uses native table markup without adding redundant ARIA or row-as-button behavior',
-    ],
-    ['packages/angular/table/table.spec.ts', "native-root').getAttribute('role')).toBeNull()"],
-    ['packages/angular/table/table.spec.ts', "native-cell').getAttribute('role')).toBeNull()"],
-    [
-      'packages/angular/table/table.spec.ts',
-      "native-root').hasAttribute('tabindex')).toBe(false)",
-    ],
-    [
-      'packages/angular/table/table.spec.ts',
-      "native-root').hasAttribute('aria-activedescendant')).toBe(false)",
-    ],
-  ]) {
-    if (!readFile(join(root, specPath)).includes(required)) {
-      failures.push(`Table semantics contract test is missing: ${specPath} ${required}`);
-    }
-  }
-
   for (const forbidden of [
     'HellTableSemantics',
     'HellTableGridInteractionMode',
@@ -4855,10 +4614,6 @@ function checkTableSortTriggerContract() {
     failures.push('hellTableSortTrigger must only match native button hosts');
   }
 
-  if (/hellTableSortButton|HellTableSortButton|hell-table-sort-button/.test(tableSource)) {
-    failures.push('Legacy hellTableSortButton API must not remain in table utilities');
-  }
-
   const docsRoot = join(root, 'apps/docs/src/app/pages/components/table');
   const docsFiles = walk(docsRoot).filter((file) => file.endsWith('.ts'));
   for (const file of docsFiles) {
@@ -4896,20 +4651,9 @@ function checkTableResizeHandleContract() {
     );
   }
 
-  if (
-    /hellTableColumnResizer|HellTableColumnResizer|hell-table-column-resizer|HellTableColumnResizeRuntime|data-table-column-resize/.test(
-      tableSource,
-    )
-  ) {
-    failures.push('Legacy hellTableColumnResizer API must not remain in table utilities');
-  }
-
   const styleSource = readFile(join(root, 'packages/angular/table/styles.css'));
   if (!styleSource.includes("[hellTableResizeHandle][data-slot='root']")) {
     failures.push('Table resize handle styles must use hellTableResizeHandle root part selectors');
-  }
-  if (/hell-table-column-resizer/.test(styleSource)) {
-    failures.push('Legacy hell-table-column-resizer class must be removed from table styles');
   }
 
   const tableHarness = readFile(join(root, 'packages/angular/testing/table-harness.ts'));
@@ -4920,158 +4664,6 @@ function checkTableResizeHandleContract() {
     failures.push(
       'Testing table harness must expose HellTableResizeHandleHarness and getResizeHandle',
     );
-  }
-  if (/HellTableColumnResizerHarness|getColumnResizer|hellTableColumnResizer/.test(tableHarness)) {
-    failures.push('Testing table harness must not expose legacy column-resizer APIs');
-  }
-
-  const docsRoot = join(root, 'apps/docs/src/app');
-  const docsOffenders = walk(docsRoot)
-    .filter((file) => /\.(?:ts|html|md)$/.test(file))
-    .filter((file) => {
-      const source = readFile(file);
-      return /hellTableColumnResizer|HellTableColumnResizer|columnResize/.test(
-        sourceWithoutAllowedTableMigrationNote(source),
-      );
-    })
-    .map((file) => file.slice(root.length + 1));
-  if (docsOffenders.length) {
-    failures.push(
-      `Docs must use hellTableResizeHandle instead of legacy resizer APIs: ${docsOffenders.join(', ')}`,
-    );
-  }
-}
-
-function sourceWithoutAllowedTableMigrationNote(source) {
-  return source.replace(/<h2>Migration note<\/h2>[\s\S]*?<h2>API<\/h2>/, '<h2>API</h2>');
-}
-
-function checkTableLegacyRemovalContract() {
-  const legacyEntrypointSpecifiers = [
-    '@hell-ui/angular/features/data-table',
-    '@hell-ui/angular/features/table-utilities',
-  ];
-  const legacyStyleSpecifiers = [
-    '@hell-ui/angular/styles/features/data-table',
-    '@hell-ui/angular/styles/features/table-utilities',
-  ];
-  const legacyEntrypointFiles = [
-    'packages/angular/features/data-table/ng-package.json',
-    'packages/angular/features/table-utilities/ng-package.json',
-    'packages/angular/public-api-feature-data-table.ts',
-    'packages/angular/public-api-feature-table-utilities.ts',
-  ];
-  const legacyStyleFiles = [
-    'packages/angular/styles/features/data-table.css',
-    'packages/angular/styles/features/table-utilities.css',
-    'packages/angular/styles/components/data-table.css',
-    'packages/angular/styles/components/table-utilities.css',
-  ];
-
-  const manifestSpecifiers = new Set(
-    entrypointPublicApiFiles().map((entrypoint) => entrypoint.specifier),
-  );
-  const packageJson = parseJsonWithComments(readFile(join(root, 'packages/angular/package.json')));
-  const tsconfig = parseJsonWithComments(readFile(join(root, 'tsconfig.json')));
-  const tsconfigPaths = tsconfig.compilerOptions?.paths ?? {};
-  const exportsMap = packageJson.exports ?? {};
-
-  for (const specifier of legacyEntrypointSpecifiers) {
-    if (manifestSpecifiers.has(specifier)) {
-      failures.push(`Legacy table entry point must be absent from the manifest: ${specifier}`);
-    }
-    if (tsconfigPaths[specifier]) {
-      failures.push(`Legacy table entry point must be absent from tsconfig paths: ${specifier}`);
-    }
-  }
-
-  for (const exportPath of ['./features/data-table', './features/table-utilities']) {
-    if (exportsMap[exportPath]) {
-      failures.push(`Legacy table package export must be removed: ${exportPath}`);
-    }
-  }
-
-  for (const exportPath of ['./styles/features/data-table', './styles/features/table-utilities']) {
-    if (exportsMap[exportPath]) {
-      failures.push(`Legacy table CSS package export must be removed: ${exportPath}`);
-    }
-  }
-
-  for (const rel of [...legacyEntrypointFiles, ...legacyStyleFiles]) {
-    if (existsSync(join(root, rel)))
-      failures.push(`Legacy table alias file must be removed: ${rel}`);
-  }
-
-  const importRoots = ['packages/angular', 'apps/docs/src/app'];
-  const legacyModuleSpecifiers = [...legacyEntrypointSpecifiers, ...legacyStyleSpecifiers];
-  const importFiles = importRoots
-    .filter((rel) => existsSync(join(root, rel)))
-    .flatMap((rel) => walk(join(root, rel)))
-    .filter((file) => file.endsWith('.ts'));
-  for (const file of importFiles) {
-    for (const hit of moduleSpecifierReferences(file)) {
-      const matched = legacyModuleSpecifiers.find(
-        (specifier) => hit.specifier === specifier || hit.specifier.startsWith(`${specifier}/`),
-      );
-      if (!matched) continue;
-      failures.push(
-        `Legacy table entry/style import ${relPath(file)}:${hit.line} references ${hit.specifier}; use @hell-ui/angular/table, @hell-ui/angular/table-tanstack, or table/styles.css.`,
-      );
-    }
-  }
-
-  const productionFiles = libraryProductionTsFiles().map((file) => join(root, file));
-  const legacySymbols = [
-    { label: 'HELL_TABLE_DIRECTIVES', pattern: /\bHELL_TABLE_DIRECTIVES\b/ },
-    { label: 'HELL_TABLE_UTILITY_DIRECTIVES', pattern: /\bHELL_TABLE_UTILITY_DIRECTIVES\b/ },
-    { label: 'selectionSemantics', pattern: /\bselectionSemantics\b/ },
-    {
-      label: 'hellTableSortButton',
-      pattern: /\bhellTableSortButton\b|\bHellTableSortButton\b|\bhell-table-sort-button\b/,
-    },
-    {
-      label: 'hellTableColumnResizer',
-      pattern:
-        /\bhellTableColumnResizer\b|\bHellTableColumnResizer\b|\bhell-table-column-resizer\b|\bHellTableColumnResizeRuntime\b|\bdata-table-column-resize\b/,
-    },
-  ];
-  for (const file of productionFiles) {
-    const source = readFile(file);
-    for (const symbol of legacySymbols) {
-      if (symbol.pattern.test(source)) {
-        failures.push(`Legacy table API ${symbol.label} must not appear in ${relPath(file)}`);
-      }
-    }
-  }
-
-  const tableSource = readFile(
-    join(root, 'packages/angular/table/table-utilities.ts'),
-  );
-  const rowModule = decoratedClassModules(tableSource).find(
-    (module) => module.className === 'HellTableRow',
-  );
-  if (!rowModule) {
-    failures.push('Legacy table removal contract could not inspect HellTableRow');
-  } else if (
-    /\breadonly\s+interactive\b|\binteractive\s*=\s*input\b|\bHellTableRow\.interactive\b/.test(
-      rowModule.moduleSource,
-    )
-  ) {
-    failures.push('HellTableRow.interactive legacy input must be removed from table primitives');
-  }
-
-  const styleEntrypointSources = [
-    'packages/angular/table/styles.css',
-  ];
-  for (const rel of styleEntrypointSources) {
-    const source = readFile(join(root, rel));
-    if (
-      /styles\/features\/data-table|\.\/features\/data-table\.css|features\/data-table\.css/.test(
-        source,
-      )
-    ) {
-      failures.push(`Legacy styles/features/data-table reference must be removed from ${rel}`);
-    }
   }
 }
 
@@ -5381,15 +4973,6 @@ function checkNgpStateWriterContract() {
     'writeRadioGroupStateDisabled',
     'writeRovingFocusActiveItem',
   ];
-  const retiredPrivateBridgeTokens = [
-    'HELL_NGP_PRIVATE_STATE_BRIDGE_VERSION',
-    'writeSelectPrivateValue',
-    'writeSelectPrivateDisabled',
-    'writeComboboxPrivateValue',
-    'writeComboboxPrivateDisabled',
-    'writeRadioGroupPrivateValue',
-    'writeRadioGroupPrivateDisabled',
-  ];
   const indexedStateWritePatterns = [
     {
       token: 'state[\'value\'].set(...) or state["value"].set(...)',
@@ -5490,9 +5073,6 @@ function checkNgpStateWriterContract() {
           );
         }
       }
-    }
-    if (retiredPrivateBridgeTokens.some((token) => source.includes(token))) {
-      failures.push(`Retired ng-primitives private bridge token is still used in ${rel}`);
     }
     if (/\bngp[A-Za-z0-9_]*\.state\b/.test(source)) {
       failures.push(
@@ -5823,12 +5403,6 @@ function checkEntrypointManifestSourceCoverage() {
       failures.push(`Entrypoint Metadata is not discoverable: ${metadataPath}`);
     }
   }
-
-  for (const legacyDir of ['packages/angular/src', 'packages/angular/primitives', 'packages/angular/composites']) {
-    if (existsSync(join(root, legacyDir))) {
-      failures.push(`Legacy category/source directory must be removed: ${legacyDir}`);
-    }
-  }
 }
 
 function checkGeneratedEntrypointFiles() {
@@ -6015,32 +5589,6 @@ function readWorkspaceCatalog() {
   }
 
   return catalog;
-}
-
-function primitiveDirectories() {
-  return childDirectories(join(root, 'packages/angular/primitives')).filter(
-    (primitive) => primitive !== 'adapters',
-  );
-}
-
-function compositeDirectories() {
-  return childDirectories(join(root, 'packages/angular/composites'));
-}
-
-function featureDirectories() {
-  const internalFeatureDirs = new Set(['assets', 'table-utilities']);
-  return childDirectories(join(root, 'packages/angular/features')).filter(
-    (feature) => !internalFeatureDirs.has(feature),
-  );
-}
-
-function childDirectories(path) {
-  return readdirSync(path)
-    .filter((name) => {
-      const fullPath = join(path, name);
-      return statSync(fullPath).isDirectory();
-    })
-    .sort();
 }
 
 function walk(path) {

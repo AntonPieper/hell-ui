@@ -20,6 +20,10 @@ import iconRegisteringIconsExampleCodeRaw from './examples/registering-icons.exa
 };
 import { IconSizesExample } from './examples/sizes.example';
 import iconSizesExampleCodeRaw from './examples/sizes.example.ts?raw' with { loader: 'text' };
+import { IconStylingExample } from './examples/styling.example';
+import iconStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 const HD_ICON_PAGE_ICONS = {
   faSolidArrowDown,
@@ -39,7 +43,7 @@ const HD_ICON_PAGE_ICONS = {
     HellIcon,
     IconExampleExample,
     IconSizesExample,
-    IconRegisteringIconsExample,
+    IconRegisteringIconsExample, IconStylingExample,
   ],
   template: `
     <article class="hd-prose">
@@ -71,6 +75,14 @@ const HD_ICON_PAGE_ICONS = {
         <hell-icon name="faSolidArrowDown" />
         — both share the parent's font-size and colour.
       </p>
+
+      <h2>Part style map</h2>
+      <p>
+        <code>HellIconUi</code> refines the icon's <code>root</code> Public Part. Use <code>ui</code> when a size or color utility must beat the recipe; plain <code>class</code> stays fine for additive, non-conflicting hooks.
+      </p>
+      <hd-example-tabs [code]="iconStylingExampleCode" previewClass="flex items-center gap-3">
+        <app-icon-styling-example />
+      </hd-example-tabs>
 
       <h2>API</h2>
       <ul>
@@ -115,4 +127,5 @@ export class IconPage {
   protected readonly iconExampleExampleCode = iconExampleExampleCodeRaw;
   protected readonly iconSizesExampleCode = iconSizesExampleCodeRaw;
   protected readonly iconRegisteringIconsExampleCode = iconRegisteringIconsExampleCodeRaw;
+  protected readonly iconStylingExampleCode = iconStylingExampleCodeRaw;
 }

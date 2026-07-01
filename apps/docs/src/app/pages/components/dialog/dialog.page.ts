@@ -9,6 +9,10 @@ import { DialogScopedToAppShellContentExample } from './examples/scoped-to-app-s
 import dialogScopedToAppShellContentExampleCodeRaw from './examples/scoped-to-app-shell-content.example.ts?raw' with {
   loader: 'text',
 };
+import { DialogStylingExample } from './examples/styling.example';
+import dialogStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-dialog',
@@ -17,7 +21,7 @@ import dialogScopedToAppShellContentExampleCodeRaw from './examples/scoped-to-ap
     ExampleTabs,
     ...HELL_DIALOG_DIRECTIVES,
     DialogExampleExample,
-    DialogScopedToAppShellContentExample,
+    DialogScopedToAppShellContentExample, DialogStylingExample,
   ],
   template: `
     <article class="hd-prose">
@@ -62,6 +66,14 @@ import dialogScopedToAppShellContentExampleCodeRaw from './examples/scoped-to-ap
         Need arbitrary region instead? Mark it with <code>hellDialogScope</code> and keep
         <code>scoped</code> on overlay.
       </p>
+
+      <h2>Part style map</h2>
+      <p>
+        Overlay, dialog, title, and description are separate directives, each with its own single-part <code>ui</code> input (<code>HellDialogUi</code>, <code>HellDialogOverlayUi</code>, …). The dialog panel stays a Public Part even though it renders in an overlay.
+      </p>
+      <hd-example-tabs [code]="dialogStylingExampleCode">
+        <app-dialog-styling-example />
+      </hd-example-tabs>
 
       <h2>API</h2>
       <ul>
@@ -112,4 +124,5 @@ export class DialogPage {
   protected readonly dialogExampleExampleCode = dialogExampleExampleCodeRaw;
   protected readonly dialogScopedToAppShellContentExampleCode =
     dialogScopedToAppShellContentExampleCodeRaw;
+  protected readonly dialogStylingExampleCode = dialogStylingExampleCodeRaw;
 }

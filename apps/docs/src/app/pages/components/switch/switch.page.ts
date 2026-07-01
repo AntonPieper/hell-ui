@@ -8,11 +8,15 @@ import { SwitchNativeExample } from './examples/native.example';
 import switchNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
   loader: 'text',
 };
+import { SwitchStylingExample } from './examples/styling.example';
+import switchStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-switch',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, SwitchExamplesExample, SwitchNativeExample],
+  imports: [ExampleTabs, SwitchExamplesExample, SwitchNativeExample, SwitchStylingExample],
   template: `
     <article class="hd-prose">
       <h1>Switch</h1>
@@ -34,6 +38,14 @@ import switchNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
       <h2>Native path</h2>
       <hd-example-tabs [code]="switchNativeExampleCode" previewClass="grid gap-2 max-w-md">
         <app-switch-native-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        <code>HellSwitchPart</code> is <code>root | thumb</code>. Use string shorthand for the default <code>root</code> part and the <code>[ui]</code> map when the thumb needs to change too.
+      </p>
+      <hd-example-tabs [code]="switchStylingExampleCode" previewClass="flex flex-col gap-3">
+        <app-switch-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -72,4 +84,5 @@ import switchNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
 export class SwitchPage {
   protected readonly switchExamplesExampleCode = switchExamplesExampleCodeRaw;
   protected readonly switchNativeExampleCode = switchNativeExampleCodeRaw;
+  protected readonly switchStylingExampleCode = switchStylingExampleCodeRaw;
 }

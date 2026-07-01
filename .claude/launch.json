@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "hell-docs",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "hell-docs", "start"],
+      "port": 4200
+    }
+  ]
+}

@@ -6,6 +6,10 @@ import { FlyoutExampleBoundaryKeepsSiblingsInteractiveExample } from './examples
 import flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw from './examples/example-boundary-keeps-siblings-interactive.example.ts?raw' with {
   loader: 'text',
 };
+import { FlyoutStylingExample } from './examples/styling.example';
+import flyoutStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-flyout',
@@ -14,7 +18,7 @@ import flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw from './examp
     ExampleTabs,
     RouterLink,
     FloatingDismissalHarnessPage,
-    FlyoutExampleBoundaryKeepsSiblingsInteractiveExample,
+    FlyoutExampleBoundaryKeepsSiblingsInteractiveExample, FlyoutStylingExample,
   ],
   template: `
     @if (showFloatingDismissalHarness) {
@@ -59,6 +63,14 @@ import flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw from './examp
       <h2>Example — boundary keeps siblings interactive</h2>
       <hd-example-tabs [code]="flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCode" flush>
         <app-flyout-example-boundary-keeps-siblings-interactive-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        <code>HellFlyoutUi</code> refines the flyout surface's <code>root</code> Public Part. Anchoring, boundary, and dismissal behavior are not affected by the Part Style Map.
+      </p>
+      <hd-example-tabs [code]="flyoutStylingExampleCode">
+        <app-flyout-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -128,4 +140,5 @@ export class FlyoutPage {
     this.route.snapshot.queryParamMap.has('floatingDismissalHarness');
   protected readonly flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCode =
     flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw;
+  protected readonly flyoutStylingExampleCode = flyoutStylingExampleCodeRaw;
 }

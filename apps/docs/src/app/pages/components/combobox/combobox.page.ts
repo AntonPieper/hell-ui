@@ -11,6 +11,10 @@ import { ComboboxBasicPresetExample } from './examples/basic-preset.example';
 import comboboxBasicPresetExampleCodeRaw from './examples/basic-preset.example.ts?raw' with {
   loader: 'text',
 };
+import { ComboboxStylingExample } from './examples/styling.example';
+import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-combobox',
@@ -21,7 +25,7 @@ import comboboxBasicPresetExampleCodeRaw from './examples/basic-preset.example.t
     ...HELL_COMBOBOX_BASIC_DIRECTIVES,
     ComboboxBasicExample,
     ComboboxBasicPresetExample,
-    ComboboxMultipleExample,
+    ComboboxMultipleExample, ComboboxStylingExample,
   ],
   template: `
     <article class="hd-prose">
@@ -51,6 +55,14 @@ import comboboxBasicPresetExampleCodeRaw from './examples/basic-preset.example.t
       <h2>Multiple</h2>
       <hd-example-tabs [code]="comboboxMultipleExampleCode">
         <app-combobox-multiple-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        <code>HellComboboxBasicUi</code> is a flat Part Style Map over the preset's owned anatomy: <code>control</code>, <code>input</code>, <code>button</code>, <code>dropdown</code>, <code>option</code>, and <code>empty</code>. When you compose the raw directives instead, each one exposes its own <code>ui</code>.
+      </p>
+      <hd-example-tabs [code]="comboboxStylingExampleCode" previewClass="min-h-[220px]">
+        <app-combobox-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -111,4 +123,5 @@ export class ComboboxPage {
   protected readonly comboboxBasicExampleCode = comboboxBasicExampleCodeRaw;
   protected readonly comboboxBasicPresetExampleCode = comboboxBasicPresetExampleCodeRaw;
   protected readonly comboboxMultipleExampleCode = comboboxMultipleExampleCodeRaw;
+  protected readonly comboboxStylingExampleCode = comboboxStylingExampleCodeRaw;
 }

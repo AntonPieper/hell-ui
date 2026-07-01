@@ -20,6 +20,10 @@ import { BreadcrumbsWithIconsExample } from './examples/with-icons.example';
 import breadcrumbsWithIconsExampleCodeRaw from './examples/with-icons.example.ts?raw' with {
   loader: 'text',
 };
+import { BreadcrumbsStylingExample } from './examples/styling.example';
+import breadcrumbsStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-breadcrumbs',
@@ -32,7 +36,7 @@ import breadcrumbsWithIconsExampleCodeRaw from './examples/with-icons.example.ts
     BreadcrumbsStandardExample,
     BreadcrumbsWithIconsExample,
     BreadcrumbsLongPathWithEllipsisExample,
-    BreadcrumbsCustomSeparatorExample,
+    BreadcrumbsCustomSeparatorExample, BreadcrumbsStylingExample,
   ],
   template: `
     <article class="hd-prose">
@@ -75,6 +79,14 @@ import breadcrumbsWithIconsExampleCodeRaw from './examples/with-icons.example.ts
       </p>
       <hd-example-tabs [code]="breadcrumbsCustomSeparatorExampleCode">
         <app-breadcrumbs-custom-separator-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        Every breadcrumbs directive exposes its own single-part <code>ui</code> input (<code>HellBreadcrumbLinkUi</code>, <code>HellBreadcrumbPageUi</code>, …). Refine each directive locally instead of styling descendants from the root.
+      </p>
+      <hd-example-tabs [code]="breadcrumbsStylingExampleCode">
+        <app-breadcrumbs-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -132,4 +144,5 @@ export class BreadcrumbsPage {
     breadcrumbsLongPathWithEllipsisExampleCodeRaw;
   protected readonly breadcrumbsCustomSeparatorExampleCode =
     breadcrumbsCustomSeparatorExampleCodeRaw;
+  protected readonly breadcrumbsStylingExampleCode = breadcrumbsStylingExampleCodeRaw;
 }

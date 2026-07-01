@@ -82,6 +82,12 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/getting-started/getting-started.page').then((m) => m.GettingStartedPage),
       },
       {
+        routePath: 'guide',
+        label: 'Guide',
+        icon: 'faSolidBook',
+        loadComponent: () => import('./pages/guide/guide.page').then((m) => m.GuidePage),
+      },
+      {
         routePath: 'theming',
         label: 'Theming',
         icon: 'faSolidPalette',
@@ -148,18 +154,18 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/combobox/combobox.page').then((m) => m.ComboboxPage),
       },
       {
-        routePath: 'components/date-picker',
-        label: 'Date picker',
-        icon: 'faSolidCalendar',
-        loadComponent: () =>
-          import('./pages/components/date-picker/date-picker.page').then((m) => m.DatePickerPage),
-      },
-      {
         routePath: 'components/dialog',
         label: 'Dialog',
         icon: 'faSolidWindowRestore',
         loadComponent: () =>
           import('./pages/components/dialog/dialog.page').then((m) => m.DialogPage),
+      },
+      {
+        routePath: 'components/drop-zone',
+        label: 'Drop zone',
+        icon: 'faSolidUpload',
+        loadComponent: () =>
+          import('./pages/components/drop-zone/drop-zone.page').then((m) => m.DropZonePage),
       },
       {
         routePath: 'components/field',
@@ -339,18 +345,18 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/date-input/date-input.page').then((m) => m.DateInputPage),
       },
       {
+        routePath: 'components/date-picker',
+        label: 'Date picker',
+        icon: 'faSolidCalendar',
+        loadComponent: () =>
+          import('./pages/components/date-picker/date-picker.page').then((m) => m.DatePickerPage),
+      },
+      {
         routePath: 'components/dialpad',
         label: 'Dialpad',
         icon: 'faSolidPhone',
         loadComponent: () =>
           import('./pages/components/dialpad/dialpad.page').then((m) => m.DialpadPage),
-      },
-      {
-        routePath: 'components/drop-zone',
-        label: 'Drop zone',
-        icon: 'faSolidUpload',
-        loadComponent: () =>
-          import('./pages/components/drop-zone/drop-zone.page').then((m) => m.DropZonePage),
       },
       {
         routePath: 'components/omnibar',
@@ -389,6 +395,18 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
     ],
   },
   {
+    heading: 'Tables',
+    items: [
+      {
+        routePath: 'components/table',
+        label: 'Table',
+        icon: 'faSolidTable',
+        loadComponent: () =>
+          import('./pages/components/table/table.page').then((m) => m.TablePage),
+      },
+    ],
+  },
+  {
     heading: 'Features',
     items: [
       {
@@ -397,13 +415,6 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
         icon: 'faSolidCode',
         loadComponent: () =>
           import('./pages/components/code-editor/code-editor.page').then((m) => m.CodeEditorPage),
-      },
-      {
-        routePath: 'components/table',
-        label: 'Table',
-        icon: 'faSolidTable',
-        loadComponent: () =>
-          import('./pages/components/table/table.page').then((m) => m.TablePage),
       },
       {
         routePath: 'components/pdf-viewer',

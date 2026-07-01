@@ -16,6 +16,10 @@ import { TimeInputReactiveFormsExample } from './examples/reactive-forms.example
 import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.example.ts?raw' with {
   loader: 'text',
 };
+import { TimeInputStylingExample } from './examples/styling.example';
+import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-time-input',
@@ -25,7 +29,7 @@ import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
     TimeInputExamplesExample,
     TimeInputReactiveFormsExample,
     TimeInputPlaceholderAndLabelsExample,
-    TimeInputSizesExample,
+    TimeInputSizesExample, TimeInputStylingExample,
   ],
   template: `
     <article class="hd-prose">
@@ -62,6 +66,14 @@ import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
       <h2>Sizes</h2>
       <hd-example-tabs [code]="timeInputSizesExampleCode" previewClass="grid gap-3 max-w-md">
         <app-time-input-sizes-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        <code>HellTimeInputUi</code> maps the input, trigger, and picker chrome parts. Parsing, validation, and keyboard stepping stay owned by the Typed Value Input behavior.
+      </p>
+      <hd-example-tabs [code]="timeInputStylingExampleCode" previewClass="min-h-[120px]">
+        <app-time-input-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -129,4 +141,5 @@ export class TimeInputPage {
   protected readonly timeInputPlaceholderAndLabelsExampleCode =
     timeInputPlaceholderAndLabelsExampleCodeRaw;
   protected readonly timeInputSizesExampleCode = timeInputSizesExampleCodeRaw;
+  protected readonly timeInputStylingExampleCode = timeInputStylingExampleCodeRaw;
 }

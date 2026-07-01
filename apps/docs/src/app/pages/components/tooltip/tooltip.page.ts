@@ -12,11 +12,15 @@ import { TooltipHoverableExample } from './examples/hoverable.example';
 import tooltipHoverableExampleCodeRaw from './examples/hoverable.example.ts?raw' with {
   loader: 'text',
 };
+import { TooltipStylingExample } from './examples/styling.example';
+import tooltipStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-tooltip',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, TooltipExampleExample, TooltipWithDelayExample, TooltipHoverableExample],
+  imports: [ExampleTabs, TooltipExampleExample, TooltipWithDelayExample, TooltipHoverableExample, TooltipStylingExample],
   template: `
     <article class="hd-prose">
       <h1>Tooltip</h1>
@@ -38,6 +42,14 @@ import tooltipHoverableExampleCodeRaw from './examples/hoverable.example.ts?raw'
       <h2>Hoverable content</h2>
       <hd-example-tabs [code]="tooltipHoverableExampleCode">
         <app-tooltip-hoverable-example />
+      </hd-example-tabs>
+
+      <h2>Part style map</h2>
+      <p>
+        <code>HellTooltipUi</code> refines the tooltip surface's <code>root</code> Public Part. Keep overrides to visual utilities; positioning and accessibility stay owned by the trigger contract.
+      </p>
+      <hd-example-tabs [code]="tooltipStylingExampleCode" previewClass="flex flex-wrap gap-2">
+        <app-tooltip-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -67,4 +79,5 @@ export class TooltipPage {
   protected readonly tooltipExampleExampleCode = tooltipExampleExampleCodeRaw;
   protected readonly tooltipWithDelayExampleCode = tooltipWithDelayExampleCodeRaw;
   protected readonly tooltipHoverableExampleCode = tooltipHoverableExampleCodeRaw;
+  protected readonly tooltipStylingExampleCode = tooltipStylingExampleCodeRaw;
 }

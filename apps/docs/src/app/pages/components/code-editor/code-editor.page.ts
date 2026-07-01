@@ -10,6 +10,10 @@ import { EditorDemo } from './examples/editor-demo.example';
 import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' with {
   loader: 'text',
 };
+import { CodeEditorStylingExample } from './examples/styling.example';
+import codeEditorStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 @Component({
   selector: 'hd-code-editor',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,7 +23,7 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
       @import '@hell-ui/angular/features/code-editor/styles.css';
     `,
   ],
-  imports: [ExampleTabs, EditorDemo, CodeBlock, CodeViewerDemo],
+  imports: [ExampleTabs, EditorDemo, CodeBlock, CodeViewerDemo, CodeEditorStylingExample],
   template: `
     <article class="hd-prose">
       <h1>Code editor</h1>
@@ -69,6 +73,14 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
         Angular, JavaScript, JSON, CSS or HTML language modes.
       </p>
       <hd-code-block [code]="supplyingALanguage" />
+
+      <h2>Part style map</h2>
+      <p>
+        <code>HellCodeEditorPart</code> is <code>root | editor</code>. Editor theme colors stay owned by the Code Editor Runtime; <code>ui</code> refines the shell chrome and text metrics.
+      </p>
+      <hd-example-tabs [code]="codeEditorStylingExampleCode">
+        <app-code-editor-styling-example />
+      </hd-example-tabs>
 
       <h2>API</h2>
       <ul>
@@ -132,4 +144,5 @@ readonly javascriptExtensions: Extension = javascript();
 `;
 
   protected readonly javascriptExtensions: Extension = javascript({ jsx: true, typescript: true });
+  protected readonly codeEditorStylingExampleCode = codeEditorStylingExampleCodeRaw;
 }

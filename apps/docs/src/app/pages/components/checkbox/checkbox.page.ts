@@ -8,11 +8,15 @@ import { CheckboxNativeExample } from './examples/native.example';
 import checkboxNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
   loader: 'text',
 };
+import { CheckboxStylingExample } from './examples/styling.example';
+import checkboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-checkbox',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, CheckboxExamplesExample, CheckboxNativeExample],
+  imports: [ExampleTabs, CheckboxExamplesExample, CheckboxNativeExample, CheckboxStylingExample],
   template: `
     <article class="hd-prose">
       <h1>Checkbox</h1>
@@ -46,6 +50,14 @@ import checkboxNativeExampleCodeRaw from './examples/native.example.ts?raw' with
         <code>button[hellCheckbox]</code> is intentionally opinionated for custom styling and
         behavior, but it is not a drop-in native checkbox control.
       </p>
+      <h2>Part style map</h2>
+      <p>
+        <code>HellCheckboxUi</code> refines the checkbox's <code>root</code> Public Part. Combine <code>ui</code> with state attributes such as <code>data-checked</code> for state-aware overrides — no custom CSS or internal selectors needed.
+      </p>
+      <hd-example-tabs [code]="checkboxStylingExampleCode" previewClass="flex flex-col gap-3">
+        <app-checkbox-styling-example />
+      </hd-example-tabs>
+
       <h2>API</h2>
       <ul>
         <li><code>checked</code>, <code>checkedChange</code></li>
@@ -75,4 +87,5 @@ import checkboxNativeExampleCodeRaw from './examples/native.example.ts?raw' with
 export class CheckboxPage {
   protected readonly checkboxExamplesExampleCode = checkboxExamplesExampleCodeRaw;
   protected readonly checkboxNativeExampleCode = checkboxNativeExampleCodeRaw;
+  protected readonly checkboxStylingExampleCode = checkboxStylingExampleCodeRaw;
 }
