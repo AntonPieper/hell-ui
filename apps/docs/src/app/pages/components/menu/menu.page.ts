@@ -74,6 +74,7 @@ const HD_MENU_PAGE_ICONS = {
         </li>
         <li><code>hellSubmenuTrigger</code>: nested menus on a <code>hellMenuItem</code>.</li>
         <li><code>hellMenuSeparator</code></li>
+        <li><code>ui</code>: Part Style Map for each styled directive's local <code>root</code> part. Portaled menu surfaces render <code>data-slot="root"</code>.</li>
       </ul>
 
       <h2>Do</h2>

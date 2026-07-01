@@ -154,12 +154,15 @@ pipeline.
 `HellButton`, `HellInput`, `HellNativeSelect`, `HellTextarea`, `HellDialpad`,
 `HellDateInput`, `HellTimeInput`, `HellDatePicker`, `HellDateRangePicker`,
 Checkbox/NativeCheckbox, RadioGroup/Radio/NativeRadioGroup/NativeRadio,
-Switch/NativeSwitch, Toggle/ToggleGroup/ToggleGroupItem, Slider, the first
-directive-suite batch (`HellCard`, `HellField`, `HellTabset`, and
-`HellAccordion` families), the App Shell/nav directives, Resizable directives,
-Pagination/PaginationStrip, and Table primitives have migrated from Style
-Opt-Out to the Part Style Map API. Pass `ui` when you want to refine public
-parts while keeping Hell behavior, state attributes, and accessibility wiring.
+Switch/NativeSwitch, Toggle/ToggleGroup/ToggleGroupItem, Slider, the migrated
+directive-suite batches (`HellCard`, `HellField`, `HellTabset`,
+`HellAccordion`, `HellMenu`, `HellListbox`, `HellPopover`, `HellTooltip`,
+`HellFlyout`, `HellSelect`, and `HellCombobox` families), SelectBasic,
+ComboboxBasic, the App Shell/nav directives, Resizable directives,
+Pagination/PaginationStrip, and Table primitives have migrated from
+Style Opt-Out to the Part Style Map API. Pass `ui` when you want to refine
+public parts while keeping Hell behavior, state attributes, and accessibility
+wiring.
 
 Split View also exposes flat owned parts such as `pane`, `compactHeader`, and
 `itemNavigation`. Dialog, Toast, AudioPlayer, Omnibar, and CodeEditor now use
@@ -208,12 +211,13 @@ Rules for migration:
 - Use `ui="..."` for single-root directives such as Button, Input, Card, Field,
   Tabs, Accordion, App Shell/nav, Resizable, Checkbox, NativeCheckbox, Radio,
   RadioGroup, NativeRadio, NativeRadioGroup, NativeSwitch, Toggle, ToggleGroup,
-  ToggleGroupItem, Pagination controls, and Table primitive directives.
+  ToggleGroupItem, Menu, Listbox, Popover, Tooltip, Flyout, Select, Combobox,
+  Pagination controls, and Table primitive directives.
 - Use each projected child directive's local `ui`; a Card, Field, Tabs,
   Accordion, or App Shell root does not style its children remotely.
 - Use `[ui]="{ ... }"` for owned-anatomy components with multiple public parts,
   such as Dialpad, PaginationStrip, Split View, Slider, Switch, Dialog, Toast,
-  AudioPlayer, Omnibar, and CodeEditor.
+  AudioPlayer, Omnibar, CodeEditor, SelectBasic, and ComboboxBasic.
 - Use `class` for layout hooks and non-conflicting additions only; use `ui` for deterministic Tailwind utility conflicts because template class order is outside the Part-Class Pipeline.
 - Continue to test the behavior and accessible name; styling APIs are not accessibility opt-outs.
 
@@ -224,10 +228,10 @@ compiled Button recipe CSS and semantic token runtime theming. The
 [`primitive-icons-css`](../../tools/check-package-consumer.mjs),
 [`pagination`](../../tools/check-package-consumer.mjs),
 [`table`](../../tools/check-package-consumer.mjs), and composite scenarios widen
-that proof across migrated primitive, directive-suite, pagination, table,
-layout, feedback, media, search, and editor CSS entry points, including
-Checkbox, Radio, Slider, Switch, Toggle, Dialog, Toast, AudioPlayer, Omnibar,
-and CodeEditor.
+that proof across migrated primitive, floating/list directive-suite,
+pagination, table, layout, feedback, media, search, and editor CSS entry
+points, including Checkbox, Radio, Slider, Switch, Toggle, Dialog, Toast,
+AudioPlayer, Omnibar, and CodeEditor.
 
 The not-yet-migrated list is machine-tracked as `legacyStyleableAllowlist` in
 [`tools/check-architecture.mjs`](../../tools/check-architecture.mjs). Every

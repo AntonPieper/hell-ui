@@ -42,7 +42,9 @@ import selectBasicPresetExampleCodeRaw from './examples/basic-preset.example.ts?
           <code>&lt;hell-select-basic&gt;</code>: compact preset composing the select pieces and a single
           option contract for quick adoption. Bind <code>aria-label</code> or
           <code>aria-labelledby</code> plus <code>aria-describedby</code> to keep the trigger name stable
-          after a value is selected.
+          after a value is selected. Accepts <code>ui</code> for flat owned parts:
+          <code>root</code>, <code>trigger</code>, <code>value</code>,
+          <code>placeholder</code>, <code>dropdown</code>, and <code>option</code>.
         </li>
         <li>
           <code>[hellSelect]</code>: trigger and state container. Inputs <code>value</code>,
@@ -61,6 +63,7 @@ import selectBasicPresetExampleCodeRaw from './examples/basic-preset.example.ts?
           <code>[hellSelectOption]</code>: individual option. Required <code>[value]</code>;
           supports <code>disabled</code>; emits <code>activated</code>.
         </li>
+        <li><code>ui</code>: Part Style Map for each styled directive's local <code>root</code> part. Rendered directive parts expose <code>data-slot="root"</code>; <code>&lt;hell-select-basic&gt;</code> exposes its owned parts by name.</li>
       </ul>
 
       <h2>When to choose what</h2>

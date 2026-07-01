@@ -540,7 +540,12 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
     className: 'text-hell-foreground',
     attrs: { 'data-slot': 'root', 'data-orientation': 'horizontal' },
   },
-  { id: 'select', module: 'HellSelect', className: 'hell-select' },
+  {
+    id: 'select',
+    module: 'HellSelect',
+    className: 'inline-flex',
+    attrs: { 'data-slot': 'root' },
+  },
 ];
 
 const STYLE_OPT_OUT_CASES: readonly ContractCase[] = [];
@@ -637,13 +642,16 @@ describe('Hell Component Contract', () => {
     const fixture = TestBed.createComponent(ContractHost);
     fixture.detectChanges();
 
-    const select = fixture.nativeElement.querySelector('.hell-select') as HTMLButtonElement;
-    const value = select.querySelector('.hell-select-value') as HTMLElement;
-    const placeholder = select.querySelector('.hell-select-placeholder') as HTMLElement;
+    const select = fixture.nativeElement.querySelector('[hellSelect]') as HTMLButtonElement;
+    const value = select.querySelector('[hellSelectValue]') as HTMLElement;
+    const placeholder = select.querySelector('[hellSelectPlaceholder]') as HTMLElement;
 
-    expect(select.classList.contains('hell-select')).toBe(true);
-    expect(value.classList.contains('hell-select-value')).toBe(true);
-    expect(placeholder.classList.contains('hell-select-placeholder')).toBe(true);
+    expect(select.getAttribute('data-slot')).toBe('root');
+    expect(select.className).toContain('inline-flex');
+    expect(value.getAttribute('data-slot')).toBe('root');
+    expect(value.className).toContain('text-ellipsis');
+    expect(placeholder.getAttribute('data-slot')).toBe('root');
+    expect(placeholder.className).toContain('text-hell-foreground-muted');
   });
 
   it('exposes app shell nav as explicit parts instead of raw descendant styling', () => {
@@ -850,7 +858,9 @@ function assertContract(root: HTMLElement, contract: ContractCase, styled: boole
     root.querySelector(`[data-contract="${contract.id}"]`) ?? root.querySelector(`#${contract.id}`);
   if (!(element instanceof HTMLElement)) throw new Error(`Expected #${contract.id}.`);
 
-  expect(element.classList.contains(contract.className)).toBe(styled);
+  expect(element.classList.contains(contract.className), `${contract.id}.${contract.className}`).toBe(
+    styled,
+  );
   for (const [name, value] of Object.entries(contract.attrs ?? {})) {
     expect(element.getAttribute(name), `${contract.id}.${name}`).toBe(value);
   }

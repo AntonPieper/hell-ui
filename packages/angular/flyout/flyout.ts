@@ -1,4 +1,4 @@
-import { HellStyleable } from '@hell-ui/angular/core';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
 import { HELL_FLOATING_SCOPE, type HellFloatingScope } from '@hell-ui/angular/internal/core';
 import {
   HellFloatingInteractionController,
@@ -35,6 +35,13 @@ import {
 } from '@floating-ui/dom';
 
 let nextFlyoutId = 0;
+
+export type HellFlyoutPart = 'root';
+export type HellFlyoutUi = HellUi<HellFlyoutPart>;
+
+const HELL_FLYOUT_RECIPE = {
+  root: 'fixed z-[var(--hell-z-popover,1000)] max-w-[min(320px,calc(100vw_-_(var(--spacing-hell-4)*2)))] rounded-hell-md border border-hell-border bg-hell-surface-elevated text-hell-foreground shadow-hell-lg outline-none animate-[hell-flyout-in_var(--hell-duration-fast,150ms)_var(--ease-hell-out,ease)]',
+} satisfies HellRecipe<HellFlyoutPart>;
 
 /**
  * Trigger half of the flyout pattern. Owns the open state. Render the panel
@@ -121,15 +128,20 @@ export class HellFlyoutTrigger extends HellNativeInteractiveDisabledGuard {
   host: {
     role: 'dialog',
     'aria-modal': 'false',
+    'data-hell-flyout': '',
     '[id]': 'trigger().panelId',
     '[attr.aria-label]': 'ariaLabel()',
     '[attr.aria-labelledby]': 'ariaLabelledby()',
     'data-state': 'open',
     '[attr.data-placement]': 'computedPlacement()',
-    '[class.hell-flyout]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
   },
 })
-export class HellFlyout extends HellStyleable {
+export class HellFlyout extends HellPartStyleable<HellFlyoutPart> {
+  protected readonly recipe = HELL_FLYOUT_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly trigger = input.required<HellFlyoutTrigger>({ alias: 'hellFlyout' });
   readonly anchor = input<HTMLElement | ElementRef<HTMLElement> | null>(null);
   readonly boundary = input<HTMLElement | ElementRef<HTMLElement> | null>(null);
@@ -168,7 +180,7 @@ export class HellFlyout extends HellStyleable {
       const update = () => {
         const middleware: Middleware[] = [floatingOffset(offset)];
         if (flip) middleware.push(floatingFlip({ padding: 8 }));
-        if (shift) middleware.push(floatingShift({ padding: 8 }));
+        if (shift) middleware.push(floatingShift({ padding: 8, crossAxis: true }));
 
         void computePosition(reference, panel, {
           placement,

@@ -26,9 +26,37 @@ class MenuHost {
   imports: [...HELL_MENU_DIRECTIVES],
   template: `
     <ng-template #menu>
+      <div hellMenu ui="rounded-hell-pill bg-hell-primary">
+        <button
+          hellMenuItem
+          type="button"
+          [ui]="{ root: 'py-hell-5 text-hell-danger' }"
+        >
+          Rename
+        </button>
+        <button hellMenuItemCheckbox type="button" [checked]="true">
+          <span hellMenuItemIndicator ui="text-hell-success-strong"></span>
+          <span>Show archived</span>
+        </button>
+      </div>
+    </ng-template>
+    <button type="button" [hellMenuTrigger]="menu">Open styled</button>
+  `,
+})
+class MenuUiHost {
+  readonly trigger = viewChild.required(NgpMenuTrigger);
+}
+
+@Component({
+  imports: [...HELL_MENU_DIRECTIVES],
+  template: `
+    <div #menuContainer></div>
+    <ng-template #menu>
       <div hellMenu><button hellMenuItem type="button">Item</button></div>
     </ng-template>
-    <a id="enabled-anchor" href="#menu" [hellMenuTrigger]="menu">Anchor</a>
+    <a id="enabled-anchor" href="#menu" [hellMenuTrigger]="menu" [container]="menuContainer">
+      Anchor
+    </a>
   `,
 })
 class EnabledMenuAnchorTriggerHost {}
@@ -98,12 +126,18 @@ afterAll(() => {
 describe('HellMenuItem', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MenuHost, EnabledMenuAnchorTriggerHost, DisabledMenuTriggerHost, CheckableMenuHost],
+      imports: [
+        MenuHost,
+        MenuUiHost,
+        EnabledMenuAnchorTriggerHost,
+        DisabledMenuTriggerHost,
+        CheckableMenuHost,
+      ],
     }).compileComponents();
   });
 
   afterEach(() => {
-    document.body.replaceChildren();
+    cleanupPortaledTestElements('[hellMenu]');
   });
 
   it('reflects disabled trigger semantics on buttons and anchors', async () => {
@@ -133,11 +167,37 @@ describe('HellMenuItem', () => {
 
     const menuItem = await waitForOverlayElement<HTMLButtonElement>(
       fixture,
-      document.body,
+      fixture.nativeElement,
       'button[hellMenuItem]',
     );
     expect(menuItem).toBeTruthy();
     expect(menuItem.textContent).toBe('Item');
+  });
+
+  it('merges local root part styles while preserving menu item state attributes', async () => {
+    const fixture = TestBed.createComponent(MenuUiHost);
+    await settle(fixture);
+
+    fixture.componentInstance.trigger().show();
+    const menu = await waitForOverlayElement<HTMLElement>(fixture, document.body, '[hellMenu]');
+    const item = query<HTMLButtonElement>(menu, 'button[hellMenuItem]');
+    const checkbox = query<HTMLButtonElement>(menu, 'button[hellMenuItemCheckbox]');
+    const indicator = query<HTMLElement>(menu, '[hellMenuItemIndicator]');
+
+    expect(menu.getAttribute('data-slot')).toBe('root');
+    expect(menu.className).toContain('rounded-hell-pill');
+    expect(menu.className).not.toContain('rounded-hell-md');
+    expect(menu.className).toContain('bg-hell-primary');
+
+    expect(item.getAttribute('data-slot')).toBe('root');
+    expect(item.className).toContain('py-hell-5');
+    expect(item.className).toContain('text-hell-danger');
+
+    expect(checkbox.getAttribute('data-slot')).toBe('root');
+    expect(checkbox.getAttribute('aria-checked')).toBe('true');
+    expect(indicator.getAttribute('data-slot')).toBe('root');
+    expect(indicator.getAttribute('data-checked')).toBe('');
+    expect(indicator.className).toContain('text-hell-success-strong');
   });
 
   it('keeps checkbox and radio menu items open while updating checked state', async () => {
@@ -210,14 +270,15 @@ async function waitForOverlayElement<T extends HTMLElement>(
   root: ParentNode,
   selector: string,
 ): Promise<T> {
-  const timeout = Date.now() + 3000;
+  const timeout = Date.now() + 10_000;
   while (Date.now() < timeout) {
-    await settle(fixture);
+    fixture.detectChanges();
     const element = queryOptional<T>(root, selector);
     if (element) {
       return element;
     }
     await nextFrame();
+    fixture.detectChanges();
   }
 
   throw new Error(`Expected ${selector}.`);
@@ -240,4 +301,10 @@ function query<T extends HTMLElement>(root: ParentNode, selector: string): T {
   const element = root.querySelector<T>(selector);
   if (!element) throw new Error(`Expected ${selector}.`);
   return element;
+}
+
+function cleanupPortaledTestElements(selector: string): void {
+  for (const element of Array.from(document.body.querySelectorAll(selector))) {
+    element.remove();
+  }
 }

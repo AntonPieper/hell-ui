@@ -78,37 +78,6 @@ const audioTranscriptRuntimeTerms = [
 // Remove a symbol here as soon as it migrates to HellPartStyleable; new public
 // modules must not extend HellStyleable.
 const legacyStyleableAllowlist = new Set([
-  'HellCombobox',
-  'HellComboboxBasic',
-  'HellComboboxButton',
-  'HellComboboxDropdown',
-  'HellComboboxEmpty',
-  'HellComboboxInput',
-  'HellComboboxOption',
-  'HellFlyout',
-  'HellListbox',
-  'HellListboxHeader',
-  'HellListboxOption',
-  'HellListboxSection',
-  'HellMenu',
-  'HellMenuItem',
-  'HellMenuItemCheckbox',
-  'HellMenuItemIcon',
-  'HellMenuItemIndicator',
-  'HellMenuItemRadio',
-  'HellMenuItemTrailing',
-  'HellMenuLabel',
-  'HellMenuSection',
-  'HellMenuSeparator',
-  'HellPopover',
-  'HellSelect',
-  'HellSelectBasic',
-  'HellSelectDropdown',
-  'HellSelectOption',
-  'HellSelectPlaceholder',
-  'HellSelectValue',
-  'HellSubmenuTrigger',
-  'HellTooltip',
   'HellAvatarGroup',
   'HellAvatarGroupItem',
   'HellAvatarGroupOverflow',
@@ -1319,6 +1288,316 @@ const migratedPartStyleMapModules = [
     apiReportFiles: [],
     legacyClass: 'hell-table-resize-handle',
   },
+  {
+    className: 'HellCombobox',
+    partType: 'HellComboboxPart',
+    uiType: 'HellComboboxUi',
+    entrypointId: 'combobox',
+    sourcePath: 'packages/angular/combobox/combobox.ts',
+    publicApiPath: 'packages/angular/combobox/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-combobox',
+  },
+  {
+    className: 'HellComboboxBasic',
+    partType: 'HellComboboxBasicPart',
+    uiType: 'HellComboboxBasicUi',
+    entrypointId: 'combobox',
+    sourcePath: 'packages/angular/combobox/combobox.ts',
+    publicApiPath: 'packages/angular/combobox/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-combobox-basic',
+  },
+  {
+    className: 'HellComboboxButton',
+    partType: 'HellComboboxButtonPart',
+    uiType: 'HellComboboxButtonUi',
+    entrypointId: 'combobox',
+    sourcePath: 'packages/angular/combobox/combobox.ts',
+    publicApiPath: 'packages/angular/combobox/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-combobox-button',
+  },
+  {
+    className: 'HellComboboxDropdown',
+    partType: 'HellComboboxDropdownPart',
+    uiType: 'HellComboboxDropdownUi',
+    entrypointId: 'combobox',
+    sourcePath: 'packages/angular/combobox/combobox.ts',
+    publicApiPath: 'packages/angular/combobox/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-combobox-dropdown',
+  },
+  {
+    className: 'HellComboboxEmpty',
+    partType: 'HellComboboxEmptyPart',
+    uiType: 'HellComboboxEmptyUi',
+    entrypointId: 'combobox',
+    sourcePath: 'packages/angular/combobox/combobox.ts',
+    publicApiPath: 'packages/angular/combobox/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-combobox-empty',
+  },
+  {
+    className: 'HellComboboxInput',
+    partType: 'HellComboboxInputPart',
+    uiType: 'HellComboboxInputUi',
+    entrypointId: 'combobox',
+    sourcePath: 'packages/angular/combobox/combobox.ts',
+    publicApiPath: 'packages/angular/combobox/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-combobox-input',
+  },
+  {
+    className: 'HellComboboxOption',
+    partType: 'HellComboboxOptionPart',
+    uiType: 'HellComboboxOptionUi',
+    entrypointId: 'combobox',
+    sourcePath: 'packages/angular/combobox/combobox.ts',
+    publicApiPath: 'packages/angular/combobox/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-combobox-option',
+  },
+  {
+    className: 'HellFlyout',
+    partType: 'HellFlyoutPart',
+    uiType: 'HellFlyoutUi',
+    entrypointId: 'flyout',
+    sourcePath: 'packages/angular/flyout/flyout.ts',
+    publicApiPath: 'packages/angular/flyout/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-flyout',
+  },
+  {
+    className: 'HellListbox',
+    partType: 'HellListboxPart',
+    uiType: 'HellListboxUi',
+    entrypointId: 'listbox',
+    sourcePath: 'packages/angular/listbox/listbox.ts',
+    publicApiPath: 'packages/angular/listbox/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-listbox',
+  },
+  {
+    className: 'HellListboxHeader',
+    partType: 'HellListboxHeaderPart',
+    uiType: 'HellListboxHeaderUi',
+    entrypointId: 'listbox',
+    sourcePath: 'packages/angular/listbox/listbox.ts',
+    publicApiPath: 'packages/angular/listbox/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-listbox-header',
+  },
+  {
+    className: 'HellListboxOption',
+    partType: 'HellListboxOptionPart',
+    uiType: 'HellListboxOptionUi',
+    entrypointId: 'listbox',
+    sourcePath: 'packages/angular/listbox/listbox.ts',
+    publicApiPath: 'packages/angular/listbox/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-listbox-option',
+  },
+  {
+    className: 'HellListboxSection',
+    partType: 'HellListboxSectionPart',
+    uiType: 'HellListboxSectionUi',
+    entrypointId: 'listbox',
+    sourcePath: 'packages/angular/listbox/listbox.ts',
+    publicApiPath: 'packages/angular/listbox/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-listbox-section',
+  },
+  {
+    className: 'HellMenu',
+    partType: 'HellMenuPart',
+    uiType: 'HellMenuUi',
+    entrypointId: 'menu',
+    sourcePath: 'packages/angular/menu/menu.ts',
+    publicApiPath: 'packages/angular/menu/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-menu',
+  },
+  {
+    className: 'HellMenuItem',
+    partType: 'HellMenuItemPart',
+    uiType: 'HellMenuItemUi',
+    entrypointId: 'menu',
+    sourcePath: 'packages/angular/menu/menu.ts',
+    publicApiPath: 'packages/angular/menu/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-menu-item',
+  },
+  {
+    className: 'HellMenuItemCheckbox',
+    partType: 'HellMenuItemCheckboxPart',
+    uiType: 'HellMenuItemCheckboxUi',
+    entrypointId: 'menu',
+    sourcePath: 'packages/angular/menu/menu.ts',
+    publicApiPath: 'packages/angular/menu/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-menu-item-checkbox',
+  },
+  {
+    className: 'HellMenuItemIcon',
+    partType: 'HellMenuItemIconPart',
+    uiType: 'HellMenuItemIconUi',
+    entrypointId: 'menu',
+    sourcePath: 'packages/angular/menu/menu.ts',
+    publicApiPath: 'packages/angular/menu/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-menu-item-icon',
+  },
+  {
+    className: 'HellMenuItemIndicator',
+    partType: 'HellMenuItemIndicatorPart',
+    uiType: 'HellMenuItemIndicatorUi',
+    entrypointId: 'menu',
+    sourcePath: 'packages/angular/menu/menu.ts',
+    publicApiPath: 'packages/angular/menu/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-menu-item-indicator',
+  },
+  {
+    className: 'HellMenuItemRadio',
+    partType: 'HellMenuItemRadioPart',
+    uiType: 'HellMenuItemRadioUi',
+    entrypointId: 'menu',
+    sourcePath: 'packages/angular/menu/menu.ts',
+    publicApiPath: 'packages/angular/menu/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-menu-item-radio',
+  },
+  {
+    className: 'HellMenuItemTrailing',
+    partType: 'HellMenuItemTrailingPart',
+    uiType: 'HellMenuItemTrailingUi',
+    entrypointId: 'menu',
+    sourcePath: 'packages/angular/menu/menu.ts',
+    publicApiPath: 'packages/angular/menu/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-menu-item-trailing',
+  },
+  {
+    className: 'HellMenuLabel',
+    partType: 'HellMenuLabelPart',
+    uiType: 'HellMenuLabelUi',
+    entrypointId: 'menu',
+    sourcePath: 'packages/angular/menu/menu.ts',
+    publicApiPath: 'packages/angular/menu/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-menu-label',
+  },
+  {
+    className: 'HellMenuSection',
+    partType: 'HellMenuSectionPart',
+    uiType: 'HellMenuSectionUi',
+    entrypointId: 'menu',
+    sourcePath: 'packages/angular/menu/menu.ts',
+    publicApiPath: 'packages/angular/menu/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-menu-section',
+  },
+  {
+    className: 'HellMenuSeparator',
+    partType: 'HellMenuSeparatorPart',
+    uiType: 'HellMenuSeparatorUi',
+    entrypointId: 'menu',
+    sourcePath: 'packages/angular/menu/menu.ts',
+    publicApiPath: 'packages/angular/menu/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-menu-separator',
+  },
+  {
+    className: 'HellPopover',
+    partType: 'HellPopoverPart',
+    uiType: 'HellPopoverUi',
+    entrypointId: 'popover',
+    sourcePath: 'packages/angular/popover/popover.ts',
+    publicApiPath: 'packages/angular/popover/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-popover',
+  },
+  {
+    className: 'HellSelect',
+    partType: 'HellSelectPart',
+    uiType: 'HellSelectUi',
+    entrypointId: 'select',
+    sourcePath: 'packages/angular/select/select.ts',
+    publicApiPath: 'packages/angular/select/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-select',
+  },
+  {
+    className: 'HellSelectBasic',
+    partType: 'HellSelectBasicPart',
+    uiType: 'HellSelectBasicUi',
+    entrypointId: 'select',
+    sourcePath: 'packages/angular/select/select.ts',
+    publicApiPath: 'packages/angular/select/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-select-basic',
+  },
+  {
+    className: 'HellSelectDropdown',
+    partType: 'HellSelectDropdownPart',
+    uiType: 'HellSelectDropdownUi',
+    entrypointId: 'select',
+    sourcePath: 'packages/angular/select/select.ts',
+    publicApiPath: 'packages/angular/select/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-select-dropdown',
+  },
+  {
+    className: 'HellSelectOption',
+    partType: 'HellSelectOptionPart',
+    uiType: 'HellSelectOptionUi',
+    entrypointId: 'select',
+    sourcePath: 'packages/angular/select/select.ts',
+    publicApiPath: 'packages/angular/select/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-select-option',
+  },
+  {
+    className: 'HellSelectPlaceholder',
+    partType: 'HellSelectPlaceholderPart',
+    uiType: 'HellSelectPlaceholderUi',
+    entrypointId: 'select',
+    sourcePath: 'packages/angular/select/select.ts',
+    publicApiPath: 'packages/angular/select/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-select-placeholder',
+  },
+  {
+    className: 'HellSelectValue',
+    partType: 'HellSelectValuePart',
+    uiType: 'HellSelectValueUi',
+    entrypointId: 'select',
+    sourcePath: 'packages/angular/select/select.ts',
+    publicApiPath: 'packages/angular/select/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-select-value',
+  },
+  {
+    className: 'HellSubmenuTrigger',
+    partType: 'HellSubmenuTriggerPart',
+    uiType: 'HellSubmenuTriggerUi',
+    entrypointId: 'menu',
+    sourcePath: 'packages/angular/menu/menu.ts',
+    publicApiPath: 'packages/angular/menu/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-submenu-trigger',
+  },
+  {
+    className: 'HellTooltip',
+    partType: 'HellTooltipPart',
+    uiType: 'HellTooltipUi',
+    entrypointId: 'tooltip',
+    sourcePath: 'packages/angular/tooltip/tooltip.ts',
+    publicApiPath: 'packages/angular/tooltip/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-tooltip',
+  },
 ];
 
 const migratedPartStyleMapClassNames = new Set(
@@ -1386,6 +1665,7 @@ function checkDocsExamples() {
   const pagesRoot = join(root, 'apps/docs/src/app/pages');
 
   checkDocsCatalogExampleSeam(catalog);
+  checkMigratedFloatingListDocsSearchTerms(examples);
 
   const indexedDetails = new Set(examples.map((example) => example.detail));
   const actualExamples = walk(pagesRoot)
@@ -1448,6 +1728,134 @@ function checkDocsExamples() {
 
     if (!routePaths.has(usage.path)) {
       failures.push(`Docs Usage "${usage.title}" points at missing route ${usage.path}`);
+    }
+  }
+}
+
+function checkMigratedFloatingListDocsSearchTerms(examples) {
+  const requiredEntries = [
+    {
+      detail: 'components/combobox/examples/basic.example.ts',
+      terms: [
+        'ui',
+        'Part Style Map',
+        'data-slot',
+        'HellComboboxUi',
+        'HellComboboxInputUi',
+        'HellComboboxButtonUi',
+        'HellComboboxDropdownUi',
+        'HellComboboxOptionUi',
+        'HellComboboxEmptyUi',
+      ],
+    },
+    {
+      detail: 'components/combobox/examples/multiple.example.ts',
+      terms: [
+        'ui',
+        'Part Style Map',
+        'data-slot',
+        'HellComboboxUi',
+        'HellComboboxInputUi',
+        'HellComboboxButtonUi',
+        'HellComboboxDropdownUi',
+        'HellComboboxOptionUi',
+        'HellComboboxEmptyUi',
+      ],
+    },
+    {
+      detail: 'components/combobox/examples/basic-preset.example.ts',
+      terms: ['ui', 'Part Style Map', 'data-slot', 'HellComboboxBasicUi'],
+    },
+    {
+      detail: 'components/flyout/examples/example-boundary-keeps-siblings-interactive.example.ts',
+      terms: ['ui', 'Part Style Map', 'data-slot', 'HellFlyoutUi'],
+    },
+    {
+      detail: 'components/listbox/examples/basic.example.ts',
+      terms: [
+        'ui',
+        'Part Style Map',
+        'data-slot',
+        'HellListboxUi',
+        'HellListboxOptionUi',
+        'HellListboxSectionUi',
+        'HellListboxHeaderUi',
+      ],
+    },
+    {
+      detail: 'components/menu/examples/basic.example.ts',
+      terms: [
+        'ui',
+        'Part Style Map',
+        'data-slot',
+        'HellMenuUi',
+        'HellMenuItemUi',
+        'HellMenuSeparatorUi',
+      ],
+    },
+    {
+      detail: 'components/menu/examples/with-icons-sections-submenus.example.ts',
+      terms: [
+        'ui',
+        'Part Style Map',
+        'data-slot',
+        'HellMenuUi',
+        'HellMenuItemUi',
+        'HellSubmenuTriggerUi',
+        'HellMenuItemCheckboxUi',
+        'HellMenuItemRadioUi',
+        'HellMenuItemIndicatorUi',
+        'HellMenuSectionUi',
+        'HellMenuLabelUi',
+        'HellMenuSeparatorUi',
+        'HellMenuItemIconUi',
+        'HellMenuItemTrailingUi',
+      ],
+    },
+    {
+      detail: 'components/popover/examples/example.example.ts',
+      terms: ['ui', 'Part Style Map', 'data-slot', 'HellPopoverUi'],
+    },
+    {
+      detail: 'components/select/examples/basic.example.ts',
+      terms: [
+        'ui',
+        'Part Style Map',
+        'data-slot',
+        'HellSelectUi',
+        'HellSelectValueUi',
+        'HellSelectPlaceholderUi',
+        'HellSelectDropdownUi',
+        'HellSelectOptionUi',
+      ],
+    },
+    {
+      detail: 'components/select/examples/basic-preset.example.ts',
+      terms: ['ui', 'Part Style Map', 'data-slot', 'HellSelectBasicUi'],
+    },
+    {
+      detail: 'components/tooltip/examples/example.example.ts',
+      terms: ['ui', 'Part Style Map', 'data-slot', 'HellTooltipUi'],
+    },
+    {
+      detail: 'components/tooltip/examples/with-delay.example.ts',
+      terms: ['ui', 'Part Style Map', 'data-slot', 'HellTooltipUi'],
+    },
+    {
+      detail: 'components/tooltip/examples/hoverable.example.ts',
+      terms: ['ui', 'Part Style Map', 'data-slot', 'HellTooltipUi'],
+    },
+  ];
+
+  for (const entry of requiredEntries) {
+    const seed = examples.find((example) => example.detail === entry.detail);
+    if (!seed) continue;
+    for (const term of entry.terms) {
+      if (!seed.terms.includes(term)) {
+        failures.push(
+          `Docs Search Index ${entry.detail} must include migrated Part Style Map search term "${term}"`,
+        );
+      }
     }
   }
 }
@@ -1837,12 +2245,13 @@ function docsSearchIndexSeeds(searchIndex, variable) {
   const body = searchIndex.slice(bodyStart, bodyEnd);
   const seeds = [];
   for (const match of body.matchAll(
-    /\{\s*title:\s*'([^']+)'\s*,\s*path:\s*'([^']+)'\s*,\s*detail:\s*'([^']+)'/g,
+    /\{\s*title:\s*'([^']+)'\s*,\s*path:\s*'([^']+)'\s*,\s*detail:\s*'([^']+)'\s*,\s*terms:\s*'([^']*)'/g,
   )) {
     seeds.push({
       title: match[1],
       path: match[2],
       detail: match[3],
+      terms: match[4],
     });
   }
 
@@ -3411,6 +3820,7 @@ function checkPartStyleMapContract() {
   for (const module of migratedPartStyleMapModules) {
     checkMigratedPartStyleMapModule(module, entrypointPackageDirs);
   }
+  checkBasicFloatingListStructuralAffordances();
   checkLegacyPartStyleCompatibilityHelpers();
 
   if (packageConsumer.includes('button-unstyled')) {
@@ -3658,6 +4068,32 @@ function checkLegacyPartStyleCompatibilityHelpers() {
         );
       }
     }
+  }
+}
+
+function checkBasicFloatingListStructuralAffordances() {
+  const selectStyles = readFile(join(root, 'packages/angular/select/styles.css'));
+  if (
+    !selectStyles.includes("hell-select-basic [hellSelect][data-slot='trigger']::after") ||
+    !selectStyles.includes("hell-select-basic [hellSelect][data-slot='trigger'][data-open]::after")
+  ) {
+    failures.push(
+      'SelectBasic trigger part must keep the shipped select chevron structural CSS',
+    );
+  }
+
+  const comboboxStyles = readFile(join(root, 'packages/angular/combobox/styles.css'));
+  if (
+    !comboboxStyles.includes(
+      "hell-combobox-basic [hellComboboxButton][data-slot='button']::after",
+    ) ||
+    !comboboxStyles.includes(
+      "hell-combobox-basic [hellCombobox][data-slot='control'][data-open] [hellComboboxButton][data-slot='button']::after",
+    )
+  ) {
+    failures.push(
+      'ComboboxBasic button part must keep the shipped combobox chevron structural CSS',
+    );
   }
 }
 

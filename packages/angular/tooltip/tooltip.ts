@@ -1,8 +1,15 @@
 import { Directive, inject } from '@angular/core';
 import { NgpTooltip, NgpTooltipTrigger, injectTooltipTriggerState } from 'ng-primitives/tooltip';
-import { HellStyleable } from '@hell-ui/angular/core';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
 import { hellRegisterFloatingHost } from '@hell-ui/angular/internal/core';
 import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
+
+export type HellTooltipPart = 'root';
+export type HellTooltipUi = HellUi<HellTooltipPart>;
+
+const HELL_TOOLTIP_RECIPE = {
+  root: 'pointer-events-none absolute max-w-[min(240px,calc(100vw_-_var(--spacing-hell-8)))] rounded-hell-sm bg-[#1c222a] px-2 py-1 text-xs font-medium leading-[var(--text-xs--line-height)] text-white shadow-hell-md [overflow-wrap:anywhere] data-hoverable:pointer-events-auto animate-[hell-pop-in_var(--hell-duration-fast)_var(--ease-hell-out)]',
+} satisfies HellRecipe<HellTooltipPart>;
 
 /**
  * Trigger for an `ng-template` tooltip. Bind `[hellTooltipTrigger]` to the
@@ -21,6 +28,7 @@ import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/co
         'ngpTooltipTriggerShowDelay:showDelay',
         'ngpTooltipTriggerHideDelay:hideDelay',
         'ngpTooltipTriggerDisabled:disabled',
+        'ngpTooltipTriggerContainer:container',
         'ngpTooltipTriggerShowOnOverflow:showOnOverflow',
         'ngpTooltipTriggerHoverableContent:hoverableContent',
       ],
@@ -47,12 +55,15 @@ export class HellTooltipTrigger extends HellNativeInteractiveDisabledGuard {
   selector: '[hellTooltip]',
   hostDirectives: [NgpTooltip],
   host: {
-    '[class.hell-tooltip]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-hoverable]': 'tooltipTrigger().hoverableContent() ? "" : null',
     role: 'tooltip',
   },
 })
-export class HellTooltip extends HellStyleable {
+export class HellTooltip extends HellPartStyleable<HellTooltipPart> {
+  protected readonly recipe = HELL_TOOLTIP_RECIPE;
+  protected readonly defaultUiPart = 'root';
   protected readonly tooltipTrigger = injectTooltipTriggerState();
 
   constructor() {

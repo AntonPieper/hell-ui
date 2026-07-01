@@ -63,15 +63,16 @@ test.describe('flyout browser accessibility contract', () => {
     await trigger.click();
     const panel = page.getByRole('dialog', { name: 'Anchored, non-modal' });
     await expect(panel).toBeVisible();
+    await expectWithinViewport(panel);
 
     const afterOutside = await requiredBox(outsideAction, 'outside action after open');
     const afterBoundary = await requiredBox(example.locator('.hd-flyout-boundary'), 'boundary');
     expect(Math.abs(afterOutside.y - beforeOutside.y)).toBeLessThanOrEqual(1);
     expect(Math.abs(afterBoundary.height - beforeBoundary.height)).toBeLessThanOrEqual(1);
 
+    await expectAnchoredToReference(panel, input);
     const inputBox = await requiredBox(input, 'input anchor');
     const panelBox = await requiredBox(panel, 'panel');
-    await expectAnchoredToReference(panel, inputBox, panelBox);
     expect(Math.abs(panelBox.x - inputBox.x)).toBeLessThanOrEqual(2);
 
     await page.mouse.wheel(0, 120);
@@ -85,9 +86,11 @@ test.describe('flyout browser accessibility contract', () => {
 
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(panel).toBeVisible();
+    await expectAnchoredToReference(panel, input);
+    await expectWithinViewport(panel);
     const resizedInput = await requiredBox(input, 'resized input anchor');
     const resizedPanel = await requiredBox(panel, 'resized panel');
-    await expectAnchoredToReference(panel, resizedInput, resizedPanel);
+    expect(Math.abs(resizedPanel.x - resizedInput.x)).toBeLessThanOrEqual(2);
   });
 
   test('Escape closes the flyout and restores focus to the trigger', async ({ page }) => {
@@ -129,10 +132,32 @@ async function requiredBox(locator: Locator, label: string) {
 
 async function expectAnchoredToReference(
   panel: Locator,
-  referenceBox: { y: number; height: number },
-  panelBox: { y: number; height: number },
+  reference: Locator,
 ) {
-  const placement = (await panel.getAttribute('data-placement')) ?? 'bottom';
-  expect(placement).toMatch(/^bottom/);
-  expect(panelBox.y).toBeGreaterThanOrEqual(referenceBox.y + referenceBox.height);
+  await expect(panel).toHaveAttribute('data-placement', /^(bottom|top)/);
+  await expect
+    .poll(async () => {
+      const referenceBox = await requiredBox(reference, 'flyout reference');
+      const panelBox = await requiredBox(panel, 'flyout panel');
+      const placement = (await panel.getAttribute('data-placement')) ?? '';
+      if (placement.startsWith('top')) return referenceBox.y - (panelBox.y + panelBox.height);
+      return panelBox.y - (referenceBox.y + referenceBox.height);
+    })
+    .toBeGreaterThanOrEqual(0);
+}
+
+async function expectWithinViewport(panel: Locator): Promise<void> {
+  await expect
+    .poll(async () => {
+      const box = await requiredBox(panel, 'flyout panel');
+      return await panel.page().evaluate(
+        ({ x, y, width, height }) =>
+          x >= -1 &&
+          y >= -1 &&
+          x + width <= window.innerWidth + 1 &&
+          y + height <= window.innerHeight + 1,
+        box,
+      );
+    })
+    .toBe(true);
 }

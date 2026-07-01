@@ -1,141 +1,43 @@
 @import '../internal/overlay/styles.css';
 
+/* Select defaults are Tailwind utility recipes in the directives. */
+@source "./select.ts";
+
 @layer components {
+  [hellSelect][data-slot='root']::after,
+  hell-select-basic [hellSelect][data-slot='trigger']::after {
+    content: '';
+    display: block;
+    flex-shrink: 0;
+    margin-inline-start: auto;
+    width: 12px;
+    height: 12px;
+    background-color: var(--color-hell-foreground-muted);
+    mask-image: var(--hell-icon-chevron-down);
+    -webkit-mask-image: var(--hell-icon-chevron-down);
+    mask-size: contain;
+    -webkit-mask-size: contain;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-position: center;
+    transition: rotate var(--hell-duration-fast) var(--ease-hell-out);
+  }
 
-  /* Select — rich, headless select built on ng-primitives. The host element
-     itself is the trigger; the dropdown lives in a portal. Layout mirrors
-     `.hell-input` so it slots into forms beside text inputs. */
+  [hellSelect][data-slot='root'][data-open]::after,
+  hell-select-basic [hellSelect][data-slot='trigger'][data-open]::after {
+    rotate: 180deg;
+    background-color: var(--color-hell-foreground);
+  }
+}
 
-  .hell-select {
-      --_hell-select-height: var(--hell-select-height, var(--spacing-hell-control-md));
-      --_hell-select-px: var(--hell-select-padding-inline, var(--spacing-hell-4));
-      --_hell-select-font: var(--hell-select-font-size, 13px);
-      display: inline-flex;
-      align-items: center;
-      width: var(--hell-select-width, 100%);
-      gap: var(--spacing-hell-3);
-      height: var(--_hell-select-height);
-      padding-inline-start: var(--_hell-select-px);
-      padding-inline-end: var(--spacing-hell-3);
-      font-size: var(--_hell-select-font);
-      font-family: inherit;
-      color: var(--hell-select-color, var(--color-hell-foreground));
-      background-color: var(--hell-select-background, var(--color-hell-surface-elevated));
-      border-style: solid;
-      border-width: 1px;
-      border-color: var(--hell-select-border-color, var(--color-hell-border));
-      border-radius: var(--hell-select-radius, var(--radius-md));
-      cursor: pointer;
-      outline: none;
-      text-align: start;
-      transition:
-        border-color var(--hell-duration-fast) var(--ease-hell-out),
-        box-shadow var(--hell-duration-fast) var(--ease-hell-out);
-      &::after {
-        content: '';
-        display: var(--hell-select-indicator-display, block);
-        flex-shrink: 0;
-        margin-inline-start: auto;
-        width: var(--hell-select-indicator-size, 12px);
-        height: var(--hell-select-indicator-size, 12px);
-        background-color: var(--hell-select-indicator-color, var(--color-hell-foreground-muted));
-        mask-image: var(--hell-select-indicator-icon, var(--hell-icon-chevron-down));
-        -webkit-mask-image: var(--hell-select-indicator-icon, var(--hell-icon-chevron-down));
-        mask-size: contain;
-        -webkit-mask-size: contain;
-        mask-repeat: no-repeat;
-        -webkit-mask-repeat: no-repeat;
-        mask-position: center;
-        -webkit-mask-position: center;
-        transition: rotate var(--hell-duration-fast) var(--ease-hell-out);
-      }
-      &[data-open]::after {
-        rotate: 180deg;
-        background-color: var(--hell-select-indicator-open-color, var(--color-hell-foreground));
-      }
-      &[data-hover]:not([data-focus]) {
-        border-color: var(--color-hell-border-strong);
-      }
-      &[data-focus] {
-        border-color: var(--color-hell-border-focus);
-        box-shadow: 0 0 0 3px var(--color-hell-focus-ring);
-      }
-      &[data-disabled] {
-        cursor: not-allowed;
-        background-color: var(--color-hell-surface-subtle);
-        color: var(--color-hell-foreground-muted);
-      }
-      &[data-invalid] {
-        border-color: var(--color-hell-danger);
-      }
-    }
-
-  .hell-select-value {
-      flex: 1 1 auto;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-  .hell-select-placeholder {
-      flex: 1 1 auto;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      color: var(--color-hell-foreground-muted);
-    }
-
-  .hell-select-dropdown {
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      width: var(--hell-select-dropdown-width, var(--ngp-select-width, 220px));
-      max-height: var(--hell-select-dropdown-max-height, min(320px, var(--ngp-select-available-height, 320px)));
-      overflow-y: auto;
-      background-color: var(--hell-select-dropdown-background, var(--color-hell-surface-elevated));
-      border-style: solid;
-      border-width: 1px;
-      border-color: var(--hell-select-dropdown-border-color, var(--color-hell-border));
-      border-radius: var(--hell-select-dropdown-radius, var(--radius-md));
-      box-shadow: var(--hell-select-dropdown-shadow, var(--shadow-hell-lg));
-      padding: var(--spacing-hell-2);
-      gap: 1px;
-      outline: none;
-      z-index: var(--hell-z-popover, 60);
-      transform-origin: var(--ngp-select-transform-origin, top);
-      animation: hell-pop-in var(--hell-duration-fast) var(--ease-hell-out);
-    }
-
-  .hell-select-option {
-      display: flex;
-      cursor: pointer;
-      align-items: center;
-      gap: var(--spacing-hell-3);
-      padding-inline: calc(var(--spacing) * 2.5);
-      padding-block: calc(var(--spacing) * 1.5);
-      font-size: 13px;
-      color: var(--color-hell-foreground);
-      background-color: transparent;
-      border-radius: var(--radius-sm);
-      outline: none;
-      &[data-active] {
-        background-color: var(--color-hell-surface-muted);
-      }
-      &[data-selected] {
-        color: var(--color-hell-primary-soft-foreground);
-        background-color: var(--color-hell-primary-soft);
-        font-weight: var(--font-weight-medium);
-      }
-      &[data-selected][data-active] {
-        background-color: color-mix(in oklab, var(--color-hell-primary) 18%, var(--color-hell-surface-muted));
-      }
-      &[data-disabled] {
-        cursor: not-allowed;
-        color: var(--color-hell-foreground-muted);
-        background-color: var(--color-hell-surface-subtle);
-      }
-    }
-
+@keyframes hell-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

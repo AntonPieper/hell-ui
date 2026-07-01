@@ -660,12 +660,12 @@ body {
 }
 
 [data-hell-skin="glass"] [hellCard][data-slot='root'],
-[data-hell-skin="glass"] .hell-popover,
-[data-hell-skin="glass"] .hell-menu,
 [data-hell-skin="glass"] [hellDialog][data-slot='root'],
-[data-hell-skin="glass"] .hell-combobox-dropdown,
-[data-hell-skin="glass"] .hell-select-dropdown,
-[data-hell-skin="glass"] .hell-flyout {
+[data-hell-skin="glass"] [hellPopover][data-slot="root"],
+[data-hell-skin="glass"] [hellMenu][data-slot="root"],
+[data-hell-skin="glass"] [hellComboboxDropdown][data-slot="root"],
+[data-hell-skin="glass"] [hellSelectDropdown][data-slot="root"],
+[data-hell-skin="glass"] [data-hell-flyout][data-slot="root"] {
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
 }

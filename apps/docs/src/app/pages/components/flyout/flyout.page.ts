@@ -95,9 +95,9 @@ import flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw from './examp
           <code>aria-label</code> or <code>aria-labelledby</code>: accessible name for the
           dialog panel
         </li>
+        <li><code>ui</code>: Part Style Map for the panel's local <code>root</code> part. The panel renders <code>data-slot="root"</code>.</li>
         <li><code>closeOnEscape</code> (default <code>true</code>)</li>
         <li><code>closeOnOutsideInteraction</code> (default <code>true</code>)</li>
-        <li><code>unstyled</code></li>
       </ul>
 
       <h2>Do</h2>

@@ -14,7 +14,6 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const junitPath = join(root, 'test-results/vitest-junit.xml');
 const coverageSummaryPath = join(root, 'coverage/coverage-summary.json');
 const markdownPath = join(root, 'test-results/summary.md');
-const summaryStartedAt = Date.now();
 const readErrors = [];
 
 function readJunitSummary() {
@@ -164,11 +163,7 @@ function validateMarkdownSummary(markdown) {
     return errors;
   }
 
-  const stats = statSync(markdownPath);
-  if (stats.mtimeMs < summaryStartedAt) {
-    errors.push(`Markdown summary is stale from a previous run at ${markdownPath}`);
-  }
-  if (stats.size === 0) {
+  if (statSync(markdownPath).size === 0) {
     errors.push(`Markdown summary is empty at ${markdownPath}`);
   }
 

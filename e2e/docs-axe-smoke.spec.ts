@@ -42,7 +42,7 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'date input',
     path: '/components/date-input',
     heading: 'Date input',
-    include: ['main', '.hell-popover'],
+    include: ['main', '[hellPopover][data-slot="root"]'],
     prepare: async (page) => {
       const example = page.locator('app-date-input-text-input-calendar-popover-example');
       const departure = example.getByRole('textbox', { name: 'Departure' });
@@ -74,7 +74,7 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'flyout',
     path: '/components/flyout',
     heading: 'Flyout',
-    include: ['main', '.hell-flyout'],
+    include: ['main', '[data-hell-flyout][data-slot="root"]'],
     prepare: async (page) => {
       await page.getByRole('button', { name: 'Show flyout' }).click();
       await expect(page.getByRole('dialog', { name: 'Anchored, non-modal' })).toBeVisible();
@@ -90,7 +90,7 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'popover',
     path: '/components/popover',
     heading: 'Popover',
-    include: ['main', '.hell-popover'],
+    include: ['main', '[hellPopover][data-slot="root"]'],
     prepare: async (page) => {
       await page.getByRole('button', { name: 'Show profile summary' }).click();
       await expect(page.getByRole('dialog', { name: 'Profile summary' })).toBeVisible();
@@ -124,7 +124,7 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'tooltip',
     path: '/components/tooltip',
     heading: 'Tooltip',
-    include: ['main', '.hell-tooltip'],
+    include: ['main', '[hellTooltip][data-slot="root"]'],
     prepare: async (page) => {
       await page.getByRole('button', { name: 'Top' }).focus();
       await expect(page.getByRole('tooltip', { name: "I'm on top" })).toBeVisible();
@@ -134,7 +134,7 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'menu',
     path: '/components/menu',
     heading: 'Menu',
-    include: ['main', '.hell-menu'],
+    include: ['main', '[hellMenu][data-slot="root"]'],
     prepare: async (page) => {
       await page.getByRole('button', { name: 'Actions' }).first().click();
       await expect(page.getByRole('menu').first()).toBeVisible();
@@ -144,7 +144,7 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'select',
     path: '/components/select',
     heading: 'Select',
-    include: ['main', '.hell-select-dropdown'],
+    include: ['main', '[hellSelectDropdown][data-slot="root"]'],
     prepare: async (page) => {
       const select = page.getByRole('combobox', { name: 'Select priority' }).first();
       await select.focus();
@@ -156,7 +156,7 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'combobox',
     path: '/components/combobox',
     heading: 'Combobox',
-    include: ['main', '.hell-combobox-dropdown'],
+    include: ['main', '[hellComboboxDropdown][data-slot="root"]'],
     prepare: async (page) => {
       const input = page.getByRole('combobox', { name: 'Search fruit…' }).first();
       await input.focus();
@@ -204,7 +204,7 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'time input docs example',
     path: '/components/time-input',
     heading: 'Time input',
-    include: ['main', '.hell-popover'],
+    include: ['main', '[data-slot="pickerPanel"]'],
     prepare: async (page) => {
       await page.getByRole('button', { name: 'Choose time for Reminder time' }).first().click();
       await expect(page.getByRole('spinbutton', { name: 'Hours' })).toBeVisible();

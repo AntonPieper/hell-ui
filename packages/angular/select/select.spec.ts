@@ -5,7 +5,13 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { NgpSelect } from 'ng-primitives/select';
 
-import { HellSelect, HellSelectBasic, HellSelectFormValue, HELL_SELECT_DIRECTIVES } from './select';
+import {
+  HellSelect,
+  HellSelectBasic,
+  HellSelectFormValue,
+  HELL_SELECT_DIRECTIVES,
+  type HellSelectBasicUi,
+} from './select';
 
 @Component({
   imports: [ReactiveFormsModule, ...HELL_SELECT_DIRECTIVES],
@@ -90,6 +96,36 @@ class SelectBasicLabelledHost {
   readonly value = signal<string | null>(null);
 }
 
+@Component({
+  imports: [HellSelectBasic],
+  template: `<hell-select-basic [ui]="selectUi" [options]="['Low']" />`,
+})
+class SelectBasicUiHost {
+  protected readonly selectUi = {
+    root: 'block p-hell-8',
+    trigger: 'rounded-hell-pill bg-hell-primary-soft',
+    placeholder: 'text-hell-danger',
+    dropdown: 'rounded-hell-pill',
+    option: 'px-hell-8 bg-hell-primary-soft',
+  } satisfies HellSelectBasicUi;
+}
+
+@Component({
+  imports: [...HELL_SELECT_DIRECTIVES],
+  template: `
+    <button hellSelect type="button" ui="rounded-hell-pill bg-hell-primary">
+      <span hellSelectValue ui="text-hell-danger">Selection</span>
+      <div *hellSelectPortal hellSelectDropdown ui="rounded-hell-pill">
+        <div hellSelectOption value="low" [ui]="{ root: 'px-hell-8 bg-hell-primary-soft' }">
+          Low
+        </div>
+        <div hellSelectOption value="high" disabled>High</div>
+      </div>
+    </button>
+  `,
+})
+class SelectUiHost {}
+
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
 
 beforeAll(() => {
@@ -113,6 +149,8 @@ describe('HellSelect', () => {
         SelectMultipleFormHost,
         SelectBasicFormHost,
         SelectBasicLabelledHost,
+        SelectBasicUiHost,
+        SelectUiHost,
       ],
     }).compileComponents();
   });
@@ -158,6 +196,35 @@ describe('HellSelect', () => {
 
     expect(select.getAttribute('data-disabled')).toBe('');
     expect(select.tabIndex).toBe(-1);
+  });
+
+  it('merges trigger, value, dropdown and option root part styles through the portal', async () => {
+    const fixture = TestBed.createComponent(SelectUiHost);
+    fixture.detectChanges();
+
+    const select = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelect]');
+    const value = query<HTMLElement>(fixture.nativeElement, '[hellSelectValue]');
+    const dropdown = await openSelectDropdown(fixture, select);
+    const option = query<HTMLElement>(dropdown, '[hellSelectOption][value="low"]');
+    const disabled = query<HTMLElement>(dropdown, '[hellSelectOption][value="high"]');
+
+    expect(select.getAttribute('data-slot')).toBe('root');
+    expect(select.className).toContain('rounded-hell-pill');
+    expect(select.className).not.toContain('rounded-hell-md');
+    expect(select.className).toContain('bg-hell-primary');
+
+    expect(value.getAttribute('data-slot')).toBe('root');
+    expect(value.className).toContain('text-hell-danger');
+
+    expect(dropdown.getAttribute('data-slot')).toBe('root');
+    expect(dropdown.className).toContain('rounded-hell-pill');
+    expect(dropdown.className).not.toContain('rounded-hell-md');
+
+    expect(option.getAttribute('data-slot')).toBe('root');
+    expect(option.className).toContain('px-hell-8');
+    expect(option.className).toContain('bg-hell-primary-soft');
+    expect(disabled.getAttribute('data-slot')).toBe('root');
+    expect(disabled.getAttribute('aria-disabled')).toBe('true');
   });
 
   it('keeps the form untouched while focus moves through a real portaled dropdown', async () => {
@@ -285,8 +352,7 @@ describe('HellSelect', () => {
       'hell-select-basic button[hellSelect]',
     );
 
-    expect(preset.classList.contains('hell-select-basic')).toBe(true);
-    expect(preset.classList.contains('hell-select')).toBe(false);
+    expect(preset.getAttribute('data-slot')).toBe('root');
     expect(trigger.textContent?.trim()).toContain('Select');
     expect(trigger.getAttribute('aria-label')).toBe('Priority');
     expect(trigger.getAttribute('aria-describedby')).toBe('priority-help');
@@ -364,6 +430,33 @@ describe('HellSelect', () => {
     expect(trigger.textContent?.trim()).toContain('High');
     expect(accessibleName(root, trigger)).toBe('Priority');
     expect(trigger.getAttribute('aria-describedby')).toBe('priority-description');
+  });
+
+  it('exposes flat owned parts on the basic select host and its portaled dropdown', async () => {
+    const fixture = TestBed.createComponent(SelectBasicUiHost);
+    fixture.detectChanges();
+
+    const preset = query<HTMLElement>(fixture.nativeElement, 'hell-select-basic');
+    const trigger = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelect]');
+    const placeholder = query<HTMLElement>(fixture.nativeElement, '[hellSelectPlaceholder]');
+
+    expect(preset.getAttribute('data-slot')).toBe('root');
+    expect(preset.className).toContain('block');
+    expect(preset.className).toContain('p-hell-8');
+    expect(trigger.getAttribute('data-slot')).toBe('trigger');
+    expect(trigger.className).toContain('rounded-hell-pill');
+    expect(trigger.className).toContain('bg-hell-primary-soft');
+    expect(placeholder.getAttribute('data-slot')).toBe('placeholder');
+    expect(placeholder.className).toContain('text-hell-danger');
+
+    const dropdown = await openSelectDropdown(fixture, trigger);
+    const option = query<HTMLElement>(dropdown, '[hellSelectOption]');
+
+    expect(dropdown.getAttribute('data-slot')).toBe('dropdown');
+    expect(dropdown.className).toContain('rounded-hell-pill');
+    expect(option.getAttribute('data-slot')).toBe('option');
+    expect(option.className).toContain('px-hell-8');
+    expect(option.className).toContain('bg-hell-primary-soft');
   });
 });
 

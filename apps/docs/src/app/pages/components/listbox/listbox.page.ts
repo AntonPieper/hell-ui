@@ -28,7 +28,7 @@ import listboxBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
         <li><code>hellListboxOption</code>: selectable option. Accepts <code>value</code> and <code>disabled</code>.</li>
         <li><code>hellListboxSection</code> and <code>hellListboxHeader</code>: structural grouping.</li>
         <li><code>hellListboxTrigger</code>: trigger wiring for composites that open a listbox panel.</li>
-        <li><code>unstyled</code>: opt out of host styling on styled directives.</li>
+        <li><code>ui</code>: Part Style Map for styled listbox directives' local <code>root</code> parts; <code>hellListboxTrigger</code> is behavior-only. Rendered styled parts expose <code>data-slot="root"</code>.</li>
       </ul>
 
       <h2>Do</h2>

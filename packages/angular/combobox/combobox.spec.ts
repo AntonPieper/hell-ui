@@ -10,6 +10,7 @@ import {
   HellComboboxBasic,
   HellComboboxValue,
   HELL_COMBOBOX_DIRECTIVES,
+  type HellComboboxBasicUi,
 } from './combobox';
 
 @Component({
@@ -97,6 +98,38 @@ class ComboboxBasicValueHost {
 })
 class ComboboxBasicLabelsHost {}
 
+@Component({
+  imports: [HellComboboxBasic],
+  template: `<hell-combobox-basic [ui]="comboboxUi" [options]="['Atlas']" />`,
+})
+class ComboboxBasicUiHost {
+  protected readonly comboboxUi = {
+    root: 'block p-hell-8',
+    control: 'rounded-hell-pill bg-hell-primary-soft',
+    input: 'text-hell-danger',
+    button: 'text-hell-success-strong',
+    dropdown: 'rounded-hell-pill',
+    option: 'px-hell-8 bg-hell-primary-soft',
+  } satisfies HellComboboxBasicUi;
+}
+
+@Component({
+  imports: [...HELL_COMBOBOX_DIRECTIVES],
+  template: `
+    <div hellCombobox ui="rounded-hell-pill bg-hell-primary-soft">
+      <input hellComboboxInput aria-label="Assignee" ui="text-hell-danger" />
+      <button hellComboboxButton type="button" ui="text-hell-success-strong">Toggle</button>
+      <div *hellComboboxPortal hellComboboxDropdown ui="rounded-hell-pill">
+        <div hellComboboxOption value="atlas" [ui]="{ root: 'px-hell-8 bg-hell-primary-soft' }">
+          Atlas
+        </div>
+        <div hellComboboxEmpty ui="text-hell-danger">No matches</div>
+      </div>
+    </div>
+  `,
+})
+class ComboboxUiHost {}
+
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
 
 beforeAll(() => {
@@ -121,6 +154,8 @@ describe('HellCombobox', () => {
         ComboboxBasicFormHost,
         ComboboxBasicValueHost,
         ComboboxBasicLabelsHost,
+        ComboboxBasicUiHost,
+        ComboboxUiHost,
       ],
     }).compileComponents();
   });
@@ -165,6 +200,40 @@ describe('HellCombobox', () => {
     fixture.detectChanges();
 
     expect(combobox.getAttribute('data-disabled')).toBe('');
+  });
+
+  it('merges root, input, button, dropdown, option and empty part styles through the portal', async () => {
+    const fixture = TestBed.createComponent(ComboboxUiHost);
+    fixture.detectChanges();
+
+    const root = query<HTMLElement>(fixture.nativeElement, '[hellCombobox]');
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+    const button = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellComboboxButton]');
+    const dropdown = await openComboboxDropdown(fixture, input, button);
+    const option = query<HTMLElement>(dropdown, '[hellComboboxOption]');
+    const empty = query<HTMLElement>(dropdown, '[hellComboboxEmpty]');
+
+    expect(root.getAttribute('data-slot')).toBe('root');
+    expect(root.className).toContain('rounded-hell-pill');
+    expect(root.className).not.toContain('rounded-hell-md');
+    expect(root.className).toContain('bg-hell-primary-soft');
+
+    expect(input.getAttribute('data-slot')).toBe('root');
+    expect(input.className).toContain('text-hell-danger');
+
+    expect(button.getAttribute('data-slot')).toBe('root');
+    expect(button.className).toContain('text-hell-success-strong');
+
+    expect(dropdown.getAttribute('data-slot')).toBe('root');
+    expect(dropdown.className).toContain('rounded-hell-pill');
+    expect(dropdown.className).not.toContain('rounded-hell-md');
+
+    expect(option.getAttribute('data-slot')).toBe('root');
+    expect(option.className).toContain('px-hell-8');
+    expect(option.className).toContain('bg-hell-primary-soft');
+
+    expect(empty.getAttribute('data-slot')).toBe('root');
+    expect(empty.className).toContain('text-hell-danger');
   });
 
   it('keeps the form untouched while focus moves through a real portaled dropdown', async () => {
@@ -350,8 +419,7 @@ describe('HellCombobox', () => {
       'hell-combobox-basic input[hellComboboxInput]',
     );
 
-    expect(preset.classList.contains('hell-combobox-basic')).toBe(true);
-    expect(preset.classList.contains('hell-combobox')).toBe(false);
+    expect(preset.getAttribute('data-slot')).toBe('root');
 
     expect(input.placeholder).toBe('Search');
 
@@ -459,6 +527,36 @@ describe('HellCombobox', () => {
     await fixture.whenStable();
 
     expect(input.value).toBe('Nova');
+  });
+
+  it('exposes flat owned parts on the basic combobox host and its portaled dropdown', async () => {
+    const fixture = TestBed.createComponent(ComboboxBasicUiHost);
+    fixture.detectChanges();
+
+    const preset = query<HTMLElement>(fixture.nativeElement, 'hell-combobox-basic');
+    const root = query<HTMLElement>(fixture.nativeElement, '[hellCombobox]');
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+    const button = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellComboboxButton]');
+
+    expect(preset.getAttribute('data-slot')).toBe('root');
+    expect(preset.className).toContain('block');
+    expect(preset.className).toContain('p-hell-8');
+    expect(root.getAttribute('data-slot')).toBe('control');
+    expect(root.className).toContain('rounded-hell-pill');
+    expect(root.className).toContain('bg-hell-primary-soft');
+    expect(input.getAttribute('data-slot')).toBe('input');
+    expect(input.className).toContain('text-hell-danger');
+    expect(button.getAttribute('data-slot')).toBe('button');
+    expect(button.className).toContain('text-hell-success-strong');
+
+    const dropdown = await openComboboxDropdown(fixture, input, button);
+    const option = query<HTMLElement>(dropdown, '[hellComboboxOption]');
+
+    expect(dropdown.getAttribute('data-slot')).toBe('dropdown');
+    expect(dropdown.className).toContain('rounded-hell-pill');
+    expect(option.getAttribute('data-slot')).toBe('option');
+    expect(option.className).toContain('px-hell-8');
+    expect(option.className).toContain('bg-hell-primary-soft');
   });
 });
 
