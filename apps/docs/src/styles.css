@@ -243,21 +243,6 @@
     -webkit-mask: url('/assets/hell-ui-logo.svg') center / contain no-repeat;
   }
 
-  @media (max-width: 640px) {
-    .hd-brand-tag,
-    .hd-topbar-link {
-      display: none;
-    }
-  }
-
-  .hd-palette-select {
-    width: 168px;
-    height: var(--spacing-hell-control-sm);
-    font-size: 12px;
-    padding-inline-start: var(--spacing-hell-3);
-    gap: var(--spacing-hell-2);
-  }
-
   .hd-docs-search {
     flex: 0 1 560px;
     min-width: 240px;
@@ -308,9 +293,6 @@
       flex-basis: 240px;
     }
 
-    .hd-docs-search-kbd {
-      display: none;
-    }
   }
 
   .hd-palette-select [hellSelectValue][data-slot='root'] {
@@ -354,12 +336,6 @@
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--color-hell-foreground-subtle);
-  }
-
-  @media (max-width: 640px) {
-    .hd-palette-select {
-      width: 132px;
-    }
   }
 
   @media (max-width: 480px) {
@@ -479,5 +455,39 @@
       color: var(--color-hell-foreground);
       font-weight: 600;
     }
+  }
+}
+
+.hd-palette-select {
+  flex: 0 0 auto;
+  width: 168px;
+  height: 28px;
+}
+
+@media (max-width: 640px) {
+  .hd-brand-tag,
+  .hd-topbar-link {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .hd-brand-name,
+  .hd-docs-search-count,
+  .hd-docs-search-kbd,
+  .hd-palette-select [hellSelectValue][data-slot='root'],
+  .hd-palette-select::after {
+    display: none;
+  }
+
+  .hd-docs-search {
+    min-width: 0;
+    flex: 1 1 0;
+  }
+
+  .hd-palette-select {
+    justify-content: center;
+    width: 28px;
+    padding-inline: 0;
   }
 }

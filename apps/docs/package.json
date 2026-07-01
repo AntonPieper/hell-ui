@@ -16,7 +16,9 @@
     "@angular/forms": "catalog:",
     "@angular/platform-browser": "catalog:",
     "@angular/router": "catalog:",
+    "@codemirror/commands": "catalog:",
     "@codemirror/lang-javascript": "catalog:",
+    "@codemirror/language": "catalog:",
     "@codemirror/state": "catalog:",
     "@codemirror/view": "catalog:",
     "@floating-ui/dom": "catalog:",
@@ -28,6 +30,7 @@
     "ng-primitives": "catalog:",
     "pdfjs-dist": "catalog:",
     "rxjs": "catalog:",
+    "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:",
     "tslib": "catalog:"
   },

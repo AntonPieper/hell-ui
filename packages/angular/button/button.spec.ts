@@ -63,6 +63,7 @@ describe('HellButton', () => {
     expect(button.className).toContain('bg-hell-primary');
     expect(button.className).toContain('h-hell-control-sm');
     expect(button.className).toContain('px-0');
+    expect(button.className).toContain('shrink-0');
     expect(button.className).toContain('w-full');
     expect(button.getAttribute('data-variant')).toBe('primary');
     expect(button.getAttribute('data-size')).toBe('sm');

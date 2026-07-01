@@ -328,7 +328,7 @@ const packageConsumerScenarioCatalog = [
     stylesCss: audioPlayerConsumerStylesCss,
     cssIncludes: [
       '.max-w-\\[var\\(--hell-audio-max-width\\,none\\)\\]{max-width:var(--hell-audio-max-width,none)}',
-      '.flex-\\[0_1_4\\.5rem\\]{flex:0 1 4.5rem}',
+      '.flex-\\[0_0_7\\.5rem\\]{flex:0 0 7.5rem}',
       '.tracking-\\[0\\.04em\\]{--tw-tracking: .04em;letter-spacing:.04em}',
       '.animate-\\[hell-audio-captions-in_200ms_var\\(--ease-hell-out\\,ease\\)\\]{animation:hell-audio-captions-in .2s var(--ease-hell-out,ease)}',
     ],
