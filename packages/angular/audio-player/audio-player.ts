@@ -71,15 +71,15 @@ const HELL_AUDIO_PLAYER_RECIPE = {
   date: 'shrink-0 text-hell-foreground-muted tabular-nums max-[480px]:whitespace-nowrap',
   controls: 'flex min-w-0 w-full flex-wrap items-center gap-hell-2',
   transport: 'flex min-w-0 flex-1 items-center gap-hell-2 max-[480px]:basis-full',
-  playButton: '',
+  playButton: 'shrink-0',
   time: 'min-w-[5ch] text-center text-hell-foreground-muted tabular-nums',
   seek: 'min-w-20 flex-1',
   actions: 'ms-auto flex min-w-0 items-center gap-hell-2 max-[480px]:ms-0 max-[480px]:basis-full',
-  muteButton: '',
-  volume: 'flex-[0_1_4.5rem]',
+  muteButton: 'shrink-0',
+  volume: 'min-w-[7.5rem] flex-[0_0_7.5rem] max-[480px]:flex-1',
   captionToggle:
-    'data-[active=true]:bg-[color-mix(in_oklab,var(--color-hell-primary)_12%,transparent)] data-[active=true]:text-hell-primary',
-  downloadButton: '',
+    'shrink-0 data-[active=true]:bg-[color-mix(in_oklab,var(--color-hell-primary)_12%,transparent)] data-[active=true]:text-hell-primary',
+  downloadButton: 'shrink-0',
   captions:
     'absolute inset-x-0 top-full z-5 mt-hell-2 flex origin-top flex-col gap-hell-2 rounded-hell-md border border-hell-border bg-hell-surface-elevated px-hell-3 py-hell-2 shadow-[0_1px_2px_rgb(0_0_0_/_0.04),0_12px_28px_-16px_rgb(0_0_0_/_0.25)] animate-[hell-audio-captions-in_200ms_var(--ease-hell-out,ease)]',
   captionsBar: 'flex items-center justify-between gap-hell-3',
@@ -177,20 +177,20 @@ function parseIsoDateOnly(value: string): Date | null {
           {{ format(currentTime()) }}
         </span>
 
-        <hell-slider
-          data-slot="seek"
-          [class]="part('seek')"
-          size="sm"
-          grow
-          thumb="hover"
-          [value]="currentTime()"
-          [min]="0"
-          [max]="seekMax()"
-          [step]="0.1"
-          (valueChange)="onSeek($event)"
-          (keydown)="onSeekKey($event)"
-          [attr.aria-label]="labels.audioPlayer.seek"
-        />
+        <div data-slot="seek" [class]="part('seek')">
+          <hell-slider
+            size="sm"
+            grow
+            thumb="hover"
+            [value]="currentTime()"
+            [min]="0"
+            [max]="seekMax()"
+            [step]="0.1"
+            (valueChange)="onSeek($event)"
+            (keydown)="onSeekKey($event)"
+            [attr.aria-label]="labels.audioPlayer.seek"
+          />
+        </div>
 
         <span data-slot="time" data-time="duration" [class]="part('time')">
           {{ format(duration()) }}
@@ -211,17 +211,17 @@ function parseIsoDateOnly(value: string): Date | null {
           <hell-icon [name]="volumeIcon()" />
         </button>
 
-        <hell-slider
-          data-slot="volume"
-          [class]="part('volume')"
-          size="sm"
-          [value]="volume() * 100"
-          [min]="0"
-          [max]="100"
-          [step]="1"
-          (valueChange)="onVolume($event)"
-          [attr.aria-label]="labels.audioPlayer.volume"
-        />
+        <div data-slot="volume" [class]="part('volume')">
+          <hell-slider
+            size="sm"
+            [value]="volume() * 100"
+            [min]="0"
+            [max]="100"
+            [step]="1"
+            (valueChange)="onVolume($event)"
+            [attr.aria-label]="labels.audioPlayer.volume"
+          />
+        </div>
 
         @if (speechTranscriptEnabled() && speechSupported()) {
           <button

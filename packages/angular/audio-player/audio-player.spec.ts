@@ -157,6 +157,15 @@ describe('HellAudioPlayer', () => {
     const times = Array.from(root.querySelectorAll<HTMLElement>('[data-slot="time"]'));
     expect(times.map((time) => time.dataset['time'])).toEqual(['elapsed', 'duration']);
 
+    const seek = root.querySelector('[data-slot="seek"]') as HTMLElement;
+    const seekSlider = seek.querySelector('hell-slider') as HTMLElement;
+    const volume = root.querySelector('[data-slot="volume"]') as HTMLElement;
+    const volumeSlider = volume.querySelector('hell-slider') as HTMLElement;
+    expect(seek.className).toContain('flex-1');
+    expect(volume.className).toContain('min-w-[7.5rem]');
+    expect(seekSlider.getAttribute('data-slot')).toBe('root');
+    expect(volumeSlider.getAttribute('data-slot')).toBe('root');
+
     const captionToggle = root.querySelector('[data-slot="captionToggle"]') as HTMLButtonElement;
     expect(captionToggle.className).toContain('text-hell-danger');
 
@@ -328,8 +337,10 @@ describe('HellAudioPlayer', () => {
     component.error.set('Speech error: network');
     fixture.detectChanges();
 
-    const track = fixture.nativeElement.querySelector('[data-slot="seek"]') as HTMLElement;
-    track.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    const seekSlider = fixture.nativeElement.querySelector(
+      '[data-slot="seek"] hell-slider',
+    ) as HTMLElement;
+    seekSlider.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     fixture.detectChanges();
 
     expect(audio.currentTime).toBe(15);

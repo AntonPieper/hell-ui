@@ -90,7 +90,8 @@
   }
 
   hell-audio-player[data-slot='root'] [data-slot='volume'] {
-    flex: 0 1 4.5rem;
+    min-width: 7.5rem;
+    flex: 0 0 7.5rem;
   }
 
   hell-audio-player[data-slot='root'] [data-slot='captionToggle'][data-active='true'] {
@@ -240,6 +241,10 @@
 
     hell-audio-player[data-slot='root'] [data-slot='actions'] {
       margin-inline-start: 0;
+    }
+
+    hell-audio-player[data-slot='root'] [data-slot='volume'] {
+      flex: 1 1 auto;
     }
   }
 }

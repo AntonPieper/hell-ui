@@ -34,11 +34,11 @@ const HELL_BUTTON_SIZE_RECIPE: Record<HellSize, string> = {
 };
 
 const HELL_BUTTON_ICON_ONLY_RECIPE: Record<HellSize, string> = {
-  xs: 'w-hell-control-xs px-0',
-  sm: 'w-hell-control-sm px-0',
-  md: 'w-hell-control-md px-0',
-  lg: 'w-hell-control-lg px-0',
-  xl: 'w-hell-control-xl px-0',
+  xs: 'w-hell-control-xs shrink-0 px-0',
+  sm: 'w-hell-control-sm shrink-0 px-0',
+  md: 'w-hell-control-md shrink-0 px-0',
+  lg: 'w-hell-control-lg shrink-0 px-0',
+  xl: 'w-hell-control-xl shrink-0 px-0',
 };
 
 /**

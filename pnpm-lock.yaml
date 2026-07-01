@@ -193,9 +193,15 @@ importers:
       '@angular/router':
         specifier: 'catalog:'
         version: 21.2.13(@angular/common@21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(@angular/platform-browser@21.2.13(@angular/common@21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@codemirror/commands':
+        specifier: 'catalog:'
+        version: 6.10.3
       '@codemirror/lang-javascript':
         specifier: 'catalog:'
         version: 6.2.5
+      '@codemirror/language':
+        specifier: 'catalog:'
+        version: 6.12.3
       '@codemirror/state':
         specifier: 'catalog:'
         version: 6.6.0
@@ -235,6 +241,9 @@ importers:
       rxjs:
         specifier: 'catalog:'
         version: 7.8.2
+      tailwind-merge:
+        specifier: 'catalog:'
+        version: 3.5.0
       tailwindcss:
         specifier: 'catalog:'
         version: 4.2.4
