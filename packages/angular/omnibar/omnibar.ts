@@ -165,23 +165,17 @@ export type HellOmnibarActionUi = HellUi<HellOmnibarActionPart>;
 
 const HELL_OMNIBAR_RECIPE = {
   root: 'relative inline-flex w-full',
-  control:
-    'inline-flex min-h-[var(--hell-omnibar-height)] w-full items-center gap-hell-2 rounded-[var(--hell-omnibar-radius)] border border-[var(--hell-omnibar-border)] bg-[var(--hell-omnibar-bg)] px-[var(--hell-omnibar-padding-x)] py-0.5 text-[length:var(--hell-omnibar-font)] text-hell-foreground transition-[border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)]',
-  inputWrap:
-    'relative flex min-h-[calc(var(--hell-omnibar-height)_-_4px)] min-w-0 flex-1 items-center overflow-hidden',
-  input:
-    'relative h-full w-full border-0 bg-transparent p-0 font-[inherit] leading-[var(--hell-omnibar-height)] tracking-[inherit] text-hell-foreground caret-hell-primary outline-none disabled:cursor-not-allowed disabled:text-hell-foreground-muted',
-  clear:
-    'relative inline-flex h-[18px] w-[18px] flex-none cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-hell-foreground-subtle outline-none hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:bg-hell-surface-muted focus-visible:text-hell-foreground data-[empty]:hidden',
-  panel:
-    'flex max-h-[var(--hell-omnibar-panel-max-height)] w-full flex-col overflow-hidden rounded-[var(--hell-omnibar-panel-radius)] border border-hell-border bg-[var(--hell-omnibar-panel-bg)] shadow-[var(--hell-omnibar-panel-shadow)] animate-[hell-pop-in_var(--hell-duration-fast)_var(--ease-hell-out)]',
-  actions:
-    'flex items-center gap-hell-1 border-b border-hell-border bg-hell-surface-subtle p-hell-2 data-[empty=true]:hidden',
-  results: 'flex flex-1 flex-col gap-hell-1 overflow-y-auto p-hell-2',
-  loading: 'flex flex-col gap-hell-2 p-1',
-  skeletonRow: 'flex items-center gap-hell-3 px-1 py-1.5',
-  skeletonText: 'flex min-w-0 flex-1 flex-col gap-1',
-  empty: 'p-hell-4 text-center text-xs text-hell-foreground-muted',
+  control: 'inline-flex w-full items-center gap-hell-2',
+  inputWrap: 'relative flex min-w-0 flex-1 items-center overflow-hidden',
+  input: 'h-full w-full bg-transparent outline-none',
+  clear: 'inline-flex h-[18px] w-[18px] items-center justify-center rounded-full',
+  panel: 'flex w-full flex-col overflow-hidden',
+  actions: 'flex items-center gap-hell-1',
+  results: 'flex flex-1 flex-col overflow-y-auto',
+  loading: 'flex flex-col',
+  skeletonRow: 'flex items-center',
+  skeletonText: 'flex min-w-0 flex-1 flex-col',
+  empty: 'text-center text-xs',
 } satisfies HellRecipe<HellOmnibarPart>;
 
 const HELL_OMNIBAR_PANEL_RECIPE = {
@@ -193,11 +187,11 @@ const HELL_OMNIBAR_GROUP_RECIPE = {
 } satisfies HellRecipe<HellOmnibarGroupPart>;
 
 const HELL_OMNIBAR_GROUP_LABEL_RECIPE = {
-  root: 'px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-hell-foreground-muted',
+  root: 'text-[10px] font-semibold uppercase',
 } satisfies HellRecipe<HellOmnibarGroupLabelPart>;
 
 const HELL_OMNIBAR_ITEM_RECIPE = {
-  root: 'flex w-full cursor-pointer items-center gap-hell-3 rounded-hell-sm border-0 bg-transparent px-2 py-1.5 text-start text-[13px] text-hell-foreground outline-none data-[active=true]:bg-hell-surface-muted focus-visible:shadow-[0_0_0_2px_var(--color-hell-focus-ring)]',
+  root: 'flex w-full items-center gap-hell-3 rounded-hell-sm',
 } satisfies HellRecipe<HellOmnibarItemPart>;
 
 const HELL_OMNIBAR_ITEM_ICON_RECIPE = {
@@ -205,7 +199,7 @@ const HELL_OMNIBAR_ITEM_ICON_RECIPE = {
 } satisfies HellRecipe<HellOmnibarItemIconPart>;
 
 const HELL_OMNIBAR_ITEM_TEXT_RECIPE = {
-  root: 'flex min-w-0 flex-1 flex-col gap-px overflow-hidden [&>*]:overflow-hidden [&>*]:text-ellipsis [&>*]:whitespace-nowrap',
+  root: 'flex min-w-0 flex-1 flex-col overflow-hidden',
 } satisfies HellRecipe<HellOmnibarItemTextPart>;
 
 const HELL_OMNIBAR_ITEM_SUBTEXT_RECIPE = {
@@ -213,15 +207,15 @@ const HELL_OMNIBAR_ITEM_SUBTEXT_RECIPE = {
 } satisfies HellRecipe<HellOmnibarItemSubtextPart>;
 
 const HELL_OMNIBAR_ITEM_TRAILING_RECIPE = {
-  root: 'ms-auto inline-flex items-center gap-1 text-[11px] text-hell-foreground-muted',
+  root: 'ms-auto inline-flex items-center',
 } satisfies HellRecipe<HellOmnibarItemTrailingPart>;
 
 const HELL_OMNIBAR_CHIP_RECIPE = {
-  root: 'inline-flex min-h-[22px] max-w-[180px] items-center gap-1 whitespace-nowrap rounded-hell-sm border border-hell-border bg-hell-surface-muted ps-1.5 pe-0.5 text-[11px] leading-[1.2] text-hell-foreground',
+  root: 'inline-flex items-center gap-1 rounded-hell-sm',
 } satisfies HellRecipe<HellOmnibarChipPart>;
 
 const HELL_OMNIBAR_CHIP_REMOVE_RECIPE = {
-  root: 'inline-flex h-[18px] w-[18px] items-center justify-center rounded-hell-sm border-0 bg-transparent p-0 text-hell-foreground-subtle outline-none hover:bg-hell-surface-subtle hover:text-hell-foreground focus-visible:bg-hell-surface-subtle focus-visible:text-hell-foreground',
+  root: 'inline-flex h-[18px] w-[18px] items-center justify-center rounded-hell-sm',
 } satisfies HellRecipe<HellOmnibarChipRemovePart>;
 
 const HELL_OMNIBAR_ACTIONS_STRIP_RECIPE = {
@@ -229,7 +223,7 @@ const HELL_OMNIBAR_ACTIONS_STRIP_RECIPE = {
 } satisfies HellRecipe<HellOmnibarActionsStripPart>;
 
 const HELL_OMNIBAR_ACTION_RECIPE = {
-  root: 'inline-flex h-hell-control-sm cursor-pointer items-center gap-hell-1 rounded-hell-sm border border-transparent bg-transparent px-hell-3 text-xs text-hell-foreground-muted outline-none transition-[background-color,color,border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:bg-hell-surface-muted focus-visible:text-hell-foreground focus-visible:shadow-[0_0_0_2px_var(--color-hell-focus-ring)] data-[active=true]:border-[color-mix(in_oklab,var(--color-hell-primary)_16%,transparent)] data-[active=true]:bg-hell-primary-soft data-[active=true]:text-hell-primary',
+  root: 'inline-flex items-center gap-hell-1 rounded-hell-sm',
 } satisfies HellRecipe<HellOmnibarActionPart>;
 
 /**
