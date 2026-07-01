@@ -1,4 +1,5 @@
 import { spawn, spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { createServer } from 'node:http';
 import {
   existsSync,
@@ -996,7 +997,7 @@ function formatList(values) {
 
 async function runConsumerScenarioGroup(group) {
   const groupName = group.scenarios.map((scenario) => scenario.name).join('-');
-  const tempRoot = mkdtempSync(join(tmpdir(), `hell-package-consumer-${groupName}-`));
+  const tempRoot = mkdtempSync(join(tmpdir(), packageConsumerTempPrefix(groupName, group)));
 
   try {
     for (const scenario of group.scenarios) printScenarioContract(scenario, 'install');
@@ -1014,6 +1015,13 @@ async function runConsumerScenarioGroup(group) {
     if (keep) console.log(`[package-consumer:${groupName}] kept ${tempRoot}`);
     else rmSync(tempRoot, { force: true, recursive: true });
   }
+}
+
+function packageConsumerTempPrefix(groupName, group) {
+  const hash = createHash('sha256').update(groupName).digest('hex').slice(0, 10);
+  const label =
+    group.scenarios.length === 1 ? group.scenarios[0].name : `group-${group.scenarios.length}`;
+  return `hell-package-consumer-${label}-${hash}-`;
 }
 
 async function runConsumerScenarioBuild(tempRoot, scenario) {
