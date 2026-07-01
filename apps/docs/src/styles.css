@@ -295,27 +295,27 @@
 
   }
 
-  .hd-palette-select [hellSelectValue][data-slot='root'] {
+  .hd-theme-select [hellSelectValue][data-slot='root'] {
     font-weight: 500;
   }
 
-  .hd-palette-swatch {
+  .hd-theme-swatch {
     flex-shrink: 0;
     width: 14px;
     height: 14px;
-    background-color: var(--hd-palette-swatch-color, transparent);
+    background-color: var(--hd-theme-swatch-color, transparent);
     border-radius: 999px;
     border: 1px solid color-mix(in oklab, var(--color-hell-foreground) 18%, transparent);
     box-shadow: inset 0 0 0 1px color-mix(in oklab, white 16%, transparent);
   }
 
-  .hd-palette-option {
+  .hd-theme-option {
     display: flex;
     align-items: center;
     gap: var(--spacing-hell-3);
   }
 
-  .hd-palette-option-label {
+  .hd-theme-option-label {
     display: inline-flex;
     align-items: baseline;
     gap: var(--spacing-hell-2);
@@ -323,11 +323,11 @@
     min-width: 0;
   }
 
-  .hd-palette-option-name {
+  .hd-theme-option-name {
     font-weight: 500;
   }
 
-  .hd-palette-option-tag {
+  .hd-theme-option-tag {
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -454,13 +454,13 @@
   }
 }
 
-.hd-palette-select {
+.hd-theme-select {
   flex: 0 0 auto;
-  width: 168px;
+  width: 176px;
   height: 28px;
 }
 
-.hd-palette-dropdown {
+.hd-theme-dropdown {
   width: 224px;
 }
 
@@ -475,8 +475,8 @@
   .hd-brand-name,
   .hd-docs-search-count,
   .hd-docs-search-kbd,
-  .hd-palette-select [hellSelectValue][data-slot='root'],
-  .hd-palette-select::after {
+  .hd-theme-select [hellSelectValue][data-slot='root'],
+  .hd-theme-select::after {
     display: none;
   }
 
@@ -485,19 +485,19 @@
     flex: 1 1 0;
   }
 
-  .hd-palette-select {
+  .hd-theme-select {
     justify-content: center;
     width: 36px;
     height: 36px;
     padding-inline: 0;
   }
 
-  .hd-palette-dropdown {
+  .hd-theme-dropdown {
     width: min(304px, calc(100vw - 16px));
     max-height: min(70vh, 420px);
   }
 
-  .hd-palette-option {
+  .hd-theme-option {
     min-height: 40px;
   }
 }

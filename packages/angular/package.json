@@ -435,6 +435,31 @@
       "@heinrich/source": "./features/code-editor/styles.css",
       "style": "./features/code-editor/styles.css",
       "default": "./features/code-editor/styles.css"
+    },
+    "./themes/aurora.css": {
+      "@heinrich/source": "./themes/aurora.css",
+      "style": "./themes/aurora.css",
+      "default": "./themes/aurora.css"
+    },
+    "./themes/compact-mono.css": {
+      "@heinrich/source": "./themes/compact-mono.css",
+      "style": "./themes/compact-mono.css",
+      "default": "./themes/compact-mono.css"
+    },
+    "./themes/glass.css": {
+      "@heinrich/source": "./themes/glass.css",
+      "style": "./themes/glass.css",
+      "default": "./themes/glass.css"
+    },
+    "./themes/high-contrast.css": {
+      "@heinrich/source": "./themes/high-contrast.css",
+      "style": "./themes/high-contrast.css",
+      "default": "./themes/high-contrast.css"
+    },
+    "./themes/newspaper.css": {
+      "@heinrich/source": "./themes/newspaper.css",
+      "style": "./themes/newspaper.css",
+      "default": "./themes/newspaper.css"
     }
   },
   "peerDependencies": {

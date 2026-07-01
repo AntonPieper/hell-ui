@@ -1,0 +1,63 @@
+/* Theme adapter: Newspaper
+ *
+ * Coverage: Cards, floating surfaces, controls, menus, tables, tabs, and
+ * component labels. Unsupported components keep defaults.
+ */
+
+@layer components {
+  [data-hell-skin="newspaper"]
+    :is(
+      [hellCard],
+      [hellDialog],
+      [hellPopover],
+      [hellMenu],
+      [hellComboboxDropdown],
+      [hellSelectDropdown],
+      [data-hell-flyout]
+    )[data-slot='root'] {
+    border-width: 2px;
+    box-shadow: var(--shadow-hell-md);
+  }
+
+  [data-hell-skin="newspaper"]
+    :is(
+      button[hellButton],
+      [hellSelect],
+      [hellCombobox],
+      input[hellInput],
+      select[hellNativeSelect],
+      textarea[hellTextarea]
+    )[data-slot='root'] {
+    border-width: 2px;
+    box-shadow: none;
+  }
+
+  [data-hell-skin="newspaper"]
+    :is(
+      [hellCardHeader],
+      [hellMenuLabel],
+      label[hellFieldLabel],
+      button[hellTab],
+      [hellTableHeaderCell],
+      [hellDialogTitle]
+    )[data-slot='root'] {
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  [data-hell-skin="newspaper"] [hellCardHeader][data-slot='root'],
+  [data-hell-skin="newspaper"] [hellCardFooter][data-slot='root'],
+  [data-hell-skin="newspaper"] [hellTableHeaderCell][data-slot='root'],
+  [data-hell-skin="newspaper"] [hellTableCell][data-slot='root'] {
+    border-color: var(--color-hell-foreground);
+  }
+
+  [data-hell-skin="newspaper"]
+    :is([hellMenuItem], [hellMenuItemCheckbox], [hellMenuItemRadio])[data-slot='root'][data-hover]::before,
+  [data-hell-skin="newspaper"]
+    :is([hellMenuItem], [hellMenuItemCheckbox], [hellMenuItemRadio])[data-slot='root'][data-focus-visible]::before,
+  [data-hell-skin="newspaper"] :is([hellSelectOption], [hellComboboxOption])[data-slot='root'][data-active] {
+    background-color: var(--color-hell-foreground);
+    color: var(--color-hell-foreground-inverse);
+  }
+}

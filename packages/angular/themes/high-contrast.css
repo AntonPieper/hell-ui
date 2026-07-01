@@ -1,0 +1,75 @@
+/* Theme adapter: High contrast
+ *
+ * Coverage: Core controls, cards, floating surfaces, options, menus, dialog
+ * overlay, tags, and tables. Unsupported components keep defaults.
+ */
+
+@layer components {
+  [data-hell-skin="high-contrast"]
+    :is(
+      [hellCard],
+      [hellDialog],
+      [hellPopover],
+      [hellMenu],
+      [hellComboboxDropdown],
+      [hellSelectDropdown],
+      [data-hell-flyout],
+      button[hellButton],
+      [hellSelect],
+      [hellCombobox],
+      input[hellInput],
+      select[hellNativeSelect],
+      textarea[hellTextarea],
+      [hellTag],
+      [hellBadge],
+      [hellKbd]
+    )[data-slot='root'] {
+    border-width: 2px;
+    box-shadow: none;
+  }
+
+  [data-hell-skin="high-contrast"]
+    :is(
+      button[hellButton],
+      [hellSelect],
+      [hellCombobox],
+      input[hellInput],
+      select[hellNativeSelect],
+      textarea[hellTextarea]
+    )[data-slot='root']:is([data-focus], [data-focus-visible], :focus-visible) {
+    outline: 3px solid var(--color-hell-focus-ring);
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+
+  [data-hell-skin="high-contrast"] [hellDialogOverlay][data-slot='root'] {
+    background-color: color-mix(in oklab, var(--color-hell-overlay) 86%, black);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  [data-hell-skin="high-contrast"]
+    :is([hellSelectOption], [hellComboboxOption])[data-slot='root'][data-active],
+  [data-hell-skin="high-contrast"]
+    :is([hellSelectOption], [hellComboboxOption])[data-slot='root'][data-selected],
+  [data-hell-skin="high-contrast"]
+    :is([hellMenuItem], [hellMenuItemCheckbox], [hellMenuItemRadio])[data-slot='root'][data-hover]::before,
+  [data-hell-skin="high-contrast"]
+    :is([hellMenuItem], [hellMenuItemCheckbox], [hellMenuItemRadio])[data-slot='root'][data-focus-visible]::before {
+    background-color: var(--color-hell-primary);
+  }
+
+  [data-hell-skin="high-contrast"]
+    :is([hellMenuItem], [hellMenuItemCheckbox], [hellMenuItemRadio])[data-slot='root'][data-hover],
+  [data-hell-skin="high-contrast"]
+    :is([hellMenuItem], [hellMenuItemCheckbox], [hellMenuItemRadio])[data-slot='root'][data-focus-visible],
+  [data-hell-skin="high-contrast"]
+    :is([hellSelectOption], [hellComboboxOption])[data-slot='root']:is([data-active], [data-selected]) {
+    color: var(--color-hell-primary-foreground);
+  }
+
+  [data-hell-skin="high-contrast"] [hellTableHeaderCell][data-slot='root'],
+  [data-hell-skin="high-contrast"] [hellTableCell][data-slot='root'] {
+    border-color: var(--color-hell-foreground);
+  }
+}

@@ -1,0 +1,62 @@
+/* Theme adapter: Compact mono
+ *
+ * Coverage: Core controls, cards, floating lists, tables, tabs, tags, and
+ * form labels. Unsupported components keep defaults.
+ */
+
+@layer components {
+  [data-hell-skin="compact-mono"]
+    :is(
+      button[hellButton],
+      [hellSelect],
+      [hellCombobox],
+      input[hellInput],
+      select[hellNativeSelect],
+      textarea[hellTextarea],
+      [hellMenuItem],
+      [hellMenuItemCheckbox],
+      [hellMenuItemRadio],
+      [hellSelectOption],
+      [hellComboboxOption],
+      [hellTag],
+      [hellBadge],
+      [hellKbd],
+      button[hellTab],
+      label[hellFieldLabel]
+    )[data-slot='root'] {
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+
+  [data-hell-skin="compact-mono"] [hellCardHeader][data-slot='root'],
+  [data-hell-skin="compact-mono"] [hellCardBody][data-slot='root'],
+  [data-hell-skin="compact-mono"] [hellCardFooter][data-slot='root'] {
+    padding: var(--spacing-hell-3);
+  }
+
+  [data-hell-skin="compact-mono"]
+    :is([hellMenu], [hellComboboxDropdown], [hellSelectDropdown])[data-slot='root'] {
+    gap: 0;
+    padding: var(--spacing-hell-1);
+  }
+
+  [data-hell-skin="compact-mono"]
+    :is(
+      [hellMenuItem],
+      [hellMenuItemCheckbox],
+      [hellMenuItemRadio],
+      [hellSelectOption],
+      [hellComboboxOption]
+    )[data-slot='root'] {
+    min-height: 24px;
+    padding-block: var(--spacing-hell-1);
+  }
+
+  [data-hell-skin="compact-mono"] [hellTableHeaderCell][data-slot='root'],
+  [data-hell-skin="compact-mono"] [hellTableCell][data-slot='root'] {
+    padding-block: var(--spacing-hell-1);
+    padding-inline: var(--spacing-hell-2);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+}

@@ -21,6 +21,11 @@
       "output": "."
     },
     {
+      "glob": "themes/*.css",
+      "input": ".",
+      "output": "."
+    },
+    {
       "glob": "internal/*/styles.css",
       "input": ".",
       "output": "."

@@ -84,7 +84,21 @@ export function entrypointStyleExports() {
         };
       })
       .filter((styleEntry) => existsSync(join(root, libraryRoot, styleEntry.sourcePath.slice(2)))),
+    ...themeAdapterStyleExports(),
   ];
+}
+
+export function themeAdapterStyleExports() {
+  const themesDir = join(libraryRootPath, 'themes');
+  if (!existsSync(themesDir)) return [];
+
+  return readdirSync(themesDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.css'))
+    .map((entry) => ({
+      exportPath: `./themes/${entry.name}`,
+      sourcePath: `./themes/${entry.name}`,
+    }))
+    .sort((a, b) => a.exportPath.localeCompare(b.exportPath));
 }
 
 export function entrypointPackageStyleExports() {

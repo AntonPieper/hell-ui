@@ -1,0 +1,12 @@
+@import 'tailwindcss';
+
+@import '@hell-ui/angular/tokens.css';
+@import '@hell-ui/angular/button/styles.css';
+@import '@hell-ui/angular/card/styles.css';
+@import '@hell-ui/angular/dialog/styles.css';
+@import '@hell-ui/angular/menu/styles.css';
+@import '@hell-ui/angular/select/styles.css';
+
+@import '@hell-ui/angular/themes/glass.css';
+
+/* Pair with <html data-hell-theme="light" data-hell-palette="indigo" data-hell-skin="glass">. */

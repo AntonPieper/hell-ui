@@ -365,7 +365,8 @@
  * radius, spacing, shadow, typography, and control density. They are
  * orthogonal to palette: any palette can pair with any skin.
  *
- * Available skins: brutalist, soft, compact, mono, editorial.
+ * Available skins: brutalist, soft, compact, compact-mono, mono,
+ * editorial, glass, high-contrast, playful, newspaper, aurora.
  * Default skin = no override (hell's quiet, compact look).
  * ------------------------------------------------------------------------- */
 
@@ -441,6 +442,38 @@
   --radius-hell-md: 3px;
   --radius-hell-lg: 4px;
   --radius-hell-xl: 6px;
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+
+  --spacing-hell-1: 2px;
+  --spacing-hell-2: 4px;
+  --spacing-hell-3: 6px;
+  --spacing-hell-4: 8px;
+  --spacing-hell-5: 12px;
+  --spacing-hell-6: 14px;
+  --spacing-hell-7: 18px;
+  --spacing-hell-8: 24px;
+
+  --spacing-hell-control-xs: 18px;
+  --spacing-hell-control-sm: 22px;
+  --spacing-hell-control-md: 26px;
+  --spacing-hell-control-lg: 32px;
+  --spacing-hell-control-xl: 38px;
+}
+
+/* Compact mono - dense operations skin with monospace UI text. */
+[data-hell-skin="compact-mono"] {
+  --font-sans: var(--font-mono);
+
+  --radius-hell-xs: 1px;
+  --radius-hell-sm: 2px;
+  --radius-hell-md: 3px;
+  --radius-hell-lg: 4px;
+  --radius-hell-xl: 6px;
+  --radius-hell-pill: 2px;
   --radius-xs: 1px;
   --radius-sm: 2px;
   --radius-md: 3px;
@@ -657,17 +690,6 @@ body {
     radial-gradient(at 100% 80%, color-mix(in oklab, var(--color-hell-info) 22%, transparent), transparent 55%),
     var(--color-hell-surface);
   backdrop-filter: blur(0);
-}
-
-[data-hell-skin="glass"] [hellCard][data-slot='root'],
-[data-hell-skin="glass"] [hellDialog][data-slot='root'],
-[data-hell-skin="glass"] [hellPopover][data-slot="root"],
-[data-hell-skin="glass"] [hellMenu][data-slot="root"],
-[data-hell-skin="glass"] [hellComboboxDropdown][data-slot="root"],
-[data-hell-skin="glass"] [hellSelectDropdown][data-slot="root"],
-[data-hell-skin="glass"] [data-hell-flyout][data-slot="root"] {
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
 }
 
 [data-hell-skin="aurora"] body {

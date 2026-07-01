@@ -3528,6 +3528,27 @@ function checkStyleEntryPoints() {
       failures.push(`Legacy category style artifact must be removed: ${rel}`);
     }
   }
+
+  checkTokenSubstrateDoesNotOwnComponentSkins();
+}
+
+function checkTokenSubstrateDoesNotOwnComponentSkins() {
+  const tokensPath = 'packages/angular/tokens.css';
+  const tokens = readFile(join(root, tokensPath)).replace(/\/\*[\s\S]*?\*\//g, '');
+  const selectorPattern = /([^{}]+)\{/g;
+  for (const match of tokens.matchAll(selectorPattern)) {
+    const selector = match[1].trim();
+    if (!selector.includes('[data-hell-skin')) continue;
+
+    const selectorWithoutSkinAttribute = selector.replace(/\[data-hell-skin[^\]]*\]/g, '');
+    if (!/(?:\[[^\]]*hell[A-Z][^\]]*\]|data-hell-(?!skin\b)[a-z-]+)/.test(selectorWithoutSkinAttribute)) {
+      continue;
+    }
+
+    failures.push(
+      `${tokensPath} must not contain component-specific skin selector "${selector.replace(/\s+/g, ' ')}"; move it to @hell-ui/angular/themes/*.css`,
+    );
+  }
 }
 
 function packageStylePathToSourcePath(packageStylePath) {

@@ -180,30 +180,30 @@
     <button
       hellSelect
       type="button"
-      class="hd-palette-select"
+      class="hd-theme-select"
       [value]="themeId()"
-      (valueChange)="onPaletteChange($event)"
+      (valueChange)="onThemeChange($event)"
       placement="bottom-end"
       aria-label="Theme variant"
     >
       <span
-        class="hd-palette-swatch"
-        [style.--hd-palette-swatch-color]="currentPaletteSwatch()"
+        class="hd-theme-swatch"
+        [style.--hd-theme-swatch-color]="currentThemeSwatch()"
       ></span>
       <span hellSelectValue>{{ currentTheme().label }}</span>
-      <div *hellSelectPortal hellSelectDropdown class="hd-palette-dropdown">
+      <div *hellSelectPortal hellSelectDropdown class="hd-theme-dropdown">
         @for (option of themes; track option.id) {
-          <div hellSelectOption [value]="option.id" class="hd-palette-option">
+          <div hellSelectOption [value]="option.id" class="hd-theme-option">
             <span
-              class="hd-palette-swatch"
-              [style.--hd-palette-swatch-color]="
+              class="hd-theme-swatch"
+              [style.--hd-theme-swatch-color]="
                 resolvedTheme() === 'dark' ? option.swatchDark : option.swatchLight
               "
             ></span>
-            <span class="hd-palette-option-label">
-              <span class="hd-palette-option-name">{{ option.label }}</span>
+            <span class="hd-theme-option-label">
+              <span class="hd-theme-option-name">{{ option.label }}</span>
               @if (option.tag) {
-                <span class="hd-palette-option-tag">{{ option.tag }}</span>
+                <span class="hd-theme-option-tag">{{ option.tag }}</span>
               }
             </span>
           </div>

@@ -56,6 +56,10 @@ _Avoid_: Multiple late class override channels.
 A public Hell CSS/Tailwind variable that represents a reusable design value such as primary color, border, foreground, or elevated surface. Runtime themes should override Semantic Theme Tokens rather than component-specific variable families.
 _Avoid_: Button-only theme variable, component-specific public color variable.
 
+**Theme Adapter Stylesheet**
+An optional exported CSS file for one curated skin, imported after the Shared Style Substrate and relevant Entrypoint-Scoped Stylesheets, that maps a skin to explicit component visual decisions through stable Public Part selectors and `data-slot` values. Adapter coverage is intentionally partial; components not selected by an adapter fall back to their default entrypoint styles.
+_Avoid_: Global token registry of component selectors, category aggregate stylesheet, hidden component theme ontology.
+
 **Additive Class Hook**
 Template `class` values used for layout hooks, test hooks, and non-conflicting classes outside the Part-Class Pipeline. It is not the deterministic override path for conflicting Tailwind recipe utilities.
 _Avoid_: Part Style Map, class override API.
@@ -102,6 +106,7 @@ The CSS file exported for one Package Entry Point, always addressed as that entr
 
 **Shared Style Substrate**
 The package-level CSS substrate shared by entrypoint-scoped styles. In `@hell-ui/angular`, this is `@hell-ui/angular/tokens.css`; it may be imported once before concrete entrypoint styles but must not become a category aggregate.
+The Shared Style Substrate owns base Semantic Theme Tokens, palettes, and skin-wide primitives; component-specific skin selectors belong in Theme Adapter Stylesheets.
 
 **Light Root Entry Point**
 The Package Entry Point policy where the root `@hell-ui/angular` export stays constrained to stable core only; UI surfaces stay behind narrow import-path entry points, while features and heavier runtime surfaces stay behind secondary entry points.

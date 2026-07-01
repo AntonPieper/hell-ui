@@ -122,6 +122,15 @@ Add only the extra entrypoint styles the app imports:
 @import "@hell-ui/angular/features/code-editor/styles.css";
 ```
 
+Optional Theme Adapter Stylesheets come after the entrypoint CSS they adapt:
+
+```css
+@import "@hell-ui/angular/card/styles.css";
+@import "@hell-ui/angular/dialog/styles.css";
+@import "@hell-ui/angular/menu/styles.css";
+@import "@hell-ui/angular/themes/glass.css";
+```
+
 Old category-level style paths are not public package contracts.
 
 ## Part Style Maps
