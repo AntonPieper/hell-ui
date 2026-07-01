@@ -255,12 +255,13 @@ const packageConsumerScenarioCatalog = [
     mainTs: compositesConsumerMainTs,
     stylesCss: compositesConsumerStylesCss,
     cssIncludes: [
-      'max-width:480px',
+      '.max-w-\\[480px\\]{max-width:480px}',
+      '.backdrop-blur-\\[2px\\]{--tw-backdrop-blur: blur(2px)',
       'z-index:var(--hell-z-dialog-scoped)',
-      'margin-inline-end:-4px',
-      'transition-property:transform,opacity,box-shadow',
-      'background-color:var(--hell-omnibar-panel-bg,var(--color-hell-surface))',
-      'font-size:10px',
+      '.me-\\[-4px\\]{margin-inline-end:-4px}',
+      '.scale-\\[0\\.98\\]{scale:.98}',
+      '.text-\\[10px\\]{font-size:10px}',
+      'animation:hell-shimmer',
     ],
   },
   {
@@ -321,9 +322,10 @@ const packageConsumerScenarioCatalog = [
     mainTs: audioPlayerConsumerMainTs,
     stylesCss: audioPlayerConsumerStylesCss,
     cssIncludes: [
-      'max-width:var(--hell-audio-max-width,none)',
-      'flex:0 1 4.5rem',
-      'max-height:calc(var(--spacing)*36)',
+      '.max-w-\\[var\\(--hell-audio-max-width\\,none\\)\\]{max-width:var(--hell-audio-max-width,none)}',
+      '.flex-\\[0_1_4\\.5rem\\]{flex:0 1 4.5rem}',
+      '.tracking-\\[0\\.04em\\]{--tw-tracking: .04em;letter-spacing:.04em}',
+      '.animate-\\[hell-audio-captions-in_200ms_var\\(--ease-hell-out\\,ease\\)\\]{animation:hell-audio-captions-in .2s var(--ease-hell-out,ease)}',
     ],
   },
   {
@@ -357,8 +359,8 @@ const packageConsumerScenarioCatalog = [
     stylesCss: codeEditorConsumerStylesCss,
     cssIncludes: [
       'background-image:linear-gradient(180deg,color-mix(in oklab,var(--color-hell-surface-subtle) 94%,white),var(--color-hell-surface-subtle))',
-      'min-height:inherit',
-      'transition-property:border-color,box-shadow',
+      '.min-h-\\[inherit\\]{min-height:inherit}',
+      '.data-\\[readonly\\=true\\]\\:bg-hell-surface-subtle[data-readonly=true]',
     ],
   },
   {

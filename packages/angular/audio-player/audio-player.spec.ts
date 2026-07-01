@@ -328,7 +328,7 @@ describe('HellAudioPlayer', () => {
     component.error.set('Speech error: network');
     fixture.detectChanges();
 
-    const track = fixture.nativeElement.querySelector('[data-slot="seek"] hell-slider') as HTMLElement;
+    const track = fixture.nativeElement.querySelector('[data-slot="seek"]') as HTMLElement;
     track.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     fixture.detectChanges();
 

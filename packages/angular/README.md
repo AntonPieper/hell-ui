@@ -43,7 +43,7 @@ Package-consumer scenarios assert these peer groups with strict peer installs. C
 | --- | --- | --- |
 | Core | `@hell-ui/angular`, `/core`, `/testing`; `root-core`, `core`, `testing` | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `ng-primitives`, `rxjs` |
 | Primitive | Narrow primitives such as `/button`, `/pagination`, `/select`, and `/icon`; `button-ui`, `button`, `pagination`, `primitive-icons-css` | Core peers. Add `tailwindcss` when importing primitive CSS; add `@ng-icons/font-awesome` for icon-backed entries. |
-| Composite | Narrow composite entry points such as `/app-shell`, `/resizable`, `/split-view`, and `/audio-player`; `composite-css`, `app-shell`, `resizable`, `split-view`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Icon-backed composites also assert optional `@ng-icons/font-awesome`. |
+| Composite | Narrow composite entry points such as `/app-shell`, `/resizable`, `/split-view`, `/dialog`, `/omnibar`, `/toast`, and `/audio-player`; `composite-css`, `app-shell`, `resizable`, `split-view`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Icon-backed composites also assert optional `@ng-icons/font-awesome`; Dialog also needs the optional router peer required by `ng-primitives/dialog`. |
 | Audio transcript | `/features/audio-transcript`; `audio-transcript` | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled. |
 | Table primitives | `/table`; `table`, `no-legacy-alias` | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack Table, or TanStack Virtual peers. The negative scenario proves removed legacy table aliases and CSS aliases stay unavailable. |
 | TanStack table shell | `/table-tanstack`; `table-tanstack` | Core peers plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`. Root, button, and `/table` scenarios prove TanStack Table is not installed unless this shell is imported. |
@@ -133,8 +133,11 @@ such as `hellCardHeader` or `hellAccordionTrigger`, expose their own local
 `root` `ui` contract. App Shell/nav directives follow the same local-root rule:
 style each directive through its own `ui`. Resizable directives follow that
 local-root rule as well. Split View exposes a flat owned-anatomy map for parts
-such as `pane`, `compactHeader`, and `itemNavigation`. Primitives that have not
-migrated yet still document `unstyled` locally.
+such as `pane`, `compactHeader`, and `itemNavigation`. Dialog, Toast,
+AudioPlayer, Omnibar, and CodeEditor expose flat owned-anatomy maps through
+`HellDialogUi`, `HellToasterUi`, `HellAudioPlayerUi`, `HellOmnibarUi`, and
+`HellCodeEditorUi`. Primitives that have not migrated yet still document
+`unstyled` locally.
 
 ```html
 <button hellButton variant="primary">Save</button>
@@ -156,6 +159,9 @@ migrated yet still document `unstyled` locally.
   <ng-template hellSplitPrimary>Primary</ng-template>
   <ng-template hellSplitDetail>Detail</ng-template>
 </hell-split-view>
+<hell-audio-player [ui]="{ controls: 'gap-hell-3', time: 'tabular-nums' }" src="/audio.ogg" />
+<hell-toaster [ui]="{ toast: 'shadow-hell-lg', toolbar: 'gap-hell-2' }" />
+<hell-code-editor [ui]="{ root: 'rounded-hell-lg', editor: 'min-h-[16rem]' }" />
 ```
 
 ## Customization

@@ -220,14 +220,14 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/dialog',
     detail: 'components/dialog/examples/example.example.ts',
     terms:
-      'dialog example components/dialog/examples/example.example components/dialog hellDialog hellDialogTrigger hellDialogTitle',
+      'dialog example components/dialog/examples/example.example components/dialog hellDialog hellDialogTrigger hellDialogTitle ui Part Style Map HellDialogUi HellDialogOverlayUi root overlay panel title description data-slot',
   },
   {
     title: 'Dialog: Scoped To App Shell Content',
     path: '/components/dialog',
     detail: 'components/dialog/examples/scoped-to-app-shell-content.example.ts',
     terms:
-      'dialog scoped-to-app-shell-content components/dialog/examples/scoped-to-app-shell-content.example components/dialog hellDialogScope hellAppContent',
+      'dialog scoped-to-app-shell-content components/dialog/examples/scoped-to-app-shell-content.example components/dialog hellDialogScope hellAppContent ui Part Style Map HellDialogUi HellDialogOverlayUi scoped overlay data-slot',
   },
   {
     title: 'Field: Horizontal',
@@ -650,21 +650,21 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/audio-player',
     detail: 'components/audio-player/examples/speech-transcript.example.ts',
     terms:
-      'audio-player speech-transcript components/audio-player/examples/speech-transcript.example components/audio-player hell-audio-player allowSpeechTranscript provideHellAudioTranscript features/audio-transcript SpeechRecognition captureStream experimental best-effort timed-text accessibility',
+      'audio-player speech-transcript components/audio-player/examples/speech-transcript.example components/audio-player hell-audio-player ui Part Style Map HellAudioPlayerUi captions captionsBar captionsStatus captionsDot captionsBody captionsError captionsInterim captionsEmpty allowSpeechTranscript provideHellAudioTranscript features/audio-transcript SpeechRecognition captureStream experimental best-effort timed-text accessibility',
   },
   {
     title: 'Audio Player: Untitled Controls Only',
     path: '/components/audio-player',
     detail: 'components/audio-player/examples/untitled-controls-only.example.ts',
     terms:
-      'audio-player untitled-controls-only components/audio-player/examples/untitled-controls-only.example components/audio-player hell-audio-player',
+      'audio-player untitled-controls-only components/audio-player/examples/untitled-controls-only.example components/audio-player hell-audio-player ui Part Style Map HellAudioPlayerUi root controls transport playButton time seek actions muteButton volume downloadButton data-time data-slot',
   },
   {
     title: 'Audio Player: With Title And Date',
     path: '/components/audio-player',
     detail: 'components/audio-player/examples/with-title-and-date.example.ts',
     terms:
-      'audio-player with-title-and-date components/audio-player/examples/with-title-and-date.example components/audio-player hell-audio-player',
+      'audio-player with-title-and-date components/audio-player/examples/with-title-and-date.example components/audio-player hell-audio-player ui Part Style Map HellAudioPlayerUi meta title date controls transport data-slot',
   },
   {
     title: 'Avatar Group: Basic',
@@ -755,7 +755,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/omnibar',
     detail: 'components/omnibar/examples/async-search.example.ts',
     terms:
-      'omnibar async-search components/omnibar/examples/async-search.example components/omnibar hell-omnibar HELL_OMNIBAR_DIRECTIVES command palette backend async search searchSource searchFields ranking debounce starter hotkey adapter search scope',
+      'omnibar async-search components/omnibar/examples/async-search.example components/omnibar hell-omnibar HELL_OMNIBAR_DIRECTIVES command palette backend async search searchSource searchFields ranking debounce starter hotkey adapter search scope ui Part Style Map HellOmnibarUi panel actions results loading skeletonRow skeletonText empty data-slot',
   },
   {
     title: 'Resizable: Grip Handle 5',
@@ -832,42 +832,42 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/toast',
     detail: 'components/toast/examples/action.example.ts',
     terms:
-      'toast action components/toast/examples/action.example components/toast hell-toaster toast action',
+      'toast action components/toast/examples/action.example components/toast hell-toaster toast action ui Part Style Map HellToasterUi root viewport toast body title description glyph close toolbar dismissAll data-slot',
   },
   {
     title: 'Toast: Persistent Custom Content',
     path: '/components/toast',
     detail: 'components/toast/examples/persistent-custom-content.example.ts',
     terms:
-      'toast persistent-custom-content components/toast/examples/persistent-custom-content.example components/toast hell-toaster persistent',
+      'toast persistent-custom-content components/toast/examples/persistent-custom-content.example components/toast hell-toaster persistent ui Part Style Map HellToasterUi toast body action close data-slot',
   },
   {
     title: 'Toast: Stacking',
     path: '/components/toast',
     detail: 'components/toast/examples/stacking.example.ts',
     terms:
-      'toast stacking components/toast/examples/stacking.example components/toast hell-toaster stacking',
+      'toast stacking components/toast/examples/stacking.example components/toast hell-toaster stacking ui Part Style Map HellToasterUi viewport list toolbar dismissAll expanded pause resume data-state data-slot',
   },
   {
     title: 'Toast: Variants',
     path: '/components/toast',
     detail: 'components/toast/examples/variants.example.ts',
     terms:
-      'toast variants components/toast/examples/variants.example components/toast hell-toaster variant',
+      'toast variants components/toast/examples/variants.example components/toast hell-toaster variant ui Part Style Map HellToasterUi glyph title description data-variant data-slot',
   },
   {
     title: 'Code Editor: Code Viewer Demo',
     path: '/components/code-editor',
     detail: 'components/code-editor/examples/code-viewer-demo.example.ts',
     terms:
-      'code-editor code-viewer-demo components/code-editor/examples/code-viewer-demo.example components/code-editor hell-code-editor readOnly CodeMirror',
+      'code-editor code-viewer-demo components/code-editor/examples/code-viewer-demo.example components/code-editor hell-code-editor readOnly CodeMirror ui Part Style Map HellCodeEditorUi root editor data-readonly data-slot',
   },
   {
     title: 'Code Editor: Editor Demo',
     path: '/components/code-editor',
     detail: 'components/code-editor/examples/editor-demo.example.ts',
     terms:
-      'code-editor editor-demo components/code-editor/examples/editor-demo.example components/code-editor hell-code-editor CodeMirror',
+      'code-editor editor-demo components/code-editor/examples/editor-demo.example components/code-editor hell-code-editor CodeMirror ui Part Style Map HellCodeEditorUi root editor value readOnly data-readonly data-slot',
   },
   {
     title: 'Table: Primitive Table',

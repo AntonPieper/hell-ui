@@ -34,7 +34,7 @@ A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`;
 | Button Part Style Map         | Core peer group only                                                                                                                            | Narrow Button import plus `ui`; no Hell CSS/Tailwind required for compile-time behavior proof                                                                                                                                     | [`button-ui`](../../tools/check-package-consumer.mjs)                                   |
 | Styled narrow primitive       | Core peer group plus `tailwindcss`                                                                                                              | Narrow primitive import plus `@hell-ui/angular/tokens.css` and each imported entry point's `styles.css`                                                                                                                           | [`button`, `pagination`](../../tools/check-package-consumer.mjs)                        |
 | Icon-backed primitive mix     | Core peer group plus `tailwindcss`, `@ng-icons/font-awesome`                                                                                    | Narrow primitive imports such as `@hell-ui/angular/button`, `@hell-ui/angular/icon`, and `@hell-ui/angular/input`; no aggregate primitive path                                                                                    | [`primitive-icons-css`](../../tools/check-package-consumer.mjs)                         |
-| Composites                    | Core peer group plus `tailwindcss`; add `@ng-icons/font-awesome` for icon-backed composites                                                    | Narrow composite entry points such as `@hell-ui/angular/app-shell`, `@hell-ui/angular/resizable`, `@hell-ui/angular/split-view`, and `@hell-ui/angular/audio-player`, plus explicit entrypoint CSS                            | [`app-shell`, `resizable`, `split-view`, `audio-player`, `composite-css`](../../tools/check-package-consumer.mjs) |
+| Composites                    | Core peer group plus `tailwindcss`; add `@ng-icons/font-awesome` for icon-backed composites and `@angular/router` when Dialog is imported       | Narrow composite entry points such as `@hell-ui/angular/app-shell`, `@hell-ui/angular/resizable`, `@hell-ui/angular/split-view`, `@hell-ui/angular/dialog`, `@hell-ui/angular/omnibar`, `@hell-ui/angular/toast`, and `@hell-ui/angular/audio-player`, plus explicit entrypoint CSS | [`app-shell`, `resizable`, `split-view`, `audio-player`, `composite-css`](../../tools/check-package-consumer.mjs) |
 | Audio transcript              | Composite audio-player peer group; no CodeMirror or pdf.js peers                                                                                | `@hell-ui/angular/audio-player` plus provider import from `@hell-ui/angular/features/audio-transcript`; use composite CSS, no feature CSS                                                                                         | [`audio-transcript`](../../tools/check-package-consumer.mjs)                            |
 | Table primitives              | Core peer group plus `tailwindcss`; no optional table-engine peers                                                                              | `@hell-ui/angular/table`; CSS from `@hell-ui/angular/table/styles.css`; removed table aliases stay unavailable                                                                                                                    | [`table`, `no-legacy-alias`](../../tools/check-package-consumer.mjs)                    |
 | TanStack table shell          | Core peer group plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`                                          | `@hell-ui/angular/table-tanstack`; caller-owned TanStack Table remains the engine                                                                                                                                                 | [`table-tanstack`](../../tools/check-package-consumer.mjs)                              |
@@ -162,7 +162,9 @@ Opt-Out to the Part Style Map API. Pass `ui` when you want to refine public
 parts while keeping Hell behavior, state attributes, and accessibility wiring.
 
 Split View also exposes flat owned parts such as `pane`, `compactHeader`, and
-`itemNavigation`.
+`itemNavigation`. Dialog, Toast, AudioPlayer, Omnibar, and CodeEditor now use
+the same Part Style Map contract for their owned anatomy and no longer expose
+`unstyled`.
 
 ```html
 <button hellButton type="button" ui="rounded-hell-pill bg-hell-primary">Save</button>
@@ -183,6 +185,9 @@ Split View also exposes flat owned parts such as `pane`, `compactHeader`, and
   <ng-template hellSplitDetail>Detail</ng-template>
 </hell-split-view>
 <hell-dialpad [ui]="{ keyButton: 'rounded-hell-pill', callButton: 'bg-hell-success-strong' }" />
+<hell-audio-player [ui]="{ controls: 'gap-hell-3', time: 'tabular-nums' }" src="/audio.ogg" />
+<hell-toaster [ui]="{ toast: 'shadow-hell-lg', toolbar: 'gap-hell-2' }" />
+<hell-code-editor [ui]="{ root: 'rounded-hell-lg', editor: 'min-h-[16rem]' }" />
 <hell-date-input [ui]="{ input: 'tabular-nums', pickerPanel: 'shadow-hell-lg' }" />
 <button hellCheckbox ui="rounded-hell-pill" aria-label="Accepted"></button>
 <button hellSwitch [ui]="{ root: 'bg-hell-info-soft', thumb: 'shadow-none' }" aria-label="Alerts"></button>
@@ -207,7 +212,8 @@ Rules for migration:
 - Use each projected child directive's local `ui`; a Card, Field, Tabs,
   Accordion, or App Shell root does not style its children remotely.
 - Use `[ui]="{ ... }"` for owned-anatomy components with multiple public parts,
-  such as Dialpad, PaginationStrip, Split View, Slider, and Switch.
+  such as Dialpad, PaginationStrip, Split View, Slider, Switch, Dialog, Toast,
+  AudioPlayer, Omnibar, and CodeEditor.
 - Use `class` for layout hooks and non-conflicting additions only; use `ui` for deterministic Tailwind utility conflicts because template class order is outside the Part-Class Pipeline.
 - Continue to test the behavior and accessible name; styling APIs are not accessibility opt-outs.
 
@@ -218,8 +224,10 @@ compiled Button recipe CSS and semantic token runtime theming. The
 [`primitive-icons-css`](../../tools/check-package-consumer.mjs),
 [`pagination`](../../tools/check-package-consumer.mjs),
 [`table`](../../tools/check-package-consumer.mjs), and composite scenarios widen
-that proof across migrated primitive, directive-suite, pagination, table, and
-layout CSS entry points, including Checkbox, Radio, Slider, Switch, and Toggle.
+that proof across migrated primitive, directive-suite, pagination, table,
+layout, feedback, media, search, and editor CSS entry points, including
+Checkbox, Radio, Slider, Switch, Toggle, Dialog, Toast, AudioPlayer, Omnibar,
+and CodeEditor.
 
 The not-yet-migrated list is machine-tracked as `legacyStyleableAllowlist` in
 [`tools/check-architecture.mjs`](../../tools/check-architecture.mjs). Every

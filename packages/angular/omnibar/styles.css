@@ -1,4 +1,5 @@
 @import '../internal/overlay/styles.css';
+@import '../skeleton/styles.css';
 
 /* Omnibar default visuals are Tailwind utility recipes in the directives. */
 @source "./omnibar.ts";
