@@ -78,8 +78,6 @@ const audioTranscriptRuntimeTerms = [
 // Remove a symbol here as soon as it migrates to HellPartStyleable; new public
 // modules must not extend HellStyleable.
 const legacyStyleableAllowlist = new Set([
-  'HellCheckbox',
-  'HellNativeCheckbox',
   'HellCombobox',
   'HellComboboxBasic',
   'HellComboboxButton',
@@ -107,23 +105,13 @@ const legacyStyleableAllowlist = new Set([
   'HellMenuSection',
   'HellMenuSeparator',
   'HellPopover',
-  'HellRadio',
-  'HellNativeRadio',
-  'HellNativeRadioGroup',
-  'HellRadioGroup',
   'HellSelect',
   'HellSelectBasic',
   'HellSelectDropdown',
   'HellSelectOption',
   'HellSelectPlaceholder',
   'HellSelectValue',
-  'HellSlider',
   'HellSubmenuTrigger',
-  'HellNativeSwitch',
-  'HellSwitch',
-  'HellToggle',
-  'HellToggleGroup',
-  'HellToggleGroupItem',
   'HellTooltip',
   'HellAudioPlayer',
   'HellAvatarGroup',
@@ -366,6 +354,138 @@ const migratedPartStyleMapModules = [
     apiReportFiles: ['hell-ui-angular-input.api.md'],
     legacyClass: 'hell-textarea',
     componentVariablePrefix: '--hell-textarea-',
+  },
+  {
+    className: 'HellCheckbox',
+    partType: 'HellCheckboxPart',
+    uiType: 'HellCheckboxUi',
+    entrypointId: 'checkbox',
+    sourcePath: 'packages/angular/checkbox/checkbox.ts',
+    publicApiPath: 'packages/angular/checkbox/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-checkbox',
+    componentVariablePrefix: '--hell-checkbox-',
+  },
+  {
+    className: 'HellNativeCheckbox',
+    partType: 'HellNativeCheckboxPart',
+    uiType: 'HellNativeCheckboxUi',
+    entrypointId: 'checkbox',
+    sourcePath: 'packages/angular/checkbox/checkbox.ts',
+    publicApiPath: 'packages/angular/checkbox/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-checkbox',
+    componentVariablePrefix: '--hell-checkbox-',
+  },
+  {
+    className: 'HellRadioGroup',
+    partType: 'HellRadioGroupPart',
+    uiType: 'HellRadioGroupUi',
+    entrypointId: 'radio',
+    sourcePath: 'packages/angular/radio/radio.ts',
+    publicApiPath: 'packages/angular/radio/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-radio-group',
+    componentVariablePrefix: '--hell-radio-group-',
+  },
+  {
+    className: 'HellRadio',
+    partType: 'HellRadioPart',
+    uiType: 'HellRadioUi',
+    entrypointId: 'radio',
+    sourcePath: 'packages/angular/radio/radio.ts',
+    publicApiPath: 'packages/angular/radio/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-radio',
+    componentVariablePrefix: '--hell-radio-',
+  },
+  {
+    className: 'HellNativeRadioGroup',
+    partType: 'HellNativeRadioGroupPart',
+    uiType: 'HellNativeRadioGroupUi',
+    entrypointId: 'radio',
+    sourcePath: 'packages/angular/radio/radio.ts',
+    publicApiPath: 'packages/angular/radio/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-radio-group',
+    componentVariablePrefix: '--hell-radio-group-',
+  },
+  {
+    className: 'HellNativeRadio',
+    partType: 'HellNativeRadioPart',
+    uiType: 'HellNativeRadioUi',
+    entrypointId: 'radio',
+    sourcePath: 'packages/angular/radio/radio.ts',
+    publicApiPath: 'packages/angular/radio/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-radio',
+    componentVariablePrefix: '--hell-radio-',
+  },
+  {
+    className: 'HellSwitch',
+    partType: 'HellSwitchPart',
+    uiType: 'HellSwitchUi',
+    entrypointId: 'switch',
+    sourcePath: 'packages/angular/switch/switch.ts',
+    publicApiPath: 'packages/angular/switch/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-switch',
+    componentVariablePrefix: '--hell-switch-',
+  },
+  {
+    className: 'HellNativeSwitch',
+    partType: 'HellNativeSwitchPart',
+    uiType: 'HellNativeSwitchUi',
+    entrypointId: 'switch',
+    sourcePath: 'packages/angular/switch/switch.ts',
+    publicApiPath: 'packages/angular/switch/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-switch',
+    componentVariablePrefix: '--hell-switch-',
+  },
+  {
+    className: 'HellToggle',
+    partType: 'HellTogglePart',
+    uiType: 'HellToggleUi',
+    entrypointId: 'toggle',
+    sourcePath: 'packages/angular/toggle/toggle.ts',
+    publicApiPath: 'packages/angular/toggle/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-toggle',
+    componentVariablePrefix: '--hell-toggle-',
+  },
+  {
+    className: 'HellToggleGroup',
+    partType: 'HellToggleGroupPart',
+    uiType: 'HellToggleGroupUi',
+    entrypointId: 'toggle',
+    sourcePath: 'packages/angular/toggle/toggle.ts',
+    publicApiPath: 'packages/angular/toggle/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-toggle-group',
+    componentVariablePrefix: '--hell-toggle-group-',
+  },
+  {
+    className: 'HellToggleGroupItem',
+    partType: 'HellToggleGroupItemPart',
+    uiType: 'HellToggleGroupItemUi',
+    entrypointId: 'toggle',
+    sourcePath: 'packages/angular/toggle/toggle.ts',
+    publicApiPath: 'packages/angular/toggle/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-toggle',
+    componentVariablePrefix: '--hell-toggle-',
+  },
+  {
+    className: 'HellSlider',
+    partType: 'HellSliderPart',
+    uiType: 'HellSliderUi',
+    entrypointId: 'slider',
+    sourcePath: 'packages/angular/slider/slider.ts',
+    publicApiPath: 'packages/angular/slider/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-slider',
+    componentVariablePrefix: '--hell-slider-',
   },
   {
     className: 'HellDialpad',
@@ -1020,6 +1140,10 @@ const migratedPartStyleMapModules = [
     legacyClass: 'hell-table-resize-handle',
   },
 ];
+
+const migratedPartStyleMapClassNames = new Set(
+  migratedPartStyleMapModules.map((module) => module.className),
+);
 
 function main() {
   checkDocsExamples();
@@ -2920,7 +3044,7 @@ function checkComponentContract() {
     if (!styleableClasses.length) continue;
 
     const rel = file.slice(root.length + 1);
-    for (const { className, moduleSource } of styleableClasses) {
+    for (const { className, classSource, moduleSource } of styleableClasses) {
       if (publicStyleableModules.has(className)) {
         failures.push(`Duplicate public styled Module ${className} in ${rel}`);
       }
@@ -2939,6 +3063,10 @@ function checkComponentContract() {
         }
         if (moduleSource.includes('unstyled')) {
           failures.push(`${rel} ${className} extends HellPartStyleable but keeps Style Opt-Out`);
+        }
+      } else if (extendsMigratedPartStyleMapBase(classSource)) {
+        if (moduleSource.includes('unstyled')) {
+          failures.push(`${rel} ${className} inherits a Part Style Map base but keeps Style Opt-Out`);
         }
       } else {
         if (!legacyStyleableAllowlist.has(className)) {
@@ -3001,6 +3129,11 @@ function checkComponentContract() {
       );
     }
   }
+}
+
+function extendsMigratedPartStyleMapBase(classSource) {
+  const baseClass = /extends\s+([A-Za-z0-9_]+)/.exec(classSource)?.[1];
+  return !!baseClass && migratedPartStyleMapClassNames.has(baseClass);
 }
 
 function checkPartStyleMapContract() {

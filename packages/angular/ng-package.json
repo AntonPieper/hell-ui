@@ -111,6 +111,11 @@
       "output": "breadcrumbs"
     },
     {
+      "glob": "checkbox.ts",
+      "input": "checkbox",
+      "output": "checkbox"
+    },
+    {
       "glob": "drop-zone.ts",
       "input": "drop-zone",
       "output": "drop-zone"
@@ -126,6 +131,11 @@
       "output": "progress"
     },
     {
+      "glob": "radio.ts",
+      "input": "radio",
+      "output": "radio"
+    },
+    {
       "glob": "separator.ts",
       "input": "separator",
       "output": "separator"
@@ -136,9 +146,24 @@
       "output": "skeleton"
     },
     {
+      "glob": "slider.ts",
+      "input": "slider",
+      "output": "slider"
+    },
+    {
+      "glob": "switch.ts",
+      "input": "switch",
+      "output": "switch"
+    },
+    {
       "glob": "tag.ts",
       "input": "tag",
       "output": "tag"
+    },
+    {
+      "glob": "toggle.ts",
+      "input": "toggle",
+      "output": "toggle"
     },
     {
       "glob": "hell-ui-logo.svg",

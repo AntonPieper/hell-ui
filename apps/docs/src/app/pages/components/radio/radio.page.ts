@@ -58,6 +58,11 @@ import radioNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
           <code>ngpRadioIndicator</code>: visual marker (re-exported as
           <code>HellRadioIndicator</code>)
         </li>
+        <li>
+          <code>ui</code>: string shorthand targets <code>root</code> on each directive; typed
+          maps use <code>HellRadioGroupUi</code>, <code>HellRadioUi</code>,
+          <code>HellNativeRadioGroupUi</code>, or <code>HellNativeRadioUi</code>.
+        </li>
       </ul>
 
       <h2>Do</h2>

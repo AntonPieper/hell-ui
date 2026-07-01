@@ -71,6 +71,11 @@ import toggleToggleGroupSingleExampleCodeRaw from './examples/toggle-group-singl
           <code>value</code>, <code>valueChange</code>, <code>disabled</code>
         </li>
         <li><code>hellToggleGroupItem</code>: <code>value</code>, <code>disabled</code></li>
+        <li>
+          <code>ui</code>: string shorthand targets <code>root</code> on each directive; typed
+          maps use <code>HellToggleUi</code>, <code>HellToggleGroupUi</code>, or
+          <code>HellToggleGroupItemUi</code>.
+        </li>
       </ul>
 
       <h2>Do</h2>

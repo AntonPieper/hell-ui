@@ -152,13 +152,14 @@ pipeline.
 ## Part Style Maps replace Style Opt-Out
 
 `HellButton`, `HellInput`, `HellNativeSelect`, `HellTextarea`, `HellDialpad`,
-`HellDateInput`, `HellTimeInput`, `HellDatePicker`, `HellDateRangePicker`, the
-first directive-suite batch (`HellCard`, `HellField`, `HellTabset`, and
+`HellDateInput`, `HellTimeInput`, `HellDatePicker`, `HellDateRangePicker`,
+Checkbox/NativeCheckbox, RadioGroup/Radio/NativeRadioGroup/NativeRadio,
+Switch/NativeSwitch, Toggle/ToggleGroup/ToggleGroupItem, Slider, the first
+directive-suite batch (`HellCard`, `HellField`, `HellTabset`, and
 `HellAccordion` families), the App Shell/nav directives, Resizable directives,
-Pagination/PaginationStrip, and Table primitives have migrated from
-Style Opt-Out to the Part Style Map API. Pass `ui` when you want to refine
-public parts while keeping Hell behavior, state attributes, and accessibility
-wiring.
+Pagination/PaginationStrip, and Table primitives have migrated from Style
+Opt-Out to the Part Style Map API. Pass `ui` when you want to refine public
+parts while keeping Hell behavior, state attributes, and accessibility wiring.
 
 Split View also exposes flat owned parts such as `pane`, `compactHeader`, and
 `itemNavigation`.
@@ -183,6 +184,9 @@ Split View also exposes flat owned parts such as `pane`, `compactHeader`, and
 </hell-split-view>
 <hell-dialpad [ui]="{ keyButton: 'rounded-hell-pill', callButton: 'bg-hell-success-strong' }" />
 <hell-date-input [ui]="{ input: 'tabular-nums', pickerPanel: 'shadow-hell-lg' }" />
+<button hellCheckbox ui="rounded-hell-pill" aria-label="Accepted"></button>
+<button hellSwitch [ui]="{ root: 'bg-hell-info-soft', thumb: 'shadow-none' }" aria-label="Alerts"></button>
+<hell-slider [ui]="{ range: 'bg-hell-info', thumb: 'border-hell-info' }" aria-label="Volume" />
 ```
 
 Rules for migration:
@@ -197,12 +201,13 @@ Rules for migration:
   matrix verifies migrated CSS entry points are importable without consumer
   `@source` scanning for Hell package files.
 - Use `ui="..."` for single-root directives such as Button, Input, Card, Field,
-  Tabs, Accordion, App Shell/nav, Resizable, Pagination controls, and Table
-  primitive directives.
+  Tabs, Accordion, App Shell/nav, Resizable, Checkbox, NativeCheckbox, Radio,
+  RadioGroup, NativeRadio, NativeRadioGroup, NativeSwitch, Toggle, ToggleGroup,
+  ToggleGroupItem, Pagination controls, and Table primitive directives.
 - Use each projected child directive's local `ui`; a Card, Field, Tabs,
   Accordion, or App Shell root does not style its children remotely.
 - Use `[ui]="{ ... }"` for owned-anatomy components with multiple public parts,
-  such as Dialpad, PaginationStrip, and Split View.
+  such as Dialpad, PaginationStrip, Split View, Slider, and Switch.
 - Use `class` for layout hooks and non-conflicting additions only; use `ui` for deterministic Tailwind utility conflicts because template class order is outside the Part-Class Pipeline.
 - Continue to test the behavior and accessible name; styling APIs are not accessibility opt-outs.
 
@@ -214,7 +219,7 @@ compiled Button recipe CSS and semantic token runtime theming. The
 [`pagination`](../../tools/check-package-consumer.mjs),
 [`table`](../../tools/check-package-consumer.mjs), and composite scenarios widen
 that proof across migrated primitive, directive-suite, pagination, table, and
-layout CSS entry points.
+layout CSS entry points, including Checkbox, Radio, Slider, Switch, and Toggle.
 
 The not-yet-migrated list is machine-tracked as `legacyStyleableAllowlist` in
 [`tools/check-architecture.mjs`](../../tools/check-architecture.mjs). Every

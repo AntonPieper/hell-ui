@@ -51,6 +51,10 @@ import checkboxNativeExampleCodeRaw from './examples/native.example.ts?raw' with
         <li><code>checked</code>, <code>checkedChange</code></li>
         <li><code>indeterminate</code>, <code>indeterminateChange</code></li>
         <li><code>disabled</code>, <code>required</code></li>
+        <li>
+          <code>ui</code>: string shorthand targets <code>root</code>; typed maps use
+          <code>HellCheckboxUi</code> or <code>HellNativeCheckboxUi</code>.
+        </li>
       </ul>
 
       <h2>Do</h2>

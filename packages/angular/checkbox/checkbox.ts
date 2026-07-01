@@ -21,7 +21,21 @@ import {
 import { ngpCheckbox } from 'ng-primitives/checkbox';
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
-import { HellStyleable } from '@hell-ui/angular/core';
+import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+
+export type HellCheckboxPart = 'root';
+export type HellCheckboxUi = HellUi<HellCheckboxPart>;
+
+export type HellNativeCheckboxPart = 'root';
+export type HellNativeCheckboxUi = HellUi<HellNativeCheckboxPart>;
+
+const HELL_CHECKBOX_RECIPE = {
+  root: 'inline-flex size-hell-5 cursor-pointer appearance-none items-center justify-center rounded-hell-sm border border-solid border-hell-border-strong bg-hell-surface-elevated p-0 m-0 font-[inherit] text-hell-primary-foreground transition-[background-color,border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:border-hell-primary data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-2 data-checked:border-hell-primary data-checked:bg-hell-primary data-indeterminate:border-hell-primary data-indeterminate:bg-hell-primary data-disabled:cursor-not-allowed data-disabled:opacity-50 [&>svg]:block [&>svg]:size-hell-4 [&>svg]:translate-y-[-0.5px]',
+} satisfies HellRecipe<HellCheckboxPart>;
+
+const HELL_NATIVE_CHECKBOX_RECIPE = {
+  root: 'relative inline-flex size-hell-5 cursor-pointer appearance-none items-center justify-center rounded-hell-sm border border-solid border-hell-border-strong bg-hell-surface-elevated p-0 m-0 font-[inherit] text-hell-foreground transition-[background-color,border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] checked:border-hell-primary checked:bg-hell-primary checked:text-hell-primary-foreground indeterminate:border-hell-primary indeterminate:bg-hell-primary indeterminate:text-hell-primary-foreground data-[indeterminate]:border-hell-primary data-[indeterminate]:bg-hell-primary data-[indeterminate]:text-hell-primary-foreground focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+} satisfies HellRecipe<HellNativeCheckboxPart>;
 
 /**
  * Styled checkbox built on `ngpCheckbox`. Forwards `checked`, `indeterminate`,
@@ -53,7 +67,8 @@ import { HellStyleable } from '@hell-ui/angular/core';
   ],
   host: {
     type: 'button',
-    '[class.hell-checkbox]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '(blur)': 'markControlTouched()',
     '[attr.required]': 'required() ? "" : null',
     '[attr.aria-required]': 'required() ? "true" : null',
@@ -83,7 +98,13 @@ import { HellStyleable } from '@hell-ui/angular/core';
     }
   `,
 })
-export class HellCheckbox extends HellStyleable implements ControlValueAccessor, Validator {
+export class HellCheckbox
+  extends HellPartStyleable<HellCheckboxPart>
+  implements ControlValueAccessor, Validator
+{
+  protected readonly recipe = HELL_CHECKBOX_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly checked = input(false, { transform: booleanAttribute });
   readonly indeterminate = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
@@ -97,7 +118,7 @@ export class HellCheckbox extends HellStyleable implements ControlValueAccessor,
     externalDisabled: this.disabled,
     initialValue: false,
   });
-  private readonly cva = new HellControlValueAccessorBridge<boolean>();
+  private readonly valueAccessor = new HellControlValueAccessorBridge<boolean>();
   private onValidatorChange: () => void = () => {};
 
   private readonly effectiveChecked = this.controlledChecked.value;
@@ -119,7 +140,7 @@ export class HellCheckbox extends HellStyleable implements ControlValueAccessor,
     onCheckedChange: (checked) => {
       this.controlledChecked.acceptUserValue(checked);
       this.checkedChange.emit(checked);
-      this.cva.emitValue(checked);
+      this.valueAccessor.emitValue(checked);
     },
     onIndeterminateChange: (indeterminate) => this.indeterminateChange.emit(indeterminate),
   });
@@ -129,11 +150,11 @@ export class HellCheckbox extends HellStyleable implements ControlValueAccessor,
   }
 
   registerOnChange(fn: (value: boolean) => void): void {
-    this.cva.registerOnChange(fn);
+    this.valueAccessor.registerOnChange(fn);
   }
 
   registerOnTouched(fn: () => void): void {
-    this.cva.registerOnTouched(fn);
+    this.valueAccessor.registerOnTouched(fn);
   }
 
   registerOnValidatorChange(fn: () => void): void {
@@ -145,7 +166,7 @@ export class HellCheckbox extends HellStyleable implements ControlValueAccessor,
   }
 
   protected markControlTouched(): void {
-    this.cva.markTouched();
+    this.valueAccessor.markTouched();
   }
 
   validate(control: AbstractControl | null): ValidationErrors | null {
@@ -162,7 +183,8 @@ export class HellCheckbox extends HellStyleable implements ControlValueAccessor,
 @Directive({
   selector: 'input[type="checkbox"][hellNativeCheckbox]',
   host: {
-    '[class.hell-checkbox]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.type]': '"checkbox"',
     '[attr.aria-required]': 'required() ? "true" : null',
     '[attr.data-indeterminate]': 'indeterminate() ? "" : null',
@@ -171,7 +193,10 @@ export class HellCheckbox extends HellStyleable implements ControlValueAccessor,
     '[attr.required]': 'required() ? "" : null',
   },
 })
-export class HellNativeCheckbox extends HellStyleable {
+export class HellNativeCheckbox extends HellPartStyleable<HellNativeCheckboxPart> {
+  protected readonly recipe = HELL_NATIVE_CHECKBOX_RECIPE;
+  protected readonly defaultUiPart = 'root';
+
   readonly required = input(false, { alias: 'required', transform: booleanAttribute });
   readonly indeterminate = input(false, { alias: 'indeterminate', transform: booleanAttribute });
 

@@ -11,7 +11,12 @@ async function boxFor(locator: Locator): Promise<{
   width: number;
   height: number;
 }> {
-  await locator.scrollIntoViewIfNeeded();
+  await locator.evaluate((element) => {
+    element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+  });
+  await locator.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())),
+  );
   const box = await locator.boundingBox();
   if (!box) throw new Error('Expected locator to have a bounding box.');
   return box;
@@ -41,9 +46,9 @@ test.describe('component visual polish regressions', () => {
     await expect(verticalSliders).toHaveCount(2);
 
     for (const slider of await verticalSliders.all()) {
-      const track = slider.locator('.hell-slider-track');
-      const range = slider.locator('.hell-slider-range');
-      const thumb = slider.locator('.hell-slider-thumb');
+      const track = slider.locator('[data-slot="track"]');
+      const range = slider.locator('[data-slot="range"]');
+      const thumb = slider.locator('[data-slot="thumb"]');
 
       await expect(thumb).toHaveAttribute('aria-orientation', 'vertical');
 
@@ -84,8 +89,8 @@ test.describe('component visual polish regressions', () => {
     const horizontal = page
       .locator('app-slider-basic-example hell-slider[data-orientation="horizontal"]')
       .first();
-    const horizontalTrack = horizontal.locator('.hell-slider-track');
-    const horizontalThumb = horizontal.locator('.hell-slider-thumb');
+    const horizontalTrack = horizontal.locator('[data-slot="track"]');
+    const horizontalThumb = horizontal.locator('[data-slot="thumb"]');
     const horizontalBox = await boxFor(horizontal);
     const horizontalTrackBox = await boxFor(horizontalTrack);
     const horizontalThumbBox = await boxFor(horizontalThumb);
@@ -103,18 +108,20 @@ test.describe('component visual polish regressions', () => {
     await expect(example).toBeVisible();
     await example.scrollIntoViewIfNeeded();
 
-    const group = example.locator('.hell-toggle-group');
-    const selected = group.locator('.hell-toggle[data-selected]');
-    const unselected = group.locator('.hell-toggle:not([data-selected])').first();
+    const group = example.locator('[hellToggleGroup][data-slot="root"]');
+    const selected = group.locator('button[hellToggleGroupItem][data-slot="root"][data-selected]');
+    const unselected = group
+      .locator('button[hellToggleGroupItem][data-slot="root"]:not([data-selected])')
+      .first();
     await expect(selected).toHaveText('Left');
 
     const colors = await group.evaluate((element) => {
       const groupElement = element as HTMLElement;
       const selectedElement = groupElement.querySelector(
-        '.hell-toggle[data-selected]',
+        'button[hellToggleGroupItem][data-slot="root"][data-selected]',
       ) as HTMLElement | null;
       const unselectedElement = groupElement.querySelector(
-        '.hell-toggle:not([data-selected])',
+        'button[hellToggleGroupItem][data-slot="root"]:not([data-selected])',
       ) as HTMLElement | null;
       if (!selectedElement || !unselectedElement) throw new Error('Expected toggle items.');
       const snapshot = (target: HTMLElement) => {
@@ -136,20 +143,84 @@ test.describe('component visual polish regressions', () => {
     expect(colors.selected.backgroundColor).not.toBe(colors.group.backgroundColor);
     expect(colors.selected.borderColor).toBe(colors.unselected.borderColor);
     expect(colors.selected.color).not.toBe(colors.unselected.color);
-    expect(colors.selected.boxShadow).toBe('none');
+    expect(hasNoVisibleShadow(colors.selected.boxShadow)).toBe(true);
 
+    const supportsHoverStyling = await page.evaluate(() =>
+      window.matchMedia('(hover: hover)').matches,
+    );
     await unselected.hover();
     await expect(unselected).not.toHaveAttribute('data-selected');
     const hoverBackground = await unselected.evaluate(
       (element) => getComputedStyle(element).backgroundColor,
     );
-    expect(hoverBackground).not.toBe(colors.unselected.backgroundColor);
+    if (supportsHoverStyling) {
+      expect(hoverBackground).not.toBe(colors.unselected.backgroundColor);
+    }
 
     await selected.hover();
     const selectedHoverBackground = await selected.evaluate(
       (element) => getComputedStyle(element).backgroundColor,
     );
     expect(selectedHoverBackground).toBe(colors.selected.backgroundColor);
+  });
+
+  test('switch thumbs animate with interpolable position properties', async ({ page }) => {
+    await gotoDocsPage(page, '/components/switch', 'Switch');
+
+    const customSwitch = page.locator('#email-notifications-switch');
+    const customThumb = customSwitch.locator('[data-slot="thumb"]');
+    await expect(customSwitch).toHaveAttribute('aria-checked', 'true');
+
+    const customMotion = await switchThumbMotion(customThumb);
+    expect(customMotion.transitionProperties).toContain('left');
+    expect(customMotion.transitionProperties).toContain('transform');
+    expect(customMotion.transitionProperties).not.toContain('right');
+
+    await page.getByText('Email notifications', { exact: true }).click();
+    await expect(customSwitch).toHaveAttribute('aria-checked', 'false');
+    const customUncheckedMotion = await switchThumbMotion(customThumb);
+    expect(customUncheckedMotion.transitionProperties).toEqual(customMotion.transitionProperties);
+
+    const nativeSwitch = page.locator('app-switch-native-example input[hellNativeSwitch]');
+    await expect(nativeSwitch).not.toBeChecked();
+    const nativeMotion = await nativeSwitchPseudoMotion(nativeSwitch);
+    expect(nativeMotion.transitionProperties).toContain('left');
+    expect(nativeMotion.transitionProperties).toContain('transform');
+    expect(nativeMotion.transitionProperties).not.toContain('right');
+
+    await page.getByText('Auto updates', { exact: true }).click();
+    await expect(nativeSwitch).toBeChecked();
+    const nativeCheckedMotion = await nativeSwitchPseudoMotion(nativeSwitch);
+    expect(nativeCheckedMotion.transitionProperties).toEqual(nativeMotion.transitionProperties);
+  });
+
+  test('disabled standalone toggle does not repaint or press on pointer interaction', async ({
+    page,
+  }) => {
+    await gotoDocsPage(page, '/components/toggle', 'Toggle');
+
+    const example = page.locator('app-toggle-disabled-example');
+    await expect(example).toBeVisible();
+    const disabledToggle = example.getByRole('button', { name: 'Disabled', exact: true });
+    await expect(disabledToggle).toBeDisabled();
+    await expect(disabledToggle).toHaveAttribute('data-disabled', '');
+
+    const idle = await visualState(disabledToggle);
+
+    await disabledToggle.hover();
+    const hovered = await visualState(disabledToggle);
+    expect(hovered.backgroundColor).toBe(idle.backgroundColor);
+    expect(hovered.borderColor).toBe(idle.borderColor);
+    expect(hovered.transform).toBe(idle.transform);
+
+    const box = await boxFor(disabledToggle);
+    await page.mouse.move(centerX(box), centerY(box));
+    await page.mouse.down();
+    const pressed = await visualState(disabledToggle);
+    await page.mouse.up();
+    expect(pressed.backgroundColor).toBe(idle.backgroundColor);
+    expect(pressed.borderColor).toBe(idle.borderColor);
+    expect(pressed.transform).toBe(idle.transform);
   });
 
   test('avatar overflow trigger behaves like a group member and keeps menu keyboard access', async ({
@@ -226,3 +297,55 @@ test.describe('component visual polish regressions', () => {
     await expect(trigger).toBeFocused();
   });
 });
+
+function hasNoVisibleShadow(boxShadow: string): boolean {
+  if (boxShadow === 'none') return true;
+
+  const transparentZeroShadow = 'rgba(0, 0, 0, 0) 0px 0px 0px 0px';
+  return boxShadow
+    .replaceAll(`${transparentZeroShadow}, `, '')
+    .replaceAll(transparentZeroShadow, '')
+    .trim() === '';
+}
+
+async function visualState(locator: Locator): Promise<{
+  backgroundColor: string;
+  borderColor: string;
+  transform: string;
+}> {
+  return locator.evaluate((element) => {
+    const styles = getComputedStyle(element);
+    return {
+      backgroundColor: styles.backgroundColor,
+      borderColor: styles.borderColor,
+      transform: styles.transform,
+    };
+  });
+}
+
+async function switchThumbMotion(locator: Locator): Promise<{
+  transitionProperties: string[];
+}> {
+  const transitionProperty = await locator.evaluate(
+    (element) => getComputedStyle(element).transitionProperty,
+  );
+
+  return { transitionProperties: parseTransitionProperties(transitionProperty) };
+}
+
+async function nativeSwitchPseudoMotion(locator: Locator): Promise<{
+  transitionProperties: string[];
+}> {
+  const transitionProperty = await locator.evaluate(
+    (element) => getComputedStyle(element, '::before').transitionProperty,
+  );
+
+  return { transitionProperties: parseTransitionProperties(transitionProperty) };
+}
+
+function parseTransitionProperties(value: string): string[] {
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}

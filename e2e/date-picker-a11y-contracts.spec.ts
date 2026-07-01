@@ -277,6 +277,36 @@ async function expectRangeDays(
 }
 
 async function expectSquareRangeButtons(picker: Locator): Promise<void> {
+  await expect
+    .poll(
+      async () =>
+        picker.evaluate((element) => {
+          const rangeButtons = Array.from(
+            element.querySelectorAll<HTMLElement>(
+              '[data-slot="dateButton"][data-range-start], [data-slot="dateButton"][data-range-between], [data-slot="dateButton"][data-range-end]',
+            ),
+          );
+
+          return (
+            rangeButtons.length > 0 &&
+            rangeButtons.every((button) => {
+              const background = getComputedStyle(button).backgroundColor.trim();
+
+              return (
+                background !== 'transparent' &&
+                background !== 'rgba(0, 0, 0, 0)' &&
+                !/\/\s*0\)?$/.test(background)
+              );
+            })
+          );
+        }),
+      {
+        message:
+          'range date buttons should finish painting their selection background before geometry assertions',
+      },
+    )
+    .toBe(true);
+
   const geometry = await picker.evaluate((element) => {
     const buttons = Array.from(
       element.querySelectorAll<HTMLElement>('[data-slot="grid"] tbody [data-slot="dateButton"]'),

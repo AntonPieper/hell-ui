@@ -13,6 +13,14 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   internals; use component opt-ins such as `HellOmnibar`'s `hotkey` input or
   `HellPdfViewer`'s `globalShortcuts` input, and keep app-wide shortcut policy
   in the host application.
+- Migrated `@hell-ui/angular/checkbox`, `@hell-ui/angular/radio`,
+  `@hell-ui/angular/switch`, `@hell-ui/angular/toggle`, and
+  `@hell-ui/angular/slider` from Style Opt-Out to Part Style Maps for PR #51.
+  Affected surfaces are `Checkbox`, `NativeCheckbox`, `RadioGroup`, `Radio`,
+  `NativeRadioGroup`, `NativeRadio`, `Switch`, `NativeSwitch`, `Toggle`,
+  `ToggleGroup`, `ToggleGroupItem`, and `Slider`; replace `unstyled` styling
+  opt-outs with `ui` string shorthand or part maps and import the corresponding
+  entrypoint CSS for default visuals.
 
 ### Added
 

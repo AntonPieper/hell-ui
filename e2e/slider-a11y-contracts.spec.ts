@@ -51,6 +51,30 @@ test.describe('slider accessibility contracts', () => {
     await expectValue(slider, 0);
   });
 
+  test('horizontal slider continues track pointerdown into a drag', async ({ page }) => {
+    await gotoSliderPage(page);
+
+    const example = page.locator('app-slider-basic-example');
+    const host = example.locator('hell-slider').first();
+    const track = host.locator('[data-slot="track"]');
+    const slider = example.getByRole('slider', { name: 'Volume' });
+    const value = example.locator('code');
+    const trackBox = await track.boundingBox();
+    if (!trackBox) throw new Error('Expected slider track box.');
+
+    const y = trackBox.y + trackBox.height / 2;
+    await page.mouse.move(trackBox.x + trackBox.width * 0.2, y);
+    await page.mouse.down();
+    await expect(host).toHaveAttribute('data-active-drag', 'true');
+    await page.mouse.move(trackBox.x + trackBox.width * 0.8, y);
+    await page.mouse.up();
+
+    await expect(host).not.toHaveAttribute('data-active-drag', 'true');
+    const nextValue = Number(await slider.getAttribute('aria-valuenow'));
+    expect(nextValue).toBeGreaterThan(50);
+    await expect(value).toHaveText(`${nextValue}%`);
+  });
+
   test('vertical slider exposes orientation and uses the same value keyboard contract', async ({
     page,
   }) => {

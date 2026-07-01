@@ -27,12 +27,17 @@ const angularRecipeSourceFiles = [
   'table/table-utilities.ts',
   'avatar/avatar.ts',
   'breadcrumbs/breadcrumbs.ts',
+  'checkbox/checkbox.ts',
   'drop-zone/drop-zone.ts',
   'icon/icon.ts',
   'progress/progress.ts',
+  'radio/radio.ts',
   'separator/separator.ts',
   'skeleton/skeleton.ts',
+  'slider/slider.ts',
+  'switch/switch.ts',
   'tag/tag.ts',
+  'toggle/toggle.ts',
 ];
 
 export const packagePeerGroups = Object.freeze({

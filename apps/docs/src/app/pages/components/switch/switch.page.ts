@@ -47,6 +47,11 @@ import switchNativeExampleCodeRaw from './examples/native.example.ts?raw' with {
           <code>checked</code> / <code>disabled</code> and Angular Forms behavior,
           <code>checkedChange</code>, <code>required</code>
         </li>
+        <li>
+          <code>ui</code>: string shorthand targets <code>root</code>; typed maps use
+          <code>HellSwitchUi</code> with <code>root</code>/<code>thumb</code> parts or
+          <code>HellNativeSwitchUi</code> with <code>root</code>.
+        </li>
       </ul>
 
       <h2>Do</h2>
