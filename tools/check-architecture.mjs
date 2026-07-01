@@ -78,8 +78,6 @@ const audioTranscriptRuntimeTerms = [
 // Remove a symbol here as soon as it migrates to HellPartStyleable; new public
 // modules must not extend HellStyleable.
 const legacyStyleableAllowlist = new Set([
-  'HellCheckbox',
-  'HellNativeCheckbox',
   'HellCombobox',
   'HellComboboxBasic',
   'HellComboboxButton',
@@ -366,6 +364,28 @@ const migratedPartStyleMapModules = [
     apiReportFiles: ['hell-ui-angular-input.api.md'],
     legacyClass: 'hell-textarea',
     componentVariablePrefix: '--hell-textarea-',
+  },
+  {
+    className: 'HellCheckbox',
+    partType: 'HellCheckboxPart',
+    uiType: 'HellCheckboxUi',
+    entrypointId: 'checkbox',
+    sourcePath: 'packages/angular/checkbox/checkbox.ts',
+    publicApiPath: 'packages/angular/checkbox/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-checkbox',
+    componentVariablePrefix: '--hell-checkbox-',
+  },
+  {
+    className: 'HellNativeCheckbox',
+    partType: 'HellNativeCheckboxPart',
+    uiType: 'HellNativeCheckboxUi',
+    entrypointId: 'checkbox',
+    sourcePath: 'packages/angular/checkbox/checkbox.ts',
+    publicApiPath: 'packages/angular/checkbox/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-checkbox',
+    componentVariablePrefix: '--hell-checkbox-',
   },
   {
     className: 'HellDialpad',
@@ -1020,6 +1040,10 @@ const migratedPartStyleMapModules = [
     legacyClass: 'hell-table-resize-handle',
   },
 ];
+
+const migratedPartStyleMapClassNames = new Set(
+  migratedPartStyleMapModules.map((module) => module.className),
+);
 
 function main() {
   checkDocsExamples();
@@ -2920,7 +2944,7 @@ function checkComponentContract() {
     if (!styleableClasses.length) continue;
 
     const rel = file.slice(root.length + 1);
-    for (const { className, moduleSource } of styleableClasses) {
+    for (const { className, classSource, moduleSource } of styleableClasses) {
       if (publicStyleableModules.has(className)) {
         failures.push(`Duplicate public styled Module ${className} in ${rel}`);
       }
@@ -2939,6 +2963,10 @@ function checkComponentContract() {
         }
         if (moduleSource.includes('unstyled')) {
           failures.push(`${rel} ${className} extends HellPartStyleable but keeps Style Opt-Out`);
+        }
+      } else if (extendsMigratedPartStyleMapBase(classSource)) {
+        if (moduleSource.includes('unstyled')) {
+          failures.push(`${rel} ${className} inherits a Part Style Map base but keeps Style Opt-Out`);
         }
       } else {
         if (!legacyStyleableAllowlist.has(className)) {
@@ -3001,6 +3029,11 @@ function checkComponentContract() {
       );
     }
   }
+}
+
+function extendsMigratedPartStyleMapBase(classSource) {
+  const baseClass = /extends\s+([A-Za-z0-9_]+)/.exec(classSource)?.[1];
+  return !!baseClass && migratedPartStyleMapClassNames.has(baseClass);
 }
 
 function checkPartStyleMapContract() {

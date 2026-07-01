@@ -3,7 +3,12 @@ import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { HellCheckbox, HellNativeCheckbox } from './checkbox';
+import {
+  HellCheckbox,
+  type HellCheckboxUi,
+  HellNativeCheckbox,
+  type HellNativeCheckboxUi,
+} from './checkbox';
 
 @Component({
   selector: 'hell-checkbox-host',
@@ -96,7 +101,7 @@ class NativeCheckboxFormHost {
 }
 
 @Component({
-  selector: 'hell-checkbox-path-comparison-host',
+  selector: 'hell-checkbox-part-style-host',
   imports: [HellCheckbox, HellNativeCheckbox],
   template: `
     <div>
@@ -104,7 +109,13 @@ class NativeCheckboxFormHost {
         id="custom-checkbox"
         hellCheckbox
         [checked]="true"
-        unstyled
+        ui="bg-hell-danger size-hell-6 rounded-hell-pill"
+      ></button>
+      <button
+        id="custom-map-checkbox"
+        hellCheckbox
+        [checked]="true"
+        [ui]="customUi"
       ></button>
       <label>
         <input
@@ -113,7 +124,7 @@ class NativeCheckboxFormHost {
           hellNativeCheckbox
           checked
           required
-          unstyled
+          [ui]="nativeUi"
           [indeterminate]="indeterminate"
         />
         Native
@@ -121,8 +132,14 @@ class NativeCheckboxFormHost {
     </div>
   `,
 })
-class CheckboxPathComparisonHost {
+class CheckboxPartStyleHost {
   readonly indeterminate = signal(false);
+  protected readonly nativeUi = {
+    root: 'border-hell-danger size-hell-5',
+  } satisfies HellNativeCheckboxUi;
+  protected readonly customUi = {
+    root: 'bg-hell-danger size-hell-6 rounded-hell-pill',
+  } satisfies HellCheckboxUi;
 }
 
 describe('HellCheckbox', () => {
@@ -134,7 +151,7 @@ describe('HellCheckbox', () => {
         CheckboxRequiredFormHost,
         CheckboxDisabledRequiredHost,
         NativeCheckboxFormHost,
-        CheckboxPathComparisonHost,
+        CheckboxPartStyleHost,
       ],
     }).compileComponents();
   });
@@ -146,7 +163,7 @@ describe('HellCheckbox', () => {
     const checkbox = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellCheckbox]');
 
     expect(checkbox.type).toBe('button');
-    expect(checkbox.classList.contains('hell-checkbox')).toBe(true);
+    expect(checkbox.getAttribute('data-slot')).toBe('root');
     expect(checkbox.getAttribute('role')).toBe('checkbox');
     expect(checkbox.getAttribute('aria-checked')).toBe('false');
     expect(checkbox.getAttribute('aria-required')).toBeNull();
@@ -241,7 +258,7 @@ describe('HellCheckbox', () => {
     const checkbox = query<HTMLInputElement>(fixture.nativeElement, 'input[hellNativeCheckbox]');
 
     expect(checkbox.type).toBe('checkbox');
-    expect(checkbox.classList.contains('hell-checkbox')).toBe(true);
+    expect(checkbox.getAttribute('data-slot')).toBe('root');
     expect(checkbox.checked).toBe(false);
 
     host.control.setValue(true);
@@ -262,21 +279,41 @@ describe('HellCheckbox', () => {
     expect(host.checkedEvents).toEqual([false]);
   });
 
-  it('documents custom ARIA checkbox tradeoff and style opt-out behavior', () => {
-    const fixture = TestBed.createComponent(CheckboxPathComparisonHost);
+  it('uses root part style maps while keeping custom and native checkbox semantics', () => {
+    const fixture = TestBed.createComponent(CheckboxPartStyleHost);
     fixture.detectChanges();
 
-    const custom = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellCheckbox]');
+    const root = fixture.nativeElement as HTMLElement;
+    const customControls = root.querySelectorAll<HTMLButtonElement>('button[hellCheckbox]');
+    const custom = customControls[0];
+    const customMap = customControls[1];
     const native = query<HTMLInputElement>(fixture.nativeElement, 'input[hellNativeCheckbox]');
+
+    expect(custom).toBeInstanceOf(HTMLButtonElement);
+    expect(customMap).toBeInstanceOf(HTMLButtonElement);
 
     expect(custom.tagName).toBe('BUTTON');
     expect(custom.type).toBe('button');
     expect(custom.getAttribute('role')).toBe('checkbox');
+    expect(custom.getAttribute('data-slot')).toBe('root');
     expect(custom.classList.contains('hell-checkbox')).toBe(false);
+    expect(custom.classList.contains('bg-hell-danger')).toBe(true);
+    expect(custom.classList.contains('size-hell-6')).toBe(true);
+    expect(custom.classList.contains('rounded-hell-pill')).toBe(true);
+    expect(custom.classList.contains('size-hell-4')).toBe(false);
+
+    expect(customMap.getAttribute('data-slot')).toBe('root');
+    expect(customMap.classList.contains('bg-hell-danger')).toBe(true);
+    expect(customMap.classList.contains('size-hell-6')).toBe(true);
+    expect(customMap.classList.contains('size-hell-4')).toBe(false);
 
     expect(native.tagName).toBe('INPUT');
     expect(native.type).toBe('checkbox');
+    expect(native.getAttribute('data-slot')).toBe('root');
     expect(native.classList.contains('hell-checkbox')).toBe(false);
+    expect(native.classList.contains('border-hell-danger')).toBe(true);
+    expect(native.classList.contains('size-hell-5')).toBe(true);
+    expect(native.classList.contains('size-hell-4')).toBe(false);
     expect(native.getAttribute('aria-required')).toBe('true');
     expect(native.getAttribute('required')).toBe('');
   });
