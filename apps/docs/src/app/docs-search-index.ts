@@ -230,13 +230,6 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'dialog scoped-to-app-shell-content components/dialog/examples/scoped-to-app-shell-content.example components/dialog hellDialogScope hellAppContent',
   },
   {
-    title: 'Dialog: Unstyled',
-    path: '/components/dialog',
-    detail: 'components/dialog/examples/unstyled.example.ts',
-    terms:
-      'dialog unstyled components/dialog/examples/unstyled.example components/dialog hellDialog unstyled focus trap',
-  },
-  {
     title: 'Field: Horizontal',
     path: '/components/field',
     detail: 'components/field/examples/horizontal.example.ts',

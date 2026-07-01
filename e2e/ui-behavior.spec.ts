@@ -21,7 +21,7 @@ interface DialogFocusContract {
   label: string;
   triggerName: string | RegExp;
   dialogName: string | RegExp;
-  description: string;
+  description?: string | RegExp;
   initialFocusName: string | RegExp;
   nextFocusName: string | RegExp;
 }
@@ -41,7 +41,14 @@ async function expectDialogFocusContract(page: Page, contract: DialogFocusContra
       const nextFocus = dialog.getByRole('button', { name: contract.nextFocusName });
 
       await expect(dialog).toBeVisible();
-      await expect(dialog.getByText(contract.description, { exact: true })).toBeVisible();
+      if (contract.description) {
+        await expect(
+          dialog.getByText(
+            contract.description,
+            typeof contract.description === 'string' ? { exact: true } : undefined,
+          ),
+        ).toBeVisible();
+      }
       await expect
         .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity))
         .toBe('1');
@@ -188,7 +195,7 @@ async function audioLayoutMetrics(player: Locator): Promise<{
 }
 
 test.describe('Hell UI browser behavior', () => {
-  test('dialog focus trap and restore covers styled and unstyled modes', async ({ page }) => {
+  test('dialog focus trap and restore covers styled and scoped modes', async ({ page }) => {
     await page.goto('/components/dialog');
 
     await expectDialogFocusContract(page, {
@@ -201,12 +208,11 @@ test.describe('Hell UI browser behavior', () => {
     });
 
     await expectDialogFocusContract(page, {
-      label: 'unstyled dialog',
-      triggerName: 'Open unstyled dialog',
-      dialogName: 'Unstyled confirmation',
-      description: 'The dialog behavior stays intact while consumer CSS owns the presentation.',
-      initialFocusName: 'Keep editing',
-      nextFocusName: 'Send unstyled',
+      label: 'scoped dialog',
+      triggerName: 'Open content-scoped dialog',
+      dialogName: 'Only docs content is blocked',
+      initialFocusName: 'Close',
+      nextFocusName: 'Close',
     });
   });
 

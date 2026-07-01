@@ -86,7 +86,10 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
           <code>ariaLabel</code>, <code>ariaLabelledby</code>, <code>ariaDescribedby</code>: name
           and describe the focusable CodeMirror content element.
         </li>
-        <li><code>unstyled</code>: removes hell host classes but keeps CodeMirror setup.</li>
+        <li>
+          <code>ui</code>: Part Style Map overrides for the <code>root</code> and
+          <code>editor</code> parts.
+        </li>
         <li>
           <code>hellCodeEditorSetupFactory(document)</code>: preferred setup export when an app
           needs a specific document or shadow-root owner; <code>hellCodeEditorSetup</code> remains

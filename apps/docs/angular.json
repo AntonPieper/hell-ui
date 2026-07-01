@@ -66,18 +66,8 @@
               },
               {
                 "glob": "styles.css",
-                "input": "../../packages/angular/audio-player",
-                "output": "hell-ui/audio-player"
-              },
-              {
-                "glob": "styles.css",
-                "input": "../../packages/angular/dialog",
-                "output": "hell-ui/dialog"
-              },
-              {
-                "glob": "styles.css",
-                "input": "../../packages/angular/internal/overlay",
-                "output": "hell-ui/internal/overlay"
+                "input": "../../packages/angular/toast",
+                "output": "hell-ui/toast"
               },
               {
                 "glob": "pdf_viewer.css",

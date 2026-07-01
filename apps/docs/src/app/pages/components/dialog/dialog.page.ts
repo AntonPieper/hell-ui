@@ -1,17 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HELL_DIALOG_DIRECTIVES } from '@hell-ui/angular/dialog';
 import { ExampleTabs } from '../../../shared/example-tabs';
-import { useLazyGlobalStyleLink } from '../../../shared/lazy-global-style';
 import { DialogExampleExample } from './examples/example.example';
 import dialogExampleExampleCodeRaw from './examples/example.example.ts?raw' with {
   loader: 'text',
 };
 import { DialogScopedToAppShellContentExample } from './examples/scoped-to-app-shell-content.example';
 import dialogScopedToAppShellContentExampleCodeRaw from './examples/scoped-to-app-shell-content.example.ts?raw' with {
-  loader: 'text',
-};
-import { DialogUnstyledExample } from './examples/unstyled.example';
-import dialogUnstyledExampleCodeRaw from './examples/unstyled.example.ts?raw' with {
   loader: 'text',
 };
 
@@ -23,7 +18,6 @@ import dialogUnstyledExampleCodeRaw from './examples/unstyled.example.ts?raw' wi
     ...HELL_DIALOG_DIRECTIVES,
     DialogExampleExample,
     DialogScopedToAppShellContentExample,
-    DialogUnstyledExample,
   ],
   template: `
     <article class="hd-prose">
@@ -64,15 +58,6 @@ import dialogUnstyledExampleCodeRaw from './examples/unstyled.example.ts?raw' wi
         <app-dialog-scoped-to-app-shell-content-example />
       </hd-example-tabs>
 
-      <h2>Unstyled behavior</h2>
-      <p>
-        Add <code>unstyled</code> when you want Hell UI's dialog behavior while owning every
-        presentation class yourself.
-      </p>
-      <hd-example-tabs [code]="dialogUnstyledExampleCode">
-        <app-dialog-unstyled-example />
-      </hd-example-tabs>
-
       <p class="hd-muted">
         Need arbitrary region instead? Mark it with <code>hellDialogScope</code> and keep
         <code>scoped</code> on overlay.
@@ -101,7 +86,10 @@ import dialogUnstyledExampleCodeRaw from './examples/unstyled.example.ts?raw' wi
           description wiring.
         </li>
         <li><code>hellDialogScope</code>: marks a custom overlay bounding region.</li>
-        <li><code>unstyled</code>: available on overlay, panel, title and description.</li>
+        <li>
+          <code>ui</code>: Part Style Map overrides for the overlay, panel, title, and description
+          root parts.
+        </li>
       </ul>
 
       <h2>Do</h2>
@@ -120,13 +108,7 @@ import dialogUnstyledExampleCodeRaw from './examples/unstyled.example.ts?raw' wi
   `,
 })
 export class DialogPage {
-  private readonly _dialogStyles = useLazyGlobalStyleLink(
-    'hell-docs-dialog-styles',
-    'hell-ui/dialog/styles.css',
-  );
-
   protected readonly dialogExampleExampleCode = dialogExampleExampleCodeRaw;
   protected readonly dialogScopedToAppShellContentExampleCode =
     dialogScopedToAppShellContentExampleCodeRaw;
-  protected readonly dialogUnstyledExampleCode = dialogUnstyledExampleCodeRaw;
 }
