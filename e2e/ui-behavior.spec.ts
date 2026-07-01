@@ -323,35 +323,47 @@ test.describe('Hell UI browser behavior', () => {
     const notifications = page.getByRole('region', { name: 'Notifications' });
     const viewport = notifications.locator('[data-slot="viewport"]');
     const toasts = notifications.locator('[data-slot="toast"]');
+    const frontToast = toasts.last();
 
     await expect(toasts).toHaveCount(8);
+    await expect(frontToast).toBeVisible();
+    await expect
+      .poll(() =>
+        viewport.evaluate((element) =>
+          Number.parseFloat(getComputedStyle(element).paddingInlineEnd),
+        ),
+      )
+      .toBeGreaterThanOrEqual(9);
+    await expect
+      .poll(() =>
+        viewport.evaluate((element) => {
+          const style = getComputedStyle(element);
+          const nativeScrollbarWidth = Number.parseFloat(
+            style.getPropertyValue('--hell-toast-scrollbar-w'),
+          );
+          const reservedContentWidth =
+            element.clientWidth -
+            Number.parseFloat(style.paddingInlineEnd) -
+            (Number.isFinite(nativeScrollbarWidth) ? nativeScrollbarWidth : 0);
+          const toast = element.querySelector<HTMLElement>('[data-slot="toast"]:last-child');
+          return toast ? Math.abs(toast.offsetWidth - reservedContentWidth) : Infinity;
+        }),
+      )
+      .toBeLessThanOrEqual(1);
+    const collapsedFrontWidth = await frontToast.evaluate((element) => element.offsetWidth);
+
     await notifications.hover();
     await expect(notifications.locator('[data-slot="dismissAll"]')).toBeVisible();
     await expect(notifications.locator('[data-slot="dismissAll"] svg path')).toHaveCount(1);
     await expect(viewport).toHaveAttribute('aria-label', 'Notification stack');
-
-    const renderedToastCount = () =>
-      viewport.evaluate((element) => {
-        const viewportRect = element.getBoundingClientRect();
-        return [...element.querySelectorAll<HTMLElement>('[data-slot="toast"]')].filter((toast) => {
-          if (toast.getAttribute('data-state') !== 'open') return false;
-          const rect = toast.getBoundingClientRect();
-          const opacity = Number(getComputedStyle(toast).opacity);
-          return rect.bottom > viewportRect.top && rect.top < viewportRect.bottom && opacity > 0.45;
-        }).length;
-      });
-
-    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(resolve)));
-    expect(await renderedToastCount()).toBeGreaterThanOrEqual(3);
-
     await expect
       .poll(() =>
-        viewport.evaluate(
-          (element) => element.scrollHeight > element.clientHeight && element.scrollTop > 0,
+        frontToast.evaluate(
+          (element, width) => Math.abs(element.offsetWidth - width),
+          collapsedFrontWidth,
         ),
       )
-      .toBe(true);
-    await expect.poll(renderedToastCount).toBeGreaterThanOrEqual(5);
+      .toBeLessThanOrEqual(1);
 
     await expect
       .poll(() =>
@@ -367,11 +379,18 @@ test.describe('Hell UI browser behavior', () => {
             })
             .sort((a, b) => a.top - b.top);
           const gaps = rects.slice(1).map((rect, index) => rect.top - rects[index].bottom);
-          if (rects.length < 8 || gaps.length === 0) return -Infinity;
-          return Math.min(...gaps);
+          const minGap = gaps.length ? Math.min(...gaps) : 0;
+
+          return (
+            rects.length >= 8 &&
+            element.scrollHeight > element.clientHeight &&
+            element.scrollTop > 0 &&
+            minGap >= 8
+          );
         }),
+        { timeout: 10_000 },
       )
-      .toBeGreaterThanOrEqual(8);
+      .toBe(true);
 
     await viewport.evaluate((element) => {
       element.scrollTop = 0;
@@ -389,7 +408,34 @@ test.describe('Hell UI browser behavior', () => {
       )
       .toBe(true);
 
+    await viewport.evaluate((element) => {
+      element.scrollTop = element.scrollHeight;
+      element.dispatchEvent(new Event('scroll', { bubbles: true }));
+    });
+    await page.waitForTimeout(240);
+    const expandedFrontTop = await frontToast.evaluate((element) =>
+      element.getBoundingClientRect().top,
+    );
+
     await page.mouse.move(10, 10);
+    const collapseTops = await frontToast.evaluate(
+      (element) =>
+        new Promise<number[]>((resolve) => {
+          const tops: number[] = [];
+          const start = performance.now();
+          const sample = () => {
+            tops.push(element.getBoundingClientRect().top);
+            if (performance.now() - start >= 520) {
+              resolve(tops);
+              return;
+            }
+            requestAnimationFrame(sample);
+          };
+          sample();
+        }),
+    );
+
+    expect(Math.min(...collapseTops)).toBeGreaterThanOrEqual(expandedFrontTop - 1);
     await expect(notifications).not.toHaveAttribute('data-expanded', 'true');
     await expect.poll(() => viewport.evaluate((element) => element.scrollTop)).toBe(0);
     await notifications.hover();
