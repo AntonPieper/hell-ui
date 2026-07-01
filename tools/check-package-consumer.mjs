@@ -1593,7 +1593,17 @@ import {
 import { HELL_TABS_DIRECTIVES, type HellTabUi } from '${packageName}/tabs';
 import { HellToggle, HellToggleGroup, HellToggleGroupItem, type HellToggleGroupItemUi, type HellToggleGroupUi, type HellToggleUi } from '${packageName}/toggle';
 import { HellTooltip, HellTooltipTrigger, type HellTooltipUi } from '${packageName}/tooltip';
-import { HellComboboxBasic, type HellComboboxBasicUi } from '${packageName}/combobox';
+import {
+  HELL_COMBOBOX_DIRECTIVES,
+  HellComboboxBasic,
+  type HellComboboxBasicUi,
+  type HellComboboxButtonUi,
+  type HellComboboxDropdownUi,
+  type HellComboboxEmptyUi,
+  type HellComboboxInputUi,
+  type HellComboboxOptionUi,
+  type HellComboboxUi,
+} from '${packageName}/combobox';
 
 type PrimitiveRootPart = HellAvatarPart | HellDropZonePart | HellIconPart;
 
@@ -1645,6 +1655,7 @@ const primitiveRootPart: PrimitiveRootPart = 'root';
     HellToggleGroupItem,
     HellTooltip,
     HellTooltipTrigger,
+    ...HELL_COMBOBOX_DIRECTIVES,
     HellComboboxBasic,
   ],
   template: \`
@@ -1743,6 +1754,35 @@ const primitiveRootPart: PrimitiveRootPart = 'root';
     </button>
 
     <hell-select-basic [options]="selectOptions" [ui]="selectBasicUi" />
+    <div
+      hellCombobox
+      [value]="comboboxValue"
+      (valueChange)="comboboxValue = $any($event)"
+      [options]="comboboxOptions"
+      [ui]="comboboxUi"
+    >
+      <input hellComboboxInput placeholder="Search fruit…" [ui]="comboboxInputUi" />
+      <button
+        hellComboboxButton
+        type="button"
+        aria-label="Toggle combobox options"
+        [ui]="comboboxButtonUi"
+      ></button>
+      <div *hellComboboxPortal hellComboboxDropdown [ui]="comboboxDropdownUi">
+        @for (option of comboboxOptions; track option) {
+          <div
+            hellComboboxOption
+            [value]="option"
+            [disabled]="option === disabledComboboxOption"
+            [ui]="comboboxOptionUi"
+          >
+            {{ option }}
+          </div>
+        } @empty {
+          <div hellComboboxEmpty [ui]="comboboxEmptyUi">No matches</div>
+        }
+      </div>
+    </div>
     <hell-combobox-basic [options]="selectOptions" [ui]="comboboxBasicUi" />
 
     <section hellCard ui="shadow-none">
@@ -1829,6 +1869,19 @@ class App {
   protected readonly toggleGroupUi = { root: 'gap-hell-2' } satisfies HellToggleGroupUi;
   protected readonly toggleUi = { root: 'text-hell-info' } satisfies HellToggleUi;
   protected readonly tooltipUi = { root: 'rounded-hell-pill' } satisfies HellTooltipUi;
+  protected comboboxValue: string | null = null;
+  protected readonly comboboxOptions = ['apple', 'apricot', 'blackberry'];
+  protected readonly disabledComboboxOption = 'blackberry';
+  protected readonly comboboxUi = { root: 'rounded-hell-pill' } satisfies HellComboboxUi;
+  protected readonly comboboxButtonUi = { root: 'text-hell-info' } satisfies HellComboboxButtonUi;
+  protected readonly comboboxDropdownUi = {
+    root: 'rounded-hell-pill',
+  } satisfies HellComboboxDropdownUi;
+  protected readonly comboboxEmptyUi = { root: 'text-hell-info' } satisfies HellComboboxEmptyUi;
+  protected readonly comboboxInputUi = { root: 'text-hell-info' } satisfies HellComboboxInputUi;
+  protected readonly comboboxOptionUi = {
+    root: 'bg-hell-primary-soft',
+  } satisfies HellComboboxOptionUi;
   protected readonly comboboxBasicUi = {
     control: 'rounded-hell-pill',
     button: 'text-hell-info',
