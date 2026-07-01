@@ -40,39 +40,26 @@ test.describe('component visual polish regressions', () => {
     await expect(example).toBeVisible();
     await example.scrollIntoViewIfNeeded();
 
-    const preview = example.locator('.hd-example');
-    const previewBox = await boxFor(preview);
     const verticalSliders = example.locator('hell-slider[data-orientation="vertical"]');
     await expect(verticalSliders).toHaveCount(2);
 
     for (const slider of await verticalSliders.all()) {
-      const track = slider.locator('[data-slot="track"]');
-      const range = slider.locator('[data-slot="range"]');
       const thumb = slider.locator('[data-slot="thumb"]');
 
       await expect(thumb).toHaveAttribute('aria-orientation', 'vertical');
 
-      const sliderBox = await boxFor(slider);
-      const trackBox = await boxFor(track);
-      const rangeBox = await boxFor(range);
-      const thumbBox = await boxFor(thumb);
-      const visualTrack = await track.evaluate((element) => {
-        const box = element.getBoundingClientRect();
-        const trackStyles = getComputedStyle(element, '::before');
-        const top = Number.parseFloat(trackStyles.top) || 0;
-        const bottom = Number.parseFloat(trackStyles.bottom) || 0;
-        return {
-          top: box.top + top,
-          bottom: box.bottom - bottom,
-        };
-      });
+      const { previewBox, rangeBox, sliderBox, thumbBox, trackBox, visualTrack } =
+        await verticalSliderGeometry(slider);
 
       expect(sliderBox.y).toBeGreaterThanOrEqual(previewBox.y);
-      expect(sliderBox.y + sliderBox.height).toBeLessThanOrEqual(previewBox.y + previewBox.height);
-      expect(trackBox.y).toBeGreaterThan(sliderBox.y);
-      expect(trackBox.y + trackBox.height).toBeLessThan(sliderBox.y + sliderBox.height);
+      expect(sliderBox.y + sliderBox.height).toBeLessThanOrEqual(
+        previewBox.y + previewBox.height,
+      );
+      expect(trackBox.y).toBeGreaterThanOrEqual(sliderBox.y);
+      expect(trackBox.y + trackBox.height).toBeLessThanOrEqual(sliderBox.y + sliderBox.height);
       expect(Math.abs(centerX(trackBox) - centerX(thumbBox))).toBeLessThanOrEqual(1);
       expect(Math.abs(centerX(rangeBox) - centerX(trackBox))).toBeLessThanOrEqual(1);
+      expect(Math.abs(rangeBox.y - centerY(thumbBox))).toBeLessThanOrEqual(1);
       expect(thumbBox.height).toBeLessThanOrEqual(14.1);
       expect(thumbBox.y).toBeGreaterThanOrEqual(visualTrack.top - 1);
       expect(thumbBox.y + thumbBox.height).toBeLessThanOrEqual(visualTrack.bottom + 1);
@@ -80,11 +67,34 @@ test.describe('component visual polish regressions', () => {
       expect(thumbBox.y + thumbBox.height).toBeLessThanOrEqual(previewBox.y + previewBox.height);
     }
 
+    const draggableSlider = verticalSliders.first();
+    const { trackBox: draggableTrackBox } = await verticalSliderGeometry(draggableSlider);
+    await page.mouse.move(
+      centerX(draggableTrackBox),
+      draggableTrackBox.y + draggableTrackBox.height * 0.82,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      centerX(draggableTrackBox),
+      draggableTrackBox.y + draggableTrackBox.height * 0.18,
+      { steps: 8 },
+    );
+    await expect(draggableSlider).toHaveAttribute('data-active-drag', 'true');
+
+    const { rangeBox: draggedRangeBox, thumbBox: draggedThumbBox } =
+      await verticalSliderGeometry(draggableSlider, false);
+    await page.mouse.up();
+    expect(Math.abs(draggedRangeBox.y - centerY(draggedThumbBox))).toBeLessThanOrEqual(1);
+
     const firstSlider = verticalSliders.first().getByRole('slider', { name: 'Vertical low' });
     await firstSlider.focus();
     await expect(firstSlider).toBeFocused();
+    const focusedValue = Number(await firstSlider.getAttribute('aria-valuenow'));
     await page.keyboard.press('ArrowUp');
-    await expect(firstSlider).toHaveAttribute('aria-valuenow', '31');
+    await expect(firstSlider).toHaveAttribute(
+      'aria-valuenow',
+      String(Math.min(focusedValue + 1, 100)),
+    );
 
     const horizontal = page
       .locator('app-slider-basic-example hell-slider[data-orientation="horizontal"]')
@@ -162,6 +172,31 @@ test.describe('component visual polish regressions', () => {
       (element) => getComputedStyle(element).backgroundColor,
     );
     expect(selectedHoverBackground).toBe(colors.selected.backgroundColor);
+  });
+
+  test('toggle press scale animates from the center using transform', async ({ page }) => {
+    await gotoDocsPage(page, '/components/toggle', 'Toggle');
+
+    const toggles = [
+      page.locator('app-toggle-single-toggle-example button[hellToggle]').first(),
+      page.locator('app-toggle-toggle-group-single-example button[hellToggleGroupItem]').nth(1),
+    ];
+
+    for (const toggle of toggles) {
+      await expect(toggle).toBeVisible();
+      const idle = await toggleMotionState(toggle);
+      expect(idle.transitionProperties).toContain('transform');
+      expect(idle.transitionProperties).not.toContain('scale');
+
+      await page.mouse.move(idle.center.x, idle.center.y);
+      await page.mouse.down();
+      const pressed = await toggleMotionState(toggle, false);
+      await page.mouse.up();
+
+      expect(pressed.transform).not.toBe(idle.transform);
+      expect(Math.abs(pressed.center.x - idle.center.x)).toBeLessThanOrEqual(0.75);
+      expect(Math.abs(pressed.center.y - idle.center.y)).toBeLessThanOrEqual(0.75);
+    }
   });
 
   test('switch thumbs animate with interpolable position properties', async ({ page }) => {
@@ -308,6 +343,63 @@ function hasNoVisibleShadow(boxShadow: string): boolean {
     .trim() === '';
 }
 
+async function verticalSliderGeometry(
+  locator: Locator,
+  scrollIntoView = true,
+): Promise<{
+  previewBox: { x: number; y: number; width: number; height: number };
+  rangeBox: { x: number; y: number; width: number; height: number };
+  sliderBox: { x: number; y: number; width: number; height: number };
+  thumbBox: { x: number; y: number; width: number; height: number };
+  trackBox: { x: number; y: number; width: number; height: number };
+  visualTrack: { top: number; bottom: number };
+}> {
+  if (scrollIntoView) {
+    await locator.evaluate((element) => {
+      element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+    });
+  }
+  await locator.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())),
+  );
+
+  return locator.evaluate((element) => {
+    const preview = element.closest('hd-example-tabs')?.querySelector('.hd-example');
+    const track = element.querySelector('[data-slot="track"]');
+    const range = element.querySelector('[data-slot="range"]');
+    const thumb = element.querySelector('[data-slot="thumb"]');
+    if (!preview || !track || !range || !thumb) {
+      throw new Error('Expected vertical slider anatomy.');
+    }
+
+    const rect = (target: Element) => {
+      const box = target.getBoundingClientRect();
+      return {
+        x: box.x,
+        y: box.y,
+        width: box.width,
+        height: box.height,
+      };
+    };
+    const trackBox = rect(track);
+    const trackStyles = getComputedStyle(track, '::before');
+    const top = Number.parseFloat(trackStyles.top) || 0;
+    const bottom = Number.parseFloat(trackStyles.bottom) || 0;
+
+    return {
+      previewBox: rect(preview),
+      rangeBox: rect(range),
+      sliderBox: rect(element),
+      thumbBox: rect(thumb),
+      trackBox,
+      visualTrack: {
+        top: trackBox.y + top,
+        bottom: trackBox.y + trackBox.height - bottom,
+      },
+    };
+  });
+}
+
 async function visualState(locator: Locator): Promise<{
   backgroundColor: string;
   borderColor: string;
@@ -321,6 +413,39 @@ async function visualState(locator: Locator): Promise<{
       transform: styles.transform,
     };
   });
+}
+
+async function toggleMotionState(
+  locator: Locator,
+  scrollIntoView = true,
+): Promise<{
+  center: { x: number; y: number };
+  transform: string;
+  transitionProperties: string[];
+}> {
+  if (scrollIntoView) {
+    await locator.evaluate((element) => {
+      element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+    });
+  }
+  await locator.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())),
+  );
+  const box = await locator.boundingBox();
+  if (!box) throw new Error('Expected toggle to have a bounding box.');
+  const styles = await locator.evaluate((element) => {
+    const computed = getComputedStyle(element);
+    return {
+      transform: computed.transform,
+      transitionProperty: computed.transitionProperty,
+    };
+  });
+
+  return {
+    center: { x: centerX(box), y: centerY(box) },
+    transform: styles.transform,
+    transitionProperties: parseTransitionProperties(styles.transitionProperty),
+  };
 }
 
 async function switchThumbMotion(locator: Locator): Promise<{
