@@ -1665,6 +1665,7 @@ function checkDocsExamples() {
   const pagesRoot = join(root, 'apps/docs/src/app/pages');
 
   checkDocsCatalogExampleSeam(catalog);
+  checkMigratedFloatingListDocsSearchTerms(examples);
 
   const indexedDetails = new Set(examples.map((example) => example.detail));
   const actualExamples = walk(pagesRoot)
@@ -1727,6 +1728,106 @@ function checkDocsExamples() {
 
     if (!routePaths.has(usage.path)) {
       failures.push(`Docs Usage "${usage.title}" points at missing route ${usage.path}`);
+    }
+  }
+}
+
+function checkMigratedFloatingListDocsSearchTerms(examples) {
+  const requiredEntries = [
+    {
+      detail: 'components/combobox/examples/basic.example.ts',
+      terms: [
+        'ui',
+        'Part Style Map',
+        'data-slot',
+        'HellComboboxUi',
+        'HellComboboxInputUi',
+        'HellComboboxButtonUi',
+        'HellComboboxDropdownUi',
+        'HellComboboxOptionUi',
+      ],
+    },
+    {
+      detail: 'components/combobox/examples/basic-preset.example.ts',
+      terms: ['ui', 'Part Style Map', 'data-slot', 'HellComboboxBasicUi'],
+    },
+    {
+      detail: 'components/flyout/examples/example-boundary-keeps-siblings-interactive.example.ts',
+      terms: ['ui', 'Part Style Map', 'data-slot', 'HellFlyoutUi'],
+    },
+    {
+      detail: 'components/listbox/examples/basic.example.ts',
+      terms: [
+        'ui',
+        'Part Style Map',
+        'data-slot',
+        'HellListboxUi',
+        'HellListboxOptionUi',
+        'HellListboxSectionUi',
+        'HellListboxHeaderUi',
+      ],
+    },
+    {
+      detail: 'components/menu/examples/basic.example.ts',
+      terms: ['ui', 'Part Style Map', 'data-slot', 'HellMenuUi', 'HellMenuItemUi'],
+    },
+    {
+      detail: 'components/menu/examples/with-icons-sections-submenus.example.ts',
+      terms: [
+        'ui',
+        'Part Style Map',
+        'data-slot',
+        'HellMenuUi',
+        'HellSubmenuTriggerUi',
+        'HellMenuSectionUi',
+        'HellMenuItemIconUi',
+        'HellMenuItemTrailingUi',
+      ],
+    },
+    {
+      detail: 'components/popover/examples/example.example.ts',
+      terms: ['ui', 'Part Style Map', 'data-slot', 'HellPopoverUi'],
+    },
+    {
+      detail: 'components/select/examples/basic.example.ts',
+      terms: [
+        'ui',
+        'Part Style Map',
+        'data-slot',
+        'HellSelectUi',
+        'HellSelectValueUi',
+        'HellSelectPlaceholderUi',
+        'HellSelectDropdownUi',
+        'HellSelectOptionUi',
+      ],
+    },
+    {
+      detail: 'components/select/examples/basic-preset.example.ts',
+      terms: ['ui', 'Part Style Map', 'data-slot', 'HellSelectBasicUi'],
+    },
+    {
+      detail: 'components/tooltip/examples/example.example.ts',
+      terms: ['ui', 'Part Style Map', 'data-slot', 'HellTooltipUi'],
+    },
+    {
+      detail: 'components/tooltip/examples/with-delay.example.ts',
+      terms: ['ui', 'Part Style Map', 'data-slot', 'HellTooltipUi'],
+    },
+    {
+      detail: 'components/tooltip/examples/hoverable.example.ts',
+      terms: ['ui', 'Part Style Map', 'data-slot', 'HellTooltipUi'],
+    },
+  ];
+
+  for (const entry of requiredEntries) {
+    const seed = examples.find((example) => example.detail === entry.detail);
+    if (!seed) continue;
+    for (const term of entry.terms) {
+      if (!seed.terms.includes(term)) {
+        failures.push(
+          `Docs Search Index ${entry.detail} must include migrated Part Style Map search term "${term}"`,
+        );
+      }
     }
   }
 }
@@ -2116,12 +2217,13 @@ function docsSearchIndexSeeds(searchIndex, variable) {
   const body = searchIndex.slice(bodyStart, bodyEnd);
   const seeds = [];
   for (const match of body.matchAll(
-    /\{\s*title:\s*'([^']+)'\s*,\s*path:\s*'([^']+)'\s*,\s*detail:\s*'([^']+)'/g,
+    /\{\s*title:\s*'([^']+)'\s*,\s*path:\s*'([^']+)'\s*,\s*detail:\s*'([^']+)'\s*,\s*terms:\s*'([^']*)'/g,
   )) {
     seeds.push({
       title: match[1],
       path: match[2],
       detail: match[3],
+      terms: match[4],
     });
   }
 

@@ -171,7 +171,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/combobox',
     detail: 'components/combobox/examples/basic.example.ts',
     terms:
-      'combobox basic components/combobox/examples/basic.example components/combobox hellCombobox hellComboboxInput hellComboboxOption ui data-slot root',
+      'combobox basic components/combobox/examples/basic.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxDropdown hellComboboxOption HellComboboxUi HellComboboxInputUi HellComboboxButtonUi HellComboboxDropdownUi HellComboboxOptionUi ui Part Style Map data-slot root',
   },
   {
     title: 'Combobox: Multiple',
@@ -185,7 +185,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/combobox',
     detail: 'components/combobox/examples/basic-preset.example.ts',
     terms:
-      'combobox preset components/combobox/examples/basic-preset.example components/combobox hell-combobox-basic HellComboboxBasic ui data-slot root',
+      'combobox preset components/combobox/examples/basic-preset.example components/combobox hell-combobox-basic HellComboboxBasic HellComboboxBasicUi ui Part Style Map data-slot root control input button dropdown option empty',
   },
   {
     title: 'Date Picker: Bounded',
@@ -248,7 +248,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/flyout',
     detail: 'components/flyout/examples/example-boundary-keeps-siblings-interactive.example.ts',
     terms:
-      'flyout example-boundary-keeps-siblings-interactive components/flyout/examples/example-boundary-keeps-siblings-interactive.example components/flyout hellFlyout hellFlyoutTrigger boundary ui data-slot root',
+      'flyout example-boundary-keeps-siblings-interactive components/flyout/examples/example-boundary-keeps-siblings-interactive.example components/flyout hellFlyout hellFlyoutTrigger boundary HellFlyoutUi ui Part Style Map data-slot root',
   },
   {
     title: 'Icon: Example',
@@ -308,21 +308,21 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/listbox',
     detail: 'components/listbox/examples/basic.example.ts',
     terms:
-      'listbox basic components/listbox/examples/basic.example components/listbox HELL_LISTBOX_DIRECTIVES hellListbox hellListboxOption hellListboxHeader valueChange option ui data-slot root',
+      'listbox basic components/listbox/examples/basic.example components/listbox HELL_LISTBOX_DIRECTIVES hellListbox hellListboxOption hellListboxHeader HellListboxUi HellListboxOptionUi HellListboxSectionUi HellListboxHeaderUi valueChange option ui Part Style Map data-slot root',
   },
   {
     title: 'Menu: Basic',
     path: '/components/menu',
     detail: 'components/menu/examples/basic.example.ts',
     terms:
-      'menu basic components/menu/examples/basic.example components/menu hellMenu hellMenuTrigger hellMenuItem ui data-slot root',
+      'menu basic components/menu/examples/basic.example components/menu hellMenu hellMenuTrigger hellMenuItem HellMenuUi HellMenuItemUi HellSubmenuTriggerUi ui Part Style Map data-slot root',
   },
   {
     title: 'Menu: With Icons Sections Submenus',
     path: '/components/menu',
     detail: 'components/menu/examples/with-icons-sections-submenus.example.ts',
     terms:
-      'menu with-icons-sections-submenus components/menu/examples/with-icons-sections-submenus.example components/menu hellMenu hellSubmenuTrigger hellMenuSection ui data-slot root',
+      'menu with-icons-sections-submenus components/menu/examples/with-icons-sections-submenus.example components/menu hellMenu hellSubmenuTrigger hellMenuSection HellMenuUi HellSubmenuTriggerUi HellMenuSectionUi HellMenuLabelUi HellMenuItemIconUi HellMenuItemTrailingUi HellMenuSeparatorUi ui Part Style Map data-slot root',
   },
   {
     title: 'Pagination: Basic',
@@ -357,7 +357,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/popover',
     detail: 'components/popover/examples/example.example.ts',
     terms:
-      'popover example components/popover/examples/example.example components/popover hellPopover hellPopoverTrigger ui data-slot root',
+      'popover example components/popover/examples/example.example components/popover hellPopover hellPopoverTrigger HellPopoverUi ui Part Style Map data-slot root',
   },
   {
     title: 'Progress: Examples',
@@ -406,14 +406,14 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/select',
     detail: 'components/select/examples/basic.example.ts',
     terms:
-      'select basic components/select/examples/basic.example components/select hellSelect hellSelectOption hellSelectDropdown ui data-slot root',
+      'select basic components/select/examples/basic.example components/select hellSelect hellSelectValue hellSelectDropdown hellSelectOption HellSelectUi HellSelectValueUi HellSelectPlaceholderUi HellSelectDropdownUi HellSelectOptionUi ui Part Style Map data-slot root',
   },
   {
     title: 'Select: Preset',
     path: '/components/select',
     detail: 'components/select/examples/basic-preset.example.ts',
     terms:
-      'select preset components/select/examples/basic-preset.example components/select hell-select-basic HellSelectBasic ui data-slot root',
+      'select preset components/select/examples/basic-preset.example components/select hell-select-basic HellSelectBasic HellSelectBasicUi ui Part Style Map data-slot root trigger value placeholder dropdown option',
   },
   {
     title: 'Separator: Flush Inside A Card',
@@ -615,21 +615,21 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/tooltip',
     detail: 'components/tooltip/examples/example.example.ts',
     terms:
-      'tooltip example components/tooltip/examples/example.example components/tooltip hellTooltip hellTooltipTrigger ui Part Style Map data-slot root',
+      'tooltip example components/tooltip/examples/example.example components/tooltip hellTooltip hellTooltipTrigger HellTooltipUi ui Part Style Map data-slot root',
   },
   {
     title: 'Tooltip: With Delay',
     path: '/components/tooltip',
     detail: 'components/tooltip/examples/with-delay.example.ts',
     terms:
-      'tooltip with-delay components/tooltip/examples/with-delay.example components/tooltip hellTooltip delay ui Part Style Map data-slot root',
+      'tooltip with-delay components/tooltip/examples/with-delay.example components/tooltip hellTooltip delay HellTooltipUi ui Part Style Map data-slot root',
   },
   {
     title: 'Tooltip: Hoverable',
     path: '/components/tooltip',
     detail: 'components/tooltip/examples/hoverable.example.ts',
     terms:
-      'tooltip hoverable components/tooltip/examples/hoverable.example components/tooltip hellTooltip hoverableContent ui Part Style Map data-slot root',
+      'tooltip hoverable components/tooltip/examples/hoverable.example components/tooltip hellTooltip hoverableContent HellTooltipUi ui Part Style Map data-slot root',
   },
   {
     title: 'App Shell: Live Miniature',
