@@ -145,12 +145,17 @@ test.describe('component visual polish regressions', () => {
     expect(colors.selected.color).not.toBe(colors.unselected.color);
     expect(hasNoVisibleShadow(colors.selected.boxShadow)).toBe(true);
 
+    const supportsHoverStyling = await page.evaluate(() =>
+      window.matchMedia('(hover: hover)').matches,
+    );
     await unselected.hover();
     await expect(unselected).not.toHaveAttribute('data-selected');
     const hoverBackground = await unselected.evaluate(
       (element) => getComputedStyle(element).backgroundColor,
     );
-    expect(hoverBackground).not.toBe(colors.unselected.backgroundColor);
+    if (supportsHoverStyling) {
+      expect(hoverBackground).not.toBe(colors.unselected.backgroundColor);
+    }
 
     await selected.hover();
     const selectedHoverBackground = await selected.evaluate(

@@ -20,6 +20,10 @@
     background-color: var(--color-hell-border);
   }
 
+  [hellSwitch][data-slot='root'] > [data-slot='thumb'] {
+    left: 2px;
+  }
+
   [hellSwitch][data-slot='root'][data-checked] > [data-slot='thumb'] {
     right: 2px;
     left: auto;
