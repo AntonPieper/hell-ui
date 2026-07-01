@@ -58,10 +58,10 @@ export type HellToasterPart =
 export type HellToasterUi = HellUi<HellToasterPart>;
 
 const HELL_TOASTER_RECIPE = {
-  root: 'fixed z-[9999] pointer-events-none w-[var(--hell-toaster-w)] max-w-[calc(100vw-32px)] [--hell-toaster-w:360px] [--hell-toaster-gap:12px] [--hell-toaster-peek:14px] [--hell-toaster-scale-step:0.06] [--hell-toaster-scrollbar-gutter:10px] [--hell-toaster-viewport-max-h:min(420px,calc(100vh-104px))] [--hell-toast-dir:-1] [--hell-toast-origin:bottom_center]',
+  root: 'fixed z-[9999] pointer-events-none w-[var(--hell-toaster-w)] max-w-[calc(100vw-32px)] [--hell-toaster-w:360px] [--hell-toaster-gap:12px] [--hell-toaster-peek:14px] [--hell-toaster-scale-step:0.06] [--hell-toast-gutter:10px] [--hell-toaster-viewport-max-h:min(420px,calc(100vh-104px))] [--hell-toast-dir:-1] [--hell-toast-origin:bottom_center]',
   region: 'relative block pointer-events-auto',
   viewport:
-    'relative box-border h-16 w-full pe-[var(--hell-toaster-scrollbar-gutter)] overflow-visible transition-[height] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-8',
+    'relative box-border h-16 w-full pe-[var(--hell-toast-gutter)] overflow-visible transition-[height] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-8',
   list: 'relative m-0 h-16 list-none p-0',
   toast:
     'absolute left-0 right-0 grid grid-cols-[auto_1fr_auto_auto] items-start gap-hell-3 rounded-hell-lg border border-hell-border bg-hell-surface-elevated p-hell-4 text-[13px] leading-[1.4] text-hell-foreground shadow-hell-lg pointer-events-auto transition-[transform,opacity,box-shadow] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)]',
@@ -325,6 +325,7 @@ export class HellToastTemplate {}
         [attr.aria-label]="labels.toast.notifications"
         [style.--hell-toast-stack-h]="stackHeightPx()"
         [style.--hell-toast-viewport-h]="expandedViewportHeightPx()"
+        [style.--hell-toast-scrollbar-w]="nativeScrollbarWidthPx()"
         tabindex="-1"
         (mouseenter)="onEnter()"
         (mouseleave)="onLeave()"
@@ -338,16 +339,7 @@ export class HellToastTemplate {}
           [attr.aria-label]="isScrollable() ? labels.toast.stack : null"
           (scroll)="onViewportScroll($event)"
         >
-          <ol
-            data-slot="list"
-            [class]="part('list')"
-            [attr.style]="
-              expanded()
-                ? null
-                : 'position:absolute;inset-inline:0 var(--hell-toaster-scrollbar-gutter);' +
-                  (position().startsWith('bottom') ? 'bottom:0' : 'top:0')
-            "
-          >
+          <ol data-slot="list" [class]="part('list')">
             @for (t of svc.toasts(); track t.id; let i = $index) {
               <li
                 data-slot="toast"
@@ -504,6 +496,7 @@ export class HellToaster extends HellPartStyleable<HellToasterPart> {
   private destroyed = false;
   private readonly viewportHeight = signal(0);
   private readonly scrollTop = signal(0);
+  private readonly nativeScrollbarWidth = signal(0);
   protected readonly stackHeightValue = computed(() =>
     hellToastStackHeightValuePx(this.svc.toasts(), this.heights()),
   );
@@ -516,6 +509,7 @@ export class HellToaster extends HellPartStyleable<HellToasterPart> {
   protected readonly expandedViewportHeightPx = computed(
     () => `${this.expandedViewportHeightValue()}px`,
   );
+  protected readonly nativeScrollbarWidthPx = computed(() => `${this.nativeScrollbarWidth()}px`);
   protected readonly isScrollable = computed(() => {
     const viewportHeight = this.viewportHeight();
     return (
@@ -531,7 +525,11 @@ export class HellToaster extends HellPartStyleable<HellToasterPart> {
   constructor() {
     super();
     inject(DestroyRef).onDestroy(() => this.cleanupObservers());
-    afterNextRender(() => this.observeAll());
+    this.syncNativeScrollbarWidth();
+    afterNextRender(() => {
+      this.syncNativeScrollbarWidth();
+      this.observeAll();
+    });
     effect(() => {
       // Snapshot the layout of any toast that just entered the removing state
       // BEFORE the next paint reflows the survivors, so its exit animation
@@ -681,6 +679,7 @@ export class HellToaster extends HellPartStyleable<HellToasterPart> {
     const finish = () => {
       if (completed) return;
       completed = true;
+      viewport.removeEventListener('transitionend', onTransitionEnd);
       if (this.collapseLayoutResetHandle != null) {
         clearTimeout(this.collapseLayoutResetHandle);
         this.collapseLayoutResetHandle = null;
@@ -691,11 +690,12 @@ export class HellToaster extends HellPartStyleable<HellToasterPart> {
     };
     const onTransitionEnd = (event: TransitionEvent) => {
       if (event.target !== viewport || event.propertyName !== 'height') return;
-      viewport.removeEventListener('transitionend', onTransitionEnd);
       finish();
     };
-    if (this.viewportTransitionsHeight(viewport)) {
+    const resetDelay = this.viewportHeightTransitionMs(viewport);
+    if (resetDelay > 0) {
       viewport.addEventListener('transitionend', onTransitionEnd);
+      this.collapseLayoutResetHandle = setTimeout(finish, resetDelay + 50);
       return;
     }
     this.collapseLayoutResetHandle = setTimeout(finish, 50);
@@ -708,11 +708,58 @@ export class HellToaster extends HellPartStyleable<HellToasterPart> {
     }
   }
 
-  private viewportTransitionsHeight(viewport: HTMLElement): boolean {
+  private viewportHeightTransitionMs(viewport: HTMLElement): number {
     const win = viewport.ownerDocument.defaultView;
-    if (!win) return false;
-    const property = win.getComputedStyle(viewport).transitionProperty;
-    return property.includes('height') || property.includes('all');
+    if (!win) return 0;
+    const style = win.getComputedStyle(viewport);
+    const transitionsHeight = style.transitionProperty.split(',').some((property) => {
+      const name = property.trim();
+      return name === 'height' || name === 'all';
+    });
+    if (!transitionsHeight) return 0;
+
+    return (
+      this.longestTransitionTimeMs(style.transitionDuration) +
+      this.longestTransitionTimeMs(style.transitionDelay)
+    );
+  }
+
+  private longestTransitionTimeMs(value: string): number {
+    return value.split(',').reduce((longest, part) => {
+      const amount = Number.parseFloat(part);
+      const ms =
+        Number.isFinite(amount) && amount > 0
+          ? part.trim().endsWith('ms')
+            ? amount
+            : amount * 1000
+          : 0;
+      return Math.max(longest, ms);
+    }, 0);
+  }
+
+  private syncNativeScrollbarWidth(): void {
+    const doc = this.host.ownerDocument;
+    if (!doc.body) return;
+
+    const style = doc.createElement('style');
+    style.textContent =
+      '[data-hell-toast-scrollbar-probe]::-webkit-scrollbar{width:8px;height:8px}';
+
+    const probe = doc.createElement('div');
+    probe.setAttribute('data-hell-toast-scrollbar-probe', '');
+    probe.style.cssText =
+      'position:absolute;top:-9999px;width:100px;height:100px;overflow:auto;scrollbar-gutter:stable;scrollbar-width:thin;visibility:hidden;pointer-events:none';
+    const content = doc.createElement('div');
+    content.style.cssText = 'width:200px;height:200px';
+    probe.append(content);
+
+    doc.head.append(style);
+    doc.body.append(probe);
+    const width = Math.max(0, probe.offsetWidth - probe.clientWidth);
+    probe.remove();
+    style.remove();
+
+    if (this.nativeScrollbarWidth() !== width) this.nativeScrollbarWidth.set(width);
   }
 
   private scheduleViewportStateSync(resetOrigin = false): void {

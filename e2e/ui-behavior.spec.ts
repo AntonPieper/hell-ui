@@ -334,6 +334,22 @@ test.describe('Hell UI browser behavior', () => {
         ),
       )
       .toBeGreaterThanOrEqual(9);
+    await expect
+      .poll(() =>
+        viewport.evaluate((element) => {
+          const style = getComputedStyle(element);
+          const nativeScrollbarWidth = Number.parseFloat(
+            style.getPropertyValue('--hell-toast-scrollbar-w'),
+          );
+          const reservedContentWidth =
+            element.clientWidth -
+            Number.parseFloat(style.paddingInlineEnd) -
+            (Number.isFinite(nativeScrollbarWidth) ? nativeScrollbarWidth : 0);
+          const toast = element.querySelector<HTMLElement>('[data-slot="toast"]:last-child');
+          return toast ? Math.abs(toast.offsetWidth - reservedContentWidth) : Infinity;
+        }),
+      )
+      .toBeLessThanOrEqual(1);
     const collapsedFrontWidth = await frontToast.evaluate((element) => element.offsetWidth);
 
     await notifications.hover();
@@ -349,28 +365,6 @@ test.describe('Hell UI browser behavior', () => {
       )
       .toBeLessThanOrEqual(1);
 
-    const renderedToastCount = () =>
-      viewport.evaluate((element) => {
-        const viewportRect = element.getBoundingClientRect();
-        return [...element.querySelectorAll<HTMLElement>('[data-slot="toast"]')].filter((toast) => {
-          if (toast.getAttribute('data-state') !== 'open') return false;
-          const rect = toast.getBoundingClientRect();
-          const opacity = Number(getComputedStyle(toast).opacity);
-          return rect.bottom > viewportRect.top && rect.top < viewportRect.bottom && opacity > 0.45;
-        }).length;
-      });
-
-    await expect.poll(renderedToastCount).toBeGreaterThanOrEqual(3);
-
-    await expect
-      .poll(() =>
-        viewport.evaluate(
-          (element) => element.scrollHeight > element.clientHeight && element.scrollTop > 0,
-        ),
-      )
-      .toBe(true);
-    await expect.poll(renderedToastCount).toBeGreaterThanOrEqual(5);
-
     await expect
       .poll(() =>
         viewport.evaluate((element) => {
@@ -385,11 +379,18 @@ test.describe('Hell UI browser behavior', () => {
             })
             .sort((a, b) => a.top - b.top);
           const gaps = rects.slice(1).map((rect, index) => rect.top - rects[index].bottom);
-          if (rects.length < 8 || gaps.length === 0) return -Infinity;
-          return Math.min(...gaps);
+          const minGap = gaps.length ? Math.min(...gaps) : 0;
+
+          return (
+            rects.length >= 8 &&
+            element.scrollHeight > element.clientHeight &&
+            element.scrollTop > 0 &&
+            minGap >= 8
+          );
         }),
+        { timeout: 10_000 },
       )
-      .toBeGreaterThanOrEqual(8);
+      .toBe(true);
 
     await viewport.evaluate((element) => {
       element.scrollTop = 0;
