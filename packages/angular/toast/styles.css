@@ -11,7 +11,7 @@
    *                         can size itself when expanded)
    */
 
-  .hell-toaster {
+  hell-toaster[data-slot='root'] {
     --hell-toaster-w: 360px;
     --hell-toaster-gap: 12px;
     --hell-toaster-peek: 14px;
@@ -46,13 +46,13 @@
     }
   }
 
-  .hell-toaster [data-slot='region'] {
+  hell-toaster[data-slot='root'] [data-slot='region'] {
     position: relative;
     display: block;
     pointer-events: auto;
   }
 
-  .hell-toaster [data-slot='viewport'] {
+  hell-toaster[data-slot='root'] [data-slot='viewport'] {
     position: relative;
     width: 100%;
     height: 64px;
@@ -73,7 +73,7 @@
     }
   }
 
-  .hell-toaster[data-expanded='true'] [data-slot='viewport'] {
+  hell-toaster[data-slot='root'][data-expanded='true'] [data-slot='viewport'] {
     box-sizing: border-box;
     height: var(
       --hell-toast-viewport-h,
@@ -84,11 +84,11 @@
     padding-right: 10px;
   }
 
-  .hell-toaster[data-expanded='true'][data-scrollable='true'] [data-slot='viewport'] {
+  hell-toaster[data-slot='root'][data-expanded='true'][data-scrollable='true'] [data-slot='viewport'] {
     border-radius: calc(var(--radius-hell-lg) + 2px);
   }
 
-  .hell-toaster[data-expanded='true']
+  hell-toaster[data-slot='root'][data-expanded='true']
     [data-slot='region']:is(:hover, :focus-within)
     [data-slot='viewport'] {
     scrollbar-color: var(--color-hell-border-strong) transparent;
@@ -98,7 +98,7 @@
     }
   }
 
-  .hell-toaster [data-slot='list'] {
+  hell-toaster[data-slot='root'] [data-slot='list'] {
     position: relative;
     list-style: none;
     margin: 0;
@@ -108,11 +108,11 @@
     pointer-events: auto;
   }
 
-  .hell-toaster[data-expanded='true'] [data-slot='list'] {
+  hell-toaster[data-slot='root'][data-expanded='true'] [data-slot='list'] {
     height: var(--hell-toast-stack-h, 64px);
   }
 
-  .hell-toaster [data-slot='toolbar'] {
+  hell-toaster[data-slot='root'] [data-slot='toolbar'] {
     position: absolute;
     z-index: 4;
     display: flex;
@@ -124,34 +124,34 @@
       transform var(--hell-duration-fast) var(--ease-hell-out);
   }
 
-  .hell-toaster[data-expanded='true'] [data-slot='toolbar'] {
+  hell-toaster[data-slot='root'][data-expanded='true'] [data-slot='toolbar'] {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0) scale(1);
   }
 
-  .hell-toaster[data-position^='bottom'] [data-slot='toolbar'] {
+  hell-toaster[data-slot='root'][data-position^='bottom'] [data-slot='toolbar'] {
     bottom: calc(100% + 8px);
   }
 
-  .hell-toaster[data-position^='top'] [data-slot='toolbar'] {
+  hell-toaster[data-slot='root'][data-position^='top'] [data-slot='toolbar'] {
     top: calc(100% + 8px);
   }
 
-  .hell-toaster[data-position$='right'] [data-slot='toolbar'] {
+  hell-toaster[data-slot='root'][data-position$='right'] [data-slot='toolbar'] {
     right: 0;
   }
 
-  .hell-toaster[data-position$='left'] [data-slot='toolbar'] {
+  hell-toaster[data-slot='root'][data-position$='left'] [data-slot='toolbar'] {
     left: 0;
   }
 
-  .hell-toaster[data-position$='center'] [data-slot='toolbar'] {
+  hell-toaster[data-slot='root'][data-position$='center'] [data-slot='toolbar'] {
     left: 50%;
     transform: translateX(-50%) translateY(4px) scale(0.98);
   }
 
-  .hell-toaster[data-expanded='true'][data-position$='center'] [data-slot='toolbar'] {
+  hell-toaster[data-slot='root'][data-expanded='true'][data-position$='center'] [data-slot='toolbar'] {
     transform: translateX(-50%) translateY(0) scale(1);
   }
 }
@@ -159,16 +159,16 @@
 /* Bottom-anchored stacks pin items to the bottom; top-anchored to the top.
  * The list grows in the OPPOSITE direction from the anchor when expanded. */
 
-.hell-toaster[data-position^='bottom'] [data-slot='toast'] {
+hell-toaster[data-slot='root'][data-position^='bottom'] [data-slot='toast'] {
   bottom: 0;
 }
 
-.hell-toaster[data-position^='top'] [data-slot='toast'] {
+hell-toaster[data-slot='root'][data-position^='top'] [data-slot='toast'] {
   top: 0;
 }
 
 @layer components {
-  .hell-toaster [data-slot='toast'] {
+  hell-toaster[data-slot='root'] [data-slot='toast'] {
     position: absolute;
     left: 0;
     right: 0;
@@ -233,20 +233,20 @@
 
 /* Hidden (further than maxVisible behind the front) */
 
-.hell-toaster [data-slot='toast'][data-visible='false'] {
+hell-toaster[data-slot='root'] [data-slot='toast'][data-visible='false'] {
   opacity: 0;
   pointer-events: none;
 }
 
 /* ── Expanded (hover / focus): real column with measured offsets ──────── */
 
-.hell-toaster[data-expanded='true'] [data-slot='toast'] {
+hell-toaster[data-slot='root'][data-expanded='true'] [data-slot='toast'] {
   --hell-toast-y: calc(var(--hell-toast-offset) * var(--hell-toast-dir, -1));
   --hell-toast-scale: calc(1 - var(--hell-toast-edge-progress, 0) * var(--hell-toaster-scale-step));
   opacity: var(--hell-toast-edge-opacity, 1);
 }
 
-.hell-toaster[data-expanded='true'] [data-slot='toast'][data-visible='false'] {
+hell-toaster[data-slot='root'][data-expanded='true'] [data-slot='toast'][data-visible='false'] {
   pointer-events: auto;
 }
 
@@ -254,19 +254,19 @@
  * hit-area when moving between cards (otherwise mouseleave fires and the
  * stack collapses mid-traversal). */
 
-.hell-toaster[data-expanded='true'] [data-slot='toast']::after {
+hell-toaster[data-slot='root'][data-expanded='true'] [data-slot='toast']::after {
   content: '';
   position: absolute;
   left: 0;
   right: 0;
 }
 
-.hell-toaster[data-expanded='true'][data-position^='bottom'] [data-slot='toast']::after {
+hell-toaster[data-slot='root'][data-expanded='true'][data-position^='bottom'] [data-slot='toast']::after {
   bottom: 100%;
   height: var(--hell-toaster-gap, 12px);
 }
 
-.hell-toaster[data-expanded='true'][data-position^='top'] [data-slot='toast']::after {
+hell-toaster[data-slot='root'][data-expanded='true'][data-position^='top'] [data-slot='toast']::after {
   top: 100%;
   height: var(--hell-toaster-gap, 12px);
 }
@@ -276,11 +276,11 @@
  * Toasts are absolutely positioned so the list itself stays compact. */
 /* ── Enter: slide in from outside the anchor ─────────────────────────── */
 
-.hell-toaster[data-position^='bottom'] [data-slot='toast'][data-state='open'] {
+hell-toaster[data-slot='root'][data-position^='bottom'] [data-slot='toast'][data-state='open'] {
   animation: hell-toast-in-bottom var(--hell-duration-slow) var(--ease-hell-out);
 }
 
-.hell-toaster[data-position^='top'] [data-slot='toast'][data-state='open'] {
+hell-toaster[data-slot='root'][data-position^='top'] [data-slot='toast'][data-state='open'] {
   animation: hell-toast-in-top var(--hell-duration-slow) var(--ease-hell-out);
 }
 
@@ -288,7 +288,7 @@
 /* High-specificity selector so it wins over the expanded-state rules
  * (which set opacity:1 and override the layout transform otherwise). */
 
-.hell-toaster [data-slot='toast'][data-state='closed'] {
+hell-toaster[data-slot='root'] [data-slot='toast'][data-state='closed'] {
   opacity: 0;
   transform: translateY(var(--hell-toast-y, 0)) translateX(110%) scale(var(--hell-toast-scale, 1));
   pointer-events: none;
@@ -311,7 +311,7 @@
 @layer components {
   /* ── Slot styles ─────────────────────────────────────────────────────── */
 
-  .hell-toaster [data-slot='glyph'] {
+  hell-toaster[data-slot='root'] [data-slot='glyph'] {
     width: 18px;
     height: 18px;
     margin-top: 1px;
@@ -323,25 +323,25 @@
     }
   }
 
-  .hell-toaster [data-slot='body'] {
+  hell-toaster[data-slot='root'] [data-slot='body'] {
     min-width: 0;
   }
 
-  .hell-toaster [data-slot='title'] {
+  hell-toaster[data-slot='root'] [data-slot='title'] {
     font-weight: 600;
     font-size: 13px;
     color: var(--color-hell-foreground);
     word-wrap: break-word;
   }
 
-  .hell-toaster [data-slot='description'] {
+  hell-toaster[data-slot='root'] [data-slot='description'] {
     font-size: 12.5px;
     color: var(--color-hell-foreground-muted);
     margin-top: 2px;
     word-wrap: break-word;
   }
 
-  .hell-toaster [data-slot='action'] {
+  hell-toaster[data-slot='root'] [data-slot='action'] {
     appearance: none;
     border: 1px solid var(--color-hell-border-strong);
     background: var(--color-hell-surface);
@@ -365,7 +365,7 @@
     }
   }
 
-  .hell-toaster [data-slot='dismiss-all'] {
+  hell-toaster[data-slot='root'] [data-slot='dismissAll'] {
     appearance: none;
     border: 1px solid var(--color-hell-border);
     background: var(--color-hell-surface-elevated);
@@ -403,7 +403,7 @@
     }
   }
 
-  .hell-toaster [data-slot='close'] {
+  hell-toaster[data-slot='root'] [data-slot='close'] {
     appearance: none;
     border: 0;
     background: transparent;
@@ -437,7 +437,7 @@
 /* Reduced motion: kill animations, keep instant updates. */
 
 @media (prefers-reduced-motion: reduce) {
-  .hell-toaster [data-slot='toast'] {
+  hell-toaster[data-slot='root'] [data-slot='toast'] {
     animation: none !important;
     transition: opacity var(--hell-duration-fast) linear !important;
   }

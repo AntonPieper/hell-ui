@@ -126,7 +126,6 @@ const legacyStyleableAllowlist = new Set([
   'HellOmnibarItemText',
   'HellOmnibarItemTrailing',
   'HellOmnibarPanel',
-  'HellToaster',
   'HellCodeEditor',
 ]);
 
@@ -533,6 +532,16 @@ const migratedPartStyleMapModules = [
     publicApiPath: 'packages/angular/dialog/public-api.ts',
     apiReportFiles: [],
     legacyClass: 'hell-dialog-description',
+  },
+  {
+    className: 'HellToaster',
+    partType: 'HellToasterPart',
+    uiType: 'HellToasterUi',
+    entrypointId: 'toast',
+    sourcePath: 'packages/angular/toast/toast.ts',
+    publicApiPath: 'packages/angular/toast/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-toaster',
   },
   {
     className: 'HellDateInput',
