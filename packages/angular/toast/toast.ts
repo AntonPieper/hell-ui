@@ -58,7 +58,7 @@ export type HellToasterPart =
 export type HellToasterUi = HellUi<HellToasterPart>;
 
 const HELL_TOASTER_RECIPE = {
-  root: 'fixed z-[9999] pointer-events-none w-[var(--hell-toaster-w)] max-w-[calc(100vw-32px)] [--hell-toaster-w:360px] [--hell-toaster-gap:12px] [--hell-toaster-peek:14px] [--hell-toaster-scale-step:0.06] [--hell-toaster-viewport-max-h:min(420px,calc(100vh-104px))] [--hell-toast-dir:-1] [--hell-toast-origin:bottom_center]',
+  root: 'fixed z-[9999] pointer-events-none w-[var(--hell-toaster-w)] max-w-[calc(100vw-32px)] [--hell-toaster-w:360px] [--hell-toaster-gap:12px] [--hell-toaster-peek:14px] [--hell-toaster-scale-step:0.06] [--hell-toaster-scrollbar-gutter:10px] [--hell-toaster-viewport-max-h:min(420px,calc(100vh-104px))] [--hell-toast-dir:-1] [--hell-toast-origin:bottom_center]',
   region: 'relative block pointer-events-auto',
   viewport:
     'relative h-16 min-h-16 w-full overflow-visible overscroll-contain pointer-events-auto outline-none transition-[height] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-8',
@@ -78,6 +78,8 @@ const HELL_TOASTER_RECIPE = {
   dismissAll:
     'inline-flex cursor-pointer items-center gap-hell-2 whitespace-nowrap rounded-hell-sm border border-hell-border bg-hell-surface-elevated px-2.5 py-[7px] text-xs font-semibold leading-none text-hell-foreground no-underline shadow-hell-md transition-[border-color,background-color,color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:border-hell-border-strong hover:bg-hell-surface-elevated active:bg-hell-surface-muted focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2',
 } satisfies HellRecipe<HellToasterPart>;
+
+const TOAST_COLLAPSE_LAYOUT_RESET_MS = 240;
 
 export interface HellToastAction {
   label: string;
@@ -517,6 +519,7 @@ export class HellToaster extends HellPartStyleable<HellToasterPart> {
   /** Pending collapse handle. Re-entry cancels it so transient mouseleave
    *  events during dismiss-driven reflows don't yank the stack closed. */
   private collapseHandle: ReturnType<typeof setTimeout> | null = null;
+  private collapseLayoutResetHandle: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     super();
@@ -533,6 +536,10 @@ export class HellToaster extends HellPartStyleable<HellToasterPart> {
         if (this.collapseHandle != null) {
           clearTimeout(this.collapseHandle);
           this.collapseHandle = null;
+        }
+        if (this.collapseLayoutResetHandle != null) {
+          clearTimeout(this.collapseLayoutResetHandle);
+          this.collapseLayoutResetHandle = null;
         }
         this.expanded.set(false);
       }
@@ -551,6 +558,10 @@ export class HellToaster extends HellPartStyleable<HellToasterPart> {
     if (this.collapseHandle != null) {
       clearTimeout(this.collapseHandle);
       this.collapseHandle = null;
+    }
+    if (this.collapseLayoutResetHandle != null) {
+      clearTimeout(this.collapseLayoutResetHandle);
+      this.collapseLayoutResetHandle = null;
     }
     this.expanded.set(true);
     this.svc.pauseAll();
@@ -648,19 +659,34 @@ export class HellToaster extends HellPartStyleable<HellToasterPart> {
       clearTimeout(this.collapseHandle);
       this.collapseHandle = null;
     }
+    if (this.collapseLayoutResetHandle != null) {
+      clearTimeout(this.collapseLayoutResetHandle);
+      this.collapseLayoutResetHandle = null;
+    }
     this.ro?.disconnect();
     this.ro = null;
   }
 
   private collapseStack(): void {
     const viewport = this.viewportElement();
-    if (viewport) {
-      viewport.scrollTop = 0;
-      this.syncViewportState(viewport);
-    }
     this.expanded.set(false);
     this.svc.resumeAll();
     this.scheduleViewportStateSync();
+    this.scheduleCollapseLayoutReset(viewport);
+  }
+
+  private scheduleCollapseLayoutReset(viewport: HTMLElement | null): void {
+    if (this.collapseLayoutResetHandle != null) {
+      clearTimeout(this.collapseLayoutResetHandle);
+    }
+    this.collapseLayoutResetHandle = setTimeout(() => {
+      this.collapseLayoutResetHandle = null;
+      if (this.destroyed || this.expanded()) return;
+      if (viewport) {
+        viewport.scrollTop = 0;
+        this.syncViewportState(viewport);
+      }
+    }, TOAST_COLLAPSE_LAYOUT_RESET_MS);
   }
 
   private scheduleViewportStateSync(resetOrigin = false): void {
