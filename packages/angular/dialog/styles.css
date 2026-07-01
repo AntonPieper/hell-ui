@@ -1,69 +1,19 @@
 @import '../internal/overlay/styles.css';
 
 @layer components {
-  /* Dialog — overlay, surface, and slot styles. */
+  /* Dialog structural rules that stay outside consumer-overridable recipes. */
 
-  .hell-dialog-overlay {
-    position: fixed;
-    inset: calc(var(--spacing) * 0);
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: auto;
-    overscroll-behavior: contain;
-    padding: var(--spacing-hell-6);
-    z-index: var(--hell-z-dialog);
-    &[data-scoped='true'] {
-      z-index: var(--hell-z-dialog-scoped);
-      inset: var(--hell-dialog-scope-top, 0) var(--hell-dialog-scope-right, 0)
-        var(--hell-dialog-scope-bottom, 0) var(--hell-dialog-scope-left, 0);
-    }
+  [hellDialogOverlay][data-slot='root'][data-scoped='true'] {
+    z-index: var(--hell-z-dialog-scoped);
+    inset: var(--hell-dialog-scope-top, 0) var(--hell-dialog-scope-right, 0)
+      var(--hell-dialog-scope-bottom, 0) var(--hell-dialog-scope-left, 0);
   }
 
-  .hell-dialog {
-    display: flex;
-    min-width: calc(var(--spacing) * 0);
-    width: 100%;
-    max-width: 480px;
-    max-height: min(90vh, 100%);
-    flex-direction: column;
-    overflow: clip;
-    border: 1px solid var(--color-hell-border);
-    border-radius: var(--radius-lg);
-    background-color: var(--color-hell-surface-elevated);
-    box-shadow: var(--shadow-hell-overlay);
-    outline: none;
-    animation: hell-dialog-in var(--hell-duration-base) var(--ease-hell-out);
-    &[data-size='sm'] {
-      max-width: 380px;
-    }
-    &[data-size='lg'] {
-      max-width: 720px;
-    }
-    &[data-size='xl'] {
-      max-width: 960px;
-    }
-  }
-
-  .hell-dialog [hellCardHeader][data-slot='root'] {
+  [hellDialog][data-slot='root'] [hellCardHeader][data-slot='root'] {
     align-items: flex-start;
   }
 
-  .hell-dialog-title {
-    margin: calc(var(--spacing) * 0);
-    font-weight: var(--font-weight-semibold);
-    font-size: 15px;
-    color: var(--color-hell-foreground);
-  }
-
-  .hell-dialog-description {
-    font-size: 13px;
-    color: var(--color-hell-foreground-muted);
-    margin: 4px 0 0;
-  }
-
-  .hell-dialog [hellCardBody][data-slot='root'] {
+  [hellDialog][data-slot='root'] [hellCardBody][data-slot='root'] {
     overflow: auto;
     font-size: 13px;
     color: var(--color-hell-foreground);

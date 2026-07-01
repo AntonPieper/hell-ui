@@ -2,7 +2,13 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgpDialogManager } from 'ng-primitives/dialog';
 
-import { HELL_DIALOG_DIRECTIVES } from './dialog';
+import {
+  HELL_DIALOG_DIRECTIVES,
+  type HellDialogDescriptionUi,
+  type HellDialogOverlayUi,
+  type HellDialogTitleUi,
+  type HellDialogUi,
+} from './dialog';
 import { HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE, HellDialogScopedOverlayAdapter } from './dialog-scope';
 
 @Component({
@@ -156,6 +162,30 @@ class DialogDataHost {}
 })
 class NamedDialogHost {}
 
+@Component({
+  imports: [...HELL_DIALOG_DIRECTIVES],
+  template: `
+    <button id="open-ui" type="button" [hellDialogTrigger]="uiDialog">Open UI</button>
+
+    <ng-template #uiDialog>
+      <div id="ui-overlay" hellDialogOverlay ui="p-0">
+        <div id="ui-dialog" hellDialog size="lg" [ui]="dialogUi">
+          <h2 id="ui-title" hellDialogTitle [ui]="titleUi">Styled title</h2>
+          <p id="ui-description" hellDialogDescription [ui]="descriptionUi">
+            Styled description
+          </p>
+        </div>
+      </div>
+    </ng-template>
+  `,
+})
+class DialogPartStyleHost {
+  readonly overlayUi = { root: 'p-0' } satisfies HellDialogOverlayUi;
+  readonly dialogUi = { root: 'max-w-[640px] rounded-none shadow-none' } satisfies HellDialogUi;
+  readonly titleUi = { root: 'text-hell-danger' } satisfies HellDialogTitleUi;
+  readonly descriptionUi = { root: 'mt-0 text-hell-primary' } satisfies HellDialogDescriptionUi;
+}
+
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
 
 beforeAll(() => {
@@ -182,6 +212,7 @@ describe('HellDialogTrigger scoped overlays', () => {
         DialogClosedResultHost,
         DialogDataHost,
         NamedDialogHost,
+        DialogPartStyleHost,
       ],
     }).compileComponents();
   });
@@ -348,6 +379,44 @@ describe('HellDialogTrigger scoped overlays', () => {
     expect(document.getElementById(descriptionIds[0])?.textContent?.trim()).toBe(
       'Once published, the article will be visible to everyone.',
     );
+  });
+
+  it('applies Part Style Map classes while preserving title and description wiring', async () => {
+    const fixture = TestBed.createComponent(DialogPartStyleHost);
+    await settle(fixture);
+
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-ui').click();
+    await settle(fixture);
+
+    const overlay = query<HTMLElement>(document.body, '#ui-overlay');
+    const dialog = query<HTMLElement>(document.body, '[role="dialog"]');
+    const titleIds = dialog.getAttribute('aria-labelledby')?.trim().split(/\s+/) ?? [];
+    const descriptionIds = dialog.getAttribute('aria-describedby')?.trim().split(/\s+/) ?? [];
+    const title = document.getElementById(titleIds[0]);
+    const description = document.getElementById(descriptionIds[0]);
+
+    if (!(title instanceof HTMLElement)) throw new Error('Expected rendered dialog title.');
+    if (!(description instanceof HTMLElement))
+      throw new Error('Expected rendered dialog description.');
+
+    expect(overlay.getAttribute('data-slot')).toBe('root');
+    expect(overlay.className).toContain('p-0');
+    expect(overlay.className).not.toContain('p-hell-6');
+
+    expect(dialog.getAttribute('data-slot')).toBe('root');
+    expect(dialog.getAttribute('data-size')).toBe('lg');
+    expect(dialog.className).toContain('max-w-[640px]');
+    expect(dialog.className).toContain('rounded-none');
+    expect(dialog.className).not.toContain('rounded-hell-lg');
+
+    expect(title.getAttribute('data-slot')).toBe('root');
+    expect(title.className).toContain('text-hell-danger');
+    expect(description.getAttribute('data-slot')).toBe('root');
+    expect(description.className).toContain('mt-0');
+    expect(description.className).toContain('text-hell-primary');
+
+    expect(title.textContent?.trim()).toBe('Styled title');
+    expect(description.textContent?.trim()).toBe('Styled description');
   });
 });
 
