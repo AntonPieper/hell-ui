@@ -7,6 +7,11 @@
    * pseudo-elements, parent-state measurements, and cross-part interaction.
    */
 
+  hell-slider[data-orientation='vertical'] > [data-slot='track'] {
+    position: absolute !important;
+    inset: 0;
+  }
+
   hell-slider[data-slot='root'] > [data-slot='track']::before {
     content: '';
     position: absolute;
@@ -20,10 +25,10 @@
     pointer-events: none;
   }
 
-  hell-slider[data-slot='root'][data-orientation='vertical'] > [data-slot='track']::before {
+  hell-slider[data-orientation='vertical'] > [data-slot='track']::before {
     inset-inline: 50%;
-    top: calc(var(--_hell-slider-thumb-clearance) * -1);
-    bottom: calc(var(--_hell-slider-thumb-clearance) * -1);
+    top: 0;
+    bottom: 0;
     width: calc(var(--spacing) * 1.5);
     height: auto;
     translate: -50% 0;
@@ -52,13 +57,12 @@
   hell-slider[data-slot='root'][data-orientation='horizontal']
     > [data-slot='track']
     > [data-slot='range'] {
+    top: 50%;
     height: calc(var(--spacing) * 1.5);
     translate: 0 -50%;
   }
 
-  hell-slider[data-slot='root'][data-orientation='vertical']
-    > [data-slot='track']
-    > [data-slot='range'] {
+  hell-slider[data-orientation='vertical'] > [data-slot='track'] > [data-slot='range'] {
     inset-inline: 50%;
     top: auto;
     width: calc(var(--spacing) * 1.5);

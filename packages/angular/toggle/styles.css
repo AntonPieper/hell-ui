@@ -1,2 +1,18 @@
 /* Toggle defaults are Tailwind utility recipes in the directives. */
 @source "./toggle.ts";
+
+@layer components {
+  :where(button[hellToggle], button[hellToggleGroupItem]) {
+    --_hell-toggle-scale: 1;
+    transform: scale(var(--_hell-toggle-scale));
+    transform-origin: center;
+  }
+
+  :where(button[hellToggle][data-press], button[hellToggleGroupItem]:active) {
+    --_hell-toggle-scale: .97;
+  }
+
+  button[hellToggleGroupItem][data-disabled]:active {
+    --_hell-toggle-scale: 1;
+  }
+}
