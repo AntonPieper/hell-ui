@@ -34,8 +34,6 @@ import { HellInput } from '@hell-ui/angular/input';
             [hellFlyout]="t"
             [anchor]="inputAnchor"
             [boundary]="boundaryEl"
-            [flip]="false"
-            [shift]="false"
             class="hd-flyout-panel"
             aria-labelledby="boundary-flyout-title"
           >

@@ -180,6 +180,11 @@ const packageConsumerScenarioCatalog = [
       'border-radius:var(--radius-hell-lg)',
       'flex-basis:100%',
       'min-width:200px',
+      'max-height:min(320px,var(--ngp-select-available-height,320px))',
+      'max-height:min(320px,var(--ngp-combobox-available-height,320px))',
+      'max-width:320px',
+      'pointer-events:none',
+      'position:fixed',
       'transition-property:height',
     ],
   },
@@ -1552,11 +1557,22 @@ import { HELL_CARD_DIRECTIVES, type HellCardHeaderUi } from '${packageName}/card
 import { HellCheckbox, HellNativeCheckbox, type HellCheckboxUi, type HellNativeCheckboxUi } from '${packageName}/checkbox';
 import { HellDropZone, type HellDropZonePart, type HellDropZoneUi } from '${packageName}/drop-zone';
 import { HELL_FIELD_DIRECTIVES } from '${packageName}/field';
+import { HellFlyout, HellFlyoutTrigger, type HellFlyoutUi } from '${packageName}/flyout';
 import { HellIcon, type HellIconPart, type HellIconUi } from '${packageName}/icon';
 import { HellInput, type HellInputUi } from '${packageName}/input';
+import { HELL_LISTBOX_DIRECTIVES, type HellListboxOptionUi, type HellListboxUi } from '${packageName}/listbox';
+import { HELL_MENU_DIRECTIVES, type HellMenuItemUi, type HellMenuUi } from '${packageName}/menu';
+import { HellPopover, HellPopoverTrigger, type HellPopoverUi } from '${packageName}/popover';
 import { HellProgress, HellProgressBar, type HellProgressBarUi, type HellProgressUi } from '${packageName}/progress';
 import { HellNativeRadio, HellNativeRadioGroup, HellRadio, HellRadioGroup, type HellNativeRadioGroupUi, type HellNativeRadioUi, type HellRadioGroupUi, type HellRadioUi } from '${packageName}/radio';
 import { HellSearch, HellSearchClear, type HellSearchClearUi, type HellSearchUi } from '${packageName}/search';
+import {
+  HELL_SELECT_DIRECTIVES,
+  HellSelectBasic,
+  type HellSelectBasicUi,
+  type HellSelectOptionUi,
+  type HellSelectUi,
+} from '${packageName}/select';
 import { HellSeparator, type HellSeparatorUi } from '${packageName}/separator';
 import { HellSlider, type HellSliderUi } from '${packageName}/slider';
 import {
@@ -1576,6 +1592,8 @@ import {
 } from '${packageName}/tag';
 import { HELL_TABS_DIRECTIVES, type HellTabUi } from '${packageName}/tabs';
 import { HellToggle, HellToggleGroup, HellToggleGroupItem, type HellToggleGroupItemUi, type HellToggleGroupUi, type HellToggleUi } from '${packageName}/toggle';
+import { HellTooltip, HellTooltipTrigger, type HellTooltipUi } from '${packageName}/tooltip';
+import { HellComboboxBasic, type HellComboboxBasicUi } from '${packageName}/combobox';
 
 type PrimitiveRootPart = HellAvatarPart | HellDropZonePart | HellIconPart;
 
@@ -1594,8 +1612,14 @@ const primitiveRootPart: PrimitiveRootPart = 'root';
     HellNativeCheckbox,
     HellDropZone,
     ...HELL_FIELD_DIRECTIVES,
+    HellFlyout,
+    HellFlyoutTrigger,
     HellIcon,
     HellInput,
+    ...HELL_LISTBOX_DIRECTIVES,
+    ...HELL_MENU_DIRECTIVES,
+    HellPopover,
+    HellPopoverTrigger,
     HellProgress,
     HellProgressBar,
     HellRadioGroup,
@@ -1604,6 +1628,8 @@ const primitiveRootPart: PrimitiveRootPart = 'root';
     HellNativeRadio,
     HellSearch,
     HellSearchClear,
+    ...HELL_SELECT_DIRECTIVES,
+    HellSelectBasic,
     HellSeparator,
     HellSlider,
     HellSkeleton,
@@ -1617,6 +1643,9 @@ const primitiveRootPart: PrimitiveRootPart = 'root';
     HellToggle,
     HellToggleGroup,
     HellToggleGroupItem,
+    HellTooltip,
+    HellTooltipTrigger,
+    HellComboboxBasic,
   ],
   template: \`
     <button hellButton type="button" [ui]="buttonUi">Save</button>
@@ -1676,6 +1705,46 @@ const primitiveRootPart: PrimitiveRootPart = 'root';
 
     <div hellDropzone [ui]="dropZoneUi">Drop files</div>
 
+    <button type="button" [hellMenuTrigger]="menu">Actions</button>
+    <ng-template #menu>
+      <div hellMenu [ui]="menuUi">
+        <button hellMenuItem type="button" [ui]="menuItemUi">Rename</button>
+      </div>
+    </ng-template>
+
+    <div hellListbox [value]="listboxValue" [ui]="listboxUi">
+      <button hellListboxOption type="button" value="ada" [ui]="listboxOptionUi">Ada</button>
+    </div>
+
+    <button type="button" [hellPopoverTrigger]="popover">Profile</button>
+    <ng-template #popover>
+      <div hellPopover [ui]="popoverUi">Summary</div>
+    </ng-template>
+
+    <button type="button" [hellTooltipTrigger]="tooltip">Hint</button>
+    <ng-template #tooltip>
+      <span hellTooltip [ui]="tooltipUi">Helpful hint</span>
+    </ng-template>
+
+    <button hellFlyoutTrigger #flyoutTrigger="hellFlyoutTrigger" type="button">Flyout</button>
+    @if (true) {
+      <div [hellFlyout]="flyoutTrigger" aria-label="Package consumer flyout" [ui]="flyoutUi">
+        Flyout panel
+      </div>
+    }
+
+    <button hellSelect type="button" [options]="selectOptions" [ui]="selectUi">
+      <span hellSelectPlaceholder>Pick priority</span>
+      <ng-template hellSelectPortal>
+        <div hellSelectDropdown>
+          <div hellSelectOption value="low" [ui]="selectOptionUi">Low</div>
+        </div>
+      </ng-template>
+    </button>
+
+    <hell-select-basic [options]="selectOptions" [ui]="selectBasicUi" />
+    <hell-combobox-basic [options]="selectOptions" [ui]="comboboxBasicUi" />
+
     <section hellCard ui="shadow-none">
       <header hellCardHeader [ui]="cardHeaderUi">Account</header>
       <div hellCardBody>
@@ -1722,6 +1791,7 @@ class App {
   protected readonly cardHeaderUi = { root: 'items-start' } satisfies HellCardHeaderUi;
   protected readonly checkboxUi = { root: 'border-hell-info' } satisfies HellCheckboxUi;
   protected readonly dropZoneUi = { root: 'border-hell-info' } satisfies HellDropZoneUi;
+  protected readonly flyoutUi = { root: 'rounded-hell-pill' } satisfies HellFlyoutUi;
   protected readonly iconUi = { root: 'text-hell-info' } satisfies HellIconUi;
   protected readonly inputUi = { root: 'border-hell-info' } satisfies HellInputUi;
   protected readonly kbdUi = { root: 'border-hell-info' } satisfies HellKbdUi;
@@ -1729,12 +1799,26 @@ class App {
   protected readonly nativeRadioGroupUi = { root: 'gap-hell-2' } satisfies HellNativeRadioGroupUi;
   protected readonly nativeRadioUi = { root: 'border-hell-info' } satisfies HellNativeRadioUi;
   protected readonly nativeSwitchUi = { root: 'bg-hell-info-soft' } satisfies HellNativeSwitchUi;
+  protected readonly listboxValue = ['ada'];
+  protected readonly listboxOptionUi = { root: 'bg-hell-primary-soft' } satisfies HellListboxOptionUi;
+  protected readonly listboxUi = { root: 'gap-hell-4' } satisfies HellListboxUi;
+  protected readonly menuItemUi = { root: 'bg-hell-primary-soft' } satisfies HellMenuItemUi;
+  protected readonly menuUi = { root: 'rounded-hell-pill' } satisfies HellMenuUi;
+  protected readonly popoverUi = { root: 'rounded-hell-pill' } satisfies HellPopoverUi;
   protected readonly progressBarUi = { root: 'bg-hell-info' } satisfies HellProgressBarUi;
   protected readonly progressUi = { root: 'bg-hell-info-soft' } satisfies HellProgressUi;
   protected readonly radioGroupUi = { root: 'gap-hell-2' } satisfies HellRadioGroupUi;
   protected readonly radioUi = { root: 'text-hell-info' } satisfies HellRadioUi;
   protected readonly searchClearUi = { root: 'text-hell-info' } satisfies HellSearchClearUi;
   protected readonly searchUi = { root: 'grid gap-hell-2' } satisfies HellSearchUi;
+  protected readonly selectBasicUi = {
+    trigger: 'rounded-hell-pill',
+    dropdown: 'rounded-hell-pill',
+    option: 'bg-hell-primary-soft',
+  } satisfies HellSelectBasicUi;
+  protected readonly selectOptionUi = { root: 'bg-hell-primary-soft' } satisfies HellSelectOptionUi;
+  protected readonly selectOptions = ['low', 'high'];
+  protected readonly selectUi = { root: 'rounded-hell-pill' } satisfies HellSelectUi;
   protected readonly separatorUi = { root: 'bg-hell-info' } satisfies HellSeparatorUi;
   protected readonly sliderUi = { range: 'bg-hell-info', thumb: 'border-hell-info' } satisfies HellSliderUi;
   protected readonly skeletonUi = { root: 'bg-hell-info-soft' } satisfies HellSkeletonUi;
@@ -1744,6 +1828,13 @@ class App {
   protected readonly toggleGroupItemUi = { root: 'text-hell-info' } satisfies HellToggleGroupItemUi;
   protected readonly toggleGroupUi = { root: 'gap-hell-2' } satisfies HellToggleGroupUi;
   protected readonly toggleUi = { root: 'text-hell-info' } satisfies HellToggleUi;
+  protected readonly tooltipUi = { root: 'rounded-hell-pill' } satisfies HellTooltipUi;
+  protected readonly comboboxBasicUi = {
+    control: 'rounded-hell-pill',
+    button: 'text-hell-info',
+    dropdown: 'rounded-hell-pill',
+    option: 'bg-hell-primary-soft',
+  } satisfies HellComboboxBasicUi;
 }
 
 bootstrapApplication(App).catch((error: unknown) => console.error(error));
@@ -2375,14 +2466,20 @@ function primitivesConsumerStylesCss() {
 @import "${packageName}/button/styles.css";
 @import "${packageName}/card/styles.css";
 @import "${packageName}/field/styles.css";
+@import "${packageName}/flyout/styles.css";
 @import "${packageName}/icon/styles.css";
 @import "${packageName}/input/styles.css";
 @import "${packageName}/avatar/styles.css";
 @import "${packageName}/breadcrumbs/styles.css";
 @import "${packageName}/checkbox/styles.css";
+@import "${packageName}/combobox/styles.css";
 @import "${packageName}/drop-zone/styles.css";
+@import "${packageName}/listbox/styles.css";
+@import "${packageName}/menu/styles.css";
+@import "${packageName}/popover/styles.css";
 @import "${packageName}/progress/styles.css";
 @import "${packageName}/radio/styles.css";
+@import "${packageName}/select/styles.css";
 @import "${packageName}/separator/styles.css";
 @import "${packageName}/slider/styles.css";
 @import "${packageName}/skeleton/styles.css";
@@ -2390,6 +2487,7 @@ function primitivesConsumerStylesCss() {
 @import "${packageName}/tag/styles.css";
 @import "${packageName}/tabs/styles.css";
 @import "${packageName}/toggle/styles.css";
+@import "${packageName}/tooltip/styles.css";
 `;
 }
 

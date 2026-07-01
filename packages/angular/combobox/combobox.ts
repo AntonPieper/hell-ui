@@ -63,7 +63,14 @@ export type HellComboboxOptionUi = HellUi<HellComboboxOptionPart>;
 export type HellComboboxEmptyPart = 'root';
 export type HellComboboxEmptyUi = HellUi<HellComboboxEmptyPart>;
 
-export type HellComboboxBasicPart = 'root';
+export type HellComboboxBasicPart =
+  | 'root'
+  | 'control'
+  | 'input'
+  | 'button'
+  | 'dropdown'
+  | 'option'
+  | 'empty';
 export type HellComboboxBasicUi = HellUi<HellComboboxBasicPart>;
 
 const HELL_COMBOBOX_RECIPE = {
@@ -92,6 +99,12 @@ const HELL_COMBOBOX_EMPTY_RECIPE = {
 
 const HELL_COMBOBOX_BASIC_RECIPE = {
   root: '',
+  control: '',
+  input: '',
+  button: '',
+  dropdown: '',
+  option: '',
+  empty: '',
 } satisfies HellRecipe<HellComboboxBasicPart>;
 
 /**
@@ -397,12 +410,16 @@ export class HellComboboxEmpty extends HellPartStyleable<HellComboboxEmptyPart> 
       [allowDeselect]="allowDeselect()"
       [compareWith]="compareWith()"
       [disabled]="effectiveDisabled()"
+      data-slot="control"
+      [ui]="part('control')"
       (focusout)="markControlTouched($event)"
       (openChange)="onOpenChange($event)"
       (valueChange)="onValueChange($event)"
     >
       <input
         hellComboboxInput
+        data-slot="input"
+        [ui]="part('input')"
         [value]="filter()"
         [placeholder]="placeholder()"
         [attr.aria-label]="ariaLabel()"
@@ -411,15 +428,29 @@ export class HellComboboxEmpty extends HellPartStyleable<HellComboboxEmptyPart> 
       <button
         hellComboboxButton
         type="button"
+        data-slot="button"
+        [ui]="part('button')"
         [attr.aria-label]="toggleLabel()"
       ></button>
-      <div *hellComboboxPortal hellComboboxDropdown>
+      <div
+        *hellComboboxPortal
+        hellComboboxDropdown
+        data-slot="dropdown"
+        [ui]="part('dropdown')"
+      >
         @for (option of filteredOptions(); track option) {
-          <div hellComboboxOption [value]="option">
+          <div
+            hellComboboxOption
+            data-slot="option"
+            [ui]="part('option')"
+            [value]="option"
+          >
             {{ displayWith()(option) }}
           </div>
         } @empty {
-          <div hellComboboxEmpty>{{ emptyLabel() }}</div>
+          <div hellComboboxEmpty data-slot="empty" [ui]="part('empty')">
+            {{ emptyLabel() }}
+          </div>
         }
       </div>
     </div>

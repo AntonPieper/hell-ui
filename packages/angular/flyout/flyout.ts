@@ -180,7 +180,7 @@ export class HellFlyout extends HellPartStyleable<HellFlyoutPart> {
       const update = () => {
         const middleware: Middleware[] = [floatingOffset(offset)];
         if (flip) middleware.push(floatingFlip({ padding: 8 }));
-        if (shift) middleware.push(floatingShift({ padding: 8 }));
+        if (shift) middleware.push(floatingShift({ padding: 8, crossAxis: true }));
 
         void computePosition(reference, panel, {
           placement,

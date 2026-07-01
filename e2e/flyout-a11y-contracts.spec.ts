@@ -63,6 +63,7 @@ test.describe('flyout browser accessibility contract', () => {
     await trigger.click();
     const panel = page.getByRole('dialog', { name: 'Anchored, non-modal' });
     await expect(panel).toBeVisible();
+    await expectWithinViewport(panel);
 
     const afterOutside = await requiredBox(outsideAction, 'outside action after open');
     const afterBoundary = await requiredBox(example.locator('.hd-flyout-boundary'), 'boundary');
@@ -86,6 +87,7 @@ test.describe('flyout browser accessibility contract', () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(panel).toBeVisible();
     await expectAnchoredToReference(panel, input);
+    await expectWithinViewport(panel);
     const resizedInput = await requiredBox(input, 'resized input anchor');
     const resizedPanel = await requiredBox(panel, 'resized panel');
     expect(Math.abs(resizedPanel.x - resizedInput.x)).toBeLessThanOrEqual(2);
@@ -132,12 +134,30 @@ async function expectAnchoredToReference(
   panel: Locator,
   reference: Locator,
 ) {
-  await expect(panel).toHaveAttribute('data-placement', /^bottom/);
+  await expect(panel).toHaveAttribute('data-placement', /^(bottom|top)/);
   await expect
     .poll(async () => {
       const referenceBox = await requiredBox(reference, 'flyout reference');
       const panelBox = await requiredBox(panel, 'flyout panel');
+      const placement = (await panel.getAttribute('data-placement')) ?? '';
+      if (placement.startsWith('top')) return referenceBox.y - (panelBox.y + panelBox.height);
       return panelBox.y - (referenceBox.y + referenceBox.height);
     })
     .toBeGreaterThanOrEqual(0);
+}
+
+async function expectWithinViewport(panel: Locator): Promise<void> {
+  await expect
+    .poll(async () => {
+      const box = await requiredBox(panel, 'flyout panel');
+      return await panel.page().evaluate(
+        ({ x, y, width, height }) =>
+          x >= -1 &&
+          y >= -1 &&
+          x + width <= window.innerWidth + 1 &&
+          y + height <= window.innerHeight + 1,
+        box,
+      );
+    })
+    .toBe(true);
 }

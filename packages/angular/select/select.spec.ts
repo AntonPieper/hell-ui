@@ -5,7 +5,13 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { NgpSelect } from 'ng-primitives/select';
 
-import { HellSelect, HellSelectBasic, HellSelectFormValue, HELL_SELECT_DIRECTIVES } from './select';
+import {
+  HellSelect,
+  HellSelectBasic,
+  HellSelectFormValue,
+  HELL_SELECT_DIRECTIVES,
+  type HellSelectBasicUi,
+} from './select';
 
 @Component({
   imports: [ReactiveFormsModule, ...HELL_SELECT_DIRECTIVES],
@@ -92,9 +98,17 @@ class SelectBasicLabelledHost {
 
 @Component({
   imports: [HellSelectBasic],
-  template: `<hell-select-basic ui="block rounded-hell-pill" [options]="['Low']" />`,
+  template: `<hell-select-basic [ui]="selectUi" [options]="['Low']" />`,
 })
-class SelectBasicUiHost {}
+class SelectBasicUiHost {
+  protected readonly selectUi = {
+    root: 'block p-hell-8',
+    trigger: 'rounded-hell-pill bg-hell-primary-soft',
+    placeholder: 'text-hell-danger',
+    dropdown: 'rounded-hell-pill',
+    option: 'px-hell-8 bg-hell-primary-soft',
+  } satisfies HellSelectBasicUi;
+}
 
 @Component({
   imports: [...HELL_SELECT_DIRECTIVES],
@@ -418,19 +432,31 @@ describe('HellSelect', () => {
     expect(trigger.getAttribute('aria-describedby')).toBe('priority-description');
   });
 
-  it('exposes a root part on the basic select host without styling owned children remotely', () => {
+  it('exposes flat owned parts on the basic select host and its portaled dropdown', async () => {
     const fixture = TestBed.createComponent(SelectBasicUiHost);
     fixture.detectChanges();
 
     const preset = query<HTMLElement>(fixture.nativeElement, 'hell-select-basic');
     const trigger = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellSelect]');
+    const placeholder = query<HTMLElement>(fixture.nativeElement, '[hellSelectPlaceholder]');
 
     expect(preset.getAttribute('data-slot')).toBe('root');
     expect(preset.className).toContain('block');
-    expect(preset.className).toContain('rounded-hell-pill');
-    expect(trigger.getAttribute('data-slot')).toBe('root');
-    expect(trigger.className).toContain('rounded-hell-md');
-    expect(trigger.className).not.toContain('rounded-hell-pill');
+    expect(preset.className).toContain('p-hell-8');
+    expect(trigger.getAttribute('data-slot')).toBe('trigger');
+    expect(trigger.className).toContain('rounded-hell-pill');
+    expect(trigger.className).toContain('bg-hell-primary-soft');
+    expect(placeholder.getAttribute('data-slot')).toBe('placeholder');
+    expect(placeholder.className).toContain('text-hell-danger');
+
+    const dropdown = await openSelectDropdown(fixture, trigger);
+    const option = query<HTMLElement>(dropdown, '[hellSelectOption]');
+
+    expect(dropdown.getAttribute('data-slot')).toBe('dropdown');
+    expect(dropdown.className).toContain('rounded-hell-pill');
+    expect(option.getAttribute('data-slot')).toBe('option');
+    expect(option.className).toContain('px-hell-8');
+    expect(option.className).toContain('bg-hell-primary-soft');
   });
 });
 

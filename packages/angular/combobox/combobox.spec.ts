@@ -10,6 +10,7 @@ import {
   HellComboboxBasic,
   HellComboboxValue,
   HELL_COMBOBOX_DIRECTIVES,
+  type HellComboboxBasicUi,
 } from './combobox';
 
 @Component({
@@ -99,9 +100,18 @@ class ComboboxBasicLabelsHost {}
 
 @Component({
   imports: [HellComboboxBasic],
-  template: `<hell-combobox-basic ui="block rounded-hell-pill" [options]="['Atlas']" />`,
+  template: `<hell-combobox-basic [ui]="comboboxUi" [options]="['Atlas']" />`,
 })
-class ComboboxBasicUiHost {}
+class ComboboxBasicUiHost {
+  protected readonly comboboxUi = {
+    root: 'block p-hell-8',
+    control: 'rounded-hell-pill bg-hell-primary-soft',
+    input: 'text-hell-danger',
+    button: 'text-hell-success-strong',
+    dropdown: 'rounded-hell-pill',
+    option: 'px-hell-8 bg-hell-primary-soft',
+  } satisfies HellComboboxBasicUi;
+}
 
 @Component({
   imports: [...HELL_COMBOBOX_DIRECTIVES],
@@ -519,19 +529,34 @@ describe('HellCombobox', () => {
     expect(input.value).toBe('Nova');
   });
 
-  it('exposes a root part on the basic combobox host without styling owned children remotely', () => {
+  it('exposes flat owned parts on the basic combobox host and its portaled dropdown', async () => {
     const fixture = TestBed.createComponent(ComboboxBasicUiHost);
     fixture.detectChanges();
 
     const preset = query<HTMLElement>(fixture.nativeElement, 'hell-combobox-basic');
     const root = query<HTMLElement>(fixture.nativeElement, '[hellCombobox]');
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input[hellComboboxInput]');
+    const button = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellComboboxButton]');
 
     expect(preset.getAttribute('data-slot')).toBe('root');
     expect(preset.className).toContain('block');
-    expect(preset.className).toContain('rounded-hell-pill');
-    expect(root.getAttribute('data-slot')).toBe('root');
-    expect(root.className).toContain('rounded-hell-md');
-    expect(root.className).not.toContain('rounded-hell-pill');
+    expect(preset.className).toContain('p-hell-8');
+    expect(root.getAttribute('data-slot')).toBe('control');
+    expect(root.className).toContain('rounded-hell-pill');
+    expect(root.className).toContain('bg-hell-primary-soft');
+    expect(input.getAttribute('data-slot')).toBe('input');
+    expect(input.className).toContain('text-hell-danger');
+    expect(button.getAttribute('data-slot')).toBe('button');
+    expect(button.className).toContain('text-hell-success-strong');
+
+    const dropdown = await openComboboxDropdown(fixture, input, button);
+    const option = query<HTMLElement>(dropdown, '[hellComboboxOption]');
+
+    expect(dropdown.getAttribute('data-slot')).toBe('dropdown');
+    expect(dropdown.className).toContain('rounded-hell-pill');
+    expect(option.getAttribute('data-slot')).toBe('option');
+    expect(option.className).toContain('px-hell-8');
+    expect(option.className).toContain('bg-hell-primary-soft');
   });
 });
 

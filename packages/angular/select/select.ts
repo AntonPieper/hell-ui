@@ -64,7 +64,13 @@ export type HellSelectDropdownUi = HellUi<HellSelectDropdownPart>;
 export type HellSelectOptionPart = 'root';
 export type HellSelectOptionUi = HellUi<HellSelectOptionPart>;
 
-export type HellSelectBasicPart = 'root';
+export type HellSelectBasicPart =
+  | 'root'
+  | 'trigger'
+  | 'value'
+  | 'placeholder'
+  | 'dropdown'
+  | 'option';
 export type HellSelectBasicUi = HellUi<HellSelectBasicPart>;
 
 const HELL_SELECT_RECIPE = {
@@ -89,6 +95,11 @@ const HELL_SELECT_OPTION_RECIPE = {
 
 const HELL_SELECT_BASIC_RECIPE = {
   root: '',
+  trigger: '',
+  value: '',
+  placeholder: '',
+  dropdown: '',
+  option: '',
 } satisfies HellRecipe<HellSelectBasicPart>;
 
 /** Rich, headless select. Trigger element is the host of `[hellSelect]`;
@@ -350,19 +361,34 @@ export class HellSelectOption extends HellPartStyleable<HellSelectOptionPart> {
       [compareWith]="compareWith()"
       [disabled]="effectiveDisabled()"
       [attr.aria-label]="triggerAriaLabel()"
+      data-slot="trigger"
+      [ui]="part('trigger')"
       (focusout)="markControlTouched($event)"
       (openChange)="openChange.emit($event)"
       (valueChange)="onValueChange($event)"
     >
       @if (selectedLabel()) {
-        <span hellSelectValue>{{ selectedLabel() }}</span>
+        <span hellSelectValue data-slot="value" [ui]="part('value')">
+          {{ selectedLabel() }}
+        </span>
       } @else {
-        <span hellSelectPlaceholder>{{ placeholder() }}</span>
+        <span
+          hellSelectPlaceholder
+          data-slot="placeholder"
+          [ui]="part('placeholder')"
+        >
+          {{ placeholder() }}
+        </span>
       }
       <ng-template hellSelectPortal>
-        <div hellSelectDropdown>
+        <div hellSelectDropdown data-slot="dropdown" [ui]="part('dropdown')">
           @for (option of options(); track option) {
-            <div hellSelectOption [value]="option">
+            <div
+              hellSelectOption
+              data-slot="option"
+              [ui]="part('option')"
+              [value]="option"
+            >
               {{ displayWith()(option) }}
             </div>
           }
