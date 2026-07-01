@@ -267,10 +267,18 @@ describe('HellOmnibar interactions', () => {
     const fixture = TestBed.createComponent(OmnibarLoadingTemplateHost);
     fixture.detectChanges();
 
-    query<HTMLInputElement>(fixture.nativeElement, 'input').dispatchEvent(new FocusEvent('focus'));
+    const input = query<HTMLInputElement>(fixture.nativeElement, 'input');
+    input.dispatchEvent(new FocusEvent('focus'));
     await new Promise((resolve) => setTimeout(resolve, 0));
     fixture.detectChanges();
 
+    const results = query<HTMLElement>(overlayRoot(), '[data-slot="results"]');
+    const loading = query<HTMLElement>(overlayRoot(), '[data-slot="loading"]');
+
+    expect(results.id).toBe(input.getAttribute('aria-controls'));
+    expect(results.getAttribute('role')).toBeNull();
+    expect(loading.getAttribute('role')).toBe('status');
+    expect(input.getAttribute('aria-activedescendant')).toBeNull();
     expect(query(overlayRoot(), '[data-contract="custom-loading"]').textContent).toContain(
       'Custom loading 2',
     );

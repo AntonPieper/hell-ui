@@ -319,8 +319,8 @@ test.describe('Hell UI browser behavior', () => {
 
     await expect(toasts).toHaveCount(8);
     await notifications.hover();
-    await expect(notifications.locator('[data-slot="dismiss-all"]')).toBeVisible();
-    await expect(notifications.locator('[data-slot="dismiss-all"] svg path')).toHaveCount(1);
+    await expect(notifications.locator('[data-slot="dismissAll"]')).toBeVisible();
+    await expect(notifications.locator('[data-slot="dismissAll"] svg path')).toHaveCount(1);
     await expect(viewport).toHaveAttribute('aria-label', 'Notification stack');
 
     const renderedToastCount = () =>
@@ -387,7 +387,7 @@ test.describe('Hell UI browser behavior', () => {
     await expect.poll(() => viewport.evaluate((element) => element.scrollTop)).toBe(0);
     await notifications.hover();
 
-    await notifications.locator('[data-slot="dismiss-all"]').click();
+    await notifications.locator('[data-slot="dismissAll"]').click();
     await expect(toasts).toHaveCount(0);
   });
 
@@ -643,7 +643,7 @@ test.describe('Hell UI browser behavior', () => {
     await firstExample.getByRole('tab', { name: 'Code' }).click();
     await expect(firstExample.locator('pre.hd-example-code')).toHaveCount(0);
     await expect(
-      firstExample.locator('hell-code-editor.hd-code-viewer.hell-code-viewer'),
+      firstExample.locator('hell-code-editor.hd-code-viewer[data-slot="root"]'),
     ).toBeVisible();
 
     await firstExample.getByRole('tab', { name: 'Preview' }).click();
@@ -701,7 +701,7 @@ test.describe('Hell UI browser behavior', () => {
     await firstExample.getByRole('tab', { name: 'Code' }).click();
 
     await expect(firstExample.locator('pre.hd-example-code')).toHaveCount(0);
-    const viewer = firstExample.locator('hell-code-editor.hd-code-viewer.hell-code-viewer');
+    const viewer = firstExample.locator('hell-code-editor.hd-code-viewer[data-slot="root"]');
     await expect(viewer).toBeVisible();
 
     const source = firstExample.getByRole('textbox', { name: 'Example source code' });

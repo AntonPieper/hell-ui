@@ -349,39 +349,44 @@ const HELL_OMNIBAR_ACTION_RECIPE = {
         >
           <ng-content select="[hellOmnibarActions]" />
         </div>
-        <div data-slot="results" [class]="part('results')" [id]="panelId" role="listbox">
-          @if (loading()) {
-            <div
-              data-slot="loading"
-              [class]="part('loading')"
-              role="status"
-              [attr.aria-label]="loadingMessage()"
-            >
-              @if (loadingTemplate(); as tpl) {
-                <ng-container *ngTemplateOutlet="tpl; context: loadingTemplateContext()" />
-              } @else {
-                @for (row of skeletonRows(); track row) {
-                  <div data-slot="skeletonRow" [class]="part('skeletonRow')">
-                    <div hellSkeleton shape="circle" width="18px" height="18px"></div>
-                    <div data-slot="skeletonText" [class]="part('skeletonText')">
-                      <div hellSkeleton width="70%" height="12px"></div>
-                      <div hellSkeleton width="46%" height="10px"></div>
-                    </div>
-                  </div>
-                }
-              }
-            </div>
-          } @else {
+        <div
+          data-slot="results"
+          [class]="part('results')"
+          [id]="panelId"
+          [attr.role]="hasListboxResults() ? 'listbox' : null"
+        >
+          @if (hasListboxResults()) {
             <ng-content />
-            @if (isEmpty()) {
-              @if (emptyTemplate(); as tpl) {
-                <ng-container *ngTemplateOutlet="tpl" />
-              } @else {
-                <div data-slot="empty" [class]="part('empty')">{{ emptyMessage() }}</div>
-              }
-            }
           }
         </div>
+        @if (loading()) {
+          <div
+            data-slot="loading"
+            [class]="part('loading')"
+            role="status"
+            [attr.aria-label]="loadingMessage()"
+          >
+            @if (loadingTemplate(); as tpl) {
+              <ng-container *ngTemplateOutlet="tpl; context: loadingTemplateContext()" />
+            } @else {
+              @for (row of skeletonRows(); track row) {
+                <div data-slot="skeletonRow" [class]="part('skeletonRow')">
+                  <div hellSkeleton shape="circle" width="18px" height="18px"></div>
+                  <div data-slot="skeletonText" [class]="part('skeletonText')">
+                    <div hellSkeleton width="70%" height="12px"></div>
+                    <div hellSkeleton width="46%" height="10px"></div>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        } @else if (isEmpty()) {
+          @if (emptyTemplate(); as tpl) {
+            <ng-container *ngTemplateOutlet="tpl" />
+          } @else {
+            <div data-slot="empty" [class]="part('empty')">{{ emptyMessage() }}</div>
+          }
+        }
         <ng-content select="[hellOmnibarFooter]" />
       </div>
       <div #floatingOutlet></div>
@@ -478,10 +483,11 @@ export class HellOmnibar extends HellPartStyleable<HellOmnibarPart> implements H
   /* ── Item registry ─────────────────────────────────────────────────── */
 
   protected readonly activeIndex = this.runtime.activeIndex;
-  protected readonly activeDescendantId = computed(() =>
-    this.isOpen() ? this.runtime.activeItemId() : null,
-  );
   protected readonly isEmpty = this.runtime.isEmpty;
+  protected readonly hasListboxResults = computed(() => !this.loading() && !this.isEmpty());
+  protected readonly activeDescendantId = computed(() =>
+    this.isOpen() && this.hasListboxResults() ? this.runtime.activeItemId() : null,
+  );
   protected readonly hasActions = this.runtime.hasActions;
 
   private readonly floatingScope = new HellFloatingScopeRegistry(() => this.host.nativeElement);
