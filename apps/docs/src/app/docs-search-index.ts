@@ -171,14 +171,14 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/combobox',
     detail: 'components/combobox/examples/basic.example.ts',
     terms:
-      'combobox basic components/combobox/examples/basic.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxDropdown hellComboboxOption HellComboboxUi HellComboboxInputUi HellComboboxButtonUi HellComboboxDropdownUi HellComboboxOptionUi ui Part Style Map data-slot root',
+      'combobox basic components/combobox/examples/basic.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxDropdown hellComboboxOption hellComboboxEmpty HellComboboxUi HellComboboxInputUi HellComboboxButtonUi HellComboboxDropdownUi HellComboboxOptionUi HellComboboxEmptyUi ui Part Style Map data-slot root',
   },
   {
     title: 'Combobox: Multiple',
     path: '/components/combobox',
     detail: 'components/combobox/examples/multiple.example.ts',
     terms:
-      'combobox multiple components/combobox/examples/multiple.example components/combobox hellCombobox multiple',
+      'combobox multiple components/combobox/examples/multiple.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxDropdown hellComboboxOption hellComboboxEmpty multiple HellComboboxUi HellComboboxInputUi HellComboboxButtonUi HellComboboxDropdownUi HellComboboxOptionUi HellComboboxEmptyUi ui Part Style Map data-slot root',
   },
   {
     title: 'Combobox: Preset',
@@ -315,14 +315,14 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/menu',
     detail: 'components/menu/examples/basic.example.ts',
     terms:
-      'menu basic components/menu/examples/basic.example components/menu hellMenu hellMenuTrigger hellMenuItem HellMenuUi HellMenuItemUi HellSubmenuTriggerUi ui Part Style Map data-slot root',
+      'menu basic components/menu/examples/basic.example components/menu hellMenu hellMenuTrigger hellMenuItem hellMenuSeparator HellMenuUi HellMenuItemUi HellMenuSeparatorUi HellSubmenuTriggerUi ui Part Style Map data-slot root',
   },
   {
     title: 'Menu: With Icons Sections Submenus',
     path: '/components/menu',
     detail: 'components/menu/examples/with-icons-sections-submenus.example.ts',
     terms:
-      'menu with-icons-sections-submenus components/menu/examples/with-icons-sections-submenus.example components/menu hellMenu hellSubmenuTrigger hellMenuSection HellMenuUi HellSubmenuTriggerUi HellMenuSectionUi HellMenuLabelUi HellMenuItemIconUi HellMenuItemTrailingUi HellMenuSeparatorUi ui Part Style Map data-slot root',
+      'menu with-icons-sections-submenus components/menu/examples/with-icons-sections-submenus.example components/menu hellMenu hellSubmenuTrigger hellMenuSection hellMenuItemCheckbox hellMenuItemIndicator HellMenuUi HellMenuItemUi HellSubmenuTriggerUi HellMenuItemCheckboxUi HellMenuItemIndicatorUi HellMenuSectionUi HellMenuLabelUi HellMenuItemIconUi HellMenuItemTrailingUi HellMenuSeparatorUi ui Part Style Map data-slot root',
   },
   {
     title: 'Pagination: Basic',
