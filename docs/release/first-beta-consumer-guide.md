@@ -154,7 +154,7 @@ pipeline.
 `HellButton`, `HellInput`, `HellNativeSelect`, `HellTextarea`, `HellDialpad`,
 `HellDateInput`, `HellTimeInput`, `HellDatePicker`, `HellDateRangePicker`,
 Checkbox/NativeCheckbox, RadioGroup/Radio/NativeRadioGroup/NativeRadio,
-Switch/NativeSwitch, Toggle/ToggleGroup/ToggleGroupItem, Slider, the first
+Switch/NativeSwitch, Toggle/ToggleGroup/ToggleGroupItem, Slider, the migrated
 directive-suite batches (`HellCard`, `HellField`, `HellTabset`,
 `HellAccordion`, `HellMenu`, `HellListbox`, `HellPopover`, `HellTooltip`,
 `HellFlyout`, `HellSelect`, and `HellCombobox` families), SelectBasic,
