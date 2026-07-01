@@ -84,6 +84,10 @@ The pdf.js lifecycle behind the PDF viewer: bootstrapping, worker ownership, doc
 **Docs Catalog**
 The docs app source of truth for pages, navigation, routes, icons, sections, and searchable entries.
 
+**Docs Theme Picker**
+A docs app chrome control for choosing one of Hell's curated runtime theme variants, separate from the light/dark/system theme preference. It is not the public Select or Combobox component contract.
+_Avoid_: Palette combobox, theme combobox.
+
 **Docs Example**
 A live Angular example plus its raw source code, preview options, and search metadata.
 
