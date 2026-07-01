@@ -28,7 +28,7 @@ export type HellNativeSwitchUi = HellUi<HellNativeSwitchPart>;
 const HELL_SWITCH_RECIPE = {
   root: 'relative inline-block h-hell-6 w-[36px] cursor-pointer appearance-none rounded-hell-pill border-0 bg-hell-border-strong p-0 m-0 align-middle font-[inherit] text-[inherit] transition-[background-color] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)] data-checked:bg-hell-primary data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-2 data-disabled:cursor-not-allowed data-disabled:opacity-50',
   thumb:
-    'absolute top-1/2 size-hell-5 -translate-y-1/2 rounded-hell-pill bg-white shadow-[0_1px_2px_rgba(0,0,0,0.2)] transition-[left,right] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)]',
+    'absolute top-1/2 size-hell-5 rounded-hell-pill bg-white shadow-[0_1px_2px_rgba(0,0,0,0.2)] transition-[left,transform] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)]',
 } satisfies HellRecipe<HellSwitchPart>;
 
 const HELL_NATIVE_SWITCH_RECIPE = {

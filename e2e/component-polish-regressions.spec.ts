@@ -164,6 +164,36 @@ test.describe('component visual polish regressions', () => {
     expect(selectedHoverBackground).toBe(colors.selected.backgroundColor);
   });
 
+  test('switch thumbs animate with interpolable position properties', async ({ page }) => {
+    await gotoDocsPage(page, '/components/switch', 'Switch');
+
+    const customSwitch = page.locator('#email-notifications-switch');
+    const customThumb = customSwitch.locator('[data-slot="thumb"]');
+    await expect(customSwitch).toHaveAttribute('aria-checked', 'true');
+
+    const customMotion = await switchThumbMotion(customThumb);
+    expect(customMotion.transitionProperties).toContain('left');
+    expect(customMotion.transitionProperties).toContain('transform');
+    expect(customMotion.transitionProperties).not.toContain('right');
+
+    await page.getByText('Email notifications', { exact: true }).click();
+    await expect(customSwitch).toHaveAttribute('aria-checked', 'false');
+    const customUncheckedMotion = await switchThumbMotion(customThumb);
+    expect(customUncheckedMotion.transitionProperties).toEqual(customMotion.transitionProperties);
+
+    const nativeSwitch = page.locator('app-switch-native-example input[hellNativeSwitch]');
+    await expect(nativeSwitch).not.toBeChecked();
+    const nativeMotion = await nativeSwitchPseudoMotion(nativeSwitch);
+    expect(nativeMotion.transitionProperties).toContain('left');
+    expect(nativeMotion.transitionProperties).toContain('transform');
+    expect(nativeMotion.transitionProperties).not.toContain('right');
+
+    await page.getByText('Auto updates', { exact: true }).click();
+    await expect(nativeSwitch).toBeChecked();
+    const nativeCheckedMotion = await nativeSwitchPseudoMotion(nativeSwitch);
+    expect(nativeCheckedMotion.transitionProperties).toEqual(nativeMotion.transitionProperties);
+  });
+
   test('disabled standalone toggle does not repaint or press on pointer interaction', async ({
     page,
   }) => {
@@ -291,4 +321,31 @@ async function visualState(locator: Locator): Promise<{
       transform: styles.transform,
     };
   });
+}
+
+async function switchThumbMotion(locator: Locator): Promise<{
+  transitionProperties: string[];
+}> {
+  const transitionProperty = await locator.evaluate(
+    (element) => getComputedStyle(element).transitionProperty,
+  );
+
+  return { transitionProperties: parseTransitionProperties(transitionProperty) };
+}
+
+async function nativeSwitchPseudoMotion(locator: Locator): Promise<{
+  transitionProperties: string[];
+}> {
+  const transitionProperty = await locator.evaluate(
+    (element) => getComputedStyle(element, '::before').transitionProperty,
+  );
+
+  return { transitionProperties: parseTransitionProperties(transitionProperty) };
+}
+
+function parseTransitionProperties(value: string): string[] {
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
