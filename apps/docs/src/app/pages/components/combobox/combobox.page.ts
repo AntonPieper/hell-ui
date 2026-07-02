@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HELL_COMBOBOX_BASIC_DIRECTIVES, HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { ComboboxBasicExample } from './examples/basic.example';
 import comboboxBasicExampleCodeRaw from './examples/basic.example.ts?raw' with { loader: 'text' };
 import { ComboboxMultipleExample } from './examples/multiple.example';
@@ -9,6 +10,10 @@ import comboboxMultipleExampleCodeRaw from './examples/multiple.example.ts?raw' 
 };
 import { ComboboxBasicPresetExample } from './examples/basic-preset.example';
 import comboboxBasicPresetExampleCodeRaw from './examples/basic-preset.example.ts?raw' with {
+  loader: 'text',
+};
+import { ComboboxStylingExample } from './examples/styling.example';
+import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
   loader: 'text',
 };
 
@@ -21,11 +26,20 @@ import comboboxBasicPresetExampleCodeRaw from './examples/basic-preset.example.t
     ...HELL_COMBOBOX_BASIC_DIRECTIVES,
     ComboboxBasicExample,
     ComboboxBasicPresetExample,
-    ComboboxMultipleExample,
+    ComboboxMultipleExample, ComboboxStylingExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Combobox</h1>
+      <hd-page-header
+        title="Combobox"
+        icon="faSolidKeyboard"
+        category="Mixed entry point"
+        importPath="@hell-ui/angular/combobox"
+        stylesPath="@hell-ui/angular/combobox/styles.css"
+      >
+        A text input with a filtered option list: free typing, keyboard navigation, multi-select, and a basic preset when composing the directives is boilerplate.
+      </hd-page-header>
       <p>
         An accessible select with optional filter input. Built on
         <code>ng-primitives/combobox</code>: input + button + dropdown of options. Supports
@@ -51,6 +65,14 @@ import comboboxBasicPresetExampleCodeRaw from './examples/basic-preset.example.t
       <h2>Multiple</h2>
       <hd-example-tabs [code]="comboboxMultipleExampleCode">
         <app-combobox-multiple-example />
+      </hd-example-tabs>
+
+      <h2>Styling</h2>
+      <p>
+        <code>HellComboboxBasicUi</code> is a flat Part Style Map over the preset's owned anatomy: <code>control</code>, <code>input</code>, <code>button</code>, <code>dropdown</code>, <code>option</code>, and <code>empty</code>. When you compose the raw directives instead, each one exposes its own <code>ui</code>.
+      </p>
+      <hd-example-tabs [code]="comboboxStylingExampleCode" previewClass="min-h-[220px]">
+        <app-combobox-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -91,15 +113,22 @@ import comboboxBasicPresetExampleCodeRaw from './examples/basic-preset.example.t
         <li><code>ui</code>: Part Style Map for each styled directive's local <code>root</code> part. Rendered directive parts expose <code>data-slot="root"</code>; <code>&lt;hell-combobox-basic&gt;</code> exposes its owned parts by name.</li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Implements the ARIA combobox pattern: <code>aria-expanded</code>, <code>aria-controls</code>, and active-option tracking on the input.</li>
+        <li>Options stay reachable by keyboard while typing; Escape closes the list before clearing.</li>
+        <li>Give the input an accessible name via a label, <code>aria-label</code>, or <code>aria-labelledby</code>.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use combobox when the option list is medium-to-large and benefits from filtering.</li>
         <li>Show selected chips above the input in multiple mode for scannability.</li>
         <li>Reuse the input value as the value for type-to-create patterns.</li>
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't use a combobox for less than ~5 options &mdash; a <code>radio</code> or plain
           <code>select</code> is faster.</li>
         <li>Don't hide the dropdown trigger; users need a visible affordance to open without typing.</li>
@@ -111,4 +140,5 @@ export class ComboboxPage {
   protected readonly comboboxBasicExampleCode = comboboxBasicExampleCodeRaw;
   protected readonly comboboxBasicPresetExampleCode = comboboxBasicPresetExampleCodeRaw;
   protected readonly comboboxMultipleExampleCode = comboboxMultipleExampleCodeRaw;
+  protected readonly comboboxStylingExampleCode = comboboxStylingExampleCodeRaw;
 }

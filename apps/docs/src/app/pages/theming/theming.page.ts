@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { PageHeader } from '../../shared/page-header';
 import { CodeBlock } from '../../shared/code-block';
 import { ExampleTabs } from '../../shared/example-tabs';
 import { ThemedPanelDemo } from './examples/scoped-theme-demo.example';
@@ -18,10 +19,12 @@ import themeAdapterCodeRaw from './examples/theme-adapter.example.css?raw' with 
 @Component({
   selector: 'hd-theming',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CodeBlock, ExampleTabs, ThemedPanelDemo],
+  imports: [CodeBlock, ExampleTabs, ThemedPanelDemo, PageHeader],
   template: `
     <article class="hd-prose">
-      <h1>Theming</h1>
+      <hd-page-header title="Theming" icon="faSolidPalette">
+        Token-first theming: semantic CSS variables, light/dark schemes, palettes, and optional Theme Adapter Stylesheets for curated skins.
+      </hd-page-header>
       <p>
         hell is token-first. Components read semantic CSS variables; Tailwind utilities read the
         same values through the <code>--color-hell-*</code>, <code>--spacing-hell-*</code>,

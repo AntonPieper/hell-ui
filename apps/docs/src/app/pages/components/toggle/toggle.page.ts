@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { ToggleDisabledExample } from './examples/disabled.example';
 import toggleDisabledExampleCodeRaw from './examples/disabled.example.ts?raw' with {
   loader: 'text',
@@ -16,6 +17,10 @@ import { ToggleToggleGroupSingleExample } from './examples/toggle-group-single.e
 import toggleToggleGroupSingleExampleCodeRaw from './examples/toggle-group-single.example.ts?raw' with {
   loader: 'text',
 };
+import { ToggleStylingExample } from './examples/styling.example';
+import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-toggle',
@@ -25,11 +30,20 @@ import toggleToggleGroupSingleExampleCodeRaw from './examples/toggle-group-singl
     ToggleSingleToggleExample,
     ToggleToggleGroupSingleExample,
     ToggleToggleGroupMultipleExample,
-    ToggleDisabledExample,
+    ToggleDisabledExample, ToggleStylingExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Toggle</h1>
+      <hd-page-header
+        title="Toggle"
+        icon="faSolidToggleOn"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/toggle"
+        stylesPath="@hell-ui/angular/toggle/styles.css"
+      >
+        Pressed-state buttons — standalone, or in single/multiple selection groups for view options and formatting bars.
+      </hd-page-header>
       <p>
         Press-toggle button. Use the standalone <code>hellToggle</code> for a single binary action,
         or wrap several <code>hellToggleGroupItem</code> buttons in a
@@ -60,6 +74,14 @@ import toggleToggleGroupSingleExampleCodeRaw from './examples/toggle-group-singl
         <app-toggle-disabled-example />
       </hd-example-tabs>
 
+      <h2>Styling</h2>
+      <p>
+        <code>HellToggleUi</code> refines the toggle's <code>root</code> Public Part. The string shorthand and the explicit map are equivalent for single-part directives.
+      </p>
+      <hd-example-tabs [code]="toggleStylingExampleCode" previewClass="flex flex-wrap items-center gap-2">
+        <app-toggle-styling-example />
+      </hd-example-tabs>
+
       <h2>API</h2>
       <ul>
         <li>
@@ -78,15 +100,21 @@ import toggleToggleGroupSingleExampleCodeRaw from './examples/toggle-group-singl
         </li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Standalone toggles expose <code>aria-pressed</code>; group items reflect selection through the group contract.</li>
+        <li>Icon-only toggles need an <code>aria-label</code>.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use toggle for compact pressed/unpressed tools.</li>
         <li>Use toggle groups when options are visually peer actions.</li>
         <li>Provide labels or tooltips for icon-only toggles.</li>
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't use toggles for irreversible actions.</li>
         <li>Don't mix single toggles and group items without visual separation.</li>
       </ul>
@@ -98,4 +126,5 @@ export class TogglePage {
   protected readonly toggleToggleGroupSingleExampleCode = toggleToggleGroupSingleExampleCodeRaw;
   protected readonly toggleToggleGroupMultipleExampleCode = toggleToggleGroupMultipleExampleCodeRaw;
   protected readonly toggleDisabledExampleCode = toggleDisabledExampleCodeRaw;
+  protected readonly toggleStylingExampleCode = toggleStylingExampleCodeRaw;
 }

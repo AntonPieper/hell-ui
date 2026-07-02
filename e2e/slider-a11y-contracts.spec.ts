@@ -13,8 +13,8 @@ test.describe('slider accessibility contracts', () => {
   test('public docs sliders all have accessible names', async ({ page }) => {
     await gotoSliderPage(page);
 
-    await expect(page.getByRole('slider')).toHaveCount(9);
-    await expect(page.getByRole('slider', { name: /.+/ })).toHaveCount(9);
+    await expect(page.getByRole('slider')).toHaveCount(10);
+    await expect(page.getByRole('slider', { name: /.+/ })).toHaveCount(10);
   });
 
   test('horizontal slider supports APG arrow and Home/End keyboard behavior', async ({ page }) => {

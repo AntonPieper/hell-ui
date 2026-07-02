@@ -1,17 +1,30 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { PopoverExampleExample } from './examples/example.example';
 import popoverExampleExampleCodeRaw from './examples/example.example.ts?raw' with {
+  loader: 'text',
+};
+import { PopoverStylingExample } from './examples/styling.example';
+import popoverStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
   loader: 'text',
 };
 
 @Component({
   selector: 'hd-popover',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, PopoverExampleExample],
+  imports: [ExampleTabs, PopoverExampleExample, PopoverStylingExample, PageHeader],
   template: `
     <article class="hd-prose">
-      <h1>Popover</h1>
+      <hd-page-header
+        title="Popover"
+        icon="faSolidMessage"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/popover"
+        stylesPath="@hell-ui/angular/popover/styles.css"
+      >
+        An anchored overlay for small amounts of interactive content — richer than a tooltip, lighter than a dialog.
+      </hd-page-header>
       <p>
         An anchored, dismissible surface for richer content than a tooltip (forms, menus,
         summaries). Use a <code>&lt;ng-template&gt;</code> for the content.
@@ -20,6 +33,14 @@ import popoverExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
       <h2>Example</h2>
       <hd-example-tabs [code]="popoverExampleExampleCode">
         <app-popover-example-example />
+      </hd-example-tabs>
+
+      <h2>Styling</h2>
+      <p>
+        The popover panel is its <code>root</code> Public Part — even though it renders in an overlay, it stays part of <code>HellPopoverUi</code>. Portaling changes DOM location, not ownership.
+      </p>
+      <hd-example-tabs [code]="popoverStylingExampleCode">
+        <app-popover-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -33,15 +54,21 @@ import popoverExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
         <li><code>ui</code>: Part Style Map for the popover surface's local <code>root</code> part. The surface renders <code>data-slot="root"</code>.</li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Focus moves into the popover on open and returns to the trigger on close.</li>
+        <li>Label the surface with <code>aria-labelledby</code>; dismissal follows the shared outside-interaction rules.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use popover for anchored content that needs focus management.</li>
         <li>Keep content short and task-focused.</li>
         <li>Use Dialog for long forms or confirmations.</li>
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't put essential page content only in a popover.</li>
         <li>Don't open nested popovers unless interaction has been tested by keyboard.</li>
       </ul>
@@ -50,4 +77,5 @@ import popoverExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
 })
 export class PopoverPage {
   protected readonly popoverExampleExampleCode = popoverExampleExampleCodeRaw;
+  protected readonly popoverStylingExampleCode = popoverStylingExampleCodeRaw;
 }

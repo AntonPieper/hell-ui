@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { CodeBlock } from '../../../shared/code-block';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { ToastActionExample } from './examples/action.example';
 import toastActionExampleCodeRaw from './examples/action.example.ts?raw' with {
   loader: 'text',
@@ -21,15 +23,25 @@ import toastVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
   selector: 'hd-toast',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CodeBlock,
     ExampleTabs,
     ToastVariantsExample,
     ToastActionExample,
     ToastPersistentCustomContentExample,
     ToastStackingExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Toast</h1>
+      <hd-page-header
+        title="Toast"
+        icon="faSolidBell"
+        category="Composite"
+        importPath="@hell-ui/angular/toast"
+        stylesPath="@hell-ui/angular/toast/styles.css"
+      >
+        Stacked, dismissable notifications driven by a service and one global toaster — with hover-to-fan, pause-on-hover, and dismiss-all.
+      </hd-page-header>
       <p>
         Stacked, dismissable, non-blocking notifications. Drop a single
         <code>&lt;hell-toaster /&gt;</code> near the root of your app and call
@@ -89,6 +101,22 @@ import toastVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
         <app-toast-stacking-example />
       </hd-example-tabs>
 
+      <h2>Styling</h2>
+      <p>
+        <code>HellToasterPart</code> names the stack anatomy — <code>toast</code>,
+        <code>glyph</code>, <code>title</code>, <code>description</code>, <code>action</code>,
+        <code>close</code>, <code>toolbar</code>, and <code>dismissAll</code> — with matching
+        <code>data-slot</code> markers on every rendered toast. Because an app renders exactly one
+        global toaster (this docs app included), pass <code>[ui]</code> where that single
+        <code>&lt;hell-toaster /&gt;</code> lives:
+      </p>
+      <hd-code-block [code]="toasterStylingCode" />
+      <p>
+        Repeated toasts share the static <code>toast</code> part name; per-variant emphasis flows
+        through <code>data-*</code> state attributes rather than indexed or variant-suffixed part
+        keys.
+      </p>
+
       <h2>API</h2>
       <h3><code>HellToastService</code></h3>
       <ul>
@@ -139,15 +167,22 @@ import toastVariantsExampleCodeRaw from './examples/variants.example.ts?raw' wit
         </li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Toasts announce through a polite live region (or an explicit <code>announcement</code> for template toasts).</li>
+        <li>The stack is keyboard reachable; hover and focus pause auto-dismiss timers.</li>
+        <li>Keep critical errors in the page — a toast may be missed.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use toasts for non-blocking feedback after an action.</li>
         <li>Keep messages short and include an action only when useful.</li>
         <li>Set <code>maxVisible</code> to avoid notification stacks.</li>
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't use toasts for errors that require correction in a form.</li>
         <li>Don't make important information disappear without another place to find it.</li>
       </ul>
@@ -160,4 +195,14 @@ export class ToastPage {
   protected readonly toastPersistentCustomContentExampleCode =
     toastPersistentCustomContentExampleCodeRaw;
   protected readonly toastStackingExampleCode = toastStackingExampleCodeRaw;
+  protected readonly toasterStylingCode = `<hell-toaster
+  position="bottom-right"
+  [ui]="{
+    toast: 'border-hell-primary bg-hell-surface-elevated',
+    title: 'text-hell-primary',
+    close: 'data-hover:text-hell-danger',
+    dismissAll: 'font-semibold',
+  }"
+/>
+`;
 }

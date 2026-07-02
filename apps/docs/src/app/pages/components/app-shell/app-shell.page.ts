@@ -10,6 +10,7 @@ import {
 } from '@ng-icons/font-awesome/solid';
 import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { AppShellLiveMiniatureExample } from './examples/live-miniature.example';
 import appShellLiveMiniatureExampleCodeRaw from './examples/live-miniature.example.ts?raw' with {
   loader: 'text',
@@ -37,10 +38,19 @@ const HD_APP_SHELL_PAGE_ICONS = {
     ...HELL_APP_SHELL_DIRECTIVES,
     AppShellLiveMiniatureExample,
     AppShellMarkupSkeletonExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>App shell</h1>
+      <hd-page-header
+        title="App shell"
+        icon="faSolidWindowMaximize"
+        category="Composite"
+        importPath="@hell-ui/angular/app-shell"
+        stylesPath="@hell-ui/angular/app-shell/styles.css"
+      >
+        The application frame: topbar, collapsible sidenav, scrollable content, and an optional secondary panel — with the mobile drawer behavior built in.
+      </hd-page-header>
       <p>
         Three-zone application chrome: <strong>topbar</strong>, <strong>sidenav</strong>,
         <strong>content</strong>, plus an optional <strong>secondary</strong> column. The shell uses
@@ -121,8 +131,15 @@ const HD_APP_SHELL_PAGE_ICONS = {
         <li>Import the bundle via <code>HELL_APP_SHELL_DIRECTIVES</code>.</li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Sidenav and secondary toggles ship accessible names through the Label Contract; localize them with <code>provideHellLabels</code>.</li>
+        <li>Use one <code>nav</code> region per navigation surface and mark the current page with <code>aria-current="page"</code> (the nav item directive does this for router links).</li>
+        <li>On mobile the panels become dismissable drawers; focus stays operable behind the shared dismissal rules.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>
           Use <code>appearance="shell"</code> as the first child of the topbar — its width matches
           the collapsed sidenav, keeping the icon centred above the rail.
@@ -133,7 +150,7 @@ const HD_APP_SHELL_PAGE_ICONS = {
         </li>
       </ul>
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>
           Don't show section headings inside the sidenav while in collapsed mode — the rail draws
           section separators automatically.

@@ -1,18 +1,35 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CodeBlock } from '../../../shared/code-block';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { OmnibarAsyncSearchExample } from './examples/async-search.example';
+import { OmnibarBasicExample } from './examples/basic.example';
+import omnibarBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
+  loader: 'text',
+};
 import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts?raw' with {
+  loader: 'text',
+};
+import { OmnibarStylingExample } from './examples/styling.example';
+import omnibarStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
   loader: 'text',
 };
 
 @Component({
   selector: 'hd-omnibar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CodeBlock, ExampleTabs, OmnibarAsyncSearchExample],
+  imports: [CodeBlock, ExampleTabs, OmnibarAsyncSearchExample, OmnibarStylingExample, PageHeader, OmnibarBasicExample],
   template: `
     <article class="hd-prose">
-      <h1>Omnibar</h1>
+      <hd-page-header
+        title="Omnibar"
+        icon="faSolidTerminal"
+        category="Composite"
+        importPath="@hell-ui/angular/omnibar"
+        stylesPath="@hell-ui/angular/omnibar/styles.css"
+      >
+        A command-palette search surface: global hotkey, async sources, ranked results, filters, and action chips — the pattern this site’s own search uses.
+      </hd-page-header>
       <p>
         Command-palette searchbox built from the command palette service, search primitive, search
         service, and listbox wiring. It can call any async backend function; local object-search ranking
@@ -20,9 +37,26 @@ import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts
         adapters for production-quality search and app-level hotkey orchestration.
       </p>
 
+      <h2>Usage</h2>
+      <p>
+        Project groups and items; the omnibar owns open state, keyboard navigation, and
+        submit-on-Enter. Items carry a <code>value</code> your handler receives on submit.
+      </p>
+      <hd-example-tabs [code]="omnibarBasicExampleCode" previewClass="min-h-[220px]">
+        <app-omnibar-basic-example />
+      </hd-example-tabs>
+
       <h2>Async search</h2>
       <hd-example-tabs [code]="omnibarAsyncSearchExampleCode">
         <app-omnibar-async-search-example />
+      </hd-example-tabs>
+
+      <h2>Styling</h2>
+      <p>
+        <code>HellOmnibarPart</code> uses canonical camelCase names such as <code>inputWrap</code> that match the rendered <code>data-slot</code> values. Projected children like items and groups expose their own <code>ui</code> contracts.
+      </p>
+      <hd-example-tabs [code]="omnibarStylingExampleCode" previewClass="min-h-[200px]">
+        <app-omnibar-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -62,8 +96,15 @@ import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts
       </p>
       <hd-code-block [code]="rankerAdapterCode" />
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>The input follows the combobox pattern with active-descendant tracking into results.</li>
+        <li>Groups are labeled; loading, empty, and error states are announced as content, not just spinners.</li>
+        <li>The global hotkey respects text inputs and editable surfaces before firing.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Debounce the search work, not opening and closing the panel.</li>
         <li>Return backend results generically; avoid coupling the component to a specific API shape.</li>
         <li>Use <code>searchSource</code> + <code>provideHellSearchRanker</code> for production scopes and scoped/search adapters that need domain-specific ranking, typo handling, indexing, or worker-backed search.</li>
@@ -72,7 +113,7 @@ import omnibarAsyncSearchExampleCodeRaw from './examples/async-search.example.ts
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't encode filter syntax in the text input; commit filters as structured state.</li>
         <li>Don't mount several always-on omnibars with the same global shortcut.</li>
       </ul>
@@ -98,4 +139,6 @@ provideHellSearchRanker((items, request) => {
 
   return ranked.map((result) => ({ item: result.item, score: result.score }));
 });`;
+  protected readonly omnibarStylingExampleCode = omnibarStylingExampleCodeRaw;
+  protected readonly omnibarBasicExampleCode = omnibarBasicExampleCodeRaw;
 }

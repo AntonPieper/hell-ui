@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { PaginationBasicExample } from './examples/basic.example';
 import paginationBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
@@ -16,6 +17,10 @@ import { PaginationJumpExample } from './examples/jump.example';
 import paginationJumpExampleCodeRaw from './examples/jump.example.ts?raw' with {
   loader: 'text',
 };
+import { PaginationStylingExample } from './examples/styling.example';
+import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-pagination',
@@ -25,11 +30,20 @@ import paginationJumpExampleCodeRaw from './examples/jump.example.ts?raw' with {
     PaginationBasicExample,
     PaginationLargerWindowExample,
     PaginationPreviousNextExample,
-    PaginationJumpExample,
+    PaginationJumpExample, PaginationStylingExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Pagination</h1>
+      <hd-page-header
+        title="Pagination"
+        icon="faSolidAnglesRight"
+        category="Mixed entry point"
+        importPath="@hell-ui/angular/pagination"
+        stylesPath="@hell-ui/angular/pagination/styles.css"
+      >
+        Page navigation in numbered, previous/next, and jump modes, with all built-in labels localizable.
+      </hd-page-header>
       <p>
         Navigate between pages. Built on the
         <code>ng-primitives/pagination</code> primitives. Renders first / previous / numbered window
@@ -80,6 +94,14 @@ import paginationJumpExampleCodeRaw from './examples/jump.example.ts?raw' with {
         <app-pagination-jump-example />
       </hd-example-tabs>
 
+      <h2>Styling</h2>
+      <p>
+        <code>HellPaginationStripUi</code> names the strip's owned anatomy — <code>root</code>, <code>status</code>, and the jump controls — so density and emphasis changes stay declarative.
+      </p>
+      <hd-example-tabs [code]="paginationStylingExampleCode" previewClass="flex items-center gap-3">
+        <app-pagination-styling-example />
+      </hd-example-tabs>
+
       <h2>API</h2>
       <ul>
         <li>
@@ -100,15 +122,21 @@ import paginationJumpExampleCodeRaw from './examples/jump.example.ts?raw' with {
         </li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Renders inside <code>nav</code> with a Label Contract name; the current page is marked with <code>aria-current="page"</code>.</li>
+        <li>Controls are real buttons with per-page accessible names, including first/previous/next/last.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use pagination when users need stable pages and totals.</li>
         <li>Keep <code>siblingCount</code> lower on narrow layouts.</li>
         <li>Preserve filters and sorting when page changes.</li>
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't paginate tiny lists.</li>
         <li>Don't hide total count when it informs the task.</li>
       </ul>
@@ -120,4 +148,5 @@ export class PaginationPage {
   protected readonly paginationLargerWindowExampleCode = paginationLargerWindowExampleCodeRaw;
   protected readonly paginationPreviousNextExampleCode = paginationPreviousNextExampleCodeRaw;
   protected readonly paginationJumpExampleCode = paginationJumpExampleCodeRaw;
+  protected readonly paginationStylingExampleCode = paginationStylingExampleCodeRaw;
 }

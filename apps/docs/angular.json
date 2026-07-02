@@ -51,7 +51,7 @@
               },
               {
                 "glob": "**/*",
-                "input": "../../packages/angular/assets",
+                "input": "node_modules/@hell-ui/angular/assets",
                 "output": "assets"
               },
               {
@@ -61,17 +61,12 @@
               },
               {
                 "glob": "pdf-viewer.css",
-                "input": "../../packages/pdf-viewer/src/lib/pdf-viewer",
+                "input": "node_modules/@hell-ui/pdf-viewer/src/lib/pdf-viewer",
                 "output": "hell-ui/pdf-viewer/styles"
               },
               {
-                "glob": "styles.css",
-                "input": "../../packages/angular/toast",
-                "output": "hell-ui/toast"
-              },
-              {
                 "glob": "*.css",
-                "input": "../../packages/angular/themes",
+                "input": "node_modules/@hell-ui/angular/themes",
                 "output": "hell-ui/themes"
               },
               {

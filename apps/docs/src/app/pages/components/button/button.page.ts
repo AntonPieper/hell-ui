@@ -10,6 +10,7 @@ import {
   faSolidXmark,
 } from '@ng-icons/font-awesome/solid';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { ButtonBlockExample } from './examples/block.example';
 import buttonBlockExampleCodeRaw from './examples/block.example.ts?raw' with {
   loader: 'text',
@@ -57,10 +58,19 @@ const HD_BUTTON_PAGE_ICONS = {
     ButtonIconOnlyExample,
     ButtonBlockExample,
     ButtonCustomizationExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Button</h1>
+      <hd-page-header
+        title="Button"
+        icon="faSolidHandPointer"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/button"
+        stylesPath="@hell-ui/angular/button/styles.css"
+      >
+        Triggers actions and navigation. Variants and sizes are tuned for dense toolbars and forms; anchors get guarded disabled semantics.
+      </hd-page-header>
       <p>
         Trigger an action or navigate. Built on the <code>NgpButton</code> primitive for keyboard,
         focus and disabled handling. Anchor buttons expose <code>aria-disabled</code> and prevent
@@ -106,7 +116,7 @@ const HD_BUTTON_PAGE_ICONS = {
         <app-button-block-example />
       </hd-example-tabs>
 
-      <h2>Part style map</h2>
+      <h2>Styling</h2>
       <p>
         Pass <code>ui="..."</code> to refine the default <code>root</code> part while keeping
         <code>NgpButton</code> behavior and Button state attributes. The equivalent explicit map
@@ -141,8 +151,15 @@ const HD_BUTTON_PAGE_ICONS = {
         </li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Native <code>button</code> hosts keep native semantics; anchor hosts expose <code>aria-disabled</code> and block activation when disabled.</li>
+        <li>Icon-only buttons must set <code>aria-label</code>.</li>
+        <li>Focus visibility comes from the shared focus-ring token and survives <code>ui</code> overrides.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use <code>primary</code> sparingly — one per region.</li>
         <li>Use <code>ghost</code> for low-emphasis actions in toolbars.</li>
         <li>Always pair <code>iconOnly</code> with an <code>aria-label</code>.</li>
@@ -153,7 +170,7 @@ const HD_BUTTON_PAGE_ICONS = {
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't put two <code>danger</code> buttons next to each other.</li>
         <li>Don't target private descendants; refine the <code>root</code> part instead.</li>
         <li>Don't rely on <code>class</code> order to beat recipe utilities.</li>

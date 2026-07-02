@@ -1,17 +1,30 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { ListboxBasicExample } from './examples/basic.example';
 import listboxBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
+  loader: 'text',
+};
+import { ListboxStylingExample } from './examples/styling.example';
+import listboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
   loader: 'text',
 };
 
 @Component({
   selector: 'hd-listbox',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, ListboxBasicExample],
+  imports: [ExampleTabs, ListboxBasicExample, ListboxStylingExample, PageHeader],
   template: `
     <article class="hd-prose">
-      <h1>Listbox</h1>
+      <hd-page-header
+        title="Listbox"
+        icon="faSolidListUl"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/listbox"
+        stylesPath="@hell-ui/angular/listbox/styles.css"
+      >
+        Single- and multi-select option lists with typeahead, disabled options, and section headers — for pickers and side panels.
+      </hd-page-header>
       <p>
         Low-level listbox wiring for selectable option lists. It wraps ng-primitives listbox
         behavior while keeping rendering in your markup.
@@ -20,6 +33,14 @@ import listboxBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
       <h2>Basic</h2>
       <hd-example-tabs [code]="listboxBasicExampleCode">
         <app-listbox-basic-example />
+      </hd-example-tabs>
+
+      <h2>Styling</h2>
+      <p>
+        Listbox and options expose their own <code>root</code> Public Parts (<code>HellListboxUi</code>, <code>HellListboxOptionUi</code>). Per-option emphasis belongs on the option's own <code>ui</code>, combined with <code>data-active</code> state utilities.
+      </p>
+      <hd-example-tabs [code]="listboxStylingExampleCode">
+        <app-listbox-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -31,14 +52,21 @@ import listboxBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
         <li><code>ui</code>: Part Style Map for styled listbox directives' local <code>root</code> parts; <code>hellListboxTrigger</code> is behavior-only. Rendered styled parts expose <code>data-slot="root"</code>.</li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Uses ARIA listbox semantics with roving focus and <code>aria-selected</code> per option.</li>
+        <li>Give each listbox an accessible name; section headers group options with <code>role="group"</code> labeling.</li>
+        <li>Type-to-focus matches option text; Space toggles in multi-select mode.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use listbox when the user is choosing from visible options.</li>
         <li>Keep the option value stable; render labels separately.</li>
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't use listbox for command execution; use Menu or Omnibar items.</li>
       </ul>
     </article>
@@ -46,4 +74,5 @@ import listboxBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
 })
 export class ListboxPage {
   protected readonly listboxBasicExampleCode = listboxBasicExampleCodeRaw;
+  protected readonly listboxStylingExampleCode = listboxStylingExampleCodeRaw;
 }

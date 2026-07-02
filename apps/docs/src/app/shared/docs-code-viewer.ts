@@ -5,8 +5,16 @@ import {
   computed,
   input,
 } from '@angular/core';
+import { javascript } from '@codemirror/lang-javascript';
 import { EditorView } from '@codemirror/view';
 import { HellCodeEditor } from '@hell-ui/angular/features/code-editor';
+
+/**
+ * Docs example sources are TypeScript with inline Angular templates; the
+ * JavaScript language in TypeScript+JSX mode covers both without a second
+ * grammar bundle.
+ */
+const DOCS_CODE_LANGUAGE = javascript({ typescript: true, jsx: true });
 
 type DocsCodeViewerVariant = 'example' | 'block';
 
@@ -54,7 +62,8 @@ export class DocsCodeViewer {
   readonly label = input<string>('Example source code');
 
   protected readonly ariaLabel = computed(() => this.label().trim() || 'Example source code');
-  protected readonly extensions = computed(() =>
-    this.variant() === 'block' ? EditorView.lineWrapping : [],
-  );
+  protected readonly extensions = computed(() => [
+    DOCS_CODE_LANGUAGE,
+    ...(this.variant() === 'block' ? [EditorView.lineWrapping] : []),
+  ]);
 }

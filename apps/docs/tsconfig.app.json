@@ -6,6 +6,11 @@
     "outDir": "../../out-tsc/app",
     "types": []
   },
+  /* Docs imports use only public @hell-ui package specifiers; the workspace
+     `@heinrich/source` exports condition resolves them to package sources
+     (see docs/adr/workspace-source-layout.md). The dev-server compiler needs
+     those sources in the program, so they are included here — this is the
+     source-condition mechanism, not a path-alias or deep-import channel. */
   "include": [
     "src/**/*.ts",
     "../../packages/angular/**/*.ts",

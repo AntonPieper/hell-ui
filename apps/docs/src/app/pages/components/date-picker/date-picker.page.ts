@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { DatePickerBoundedExample } from './examples/bounded.example';
 import datePickerBoundedExampleCodeRaw from './examples/bounded.example.ts?raw' with {
   loader: 'text'
@@ -16,6 +17,10 @@ import { DatePickerSingleDateExample } from './examples/single-date.example';
 import datePickerSingleDateExampleCodeRaw from './examples/single-date.example.ts?raw' with {
   loader: 'text'
 };
+import { DatePickerStylingExample } from './examples/styling.example';
+import datePickerStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-date-picker',
@@ -25,11 +30,20 @@ import datePickerSingleDateExampleCodeRaw from './examples/single-date.example.t
     DatePickerSingleDateExample,
     DatePickerBoundedExample,
     DatePickerRangeExample,
-    DatePickerDisabledExample,
+    DatePickerDisabledExample, DatePickerStylingExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Date picker</h1>
+      <hd-page-header
+        title="Date picker"
+        icon="faSolidCalendarDays"
+        category="Composite"
+        importPath="@hell-ui/angular/date-picker"
+        stylesPath="@hell-ui/angular/date-picker/styles.css"
+      >
+        An inline calendar for single dates and ranges, with min/max bounds and disabled-date rules.
+      </hd-page-header>
       <p>
         Calendar surface for single-date and range selection. Built on
         <code>ng-primitives/date-picker</code>; keyboard focus, disabled dates, month navigation and
@@ -76,6 +90,14 @@ import datePickerSingleDateExampleCodeRaw from './examples/single-date.example.t
         <app-date-picker-disabled-example />
       </hd-example-tabs>
 
+      <h2>Styling</h2>
+      <p>
+        <code>HellDatePickerPart</code> names the calendar anatomy: <code>header</code>, <code>nav</code>, <code>label</code>, <code>grid</code>, <code>cell</code>, and <code>dateButton</code>. Selected and today states stay expressed through <code>data-*</code> attributes.
+      </p>
+      <hd-example-tabs [code]="datePickerStylingExampleCode">
+        <app-date-picker-styling-example />
+      </hd-example-tabs>
+
       <h2>API</h2>
       <h3><code>hell-date-picker</code></h3>
       <ul>
@@ -104,15 +126,22 @@ import datePickerSingleDateExampleCodeRaw from './examples/single-date.example.t
         </li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>The grid uses ARIA date-grid semantics from ng-primitives; arrow keys move by day and week, PageUp/PageDown by month.</li>
+        <li>Month and year navigation buttons carry Label Contract names.</li>
+        <li>Disabled dates stay focusable-skipped and are announced as unavailable.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use date picker for bounded calendar selection.</li>
         <li>Use range picker when start and end dates are part of one decision.</li>
         <li>Set initial dates close to expected values.</li>
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't use it for free-form historic dates where typing is faster.</li>
         <li>Don't hide min/max rules until submit.</li>
       </ul>
@@ -124,4 +153,5 @@ export class DatePickerPage {
   protected readonly datePickerBoundedExampleCode = datePickerBoundedExampleCodeRaw;
   protected readonly datePickerRangeExampleCode = datePickerRangeExampleCodeRaw;
   protected readonly datePickerDisabledExampleCode = datePickerDisabledExampleCodeRaw;
+  protected readonly datePickerStylingExampleCode = datePickerStylingExampleCodeRaw;
 }

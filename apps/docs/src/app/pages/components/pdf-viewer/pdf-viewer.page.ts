@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { PdfViewerLazyLoadingExample } from './examples/lazy-loading.example';
 import pdfViewerLazyLoadingExampleCodeRaw from './examples/lazy-loading.example.ts?raw' with {
   loader: 'text',
@@ -12,10 +13,19 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
 @Component({
   selector: 'hd-pdf-viewer',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, PdfViewerLazyLoadingExample, PdfViewerLiveDemoExample],
+  imports: [ExampleTabs, PdfViewerLazyLoadingExample, PdfViewerLiveDemoExample, PageHeader],
   template: `
     <article class="hd-prose">
-      <h1>PDF viewer</h1>
+      <hd-page-header
+        title="PDF viewer"
+        icon="faSolidFilePdf"
+        category="Feature"
+        status="Experimental"
+        importPath="@hell-ui/pdf-viewer"
+        stylesPath="@hell-ui/pdf-viewer/styles"
+      >
+        An embedded pdf.js viewer with find, thumbnails, zoom, and printing — a separate package so pdf.js never travels with the core library.
+      </hd-page-header>
       <p>
         Wraps
         <a href="https://mozilla.github.io/pdf.js/" target="_blank" rel="noreferrer">PDF.js</a> with
@@ -85,8 +95,14 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
         to the active viewer and skips keydowns your app already prevented.
       </p>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Toolbar controls are labeled buttons and inputs (Label Contract); find results announce match counts.</li>
+        <li>The document canvas is pdf.js-rendered; provide document titles and surrounding context in your page.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Lazy-load the viewer route or feature area.</li>
         <li>Provide <code>worker</code> from your app assets or bundler-owned pdf.js worker URL.</li>
         <li>Provide <code>fileName</code> so downloads and print jobs are recognizable.</li>
@@ -95,7 +111,7 @@ import pdfViewerLiveDemoExampleCodeRaw from './examples/live-demo.example.ts?raw
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't bundle PDF viewer into the initial shell.</li>
         <li>Don't assume every PDF allows fast text search or thumbnails.</li>
         <li>Don't enable document-level shortcuts globally without an app-level keyboard policy.</li>

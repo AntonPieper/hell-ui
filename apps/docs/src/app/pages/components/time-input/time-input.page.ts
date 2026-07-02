@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { TimeInputExamplesExample } from './examples/examples.example';
 import timeInputExamplesExampleCodeRaw from './examples/examples.example.ts?raw' with {
   loader: 'text',
@@ -16,6 +17,10 @@ import { TimeInputReactiveFormsExample } from './examples/reactive-forms.example
 import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.example.ts?raw' with {
   loader: 'text',
 };
+import { TimeInputStylingExample } from './examples/styling.example';
+import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-time-input',
@@ -25,11 +30,20 @@ import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
     TimeInputExamplesExample,
     TimeInputReactiveFormsExample,
     TimeInputPlaceholderAndLabelsExample,
-    TimeInputSizesExample,
+    TimeInputSizesExample, TimeInputStylingExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Time input</h1>
+      <hd-page-header
+        title="Time input"
+        icon="faSolidClock"
+        category="Composite"
+        importPath="@hell-ui/angular/time-input"
+        stylesPath="@hell-ui/angular/time-input/styles.css"
+      >
+        Text-first time entry backed by a structured hour/minute/second value, with parsing, validation, and an optional stepper picker.
+      </hd-page-header>
       <p>
         A native-backed time field that keeps the colon visible, selects the current value on focus,
         and lets the browser reject illegal time strings. The default editor commits
@@ -62,6 +76,14 @@ import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
       <h2>Sizes</h2>
       <hd-example-tabs [code]="timeInputSizesExampleCode" previewClass="grid gap-3 max-w-md">
         <app-time-input-sizes-example />
+      </hd-example-tabs>
+
+      <h2>Styling</h2>
+      <p>
+        <code>HellTimeInputUi</code> maps the input, trigger, and picker chrome parts. Parsing, validation, and keyboard stepping stay owned by the Typed Value Input behavior.
+      </p>
+      <hd-example-tabs [code]="timeInputStylingExampleCode" previewClass="min-h-[120px]">
+        <app-time-input-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
@@ -108,15 +130,21 @@ import timeInputReactiveFormsExampleCodeRaw from './examples/reactive-forms.exam
         <code>HELL_TIME_INPUT_ADAPTER</code>; custom adapters use the text-backed editing path.
       </p>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>The text input keeps normal input semantics with <code>aria-invalid</code> for unparseable drafts.</li>
+        <li>Picker steppers are labeled buttons (Label Contract) and announce the unit they change.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use <code>seconds</code> only when users really need second precision.</li>
         <li>Pair with field labels and help for timezone expectations.</li>
         <li>Format the structured value at your form or transport seam.</li>
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't force time input for broad periods like morning or afternoon.</li>
         <li>Don't omit timezone context in scheduling flows.</li>
       </ul>
@@ -129,4 +157,5 @@ export class TimeInputPage {
   protected readonly timeInputPlaceholderAndLabelsExampleCode =
     timeInputPlaceholderAndLabelsExampleCodeRaw;
   protected readonly timeInputSizesExampleCode = timeInputSizesExampleCodeRaw;
+  protected readonly timeInputStylingExampleCode = timeInputStylingExampleCodeRaw;
 }

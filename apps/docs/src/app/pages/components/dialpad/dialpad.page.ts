@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { DialpadExampleExample } from './examples/example.example';
 import dialpadExampleExampleCodeRaw from './examples/example.example.ts?raw' with {
   loader: 'text',
@@ -8,10 +9,18 @@ import dialpadExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
 @Component({
   selector: 'hd-dialpad',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, DialpadExampleExample],
+  imports: [ExampleTabs, DialpadExampleExample, PageHeader],
   template: `
     <article class="hd-prose">
-      <h1>Dialpad</h1>
+      <hd-page-header
+        title="Dialpad"
+        icon="faSolidPhone"
+        category="Composite"
+        importPath="@hell-ui/angular/dialpad"
+        stylesPath="@hell-ui/angular/dialpad/styles.css"
+      >
+        A phone-style keypad Composite with display, digit letters, backspace/clear, and a call action — owned anatomy end to end.
+      </hd-page-header>
       <p>
         Telephony dialpad with key letters, used in CTI / VoIP applications. Users can tap, click,
         focus the number field, or type digits from the keyboard.
@@ -65,15 +74,21 @@ import dialpadExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
         <li>Press and hold <code>0</code> with touch or pointer input to enter <code>+</code>.</li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Keys are native buttons; the number display is a real input that accepts typing and paste.</li>
+        <li>Backspace, clear, and call actions expose Label Contract names.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use for phone-like numeric entry and DTMF flows.</li>
         <li>Listen to <code>digit</code> for tones and <code>valueChange</code> for form state.</li>
         <li>Keep call, clear, and delete actions visually separated from number entry.</li>
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't use dialpad for arbitrary numeric forms.</li>
         <li>Don't hide entered digits when users must verify the number.</li>
       </ul>

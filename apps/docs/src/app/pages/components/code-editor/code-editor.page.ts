@@ -2,12 +2,17 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation, signal } from '@
 import { javascript } from '@codemirror/lang-javascript';
 import { type Extension } from '@codemirror/state';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 
 import { CodeBlock } from '../../../shared/code-block';
 import { CodeViewerDemo } from './examples/code-viewer-demo.example';
 import codeViewerDemoCode from './examples/code-viewer-demo.example.ts?raw' with { loader: 'text' };
 import { EditorDemo } from './examples/editor-demo.example';
 import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' with {
+  loader: 'text',
+};
+import { CodeEditorStylingExample } from './examples/styling.example';
+import codeEditorStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
   loader: 'text',
 };
 @Component({
@@ -19,10 +24,19 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
       @import '@hell-ui/angular/features/code-editor/styles.css';
     `,
   ],
-  imports: [ExampleTabs, EditorDemo, CodeBlock, CodeViewerDemo],
+  imports: [ExampleTabs, EditorDemo, CodeBlock, CodeViewerDemo, CodeEditorStylingExample, PageHeader],
   template: `
     <article class="hd-prose">
-      <h1>Code editor</h1>
+      <hd-page-header
+        title="Code editor"
+        icon="faSolidCode"
+        category="Feature"
+        status="Experimental"
+        importPath="@hell-ui/angular/features/code-editor"
+        stylesPath="@hell-ui/angular/features/code-editor/styles.css"
+      >
+        A CodeMirror 6 shell with value sync, read-only policy, and theme ownership — you bring the language extensions.
+      </hd-page-header>
       <p>
         CodeMirror 6 wrapped behind a signal-based Angular component. The core editor ships shell,
         history, line numbers, keyboard bindings and the hell theme. Language modes are supplied by
@@ -70,6 +84,14 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
       </p>
       <hd-code-block [code]="supplyingALanguage" />
 
+      <h2>Styling</h2>
+      <p>
+        <code>HellCodeEditorPart</code> is <code>root | editor</code>. Editor theme colors stay owned by the Code Editor Runtime; <code>ui</code> refines the shell chrome and text metrics.
+      </p>
+      <hd-example-tabs [code]="codeEditorStylingExampleCode">
+        <app-code-editor-styling-example />
+      </hd-example-tabs>
+
       <h2>API</h2>
       <ul>
         <li><code>value</code>: editor document as a string.</li>
@@ -97,8 +119,14 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
         </li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>The editor region is labeled via <code>ariaLabel</code> and reachable by keyboard; CodeMirror handles caret and selection semantics.</li>
+        <li>Keep editors lazy/client-only; provide a plain-text fallback where content must be indexable.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Install language packages in the app using the editor, not in the reusable library.</li>
         <li>Keep extension arrays stable when possible so reconfiguration is intentional.</li>
         <li>
@@ -115,7 +143,7 @@ import editableAngularTemplateCode from './examples/editor-demo.example.ts?raw' 
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't bundle every CodeMirror language mode into a shared component package.</li>
         <li>Don't recreate the editor to change value or language; pass new inputs instead.</li>
       </ul>
@@ -132,4 +160,5 @@ readonly javascriptExtensions: Extension = javascript();
 `;
 
   protected readonly javascriptExtensions: Extension = javascript({ jsx: true, typescript: true });
+  protected readonly codeEditorStylingExampleCode = codeEditorStylingExampleCodeRaw;
 }

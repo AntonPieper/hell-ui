@@ -11,13 +11,7 @@ import { HellTag } from '@hell-ui/angular/tag';
     <span hellTag variant="info">info</span>
     <span hellTag variant="success">success</span>
     <span hellTag variant="warning">warning</span>
-    <span
-      hellTag
-      variant="danger"
-      [ui]="'bg-hell-danger text-hell-foreground-inverse'"
-    >
-      danger
-    </span>
+    <span hellTag variant="danger">danger</span>
   `,
 })
 export class TagTagVariantsExample {}
