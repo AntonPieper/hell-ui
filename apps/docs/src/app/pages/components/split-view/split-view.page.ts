@@ -1,6 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
+import { SplitViewBasicExample } from './examples/basic.example';
+import splitViewBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
+  loader: 'text',
+};
 import { SplitViewMasterDetailExample } from './examples/master-detail.example';
 import splitViewMasterDetailExampleCodeRaw from './examples/master-detail.example.ts?raw' with {
   loader: 'text',
@@ -9,7 +13,7 @@ import splitViewMasterDetailExampleCodeRaw from './examples/master-detail.exampl
 @Component({
   selector: 'hd-split-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, SplitViewMasterDetailExample, PageHeader],
+  imports: [ExampleTabs, SplitViewBasicExample, SplitViewMasterDetailExample, PageHeader],
   template: `
     <article class="hd-doc-page">
       <div class="hd-prose">
@@ -27,6 +31,15 @@ import splitViewMasterDetailExampleCodeRaw from './examples/master-detail.exampl
           columns and switches to a compact screen flow with a back button below the breakpoint.
         </p>
 
+        <h2>Basic</h2>
+        <p>Default framing, handle, and compact behavior with no <code>ui</code> refinements.</p>
+      </div>
+
+      <hd-example-tabs class="hd-doc-wide" [code]="splitViewBasicExampleCode">
+        <app-split-view-basic-example />
+      </hd-example-tabs>
+
+      <div class="hd-prose">
         <h2>Master/detail</h2>
       </div>
 
@@ -89,5 +102,6 @@ import splitViewMasterDetailExampleCodeRaw from './examples/master-detail.exampl
   `,
 })
 export class SplitViewPage {
+  protected readonly splitViewBasicExampleCode = splitViewBasicExampleCodeRaw;
   protected readonly splitViewMasterDetailExampleCode = splitViewMasterDetailExampleCodeRaw;
 }

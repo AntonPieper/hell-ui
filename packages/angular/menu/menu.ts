@@ -136,6 +136,9 @@ export class HellMenuTrigger extends HellNativeInteractiveDisabledGuard {
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
+    // Static marker: the directive is applied through a property binding, so
+    // no selector attribute lands in the DOM for stylesheets to target.
+    'data-hell-submenu-trigger': '',
   },
 })
 export class HellSubmenuTrigger extends HellPartStyleable<HellSubmenuTriggerPart> {

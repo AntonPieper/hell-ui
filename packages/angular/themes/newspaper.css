@@ -1,6 +1,7 @@
 /* Theme adapter: Newspaper
  *
- * Coverage: Cards, floating surfaces, controls, menus, tables, tabs, and
+ * Coverage: Cards, floating surfaces (incl. Listbox and Toast), controls
+ * (incl. Date/Time input and the Omnibar control), menus, tables, tabs, and
  * component labels. Unsupported components keep defaults.
  */
 
@@ -13,8 +14,10 @@
       [hellMenu],
       [hellComboboxDropdown],
       [hellSelectDropdown],
+      [hellListbox],
       [data-hell-flyout]
-    )[data-slot='root'] {
+    )[data-slot='root'],
+  [data-hell-skin="newspaper"] hell-toaster[data-slot='root'] [data-slot='toast'] {
     border-width: 2px;
     box-shadow: var(--shadow-hell-md);
   }
@@ -26,8 +29,11 @@
       [hellCombobox],
       input[hellInput],
       select[hellNativeSelect],
-      textarea[hellTextarea]
-    )[data-slot='root'] {
+      textarea[hellTextarea],
+      hell-time-input,
+      hell-date-input
+    )[data-slot='root'],
+  [data-hell-skin="newspaper"] hell-omnibar[data-slot='root'] > [data-slot='control'] {
     border-width: 2px;
     box-shadow: none;
   }
@@ -56,7 +62,8 @@
     :is([hellMenuItem], [hellMenuItemCheckbox], [hellMenuItemRadio])[data-slot='root'][data-hover]::before,
   [data-hell-skin="newspaper"]
     :is([hellMenuItem], [hellMenuItemCheckbox], [hellMenuItemRadio])[data-slot='root'][data-focus-visible]::before,
-  [data-hell-skin="newspaper"] :is([hellSelectOption], [hellComboboxOption])[data-slot='root'][data-active] {
+  [data-hell-skin="newspaper"]
+    :is([hellSelectOption], [hellComboboxOption], [hellListboxOption])[data-slot='root'][data-active] {
     background-color: var(--color-hell-foreground);
     color: var(--color-hell-foreground-inverse);
   }

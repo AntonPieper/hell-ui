@@ -20,6 +20,12 @@ import {
 class SpinnerHost {}
 
 @Component({
+  imports: [HellSkeleton],
+  template: `<div id="skeleton-class-hook" hellSkeleton class="h-5 w-3/5"></div>`,
+})
+class SkeletonClassHookHost {}
+
+@Component({
   imports: [HellSkeleton, HellSpinner],
   providers: [provideHellLabels({ loading: 'Loading from contract' })],
   template: `
@@ -49,7 +55,7 @@ class SkeletonPartStyleHost {
 describe('HellSpinner', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SpinnerHost, SkeletonPartStyleHost],
+      imports: [SpinnerHost, SkeletonPartStyleHost, SkeletonClassHookHost],
     }).compileComponents();
   });
 
@@ -82,6 +88,27 @@ describe('HellSpinner', () => {
     expect(classes).not.toContain('rounded-sm');
     expect(classes).not.toContain('bg-hell-surface-muted');
     expect(skeleton.classList.contains('hell-skeleton')).toBe(false);
+  });
+
+  it('leaves sizing to consumer utility classes instead of recipe width/height utilities', () => {
+    const fixture = TestBed.createComponent(SkeletonClassHookHost);
+    fixture.detectChanges();
+
+    const skeleton = spinner(fixture.nativeElement, 'skeleton-class-hook');
+    const classes = skeleton.className.split(/\s+/);
+
+    // Consumer layout hooks must win: the recipe may not re-introduce
+    // width/height utilities that outrank `class="h-5 w-3/5"` by stylesheet
+    // order. Sizing defaults live in the entrypoint stylesheet instead.
+    expect(classes).toContain('h-5');
+    expect(classes).toContain('w-3/5');
+    expect(skeleton.className).not.toMatch(/h-\[var\(--_hell-skeleton-height/);
+    expect(skeleton.className).not.toMatch(/w-\[var\(--_hell-skeleton-width/);
+    expect(skeleton.className).not.toContain('min-h-hell-3');
+
+    // The stylesheet defaults still receive their inputs through host vars.
+    expect(skeleton.style.getPropertyValue('--_hell-skeleton-width')).toBe('100%');
+    expect(skeleton.style.getPropertyValue('--_hell-skeleton-height')).toBe('14px');
   });
 
   it('applies object maps to Skeleton and Spinner roots', () => {

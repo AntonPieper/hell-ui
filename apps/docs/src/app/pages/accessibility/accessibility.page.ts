@@ -691,7 +691,7 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
         aria-describedby="hd-a11y-table-hint"
         tabindex="0"
       >
-        <table hellTable contentWidth class="hd-a11y-table">
+        <table hellTable class="hd-a11y-table">
           <colgroup>
             <col class="hd-a11y-col-kind" />
             <col class="hd-a11y-col-surface" />

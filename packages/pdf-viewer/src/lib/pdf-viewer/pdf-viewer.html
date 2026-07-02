@@ -1,153 +1,151 @@
 <div class="hell-pdf-toolbar">
-  <button
-    hellButton
-    variant="ghost"
-    size="sm"
-    iconOnly
-    type="button"
-    (click)="toggleOverview()"
-    [attr.aria-pressed]="overviewOpen()"
-    [attr.aria-label]="labels.pdfViewer.togglePageOverview"
-  >
-    <hell-icon name="faSolidTableColumns" />
-  </button>
+  <div class="hell-pdf-toolbar-group" data-toolbar-group="overview">
+    <button
+      hellButton
+      variant="ghost"
+      size="sm"
+      iconOnly
+      type="button"
+      (click)="toggleOverview()"
+      [attr.aria-pressed]="overviewOpen()"
+      [attr.aria-label]="labels.pdfViewer.togglePageOverview"
+    >
+      <hell-icon name="faSolidTableColumns" />
+    </button>
+  </div>
 
   <span class="hell-pdf-divider" aria-hidden="true"></span>
 
-  <button
-    hellButton
-    variant="ghost"
-    size="sm"
-    iconOnly
-    type="button"
-    (click)="prev()"
-    [disabled]="page() <= 1"
-    [attr.aria-label]="labels.pdfViewer.previousPage"
-  >
-    <hell-icon name="faSolidChevronLeft" />
-  </button>
-
-  <input
-    #pageInput
-    hellInput
-    size="sm"
-    class="hell-pdf-page-input"
-    type="number"
-    min="1"
-    [max]="totalPages() || 1"
-    [value]="page()"
-    (change)="goTo(+pageInput.value)"
+  <nav
+    hellPagination
+    class="hell-pdf-toolbar-group"
+    data-toolbar-group="pagination"
+    [page]="page()"
+    [pageCount]="totalPages() || 1"
+    (pageChange)="goTo($event)"
     [attr.aria-label]="labels.pdfViewer.page"
-  />
-  <span class="hell-pdf-toolbar-text">/ {{ totalPages() || '…' }}</span>
-
-  <button
-    hellButton
-    variant="ghost"
-    size="sm"
-    iconOnly
-    type="button"
-    (click)="next()"
-    [disabled]="page() >= totalPages()"
-    [attr.aria-label]="labels.pdfViewer.nextPage"
   >
-    <hell-icon name="faSolidChevronRight" />
-  </button>
+    <button hellPaginationPrev [attr.aria-label]="labels.pdfViewer.previousPage">
+      <hell-icon name="faSolidChevronLeft" />
+    </button>
+
+    <input
+      #pageInput
+      hellInput
+      size="sm"
+      class="hell-pdf-page-input"
+      type="number"
+      min="1"
+      [max]="totalPages() || 1"
+      [value]="page()"
+      (change)="goTo(+pageInput.value)"
+      [attr.aria-label]="labels.pdfViewer.page"
+    />
+    <span class="hell-pdf-toolbar-text">/ {{ totalPages() || '…' }}</span>
+
+    <button hellPaginationNext [attr.aria-label]="labels.pdfViewer.nextPage">
+      <hell-icon name="faSolidChevronRight" />
+    </button>
+  </nav>
 
   <span class="hell-pdf-spacer"></span>
 
-  <button
-    hellButton
-    variant="ghost"
-    size="sm"
-    iconOnly
-    type="button"
-    (click)="openFind()"
-    [attr.aria-pressed]="findOpen()"
-    [attr.aria-label]="labels.pdfViewer.findInDocument"
-  >
-    <hell-icon name="faSolidMagnifyingGlass" />
-  </button>
+  <div class="hell-pdf-toolbar-group" data-toolbar-group="zoom">
+    <button
+      hellButton
+      variant="ghost"
+      size="sm"
+      iconOnly
+      type="button"
+      (click)="zoomOut()"
+      [attr.aria-label]="labels.pdfViewer.zoomOut"
+    >
+      <hell-icon name="faSolidMinus" />
+    </button>
 
-  <button
-    hellButton
-    variant="ghost"
-    size="sm"
-    iconOnly
-    type="button"
-    (click)="download()"
-    [disabled]="!ready()"
-    [attr.aria-label]="labels.pdfViewer.download"
-  >
-    <hell-icon name="faSolidDownload" />
-  </button>
+    <select
+      #zoomSelect
+      hellNativeSelect
+      size="sm"
+      class="hell-pdf-zoom-select"
+      (change)="onZoomSelect(zoomSelect.value)"
+      [attr.aria-label]="labels.pdfViewer.zoomLevel"
+    >
+      <option value="auto" [selected]="effectiveZoomValue() === 'auto'">
+        {{ labels.pdfViewer.automaticZoom }}
+      </option>
+      <option value="page-actual" [selected]="effectiveZoomValue() === 'page-actual'">
+        {{ labels.pdfViewer.actualSize }}
+      </option>
+      <option value="page-fit" [selected]="effectiveZoomValue() === 'page-fit'">
+        {{ labels.pdfViewer.pageFit }}
+      </option>
+      <option value="page-width" [selected]="effectiveZoomValue() === 'page-width'">
+        {{ labels.pdfViewer.pageWidth }}
+      </option>
+      @for (z of zoomOptions; track z.value) {
+        <option [value]="z.value" [selected]="effectiveZoomValue() === z.value">{{ z.label }}</option>
+      }
+      @if (showCustomZoom()) {
+        <option [value]="effectiveZoomValue()" [selected]="true">{{ customZoomLabel() }}</option>
+      }
+    </select>
 
-  <button
-    hellButton
-    variant="ghost"
-    size="sm"
-    iconOnly
-    type="button"
-    (click)="print()"
-    [disabled]="!ready()"
-    [attr.aria-label]="labels.pdfViewer.print"
-  >
-    <hell-icon name="faSolidPrint" />
-  </button>
+    <button
+      hellButton
+      variant="ghost"
+      size="sm"
+      iconOnly
+      type="button"
+      (click)="zoomIn()"
+      [attr.aria-label]="labels.pdfViewer.zoomIn"
+    >
+      <hell-icon name="faSolidPlus" />
+    </button>
+  </div>
 
   <span class="hell-pdf-divider" aria-hidden="true"></span>
 
-  <button
-    hellButton
-    variant="ghost"
-    size="sm"
-    iconOnly
-    type="button"
-    (click)="zoomOut()"
-    [attr.aria-label]="labels.pdfViewer.zoomOut"
-  >
-    <hell-icon name="faSolidMinus" />
-  </button>
+  <div class="hell-pdf-toolbar-group" data-toolbar-group="actions">
+    <button
+      hellButton
+      variant="ghost"
+      size="sm"
+      iconOnly
+      type="button"
+      (click)="openFind()"
+      [attr.aria-pressed]="findOpen()"
+      [attr.aria-label]="labels.pdfViewer.findInDocument"
+    >
+      <hell-icon name="faSolidMagnifyingGlass" />
+    </button>
 
-  <select
-    #zoomSelect
-    hellNativeSelect
-    size="sm"
-    class="hell-pdf-zoom-select"
-    (change)="onZoomSelect(zoomSelect.value)"
-    [attr.aria-label]="labels.pdfViewer.zoomLevel"
-  >
-    <option value="auto" [selected]="effectiveZoomValue() === 'auto'">
-      {{ labels.pdfViewer.automaticZoom }}
-    </option>
-    <option value="page-actual" [selected]="effectiveZoomValue() === 'page-actual'">
-      {{ labels.pdfViewer.actualSize }}
-    </option>
-    <option value="page-fit" [selected]="effectiveZoomValue() === 'page-fit'">
-      {{ labels.pdfViewer.pageFit }}
-    </option>
-    <option value="page-width" [selected]="effectiveZoomValue() === 'page-width'">
-      {{ labels.pdfViewer.pageWidth }}
-    </option>
-    @for (z of zoomOptions; track z.value) {
-      <option [value]="z.value" [selected]="effectiveZoomValue() === z.value">{{ z.label }}</option>
-    }
-    @if (showCustomZoom()) {
-      <option [value]="effectiveZoomValue()" [selected]="true">{{ customZoomLabel() }}</option>
-    }
-  </select>
+    <button
+      hellButton
+      variant="ghost"
+      size="sm"
+      iconOnly
+      type="button"
+      (click)="download()"
+      [disabled]="!ready()"
+      [attr.aria-label]="labels.pdfViewer.download"
+    >
+      <hell-icon name="faSolidDownload" />
+    </button>
 
-  <button
-    hellButton
-    variant="ghost"
-    size="sm"
-    iconOnly
-    type="button"
-    (click)="zoomIn()"
-    [attr.aria-label]="labels.pdfViewer.zoomIn"
-  >
-    <hell-icon name="faSolidPlus" />
-  </button>
+    <button
+      hellButton
+      variant="ghost"
+      size="sm"
+      iconOnly
+      type="button"
+      (click)="print()"
+      [disabled]="!ready()"
+      [attr.aria-label]="labels.pdfViewer.print"
+    >
+      <hell-icon name="faSolidPrint" />
+    </button>
+  </div>
 </div>
 
 @if (findOpen()) {

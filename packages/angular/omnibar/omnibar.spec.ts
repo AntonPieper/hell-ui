@@ -349,6 +349,53 @@ describe('HellOmnibar interactions', () => {
     );
   });
 
+  it('renders the actions strip only when action buttons register', () => {
+    const withActions = TestBed.createComponent(OmnibarHost);
+    withActions.detectChanges();
+    query<HTMLInputElement>(withActions.nativeElement, 'input').dispatchEvent(
+      new FocusEvent('focus'),
+    );
+    withActions.detectChanges();
+
+    expect(overlayRoot().querySelector('[data-slot="actions"]')).not.toBeNull();
+    withActions.destroy();
+
+    const withoutActions = TestBed.createComponent(OmnibarDisabledItemHost);
+    withoutActions.detectChanges();
+    query<HTMLInputElement>(withoutActions.nativeElement, 'input').dispatchEvent(
+      new FocusEvent('focus'),
+    );
+    withoutActions.detectChanges();
+
+    // No projected `[hellOmnibarAction]` means no empty toolbar strip.
+    expect(overlayRoot().querySelector('[data-slot="panel"]')).not.toBeNull();
+    expect(overlayRoot().querySelector('[data-slot="actions"]')).toBeNull();
+  });
+
+  it('keeps the portaled panel out of the browser top layer', () => {
+    // Simulate Popover API support so CDK would use the top layer by default;
+    // hell menus/submenus stack above the panel via z-index, which the top
+    // layer would always defeat.
+    Object.defineProperty(HTMLElement.prototype, 'showPopover', {
+      configurable: true,
+      value: vi.fn(),
+    });
+
+    try {
+      const fixture = TestBed.createComponent(OmnibarHost);
+      fixture.detectChanges();
+      query<HTMLInputElement>(fixture.nativeElement, 'input').dispatchEvent(
+        new FocusEvent('focus'),
+      );
+      fixture.detectChanges();
+
+      expect(overlayRoot().querySelector('.hell-omnibar-overlay-pane')).not.toBeNull();
+      expect(overlayRoot().querySelector('[popover]')).toBeNull();
+    } finally {
+      delete (HTMLElement.prototype as { showPopover?: () => void }).showPopover;
+    }
+  });
+
   it('moves active results with the keyboard and submits without closing when requested', () => {
     const fixture = TestBed.createComponent(OmnibarHost);
     const host = fixture.componentInstance;

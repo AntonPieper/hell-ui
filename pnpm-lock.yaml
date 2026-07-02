@@ -385,6 +385,9 @@ importers:
       '@angular/core':
         specifier: 'catalog:'
         version: 21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2)
+      '@angular/platform-browser':
+        specifier: 'catalog:'
+        version: 21.2.13(@angular/common@21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))
       '@hell-ui/angular':
         specifier: workspace:*
         version: link:../angular
@@ -403,9 +406,18 @@ importers:
       ng-packagr:
         specifier: 'catalog:'
         version: 21.2.3(@angular/compiler-cli@21.2.13(@angular/compiler@21.2.13)(typescript@5.9.3))(tailwindcss@4.2.4)(tslib@2.8.1)(typescript@5.9.3)
+      ng-primitives:
+        specifier: 'catalog:'
+        version: 0.117.2(b3a3993826153d8d04b6cf59c44813bf)
       pdfjs-dist:
         specifier: 'catalog:'
         version: 5.6.205
+      rxjs:
+        specifier: 'catalog:'
+        version: 7.8.2
+      tailwind-merge:
+        specifier: 'catalog:'
+        version: 3.5.0
       tailwindcss:
         specifier: 'catalog:'
         version: 4.2.4

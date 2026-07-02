@@ -224,15 +224,15 @@ hell-toaster[data-slot='root'][data-position^='top'] [data-slot='toast'] {
       transform var(--hell-duration-base) var(--ease-hell-out),
       opacity var(--hell-duration-base) var(--ease-hell-out),
       box-shadow var(--hell-duration-base) var(--ease-hell-out);
+    /* Accent renders as an inset border on a full overlay so it follows the
+       toast's themed corner radius (and any translucent skin) exactly. */
     &::before {
       content: '';
       position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 3px;
-      border-radius: var(--radius-hell-lg) 0 0 var(--radius-hell-lg);
-      background: var(--hell-toast-accent);
+      inset: 0;
+      border-radius: inherit;
+      border-inline-start: 3px solid var(--hell-toast-accent);
+      pointer-events: none;
     }
     & [data-slot='glyph'] {
       color: var(--hell-toast-glyph);
