@@ -2,6 +2,13 @@
 @source "./skeleton.ts";
 
 @layer components {
+  /* Sizing defaults live in the components layer so consumer utility
+     classes (the Additive Class Hook) and `ui` overrides always win. */
+  [hellSkeleton][data-slot='root'] {
+    width: var(--_hell-skeleton-width, 100%);
+    height: var(--_hell-skeleton-height, 14px);
+  }
+
   [hellSpinner][data-slot='root'][data-variant='ring'] {
     width: 1em;
     height: 1em;

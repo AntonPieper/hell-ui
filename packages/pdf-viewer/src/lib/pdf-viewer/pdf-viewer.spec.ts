@@ -41,7 +41,9 @@ class FakePdfRuntime implements HellPdfRuntimePort {
     this.cleanedUp = true;
   }
 
-  goTo(): void {}
+  goTo(page: number): void {
+    this.handlers?.onPageChange(page);
+  }
   zoomIn(): void {}
   zoomOut(): void {}
   setZoomValue(): void {}
@@ -165,6 +167,29 @@ describe('HellPdfViewer', () => {
     expect(runtime.printedWith).toEqual(fixture.componentInstance.printFetchOptions);
   });
 
+  it('drives page navigation through the Hell pagination primitives', async () => {
+    const fixture = TestBed.createComponent(PdfViewerHost);
+    await settle(fixture);
+
+    const root = fixture.nativeElement as HTMLElement;
+    const nav = root.querySelector<HTMLElement>('nav[hellPagination]');
+    if (!nav) throw new Error('Expected the toolbar pagination nav.');
+
+    const prev = nav.querySelector<HTMLButtonElement>('button[hellPaginationPrev]');
+    const next = nav.querySelector<HTMLButtonElement>('button[hellPaginationNext]');
+    const pageInput = nav.querySelector<HTMLInputElement>('.hell-pdf-page-input');
+    if (!prev || !next || !pageInput) throw new Error('Expected pagination controls.');
+
+    expect(pageInput.value).toBe('1');
+    expect(prev.disabled).toBe(true);
+
+    next.click();
+    await settle(fixture);
+
+    expect(pageInput.value).toBe('2');
+    expect(prev.disabled).toBe(false);
+  });
+
   it('composes page overview thumbnails with the Hell button primitive', async () => {
     const fixture = TestBed.createComponent(PdfViewerHost);
     await settle(fixture);
@@ -177,7 +202,7 @@ describe('HellPdfViewer', () => {
 
     const thumbnail = fixture.nativeElement.querySelector('.hell-pdf-thumb') as HTMLButtonElement;
     expect(thumbnail).toBeInstanceOf(HTMLButtonElement);
-    expect(thumbnail.classList.contains('hell-button')).toBe(true);
+    expect(thumbnail.hasAttribute('hellbutton')).toBe(true);
     expect(thumbnail.getAttribute('data-variant')).toBe('ghost');
     expect(thumbnail.getAttribute('data-size')).toBe('sm');
     expect(thumbnail.getAttribute('data-block')).toBe('');

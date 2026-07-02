@@ -33,6 +33,11 @@ import {
 import { HellButton } from '@hell-ui/angular/button';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellInput, HellNativeSelect } from '@hell-ui/angular/input';
+import {
+  HellPagination,
+  HellPaginationNext,
+  HellPaginationPrev,
+} from '@hell-ui/angular/pagination';
 import { HELL_LABELS, HellStyleable, type HellLabels } from '@hell-ui/angular/core';
 import {
   HellGlobalKeydownService,
@@ -97,7 +102,15 @@ const HELL_PDF_VIEWER_ICONS = {
 @Component({
   selector: 'hell-pdf-viewer',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellButton, HellIcon, HellInput, HellNativeSelect],
+  imports: [
+    HellButton,
+    HellIcon,
+    HellInput,
+    HellNativeSelect,
+    HellPagination,
+    HellPaginationNext,
+    HellPaginationPrev,
+  ],
   providers: [provideIcons(HELL_PDF_VIEWER_ICONS)],
   host: {
     '[class.hell-pdf]': '!unstyled()',

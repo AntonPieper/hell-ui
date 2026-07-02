@@ -4,6 +4,10 @@ import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
 import { ResizableContractHarnessPage } from './resizable-contract-harness.page';
+import { ResizableBasicExample } from './examples/basic.example';
+import resizableBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
+  loader: 'text',
+};
 import { ResizableGripHandle5Example } from './examples/grip-handle-5.example';
 import resizableGripHandle5ExampleCodeRaw from './examples/grip-handle-5.example.ts?raw' with {
   loader: 'text',
@@ -31,6 +35,7 @@ import resizableVerticalSplitExampleCodeRaw from './examples/vertical-split.exam
   imports: [
     ExampleTabs,
     ...HELL_RESIZABLE_DIRECTIVES,
+    ResizableBasicExample,
     ResizableHorizontalSplitExample,
     ResizableThreePanesExample,
     ResizableVerticalSplitExample,
@@ -58,6 +63,12 @@ import resizableVerticalSplitExampleCodeRaw from './examples/vertical-split.exam
         <code>hellResizablePane</code> elements; the handle drags both at once. After user sizing,
         panes rescale with their container so one pane cannot disappear during window resize.
       </p>
+
+      <h2>Basic</h2>
+      <p>Default pane and handle styling with no <code>ui</code> refinements.</p>
+      <hd-example-tabs [code]="resizableBasicExampleCode" flush>
+        <app-resizable-basic-example />
+      </hd-example-tabs>
 
       <h2>Horizontal split</h2>
       <hd-example-tabs [code]="resizableHorizontalSplitExampleCode" flush>
@@ -136,6 +147,7 @@ export class ResizablePage {
   private readonly route = inject(ActivatedRoute);
 
   protected readonly showResizeHarness = this.route.snapshot.queryParamMap.has('resizeHarness');
+  protected readonly resizableBasicExampleCode = resizableBasicExampleCodeRaw;
   protected readonly resizableHorizontalSplitExampleCode = resizableHorizontalSplitExampleCodeRaw;
   protected readonly resizableThreePanesExampleCode = resizableThreePanesExampleCodeRaw;
   protected readonly resizableVerticalSplitExampleCode = resizableVerticalSplitExampleCodeRaw;

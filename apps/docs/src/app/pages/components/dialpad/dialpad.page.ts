@@ -1,6 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
+import { DialpadBasicExample } from './examples/basic.example';
+import dialpadBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
+  loader: 'text',
+};
 import { DialpadExampleExample } from './examples/example.example';
 import dialpadExampleExampleCodeRaw from './examples/example.example.ts?raw' with {
   loader: 'text',
@@ -9,7 +13,7 @@ import dialpadExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
 @Component({
   selector: 'hd-dialpad',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, DialpadExampleExample, PageHeader],
+  imports: [ExampleTabs, DialpadBasicExample, DialpadExampleExample, PageHeader],
   template: `
     <article class="hd-prose">
       <hd-page-header
@@ -26,7 +30,17 @@ import dialpadExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
         focus the number field, or type digits from the keyboard.
       </p>
 
-      <h2>Example</h2>
+      <h2>Basic</h2>
+      <p>The default anatomy needs no configuration — drop in the component and listen to outputs.</p>
+      <hd-example-tabs [code]="dialpadBasicExampleCode">
+        <app-dialpad-basic-example />
+      </hd-example-tabs>
+
+      <h2>States &amp; styling</h2>
+      <p>
+        State inputs combine with a <code>ui</code> Part Style Map for visual refinements per public
+        part.
+      </p>
       <hd-example-tabs
         [code]="dialpadExampleExampleCode"
         previewClass="flex flex-wrap items-start gap-6"
@@ -96,5 +110,6 @@ import dialpadExampleExampleCodeRaw from './examples/example.example.ts?raw' wit
   `,
 })
 export class DialpadPage {
+  protected readonly dialpadBasicExampleCode = dialpadBasicExampleCodeRaw;
   protected readonly dialpadExampleExampleCode = dialpadExampleExampleCodeRaw;
 }

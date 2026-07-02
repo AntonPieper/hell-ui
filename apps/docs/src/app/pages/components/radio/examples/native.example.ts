@@ -8,7 +8,7 @@ import { HellNativeRadio, HellNativeRadioGroup } from '@hell-ui/angular/radio';
   template: `
     <div class="mb-2 text-sm font-medium">Priority</div>
     <div hellNativeRadioGroup aria-label="Priority" orientation="horizontal">
-      <label>
+      <label class="inline-flex items-center gap-2">
         <input
           type="radio"
           hellNativeRadio
@@ -19,7 +19,7 @@ import { HellNativeRadio, HellNativeRadioGroup } from '@hell-ui/angular/radio';
         />
         <span>Low</span>
       </label>
-      <label>
+      <label class="inline-flex items-center gap-2">
         <input
           type="radio"
           hellNativeRadio

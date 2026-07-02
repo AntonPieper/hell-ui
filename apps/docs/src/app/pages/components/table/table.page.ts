@@ -15,12 +15,17 @@ import tableTanStackVirtualExampleCodeRaw from './examples/tanstack-virtual.exam
   loader: 'text',
 };
 import { TableA11yHarnessPage } from './table-a11y-harness.page';
+import { TableBasicExample } from './examples/basic-table.example';
+import tableBasicExampleCodeRaw from './examples/basic-table.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-table-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ExampleTabs,
+    TableBasicExample,
     TablePrimitiveExample,
     TableTanStackShellExample,
     TableTanStackVirtualExample,
@@ -55,6 +60,18 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
             pagination/filter controls, and FlexRender integration.
           </p>
 
+          <h2>Basic</h2>
+          <p>
+            Default table chrome with no <code>ui</code> refinements: container scroll region,
+            header, rows, and cells.
+          </p>
+        </div>
+
+        <hd-example-tabs class="hd-doc-wide" [code]="tableBasicExampleCode">
+          <app-table-basic-example />
+        </hd-example-tabs>
+
+        <div class="hd-prose">
           <h2>Primitive table</h2>
           <p>
             Use the primitive path when you already have simple native markup and only need Hell
@@ -196,6 +213,7 @@ export class TablePage {
 
   protected readonly showTableA11yHarness =
     this.route.snapshot.queryParamMap.has('tableA11yHarness');
+  protected readonly tableBasicExampleCode = tableBasicExampleCodeRaw;
   protected readonly tablePrimitiveExampleCode = tablePrimitiveExampleCodeRaw;
   protected readonly tableTanStackShellExampleCode = tableTanStackShellExampleCodeRaw;
   protected readonly tableTanStackVirtualExampleCode = tableTanStackVirtualExampleCodeRaw;

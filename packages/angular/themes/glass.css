@@ -1,8 +1,8 @@
 /* Theme adapter: Glass
  *
- * Coverage: Card, Dialog, Popover, Menu, Select, Combobox, and Flyout
- * floating surfaces. Components not listed here intentionally fall back to
- * their default entrypoint styles.
+ * Coverage: Card, Dialog, Popover, Menu, Select, Combobox, Flyout, Listbox,
+ * Toast, and Omnibar panel surfaces. Components not listed here intentionally
+ * fall back to their default entrypoint styles.
  */
 
 @layer components {
@@ -14,11 +14,26 @@
       [hellMenu],
       [hellComboboxDropdown],
       [hellSelectDropdown],
+      [hellListbox],
       [data-hell-flyout]
     )[data-slot='root'] {
     border-color: color-mix(in oklab, var(--color-hell-foreground) 16%, transparent);
     background-color: color-mix(in oklab, var(--color-hell-surface-elevated) 84%, transparent);
     box-shadow: var(--shadow-hell-lg);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  [data-hell-skin="glass"] .hell-omnibar-overlay-pane [data-slot='panel'] {
+    border-color: color-mix(in oklab, var(--color-hell-foreground) 16%, transparent);
+    background-color: color-mix(in oklab, var(--color-hell-surface-elevated) 84%, transparent);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  [data-hell-skin="glass"] hell-toaster[data-slot='root'] [data-slot='toast'] {
+    border-color: color-mix(in oklab, var(--color-hell-foreground) 16%, transparent);
+    background-color: color-mix(in oklab, var(--color-hell-surface-elevated) 84%, transparent);
     backdrop-filter: blur(16px) saturate(140%);
     -webkit-backdrop-filter: blur(16px) saturate(140%);
   }
@@ -30,7 +45,7 @@
   }
 
   [data-hell-skin="glass"]
-    :is([hellSelectOption], [hellComboboxOption])[data-slot='root'][data-active],
+    :is([hellSelectOption], [hellComboboxOption], [hellListboxOption])[data-slot='root'][data-active],
   [data-hell-skin="glass"]
     :is([hellMenuItem], [hellMenuItemCheckbox], [hellMenuItemRadio])[data-slot='root'][data-hover]::before {
     background-color: color-mix(in oklab, var(--color-hell-primary) 14%, transparent);

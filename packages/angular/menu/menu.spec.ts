@@ -108,6 +108,31 @@ class CheckableMenuHost {
   readonly trigger = viewChild.required(NgpMenuTrigger);
 }
 
+@Component({
+  imports: [...HELL_MENU_DIRECTIVES],
+  template: `
+    <ng-template #rootMenu>
+      <div hellMenu>
+        <button
+          hellMenuItem
+          type="button"
+          data-testid="submenu-item"
+          [hellSubmenuTrigger]="subMenu"
+        >
+          More
+        </button>
+      </div>
+    </ng-template>
+    <ng-template #subMenu>
+      <div hellMenu><button hellMenuItem type="button">Child</button></div>
+    </ng-template>
+    <button type="button" [hellMenuTrigger]="rootMenu">Open</button>
+  `,
+})
+class SubmenuHost {
+  readonly trigger = viewChild.required(NgpMenuTrigger);
+}
+
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
 
 beforeAll(() => {
@@ -132,6 +157,7 @@ describe('HellMenuItem', () => {
         EnabledMenuAnchorTriggerHost,
         DisabledMenuTriggerHost,
         CheckableMenuHost,
+        SubmenuHost,
       ],
     }).compileComponents();
   });
@@ -231,6 +257,24 @@ describe('HellMenuItem', () => {
     expect(fixture.componentInstance.density()).toBe('compact');
     expect(compact.getAttribute('aria-checked')).toBe('true');
     expect(document.body.querySelector('[role="menu"]')).toBeTruthy();
+  });
+
+  it('marks property-bound submenu triggers with a static styling hook', async () => {
+    const fixture = TestBed.createComponent(SubmenuHost);
+    await settle(fixture);
+
+    fixture.componentInstance.trigger().show();
+    const item = await waitForOverlayElement<HTMLButtonElement>(
+      fixture,
+      document.body,
+      '[data-testid="submenu-item"]',
+    );
+
+    // `[hellSubmenuTrigger]="tpl"` is a property binding, so no selector
+    // attribute lands in the DOM. The static marker is what the stylesheet
+    // keys the submenu chevron on — without it the chevron disappears.
+    expect(item.hasAttribute('data-hell-submenu-trigger')).toBe(true);
+    expect(item.getAttribute('aria-haspopup')).toBe('true');
   });
 
   it('guards disabled non-native menu items', async () => {

@@ -73,15 +73,18 @@ const HELL_AUDIO_PLAYER_RECIPE = {
   transport: 'flex min-w-0 flex-1 items-center gap-hell-2 max-[480px]:basis-full',
   playButton: 'shrink-0',
   time: 'min-w-[5ch] text-center text-hell-foreground-muted tabular-nums',
-  seek: 'min-w-20 flex-1',
+  /* Slider wrappers center the control vertically and reserve the 7px thumb
+     overhang (14px sm thumb centered on the track ends) so the thumb never
+     collides with adjacent time labels or buttons. */
+  seek: 'flex min-w-20 flex-1 items-center px-[7px]',
   actions: 'ms-auto flex min-w-0 items-center gap-hell-2 max-[480px]:ms-0 max-[480px]:basis-full',
   muteButton: 'shrink-0',
-  volume: 'min-w-[7.5rem] flex-[0_0_7.5rem] max-[480px]:flex-1',
+  volume: 'flex min-w-[7.5rem] flex-[0_0_7.5rem] items-center px-[7px] max-[480px]:flex-1',
   captionToggle:
     'shrink-0 data-[active=true]:bg-[color-mix(in_oklab,var(--color-hell-primary)_12%,transparent)] data-[active=true]:text-hell-primary',
   downloadButton: 'shrink-0',
   captions:
-    'absolute inset-x-0 top-full z-5 mt-hell-2 flex origin-top flex-col gap-hell-2 rounded-hell-md border border-hell-border bg-hell-surface-elevated px-hell-3 py-hell-2 shadow-[0_1px_2px_rgb(0_0_0_/_0.04),0_12px_28px_-16px_rgb(0_0_0_/_0.25)] animate-[hell-audio-captions-in_200ms_var(--ease-hell-out,ease)]',
+    'absolute inset-x-0 top-full z-5 mt-hell-2 flex max-w-none origin-top flex-col gap-hell-2 rounded-hell-md border border-hell-border bg-hell-surface-elevated px-hell-3 py-hell-2 shadow-[0_1px_2px_rgb(0_0_0_/_0.04),0_12px_28px_-16px_rgb(0_0_0_/_0.25)] animate-[hell-audio-captions-in_200ms_var(--ease-hell-out,ease)]',
   captionsBar: 'flex items-center justify-between gap-hell-3',
   captionsStatus:
     'inline-flex items-center gap-hell-2 text-xs font-semibold uppercase tracking-[0.04em] text-hell-foreground-muted',
@@ -264,11 +267,15 @@ function parseIsoDateOnly(value: string): Date | null {
     </div>
 
     @if (captions() && ccTrigger(); as ccTriggerInstance) {
+      <!-- Captions strip anchors below the player through its own recipe; the
+           classes flow through the flyout's Part Style Map so the strip's
+           absolute anchoring deterministically replaces the flyout's fixed
+           floating-ui positioning. -->
       <section
         [hellFlyout]="ccTriggerInstance"
         [boundary]="hostElement"
         data-slot="captions"
-        [class]="part('captions')"
+        [ui]="part('captions')"
         [aria-label]="speechTranscriptLabel"
         [attr.data-state]="transcribing() ? 'live' : 'idle'"
       >

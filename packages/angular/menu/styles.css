@@ -64,7 +64,7 @@
     transform-origin: center;
   }
 
-  [hellSubmenuTrigger][data-slot='root']::after {
+  [data-hell-submenu-trigger][data-slot='root']::after {
     content: '';
     margin-inline-start: auto;
     width: calc(var(--spacing) * 1.5);
@@ -76,7 +76,7 @@
     flex-shrink: 0;
   }
 
-  [hellSubmenuTrigger][data-slot='root']:has(> [hellMenuItemTrailing][data-slot='root'])::after {
+  [data-hell-submenu-trigger][data-slot='root']:has(> [hellMenuItemTrailing][data-slot='root'])::after {
     margin-inline-start: calc(var(--spacing) * 1);
   }
 }

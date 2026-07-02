@@ -13,6 +13,15 @@ import {
 } from './date-input';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 
+{
+  const elementPrototype = HTMLElement.prototype as HTMLElement & {
+    getAnimations?: () => readonly Animation[];
+  };
+  if (typeof elementPrototype.getAnimations !== 'function') {
+    elementPrototype.getAnimations = () => [];
+  }
+}
+
 @Component({
   imports: [HellDateInput],
   template: `
@@ -214,6 +223,30 @@ describe('HellDateInput', () => {
     expect(panelClass).toContain('border-hell-danger');
     expect(panelClass).toContain('p-hell-6');
     expect(panelClass).not.toContain('p-0');
+  });
+
+  it('neutralizes the popover chrome around the embedded date picker', async () => {
+    const fixture = TestBed.createComponent(DateInputHost);
+    fixture.detectChanges();
+
+    triggerButton(fixture.nativeElement).click();
+    const panel = await waitForElement(fixture, document.body, '[data-slot="pickerPanel"]');
+
+    // The picker panel classes flow through the popover's Part Style Map, so
+    // the popover recipe's border/background/padding merge away instead of
+    // stacking a second outline and a padding ring around the date picker.
+    // A plain `[class]` binding would leave both class sets on the element.
+    expect(panel.className).toContain('border-0');
+    expect(panel.className).toContain('p-0');
+    expect(panel.className).toContain('bg-transparent');
+    expect(panel.className).not.toContain('p-hell-4');
+    expect(panel.className).not.toContain('bg-hell-surface-elevated');
+    expect(panel.querySelector('hell-date-picker')).not.toBeNull();
+
+    fixture.destroy();
+    for (const leftover of Array.from(document.body.querySelectorAll('[hellPopover]'))) {
+      leftover.remove();
+    }
   });
 
   it('inherits hellField label and description wiring for the internal text field', () => {
@@ -621,6 +654,23 @@ function dateInputComponent(fixture: ComponentFixture<unknown>): HellDateInput {
 
 function dateInputPartClass(component: HellDateInput, part: HellDateInputPart): string {
   return (component as unknown as { part(part: HellDateInputPart): string }).part(part);
+}
+
+async function waitForElement<T extends HTMLElement>(
+  fixture: ComponentFixture<unknown>,
+  root: ParentNode,
+  selector: string,
+): Promise<T> {
+  const timeout = Date.now() + 10_000;
+  while (Date.now() < timeout) {
+    fixture.detectChanges();
+    const element = root.querySelector<T>(selector);
+    if (element) return element;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    fixture.detectChanges();
+  }
+
+  throw new Error(`Expected ${selector}.`);
 }
 
 function formatDate(date: Date | null): string {
