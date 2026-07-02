@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { TablePrimitiveExample } from './examples/primitive-table.example';
 import tablePrimitiveExampleCodeRaw from './examples/primitive-table.example.ts?raw' with {
   loader: 'text',
@@ -24,6 +25,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
     TableTanStackShellExample,
     TableTanStackVirtualExample,
     TableA11yHarnessPage,
+    PageHeader,
   ],
   template: `
     @if (showTableA11yHarness) {
@@ -31,7 +33,16 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
     } @else {
       <article class="hd-doc-page">
         <div class="hd-prose">
-          <h1>Table</h1>
+          <hd-page-header
+            title="Table"
+            icon="faSolidTable"
+            category="Table primitives"
+            status="Beta"
+            importPath="@hell-ui/angular/table"
+            stylesPath="@hell-ui/angular/table/styles.css"
+          >
+            Semantic native-table primitives — plus a Hell-styled shell that renders a caller-owned TanStack Table with toolbar, status, pagination, and optional virtual rows.
+          </hd-page-header>
           <p>
             Hell supports two table paths. <code>@hell-ui/angular/table</code> is the low-level
             native-table primitive layer. <code>@hell-ui/angular/table-tanstack</code> is a
@@ -142,8 +153,15 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
             <li><code>hellTanStackVirtualRows</code>: optional TanStack Virtual body strategy.</li>
           </ul>
 
-          <h2>Do</h2>
+          <h2>Accessibility</h2>
           <ul>
+            <li>Primitives preserve native table semantics; roles are only inferred when markup is non-native.</li>
+            <li>Sorting is activated through real buttons (<code>hellTableSortTrigger</code>) exposing <code>aria-sort</code> on the header cell.</li>
+            <li>Column resize handles are keyboard-operable separators with Label Contract names.</li>
+          </ul>
+
+          <h2>Do</h2>
+          <ul class="hd-do">
             <li>Let TanStack own table state and feature behavior.</li>
             <li>
               Use projected shell regions for pagination, selected-count summaries, and exports.
@@ -159,7 +177,7 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
           </ul>
 
           <h2>Don't</h2>
-          <ul>
+          <ul class="hd-dont">
             <li>Don't build a second table model or column-definition DSL in Hell.</li>
             <li>Don't use row click shortcuts for actions; put Hell table controls in cells.</li>
             <li>

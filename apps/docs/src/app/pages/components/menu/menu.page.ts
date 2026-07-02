@@ -9,6 +9,7 @@ import {
 } from '@ng-icons/font-awesome/solid';
 import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { MenuBasicExample } from './examples/basic.example';
 import menuBasicExampleCodeRaw from './examples/basic.example.ts?raw' with { loader: 'text' };
 import { MenuWithIconsSectionsSubmenusExample } from './examples/with-icons-sections-submenus.example';
@@ -37,10 +38,19 @@ const HD_MENU_PAGE_ICONS = {
     ...HELL_MENU_DIRECTIVES,
     MenuBasicExample,
     MenuWithIconsSectionsSubmenusExample, MenuStylingExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Menu</h1>
+      <hd-page-header
+        title="Menu"
+        icon="faSolidEllipsisVertical"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/menu"
+        stylesPath="@hell-ui/angular/menu/styles.css"
+      >
+        Action menus with sections, checkable items, radio groups, icons, and submenus — attached to native button or anchor triggers.
+      </hd-page-header>
       <p>
         A floating list of actions, anchored to a trigger. Use for overflow menus and contextual
         actions; use <code>tabs</code> for navigation between sibling views. Supports leading icons,
@@ -58,7 +68,7 @@ const HD_MENU_PAGE_ICONS = {
         <app-menu-with-icons-sections-submenus-example />
       </hd-example-tabs>
 
-      <h2>Part style map</h2>
+      <h2>Styling</h2>
       <p>
         The menu panel and each item expose their own <code>root</code> Public Part (<code>HellMenuUi</code>, <code>HellMenuItemUi</code>). Use state attributes such as <code>data-active</code> for highlight styling instead of hover-only CSS.
       </p>
@@ -89,8 +99,15 @@ const HD_MENU_PAGE_ICONS = {
         <li><code>ui</code>: Part Style Map for each styled directive's local <code>root</code> part. Portaled menu surfaces render <code>data-slot="root"</code>.</li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Follows the ARIA menu pattern: arrow-key navigation, Home/End, Escape to the trigger, typeahead.</li>
+        <li>Checkbox and radio items expose <code>aria-checked</code>; disabled items stay perceivable.</li>
+        <li>Triggers only bind to native buttons and anchors, keeping activation semantics native.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use menus for compact action lists tied to a trigger.</li>
         <li>Group destructive or secondary actions with separators and labels.</li>
         <li>Use submenu only when it reduces scanning cost.</li>
@@ -100,7 +117,7 @@ const HD_MENU_PAGE_ICONS = {
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't put form fields inside a menu.</li>
         <li>Don't use menus for primary navigation when tabs or links fit better.</li>
       </ul>

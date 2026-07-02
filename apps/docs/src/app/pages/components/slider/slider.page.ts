@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { SliderBasicExample } from './examples/basic.example';
 import sliderBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
@@ -35,10 +36,19 @@ import sliderStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
     SliderHoverRevealedThumbExample,
     SliderVerticalExample,
     SliderDisabledExample, SliderStylingExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Slider</h1>
+      <hd-page-header
+        title="Slider"
+        icon="faSolidSliders"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/slider"
+        stylesPath="@hell-ui/angular/slider/styles.css"
+      >
+        A single-value slider with keyboard steps, vertical orientation, and size variants.
+      </hd-page-header>
       <p>
         Single-thumb range selector built on <code>ng-primitives/slider</code>. Drag the thumb,
         click anywhere on the track (which then continues into a drag in one fluid motion), or use
@@ -82,7 +92,7 @@ import sliderStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         <app-slider-disabled-example />
       </hd-example-tabs>
 
-      <h2>Part style map</h2>
+      <h2>Styling</h2>
       <p>
         Slider is a multi-part component: <code>HellSliderPart</code> is <code>root | track | range | thumb</code>. The <code>[ui]</code> map targets each named Public Part; matching <code>data-slot</code> attributes mark them in the DOM.
       </p>
@@ -113,8 +123,14 @@ import sliderStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         </li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Exposes <code>role="slider"</code> with min/max/now and keyboard steps (arrows, PageUp/PageDown, Home/End).</li>
+        <li>Name it via a label with <code>aria-labelledby</code> or an <code>aria-label</code>; show the current value as text.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use sliders for approximate values where dragging is faster than typing.</li>
         <li>
           Provide an accessible label through <code>hellFieldLabel</code>,
@@ -124,7 +140,7 @@ import sliderStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't use sliders for exact currency or IDs.</li>
         <li>Don't hide the current value when precision matters.</li>
       </ul>

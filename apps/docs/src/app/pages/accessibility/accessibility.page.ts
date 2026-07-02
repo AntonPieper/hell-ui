@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { PageHeader } from '../../shared/page-header';
 import { RouterLink } from '@angular/router';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 
@@ -536,7 +537,7 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
 @Component({
   selector: 'hd-accessibility',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, ...HELL_TABLE_UTILITIES_DIRECTIVES],
+  imports: [RouterLink, ...HELL_TABLE_UTILITIES_DIRECTIVES, PageHeader],
   styles: [
     `
       :host {
@@ -641,7 +642,9 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
   template: `
     <article class="hd-doc-page">
       <div class="hd-prose">
-        <h1>Accessibility support matrix</h1>
+        <hd-page-header title="Accessibility support matrix" icon="faSolidUniversalAccess">
+          Per-component accessibility contracts: roles, keyboard behavior, and the browser tests that verify them.
+        </hd-page-header>
         <p>
           This matrix is the support claim for public Hell primitives, composites, and feature entry
           points. It is intentionally conservative: a component is marked covered only when a

@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { PageHeader } from '../../shared/page-header';
 import { RouterLink } from '@angular/router';
 import { CodeBlock } from '../../shared/code-block';
 
@@ -41,15 +42,12 @@ const THEME_CODE = `/* Runtime themes override Semantic Theme Tokens, not compon
 @Component({
   selector: 'hd-guide',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, CodeBlock],
+  imports: [RouterLink, CodeBlock, PageHeader],
   template: `
     <article class="hd-prose">
-      <h1>Guide</h1>
-      <p>
-        hell is a compact Angular component system for dense business applications. This page is
-        the map: what the library optimizes for, how its entry points are organized, and which
-        contracts you should build against as a consumer.
-      </p>
+      <hd-page-header title="Guide" icon="faSolidBook">
+        The map of the library: what hell optimizes for, how its entry points are organized, and which contracts to build against as a consumer.
+      </hd-page-header>
 
       <h2>Philosophy</h2>
       <ul>
@@ -183,7 +181,7 @@ const THEME_CODE = `/* Runtime themes override Semantic Theme Tokens, not compon
       </ul>
 
       <h2>Do</h2>
-      <ul>
+      <ul class="hd-do">
         <li>Import one entry point per surface; let unused surfaces cost nothing.</li>
         <li>Use <code>ui</code> for visual refinement and <code>data-*</code> selectors in CSS.</li>
         <li>Override semantic tokens at the narrowest scope that owns the decision.</li>
@@ -191,7 +189,7 @@ const THEME_CODE = `/* Runtime themes override Semantic Theme Tokens, not compon
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't import the root entry point for UI — it is core-only by design.</li>
         <li>Don't style unknown internal DOM; only Public Parts are contract.</li>
         <li>Don't fight the recipe with <code>class</code>; conflicting utilities belong in

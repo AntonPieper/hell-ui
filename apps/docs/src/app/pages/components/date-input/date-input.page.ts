@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { DateInputPlaceholdersAndLabelsExample } from './examples/placeholders-and-labels.example';
 import dateInputPlaceholdersAndLabelsExampleCodeRaw from './examples/placeholders-and-labels.example.ts?raw' with {
   loader: 'text',
@@ -34,10 +35,19 @@ import dateInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
     DateInputReactiveFormsExample,
     DateInputSizesExample,
     DateInputPlaceholdersAndLabelsExample, DateInputStylingExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Date input</h1>
+      <hd-page-header
+        title="Date input"
+        icon="faSolidCalendarDay"
+        category="Composite"
+        importPath="@hell-ui/angular/date-input"
+        stylesPath="@hell-ui/angular/date-input/styles.css"
+      >
+        Text-first date entry with parsing, stable formatting, validation, and an optional calendar popover — the Typed Value Input pattern for dates.
+      </hd-page-header>
       <p>
         Composite date field: a text input plus calendar-trigger popover. Type or paste an explicit
         <code>YYYY-MM-DD</code> date, then blur or press Enter to commit. Empty text clears to
@@ -74,7 +84,7 @@ import dateInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         <app-date-input-placeholders-and-labels-example />
       </hd-example-tabs>
 
-      <h2>Part style map</h2>
+      <h2>Styling</h2>
       <p>
         <code>HellDateInputPart</code> covers <code>root</code>, <code>input</code>, <code>trigger</code>, <code>triggerIcon</code>, and <code>pickerPanel</code>. The picker panel keeps its part identity even though it renders in an overlay.
       </p>
@@ -128,15 +138,21 @@ import dateInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         rules.
       </p>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>The text input remains a normal input: label association, invalid-draft state via <code>aria-invalid</code>, and screen-reader-readable formatting.</li>
+        <li>The calendar trigger is a labeled button (Label Contract); the popover follows the shared Floating Dismissal rules.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Pair with <code>hellFieldLabel</code> for visible naming.</li>
         <li>Use <code>min</code> and <code>max</code> for business constraints.</li>
         <li>Accept typed dates and picker selection as equal paths.</li>
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't block keyboard entry by forcing the calendar only.</li>
         <li>Don't use locale-specific placeholders without validation copy.</li>
       </ul>

@@ -72,7 +72,8 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
         label: 'Overview',
         icon: 'faSolidHouse',
         exact: true,
-        loadComponent: () => import('./pages/overview/overview.page').then((m) => m.OverviewPage),
+        loadComponent: () =>
+          import('./pages/overview/overview.page').then((m) => m.OverviewPage),
       },
       {
         routePath: 'getting-started',
@@ -85,178 +86,60 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
         routePath: 'guide',
         label: 'Guide',
         icon: 'faSolidBook',
-        loadComponent: () => import('./pages/guide/guide.page').then((m) => m.GuidePage),
+        loadComponent: () =>
+          import('./pages/guide/guide.page').then((m) => m.GuidePage),
       },
       {
         routePath: 'theming',
         label: 'Theming',
         icon: 'faSolidPalette',
-        loadComponent: () => import('./pages/theming/theming.page').then((m) => m.ThemingPage),
+        loadComponent: () =>
+          import('./pages/theming/theming.page').then((m) => m.ThemingPage),
       },
       {
         routePath: 'accessibility',
         label: 'Accessibility matrix',
-        icon: 'faSolidCheck',
+        icon: 'faSolidUniversalAccess',
         loadComponent: () =>
           import('./pages/accessibility/accessibility.page').then((m) => m.AccessibilityPage),
       },
     ],
   },
   {
-    heading: 'Primitives',
+    heading: 'Buttons & indicators',
     items: [
-      {
-        routePath: 'components/accordion',
-        label: 'Accordion',
-        icon: 'faSolidLayerGroup',
-        loadComponent: () =>
-          import('./pages/components/accordion/accordion.page').then((m) => m.AccordionPage),
-      },
-      {
-        routePath: 'components/avatar',
-        label: 'Avatar',
-        icon: 'faSolidUser',
-        loadComponent: () =>
-          import('./pages/components/avatar/avatar.page').then((m) => m.AvatarPage),
-      },
-      {
-        routePath: 'components/breadcrumbs',
-        label: 'Breadcrumbs',
-        icon: 'faSolidSignsPost',
-        loadComponent: () =>
-          import('./pages/components/breadcrumbs/breadcrumbs.page').then((m) => m.BreadcrumbsPage),
-      },
       {
         routePath: 'components/button',
         label: 'Button',
-        icon: 'faSolidWindowMaximize',
+        icon: 'faSolidHandPointer',
         loadComponent: () =>
           import('./pages/components/button/button.page').then((m) => m.ButtonPage),
       },
       {
-        routePath: 'components/card',
-        label: 'Card',
-        icon: 'faSolidIdCard',
-        loadComponent: () => import('./pages/components/card/card.page').then((m) => m.CardPage),
-      },
-      {
-        routePath: 'components/checkbox',
-        label: 'Checkbox',
-        icon: 'faSolidCheck',
+        routePath: 'components/toggle',
+        label: 'Toggle',
+        icon: 'faSolidToggleOn',
         loadComponent: () =>
-          import('./pages/components/checkbox/checkbox.page').then((m) => m.CheckboxPage),
+          import('./pages/components/toggle/toggle.page').then((m) => m.TogglePage),
       },
       {
-        routePath: 'components/combobox',
-        label: 'Combobox',
-        icon: 'faSolidPenRuler',
+        routePath: 'components/tag',
+        label: 'Tag',
+        icon: 'faSolidTag',
         loadComponent: () =>
-          import('./pages/components/combobox/combobox.page').then((m) => m.ComboboxPage),
-      },
-      {
-        routePath: 'components/dialog',
-        label: 'Dialog',
-        icon: 'faSolidWindowRestore',
-        loadComponent: () =>
-          import('./pages/components/dialog/dialog.page').then((m) => m.DialogPage),
-      },
-      {
-        routePath: 'components/drop-zone',
-        label: 'Drop zone',
-        icon: 'faSolidUpload',
-        loadComponent: () =>
-          import('./pages/components/drop-zone/drop-zone.page').then((m) => m.DropZonePage),
-      },
-      {
-        routePath: 'components/field',
-        label: 'Field',
-        icon: 'faSolidPenToSquare',
-        loadComponent: () => import('./pages/components/field/field.page').then((m) => m.FieldPage),
-      },
-      {
-        routePath: 'components/flyout',
-        label: 'Flyout',
-        icon: 'faSolidComment',
-        loadComponent: () =>
-          import('./pages/components/flyout/flyout.page').then((m) => m.FlyoutPage),
-      },
-      {
-        routePath: 'components/icon',
-        label: 'Icon',
-        icon: 'faSolidStar',
-        loadComponent: () => import('./pages/components/icon/icon.page').then((m) => m.IconPage),
-      },
-      {
-        routePath: 'components/input',
-        label: 'Input & select',
-        icon: 'faSolidPenRuler',
-        loadComponent: () => import('./pages/components/input/input.page').then((m) => m.InputPage),
-      },
-      {
-        routePath: 'components/listbox',
-        label: 'Listbox',
-        icon: 'faSolidBars',
-        loadComponent: () =>
-          import('./pages/components/listbox/listbox.page').then((m) => m.ListboxPage),
-      },
-      {
-        routePath: 'components/menu',
-        label: 'Menu',
-        icon: 'faSolidEllipsisVertical',
-        loadComponent: () => import('./pages/components/menu/menu.page').then((m) => m.MenuPage),
-      },
-      {
-        routePath: 'components/pagination',
-        label: 'Pagination',
-        icon: 'faSolidTableColumns',
-        loadComponent: () =>
-          import('./pages/components/pagination/pagination.page').then((m) => m.PaginationPage),
-      },
-      {
-        routePath: 'components/popover',
-        label: 'Popover',
-        icon: 'faSolidComment',
-        loadComponent: () =>
-          import('./pages/components/popover/popover.page').then((m) => m.PopoverPage),
+          import('./pages/components/tag/tag.page').then((m) => m.TagPage),
       },
       {
         routePath: 'components/progress',
         label: 'Progress',
-        icon: 'faSolidSliders',
+        icon: 'faSolidBarsProgress',
         loadComponent: () =>
           import('./pages/components/progress/progress.page').then((m) => m.ProgressPage),
       },
       {
-        routePath: 'components/radio',
-        label: 'Radio',
-        icon: 'faSolidCircleHalfStroke',
-        loadComponent: () => import('./pages/components/radio/radio.page').then((m) => m.RadioPage),
-      },
-      {
-        routePath: 'components/search',
-        label: 'Search',
-        icon: 'faSolidMagnifyingGlass',
-        loadComponent: () =>
-          import('./pages/components/search/search.page').then((m) => m.SearchPage),
-      },
-      {
-        routePath: 'components/select',
-        label: 'Select',
-        icon: 'faSolidPenRuler',
-        loadComponent: () =>
-          import('./pages/components/select/select.page').then((m) => m.SelectPage),
-      },
-      {
-        routePath: 'components/separator',
-        label: 'Separator',
-        icon: 'faSolidGripLines',
-        loadComponent: () =>
-          import('./pages/components/separator/separator.page').then((m) => m.SeparatorPage),
-      },
-      {
         routePath: 'components/skeleton',
         label: 'Skeleton',
-        icon: 'faSolidImage',
+        icon: 'faSolidBarsStaggered',
         loadComponent: () =>
           import('./pages/components/skeleton/skeleton.page').then((m) => m.SkeletonPage),
       },
@@ -267,6 +150,46 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
         loadComponent: () =>
           import('./pages/components/spinner/spinner.page').then((m) => m.SpinnerPage),
       },
+    ],
+  },
+  {
+    heading: 'Forms & input',
+    items: [
+      {
+        routePath: 'components/field',
+        label: 'Field',
+        icon: 'faSolidRectangleList',
+        loadComponent: () =>
+          import('./pages/components/field/field.page').then((m) => m.FieldPage),
+      },
+      {
+        routePath: 'components/input',
+        label: 'Input & select',
+        icon: 'faSolidICursor',
+        loadComponent: () =>
+          import('./pages/components/input/input.page').then((m) => m.InputPage),
+      },
+      {
+        routePath: 'components/checkbox',
+        label: 'Checkbox',
+        icon: 'faSolidSquareCheck',
+        loadComponent: () =>
+          import('./pages/components/checkbox/checkbox.page').then((m) => m.CheckboxPage),
+      },
+      {
+        routePath: 'components/radio',
+        label: 'Radio',
+        icon: 'faSolidCircleDot',
+        loadComponent: () =>
+          import('./pages/components/radio/radio.page').then((m) => m.RadioPage),
+      },
+      {
+        routePath: 'components/switch',
+        label: 'Switch',
+        icon: 'faSolidToggleOff',
+        loadComponent: () =>
+          import('./pages/components/switch/switch.page').then((m) => m.SwitchPage),
+      },
       {
         routePath: 'components/slider',
         label: 'Slider',
@@ -275,81 +198,60 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/slider/slider.page').then((m) => m.SliderPage),
       },
       {
-        routePath: 'components/switch',
-        label: 'Switch',
-        icon: 'faSolidToggleOn',
+        routePath: 'components/select',
+        label: 'Select',
+        icon: 'faSolidCaretDown',
         loadComponent: () =>
-          import('./pages/components/switch/switch.page').then((m) => m.SwitchPage),
+          import('./pages/components/select/select.page').then((m) => m.SelectPage),
       },
       {
-        routePath: 'components/tabs',
-        label: 'Tabs',
-        icon: 'faSolidFolderOpen',
-        loadComponent: () => import('./pages/components/tabs/tabs.page').then((m) => m.TabsPage),
-      },
-      {
-        routePath: 'components/tag',
-        label: 'Tag',
-        icon: 'faSolidTag',
-        loadComponent: () => import('./pages/components/tag/tag.page').then((m) => m.TagPage),
-      },
-      {
-        routePath: 'components/toggle',
-        label: 'Toggle',
-        icon: 'faSolidToggleOn',
+        routePath: 'components/combobox',
+        label: 'Combobox',
+        icon: 'faSolidKeyboard',
         loadComponent: () =>
-          import('./pages/components/toggle/toggle.page').then((m) => m.TogglePage),
+          import('./pages/components/combobox/combobox.page').then((m) => m.ComboboxPage),
       },
       {
-        routePath: 'components/tooltip',
-        label: 'Tooltip',
-        icon: 'faSolidQuestion',
+        routePath: 'components/listbox',
+        label: 'Listbox',
+        icon: 'faSolidListUl',
         loadComponent: () =>
-          import('./pages/components/tooltip/tooltip.page').then((m) => m.TooltipPage),
-      },
-    ],
-  },
-  {
-    heading: 'Composites',
-    items: [
-      {
-        routePath: 'components/app-shell',
-        label: 'App shell',
-        icon: 'faSolidTableColumns',
-        loadComponent: () =>
-          import('./pages/components/app-shell/app-shell.page').then((m) => m.AppShellPage),
+          import('./pages/components/listbox/listbox.page').then((m) => m.ListboxPage),
       },
       {
-        routePath: 'components/audio-player',
-        label: 'Audio player',
-        icon: 'faSolidPlay',
+        routePath: 'components/search',
+        label: 'Search',
+        icon: 'faSolidMagnifyingGlass',
         loadComponent: () =>
-          import('./pages/components/audio-player/audio-player.page').then(
-            (m) => m.AudioPlayerPage,
-          ),
-      },
-      {
-        routePath: 'components/avatar-group',
-        label: 'Avatar group',
-        icon: 'faSolidUsers',
-        loadComponent: () =>
-          import('./pages/components/avatar-group/avatar-group.page').then(
-            (m) => m.AvatarGroupPage,
-          ),
+          import('./pages/components/search/search.page').then((m) => m.SearchPage),
       },
       {
         routePath: 'components/date-input',
         label: 'Date input',
-        icon: 'faSolidCalendar',
+        icon: 'faSolidCalendarDay',
         loadComponent: () =>
           import('./pages/components/date-input/date-input.page').then((m) => m.DateInputPage),
       },
       {
+        routePath: 'components/time-input',
+        label: 'Time input',
+        icon: 'faSolidClock',
+        loadComponent: () =>
+          import('./pages/components/time-input/time-input.page').then((m) => m.TimeInputPage),
+      },
+      {
         routePath: 'components/date-picker',
         label: 'Date picker',
-        icon: 'faSolidCalendar',
+        icon: 'faSolidCalendarDays',
         loadComponent: () =>
           import('./pages/components/date-picker/date-picker.page').then((m) => m.DatePickerPage),
+      },
+      {
+        routePath: 'components/drop-zone',
+        label: 'Drop zone',
+        icon: 'faSolidUpload',
+        loadComponent: () =>
+          import('./pages/components/drop-zone/drop-zone.page').then((m) => m.DropZonePage),
       },
       {
         routePath: 'components/dialpad',
@@ -358,17 +260,104 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
         loadComponent: () =>
           import('./pages/components/dialpad/dialpad.page').then((m) => m.DialpadPage),
       },
+    ],
+  },
+  {
+    heading: 'Overlays & feedback',
+    items: [
+      {
+        routePath: 'components/dialog',
+        label: 'Dialog',
+        icon: 'faSolidWindowRestore',
+        loadComponent: () =>
+          import('./pages/components/dialog/dialog.page').then((m) => m.DialogPage),
+      },
+      {
+        routePath: 'components/popover',
+        label: 'Popover',
+        icon: 'faSolidMessage',
+        loadComponent: () =>
+          import('./pages/components/popover/popover.page').then((m) => m.PopoverPage),
+      },
+      {
+        routePath: 'components/tooltip',
+        label: 'Tooltip',
+        icon: 'faSolidCircleQuestion',
+        loadComponent: () =>
+          import('./pages/components/tooltip/tooltip.page').then((m) => m.TooltipPage),
+      },
+      {
+        routePath: 'components/flyout',
+        label: 'Flyout',
+        icon: 'faSolidCommentDots',
+        loadComponent: () =>
+          import('./pages/components/flyout/flyout.page').then((m) => m.FlyoutPage),
+      },
+      {
+        routePath: 'components/menu',
+        label: 'Menu',
+        icon: 'faSolidEllipsisVertical',
+        loadComponent: () =>
+          import('./pages/components/menu/menu.page').then((m) => m.MenuPage),
+      },
+      {
+        routePath: 'components/toast',
+        label: 'Toast',
+        icon: 'faSolidBell',
+        loadComponent: () =>
+          import('./pages/components/toast/toast.page').then((m) => m.ToastPage),
+      },
       {
         routePath: 'components/omnibar',
         label: 'Omnibar',
-        icon: 'faSolidMagnifyingGlass',
+        icon: 'faSolidTerminal',
         loadComponent: () =>
           import('./pages/components/omnibar/omnibar.page').then((m) => m.OmnibarPage),
+      },
+    ],
+  },
+  {
+    heading: 'Navigation & layout',
+    items: [
+      {
+        routePath: 'components/app-shell',
+        label: 'App shell',
+        icon: 'faSolidWindowMaximize',
+        loadComponent: () =>
+          import('./pages/components/app-shell/app-shell.page').then((m) => m.AppShellPage),
+      },
+      {
+        routePath: 'components/breadcrumbs',
+        label: 'Breadcrumbs',
+        icon: 'faSolidSignsPost',
+        loadComponent: () =>
+          import('./pages/components/breadcrumbs/breadcrumbs.page').then((m) => m.BreadcrumbsPage),
+      },
+      {
+        routePath: 'components/tabs',
+        label: 'Tabs',
+        icon: 'faSolidFolderOpen',
+        loadComponent: () =>
+          import('./pages/components/tabs/tabs.page').then((m) => m.TabsPage),
+      },
+      {
+        routePath: 'components/pagination',
+        label: 'Pagination',
+        icon: 'faSolidAnglesRight',
+        loadComponent: () =>
+          import('./pages/components/pagination/pagination.page').then((m) => m.PaginationPage),
+      },
+      {
+        routePath: 'components/accordion',
+        label: 'Accordion',
+        icon: 'faSolidLayerGroup',
+        loadComponent: () =>
+          import('./pages/components/accordion/accordion.page').then((m) => m.AccordionPage),
       },
       {
         routePath: 'components/resizable',
         label: 'Resizable',
-        icon: 'faSolidGripVertical',
+        icon: 'faSolidLeftRight',
         loadComponent: () =>
           import('./pages/components/resizable/resizable.page').then((m) => m.ResizablePage),
       },
@@ -379,18 +368,52 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
         loadComponent: () =>
           import('./pages/components/split-view/split-view.page').then((m) => m.SplitViewPage),
       },
+    ],
+  },
+  {
+    heading: 'Display & media',
+    items: [
       {
-        routePath: 'components/time-input',
-        label: 'Time input',
-        icon: 'faSolidClock',
+        routePath: 'components/avatar',
+        label: 'Avatar',
+        icon: 'faSolidUser',
         loadComponent: () =>
-          import('./pages/components/time-input/time-input.page').then((m) => m.TimeInputPage),
+          import('./pages/components/avatar/avatar.page').then((m) => m.AvatarPage),
       },
       {
-        routePath: 'components/toast',
-        label: 'Toast',
-        icon: 'faSolidBell',
-        loadComponent: () => import('./pages/components/toast/toast.page').then((m) => m.ToastPage),
+        routePath: 'components/avatar-group',
+        label: 'Avatar group',
+        icon: 'faSolidUsers',
+        loadComponent: () =>
+          import('./pages/components/avatar-group/avatar-group.page').then((m) => m.AvatarGroupPage),
+      },
+      {
+        routePath: 'components/card',
+        label: 'Card',
+        icon: 'faSolidIdCard',
+        loadComponent: () =>
+          import('./pages/components/card/card.page').then((m) => m.CardPage),
+      },
+      {
+        routePath: 'components/icon',
+        label: 'Icon',
+        icon: 'faSolidStar',
+        loadComponent: () =>
+          import('./pages/components/icon/icon.page').then((m) => m.IconPage),
+      },
+      {
+        routePath: 'components/separator',
+        label: 'Separator',
+        icon: 'faSolidGripLines',
+        loadComponent: () =>
+          import('./pages/components/separator/separator.page').then((m) => m.SeparatorPage),
+      },
+      {
+        routePath: 'components/audio-player',
+        label: 'Audio player',
+        icon: 'faSolidPlay',
+        loadComponent: () =>
+          import('./pages/components/audio-player/audio-player.page').then((m) => m.AudioPlayerPage),
       },
     ],
   },

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { InputCustomizationExample } from './examples/customization.example';
 import inputCustomizationExampleCodeRaw from './examples/customization.example.ts?raw' with {
   loader: 'text',
@@ -31,10 +32,19 @@ import inputTextareaExampleCodeRaw from './examples/textarea.example.ts?raw' wit
     InputStatesExample,
     InputSelectExample,
     InputTextareaExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Input, Select &amp; Textarea</h1>
+      <hd-page-header
+        title="Input, Select &amp; Textarea"
+        icon="faSolidICursor"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/input"
+        stylesPath="@hell-ui/angular/input/styles.css"
+      >
+        Text inputs, textareas, and native selects with shared sizing, states, and Part Style Maps — native elements first.
+      </hd-page-header>
       <p>
         Single-line inputs, native selects and multi-line textareas. Apply the
         <code>hellInput</code> directive to a native <code>&lt;input&gt;</code>,
@@ -95,15 +105,21 @@ import inputTextareaExampleCodeRaw from './examples/textarea.example.ts?raw' wit
         Tailwind conflicts.
       </p>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>These directives style native elements, so platform semantics, autofill, and IME behavior stay intact.</li>
+        <li>Associate labels through <code>hellField</code> or <code>for</code>/<code>id</code>; placeholders are not labels.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use <code>hellField</code> around inputs for labels, help and errors.</li>
         <li>Choose <code>sm</code>, <code>md</code> or <code>lg</code> based on density.</li>
         <li>Use <code>invalid</code> only when error copy is present.</li>
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't rely on placeholder text as the only label.</li>
         <li>Don't mark a field invalid before the user can act.</li>
       </ul>

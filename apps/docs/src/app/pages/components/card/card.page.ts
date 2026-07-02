@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { CardExamplesExample } from './examples/examples.example';
 import cardExamplesExampleCodeRaw from './examples/examples.example.ts?raw' with {
   loader: 'text',
@@ -16,10 +17,18 @@ import cardWithoutHeaderExampleCodeRaw from './examples/without-header.example.t
 @Component({
   selector: 'hd-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, CardExamplesExample, CardWithoutHeaderExample, CardWithFooterExample],
+  imports: [ExampleTabs, CardExamplesExample, CardWithoutHeaderExample, CardWithFooterExample, PageHeader],
   template: `
     <article class="hd-prose">
-      <h1>Card</h1>
+      <hd-page-header
+        title="Card"
+        icon="faSolidIdCard"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/card"
+        stylesPath="@hell-ui/angular/card/styles.css"
+      >
+        A bordered surface with header, body, and footer regions for grouping related content in dense layouts.
+      </hd-page-header>
       <p>
         A surface that groups related content. Compose with <code>hellCardHeader</code>,
         <code>hellCardBody</code> and <code>hellCardFooter</code>. Use <code>elevation</code> to
@@ -61,8 +70,14 @@ import cardWithoutHeaderExampleCodeRaw from './examples/without-header.example.t
         </li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Cards are generic containers — add headings inside the header region to keep the page outline meaningful.</li>
+        <li>Interactive content keeps its own semantics; the card itself is never a click target.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use cards to group one idea, object or workflow.</li>
         <li>
           Prefer <code>hellCardHeader</code>, <code>hellCardBody</code> and
@@ -72,7 +87,7 @@ import cardWithoutHeaderExampleCodeRaw from './examples/without-header.example.t
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't turn every list row into a card.</li>
         <li>Don't put unrelated actions in a card footer.</li>
       </ul>

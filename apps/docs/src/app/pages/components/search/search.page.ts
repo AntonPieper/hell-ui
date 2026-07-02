@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { SearchBasicExample } from './examples/basic.example';
 import searchBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
@@ -12,10 +13,18 @@ import searchStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
 @Component({
   selector: 'hd-search',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, SearchBasicExample, SearchStylingExample],
+  imports: [ExampleTabs, SearchBasicExample, SearchStylingExample, PageHeader],
   template: `
     <article class="hd-prose">
-      <h1>Search</h1>
+      <hd-page-header
+        title="Search"
+        icon="faSolidMagnifyingGlass"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/search"
+        stylesPath="@hell-ui/angular/search/styles.css"
+      >
+        A small search pattern: input wiring, a clear affordance, and result-region hooks — bring your own ranking.
+      </hd-page-header>
       <p>
         Small wrapper directives around the ng-primitives search pattern. Use them when you need a
         plain search region with a clear control. For ranked command-palette search, use
@@ -27,7 +36,7 @@ import searchStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         <app-search-basic-example />
       </hd-example-tabs>
 
-      <h2>Part style map</h2>
+      <h2>Styling</h2>
       <p>
         The search wrapper, input, and clear affordance each keep their own narrow <code>ui</code> contract. Refine the part you own instead of styling through descendant selectors.
       </p>
@@ -42,14 +51,20 @@ import searchStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         <li><code>ui</code>: string or <code>{{ '{' }} root: string {{ '}' }}</code> map.</li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Use <code>type="search"</code> with an accessible name; the clear button is labeled and keyboard-reachable.</li>
+        <li>Announce result counts in text near the list.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use native <code>type="search"</code> inputs for simple local filtering.</li>
         <li>Keep clear buttons explicit when query state is controlled by a signal.</li>
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't rebuild omnibar keyboard navigation on top of this primitive.</li>
       </ul>
     </article>

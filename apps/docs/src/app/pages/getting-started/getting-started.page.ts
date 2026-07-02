@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { PageHeader } from '../../shared/page-header';
 import { CodeBlock } from '../../shared/code-block';
 import { ExampleTabs } from '../../shared/example-tabs';
 import { GettingStartedButtonDemo } from './examples/button-demo.example';
@@ -10,10 +11,12 @@ import stylesCodeRaw from './examples/styles.example.css?raw' with { loader: 'te
 @Component({
   selector: 'hd-getting-started',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CodeBlock, ExampleTabs, GettingStartedButtonDemo],
+  imports: [CodeBlock, ExampleTabs, GettingStartedButtonDemo, PageHeader],
   template: `
     <article class="hd-prose">
-      <h1>Getting started</h1>
+      <hd-page-header title="Getting started" icon="faSolidRocket">
+        Install the peers, configure Tailwind v4, import the styles you need, and compose your first components.
+      </hd-page-header>
       <p>
         hell ships Angular standalone components and directives with optional Tailwind-v4-backed
         style entry points. Install the peer packages, add the Tailwind v4 PostCSS plugin, import

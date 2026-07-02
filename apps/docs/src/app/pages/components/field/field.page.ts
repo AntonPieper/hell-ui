@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { FieldHorizontalExample } from './examples/horizontal.example';
 import fieldHorizontalExampleCodeRaw from './examples/horizontal.example.ts?raw' with {
   loader: 'text',
@@ -18,10 +19,19 @@ import fieldVerticalDefaultExampleCodeRaw from './examples/vertical-default.exam
     ...HELL_FIELD_DIRECTIVES,
     FieldVerticalDefaultExample,
     FieldHorizontalExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Field</h1>
+      <hd-page-header
+        title="Field"
+        icon="faSolidRectangleList"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/field"
+        stylesPath="@hell-ui/angular/field/styles.css"
+      >
+        Wires labels, descriptions, and error messages to any control with correct ids, <code>aria-describedby</code>, and required/invalid states.
+      </hd-page-header>
       <p>
         A form-field shell that wires <code>label</code>, <code>description</code> and
         <code>error</code> elements to the control inside it via the underlying form-field primitive
@@ -65,15 +75,21 @@ import fieldVerticalDefaultExampleCodeRaw from './examples/vertical-default.exam
         <li>Import the bundle via <code>HELL_FIELD_DIRECTIVES</code>.</li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>One field wraps one control; the label is clickable and programmatically associated.</li>
+        <li>Descriptions and errors join <code>aria-describedby</code> automatically; errors also set <code>aria-invalid</code>.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use <code>hellField</code> to bind label, hint and error copy to one control.</li>
         <li>Use horizontal orientation only for compact settings rows.</li>
         <li>Keep errors actionable and specific.</li>
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't put multiple unrelated controls in one field.</li>
         <li>Don't replace labels with placeholders.</li>
       </ul>

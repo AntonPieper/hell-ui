@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { ResizableContractHarnessPage } from './resizable-contract-harness.page';
 import { ResizableGripHandle5Example } from './examples/grip-handle-5.example';
 import resizableGripHandle5ExampleCodeRaw from './examples/grip-handle-5.example.ts?raw' with {
@@ -36,13 +37,22 @@ import resizableVerticalSplitExampleCodeRaw from './examples/vertical-split.exam
     ResizableGripHandleExample,
     ResizableGripHandle5Example,
     ResizableContractHarnessPage,
+    PageHeader,
   ],
   template: `
     @if (showResizeHarness) {
       <hd-resizable-contract-harness />
     } @else {
     <article class="hd-prose">
-      <h1>Resizable</h1>
+      <hd-page-header
+        title="Resizable"
+        icon="faSolidLeftRight"
+        category="Composite"
+        importPath="@hell-ui/angular/resizable"
+        stylesPath="@hell-ui/angular/resizable/styles.css"
+      >
+        Pointer- and keyboard-resizable panes with minimum sizes, double-click reset, and persistence hooks — Resize Behavior applied to layout.
+      </hd-page-header>
       <p>
         Pointer-driven resizable panes. Place <code>hellResizableHandle</code> between sibling
         <code>hellResizablePane</code> elements; the handle drags both at once. After user sizing,
@@ -96,8 +106,14 @@ import resizableVerticalSplitExampleCodeRaw from './examples/vertical-split.exam
         </li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Handles are focusable separators with value semantics; arrow keys resize, Home/End jump to limits.</li>
+        <li>Handle labels come from the Label Contract and include the pane pair being resized.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Set practical <code>minSize</code> on every pane.</li>
         <li>Use grip handles when discoverability matters.</li>
         <li>
@@ -108,7 +124,7 @@ import resizableVerticalSplitExampleCodeRaw from './examples/vertical-split.exam
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't let panes resize below usable content.</li>
         <li>Don't place resize handles where they conflict with scrollbars.</li>
       </ul>

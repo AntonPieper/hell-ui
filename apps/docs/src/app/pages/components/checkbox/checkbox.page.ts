@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { CheckboxExamplesExample } from './examples/examples.example';
 import checkboxExamplesExampleCodeRaw from './examples/examples.example.ts?raw' with {
   loader: 'text',
@@ -16,10 +17,18 @@ import checkboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
 @Component({
   selector: 'hd-checkbox',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, CheckboxExamplesExample, CheckboxNativeExample, CheckboxStylingExample],
+  imports: [ExampleTabs, CheckboxExamplesExample, CheckboxNativeExample, CheckboxStylingExample, PageHeader],
   template: `
     <article class="hd-prose">
-      <h1>Checkbox</h1>
+      <hd-page-header
+        title="Checkbox"
+        icon="faSolidSquareCheck"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/checkbox"
+        stylesPath="@hell-ui/angular/checkbox/styles.css"
+      >
+        Binary and indeterminate selection — as a styled button-based control or as a directive on a native input.
+      </hd-page-header>
       <p>
         Two- or three-state checkbox API with an Angular Forms-ready facade. Bind
         <code>checked</code> and listen for <code>checkedChange</code>; <code>indeterminate</code>
@@ -50,7 +59,7 @@ import checkboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         <code>button[hellCheckbox]</code> is intentionally opinionated for custom styling and
         behavior, but it is not a drop-in native checkbox control.
       </p>
-      <h2>Part style map</h2>
+      <h2>Styling</h2>
       <p>
         <code>HellCheckboxUi</code> refines the checkbox's <code>root</code> Public Part. Combine <code>ui</code> with state attributes such as <code>data-checked</code> for state-aware overrides — no custom CSS or internal selectors needed.
       </p>
@@ -69,15 +78,22 @@ import checkboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         </li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>The styled control exposes <code>role="checkbox"</code> with <code>aria-checked</code>, including <code>mixed</code> for indeterminate.</li>
+        <li>Associate a visible label via <code>hellField</code> or reference text with <code>aria-labelledby</code>; bare controls need <code>aria-label</code>.</li>
+        <li>Space toggles; disabled state is conveyed to assistive tech, not just visually.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use checkboxes for independent boolean choices.</li>
         <li>Write labels that still make sense when checked.</li>
         <li>Use the indeterminate state for partially selected groups.</li>
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't use checkboxes for mutually exclusive choices; use Radio.</li>
         <li>Don't omit visible labels unless there is an accessible name.</li>
       </ul>

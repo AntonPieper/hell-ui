@@ -4,6 +4,7 @@ import { faSolidFolderOpen, faSolidGear, faSolidHouse } from '@ng-icons/font-awe
 import { HELL_BREADCRUMBS_DIRECTIVES } from '@hell-ui/angular/breadcrumbs';
 import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { BreadcrumbsCustomSeparatorExample } from './examples/custom-separator.example';
 import breadcrumbsCustomSeparatorExampleCodeRaw from './examples/custom-separator.example.ts?raw' with {
   loader: 'text',
@@ -37,10 +38,19 @@ import breadcrumbsStylingExampleCodeRaw from './examples/styling.example.ts?raw'
     BreadcrumbsWithIconsExample,
     BreadcrumbsLongPathWithEllipsisExample,
     BreadcrumbsCustomSeparatorExample, BreadcrumbsStylingExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Breadcrumbs</h1>
+      <hd-page-header
+        title="Breadcrumbs"
+        icon="faSolidSignsPost"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/breadcrumbs"
+        stylesPath="@hell-ui/angular/breadcrumbs/styles.css"
+      >
+        Hierarchical location trail with links, a current-page marker, and a collapsible middle for deep paths.
+      </hd-page-header>
       <p>
         Hierarchical trail showing the user's location, built on
         <code>ng-primitives/breadcrumbs</code>. Use <code>hellBreadcrumbLink</code> for navigable
@@ -81,7 +91,7 @@ import breadcrumbsStylingExampleCodeRaw from './examples/styling.example.ts?raw'
         <app-breadcrumbs-custom-separator-example />
       </hd-example-tabs>
 
-      <h2>Part style map</h2>
+      <h2>Styling</h2>
       <p>
         Every breadcrumbs directive exposes its own single-part <code>ui</code> input (<code>HellBreadcrumbLinkUi</code>, <code>HellBreadcrumbPageUi</code>, …). Refine each directive locally instead of styling descendants from the root.
       </p>
@@ -118,8 +128,15 @@ import breadcrumbsStylingExampleCodeRaw from './examples/styling.example.ts?raw'
         <li>Import the bundle via <code>HELL_BREADCRUMBS_DIRECTIVES</code>.</li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Render inside <code>nav aria-label="Breadcrumb"</code>; separators are presentational.</li>
+        <li>The current page uses <code>aria-current="page"</code> instead of a link.</li>
+        <li>The ellipsis expander is a labeled button provided through the Label Contract.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>
           Use <code>hellBreadcrumbPage</code> for the leaf crumb so screen readers announce the
           current location.
@@ -127,7 +144,7 @@ import breadcrumbsStylingExampleCodeRaw from './examples/styling.example.ts?raw'
         <li>Collapse with an ellipsis once the trail exceeds ~5 levels.</li>
       </ul>
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't make the current page a link — it confuses users and fails WCAG 2.4.8.</li>
         <li>
           Don't render breadcrumbs for flat hierarchies; they only help when there's a parent to

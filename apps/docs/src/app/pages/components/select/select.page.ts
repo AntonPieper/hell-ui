@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HELL_SELECT_BASIC_DIRECTIVES, HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { SelectBasicExample } from './examples/basic.example';
 import selectBasicExampleCodeRaw from './examples/basic.example.ts?raw' with { loader: 'text' };
 import { SelectBasicPresetExample } from './examples/basic-preset.example';
@@ -13,10 +14,18 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
 @Component({
   selector: 'hd-select',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, ...HELL_SELECT_DIRECTIVES, ...HELL_SELECT_BASIC_DIRECTIVES, SelectBasicExample, SelectBasicPresetExample, SelectStylingExample],
+  imports: [ExampleTabs, ...HELL_SELECT_DIRECTIVES, ...HELL_SELECT_BASIC_DIRECTIVES, SelectBasicExample, SelectBasicPresetExample, SelectStylingExample, PageHeader],
   template: `
     <article class="hd-prose">
-      <h1>Select</h1>
+      <hd-page-header
+        title="Select"
+        icon="faSolidCaretDown"
+        category="Mixed entry point"
+        importPath="@hell-ui/angular/select"
+        stylesPath="@hell-ui/angular/select/styles.css"
+      >
+        Single-choice dropdown on a native button trigger — compose the directives, or use the basic preset for the common case.
+      </hd-page-header>
       <p>
         Headless rich select built on <code>ng-primitives/select</code>. Unlike a native
         <code>&lt;select&gt;</code> (use <code>hellNativeSelect</code> for that) the rich
@@ -40,7 +49,7 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         <app-select-basic-preset-example />
       </hd-example-tabs>
 
-      <h2>Part style map</h2>
+      <h2>Styling</h2>
       <p>
         <code>hell-select-basic</code> is owned anatomy, so <code>HellSelectBasicUi</code> is a flat multi-part map: <code>trigger</code>, <code>value</code>, <code>placeholder</code>, <code>dropdown</code>, and <code>option</code>. The same part names appear in DOM as <code>data-slot</code> values.
       </p>
@@ -95,6 +104,13 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
           preferable.
         </li>
       </ul>
+      <h2>Accessibility</h2>
+      <ul>
+        <li>The trigger is a native button exposing <code>aria-expanded</code> and the selected value as its accessible name.</li>
+        <li>Options use listbox semantics with typeahead; Escape returns focus to the trigger.</li>
+        <li>Prefer <code>hellNativeSelect</code> when platform pickers matter (mobile forms).</li>
+      </ul>
+
     </article>
   `,
 })

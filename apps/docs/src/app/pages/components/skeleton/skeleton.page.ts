@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { SkeletonAvatarLinesExample } from './examples/avatar-lines.example';
 import skeletonAvatarLinesExampleCodeRaw from './examples/avatar-lines.example.ts?raw' with {
   loader: 'text',
@@ -32,10 +33,19 @@ import skeletonStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
     SkeletonAvatarLinesExample,
     SkeletonCardPlaceholderExample,
     SkeletonShapesExample, SkeletonStylingExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Skeleton</h1>
+      <hd-page-header
+        title="Skeleton"
+        icon="faSolidBarsStaggered"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/skeleton"
+        stylesPath="@hell-ui/angular/skeleton/styles.css"
+      >
+        Loading placeholders that mirror your layout while content arrives — lines, shapes, and composed previews.
+      </hd-page-header>
       <p>
         Layout-preserving loading placeholder. Reserves the space the real content will occupy so
         the page does not jump when it arrives. For short, indeterminate work prefer
@@ -68,7 +78,7 @@ import skeletonStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         <app-skeleton-shapes-example />
       </hd-example-tabs>
 
-      <h2>Part style map</h2>
+      <h2>Styling</h2>
       <p>
         Keep <code>class</code> for sizing placement (the Additive Class Hook) and use <code>ui</code> — <code>HellSkeletonUi</code> — for visual overrides such as radius and shimmer surface.
       </p>
@@ -86,8 +96,13 @@ import skeletonStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         <li><code>ui</code>: string or <code>{{ '{' }} root: string {{ '}' }}</code> map</li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Skeletons are <code>aria-hidden</code>; announce loading once at the region level (e.g. <code>aria-busy</code> or a status line), not per placeholder.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>
           Match the skeleton's footprint to the real content — same height, same border radius, same
           column widths.
@@ -96,7 +111,7 @@ import skeletonStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>
           Don't show a skeleton for content that loads in under ~300 ms — the flash is more
           distracting than a brief blank.

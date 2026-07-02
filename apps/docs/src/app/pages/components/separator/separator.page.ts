@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { SeparatorFlushInsideACardExample } from './examples/flush-inside-a-card.example';
 import separatorFlushInsideACardExampleCodeRaw from './examples/flush-inside-a-card.example.ts?raw' with {
   loader: 'text',
@@ -30,10 +31,19 @@ import separatorStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
     SeparatorSpacingOptionsExample,
     SeparatorVerticalExample,
     SeparatorFlushInsideACardExample, SeparatorStylingExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Separator</h1>
+      <hd-page-header
+        title="Separator"
+        icon="faSolidGripLines"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/separator"
+        stylesPath="@hell-ui/angular/separator/styles.css"
+      >
+        A horizontal or vertical rule with spacing presets, for dividing dense regions without extra margin utilities.
+      </hd-page-header>
       <p>
         A thin divider with the correct ARIA role for both axes. Configure breathing room via
         <code>spacing</code>, or set it to <code>none</code> for flush dividers (e.g. inside cards).
@@ -62,7 +72,7 @@ import separatorStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         <app-separator-flush-inside-a-card-example />
       </hd-example-tabs>
 
-      <h2>Part style map</h2>
+      <h2>Styling</h2>
       <p>
         <code>HellSeparatorUi</code> refines the separator's <code>root</code> Public Part. Conflicting height and background utilities deterministically replace the recipe's hairline defaults.
       </p>
@@ -93,15 +103,20 @@ import separatorStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         </li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Defaults to <code>role="separator"</code> with correct orientation; use <code>decorative</code> to remove it from the tree.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use separators to clarify groups, not decorate empty space.</li>
         <li>Choose spacing that matches surrounding density.</li>
         <li>Use vertical separators only in horizontal layouts with enough height.</li>
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't use separators as section headings.</li>
         <li>Don't stack multiple separators to create borders.</li>
       </ul>

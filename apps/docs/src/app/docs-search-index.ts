@@ -286,6 +286,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'field vertical-default components/field/examples/vertical-default.example components/field hellField hellFieldLabel hellFieldError',
   },
   {
+    title: 'Flyout: Basic',
+    path: '/components/flyout',
+    detail: 'components/flyout/examples/basic.example.ts',
+    terms:
+      'flyout basic components/flyout/examples/basic.example components/flyout hellFlyout hellFlyoutTrigger usage non-modal anchored surface',
+  },
+  {
     title: 'Flyout: Example Boundary Keeps Siblings Interactive',
     path: '/components/flyout',
     detail: 'components/flyout/examples/example-boundary-keeps-siblings-interactive.example.ts',
@@ -924,6 +931,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     detail: 'components/drop-zone/examples/styling.example.ts',
     terms:
       'drop-zone styling components/drop-zone/examples/styling.example components/drop-zone hellDropzone ui Part Style Map data-slot root HellDropZoneUi',
+  },
+  {
+    title: 'Omnibar: Basic',
+    path: '/components/omnibar',
+    detail: 'components/omnibar/examples/basic.example.ts',
+    terms:
+      'omnibar basic components/omnibar/examples/basic.example components/omnibar hell-omnibar usage hellOmnibarItem hellOmnibarGroup command palette submit',
   },
   {
     title: 'Omnibar: Async Search',

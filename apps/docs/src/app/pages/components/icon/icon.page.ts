@@ -10,6 +10,7 @@ import {
 } from '@ng-icons/font-awesome/solid';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { IconExampleExample } from './examples/example.example';
 import iconExampleExampleCodeRaw from './examples/example.example.ts?raw' with {
   loader: 'text',
@@ -44,10 +45,19 @@ const HD_ICON_PAGE_ICONS = {
     IconExampleExample,
     IconSizesExample,
     IconRegisteringIconsExample, IconStylingExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Icon</h1>
+      <hd-page-header
+        title="Icon"
+        icon="faSolidStar"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/icon"
+        stylesPath="@hell-ui/angular/icon/styles.css"
+      >
+        Renders registered SVG icons, sized and colored through text styles so they align with surrounding content.
+      </hd-page-header>
       <p>
         Thin wrapper around <code>&lt;ng-icon&gt;</code> from <code>&#64;ng-icons/core</code>.
         Consumer apps must register the icons they use via <code>provideIcons()</code>, ideally in
@@ -76,7 +86,7 @@ const HD_ICON_PAGE_ICONS = {
         — both share the parent's font-size and colour.
       </p>
 
-      <h2>Part style map</h2>
+      <h2>Styling</h2>
       <p>
         <code>HellIconUi</code> refines the icon's <code>root</code> Public Part. Use <code>ui</code> when a size or color utility must beat the recipe; plain <code>class</code> stays fine for additive, non-conflicting hooks.
       </p>
@@ -105,8 +115,14 @@ const HD_ICON_PAGE_ICONS = {
         <app-icon-registering-icons-example />
       </hd-example-tabs>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Icons are <code>aria-hidden</code> by default; pair them with text or give the interactive parent an accessible name.</li>
+        <li>Standalone meaningful icons need an explicit label on the host element.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Register only the icon packs needed by the page.</li>
         <li>
           Prefer visible text; use <code>decorative="false" aria-label="…"</code> only for
@@ -116,7 +132,7 @@ const HD_ICON_PAGE_ICONS = {
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't use icons as unlabeled buttons.</li>
         <li>Don't mix icon styles in the same toolbar without intent.</li>
       </ul>

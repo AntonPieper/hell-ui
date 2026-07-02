@@ -1,8 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { FloatingDismissalHarnessPage } from '../../testing/floating-dismissal-harness.page';
 import { FlyoutExampleBoundaryKeepsSiblingsInteractiveExample } from './examples/example-boundary-keeps-siblings-interactive.example';
+import { FlyoutBasicExample } from './examples/basic.example';
+import flyoutBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
+  loader: 'text',
+};
 import flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw from './examples/example-boundary-keeps-siblings-interactive.example.ts?raw' with {
   loader: 'text',
 };
@@ -19,13 +24,23 @@ import flyoutStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
     RouterLink,
     FloatingDismissalHarnessPage,
     FlyoutExampleBoundaryKeepsSiblingsInteractiveExample, FlyoutStylingExample,
+    PageHeader,
+    FlyoutBasicExample,
   ],
   template: `
     @if (showFloatingDismissalHarness) {
       <hd-floating-dismissal-harness />
     } @else {
       <article class="hd-prose">
-      <h1>Flyout</h1>
+      <hd-page-header
+        title="Flyout"
+        icon="faSolidCommentDots"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/flyout"
+        stylesPath="@hell-ui/angular/flyout/styles.css"
+      >
+        A non-modal anchored surface that keeps the rest of the page interactive — for pinned helpers, inspectors, and tool panels.
+      </hd-page-header>
       <p>
         An anchored, non-modal, light-dismiss surface that <strong>does not trap focus</strong>. Use
         a flyout when the surrounding context — for example a media player or a toolbar — must
@@ -38,6 +53,16 @@ import flyoutStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         Pick <a routerLink="/components/popover">Popover</a> or
         <a routerLink="/components/dialog">Dialog</a> instead when you need a focus trap.
       </p>
+
+      <h2>Usage</h2>
+      <p>
+        Bind a trigger with <code>hellFlyoutTrigger</code> and render the surface with
+        <code>[hellFlyout]</code> when open. The consumer owns open state, so showing the surface
+        from routing, selection, or media events is trivial.
+      </p>
+      <hd-example-tabs [code]="flyoutBasicExampleCode">
+        <app-flyout-basic-example />
+      </hd-example-tabs>
 
       <h2>Behaviour</h2>
       <ul>
@@ -65,7 +90,7 @@ import flyoutStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         <app-flyout-example-boundary-keeps-siblings-interactive-example />
       </hd-example-tabs>
 
-      <h2>Part style map</h2>
+      <h2>Styling</h2>
       <p>
         <code>HellFlyoutUi</code> refines the flyout surface's <code>root</code> Public Part. Anchoring, boundary, and dismissal behavior are not affected by the Part Style Map.
       </p>
@@ -112,8 +137,14 @@ import flyoutStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         <li><code>closeOnOutsideInteraction</code> (default <code>true</code>)</li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>The surface participates in the Floating Scope, so outside interaction rules are explicit and composable.</li>
+        <li>Label the surface with <code>aria-labelledby</code>; keep focus management non-modal (no trap).</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use flyout for anchored non-modal panels where nearby controls stay interactive.</li>
         <li>Pass <code>anchor</code> when the panel should visually attach to a sibling control.</li>
         <li>Pass <code>boundary</code> when siblings should count as inside.</li>
@@ -125,7 +156,7 @@ import flyoutStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't use flyout when focus must be trapped; use Dialog or Popover.</li>
         <li>Don't place critical confirmation flows in a light-dismiss surface.</li>
       </ul>
@@ -141,4 +172,5 @@ export class FlyoutPage {
   protected readonly flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCode =
     flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw;
   protected readonly flyoutStylingExampleCode = flyoutStylingExampleCodeRaw;
+  protected readonly flyoutBasicExampleCode = flyoutBasicExampleCodeRaw;
 }

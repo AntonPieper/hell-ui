@@ -2233,18 +2233,20 @@ function checkDocsRootImportContract() {
   }
 }
 
-// Docs navigation must present each component Package Entry Point under the
-// docs section that matches its Module Category sidecar. Entry points that
-// are deliberately documented on another entry point's page are listed as
-// explicit exceptions naming the page that owns them.
-const docsCategorySections = new Map([
-  [entrypointCategories.STYLED_PRIMITIVE, 'Primitives'],
-  [entrypointCategories.MIXED_ENTRYPOINT, 'Primitives'],
-  [entrypointCategories.COMPOSITE, 'Composites'],
-  [entrypointCategories.FEATURE, 'Features'],
-  [entrypointCategories.TABLE_PRIMITIVES, 'Tables'],
-  [entrypointCategories.TANSTACK_TABLE_SHELL, 'Tables'],
-  [entrypointCategories.TANSTACK_TABLE_BODY_STRATEGY, 'Tables'],
+// Every component Package Entry Point must have a registered docs page, and
+// that page must present the entry point's Module Category (from its
+// hell-entrypoint.json sidecar) through the shared docs page header. The
+// sidebar groups pages functionally for consumers; the category badge keeps
+// the architectural classification visible and machine-checked. Entry points
+// that are deliberately documented on another entry point's page are listed
+// as explicit exceptions naming the page that owns them.
+const docsCategoryBadgeLabels = new Map([
+  [entrypointCategories.STYLED_PRIMITIVE, 'Styled primitive'],
+  [entrypointCategories.MIXED_ENTRYPOINT, 'Mixed entry point'],
+  [entrypointCategories.COMPOSITE, 'Composite'],
+  [entrypointCategories.FEATURE, 'Feature'],
+  [entrypointCategories.TABLE_PRIMITIVES, 'Table primitives'],
+  [entrypointCategories.TANSTACK_TABLE_SHELL, 'TanStack table shell'],
 ]);
 
 const docsCategoryPageExceptions = new Map([
@@ -2257,21 +2259,11 @@ const docsCategoryPageExceptions = new Map([
 
 function checkDocsCategoryNavigationContract() {
   const catalog = readFile(join(root, 'apps/docs/src/app/docs-catalog.ts'));
-  const sectionBlocks = [...catalog.matchAll(/heading:\s*'([^']+)'/g)];
-  const sectionForRoute = new Map();
-  for (const [index, match] of sectionBlocks.entries()) {
-    const start = match.index;
-    const end = sectionBlocks[index + 1]?.index ?? catalog.length;
-    const block = catalog.slice(start, end);
-    for (const route of block.matchAll(/routePath:\s*'([^']+)'/g)) {
-      sectionForRoute.set(route[1], match[1]);
-    }
-  }
+  const registeredRoutes = new Set(
+    [...catalog.matchAll(/routePath:\s*'([^']+)'/g)].map((match) => match[1]),
+  );
 
   for (const entrypoint of componentEntrypoints()) {
-    const expectedSection = docsCategorySections.get(entrypoint.category);
-    if (!expectedSection) continue;
-
     const exceptionRoute = docsCategoryPageExceptions.get(entrypoint.id);
     const route = exceptionRoute ?? `components/${basename(entrypoint.id)}`;
     const pagePath = pagePathForRoute(`/${route}`);
@@ -2281,16 +2273,25 @@ function checkDocsCategoryNavigationContract() {
       );
       continue;
     }
-    if (exceptionRoute) continue;
-
-    const actualSection = sectionForRoute.get(route);
-    if (!actualSection) {
+    if (!registeredRoutes.has(route)) {
       failures.push(
         `Docs Catalog does not register route ${route} for ${entrypoint.specifier} (${entrypoint.category})`,
       );
-    } else if (actualSection !== expectedSection) {
+      continue;
+    }
+    if (exceptionRoute) continue;
+
+    const expectedBadge = docsCategoryBadgeLabels.get(entrypoint.category);
+    if (!expectedBadge) continue;
+
+    const pageSource = readFile(pagePath);
+    if (!pageSource.includes('<hd-page-header')) {
       failures.push(
-        `Docs Catalog lists ${route} under "${actualSection}" but Module Category ${entrypoint.category} belongs under "${expectedSection}"`,
+        `Docs page ${relPath(pagePath)} must present ${entrypoint.specifier} through the shared hd-page-header`,
+      );
+    } else if (!pageSource.includes(`category="${expectedBadge}"`)) {
+      failures.push(
+        `Docs page ${relPath(pagePath)} must show Module Category badge category="${expectedBadge}" for ${entrypoint.specifier}`,
       );
     }
   }

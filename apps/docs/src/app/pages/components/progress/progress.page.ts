@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { ProgressExamplesExample } from './examples/examples.example';
 import progressExamplesExampleCodeRaw from './examples/examples.example.ts?raw' with {
   loader: 'text',
@@ -12,10 +13,18 @@ import progressInteractiveExampleCodeRaw from './examples/interactive.example.ts
 @Component({
   selector: 'hd-progress',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, ProgressExamplesExample, ProgressInteractiveExample],
+  imports: [ExampleTabs, ProgressExamplesExample, ProgressInteractiveExample, PageHeader],
   template: `
     <article class="hd-prose">
-      <h1>Progress</h1>
+      <hd-page-header
+        title="Progress"
+        icon="faSolidBarsProgress"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/progress"
+        stylesPath="@hell-ui/angular/progress/styles.css"
+      >
+        A determinate progress bar driven by semantic tokens, with value text for assistive tech.
+      </hd-page-header>
       <p>
         Indicates the percentage of completion for a known-duration task. Set <code>value</code> as
         a number between <code>0</code> and <code>max</code> (default 100).
@@ -42,15 +51,20 @@ import progressInteractiveExampleCodeRaw from './examples/interactive.example.ts
         <li><code>ui</code>: string shorthand or <code>&#123; root: '...' &#125;</code> on either directive</li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Exposes <code>role="progressbar"</code> with min/max/now; pair with visible text for long operations.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use progress when completion percentage is known.</li>
         <li>Pair bars with text for precise long-running jobs.</li>
         <li>Use native values consistently from 0 to max.</li>
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't show fake progress for unknown duration; use Spinner or Skeleton.</li>
         <li>Don't rely on color alone for status.</li>
       </ul>

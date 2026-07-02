@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { TimeInputExamplesExample } from './examples/examples.example';
 import timeInputExamplesExampleCodeRaw from './examples/examples.example.ts?raw' with {
   loader: 'text',
@@ -30,10 +31,19 @@ import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
     TimeInputReactiveFormsExample,
     TimeInputPlaceholderAndLabelsExample,
     TimeInputSizesExample, TimeInputStylingExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Time input</h1>
+      <hd-page-header
+        title="Time input"
+        icon="faSolidClock"
+        category="Composite"
+        importPath="@hell-ui/angular/time-input"
+        stylesPath="@hell-ui/angular/time-input/styles.css"
+      >
+        Text-first time entry backed by a structured hour/minute/second value, with parsing, validation, and an optional stepper picker.
+      </hd-page-header>
       <p>
         A native-backed time field that keeps the colon visible, selects the current value on focus,
         and lets the browser reject illegal time strings. The default editor commits
@@ -68,7 +78,7 @@ import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         <app-time-input-sizes-example />
       </hd-example-tabs>
 
-      <h2>Part style map</h2>
+      <h2>Styling</h2>
       <p>
         <code>HellTimeInputUi</code> maps the input, trigger, and picker chrome parts. Parsing, validation, and keyboard stepping stay owned by the Typed Value Input behavior.
       </p>
@@ -120,15 +130,21 @@ import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         <code>HELL_TIME_INPUT_ADAPTER</code>; custom adapters use the text-backed editing path.
       </p>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>The text input keeps normal input semantics with <code>aria-invalid</code> for unparseable drafts.</li>
+        <li>Picker steppers are labeled buttons (Label Contract) and announce the unit they change.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use <code>seconds</code> only when users really need second precision.</li>
         <li>Pair with field labels and help for timezone expectations.</li>
         <li>Format the structured value at your form or transport seam.</li>
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't force time input for broad periods like morning or afternoon.</li>
         <li>Don't omit timezone context in scheduling flows.</li>
       </ul>

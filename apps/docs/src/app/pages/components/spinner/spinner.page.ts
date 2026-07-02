@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { SpinnerColourExample } from './examples/colour.example';
 import spinnerColourExampleCodeRaw from './examples/colour.example.ts?raw' with {
   loader: 'text',
@@ -32,10 +33,19 @@ import spinnerStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
     SpinnerSizesExample,
     SpinnerColourExample,
     SpinnerInsideAButtonExample, SpinnerStylingExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Spinner</h1>
+      <hd-page-header
+        title="Spinner"
+        icon="faSolidSpinner"
+        category="Styled primitive"
+        importPath="@hell-ui/angular/skeleton"
+        stylesPath="@hell-ui/angular/skeleton/styles.css"
+      >
+        An indeterminate activity indicator that follows text size and color — for short, unquantifiable waits.
+      </hd-page-header>
       <p>
         Indeterminate loading indicator. Use for short, in-flight operations — submit buttons,
         refresh, polling. For layout-preserving placeholders prefer
@@ -83,7 +93,7 @@ import spinnerStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         <app-spinner-inside-a-button-example />
       </hd-example-tabs>
 
-      <h2>Part style map</h2>
+      <h2>Styling</h2>
       <p>
         <code>HellSpinnerUi</code> refines the spinner's <code>root</code> Public Part. The recipe sets font-size per <code>size</code> variant; a conflicting <code>ui</code> font-size wins through the Part-Class Pipeline.
       </p>
@@ -98,8 +108,14 @@ import spinnerStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
         <li><code>ui</code>: string or <code>{{ '{' }} root: string {{ '}' }}</code> map</li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Ships a Label Contract loading label; override it per instance when the context is more specific.</li>
+        <li>For longer operations prefer Progress with real values.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>
           Pair the spinner with a label when the action is non-trivial (e.g. <em>Saving…</em>).
         </li>
@@ -110,7 +126,7 @@ import spinnerStylingExampleCodeRaw from './examples/styling.example.ts?raw' wit
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>
           Don't use a spinner where the result will arrive in &lt; 200 ms; flicker is worse than no
           feedback.

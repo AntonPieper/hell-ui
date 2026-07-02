@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { AudioPlayerSpeechTranscriptExample } from './examples/speech-transcript.example';
 import audioPlayerSpeechTranscriptExampleCodeRaw from './examples/speech-transcript.example.ts?raw' with {
   loader: 'text',
@@ -25,10 +26,19 @@ import audioPlayerStylingExampleCodeRaw from './examples/styling.example.ts?raw'
     AudioPlayerWithTitleAndDateExample,
     AudioPlayerUntitledControlsOnlyExample,
     AudioPlayerSpeechTranscriptExample, AudioPlayerStylingExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Audio player</h1>
+      <hd-page-header
+        title="Audio player"
+        icon="faSolidPlay"
+        category="Composite"
+        importPath="@hell-ui/angular/audio-player"
+        stylesPath="@hell-ui/angular/audio-player/styles.css"
+      >
+        A compact player for recorded audio: play/pause, seek, volume, optional download — and an explicitly opt-in, best-effort browser speech transcript.
+      </hd-page-header>
       <p>
         Compact player wrapping a native <code>&lt;audio&gt;</code> element with play/pause,
         draggable scrubber, mute, volume slider, an optional download button, and — when the
@@ -72,7 +82,7 @@ import audioPlayerStylingExampleCodeRaw from './examples/styling.example.ts?raw'
         <app-audio-player-speech-transcript-example />
       </hd-example-tabs>
 
-      <h2>Part style map</h2>
+      <h2>Styling</h2>
       <p>
         The audio player is an owned-anatomy Composite: <code>HellAudioPlayerUi</code> names player-owned parts such as <code>playButton</code>, <code>seek</code>, and <code>title</code> — not the internals of the primitives it happens to render.
       </p>
@@ -143,8 +153,15 @@ import audioPlayerStylingExampleCodeRaw from './examples/styling.example.ts?raw'
         </li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>Transport controls are native buttons with Label Contract names; the seek and volume sliders expose value text.</li>
+        <li>Playback state changes are reflected through structured state, not color alone.</li>
+        <li>Treat the speech transcript as a convenience aid, never as provided captions or an accessibility substitute.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>
           Provide a clear <code>title</code> and <code>date</code> for recorded calls or messages.
         </li>
@@ -158,7 +175,7 @@ import audioPlayerStylingExampleCodeRaw from './examples/styling.example.ts?raw'
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't rely on waveform or timing alone to communicate state.</li>
         <li>Don't treat browser speech transcripts as production-grade accessibility content.</li>
         <li>Don't expose download actions for private recordings.</li>

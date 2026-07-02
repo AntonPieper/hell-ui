@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { SplitViewMasterDetailExample } from './examples/master-detail.example';
 import splitViewMasterDetailExampleCodeRaw from './examples/master-detail.example.ts?raw' with {
   loader: 'text',
@@ -8,11 +9,19 @@ import splitViewMasterDetailExampleCodeRaw from './examples/master-detail.exampl
 @Component({
   selector: 'hd-split-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, SplitViewMasterDetailExample],
+  imports: [ExampleTabs, SplitViewMasterDetailExample, PageHeader],
   template: `
     <article class="hd-doc-page">
       <div class="hd-prose">
-        <h1>Split view</h1>
+        <hd-page-header
+          title="Split view"
+          icon="faSolidTableColumns"
+          category="Composite"
+          importPath="@hell-ui/angular/split-view"
+          stylesPath="@hell-ui/angular/split-view/styles.css"
+        >
+          Master–detail layout on top of Resizable that collapses into a stacked screen flow with item navigation on small viewports.
+        </hd-page-header>
         <p>
           Responsive master/detail shell. It uses resizable panes when the container can support two
           columns and switches to a compact screen flow with a back button below the breakpoint.
@@ -53,8 +62,14 @@ import splitViewMasterDetailExampleCodeRaw from './examples/master-detail.exampl
           </li>
         </ul>
 
-        <h2>Do</h2>
+        <h2>Accessibility</h2>
         <ul>
+          <li>Compact mode exposes back/previous/next controls as labeled buttons; headers stay real headings.</li>
+          <li>The resize handle inherits the Resizable keyboard contract.</li>
+        </ul>
+
+        <h2>Do</h2>
+        <ul class="hd-do">
           <li>Drive selection outside the split view and pass compact detail state explicitly.</li>
           <li>Disable previous/next item controls at collection boundaries.</li>
           <li>
@@ -63,7 +78,7 @@ import splitViewMasterDetailExampleCodeRaw from './examples/master-detail.exampl
         </ul>
 
         <h2>Don't</h2>
-        <ul>
+        <ul class="hd-dont">
           <li>
             Don't assume viewport size equals available component size; split view watches its own
             container.

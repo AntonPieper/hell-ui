@@ -3,6 +3,7 @@ import { provideIcons } from '@ng-icons/core';
 import { faSolidChevronDown, faSolidUsers } from '@ng-icons/font-awesome/solid';
 import { HELL_AVATAR_GROUP_DIRECTIVES } from '@hell-ui/angular/avatar-group';
 import { ExampleTabs } from '../../../shared/example-tabs';
+import { PageHeader } from '../../../shared/page-header';
 import { AvatarGroupBasicExample } from './examples/basic.example';
 import avatarGroupBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
@@ -32,10 +33,19 @@ interface TeamMember {
     AvatarGroupBasicExample,
     AvatarGroupInteractionHooksExample,
     AvatarGroupOverflowMenuExample,
+    PageHeader,
   ],
   template: `
     <article class="hd-prose">
-      <h1>Avatar group</h1>
+      <hd-page-header
+        title="Avatar group"
+        icon="faSolidUsers"
+        category="Composite"
+        importPath="@hell-ui/angular/avatar-group"
+        stylesPath="@hell-ui/angular/avatar-group/styles.css"
+      >
+        Overlapping avatars with a configurable limit and an overflow menu for the rest of the list.
+      </hd-page-header>
       <p>
         A small composite for stacking avatar-like content. Use <code>hell-avatar</code> for
         visuals, project any trigger you need, and wire clicks in the consuming template.
@@ -70,8 +80,14 @@ interface TeamMember {
         </li>
       </ul>
 
-      <h2>Do</h2>
+      <h2>Accessibility</h2>
       <ul>
+        <li>The overflow trigger is a native button whose accessible name includes the hidden count.</li>
+        <li>Menu items expose each remaining person by name; the visual stack alone never carries the list.</li>
+      </ul>
+
+      <h2>Do</h2>
+      <ul class="hd-do">
         <li>Use a small <code>max</code> and an overflow item for dense lists.</li>
         <li>
           Mark selected people with <code>selected</code> only when selection changes behavior.
@@ -80,7 +96,7 @@ interface TeamMember {
       </ul>
 
       <h2>Don't</h2>
-      <ul>
+      <ul class="hd-dont">
         <li>Don't mix unrelated users and actions in one group.</li>
         <li>Don't use overflow as a menu unless it is keyboard reachable.</li>
       </ul>
