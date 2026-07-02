@@ -504,6 +504,63 @@ describe('HellAppShell secondary panel', () => {
     expect(document.activeElement).toBe(toggle);
   });
 
+  it('moves mobile secondary focus from the rail opener to the header toggle', async () => {
+    mockMobileLayout(true);
+    const fixture = TestBed.createComponent(TestHost);
+    fixture.detectChanges();
+    const shell = query(fixture.nativeElement, '[hellAppShell]');
+    const rail = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      'button[data-hell-secondary-toggle="rail"]',
+    );
+    const header = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      'button[data-hell-secondary-toggle="header"]',
+    );
+    mockRenderedBox(rail);
+    mockRenderedBox(header);
+
+    rail.focus();
+    await settle(fixture);
+    expect(document.activeElement).toBe(rail);
+
+    rail.click();
+    await settle(fixture);
+
+    expect(shell.getAttribute('data-mobile-secondary-open')).toBe('true');
+    expect(document.activeElement).toBe(header);
+  });
+
+  it('switches from mobile sidenav to secondary without losing the secondary open request', async () => {
+    mockMobileLayout(true);
+    const fixture = TestBed.createComponent(TestHost);
+    fixture.detectChanges();
+    const shell = query(fixture.nativeElement, '[hellAppShell]');
+    const sidenavToggle = query<HTMLButtonElement>(fixture.nativeElement, '#sidenav-toggle');
+    const rail = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      'button[data-hell-secondary-toggle="rail"]',
+    );
+    const header = query<HTMLButtonElement>(
+      fixture.nativeElement,
+      'button[data-hell-secondary-toggle="header"]',
+    );
+    mockRenderedBox(rail);
+    mockRenderedBox(header);
+
+    sidenavToggle.click();
+    await settle(fixture);
+    expect(shell.getAttribute('data-mobile-sidenav-open')).toBe('true');
+
+    rail.focus();
+    rail.click();
+    await settle(fixture);
+
+    expect(shell.getAttribute('data-mobile-sidenav-open')).toBeNull();
+    expect(shell.getAttribute('data-mobile-secondary-open')).toBe('true');
+    expect(document.activeElement).toBe(header);
+  });
+
   it('closes mobile panels when Escape is pressed', () => {
     mockMobileLayout(true);
     const fixture = TestBed.createComponent(SentinelShellHost);

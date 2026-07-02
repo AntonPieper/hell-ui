@@ -275,18 +275,20 @@ export class HellAppShell extends HellPartStyleable<HellAppShellPart> implements
 
   toggleSidenav() {
     const next = !this.isSidenavCollapsed();
-    this.setSidenavCollapsed(next);
-    if (this.isMobileLayout() && !next && !this.isSecondaryHidden()) {
-      this.setSecondaryHidden(true);
+    if (this.isMobileLayout() && !next) {
+      this.openMobilePanel('sidenav');
+      return;
     }
+    this.setSidenavCollapsed(next);
   }
 
   toggleSecondary() {
     const next = !this.isSecondaryHidden();
-    this.setSecondaryHidden(next);
-    if (this.isMobileLayout() && !next && !this.isSidenavCollapsed()) {
-      this.setSidenavCollapsed(true);
+    if (this.isMobileLayout() && !next) {
+      this.openMobilePanel('secondary');
+      return;
     }
+    this.setSecondaryHidden(next);
   }
 
   closeMobilePanels() {
@@ -309,6 +311,27 @@ export class HellAppShell extends HellPartStyleable<HellAppShellPart> implements
       else this._secondaryHidden.set(next);
     }
     this.secondaryHiddenChange.emit(next);
+  }
+
+  private openMobilePanel(panel: HellAppShellMobilePanel): void {
+    const nextSidenavCollapsed = panel !== 'sidenav';
+    const nextSecondaryHidden = panel !== 'secondary';
+    const previousSidenavCollapsed = this.isSidenavCollapsed();
+    const previousSecondaryHidden = this.isSecondaryHidden();
+
+    if (this.sidenavCollapsed() === null) {
+      this._mobileSidenavOpen.set(!nextSidenavCollapsed);
+    }
+    if (this.secondaryHidden() === null) {
+      this._mobileSecondaryOpen.set(!nextSecondaryHidden);
+    }
+
+    if (previousSidenavCollapsed !== nextSidenavCollapsed) {
+      this.sidenavCollapsedChange.emit(nextSidenavCollapsed);
+    }
+    if (previousSecondaryHidden !== nextSecondaryHidden) {
+      this.secondaryHiddenChange.emit(nextSecondaryHidden);
+    }
   }
 
   protected dismissMobilePanels(event: PointerEvent) {
@@ -373,7 +396,11 @@ export class HellAppShell extends HellPartStyleable<HellAppShellPart> implements
     const activeElement = this.document.activeElement;
     const panelHasFocus =
       activeElement instanceof HTMLElement && panelElement.contains(activeElement);
-    if (panelHasFocus && activeElement !== panelElement) {
+    if (
+      panelHasFocus &&
+      activeElement !== panelElement &&
+      activeElement !== this._mobilePanelRestoreTarget
+    ) {
       return;
     }
 
