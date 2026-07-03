@@ -489,6 +489,9 @@
     "@angular/router": {
       "optional": true
     },
+    "@ng-icons/core": {
+      "optional": true
+    },
     "@ng-icons/font-awesome": {
       "optional": true
     },

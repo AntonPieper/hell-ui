@@ -15,14 +15,18 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgpSwitchThumb, ngpSwitch, provideSwitchState } from 'ng-primitives/switch';
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
 let nextSwitchId = 0;
 
+/** Public parts of the HellSwitch module, styleable through its Part Style Map. */
 export type HellSwitchPart = 'root' | 'thumb';
+/** Part Style Map accepted by the HellSwitch `ui` input. */
 export type HellSwitchUi = HellUi<HellSwitchPart>;
 
+/** Public parts of the HellNativeSwitch module, styleable through its Part Style Map. */
 export type HellNativeSwitchPart = 'root';
+/** Part Style Map accepted by the HellNativeSwitch `ui` input. */
 export type HellNativeSwitchUi = HellUi<HellNativeSwitchPart>;
 
 const HELL_SWITCH_RECIPE = {
@@ -64,9 +68,15 @@ const HELL_NATIVE_SWITCH_RECIPE = {
   },
   template: `<span ngpSwitchThumb data-slot="thumb" [class]="part('thumb')"></span>`,
 })
-export class HellSwitch extends HellPartStyleable<HellSwitchPart> implements ControlValueAccessor {
-  protected readonly recipe = HELL_SWITCH_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellSwitch implements ControlValueAccessor {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellSwitchPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellSwitchPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_SWITCH_RECIPE,
+  });
 
   readonly checked = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
@@ -160,9 +170,15 @@ export class HellSwitch extends HellPartStyleable<HellSwitchPart> implements Con
     '(change)': 'onChange()',
   },
 })
-export class HellNativeSwitch extends HellPartStyleable<HellNativeSwitchPart> {
-  protected readonly recipe = HELL_NATIVE_SWITCH_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellNativeSwitch {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellNativeSwitchPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellNativeSwitchPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_NATIVE_SWITCH_RECIPE,
+  });
 
   readonly required = input(false, { alias: 'required', transform: booleanAttribute });
 

@@ -1,5 +1,4 @@
-import {
-  ChangeDetectionStrategy,
+import { ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -9,18 +8,49 @@ import {
   booleanAttribute,
   computed,
   inject,
-  signal,
-} from '@angular/core';
+  signal, input } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { faSolidDeleteLeft, faSolidPhone } from '@ng-icons/font-awesome/solid';
-import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import type { InjectionToken, Provider } from '@angular/core';
+
+/** Built-in accessibility labels owned by the dialpad entry point. */
+export interface HellDialpadLabels {
+  /** Group label for the whole dialpad. */
+  readonly dialpad: string;
+  /** Label for the number display input. Defaults to "Number". */
+  readonly number?: string;
+  /** Label for the backspace control. */
+  readonly backspace: string;
+  /** Label for the clear control. Defaults to "Clear". */
+  readonly clear?: string;
+  /** Label for the call action. */
+  readonly call: string;
+  /** Label factory for one key, given its digit and optional letters. */
+  readonly key?: (digit: string, letters?: string) => string;
+}
+
+const HELL_DIALPAD_LABELS_CONTRACT = hellCreateLabels<HellDialpadLabels>('HELL_DIALPAD_LABELS', {
+  dialpad: 'Dial pad',
+  backspace: 'Backspace',
+  call: 'Call',
+});
+
+/** Injection token resolving to the effective dialpad labels. */
+export const HELL_DIALPAD_LABELS: InjectionToken<HellDialpadLabels> = HELL_DIALPAD_LABELS_CONTRACT.token;
+
+/** Override any subset of the dialpad labels for an injector scope. */
+export function provideHellDialpadLabels(overrides: Partial<HellDialpadLabels>): Provider {
+  return HELL_DIALPAD_LABELS_CONTRACT.provide(overrides);
+}
 
 interface HellDialpadKey {
   digit: string;
   letters?: string;
 }
 
+/** Public parts of the HellDialpad module, styleable through its Part Style Map. */
 export type HellDialpadPart =
   | 'root'
   | 'display'
@@ -36,6 +66,7 @@ export type HellDialpadPart =
   | 'lowerGrid'
   | 'callButton';
 
+/** Part Style Map accepted by the HellDialpad `ui` input. */
 export type HellDialpadUi = HellUi<HellDialpadPart>;
 
 const MAIN_KEYS: HellDialpadKey[] = [
@@ -95,7 +126,7 @@ const HELL_DIALPAD_RECIPE = {
     '[class]': "part('root')",
     role: 'group',
     'data-slot': 'root',
-    '[attr.aria-label]': 'labels.dialpad.dialpad',
+    '[attr.aria-label]': 'labels.dialpad',
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
     '[attr.aria-invalid]': 'invalid() ? "true" : null',
     '[attr.data-empty]': 'hasValue() ? null : ""',
@@ -157,7 +188,7 @@ const HELL_DIALPAD_RECIPE = {
         [attr.data-disabled]="!canEdit() || !hasValue() ? '' : null"
         [disabled]="!canEdit() || !hasValue()"
         (click)="backspace()"
-        [attr.aria-label]="labels.dialpad.backspace"
+        [attr.aria-label]="labels.backspace"
       >
         <ng-icon name="faSolidDeleteLeft" size="14px" aria-hidden="true" />
       </button>
@@ -218,17 +249,23 @@ const HELL_DIALPAD_RECIPE = {
         [attr.data-disabled]="disabled() || !hasValue() ? '' : null"
         (click)="submit()"
         [disabled]="disabled() || !hasValue()"
-        [attr.aria-label]="labels.dialpad.call"
+        [attr.aria-label]="labels.call"
       >
         <ng-icon name="faSolidPhone" size="14px" aria-hidden="true" />
-        {{ labels.dialpad.call }}
+        {{ labels.call }}
       </button>
     }
   `,
 })
-export class HellDialpad extends HellPartStyleable<HellDialpadPart> {
-  protected readonly recipe = HELL_DIALPAD_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellDialpad {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellDialpadPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellDialpadPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_DIALPAD_RECIPE,
+  });
 
   private readonly valueInput = signal<string | null | undefined>(null);
   private readonly showCallButtonInput = signal(true);
@@ -251,74 +288,91 @@ export class HellDialpad extends HellPartStyleable<HellDialpadPart> {
   /** Mark the current number invalid for styling and accessibility. */
   readonly invalid = this.invalidInput.asReadonly();
 
+  /** Emits each pressed digit (including `*`, `#`, and held `+`). */
   @Output() readonly digit = new EventEmitter<string>();
+  /** Emits the full number after every edit. */
   @Output() readonly valueChange = new EventEmitter<string>();
+  /** Emits the current number when the call action is pressed. */
   @Output() readonly call = new EventEmitter<string>();
 
-  protected readonly labels = inject<HellLabels>(HELL_LABELS);
+  /** Effective dialpad labels from the Label Contract. */
+  protected readonly labels = inject(HELL_DIALPAD_LABELS);
   private readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly destroyRef = inject(DestroyRef);
 
+  /** Digit keys 1-9 rendered in the main grid. */
   protected readonly mainKeys = MAIN_KEYS;
+  /** Bottom row keys: `*`, `0` (hold for `+`), and `#`. */
   protected readonly lowerKeys = LOWER_KEYS;
   private readonly local = signal('');
   private readonly activeControl = signal<string | null>(null);
   private activeTimer: ReturnType<typeof setTimeout> | null = null;
   private plusHoldTimer: ReturnType<typeof setTimeout> | null = null;
   private plusHoldTriggered = false;
+  /** Template alias for the call-button visibility signal. */
   protected readonly showCallButtonState = this.showCallButton;
 
   constructor() {
-    super();
     this.destroyRef.onDestroy(() => {
       this.clearActiveTimer();
       this.cancelPlusHold();
     });
   }
 
+  /** Controlled number value; nullish keeps local state. */
   @Input('value')
   set valueBinding(value: string | null | undefined) {
     this.valueInput.set(value);
   }
 
+  /** Show or hide the call action button. */
   @Input({ alias: 'showCallButton', transform: booleanAttribute })
   set showCallButtonBinding(value: boolean) {
     this.showCallButtonInput.set(value);
   }
 
+  /** Disable every dialpad control. */
   @Input({ alias: 'disabled', transform: booleanAttribute })
   set disabledBinding(value: boolean) {
     this.disabledInput.set(value);
   }
 
+  /** Prevent number edits while keeping display and call action usable. */
   @Input({ alias: 'readOnly', transform: booleanAttribute })
   set readOnlyBinding(value: boolean) {
     this.readOnlyInput.set(value);
   }
 
+  /** Mark the current number invalid for styling and `aria-invalid`. */
   @Input({ alias: 'invalid', transform: booleanAttribute })
   set invalidBinding(value: boolean) {
     this.invalidInput.set(value);
   }
 
+  /** Effective number: the controlled value when bound, else local state. */
   protected readonly display = computed(() => {
     const value = this.value();
     return value === null || value === undefined ? this.local() : value;
   });
 
+  /** Whether any digits have been entered. */
   protected readonly hasValue = computed(() => this.display().length > 0);
+  /** Whether edits are currently allowed. */
   protected readonly canEdit = computed(() => !this.disabled() && !this.readOnly());
 
+  /** Label for the number display, with English fallback. */
   protected numberLabel(): string {
-    return this.labels.dialpad.number ?? 'Number';
+    return this.labels.number ?? 'Number';
   }
 
+  /** Label for the clear control, with English fallback. */
   protected clearLabel(): string {
-    return this.labels.dialpad.clear ?? 'Clear';
+    return this.labels.clear ?? 'Clear';
   }
 
+  /** Accessible label for one key, honoring the `key` label factory. */
   protected keyLabel(key: HellDialpadKey): string {
-    const label = this.labels.dialpad.key;
+    const label = this.labels.key;
     if (key.digit === '0' && key.letters === '+') {
       return label ? label(key.digit, key.letters) : 'Digit 0, plus';
     }
@@ -328,15 +382,18 @@ export class HellDialpad extends HellPartStyleable<HellDialpadPart> {
     return key.letters ? `Digit ${key.digit}, ${key.letters}` : `Digit ${key.digit}`;
   }
 
+  /** Whether a named control is flashing as active. */
   protected isActive(control: string): boolean {
     return this.activeControl() === control;
   }
 
+  /** Whether a key is flashing as active (held `+` highlights the `0` key). */
   protected isKeyActive(digit: string): boolean {
     const active = this.activeControl();
     return active === digit || (digit === '0' && active === '+');
   }
 
+  /** Start the hold-for-plus timer when `0` is pressed. */
   protected onPointerDown(event: PointerEvent, digit: string): void {
     if (digit !== '0' || !this.canEdit()) return;
     this.cancelPlusHold();
@@ -351,6 +408,7 @@ export class HellDialpad extends HellPartStyleable<HellDialpadPart> {
     }, 520);
   }
 
+  /** Stop the hold-for-plus timer and release pointer capture. */
   protected onPointerUp(event: PointerEvent, digit: string): void {
     if (digit !== '0') return;
     this.clearPlusHoldTimer();
@@ -360,6 +418,7 @@ export class HellDialpad extends HellPartStyleable<HellDialpadPart> {
     }
   }
 
+  /** Press a key, swallowing the click that follows a completed `+` hold. */
   protected onKeyClick(digit: string): void {
     if (digit === '0' && this.plusHoldTriggered) {
       this.plusHoldTriggered = false;
@@ -368,6 +427,7 @@ export class HellDialpad extends HellPartStyleable<HellDialpadPart> {
     this.press(digit);
   }
 
+  /** Append one digit and emit `digit`/`valueChange`. */
   protected press(d: string): void {
     if (!this.canEdit()) return;
     const next = this.display() + d;
@@ -376,6 +436,7 @@ export class HellDialpad extends HellPartStyleable<HellDialpadPart> {
     this.digit.emit(d);
   }
 
+  /** Remove the last digit. */
   protected backspace(): void {
     if (!this.canEdit() || !this.hasValue()) return;
     const next = this.display().slice(0, -1);
@@ -383,18 +444,21 @@ export class HellDialpad extends HellPartStyleable<HellDialpadPart> {
     this.setNumber(next);
   }
 
+  /** Clear the whole number. */
   protected clear(): void {
     if (!this.canEdit() || !this.hasValue()) return;
     this.flash('clear');
     this.setNumber('');
   }
 
+  /** Emit the call event for the current number. */
   protected submit(): void {
     if (this.disabled() || !this.hasValue()) return;
     this.flash('call');
     this.call.emit(this.display());
   }
 
+  /** Filter typed characters to valid dialpad input before it lands. */
   protected onBeforeInput(event: InputEvent): void {
     if (!this.canEdit()) {
       event.preventDefault();
@@ -406,6 +470,7 @@ export class HellDialpad extends HellPartStyleable<HellDialpadPart> {
     }
   }
 
+  /** Sync direct edits of the number input into dialpad state. */
   protected onNumberInput(event: Event): void {
     const input = event.target;
     if (!(input instanceof HTMLInputElement)) return;
@@ -420,6 +485,7 @@ export class HellDialpad extends HellPartStyleable<HellDialpadPart> {
     this.setNumber(next);
   }
 
+  /** Keyboard support: digits, `*`, `#`, `+`, Backspace, Delete, and Enter. */
   protected onKey(e: KeyboardEvent): void {
     if (this.disabled() || e.defaultPrevented) return;
 
@@ -493,6 +559,7 @@ export class HellDialpad extends HellPartStyleable<HellDialpadPart> {
     }
   }
 
+  /** Abort a pending hold-for-plus gesture. */
   protected cancelPlusHold(): void {
     this.clearPlusHoldTimer();
     this.plusHoldTriggered = false;

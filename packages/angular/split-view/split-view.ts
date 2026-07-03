@@ -25,9 +25,10 @@ import {
   HellPaginationNext,
   HellPaginationPrev,
 } from '@hell-ui/angular/pagination';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { HellResizable, HellResizableHandle, HellResizablePane } from '@hell-ui/angular/resizable';
 
+/** Public parts of the HellSplitView module, styleable through its Part Style Map. */
 export type HellSplitViewPart =
   | 'root'
   | 'resizable'
@@ -36,6 +37,7 @@ export type HellSplitViewPart =
   | 'compactHeader'
   | 'detailHeader'
   | 'itemNavigation';
+/** Part Style Map accepted by the HellSplitView `ui` input. */
 export type HellSplitViewUi = HellUi<HellSplitViewPart>;
 
 const HELL_SPLIT_VIEW_RECIPE = {
@@ -195,9 +197,15 @@ export class HellSplitDetail {
     }
   `,
 })
-export class HellSplitView extends HellPartStyleable<HellSplitViewPart> {
-  protected readonly recipe = HELL_SPLIT_VIEW_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellSplitView {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellSplitViewPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellSplitViewPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_SPLIT_VIEW_RECIPE,
+  });
 
   readonly compactBelow = input(720, { transform: numberAttribute });
   readonly detailOpen = input(false, { transform: booleanAttribute });
@@ -245,7 +253,6 @@ export class HellSplitView extends HellPartStyleable<HellSplitViewPart> {
   });
 
   constructor() {
-    super();
     const update = () => this.inlineSize.set(this.host.clientWidth);
     queueMicrotask(update);
 

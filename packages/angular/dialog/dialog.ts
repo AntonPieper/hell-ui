@@ -28,7 +28,7 @@ import {
 } from 'ng-primitives/portal';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { HellSize } from '@hell-ui/angular/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
 import {
   HELL_DIALOG_SCOPE_ROOT,
@@ -36,16 +36,24 @@ import {
   hellFindDialogScopeRoot,
 } from './dialog-scope';
 
+/** Public parts of the HellDialogOverlay module, styleable through its Part Style Map. */
 export type HellDialogOverlayPart = 'root';
+/** Part Style Map accepted by the HellDialogOverlay `ui` input. */
 export type HellDialogOverlayUi = HellUi<HellDialogOverlayPart>;
 
+/** Public parts of the HellDialog module, styleable through its Part Style Map. */
 export type HellDialogPart = 'root';
+/** Part Style Map accepted by the HellDialog `ui` input. */
 export type HellDialogUi = HellUi<HellDialogPart>;
 
+/** Public parts of the HellDialogTitle module, styleable through its Part Style Map. */
 export type HellDialogTitlePart = 'root';
+/** Part Style Map accepted by the HellDialogTitle `ui` input. */
 export type HellDialogTitleUi = HellUi<HellDialogTitlePart>;
 
+/** Public parts of the HellDialogDescription module, styleable through its Part Style Map. */
 export type HellDialogDescriptionPart = 'root';
+/** Part Style Map accepted by the HellDialogDescription `ui` input. */
 export type HellDialogDescriptionUi = HellUi<HellDialogDescriptionPart>;
 
 const HELL_DIALOG_OVERLAY_RECIPE = {
@@ -173,9 +181,15 @@ function optionalDismissGuardAttribute<T>(
     '[attr.data-scoped]': 'scoped() ? "true" : null',
   },
 })
-export class HellDialogOverlay extends HellPartStyleable<HellDialogOverlayPart> {
-  protected readonly recipe = HELL_DIALOG_OVERLAY_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellDialogOverlay {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellDialogOverlayPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellDialogOverlayPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_DIALOG_OVERLAY_RECIPE,
+  });
 
   /** When true, overlay reads bounds from nearest dialog root captured by
    *  opening trigger. If none exists, it falls back to viewport. */
@@ -187,7 +201,6 @@ export class HellDialogOverlay extends HellPartStyleable<HellDialogOverlayPart> 
   private adapter: HellDialogScopedOverlayAdapter | null = null;
 
   constructor() {
-    super();
     const destroyRef = inject(DestroyRef);
     effect(() => {
       if (this.scoped()) this.connectScope();
@@ -238,9 +251,15 @@ export class HellDialogScope {}
     '(keydown.tab)': 'onTabKeydown($event)',
   },
 })
-export class HellDialog extends HellPartStyleable<HellDialogPart> {
-  protected readonly recipe = HELL_DIALOG_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellDialog {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellDialogPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellDialogPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_DIALOG_RECIPE,
+  });
 
   readonly size = input<HellSize>('md');
 
@@ -311,9 +330,15 @@ export class HellDialog extends HellPartStyleable<HellDialogPart> {
   hostDirectives: [NgpDialogTitle],
   host: { '[class]': "part('root')", 'data-slot': 'root' },
 })
-export class HellDialogTitle extends HellPartStyleable<HellDialogTitlePart> {
-  protected readonly recipe = HELL_DIALOG_TITLE_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellDialogTitle {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellDialogTitlePart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellDialogTitlePart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_DIALOG_TITLE_RECIPE,
+  });
 }
 
 @Directive({
@@ -321,9 +346,15 @@ export class HellDialogTitle extends HellPartStyleable<HellDialogTitlePart> {
   hostDirectives: [NgpDialogDescription],
   host: { '[class]': "part('root')", 'data-slot': 'root' },
 })
-export class HellDialogDescription extends HellPartStyleable<HellDialogDescriptionPart> {
-  protected readonly recipe = HELL_DIALOG_DESCRIPTION_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellDialogDescription {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellDialogDescriptionPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellDialogDescriptionPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_DIALOG_DESCRIPTION_RECIPE,
+  });
 }
 
 export const HELL_DIALOG_DIRECTIVES = [

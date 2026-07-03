@@ -7,17 +7,23 @@ import {
 } from 'ng-primitives/toggle-group';
 import { containsNode } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
-import { HellSize, HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, HellSize, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
 export type HellToggleGroupValue = string | null | readonly string[];
 
+/** Public parts of the HellToggle module, styleable through its Part Style Map. */
 export type HellTogglePart = 'root';
+/** Part Style Map accepted by the HellToggle `ui` input. */
 export type HellToggleUi = HellUi<HellTogglePart>;
 
+/** Public parts of the HellToggleGroup module, styleable through its Part Style Map. */
 export type HellToggleGroupPart = 'root';
+/** Part Style Map accepted by the HellToggleGroup `ui` input. */
 export type HellToggleGroupUi = HellUi<HellToggleGroupPart>;
 
+/** Public parts of the HellToggleGroupItem module, styleable through its Part Style Map. */
 export type HellToggleGroupItemPart = 'root';
+/** Part Style Map accepted by the HellToggleGroupItem `ui` input. */
 export type HellToggleGroupItemUi = HellUi<HellToggleGroupItemPart>;
 
 const HELL_TOGGLE_BASE_RECIPE =
@@ -61,17 +67,21 @@ const HELL_TOGGLE_GROUP_RECIPE = {
     type: 'button',
   },
 })
-export class HellToggle extends HellPartStyleable<HellTogglePart> {
-  protected readonly defaultUiPart = 'root';
+export class HellToggle {
   readonly size = input<HellSize>('md');
 
-  protected get recipe(): HellRecipe<HellTogglePart> {
-    return {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellTogglePart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellTogglePart>(this.ui, {
+    defaultPart: 'root',
+    recipe: (): HellRecipe<HellTogglePart> => ({
       root: [HELL_TOGGLE_BASE_RECIPE, HELL_TOGGLE_SIZE_RECIPE[this.size()], HELL_TOGGLE_SELECTED_RECIPE].join(
         ' ',
       ),
-    };
-  }
+    }),
+  });
 }
 
 @Directive({
@@ -101,12 +111,15 @@ export class HellToggle extends HellPartStyleable<HellTogglePart> {
     role: 'group',
   },
 })
-export class HellToggleGroup
-  extends HellPartStyleable<HellToggleGroupPart>
-  implements ControlValueAccessor
-{
-  protected readonly recipe = HELL_TOGGLE_GROUP_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellToggleGroup implements ControlValueAccessor {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellToggleGroupPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellToggleGroupPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_TOGGLE_GROUP_RECIPE,
+  });
 
   private readonly group = inject(NgpToggleGroup);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -114,7 +127,6 @@ export class HellToggleGroup
   private readonly valueAccessor = new HellControlValueAccessorBridge<HellToggleGroupValue>();
 
   constructor() {
-    super();
     const valueSub = this.group.valueChange.subscribe((value) => {
       this.valueAccessor.emitValue(this.asControlValue(value));
     });
@@ -175,17 +187,21 @@ export class HellToggleGroup
     type: 'button',
   },
 })
-export class HellToggleGroupItem extends HellPartStyleable<HellToggleGroupItemPart> {
-  protected readonly defaultUiPart = 'root';
+export class HellToggleGroupItem {
   readonly size = input<HellSize>('sm');
 
-  protected get recipe(): HellRecipe<HellToggleGroupItemPart> {
-    return {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellToggleGroupItemPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellToggleGroupItemPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: (): HellRecipe<HellToggleGroupItemPart> => ({
       root: [
         HELL_TOGGLE_BASE_RECIPE,
         HELL_TOGGLE_SIZE_RECIPE[this.size()],
         HELL_TOGGLE_GROUP_ITEM_SELECTED_RECIPE,
       ].join(' '),
-    };
-  }
+    }),
+  });
 }

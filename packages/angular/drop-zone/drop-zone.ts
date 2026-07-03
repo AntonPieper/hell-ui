@@ -1,4 +1,4 @@
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import {
   Directive,
   ElementRef,
@@ -11,7 +11,9 @@ import {
   signal,
 } from '@angular/core';
 
+/** Public parts of the HellDropZone module, styleable through its Part Style Map. */
 export type HellDropZonePart = 'root';
+/** Part Style Map accepted by the HellDropZone `ui` input. */
 export type HellDropZoneUi = HellUi<HellDropZonePart>;
 
 const HELL_DROP_ZONE_RECIPE = {
@@ -66,9 +68,15 @@ function hellFileMatchesAccept(file: File, accept: string | null): boolean {
     '(drop)': 'onDrop($event)',
   },
 })
-export class HellDropZone extends HellPartStyleable<HellDropZonePart> implements OnDestroy {
-  protected readonly recipe = HELL_DROP_ZONE_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellDropZone implements OnDestroy {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellDropZonePart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellDropZonePart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_DROP_ZONE_RECIPE,
+  });
 
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly multiple = input(true, { transform: booleanAttribute });
@@ -96,7 +104,6 @@ export class HellDropZone extends HellPartStyleable<HellDropZonePart> implements
   };
 
   constructor() {
-    super();
     effect(() => {
       const configuredInput = this.resolveNativeInput();
       if (configuredInput) {

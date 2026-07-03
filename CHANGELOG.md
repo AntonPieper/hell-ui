@@ -27,8 +27,53 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   parts while keeping runtime ownership, portals, focus, media, search, and
   form contracts intact.
 
+- Removed the public `HellPartStyleable<Part>` inheritance base from
+  `@hell-ui/angular/core` (and its `@hell-ui/angular/input` re-export). The
+  Part-Class Pipeline is now the `hellPartStyler<Part>` composition factory:
+  every styled module declares its own typed
+  `readonly ui = input<HellUiInput<Part>>(undefined, { alias: 'ui' })` signal
+  input and composes `hellPartStyler<Part>(this.ui, { defaultPart, recipe })`.
+  The consumer-facing `[ui]` binding, string shorthand, part unions,
+  `Hell<Component>Ui` types, recipes, and `data-slot` contract are unchanged;
+  only code that subclassed `HellPartStyleable` breaks. Migration: replace
+  `extends HellPartStyleable<Part>` + `defaultUiPart`/`recipe` members with the
+  typed `ui` input plus a `hellPartStyler` field (see the amended
+  `docs/adr/part-style-map.md`). This removes the protected abstract
+  inheritance contract from every component declaration, so core styling
+  changes no longer ripple through subclass d.ts surfaces.
+
+- Replaced the central Label Contract bag in `@hell-ui/angular/core`
+  (`HellLabels`, `HellLabelOverrides`, `HELL_LABELS`, `HELL_DEFAULT_LABELS`,
+  `provideHellLabels`) with entry-point-owned label contracts. Each labeled
+  entry point now exports its own interface, token, and provide function —
+  for example `provideHellPaginationLabels({...})` from
+  `@hell-ui/angular/pagination`, `provideHellSkeletonLabels({ loading })` from
+  `@hell-ui/angular/skeleton`, and `provideHellPdfViewerLabels({...})` from
+  `@hell-ui/pdf-viewer` (whose labels no longer live in the Angular core
+  package). Core keeps only the `hellCreateLabels` factory. Migration: replace
+  one `provideHellLabels({ group: {...} })` call with the matching
+  `provideHell<Module>Labels({...})` calls, and import label interfaces such
+  as `HellPaginationLabels` from their entry points instead of core. This
+  removes core's compile-time knowledge of every component and stops
+  unrelated label strings (including PDF viewer labels) from landing in every
+  consumer bundle.
+
 ### Added
 
+- Expanded API-report guard coverage from 6 to 41 entry points: every
+  non-experimental `@hell-ui/angular` entry point now has a committed API
+  Extractor baseline under `etc/api-reports/`, so public-surface drift on
+  select-adjacent, table, composite, and primitive entry points is reviewed
+  like root/core. Four entry points (`/audio-player`, `/combobox`,
+  `/date-input`, `/select`) are temporarily excluded through the documented
+  `apiReportBlockedEntrypoints` policy because `@microsoft/api-extractor`
+  crashes on their flattened declarations; the list is re-probed on extractor
+  upgrades. Experimental surfaces stay out of stable reports by policy.
+- Documented every human-authored export of the report-guarded surfaces
+  (root, `/core`, `/input`, `/dialpad`, `/testing`) with TSDoc; those API
+  reports now carry zero authored `ae-undocumented` warnings, and all
+  entry-point label contracts, part unions, and Part Style Map types ship
+  doc comments for IDE IntelliSense.
 - Added this changelog, the alpha-to-beta SemVer policy, and a release dry-run
   guard that fails when the current package version has no changelog entry.
 - Added the [first-beta consumer migration guide](docs/release/first-beta-consumer-guide.md)
@@ -39,6 +84,18 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   contracts.
 
 ### Changed
+
+- `@ng-icons/core` is now an optional peer dependency of `@hell-ui/angular`.
+  Only icon-backed entry points (`/icon`, `/date-input`, `/date-picker`,
+  `/dialpad`, `/time-input`, `/split-view`, `/audio-player`, and
+  `@hell-ui/pdf-viewer`) need it at runtime; core, button, table, and other
+  non-icon consumers now strict-peer install without any `@ng-icons/*` package.
+  The required light peer stack is `@angular/common`, `@angular/core`,
+  `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `ng-primitives`, and
+  `rxjs` (forms/cdk/floating-ui are mandated by `ng-primitives` itself).
+  Package-consumer scenarios, pack audit, and architecture gates now assert the
+  icon tier separately (evidence: `pnpm test:architecture`,
+  `pnpm test:ci-contract`, `pnpm test:package-consumer -- --minimal-deps`).
 
 - Upgraded `ng-primitives` from 0.117.2 to 0.123.0 and shrank Hell's
   version-bound compatibility seams to match

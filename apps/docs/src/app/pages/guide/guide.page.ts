@@ -6,7 +6,6 @@ import { CodeBlock } from '../../shared/code-block';
 const ENTRYPOINT_IMPORTS_CODE = `// TypeScript: one narrow entry point per surface you use.
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
-import { provideHellLabels } from '@hell-ui/angular/core';
 
 // CSS: shared tokens once, then one stylesheet per entry point you render.
 // styles.css
@@ -166,8 +165,10 @@ const THEME_CODE = `/* Runtime themes override Semantic Theme Tokens, not compon
       <p>Beyond visuals, the Customization Surface is deliberately explicit:</p>
       <ul>
         <li>
-          <strong>Labels:</strong> built-in ARIA and status text is injectable through
-          <code>provideHellLabels</code> — no forking components to localize.
+          <strong>Labels:</strong> built-in ARIA and status text is injectable through each
+          entry point's <code>provideHell&lt;Module&gt;Labels</code> function — no forking
+          components to localize, and no central label bag pulling every module's strings into
+          your bundle.
         </li>
         <li>
           <strong>Adapters:</strong> date/time parsing, search ranking, and resize policy expose

@@ -1,17 +1,17 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { provideHellLabels } from '@hell-ui/angular/core';
 import {
   HellSkeleton,
   type HellSkeletonUi,
   HellSpinner,
   type HellSpinnerUi,
+  provideHellSkeletonLabels,
 } from './skeleton';
 
 @Component({
   imports: [HellSpinner],
-  providers: [provideHellLabels({ loading: 'Wird geladen' })],
+  providers: [provideHellSkeletonLabels({ loading: 'Wird geladen' })],
   template: `
     <span id="localized" hellSpinner></span>
     <span id="explicit" hellSpinner aria-label="Please wait"></span>
@@ -27,7 +27,7 @@ class SkeletonClassHookHost {}
 
 @Component({
   imports: [HellSkeleton, HellSpinner],
-  providers: [provideHellLabels({ loading: 'Loading from contract' })],
+  providers: [provideHellSkeletonLabels({ loading: 'Loading from contract' })],
   template: `
     <div
       id="skeleton-string"

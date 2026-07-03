@@ -61,10 +61,9 @@ const behaviorUiWithoutFontAwesomeDeps = [
   '@angular/cdk',
   '@floating-ui/dom',
   'ng-primitives',
-  '@ng-icons/core',
 ];
 const styledUiWithoutFontAwesomeDeps = [...behaviorUiWithoutFontAwesomeDeps, 'tailwindcss'];
-const styledUiDeps = [...styledUiWithoutFontAwesomeDeps, '@ng-icons/font-awesome'];
+const styledUiDeps = [...styledUiWithoutFontAwesomeDeps, '@ng-icons/core', '@ng-icons/font-awesome'];
 const styledUiRouterDeps = [...styledUiDeps, '@angular/router'];
 const coreDeps = behaviorUiWithoutFontAwesomeDeps;
 const buttonStyledDeps = styledUiWithoutFontAwesomeDeps;
@@ -1416,19 +1415,22 @@ function exactInstalledVersion(name) {
 function rootConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellPartStyleable, HellStyleable, hellTwMerge, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '${packageName}';
+import { HellStyleable, hellPartStyler, hellTwMerge, type HellPartStyler, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '${packageName}';
 
 const size: HellSize = 'md';
 const recipe: HellRecipe<'root'> = { root: 'block' };
 const ui: HellUi<'root'> = { root: 'rounded-md' };
 const uiInput: HellUiInput<'root'> = 'rounded-md';
 const merged = hellTwMerge('px-hell-4', 'px-hell-7');
+const styler: HellPartStyler<'root'> = hellPartStyler(() => uiInput, {
+  defaultPart: 'root',
+  recipe: () => recipe,
+});
+const styledRoot = styler('root');
 void size;
-void recipe;
 void ui;
-void uiInput;
 void merged;
-void HellPartStyleable;
+void styledRoot;
 void HellStyleable;
 
 @Component({
@@ -1445,19 +1447,22 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function coreConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellPartStyleable, HellStyleable, hellTwMerge, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '${packageName}/core';
+import { HellStyleable, hellPartStyler, hellTwMerge, type HellPartStyler, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '${packageName}/core';
 
 const size: HellSize = 'md';
 const recipe: HellRecipe<'root'> = { root: 'block' };
 const ui: HellUi<'root'> = { root: 'rounded-md' };
 const uiInput: HellUiInput<'root'> = 'rounded-md';
 const merged = hellTwMerge('px-hell-4', 'px-hell-7');
+const styler: HellPartStyler<'root'> = hellPartStyler(() => uiInput, {
+  defaultPart: 'root',
+  recipe: () => recipe,
+});
+const styledRoot = styler('root');
 void size;
-void recipe;
 void ui;
-void uiInput;
 void merged;
-void HellPartStyleable;
+void styledRoot;
 void HellStyleable;
 
 @Component({

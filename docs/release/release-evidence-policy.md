@@ -51,6 +51,51 @@ language remain policy-owned.
 | `@hell-ui/angular/input` | `hell-ui-angular-input.api.md` | Stable API report. |
 | `@hell-ui/angular/dialpad` | `hell-ui-angular-dialpad.api.md` | Stable API report. |
 | `@hell-ui/angular/testing` | `hell-ui-angular-testing.api.md` | Stable API report. |
+| `@hell-ui/angular/accordion` | `hell-ui-angular-accordion.api.md` | Stable API report. |
+| `@hell-ui/angular/app-shell` | `hell-ui-angular-app-shell.api.md` | Stable API report. |
+| `@hell-ui/angular/avatar` | `hell-ui-angular-avatar.api.md` | Stable API report. |
+| `@hell-ui/angular/avatar-group` | `hell-ui-angular-avatar-group.api.md` | Stable API report. |
+| `@hell-ui/angular/breadcrumbs` | `hell-ui-angular-breadcrumbs.api.md` | Stable API report. |
+| `@hell-ui/angular/button` | `hell-ui-angular-button.api.md` | Stable API report. |
+| `@hell-ui/angular/card` | `hell-ui-angular-card.api.md` | Stable API report. |
+| `@hell-ui/angular/checkbox` | `hell-ui-angular-checkbox.api.md` | Stable API report. |
+| `@hell-ui/angular/date-picker` | `hell-ui-angular-date-picker.api.md` | Stable API report. |
+| `@hell-ui/angular/dialog` | `hell-ui-angular-dialog.api.md` | Stable API report. |
+| `@hell-ui/angular/drop-zone` | `hell-ui-angular-drop-zone.api.md` | Stable API report. |
+| `@hell-ui/angular/field` | `hell-ui-angular-field.api.md` | Stable API report. |
+| `@hell-ui/angular/flyout` | `hell-ui-angular-flyout.api.md` | Stable API report. |
+| `@hell-ui/angular/icon` | `hell-ui-angular-icon.api.md` | Stable API report. |
+| `@hell-ui/angular/listbox` | `hell-ui-angular-listbox.api.md` | Stable API report. |
+| `@hell-ui/angular/menu` | `hell-ui-angular-menu.api.md` | Stable API report. |
+| `@hell-ui/angular/omnibar` | `hell-ui-angular-omnibar.api.md` | Stable API report. |
+| `@hell-ui/angular/pagination` | `hell-ui-angular-pagination.api.md` | Stable API report. |
+| `@hell-ui/angular/popover` | `hell-ui-angular-popover.api.md` | Stable API report. |
+| `@hell-ui/angular/progress` | `hell-ui-angular-progress.api.md` | Stable API report. |
+| `@hell-ui/angular/radio` | `hell-ui-angular-radio.api.md` | Stable API report. |
+| `@hell-ui/angular/resizable` | `hell-ui-angular-resizable.api.md` | Stable API report. |
+| `@hell-ui/angular/search` | `hell-ui-angular-search.api.md` | Stable API report. |
+| `@hell-ui/angular/separator` | `hell-ui-angular-separator.api.md` | Stable API report. |
+| `@hell-ui/angular/skeleton` | `hell-ui-angular-skeleton.api.md` | Stable API report. |
+| `@hell-ui/angular/slider` | `hell-ui-angular-slider.api.md` | Stable API report. |
+| `@hell-ui/angular/split-view` | `hell-ui-angular-split-view.api.md` | Stable API report. |
+| `@hell-ui/angular/switch` | `hell-ui-angular-switch.api.md` | Stable API report. |
+| `@hell-ui/angular/table` | `hell-ui-angular-table.api.md` | Stable API report. |
+| `@hell-ui/angular/tabs` | `hell-ui-angular-tabs.api.md` | Stable API report. |
+| `@hell-ui/angular/tag` | `hell-ui-angular-tag.api.md` | Stable API report. |
+| `@hell-ui/angular/time-input` | `hell-ui-angular-time-input.api.md` | Stable API report. |
+| `@hell-ui/angular/toast` | `hell-ui-angular-toast.api.md` | Stable API report. |
+| `@hell-ui/angular/toggle` | `hell-ui-angular-toggle.api.md` | Stable API report. |
+| `@hell-ui/angular/tooltip` | `hell-ui-angular-tooltip.api.md` | Stable API report. |
+
+Blocked entry points: `@hell-ui/angular/audio-player`, `@hell-ui/angular/combobox`,
+`@hell-ui/angular/date-input`, and `@hell-ui/angular/select` are temporarily
+outside the API report gate because `@microsoft/api-extractor` crashes
+analyzing their flattened declarations ("InternalError: Unable to follow
+symbol"). The list lives in `tools/release-evidence-policy.mjs` as
+`apiReportBlockedEntrypoints` and is re-probed on extractor upgrades.
+Experimental entry points (`features/*`, `table-tanstack*`) stay out of stable
+reports by policy.
+
 
 ## Freshness rules
 

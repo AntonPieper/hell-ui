@@ -97,6 +97,26 @@ mapped to command evidence and concrete evidence checks.
           "path": "etc/api-reports/hell-ui-angular-testing.api.md"
         },
         {
+          "type": "fileExists",
+          "label": "button API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-button.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "table API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-table.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "dialog API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-dialog.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "app-shell API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-app-shell.api.md"
+        },
+        {
           "type": "releaseDryRunEvidence",
           "label": "full release dry-run passed API report task"
         }

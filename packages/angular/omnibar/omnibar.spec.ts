@@ -2,7 +2,6 @@ import { Component, signal } from '@angular/core';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { TestBed } from '@angular/core/testing';
 
-import { provideHellLabels } from '@hell-ui/angular/core';
 import { type HellSearchSource, type HellUiInput } from '@hell-ui/angular/core';
 import { HellGlobalKeydownService, matchHotkey } from '@hell-ui/angular/internal/hotkeys';
 import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
@@ -22,6 +21,7 @@ import {
   type HellOmnibarPart,
   type HellOmnibarSubmitEvent,
   type HellOmnibarUi,
+  provideHellOmnibarLabels,
 } from './omnibar';
 
 @Component({
@@ -109,10 +109,8 @@ class OmnibarDisabledItemHost {
 @Component({
   imports: [...HELL_OMNIBAR_DIRECTIVES],
   providers: [
-    provideHellLabels({
-      omnibar: {
-        clearSearch: 'Suche löschen',
-      },
+    provideHellOmnibarLabels({
+      clearSearch: 'Suche löschen',
     }),
   ],
   template: `<hell-omnibar />`,

@@ -1,7 +1,15 @@
 # ADR: Part style map replaces unstyled
 
-- Status: Accepted
+- Status: Accepted (amended)
 - Date: 2026-06-24
+- Amended: 2026-07-03 — the shared `HellPartStyleable<Part>` inheritance base is
+  replaced by the `hellPartStyler` composition contract. The consumer-facing
+  `[ui]` API, part unions, `Hell<Component>Ui` types, recipes, and `data-slot`
+  rules are unchanged; only the library-internal wiring and the public core
+  seam changed. Rationale: an abstract base class with protected abstract
+  members is itself public API surface — every component d.ts inherits it, and
+  base evolution ripples through all component declarations. Composition keeps
+  one shared Part-Class Pipeline without an inheritance contract.
 
 ## Context
 
@@ -25,10 +33,21 @@ export type HellUiInput<Part extends string> = string | HellUi<Part> | null | un
 export type HellRecipe<Part extends string> = Readonly<Record<Part, string>>;
 ```
 
-Every public component that exposes `[ui]` should export its part union and concrete UI type, for example `HellDialpadPart` and `HellDialpadUi = HellUi<HellDialpadPart>`. Migrated components should extend a shared `HellPartStyleable<Part>` base that owns the `[ui]` input, the abstract recipe contract, and the `part()` merge pipeline. `HellPartStyleable` owns the default Public Part for string shorthand, so single-root directives can use `ui="px-0"` while multi-part components can use `[ui]="{ header: 'px-6' }"`.
+Every public component that exposes `[ui]` should export its part union and concrete UI type, for example `HellDialpadPart` and `HellDialpadUi = HellUi<HellDialpadPart>`. Migrated components declare their own typed `[ui]` signal input and compose the shared `hellPartStyler<Part>` factory from core, which owns the single part-class merge pipeline and the default Public Part for string shorthand, so single-root directives can use `ui="px-0"` while multi-part components can use `[ui]="{ header: 'px-6' }"`:
 
-`HellPartStyleable.ui` is a signal input. The public Angular binding remains
-`[ui]`, while subclasses and core helpers read it as `this.ui()`. Do not carry a
+```ts
+readonly ui = input<HellUiInput<HellButtonPart>>(undefined, { alias: 'ui' });
+
+protected readonly part = hellPartStyler<HellButtonPart>(this.ui, {
+  defaultPart: 'root',
+  recipe: () => ({ root: this.rootRecipe() }),
+});
+```
+
+Do not reintroduce an inheritance base for this contract; the pipeline is a composition seam.
+
+The `ui` input is a signal input declared per component. The public Angular
+binding remains `[ui]`, and the styler reads it lazily. Do not carry a
 class-property compatibility layer such as a setter, `uiSignal`, or a parallel
 legacy field; the migration point is the switch to the signal-native contract.
 
@@ -145,7 +164,7 @@ both should migrate separately from owned-anatomy Composites with real
 multi-part root maps. This keeps each implementation goal focused on one
 architecture rule and one validation shape.
 
-After the `HellPartStyleable.ui` signal-input foundation lands, migrate the
+After the signal-input foundation lands, migrate the
 directive-suite batch first: Card, Field, Tabs, and Accordion. This batch proves
 the projected-child and single-host directive rules before taking on floating
 surfaces or owned-anatomy Composites with portaled DOM, runtime state, and
@@ -162,8 +181,8 @@ part contract.
 
 Before enforcing global Part Style Map gates, resolve implementation feedback:
 remove or allowlist remaining `HellStyleable` use, add `HellUiInput` shorthand,
-replace per-component merge callbacks with direct `hellTwMerge` use in
-`HellPartStyleable`, remove button-specific variable fallbacks unless justified,
+replace per-component merge callbacks with the shared `hellPartStyler` pipeline,
+remove button-specific variable fallbacks unless justified,
 and document the `class` caveat.
 
 ## Consequences
@@ -172,9 +191,8 @@ and document the `class` caveat.
 - Existing `unstyled` docs, API reports, component-contract checks, release scenarios, and package-consumer gates must be rewritten around Part Style Maps.
 - The migration must prove behavior-only usage through `[ui]` rather than a legacy boolean.
 - Every public `[ui]` component should export its part union type and `Hell<Component>Ui` type, backed by shared `HellUi`, `HellUiInput`, and `HellRecipe` core types.
-- `HellPartStyleable<Part>` is the migration base for components adopting `[ui]`; do not duplicate part-class merge code per component.
-- `HellPartStyleable.ui` is a signal input; subclasses read `this.ui()` and do
-  not keep a compatibility class-property path.
+- `hellPartStyler<Part>` is the shared Part-Class Pipeline for components adopting `[ui]`; do not duplicate part-class merge code per component and do not reintroduce an inheritance base.
+- Each migrated component declares `readonly ui = input<HellUiInput<Part>>(undefined, { alias: 'ui' })`; there is no compatibility class-property path.
 - `ui` string shorthand belongs to a component's documented default Public Part; object-form `ui` remains the explicit multi-part map.
 - `class` is additive and not the deterministic Tailwind conflict override contract.
 - Public Parts should render with stable `data-slot` values; do not rename the DOM marker to `data-part`.

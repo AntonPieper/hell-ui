@@ -15,8 +15,8 @@ import {
 } from '@angular/core';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { NgTemplateOutlet } from '@angular/common';
-import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import {
   hellToastFrontDistance,
   hellToastHeightPx,
@@ -30,6 +30,32 @@ import {
   hellToastStackSnapshotsEqual,
   type HellToastStackSnapshot,
 } from './toast-stack.runtime';
+import type { InjectionToken, Provider } from '@angular/core';
+
+/** Built-in accessibility labels owned by the toast entry point. */
+export interface HellToastLabels {
+  readonly notifications: string;
+  readonly notification: string;
+  readonly stack: string;
+  readonly dismiss: string;
+  readonly dismissAll: string;
+}
+
+const HELL_TOAST_LABELS_CONTRACT = hellCreateLabels<HellToastLabels>('HELL_TOAST_LABELS', {
+  notifications: 'Notifications',
+  notification: 'Notification',
+  stack: 'Notification stack',
+  dismiss: 'Dismiss',
+  dismissAll: 'Dismiss all',
+});
+
+/** Injection token resolving to the effective toast labels. */
+export const HELL_TOAST_LABELS: InjectionToken<HellToastLabels> = HELL_TOAST_LABELS_CONTRACT.token;
+
+/** Override any subset of the toast labels for an injector scope. */
+export function provideHellToastLabels(overrides: Partial<HellToastLabels>): Provider {
+  return HELL_TOAST_LABELS_CONTRACT.provide(overrides);
+}
 
 export type HellToastVariant = 'default' | 'success' | 'info' | 'warning' | 'danger';
 export type HellToastPosition =
@@ -40,6 +66,7 @@ export type HellToastPosition =
   | 'bottom-center'
   | 'bottom-right';
 
+/** Public parts of the HellToaster module, styleable through its Part Style Map. */
 export type HellToasterPart =
   | 'root'
   | 'region'
@@ -55,6 +82,7 @@ export type HellToasterPart =
   | 'toolbar'
   | 'dismissAll';
 
+/** Part Style Map accepted by the HellToaster `ui` input. */
 export type HellToasterUi = HellUi<HellToasterPart>;
 
 const HELL_TOASTER_RECIPE = {
@@ -139,7 +167,7 @@ interface ToastTimer {
 @Injectable({ providedIn: 'root' })
 export class HellToastService {
   private readonly announcer = inject(LiveAnnouncer);
-  private readonly labels = inject<HellLabels>(HELL_LABELS);
+  private readonly labels = inject(HELL_TOAST_LABELS);
   private nextId = 1;
   private timers = new Map<number, ToastTimer>();
   private exitTimers = new Map<number, ReturnType<typeof setTimeout>>();
@@ -266,7 +294,7 @@ export class HellToastService {
     const announcement =
       explicitAnnouncement ||
       [toast.title, toast.description].filter((part) => part.length > 0).join('. ') ||
-      (toast.template ? this.labels.toast.notification : '');
+      (toast.template ? this.labels.notification : '');
     if (!announcement) return;
     this.announcer.announce(announcement, 'polite');
   }
@@ -322,7 +350,7 @@ export class HellToastTemplate {}
         data-slot="region"
         [class]="part('region')"
         role="region"
-        [attr.aria-label]="labels.toast.notifications"
+        [attr.aria-label]="labels.notifications"
         [style.--hell-toast-stack-h]="stackHeightPx()"
         [style.--hell-toast-viewport-h]="expandedViewportHeightPx()"
         [style.--hell-toast-scrollbar-w]="nativeScrollbarWidthPx()"
@@ -336,7 +364,7 @@ export class HellToastTemplate {}
           data-slot="viewport"
           [class]="part('viewport')"
           [attr.tabindex]="isScrollable() ? 0 : null"
-          [attr.aria-label]="isScrollable() ? labels.toast.stack : null"
+          [attr.aria-label]="isScrollable() ? labels.stack : null"
           (scroll)="onViewportScroll($event)"
         >
           <ol data-slot="list" [class]="part('list')">
@@ -428,7 +456,7 @@ export class HellToastTemplate {}
                     type="button"
                     data-slot="close"
                     [class]="part('close')"
-                    [attr.aria-label]="labels.toast.dismiss"
+                    [attr.aria-label]="labels.dismiss"
                     [attr.tabindex]="toastControlTabIndex(t)"
                     (click)="svc.dismiss(t.id)"
                   >
@@ -447,7 +475,7 @@ export class HellToastTemplate {}
               type="button"
               data-slot="dismissAll"
               [class]="part('dismissAll')"
-              [attr.aria-label]="labels.toast.dismissAll"
+              [attr.aria-label]="labels.dismissAll"
               [attr.tabindex]="expanded() ? null : -1"
               (click)="svc.dismissAll()"
             >
@@ -460,7 +488,7 @@ export class HellToastTemplate {}
               >
                 <path d="M4 4l8 8m0-8l-8 8" stroke-linecap="round" />
               </svg>
-              <span>{{ labels.toast.dismissAll }}</span>
+              <span>{{ labels.dismissAll }}</span>
             </button>
           </div>
         }
@@ -468,12 +496,18 @@ export class HellToastTemplate {}
     }
   `,
 })
-export class HellToaster extends HellPartStyleable<HellToasterPart> {
-  protected readonly recipe = HELL_TOASTER_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellToaster {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellToasterPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellToasterPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_TOASTER_RECIPE,
+  });
 
   readonly svc = inject(HellToastService);
-  protected readonly labels = inject<HellLabels>(HELL_LABELS);
+  protected readonly labels = inject(HELL_TOAST_LABELS);
   private readonly host: HTMLElement = inject(ElementRef).nativeElement;
 
   protected readonly hasToasts = computed(() => this.svc.toasts().length > 0);
@@ -523,7 +557,6 @@ export class HellToaster extends HellPartStyleable<HellToasterPart> {
   private collapseLayoutResetHandle: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
-    super();
     inject(DestroyRef).onDestroy(() => this.cleanupObservers());
     this.syncNativeScrollbarWidth();
     afterNextRender(() => {

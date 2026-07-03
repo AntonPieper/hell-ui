@@ -25,16 +25,83 @@ import { HellButton } from '@hell-ui/angular/button';
 import { HellFlyout, HellFlyoutTrigger } from '@hell-ui/angular/flyout';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellSlider } from '@hell-ui/angular/slider';
-import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { HellAudioRuntime, hellHtmlAudioElementAdapter } from './audio-player.runtime';
 import {
   HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY,
   HellAudioTranscriptUnavailableRuntime,
   type HellAudioTranscriptRuntimeFactory,
 } from '@hell-ui/angular/internal/audio-transcript';
-export { hellAudioSpeechSupported } from '@hell-ui/angular/internal/audio-transcript';
+import type { InjectionToken, Provider } from '@angular/core';
 
+/** Built-in accessibility labels owned by the audio player entry point. */
+export interface HellAudioPlayerLabels {
+  readonly play: string;
+  readonly pause: string;
+  readonly seek: string;
+  readonly mute: string;
+  readonly unmute: string;
+  readonly volume: string;
+  readonly showLiveCaptions: string;
+  readonly hideLiveCaptions: string;
+  readonly speechTranscript?: string;
+  readonly download: string;
+  readonly playbackSpeed: (rate: number) => string;
+  readonly copyTranscript: string;
+  readonly clearTranscript: string;
+  readonly errorStatus: string;
+  readonly liveStatus: string;
+  readonly pausedStatus: string;
+  readonly copied: string;
+  readonly copy: string;
+  readonly clear: string;
+  readonly listening: string;
+  readonly pressPlayForCaptions: string;
+}
+
+const HELL_AUDIO_PLAYER_LABELS_CONTRACT = hellCreateLabels<HellAudioPlayerLabels>('HELL_AUDIO_PLAYER_LABELS', {
+  play: 'Play',
+  pause: 'Pause',
+  seek: 'Seek',
+  mute: 'Mute',
+  unmute: 'Unmute',
+  volume: 'Volume',
+  showLiveCaptions: 'Show speech transcript',
+  hideLiveCaptions: 'Hide speech transcript',
+  speechTranscript: 'Speech transcript',
+  download: 'Download',
+  playbackSpeed: (rate) => `Playback speed ${rate}x`,
+  copyTranscript: 'Copy transcript',
+  clearTranscript: 'Clear transcript',
+  errorStatus: 'Error',
+  liveStatus: 'Live',
+  pausedStatus: 'Paused',
+  copied: 'Copied',
+  copy: 'Copy',
+  clear: 'Clear',
+  listening: 'Listening…',
+  pressPlayForCaptions: 'Press play to capture a speech transcript.',
+});
+
+/** Injection token resolving to the effective audio player labels. */
+export const HELL_AUDIO_PLAYER_LABELS: InjectionToken<HellAudioPlayerLabels> = HELL_AUDIO_PLAYER_LABELS_CONTRACT.token;
+
+/** Override any subset of the audio player labels for an injector scope. */
+export function provideHellAudioPlayerLabels(overrides: Partial<HellAudioPlayerLabels>): Provider {
+  return HELL_AUDIO_PLAYER_LABELS_CONTRACT.provide(overrides);
+}
+import { hellAudioSpeechSupported as hellAudioSpeechSupportedImpl } from '@hell-ui/angular/internal/audio-transcript';
+
+/**
+ * @deprecated Import `hellAudioSpeechSupported` from
+ * `@hell-ui/angular/features/audio-transcript` after opting into the transcript provider.
+ */
+export function hellAudioSpeechSupported(): boolean {
+  return hellAudioSpeechSupportedImpl();
+}
+
+/** Public parts of the HellAudioPlayer module, styleable through its Part Style Map. */
 export type HellAudioPlayerPart =
   | 'root'
   | 'meta'
@@ -61,6 +128,7 @@ export type HellAudioPlayerPart =
   | 'captionsInterim'
   | 'captionsEmpty';
 
+/** Part Style Map accepted by the HellAudioPlayer `ui` input. */
 export type HellAudioPlayerUi = HellUi<HellAudioPlayerPart>;
 
 const HELL_AUDIO_PLAYER_RECIPE = {
@@ -170,7 +238,7 @@ function parseIsoDateOnly(value: string): Date | null {
           data-slot="playButton"
           [iconOnly]="true"
           type="button"
-          [attr.aria-label]="playing() ? labels.audioPlayer.pause : labels.audioPlayer.play"
+          [attr.aria-label]="playing() ? labels.pause : labels.play"
           (click)="toggle()"
         >
           <hell-icon [name]="playing() ? 'faSolidPause' : 'faSolidPlay'" />
@@ -191,7 +259,7 @@ function parseIsoDateOnly(value: string): Date | null {
             [step]="0.1"
             (valueChange)="onSeek($event)"
             (keydown)="onSeekKey($event)"
-            [attr.aria-label]="labels.audioPlayer.seek"
+            [attr.aria-label]="labels.seek"
           />
         </div>
 
@@ -208,7 +276,7 @@ function parseIsoDateOnly(value: string): Date | null {
           data-slot="muteButton"
           [iconOnly]="true"
           type="button"
-          [attr.aria-label]="muted() ? labels.audioPlayer.unmute : labels.audioPlayer.mute"
+          [attr.aria-label]="muted() ? labels.unmute : labels.mute"
           (click)="toggleMute()"
         >
           <hell-icon [name]="volumeIcon()" />
@@ -222,7 +290,7 @@ function parseIsoDateOnly(value: string): Date | null {
             [max]="100"
             [step]="1"
             (valueChange)="onVolume($event)"
-            [attr.aria-label]="labels.audioPlayer.volume"
+            [attr.aria-label]="labels.volume"
           />
         </div>
 
@@ -238,7 +306,7 @@ function parseIsoDateOnly(value: string): Date | null {
             data-slot="captionToggle"
             [attr.aria-pressed]="captions()"
             [attr.aria-label]="
-              captions() ? labels.audioPlayer.hideLiveCaptions : labels.audioPlayer.showLiveCaptions
+              captions() ? labels.hideLiveCaptions : labels.showLiveCaptions
             "
             [attr.data-active]="captions() ? 'true' : null"
             (openChange)="captions.set($event)"
@@ -258,7 +326,7 @@ function parseIsoDateOnly(value: string): Date | null {
             [download]="downloadName()"
             target="_blank"
             rel="noopener"
-            [attr.aria-label]="labels.audioPlayer.download"
+            [attr.aria-label]="labels.download"
           >
             <hell-icon name="faSolidDownload" />
           </a>
@@ -283,11 +351,11 @@ function parseIsoDateOnly(value: string): Date | null {
           <span data-slot="captionsStatus" [class]="part('captionsStatus')">
             <span data-slot="captionsDot" [class]="part('captionsDot')" aria-hidden="true"></span>
             @if (error()) {
-              {{ labels.audioPlayer.errorStatus }}
+              {{ labels.errorStatus }}
             } @else if (transcribing()) {
-              {{ labels.audioPlayer.liveStatus }}
+              {{ labels.liveStatus }}
             } @else {
-              {{ labels.audioPlayer.pausedStatus }}
+              {{ labels.pausedStatus }}
             }
           </span>
 
@@ -300,7 +368,7 @@ function parseIsoDateOnly(value: string): Date | null {
               type="button"
               data-slot="captionAction"
               data-action="rate"
-              [attr.aria-label]="labels.audioPlayer.playbackSpeed(playbackRate())"
+              [attr.aria-label]="labels.playbackSpeed(playbackRate())"
               (click)="cyclePlaybackRate()"
             >
               {{ playbackRate() }}×
@@ -315,10 +383,10 @@ function parseIsoDateOnly(value: string): Date | null {
                 type="button"
                 data-slot="captionAction"
                 data-action="copy"
-                [attr.aria-label]="labels.audioPlayer.copyTranscript"
+                [attr.aria-label]="labels.copyTranscript"
                 (click)="copyTranscript()"
               >
-                {{ copied() ? labels.audioPlayer.copied : labels.audioPlayer.copy }}
+                {{ copied() ? labels.copied : labels.copy }}
               </button>
 
               <button
@@ -329,10 +397,10 @@ function parseIsoDateOnly(value: string): Date | null {
                 type="button"
                 data-slot="captionAction"
                 data-action="clear"
-                [attr.aria-label]="labels.audioPlayer.clearTranscript"
+                [attr.aria-label]="labels.clearTranscript"
                 (click)="clearTranscript()"
               >
-                {{ labels.audioPlayer.clear }}
+                {{ labels.clear }}
               </button>
             }
           </div>
@@ -358,11 +426,11 @@ function parseIsoDateOnly(value: string): Date | null {
             </p>
           } @else if (transcribing()) {
             <p data-slot="captionsEmpty" [class]="part('captionsEmpty')">
-              {{ labels.audioPlayer.listening }}
+              {{ labels.listening }}
             </p>
           } @else {
             <p data-slot="captionsEmpty" [class]="part('captionsEmpty')">
-              {{ labels.audioPlayer.pressPlayForCaptions }}
+              {{ labels.pressPlayForCaptions }}
             </p>
           }
         </div>
@@ -370,9 +438,15 @@ function parseIsoDateOnly(value: string): Date | null {
     }
   `,
 })
-export class HellAudioPlayer extends HellPartStyleable<HellAudioPlayerPart> {
-  protected readonly recipe = HELL_AUDIO_PLAYER_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellAudioPlayer {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellAudioPlayerPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellAudioPlayerPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_AUDIO_PLAYER_RECIPE,
+  });
 
   readonly src = input.required<string>();
   /**
@@ -423,9 +497,9 @@ export class HellAudioPlayer extends HellPartStyleable<HellAudioPlayerPart> {
   protected readonly error = this.transcriptRuntime.error;
   protected readonly copied = this.transcriptRuntime.copied;
   protected readonly speechSupported = this.transcriptRuntime.speechSupported;
-  protected readonly labels = inject<HellLabels>(HELL_LABELS);
+  protected readonly labels = inject(HELL_AUDIO_PLAYER_LABELS);
   protected readonly speechTranscriptLabel =
-    this.labels.audioPlayer.speechTranscript ?? 'Speech transcript';
+    this.labels.speechTranscript ?? 'Speech transcript';
 
   private seekRestartTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -468,7 +542,6 @@ export class HellAudioPlayer extends HellPartStyleable<HellAudioPlayerPart> {
   protected readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
   constructor() {
-    super();
     inject(DestroyRef).onDestroy(() => {
       this.transcriptRuntime.destroy();
       if (this.seekRestartTimer) clearTimeout(this.seekRestartTimer);

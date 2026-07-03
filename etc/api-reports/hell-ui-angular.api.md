@@ -11,121 +11,17 @@ import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
-// @public (undocumented)
-export const HELL_DEFAULT_LABELS: HellLabels;
-
-// @public (undocumented)
-export const HELL_LABELS: InjectionToken<HellLabels>;
-
-// @public (undocumented)
+// @public
 export const HELL_SEARCH_RANKER: InjectionToken<HellSearchRanker>;
 
-// @public (undocumented)
-export interface HellAppShellLabels {
-    // (undocumented)
-    readonly collapseSidebar: string;
-    // (undocumented)
-    readonly expandSidebar: string;
-    // (undocumented)
-    readonly hideSecondaryPanel: string;
-    // (undocumented)
-    readonly showSecondaryPanel: string;
-}
-
-// @public (undocumented)
-export interface HellAudioPlayerLabels {
-    // (undocumented)
-    readonly clear: string;
-    // (undocumented)
-    readonly clearTranscript: string;
-    // (undocumented)
-    readonly copied: string;
-    // (undocumented)
-    readonly copy: string;
-    // (undocumented)
-    readonly copyTranscript: string;
-    // (undocumented)
-    readonly download: string;
-    // (undocumented)
-    readonly errorStatus: string;
-    // (undocumented)
-    readonly hideLiveCaptions: string;
-    // (undocumented)
-    readonly listening: string;
-    // (undocumented)
-    readonly liveStatus: string;
-    // (undocumented)
-    readonly mute: string;
-    // (undocumented)
-    readonly pause: string;
-    // (undocumented)
-    readonly pausedStatus: string;
-    // (undocumented)
-    readonly play: string;
-    // (undocumented)
-    readonly playbackSpeed: (rate: number) => string;
-    // (undocumented)
-    readonly pressPlayForCaptions: string;
-    // (undocumented)
-    readonly seek: string;
-    // (undocumented)
-    readonly showLiveCaptions: string;
-    // (undocumented)
-    readonly speechTranscript?: string;
-    // (undocumented)
-    readonly unmute: string;
-    // (undocumented)
-    readonly volume: string;
-}
-
-// @public (undocumented)
-export interface HellBreadcrumbLabels {
-    // (undocumented)
-    readonly showHiddenNavigation: string;
-}
-
-// @public (undocumented)
+// @public
 export type HellButtonVariant = 'default' | 'primary' | 'soft' | 'ghost' | 'link' | 'danger' | 'success';
 
-// @public (undocumented)
-export interface HellDateInputLabels {
-    // (undocumented)
-    readonly chooseDate: string;
-    // (undocumented)
-    readonly chooseDateFor: (label: string) => string;
-}
-
-// @public (undocumented)
-export interface HellDatePickerLabels {
-    // (undocumented)
-    readonly nextMonth: string;
-    // (undocumented)
-    readonly nextYear: string;
-    // (undocumented)
-    readonly previousMonth: string;
-    // (undocumented)
-    readonly previousYear: string;
-}
-
-// @public (undocumented)
-export interface HellDialpadLabels {
-    // (undocumented)
-    readonly backspace: string;
-    // (undocumented)
-    readonly call: string;
-    // (undocumented)
-    readonly clear?: string;
-    // (undocumented)
-    readonly dialpad: string;
-    // (undocumented)
-    readonly key?: (digit: string, letters?: string) => string;
-    // (undocumented)
-    readonly number?: string;
-}
+// @public
+export function hellCreateLabels<T extends object>(description: string, defaults: T): HellLabelContract<T>;
 
 // @public
 export class HellFloatingElement implements AfterViewInit {
-    // (undocumented)
     ngAfterViewInit(): void;
     // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellFloatingElement, "[hellFloatingElement]", never, {}, {}, never, never, true, never>;
@@ -133,229 +29,77 @@ export class HellFloatingElement implements AfterViewInit {
     static ɵfac: i0.ɵɵFactoryDeclaration<HellFloatingElement, never>;
 }
 
-// @public (undocumented)
-export interface HellLabelOverrides {
-    // (undocumented)
-    readonly appShell?: Partial<HellAppShellLabels>;
-    // (undocumented)
-    readonly audioPlayer?: Partial<HellAudioPlayerLabels>;
-    // (undocumented)
-    readonly breadcrumbs?: Partial<HellBreadcrumbLabels>;
-    // (undocumented)
-    readonly dateInput?: Partial<HellDateInputLabels>;
-    // (undocumented)
-    readonly datePicker?: Partial<HellDatePickerLabels>;
-    // (undocumented)
-    readonly dialpad?: Partial<HellDialpadLabels>;
-    // (undocumented)
-    readonly loading?: string;
-    // (undocumented)
-    readonly omnibar?: Partial<HellOmnibarLabels>;
-    // (undocumented)
-    readonly pagination?: Partial<HellPaginationLabels>;
-    // (undocumented)
-    readonly pdfViewer?: Partial<HellPdfViewerLabels>;
-    // (undocumented)
-    readonly resizable?: Partial<HellResizableLabels>;
-    // (undocumented)
-    readonly tableUtilities?: Partial<HellTableUtilitiesLabels>;
-    // (undocumented)
-    readonly timeInput?: Partial<HellTimeInputLabels>;
-    // (undocumented)
-    readonly toast?: Partial<HellToastLabels>;
-}
-
-// @public (undocumented)
-export interface HellLabels {
-    // (undocumented)
-    readonly appShell: HellAppShellLabels;
-    // (undocumented)
-    readonly audioPlayer: HellAudioPlayerLabels;
-    // (undocumented)
-    readonly breadcrumbs: HellBreadcrumbLabels;
-    // (undocumented)
-    readonly dateInput: HellDateInputLabels;
-    // (undocumented)
-    readonly datePicker: HellDatePickerLabels;
-    // (undocumented)
-    readonly dialpad: HellDialpadLabels;
-    // (undocumented)
-    readonly loading: string;
-    // (undocumented)
-    readonly omnibar: HellOmnibarLabels;
-    // (undocumented)
-    readonly pagination: HellPaginationLabels;
-    // (undocumented)
-    readonly pdfViewer: HellPdfViewerLabels;
-    // (undocumented)
-    readonly resizable: HellResizableLabels;
-    // (undocumented)
-    readonly tableUtilities: HellTableUtilitiesLabels;
-    // (undocumented)
-    readonly timeInput: HellTimeInputLabels;
-    // (undocumented)
-    readonly toast: HellToastLabels;
+// @public
+export interface HellLabelContract<T extends object> {
+    readonly defaults: T;
+    readonly provide: (overrides: Partial<T>) => Provider;
+    readonly token: InjectionToken<T>;
 }
 
 // @public
 export type HellMaybeAsync<T> = T | Promise<T> | Observable<T>;
 
-// @public (undocumented)
-export interface HellOmnibarLabels {
-    // (undocumented)
-    readonly clearSearch: string;
-}
-
-// @public (undocumented)
+// @public
 export type HellOrientation = 'horizontal' | 'vertical';
 
-// @public (undocumented)
-export interface HellPaginationLabels {
-    // (undocumented)
-    readonly firstPage: string;
-    // (undocumented)
-    readonly jumpToPage?: string;
-    // (undocumented)
-    readonly lastPage: string;
-    // (undocumented)
-    readonly navigation: string;
-    // (undocumented)
-    readonly nextPage: string;
-    // (undocumented)
-    readonly page: (page: number) => string;
-    // (undocumented)
-    readonly pageStatus?: (page: number, pageCount: number) => string;
-    // (undocumented)
-    readonly pageTotal?: (pageCount: number) => string;
-    // (undocumented)
-    readonly previousPage: string;
+// @public
+export type HellPartStyler<Part extends string> = (part: Part) => string;
+
+// @public
+export function hellPartStyler<Part extends string>(ui: () => HellUiInput<Part>, options: HellPartStylerOptions<Part>): HellPartStyler<Part>;
+
+// @public
+export interface HellPartStylerOptions<Part extends string> {
+    readonly defaultPart: Part;
+    readonly recipe: () => HellRecipe<Part>;
 }
 
 // @public
-export abstract class HellPartStyleable<Part extends string> {
-    protected abstract readonly defaultUiPart: Part;
-    protected part(part: Part): string;
-    protected abstract readonly recipe: HellRecipe<Part>;
-    readonly ui: i0.InputSignal<HellUiInput<Part>>;
-    // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellPartStyleable<any>, never, never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellPartStyleable<any>, never>;
-}
-
-// @public (undocumented)
-export interface HellPdfViewerLabels {
-    // (undocumented)
-    readonly actualSize: string;
-    // (undocumented)
-    readonly automaticZoom: string;
-    // (undocumented)
-    readonly closeFindBar: string;
-    // (undocumented)
-    readonly download: string;
-    // (undocumented)
-    readonly findInDocument: string;
-    // (undocumented)
-    readonly findPlaceholder: string;
-    // (undocumented)
-    readonly findQuery: string;
-    // (undocumented)
-    readonly goToPage: (page: number) => string;
-    // (undocumented)
-    readonly nextMatch: string;
-    // (undocumented)
-    readonly nextPage: string;
-    // (undocumented)
-    readonly notFound: string;
-    // (undocumented)
-    readonly page: string;
-    // (undocumented)
-    readonly pageFit: string;
-    // (undocumented)
-    readonly pageOverview: string;
-    // (undocumented)
-    readonly pageWidth: string;
-    // (undocumented)
-    readonly previousMatch: string;
-    // (undocumented)
-    readonly previousPage: string;
-    // (undocumented)
-    readonly print: string;
-    // (undocumented)
-    readonly searching: string;
-    // (undocumented)
-    readonly togglePageOverview: string;
-    // (undocumented)
-    readonly zoomIn: string;
-    // (undocumented)
-    readonly zoomLevel: string;
-    // (undocumented)
-    readonly zoomOut: string;
-}
-
-// @public (undocumented)
 export function hellRankLocalSearch<T>(items: readonly T[], request: HellSearchRankRequest<T>): readonly HellSearchResult<T>[];
 
 // @public
 export type HellRecipe<Part extends string> = Readonly<Record<Part, string>>;
 
-// @public (undocumented)
-export interface HellResizableLabels {
-    // (undocumented)
-    readonly resizePanels: string;
-}
-
 // @public
 export interface HellSearchField<T> {
-    // (undocumented)
     readonly get: (item: T) => HellSearchFieldValue;
-    // (undocumented)
     readonly name?: string;
-    // (undocumented)
     readonly weight?: number;
 }
 
-// @public (undocumented)
+// @public
 export type HellSearchFieldValue = HellSearchPrimitive | readonly HellSearchPrimitive[];
 
 // @public
 export function hellSearchKey(value: string): string;
 
-// @public (undocumented)
+// @public
 export type HellSearchPrimitive = string | number | boolean | null | undefined | Date;
 
-// @public (undocumented)
+// @public
 export type HellSearchRanker = <T>(items: readonly T[], request: HellSearchRankRequest<T>) => readonly HellSearchResult<T>[];
 
-// @public (undocumented)
+// @public
 export interface HellSearchRankRequest<T> extends Pick<HellSearchSourceRequest, 'query' | 'limit'> {
-    // (undocumented)
     readonly fields?: readonly HellSearchField<T>[];
 }
 
 // @public
 export interface HellSearchRequest<T, P = unknown> extends HellSearchSourceRequest<P> {
-    // (undocumented)
     readonly fields?: readonly HellSearchField<T>[];
-    // (undocumented)
     readonly items?: readonly T[];
-    // (undocumented)
     readonly source?: HellSearchSource<T, P> | null;
 }
 
 // @public
 export interface HellSearchResponse<T> {
-    // (undocumented)
     readonly items?: readonly T[];
-    // (undocumented)
     readonly results?: readonly HellSearchResult<T>[];
 }
 
 // @public
 export interface HellSearchResult<T> {
-    // (undocumented)
     readonly item: T;
-    // (undocumented)
     readonly score: number;
 }
 
@@ -374,20 +118,16 @@ export type HellSearchSource<T, P = unknown> = (request: HellSearchSourceRequest
 
 // @public
 export interface HellSearchSourceRequest<P = unknown> {
-    // (undocumented)
     readonly limit?: number;
-    // (undocumented)
     readonly params?: P;
-    // (undocumented)
     readonly query: string;
-    // (undocumented)
     readonly signal?: AbortSignal;
 }
 
 // @public
 export function hellSearchWords(value: string): readonly string[];
 
-// @public (undocumented)
+// @public
 export type HellSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 // @public
@@ -399,56 +139,8 @@ export abstract class HellStyleable {
     static ɵfac: i0.ɵɵFactoryDeclaration<HellStyleable, never>;
 }
 
-// @public (undocumented)
-export interface HellTableUtilitiesLabels {
-    // (undocumented)
-    readonly resizeColumn: string;
-}
-
-// @public (undocumented)
+// @public
 export type HellTagVariant = 'default' | 'primary' | 'success' | 'info' | 'danger' | 'warning';
-
-// @public (undocumented)
-export interface HellTimeInputLabels {
-    // (undocumented)
-    readonly addFiveMinutes: string;
-    // (undocumented)
-    readonly chooseTime: string;
-    // (undocumented)
-    readonly chooseTimeFor: (label: string) => string;
-    // (undocumented)
-    readonly decreaseUnit?: (unitLabel: string) => string;
-    // (undocumented)
-    readonly hours: string;
-    // (undocumented)
-    readonly increaseUnit?: (unitLabel: string) => string;
-    // (undocumented)
-    readonly minutePreset?: (minute: number) => string;
-    // (undocumented)
-    readonly minutePresets?: string;
-    // (undocumented)
-    readonly minutes: string;
-    // (undocumented)
-    readonly seconds: string;
-    // (undocumented)
-    readonly selectedTime?: (time: string) => string;
-    // (undocumented)
-    readonly subtractFiveMinutes: string;
-}
-
-// @public (undocumented)
-export interface HellToastLabels {
-    // (undocumented)
-    readonly dismiss: string;
-    // (undocumented)
-    readonly dismissAll: string;
-    // (undocumented)
-    readonly notification: string;
-    // (undocumented)
-    readonly notifications: string;
-    // (undocumented)
-    readonly stack: string;
-}
 
 // @public
 export const hellTwMerge: (...classLists: tailwind_merge.ClassNameValue[]) => string;
@@ -459,185 +151,17 @@ export type HellUi<Part extends string> = Partial<Record<Part, string>>;
 // @public
 export type HellUiInput<Part extends string> = string | HellUi<Part> | null | undefined;
 
-// @public (undocumented)
-export function provideHellLabels(overrides: HellLabelOverrides): Provider;
-
-// @public (undocumented)
+// @public
 export function provideHellSearchRanker(ranker: HellSearchRanker): Provider;
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-angular-internal-core.d.ts:110:5 - (ae-undocumented) Missing documentation for "ngAfterViewInit".
-// types/hell-ui-angular-internal-core.d.ts:111:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-internal-core.d.ts:112:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular.d.ts:7:1 - (ae-undocumented) Missing documentation for "HellSize".
-// types/hell-ui-angular.d.ts:8:1 - (ae-undocumented) Missing documentation for "HellButtonVariant".
-// types/hell-ui-angular.d.ts:9:1 - (ae-undocumented) Missing documentation for "HellTagVariant".
-// types/hell-ui-angular.d.ts:10:1 - (ae-undocumented) Missing documentation for "HellOrientation".
-// types/hell-ui-angular.d.ts:31:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular.d.ts:32:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular.d.ts:50:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular.d.ts:51:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular.d.ts:59:1 - (ae-undocumented) Missing documentation for "HellSearchPrimitive".
-// types/hell-ui-angular.d.ts:60:1 - (ae-undocumented) Missing documentation for "HellSearchFieldValue".
-// types/hell-ui-angular.d.ts:63:5 - (ae-undocumented) Missing documentation for "name".
-// types/hell-ui-angular.d.ts:64:5 - (ae-undocumented) Missing documentation for "weight".
-// types/hell-ui-angular.d.ts:65:5 - (ae-undocumented) Missing documentation for "get".
-// types/hell-ui-angular.d.ts:69:5 - (ae-undocumented) Missing documentation for "item".
-// types/hell-ui-angular.d.ts:70:5 - (ae-undocumented) Missing documentation for "score".
-// types/hell-ui-angular.d.ts:77:5 - (ae-undocumented) Missing documentation for "items".
-// types/hell-ui-angular.d.ts:78:5 - (ae-undocumented) Missing documentation for "results".
-// types/hell-ui-angular.d.ts:82:5 - (ae-undocumented) Missing documentation for "query".
-// types/hell-ui-angular.d.ts:83:5 - (ae-undocumented) Missing documentation for "limit".
-// types/hell-ui-angular.d.ts:84:5 - (ae-undocumented) Missing documentation for "params".
-// types/hell-ui-angular.d.ts:85:5 - (ae-undocumented) Missing documentation for "signal".
-// types/hell-ui-angular.d.ts:89:1 - (ae-undocumented) Missing documentation for "HellSearchRankRequest".
-// types/hell-ui-angular.d.ts:90:5 - (ae-undocumented) Missing documentation for "fields".
-// types/hell-ui-angular.d.ts:92:1 - (ae-undocumented) Missing documentation for "HellSearchRanker".
-// types/hell-ui-angular.d.ts:95:5 - (ae-undocumented) Missing documentation for "items".
-// types/hell-ui-angular.d.ts:96:5 - (ae-undocumented) Missing documentation for "source".
-// types/hell-ui-angular.d.ts:97:5 - (ae-undocumented) Missing documentation for "fields".
-// types/hell-ui-angular.d.ts:99:15 - (ae-undocumented) Missing documentation for "HELL_SEARCH_RANKER".
-// types/hell-ui-angular.d.ts:100:1 - (ae-undocumented) Missing documentation for "provideHellSearchRanker".
-// types/hell-ui-angular.d.ts:108:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular.d.ts:109:5 - (ae-undocumented) Missing documentation for "ɵprov".
-// types/hell-ui-angular.d.ts:111:1 - (ae-undocumented) Missing documentation for "hellRankLocalSearch".
-// types/hell-ui-angular.d.ts:117:1 - (ae-undocumented) Missing documentation for "HellAppShellLabels".
-// types/hell-ui-angular.d.ts:118:5 - (ae-undocumented) Missing documentation for "expandSidebar".
-// types/hell-ui-angular.d.ts:119:5 - (ae-undocumented) Missing documentation for "collapseSidebar".
-// types/hell-ui-angular.d.ts:120:5 - (ae-undocumented) Missing documentation for "showSecondaryPanel".
-// types/hell-ui-angular.d.ts:121:5 - (ae-undocumented) Missing documentation for "hideSecondaryPanel".
-// types/hell-ui-angular.d.ts:123:1 - (ae-undocumented) Missing documentation for "HellAudioPlayerLabels".
-// types/hell-ui-angular.d.ts:124:5 - (ae-undocumented) Missing documentation for "play".
-// types/hell-ui-angular.d.ts:125:5 - (ae-undocumented) Missing documentation for "pause".
-// types/hell-ui-angular.d.ts:126:5 - (ae-undocumented) Missing documentation for "seek".
-// types/hell-ui-angular.d.ts:127:5 - (ae-undocumented) Missing documentation for "mute".
-// types/hell-ui-angular.d.ts:128:5 - (ae-undocumented) Missing documentation for "unmute".
-// types/hell-ui-angular.d.ts:129:5 - (ae-undocumented) Missing documentation for "volume".
-// types/hell-ui-angular.d.ts:130:5 - (ae-undocumented) Missing documentation for "showLiveCaptions".
-// types/hell-ui-angular.d.ts:131:5 - (ae-undocumented) Missing documentation for "hideLiveCaptions".
-// types/hell-ui-angular.d.ts:132:5 - (ae-undocumented) Missing documentation for "speechTranscript".
-// types/hell-ui-angular.d.ts:133:5 - (ae-undocumented) Missing documentation for "download".
-// types/hell-ui-angular.d.ts:134:5 - (ae-undocumented) Missing documentation for "playbackSpeed".
-// types/hell-ui-angular.d.ts:135:5 - (ae-undocumented) Missing documentation for "copyTranscript".
-// types/hell-ui-angular.d.ts:136:5 - (ae-undocumented) Missing documentation for "clearTranscript".
-// types/hell-ui-angular.d.ts:137:5 - (ae-undocumented) Missing documentation for "errorStatus".
-// types/hell-ui-angular.d.ts:138:5 - (ae-undocumented) Missing documentation for "liveStatus".
-// types/hell-ui-angular.d.ts:139:5 - (ae-undocumented) Missing documentation for "pausedStatus".
-// types/hell-ui-angular.d.ts:140:5 - (ae-undocumented) Missing documentation for "copied".
-// types/hell-ui-angular.d.ts:141:5 - (ae-undocumented) Missing documentation for "copy".
-// types/hell-ui-angular.d.ts:142:5 - (ae-undocumented) Missing documentation for "clear".
-// types/hell-ui-angular.d.ts:143:5 - (ae-undocumented) Missing documentation for "listening".
-// types/hell-ui-angular.d.ts:144:5 - (ae-undocumented) Missing documentation for "pressPlayForCaptions".
-// types/hell-ui-angular.d.ts:146:1 - (ae-undocumented) Missing documentation for "HellDialpadLabels".
-// types/hell-ui-angular.d.ts:147:5 - (ae-undocumented) Missing documentation for "dialpad".
-// types/hell-ui-angular.d.ts:148:5 - (ae-undocumented) Missing documentation for "number".
-// types/hell-ui-angular.d.ts:149:5 - (ae-undocumented) Missing documentation for "backspace".
-// types/hell-ui-angular.d.ts:150:5 - (ae-undocumented) Missing documentation for "clear".
-// types/hell-ui-angular.d.ts:151:5 - (ae-undocumented) Missing documentation for "call".
-// types/hell-ui-angular.d.ts:152:5 - (ae-undocumented) Missing documentation for "key".
-// types/hell-ui-angular.d.ts:154:1 - (ae-undocumented) Missing documentation for "HellBreadcrumbLabels".
-// types/hell-ui-angular.d.ts:155:5 - (ae-undocumented) Missing documentation for "showHiddenNavigation".
-// types/hell-ui-angular.d.ts:157:1 - (ae-undocumented) Missing documentation for "HellResizableLabels".
-// types/hell-ui-angular.d.ts:158:5 - (ae-undocumented) Missing documentation for "resizePanels".
-// types/hell-ui-angular.d.ts:160:1 - (ae-undocumented) Missing documentation for "HellOmnibarLabels".
-// types/hell-ui-angular.d.ts:161:5 - (ae-undocumented) Missing documentation for "clearSearch".
-// types/hell-ui-angular.d.ts:163:1 - (ae-undocumented) Missing documentation for "HellTableUtilitiesLabels".
-// types/hell-ui-angular.d.ts:164:5 - (ae-undocumented) Missing documentation for "resizeColumn".
-// types/hell-ui-angular.d.ts:166:1 - (ae-undocumented) Missing documentation for "HellDateInputLabels".
-// types/hell-ui-angular.d.ts:167:5 - (ae-undocumented) Missing documentation for "chooseDate".
-// types/hell-ui-angular.d.ts:168:5 - (ae-undocumented) Missing documentation for "chooseDateFor".
-// types/hell-ui-angular.d.ts:170:1 - (ae-undocumented) Missing documentation for "HellDatePickerLabels".
-// types/hell-ui-angular.d.ts:171:5 - (ae-undocumented) Missing documentation for "previousYear".
-// types/hell-ui-angular.d.ts:172:5 - (ae-undocumented) Missing documentation for "nextYear".
-// types/hell-ui-angular.d.ts:173:5 - (ae-undocumented) Missing documentation for "previousMonth".
-// types/hell-ui-angular.d.ts:174:5 - (ae-undocumented) Missing documentation for "nextMonth".
-// types/hell-ui-angular.d.ts:176:1 - (ae-undocumented) Missing documentation for "HellPaginationLabels".
-// types/hell-ui-angular.d.ts:177:5 - (ae-undocumented) Missing documentation for "navigation".
-// types/hell-ui-angular.d.ts:178:5 - (ae-undocumented) Missing documentation for "firstPage".
-// types/hell-ui-angular.d.ts:179:5 - (ae-undocumented) Missing documentation for "previousPage".
-// types/hell-ui-angular.d.ts:180:5 - (ae-undocumented) Missing documentation for "nextPage".
-// types/hell-ui-angular.d.ts:181:5 - (ae-undocumented) Missing documentation for "lastPage".
-// types/hell-ui-angular.d.ts:182:5 - (ae-undocumented) Missing documentation for "page".
-// types/hell-ui-angular.d.ts:183:5 - (ae-undocumented) Missing documentation for "pageStatus".
-// types/hell-ui-angular.d.ts:184:5 - (ae-undocumented) Missing documentation for "jumpToPage".
-// types/hell-ui-angular.d.ts:185:5 - (ae-undocumented) Missing documentation for "pageTotal".
-// types/hell-ui-angular.d.ts:187:1 - (ae-undocumented) Missing documentation for "HellPdfViewerLabels".
-// types/hell-ui-angular.d.ts:188:5 - (ae-undocumented) Missing documentation for "togglePageOverview".
-// types/hell-ui-angular.d.ts:189:5 - (ae-undocumented) Missing documentation for "previousPage".
-// types/hell-ui-angular.d.ts:190:5 - (ae-undocumented) Missing documentation for "nextPage".
-// types/hell-ui-angular.d.ts:191:5 - (ae-undocumented) Missing documentation for "page".
-// types/hell-ui-angular.d.ts:192:5 - (ae-undocumented) Missing documentation for "findInDocument".
-// types/hell-ui-angular.d.ts:193:5 - (ae-undocumented) Missing documentation for "download".
-// types/hell-ui-angular.d.ts:194:5 - (ae-undocumented) Missing documentation for "print".
-// types/hell-ui-angular.d.ts:195:5 - (ae-undocumented) Missing documentation for "zoomOut".
-// types/hell-ui-angular.d.ts:196:5 - (ae-undocumented) Missing documentation for "zoomIn".
-// types/hell-ui-angular.d.ts:197:5 - (ae-undocumented) Missing documentation for "zoomLevel".
-// types/hell-ui-angular.d.ts:198:5 - (ae-undocumented) Missing documentation for "automaticZoom".
-// types/hell-ui-angular.d.ts:199:5 - (ae-undocumented) Missing documentation for "actualSize".
-// types/hell-ui-angular.d.ts:200:5 - (ae-undocumented) Missing documentation for "pageFit".
-// types/hell-ui-angular.d.ts:201:5 - (ae-undocumented) Missing documentation for "pageWidth".
-// types/hell-ui-angular.d.ts:202:5 - (ae-undocumented) Missing documentation for "findPlaceholder".
-// types/hell-ui-angular.d.ts:203:5 - (ae-undocumented) Missing documentation for "findQuery".
-// types/hell-ui-angular.d.ts:204:5 - (ae-undocumented) Missing documentation for "searching".
-// types/hell-ui-angular.d.ts:205:5 - (ae-undocumented) Missing documentation for "notFound".
-// types/hell-ui-angular.d.ts:206:5 - (ae-undocumented) Missing documentation for "previousMatch".
-// types/hell-ui-angular.d.ts:207:5 - (ae-undocumented) Missing documentation for "nextMatch".
-// types/hell-ui-angular.d.ts:208:5 - (ae-undocumented) Missing documentation for "closeFindBar".
-// types/hell-ui-angular.d.ts:209:5 - (ae-undocumented) Missing documentation for "pageOverview".
-// types/hell-ui-angular.d.ts:210:5 - (ae-undocumented) Missing documentation for "goToPage".
-// types/hell-ui-angular.d.ts:212:1 - (ae-undocumented) Missing documentation for "HellTimeInputLabels".
-// types/hell-ui-angular.d.ts:213:5 - (ae-undocumented) Missing documentation for "chooseTime".
-// types/hell-ui-angular.d.ts:214:5 - (ae-undocumented) Missing documentation for "chooseTimeFor".
-// types/hell-ui-angular.d.ts:215:5 - (ae-undocumented) Missing documentation for "subtractFiveMinutes".
-// types/hell-ui-angular.d.ts:216:5 - (ae-undocumented) Missing documentation for "addFiveMinutes".
-// types/hell-ui-angular.d.ts:217:5 - (ae-undocumented) Missing documentation for "hours".
-// types/hell-ui-angular.d.ts:218:5 - (ae-undocumented) Missing documentation for "minutes".
-// types/hell-ui-angular.d.ts:219:5 - (ae-undocumented) Missing documentation for "seconds".
-// types/hell-ui-angular.d.ts:220:5 - (ae-undocumented) Missing documentation for "selectedTime".
-// types/hell-ui-angular.d.ts:221:5 - (ae-undocumented) Missing documentation for "decreaseUnit".
-// types/hell-ui-angular.d.ts:222:5 - (ae-undocumented) Missing documentation for "increaseUnit".
-// types/hell-ui-angular.d.ts:223:5 - (ae-undocumented) Missing documentation for "minutePresets".
-// types/hell-ui-angular.d.ts:224:5 - (ae-undocumented) Missing documentation for "minutePreset".
-// types/hell-ui-angular.d.ts:226:1 - (ae-undocumented) Missing documentation for "HellToastLabels".
-// types/hell-ui-angular.d.ts:227:5 - (ae-undocumented) Missing documentation for "notifications".
-// types/hell-ui-angular.d.ts:228:5 - (ae-undocumented) Missing documentation for "notification".
-// types/hell-ui-angular.d.ts:229:5 - (ae-undocumented) Missing documentation for "stack".
-// types/hell-ui-angular.d.ts:230:5 - (ae-undocumented) Missing documentation for "dismiss".
-// types/hell-ui-angular.d.ts:231:5 - (ae-undocumented) Missing documentation for "dismissAll".
-// types/hell-ui-angular.d.ts:233:1 - (ae-undocumented) Missing documentation for "HellLabels".
-// types/hell-ui-angular.d.ts:234:5 - (ae-undocumented) Missing documentation for "loading".
-// types/hell-ui-angular.d.ts:235:5 - (ae-undocumented) Missing documentation for "appShell".
-// types/hell-ui-angular.d.ts:236:5 - (ae-undocumented) Missing documentation for "audioPlayer".
-// types/hell-ui-angular.d.ts:237:5 - (ae-undocumented) Missing documentation for "breadcrumbs".
-// types/hell-ui-angular.d.ts:238:5 - (ae-undocumented) Missing documentation for "tableUtilities".
-// types/hell-ui-angular.d.ts:239:5 - (ae-undocumented) Missing documentation for "dateInput".
-// types/hell-ui-angular.d.ts:240:5 - (ae-undocumented) Missing documentation for "datePicker".
-// types/hell-ui-angular.d.ts:241:5 - (ae-undocumented) Missing documentation for "dialpad".
-// types/hell-ui-angular.d.ts:242:5 - (ae-undocumented) Missing documentation for "omnibar".
-// types/hell-ui-angular.d.ts:243:5 - (ae-undocumented) Missing documentation for "pagination".
-// types/hell-ui-angular.d.ts:244:5 - (ae-undocumented) Missing documentation for "pdfViewer".
-// types/hell-ui-angular.d.ts:245:5 - (ae-undocumented) Missing documentation for "resizable".
-// types/hell-ui-angular.d.ts:246:5 - (ae-undocumented) Missing documentation for "timeInput".
-// types/hell-ui-angular.d.ts:247:5 - (ae-undocumented) Missing documentation for "toast".
-// types/hell-ui-angular.d.ts:249:1 - (ae-undocumented) Missing documentation for "HellLabelOverrides".
-// types/hell-ui-angular.d.ts:250:5 - (ae-undocumented) Missing documentation for "loading".
-// types/hell-ui-angular.d.ts:251:5 - (ae-undocumented) Missing documentation for "appShell".
-// types/hell-ui-angular.d.ts:252:5 - (ae-undocumented) Missing documentation for "audioPlayer".
-// types/hell-ui-angular.d.ts:253:5 - (ae-undocumented) Missing documentation for "breadcrumbs".
-// types/hell-ui-angular.d.ts:254:5 - (ae-undocumented) Missing documentation for "tableUtilities".
-// types/hell-ui-angular.d.ts:255:5 - (ae-undocumented) Missing documentation for "dateInput".
-// types/hell-ui-angular.d.ts:256:5 - (ae-undocumented) Missing documentation for "datePicker".
-// types/hell-ui-angular.d.ts:257:5 - (ae-undocumented) Missing documentation for "dialpad".
-// types/hell-ui-angular.d.ts:258:5 - (ae-undocumented) Missing documentation for "omnibar".
-// types/hell-ui-angular.d.ts:259:5 - (ae-undocumented) Missing documentation for "pagination".
-// types/hell-ui-angular.d.ts:260:5 - (ae-undocumented) Missing documentation for "pdfViewer".
-// types/hell-ui-angular.d.ts:261:5 - (ae-undocumented) Missing documentation for "resizable".
-// types/hell-ui-angular.d.ts:262:5 - (ae-undocumented) Missing documentation for "timeInput".
-// types/hell-ui-angular.d.ts:263:5 - (ae-undocumented) Missing documentation for "toast".
-// types/hell-ui-angular.d.ts:265:15 - (ae-undocumented) Missing documentation for "HELL_DEFAULT_LABELS".
-// types/hell-ui-angular.d.ts:266:15 - (ae-undocumented) Missing documentation for "HELL_LABELS".
-// types/hell-ui-angular.d.ts:267:1 - (ae-undocumented) Missing documentation for "provideHellLabels".
+// types/hell-ui-angular-internal-core.d.ts:112:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-internal-core.d.ts:113:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular.d.ts:61:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular.d.ts:62:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular.d.ts:140:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular.d.ts:141:5 - (ae-undocumented) Missing documentation for "ɵprov".
 
 // (No @packageDocumentation comment for this package)
 

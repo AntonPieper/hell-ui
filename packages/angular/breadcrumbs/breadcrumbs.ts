@@ -1,7 +1,7 @@
 import {
   Directive, ElementRef, inject, input } from '@angular/core';
-import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import {
   NgpBreadcrumbs,
   NgpBreadcrumbList,
@@ -11,26 +11,58 @@ import {
   NgpBreadcrumbSeparator,
   NgpBreadcrumbEllipsis,
 } from 'ng-primitives/breadcrumbs';
+import type { InjectionToken, Provider } from '@angular/core';
 
+/** Built-in accessibility labels owned by the breadcrumbs entry point. */
+export interface HellBreadcrumbLabels {
+  readonly showHiddenNavigation: string;
+}
+
+const HELL_BREADCRUMBS_LABELS_CONTRACT = hellCreateLabels<HellBreadcrumbLabels>('HELL_BREADCRUMBS_LABELS', {
+  showHiddenNavigation: 'Show hidden navigation',
+});
+
+/** Injection token resolving to the effective breadcrumbs labels. */
+export const HELL_BREADCRUMBS_LABELS: InjectionToken<HellBreadcrumbLabels> = HELL_BREADCRUMBS_LABELS_CONTRACT.token;
+
+/** Override any subset of the breadcrumbs labels for an injector scope. */
+export function provideHellBreadcrumbsLabels(overrides: Partial<HellBreadcrumbLabels>): Provider {
+  return HELL_BREADCRUMBS_LABELS_CONTRACT.provide(overrides);
+}
+
+/** Public parts of the HellBreadcrumbs module, styleable through its Part Style Map. */
 export type HellBreadcrumbsPart = 'root';
+/** Part Style Map accepted by the HellBreadcrumbs `ui` input. */
 export type HellBreadcrumbsUi = HellUi<HellBreadcrumbsPart>;
 
+/** Public parts of the HellBreadcrumbList module, styleable through its Part Style Map. */
 export type HellBreadcrumbListPart = 'root';
+/** Part Style Map accepted by the HellBreadcrumbList `ui` input. */
 export type HellBreadcrumbListUi = HellUi<HellBreadcrumbListPart>;
 
+/** Public parts of the HellBreadcrumbItem module, styleable through its Part Style Map. */
 export type HellBreadcrumbItemPart = 'root';
+/** Part Style Map accepted by the HellBreadcrumbItem `ui` input. */
 export type HellBreadcrumbItemUi = HellUi<HellBreadcrumbItemPart>;
 
+/** Public parts of the HellBreadcrumbLink module, styleable through its Part Style Map. */
 export type HellBreadcrumbLinkPart = 'root';
+/** Part Style Map accepted by the HellBreadcrumbLink `ui` input. */
 export type HellBreadcrumbLinkUi = HellUi<HellBreadcrumbLinkPart>;
 
+/** Public parts of the HellBreadcrumbPage module, styleable through its Part Style Map. */
 export type HellBreadcrumbPagePart = 'root';
+/** Part Style Map accepted by the HellBreadcrumbPage `ui` input. */
 export type HellBreadcrumbPageUi = HellUi<HellBreadcrumbPagePart>;
 
+/** Public parts of the HellBreadcrumbSeparator module, styleable through its Part Style Map. */
 export type HellBreadcrumbSeparatorPart = 'root';
+/** Part Style Map accepted by the HellBreadcrumbSeparator `ui` input. */
 export type HellBreadcrumbSeparatorUi = HellUi<HellBreadcrumbSeparatorPart>;
 
+/** Public parts of the HellBreadcrumbEllipsis module, styleable through its Part Style Map. */
 export type HellBreadcrumbEllipsisPart = 'root';
+/** Part Style Map accepted by the HellBreadcrumbEllipsis `ui` input. */
 export type HellBreadcrumbEllipsisUi = HellUi<HellBreadcrumbEllipsisPart>;
 
 const HELL_BREADCRUMBS_RECIPE = {
@@ -82,9 +114,15 @@ const HELL_BREADCRUMB_ELLIPSIS_RECIPE = {
     'data-slot': 'root',
   },
 })
-export class HellBreadcrumbs extends HellPartStyleable<HellBreadcrumbsPart> {
-  protected readonly recipe = HELL_BREADCRUMBS_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellBreadcrumbs {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellBreadcrumbsPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellBreadcrumbsPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_BREADCRUMBS_RECIPE,
+  });
 }
 
 @Directive({
@@ -95,9 +133,15 @@ export class HellBreadcrumbs extends HellPartStyleable<HellBreadcrumbsPart> {
     'data-slot': 'root',
   },
 })
-export class HellBreadcrumbList extends HellPartStyleable<HellBreadcrumbListPart> {
-  protected readonly recipe = HELL_BREADCRUMB_LIST_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellBreadcrumbList {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellBreadcrumbListPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellBreadcrumbListPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_BREADCRUMB_LIST_RECIPE,
+  });
 }
 
 @Directive({
@@ -108,9 +152,15 @@ export class HellBreadcrumbList extends HellPartStyleable<HellBreadcrumbListPart
     'data-slot': 'root',
   },
 })
-export class HellBreadcrumbItem extends HellPartStyleable<HellBreadcrumbItemPart> {
-  protected readonly recipe = HELL_BREADCRUMB_ITEM_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellBreadcrumbItem {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellBreadcrumbItemPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellBreadcrumbItemPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_BREADCRUMB_ITEM_RECIPE,
+  });
 }
 
 /** Navigable crumb — apply to <a> or <button>. */
@@ -123,9 +173,15 @@ export class HellBreadcrumbItem extends HellPartStyleable<HellBreadcrumbItemPart
     '[attr.type]': 'nativeButtonType()',
   },
 })
-export class HellBreadcrumbLink extends HellPartStyleable<HellBreadcrumbLinkPart> {
-  protected readonly recipe = HELL_BREADCRUMB_LINK_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellBreadcrumbLink {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellBreadcrumbLinkPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellBreadcrumbLinkPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_BREADCRUMB_LINK_RECIPE,
+  });
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
 
@@ -144,9 +200,15 @@ export class HellBreadcrumbLink extends HellPartStyleable<HellBreadcrumbLinkPart
     'aria-current': 'page',
   },
 })
-export class HellBreadcrumbPage extends HellPartStyleable<HellBreadcrumbPagePart> {
-  protected readonly recipe = HELL_BREADCRUMB_PAGE_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellBreadcrumbPage {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellBreadcrumbPagePart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellBreadcrumbPagePart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_BREADCRUMB_PAGE_RECIPE,
+  });
 }
 
 /**
@@ -165,9 +227,15 @@ export class HellBreadcrumbPage extends HellPartStyleable<HellBreadcrumbPagePart
     'aria-hidden': 'true',
   },
 })
-export class HellBreadcrumbSeparator extends HellPartStyleable<HellBreadcrumbSeparatorPart> {
-  protected readonly recipe = HELL_BREADCRUMB_SEPARATOR_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellBreadcrumbSeparator {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellBreadcrumbSeparatorPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellBreadcrumbSeparatorPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_BREADCRUMB_SEPARATOR_RECIPE,
+  });
 }
 
 /**
@@ -182,16 +250,22 @@ export class HellBreadcrumbSeparator extends HellPartStyleable<HellBreadcrumbSep
     '[class]': "part('root')",
     'data-slot': 'root',
     '[attr.type]': 'nativeButtonType()',
-    '[attr.aria-label]': 'nativeButtonType() ? (ariaLabel() ?? labels.breadcrumbs.showHiddenNavigation) : null',
+    '[attr.aria-label]': 'nativeButtonType() ? (ariaLabel() ?? labels.showHiddenNavigation) : null',
   },
 })
-export class HellBreadcrumbEllipsis extends HellPartStyleable<HellBreadcrumbEllipsisPart> {
-  protected readonly recipe = HELL_BREADCRUMB_ELLIPSIS_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellBreadcrumbEllipsis {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellBreadcrumbEllipsisPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellBreadcrumbEllipsisPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_BREADCRUMB_ELLIPSIS_RECIPE,
+  });
 
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
-  protected readonly labels = inject<HellLabels>(HELL_LABELS);
+  protected readonly labels = inject(HELL_BREADCRUMBS_LABELS);
 
   protected nativeButtonType(): 'button' | null {
     return this.host.tagName.toLowerCase() === 'button' ? 'button' : null;

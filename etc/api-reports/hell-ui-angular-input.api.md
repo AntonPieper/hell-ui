@@ -4,95 +4,83 @@
 
 ```ts
 
-import * as i0 from '@angular/core';
+import { AfterViewInit } from '@angular/core';
+import * as _angular_core from '@angular/core';
 import * as i1 from 'ng-primitives/input';
 import * as i2 from 'ng-primitives/textarea';
+import { InjectionToken } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Provider } from '@angular/core';
+import * as tailwind_merge from 'tailwind-merge';
 
-// @public (undocumented)
-export class HellInput extends HellPartStyleable<HellInputPart> {
+// @public
+export class HellInput {
+    readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
+    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-input.d.ts
+    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
+    readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
+    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     // (undocumented)
-    protected readonly defaultUiPart = "root";
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellInput, "input[hellInput]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpInput; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
     // (undocumented)
-    readonly invalid: i0.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
-    protected readonly recipe: {
-        root: string;
-    };
-    // (undocumented)
-    readonly size: i0.InputSignal<"sm" | "md" | "lg">;
-    // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellInput, "input[hellInput]", never, { "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpInput; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellInput, never>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellInput, never>;
 }
 
-// @public (undocumented)
+// @public
 export type HellInputPart = 'root';
 
-// @public (undocumented)
+// @public
 export type HellInputUi = HellUi<HellInputPart>;
 
-// @public (undocumented)
-export class HellNativeSelect extends HellPartStyleable<HellNativeSelectPart> {
+// @public
+export class HellNativeSelect {
+    readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
+    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
+    readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
+    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     // (undocumented)
-    protected readonly defaultUiPart = "root";
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNativeSelect, "select[hellNativeSelect]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpInput; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
     // (undocumented)
-    readonly invalid: i0.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
-    protected readonly recipe: {
-        root: string;
-    };
-    // (undocumented)
-    readonly size: i0.InputSignal<"sm" | "md" | "lg">;
-    // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellNativeSelect, "select[hellNativeSelect]", never, { "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpInput; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellNativeSelect, never>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNativeSelect, never>;
 }
 
-// @public (undocumented)
+// @public
 export type HellNativeSelectPart = 'root';
 
-// @public (undocumented)
+// @public
 export type HellNativeSelectUi = HellUi<HellNativeSelectPart>;
 
 // @public
-export abstract class HellPartStyleable<Part extends string> {
-    protected abstract readonly defaultUiPart: Part;
-    protected part(part: Part): string;
-    protected abstract readonly recipe: HellRecipe<Part>;
-    readonly ui: i0.InputSignal<HellUiInput<Part>>;
-    // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellPartStyleable<any>, never, never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellPartStyleable<any>, never>;
+export type HellPartStyler<Part extends string> = (part: Part) => string;
+
+// @public
+export function hellPartStyler<Part extends string>(ui: () => HellUiInput<Part>, options: HellPartStylerOptions<Part>): HellPartStyler<Part>;
+
+// @public
+export interface HellPartStylerOptions<Part extends string> {
+    readonly defaultPart: Part;
+    readonly recipe: () => HellRecipe<Part>;
 }
 
 // @public
 export type HellRecipe<Part extends string> = Readonly<Record<Part, string>>;
 
-// @public (undocumented)
-export class HellTextarea extends HellPartStyleable<HellTextareaPart> {
+// @public
+export class HellTextarea {
+    readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
+    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
+    readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
+    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     // (undocumented)
-    protected readonly defaultUiPart = "root";
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTextarea, "textarea[hellTextarea]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i2.NgpTextarea; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
     // (undocumented)
-    readonly invalid: i0.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
-    protected readonly recipe: {
-        root: string;
-    };
-    // (undocumented)
-    readonly size: i0.InputSignal<"sm" | "md" | "lg">;
-    // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellTextarea, "textarea[hellTextarea]", never, { "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i2.NgpTextarea; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellTextarea, never>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTextarea, never>;
 }
 
-// @public (undocumented)
+// @public
 export type HellTextareaPart = 'root';
 
-// @public (undocumented)
+// @public
 export type HellTextareaUi = HellUi<HellTextareaPart>;
 
 // @public
@@ -103,35 +91,12 @@ export type HellUiInput<Part extends string> = string | HellUi<Part> | null | un
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-angular-core.d.ts:50:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-core.d.ts:51:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-input.d.ts:7:1 - (ae-undocumented) Missing documentation for "HellInputPart".
-// types/hell-ui-angular-input.d.ts:8:1 - (ae-undocumented) Missing documentation for "HellInputUi".
-// types/hell-ui-angular-input.d.ts:9:1 - (ae-undocumented) Missing documentation for "HellNativeSelectPart".
-// types/hell-ui-angular-input.d.ts:10:1 - (ae-undocumented) Missing documentation for "HellNativeSelectUi".
-// types/hell-ui-angular-input.d.ts:11:1 - (ae-undocumented) Missing documentation for "HellTextareaPart".
-// types/hell-ui-angular-input.d.ts:12:1 - (ae-undocumented) Missing documentation for "HellTextareaUi".
-// types/hell-ui-angular-input.d.ts:13:1 - (ae-undocumented) Missing documentation for "HellInput".
-// types/hell-ui-angular-input.d.ts:14:5 - (ae-undocumented) Missing documentation for "recipe".
-// types/hell-ui-angular-input.d.ts:17:5 - (ae-undocumented) Missing documentation for "defaultUiPart".
-// types/hell-ui-angular-input.d.ts:18:5 - (ae-undocumented) Missing documentation for "size".
-// types/hell-ui-angular-input.d.ts:19:5 - (ae-undocumented) Missing documentation for "invalid".
-// types/hell-ui-angular-input.d.ts:20:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-input.d.ts:21:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-input.d.ts:23:1 - (ae-undocumented) Missing documentation for "HellNativeSelect".
-// types/hell-ui-angular-input.d.ts:24:5 - (ae-undocumented) Missing documentation for "recipe".
-// types/hell-ui-angular-input.d.ts:27:5 - (ae-undocumented) Missing documentation for "defaultUiPart".
-// types/hell-ui-angular-input.d.ts:28:5 - (ae-undocumented) Missing documentation for "size".
-// types/hell-ui-angular-input.d.ts:29:5 - (ae-undocumented) Missing documentation for "invalid".
 // types/hell-ui-angular-input.d.ts:30:5 - (ae-undocumented) Missing documentation for "ɵfac".
 // types/hell-ui-angular-input.d.ts:31:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-input.d.ts:33:1 - (ae-undocumented) Missing documentation for "HellTextarea".
-// types/hell-ui-angular-input.d.ts:34:5 - (ae-undocumented) Missing documentation for "recipe".
-// types/hell-ui-angular-input.d.ts:37:5 - (ae-undocumented) Missing documentation for "defaultUiPart".
-// types/hell-ui-angular-input.d.ts:38:5 - (ae-undocumented) Missing documentation for "size".
-// types/hell-ui-angular-input.d.ts:39:5 - (ae-undocumented) Missing documentation for "invalid".
-// types/hell-ui-angular-input.d.ts:40:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-input.d.ts:41:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-input.d.ts:43:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-input.d.ts:44:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-input.d.ts:56:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-input.d.ts:57:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

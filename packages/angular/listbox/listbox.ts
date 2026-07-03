@@ -1,5 +1,5 @@
-import { Directive, inject } from '@angular/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { Directive, inject, input } from '@angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import {
   NgpListbox,
   NgpListboxHeader,
@@ -8,16 +8,24 @@ import {
   NgpListboxTrigger,
 } from 'ng-primitives/listbox';
 
+/** Public parts of the HellListbox module, styleable through its Part Style Map. */
 export type HellListboxPart = 'root';
+/** Part Style Map accepted by the HellListbox `ui` input. */
 export type HellListboxUi = HellUi<HellListboxPart>;
 
+/** Public parts of the HellListboxOption module, styleable through its Part Style Map. */
 export type HellListboxOptionPart = 'root';
+/** Part Style Map accepted by the HellListboxOption `ui` input. */
 export type HellListboxOptionUi = HellUi<HellListboxOptionPart>;
 
+/** Public parts of the HellListboxSection module, styleable through its Part Style Map. */
 export type HellListboxSectionPart = 'root';
+/** Part Style Map accepted by the HellListboxSection `ui` input. */
 export type HellListboxSectionUi = HellUi<HellListboxSectionPart>;
 
+/** Public parts of the HellListboxHeader module, styleable through its Part Style Map. */
 export type HellListboxHeaderPart = 'root';
+/** Part Style Map accepted by the HellListboxHeader `ui` input. */
 export type HellListboxHeaderUi = HellUi<HellListboxHeaderPart>;
 
 const HELL_LISTBOX_RECIPE = {
@@ -62,9 +70,15 @@ const HELL_LISTBOX_HEADER_RECIPE = {
     'data-slot': 'root',
   },
 })
-export class HellListbox extends HellPartStyleable<HellListboxPart> {
-  protected readonly recipe = HELL_LISTBOX_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellListbox {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellListboxPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellListboxPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_LISTBOX_RECIPE,
+  });
 }
 
 /** Optional trigger used by composed controls that open a separate listbox. */
@@ -89,9 +103,15 @@ export class HellListboxTrigger {}
     '[attr.aria-selected]': 'option.selected() ? "true" : "false"',
   },
 })
-export class HellListboxOption extends HellPartStyleable<HellListboxOptionPart> {
-  protected readonly recipe = HELL_LISTBOX_OPTION_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellListboxOption {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellListboxOptionPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellListboxOptionPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_LISTBOX_OPTION_RECIPE,
+  });
   protected readonly option = inject(NgpListboxOption);
 }
 
@@ -104,9 +124,15 @@ export class HellListboxOption extends HellPartStyleable<HellListboxOptionPart> 
     'data-slot': 'root',
   },
 })
-export class HellListboxSection extends HellPartStyleable<HellListboxSectionPart> {
-  protected readonly recipe = HELL_LISTBOX_SECTION_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellListboxSection {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellListboxSectionPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellListboxSectionPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_LISTBOX_SECTION_RECIPE,
+  });
 }
 
 /** Non-selectable label/header for a listbox section. */
@@ -118,9 +144,15 @@ export class HellListboxSection extends HellPartStyleable<HellListboxSectionPart
     'data-slot': 'root',
   },
 })
-export class HellListboxHeader extends HellPartStyleable<HellListboxHeaderPart> {
-  protected readonly recipe = HELL_LISTBOX_HEADER_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellListboxHeader {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellListboxHeaderPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellListboxHeaderPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_LISTBOX_HEADER_RECIPE,
+  });
 }
 
 export const HELL_LISTBOX_DIRECTIVES = [

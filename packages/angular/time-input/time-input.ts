@@ -32,13 +32,13 @@ import {
 } from 'ng-primitives/form-field';
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
-import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
+import { hellCreateLabels } from '@hell-ui/angular/core';
 import {
   hellSyncFormFieldDescriptions,
   hellSyncFormFieldLabels,
 } from '@hell-ui/angular/internal/core';
 import type { HellSize } from '@hell-ui/angular/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import {
   HellTypedValueInputState,
   type HellTypedValueParseResult,
@@ -50,6 +50,45 @@ import {
   hellTimeInputPickerMaxValue,
   type HellTimeInputPickerUnit,
 } from './time-input-picker';
+
+/** Built-in accessibility labels owned by the time input entry point. */
+export interface HellTimeInputLabels {
+  readonly chooseTime: string;
+  readonly chooseTimeFor: (label: string) => string;
+  readonly subtractFiveMinutes: string;
+  readonly addFiveMinutes: string;
+  readonly hours: string;
+  readonly minutes: string;
+  readonly seconds: string;
+  readonly selectedTime?: (time: string) => string;
+  readonly decreaseUnit?: (unitLabel: string) => string;
+  readonly increaseUnit?: (unitLabel: string) => string;
+  readonly minutePresets?: string;
+  readonly minutePreset?: (minute: number) => string;
+}
+
+const HELL_TIME_INPUT_LABELS_CONTRACT = hellCreateLabels<HellTimeInputLabels>('HELL_TIME_INPUT_LABELS', {
+  chooseTime: 'Choose time',
+  chooseTimeFor: (label) => `Choose time for ${label}`,
+  subtractFiveMinutes: 'Subtract 5 minutes',
+  addFiveMinutes: 'Add 5 minutes',
+  hours: 'Hours',
+  minutes: 'Minutes',
+  seconds: 'Seconds',
+  selectedTime: (time) => `Selected time ${time}`,
+  decreaseUnit: (unitLabel) => `Decrease ${unitLabel.toLowerCase()}`,
+  increaseUnit: (unitLabel) => `Increase ${unitLabel.toLowerCase()}`,
+  minutePresets: 'Minute presets',
+  minutePreset: (minute) => `Set minutes to ${minute.toString().padStart(2, '0')}`,
+});
+
+/** Injection token resolving to the effective time input labels. */
+export const HELL_TIME_INPUT_LABELS: InjectionToken<HellTimeInputLabels> = HELL_TIME_INPUT_LABELS_CONTRACT.token;
+
+/** Override any subset of the time input labels for an injector scope. */
+export function provideHellTimeInputLabels(overrides: Partial<HellTimeInputLabels>): Provider {
+  return HELL_TIME_INPUT_LABELS_CONTRACT.provide(overrides);
+}
 
 export interface HellTimeValue {
   readonly hour: number;
@@ -63,6 +102,7 @@ const HELL_TIME_INPUT_ICONS = {
 
 let nextTimeInputId = 0;
 
+/** Public parts of the HellTimeInput module, styleable through its Part Style Map. */
 export type HellTimeInputPart =
   | 'root'
   | 'input'
@@ -80,6 +120,7 @@ export type HellTimeInputPart =
   | 'minutePresets'
   | 'minutePreset';
 
+/** Part Style Map accepted by the HellTimeInput `ui` input. */
 export type HellTimeInputUi = HellUi<HellTimeInputPart>;
 
 const HELL_TIME_INPUT_RECIPE = {
@@ -400,12 +441,15 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
     </ng-template>
   `,
 })
-export class HellTimeInput
-  extends HellPartStyleable<HellTimeInputPart>
-  implements ControlValueAccessor, Validator
-{
-  protected readonly recipe = HELL_TIME_INPUT_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellTimeInput implements ControlValueAccessor, Validator {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellTimeInputPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellTimeInputPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_TIME_INPUT_RECIPE,
+  });
 
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
@@ -461,14 +505,13 @@ export class HellTimeInput
   protected readonly fieldAriaLabelledby = computed(
     () => this.formField.labels().join(' ') || null,
   );
-  protected readonly labels = inject<HellLabels>(HELL_LABELS);
+  protected readonly labels = inject(HELL_TIME_INPUT_LABELS);
   private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
   private readonly formField =
     this.inheritedFormField() ??
     ngpFormField({ ngControl: signal<NgControl | undefined>(undefined) });
 
   constructor() {
-    super();
     hellSyncFormFieldDescriptions(this.formField, this.ariaDescribedby);
     hellSyncFormFieldLabels(this.formField, this.ariaLabelledby);
     effect(() => {
@@ -480,7 +523,7 @@ export class HellTimeInput
 
   protected readonly triggerAriaLabel = () => {
     const label = this.ariaLabel();
-    return label ? this.labels.timeInput.chooseTimeFor(label) : this.labels.timeInput.chooseTime;
+    return label ? this.labels.chooseTimeFor(label) : this.labels.chooseTime;
   };
 
   writeValue(value: HellTimeValue | null): void {
@@ -555,9 +598,9 @@ export class HellTimeInput
   }
 
   protected unitLabel(unit: HellTimeUnit): string {
-    if (unit === 'hour') return this.labels.timeInput.hours;
-    if (unit === 'minute') return this.labels.timeInput.minutes;
-    return this.labels.timeInput.seconds;
+    if (unit === 'hour') return this.labels.hours;
+    if (unit === 'minute') return this.labels.minutes;
+    return this.labels.seconds;
   }
 
   protected unitLabelId(unit: HellTimeUnit): string {
@@ -578,27 +621,27 @@ export class HellTimeInput
 
   protected selectedTimeLabel(): string {
     return (
-      this.labels.timeInput.selectedTime?.(this.format(this.current(), this.seconds())) ??
+      this.labels.selectedTime?.(this.format(this.current(), this.seconds())) ??
       `Selected time ${this.format(this.current(), this.seconds())}`
     );
   }
 
   protected decreaseUnitLabel(unit: HellTimeUnit): string {
     const label = this.unitLabel(unit);
-    return this.labels.timeInput.decreaseUnit?.(label) ?? `Decrease ${label.toLowerCase()}`;
+    return this.labels.decreaseUnit?.(label) ?? `Decrease ${label.toLowerCase()}`;
   }
 
   protected increaseUnitLabel(unit: HellTimeUnit): string {
     const label = this.unitLabel(unit);
-    return this.labels.timeInput.increaseUnit?.(label) ?? `Increase ${label.toLowerCase()}`;
+    return this.labels.increaseUnit?.(label) ?? `Increase ${label.toLowerCase()}`;
   }
 
   protected minutePresetsLabel(): string {
-    return this.labels.timeInput.minutePresets ?? 'Minute presets';
+    return this.labels.minutePresets ?? 'Minute presets';
   }
 
   protected minutePresetLabel(minute: number): string {
-    return this.labels.timeInput.minutePreset?.(minute) ?? `Set minutes to ${pad(minute)}`;
+    return this.labels.minutePreset?.(minute) ?? `Set minutes to ${pad(minute)}`;
   }
 
   protected stepUnit(unit: HellTimeUnit, delta: number): void {

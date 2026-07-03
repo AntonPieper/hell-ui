@@ -1,4 +1,4 @@
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { HELL_FLOATING_SCOPE, type HellFloatingScope } from '@hell-ui/angular/internal/core';
 import {
   HellFloatingInteractionController,
@@ -36,7 +36,9 @@ import {
 
 let nextFlyoutId = 0;
 
+/** Public parts of the HellFlyout module, styleable through its Part Style Map. */
 export type HellFlyoutPart = 'root';
+/** Part Style Map accepted by the HellFlyout `ui` input. */
 export type HellFlyoutUi = HellUi<HellFlyoutPart>;
 
 const HELL_FLYOUT_RECIPE = {
@@ -138,9 +140,15 @@ export class HellFlyoutTrigger extends HellNativeInteractiveDisabledGuard {
     'data-slot': 'root',
   },
 })
-export class HellFlyout extends HellPartStyleable<HellFlyoutPart> {
-  protected readonly recipe = HELL_FLYOUT_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellFlyout {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellFlyoutPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellFlyoutPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_FLYOUT_RECIPE,
+  });
 
   readonly trigger = input.required<HellFlyoutTrigger>({ alias: 'hellFlyout' });
   readonly anchor = input<HTMLElement | ElementRef<HTMLElement> | null>(null);
@@ -165,7 +173,6 @@ export class HellFlyout extends HellPartStyleable<HellFlyoutPart> {
   private interaction: HellFloatingInteractionController | null = null;
 
   constructor() {
-    super();
     effect((onCleanup) => {
       const panel = this.panel();
       if (!panel) return;

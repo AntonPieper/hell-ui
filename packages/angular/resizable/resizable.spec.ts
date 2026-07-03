@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { provideHellLabels } from '@hell-ui/angular/core';
 import {
   HELL_RESIZABLE_DIRECTIVES,
   type HellResizableHandleUi,
   type HellResizablePaneUi,
+  provideHellResizableLabels,
 } from './resizable';
 
 @Component({
@@ -24,7 +24,7 @@ class ResizableHost {}
 
 @Component({
   imports: [...HELL_RESIZABLE_DIRECTIVES],
-  providers: [provideHellLabels({ resizable: { resizePanels: 'Contract resize handle' } })],
+  providers: [provideHellResizableLabels({ resizePanels: 'Contract resize handle' })],
   template: `
     <div id="contract-group" hellResizable>
       <section hellResizablePane [minSize]="40">A</section>

@@ -35,13 +35,13 @@ import {
 import { HellIcon } from '@hell-ui/angular/icon';
 import { HellPopover, HellPopoverTrigger } from '@hell-ui/angular/popover';
 import { HellDatePicker } from '@hell-ui/angular/date-picker';
-import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
+import { hellCreateLabels } from '@hell-ui/angular/core';
 import {
   hellSyncFormFieldDescriptions,
   hellSyncFormFieldLabels,
 } from '@hell-ui/angular/internal/core';
 import type { HellSize } from '@hell-ui/angular/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import {
   HellTypedValueInputState,
   type HellTypedValueParseResult,
@@ -49,14 +49,35 @@ import {
   hellTypedValue,
 } from '@hell-ui/angular/internal/core';
 
+/** Built-in accessibility labels owned by the date input entry point. */
+export interface HellDateInputLabels {
+  readonly chooseDate: string;
+  readonly chooseDateFor: (label: string) => string;
+}
+
+const HELL_DATE_INPUT_LABELS_CONTRACT = hellCreateLabels<HellDateInputLabels>('HELL_DATE_INPUT_LABELS', {
+  chooseDate: 'Choose date',
+  chooseDateFor: (label) => `Choose date for ${label}`,
+});
+
+/** Injection token resolving to the effective date input labels. */
+export const HELL_DATE_INPUT_LABELS: InjectionToken<HellDateInputLabels> = HELL_DATE_INPUT_LABELS_CONTRACT.token;
+
+/** Override any subset of the date input labels for an injector scope. */
+export function provideHellDateInputLabels(overrides: Partial<HellDateInputLabels>): Provider {
+  return HELL_DATE_INPUT_LABELS_CONTRACT.provide(overrides);
+}
+
 const HELL_DATE_INPUT_ICONS = {
   faSolidCalendar,
 };
 
 let nextDateInputId = 0;
 
+/** Public parts of the HellDateInput module, styleable through its Part Style Map. */
 export type HellDateInputPart = 'root' | 'input' | 'trigger' | 'triggerIcon' | 'pickerPanel';
 
+/** Part Style Map accepted by the HellDateInput `ui` input. */
 export type HellDateInputUi = HellUi<HellDateInputPart>;
 
 const HELL_DATE_INPUT_RECIPE = {
@@ -248,12 +269,15 @@ export function hellCoerceDateInputValue(value: Date | null | undefined): Date |
     </ng-template>
   `,
 })
-export class HellDateInput
-  extends HellPartStyleable<HellDateInputPart>
-  implements ControlValueAccessor, Validator
-{
-  protected readonly recipe = HELL_DATE_INPUT_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellDateInput implements ControlValueAccessor, Validator {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellDateInputPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellDateInputPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_DATE_INPUT_RECIPE,
+  });
 
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly invalid = input(false, { transform: booleanAttribute });
@@ -301,10 +325,10 @@ export class HellDateInput
   protected readonly pickerFocusedDate = signal<Date>(dateDayValue(new Date()) ?? new Date());
   protected readonly triggerAriaLabel = () => {
     const label = this.ariaLabel();
-    return label ? this.labels.dateInput.chooseDateFor(label) : this.labels.dateInput.chooseDate;
+    return label ? this.labels.chooseDateFor(label) : this.labels.chooseDate;
   };
 
-  private readonly labels = inject<HellLabels>(HELL_LABELS);
+  private readonly labels = inject(HELL_DATE_INPUT_LABELS);
   private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
   private readonly formField =
     this.inheritedFormField() ??
@@ -313,7 +337,6 @@ export class HellDateInput
   private readonly calendarTrigger = viewChild.required<HellPopoverTrigger>('calendarTrigger');
 
   constructor() {
-    super();
     hellSyncFormFieldDescriptions(this.formField, this.ariaDescribedby);
     hellSyncFormFieldLabels(this.formField, this.ariaLabelledby);
     effect(() => {

@@ -3,19 +3,26 @@ import { Observable, firstValueFrom, isObservable } from 'rxjs';
 
 /** Value shape that local ranking can normalize into searchable text. */
 export type HellMaybeAsync<T> = T | Promise<T> | Observable<T>;
+/** Primitive value that local ranking can turn into searchable text. */
 export type HellSearchPrimitive = string | number | boolean | null | undefined | Date;
+/** One field's extracted value: a primitive or a list of primitives. */
 export type HellSearchFieldValue = HellSearchPrimitive | readonly HellSearchPrimitive[];
 
 /** Weighted field extractor for local search. Higher weights make a field win ties. */
 export interface HellSearchField<T> {
+  /** Optional debug/display name for the field. */
   readonly name?: string;
+  /** Relative weight applied to this field's match score. Defaults to 1. */
   readonly weight?: number;
+  /** Extract the searchable value from an item. */
   readonly get: (item: T) => HellSearchFieldValue;
 }
 
 /** Ranked item returned from local search or a remote source. */
 export interface HellSearchResult<T> {
+  /** The matched item. */
   readonly item: T;
+  /** Relevance score; higher ranks earlier. */
   readonly score: number;
 }
 
@@ -24,15 +31,21 @@ export interface HellSearchResult<T> {
  * when server-side relevance/order must be preserved.
  */
 export interface HellSearchResponse<T> {
+  /** Raw items to be ranked locally. */
   readonly items?: readonly T[];
+  /** Pre-scored results whose server-side order is preserved. */
   readonly results?: readonly HellSearchResult<T>[];
 }
 
 /** Context passed to a search source; `signal` aborts superseded async work. */
 export interface HellSearchSourceRequest<P = unknown> {
+  /** Raw user query text. */
   readonly query: string;
+  /** Maximum number of results the caller will render. */
   readonly limit?: number;
+  /** Caller-defined parameters forwarded to the source. */
   readonly params?: P;
+  /** Aborts superseded async work. */
   readonly signal?: AbortSignal;
 }
 
@@ -41,11 +54,14 @@ export type HellSearchSource<T, P = unknown> = (
   request: HellSearchSourceRequest<P>,
 ) => HellMaybeAsync<readonly T[] | HellSearchResponse<T>>;
 
+/** Request accepted by a `HellSearchRanker`: query, limit, and optional weighted fields. */
 export interface HellSearchRankRequest<T>
   extends Pick<HellSearchSourceRequest, 'query' | 'limit'> {
+  /** Weighted field extractors; omitted fields fall back to deep default text extraction. */
   readonly fields?: readonly HellSearchField<T>[];
 }
 
+/** Pluggable local ranking strategy; replace it through `provideHellSearchRanker`. */
 export type HellSearchRanker = <T>(
   items: readonly T[],
   request: HellSearchRankRequest<T>,
@@ -53,16 +69,21 @@ export type HellSearchRanker = <T>(
 
 /** Full request accepted by `HellSearchService`: local items, remote source, or both. */
 export interface HellSearchRequest<T, P = unknown> extends HellSearchSourceRequest<P> {
+  /** Local items to rank when no source is given (or the source returns raw items). */
   readonly items?: readonly T[];
+  /** Optional async/remote source; `null` behaves like an absent source. */
   readonly source?: HellSearchSource<T, P> | null;
+  /** Weighted field extractors used for local ranking. */
   readonly fields?: readonly HellSearchField<T>[];
 }
 
+/** Injection token holding the active ranking strategy. Defaults to `hellRankLocalSearch`. */
 export const HELL_SEARCH_RANKER = new InjectionToken<HellSearchRanker>('HELL_SEARCH_RANKER', {
   providedIn: 'root',
   factory: () => hellRankLocalSearch,
 });
 
+/** Replace the local ranking strategy for an injector scope. */
 export function provideHellSearchRanker(ranker: HellSearchRanker): Provider {
   return { provide: HELL_SEARCH_RANKER, useValue: ranker };
 }
@@ -94,6 +115,7 @@ export class HellSearchService {
   }
 }
 
+/** Default ranker: word-based, accent-insensitive scoring with stable tie order. */
 export function hellRankLocalSearch<T>(
   items: readonly T[],
   request: HellSearchRankRequest<T>,

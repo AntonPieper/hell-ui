@@ -44,17 +44,17 @@ Angular 22 / TypeScript 6 strict-pnpm consumers also need the current transitive
 
 | Consumer path                 | Install peers for this path                                                                                                                     | Entry points / CSS                                                                                                                                                                                                                | Proof scenario                                                                          |
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Root/core only                | `@hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs` plus Angular app peers                        | `@hell-ui/angular`, `@hell-ui/angular/core`, `@hell-ui/angular/testing`; no Hell CSS required                                                                                                                                     | [`root-core`, `core`, `testing`](../../tools/check-package-consumer.mjs)                |
+| Root/core only                | `@hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom ng-primitives rxjs` plus Angular app peers                                       | `@hell-ui/angular`, `@hell-ui/angular/core`, `@hell-ui/angular/testing`; no Hell CSS required                                                                                                                                     | [`root-core`, `core`, `testing`](../../tools/check-package-consumer.mjs)                |
 | Button Part Style Map         | Core peer group only                                                                                                                            | Narrow Button import plus `ui`; no Hell CSS/Tailwind required for compile-time behavior proof                                                                                                                                     | [`button-ui`](../../tools/check-package-consumer.mjs)                                   |
 | Styled narrow primitive       | Core peer group plus `tailwindcss`                                                                                                              | Narrow primitive import plus `@hell-ui/angular/tokens.css` and each imported entry point's `styles.css`                                                                                                                           | [`button`, `pagination`](../../tools/check-package-consumer.mjs)                        |
-| Icon-backed primitive mix     | Core peer group plus `tailwindcss`, `@ng-icons/font-awesome`                                                                                    | Narrow primitive imports such as `@hell-ui/angular/button`, `@hell-ui/angular/icon`, and `@hell-ui/angular/input`; no aggregate primitive path                                                                                    | [`primitive-icons-css`](../../tools/check-package-consumer.mjs)                         |
-| Composites                    | Core peer group plus `tailwindcss`; add `@ng-icons/font-awesome` for icon-backed composites and `@angular/router` when Dialog is imported       | Narrow composite entry points such as `@hell-ui/angular/app-shell`, `@hell-ui/angular/resizable`, `@hell-ui/angular/split-view`, `@hell-ui/angular/dialog`, `@hell-ui/angular/omnibar`, `@hell-ui/angular/toast`, and `@hell-ui/angular/audio-player`, plus explicit entrypoint CSS | [`app-shell`, `resizable`, `split-view`, `audio-player`, `composite-css`](../../tools/check-package-consumer.mjs) |
+| Icon-backed primitive mix     | Core peer group plus `tailwindcss`, `@ng-icons/core`, `@ng-icons/font-awesome`                                                                  | Narrow primitive imports such as `@hell-ui/angular/button`, `@hell-ui/angular/icon`, and `@hell-ui/angular/input`; no aggregate primitive path                                                                                    | [`primitive-icons-css`](../../tools/check-package-consumer.mjs)                         |
+| Composites                    | Core peer group plus `tailwindcss`; add `@ng-icons/core` and `@ng-icons/font-awesome` for icon-backed composites and `@angular/router` when Dialog is imported | Narrow composite entry points such as `@hell-ui/angular/app-shell`, `@hell-ui/angular/resizable`, `@hell-ui/angular/split-view`, `@hell-ui/angular/dialog`, `@hell-ui/angular/omnibar`, `@hell-ui/angular/toast`, and `@hell-ui/angular/audio-player`, plus explicit entrypoint CSS | [`app-shell`, `resizable`, `split-view`, `audio-player`, `composite-css`](../../tools/check-package-consumer.mjs) |
 | Audio transcript              | Composite audio-player peer group; no CodeMirror or pdf.js peers                                                                                | `@hell-ui/angular/audio-player` plus provider import from `@hell-ui/angular/features/audio-transcript`; use composite CSS, no feature CSS                                                                                         | [`audio-transcript`](../../tools/check-package-consumer.mjs)                            |
 | Table primitives              | Core peer group plus `tailwindcss`; no optional table-engine peers                                                                              | `@hell-ui/angular/table`; CSS from `@hell-ui/angular/table/styles.css`; removed table aliases stay unavailable                                                                                                                    | [`table`, `no-legacy-alias`](../../tools/check-package-consumer.mjs)                    |
 | TanStack table shell          | Core peer group plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`                                          | `@hell-ui/angular/table-tanstack`; caller-owned TanStack Table remains the engine                                                                                                                                                 | [`table-tanstack`](../../tools/check-package-consumer.mjs)                              |
 | TanStack virtual row strategy | TanStack shell peer group plus optional `@tanstack/virtual-core`                                                                                | `@hell-ui/angular/table-tanstack/virtual`; mounts on `hell-tanstack-table` and does not create a second table engine or root component                                                                                            | [`table-tanstack-virtual`](../../tools/check-package-consumer.mjs)                      |
 | Code editor                   | Core peer group plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, `@lezer/highlight` | Kept optional entry point `@hell-ui/angular/features/code-editor`; keep lazy/client-only when runtime risk matters                                                                                                                | [`code-editor`](../../tools/check-package-consumer.mjs)                                 |
-| PDF viewer                    | Core peer group plus `@hell-ui/pdf-viewer`, `tailwindcss`, `@ng-icons/font-awesome`, and the split package's pdf.js peer                        | `@hell-ui/pdf-viewer`; app must provide the pdf.js worker source                                                                                                                                                                  | [`pdf-viewer`](../../tools/check-package-consumer.mjs)                                  |
+| PDF viewer                    | Core peer group plus `@hell-ui/pdf-viewer`, `tailwindcss`, `@ng-icons/core`, `@ng-icons/font-awesome`, and the split package's pdf.js peer      | `@hell-ui/pdf-viewer`; app must provide the pdf.js worker source                                                                                                                                                                  | [`pdf-viewer`](../../tools/check-package-consumer.mjs)                                  |
 
 Styled examples also need the Tailwind v4 build plugin from
 `@tailwindcss/postcss` plus `postcss` in dev dependencies, with the same
@@ -64,26 +64,29 @@ Examples:
 
 ```bash
 # Button Part Style Map. Proved by the button-ui scenario.
-pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs
+pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom ng-primitives rxjs
 
-# Styled primitives. Proved by the button/pagination/primitive-icons-css scenarios.
-pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss
+# Styled primitives. Proved by the button/pagination scenarios.
+pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom ng-primitives rxjs tailwindcss
 pnpm add -D @tailwindcss/postcss postcss
+
+# Icon-backed primitives. Proved by the primitive-icons-css scenario.
+pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome ng-primitives rxjs tailwindcss
 
 # Audio transcript feature. Proved by the audio-transcript scenario.
 pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome ng-primitives rxjs tailwindcss
 
 # Table primitives. Proved by the table/no-legacy-alias scenarios.
-pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss
+pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom ng-primitives rxjs tailwindcss
 
 # TanStack table shell. Proved by the table-tanstack scenario.
-pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss @tanstack/angular-table
+pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom ng-primitives rxjs tailwindcss @tanstack/angular-table
 
 # TanStack virtual row strategy. Proved by the table-tanstack-virtual scenario.
-pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss @tanstack/angular-table @tanstack/virtual-core
+pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom ng-primitives rxjs tailwindcss @tanstack/angular-table @tanstack/virtual-core
 
 # Code editor feature. Proved by the code-editor scenario.
-pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core ng-primitives rxjs tailwindcss @codemirror/commands @codemirror/language @codemirror/state @codemirror/view @lezer/highlight
+pnpm add @hell-ui/angular @angular/forms @angular/cdk @floating-ui/dom ng-primitives rxjs tailwindcss @codemirror/commands @codemirror/language @codemirror/state @codemirror/view @lezer/highlight
 
 # Split PDF viewer package. Proved by the pdf-viewer scenario.
 pnpm add @hell-ui/angular @hell-ui/pdf-viewer @angular/forms @angular/cdk @floating-ui/dom @ng-icons/core @ng-icons/font-awesome ng-primitives rxjs tailwindcss pdfjs-dist@5.6.205
@@ -323,7 +326,7 @@ Accessibility support lives in the docs app accessibility matrix source at [`app
 
 Current not-production-ready gaps until the production-readiness gate passes:
 
-- Critical accessibility gaps still block a production-ready claim for several public surfaces, including omnibar.
+- The accessibility matrix currently records no critical gaps, but the production-ready claim still requires fresh browser evidence (`pnpm e2e` across chromium/firefox/webkit) on the release-candidate commit; per-surface known gaps in the matrix remain consumer-relevant reading.
 - Full release-candidate evidence must prove the package-consumer scenario set, API report membership, accessibility/browser, docs budget, pack audit, and release dry-run tasks from [`docs/release/release-evidence-policy.md`](release-evidence-policy.md) on the current commit.
 - Local `test-results/` evidence is intentionally untracked; rerun the commands for each release candidate instead of relying on stale artifacts.
 

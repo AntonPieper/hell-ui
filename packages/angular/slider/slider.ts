@@ -26,17 +26,13 @@ import {
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
 import { hellUniqueIdRefs } from '@hell-ui/angular/internal/core';
-import {
-  HellPartStyleable,
-  type HellOrientation,
-  type HellRecipe,
-  type HellSize,
-  type HellUi,
-} from '@hell-ui/angular/core';
+import { hellPartStyler, type HellOrientation, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
 let nextSliderId = 0;
 
+/** Public parts of the HellSlider module, styleable through its Part Style Map. */
 export type HellSliderPart = 'root' | 'track' | 'range' | 'thumb';
+/** Part Style Map accepted by the HellSlider `ui` input. */
 export type HellSliderUi = HellUi<HellSliderPart>;
 
 const HELL_SLIDER_RECIPE = {
@@ -95,9 +91,15 @@ const HELL_SLIDER_RECIPE = {
     ></div>
   `,
 })
-export class HellSlider extends HellPartStyleable<HellSliderPart> implements ControlValueAccessor {
-  protected readonly recipe = HELL_SLIDER_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellSlider implements ControlValueAccessor {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellSliderPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellSliderPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_SLIDER_RECIPE,
+  });
 
   readonly value = input(0, { transform: numberAttribute });
   readonly min = input(0, { transform: numberAttribute });
@@ -173,7 +175,6 @@ export class HellSlider extends HellPartStyleable<HellSliderPart> implements Con
   );
 
   constructor() {
-    super();
     this.syncHostAriaAttributes();
     const hostElement = this.host.nativeElement;
     const focusThumb = () => this.sliderState.focusThumb('program');

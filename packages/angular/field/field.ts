@@ -1,17 +1,25 @@
 import { Directive, inject, input } from '@angular/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { NgpFormField, NgpDescription, NgpError, NgpLabel } from 'ng-primitives/form-field';
 
+/** Public parts of the HellField module, styleable through its Part Style Map. */
 export type HellFieldPart = 'root';
+/** Part Style Map accepted by the HellField `ui` input. */
 export type HellFieldUi = HellUi<HellFieldPart>;
 
+/** Public parts of the HellFieldLabel module, styleable through its Part Style Map. */
 export type HellFieldLabelPart = 'root';
+/** Part Style Map accepted by the HellFieldLabel `ui` input. */
 export type HellFieldLabelUi = HellUi<HellFieldLabelPart>;
 
+/** Public parts of the HellFieldDescription module, styleable through its Part Style Map. */
 export type HellFieldDescriptionPart = 'root';
+/** Part Style Map accepted by the HellFieldDescription `ui` input. */
 export type HellFieldDescriptionUi = HellUi<HellFieldDescriptionPart>;
 
+/** Public parts of the HellFieldError module, styleable through its Part Style Map. */
 export type HellFieldErrorPart = 'root';
+/** Part Style Map accepted by the HellFieldError `ui` input. */
 export type HellFieldErrorUi = HellUi<HellFieldErrorPart>;
 
 const HELL_FIELD_RECIPE = {
@@ -51,9 +59,15 @@ const HELL_FIELD_ERROR_RECIPE = {
     '[attr.data-orientation]': 'orientation()',
   },
 })
-export class HellField extends HellPartStyleable<HellFieldPart> {
-  protected readonly recipe = HELL_FIELD_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellField {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellFieldPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellFieldPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_FIELD_RECIPE,
+  });
 
   /**
    * Layout direction. `vertical` (default) stacks label / control /
@@ -71,9 +85,15 @@ export class HellField extends HellPartStyleable<HellFieldPart> {
     'data-slot': 'root',
   },
 })
-export class HellFieldLabel extends HellPartStyleable<HellFieldLabelPart> {
-  protected readonly recipe = HELL_FIELD_LABEL_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellFieldLabel {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellFieldLabelPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellFieldLabelPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_FIELD_LABEL_RECIPE,
+  });
 }
 
 @Directive({
@@ -85,9 +105,15 @@ export class HellFieldLabel extends HellPartStyleable<HellFieldLabelPart> {
     '[attr.data-orientation]': 'field?.orientation() ?? null',
   },
 })
-export class HellFieldDescription extends HellPartStyleable<HellFieldDescriptionPart> {
-  protected readonly recipe = HELL_FIELD_DESCRIPTION_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellFieldDescription {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellFieldDescriptionPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellFieldDescriptionPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_FIELD_DESCRIPTION_RECIPE,
+  });
   protected readonly field = inject(HellField, { optional: true });
 }
 
@@ -105,9 +131,15 @@ export class HellFieldDescription extends HellPartStyleable<HellFieldDescription
     '[attr.data-orientation]': 'field?.orientation() ?? null',
   },
 })
-export class HellFieldError extends HellPartStyleable<HellFieldErrorPart> {
-  protected readonly recipe = HELL_FIELD_ERROR_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellFieldError {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellFieldErrorPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellFieldErrorPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_FIELD_ERROR_RECIPE,
+  });
   protected readonly field = inject(HellField, { optional: true });
 }
 

@@ -4,59 +4,41 @@
 
 ```ts
 
+import { AfterViewInit } from '@angular/core';
 import * as _angular_core from '@angular/core';
 import { EventEmitter } from '@angular/core';
+import { InjectionToken } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Provider } from '@angular/core';
+import * as tailwind_merge from 'tailwind-merge';
 
-// Warning: (ae-forgotten-export) The symbol "HellPartStyleable" needs to be exported by the entry point hell-ui-angular-dialpad.d.ts
-//
 // @public
-export class HellDialpad extends HellPartStyleable<HellDialpadPart> {
+export const HELL_DIALPAD_LABELS: InjectionToken<HellDialpadLabels>;
+
+// @public
+export class HellDialpad {
     constructor();
-    // (undocumented)
     protected backspace(): void;
-    // (undocumented)
     readonly call: EventEmitter<string>;
-    // (undocumented)
     protected cancelPlusHold(): void;
-    // (undocumented)
     protected readonly canEdit: _angular_core.Signal<boolean>;
-    // (undocumented)
     protected clear(): void;
-    // (undocumented)
     protected clearLabel(): string;
-    // (undocumented)
-    protected readonly defaultUiPart = "root";
-    // (undocumented)
     readonly digit: EventEmitter<string>;
     readonly disabled: _angular_core.Signal<boolean>;
     // Warning: (ae-missing-getter) The property "disabledBinding" has a setter but no getter.
-    //
-    // (undocumented)
     set disabledBinding(value: boolean);
-    // (undocumented)
     protected readonly display: _angular_core.Signal<string>;
-    // (undocumented)
     protected readonly hasValue: _angular_core.Signal<boolean>;
     readonly invalid: _angular_core.Signal<boolean>;
     // Warning: (ae-missing-getter) The property "invalidBinding" has a setter but no getter.
-    //
-    // (undocumented)
     set invalidBinding(value: boolean);
-    // (undocumented)
     protected isActive(control: string): boolean;
-    // (undocumented)
     protected isKeyActive(digit: string): boolean;
-    // (undocumented)
     protected keyLabel(key: HellDialpadKey): string;
-    // Warning: (ae-forgotten-export) The symbol "HellLabels" needs to be exported by the entry point hell-ui-angular-dialpad.d.ts
-    //
-    // (undocumented)
-    protected readonly labels: HellLabels;
-    // (undocumented)
+    protected readonly labels: HellDialpadLabels;
     protected readonly lowerKeys: HellDialpadKey[];
     // Warning: (ae-forgotten-export) The symbol "HellDialpadKey" needs to be exported by the entry point hell-ui-angular-dialpad.d.ts
-    //
-    // (undocumented)
     protected readonly mainKeys: HellDialpadKey[];
     // (undocumented)
     static ngAcceptInputType_disabledBinding: unknown;
@@ -66,116 +48,65 @@ export class HellDialpad extends HellPartStyleable<HellDialpadPart> {
     static ngAcceptInputType_readOnlyBinding: unknown;
     // (undocumented)
     static ngAcceptInputType_showCallButtonBinding: unknown;
-    // (undocumented)
     protected numberLabel(): string;
-    // (undocumented)
     protected onBeforeInput(event: InputEvent): void;
-    // (undocumented)
     protected onKey(e: KeyboardEvent): void;
-    // (undocumented)
     protected onKeyClick(digit: string): void;
-    // (undocumented)
     protected onNumberInput(event: Event): void;
-    // (undocumented)
     protected onPointerDown(event: PointerEvent, digit: string): void;
-    // (undocumented)
     protected onPointerUp(event: PointerEvent, digit: string): void;
-    // (undocumented)
+    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-dialpad.d.ts
+    protected readonly part: _hell_ui_angular_core.HellPartStyler<HellDialpadPart>;
     protected press(d: string): void;
     readonly readOnly: _angular_core.Signal<boolean>;
     // Warning: (ae-missing-getter) The property "readOnlyBinding" has a setter but no getter.
-    //
-    // (undocumented)
     set readOnlyBinding(value: boolean);
-    // (undocumented)
-    protected readonly recipe: {
-        root: string;
-        display: string;
-        displayLabel: string;
-        numberInput: string;
-        controls: string;
-        clearButton: string;
-        backspaceButton: string;
-        grid: string;
-        keyButton: string;
-        digit: string;
-        letters: string;
-        lowerGrid: string;
-        callButton: string;
-    };
     readonly showCallButton: _angular_core.Signal<boolean>;
     // Warning: (ae-missing-getter) The property "showCallButtonBinding" has a setter but no getter.
-    //
-    // (undocumented)
     set showCallButtonBinding(value: boolean);
-    // (undocumented)
     protected readonly showCallButtonState: _angular_core.Signal<boolean>;
-    // (undocumented)
     protected submit(): void;
+    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-dialpad.d.ts
+    readonly ui: _angular_core.InputSignal<HellUiInput<HellDialpadPart>>;
     readonly value: _angular_core.Signal<string | null | undefined>;
     // Warning: (ae-missing-getter) The property "valueBinding" has a setter but no getter.
-    //
-    // (undocumented)
     set valueBinding(value: string | null | undefined);
-    // (undocumented)
     readonly valueChange: EventEmitter<string>;
     // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellDialpad, "hell-dialpad", never, { "valueBinding": { "alias": "value"; "required": false; }; "showCallButtonBinding": { "alias": "showCallButton"; "required": false; }; "disabledBinding": { "alias": "disabled"; "required": false; }; "readOnlyBinding": { "alias": "readOnly"; "required": false; }; "invalidBinding": { "alias": "invalid"; "required": false; }; }, { "digit": "digit"; "valueChange": "valueChange"; "call": "call"; }, never, never, true, never>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellDialpad, "hell-dialpad", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "valueBinding": { "alias": "value"; "required": false; }; "showCallButtonBinding": { "alias": "showCallButton"; "required": false; }; "disabledBinding": { "alias": "disabled"; "required": false; }; "readOnlyBinding": { "alias": "readOnly"; "required": false; }; "invalidBinding": { "alias": "invalid"; "required": false; }; }, { "digit": "digit"; "valueChange": "valueChange"; "call": "call"; }, never, never, true, never>;
     // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDialpad, never>;
 }
 
-// @public (undocumented)
+// @public
+export interface HellDialpadLabels {
+    readonly backspace: string;
+    readonly call: string;
+    readonly clear?: string;
+    readonly dialpad: string;
+    readonly key?: (digit: string, letters?: string) => string;
+    readonly number?: string;
+}
+
+// @public
 export type HellDialpadPart = 'root' | 'display' | 'displayLabel' | 'numberInput' | 'controls' | 'clearButton' | 'backspaceButton' | 'grid' | 'keyButton' | 'digit' | 'letters' | 'lowerGrid' | 'callButton';
 
 // Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-dialpad.d.ts
 //
-// @public (undocumented)
+// @public
 export type HellDialpadUi = HellUi<HellDialpadPart>;
+
+// @public
+export function provideHellDialpadLabels(overrides: Partial<HellDialpadLabels>): Provider;
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-angular-dialpad.d.ts:9:1 - (ae-undocumented) Missing documentation for "HellDialpadPart".
-// types/hell-ui-angular-dialpad.d.ts:10:1 - (ae-undocumented) Missing documentation for "HellDialpadUi".
-// types/hell-ui-angular-dialpad.d.ts:19:5 - (ae-undocumented) Missing documentation for "recipe".
-// types/hell-ui-angular-dialpad.d.ts:34:5 - (ae-undocumented) Missing documentation for "defaultUiPart".
-// types/hell-ui-angular-dialpad.d.ts:50:5 - (ae-undocumented) Missing documentation for "digit".
-// types/hell-ui-angular-dialpad.d.ts:51:5 - (ae-undocumented) Missing documentation for "valueChange".
-// types/hell-ui-angular-dialpad.d.ts:52:5 - (ae-undocumented) Missing documentation for "call".
-// types/hell-ui-angular-dialpad.d.ts:53:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-dialpad.d.ts:56:5 - (ae-undocumented) Missing documentation for "mainKeys".
-// types/hell-ui-angular-dialpad.d.ts:57:5 - (ae-undocumented) Missing documentation for "lowerKeys".
-// types/hell-ui-angular-dialpad.d.ts:63:5 - (ae-undocumented) Missing documentation for "showCallButtonState".
-// types/hell-ui-angular-dialpad.d.ts:65:5 - (ae-undocumented) Missing documentation for "valueBinding".
-// types/hell-ui-angular-dialpad.d.ts:66:5 - (ae-undocumented) Missing documentation for "showCallButtonBinding".
-// types/hell-ui-angular-dialpad.d.ts:67:5 - (ae-undocumented) Missing documentation for "disabledBinding".
-// types/hell-ui-angular-dialpad.d.ts:68:5 - (ae-undocumented) Missing documentation for "readOnlyBinding".
-// types/hell-ui-angular-dialpad.d.ts:69:5 - (ae-undocumented) Missing documentation for "invalidBinding".
-// types/hell-ui-angular-dialpad.d.ts:70:5 - (ae-undocumented) Missing documentation for "display".
-// types/hell-ui-angular-dialpad.d.ts:71:5 - (ae-undocumented) Missing documentation for "hasValue".
-// types/hell-ui-angular-dialpad.d.ts:72:5 - (ae-undocumented) Missing documentation for "canEdit".
-// types/hell-ui-angular-dialpad.d.ts:73:5 - (ae-undocumented) Missing documentation for "numberLabel".
-// types/hell-ui-angular-dialpad.d.ts:74:5 - (ae-undocumented) Missing documentation for "clearLabel".
-// types/hell-ui-angular-dialpad.d.ts:75:5 - (ae-undocumented) Missing documentation for "keyLabel".
-// types/hell-ui-angular-dialpad.d.ts:76:5 - (ae-undocumented) Missing documentation for "isActive".
-// types/hell-ui-angular-dialpad.d.ts:77:5 - (ae-undocumented) Missing documentation for "isKeyActive".
-// types/hell-ui-angular-dialpad.d.ts:78:5 - (ae-undocumented) Missing documentation for "onPointerDown".
-// types/hell-ui-angular-dialpad.d.ts:79:5 - (ae-undocumented) Missing documentation for "onPointerUp".
-// types/hell-ui-angular-dialpad.d.ts:80:5 - (ae-undocumented) Missing documentation for "onKeyClick".
-// types/hell-ui-angular-dialpad.d.ts:81:5 - (ae-undocumented) Missing documentation for "press".
-// types/hell-ui-angular-dialpad.d.ts:82:5 - (ae-undocumented) Missing documentation for "backspace".
-// types/hell-ui-angular-dialpad.d.ts:83:5 - (ae-undocumented) Missing documentation for "clear".
-// types/hell-ui-angular-dialpad.d.ts:84:5 - (ae-undocumented) Missing documentation for "submit".
-// types/hell-ui-angular-dialpad.d.ts:85:5 - (ae-undocumented) Missing documentation for "onBeforeInput".
-// types/hell-ui-angular-dialpad.d.ts:86:5 - (ae-undocumented) Missing documentation for "onNumberInput".
-// types/hell-ui-angular-dialpad.d.ts:87:5 - (ae-undocumented) Missing documentation for "onKey".
-// types/hell-ui-angular-dialpad.d.ts:95:5 - (ae-undocumented) Missing documentation for "cancelPlusHold".
-// types/hell-ui-angular-dialpad.d.ts:97:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-dialpad.d.ts:98:5 - (ae-undocumented) Missing documentation for "ɵcmp".
-// types/hell-ui-angular-dialpad.d.ts:99:5 - (ae-undocumented) Missing documentation for "ngAcceptInputType_showCallButtonBinding".
-// types/hell-ui-angular-dialpad.d.ts:100:5 - (ae-undocumented) Missing documentation for "ngAcceptInputType_disabledBinding".
-// types/hell-ui-angular-dialpad.d.ts:101:5 - (ae-undocumented) Missing documentation for "ngAcceptInputType_readOnlyBinding".
-// types/hell-ui-angular-dialpad.d.ts:102:5 - (ae-undocumented) Missing documentation for "ngAcceptInputType_invalidBinding".
+// types/hell-ui-angular-dialpad.d.ts:138:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-dialpad.d.ts:139:5 - (ae-undocumented) Missing documentation for "ɵcmp".
+// types/hell-ui-angular-dialpad.d.ts:140:5 - (ae-undocumented) Missing documentation for "ngAcceptInputType_showCallButtonBinding".
+// types/hell-ui-angular-dialpad.d.ts:141:5 - (ae-undocumented) Missing documentation for "ngAcceptInputType_disabledBinding".
+// types/hell-ui-angular-dialpad.d.ts:142:5 - (ae-undocumented) Missing documentation for "ngAcceptInputType_readOnlyBinding".
+// types/hell-ui-angular-dialpad.d.ts:143:5 - (ae-undocumented) Missing documentation for "ngAcceptInputType_invalidBinding".
 
 // (No @packageDocumentation comment for this package)
 

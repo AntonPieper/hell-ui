@@ -16,7 +16,7 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { type Extension } from '@codemirror/state';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import {
   HellCodeEditorRuntime,
   type HellCodeEditorRuntimeAccessibilityOptions,
@@ -30,8 +30,10 @@ export {
   hellCodeEditorTheme,
 } from './code-editor.runtime';
 
+/** Public parts of the HellCodeEditor module, styleable through its Part Style Map. */
 export type HellCodeEditorPart = 'root' | 'editor';
 
+/** Part Style Map accepted by the HellCodeEditor `ui` input. */
 export type HellCodeEditorUi = HellUi<HellCodeEditorPart>;
 
 const HELL_CODE_EDITOR_RECIPE = {
@@ -84,12 +86,15 @@ export const HELL_CODE_EDITOR_RUNTIME_FACTORY = new InjectionToken<HellCodeEdito
     <div #host data-slot="editor" [class]="part('editor')" (focusout)="markTouched()"></div>
   `,
 })
-export class HellCodeEditor
-  extends HellPartStyleable<HellCodeEditorPart>
-  implements ControlValueAccessor
-{
-  protected readonly recipe = HELL_CODE_EDITOR_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellCodeEditor implements ControlValueAccessor {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellCodeEditorPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellCodeEditorPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_CODE_EDITOR_RECIPE,
+  });
 
   /** External document text. Updating it reconfigures the editor without echoing `valueChange`. */
   readonly value = input<string>('');
@@ -121,7 +126,6 @@ export class HellCodeEditor
   private runtime: HellCodeEditorRuntimePort | null = null;
 
   constructor() {
-    super();
     inject(DestroyRef).onDestroy(() => this.runtime?.destroy());
 
     afterNextRender(() => {

@@ -1,16 +1,24 @@
 import { Directive, input } from '@angular/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
+/** Public parts of the HellCard module, styleable through its Part Style Map. */
 export type HellCardPart = 'root';
+/** Part Style Map accepted by the HellCard `ui` input. */
 export type HellCardUi = HellUi<HellCardPart>;
 
+/** Public parts of the HellCardHeader module, styleable through its Part Style Map. */
 export type HellCardHeaderPart = 'root';
+/** Part Style Map accepted by the HellCardHeader `ui` input. */
 export type HellCardHeaderUi = HellUi<HellCardHeaderPart>;
 
+/** Public parts of the HellCardBody module, styleable through its Part Style Map. */
 export type HellCardBodyPart = 'root';
+/** Part Style Map accepted by the HellCardBody `ui` input. */
 export type HellCardBodyUi = HellUi<HellCardBodyPart>;
 
+/** Public parts of the HellCardFooter module, styleable through its Part Style Map. */
 export type HellCardFooterPart = 'root';
+/** Part Style Map accepted by the HellCardFooter `ui` input. */
 export type HellCardFooterUi = HellUi<HellCardFooterPart>;
 
 const HELL_CARD_RECIPE = {
@@ -37,9 +45,15 @@ const HELL_CARD_FOOTER_RECIPE = {
     '[attr.data-elevation]': 'elevation()',
   },
 })
-export class HellCard extends HellPartStyleable<HellCardPart> {
-  protected readonly recipe = HELL_CARD_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellCard {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellCardPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellCardPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_CARD_RECIPE,
+  });
 
   readonly elevation = input<0 | 1 | 2 | 3>(1);
 }
@@ -51,9 +65,15 @@ export class HellCard extends HellPartStyleable<HellCardPart> {
     'data-slot': 'root',
   },
 })
-export class HellCardHeader extends HellPartStyleable<HellCardHeaderPart> {
-  protected readonly recipe = HELL_CARD_HEADER_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellCardHeader {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellCardHeaderPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellCardHeaderPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_CARD_HEADER_RECIPE,
+  });
 }
 
 @Directive({
@@ -63,9 +83,15 @@ export class HellCardHeader extends HellPartStyleable<HellCardHeaderPart> {
     'data-slot': 'root',
   },
 })
-export class HellCardBody extends HellPartStyleable<HellCardBodyPart> {
-  protected readonly recipe = HELL_CARD_BODY_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellCardBody {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellCardBodyPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellCardBodyPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_CARD_BODY_RECIPE,
+  });
 }
 
 @Directive({
@@ -75,9 +101,15 @@ export class HellCardBody extends HellPartStyleable<HellCardBodyPart> {
     'data-slot': 'root',
   },
 })
-export class HellCardFooter extends HellPartStyleable<HellCardFooterPart> {
-  protected readonly recipe = HELL_CARD_FOOTER_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellCardFooter {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellCardFooterPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellCardFooterPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_CARD_FOOTER_RECIPE,
+  });
 }
 
 export const HELL_CARD_DIRECTIVES = [

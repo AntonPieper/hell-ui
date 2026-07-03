@@ -133,7 +133,7 @@ const HD_APP_SHELL_PAGE_ICONS = {
 
       <h2>Accessibility</h2>
       <ul>
-        <li>Sidenav and secondary toggles ship accessible names through the Label Contract; localize them with <code>provideHellLabels</code>.</li>
+        <li>Sidenav and secondary toggles ship accessible names through the Label Contract; localize them with <code>provideHellAppShellLabels</code> from <code>@hell-ui/angular/app-shell</code>.</li>
         <li>Use one <code>nav</code> region per navigation surface and mark the current page with <code>aria-current="page"</code> (the nav item directive does this for router links).</li>
         <li>On mobile the panels become dismissable drawers; focus stays operable behind the shared dismissal rules.</li>
       </ul>

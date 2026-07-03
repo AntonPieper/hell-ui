@@ -1,14 +1,20 @@
 import { Directive, input } from '@angular/core';
 import { HellTagVariant } from '@hell-ui/angular/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
+/** Public parts of the HellTag module, styleable through its Part Style Map. */
 export type HellTagPart = 'root';
+/** Part Style Map accepted by the HellTag `ui` input. */
 export type HellTagUi = HellUi<HellTagPart>;
 
+/** Public parts of the HellBadge module, styleable through its Part Style Map. */
 export type HellBadgePart = 'root';
+/** Part Style Map accepted by the HellBadge `ui` input. */
 export type HellBadgeUi = HellUi<HellBadgePart>;
 
+/** Public parts of the HellKbd module, styleable through its Part Style Map. */
 export type HellKbdPart = 'root';
+/** Part Style Map accepted by the HellKbd `ui` input. */
 export type HellKbdUi = HellUi<HellKbdPart>;
 
 const HELL_TAG_RECIPE = {
@@ -31,9 +37,15 @@ const HELL_KBD_RECIPE = {
     '[attr.data-variant]': 'variant()',
   },
 })
-export class HellTag extends HellPartStyleable<HellTagPart> {
-  protected readonly recipe = HELL_TAG_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellTag {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellTagPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellTagPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_TAG_RECIPE,
+  });
 
   readonly variant = input<HellTagVariant>('default');
 }
@@ -45,9 +57,15 @@ export class HellTag extends HellPartStyleable<HellTagPart> {
     'data-slot': 'root',
   },
 })
-export class HellBadge extends HellPartStyleable<HellBadgePart> {
-  protected readonly recipe = HELL_BADGE_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellBadge {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellBadgePart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellBadgePart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_BADGE_RECIPE,
+  });
 }
 
 @Directive({
@@ -57,7 +75,13 @@ export class HellBadge extends HellPartStyleable<HellBadgePart> {
     'data-slot': 'root',
   },
 })
-export class HellKbd extends HellPartStyleable<HellKbdPart> {
-  protected readonly recipe = HELL_KBD_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellKbd {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellKbdPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellKbdPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_KBD_RECIPE,
+  });
 }

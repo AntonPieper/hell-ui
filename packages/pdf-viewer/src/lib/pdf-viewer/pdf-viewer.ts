@@ -38,7 +38,8 @@ import {
   HellPaginationNext,
   HellPaginationPrev,
 } from '@hell-ui/angular/pagination';
-import { HELL_LABELS, HellStyleable, type HellLabels } from '@hell-ui/angular/core';
+import { HellStyleable } from '@hell-ui/angular/core';
+import { HELL_PDF_VIEWER_LABELS, type HellPdfViewerLabels } from './pdf-viewer-labels';
 import {
   HellGlobalKeydownService,
   HellGlobalPointerdownService,
@@ -171,7 +172,7 @@ export class HellPdfViewer extends HellStyleable {
     return !PDF_ZOOM_VALUES.includes(v as never) && !this.zoomOptions.some((o) => o.value === v);
   });
   protected readonly customZoomLabel = computed(() => getZoomLabel(this.effectiveZoomValue()));
-  protected readonly labels: HellLabels = inject(HELL_LABELS);
+  protected readonly labels: HellPdfViewerLabels = inject(HELL_PDF_VIEWER_LABELS);
 
   private readonly globalKeydown = inject(HellGlobalKeydownService);
   private readonly globalPointerdown = inject(HellGlobalPointerdownService);
