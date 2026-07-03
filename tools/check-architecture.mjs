@@ -4959,15 +4959,12 @@ function checkNgpStateWriterContract() {
     adapterRelPath,
     'packages/angular/internal/ng-primitives/public-api.ts',
     'packages/angular/internal/ng-primitives/ngp-state-adapters.spec.ts',
-    'packages/angular/select/select.ts',
     'packages/angular/combobox/combobox.ts',
     'packages/angular/radio/radio.ts',
   ]);
   const stateWriterTokens = [
     'HELL_NGP_STATE_WRITER_VERSION',
     'HELL_NGP_STATE_WRITER_UPGRADE_PATH',
-    'writeSelectStateValue',
-    'writeSelectStateDisabled',
     'writeComboboxStateValue',
     'writeComboboxStateDisabled',
     'writeRadioGroupStateValue',
@@ -5099,14 +5096,18 @@ function checkNgpStateWriterContract() {
     failures.push('ng-primitives state writer must not be re-exported through the adapters barrel');
   }
 
+  // Select and toggle group have public ng-primitives setters; they must not
+  // regrow state-writer fallbacks in the adapter seam.
   for (const token of [
     'writeToggleGroupValue',
     'writeToggleGroupDisabled',
     'ToggleGroupStateMutation',
+    'writeSelectStateValue',
+    'writeSelectStateDisabled',
   ]) {
     if (adapterSource.includes(token)) {
       failures.push(
-        `Toggle group must use public ng-primitives setters, not state-writer token ${token}`,
+        `Primitives with public ng-primitives setters must use them, not state-writer token ${token}`,
       );
     }
   }
@@ -5114,43 +5115,22 @@ function checkNgpStateWriterContract() {
 
 function checkFloatingAdapterContract() {
   const coreApi = readFile(join(root, 'packages/angular/core/public-api.ts'));
-  const popoverAdapterRelPath =
-    'packages/angular/internal/ng-primitives/ngp-popover-close-adapter.ts';
-  const popoverAdapterSource = readFile(join(root, popoverAdapterRelPath));
-  const ngpPackage = parseJsonWithComments(
-    readFile(join(root, 'packages/angular/node_modules/ng-primitives/package.json')),
-  );
-  const expectedPopoverAdapterVersion = `ng-primitives@${ngpPackage.version}`;
 
   if (!coreApi.includes("export * from './floating-element'")) {
     failures.push('Core Package Entry Point must export ./floating-element');
   }
 
+  // ng-primitives >= 0.123 emits popover openChange during trigger ngOnDestroy
+  // while output bindings are still attached, so the retired close adapter's
+  // private overlay()/updateConfig() reach-ins must not come back.
   const popoverOverlayReachIns = libraryProductionTsFiles()
     .map((file) => join(root, file))
     .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts'))
-    .filter((file) => relPath(file) !== popoverAdapterRelPath)
     .filter((file) => /\boverlay\s*\(\s*\)|\bupdateConfig\s*\(/.test(readFile(file)))
     .map(relPath);
   if (popoverOverlayReachIns.length) {
     failures.push(
-      `Private ng-primitives popover overlay handling must stay quarantined in ${popoverAdapterRelPath}: ${popoverOverlayReachIns.join(', ')}`,
-    );
-  }
-
-  if (
-    !popoverAdapterSource.includes(
-      `HELL_NGP_POPOVER_CLOSE_ADAPTER_VERSION = '${expectedPopoverAdapterVersion}'`,
-    )
-  ) {
-    failures.push(
-      `ng-primitives popover close adapter version must match installed ${expectedPopoverAdapterVersion}`,
-    );
-  }
-
-  if (!popoverAdapterSource.includes('NG0953')) {
-    failures.push(
-      'ng-primitives popover close adapter must document the destroyed OutputRef warning it guards.',
+      `Private ng-primitives popover overlay handling is not allowed; use public ng-primitives APIs: ${popoverOverlayReachIns.join(', ')}`,
     );
   }
 }

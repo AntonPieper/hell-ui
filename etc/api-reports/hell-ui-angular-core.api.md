@@ -635,9 +635,9 @@ export function provideHellSearchRanker(ranker: HellSearchRanker): Provider;
 // types/hell-ui-angular-core.d.ts:265:15 - (ae-undocumented) Missing documentation for "HELL_DEFAULT_LABELS".
 // types/hell-ui-angular-core.d.ts:266:15 - (ae-undocumented) Missing documentation for "HELL_LABELS".
 // types/hell-ui-angular-core.d.ts:267:1 - (ae-undocumented) Missing documentation for "provideHellLabels".
-// types/hell-ui-angular-internal-core.d.ts:102:5 - (ae-undocumented) Missing documentation for "ngAfterViewInit".
-// types/hell-ui-angular-internal-core.d.ts:103:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-internal-core.d.ts:104:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-internal-core.d.ts:110:5 - (ae-undocumented) Missing documentation for "ngAfterViewInit".
+// types/hell-ui-angular-internal-core.d.ts:111:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-internal-core.d.ts:112:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

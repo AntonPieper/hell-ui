@@ -1,10 +1,9 @@
-import { DestroyRef, Directive, inject } from '@angular/core';
+import { Directive, inject } from '@angular/core';
 import type { FocusOrigin } from '@angular/cdk/a11y';
 import { NgpPopover, NgpPopoverTrigger } from 'ng-primitives/popover';
 import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
 import { hellRegisterFloatingHost } from '@hell-ui/angular/internal/core';
 import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
-import { hellConnectNgpPopoverCloseAdapter } from '@hell-ui/angular/internal/ng-primitives';
 
 export type HellPopoverPart = 'root';
 export type HellPopoverUi = HellUi<HellPopoverPart>;
@@ -49,11 +48,6 @@ const HELL_POPOVER_RECIPE = {
 })
 export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
   protected readonly trigger = inject(NgpPopoverTrigger);
-
-  constructor() {
-    super();
-    hellConnectNgpPopoverCloseAdapter(this.trigger, inject(DestroyRef));
-  }
 
   show(): Promise<void> {
     return this.trigger.show();

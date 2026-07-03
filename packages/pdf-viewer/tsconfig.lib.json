@@ -16,8 +16,10 @@
         "../../dist/hell/*",
         "../../dist/hell/types/hell-ui-angular-*.d.ts"
       ],
+      /* dist/hell/types has no node_modules ancestor with ng-primitives, so its
+         bare ng-primitives imports need this mapping to the packaged typings. */
       "ng-primitives/*": [
-        "./node_modules/ng-primitives/*"
+        "./node_modules/ng-primitives/types/ng-primitives-*.d.ts"
       ]
     }
   },

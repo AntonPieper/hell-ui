@@ -40,6 +40,31 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- Upgraded `ng-primitives` from 0.117.2 to 0.123.0 and shrank Hell's
+  version-bound compatibility seams to match
+  (`docs/adr/ng-primitives-state-adapter.md` recheck, 2026-07-03):
+  `HellSelect` now syncs form writes through the public
+  `NgpSelectState.setValue(value, { emit: false })` / `setDisabled()` API
+  instead of the internal state adapter; the popover close adapter
+  (`ngp-popover-close-adapter.ts`) was deleted because ng-primitives now emits
+  `openChange(false)` during trigger destroy while output bindings are still
+  attached; the state adapter keeps only the combobox/radio channel writes and
+  the non-focusing roving-focus tab-stop write. Hell pagination controls now
+  read combined disabled state from the public `injectPagination*State()`
+  providers and restore Enter/Space keyboard activation that regressed
+  upstream (evidence: `packages/angular/pagination/pagination.spec.ts`,
+  `packages/angular/internal/ng-primitives/ngp-state-adapters.spec.ts`).
+  `HellControlledValueState` now absorbs user interactions through a linked
+  signal when a control is not form-controlled, because ng-primitives >= 0.123
+  latches any defined value input as permanently controlled — without this,
+  unbound checkboxes stopped toggling (evidence:
+  `packages/angular/checkbox/checkbox.spec.ts` "toggles an unbound checkbox").
+  Natively disabled date-picker navigation buttons no longer carry a redundant
+  `aria-disabled` attribute: ng-primitives >= 0.123 strips it from
+  hard-disabled native buttons, so Hell's year-shift buttons and the a11y
+  contracts now assert `disabled` + `data-disabled` instead (evidence:
+  `e2e/date-picker-a11y-contracts.spec.ts`).
+
 - Restyled `@hell-ui/angular/listbox` defaults to match the Select/Menu family:
   the listbox root is now a bordered elevated panel and options render as flat
   rows with soft active/selected backgrounds instead of per-option outlines.

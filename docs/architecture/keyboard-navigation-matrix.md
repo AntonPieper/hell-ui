@@ -1,7 +1,8 @@
 # Keyboard navigation matrix: menu, select, combobox
 
 - Date: 2026-05-29
-- Evidence sources: `ng-primitives@0.117.2`, Hell docs examples under
+- Evidence sources: `ng-primitives@0.123.0` (originally audited against
+  `ng-primitives@0.117.2`), Hell docs examples under
   `apps/docs/src/app/pages/components/{menu,select,combobox}`, and
   browser coverage in `e2e/menu-select-combobox-keyboard.spec.ts`.
 

@@ -14,7 +14,17 @@ import {
   NgpPaginationLast,
   NgpPaginationNext,
   NgpPaginationPrevious,
+  injectPaginationButtonState,
+  injectPaginationFirstState,
+  injectPaginationLastState,
+  injectPaginationNextState,
+  injectPaginationPreviousState,
   injectPaginationState,
+  providePaginationButtonState,
+  providePaginationFirstState,
+  providePaginationLastState,
+  providePaginationNextState,
+  providePaginationPreviousState,
 } from 'ng-primitives/pagination';
 import { HellNativeSelect, type HellNativeSelectUi } from '@hell-ui/angular/input';
 import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
@@ -116,6 +126,28 @@ function injectPaginationNativeControl(): HellPaginationNativeControl {
 }
 
 /**
+ * ng-primitives >= 0.123 registers its pagination `keydown.enter`/`keydown.space`
+ * handlers as literal DOM event names, so keyboard activation never reaches
+ * them. Hell keeps Enter/Space activation (with the anchor guard and without
+ * double-firing native click synthesis) through Angular host listeners until
+ * upstream restores it.
+ */
+function paginationKeyboardActivation(
+  native: HellPaginationNativeControl,
+  disabled: () => boolean,
+  action: () => void,
+): (event: Event) => void {
+  return (event) => {
+    if (disabled()) {
+      native.preventDisabledAnchor(event, true);
+      return;
+    }
+    event.preventDefault();
+    action();
+  };
+}
+
+/**
  * Wrappers around `ng-primitives/pagination`. Two ways to use:
  *
  *   1. Compose with the `[hellPagination*]` directives on plain `<button>`
@@ -153,6 +185,7 @@ export class HellPagination extends HellPartStyleable<HellPaginationPart> {
   hostDirectives: [
     { directive: NgpPaginationFirst, inputs: ['ngpPaginationFirstDisabled:disabled'] },
   ],
+  providers: [providePaginationFirstState()],
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
@@ -163,14 +196,19 @@ export class HellPagination extends HellPartStyleable<HellPaginationPart> {
     '[attr.aria-disabled]': 'native.anchorAriaDisabled(disabled())',
     '[attr.tabindex]': 'native.disabledAnchorTabIndex(disabled())',
     '(click)': 'native.preventDisabledAnchor($event, disabled())',
-    '(keydown.enter)': 'native.preventDisabledAnchor($event, disabled())',
+    '(keydown.enter)': 'activate($event)',
+    '(keydown.space)': 'activate($event)',
   },
 })
 export class HellPaginationFirst extends HellPartStyleable<HellPaginationFirstPart> {
   protected readonly recipe = HELL_PAGINATION_FIRST_RECIPE;
   protected readonly defaultUiPart = 'root';
   protected readonly native = injectPaginationNativeControl();
-  protected readonly disabled = inject(NgpPaginationFirst).disabled;
+  private readonly state = injectPaginationFirstState();
+  protected readonly disabled = computed(() => this.state().disabled());
+  protected readonly activate = paginationKeyboardActivation(this.native, this.disabled, () =>
+    this.state().goToFirstPage(),
+  );
 }
 
 @Directive({
@@ -178,6 +216,7 @@ export class HellPaginationFirst extends HellPartStyleable<HellPaginationFirstPa
   hostDirectives: [
     { directive: NgpPaginationPrevious, inputs: ['ngpPaginationPreviousDisabled:disabled'] },
   ],
+  providers: [providePaginationPreviousState()],
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
@@ -188,14 +227,19 @@ export class HellPaginationFirst extends HellPartStyleable<HellPaginationFirstPa
     '[attr.aria-disabled]': 'native.anchorAriaDisabled(disabled())',
     '[attr.tabindex]': 'native.disabledAnchorTabIndex(disabled())',
     '(click)': 'native.preventDisabledAnchor($event, disabled())',
-    '(keydown.enter)': 'native.preventDisabledAnchor($event, disabled())',
+    '(keydown.enter)': 'activate($event)',
+    '(keydown.space)': 'activate($event)',
   },
 })
 export class HellPaginationPrev extends HellPartStyleable<HellPaginationPrevPart> {
   protected readonly recipe = HELL_PAGINATION_PREV_RECIPE;
   protected readonly defaultUiPart = 'root';
   protected readonly native = injectPaginationNativeControl();
-  protected readonly disabled = inject(NgpPaginationPrevious).disabled;
+  private readonly state = injectPaginationPreviousState();
+  protected readonly disabled = computed(() => this.state().disabled());
+  protected readonly activate = paginationKeyboardActivation(this.native, this.disabled, () =>
+    this.state().goToPreviousPage(),
+  );
 }
 
 @Directive({
@@ -203,6 +247,7 @@ export class HellPaginationPrev extends HellPartStyleable<HellPaginationPrevPart
   hostDirectives: [
     { directive: NgpPaginationNext, inputs: ['ngpPaginationNextDisabled:disabled'] },
   ],
+  providers: [providePaginationNextState()],
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
@@ -213,14 +258,19 @@ export class HellPaginationPrev extends HellPartStyleable<HellPaginationPrevPart
     '[attr.aria-disabled]': 'native.anchorAriaDisabled(disabled())',
     '[attr.tabindex]': 'native.disabledAnchorTabIndex(disabled())',
     '(click)': 'native.preventDisabledAnchor($event, disabled())',
-    '(keydown.enter)': 'native.preventDisabledAnchor($event, disabled())',
+    '(keydown.enter)': 'activate($event)',
+    '(keydown.space)': 'activate($event)',
   },
 })
 export class HellPaginationNext extends HellPartStyleable<HellPaginationNextPart> {
   protected readonly recipe = HELL_PAGINATION_NEXT_RECIPE;
   protected readonly defaultUiPart = 'root';
   protected readonly native = injectPaginationNativeControl();
-  protected readonly disabled = inject(NgpPaginationNext).disabled;
+  private readonly state = injectPaginationNextState();
+  protected readonly disabled = computed(() => this.state().disabled());
+  protected readonly activate = paginationKeyboardActivation(this.native, this.disabled, () =>
+    this.state().goToNextPage(),
+  );
 }
 
 @Directive({
@@ -228,6 +278,7 @@ export class HellPaginationNext extends HellPartStyleable<HellPaginationNextPart
   hostDirectives: [
     { directive: NgpPaginationLast, inputs: ['ngpPaginationLastDisabled:disabled'] },
   ],
+  providers: [providePaginationLastState()],
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
@@ -238,14 +289,19 @@ export class HellPaginationNext extends HellPartStyleable<HellPaginationNextPart
     '[attr.aria-disabled]': 'native.anchorAriaDisabled(disabled())',
     '[attr.tabindex]': 'native.disabledAnchorTabIndex(disabled())',
     '(click)': 'native.preventDisabledAnchor($event, disabled())',
-    '(keydown.enter)': 'native.preventDisabledAnchor($event, disabled())',
+    '(keydown.enter)': 'activate($event)',
+    '(keydown.space)': 'activate($event)',
   },
 })
 export class HellPaginationLast extends HellPartStyleable<HellPaginationLastPart> {
   protected readonly recipe = HELL_PAGINATION_LAST_RECIPE;
   protected readonly defaultUiPart = 'root';
   protected readonly native = injectPaginationNativeControl();
-  protected readonly disabled = inject(NgpPaginationLast).disabled;
+  private readonly state = injectPaginationLastState();
+  protected readonly disabled = computed(() => this.state().disabled());
+  protected readonly activate = paginationKeyboardActivation(this.native, this.disabled, () =>
+    this.state().goToLastPage(),
+  );
 }
 
 @Directive({
@@ -256,6 +312,7 @@ export class HellPaginationLast extends HellPartStyleable<HellPaginationLastPart
       inputs: ['ngpPaginationButtonPage:page', 'ngpPaginationButtonDisabled:disabled'],
     },
   ],
+  providers: [providePaginationButtonState()],
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
@@ -266,14 +323,19 @@ export class HellPaginationLast extends HellPartStyleable<HellPaginationLastPart
     '[attr.aria-disabled]': 'native.anchorAriaDisabled(disabled())',
     '[attr.tabindex]': 'native.disabledAnchorTabIndex(disabled())',
     '(click)': 'native.preventDisabledAnchor($event, disabled())',
-    '(keydown.enter)': 'native.preventDisabledAnchor($event, disabled())',
+    '(keydown.enter)': 'activate($event)',
+    '(keydown.space)': 'activate($event)',
   },
 })
 export class HellPaginationButton extends HellPartStyleable<HellPaginationButtonPart> {
   protected readonly recipe = HELL_PAGINATION_BUTTON_RECIPE;
   protected readonly defaultUiPart = 'root';
   protected readonly native = injectPaginationNativeControl();
-  protected readonly disabled = inject(NgpPaginationButton).disabled;
+  private readonly state = injectPaginationButtonState();
+  protected readonly disabled = computed(() => this.state().disabled());
+  protected readonly activate = paginationKeyboardActivation(this.native, this.disabled, () =>
+    this.state().goToPage(),
+  );
 }
 
 /**
