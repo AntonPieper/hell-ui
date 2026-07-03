@@ -467,9 +467,9 @@ export function provideHellSearchRanker(ranker: HellSearchRanker): Provider;
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-angular-internal-core.d.ts:102:5 - (ae-undocumented) Missing documentation for "ngAfterViewInit".
-// types/hell-ui-angular-internal-core.d.ts:103:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-internal-core.d.ts:104:5 - (ae-undocumented) Missing documentation for "ɵdir".
+// types/hell-ui-angular-internal-core.d.ts:110:5 - (ae-undocumented) Missing documentation for "ngAfterViewInit".
+// types/hell-ui-angular-internal-core.d.ts:111:5 - (ae-undocumented) Missing documentation for "ɵfac".
+// types/hell-ui-angular-internal-core.d.ts:112:5 - (ae-undocumented) Missing documentation for "ɵdir".
 // types/hell-ui-angular.d.ts:7:1 - (ae-undocumented) Missing documentation for "HellSize".
 // types/hell-ui-angular.d.ts:8:1 - (ae-undocumented) Missing documentation for "HellButtonVariant".
 // types/hell-ui-angular.d.ts:9:1 - (ae-undocumented) Missing documentation for "HellTagVariant".
