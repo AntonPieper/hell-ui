@@ -98,13 +98,48 @@ mapped to command evidence and concrete evidence checks.
         },
         {
           "type": "fileExists",
+          "label": "accordion API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-accordion.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "app shell API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-app-shell.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "avatar API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-avatar.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "avatar group API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-avatar-group.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "breadcrumbs API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-breadcrumbs.api.md"
+        },
+        {
+          "type": "fileExists",
           "label": "button API report is committed",
           "path": "etc/api-reports/hell-ui-angular-button.api.md"
         },
         {
           "type": "fileExists",
-          "label": "table API report is committed",
-          "path": "etc/api-reports/hell-ui-angular-table.api.md"
+          "label": "card API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-card.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "checkbox API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-checkbox.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "date picker API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-date-picker.api.md"
         },
         {
           "type": "fileExists",
@@ -113,8 +148,123 @@ mapped to command evidence and concrete evidence checks.
         },
         {
           "type": "fileExists",
-          "label": "app-shell API report is committed",
-          "path": "etc/api-reports/hell-ui-angular-app-shell.api.md"
+          "label": "drop zone API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-drop-zone.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "field API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-field.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "flyout API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-flyout.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "icon API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-icon.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "listbox API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-listbox.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "menu API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-menu.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "omnibar API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-omnibar.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "pagination API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-pagination.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "popover API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-popover.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "progress API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-progress.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "radio API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-radio.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "resizable API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-resizable.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "search API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-search.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "separator API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-separator.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "skeleton API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-skeleton.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "slider API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-slider.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "split view API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-split-view.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "switch API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-switch.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "table API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-table.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "tabs API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-tabs.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "tag API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-tag.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "time input API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-time-input.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "toast API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-toast.api.md"
+        },
+        {
+          "type": "fileExists",
+          "label": "toggle API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-toggle.api.md"
         },
         {
           "type": "fileExists",
@@ -130,7 +280,10 @@ mapped to command evidence and concrete evidence checks.
     {
       "category": "accessibility",
       "title": "Browser accessibility and matrix proof",
-      "commandEvidence": ["pnpm e2e", "pnpm release:dry-run -- --full"],
+      "commandEvidence": [
+        "pnpm e2e",
+        "pnpm release:dry-run -- --full"
+      ],
       "evidenceChecks": [
         {
           "type": "playwrightJsonReport",
@@ -143,7 +296,10 @@ mapped to command evidence and concrete evidence checks.
           "type": "fileNotContains",
           "label": "accessibility matrix has no critical gaps",
           "path": "apps/docs/src/app/pages/accessibility/accessibility.page.ts",
-          "forbids": ["Critical gap", "criticalGap: true"]
+          "forbids": [
+            "Critical gap",
+            "criticalGap: true"
+          ]
         }
       ]
     },
@@ -192,7 +348,9 @@ mapped to command evidence and concrete evidence checks.
     {
       "category": "release-dry-run",
       "title": "Full release-candidate dry-run evidence",
-      "commandEvidence": ["pnpm release:dry-run -- --full"],
+      "commandEvidence": [
+        "pnpm release:dry-run -- --full"
+      ],
       "evidenceChecks": [
         {
           "type": "releaseDryRunEvidence",
