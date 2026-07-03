@@ -4,6 +4,15 @@
 @source "./menu.ts";
 
 @layer components {
+  /* Menus promote themselves into the browser top-most rendering context
+     (Popover API) so they paint above popover-based overlay panes. Undo the
+     UA popover geometry; ng-primitives positions via inline left/top. */
+  [hellMenu][data-slot='root'][popover] {
+    inset: auto;
+    margin: 0;
+    overflow: visible;
+  }
+
   [hellMenu][data-slot='root'][data-submenu='true'] {
     margin-block-start: calc(var(--spacing-hell-2) * -1 - 1px);
 

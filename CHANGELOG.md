@@ -55,9 +55,10 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 - Skeleton sizing: the recipe no longer hard-codes width/height utilities, so
   consumer `class`/`ui` sizing utilities (`h-5`, `size-10`, …) win over the
   stylesheet defaults.
-- Menus opened from Composites: the Omnibar panel opts out of the browser
-  Popover API rendering so body-attached menus and submenus stack above it,
-  and property-bound `[hellSubmenuTrigger]` items now carry a static
+- Menus opened from Composites: menus and submenus now join the browser
+  Popover API top-most rendering context, so they paint above popover-based
+  overlay panes such as the Omnibar panel, and property-bound
+  `[hellSubmenuTrigger]` items now carry a static
   `data-hell-submenu-trigger` marker so submenu chevrons render.
 - Omnibar: the actions strip only renders when action buttons register, so
   actionless omnibars no longer show an empty toolbar band.

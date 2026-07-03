@@ -259,6 +259,30 @@ describe('HellMenuItem', () => {
     expect(document.body.querySelector('[role="menu"]')).toBeTruthy();
   });
 
+  it('joins the browser top-most rendering context when the Popover API exists', async () => {
+    // Overlay panes (e.g. the Omnibar panel through CDK) render via the
+    // Popover API and paint above all z-indexed content; menus must join the
+    // same context so a menu opened from such a pane paints above it.
+    const showPopover = vi.fn();
+    Object.defineProperty(HTMLElement.prototype, 'showPopover', {
+      configurable: true,
+      value: showPopover,
+    });
+
+    try {
+      const fixture = TestBed.createComponent(MenuHost);
+      await settle(fixture);
+
+      fixture.componentInstance.trigger().show();
+      const menu = await waitForOverlayElement<HTMLElement>(fixture, document.body, '[hellMenu]');
+
+      expect(menu.getAttribute('popover')).toBe('manual');
+      expect(showPopover).toHaveBeenCalled();
+    } finally {
+      delete (HTMLElement.prototype as { showPopover?: () => void }).showPopover;
+    }
+  });
+
   it('marks property-bound submenu triggers with a static styling hook', async () => {
     const fixture = TestBed.createComponent(SubmenuHost);
     await settle(fixture);

@@ -317,10 +317,6 @@ const HELL_OMNIBAR_ACTION_RECIPE = {
       <ng-content select="[hellOmnibarTrailing]" />
     </div>
 
-    <!-- usePopover=null keeps the panel out of the browser top-most
-         rendering context (Popover API), so body-attached Floating
-         Interactions (menus, submenus) can stack above it through the
-         hell z-index scale. -->
     <ng-template
       cdkConnectedOverlay
       [cdkConnectedOverlayOrigin]="overlayOrigin"
@@ -329,7 +325,6 @@ const HELL_OMNIBAR_ACTION_RECIPE = {
       [cdkConnectedOverlayMinWidth]="minPanelWidth()"
       [cdkConnectedOverlayMatchWidth]="true"
       [cdkConnectedOverlayHasBackdrop]="false"
-      [cdkConnectedOverlayUsePopover]="null"
       [cdkConnectedOverlayFlexibleDimensions]="true"
       [cdkConnectedOverlayGrowAfterOpen]="true"
       [cdkConnectedOverlayPush]="true"
