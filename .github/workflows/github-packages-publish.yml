@@ -119,7 +119,9 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.HELL_UI_GITHUB_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          for tarball in ghpr-package/*.tgz; do
+          # Absolute paths: pnpm publish re-resolves a relative tarball path
+          # from a different working directory and misreads it as a git spec.
+          for tarball in "$PWD"/ghpr-package/*.tgz; do
             echo "Publishing ${tarball}"
             pnpm publish "$tarball" --no-git-checks
           done
