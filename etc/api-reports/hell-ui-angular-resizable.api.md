@@ -22,19 +22,14 @@ export const HELL_RESIZABLE_LABELS: InjectionToken<HellResizableLabels>;
 // @public
 export class HellResizable implements AfterContentInit {
     constructor();
-    // (undocumented)
     fitPanesToAvailableSize(): void;
     getAvailableSize(): number;
     getPanes(): readonly HellResizablePane[];
     indexOf(p: HellResizablePane | null): number;
-    // (undocumented)
     isConstrained(): boolean;
     markUserSized(): void;
-    // (undocumented)
     ngAfterContentInit(): void;
     // Warning: (ae-forgotten-export) The symbol "HellOrientation" needs to be exported by the entry point hell-ui-angular-resizable.d.ts
-    //
-    // (undocumented)
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-resizable.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
@@ -43,42 +38,27 @@ export class HellResizable implements AfterContentInit {
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-resizable.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     unregisterPane(p: HellResizablePane): void;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellResizable, "[hellResizable]", ["hellResizable"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "rescaleOnResize": { "alias": "rescaleOnResize"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellResizable, never>;
 }
 
-// @public (undocumented)
+// @public
 export class HellResizableHandle implements AfterViewInit, OnDestroy {
     readonly appearance: _angular_core.InputSignal<"grip" | "line">;
-    // (undocumented)
     readonly ariaControls: _angular_core.InputSignal<string | readonly string[] | null>;
-    // (undocumented)
     protected readonly ariaControlsValue: _angular_core.Signal<string | null>;
-    // (undocumented)
     readonly ariaLabel: _angular_core.InputSignal<string | null>;
-    // (undocumented)
     protected readonly ariaValueNow: _angular_core.WritableSignal<number | null>;
-    // (undocumented)
     protected readonly dragging: _angular_core.WritableSignal<boolean>;
-    // (undocumented)
     protected readonly labels: HellResizableLabels;
-    // (undocumented)
     ngAfterViewInit(): void;
-    // (undocumented)
     ngOnDestroy(): void;
-    // (undocumented)
     protected onKey(e: KeyboardEvent): void;
-    // (undocumented)
     protected onPointerDown(e: PointerEvent): void;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellResizableHandlePart>;
-    // (undocumented)
     protected readonly resizable: HellResizable;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellResizableHandlePart>>;
-    // (undocumented)
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellResizableHandle, "[hellResizableHandle]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "appearance": { "alias": "appearance"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; "ariaControls": { "alias": "aria-controls"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellResizableHandle, never>;
 }
 
@@ -92,47 +72,31 @@ export type HellResizableHandleUi = HellUi<HellResizableHandlePart>;
 
 // @public
 export interface HellResizableLabels {
-    // (undocumented)
     readonly resizePanels: string;
 }
 
-// @public (undocumented)
+// @public
 export class HellResizablePane implements OnDestroy {
     constructor();
-    // (undocumented)
     currentMinSize(): number;
-    // (undocumented)
     currentSize(): number | null;
-    // (undocumented)
     protected readonly flexValue: _angular_core.Signal<string>;
-    // (undocumented)
     hasSize(): boolean;
-    // (undocumented)
     readonly host: HTMLElement;
     readonly initialFlex: _angular_core.InputSignalWithTransform<number, unknown>;
-    // (undocumented)
     measure(): number;
     readonly minSize: _angular_core.InputSignalWithTransform<number, unknown>;
-    // (undocumented)
     protected readonly minSizeValue: _angular_core.Signal<number>;
-    // (undocumented)
     ngOnDestroy(): void;
-    // (undocumented)
     protected readonly orientation: _angular_core.InputSignal<HellOrientation>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // (undocumented)
     resetSize(): void;
-    // (undocumented)
     readonly resizable: HellResizable;
-    // (undocumented)
     setEffectiveMinSize(px: number | null): void;
-    // (undocumented)
     setSize(px: number): void;
     readonly _size: _angular_core.WritableSignal<number | null>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellResizablePane, "[hellResizablePane]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "initialFlex": { "alias": "initialFlex"; "required": false; "isSignal": true; }; "minSize": { "alias": "minSize"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellResizablePane, never>;
 }
 
@@ -150,46 +114,6 @@ export type HellResizableUi = HellUi<HellResizablePart>;
 
 // @public
 export function provideHellResizableLabels(overrides: Partial<HellResizableLabels>): Provider;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-resizable.d.ts:8:5 - (ae-undocumented) Missing documentation for "resizePanels".
-// types/hell-ui-angular-resizable.d.ts:39:5 - (ae-undocumented) Missing documentation for "orientation".
-// types/hell-ui-angular-resizable.d.ts:53:5 - (ae-undocumented) Missing documentation for "ngAfterContentInit".
-// types/hell-ui-angular-resizable.d.ts:60:5 - (ae-undocumented) Missing documentation for "isConstrained".
-// types/hell-ui-angular-resizable.d.ts:63:5 - (ae-undocumented) Missing documentation for "fitPanesToAvailableSize".
-// types/hell-ui-angular-resizable.d.ts:66:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-resizable.d.ts:67:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-resizable.d.ts:69:1 - (ae-undocumented) Missing documentation for "HellResizablePane".
-// types/hell-ui-angular-resizable.d.ts:82:5 - (ae-undocumented) Missing documentation for "flexValue".
-// types/hell-ui-angular-resizable.d.ts:83:5 - (ae-undocumented) Missing documentation for "minSizeValue".
-// types/hell-ui-angular-resizable.d.ts:84:5 - (ae-undocumented) Missing documentation for "resizable".
-// types/hell-ui-angular-resizable.d.ts:85:5 - (ae-undocumented) Missing documentation for "host".
-// types/hell-ui-angular-resizable.d.ts:86:5 - (ae-undocumented) Missing documentation for "orientation".
-// types/hell-ui-angular-resizable.d.ts:88:5 - (ae-undocumented) Missing documentation for "ngOnDestroy".
-// types/hell-ui-angular-resizable.d.ts:89:5 - (ae-undocumented) Missing documentation for "setSize".
-// types/hell-ui-angular-resizable.d.ts:90:5 - (ae-undocumented) Missing documentation for "resetSize".
-// types/hell-ui-angular-resizable.d.ts:91:5 - (ae-undocumented) Missing documentation for "hasSize".
-// types/hell-ui-angular-resizable.d.ts:92:5 - (ae-undocumented) Missing documentation for "currentSize".
-// types/hell-ui-angular-resizable.d.ts:93:5 - (ae-undocumented) Missing documentation for "setEffectiveMinSize".
-// types/hell-ui-angular-resizable.d.ts:94:5 - (ae-undocumented) Missing documentation for "currentMinSize".
-// types/hell-ui-angular-resizable.d.ts:95:5 - (ae-undocumented) Missing documentation for "measure".
-// types/hell-ui-angular-resizable.d.ts:98:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-resizable.d.ts:99:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-resizable.d.ts:101:1 - (ae-undocumented) Missing documentation for "HellResizableHandle".
-// types/hell-ui-angular-resizable.d.ts:113:5 - (ae-undocumented) Missing documentation for "ariaLabel".
-// types/hell-ui-angular-resizable.d.ts:114:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-resizable.d.ts:115:5 - (ae-undocumented) Missing documentation for "ariaControls".
-// types/hell-ui-angular-resizable.d.ts:116:5 - (ae-undocumented) Missing documentation for "ariaControlsValue".
-// types/hell-ui-angular-resizable.d.ts:117:5 - (ae-undocumented) Missing documentation for "dragging".
-// types/hell-ui-angular-resizable.d.ts:118:5 - (ae-undocumented) Missing documentation for "ariaValueNow".
-// types/hell-ui-angular-resizable.d.ts:120:5 - (ae-undocumented) Missing documentation for "resizable".
-// types/hell-ui-angular-resizable.d.ts:125:5 - (ae-undocumented) Missing documentation for "ngAfterViewInit".
-// types/hell-ui-angular-resizable.d.ts:126:5 - (ae-undocumented) Missing documentation for "onPointerDown".
-// types/hell-ui-angular-resizable.d.ts:127:5 - (ae-undocumented) Missing documentation for "onKey".
-// types/hell-ui-angular-resizable.d.ts:129:5 - (ae-undocumented) Missing documentation for "ngOnDestroy".
-// types/hell-ui-angular-resizable.d.ts:130:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-resizable.d.ts:131:5 - (ae-undocumented) Missing documentation for "ɵcmp".
 
 // (No @packageDocumentation comment for this package)
 

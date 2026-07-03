@@ -1,7 +1,9 @@
 import { DOCUMENT } from '@angular/common';
 import { DestroyRef, Injectable, inject } from '@angular/core';
 
+/** Handler invoked for document-level keydown events registered through {@link HellGlobalKeydownService}. */
 export type HellGlobalKeydownHandler = (event: KeyboardEvent) => void;
+/** Handler invoked for document-level pointerdown events registered through {@link HellGlobalPointerdownService}. */
 export type HellGlobalPointerdownHandler = (event: PointerEvent) => void;
 
 /** Match a keydown against a hotkey string. Supported tokens:
@@ -111,6 +113,7 @@ function isEditableTarget(target: EventTarget | null | undefined): boolean {
 export class HellGlobalKeydownService {
   private readonly document = inject(DOCUMENT, { optional: true });
 
+  /** Registers a document-level keydown handler, auto-removed on `destroyRef` teardown. Returns a manual unregister function. */
   register(handler: HellGlobalKeydownHandler, destroyRef: DestroyRef): () => void {
     const doc = this.document;
     if (!doc?.addEventListener) return () => undefined;
@@ -136,6 +139,7 @@ export class HellGlobalKeydownService {
 export class HellGlobalPointerdownService {
   private readonly document = inject(DOCUMENT, { optional: true });
 
+  /** Registers a document-level pointerdown handler, auto-removed on `destroyRef` teardown. Returns a manual unregister function. */
   register(handler: HellGlobalPointerdownHandler, destroyRef: DestroyRef): () => void {
     const doc = this.document;
     if (!doc?.addEventListener) return () => undefined;

@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
-// @public (undocumented)
+// @public
 export const HELL_PAGINATION_DIRECTIVES: readonly [typeof HellPagination, typeof HellPaginationFirst, typeof HellPaginationPrev, typeof HellPaginationNext, typeof HellPaginationLast, typeof HellPaginationButton, typeof HellPaginationStrip];
 
 // @public
@@ -24,27 +24,19 @@ export class HellPagination {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-pagination.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPagination, "[hellPagination]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPagination; inputs: { "ngpPaginationPage": "page"; "ngpPaginationPageCount": "pageCount"; "ngpPaginationDisabled": "disabled"; }; outputs: { "ngpPaginationPageChange": "pageChange"; }; }]>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPagination, never>;
 }
 
-// @public (undocumented)
+// @public
 export class HellPaginationButton {
-    // (undocumented)
     protected readonly activate: (event: Event) => void;
-    // (undocumented)
     protected readonly disabled: _angular_core.Signal<boolean>;
     // Warning: (ae-forgotten-export) The symbol "HellPaginationNativeControl" needs to be exported by the entry point hell-ui-angular-pagination.d.ts
-    //
-    // (undocumented)
     protected readonly native: HellPaginationNativeControl;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPaginationButton, "button[hellPaginationButton], a[hellPaginationButton]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPaginationButton; inputs: { "ngpPaginationButtonPage": "page"; "ngpPaginationButtonDisabled": "disabled"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPaginationButton, never>;
 }
 
@@ -56,19 +48,14 @@ export type HellPaginationButtonPart = 'root';
 // @public
 export type HellPaginationButtonUi = HellUi<HellPaginationButtonPart>;
 
-// @public (undocumented)
+// @public
 export class HellPaginationFirst {
-    // (undocumented)
     protected readonly activate: (event: Event) => void;
-    // (undocumented)
     protected readonly disabled: _angular_core.Signal<boolean>;
-    // (undocumented)
     protected readonly native: HellPaginationNativeControl;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPaginationFirst, "button[hellPaginationFirst], a[hellPaginationFirst]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPaginationFirst; inputs: { "ngpPaginationFirstDisabled": "disabled"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPaginationFirst, never>;
 }
 
@@ -80,39 +67,25 @@ export type HellPaginationFirstUi = HellUi<HellPaginationFirstPart>;
 
 // @public
 export interface HellPaginationLabels {
-    // (undocumented)
     readonly firstPage: string;
-    // (undocumented)
     readonly jumpToPage?: string;
-    // (undocumented)
     readonly lastPage: string;
-    // (undocumented)
     readonly navigation: string;
-    // (undocumented)
     readonly nextPage: string;
-    // (undocumented)
     readonly page: (page: number) => string;
-    // (undocumented)
     readonly pageStatus?: (page: number, pageCount: number) => string;
-    // (undocumented)
     readonly pageTotal?: (pageCount: number) => string;
-    // (undocumented)
     readonly previousPage: string;
 }
 
-// @public (undocumented)
+// @public
 export class HellPaginationLast {
-    // (undocumented)
     protected readonly activate: (event: Event) => void;
-    // (undocumented)
     protected readonly disabled: _angular_core.Signal<boolean>;
-    // (undocumented)
     protected readonly native: HellPaginationNativeControl;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPaginationLast, "button[hellPaginationLast], a[hellPaginationLast]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPaginationLast; inputs: { "ngpPaginationLastDisabled": "disabled"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPaginationLast, never>;
 }
 
@@ -122,22 +95,17 @@ export type HellPaginationLastPart = 'root';
 // @public
 export type HellPaginationLastUi = HellUi<HellPaginationLastPart>;
 
-// @public (undocumented)
+// @public
 export type HellPaginationMode = 'pages' | 'previous-next' | 'jump';
 
-// @public (undocumented)
+// @public
 export class HellPaginationNext {
-    // (undocumented)
     protected readonly activate: (event: Event) => void;
-    // (undocumented)
     protected readonly disabled: _angular_core.Signal<boolean>;
-    // (undocumented)
     protected readonly native: HellPaginationNativeControl;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPaginationNext, "button[hellPaginationNext], a[hellPaginationNext]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPaginationNext; inputs: { "ngpPaginationNextDisabled": "disabled"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPaginationNext, never>;
 }
 
@@ -150,19 +118,14 @@ export type HellPaginationNextUi = HellUi<HellPaginationNextPart>;
 // @public
 export type HellPaginationPart = 'root';
 
-// @public (undocumented)
+// @public
 export class HellPaginationPrev {
-    // (undocumented)
     protected readonly activate: (event: Event) => void;
-    // (undocumented)
     protected readonly disabled: _angular_core.Signal<boolean>;
-    // (undocumented)
     protected readonly native: HellPaginationNativeControl;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPaginationPrev, "button[hellPaginationPrev], a[hellPaginationPrev]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPaginationPrevious; inputs: { "ngpPaginationPreviousDisabled": "disabled"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPaginationPrev, never>;
 }
 
@@ -174,41 +137,24 @@ export type HellPaginationPrevUi = HellUi<HellPaginationPrevPart>;
 
 // @public
 export class HellPaginationStrip {
-    // (undocumented)
     protected currentPage(): number;
-    // (undocumented)
     protected goToSelectedPage(event: Event): void;
     // Warning: (ae-forgotten-export) The symbol "HellNativeSelectUi" needs to be exported by the entry point hell-ui-angular-pagination.d.ts
-    //
-    // (undocumented)
     protected jumpSelectUi(): HellNativeSelectUi;
-    // (undocumented)
     protected readonly labels: HellPaginationLabels;
-    // (undocumented)
     readonly mode: _angular_core.InputSignal<HellPaginationMode>;
-    // (undocumented)
     protected pageCount(): number;
-    // (undocumented)
     protected pageJumpLabel(): string;
-    // (undocumented)
     protected readonly pageOptions: _angular_core.Signal<number[]>;
-    // (undocumented)
     protected readonly pages: _angular_core.Signal<number[]>;
-    // (undocumented)
     protected pageStatusLabel(): string;
-    // (undocumented)
     protected pageTotalLabel(): string;
-    // (undocumented)
     protected paginationDisabled(): boolean;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellPaginationStripPart>;
-    // (undocumented)
     readonly siblingCount: _angular_core.InputSignal<number>;
-    // (undocumented)
     protected readonly trackPage: (_: number, page: number) => number;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellPaginationStripPart>>;
-    // (undocumented)
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellPaginationStrip, "hell-pagination", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "siblingCount": { "alias": "siblingCount"; "required": false; "isSignal": true; }; "mode": { "alias": "mode"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPagination; inputs: { "ngpPaginationPage": "page"; "ngpPaginationPageCount": "pageCount"; "ngpPaginationDisabled": "disabled"; }; outputs: { "ngpPaginationPageChange": "pageChange"; }; }]>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPaginationStrip, never>;
 }
 
@@ -223,68 +169,6 @@ export type HellPaginationUi = HellUi<HellPaginationPart>;
 
 // @public
 export function provideHellPaginationLabels(overrides: Partial<HellPaginationLabels>): Provider;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-pagination.d.ts:10:5 - (ae-undocumented) Missing documentation for "navigation".
-// types/hell-ui-angular-pagination.d.ts:11:5 - (ae-undocumented) Missing documentation for "firstPage".
-// types/hell-ui-angular-pagination.d.ts:12:5 - (ae-undocumented) Missing documentation for "previousPage".
-// types/hell-ui-angular-pagination.d.ts:13:5 - (ae-undocumented) Missing documentation for "nextPage".
-// types/hell-ui-angular-pagination.d.ts:14:5 - (ae-undocumented) Missing documentation for "lastPage".
-// types/hell-ui-angular-pagination.d.ts:15:5 - (ae-undocumented) Missing documentation for "page".
-// types/hell-ui-angular-pagination.d.ts:16:5 - (ae-undocumented) Missing documentation for "pageStatus".
-// types/hell-ui-angular-pagination.d.ts:17:5 - (ae-undocumented) Missing documentation for "jumpToPage".
-// types/hell-ui-angular-pagination.d.ts:18:5 - (ae-undocumented) Missing documentation for "pageTotal".
-// types/hell-ui-angular-pagination.d.ts:24:1 - (ae-undocumented) Missing documentation for "HellPaginationMode".
-// types/hell-ui-angular-pagination.d.ts:75:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-pagination.d.ts:76:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-pagination.d.ts:78:1 - (ae-undocumented) Missing documentation for "HellPaginationFirst".
-// types/hell-ui-angular-pagination.d.ts:83:5 - (ae-undocumented) Missing documentation for "native".
-// types/hell-ui-angular-pagination.d.ts:85:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-pagination.d.ts:86:5 - (ae-undocumented) Missing documentation for "activate".
-// types/hell-ui-angular-pagination.d.ts:87:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-pagination.d.ts:88:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-pagination.d.ts:90:1 - (ae-undocumented) Missing documentation for "HellPaginationPrev".
-// types/hell-ui-angular-pagination.d.ts:95:5 - (ae-undocumented) Missing documentation for "native".
-// types/hell-ui-angular-pagination.d.ts:97:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-pagination.d.ts:98:5 - (ae-undocumented) Missing documentation for "activate".
-// types/hell-ui-angular-pagination.d.ts:99:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-pagination.d.ts:100:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-pagination.d.ts:102:1 - (ae-undocumented) Missing documentation for "HellPaginationNext".
-// types/hell-ui-angular-pagination.d.ts:107:5 - (ae-undocumented) Missing documentation for "native".
-// types/hell-ui-angular-pagination.d.ts:109:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-pagination.d.ts:110:5 - (ae-undocumented) Missing documentation for "activate".
-// types/hell-ui-angular-pagination.d.ts:111:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-pagination.d.ts:112:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-pagination.d.ts:114:1 - (ae-undocumented) Missing documentation for "HellPaginationLast".
-// types/hell-ui-angular-pagination.d.ts:119:5 - (ae-undocumented) Missing documentation for "native".
-// types/hell-ui-angular-pagination.d.ts:121:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-pagination.d.ts:122:5 - (ae-undocumented) Missing documentation for "activate".
-// types/hell-ui-angular-pagination.d.ts:123:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-pagination.d.ts:124:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-pagination.d.ts:126:1 - (ae-undocumented) Missing documentation for "HellPaginationButton".
-// types/hell-ui-angular-pagination.d.ts:131:5 - (ae-undocumented) Missing documentation for "native".
-// types/hell-ui-angular-pagination.d.ts:133:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-pagination.d.ts:134:5 - (ae-undocumented) Missing documentation for "activate".
-// types/hell-ui-angular-pagination.d.ts:135:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-pagination.d.ts:136:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-pagination.d.ts:149:5 - (ae-undocumented) Missing documentation for "siblingCount".
-// types/hell-ui-angular-pagination.d.ts:150:5 - (ae-undocumented) Missing documentation for "mode".
-// types/hell-ui-angular-pagination.d.ts:151:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-pagination.d.ts:153:5 - (ae-undocumented) Missing documentation for "trackPage".
-// types/hell-ui-angular-pagination.d.ts:154:5 - (ae-undocumented) Missing documentation for "pageOptions".
-// types/hell-ui-angular-pagination.d.ts:155:5 - (ae-undocumented) Missing documentation for "pages".
-// types/hell-ui-angular-pagination.d.ts:156:5 - (ae-undocumented) Missing documentation for "currentPage".
-// types/hell-ui-angular-pagination.d.ts:157:5 - (ae-undocumented) Missing documentation for "pageCount".
-// types/hell-ui-angular-pagination.d.ts:158:5 - (ae-undocumented) Missing documentation for "paginationDisabled".
-// types/hell-ui-angular-pagination.d.ts:159:5 - (ae-undocumented) Missing documentation for "pageStatusLabel".
-// types/hell-ui-angular-pagination.d.ts:160:5 - (ae-undocumented) Missing documentation for "pageJumpLabel".
-// types/hell-ui-angular-pagination.d.ts:161:5 - (ae-undocumented) Missing documentation for "pageTotalLabel".
-// types/hell-ui-angular-pagination.d.ts:162:5 - (ae-undocumented) Missing documentation for "jumpSelectUi".
-// types/hell-ui-angular-pagination.d.ts:163:5 - (ae-undocumented) Missing documentation for "goToSelectedPage".
-// types/hell-ui-angular-pagination.d.ts:164:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-pagination.d.ts:165:5 - (ae-undocumented) Missing documentation for "ɵcmp".
-// types/hell-ui-angular-pagination.d.ts:167:15 - (ae-undocumented) Missing documentation for "HELL_PAGINATION_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

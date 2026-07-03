@@ -25,9 +25,11 @@ import { HellStyleable } from '@hell-ui/angular/core';
   template: `<ng-content />`,
 })
 export class HellAvatarGroup extends HellStyleable {
+  /** Size applied to the group and its projected avatars. Defaults to `md`. */
   readonly size = input<HellSize>('md');
 }
 
+/** Marks a single projected avatar as a member of the group, applying stacking and selection styling. */
 @Directive({
   selector: '[hellAvatarGroupItem]',
   host: {
@@ -36,9 +38,11 @@ export class HellAvatarGroup extends HellStyleable {
   },
 })
 export class HellAvatarGroupItem extends HellStyleable {
+  /** Marks the item as selected, applying the selected styling. Defaults to `false`. */
   readonly selected = input(false, { transform: booleanAttribute });
 }
 
+/** Marker for the overflow indicator (e.g. "+3") shown at the end of the avatar stack. */
 @Directive({
   selector: '[hellAvatarGroupOverflow]',
   host: {
@@ -47,6 +51,7 @@ export class HellAvatarGroupItem extends HellStyleable {
 })
 export class HellAvatarGroupOverflow extends HellStyleable {}
 
+/** All directives that make up the avatar-group entry point, for bulk `imports`. */
 export const HELL_AVATAR_GROUP_DIRECTIVES = [
   HellAvatarGroup,
   HellAvatarGroupItem,

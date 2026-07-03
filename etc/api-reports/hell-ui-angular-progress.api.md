@@ -12,25 +12,21 @@ import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
-// @public (undocumented)
+// @public
 export class HellProgress {
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-progress.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-progress.d.ts
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellProgress, "[hellProgress]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpProgress; inputs: { "ngpProgressValue": "value"; "ngpProgressMax": "max"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellProgress, never>;
 }
 
-// @public (undocumented)
+// @public
 export class HellProgressBar {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellProgressBar, "[hellProgressBar]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpProgressIndicator; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellProgressBar, never>;
 }
 
@@ -47,15 +43,6 @@ export type HellProgressPart = 'root';
 
 // @public
 export type HellProgressUi = HellUi<HellProgressPart>;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-progress.d.ts:14:1 - (ae-undocumented) Missing documentation for "HellProgress".
-// types/hell-ui-angular-progress.d.ts:19:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-progress.d.ts:20:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-progress.d.ts:22:1 - (ae-undocumented) Missing documentation for "HellProgressBar".
-// types/hell-ui-angular-progress.d.ts:27:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-progress.d.ts:28:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

@@ -12,30 +12,25 @@ import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
-// @public (undocumented)
+// @public
 export const HELL_ACCORDION_DIRECTIVES: readonly [typeof HellAccordion, typeof HellAccordionItem, typeof HellAccordionTrigger, typeof HellAccordionContent];
 
-// @public (undocumented)
+// @public
 export class HellAccordion {
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-accordion.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-accordion.d.ts
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAccordion, "[hellAccordion]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpAccordion; inputs: { "ngpAccordionValue": "value"; "ngpAccordionType": "type"; "ngpAccordionCollapsible": "collapsible"; "ngpAccordionDisabled": "disabled"; "ngpAccordionOrientation": "orientation"; }; outputs: { "ngpAccordionValueChange": "valueChange"; }; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAccordion, never>;
 }
 
-// @public (undocumented)
+// @public
 export class HellAccordionContent {
-    // (undocumented)
     protected readonly closed: i0.Signal<boolean>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAccordionContent, "[hellAccordionContent]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpAccordionContent; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAccordionContent, never>;
 }
 
@@ -47,13 +42,11 @@ export type HellAccordionContentPart = 'root';
 // @public
 export type HellAccordionContentUi = HellUi<HellAccordionContentPart>;
 
-// @public (undocumented)
+// @public
 export class HellAccordionItem {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAccordionItem, "[hellAccordionItem]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpAccordionItem; inputs: { "ngpAccordionItemValue": "value"; "ngpAccordionItemDisabled": "disabled"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAccordionItem, never>;
 }
 
@@ -66,13 +59,11 @@ export type HellAccordionItemUi = HellUi<HellAccordionItemPart>;
 // @public
 export type HellAccordionPart = 'root';
 
-// @public (undocumented)
+// @public
 export class HellAccordionTrigger {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAccordionTrigger, "button[hellAccordionTrigger]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpAccordionTrigger; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAccordionTrigger, never>;
 }
 
@@ -84,23 +75,6 @@ export type HellAccordionTriggerUi = HellUi<HellAccordionTriggerPart>;
 
 // @public
 export type HellAccordionUi = HellUi<HellAccordionPart>;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-accordion.d.ts:22:1 - (ae-undocumented) Missing documentation for "HellAccordion".
-// types/hell-ui-angular-accordion.d.ts:27:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-accordion.d.ts:28:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-accordion.d.ts:30:1 - (ae-undocumented) Missing documentation for "HellAccordionItem".
-// types/hell-ui-angular-accordion.d.ts:35:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-accordion.d.ts:36:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-accordion.d.ts:38:1 - (ae-undocumented) Missing documentation for "HellAccordionTrigger".
-// types/hell-ui-angular-accordion.d.ts:43:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-accordion.d.ts:44:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-accordion.d.ts:46:1 - (ae-undocumented) Missing documentation for "HellAccordionContent".
-// types/hell-ui-angular-accordion.d.ts:52:5 - (ae-undocumented) Missing documentation for "closed".
-// types/hell-ui-angular-accordion.d.ts:53:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-accordion.d.ts:54:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-accordion.d.ts:56:15 - (ae-undocumented) Missing documentation for "HELL_ACCORDION_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

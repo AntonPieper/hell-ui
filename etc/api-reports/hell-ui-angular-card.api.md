@@ -11,30 +11,25 @@ import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
-// @public (undocumented)
+// @public
 export const HELL_CARD_DIRECTIVES: readonly [typeof HellCard, typeof HellCardHeader, typeof HellCardBody, typeof HellCardFooter];
 
-// @public (undocumented)
+// @public
 export class HellCard {
-    // (undocumented)
     readonly elevation: i0.InputSignal<0 | 1 | 2 | 3>;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-card.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-card.d.ts
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellCard, "[hellCard]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "elevation": { "alias": "elevation"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellCard, never>;
 }
 
-// @public (undocumented)
+// @public
 export class HellCardBody {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellCardBody, "[hellCardBody]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellCardBody, never>;
 }
 
@@ -46,13 +41,11 @@ export type HellCardBodyPart = 'root';
 // @public
 export type HellCardBodyUi = HellUi<HellCardBodyPart>;
 
-// @public (undocumented)
+// @public
 export class HellCardFooter {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellCardFooter, "[hellCardFooter]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellCardFooter, never>;
 }
 
@@ -62,13 +55,11 @@ export type HellCardFooterPart = 'root';
 // @public
 export type HellCardFooterUi = HellUi<HellCardFooterPart>;
 
-// @public (undocumented)
+// @public
 export class HellCardHeader {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellCardHeader, "[hellCardHeader]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellCardHeader, never>;
 }
 
@@ -83,23 +74,6 @@ export type HellCardPart = 'root';
 
 // @public
 export type HellCardUi = HellUi<HellCardPart>;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-card.d.ts:21:1 - (ae-undocumented) Missing documentation for "HellCard".
-// types/hell-ui-angular-card.d.ts:26:5 - (ae-undocumented) Missing documentation for "elevation".
-// types/hell-ui-angular-card.d.ts:27:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-card.d.ts:28:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-card.d.ts:30:1 - (ae-undocumented) Missing documentation for "HellCardHeader".
-// types/hell-ui-angular-card.d.ts:35:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-card.d.ts:36:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-card.d.ts:38:1 - (ae-undocumented) Missing documentation for "HellCardBody".
-// types/hell-ui-angular-card.d.ts:43:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-card.d.ts:44:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-card.d.ts:46:1 - (ae-undocumented) Missing documentation for "HellCardFooter".
-// types/hell-ui-angular-card.d.ts:51:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-card.d.ts:52:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-card.d.ts:54:15 - (ae-undocumented) Missing documentation for "HELL_CARD_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

@@ -17,7 +17,9 @@ type HellTableResizeObserver = {
 
 type HellTableResizeObserverConstructor = new (callback: () => void) => HellTableResizeObserver;
 
+/** Minimal row-item shape whose `key` seeds the measurement key. */
 export interface HellTableMeasurableItem {
+  /** Optional stable identity used as the measurement key when present. */
   readonly key?: string | number | null;
 }
 
@@ -26,12 +28,19 @@ export type HellTableRowMeasurementReason = 'init' | 'input' | 'manual' | 'resiz
 
 /** Adapter-safe row size report. `size` is the block-axis row height in CSS pixels. */
 export interface HellTableRowMeasurement<TItem = unknown> {
+  /** Stable key identifying the measured row. */
   readonly key: string;
+  /** Row item that was measured, or `null` when only a key was supplied. */
   readonly item: TItem | null;
+  /** The measured host element. */
   readonly element: HTMLElement;
+  /** Block-axis row height in CSS pixels. */
   readonly size: number;
+  /** Measured element height in CSS pixels. */
   readonly height: number;
+  /** Measured element width in CSS pixels. */
   readonly width: number;
+  /** What triggered this measurement report. */
   readonly reason: HellTableRowMeasurementReason;
 }
 
@@ -66,6 +75,7 @@ export class HellTableMeasureRow<TItem = unknown> implements AfterViewInit, OnDe
   /** Output mirror for Angular templates that prefer event binding over callback inputs. */
   readonly measured = output<HellTableRowMeasurement<TItem>>();
 
+  /** Effective measurement key, preferring the explicit key over the item key. */
   protected readonly partKey = computed(() => this.rowPartKey() ?? keyFromItem(this.rowPart()));
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
@@ -83,12 +93,14 @@ export class HellTableMeasureRow<TItem = unknown> implements AfterViewInit, OnDe
     });
   }
 
+  /** Starts observing size changes and reports the initial measurement. */
   ngAfterViewInit(): void {
     this.viewReady = true;
     this.observeSizeChanges();
     this.reportMeasurement('init', true);
   }
 
+  /** Stops the resize observer and prevents further measurement reports. */
   ngOnDestroy(): void {
     this.destroyed = true;
     this.resizeObserver?.disconnect();

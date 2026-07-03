@@ -101,13 +101,21 @@ export class HellSlider implements ControlValueAccessor {
     recipe: () => HELL_SLIDER_RECIPE,
   });
 
+  /** Current slider value. Defaults to `0`. */
   readonly value = input(0, { transform: numberAttribute });
+  /** Minimum allowed value. Defaults to `0`. */
   readonly min = input(0, { transform: numberAttribute });
+  /** Maximum allowed value. Defaults to `100`. */
   readonly max = input(100, { transform: numberAttribute });
+  /** Increment size for keyboard and drag stepping. Defaults to `1`. */
   readonly step = input(1, { transform: numberAttribute });
+  /** Whether the slider is disabled. Defaults to `false`. */
   readonly disabled = input(false, { transform: booleanAttribute });
+  /** Layout axis of the slider. Defaults to `'horizontal'`. */
   readonly orientation = input<HellOrientation>('horizontal');
+  /** Visual size of the slider. Defaults to `'md'`. */
   readonly size = input<HellSize>('md');
+  /** Accessible label for the thumb, mirrored from the host's `aria-label` when unset. */
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
   /**
    * Thumb visibility. `'always'` (default) keeps the thumb visible; `'hover'`
@@ -121,8 +129,10 @@ export class HellSlider implements ControlValueAccessor {
    */
   readonly grow = input(false, { transform: booleanAttribute });
 
+  /** Emits the new value whenever the user changes it. */
   readonly valueChange = output<number>();
 
+  /** Whether the thumb is currently being dragged. */
   protected readonly activeDrag = signal(false);
 
   private readonly host = inject(ElementRef<HTMLElement>);
@@ -146,6 +156,7 @@ export class HellSlider implements ControlValueAccessor {
   private readonly effectiveValue = computed(() => this.coerceValue(this.controlledValue.value()));
   private readonly effectiveDisabled = this.controlledValue.disabled;
 
+  /** Headless slider state and behavior from `ngpSlider`. */
   protected readonly sliderState = ngpSlider({
     id: this.sliderId,
     value: this.effectiveValue,
@@ -217,18 +228,22 @@ export class HellSlider implements ControlValueAccessor {
     });
   }
 
+  /** Writes a form-driven value onto the slider. */
   writeValue(value: number): void {
     this.controlledValue.writeValue(value);
   }
 
+  /** Registers the callback Angular Forms uses to be notified of value changes. */
   registerOnChange(fn: (value: number) => void): void {
     this.valueAccessor.registerOnChange(fn);
   }
 
+  /** Registers the callback Angular Forms uses to be notified when the control is touched. */
   registerOnTouched(fn: () => void): void {
     this.valueAccessor.registerOnTouched(fn);
   }
 
+  /** Applies a form-driven disabled state to the slider. */
   setDisabledState(isDisabled: boolean): void {
     this.controlledValue.setDisabledState(isDisabled);
   }
@@ -264,6 +279,7 @@ export class HellSlider implements ControlValueAccessor {
     );
   }
 
+  /** Starts tracking an active drag from a track pointerdown, clearing on pointerup/cancel. */
   protected markActiveDrag(e: PointerEvent) {
     if (!this.canContinueTrackDrag(e)) return;
 
@@ -299,6 +315,7 @@ export class HellSlider implements ControlValueAccessor {
     return true;
   }
 
+  /** Marks the control as touched for Angular Forms. */
   protected markControlTouched(): void {
     this.valueAccessor.markTouched();
   }

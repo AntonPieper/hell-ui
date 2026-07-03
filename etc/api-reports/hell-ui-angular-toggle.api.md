@@ -19,47 +19,33 @@ export class HellToggle {
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-toggle.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     // Warning: (ae-forgotten-export) The symbol "HellSize" needs to be exported by the entry point hell-ui-angular-toggle.d.ts
-    //
-    // (undocumented)
     readonly size: i0.InputSignal<HellSize>;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-toggle.d.ts
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellToggle, "button[hellToggle]", never, { "size": { "alias": "size"; "required": false; "isSignal": true; }; "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpToggle; inputs: { "ngpToggleSelected": "selected"; "ngpToggleDisabled": "disabled"; }; outputs: { "ngpToggleSelectedChange": "selectedChange"; }; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellToggle, never>;
 }
 
-// @public (undocumented)
+// @public
 export class HellToggleGroup implements ControlValueAccessor {
     constructor();
-    // (undocumented)
     protected onFocusOut(event: FocusEvent): void;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // (undocumented)
     registerOnChange(fn: (value: HellToggleGroupValue) => void): void;
-    // (undocumented)
     registerOnTouched(fn: () => void): void;
-    // (undocumented)
     setDisabledState(isDisabled: boolean): void;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     writeValue(value: HellToggleGroupValue): void;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellToggleGroup, "[hellToggleGroup]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i2.NgpToggleGroup; inputs: { "ngpToggleGroupValue": "value"; "ngpToggleGroupType": "type"; "ngpToggleGroupDisabled": "disabled"; }; outputs: { "ngpToggleGroupValueChange": "valueChange"; }; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellToggleGroup, never>;
 }
 
-// @public (undocumented)
+// @public
 export class HellToggleGroupItem {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // (undocumented)
     readonly size: i0.InputSignal<HellSize>;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellToggleGroupItem, "button[hellToggleGroupItem]", never, { "size": { "alias": "size"; "required": false; "isSignal": true; }; "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i2.NgpToggleGroupItem; inputs: { "ngpToggleGroupItemValue": "value"; "ngpToggleGroupItemDisabled": "disabled"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellToggleGroupItem, never>;
 }
 
@@ -77,7 +63,7 @@ export type HellToggleGroupPart = 'root';
 // @public
 export type HellToggleGroupUi = HellUi<HellToggleGroupPart>;
 
-// @public (undocumented)
+// @public
 export type HellToggleGroupValue = string | null | readonly string[];
 
 // @public
@@ -85,25 +71,6 @@ export type HellTogglePart = 'root';
 
 // @public
 export type HellToggleUi = HellUi<HellTogglePart>;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-toggle.d.ts:8:1 - (ae-undocumented) Missing documentation for "HellToggleGroupValue".
-// types/hell-ui-angular-toggle.d.ts:25:5 - (ae-undocumented) Missing documentation for "size".
-// types/hell-ui-angular-toggle.d.ts:30:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-toggle.d.ts:31:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-toggle.d.ts:33:1 - (ae-undocumented) Missing documentation for "HellToggleGroup".
-// types/hell-ui-angular-toggle.d.ts:43:5 - (ae-undocumented) Missing documentation for "writeValue".
-// types/hell-ui-angular-toggle.d.ts:46:5 - (ae-undocumented) Missing documentation for "registerOnChange".
-// types/hell-ui-angular-toggle.d.ts:47:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
-// types/hell-ui-angular-toggle.d.ts:48:5 - (ae-undocumented) Missing documentation for "setDisabledState".
-// types/hell-ui-angular-toggle.d.ts:49:5 - (ae-undocumented) Missing documentation for "onFocusOut".
-// types/hell-ui-angular-toggle.d.ts:50:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-toggle.d.ts:51:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-toggle.d.ts:53:1 - (ae-undocumented) Missing documentation for "HellToggleGroupItem".
-// types/hell-ui-angular-toggle.d.ts:54:5 - (ae-undocumented) Missing documentation for "size".
-// types/hell-ui-angular-toggle.d.ts:59:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-toggle.d.ts:60:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

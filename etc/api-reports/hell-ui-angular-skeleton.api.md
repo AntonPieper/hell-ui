@@ -16,24 +16,19 @@ export const HELL_SKELETON_LABELS: InjectionToken<HellSkeletonLabels>;
 
 // @public
 export class HellSkeleton {
-    // (undocumented)
     readonly height: _angular_core.InputSignal<string>;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-skeleton.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly shape: _angular_core.InputSignal<"text" | "circle" | "rect">;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-skeleton.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     readonly width: _angular_core.InputSignal<string>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSkeleton, "[hellSkeleton]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "width": { "alias": "width"; "required": false; "isSignal": true; }; "height": { "alias": "height"; "required": false; "isSignal": true; }; "shape": { "alias": "shape"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSkeleton, never>;
 }
 
 // @public
 export interface HellSkeletonLabels {
-    // (undocumented)
     readonly loading: string;
 }
 
@@ -47,21 +42,14 @@ export type HellSkeletonUi = HellUi<HellSkeletonPart>;
 
 // @public
 export class HellSpinner {
-    // (undocumented)
     readonly ariaLabel: _angular_core.InputSignal<string | null>;
-    // (undocumented)
     protected readonly labels: HellSkeletonLabels;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     // Warning: (ae-forgotten-export) The symbol "HellSize" needs to be exported by the entry point hell-ui-angular-skeleton.d.ts
-    //
-    // (undocumented)
     readonly size: _angular_core.InputSignal<HellSize>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     readonly variant: _angular_core.InputSignal<HellSpinnerVariant>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSpinner, "[hellSpinner]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "variant": { "alias": "variant"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSpinner, never>;
 }
 
@@ -71,26 +59,11 @@ export type HellSpinnerPart = 'root';
 // @public
 export type HellSpinnerUi = HellUi<HellSpinnerPart>;
 
-// @public (undocumented)
+// @public
 export type HellSpinnerVariant = 'ring' | 'dots' | 'bars' | 'pulse';
 
 // @public
 export function provideHellSkeletonLabels(overrides: Partial<HellSkeletonLabels>): Provider;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-skeleton.d.ts:8:5 - (ae-undocumented) Missing documentation for "loading".
-// types/hell-ui-angular-skeleton.d.ts:28:5 - (ae-undocumented) Missing documentation for "width".
-// types/hell-ui-angular-skeleton.d.ts:29:5 - (ae-undocumented) Missing documentation for "height".
-// types/hell-ui-angular-skeleton.d.ts:32:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-skeleton.d.ts:33:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-skeleton.d.ts:35:1 - (ae-undocumented) Missing documentation for "HellSpinnerVariant".
-// types/hell-ui-angular-skeleton.d.ts:45:5 - (ae-undocumented) Missing documentation for "variant".
-// types/hell-ui-angular-skeleton.d.ts:46:5 - (ae-undocumented) Missing documentation for "size".
-// types/hell-ui-angular-skeleton.d.ts:47:5 - (ae-undocumented) Missing documentation for "ariaLabel".
-// types/hell-ui-angular-skeleton.d.ts:48:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-skeleton.d.ts:49:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-skeleton.d.ts:50:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

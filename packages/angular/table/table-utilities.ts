@@ -46,6 +46,7 @@ import type { InjectionToken, Provider } from '@angular/core';
 
 /** Built-in accessibility labels owned by the table utilities entry point. */
 export interface HellTableUtilitiesLabels {
+  /** Accessible label announced on the column resize handle. */
   readonly resizeColumn: string;
 }
 
@@ -327,6 +328,7 @@ export class HellTableContainer {
     defaultPart: 'root',
     recipe: () => HELL_TABLE_CONTAINER_RECIPE,
   });
+  /** Reflects a loading state via `data-loading`/`aria-busy`. Defaults to `false`. */
   readonly busy = input(false, { transform: booleanAttribute });
 
   private readonly tableClasses = injectHellTablePartClassSync();
@@ -361,6 +363,7 @@ export class HellTable {
     recipe: () => HELL_TABLE_RECIPE,
   });
 
+  /** Whether the table sizes to its content width rather than filling its container. */
   readonly contentWidth = signal(false);
 
   private readonly tableClasses = injectHellTablePartClassSync();
@@ -373,10 +376,12 @@ export class HellTable {
     effect(() => this.tableClasses.apply(this.part('root')));
   }
 
+  /** Resolves the host ARIA role, inferring `table` for non-native hosts. */
   protected role(): string | null {
     return this.roleSupport.role();
   }
 
+  /** Sets `contentWidth` from the `contentWidth` attribute input. */
   @Input({ alias: 'contentWidth', transform: booleanAttribute })
   set contentWidthInput(value: boolean) {
     this.contentWidth.set(value);
@@ -418,13 +423,16 @@ export class HellTableHead {
     effect(() => this.tableClasses.apply(this.part('root')));
   }
 
+  /** Resolves the host ARIA role, inferring `rowgroup` for non-native hosts. */
   protected role(): string | null {
     return this.roleSupport.role();
   }
 
+  /** Registers a child header cell so its neighbors can be discovered. */
   register(c: HellTableHeaderCell) {
     this.cells.add(c);
   }
+  /** Removes a header cell from neighbor tracking. */
   unregister(c: HellTableHeaderCell) {
     this.cells.delete(c);
   }
@@ -438,6 +446,7 @@ export class HellTableHead {
   }
 }
 
+/** Body section for table utilities. Applies the host class and infers its ARIA role. */
 @Directive({
   selector: '[hellTableBody]',
   host: {
@@ -466,6 +475,7 @@ export class HellTableBody {
     effect(() => this.tableClasses.apply(this.part('root')));
   }
 
+  /** Resolves the host ARIA role, inferring `rowgroup` for non-native hosts. */
   protected role(): string | null {
     return this.roleSupport.role();
   }
@@ -516,7 +526,9 @@ export class HellTableRow {
     recipe: () => HELL_TABLE_ROW_RECIPE,
   });
 
+  /** Whether the row shows the active master/detail or editor highlight. */
   readonly active = signal(false);
+  /** Whether the row shows the bulk-selection highlight. */
   readonly selected = signal(false);
 
   private readonly tableClasses = injectHellTablePartClassSync();
@@ -526,15 +538,18 @@ export class HellTableRow {
     effect(() => this.tableClasses.apply(this.part('root')));
   }
 
+  /** Resolves the host ARIA role, inferring `row` for non-native hosts. */
   protected role(): string | null {
     return this.roleSupport.role();
   }
 
+  /** Sets `active` from the `active` attribute input. */
   @Input({ alias: 'active', transform: booleanAttribute })
   set activeInput(value: boolean) {
     this.active.set(value);
   }
 
+  /** Sets `selected` from the `selected` attribute input. */
   @Input({ alias: 'selected', transform: booleanAttribute })
   set selectedInput(value: boolean) {
     this.selected.set(value);
@@ -571,6 +586,7 @@ export class HellTableRowAction {
     effect(() => this.tableClasses.apply(this.part('root')));
   }
 
+  /** Emits `"button"` for native button hosts so the type attribute is set. */
   protected nativeButtonType(): 'button' | null {
     return hellHostElementName(this.host) === 'BUTTON' ? 'button' : null;
   }
@@ -630,10 +646,14 @@ export class HellTableRowCheckbox {
     recipe: () => HELL_TABLE_ROW_CHECKBOX_RECIPE,
   });
 
+  /** Whether the checkbox is required. Defaults to `false`. */
   readonly required = input(false, { alias: 'required', transform: booleanAttribute });
+  /** Whether the checkbox renders the indeterminate state. Defaults to `false`. */
   readonly indeterminate = input(false, { alias: 'indeterminate', transform: booleanAttribute });
 
+  /** Emits the native checked value whenever the checkbox changes. */
   readonly checkedChange = output<boolean>();
+  /** Emits the native indeterminate value whenever the checkbox changes. */
   readonly indeterminateChange = output<boolean>();
 
   private readonly host = inject(ElementRef<HTMLInputElement>);
@@ -646,6 +666,7 @@ export class HellTableRowCheckbox {
     });
   }
 
+  /** Relays the native change event through the checked/indeterminate outputs. */
   protected onChange(): void {
     this.checkedChange.emit(this.host.nativeElement.checked);
     this.indeterminateChange.emit(this.host.nativeElement.indeterminate);
@@ -676,7 +697,9 @@ export class HellTableRowRadio {
     recipe: () => HELL_TABLE_ROW_RADIO_RECIPE,
   });
 
+  /** Whether the radio is required. Defaults to `false`. */
   readonly required = input(false, { alias: 'required', transform: booleanAttribute });
+  /** Emits the native checked value whenever the radio changes. */
   readonly checkedChange = output<boolean>();
 
   private readonly host = inject(ElementRef<HTMLInputElement>);
@@ -686,6 +709,7 @@ export class HellTableRowRadio {
     effect(() => this.tableClasses.apply(this.part('root')));
   }
 
+  /** Relays the native change event through the checked output. */
   protected onChange(): void {
     this.checkedChange.emit(this.host.nativeElement.checked);
   }
@@ -725,28 +749,37 @@ export class HellTableHeaderCell implements OnDestroy {
     recipe: () => HELL_TABLE_HEADER_CELL_RECIPE,
   });
 
+  /** Current sort direction of the column, or `null` when unsorted. */
   readonly sort = signal<'asc' | 'desc' | null>(null);
+  /** Whether the column advertises itself as sortable. */
   readonly sortable = signal(false);
+  /** Stable column id used by resize adapters, or `null` when unset. */
   readonly columnId = signal<string | null>(null);
 
+  /** Sets `sort` from the `sort` attribute input. */
   @Input({ alias: 'sort' })
   set sortInput(value: 'asc' | 'desc' | null) {
     this.sort.set(value);
   }
 
+  /** Sets `sortable` from the `sortable` attribute input. */
   @Input({ alias: 'sortable', transform: booleanAttribute })
   set sortableInput(value: boolean) {
     this.sortable.set(value);
   }
 
+  /** Sets `columnId` from the `columnId` attribute input. */
   @Input({ alias: 'columnId' })
   set columnIdInput(value: string | null) {
     this.columnId.set(value);
   }
 
+  /** Emits the originating event when a sortable header cell is toggled. */
   readonly sortToggle = output<MouseEvent | KeyboardEvent>();
 
+  /** The header cell host element. */
   readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  /** The enclosing header section, or `null` when used standalone. */
   readonly head = inject(HellTableHead, { optional: true });
   private readonly tableClasses = injectHellTablePartClassSync();
   private readonly roleSupport = injectHellTableRoleSupport(
@@ -754,6 +787,7 @@ export class HellTableHeaderCell implements OnDestroy {
     'columnheader',
   );
 
+  /** Maps the current sort direction to the `aria-sort` token when sortable. */
   protected readonly ariaSort = computed<'ascending' | 'descending' | null>(() => {
     if (!this.sortable()) return null;
     const s = this.sort();
@@ -767,14 +801,17 @@ export class HellTableHeaderCell implements OnDestroy {
     this.head?.register(this);
   }
 
+  /** Resolves the host ARIA role, inferring `columnheader` for non-native hosts. */
   protected role(): string | null {
     return this.roleSupport.role();
   }
 
+  /** Unregisters this cell from its header section on teardown. */
   ngOnDestroy() {
     this.head?.unregister(this);
   }
 
+  /** Emits `sortToggle` for the given event when the column is sortable. */
   toggleSortFrom(e: MouseEvent | KeyboardEvent): void {
     if (!this.sortable()) return;
     this.sortToggle.emit(e);
@@ -838,6 +875,7 @@ export class HellTableSortTrigger {
     recipe: () => HELL_TABLE_SORT_TRIGGER_RECIPE,
   });
 
+  /** Emits the click event when the trigger activates a sort. */
   readonly sortToggle = output<MouseEvent>();
 
   private readonly host = inject(ElementRef<HTMLButtonElement>).nativeElement;
@@ -848,14 +886,17 @@ export class HellTableSortTrigger {
     effect(() => this.tableClasses.apply(this.part('root')));
   }
 
+  /** Emits `"button"` for native button hosts so the type attribute is set. */
   protected nativeButtonType(): 'button' | null {
     return hellHostElementName(this.host) === 'BUTTON' ? 'button' : null;
   }
 
+  /** Whether the trigger is disabled because its header cell is not sortable. */
   protected disabled(): boolean {
     return this.header ? !this.header.sortable() : false;
   }
 
+  /** Forwards activation to the header cell and emits `sortToggle`. */
   protected onClick(e: MouseEvent): void {
     if (this.disabled()) return;
     this.header?.toggleSortFrom(e);
@@ -888,7 +929,9 @@ export class HellTableCell {
     recipe: () => HELL_TABLE_CELL_RECIPE,
   });
 
+  /** Horizontal content alignment of the cell. Defaults to `start`. */
   readonly align = signal<'start' | 'center' | 'end'>('start');
+  /** Content spacing mode; `empty` adds extra vertical padding. Defaults to `normal`. */
   readonly space = signal<'normal' | 'empty'>('normal');
 
   private readonly tableClasses = injectHellTablePartClassSync();
@@ -898,20 +941,24 @@ export class HellTableCell {
     effect(() => this.tableClasses.apply(this.part('root')));
   }
 
+  /** Resolves the host ARIA role, inferring `cell` for non-native hosts. */
   protected role(): string | null {
     return this.roleSupport.role();
   }
 
+  /** Sets `align` from the `align` attribute input. */
   @Input({ alias: 'align' })
   set alignInput(value: 'start' | 'center' | 'end') {
     this.align.set(value);
   }
 
+  /** Sets `space` from the `space` attribute input. */
   @Input({ alias: 'space' })
   set spaceInput(value: 'normal' | 'empty') {
     this.space.set(value);
   }
 
+  /** The cell host element. */
   readonly host = inject(ElementRef<HTMLElement>).nativeElement;
 }
 
@@ -958,25 +1005,34 @@ export class HellTableResizeHandle implements AfterViewInit, OnDestroy {
     recipe: () => HELL_TABLE_RESIZE_HANDLE_RECIPE,
   });
 
+  /** Minimum column width in CSS pixels either side may shrink to. Defaults to `40`. */
   readonly minWidth = input(40, { transform: numberAttribute });
+  /** Optional adapter supplying the two sides to resize. Defaults to the adjacent header cells. */
   readonly resizeAdapter = input<HellTableResizeAdapter | null>(null);
+  /** Accessible label override for the handle. Defaults to the injected resize-column label. */
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
+  /** Ids the handle controls, overriding the values derived from the resize pair. */
   readonly ariaControls = input<string | readonly string[] | null>(null, {
     alias: 'aria-controls',
   });
 
+  /** Resolved `aria-controls` value, preferring the input over adapter-derived ids. */
   protected readonly ariaControlsValue = computed(() =>
     hellAriaControlsValue(this.ariaControls() ?? this.adapterAriaControls()),
   );
 
+  /** Emits once per committed resize with the affected adjacent columns. */
   readonly resizeCommit = output<HellTableResizeEvent>();
 
+  /** Whether a pointer drag is currently in progress. */
   protected readonly dragging = signal(false);
+  /** Current `aria-valuenow` percentage for the resize separator. */
   protected readonly ariaValueNow = signal<number | null>(null);
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly cell = inject(HellTableHeaderCell, { optional: true });
   private readonly tableClasses = injectHellTablePartClassSync();
+  /** Resolved accessibility labels for the table utilities. */
   protected readonly labels = inject(HELL_TABLE_UTILITIES_LABELS);
   private readonly resizeInteraction = new HellResizePairInteractionController<HellTableResizeItem>(
     {
@@ -1032,28 +1088,34 @@ export class HellTableResizeHandle implements AfterViewInit, OnDestroy {
     this.resizeCommit.emit(hellTableResizeEvent(pair, beforePx, afterPx));
   }
 
+  /** Whether the handle has no resolvable resize pair and is therefore inert. */
   protected isDisabled(): boolean {
     return this.resizePair() === null;
   }
 
+  /** Emits `"button"` for native button hosts so the type attribute is set. */
   protected nativeButtonType(): 'button' | null {
     return hellHostElementName(this.host) === 'BUTTON' ? 'button' : null;
   }
 
+  /** Tab index for the handle: `0` when active, `-1` when disabled. */
   protected resizeTabIndex(): -1 | 0 {
     return this.isDisabled() ? -1 : 0;
   }
 
+  /** Seeds the initial `aria-valuenow` once the view is ready. */
   ngAfterViewInit(): void {
     this.refreshAriaValueNow();
   }
 
+  /** Starts a pointer-driven resize interaction. */
   protected onPointerDown(e: PointerEvent) {
     if (this.isDisabled()) return;
     this.refreshAriaValueNow();
     this.resizeInteraction.startPointer(e);
   }
 
+  /** Applies a keyboard step to the resize interaction. */
   protected onKey(e: KeyboardEvent) {
     if (this.isDisabled()) return;
     this.refreshAriaValueNow();
@@ -1099,6 +1161,7 @@ export class HellTableResizeHandle implements AfterViewInit, OnDestroy {
     else ids.push(...value);
   }
 
+  /** Tears down the resize interaction controller. */
   ngOnDestroy(): void {
     this.resizeInteraction.destroy();
   }

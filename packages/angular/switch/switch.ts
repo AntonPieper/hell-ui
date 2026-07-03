@@ -78,9 +78,12 @@ export class HellSwitch implements ControlValueAccessor {
     recipe: () => HELL_SWITCH_RECIPE,
   });
 
+  /** Controlled checked state. Defaults to `false`. */
   readonly checked = input(false, { transform: booleanAttribute });
+  /** Disables toggling the switch. Defaults to `false`. */
   readonly disabled = input(false, { transform: booleanAttribute });
 
+  /** Emits the new checked state whenever the switch is toggled. */
   readonly checkedChange = output<boolean>();
 
   private readonly controlledChecked = new HellControlledValueState<boolean>({
@@ -98,6 +101,7 @@ export class HellSwitch implements ControlValueAccessor {
   private readonly effectiveChecked = this.controlledChecked.value;
   private readonly effectiveDisabled = this.controlledChecked.disabled;
 
+  /** ng-primitives switch state driving checked/disabled and toggle behavior. */
   protected readonly state = ngpSwitch({
     id: this.switchId,
     checked: this.effectiveChecked,
@@ -110,22 +114,27 @@ export class HellSwitch implements ControlValueAccessor {
   });
   private readonly installSpaceKeyHandler = this.registerSpaceKeyHandler();
 
+  /** Applies a form-driven value to the switch. */
   writeValue(value: boolean): void {
     this.controlledChecked.writeValue(value === true);
   }
 
+  /** Registers the callback invoked when the switch value changes. */
   registerOnChange(fn: (value: boolean) => void): void {
     this.valueAccessor.registerOnChange(fn);
   }
 
+  /** Registers the callback invoked when the switch is touched. */
   registerOnTouched(fn: () => void): void {
     this.valueAccessor.registerOnTouched(fn);
   }
 
+  /** Applies a form-driven disabled state to the switch. */
   setDisabledState(isDisabled: boolean): void {
     this.controlledChecked.setDisabledState(isDisabled);
   }
 
+  /** Notifies the form control that the switch has been touched. */
   protected markControlTouched(): void {
     this.valueAccessor.markTouched();
   }
@@ -180,12 +189,15 @@ export class HellNativeSwitch {
     recipe: () => HELL_NATIVE_SWITCH_RECIPE,
   });
 
+  /** Marks the switch as required for native form validation. Defaults to `false`. */
   readonly required = input(false, { alias: 'required', transform: booleanAttribute });
 
+  /** Emits the new checked state whenever the switch is toggled. */
   readonly checkedChange = output<boolean>();
 
   private readonly host = inject(ElementRef<HTMLInputElement>);
 
+  /** Emits `checkedChange` with the native checkbox's current checked state. */
   protected onChange(): void {
     this.checkedChange.emit(this.host.nativeElement.checked);
   }

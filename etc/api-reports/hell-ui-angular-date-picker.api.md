@@ -17,50 +17,34 @@ export const HELL_DATE_PICKER_LABELS: InjectionToken<HellDatePickerLabels>;
 
 // @public
 export class HellDatePicker {
-    // (undocumented)
     protected readonly label: _angular_core.Signal<string>;
-    // (undocumented)
     protected readonly labels: HellDatePickerLabels;
-    // (undocumented)
     readonly locale: _angular_core.InputSignal<string | null>;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-date-picker.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellDatePickerPart>;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-date-picker.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellDatePickerPart>>;
     // Warning: (ae-forgotten-export) The symbol "HellWeekdayLabel" needs to be exported by the entry point hell-ui-angular-date-picker.d.ts
-    //
-    // (undocumented)
     protected readonly weekdayLabels: _angular_core.Signal<HellWeekdayLabel[]>;
-    // (undocumented)
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellDatePicker, "hell-date-picker", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "locale": { "alias": "locale"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDatePicker; inputs: { "ngpDatePickerDate": "date"; "ngpDatePickerFocusedDate": "focusedDate"; "ngpDatePickerMin": "min"; "ngpDatePickerMax": "max"; "ngpDatePickerDisabled": "disabled"; "ngpDatePickerFirstDayOfWeek": "firstDayOfWeek"; }; outputs: { "ngpDatePickerDateChange": "dateChange"; "ngpDatePickerFocusedDateChange": "focusedDateChange"; }; }]>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDatePicker, never>;
 }
 
 // @public
 export interface HellDatePickerLabels {
-    // (undocumented)
     readonly nextMonth: string;
-    // (undocumented)
     readonly nextYear: string;
-    // (undocumented)
     readonly previousMonth: string;
-    // (undocumented)
     readonly previousYear: string;
 }
 
-// @public (undocumented)
+// @public
 export class HellDatePickerNextYear {
     constructor();
-    // (undocumented)
     protected readonly disabled: _angular_core.Signal<boolean>;
-    // (undocumented)
     protected readonly labels: HellDatePickerLabels;
-    // (undocumented)
     protected shift(months: number): void;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDatePickerNextYear, "button[hellDatePickerNextYear]", never, {}, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDatePickerNextYear, never>;
 }
 
@@ -70,15 +54,10 @@ export type HellDatePickerPart = 'root' | 'header' | 'nav' | 'navButton' | 'labe
 // @public
 export class HellDatePickerPreviousYear {
     constructor();
-    // (undocumented)
     protected readonly disabled: _angular_core.Signal<boolean>;
-    // (undocumented)
     protected readonly labels: HellDatePickerLabels;
-    // (undocumented)
     protected shift(months: number): void;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDatePickerPreviousYear, "button[hellDatePickerPreviousYear]", never, {}, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDatePickerPreviousYear, never>;
 }
 
@@ -89,21 +68,14 @@ export type HellDatePickerUi = HellUi<HellDatePickerPart>;
 
 // @public
 export class HellDateRangePicker {
-    // (undocumented)
     protected readonly label: _angular_core.Signal<string>;
-    // (undocumented)
     protected readonly labels: HellDatePickerLabels;
-    // (undocumented)
     readonly locale: _angular_core.InputSignal<string | null>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellDateRangePickerPart>;
-    // (undocumented)
     protected readonly rangeComplete: _angular_core.Signal<boolean>;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellDateRangePickerPart>>;
-    // (undocumented)
     protected readonly weekdayLabels: _angular_core.Signal<HellWeekdayLabel[]>;
-    // (undocumented)
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellDateRangePicker, "hell-date-range-picker", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "locale": { "alias": "locale"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDateRangePicker; inputs: { "ngpDateRangePickerStartDate": "startDate"; "ngpDateRangePickerEndDate": "endDate"; "ngpDateRangePickerFocusedDate": "focusedDate"; "ngpDateRangePickerMin": "min"; "ngpDateRangePickerMax": "max"; "ngpDateRangePickerDisabled": "disabled"; "ngpDateRangePickerFirstDayOfWeek": "firstDayOfWeek"; }; outputs: { "ngpDateRangePickerStartDateChange": "startDateChange"; "ngpDateRangePickerEndDateChange": "endDateChange"; "ngpDateRangePickerFocusedDateChange": "focusedDateChange"; }; }]>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDateRangePicker, never>;
 }
 
@@ -115,37 +87,6 @@ export type HellDateRangePickerUi = HellUi<HellDateRangePickerPart>;
 
 // @public
 export function provideHellDatePickerLabels(overrides: Partial<HellDatePickerLabels>): Provider;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-date-picker.d.ts:9:5 - (ae-undocumented) Missing documentation for "previousYear".
-// types/hell-ui-angular-date-picker.d.ts:10:5 - (ae-undocumented) Missing documentation for "nextYear".
-// types/hell-ui-angular-date-picker.d.ts:11:5 - (ae-undocumented) Missing documentation for "previousMonth".
-// types/hell-ui-angular-date-picker.d.ts:12:5 - (ae-undocumented) Missing documentation for "nextMonth".
-// types/hell-ui-angular-date-picker.d.ts:32:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-date-picker.d.ts:36:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-date-picker.d.ts:38:5 - (ae-undocumented) Missing documentation for "shift".
-// types/hell-ui-angular-date-picker.d.ts:39:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-date-picker.d.ts:40:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-date-picker.d.ts:42:1 - (ae-undocumented) Missing documentation for "HellDatePickerNextYear".
-// types/hell-ui-angular-date-picker.d.ts:43:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-date-picker.d.ts:47:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-date-picker.d.ts:49:5 - (ae-undocumented) Missing documentation for "shift".
-// types/hell-ui-angular-date-picker.d.ts:50:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-date-picker.d.ts:51:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-date-picker.d.ts:67:5 - (ae-undocumented) Missing documentation for "locale".
-// types/hell-ui-angular-date-picker.d.ts:68:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-date-picker.d.ts:70:5 - (ae-undocumented) Missing documentation for "label".
-// types/hell-ui-angular-date-picker.d.ts:71:5 - (ae-undocumented) Missing documentation for "weekdayLabels".
-// types/hell-ui-angular-date-picker.d.ts:72:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-date-picker.d.ts:73:5 - (ae-undocumented) Missing documentation for "ɵcmp".
-// types/hell-ui-angular-date-picker.d.ts:85:5 - (ae-undocumented) Missing documentation for "locale".
-// types/hell-ui-angular-date-picker.d.ts:86:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-date-picker.d.ts:88:5 - (ae-undocumented) Missing documentation for "rangeComplete".
-// types/hell-ui-angular-date-picker.d.ts:89:5 - (ae-undocumented) Missing documentation for "label".
-// types/hell-ui-angular-date-picker.d.ts:90:5 - (ae-undocumented) Missing documentation for "weekdayLabels".
-// types/hell-ui-angular-date-picker.d.ts:91:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-date-picker.d.ts:92:5 - (ae-undocumented) Missing documentation for "ɵcmp".
 
 // (No @packageDocumentation comment for this package)
 

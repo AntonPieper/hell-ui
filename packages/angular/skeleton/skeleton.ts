@@ -7,6 +7,7 @@ import type { InjectionToken, Provider } from '@angular/core';
 
 /** Built-in accessibility labels owned by the skeleton entry point. */
 export interface HellSkeletonLabels {
+  /** Accessible label announced while `hellSpinner` is loading. */
   readonly loading: string;
 }
 
@@ -62,12 +63,15 @@ export class HellSkeleton {
     recipe: () => HELL_SKELETON_RECIPE,
   });
 
+  /** CSS width of the placeholder. Defaults to `100%`. */
   readonly width = input<string>('100%');
+  /** CSS height of the placeholder. Defaults to `14px`. */
   readonly height = input<string>('14px');
   /** Built-in shapes. `text` (default), `circle`, `rect`. */
   readonly shape = input<'text' | 'circle' | 'rect'>('text');
 }
 
+/** Visual style of the `hellSpinner` indicator. */
 export type HellSpinnerVariant = 'ring' | 'dots' | 'bars' | 'pulse';
 
 /**
@@ -95,9 +99,13 @@ export class HellSpinner {
     recipe: () => HELL_SPINNER_RECIPE,
   });
 
+  /** Visual style of the spinner. Defaults to `ring`. */
   readonly variant = input<HellSpinnerVariant>('ring');
+  /** Size of the spinner. Defaults to `md`. */
   readonly size = input<HellSize>('md');
+  /** Overrides the accessible label. Defaults to `null`, falling back to the injected loading label. */
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
 
+  /** Effective skeleton labels resolved from `HELL_SKELETON_LABELS`. */
   protected readonly labels = inject(HELL_SKELETON_LABELS);
 }

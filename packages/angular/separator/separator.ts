@@ -12,6 +12,7 @@ const HELL_SEPARATOR_RECIPE = {
   root: 'block shrink-0 border-0 bg-hell-border data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[spacing=none]:m-0 data-[orientation=horizontal]:data-[spacing=xs]:my-hell-1 data-[orientation=horizontal]:data-[spacing=sm]:my-hell-2 data-[orientation=horizontal]:data-[spacing=md]:my-hell-4 data-[orientation=horizontal]:data-[spacing=lg]:my-hell-6 data-[orientation=horizontal]:data-[spacing=xl]:my-hell-8 data-[orientation=vertical]:data-[spacing=xs]:mx-hell-1 data-[orientation=vertical]:data-[spacing=sm]:mx-hell-2 data-[orientation=vertical]:data-[spacing=md]:mx-hell-4 data-[orientation=vertical]:data-[spacing=lg]:mx-hell-6 data-[orientation=vertical]:data-[spacing=xl]:mx-hell-8',
 } satisfies HellRecipe<HellSeparatorPart>;
 
+/** Visual or semantic divider between sections of content. */
 @Directive({
   selector: '[hellSeparator]',
   hostDirectives: [{ directive: NgpSeparator, inputs: ['ngpSeparatorOrientation:orientation'] }],
@@ -33,6 +34,7 @@ export class HellSeparator {
     recipe: () => HELL_SEPARATOR_RECIPE,
   });
 
+  /** Axis the separator lies on. Defaults to `horizontal`. */
   readonly orientation = input<HellOrientation>('horizontal');
   /**
    * Symmetric margin around the separator on its main axis.

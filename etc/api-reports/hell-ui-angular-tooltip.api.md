@@ -18,13 +18,10 @@ export class HellTooltip {
     constructor();
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-tooltip.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // (undocumented)
     protected readonly tooltipTrigger: i0.Signal<i1.NgpTooltipTriggerState<unknown>>;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-tooltip.d.ts
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellTooltip, "[hellTooltip]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpTooltip; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTooltip, never>;
 }
 
@@ -35,11 +32,8 @@ export type HellTooltipPart = 'root';
 //
 // @public
 export class HellTooltipTrigger extends HellNativeInteractiveDisabledGuard {
-    // (undocumented)
     protected readonly trigger: NgpTooltipTrigger<any>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellTooltipTrigger, "button[hellTooltipTrigger], a[hellTooltipTrigger]", never, {}, {}, never, never, true, [{ directive: typeof i1.NgpTooltipTrigger; inputs: { "ngpTooltipTrigger": "hellTooltipTrigger"; "ngpTooltipTriggerPlacement": "placement"; "ngpTooltipTriggerOffset": "offset"; "ngpTooltipTriggerShowDelay": "showDelay"; "ngpTooltipTriggerHideDelay": "hideDelay"; "ngpTooltipTriggerDisabled": "disabled"; "ngpTooltipTriggerContainer": "container"; "ngpTooltipTriggerShowOnOverflow": "showOnOverflow"; "ngpTooltipTriggerHoverableContent": "hoverableContent"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTooltipTrigger, never>;
 }
 
@@ -47,15 +41,6 @@ export class HellTooltipTrigger extends HellNativeInteractiveDisabledGuard {
 //
 // @public
 export type HellTooltipUi = HellUi<HellTooltipPart>;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-tooltip.d.ts:18:5 - (ae-undocumented) Missing documentation for "trigger".
-// types/hell-ui-angular-tooltip.d.ts:19:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-tooltip.d.ts:20:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-tooltip.d.ts:31:5 - (ae-undocumented) Missing documentation for "tooltipTrigger".
-// types/hell-ui-angular-tooltip.d.ts:33:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-tooltip.d.ts:34:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

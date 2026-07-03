@@ -23,9 +23,7 @@ export function hellCreateLabels<T extends object>(description: string, defaults
 // @public
 export class HellFloatingElement implements AfterViewInit {
     ngAfterViewInit(): void;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellFloatingElement, "[hellFloatingElement]", never, {}, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellFloatingElement, never>;
 }
 
@@ -107,9 +105,7 @@ export interface HellSearchResult<T> {
 export class HellSearchService {
     rank<T>(items: readonly T[], request: Pick<HellSearchRequest<T>, 'query' | 'fields' | 'limit'>): readonly HellSearchResult<T>[];
     search<T>(request: HellSearchRequest<T>): Promise<readonly HellSearchResult<T>[]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellSearchService, never>;
-    // (undocumented)
     static ɵprov: i0.ɵɵInjectableDeclaration<HellSearchService>;
 }
 
@@ -133,9 +129,7 @@ export type HellSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 // @public
 export abstract class HellStyleable {
     readonly unstyled: i0.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellStyleable, never, never, { "unstyled": { "alias": "unstyled"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellStyleable, never>;
 }
 
@@ -153,15 +147,6 @@ export type HellUiInput<Part extends string> = string | HellUi<Part> | null | un
 
 // @public
 export function provideHellSearchRanker(ranker: HellSearchRanker): Provider;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-core.d.ts:61:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-core.d.ts:62:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-core.d.ts:140:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-core.d.ts:141:5 - (ae-undocumented) Missing documentation for "ɵprov".
-// types/hell-ui-angular-internal-core.d.ts:112:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-internal-core.d.ts:113:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

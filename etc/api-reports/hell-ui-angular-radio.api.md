@@ -17,35 +17,26 @@ import * as tailwind_merge from 'tailwind-merge';
 import { ValidationErrors } from '@angular/forms';
 import { Validator } from '@angular/forms';
 
-// @public (undocumented)
+// @public
 export class HellNativeRadio {
-    // (undocumented)
     readonly checkedChange: _angular_core.OutputEmitterRef<boolean>;
-    // (undocumented)
     protected onChange(): void;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-radio.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // (undocumented)
     readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-radio.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNativeRadio, "input[type=\"radio\"][hellNativeRadio]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; }, { "checkedChange": "checkedChange"; }, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNativeRadio, never>;
 }
 
-// @public (undocumented)
+// @public
 export class HellNativeRadioGroup {
     // Warning: (ae-forgotten-export) The symbol "HellOrientation" needs to be exported by the entry point hell-ui-angular-radio.d.ts
-    //
-    // (undocumented)
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNativeRadioGroup, "[hellNativeRadioGroup]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNativeRadioGroup, never>;
 }
 
@@ -63,49 +54,33 @@ export type HellNativeRadioPart = 'root';
 // @public
 export type HellNativeRadioUi = HellUi<HellNativeRadioPart>;
 
-// @public (undocumented)
+// @public
 export class HellRadio {
     constructor();
-    // (undocumented)
     protected readonly groupDisabled: _angular_core.Signal<boolean>;
-    // (undocumented)
     protected readonly isDisabled: _angular_core.Signal<boolean>;
-    // (undocumented)
     protected readonly itemDisabled: _angular_core.Signal<boolean>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellRadio, "button[hellRadio]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpRadioItem; inputs: { "ngpRadioItemValue": "value"; "ngpRadioItemDisabled": "disabled"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellRadio, never>;
 }
 
-// @public (undocumented)
+// @public
 export class HellRadioGroup<T = unknown> implements ControlValueAccessor, Validator {
     constructor();
-    // (undocumented)
     protected onFocusOut(event: FocusEvent): void;
-    // (undocumented)
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // (undocumented)
     registerOnChange(fn: (value: T | null) => void): void;
-    // (undocumented)
     registerOnTouched(fn: () => void): void;
-    // (undocumented)
     registerOnValidatorChange(fn: () => void): void;
-    // (undocumented)
     readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     setDisabledState(isDisabled: boolean): void;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     validate(control: AbstractControl | null): ValidationErrors | null;
-    // (undocumented)
     writeValue(value: T | null): void;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellRadioGroup<any>, "[hellRadioGroup]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpRadioGroup; inputs: { "ngpRadioGroupValue": "value"; "ngpRadioGroupDisabled": "disabled"; "ngpRadioGroupOrientation": "orientation"; "ngpRadioGroupCompareWith": "compareWith"; }; outputs: { "ngpRadioGroupValueChange": "valueChange"; }; }]>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellRadioGroup<any>, never>;
 }
 
@@ -122,37 +97,6 @@ export type HellRadioPart = 'root';
 
 // @public
 export type HellRadioUi = HellUi<HellRadioPart>;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-radio.d.ts:24:1 - (ae-undocumented) Missing documentation for "HellRadioGroup".
-// types/hell-ui-angular-radio.d.ts:29:5 - (ae-undocumented) Missing documentation for "orientation".
-// types/hell-ui-angular-radio.d.ts:30:5 - (ae-undocumented) Missing documentation for "required".
-// types/hell-ui-angular-radio.d.ts:41:5 - (ae-undocumented) Missing documentation for "writeValue".
-// types/hell-ui-angular-radio.d.ts:42:5 - (ae-undocumented) Missing documentation for "registerOnChange".
-// types/hell-ui-angular-radio.d.ts:43:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
-// types/hell-ui-angular-radio.d.ts:44:5 - (ae-undocumented) Missing documentation for "registerOnValidatorChange".
-// types/hell-ui-angular-radio.d.ts:45:5 - (ae-undocumented) Missing documentation for "setDisabledState".
-// types/hell-ui-angular-radio.d.ts:46:5 - (ae-undocumented) Missing documentation for "validate".
-// types/hell-ui-angular-radio.d.ts:48:5 - (ae-undocumented) Missing documentation for "onFocusOut".
-// types/hell-ui-angular-radio.d.ts:56:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-radio.d.ts:57:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-radio.d.ts:59:1 - (ae-undocumented) Missing documentation for "HellRadio".
-// types/hell-ui-angular-radio.d.ts:71:5 - (ae-undocumented) Missing documentation for "groupDisabled".
-// types/hell-ui-angular-radio.d.ts:72:5 - (ae-undocumented) Missing documentation for "itemDisabled".
-// types/hell-ui-angular-radio.d.ts:73:5 - (ae-undocumented) Missing documentation for "isDisabled".
-// types/hell-ui-angular-radio.d.ts:76:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-radio.d.ts:77:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-radio.d.ts:79:1 - (ae-undocumented) Missing documentation for "HellNativeRadioGroup".
-// types/hell-ui-angular-radio.d.ts:84:5 - (ae-undocumented) Missing documentation for "orientation".
-// types/hell-ui-angular-radio.d.ts:85:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-radio.d.ts:86:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-radio.d.ts:88:1 - (ae-undocumented) Missing documentation for "HellNativeRadio".
-// types/hell-ui-angular-radio.d.ts:93:5 - (ae-undocumented) Missing documentation for "required".
-// types/hell-ui-angular-radio.d.ts:94:5 - (ae-undocumented) Missing documentation for "checkedChange".
-// types/hell-ui-angular-radio.d.ts:96:5 - (ae-undocumented) Missing documentation for "onChange".
-// types/hell-ui-angular-radio.d.ts:97:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-radio.d.ts:98:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

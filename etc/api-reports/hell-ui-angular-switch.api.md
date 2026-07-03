@@ -15,19 +15,14 @@ import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export class HellNativeSwitch {
-    // (undocumented)
     readonly checkedChange: _angular_core.OutputEmitterRef<boolean>;
-    // (undocumented)
     protected onChange(): void;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-switch.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // (undocumented)
     readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-switch.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNativeSwitch, "input[type=\"checkbox\"][hellNativeSwitch]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; }, { "checkedChange": "checkedChange"; }, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNativeSwitch, never>;
 }
 
@@ -41,29 +36,18 @@ export type HellNativeSwitchUi = HellUi<HellNativeSwitchPart>;
 
 // @public
 export class HellSwitch implements ControlValueAccessor {
-    // (undocumented)
     readonly checked: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     readonly checkedChange: _angular_core.OutputEmitterRef<boolean>;
-    // (undocumented)
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     protected markControlTouched(): void;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellSwitchPart>;
-    // (undocumented)
     registerOnChange(fn: (value: boolean) => void): void;
-    // (undocumented)
     registerOnTouched(fn: () => void): void;
-    // (undocumented)
     setDisabledState(isDisabled: boolean): void;
-    // (undocumented)
     protected readonly state: ng_primitives_switch.NgpSwitchState;
     readonly ui: _angular_core.InputSignal<HellUiInput<HellSwitchPart>>;
-    // (undocumented)
     writeValue(value: boolean): void;
-    // (undocumented)
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellSwitch, "button[hellSwitch]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "checked": { "alias": "checked"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; }, { "checkedChange": "checkedChange"; }, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSwitch, never>;
 }
 
@@ -72,25 +56,6 @@ export type HellSwitchPart = 'root' | 'thumb';
 
 // @public
 export type HellSwitchUi = HellUi<HellSwitchPart>;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-switch.d.ts:29:5 - (ae-undocumented) Missing documentation for "checked".
-// types/hell-ui-angular-switch.d.ts:30:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-switch.d.ts:31:5 - (ae-undocumented) Missing documentation for "checkedChange".
-// types/hell-ui-angular-switch.d.ts:39:5 - (ae-undocumented) Missing documentation for "state".
-// types/hell-ui-angular-switch.d.ts:41:5 - (ae-undocumented) Missing documentation for "writeValue".
-// types/hell-ui-angular-switch.d.ts:42:5 - (ae-undocumented) Missing documentation for "registerOnChange".
-// types/hell-ui-angular-switch.d.ts:43:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
-// types/hell-ui-angular-switch.d.ts:44:5 - (ae-undocumented) Missing documentation for "setDisabledState".
-// types/hell-ui-angular-switch.d.ts:45:5 - (ae-undocumented) Missing documentation for "markControlTouched".
-// types/hell-ui-angular-switch.d.ts:49:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-switch.d.ts:50:5 - (ae-undocumented) Missing documentation for "ɵcmp".
-// types/hell-ui-angular-switch.d.ts:60:5 - (ae-undocumented) Missing documentation for "required".
-// types/hell-ui-angular-switch.d.ts:61:5 - (ae-undocumented) Missing documentation for "checkedChange".
-// types/hell-ui-angular-switch.d.ts:63:5 - (ae-undocumented) Missing documentation for "onChange".
-// types/hell-ui-angular-switch.d.ts:64:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-switch.d.ts:65:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

@@ -112,12 +112,18 @@ export class HellCheckbox implements ControlValueAccessor, Validator {
     recipe: () => HELL_CHECKBOX_RECIPE,
   });
 
+  /** Whether the checkbox is checked. Defaults to `false`. */
   readonly checked = input(false, { transform: booleanAttribute });
+  /** Whether the checkbox is in the indeterminate (mixed) state. Defaults to `false`. */
   readonly indeterminate = input(false, { transform: booleanAttribute });
+  /** Whether the checkbox is disabled. Defaults to `false`. */
   readonly disabled = input(false, { transform: booleanAttribute });
+  /** Whether the checkbox must be checked for form validity. Defaults to `false`. */
   readonly required = input(false, { transform: booleanAttribute });
 
+  /** Emits the new checked state whenever the user toggles the checkbox. */
   readonly checkedChange = output<boolean>();
+  /** Emits the new indeterminate state whenever it changes. */
   readonly indeterminateChange = output<boolean>();
 
   private readonly controlledChecked = new HellControlledValueState<boolean>({
@@ -139,6 +145,7 @@ export class HellCheckbox implements ControlValueAccessor, Validator {
     });
   }
 
+  /** Headless checkbox state and behavior from `ngpCheckbox`. */
   protected readonly state = ngpCheckbox({
     checked: this.effectiveChecked,
     indeterminate: this.indeterminate,
@@ -151,30 +158,37 @@ export class HellCheckbox implements ControlValueAccessor, Validator {
     onIndeterminateChange: (indeterminate) => this.indeterminateChange.emit(indeterminate),
   });
 
+  /** Writes a form-driven checked value onto the checkbox. */
   writeValue(value: boolean): void {
     this.controlledChecked.writeValue(value === true);
   }
 
+  /** Registers the callback Angular Forms uses to be notified of checked-state changes. */
   registerOnChange(fn: (value: boolean) => void): void {
     this.valueAccessor.registerOnChange(fn);
   }
 
+  /** Registers the callback Angular Forms uses to be notified when the control is touched. */
   registerOnTouched(fn: () => void): void {
     this.valueAccessor.registerOnTouched(fn);
   }
 
+  /** Registers the callback Angular Forms uses to be notified when validation should rerun. */
   registerOnValidatorChange(fn: () => void): void {
     this.onValidatorChange = fn;
   }
 
+  /** Applies a form-driven disabled state to the checkbox. */
   setDisabledState(isDisabled: boolean): void {
     this.controlledChecked.setDisabledState(isDisabled);
   }
 
+  /** Marks the control as touched for Angular Forms. */
   protected markControlTouched(): void {
     this.valueAccessor.markTouched();
   }
 
+  /** Validates that a required checkbox is checked. */
   validate(control: AbstractControl | null): ValidationErrors | null {
     if (!this.required() || control?.disabled || this.effectiveDisabled()) return null;
     const checked = control ? control.value === true : this.effectiveChecked();
@@ -209,10 +223,14 @@ export class HellNativeCheckbox {
     recipe: () => HELL_NATIVE_CHECKBOX_RECIPE,
   });
 
+  /** Whether the checkbox must be checked for form validity. Defaults to `false`. */
   readonly required = input(false, { alias: 'required', transform: booleanAttribute });
+  /** Whether the checkbox is in the indeterminate (mixed) state. Defaults to `false`. */
   readonly indeterminate = input(false, { alias: 'indeterminate', transform: booleanAttribute });
 
+  /** Emits the native checked state whenever the checkbox changes. */
   readonly checkedChange = output<boolean>();
+  /** Emits the native indeterminate state whenever the checkbox changes. */
   readonly indeterminateChange = output<boolean>();
 
   private readonly host = inject(ElementRef<HTMLInputElement>);
@@ -223,6 +241,7 @@ export class HellNativeCheckbox {
     });
   }
 
+  /** Relays the native input's checked and indeterminate state on `change`. */
   protected onChange(): void {
     this.checkedChange.emit(this.host.nativeElement.checked);
     this.indeterminateChange.emit(this.host.nativeElement.indeterminate);

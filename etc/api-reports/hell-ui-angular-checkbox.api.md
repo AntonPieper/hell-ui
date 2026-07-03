@@ -19,41 +19,25 @@ import { Validator } from '@angular/forms';
 // @public
 export class HellCheckbox implements ControlValueAccessor, Validator {
     constructor();
-    // (undocumented)
     readonly checked: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     readonly checkedChange: _angular_core.OutputEmitterRef<boolean>;
-    // (undocumented)
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     readonly indeterminate: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     readonly indeterminateChange: _angular_core.OutputEmitterRef<boolean>;
-    // (undocumented)
     protected markControlTouched(): void;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-checkbox.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // (undocumented)
     registerOnChange(fn: (value: boolean) => void): void;
-    // (undocumented)
     registerOnTouched(fn: () => void): void;
-    // (undocumented)
     registerOnValidatorChange(fn: () => void): void;
-    // (undocumented)
     readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     setDisabledState(isDisabled: boolean): void;
-    // (undocumented)
     protected readonly state: ng_primitives_checkbox.NgpCheckboxState;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-checkbox.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     validate(control: AbstractControl | null): ValidationErrors | null;
-    // (undocumented)
     writeValue(value: boolean): void;
-    // (undocumented)
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellCheckbox, "button[hellCheckbox]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "checked": { "alias": "checked"; "required": false; "isSignal": true; }; "indeterminate": { "alias": "indeterminate"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; }, { "checkedChange": "checkedChange"; "indeterminateChange": "indeterminateChange"; }, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellCheckbox, never>;
 }
 
@@ -68,21 +52,14 @@ export type HellCheckboxUi = HellUi<HellCheckboxPart>;
 // @public
 export class HellNativeCheckbox {
     constructor();
-    // (undocumented)
     readonly checkedChange: _angular_core.OutputEmitterRef<boolean>;
-    // (undocumented)
     readonly indeterminate: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     readonly indeterminateChange: _angular_core.OutputEmitterRef<boolean>;
-    // (undocumented)
     protected onChange(): void;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // (undocumented)
     readonly required: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNativeCheckbox, "input[type=\"checkbox\"][hellNativeCheckbox]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; "indeterminate": { "alias": "indeterminate"; "required": false; "isSignal": true; }; }, { "checkedChange": "checkedChange"; "indeterminateChange": "indeterminateChange"; }, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNativeCheckbox, never>;
 }
 
@@ -91,32 +68,6 @@ export type HellNativeCheckboxPart = 'root';
 
 // @public
 export type HellNativeCheckboxUi = HellUi<HellNativeCheckboxPart>;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-checkbox.d.ts:33:5 - (ae-undocumented) Missing documentation for "checked".
-// types/hell-ui-angular-checkbox.d.ts:34:5 - (ae-undocumented) Missing documentation for "indeterminate".
-// types/hell-ui-angular-checkbox.d.ts:35:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-checkbox.d.ts:36:5 - (ae-undocumented) Missing documentation for "required".
-// types/hell-ui-angular-checkbox.d.ts:37:5 - (ae-undocumented) Missing documentation for "checkedChange".
-// types/hell-ui-angular-checkbox.d.ts:38:5 - (ae-undocumented) Missing documentation for "indeterminateChange".
-// types/hell-ui-angular-checkbox.d.ts:45:5 - (ae-undocumented) Missing documentation for "state".
-// types/hell-ui-angular-checkbox.d.ts:46:5 - (ae-undocumented) Missing documentation for "writeValue".
-// types/hell-ui-angular-checkbox.d.ts:47:5 - (ae-undocumented) Missing documentation for "registerOnChange".
-// types/hell-ui-angular-checkbox.d.ts:48:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
-// types/hell-ui-angular-checkbox.d.ts:49:5 - (ae-undocumented) Missing documentation for "registerOnValidatorChange".
-// types/hell-ui-angular-checkbox.d.ts:50:5 - (ae-undocumented) Missing documentation for "setDisabledState".
-// types/hell-ui-angular-checkbox.d.ts:51:5 - (ae-undocumented) Missing documentation for "markControlTouched".
-// types/hell-ui-angular-checkbox.d.ts:52:5 - (ae-undocumented) Missing documentation for "validate".
-// types/hell-ui-angular-checkbox.d.ts:53:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-checkbox.d.ts:54:5 - (ae-undocumented) Missing documentation for "ɵcmp".
-// types/hell-ui-angular-checkbox.d.ts:65:5 - (ae-undocumented) Missing documentation for "required".
-// types/hell-ui-angular-checkbox.d.ts:66:5 - (ae-undocumented) Missing documentation for "indeterminate".
-// types/hell-ui-angular-checkbox.d.ts:67:5 - (ae-undocumented) Missing documentation for "checkedChange".
-// types/hell-ui-angular-checkbox.d.ts:68:5 - (ae-undocumented) Missing documentation for "indeterminateChange".
-// types/hell-ui-angular-checkbox.d.ts:71:5 - (ae-undocumented) Missing documentation for "onChange".
-// types/hell-ui-angular-checkbox.d.ts:72:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-checkbox.d.ts:73:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

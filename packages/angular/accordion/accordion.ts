@@ -44,6 +44,7 @@ const HELL_ACCORDION_CONTENT_RECIPE = {
   root: 'block overflow-hidden text-[13px] leading-[1.55] text-hell-foreground-muted transition-[height] duration-[var(--hell-duration-base)] ease-hell-out [interpolate-size:allow-keywords]',
 } satisfies HellRecipe<HellAccordionContentPart>;
 
+/** Container coordinating a group of collapsible `HellAccordionItem` sections. */
 @Directive({
   selector: '[hellAccordion]',
   hostDirectives: [
@@ -75,6 +76,7 @@ export class HellAccordion {
   });
 }
 
+/** Single collapsible section within a `HellAccordion`, pairing a trigger with its content. */
 @Directive({
   selector: '[hellAccordionItem]',
   hostDirectives: [
@@ -99,6 +101,7 @@ export class HellAccordionItem {
   });
 }
 
+/** Button that toggles its enclosing accordion item's open state. */
 @Directive({
   selector: 'button[hellAccordionTrigger]',
   hostDirectives: [NgpAccordionTrigger],
@@ -119,6 +122,7 @@ export class HellAccordionTrigger {
   });
 }
 
+/** Collapsible content panel of an accordion item, hidden from assistive tech while closed. */
 @Directive({
   selector: '[hellAccordionContent]',
   hostDirectives: [NgpAccordionContent],
@@ -140,9 +144,11 @@ export class HellAccordionContent {
   });
 
   private readonly accordionItem = injectAccordionItemState<unknown>();
+  /** Whether the enclosing accordion item is currently closed. */
   protected readonly closed = computed(() => !this.accordionItem().open());
 }
 
+/** All directives that make up the accordion entry point, for bulk `imports`. */
 export const HELL_ACCORDION_DIRECTIVES = [
   HellAccordion,
   HellAccordionItem,

@@ -78,9 +78,11 @@ export class HellTabset {
     recipe: () => HELL_TABSET_RECIPE,
   });
 
+  /** Layout direction of the tab list. Defaults to `horizontal`. */
   readonly orientation = input<HellOrientation>('horizontal');
 }
 
+/** List element wrapping the tab buttons. */
 @Directive({
   selector: '[hellTabList]',
   hostDirectives: [NgpTabList],
@@ -100,6 +102,7 @@ export class HellTabList {
   });
 }
 
+/** Button that selects its associated tab panel when activated. */
 @Directive({
   selector: 'button[hellTab]',
   hostDirectives: [
@@ -125,6 +128,7 @@ export class HellTab {
   });
 }
 
+/** Content panel shown when its associated tab is selected. */
 @Directive({
   selector: '[hellTabPanel]',
   hostDirectives: [{ directive: NgpTabPanel, inputs: ['ngpTabPanelValue:value'] }],
@@ -144,4 +148,5 @@ export class HellTabPanel {
   });
 }
 
+/** All directives that make up the tabs entry point, for bulk `imports`. */
 export const HELL_TABS_DIRECTIVES = [HellTabset, HellTabList, HellTab, HellTabPanel] as const;

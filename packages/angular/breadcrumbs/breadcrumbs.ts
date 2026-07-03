@@ -15,6 +15,7 @@ import type { InjectionToken, Provider } from '@angular/core';
 
 /** Built-in accessibility labels owned by the breadcrumbs entry point. */
 export interface HellBreadcrumbLabels {
+  /** Accessible label for the control that reveals the collapsed-middle crumbs. */
   readonly showHiddenNavigation: string;
 }
 
@@ -125,6 +126,7 @@ export class HellBreadcrumbs {
   });
 }
 
+/** List element wrapping the individual breadcrumb items. */
 @Directive({
   selector: 'ol[hellBreadcrumbList], ul[hellBreadcrumbList]',
   hostDirectives: [NgpBreadcrumbList],
@@ -144,6 +146,7 @@ export class HellBreadcrumbList {
   });
 }
 
+/** List item wrapping a single crumb (a link, the current page, a separator, or an ellipsis). */
 @Directive({
   selector: 'li[hellBreadcrumbItem]',
   hostDirectives: [NgpBreadcrumbItem],
@@ -185,6 +188,7 @@ export class HellBreadcrumbLink {
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
 
+  /** Native `type` attribute to apply when the host is a `<button>` element. */
   protected nativeButtonType(): 'button' | null {
     return this.host.tagName.toLowerCase() === 'button' ? 'button' : null;
   }
@@ -263,15 +267,19 @@ export class HellBreadcrumbEllipsis {
     recipe: () => HELL_BREADCRUMB_ELLIPSIS_RECIPE,
   });
 
+  /** Accessible label used when the host is interactive. Defaults to the `showHiddenNavigation` label. */
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  /** Effective breadcrumbs labels resolved from `HELL_BREADCRUMBS_LABELS`. */
   protected readonly labels = inject(HELL_BREADCRUMBS_LABELS);
 
+  /** Native `type` attribute to apply when the host is a `<button>` element. */
   protected nativeButtonType(): 'button' | null {
     return this.host.tagName.toLowerCase() === 'button' ? 'button' : null;
   }
 }
 
+/** All directives that make up the breadcrumbs entry point, for bulk `imports`. */
 export const HELL_BREADCRUMBS_DIRECTIVES = [
   HellBreadcrumbs,
   HellBreadcrumbList,

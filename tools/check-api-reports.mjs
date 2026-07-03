@@ -1,5 +1,5 @@
 import { createRequire } from 'node:module';
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { apiReportEntrypoints } from './release-evidence-policy.mjs';
@@ -22,6 +22,8 @@ if (missingInputs.length) {
 
 mkdirSync(reportFolder, { recursive: true });
 mkdirSync(reportTempFolder, { recursive: true });
+
+annotateCompilerGeneratedStatics();
 
 let failed = false;
 
@@ -58,6 +60,33 @@ if (failed) {
 console.log(
   `[api-report] ${localBuild ? 'updated' : 'current'}: ${apiReportEntrypoints.length} entrypoints.`,
 );
+
+// The Angular compiler emits ɵfac/ɵdir/ɵcmp/... and ngAcceptInputType_...
+// static declarations into the built d.ts with no way to attach TSDoc in
+// source, so API Extractor flags every one as ae-undocumented. Annotate them
+// in the built types (idempotent) before extraction so reports only flag
+// documentation gaps authors can fix.
+function annotateCompilerGeneratedStatics() {
+  const typesFolder = join(root, 'dist/hell/types');
+  const staticPattern = /^([ \t]*)(static (?:ɵ(?:fac|dir|cmp|prov|mod|inj|pipe)|ngAcceptInputType_\w+):)/;
+  for (const name of readdirSync(typesFolder)) {
+    if (!name.endsWith('.d.ts')) continue;
+    const filePath = join(typesFolder, name);
+    const lines = readFileSync(filePath, 'utf8').split('\n');
+    const annotated = [];
+    let changed = false;
+    for (const line of lines) {
+      const match = staticPattern.exec(line);
+      const previous = annotated[annotated.length - 1];
+      if (match && !previous?.trimEnd().endsWith('*/')) {
+        annotated.push(`${match[1]}/** Angular compiler-generated declaration. */`);
+        changed = true;
+      }
+      annotated.push(line);
+    }
+    if (changed) writeFileSync(filePath, annotated.join('\n'));
+  }
+}
 
 function requiredBuildInputs() {
   return [

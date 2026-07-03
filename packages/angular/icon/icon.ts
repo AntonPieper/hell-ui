@@ -47,9 +47,14 @@ export class HellIcon {
     recipe: () => HELL_ICON_RECIPE,
   });
 
+  /** Name of the registered icon to render, as passed to `provideIcons`. */
   readonly name = input.required<string>();
+  /** CSS length for the glyph size. Defaults to `1em` so the icon scales with the surrounding text. */
   readonly size = input<string>('1em');
+  /** CSS color for the glyph. Defaults to `null`, which inherits `currentColor`. */
   readonly color = input<string | null>(null);
+  /** Hides the icon from assistive tech when `true`. Defaults to `true`. */
   readonly decorative = input(true, { transform: booleanAttribute });
+  /** Accessible label used when `decorative` is `false`. Defaults to `null`. */
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
 }

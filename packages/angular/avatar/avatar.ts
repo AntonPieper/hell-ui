@@ -52,6 +52,8 @@ export class HellAvatar {
   readonly fallback = input<string>('');
   /** Image alt-text — defaults to fallback when omitted. */
   readonly alt = input<string | null>(null);
+  /** Avatar diameter. Defaults to `md`. */
   readonly size = input<HellSize>('md');
+  /** Outline shape of the avatar. Defaults to `round`. */
   readonly shape = input<'round' | 'square'>('round');
 }

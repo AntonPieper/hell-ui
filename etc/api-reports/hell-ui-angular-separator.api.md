@@ -12,11 +12,9 @@ import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
-// @public (undocumented)
+// @public
 export class HellSeparator {
     // Warning: (ae-forgotten-export) The symbol "HellOrientation" needs to be exported by the entry point hell-ui-angular-separator.d.ts
-    //
-    // (undocumented)
     readonly orientation: _angular_core.InputSignal<HellOrientation>;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-separator.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
@@ -24,9 +22,7 @@ export class HellSeparator {
     readonly spacing: _angular_core.InputSignal<HellSize | "none">;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-separator.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSeparator, "[hellSeparator]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; "spacing": { "alias": "spacing"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpSeparator; inputs: { "ngpSeparatorOrientation": "orientation"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSeparator, never>;
 }
 
@@ -37,13 +33,6 @@ export type HellSeparatorPart = 'root';
 //
 // @public
 export type HellSeparatorUi = HellUi<HellSeparatorPart>;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-separator.d.ts:10:1 - (ae-undocumented) Missing documentation for "HellSeparator".
-// types/hell-ui-angular-separator.d.ts:15:5 - (ae-undocumented) Missing documentation for "orientation".
-// types/hell-ui-angular-separator.d.ts:23:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-separator.d.ts:24:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

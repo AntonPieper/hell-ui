@@ -46,6 +46,7 @@ const HELL_TOOLTIP_RECIPE = {
   },
 })
 export class HellTooltipTrigger extends HellNativeInteractiveDisabledGuard {
+  /** Underlying ng-primitives tooltip trigger state. */
   protected readonly trigger = inject(NgpTooltipTrigger);
 }
 
@@ -72,6 +73,7 @@ export class HellTooltip {
     defaultPart: 'root',
     recipe: () => HELL_TOOLTIP_RECIPE,
   });
+  /** Trigger state of the associated `hellTooltipTrigger`. */
   protected readonly tooltipTrigger = injectTooltipTriggerState();
 
   constructor() {

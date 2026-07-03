@@ -55,6 +55,7 @@ const HELL_SPLIT_VIEW_RECIPE = {
   selector: 'ng-template[hellSplitPrimary]',
 })
 export class HellSplitPrimary {
+  /** The template applied to the primary pane. */
   readonly template = inject<TemplateRef<unknown>>(TemplateRef);
 }
 
@@ -63,6 +64,7 @@ export class HellSplitPrimary {
   selector: 'ng-template[hellSplitDetail]',
 })
 export class HellSplitDetail {
+  /** The template applied to the detail pane. */
   readonly template = inject<TemplateRef<unknown>>(TemplateRef);
 }
 
@@ -207,42 +209,65 @@ export class HellSplitView {
     recipe: () => HELL_SPLIT_VIEW_RECIPE,
   });
 
+  /** Inline size in pixels below which the view switches to compact mode. Defaults to `720`. */
   readonly compactBelow = input(720, { transform: numberAttribute });
+  /** Whether the detail pane is shown in compact mode. Defaults to `false`. */
   readonly detailOpen = input(false, { transform: booleanAttribute });
+  /** Whether to render the framed appearance. Defaults to `false`. */
   readonly framed = input(false, { transform: booleanAttribute });
+  /** Label for the compact-mode back button. Defaults to `'Back'`. */
   readonly backLabel = input('Back');
+  /** Initial flex grow factor for the primary pane. Defaults to `3`. */
   readonly primaryFlex = input(3, { transform: numberAttribute });
+  /** Initial flex grow factor for the detail pane. Defaults to `2`. */
   readonly detailFlex = input(2, { transform: numberAttribute });
+  /** Minimum size in pixels for the primary pane. Defaults to `320`. */
   readonly primaryMinSize = input(320, { transform: numberAttribute });
+  /** Minimum size in pixels for the detail pane. Defaults to `260`. */
   readonly detailMinSize = input(260, { transform: numberAttribute });
+  /** Fixed height for the view; numbers are normalized to pixels. Defaults to `null` (fill container). */
   readonly height = input<string | number | null>(null);
+  /** Whether to render the item navigation controls. Defaults to `false`. */
   readonly itemNavigation = input(false, { transform: booleanAttribute });
+  /** Accessible label for the item navigation region. Defaults to `'Item navigation'`. */
   readonly itemNavigationLabel = input('Item navigation');
+  /** Accessible label for the previous-item control. Defaults to `'Previous item'`. */
   readonly previousItemLabel = input('Previous item');
+  /** Accessible label for the next-item control. Defaults to `'Next item'`. */
   readonly nextItemLabel = input('Next item');
+  /** Disables the previous-item control. Defaults to `false`. */
   readonly previousItemDisabled = input(false, { transform: booleanAttribute });
+  /** Disables the next-item control. Defaults to `false`. */
   readonly nextItemDisabled = input(false, { transform: booleanAttribute });
 
+  /** Emits the requested `detailOpen` state when the compact back button is pressed. */
   readonly detailOpenChange = output<boolean>();
+  /** Emits when the previous-item control is activated. */
   readonly previousItem = output<void>();
+  /** Emits when the next-item control is activated. */
   readonly nextItem = output<void>();
 
+  /** The projected `HellSplitPrimary` template, if provided. */
   protected readonly primaryTemplate = contentChild(HellSplitPrimary);
+  /** The projected `HellSplitDetail` template, if provided. */
   protected readonly detailTemplate = contentChild(HellSplitDetail);
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly destroyRef = inject(DestroyRef);
   private readonly inlineSize = signal(0);
 
+  /** Whether the view's inline size is currently below `compactBelow`. */
   protected readonly isCompact = computed(() => {
     const breakpoint = this.compactBelow();
     return breakpoint > 0 && this.inlineSize() > 0 && this.inlineSize() < breakpoint;
   });
 
+  /** Context object (`{ compact, detailOpen }`) passed to the primary/detail templates. */
   protected readonly templateContext = computed(() => ({
     compact: this.isCompact(),
     detailOpen: this.detailOpen(),
   }));
+  /** Normalized `height` value, in pixels or the given CSS unit, for the host style binding. */
   protected readonly heightValue = computed(() => {
     const value = this.height();
     if (value == null || value === '') return null;
@@ -266,21 +291,25 @@ export class HellSplitView {
     this.destroyRef.onDestroy(() => observer.disconnect());
   }
 
+  /** Closes the detail pane in compact mode by emitting `detailOpenChange(false)`. */
   protected closeDetail(): void {
     this.detailOpenChange.emit(false);
   }
 
+  /** Number of pages exposed to the item navigation pagination control. */
   protected itemNavigationPageCount(): number {
     if (this.previousItemDisabled() && this.nextItemDisabled()) return 1;
     return this.previousItemDisabled() || this.nextItemDisabled() ? 2 : 3;
   }
 
+  /** Current page reported to the item navigation pagination control. */
   protected itemNavigationPage(): number {
     if (this.previousItemDisabled()) return 1;
     if (this.nextItemDisabled()) return this.itemNavigationPageCount();
     return 2;
   }
 
+  /** Translates a pagination page change into a previous/next item emission. */
   protected goToItemPage(page: number): void {
     const current = this.itemNavigationPage();
     if (page < current) this.goToPreviousItem();
@@ -300,6 +329,7 @@ export class HellSplitView {
   }
 }
 
+/** Standalone imports for the complete split-view API: view, primary, and detail. */
 export const HELL_SPLIT_VIEW_DIRECTIVES = [
   HellSplitView,
   HellSplitPrimary,
