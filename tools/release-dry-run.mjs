@@ -66,7 +66,10 @@ if (exitCode === 0) {
 
 process.exit(exitCode);
 
-function parseMode(args) {
+function parseMode(rawArgs) {
+  // pnpm 10 forwards the literal `--` separator from the documented
+  // `pnpm release:dry-run -- --full` invocation; treat it as noise.
+  const args = rawArgs.filter((arg) => arg !== '--');
   if (args.includes('--help') || args.includes('-h')) {
     printUsage();
     process.exit(0);
