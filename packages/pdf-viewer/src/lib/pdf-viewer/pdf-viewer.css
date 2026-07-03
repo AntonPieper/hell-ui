@@ -12,7 +12,7 @@
     border-style: solid;
     border-width: 1px;
     border-color: var(--color-hell-border);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-hell-md);
     outline: none;
     position: relative;
     &:focus-visible {
@@ -25,20 +25,22 @@
   .hell-pdf-toolbar {
     display: flex;
     align-items: center;
-    gap: calc(var(--spacing) * 1);
+    gap: calc(var(--spacing) * 1.5);
     padding-inline: calc(var(--spacing) * 2.5);
     padding-block: calc(var(--spacing) * 1.5);
     border-bottom: 1px solid var(--color-hell-border);
-    background-color: var(--color-hell-surface);
-    @supports (color: color-mix(in lab, red, red)) {
-      background-color: color-mix(
-        in srgb,
-        var(--color-hell-surface) 92%,
-        var(--color-hell-foreground)
-      );
-    }
+    background-color: var(--color-hell-surface-subtle);
     flex: 0 0 auto;
     flex-wrap: wrap;
+  }
+
+  /* Controls wrap as whole clusters instead of orphaning single buttons. */
+  .hell-pdf-toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing) * 1);
+    flex: 0 0 auto;
+    min-width: 0;
   }
 
   .hell-pdf-spacer {
@@ -49,13 +51,13 @@
     width: 1px;
     height: calc(var(--spacing) * 5);
     background-color: var(--color-hell-border);
-    margin-inline: calc(var(--spacing) * 1);
+    margin-inline: calc(var(--spacing) * 0.5);
     margin-block: calc(var(--spacing) * 0);
   }
 
   .hell-pdf-toolbar-text {
-    font-size: var(--text-sm);
-    line-height: var(--text-sm--line-height);
+    font-size: var(--text-xs);
+    line-height: var(--text-xs--line-height);
     color: var(--color-hell-foreground-muted);
     margin-inline: calc(var(--spacing) * 1);
     margin-block: calc(var(--spacing) * 0);
@@ -78,10 +80,12 @@
     }
   }
 
+  /* The control recipe applies `w-full` from the utilities layer, which
+     outranks a components-layer `width`. A fixed flex-basis wins over width
+     inside the flex row, keeping the select from stretching the toolbar. */
   .hell-pdf-zoom-select {
-    width: auto;
-    min-width: 8.5rem;
-    flex: 0 0 auto;
+    flex: 0 0 6.5rem;
+    min-width: 0;
   }
 
   .hell-pdf-findbar {
@@ -91,7 +95,7 @@
     padding-inline: calc(var(--spacing) * 2.5);
     padding-block: calc(var(--spacing) * 1.5);
     border-bottom: 1px solid var(--color-hell-border);
-    background-color: var(--color-hell-surface);
+    background-color: var(--color-hell-surface-subtle);
     flex: 0 0 auto;
   }
 
@@ -115,14 +119,7 @@
     min-height: calc(var(--spacing) * 0);
     position: relative;
     display: flex;
-    background-color: var(--color-hell-foreground);
-    @supports (color: color-mix(in lab, red, red)) {
-      background-color: color-mix(
-        in srgb,
-        var(--color-hell-foreground) 6%,
-        var(--color-hell-surface)
-      );
-    }
+    background-color: var(--color-hell-surface-muted);
   }
 
   .hell-pdf-overview {
@@ -134,14 +131,7 @@
     display: flex;
     flex-direction: column;
     gap: calc(var(--spacing) * 2);
-    background-color: var(--color-hell-foreground);
-    @supports (color: color-mix(in lab, red, red)) {
-      background-color: color-mix(
-        in srgb,
-        var(--color-hell-foreground) 4%,
-        var(--color-hell-surface)
-      );
-    }
+    background-color: var(--color-hell-surface-subtle);
     border-right: 1px solid var(--color-hell-border);
   }
 
@@ -161,7 +151,7 @@
     align-items: center;
     gap: calc(var(--spacing) * 1);
     padding-block: calc(var(--spacing) * 1.5);
-    border-radius: 0.25rem;
+    border-radius: var(--radius-hell-sm);
     line-height: var(--text-sm--line-height);
     white-space: normal;
     @supports (color: color-mix(in lab, red, red)) {

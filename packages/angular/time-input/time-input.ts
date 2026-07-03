@@ -88,7 +88,7 @@ const HELL_TIME_INPUT_RECIPE = {
     'h-hell-control-md min-w-0 flex-1 rounded-hell-md border-0 bg-transparent px-hell-3 py-0 font-[inherit] text-[13px] tracking-normal text-hell-foreground tabular-nums outline-none placeholder:text-hell-foreground-subtle disabled:cursor-not-allowed disabled:text-hell-foreground-muted data-[size=sm]:h-hell-control-sm data-[size=sm]:text-xs data-[size=lg]:h-hell-control-lg data-[size=lg]:text-sm',
   trigger:
     'me-hell-1 inline-flex h-hell-control-sm w-hell-control-sm flex-none cursor-pointer items-center justify-center self-center rounded-hell-md border border-transparent bg-transparent p-0 text-hell-foreground-muted transition-[background-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
-  triggerIcon: 'size-hell-4',
+  triggerIcon: 'size-hell-4 text-[length:var(--spacing-hell-4)]',
   pickerPanel:
     'grid w-[min(20rem,calc(100vw-2rem))] gap-hell-2 rounded-hell-md border border-hell-border bg-hell-surface-elevated p-hell-3 text-[13px] text-hell-foreground shadow-hell-lg outline-none',
   pickerHeader: 'flex min-h-hell-control-sm items-center justify-start',
@@ -315,7 +315,9 @@ export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue
     </button>
 
     <ng-template #picker>
-      <div hellPopover data-slot="pickerPanel" [class]="part('pickerPanel')">
+      <!-- Panel overrides flow through the popover's Part Style Map so they
+           merge deterministically with the popover recipe. -->
+      <div hellPopover data-slot="pickerPanel" [ui]="part('pickerPanel')">
         <div data-slot="pickerHeader" [class]="part('pickerHeader')">
           <span
             data-slot="pickerReadout"

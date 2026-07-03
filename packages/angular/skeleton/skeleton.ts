@@ -11,7 +11,7 @@ export type HellSpinnerPart = 'root';
 export type HellSpinnerUi = HellUi<HellSpinnerPart>;
 
 const HELL_SKELETON_RECIPE = {
-  root: 'block h-[var(--_hell-skeleton-height,14px)] min-h-hell-3 w-[var(--_hell-skeleton-width,100%)] animate-[hell-shimmer_1.6s_linear_infinite] rounded-sm bg-hell-surface-muted bg-[linear-gradient(90deg,transparent_0%,color-mix(in_oklab,var(--color-hell-surface)_70%,transparent)_50%,transparent_100%)] bg-[length:200%_100%] bg-no-repeat data-[shape=circle]:rounded-full data-[shape=rect]:rounded-hell-md',
+  root: 'block animate-[hell-shimmer_1.6s_linear_infinite] rounded-sm bg-hell-surface-muted bg-[linear-gradient(90deg,transparent_0%,color-mix(in_oklab,var(--color-hell-surface)_70%,transparent)_50%,transparent_100%)] bg-[length:200%_100%] bg-no-repeat data-[shape=circle]:rounded-full data-[shape=rect]:rounded-hell-md',
 } satisfies HellRecipe<HellSkeletonPart>;
 
 const HELL_SPINNER_RECIPE = {

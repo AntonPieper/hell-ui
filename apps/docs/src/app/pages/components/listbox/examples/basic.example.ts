@@ -37,19 +37,10 @@ const CHECK_OPTIONS: readonly Option[] = [
           aria-labelledby="listbox-reviewer-label"
           [value]="selectedReviewer()"
           (valueChange)="selectedReviewer.set($any($event))"
-          class="grid gap-1"
         >
-          <div hellListboxHeader class="px-2 pb-1 text-xs font-semibold text-hell-foreground-muted">
-            Reviewer
-          </div>
+          <div hellListboxHeader>Reviewer</div>
           @for (option of reviewerOptions; track option.id) {
-            <button
-              hellListboxOption
-              type="button"
-              [value]="option.id"
-              [disabled]="option.disabled"
-              class="grid gap-0.5 rounded-md border border-transparent px-3 py-2 text-left text-sm hover:bg-hell-surface-subtle aria-disabled:cursor-not-allowed aria-disabled:opacity-50 aria-disabled:hover:bg-transparent aria-selected:border-hell-border-focus aria-selected:bg-hell-primary-soft"
-            >
+            <button hellListboxOption type="button" [value]="option.id" [disabled]="option.disabled">
               <span>{{ option.label }}</span>
               <span class="text-xs text-hell-foreground-muted">{{ option.detail }}</span>
             </button>
@@ -67,19 +58,10 @@ const CHECK_OPTIONS: readonly Option[] = [
           [mode]="'multiple'"
           [value]="selectedChecks()"
           (valueChange)="selectedChecks.set($any($event))"
-          class="grid gap-1"
         >
-          <div hellListboxHeader class="px-2 pb-1 text-xs font-semibold text-hell-foreground-muted">
-            Launch checks
-          </div>
+          <div hellListboxHeader>Launch checks</div>
           @for (option of checkOptions; track option.id) {
-            <button
-              hellListboxOption
-              type="button"
-              [value]="option.id"
-              [disabled]="option.disabled"
-              class="grid gap-0.5 rounded-md border border-transparent px-3 py-2 text-left text-sm hover:bg-hell-surface-subtle aria-disabled:cursor-not-allowed aria-disabled:opacity-50 aria-disabled:hover:bg-transparent aria-selected:border-hell-border-focus aria-selected:bg-hell-primary-soft"
-            >
+            <button hellListboxOption type="button" [value]="option.id" [disabled]="option.disabled">
               <span>{{ option.label }}</span>
               <span class="text-xs text-hell-foreground-muted">{{ option.detail }}</span>
             </button>

@@ -25,9 +25,24 @@ class ListboxUiHost {
   readonly value = signal<string[]>(['ada']);
 }
 
+@Component({
+  imports: [...HELL_LISTBOX_DIRECTIVES],
+  template: `
+    <div hellListbox aria-label="Plain listbox" [value]="value()">
+      <div hellListboxOption value="ada">Ada</div>
+      <div hellListboxOption value="grace">Grace</div>
+    </div>
+  `,
+})
+class ListboxDefaultHost {
+  readonly value = signal<string[]>(['ada']);
+}
+
 describe('HellListbox Part Style Map', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [ListboxUiHost] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [ListboxUiHost, ListboxDefaultHost],
+    }).compileComponents();
   });
 
   it('merges local root part styles while preserving selected and disabled state', () => {
@@ -55,6 +70,21 @@ describe('HellListbox Part Style Map', () => {
     expect(disabled.getAttribute('data-slot')).toBe('root');
     expect(disabled.getAttribute('aria-disabled')).toBe('true');
     expect(disabled.getAttribute('aria-selected')).toBe('false');
+  });
+
+  it('renders a bordered panel with flat borderless option rows by default', () => {
+    const fixture = TestBed.createComponent(ListboxDefaultHost);
+    fixture.detectChanges();
+
+    const listbox = query<HTMLElement>(fixture.nativeElement, '[hellListbox]');
+    const option = query<HTMLElement>(fixture.nativeElement, '[hellListboxOption][value="ada"]');
+
+    // The container owns the outline; options must not look like outlined buttons.
+    expect(listbox.className).toContain('border-hell-border');
+    expect(listbox.className).toContain('bg-hell-surface-elevated');
+    expect(option.className).toContain('border-0');
+    expect(option.className).not.toContain('border-transparent');
+    expect(option.className).not.toContain('data-selected:border-hell-border-focus');
   });
 });
 

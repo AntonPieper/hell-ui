@@ -21,15 +21,15 @@ export type HellListboxHeaderPart = 'root';
 export type HellListboxHeaderUi = HellUi<HellListboxHeaderPart>;
 
 const HELL_LISTBOX_RECIPE = {
-  root: 'grid gap-hell-2 outline-none',
+  root: 'flex w-full flex-col gap-px rounded-hell-md border border-solid border-hell-border bg-hell-surface-elevated p-hell-2 outline-none transition-[border-color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out focus-visible:border-hell-border-focus focus-visible:shadow-[0_0_0_3px_var(--color-hell-focus-ring)]',
 } satisfies HellRecipe<HellListboxPart>;
 
 const HELL_LISTBOX_OPTION_RECIPE = {
-  root: 'grid cursor-pointer gap-0.5 rounded-hell-md border border-transparent px-hell-3 py-hell-2 text-left text-sm text-hell-foreground outline-none data-active:bg-hell-surface-subtle data-disabled:cursor-not-allowed data-disabled:opacity-50 data-selected:border-hell-border-focus data-selected:bg-hell-primary-soft aria-disabled:cursor-not-allowed aria-disabled:opacity-50 aria-selected:border-hell-border-focus aria-selected:bg-hell-primary-soft',
+  root: 'grid cursor-pointer gap-0.5 rounded-hell-sm border-0 bg-transparent px-[calc(var(--spacing)*2.5)] py-[calc(var(--spacing)*1.5)] text-start font-[inherit] text-[13px] text-hell-foreground outline-none hover:bg-hell-surface-muted data-active:bg-hell-surface-muted data-selected:bg-hell-primary-soft data-selected:font-medium data-selected:text-hell-primary-soft-foreground aria-selected:bg-hell-primary-soft aria-selected:font-medium aria-selected:text-hell-primary-soft-foreground data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:hover:bg-transparent aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&[data-selected][data-active]]:bg-[color-mix(in_oklab,var(--color-hell-primary)_18%,var(--color-hell-surface-muted))]',
 } satisfies HellRecipe<HellListboxOptionPart>;
 
 const HELL_LISTBOX_SECTION_RECIPE = {
-  root: 'grid gap-hell-2',
+  root: 'flex flex-col gap-px',
 } satisfies HellRecipe<HellListboxSectionPart>;
 
 const HELL_LISTBOX_HEADER_RECIPE = {

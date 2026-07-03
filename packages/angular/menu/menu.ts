@@ -1,4 +1,4 @@
-import { Directive, ElementRef, inject } from '@angular/core';
+import { Directive, ElementRef, afterNextRender, inject } from '@angular/core';
 import type { Signal } from '@angular/core';
 import {
   NgpMenu,
@@ -136,6 +136,9 @@ export class HellMenuTrigger extends HellNativeInteractiveDisabledGuard {
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
+    // Static marker: the directive is applied through a property binding, so
+    // no selector attribute lands in the DOM for stylesheets to target.
+    'data-hell-submenu-trigger': '',
   },
 })
 export class HellSubmenuTrigger extends HellPartStyleable<HellSubmenuTriggerPart> {
@@ -162,6 +165,22 @@ export class HellMenu extends HellPartStyleable<HellMenuPart> {
   constructor() {
     super();
     hellRegisterFloatingHost();
+
+    // Overlay panes such as the Omnibar panel render through the browser
+    // Popover API, which paints above every z-indexed element. Menus join the
+    // same top-most rendering context so a menu opened from inside such a
+    // pane still paints above it (later entries win); ng-primitives keeps
+    // owning position and dismissal.
+    const element = inject(ElementRef<HTMLElement>).nativeElement;
+    afterNextRender(() => {
+      if (typeof element.showPopover !== 'function' || !element.isConnected) return;
+      element.setAttribute('popover', 'manual');
+      try {
+        element.showPopover();
+      } catch {
+        element.removeAttribute('popover');
+      }
+    });
   }
 }
 

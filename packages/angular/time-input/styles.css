@@ -1,2 +1,10 @@
 /* Time input default visuals are Tailwind utility recipes in the component. */
 @source "./time-input.ts";
+
+@layer components {
+  /* The component renders its own clock trigger; hide the native picker
+     indicator so `type="time"` fields don't show a second clock glyph. */
+  hell-time-input[data-slot='root'] [data-slot='input']::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+}

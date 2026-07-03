@@ -38,6 +38,44 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   migration-guide gates for migrated Button, Input, and Dialpad styling
   contracts.
 
+### Changed
+
+- Restyled `@hell-ui/angular/listbox` defaults to match the Select/Menu family:
+  the listbox root is now a bordered elevated panel and options render as flat
+  rows with soft active/selected backgrounds instead of per-option outlines.
+- Redesigned the PDF viewer toolbar into grouped clusters, drove page
+  navigation through the Hell pagination primitives, constrained the zoom
+  select width, and replaced ad-hoc color mixes with semantic theme tokens.
+- Extended the Glass, Aurora, Newspaper, High contrast, and Compact mono theme
+  adapters to also treat Listbox panels/options, Toast surfaces, the Omnibar
+  control and panel, and Date/Time input roots.
+
+### Fixed
+
+- Skeleton sizing: the recipe no longer hard-codes width/height utilities, so
+  consumer `class`/`ui` sizing utilities (`h-5`, `size-10`, …) win over the
+  stylesheet defaults.
+- Menus opened from Composites: menus and submenus now join the browser
+  Popover API top-most rendering context, so they paint above popover-based
+  overlay panes such as the Omnibar panel, and property-bound
+  `[hellSubmenuTrigger]` items now carry a static
+  `data-hell-submenu-trigger` marker so submenu chevrons render.
+- Omnibar: the actions strip only renders when action buttons register, so
+  actionless omnibars no longer show an empty toolbar band.
+- Date input: picker-panel overrides flow through the popover's Part Style Map,
+  removing the doubled outline and padding ring around the embedded date
+  picker.
+- Time input: the native `type="time"` picker indicator is hidden in favor of
+  the component's clock trigger, and trigger icons size their glyph to the
+  icon box instead of clipping.
+- Audio player: the speech-transcript strip anchors below the player again
+  (its classes flow through the flyout's Part Style Map), sliders center
+  vertically in the control rows, and slider thumbs reserve their overhang so
+  they stop colliding with neighboring controls.
+- Toast: the accent bar follows the themed corner radius via an inset overlay
+  border, and the Glass skin now applies its translucency and backdrop blur to
+  toasts.
+
 ## [0.1.0] - 2026-06-03
 
 Initial internal-beta seed. This version is not a stable-production claim; see

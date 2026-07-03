@@ -1,6 +1,7 @@
 /* Theme adapter: Aurora
  *
- * Coverage: Cards, floating surfaces, common form controls, menu/select
+ * Coverage: Cards, floating surfaces (incl. Listbox and Toast), common form
+ * controls (incl. Date/Time input and the Omnibar control), menu/select/listbox
  * options, tags, and table headers. Unsupported components keep defaults.
  */
 
@@ -13,8 +14,10 @@
       [hellMenu],
       [hellComboboxDropdown],
       [hellSelectDropdown],
+      [hellListbox],
       [data-hell-flyout]
-    )[data-slot='root'] {
+    )[data-slot='root'],
+  [data-hell-skin="aurora"] hell-toaster[data-slot='root'] [data-slot='toast'] {
     border-color: color-mix(in oklab, var(--color-hell-primary) 32%, var(--color-hell-border));
     background-image:
       linear-gradient(
@@ -37,14 +40,18 @@
       [hellCombobox],
       input[hellInput],
       select[hellNativeSelect],
-      textarea[hellTextarea]
-    )[data-slot='root'] {
+      textarea[hellTextarea],
+      hell-time-input,
+      hell-date-input
+    )[data-slot='root'],
+  [data-hell-skin="aurora"] hell-omnibar[data-slot='root'] > [data-slot='control'] {
     border-color: color-mix(in oklab, var(--color-hell-primary) 28%, var(--color-hell-border));
   }
 
-  [data-hell-skin="aurora"] :is([hellSelectOption], [hellComboboxOption])[data-slot='root'][data-active],
   [data-hell-skin="aurora"]
-    :is([hellSelectOption], [hellComboboxOption])[data-slot='root'][data-selected],
+    :is([hellSelectOption], [hellComboboxOption], [hellListboxOption])[data-slot='root'][data-active],
+  [data-hell-skin="aurora"]
+    :is([hellSelectOption], [hellComboboxOption], [hellListboxOption])[data-slot='root'][data-selected],
   [data-hell-skin="aurora"]
     :is([hellMenuItem], [hellMenuItemCheckbox], [hellMenuItemRadio])[data-slot='root'][data-hover]::before,
   [data-hell-skin="aurora"]

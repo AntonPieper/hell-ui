@@ -349,6 +349,29 @@ describe('HellOmnibar interactions', () => {
     );
   });
 
+  it('renders the actions strip only when action buttons register', () => {
+    const withActions = TestBed.createComponent(OmnibarHost);
+    withActions.detectChanges();
+    query<HTMLInputElement>(withActions.nativeElement, 'input').dispatchEvent(
+      new FocusEvent('focus'),
+    );
+    withActions.detectChanges();
+
+    expect(overlayRoot().querySelector('[data-slot="actions"]')).not.toBeNull();
+    withActions.destroy();
+
+    const withoutActions = TestBed.createComponent(OmnibarDisabledItemHost);
+    withoutActions.detectChanges();
+    query<HTMLInputElement>(withoutActions.nativeElement, 'input').dispatchEvent(
+      new FocusEvent('focus'),
+    );
+    withoutActions.detectChanges();
+
+    // No projected `[hellOmnibarAction]` means no empty toolbar strip.
+    expect(overlayRoot().querySelector('[data-slot="panel"]')).not.toBeNull();
+    expect(overlayRoot().querySelector('[data-slot="actions"]')).toBeNull();
+  });
+
   it('moves active results with the keyboard and submits without closing when requested', () => {
     const fixture = TestBed.createComponent(OmnibarHost);
     const host = fixture.componentInstance;

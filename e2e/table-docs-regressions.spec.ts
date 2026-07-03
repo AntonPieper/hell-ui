@@ -41,7 +41,7 @@ test.describe('table docs regressions', () => {
     await gotoTableDocs(page);
 
     const previews = page.locator('hd-table-page hd-example-tabs .hd-example');
-    await expect(previews).toHaveCount(3);
+    await expect(previews).toHaveCount(4);
 
     const paddingTopValues = await previews.evaluateAll((elements) =>
       elements.map((element) => Number.parseFloat(getComputedStyle(element).paddingTop)),
@@ -292,6 +292,13 @@ test.describe('table docs regressions', () => {
       .click();
     await expect(page.getByRole('menu').filter({ hasText: 'Any status' })).toBeVisible();
     await page.keyboard.press('Escape');
+
+    // First Escape closes the menu and restores focus to the Filters action;
+    // a second Escape uses the action-strip contract to close the omnibar
+    // panel so it no longer covers the rows we interact with below.
+    await expect(page.getByRole('menu')).toHaveCount(0);
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.cdk-overlay-pane [data-slot="panel"]')).toHaveCount(0);
 
     await virtual.getByRole('button', { name: 'Toggle details for Person 1', exact: true }).click();
     await expect(

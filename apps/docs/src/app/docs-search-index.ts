@@ -891,6 +891,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'date-input styling components/date-input/examples/styling.example components/date-input hell-date-input ui Part Style Map data-slot root input trigger pickerPanel HellDateInputUi HellDateInputPart',
   },
   {
+    title: 'Dialpad: Basic',
+    path: '/components/dialpad',
+    detail: 'components/dialpad/examples/basic.example.ts',
+    terms:
+      'dialpad basic components/dialpad/examples/basic.example components/dialpad hell-dialpad default call valueChange',
+  },
+  {
     title: 'Dialpad: Example',
     path: '/components/dialpad',
     detail: 'components/dialpad/examples/example.example.ts',
@@ -954,6 +961,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'omnibar styling components/omnibar/examples/styling.example components/omnibar hell-omnibar ui Part Style Map data-slot control inputWrap input panel HellOmnibarUi HellOmnibarPart',
   },
   {
+    title: 'Resizable: Basic',
+    path: '/components/resizable',
+    detail: 'components/resizable/examples/basic.example.ts',
+    terms:
+      'resizable basic components/resizable/examples/basic.example components/resizable hellResizable hellResizablePane hellResizableHandle default',
+  },
+  {
     title: 'Resizable: Grip Handle 5',
     path: '/components/resizable',
     detail: 'components/resizable/examples/grip-handle-5.example.ts',
@@ -987,6 +1001,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     detail: 'components/resizable/examples/vertical-split.example.ts',
     terms:
       'resizable vertical-split components/resizable/examples/vertical-split.example components/resizable hellResizable vertical',
+  },
+  {
+    title: 'Split View: Basic',
+    path: '/components/split-view',
+    detail: 'components/split-view/examples/basic.example.ts',
+    terms:
+      'split-view basic components/split-view/examples/basic.example components/split-view hell-split-view hellSplitPrimary hellSplitDetail default framed',
   },
   {
     title: 'Split View: Master Detail',
@@ -1078,6 +1099,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     detail: 'components/code-editor/examples/styling.example.ts',
     terms:
       'code-editor styling components/code-editor/examples/styling.example components/code-editor hell-code-editor ui Part Style Map data-slot root editor HellCodeEditorUi HellCodeEditorPart',
+  },
+  {
+    title: 'Table: Basic',
+    path: '/components/table',
+    detail: 'components/table/examples/basic-table.example.ts',
+    terms:
+      'table basic components/table/examples/basic-table.example components/table hellTableRoot hellTableContainer default native table',
   },
   {
     title: 'Table: Primitive Table',

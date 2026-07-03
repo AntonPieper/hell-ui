@@ -1,6 +1,7 @@
 /* Theme adapter: High contrast
  *
- * Coverage: Core controls, cards, floating surfaces, options, menus, dialog
+ * Coverage: Core controls (incl. Date/Time input and the Omnibar control),
+ * cards, floating surfaces (incl. Listbox and Toast), options, menus, dialog
  * overlay, tags, and tables. Unsupported components keep defaults.
  */
 
@@ -22,8 +23,13 @@
       textarea[hellTextarea],
       [hellTag],
       [hellBadge],
-      [hellKbd]
-    )[data-slot='root'] {
+      [hellKbd],
+      [hellListbox],
+      hell-time-input,
+      hell-date-input
+    )[data-slot='root'],
+  [data-hell-skin="high-contrast"] hell-omnibar[data-slot='root'] > [data-slot='control'],
+  [data-hell-skin="high-contrast"] hell-toaster[data-slot='root'] [data-slot='toast'] {
     border-width: 2px;
     box-shadow: none;
   }
@@ -49,9 +55,9 @@
   }
 
   [data-hell-skin="high-contrast"]
-    :is([hellSelectOption], [hellComboboxOption])[data-slot='root'][data-active],
+    :is([hellSelectOption], [hellComboboxOption], [hellListboxOption])[data-slot='root'][data-active],
   [data-hell-skin="high-contrast"]
-    :is([hellSelectOption], [hellComboboxOption])[data-slot='root'][data-selected],
+    :is([hellSelectOption], [hellComboboxOption], [hellListboxOption])[data-slot='root'][data-selected],
   [data-hell-skin="high-contrast"]
     :is([hellMenuItem], [hellMenuItemCheckbox], [hellMenuItemRadio])[data-slot='root'][data-hover]::before,
   [data-hell-skin="high-contrast"]
@@ -64,7 +70,7 @@
   [data-hell-skin="high-contrast"]
     :is([hellMenuItem], [hellMenuItemCheckbox], [hellMenuItemRadio])[data-slot='root'][data-focus-visible],
   [data-hell-skin="high-contrast"]
-    :is([hellSelectOption], [hellComboboxOption])[data-slot='root']:is([data-active], [data-selected]) {
+    :is([hellSelectOption], [hellComboboxOption], [hellListboxOption])[data-slot='root']:is([data-active], [data-selected]) {
     color: var(--color-hell-primary-foreground);
   }
 

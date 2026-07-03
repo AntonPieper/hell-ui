@@ -65,8 +65,8 @@ const HELL_DATE_INPUT_RECIPE = {
     'h-hell-control-md min-w-0 flex-1 rounded-hell-md border-0 bg-transparent px-hell-3 py-0 font-[inherit] text-[13px] text-hell-foreground tabular-nums outline-none placeholder:text-hell-foreground-subtle disabled:cursor-not-allowed disabled:text-hell-foreground-muted data-[size=sm]:h-hell-control-sm data-[size=sm]:text-xs data-[size=lg]:h-hell-control-lg data-[size=lg]:text-sm',
   trigger:
     'me-hell-1 inline-flex h-hell-control-sm w-hell-control-sm flex-none cursor-pointer items-center justify-center self-center rounded-hell-md border border-transparent bg-transparent p-0 text-hell-foreground-subtle transition-[background-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-muted hover:text-hell-foreground focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-1 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
-  triggerIcon: 'size-hell-4',
-  pickerPanel: 'block rounded-hell-md bg-transparent p-0 shadow-none',
+  triggerIcon: 'size-hell-4 text-[length:var(--spacing-hell-4)]',
+  pickerPanel: 'block rounded-hell-md border-0 bg-transparent p-0 shadow-none',
 } satisfies HellRecipe<HellDateInputPart>;
 
 export type HellDateInputParseResult = HellTypedValueParseResult<Date>;
@@ -232,7 +232,9 @@ export function hellCoerceDateInputValue(value: Date | null | undefined): Date |
     </button>
 
     <ng-template #cal>
-      <div hellPopover data-slot="pickerPanel" [class]="part('pickerPanel')">
+      <!-- Panel overrides flow through the popover's Part Style Map so they
+           merge deterministically with the popover recipe. -->
+      <div hellPopover data-slot="pickerPanel" [ui]="part('pickerPanel')">
         <hell-date-picker
           [date]="current() ?? undefined"
           [focusedDate]="pickerFocusedDate()"

@@ -15,6 +15,12 @@
       "@hell-ui/angular/*": [
         "../../dist/hell/*",
         "../../dist/hell/types/hell-ui-angular-*.d.ts"
+      ],
+      /* The dist type declarations above import ng-primitives; resolve it
+         from this package's own dependencies so host-directive inputs
+         (e.g. HellPagination page/pageCount) keep their types. */
+      "ng-primitives/*": [
+        "./node_modules/ng-primitives/*"
       ]
     }
   },

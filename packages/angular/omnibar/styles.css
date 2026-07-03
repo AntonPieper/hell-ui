@@ -257,10 +257,6 @@
     background-color: var(--color-hell-surface-subtle);
   }
 
-  .hell-omnibar-overlay-pane [data-slot='panel'] [data-slot='actions'][data-empty='true'] {
-    display: none;
-  }
-
   button[hellOmnibarAction][data-slot='root'] {
     display: inline-flex;
     align-items: center;

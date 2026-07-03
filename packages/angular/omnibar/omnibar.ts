@@ -342,13 +342,14 @@ const HELL_OMNIBAR_ACTION_RECIPE = {
         [id]="panelId + '-surface'"
         [class]="part('panel')"
       >
-        <div
-          data-slot="actions"
-          [class]="part('actions')"
-          [attr.data-empty]="!hasActions() ? 'true' : null"
-        >
-          <ng-content select="[hellOmnibarActions]" />
-        </div>
+        <!-- Projected action directives register with the runtime on
+             construction, so the strip wrapper can stay conditional without
+             a registration chicken-and-egg. -->
+        @if (hasActions()) {
+          <div data-slot="actions" [class]="part('actions')">
+            <ng-content select="[hellOmnibarActions]" />
+          </div>
+        }
         <div
           data-slot="results"
           [class]="part('results')"
