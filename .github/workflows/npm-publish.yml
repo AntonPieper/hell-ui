@@ -39,6 +39,11 @@ jobs:
       - name: Install
         run: pnpm run ci:install
 
+      # The full dry-run's package-consumer runtime style check launches a
+      # headless chromium (HELL_PACKAGE_CONSUMER_RUNTIME_STYLE_CHECK=1).
+      - name: Install Playwright chromium
+        run: pnpm run ci:playwright:chromium
+
       - name: Run release dry-run
         run: pnpm run release:dry-run -- --full
 
@@ -144,9 +149,11 @@ jobs:
 
           seen_angular=0
           seen_pdf=0
+          # Absolute paths: pnpm publish re-resolves a relative tarball path
+          # from a different working directory and misreads it as a git spec.
           {
             echo 'HELL_RELEASE_TARBALLS<<EOF'
-            find release-package -type f -name '*.tgz' | sort
+            find "$PWD/release-package" -type f -name '*.tgz' | sort
             echo 'EOF'
           } >> "$GITHUB_ENV"
 
@@ -165,7 +172,7 @@ jobs:
                 exit 1
                 ;;
             esac
-          done < <(find release-package -type f -name '*.tgz' | sort)
+          done < <(find "$PWD/release-package" -type f -name '*.tgz' | sort)
 
           test "$seen_angular" = "1"
           test "$seen_pdf" = "1"
