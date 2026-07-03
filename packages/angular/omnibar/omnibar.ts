@@ -37,7 +37,7 @@ import {
   type HellSearchResult,
   type HellSearchSource,
 } from '@hell-ui/angular/core';
-import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
+import { hellCreateLabels } from '@hell-ui/angular/core';
 import { NgpInput } from 'ng-primitives/input';
 import { HellSearch, HellSearchClear } from '@hell-ui/angular/search';
 import { HellSkeleton } from '@hell-ui/angular/skeleton';
@@ -47,7 +47,25 @@ import {
   matchHotkey,
 } from '@hell-ui/angular/internal/hotkeys';
 import { HellOmnibarRuntime } from './omnibar.runtime';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import type { InjectionToken, Provider } from '@angular/core';
+
+/** Built-in accessibility labels owned by the omnibar entry point. */
+export interface HellOmnibarLabels {
+  readonly clearSearch: string;
+}
+
+const HELL_OMNIBAR_LABELS_CONTRACT = hellCreateLabels<HellOmnibarLabels>('HELL_OMNIBAR_LABELS', {
+  clearSearch: 'Clear search',
+});
+
+/** Injection token resolving to the effective omnibar labels. */
+export const HELL_OMNIBAR_LABELS: InjectionToken<HellOmnibarLabels> = HELL_OMNIBAR_LABELS_CONTRACT.token;
+
+/** Override any subset of the omnibar labels for an injector scope. */
+export function provideHellOmnibarLabels(overrides: Partial<HellOmnibarLabels>): Provider {
+  return HELL_OMNIBAR_LABELS_CONTRACT.provide(overrides);
+}
 
 /**
  * Advanced contract implemented by omnibar item directives. Custom items can
@@ -111,6 +129,7 @@ const HELL_OMNIBAR_OVERLAY_POSITIONS: ConnectedPosition[] = [
   },
 ];
 
+/** Public parts of the HellOmnibar module, styleable through its Part Style Map. */
 export type HellOmnibarPart =
   | 'root'
   | 'control'
@@ -125,42 +144,67 @@ export type HellOmnibarPart =
   | 'skeletonText'
   | 'empty';
 
+/** Part Style Map accepted by the HellOmnibar `ui` input. */
 export type HellOmnibarUi = HellUi<HellOmnibarPart>;
 
+/** Public parts of the HellOmnibarPanel module, styleable through its Part Style Map. */
 export type HellOmnibarPanelPart = 'root';
+/** Part Style Map accepted by the HellOmnibarPanel `ui` input. */
 export type HellOmnibarPanelUi = HellUi<HellOmnibarPanelPart>;
 
+/** Public parts of the HellOmnibarGroup module, styleable through its Part Style Map. */
 export type HellOmnibarGroupPart = 'root';
+/** Part Style Map accepted by the HellOmnibarGroup `ui` input. */
 export type HellOmnibarGroupUi = HellUi<HellOmnibarGroupPart>;
 
+/** Public parts of the HellOmnibarGroupLabel module, styleable through its Part Style Map. */
 export type HellOmnibarGroupLabelPart = 'root';
+/** Part Style Map accepted by the HellOmnibarGroupLabel `ui` input. */
 export type HellOmnibarGroupLabelUi = HellUi<HellOmnibarGroupLabelPart>;
 
+/** Public parts of the HellOmnibarItem module, styleable through its Part Style Map. */
 export type HellOmnibarItemPart = 'root';
+/** Part Style Map accepted by the HellOmnibarItem `ui` input. */
 export type HellOmnibarItemUi = HellUi<HellOmnibarItemPart>;
 
+/** Public parts of the HellOmnibarItemIcon module, styleable through its Part Style Map. */
 export type HellOmnibarItemIconPart = 'root';
+/** Part Style Map accepted by the HellOmnibarItemIcon `ui` input. */
 export type HellOmnibarItemIconUi = HellUi<HellOmnibarItemIconPart>;
 
+/** Public parts of the HellOmnibarItemText module, styleable through its Part Style Map. */
 export type HellOmnibarItemTextPart = 'root';
+/** Part Style Map accepted by the HellOmnibarItemText `ui` input. */
 export type HellOmnibarItemTextUi = HellUi<HellOmnibarItemTextPart>;
 
+/** Public parts of the HellOmnibarItemSubtext module, styleable through its Part Style Map. */
 export type HellOmnibarItemSubtextPart = 'root';
+/** Part Style Map accepted by the HellOmnibarItemSubtext `ui` input. */
 export type HellOmnibarItemSubtextUi = HellUi<HellOmnibarItemSubtextPart>;
 
+/** Public parts of the HellOmnibarItemTrailing module, styleable through its Part Style Map. */
 export type HellOmnibarItemTrailingPart = 'root';
+/** Part Style Map accepted by the HellOmnibarItemTrailing `ui` input. */
 export type HellOmnibarItemTrailingUi = HellUi<HellOmnibarItemTrailingPart>;
 
+/** Public parts of the HellOmnibarChip module, styleable through its Part Style Map. */
 export type HellOmnibarChipPart = 'root';
+/** Part Style Map accepted by the HellOmnibarChip `ui` input. */
 export type HellOmnibarChipUi = HellUi<HellOmnibarChipPart>;
 
+/** Public parts of the HellOmnibarChipRemove module, styleable through its Part Style Map. */
 export type HellOmnibarChipRemovePart = 'root';
+/** Part Style Map accepted by the HellOmnibarChipRemove `ui` input. */
 export type HellOmnibarChipRemoveUi = HellUi<HellOmnibarChipRemovePart>;
 
+/** Public parts of the HellOmnibarActionsStrip module, styleable through its Part Style Map. */
 export type HellOmnibarActionsStripPart = 'root';
+/** Part Style Map accepted by the HellOmnibarActionsStrip `ui` input. */
 export type HellOmnibarActionsStripUi = HellUi<HellOmnibarActionsStripPart>;
 
+/** Public parts of the HellOmnibarAction module, styleable through its Part Style Map. */
 export type HellOmnibarActionPart = 'root';
+/** Part Style Map accepted by the HellOmnibarAction `ui` input. */
 export type HellOmnibarActionUi = HellUi<HellOmnibarActionPart>;
 
 const HELL_OMNIBAR_RECIPE = {
@@ -309,7 +353,7 @@ const HELL_OMNIBAR_ACTION_RECIPE = {
         data-slot="clear"
         [class]="part('clear')"
         type="button"
-        [attr.aria-label]="labels.omnibar.clearSearch"
+        [attr.aria-label]="labels.clearSearch"
         [attr.data-empty]="value() ? null : ''"
         [attr.tabindex]="isOpen() ? -1 : null"
         (click)="onClearClick($event)"
@@ -395,10 +439,16 @@ const HELL_OMNIBAR_ACTION_RECIPE = {
   `,
   exportAs: 'hellOmnibar',
 })
-export class HellOmnibar extends HellPartStyleable<HellOmnibarPart> implements HellFloatingScope {
-  protected readonly recipe = HELL_OMNIBAR_RECIPE;
-  protected readonly defaultUiPart = 'root';
-  protected readonly labels = inject<HellLabels>(HELL_LABELS);
+export class HellOmnibar implements HellFloatingScope {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellOmnibarPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellOmnibarPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_OMNIBAR_RECIPE,
+  });
+  protected readonly labels = inject(HELL_OMNIBAR_LABELS);
   private readonly overlay = inject(Overlay);
   private readonly ngZone = inject(NgZone);
 
@@ -534,7 +584,6 @@ export class HellOmnibar extends HellPartStyleable<HellOmnibarPart> implements H
   private overlayGeometryFrame: number | null = null;
 
   constructor() {
-    super();
     effect(() => {
       // Reset active when items shift or query changes.
       this.value();
@@ -932,9 +981,15 @@ export class HellOmnibar extends HellPartStyleable<HellOmnibarPart> implements H
   selector: '[hellOmnibarPanel]',
   host: { '[class]': "part('root')", 'data-slot': 'root' },
 })
-export class HellOmnibarPanel extends HellPartStyleable<HellOmnibarPanelPart> {
-  protected readonly recipe = HELL_OMNIBAR_PANEL_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellOmnibarPanel {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellOmnibarPanelPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellOmnibarPanelPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_OMNIBAR_PANEL_RECIPE,
+  });
 }
 
 @Directive({
@@ -946,9 +1001,15 @@ export class HellOmnibarPanel extends HellPartStyleable<HellOmnibarPanelPart> {
     '[attr.aria-label]': 'label() || null',
   },
 })
-export class HellOmnibarGroup extends HellPartStyleable<HellOmnibarGroupPart> {
-  protected readonly recipe = HELL_OMNIBAR_GROUP_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellOmnibarGroup {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellOmnibarGroupPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellOmnibarGroupPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_OMNIBAR_GROUP_RECIPE,
+  });
   readonly label = input<string>('');
 }
 
@@ -956,9 +1017,15 @@ export class HellOmnibarGroup extends HellPartStyleable<HellOmnibarGroupPart> {
   selector: '[hellOmnibarGroupLabel]',
   host: { '[class]': "part('root')", 'data-slot': 'root', role: 'presentation' },
 })
-export class HellOmnibarGroupLabel extends HellPartStyleable<HellOmnibarGroupLabelPart> {
-  protected readonly recipe = HELL_OMNIBAR_GROUP_LABEL_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellOmnibarGroupLabel {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellOmnibarGroupLabelPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellOmnibarGroupLabelPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_OMNIBAR_GROUP_LABEL_RECIPE,
+  });
 }
 
 /**
@@ -984,12 +1051,15 @@ export class HellOmnibarGroupLabel extends HellPartStyleable<HellOmnibarGroupLab
     '(mousemove)': 'onMouseMove()',
   },
 })
-export class HellOmnibarItem<T = unknown>
-  extends HellPartStyleable<HellOmnibarItemPart>
-  implements HellOmnibarRegisteredItem
-{
-  protected readonly recipe = HELL_OMNIBAR_ITEM_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellOmnibarItem<T = unknown> implements HellOmnibarRegisteredItem {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellOmnibarItemPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellOmnibarItemPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_OMNIBAR_ITEM_RECIPE,
+  });
 
   readonly itemValue = input<T>(undefined as T, { alias: 'value' });
   readonly closeOnSelect = input(true, { transform: booleanAttribute });
@@ -1004,7 +1074,6 @@ export class HellOmnibarItem<T = unknown>
   readonly itemId = `hell-omnibar-item-${++nextOmnibarItemId}`;
 
   constructor() {
-    super();
     this.omnibar.registerItem(this);
     inject(DestroyRef).onDestroy(() => this.omnibar.unregisterItem(this));
   }
@@ -1042,45 +1111,75 @@ export class HellOmnibarItem<T = unknown>
   selector: '[hellOmnibarItemIcon]',
   host: { '[class]': "part('root')", 'data-slot': 'root', 'aria-hidden': 'true' },
 })
-export class HellOmnibarItemIcon extends HellPartStyleable<HellOmnibarItemIconPart> {
-  protected readonly recipe = HELL_OMNIBAR_ITEM_ICON_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellOmnibarItemIcon {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellOmnibarItemIconPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellOmnibarItemIconPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_OMNIBAR_ITEM_ICON_RECIPE,
+  });
 }
 
 @Directive({
   selector: '[hellOmnibarItemText]',
   host: { '[class]': "part('root')", 'data-slot': 'root' },
 })
-export class HellOmnibarItemText extends HellPartStyleable<HellOmnibarItemTextPart> {
-  protected readonly recipe = HELL_OMNIBAR_ITEM_TEXT_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellOmnibarItemText {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellOmnibarItemTextPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellOmnibarItemTextPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_OMNIBAR_ITEM_TEXT_RECIPE,
+  });
 }
 
 @Directive({
   selector: '[hellOmnibarItemSubtext]',
   host: { '[class]': "part('root')", 'data-slot': 'root' },
 })
-export class HellOmnibarItemSubtext extends HellPartStyleable<HellOmnibarItemSubtextPart> {
-  protected readonly recipe = HELL_OMNIBAR_ITEM_SUBTEXT_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellOmnibarItemSubtext {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellOmnibarItemSubtextPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellOmnibarItemSubtextPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_OMNIBAR_ITEM_SUBTEXT_RECIPE,
+  });
 }
 
 @Directive({
   selector: '[hellOmnibarItemTrailing]',
   host: { '[class]': "part('root')", 'data-slot': 'root' },
 })
-export class HellOmnibarItemTrailing extends HellPartStyleable<HellOmnibarItemTrailingPart> {
-  protected readonly recipe = HELL_OMNIBAR_ITEM_TRAILING_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellOmnibarItemTrailing {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellOmnibarItemTrailingPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellOmnibarItemTrailingPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_OMNIBAR_ITEM_TRAILING_RECIPE,
+  });
 }
 
 @Directive({
   selector: '[hellOmnibarChip]',
   host: { '[class]': "part('root')", 'data-slot': 'root' },
 })
-export class HellOmnibarChip extends HellPartStyleable<HellOmnibarChipPart> {
-  protected readonly recipe = HELL_OMNIBAR_CHIP_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellOmnibarChip {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellOmnibarChipPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellOmnibarChipPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_OMNIBAR_CHIP_RECIPE,
+  });
 }
 
 @Directive({
@@ -1092,9 +1191,15 @@ export class HellOmnibarChip extends HellPartStyleable<HellOmnibarChipPart> {
     '[attr.tabindex]': 'tabIndex()',
   },
 })
-export class HellOmnibarChipRemove extends HellPartStyleable<HellOmnibarChipRemovePart> {
-  protected readonly recipe = HELL_OMNIBAR_CHIP_REMOVE_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellOmnibarChipRemove {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellOmnibarChipRemovePart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellOmnibarChipRemovePart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_OMNIBAR_CHIP_REMOVE_RECIPE,
+  });
 
   private readonly omnibar = inject(HellOmnibar, { optional: true });
 
@@ -1112,9 +1217,15 @@ export class HellOmnibarChipRemove extends HellPartStyleable<HellOmnibarChipRemo
     'aria-orientation': 'horizontal',
   },
 })
-export class HellOmnibarActionsStrip extends HellPartStyleable<HellOmnibarActionsStripPart> {
-  protected readonly recipe = HELL_OMNIBAR_ACTIONS_STRIP_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellOmnibarActionsStrip {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellOmnibarActionsStripPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellOmnibarActionsStripPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_OMNIBAR_ACTIONS_STRIP_RECIPE,
+  });
 }
 
 /** Action button rendered in the actions strip. */
@@ -1129,12 +1240,15 @@ export class HellOmnibarActionsStrip extends HellPartStyleable<HellOmnibarAction
     '(keydown)': 'onKeyDown($event)',
   },
 })
-export class HellOmnibarAction
-  extends HellPartStyleable<HellOmnibarActionPart>
-  implements HellOmnibarRegisteredAction
-{
-  protected readonly recipe = HELL_OMNIBAR_ACTION_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellOmnibarAction implements HellOmnibarRegisteredAction {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellOmnibarActionPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellOmnibarActionPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_OMNIBAR_ACTION_RECIPE,
+  });
 
   readonly pressed = input(false, { transform: booleanAttribute });
 
@@ -1142,7 +1256,6 @@ export class HellOmnibarAction
   private readonly omnibar = inject(HellOmnibar);
 
   constructor() {
-    super();
     this.omnibar.registerAction(this);
     inject(DestroyRef).onDestroy(() => this.omnibar.unregisterAction(this));
   }

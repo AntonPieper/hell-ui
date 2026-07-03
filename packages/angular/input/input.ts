@@ -1,16 +1,22 @@
 import { Directive, booleanAttribute, input } from '@angular/core';
 import { NgpInput } from 'ng-primitives/input';
 import { NgpTextarea } from 'ng-primitives/textarea';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { HellSize } from '@hell-ui/angular/core';
 
+/** Public parts of the HellInput module, styleable through its Part Style Map. */
 export type HellInputPart = 'root';
+/** Part Style Map accepted by the HellInput `ui` input. */
 export type HellInputUi = HellUi<HellInputPart>;
 
+/** Public parts of the HellNativeSelect module, styleable through its Part Style Map. */
 export type HellNativeSelectPart = 'root';
+/** Part Style Map accepted by the HellNativeSelect `ui` input. */
 export type HellNativeSelectUi = HellUi<HellNativeSelectPart>;
 
+/** Public parts of the HellTextarea module, styleable through its Part Style Map. */
 export type HellTextareaPart = 'root';
+/** Part Style Map accepted by the HellTextarea `ui` input. */
 export type HellTextareaUi = HellUi<HellTextareaPart>;
 
 const HELL_FORM_CONTROL_STATE_CLASSES =
@@ -31,6 +37,7 @@ const HELL_TEXTAREA_RECIPE = {
   root: `block min-h-[calc(var(--spacing-hell-control-md)*2)] w-full resize-y rounded-hell-md border border-hell-border bg-hell-surface-elevated px-hell-4 py-hell-3 font-[inherit] text-[13px] leading-normal text-hell-foreground ${HELL_FORM_CONTROL_STATE_CLASSES} ${HELL_TEXT_CONTROL_PLACEHOLDER_CLASSES} data-[size=sm]:min-h-[calc(var(--spacing-hell-control-sm)*2)] data-[size=sm]:px-hell-3 data-[size=sm]:py-hell-2 data-[size=sm]:text-xs data-[size=lg]:min-h-[calc(var(--spacing-hell-control-lg)*2)] data-[size=lg]:px-hell-5 data-[size=lg]:py-hell-4 data-[size=lg]:text-sm`,
 } satisfies HellRecipe<HellTextareaPart>;
 
+/** Styled text input built on `NgpInput`. Sizes via `size`; error styling via `invalid`. */
 @Directive({
   selector: 'input[hellInput]',
   hostDirectives: [{ directive: NgpInput, inputs: ['disabled', 'id'] }],
@@ -41,14 +48,23 @@ const HELL_TEXTAREA_RECIPE = {
     '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
 })
-export class HellInput extends HellPartStyleable<HellInputPart> {
-  protected readonly recipe = HELL_INPUT_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellInput {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellInputPart>>(undefined, { alias: 'ui' });
 
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellInputPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_INPUT_RECIPE,
+  });
+
+  /** Control size; `sm`, `md`, or `lg`. */
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
+  /** Marks the control invalid for styling and `aria-invalid`. */
   readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
 }
 
+/** Styled native `<select>` built on `NgpInput`, with a CSS-drawn chevron. */
 @Directive({
   selector: 'select[hellNativeSelect]',
   hostDirectives: [{ directive: NgpInput, inputs: ['disabled', 'id'] }],
@@ -59,14 +75,23 @@ export class HellInput extends HellPartStyleable<HellInputPart> {
     '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
 })
-export class HellNativeSelect extends HellPartStyleable<HellNativeSelectPart> {
-  protected readonly recipe = HELL_NATIVE_SELECT_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellNativeSelect {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellNativeSelectPart>>(undefined, { alias: 'ui' });
 
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellNativeSelectPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_NATIVE_SELECT_RECIPE,
+  });
+
+  /** Control size; `sm`, `md`, or `lg`. */
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
+  /** Marks the control invalid for styling and `aria-invalid`. */
   readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
 }
 
+/** Styled resizable `<textarea>` built on `NgpTextarea`. */
 @Directive({
   selector: 'textarea[hellTextarea]',
   hostDirectives: [{ directive: NgpTextarea, inputs: ['disabled', 'id'] }],
@@ -77,10 +102,18 @@ export class HellNativeSelect extends HellPartStyleable<HellNativeSelectPart> {
     '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
 })
-export class HellTextarea extends HellPartStyleable<HellTextareaPart> {
-  protected readonly recipe = HELL_TEXTAREA_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellTextarea {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellTextareaPart>>(undefined, { alias: 'ui' });
 
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellTextareaPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_TEXTAREA_RECIPE,
+  });
+
+  /** Control size; `sm`, `md`, or `lg`. */
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
+  /** Marks the control invalid for styling and `aria-invalid`. */
   readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
 }

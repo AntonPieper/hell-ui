@@ -27,13 +27,13 @@ behind scoped entry points. The PDF viewer lives in the separate
 ## Install
 
 ```bash
-pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom @ng-icons/core rxjs tailwindcss
-# add @ng-icons/font-awesome when you use icon-backed entries such as date-picker
+pnpm add @hell-ui/angular @angular/forms ng-primitives @angular/cdk @floating-ui/dom rxjs tailwindcss
+# add @ng-icons/core and @ng-icons/font-awesome when you use icon-backed entries such as date-picker
 ```
 
 Feature peers remain optional at runtime, but package peer metadata is package-wide: install the core peer group for any package entry point, then add tier peers only for entry points and styles you import. A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`; install any missing peers explicitly.
 
-`@floating-ui/dom` is required by `ng-primitives`; install it explicitly with the primitive stack. `@angular/router` is an optional peer only for `ng-primitives/dialog`; install it when importing Hell dialog.
+`@angular/forms`, `@angular/cdk`, and `@floating-ui/dom` are strict peers of `ng-primitives`; install them explicitly with the primitive stack. `@ng-icons/core` is an optional peer needed only by icon-backed entry points. `@angular/router` is an optional peer only for `ng-primitives/dialog`; install it when importing Hell dialog.
 
 ### Peer dependency tiers
 
@@ -41,9 +41,9 @@ Package-consumer scenarios assert these peer groups with strict peer installs. C
 
 | Tier | Entry points / scenarios | Peer group asserted |
 | --- | --- | --- |
-| Core | `@hell-ui/angular`, `/core`, `/testing`; `root-core`, `core`, `testing` | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `@ng-icons/core`, `ng-primitives`, `rxjs` |
-| Primitive | Narrow primitives such as `/button`, `/pagination`, `/select`, and `/icon`; `button-ui`, `button`, `pagination`, `primitive-icons-css` | Core peers. Add `tailwindcss` when importing primitive CSS; add `@ng-icons/font-awesome` for icon-backed entries. |
-| Composite | Narrow composite entry points such as `/app-shell`, `/resizable`, `/split-view`, `/dialog`, `/omnibar`, `/toast`, and `/audio-player`; `composite-css`, `app-shell`, `resizable`, `split-view`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Icon-backed composites also assert optional `@ng-icons/font-awesome`; Dialog also needs the optional router peer required by `ng-primitives/dialog`. |
+| Core | `@hell-ui/angular`, `/core`, `/testing`; `root-core`, `core`, `testing` | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/cdk`, `@floating-ui/dom`, `ng-primitives`, `rxjs` |
+| Primitive | Narrow primitives such as `/button`, `/pagination`, `/select`, and `/icon`; `button-ui`, `button`, `pagination`, `primitive-icons-css` | Core peers. Add `tailwindcss` when importing primitive CSS; add `@ng-icons/core` and `@ng-icons/font-awesome` for icon-backed entries. |
+| Composite | Narrow composite entry points such as `/app-shell`, `/resizable`, `/split-view`, `/dialog`, `/omnibar`, `/toast`, and `/audio-player`; `composite-css`, `app-shell`, `resizable`, `split-view`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Icon-backed composites also assert optional `@ng-icons/core` and `@ng-icons/font-awesome`; Dialog also needs the optional router peer required by `ng-primitives/dialog`. |
 | Audio transcript | `/features/audio-transcript`; `audio-transcript` | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled. |
 | Table primitives | `/table`; `table`, `no-legacy-alias` | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack Table, or TanStack Virtual peers. The negative scenario proves removed legacy table aliases and CSS aliases stay unavailable. |
 | TanStack table shell | `/table-tanstack`; `table-tanstack` | Core peers plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`. Root, button, and `/table` scenarios prove TanStack Table is not installed unless this shell is imported. |
@@ -64,17 +64,22 @@ Every exported API belongs to one documented category:
 - `Deprecated`: compatibility alias with a preferred replacement. API comments must include `@deprecated`, docs must name the replacement, and removal needs an explicit release decision.
 - `Internal`: implementation detail, not a consumer import path. Public API files must not export from `/internal/`, `/adapters/`, or metadata-declared internal directories unless the architecture allowlist names the exception and rationale.
 
-The API report gate currently covers stable entry points
-`@hell-ui/angular`, `@hell-ui/angular/core`, `@hell-ui/angular/input`,
-`@hell-ui/angular/dialpad`, and `@hell-ui/angular/testing`, plus one documented
-internal exception: `@hell-ui/angular/internal/hotkeys` is tracked to guard
-accidental shape drift, but it is not promoted to Stable.
+The API report gate covers every non-experimental entry point (root, `/core`,
+`/testing`, and all narrow primitive, composite, and table entry points), plus
+one documented internal exception: `@hell-ui/angular/internal/hotkeys` is
+tracked to guard accidental shape drift, but it is not promoted to Stable.
+Four entry points are temporarily excluded because `@microsoft/api-extractor`
+crashes analyzing their flattened declarations (`/audio-player`, `/combobox`,
+`/date-input`, `/select`); the blocked list lives in
+`tools/release-evidence-policy.mjs` as `apiReportBlockedEntrypoints` and is
+re-probed on extractor upgrades. Experimental surfaces
+(`/features/*`, `/table-tanstack*`) stay out of stable reports by policy.
 
 | Surface | Category | Browser/SSR notes |
 |---|---|---|
 | Root/core (`@hell-ui/angular`, `/core`) | Stable | Lightweight contracts; no composite or heavy feature exports |
-| Report-guarded primitives (`/input`, `/dialpad`) | Stable | SSR-safe unless a primitive's own docs say otherwise |
-| Other narrow primitive entry points | Beta until promoted into the API report policy | SSR-safe unless a primitive's own docs say otherwise |
+| Report-guarded narrow primitives | Stable | SSR-safe unless a primitive's own docs say otherwise |
+| Extractor-blocked entry points (`/audio-player`, `/combobox`, `/date-input`, `/select`) | Beta until the extractor defect clears and they rejoin the API report policy | SSR-safe unless a primitive's own docs say otherwise |
 | Composites (narrow composite entry points) | Beta | Browser-first surfaces can use `window`/`document` and global listeners for overlays |
 | Table primitives (`@hell-ui/angular/table`) | Beta | Optional peer; uses `ResizeObserver` for table sizing |
 | TanStack table shell (`@hell-ui/angular/table-tanstack`, `/table-tanstack/virtual`) | Experimental | Caller-owned TanStack Table remains the engine; Hell owns shell chrome, styling, projection regions, status views, controls, and the optional TanStack Virtual body strategy |

@@ -17,7 +17,7 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import {
   hellContainsFloatingTarget,
   hellRegisterFloatingHost,
@@ -45,24 +45,37 @@ export type HellComboboxValue<T = unknown> =
 export type HellComboboxDisplayWith<T = unknown> = (value: T) => string;
 export type HellComboboxCompareWith<T = unknown> = (a: T, b: T) => boolean;
 
+/** Public parts of the HellCombobox module, styleable through its Part Style Map. */
 export type HellComboboxPart = 'root';
+/** Part Style Map accepted by the HellCombobox `ui` input. */
 export type HellComboboxUi = HellUi<HellComboboxPart>;
 
+/** Public parts of the HellComboboxInput module, styleable through its Part Style Map. */
 export type HellComboboxInputPart = 'root';
+/** Part Style Map accepted by the HellComboboxInput `ui` input. */
 export type HellComboboxInputUi = HellUi<HellComboboxInputPart>;
 
+/** Public parts of the HellComboboxButton module, styleable through its Part Style Map. */
 export type HellComboboxButtonPart = 'root';
+/** Part Style Map accepted by the HellComboboxButton `ui` input. */
 export type HellComboboxButtonUi = HellUi<HellComboboxButtonPart>;
 
+/** Public parts of the HellComboboxDropdown module, styleable through its Part Style Map. */
 export type HellComboboxDropdownPart = 'root';
+/** Part Style Map accepted by the HellComboboxDropdown `ui` input. */
 export type HellComboboxDropdownUi = HellUi<HellComboboxDropdownPart>;
 
+/** Public parts of the HellComboboxOption module, styleable through its Part Style Map. */
 export type HellComboboxOptionPart = 'root';
+/** Part Style Map accepted by the HellComboboxOption `ui` input. */
 export type HellComboboxOptionUi = HellUi<HellComboboxOptionPart>;
 
+/** Public parts of the HellComboboxEmpty module, styleable through its Part Style Map. */
 export type HellComboboxEmptyPart = 'root';
+/** Part Style Map accepted by the HellComboboxEmpty `ui` input. */
 export type HellComboboxEmptyUi = HellUi<HellComboboxEmptyPart>;
 
+/** Public parts of the HellComboboxBasic module, styleable through its Part Style Map. */
 export type HellComboboxBasicPart =
   | 'root'
   | 'control'
@@ -71,6 +84,7 @@ export type HellComboboxBasicPart =
   | 'dropdown'
   | 'option'
   | 'empty';
+/** Part Style Map accepted by the HellComboboxBasic `ui` input. */
 export type HellComboboxBasicUi = HellUi<HellComboboxBasicPart>;
 
 const HELL_COMBOBOX_RECIPE = {
@@ -147,12 +161,15 @@ const HELL_COMBOBOX_BASIC_RECIPE = {
     '(focusout)': 'markControlTouched($event)',
   },
 })
-export class HellCombobox<T = unknown>
-  extends HellPartStyleable<HellComboboxPart>
-  implements ControlValueAccessor
-{
-  protected readonly recipe = HELL_COMBOBOX_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellCombobox<T = unknown> implements ControlValueAccessor {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellComboboxPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellComboboxPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_COMBOBOX_RECIPE,
+  });
 
   private readonly combobox = inject(NgpCombobox);
   private readonly comboboxState = injectComboboxState<NgpCombobox>();
@@ -163,7 +180,6 @@ export class HellCombobox<T = unknown>
   private dropdownOpen = false;
 
   constructor() {
-    super();
     const valueSub = this.combobox.valueChange.subscribe((value) => {
       this.valueAccessor.emitValue(this.normalizeValue(value));
     });
@@ -250,9 +266,15 @@ export class HellCombobox<T = unknown>
     'data-slot': 'root',
   },
 })
-export class HellComboboxInput extends HellPartStyleable<HellComboboxInputPart> {
-  protected readonly recipe = HELL_COMBOBOX_INPUT_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellComboboxInput {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellComboboxInputPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellComboboxInputPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_COMBOBOX_INPUT_RECIPE,
+  });
 }
 
 /** Toggle button for opening and closing the combobox dropdown. */
@@ -264,9 +286,15 @@ export class HellComboboxInput extends HellPartStyleable<HellComboboxInputPart> 
     'data-slot': 'root',
   },
 })
-export class HellComboboxButton extends HellPartStyleable<HellComboboxButtonPart> {
-  protected readonly recipe = HELL_COMBOBOX_BUTTON_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellComboboxButton {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellComboboxButtonPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellComboboxButtonPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_COMBOBOX_BUTTON_RECIPE,
+  });
 }
 
 /**
@@ -283,19 +311,21 @@ export class HellComboboxButton extends HellPartStyleable<HellComboboxButtonPart
     '(focusout)': 'markControlTouched($event)',
   },
 })
-export class HellComboboxDropdown
-  extends HellPartStyleable<HellComboboxDropdownPart>
-  implements OnDestroy
-{
-  protected readonly recipe = HELL_COMBOBOX_DROPDOWN_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellComboboxDropdown implements OnDestroy {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellComboboxDropdownPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellComboboxDropdownPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_COMBOBOX_DROPDOWN_RECIPE,
+  });
 
   private readonly dropdown = inject(NgpComboboxDropdown);
   private readonly combobox = inject(HellCombobox, { optional: true });
   private readonly basicCombobox = inject(HellComboboxBasic, { optional: true });
 
   constructor() {
-    super();
     hellRegisterFloatingHost();
     if (this.combobox) {
       this.combobox.registerDropdown(this.dropdown.elementRef.nativeElement);
@@ -354,9 +384,15 @@ export class HellComboboxPortal {}
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
   },
 })
-export class HellComboboxOption extends HellPartStyleable<HellComboboxOptionPart> {
-  protected readonly recipe = HELL_COMBOBOX_OPTION_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellComboboxOption {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellComboboxOptionPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellComboboxOptionPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_COMBOBOX_OPTION_RECIPE,
+  });
 
   private readonly option = inject(NgpComboboxOption);
   protected readonly disabled = computed(() => this.option.disabled());
@@ -369,9 +405,15 @@ export class HellComboboxOption extends HellPartStyleable<HellComboboxOptionPart
     'data-slot': 'root',
   },
 })
-export class HellComboboxEmpty extends HellPartStyleable<HellComboboxEmptyPart> {
-  protected readonly recipe = HELL_COMBOBOX_EMPTY_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellComboboxEmpty {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellComboboxEmptyPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellComboboxEmptyPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_COMBOBOX_EMPTY_RECIPE,
+  });
 }
 
 /**
@@ -456,12 +498,15 @@ export class HellComboboxEmpty extends HellPartStyleable<HellComboboxEmptyPart> 
     </div>
   `,
 })
-export class HellComboboxBasic<T = unknown>
-  extends HellPartStyleable<HellComboboxBasicPart>
-  implements ControlValueAccessor
-{
-  protected readonly recipe = HELL_COMBOBOX_BASIC_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellComboboxBasic<T = unknown> implements ControlValueAccessor {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellComboboxBasicPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellComboboxBasicPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_COMBOBOX_BASIC_RECIPE,
+  });
 
   readonly options = input<readonly T[]>([]);
   readonly multiple = input(false, { transform: booleanAttribute });

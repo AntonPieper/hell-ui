@@ -1,10 +1,12 @@
 import { Directive, ElementRef, booleanAttribute, inject, input } from '@angular/core';
 import { NgpButton, injectButtonState } from 'ng-primitives/button';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { HellButtonVariant, HellSize } from '@hell-ui/angular/core';
 
+/** Public parts of the HellButton module, styleable through its Part Style Map. */
 export type HellButtonPart = 'root';
 
+/** Part Style Map accepted by the HellButton `ui` input. */
 export type HellButtonUi = HellUi<HellButtonPart>;
 
 const HELL_BUTTON_BASE_RECIPE =
@@ -72,16 +74,20 @@ const HELL_BUTTON_ICON_ONLY_RECIPE: Record<HellSize, string> = {
     '(keydown.enter)': 'preventDisabledAnchor($event)',
   },
 })
-export class HellButton extends HellPartStyleable<HellButtonPart> {
+export class HellButton {
   readonly variant = input<HellButtonVariant>('default');
   readonly size = input<HellSize>('md');
   readonly iconOnly = input(false, { transform: booleanAttribute });
   readonly block = input(false, { transform: booleanAttribute });
-  protected readonly defaultUiPart = 'root';
 
-  protected get recipe(): HellRecipe<HellButtonPart> {
-    return { root: this.rootRecipe() };
-  }
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellButtonPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellButtonPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: (): HellRecipe<HellButtonPart> => ({ root: this.rootRecipe() }),
+  });
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly buttonState = injectButtonState();

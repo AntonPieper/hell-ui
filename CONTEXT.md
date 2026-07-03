@@ -68,7 +68,8 @@ _Avoid_: Part Style Map, class override API.
 The consumer-facing Interface for changing a hell module's behavior, styling, and policy without forking or fighting the library. A good Customization Surface exposes the underlying settings consumers naturally want to adjust rather than mode switches or booleans that apply bundled presets.
 
 **Label Contract**
-The injectable text Interface for built-in accessibility labels and status strings. Defaults remain English, but consumers can replace labels through `provideHellLabels` instead of forking components or accepting hardcoded ARIA text.
+The injectable text Interface for built-in accessibility labels and status strings. Each Package Entry Point owns its label interface, English defaults, injection token, and `provideHell<Module>Labels` function (built on core's `hellCreateLabels` factory), so consumers replace labels per imported module instead of forking components or accepting hardcoded ARIA text. Core owns no aggregate label bag; a consumer bundle carries only the label strings of the entry points it imports.
+_Avoid_: Central `HellLabels` bag, `provideHellLabels`, cross-entry-point label registries.
 
 **Floating Interaction**
 Any interaction involving content rendered outside, beside, or above its logical host: menus, popovers, tooltips, dialogs, flyouts, selects, comboboxes, and omnibar child overlays.

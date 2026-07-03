@@ -17,7 +17,7 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms';
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import {
   hellContainsFloatingTarget,
   hellRegisterFloatingHost,
@@ -48,21 +48,32 @@ export type HellSelectFormValue<T = unknown> =
 export type HellSelectDisplayWith<T = unknown> = (value: T) => string;
 export type HellSelectCompareWith<T = unknown> = (a: T, b: T) => boolean;
 
+/** Public parts of the HellSelect module, styleable through its Part Style Map. */
 export type HellSelectPart = 'root';
+/** Part Style Map accepted by the HellSelect `ui` input. */
 export type HellSelectUi = HellUi<HellSelectPart>;
 
+/** Public parts of the HellSelectValue module, styleable through its Part Style Map. */
 export type HellSelectValuePart = 'root';
+/** Part Style Map accepted by the HellSelectValue `ui` input. */
 export type HellSelectValueUi = HellUi<HellSelectValuePart>;
 
+/** Public parts of the HellSelectPlaceholder module, styleable through its Part Style Map. */
 export type HellSelectPlaceholderPart = 'root';
+/** Part Style Map accepted by the HellSelectPlaceholder `ui` input. */
 export type HellSelectPlaceholderUi = HellUi<HellSelectPlaceholderPart>;
 
+/** Public parts of the HellSelectDropdown module, styleable through its Part Style Map. */
 export type HellSelectDropdownPart = 'root';
+/** Part Style Map accepted by the HellSelectDropdown `ui` input. */
 export type HellSelectDropdownUi = HellUi<HellSelectDropdownPart>;
 
+/** Public parts of the HellSelectOption module, styleable through its Part Style Map. */
 export type HellSelectOptionPart = 'root';
+/** Part Style Map accepted by the HellSelectOption `ui` input. */
 export type HellSelectOptionUi = HellUi<HellSelectOptionPart>;
 
+/** Public parts of the HellSelectBasic module, styleable through its Part Style Map. */
 export type HellSelectBasicPart =
   | 'root'
   | 'trigger'
@@ -70,6 +81,7 @@ export type HellSelectBasicPart =
   | 'placeholder'
   | 'dropdown'
   | 'option';
+/** Part Style Map accepted by the HellSelectBasic `ui` input. */
 export type HellSelectBasicUi = HellUi<HellSelectBasicPart>;
 
 const HELL_SELECT_RECIPE = {
@@ -137,12 +149,15 @@ const HELL_SELECT_BASIC_RECIPE = {
     '(focusout)': 'markControlTouched($event)',
   },
 })
-export class HellSelect<T = unknown>
-  extends HellPartStyleable<HellSelectPart>
-  implements ControlValueAccessor
-{
-  protected readonly recipe = HELL_SELECT_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellSelect<T = unknown> implements ControlValueAccessor {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellSelectPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellSelectPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_SELECT_RECIPE,
+  });
 
   private readonly select = inject(NgpSelect);
   private readonly selectState = injectSelectState<HellSelectFormValue<T>>();
@@ -153,7 +168,6 @@ export class HellSelect<T = unknown>
   private dropdownOpen = false;
 
   constructor() {
-    super();
     const valueSub = this.select.valueChange.subscribe((value) => {
       this.valueAccessor.emitValue(this.normalizeValue(value));
     });
@@ -238,9 +252,15 @@ export class HellSelect<T = unknown>
     'data-slot': 'root',
   },
 })
-export class HellSelectValue extends HellPartStyleable<HellSelectValuePart> {
-  protected readonly recipe = HELL_SELECT_VALUE_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellSelectValue {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellSelectValuePart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellSelectValuePart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_SELECT_VALUE_RECIPE,
+  });
 }
 
 @Directive({
@@ -250,9 +270,15 @@ export class HellSelectValue extends HellPartStyleable<HellSelectValuePart> {
     'data-slot': 'root',
   },
 })
-export class HellSelectPlaceholder extends HellPartStyleable<HellSelectPlaceholderPart> {
-  protected readonly recipe = HELL_SELECT_PLACEHOLDER_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellSelectPlaceholder {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellSelectPlaceholderPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellSelectPlaceholderPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_SELECT_PLACEHOLDER_RECIPE,
+  });
 }
 
 @Directive({
@@ -264,19 +290,21 @@ export class HellSelectPlaceholder extends HellPartStyleable<HellSelectPlacehold
     '(focusout)': 'markControlTouched($event)',
   },
 })
-export class HellSelectDropdown
-  extends HellPartStyleable<HellSelectDropdownPart>
-  implements OnDestroy
-{
-  protected readonly recipe = HELL_SELECT_DROPDOWN_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellSelectDropdown implements OnDestroy {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellSelectDropdownPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellSelectDropdownPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_SELECT_DROPDOWN_RECIPE,
+  });
 
   private readonly dropdownElement = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly select = inject(HellSelect, { optional: true });
   private readonly basicSelect = inject(HellSelectBasic, { optional: true });
 
   constructor() {
-    super();
     hellRegisterFloatingHost();
     if (this.select) {
       this.select.registerDropdown(this.dropdownElement.nativeElement);
@@ -320,9 +348,15 @@ export class HellSelectPortal {}
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
   },
 })
-export class HellSelectOption extends HellPartStyleable<HellSelectOptionPart> {
-  protected readonly recipe = HELL_SELECT_OPTION_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellSelectOption {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellSelectOptionPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellSelectOptionPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_SELECT_OPTION_RECIPE,
+  });
 
   private readonly option = inject(NgpSelectOption);
   protected readonly disabled = computed(() => this.option.disabled());
@@ -396,12 +430,15 @@ export class HellSelectOption extends HellPartStyleable<HellSelectOptionPart> {
     </button>
   `,
 })
-export class HellSelectBasic<T = unknown>
-  extends HellPartStyleable<HellSelectBasicPart>
-  implements ControlValueAccessor
-{
-  protected readonly recipe = HELL_SELECT_BASIC_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellSelectBasic<T = unknown> implements ControlValueAccessor {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellSelectBasicPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellSelectBasicPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_SELECT_BASIC_RECIPE,
+  });
 
   readonly options = input<readonly T[]>([]);
   readonly multiple = input(false, { transform: booleanAttribute });
@@ -454,7 +491,6 @@ export class HellSelectBasic<T = unknown>
   });
 
   constructor() {
-    super();
     hellSyncFormFieldLabels(this.formField, this.triggerAriaLabelledby);
     hellSyncFormFieldDescriptions(this.formField, this.triggerAriaDescribedby);
   }

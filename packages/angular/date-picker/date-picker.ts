@@ -30,8 +30,32 @@ import {
 } from 'ng-primitives/date-picker';
 import { injectButtonState } from 'ng-primitives/button';
 import { HellIcon } from '@hell-ui/angular/icon';
-import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import type { InjectionToken, Provider } from '@angular/core';
+
+/** Built-in accessibility labels owned by the date picker entry point. */
+export interface HellDatePickerLabels {
+  readonly previousYear: string;
+  readonly nextYear: string;
+  readonly previousMonth: string;
+  readonly nextMonth: string;
+}
+
+const HELL_DATE_PICKER_LABELS_CONTRACT = hellCreateLabels<HellDatePickerLabels>('HELL_DATE_PICKER_LABELS', {
+  previousYear: 'Previous year',
+  nextYear: 'Next year',
+  previousMonth: 'Previous month',
+  nextMonth: 'Next month',
+});
+
+/** Injection token resolving to the effective date picker labels. */
+export const HELL_DATE_PICKER_LABELS: InjectionToken<HellDatePickerLabels> = HELL_DATE_PICKER_LABELS_CONTRACT.token;
+
+/** Override any subset of the date picker labels for an injector scope. */
+export function provideHellDatePickerLabels(overrides: Partial<HellDatePickerLabels>): Provider {
+  return HELL_DATE_PICKER_LABELS_CONTRACT.provide(overrides);
+}
 
 const HELL_DATE_PICKER_ICONS = {
   faSolidAnglesLeft,
@@ -40,6 +64,7 @@ const HELL_DATE_PICKER_ICONS = {
   faSolidChevronRight,
 };
 
+/** Public parts of the HellDatePicker module, styleable through its Part Style Map. */
 export type HellDatePickerPart =
   | 'root'
   | 'header'
@@ -51,8 +76,10 @@ export type HellDatePickerPart =
   | 'cell'
   | 'dateButton';
 
+/** Part Style Map accepted by the HellDatePicker `ui` input. */
 export type HellDatePickerUi = HellUi<HellDatePickerPart>;
 
+/** Public parts of the HellDateRangePicker module, styleable through its Part Style Map. */
 export type HellDateRangePickerPart =
   | 'root'
   | 'header'
@@ -64,6 +91,7 @@ export type HellDateRangePickerPart =
   | 'cell'
   | 'dateButton';
 
+/** Part Style Map accepted by the HellDateRangePicker `ui` input. */
 export type HellDateRangePickerUi = HellUi<HellDateRangePickerPart>;
 
 const HELL_DATE_PICKER_RECIPE = {
@@ -133,13 +161,13 @@ function hellDatePickerYearShiftDisabled(
   host: {
     type: 'button',
     '[disabled]': 'disabled()',
-    '[attr.aria-label]': 'labels.datePicker.previousYear',
+    '[attr.aria-label]': 'labels.previousYear',
     '[attr.data-disabled]': 'disabled() ? "" : null',
     '(click)': 'shift(-12)',
   },
 })
 export class HellDatePickerPreviousYear {
-  protected readonly labels = inject<HellLabels>(HELL_LABELS);
+  protected readonly labels = inject(HELL_DATE_PICKER_LABELS);
   private readonly state = injectDatePickerState<Date>({ optional: true });
   private readonly rangeState = injectDateRangePickerState<Date>({ optional: true });
   private readonly buttonState = injectButtonState({ optional: true });
@@ -166,13 +194,13 @@ export class HellDatePickerPreviousYear {
   host: {
     type: 'button',
     '[disabled]': 'disabled()',
-    '[attr.aria-label]': 'labels.datePicker.nextYear',
+    '[attr.aria-label]': 'labels.nextYear',
     '[attr.data-disabled]': 'disabled() ? "" : null',
     '(click)': 'shift(12)',
   },
 })
 export class HellDatePickerNextYear {
-  protected readonly labels = inject<HellLabels>(HELL_LABELS);
+  protected readonly labels = inject(HELL_DATE_PICKER_LABELS);
   private readonly state = injectDatePickerState<Date>({ optional: true });
   private readonly rangeState = injectDateRangePickerState<Date>({ optional: true });
   private readonly buttonState = injectButtonState({ optional: true });
@@ -214,7 +242,7 @@ const PICKER_TEMPLATE = `
         [class]="part('navButton')"
         type="button"
         ngpDatePickerPreviousMonth
-        [attr.aria-label]="labels.datePicker.previousMonth"
+        [attr.aria-label]="labels.previousMonth"
       >
         <hell-icon name="faSolidChevronLeft" />
       </button>
@@ -228,7 +256,7 @@ const PICKER_TEMPLATE = `
         [class]="part('navButton')"
         type="button"
         ngpDatePickerNextMonth
-        [attr.aria-label]="labels.datePicker.nextMonth"
+        [attr.aria-label]="labels.nextMonth"
       >
         <hell-icon name="faSolidChevronRight" />
       </button>
@@ -366,13 +394,19 @@ const PICKER_IMPORTS = [
   },
   template: PICKER_TEMPLATE,
 })
-export class HellDatePicker extends HellPartStyleable<HellDatePickerPart> {
-  protected readonly recipe = HELL_DATE_PICKER_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellDatePicker {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellDatePickerPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellDatePickerPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_DATE_PICKER_RECIPE,
+  });
 
   readonly locale = input<string | null>(null);
 
-  protected readonly labels = inject<HellLabels>(HELL_LABELS);
+  protected readonly labels = inject(HELL_DATE_PICKER_LABELS);
   private readonly state = injectDatePickerState<Date>();
 
   protected readonly label = computed(() =>
@@ -420,13 +454,19 @@ export class HellDatePicker extends HellPartStyleable<HellDatePickerPart> {
   },
   template: PICKER_TEMPLATE,
 })
-export class HellDateRangePicker extends HellPartStyleable<HellDateRangePickerPart> {
-  protected readonly recipe: HellRecipe<HellDateRangePickerPart> = HELL_DATE_RANGE_PICKER_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellDateRangePicker {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellDateRangePickerPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellDateRangePickerPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: (): HellRecipe<HellDateRangePickerPart> => HELL_DATE_RANGE_PICKER_RECIPE,
+  });
 
   readonly locale = input<string | null>(null);
 
-  protected readonly labels = inject<HellLabels>(HELL_LABELS);
+  protected readonly labels = inject(HELL_DATE_PICKER_LABELS);
   private readonly state = injectDateRangePickerState<Date>();
   protected readonly rangeComplete = computed(() =>
     Boolean(this.state().startDate() && this.state().endDate()),

@@ -1,9 +1,11 @@
 import { Directive, input } from '@angular/core';
 import { NgpSeparator } from 'ng-primitives/separator';
 import type { HellOrientation, HellSize } from '@hell-ui/angular/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
+/** Public parts of the HellSeparator module, styleable through its Part Style Map. */
 export type HellSeparatorPart = 'root';
+/** Part Style Map accepted by the HellSeparator `ui` input. */
 export type HellSeparatorUi = HellUi<HellSeparatorPart>;
 
 const HELL_SEPARATOR_RECIPE = {
@@ -21,9 +23,15 @@ const HELL_SEPARATOR_RECIPE = {
     '[attr.role]': '"separator"',
   },
 })
-export class HellSeparator extends HellPartStyleable<HellSeparatorPart> {
-  protected readonly recipe = HELL_SEPARATOR_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellSeparator {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellSeparatorPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellSeparatorPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_SEPARATOR_RECIPE,
+  });
 
   readonly orientation = input<HellOrientation>('horizontal');
   /**

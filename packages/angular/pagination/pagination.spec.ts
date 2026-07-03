@@ -1,7 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { provideHellLabels } from '@hell-ui/angular/core';
 import {
   HellPagination,
   HellPaginationButton,
@@ -17,6 +16,7 @@ import {
   type HellPaginationNextUi,
   type HellPaginationPrevUi,
   type HellPaginationStripUi,
+  provideHellPaginationLabels,
 } from './pagination';
 
 @Component({
@@ -84,12 +84,10 @@ class PaginationExplicitDisabledHost {}
 @Component({
   imports: [HellPaginationStrip],
   providers: [
-    provideHellLabels({
-      pagination: {
-        navigation: 'Seiten',
-        nextPage: 'Nächste Seite',
-        page: (page) => `Seite ${page}`,
-      },
+    provideHellPaginationLabels({
+      navigation: 'Seiten',
+      nextPage: 'Nächste Seite',
+      page: (page) => `Seite ${page}`,
     }),
   ],
   template: `<hell-pagination [page]="1" [pageCount]="3" />`,

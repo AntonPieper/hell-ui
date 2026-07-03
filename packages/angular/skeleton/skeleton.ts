@@ -1,13 +1,35 @@
 import {
   Directive, inject, input } from '@angular/core';
 import type { HellSize } from '@hell-ui/angular/core';
-import { type HellLabels, HELL_LABELS } from '@hell-ui/angular/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import type { InjectionToken, Provider } from '@angular/core';
 
+/** Built-in accessibility labels owned by the skeleton entry point. */
+export interface HellSkeletonLabels {
+  readonly loading: string;
+}
+
+const HELL_SKELETON_LABELS_CONTRACT = hellCreateLabels<HellSkeletonLabels>('HELL_SKELETON_LABELS', {
+  loading: 'Loading',
+});
+
+/** Injection token resolving to the effective skeleton labels. */
+export const HELL_SKELETON_LABELS: InjectionToken<HellSkeletonLabels> = HELL_SKELETON_LABELS_CONTRACT.token;
+
+/** Override any subset of the skeleton labels for an injector scope. */
+export function provideHellSkeletonLabels(overrides: Partial<HellSkeletonLabels>): Provider {
+  return HELL_SKELETON_LABELS_CONTRACT.provide(overrides);
+}
+
+/** Public parts of the HellSkeleton module, styleable through its Part Style Map. */
 export type HellSkeletonPart = 'root';
+/** Part Style Map accepted by the HellSkeleton `ui` input. */
 export type HellSkeletonUi = HellUi<HellSkeletonPart>;
 
+/** Public parts of the HellSpinner module, styleable through its Part Style Map. */
 export type HellSpinnerPart = 'root';
+/** Part Style Map accepted by the HellSpinner `ui` input. */
 export type HellSpinnerUi = HellUi<HellSpinnerPart>;
 
 const HELL_SKELETON_RECIPE = {
@@ -30,9 +52,15 @@ const HELL_SPINNER_RECIPE = {
     'aria-hidden': 'true',
   },
 })
-export class HellSkeleton extends HellPartStyleable<HellSkeletonPart> {
-  protected readonly recipe = HELL_SKELETON_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellSkeleton {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellSkeletonPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellSkeletonPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_SKELETON_RECIPE,
+  });
 
   readonly width = input<string>('100%');
   readonly height = input<string>('14px');
@@ -57,13 +85,19 @@ export type HellSpinnerVariant = 'ring' | 'dots' | 'bars' | 'pulse';
     role: 'status',
   },
 })
-export class HellSpinner extends HellPartStyleable<HellSpinnerPart> {
-  protected readonly recipe = HELL_SPINNER_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellSpinner {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellSpinnerPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellSpinnerPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_SPINNER_RECIPE,
+  });
 
   readonly variant = input<HellSpinnerVariant>('ring');
   readonly size = input<HellSize>('md');
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
 
-  protected readonly labels = inject<HellLabels>(HELL_LABELS);
+  protected readonly labels = inject(HELL_SKELETON_LABELS);
 }

@@ -1,9 +1,11 @@
 import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { NgpAvatar, NgpAvatarFallback, NgpAvatarImage } from 'ng-primitives/avatar';
 import { HellSize } from '@hell-ui/angular/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
+/** Public parts of the HellAvatar module, styleable through its Part Style Map. */
 export type HellAvatarPart = 'root';
+/** Part Style Map accepted by the HellAvatar `ui` input. */
 export type HellAvatarUi = HellUi<HellAvatarPart>;
 
 const HELL_AVATAR_RECIPE = {
@@ -34,9 +36,15 @@ const HELL_AVATAR_RECIPE = {
     <span ngpAvatarFallback>{{ fallback() }}</span>
   `,
 })
-export class HellAvatar extends HellPartStyleable<HellAvatarPart> {
-  protected readonly recipe = HELL_AVATAR_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellAvatar {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellAvatarPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellAvatarPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_AVATAR_RECIPE,
+  });
 
   /** Avatar image src. */
   readonly image = input<string | null>(null);

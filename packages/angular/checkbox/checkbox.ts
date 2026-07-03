@@ -21,12 +21,16 @@ import {
 import { ngpCheckbox } from 'ng-primitives/checkbox';
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
+/** Public parts of the HellCheckbox module, styleable through its Part Style Map. */
 export type HellCheckboxPart = 'root';
+/** Part Style Map accepted by the HellCheckbox `ui` input. */
 export type HellCheckboxUi = HellUi<HellCheckboxPart>;
 
+/** Public parts of the HellNativeCheckbox module, styleable through its Part Style Map. */
 export type HellNativeCheckboxPart = 'root';
+/** Part Style Map accepted by the HellNativeCheckbox `ui` input. */
 export type HellNativeCheckboxUi = HellUi<HellNativeCheckboxPart>;
 
 const HELL_CHECKBOX_RECIPE = {
@@ -98,12 +102,15 @@ const HELL_NATIVE_CHECKBOX_RECIPE = {
     }
   `,
 })
-export class HellCheckbox
-  extends HellPartStyleable<HellCheckboxPart>
-  implements ControlValueAccessor, Validator
-{
-  protected readonly recipe = HELL_CHECKBOX_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellCheckbox implements ControlValueAccessor, Validator {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellCheckboxPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellCheckboxPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_CHECKBOX_RECIPE,
+  });
 
   readonly checked = input(false, { transform: booleanAttribute });
   readonly indeterminate = input(false, { transform: booleanAttribute });
@@ -125,7 +132,6 @@ export class HellCheckbox
   private readonly effectiveDisabled = this.controlledChecked.disabled;
 
   constructor() {
-    super();
     effect(() => {
       this.required();
       this.effectiveDisabled();
@@ -193,9 +199,15 @@ export class HellCheckbox
     '[attr.required]': 'required() ? "" : null',
   },
 })
-export class HellNativeCheckbox extends HellPartStyleable<HellNativeCheckboxPart> {
-  protected readonly recipe = HELL_NATIVE_CHECKBOX_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellNativeCheckbox {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellNativeCheckboxPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellNativeCheckboxPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_NATIVE_CHECKBOX_RECIPE,
+  });
 
   readonly required = input(false, { alias: 'required', transform: booleanAttribute });
   readonly indeterminate = input(false, { alias: 'indeterminate', transform: booleanAttribute });
@@ -206,7 +218,6 @@ export class HellNativeCheckbox extends HellPartStyleable<HellNativeCheckboxPart
   private readonly host = inject(ElementRef<HTMLInputElement>);
 
   constructor() {
-    super();
     effect(() => {
       this.host.nativeElement.indeterminate = this.indeterminate();
     });

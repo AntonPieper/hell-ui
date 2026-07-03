@@ -1,17 +1,25 @@
 import { Directive, input } from '@angular/core';
 import { NgpTabset, NgpTabList, NgpTabButton, NgpTabPanel } from 'ng-primitives/tabs';
-import { HellOrientation, HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, HellOrientation, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
+/** Public parts of the HellTabset module, styleable through its Part Style Map. */
 export type HellTabsetPart = 'root';
+/** Part Style Map accepted by the HellTabset `ui` input. */
 export type HellTabsetUi = HellUi<HellTabsetPart>;
 
+/** Public parts of the HellTabList module, styleable through its Part Style Map. */
 export type HellTabListPart = 'root';
+/** Part Style Map accepted by the HellTabList `ui` input. */
 export type HellTabListUi = HellUi<HellTabListPart>;
 
+/** Public parts of the HellTab module, styleable through its Part Style Map. */
 export type HellTabPart = 'root';
+/** Part Style Map accepted by the HellTab `ui` input. */
 export type HellTabUi = HellUi<HellTabPart>;
 
+/** Public parts of the HellTabPanel module, styleable through its Part Style Map. */
 export type HellTabPanelPart = 'root';
+/** Part Style Map accepted by the HellTabPanel `ui` input. */
 export type HellTabPanelUi = HellUi<HellTabPanelPart>;
 
 const HELL_TABSET_RECIPE = {
@@ -60,9 +68,15 @@ const HELL_TAB_PANEL_RECIPE = {
     '[attr.data-orientation]': 'orientation()',
   },
 })
-export class HellTabset extends HellPartStyleable<HellTabsetPart> {
-  protected readonly recipe = HELL_TABSET_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellTabset {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellTabsetPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellTabsetPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_TABSET_RECIPE,
+  });
 
   readonly orientation = input<HellOrientation>('horizontal');
 }
@@ -75,9 +89,15 @@ export class HellTabset extends HellPartStyleable<HellTabsetPart> {
     'data-slot': 'root',
   },
 })
-export class HellTabList extends HellPartStyleable<HellTabListPart> {
-  protected readonly recipe = HELL_TAB_LIST_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellTabList {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellTabListPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellTabListPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_TAB_LIST_RECIPE,
+  });
 }
 
 @Directive({
@@ -94,9 +114,15 @@ export class HellTabList extends HellPartStyleable<HellTabListPart> {
     type: 'button',
   },
 })
-export class HellTab extends HellPartStyleable<HellTabPart> {
-  protected readonly recipe = HELL_TAB_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellTab {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellTabPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellTabPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_TAB_RECIPE,
+  });
 }
 
 @Directive({
@@ -107,9 +133,15 @@ export class HellTab extends HellPartStyleable<HellTabPart> {
     'data-slot': 'root',
   },
 })
-export class HellTabPanel extends HellPartStyleable<HellTabPanelPart> {
-  protected readonly recipe = HELL_TAB_PANEL_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellTabPanel {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellTabPanelPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellTabPanelPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_TAB_PANEL_RECIPE,
+  });
 }
 
 export const HELL_TABS_DIRECTIVES = [HellTabset, HellTabList, HellTab, HellTabPanel] as const;

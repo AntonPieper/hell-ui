@@ -1,4 +1,4 @@
-import { Directive, ElementRef, afterNextRender, inject } from '@angular/core';
+import { Directive, ElementRef, afterNextRender, inject, input } from '@angular/core';
 import type { Signal } from '@angular/core';
 import {
   NgpMenu,
@@ -12,40 +12,62 @@ import {
   injectSubmenuTriggerState,
 } from 'ng-primitives/menu';
 import { hellRegisterFloatingHost } from '@hell-ui/angular/internal/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
 
+/** Public parts of the HellSubmenuTrigger module, styleable through its Part Style Map. */
 export type HellSubmenuTriggerPart = 'root';
+/** Part Style Map accepted by the HellSubmenuTrigger `ui` input. */
 export type HellSubmenuTriggerUi = HellUi<HellSubmenuTriggerPart>;
 
+/** Public parts of the HellMenu module, styleable through its Part Style Map. */
 export type HellMenuPart = 'root';
+/** Part Style Map accepted by the HellMenu `ui` input. */
 export type HellMenuUi = HellUi<HellMenuPart>;
 
+/** Public parts of the HellMenuItem module, styleable through its Part Style Map. */
 export type HellMenuItemPart = 'root';
+/** Part Style Map accepted by the HellMenuItem `ui` input. */
 export type HellMenuItemUi = HellUi<HellMenuItemPart>;
 
+/** Public parts of the HellMenuItemCheckbox module, styleable through its Part Style Map. */
 export type HellMenuItemCheckboxPart = 'root';
+/** Part Style Map accepted by the HellMenuItemCheckbox `ui` input. */
 export type HellMenuItemCheckboxUi = HellUi<HellMenuItemCheckboxPart>;
 
+/** Public parts of the HellMenuItemRadio module, styleable through its Part Style Map. */
 export type HellMenuItemRadioPart = 'root';
+/** Part Style Map accepted by the HellMenuItemRadio `ui` input. */
 export type HellMenuItemRadioUi = HellUi<HellMenuItemRadioPart>;
 
+/** Public parts of the HellMenuItemIndicator module, styleable through its Part Style Map. */
 export type HellMenuItemIndicatorPart = 'root';
+/** Part Style Map accepted by the HellMenuItemIndicator `ui` input. */
 export type HellMenuItemIndicatorUi = HellUi<HellMenuItemIndicatorPart>;
 
+/** Public parts of the HellMenuSeparator module, styleable through its Part Style Map. */
 export type HellMenuSeparatorPart = 'root';
+/** Part Style Map accepted by the HellMenuSeparator `ui` input. */
 export type HellMenuSeparatorUi = HellUi<HellMenuSeparatorPart>;
 
+/** Public parts of the HellMenuSection module, styleable through its Part Style Map. */
 export type HellMenuSectionPart = 'root';
+/** Part Style Map accepted by the HellMenuSection `ui` input. */
 export type HellMenuSectionUi = HellUi<HellMenuSectionPart>;
 
+/** Public parts of the HellMenuLabel module, styleable through its Part Style Map. */
 export type HellMenuLabelPart = 'root';
+/** Part Style Map accepted by the HellMenuLabel `ui` input. */
 export type HellMenuLabelUi = HellUi<HellMenuLabelPart>;
 
+/** Public parts of the HellMenuItemIcon module, styleable through its Part Style Map. */
 export type HellMenuItemIconPart = 'root';
+/** Part Style Map accepted by the HellMenuItemIcon `ui` input. */
 export type HellMenuItemIconUi = HellUi<HellMenuItemIconPart>;
 
+/** Public parts of the HellMenuItemTrailing module, styleable through its Part Style Map. */
 export type HellMenuItemTrailingPart = 'root';
+/** Part Style Map accepted by the HellMenuItemTrailing `ui` input. */
 export type HellMenuItemTrailingUi = HellUi<HellMenuItemTrailingPart>;
 
 const HELL_MENU_RECIPE = {
@@ -141,9 +163,15 @@ export class HellMenuTrigger extends HellNativeInteractiveDisabledGuard {
     'data-hell-submenu-trigger': '',
   },
 })
-export class HellSubmenuTrigger extends HellPartStyleable<HellSubmenuTriggerPart> {
-  protected readonly recipe = { root: '' } satisfies HellRecipe<HellSubmenuTriggerPart>;
-  protected readonly defaultUiPart = 'root';
+export class HellSubmenuTrigger {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellSubmenuTriggerPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellSubmenuTriggerPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => ({ root: '' } satisfies HellRecipe<HellSubmenuTriggerPart>),
+  });
 }
 
 @Directive({
@@ -155,15 +183,20 @@ export class HellSubmenuTrigger extends HellPartStyleable<HellSubmenuTriggerPart
     '[attr.data-submenu]': 'submenuTrigger() ? "true" : null',
   },
 })
-export class HellMenu extends HellPartStyleable<HellMenuPart> {
-  protected readonly recipe = HELL_MENU_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellMenu {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellMenuPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellMenuPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_MENU_RECIPE,
+  });
   protected readonly submenuTrigger: Signal<unknown> = injectSubmenuTriggerState({
     optional: true,
   });
 
   constructor() {
-    super();
     hellRegisterFloatingHost();
 
     // Overlay panes such as the Omnibar panel render through the browser
@@ -202,9 +235,15 @@ export class HellMenu extends HellPartStyleable<HellMenuPart> {
     '(keydown.space)': 'preventDisabledNonNative($event)',
   },
 })
-export class HellMenuItem extends HellPartStyleable<HellMenuItemPart> {
-  protected readonly recipe = { root: HELL_MENU_ITEM_RECIPE } satisfies HellRecipe<HellMenuItemPart>;
-  protected readonly defaultUiPart = 'root';
+export class HellMenuItem {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellMenuItemPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellMenuItemPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => ({ root: HELL_MENU_ITEM_RECIPE } satisfies HellRecipe<HellMenuItemPart>),
+  });
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly menuItem = inject(NgpMenuItem);
 
@@ -245,11 +284,17 @@ export class HellMenuItem extends HellPartStyleable<HellMenuItemPart> {
     '[attr.disabled]': 'menuItem.disabled() ? "" : null',
   },
 })
-export class HellMenuItemCheckbox extends HellPartStyleable<HellMenuItemCheckboxPart> {
-  protected readonly recipe = {
+export class HellMenuItemCheckbox {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellMenuItemCheckboxPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellMenuItemCheckboxPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => ({
     root: HELL_MENU_ITEM_CHECKABLE_RECIPE,
-  } satisfies HellRecipe<HellMenuItemCheckboxPart>;
-  protected readonly defaultUiPart = 'root';
+  } satisfies HellRecipe<HellMenuItemCheckboxPart>),
+  });
   protected readonly menuItem = inject(NgpMenuItemCheckbox);
 }
 
@@ -269,11 +314,17 @@ export class HellMenuItemCheckbox extends HellPartStyleable<HellMenuItemCheckbox
     '[attr.disabled]': 'menuItem.disabled() ? "" : null',
   },
 })
-export class HellMenuItemRadio extends HellPartStyleable<HellMenuItemRadioPart> {
-  protected readonly recipe = {
+export class HellMenuItemRadio {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellMenuItemRadioPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellMenuItemRadioPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => ({
     root: HELL_MENU_ITEM_CHECKABLE_RECIPE,
-  } satisfies HellRecipe<HellMenuItemRadioPart>;
-  protected readonly defaultUiPart = 'root';
+  } satisfies HellRecipe<HellMenuItemRadioPart>),
+  });
   protected readonly menuItem = inject(NgpMenuItemRadio);
 }
 
@@ -300,9 +351,15 @@ export class HellMenuItemRadioGroup {}
     'aria-hidden': 'true',
   },
 })
-export class HellMenuItemIndicator extends HellPartStyleable<HellMenuItemIndicatorPart> {
-  protected readonly recipe = HELL_MENU_ITEM_INDICATOR_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellMenuItemIndicator {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellMenuItemIndicatorPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellMenuItemIndicatorPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_MENU_ITEM_INDICATOR_RECIPE,
+  });
 }
 
 @Directive({
@@ -313,9 +370,15 @@ export class HellMenuItemIndicator extends HellPartStyleable<HellMenuItemIndicat
     role: 'separator',
   },
 })
-export class HellMenuSeparator extends HellPartStyleable<HellMenuSeparatorPart> {
-  protected readonly recipe = HELL_MENU_SEPARATOR_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellMenuSeparator {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellMenuSeparatorPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellMenuSeparatorPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_MENU_SEPARATOR_RECIPE,
+  });
 }
 
 /** Section grouping wrapper. Use with `[hellMenuLabel]` for an optional header. */
@@ -327,9 +390,15 @@ export class HellMenuSeparator extends HellPartStyleable<HellMenuSeparatorPart> 
     role: 'group',
   },
 })
-export class HellMenuSection extends HellPartStyleable<HellMenuSectionPart> {
-  protected readonly recipe = HELL_MENU_SECTION_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellMenuSection {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellMenuSectionPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellMenuSectionPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_MENU_SECTION_RECIPE,
+  });
 }
 
 /** Section / group label rendered above a section's items. */
@@ -341,9 +410,15 @@ export class HellMenuSection extends HellPartStyleable<HellMenuSectionPart> {
     role: 'presentation',
   },
 })
-export class HellMenuLabel extends HellPartStyleable<HellMenuLabelPart> {
-  protected readonly recipe = HELL_MENU_LABEL_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellMenuLabel {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellMenuLabelPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellMenuLabelPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_MENU_LABEL_RECIPE,
+  });
 }
 
 /** Optional leading-icon slot inside a `[hellMenuItem]`. */
@@ -355,9 +430,15 @@ export class HellMenuLabel extends HellPartStyleable<HellMenuLabelPart> {
     'aria-hidden': 'true',
   },
 })
-export class HellMenuItemIcon extends HellPartStyleable<HellMenuItemIconPart> {
-  protected readonly recipe = HELL_MENU_ITEM_ICON_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellMenuItemIcon {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellMenuItemIconPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellMenuItemIconPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_MENU_ITEM_ICON_RECIPE,
+  });
 }
 
 /** Trailing slot — kbd hint, chevron, badge, etc. */
@@ -368,9 +449,15 @@ export class HellMenuItemIcon extends HellPartStyleable<HellMenuItemIconPart> {
     'data-slot': 'root',
   },
 })
-export class HellMenuItemTrailing extends HellPartStyleable<HellMenuItemTrailingPart> {
-  protected readonly recipe = HELL_MENU_ITEM_TRAILING_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellMenuItemTrailing {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellMenuItemTrailingPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellMenuItemTrailingPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_MENU_ITEM_TRAILING_RECIPE,
+  });
 }
 
 export const HELL_MENU_DIRECTIVES = [

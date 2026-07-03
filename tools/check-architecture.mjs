@@ -76,8 +76,8 @@ const audioTranscriptRuntimeTerms = [
 ];
 
 // Explicit not-yet-migrated allowlist for the legacy Style Opt-Out base.
-// Remove a symbol here as soon as it migrates to HellPartStyleable; new public
-// modules must not extend HellStyleable.
+// Remove a symbol here as soon as it migrates to the hellPartStyler
+// composition contract; new public modules must not extend HellStyleable.
 const legacyStyleableAllowlist = new Set([
   'HellAvatarGroup',
   'HellAvatarGroupItem',
@@ -3035,11 +3035,11 @@ function checkPackageDependencyContract() {
     '@angular/core',
     '@angular/forms',
     '@floating-ui/dom',
-    '@ng-icons/core',
     'ng-primitives',
     'rxjs',
   ]);
-  const iconOnlyPeers = new Set(['@ng-icons/font-awesome']);
+  // Icon-backed entry points only; non-icon consumers install without them.
+  const iconOnlyPeers = new Set(['@ng-icons/core', '@ng-icons/font-awesome']);
   const transitiveOnlyPeers = new Set(['@angular/router']);
   const featureOnlyPeers = new Set([
     '@codemirror/commands',
@@ -3497,19 +3497,19 @@ function checkComponentContract() {
       }
       publicStyleableModules.set(className, rel);
 
-      if (moduleSource.includes('extends HellPartStyleable')) {
+      if (moduleSource.includes('hellPartStyler')) {
         if (legacyStyleableAllowlist.has(className)) {
           failures.push(
-            `${rel} ${className} migrated to HellPartStyleable but remains in the legacy HellStyleable allowlist`,
+            `${rel} ${className} migrated to the Part-Class Pipeline but remains in the legacy HellStyleable allowlist`,
           );
         }
         if (!moduleSource.includes('part(') || !moduleSource.includes('recipe')) {
           failures.push(
-            `${rel} ${className} extends HellPartStyleable but does not use the Part-Class Pipeline`,
+            `${rel} ${className} composes hellPartStyler but does not use the Part-Class Pipeline`,
           );
         }
         if (moduleSource.includes('unstyled')) {
-          failures.push(`${rel} ${className} extends HellPartStyleable but keeps Style Opt-Out`);
+          failures.push(`${rel} ${className} composes hellPartStyler but keeps Style Opt-Out`);
         }
       } else if (extendsMigratedPartStyleMapBase(classSource)) {
         if (moduleSource.includes('unstyled')) {
@@ -3598,14 +3598,23 @@ function checkPartStyleMapContract() {
     entrypointPublicApiFiles().map((entrypoint) => entrypoint.packageDir),
   );
 
-  for (const symbol of ['HellUi', 'HellUiInput', 'HellRecipe', 'HellPartStyleable']) {
-    if (
-      !styleableSource.includes(
-        `export ${symbol === 'HellPartStyleable' ? 'abstract class' : 'type'} ${symbol}`,
-      )
-    ) {
-      failures.push(`Part Style Map core contract must export ${symbol}`);
+  for (const symbol of [
+    ['type', 'HellUi'],
+    ['type', 'HellUiInput'],
+    ['type', 'HellRecipe'],
+    ['type', 'HellPartStyler'],
+    ['interface', 'HellPartStylerOptions'],
+    ['function', 'hellPartStyler'],
+  ]) {
+    const [kind, name] = symbol;
+    if (!styleableSource.includes(`export ${kind} ${name}`)) {
+      failures.push(`Part Style Map core contract must export ${name}`);
     }
+  }
+  if (styleableSource.includes('HellPartStyleable')) {
+    failures.push(
+      'Part Style Map core contract must stay composition-based; do not reintroduce the HellPartStyleable inheritance base',
+    );
   }
   if (
     !/export\s+type\s+HellUiInput<Part extends string>\s*=\s*string\s*\|\s*HellUi<Part>\s*\|\s*null\s*\|\s*undefined/.test(
@@ -3614,27 +3623,17 @@ function checkPartStyleMapContract() {
   ) {
     failures.push('HellUiInput must keep the string/default-part shorthand shape');
   }
-  if (
-    !/readonly\s+ui\s*=\s*input<\s*HellUiInput<Part>\s*>\(\s*undefined\s*,\s*\{\s*alias:\s*['"]ui['"]\s*\}\s*\)/.test(
-      styleableCompact,
-    )
-  ) {
-    failures.push('HellPartStyleable must own the public [ui] signal input');
-  }
   if (/@Input\(\{\s*alias:\s*['"]ui['"]/.test(styleableCompact)) {
-    failures.push('HellPartStyleable must not keep a decorator-based [ui] compatibility input');
+    failures.push('Part Style Map core must not keep a decorator-based [ui] compatibility input');
   }
   if (/\b(?:set\s+ui|uiSignal)\b/.test(styleableCompact)) {
-    failures.push('HellPartStyleable must not keep a parallel ui compatibility path');
+    failures.push('Part Style Map core must not keep a parallel ui compatibility path');
   }
-  if (!styleableSource.includes('const ui = this.ui()')) {
-    failures.push('HellPartStyleable must read ui through its signal input');
+  if (!styleableSource.includes('readonly defaultPart: Part')) {
+    failures.push('hellPartStyler options must own a default public part for string shorthand');
   }
-  if (!styleableSource.includes('protected abstract readonly defaultUiPart: Part')) {
-    failures.push('HellPartStyleable must own a default public part for string shorthand');
-  }
-  if (!styleableSource.includes('hellTwMerge(this.recipe[part], this.uiClassForPart(part))')) {
-    failures.push('HellPartStyleable must use the configured hellTwMerge Part-Class Pipeline');
+  if (!/hellTwMerge\(\s*options\.recipe\(\)\[part\]/.test(styleableCompact)) {
+    failures.push('hellPartStyler must use the configured hellTwMerge Part-Class Pipeline');
   }
   if (
     !mergeSource.includes('extendTailwindMerge') ||
@@ -3649,7 +3648,8 @@ function checkPartStyleMapContract() {
     'HellUi',
     'HellUiInput',
     'HellRecipe',
-    'HellPartStyleable',
+    'HellPartStyler',
+    'hellPartStyler',
     'hellTwMerge',
   ]) {
     if (!rootApiReport.includes(symbol)) {
@@ -3663,15 +3663,21 @@ function checkPartStyleMapContract() {
     ['Root', rootApiReport],
     ['Core', coreApiReport],
   ]) {
-    if (!report.includes('readonly ui: i0.InputSignal<HellUiInput<Part>>')) {
-      failures.push(`${label} API report must expose HellPartStyleable.ui as an InputSignal`);
+    if (report.includes('HellPartStyleable')) {
+      failures.push(
+        `${label} API report must not expose the removed HellPartStyleable inheritance base`,
+      );
     }
-    if (
-      !report.includes(
-        '"ui": { "alias": "ui"; "required": false; "isSignal": true; }',
-      )
-    ) {
-      failures.push(`${label} API report must expose HellPartStyleable ui metadata as signal input`);
+  }
+  // Migrated component reports expose their own typed [ui] signal inputs.
+  const inputApiReport = readApiReport('hell-ui-angular-input.api.md');
+  const dialpadApiReport = readApiReport('hell-ui-angular-dialpad.api.md');
+  for (const [label, report] of [
+    ['Input', inputApiReport],
+    ['Dialpad', dialpadApiReport],
+  ]) {
+    if (!report.includes('"ui": { "alias": "ui"; "required": false; "isSignal": true; }')) {
+      failures.push(`${label} API report must expose the component ui metadata as signal input`);
     }
   }
 
@@ -3780,8 +3786,25 @@ function checkMigratedPartStyleMapModule(module, entrypointPackageDirs) {
   }
 
   const moduleSource = moduleInfo.moduleSource;
-  if (!moduleInfo.classSource.includes(`extends HellPartStyleable<${module.partType}>`)) {
-    failures.push(`${rel} ${module.className} must extend HellPartStyleable<${module.partType}>`);
+  const compactModuleSource = compactSource(moduleSource);
+  if (
+    !compactModuleSource.includes(
+      `readonly ui = input<HellUiInput<${module.partType}>>(undefined, { alias: 'ui' })`,
+    )
+  ) {
+    failures.push(
+      `${rel} ${module.className} must declare its typed [ui] signal input for ${module.partType}`,
+    );
+  }
+  if (!compactModuleSource.includes(`hellPartStyler<${module.partType}>(this.ui`)) {
+    failures.push(
+      `${rel} ${module.className} must compose hellPartStyler<${module.partType}> over its ui input`,
+    );
+  }
+  if (/extends\s+HellPartStyleable\b/.test(moduleSource)) {
+    failures.push(
+      `${rel} ${module.className} must not reintroduce the removed HellPartStyleable inheritance base`,
+    );
   }
   if (/\bHellStyleable\b/.test(moduleSource)) {
     failures.push(`${rel} ${module.className} must not keep legacy HellStyleable`);
@@ -3801,12 +3824,12 @@ function checkMigratedPartStyleMapModule(module, entrypointPackageDirs) {
     failures.push(`${rel} must type its default recipe as HellRecipe<${module.partType}>`);
   }
 
-  const defaultUiPart = /defaultUiPart\s*=\s*['"]([^'"]+)['"]/.exec(moduleSource)?.[1];
-  if (!defaultUiPart) {
-    failures.push(`${rel} ${module.className} must declare defaultUiPart for ui string shorthand`);
-  } else if (!partNames.includes(defaultUiPart)) {
+  const defaultPart = /defaultPart:\s*['"]([^'"]+)['"]/.exec(moduleSource)?.[1];
+  if (!defaultPart) {
+    failures.push(`${rel} ${module.className} must declare defaultPart for ui string shorthand`);
+  } else if (!partNames.includes(defaultPart)) {
     failures.push(
-      `${rel} ${module.className} defaultUiPart "${defaultUiPart}" is not in ${module.partType}`,
+      `${rel} ${module.className} defaultPart "${defaultPart}" is not in ${module.partType}`,
     );
   }
 
@@ -4025,41 +4048,69 @@ function compactSource(source) {
 }
 
 function checkLabelContract() {
+  // Core owns only the hellCreateLabels factory; entry points own their label
+  // interfaces, defaults, tokens, and provide functions.
   const labelsSource = readFile(join(root, 'packages/angular/core/labels.ts'));
-  for (const symbol of ['HELL_LABELS', 'HELL_DEFAULT_LABELS', 'provideHellLabels']) {
-    if (!labelsSource.includes(symbol)) failures.push(`Label Contract is missing ${symbol}`);
+  if (!labelsSource.includes('hellCreateLabels')) {
+    failures.push('Label Contract core factory hellCreateLabels is missing');
   }
-
-  const rootApi = readFile(join(root, 'packages/angular/public-api.ts'));
-  const coreApi = readFile(join(root, 'packages/angular/core/public-api.ts'));
-  const rootApiExportsCoreAggregate =
-    rootApi.includes('./lib/public-api-core') ||
-    rootApi.includes('./public-api-core') ||
-    rootApi.includes('./core/public-api');
-
-  for (const [api, source] of [
-    ['packages/angular/public-api.ts', rootApi],
-    ['packages/angular/core/public-api.ts', coreApi],
-  ]) {
-    const sourceExportsLabelContract =
-      source.includes('./lib/core/labels') ||
-      source.includes('./core/labels') ||
-      source.includes('./labels') ||
-      (api === 'packages/angular/public-api.ts' && rootApiExportsCoreAggregate);
-    if (!sourceExportsLabelContract) {
-      failures.push(`Label Contract is not exported from ${api}`);
+  for (const legacySymbol of ['HELL_LABELS', 'HELL_DEFAULT_LABELS', 'provideHellLabels']) {
+    if (labelsSource.includes(legacySymbol)) {
+      failures.push(
+        `Label Contract core must not reintroduce the aggregate symbol ${legacySymbol}; labels are entry-point-owned`,
+      );
     }
   }
 
-  const spinnerSource = readFile(
-    join(root, 'packages/angular/skeleton/skeleton.ts'),
+  const coreApi = readFile(join(root, 'packages/angular/core/public-api.ts'));
+  if (!coreApi.includes('./labels')) {
+    failures.push(
+      'Label Contract factory is not exported from packages/angular/core/public-api.ts',
+    );
+  }
+
+  // Every labeled entry point must own its full label contract.
+  const labelContractOwners = [
+    ['packages/angular/app-shell/app-shell.ts', 'HELL_APP_SHELL_LABELS', 'provideHellAppShellLabels'],
+    ['packages/angular/audio-player/audio-player.ts', 'HELL_AUDIO_PLAYER_LABELS', 'provideHellAudioPlayerLabels'],
+    ['packages/angular/breadcrumbs/breadcrumbs.ts', 'HELL_BREADCRUMBS_LABELS', 'provideHellBreadcrumbsLabels'],
+    ['packages/angular/date-input/date-input.ts', 'HELL_DATE_INPUT_LABELS', 'provideHellDateInputLabels'],
+    ['packages/angular/date-picker/date-picker.ts', 'HELL_DATE_PICKER_LABELS', 'provideHellDatePickerLabels'],
+    ['packages/angular/dialpad/dialpad.ts', 'HELL_DIALPAD_LABELS', 'provideHellDialpadLabels'],
+    ['packages/angular/omnibar/omnibar.ts', 'HELL_OMNIBAR_LABELS', 'provideHellOmnibarLabels'],
+    ['packages/angular/pagination/pagination.ts', 'HELL_PAGINATION_LABELS', 'provideHellPaginationLabels'],
+    ['packages/angular/resizable/resizable.ts', 'HELL_RESIZABLE_LABELS', 'provideHellResizableLabels'],
+    ['packages/angular/skeleton/skeleton.ts', 'HELL_SKELETON_LABELS', 'provideHellSkeletonLabels'],
+    ['packages/angular/table/table-utilities.ts', 'HELL_TABLE_UTILITIES_LABELS', 'provideHellTableUtilitiesLabels'],
+    ['packages/angular/time-input/time-input.ts', 'HELL_TIME_INPUT_LABELS', 'provideHellTimeInputLabels'],
+    ['packages/angular/toast/toast.ts', 'HELL_TOAST_LABELS', 'provideHellToastLabels'],
+    ['packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer-labels.ts', 'HELL_PDF_VIEWER_LABELS', 'provideHellPdfViewerLabels'],
+  ];
+  for (const [file, token, provideFn] of labelContractOwners) {
+    const source = readFile(join(root, file));
+    if (!source.includes('hellCreateLabels')) {
+      failures.push(`${file} must build its Label Contract through hellCreateLabels`);
+    }
+    if (!source.includes(`export const ${token}`)) {
+      failures.push(`${file} must export its label token ${token}`);
+    }
+    if (!source.includes(`export function ${provideFn}`)) {
+      failures.push(`${file} must export its label provider ${provideFn}`);
+    }
+  }
+
+  const spinnerSource = stripLabelDefaults(
+    readFile(join(root, 'packages/angular/skeleton/skeleton.ts')),
   );
-  if (!spinnerSource.includes('HELL_LABELS') || spinnerSource.includes("'aria-label': 'Loading'")) {
+  if (
+    !spinnerSource.includes('HELL_SKELETON_LABELS') ||
+    spinnerSource.includes("'aria-label': 'Loading'")
+  ) {
     failures.push('HellSpinner must read its default aria-label from the Label Contract');
   }
 
-  const paginationSource = readFile(
-    join(root, 'packages/angular/pagination/pagination.ts'),
+  const paginationSource = stripLabelDefaults(
+    readFile(join(root, 'packages/angular/pagination/pagination.ts')),
   );
   for (const hardcoded of [
     'aria-label="First page"',
@@ -4103,7 +4154,7 @@ function checkLabelContract() {
   ];
 
   for (const [file, hardcodedLabels] of labelConsumers) {
-    const source = readFile(join(root, file));
+    const source = stripLabelDefaults(readFile(join(root, file)));
     if (!source.includes('labels.')) {
       failures.push(`${file} must consume the Label Contract for built-in text`);
     }
@@ -4115,13 +4166,44 @@ function checkLabelContract() {
   }
 }
 
+/**
+ * Remove hellCreateLabels(...) call arguments so entry-point-owned label
+ * defaults do not count as hardcoded template text.
+ */
+function stripLabelDefaults(source) {
+  let result = source;
+  let searchFrom = 0;
+  for (;;) {
+    const callStart = result.indexOf('hellCreateLabels', searchFrom);
+    if (callStart === -1) return result;
+    const open = result.indexOf('(', callStart);
+    if (open === -1) return result;
+    let depth = 0;
+    let end = -1;
+    for (let index = open; index < result.length; index += 1) {
+      const char = result[index];
+      if (char === '(') depth += 1;
+      else if (char === ')') {
+        depth -= 1;
+        if (depth === 0) {
+          end = index;
+          break;
+        }
+      }
+    }
+    if (end === -1) return result;
+    result = result.slice(0, open + 1) + result.slice(end);
+    searchFrom = open + 1;
+  }
+}
+
 function exportedStyleableClasses(source) {
   const styleableBases = new Set([
     'HellNativeCheckbox',
     'HellNativeRadio',
     ...[
       ...source.matchAll(
-        /(?:abstract\s+)?class\s+([A-Za-z0-9_]+)[^{]*extends\s+(?:HellStyleable|HellPartStyleable|HellNativeInteractiveDisabledGuard)\b/g,
+        /(?:abstract\s+)?class\s+([A-Za-z0-9_]+)[^{]*extends\s+(?:HellStyleable|HellNativeInteractiveDisabledGuard)\b/g,
       ),
     ].map((match) => match[1]),
   ]);
@@ -4129,7 +4211,7 @@ function exportedStyleableClasses(source) {
   return decoratedClassModules(source).filter((module) => {
     if (
       module.classSource.includes('extends HellStyleable') ||
-      module.classSource.includes('extends HellPartStyleable')
+      module.moduleSource.includes('hellPartStyler')
     ) {
       return true;
     }

@@ -1,7 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { provideHellLabels } from '@hell-ui/angular/core';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellInput } from '@hell-ui/angular/input';
 import {
@@ -10,6 +9,7 @@ import {
   type HellTableResizeAdapter,
   type HellTableResizeEvent,
   type HellTableResizeItem,
+  provideHellTableUtilitiesLabels,
 } from './table-utilities';
 
 @Component({
@@ -251,7 +251,7 @@ class TableUtilitiesResizerAriaOverrideHost {}
 
 @Component({
   imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
-  providers: [provideHellLabels({ tableUtilities: { resizeColumn: 'Spaltenbreite ändern' } })],
+  providers: [provideHellTableUtilitiesLabels({ resizeColumn: 'Spaltenbreite ändern' })],
   template: `
     <table hellTable>
       <thead hellTableHead>

@@ -126,6 +126,7 @@ export class HellFloatingElement implements AfterViewInit {
   private readonly element = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly destroyRef = inject(DestroyRef);
 
+  /** Register the host element with the owning Floating Scope once rendered. */
   ngAfterViewInit(): void {
     hellRegisterFloatingElement(this.scope, this.element, this.destroyRef);
   }

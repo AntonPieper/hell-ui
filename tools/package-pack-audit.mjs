@@ -59,12 +59,12 @@ export const packagePeerGroups = Object.freeze({
     '@angular/core',
     '@angular/forms',
     '@floating-ui/dom',
-    '@ng-icons/core',
     'ng-primitives',
     'rxjs',
   ]),
   style: Object.freeze(['tailwindcss']),
   router: Object.freeze(['@angular/router']),
+  icons: Object.freeze(['@ng-icons/core']),
   fontAwesome: Object.freeze(['@ng-icons/font-awesome']),
   codeEditor: Object.freeze([
     '@codemirror/commands',
@@ -110,6 +110,7 @@ export const peerGroupContracts = Object.freeze({
     peers: [
       ...packagePeerGroups.core,
       ...packagePeerGroups.style,
+      ...packagePeerGroups.icons,
       ...packagePeerGroups.fontAwesome,
     ],
   },
@@ -122,6 +123,7 @@ export const peerGroupContracts = Object.freeze({
     peers: [
       ...packagePeerGroups.core,
       ...packagePeerGroups.style,
+      ...packagePeerGroups.icons,
       ...packagePeerGroups.fontAwesome,
     ],
   },
@@ -131,6 +133,7 @@ export const peerGroupContracts = Object.freeze({
       ...packagePeerGroups.core,
       ...packagePeerGroups.style,
       ...packagePeerGroups.router,
+      ...packagePeerGroups.icons,
       ...packagePeerGroups.fontAwesome,
     ],
   },
@@ -157,6 +160,7 @@ export const peerGroupContracts = Object.freeze({
     peers: [
       ...packagePeerGroups.core,
       ...packagePeerGroups.style,
+      ...packagePeerGroups.icons,
       ...packagePeerGroups.fontAwesome,
     ],
   },
@@ -173,6 +177,7 @@ export const peerGroupContracts = Object.freeze({
     peers: [
       ...packagePeerGroups.core,
       ...packagePeerGroups.style,
+      ...packagePeerGroups.icons,
       ...packagePeerGroups.fontAwesome,
       ...packagePeerGroups.pdfViewer,
     ],
@@ -485,6 +490,7 @@ function checkPackagePeers(packageJson, failures) {
     const expectedOptionalPeers = [
       ...packagePeerGroups.style,
       ...packagePeerGroups.router,
+      ...packagePeerGroups.icons,
       ...packagePeerGroups.fontAwesome,
       ...packagePeerGroups.tanStackTable,
       ...packagePeerGroups.tanStackVirtual,

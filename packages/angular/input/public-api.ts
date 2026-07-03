@@ -1,3 +1,3 @@
 export * from './input';
-export { HellPartStyleable } from '@hell-ui/angular/core';
-export type { HellRecipe, HellUi, HellUiInput } from '@hell-ui/angular/core';
+export { hellPartStyler } from '@hell-ui/angular/core';
+export type { HellPartStyler, HellPartStylerOptions, HellRecipe, HellUi, HellUiInput } from '@hell-ui/angular/core';

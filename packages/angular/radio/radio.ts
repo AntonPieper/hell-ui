@@ -37,23 +37,26 @@ import {
 } from '@hell-ui/angular/internal/ng-primitives';
 import { containsNode } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
-import {
-  HellOrientation,
-  HellPartStyleable,
-  type HellRecipe,
-  type HellUi,
-} from '@hell-ui/angular/core';
+import { hellPartStyler, HellOrientation, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
+/** Public parts of the HellRadioGroup module, styleable through its Part Style Map. */
 export type HellRadioGroupPart = 'root';
+/** Part Style Map accepted by the HellRadioGroup `ui` input. */
 export type HellRadioGroupUi = HellUi<HellRadioGroupPart>;
 
+/** Public parts of the HellRadio module, styleable through its Part Style Map. */
 export type HellRadioPart = 'root';
+/** Part Style Map accepted by the HellRadio `ui` input. */
 export type HellRadioUi = HellUi<HellRadioPart>;
 
+/** Public parts of the HellNativeRadioGroup module, styleable through its Part Style Map. */
 export type HellNativeRadioGroupPart = 'root';
+/** Part Style Map accepted by the HellNativeRadioGroup `ui` input. */
 export type HellNativeRadioGroupUi = HellUi<HellNativeRadioGroupPart>;
 
+/** Public parts of the HellNativeRadio module, styleable through its Part Style Map. */
 export type HellNativeRadioPart = 'root';
+/** Part Style Map accepted by the HellNativeRadio `ui` input. */
 export type HellNativeRadioUi = HellUi<HellNativeRadioPart>;
 
 const HELL_RADIO_GROUP_RECIPE = {
@@ -127,12 +130,15 @@ class HellRadioRovingRegistry {
     '(focusout)': 'onFocusOut($event)',
   },
 })
-export class HellRadioGroup<T = unknown>
-  extends HellPartStyleable<HellRadioGroupPart>
-  implements ControlValueAccessor, Validator
-{
-  protected readonly recipe = HELL_RADIO_GROUP_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellRadioGroup<T = unknown> implements ControlValueAccessor, Validator {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellRadioGroupPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellRadioGroupPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_RADIO_GROUP_RECIPE,
+  });
 
   readonly orientation = input<HellOrientation>('vertical');
   readonly required = input(false, { transform: booleanAttribute });
@@ -148,7 +154,6 @@ export class HellRadioGroup<T = unknown>
   private readonly disabled = computed(() => this.groupState().disabled());
 
   constructor() {
-    super();
     effect(() => {
       this.required();
       this.disabled();
@@ -315,9 +320,15 @@ export class HellRadioGroup<T = unknown>
     type: 'button',
   },
 })
-export class HellRadio extends HellPartStyleable<HellRadioPart> {
-  protected readonly recipe = HELL_RADIO_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellRadio {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellRadioPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellRadioPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_RADIO_RECIPE,
+  });
 
   private readonly groupState = injectRadioGroupState<unknown>();
   private readonly rovingRegistry = inject(HellRadioRovingRegistry);
@@ -332,7 +343,6 @@ export class HellRadio extends HellPartStyleable<HellRadioPart> {
   protected readonly isDisabled = computed(() => this.groupDisabled() || this.itemDisabled());
 
   constructor() {
-    super();
     const item: HellRadioRovingRegistration = {
       element: this.host.nativeElement,
       checked: this.radioItem.checked,
@@ -367,9 +377,15 @@ export class HellRadio extends HellPartStyleable<HellRadioPart> {
     role: 'radiogroup',
   },
 })
-export class HellNativeRadioGroup extends HellPartStyleable<HellNativeRadioGroupPart> {
-  protected readonly recipe = HELL_NATIVE_RADIO_GROUP_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellNativeRadioGroup {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellNativeRadioGroupPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellNativeRadioGroupPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_NATIVE_RADIO_GROUP_RECIPE,
+  });
 
   readonly orientation = input<HellOrientation>('vertical');
 }
@@ -386,9 +402,15 @@ export class HellNativeRadioGroup extends HellPartStyleable<HellNativeRadioGroup
     '(change)': 'onChange()',
   },
 })
-export class HellNativeRadio extends HellPartStyleable<HellNativeRadioPart> {
-  protected readonly recipe = HELL_NATIVE_RADIO_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellNativeRadio {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellNativeRadioPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellNativeRadioPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_NATIVE_RADIO_RECIPE,
+  });
 
   readonly required = input(false, { alias: 'required', transform: booleanAttribute });
 

@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { provideHellLabels } from '@hell-ui/angular/core';
 import {
   HELL_BREADCRUMBS_DIRECTIVES,
   type HellBreadcrumbEllipsisUi,
@@ -11,6 +10,7 @@ import {
   type HellBreadcrumbPageUi,
   type HellBreadcrumbSeparatorUi,
   type HellBreadcrumbsUi,
+  provideHellBreadcrumbsLabels,
 } from './breadcrumbs';
 
 @Component({
@@ -30,7 +30,7 @@ class BreadcrumbEllipsisHost {}
 
 @Component({
   imports: [...HELL_BREADCRUMBS_DIRECTIVES],
-  providers: [provideHellLabels({ breadcrumbs: { showHiddenNavigation: 'Contract breadcrumbs' } })],
+  providers: [provideHellBreadcrumbsLabels({ showHiddenNavigation: 'Contract breadcrumbs' })],
   template: `
     <nav hellBreadcrumbs>
       <ol hellBreadcrumbList>
@@ -70,7 +70,7 @@ class BreadcrumbPartStyleStringHost {}
 
 @Component({
   imports: [...HELL_BREADCRUMBS_DIRECTIVES],
-  providers: [provideHellLabels({ breadcrumbs: { showHiddenNavigation: 'Map breadcrumbs' } })],
+  providers: [provideHellBreadcrumbsLabels({ showHiddenNavigation: 'Map breadcrumbs' })],
   template: `
     <nav id="breadcrumbs-map" hellBreadcrumbs [ui]="breadcrumbsUi">
       <ol id="list-map" hellBreadcrumbList [ui]="listUi">

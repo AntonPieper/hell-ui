@@ -1148,8 +1148,8 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
   {
     title: 'Configure labels',
     path: '/getting-started',
-    detail: 'provideHellLabels, HELL_LABELS, HELL_DEFAULT_LABELS',
-    terms: 'i18n labels localization aria-label accessibility provideHellLabels HELL_LABELS',
+    detail: 'provideHell<Module>Labels, HELL_<MODULE>_LABELS',
+    terms: 'i18n labels localization aria-label accessibility provideHellPaginationLabels provideHellSkeletonLabels labels',
   },
   {
     title: 'Combobox slots',

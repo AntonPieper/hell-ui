@@ -1,5 +1,5 @@
-import { computed, Directive } from '@angular/core';
-import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
+import { computed, Directive, input } from '@angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 import {
   NgpAccordion,
   NgpAccordionItem,
@@ -8,16 +8,24 @@ import {
   injectAccordionItemState,
 } from 'ng-primitives/accordion';
 
+/** Public parts of the HellAccordion module, styleable through its Part Style Map. */
 export type HellAccordionPart = 'root';
+/** Part Style Map accepted by the HellAccordion `ui` input. */
 export type HellAccordionUi = HellUi<HellAccordionPart>;
 
+/** Public parts of the HellAccordionItem module, styleable through its Part Style Map. */
 export type HellAccordionItemPart = 'root';
+/** Part Style Map accepted by the HellAccordionItem `ui` input. */
 export type HellAccordionItemUi = HellUi<HellAccordionItemPart>;
 
+/** Public parts of the HellAccordionTrigger module, styleable through its Part Style Map. */
 export type HellAccordionTriggerPart = 'root';
+/** Part Style Map accepted by the HellAccordionTrigger `ui` input. */
 export type HellAccordionTriggerUi = HellUi<HellAccordionTriggerPart>;
 
+/** Public parts of the HellAccordionContent module, styleable through its Part Style Map. */
 export type HellAccordionContentPart = 'root';
+/** Part Style Map accepted by the HellAccordionContent `ui` input. */
 export type HellAccordionContentUi = HellUi<HellAccordionContentPart>;
 
 const HELL_ACCORDION_RECIPE = {
@@ -56,9 +64,15 @@ const HELL_ACCORDION_CONTENT_RECIPE = {
     'data-slot': 'root',
   },
 })
-export class HellAccordion extends HellPartStyleable<HellAccordionPart> {
-  protected readonly recipe = HELL_ACCORDION_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellAccordion {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellAccordionPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellAccordionPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_ACCORDION_RECIPE,
+  });
 }
 
 @Directive({
@@ -74,9 +88,15 @@ export class HellAccordion extends HellPartStyleable<HellAccordionPart> {
     'data-slot': 'root',
   },
 })
-export class HellAccordionItem extends HellPartStyleable<HellAccordionItemPart> {
-  protected readonly recipe = HELL_ACCORDION_ITEM_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellAccordionItem {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellAccordionItemPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellAccordionItemPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_ACCORDION_ITEM_RECIPE,
+  });
 }
 
 @Directive({
@@ -88,9 +108,15 @@ export class HellAccordionItem extends HellPartStyleable<HellAccordionItemPart> 
     type: 'button',
   },
 })
-export class HellAccordionTrigger extends HellPartStyleable<HellAccordionTriggerPart> {
-  protected readonly recipe = HELL_ACCORDION_TRIGGER_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellAccordionTrigger {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellAccordionTriggerPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellAccordionTriggerPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_ACCORDION_TRIGGER_RECIPE,
+  });
 }
 
 @Directive({
@@ -103,9 +129,15 @@ export class HellAccordionTrigger extends HellPartStyleable<HellAccordionTrigger
     '[attr.inert]': 'closed() ? "" : null',
   },
 })
-export class HellAccordionContent extends HellPartStyleable<HellAccordionContentPart> {
-  protected readonly recipe = HELL_ACCORDION_CONTENT_RECIPE;
-  protected readonly defaultUiPart = 'root';
+export class HellAccordionContent {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellAccordionContentPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellAccordionContentPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_ACCORDION_CONTENT_RECIPE,
+  });
 
   private readonly accordionItem = injectAccordionItemState<unknown>();
   protected readonly closed = computed(() => !this.accordionItem().open());
