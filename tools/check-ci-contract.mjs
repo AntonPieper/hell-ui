@@ -145,10 +145,12 @@ const e2eGroups = [
     specs: [
       'e2e/accordion-a11y-contracts.spec.ts',
       'e2e/checkbox-a11y-contracts.spec.ts',
+      'e2e/pagination-a11y-contracts.spec.ts',
       'e2e/radio-a11y-contracts.spec.ts',
       'e2e/slider-a11y-contracts.spec.ts',
       'e2e/switch-a11y-contracts.spec.ts',
       'e2e/tabs-a11y-contracts.spec.ts',
+      'e2e/toggle-a11y-contracts.spec.ts',
       'e2e/tooltip-a11y-contracts.spec.ts',
     ],
   },

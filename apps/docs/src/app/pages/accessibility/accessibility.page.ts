@@ -196,10 +196,12 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     path: '/components/pagination',
     rolePattern:
       'Navigation landmark with native page/first/previous/next/last buttons and current-page labels.',
-    keyboardCoverage: 'Native button keyboard only.',
-    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    keyboardCoverage:
+      'Browser contract covers Enter/Space activation of numbered and next/previous controls through the ng-primitives keyboard workaround, plus disabled-boundary tab stops.',
+    automatedCoverage:
+      'Dedicated Playwright browser contract in pagination-a11y-contracts.spec.ts covers landmark naming, first/previous/next/last aria-labels, aria-current page announcement, disabled range-edge buttons, and Enter/Space keyboard activation.',
     knownGaps:
-      'No browser assertion for aria-labels, disabled edge buttons, or current page announcement.',
+      'No critical gap recorded; jump-mode select behavior beyond navigation-controls.spec.ts and consumer-supplied localized labels remain outside this contract.',
   },
   {
     kind: 'Primitive',
@@ -343,10 +345,12 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     name: 'Toggle',
     path: '/components/toggle',
     rolePattern: 'Pressed toggle button and role=group toggle groups through ng-primitives.',
-    keyboardCoverage: 'Native button Enter/Space; group roving behavior is not browser-covered.',
-    automatedCoverage: 'No axe smoke, ARIA snapshot, or browser interaction test yet.',
+    keyboardCoverage:
+      'Browser contract covers standalone Enter/Space aria-pressed toggling plus group roving ArrowLeft/ArrowRight focus with Enter/Space item activation.',
+    automatedCoverage:
+      'Dedicated Playwright browser contract in toggle-a11y-contracts.spec.ts covers standalone aria-pressed toggling, disabled toggle and disabled group semantics, single-select radio replacement, and multiple-select independent selection.',
     knownGaps:
-      'No browser assertion for aria-pressed/selected state, disabled items, or single versus multiple groups.',
+      'No critical gap recorded; icon-only toggles still depend on consumer-supplied aria-labels and axe/ARIA snapshot evidence for the Toggle page is not yet in place.',
   },
   {
     kind: 'Primitive',
