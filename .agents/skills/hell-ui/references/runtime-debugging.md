@@ -23,7 +23,9 @@ hard UI bugs.
   Flyout is the manual full-dismissal exception, and Omnibar uses CDK overlay
   plus focus-only dismissal.
 - Global hotkeys go through `HellGlobalKeydownService`; ng-primitives
-  state-channel writes go through `primitives/adapters/ngp-state-adapters.ts`.
+  state-channel writes go through
+  `packages/angular/internal/ng-primitives/ngp-state-adapters.ts` (combobox,
+  radio, and roving-focus only — select uses public ng-primitives setters).
 - Current Angular, CDK, ng-primitives, CodeMirror, pdf.js, TanStack,
   Playwright, pnpm, or Vercel facts require the configured docs/MCP path before
   relying on memory.

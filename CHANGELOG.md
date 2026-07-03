@@ -40,6 +40,21 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- Upgraded `ng-primitives` from 0.117.2 to 0.123.0 and shrank Hell's
+  version-bound compatibility seams to match
+  (`docs/adr/ng-primitives-state-adapter.md` recheck, 2026-07-03):
+  `HellSelect` now syncs form writes through the public
+  `NgpSelectState.setValue(value, { emit: false })` / `setDisabled()` API
+  instead of the internal state adapter; the popover close adapter
+  (`ngp-popover-close-adapter.ts`) was deleted because ng-primitives now emits
+  `openChange(false)` during trigger destroy while output bindings are still
+  attached; the state adapter keeps only the combobox/radio channel writes and
+  the non-focusing roving-focus tab-stop write. Hell pagination controls now
+  read combined disabled state from the public `injectPagination*State()`
+  providers and restore Enter/Space keyboard activation that regressed
+  upstream (evidence: `packages/angular/pagination/pagination.spec.ts`,
+  `packages/angular/internal/ng-primitives/ngp-state-adapters.spec.ts`).
+
 - Restyled `@hell-ui/angular/listbox` defaults to match the Select/Menu family:
   the listbox root is now a bordered elevated panel and options render as flat
   rows with soft active/selected backgrounds instead of per-option outlines.

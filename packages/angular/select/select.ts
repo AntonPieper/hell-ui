@@ -39,7 +39,6 @@ import {
   ngpFormField,
   provideFormFieldState,
 } from 'ng-primitives/form-field';
-import { writeSelectStateDisabled, writeSelectStateValue } from '@hell-ui/angular/internal/ng-primitives';
 
 export type HellSelectSingleValue<T = unknown> = T | null;
 export type HellSelectMultipleValue<T = unknown> = readonly T[];
@@ -146,7 +145,7 @@ export class HellSelect<T = unknown>
   protected readonly defaultUiPart = 'root';
 
   private readonly select = inject(NgpSelect);
-  private readonly selectState = injectSelectState<NgpSelect>();
+  private readonly selectState = injectSelectState<HellSelectFormValue<T>>();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly valueAccessor = new HellControlValueAccessorBridge<HellSelectFormValue<T>>();
@@ -168,7 +167,7 @@ export class HellSelect<T = unknown>
   }
 
   writeValue(value: HellSelectFormValue<T>): void {
-    writeSelectStateValue(this.selectState(), this.normalizeWriteValue(value));
+    this.selectState().setValue(this.normalizeWriteValue(value), { emit: false });
   }
 
   registerOnChange(fn: (value: HellSelectFormValue<T>) => void): void {
@@ -180,7 +179,7 @@ export class HellSelect<T = unknown>
   }
 
   setDisabledState(isDisabled: boolean): void {
-    writeSelectStateDisabled(this.selectState(), isDisabled);
+    this.selectState().setDisabled(isDisabled);
   }
 
   isOutsideControl(next: EventTarget | Node | null): boolean {
@@ -272,7 +271,7 @@ export class HellSelectDropdown
   protected readonly recipe = HELL_SELECT_DROPDOWN_RECIPE;
   protected readonly defaultUiPart = 'root';
 
-  private readonly dropdown = inject(NgpSelectDropdown);
+  private readonly dropdownElement = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly select = inject(HellSelect, { optional: true });
   private readonly basicSelect = inject(HellSelectBasic, { optional: true });
 
@@ -280,13 +279,13 @@ export class HellSelectDropdown
     super();
     hellRegisterFloatingHost();
     if (this.select) {
-      this.select.registerDropdown(this.dropdown.elementRef.nativeElement);
+      this.select.registerDropdown(this.dropdownElement.nativeElement);
     }
   }
 
   ngOnDestroy(): void {
     if (this.select) {
-      this.select.unregisterDropdown(this.dropdown.elementRef.nativeElement);
+      this.select.unregisterDropdown(this.dropdownElement.nativeElement);
     }
   }
 
