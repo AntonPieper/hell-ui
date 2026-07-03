@@ -54,6 +54,16 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   providers and restore Enter/Space keyboard activation that regressed
   upstream (evidence: `packages/angular/pagination/pagination.spec.ts`,
   `packages/angular/internal/ng-primitives/ngp-state-adapters.spec.ts`).
+  `HellControlledValueState` now absorbs user interactions through a linked
+  signal when a control is not form-controlled, because ng-primitives >= 0.123
+  latches any defined value input as permanently controlled — without this,
+  unbound checkboxes stopped toggling (evidence:
+  `packages/angular/checkbox/checkbox.spec.ts` "toggles an unbound checkbox").
+  Natively disabled date-picker navigation buttons no longer carry a redundant
+  `aria-disabled` attribute: ng-primitives >= 0.123 strips it from
+  hard-disabled native buttons, so Hell's year-shift buttons and the a11y
+  contracts now assert `disabled` + `data-disabled` instead (evidence:
+  `e2e/date-picker-a11y-contracts.spec.ts`).
 
 - Restyled `@hell-ui/angular/listbox` defaults to match the Select/Menu family:
   the listbox root is now a bordered elevated panel and options render as flat

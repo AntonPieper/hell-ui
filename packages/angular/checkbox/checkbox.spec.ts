@@ -35,6 +35,23 @@ class CheckboxHost {
 }
 
 @Component({
+  selector: 'hell-checkbox-unbound-host',
+  imports: [HellCheckbox],
+  template: `
+    <button
+      hellCheckbox
+      indeterminate
+      (checkedChange)="checkedEvents.push($event)"
+      (indeterminateChange)="indeterminateEvents.push($event)"
+    ></button>
+  `,
+})
+class CheckboxUnboundHost {
+  readonly checkedEvents: boolean[] = [];
+  readonly indeterminateEvents: boolean[] = [];
+}
+
+@Component({
   selector: 'hell-checkbox-form-host',
   imports: [ReactiveFormsModule, HellCheckbox],
   template: `
@@ -147,6 +164,7 @@ describe('HellCheckbox', () => {
     await TestBed.configureTestingModule({
       imports: [
         CheckboxHost,
+        CheckboxUnboundHost,
         CheckboxFormHost,
         CheckboxRequiredFormHost,
         CheckboxDisabledRequiredHost,
@@ -185,6 +203,31 @@ describe('HellCheckbox', () => {
     expect(checkbox.getAttribute('required')).toBe('');
     expect(checkbox.getAttribute('aria-required')).toBe('true');
     expect(checkbox.getAttribute('data-required')).toBe('true');
+  });
+
+  it('toggles an unbound checkbox and resolves indeterminate to checked', () => {
+    const fixture = TestBed.createComponent(CheckboxUnboundHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const checkbox = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellCheckbox]');
+
+    expect(checkbox.getAttribute('aria-checked')).toBe('mixed');
+    expect(checkbox.getAttribute('data-indeterminate')).toBe('');
+
+    checkbox.click();
+    fixture.detectChanges();
+
+    expect(checkbox.getAttribute('aria-checked')).toBe('true');
+    expect(checkbox.hasAttribute('data-indeterminate')).toBe(false);
+    expect(host.checkedEvents).toEqual([true]);
+    expect(host.indeterminateEvents).toEqual([false]);
+
+    checkbox.click();
+    fixture.detectChanges();
+
+    expect(checkbox.getAttribute('aria-checked')).toBe('false');
+    expect(host.checkedEvents).toEqual([true, false]);
   });
 
   it('integrates with reactive forms without echoing programmatic writes', async () => {

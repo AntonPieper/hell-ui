@@ -146,11 +146,9 @@ describe('HellDatePicker', () => {
     fixture.detectChanges();
 
     expect(button(fixture.nativeElement, 'Previous year').disabled).toBe(true);
-    expect(button(fixture.nativeElement, 'Previous year').getAttribute('aria-disabled')).toBe(
-      'true',
-    );
+    expect(button(fixture.nativeElement, 'Previous year').getAttribute('data-disabled')).toBe('');
     expect(button(fixture.nativeElement, 'Next year').disabled).toBe(true);
-    expect(button(fixture.nativeElement, 'Next year').getAttribute('aria-disabled')).toBe('true');
+    expect(button(fixture.nativeElement, 'Next year').getAttribute('data-disabled')).toBe('');
   });
 
   it('marks date ranges complete independently of the focused month', () => {

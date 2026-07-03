@@ -118,11 +118,13 @@ test.describe('date picker browser accessibility contract', () => {
       .locator('hell-date-picker')
       .first();
     await expect(disabledPicker.getByRole('grid')).toHaveAttribute('data-disabled', '');
+    // ng-primitives >= 0.123 drops redundant aria-disabled from natively
+    // disabled buttons; data-disabled is the stable disabled marker.
     for (const name of ['Previous year', 'Previous month', 'Next month', 'Next year']) {
       await expect(disabledPicker.getByRole('button', { name })).toBeDisabled();
       await expect(disabledPicker.getByRole('button', { name })).toHaveAttribute(
-        'aria-disabled',
-        'true',
+        'data-disabled',
+        '',
       );
     }
     await expect(dayButton(disabledPicker, 22)).toBeDisabled();
