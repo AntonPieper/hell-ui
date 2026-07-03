@@ -3,6 +3,11 @@
   "dest": "../../dist/hell-pdf-viewer",
   "assets": [
     {
+      "glob": "LICENSE",
+      "input": ".",
+      "output": "."
+    },
+    {
       "glob": "**/*.css",
       "input": "src/lib/pdf-viewer",
       "output": "pdf-viewer"

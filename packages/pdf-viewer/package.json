@@ -1,7 +1,8 @@
 {
   "name": "@hell-ui/pdf-viewer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Hell UI PDF viewer package for Angular, backed by pdf.js.",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AntonPieper/hell-ui.git",
@@ -14,6 +15,7 @@
   },
   "files": [
     "README.md",
+    "LICENSE",
     "package.json",
     "fesm2022/*.mjs",
     "types/*.d.ts",
@@ -37,7 +39,7 @@
   "peerDependencies": {
     "@angular/common": "^22.0.0",
     "@angular/core": "^22.0.0",
-    "@hell-ui/angular": "0.1.0",
+    "@hell-ui/angular": "0.2.0",
     "@ng-icons/core": "^33.0.0",
     "@ng-icons/font-awesome": "^33.0.0",
     "pdfjs-dist": "5.6.205",

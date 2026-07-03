@@ -5,6 +5,8 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-03
+
 ### Breaking changes
 
 - Removed the accidental public hotkey helpers and listener services from
@@ -59,6 +61,26 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   consumer bundle.
 
 ### Added
+
+- Licensed the workspace and both published packages under MIT: a root
+  `LICENSE` file, per-package `LICENSE` copies shipped in the packed tarballs,
+  and `"license": "MIT"` metadata in `@hell-ui/angular` and
+  `@hell-ui/pdf-viewer`. The pack audit now requires the packed `LICENSE`
+  (evidence: `tools/package-pack-audit.mjs`).
+- Added a GitHub Packages publish workflow so tagged releases publish both
+  package tarballs to `npm.pkg.github.com` alongside the documented npmjs
+  trusted-publishing path (evidence: `docs/release/npm-publishing.md`).
+- Added unit coverage for the previously untested `@hell-ui/angular/avatar-group`
+  entry point and the internal embedded-input UI contract (evidence:
+  `packages/angular/avatar-group/avatar-group.spec.ts`,
+  `packages/angular/internal/input/embedded-input-ui.spec.ts`).
+- Added dedicated browser accessibility contracts for Pagination (aria labels,
+  disabled edge controls, current-page announcement, keyboard activation) and
+  Toggle (aria-pressed, disabled, group modes) (evidence:
+  `e2e/pagination-a11y-contracts.spec.ts`, `e2e/toggle-a11y-contracts.spec.ts`).
+- Added a Renovate configuration for automated dependency update proposals,
+  with `ng-primitives` bumps gated behind dashboard approval per the
+  version-bound seam ADR (evidence: `docs/adr/ng-primitives-state-adapter.md`).
 
 - Expanded API-report guard coverage from 6 to 41 entry points: every
   non-experimental `@hell-ui/angular` entry point now has a committed API
@@ -157,6 +179,13 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 - Toast: the accent bar follows the themed corner radius via an inset overlay
   border, and the Glass skin now applies its translucency and backdrop blur to
   toasts.
+
+### Security
+
+- Forced transitive `fast-uri` to a patched release (>= 3.1.2) via a pnpm
+  override, clearing GHSA-q3j6-qgpj-74h6 and GHSA-v39h-62p7-jpjc from the
+  docs-app build toolchain audit (evidence: `CHANGELOG.md` section 0.2.0,
+  `pnpm audit --prod`).
 
 ## [0.1.0] - 2026-06-03
 

@@ -6,6 +6,11 @@
   ],
   "assets": [
     {
+      "glob": "LICENSE",
+      "input": ".",
+      "output": "."
+    },
+    {
       "glob": "tokens.css",
       "input": ".",
       "output": "."

@@ -457,6 +457,7 @@ function expectedPackageFiles(packageName) {
   if (packageName === angularPackageName) {
     return [
       'README.md',
+      'LICENSE',
       'package.json',
       '**/package.json',
       'fesm2022/*.mjs',
@@ -467,7 +468,7 @@ function expectedPackageFiles(packageName) {
     ];
   }
   if (packageName === splitPdfPackageName) {
-    return ['README.md', 'package.json', 'fesm2022/*.mjs', 'types/*.d.ts', 'pdf-viewer/**/*.css'];
+    return ['README.md', 'LICENSE', 'package.json', 'fesm2022/*.mjs', 'types/*.d.ts', 'pdf-viewer/**/*.css'];
   }
   return null;
 }
@@ -807,7 +808,7 @@ function checkPackedFileAccounting(packageJson, tarball, files, fileSet, failure
   const exportsMap = packageJson.exports;
   if (!exportsMap || typeof exportsMap !== 'object' || Array.isArray(exportsMap)) return;
 
-  const allowed = new Set(['README.md', 'package.json']);
+  const allowed = new Set(['README.md', 'LICENSE', 'package.json']);
 
   const packageJsonExportTarget = normalizeExportTarget(exportsMap['./package.json']?.default);
   if (packageJsonExportTarget) allowed.add(packageJsonExportTarget);
@@ -854,7 +855,10 @@ function checkPackedFileAccounting(packageJson, tarball, files, fileSet, failure
 
 function expectedExplicitPackedFiles(packageName) {
   if (packageName === angularPackageName) {
-    return [...angularRecipeSourceFiles, 'assets/hell-ui-logo.svg'];
+    return [...angularRecipeSourceFiles, 'assets/hell-ui-logo.svg', 'LICENSE'];
+  }
+  if (packageName === splitPdfPackageName) {
+    return ['LICENSE'];
   }
   return [];
 }

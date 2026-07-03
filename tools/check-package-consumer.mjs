@@ -1396,6 +1396,7 @@ function readWorkspaceScalarMap(sectionName) {
   for (const line of source.split(/\r?\n/)) {
     if (/^\S/.test(line)) inSection = line === `${sectionName}:`;
     if (!inSection || !line.startsWith('  ')) continue;
+    if (/^\s*#/.test(line)) continue;
 
     const match = line.match(/^\s+(['"]?)([^'":]+)\1:\s+(['"]?)([^'"]+)\3\s*$/);
     if (match) map[match[2]] = match[4];

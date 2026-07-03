@@ -117,6 +117,11 @@ mapped to command evidence and concrete evidence checks.
           "path": "etc/api-reports/hell-ui-angular-app-shell.api.md"
         },
         {
+          "type": "fileExists",
+          "label": "tooltip API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-tooltip.api.md"
+        },
+        {
           "type": "releaseDryRunEvidence",
           "label": "full release dry-run passed API report task"
         }

@@ -52,10 +52,12 @@ const ciGroups = [
     testMatch: [
       'accordion-a11y-contracts.spec.ts',
       'checkbox-a11y-contracts.spec.ts',
+      'pagination-a11y-contracts.spec.ts',
       'radio-a11y-contracts.spec.ts',
       'slider-a11y-contracts.spec.ts',
       'switch-a11y-contracts.spec.ts',
       'tabs-a11y-contracts.spec.ts',
+      'toggle-a11y-contracts.spec.ts',
       'tooltip-a11y-contracts.spec.ts',
     ],
   },

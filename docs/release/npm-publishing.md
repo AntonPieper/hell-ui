@@ -43,7 +43,35 @@ The release workflow lives at `.github/workflows/npm-publish.yml` in this reposi
 - The job runs on `ubuntu-latest` with Node 24 and the pinned pnpm version so trusted publishing and provenance are available.
 - The OIDC-enabled publish job does not install dependencies, build, or run package scripts; it only verifies the downloaded artifacts and runs `pnpm publish "$tarball" --access public --provenance --no-git-checks` for each audited package tarball.
 
-`workflow_dispatch` is evidence-only. To publish, create a protected tag whose name matches the package version, for example `v0.1.0`.
+`workflow_dispatch` is evidence-only. To publish, create a protected tag whose name matches the package version, for example `v0.2.0`.
+
+The npmjs publish job only runs when the repository variable
+`HELL_ENABLE_NPMJS_PUBLISH` is set to `true`. Until the npm trusted-publisher
+records above exist for both packages, leave the variable unset so tag pushes
+still produce dry-run evidence and audited tarballs without a doomed publish
+attempt.
+
+## GitHub Packages registry
+
+Tagged releases also publish both packages to the GitHub Packages npm registry
+through `.github/workflows/github-packages-publish.yml`:
+
+- Tag pushes matching `v*.*.*` rebuild `@hell-ui/angular` and
+  `@hell-ui/pdf-viewer`, re-run the pack audit, verify the tag matches both
+  package versions, and publish the built packages to
+  `https://npm.pkg.github.com`.
+- The publish job rewrites each built `package.json`'s `publishConfig.registry`
+  to GitHub Packages at publish time only; the source manifests keep
+  `https://registry.npmjs.org/` as required by the CI contract.
+- GitHub Packages scopes npm packages to the owning GitHub account. The
+  `@hell-ui` scope belongs to the `Hell-UI` GitHub account, not to
+  `AntonPieper`, so the default `GITHUB_TOKEN` cannot publish it from this
+  repository. Provide a repository secret `HELL_UI_GITHUB_PACKAGES_TOKEN`
+  containing a `packages:write` token from the `Hell-UI` account (or transfer
+  the repository to that account, after which the default token suffices).
+- Consumers install from GitHub Packages with an `.npmrc` entry:
+  `@hell-ui:registry=https://npm.pkg.github.com` plus an authenticated
+  `//npm.pkg.github.com/:_authToken`.
 
 ## Release steps
 
