@@ -1,0 +1,17 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":semanticCommits"],
+  "rangeStrategy": "auto",
+  "packageRules": [
+    {
+      "description": "ng-primitives is an exact-pinned, version-bound seam (docs/adr/ng-primitives-state-adapter.md); every bump needs the ADR recheck before merge.",
+      "matchPackageNames": ["ng-primitives"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Angular majors move together with the workspace catalog; group them so a partial bump never lands.",
+      "matchPackageNames": ["@angular/**", "ng-packagr"],
+      "groupName": "angular toolchain"
+    }
+  ]
+}

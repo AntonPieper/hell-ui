@@ -58,6 +58,9 @@ catalog:
   "vitest": "4.1.5"
 overrides:
   "@phenomnomnominal/tsquery": "6.2.0"
+  # GHSA-q3j6-qgpj-74h6 / GHSA-v39h-62p7-jpjc: force patched fast-uri in the
+  # @angular-devkit/schematics -> ajv chain until upstream bumps it.
+  "fast-uri": ">=3.1.2"
 packageExtensions:
   # ng-primitives/dialog imports @angular/router without declaring the peer.
   ng-primitives:
