@@ -9,7 +9,7 @@ Use this guide when moving an app from local/alpha Hell imports to the first bet
 
 ## Quick path
 
-1. Start from an Angular 21 app that satisfies `@angular/common`, `@angular/core`, `@angular/forms`, and `rxjs` peer ranges from [`packages/angular/package.json`](../../packages/angular/package.json).
+1. Start from an Angular 22 app that satisfies `@angular/common`, `@angular/core`, `@angular/forms`, and `rxjs` peer ranges from [`packages/angular/package.json`](../../packages/angular/package.json).
 2. Install the smallest peer tier for the entry points and CSS you import.
 3. Replace root or kitchen-sink imports with narrow secondary entry points where possible.
 4. Import only the Hell CSS files you need. Migrated components use `ui` Part Style Maps; components not yet migrated are tracked in the legacy allowlist and MUST replace `unstyled`.
@@ -27,6 +27,20 @@ Release-candidate evidence uses the scenario set in
 but it does not put pdf.js back into `@hell-ui/angular` peer metadata.
 
 A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`; install any missing core peers explicitly. Use `pnpm add` in consumer snippets below because the package-consumer proof uses pnpm strict-peer installs.
+
+Angular 22 / TypeScript 6 strict-pnpm consumers also need the current transitive
+`ng-primitives` peer metadata workaround until `ng-primitives` moves from
+`@phenomnomnominal/tsquery@6.1.3` to a TS-6-compatible release:
+
+```json
+{
+  "pnpm": {
+    "overrides": {
+      "@phenomnomnominal/tsquery": "6.2.0"
+    }
+  }
+}
+```
 
 | Consumer path                 | Install peers for this path                                                                                                                     | Entry points / CSS                                                                                                                                                                                                                | Proof scenario                                                                          |
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |

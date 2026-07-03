@@ -493,6 +493,7 @@ try {
 
 const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 const workspaceCatalog = readWorkspaceCatalog();
+const workspaceOverrides = readWorkspaceOverrides();
 const deps = { ...(rootPackage.dependencies ?? {}), ...workspaceCatalog };
 const devDeps = { ...(rootPackage.devDependencies ?? {}), ...workspaceCatalog };
 const scenarios = materializeScenarios(packageConsumerScenarioCatalog);
@@ -1268,6 +1269,13 @@ function writeConsumerWorkspace(workspace, scenarios, dependencies = unionDepend
       ...(usesTailwindCss ? tailwindPostcssDevDeps : []),
       'typescript',
     ]),
+    ...(Object.keys(workspaceOverrides).length
+      ? {
+          pnpm: {
+            overrides: workspaceOverrides,
+          },
+        }
+      : {}),
   };
   packageJson.dependencies[packageName] = pathToFileURL(packedHell.tarball).href;
   if (scenarios.some((candidate) => candidate.installPdfPackage)) {
@@ -1373,20 +1381,28 @@ function pickDeps(source, names) {
 }
 
 function readWorkspaceCatalog() {
+  return readWorkspaceScalarMap('catalog');
+}
+
+function readWorkspaceOverrides() {
+  return readWorkspaceScalarMap('overrides');
+}
+
+function readWorkspaceScalarMap(sectionName) {
   const workspacePath = join(root, 'pnpm-workspace.yaml');
   const source = readFileSync(workspacePath, 'utf8');
-  const catalog = {};
-  let inCatalog = false;
+  const map = {};
+  let inSection = false;
 
   for (const line of source.split(/\r?\n/)) {
-    if (/^\S/.test(line)) inCatalog = line === 'catalog:';
-    if (!inCatalog || !line.startsWith('  ')) continue;
+    if (/^\S/.test(line)) inSection = line === `${sectionName}:`;
+    if (!inSection || !line.startsWith('  ')) continue;
 
     const match = line.match(/^\s+(['"]?)([^'":]+)\1:\s+(['"]?)([^'"]+)\3\s*$/);
-    if (match) catalog[match[2]] = match[4];
+    if (match) map[match[2]] = match[4];
   }
 
-  return catalog;
+  return map;
 }
 
 function exactInstalledVersion(name) {
