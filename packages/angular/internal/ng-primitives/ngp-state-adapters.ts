@@ -2,36 +2,33 @@ import type { State } from 'ng-primitives/state';
 import type { NgpCombobox } from 'ng-primitives/combobox';
 import type { NgpRadioGroup } from 'ng-primitives/radio';
 import type { NgpRovingFocusGroupState } from 'ng-primitives/roving-focus';
-import type { NgpSelect } from 'ng-primitives/select';
 
 /**
  * Internal compatibility seam for ng-primitives form-control state sync.
  *
- * Deliberate version-bound State-channel seam for `ng-primitives@0.117.2`, not
+ * Deliberate version-bound State-channel seam for `ng-primitives@0.123.0`, not
  * an ad hoc primitive-instance state escape hatch.
- * Context7 documents state providers as the programmatic-control seam, and the
- * installed `ng-primitives@0.117.2` typings/source expose select, combobox, and
- * radio-group value/disabled state as typed public `State<T>` channels while the
- * primitives still do not expose complete CVA-safe `setValue` / `setDisabled`
- * APIs.
+ * The installed `ng-primitives@0.123.0` typings/source now expose CVA-safe
+ * public setters for select, so `HellSelect` calls those directly. Combobox and
+ * radio group still do not expose complete CVA-safe `setValue` / `setDisabled`
+ * APIs, and roving focus still lacks a non-focusing active-item setter.
  *
  * Keep `ng-primitives` pinned while this fallback exists. Upgrade/removal path:
  * rerun `docs/adr/ng-primitives-state-adapter.md` for the target version, keep
  * preferring public setters when they exist, and remove the State-channel
- * fallback once select, combobox, and radio group all have
- * public value + disabled setters that support silent CVA writes, and roving
- * focus has a public non-focusing active-item setter.
+ * fallback once combobox and radio group have public value + disabled setters
+ * that support silent CVA writes, and roving focus has a public non-focusing
+ * active-item setter.
  *
  * If ng-primitives changes these writable channels before adding setters, fail
- * loudly here instead of silently dropping form writes across select, combobox,
- * and radio.
+ * loudly here instead of silently dropping form writes across combobox and radio.
  *
  * @internal
  */
 
-export const HELL_NGP_STATE_WRITER_VERSION = 'ng-primitives@0.117.2';
+export const HELL_NGP_STATE_WRITER_VERSION = 'ng-primitives@0.123.0';
 export const HELL_NGP_STATE_WRITER_UPGRADE_PATH =
-  'Upgrade/removal path: rerun docs/adr/ng-primitives-state-adapter.md for the target ng-primitives version; keep the package pin while this State<T> fallback is needed; remove the fallback once public value+disabled setters support silent CVA writes and roving-focus exposes a non-focusing active-item setter.';
+  'Upgrade/removal path: rerun docs/adr/ng-primitives-state-adapter.md for the target ng-primitives version; keep the package pin while this State<T> fallback is needed; remove the fallback once combobox/radio public value+disabled setters support silent CVA writes and roving-focus exposes a non-focusing active-item setter.';
 
 type WritableStateChannel<T> = { set: (value: T) => void };
 type StateSetterOptions = { emit?: boolean };
@@ -41,11 +38,6 @@ type StateWithActiveItemChannel = { activeItem: WritableStateChannel<string | nu
 type StateWithValueSetter<T> = { setValue?: (value: T, options?: StateSetterOptions) => void };
 type StateWithDisabledSetter = { setDisabled?: (isDisabled: boolean) => void };
 
-type SelectStateWriter = State<NgpSelect> &
-  StateWithValueChannel<unknown> &
-  StateWithDisabledChannel &
-  StateWithValueSetter<unknown> &
-  StateWithDisabledSetter;
 type ComboboxStateWriter = State<NgpCombobox> &
   StateWithValueChannel<unknown> &
   StateWithDisabledChannel &
@@ -160,22 +152,6 @@ function writeStateDisabled(
 
   assertWritableDisabledSignal(state, operation);
   state.disabled.set(isDisabled);
-}
-
-/**
- * Internal ng-primitives form-state sync for select CVA writes. Replace this
- * with public ng-primitives setters when NgpSelect exposes them.
- */
-export function writeSelectStateValue(state: SelectStateWriter, value: unknown): void {
-  writeStateValue(state, value, 'writeSelectStateValue');
-}
-
-/**
- * Internal ng-primitives form-state sync for select CVA disabled sync. Replace
- * this with public ng-primitives setters when NgpSelect exposes them.
- */
-export function writeSelectStateDisabled(state: SelectStateWriter, isDisabled: boolean): void {
-  writeStateDisabled(state, isDisabled, 'writeSelectStateDisabled');
 }
 
 /**

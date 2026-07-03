@@ -21,7 +21,7 @@ non-modal surface with widened boundary semantics.
 - Context7 `/websites/angular_dev` confirmed Angular CDK connected overlays expose outside-click behavior through `cdkConnectedOverlay` / overlay outside-pointer APIs, and Angular A11y owns focus tools such as focus traps.
 - Context7 `/websites/angular_dev` showed Angular Aria currently documents listbox/combobox popup patterns, including CDK Overlay integration, but not a general inline flyout/dismissible-layer primitive.
 - Context7 `/ng-primitives/ng-primitives` documented popover/dialog `closeOnOutsideClick` and `closeOnEscape` dismiss guards.
-- Local `ng-primitives@0.117.2` typings confirm `NgpPopoverTrigger` owns overlay creation from a `TemplateRef`, exposes `closeOnOutsideClick` / `closeOnEscape`, and renders through the ng-primitives overlay registry rather than attaching behavior to an already-rendered inline element.
+- Local `ng-primitives@0.123.0` typings confirm `NgpPopoverTrigger` owns overlay creation from a `TemplateRef`, exposes `closeOnOutsideClick` / `closeOnEscape`, and renders through the ng-primitives overlay registry rather than attaching behavior to an already-rendered inline element.
 - Local Angular CDK 21.2 runtime confirms `CdkConnectedOverlay` emits `overlayOutsideClick` from the overlay ref outside-pointer stream and filters trigger-origin clicks.
 
 ## Decision

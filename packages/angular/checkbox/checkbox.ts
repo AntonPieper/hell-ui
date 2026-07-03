@@ -4,11 +4,14 @@ import {
   Directive,
   ElementRef,
   booleanAttribute,
+  computed,
   effect,
   forwardRef,
   inject,
   input,
+  linkedSignal,
   output,
+  signal,
 } from '@angular/core';
 import {
   ControlValueAccessor,
@@ -19,7 +22,6 @@ import {
   type Validator,
 } from '@angular/forms';
 import { ngpCheckbox } from 'ng-primitives/checkbox';
-import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
 import { HellPartStyleable, type HellRecipe, type HellUi } from '@hell-ui/angular/core';
 
@@ -113,16 +115,18 @@ export class HellCheckbox
   readonly checkedChange = output<boolean>();
   readonly indeterminateChange = output<boolean>();
 
-  private readonly controlledChecked = new HellControlledValueState<boolean>({
-    externalValue: this.checked,
-    externalDisabled: this.disabled,
-    initialValue: false,
-  });
+  private readonly formControlled = signal(false);
+  private readonly formChecked = signal(false);
+  private readonly formDisabled = signal(false);
+  private readonly localChecked = linkedSignal(() => this.checked());
+  private readonly localIndeterminate = linkedSignal(() => this.indeterminate());
   private readonly valueAccessor = new HellControlValueAccessorBridge<boolean>();
   private onValidatorChange: () => void = () => {};
 
-  private readonly effectiveChecked = this.controlledChecked.value;
-  private readonly effectiveDisabled = this.controlledChecked.disabled;
+  private readonly effectiveChecked = computed(() =>
+    this.formControlled() ? this.formChecked() : this.localChecked(),
+  );
+  private readonly effectiveDisabled = computed(() => this.disabled() || this.formDisabled());
 
   constructor() {
     super();
@@ -135,18 +139,23 @@ export class HellCheckbox
 
   protected readonly state = ngpCheckbox({
     checked: this.effectiveChecked,
-    indeterminate: this.indeterminate,
+    indeterminate: this.localIndeterminate,
     disabled: this.effectiveDisabled,
     onCheckedChange: (checked) => {
-      this.controlledChecked.acceptUserValue(checked);
+      this.localChecked.set(checked);
+      if (this.formControlled()) this.formChecked.set(checked);
       this.checkedChange.emit(checked);
       this.valueAccessor.emitValue(checked);
     },
-    onIndeterminateChange: (indeterminate) => this.indeterminateChange.emit(indeterminate),
+    onIndeterminateChange: (indeterminate) => {
+      this.localIndeterminate.set(indeterminate);
+      this.indeterminateChange.emit(indeterminate);
+    },
   });
 
   writeValue(value: boolean): void {
-    this.controlledChecked.writeValue(value === true);
+    this.formControlled.set(true);
+    this.formChecked.set(value === true);
   }
 
   registerOnChange(fn: (value: boolean) => void): void {
@@ -162,7 +171,7 @@ export class HellCheckbox
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.controlledChecked.setDisabledState(isDisabled);
+    this.formDisabled.set(isDisabled);
   }
 
   protected markControlTouched(): void {

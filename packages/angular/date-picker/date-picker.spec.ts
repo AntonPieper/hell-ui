@@ -130,27 +130,41 @@ describe('HellDatePicker', () => {
     expect(label(fixture.nativeElement)).toBe('April 2027');
   });
 
-  it('disables year navigation when the picker is disabled or the target month is outside bounds', () => {
+  it('disables year navigation when the picker is disabled or the target month is outside bounds', async () => {
     vi.setSystemTime(new Date(2026, 3, 22));
     const fixture = TestBed.createComponent(DatePickerHost);
     fixture.componentInstance.disabled.set(true);
     fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
 
     expect(button(fixture.nativeElement, 'Previous year').disabled).toBe(true);
     expect(button(fixture.nativeElement, 'Previous year').getAttribute('data-disabled')).toBe('');
+    expect(button(fixture.nativeElement, 'Previous month').disabled).toBe(true);
+    expect(button(fixture.nativeElement, 'Previous month').getAttribute('aria-disabled')).toBe(
+      'true',
+    );
     expect(button(fixture.nativeElement, 'Next year').disabled).toBe(true);
+    expect(button(fixture.nativeElement, 'Next month').getAttribute('aria-disabled')).toBe('true');
 
     fixture.componentInstance.disabled.set(false);
     fixture.componentInstance.min.set(new Date(2026, 3, 1));
     fixture.componentInstance.max.set(new Date(2026, 11, 31));
+    fixture.detectChanges();
+    await fixture.whenStable();
     fixture.detectChanges();
 
     expect(button(fixture.nativeElement, 'Previous year').disabled).toBe(true);
     expect(button(fixture.nativeElement, 'Previous year').getAttribute('aria-disabled')).toBe(
       'true',
     );
+    expect(button(fixture.nativeElement, 'Previous month').disabled).toBe(true);
+    expect(button(fixture.nativeElement, 'Previous month').getAttribute('aria-disabled')).toBe(
+      'true',
+    );
     expect(button(fixture.nativeElement, 'Next year').disabled).toBe(true);
     expect(button(fixture.nativeElement, 'Next year').getAttribute('aria-disabled')).toBe('true');
+    expect(button(fixture.nativeElement, 'Next month').disabled).toBe(false);
   });
 
   it('marks date ranges complete independently of the focused month', () => {

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   Directive,
+  ElementRef,
   computed,
   effect,
   inject,
@@ -196,6 +197,54 @@ export class HellDatePickerNextYear {
   }
 }
 
+@Directive({
+  selector: 'button[hellDatePickerPreviousMonthA11y]',
+})
+class HellDatePickerPreviousMonthA11y {
+  private readonly host = inject(ElementRef<HTMLButtonElement>);
+  protected readonly previousMonth = inject<NgpDatePickerPreviousMonth<Date>>(
+    NgpDatePickerPreviousMonth,
+  );
+
+  constructor() {
+    effect(() => this.syncAriaDisabled(this.previousMonth.disabled()));
+  }
+
+  private syncAriaDisabled(disabled: boolean): void {
+    syncMonthNavAriaDisabled(this.host.nativeElement, disabled);
+  }
+}
+
+@Directive({
+  selector: 'button[hellDatePickerNextMonthA11y]',
+})
+class HellDatePickerNextMonthA11y {
+  private readonly host = inject(ElementRef<HTMLButtonElement>);
+  protected readonly nextMonth = inject<NgpDatePickerNextMonth<Date>>(NgpDatePickerNextMonth);
+
+  constructor() {
+    effect(() => this.syncAriaDisabled(this.nextMonth.disabled()));
+  }
+
+  private syncAriaDisabled(disabled: boolean): void {
+    syncMonthNavAriaDisabled(this.host.nativeElement, disabled);
+  }
+}
+
+function syncMonthNavAriaDisabled(element: HTMLButtonElement, disabled: boolean): void {
+  setMonthNavAriaDisabled(element, disabled);
+  // ngpButton clears aria-disabled for hard-disabled native buttons.
+  queueMicrotask(() => setMonthNavAriaDisabled(element, disabled));
+}
+
+function setMonthNavAriaDisabled(element: HTMLButtonElement, disabled: boolean): void {
+  if (disabled) {
+    element.setAttribute('aria-disabled', 'true');
+  } else {
+    element.removeAttribute('aria-disabled');
+  }
+}
+
 const PICKER_TEMPLATE = `
   <div data-slot="header" [class]="part('header')">
     <div data-slot="nav" [class]="part('nav')" data-direction="previous">
@@ -216,6 +265,7 @@ const PICKER_TEMPLATE = `
         [class]="part('navButton')"
         type="button"
         ngpDatePickerPreviousMonth
+        hellDatePickerPreviousMonthA11y
         [attr.aria-label]="labels.datePicker.previousMonth"
       >
         <hell-icon name="faSolidChevronLeft" />
@@ -230,6 +280,7 @@ const PICKER_TEMPLATE = `
         [class]="part('navButton')"
         type="button"
         ngpDatePickerNextMonth
+        hellDatePickerNextMonthA11y
         [attr.aria-label]="labels.datePicker.nextMonth"
       >
         <hell-icon name="faSolidChevronRight" />
@@ -333,6 +384,8 @@ const PICKER_IMPORTS = [
   NgpDatePickerDateButton,
   HellDatePickerPreviousYear,
   HellDatePickerNextYear,
+  HellDatePickerPreviousMonthA11y,
+  HellDatePickerNextMonthA11y,
 ] as const;
 
 /**

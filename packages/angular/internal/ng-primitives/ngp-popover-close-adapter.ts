@@ -1,10 +1,10 @@
 import { DestroyRef, effect } from '@angular/core';
 import type { NgpPopoverTrigger } from 'ng-primitives/popover';
 
-export const HELL_NGP_POPOVER_CLOSE_ADAPTER_VERSION = 'ng-primitives@0.117.2';
+export const HELL_NGP_POPOVER_CLOSE_ADAPTER_VERSION = 'ng-primitives@0.123.0';
 
 export const HELL_NGP_POPOVER_CLOSE_ADAPTER_REASON =
-  'ng-primitives@0.117.2 emits popover openChange(false) from overlay destroy after Angular destroys the trigger OutputRef, causing Angular NG0953 warnings. Keep this adapter only until ng-primitives guards overlay destroy callbacks or exposes a public close callback hook.';
+  'ng-primitives@0.123.0 still wires popover overlay onClose to openChange.emit(false) and destroys that overlay from ngOnDestroy, causing Angular NG0953 warnings after the trigger OutputRef is destroyed. Keep this adapter only until ng-primitives guards overlay destroy callbacks or exposes a public close callback hook.';
 
 /**
  * Version-bound ng-primitives popover close adapter.
@@ -44,12 +44,16 @@ interface HellNgpPopoverOverlay {
   updateConfig(config: HellNgpPopoverOverlayConfig): void;
 }
 
-interface HellNgpPopoverTriggerWithOverlay {
-  overlay(): unknown;
+interface HellNgpPopoverTriggerWithOverlayState {
+  state?: {
+    overlay?: () => unknown;
+  };
+  overlay?: () => unknown;
 }
 
 function popoverOverlay(trigger: NgpPopoverTrigger): HellNgpPopoverOverlay | null {
-  const overlay = (trigger as unknown as HellNgpPopoverTriggerWithOverlay).overlay();
+  const candidate = trigger as unknown as HellNgpPopoverTriggerWithOverlayState;
+  const overlay = candidate.state?.overlay?.() ?? candidate.overlay?.();
   return isPopoverOverlay(overlay) ? overlay : null;
 }
 

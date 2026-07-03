@@ -290,7 +290,7 @@ export class HellComboboxDropdown
   protected readonly recipe = HELL_COMBOBOX_DROPDOWN_RECIPE;
   protected readonly defaultUiPart = 'root';
 
-  private readonly dropdown = inject(NgpComboboxDropdown);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly combobox = inject(HellCombobox, { optional: true });
   private readonly basicCombobox = inject(HellComboboxBasic, { optional: true });
 
@@ -298,13 +298,13 @@ export class HellComboboxDropdown
     super();
     hellRegisterFloatingHost();
     if (this.combobox) {
-      this.combobox.registerDropdown(this.dropdown.elementRef.nativeElement);
+      this.combobox.registerDropdown(this.host.nativeElement);
     }
   }
 
   ngOnDestroy(): void {
     if (this.combobox) {
-      this.combobox.unregisterDropdown(this.dropdown.elementRef.nativeElement);
+      this.combobox.unregisterDropdown(this.host.nativeElement);
     }
   }
 

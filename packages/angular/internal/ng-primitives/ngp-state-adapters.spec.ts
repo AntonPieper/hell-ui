@@ -5,11 +5,9 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NgpCombobox, injectComboboxState } from 'ng-primitives/combobox';
 import { NgpRadioGroup, injectRadioGroupState } from 'ng-primitives/radio';
 import { NgpRovingFocusGroup, injectRovingFocusGroupState } from 'ng-primitives/roving-focus';
-import { NgpSelect, injectSelectState } from 'ng-primitives/select';
 
 import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
 import { HellRadio, HellRadioGroup } from '@hell-ui/angular/radio';
-import { HELL_SELECT_DIRECTIVES } from '@hell-ui/angular/select';
 import {
   HELL_NGP_STATE_WRITER_UPGRADE_PATH,
   HELL_NGP_STATE_WRITER_VERSION,
@@ -18,25 +16,9 @@ import {
   writeRadioGroupStateDisabled,
   writeRadioGroupStateValue,
   writeRovingFocusActiveItem,
-  writeSelectStateDisabled,
-  writeSelectStateValue,
 } from './ngp-state-adapters';
 
 type WritableSignalLike<T> = (() => T) & { set: (value: T) => void };
-
-@Directive({
-  selector: '[hellSelectStateProbe]',
-  hostDirectives: [NgpSelect],
-})
-class SelectStateProbe {
-  readonly state = injectSelectState<NgpSelect>();
-}
-
-@Component({
-  imports: [SelectStateProbe],
-  template: `<button hellSelectStateProbe type="button"></button>`,
-})
-class SelectStateProbeHost {}
 
 @Directive({
   selector: '[hellComboboxStateProbe]',
@@ -79,36 +61,6 @@ class RovingFocusGroupStateProbe {
   template: `<div hellRovingFocusGroupStateProbe></div>`,
 })
 class RovingFocusGroupStateProbeHost {}
-
-@Directive({
-  selector: '[hellSelectCvaStateProbe]',
-})
-class SelectCvaStateProbe {
-  readonly state = injectSelectState<NgpSelect>();
-}
-
-@Component({
-  imports: [ReactiveFormsModule, SelectCvaStateProbe, ...HELL_SELECT_DIRECTIVES],
-  template: `
-    <button
-      hellSelect
-      hellSelectCvaStateProbe
-      type="button"
-      [formControl]="control"
-      (valueChange)="values.push($any($event))"
-    >
-      <span hellSelectValue>Selection</span>
-      <div *hellSelectPortal hellSelectDropdown>
-        <div hellSelectOption value="low">Low</div>
-        <div hellSelectOption value="high">High</div>
-      </div>
-    </button>
-  `,
-})
-class SelectCvaContractHost {
-  readonly control = new FormControl<string | null>(null);
-  readonly values: Array<string | null> = [];
-}
 
 @Directive({
   selector: '[hellComboboxCvaStateProbe]',
@@ -230,33 +182,16 @@ function expectAdapterError(fn: () => void, operation: string, detail: RegExp): 
 
 describe('ngp form-state compatibility helpers', () => {
   it('documents the installed ng-primitives version and upgrade/removal path this form-state adapter targets', () => {
-    expect(HELL_NGP_STATE_WRITER_VERSION).toBe('ng-primitives@0.117.2');
+    expect(HELL_NGP_STATE_WRITER_VERSION).toBe('ng-primitives@0.123.0');
     expect(HELL_NGP_STATE_WRITER_UPGRADE_PATH).toContain('docs/adr/ng-primitives-state-adapter.md');
-    expect(HELL_NGP_STATE_WRITER_UPGRADE_PATH).toContain('public value+disabled setters');
+    expect(HELL_NGP_STATE_WRITER_UPGRADE_PATH).toContain('combobox/radio public value+disabled setters');
   });
 
-  describe('installed ng-primitives public typed State<T> channel drift', () => {
+  describe('installed ng-primitives public typed State<T> channel drift for remaining fallbacks', () => {
     beforeEach(async () => {
       await TestBed.configureTestingModule({
-        imports: [
-          SelectStateProbeHost,
-          ComboboxStateProbeHost,
-          RadioGroupStateProbeHost,
-          RovingFocusGroupStateProbeHost,
-        ],
+        imports: [ComboboxStateProbeHost, RadioGroupStateProbeHost, RovingFocusGroupStateProbeHost],
       }).compileComponents();
-    });
-
-    it('writes select CVA updates through public typed State<T> channels', () => {
-      const state = probe(SelectStateProbeHost, SelectStateProbe).state();
-      const value = writableValueChannel<unknown>(state);
-      const disabled = writableDisabledChannel(state);
-
-      writeSelectStateValue(state, 'from-public-state');
-      writeSelectStateDisabled(state, true);
-
-      expect(value()).toBe('from-public-state');
-      expect(disabled()).toBe(true);
     });
 
     it('writes combobox CVA updates through public typed State<T> channels', () => {
@@ -296,31 +231,8 @@ describe('ngp form-state compatibility helpers', () => {
   describe('Hell CVA contract through the adapter seam', () => {
     beforeEach(async () => {
       await TestBed.configureTestingModule({
-        imports: [SelectCvaContractHost, ComboboxCvaContractHost, RadioGroupCvaContractHost],
+        imports: [ComboboxCvaContractHost, RadioGroupCvaContractHost],
       }).compileComponents();
-    });
-
-    it('syncs select CVA value and disabled writes into ng-primitives state', async () => {
-      const fixture = TestBed.createComponent(SelectCvaContractHost);
-      await settle(fixture);
-
-      const host = fixture.componentInstance;
-      const state = getDirective(fixture, SelectCvaStateProbe).state;
-      const root = fixture.nativeElement as HTMLElement;
-      const select = root.querySelector<HTMLButtonElement>('button[hellSelect]');
-
-      host.control.setValue('high');
-      await settle(fixture);
-
-      expect(state().value()).toBe('high');
-      expect(host.values).toEqual([]);
-
-      host.control.disable();
-      await settle(fixture);
-
-      expect(state().disabled()).toBe(true);
-      expect(select?.getAttribute('data-disabled')).toBe('');
-      expect(select?.tabIndex).toBe(-1);
     });
 
     it('syncs combobox CVA value and disabled writes into ng-primitives state', async () => {
@@ -372,21 +284,6 @@ describe('ngp form-state compatibility helpers', () => {
     });
   });
 
-  it('prefers select public value setter when present', () => {
-    const setValue = vi.fn();
-    const value = vi.fn();
-    const state = {
-      setValue,
-      value: { set: value },
-      disabled: { set: vi.fn() },
-    };
-
-    writeSelectStateValue(state as never, 'value');
-
-    expect(setValue).toHaveBeenCalledWith('value', { emit: false });
-    expect(value).not.toHaveBeenCalled();
-  });
-
   it('prefers combobox public value setter when present', () => {
     const setValue = vi.fn();
     const value = vi.fn();
@@ -417,36 +314,6 @@ describe('ngp form-state compatibility helpers', () => {
     expect(value).not.toHaveBeenCalled();
   });
 
-  it('falls back to select typed ng-primitives State<T>.value channel', () => {
-    const value = vi.fn();
-    const disabled = vi.fn();
-    const state = {
-      value: { set: value },
-      disabled: { set: disabled },
-    };
-
-    writeSelectStateValue(state as never, 'value');
-
-    expect(value).toHaveBeenCalledWith('value');
-    expect(value).toHaveBeenCalledTimes(1);
-    expect(disabled).not.toHaveBeenCalled();
-  });
-
-  it('prefers select public disabled setter when present', () => {
-    const setDisabled = vi.fn();
-    const disabled = vi.fn();
-    const state = {
-      setDisabled,
-      value: { set: vi.fn() },
-      disabled: { set: disabled },
-    };
-
-    writeSelectStateDisabled(state as never, true);
-
-    expect(setDisabled).toHaveBeenCalledWith(true);
-    expect(disabled).not.toHaveBeenCalled();
-  });
-
   it('prefers combobox public disabled setter when present', () => {
     const setDisabled = vi.fn();
     const disabled = vi.fn();
@@ -475,47 +342,6 @@ describe('ngp form-state compatibility helpers', () => {
 
     expect(setDisabled).toHaveBeenCalledWith(true);
     expect(disabled).not.toHaveBeenCalled();
-  });
-
-  it('falls back to select typed ng-primitives State<T>.disabled channel', () => {
-    const value = vi.fn();
-    const disabled = vi.fn();
-    const state = {
-      value: { set: value },
-      disabled: { set: disabled },
-    };
-
-    writeSelectStateDisabled(state as never, true);
-
-    expect(disabled).toHaveBeenCalledWith(true);
-    expect(disabled).toHaveBeenCalledTimes(1);
-    expect(value).not.toHaveBeenCalled();
-  });
-
-  it('throws version-bound errors with affected operation when select State<T> channel shape is invalid', () => {
-    expectAdapterError(
-      () => writeSelectStateValue({} as never, 'value'),
-      'writeSelectStateValue',
-      /value\.set/,
-    );
-    expectAdapterError(
-      () =>
-        writeSelectStateValue(
-          { value: { set: 'not-a-function' } as never, disabled: { set: vi.fn() } } as never,
-          'value',
-        ),
-      'writeSelectStateValue',
-      /value\.set/,
-    );
-    expectAdapterError(
-      () =>
-        writeSelectStateDisabled(
-          { value: { set: vi.fn() }, disabled: { set: 0 } as never } as never,
-          true,
-        ),
-      'writeSelectStateDisabled',
-      /disabled\.set/,
-    );
   });
 
   it('falls back to combobox typed ng-primitives State<T>.value channel', () => {

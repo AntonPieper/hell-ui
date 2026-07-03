@@ -4966,8 +4966,6 @@ function checkNgpStateWriterContract() {
   const stateWriterTokens = [
     'HELL_NGP_STATE_WRITER_VERSION',
     'HELL_NGP_STATE_WRITER_UPGRADE_PATH',
-    'writeSelectStateValue',
-    'writeSelectStateDisabled',
     'writeComboboxStateValue',
     'writeComboboxStateDisabled',
     'writeRadioGroupStateValue',
@@ -5036,7 +5034,6 @@ function checkNgpStateWriterContract() {
     'injectComboboxState',
     'injectRadioGroupState',
     'injectRovingFocusGroupState',
-    'State<NgpSelect',
     'State<NgpCombobox',
     'State<NgpRadioGroup',
     'NgpRovingFocusGroupState',

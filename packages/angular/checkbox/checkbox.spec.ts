@@ -35,6 +35,24 @@ class CheckboxHost {
 }
 
 @Component({
+  selector: 'hell-checkbox-standalone-host',
+  imports: [HellCheckbox],
+  template: `
+    <button
+      hellCheckbox
+      indeterminate
+      aria-label="Standalone mixed"
+      (checkedChange)="checkedEvents.push($event)"
+      (indeterminateChange)="indeterminateEvents.push($event)"
+    ></button>
+  `,
+})
+class CheckboxStandaloneHost {
+  readonly checkedEvents: boolean[] = [];
+  readonly indeterminateEvents: boolean[] = [];
+}
+
+@Component({
   selector: 'hell-checkbox-form-host',
   imports: [ReactiveFormsModule, HellCheckbox],
   template: `
@@ -147,6 +165,7 @@ describe('HellCheckbox', () => {
     await TestBed.configureTestingModule({
       imports: [
         CheckboxHost,
+        CheckboxStandaloneHost,
         CheckboxFormHost,
         CheckboxRequiredFormHost,
         CheckboxDisabledRequiredHost,
@@ -185,6 +204,25 @@ describe('HellCheckbox', () => {
     expect(checkbox.getAttribute('required')).toBe('');
     expect(checkbox.getAttribute('aria-required')).toBe('true');
     expect(checkbox.getAttribute('data-required')).toBe('true');
+  });
+
+  it('lets standalone mixed checkboxes clear indeterminate state on keyboard activation', () => {
+    const fixture = TestBed.createComponent(CheckboxStandaloneHost);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const checkbox = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellCheckbox]');
+
+    expect(checkbox.getAttribute('aria-checked')).toBe('mixed');
+    expect(checkbox.getAttribute('data-indeterminate')).toBe('');
+
+    checkbox.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    fixture.detectChanges();
+
+    expect(checkbox.getAttribute('aria-checked')).toBe('true');
+    expect(checkbox.hasAttribute('data-indeterminate')).toBe(false);
+    expect(host.checkedEvents).toEqual([true]);
+    expect(host.indeterminateEvents).toEqual([false]);
   });
 
   it('integrates with reactive forms without echoing programmatic writes', async () => {

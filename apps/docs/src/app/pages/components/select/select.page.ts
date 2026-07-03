@@ -35,8 +35,8 @@ import selectStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       </p>
       <p>
         Prefer native controls where browser/mobile semantics are the priority. The rich
-        headless select keeps Angular forms compatible through a version-bound
-        <code>ng-primitives</code> compatibility bridge until upstream public setters exist.
+        headless select keeps Angular forms compatible through public
+        <code>ng-primitives</code> select state setters.
       </p>
 
       <h2>Basic</h2>
