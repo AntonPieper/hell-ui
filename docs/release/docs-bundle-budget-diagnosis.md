@@ -9,7 +9,7 @@
 
 | Budget | Current | Warning | Error | Status |
 | --- | ---: | ---: | ---: | --- |
-| Initial bundle | 926.79 kB | 500.00 kB | 1050.00 kB | accepted warning: 426.79 kB over; accepted ceiling: 930.00 kB; owner: Docs shell / global styles; follow-up: lazy-route import graph guard |
+| Initial bundle | 926.81 kB | 500.00 kB | 1050.00 kB | accepted warning: 426.81 kB over; accepted ceiling: 930.00 kB; owner: Docs shell / global styles; follow-up: lazy-route import graph guard |
 | Any component style | 1.41 kB largest | 4.00 kB | 8.00 kB | within warning budget |
 
 ## Budget policy
@@ -23,14 +23,14 @@
 
 | Budget | Current | Accepted ceiling | Owner | Rationale | Evidence | Follow-up | Expiry |
 | --- | ---: | ---: | --- | --- | --- | --- | --- |
-| Initial bundle | 926.79 kB | 930.00 kB | Docs shell / global styles | The current warning is the accepted Angular 22 and TypeScript 6 internal-beta docs-shell baseline: Angular runtime/router, global Tailwind, Hell composite/table/toast CSS imported from public stylesheet entry points exactly as an external consumer would, app-shell/search/menu/select navigation UI, the full sidebar icon registry, shared docs page-header chrome, and tailwind-merge. Heavy feature examples and raw source previews stay behind lazy docs route boundaries. This acceptance is not permission for unrelated eager imports. | `docs/release/docs-bundle-budget-diagnosis.md` | lazy-route import graph guard | Any build that exceeds the accepted ceiling, reaches the initial maximumError threshold, or reopens the production-readiness budget decision. |
+| Initial bundle | 926.81 kB | 930.00 kB | Docs shell / global styles | The current warning is the accepted Angular 22 and TypeScript 6 internal-beta docs-shell baseline: Angular runtime/router, global Tailwind, Hell composite/table/toast CSS imported from public stylesheet entry points exactly as an external consumer would, app-shell/search/menu/select navigation UI, the full sidebar icon registry, shared docs page-header chrome, and tailwind-merge. Heavy feature examples and raw source previews stay behind lazy docs route boundaries. This acceptance is not permission for unrelated eager imports. | `docs/release/docs-bundle-budget-diagnosis.md` | lazy-route import graph guard | Any build that exceeds the accepted ceiling, reaches the initial maximumError threshold, or reopens the production-readiness budget decision. |
 
 ## Largest initial chunks
 
 | Rank | Chunk | Size | Owner | Largest inputs |
 | ---: | --- | ---: | --- | --- |
 | 1 | `main-WXZVTV7T.js` | 706.15 kB | Docs app shell bootstrap | `../../node_modules/.pnpm/@angular+core@22.0.5_@angular+compiler@22.0.5_rxjs@7.8.2/node_modules/@angular/core/fesm2022/_debug_node-chunk.mjs` (106.91 kB)<br>`../../node_modules/.pnpm/@angular+router@22.0.5_@angular+common@22.0.5_@angular+core@22.0.5_@angular+compiler@22_cf52b306686970b4d8f4ed611e0cf122/node_modules/@angular/router/fesm2022/_router-chunk.mjs` (69.21 kB)<br>`../../node_modules/.pnpm/@angular+cdk@22.0.3_@angular+common@22.0.5_@angular+core@22.0.5_@angular+compiler@22.0._1f6d74af5964d06576694baa3f3deccf/node_modules/@angular/cdk/fesm2022/_overlay-module-chunk.mjs` (45.86 kB) |
-| 2 | `styles-D6T5XUJD.css` | 220.64 kB | Docs global stylesheet (`styles.css`) | `src/styles.css` (220.64 kB)<br>`angular:styles/global:styles` (0 B) |
+| 2 | `styles-RMTBMVS2.css` | 220.66 kB | Docs global stylesheet (`styles.css`) | `src/styles.css` (220.66 kB)<br>`angular:styles/global:styles` (0 B) |
 
 Initial owner summary: the overage is mostly the docs shell, not a single routed page. The shell eagerly owns Angular runtime/router, global Tailwind + Hell composite CSS, the app-shell/omnibar/menu/select controls used for navigation/search/theme UI, and the top-level Font Awesome icon registry.
 
@@ -67,7 +67,7 @@ Lazy owner summary: the largest lazy chunks are correctly behind feature/page bo
 
 | Warning / risk | Root cause from stats | Owner | Follow-up fix |
 | --- | --- | --- | --- |
-| Initial bundle exceeds 500 kB by 426.79 kB | Static imports from `main` pull router/runtime plus docs-shell controls; `styles.css` globally imports Tailwind and explicit Hell entrypoint styles. Top chunks: `main-WXZVTV7T.js`, `styles-D6T5XUJD.css`. | Docs shell / global styles | Accepted by the docs budget policy (lazy-route import graph guard; expires when: Any build that exceeds the accepted ceiling, reaches the initial maximumError threshold, or reopens the production-readiness budget decision.); the architecture guard blocks future eager imports across docs route boundaries, and any undocumented new warning is a regression. |
+| Initial bundle exceeds 500 kB by 426.81 kB | Static imports from `main` pull router/runtime plus docs-shell controls; `styles.css` globally imports Tailwind and explicit Hell entrypoint styles. Top chunks: `main-WXZVTV7T.js`, `styles-RMTBMVS2.css`. | Docs shell / global styles | Accepted by the docs budget policy (lazy-route import graph guard; expires when: Any build that exceeds the accepted ceiling, reaches the initial maximumError threshold, or reopens the production-readiness budget decision.); the architecture guard blocks future eager imports across docs route boundaries, and any undocumented new warning is a regression. |
 | PDF viewer docs style is isolated from component-style budget | No pdf-viewer component style chunk exceeds the 4 kB warning budget; the docs page serves `@hell-ui/pdf-viewer/styles` as a copied lazy asset instead of an Angular component style. | PDF viewer docs page | Keep the lazy boundary; docs budget policy keeps component-style warnings unaccepted unless explicitly documented. |
 | PDF lazy weight is large even when initial bundle is protected | `pdfjs-dist/build/pdf.mjs`, `pdfjs-dist/web/pdf_viewer.mjs`, and `hell-ui-pdf-viewer.mjs` are the top PDF lazy inputs. | PDF viewer split package | Keep the docs page lazy/isolated and keep PDF outside the core package. |
 | Code editor lazy chunks stay behind lazy docs boundaries | CodeMirror and Lezer packages dominate the code editor route and shared docs code-viewer lazy chunks; this is expected feature weight, not initial shell weight. | Code editor feature / docs code previews | Keep CodeMirror behind its optional entrypoint and keep shared docs code previews dynamically imported instead of part of the docs shell. |
