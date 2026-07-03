@@ -6,7 +6,7 @@
 
 import * as i0 from '@angular/core';
 
-// @public (undocumented)
+// @public
 export const HELL_AVATAR_GROUP_DIRECTIVES: readonly [typeof HellAvatarGroup, typeof HellAvatarGroupItem, typeof HellAvatarGroupOverflow];
 
 // Warning: (ae-forgotten-export) The symbol "HellStyleable" needs to be exported by the entry point hell-ui-angular-avatar-group.d.ts
@@ -14,46 +14,23 @@ export const HELL_AVATAR_GROUP_DIRECTIVES: readonly [typeof HellAvatarGroup, typ
 // @public
 export class HellAvatarGroup extends HellStyleable {
     // Warning: (ae-forgotten-export) The symbol "HellSize" needs to be exported by the entry point hell-ui-angular-avatar-group.d.ts
-    //
-    // (undocumented)
     readonly size: i0.InputSignal<HellSize>;
-    // (undocumented)
     static ɵcmp: i0.ɵɵComponentDeclaration<HellAvatarGroup, "hell-avatar-group", never, { "size": { "alias": "size"; "required": false; "isSignal": true; }; }, {}, never, ["*"], true, never>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAvatarGroup, never>;
 }
 
-// @public (undocumented)
+// @public
 export class HellAvatarGroupItem extends HellStyleable {
-    // (undocumented)
     readonly selected: i0.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAvatarGroupItem, "[hellAvatarGroupItem]", never, { "selected": { "alias": "selected"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAvatarGroupItem, never>;
 }
 
-// @public (undocumented)
+// @public
 export class HellAvatarGroupOverflow extends HellStyleable {
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellAvatarGroupOverflow, "[hellAvatarGroupOverflow]", never, {}, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAvatarGroupOverflow, never>;
 }
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-avatar-group.d.ts:12:5 - (ae-undocumented) Missing documentation for "size".
-// types/hell-ui-angular-avatar-group.d.ts:13:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-avatar-group.d.ts:14:5 - (ae-undocumented) Missing documentation for "ɵcmp".
-// types/hell-ui-angular-avatar-group.d.ts:16:1 - (ae-undocumented) Missing documentation for "HellAvatarGroupItem".
-// types/hell-ui-angular-avatar-group.d.ts:17:5 - (ae-undocumented) Missing documentation for "selected".
-// types/hell-ui-angular-avatar-group.d.ts:18:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-avatar-group.d.ts:19:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-avatar-group.d.ts:21:1 - (ae-undocumented) Missing documentation for "HellAvatarGroupOverflow".
-// types/hell-ui-angular-avatar-group.d.ts:22:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-avatar-group.d.ts:23:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-avatar-group.d.ts:25:15 - (ae-undocumented) Missing documentation for "HELL_AVATAR_GROUP_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

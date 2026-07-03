@@ -12,96 +12,61 @@ import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 import { TemplateRef } from '@angular/core';
 
-// @public (undocumented)
+// @public
 export const HELL_SPLIT_VIEW_DIRECTIVES: readonly [typeof HellSplitView, typeof HellSplitPrimary, typeof HellSplitDetail];
 
 // @public
 export class HellSplitDetail {
-    // (undocumented)
     readonly template: TemplateRef<unknown>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSplitDetail, "ng-template[hellSplitDetail]", never, {}, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSplitDetail, never>;
 }
 
 // @public
 export class HellSplitPrimary {
-    // (undocumented)
     readonly template: TemplateRef<unknown>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSplitPrimary, "ng-template[hellSplitPrimary]", never, {}, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSplitPrimary, never>;
 }
 
 // @public
 export class HellSplitView {
     constructor();
-    // (undocumented)
     readonly backLabel: _angular_core.InputSignal<string>;
-    // (undocumented)
     protected closeDetail(): void;
-    // (undocumented)
     readonly compactBelow: _angular_core.InputSignalWithTransform<number, unknown>;
-    // (undocumented)
     readonly detailFlex: _angular_core.InputSignalWithTransform<number, unknown>;
-    // (undocumented)
     readonly detailMinSize: _angular_core.InputSignalWithTransform<number, unknown>;
-    // (undocumented)
     readonly detailOpen: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     readonly detailOpenChange: _angular_core.OutputEmitterRef<boolean>;
-    // (undocumented)
     protected readonly detailTemplate: _angular_core.Signal<HellSplitDetail | undefined>;
-    // (undocumented)
     readonly framed: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     protected goToItemPage(page: number): void;
-    // (undocumented)
     readonly height: _angular_core.InputSignal<string | number | null>;
-    // (undocumented)
     protected readonly heightValue: _angular_core.Signal<string | null>;
-    // (undocumented)
     protected readonly isCompact: _angular_core.Signal<boolean>;
-    // (undocumented)
     readonly itemNavigation: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     readonly itemNavigationLabel: _angular_core.InputSignal<string>;
-    // (undocumented)
     protected itemNavigationPage(): number;
-    // (undocumented)
     protected itemNavigationPageCount(): number;
-    // (undocumented)
     readonly nextItem: _angular_core.OutputEmitterRef<void>;
-    // (undocumented)
     readonly nextItemDisabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     readonly nextItemLabel: _angular_core.InputSignal<string>;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-split-view.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellSplitViewPart>;
-    // (undocumented)
     readonly previousItem: _angular_core.OutputEmitterRef<void>;
-    // (undocumented)
     readonly previousItemDisabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     readonly previousItemLabel: _angular_core.InputSignal<string>;
-    // (undocumented)
     readonly primaryFlex: _angular_core.InputSignalWithTransform<number, unknown>;
-    // (undocumented)
     readonly primaryMinSize: _angular_core.InputSignalWithTransform<number, unknown>;
-    // (undocumented)
     protected readonly primaryTemplate: _angular_core.Signal<HellSplitPrimary | undefined>;
-    // (undocumented)
     protected readonly templateContext: _angular_core.Signal<{
         compact: boolean;
         detailOpen: boolean;
     }>;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-split-view.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellSplitViewPart>>;
-    // (undocumented)
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellSplitView, "hell-split-view", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "compactBelow": { "alias": "compactBelow"; "required": false; "isSignal": true; }; "detailOpen": { "alias": "detailOpen"; "required": false; "isSignal": true; }; "framed": { "alias": "framed"; "required": false; "isSignal": true; }; "backLabel": { "alias": "backLabel"; "required": false; "isSignal": true; }; "primaryFlex": { "alias": "primaryFlex"; "required": false; "isSignal": true; }; "detailFlex": { "alias": "detailFlex"; "required": false; "isSignal": true; }; "primaryMinSize": { "alias": "primaryMinSize"; "required": false; "isSignal": true; }; "detailMinSize": { "alias": "detailMinSize"; "required": false; "isSignal": true; }; "height": { "alias": "height"; "required": false; "isSignal": true; }; "itemNavigation": { "alias": "itemNavigation"; "required": false; "isSignal": true; }; "itemNavigationLabel": { "alias": "itemNavigationLabel"; "required": false; "isSignal": true; }; "previousItemLabel": { "alias": "previousItemLabel"; "required": false; "isSignal": true; }; "nextItemLabel": { "alias": "nextItemLabel"; "required": false; "isSignal": true; }; "previousItemDisabled": { "alias": "previousItemDisabled"; "required": false; "isSignal": true; }; "nextItemDisabled": { "alias": "nextItemDisabled"; "required": false; "isSignal": true; }; }, { "detailOpenChange": "detailOpenChange"; "previousItem": "previousItem"; "nextItem": "nextItem"; }, ["primaryTemplate", "detailTemplate"], never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSplitView, never>;
 }
 
@@ -112,45 +77,6 @@ export type HellSplitViewPart = 'root' | 'resizable' | 'screen' | 'pane' | 'comp
 //
 // @public
 export type HellSplitViewUi = HellUi<HellSplitViewPart>;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-split-view.d.ts:12:5 - (ae-undocumented) Missing documentation for "template".
-// types/hell-ui-angular-split-view.d.ts:13:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-split-view.d.ts:14:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-split-view.d.ts:18:5 - (ae-undocumented) Missing documentation for "template".
-// types/hell-ui-angular-split-view.d.ts:19:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-split-view.d.ts:20:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-split-view.d.ts:33:5 - (ae-undocumented) Missing documentation for "compactBelow".
-// types/hell-ui-angular-split-view.d.ts:34:5 - (ae-undocumented) Missing documentation for "detailOpen".
-// types/hell-ui-angular-split-view.d.ts:35:5 - (ae-undocumented) Missing documentation for "framed".
-// types/hell-ui-angular-split-view.d.ts:36:5 - (ae-undocumented) Missing documentation for "backLabel".
-// types/hell-ui-angular-split-view.d.ts:37:5 - (ae-undocumented) Missing documentation for "primaryFlex".
-// types/hell-ui-angular-split-view.d.ts:38:5 - (ae-undocumented) Missing documentation for "detailFlex".
-// types/hell-ui-angular-split-view.d.ts:39:5 - (ae-undocumented) Missing documentation for "primaryMinSize".
-// types/hell-ui-angular-split-view.d.ts:40:5 - (ae-undocumented) Missing documentation for "detailMinSize".
-// types/hell-ui-angular-split-view.d.ts:41:5 - (ae-undocumented) Missing documentation for "height".
-// types/hell-ui-angular-split-view.d.ts:42:5 - (ae-undocumented) Missing documentation for "itemNavigation".
-// types/hell-ui-angular-split-view.d.ts:43:5 - (ae-undocumented) Missing documentation for "itemNavigationLabel".
-// types/hell-ui-angular-split-view.d.ts:44:5 - (ae-undocumented) Missing documentation for "previousItemLabel".
-// types/hell-ui-angular-split-view.d.ts:45:5 - (ae-undocumented) Missing documentation for "nextItemLabel".
-// types/hell-ui-angular-split-view.d.ts:46:5 - (ae-undocumented) Missing documentation for "previousItemDisabled".
-// types/hell-ui-angular-split-view.d.ts:47:5 - (ae-undocumented) Missing documentation for "nextItemDisabled".
-// types/hell-ui-angular-split-view.d.ts:48:5 - (ae-undocumented) Missing documentation for "detailOpenChange".
-// types/hell-ui-angular-split-view.d.ts:49:5 - (ae-undocumented) Missing documentation for "previousItem".
-// types/hell-ui-angular-split-view.d.ts:50:5 - (ae-undocumented) Missing documentation for "nextItem".
-// types/hell-ui-angular-split-view.d.ts:51:5 - (ae-undocumented) Missing documentation for "primaryTemplate".
-// types/hell-ui-angular-split-view.d.ts:52:5 - (ae-undocumented) Missing documentation for "detailTemplate".
-// types/hell-ui-angular-split-view.d.ts:56:5 - (ae-undocumented) Missing documentation for "isCompact".
-// types/hell-ui-angular-split-view.d.ts:57:5 - (ae-undocumented) Missing documentation for "templateContext".
-// types/hell-ui-angular-split-view.d.ts:61:5 - (ae-undocumented) Missing documentation for "heightValue".
-// types/hell-ui-angular-split-view.d.ts:63:5 - (ae-undocumented) Missing documentation for "closeDetail".
-// types/hell-ui-angular-split-view.d.ts:64:5 - (ae-undocumented) Missing documentation for "itemNavigationPageCount".
-// types/hell-ui-angular-split-view.d.ts:65:5 - (ae-undocumented) Missing documentation for "itemNavigationPage".
-// types/hell-ui-angular-split-view.d.ts:66:5 - (ae-undocumented) Missing documentation for "goToItemPage".
-// types/hell-ui-angular-split-view.d.ts:69:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-split-view.d.ts:70:5 - (ae-undocumented) Missing documentation for "ɵcmp".
-// types/hell-ui-angular-split-view.d.ts:72:15 - (ae-undocumented) Missing documentation for "HELL_SPLIT_VIEW_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

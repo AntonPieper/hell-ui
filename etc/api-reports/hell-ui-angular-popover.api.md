@@ -21,9 +21,7 @@ export class HellPopover {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-popover.d.ts
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellPopover, "[hellPopover]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpPopover; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellPopover, never>;
 }
 
@@ -34,15 +32,10 @@ export type HellPopoverPart = 'root';
 //
 // @public
 export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
-    // (undocumented)
     hide(origin?: FocusOrigin): Promise<void>;
-    // (undocumented)
     show(): Promise<void>;
-    // (undocumented)
     protected readonly trigger: NgpPopoverTrigger<any>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellPopoverTrigger, "button[hellPopoverTrigger], a[hellPopoverTrigger]", ["hellPopoverTrigger"], {}, {}, never, never, true, [{ directive: typeof i1.NgpPopoverTrigger; inputs: { "ngpPopoverTrigger": "hellPopoverTrigger"; "ngpPopoverTriggerPlacement": "placement"; "ngpPopoverTriggerOffset": "offset"; "ngpPopoverTriggerFlip": "flip"; "ngpPopoverTriggerShift": "shift"; "ngpPopoverTriggerContainer": "container"; "ngpPopoverTriggerDisabled": "disabled"; "ngpPopoverTriggerCloseOnEscape": "closeOnEscape"; "ngpPopoverTriggerCloseOnOutsideClick": "closeOnOutsideClick"; }; outputs: { "ngpPopoverTriggerOpenChange": "openChange"; }; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellPopoverTrigger, never>;
 }
 
@@ -50,16 +43,6 @@ export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
 //
 // @public
 export type HellPopoverUi = HellUi<HellPopoverPart>;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-popover.d.ts:19:5 - (ae-undocumented) Missing documentation for "trigger".
-// types/hell-ui-angular-popover.d.ts:20:5 - (ae-undocumented) Missing documentation for "show".
-// types/hell-ui-angular-popover.d.ts:21:5 - (ae-undocumented) Missing documentation for "hide".
-// types/hell-ui-angular-popover.d.ts:22:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-popover.d.ts:23:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-popover.d.ts:36:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-popover.d.ts:37:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

@@ -49,12 +49,15 @@ const HELL_POPOVER_RECIPE = {
   },
 })
 export class HellPopoverTrigger extends HellNativeInteractiveDisabledGuard {
+  /** Underlying ng-primitives popover trigger state. */
   protected readonly trigger = inject(NgpPopoverTrigger);
 
+  /** Opens the popover. */
   show(): Promise<void> {
     return this.trigger.show();
   }
 
+  /** Closes the popover, optionally restoring focus to the given origin. */
   hide(origin?: FocusOrigin): Promise<void> {
     return this.trigger.hide(origin);
   }

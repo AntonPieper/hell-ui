@@ -9,6 +9,7 @@ import { containsNode } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
 import { hellPartStyler, HellSize, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
+/** Value shape of a `[hellToggleGroup]`: a single value, `null`, or a list of values for multi-select. */
 export type HellToggleGroupValue = string | null | readonly string[];
 
 /** Public parts of the HellToggle module, styleable through its Part Style Map. */
@@ -68,6 +69,7 @@ const HELL_TOGGLE_GROUP_RECIPE = {
   },
 })
 export class HellToggle {
+  /** Size of the toggle button. Defaults to `md`. */
   readonly size = input<HellSize>('md');
 
   /** Tailwind class refinements for public parts. */
@@ -84,6 +86,7 @@ export class HellToggle {
   });
 }
 
+/** Groups `[hellToggleGroupItem]` buttons into a single- or multi-select control with Angular Forms support. */
 @Directive({
   selector: '[hellToggleGroup]',
   hostDirectives: [
@@ -133,6 +136,7 @@ export class HellToggleGroup implements ControlValueAccessor {
     this.destroyRef.onDestroy(() => valueSub.unsubscribe());
   }
 
+  /** Applies a form-driven value to the toggle group. */
   writeValue(value: HellToggleGroupValue): void {
     this.group.setValue(this.asGroupValue(value), { emit: false });
   }
@@ -151,18 +155,22 @@ export class HellToggleGroup implements ControlValueAccessor {
     return this.group.type() === 'multiple' ? [...value] : value[0] ?? null;
   }
 
+  /** Registers the callback invoked when the toggle group value changes. */
   registerOnChange(fn: (value: HellToggleGroupValue) => void): void {
     this.valueAccessor.registerOnChange(fn);
   }
 
+  /** Registers the callback invoked when the toggle group is touched. */
   registerOnTouched(fn: () => void): void {
     this.valueAccessor.registerOnTouched(fn);
   }
 
+  /** Applies a form-driven disabled state to the toggle group. */
   setDisabledState(isDisabled: boolean): void {
     this.group.setDisabled(isDisabled);
   }
 
+  /** Marks the control touched once focus leaves the group entirely. */
   protected onFocusOut(event: FocusEvent): void {
     const next = event.relatedTarget;
     if (!containsNode(this.host.nativeElement, next)) {
@@ -171,6 +179,7 @@ export class HellToggleGroup implements ControlValueAccessor {
   }
 }
 
+/** Single selectable button within a `[hellToggleGroup]`. */
 @Directive({
   selector: 'button[hellToggleGroupItem]',
   hostDirectives: [
@@ -188,6 +197,7 @@ export class HellToggleGroup implements ControlValueAccessor {
   },
 })
 export class HellToggleGroupItem {
+  /** Size of the toggle button. Defaults to `sm`. */
   readonly size = input<HellSize>('sm');
 
   /** Tailwind class refinements for public parts. */

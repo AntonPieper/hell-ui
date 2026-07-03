@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
-// @public (undocumented)
+// @public
 export const HELL_BREADCRUMBS_DIRECTIVES: readonly [typeof HellBreadcrumbs, typeof HellBreadcrumbList, typeof HellBreadcrumbItem, typeof HellBreadcrumbLink, typeof HellBreadcrumbPage, typeof HellBreadcrumbSeparator, typeof HellBreadcrumbEllipsis];
 
 // @public
@@ -20,19 +20,14 @@ export const HELL_BREADCRUMBS_LABELS: InjectionToken<HellBreadcrumbLabels>;
 
 // @public
 export class HellBreadcrumbEllipsis {
-    // (undocumented)
     readonly ariaLabel: i0.InputSignal<string | null>;
-    // (undocumented)
     protected readonly labels: HellBreadcrumbLabels;
-    // (undocumented)
     protected nativeButtonType(): 'button' | null;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-breadcrumbs.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-breadcrumbs.d.ts
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbEllipsis, "[hellBreadcrumbEllipsis]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbEllipsis; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbEllipsis, never>;
 }
 
@@ -44,13 +39,11 @@ export type HellBreadcrumbEllipsisPart = 'root';
 // @public
 export type HellBreadcrumbEllipsisUi = HellUi<HellBreadcrumbEllipsisPart>;
 
-// @public (undocumented)
+// @public
 export class HellBreadcrumbItem {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbItem, "li[hellBreadcrumbItem]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbItem; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbItem, never>;
 }
 
@@ -62,19 +55,15 @@ export type HellBreadcrumbItemUi = HellUi<HellBreadcrumbItemPart>;
 
 // @public
 export interface HellBreadcrumbLabels {
-    // (undocumented)
     readonly showHiddenNavigation: string;
 }
 
 // @public
 export class HellBreadcrumbLink {
-    // (undocumented)
     protected nativeButtonType(): 'button' | null;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbLink, "a[hellBreadcrumbLink], button[hellBreadcrumbLink]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbLink; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbLink, never>;
 }
 
@@ -84,13 +73,11 @@ export type HellBreadcrumbLinkPart = 'root';
 // @public
 export type HellBreadcrumbLinkUi = HellUi<HellBreadcrumbLinkPart>;
 
-// @public (undocumented)
+// @public
 export class HellBreadcrumbList {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbList, "ol[hellBreadcrumbList], ul[hellBreadcrumbList]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbList; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbList, never>;
 }
 
@@ -104,9 +91,7 @@ export type HellBreadcrumbListUi = HellUi<HellBreadcrumbListPart>;
 export class HellBreadcrumbPage {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbPage, "[hellBreadcrumbPage]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbPage; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbPage, never>;
 }
 
@@ -120,9 +105,7 @@ export type HellBreadcrumbPageUi = HellUi<HellBreadcrumbPagePart>;
 export class HellBreadcrumbs {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbs, "nav[hellBreadcrumbs]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbs; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbs, never>;
 }
 
@@ -130,9 +113,7 @@ export class HellBreadcrumbs {
 export class HellBreadcrumbSeparator {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBreadcrumbSeparator, "li[hellBreadcrumbSeparator], [hellBreadcrumbSeparator]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpBreadcrumbSeparator; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBreadcrumbSeparator, never>;
 }
 
@@ -150,31 +131,6 @@ export type HellBreadcrumbsUi = HellUi<HellBreadcrumbsPart>;
 
 // @public
 export function provideHellBreadcrumbsLabels(overrides: Partial<HellBreadcrumbLabels>): Provider;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-breadcrumbs.d.ts:9:5 - (ae-undocumented) Missing documentation for "showHiddenNavigation".
-// types/hell-ui-angular-breadcrumbs.d.ts:60:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-breadcrumbs.d.ts:61:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-breadcrumbs.d.ts:63:1 - (ae-undocumented) Missing documentation for "HellBreadcrumbList".
-// types/hell-ui-angular-breadcrumbs.d.ts:68:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-breadcrumbs.d.ts:69:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-breadcrumbs.d.ts:71:1 - (ae-undocumented) Missing documentation for "HellBreadcrumbItem".
-// types/hell-ui-angular-breadcrumbs.d.ts:76:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-breadcrumbs.d.ts:77:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-breadcrumbs.d.ts:86:5 - (ae-undocumented) Missing documentation for "nativeButtonType".
-// types/hell-ui-angular-breadcrumbs.d.ts:87:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-breadcrumbs.d.ts:88:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-breadcrumbs.d.ts:96:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-breadcrumbs.d.ts:97:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-breadcrumbs.d.ts:110:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-breadcrumbs.d.ts:111:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-breadcrumbs.d.ts:123:5 - (ae-undocumented) Missing documentation for "ariaLabel".
-// types/hell-ui-angular-breadcrumbs.d.ts:125:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-breadcrumbs.d.ts:126:5 - (ae-undocumented) Missing documentation for "nativeButtonType".
-// types/hell-ui-angular-breadcrumbs.d.ts:127:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-breadcrumbs.d.ts:128:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-breadcrumbs.d.ts:130:15 - (ae-undocumented) Missing documentation for "HELL_BREADCRUMBS_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

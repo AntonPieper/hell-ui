@@ -12,28 +12,24 @@ import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
-// @public (undocumented)
+// @public
 export const HELL_SEARCH_DIRECTIVES: readonly [typeof HellSearch, typeof HellSearchClear];
 
-// @public (undocumented)
+// @public
 export class HellSearch {
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-search.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-search.d.ts
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellSearch, "[hellSearch]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpSearch; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellSearch, never>;
 }
 
-// @public (undocumented)
+// @public
 export class HellSearchClear {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellSearchClear, "button[hellSearchClear]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpSearchClear; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellSearchClear, never>;
 }
 
@@ -50,16 +46,6 @@ export type HellSearchPart = 'root';
 
 // @public
 export type HellSearchUi = HellUi<HellSearchPart>;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-search.d.ts:14:1 - (ae-undocumented) Missing documentation for "HellSearch".
-// types/hell-ui-angular-search.d.ts:19:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-search.d.ts:20:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-search.d.ts:22:1 - (ae-undocumented) Missing documentation for "HellSearchClear".
-// types/hell-ui-angular-search.d.ts:27:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-search.d.ts:28:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-search.d.ts:30:15 - (ae-undocumented) Missing documentation for "HELL_SEARCH_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

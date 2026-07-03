@@ -74,7 +74,9 @@ export class HellFlyoutTrigger extends HellNativeInteractiveDisabledGuard {
   /** Native element of the trigger — used as default boundary by `HellFlyout`. */
   readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
 
+  /** Whether the trigger is disabled. Defaults to `false`. */
   readonly disabled = input(false, { transform: booleanAttribute });
+  /** Emits the new open state whenever the panel opens or closes. */
   readonly openChange = output<boolean>();
 
   /** Stable id wired into trigger `aria-controls` and panel `id`. */
@@ -82,9 +84,12 @@ export class HellFlyoutTrigger extends HellNativeInteractiveDisabledGuard {
 
   private readonly _open = signal(false);
   private readonly _openVersion = signal(0);
+  /** Whether the flyout panel is currently open. */
   readonly open = this._open.asReadonly();
+  /** Counter bumped on every open/close, used to key the panel's floating-UI lifecycle. */
   readonly openVersion = this._openVersion.asReadonly();
 
+  /** Opens the flyout panel, unless disabled or already open. */
   show(): void {
     if (this.disabled() || this._open()) return;
     this._openVersion.update((version) => version + 1);
@@ -92,6 +97,7 @@ export class HellFlyoutTrigger extends HellNativeInteractiveDisabledGuard {
     this.openChange.emit(true);
   }
 
+  /** Closes the flyout panel, if currently open. */
   hide(): void {
     if (!this._open()) return;
     this._openVersion.update((version) => version + 1);
@@ -99,10 +105,12 @@ export class HellFlyoutTrigger extends HellNativeInteractiveDisabledGuard {
     this.openChange.emit(false);
   }
 
+  /** Toggles the flyout panel between open and closed. */
   toggle(): void {
     this._open() ? this.hide() : this.show();
   }
 
+  /** Prevents default anchor navigation and toggles the panel on trigger activation. */
   protected onTriggerClick(event: Event): void {
     this.preventActionAnchorNavigation(event, this.disabled());
     if (this.disabled()) return;
@@ -150,17 +158,29 @@ export class HellFlyout {
     recipe: () => HELL_FLYOUT_RECIPE,
   });
 
+  /** The `HellFlyoutTrigger` that owns this panel's open state. */
   readonly trigger = input.required<HellFlyoutTrigger>({ alias: 'hellFlyout' });
+  /** Element the panel is positioned against, if different from the trigger. */
   readonly anchor = input<HTMLElement | ElementRef<HTMLElement> | null>(null);
+  /** Element defining the "inside" region for light-dismiss beyond the trigger and panel. */
   readonly boundary = input<HTMLElement | ElementRef<HTMLElement> | null>(null);
+  /** Preferred floating-ui placement relative to the reference element. Defaults to `bottom-start`. */
   readonly placement = input<Placement>('bottom-start');
+  /** Distance in pixels between the panel and its reference element. Defaults to `8`. */
   readonly offset = input(8, { transform: numberAttribute });
+  /** Whether to flip to the opposite side when there's insufficient space. Defaults to `true`. */
   readonly flip = input(true, { transform: booleanAttribute });
+  /** Whether to shift the panel along the reference edge to stay in view. Defaults to `true`. */
   readonly shift = input(true, { transform: booleanAttribute });
+  /** Accessible label for the panel. */
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
+  /** Id of the element labelling the panel. */
   readonly ariaLabelledby = input<string | null>(null, { alias: 'aria-labelledby' });
+  /** Whether pressing Escape closes the panel. Defaults to `true`. */
   readonly closeOnEscape = input(true, { transform: booleanAttribute });
+  /** Whether clicking or focusing outside the panel closes it. Defaults to `true`. */
   readonly closeOnOutsideInteraction = input(true, { transform: booleanAttribute });
+  /** Actual placement resolved by floating-ui after collision handling. */
   protected readonly computedPlacement = signal<Placement>('bottom-start');
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);

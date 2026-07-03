@@ -75,9 +75,13 @@ const HELL_BUTTON_ICON_ONLY_RECIPE: Record<HellSize, string> = {
   },
 })
 export class HellButton {
+  /** Visual style of the button. Defaults to `default`. */
   readonly variant = input<HellButtonVariant>('default');
+  /** Size of the button. Defaults to `md`. */
   readonly size = input<HellSize>('md');
+  /** Renders a square icon-only shape when `true`. Defaults to `false`. */
   readonly iconOnly = input(false, { transform: booleanAttribute });
+  /** Stretches the button to fill its container's width when `true`. Defaults to `false`. */
   readonly block = input(false, { transform: booleanAttribute });
 
   /** Tailwind class refinements for public parts. */
@@ -92,14 +96,17 @@ export class HellButton {
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly buttonState = injectButtonState();
 
+  /** `"true"` when the host is a disabled anchor, so assistive tech announces it as disabled. */
   protected anchorAriaDisabled(): 'true' | null {
     return this.isAnchor() && this.buttonState().disabled() ? 'true' : null;
   }
 
+  /** Removes the disabled anchor from the tab order by returning `-1`. */
   protected disabledAnchorTabIndex(): -1 | null {
     return this.isAnchor() && this.buttonState().disabled() ? -1 : null;
   }
 
+  /** Blocks click and Enter-key activation while the host is a disabled anchor. */
   protected preventDisabledAnchor(event: Event): void {
     if (!this.isAnchor() || !this.buttonState().disabled()) {
       return;
@@ -109,6 +116,7 @@ export class HellButton {
     event.stopImmediatePropagation();
   }
 
+  /** Native `type` attribute to apply when the host is a `<button>` element. */
   protected nativeButtonType(): string | null {
     if (!this.isButton()) return null;
     return this.host.getAttribute('type') ?? 'button';

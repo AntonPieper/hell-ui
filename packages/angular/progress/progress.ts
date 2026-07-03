@@ -20,6 +20,7 @@ const HELL_PROGRESS_BAR_RECIPE = {
   root: 'block h-full rounded-[inherit] bg-hell-primary transition-[width] duration-[var(--hell-duration-base)] ease-[var(--ease-hell-out)]',
 } satisfies HellRecipe<HellProgressBarPart>;
 
+/** Track for a determinate progress indicator. */
 @Directive({
   selector: '[hellProgress]',
   hostDirectives: [
@@ -44,6 +45,7 @@ export class HellProgress {
   });
 }
 
+/** Filled indicator inside a `hellProgress` track, sized to the current value. */
 @Directive({
   selector: '[hellProgressBar]',
   hostDirectives: [NgpProgressIndicator],

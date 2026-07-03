@@ -36,9 +36,13 @@ import type { InjectionToken, Provider } from '@angular/core';
 
 /** Built-in accessibility labels owned by the date picker entry point. */
 export interface HellDatePickerLabels {
+  /** Accessible label for the previous-year navigation button. */
   readonly previousYear: string;
+  /** Accessible label for the next-year navigation button. */
   readonly nextYear: string;
+  /** Accessible label for the previous-month navigation button. */
   readonly previousMonth: string;
+  /** Accessible label for the next-month navigation button. */
   readonly nextMonth: string;
 }
 
@@ -167,10 +171,12 @@ function hellDatePickerYearShiftDisabled(
   },
 })
 export class HellDatePickerPreviousYear {
+  /** Resolved accessibility labels for the date picker. */
   protected readonly labels = inject(HELL_DATE_PICKER_LABELS);
   private readonly state = injectDatePickerState<Date>({ optional: true });
   private readonly rangeState = injectDateRangePickerState<Date>({ optional: true });
   private readonly buttonState = injectButtonState({ optional: true });
+  /** Whether shifting back a year would move outside the `min`/`max` range. */
   protected readonly disabled = computed(() =>
     hellDatePickerYearShiftDisabled(this.state() ?? this.rangeState(), -12),
   );
@@ -179,6 +185,7 @@ export class HellDatePickerPreviousYear {
     effect(() => this.buttonState()?.setDisabled(this.disabled()));
   }
 
+  /** Moves the focused date by the given number of months. */
   protected shift(months: number) {
     if (this.disabled()) return;
     const s = this.state() ?? this.rangeState();
@@ -189,6 +196,7 @@ export class HellDatePickerPreviousYear {
   }
 }
 
+/** Next-year navigation button, jumping the focused date forward 12 months. */
 @Directive({
   selector: 'button[hellDatePickerNextYear]',
   host: {
@@ -200,10 +208,12 @@ export class HellDatePickerPreviousYear {
   },
 })
 export class HellDatePickerNextYear {
+  /** Resolved accessibility labels for the date picker. */
   protected readonly labels = inject(HELL_DATE_PICKER_LABELS);
   private readonly state = injectDatePickerState<Date>({ optional: true });
   private readonly rangeState = injectDateRangePickerState<Date>({ optional: true });
   private readonly buttonState = injectButtonState({ optional: true });
+  /** Whether shifting forward a year would move outside the `min`/`max` range. */
   protected readonly disabled = computed(() =>
     hellDatePickerYearShiftDisabled(this.state() ?? this.rangeState(), 12),
   );
@@ -212,6 +222,7 @@ export class HellDatePickerNextYear {
     effect(() => this.buttonState()?.setDisabled(this.disabled()));
   }
 
+  /** Moves the focused date by the given number of months. */
   protected shift(months: number) {
     if (this.disabled()) return;
     const s = this.state() ?? this.rangeState();
@@ -404,14 +415,18 @@ export class HellDatePicker {
     recipe: () => HELL_DATE_PICKER_RECIPE,
   });
 
+  /** BCP 47 locale used to format the month label and weekday headers. Defaults to the runtime locale. */
   readonly locale = input<string | null>(null);
 
+  /** Resolved accessibility labels for the date picker. */
   protected readonly labels = inject(HELL_DATE_PICKER_LABELS);
   private readonly state = injectDatePickerState<Date>();
 
+  /** Formatted month and year heading for the currently focused date. */
   protected readonly label = computed(() =>
     formatMonthLabel(this.state().focusedDate(), this.locale()),
   );
+  /** Weekday column headers, ordered from the picker's first day of week. */
   protected readonly weekdayLabels = computed(() =>
     formatWeekdayLabels(this.locale(), this.state().firstDayOfWeek()),
   );
@@ -464,17 +479,22 @@ export class HellDateRangePicker {
     recipe: (): HellRecipe<HellDateRangePickerPart> => HELL_DATE_RANGE_PICKER_RECIPE,
   });
 
+  /** BCP 47 locale used to format the month label and weekday headers. Defaults to the runtime locale. */
   readonly locale = input<string | null>(null);
 
+  /** Resolved accessibility labels for the date picker. */
   protected readonly labels = inject(HELL_DATE_PICKER_LABELS);
   private readonly state = injectDateRangePickerState<Date>();
+  /** Whether both a start and end date have been selected. */
   protected readonly rangeComplete = computed(() =>
     Boolean(this.state().startDate() && this.state().endDate()),
   );
 
+  /** Formatted month and year heading for the currently focused date. */
   protected readonly label = computed(() =>
     formatMonthLabel(this.state().focusedDate(), this.locale()),
   );
+  /** Weekday column headers, ordered from the picker's first day of week. */
   protected readonly weekdayLabels = computed(() =>
     formatWeekdayLabels(this.locale(), this.state().firstDayOfWeek()),
   );

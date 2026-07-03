@@ -103,6 +103,7 @@ const HELL_MENU_ITEM_TRAILING_RECIPE = {
   root: 'ms-auto inline-flex items-center gap-1 text-[11px] text-hell-foreground-subtle tabular-nums',
 } satisfies HellRecipe<HellMenuItemTrailingPart>;
 
+/** Trigger that opens a `[hellMenu]` when activated. Apply to a `<button>` or `<a>`. */
 @Directive({
   selector: 'button[hellMenuTrigger], a[hellMenuTrigger]',
   hostDirectives: [
@@ -136,6 +137,7 @@ const HELL_MENU_ITEM_TRAILING_RECIPE = {
   },
 })
 export class HellMenuTrigger extends HellNativeInteractiveDisabledGuard {
+  /** Underlying ng-primitives menu trigger state. */
   protected readonly trigger = inject(NgpMenuTrigger);
 }
 
@@ -174,6 +176,7 @@ export class HellSubmenuTrigger {
   });
 }
 
+/** Floating menu panel opened by `[hellMenuTrigger]` or `[hellSubmenuTrigger]`. */
 @Directive({
   selector: '[hellMenu]',
   hostDirectives: [NgpMenu],
@@ -192,6 +195,7 @@ export class HellMenu {
     defaultPart: 'root',
     recipe: () => HELL_MENU_RECIPE,
   });
+  /** Submenu trigger state when this menu is nested inside another menu, if any. */
   protected readonly submenuTrigger: Signal<unknown> = injectSubmenuTriggerState({
     optional: true,
   });
@@ -217,6 +221,7 @@ export class HellMenu {
   }
 }
 
+/** Selectable menu entry. Apply to a `<button>`, `<a>`, or `<div>` inside a `[hellMenu]`. */
 @Directive({
   selector: 'button[hellMenuItem], a[hellMenuItem], div[hellMenuItem]',
   hostDirectives: [
@@ -247,14 +252,17 @@ export class HellMenuItem {
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly menuItem = inject(NgpMenuItem);
 
+  /** Returns `"button"` for native `<button>` hosts so type defaults to a submit-safe button. */
   protected nativeButtonType(): 'button' | null {
     return this.isButton() ? 'button' : null;
   }
 
+  /** Returns `"true"` when disabled on a non-native (non-`<button>`) host, which lacks the native `disabled` attribute. */
   protected nonNativeAriaDisabled(): 'true' | null {
     return !this.isButton() && this.menuItem.disabled() ? 'true' : null;
   }
 
+  /** Blocks activation on a disabled non-native host, since it has no native `disabled` semantics. */
   protected preventDisabledNonNative(event: Event): void {
     if (this.isButton() || !this.menuItem.disabled()) return;
 
@@ -295,6 +303,7 @@ export class HellMenuItemCheckbox {
     root: HELL_MENU_ITEM_CHECKABLE_RECIPE,
   } satisfies HellRecipe<HellMenuItemCheckboxPart>),
   });
+  /** Underlying ng-primitives checkbox menu item state. */
   protected readonly menuItem = inject(NgpMenuItemCheckbox);
 }
 
@@ -325,6 +334,7 @@ export class HellMenuItemRadio {
     root: HELL_MENU_ITEM_CHECKABLE_RECIPE,
   } satisfies HellRecipe<HellMenuItemRadioPart>),
   });
+  /** Underlying ng-primitives radio menu item state. */
   protected readonly menuItem = inject(NgpMenuItemRadio);
 }
 
@@ -362,6 +372,7 @@ export class HellMenuItemIndicator {
   });
 }
 
+/** Visual divider between groups of menu items. */
 @Directive({
   selector: '[hellMenuSeparator]',
   host: {
@@ -460,6 +471,7 @@ export class HellMenuItemTrailing {
   });
 }
 
+/** All directives that make up the menu entry point, for bulk `imports`. */
 export const HELL_MENU_DIRECTIVES = [
   HellMenuTrigger,
   HellSubmenuTrigger,

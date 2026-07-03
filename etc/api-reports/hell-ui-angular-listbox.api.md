@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
-// @public (undocumented)
+// @public
 export const HELL_LISTBOX_DIRECTIVES: readonly [typeof HellListbox, typeof HellListboxTrigger, typeof HellListboxOption, typeof HellListboxSection, typeof HellListboxHeader];
 
 // @public
@@ -22,9 +22,7 @@ export class HellListbox {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-listbox.d.ts
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellListbox, "[hellListbox]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpListbox; inputs: { "id": "id"; "ngpListboxMode": "mode"; "ngpListboxValue": "value"; "ngpListboxDisabled": "disabled"; "ngpListboxCompareWith": "compareWith"; }; outputs: { "ngpListboxValueChange": "valueChange"; }; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellListbox, never>;
 }
 
@@ -32,9 +30,7 @@ export class HellListbox {
 export class HellListboxHeader {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellListboxHeader, "[hellListboxHeader]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpListboxHeader; inputs: { "id": "id"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellListboxHeader, never>;
 }
 
@@ -48,13 +44,10 @@ export type HellListboxHeaderUi = HellUi<HellListboxHeaderPart>;
 
 // @public
 export class HellListboxOption {
-    // (undocumented)
     protected readonly option: NgpListboxOption<any>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellListboxOption, "[hellListboxOption]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpListboxOption; inputs: { "id": "id"; "ngpListboxOptionValue": "value"; "ngpListboxOptionDisabled": "disabled"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellListboxOption, never>;
 }
 
@@ -71,9 +64,7 @@ export type HellListboxPart = 'root';
 export class HellListboxSection {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellListboxSection, "[hellListboxSection]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpListboxSection; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellListboxSection, never>;
 }
 
@@ -85,29 +76,12 @@ export type HellListboxSectionUi = HellUi<HellListboxSectionPart>;
 
 // @public
 export class HellListboxTrigger {
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellListboxTrigger, "[hellListboxTrigger]", never, {}, {}, never, never, true, [{ directive: typeof i1.NgpListboxTrigger; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellListboxTrigger, never>;
 }
 
 // @public
 export type HellListboxUi = HellUi<HellListboxPart>;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-listbox.d.ts:34:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-listbox.d.ts:35:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-listbox.d.ts:39:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-listbox.d.ts:40:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-listbox.d.ts:48:5 - (ae-undocumented) Missing documentation for "option".
-// types/hell-ui-angular-listbox.d.ts:49:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-listbox.d.ts:50:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-listbox.d.ts:58:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-listbox.d.ts:59:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-listbox.d.ts:67:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-listbox.d.ts:68:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-listbox.d.ts:70:15 - (ae-undocumented) Missing documentation for "HELL_LISTBOX_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

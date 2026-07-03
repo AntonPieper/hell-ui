@@ -20,9 +20,7 @@ export class HellInput {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellInput, "input[hellInput]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpInput; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellInput, never>;
 }
 
@@ -38,9 +36,7 @@ export class HellNativeSelect {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellNativeSelect, "select[hellNativeSelect]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpInput; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellNativeSelect, never>;
 }
 
@@ -71,9 +67,7 @@ export class HellTextarea {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTextarea, "textarea[hellTextarea]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i2.NgpTextarea; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTextarea, never>;
 }
 
@@ -88,15 +82,6 @@ export type HellUi<Part extends string> = Partial<Record<Part, string>>;
 
 // @public
 export type HellUiInput<Part extends string> = string | HellUi<Part> | null | undefined;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-input.d.ts:30:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-input.d.ts:31:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-input.d.ts:43:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-input.d.ts:44:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-input.d.ts:56:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-input.d.ts:57:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

@@ -25,98 +25,57 @@ export const HELL_OMNIBAR_LABELS: InjectionToken<HellOmnibarLabels>;
 // @public
 export class HellOmnibar implements HellFloatingScope {
     constructor();
-    // (undocumented)
     activate(item: HellOmnibarRegisteredItem, source: HellOmnibarActivationSource): void;
-    // (undocumented)
     protected readonly activeDescendantId: _angular_core.Signal<string | null>;
-    // (undocumented)
     protected readonly activeIndex: _angular_core.Signal<number>;
-    // (undocumented)
     readonly ariaLabel: _angular_core.InputSignal<string>;
     close(): void;
-    // (undocumented)
     containsFloatingTarget(target: EventTarget | Node | null): boolean;
-    // (undocumented)
     protected readonly cursor: _angular_core.WritableSignal<number>;
-    // (undocumented)
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     readonly emptyMessage: _angular_core.InputSignal<string>;
-    // (undocumented)
     readonly emptyTemplate: _angular_core.InputSignal<TemplateRef<unknown> | null>;
-    // (undocumented)
     readonly error: _angular_core.Signal<unknown>;
     floatingContainer(): HTMLElement;
     focus(): void;
-    // (undocumented)
     focusAdjacentAction(action: HellOmnibarRegisteredAction, delta: number): void;
-    // (undocumented)
     protected readonly hasActions: _angular_core.Signal<boolean>;
-    // (undocumented)
     protected readonly hasListboxResults: _angular_core.Signal<boolean>;
     readonly hotkey: _angular_core.InputSignal<string | null>;
-    // (undocumented)
     readonly inputId: string;
     // @internal
     internalControlTabIndex(): -1 | null;
-    // (undocumented)
     isActive(item: HellOmnibarRegisteredItem): boolean;
-    // (undocumented)
     protected readonly isEmpty: _angular_core.Signal<boolean>;
-    // (undocumented)
     protected readonly isOpen: _angular_core.Signal<boolean>;
-    // (undocumented)
     protected readonly labels: HellOmnibarLabels;
-    // (undocumented)
     readonly loading: _angular_core.Signal<boolean>;
-    // (undocumented)
     readonly loadingMessage: _angular_core.InputSignal<string>;
-    // (undocumented)
     readonly loadingRows: _angular_core.InputSignal<number>;
-    // (undocumented)
     readonly loadingTemplate: _angular_core.InputSignal<TemplateRef<HellOmnibarLoadingTemplateContext> | null>;
-    // (undocumented)
     protected readonly loadingTemplateContext: _angular_core.Signal<HellOmnibarLoadingTemplateContext>;
     readonly minPanelWidth: _angular_core.InputSignal<number>;
-    // (undocumented)
     protected onBlur(event: FocusEvent): void;
-    // (undocumented)
     protected onClearClick(event: MouseEvent): void;
-    // (undocumented)
     protected onCursorChange(): void;
-    // (undocumented)
     protected onFocus(): void;
-    // (undocumented)
     protected onInput(event: Event): void;
-    // (undocumented)
     protected onKeyDown(event: KeyboardEvent): void;
-    // (undocumented)
     protected onOverlayAttach(): void;
-    // (undocumented)
     protected onOverlayDetach(): void;
-    // (undocumented)
     protected onOverlayOutsideClick(event: MouseEvent): void;
-    // (undocumented)
     protected onOverlayPositionChange(): void;
     open(): void;
-    // (undocumented)
     readonly openChange: _angular_core.OutputEmitterRef<boolean>;
     readonly openOnFocus: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     protected readonly overlayPositions: ConnectedPosition[];
-    // (undocumented)
     protected readonly overlayScrollStrategy: ScrollStrategy;
-    // (undocumented)
     readonly panelId: string;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-omnibar.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellOmnibarPart>;
-    // (undocumented)
     readonly placeholder: _angular_core.InputSignal<string>;
-    // (undocumented)
     registerAction(action: HellOmnibarAction): void;
-    // (undocumented)
     registerFloatingElement(element: HTMLElement): void;
-    // (undocumented)
     registerItem(item: HellOmnibarRegisteredItem): void;
     readonly searchDebounce: _angular_core.InputSignal<number>;
     readonly searchError: _angular_core.OutputEmitterRef<unknown>;
@@ -125,69 +84,50 @@ export class HellOmnibar implements HellFloatingScope {
     readonly searchItems: _angular_core.InputSignal<readonly unknown[] | null>;
     readonly searchLimit: _angular_core.InputSignal<number | undefined>;
     readonly searchParams: _angular_core.InputSignal<unknown>;
-    // (undocumented)
     readonly searchResults: _angular_core.Signal<readonly HellSearchResult<any>[]>;
     // Warning: (ae-forgotten-export) The symbol "HellSearchResult" needs to be exported by the entry point hell-ui-angular-omnibar.d.ts
     readonly searchResultsChange: _angular_core.OutputEmitterRef<readonly HellSearchResult<unknown>[]>;
     // Warning: (ae-forgotten-export) The symbol "HellSearchSource" needs to be exported by the entry point hell-ui-angular-omnibar.d.ts
     readonly searchSource: _angular_core.InputSignal<HellSearchSource<unknown> | null>;
-    // (undocumented)
     setActive(item: HellOmnibarRegisteredItem): void;
     setValue(next: string, opts?: {
         focus?: boolean;
         caretToEnd?: boolean;
     }): void;
-    // (undocumented)
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
-    // (undocumented)
     protected readonly skeletonRows: _angular_core.Signal<number[]>;
-    // (undocumented)
     readonly submit: _angular_core.OutputEmitterRef<HellOmnibarSubmitEvent<unknown>>;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-omnibar.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellOmnibarPart>>;
-    // (undocumented)
     unregisterAction(action: HellOmnibarAction): void;
-    // (undocumented)
     unregisterFloatingElement(element: HTMLElement): void;
-    // (undocumented)
     unregisterItem(item: HellOmnibarRegisteredItem): void;
-    // (undocumented)
     readonly value: _angular_core.ModelSignal<string>;
-    // (undocumented)
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellOmnibar, "hell-omnibar", ["hellOmnibar"], { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "ariaLabel"; "required": false; "isSignal": true; }; "emptyMessage": { "alias": "emptyMessage"; "required": false; "isSignal": true; }; "emptyTemplate": { "alias": "emptyTemplate"; "required": false; "isSignal": true; }; "loadingTemplate": { "alias": "loadingTemplate"; "required": false; "isSignal": true; }; "searchItems": { "alias": "searchItems"; "required": false; "isSignal": true; }; "searchSource": { "alias": "searchSource"; "required": false; "isSignal": true; }; "searchFields": { "alias": "searchFields"; "required": false; "isSignal": true; }; "searchLimit": { "alias": "searchLimit"; "required": false; "isSignal": true; }; "searchParams": { "alias": "searchParams"; "required": false; "isSignal": true; }; "searchDebounce": { "alias": "searchDebounce"; "required": false; "isSignal": true; }; "loadingMessage": { "alias": "loadingMessage"; "required": false; "isSignal": true; }; "loadingRows": { "alias": "loadingRows"; "required": false; "isSignal": true; }; "hotkey": { "alias": "hotkey"; "required": false; "isSignal": true; }; "openOnFocus": { "alias": "openOnFocus"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "minPanelWidth": { "alias": "minPanelWidth"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "submit": "submit"; "openChange": "openChange"; "searchResultsChange": "searchResultsChange"; "searchError": "searchError"; }, never, ["[hellOmnibarLeading]", "[hellOmnibarTrailing]", "[hellOmnibarActions]", "*", "[hellOmnibarFooter]"], true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibar, never>;
 }
 
 // @public
 export class HellOmnibarAction implements HellOmnibarRegisteredAction {
     constructor();
-    // (undocumented)
     focus(): void;
-    // (undocumented)
     protected onKeyDown(event: KeyboardEvent): void;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // (undocumented)
     readonly pressed: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     protected tabIndex(): -1 | null;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarAction, "button[hellOmnibarAction]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "pressed": { "alias": "pressed"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarAction, never>;
 }
 
 // @public
 export type HellOmnibarActionPart = 'root';
 
-// @public (undocumented)
+// @public
 export class HellOmnibarActionsStrip {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarActionsStrip, "[hellOmnibarActions]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarActionsStrip, never>;
 }
 
@@ -205,28 +145,23 @@ export type HellOmnibarActionUi = HellUi<HellOmnibarActionPart>;
 // @public
 export type HellOmnibarActivationSource = 'mouse' | 'keyboard' | 'api';
 
-// @public (undocumented)
+// @public
 export class HellOmnibarChip {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarChip, "[hellOmnibarChip]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarChip, never>;
 }
 
 // @public
 export type HellOmnibarChipPart = 'root';
 
-// @public (undocumented)
+// @public
 export class HellOmnibarChipRemove {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // (undocumented)
     protected tabIndex(): -1 | null;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarChipRemove, "button[hellOmnibarChipRemove]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarChipRemove, never>;
 }
 
@@ -239,25 +174,20 @@ export type HellOmnibarChipRemoveUi = HellUi<HellOmnibarChipRemovePart>;
 // @public
 export type HellOmnibarChipUi = HellUi<HellOmnibarChipPart>;
 
-// @public (undocumented)
+// @public
 export class HellOmnibarGroup {
-    // (undocumented)
     readonly label: _angular_core.InputSignal<string>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarGroup, "[hellOmnibarGroup]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "label": { "alias": "label"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarGroup, never>;
 }
 
-// @public (undocumented)
+// @public
 export class HellOmnibarGroupLabel {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarGroupLabel, "[hellOmnibarGroupLabel]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarGroupLabel, never>;
 }
 
@@ -276,43 +206,28 @@ export type HellOmnibarGroupUi = HellUi<HellOmnibarGroupPart>;
 // @public
 export class HellOmnibarItem<T = unknown> implements HellOmnibarRegisteredItem {
     constructor();
-    // (undocumented)
     readonly active: _angular_core.Signal<boolean>;
-    // (undocumented)
     readonly closeOnSelect: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     readonly itemId: string;
-    // (undocumented)
     readonly itemValue: _angular_core.InputSignal<T>;
-    // (undocumented)
     protected onClick(event: MouseEvent): void;
-    // (undocumented)
     protected onMouseMove(): void;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // (undocumented)
     scrollIntoView(): void;
-    // (undocumented)
     readonly select: _angular_core.OutputEmitterRef<T>;
-    // (undocumented)
     selectValue(): unknown;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     value(): unknown;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarItem<any>, "button[hellOmnibarItem]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "itemValue": { "alias": "value"; "required": false; "isSignal": true; }; "closeOnSelect": { "alias": "closeOnSelect"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; }, { "select": "select"; }, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarItem<any>, never>;
 }
 
-// @public (undocumented)
+// @public
 export class HellOmnibarItemIcon {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarItemIcon, "[hellOmnibarItemIcon]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarItemIcon, never>;
 }
 
@@ -325,13 +240,11 @@ export type HellOmnibarItemIconUi = HellUi<HellOmnibarItemIconPart>;
 // @public
 export type HellOmnibarItemPart = 'root';
 
-// @public (undocumented)
+// @public
 export class HellOmnibarItemSubtext {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarItemSubtext, "[hellOmnibarItemSubtext]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarItemSubtext, never>;
 }
 
@@ -341,13 +254,11 @@ export type HellOmnibarItemSubtextPart = 'root';
 // @public
 export type HellOmnibarItemSubtextUi = HellUi<HellOmnibarItemSubtextPart>;
 
-// @public (undocumented)
+// @public
 export class HellOmnibarItemText {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarItemText, "[hellOmnibarItemText]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarItemText, never>;
 }
 
@@ -357,13 +268,11 @@ export type HellOmnibarItemTextPart = 'root';
 // @public
 export type HellOmnibarItemTextUi = HellUi<HellOmnibarItemTextPart>;
 
-// @public (undocumented)
+// @public
 export class HellOmnibarItemTrailing {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarItemTrailing, "[hellOmnibarItemTrailing]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarItemTrailing, never>;
 }
 
@@ -378,26 +287,21 @@ export type HellOmnibarItemUi = HellUi<HellOmnibarItemPart>;
 
 // @public
 export interface HellOmnibarLabels {
-    // (undocumented)
     readonly clearSearch: string;
 }
 
 // @public
 export interface HellOmnibarLoadingTemplateContext {
     readonly $implicit: number;
-    // (undocumented)
     readonly message: string;
-    // (undocumented)
     readonly rows: number;
 }
 
-// @public (undocumented)
+// @public
 export class HellOmnibarPanel {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellOmnibarPanel, "[hellOmnibarPanel]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellOmnibarPanel, never>;
 }
 
@@ -410,12 +314,12 @@ export type HellOmnibarPanelUi = HellUi<HellOmnibarPanelPart>;
 // @public
 export type HellOmnibarPart = 'root' | 'control' | 'inputWrap' | 'input' | 'clear' | 'panel' | 'actions' | 'results' | 'loading' | 'skeletonRow' | 'skeletonText' | 'empty';
 
-// @public (undocumented)
+// @public
 export interface HellOmnibarRegisteredAction {
     focus(): void;
 }
 
-// @public (undocumented)
+// @public
 export interface HellOmnibarRegisteredItem {
     readonly closeOnSelect: () => boolean;
     readonly disabled: () => boolean;
@@ -427,11 +331,8 @@ export interface HellOmnibarRegisteredItem {
 
 // @public
 export interface HellOmnibarSubmitEvent<T = unknown> {
-    // (undocumented)
     readonly item: T;
-    // (undocumented)
     readonly source: HellOmnibarActivationSource;
-    // (undocumented)
     readonly value: string;
 }
 
@@ -443,119 +344,8 @@ export function provideHellOmnibarLabels(overrides: Partial<HellOmnibarLabels>):
 
 // Warnings were encountered during analysis:
 //
-// types/hell-ui-angular-omnibar.d.ts:10:5 - (ae-undocumented) Missing documentation for "clearSearch".
-// types/hell-ui-angular-omnibar.d.ts:24:5 - (ae-undocumented) Missing documentation for "rows".
-// types/hell-ui-angular-omnibar.d.ts:25:5 - (ae-undocumented) Missing documentation for "message".
-// types/hell-ui-angular-omnibar.d.ts:27:1 - (ae-undocumented) Missing documentation for "HellOmnibarRegisteredItem".
-// types/hell-ui-angular-omnibar.d.ts:41:1 - (ae-undocumented) Missing documentation for "HellOmnibarRegisteredAction".
-// types/hell-ui-angular-omnibar.d.ts:119:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-omnibar.d.ts:122:5 - (ae-undocumented) Missing documentation for "size".
-// types/hell-ui-angular-omnibar.d.ts:123:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-omnibar.d.ts:124:5 - (ae-undocumented) Missing documentation for "placeholder".
-// types/hell-ui-angular-omnibar.d.ts:125:5 - (ae-undocumented) Missing documentation for "ariaLabel".
-// types/hell-ui-angular-omnibar.d.ts:126:5 - (ae-undocumented) Missing documentation for "emptyMessage".
-// types/hell-ui-angular-omnibar.d.ts:127:5 - (ae-undocumented) Missing documentation for "emptyTemplate".
-// types/hell-ui-angular-omnibar.d.ts:128:5 - (ae-undocumented) Missing documentation for "loadingTemplate".
-// types/hell-ui-angular-omnibar.d.ts:141:5 - (ae-undocumented) Missing documentation for "loadingMessage".
-// types/hell-ui-angular-omnibar.d.ts:142:5 - (ae-undocumented) Missing documentation for "loadingRows".
-// types/hell-ui-angular-omnibar.d.ts:149:5 - (ae-undocumented) Missing documentation for "value".
-// types/hell-ui-angular-omnibar.d.ts:152:5 - (ae-undocumented) Missing documentation for "submit".
-// types/hell-ui-angular-omnibar.d.ts:153:5 - (ae-undocumented) Missing documentation for "openChange".
-// types/hell-ui-angular-omnibar.d.ts:158:5 - (ae-undocumented) Missing documentation for "inputId".
-// types/hell-ui-angular-omnibar.d.ts:159:5 - (ae-undocumented) Missing documentation for "panelId".
-// types/hell-ui-angular-omnibar.d.ts:166:5 - (ae-undocumented) Missing documentation for "isOpen".
-// types/hell-ui-angular-omnibar.d.ts:167:5 - (ae-undocumented) Missing documentation for "overlayPositions".
-// types/hell-ui-angular-omnibar.d.ts:168:5 - (ae-undocumented) Missing documentation for "overlayScrollStrategy".
-// types/hell-ui-angular-omnibar.d.ts:170:5 - (ae-undocumented) Missing documentation for "cursor".
-// types/hell-ui-angular-omnibar.d.ts:171:5 - (ae-undocumented) Missing documentation for "searchResults".
-// types/hell-ui-angular-omnibar.d.ts:172:5 - (ae-undocumented) Missing documentation for "loading".
-// types/hell-ui-angular-omnibar.d.ts:173:5 - (ae-undocumented) Missing documentation for "error".
-// types/hell-ui-angular-omnibar.d.ts:174:5 - (ae-undocumented) Missing documentation for "skeletonRows".
-// types/hell-ui-angular-omnibar.d.ts:175:5 - (ae-undocumented) Missing documentation for "loadingTemplateContext".
-// types/hell-ui-angular-omnibar.d.ts:176:5 - (ae-undocumented) Missing documentation for "activeIndex".
-// types/hell-ui-angular-omnibar.d.ts:177:5 - (ae-undocumented) Missing documentation for "isEmpty".
-// types/hell-ui-angular-omnibar.d.ts:178:5 - (ae-undocumented) Missing documentation for "hasListboxResults".
-// types/hell-ui-angular-omnibar.d.ts:179:5 - (ae-undocumented) Missing documentation for "activeDescendantId".
-// types/hell-ui-angular-omnibar.d.ts:180:5 - (ae-undocumented) Missing documentation for "hasActions".
-// types/hell-ui-angular-omnibar.d.ts:186:5 - (ae-missing-getter) The property "panelRef" has a setter but no getter.
-// types/hell-ui-angular-omnibar.d.ts:187:5 - (ae-missing-getter) The property "floatingOutletRef" has a setter but no getter.
-// types/hell-ui-angular-omnibar.d.ts:199:5 - (ae-undocumented) Missing documentation for "registerFloatingElement".
-// types/hell-ui-angular-omnibar.d.ts:200:5 - (ae-undocumented) Missing documentation for "unregisterFloatingElement".
-// types/hell-ui-angular-omnibar.d.ts:201:5 - (ae-undocumented) Missing documentation for "containsFloatingTarget".
-// types/hell-ui-angular-omnibar.d.ts:211:5 - (ae-undocumented) Missing documentation for "registerItem".
-// types/hell-ui-angular-omnibar.d.ts:212:5 - (ae-undocumented) Missing documentation for "unregisterItem".
-// types/hell-ui-angular-omnibar.d.ts:213:5 - (ae-undocumented) Missing documentation for "setActive".
-// types/hell-ui-angular-omnibar.d.ts:214:5 - (ae-undocumented) Missing documentation for "isActive".
-// types/hell-ui-angular-omnibar.d.ts:215:5 - (ae-undocumented) Missing documentation for "activate".
-// types/hell-ui-angular-omnibar.d.ts:216:5 - (ae-undocumented) Missing documentation for "registerAction".
-// types/hell-ui-angular-omnibar.d.ts:217:5 - (ae-undocumented) Missing documentation for "unregisterAction".
-// types/hell-ui-angular-omnibar.d.ts:218:5 - (ae-undocumented) Missing documentation for "onInput".
-// types/hell-ui-angular-omnibar.d.ts:219:5 - (ae-undocumented) Missing documentation for "onFocus".
-// types/hell-ui-angular-omnibar.d.ts:220:5 - (ae-undocumented) Missing documentation for "onBlur".
-// types/hell-ui-angular-omnibar.d.ts:221:5 - (ae-undocumented) Missing documentation for "onCursorChange".
-// types/hell-ui-angular-omnibar.d.ts:222:5 - (ae-undocumented) Missing documentation for "onClearClick".
-// types/hell-ui-angular-omnibar.d.ts:223:5 - (ae-undocumented) Missing documentation for "onOverlayOutsideClick".
-// types/hell-ui-angular-omnibar.d.ts:224:5 - (ae-undocumented) Missing documentation for "onOverlayAttach".
-// types/hell-ui-angular-omnibar.d.ts:225:5 - (ae-undocumented) Missing documentation for "onOverlayDetach".
-// types/hell-ui-angular-omnibar.d.ts:226:5 - (ae-undocumented) Missing documentation for "onOverlayPositionChange".
-// types/hell-ui-angular-omnibar.d.ts:227:5 - (ae-undocumented) Missing documentation for "onKeyDown".
-// types/hell-ui-angular-omnibar.d.ts:229:5 - (ae-undocumented) Missing documentation for "focusAdjacentAction".
-// types/hell-ui-angular-omnibar.d.ts:239:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-omnibar.d.ts:240:5 - (ae-undocumented) Missing documentation for "ɵcmp".
-// types/hell-ui-angular-omnibar.d.ts:242:1 - (ae-undocumented) Missing documentation for "HellOmnibarPanel".
-// types/hell-ui-angular-omnibar.d.ts:247:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-omnibar.d.ts:248:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-omnibar.d.ts:250:1 - (ae-undocumented) Missing documentation for "HellOmnibarGroup".
-// types/hell-ui-angular-omnibar.d.ts:255:5 - (ae-undocumented) Missing documentation for "label".
-// types/hell-ui-angular-omnibar.d.ts:256:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-omnibar.d.ts:257:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-omnibar.d.ts:259:1 - (ae-undocumented) Missing documentation for "HellOmnibarGroupLabel".
-// types/hell-ui-angular-omnibar.d.ts:264:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-omnibar.d.ts:265:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-omnibar.d.ts:277:5 - (ae-undocumented) Missing documentation for "itemValue".
-// types/hell-ui-angular-omnibar.d.ts:278:5 - (ae-undocumented) Missing documentation for "closeOnSelect".
-// types/hell-ui-angular-omnibar.d.ts:279:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-omnibar.d.ts:280:5 - (ae-undocumented) Missing documentation for "select".
-// types/hell-ui-angular-omnibar.d.ts:283:5 - (ae-undocumented) Missing documentation for "active".
-// types/hell-ui-angular-omnibar.d.ts:284:5 - (ae-undocumented) Missing documentation for "itemId".
-// types/hell-ui-angular-omnibar.d.ts:286:5 - (ae-undocumented) Missing documentation for "onClick".
-// types/hell-ui-angular-omnibar.d.ts:287:5 - (ae-undocumented) Missing documentation for "onMouseMove".
-// types/hell-ui-angular-omnibar.d.ts:288:5 - (ae-undocumented) Missing documentation for "scrollIntoView".
-// types/hell-ui-angular-omnibar.d.ts:289:5 - (ae-undocumented) Missing documentation for "selectValue".
-// types/hell-ui-angular-omnibar.d.ts:290:5 - (ae-undocumented) Missing documentation for "value".
-// types/hell-ui-angular-omnibar.d.ts:291:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-omnibar.d.ts:292:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-omnibar.d.ts:294:1 - (ae-undocumented) Missing documentation for "HellOmnibarItemIcon".
-// types/hell-ui-angular-omnibar.d.ts:299:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-omnibar.d.ts:300:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-omnibar.d.ts:302:1 - (ae-undocumented) Missing documentation for "HellOmnibarItemText".
-// types/hell-ui-angular-omnibar.d.ts:307:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-omnibar.d.ts:308:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-omnibar.d.ts:310:1 - (ae-undocumented) Missing documentation for "HellOmnibarItemSubtext".
-// types/hell-ui-angular-omnibar.d.ts:315:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-omnibar.d.ts:316:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-omnibar.d.ts:318:1 - (ae-undocumented) Missing documentation for "HellOmnibarItemTrailing".
-// types/hell-ui-angular-omnibar.d.ts:323:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-omnibar.d.ts:324:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-omnibar.d.ts:326:1 - (ae-undocumented) Missing documentation for "HellOmnibarChip".
-// types/hell-ui-angular-omnibar.d.ts:331:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-omnibar.d.ts:332:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-omnibar.d.ts:334:1 - (ae-undocumented) Missing documentation for "HellOmnibarChipRemove".
-// types/hell-ui-angular-omnibar.d.ts:340:5 - (ae-undocumented) Missing documentation for "tabIndex".
-// types/hell-ui-angular-omnibar.d.ts:341:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-omnibar.d.ts:342:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-omnibar.d.ts:344:1 - (ae-undocumented) Missing documentation for "HellOmnibarActionsStrip".
-// types/hell-ui-angular-omnibar.d.ts:349:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-omnibar.d.ts:350:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-omnibar.d.ts:358:5 - (ae-undocumented) Missing documentation for "pressed".
-// types/hell-ui-angular-omnibar.d.ts:362:5 - (ae-undocumented) Missing documentation for "focus".
-// types/hell-ui-angular-omnibar.d.ts:363:5 - (ae-undocumented) Missing documentation for "tabIndex".
-// types/hell-ui-angular-omnibar.d.ts:364:5 - (ae-undocumented) Missing documentation for "onKeyDown".
-// types/hell-ui-angular-omnibar.d.ts:365:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-omnibar.d.ts:366:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-omnibar.d.ts:375:5 - (ae-undocumented) Missing documentation for "value".
-// types/hell-ui-angular-omnibar.d.ts:376:5 - (ae-undocumented) Missing documentation for "item".
-// types/hell-ui-angular-omnibar.d.ts:377:5 - (ae-undocumented) Missing documentation for "source".
+// types/hell-ui-angular-omnibar.d.ts:220:5 - (ae-missing-getter) The property "panelRef" has a setter but no getter.
+// types/hell-ui-angular-omnibar.d.ts:221:5 - (ae-missing-getter) The property "floatingOutletRef" has a setter but no getter.
 
 // (No @packageDocumentation comment for this package)
 

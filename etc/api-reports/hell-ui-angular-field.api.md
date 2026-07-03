@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
-// @public (undocumented)
+// @public
 export const HELL_FIELD_DIRECTIVES: readonly [typeof HellField, typeof HellFieldLabel, typeof HellFieldDescription, typeof HellFieldError];
 
 // @public
@@ -22,21 +22,16 @@ export class HellField {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-field.d.ts
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellField, "[hellField]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpFormField; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellField, never>;
 }
 
-// @public (undocumented)
+// @public
 export class HellFieldDescription {
-    // (undocumented)
     protected readonly field: HellField | null;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellFieldDescription, "[hellFieldDescription]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDescription; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellFieldDescription, never>;
 }
 
@@ -48,15 +43,12 @@ export type HellFieldDescriptionPart = 'root';
 // @public
 export type HellFieldDescriptionUi = HellUi<HellFieldDescriptionPart>;
 
-// @public (undocumented)
+// @public
 export class HellFieldError {
-    // (undocumented)
     protected readonly field: HellField | null;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellFieldError, "[hellFieldError]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpError; inputs: { "id": "id"; "ngpErrorValidator": "ngpErrorValidator"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellFieldError, never>;
 }
 
@@ -66,13 +58,11 @@ export type HellFieldErrorPart = 'root';
 // @public
 export type HellFieldErrorUi = HellUi<HellFieldErrorPart>;
 
-// @public (undocumented)
+// @public
 export class HellFieldLabel {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellFieldLabel, "label[hellFieldLabel]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpLabel; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellFieldLabel, never>;
 }
 
@@ -87,23 +77,6 @@ export type HellFieldPart = 'root';
 
 // @public
 export type HellFieldUi = HellUi<HellFieldPart>;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-field.d.ts:45:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-field.d.ts:46:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-field.d.ts:48:1 - (ae-undocumented) Missing documentation for "HellFieldLabel".
-// types/hell-ui-angular-field.d.ts:53:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-field.d.ts:54:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-field.d.ts:56:1 - (ae-undocumented) Missing documentation for "HellFieldDescription".
-// types/hell-ui-angular-field.d.ts:61:5 - (ae-undocumented) Missing documentation for "field".
-// types/hell-ui-angular-field.d.ts:62:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-field.d.ts:63:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-field.d.ts:65:1 - (ae-undocumented) Missing documentation for "HellFieldError".
-// types/hell-ui-angular-field.d.ts:70:5 - (ae-undocumented) Missing documentation for "field".
-// types/hell-ui-angular-field.d.ts:71:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-field.d.ts:72:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-field.d.ts:74:15 - (ae-undocumented) Missing documentation for "HELL_FIELD_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

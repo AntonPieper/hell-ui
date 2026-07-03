@@ -11,15 +11,13 @@ import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
-// @public (undocumented)
+// @public
 export class HellBadge {
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-tag.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-tag.d.ts
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellBadge, "[hellBadge]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellBadge, never>;
 }
 
@@ -31,13 +29,11 @@ export type HellBadgePart = 'root';
 // @public
 export type HellBadgeUi = HellUi<HellBadgePart>;
 
-// @public (undocumented)
+// @public
 export class HellKbd {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellKbd, "kbd[hellKbd], [hellKbd]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellKbd, never>;
 }
 
@@ -47,17 +43,13 @@ export type HellKbdPart = 'root';
 // @public
 export type HellKbdUi = HellUi<HellKbdPart>;
 
-// @public (undocumented)
+// @public
 export class HellTag {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
     // Warning: (ae-forgotten-export) The symbol "HellTagVariant" needs to be exported by the entry point hell-ui-angular-tag.d.ts
-    //
-    // (undocumented)
     readonly variant: i0.InputSignal<HellTagVariant>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellTag, "[hellTag]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "variant": { "alias": "variant"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTag, never>;
 }
 
@@ -66,19 +58,6 @@ export type HellTagPart = 'root';
 
 // @public
 export type HellTagUi = HellUi<HellTagPart>;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-tag.d.ts:17:1 - (ae-undocumented) Missing documentation for "HellTag".
-// types/hell-ui-angular-tag.d.ts:22:5 - (ae-undocumented) Missing documentation for "variant".
-// types/hell-ui-angular-tag.d.ts:23:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-tag.d.ts:24:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-tag.d.ts:26:1 - (ae-undocumented) Missing documentation for "HellBadge".
-// types/hell-ui-angular-tag.d.ts:31:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-tag.d.ts:32:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-tag.d.ts:34:1 - (ae-undocumented) Missing documentation for "HellKbd".
-// types/hell-ui-angular-tag.d.ts:39:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-tag.d.ts:40:5 - (ae-undocumented) Missing documentation for "ɵdir".
 
 // (No @packageDocumentation comment for this package)
 

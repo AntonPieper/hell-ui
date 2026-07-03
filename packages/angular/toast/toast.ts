@@ -34,10 +34,15 @@ import type { InjectionToken, Provider } from '@angular/core';
 
 /** Built-in accessibility labels owned by the toast entry point. */
 export interface HellToastLabels {
+  /** Accessible label for the toast region landmark. */
   readonly notifications: string;
+  /** Screen-reader announcement for a template-based toast with no derivable text. */
   readonly notification: string;
+  /** Accessible label for the scrollable toast stack viewport. */
   readonly stack: string;
+  /** Accessible label for an individual toast's close button. */
   readonly dismiss: string;
+  /** Accessible label for the dismiss-all button. */
   readonly dismissAll: string;
 }
 
@@ -57,7 +62,9 @@ export function provideHellToastLabels(overrides: Partial<HellToastLabels>): Pro
   return HELL_TOAST_LABELS_CONTRACT.provide(overrides);
 }
 
+/** Visual and semantic style of a toast. */
 export type HellToastVariant = 'default' | 'success' | 'info' | 'warning' | 'danger';
+/** Screen corner the toaster is anchored to. */
 export type HellToastPosition =
   | 'top-left'
   | 'top-center'
@@ -107,11 +114,15 @@ const HELL_TOASTER_RECIPE = {
     'inline-flex cursor-pointer items-center gap-hell-2 whitespace-nowrap rounded-hell-sm border border-hell-border bg-hell-surface-elevated px-2.5 py-[7px] text-xs font-semibold leading-none text-hell-foreground no-underline shadow-hell-md transition-[border-color,background-color,color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] hover:border-hell-border-strong hover:bg-hell-surface-elevated active:bg-hell-surface-muted focus-visible:outline-2 focus-visible:outline-hell-focus-ring focus-visible:outline-offset-2',
 } satisfies HellRecipe<HellToasterPart>;
 
+/** Optional action button configuration for a toast. */
 export interface HellToastAction {
+  /** Text shown on the action button. */
   label: string;
+  /** Invoked when the action is clicked; receives a callback that dismisses the toast. */
   onClick: (dismiss: () => void) => void;
 }
 
+/** Configuration passed to `HellToastService.show` and its variant shortcuts. */
 export interface HellToastOptions {
   /** Heading line. Falls back to `description` when omitted. */
   title?: string;
@@ -205,18 +216,23 @@ export class HellToastService {
     return id;
   }
 
+  /** Show a `default`-variant toast. Returns the toast id. */
   message(title: string, opts: Omit<HellToastOptions, 'title' | 'variant'> = {}) {
     return this.show({ ...opts, title, variant: 'default' });
   }
+  /** Show a `success`-variant toast. Returns the toast id. */
   success(title: string, opts: Omit<HellToastOptions, 'title' | 'variant'> = {}) {
     return this.show({ ...opts, title, variant: 'success' });
   }
+  /** Show an `info`-variant toast. Returns the toast id. */
   info(title: string, opts: Omit<HellToastOptions, 'title' | 'variant'> = {}) {
     return this.show({ ...opts, title, variant: 'info' });
   }
+  /** Show a `warning`-variant toast. Returns the toast id. */
   warning(title: string, opts: Omit<HellToastOptions, 'title' | 'variant'> = {}) {
     return this.show({ ...opts, title, variant: 'warning' });
   }
+  /** Show a `danger`-variant toast. Returns the toast id. */
   error(title: string, opts: Omit<HellToastOptions, 'title' | 'variant'> = {}) {
     return this.show({ ...opts, title, variant: 'danger' });
   }
@@ -506,19 +522,27 @@ export class HellToaster {
     recipe: () => HELL_TOASTER_RECIPE,
   });
 
+  /** The toast store this toaster renders. */
   readonly svc = inject(HellToastService);
+  /** Effective accessibility labels for the toaster's controls. */
   protected readonly labels = inject(HELL_TOAST_LABELS);
   private readonly host: HTMLElement = inject(ElementRef).nativeElement;
 
+  /** Whether any toasts are currently mounted. */
   protected readonly hasToasts = computed(() => this.svc.toasts().length > 0);
+  /** Number of toasts that are not in the process of exiting. */
   protected readonly liveToastCount = computed(
     () => this.svc.toasts().filter((toast) => !toast.removing).length,
   );
+  /** Whether the dismiss-all control should be shown (more than one live toast). */
   protected readonly showDismissAll = computed(() => this.liveToastCount() > 1);
 
+  /** Screen corner the stack is anchored to. Defaults to `bottom-right`. */
   readonly position = input<HellToastPosition>('bottom-right');
+  /** Maximum number of toasts shown before the stack collapses. Defaults to `3`. */
   readonly maxVisible = input<number>(3);
 
+  /** Whether the stack is currently expanded (hovered or focused). */
   protected readonly expanded = signal(false);
   /** id → measured pixel height */
   private readonly heights = signal(new Map<number, number>());
@@ -531,19 +555,25 @@ export class HellToaster {
   private readonly viewportHeight = signal(0);
   private readonly scrollTop = signal(0);
   private readonly nativeScrollbarWidth = signal(0);
+  /** Total measured height of the expanded stack, in pixels. */
   protected readonly stackHeightValue = computed(() =>
     hellToastStackHeightValuePx(this.svc.toasts(), this.heights()),
   );
+  /** Total measured stack height as a CSS `px` string. */
   protected readonly stackHeightPx = computed(() =>
     hellToastStackHeightPx(this.svc.toasts(), this.heights()),
   );
+  /** Expanded viewport height, clamped to the on-screen limit, in pixels. */
   protected readonly expandedViewportHeightValue = computed(() =>
     Math.min(this.stackHeightValue(), this.viewportHeightLimit()),
   );
+  /** Expanded viewport height as a CSS `px` string. */
   protected readonly expandedViewportHeightPx = computed(
     () => `${this.expandedViewportHeightValue()}px`,
   );
+  /** Measured native scrollbar width as a CSS `px` string. */
   protected readonly nativeScrollbarWidthPx = computed(() => `${this.nativeScrollbarWidth()}px`);
+  /** Whether the stack overflows the visible cap or viewport and needs scrolling. */
   protected readonly isScrollable = computed(() => {
     const viewportHeight = this.viewportHeight();
     return (
@@ -588,6 +618,7 @@ export class HellToaster {
     });
   }
 
+  /** Expand the stack and pause auto-dismiss when the pointer or focus enters. */
   protected onEnter() {
     const wasExpanded = this.expanded();
     if (this.collapseHandle != null) {
@@ -600,6 +631,7 @@ export class HellToaster {
     this.scheduleViewportStateSync(!wasExpanded);
   }
 
+  /** Schedule a deferred collapse of the stack when the pointer or focus leaves. */
   protected onLeave() {
     if (this.collapseHandle != null) clearTimeout(this.collapseHandle);
     // Defer collapse so a re-enter within the grace window (e.g. after the
@@ -618,12 +650,14 @@ export class HellToaster {
     }, 320);
   }
 
+  /** Collapse the stack when focus moves outside the toaster. */
   protected onFocusOut(event: FocusEvent) {
     const next = event.relatedTarget;
     if (next instanceof Node && this.host.contains(next)) return;
     this.onLeave();
   }
 
+  /** Sync scroll-derived viewport state as the stack viewport is scrolled. */
   protected onViewportScroll(event: Event) {
     this.syncViewportState(event.currentTarget as HTMLElement);
   }
@@ -649,10 +683,12 @@ export class HellToaster {
     return hellToastOverflow(this.svc.toasts(), t, this.maxVisible(), this.exitSnapshot());
   }
 
+  /** Measured height of the toast with the given id as a CSS `px` string. */
   protected heightPx(id: number): string {
     return hellToastHeightPx(id, this.heights());
   }
 
+  /** Fade progress (0–1) for `t` near a scroll edge, or its collapsed overflow depth. */
   protected edgeProgress(t: ToastInternal): number {
     if (!this.expanded()) return this.overflow(t);
     return hellToastScrollEdgeProgress(
@@ -669,18 +705,22 @@ export class HellToaster {
     );
   }
 
+  /** Opacity applied to `t` derived from its edge-fade progress. */
   protected edgeOpacity(t: ToastInternal): number {
     return hellToastScrollEdgeOpacity(this.edgeProgress(t));
   }
 
+  /** Whether `t` is hidden behind the visible cap while the stack is collapsed. */
   protected isCollapsedOverflow(t: ToastInternal): boolean {
     return !this.expanded() && this.frontDistance(t) >= this.maxVisible();
   }
 
+  /** `tabindex` for a toast's controls: removed from tab order when collapsed out of view. */
   protected toastControlTabIndex(t: ToastInternal): -1 | null {
     return this.isCollapsedOverflow(t) ? -1 : null;
   }
 
+  /** Template context (`{ id, dismiss }`) passed to custom toast templates. */
   protected ctxFor(id: number) {
     return { id, dismiss: () => this.svc.dismiss(id) };
   }
@@ -892,4 +932,5 @@ export class HellToaster {
   }
 }
 
+/** All Hell toast directives and components, for convenient bulk import. */
 export const HELL_TOAST_DIRECTIVES = [HellToaster, HellToastTemplate] as const;

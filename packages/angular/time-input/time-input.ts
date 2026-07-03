@@ -53,17 +53,29 @@ import {
 
 /** Built-in accessibility labels owned by the time input entry point. */
 export interface HellTimeInputLabels {
+  /** Accessible label for the clock trigger button when no field label is set. */
   readonly chooseTime: string;
+  /** Accessible label for the clock trigger button, incorporating the field label. */
   readonly chooseTimeFor: (label: string) => string;
+  /** Label for the control that steps the picker back by five minutes. */
   readonly subtractFiveMinutes: string;
+  /** Label for the control that steps the picker forward by five minutes. */
   readonly addFiveMinutes: string;
+  /** Label for the hours spinbutton. */
   readonly hours: string;
+  /** Label for the minutes spinbutton. */
   readonly minutes: string;
+  /** Label for the seconds spinbutton. */
   readonly seconds: string;
+  /** Accessible label announcing the currently selected time in the picker readout. */
   readonly selectedTime?: (time: string) => string;
+  /** Accessible label for a unit's decrement step button. */
   readonly decreaseUnit?: (unitLabel: string) => string;
+  /** Accessible label for a unit's increment step button. */
   readonly increaseUnit?: (unitLabel: string) => string;
+  /** Accessible label for the minute presets group. */
   readonly minutePresets?: string;
+  /** Accessible label for a single minute preset button. */
   readonly minutePreset?: (minute: number) => string;
 }
 
@@ -90,9 +102,13 @@ export function provideHellTimeInputLabels(overrides: Partial<HellTimeInputLabel
   return HELL_TIME_INPUT_LABELS_CONTRACT.provide(overrides);
 }
 
+/** Structured time value exchanged by the time input. */
 export interface HellTimeValue {
+  /** Hour of day, from 0 to 23. */
   readonly hour: number;
+  /** Minute of hour, from 0 to 59. */
   readonly minute: number;
+  /** Second of minute, from 0 to 59. */
   readonly second: number;
 }
 
@@ -148,14 +164,18 @@ const HELL_TIME_INPUT_RECIPE = {
     'h-hell-control-sm cursor-pointer rounded-hell-pill border border-hell-border bg-hell-surface-elevated font-[inherit] text-xs font-medium text-hell-foreground tabular-nums transition-[background-color,border-color,color,box-shadow] duration-[var(--hell-duration-fast)] ease-hell-out hover:bg-hell-surface-subtle focus-visible:relative focus-visible:z-[1] focus-visible:outline-0 focus-visible:shadow-[inset_0_0_0_2px_var(--color-hell-border-focus),0_0_0_2px_var(--color-hell-focus-ring)] data-[selected=true]:border-hell-primary data-[selected=true]:bg-hell-primary data-[selected=true]:text-hell-primary-foreground',
 } satisfies HellRecipe<HellTimeInputPart>;
 
+/** Contextual flags passed to adapter parse, format, and normalize hooks. */
 export interface HellTimeInputAdapterContext {
+  /** Whether seconds are part of the value being parsed, formatted, or normalized. */
   readonly seconds: boolean;
 }
 
 type HellTimeUnit = HellTimeInputPickerUnit;
 
+/** Result of parsing time input text into a value or an invalid draft. */
 export type HellTimeInputParseResult = HellTypedValueParseResult<HellTimeValue>;
 
+/** Strategy for parsing, formatting, normalizing, and comparing time values. */
 export interface HellTimeInputAdapter {
   /** Parse visible text. Return `{ valid: true, value: null }` to commit a clear. */
   readonly parseText: (
@@ -173,6 +193,7 @@ export interface HellTimeInputAdapter {
   readonly isSameValue?: (a: HellTimeValue | null, b: HellTimeValue | null) => boolean;
 }
 
+/** Default time input adapter parsing and formatting the built-in `HH:mm`/`HH:mm:ss` formats. */
 export const HELL_DEFAULT_TIME_INPUT_ADAPTER: HellTimeInputAdapter = {
   parseText: hellParseTimeInputText,
   format: hellFormatTimeInputValue,
@@ -180,11 +201,13 @@ export const HELL_DEFAULT_TIME_INPUT_ADAPTER: HellTimeInputAdapter = {
   isSameValue: hellSameTimeInputValue,
 };
 
+/** Injection token resolving to the effective time input adapter. */
 export const HELL_TIME_INPUT_ADAPTER = new InjectionToken<HellTimeInputAdapter>(
   'HELL_TIME_INPUT_ADAPTER',
   { factory: () => HELL_DEFAULT_TIME_INPUT_ADAPTER },
 );
 
+/** Override the time input adapter for an injector scope. */
 export function provideHellTimeInputAdapter(adapter: HellTimeInputAdapter): Provider {
   return { provide: HELL_TIME_INPUT_ADAPTER, useValue: adapter };
 }
@@ -193,6 +216,7 @@ function pad(n: number) {
   return n.toString().padStart(2, '0');
 }
 
+/** Format a time value as `HH:mm`, or `HH:mm:ss` when seconds are enabled. */
 export function hellFormatTimeInputValue(
   t: HellTimeValue,
   context: HellTimeInputAdapterContext,
@@ -217,6 +241,7 @@ export function hellNormalizeTimeInputValue(
   return context.seconds ? value : { ...value, second: 0 };
 }
 
+/** Parse time input text into a value or an invalid draft, per the default formats. */
 export function hellParseTimeInputText(
   text: string,
   context: HellTimeInputAdapterContext,
@@ -273,6 +298,7 @@ function isValidTime(value: HellTimeValue | null | undefined): value is HellTime
   );
 }
 
+/** Compare two time values by their hour, minute, and second fields. */
 export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue | null): boolean {
   return a?.hour === b?.hour && a?.minute === b?.minute && a?.second === b?.second;
 }
@@ -451,27 +477,44 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     recipe: () => HELL_TIME_INPUT_RECIPE,
   });
 
+  /** Control height. Defaults to `md`. */
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
+  /** Forces the invalid visual state. Defaults to `false`. */
   readonly invalid = input(false, { transform: booleanAttribute });
+  /** Disables the field and trigger. Defaults to `false`. */
   readonly disabled = input(false, { transform: booleanAttribute });
+  /** Current time value in uncontrolled use. Defaults to `null`. */
   readonly value = input<HellTimeValue | null>(null);
+  /** Includes seconds in the field and picker. Defaults to `false`. */
   readonly seconds = input(false, { transform: booleanAttribute });
+  /** Placeholder text for the field. Defaults to a format hint. */
   readonly placeholder = input<string | null>(null);
+  /** `id` of the text field. Defaults to a generated unique id. */
   readonly inputId = input<string>(`hell-time-input-${++nextTimeInputId}-field`);
+  /** `name` attribute of the text field. Defaults to `null`. */
   readonly name = input<string | null>(null);
+  /** Accessible label for the field. Defaults to `null`. */
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
+  /** `aria-describedby` reference for the field. Defaults to `null`. */
   readonly ariaDescribedby = input<string | null>(null, { alias: 'aria-describedby' });
+  /** `aria-labelledby` reference for the field. Defaults to `null`. */
   readonly ariaLabelledby = input<string | null>(null, { alias: 'aria-labelledby' });
 
+  /** Emits when the committed time value changes. */
   readonly valueChange = output<HellTimeValue | null>();
 
+  /** Minute values offered as quick presets in the picker. */
   protected readonly minutePresets = [0, 15, 30, 45] as const;
+  /** Popover shift padding keeping the picker panel off the viewport edge. */
   protected readonly pickerShift = { padding: 8 } as const;
+  /** Zero-pads a number to two digits for display. */
   protected readonly pad = pad;
   private readonly timeAdapter = inject(HELL_TIME_INPUT_ADAPTER);
 
+  /** Formats a time value through the adapter, or empty string when null. */
   protected readonly format = (value: HellTimeValue | null, seconds: boolean) =>
     value ? this.timeAdapter.format(value, { seconds }) : '';
+  /** Whether to render a native `<input type="time">`, used only with the default adapter. */
   protected readonly nativeTimeInput = this.timeAdapter === HELL_DEFAULT_TIME_INPUT_ADAPTER;
 
   private readonly controlMode = signal(false);
@@ -492,19 +535,27 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     externalChanged: (base, current) => !this.sameValue(base, current),
   });
 
+  /** Current committed time value, defaulting to midnight when none is set. */
   protected readonly current = computed<HellTimeValue>(
     () => this.valueState.current() ?? { hour: 0, minute: 0, second: 0 },
   );
+  /** Text shown in the field for the current value or draft. */
   protected readonly display = this.valueState.display;
+  /** Whether the current draft text is unparseable. */
   protected readonly invalidDraft = this.valueState.invalidDraft;
+  /** Whether the control is in an invalid state. */
   protected readonly isInvalid = () => this.invalid() || this.invalidDraft();
+  /** Whether the control is disabled by input or form state. */
   protected readonly isDisabled = () => this.disabled() || this.controlDisabled();
+  /** `aria-describedby` value combining the field input and form field descriptions. */
   protected readonly fieldAriaDescribedby = computed(
     () => this.formField.descriptions().join(' ') || null,
   );
+  /** `aria-labelledby` value combining the field input and form field labels. */
   protected readonly fieldAriaLabelledby = computed(
     () => this.formField.labels().join(' ') || null,
   );
+  /** Resolved accessibility labels for the control. */
   protected readonly labels = inject(HELL_TIME_INPUT_LABELS);
   private readonly inheritedFormField = injectFormFieldState({ optional: true, skipSelf: true });
   private readonly formField =
@@ -521,11 +572,13 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     });
   }
 
+  /** Accessible label for the clock trigger button. */
   protected readonly triggerAriaLabel = () => {
     const label = this.ariaLabel();
     return label ? this.labels.chooseTimeFor(label) : this.labels.chooseTime;
   };
 
+  /** Writes a value from the form model into the control. */
   writeValue(value: HellTimeValue | null): void {
     this.controlMode.set(true);
     this.controlValue.set(this.normalizeValue(value));
@@ -534,18 +587,22 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     this.onValidatorChange();
   }
 
+  /** Registers the form model's change callback. */
   registerOnChange(fn: (value: HellTimeValue | null) => void): void {
     this.onControlChange = fn;
   }
 
+  /** Registers the form model's touched callback. */
   registerOnTouched(fn: () => void): void {
     this.onControlTouched = fn;
   }
 
+  /** Registers the callback invoked when validation state changes. */
   registerOnValidatorChange(fn: () => void): void {
     this.onValidatorChange = fn;
   }
 
+  /** Sets the disabled state from the form model. */
   setDisabledState(isDisabled: boolean): void {
     this.controlDisabled.set(isDisabled);
   }
@@ -554,11 +611,13 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     return this.controlMode() ? this.controlValue() : this.value();
   }
 
+  /** Records field text as a draft as the user types. */
   protected onInput(value: string) {
     this.valueState.writeDraft(value);
     this.onValidatorChange();
   }
 
+  /** Selects the field contents on focus for quick overwriting. */
   protected onFieldFocus(field: HTMLInputElement) {
     if (!field.value || this.isDisabled()) return;
     queueMicrotask(() => {
@@ -570,6 +629,7 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     });
   }
 
+  /** Commits the pending draft when the field loses focus. */
   protected onBlur() {
     const next = this.valueState.commitDraft();
     if (next.committed) this.emitValue(next.value);
@@ -577,6 +637,7 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     this.onValidatorChange();
   }
 
+  /** Commits the given field text, e.g. on Enter. */
   protected commit(text: string, event?: Event) {
     event?.preventDefault();
     const next = this.valueState.commitText(text);
@@ -584,6 +645,7 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     this.onValidatorChange();
   }
 
+  /** Sets a single time unit to a value and commits the result. */
   protected setUnit(unit: HellTimeUnit, n: number) {
     const value = this.normalizeValue({ ...this.current(), [unit]: n });
     if (!value) return;
@@ -593,32 +655,39 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     this.onValidatorChange();
   }
 
+  /** Units shown in the picker, including seconds when enabled. */
   protected visibleUnits(): readonly HellTimeUnit[] {
     return this.seconds() ? this.hourMinuteSecondUnits : this.hourMinuteUnits;
   }
 
+  /** Localized label for a time unit. */
   protected unitLabel(unit: HellTimeUnit): string {
     if (unit === 'hour') return this.labels.hours;
     if (unit === 'minute') return this.labels.minutes;
     return this.labels.seconds;
   }
 
+  /** DOM id of a unit's label element, for `aria-labelledby`. */
   protected unitLabelId(unit: HellTimeUnit): string {
     return `${this.inputId()}-${unit}-label`;
   }
 
+  /** Current numeric value of a time unit. */
   protected unitValue(unit: HellTimeUnit): number {
     return this.current()[unit];
   }
 
+  /** Maximum value a time unit accepts. */
   protected unitMax(unit: HellTimeUnit): number {
     return hellTimeInputPickerMaxValue(unit);
   }
 
+  /** Accessible `aria-valuetext` for a unit's spinbutton. */
   protected unitValueText(unit: HellTimeUnit): string {
     return `${pad(this.unitValue(unit))} ${this.unitLabel(unit).toLowerCase()}`;
   }
 
+  /** Accessible label announcing the currently selected time. */
   protected selectedTimeLabel(): string {
     return (
       this.labels.selectedTime?.(this.format(this.current(), this.seconds())) ??
@@ -626,24 +695,29 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     );
   }
 
+  /** Accessible label for a unit's decrement button. */
   protected decreaseUnitLabel(unit: HellTimeUnit): string {
     const label = this.unitLabel(unit);
     return this.labels.decreaseUnit?.(label) ?? `Decrease ${label.toLowerCase()}`;
   }
 
+  /** Accessible label for a unit's increment button. */
   protected increaseUnitLabel(unit: HellTimeUnit): string {
     const label = this.unitLabel(unit);
     return this.labels.increaseUnit?.(label) ?? `Increase ${label.toLowerCase()}`;
   }
 
+  /** Accessible label for the minute presets group. */
   protected minutePresetsLabel(): string {
     return this.labels.minutePresets ?? 'Minute presets';
   }
 
+  /** Accessible label for a single minute preset button. */
   protected minutePresetLabel(minute: number): string {
     return this.labels.minutePreset?.(minute) ?? `Set minutes to ${pad(minute)}`;
   }
 
+  /** Steps a time unit by a delta, clamped to its range. */
   protected stepUnit(unit: HellTimeUnit, delta: number): void {
     const value = this.unitValue(unit);
     const next = Math.min(Math.max(value + delta, 0), this.unitMax(unit));
@@ -651,6 +725,7 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     this.setUnit(unit, next);
   }
 
+  /** Handles keyboard navigation on a unit's spinbutton. */
   protected onPickerSpinKeydown(event: KeyboardEvent, unit: HellTimeUnit): void {
     const next = hellTimeInputNextPickerValue(event.key, this.unitValue(unit), unit);
     if (next === null) return;
@@ -670,6 +745,7 @@ export class HellTimeInput implements ControlValueAccessor, Validator {
     return this.timeAdapter.isSameValue?.(a, b) ?? hellSameTimeInputValue(a, b);
   }
 
+  /** Reports a validation error while the draft text is unparseable. */
   validate(_control: AbstractControl | null): ValidationErrors | null {
     const errors: ValidationErrors = {};
 

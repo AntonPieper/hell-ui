@@ -37,6 +37,7 @@ const HELL_CARD_FOOTER_RECIPE = {
   root: 'flex justify-end gap-hell-3 border-t border-hell-border px-hell-6 py-hell-4',
 } satisfies HellRecipe<HellCardFooterPart>;
 
+/** Container for a card's header, body and footer, with elevation-driven shadow and border. */
 @Directive({
   selector: '[hellCard]',
   host: {
@@ -55,9 +56,11 @@ export class HellCard {
     recipe: () => HELL_CARD_RECIPE,
   });
 
+  /** Shadow depth of the card, from `0` (flat) to `3` (highest). Defaults to `1`. */
   readonly elevation = input<0 | 1 | 2 | 3>(1);
 }
 
+/** Header region of a card, typically holding a title and actions. */
 @Directive({
   selector: '[hellCardHeader]',
   host: {
@@ -76,6 +79,7 @@ export class HellCardHeader {
   });
 }
 
+/** Main content region of a card. */
 @Directive({
   selector: '[hellCardBody]',
   host: {
@@ -94,6 +98,7 @@ export class HellCardBody {
   });
 }
 
+/** Footer region of a card, typically holding actions. */
 @Directive({
   selector: '[hellCardFooter]',
   host: {
@@ -112,6 +117,7 @@ export class HellCardFooter {
   });
 }
 
+/** All directives that make up the card entry point, for bulk `imports`. */
 export const HELL_CARD_DIRECTIVES = [
   HellCard,
   HellCardHeader,

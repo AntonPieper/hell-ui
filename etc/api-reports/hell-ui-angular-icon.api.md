@@ -13,23 +13,16 @@ import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export class HellIcon {
-    // (undocumented)
     readonly ariaLabel: _angular_core.InputSignal<string | null>;
-    // (undocumented)
     readonly color: _angular_core.InputSignal<string | null>;
-    // (undocumented)
     readonly decorative: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     readonly name: _angular_core.InputSignal<string>;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-icon.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // (undocumented)
     readonly size: _angular_core.InputSignal<string>;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-icon.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellIcon, "hell-icon", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "name": { "alias": "name"; "required": true; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "color": { "alias": "color"; "required": false; "isSignal": true; }; "decorative": { "alias": "decorative"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellIcon, never>;
 }
 
@@ -40,16 +33,6 @@ export type HellIconPart = 'root';
 //
 // @public
 export type HellIconUi = HellUi<HellIconPart>;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-icon.d.ts:25:5 - (ae-undocumented) Missing documentation for "name".
-// types/hell-ui-angular-icon.d.ts:26:5 - (ae-undocumented) Missing documentation for "size".
-// types/hell-ui-angular-icon.d.ts:27:5 - (ae-undocumented) Missing documentation for "color".
-// types/hell-ui-angular-icon.d.ts:28:5 - (ae-undocumented) Missing documentation for "decorative".
-// types/hell-ui-angular-icon.d.ts:29:5 - (ae-undocumented) Missing documentation for "ariaLabel".
-// types/hell-ui-angular-icon.d.ts:30:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-icon.d.ts:31:5 - (ae-undocumented) Missing documentation for "ɵcmp".
 
 // (No @packageDocumentation comment for this package)
 

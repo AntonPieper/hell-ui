@@ -20,6 +20,7 @@ const HELL_SEARCH_CLEAR_RECIPE = {
   root: '',
 } satisfies HellRecipe<HellSearchClearPart>;
 
+/** Root container for a search field, coordinating its clear control. */
 @Directive({
   selector: '[hellSearch]',
   hostDirectives: [NgpSearch],
@@ -39,6 +40,7 @@ export class HellSearch {
   });
 }
 
+/** Button that clears the value of an enclosing `hellSearch` field. */
 @Directive({
   selector: 'button[hellSearchClear]',
   hostDirectives: [NgpSearchClear],
@@ -59,4 +61,5 @@ export class HellSearchClear {
   });
 }
 
+/** All directives exported by the search entry point, for bulk `imports`. */
 export const HELL_SEARCH_DIRECTIVES = [HellSearch, HellSearchClear] as const;

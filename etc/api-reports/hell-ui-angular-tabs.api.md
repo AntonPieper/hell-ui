@@ -12,28 +12,24 @@ import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
-// @public (undocumented)
+// @public
 export const HELL_TABS_DIRECTIVES: readonly [typeof HellTabset, typeof HellTabList, typeof HellTab, typeof HellTabPanel];
 
-// @public (undocumented)
+// @public
 export class HellTab {
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-tabs.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-tabs.d.ts
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellTab, "button[hellTab]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpTabButton; inputs: { "ngpTabButtonValue": "value"; "ngpTabButtonDisabled": "disabled"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTab, never>;
 }
 
-// @public (undocumented)
+// @public
 export class HellTabList {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellTabList, "[hellTabList]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpTabList; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTabList, never>;
 }
 
@@ -45,13 +41,11 @@ export type HellTabListPart = 'root';
 // @public
 export type HellTabListUi = HellUi<HellTabListPart>;
 
-// @public (undocumented)
+// @public
 export class HellTabPanel {
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellTabPanel, "[hellTabPanel]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpTabPanel; inputs: { "ngpTabPanelValue": "value"; }; outputs: {}; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTabPanel, never>;
 }
 
@@ -67,14 +61,10 @@ export type HellTabPart = 'root';
 // @public
 export class HellTabset {
     // Warning: (ae-forgotten-export) The symbol "HellOrientation" needs to be exported by the entry point hell-ui-angular-tabs.d.ts
-    //
-    // (undocumented)
     readonly orientation: i0.InputSignal<HellOrientation>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;
-    // (undocumented)
     static ɵdir: i0.ɵɵDirectiveDeclaration<HellTabset, "[hellTabset]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "orientation": { "alias": "orientation"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpTabset; inputs: { "ngpTabsetValue": "value"; "ngpTabsetOrientation": "orientation"; "ngpTabsetActivateOnFocus": "activateOnFocus"; }; outputs: { "ngpTabsetValueChange": "valueChange"; }; }]>;
-    // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<HellTabset, never>;
 }
 
@@ -86,22 +76,6 @@ export type HellTabsetUi = HellUi<HellTabsetPart>;
 
 // @public
 export type HellTabUi = HellUi<HellTabPart>;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-tabs.d.ts:38:5 - (ae-undocumented) Missing documentation for "orientation".
-// types/hell-ui-angular-tabs.d.ts:39:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-tabs.d.ts:40:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-tabs.d.ts:42:1 - (ae-undocumented) Missing documentation for "HellTabList".
-// types/hell-ui-angular-tabs.d.ts:47:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-tabs.d.ts:48:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-tabs.d.ts:50:1 - (ae-undocumented) Missing documentation for "HellTab".
-// types/hell-ui-angular-tabs.d.ts:55:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-tabs.d.ts:56:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-tabs.d.ts:58:1 - (ae-undocumented) Missing documentation for "HellTabPanel".
-// types/hell-ui-angular-tabs.d.ts:63:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-tabs.d.ts:64:5 - (ae-undocumented) Missing documentation for "ɵdir".
-// types/hell-ui-angular-tabs.d.ts:66:15 - (ae-undocumented) Missing documentation for "HELL_TABS_DIRECTIVES".
 
 // (No @packageDocumentation comment for this package)
 

@@ -94,6 +94,11 @@ class HellRadioRovingRegistry {
   }
 }
 
+/**
+ * Roving-focus radio group built on `ng-primitives/radio`. Manages the
+ * checked value, keyboard navigation between `HellRadio` items, and
+ * `ControlValueAccessor`/`Validator` integration for reactive forms.
+ */
 @Directive({
   selector: '[hellRadioGroup]',
   hostDirectives: [
@@ -140,7 +145,9 @@ export class HellRadioGroup<T = unknown> implements ControlValueAccessor, Valida
     recipe: () => HELL_RADIO_GROUP_RECIPE,
   });
 
+  /** Layout axis for the group's roving focus and Tailwind data attribute. Defaults to `vertical`. */
   readonly orientation = input<HellOrientation>('vertical');
+  /** Whether a value must be selected for the group to be valid. Defaults to `false`. */
   readonly required = input(false, { transform: booleanAttribute });
 
   private readonly group = inject(NgpRadioGroup<T>);
@@ -180,27 +187,33 @@ export class HellRadioGroup<T = unknown> implements ControlValueAccessor, Valida
     );
   }
 
+  /** Writes a value from the form model into the radio group state. */
   writeValue(value: T | null): void {
     writeRadioGroupStateValue(this.groupState(), value);
   }
 
+  /** Registers the callback invoked when the checked value changes. */
   registerOnChange(fn: (value: T | null) => void): void {
     this.valueAccessor.registerOnChange(fn);
   }
 
+  /** Registers the callback invoked when the group is touched. */
   registerOnTouched(fn: () => void): void {
     this.valueAccessor.registerOnTouched(fn);
   }
 
+  /** Registers the callback invoked when validator-relevant state changes. */
   registerOnValidatorChange(fn: () => void): void {
     this.onValidatorChange = fn;
   }
 
+  /** Applies the disabled state pushed down from the form model. */
   setDisabledState(isDisabled: boolean): void {
     writeRadioGroupStateDisabled(this.groupState(), isDisabled);
     this.onValidatorChange();
   }
 
+  /** Returns a `required` validation error when `required` is set and no value is selected. */
   validate(control: AbstractControl | null): ValidationErrors | null {
     if (!this.required() || control?.disabled || this.disabled()) return null;
     const value = control ? control.value : this.groupState().value();
@@ -211,6 +224,7 @@ export class HellRadioGroup<T = unknown> implements ControlValueAccessor, Valida
     return value == null || value === '';
   }
 
+  /** Marks the group as touched once focus leaves the group entirely. */
   protected onFocusOut(event: FocusEvent): void {
     const next = event.relatedTarget;
     if (!containsNode(this.host.nativeElement, next)) {
@@ -304,6 +318,10 @@ export class HellRadioGroup<T = unknown> implements ControlValueAccessor, Valida
   }
 }
 
+/**
+ * Individual radio item button. Must be placed inside a `HellRadioGroup`;
+ * participates in its roving focus and checked-value state.
+ */
 @Directive({
   selector: 'button[hellRadio]',
   hostDirectives: [
@@ -338,8 +356,11 @@ export class HellRadio {
   private readonly host = inject<ElementRef<HTMLButtonElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
 
+  /** Whether the enclosing `HellRadioGroup` is disabled. */
   protected readonly groupDisabled = computed(() => this.groupState().disabled());
+  /** Whether this item is individually disabled. */
   protected readonly itemDisabled = computed(() => this.radioItem.disabled());
+  /** Whether the item is disabled, either individually or via its group. */
   protected readonly isDisabled = computed(() => this.groupDisabled() || this.itemDisabled());
 
   constructor() {
@@ -368,6 +389,11 @@ export class HellRadio {
   }
 }
 
+/**
+ * Layout wrapper for a group of native `input[type="radio"][hellNativeRadio]`
+ * elements. Purely presentational — it does not manage checked state, since
+ * native radios coordinate that through their shared `name` attribute.
+ */
 @Directive({
   selector: '[hellNativeRadioGroup]',
   host: {
@@ -387,9 +413,11 @@ export class HellNativeRadioGroup {
     recipe: () => HELL_NATIVE_RADIO_GROUP_RECIPE,
   });
 
+  /** Layout axis for the group's Tailwind data attribute. Defaults to `vertical`. */
   readonly orientation = input<HellOrientation>('vertical');
 }
 
+/** Styleable wrapper around a native `input[type="radio"]` element. */
 @Directive({
   selector: 'input[type="radio"][hellNativeRadio]',
   host: {
@@ -412,11 +440,14 @@ export class HellNativeRadio {
     recipe: () => HELL_NATIVE_RADIO_RECIPE,
   });
 
+  /** Whether the input must be checked for the surrounding form to be valid. Defaults to `false`. */
   readonly required = input(false, { alias: 'required', transform: booleanAttribute });
 
+  /** Emits the input's checked state whenever it changes. */
   readonly checkedChange = output<boolean>();
   private readonly host = inject(ElementRef<HTMLInputElement>);
 
+  /** Re-emits `checkedChange` in response to the native `change` event. */
   protected onChange(): void {
     this.checkedChange.emit(this.host.nativeElement.checked);
   }

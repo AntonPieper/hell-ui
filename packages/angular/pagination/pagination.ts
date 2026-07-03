@@ -34,14 +34,23 @@ import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '
 
 /** Built-in accessibility labels owned by the pagination entry point. */
 export interface HellPaginationLabels {
+  /** Accessible label for the pagination navigation landmark. */
   readonly navigation: string;
+  /** Accessible label for the first-page control. */
   readonly firstPage: string;
+  /** Accessible label for the previous-page control. */
   readonly previousPage: string;
+  /** Accessible label for the next-page control. */
   readonly nextPage: string;
+  /** Accessible label for the last-page control. */
   readonly lastPage: string;
+  /** Accessible label for a numbered page button. */
   readonly page: (page: number) => string;
+  /** Status text announcing the current page in `previous-next` mode. */
   readonly pageStatus?: (page: number, pageCount: number) => string;
+  /** Label for the page-jump select in `jump` mode. */
   readonly jumpToPage?: string;
+  /** Trailing text showing the total page count in `jump` mode. */
   readonly pageTotal?: (pageCount: number) => string;
 }
 
@@ -71,6 +80,7 @@ export function provideHellPaginationLabels(
   return HELL_PAGINATION_LABEL_CONTRACT.provide(overrides);
 }
 
+/** Layout variant of the `HellPaginationStrip`: full page buttons, a compact previous/next control, or a page-jump select. */
 export type HellPaginationMode = 'pages' | 'previous-next' | 'jump';
 
 /** Public parts of the HellPagination module, styleable through its Part Style Map. */
@@ -241,6 +251,7 @@ export class HellPagination {
   });
 }
 
+/** Directive turning a `<button>` or `<a>` into the first-page pagination control. */
 @Directive({
   selector: 'button[hellPaginationFirst], a[hellPaginationFirst]',
   hostDirectives: [
@@ -270,14 +281,18 @@ export class HellPaginationFirst {
     defaultPart: 'root',
     recipe: () => HELL_PAGINATION_FIRST_RECIPE,
   });
+  /** Host-tag-aware native control helpers (button vs. anchor attributes and guards). */
   protected readonly native = injectPaginationNativeControl();
   private readonly state = injectPaginationFirstState();
+  /** Whether this control is currently disabled by pagination state. */
   protected readonly disabled = computed(() => this.state().disabled());
+  /** Keyboard (Enter/Space) activation handler that navigates to the first page. */
   protected readonly activate = paginationKeyboardActivation(this.native, this.disabled, () =>
     this.state().goToFirstPage(),
   );
 }
 
+/** Directive turning a `<button>` or `<a>` into the previous-page pagination control. */
 @Directive({
   selector: 'button[hellPaginationPrev], a[hellPaginationPrev]',
   hostDirectives: [
@@ -307,14 +322,18 @@ export class HellPaginationPrev {
     defaultPart: 'root',
     recipe: () => HELL_PAGINATION_PREV_RECIPE,
   });
+  /** Host-tag-aware native control helpers (button vs. anchor attributes and guards). */
   protected readonly native = injectPaginationNativeControl();
   private readonly state = injectPaginationPreviousState();
+  /** Whether this control is currently disabled by pagination state. */
   protected readonly disabled = computed(() => this.state().disabled());
+  /** Keyboard (Enter/Space) activation handler that navigates to the previous page. */
   protected readonly activate = paginationKeyboardActivation(this.native, this.disabled, () =>
     this.state().goToPreviousPage(),
   );
 }
 
+/** Directive turning a `<button>` or `<a>` into the next-page pagination control. */
 @Directive({
   selector: 'button[hellPaginationNext], a[hellPaginationNext]',
   hostDirectives: [
@@ -344,14 +363,18 @@ export class HellPaginationNext {
     defaultPart: 'root',
     recipe: () => HELL_PAGINATION_NEXT_RECIPE,
   });
+  /** Host-tag-aware native control helpers (button vs. anchor attributes and guards). */
   protected readonly native = injectPaginationNativeControl();
   private readonly state = injectPaginationNextState();
+  /** Whether this control is currently disabled by pagination state. */
   protected readonly disabled = computed(() => this.state().disabled());
+  /** Keyboard (Enter/Space) activation handler that navigates to the next page. */
   protected readonly activate = paginationKeyboardActivation(this.native, this.disabled, () =>
     this.state().goToNextPage(),
   );
 }
 
+/** Directive turning a `<button>` or `<a>` into the last-page pagination control. */
 @Directive({
   selector: 'button[hellPaginationLast], a[hellPaginationLast]',
   hostDirectives: [
@@ -381,14 +404,18 @@ export class HellPaginationLast {
     defaultPart: 'root',
     recipe: () => HELL_PAGINATION_LAST_RECIPE,
   });
+  /** Host-tag-aware native control helpers (button vs. anchor attributes and guards). */
   protected readonly native = injectPaginationNativeControl();
   private readonly state = injectPaginationLastState();
+  /** Whether this control is currently disabled by pagination state. */
   protected readonly disabled = computed(() => this.state().disabled());
+  /** Keyboard (Enter/Space) activation handler that navigates to the last page. */
   protected readonly activate = paginationKeyboardActivation(this.native, this.disabled, () =>
     this.state().goToLastPage(),
   );
 }
 
+/** Directive turning a `<button>` or `<a>` into a numbered page pagination control. */
 @Directive({
   selector: 'button[hellPaginationButton], a[hellPaginationButton]',
   hostDirectives: [
@@ -421,9 +448,12 @@ export class HellPaginationButton {
     defaultPart: 'root',
     recipe: () => HELL_PAGINATION_BUTTON_RECIPE,
   });
+  /** Host-tag-aware native control helpers (button vs. anchor attributes and guards). */
   protected readonly native = injectPaginationNativeControl();
   private readonly state = injectPaginationButtonState();
+  /** Whether this control is currently disabled by pagination state. */
   protected readonly disabled = computed(() => this.state().disabled());
+  /** Keyboard (Enter/Space) activation handler that navigates to this button's page. */
   protected readonly activate = paginationKeyboardActivation(this.native, this.disabled, () =>
     this.state().goToPage(),
   );
@@ -538,19 +568,25 @@ export class HellPaginationStrip {
     recipe: () => HELL_PAGINATION_STRIP_RECIPE,
   });
 
+  /** Number of page buttons to show on each side of the active page. Defaults to `2`. */
   readonly siblingCount = input<number>(2);
+  /** Layout variant of the strip. Defaults to `pages`. */
   readonly mode = input<HellPaginationMode>('pages');
 
+  /** Effective accessibility labels for the strip's controls. */
   protected readonly labels = inject(HELL_PAGINATION_LABELS);
 
   private readonly state = injectPaginationState();
 
+  /** `@for` track function keying rendered pages by page number. */
   protected readonly trackPage = (_: number, page: number) => page;
 
+  /** All page numbers (1…pageCount), used to populate the jump select. */
   protected readonly pageOptions = computed(() =>
     Array.from({ length: this.pageCount() }, (_, i) => i + 1),
   );
 
+  /** Windowed page numbers to render as buttons, clamped around the active page. */
   protected readonly pages = computed(() => {
     const total = this.pageCount();
     const current = this.currentPage();
@@ -567,19 +603,23 @@ export class HellPaginationStrip {
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   });
 
+  /** The currently active page number. */
   protected currentPage(): number {
     return this.state().page();
   }
 
+  /** The total number of pages, floored and clamped to a non-negative integer. */
   protected pageCount(): number {
     const pageCount = Math.floor(this.state().pageCount());
     return Number.isFinite(pageCount) ? Math.max(0, pageCount) : 0;
   }
 
+  /** Whether pagination is currently disabled. */
   protected paginationDisabled(): boolean {
     return this.state().disabled();
   }
 
+  /** Status text announcing the current page, used in `previous-next` mode. */
   protected pageStatusLabel(): string {
     return (
       this.labels.pageStatus?.(this.currentPage(), this.pageCount()) ??
@@ -587,18 +627,22 @@ export class HellPaginationStrip {
     );
   }
 
+  /** Label for the page-jump select, used in `jump` mode. */
   protected pageJumpLabel(): string {
     return this.labels.jumpToPage ?? 'Page';
   }
 
+  /** Trailing total-page text shown next to the jump select. */
   protected pageTotalLabel(): string {
     return this.labels.pageTotal?.(this.pageCount()) ?? `of ${this.pageCount()}`;
   }
 
+  /** Part Style Map forwarded to the embedded `hellNativeSelect` jump control. */
   protected jumpSelectUi(): HellNativeSelectUi {
     return { root: this.part('jumpSelect') };
   }
 
+  /** Navigate to the page chosen in the jump select. */
   protected goToSelectedPage(event: Event): void {
     if (this.paginationDisabled()) return;
     const target = event.target;
@@ -611,6 +655,7 @@ export class HellPaginationStrip {
   }
 }
 
+/** All HellPagination directives and components, for convenient bulk import. */
 export const HELL_PAGINATION_DIRECTIVES = [
   HellPagination,
   HellPaginationFirst,

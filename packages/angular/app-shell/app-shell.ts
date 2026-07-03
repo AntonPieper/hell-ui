@@ -24,9 +24,13 @@ import type { InjectionToken, Provider } from '@angular/core';
 
 /** Built-in accessibility labels owned by the app shell entry point. */
 export interface HellAppShellLabels {
+  /** Accessible label for the sidenav toggle when the sidenav is collapsed. */
   readonly expandSidebar: string;
+  /** Accessible label for the sidenav toggle when the sidenav is expanded. */
   readonly collapseSidebar: string;
+  /** Accessible label for the secondary toggle when the secondary panel is hidden. */
   readonly showSecondaryPanel: string;
+  /** Accessible label for the secondary toggle when the secondary panel is visible. */
   readonly hideSecondaryPanel: string;
 }
 
@@ -45,8 +49,11 @@ export function provideHellAppShellLabels(overrides: Partial<HellAppShellLabels>
   return HELL_APP_SHELL_LABELS_CONTRACT.provide(overrides);
 }
 
+/** Minimum viewport width in pixels at which the shell uses the desktop layout. */
 export const HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX = 768;
+/** Maximum viewport width in pixels at which the shell uses the mobile overlay layout. */
 export const HELL_APP_SHELL_MOBILE_MAX_WIDTH_PX = HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX - 1;
+/** Media query that matches the mobile overlay layout breakpoint. */
 export const HELL_APP_SHELL_MOBILE_MEDIA = `(max-width: ${HELL_APP_SHELL_MOBILE_MAX_WIDTH_PX}px)`;
 let nextAppShellId = 0;
 
@@ -242,21 +249,29 @@ export class HellAppShell implements OnDestroy {
     recipe: () => HELL_APP_SHELL_RECIPE,
   });
 
+  /** Controlled sidenav collapsed state; when set, the shell defers to this input instead of its internal toggle. Defaults to `null` (uncontrolled). */
   readonly sidenavCollapsed = input<boolean | null, boolean | string | null | undefined>(null, {
     transform: nullableBooleanAttribute,
   });
+  /** Emits the requested sidenav collapsed state whenever a toggle occurs. */
   readonly sidenavCollapsedChange = output<boolean>();
+  /** Controlled secondary panel hidden state; when set, the shell defers to this input instead of its internal toggle. Defaults to `null` (uncontrolled). */
   readonly secondaryHidden = input<boolean | null, boolean | string | null | undefined>(null, {
     transform: nullableBooleanAttribute,
   });
+  /** Emits the requested secondary panel hidden state whenever a toggle occurs. */
   readonly secondaryHiddenChange = output<boolean>();
 
-  /** Internal toggles — written only while the matching input is uncontrolled. */
+  /** Internal sidenav toggle — written only while `sidenavCollapsed` is uncontrolled. */
   protected readonly _sidenavCollapsed = signal(false);
+  /** Internal secondary toggle — written only while `secondaryHidden` is uncontrolled. */
   protected readonly _secondaryHidden = signal(false);
 
+  /** Unique per-instance shell identifier used to derive panel ids. */
   readonly shellId = ++nextAppShellId;
+  /** DOM id of the sidenav panel, referenced by toggles via `aria-controls`. */
   sidenavPanelId = `hell-app-shell-${this.shellId}-sidenav`;
+  /** DOM id of the secondary panel, referenced by toggles via `aria-controls`. */
   secondaryPanelId = `hell-app-shell-${this.shellId}-secondary`;
 
   /** Mobile uses overlay panels instead of layout-shifting rails. */
@@ -307,8 +322,10 @@ export class HellAppShell implements OnDestroy {
     });
   }
 
+  /** Whether the shell is currently rendering the mobile overlay layout. */
   readonly isMobileLayout = () => this._isMobileLayout();
 
+  /** The panel currently open as a mobile overlay, or `null` when none is open. */
   readonly mobileOpenPanel = () => {
     if (!this._isMobileLayout()) return null;
     if (!this.isSidenavCollapsed()) return 'sidenav';
@@ -316,22 +333,26 @@ export class HellAppShell implements OnDestroy {
     return null;
   };
 
+  /** Tears down any active mobile focus trap when the shell is destroyed. */
   ngOnDestroy(): void {
     this.teardownMobileFocusTrap();
   }
 
+  /** Resolved sidenav collapsed state, honoring the controlled input, mobile overlay, or internal toggle. */
   readonly isSidenavCollapsed = () => {
     const controlled = this.sidenavCollapsed();
     if (controlled !== null) return controlled;
     return this.isMobileLayout() ? !this._mobileSidenavOpen() : this._sidenavCollapsed();
   };
 
+  /** Resolved secondary panel hidden state, honoring the controlled input, mobile overlay, or internal toggle. */
   readonly isSecondaryHidden = () => {
     const controlled = this.secondaryHidden();
     if (controlled !== null) return controlled;
     return this.isMobileLayout() ? !this._mobileSecondaryOpen() : this._secondaryHidden();
   };
 
+  /** Toggles the sidenav collapsed state, opening the mobile overlay when applicable. */
   toggleSidenav() {
     const next = !this.isSidenavCollapsed();
     if (this.isMobileLayout() && !next) {
@@ -341,6 +362,7 @@ export class HellAppShell implements OnDestroy {
     this.setSidenavCollapsed(next);
   }
 
+  /** Toggles the secondary panel hidden state, opening the mobile overlay when applicable. */
   toggleSecondary() {
     const next = !this.isSecondaryHidden();
     if (this.isMobileLayout() && !next) {
@@ -350,6 +372,7 @@ export class HellAppShell implements OnDestroy {
     this.setSecondaryHidden(next);
   }
 
+  /** Closes any open mobile overlay panels; no-op outside the mobile layout. */
   closeMobilePanels() {
     if (!this.isMobileLayout()) return;
     if (!this.isSidenavCollapsed()) this.setSidenavCollapsed(true);
@@ -393,6 +416,7 @@ export class HellAppShell implements OnDestroy {
     }
   }
 
+  /** Closes open mobile panels when a pointer press lands outside a panel or toggle. */
   protected dismissMobilePanels(event: PointerEvent) {
     if (!this.isMobileLayout() || (this.isSidenavCollapsed() && this.isSecondaryHidden())) {
       return;
@@ -411,6 +435,7 @@ export class HellAppShell implements OnDestroy {
     if (!insidePanelOrToggle) this.closeMobilePanels();
   }
 
+  /** Closes open mobile panels when the Escape key is pressed. */
   protected dismissMobilePanelsOnEscape() {
     if (!this.isMobileLayout()) {
       return;
@@ -577,6 +602,7 @@ export class HellAppShell implements OnDestroy {
   }
 }
 
+/** Top bar slot of the app shell, hosting global actions and the sidenav toggle. */
 @Directive({
   selector: '[hellAppTopbar]',
   host: { '[class]': "part('root')", 'data-slot': 'root' },
@@ -592,6 +618,7 @@ export class HellAppTopbar {
   });
 }
 
+/** Sidenav slot of the app shell; collapses inline on desktop and becomes an overlay on mobile. */
 @Directive({
   selector: '[hellAppSidenav]',
   host: {
@@ -619,11 +646,16 @@ export class HellAppSidenav {
   readonly collapsed = input<boolean | null, boolean | string | null | undefined>(null, {
     transform: (v) => (v == null ? null : booleanAttribute(v)),
   });
+  /** Optional DOM id override for the sidenav panel; defaults to the shell-derived id. */
   readonly id = input<string | null>(null, { alias: 'id' });
 
+  /** Parent app shell, if the sidenav is rendered inside one. */
   protected readonly shell = inject(HellAppShell, { optional: true });
+  /** Effective DOM id for the sidenav panel. */
   protected readonly panelId = computed(() => this.id() ?? this.shell?.sidenavPanelId ?? null);
+  /** Resolved collapsed state, from the local override or the parent shell. */
   readonly isCollapsed = () => this.collapsed() ?? this.shell?.isSidenavCollapsed() ?? false;
+  /** Whether the sidenav is hidden as a collapsed mobile overlay. */
   protected readonly isMobileHidden = () => !!this.shell?.isMobileLayout() && this.isCollapsed();
 
   constructor() {
@@ -634,6 +666,7 @@ export class HellAppSidenav {
   }
 }
 
+/** A single navigation entry within the sidenav, with active and hover styling. */
 @Directive({
   selector: '[hellNavItem]',
   host: {
@@ -652,9 +685,11 @@ export class HellNavItem {
     recipe: () => HELL_NAV_ITEM_RECIPE,
   });
 
+  /** Whether the nav item is marked as the active route. Defaults to `false`. */
   readonly active = input(false, { transform: booleanAttribute });
 }
 
+/** Leading icon slot of a nav item. */
 @Directive({
   selector: '[hellNavItemIcon]',
   host: {
@@ -673,6 +708,7 @@ export class HellNavItemIcon {
   });
 }
 
+/** Text label slot of a nav item. */
 @Directive({
   selector: '[hellNavItemLabel]',
   host: {
@@ -691,6 +727,7 @@ export class HellNavItemLabel {
   });
 }
 
+/** Trailing content slot of a nav item, such as a badge or count. */
 @Directive({
   selector: '[hellNavItemTrailing]',
   host: {
@@ -709,6 +746,7 @@ export class HellNavItemTrailing {
   });
 }
 
+/** A collapsible group of nav items within the sidenav. */
 @Directive({
   selector: '[hellNavSection]',
   host: {
@@ -727,15 +765,19 @@ export class HellNavSection {
     recipe: () => HELL_NAV_SECTION_RECIPE,
   });
 
+  /** Controlled collapsed state; when set, overrides the internal toggle. Defaults to `null` (uncontrolled). */
   readonly collapsed = input<boolean | null, boolean | string | null | undefined>(null, {
     transform: (v) => (v == null ? null : booleanAttribute(v)),
   });
+  /** Emits the requested collapsed state whenever the section is toggled. */
   readonly collapsedChange = output<boolean>();
 
   private readonly _collapsed = signal(false);
 
+  /** Resolved collapsed state, from the controlled input or the internal toggle. */
   readonly isCollapsed = () => this.collapsed() ?? this._collapsed();
 
+  /** Toggles the section's collapsed state and emits the change. */
   toggle() {
     const next = !this.isCollapsed();
     this._collapsed.set(next);
@@ -743,6 +785,7 @@ export class HellNavSection {
   }
 }
 
+/** Button that toggles the collapsed state of its parent nav section. */
 @Directive({
   selector: 'button[hellNavSectionToggle]',
   host: {
@@ -762,13 +805,16 @@ export class HellNavSectionToggle {
     defaultPart: 'root',
     recipe: () => HELL_NAV_SECTION_TOGGLE_RECIPE,
   });
+  /** Parent nav section this toggle controls. */
   protected readonly section = inject(HellNavSection);
 
+  /** Toggles the parent section's collapsed state. */
   protected toggle() {
     this.section.toggle();
   }
 }
 
+/** Container for a nav section's items, hidden when the section is collapsed. */
 @Directive({
   selector: '[hellNavSectionItems]',
   host: {
@@ -787,13 +833,16 @@ export class HellNavSectionItems {
     defaultPart: 'root',
     recipe: () => HELL_NAV_SECTION_ITEMS_RECIPE,
   });
+  /** Parent nav section whose collapsed state gates these items. */
   protected readonly section = inject(HellNavSection);
   private readonly sidenav = inject(HellAppSidenav, { optional: true });
 
+  /** Whether the items are hidden because the section is collapsed while the sidenav is expanded. */
   protected readonly isHidden = () =>
     this.section.isCollapsed() && !(this.sidenav?.isCollapsed() ?? false);
 }
 
+/** Main content slot of the app shell, with an optional constrained max width. */
 @Directive({
   selector: '[hellAppContent]',
   host: {
@@ -815,8 +864,10 @@ export class HellAppContent {
     recipe: () => HELL_APP_CONTENT_RECIPE,
   });
 
+  /** Optional max content width; bare numbers are treated as pixels. Defaults to `null` (unconstrained). */
   readonly maxWidth = input<string | number | null>(null);
 
+  /** Normalized `max-width` CSS value bound to the content area, or `null` when unconstrained. */
   protected readonly maxWidthValue = computed(() => {
     const value = this.maxWidth();
     if (value == null || value === '') return null;
@@ -844,6 +895,7 @@ export class HellAppContent {
   },
 })
 export class HellSidenavToggle {
+  /** Visual variant of the toggle. Defaults to `plain`. */
   readonly appearance = input<'plain' | 'shell'>('plain');
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<HellSidenavTogglePart>>(undefined, { alias: 'ui' });
@@ -853,9 +905,13 @@ export class HellSidenavToggle {
     defaultPart: 'root',
     recipe: () => this.appearance() === 'shell' ? HELL_SIDENAV_TOGGLE_SHELL_RECIPE : { root: '' },
   });
+  /** Resolved accessibility labels for the toggle. */
   protected readonly labels = inject(HELL_APP_SHELL_LABELS);
+  /** Parent app shell whose sidenav this toggle controls. */
   protected readonly shell = inject(HellAppShell);
+  /** Whether the parent shell's sidenav is currently collapsed. */
   protected readonly collapsed = () => this.shell.isSidenavCollapsed();
+  /** Toggles the parent shell's sidenav. */
   protected toggle() {
     this.shell.toggleSidenav();
   }
@@ -878,6 +934,7 @@ export class HellSidenavToggle {
   },
 })
 export class HellSecondaryToggle {
+  /** Visual variant of the toggle. Defaults to `plain`. */
   readonly appearance = input<'plain' | 'header' | 'rail'>('plain');
   /** Tailwind class refinements for public parts. */
   readonly ui = input<HellUiInput<HellSecondaryTogglePart>>(undefined, { alias: 'ui' });
@@ -891,14 +948,19 @@ export class HellSecondaryToggle {
         return { root: '' };
   },
   });
+  /** Resolved accessibility labels for the toggle. */
   protected readonly labels = inject(HELL_APP_SHELL_LABELS);
+  /** Parent app shell whose secondary panel this toggle controls. */
   protected readonly shell = inject(HellAppShell);
+  /** Whether the parent shell's secondary panel is currently hidden. */
   protected readonly hidden = () => this.shell.isSecondaryHidden();
+  /** Toggles the parent shell's secondary panel. */
   protected toggle() {
     this.shell.toggleSecondary();
   }
 }
 
+/** Secondary sidebar slot of the app shell; hides inline on desktop and becomes an overlay on mobile. */
 @Directive({
   selector: '[hellAppSecondary]',
   host: {
@@ -920,14 +982,20 @@ export class HellAppSecondary {
     recipe: () => HELL_APP_SECONDARY_RECIPE,
   });
 
+  /** Optional override; if omitted, follows the parent shell. */
   readonly hidden = input<boolean | null, boolean | string | null | undefined>(null, {
     transform: (v) => (v == null ? null : booleanAttribute(v)),
   });
+  /** Optional DOM id override for the secondary panel; defaults to the shell-derived id. */
   readonly id = input<string | null>(null, { alias: 'id' });
 
+  /** Parent app shell, if the secondary panel is rendered inside one. */
   protected readonly shell = inject(HellAppShell, { optional: true });
+  /** Effective DOM id for the secondary panel. */
   protected readonly panelId = computed(() => this.id() ?? this.shell?.secondaryPanelId ?? null);
+  /** Resolved hidden state, from the local override or the parent shell. */
   readonly isHidden = () => this.hidden() ?? this.shell?.isSecondaryHidden() ?? false;
+  /** Whether the panel is hidden as a mobile overlay. */
   protected readonly isMobileHidden = () => !!this.shell?.isMobileLayout() && this.isHidden();
 
   constructor() {
@@ -938,6 +1006,7 @@ export class HellAppSecondary {
   }
 }
 
+/** Body slot of the secondary panel, made inert while the panel is hidden. */
 @Directive({
   selector: '[hellAppSecondaryBody]',
   host: {
@@ -956,6 +1025,7 @@ export class HellAppSecondaryBody {
     defaultPart: 'root',
     recipe: () => HELL_APP_SECONDARY_BODY_RECIPE,
   });
+  /** Parent secondary panel whose hidden state gates this body. */
   readonly secondary = inject(HellAppSecondary);
 }
 
@@ -963,6 +1033,7 @@ function nullableBooleanAttribute(value: boolean | string | null | undefined): b
   return value == null ? null : booleanAttribute(value);
 }
 
+/** All app shell directives, for importing the module's building blocks together. */
 export const HELL_APP_SHELL_DIRECTIVES = [
   HellAppShell,
   HellAppTopbar,

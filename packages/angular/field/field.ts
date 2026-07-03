@@ -77,6 +77,7 @@ export class HellField {
   readonly orientation = input<'vertical' | 'horizontal'>('vertical');
 }
 
+/** Label element associated with the field's control. */
 @Directive({
   selector: 'label[hellFieldLabel]',
   hostDirectives: [NgpLabel],
@@ -96,6 +97,7 @@ export class HellFieldLabel {
   });
 }
 
+/** Helper text describing the field's control, wired to it for accessibility. */
 @Directive({
   selector: '[hellFieldDescription]',
   hostDirectives: [NgpDescription],
@@ -114,9 +116,11 @@ export class HellFieldDescription {
     defaultPart: 'root',
     recipe: () => HELL_FIELD_DESCRIPTION_RECIPE,
   });
+  /** Enclosing `HellField`, used to mirror its orientation. */
   protected readonly field = inject(HellField, { optional: true });
 }
 
+/** Validation error message for the field's control, shown when validation fails. */
 @Directive({
   selector: '[hellFieldError]',
   hostDirectives: [
@@ -140,9 +144,11 @@ export class HellFieldError {
     defaultPart: 'root',
     recipe: () => HELL_FIELD_ERROR_RECIPE,
   });
+  /** Enclosing `HellField`, used to mirror its orientation. */
   protected readonly field = inject(HellField, { optional: true });
 }
 
+/** All directives that make up the field entry point, for bulk `imports`. */
 export const HELL_FIELD_DIRECTIVES = [
   HellField,
   HellFieldLabel,

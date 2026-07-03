@@ -72,8 +72,11 @@ const HELL_DIALOG_DESCRIPTION_RECIPE = {
   root: 'mt-hell-1 mb-0 text-[13px] text-hell-foreground-muted',
 } satisfies HellRecipe<HellDialogDescriptionPart>;
 
+/** Template context provided to the `<ng-template>` bound to `hellDialogTrigger`. */
 export interface HellDialogTemplateContext<TData = unknown, TResult = unknown> {
+  /** The dialog reference for the dialog being rendered. */
   readonly $implicit: NgpDialogRef<TData, TResult>;
+  /** Closes the dialog, optionally passing a result back to the trigger's `closed` output. */
   readonly close: (result?: TResult) => void;
 }
 
@@ -96,9 +99,11 @@ export interface HellDialogTemplateContext<TData = unknown, TResult = unknown> {
   },
 })
 export class HellDialogTrigger<TData = unknown, TResult = unknown> extends HellNativeInteractiveDisabledGuard {
+  /** The `<ng-template>` to render as the dialog's content. */
   readonly template = input.required<TemplateRef<HellDialogTemplateContext<TData, TResult>>>({
     alias: 'hellDialogTrigger',
   });
+  /** Controls whether pressing Escape dismisses the dialog. */
   readonly closeOnEscape = input<
     NgpDismissGuard<KeyboardEvent> | undefined,
     NgpDismissGuardInput<KeyboardEvent> | undefined
@@ -106,6 +111,7 @@ export class HellDialogTrigger<TData = unknown, TResult = unknown> extends HellN
     alias: 'closeOnEscape',
     transform: optionalDismissGuardAttribute,
   });
+  /** Controls whether clicking outside the dialog dismisses it. */
   readonly closeOnOutsideClick = input<
     NgpDismissGuard<Element> | undefined,
     NgpDismissGuardInput<Element> | undefined
@@ -113,9 +119,13 @@ export class HellDialogTrigger<TData = unknown, TResult = unknown> extends HellN
     alias: 'closeOnOutsideClick',
     transform: optionalDismissGuardAttribute,
   });
+  /** Whether the trigger is disabled. Defaults to `false`. */
   readonly disabled = input(false, { transform: booleanAttribute });
+  /** Data passed through to the opened dialog. */
   readonly dialogData = input<TData | undefined>(undefined);
+  /** Alias for `dialogData`; takes precedence when both are set. */
   readonly hellDialogData = input<TData | undefined>(undefined, { alias: 'hellDialogData' });
+  /** Emits the dialog's result when it closes. */
   readonly closed = output<TResult | undefined>();
 
   private readonly destroyRef = inject(DestroyRef);
@@ -127,6 +137,7 @@ export class HellDialogTrigger<TData = unknown, TResult = unknown> extends HellN
     return this.hellDialogData() ?? this.dialogData();
   }
 
+  /** Opens the dialog, scoping it to the nearest Dialog Scope root if any. */
   protected launch(event: Event): void {
     this.preventActionAnchorNavigation(event, this.disabled());
     if (this.disabled()) return;
@@ -172,6 +183,7 @@ function optionalDismissGuardAttribute<T>(
   return value === undefined ? undefined : dismissGuardAttribute(value);
 }
 
+/** Backdrop rendered behind an `hellDialog`, styled and optionally scoped to a container. */
 @Directive({
   selector: '[hellDialogOverlay]',
   hostDirectives: [NgpDialogOverlay],
@@ -240,6 +252,7 @@ export class HellDialogOverlay {
 })
 export class HellDialogScope {}
 
+/** Styled dialog surface rendered inside `hellDialogOverlay`. */
 @Directive({
   selector: '[hellDialog]',
   hostDirectives: [NgpDialog],
@@ -261,12 +274,14 @@ export class HellDialog {
     recipe: () => HELL_DIALOG_RECIPE,
   });
 
+  /** Max-width breakpoint of the dialog. Defaults to `'md'`. */
   readonly size = input<HellSize>('md');
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly focusMonitor = inject(FocusMonitor);
   private readonly interactivityChecker = inject(InteractivityChecker);
 
+  /** Traps focus by cycling Tab/Shift+Tab between the dialog's focusable candidates. */
   protected onTabKeydown(event: Event): void {
     const keyboardEvent = event as KeyboardEvent;
     if (
@@ -325,6 +340,7 @@ export class HellDialog {
   }
 }
 
+/** Styled title element for an `hellDialog`. */
 @Directive({
   selector: '[hellDialogTitle]',
   hostDirectives: [NgpDialogTitle],
@@ -341,6 +357,7 @@ export class HellDialogTitle {
   });
 }
 
+/** Styled description element for an `hellDialog`. */
 @Directive({
   selector: '[hellDialogDescription]',
   hostDirectives: [NgpDialogDescription],
@@ -357,6 +374,7 @@ export class HellDialogDescription {
   });
 }
 
+/** All directives that make up the Dialog module, for convenient bulk import. */
 export const HELL_DIALOG_DIRECTIVES = [
   HellDialogTrigger,
   HellDialogOverlay,

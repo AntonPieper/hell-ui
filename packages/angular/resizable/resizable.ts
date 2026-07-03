@@ -28,6 +28,7 @@ import type { InjectionToken, Provider } from '@angular/core';
 
 /** Built-in accessibility labels owned by the resizable entry point. */
 export interface HellResizableLabels {
+  /** Accessible label for a resize handle when no `aria-label` is set. */
   readonly resizePanels: string;
 }
 
@@ -116,6 +117,7 @@ export class HellResizable implements AfterContentInit {
     recipe: () => HELL_RESIZABLE_RECIPE,
   });
 
+  /** Main axis along which panes are laid out and resized. Defaults to `horizontal`. */
   readonly orientation = input<HellOrientation>('horizontal');
   /** When false, container resizes do not rebalance panes after user sizing. */
   readonly rescaleOnResize = input(true, { transform: booleanAttribute });
@@ -152,6 +154,7 @@ export class HellResizable implements AfterContentInit {
     queueMicrotask(() => this.fitPanesToAvailableSize());
   }
 
+  /** Orders registered panes by DOM position and performs the initial fit. */
   ngAfterContentInit() {
     // Sort by DOM order to be safe (initial registration order can vary).
     this.panes.sort((a, b) => {
@@ -190,6 +193,7 @@ export class HellResizable implements AfterContentInit {
     return Math.max(0, total - handlesSize);
   }
 
+  /** Whether the available size is smaller than the panes' combined minimum size. */
   isConstrained(): boolean {
     return this.constrained();
   }
@@ -199,6 +203,7 @@ export class HellResizable implements AfterContentInit {
     this.userSized = true;
   }
 
+  /** Recomputes and applies pane sizes to fill the container's available size. */
   fitPanesToAvailableSize(): void {
     if (!this.rescaleOnResize()) return;
 
@@ -266,6 +271,7 @@ export class HellResizable implements AfterContentInit {
   }
 }
 
+/** A single resizable region within a `[hellResizable]` group. */
 @Directive({
   selector: '[hellResizablePane]',
   host: {
@@ -294,14 +300,19 @@ export class HellResizablePane implements OnDestroy {
   readonly _size = signal<number | null>(null);
   private readonly effectiveMinSize = signal<number | null>(null);
 
+  /** CSS `flex` shorthand for the pane's current size or initial flex factor. */
   protected readonly flexValue = computed(() => {
     const px = this._size();
     return px == null ? `${this.initialFlex()} 1 0` : `0 0 ${px}px`;
   });
+  /** Effective minimum size in pixels, honoring any constrained-fit override. */
   protected readonly minSizeValue = computed(() => this.effectiveMinSize() ?? this.minSize());
 
+  /** The parent resizable group this pane belongs to. */
   readonly resizable = inject(HellResizable);
+  /** The pane's host element. */
   readonly host: HTMLElement = inject(ElementRef<HTMLElement>).nativeElement;
+  /** Main axis inherited from the parent resizable group. */
   protected readonly orientation = this.resizable.orientation;
 
   constructor() {
@@ -312,37 +323,45 @@ export class HellResizablePane implements OnDestroy {
     });
   }
 
+  /** Unregisters this pane from the parent resizable group. */
   ngOnDestroy() {
     this.resizable.unregisterPane(this);
   }
 
+  /** Sets an explicit pixel size for the pane, overriding its flex factor. */
   setSize(px: number) {
     this._size.set(px);
     this.writeFlexValue(this.flexValue());
   }
 
+  /** Clears any explicit pixel size, reverting to the initial flex factor. */
   resetSize() {
     this._size.set(null);
     this.writeFlexValue(this.flexValue());
   }
 
+  /** Whether the pane currently has an explicit pixel size set. */
   hasSize(): boolean {
     return this._size() != null;
   }
 
+  /** The pane's current explicit pixel size, or `null` if unset. */
   currentSize(): number | null {
     return this._size();
   }
 
+  /** Overrides the minimum size used while the container is constrained. */
   setEffectiveMinSize(px: number | null): void {
     this.effectiveMinSize.set(px);
     this.writeMinSizeValue(this.minSizeValue());
   }
 
+  /** The minimum size currently enforced, in pixels. */
   currentMinSize(): number {
     return this.minSizeValue();
   }
 
+  /** Measures the pane's current rendered size along the main axis, in pixels. */
   measure(): number {
     return this.orientation() === 'horizontal' ? this.host.offsetWidth : this.host.offsetHeight;
   }
@@ -356,6 +375,7 @@ export class HellResizablePane implements OnDestroy {
   }
 }
 
+/** Draggable divider between two adjacent panes in a `[hellResizable]` group. */
 @Component({
   selector: '[hellResizableHandle]',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -396,17 +416,24 @@ export class HellResizableHandle implements AfterViewInit, OnDestroy {
    *   the handle is the primary affordance.
    */
   readonly appearance = input<'line' | 'grip'>('line');
+  /** Accessible label for the handle. Falls back to the resizable labels default. */
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
+  /** Effective resizable labels resolved from the injector. */
   protected readonly labels = inject(HELL_RESIZABLE_LABELS);
+  /** Id(s) of the element(s) this handle controls, mirrored to `aria-controls`. */
   readonly ariaControls = input<string | readonly string[] | null>(null, {
     alias: 'aria-controls',
   });
+  /** Normalized `aria-controls` value derived from `ariaControls`. */
   protected readonly ariaControlsValue = computed(() => hellAriaControlsValue(this.ariaControls()));
 
+  /** Whether the handle is currently being dragged. */
   protected readonly dragging = signal(false);
+  /** Current `aria-valuenow` reflecting the adjacent panes' size split. */
   protected readonly ariaValueNow = signal<number | null>(null);
 
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  /** The parent resizable group this handle belongs to. */
   protected readonly resizable = inject(HellResizable);
   private readonly resizeInteraction = new HellResizePairInteractionController<HellResizablePane>({
     handle: this.host,
@@ -463,15 +490,18 @@ export class HellResizableHandle implements AfterViewInit, OnDestroy {
     return sizes;
   }
 
+  /** Initializes `aria-valuenow` once the adjacent panes are available. */
   ngAfterViewInit(): void {
     this.refreshAriaValueNow();
   }
 
+  /** Starts a pointer-driven resize gesture. */
   protected onPointerDown(e: PointerEvent) {
     this.refreshAriaValueNow();
     this.resizeInteraction.startPointer(e);
   }
 
+  /** Applies keyboard-driven resizing (arrow keys; Home/End for min/max). */
   protected onKey(e: KeyboardEvent) {
     this.refreshAriaValueNow();
     this.resizeInteraction.applyKey(e);
@@ -496,6 +526,7 @@ export class HellResizableHandle implements AfterViewInit, OnDestroy {
     );
   }
 
+  /** Tears down the resize interaction controller. */
   ngOnDestroy(): void {
     this.resizeInteraction.destroy();
   }

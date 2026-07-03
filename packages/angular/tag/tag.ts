@@ -29,6 +29,7 @@ const HELL_KBD_RECIPE = {
   root: 'inline-flex h-[18px] min-w-[18px] items-center justify-center rounded bg-hell-surface-subtle px-[5px] py-0 font-mono text-[11px] text-hell-foreground-muted border border-b-2 border-solid border-hell-border',
 } satisfies HellRecipe<HellKbdPart>;
 
+/** Compact label used to categorize or annotate content. */
 @Directive({
   selector: '[hellTag]',
   host: {
@@ -47,9 +48,11 @@ export class HellTag {
     recipe: () => HELL_TAG_RECIPE,
   });
 
+  /** Color scheme conveying the tag's semantic meaning. Defaults to `default`. */
   readonly variant = input<HellTagVariant>('default');
 }
 
+/** Small numeric or status indicator, typically overlaid on another element. */
 @Directive({
   selector: '[hellBadge]',
   host: {
@@ -68,6 +71,7 @@ export class HellBadge {
   });
 }
 
+/** Styled representation of a keyboard key or shortcut. */
 @Directive({
   selector: 'kbd[hellKbd], [hellKbd]',
   host: {

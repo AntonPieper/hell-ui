@@ -40,13 +40,9 @@ export class HellDialpad {
     protected readonly lowerKeys: HellDialpadKey[];
     // Warning: (ae-forgotten-export) The symbol "HellDialpadKey" needs to be exported by the entry point hell-ui-angular-dialpad.d.ts
     protected readonly mainKeys: HellDialpadKey[];
-    // (undocumented)
     static ngAcceptInputType_disabledBinding: unknown;
-    // (undocumented)
     static ngAcceptInputType_invalidBinding: unknown;
-    // (undocumented)
     static ngAcceptInputType_readOnlyBinding: unknown;
-    // (undocumented)
     static ngAcceptInputType_showCallButtonBinding: unknown;
     protected numberLabel(): string;
     protected onBeforeInput(event: InputEvent): void;
@@ -72,9 +68,7 @@ export class HellDialpad {
     // Warning: (ae-missing-getter) The property "valueBinding" has a setter but no getter.
     set valueBinding(value: string | null | undefined);
     readonly valueChange: EventEmitter<string>;
-    // (undocumented)
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellDialpad, "hell-dialpad", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "valueBinding": { "alias": "value"; "required": false; }; "showCallButtonBinding": { "alias": "showCallButton"; "required": false; }; "disabledBinding": { "alias": "disabled"; "required": false; }; "readOnlyBinding": { "alias": "readOnly"; "required": false; }; "invalidBinding": { "alias": "invalid"; "required": false; }; }, { "digit": "digit"; "valueChange": "valueChange"; "call": "call"; }, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellDialpad, never>;
 }
 
@@ -98,15 +92,6 @@ export type HellDialpadUi = HellUi<HellDialpadPart>;
 
 // @public
 export function provideHellDialpadLabels(overrides: Partial<HellDialpadLabels>): Provider;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-dialpad.d.ts:138:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-dialpad.d.ts:139:5 - (ae-undocumented) Missing documentation for "ɵcmp".
-// types/hell-ui-angular-dialpad.d.ts:140:5 - (ae-undocumented) Missing documentation for "ngAcceptInputType_showCallButtonBinding".
-// types/hell-ui-angular-dialpad.d.ts:141:5 - (ae-undocumented) Missing documentation for "ngAcceptInputType_disabledBinding".
-// types/hell-ui-angular-dialpad.d.ts:142:5 - (ae-undocumented) Missing documentation for "ngAcceptInputType_readOnlyBinding".
-// types/hell-ui-angular-dialpad.d.ts:143:5 - (ae-undocumented) Missing documentation for "ngAcceptInputType_invalidBinding".
 
 // (No @packageDocumentation comment for this package)
 

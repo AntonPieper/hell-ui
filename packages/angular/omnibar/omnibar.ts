@@ -52,6 +52,7 @@ import type { InjectionToken, Provider } from '@angular/core';
 
 /** Built-in accessibility labels owned by the omnibar entry point. */
 export interface HellOmnibarLabels {
+  /** Accessible label for the clear-search button. */
   readonly clearSearch: string;
 }
 
@@ -75,10 +76,13 @@ export function provideHellOmnibarLabels(overrides: Partial<HellOmnibarLabels>):
 export interface HellOmnibarLoadingTemplateContext {
   /** Row count requested by `loadingRows`, useful when custom templates still render placeholders. */
   readonly $implicit: number;
+  /** Row count requested by `loadingRows`. */
   readonly rows: number;
+  /** Loading status message shown while a search runs. */
   readonly message: string;
 }
 
+/** Contract a result row must implement to register with the omnibar for navigation and selection. */
 export interface HellOmnibarRegisteredItem {
   /** Stable DOM id used for `aria-activedescendant`. */
   readonly itemId: string;
@@ -95,6 +99,7 @@ export interface HellOmnibarRegisteredItem {
   scrollIntoView(): void;
 }
 
+/** Contract an actions-strip button must implement to register with the omnibar keyboard navigation. */
 export interface HellOmnibarRegisteredAction {
   /** Moves DOM focus into an action reached through the omnibar keyboard contract. */
   focus(): void;
@@ -448,19 +453,27 @@ export class HellOmnibar implements HellFloatingScope {
     defaultPart: 'root',
     recipe: () => HELL_OMNIBAR_RECIPE,
   });
+  /** Resolved accessibility labels for the omnibar. */
   protected readonly labels = inject(HELL_OMNIBAR_LABELS);
   private readonly overlay = inject(Overlay);
   private readonly ngZone = inject(NgZone);
 
   /* ── Inputs ────────────────────────────────────────────────────────── */
 
+  /** Control size preset; defaults to `'md'`. */
   readonly size = input<'sm' | 'md' | 'lg'>('md');
+  /** Whether the omnibar is disabled and cannot be opened or edited. Defaults to false. */
   readonly disabled = input(false, { transform: booleanAttribute });
 
+  /** Input placeholder text; defaults to `'Search…'`. */
   readonly placeholder = input<string>('Search…');
+  /** Accessible label for the search input; defaults to `'Search'`. */
   readonly ariaLabel = input<string>('Search');
+  /** Message shown when there are no results; defaults to `'No results'`. */
   readonly emptyMessage = input<string>('No results');
+  /** Optional template rendered instead of the default empty message. */
   readonly emptyTemplate = input<TemplateRef<unknown> | null>(null);
+  /** Optional template rendered instead of the default loading skeleton. */
   readonly loadingTemplate = input<TemplateRef<HellOmnibarLoadingTemplateContext> | null>(null);
   /** Local items ranked by `HellSearchService` whenever the query changes. */
   readonly searchItems = input<readonly unknown[] | null>(null);
@@ -474,7 +487,9 @@ export class HellOmnibar implements HellFloatingScope {
   readonly searchParams = input<unknown>(undefined);
   /** Debounce in ms before search starts; set 0 for immediate searches. */
   readonly searchDebounce = input<number>(120);
+  /** Status message announced while a search runs; defaults to `'Searching'`. */
   readonly loadingMessage = input<string>('Searching');
+  /** Number of skeleton rows shown while loading; defaults to 4. */
   readonly loadingRows = input<number>(4);
 
   /** Optional global hotkey, e.g. `'mod+k'` (Cmd on macOS, Ctrl elsewhere)
@@ -485,6 +500,7 @@ export class HellOmnibar implements HellFloatingScope {
    *  or focuses. Set false for fully-controlled mode. */
   readonly openOnFocus = input(true, { transform: booleanAttribute });
 
+  /** Two-way bound query string. */
   readonly value = model<string>('');
 
   /** Minimum CDK connected-overlay panel width. The overlay still matches the control when wider. */
@@ -492,7 +508,9 @@ export class HellOmnibar implements HellFloatingScope {
 
   /* ── Outputs ───────────────────────────────────────────────────────── */
 
+  /** Emits when an item is activated (mouse, keyboard, or API). */
   readonly submit = output<HellOmnibarSubmitEvent>();
+  /** Emits the new open state whenever the panel opens or closes. */
   readonly openChange = output<boolean>();
   /** Emits ranked results so projected content can render custom rows. */
   readonly searchResultsChange = output<readonly HellSearchResult<unknown>[]>();
@@ -501,7 +519,9 @@ export class HellOmnibar implements HellFloatingScope {
 
   /* ── Internal state ────────────────────────────────────────────────── */
 
+  /** Unique DOM id for the search input. */
   readonly inputId = `hell-omnibar-${++nextOmnibarId}`;
+  /** Unique DOM id for the results panel. */
   readonly panelId = `${this.inputId}-panel`;
 
   private readonly host = inject(ElementRef<HTMLElement>);
@@ -511,20 +531,29 @@ export class HellOmnibar implements HellFloatingScope {
 
   private readonly _open = signal(false);
   private readonly openVersion = signal(0);
+  /** Whether the panel is currently open (never open while disabled). */
   protected readonly isOpen = computed(() => !this.disabled() && this._open());
+  /** Connected-overlay positions used to place the results panel. */
   protected readonly overlayPositions = HELL_OMNIBAR_OVERLAY_POSITIONS;
+  /** Scroll strategy that repositions the overlay as the page scrolls. */
   protected readonly overlayScrollStrategy: ScrollStrategy =
     this.overlay.scrollStrategies.reposition({
       scrollThrottle: 0,
     });
   private overlayPanelElement: HTMLElement | null = null;
+  /** Current caret position within the input. */
   protected readonly cursor = signal(0);
+  /** Ranked search results for the current query. */
   readonly searchResults = computed(() => this.runtime.results());
+  /** Whether a search is currently in flight. */
   readonly loading = computed(() => this.runtime.loading());
+  /** Last search error, or null when the last search succeeded. */
   readonly error = computed(() => this.runtime.error());
+  /** Index array driving the loading skeleton rows. */
   protected readonly skeletonRows = computed(() =>
     Array.from({ length: Math.max(1, this.loadingRows()) }, (_, i) => i),
   );
+  /** Context passed to a custom `loadingTemplate`. */
   protected readonly loadingTemplateContext = computed<HellOmnibarLoadingTemplateContext>(() => ({
     $implicit: Math.max(1, this.loadingRows()),
     rows: Math.max(1, this.loadingRows()),
@@ -533,12 +562,17 @@ export class HellOmnibar implements HellFloatingScope {
 
   /* ── Item registry ─────────────────────────────────────────────────── */
 
+  /** Index of the currently active (highlighted) item. */
   protected readonly activeIndex = this.runtime.activeIndex;
+  /** Whether there are no registered result items. */
   protected readonly isEmpty = this.runtime.isEmpty;
+  /** Whether the results listbox should render (not loading and not empty). */
   protected readonly hasListboxResults = computed(() => !this.loading() && !this.isEmpty());
+  /** DOM id of the active item for `aria-activedescendant`, or null. */
   protected readonly activeDescendantId = computed(() =>
     this.isOpen() && this.hasListboxResults() ? this.runtime.activeItemId() : null,
   );
+  /** Whether any action buttons are registered in the actions strip. */
   protected readonly hasActions = this.runtime.hasActions;
 
   private readonly floatingScope = new HellFloatingScopeRegistry(() => this.host.nativeElement);
@@ -662,14 +696,17 @@ export class HellOmnibar implements HellFloatingScope {
     return this.floatingOutletElement ?? this.host.nativeElement;
   }
 
+  /** Register a floating element so it counts as inside the omnibar for dismissal. */
   registerFloatingElement(element: HTMLElement): void {
     this.floatingScope.registerFloatingElement(element);
   }
 
+  /** Stop treating a previously registered floating element as part of the omnibar. */
   unregisterFloatingElement(element: HTMLElement): void {
     this.floatingScope.unregisterFloatingElement(element);
   }
 
+  /** Whether the given target lies within the omnibar or one of its floating elements. */
   containsFloatingTarget(target: EventTarget | Node | null): boolean {
     return this.floatingScope.containsFloatingTarget(target);
   }
@@ -706,22 +743,27 @@ export class HellOmnibar implements HellFloatingScope {
 
   /* ── Item / action registration (used by child directives) ─────────── */
 
+  /** Register a child item directive for navigation and selection. */
   registerItem(item: HellOmnibarRegisteredItem): void {
     this.runtime.registerItem(item);
   }
 
+  /** Remove a previously registered item. */
   unregisterItem(item: HellOmnibarRegisteredItem): void {
     this.runtime.unregisterItem(item);
   }
 
+  /** Mark the given item as the active (highlighted) item. */
   setActive(item: HellOmnibarRegisteredItem): void {
     this.runtime.setActive(item);
   }
 
+  /** Whether the given item is the active item. */
   isActive(item: HellOmnibarRegisteredItem): boolean {
     return this.runtime.isActive(item);
   }
 
+  /** Activate an item, emitting `submit` and closing the panel when appropriate. */
   activate(item: HellOmnibarRegisteredItem, source: HellOmnibarActivationSource): void {
     if (item.disabled()) return;
 
@@ -736,15 +778,18 @@ export class HellOmnibar implements HellFloatingScope {
     if (item.closeOnSelect()) this.close();
   }
 
+  /** Register a child action button for the actions strip. */
   registerAction(action: HellOmnibarAction): void {
     this.runtime.registerAction(action);
   }
+  /** Remove a previously registered action button. */
   unregisterAction(action: HellOmnibarAction): void {
     this.runtime.unregisterAction(action);
   }
 
   /* ── Event handlers (template) ─────────────────────────────────────── */
 
+  /** Handle input changes, syncing the query and opening the panel when configured. */
   protected onInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     const next = input.value;
@@ -753,20 +798,24 @@ export class HellOmnibar implements HellFloatingScope {
     if (this.openOnFocus()) this.open();
   }
 
+  /** Open the panel on input focus when `openOnFocus` is set. */
   protected onFocus(): void {
     if (this.openOnFocus()) this.open();
   }
 
+  /** Handle focus leaving the input, dismissing the panel on outside focus. */
   protected onBlur(event: FocusEvent): void {
     this.floatingFocusDismissal.handleFocusExit(event);
   }
 
+  /** Track the caret position after clicks, key-ups, and selection changes. */
   protected onCursorChange(): void {
     const el = this.inputRef?.nativeElement;
     if (!el) return;
     this.cursor.set(el.selectionStart ?? el.value.length);
   }
 
+  /** Clear the query and refocus the input when the clear button is clicked. */
   protected onClearClick(event: MouseEvent): void {
     event.stopPropagation();
     queueMicrotask(() => {
@@ -777,24 +826,29 @@ export class HellOmnibar implements HellFloatingScope {
     });
   }
 
+  /** Close the panel on a click outside the omnibar and its floating elements. */
   protected onOverlayOutsideClick(event: MouseEvent): void {
     if (this.floatingFocusDismissal.isInside(event.target)) return;
     this.close();
   }
 
+  /** Sync overlay geometry when the overlay attaches. */
   protected onOverlayAttach(): void {
     this.syncOverlayGeometry();
   }
 
+  /** Stop geometry tracking and release the panel when the overlay detaches. */
   protected onOverlayDetach(): void {
     this.stopOverlayGeometryTracking();
     this.unregisterOverlayPanel();
   }
 
+  /** Re-apply panel styles when the overlay position changes. */
   protected onOverlayPositionChange(): void {
     this.syncOverlayPanelStyles();
   }
 
+  /** Handle keyboard navigation and activation on the input. */
   protected onKeyDown(event: KeyboardEvent): void {
     switch (event.key) {
       case 'ArrowDown':
@@ -854,6 +908,7 @@ export class HellOmnibar implements HellFloatingScope {
     this.runtime.moveActive(delta);
   }
 
+  /** Move focus to the action `delta` steps away in the strip, wrapping at the ends. */
   focusAdjacentAction(action: HellOmnibarRegisteredAction, delta: number): void {
     const actions = this.runtime.actionItems();
     const current = actions.indexOf(action);
@@ -977,6 +1032,7 @@ export class HellOmnibar implements HellFloatingScope {
 
 /* ──────────────────────────── Children ──────────────────────────── */
 
+/** Optional wrapper for the omnibar panel body. */
 @Directive({
   selector: '[hellOmnibarPanel]',
   host: { '[class]': "part('root')", 'data-slot': 'root' },
@@ -992,6 +1048,7 @@ export class HellOmnibarPanel {
   });
 }
 
+/** Groups related result items under an optional label. */
 @Directive({
   selector: '[hellOmnibarGroup]',
   host: {
@@ -1010,9 +1067,11 @@ export class HellOmnibarGroup {
     defaultPart: 'root',
     recipe: () => HELL_OMNIBAR_GROUP_RECIPE,
   });
+  /** Accessible label describing the group. */
   readonly label = input<string>('');
 }
 
+/** Visual label heading for a result group. */
 @Directive({
   selector: '[hellOmnibarGroupLabel]',
   host: { '[class]': "part('root')", 'data-slot': 'root', role: 'presentation' },
@@ -1061,16 +1120,22 @@ export class HellOmnibarItem<T = unknown> implements HellOmnibarRegisteredItem {
     recipe: () => HELL_OMNIBAR_ITEM_RECIPE,
   });
 
+  /** Payload emitted via `(select)` and the parent `(submit)` when activated. */
   readonly itemValue = input<T>(undefined as T, { alias: 'value' });
+  /** Whether selecting this item closes the panel; defaults to true. */
   readonly closeOnSelect = input(true, { transform: booleanAttribute });
+  /** Whether the item is disabled for navigation and activation. Defaults to false. */
   readonly disabled = input(false, { transform: booleanAttribute });
 
+  /** Emits the item value when the item is selected. */
   readonly select = output<T>();
 
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly omnibar = inject(HellOmnibar);
 
+  /** Whether this item is currently the active (highlighted) item. */
   readonly active = computed(() => this.omnibar.isActive(this));
+  /** Stable DOM id used for `aria-activedescendant`. */
   readonly itemId = `hell-omnibar-item-${++nextOmnibarItemId}`;
 
   constructor() {
@@ -1078,6 +1143,7 @@ export class HellOmnibarItem<T = unknown> implements HellOmnibarRegisteredItem {
     inject(DestroyRef).onDestroy(() => this.omnibar.unregisterItem(this));
   }
 
+  /** Activate the item on click unless disabled. */
   protected onClick(event: MouseEvent): void {
     if (this.disabled()) {
       event.preventDefault();
@@ -1088,25 +1154,30 @@ export class HellOmnibarItem<T = unknown> implements HellOmnibarRegisteredItem {
     this.omnibar.activate(this, 'mouse');
   }
 
+  /** Make the item active when the pointer moves over it. */
   protected onMouseMove(): void {
     if (!this.disabled() && !this.active()) this.omnibar.setActive(this);
   }
 
+  /** Scroll the item into view within the results list. */
   scrollIntoView(): void {
     this.host.nativeElement.scrollIntoView({ block: 'nearest' });
   }
 
+  /** Emit the `(select)` output and return the selected value. */
   selectValue(): unknown {
     const selected = this.value();
     this.select.emit(selected as T);
     return selected;
   }
 
+  /** Return the raw item value. */
   value(): unknown {
     return this.itemValue();
   }
 }
 
+/** Leading icon slot inside a result item. */
 @Directive({
   selector: '[hellOmnibarItemIcon]',
   host: { '[class]': "part('root')", 'data-slot': 'root', 'aria-hidden': 'true' },
@@ -1122,6 +1193,7 @@ export class HellOmnibarItemIcon {
   });
 }
 
+/** Primary text slot inside a result item. */
 @Directive({
   selector: '[hellOmnibarItemText]',
   host: { '[class]': "part('root')", 'data-slot': 'root' },
@@ -1137,6 +1209,7 @@ export class HellOmnibarItemText {
   });
 }
 
+/** Secondary text slot inside a result item. */
 @Directive({
   selector: '[hellOmnibarItemSubtext]',
   host: { '[class]': "part('root')", 'data-slot': 'root' },
@@ -1152,6 +1225,7 @@ export class HellOmnibarItemSubtext {
   });
 }
 
+/** Trailing slot inside a result item, e.g. a shortcut hint. */
 @Directive({
   selector: '[hellOmnibarItemTrailing]',
   host: { '[class]': "part('root')", 'data-slot': 'root' },
@@ -1167,6 +1241,7 @@ export class HellOmnibarItemTrailing {
   });
 }
 
+/** Chip rendered in a leading or trailing slot, e.g. an active scope filter. */
 @Directive({
   selector: '[hellOmnibarChip]',
   host: { '[class]': "part('root')", 'data-slot': 'root' },
@@ -1182,6 +1257,7 @@ export class HellOmnibarChip {
   });
 }
 
+/** Remove button rendered inside a chip. */
 @Directive({
   selector: 'button[hellOmnibarChipRemove]',
   host: {
@@ -1203,11 +1279,13 @@ export class HellOmnibarChipRemove {
 
   private readonly omnibar = inject(HellOmnibar, { optional: true });
 
+  /** Keep the button out of the tab order while the panel is open. */
   protected tabIndex(): -1 | null {
     return this.omnibar?.internalControlTabIndex() ?? null;
   }
 }
 
+/** Toolbar container for action buttons rendered above the results. */
 @Directive({
   selector: '[hellOmnibarActions]',
   host: {
@@ -1250,6 +1328,7 @@ export class HellOmnibarAction implements HellOmnibarRegisteredAction {
     recipe: () => HELL_OMNIBAR_ACTION_RECIPE,
   });
 
+  /** Whether the action renders in a pressed/active state. Defaults to false. */
   readonly pressed = input(false, { transform: booleanAttribute });
 
   private readonly host = inject(ElementRef<HTMLButtonElement>);
@@ -1260,14 +1339,17 @@ export class HellOmnibarAction implements HellOmnibarRegisteredAction {
     inject(DestroyRef).onDestroy(() => this.omnibar.unregisterAction(this));
   }
 
+  /** Move DOM focus to the action button. */
   focus(): void {
     this.host.nativeElement.focus();
   }
 
+  /** Keep the button out of the tab order while the panel is open. */
   protected tabIndex(): -1 | null {
     return this.omnibar.internalControlTabIndex();
   }
 
+  /** Handle arrow/F6/Escape navigation within the actions strip. */
   protected onKeyDown(event: KeyboardEvent): void {
     switch (event.key) {
       case 'ArrowLeft':
@@ -1302,8 +1384,11 @@ export type HellOmnibarActivationSource = 'mouse' | 'keyboard' | 'api';
  * `item` is the selected payload, and `source` identifies the activation path.
  */
 export interface HellOmnibarSubmitEvent<T = unknown> {
+  /** Current query text at the moment of activation. */
   readonly value: string;
+  /** Selected item payload. */
   readonly item: T;
+  /** How the item was activated. */
   readonly source: HellOmnibarActivationSource;
 }
 

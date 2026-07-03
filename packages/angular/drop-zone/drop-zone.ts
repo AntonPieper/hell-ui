@@ -78,13 +78,19 @@ export class HellDropZone implements OnDestroy {
     recipe: () => HELL_DROP_ZONE_RECIPE,
   });
 
+  /** Disables interaction and drag/drop handling. Defaults to `false`. */
   readonly disabled = input(false, { transform: booleanAttribute });
+  /** Allows selecting or dropping more than one file. Defaults to `true`. */
   readonly multiple = input(true, { transform: booleanAttribute });
+  /** Comma-separated list of accepted file extensions or MIME types. Defaults to `null` (no restriction). */
   readonly accept = input<string | null>(null);
+  /** Consumer-owned native file input (element or its ID) to bind instead of the auto-created fallback. Defaults to `null`. */
   readonly nativeInput = input<HTMLInputElement | string | null>(null);
 
+  /** Emits the accepted files once the user drops or selects them. */
   readonly files = output<File[]>();
 
+  /** Whether a dragged file is currently over the drop zone. */
   protected readonly active = signal(false);
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
   private fileInput?: HTMLInputElement;
@@ -127,6 +133,7 @@ export class HellDropZone implements OnDestroy {
     });
   }
 
+  /** Opens the file picker unless the zone is disabled or the click originated from the input itself. */
   protected onClick(event?: MouseEvent) {
     if (event?.target === this.fileInput) return;
     event?.preventDefault();
@@ -134,12 +141,14 @@ export class HellDropZone implements OnDestroy {
     this.ensureInput().click();
   }
 
+  /** Activates the file picker on Enter/Space, mirroring native button behavior. */
   protected onKey(e: Event) {
     if (this.disabled()) return;
     e.preventDefault();
     this.onClick();
   }
 
+  /** Tracks drag depth and marks the zone active when a drag enters it. */
   protected onDragEnter(e: DragEvent) {
     if (this.disabled()) {
       this.resetDragState();
@@ -153,6 +162,7 @@ export class HellDropZone implements OnDestroy {
     this.active.set(true);
   }
 
+  /** Keeps the zone marked active while a drag remains over it. */
   protected onDragOver(e: DragEvent) {
     if (this.disabled()) {
       this.resetDragState();
@@ -163,6 +173,7 @@ export class HellDropZone implements OnDestroy {
     if (!this.dragDepth) this.dragDepth = 1;
   }
 
+  /** Reduces drag depth and clears the active state once the drag fully leaves the zone. */
   protected onDragLeave(e: DragEvent) {
     if (this.disabled()) {
       this.resetDragState();
@@ -176,6 +187,7 @@ export class HellDropZone implements OnDestroy {
     }
   }
 
+  /** Resets drag state and emits the dropped files that match `accept`. */
   protected onDrop(e: DragEvent) {
     if (this.disabled()) {
       this.resetDragState();
@@ -263,6 +275,7 @@ export class HellDropZone implements OnDestroy {
     this.active.set(false);
   }
 
+  /** Unbinds the native input and removes the auto-created fallback input. */
   ngOnDestroy(): void {
     if (this.nativeInputBound) this.unbindInput(this.nativeInputBound);
 

@@ -112,6 +112,7 @@ export class HellListboxOption {
     defaultPart: 'root',
     recipe: () => HELL_LISTBOX_OPTION_RECIPE,
   });
+  /** Underlying ng-primitives listbox option state. */
   protected readonly option = inject(NgpListboxOption);
 }
 
@@ -155,6 +156,7 @@ export class HellListboxHeader {
   });
 }
 
+/** All directives exported by the listbox entry point, for bulk `imports`. */
 export const HELL_LISTBOX_DIRECTIVES = [
   HellListbox,
   HellListboxTrigger,

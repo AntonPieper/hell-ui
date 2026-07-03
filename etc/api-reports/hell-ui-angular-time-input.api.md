@@ -15,147 +15,93 @@ import * as tailwind_merge from 'tailwind-merge';
 import { ValidationErrors } from '@angular/forms';
 import { Validator } from '@angular/forms';
 
-// @public (undocumented)
+// @public
 export const HELL_DEFAULT_TIME_INPUT_ADAPTER: HellTimeInputAdapter;
 
-// @public (undocumented)
+// @public
 export const HELL_TIME_INPUT_ADAPTER: InjectionToken<HellTimeInputAdapter>;
 
 // @public
 export const HELL_TIME_INPUT_LABELS: InjectionToken<HellTimeInputLabels>;
 
-// @public (undocumented)
+// @public
 export function hellFormatTimeInputValue(t: HellTimeValue, context: HellTimeInputAdapterContext): string;
 
 // @public
 export function hellNormalizeTimeInputValue(value: HellTimeValue | null | undefined, context: HellTimeInputAdapterContext): HellTimeValue | null;
 
-// @public (undocumented)
+// @public
 export function hellParseTimeInputText(text: string, context: HellTimeInputAdapterContext): HellTimeInputParseResult;
 
-// @public (undocumented)
+// @public
 export function hellSameTimeInputValue(a: HellTimeValue | null, b: HellTimeValue | null): boolean;
 
 // @public
 export class HellTimeInput implements ControlValueAccessor, Validator {
     constructor();
-    // (undocumented)
     readonly ariaDescribedby: _angular_core.InputSignal<string | null>;
-    // (undocumented)
     readonly ariaLabel: _angular_core.InputSignal<string | null>;
-    // (undocumented)
     readonly ariaLabelledby: _angular_core.InputSignal<string | null>;
-    // (undocumented)
     protected commit(text: string, event?: Event): void;
-    // (undocumented)
     protected readonly current: _angular_core.Signal<HellTimeValue>;
-    // (undocumented)
     protected decreaseUnitLabel(unit: HellTimeUnit): string;
-    // (undocumented)
     readonly disabled: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     protected readonly display: _angular_core.Signal<string>;
-    // (undocumented)
     protected readonly fieldAriaDescribedby: _angular_core.Signal<string | null>;
-    // (undocumented)
     protected readonly fieldAriaLabelledby: _angular_core.Signal<string | null>;
-    // (undocumented)
     protected readonly format: (value: HellTimeValue | null, seconds: boolean) => string;
-    // (undocumented)
     protected increaseUnitLabel(unit: HellTimeUnit): string;
-    // (undocumented)
     readonly inputId: _angular_core.InputSignal<string>;
-    // (undocumented)
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     protected readonly invalidDraft: _angular_core.Signal<boolean>;
-    // (undocumented)
     protected readonly isDisabled: () => boolean;
-    // (undocumented)
     protected readonly isInvalid: () => any;
-    // (undocumented)
     protected readonly labels: HellTimeInputLabels;
-    // (undocumented)
     protected minutePresetLabel(minute: number): string;
-    // (undocumented)
     protected readonly minutePresets: readonly [0, 15, 30, 45];
-    // (undocumented)
     protected minutePresetsLabel(): string;
-    // (undocumented)
     readonly name: _angular_core.InputSignal<string | null>;
-    // (undocumented)
     protected readonly nativeTimeInput: boolean;
-    // (undocumented)
     protected onBlur(): void;
-    // (undocumented)
     protected onFieldFocus(field: HTMLInputElement): void;
-    // (undocumented)
     protected onInput(value: string): void;
-    // (undocumented)
     protected onPickerSpinKeydown(event: KeyboardEvent, unit: HellTimeUnit): void;
     // Warning: (ae-forgotten-export) The symbol "pad" needs to be exported by the entry point hell-ui-angular-time-input.d.ts
-    //
-    // (undocumented)
     protected readonly pad: typeof pad;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-time-input.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<HellTimeInputPart>;
-    // (undocumented)
     protected readonly pickerShift: {
         readonly padding: 8;
     };
-    // (undocumented)
     readonly placeholder: _angular_core.InputSignal<string | null>;
-    // (undocumented)
     registerOnChange(fn: (value: HellTimeValue | null) => void): void;
-    // (undocumented)
     registerOnTouched(fn: () => void): void;
-    // (undocumented)
     registerOnValidatorChange(fn: () => void): void;
-    // (undocumented)
     readonly seconds: _angular_core.InputSignalWithTransform<boolean, unknown>;
-    // (undocumented)
     protected selectedTimeLabel(): string;
-    // (undocumented)
     setDisabledState(isDisabled: boolean): void;
     // Warning: (ae-forgotten-export) The symbol "HellTimeUnit" needs to be exported by the entry point hell-ui-angular-time-input.d.ts
-    //
-    // (undocumented)
     protected setUnit(unit: HellTimeUnit, n: number): void;
-    // (undocumented)
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
-    // (undocumented)
     protected stepUnit(unit: HellTimeUnit, delta: number): void;
-    // (undocumented)
     protected readonly triggerAriaLabel: () => string;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-time-input.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<HellTimeInputPart>>;
-    // (undocumented)
     protected unitLabel(unit: HellTimeUnit): string;
-    // (undocumented)
     protected unitLabelId(unit: HellTimeUnit): string;
-    // (undocumented)
     protected unitMax(unit: HellTimeUnit): number;
-    // (undocumented)
     protected unitValue(unit: HellTimeUnit): number;
-    // (undocumented)
     protected unitValueText(unit: HellTimeUnit): string;
-    // (undocumented)
     validate(_control: AbstractControl | null): ValidationErrors | null;
-    // (undocumented)
     readonly value: _angular_core.InputSignal<HellTimeValue | null>;
-    // (undocumented)
     readonly valueChange: _angular_core.OutputEmitterRef<HellTimeValue | null>;
-    // (undocumented)
     protected visibleUnits(): readonly HellTimeUnit[];
-    // (undocumented)
     writeValue(value: HellTimeValue | null): void;
-    // (undocumented)
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellTimeInput, "hell-time-input", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "seconds": { "alias": "seconds"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "inputId": { "alias": "inputId"; "required": false; "isSignal": true; }; "name": { "alias": "name"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; "ariaDescribedby": { "alias": "aria-describedby"; "required": false; "isSignal": true; }; "ariaLabelledby": { "alias": "aria-labelledby"; "required": false; "isSignal": true; }; }, { "valueChange": "valueChange"; }, never, never, true, never>;
-    // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTimeInput, never>;
 }
 
-// @public (undocumented)
+// @public
 export interface HellTimeInputAdapter {
     readonly format: (value: HellTimeValue, context: HellTimeInputAdapterContext) => string;
     readonly isSameValue?: (a: HellTimeValue | null, b: HellTimeValue | null) => boolean;
@@ -163,43 +109,30 @@ export interface HellTimeInputAdapter {
     readonly parseText: (text: string, context: HellTimeInputAdapterContext) => HellTimeInputParseResult;
 }
 
-// @public (undocumented)
+// @public
 export interface HellTimeInputAdapterContext {
-    // (undocumented)
     readonly seconds: boolean;
 }
 
 // @public
 export interface HellTimeInputLabels {
-    // (undocumented)
     readonly addFiveMinutes: string;
-    // (undocumented)
     readonly chooseTime: string;
-    // (undocumented)
     readonly chooseTimeFor: (label: string) => string;
-    // (undocumented)
     readonly decreaseUnit?: (unitLabel: string) => string;
-    // (undocumented)
     readonly hours: string;
-    // (undocumented)
     readonly increaseUnit?: (unitLabel: string) => string;
-    // (undocumented)
     readonly minutePreset?: (minute: number) => string;
-    // (undocumented)
     readonly minutePresets?: string;
-    // (undocumented)
     readonly minutes: string;
-    // (undocumented)
     readonly seconds: string;
-    // (undocumented)
     readonly selectedTime?: (time: string) => string;
-    // (undocumented)
     readonly subtractFiveMinutes: string;
 }
 
 // Warning: (ae-forgotten-export) The symbol "HellTypedValueParseResult" needs to be exported by the entry point hell-ui-angular-time-input.d.ts
 //
-// @public (undocumented)
+// @public
 export type HellTimeInputParseResult = HellTypedValueParseResult<HellTimeValue>;
 
 // @public
@@ -210,102 +143,18 @@ export type HellTimeInputPart = 'root' | 'input' | 'trigger' | 'triggerIcon' | '
 // @public
 export type HellTimeInputUi = HellUi<HellTimeInputPart>;
 
-// @public (undocumented)
+// @public
 export interface HellTimeValue {
-    // (undocumented)
     readonly hour: number;
-    // (undocumented)
     readonly minute: number;
-    // (undocumented)
     readonly second: number;
 }
 
-// @public (undocumented)
+// @public
 export function provideHellTimeInputAdapter(adapter: HellTimeInputAdapter): Provider;
 
 // @public
 export function provideHellTimeInputLabels(overrides: Partial<HellTimeInputLabels>): Provider;
-
-// Warnings were encountered during analysis:
-//
-// types/hell-ui-angular-time-input.d.ts:12:5 - (ae-undocumented) Missing documentation for "chooseTime".
-// types/hell-ui-angular-time-input.d.ts:13:5 - (ae-undocumented) Missing documentation for "chooseTimeFor".
-// types/hell-ui-angular-time-input.d.ts:14:5 - (ae-undocumented) Missing documentation for "subtractFiveMinutes".
-// types/hell-ui-angular-time-input.d.ts:15:5 - (ae-undocumented) Missing documentation for "addFiveMinutes".
-// types/hell-ui-angular-time-input.d.ts:16:5 - (ae-undocumented) Missing documentation for "hours".
-// types/hell-ui-angular-time-input.d.ts:17:5 - (ae-undocumented) Missing documentation for "minutes".
-// types/hell-ui-angular-time-input.d.ts:18:5 - (ae-undocumented) Missing documentation for "seconds".
-// types/hell-ui-angular-time-input.d.ts:19:5 - (ae-undocumented) Missing documentation for "selectedTime".
-// types/hell-ui-angular-time-input.d.ts:20:5 - (ae-undocumented) Missing documentation for "decreaseUnit".
-// types/hell-ui-angular-time-input.d.ts:21:5 - (ae-undocumented) Missing documentation for "increaseUnit".
-// types/hell-ui-angular-time-input.d.ts:22:5 - (ae-undocumented) Missing documentation for "minutePresets".
-// types/hell-ui-angular-time-input.d.ts:23:5 - (ae-undocumented) Missing documentation for "minutePreset".
-// types/hell-ui-angular-time-input.d.ts:29:1 - (ae-undocumented) Missing documentation for "HellTimeValue".
-// types/hell-ui-angular-time-input.d.ts:30:5 - (ae-undocumented) Missing documentation for "hour".
-// types/hell-ui-angular-time-input.d.ts:31:5 - (ae-undocumented) Missing documentation for "minute".
-// types/hell-ui-angular-time-input.d.ts:32:5 - (ae-undocumented) Missing documentation for "second".
-// types/hell-ui-angular-time-input.d.ts:38:1 - (ae-undocumented) Missing documentation for "HellTimeInputAdapterContext".
-// types/hell-ui-angular-time-input.d.ts:39:5 - (ae-undocumented) Missing documentation for "seconds".
-// types/hell-ui-angular-time-input.d.ts:42:1 - (ae-undocumented) Missing documentation for "HellTimeInputParseResult".
-// types/hell-ui-angular-time-input.d.ts:43:1 - (ae-undocumented) Missing documentation for "HellTimeInputAdapter".
-// types/hell-ui-angular-time-input.d.ts:53:15 - (ae-undocumented) Missing documentation for "HELL_DEFAULT_TIME_INPUT_ADAPTER".
-// types/hell-ui-angular-time-input.d.ts:54:15 - (ae-undocumented) Missing documentation for "HELL_TIME_INPUT_ADAPTER".
-// types/hell-ui-angular-time-input.d.ts:55:1 - (ae-undocumented) Missing documentation for "provideHellTimeInputAdapter".
-// types/hell-ui-angular-time-input.d.ts:57:1 - (ae-undocumented) Missing documentation for "hellFormatTimeInputValue".
-// types/hell-ui-angular-time-input.d.ts:66:1 - (ae-undocumented) Missing documentation for "hellParseTimeInputText".
-// types/hell-ui-angular-time-input.d.ts:67:1 - (ae-undocumented) Missing documentation for "hellSameTimeInputValue".
-// types/hell-ui-angular-time-input.d.ts:81:5 - (ae-undocumented) Missing documentation for "size".
-// types/hell-ui-angular-time-input.d.ts:82:5 - (ae-undocumented) Missing documentation for "invalid".
-// types/hell-ui-angular-time-input.d.ts:83:5 - (ae-undocumented) Missing documentation for "disabled".
-// types/hell-ui-angular-time-input.d.ts:84:5 - (ae-undocumented) Missing documentation for "value".
-// types/hell-ui-angular-time-input.d.ts:85:5 - (ae-undocumented) Missing documentation for "seconds".
-// types/hell-ui-angular-time-input.d.ts:86:5 - (ae-undocumented) Missing documentation for "placeholder".
-// types/hell-ui-angular-time-input.d.ts:87:5 - (ae-undocumented) Missing documentation for "inputId".
-// types/hell-ui-angular-time-input.d.ts:88:5 - (ae-undocumented) Missing documentation for "name".
-// types/hell-ui-angular-time-input.d.ts:89:5 - (ae-undocumented) Missing documentation for "ariaLabel".
-// types/hell-ui-angular-time-input.d.ts:90:5 - (ae-undocumented) Missing documentation for "ariaDescribedby".
-// types/hell-ui-angular-time-input.d.ts:91:5 - (ae-undocumented) Missing documentation for "ariaLabelledby".
-// types/hell-ui-angular-time-input.d.ts:92:5 - (ae-undocumented) Missing documentation for "valueChange".
-// types/hell-ui-angular-time-input.d.ts:93:5 - (ae-undocumented) Missing documentation for "minutePresets".
-// types/hell-ui-angular-time-input.d.ts:94:5 - (ae-undocumented) Missing documentation for "pickerShift".
-// types/hell-ui-angular-time-input.d.ts:97:5 - (ae-undocumented) Missing documentation for "pad".
-// types/hell-ui-angular-time-input.d.ts:99:5 - (ae-undocumented) Missing documentation for "format".
-// types/hell-ui-angular-time-input.d.ts:100:5 - (ae-undocumented) Missing documentation for "nativeTimeInput".
-// types/hell-ui-angular-time-input.d.ts:110:5 - (ae-undocumented) Missing documentation for "current".
-// types/hell-ui-angular-time-input.d.ts:111:5 - (ae-undocumented) Missing documentation for "display".
-// types/hell-ui-angular-time-input.d.ts:112:5 - (ae-undocumented) Missing documentation for "invalidDraft".
-// types/hell-ui-angular-time-input.d.ts:113:5 - (ae-undocumented) Missing documentation for "isInvalid".
-// types/hell-ui-angular-time-input.d.ts:114:5 - (ae-undocumented) Missing documentation for "isDisabled".
-// types/hell-ui-angular-time-input.d.ts:115:5 - (ae-undocumented) Missing documentation for "fieldAriaDescribedby".
-// types/hell-ui-angular-time-input.d.ts:116:5 - (ae-undocumented) Missing documentation for "fieldAriaLabelledby".
-// types/hell-ui-angular-time-input.d.ts:117:5 - (ae-undocumented) Missing documentation for "labels".
-// types/hell-ui-angular-time-input.d.ts:121:5 - (ae-undocumented) Missing documentation for "triggerAriaLabel".
-// types/hell-ui-angular-time-input.d.ts:122:5 - (ae-undocumented) Missing documentation for "writeValue".
-// types/hell-ui-angular-time-input.d.ts:123:5 - (ae-undocumented) Missing documentation for "registerOnChange".
-// types/hell-ui-angular-time-input.d.ts:124:5 - (ae-undocumented) Missing documentation for "registerOnTouched".
-// types/hell-ui-angular-time-input.d.ts:125:5 - (ae-undocumented) Missing documentation for "registerOnValidatorChange".
-// types/hell-ui-angular-time-input.d.ts:126:5 - (ae-undocumented) Missing documentation for "setDisabledState".
-// types/hell-ui-angular-time-input.d.ts:128:5 - (ae-undocumented) Missing documentation for "onInput".
-// types/hell-ui-angular-time-input.d.ts:129:5 - (ae-undocumented) Missing documentation for "onFieldFocus".
-// types/hell-ui-angular-time-input.d.ts:130:5 - (ae-undocumented) Missing documentation for "onBlur".
-// types/hell-ui-angular-time-input.d.ts:131:5 - (ae-undocumented) Missing documentation for "commit".
-// types/hell-ui-angular-time-input.d.ts:132:5 - (ae-undocumented) Missing documentation for "setUnit".
-// types/hell-ui-angular-time-input.d.ts:133:5 - (ae-undocumented) Missing documentation for "visibleUnits".
-// types/hell-ui-angular-time-input.d.ts:134:5 - (ae-undocumented) Missing documentation for "unitLabel".
-// types/hell-ui-angular-time-input.d.ts:135:5 - (ae-undocumented) Missing documentation for "unitLabelId".
-// types/hell-ui-angular-time-input.d.ts:136:5 - (ae-undocumented) Missing documentation for "unitValue".
-// types/hell-ui-angular-time-input.d.ts:137:5 - (ae-undocumented) Missing documentation for "unitMax".
-// types/hell-ui-angular-time-input.d.ts:138:5 - (ae-undocumented) Missing documentation for "unitValueText".
-// types/hell-ui-angular-time-input.d.ts:139:5 - (ae-undocumented) Missing documentation for "selectedTimeLabel".
-// types/hell-ui-angular-time-input.d.ts:140:5 - (ae-undocumented) Missing documentation for "decreaseUnitLabel".
-// types/hell-ui-angular-time-input.d.ts:141:5 - (ae-undocumented) Missing documentation for "increaseUnitLabel".
-// types/hell-ui-angular-time-input.d.ts:142:5 - (ae-undocumented) Missing documentation for "minutePresetsLabel".
-// types/hell-ui-angular-time-input.d.ts:143:5 - (ae-undocumented) Missing documentation for "minutePresetLabel".
-// types/hell-ui-angular-time-input.d.ts:144:5 - (ae-undocumented) Missing documentation for "stepUnit".
-// types/hell-ui-angular-time-input.d.ts:145:5 - (ae-undocumented) Missing documentation for "onPickerSpinKeydown".
-// types/hell-ui-angular-time-input.d.ts:148:5 - (ae-undocumented) Missing documentation for "validate".
-// types/hell-ui-angular-time-input.d.ts:150:5 - (ae-undocumented) Missing documentation for "ɵfac".
-// types/hell-ui-angular-time-input.d.ts:151:5 - (ae-undocumented) Missing documentation for "ɵcmp".
 
 // (No @packageDocumentation comment for this package)
 

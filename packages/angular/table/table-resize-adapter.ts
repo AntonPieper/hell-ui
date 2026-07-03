@@ -4,21 +4,29 @@ export interface HellTableResizeItem {
   readonly columnId: string;
   /** Optional controlled cell/header ids for aria-controls derivation. */
   readonly ariaControls?: string | readonly string[] | null;
+  /** Current size of the item in CSS pixels, used as the drag start anchor. */
   measure(): number;
+  /** Minimum size the item may shrink to, in CSS pixels. */
   minSize?(): number;
+  /** Applies a live size to the item while the user is dragging. */
   setSize(px: number): void;
+  /** Persists the final size after pointerup or a key step. */
   commitSize?(px: number): void;
 }
 
 /** Narrow adapter boundary consumed by hellTableResizeHandle. */
 export interface HellTableResizeAdapter {
+  /** The item on the leading side of the handle. */
   readonly before: HellTableResizeItem;
+  /** The item on the trailing side of the handle. */
   readonly after: HellTableResizeItem;
 }
 
 /** One side of a committed two-column resize transaction. */
 export interface HellTableResizeSide {
+  /** Stable column id of this side. */
   readonly columnId: string;
+  /** Final size of this column in CSS pixels. */
   readonly px: number;
   /** Fraction of `totalPx` held by this column after the resize. */
   readonly share: number;
@@ -26,11 +34,15 @@ export interface HellTableResizeSide {
 
 /** Emitted once per committed resize for the affected adjacent columns. */
 export interface HellTableResizeEvent {
+  /** The leading column after the resize. */
   readonly before: HellTableResizeSide;
+  /** The trailing column after the resize. */
   readonly after: HellTableResizeSide;
+  /** Combined width of both columns in CSS pixels. */
   readonly totalPx: number;
 }
 
+/** Type guard that reports whether the adapter has both sides ready to resize. */
 export function hellTableResizeAdapterCanResize(
   adapter: HellTableResizeAdapter | null | undefined,
 ): adapter is HellTableResizeAdapter {
