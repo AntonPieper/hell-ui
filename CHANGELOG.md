@@ -69,7 +69,10 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   (evidence: `tools/package-pack-audit.mjs`).
 - Added a GitHub Packages publish workflow so tagged releases publish both
   package tarballs to `npm.pkg.github.com` alongside the documented npmjs
-  trusted-publishing path (evidence: `docs/release/npm-publishing.md`).
+  trusted-publishing path. The GitHub Packages copy is an owner-scope mirror
+  (`@antonpieper/hell-ui-angular`, `@antonpieper/hell-ui-pdf-viewer`) because
+  the `@hell-ui` GitHub namespace belongs to an unrelated account; consumers
+  install it through npm aliases (evidence: `docs/release/npm-publishing.md`).
 - Added unit coverage for the previously untested `@hell-ui/angular/avatar-group`
   entry point and the internal embedded-input UI contract (evidence:
   `packages/angular/avatar-group/avatar-group.spec.ts`,
