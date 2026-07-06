@@ -90,18 +90,23 @@ test.describe('toggle browser accessibility contract', () => {
     await expect(example).toContainText('right');
   });
 
-  test('multiple-select group keeps independent selections across items', async ({ page }) => {
+  test('multiple-select group exposes pressed toggle buttons with independent selections', async ({
+    page,
+  }) => {
     await gotoToggle(page);
 
     const example = page.locator('app-toggle-toggle-group-multiple-example');
     const group = example.locator('[hellToggleGroup]');
-    const bold = example.getByRole('radio', { name: 'Bold' });
-    const italic = example.getByRole('radio', { name: 'Italic' });
+    const bold = example.getByRole('button', { name: 'Bold' });
+    const italic = example.getByRole('button', { name: 'Italic' });
 
     await expect(group).toHaveAttribute('role', 'group');
     await expect(group).toHaveAttribute('data-type', 'multiple');
-    await expectSelectedItem(bold);
-    await expectUnselectedItem(italic);
+    await expectPressedItem(bold);
+    await expectUnpressedItem(italic);
+    // Roving focus still applies in multiple mode.
+    await expect(bold).toHaveAttribute('tabindex', '0');
+    await expect(italic).toHaveAttribute('tabindex', '-1');
 
     await bold.focus();
     await page.keyboard.press('ArrowRight');
@@ -109,8 +114,8 @@ test.describe('toggle browser accessibility contract', () => {
     await page.keyboard.press('Enter');
 
     // Multiple-select keeps both selections instead of replacing.
-    await expect(italic).toHaveAttribute('aria-checked', 'true');
-    await expect(bold).toHaveAttribute('aria-checked', 'true');
+    await expectPressedItem(italic);
+    await expectPressedItem(bold);
     await expect(example).toContainText('bold, italic');
   });
 });
@@ -125,4 +130,18 @@ async function expectUnselectedItem(item: Locator): Promise<void> {
   await expect(item).toHaveAttribute('role', 'radio');
   await expect(item).toHaveAttribute('aria-checked', 'false');
   await expect(item).toHaveAttribute('tabindex', '-1');
+}
+
+// Multiple-select items are native toggle buttons: no radio role override and
+// no aria-checked, with the selection exposed through aria-pressed instead.
+async function expectPressedItem(item: Locator): Promise<void> {
+  await expect(item).not.toHaveAttribute('role');
+  await expect(item).not.toHaveAttribute('aria-checked');
+  await expect(item).toHaveAttribute('aria-pressed', 'true');
+}
+
+async function expectUnpressedItem(item: Locator): Promise<void> {
+  await expect(item).not.toHaveAttribute('role');
+  await expect(item).not.toHaveAttribute('aria-checked');
+  await expect(item).toHaveAttribute('aria-pressed', 'false');
 }

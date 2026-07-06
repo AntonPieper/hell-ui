@@ -1,9 +1,21 @@
-import { DestroyRef, Directive, ElementRef, forwardRef, inject, input } from '@angular/core';
+import {
+  afterRenderEffect,
+  DestroyRef,
+  Directive,
+  effect,
+  ElementRef,
+  forwardRef,
+  inject,
+  input,
+  PLATFORM_ID,
+} from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgpToggle } from 'ng-primitives/toggle';
 import {
   NgpToggleGroup,
   NgpToggleGroupItem,
+  injectToggleGroupItemState,
 } from 'ng-primitives/toggle-group';
 import { containsNode } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
@@ -179,6 +191,45 @@ export class HellToggleGroup implements ControlValueAccessor {
   }
 }
 
+/**
+ * ng-primitives <= 0.124 hardcodes `role="radio"` and `aria-checked` on
+ * toggle-group items regardless of the group's `type`, but items in a
+ * `multiple` group are toggle buttons, not radios: they need native button
+ * semantics with `aria-pressed`. Upstream re-writes `aria-checked` from a
+ * render effect on every selection change, so a host binding cannot remove
+ * it; Hell corrects the attributes from a later-registered render effect
+ * (host directives construct first, so this one runs after upstream's each
+ * flush) until upstream derives the semantics from the group type.
+ */
+function toggleGroupItemModeAria(): void {
+  const element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  const group = inject(NgpToggleGroup, { optional: true });
+  const item = injectToggleGroupItemState();
+
+  const syncModeAria = () => {
+    // Read `selected` in both modes so this effect re-runs (after upstream's)
+    // whenever upstream re-writes `aria-checked`.
+    const selected = `${item().selected()}`;
+    if (group?.type() === 'multiple') {
+      element.removeAttribute('role');
+      element.removeAttribute('aria-checked');
+      element.setAttribute('aria-pressed', selected);
+    } else {
+      element.setAttribute('role', 'radio');
+      element.setAttribute('aria-checked', selected);
+      element.removeAttribute('aria-pressed');
+    }
+  };
+
+  // Mirror ng-primitives' isomorphic scheduling so the write order also holds
+  // during server rendering, where upstream binds via plain effects.
+  if (isPlatformBrowser(inject(PLATFORM_ID))) {
+    afterRenderEffect(syncModeAria);
+  } else {
+    effect(syncModeAria);
+  }
+}
+
 /** Single selectable button within a `[hellToggleGroup]`. */
 @Directive({
   selector: 'button[hellToggleGroupItem]',
@@ -214,4 +265,8 @@ export class HellToggleGroupItem {
       ].join(' '),
     }),
   });
+
+  constructor() {
+    toggleGroupItemModeAria();
+  }
 }

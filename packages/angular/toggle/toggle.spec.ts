@@ -160,6 +160,44 @@ describe('HellToggleGroup', () => {
     expect(host.control.touched).toBe(true);
   });
 
+  it('exposes pressed toggle-button semantics for multiple-select items', () => {
+    const fixture = TestBed.createComponent(ToggleGroupFormsHost);
+    fixture.detectChanges();
+
+    const bold = button(fixture.nativeElement, 'bold');
+    const italic = button(fixture.nativeElement, 'italic');
+    expect(bold.hasAttribute('role')).toBe(false);
+    expect(bold.hasAttribute('aria-checked')).toBe(false);
+    expect(bold.getAttribute('aria-pressed')).toBe('true');
+    expect(italic.getAttribute('aria-pressed')).toBe('false');
+
+    // ng-primitives re-writes aria-checked whenever the selection changes;
+    // the Hell override must win again after each toggle.
+    italic.click();
+    fixture.detectChanges();
+
+    expect(italic.getAttribute('aria-pressed')).toBe('true');
+    expect(italic.hasAttribute('aria-checked')).toBe(false);
+    expect(italic.hasAttribute('role')).toBe(false);
+  });
+
+  it('keeps radio semantics for single-select items', () => {
+    const fixture = TestBed.createComponent(ToggleGroupSingleFormsHost);
+    fixture.detectChanges();
+
+    const bold = button(fixture.nativeElement, 'single-bold');
+    const italic = button(fixture.nativeElement, 'single-italic');
+    bold.click();
+    fixture.detectChanges();
+
+    expect(bold.getAttribute('role')).toBe('radio');
+    expect(bold.getAttribute('aria-checked')).toBe('true');
+    expect(bold.hasAttribute('aria-pressed')).toBe(false);
+    expect(italic.getAttribute('role')).toBe('radio');
+    expect(italic.getAttribute('aria-checked')).toBe('false');
+    expect(italic.hasAttribute('aria-pressed')).toBe(false);
+  });
+
   it('uses root part style maps for standalone toggles and grouped items', () => {
     const fixture = TestBed.createComponent(TogglePartStyleHost);
     fixture.detectChanges();
