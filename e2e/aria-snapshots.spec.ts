@@ -170,7 +170,9 @@ test.describe('public docs aria snapshots', () => {
     await expect(dialpad).toBeVisible();
     await expect(dialpad.getByRole('button', { name: 'Digit 2, ABC' })).toBeVisible();
     await expect(dialpad.getByRole('button', { name: 'Star' })).toBeVisible();
-    await example.getByRole('radio', { name: 'Invalid' }).click();
+    // The states control is a multiple-select toggle group, so its items are
+    // aria-pressed toggle buttons rather than radios.
+    await example.getByRole('button', { name: 'Invalid' }).click();
     await expect(dialpad).toHaveAttribute('aria-invalid', 'true');
 
     await expectNamedAriaSnapshot(example, 'dialpad-interactive.aria.yml');

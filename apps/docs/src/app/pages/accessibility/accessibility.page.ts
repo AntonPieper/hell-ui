@@ -344,11 +344,12 @@ const A11Y_MATRIX: readonly AccessibilityMatrixRow[] = [
     kind: 'Primitive',
     name: 'Toggle',
     path: '/components/toggle',
-    rolePattern: 'Pressed toggle button and role=group toggle groups through ng-primitives.',
+    rolePattern:
+      'Pressed toggle button and role=group toggle groups; single-select items expose role=radio with aria-checked while multiple-select items stay aria-pressed toggle buttons through the local override of ng-primitives radio-only item semantics.',
     keyboardCoverage:
       'Browser contract covers standalone Enter/Space aria-pressed toggling plus group roving ArrowLeft/ArrowRight focus with Enter/Space item activation.',
     automatedCoverage:
-      'Dedicated Playwright browser contract in toggle-a11y-contracts.spec.ts covers standalone aria-pressed toggling, disabled toggle and disabled group semantics, single-select radio replacement, and multiple-select independent selection.',
+      'Dedicated Playwright browser contract in toggle-a11y-contracts.spec.ts covers standalone aria-pressed toggling, disabled toggle and disabled group semantics, single-select radio replacement, and multiple-select pressed-button independent selection.',
     knownGaps:
       'No critical gap recorded; icon-only toggles still depend on consumer-supplied aria-labels and axe/ARIA snapshot evidence for the Toggle page is not yet in place.',
   },

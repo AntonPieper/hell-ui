@@ -42,6 +42,7 @@ export class HellToggleGroup implements ControlValueAccessor {
 
 // @public
 export class HellToggleGroupItem {
+    constructor();
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly size: i0.InputSignal<HellSize>;
     readonly ui: i0.InputSignal<HellUiInput<"root">>;

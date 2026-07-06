@@ -102,7 +102,12 @@ import toggleStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
 
       <h2>Accessibility</h2>
       <ul>
-        <li>Standalone toggles expose <code>aria-pressed</code>; group items reflect selection through the group contract.</li>
+        <li>Standalone toggles expose <code>aria-pressed</code>.</li>
+        <li>
+          Single-select group items expose <code>role="radio"</code> with
+          <code>aria-checked</code>; multiple-select group items stay toggle buttons with
+          <code>aria-pressed</code>.
+        </li>
         <li>Icon-only toggles need an <code>aria-label</code>.</li>
       </ul>
 
