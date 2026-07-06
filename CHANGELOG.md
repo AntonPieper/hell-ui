@@ -11,9 +11,10 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   and `aria-checked`; they are native toggle buttons announcing selection via
   `aria-pressed`, matching the WAI-ARIA toggle-button pattern. This works
   around ng-primitives (<= 0.124) hardcoding radio semantics on toggle-group
-  items in both selection modes; single-select groups keep radio items.
-  Evidence: mode-specific assertions in `packages/angular/toggle/toggle.spec.ts`
-  and `e2e/toggle-a11y-contracts.spec.ts`.
+  items in both selection modes ([ng-primitives#813](https://github.com/ng-primitives/ng-primitives/issues/813));
+  single-select groups keep radio items. Evidence: mode-specific assertions in
+  `packages/angular/toggle/toggle.spec.ts` and
+  `e2e/toggle-a11y-contracts.spec.ts`.
 
 ## [0.2.0] - 2026-07-03
 

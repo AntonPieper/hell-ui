@@ -199,7 +199,8 @@ export class HellToggleGroup implements ControlValueAccessor {
  * render effect on every selection change, so a host binding cannot remove
  * it; Hell corrects the attributes from a later-registered render effect
  * (host directives construct first, so this one runs after upstream's each
- * flush) until upstream derives the semantics from the group type.
+ * flush) until upstream derives the semantics from the group type. Tracked
+ * upstream as https://github.com/ng-primitives/ng-primitives/issues/813.
  */
 function toggleGroupItemModeAria(): void {
   const element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
