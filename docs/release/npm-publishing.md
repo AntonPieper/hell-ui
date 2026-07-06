@@ -51,27 +51,37 @@ records above exist for both packages, leave the variable unset so tag pushes
 still produce dry-run evidence and audited tarballs without a doomed publish
 attempt.
 
-## GitHub Packages registry
+## GitHub Packages registry (owner-scope mirror)
 
-Tagged releases also publish both packages to the GitHub Packages npm registry
-through `.github/workflows/github-packages-publish.yml`:
+Tagged releases also publish an owner-scope mirror of both packages to the
+GitHub Packages npm registry through
+`.github/workflows/github-packages-publish.yml`:
 
-- Tag pushes matching `v*.*.*` rebuild `@hell-ui/angular` and
-  `@hell-ui/pdf-viewer`, re-run the pack audit, verify the tag matches both
-  package versions, and publish the built packages to
+- GitHub Packages scopes npm packages to the owning GitHub account, and the
+  `@hell-ui` GitHub username belongs to an unrelated account, so the canonical
+  `@hell-ui/*` names can never publish there from this repository. The mirror
+  publishes as `@antonpieper/hell-ui-angular` and
+  `@antonpieper/hell-ui-pdf-viewer` instead, which the default workflow
+  `GITHUB_TOKEN` can write. The canonical `@hell-ui/*` names remain reserved
+  for the npmjs trusted-publishing path above.
+- Tag pushes matching `v*.*.*` rebuild both packages, re-run the pack audit,
+  verify the tag matches both package versions, and publish the mirror to
   `https://npm.pkg.github.com`.
-- The publish job rewrites each built `package.json`'s `publishConfig.registry`
-  to GitHub Packages at publish time only; the source manifests keep
-  `https://registry.npmjs.org/` as required by the CI contract.
-- GitHub Packages scopes npm packages to the owning GitHub account. The
-  `@hell-ui` scope belongs to the `Hell-UI` GitHub account, not to
-  `AntonPieper`, so the default `GITHUB_TOKEN` cannot publish it from this
-  repository. Provide a repository secret `HELL_UI_GITHUB_PACKAGES_TOKEN`
-  containing a `packages:write` token from the `Hell-UI` account (or transfer
-  the repository to that account, after which the default token suffices).
-- Consumers install from GitHub Packages with an `.npmrc` entry:
-  `@hell-ui:registry=https://npm.pkg.github.com` plus an authenticated
-  `//npm.pkg.github.com/:_authToken`.
+- The pack step rewrites each built `package.json`'s `name` and
+  `publishConfig.registry` at publish time only; the source manifests keep the
+  `@hell-ui/*` names and `https://registry.npmjs.org/` as required by the CI
+  contract. Internal entry points, peer names, and import paths are untouched.
+- Consumers install the mirror through npm aliases so `@hell-ui/*` import
+  paths and peer resolution keep working:
+
+  ```jsonc
+  // package.json dependencies
+  "@hell-ui/angular": "npm:@antonpieper/hell-ui-angular@0.2.0",
+  "@hell-ui/pdf-viewer": "npm:@antonpieper/hell-ui-pdf-viewer@0.2.0"
+  ```
+
+  plus an `.npmrc` entry `@antonpieper:registry=https://npm.pkg.github.com`
+  and an authenticated `//npm.pkg.github.com/:_authToken`.
 
 ## Release steps
 

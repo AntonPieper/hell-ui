@@ -3,6 +3,32 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 
 const WCAG_SMOKE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 
+/**
+ * Loaded CI runners (webkit especially) can deactivate the page long enough
+ * for 5s focus expectations to flake, so focus predicates get extra headroom.
+ */
+const FOCUS_SETTLE_TIMEOUT = 10_000;
+
+async function ensurePageIsActive(page: Page): Promise<void> {
+  // Headless WebKit on a loaded runner can drop page activation, which both
+  // freezes CSS animation clocks and makes toBeFocused report "inactive".
+  await expect
+    .poll(
+      async () => {
+        await page.bringToFront();
+        return page.evaluate(() => {
+          window.focus();
+          return document.visibilityState === 'visible' && document.hasFocus();
+        });
+      },
+      {
+        message: 'page should be visible and focused before asserting the focus contract',
+        timeout: FOCUS_SETTLE_TIMEOUT,
+      },
+    )
+    .toBe(true);
+}
+
 async function expectNoSeriousA11yIssues(
   page: Page,
   include: string,
@@ -31,6 +57,8 @@ interface DialogFocusContract {
 async function expectDialogFocusContract(page: Page, contract: DialogFocusContract): Promise<void> {
   try {
     await test.step(`${contract.label} focus trap`, async () => {
+      await ensurePageIsActive(page);
+
       const trigger = page.getByRole('button', { name: contract.triggerName }).first();
       await expect(trigger).toBeVisible();
       await trigger.focus();
@@ -51,8 +79,22 @@ async function expectDialogFocusContract(page: Page, contract: DialogFocusContra
           ),
         ).toBeVisible();
       }
+      // A throttled WebKit page can freeze the enter animation's clock just
+      // below full opacity, so finish it deterministically instead of waiting
+      // for the frozen timeline to reach the final frame on its own.
+      await dialog.evaluate((element) => {
+        for (const animation of element.getAnimations({ subtree: true })) {
+          try {
+            animation.finish();
+          } catch {
+            // Infinite animations cannot finish and do not gate settling.
+          }
+        }
+      });
       await expect
-        .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity))
+        .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity), {
+          timeout: FOCUS_SETTLE_TIMEOUT,
+        })
         .toBe('1');
 
       await expectFocused(page, initialFocus, `${contract.label} initial focus`);
@@ -64,7 +106,7 @@ async function expectDialogFocusContract(page: Page, contract: DialogFocusContra
       await expectFocused(page, nextFocus, `${contract.label} reverse tab wraps inside`);
 
       await page.keyboard.press('Escape');
-      await expect(dialog).toBeHidden();
+      await expect(dialog).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
       await expectFocused(page, trigger, `${contract.label} trigger restore`);
     });
   } catch (error) {
@@ -78,7 +120,7 @@ async function expectDialogFocusContract(page: Page, contract: DialogFocusContra
 
 async function expectFocused(page: Page, locator: Locator, label: string): Promise<void> {
   try {
-    await expect(locator, label).toBeFocused();
+    await expect(locator, label).toBeFocused({ timeout: FOCUS_SETTLE_TIMEOUT });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`${message}\n\n${await collectFocusDiagnostics(page)}`, { cause: error });
@@ -98,7 +140,12 @@ async function expectNoHorizontalOverflow(page: Page): Promise<void> {
 }
 
 async function collectFocusDiagnostics(page: Page): Promise<string> {
-  const [focusedPath, ariaSnapshot] = await Promise.all([
+  const [documentState, focusedPath, ariaSnapshot] = await Promise.all([
+    page
+      .evaluate(
+        () => `visibilityState=${document.visibilityState} hasFocus=${document.hasFocus()}`,
+      )
+      .catch((error: unknown) => `Unavailable: ${error instanceof Error ? error.message : error}`),
     focusedElementPath(page),
     page
       .locator('body')
@@ -106,7 +153,7 @@ async function collectFocusDiagnostics(page: Page): Promise<string> {
       .catch((error: unknown) => `Unavailable: ${error instanceof Error ? error.message : error}`),
   ]);
 
-  return `Focused element path:\n${focusedPath}\n\nAccessibility tree:\n${ariaSnapshot}`;
+  return `Document state: ${documentState}\n\nFocused element path:\n${focusedPath}\n\nAccessibility tree:\n${ariaSnapshot}`;
 }
 
 async function focusedElementPath(page: Page): Promise<string> {
