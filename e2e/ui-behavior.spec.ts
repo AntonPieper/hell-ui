@@ -1,33 +1,8 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import { SETTLE_TIMEOUT, ensurePageIsActive, finishAnimations } from './utils';
 
 const WCAG_SMOKE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
-
-/**
- * Loaded CI runners (webkit especially) can deactivate the page long enough
- * for 5s focus expectations to flake, so focus predicates get extra headroom.
- */
-const FOCUS_SETTLE_TIMEOUT = 10_000;
-
-async function ensurePageIsActive(page: Page): Promise<void> {
-  // Headless WebKit on a loaded runner can drop page activation, which both
-  // freezes CSS animation clocks and makes toBeFocused report "inactive".
-  await expect
-    .poll(
-      async () => {
-        await page.bringToFront();
-        return page.evaluate(() => {
-          window.focus();
-          return document.visibilityState === 'visible' && document.hasFocus();
-        });
-      },
-      {
-        message: 'page should be visible and focused before asserting the focus contract',
-        timeout: FOCUS_SETTLE_TIMEOUT,
-      },
-    )
-    .toBe(true);
-}
 
 async function expectNoSeriousA11yIssues(
   page: Page,
@@ -82,18 +57,10 @@ async function expectDialogFocusContract(page: Page, contract: DialogFocusContra
       // A throttled WebKit page can freeze the enter animation's clock just
       // below full opacity, so finish it deterministically instead of waiting
       // for the frozen timeline to reach the final frame on its own.
-      await dialog.evaluate((element) => {
-        for (const animation of element.getAnimations({ subtree: true })) {
-          try {
-            animation.finish();
-          } catch {
-            // Infinite animations cannot finish and do not gate settling.
-          }
-        }
-      });
+      await finishAnimations(dialog);
       await expect
         .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity), {
-          timeout: FOCUS_SETTLE_TIMEOUT,
+          timeout: SETTLE_TIMEOUT,
         })
         .toBe('1');
 
@@ -106,7 +73,7 @@ async function expectDialogFocusContract(page: Page, contract: DialogFocusContra
       await expectFocused(page, nextFocus, `${contract.label} reverse tab wraps inside`);
 
       await page.keyboard.press('Escape');
-      await expect(dialog).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
+      await expect(dialog).toBeHidden({ timeout: SETTLE_TIMEOUT });
       await expectFocused(page, trigger, `${contract.label} trigger restore`);
     });
   } catch (error) {
@@ -120,7 +87,7 @@ async function expectDialogFocusContract(page: Page, contract: DialogFocusContra
 
 async function expectFocused(page: Page, locator: Locator, label: string): Promise<void> {
   try {
-    await expect(locator, label).toBeFocused({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(locator, label).toBeFocused({ timeout: SETTLE_TIMEOUT });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`${message}\n\n${await collectFocusDiagnostics(page)}`, { cause: error });
