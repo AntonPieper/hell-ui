@@ -336,13 +336,15 @@ test.describe('Hell UI browser behavior', () => {
       'dialpad first key focus',
     );
 
-    await example.getByRole('radio', { name: 'Invalid' }).click();
+    // The states control is a multiple-select toggle group, so its items are
+    // aria-pressed toggle buttons rather than radios.
+    await example.getByRole('button', { name: 'Invalid' }).click();
     await expect(dialpad).toHaveAttribute('aria-invalid', 'true');
-    await example.getByRole('radio', { name: 'Readonly' }).click();
+    await example.getByRole('button', { name: 'Readonly' }).click();
     await expect(dialpad).toHaveAttribute('data-readonly', '');
     await expect(dialpad.getByRole('button', { name: 'Digit 1' })).toBeDisabled();
     await expect(dialpad.getByRole('button', { name: 'Call' })).toBeEnabled();
-    await example.getByRole('radio', { name: 'Disabled' }).click();
+    await example.getByRole('button', { name: 'Disabled' }).click();
     await expect(dialpad).toHaveAttribute('aria-disabled', 'true');
     await expect(display).toBeDisabled();
     await expect(dialpad.getByRole('button', { name: 'Call' })).toBeDisabled();
