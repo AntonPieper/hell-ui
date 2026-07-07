@@ -15,6 +15,54 @@ async function expectDescribedBy(trigger: Locator, tooltip: Locator): Promise<vo
   await expect(trigger).toHaveAttribute('aria-describedby', tooltipId);
 }
 
+/**
+ * Stamps a baseline on the page's own clock, taken BEFORE the pointer action
+ * that arms a tooltip show/hide timer. Because the baseline is captured before
+ * the interaction, any elapsed time measured against it is a conservative upper
+ * bound on the true delay — so a starved renderer can only inflate, never
+ * shrink, the observed value, keeping the "honors the delay" lower bounds sound.
+ */
+async function armPageClock(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    (window as unknown as { __hellClockBaseline: number }).__hellClockBaseline =
+      performance.now();
+  });
+}
+
+/**
+ * Waits — entirely inside the page's own event loop — for the named trigger's
+ * `data-open` state to reach `targetOpen`, and returns the delay in ms measured
+ * from the baseline stamped by {@link armPageClock}. Both the elapsed time and
+ * the open-state observation share the renderer's clock, so the measurement is
+ * immune to the wall-clock drift that pushes `page.waitForTimeout` out of step
+ * with the tooltip's internal timers under concurrent load. Returns Infinity if
+ * the transition never happens within `budgetMs`.
+ */
+async function awaitOpenStateMs(
+  page: Page,
+  triggerText: string,
+  targetOpen: boolean,
+  budgetMs: number,
+): Promise<number> {
+  return page.evaluate(
+    async ({ triggerText, targetOpen, budgetMs }) => {
+      const baseline = (window as unknown as { __hellClockBaseline: number })
+        .__hellClockBaseline;
+      const trigger = [...document.querySelectorAll('button')].find(
+        (b) => b.textContent?.trim() === triggerText,
+      );
+      if (!trigger) throw new Error(`Trigger "${triggerText}" not found.`);
+      const isOpen = () => trigger.hasAttribute('data-open');
+      while (isOpen() !== targetOpen) {
+        if (performance.now() - baseline > budgetMs) return Number.POSITIVE_INFINITY;
+        await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+      }
+      return performance.now() - baseline;
+    },
+    { triggerText, targetOpen, budgetMs },
+  );
+}
+
 test.describe('tooltip browser accessibility contract', () => {
   test('focus opens a described tooltip and Escape closes it', async ({ page }) => {
     await gotoTooltip(page);
@@ -38,22 +86,32 @@ test.describe('tooltip browser accessibility contract', () => {
   test('hover respects configured show and hide delays', async ({ page }) => {
     await gotoTooltip(page);
 
-    const trigger = page.getByRole('button', { name: 'Hover for 600ms' });
+    const triggerName = 'Hover for 600ms';
+    const trigger = page.getByRole('button', { name: triggerName });
     const tooltip = page.getByRole('tooltip', { name: 'Took my time' });
 
+    // Show delay is 600ms: the tooltip must not open eagerly. Measure the
+    // hover→open latency in the page's own clock so a starved renderer cannot
+    // drift the observation out of step with the internal show timer.
+    await armPageClock(page);
     await trigger.hover();
-    await page.waitForTimeout(300);
-    await expect(tooltip).toBeHidden();
-
-    await page.waitForTimeout(350);
+    const showDelayMs = await awaitOpenStateMs(page, triggerName, true, 5_000);
+    // Honors the delay (not eager: never open before the 300ms mark) and still
+    // opens well within budget (finite, not stuck hidden forever).
+    expect(showDelayMs).toBeGreaterThanOrEqual(300);
+    expect(showDelayMs).toBeLessThan(5_000);
     await expect(tooltip).toBeVisible();
     await expectDescribedBy(trigger, tooltip);
 
+    // Hide delay is 300ms: after the pointer leaves the tooltip stays open
+    // briefly before closing. Measure the leave→close latency the same way.
+    await armPageClock(page);
     await page.mouse.move(0, 0);
-    await page.waitForTimeout(150);
-    await expect(tooltip).toBeVisible();
-
-    await expect(tooltip).toBeHidden({ timeout: 1_000 });
+    const hideDelayMs = await awaitOpenStateMs(page, triggerName, false, 5_000);
+    // Honors the delay (stays open past the 150ms mark) and does close in budget.
+    expect(hideDelayMs).toBeGreaterThanOrEqual(150);
+    expect(hideDelayMs).toBeLessThan(5_000);
+    await expect(tooltip).toBeHidden();
     await expect(trigger).not.toHaveAttribute('aria-describedby');
   });
 

@@ -27,7 +27,7 @@ test.describe('tabs browser accessibility contract', () => {
   }) => {
     await gotoTabs(page);
 
-    const example = page.locator('app-tabs-example-example');
+    const example = page.locator('app-tabs-basic-example');
     const tablist = example.getByRole('tablist', { name: 'Account sections' });
     const general = tablist.getByRole('tab', { name: 'General' });
     const security = tablist.getByRole('tab', { name: 'Security' });
@@ -80,49 +80,49 @@ test.describe('tabs browser accessibility contract', () => {
     await gotoTabs(page);
 
     const example = page.locator('app-tabs-vertical-example');
-    const tablist = example.getByRole('tablist', { name: 'Manual content sections' });
-    const sectionA = tablist.getByRole('tab', { name: 'Section A' });
-    const sectionB = tablist.getByRole('tab', { name: 'Section B' });
-    const sectionC = tablist.getByRole('tab', { name: 'Section C' });
-    const panelA = example.locator('[helltabpanel][value="a"]');
-    const panelB = example.locator('[helltabpanel][value="b"]');
-    const panelC = example.locator('[helltabpanel][value="c"]');
+    const tablist = example.getByRole('tablist', { name: 'Settings sections' });
+    const profile = tablist.getByRole('tab', { name: 'Profile' });
+    const notifications = tablist.getByRole('tab', { name: 'Notifications' });
+    const integrations = tablist.getByRole('tab', { name: 'Integrations' });
+    const profilePanel = example.locator('[helltabpanel][value="profile"]');
+    const notificationsPanel = example.locator('[helltabpanel][value="notifications"]');
+    const integrationsPanel = example.locator('[helltabpanel][value="integrations"]');
 
     await expect(tablist).toHaveAttribute('aria-orientation', 'vertical');
-    await expect(sectionA).toHaveAttribute('aria-selected', 'true');
-    await expect(panelA).not.toHaveAttribute('aria-hidden', 'true');
-    await expectLinkedTabPanel(sectionA, panelA);
-    await expectLinkedTabPanel(sectionB, panelB);
-    await expectLinkedTabPanel(sectionC, panelC);
+    await expect(profile).toHaveAttribute('aria-selected', 'true');
+    await expect(profilePanel).not.toHaveAttribute('aria-hidden', 'true');
+    await expectLinkedTabPanel(profile, profilePanel);
+    await expectLinkedTabPanel(notifications, notificationsPanel);
+    await expectLinkedTabPanel(integrations, integrationsPanel);
 
-    await sectionA.focus();
-    await expect(sectionA).toBeFocused();
+    await profile.focus();
+    await expect(profile).toBeFocused();
     await page.keyboard.press('ArrowDown');
-    await expect(sectionB).toBeFocused();
-    await expect(sectionA).toHaveAttribute('aria-selected', 'true');
-    await expect(sectionB).toHaveAttribute('aria-selected', 'false');
-    await expect(panelA).not.toHaveAttribute('aria-hidden', 'true');
-    await expect(panelB).toHaveAttribute('aria-hidden', 'true');
+    await expect(notifications).toBeFocused();
+    await expect(profile).toHaveAttribute('aria-selected', 'true');
+    await expect(notifications).toHaveAttribute('aria-selected', 'false');
+    await expect(profilePanel).not.toHaveAttribute('aria-hidden', 'true');
+    await expect(notificationsPanel).toHaveAttribute('aria-hidden', 'true');
 
     await page.keyboard.press('Enter');
-    await expect(sectionB).toBeFocused();
-    await expect(sectionB).toHaveAttribute('aria-selected', 'true');
-    await expect(panelB).not.toHaveAttribute('aria-hidden', 'true');
-    await expect(panelB).toHaveAttribute('tabindex', '0');
+    await expect(notifications).toBeFocused();
+    await expect(notifications).toHaveAttribute('aria-selected', 'true');
+    await expect(notificationsPanel).not.toHaveAttribute('aria-hidden', 'true');
+    await expect(notificationsPanel).toHaveAttribute('tabindex', '0');
 
     await page.keyboard.press('End');
-    await expect(sectionC).toBeFocused();
-    await expect(sectionB).toHaveAttribute('aria-selected', 'true');
-    await expect(sectionC).toHaveAttribute('aria-selected', 'false');
+    await expect(integrations).toBeFocused();
+    await expect(notifications).toHaveAttribute('aria-selected', 'true');
+    await expect(integrations).toHaveAttribute('aria-selected', 'false');
 
     await page.keyboard.press('Space');
-    await expect(sectionC).toBeFocused();
-    await expect(sectionC).toHaveAttribute('aria-selected', 'true');
-    await expect(panelC).not.toHaveAttribute('aria-hidden', 'true');
+    await expect(integrations).toBeFocused();
+    await expect(integrations).toHaveAttribute('aria-selected', 'true');
+    await expect(integrationsPanel).not.toHaveAttribute('aria-hidden', 'true');
 
     await page.keyboard.press('Home');
-    await expect(sectionA).toBeFocused();
-    await expect(sectionC).toHaveAttribute('aria-selected', 'true');
-    await expect(sectionA).toHaveAttribute('aria-selected', 'false');
+    await expect(profile).toBeFocused();
+    await expect(integrations).toHaveAttribute('aria-selected', 'true');
+    await expect(profile).toHaveAttribute('aria-selected', 'false');
   });
 });

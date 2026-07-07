@@ -30,64 +30,75 @@ test.describe('listbox accessibility contracts', () => {
   test('single-select listbox supports Arrow, Home, End, disabled skip, and Enter selection', async ({
     page,
   }) => {
-    await page.goto('/components/listbox');
+    await page.goto('/components/listbox', { waitUntil: 'domcontentloaded' });
 
-    const example = page.locator('app-listbox-basic-example');
-    const listbox = example.getByRole('listbox', { name: 'Choose a reviewer' });
-    const ada = listbox.getByRole('option', { name: /Ada Lovelace/ });
-    const grace = listbox.getByRole('option', { name: /Grace Hopper/ });
-    const margaret = listbox.getByRole('option', { name: /Margaret Hamilton/ });
-    const katherine = listbox.getByRole('option', { name: /Katherine Johnson/ });
+    // The single-select example that still carries a disabled option is the
+    // sections demo ("Jump to region"): a single-mode listbox whose trailing
+    // Dublin option is disabled, so it exercises the same Arrow/Home/End/
+    // disabled-skip/Enter matrix the old combined reviewer listbox did.
+    const example = page.locator('app-listbox-sections-example');
+    const listbox = example.getByRole('listbox', { name: 'Jump to region' });
+    const usEast = listbox.getByRole('option', { name: 'US East' });
+    const usWest = listbox.getByRole('option', { name: 'US West' });
+    const frankfurt = listbox.getByRole('option', { name: 'Frankfurt' });
+    const dublin = listbox.getByRole('option', { name: /Dublin/ });
 
     await expect(listbox).toBeVisible();
-    await expect(grace).toHaveAttribute('aria-selected', 'true');
-    await expect(margaret).toHaveAttribute('aria-disabled', 'true');
-    await expect(margaret).toHaveAttribute('aria-selected', 'false');
+    await expect(listbox).toHaveAttribute('aria-multiselectable', 'false');
+    await expect(usEast).toHaveAttribute('aria-selected', 'true');
+    await expect(dublin).toHaveAttribute('aria-disabled', 'true');
+    await expect(dublin).toHaveAttribute('aria-selected', 'false');
 
     await listbox.focus();
-    await expectActiveDescendantText(page, listbox, 'Grace Hopper', 'initial selected option is active');
+    await expectActiveDescendantText(page, listbox, 'US East', 'initial selected option is active');
 
-    await page.keyboard.press('ArrowDown');
-    await expectActiveDescendantText(
-      page,
-      listbox,
-      'Katherine Johnson',
-      'ArrowDown skips the disabled reviewer option',
-    );
-    await page.keyboard.press('Enter');
-    await expect(katherine).toHaveAttribute('aria-selected', 'true');
-    await expect(grace).toHaveAttribute('aria-selected', 'false');
-
-    await page.keyboard.press('Home');
-    await expectActiveDescendantText(page, listbox, 'Ada Lovelace', 'Home moves to the first option');
     await page.keyboard.press('End');
     await expectActiveDescendantText(
       page,
       listbox,
-      'Katherine Johnson',
-      'End moves to the last option',
+      'Frankfurt',
+      'End moves to the last enabled option, skipping the disabled Dublin option',
     );
+    await page.keyboard.press('ArrowDown');
+    await expectActiveDescendantText(
+      page,
+      listbox,
+      'Frankfurt',
+      'ArrowDown at the last enabled option does not move onto the disabled Dublin option',
+    );
+    await page.keyboard.press('Enter');
+    await expect(frankfurt).toHaveAttribute('aria-selected', 'true');
+    await expect(usEast).toHaveAttribute('aria-selected', 'false');
 
     await page.keyboard.press('Home');
+    await expectActiveDescendantText(page, listbox, 'US East', 'Home moves to the first option');
+    await page.keyboard.press('ArrowDown');
+    await expectActiveDescendantText(
+      page,
+      listbox,
+      'US West',
+      'ArrowDown moves to the next enabled option',
+    );
     await page.keyboard.press('Enter');
-    await expect(ada).toHaveAttribute('aria-selected', 'true');
-    await expect(katherine).toHaveAttribute('aria-selected', 'false');
+    await expect(usWest).toHaveAttribute('aria-selected', 'true');
+    await expect(frankfurt).toHaveAttribute('aria-selected', 'false');
   });
 
   test('multiple listbox exposes multiselect state and toggles independent selections', async ({
     page,
   }) => {
-    await page.goto('/components/listbox');
+    await page.goto('/components/listbox', { waitUntil: 'domcontentloaded' });
 
-    const example = page.locator('app-listbox-basic-example');
-    const listbox = example.getByRole('listbox', { name: 'Choose launch checks' });
+    const example = page.locator('app-listbox-multiple-example');
+    const listbox = example.getByRole('listbox', { name: 'Launch checks' });
     const docs = listbox.getByRole('option', { name: /Documentation/ });
     const a11y = listbox.getByRole('option', { name: /Accessibility review/ });
-    const migration = listbox.getByRole('option', { name: /Blocked migration/ });
+    const migration = listbox.getByRole('option', { name: /Data migration/ });
     const release = listbox.getByRole('option', { name: /Release notes/ });
 
     await expect(listbox).toBeVisible();
     await expect(listbox).toHaveAttribute('aria-multiselectable', 'true');
+    await expect(docs).toHaveAttribute('aria-selected', 'true');
     await expect(a11y).toHaveAttribute('aria-selected', 'true');
     await expect(migration).toHaveAttribute('aria-disabled', 'true');
     await expect(migration).toHaveAttribute('aria-selected', 'false');
@@ -96,10 +107,17 @@ test.describe('listbox accessibility contracts', () => {
     await expectActiveDescendantText(
       page,
       listbox,
-      'Accessibility review',
+      'Documentation',
       'initial selected check is active',
     );
 
+    await page.keyboard.press('ArrowDown');
+    await expectActiveDescendantText(
+      page,
+      listbox,
+      'Accessibility review',
+      'ArrowDown moves to the next check',
+    );
     await page.keyboard.press('Space');
     await expect(a11y).toHaveAttribute('aria-selected', 'false');
 
@@ -115,10 +133,17 @@ test.describe('listbox accessibility contracts', () => {
 
     await page.keyboard.press('Home');
     await expectActiveDescendantText(page, listbox, 'Documentation', 'Home moves to first check');
+    await page.keyboard.press('ArrowDown');
+    await expectActiveDescendantText(
+      page,
+      listbox,
+      'Accessibility review',
+      'ArrowDown returns to the accessibility review check',
+    );
     await page.keyboard.press('Space');
     await expect(docs).toHaveAttribute('aria-selected', 'true');
     await expect(release).toHaveAttribute('aria-selected', 'true');
-    await expect(a11y).toHaveAttribute('aria-selected', 'false');
+    await expect(a11y).toHaveAttribute('aria-selected', 'true');
     await expect(migration).toHaveAttribute('aria-selected', 'false');
   });
 });

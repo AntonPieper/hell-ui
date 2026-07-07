@@ -1,8 +1,6 @@
 - menu:
   - menuitem "Rename"
   - menuitem "Duplicate"
-  - separator
-  - menuitem "Move (disabled)" [disabled]
-  - menuitem "Archive"
+  - menuitem "Move" [disabled]
   - separator
   - menuitem "Delete"

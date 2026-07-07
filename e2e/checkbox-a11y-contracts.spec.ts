@@ -11,10 +11,10 @@ test.describe('checkbox browser accessibility contract', () => {
   }) => {
     await gotoCheckbox(page);
 
-    const example = page.locator('app-checkbox-examples-example');
-    await expect(example).toBeVisible();
+    const basicExample = page.locator('app-checkbox-basic-example');
+    await expect(basicExample).toBeVisible();
 
-    const required = example.getByRole('checkbox', { name: 'I agree to the terms' });
+    const required = basicExample.getByRole('checkbox', { name: 'I agree to the terms of service' });
     await expect(required).toHaveAttribute('type', 'button');
     await expect(required).toHaveAttribute('role', 'checkbox');
     await expect(required).toHaveAttribute('required', '');
@@ -27,9 +27,12 @@ test.describe('checkbox browser accessibility contract', () => {
     await page.keyboard.press('Space');
     await expect(required).toHaveAttribute('aria-checked', 'true');
     await expect(required).toBeFocused();
-    await expect(example).toContainText('Current value: true');
+    await expect(basicExample).toContainText('Current value: true');
 
-    const mixed = example.getByRole('checkbox', { name: 'Indeterminate' });
+    const statesExample = page.locator('app-checkbox-states-example');
+    await expect(statesExample).toBeVisible();
+
+    const mixed = statesExample.getByRole('checkbox', { name: 'Indeterminate' });
     await expect(mixed).toHaveAttribute('aria-checked', 'mixed');
     await expect(mixed).toHaveAttribute('data-indeterminate', '');
     await mixed.focus();
@@ -37,13 +40,13 @@ test.describe('checkbox browser accessibility contract', () => {
     await expect(mixed).toHaveAttribute('aria-checked', 'true');
     await expect(mixed).not.toHaveAttribute('data-indeterminate');
 
-    const disabled = example.getByRole('checkbox', { name: 'Disabled', exact: true });
+    const disabled = statesExample.getByRole('checkbox', { name: 'Disabled, unchecked' });
     await expect(disabled).toBeDisabled();
     await expect(disabled).toHaveAttribute('aria-disabled', 'true');
     await expect(disabled).toHaveAttribute('tabindex', '-1');
     await expect(disabled).toHaveAttribute('aria-checked', 'false');
 
-    const disabledChecked = example.getByRole('checkbox', { name: 'Disabled, checked' });
+    const disabledChecked = statesExample.getByRole('checkbox', { name: 'Disabled, checked' });
     await expect(disabledChecked).toBeDisabled();
     await expect(disabledChecked).toHaveAttribute('aria-disabled', 'true');
     await expect(disabledChecked).toHaveAttribute('aria-checked', 'true');

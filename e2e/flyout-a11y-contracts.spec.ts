@@ -14,12 +14,12 @@ test.describe('flyout browser accessibility contract', () => {
 
     await trigger.click();
 
-    const panel = page.getByRole('dialog', { name: 'Anchored, non-modal' });
+    const panel = page.getByRole('dialog', { name: 'Anchored to the input' });
     await expect(panel).toBeVisible();
     await expect(panel).toHaveAttribute('aria-modal', 'false');
     await expect(panel).toHaveAttribute('aria-labelledby', 'boundary-flyout-title');
     await expect(panel).not.toHaveAttribute('aria-label', /.+/);
-    await expect(panel.getByRole('button', { name: 'Review settings' })).toBeVisible();
+    await expect(panel.getByRole('button', { name: 'Apply suggestion' })).toBeVisible();
 
     const panelId = await panel.getAttribute('id');
     expect(panelId).toMatch(/^hell-flyout-\d+$/);
@@ -30,11 +30,16 @@ test.describe('flyout browser accessibility contract', () => {
 
   test('keeps tab order non-modal inside the boundary and closes on outside focus', async ({
     page,
+    browserName,
   }) => {
     const { example, trigger } = flyoutExample(page);
 
-    await trigger.click();
-    const panel = page.getByRole('dialog', { name: 'Anchored, non-modal' });
+    // Keyboard activation: click-focus on buttons is engine-dependent (WebKit
+    // leaves focus on the nearest focusable ancestor), and this test guards
+    // the keyboard tab order anyway.
+    await trigger.focus();
+    await page.keyboard.press('Enter');
+    const panel = page.getByRole('dialog', { name: 'Anchored to the input' });
     await expect(panel).toBeVisible();
     await expect(trigger).toBeFocused();
 
@@ -42,12 +47,29 @@ test.describe('flyout browser accessibility contract', () => {
     await expect(example.getByLabel('Sibling input within boundary')).toBeFocused();
     await expect(panel).toBeVisible();
 
-    await page.keyboard.press('Tab');
-    await expect(panel.getByRole('button', { name: 'Review settings' })).toBeFocused();
-    await expect(panel).toBeVisible();
+    const applyButton = panel.getByRole('button', { name: 'Apply suggestion' });
+    const outsideAction = example.getByRole('button', { name: 'Outside boundary action' });
+    // WebKit's sequential focus navigation skips plain buttons (Safari default),
+    // so synthetic Tab cannot land on them there; keep full tab-order coverage
+    // on the engines that support it and assert focusability plus the
+    // outside-focus dismissal contract directly on WebKit.
+    const supportsSyntheticButtonTab = browserName !== 'webkit';
+    if (supportsSyntheticButtonTab) {
+      await page.keyboard.press('Tab');
+      await expect(applyButton).toBeFocused();
+      await expect(panel).toBeVisible();
 
-    await page.keyboard.press('Tab');
-    await expect(example.getByRole('button', { name: 'Outside boundary action' })).toBeFocused();
+      await page.keyboard.press('Tab');
+      await expect(outsideAction).toBeFocused();
+    } else {
+      await expect(applyButton).not.toHaveAttribute('tabindex', '-1');
+      await applyButton.focus();
+      await expect(applyButton).toBeFocused();
+      await expect(panel).toBeVisible();
+
+      await outsideAction.focus();
+      await expect(outsideAction).toBeFocused();
+    }
     await expect(panel).toBeHidden();
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
@@ -58,15 +80,15 @@ test.describe('flyout browser accessibility contract', () => {
 
     await trigger.scrollIntoViewIfNeeded();
     const beforeOutside = await requiredBox(outsideAction, 'outside action before open');
-    const beforeBoundary = await requiredBox(example.locator('.hd-flyout-boundary'), 'boundary');
+    const beforeBoundary = await requiredBox(flyoutBoundary(example), 'boundary');
 
     await trigger.click();
-    const panel = page.getByRole('dialog', { name: 'Anchored, non-modal' });
+    const panel = page.getByRole('dialog', { name: 'Anchored to the input' });
     await expect(panel).toBeVisible();
     await expectWithinViewport(panel);
 
     const afterOutside = await requiredBox(outsideAction, 'outside action after open');
-    const afterBoundary = await requiredBox(example.locator('.hd-flyout-boundary'), 'boundary');
+    const afterBoundary = await requiredBox(flyoutBoundary(example), 'boundary');
     expect(Math.abs(afterOutside.y - beforeOutside.y)).toBeLessThanOrEqual(1);
     expect(Math.abs(afterBoundary.height - beforeBoundary.height)).toBeLessThanOrEqual(1);
 
@@ -97,8 +119,8 @@ test.describe('flyout browser accessibility contract', () => {
     const { trigger } = flyoutExample(page);
 
     await trigger.click();
-    const panel = page.getByRole('dialog', { name: 'Anchored, non-modal' });
-    const panelAction = panel.getByRole('button', { name: 'Review settings' });
+    const panel = page.getByRole('dialog', { name: 'Anchored to the input' });
+    const panelAction = panel.getByRole('button', { name: 'Apply suggestion' });
     await panelAction.focus();
     await expect(panelAction).toBeFocused();
 
@@ -116,12 +138,19 @@ async function gotoFlyoutDocs(page: Page): Promise<void> {
 }
 
 function flyoutExample(page: Page): { example: Locator; input: Locator; trigger: Locator } {
-  const example = page.locator('app-flyout-example-boundary-keeps-siblings-interactive-example');
+  const example = page.locator('app-flyout-anchor-and-boundary-example');
   return {
     example,
     input: example.getByLabel('Sibling input within boundary'),
-    trigger: example.getByRole('button', { name: /^(Show|Hide) flyout$/ }),
+    trigger: example.getByRole('button', { name: /^(Show|Hide) suggestions$/ }),
   };
+}
+
+// The flyout's `[boundary]` host is the dashed-border box wrapping both the trigger and the
+// sibling input; it is the only dashed-border element in the example, so `.border-dashed`
+// resolves to it unambiguously.
+function flyoutBoundary(example: Locator): Locator {
+  return example.locator('.border-dashed');
 }
 
 async function requiredBox(locator: Locator, label: string) {
