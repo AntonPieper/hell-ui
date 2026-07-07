@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import { SETTLE_TIMEOUT, ensurePageIsActive, finishAnimations, finishPageAnimations } from './utils';
 
 async function gotoDocsPage(page: Page, path: string, heading: string): Promise<void> {
   await page.goto(path);
@@ -233,6 +234,10 @@ test.describe('component visual polish regressions', () => {
     page,
   }) => {
     await gotoDocsPage(page, '/components/toggle', 'Toggle');
+    // A deactivated headless WebKit page freezes animation clocks and hover
+    // repaints, which would make the style snapshots below compare frozen
+    // mid-transition frames instead of settled values.
+    await ensurePageIsActive(page);
 
     const example = page.locator('app-toggle-basic-example');
     await expect(example).toBeVisible();
@@ -240,9 +245,14 @@ test.describe('component visual polish regressions', () => {
     await expect(disabledToggle).toBeDisabled();
     await expect(disabledToggle).toHaveAttribute('data-disabled', '');
 
+    await finishAnimations(disabledToggle);
     const idle = await visualState(disabledToggle);
 
     await disabledToggle.hover();
+    // Finishing animations before each snapshot also strengthens the check: a
+    // wrongly-started hover/press transition is jumped to its end state and
+    // caught, instead of being read mid-flight near the idle value.
+    await finishAnimations(disabledToggle);
     const hovered = await visualState(disabledToggle);
     expect(hovered.backgroundColor).toBe(idle.backgroundColor);
     expect(hovered.borderColor).toBe(idle.borderColor);
@@ -251,6 +261,7 @@ test.describe('component visual polish regressions', () => {
     const box = await boxFor(disabledToggle);
     await page.mouse.move(centerX(box), centerY(box));
     await page.mouse.down();
+    await finishAnimations(disabledToggle);
     const pressed = await visualState(disabledToggle);
     await page.mouse.up();
     expect(pressed.backgroundColor).toBe(idle.backgroundColor);
@@ -262,51 +273,70 @@ test.describe('component visual polish regressions', () => {
     page,
   }) => {
     await gotoDocsPage(page, '/components/avatar-group', 'Avatar group');
+    // Hover styling and its transition only progress on an active page; a
+    // deactivated headless WebKit page would keep reporting the idle colors.
+    await ensurePageIsActive(page);
 
     const example = page.locator('app-avatar-group-with-tooltip-menu-example');
     const trigger = example.getByRole('button', { name: '2 more assignees' });
     await expect(trigger).toBeVisible();
     await trigger.scrollIntoViewIfNeeded();
 
-    const idle = await trigger.evaluate((element) => {
-      const styles = getComputedStyle(element);
-      return {
-        backgroundColor: styles.backgroundColor,
-        boxShadow: styles.boxShadow,
-        color: styles.color,
-        transform: styles.transform,
-        zIndex: styles.zIndex,
-        opacity: styles.opacity,
-      };
-    });
+    const triggerVisualSnapshot = () =>
+      trigger.evaluate((element) => {
+        const styles = getComputedStyle(element);
+        return {
+          backgroundColor: styles.backgroundColor,
+          boxShadow: styles.boxShadow,
+          color: styles.color,
+          transform: styles.transform,
+          zIndex: styles.zIndex,
+          opacity: styles.opacity,
+        };
+      });
+
+    await finishAnimations(trigger);
+    const idle = await triggerVisualSnapshot();
 
     await trigger.hover();
-    const hovered = await trigger.evaluate((element) => {
-      const styles = getComputedStyle(element);
-      return {
-        backgroundColor: styles.backgroundColor,
-        boxShadow: styles.boxShadow,
-        color: styles.color,
-        transform: styles.transform,
-        zIndex: styles.zIndex,
-        opacity: styles.opacity,
-      };
-    });
-    // The overflow badge signals hover the way every avatar-group member does —
-    // a ring drawn via box-shadow that cuts through neighbors — rather than a
-    // background/color swap, so it stays a peer in the stack instead of lifting
-    // out of it (transform, z-index, and opacity all hold).
+    // Poll the settled hover color instead of one-shot-reading a frame that a
+    // frozen transition clock could leave at the idle color; re-hovering and
+    // finishing animations each attempt makes the poll self-healing if the
+    // runner drops activation mid-test.
+    await expect
+      .poll(
+        async () => {
+          await trigger.hover();
+          await finishAnimations(trigger);
+          return (await triggerVisualSnapshot()).backgroundColor;
+        },
+        {
+          message: 'overflow trigger should repaint its background on hover',
+          timeout: SETTLE_TIMEOUT,
+        },
+      )
+      .not.toBe(idle.backgroundColor);
+    const hovered = await triggerVisualSnapshot();
+    expect(hovered.backgroundColor).not.toBe(idle.backgroundColor);
+    expect(hovered.color).not.toBe(idle.color);
+    // The overflow badge also draws the shared member hover ring (box-shadow
+    // cutting through neighbors), so it stays a peer in the stack instead of
+    // lifting out of it (transform, z-index, and opacity all hold).
     expect(hovered.boxShadow).not.toBe(idle.boxShadow);
     expect(hovered.transform).toBe(idle.transform);
     expect(hovered.zIndex).toBe(idle.zIndex);
     expect(hovered.opacity).toBe('1');
 
     await trigger.focus();
-    await expect(trigger).toBeFocused();
+    await expect(trigger).toBeFocused({ timeout: SETTLE_TIMEOUT });
 
     await page.keyboard.press('Enter');
     const menu = page.getByRole('menu', { name: 'Remaining assignees' });
     await expect(menu).toBeVisible();
+    // Settle the menu enter animation and the trigger's open-state transition
+    // deterministically before reading styles and geometry.
+    await finishAnimations(menu);
+    await finishAnimations(trigger);
 
     const openState = await trigger.evaluate((element) => ({
       ariaExpanded: element.getAttribute('aria-expanded'),
@@ -337,8 +367,21 @@ test.describe('component visual polish regressions', () => {
     ).toBe(true);
 
     await page.keyboard.press('Escape');
-    await expect(menu).toBeHidden();
-    await expect(trigger).toBeFocused();
+    // Finish the exit animation each attempt so a frozen animation clock
+    // cannot keep the closing menu visible past the assertion timeout.
+    await expect
+      .poll(
+        async () => {
+          await finishPageAnimations(page);
+          return menu.isHidden();
+        },
+        {
+          message: 'menu should close after Escape',
+          timeout: SETTLE_TIMEOUT,
+        },
+      )
+      .toBe(true);
+    await expect(trigger).toBeFocused({ timeout: SETTLE_TIMEOUT });
   });
 });
 

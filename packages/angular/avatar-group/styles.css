@@ -53,17 +53,12 @@
     cursor: pointer;
   }
 
-  [hellAvatarGroupOverflow][data-slot='root']:is(button, a):hover {
-    background-color: var(--color-hell-surface-subtle);
-    color: var(--color-hell-foreground);
-  }
-
+  /* State colors (hover/active/open background, text, border) live in the
+     overflow Tailwind recipe so they merge through the Part-Class Pipeline;
+     only the ring stack that composes group-level cutout variables stays here. */
   [hellAvatarGroupOverflow][data-slot='root']:is(button, a):active,
   [hellAvatarGroupOverflow][data-slot='root'][data-open],
   [hellAvatarGroupOverflow][data-slot='root'][aria-expanded='true'] {
-    background-color: var(--color-hell-surface-subtle);
-    border-color: var(--color-hell-border-strong);
-    color: var(--color-hell-foreground);
     box-shadow:
       0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-cutout),
       0 0 0 calc(var(--_hell-avatar-group-ring-width) * 2) var(--color-hell-border-strong);
