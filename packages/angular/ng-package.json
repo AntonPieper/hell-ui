@@ -166,6 +166,11 @@
       "output": "avatar"
     },
     {
+      "glob": "avatar-group.ts",
+      "input": "avatar-group",
+      "output": "avatar-group"
+    },
+    {
       "glob": "breadcrumbs.ts",
       "input": "breadcrumbs",
       "output": "breadcrumbs"
