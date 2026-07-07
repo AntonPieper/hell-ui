@@ -1,0 +1,57 @@
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { provideIcons } from '@ng-icons/core';
+import { faSolidXmark } from '@ng-icons/font-awesome/solid';
+import { HellButton } from '@hell-ui/angular/button';
+import { HellDateInput } from '@hell-ui/angular/date-input';
+import { HellIcon } from '@hell-ui/angular/icon';
+import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+
+@Component({
+  selector: 'app-date-input-with-field-filter-row-example',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellButton, HellDateInput, HellIcon, ...HELL_FIELD_DIRECTIVES],
+  providers: [provideIcons({ faSolidXmark })],
+  template: `
+    <div class="flex flex-wrap items-end gap-3">
+      <div hellField>
+        <label hellFieldLabel for="report-from">From</label>
+        <hell-date-input
+          inputId="report-from"
+          size="sm"
+          [date]="from()"
+          [max]="to() ?? null"
+          (dateChange)="from.set($event)"
+        />
+      </div>
+
+      <div hellField>
+        <label hellFieldLabel for="report-to">To</label>
+        <hell-date-input
+          inputId="report-to"
+          size="sm"
+          [date]="to()"
+          [min]="from() ?? null"
+          (dateChange)="to.set($event)"
+        />
+      </div>
+
+      <button hellButton variant="ghost" size="sm" type="button" (click)="clear()">
+        <hell-icon name="faSolidXmark" />
+        Clear
+      </button>
+    </div>
+
+    <p class="hd-muted">
+      Range: {{ from()?.toDateString() ?? '…' }} – {{ to()?.toDateString() ?? '…' }}
+    </p>
+  `,
+})
+export class DateInputWithFieldFilterRowExample {
+  protected readonly from = signal<Date | null>(new Date(2026, 0, 1));
+  protected readonly to = signal<Date | null>(new Date(2026, 2, 31));
+
+  protected clear(): void {
+    this.from.set(null);
+    this.to.set(null);
+  }
+}

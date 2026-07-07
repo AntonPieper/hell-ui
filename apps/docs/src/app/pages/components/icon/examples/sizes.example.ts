@@ -1,33 +1,18 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
-import {
-  faSolidArrowDown,
-  faSolidCircleCheck,
-  faSolidCircleInfo,
-  faSolidPhone,
-  faSolidTriangleExclamation,
-  faSolidXmark,
-} from '@ng-icons/font-awesome/solid';
+import { faSolidPhone } from '@ng-icons/font-awesome/solid';
 import { HellIcon } from '@hell-ui/angular/icon';
 
-const HD_ICON_PAGE_ICONS = {
-  faSolidArrowDown,
-  faSolidCircleCheck,
-  faSolidCircleInfo,
-  faSolidPhone,
-  faSolidTriangleExclamation,
-  faSolidXmark,
-};
 @Component({
   selector: 'app-icon-sizes-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellIcon],
-  providers: [provideIcons(HD_ICON_PAGE_ICONS)],
+  providers: [provideIcons({ faSolidPhone })],
   template: `
-    <span class="text-[14px]"><hell-icon name="faSolidPhone" /></span>
-    <span class="text-[20px]"><hell-icon name="faSolidPhone" /></span>
-    <span class="text-[32px]"><hell-icon name="faSolidPhone" /></span>
-    <span class="text-[48px]"><hell-icon name="faSolidPhone" /></span>
+    <hell-icon name="faSolidPhone" size="14px" />
+    <hell-icon name="faSolidPhone" size="20px" />
+    <hell-icon name="faSolidPhone" size="32px" />
+    <hell-icon name="faSolidPhone" size="48px" />
   `,
 })
 export class IconSizesExample {}

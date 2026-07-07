@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HellDropZone } from '@hell-ui/angular/drop-zone';
 
 @Component({
@@ -8,13 +8,8 @@ import { HellDropZone } from '@hell-ui/angular/drop-zone';
   template: `
     <div hellDropzone disabled>
       <strong>Uploads disabled</strong>
-      <span class="hd-muted">This area ignores click, keyboard and drop.</span>
+      <span class="hd-muted">This area ignores click, keyboard, and drop while disabled.</span>
     </div>
   `,
 })
-export class DropZoneDisabledExample {
-  protected readonly files = signal<File[]>([]);
-  protected onFiles(f: File[]) {
-    this.files.set(f);
-  }
-}
+export class DropZoneDisabledExample {}

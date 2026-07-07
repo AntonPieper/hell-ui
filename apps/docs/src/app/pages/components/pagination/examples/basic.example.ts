@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellPaginationStrip } from '@hell-ui/angular/pagination';
 
 @Component({
@@ -12,6 +12,5 @@ import { HellPaginationStrip } from '@hell-ui/angular/pagination';
 })
 export class PaginationBasicExample {
   protected readonly page = signal(3);
-  protected readonly page2 = signal(8);
   protected readonly pageCount = 12;
 }

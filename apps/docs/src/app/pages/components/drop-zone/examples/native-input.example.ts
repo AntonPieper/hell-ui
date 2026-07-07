@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellDropZone } from '@hell-ui/angular/drop-zone';
 
 @Component({
@@ -6,28 +6,29 @@ import { HellDropZone } from '@hell-ui/angular/drop-zone';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellDropZone],
   template: `
-    <input type="file" data-input #nativeInput />
+    <input type="file" #nativeInput hidden />
 
     <div hellDropzone [nativeInput]="nativeInput" (files)="onFiles($event)">
-      <strong>Use a consumer-owned input</strong>
-      <span class="hd-muted">Bind <code>nativeInput</code> to an existing file input.</span>
+      <strong>Bind an existing input</strong>
+      <span class="hd-muted">
+        <code>nativeInput</code> takes the element (or its <code>id</code>) instead of the
+        auto-created fallback.
+      </span>
     </div>
 
     @if (files().length) {
-      <div>
-        <h3>Picked files</h3>
-        <ul>
-          @for (f of files(); track f.name) {
-            <li><code>{{ f.name }}</code></li>
-          }
-        </ul>
-      </div>
+      <ul class="hd-muted">
+        @for (file of files(); track file.name) {
+          <li>{{ file.name }}</li>
+        }
+      </ul>
     }
   `,
 })
 export class DropZoneNativeInputExample {
   protected readonly files = signal<File[]>([]);
-  protected onFiles(f: File[]) {
-    this.files.set(f);
+
+  protected onFiles(files: File[]): void {
+    this.files.set(files);
   }
 }

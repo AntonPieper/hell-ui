@@ -6,23 +6,38 @@ import { HELL_LISTBOX_DIRECTIVES } from '@hell-ui/angular/listbox';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [...HELL_LISTBOX_DIRECTIVES],
   template: `
-    <!-- Listbox and options each expose a root Public Part. -->
+    <!-- hellListbox, hellListboxSection, hellListboxHeader, and hellListboxOption each
+         expose a single root Public Part. -->
     <div
       hellListbox
-      aria-label="Environment"
       class="max-w-72"
-      ui="border-hell-primary"
+      aria-label="Environment"
+      ui="rounded-hell-lg border-hell-primary bg-hell-surface-subtle"
       [value]="env()"
       (valueChange)="env.set($any($event))"
     >
-      <div hellListboxOption value="dev" ui="data-active:bg-hell-primary-soft">Development</div>
-      <div hellListboxOption value="stage" ui="data-active:bg-hell-primary-soft">Staging</div>
-      <div
-        hellListboxOption
-        value="prod"
-        [ui]="{ root: 'font-semibold text-hell-danger data-active:bg-hell-danger/10' }"
-      >
-        Production
+      <div hellListboxSection [ui]="{ root: 'gap-hell-1' }">
+        <div hellListboxHeader ui="rounded-hell-sm bg-hell-primary-soft text-hell-primary-soft-foreground">
+          Non-production
+        </div>
+        <div hellListboxOption value="dev" ui="rounded-hell-md data-active:bg-hell-primary-soft">
+          Development
+        </div>
+        <div hellListboxOption value="stage" ui="rounded-hell-md data-active:bg-hell-primary-soft">
+          Staging
+        </div>
+      </div>
+      <div hellListboxSection>
+        <div hellListboxHeader ui="rounded-hell-sm bg-hell-danger-soft text-hell-danger">
+          Production
+        </div>
+        <div
+          hellListboxOption
+          value="prod"
+          [ui]="{ root: 'rounded-hell-md font-semibold text-hell-danger data-active:bg-hell-danger/10' }"
+        >
+          Production
+        </div>
       </div>
     </div>
   `,

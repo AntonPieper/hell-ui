@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
 
 @Component({
@@ -6,14 +6,14 @@ import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [...HELL_RESIZABLE_DIRECTIVES],
   template: `
-    <!-- class is the docs layout hook; panes and handle render default styling. -->
-    <div hellResizable orientation="horizontal" class="h-60">
-      <div hellResizablePane [initialFlex]="1">
-        <p class="m-0 p-4 text-sm">Left pane</p>
+    <!-- The group needs an explicit main-axis size; h-64 is the docs layout hook. -->
+    <div hellResizable class="h-64">
+      <div hellResizablePane class="p-hell-4">
+        <p class="m-0 text-sm">Drag the divider to resize.</p>
       </div>
       <div hellResizableHandle></div>
-      <div hellResizablePane [initialFlex]="1">
-        <p class="m-0 p-4 text-sm">Right pane</p>
+      <div hellResizablePane class="p-hell-4">
+        <p class="m-0 text-sm">Focus it and use the arrow keys.</p>
       </div>
     </div>
   `,

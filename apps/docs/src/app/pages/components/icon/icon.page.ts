@@ -1,22 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { provideIcons } from '@ng-icons/core';
-import {
-  faSolidArrowDown,
-  faSolidCircleCheck,
-  faSolidCircleInfo,
-  faSolidPhone,
-  faSolidTriangleExclamation,
-  faSolidXmark,
-} from '@ng-icons/font-awesome/solid';
-import { HellIcon } from '@hell-ui/angular/icon';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
-import { IconExampleExample } from './examples/example.example';
-import iconExampleExampleCodeRaw from './examples/example.example.ts?raw' with {
+import { IconBasicExample } from './examples/basic.example';
+import iconBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
 };
-import { IconRegisteringIconsExample } from './examples/registering-icons.example';
-import iconRegisteringIconsExampleCodeRaw from './examples/registering-icons.example.ts?raw' with {
+import { IconColorsExample } from './examples/colors.example';
+import iconColorsExampleCodeRaw from './examples/colors.example.ts?raw' with {
   loader: 'text',
 };
 import { IconSizesExample } from './examples/sizes.example';
@@ -25,26 +15,21 @@ import { IconStylingExample } from './examples/styling.example';
 import iconStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
   loader: 'text',
 };
-
-const HD_ICON_PAGE_ICONS = {
-  faSolidArrowDown,
-  faSolidCircleCheck,
-  faSolidCircleInfo,
-  faSolidPhone,
-  faSolidTriangleExclamation,
-  faSolidXmark,
+import { IconWithButtonAndTagExample } from './examples/with-button-and-tag.example';
+import iconWithButtonAndTagExampleCodeRaw from './examples/with-button-and-tag.example.ts?raw' with {
+  loader: 'text',
 };
 
 @Component({
   selector: 'hd-icon',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [provideIcons(HD_ICON_PAGE_ICONS)],
   imports: [
     ExampleTabs,
-    HellIcon,
-    IconExampleExample,
+    IconBasicExample,
     IconSizesExample,
-    IconRegisteringIconsExample, IconStylingExample,
+    IconColorsExample,
+    IconWithButtonAndTagExample,
+    IconStylingExample,
     PageHeader,
   ],
   template: `
@@ -56,39 +41,86 @@ const HD_ICON_PAGE_ICONS = {
         importPath="@hell-ui/angular/icon"
         stylesPath="@hell-ui/angular/icon/styles.css"
       >
-        Renders registered SVG icons, sized and colored through text styles so they align with surrounding content.
+        Renders a registered SVG glyph that scales and colors with the surrounding text.
       </hd-page-header>
       <p>
-        Thin wrapper around <code>&lt;ng-icon&gt;</code> from <code>&#64;ng-icons/core</code>.
-        Consumer apps must register the icons they use via <code>provideIcons()</code>, ideally in
-        the component that renders them. Icons are decorative by default and hidden from assistive
-        technology; set <code>decorative="false"</code> with an <code>aria-label</code> only when the
-        icon itself conveys meaning without adjacent text.
+        <code>hell-icon</code> is a thin styled wrapper around <code>&lt;ng-icon&gt;</code> from
+        <code>&#64;ng-icons/core</code>. It adds a single Public Part (<code>root</code>), a
+        <code>ui</code> Part Style Map, and two conveniences on top of the raw primitive: a
+        <code>size</code> input that defaults to <code>1em</code> so glyphs scale with the
+        surrounding font size, and a <code>decorative</code> input that hides the icon from
+        assistive technology by default.
+      </p>
+      <p>
+        Consumer apps register the icons they use via <code>provideIcons({{ '{' }} faChevronDown,
+        ... {{ '}' }})</code>, ideally in the component that renders them rather than at
+        application bootstrap — this keeps icon sets tree-shakeable per feature. In a dense
+        business app, <code>hell-icon</code> is the default way to add status glyphs, leading
+        icons on buttons, and small inline affordances without hand-rolling SVG markup.
       </p>
 
-      <h2>Example</h2>
-      <hd-example-tabs
-        [code]="iconExampleExampleCode"
-        previewClass="flex items-center gap-4 text-base"
-      >
-        <app-icon-example-example />
+      <h2>Basic</h2>
+      <hd-example-tabs [code]="iconBasicExampleCode">
+        <app-icon-basic-example />
       </hd-example-tabs>
 
       <h2>Sizes</h2>
+      <p>
+        <code>size</code> accepts any CSS length and defaults to <code>1em</code>, so an icon
+        placed inside running text tracks the surrounding font size automatically. Pass an
+        explicit length to size it independently of the parent's <code>font-size</code>.
+      </p>
       <hd-example-tabs [code]="iconSizesExampleCode" previewClass="flex items-center gap-4">
         <app-icon-sizes-example />
       </hd-example-tabs>
 
-      <h2>Inherits text colour and size</h2>
-      <p class="text-hell-primary text-[1.25rem]">
-        I am text with an icon
-        <hell-icon name="faSolidArrowDown" />
-        — both share the parent's font-size and colour.
+      <h2>Color</h2>
+      <p>
+        Without a <code>color</code> input, the glyph inherits <code>currentColor</code>, so
+        wrapping it in an element with a text color utility such as <code>text-hell-danger</code>
+        is usually enough. Pass <code>color</code> directly when the glyph's color must differ
+        from the surrounding text, for example a status dot inside a neutral-colored row.
       </p>
+      <hd-example-tabs [code]="iconColorsExampleCode" previewClass="flex items-center gap-4 text-lg">
+        <app-icon-colors-example />
+      </hd-example-tabs>
+
+      <h2>With button and tag</h2>
+      <p>
+        A status row combining <code>hellTag</code> for the connection state, <code>hell-icon</code>
+        for the status glyph and the leading call icon, and <code>hellButton</code> for the
+        action. The disabled button communicates why the action is unavailable without any extra
+        state plumbing — the <code>hellButton</code> directive handles the disabled semantics.
+      </p>
+      <hd-example-tabs [code]="iconWithButtonAndTagExampleCode" previewClass="flex flex-col gap-hell-3">
+        <app-icon-with-button-and-tag-example />
+      </hd-example-tabs>
 
       <h2>Styling</h2>
       <p>
-        <code>HellIconUi</code> refines the icon's <code>root</code> Public Part. Use <code>ui</code> when a size or color utility must beat the recipe; plain <code>class</code> stays fine for additive, non-conflicting hooks.
+        <code>@hell-ui/angular/icon</code> exports one module, <code>HellIcon</code>, with one
+        Public Part.
+      </p>
+      <table class="hd-doc-table">
+        <thead>
+          <tr>
+            <th>Part</th>
+            <th>Styles</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>root</code></td>
+            <td>The <code>hell-icon</code> host element — layout, text color, size variables.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        Pass <code>ui="..."</code> as shorthand to refine <code>root</code>, or
+        <code>[ui]="&#123; root: '...' &#125;"</code> for the equivalent explicit
+        <code>HellIconUi</code> map. Both forms merge on top of the default recipe through Hell's
+        Tailwind merge, so a conflicting utility like <code>text-hell-primary</code> wins
+        deterministically over the inherited-color default.
       </p>
       <hd-example-tabs [code]="iconStylingExampleCode" previewClass="flex items-center gap-3">
         <app-icon-styling-example />
@@ -96,52 +128,63 @@ const HD_ICON_PAGE_ICONS = {
 
       <h2>API</h2>
       <ul>
-        <li><code>name</code>: registered icon name (e.g. <code>faSolidCheck</code>)</li>
-        <li><code>size</code>: any CSS length, defaults to <code>1em</code></li>
-        <li><code>color</code>: any CSS colour, defaults to <code>currentColor</code></li>
+        <li><code>name</code>: <code>string</code> (required). Name of the registered icon, as passed to <code>provideIcons</code>.</li>
+        <li><code>size</code>: <code>string</code>. Any CSS length. Default <code>'1em'</code>.</li>
+        <li><code>color</code>: <code>string | null</code>. Any CSS color. Default <code>null</code>, which inherits <code>currentColor</code>.</li>
+        <li><code>decorative</code>: <code>boolean</code>. Hides the icon from assistive technology when <code>true</code>. Default <code>true</code>.</li>
+        <li><code>aria-label</code>: <code>string | null</code> (input alias for <code>ariaLabel</code>). Accessible name used when <code>decorative</code> is <code>false</code>. Default <code>null</code>.</li>
         <li>
-          <code>decorative</code>: defaults to <code>true</code> and hides the icon from assistive
-          tech
+          <code>ui</code>: <code>HellUiInput&lt;HellIconPart&gt;</code> — a shorthand class string
+          or a <code>HellIconUi</code> map (<code>&#123; root: string &#125;</code>) that refines
+          the <code>root</code> public part.
         </li>
-        <li><code>aria-label</code>: required when <code>decorative="false"</code></li>
-        <li><code>ui</code>: string or <code>{{ '{' }} root: string {{ '}' }}</code> map</li>
+        <li>
+          Exported types: <code>HellIconPart</code> (<code>'root'</code>), <code>HellIconUi</code>
+          (<code>HellUi&lt;HellIconPart&gt;</code>).
+        </li>
       </ul>
-
-      <h2>Registering icons</h2>
-      <hd-example-tabs
-        [code]="iconRegisteringIconsExampleCode"
-        previewClass="flex items-center gap-3"
-      >
-        <app-icon-registering-icons-example />
-      </hd-example-tabs>
 
       <h2>Accessibility</h2>
       <ul>
-        <li>Icons are <code>aria-hidden</code> by default; pair them with text or give the interactive parent an accessible name.</li>
-        <li>Standalone meaningful icons need an explicit label on the host element.</li>
+        <li>
+          When <code>decorative</code> is <code>true</code> (the default), the host gets
+          <code>aria-hidden="true"</code> and no <code>role</code> or <code>aria-label</code> —
+          assistive technology skips it entirely.
+        </li>
+        <li>
+          When <code>decorative</code> is <code>false</code>, the host gets
+          <code>role="img"</code> and <code>aria-label</code> from the <code>aria-label</code>
+          input, so the icon is announced as a labeled image.
+        </li>
+        <li>
+          The inner <code>&lt;ng-icon&gt;</code> element always carries
+          <code>aria-hidden="true"</code>, regardless of <code>decorative</code>, so the SVG
+          itself is never independently exposed to assistive tech — only the host's role/label
+          state matters.
+        </li>
       </ul>
 
       <h2>Do</h2>
       <ul class="hd-do">
-        <li>Register only the icon packs needed by the page.</li>
-        <li>
-          Prefer visible text; use <code>decorative="false" aria-label="…"</code> only for
-          standalone meaningful icons.
-        </li>
-        <li>Use <code>size</code> to align icons with text rhythm.</li>
+        <li>Register only the icon packs a component actually renders, close to where they're used.</li>
+        <li>Prefer visible text; use <code>decorative="false"</code> with an <code>aria-label</code> only for standalone meaningful icons.</li>
+        <li>Rely on the default <code>1em</code> size to keep icons aligned with surrounding text rhythm.</li>
+        <li>Use <code>ui</code> instead of a conflicting <code>class</code> utility when a refinement must beat the recipe.</li>
       </ul>
 
       <h2>Don't</h2>
       <ul class="hd-dont">
-        <li>Don't use icons as unlabeled buttons.</li>
-        <li>Don't mix icon styles in the same toolbar without intent.</li>
+        <li>Don't use a bare icon as the only content of an interactive element without an accessible name.</li>
+        <li>Don't set <code>decorative="false"</code> without also providing <code>aria-label</code>.</li>
+        <li>Don't mix icon styles (solid, regular, brand) in the same toolbar without intent.</li>
       </ul>
     </article>
   `,
 })
 export class IconPage {
-  protected readonly iconExampleExampleCode = iconExampleExampleCodeRaw;
+  protected readonly iconBasicExampleCode = iconBasicExampleCodeRaw;
   protected readonly iconSizesExampleCode = iconSizesExampleCodeRaw;
-  protected readonly iconRegisteringIconsExampleCode = iconRegisteringIconsExampleCodeRaw;
+  protected readonly iconColorsExampleCode = iconColorsExampleCodeRaw;
+  protected readonly iconWithButtonAndTagExampleCode = iconWithButtonAndTagExampleCodeRaw;
   protected readonly iconStylingExampleCode = iconStylingExampleCodeRaw;
 }

@@ -6,11 +6,11 @@ import { HellBadge } from '@hell-ui/angular/tag';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellBadge],
   template: `
-    <span class="relative pr-6">
+    <span class="relative inline-flex pr-6">
       Inbox
       <span hellBadge class="absolute -top-1 right-0">3</span>
     </span>
-    <span class="relative pr-6">
+    <span class="relative inline-flex pr-6">
       Notifications
       <span hellBadge class="absolute -top-1 right-0">99+</span>
     </span>

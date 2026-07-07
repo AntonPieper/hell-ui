@@ -1,34 +1,34 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellNativeCheckbox } from '@hell-ui/angular/checkbox';
+import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 
 @Component({
   selector: 'app-checkbox-native-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HellNativeCheckbox],
+  imports: [HellNativeCheckbox, ...HELL_FIELD_DIRECTIVES],
   template: `
-    <label class="inline-flex items-center gap-2">
+    <div hellField orientation="horizontal">
       <input
+        id="native-terms"
         type="checkbox"
         hellNativeCheckbox
-        [checked]="value()"
-        [required]="true"
+        required
+        aria-label="Accept terms"
+        [checked]="value() === true"
         [indeterminate]="value() === null"
-        (checkedChange)="onCheckedChange($event)"
+        (checkedChange)="value.set($event)"
       />
-      <span>Accept terms</span>
-    </label>
-    <p>State: {{ valueText() }}</p>
+      <label hellFieldLabel for="native-terms">Accept terms</label>
+      <div hellFieldDescription>Required before you can continue.</div>
+    </div>
+    <p>State: {{ stateText() }}</p>
   `,
 })
 export class CheckboxNativeExample {
   protected readonly value = signal<boolean | null>(null);
 
-  protected valueText(): string {
+  protected stateText(): string {
     if (this.value() === null) return 'indeterminate';
     return this.value() ? 'checked' : 'unchecked';
-  }
-
-  protected onCheckedChange(next: boolean): void {
-    this.value.set(next);
   }
 }

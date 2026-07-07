@@ -1,31 +1,15 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { provideIcons } from '@ng-icons/core';
-import {
-  faSolidChevronDown,
-  faSolidDownload,
-  faSolidGear,
-  faSolidPenToSquare,
-  faSolidPlus,
-  faSolidUpload,
-  faSolidXmark,
-} from '@ng-icons/font-awesome/solid';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HellIcon } from '@hell-ui/angular/icon';
 
-const HD_BUTTON_PAGE_ICONS = {
-  faSolidChevronDown,
-  faSolidDownload,
-  faSolidGear,
-  faSolidPenToSquare,
-  faSolidPlus,
-  faSolidUpload,
-  faSolidXmark,
-};
 @Component({
   selector: 'app-button-block-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton],
-  providers: [provideIcons(HD_BUTTON_PAGE_ICONS)],
-  template: ` <button hellButton variant="primary" block>Continue</button> `,
+  template: `
+    <div class="grid max-w-xs gap-2">
+      <button hellButton variant="primary" type="button" block>Continue</button>
+      <button hellButton variant="ghost" type="button" block>Cancel</button>
+    </div>
+  `,
 })
 export class ButtonBlockExample {}

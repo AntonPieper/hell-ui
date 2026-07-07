@@ -5,15 +5,30 @@ import { SearchBasicExample } from './examples/basic.example';
 import searchBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
 };
+import { SearchEmptyStateExample } from './examples/empty-state.example';
+import searchEmptyStateExampleCodeRaw from './examples/empty-state.example.ts?raw' with {
+  loader: 'text',
+};
 import { SearchStylingExample } from './examples/styling.example';
 import searchStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+  loader: 'text',
+};
+import { SearchWithTableFilterToolbarExample } from './examples/with-table-filter-toolbar.example';
+import searchWithTableFilterToolbarExampleCodeRaw from './examples/with-table-filter-toolbar.example.ts?raw' with {
   loader: 'text',
 };
 
 @Component({
   selector: 'hd-search',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleTabs, SearchBasicExample, SearchStylingExample, PageHeader],
+  imports: [
+    ExampleTabs,
+    SearchBasicExample,
+    SearchEmptyStateExample,
+    SearchStylingExample,
+    SearchWithTableFilterToolbarExample,
+    PageHeader,
+  ],
   template: `
     <article class="hd-prose">
       <hd-page-header
@@ -23,22 +38,95 @@ import searchStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         importPath="@hell-ui/angular/search"
         stylesPath="@hell-ui/angular/search/styles.css"
       >
-        A small search pattern: input wiring, a clear affordance, and result-region hooks — bring your own ranking.
+        Wires a search input to a clear affordance and an empty-state signal — you own the input,
+        the results, and the filtering logic.
       </hd-page-header>
       <p>
-        Small wrapper directives around the ng-primitives search pattern. Use them when you need a
-        plain search region with a clear control. For ranked command-palette search, use
-        <code>hell-omnibar</code>.
+        <code>hellSearch</code> and <code>hellSearchClear</code> are a small directive pair built
+        on <code>NgpSearch</code> / <code>NgpSearchClear</code> from ng-primitives.
+        <code>hellSearch</code> marks the region and tracks whichever <code>hellInput</code> is
+        registered inside it — automatically, through the same optional injection
+        <code>HellInput</code> already uses for form-field wiring, no extra plumbing required.
+        <code>hellSearchClear</code> is a plain button that resets that input's value and dispatches
+        a native <code>input</code> event, so whatever you bound to <code>(input)</code> updates the
+        same way a manual clear would.
+      </p>
+      <p>
+        Use it for any local, client-side filter: a table toolbar, a list of already-loaded
+        options, a settings search. It has no ranking, no keyboard navigation, and no result
+        popover — it is exactly the input-plus-clear wiring, nothing more. For a ranked
+        command-palette experience with its own overlay and keyboard model, use
+        <code>hell-omnibar</code> instead.
       </p>
 
       <h2>Basic</h2>
+      <p>
+        A search field wrapping a <code>hellInput</code> and a <code>hellSearchClear</code> button,
+        filtering a plain in-memory list. The clear button works immediately — no wiring beyond
+        placing it inside the same <code>hellSearch</code> region.
+      </p>
       <hd-example-tabs [code]="searchBasicExampleCode">
         <app-search-basic-example />
       </hd-example-tabs>
 
+      <h2>Empty state</h2>
+      <p>
+        Both <code>hellSearch</code> and <code>hellSearchClear</code> reflect the input's empty
+        state through a <code>data-empty</code> attribute, so you can hide the clear affordance
+        until there is something to clear — no derived signal needed. Pressing
+        <kbd>Escape</kbd> inside the field clears it the same way the button does.
+      </p>
+      <hd-example-tabs [code]="searchEmptyStateExampleCode">
+        <app-search-empty-state-example />
+      </hd-example-tabs>
+
+      <h2>With table filter toolbar</h2>
+      <p>
+        A realistic filter bar: <code>hellSearch</code> filters an invoice table by customer or
+        invoice number, and a compact <code>hellListbox</code> filters the same rows by status.
+        Both controls stay in sync through one <code>computed</code> — the table only ever renders
+        the filtered result, and an empty match shows a message instead of an empty grid.
+      </p>
+      <hd-example-tabs [code]="searchWithTableFilterToolbarExampleCode">
+        <app-search-with-table-filter-toolbar-example />
+      </hd-example-tabs>
+
       <h2>Styling</h2>
       <p>
-        The search wrapper, input, and clear affordance each keep their own narrow <code>ui</code> contract. Refine the part you own instead of styling through descendant selectors.
+        <code>HellSearch</code> and <code>HellSearchClear</code> are separate Part Style Map
+        owners, each with exactly one Public Part, <code>root</code> — their own host element. Pass
+        <code>ui="..."</code> as shorthand to refine either root, or
+        <code>[ui]="&#123; root: '...' &#125;"</code> for the equivalent explicit map. A Part Style
+        Map only reaches the DOM its own directive owns: the search wrapper's <code>ui</code> never
+        reaches into the input or the clear button, and vice versa — style each part where it is
+        declared.
+      </p>
+      <table class="hd-doc-table">
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Part</th>
+            <th>Styles</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>HellSearch</code></td>
+            <td><code>root</code></td>
+            <td>The search region host — layout, spacing, background, border around the input and clear control.</td>
+          </tr>
+          <tr>
+            <td><code>HellSearchClear</code></td>
+            <td><code>root</code></td>
+            <td>The clear <code>&lt;button&gt;</code> host — color, shape, and visibility (for example hiding it via <code>data-empty</code>).</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        The example below refines both roots plus the input it wraps: a bordered, padded
+        <code>hellSearch</code> shell using <code>bg-hell-surface-subtle</code> and
+        <code>rounded-hell-lg</code>, a pill-shaped <code>hellInput</code>, and a pill-shaped,
+        danger-colored <code>hellSearchClear</code> button.
       </p>
       <hd-example-tabs [code]="searchStylingExampleCode">
         <app-search-styling-example />
@@ -46,31 +134,80 @@ import searchStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
 
       <h2>API</h2>
       <ul>
-        <li><code>hellSearch</code>: marks the search root.</li>
-        <li><code>hellSearchClear</code>: native button clear control that composes with the search root.</li>
-        <li><code>ui</code>: string or <code>{{ '{' }} root: string {{ '}' }}</code> map.</li>
+        <li>
+          <code>hellSearch</code> (<code>HellSearch</code>): marks the search region root. Built on
+          <code>NgpSearch</code>. Tracks the registered <code>hellInput</code> descendant and sets
+          <code>data-empty</code> on itself when that input's value is empty. Listens for
+          <code>Escape</code> inside the region and clears the input.
+        </li>
+        <li>
+          <code>hellSearchClear</code> (<code>HellSearchClear</code>, selector
+          <code>button[hellSearchClear]</code>): built on <code>NgpSearchClear</code>. Sets the
+          registered input's value to <code>''</code> and dispatches a native
+          <code>input</code> event on click. Hosts default to
+          <code>type="button"</code> and <code>tabindex="-1"</code> (it is a pointer-only quick
+          action; <code>Escape</code> already clears from the keyboard) and mirror the region's
+          <code>data-empty</code> state.
+        </li>
+        <li>
+          <code>ui</code>: <code>HellUiInput&lt;HellSearchPart&gt;</code> on
+          <code>hellSearch</code>, <code>HellUiInput&lt;HellSearchClearPart&gt;</code> on
+          <code>hellSearchClear</code> — a shorthand class string or a
+          <code>&#123; root: string &#125;</code> map for each directive's own root.
+        </li>
+        <li>
+          Exported types: <code>HellSearchPart</code> / <code>HellSearchClearPart</code> (both
+          <code>'root'</code>), <code>HellSearchUi</code> / <code>HellSearchClearUi</code>
+          (<code>HellUi&lt;HellSearchPart&gt;</code> / <code>HellUi&lt;HellSearchClearPart&gt;</code>),
+          and <code>HELL_SEARCH_DIRECTIVES</code> for bulk <code>imports</code>.
+        </li>
       </ul>
 
       <h2>Accessibility</h2>
       <ul>
-        <li>Use <code>type="search"</code> with an accessible name; the clear button is labeled and keyboard-reachable.</li>
-        <li>Announce result counts in text near the list.</li>
+        <li>
+          Give the input inside <code>hellSearch</code> an accessible name — either
+          <code>aria-label</code> or a visible <code>hellFieldLabel</code> — since
+          <code>type="search"</code> alone does not guarantee one across assistive technologies.
+        </li>
+        <li>
+          <code>hellSearchClear</code> renders with <code>tabindex="-1"</code> — it stays a
+          pointer/mouse quick action outside the Tab order, since <kbd>Escape</kbd> already clears
+          the field from the keyboard without a dedicated Tab stop. Always give it an
+          <code>aria-label</code> such as "Clear search" since its content may be icon-only.
+        </li>
+        <li>
+          Escape-to-clear only fires while focus is inside the <code>hellSearch</code> region, so
+          it never intercepts <kbd>Escape</kbd> meant for an enclosing dialog or popover.
+        </li>
+        <li>
+          For filtered results, announce the outcome in text near the list (a result count or an
+          empty-state message) — <code>hellSearch</code> does not manage live-region announcements
+          for you.
+        </li>
       </ul>
 
       <h2>Do</h2>
       <ul class="hd-do">
-        <li>Use native <code>type="search"</code> inputs for simple local filtering.</li>
-        <li>Keep clear buttons explicit when query state is controlled by a signal.</li>
+        <li>Use native <code>type="search"</code> inputs for simple, local, client-side filtering.</li>
+        <li>Place <code>hellSearchClear</code> inside the same <code>hellSearch</code> region as the input it clears.</li>
+        <li>Give <code>hellSearchClear</code> an explicit <code>aria-label</code>.</li>
+        <li>Pair it with a listbox, table, or other rendered list that reacts to the same query signal.</li>
       </ul>
 
       <h2>Don't</h2>
       <ul class="hd-dont">
-        <li>Don't rebuild omnibar keyboard navigation on top of this primitive.</li>
+        <li>Don't rebuild omnibar-style keyboard navigation or ranking on top of this primitive — use <code>hell-omnibar</code> instead.</li>
+        <li>Don't rely on <code>hellSearchClear</code> alone for keyboard users; <kbd>Escape</kbd> is the keyboard path.</li>
+        <li>Don't put more than one <code>hellInput</code> inside a single <code>hellSearch</code> region — each registration replaces the previous one, so only the last-registered input is tracked.</li>
       </ul>
     </article>
   `,
 })
 export class SearchPage {
   protected readonly searchBasicExampleCode = searchBasicExampleCodeRaw;
+  protected readonly searchEmptyStateExampleCode = searchEmptyStateExampleCodeRaw;
   protected readonly searchStylingExampleCode = searchStylingExampleCodeRaw;
+  protected readonly searchWithTableFilterToolbarExampleCode =
+    searchWithTableFilterToolbarExampleCodeRaw;
 }

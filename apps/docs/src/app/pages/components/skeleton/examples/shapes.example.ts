@@ -1,5 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HellSkeleton } from '@hell-ui/angular/skeleton';
 
 @Component({
@@ -9,7 +8,7 @@ import { HellSkeleton } from '@hell-ui/angular/skeleton';
   template: `
     <div hellSkeleton shape="circle" class="size-12"></div>
     <div hellSkeleton shape="rect" class="h-12 w-24"></div>
-    <div hellSkeleton class="h-3 w-32"></div>
+    <div hellSkeleton shape="text" class="h-3 w-32"></div>
   `,
 })
 export class SkeletonShapesExample {}
