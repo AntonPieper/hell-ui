@@ -1,11 +1,10 @@
-- checkbox "I agree to the terms"
-- text: I agree to the terms
+- checkbox "Unchecked"
+- text: Unchecked
+- checkbox "Checked" [checked]
+- text: Checked
 - checkbox "Indeterminate" [checked=mixed]
-- text: Indeterminate (parent of mixed children)
-- checkbox "Disabled" [disabled]
+- text: Indeterminate
+- checkbox "Disabled, unchecked" [disabled]
 - text: Disabled
 - checkbox "Disabled, checked" [checked] [disabled]
 - text: Disabled, checked
-- paragraph:
-  - text: "Current value:"
-  - code: "false"

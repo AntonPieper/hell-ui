@@ -11,21 +11,21 @@ const PRIORITIES = ['Lowest', 'Low', 'Medium', 'High', 'Highest'];
     <button
       hellSelect
       type="button"
-      aria-label="Select priority"
-      style="max-width: 240px"
+      aria-label="Priority"
+      class="max-w-60"
       [value]="value()"
-      (valueChange)="value.set($event)"
+      (valueChange)="value.set($any($event))"
     >
-      @if (value(); as v) {
-        <span hellSelectValue>{{ v }}</span>
+      @if (value(); as current) {
+        <span hellSelectValue>{{ current }}</span>
       } @else {
         <span hellSelectPlaceholder>Select priority…</span>
       }
       <ng-template hellSelectPortal>
         <div hellSelectDropdown>
-          @for (option of options; track option) {
-            <div hellSelectOption [value]="option" [disabled]="option === disabledPriority">
-              {{ option }}
+          @for (priority of priorities; track priority) {
+            <div hellSelectOption [value]="priority" [disabled]="priority === 'Medium'">
+              {{ priority }}
             </div>
           }
         </div>
@@ -34,7 +34,6 @@ const PRIORITIES = ['Lowest', 'Low', 'Medium', 'High', 'Highest'];
   `,
 })
 export class SelectBasicExample {
-  protected readonly options = PRIORITIES;
-  protected readonly disabledPriority = 'Medium';
+  protected readonly priorities = PRIORITIES;
   protected readonly value = signal<string | null>(null);
 }

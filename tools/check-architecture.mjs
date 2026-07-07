@@ -78,11 +78,7 @@ const audioTranscriptRuntimeTerms = [
 // Explicit not-yet-migrated allowlist for the legacy Style Opt-Out base.
 // Remove a symbol here as soon as it migrates to the hellPartStyler
 // composition contract; new public modules must not extend HellStyleable.
-const legacyStyleableAllowlist = new Set([
-  'HellAvatarGroup',
-  'HellAvatarGroupItem',
-  'HellAvatarGroupOverflow',
-]);
+const legacyStyleableAllowlist = new Set([]);
 
 const migratedPartStyleMapModules = [
   {
@@ -649,6 +645,26 @@ const migratedPartStyleMapModules = [
     legacyClass: 'hell-code',
   },
   {
+    className: 'HellTanStackTable',
+    partType: 'HellTanStackTablePart',
+    uiType: 'HellTanStackTableUi',
+    entrypointId: 'table-tanstack',
+    sourcePath: 'packages/angular/table-tanstack/table-tanstack.ts',
+    publicApiPath: 'packages/angular/table-tanstack/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-tanstack-table',
+  },
+  {
+    className: 'HellTanStackPagination',
+    partType: 'HellTanStackPaginationPart',
+    uiType: 'HellTanStackPaginationUi',
+    entrypointId: 'table-tanstack',
+    sourcePath: 'packages/angular/table-tanstack/table-tanstack.ts',
+    publicApiPath: 'packages/angular/table-tanstack/public-api.ts',
+    apiReportFiles: [],
+    legacyClass: 'hell-tanstack-pagination',
+  },
+  {
     className: 'HellDateInput',
     partType: 'HellDateInputPart',
     uiType: 'HellDateInputUi',
@@ -702,6 +718,39 @@ const migratedPartStyleMapModules = [
     apiReportFiles: [],
     legacyClass: 'hell-avatar',
     componentVariablePrefix: '--hell-avatar-',
+  },
+  {
+    className: 'HellAvatarGroup',
+    partType: 'HellAvatarGroupPart',
+    uiType: 'HellAvatarGroupUi',
+    entrypointId: 'avatar-group',
+    sourcePath: 'packages/angular/avatar-group/avatar-group.ts',
+    publicApiPath: 'packages/angular/avatar-group/public-api.ts',
+    apiReportFiles: ['hell-ui-angular-avatar-group.api.md'],
+    legacyClass: 'hell-avatar-group',
+    componentVariablePrefix: '--hell-avatar-group-',
+  },
+  {
+    className: 'HellAvatarGroupItem',
+    partType: 'HellAvatarGroupItemPart',
+    uiType: 'HellAvatarGroupItemUi',
+    entrypointId: 'avatar-group',
+    sourcePath: 'packages/angular/avatar-group/avatar-group.ts',
+    publicApiPath: 'packages/angular/avatar-group/public-api.ts',
+    apiReportFiles: ['hell-ui-angular-avatar-group.api.md'],
+    legacyClass: 'hell-avatar-group-item',
+    componentVariablePrefix: '--hell-avatar-group-item-',
+  },
+  {
+    className: 'HellAvatarGroupOverflow',
+    partType: 'HellAvatarGroupOverflowPart',
+    uiType: 'HellAvatarGroupOverflowUi',
+    entrypointId: 'avatar-group',
+    sourcePath: 'packages/angular/avatar-group/avatar-group.ts',
+    publicApiPath: 'packages/angular/avatar-group/public-api.ts',
+    apiReportFiles: ['hell-ui-angular-avatar-group.api.md'],
+    legacyClass: 'hell-avatar-group-overflow',
+    componentVariablePrefix: '--hell-avatar-group-overflow-',
   },
   {
     className: 'HellBreadcrumbs',

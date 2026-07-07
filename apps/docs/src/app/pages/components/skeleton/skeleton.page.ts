@@ -2,24 +2,24 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
-import { SkeletonAvatarLinesExample } from './examples/avatar-lines.example';
-import skeletonAvatarLinesExampleCodeRaw from './examples/avatar-lines.example.ts?raw' with {
+import { SkeletonAllPartsStylingExample } from './examples/all-parts-styling.example';
+import skeletonAllPartsStylingExampleCodeRaw from './examples/all-parts-styling.example.ts?raw' with {
   loader: 'text',
 };
-import { SkeletonCardPlaceholderExample } from './examples/card-placeholder.example';
-import skeletonCardPlaceholderExampleCodeRaw from './examples/card-placeholder.example.ts?raw' with {
+import { SkeletonBasicExample } from './examples/basic.example';
+import skeletonBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
 };
 import { SkeletonShapesExample } from './examples/shapes.example';
 import skeletonShapesExampleCodeRaw from './examples/shapes.example.ts?raw' with {
   loader: 'text',
 };
-import { SkeletonTextLinesExample } from './examples/text-lines.example';
-import skeletonTextLinesExampleCodeRaw from './examples/text-lines.example.ts?raw' with {
+import { SkeletonTextBlockExample } from './examples/text-block.example';
+import skeletonTextBlockExampleCodeRaw from './examples/text-block.example.ts?raw' with {
   loader: 'text',
 };
-import { SkeletonStylingExample } from './examples/styling.example';
-import skeletonStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+import { SkeletonWithCardAvatarExample } from './examples/with-card-avatar.example';
+import skeletonWithCardAvatarExampleCodeRaw from './examples/with-card-avatar.example.ts?raw' with {
   loader: 'text',
 };
 
@@ -29,10 +29,11 @@ import skeletonStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
   imports: [
     ExampleTabs,
     RouterLink,
-    SkeletonTextLinesExample,
-    SkeletonAvatarLinesExample,
-    SkeletonCardPlaceholderExample,
-    SkeletonShapesExample, SkeletonStylingExample,
+    SkeletonBasicExample,
+    SkeletonShapesExample,
+    SkeletonTextBlockExample,
+    SkeletonWithCardAvatarExample,
+    SkeletonAllPartsStylingExample,
     PageHeader,
   ],
   template: `
@@ -44,70 +45,182 @@ import skeletonStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         importPath="@hell-ui/angular/skeleton"
         stylesPath="@hell-ui/angular/skeleton/styles.css"
       >
-        Loading placeholders that mirror your layout while content arrives — lines, shapes, and composed previews.
+        A layout-shaped placeholder that reserves the exact footprint of content still loading, so
+        the page never jumps when it arrives.
       </hd-page-header>
       <p>
-        Layout-preserving loading placeholder. Reserves the space the real content will occupy so
-        the page does not jump when it arrives. For short, indeterminate work prefer
-        <a routerLink="/components/spinner">Spinner</a> instead.
+        <code>hellSkeleton</code> is a directive you attach to a plain <code>div</code> you already
+        size with <code>class</code> — it contributes only a shimmering background and a
+        <code>shape</code>-driven radius, never a wrapper element. It carries no semantics
+        (<code>aria-hidden="true"</code>); it is purely visual.
+      </p>
+      <p>
+        The <code>@hell-ui/angular/skeleton</code> entry point also exports
+        <code>hellSpinner</code>, an indeterminate activity indicator that shares this package for
+        historical reasons but solves a different problem. Reach for
+        <code>hellSkeleton</code> when you know the shape of the content that is coming — a line of
+        text, an avatar, a card — and want to reserve its space. Reach for
+        <a routerLink="/components/spinner">Spinner</a> for short, unquantifiable waits such as a
+        submit button or a refresh icon, where there is no layout to preserve.
       </p>
 
-      <h2>Text lines</h2>
-      <hd-example-tabs [code]="skeletonTextLinesExampleCode" previewClass="grid max-w-95 gap-2">
-        <app-skeleton-text-lines-example />
-      </hd-example-tabs>
-
-      <h2>Avatar + lines</h2>
-      <hd-example-tabs
-        [code]="skeletonAvatarLinesExampleCode"
-        previewClass="flex max-w-95 items-center gap-3"
-      >
-        <app-skeleton-avatar-lines-example />
-      </hd-example-tabs>
-
-      <h2>Card placeholder</h2>
-      <hd-example-tabs
-        [code]="skeletonCardPlaceholderExampleCode"
-        previewClass="grid max-w-95 gap-3"
-      >
-        <app-skeleton-card-placeholder-example />
+      <h2>Basic</h2>
+      <hd-example-tabs [code]="skeletonBasicExampleCode">
+        <app-skeleton-basic-example />
       </hd-example-tabs>
 
       <h2>Shapes</h2>
+      <p>
+        <code>shape</code> selects the built-in radius: <code>text</code> (default, small radius
+        for a line of copy), <code>circle</code> (avatars, icons), and <code>rect</code> (images,
+        cards, larger blocks). Pair it with <code>class</code> for the actual width and height —
+        the directive has no opinion on size beyond its <code>100% / 14px</code> default.
+      </p>
       <hd-example-tabs [code]="skeletonShapesExampleCode" previewClass="flex items-center gap-4">
         <app-skeleton-shapes-example />
       </hd-example-tabs>
 
+      <h2>Text block</h2>
+      <p>
+        Stagger line widths — full, full, four-fifths — so a paragraph placeholder reads as prose
+        rather than a uniform grid of bars.
+      </p>
+      <hd-example-tabs [code]="skeletonTextBlockExampleCode" previewClass="max-w-95">
+        <app-skeleton-text-block-example />
+      </hd-example-tabs>
+
+      <h2>With card and avatar</h2>
+      <p>
+        A realistic loading state: <code>hellCard</code> (narrow entry point
+        <code>@hell-ui/angular/card</code>) supplies the surface, and its header/body swap between
+        <code>hellSkeleton</code> placeholders and the real <code>hell-avatar</code> and copy once
+        data arrives. The card also sets <code>aria-busy</code> while loading so assistive tech gets
+        one region-level signal instead of one per placeholder.
+      </p>
+      <hd-example-tabs [code]="skeletonWithCardAvatarExampleCode">
+        <app-skeleton-with-card-avatar-example />
+      </hd-example-tabs>
+
       <h2>Styling</h2>
       <p>
-        Keep <code>class</code> for sizing placement (the Additive Class Hook) and use <code>ui</code> — <code>HellSkeletonUi</code> — for visual overrides such as radius and shimmer surface.
+        Both directives in this entry point own exactly one Public Part, <code>root</code> — the
+        host element itself. Pass <code>ui="..."</code> as shorthand to refine it, or
+        <code>[ui]="&#123; root: '...' &#125;"</code> for the equivalent explicit map
+        (<code>HellSkeletonUi</code> / <code>HellSpinnerUi</code>). Refinements merge on top of the
+        default recipe through Hell's Tailwind merge, so a conflicting utility such as
+        <code>bg-hell-primary-soft</code> or <code>rounded-hell-lg</code> wins deterministically.
       </p>
-      <hd-example-tabs [code]="skeletonStylingExampleCode" previewClass="grid max-w-md gap-3">
-        <app-skeleton-styling-example />
+      <table class="hd-doc-table">
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Part</th>
+            <th>Styles</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>HellSkeleton</code></td>
+            <td><code>root</code></td>
+            <td>
+              The placeholder itself — shimmer background, radius. Sizing (<code>width</code> /
+              <code>height</code> CSS vars) is a separate input, not part of the Part Style Map.
+            </td>
+          </tr>
+          <tr>
+            <td><code>HellSpinner</code></td>
+            <td><code>root</code></td>
+            <td>The indicator itself — color (via <code>currentColor</code>) and font-size-driven scale.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        Keep <code>class</code> for layout hooks — width, height, margins — since the recipe never
+        sets them itself. Use <code>ui</code> whenever a refinement needs to beat a recipe utility
+        such as the default shimmer background or radius.
+      </p>
+      <hd-example-tabs
+        [code]="skeletonAllPartsStylingExampleCode"
+        previewClass="flex flex-col"
+      >
+        <app-skeleton-all-parts-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
+      <p><code>hellSkeleton</code></p>
       <ul>
         <li>
-          <code>width</code>, <code>height</code>: any CSS length (defaults to
-          <code>100% / 14px</code>). Tailwind utilities work too.
+          <code>width</code>: <code>string</code> — any CSS length. Sets the
+          <code>--_hell-skeleton-width</code> host variable. Default <code>'100%'</code>.
         </li>
-        <li><code>shape</code>: <code>text | circle | rect</code></li>
-        <li><code>ui</code>: string or <code>{{ '{' }} root: string {{ '}' }}</code> map</li>
+        <li>
+          <code>height</code>: <code>string</code> — any CSS length. Sets the
+          <code>--_hell-skeleton-height</code> host variable. Default <code>'14px'</code>.
+        </li>
+        <li>
+          <code>shape</code>: <code>'text' | 'circle' | 'rect'</code>. Default <code>'text'</code>.
+        </li>
+        <li>
+          <code>ui</code>: <code>HellUiInput&lt;HellSkeletonPart&gt;</code> — a shorthand class
+          string or a <code>HellSkeletonUi</code> map (<code>&#123; root: string &#125;</code>) that
+          refines the <code>root</code> public part.
+        </li>
+        <li>
+          Exported types: <code>HellSkeletonPart</code> (<code>'root'</code>),
+          <code>HellSkeletonUi</code> (<code>HellUi&lt;HellSkeletonPart&gt;</code>).
+        </li>
+      </ul>
+      <p><code>hellSpinner</code></p>
+      <ul>
+        <li>
+          <code>variant</code>: <code>HellSpinnerVariant</code> —
+          <code>'ring' | 'dots' | 'bars' | 'pulse'</code>. Default <code>'ring'</code>.
+        </li>
+        <li><code>size</code>: <code>HellSize</code> — <code>xs | sm | md | lg | xl</code>. Default <code>'md'</code>.</li>
+        <li>
+          <code>aria-label</code> (<code>ariaLabel</code>): <code>string | null</code>. Overrides
+          the accessible label. Default <code>null</code>, falling back to the injected
+          <code>HELL_SKELETON_LABELS</code> loading label.
+        </li>
+        <li>
+          <code>ui</code>: <code>HellUiInput&lt;HellSpinnerPart&gt;</code> — a shorthand class
+          string or a <code>HellSpinnerUi</code> map (<code>&#123; root: string &#125;</code>) that
+          refines the <code>root</code> public part.
+        </li>
+        <li>
+          Exported types: <code>HellSpinnerPart</code> (<code>'root'</code>),
+          <code>HellSpinnerUi</code> (<code>HellUi&lt;HellSpinnerPart&gt;</code>).
+        </li>
+        <li>
+          Also exported: <code>HELL_SKELETON_LABELS</code> injection token and
+          <code>provideHellSkeletonLabels()</code> to override the shared <code>loading</code> label
+          for both directives' scope.
+        </li>
       </ul>
 
       <h2>Accessibility</h2>
       <ul>
-        <li>Skeletons are <code>aria-hidden</code>; announce loading once at the region level (e.g. <code>aria-busy</code> or a status line), not per placeholder.</li>
+        <li>
+          <code>hellSkeleton</code> renders with <code>aria-hidden="true"</code> — it has no
+          semantics of its own. Announce loading once at the region level (for example
+          <code>aria-busy</code> on the containing card, or a single status line), not once per
+          placeholder.
+        </li>
+        <li>
+          <code>hellSpinner</code> carries <code>role="status"</code> and an
+          <code>aria-label</code> resolved from the <code>HELL_SKELETON_LABELS</code> Label
+          Contract ("Loading" by default) unless you pass an explicit <code>aria-label</code>.
+        </li>
       </ul>
 
       <h2>Do</h2>
       <ul class="hd-do">
         <li>
-          Match the skeleton's footprint to the real content — same height, same border radius, same
-          column widths.
+          Match the skeleton's footprint to the real content — same height, same radius, same
+          column widths — so nothing shifts when data arrives.
         </li>
-        <li>Stagger widths slightly to suggest natural prose.</li>
+        <li>Stagger line widths slightly to suggest natural prose instead of a uniform grid.</li>
+        <li>Set <code>aria-busy</code> on the loading region rather than adding ARIA to each placeholder.</li>
       </ul>
 
       <h2>Don't</h2>
@@ -116,15 +229,16 @@ import skeletonStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
           Don't show a skeleton for content that loads in under ~300 ms — the flash is more
           distracting than a brief blank.
         </li>
-        <li>Don't combine a skeleton with a spinner in the same region.</li>
+        <li>Don't combine a skeleton with a spinner in the same region; pick one loading signal.</li>
+        <li>Don't reach for <code>hellSkeleton</code> for unquantifiable waits with no known layout — use <a routerLink="/components/spinner">Spinner</a> instead.</li>
       </ul>
     </article>
   `,
 })
 export class SkeletonPage {
-  protected readonly skeletonTextLinesExampleCode = skeletonTextLinesExampleCodeRaw;
-  protected readonly skeletonAvatarLinesExampleCode = skeletonAvatarLinesExampleCodeRaw;
-  protected readonly skeletonCardPlaceholderExampleCode = skeletonCardPlaceholderExampleCodeRaw;
+  protected readonly skeletonBasicExampleCode = skeletonBasicExampleCodeRaw;
   protected readonly skeletonShapesExampleCode = skeletonShapesExampleCodeRaw;
-  protected readonly skeletonStylingExampleCode = skeletonStylingExampleCodeRaw;
+  protected readonly skeletonTextBlockExampleCode = skeletonTextBlockExampleCodeRaw;
+  protected readonly skeletonWithCardAvatarExampleCode = skeletonWithCardAvatarExampleCodeRaw;
+  protected readonly skeletonAllPartsStylingExampleCode = skeletonAllPartsStylingExampleCodeRaw;
 }

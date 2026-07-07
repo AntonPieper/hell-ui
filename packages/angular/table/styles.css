@@ -134,67 +134,36 @@
     }
   }
 
-  /* TanStack shell chrome. */
+  /*
+   * TanStack shell chrome. The panel surface (root), toolbar bar, footer bar, and
+   * scrollport are Public Parts owned by HellTanStackTable's Part-Class Pipeline; the
+   * pagination root and its pageSize label are Public Parts of HellTanStackPagination.
+   * Only selector logic Tailwind cannot express — ancestor-scoped pinning/sticky/virtual
+   * rules, scrollbar pseudo-elements, and private status/expanded scaffolding — stays
+   * here, re-keyed on the public `data-slot` values and the shell element selectors.
+   */
 
-  .hell-tanstack-table {
-    display: block;
-    min-width: 0;
-    overflow: clip;
-    color: var(--color-hell-foreground);
-    background-color: var(--color-hell-surface-elevated);
-    border: 1px solid var(--color-hell-border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-hell-xs);
-  }
-
-  .hell-table-shell-toolbar,
-  .hell-table-shell-footer {
-    display: flex;
-    min-height: calc(var(--spacing) * 10);
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--spacing-hell-2);
-    padding-inline: var(--spacing-hell-3);
-    padding-block: var(--spacing-hell-2);
-    color: var(--color-hell-foreground-muted);
-    font-size: 12px;
-  }
-
-  .hell-table-shell-toolbar {
-    border-bottom: 1px solid var(--color-hell-border);
-    background-color: var(--color-hell-surface-subtle);
-  }
-
-  .hell-table-shell-footer {
-    justify-content: flex-end;
-    border-top: 1px solid var(--color-hell-border);
-    background-color: var(--color-hell-surface-elevated);
-  }
-
-  .hell-table-shell-toolbar [data-hell-table-shell-toolbar-item],
-  .hell-table-shell-footer [data-hell-table-shell-footer-item] {
+  [data-slot='toolbar'][data-hell-table-shell-toolbar] [data-hell-table-shell-toolbar-item],
+  [data-slot='footer'][data-hell-table-shell-footer] [data-hell-table-shell-footer-item] {
     min-width: 0;
   }
 
-  .hell-table-shell-scrollport {
-    max-width: 100%;
-    overflow: auto;
-    overscroll-behavior-x: contain;
+  [data-slot='scrollport'][data-hell-table-shell-scrollport] {
     scrollbar-color: color-mix(in oklab, var(--color-hell-foreground-muted) 42%, transparent)
       transparent;
     scrollbar-width: thin;
   }
 
-  .hell-table-shell-scrollport::-webkit-scrollbar {
+  [data-slot='scrollport'][data-hell-table-shell-scrollport]::-webkit-scrollbar {
     width: 10px;
     height: 10px;
   }
 
-  .hell-table-shell-scrollport::-webkit-scrollbar-track {
+  [data-slot='scrollport'][data-hell-table-shell-scrollport]::-webkit-scrollbar-track {
     background-color: transparent;
   }
 
-  .hell-table-shell-scrollport::-webkit-scrollbar-thumb {
+  [data-slot='scrollport'][data-hell-table-shell-scrollport]::-webkit-scrollbar-thumb {
     border: 3px solid var(--color-hell-surface-elevated);
     border-radius: 999px;
     background-color: color-mix(in oklab, var(--color-hell-foreground-muted) 42%, transparent);
@@ -205,38 +174,38 @@
     min-width: var(--hell-table-total-size, 100%);
   }
 
-  .hell-tanstack-table:not([data-sticky-header='true'])
+  hell-tanstack-table:not([data-sticky-header='true'])
     .hell-table-shell-table
     [data-hell-table-header-cell][data-slot='root'] {
     position: static;
   }
 
-  .hell-tanstack-table [data-pinned='left'],
-  .hell-tanstack-table [data-pinned='right'] {
+  hell-tanstack-table [data-pinned='left'],
+  hell-tanstack-table [data-pinned='right'] {
     position: sticky;
     z-index: 2;
     background-color: var(--color-hell-surface-elevated);
   }
 
-  .hell-tanstack-table [data-hell-table-header-cell][data-slot='root'][data-pinned='left'],
-  .hell-tanstack-table [data-hell-table-header-cell][data-slot='root'][data-pinned='right'] {
+  hell-tanstack-table [data-hell-table-header-cell][data-slot='root'][data-pinned='left'],
+  hell-tanstack-table [data-hell-table-header-cell][data-slot='root'][data-pinned='right'] {
     z-index: 3;
     background-color: var(--color-hell-surface-subtle);
   }
 
-  .hell-tanstack-table [data-pinned='left'] {
+  hell-tanstack-table [data-pinned='left'] {
     left: var(--hell-table-pinned-start, 0);
   }
 
-  .hell-tanstack-table [data-pinned='right'] {
+  hell-tanstack-table [data-pinned='right'] {
     right: var(--hell-table-pinned-after, 0);
   }
 
-  .hell-tanstack-table [data-pinned-last='true'] {
+  hell-tanstack-table [data-pinned-last='true'] {
     box-shadow: 8px 0 8px -8px rgb(0 0 0 / 0.16);
   }
 
-  .hell-tanstack-table [data-pinned-first='true'] {
+  hell-tanstack-table [data-pinned-first='true'] {
     box-shadow: -8px 0 8px -8px rgb(0 0 0 / 0.16);
   }
 
@@ -253,25 +222,6 @@
     white-space: normal;
   }
 
-  .hell-tanstack-pagination {
-    display: inline-flex;
-    min-width: 0;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--spacing-hell-2);
-  }
-
-  .hell-tanstack-pagination [data-slot='page-size'] {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacing-hell-2);
-    white-space: nowrap;
-  }
-
-  .hell-tanstack-pagination [data-slot='page-size-select'] {
-    min-width: calc(var(--spacing) * 18);
-  }
-
   .hell-tanstack-filter-search {
     display: inline-flex;
     min-width: 0;
@@ -279,12 +229,13 @@
     gap: var(--spacing-hell-2);
   }
 
-  .hell-tanstack-table[data-hell-tanstack-virtual-rows='true'] .hell-table-shell-scrollport {
+  hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
+    [data-slot='scrollport'][data-hell-table-shell-scrollport] {
     max-height: var(--hell-table-virtual-height, 420px);
     overflow: auto;
   }
 
-  .hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
+  hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
     [data-hell-table-virtual-body='true'] {
     display: block;
     position: relative;
@@ -293,7 +244,7 @@
     height: var(--hell-table-virtual-total-size, auto);
   }
 
-  .hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
+  hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
     [data-hell-table-virtual-row='true'] {
     position: absolute;
     inset-inline-start: 0;
@@ -306,7 +257,7 @@
     background-color: var(--color-hell-surface-elevated);
   }
 
-  .hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
+  hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
     [data-hell-table-virtual-row='true']
     > [data-hell-table-cell][data-slot='root'] {
     display: block;
@@ -316,7 +267,7 @@
     min-width: var(--hell-table-column-size, auto);
   }
 
-  .hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
+  hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
     [data-hell-table-virtual-row-kind='expanded']
     > .hell-table-shell-expanded-cell {
     flex-basis: 100%;
@@ -324,29 +275,18 @@
     min-width: 100%;
   }
 
-  .hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
+  hell-tanstack-table[data-hell-tanstack-virtual-rows='true']
     [data-hell-table-virtual-row-kind='expanded'] {
     background-color: var(--color-hell-surface-subtle);
   }
 
   @media (width <= 640px) {
-    .hell-table-shell-footer {
-      justify-content: flex-start;
-      align-items: flex-start;
-      gap: var(--spacing-hell-3);
-    }
-
-    .hell-tanstack-pagination {
-      width: 100%;
-      gap: var(--spacing-hell-3);
-    }
-
-    .hell-tanstack-pagination hell-pagination[data-slot='root'] {
+    hell-tanstack-pagination[data-slot='root'] hell-pagination[data-slot='root'] {
       flex: 1 1 100%;
       gap: var(--spacing-hell-2);
     }
 
-    .hell-tanstack-pagination
+    hell-tanstack-pagination[data-slot='root']
       :is(
         button[hellPaginationFirst],
         button[hellPaginationPrev],
@@ -358,14 +298,6 @@
       width: var(--spacing-hell-control-md);
       min-width: var(--spacing-hell-control-md);
       padding-inline: 0;
-    }
-
-    .hell-tanstack-pagination [data-slot='page-size'] {
-      flex-basis: 100%;
-    }
-
-    .hell-tanstack-pagination [data-slot='page-size-select'] {
-      min-width: calc(var(--spacing) * 20);
     }
   }
 }

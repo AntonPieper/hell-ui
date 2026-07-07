@@ -38,7 +38,12 @@ import {
   HellPaginationNext,
   HellPaginationPrev,
 } from '@hell-ui/angular/pagination';
-import { HellStyleable } from '@hell-ui/angular/core';
+import {
+  hellPartStyler,
+  type HellRecipe,
+  type HellUi,
+  type HellUiInput,
+} from '@hell-ui/angular/core';
 import { HELL_PDF_VIEWER_LABELS, type HellPdfViewerLabels } from './pdf-viewer-labels';
 import {
   HellGlobalKeydownService,
@@ -74,6 +79,55 @@ export const HELL_PDF_RUNTIME_FACTORY = new InjectionToken<HellPdfRuntimeFactory
 );
 
 const HELL_PDF_THUMBNAIL_INITIAL_BATCH = 12;
+
+/** Public parts of the HellPdfViewer module, styleable through its Part Style Map. */
+export type HellPdfViewerPart =
+  | 'root'
+  | 'toolbar'
+  | 'toolbarGroup'
+  | 'divider'
+  | 'pageInput'
+  | 'toolbarText'
+  | 'zoomSelect'
+  | 'findBar'
+  | 'findInput'
+  | 'findCount'
+  | 'viewport'
+  | 'sidebar'
+  | 'thumb'
+  | 'thumbLabel'
+  | 'pageArea';
+
+/** Part Style Map accepted by the HellPdfViewer `ui` input. */
+export type HellPdfViewerUi = HellUi<HellPdfViewerPart>;
+
+/**
+ * Component-owned default classes for the PDF viewer's public parts.
+ *
+ * This package ships hand-written CSS keyed on `data-slot` (see
+ * `pdf-viewer.css`) rather than a scanned Tailwind recipe: `tailwindcss` is an
+ * optional peer dependency and nothing scans this file's class strings. Recipe
+ * entries stay empty so the co-located stylesheet carries the default visuals,
+ * while consumers can still merge their own classes through the `ui` Part Style
+ * Map on any public part.
+ */
+const HELL_PDF_VIEWER_RECIPE = {
+  root: '',
+  toolbar: '',
+  toolbarGroup: '',
+  divider: '',
+  pageInput: '',
+  toolbarText: '',
+  zoomSelect: '',
+  findBar: '',
+  findInput: '',
+  findCount: '',
+  viewport: '',
+  sidebar: '',
+  thumb: '',
+  thumbLabel: '',
+  pageArea: '',
+} satisfies HellRecipe<HellPdfViewerPart>;
 
 const HELL_PDF_VIEWER_ICONS = {
   faSolidChevronDown,
@@ -114,13 +168,23 @@ const HELL_PDF_VIEWER_ICONS = {
   ],
   providers: [provideIcons(HELL_PDF_VIEWER_ICONS)],
   host: {
-    '[class.hell-pdf]': '!unstyled()',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '(keydown)': 'onKey($event)',
     tabindex: '0',
   },
   templateUrl: './pdf-viewer.html',
 })
-export class HellPdfViewer extends HellStyleable {
+export class HellPdfViewer {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellPdfViewerPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellPdfViewerPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_PDF_VIEWER_RECIPE,
+  });
+
   readonly src = input.required<string | URL | ArrayBuffer>();
   readonly initialPage = input(1, { transform: numberAttribute });
   readonly initialZoom = input<number | 'auto' | 'page-actual' | 'page-fit' | 'page-width'>('auto');
@@ -185,7 +249,6 @@ export class HellPdfViewer extends HellStyleable {
   );
 
   constructor() {
-    super();
     effect((onCleanup) => {
       if (!this.globalShortcuts()) return;
 

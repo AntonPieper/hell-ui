@@ -15,1132 +15,1733 @@ interface DocsSearchSeed {
 
 const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
   {
-    title: 'Getting Started: Button Demo',
-    path: '/getting-started',
-    detail: 'getting-started/examples/button-demo.example.ts',
+    title: 'Accordion: All Parts Styling',
+    path: '/components/accordion',
+    detail: 'components/accordion/examples/all-parts-styling.example.ts',
     terms:
-      'getting-started button-demo getting-started/examples/button-demo.example getting-started install styles hellButton',
+      'all-parts-styling ui part style map components/accordion/examples/all-parts-styling.example components/accordion hellAccordion hellAccordionItem hellAccordionTrigger hellAccordionContent HellAccordionPart HellAccordionItemPart HellAccordionTriggerPart HellAccordionContentPart root theme tokens',
   },
   {
-    title: 'Theming: Scoped Theme Demo',
-    path: '/theming',
-    detail: 'theming/examples/scoped-theme-demo.example.ts',
+    title: 'Accordion: Basic',
+    path: '/components/accordion',
+    detail: 'components/accordion/examples/basic.example.ts',
     terms:
-      'theming scoped-theme-demo theming/examples/scoped-theme-demo.example theming data-hell-theme data-hell-palette data-hell-skin tokens theme adapter stylesheets glass high contrast aurora newspaper compact mono',
+      'components/accordion/examples/basic.example components/accordion hellAccordion hellAccordionItem hellAccordionTrigger hellAccordionContent single collapsible faq disclosure',
+  },
+  {
+    title: 'Accordion: Disabled Item',
+    path: '/components/accordion',
+    detail: 'components/accordion/examples/disabled-item.example.ts',
+    terms:
+      'disabled-item components/accordion/examples/disabled-item.example components/accordion hellAccordion hellAccordionItem hellAccordionTrigger hellAccordionContent locked gated plan permission',
   },
   {
     title: 'Accordion: Multiple',
     path: '/components/accordion',
     detail: 'components/accordion/examples/multiple.example.ts',
     terms:
-      'accordion multiple components/accordion/examples/multiple.example components/accordion hellAccordion hellAccordionItem hellAccordionTrigger',
+      'components/accordion/examples/multiple.example components/accordion hellAccordion hellAccordionItem hellAccordionTrigger hellAccordionContent type=multiple several open',
   },
   {
-    title: 'Accordion: Single Collapsible',
+    title: 'Accordion: With Settings Panel',
     path: '/components/accordion',
-    detail: 'components/accordion/examples/single-collapsible.example.ts',
+    detail: 'components/accordion/examples/with-settings-panel.example.ts',
     terms:
-      'accordion single-collapsible components/accordion/examples/single-collapsible.example components/accordion hellAccordion hellAccordionItem hellAccordionTrigger',
+      'with-settings-panel components/accordion/examples/with-settings-panel.example components/accordion hellAccordion hellAccordionItem hellAccordionTrigger hellAccordionContent hellCard hellCardHeader hellCardBody hell-icon composite card icon notifications preferences billing',
   },
   {
-    title: 'Avatar: Sizes',
-    path: '/components/avatar',
-    detail: 'components/avatar/examples/sizes.example.ts',
-    terms: 'avatar sizes components/avatar/examples/sizes.example components/avatar hell-avatar',
-  },
-  {
-    title: 'Avatar: Square Shape',
-    path: '/components/avatar',
-    detail: 'components/avatar/examples/square-shape.example.ts',
-    terms:
-      'avatar square-shape components/avatar/examples/square-shape.example components/avatar hell-avatar',
-  },
-  {
-    title: 'Avatar: With Image',
-    path: '/components/avatar',
-    detail: 'components/avatar/examples/with-image.example.ts',
-    terms:
-      'avatar with-image components/avatar/examples/with-image.example components/avatar hell-avatar',
-  },
-  {
-    title: 'Avatar: Styling',
-    path: '/components/avatar',
-    detail: 'components/avatar/examples/styling.example.ts',
-    terms:
-      'avatar styling components/avatar/examples/styling.example components/avatar hell-avatar ui Part Style Map data-slot root HellAvatarUi',
-  },
-  {
-    title: 'Breadcrumbs: Custom Separator',
-    path: '/components/breadcrumbs',
-    detail: 'components/breadcrumbs/examples/custom-separator.example.ts',
-    terms:
-      'breadcrumbs custom-separator components/breadcrumbs/examples/custom-separator.example components/breadcrumbs hellBreadcrumbs hellBreadcrumbItem',
-  },
-  {
-    title: 'Breadcrumbs: Long Path With Ellipsis',
-    path: '/components/breadcrumbs',
-    detail: 'components/breadcrumbs/examples/long-path-with-ellipsis.example.ts',
-    terms:
-      'breadcrumbs long-path-with-ellipsis components/breadcrumbs/examples/long-path-with-ellipsis.example components/breadcrumbs hellBreadcrumbs hellBreadcrumbEllipsis',
-  },
-  {
-    title: 'Breadcrumbs: Standard',
-    path: '/components/breadcrumbs',
-    detail: 'components/breadcrumbs/examples/standard.example.ts',
-    terms:
-      'breadcrumbs standard components/breadcrumbs/examples/standard.example components/breadcrumbs hellBreadcrumbs hellBreadcrumbLink',
-  },
-  {
-    title: 'Breadcrumbs: With Icons',
-    path: '/components/breadcrumbs',
-    detail: 'components/breadcrumbs/examples/with-icons.example.ts',
-    terms:
-      'breadcrumbs with-icons components/breadcrumbs/examples/with-icons.example components/breadcrumbs hellBreadcrumbs hell-icon',
-  },
-  {
-    title: 'Breadcrumbs: Styling',
-    path: '/components/breadcrumbs',
-    detail: 'components/breadcrumbs/examples/styling.example.ts',
-    terms:
-      'breadcrumbs styling components/breadcrumbs/examples/styling.example components/breadcrumbs hellBreadcrumbs hellBreadcrumbLink hellBreadcrumbPage ui Part Style Map data-slot root HellBreadcrumbLinkUi HellBreadcrumbPageUi',
-  },
-  {
-    title: 'Button: Block',
-    path: '/components/button',
-    detail: 'components/button/examples/block.example.ts',
-    terms: 'button block components/button/examples/block.example components/button hellButton',
-  },
-  {
-    title: 'Button: Customization',
-    path: '/components/button',
-    detail: 'components/button/examples/customization.example.ts',
-    terms:
-      'button customization components/button/examples/customization.example components/button hellButton ui part style map',
-  },
-  {
-    title: 'Button: Icon Only',
-    path: '/components/button',
-    detail: 'components/button/examples/icon-only.example.ts',
-    terms:
-      'button icon-only components/button/examples/icon-only.example components/button hellButton iconOnly',
-  },
-  {
-    title: 'Button: Sizes',
-    path: '/components/button',
-    detail: 'components/button/examples/sizes.example.ts',
-    terms:
-      'button sizes components/button/examples/sizes.example components/button hellButton size',
-  },
-  {
-    title: 'Button: Variants',
-    path: '/components/button',
-    detail: 'components/button/examples/variants.example.ts',
-    terms:
-      'button variants components/button/examples/variants.example components/button hellButton variant',
-  },
-  {
-    title: 'Button: With Icons',
-    path: '/components/button',
-    detail: 'components/button/examples/with-icons.example.ts',
-    terms:
-      'button with-icons components/button/examples/with-icons.example components/button hellButton hell-icon',
-  },
-  {
-    title: 'Card: Examples',
-    path: '/components/card',
-    detail: 'components/card/examples/examples.example.ts',
-    terms:
-      'card examples components/card/examples/examples.example components/card hellCard hellCardHeader hellCardBody',
-  },
-  {
-    title: 'Card: With Footer',
-    path: '/components/card',
-    detail: 'components/card/examples/with-footer.example.ts',
-    terms:
-      'card with-footer components/card/examples/with-footer.example components/card hellCard hellCardFooter',
-  },
-  {
-    title: 'Card: Without Header',
-    path: '/components/card',
-    detail: 'components/card/examples/without-header.example.ts',
-    terms:
-      'card without-header components/card/examples/without-header.example components/card hellCard',
-  },
-  {
-    title: 'Checkbox: Examples',
-    path: '/components/checkbox',
-    detail: 'components/checkbox/examples/examples.example.ts',
-    terms:
-      'checkbox examples components/checkbox/examples/examples.example components/checkbox hellCheckbox HellCheckboxUi ui part style map',
-  },
-  {
-    title: 'Checkbox: Native',
-    path: '/components/checkbox',
-    detail: 'components/checkbox/examples/native.example.ts',
-    terms:
-      'checkbox native components/checkbox/examples/native.example components/checkbox hellNativeCheckbox HellNativeCheckboxUi ui part style map',
-  },
-  {
-    title: 'Checkbox: Styling',
-    path: '/components/checkbox',
-    detail: 'components/checkbox/examples/styling.example.ts',
-    terms:
-      'checkbox styling components/checkbox/examples/styling.example components/checkbox hellCheckbox ui Part Style Map data-slot root data-checked HellCheckboxUi',
-  },
-  {
-    title: 'Combobox: Basic',
-    path: '/components/combobox',
-    detail: 'components/combobox/examples/basic.example.ts',
-    terms:
-      'combobox basic components/combobox/examples/basic.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxDropdown hellComboboxOption hellComboboxEmpty HellComboboxUi HellComboboxInputUi HellComboboxButtonUi HellComboboxDropdownUi HellComboboxOptionUi HellComboboxEmptyUi ui Part Style Map data-slot root',
-  },
-  {
-    title: 'Combobox: Multiple',
-    path: '/components/combobox',
-    detail: 'components/combobox/examples/multiple.example.ts',
-    terms:
-      'combobox multiple components/combobox/examples/multiple.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxDropdown hellComboboxOption hellComboboxEmpty multiple HellComboboxUi HellComboboxInputUi HellComboboxButtonUi HellComboboxDropdownUi HellComboboxOptionUi HellComboboxEmptyUi ui Part Style Map data-slot root',
-  },
-  {
-    title: 'Combobox: Preset',
-    path: '/components/combobox',
-    detail: 'components/combobox/examples/basic-preset.example.ts',
-    terms:
-      'combobox preset components/combobox/examples/basic-preset.example components/combobox hell-combobox-basic HellComboboxBasic HellComboboxBasicUi ui Part Style Map data-slot root control input button dropdown option empty',
-  },
-  {
-    title: 'Combobox: Styling',
-    path: '/components/combobox',
-    detail: 'components/combobox/examples/styling.example.ts',
-    terms:
-      'combobox styling components/combobox/examples/styling.example components/combobox hell-combobox-basic ui Part Style Map data-slot control input dropdown option empty HellComboboxBasicUi HellComboboxBasicPart',
-  },
-  {
-    title: 'Date Picker: Bounded',
-    path: '/components/date-picker',
-    detail: 'components/date-picker/examples/bounded.example.ts',
-    terms:
-      'date-picker bounded components/date-picker/examples/bounded.example components/date-picker hell-date-picker min max ui HellDatePickerUi navButton dateButton data-slot',
-  },
-  {
-    title: 'Date Picker: Disabled',
-    path: '/components/date-picker',
-    detail: 'components/date-picker/examples/disabled.example.ts',
-    terms:
-      'date-picker disabled components/date-picker/examples/disabled.example components/date-picker hell-date-picker disabled ui HellDatePickerUi data-slot',
-  },
-  {
-    title: 'Date Picker: Range',
-    path: '/components/date-picker',
-    detail: 'components/date-picker/examples/range.example.ts',
-    terms:
-      'date-picker range components/date-picker/examples/range.example components/date-picker hell-date-range-picker range ui HellDateRangePickerUi dateButton data-range data-slot',
-  },
-  {
-    title: 'Date Picker: Single Date',
-    path: '/components/date-picker',
-    detail: 'components/date-picker/examples/single-date.example.ts',
-    terms:
-      'date-picker single-date components/date-picker/examples/single-date.example components/date-picker hell-date-picker ui HellDatePickerUi root header navButton label grid weekdayHeader cell dateButton data-slot',
-  },
-  {
-    title: 'Date Picker: Styling',
-    path: '/components/date-picker',
-    detail: 'components/date-picker/examples/styling.example.ts',
-    terms:
-      'date-picker styling components/date-picker/examples/styling.example components/date-picker hell-date-picker ui Part Style Map data-slot root label dateButton HellDatePickerUi HellDatePickerPart',
-  },
-  {
-    title: 'Dialog: Example',
-    path: '/components/dialog',
-    detail: 'components/dialog/examples/example.example.ts',
-    terms:
-      'dialog example components/dialog/examples/example.example components/dialog hellDialog hellDialogTrigger hellDialogTitle ui Part Style Map HellDialogUi HellDialogOverlayUi root overlay panel title description data-slot',
-  },
-  {
-    title: 'Dialog: Scoped To App Shell Content',
-    path: '/components/dialog',
-    detail: 'components/dialog/examples/scoped-to-app-shell-content.example.ts',
-    terms:
-      'dialog scoped-to-app-shell-content components/dialog/examples/scoped-to-app-shell-content.example components/dialog hellDialogScope hellAppContent ui Part Style Map HellDialogUi HellDialogOverlayUi scoped overlay data-slot',
-  },
-  {
-    title: 'Dialog: Styling',
-    path: '/components/dialog',
-    detail: 'components/dialog/examples/styling.example.ts',
-    terms:
-      'dialog styling components/dialog/examples/styling.example components/dialog hellDialog hellDialogOverlay hellDialogTitle ui Part Style Map data-slot root HellDialogUi HellDialogOverlayUi',
-  },
-  {
-    title: 'Field: Horizontal',
-    path: '/components/field',
-    detail: 'components/field/examples/horizontal.example.ts',
-    terms:
-      'field horizontal components/field/examples/horizontal.example components/field hellField hellFieldLabel hellFieldDescription',
-  },
-  {
-    title: 'Field: Vertical Default',
-    path: '/components/field',
-    detail: 'components/field/examples/vertical-default.example.ts',
-    terms:
-      'field vertical-default components/field/examples/vertical-default.example components/field hellField hellFieldLabel hellFieldError',
-  },
-  {
-    title: 'Flyout: Basic',
-    path: '/components/flyout',
-    detail: 'components/flyout/examples/basic.example.ts',
-    terms:
-      'flyout basic components/flyout/examples/basic.example components/flyout hellFlyout hellFlyoutTrigger usage non-modal anchored surface',
-  },
-  {
-    title: 'Flyout: Example Boundary Keeps Siblings Interactive',
-    path: '/components/flyout',
-    detail: 'components/flyout/examples/example-boundary-keeps-siblings-interactive.example.ts',
-    terms:
-      'flyout example-boundary-keeps-siblings-interactive components/flyout/examples/example-boundary-keeps-siblings-interactive.example components/flyout hellFlyout hellFlyoutTrigger boundary HellFlyoutUi ui Part Style Map data-slot root',
-  },
-  {
-    title: 'Flyout: Styling',
-    path: '/components/flyout',
-    detail: 'components/flyout/examples/styling.example.ts',
-    terms:
-      'flyout styling components/flyout/examples/styling.example components/flyout hellFlyout ui Part Style Map data-slot root HellFlyoutUi',
-  },
-  {
-    title: 'Icon: Example',
-    path: '/components/icon',
-    detail: 'components/icon/examples/example.example.ts',
-    terms: 'icon example components/icon/examples/example.example components/icon hell-icon',
-  },
-  {
-    title: 'Icon: Registering Icons',
-    path: '/components/icon',
-    detail: 'components/icon/examples/registering-icons.example.ts',
-    terms:
-      'icon registering-icons components/icon/examples/registering-icons.example components/icon provideIcons hell-icon',
-  },
-  {
-    title: 'Icon: Sizes',
-    path: '/components/icon',
-    detail: 'components/icon/examples/sizes.example.ts',
-    terms: 'icon sizes components/icon/examples/sizes.example components/icon hell-icon size',
-  },
-  {
-    title: 'Icon: Styling',
-    path: '/components/icon',
-    detail: 'components/icon/examples/styling.example.ts',
-    terms:
-      'icon styling components/icon/examples/styling.example components/icon hell-icon ui Part Style Map data-slot root HellIconUi',
-  },
-  {
-    title: 'Input: Select',
-    path: '/components/input',
-    detail: 'components/input/examples/select.example.ts',
-    terms:
-      'input select components/input/examples/select.example components/input hellInput hellNativeSelect',
-  },
-  {
-    title: 'Input: Sizes',
-    path: '/components/input',
-    detail: 'components/input/examples/sizes.example.ts',
-    terms: 'input sizes components/input/examples/sizes.example components/input hellInput size',
-  },
-  {
-    title: 'Input: States',
-    path: '/components/input',
-    detail: 'components/input/examples/states.example.ts',
-    terms:
-      'input states components/input/examples/states.example components/input hellInput disabled invalid',
-  },
-  {
-    title: 'Input: Customization',
-    path: '/components/input',
-    detail: 'components/input/examples/customization.example.ts',
-    terms:
-      'input customization components/input/examples/customization.example components/input hellInput hellNativeSelect hellTextarea ui HellInputUi HellNativeSelectUi HellTextareaUi data-slot root',
-  },
-  {
-    title: 'Input: Textarea',
-    path: '/components/input',
-    detail: 'components/input/examples/textarea.example.ts',
-    terms:
-      'input textarea components/input/examples/textarea.example components/input hellTextarea',
-  },
-  {
-    title: 'Listbox: Basic',
-    path: '/components/listbox',
-    detail: 'components/listbox/examples/basic.example.ts',
-    terms:
-      'listbox basic components/listbox/examples/basic.example components/listbox HELL_LISTBOX_DIRECTIVES hellListbox hellListboxOption hellListboxHeader HellListboxUi HellListboxOptionUi HellListboxSectionUi HellListboxHeaderUi valueChange option ui Part Style Map data-slot root',
-  },
-  {
-    title: 'Listbox: Styling',
-    path: '/components/listbox',
-    detail: 'components/listbox/examples/styling.example.ts',
-    terms:
-      'listbox styling components/listbox/examples/styling.example components/listbox hellListbox hellListboxOption ui Part Style Map data-slot root data-active HellListboxUi HellListboxOptionUi',
-  },
-  {
-    title: 'Menu: Basic',
-    path: '/components/menu',
-    detail: 'components/menu/examples/basic.example.ts',
-    terms:
-      'menu basic components/menu/examples/basic.example components/menu hellMenu hellMenuTrigger hellMenuItem hellMenuSeparator HellMenuUi HellMenuItemUi HellMenuSeparatorUi HellSubmenuTriggerUi ui Part Style Map data-slot root',
-  },
-  {
-    title: 'Menu: With Icons Sections Submenus',
-    path: '/components/menu',
-    detail: 'components/menu/examples/with-icons-sections-submenus.example.ts',
-    terms:
-      'menu with-icons-sections-submenus components/menu/examples/with-icons-sections-submenus.example components/menu hellMenu hellSubmenuTrigger hellMenuSection hellMenuItemCheckbox hellMenuItemRadio hellMenuItemIndicator HellMenuUi HellMenuItemUi HellSubmenuTriggerUi HellMenuItemCheckboxUi HellMenuItemRadioUi HellMenuItemIndicatorUi HellMenuSectionUi HellMenuLabelUi HellMenuItemIconUi HellMenuItemTrailingUi HellMenuSeparatorUi ui Part Style Map data-slot root',
-  },
-  {
-    title: 'Menu: Styling',
-    path: '/components/menu',
-    detail: 'components/menu/examples/styling.example.ts',
-    terms:
-      'menu styling components/menu/examples/styling.example components/menu hellMenu hellMenuItem ui Part Style Map data-slot root data-active HellMenuUi HellMenuItemUi',
-  },
-  {
-    title: 'Pagination: Basic',
-    path: '/components/pagination',
-    detail: 'components/pagination/examples/basic.example.ts',
-    terms:
-      'pagination basic components/pagination/examples/basic.example components/pagination hell-pagination',
-  },
-  {
-    title: 'Pagination: Larger Window',
-    path: '/components/pagination',
-    detail: 'components/pagination/examples/larger-window.example.ts',
-    terms:
-      'pagination larger-window components/pagination/examples/larger-window.example components/pagination hell-pagination',
-  },
-  {
-    title: 'Pagination: Previous Next',
-    path: '/components/pagination',
-    detail: 'components/pagination/examples/previous-next.example.ts',
-    terms:
-      'pagination previous-next previous next components/pagination/examples/previous-next.example components/pagination hell-pagination mode',
-  },
-  {
-    title: 'Pagination: Jump',
-    path: '/components/pagination',
-    detail: 'components/pagination/examples/jump.example.ts',
-    terms:
-      'pagination jump select page jump components/pagination/examples/jump.example components/pagination hell-pagination mode',
-  },
-  {
-    title: 'Pagination: Styling',
-    path: '/components/pagination',
-    detail: 'components/pagination/examples/styling.example.ts',
-    terms:
-      'pagination styling components/pagination/examples/styling.example components/pagination hell-pagination ui Part Style Map data-slot root status HellPaginationStripUi HellPaginationStripPart',
-  },
-  {
-    title: 'Popover: Example',
-    path: '/components/popover',
-    detail: 'components/popover/examples/example.example.ts',
-    terms:
-      'popover example components/popover/examples/example.example components/popover hellPopover hellPopoverTrigger HellPopoverUi ui Part Style Map data-slot root',
-  },
-  {
-    title: 'Popover: Styling',
-    path: '/components/popover',
-    detail: 'components/popover/examples/styling.example.ts',
-    terms:
-      'popover styling components/popover/examples/styling.example components/popover hellPopover ui Part Style Map data-slot root HellPopoverUi',
-  },
-  {
-    title: 'Progress: Examples',
-    path: '/components/progress',
-    detail: 'components/progress/examples/examples.example.ts',
-    terms:
-      'progress examples components/progress/examples/examples.example components/progress hellProgress hellProgressBar',
-  },
-  {
-    title: 'Progress: Interactive',
-    path: '/components/progress',
-    detail: 'components/progress/examples/interactive.example.ts',
-    terms:
-      'progress interactive components/progress/examples/interactive.example components/progress hellProgress value',
-  },
-  {
-    title: 'Radio: Example',
-    path: '/components/radio',
-    detail: 'components/radio/examples/example.example.ts',
-    terms:
-      'radio example components/radio/examples/example.example components/radio hellRadioGroup hellRadio HellRadioGroupUi HellRadioUi ui part style map',
-  },
-  {
-    title: 'Radio: Horizontal',
-    path: '/components/radio',
-    detail: 'components/radio/examples/horizontal.example.ts',
-    terms:
-      'radio horizontal components/radio/examples/horizontal.example components/radio hellRadioGroup hellRadio HellRadioGroupUi HellRadioUi ui part style map',
-  },
-  {
-    title: 'Radio: Native',
-    path: '/components/radio',
-    detail: 'components/radio/examples/native.example.ts',
-    terms:
-      'radio native components/radio/examples/native.example components/radio hellNativeRadio hellNativeRadioGroup HellNativeRadioUi HellNativeRadioGroupUi ui part style map',
-  },
-  {
-    title: 'Radio: Styling',
-    path: '/components/radio',
-    detail: 'components/radio/examples/styling.example.ts',
-    terms:
-      'radio styling components/radio/examples/styling.example components/radio hellRadioGroup hellRadio ui Part Style Map data-slot root data-checked HellRadioUi',
-  },
-  {
-    title: 'Search: Basic',
-    path: '/components/search',
-    detail: 'components/search/examples/basic.example.ts',
-    terms:
-      'search basic components/search/examples/basic.example components/search HELL_SEARCH_DIRECTIVES hellSearch hellSearchClear clear input local filtering',
-  },
-  {
-    title: 'Search: Styling',
-    path: '/components/search',
-    detail: 'components/search/examples/styling.example.ts',
-    terms:
-      'search styling components/search/examples/styling.example components/search hellSearch hellSearchClear hellInput ui Part Style Map data-slot root HellSearchUi HellSearchClearUi',
-  },
-  {
-    title: 'Select: Basic',
-    path: '/components/select',
-    detail: 'components/select/examples/basic.example.ts',
-    terms:
-      'select basic components/select/examples/basic.example components/select hellSelect hellSelectValue hellSelectDropdown hellSelectOption HellSelectUi HellSelectValueUi HellSelectPlaceholderUi HellSelectDropdownUi HellSelectOptionUi ui Part Style Map data-slot root',
-  },
-  {
-    title: 'Select: Preset',
-    path: '/components/select',
-    detail: 'components/select/examples/basic-preset.example.ts',
-    terms:
-      'select preset components/select/examples/basic-preset.example components/select hell-select-basic HellSelectBasic HellSelectBasicUi ui Part Style Map data-slot root trigger value placeholder dropdown option',
-  },
-  {
-    title: 'Select: Styling',
-    path: '/components/select',
-    detail: 'components/select/examples/styling.example.ts',
-    terms:
-      'select styling components/select/examples/styling.example components/select hell-select-basic ui Part Style Map data-slot trigger dropdown option HellSelectBasicUi HellSelectBasicPart',
-  },
-  {
-    title: 'Separator: Flush Inside A Card',
-    path: '/components/separator',
-    detail: 'components/separator/examples/flush-inside-a-card.example.ts',
-    terms:
-      'separator flush-inside-a-card components/separator/examples/flush-inside-a-card.example components/separator hellSeparator',
-  },
-  {
-    title: 'Separator: Horizontal',
-    path: '/components/separator',
-    detail: 'components/separator/examples/horizontal.example.ts',
-    terms:
-      'separator horizontal components/separator/examples/horizontal.example components/separator hellSeparator horizontal',
-  },
-  {
-    title: 'Separator: Spacing Options',
-    path: '/components/separator',
-    detail: 'components/separator/examples/spacing-options.example.ts',
-    terms:
-      'separator spacing-options components/separator/examples/spacing-options.example components/separator hellSeparator spacing',
-  },
-  {
-    title: 'Separator: Vertical',
-    path: '/components/separator',
-    detail: 'components/separator/examples/vertical.example.ts',
-    terms:
-      'separator vertical components/separator/examples/vertical.example components/separator hellSeparator vertical',
-  },
-  {
-    title: 'Separator: Styling',
-    path: '/components/separator',
-    detail: 'components/separator/examples/styling.example.ts',
-    terms:
-      'separator styling components/separator/examples/styling.example components/separator hellSeparator ui Part Style Map data-slot root HellSeparatorUi',
-  },
-  {
-    title: 'Skeleton: Avatar Lines',
-    path: '/components/skeleton',
-    detail: 'components/skeleton/examples/avatar-lines.example.ts',
-    terms:
-      'skeleton avatar-lines components/skeleton/examples/avatar-lines.example components/skeleton hellSkeleton loading',
-  },
-  {
-    title: 'Skeleton: Card Placeholder',
-    path: '/components/skeleton',
-    detail: 'components/skeleton/examples/card-placeholder.example.ts',
-    terms:
-      'skeleton card-placeholder components/skeleton/examples/card-placeholder.example components/skeleton hellSkeleton card',
-  },
-  {
-    title: 'Skeleton: Shapes',
-    path: '/components/skeleton',
-    detail: 'components/skeleton/examples/shapes.example.ts',
-    terms:
-      'skeleton shapes components/skeleton/examples/shapes.example components/skeleton hellSkeleton circle rect',
-  },
-  {
-    title: 'Skeleton: Text Lines',
-    path: '/components/skeleton',
-    detail: 'components/skeleton/examples/text-lines.example.ts',
-    terms:
-      'skeleton text-lines components/skeleton/examples/text-lines.example components/skeleton hellSkeleton text',
-  },
-  {
-    title: 'Skeleton: Styling',
-    path: '/components/skeleton',
-    detail: 'components/skeleton/examples/styling.example.ts',
-    terms:
-      'skeleton styling components/skeleton/examples/styling.example components/skeleton hellSkeleton ui Part Style Map data-slot root HellSkeletonUi',
-  },
-  {
-    title: 'Spinner: Colour',
-    path: '/components/spinner',
-    detail: 'components/spinner/examples/colour.example.ts',
-    terms:
-      'spinner colour components/spinner/examples/colour.example components/spinner hellSpinner color',
-  },
-  {
-    title: 'Spinner: Inside A Button',
-    path: '/components/spinner',
-    detail: 'components/spinner/examples/inside-a-button.example.ts',
-    terms:
-      'spinner inside-a-button components/spinner/examples/inside-a-button.example components/spinner hellSpinner hellButton',
-  },
-  {
-    title: 'Spinner: Sizes',
-    path: '/components/spinner',
-    detail: 'components/spinner/examples/sizes.example.ts',
-    terms:
-      'spinner sizes components/spinner/examples/sizes.example components/spinner hellSpinner size',
-  },
-  {
-    title: 'Spinner: Variants',
-    path: '/components/spinner',
-    detail: 'components/spinner/examples/variants.example.ts',
-    terms:
-      'spinner variants components/spinner/examples/variants.example components/spinner hellSpinner variant',
-  },
-  {
-    title: 'Spinner: Styling',
-    path: '/components/spinner',
-    detail: 'components/spinner/examples/styling.example.ts',
-    terms:
-      'spinner styling components/spinner/examples/styling.example components/spinner hellSpinner ui Part Style Map data-slot root HellSpinnerUi',
-  },
-  {
-    title: 'Slider: Basic',
-    path: '/components/slider',
-    detail: 'components/slider/examples/basic.example.ts',
-    terms:
-      'slider basic components/slider/examples/basic.example components/slider hell-slider HellSliderUi ui part style map',
-  },
-  {
-    title: 'Slider: Disabled',
-    path: '/components/slider',
-    detail: 'components/slider/examples/disabled.example.ts',
-    terms:
-      'slider disabled components/slider/examples/disabled.example components/slider hell-slider disabled HellSliderUi ui part style map',
-  },
-  {
-    title: 'Slider: Hover Revealed Thumb',
-    path: '/components/slider',
-    detail: 'components/slider/examples/hover-revealed-thumb.example.ts',
-    terms:
-      'slider hover-revealed-thumb components/slider/examples/hover-revealed-thumb.example components/slider hell-slider thumb HellSliderUi ui part style map',
-  },
-  {
-    title: 'Slider: Sizes',
-    path: '/components/slider',
-    detail: 'components/slider/examples/sizes.example.ts',
-    terms:
-      'slider sizes components/slider/examples/sizes.example components/slider hell-slider size HellSliderUi ui part style map',
-  },
-  {
-    title: 'Slider: Vertical',
-    path: '/components/slider',
-    detail: 'components/slider/examples/vertical.example.ts',
-    terms:
-      'slider vertical components/slider/examples/vertical.example components/slider hell-slider vertical HellSliderUi ui part style map',
-  },
-  {
-    title: 'Slider: Styling',
-    path: '/components/slider',
-    detail: 'components/slider/examples/styling.example.ts',
-    terms:
-      'slider styling components/slider/examples/styling.example components/slider hell-slider ui Part Style Map data-slot root track range thumb HellSliderPart HellSliderUi',
-  },
-  {
-    title: 'Switch: Examples',
-    path: '/components/switch',
-    detail: 'components/switch/examples/examples.example.ts',
-    terms:
-      'switch examples components/switch/examples/examples.example components/switch hellSwitch HellSwitchUi ui part style map',
-  },
-  {
-    title: 'Switch: Native',
-    path: '/components/switch',
-    detail: 'components/switch/examples/native.example.ts',
-    terms:
-      'switch native components/switch/examples/native.example components/switch hellNativeSwitch HellNativeSwitchUi ui part style map',
-  },
-  {
-    title: 'Switch: Styling',
-    path: '/components/switch',
-    detail: 'components/switch/examples/styling.example.ts',
-    terms:
-      'switch styling components/switch/examples/styling.example components/switch hellSwitch ui Part Style Map data-slot root thumb data-checked HellSwitchPart HellSwitchUi',
-  },
-  {
-    title: 'Tabs: Example',
-    path: '/components/tabs',
-    detail: 'components/tabs/examples/example.example.ts',
-    terms:
-      'tabs example components/tabs/examples/example.example components/tabs hellTabset hellTab hellTabPanel',
-  },
-  {
-    title: 'Tabs: Vertical',
-    path: '/components/tabs',
-    detail: 'components/tabs/examples/vertical.example.ts',
-    terms:
-      'tabs vertical components/tabs/examples/vertical.example components/tabs hellTabset vertical',
-  },
-  {
-    title: 'Tag: Badge',
-    path: '/components/tag',
-    detail: 'components/tag/examples/badge.example.ts',
-    terms: 'tag badge components/tag/examples/badge.example components/tag hellTag hellBadge',
-  },
-  {
-    title: 'Tag: Keyboard Hint',
-    path: '/components/tag',
-    detail: 'components/tag/examples/keyboard-hint.example.ts',
-    terms:
-      'tag keyboard-hint components/tag/examples/keyboard-hint.example components/tag hellKbd keyboard',
-  },
-  {
-    title: 'Tag: Tag Variants',
-    path: '/components/tag',
-    detail: 'components/tag/examples/tag-variants.example.ts',
-    terms:
-      'tag tag-variants components/tag/examples/tag-variants.example components/tag hellTag variant',
-  },
-  {
-    title: 'Toggle: Disabled',
-    path: '/components/toggle',
-    detail: 'components/toggle/examples/disabled.example.ts',
-    terms:
-      'toggle disabled components/toggle/examples/disabled.example components/toggle hellToggle disabled HellToggleUi ui part style map',
-  },
-  {
-    title: 'Toggle: Single Toggle',
-    path: '/components/toggle',
-    detail: 'components/toggle/examples/single-toggle.example.ts',
-    terms:
-      'toggle single-toggle components/toggle/examples/single-toggle.example components/toggle hellToggle HellToggleUi ui part style map',
-  },
-  {
-    title: 'Toggle: Toggle Group Multiple',
-    path: '/components/toggle',
-    detail: 'components/toggle/examples/toggle-group-multiple.example.ts',
-    terms:
-      'toggle toggle-group-multiple components/toggle/examples/toggle-group-multiple.example components/toggle hellToggleGroup multiple HellToggleGroupUi HellToggleGroupItemUi ui part style map',
-  },
-  {
-    title: 'Toggle: Toggle Group Single',
-    path: '/components/toggle',
-    detail: 'components/toggle/examples/toggle-group-single.example.ts',
-    terms:
-      'toggle toggle-group-single components/toggle/examples/toggle-group-single.example components/toggle hellToggleGroup single HellToggleGroupUi HellToggleGroupItemUi ui part style map',
-  },
-  {
-    title: 'Toggle: Styling',
-    path: '/components/toggle',
-    detail: 'components/toggle/examples/styling.example.ts',
-    terms:
-      'toggle styling components/toggle/examples/styling.example components/toggle hellToggle ui Part Style Map data-slot root HellToggleUi',
-  },
-  {
-    title: 'Tooltip: Example',
-    path: '/components/tooltip',
-    detail: 'components/tooltip/examples/example.example.ts',
-    terms:
-      'tooltip example components/tooltip/examples/example.example components/tooltip hellTooltip hellTooltipTrigger HellTooltipUi ui Part Style Map data-slot root',
-  },
-  {
-    title: 'Tooltip: With Delay',
-    path: '/components/tooltip',
-    detail: 'components/tooltip/examples/with-delay.example.ts',
-    terms:
-      'tooltip with-delay components/tooltip/examples/with-delay.example components/tooltip hellTooltip delay HellTooltipUi ui Part Style Map data-slot root',
-  },
-  {
-    title: 'Tooltip: Hoverable',
-    path: '/components/tooltip',
-    detail: 'components/tooltip/examples/hoverable.example.ts',
-    terms:
-      'tooltip hoverable components/tooltip/examples/hoverable.example components/tooltip hellTooltip hoverableContent HellTooltipUi ui Part Style Map data-slot root',
-  },
-  {
-    title: 'Tooltip: Styling',
-    path: '/components/tooltip',
-    detail: 'components/tooltip/examples/styling.example.ts',
-    terms:
-      'tooltip styling components/tooltip/examples/styling.example components/tooltip hellTooltip ui Part Style Map data-slot root HellTooltipUi',
-  },
-  {
-    title: 'App Shell: Live Miniature',
+    title: 'App Shell: Basic',
     path: '/components/app-shell',
-    detail: 'components/app-shell/examples/live-miniature.example.ts',
+    detail: 'components/app-shell/examples/basic.example.ts',
     terms:
-      'app-shell live-miniature components/app-shell/examples/live-miniature.example components/app-shell hellAppShell hellAppTopbar hellAppSidenav hellAppContent',
+      'app-shell hellAppShell hellAppTopbar hellSidenavToggle hellAppSidenav hellNavItem hellNavItemIcon hellNavItemLabel hellAppContent hell-icon smallest usage topbar sidenav content collapse rail',
   },
   {
-    title: 'App Shell: Markup Skeleton',
+    title: 'App Shell: Secondary panel and toggle appearances',
     path: '/components/app-shell',
-    detail: 'components/app-shell/examples/markup-skeleton.example.ts',
+    detail: 'components/app-shell/examples/secondary-panel.example.ts',
     terms:
-      'app-shell markup-skeleton components/app-shell/examples/markup-skeleton.example components/app-shell hellAppShell hellAppTopbar hellAppSidenav hellAppContent',
+      'app-shell hellAppSecondary hellAppSecondaryBody hellSecondaryToggle hellSidenavToggle appearance header rail activity feed collapse inert',
   },
   {
-    title: 'Audio Player: Speech Transcript',
+    title: 'App Shell: Sidenav navigation',
+    path: '/components/app-shell',
+    detail: 'components/app-shell/examples/sidenav.example.ts',
+    terms:
+      'app-shell hellAppShell hellAppSidenav hellNavItem hellNavItemIcon hellNavItemLabel hellNavItemTrailing hellNavSection hellNavSectionToggle hellNavSectionItems hellTag hell-icon collapsible section aria-current badge count rail icon-only',
+  },
+  {
+    title: 'App Shell: Styling (all parts)',
+    path: '/components/app-shell',
+    detail: 'components/app-shell/examples/styling.example.ts',
+    terms:
+      'app-shell ui part style map hellAppShell hellAppTopbar hellAppSidenav hellNavItem hellNavItemIcon hellNavItemLabel hellNavItemTrailing hellNavSection hellNavSectionToggle hellNavSectionItems hellAppContent hellSidenavToggle hellSecondaryToggle hellAppSecondary hellAppSecondaryBody hell-icon root recipe bg-hell text-hell rounded-hell tokens',
+  },
+  {
+    title: 'App Shell: With omnibar, menu, and avatar',
+    path: '/components/app-shell',
+    detail: 'components/app-shell/examples/with-omnibar-menu-avatar.example.ts',
+    terms:
+      'app-shell composite full frame hellAppShell hellAppTopbar hell-omnibar hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarItemText hellMenuTrigger hellMenu hellMenuItem hellMenuItemIcon hellMenuSeparator hell-avatar hellNavItem hellAppContent maxWidth search account aria-current',
+  },
+  {
+    title: 'Audio Player: Basic',
+    path: '/components/audio-player',
+    detail: 'components/audio-player/examples/basic.example.ts',
+    terms:
+      'audio-player components/audio-player/examples/basic.example hell-audio-player src smallest minimal controls-only meta-row',
+  },
+  {
+    title: 'Audio Player: Speech transcript',
     path: '/components/audio-player',
     detail: 'components/audio-player/examples/speech-transcript.example.ts',
     terms:
-      'audio-player speech-transcript components/audio-player/examples/speech-transcript.example components/audio-player hell-audio-player ui Part Style Map HellAudioPlayerUi captions captionsBar captionsStatus captionsDot captionsBody captionsError captionsInterim captionsEmpty allowSpeechTranscript provideHellAudioTranscript features/audio-transcript SpeechRecognition captureStream experimental best-effort timed-text accessibility',
+      'audio-player speech-transcript components/audio-player/examples/speech-transcript.example hell-audio-player allowSpeechTranscript provideHellAudioTranscript features/audio-transcript captions recognition experimental',
   },
   {
-    title: 'Audio Player: Untitled Controls Only',
-    path: '/components/audio-player',
-    detail: 'components/audio-player/examples/untitled-controls-only.example.ts',
-    terms:
-      'audio-player untitled-controls-only components/audio-player/examples/untitled-controls-only.example components/audio-player hell-audio-player ui Part Style Map HellAudioPlayerUi root controls transport playButton time seek actions muteButton volume downloadButton data-time data-slot',
-  },
-  {
-    title: 'Audio Player: With Title And Date',
-    path: '/components/audio-player',
-    detail: 'components/audio-player/examples/with-title-and-date.example.ts',
-    terms:
-      'audio-player with-title-and-date components/audio-player/examples/with-title-and-date.example components/audio-player hell-audio-player ui Part Style Map HellAudioPlayerUi meta title date controls transport data-slot',
-  },
-  {
-    title: 'Audio Player: Styling',
+    title: 'Audio Player: Styling (all parts)',
     path: '/components/audio-player',
     detail: 'components/audio-player/examples/styling.example.ts',
     terms:
-      'audio-player styling components/audio-player/examples/styling.example components/audio-player hell-audio-player ui Part Style Map data-slot root playButton title HellAudioPlayerUi HellAudioPlayerPart',
+      'audio-player components/audio-player/examples/styling.example hell-audio-player ui HellAudioPlayerUi part style map provideHellAudioTranscript allowSpeechTranscript captions tokens',
+  },
+  {
+    title: 'Audio Player: With a voicemail inbox',
+    path: '/components/audio-player',
+    detail: 'components/audio-player/examples/voicemail-inbox.example.ts',
+    terms:
+      'audio-player voicemail-inbox components/audio-player/examples/voicemail-inbox.example hell-audio-player hellCard hellCardHeader hellCardBody HELL_CARD_DIRECTIVES hellTag tag card composite unread urgent allowDownload',
+  },
+  {
+    title: 'Audio Player: Title and date',
+    path: '/components/audio-player',
+    detail: 'components/audio-player/examples/with-title-and-date.example.ts',
+    terms:
+      'audio-player with-title-and-date components/audio-player/examples/with-title-and-date.example hell-audio-player downloadName meta row recorded call',
   },
   {
     title: 'Avatar Group: Basic',
     path: '/components/avatar-group',
     detail: 'components/avatar-group/examples/basic.example.ts',
     terms:
-      'avatar-group basic components/avatar-group/examples/basic.example components/avatar-group hellAvatarGroup hellAvatarGroupItem',
+      'avatar-group hell-avatar-group hellAvatarGroupItem hellAvatarGroupOverflow hell-avatar stack overflow badge smallest usage',
   },
   {
-    title: 'Avatar Group: Interaction Hooks',
+    title: 'Avatar Group: Selection',
     path: '/components/avatar-group',
-    detail: 'components/avatar-group/examples/interaction-hooks.example.ts',
+    detail: 'components/avatar-group/examples/selection.example.ts',
     terms:
-      'avatar-group interaction-hooks components/avatar-group/examples/interaction-hooks.example components/avatar-group hellAvatarGroup hellAvatarGroupItem',
+      'avatar-group hellAvatarGroupItem selected data-selected toggle filter button aria-pressed multi-select',
   },
   {
-    title: 'Avatar Group: Overflow Menu',
+    title: 'Avatar Group: Sizes',
     path: '/components/avatar-group',
-    detail: 'components/avatar-group/examples/overflow-menu.example.ts',
+    detail: 'components/avatar-group/examples/sizes.example.ts',
     terms:
-      'avatar-group overflow-menu components/avatar-group/examples/overflow-menu.example components/avatar-group hellAvatarGroup hellAvatarGroupOverflow',
+      'avatar-group hell-avatar-group size HellSize xs sm md lg xl hellAvatarGroupItem hellAvatarGroupOverflow scale',
   },
   {
-    title: 'Date Input: Placeholders And Labels',
-    path: '/components/date-input',
-    detail: 'components/date-input/examples/placeholders-and-labels.example.ts',
+    title: 'Avatar Group: Styling',
+    path: '/components/avatar-group',
+    detail: 'components/avatar-group/examples/styling.example.ts',
     terms:
-      'date-input placeholders-and-labels components/date-input/examples/placeholders-and-labels.example components/date-input hell-date-input ui HellDateInputUi input trigger pickerPanel data-slot',
+      'avatar-group ui HellAvatarGroupUi HellAvatarGroupItemUi HellAvatarGroupOverflowUi Part Style Map root all-parts hell-avatar-group hellAvatarGroupItem hellAvatarGroupOverflow tokens rounded-hell bg-hell text-hell',
   },
   {
-    title: 'Date Input: Reactive Forms',
-    path: '/components/date-input',
-    detail: 'components/date-input/examples/reactive-forms.example.ts',
+    title: 'Avatar Group: With Tooltip & Menu',
+    path: '/components/avatar-group',
+    detail: 'components/avatar-group/examples/with-tooltip-menu.example.ts',
     terms:
-      'date-input reactive-forms components/date-input/examples/reactive-forms.example components/date-input hell-date-input formControl ReactiveFormsModule ControlValueAccessor Date null Angular Forms ui HellDateInputUi',
+      'avatar-group with-tooltip-menu composite hellTooltipTrigger hellTooltip hellMenuTrigger hellMenu hellMenuItem hellMenuLabel hellAvatarGroupOverflow assignee stack overflow hover',
   },
   {
-    title: 'Date Input: Sizes',
-    path: '/components/date-input',
-    detail: 'components/date-input/examples/sizes.example.ts',
+    title: 'Avatar: Basic',
+    path: '/components/avatar',
+    detail: 'components/avatar/examples/basic.example.ts',
     terms:
-      'date-input sizes components/date-input/examples/sizes.example components/date-input hell-date-input size ui HellDateInputUi root input trigger',
+      'components/avatar/examples/basic.example components/avatar hell-avatar image fallback alt smallest simple usage',
   },
   {
-    title: 'Date Input: Text Input Calendar Popover',
-    path: '/components/date-input',
-    detail: 'components/date-input/examples/text-input-calendar-popover.example.ts',
+    title: 'Avatar: Missing and broken images',
+    path: '/components/avatar',
+    detail: 'components/avatar/examples/broken-image.example.ts',
     terms:
-      'date-input text-input-calendar-popover components/date-input/examples/text-input-calendar-popover.example components/date-input hell-date-input popover ui HellDateInputUi pickerPanel triggerIcon data-slot',
+      'broken-image loading error fallback components/avatar/examples/broken-image.example components/avatar hell-avatar data-status idle loaded 404',
   },
   {
-    title: 'Date Input: Styling',
-    path: '/components/date-input',
-    detail: 'components/date-input/examples/styling.example.ts',
+    title: 'Avatar: Shape',
+    path: '/components/avatar',
+    detail: 'components/avatar/examples/shape.example.ts',
     terms:
-      'date-input styling components/date-input/examples/styling.example components/date-input hell-date-input ui Part Style Map data-slot root input trigger pickerPanel HellDateInputUi HellDateInputPart',
+      'round square components/avatar/examples/shape.example components/avatar hell-avatar organization entity',
   },
   {
-    title: 'Dialpad: Basic',
-    path: '/components/dialpad',
-    detail: 'components/dialpad/examples/basic.example.ts',
+    title: 'Avatar: Sizes',
+    path: '/components/avatar',
+    detail: 'components/avatar/examples/sizes.example.ts',
     terms:
-      'dialpad basic components/dialpad/examples/basic.example components/dialpad hell-dialpad default call valueChange',
+      'components/avatar/examples/sizes.example components/avatar hell-avatar size xs sm md lg xl',
   },
   {
-    title: 'Dialpad: Example',
-    path: '/components/dialpad',
-    detail: 'components/dialpad/examples/example.example.ts',
+    title: 'Avatar: Styling',
+    path: '/components/avatar',
+    detail: 'components/avatar/examples/styling.example.ts',
     terms:
-      'dialpad example components/dialpad/examples/example.example components/dialpad hell-dialpad ui part style map numberInput clearButton backspaceButton callButton keyButton keyboard Backspace Delete Enter disabled readOnly readonly invalid clear call digit valueChange',
+      'components/avatar/examples/styling.example components/avatar hell-avatar ui Part Style Map data-slot root image fallback HellAvatarUi all-parts',
   },
   {
-    title: 'Drop Zone: Disabled',
-    path: '/components/drop-zone',
-    detail: 'components/drop-zone/examples/disabled.example.ts',
+    title: 'Avatar: With card and tag',
+    path: '/components/avatar',
+    detail: 'components/avatar/examples/with-card-profile.example.ts',
     terms:
-      'drop-zone disabled components/drop-zone/examples/disabled.example components/drop-zone hellDropzone disabled',
+      'with-card-profile profile header composite components/avatar/examples/with-card-profile.example components/avatar hell-avatar hellCard hellCardBody hellTag directory people settings',
   },
   {
-    title: 'Drop Zone: Example',
-    path: '/components/drop-zone',
-    detail: 'components/drop-zone/examples/example.example.ts',
+    title: 'Breadcrumbs: All Parts Styling',
+    path: '/components/breadcrumbs',
+    detail: 'components/breadcrumbs/examples/all-parts-styling.example.ts',
     terms:
-      'drop-zone example components/drop-zone/examples/example.example components/drop-zone hellDropzone upload file',
+      'all-parts-styling ui Part Style Map hellBreadcrumbs hellBreadcrumbList hellBreadcrumbItem hellBreadcrumbLink hellBreadcrumbPage hellBreadcrumbSeparator hellBreadcrumbEllipsis rounded-hell bg-hell text-hell tokens refine every',
   },
   {
-    title: 'Drop Zone: Native Input Seam',
-    path: '/components/drop-zone',
-    detail: 'components/drop-zone/examples/native-input.example.ts',
+    title: 'Breadcrumbs: Basic',
+    path: '/components/breadcrumbs',
+    detail: 'components/breadcrumbs/examples/basic.example.ts',
     terms:
-      'drop-zone nativeInput components/drop-zone/examples/native-input.example.ts components/drop-zone hellDropzone HTMLInputElement',
+      'hellBreadcrumbs hellBreadcrumbList hellBreadcrumbItem hellBreadcrumbLink hellBreadcrumbPage hellBreadcrumbSeparator smallest simple trail',
   },
   {
-    title: 'Drop Zone: Single File Images Only',
-    path: '/components/drop-zone',
-    detail: 'components/drop-zone/examples/single-file-images-only.example.ts',
+    title: 'Breadcrumbs: Collapsed Ellipsis',
+    path: '/components/breadcrumbs',
+    detail: 'components/breadcrumbs/examples/collapsed-ellipsis.example.ts',
     terms:
-      'drop-zone single-file-images-only components/drop-zone/examples/single-file-images-only.example components/drop-zone hellDropzone image accept',
+      'collapsed-ellipsis hellBreadcrumbEllipsis hellMenuTrigger hellMenu hellMenuItem HELL_MENU_DIRECTIVES deep path long trail hidden crumbs menu composite',
   },
   {
-    title: 'Drop Zone: Styling',
-    path: '/components/drop-zone',
-    detail: 'components/drop-zone/examples/styling.example.ts',
+    title: 'Breadcrumbs: Custom Separator',
+    path: '/components/breadcrumbs',
+    detail: 'components/breadcrumbs/examples/custom-separator.example.ts',
     terms:
-      'drop-zone styling components/drop-zone/examples/styling.example components/drop-zone hellDropzone ui Part Style Map data-slot root HellDropZoneUi',
+      'custom-separator hellBreadcrumbSeparator slash divider override chevron',
   },
   {
-    title: 'Omnibar: Basic',
-    path: '/components/omnibar',
-    detail: 'components/omnibar/examples/basic.example.ts',
+    title: 'Breadcrumbs: With App Shell Topbar',
+    path: '/components/breadcrumbs',
+    detail: 'components/breadcrumbs/examples/with-app-shell-topbar.example.ts',
     terms:
-      'omnibar basic components/omnibar/examples/basic.example components/omnibar hell-omnibar usage hellOmnibarItem hellOmnibarGroup command palette submit',
+      'with-app-shell-topbar hellAppShell hellAppTopbar hellAppContent hell-icon composite product ui navigation location',
   },
   {
-    title: 'Omnibar: Async Search',
-    path: '/components/omnibar',
-    detail: 'components/omnibar/examples/async-search.example.ts',
+    title: 'Breadcrumbs: With Icons',
+    path: '/components/breadcrumbs',
+    detail: 'components/breadcrumbs/examples/with-icons.example.ts',
     terms:
-      'omnibar async-search components/omnibar/examples/async-search.example components/omnibar hell-omnibar HELL_OMNIBAR_DIRECTIVES command palette backend async search searchSource searchFields ranking debounce starter hotkey adapter search scope ui Part Style Map HellOmnibarUi panel actions results loading skeletonRow skeletonText empty data-slot',
+      'with-icons hellBreadcrumbs hellBreadcrumbLink hellBreadcrumbPage hell-icon HellIcon faSolidHouse faSolidFolderOpen faSolidGear glyph',
   },
   {
-    title: 'Omnibar: Styling',
-    path: '/components/omnibar',
-    detail: 'components/omnibar/examples/styling.example.ts',
+    title: 'Button: Basic',
+    path: '/components/button',
+    detail: 'components/button/examples/basic.example.ts',
     terms:
-      'omnibar styling components/omnibar/examples/styling.example components/omnibar hell-omnibar ui Part Style Map data-slot control inputWrap input panel HellOmnibarUi HellOmnibarPart',
+      'components/button/examples/basic.example components/button hellButton smallest simple usage',
   },
   {
-    title: 'Resizable: Basic',
-    path: '/components/resizable',
-    detail: 'components/resizable/examples/basic.example.ts',
+    title: 'Button: Block',
+    path: '/components/button',
+    detail: 'components/button/examples/block.example.ts',
     terms:
-      'resizable basic components/resizable/examples/basic.example components/resizable hellResizable hellResizablePane hellResizableHandle default',
+      'components/button/examples/block.example components/button hellButton full width stacked actions',
   },
   {
-    title: 'Resizable: Grip Handle 5',
-    path: '/components/resizable',
-    detail: 'components/resizable/examples/grip-handle-5.example.ts',
+    title: 'Button: With field and input',
+    path: '/components/button',
+    detail: 'components/button/examples/form-actions.example.ts',
     terms:
-      'resizable grip-handle-5 components/resizable/examples/grip-handle-5.example components/resizable hellResizable hellResizablePane hellResizableHandle',
+      'form actions components/button/examples/form-actions.example components/button hellButton hellField hellFieldLabel hellFieldDescription hellInput composite row cancel save submit',
   },
   {
-    title: 'Resizable: Grip Handle',
-    path: '/components/resizable',
-    detail: 'components/resizable/examples/grip-handle.example.ts',
+    title: 'Button: Icons',
+    path: '/components/button',
+    detail: 'components/button/examples/icons.example.ts',
     terms:
-      'resizable grip-handle components/resizable/examples/grip-handle.example components/resizable hellResizable hellResizableHandle',
+      'components/button/examples/icons.example components/button hellButton hell-icon iconOnly leading trailing icon-only',
   },
   {
-    title: 'Resizable: Horizontal Split',
-    path: '/components/resizable',
-    detail: 'components/resizable/examples/horizontal-split.example.ts',
+    title: 'Button: Sizes',
+    path: '/components/button',
+    detail: 'components/button/examples/sizes.example.ts',
     terms:
-      'resizable horizontal-split components/resizable/examples/horizontal-split.example components/resizable hellResizable horizontal',
+      'components/button/examples/sizes.example components/button hellButton size xs sm md lg xl',
   },
   {
-    title: 'Resizable: Three Panes',
-    path: '/components/resizable',
-    detail: 'components/resizable/examples/three-panes.example.ts',
+    title: 'Button: Styling',
+    path: '/components/button',
+    detail: 'components/button/examples/styling.example.ts',
     terms:
-      'resizable three-panes components/resizable/examples/three-panes.example components/resizable hellResizable panes',
+      'components/button/examples/styling.example components/button hellButton ui HellButtonUi part style map root tailwind refinement hell tokens',
   },
   {
-    title: 'Resizable: Vertical Split',
-    path: '/components/resizable',
-    detail: 'components/resizable/examples/vertical-split.example.ts',
+    title: 'Button: Variants',
+    path: '/components/button',
+    detail: 'components/button/examples/variants.example.ts',
     terms:
-      'resizable vertical-split components/resizable/examples/vertical-split.example components/resizable hellResizable vertical',
+      'components/button/examples/variants.example components/button hellButton variant default primary soft ghost link danger success',
   },
   {
-    title: 'Split View: Basic',
-    path: '/components/split-view',
-    detail: 'components/split-view/examples/basic.example.ts',
+    title: 'Card: All Parts Styling',
+    path: '/components/card',
+    detail: 'components/card/examples/all-parts-styling.example.ts',
     terms:
-      'split-view basic components/split-view/examples/basic.example components/split-view hell-split-view hellSplitPrimary hellSplitDetail default framed',
+      'all-parts hellCard hellCardHeader hellCardBody hellCardFooter ui Part Style Map root rounded-hell-xl bg-hell-primary bg-hell-primary-soft deployment pipeline',
   },
   {
-    title: 'Split View: Master Detail',
-    path: '/components/split-view',
-    detail: 'components/split-view/examples/master-detail.example.ts',
+    title: 'Card: Basic',
+    path: '/components/card',
+    detail: 'components/card/examples/basic.example.ts',
     terms:
-      'split-view master-detail components/split-view/examples/master-detail.example components/split-view hell-split-view HELL_SPLIT_VIEW_DIRECTIVES hellSplitPrimary hellSplitDetail responsive compact back detailOpen resizable',
+      'hellCard hellCardHeader hellCardBody smallest simple invoice minimal usage',
   },
   {
-    title: 'Time Input: Examples',
-    path: '/components/time-input',
-    detail: 'components/time-input/examples/examples.example.ts',
+    title: 'Card: Elevation',
+    path: '/components/card',
+    detail: 'components/card/examples/elevation.example.ts',
     terms:
-      'time-input examples components/time-input/examples/examples.example components/time-input hell-time-input ui HellTimeInputUi pickerPanel pickerUnit minutePreset data-slot',
+      'hellCard hellCardHeader hellCardBody shadow depth data-elevation flat raised floating',
   },
   {
-    title: 'Time Input: Reactive Forms',
-    path: '/components/time-input',
-    detail: 'components/time-input/examples/reactive-forms.example.ts',
+    title: 'Card: Entity Summary',
+    path: '/components/card',
+    detail: 'components/card/examples/entity-summary.example.ts',
     terms:
-      'time-input reactive-forms components/time-input/examples/reactive-forms.example components/time-input hell-time-input formControl ReactiveFormsModule ControlValueAccessor HellTimeValue null Angular Forms ui HellTimeInputUi',
+      'entity-summary hellCard hellCardHeader hellCardBody hellCardFooter hell-avatar hellTag hellButton hell-icon composite account owner overflow menu renewal',
   },
   {
-    title: 'Time Input: Placeholder And Labels',
-    path: '/components/time-input',
-    detail: 'components/time-input/examples/placeholder-and-labels.example.ts',
+    title: 'Card: With Footer',
+    path: '/components/card',
+    detail: 'components/card/examples/with-footer.example.ts',
     terms:
-      'time-input placeholder-and-labels components/time-input/examples/placeholder-and-labels.example components/time-input hell-time-input placeholder label ui HellTimeInputUi input trigger',
+      'with-footer hellCard hellCardHeader hellCardBody hellCardFooter hellButton confirmation danger delete action row',
   },
   {
-    title: 'Time Input: Sizes',
-    path: '/components/time-input',
-    detail: 'components/time-input/examples/sizes.example.ts',
+    title: 'Card: Without Header',
+    path: '/components/card',
+    detail: 'components/card/examples/without-header.example.ts',
     terms:
-      'time-input sizes components/time-input/examples/sizes.example components/time-input hell-time-input size ui HellTimeInputUi root input trigger',
+      'without-header hellCard hellCardBody hellButton composable regions optional footer stat tile',
   },
   {
-    title: 'Time Input: Styling',
-    path: '/components/time-input',
-    detail: 'components/time-input/examples/styling.example.ts',
+    title: 'Checkbox: Styling (all parts)',
+    path: '/components/checkbox',
+    detail: 'components/checkbox/examples/all-parts-styling.example.ts',
     terms:
-      'time-input styling components/time-input/examples/styling.example components/time-input hell-time-input ui Part Style Map data-slot root input trigger pickerPanel HellTimeInputUi HellTimeInputPart',
+      'components/checkbox/examples/all-parts-styling.example components/checkbox hellCheckbox hellNativeCheckbox ui Part Style Map HellCheckboxUi root indicator data-slot rounded-hell-pill',
   },
   {
-    title: 'Toast: Action',
-    path: '/components/toast',
-    detail: 'components/toast/examples/action.example.ts',
+    title: 'Checkbox: Basic',
+    path: '/components/checkbox',
+    detail: 'components/checkbox/examples/basic.example.ts',
     terms:
-      'toast action components/toast/examples/action.example components/toast hell-toaster toast action ui Part Style Map HellToasterUi root viewport toast body title description glyph close toolbar dismissAll data-slot',
+      'components/checkbox/examples/basic.example components/checkbox hellCheckbox hellField hellFieldLabel checked checkedChange minimal usage',
   },
   {
-    title: 'Toast: Persistent Custom Content',
-    path: '/components/toast',
-    detail: 'components/toast/examples/persistent-custom-content.example.ts',
+    title: 'Checkbox: Parent/child group',
+    path: '/components/checkbox',
+    detail: 'components/checkbox/examples/group.example.ts',
     terms:
-      'toast persistent-custom-content components/toast/examples/persistent-custom-content.example components/toast hell-toaster persistent ui Part Style Map HellToasterUi toast body action close data-slot',
+      'indeterminate select all components/checkbox/examples/group.example components/checkbox hellCheckbox hellField hellFieldLabel parent child permissions',
   },
   {
-    title: 'Toast: Stacking',
-    path: '/components/toast',
-    detail: 'components/toast/examples/stacking.example.ts',
+    title: 'Checkbox: Native path',
+    path: '/components/checkbox',
+    detail: 'components/checkbox/examples/native.example.ts',
     terms:
-      'toast stacking components/toast/examples/stacking.example components/toast hell-toaster stacking ui Part Style Map HellToasterUi viewport list toolbar dismissAll expanded pause resume data-state data-slot',
+      'components/checkbox/examples/native.example components/checkbox hellNativeCheckbox hellField hellFieldLabel hellFieldDescription required indeterminate input form',
   },
   {
-    title: 'Toast: Variants',
-    path: '/components/toast',
-    detail: 'components/toast/examples/variants.example.ts',
+    title: 'Checkbox: With field and card',
+    path: '/components/checkbox',
+    detail: 'components/checkbox/examples/settings-list.example.ts',
     terms:
-      'toast variants components/toast/examples/variants.example components/toast hell-toaster variant ui Part Style Map HellToasterUi glyph title description data-variant data-slot',
+      'settings list components/checkbox/examples/settings-list.example components/checkbox hellCheckbox hellCard hellCardHeader hellCardBody hellField hellFieldLabel hellFieldDescription hell-icon notification preferences composite',
   },
   {
-    title: 'Code Editor: Code Viewer Demo',
+    title: 'Checkbox: States',
+    path: '/components/checkbox',
+    detail: 'components/checkbox/examples/states.example.ts',
+    terms:
+      'components/checkbox/examples/states.example components/checkbox hellCheckbox checked indeterminate disabled unchecked',
+  },
+  {
+    title: 'Code Editor: Basic',
     path: '/components/code-editor',
-    detail: 'components/code-editor/examples/code-viewer-demo.example.ts',
+    detail: 'components/code-editor/examples/basic.example.ts',
     terms:
-      'code-editor code-viewer-demo components/code-editor/examples/code-viewer-demo.example components/code-editor hell-code-editor readOnly CodeMirror ui Part Style Map HellCodeEditorUi root editor data-readonly data-slot',
+      'code-editor hell-code-editor value extensions valueChange ariaLabel javascript CodeMirror editable signal min-h-40 feature-flags',
   },
   {
-    title: 'Code Editor: Editor Demo',
+    title: 'Code Editor: With card, select, and buttons',
     path: '/components/code-editor',
-    detail: 'components/code-editor/examples/editor-demo.example.ts',
+    detail: 'components/code-editor/examples/config-editor.example.ts',
     terms:
-      'code-editor editor-demo components/code-editor/examples/editor-demo.example components/code-editor hell-code-editor CodeMirror ui Part Style Map HellCodeEditorUi root editor value readOnly data-readonly data-slot',
+      'code-editor config-editor composite hell-code-editor hellCard hellCardHeader hellCardBody hellCardFooter hell-select-basic HELL_CARD_DIRECTIVES HELL_SELECT_BASIC_DIRECTIVES hellButton language picker dirty reset apply ui root',
+  },
+  {
+    title: 'Code Editor: Supplying a language',
+    path: '/components/code-editor',
+    detail: 'components/code-editor/examples/language.example.ts',
+    terms:
+      'code-editor supplying-a-language extensions hell-code-editor hellButton variant size compartment reconfigure javascript typescript jsx tsx computed signal',
+  },
+  {
+    title: 'Code Editor: Read-only viewer',
+    path: '/components/code-editor',
+    detail: 'components/code-editor/examples/read-only.example.ts',
+    terms:
+      'code-editor read only hell-code-editor readOnly value extensions ariaLabel aria-readonly generated audit CodeMirror',
   },
   {
     title: 'Code Editor: Styling',
     path: '/components/code-editor',
     detail: 'components/code-editor/examples/styling.example.ts',
     terms:
-      'code-editor styling components/code-editor/examples/styling.example components/code-editor hell-code-editor ui Part Style Map data-slot root editor HellCodeEditorUi HellCodeEditorPart',
+      'code-editor all-parts part style map hell-code-editor ui HellCodeEditorUi root rounded-hell-xl border-hell-primary bg-hell-surface-elevated shadow-hell-lg min-h-40',
+  },
+  {
+    title: 'Combobox: Basic',
+    path: '/components/combobox',
+    detail: 'components/combobox/examples/basic.example.ts',
+    terms:
+      'components/combobox/examples/basic.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty HELL_COMBOBOX_DIRECTIVES single-select filter currency ui data-slot root',
+  },
+  {
+    title: 'Combobox: Multiple',
+    path: '/components/combobox',
+    detail: 'components/combobox/examples/multiple.example.ts',
+    terms:
+      'components/combobox/examples/multiple.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellTag HellComboboxValue HELL_COMBOBOX_DIRECTIVES multi-select array token chips labels ui data-slot root',
+  },
+  {
+    title: 'Combobox: Preset',
+    path: '/components/combobox',
+    detail: 'components/combobox/examples/preset.example.ts',
+    terms:
+      'components/combobox/examples/preset.example components/combobox hell-combobox-basic HellComboboxBasic HELL_COMBOBOX_BASIC_DIRECTIVES options value valueChange allowDeselect emptyLabel placeholder aria-label convenience warehouse ui data-slot root control input button dropdown option empty',
+  },
+  {
+    title: 'Combobox: Styling',
+    path: '/components/combobox',
+    detail: 'components/combobox/examples/styling.example.ts',
+    terms:
+      'components/combobox/examples/styling.example components/combobox hell-combobox-basic HellComboboxBasic HellComboboxBasicUi HELL_COMBOBOX_BASIC_DIRECTIVES ui Part Style Map data-slot root control input button dropdown option empty all-parts hell tokens bg-hell text-hell rounded-hell priority',
+  },
+  {
+    title: 'Combobox: With field and tag',
+    path: '/components/combobox',
+    detail: 'components/combobox/examples/with-field-tag.example.ts',
+    terms:
+      'components/combobox/examples/with-field-tag.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellField hellFieldLabel hellFieldDescription hellTag hellButton hell-icon iconOnly HellComboboxValue HELL_COMBOBOX_DIRECTIVES HELL_FIELD_DIRECTIVES reviewers multi-select removable chips composite ui data-slot root',
+  },
+  {
+    title: 'Date Input: Basic',
+    path: '/components/date-input',
+    detail: 'components/date-input/examples/basic.example.ts',
+    terms:
+      'date-input hell-date-input smallest usage aria-label dateChange minimal simple',
+  },
+  {
+    title: 'Date Input: Bounds and Validation',
+    path: '/components/date-input',
+    detail: 'components/date-input/examples/bounds-and-validation.example.ts',
+    terms:
+      'date-input hell-date-input min max invalid disabled outOfRangeDate invalidDateInputDraft',
+  },
+  {
+    title: 'Date Input: Reactive Forms',
+    path: '/components/date-input',
+    detail: 'components/date-input/examples/reactive-forms.example.ts',
+    terms:
+      'date-input reactive-forms hell-date-input FormControl ReactiveFormsModule hellField hellFieldLabel hellFieldDescription ControlValueAccessor',
+  },
+  {
+    title: 'Date Input: Sizes',
+    path: '/components/date-input',
+    detail: 'components/date-input/examples/sizes.example.ts',
+    terms:
+      'date-input hell-date-input size sm md lg',
+  },
+  {
+    title: 'Date Input: Styling',
+    path: '/components/date-input',
+    detail: 'components/date-input/examples/styling.example.ts',
+    terms:
+      'date-input hell-date-input ui HellDateInputUi HellDateInputPart root trigger triggerIcon pickerPanel part style map tailwind tokens',
+  },
+  {
+    title: 'Date Input: With Field and Button',
+    path: '/components/date-input',
+    detail: 'components/date-input/examples/with-field-filter-row.example.ts',
+    terms:
+      'date-input with-field-filter-row hell-date-input hellField hellFieldLabel hellButton hell-icon composite filter row from to range clear',
+  },
+  {
+    title: 'Date Picker: Basic',
+    path: '/components/date-picker',
+    detail: 'components/date-picker/examples/basic.example.ts',
+    terms:
+      'date-picker hell-date-picker dateChange single calendar signal smallest usage',
+  },
+  {
+    title: 'Date Picker: Bounded',
+    path: '/components/date-picker',
+    detail: 'components/date-picker/examples/bounded.example.ts',
+    terms:
+      'date-picker hell-date-picker min max dateChange disabled days constrain range window bounds',
+  },
+  {
+    title: 'Date Picker: Disabled',
+    path: '/components/date-picker',
+    detail: 'components/date-picker/examples/disabled.example.ts',
+    terms:
+      'date-picker hell-date-picker hell-date-range-picker disabled state grid navigation aria-disabled',
+  },
+  {
+    title: 'Date Picker: Localized',
+    path: '/components/date-picker',
+    detail: 'components/date-picker/examples/localized.example.ts',
+    terms:
+      'date-picker hell-date-picker locale firstDayOfWeek de-DE Monday BCP-47 Intl weekday headers international',
+  },
+  {
+    title: 'Date Picker: Range',
+    path: '/components/date-picker',
+    detail: 'components/date-picker/examples/range.example.ts',
+    terms:
+      'date-picker hell-date-range-picker startDate endDate startDateChange endDateChange range-between booking report period',
+  },
+  {
+    title: 'Date Picker: Styling',
+    path: '/components/date-picker',
+    detail: 'components/date-picker/examples/styling.example.ts',
+    terms:
+      'date-picker hell-date-range-picker ui HellDateRangePickerUi part style map root header nav navButton label grid weekdayHeader cell dateButton data-selected data-range-between tokens all-parts',
+  },
+  {
+    title: 'Date Picker: With popover',
+    path: '/components/date-picker',
+    detail: 'components/date-picker/examples/with-popover.example.ts',
+    terms:
+      'date-picker with-popover composite hell-date-range-picker hellButton hellPopover hellPopoverTrigger hell-icon block placement min ui trip dates booking field',
+  },
+  {
+    title: 'Dialog: Basic',
+    path: '/components/dialog',
+    detail: 'components/dialog/examples/basic.example.ts',
+    terms:
+      'hellDialogTrigger hellDialogOverlay hellDialog hellDialogTitle hellDialogDescription hellCardHeader hellCardBody hellCardFooter hellButton close template-context confirm modal smallest usage',
+  },
+  {
+    title: 'Dialog: Dismissal',
+    path: '/components/dialog',
+    detail: 'components/dialog/examples/dismissal.example.ts',
+    terms:
+      'closeOnEscape closeOnOutsideClick hellDialogTrigger hellDialogOverlay hellDialog hellButton guard escape outside-click force decision NgpDismissGuard',
+  },
+  {
+    title: 'Dialog: With field, input, and button',
+    path: '/components/dialog',
+    detail: 'components/dialog/examples/edit-record.example.ts',
+    terms:
+      'edit-record hellDialogTrigger hellDialogData closed hellDialog hellField hellFieldLabel hellFieldDescription hellInput hellTextarea hellButton hellCardHeader hellCardBody hellCardFooter form submit close result composite edit modal customer record',
+  },
+  {
+    title: 'Dialog: Scoped',
+    path: '/components/dialog',
+    detail: 'components/dialog/examples/scoped.example.ts',
+    terms:
+      'hellDialogScope hellDialogOverlay hellDialogTrigger hellDialog hellButton region backdrop app-shell hellAppContent interactive chrome inset',
+  },
+  {
+    title: 'Dialog: Sizes',
+    path: '/components/dialog',
+    detail: 'components/dialog/examples/sizes.example.ts',
+    terms:
+      'hellDialog size hellDialogTrigger hellDialogData hellDialogOverlay hellDialogTitle hellDialogDescription hellButton HellSize sm md lg xl max-width ref.data',
+  },
+  {
+    title: 'Dialog: Styling',
+    path: '/components/dialog',
+    detail: 'components/dialog/examples/styling.example.ts',
+    terms:
+      'ui HellDialogUi HellDialogOverlayUi part style map hellDialogOverlay hellDialog hellDialogTitle hellDialogDescription root shorthand bg-hell-danger-soft rounded-hell-xl text-hell-danger-strong border-hell-danger tailwind refine',
+  },
+  {
+    title: 'Dialpad: Styling (all parts)',
+    path: '/components/dialpad',
+    detail: 'components/dialpad/examples/all-parts-styling.example.ts',
+    terms:
+      'all-parts hell-dialpad ui HellDialpadUi root display displayLabel numberInput controls clearButton backspaceButton grid keyButton digit letters lowerGrid callButton part style map',
+  },
+  {
+    title: 'Dialpad: Basic',
+    path: '/components/dialpad',
+    detail: 'components/dialpad/examples/basic.example.ts',
+    terms:
+      'hell-dialpad valueChange call uncontrolled default anatomy',
+  },
+  {
+    title: 'Dialpad: With button and card',
+    path: '/components/dialpad',
+    detail: 'components/dialpad/examples/call-console.example.ts',
+    terms:
+      'call-console hell-dialpad hellButton hellCard hellCardHeader hellCardBody hellCardFooter hellTag composite call console dial hang up readOnly',
+  },
+  {
+    title: 'Dialpad: States',
+    path: '/components/dialpad',
+    detail: 'components/dialpad/examples/states.example.ts',
+    terms:
+      'hell-dialpad disabled readOnly invalid showCallButton hellToggleGroup hellToggleGroupItem toggle multiple',
+  },
+  {
+    title: 'Drop Zone: Basic',
+    path: '/components/drop-zone',
+    detail: 'components/drop-zone/examples/basic.example.ts',
+    terms:
+      'drop-zone components/drop-zone/examples/basic.example components/drop-zone hellDropzone files upload smallest usage',
+  },
+  {
+    title: 'Drop Zone: Disabled',
+    path: '/components/drop-zone',
+    detail: 'components/drop-zone/examples/disabled.example.ts',
+    terms:
+      'drop-zone components/drop-zone/examples/disabled.example components/drop-zone hellDropzone state',
+  },
+  {
+    title: 'Drop Zone: Native Input',
+    path: '/components/drop-zone',
+    detail: 'components/drop-zone/examples/native-input.example.ts',
+    terms:
+      'drop-zone native-input components/drop-zone/examples/native-input.example components/drop-zone hellDropzone nativeInput HTMLInputElement consumer-owned seam',
+  },
+  {
+    title: 'Drop Zone: Restricted',
+    path: '/components/drop-zone',
+    detail: 'components/drop-zone/examples/restricted.example.ts',
+    terms:
+      'drop-zone single-file images-only components/drop-zone/examples/restricted.example components/drop-zone hellDropzone multiple accept image pdf avatar id-scan',
+  },
+  {
+    title: 'Drop Zone: Styling',
+    path: '/components/drop-zone',
+    detail: 'components/drop-zone/examples/styling.example.ts',
+    terms:
+      'drop-zone all-parts components/drop-zone/examples/styling.example components/drop-zone hellDropzone ui Part Style Map data-slot root HellDropZoneUi tokens',
+  },
+  {
+    title: 'Drop Zone: Upload Queue',
+    path: '/components/drop-zone',
+    detail: 'components/drop-zone/examples/upload-queue.example.ts',
+    terms:
+      'drop-zone upload-queue composite components/drop-zone/examples/upload-queue.example components/drop-zone components/progress components/tag hellDropzone hellProgress hellProgressBar hellTag hellButton hellIcon invoices progress status',
+  },
+  {
+    title: 'Field: All Parts Styling',
+    path: '/components/field',
+    detail: 'components/field/examples/all-parts-styling.example.ts',
+    terms:
+      'all-parts-styling hellField hellFieldLabel hellFieldDescription hellFieldError hellInput ui part style map root every module hell-primary hell-danger-strong',
+  },
+  {
+    title: 'Field: Basic',
+    path: '/components/field',
+    detail: 'components/field/examples/basic.example.ts',
+    terms:
+      'hellField hellFieldLabel hellFieldDescription hellInput smallest realistic usage email',
+  },
+  {
+    title: 'Field: Orientation',
+    path: '/components/field',
+    detail: 'components/field/examples/orientation.example.ts',
+    terms:
+      'hellField hellFieldLabel hellFieldDescription hellCheckbox hellInput vertical horizontal ui gap',
+  },
+  {
+    title: 'Field: Validation',
+    path: '/components/field',
+    detail: 'components/field/examples/validation.example.ts',
+    terms:
+      'hellField hellFieldLabel hellFieldError hellFieldDescription hellInput invalid aria-invalid password error message',
+  },
+  {
+    title: 'Field: With Form Section',
+    path: '/components/field',
+    detail: 'components/field/examples/with-form-section.example.ts',
+    terms:
+      'with-form-section hellField hellFieldLabel hellFieldDescription hellCard hellCardHeader hellCardBody hellCheckbox hellInput hellNativeSelect invite teammate composite',
+  },
+  {
+    title: 'Flyout: All Parts Styling',
+    path: '/components/flyout',
+    detail: 'components/flyout/examples/all-parts-styling.example.ts',
+    terms:
+      'components/flyout/examples/all-parts-styling.example components/flyout hellFlyout hellFlyoutTrigger ui HellFlyoutUi HellFlyoutPart root Part Style Map data-slot bg-hell-primary-soft border-hell-primary rounded-hell-lg',
+  },
+  {
+    title: 'Flyout: Anchor And Boundary',
+    path: '/components/flyout',
+    detail: 'components/flyout/examples/anchor-and-boundary.example.ts',
+    terms:
+      'components/flyout/examples/anchor-and-boundary.example components/flyout hellFlyout hellFlyoutTrigger hellInput sibling input light-dismiss outside-click outside-focus escape',
+  },
+  {
+    title: 'Flyout: Basic',
+    path: '/components/flyout',
+    detail: 'components/flyout/examples/basic.example.ts',
+    terms:
+      'components/flyout/examples/basic.example components/flyout hellFlyout hellFlyoutTrigger openChange open show hide toggle non-modal light-dismiss anchored panel',
+  },
+  {
+    title: 'Flyout: Placement',
+    path: '/components/flyout',
+    detail: 'components/flyout/examples/placement.example.ts',
+    terms:
+      'components/flyout/examples/placement.example components/flyout hellFlyout hellFlyoutTrigger flip shift floating-ui top right bottom left viewport collision',
+  },
+  {
+    title: 'Flyout: With A Filters Panel',
+    path: '/components/flyout',
+    detail: 'components/flyout/examples/with-filters-panel.example.ts',
+    terms:
+      'components/flyout/examples/with-filters-panel.example components/flyout hellFlyout hellFlyoutTrigger hellCheckbox hellField hellFieldLabel hellTag hellButton hell-icon faSolidFilter composite toolbar status active count badge',
+  },
+  {
+    title: 'Icon: Basic',
+    path: '/components/icon',
+    detail: 'components/icon/examples/basic.example.ts',
+    terms:
+      'hell-icon HellIcon provideIcons faSolidCircleInfo smallest minimal usage',
+  },
+  {
+    title: 'Icon: Colors',
+    path: '/components/icon',
+    detail: 'components/icon/examples/colors.example.ts',
+    terms:
+      'color hell-icon HellIcon currentColor text-hell-success text-hell-info text-hell-warning text-hell-danger input faSolidCircleCheck faSolidCircleInfo faSolidTriangleExclamation faSolidXmark',
+  },
+  {
+    title: 'Icon: Sizes',
+    path: '/components/icon',
+    detail: 'components/icon/examples/sizes.example.ts',
+    terms:
+      'hell-icon HellIcon size input CSS length faSolidPhone em scaling',
+  },
+  {
+    title: 'Icon: Styling',
+    path: '/components/icon',
+    detail: 'components/icon/examples/styling.example.ts',
+    terms:
+      'all-parts hell-icon HellIcon HellIconUi HellIconPart ui shorthand map root part style pipeline faSolidBell bg-hell-primary-soft rounded-hell-sm text-hell-primary',
+  },
+  {
+    title: 'Icon: With Button And Tag',
+    path: '/components/icon',
+    detail: 'components/icon/examples/with-button-and-tag.example.ts',
+    terms:
+      'composite hell-icon HellIcon hellButton hellTag status glyph connection row trunk sip disabled faSolidCircleCheck faSolidPhone faSolidTriangleExclamation',
+  },
+  {
+    title: 'Input: All Parts Styling',
+    path: '/components/input',
+    detail: 'components/input/examples/all-parts-styling.example.ts',
+    terms:
+      'components/input/examples/all-parts-styling.example components/input hellInput hellNativeSelect hellTextarea ui HellInputUi HellNativeSelectUi HellTextareaUi data-slot root part style map recipe',
+  },
+  {
+    title: 'Input: Basic',
+    path: '/components/input',
+    detail: 'components/input/examples/basic.example.ts',
+    terms:
+      'components/input/examples/basic.example components/input hellInput hellField hellFieldLabel minimal simple usage text field',
+  },
+  {
+    title: 'Input: Select',
+    path: '/components/input',
+    detail: 'components/input/examples/select.example.ts',
+    terms:
+      'native components/input/examples/select.example components/input hellNativeSelect size sm md lg invalid disabled dropdown chevron',
+  },
+  {
+    title: 'Input: Sizes And States',
+    path: '/components/input',
+    detail: 'components/input/examples/sizes.example.ts',
+    terms:
+      'components/input/examples/sizes.example components/input hellInput size sm md lg invalid disabled aria-invalid',
+  },
+  {
+    title: 'Input: Textarea',
+    path: '/components/input',
+    detail: 'components/input/examples/textarea.example.ts',
+    terms:
+      'components/input/examples/textarea.example components/input hellTextarea size sm md lg invalid resize multiline notes',
+  },
+  {
+    title: 'Input: With Search Icon',
+    path: '/components/input',
+    detail: 'components/input/examples/with-search-icon.example.ts',
+    terms:
+      'field composite components/input/examples/with-search-icon.example components/input hellInput hellField hellFieldLabel hellFieldDescription hell-icon HellIcon prefix clear button provideIcons faSolidMagnifyingGlass faSolidXmark',
+  },
+  {
+    title: 'Listbox: With search and card',
+    path: '/components/listbox',
+    detail: 'components/listbox/examples/assignment-picker.example.ts',
+    terms:
+      'composite assignment picker hellCard hellSearch hellListbox hell-avatar teammate filter client-side',
+  },
+  {
+    title: 'Listbox: Basic',
+    path: '/components/listbox',
+    detail: 'components/listbox/examples/basic.example.ts',
+    terms:
+      'hellListbox hellListboxOption single-select assign owner value valueChange aria-labelledby',
+  },
+  {
+    title: 'Listbox: Multiple selection',
+    path: '/components/listbox',
+    detail: 'components/listbox/examples/multiple.example.ts',
+    terms:
+      'mode hellListbox hellListboxOption disabled launch checks checklist multi-select',
+  },
+  {
+    title: 'Listbox: Sections',
+    path: '/components/listbox',
+    detail: 'components/listbox/examples/sections.example.ts',
+    terms:
+      'hellListboxSection hellListboxHeader grouping region picker role group aria-labelledby',
+  },
+  {
+    title: 'Listbox: Styling',
+    path: '/components/listbox',
+    detail: 'components/listbox/examples/styling.example.ts',
+    terms:
+      'ui part style map hellListbox hellListboxOption hellListboxSection hellListboxHeader root data-active refinement tokens',
+  },
+  {
+    title: 'Menu: Basic',
+    path: '/components/menu',
+    detail: 'components/menu/examples/basic.example.ts',
+    terms:
+      'hellButton hellMenuTrigger hellMenu hellMenuItem hellMenuSeparator overflow actions row disabled item trigger ng-template',
+  },
+  {
+    title: 'Menu: Checkable items',
+    path: '/components/menu',
+    detail: 'components/menu/examples/checkable.example.ts',
+    terms:
+      'hellButton hellMenuTrigger hellMenu hellMenuSection hellMenuLabel hellMenuItemCheckbox hellMenuItemRadioGroup hellMenuItemRadio hellMenuItemIndicator hellMenuSeparator checkbox radio group preferences toggle multi-select single-choice checked valueChange',
+  },
+  {
+    title: 'Menu: With avatar (account menu)',
+    path: '/components/menu',
+    detail: 'components/menu/examples/profile-menu.example.ts',
+    terms:
+      'profile-menu hellMenuTrigger hellMenu hellMenuSection hellMenuSeparator hellMenuItem hellMenuItemIcon hellMenuItemTrailing hell-avatar hell-icon composite bottom-end sign out header aria-label',
+  },
+  {
+    title: 'Menu: Icons, sections & submenus',
+    path: '/components/menu',
+    detail: 'components/menu/examples/sections.example.ts',
+    terms:
+      'hellButton hell-icon hellMenuTrigger hellMenu hellMenuSection hellMenuLabel hellMenuItem hellMenuItemIcon hellMenuItemTrailing hellSubmenuTrigger hellMenuSeparator submenu nested shortcut kbd hint grouped',
+  },
+  {
+    title: 'Menu: Styling (all parts)',
+    path: '/components/menu',
+    detail: 'components/menu/examples/styling.example.ts',
+    terms:
+      'hellButton hell-icon hellMenuTrigger hellMenu hellMenuSection hellMenuLabel hellMenuItem hellMenuItemIcon hellMenuItemTrailing hellMenuItemCheckbox hellMenuItemIndicator hellMenuItemRadioGroup hellMenuItemRadio hellMenuSeparator hellSubmenuTrigger ui part style map data-hover data-focus-visible bg-hell-primary-soft rounded-hell-lg refine',
+  },
+  {
+    title: 'Omnibar: Async search',
+    path: '/components/omnibar',
+    detail: 'components/omnibar/examples/async-search.example.ts',
+    terms:
+      'async-search components/omnibar/examples/async-search.example components/omnibar hell-omnibar searchSource searchFields searchLimit searchDebounce loadingTemplate loadingMessage searchError HellSearchSource HellSearchField abort signal hellOmnibarLeading hellOmnibarActions hellOmnibarAction pressed hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarItemIcon hellOmnibarItemText hellOmnibarItemSubtext hellOmnibarItemTrailing hellOmnibarFooter hell-icon HellIcon disabled item error footer remote backend',
+  },
+  {
+    title: 'Omnibar: Basic',
+    path: '/components/omnibar',
+    detail: 'components/omnibar/examples/basic.example.ts',
+    terms:
+      'components/omnibar/examples/basic.example components/omnibar hell-omnibar hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarItemText searchItems searchFields searchResultsChange submit value HELL_OMNIBAR_DIRECTIVES HellSearchField HellSearchResult local ranking command palette smallest usage',
+  },
+  {
+    title: 'Omnibar: Command palette with kbd',
+    path: '/components/omnibar',
+    detail: 'components/omnibar/examples/command-palette.example.ts',
+    terms:
+      'command-palette components/omnibar/examples/command-palette.example components/omnibar hell-omnibar hellKbd @hell-ui/angular/tag hotkey mod+k hellOmnibarLeading hellOmnibarTrailing hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarItemIcon hellOmnibarItemText hellOmnibarItemTrailing hell-icon HellIcon topbar grouped commands shortcut chips composite',
+  },
+  {
+    title: 'Omnibar: Global hotkey',
+    path: '/components/omnibar',
+    detail: 'components/omnibar/examples/hotkey.example.ts',
+    terms:
+      'components/omnibar/examples/hotkey.example components/omnibar hell-omnibar mod+k shortcut hellOmnibarTrailing hellKbd kbd @hell-ui/angular/tag hellOmnibarGroup hellOmnibarItem hellOmnibarItemText searchItems searchFields command palette',
+  },
+  {
+    title: 'Omnibar: Sizes',
+    path: '/components/omnibar',
+    detail: 'components/omnibar/examples/sizes.example.ts',
+    terms:
+      'components/omnibar/examples/sizes.example components/omnibar hell-omnibar size sm md lg data-size hellOmnibarGroup hellOmnibarItem hellOmnibarItemText searchItems searchFields HELL_OMNIBAR_DIRECTIVES control height density',
+  },
+  {
+    title: 'Omnibar: Styling all parts',
+    path: '/components/omnibar',
+    detail: 'components/omnibar/examples/styling.example.ts',
+    terms:
+      'components/omnibar/examples/styling.example components/omnibar hell-omnibar ui Part Style Map HellOmnibarUi HellOmnibarPart data-slot control inputWrap input clear panel actions results loading skeletonRow skeletonText empty hellOmnibarPanel hellOmnibarGroup hellOmnibarGroupLabel hellOmnibarItem hellOmnibarItemIcon hellOmnibarItemText hellOmnibarItemSubtext hellOmnibarItemTrailing hellOmnibarChip hellOmnibarChipRemove hellOmnibarActions hellOmnibarAction hell-icon HellIcon searchSource design tokens bg-hell-primary-soft rounded-hell',
+  },
+  {
+    title: 'Pagination: Basic',
+    path: '/components/pagination',
+    detail: 'components/pagination/examples/basic.example.ts',
+    terms:
+      'hell-pagination HellPaginationStrip page pageCount pageChange simple usage',
+  },
+  {
+    title: 'Pagination: Composing your own layout',
+    path: '/components/pagination',
+    detail: 'components/pagination/examples/composed.example.ts',
+    terms:
+      'composed custom hellPagination hellPaginationFirst hellPaginationPrev hellPaginationNext hellPaginationLast directive composition nav aria-label',
+  },
+  {
+    title: 'Pagination: Page Jump',
+    path: '/components/pagination',
+    detail: 'components/pagination/examples/jump.example.ts',
+    terms:
+      'mode select hellNativeSelect large set page-jump HellPaginationStrip hell-pagination',
+  },
+  {
+    title: 'Pagination: Previous / Next',
+    path: '/components/pagination',
+    detail: 'components/pagination/examples/previous-next.example.ts',
+    terms:
+      'previous-next mode compact status aria-live HellPaginationStrip hell-pagination boundary disabled',
+  },
+  {
+    title: 'Pagination: Styling',
+    path: '/components/pagination',
+    detail: 'components/pagination/examples/styling.example.ts',
+    terms:
+      'ui Part Style Map HellPaginationFirstUi HellPaginationPrevUi HellPaginationButtonUi HellPaginationNextUi HellPaginationLastUi HellPaginationStripUi root control controlGlyph jump jumpLabel jumpSelect jumpTotal status all-parts tokens',
+  },
+  {
+    title: 'Pagination: With table and page size',
+    path: '/components/pagination',
+    detail: 'components/pagination/examples/with-table.example.ts',
+    terms:
+      'rows per hellNativeSelect HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableCell composite invoices',
+  },
+  {
+    title: 'Pdf Viewer: Basic',
+    path: '/components/pdf-viewer',
+    detail: 'components/pdf-viewer/examples/basic.example.ts',
+    terms:
+      'pdf-viewer hell-pdf-viewer HellPdfViewer src worker fileName smallest usage lazy stylesheet loader document',
+  },
+  {
+    title: 'Pdf Viewer: With Split View And Card',
+    path: '/components/pdf-viewer',
+    detail: 'components/pdf-viewer/examples/document-review.example.ts',
+    terms:
+      'pdf-viewer document-review composite hell-pdf-viewer HellPdfViewer hell-split-view hellSplitPrimary hellSplitDetail HELL_SPLIT_VIEW_DIRECTIVES hellCard hellCardHeader hellCardBody hellCardFooter HELL_CARD_DIRECTIVES hellButton hell-icon HellIcon hellTag master detail review queue approve invoice',
+  },
+  {
+    title: 'Pdf Viewer: Events And Error Handling',
+    path: '/components/pdf-viewer',
+    detail: 'components/pdf-viewer/examples/events.example.ts',
+    terms:
+      'pdf-viewer hell-pdf-viewer HellPdfViewer hellButton loaded pageChange zoomChange totalPages fallback open in new tab outputs',
+  },
+  {
+    title: 'Pdf Viewer: Initial View',
+    path: '/components/pdf-viewer',
+    detail: 'components/pdf-viewer/examples/initial-view.example.ts',
+    terms:
+      'pdf-viewer initial-view hell-pdf-viewer HellPdfViewer initialPage initialZoom page-width preset zoom starting page state',
+  },
+  {
+    title: 'Pdf Viewer: Lazy Loading',
+    path: '/components/pdf-viewer',
+    detail: 'components/pdf-viewer/examples/lazy-route.example.ts',
+    terms:
+      'pdf-viewer lazy-route hell-pdf-viewer HellPdfViewer RouterOutlet router-outlet Routes loadComponent feature route bundle pdfjs stylesheet on demand',
+  },
+  {
+    title: 'Pdf Viewer: Styling',
+    path: '/components/pdf-viewer',
+    detail: 'components/pdf-viewer/examples/styling.example.ts',
+    terms:
+      'pdf-viewer all-parts hell-pdf-viewer HellPdfViewer HellPdfViewerUi ui part style map root toolbar toolbarGroup divider pageInput toolbarText zoomSelect findBar findInput findCount viewport sidebar thumb thumbLabel pageArea',
+  },
+  {
+    title: 'Popover: All Parts Styling',
+    path: '/components/popover',
+    detail: 'components/popover/examples/all-parts-styling.example.ts',
+    terms:
+      'ui HellPopoverUi HellPopoverPart root part style map recipe refinement',
+  },
+  {
+    title: 'Popover: Basic',
+    path: '/components/popover',
+    detail: 'components/popover/examples/basic.example.ts',
+    terms:
+      'hellPopoverTrigger hellPopover simple usage button click status',
+  },
+  {
+    title: 'Popover: Dismissal',
+    path: '/components/popover',
+    detail: 'components/popover/examples/dismissal.example.ts',
+    terms:
+      'closeOnOutsideClick closeOnEscape hellSwitch confirmation delete destructive',
+  },
+  {
+    title: 'Popover: Placement',
+    path: '/components/popover',
+    detail: 'components/popover/examples/placement.example.ts',
+    terms:
+      'hellPopoverTrigger flip shift top right bottom left NgpPopoverPlacement floating-ui',
+  },
+  {
+    title: 'Popover: With Card',
+    path: '/components/popover',
+    detail: 'components/popover/examples/with-card.example.ts',
+    terms:
+      'composite hellCard hellCardBody hellCardFooter hell-avatar hellTag profile summary assignee reassign',
+  },
+  {
+    title: 'Progress: All Parts Styling',
+    path: '/components/progress',
+    detail: 'components/progress/examples/all-parts-styling.example.ts',
+    terms:
+      'all-parts hellProgress hellProgressBar ui part style map root bg-hell-success bg-hell-primary-soft h-hell-3 rounded-hell-md deployment',
+  },
+  {
+    title: 'Progress: Basic',
+    path: '/components/progress',
+    detail: 'components/progress/examples/basic.example.ts',
+    terms:
+      'hellProgress hellProgressBar determinate track fill upload value max simple',
+  },
+  {
+    title: 'Progress: Indeterminate',
+    path: '/components/progress',
+    detail: 'components/progress/examples/indeterminate.example.ts',
+    terms:
+      'hellProgress hellProgressBar null value unknown duration loading connecting data-indeterminate pulse animation',
+  },
+  {
+    title: 'Progress: Labeled Value',
+    path: '/components/progress',
+    detail: 'components/progress/examples/labeled-value.example.ts',
+    terms:
+      'labeled-value hellProgress hellProgressBar hellButton aria-labelledby storage used percentage signal stepper interactive text',
+  },
+  {
+    title: 'Progress: Thickness',
+    path: '/components/progress',
+    detail: 'components/progress/examples/thickness.example.ts',
+    terms:
+      'sizes hellProgress hellProgressBar ui height h-hell track thin thick',
+  },
+  {
+    title: 'Progress: With Job Status Card',
+    path: '/components/progress',
+    detail: 'components/progress/examples/with-job-status-card.example.ts',
+    terms:
+      'composite hellCard hellCardHeader hellCardBody hellProgress hellProgressBar hellTag export nightly running tag',
+  },
+  {
+    title: 'Radio: All Parts Styling',
+    path: '/components/radio',
+    detail: 'components/radio/examples/all-parts-styling.example.ts',
+    terms:
+      'ui part style map HellRadioGroupUi HellNativeRadioGroupUi hellRadioGroup hellRadio hellNativeRadioGroup hellNativeRadio root data-checked tailwind refinement',
+  },
+  {
+    title: 'Radio: Basic',
+    path: '/components/radio',
+    detail: 'components/radio/examples/basic.example.ts',
+    terms:
+      'hellRadioGroup hellRadio HellRadioIndicator ngpRadioIndicator digest frequency simplest usage exclusive choice',
+  },
+  {
+    title: 'Radio: Orientation and Disabled Options',
+    path: '/components/radio',
+    detail: 'components/radio/examples/horizontal.example.ts',
+    terms:
+      'horizontal hellRadioGroup hellRadio HellRadioIndicator t-shirt size arrow keys roving focus data-orientation',
+  },
+  {
+    title: 'Radio: Native Path',
+    path: '/components/radio',
+    detail: 'components/radio/examples/native.example.ts',
+    terms:
+      'hellNativeRadioGroup hellNativeRadio input type=radio priority checkedChange form semantics',
+  },
+  {
+    title: 'Radio: With Field and Card (Plan Picker)',
+    path: '/components/radio',
+    detail: 'components/radio/examples/plan-picker.example.ts',
+    terms:
+      'hellRadioGroup hellRadio hellCard hellCardHeader hellCardBody hellCardFooter hellField hellFieldLabel hellFieldDescription hellTag composite pricing tiers required validation',
+  },
+  {
+    title: 'Resizable: Basic',
+    path: '/components/resizable',
+    detail: 'components/resizable/examples/basic.example.ts',
+    terms:
+      'hellResizable hellResizablePane hellResizableHandle two-pane divider drag keyboard arrow-keys smallest usage default hairline',
+  },
+  {
+    title: 'Resizable: Grip handle',
+    path: '/components/resizable',
+    detail: 'components/resizable/examples/grip-handle.example.ts',
+    terms:
+      'grip-handle hellResizable hellResizablePane hellResizableHandle appearance pill three-dot indicator navigator preview affordance',
+  },
+  {
+    title: 'Resizable: With card and table',
+    path: '/components/resizable',
+    detail: 'components/resizable/examples/inspector.example.ts',
+    terms:
+      'inspector hellResizable hellResizablePane hellResizableHandle hellCard hellCardHeader hellCardBody hellTableContainer hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableHeaderCell hellTableCell hellTag aria-controls list detail composite grip appearance selection',
+  },
+  {
+    title: 'Resizable: Minimum sizes',
+    path: '/components/resizable',
+    detail: 'components/resizable/examples/min-sizes.example.ts',
+    terms:
+      'min-sizes hellResizable hellResizablePane hellResizableHandle minSize initialFlex three panes sidebar main inspector constrained adjacent rebalance',
+  },
+  {
+    title: 'Resizable: Styling',
+    path: '/components/resizable',
+    detail: 'components/resizable/examples/styling.example.ts',
+    terms:
+      'hellResizable hellResizablePane hellResizableHandle ui part style map HellResizableHandleUi root grip all-parts appearance design tokens rounded-hell bg-hell',
+  },
+  {
+    title: 'Resizable: Vertical orientation',
+    path: '/components/resizable',
+    detail: 'components/resizable/examples/vertical.example.ts',
+    terms:
+      'hellResizable hellResizablePane hellResizableHandle stacked panes row-resize initialFlex editor console',
+  },
+  {
+    title: 'Search: Basic',
+    path: '/components/search',
+    detail: 'components/search/examples/basic.example.ts',
+    terms:
+      'hellSearch hellSearchClear hellInput HellButton HELL_SEARCH_DIRECTIVES filter list computed signal input clear',
+  },
+  {
+    title: 'Search: Empty State',
+    path: '/components/search',
+    detail: 'components/search/examples/empty-state.example.ts',
+    terms:
+      'empty-state hellSearch hellSearchClear data-empty escape clear icon HellIcon faSolidXmark iconOnly HELL_SEARCH_DIRECTIVES',
+  },
+  {
+    title: 'Search: Styling',
+    path: '/components/search',
+    detail: 'components/search/examples/styling.example.ts',
+    terms:
+      'ui part-style-map HellSearchUi HellSearchClearUi hellSearch hellSearchClear hellInput rounded-hell-pill bg-hell-surface-subtle rounded-hell-lg text-hell-danger all-parts',
+  },
+  {
+    title: 'Search: With Table Filter Toolbar',
+    path: '/components/search',
+    detail: 'components/search/examples/with-table-filter-toolbar.example.ts',
+    terms:
+      'composite hellSearch hellListbox hellListboxOption HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTableRoot hellTableRow hellTableHeaderCell hellTableCell hellTag invoices status',
+  },
+  {
+    title: 'Select: Basic',
+    path: '/components/select',
+    detail: 'components/select/examples/basic.example.ts',
+    terms:
+      'hellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption HELL_SELECT_DIRECTIVES placeholder disabled option valueChange single-choice dropdown trigger button',
+  },
+  {
+    title: 'Select: Multiple',
+    path: '/components/select',
+    detail: 'components/select/examples/multiple.example.ts',
+    terms:
+      'hellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hellTag HELL_SELECT_DIRECTIVES multi-select array selected count tags permissions',
+  },
+  {
+    title: 'Select: Preset',
+    path: '/components/select',
+    detail: 'components/select/examples/preset.example.ts',
+    terms:
+      'hell-select-basic HELL_SELECT_BASIC_DIRECTIVES hellField hellFieldLabel hellFieldDescription HELL_FIELD_DIRECTIVES options value placeholder valueChange form field region',
+  },
+  {
+    title: 'Select: Rich options',
+    path: '/components/select',
+    detail: 'components/select/examples/rich-options.example.ts',
+    terms:
+      'rich-options hellSelect hellSelectValue hellSelectPlaceholder hellSelectPortal hellSelectDropdown hellSelectOption hell-icon HellIcon provideIcons HELL_SELECT_DIRECTIVES compareWith object-values custom option markup icon description status',
+  },
+  {
+    title: 'Select: Styling',
+    path: '/components/select',
+    detail: 'components/select/examples/styling.example.ts',
+    terms:
+      'hell-select-basic HELL_SELECT_BASIC_DIRECTIVES HellSelectBasicUi ui part-style-map root trigger value placeholder dropdown option all-parts refine tokens rounded-hell bg-hell text-hell',
+  },
+  {
+    title: 'Select: With field and tag',
+    path: '/components/select',
+    detail: 'components/select/examples/with-field-status.example.ts',
+    terms:
+      'with-field-status hell-select-basic HELL_SELECT_BASIC_DIRECTIVES hellField hellFieldLabel hellFieldDescription hellFieldError HELL_FIELD_DIRECTIVES hellTag HellTagVariant hellButton composite form review decision status submit error',
+  },
+  {
+    title: 'Separator: All Parts Styling',
+    path: '/components/separator',
+    detail: 'components/separator/examples/all-parts-styling.example.ts',
+    terms:
+      'all-parts hellSeparator ui HellSeparatorUi root part shorthand map bg-hell-primary bg-hell-danger rounded-hell-full',
+  },
+  {
+    title: 'Separator: Basic',
+    path: '/components/separator',
+    detail: 'components/separator/examples/basic.example.ts',
+    terms:
+      'hellSeparator smallest realistic usage horizontal divider between two sections default spacing md',
+  },
+  {
+    title: 'Separator: Orientation',
+    path: '/components/separator',
+    detail: 'components/separator/examples/orientation.example.ts',
+    terms:
+      'hellSeparator horizontal vertical axis self-stretch height ancestor',
+  },
+  {
+    title: 'Separator: Spacing',
+    path: '/components/separator',
+    detail: 'components/separator/examples/spacing.example.ts',
+    terms:
+      'hellSeparator none xs sm md lg xl HellSize margin scale main axis',
+  },
+  {
+    title: 'Separator: With Card',
+    path: '/components/separator',
+    detail: 'components/separator/examples/with-card.example.ts',
+    terms:
+      'with-card hellSeparator hellCard hellCardHeader hellCardBody HELL_CARD_DIRECTIVES hellButton iconOnly hell-icon notification settings list composite',
+  },
+  {
+    title: 'Skeleton: All Parts Styling',
+    path: '/components/skeleton',
+    detail: 'components/skeleton/examples/all-parts-styling.example.ts',
+    terms:
+      'all-parts-styling hellSkeleton hellSpinner HellSkeletonUi HellSpinnerUi ui part style map root',
+  },
+  {
+    title: 'Skeleton: Basic',
+    path: '/components/skeleton',
+    detail: 'components/skeleton/examples/basic.example.ts',
+    terms:
+      'hellSkeleton simplest usage placeholder text line',
+  },
+  {
+    title: 'Skeleton: Shapes',
+    path: '/components/skeleton',
+    detail: 'components/skeleton/examples/shapes.example.ts',
+    terms:
+      'hellSkeleton shape text circle rect radius',
+  },
+  {
+    title: 'Skeleton: Text Block',
+    path: '/components/skeleton',
+    detail: 'components/skeleton/examples/text-block.example.ts',
+    terms:
+      'text-block hellSkeleton paragraph placeholder staggered widths prose',
+  },
+  {
+    title: 'Skeleton: With Card Avatar',
+    path: '/components/skeleton',
+    detail: 'components/skeleton/examples/with-card-avatar.example.ts',
+    terms:
+      'with-card-avatar hellSkeleton hellCard hellCardHeader hellCardBody hellCardFooter hell-avatar hellButton HellAvatar loading composite aria-busy',
+  },
+  {
+    title: 'Slider: Basic',
+    path: '/components/slider',
+    detail: 'components/slider/examples/basic.example.ts',
+    terms:
+      'components/slider/examples/basic.example components/slider hell-slider hellField hellFieldLabel valueChange volume min max step signal',
+  },
+  {
+    title: 'Slider: Disabled',
+    path: '/components/slider',
+    detail: 'components/slider/examples/disabled.example.ts',
+    terms:
+      'components/slider/examples/disabled.example components/slider hell-slider hellField hellFieldLabel',
+  },
+  {
+    title: 'Slider: Thumb visibility and grow',
+    path: '/components/slider',
+    detail: 'components/slider/examples/modes.example.ts',
+    terms:
+      'modes hover components/slider/examples/modes.example components/slider hell-slider hellField hellFieldLabel media seek bar tactile',
+  },
+  {
+    title: 'Slider: Orientation',
+    path: '/components/slider',
+    detail: 'components/slider/examples/orientation.example.ts',
+    terms:
+      'vertical horizontal components/slider/examples/orientation.example components/slider hell-slider fader',
+  },
+  {
+    title: 'Slider: Sizes',
+    path: '/components/slider',
+    detail: 'components/slider/examples/sizes.example.ts',
+    terms:
+      'components/slider/examples/sizes.example components/slider hell-slider size sm md lg aria-label',
+  },
+  {
+    title: 'Slider: Styling',
+    path: '/components/slider',
+    detail: 'components/slider/examples/styling.example.ts',
+    terms:
+      'ui Part Style Map data-slot root track range thumb HellSliderPart HellSliderUi components/slider/examples/styling.example components/slider hell-slider quota',
+  },
+  {
+    title: 'Slider: With field and input',
+    path: '/components/slider',
+    detail: 'components/slider/examples/with-field-input.example.ts',
+    terms:
+      'with-field-input threshold numeric echo components/slider/examples/with-field-input.example components/slider hell-slider hellField hellFieldLabel hellFieldDescription hellInput CPU alert composite',
+  },
+  {
+    title: 'Spinner: Styling all parts',
+    path: '/components/spinner',
+    detail: 'components/spinner/examples/all-parts-styling.example.ts',
+    terms:
+      'hellSpinner hellSkeleton HellSpinnerUi HellSkeletonUi ui part style map root text-hell bg-hell rounded-hell refinement',
+  },
+  {
+    title: 'Spinner: Basic',
+    path: '/components/spinner',
+    detail: 'components/spinner/examples/basic.example.ts',
+    terms:
+      'hellSpinner minimal smallest usage span indeterminate loading',
+  },
+  {
+    title: 'Spinner: Inside a button',
+    path: '/components/spinner',
+    detail: 'components/spinner/examples/inside-a-button.example.ts',
+    terms:
+      'hellSpinner hellButton disabled saving loading pending icon-only currentColor',
+  },
+  {
+    title: 'Spinner: Sizes',
+    path: '/components/spinner',
+    detail: 'components/spinner/examples/sizes.example.ts',
+    terms:
+      'hellSpinner size xs sm md lg xl font-size em custom scale',
+  },
+  {
+    title: 'Spinner: Variants',
+    path: '/components/spinner',
+    detail: 'components/spinner/examples/variants.example.ts',
+    terms:
+      'hellSpinner variant ring dots bars pulse animation style',
+  },
+  {
+    title: 'Spinner: With card',
+    path: '/components/spinner',
+    detail: 'components/spinner/examples/with-card-pending-action.example.ts',
+    terms:
+      'pending action hellSpinner hellButton hellCard hellCardHeader hellCardBody hellCardFooter HELL_CARD_DIRECTIVES confirm renewal subscription signal composite',
+  },
+  {
+    title: 'Split View: All parts styling',
+    path: '/components/split-view',
+    detail: 'components/split-view/examples/all-parts-styling.example.ts',
+    terms:
+      'split-view all-parts-styling hell-split-view hellSplitPrimary hellSplitDetail HELL_SPLIT_VIEW_DIRECTIVES ui HellSplitViewUi root resizable screen pane compactHeader backButton detailHeader itemNavigation part style map tokens',
+  },
+  {
+    title: 'Split View: Basic',
+    path: '/components/split-view',
+    detail: 'components/split-view/examples/basic.example.ts',
+    terms:
+      'split-view hell-split-view hellSplitPrimary hellSplitDetail HELL_SPLIT_VIEW_DIRECTIVES detailOpen detailOpenChange framed height master detail resizable compact smallest usage',
+  },
+  {
+    title: 'Split View: Item navigation',
+    path: '/components/split-view',
+    detail: 'components/split-view/examples/item-navigation.example.ts',
+    terms:
+      'split-view item-navigation hell-split-view hellSplitPrimary hellSplitDetail HELL_SPLIT_VIEW_DIRECTIVES itemNavigation previousItem nextItem previousItemDisabled nextItemDisabled previousItemLabel nextItemLabel itemNavigationLabel prev next detail',
+  },
+  {
+    title: 'Split View: With table and card',
+    path: '/components/split-view',
+    detail: 'components/split-view/examples/master-detail.example.ts',
+    terms:
+      'split-view master-detail hell-split-view hellSplitPrimary hellSplitDetail HELL_SPLIT_VIEW_DIRECTIVES hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableHeaderCell hellTableCell hellTableRowAction HELL_TABLE_UTILITIES_DIRECTIVES hellCard hellCardHeader hellCardBody HELL_CARD_DIRECTIVES hellTag itemNavigation active tickets composite master detail',
+  },
+  {
+    title: 'Split View: Sizing',
+    path: '/components/split-view',
+    detail: 'components/split-view/examples/sizing.example.ts',
+    terms:
+      'split-view hell-split-view hellSplitPrimary hellSplitDetail HELL_SPLIT_VIEW_DIRECTIVES compactBelow primaryFlex detailFlex primaryMinSize detailMinSize height framed pane ratio breakpoint',
+  },
+  {
+    title: 'Switch: Styling (all parts)',
+    path: '/components/switch',
+    detail: 'components/switch/examples/all-parts-styling.example.ts',
+    terms:
+      'all-parts hellSwitch hellNativeSwitch ui HellSwitchUi root thumb part-style-map tailwind bg-hell-danger bg-hell-success rounded-hell-sm',
+  },
+  {
+    title: 'Switch: Basic',
+    path: '/components/switch',
+    detail: 'components/switch/examples/basic.example.ts',
+    terms:
+      'hellSwitch button checked checkedChange label notifications toggle immediate',
+  },
+  {
+    title: 'Switch: Native path',
+    path: '/components/switch',
+    detail: 'components/switch/examples/native.example.ts',
+    terms:
+      'hellNativeSwitch checkbox role=switch required checkedChange forms auto-renew',
+  },
+  {
+    title: 'Switch: With field and card',
+    path: '/components/switch',
+    detail: 'components/switch/examples/settings-list.example.ts',
+    terms:
+      'settings-list hellSwitch hellCard hellCardHeader hellCardBody hellField hellFieldLabel hellFieldDescription hell-icon provideIcons faSolidWifi faSolidVolumeHigh faSolidMoon composite device settings wifi sound focus-mode disabled',
+  },
+  {
+    title: 'Switch: States',
+    path: '/components/switch',
+    detail: 'components/switch/examples/states.example.ts',
+    terms:
+      'hellSwitch checked disabled off on disabled-on aria-label',
   },
   {
     title: 'Table: Basic',
     path: '/components/table',
     detail: 'components/table/examples/basic-table.example.ts',
     terms:
-      'table basic components/table/examples/basic-table.example components/table hellTableRoot hellTableContainer default native table',
+      'components/table/examples/basic-table.example components/table hellTableContainer hellTableRoot hellTableHeader hellTableRow hellTableHeaderCell hellTableBody hellTableCell native smallest usage invoices',
   },
   {
-    title: 'Table: Primitive Table',
+    title: 'Table: Interactive primitives',
     path: '/components/table',
     detail: 'components/table/examples/primitive-table.example.ts',
     terms:
-      'table primitive components/table/examples/primitive-table.example components/table hellTable HELL_TABLE_UTILITIES_DIRECTIVES native table sort trigger resize handle row action selection controls',
+      'primitive components/table/examples/primitive-table.example components/table HELL_TABLE_UTILITIES_DIRECTIVES hellTableHeaderCell sortable sort sortToggle hellTableSortTrigger hellTableRow active selected hellTableSelectionCell hellTableRowRadio hellTableRowAction hell-icon selection row action',
   },
   {
-    title: 'Table: TanStack Shell',
+    title: 'Table: Styling (all parts)',
+    path: '/components/table',
+    detail: 'components/table/examples/styling.example.ts',
+    terms:
+      'components/table/examples/styling.example components/table part style map ui HellTableResizeHandleUi hellTableContainer hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableHeaderCell hellTableSortTrigger hellTableCell hellTableSelectionCell hellTableRowCheckbox hellTableRowAction hellTableResizeHandle grip hell-icon design tokens rounded-hell bg-hell text-hell',
+  },
+  {
+    title: 'Table: With TanStack, search, filters, and pagination',
     path: '/components/table',
     detail: 'components/table/examples/tanstack-shell.example.ts',
     terms:
-      'table tanstack shell components/table/examples/tanstack-shell.example components/table hell-tanstack-table HellTanStackTable HellTableStatus hellTableShellCell hellTableShellToolbar hellTableShellFooter hell-tanstack-pagination HellPaginationStrip omnibar menu filters sort split view master detail pagination filtering flexRender',
+      'shell composite components/table/examples/tanstack-shell.example components/table hell-tanstack-table HellTanStackTable HellTableStatus hellTableShellCell hellTableShellToolbar hellTableShellFooter hellTableShellLoading hellTableShellEmpty hellTableShellError hell-tanstack-pagination HellTanStackPagination hellTableRowRadio hell-omnibar hellMenu hell-split-view omnibar menu split view master detail sorting server-side manual flexRender columnDef meta hell',
   },
   {
-    title: 'Table: TanStack Virtual Rows',
+    title: 'Table: Virtual rows and expansion',
     path: '/components/table',
     detail: 'components/table/examples/tanstack-virtual.example.ts',
     terms:
-      'table tanstack virtual rows components/table/examples/tanstack-virtual.example components/table @hell-ui/angular/table-tanstack/virtual hellTanStackVirtualRows HellTanStackVirtualRows hellTableShellExpandedRow omnibar menu filters sort expanded rows TanStack Virtual',
+      'tanstack components/table/examples/tanstack-virtual.example components/table @hell-ui/angular/table-tanstack/virtual hellTanStackVirtualRows virtualEstimateRowSize virtualOverscan hellTableShellExpandedRow hellTableShellCell hellTableShellToolbar hell-tanstack-table hell-omnibar hellMenu expanded',
   },
   {
-    title: 'Pdf Viewer: Lazy Loading',
-    path: '/components/pdf-viewer',
-    detail: 'components/pdf-viewer/examples/lazy-loading.example.ts',
+    title: 'Tabs: Basic',
+    path: '/components/tabs',
+    detail: 'components/tabs/examples/basic.example.ts',
     terms:
-      'pdf-viewer lazy-loading components/pdf-viewer/examples/lazy-loading.example components/pdf-viewer hell-pdf-viewer pdfjs lazy loadComponent dynamic import feature route stylesheet experimental beta app-surface recipe',
+      'hellTabset hellTabList hellTab hellTabPanel HELL_TABS_DIRECTIVES account settings general security billing simplest usage',
   },
   {
-    title: 'Pdf Viewer: Live Demo',
-    path: '/components/pdf-viewer',
-    detail: 'components/pdf-viewer/examples/live-demo.example.ts',
+    title: 'Tabs: Disabled Tabs',
+    path: '/components/tabs',
+    detail: 'components/tabs/examples/disabled.example.ts',
     terms:
-      'pdf-viewer live-demo components/pdf-viewer/examples/live-demo.example components/pdf-viewer hell-pdf-viewer pdfjs experimental beta app-surface recipe',
+      'hellTab invoice draft sent paid roving focus skip',
+  },
+  {
+    title: 'Tabs: Styling (All Parts)',
+    path: '/components/tabs',
+    detail: 'components/tabs/examples/styling.example.ts',
+    terms:
+      'ui Part Style Map HellTabsetUi hellTabset hellTabList hellTab hellTabPanel root rounded-hell bg-hell text-hell refinement ticket queues',
+  },
+  {
+    title: 'Tabs: Vertical Orientation',
+    path: '/components/tabs',
+    detail: 'components/tabs/examples/vertical.example.ts',
+    terms:
+      'activateOnFocus manual activation settings profile notifications integrations arrow keys',
+  },
+  {
+    title: 'Tabs: With Card and Tag',
+    path: '/components/tabs',
+    detail: 'components/tabs/examples/with-card.example.ts',
+    terms:
+      'hellCard hellCardHeader hellCardBody hellTag composite server metrics processes logs status detail sections',
+  },
+  {
+    title: 'Tag: Badge',
+    path: '/components/tag',
+    detail: 'components/tag/examples/badge.example.ts',
+    terms:
+      'hellBadge counter notification count numeric indicator',
+  },
+  {
+    title: 'Tag: Basic',
+    path: '/components/tag',
+    detail: 'components/tag/examples/basic.example.ts',
+    terms:
+      'hellTag variant status label simple smallest usage',
+  },
+  {
+    title: 'Tag: Keyboard Hint',
+    path: '/components/tag',
+    detail: 'components/tag/examples/keyboard-hint.example.ts',
+    terms:
+      'keyboard-hint hellKbd kbd shortcut keycap command palette',
+  },
+  {
+    title: 'Tag: Styling',
+    path: '/components/tag',
+    detail: 'components/tag/examples/styling.example.ts',
+    terms:
+      'hellTag hellBadge hellKbd ui HellTagUi HellBadgeUi HellKbdUi part style map root refinement all-parts tailwind hell design tokens',
+  },
+  {
+    title: 'Tag: Variants',
+    path: '/components/tag',
+    detail: 'components/tag/examples/variants.example.ts',
+    terms:
+      'hellTag variant default primary info success warning danger color semantic',
+  },
+  {
+    title: 'Tag: With Table',
+    path: '/components/tag',
+    detail: 'components/tag/examples/with-table.example.ts',
+    terms:
+      'with-table hellTag hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableCell hellTableHeaderCell hell-avatar HellAvatar HELL_TABLE_UTILITIES_DIRECTIVES status column team member composite realistic',
+  },
+  {
+    title: 'Time Input: Basic',
+    path: '/components/time-input',
+    detail: 'components/time-input/examples/basic.example.ts',
+    terms:
+      'time-input hell-time-input hellField hellFieldLabel hellFieldDescription HellTimeInput smallest realistic usage reminder',
+  },
+  {
+    title: 'Time Input: Reactive Forms',
+    path: '/components/time-input',
+    detail: 'components/time-input/examples/reactive-forms.example.ts',
+    terms:
+      'time-input hell-time-input hellField FormControl ReactiveFormsModule ControlValueAccessor HellTimeValue meeting',
+  },
+  {
+    title: 'Time Input: Seconds And Validation',
+    path: '/components/time-input',
+    detail: 'components/time-input/examples/seconds-and-validation.example.ts',
+    terms:
+      'time-input hell-time-input hellField hellFieldError hellFieldDescription invalid disabled HellTimeInput HH:mm:ss log timestamp departure locked slot',
+  },
+  {
+    title: 'Time Input: Sizes',
+    path: '/components/time-input',
+    detail: 'components/time-input/examples/sizes.example.ts',
+    terms:
+      'time-input hell-time-input size sm md lg HellTimeInput control height',
+  },
+  {
+    title: 'Time Input: Styling',
+    path: '/components/time-input',
+    detail: 'components/time-input/examples/styling.example.ts',
+    terms:
+      'time-input hell-time-input ui HellTimeInputUi part style map root trigger triggerIcon pickerPanel pickerHeader pickerReadout pickerUnits pickerUnit pickerUnitLabel pickerUnitControl pickerUnitValue pickerUnitStep minutePresets minutePreset all-parts tailwind hell design tokens',
+  },
+  {
+    title: 'Time Input: With Field Schedule Row',
+    path: '/components/time-input',
+    detail: 'components/time-input/examples/with-field-schedule-row.example.ts',
+    terms:
+      'time-input hell-time-input hell-date-input hellField composite scheduling shift start end date',
+  },
+  {
+    title: 'Toast: Action',
+    path: '/components/toast',
+    detail: 'components/toast/examples/action.example.ts',
+    terms:
+      'hellButton HellToastService HellToastAction onClick dismiss undo label duration move to trash restore',
+  },
+  {
+    title: 'Toast: Basic',
+    path: '/components/toast',
+    detail: 'components/toast/examples/basic.example.ts',
+    terms:
+      'hellButton hell HellToastService svc.success duration description smallest usage notification feedback',
+  },
+  {
+    title: 'Toast: Stacking',
+    path: '/components/toast',
+    detail: 'components/toast/examples/stacking.example.ts',
+    terms:
+      'hellButton HellToastService burst collapse fan-out hover focus pause resume dismiss-all maxVisible duration 0 scrollable viewport deploy log',
+  },
+  {
+    title: 'Toast: Styling',
+    path: '/components/toast',
+    detail: 'components/toast/examples/styling.example.ts',
+    terms:
+      'hell-toaster HellToaster HellToastService HellToasterUi ui Part Style Map all parts root region viewport list glyph body title description action close toolbar dismissAll position top-center providers scoped service bg-hell-primary-soft text-hell-primary rounded-hell-xl data-slot',
+  },
+  {
+    title: 'Toast: Custom template',
+    path: '/components/toast',
+    detail: 'components/toast/examples/template.example.ts',
+    terms:
+      'hellButton hellToastTemplate HellToastService TemplateRef viewChild announcement duration persistent body let-ctx dismiss id context comment avatar',
+  },
+  {
+    title: 'Toast: Variants',
+    path: '/components/toast',
+    detail: 'components/toast/examples/variants.example.ts',
+    terms:
+      'hellButton HellToastService message success info warning error default danger variant data-variant glyph semantic color',
+  },
+  {
+    title: 'Toast: With button and progress',
+    path: '/components/toast',
+    detail: 'components/toast/examples/with-upload-progress.example.ts',
+    terms:
+      'with-upload-progress hellButton hellProgress hellProgressBar HellToastService hellToastTemplate TemplateRef viewChild signal id update in place async upload bar disabled success dismissible announcement composite',
+  },
+  {
+    title: 'Toggle: Basic',
+    path: '/components/toggle',
+    detail: 'components/toggle/examples/basic.example.ts',
+    terms:
+      'hellToggle standalone mute notify bell icon selected selectedChange aria-label press-toggle',
+  },
+  {
+    title: 'Toggle: Group Multiple',
+    path: '/components/toggle',
+    detail: 'components/toggle/examples/group-multiple.example.ts',
+    terms:
+      'hellToggleGroup hellToggleGroupItem type bold italic underline formatting aria-pressed',
+  },
+  {
+    title: 'Toggle: Group Single',
+    path: '/components/toggle',
+    detail: 'components/toggle/examples/group-single.example.ts',
+    terms:
+      'hellToggleGroup hellToggleGroupItem type align text alignment radio role aria-checked icon faSolidAlignLeft faSolidAlignCenter faSolidAlignRight',
+  },
+  {
+    title: 'Toggle: Sizes',
+    path: '/components/toggle',
+    detail: 'components/toggle/examples/sizes.example.ts',
+    terms:
+      'hellToggle HellSize xs sm md lg xl scale',
+  },
+  {
+    title: 'Toggle: Styling',
+    path: '/components/toggle',
+    detail: 'components/toggle/examples/styling.example.ts',
+    terms:
+      'all-parts ui shorthand HellToggleUi HellToggleGroupUi HellToggleGroupItemUi part style map root rounded-hell bg-hell text-hell border-hell data-selected',
+  },
+  {
+    title: 'Toggle: With Tooltip',
+    path: '/components/toggle',
+    detail: 'components/toggle/examples/with-tooltip.example.ts',
+    terms:
+      'composite hellToggleGroup hellToggleGroupItem hellTooltip hellTooltipTrigger formatting toolbar icon-only bold italic underline aria-label',
+  },
+  {
+    title: 'Tooltip: Styling',
+    path: '/components/tooltip',
+    detail: 'components/tooltip/examples/all-parts-styling.example.ts',
+    terms:
+      'ui part style map root HellTooltipUi HellTooltipPart hellTooltipTrigger hellTooltip hellButton bg-hell-primary rounded-hell-lg',
+  },
+  {
+    title: 'Tooltip: Basic',
+    path: '/components/tooltip',
+    detail: 'components/tooltip/examples/basic.example.ts',
+    terms:
+      'hellTooltipTrigger hellTooltip hellButton smallest usage hover',
+  },
+  {
+    title: 'Tooltip: Delay',
+    path: '/components/tooltip',
+    detail: 'components/tooltip/examples/delay.example.ts',
+    terms:
+      'showDelay hideDelay hellTooltipTrigger hellTooltip hellButton timing',
+  },
+  {
+    title: 'Tooltip: Hoverable content',
+    path: '/components/tooltip',
+    detail: 'components/tooltip/examples/hoverable.example.ts',
+    terms:
+      'hoverableContent hellTooltipTrigger hellTooltip hellButton hover-bridge',
+  },
+  {
+    title: 'Tooltip: Placement',
+    path: '/components/tooltip',
+    detail: 'components/tooltip/examples/placements.example.ts',
+    terms:
+      'placements top right bottom left hellTooltipTrigger hellTooltip hellButton floating-ui',
+  },
+  {
+    title: 'Tooltip: With icon buttons and shortcuts',
+    path: '/components/tooltip',
+    detail: 'components/tooltip/examples/with-toolbar.example.ts',
+    terms:
+      'toolbar button kbd shortcut hellTooltipTrigger hellTooltip hellButton hellIcon hellKbd iconOnly composite bold italic underline',
+  },
+  {
+    title: 'Getting Started: Button Demo',
+    path: '/getting-started',
+    detail: 'getting-started/examples/button-demo.example.ts',
+    terms:
+      'getting-started button-demo getting-started/examples/button-demo.example hellButton',
+  },
+  {
+    title: 'Theming: Scoped Theme Demo',
+    path: '/theming',
+    detail: 'theming/examples/scoped-theme-demo.example.ts',
+    terms:
+      'scoped-theme-demo theming/examples/scoped-theme-demo.example hellCard hellCardHeader hellTag hellCardBody hellButton',
   },
 ];
 

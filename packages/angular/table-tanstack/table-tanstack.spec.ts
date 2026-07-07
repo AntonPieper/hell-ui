@@ -23,6 +23,7 @@ import {
   HellTableShellExpandedRow,
   HellTableShellFooter,
   HellTableShellLoading,
+  HellTableShellToolbar,
 } from './table-tanstack';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellTanStackVirtualRows } from '@hell-ui/angular/table-tanstack/virtual';
@@ -173,10 +174,45 @@ class VirtualRowsHost {
 })
 class FilterHost extends ShellHost {}
 
+@Component({
+  selector: 'hell-test-styled-host',
+  standalone: true,
+  imports: [HellTanStackTable, HellTableShellToolbar, HellTableShellFooter, HellTanStackPagination],
+  template: `
+    <hell-tanstack-table
+      id="styled-shell"
+      [table]="table"
+      [ui]="{
+        root: 'rounded-none border-hell-danger',
+        toolbar: 'bg-hell-danger justify-end',
+        footer: 'bg-hell-danger justify-start',
+        scrollport: 'overflow-hidden',
+      }"
+    >
+      <span hellTableShellToolbar>Toolbar</span>
+      <hell-tanstack-pagination
+        hellTableShellFooter
+        id="styled-pagination"
+        [table]="table"
+        [pageSizeOptions]="[1, 2]"
+        [ui]="{ root: 'gap-hell-6', pageSize: 'bg-hell-danger whitespace-normal' }"
+      />
+    </hell-tanstack-table>
+  `,
+})
+class StyledShellHost extends ShellHost {}
+
 describe('Hell TanStack table shell', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ShellHost, ConflictHost, MissingStatusHost, VirtualRowsHost, FilterHost],
+      imports: [
+        ShellHost,
+        ConflictHost,
+        MissingStatusHost,
+        VirtualRowsHost,
+        FilterHost,
+        StyledShellHost,
+      ],
     }).compileComponents();
   });
 
@@ -291,7 +327,97 @@ describe('Hell TanStack table shell', () => {
       )?.style.getPropertyValue('--hell-table-virtual-total-size'),
     ).toBe('');
   });
+
+  it('exposes the shell chrome parts through public data-slot markers', () => {
+    const fixture = TestBed.createComponent(StyledShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const shell = query(root, '#styled-shell');
+    const toolbar = query(root, '#styled-shell [data-slot="toolbar"]');
+    const scrollport = query(root, '#styled-shell [data-slot="scrollport"]');
+    const footer = query(root, '#styled-shell [data-slot="footer"]');
+
+    expect(shell.getAttribute('data-slot')).toBe('root');
+    expect(toolbar.getAttribute('data-slot')).toBe('toolbar');
+    expect(scrollport.getAttribute('data-slot')).toBe('scrollport');
+    expect(footer.getAttribute('data-slot')).toBe('footer');
+
+    // Behavior/measurement markers are preserved alongside the public parts.
+    expect(shell.classList.contains('hell-tanstack-table')).toBe(false);
+    expect(toolbar.hasAttribute('data-hell-table-shell-toolbar')).toBe(true);
+    expect(scrollport.hasAttribute('data-hell-table-shell-scrollport')).toBe(true);
+    expect(footer.hasAttribute('data-hell-table-shell-footer')).toBe(true);
+  });
+
+  it('merges shell ui part maps and lets them win over recipe classes per part', () => {
+    const fixture = TestBed.createComponent(StyledShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const shell = query(root, '#styled-shell');
+    const toolbar = query(root, '#styled-shell [data-slot="toolbar"]');
+    const scrollport = query(root, '#styled-shell [data-slot="scrollport"]');
+    const footer = query(root, '#styled-shell [data-slot="footer"]');
+
+    // root: ui refinements merge in and win over conflicting recipe utilities.
+    expect(shell.classList.contains('block')).toBe(true);
+    expect(shell.classList.contains('rounded-none')).toBe(true);
+    expect(shell.classList.contains('rounded-md')).toBe(false);
+    expect(shell.classList.contains('border-hell-danger')).toBe(true);
+    expect(shell.classList.contains('border-hell-border')).toBe(false);
+
+    // toolbar: recipe border-bottom stays, background/justify overridden.
+    expect(toolbar.classList.contains('border-b')).toBe(true);
+    expect(toolbar.classList.contains('bg-hell-danger')).toBe(true);
+    expect(toolbar.classList.contains('bg-hell-surface-subtle')).toBe(false);
+    expect(toolbar.classList.contains('justify-end')).toBe(true);
+
+    // footer: recipe justify-end overridden to justify-start, background wins.
+    expect(footer.classList.contains('border-t')).toBe(true);
+    expect(footer.classList.contains('justify-start')).toBe(true);
+    expect(footer.classList.contains('justify-end')).toBe(false);
+    expect(footer.classList.contains('bg-hell-danger')).toBe(true);
+    expect(footer.classList.contains('bg-hell-surface-elevated')).toBe(false);
+
+    // scrollport: overflow-auto recipe replaced by overflow-hidden refinement.
+    expect(scrollport.classList.contains('overflow-hidden')).toBe(true);
+    expect(scrollport.classList.contains('overflow-auto')).toBe(false);
+    expect(scrollport.classList.contains('max-w-full')).toBe(true);
+  });
+
+  it('exposes pagination parts and lets ui maps win over recipe classes', () => {
+    const fixture = TestBed.createComponent(StyledShellHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const pagination = query(root, '#styled-pagination');
+    const pageSize = query(root, '#styled-pagination [data-slot="pageSize"]');
+
+    expect(pagination.getAttribute('data-slot')).toBe('root');
+    expect(pageSize.getAttribute('data-slot')).toBe('pageSize');
+    expect(pagination.classList.contains('hell-tanstack-pagination')).toBe(false);
+
+    // root: gap refinement wins over recipe gap.
+    expect(pagination.classList.contains('inline-flex')).toBe(true);
+    expect(pagination.classList.contains('gap-hell-6')).toBe(true);
+    expect(pagination.classList.contains('gap-hell-2')).toBe(false);
+
+    // pageSize: whitespace refinement wins over recipe whitespace-nowrap.
+    expect(pageSize.classList.contains('inline-flex')).toBe(true);
+    expect(pageSize.classList.contains('bg-hell-danger')).toBe(true);
+    expect(pageSize.classList.contains('whitespace-normal')).toBe(true);
+    expect(pageSize.classList.contains('whitespace-nowrap')).toBe(false);
+
+    // The rows-per-page select delegates to the nested hellNativeSelect root part.
+    const select = query(root, '#styled-pagination select[hellNativeSelect]');
+    expect(select.getAttribute('data-slot')).toBe('root');
+    expect(select.classList.contains('min-w-[calc(var(--spacing)*18)]')).toBe(true);
+  });
 });
+
+function query(root: HTMLElement, selector: string): HTMLElement {
+  const element = root.querySelector<HTMLElement>(selector);
+  if (!(element instanceof HTMLElement)) throw new Error(`Expected ${selector}.`);
+  return element;
+}
 
 function text(element: Element): string {
   return (element.textContent ?? '').replace(/\s+/g, ' ').trim();

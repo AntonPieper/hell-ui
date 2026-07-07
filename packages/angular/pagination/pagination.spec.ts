@@ -150,6 +150,7 @@ class PaginationUiHost {
   } satisfies HellPaginationLastUi;
   protected readonly stripUi = {
     root: 'gap-hell-4 bg-hell-surface-muted',
+    control: 'rounded-hell-pill px-hell-9',
     controlGlyph: 'text-hell-danger text-lg',
     jump: 'gap-hell-4 text-hell-danger',
     jumpSelect: 'min-w-[calc(var(--spacing)*24)]',
@@ -324,6 +325,8 @@ describe('HellPaginationStrip', () => {
     const stripGlyph = query(strip, '[data-slot="controlGlyph"]');
     const jump = query(strip, '[data-slot="jump"]');
     const jumpSelect = query(strip, '[data-slot="jumpSelect"]') as HTMLSelectElement;
+    const stripPrev = strip.querySelector('[hellPaginationPrev]') as HTMLButtonElement;
+    const stripNext = strip.querySelector('[hellPaginationNext]') as HTMLButtonElement;
 
     expect(pagination.classList.contains('hell-pagination')).toBe(false);
     expect(pagination.getAttribute('data-slot')).toBe('root');
@@ -359,6 +362,13 @@ describe('HellPaginationStrip', () => {
     expect(jumpSelect.className).toContain('min-w-[calc(var(--spacing)*24)]');
     expect(jumpSelect.className).toContain('h-hell-control-sm');
     expect(stripGlyph.className).toContain('text-hell-danger');
+
+    for (const control of [stripPrev, stripNext]) {
+      expect(control.getAttribute('data-slot')).toBe('control');
+      expect(control.className).toContain('rounded-hell-pill');
+      expect(control.className).toContain('px-hell-9');
+      expect(control.className).toContain('h-hell-control-sm');
+    }
   });
 });
 

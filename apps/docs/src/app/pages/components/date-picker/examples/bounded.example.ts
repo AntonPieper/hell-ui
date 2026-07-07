@@ -1,5 +1,5 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
-import { HellDatePicker, HellDateRangePicker } from '@hell-ui/angular/date-picker';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { HellDatePicker } from '@hell-ui/angular/date-picker';
 
 @Component({
   selector: 'app-date-picker-bounded-example',
@@ -7,19 +7,18 @@ import { HellDatePicker, HellDateRangePicker } from '@hell-ui/angular/date-picke
   imports: [HellDatePicker],
   template: `
     <hell-date-picker
-      [date]="bounded()"
-      (dateChange)="bounded.set($event)"
-      [min]="minDate"
-      [max]="maxDate"
+      [date]="date()"
+      [min]="min"
+      [max]="max"
+      (dateChange)="date.set($event)"
     />
-    <p class="hd-muted">{{ minDate.toDateString() }} → {{ maxDate.toDateString() }}</p>
+    <p class="hd-muted">
+      Allowed: {{ min.toDateString() }} to {{ max.toDateString() }}
+    </p>
   `,
 })
 export class DatePickerBoundedExample {
-  protected readonly single = signal<Date | undefined>(new Date(2026, 3, 22));
-  protected readonly bounded = signal<Date | undefined>(new Date(2026, 5, 15));
-  protected readonly rangeStart = signal<Date | undefined>(new Date(2026, 3, 5));
-  protected readonly rangeEnd = signal<Date | undefined>(new Date(2026, 3, 12));
-  protected readonly minDate = new Date(2026, 3, 1);
-  protected readonly maxDate = new Date(2026, 11, 31);
+  protected readonly min = new Date(2026, 3, 6);
+  protected readonly max = new Date(2026, 4, 15);
+  protected readonly date = signal<Date | undefined>(new Date(2026, 3, 22));
 }

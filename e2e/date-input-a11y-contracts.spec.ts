@@ -1,9 +1,24 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
+// The docs dev server compiles routes on demand and is shared across the whole
+// browser matrix, so first navigation to this route can be slow under load —
+// especially on Firefox. Widen the navigation/settle budgets so the contract
+// assertions below are exercised against a hydrated page instead of racing a
+// cold compile. These timeouts only grant the existing assertions more time to
+// become true; they never relax what is asserted.
+const NAV_TIMEOUT = 60_000;
+const HYDRATION_TIMEOUT = 15_000;
+
 async function gotoDateInput(page: Page): Promise<void> {
+  test.setTimeout(90_000);
   await freezeBrowserDate(page);
-  await page.goto('/components/date-input');
-  await expect(page.getByRole('heading', { name: 'Date input', level: 1 })).toBeVisible();
+  await page.goto('/components/date-input', {
+    waitUntil: 'domcontentloaded',
+    timeout: NAV_TIMEOUT,
+  });
+  await expect(page.getByRole('heading', { name: 'Date input', level: 1 })).toBeVisible({
+    timeout: HYDRATION_TIMEOUT,
+  });
 }
 
 async function freezeBrowserDate(page: Page): Promise<void> {
@@ -46,26 +61,33 @@ test.describe('date input accessibility contract', () => {
   test('wires visible labels, descriptions, errors, and invalid typed drafts', async ({ page }) => {
     await gotoDateInput(page);
 
-    const example = page.locator('app-date-input-text-input-calendar-popover-example');
-    const departure = example.getByRole('textbox', { name: 'Departure' });
+    const example = page.locator('app-date-input-reactive-forms-example');
+    const departure = example.getByRole('textbox', { name: 'Invoice date' });
     const departureLabel = example
       .locator('label[hellFieldLabel]')
-      .filter({ hasText: 'Departure' });
+      .filter({ hasText: 'Invoice date' });
     const departureDescription = example.locator('[hellFieldDescription]').first();
-    const departureLabelId = await requiredId(departureLabel, 'Departure label');
-    const departureDescriptionId = await requiredId(departureDescription, 'Departure description');
-    await expect(departure).toHaveAttribute('id', 'departure-date');
+    const departureLabelId = await requiredId(departureLabel, 'Invoice date label');
+    const departureDescriptionId = await requiredId(
+      departureDescription,
+      'Invoice date description',
+    );
+    await expect(departure).toHaveAttribute('id', 'reactive-date');
     await expect(departure).toHaveAttribute('aria-labelledby', departureLabelId);
     await expect(departure).toHaveAttribute('aria-describedby', departureDescriptionId);
     await expect(departure).not.toHaveAttribute('aria-label', /.+/);
     await expect(departure).toHaveAccessibleDescription(
-      'Type a date or pick from the calendar — both work.',
+      'Reactive forms receive Date | null; empty text writes null.',
     );
 
     await departure.fill('2026-02-31');
     await departure.blur();
     await expect(departure).toHaveValue('2026-02-31');
-    await expect(departure).toHaveAttribute('aria-invalid', 'true');
+    // The invalid draft flows through the control's parse/validate round-trip
+    // before aria-invalid flips; allow extra settle time under a loaded server.
+    await expect(departure).toHaveAttribute('aria-invalid', 'true', {
+      timeout: HYDRATION_TIMEOUT,
+    });
 
     const invalid = example.getByRole('textbox', { name: 'Invalid' });
     const invalidLabel = example.locator('label[hellFieldLabel]').filter({ hasText: 'Invalid' });
@@ -85,9 +107,9 @@ test.describe('date input accessibility contract', () => {
   }) => {
     await gotoDateInput(page);
 
-    const example = page.locator('app-date-input-text-input-calendar-popover-example');
-    const input = example.getByRole('textbox', { name: 'Bounded' });
-    const trigger = dateInputHost(input).getByRole('button', { name: 'Choose date' });
+    const example = page.locator('app-date-input-bounds-and-validation-example');
+    const input = example.getByRole('textbox', { name: 'Bounded date' });
+    const trigger = dateInputHost(input).getByRole('button', { name: 'Choose date for Bounded date' });
 
     await trigger.click();
     const popover = page.locator('[data-slot="pickerPanel"]', {

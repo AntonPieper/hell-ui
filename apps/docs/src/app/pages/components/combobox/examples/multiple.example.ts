@@ -1,18 +1,18 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
+import { HELL_COMBOBOX_DIRECTIVES, type HellComboboxValue } from '@hell-ui/angular/combobox';
 import { HellTag } from '@hell-ui/angular/tag';
 
-const TAGS = [
-  'angular',
-  'cdk',
-  'tailwind',
-  'typescript',
-  'rxjs',
-  'signals',
-  'forms',
-  'a11y',
-  'router',
-  'ssr',
+const LABELS = [
+  'billing',
+  'bug',
+  'compliance',
+  'design',
+  'docs',
+  'infra',
+  'onboarding',
+  'performance',
+  'security',
+  'support',
 ];
 
 @Component({
@@ -20,41 +20,43 @@ const TAGS = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [...HELL_COMBOBOX_DIRECTIVES, HellTag],
   template: `
-    <div style="display:flex; flex-direction:column; gap: 8px; max-width: 320px">
-      <div
-        hellCombobox
-        multiple
-        [value]="selected()"
-        (valueChange)="selected.set($event)"
-      >
+    <div class="flex max-w-80 flex-col gap-hell-2">
+      <div hellCombobox multiple [value]="selected()" (valueChange)="onValueChange($event)">
         <input
           hellComboboxInput
-          placeholder="Add tags…"
+          aria-label="Issue labels"
+          placeholder="Add labels…"
           (input)="filter.set(($any($event.target).value ?? '').toLowerCase())"
         />
-        <button hellComboboxButton type="button" aria-label="Toggle options"></button>
+        <button hellComboboxButton type="button" aria-label="Toggle labels"></button>
         <div *hellComboboxPortal hellComboboxDropdown>
           @for (option of filtered(); track option) {
             <div hellComboboxOption [value]="option">{{ option }}</div>
           } @empty {
-            <div hellComboboxEmpty>No matches</div>
+            <div hellComboboxEmpty>No labels match</div>
           }
         </div>
       </div>
 
-      <div style="display:flex; gap: 4px; flex-wrap: wrap">
-        @for (tag of selected(); track tag) {
-          <span hellTag variant="primary">{{ tag }}</span>
+      <div class="flex flex-wrap gap-hell-1">
+        @for (label of selected(); track label) {
+          <span hellTag variant="primary">{{ label }}</span>
+        } @empty {
+          <span class="text-xs text-hell-foreground-subtle">No labels applied</span>
         }
       </div>
     </div>
   `,
 })
 export class ComboboxMultipleExample {
-  protected readonly selected = signal<string[]>([]);
+  protected readonly selected = signal<readonly string[]>([]);
   protected readonly filter = signal('');
   protected readonly filtered = computed(() => {
-    const q = this.filter();
-    return q ? TAGS.filter((t) => t.toLowerCase().includes(q)) : TAGS;
+    const q = this.filter().trim();
+    return q ? LABELS.filter((l) => l.includes(q)) : LABELS;
   });
+
+  protected onValueChange(next: HellComboboxValue<string>): void {
+    this.selected.set(Array.isArray(next) ? next : []);
+  }
 }

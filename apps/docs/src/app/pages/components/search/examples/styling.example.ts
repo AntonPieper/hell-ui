@@ -1,15 +1,18 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_SEARCH_DIRECTIVES } from '@hell-ui/angular/search';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellInput } from '@hell-ui/angular/input';
+import { HELL_SEARCH_DIRECTIVES, type HellSearchClearUi } from '@hell-ui/angular/search';
 
 @Component({
   selector: 'app-search-styling-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton, HellInput, ...HELL_SEARCH_DIRECTIVES],
   template: `
-    <div hellSearch class="flex max-w-90 items-center gap-2">
-      <!-- Input and clear affordance keep their own single-part ui inputs. -->
+    <!-- HellSearch: refine root with the ui string shorthand. -->
+    <div
+      hellSearch
+      ui="flex max-w-90 items-center gap-hell-3 rounded-hell-lg border border-hell-border bg-hell-surface-subtle p-hell-2"
+    >
       <input
         hellInput
         type="search"
@@ -19,14 +22,13 @@ import { HellInput } from '@hell-ui/angular/input';
         [value]="query()"
         (input)="query.set($any($event.target).value)"
       />
+      <!-- HellSearchClear: refine root with the [ui] map. -->
       <button
         hellButton
         hellSearchClear
         variant="ghost"
-        type="button"
         aria-label="Clear search"
-        [ui]="{ root: 'text-hell-danger' }"
-        (click)="query.set('')"
+        [ui]="clearUi"
       >
         Clear
       </button>
@@ -35,4 +37,8 @@ import { HellInput } from '@hell-ui/angular/input';
 })
 export class SearchStylingExample {
   protected readonly query = signal('failed login');
+
+  protected readonly clearUi = {
+    root: 'rounded-hell-pill text-hell-danger',
+  } satisfies HellSearchClearUi;
 }

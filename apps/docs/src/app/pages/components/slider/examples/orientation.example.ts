@@ -1,0 +1,14 @@
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { HellSlider } from '@hell-ui/angular/slider';
+
+@Component({
+  selector: 'app-slider-orientation-example',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HellSlider],
+  template: `
+    <hell-slider orientation="horizontal" [value]="65" aria-label="Horizontal slider" />
+    <hell-slider orientation="vertical" [value]="30" aria-label="Vertical low" />
+    <hell-slider orientation="vertical" [value]="70" aria-label="Vertical high" />
+  `,
+})
+export class SliderOrientationExample {}

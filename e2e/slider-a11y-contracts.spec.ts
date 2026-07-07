@@ -13,8 +13,8 @@ test.describe('slider accessibility contracts', () => {
   test('public docs sliders all have accessible names', async ({ page }) => {
     await gotoSliderPage(page);
 
-    await expect(page.getByRole('slider')).toHaveCount(10);
-    await expect(page.getByRole('slider', { name: /.+/ })).toHaveCount(10);
+    await expect(page.getByRole('slider')).toHaveCount(13);
+    await expect(page.getByRole('slider', { name: /.+/ })).toHaveCount(13);
   });
 
   test('horizontal slider supports APG arrow and Home/End keyboard behavior', async ({ page }) => {
@@ -81,7 +81,7 @@ test.describe('slider accessibility contracts', () => {
     await gotoSliderPage(page);
 
     const slider = page
-      .locator('app-slider-vertical-example')
+      .locator('app-slider-orientation-example')
       .getByRole('slider', { name: 'Vertical low' });
 
     await expect(slider).toHaveAttribute('aria-orientation', 'vertical');

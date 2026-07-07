@@ -1,37 +1,16 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { provideIcons } from '@ng-icons/core';
-import {
-  faSolidChevronDown,
-  faSolidDownload,
-  faSolidGear,
-  faSolidPenToSquare,
-  faSolidPlus,
-  faSolidUpload,
-  faSolidXmark,
-} from '@ng-icons/font-awesome/solid';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
-import { HellIcon } from '@hell-ui/angular/icon';
 
-const HD_BUTTON_PAGE_ICONS = {
-  faSolidChevronDown,
-  faSolidDownload,
-  faSolidGear,
-  faSolidPenToSquare,
-  faSolidPlus,
-  faSolidUpload,
-  faSolidXmark,
-};
 @Component({
   selector: 'app-button-sizes-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton],
-  providers: [provideIcons(HD_BUTTON_PAGE_ICONS)],
   template: `
-    <button hellButton size="xs">XS</button>
-    <button hellButton size="sm">Small</button>
-    <button hellButton size="md">Medium</button>
-    <button hellButton size="lg">Large</button>
-    <button hellButton size="xl">XL</button>
+    <button hellButton size="xs" type="button">XS</button>
+    <button hellButton size="sm" type="button">Small</button>
+    <button hellButton size="md" type="button">Medium</button>
+    <button hellButton size="lg" type="button">Large</button>
+    <button hellButton size="xl" type="button">XL</button>
   `,
 })
 export class ButtonSizesExample {}

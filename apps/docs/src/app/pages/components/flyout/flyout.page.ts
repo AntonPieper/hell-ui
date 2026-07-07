@@ -3,16 +3,24 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
 import { FloatingDismissalHarnessPage } from '../../testing/floating-dismissal-harness.page';
-import { FlyoutExampleBoundaryKeepsSiblingsInteractiveExample } from './examples/example-boundary-keeps-siblings-interactive.example';
+import { FlyoutAllPartsStylingExample } from './examples/all-parts-styling.example';
+import flyoutAllPartsStylingExampleCodeRaw from './examples/all-parts-styling.example.ts?raw' with {
+  loader: 'text',
+};
+import { FlyoutAnchorAndBoundaryExample } from './examples/anchor-and-boundary.example';
+import flyoutAnchorAndBoundaryExampleCodeRaw from './examples/anchor-and-boundary.example.ts?raw' with {
+  loader: 'text',
+};
 import { FlyoutBasicExample } from './examples/basic.example';
 import flyoutBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
 };
-import flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw from './examples/example-boundary-keeps-siblings-interactive.example.ts?raw' with {
+import { FlyoutPlacementExample } from './examples/placement.example';
+import flyoutPlacementExampleCodeRaw from './examples/placement.example.ts?raw' with {
   loader: 'text',
 };
-import { FlyoutStylingExample } from './examples/styling.example';
-import flyoutStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
+import { FlyoutWithFiltersPanelExample } from './examples/with-filters-panel.example';
+import flyoutWithFiltersPanelExampleCodeRaw from './examples/with-filters-panel.example.ts?raw' with {
   loader: 'text',
 };
 
@@ -23,9 +31,12 @@ import flyoutStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
     ExampleTabs,
     RouterLink,
     FloatingDismissalHarnessPage,
-    FlyoutExampleBoundaryKeepsSiblingsInteractiveExample, FlyoutStylingExample,
-    PageHeader,
+    FlyoutAllPartsStylingExample,
+    FlyoutAnchorAndBoundaryExample,
     FlyoutBasicExample,
+    FlyoutPlacementExample,
+    FlyoutWithFiltersPanelExample,
+    PageHeader,
   ],
   template: `
     @if (showFloatingDismissalHarness) {
@@ -39,126 +50,186 @@ import flyoutStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
         importPath="@hell-ui/angular/flyout"
         stylesPath="@hell-ui/angular/flyout/styles.css"
       >
-        A non-modal anchored surface that keeps the rest of the page interactive — for pinned helpers, inspectors, and tool panels.
+        An anchored, non-modal surface that keeps the rest of the page interactive — for pinned
+        helpers, filter panels, and toolbar controls.
       </hd-page-header>
       <p>
-        An anchored, non-modal, light-dismiss surface that <strong>does not trap focus</strong>. Use
-        a flyout when the surrounding context — for example a media player or a toolbar — must
-        remain interactive while the surface is open. The panel has <code>role="dialog"</code>, so
-        give every flyout an accessible name with <code>aria-label</code> or
-        <code>aria-labelledby</code>.
+        <code>HellFlyoutTrigger</code> and <code>HellFlyout</code> are a directive pair, not a
+        component: the trigger directive owns open state and is applied to a
+        <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code>, while the panel directive is applied
+        to whatever element you render as the surface. Positioning comes from
+        <a href="https://floating-ui.com" target="_blank" rel="noreferrer">Floating UI</a>; dismissal
+        joins the shared Floating Scope so outside clicks, outside focus, and Escape are handled
+        consistently with every other floating surface in Hell.
       </p>
-
-      <p class="hd-muted">
-        Pick <a routerLink="/components/popover">Popover</a> or
-        <a routerLink="/components/dialog">Dialog</a> instead when you need a focus trap.
-      </p>
-
-      <h2>Usage</h2>
       <p>
-        Bind a trigger with <code>hellFlyoutTrigger</code> and render the surface with
-        <code>[hellFlyout]</code> when open. The consumer owns open state, so showing the surface
-        from routing, selection, or media events is trivial.
+        Because the panel has <code>role="dialog"</code> but <strong>does not trap focus</strong>,
+        it is the right choice whenever the trigger's surrounding context must stay usable while
+        the panel is open — a toolbar filter, an audio player's caption settings, or an inspector
+        pinned beside a row. Reach for <a routerLink="/components/popover">Popover</a> or
+        <a routerLink="/components/dialog">Dialog</a> instead when the interaction needs a focus
+        trap.
+      </p>
+
+      <h2>Basic</h2>
+      <p>
+        Bind a trigger with <code>hellFlyoutTrigger</code>, capture it with a template reference
+        variable, and render the surface with <code>[hellFlyout]="t"</code> when open. The consumer
+        owns open state entirely — showing the surface from routing, selection, or media events is
+        trivial.
       </p>
       <hd-example-tabs [code]="flyoutBasicExampleCode">
         <app-flyout-basic-example />
       </hd-example-tabs>
 
-      <h2>Behaviour</h2>
-      <ul>
-        <li>
-          Trigger drives the open state. Read it via <code>open()</code> and
-          <code>(openChange)</code>.
-        </li>
-        <li>
-          Light dismiss on outside <code>click</code> or <code>focusin</code>. Touch scroll gestures
-          do not dismiss.
-        </li>
-        <li><code>Escape</code> closes and restores focus to the trigger.</li>
-        <li>
-          Pass <code>boundary</code> to widen the “inside” region beyond the trigger and panel —
-          useful for composites where surrounding controls must stay interactive.
-        </li>
-        <li>
-          No focus trap. Tab moves focus naturally; the flyout dismisses if focus lands outside the
-          boundary.
-        </li>
-      </ul>
+      <h2>Placement</h2>
+      <p>
+        <code>placement</code> (default <code>bottom-start</code>) sets the preferred side and
+        alignment relative to the reference element. <code>flip</code> and <code>shift</code>
+        (both default <code>true</code>) let Floating UI move the panel to stay inside the
+        viewport when the preferred placement doesn't fit — resize the window to see it kick in.
+      </p>
+      <hd-example-tabs [code]="flyoutPlacementExampleCode">
+        <app-flyout-placement-example />
+      </hd-example-tabs>
 
-      <h2>Example — boundary keeps siblings interactive</h2>
-      <hd-example-tabs [code]="flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCode" flush>
-        <app-flyout-example-boundary-keeps-siblings-interactive-example />
+      <h2>Anchor and boundary</h2>
+      <p>
+        <code>anchor</code> repositions the panel against a different element than the trigger —
+        useful when a sibling input owns the visual anchor while a nearby button still owns open
+        state. <code>boundary</code> widens the "inside" region for dismissal beyond the trigger
+        and panel, so surrounding controls (like that sibling input) stay interactive without
+        closing the flyout.
+      </p>
+      <hd-example-tabs [code]="flyoutAnchorAndBoundaryExampleCode" flush>
+        <app-flyout-anchor-and-boundary-example />
+      </hd-example-tabs>
+
+      <h2>With a filters panel</h2>
+      <p>
+        A toolbar button that opens a checklist of status filters and reflects the active count
+        back onto the trigger with <code>hellTag</code> (narrow entry point
+        <code>@hell-ui/angular/tag</code>). Each option is a <code>hellCheckbox</code> wrapped in
+        <code>hellField</code> (narrow entry point <code>@hell-ui/angular/field</code>) for label
+        association. Because the flyout doesn't trap focus, the rest of the toolbar stays usable
+        while the panel is open.
+      </p>
+      <hd-example-tabs [code]="flyoutWithFiltersPanelExampleCode">
+        <app-flyout-with-filters-panel-example />
       </hd-example-tabs>
 
       <h2>Styling</h2>
       <p>
-        <code>HellFlyoutUi</code> refines the flyout surface's <code>root</code> Public Part. Anchoring, boundary, and dismissal behavior are not affected by the Part Style Map.
+        <code>HellFlyout</code> exposes exactly one Public Part, <code>root</code> — the panel
+        element itself. Pass <code>ui="..."</code> as shorthand to refine it, or
+        <code>[ui]="&#123; root: '...' &#125;"</code> for the equivalent explicit
+        <code>HellFlyoutUi</code> map. Both forms merge on top of the default recipe through Hell's
+        Tailwind merge, so refinements win deterministically over the defaults they conflict with.
+        <code>HellFlyoutTrigger</code> renders no owned structure of its own — it attaches directly
+        to your <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code> and has no Part Style Map.
       </p>
-      <hd-example-tabs [code]="flyoutStylingExampleCode">
-        <app-flyout-styling-example />
+      <table class="hd-doc-table">
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Part</th>
+            <th>Styles</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>HellFlyout</code></td>
+            <td><code>root</code></td>
+            <td>The panel surface — background, border, radius, shadow, and open animation.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        Anchoring, boundary, and dismissal behavior are unaffected by the Part Style Map — only
+        visual classes flow through <code>ui</code>.
+      </p>
+      <hd-example-tabs [code]="flyoutAllPartsStylingExampleCode">
+        <app-flyout-all-parts-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
       <h3><code>hellFlyoutTrigger</code></h3>
+      <p>Selector: <code>button[hellFlyoutTrigger], a[hellFlyoutTrigger]</code>. Exported as <code>hellFlyoutTrigger</code>.</p>
       <ul>
+        <li><code>disabled</code>: <code>boolean</code>, default <code>false</code>.</li>
         <li>
-          <code>open()</code>, <code>show()</code>, <code>hide()</code>, <code>toggle()</code>
+          <code>(openChange)</code>: <code>OutputEmitterRef&lt;boolean&gt;</code> — emits the new
+          open state whenever the panel opens or closes.
         </li>
-        <li><code>(openChange)</code></li>
-        <li><code>disabled</code></li>
+        <li>
+          <code>open()</code>: <code>Signal&lt;boolean&gt;</code> — the current open state, read
+          via the exported reference (<code>#t="hellFlyoutTrigger"</code>).
+        </li>
+        <li>
+          <code>show()</code>, <code>hide()</code>, <code>toggle()</code>: imperative methods on
+          the exported reference.
+        </li>
+        <li><code>panelId</code>: the stable id wired into <code>aria-controls</code> and the panel's <code>id</code>.</li>
       </ul>
 
       <h3><code>hellFlyout</code></h3>
+      <p>Selector: <code>[hellFlyout]</code>. Exported as <code>hellFlyout</code>.</p>
       <ul>
+        <li><code>[hellFlyout]</code>: <code>HellFlyoutTrigger</code>, required — the trigger instance that owns this panel's open state.</li>
         <li>
-          <code>[hellFlyout]</code>: the trigger instance (template ref or <code>viewChild</code>)
+          <code>anchor</code>: <code>HTMLElement | ElementRef&lt;HTMLElement&gt; | null</code>,
+          default <code>null</code>. Element the panel positions against when it differs from the
+          trigger.
         </li>
         <li>
-          <code>boundary</code>: optional <code>HTMLElement</code> or
-          <code>ElementRef</code> treated as “inside” for dismiss
+          <code>boundary</code>: <code>HTMLElement | ElementRef&lt;HTMLElement&gt; | null</code>,
+          default <code>null</code>. Element defining the "inside" region for light-dismiss beyond
+          the trigger and panel.
+        </li>
+        <li><code>placement</code>: <code>Placement</code> (Floating UI), default <code>'bottom-start'</code>.</li>
+        <li><code>offset</code>: <code>number</code>, default <code>8</code>. Distance in pixels between the panel and its reference element.</li>
+        <li><code>flip</code>: <code>boolean</code>, default <code>true</code>.</li>
+        <li><code>shift</code>: <code>boolean</code>, default <code>true</code>.</li>
+        <li><code>aria-label</code>: <code>string | null</code>, default <code>null</code>.</li>
+        <li><code>aria-labelledby</code>: <code>string | null</code>, default <code>null</code>.</li>
+        <li><code>closeOnEscape</code>: <code>boolean</code>, default <code>true</code>.</li>
+        <li><code>closeOnOutsideInteraction</code>: <code>boolean</code>, default <code>true</code>.</li>
+        <li>
+          <code>ui</code>: <code>HellUiInput&lt;HellFlyoutPart&gt;</code> — a shorthand class
+          string or a <code>HellFlyoutUi</code> map (<code>&#123; root: string &#125;</code>) that
+          refines the <code>root</code> public part.
         </li>
         <li>
-          <code>anchor</code>: optional visual reference <code>HTMLElement</code> or
-          <code>ElementRef</code> when the panel should align to a sibling control instead of the
-          trigger
+          Exported types: <code>HellFlyoutPart</code> (<code>'root'</code>),
+          <code>HellFlyoutUi</code> (<code>HellUi&lt;HellFlyoutPart&gt;</code>).
         </li>
-        <li>
-          <code>flip</code> (default <code>true</code>): allow viewport-aware placement flipping
-        </li>
-        <li>
-          <code>shift</code> (default <code>true</code>): allow viewport-aware placement shifting
-        </li>
-        <li>
-          <code>aria-label</code> or <code>aria-labelledby</code>: accessible name for the
-          dialog panel
-        </li>
-        <li><code>ui</code>: Part Style Map for the panel's local <code>root</code> part. The panel renders <code>data-slot="root"</code>.</li>
-        <li><code>closeOnEscape</code> (default <code>true</code>)</li>
-        <li><code>closeOnOutsideInteraction</code> (default <code>true</code>)</li>
       </ul>
 
       <h2>Accessibility</h2>
       <ul>
-        <li>The surface participates in the Floating Scope, so outside interaction rules are explicit and composable.</li>
-        <li>Label the surface with <code>aria-labelledby</code>; keep focus management non-modal (no trap).</li>
+        <li>The trigger sets <code>aria-haspopup="dialog"</code>, <code>aria-expanded</code>, and (while open) <code>aria-controls</code> pointing at the panel's id.</li>
+        <li>The panel renders <code>role="dialog"</code> with <code>aria-modal="false"</code> — it participates in the accessibility tree as a dialog without claiming modal semantics.</li>
+        <li>The panel has no accessible name by default; set <code>aria-label</code> or <code>aria-labelledby</code> on every flyout.</li>
+        <li>Dismissal listens for outside <code>click</code> and outside <code>focusin</code> (each gated by <code>closeOnOutsideInteraction</code>), and <code>Escape</code> (gated by <code>closeOnEscape</code>).</li>
+        <li>Escape stops propagation and restores focus to the trigger element.</li>
+        <li>There is no focus trap: Tab moves through the document normally, and focus leaving the trigger, panel, anchor, and boundary dismisses the panel.</li>
+        <li>A disabled trigger sets the native <code>disabled</code> attribute on a <code>&lt;button&gt;</code> host, or <code>aria-disabled="true"</code> plus <code>tabindex="-1"</code> on an <code>&lt;a&gt;</code> host, and blocks click/Enter activation either way.</li>
       </ul>
 
       <h2>Do</h2>
       <ul class="hd-do">
-        <li>Use flyout for anchored non-modal panels where nearby controls stay interactive.</li>
-        <li>Pass <code>anchor</code> when the panel should visually attach to a sibling control.</li>
-        <li>Pass <code>boundary</code> when siblings should count as inside.</li>
-        <li>
-          Name each flyout panel with visible heading text via
-          <code>aria-labelledby</code>, or a concise <code>aria-label</code>.
-        </li>
-        <li>Close on Escape unless the composite has a stronger reason not to.</li>
+        <li>Use flyout for anchored, non-modal panels where nearby controls must stay interactive.</li>
+        <li>Give every flyout an accessible name via <code>aria-labelledby</code> pointing at a visible heading, or a concise <code>aria-label</code>.</li>
+        <li>Pass <code>anchor</code> when the panel should visually attach to a sibling control instead of the trigger.</li>
+        <li>Pass <code>boundary</code> when sibling controls should count as "inside" for dismissal.</li>
+        <li>Leave <code>closeOnEscape</code> and <code>closeOnOutsideInteraction</code> enabled unless the composite has a strong reason not to.</li>
       </ul>
 
       <h2>Don't</h2>
       <ul class="hd-dont">
-        <li>Don't use flyout when focus must be trapped; use Dialog or Popover.</li>
-        <li>Don't place critical confirmation flows in a light-dismiss surface.</li>
+        <li>Don't use flyout when the interaction needs a focus trap — use Dialog or Popover instead.</li>
+        <li>Don't place critical confirmation flows in a light-dismiss surface; a stray click elsewhere silently discards them.</li>
+        <li>Don't target private descendants for styling — <code>root</code> is the only public part.</li>
       </ul>
       </article>
     }
@@ -169,8 +240,9 @@ export class FlyoutPage {
 
   protected readonly showFloatingDismissalHarness =
     this.route.snapshot.queryParamMap.has('floatingDismissalHarness');
-  protected readonly flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCode =
-    flyoutExampleBoundaryKeepsSiblingsInteractiveExampleCodeRaw;
-  protected readonly flyoutStylingExampleCode = flyoutStylingExampleCodeRaw;
+  protected readonly flyoutAllPartsStylingExampleCode = flyoutAllPartsStylingExampleCodeRaw;
+  protected readonly flyoutAnchorAndBoundaryExampleCode = flyoutAnchorAndBoundaryExampleCodeRaw;
   protected readonly flyoutBasicExampleCode = flyoutBasicExampleCodeRaw;
+  protected readonly flyoutPlacementExampleCode = flyoutPlacementExampleCodeRaw;
+  protected readonly flyoutWithFiltersPanelExampleCode = flyoutWithFiltersPanelExampleCodeRaw;
 }

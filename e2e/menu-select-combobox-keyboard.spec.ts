@@ -42,8 +42,7 @@ test.describe('menu-select-combobox-keyboard matrix', () => {
     const menu = page.getByRole('menu').first();
     const rename = page.getByRole('menuitem', { name: 'Rename' }).first();
     const duplicate = page.getByRole('menuitem', { name: 'Duplicate' }).first();
-    const moveDisabled = page.getByRole('menuitem', { name: 'Move (disabled)' }).first();
-    const archive = page.getByRole('menuitem', { name: 'Archive' }).first();
+    const moveDisabled = page.getByRole('menuitem', { name: 'Move' }).first();
     const deleteItem = page.getByRole('menuitem', { name: 'Delete' }).first();
 
     await trigger.focus();
@@ -59,7 +58,7 @@ test.describe('menu-select-combobox-keyboard matrix', () => {
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('ArrowDown');
     await expect(moveDisabled).toBeDisabled();
-    await expect(archive).toBeFocused();
+    await expect(deleteItem).toBeFocused();
 
     await page.keyboard.press('Home');
     await expect(rename).toBeFocused();
@@ -75,11 +74,11 @@ test.describe('menu-select-combobox-keyboard matrix', () => {
     await expect(rename).toBeFocused();
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('ArrowDown');
-    await expect(archive).toBeFocused();
+    await expect(deleteItem).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(menu).toBeHidden();
     await expect(trigger).toBeFocused();
-    expect(menuActions).toContain('menu action: archive');
+    expect(menuActions).toContain('menu action: delete');
 
     await page.keyboard.press('Space');
     await expect(menu).toBeVisible();
@@ -97,7 +96,7 @@ test.describe('menu-select-combobox-keyboard matrix', () => {
   }) => {
     await page.goto('/components/select');
 
-    const select = page.getByRole('combobox', { name: 'Select priority' }).first();
+    const select = page.getByRole('combobox', { name: 'Priority' }).first();
 
     await expect(select).toHaveAttribute('aria-expanded', 'false');
     await select.focus();
@@ -137,39 +136,39 @@ test.describe('menu-select-combobox-keyboard matrix', () => {
   }) => {
     await page.goto('/components/combobox');
 
-    const input = page.getByRole('combobox', { name: 'Search fruit…' }).first();
+    const input = page.getByRole('combobox', { name: 'Settlement currency' }).first();
 
     await input.focus();
     await page.keyboard.press('ArrowDown');
 
     await expect(input).toHaveAttribute('aria-expanded', 'true');
-    await expectActiveDescendantText(page, input, 'Apple', 'combobox opens on ArrowDown');
+    await expectActiveDescendantText(page, input, 'AUD — Australian Dollar', 'combobox opens on ArrowDown');
     await page.keyboard.press('ArrowUp');
-    await expectActiveDescendantText(page, input, 'Strawberry', 'combobox ArrowUp wraps to last option');
+    await expectActiveDescendantText(page, input, 'USD — US Dollar', 'combobox ArrowUp wraps to last option');
     await page.keyboard.press('Home');
-    await expectActiveDescendantText(page, input, 'Apple', 'combobox Home moves to first option');
+    await expectActiveDescendantText(page, input, 'AUD — Australian Dollar', 'combobox Home moves to first option');
     await page.keyboard.press('End');
-    await expectActiveDescendantText(page, input, 'Strawberry', 'combobox End moves to last option');
+    await expectActiveDescendantText(page, input, 'USD — US Dollar', 'combobox End moves to last option');
 
     await page.keyboard.press('Escape');
     await expect(input).toHaveAttribute('aria-expanded', 'false');
     await expect(input).toBeFocused();
 
-    await input.fill('Bl');
+    await input.fill('c');
     await page.keyboard.press('ArrowDown');
     await expect(input).toHaveAttribute('aria-expanded', 'true');
-    await expect(page.getByRole('option', { name: 'Blackberry' })).toBeVisible();
-    await expect(page.getByRole('option', { name: 'Blueberry' })).toBeVisible();
+    await expect(page.getByRole('option', { name: 'CHF — Swiss Franc' })).toBeVisible();
+    await expect(page.getByRole('option', { name: 'CNY — Chinese Yuan' })).toBeVisible();
     await page.keyboard.press('Home');
     await expectActiveDescendantText(
       page,
       input,
-      'Blueberry',
+      'CHF — Swiss Franc',
       'combobox skips disabled visible options',
     );
 
     await page.keyboard.press('Enter');
-    await expect(input).toHaveValue('Blueberry');
+    await expect(input).toHaveValue('CHF — Swiss Franc');
     await expect(input).toHaveAttribute('aria-expanded', 'false');
     await expect(input).toBeFocused();
   });

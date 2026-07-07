@@ -42,11 +42,11 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'date input',
     path: '/components/date-input',
     heading: 'Date input',
-    include: ['main', '[hellPopover][data-slot="root"]'],
+    include: ['main', '[data-slot="pickerPanel"]'],
     prepare: async (page) => {
-      const example = page.locator('app-date-input-text-input-calendar-popover-example');
-      const departure = example.getByRole('textbox', { name: 'Departure' });
-      await departure.locator('xpath=..').getByRole('button', { name: 'Choose date' }).click();
+      const example = page.locator('app-date-input-basic-example');
+      await expect(example.getByRole('textbox', { name: 'Invoice date' })).toBeVisible();
+      await example.getByRole('button', { name: 'Choose date for Invoice date' }).click();
       await expect(page.getByRole('grid')).toBeVisible();
     },
   },
@@ -76,8 +76,8 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     heading: 'Flyout',
     include: ['main', '[data-hell-flyout][data-slot="root"]'],
     prepare: async (page) => {
-      await page.getByRole('button', { name: 'Show flyout' }).click();
-      await expect(page.getByRole('dialog', { name: 'Anchored, non-modal' })).toBeVisible();
+      await page.getByRole('button', { name: 'Show suggestions' }).click();
+      await expect(page.getByRole('dialog', { name: 'Anchored to the input' })).toBeVisible();
     },
   },
   {
@@ -92,8 +92,8 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     heading: 'Popover',
     include: ['main', '[hellPopover][data-slot="root"]'],
     prepare: async (page) => {
-      await page.getByRole('button', { name: 'Show profile summary' }).click();
-      await expect(page.getByRole('dialog', { name: 'Profile summary' })).toBeVisible();
+      await page.getByRole('button', { name: 'Assigned to Mara Voss' }).click();
+      await expect(page.getByRole('dialog', { name: 'Mara Voss' })).toBeVisible();
     },
   },
   {
@@ -146,7 +146,7 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     heading: 'Select',
     include: ['main', '[hellSelectDropdown][data-slot="root"]'],
     prepare: async (page) => {
-      const select = page.getByRole('combobox', { name: 'Select priority' }).first();
+      const select = page.getByRole('combobox', { name: 'Priority' }).first();
       await select.focus();
       await page.keyboard.press('ArrowDown');
       await expect(page.getByRole('option', { name: 'Lowest' })).toBeVisible();
@@ -158,10 +158,12 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     heading: 'Combobox',
     include: ['main', '[hellComboboxDropdown][data-slot="root"]'],
     prepare: async (page) => {
-      const input = page.getByRole('combobox', { name: 'Search fruit…' }).first();
+      const input = page.getByRole('combobox', { name: 'Settlement currency' }).first();
       await input.focus();
       await page.keyboard.press('ArrowDown');
-      await expect(page.getByRole('option', { name: 'Apple', exact: true })).toBeVisible();
+      await expect(
+        page.getByRole('option', { name: 'AUD — Australian Dollar', exact: true }),
+      ).toBeVisible();
     },
   },
   {
@@ -206,7 +208,10 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     heading: 'Time input',
     include: ['main', '[data-slot="pickerPanel"]'],
     prepare: async (page) => {
-      await page.getByRole('button', { name: 'Choose time for Reminder time' }).first().click();
+      await page
+        .locator('app-time-input-basic-example')
+        .getByRole('button', { name: 'Choose time' })
+        .click();
       await expect(page.getByRole('spinbutton', { name: 'Hours' })).toBeVisible();
     },
   },
@@ -214,10 +219,12 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     name: 'pdf viewer shell',
     path: '/components/pdf-viewer',
     heading: 'PDF viewer',
-    include: ['hell-pdf-viewer'],
+    include: ['app-pdf-viewer-initial-view-example hell-pdf-viewer'],
     prepare: async (page) => {
       await page.getByRole('tab', { name: 'Preview' }).nth(1).click();
-      await expect(page.locator('hell-pdf-viewer')).toBeVisible();
+      await expect(
+        page.locator('app-pdf-viewer-initial-view-example hell-pdf-viewer'),
+      ).toBeVisible();
     },
   },
 ];

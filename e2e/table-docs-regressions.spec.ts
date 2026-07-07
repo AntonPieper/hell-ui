@@ -41,7 +41,7 @@ test.describe('table docs regressions', () => {
     await gotoTableDocs(page);
 
     const previews = page.locator('hd-table-page hd-example-tabs .hd-example');
-    await expect(previews).toHaveCount(4);
+    await expect(previews).toHaveCount(5);
 
     const paddingTopValues = await previews.evaluateAll((elements) =>
       elements.map((element) => Number.parseFloat(getComputedStyle(element).paddingTop)),
@@ -362,7 +362,9 @@ test.describe('table docs regressions', () => {
 
     const example = page.locator('app-table-tanstack-shell-example');
     const shell = example.locator('hell-tanstack-table');
-    const pageSize = shell.locator('hell-tanstack-pagination select[data-slot="page-size-select"]');
+    const pageSize = shell.locator(
+      'hell-tanstack-pagination [data-slot="pageSize"] select[hellNativeSelect]',
+    );
 
     await pageSize.selectOption('5');
     await expect(pageSize).toHaveValue('5');
@@ -424,36 +426,33 @@ function omnibarPanelAnchorOffset(
 }
 
 test.describe('split-view docs regressions', () => {
-  test('master/detail list buttons use the compact ghost Button root recipe', async ({ page }) => {
+  test('master/detail ticket actions use the TableRowAction root recipe', async ({ page }) => {
     await page.goto('/components/split-view');
     await expect(page.getByRole('heading', { name: 'Split view', level: 1 })).toBeVisible();
 
-    const ticketButtons = page.locator(
-      'app-split-view-master-detail-example [data-pane="primary"] button[hellbutton][data-slot="root"]',
+    const ticketActions = page.locator(
+      'app-split-view-master-detail-example [data-pane="primary"] button[helltablerowaction][data-slot="root"]',
     );
-    await expect(ticketButtons).toHaveCount(3);
+    await expect(ticketActions).toHaveCount(4);
     await expect(
       page.locator(
         'app-split-view-master-detail-example [data-pane="primary"] [data-hell-split-master-item]',
       ),
     ).toHaveCount(0);
-    await expect(ticketButtons.filter({ hasText: 'T-104' })).toHaveAttribute(
-      'data-current',
+    await expect(ticketActions.filter({ hasText: 'T-104' })).toHaveAttribute(
+      'aria-current',
       'true',
     );
 
-    for (let index = 0; index < 3; index += 1) {
-      await expect(ticketButtons.nth(index)).toHaveAttribute('data-variant', 'ghost');
-      await expect(ticketButtons.nth(index)).toHaveAttribute('data-size', 'sm');
-      await expect(ticketButtons.nth(index)).not.toHaveClass(/(^|\s)hell-button(\s|$)/);
-      await expect(ticketButtons.nth(index)).toHaveClass(/(^|\s)bg-transparent(\s|$)/);
-      await expect(ticketButtons.nth(index)).toHaveClass(
-        /(^|\s)data-hover:bg-hell-surface-muted(\s|$)/,
+    for (let index = 0; index < 4; index += 1) {
+      await expect(ticketActions.nth(index)).not.toHaveClass(/(^|\s)hell-table-row-action(\s|$)/);
+      await expect(ticketActions.nth(index)).not.toHaveClass(/(^|\s)hell-button(\s|$)/);
+      await expect(ticketActions.nth(index)).toHaveClass(/(^|\s)bg-transparent(\s|$)/);
+      await expect(ticketActions.nth(index)).toHaveClass(
+        /(^|\s)hover:bg-hell-surface-muted(\s|$)/,
       );
-      await expect(ticketButtons.nth(index)).toHaveClass(
-        /(^|\s)data-press:bg-hell-surface-muted(\s|$)/,
-      );
-      await expect(ticketButtons.nth(index)).toHaveClass(/(^|\s)shadow-none(\s|$)/);
+      await expect(ticketActions.nth(index)).toHaveClass(/(^|\s)shadow-none(\s|$)/);
+      await expect(ticketActions.nth(index)).toHaveClass(/(^|\s)rounded-hell-sm(\s|$)/);
     }
   });
 });

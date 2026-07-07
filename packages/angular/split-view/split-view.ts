@@ -35,6 +35,7 @@ export type HellSplitViewPart =
   | 'screen'
   | 'pane'
   | 'compactHeader'
+  | 'backButton'
   | 'detailHeader'
   | 'itemNavigation';
 /** Part Style Map accepted by the HellSplitView `ui` input. */
@@ -46,6 +47,7 @@ const HELL_SPLIT_VIEW_RECIPE = {
   screen: 'flex h-full w-full flex-col',
   pane: 'flex min-h-0 min-w-0 flex-col overflow-hidden',
   compactHeader: 'gap-hell-2 border-hell-border bg-hell-surface-subtle p-hell-2',
+  backButton: '',
   detailHeader: 'gap-hell-2 border-hell-border bg-hell-surface-subtle p-hell-2',
   itemNavigation: 'gap-hell-1',
 } satisfies HellRecipe<HellSplitViewPart>;
@@ -138,7 +140,15 @@ export class HellSplitDetail {
       <div data-slot="screen" [class]="part('screen')">
         @if (detailOpen()) {
           <div data-slot="compactHeader" [class]="part('compactHeader')">
-            <button hellButton variant="ghost" size="sm" type="button" (click)="closeDetail()">
+            <button
+              hellButton
+              variant="ghost"
+              size="sm"
+              type="button"
+              data-slot="backButton"
+              [ui]="part('backButton')"
+              (click)="closeDetail()"
+            >
               <hell-icon [name]="'faSolidArrowLeft'" size="13px" />
               <span>{{ backLabel() }}</span>
             </button>

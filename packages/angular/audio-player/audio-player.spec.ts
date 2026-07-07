@@ -57,6 +57,7 @@ class AudioPlayerPartStyleHost {
     captions: 'rounded-none border-hell-danger',
     captionsStatus: 'text-hell-danger',
     captionsBody: 'bg-hell-surface-muted',
+    captionsText: 'font-semibold',
     captionsEmpty: 'text-hell-danger',
   } satisfies HellAudioPlayerUi;
   readonly ui = signal<HellUiInput<HellAudioPlayerPart>>('max-w-[360px]');
@@ -185,6 +186,38 @@ describe('HellAudioPlayer', () => {
     expect(captions.querySelector('[data-slot="captionsEmpty"]')?.className).toContain(
       'text-hell-danger',
     );
+
+    transcriptRuntime.transcript.set('Existing transcript');
+    fixture.detectChanges();
+
+    const captionsText = captions.querySelector('[data-slot="captionsText"]') as HTMLElement;
+    expect(captionsText.className).toContain('font-semibold');
+  });
+
+  it('marks the committed transcript text with a captionsText Public Part', async () => {
+    const { fixture, component } = await createPlayer();
+
+    const transcriptButton = fixture.nativeElement.querySelector(
+      '[data-slot="captionToggle"]',
+    ) as HTMLButtonElement;
+    transcriptButton.click();
+    fixture.detectChanges();
+
+    component.transcript.set('Committed words');
+    fixture.detectChanges();
+
+    const captionsText = fixture.nativeElement.querySelector(
+      '[data-slot="captionsText"]',
+    ) as HTMLElement;
+    expect(captionsText).toBeInstanceOf(HTMLSpanElement);
+    expect(captionsText.textContent).toBe('Committed words');
+
+    // Default recipe for captionsText is empty; a Part Style Map entry should
+    // still merge in and win deterministically through the pipeline.
+    fixture.componentRef.setInput('ui', { captionsText: 'text-hell-primary' });
+    fixture.detectChanges();
+
+    expect(captionsText.className).toContain('text-hell-primary');
   });
 
   it('does not start playback when the speech transcript is toggled while paused', async () => {

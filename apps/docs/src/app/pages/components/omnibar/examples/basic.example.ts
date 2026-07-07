@@ -27,7 +27,7 @@ const QUICK_ACTIONS: readonly QuickAction[] = [
       [searchFields]="searchFields"
       [(value)]="query"
       (searchResultsChange)="results.set($any($event))"
-      (submit)="lastAction.set($any($event.item).id)"
+      (submit)="lastAction.set($any($event.item).label)"
     >
       <div hellOmnibarGroup label="Actions">
         <div hellOmnibarGroupLabel>Actions</div>
@@ -40,7 +40,7 @@ const QUICK_ACTIONS: readonly QuickAction[] = [
     </hell-omnibar>
 
     @if (lastAction(); as action) {
-      <p class="mt-3 text-sm hd-muted">Submitted: {{ action }}</p>
+      <p class="mt-3 text-sm text-hell-foreground-muted">Ran: {{ action }}</p>
     }
   `,
 })

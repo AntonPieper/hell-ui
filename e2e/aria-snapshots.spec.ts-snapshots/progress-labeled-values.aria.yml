@@ -1,8 +1,4 @@
-- text: Queued migration
-- progressbar "Queued migration"
-- text: Profile import
-- progressbar "Profile import"
-- text: Media processing
-- progressbar "Media processing"
-- text: Backup complete
-- progressbar "Backup complete"
+- text: /Storage used \d+%/
+- progressbar "Storage used"
+- button /−\d+/
+- button /\+\d+/

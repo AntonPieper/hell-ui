@@ -14,7 +14,7 @@ import { HellNativeSwitch } from '@hell-ui/angular/switch';
         (checkedChange)="value.set($event)"
         required
       />
-      <span>Auto updates</span>
+      <span>Auto-renew subscription</span>
     </label>
     <p>
       Checked: <code>{{ value() }}</code>

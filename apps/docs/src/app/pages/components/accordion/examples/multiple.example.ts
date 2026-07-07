@@ -6,21 +6,29 @@ import { HELL_ACCORDION_DIRECTIVES } from '@hell-ui/angular/accordion';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [...HELL_ACCORDION_DIRECTIVES],
   template: `
-    <div hellAccordion type="multiple">
-      <div hellAccordionItem value="a">
+    <div hellAccordion type="multiple" [value]="['permissions']">
+      <div hellAccordionItem value="permissions">
         <h3 class="m-0">
-          <button hellAccordionTrigger type="button">First</button>
+          <button hellAccordionTrigger type="button">Permissions</button>
         </h3>
         <div hellAccordionContent>
-          <div>You can open me…</div>
+          <div>Read, write, and admin scopes for this workspace.</div>
         </div>
       </div>
-      <div hellAccordionItem value="b">
+      <div hellAccordionItem value="integrations">
         <h3 class="m-0">
-          <button hellAccordionTrigger type="button">Second</button>
+          <button hellAccordionTrigger type="button">Integrations</button>
         </h3>
         <div hellAccordionContent>
-          <div>…and me at the same time.</div>
+          <div>Connected services that can read workspace data.</div>
+        </div>
+      </div>
+      <div hellAccordionItem value="audit-log">
+        <h3 class="m-0">
+          <button hellAccordionTrigger type="button">Audit log</button>
+        </h3>
+        <div hellAccordionContent>
+          <div>Every permission and integration change, timestamped.</div>
         </div>
       </div>
     </div>

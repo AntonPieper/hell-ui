@@ -24,7 +24,7 @@ import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 
 /** Public parts of the HellCheckbox module, styleable through its Part Style Map. */
-export type HellCheckboxPart = 'root';
+export type HellCheckboxPart = 'root' | 'indicator';
 /** Part Style Map accepted by the HellCheckbox `ui` input. */
 export type HellCheckboxUi = HellUi<HellCheckboxPart>;
 
@@ -34,7 +34,8 @@ export type HellNativeCheckboxPart = 'root';
 export type HellNativeCheckboxUi = HellUi<HellNativeCheckboxPart>;
 
 const HELL_CHECKBOX_RECIPE = {
-  root: 'inline-flex size-hell-5 cursor-pointer appearance-none items-center justify-center rounded-hell-sm border border-solid border-hell-border-strong bg-hell-surface-elevated p-0 m-0 font-[inherit] text-hell-primary-foreground transition-[background-color,border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:border-hell-primary data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-2 data-checked:border-hell-primary data-checked:bg-hell-primary data-indeterminate:border-hell-primary data-indeterminate:bg-hell-primary data-disabled:cursor-not-allowed data-disabled:opacity-50 [&>svg]:block [&>svg]:size-hell-4 [&>svg]:translate-y-[-0.5px]',
+  root: 'inline-flex size-hell-5 cursor-pointer appearance-none items-center justify-center rounded-hell-sm border border-solid border-hell-border-strong bg-hell-surface-elevated p-0 m-0 font-[inherit] text-hell-primary-foreground transition-[background-color,border-color] duration-[var(--hell-duration-fast)] ease-[var(--ease-hell-out)] data-hover:border-hell-primary data-focus-visible:outline-2 data-focus-visible:outline-hell-focus-ring data-focus-visible:outline-offset-2 data-checked:border-hell-primary data-checked:bg-hell-primary data-indeterminate:border-hell-primary data-indeterminate:bg-hell-primary data-disabled:cursor-not-allowed data-disabled:opacity-50',
+  indicator: 'block size-hell-4 translate-y-[-0.5px]',
 } satisfies HellRecipe<HellCheckboxPart>;
 
 const HELL_NATIVE_CHECKBOX_RECIPE = {
@@ -81,6 +82,8 @@ const HELL_NATIVE_CHECKBOX_RECIPE = {
   template: `
     @if (state.indeterminate()) {
       <svg
+        data-slot="indicator"
+        [class]="part('indicator')"
         viewBox="0 0 16 16"
         fill="none"
         stroke="currentColor"
@@ -91,6 +94,8 @@ const HELL_NATIVE_CHECKBOX_RECIPE = {
       </svg>
     } @else if (state.checked()) {
       <svg
+        data-slot="indicator"
+        [class]="part('indicator')"
         viewBox="0 0 16 16"
         fill="none"
         stroke="currentColor"

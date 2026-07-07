@@ -1,15 +1,16 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_COMBOBOX_BASIC_DIRECTIVES, HELL_COMBOBOX_DIRECTIVES } from '@hell-ui/angular/combobox';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
 import { ComboboxBasicExample } from './examples/basic.example';
 import comboboxBasicExampleCodeRaw from './examples/basic.example.ts?raw' with { loader: 'text' };
+import { ComboboxPresetExample } from './examples/preset.example';
+import comboboxPresetExampleCodeRaw from './examples/preset.example.ts?raw' with { loader: 'text' };
 import { ComboboxMultipleExample } from './examples/multiple.example';
 import comboboxMultipleExampleCodeRaw from './examples/multiple.example.ts?raw' with {
   loader: 'text',
 };
-import { ComboboxBasicPresetExample } from './examples/basic-preset.example';
-import comboboxBasicPresetExampleCodeRaw from './examples/basic-preset.example.ts?raw' with {
+import { ComboboxWithFieldTagExample } from './examples/with-field-tag.example';
+import comboboxWithFieldTagExampleCodeRaw from './examples/with-field-tag.example.ts?raw' with {
   loader: 'text',
 };
 import { ComboboxStylingExample } from './examples/styling.example';
@@ -22,11 +23,11 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ExampleTabs,
-    ...HELL_COMBOBOX_DIRECTIVES,
-    ...HELL_COMBOBOX_BASIC_DIRECTIVES,
     ComboboxBasicExample,
-    ComboboxBasicPresetExample,
-    ComboboxMultipleExample, ComboboxStylingExample,
+    ComboboxPresetExample,
+    ComboboxMultipleExample,
+    ComboboxWithFieldTagExample,
+    ComboboxStylingExample,
     PageHeader,
   ],
   template: `
@@ -38,107 +39,258 @@ import comboboxStylingExampleCodeRaw from './examples/styling.example.ts?raw' wi
         importPath="@hell-ui/angular/combobox"
         stylesPath="@hell-ui/angular/combobox/styles.css"
       >
-        A text input with a filtered option list: free typing, keyboard navigation, multi-select, and a basic preset when composing the directives is boilerplate.
+        A text input paired with a filterable, keyboard-navigable option list for single or
+        multiple selection.
       </hd-page-header>
       <p>
-        An accessible select with optional filter input. Built on
-        <code>ng-primitives/combobox</code>: input + button + dropdown of options. Supports
-        single and multiple selection, keyboard navigation (Arrow/Home/End/Enter/Escape) and
-        active-descendant focus per WAI-ARIA combobox pattern.
+        The combobox entry point ships a suite of directives —
+        <code>hellCombobox</code>, <code>hellComboboxInput</code>,
+        <code>hellComboboxButton</code>, <code>hellComboboxDropdown</code>,
+        <code>hellComboboxOption</code>, and <code>hellComboboxEmpty</code> — that you compose over
+        native elements, plus the <code>*hellComboboxPortal</code> structural directive that renders
+        the dropdown as a floating overlay only while open. It builds on the
+        <code>NgpCombobox</code> primitive from <code>ng-primitives</code>, which owns the WAI-ARIA
+        combobox pattern, active-descendant focus, and dropdown positioning; Hell adds the default
+        Tailwind recipe, Part Style Maps, and an Angular forms bridge on top.
       </p>
       <p>
-        Prefer native controls where native form/mobile semantics matter most. This rich
-        headless combobox keeps Angular forms compatible through a version-bound
-        <code>ng-primitives</code> compatibility bridge until upstream public setters exist.
+        Reach for it when a list is large enough that free typing beats scanning — currency pickers,
+        assignee and label selectors, warehouse or account lookups — where a plain
+        <code>&lt;select&gt;</code> or a <code>radio</code> group would be slower. In multiple mode
+        the value follows the primitive's array contract, which pairs naturally with
+        <code>hellTag</code> chips for a token filter. When wiring the full directive set is more
+        boilerplate than the screen deserves, the <code>&lt;hell-combobox-basic&gt;</code>
+        convenience component composes the whole anatomy and handles display filtering for you.
       </p>
 
       <h2>Basic</h2>
+      <p>
+        The smallest realistic composition: an input, a toggle button, and a portalled dropdown of
+        options. You own the filtering — bind the input value and filter the list yourself so the
+        example works for any data source.
+      </p>
       <hd-example-tabs [code]="comboboxBasicExampleCode">
         <app-combobox-basic-example />
       </hd-example-tabs>
 
       <h2>Preset</h2>
-      <hd-example-tabs [code]="comboboxBasicPresetExampleCode">
-        <app-combobox-basic-preset-example />
+      <p>
+        <code>&lt;hell-combobox-basic&gt;</code> composes the input, button, portal, dropdown, and
+        options into one component and filters by <code>displayWith</code> internally. Pass
+        <code>[options]</code>, bind <code>[value]</code>/<code>(valueChange)</code>, and set
+        <code>allowDeselect</code> to let users clear a single selection by re-picking it.
+      </p>
+      <hd-example-tabs [code]="comboboxPresetExampleCode">
+        <app-combobox-preset-example />
       </hd-example-tabs>
 
       <h2>Multiple</h2>
+      <p>
+        Add <code>multiple</code> to <code>hellCombobox</code> and the value becomes a read-only
+        array; selecting an option toggles its membership and the dropdown stays open for the next
+        pick. Render the current selection as <code>hellTag</code> chips below the control so the
+        applied tokens stay scannable.
+      </p>
       <hd-example-tabs [code]="comboboxMultipleExampleCode">
         <app-combobox-multiple-example />
       </hd-example-tabs>
 
+      <h2>With field and tag</h2>
+      <p>
+        A realistic reviewer picker: <code>hellField</code> wires a <code>hellFieldLabel</code> and
+        <code>hellFieldDescription</code> to the combobox for accessible naming, while each selected
+        teammate renders as a dismissible <code>hellTag</code> chip with a
+        <code>hellButton iconOnly</code> remove control. Every piece imports from its own narrow
+        entry point.
+      </p>
+      <hd-example-tabs [code]="comboboxWithFieldTagExampleCode">
+        <app-combobox-with-field-tag-example />
+      </hd-example-tabs>
+
       <h2>Styling</h2>
       <p>
-        <code>HellComboboxBasicUi</code> is a flat Part Style Map over the preset's owned anatomy: <code>control</code>, <code>input</code>, <code>button</code>, <code>dropdown</code>, <code>option</code>, and <code>empty</code>. When you compose the raw directives instead, each one exposes its own <code>ui</code>.
+        Every module in this entry point follows Hell's Part Style Map contract. Pass
+        <code>ui="…"</code> as a shorthand class string to refine a directive's default part, or
+        <code>[ui]="&#123; … &#125;"</code> as a map keyed by named public parts. Refinements merge
+        on top of each part's default recipe through Hell's Tailwind merge, so a conflicting utility
+        wins deterministically over the default it replaces.
+      </p>
+      <p>
+        The single-host directives each expose one <code>root</code> part (their host element).
+        <code>&lt;hell-combobox-basic&gt;</code> owns the full anatomy, so its <code>ui</code> map
+        keys the named parts of every element it renders:
+      </p>
+      <table class="hd-doc-table">
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Part</th>
+            <th>Styles</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>hellCombobox</code></td>
+            <td><code>root</code></td>
+            <td>The control shell — border, background, radius, height, focus ring, disabled and invalid states.</td>
+          </tr>
+          <tr>
+            <td><code>hellComboboxInput</code></td>
+            <td><code>root</code></td>
+            <td>The editable filter input — text color, placeholder color, transparent background.</td>
+          </tr>
+          <tr>
+            <td><code>hellComboboxButton</code></td>
+            <td><code>root</code></td>
+            <td>The toggle button hosting the chevron glyph — width, color, hover state.</td>
+          </tr>
+          <tr>
+            <td><code>hellComboboxDropdown</code></td>
+            <td><code>root</code></td>
+            <td>The floating listbox surface — width, max-height, border, elevation, scroll, pop-in.</td>
+          </tr>
+          <tr>
+            <td><code>hellComboboxOption</code></td>
+            <td><code>root</code></td>
+            <td>An option row — padding, radius, and active/selected/disabled states.</td>
+          </tr>
+          <tr>
+            <td><code>hellComboboxEmpty</code></td>
+            <td><code>root</code></td>
+            <td>The no-results placeholder — muted text and padding.</td>
+          </tr>
+          <tr>
+            <td><code>&lt;hell-combobox-basic&gt;</code></td>
+            <td><code>root</code></td>
+            <td>The component host wrapping the control.</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><code>control</code></td>
+            <td>The inner <code>hellCombobox</code> shell.</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><code>input</code></td>
+            <td>The projected <code>hellComboboxInput</code>.</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><code>button</code></td>
+            <td>The projected <code>hellComboboxButton</code>.</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><code>dropdown</code></td>
+            <td>The projected <code>hellComboboxDropdown</code>.</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><code>option</code></td>
+            <td>Each rendered <code>hellComboboxOption</code>.</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><code>empty</code></td>
+            <td>The <code>hellComboboxEmpty</code> placeholder.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        The example below refines every <code>&lt;hell-combobox-basic&gt;</code> part — and through
+        it every underlying module — with Hell design tokens. Open the dropdown to see the styled
+        surface and options.
       </p>
       <hd-example-tabs [code]="comboboxStylingExampleCode" previewClass="min-h-[220px]">
         <app-combobox-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
+      <p><code>[hellCombobox]</code> — the control container (host of <code>NgpCombobox</code>).</p>
       <ul>
-        <li>
-          <code>&lt;hell-combobox-basic&gt;</code>: compact preset that composes input+button+
-          portal+options and applies common display filtering. Accepts <code>ui</code> for flat
-          owned parts: <code>root</code>, <code>control</code>, <code>input</code>,
-          <code>button</code>, <code>dropdown</code>, <code>option</code>, and
-          <code>empty</code>.
-        </li>
-        <li>
-          <code>[hellCombobox]</code>: container.
-          Inputs <code>value</code>, <code>multiple</code>, <code>disabled</code>,
-          <code>allowDeselect</code>, <code>compareWith</code>, <code>placement</code>,
-          <code>container</code>, <code>flip</code>, <code>options</code>.
-          Outputs <code>valueChange</code>, <code>openChange</code>.
-        </li>
-        <li>
-          <code>input[hellComboboxInput]</code>: editable filter input.
-        </li>
-        <li>
-          <code>button[hellComboboxButton]</code>: dropdown toggle. Renders the chevron via
-          <code>::after</code> mask; keep it empty.
-        </li>
-        <li>
-          <code>[hellComboboxDropdown]</code>: option container. Pair with the
-          <code>*hellComboboxPortal</code> structural directive so the dropdown is rendered
-          in a floating overlay only while open: <code>&lt;div *hellComboboxPortal hellComboboxDropdown&gt;…&lt;/div&gt;</code>.
-        </li>
-        <li>
-          <code>[hellComboboxOption]</code>: option row. <code>[value]</code> required;
-          <code>disabled</code> supported. Emits <code>activated</code>.
-        </li>
-        <li>
-          <code>[hellComboboxEmpty]</code>: placeholder slot for the no-results state.
-        </li>
-        <li><code>ui</code>: Part Style Map for each styled directive's local <code>root</code> part. Rendered directive parts expose <code>data-slot="root"</code>; <code>&lt;hell-combobox-basic&gt;</code> exposes its owned parts by name.</li>
+        <li><code>value</code>: <code>HellComboboxValue&lt;T&gt;</code> — <code>T | null</code> in single mode, <code>readonly T[]</code> in multiple mode.</li>
+        <li><code>multiple</code>: <code>boolean</code>. Switches to array-valued multi-select. Default <code>false</code>.</li>
+        <li><code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
+        <li><code>allowDeselect</code>: <code>boolean</code>. Lets a single selection be cleared by re-picking it. Default <code>false</code>.</li>
+        <li><code>compareWith</code>: <code>HellComboboxCompareWith&lt;T&gt;</code> — <code>(a, b) =&gt; boolean</code> for non-reference option identity.</li>
+        <li><code>placement</code>: <code>NgpComboboxPlacement</code> — dropdown side/alignment. Default <code>bottom</code>.</li>
+        <li><code>container</code>: <code>string | HTMLElement | null</code> — overlay mount target. Default <code>body</code>.</li>
+        <li><code>flip</code>: <code>NgpFlipInput</code> — flip on overflow. Default <code>true</code>.</li>
+        <li><code>options</code>: <code>readonly T[]</code> — full option registry for virtualized/manually ordered lists (aliases <code>ngpComboboxOptions</code>).</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;HellComboboxPart&gt;</code> — refines the <code>root</code> part.</li>
+        <li>Outputs: <code>valueChange: HellComboboxValue&lt;T&gt;</code>, <code>openChange: boolean</code>.</li>
+        <li>Implements <code>ControlValueAccessor</code>, so it works with <code>ngModel</code> and reactive forms.</li>
       </ul>
+      <p><code>input[hellComboboxInput]</code> — the editable filter input; drives typing and keyboard focus. Exposes <code>ui</code> (<code>HellComboboxInputPart</code> = <code>'root'</code>).</p>
+      <p><code>button[hellComboboxButton]</code> — the dropdown toggle. Renders the chevron via a <code>::after</code> mask, so keep the element empty. Exposes <code>ui</code> (<code>HellComboboxButtonPart</code> = <code>'root'</code>).</p>
+      <p><code>[hellComboboxDropdown]</code> — the floating option surface. Pair with the <code>*hellComboboxPortal</code> structural directive so it renders in an overlay only while open: <code>&lt;div *hellComboboxPortal hellComboboxDropdown&gt;…&lt;/div&gt;</code>. Exposes <code>ui</code> (<code>HellComboboxDropdownPart</code> = <code>'root'</code>).</p>
+      <p><code>[hellComboboxOption]</code> — an option row.</p>
+      <ul>
+        <li><code>value</code>: the payload emitted on selection (aliases <code>ngpComboboxOptionValue</code>).</li>
+        <li><code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
+        <li><code>index</code>: <code>number</code> — explicit ordering for virtualized lists.</li>
+        <li><code>activated</code>: output emitted on click/keyboard activation (for value-less options).</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;HellComboboxOptionPart&gt;</code> (<code>'root'</code>).</li>
+      </ul>
+      <p><code>[hellComboboxEmpty]</code> — the no-results placeholder slot. Exposes <code>ui</code> (<code>HellComboboxEmptyPart</code> = <code>'root'</code>).</p>
+      <p><code>[hellComboboxPortal]</code> — structural directive that renders the dropdown as a floating overlay while open. No inputs.</p>
+      <p><code>&lt;hell-combobox-basic&gt;</code> — the convenience component composing the whole anatomy.</p>
+      <ul>
+        <li><code>options</code>: <code>readonly T[]</code>. Default <code>[]</code>.</li>
+        <li><code>value</code>: <code>HellComboboxValue&lt;T&gt; | null</code>. Default <code>null</code>.</li>
+        <li><code>multiple</code> / <code>allowDeselect</code> / <code>disabled</code>: <code>boolean</code>. Default <code>false</code>.</li>
+        <li><code>placeholder</code>: <code>string</code>. Default <code>'Search'</code>.</li>
+        <li><code>toggleLabel</code>: <code>string</code> — button aria-label. Default <code>'Toggle options'</code>.</li>
+        <li><code>emptyLabel</code>: <code>string</code>. Default <code>'No matches'</code>.</li>
+        <li><code>aria-label</code>: <code>string | null</code> — accessible name for the input. Default <code>null</code>.</li>
+        <li><code>compareWith</code>: <code>HellComboboxCompareWith&lt;T&gt;</code>. Default reference equality.</li>
+        <li><code>displayWith</code>: <code>HellComboboxDisplayWith&lt;T&gt;</code> — <code>(value) =&gt; string</code>. Default <code>String</code>.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;HellComboboxBasicPart&gt;</code> — map of <code>root | control | input | button | dropdown | option | empty</code>.</li>
+        <li>Outputs: <code>valueChange</code>, <code>openChange</code>. Implements <code>ControlValueAccessor</code>.</li>
+      </ul>
+      <p>
+        Exported types: <code>HellComboboxValue&lt;T&gt;</code>,
+        <code>HellComboboxSingleValue&lt;T&gt;</code>, <code>HellComboboxMultipleValue&lt;T&gt;</code>,
+        <code>HellComboboxCompareWith&lt;T&gt;</code>, <code>HellComboboxDisplayWith&lt;T&gt;</code>;
+        and per-module <code>Hell*Part</code> / <code>Hell*Ui</code> pairs for
+        <code>Combobox</code>, <code>ComboboxInput</code>, <code>ComboboxButton</code>,
+        <code>ComboboxDropdown</code>, <code>ComboboxOption</code>, <code>ComboboxEmpty</code>, and
+        <code>ComboboxBasic</code>. The bundles <code>HELL_COMBOBOX_DIRECTIVES</code> and
+        <code>HELL_COMBOBOX_BASIC_DIRECTIVES</code> ease <code>imports</code>.
+      </p>
 
       <h2>Accessibility</h2>
       <ul>
-        <li>Implements the ARIA combobox pattern: <code>aria-expanded</code>, <code>aria-controls</code>, and active-option tracking on the input.</li>
-        <li>Options stay reachable by keyboard while typing; Escape closes the list before clearing.</li>
-        <li>Give the input an accessible name via a label, <code>aria-label</code>, or <code>aria-labelledby</code>.</li>
+        <li>The input carries <code>role="combobox"</code>, <code>aria-autocomplete="list"</code>, <code>aria-haspopup="listbox"</code>, and <code>autocomplete="off"</code>, with <code>aria-expanded</code>, <code>aria-controls</code>, and <code>aria-activedescendant</code> tracking the open state and highlighted option.</li>
+        <li>The dropdown is a <code>role="listbox"</code>; each option is a <code>role="option"</code> that reflects <code>aria-selected</code> and <code>data-selected</code> / <code>data-active</code> / <code>data-disabled</code> state.</li>
+        <li>Keyboard: Arrow Down/Up open and move the active option, Home/End jump to first/last, Enter selects the active option, and Escape closes the dropdown.</li>
+        <li>The toggle button is <code>tabindex="-1"</code> with <code>aria-haspopup="listbox"</code>, so the input stays the single keyboard entry point while the button remains a pointer affordance.</li>
+        <li>Give the input an accessible name via a <code>&lt;label&gt;</code> (for example inside <code>hellField</code>), <code>aria-label</code>, or <code>aria-labelledby</code>. On <code>&lt;hell-combobox-basic&gt;</code> pass <code>aria-label</code>.</li>
       </ul>
 
       <h2>Do</h2>
       <ul class="hd-do">
-        <li>Use combobox when the option list is medium-to-large and benefits from filtering.</li>
-        <li>Show selected chips above the input in multiple mode for scannability.</li>
-        <li>Reuse the input value as the value for type-to-create patterns.</li>
+        <li>Use combobox when a list is large enough that typing to filter beats scanning.</li>
+        <li>Show selected values as <code>hellTag</code> chips in multiple mode so applied tokens stay scannable.</li>
+        <li>Leave <code>hellComboboxButton</code> empty — its chevron is drawn by the stylesheet.</li>
+        <li>Provide an accessible name via a label, <code>aria-label</code>, or <code>aria-labelledby</code>.</li>
+        <li>Reach for <code>&lt;hell-combobox-basic&gt;</code> when composing the directives is just boilerplate.</li>
       </ul>
 
       <h2>Don't</h2>
       <ul class="hd-dont">
-        <li>Don't use a combobox for less than ~5 options &mdash; a <code>radio</code> or plain
-          <code>select</code> is faster.</li>
-        <li>Don't hide the dropdown trigger; users need a visible affordance to open without typing.</li>
+        <li>Don't use a combobox for fewer than ~5 options — a <code>radio</code> group or plain <code>select</code> is faster.</li>
+        <li>Don't hide the toggle button; users need a visible affordance to open the list without typing.</li>
+        <li>Don't render <code>hellComboboxDropdown</code> without <code>*hellComboboxPortal</code>, or it stays inline and always visible.</li>
+        <li>Don't target private descendants — each directive's only public part is <code>root</code>.</li>
       </ul>
     </article>
   `,
 })
 export class ComboboxPage {
   protected readonly comboboxBasicExampleCode = comboboxBasicExampleCodeRaw;
-  protected readonly comboboxBasicPresetExampleCode = comboboxBasicPresetExampleCodeRaw;
+  protected readonly comboboxPresetExampleCode = comboboxPresetExampleCodeRaw;
   protected readonly comboboxMultipleExampleCode = comboboxMultipleExampleCodeRaw;
+  protected readonly comboboxWithFieldTagExampleCode = comboboxWithFieldTagExampleCodeRaw;
   protected readonly comboboxStylingExampleCode = comboboxStylingExampleCodeRaw;
 }

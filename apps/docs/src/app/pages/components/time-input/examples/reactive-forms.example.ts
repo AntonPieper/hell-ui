@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { HellTimeInput, type HellTimeValue } from '@hell-ui/angular/time-input';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
@@ -10,14 +10,14 @@ import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
   template: `
     <div hellField>
       <label hellFieldLabel for="reactive-time">Meeting time</label>
-      <hell-time-input inputId="reactive-time" aria-label="Meeting time" [formControl]="control" />
+      <hell-time-input inputId="reactive-time" [formControl]="control" />
       <div hellFieldDescription>
-        Reactive forms receive <code>HellTimeValue | null</code>; the transport format stays your
-        responsibility.
+        Reactive forms read/write <code>HellTimeValue | null</code>; transport formatting stays
+        your responsibility.
       </div>
     </div>
 
-    <p class="hd-muted">Form value: {{ format(control.value) || 'not set' }}</p>
+    <p class="hd-muted">Form value: {{ format(control.value) }}</p>
   `,
 })
 export class TimeInputReactiveFormsExample {
@@ -28,8 +28,8 @@ export class TimeInputReactiveFormsExample {
   });
 
   protected format(value: HellTimeValue | null): string {
-    return value
-      ? `${value.hour.toString().padStart(2, '0')}:${value.minute.toString().padStart(2, '0')}`
-      : '';
+    if (!value) return 'not set';
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${pad(value.hour)}:${pad(value.minute)}`;
   }
 }

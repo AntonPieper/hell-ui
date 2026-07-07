@@ -1,10 +1,2 @@
-/* Avatar root defaults are Tailwind utility recipes. */
+/* Avatar defaults are Tailwind utility recipes. */
 @source "./avatar.ts";
-
-@layer components {
-  hell-avatar[data-slot='root'] > img {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-  }
-}

@@ -48,7 +48,7 @@ test.describe('date picker browser accessibility contract', () => {
   }) => {
     await gotoDatePicker(page);
 
-    const example = page.locator('app-date-picker-single-date-example');
+    const example = page.locator('app-date-picker-basic-example');
     const picker = example.locator('hell-date-picker');
     await expect(example).toBeVisible();
     await expect(monthLabel(picker, 'April 2026')).toHaveAttribute('aria-live', 'polite');
@@ -150,21 +150,21 @@ test.describe('date picker browser accessibility contract', () => {
     const picker = example.locator('hell-date-range-picker');
     await expect(picker).toHaveAttribute('data-range', 'true');
     await expectRangeDays(picker, {
-      start: 5,
-      between: [6, 7, 8, 9, 10, 11],
-      end: 12,
+      start: 6,
+      between: [7, 8, 9, 10, 11, 12],
+      end: 13,
     });
     await expectSquareRangeButtons(picker);
-    await expect(example).toContainText('Sun Apr 05 2026');
-    await expect(example).toContainText('Sun Apr 12 2026');
+    await expect(example).toContainText('Mon Apr 06 2026');
+    await expect(example).toContainText('Mon Apr 13 2026');
 
     await dayButton(picker, 18).focus();
     await page.keyboard.press('Enter');
     await expect(dayButton(picker, 18)).toHaveAttribute('data-range-start', '');
-    await expect(dayButton(picker, 12)).not.toHaveAttribute('data-range-end');
+    await expect(dayButton(picker, 13)).not.toHaveAttribute('data-range-end');
     await expectStandaloneRangeButton(picker, 18);
     await expect(example).toContainText('Sat Apr 18 2026');
-    await expect(example).toContainText(/Sat Apr 18 2026\s*\u2192\s*\u2014/);
+    await expect(example).toContainText(/Sat Apr 18 2026\s+to\s+none/);
 
     await page.keyboard.press('ArrowRight');
     await expect(dayButton(picker, 19)).toBeFocused();
@@ -184,7 +184,7 @@ test.describe('date picker browser accessibility contract', () => {
     await expect(dayButton(picker, 22)).toHaveAttribute('data-range-start', '');
     await expect(dayButton(picker, 22)).toHaveAttribute('data-range-end', '');
     await expectStandaloneRangeButton(picker, 22);
-    await expect(example).toContainText(/Wed Apr 22 2026\s*\u2192\s*Wed Apr 22 2026/);
+    await expect(example).toContainText(/Wed Apr 22 2026\s+to\s+Wed Apr 22 2026/);
   });
 
   test('range picker keeps completed ranges visible across month and year views', async ({
@@ -208,7 +208,7 @@ test.describe('date picker browser accessibility contract', () => {
       end: 2,
     });
     await expectSquareRangeButtons(picker);
-    await expect(example).toContainText(/Tue Nov 24 2026\s*\u2192\s*Sat Jan 02 2027/);
+    await expect(example).toContainText(/Tue Nov 24 2026\s+to\s+Sat Jan 02 2027/);
 
     await navigateMonths(picker, -1);
     await expect(monthLabel(picker, 'December 2026')).toBeVisible();

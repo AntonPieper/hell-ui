@@ -1,3 +1,4 @@
 - listbox:
-  - option "Blackberry" [disabled]
-  - option "Blueberry"
+  - option "AUD — Australian Dollar"
+  - option "CAD — Canadian Dollar"
+  - option "USD — US Dollar"

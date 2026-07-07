@@ -12,17 +12,17 @@ import { HellSlider } from '@hell-ui/angular/slider';
       <div class="flex items-center gap-4">
         <hell-slider
           id="volume-slider"
-          [value]="vol()"
-          (valueChange)="vol.set($event)"
+          [value]="volume()"
+          (valueChange)="volume.set($event)"
           [min]="0"
           [max]="100"
           [step]="1"
         />
-        <code class="w-12 text-end">{{ vol() }}%</code>
+        <code class="w-12 text-end">{{ volume() }}%</code>
       </div>
     </div>
   `,
 })
 export class SliderBasicExample {
-  protected readonly vol = signal(50);
+  protected readonly volume = signal(50);
 }

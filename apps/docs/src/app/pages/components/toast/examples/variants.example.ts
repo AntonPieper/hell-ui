@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject, viewChild, TemplateRef } from '@angular/core';
-import { HellToastService } from '@hell-ui/angular/toast';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
+import { HellToastService } from '@hell-ui/angular/toast';
 
 @Component({
   selector: 'app-toast-variants-example',
@@ -10,47 +10,40 @@ import { HellButton } from '@hell-ui/angular/button';
     <button
       hellButton
       variant="ghost"
+      type="button"
       (click)="svc.message('Saved as draft', { description: 'Your changes are stored locally.' })"
     >
       Default
     </button>
     <button
       hellButton
-      variant="primary"
-      (click)="
-        svc.success('Article published', {
-          description: 'Visible to readers in a few seconds.',
-        })
-      "
+      variant="ghost"
+      type="button"
+      (click)="svc.success('Invoice sent', { description: 'INV-2043 was emailed to the client.' })"
     >
       Success
     </button>
     <button
       hellButton
       variant="ghost"
-      (click)="
-        svc.info('Background sync running', {
-          description: 'Updating your library in the background.',
-        })
-      "
+      type="button"
+      (click)="svc.info('Sync running', { description: 'Refreshing your library in the background.' })"
     >
       Info
     </button>
     <button
       hellButton
       variant="ghost"
-      (click)="svc.warning('Quota almost full', { description: '92% of your storage is used.' })"
+      type="button"
+      (click)="svc.warning('Storage almost full', { description: '92% of your quota is used.' })"
     >
       Warning
     </button>
     <button
       hellButton
-      variant="danger"
-      (click)="
-        svc.error('Upload failed', {
-          description: 'Network unreachable. We will retry shortly.',
-        })
-      "
+      variant="ghost"
+      type="button"
+      (click)="svc.error('Upload failed', { description: 'Network unreachable. We will retry shortly.' })"
     >
       Danger
     </button>
@@ -58,41 +51,4 @@ import { HellButton } from '@hell-ui/angular/button';
 })
 export class ToastVariantsExample {
   protected readonly svc = inject(HellToastService);
-  private readonly customTpl =
-    viewChild<TemplateRef<{ $implicit: { id: number; dismiss: () => void } }>>('custom');
-
-  protected undoExample() {
-    this.svc.show({
-      title: 'Article moved to trash',
-      description: '“Roadmap Q4”',
-      variant: 'default',
-      duration: 6000,
-      action: {
-        label: 'Undo',
-        onClick: (dismiss) => {
-          this.svc.success('Restored', { description: '“Roadmap Q4” is back where it was.' });
-          dismiss();
-        },
-      },
-    });
-  }
-
-  protected customExample() {
-    const tpl = this.customTpl();
-    if (!tpl) return;
-    this.svc.show({ template: tpl, duration: 0 });
-  }
-
-  protected burst() {
-    const lines = [
-      ['Build started', 'main @ 7c9a02b'],
-      ['Tests passed', '482 specs in 14.2s'],
-      ['Bundle ready', 'main.js — 142kb gzipped'],
-      ['Deployed', 'preview-42.heinrich.app'],
-      ['Notified team', '#release on Slack'],
-    ] as const;
-    lines.forEach(([t, d], i) => {
-      setTimeout(() => this.svc.success(t, { description: d }), i * 220);
-    });
-  }
 }

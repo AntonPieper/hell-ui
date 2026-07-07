@@ -1,5 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
 import { HellSpinner } from '@hell-ui/angular/skeleton';
 
@@ -8,15 +7,15 @@ import { HellSpinner } from '@hell-ui/angular/skeleton';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton, HellSpinner],
   template: `
-    <button hellButton variant="primary" disabled>
+    <button hellButton variant="primary" disabled type="button">
       <span hellSpinner size="sm"></span>
       Saving…
     </button>
-    <button hellButton variant="default" disabled>
+    <button hellButton variant="default" disabled type="button">
       <span hellSpinner size="sm" variant="dots"></span>
       Loading
     </button>
-    <button hellButton variant="ghost" disabled>
+    <button hellButton iconOnly variant="ghost" disabled type="button" aria-label="Refreshing">
       <span hellSpinner size="sm" variant="pulse"></span>
     </button>
   `,

@@ -53,7 +53,7 @@ interface PublicComponentContractModule {
 
 /**
  * Public Component Contract manifest. `tools/check-architecture.mjs` compares this list against
- * every exported `HellStyleable` Module so a new public Module cannot skip contract review.
+ * every exported styled Module so a new public Module cannot skip contract review.
  */
 const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[] = [
   { symbol: 'HellAccordion', area: 'primitive', coverage: 'static' },
@@ -206,6 +206,8 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellTableRowRadio', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableSelectionCell', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableSortTrigger', area: 'feature', coverage: 'dom' },
+  { symbol: 'HellTanStackPagination', area: 'feature', coverage: 'static' },
+  { symbol: 'HellTanStackTable', area: 'feature', coverage: 'static' },
 ];
 
 const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(
@@ -548,8 +550,6 @@ const STYLEABLE_CASES: readonly ContractCase[] = [
   },
 ];
 
-const STYLE_OPT_OUT_CASES: readonly ContractCase[] = [];
-
 describe('Hell Component Contract', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -567,7 +567,7 @@ describe('Hell Component Contract', () => {
     const fixture = TestBed.createComponent(ContractHost);
     fixture.detectChanges();
 
-    for (const contract of STYLEABLE_CASES) assertContract(fixture.nativeElement, contract, true);
+    for (const contract of STYLEABLE_CASES) assertContract(fixture.nativeElement, contract);
   });
 
   it('exposes migrated Part Style Map contracts through public root parts', () => {
@@ -628,14 +628,6 @@ describe('Hell Component Contract', () => {
     expect(fieldError.classList.contains('hell-field-error')).toBe(false);
     expect(fieldError.className).toContain('text-hell-foreground');
     expect(fieldError.className).not.toContain('text-hell-danger');
-  });
-
-  it('keeps state attributes while Style Opt-Out removes default classes', () => {
-    const fixture = TestBed.createComponent(ContractHost);
-    fixture.detectChanges();
-
-    for (const contract of STYLE_OPT_OUT_CASES)
-      assertContract(fixture.nativeElement, contract, false);
   });
 
   it('exposes primitive parts through host classes without owning caller markup', () => {
@@ -848,7 +840,7 @@ describe('Hell Component Contract', () => {
   });
 });
 
-function assertContract(root: HTMLElement, contract: ContractCase, styled: boolean): void {
+function assertContract(root: HTMLElement, contract: ContractCase): void {
   expect(
     PUBLIC_COMPONENT_CONTRACT_SYMBOLS.has(contract.module),
     `${contract.module} must be declared in PUBLIC_COMPONENT_CONTRACT_MODULES`,
@@ -859,7 +851,7 @@ function assertContract(root: HTMLElement, contract: ContractCase, styled: boole
   if (!(element instanceof HTMLElement)) throw new Error(`Expected #${contract.id}.`);
 
   expect(element.classList.contains(contract.className), `${contract.id}.${contract.className}`).toBe(
-    styled,
+    true,
   );
   for (const [name, value] of Object.entries(contract.attrs ?? {})) {
     expect(element.getAttribute(name), `${contract.id}.${name}`).toBe(value);

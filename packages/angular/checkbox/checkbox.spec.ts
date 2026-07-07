@@ -156,6 +156,7 @@ class CheckboxPartStyleHost {
   } satisfies HellNativeCheckboxUi;
   protected readonly customUi = {
     root: 'bg-hell-danger size-hell-6 rounded-hell-pill',
+    indicator: 'text-hell-danger size-hell-3',
   } satisfies HellCheckboxUi;
 }
 
@@ -350,6 +351,14 @@ describe('HellCheckbox', () => {
     expect(customMap.classList.contains('size-hell-6')).toBe(true);
     expect(customMap.classList.contains('size-hell-5')).toBe(false);
 
+    const customMapIndicator = customMap.querySelector<SVGElement>('svg[data-slot="indicator"]');
+    if (!customMapIndicator) throw new Error('Expected svg[data-slot="indicator"].');
+    expect(customMapIndicator.classList.contains('block')).toBe(true);
+    expect(customMapIndicator.classList.contains('translate-y-[-0.5px]')).toBe(true);
+    expect(customMapIndicator.classList.contains('text-hell-danger')).toBe(true);
+    expect(customMapIndicator.classList.contains('size-hell-3')).toBe(true);
+    expect(customMapIndicator.classList.contains('size-hell-4')).toBe(false);
+
     expect(native.tagName).toBe('INPUT');
     expect(native.type).toBe('checkbox');
     expect(native.getAttribute('data-slot')).toBe('root');
@@ -359,6 +368,35 @@ describe('HellCheckbox', () => {
     expect(native.classList.contains('size-hell-5')).toBe(false);
     expect(native.getAttribute('aria-required')).toBe('true');
     expect(native.getAttribute('required')).toBe('');
+  });
+
+  it('renders the indicator part with default recipe classes and data-slot', () => {
+    const fixture = TestBed.createComponent(CheckboxHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const checkbox = query<HTMLButtonElement>(fixture.nativeElement, 'button[hellCheckbox]');
+
+    expect(checkbox.querySelector('svg[data-slot="indicator"]')).toBeNull();
+
+    host.checked.set(true);
+    fixture.detectChanges();
+
+    const checkedIndicator = checkbox.querySelector<SVGElement>('svg[data-slot="indicator"]');
+    if (!checkedIndicator) throw new Error('Expected svg[data-slot="indicator"].');
+    expect(checkedIndicator.classList.contains('block')).toBe(true);
+    expect(checkedIndicator.classList.contains('size-hell-4')).toBe(true);
+    expect(checkedIndicator.classList.contains('translate-y-[-0.5px]')).toBe(true);
+
+    host.checked.set(false);
+    host.indeterminate.set(true);
+    fixture.detectChanges();
+
+    const indeterminateIndicator = checkbox.querySelector<SVGElement>('svg[data-slot="indicator"]');
+    if (!indeterminateIndicator) throw new Error('Expected svg[data-slot="indicator"].');
+    expect(indeterminateIndicator.classList.contains('block')).toBe(true);
+    expect(indeterminateIndicator.classList.contains('size-hell-4')).toBe(true);
+    expect(indeterminateIndicator.classList.contains('translate-y-[-0.5px]')).toBe(true);
   });
 
   it('does not report required when control is disabled', () => {

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
 
 @Component({
@@ -6,12 +6,15 @@ import { HELL_RESIZABLE_DIRECTIVES } from '@hell-ui/angular/resizable';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [...HELL_RESIZABLE_DIRECTIVES],
   template: `
-    <div hellResizable orientation="horizontal" ui="h-[200px]">
-      <div hellResizablePane [initialFlex]="1" ui="hd-surface-elevated p-4">Sidebar</div>
+    <!-- appearance="grip" gives the divider a visible pill with a three-dot indicator. -->
+    <div hellResizable class="h-64">
+      <div hellResizablePane [initialFlex]="1" class="hd-surface-elevated p-hell-4 text-sm">
+        Navigator
+      </div>
       <div hellResizableHandle appearance="grip"></div>
-      <div hellResizablePane [initialFlex]="2" ui="hd-surface-subtle p-4">Main</div>
-      <div hellResizableHandle appearance="grip"></div>
-      <div hellResizablePane [initialFlex]="1" ui="hd-surface-elevated p-4">Inspector</div>
+      <div hellResizablePane [initialFlex]="2" class="hd-surface-subtle p-hell-4 text-sm">
+        Preview
+      </div>
     </div>
   `,
 })

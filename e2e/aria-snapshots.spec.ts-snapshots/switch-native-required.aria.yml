@@ -1,5 +1,5 @@
-- switch "Auto updates"
-- text: Auto updates
+- switch "Auto-renew subscription"
+- text: Auto-renew subscription
 - paragraph:
   - text: "Checked:"
   - code: "false"

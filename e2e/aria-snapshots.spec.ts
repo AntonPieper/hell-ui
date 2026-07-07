@@ -60,12 +60,11 @@ test.describe('public docs aria snapshots', () => {
   }) => {
     await gotoDocsPage(page, '/components/accordion', 'Accordion');
 
-    const example = page.locator('app-accordion-single-collapsible-example');
+    const example = page.locator('app-accordion-basic-example');
     await expect(example).toBeVisible();
-    await expect(example.getByRole('button', { name: 'Installation' })).toHaveAttribute(
-      'aria-expanded',
-      'true',
-    );
+    await expect(
+      example.getByRole('button', { name: 'When will my order ship?' }),
+    ).toHaveAttribute('aria-expanded', 'true');
 
     await expectNamedAriaSnapshot(example, 'accordion-single-open.aria.yml');
   });
@@ -75,7 +74,7 @@ test.describe('public docs aria snapshots', () => {
   }) => {
     await gotoDocsPage(page, '/components/checkbox', 'Checkbox');
 
-    const custom = page.locator('app-checkbox-examples-example');
+    const custom = page.locator('app-checkbox-states-example');
     const native = page.locator('app-checkbox-native-example');
     await expect(custom).toBeVisible();
     await expect(native).toBeVisible();
@@ -96,7 +95,7 @@ test.describe('public docs aria snapshots', () => {
     await freezeBrowserDate(page);
     await gotoDocsPage(page, '/components/date-picker', 'Date picker');
 
-    const single = page.locator('app-date-picker-single-date-example hell-date-picker');
+    const single = page.locator('app-date-picker-basic-example hell-date-picker');
     const range = page.locator('app-date-picker-range-example hell-date-range-picker');
 
     await expect(single.getByRole('grid', { name: 'April 2026' })).toBeVisible();
@@ -108,7 +107,7 @@ test.describe('public docs aria snapshots', () => {
     await expect(
       range
         .locator('button[ngpdatepickerdatebutton]:not([data-outside-month])')
-        .filter({ hasText: /^\s*5\s*$/ }),
+        .filter({ hasText: /^\s*6\s*$/ }),
     ).toHaveAttribute('data-range-start', '');
 
     await expectNamedAriaSnapshot(single, 'date-picker-single-grid.aria.yml');
@@ -135,13 +134,20 @@ test.describe('public docs aria snapshots', () => {
     await freezeBrowserDate(page);
     await gotoDocsPage(page, '/components/date-input', 'Date input');
 
-    const example = page.locator('app-date-input-text-input-calendar-popover-example');
-    const invalid = example.getByRole('textbox', { name: 'Invalid' });
+    const invalid = page
+      .locator('app-date-input-bounds-and-validation-example')
+      .getByRole('textbox', { name: 'Invalid date' });
     await expect(invalid).toHaveAttribute('aria-invalid', 'true');
-    await expect(invalid).toHaveAccessibleDescription('Pick a date in the future.');
 
-    const departure = example.getByRole('textbox', { name: 'Departure' });
-    await departure.locator('xpath=..').getByRole('button', { name: 'Choose date' }).click();
+    const described = page
+      .locator('app-date-input-reactive-forms-example')
+      .getByRole('textbox', { name: 'Invoice date' });
+    await expect(described).toHaveAccessibleDescription(
+      'Reactive forms receive Date | null; empty text writes null.',
+    );
+
+    const basic = page.locator('app-date-input-basic-example');
+    await basic.getByRole('button', { name: 'Choose date for Invoice date' }).click();
     const popover = page.locator('[data-slot="pickerPanel"]', {
       has: page.getByRole('grid'),
     });
@@ -165,7 +171,7 @@ test.describe('public docs aria snapshots', () => {
   test('dialpad snapshot records named keys and state controls', async ({ page }) => {
     await gotoDocsPage(page, '/components/dialpad', 'Dialpad');
 
-    const example = page.locator('app-dialpad-example-example');
+    const example = page.locator('app-dialpad-states-example');
     const dialpad = example.getByRole('group', { name: 'Dial pad' });
     await expect(dialpad).toBeVisible();
     await expect(dialpad.getByRole('button', { name: 'Digit 2, ABC' })).toBeVisible();
@@ -181,11 +187,11 @@ test.describe('public docs aria snapshots', () => {
   test('flyout snapshot records the named non-modal dialog and trigger state', async ({ page }) => {
     await gotoDocsPage(page, '/components/flyout', 'Flyout');
 
-    const example = page.locator('app-flyout-example-boundary-keeps-siblings-interactive-example');
-    const trigger = example.getByRole('button', { name: /^(Show|Hide) flyout$/ });
+    const example = page.locator('app-flyout-anchor-and-boundary-example');
+    const trigger = example.getByRole('button', { name: /^(Show|Hide) suggestions$/ });
     await trigger.click();
 
-    const flyout = page.getByRole('dialog', { name: 'Anchored, non-modal' });
+    const flyout = page.getByRole('dialog', { name: 'Anchored to the input' });
     await expect(flyout).toBeVisible();
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
     await expect(flyout).toHaveAttribute('aria-modal', 'false');
@@ -198,22 +204,23 @@ test.describe('public docs aria snapshots', () => {
   }) => {
     await gotoDocsPage(page, '/components/listbox', 'Listbox');
 
-    const example = page.locator('app-listbox-basic-example');
-    const single = example.getByRole('listbox', { name: 'Choose a reviewer' });
-    const multiple = example.getByRole('listbox', { name: 'Choose launch checks' });
+    const singleExample = page.locator('app-listbox-basic-example');
+    const multipleExample = page.locator('app-listbox-multiple-example');
+    const single = singleExample.getByRole('listbox', { name: 'Assign owner' });
+    const multiple = multipleExample.getByRole('listbox', { name: 'Launch checks' });
 
     await expect(single).toBeVisible();
     await expect(multiple).toHaveAttribute('aria-multiselectable', 'true');
-    await expect(example.getByRole('option', { name: /Margaret Hamilton/ })).toHaveAttribute(
+    await expect(multipleExample.getByRole('option', { name: /Data migration/ })).toHaveAttribute(
       'aria-disabled',
       'true',
     );
-    await expect(example.getByRole('option', { name: /Accessibility review/ })).toHaveAttribute(
-      'aria-selected',
-      'true',
-    );
+    await expect(
+      multipleExample.getByRole('option', { name: /Accessibility review/ }),
+    ).toHaveAttribute('aria-selected', 'true');
 
-    await expectNamedAriaSnapshot(example, 'listbox-basic-matrix.aria.yml');
+    await expectNamedAriaSnapshot(singleExample, 'listbox-basic-matrix.aria.yml');
+    await expectNamedAriaSnapshot(multipleExample, 'listbox-multiple-matrix.aria.yml');
   });
 
   test('menu snapshot records action roles, names, and disabled state', async ({ page }) => {
@@ -225,14 +232,14 @@ test.describe('public docs aria snapshots', () => {
   test('popover snapshots record trigger state and named dialog actions', async ({ page }) => {
     await gotoDocsPage(page, '/components/popover', 'Popover');
 
-    const example = page.locator('app-popover-example-example');
-    const trigger = example.getByRole('button', { name: 'Show profile summary' });
+    const example = page.locator('app-popover-basic-example');
+    const trigger = example.getByRole('button', { name: 'What is this status?' });
     await trigger.click();
 
-    const popover = page.getByRole('dialog', { name: 'Profile summary' });
+    const popover = page.getByRole('dialog', { name: 'Pending review' });
     await expect(popover).toBeVisible();
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    await expect(popover).toHaveAttribute('aria-labelledby', 'profile-popover-title');
+    await expect(popover).toHaveAttribute('aria-labelledby', 'basic-popover-title');
 
     await expectNamedAriaSnapshot(trigger, 'popover-trigger-open.aria.yml');
     await expectNamedAriaSnapshot(popover, 'popover-dialog-open.aria.yml');
@@ -241,7 +248,7 @@ test.describe('public docs aria snapshots', () => {
   test('select snapshots record the expanded trigger and option roles', async ({ page }) => {
     await gotoDocsPage(page, '/components/select', 'Select');
 
-    const select = page.getByRole('combobox', { name: 'Select priority' }).first();
+    const select = page.getByRole('combobox', { name: 'Priority' }).first();
     await select.focus();
     await page.keyboard.press('ArrowDown');
     await expect(select).toHaveAttribute('aria-expanded', 'true');
@@ -256,11 +263,11 @@ test.describe('public docs aria snapshots', () => {
   test('combobox snapshots record the filtered input and option roles', async ({ page }) => {
     await gotoDocsPage(page, '/components/combobox', 'Combobox');
 
-    const input = page.getByRole('combobox', { name: 'Search fruit…' }).first();
-    await input.fill('Bl');
+    const input = page.getByRole('combobox', { name: 'Settlement currency' }).first();
+    await input.fill('Dollar');
     await page.keyboard.press('ArrowDown');
     await expect(input).toHaveAttribute('aria-expanded', 'true');
-    await expect(page.getByRole('option', { name: 'Blueberry' })).toBeVisible();
+    await expect(page.getByRole('option', { name: 'USD — US Dollar' })).toBeVisible();
 
     const options = page.getByRole('listbox').first();
     await expect(options).toBeVisible();
@@ -287,32 +294,32 @@ test.describe('public docs aria snapshots', () => {
   test('progress snapshots record visible labels and value states', async ({ page }) => {
     await gotoDocsPage(page, '/components/progress', 'Progress');
 
-    const examples = page.locator('app-progress-examples-example');
-    await expect(examples).toBeVisible();
-    await expect(page.getByRole('progressbar', { name: 'Queued migration' })).toHaveAttribute(
-      'aria-valuenow',
-      '0',
-    );
-    await expect(page.getByRole('progressbar', { name: 'Profile import' })).toHaveAttribute(
-      'aria-valuenow',
-      '33',
-    );
-    await expect(page.getByRole('progressbar', { name: 'Media processing' })).toHaveAttribute(
+    const labeled = page.locator('app-progress-labeled-value-example');
+    await expect(labeled).toBeVisible();
+    await expect(page.getByRole('progressbar', { name: 'Upload progress' })).toHaveAttribute(
       'aria-valuenow',
       '66',
     );
-    await expect(page.getByRole('progressbar', { name: 'Backup complete' })).toHaveAttribute(
+    await expect(page.getByRole('progressbar', { name: 'Storage used' })).toHaveAttribute(
       'aria-valuenow',
-      '100',
+      '40',
     );
+    await expect(page.getByRole('progressbar', { name: 'Thin track' })).toHaveAttribute(
+      'aria-valuenow',
+      '70',
+    );
+    // Indeterminate progress omits aria-valuenow entirely — a distinct value state.
+    await expect(
+      page.getByRole('progressbar', { name: 'Connecting to server' }),
+    ).not.toHaveAttribute('aria-valuenow');
 
-    await expectNamedAriaSnapshot(examples, 'progress-labeled-values.aria.yml');
+    await expectNamedAriaSnapshot(labeled, 'progress-labeled-values.aria.yml');
   });
 
   test('radio snapshots record group labels and checked states', async ({ page }) => {
     await gotoDocsPage(page, '/components/radio', 'Radio');
 
-    const vertical = page.locator('app-radio-example-example');
+    const vertical = page.locator('app-radio-plan-picker-example');
     const horizontal = page.locator('app-radio-horizontal-example');
     await expect(vertical).toBeVisible();
     await expect(horizontal).toBeVisible();
@@ -320,11 +327,11 @@ test.describe('public docs aria snapshots', () => {
       'aria-required',
       'true',
     );
-    await expect(vertical.getByRole('radio', { name: 'Legacy' })).toBeDisabled();
+    await expect(horizontal.getByRole('radio', { name: 'X-Large' })).toBeDisabled();
 
     await expectNamedAriaSnapshot(vertical, 'radio-plan-group.aria.yml');
     await expectNamedAriaSnapshot(
-      vertical.getByRole('radio', { name: 'Legacy' }),
+      horizontal.getByRole('radio', { name: 'X-Large' }),
       'radio-disabled-option.aria.yml',
     );
     await expectNamedAriaSnapshot(horizontal, 'radio-size-group.aria.yml');
@@ -346,7 +353,7 @@ test.describe('public docs aria snapshots', () => {
   test('slider snapshot records vertical orientation', async ({ page }) => {
     await gotoDocsPage(page, '/components/slider', 'Slider');
 
-    const vertical = page.locator('app-slider-vertical-example');
+    const vertical = page.locator('app-slider-orientation-example');
 
     await expect(vertical.getByRole('slider', { name: 'Vertical low' })).toHaveAttribute(
       'aria-orientation',
@@ -372,15 +379,15 @@ test.describe('public docs aria snapshots', () => {
   test('switch snapshots record visible labels and switch states', async ({ page }) => {
     await gotoDocsPage(page, '/components/switch', 'Switch');
 
-    const custom = page.locator('app-switch-examples-example');
+    const custom = page.locator('app-switch-states-example');
     const native = page.locator('app-switch-native-example');
 
-    await expect(custom.getByRole('switch', { name: 'Email notifications' })).toHaveAttribute(
+    await expect(custom.getByRole('switch', { name: 'On', exact: true })).toHaveAttribute(
       'aria-checked',
       'true',
     );
-    await expect(custom.getByRole('switch', { name: 'Disabled', exact: true })).toBeDisabled();
-    await expect(native.getByRole('switch', { name: 'Auto updates' })).toHaveAttribute(
+    await expect(custom.getByRole('switch', { name: 'Disabled, off' })).toBeDisabled();
+    await expect(native.getByRole('switch', { name: 'Auto-renew subscription' })).toHaveAttribute(
       'aria-required',
       'true',
     );
@@ -394,10 +401,10 @@ test.describe('public docs aria snapshots', () => {
   }) => {
     await gotoDocsPage(page, '/components/tabs', 'Tabs');
 
-    const automatic = page.locator('app-tabs-example-example');
+    const automatic = page.locator('app-tabs-basic-example');
     const manual = page.locator('app-tabs-vertical-example');
     const automaticList = automatic.getByRole('tablist', { name: 'Account sections' });
-    const manualList = manual.getByRole('tablist', { name: 'Manual content sections' });
+    const manualList = manual.getByRole('tablist', { name: 'Settings sections' });
 
     await expect(automaticList).toHaveAttribute('aria-orientation', 'horizontal');
     await expect(manualList).toHaveAttribute('aria-orientation', 'vertical');
@@ -405,7 +412,7 @@ test.describe('public docs aria snapshots', () => {
       'aria-selected',
       'true',
     );
-    await expect(manual.getByRole('tab', { name: 'Section A' })).toHaveAttribute(
+    await expect(manual.getByRole('tab', { name: 'Profile' })).toHaveAttribute(
       'aria-selected',
       'true',
     );
@@ -452,7 +459,10 @@ test.describe('public docs aria snapshots', () => {
   test('time input snapshot records labeled spinbuttons and minute presets', async ({ page }) => {
     await gotoDocsPage(page, '/components/time-input', 'Time input');
 
-    await page.getByRole('button', { name: 'Choose time for Reminder time' }).first().click();
+    await page
+      .locator('app-time-input-basic-example')
+      .getByRole('button', { name: 'Choose time' })
+      .click();
     const picker = page
       .locator('[data-slot="pickerPanel"]')
       .filter({ has: page.getByRole('spinbutton', { name: 'Hours' }) });

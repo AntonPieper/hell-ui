@@ -5,16 +5,20 @@ import { PaginationBasicExample } from './examples/basic.example';
 import paginationBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
 };
-import { PaginationLargerWindowExample } from './examples/larger-window.example';
-import paginationLargerWindowExampleCodeRaw from './examples/larger-window.example.ts?raw' with {
-  loader: 'text',
-};
 import { PaginationPreviousNextExample } from './examples/previous-next.example';
 import paginationPreviousNextExampleCodeRaw from './examples/previous-next.example.ts?raw' with {
   loader: 'text',
 };
 import { PaginationJumpExample } from './examples/jump.example';
 import paginationJumpExampleCodeRaw from './examples/jump.example.ts?raw' with {
+  loader: 'text',
+};
+import { PaginationComposedExample } from './examples/composed.example';
+import paginationComposedExampleCodeRaw from './examples/composed.example.ts?raw' with {
+  loader: 'text',
+};
+import { PaginationWithTableExample } from './examples/with-table.example';
+import paginationWithTableExampleCodeRaw from './examples/with-table.example.ts?raw' with {
   loader: 'text',
 };
 import { PaginationStylingExample } from './examples/styling.example';
@@ -28,9 +32,11 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
   imports: [
     ExampleTabs,
     PaginationBasicExample,
-    PaginationLargerWindowExample,
     PaginationPreviousNextExample,
-    PaginationJumpExample, PaginationStylingExample,
+    PaginationJumpExample,
+    PaginationComposedExample,
+    PaginationWithTableExample,
+    PaginationStylingExample,
     PageHeader,
   ],
   template: `
@@ -42,13 +48,25 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         importPath="@hell-ui/angular/pagination"
         stylesPath="@hell-ui/angular/pagination/styles.css"
       >
-        Page navigation in numbered, previous/next, and jump modes, with all built-in labels localizable.
+        Page navigation as composable button directives or a ready-made strip, in numbered,
+        previous/next, and page-jump layouts.
       </hd-page-header>
       <p>
-        Navigate between pages. Built on the
-        <code>ng-primitives/pagination</code> primitives. Renders first / previous / numbered window
-        / next / last buttons with chevron icons, and emits <code>(pageChange)</code> with the new
-        1-based page number.
+        Pagination is a <code>ng-primitives/pagination</code>-backed entry point with two ways in.
+        Compose the <code>[hellPagination]</code> directive with
+        <code>hellPaginationFirst</code>/<code>Prev</code>/<code>Button</code>/<code>Next</code>/<code>Last</code>
+        on your own <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code> elements when you need
+        custom markup or non-standard controls in between. Or drop in
+        <code>&lt;hell-pagination&gt;</code>, a ready-made strip that renders the whole first /
+        previous / numbered window / next / last sequence — or a compact previous/next or
+        page-jump layout — and emits <code>(pageChange)</code> with the new 1-based page number.
+      </p>
+      <p>
+        Reach for pagination whenever a table, list, or search result set is too large to render
+        at once and the total count is meaningful to the user. All labels — including the
+        per-page accessible names — go through the <code>HellPaginationLabels</code> Label
+        Contract, so a dense admin table and a public-facing results page can each localize
+        pagination independently.
       </p>
 
       <h2>Basic</h2>
@@ -59,21 +77,11 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <app-pagination-basic-example />
       </hd-example-tabs>
 
-      <h2>Larger window</h2>
-      <p>
-        Use <code>siblingCount</code> to show more numbered buttons around the current page (default
-        2).
-      </p>
-      <hd-example-tabs [code]="paginationLargerWindowExampleCode">
-        <app-pagination-larger-window-example />
-      </hd-example-tabs>
-
       <h2>Previous / next only</h2>
       <p>
-        Use <code>mode="previous-next"</code> when page numbers would be noisy but users still need
-        clear position and disabled boundary states. For custom markup, compose
-        <code>[hellPagination]</code> with only <code>hellPaginationPrev</code> and
-        <code>hellPaginationNext</code>.
+        Set <code>mode="previous-next"</code> when a numbered window would be noisy but users
+        still need clear position and disabled boundary states. The strip renders only the
+        previous/next controls plus a live <code>status</code> text such as "Page 1 of 9".
       </p>
       <hd-example-tabs
         [code]="paginationPreviousNextExampleCode"
@@ -84,8 +92,10 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
 
       <h2>Page jump</h2>
       <p>
-        Use <code>mode="jump"</code> for large page sets. The native select is keyboard and screen
-        reader reachable while keeping the current page and page count compact.
+        Set <code>mode="jump"</code> for large page sets where a numbered window doesn't scale.
+        The strip renders previous/next controls around a native
+        <code>hellNativeSelect</code>, keeping the current page and total page count keyboard-
+        and screen-reader-reachable in a compact footprint.
       </p>
       <hd-example-tabs
         [code]="paginationJumpExampleCode"
@@ -94,59 +104,230 @@ import paginationStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
         <app-pagination-jump-example />
       </hd-example-tabs>
 
+      <h2>Composing your own layout</h2>
+      <p>
+        Skip <code>&lt;hell-pagination&gt;</code> and compose the directives directly when you
+        need custom markup — text labels instead of icons, a different control order, or extra
+        elements interleaved with the controls. <code>[hellPagination]</code> provides the shared
+        page/pageCount/disabled state; each <code>hellPagination*</code> directive reads it and
+        exposes its own single <code>root</code> part.
+      </p>
+      <hd-example-tabs [code]="paginationComposedExampleCode">
+        <app-pagination-composed-example />
+      </hd-example-tabs>
+
+      <h2>With table and page size</h2>
+      <p>
+        A common shape in dense business apps: a table body sliced to the active page, a
+        <code>hellNativeSelect</code> for rows-per-page, and a <code>previous-next</code>
+        pagination strip anchoring the row. Changing the page size resets to page one so the
+        slice stays valid.
+      </p>
+      <hd-example-tabs [code]="paginationWithTableExampleCode">
+        <app-pagination-with-table-example />
+      </hd-example-tabs>
+
       <h2>Styling</h2>
       <p>
-        <code>HellPaginationStripUi</code> names the strip's owned anatomy — <code>root</code>, <code>status</code>, and the jump controls — so density and emphasis changes stay declarative.
+        Every module in this entry point takes a <code>ui</code> Part Style Map. Pass a plain
+        string to refine the module's default part — <code>root</code> on every module except
+        <code>HellPaginationStrip</code>, which owns more anatomy — or an explicit
+        <code>HellUi&lt;Part&gt;</code> map to target named parts. Refinements merge on top of the
+        default recipe through Hell's Tailwind merge, so they win deterministically over the
+        classes they conflict with.
       </p>
-      <hd-example-tabs [code]="paginationStylingExampleCode" previewClass="flex items-center gap-3">
+      <table class="hd-doc-table">
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Part</th>
+            <th>Styles</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>HellPagination</code></td>
+            <td><code>root</code></td>
+            <td>The <code>[hellPagination]</code> host — layout of composed controls.</td>
+          </tr>
+          <tr>
+            <td><code>HellPaginationFirst</code></td>
+            <td><code>root</code></td>
+            <td>The first-page button/anchor host.</td>
+          </tr>
+          <tr>
+            <td><code>HellPaginationPrev</code></td>
+            <td><code>root</code></td>
+            <td>The previous-page button/anchor host.</td>
+          </tr>
+          <tr>
+            <td><code>HellPaginationNext</code></td>
+            <td><code>root</code></td>
+            <td>The next-page button/anchor host.</td>
+          </tr>
+          <tr>
+            <td><code>HellPaginationLast</code></td>
+            <td><code>root</code></td>
+            <td>The last-page button/anchor host.</td>
+          </tr>
+          <tr>
+            <td><code>HellPaginationButton</code></td>
+            <td><code>root</code></td>
+            <td>A numbered page button/anchor host.</td>
+          </tr>
+          <tr>
+            <td rowspan="8"><code>HellPaginationStrip</code></td>
+            <td><code>root</code></td>
+            <td>The <code>&lt;hell-pagination&gt;</code> host — gap and wrapping of the whole strip.</td>
+          </tr>
+          <tr>
+            <td><code>control</code></td>
+            <td>Forwarded to every rendered first/prev/numbered/next/last control's <code>root</code>.</td>
+          </tr>
+          <tr>
+            <td><code>controlGlyph</code></td>
+            <td>The chevron glyph inside each control.</td>
+          </tr>
+          <tr>
+            <td><code>status</code></td>
+            <td>The live "Page X of Y" text in <code>previous-next</code> mode.</td>
+          </tr>
+          <tr>
+            <td><code>jump</code></td>
+            <td>The label wrapping the page-jump control in <code>jump</code> mode.</td>
+          </tr>
+          <tr>
+            <td><code>jumpLabel</code></td>
+            <td>The leading "Page" text in <code>jump</code> mode.</td>
+          </tr>
+          <tr>
+            <td><code>jumpSelect</code></td>
+            <td>Forwarded to the embedded <code>hellNativeSelect</code>'s <code>root</code> part.</td>
+          </tr>
+          <tr>
+            <td><code>jumpTotal</code></td>
+            <td>The trailing "of Y" text in <code>jump</code> mode.</td>
+          </tr>
+        </tbody>
+      </table>
+      <hd-example-tabs [code]="paginationStylingExampleCode">
         <app-pagination-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
+      <h3><code>HellPagination</code> (<code>[hellPagination]</code>)</h3>
+      <ul>
+        <li><code>page</code>: <code>number</code>. 1-based current page, two-way bindable via <code>(pageChange)</code>.</li>
+        <li><code>pageCount</code>: <code>number</code>. Total number of pages.</li>
+        <li><code>disabled</code>: <code>boolean</code>. Disables every composed control's activation.</li>
+        <li><code>pageChange</code>: <code>EventEmitter&lt;number&gt;</code>. Emits the new 1-based page.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;HellPaginationPart&gt;</code> — refines the single <code>root</code> part.</li>
+        <li>Exported types: <code>HellPaginationPart</code> (<code>'root'</code>), <code>HellPaginationUi</code>.</li>
+      </ul>
+      <h3>
+        <code>HellPaginationFirst</code> / <code>HellPaginationPrev</code> /
+        <code>HellPaginationNext</code> / <code>HellPaginationLast</code>
+      </h3>
+      <ul>
+        <li>Selectors: <code>button[hellPaginationFirst]</code>, <code>a[hellPaginationFirst]</code> (and the equivalent <code>Prev</code>/<code>Next</code>/<code>Last</code> selectors).</li>
+        <li><code>disabled</code>: <code>boolean</code>. Explicit disable in addition to the boundary state derived from <code>page</code>/<code>pageCount</code>.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;Part&gt;</code> — refines the module's single <code>root</code> part.</li>
+        <li>Exported types per module: <code>HellPaginationFirstPart</code>/<code>Ui</code>, <code>HellPaginationPrevPart</code>/<code>Ui</code>, <code>HellPaginationNextPart</code>/<code>Ui</code>, <code>HellPaginationLastPart</code>/<code>Ui</code> — each <code>Part</code> is <code>'root'</code>.</li>
+      </ul>
+      <h3><code>HellPaginationButton</code></h3>
+      <ul>
+        <li>Selectors: <code>button[hellPaginationButton]</code>, <code>a[hellPaginationButton]</code>.</li>
+        <li><code>page</code>: <code>number</code>. The page this button navigates to.</li>
+        <li><code>disabled</code>: <code>boolean</code>.</li>
+        <li><code>ui</code>: <code>HellUiInput&lt;HellPaginationButtonPart&gt;</code> — refines the single <code>root</code> part.</li>
+        <li>Exported types: <code>HellPaginationButtonPart</code> (<code>'root'</code>), <code>HellPaginationButtonUi</code>.</li>
+      </ul>
+      <h3><code>HellPaginationStrip</code> (<code>&lt;hell-pagination&gt;</code>)</h3>
+      <ul>
+        <li><code>page</code>: <code>number</code>. 1-based current page, two-way bindable via <code>(pageChange)</code>.</li>
+        <li><code>pageCount</code>: <code>number</code>. Total number of pages.</li>
+        <li><code>disabled</code>: <code>boolean</code>. Disables every rendered control.</li>
+        <li><code>mode</code>: <code>HellPaginationMode</code> — <code>'pages' | 'previous-next' | 'jump'</code>. Default <code>'pages'</code>.</li>
+        <li><code>siblingCount</code>: <code>number</code>. Numbered buttons rendered on each side of the current page in <code>pages</code> mode. Default <code>2</code>.</li>
+        <li><code>pageChange</code>: <code>EventEmitter&lt;number&gt;</code>. Emits the new 1-based page.</li>
+        <li>
+          <code>ui</code>: <code>HellUiInput&lt;HellPaginationStripPart&gt;</code> — a shorthand
+          string refining <code>root</code>, or a map over <code>root</code>,
+          <code>control</code>, <code>controlGlyph</code>, <code>status</code>, <code>jump</code>,
+          <code>jumpLabel</code>, <code>jumpSelect</code>, and <code>jumpTotal</code>.
+        </li>
+        <li>Exported types: <code>HellPaginationStripPart</code>, <code>HellPaginationStripUi</code>, <code>HellPaginationMode</code>.</li>
+      </ul>
+      <h3>Labels</h3>
       <ul>
         <li>
-          <code>page</code>: 1-based current page (two-way bindable via <code>(pageChange)</code>).
+          <code>provideHellPaginationLabels(overrides: Partial&lt;HellPaginationLabels&gt;)</code>:
+          overrides any subset of <code>navigation</code>, <code>firstPage</code>,
+          <code>previousPage</code>, <code>nextPage</code>, <code>lastPage</code>,
+          <code>page(page)</code>, <code>pageStatus(page, pageCount)</code>,
+          <code>jumpToPage</code>, and <code>pageTotal(pageCount)</code> for an injector scope.
         </li>
-        <li><code>pageCount</code>: total number of pages.</li>
-        <li>
-          <code>mode</code>: <code>pages</code> (default), <code>previous-next</code>, or
-          <code>jump</code>.
-        </li>
-        <li><code>siblingCount</code>: numbered buttons shown either side of current.</li>
-        <li><code>disabled</code>: disable all controls.</li>
-        <li>
-          <code>ui</code>: customize the ready-made strip parts
-          <code>root</code>, <code>controlGlyph</code>, <code>status</code>, <code>jump</code>,
-          <code>jumpLabel</code>, <code>jumpSelect</code>, and <code>jumpTotal</code>. Composed
-          <code>[hellPagination*]</code> controls each expose a local <code>root</code> part.
-        </li>
+        <li><code>HELL_PAGINATION_LABELS</code>: the injection token resolving to the effective labels.</li>
       </ul>
 
       <h2>Accessibility</h2>
       <ul>
-        <li>Renders inside <code>nav</code> with a Label Contract name; the current page is marked with <code>aria-current="page"</code>.</li>
-        <li>Controls are real buttons with per-page accessible names, including first/previous/next/last.</li>
+        <li>
+          <code>&lt;hell-pagination&gt;</code> carries <code>role="navigation"</code> and an
+          <code>aria-label</code> from the <code>navigation</code> label. Composing
+          <code>[hellPagination]</code> yourself on a native <code>&lt;nav&gt;</code> gets the same
+          landmark semantics for free; put it on another element and add the role/label yourself.
+        </li>
+        <li>
+          Every control has a per-instance accessible name: first/previous/next/last use their
+          respective labels, and numbered buttons use <code>page(n)</code> (for example "Page 8").
+        </li>
+        <li>
+          Controls render as real <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code> elements.
+          On a button host, <code>disabled</code> sets the native <code>disabled</code> attribute;
+          on an anchor host it sets <code>aria-disabled="true"</code> and <code>tabindex="-1"</code>
+          and blocks both <code>click</code> and keyboard activation, so a disabled link never
+          navigates.
+        </li>
+        <li>
+          Enter and Space activate every control, including anchor hosts, through an
+          Angular-level keyboard handler kept in place as a workaround for an upstream
+          <code>ng-primitives</code> regression (see the entry point's source comment).
+        </li>
+        <li>
+          In <code>previous-next</code> mode, the <code>status</code> text is
+          <code>aria-live="polite"</code>, so screen reader users hear the new page after
+          navigating without focus moving.
+        </li>
+        <li>
+          In <code>jump</code> mode, the native <code>&lt;select&gt;</code> carries an
+          <code>aria-label</code> from <code>jumpToPage</code> and is disabled whenever pagination
+          is disabled or there is only one page.
+        </li>
       </ul>
 
       <h2>Do</h2>
       <ul class="hd-do">
-        <li>Use pagination when users need stable pages and totals.</li>
-        <li>Keep <code>siblingCount</code> lower on narrow layouts.</li>
-        <li>Preserve filters and sorting when page changes.</li>
+        <li>Use pagination when a result set is too large to render at once and the total is meaningful.</li>
+        <li>Use <code>previous-next</code> or <code>jump</code> mode once the numbered window would need to scroll or wrap.</li>
+        <li>Preserve filters, sorting, and page size when the page changes.</li>
+        <li>Reset to page one when the page size or filters change so the current slice stays valid.</li>
       </ul>
 
       <h2>Don't</h2>
       <ul class="hd-dont">
-        <li>Don't paginate tiny lists.</li>
-        <li>Don't hide total count when it informs the task.</li>
+        <li>Don't paginate a list short enough to show in full.</li>
+        <li>Don't hide the total page count when it informs the task — prefer <code>jump</code> mode over hiding it.</li>
+        <li>Don't reach for a custom composed layout unless the ready-made strip's markup genuinely doesn't fit.</li>
       </ul>
     </article>
   `,
 })
 export class PaginationPage {
   protected readonly paginationBasicExampleCode = paginationBasicExampleCodeRaw;
-  protected readonly paginationLargerWindowExampleCode = paginationLargerWindowExampleCodeRaw;
   protected readonly paginationPreviousNextExampleCode = paginationPreviousNextExampleCodeRaw;
   protected readonly paginationJumpExampleCode = paginationJumpExampleCodeRaw;
+  protected readonly paginationComposedExampleCode = paginationComposedExampleCodeRaw;
+  protected readonly paginationWithTableExampleCode = paginationWithTableExampleCodeRaw;
   protected readonly paginationStylingExampleCode = paginationStylingExampleCodeRaw;
 }

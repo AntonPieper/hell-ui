@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HellAudioPlayer } from '@hell-ui/angular/audio-player';
 
 @Component({
@@ -8,12 +8,12 @@ import { HellAudioPlayer } from '@hell-ui/angular/audio-player';
   template: `
     <hell-audio-player
       src="https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg"
-      downloadName="example.ogg"
-      title="Example track"
-      [date]="exampleDate"
+      title="Onboarding call — Acme Corp"
+      [date]="recordedOn"
+      downloadName="acme-onboarding-call.ogg"
     />
   `,
 })
 export class AudioPlayerWithTitleAndDateExample {
-  protected readonly exampleDate = new Date(2026, 3, 22);
+  protected readonly recordedOn = new Date(2026, 3, 22);
 }

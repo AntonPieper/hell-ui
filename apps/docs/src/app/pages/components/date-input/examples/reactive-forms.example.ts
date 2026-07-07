@@ -17,8 +17,19 @@ import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
     </div>
 
     <p class="hd-muted">Form value: {{ control.value?.toDateString() ?? 'not set' }}</p>
+
+    <div hellField>
+      <label hellFieldLabel for="invalid-date">Invalid</label>
+      <hell-date-input inputId="invalid-date" [formControl]="invalidControl" />
+      <div hellFieldError id="invalid-date-error" ngpErrorValidator="futureDate">
+        Pick a date in the future.
+      </div>
+    </div>
   `,
 })
 export class DateInputReactiveFormsExample {
   protected readonly control = new FormControl<Date | null>(new Date(2026, 4, 13));
+  protected readonly invalidControl = new FormControl<Date | null>(new Date(2026, 3, 22), {
+    validators: () => ({ futureDate: true }),
+  });
 }

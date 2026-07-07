@@ -217,15 +217,15 @@ test.describe('Hell UI browser behavior', () => {
       label: 'styled dialog',
       triggerName: 'Publish article',
       dialogName: 'Publish this article?',
-      description: 'Once published, the article will be visible to everyone.',
+      description: 'Once published, the article is visible to everyone.',
       initialFocusName: 'Cancel',
       nextFocusName: 'Publish',
     });
 
     await expectDialogFocusContract(page, {
       label: 'scoped dialog',
-      triggerName: 'Open content-scoped dialog',
-      dialogName: 'Only docs content is blocked',
+      triggerName: 'Block this panel',
+      dialogName: 'Scoped to this region',
       initialFocusName: 'Close',
       nextFocusName: 'Close',
     });
@@ -234,11 +234,12 @@ test.describe('Hell UI browser behavior', () => {
   test('dialpad supports keyboard entry, focus order, and state attributes', async ({ page }) => {
     await page.goto('/components/dialpad');
 
-    const example = page.locator('app-dialpad-example-example');
+    // The basic example is an uncontrolled dialpad that surfaces (valueChange)
+    // through its display input and (call) through a "Calling …" status line.
+    const example = page.locator('app-dialpad-basic-example');
     const dialpad = example.getByRole('group', { name: 'Dial pad' });
     const display = dialpad.getByRole('textbox', { name: 'Number' });
-    const currentNumber = example.locator('dd code').nth(1);
-    const lastCall = example.locator('dd code').nth(2);
+    const lastCall = example.locator('p');
 
     await expect(dialpad).toBeVisible();
     await expect(dialpad.getByRole('button', { name: 'Digit 1' })).toBeVisible();
@@ -255,7 +256,6 @@ test.describe('Hell UI browser behavior', () => {
     await expectFocused(page, display, 'dialpad number input focus');
     await page.keyboard.press('2');
     await expect(display).toHaveValue('2');
-    await expect(currentNumber).toHaveText('2');
 
     const five = dialpad.getByRole('button', { name: 'Digit 5, JKL' });
     await five.focus();
@@ -267,7 +267,6 @@ test.describe('Hell UI browser behavior', () => {
     await expect(display).toHaveValue('2');
     await page.keyboard.press('Delete');
     await expect(display).toHaveValue('');
-    await expect(currentNumber).toHaveText('—');
 
     const zero = dialpad.getByRole('button', { name: 'Digit 0, plus' });
     await zero.hover();
@@ -275,13 +274,12 @@ test.describe('Hell UI browser behavior', () => {
     await page.waitForTimeout(560);
     await page.mouse.up();
     await expect(display).toHaveValue('+');
-    await expect(currentNumber).toHaveText('+');
 
     await display.focus();
     await page.keyboard.press('Delete');
     await page.keyboard.press('3');
     await page.keyboard.press('Enter');
-    await expect(lastCall).toHaveText('3');
+    await expect(lastCall).toHaveText('Calling 3…');
 
     await display.focus();
     await page.keyboard.press('Tab');
@@ -303,20 +301,24 @@ test.describe('Hell UI browser behavior', () => {
       'dialpad first key focus',
     );
 
-    // The states control is a multiple-select toggle group, so its items are
-    // aria-pressed toggle buttons rather than radios.
-    await example.getByRole('button', { name: 'Invalid' }).click();
-    await expect(dialpad).toHaveAttribute('aria-invalid', 'true');
-    await example.getByRole('button', { name: 'Readonly' }).click();
-    await expect(dialpad).toHaveAttribute('data-readonly', '');
-    await expect(dialpad.getByRole('button', { name: 'Digit 1' })).toBeDisabled();
-    await expect(dialpad.getByRole('button', { name: 'Call' })).toBeEnabled();
-    await example.getByRole('button', { name: 'Disabled' }).click();
-    await expect(dialpad).toHaveAttribute('aria-disabled', 'true');
-    await expect(display).toBeDisabled();
-    await expect(dialpad.getByRole('button', { name: 'Call' })).toBeDisabled();
+    // The states example toggles disabled/readOnly/invalid through a
+    // multiple-select toggle group, so its items are aria-pressed toggle
+    // buttons rather than radios.
+    const statesExample = page.locator('app-dialpad-states-example');
+    const statesDialpad = statesExample.getByRole('group', { name: 'Dial pad' });
+    const statesDisplay = statesDialpad.getByRole('textbox', { name: 'Number' });
+    await statesExample.getByRole('button', { name: 'Invalid' }).click();
+    await expect(statesDialpad).toHaveAttribute('aria-invalid', 'true');
+    await statesExample.getByRole('button', { name: 'Read-only' }).click();
+    await expect(statesDialpad).toHaveAttribute('data-readonly', '');
+    await expect(statesDialpad.getByRole('button', { name: 'Digit 1' })).toBeDisabled();
+    await expect(statesDialpad.getByRole('button', { name: 'Call' })).toBeEnabled();
+    await statesExample.getByRole('button', { name: 'Disabled' }).click();
+    await expect(statesDialpad).toHaveAttribute('aria-disabled', 'true');
+    await expect(statesDisplay).toBeDisabled();
+    await expect(statesDialpad.getByRole('button', { name: 'Call' })).toBeDisabled();
 
-    await expectNoSeriousA11yIssues(page, 'app-dialpad-example-example');
+    await expectNoSeriousA11yIssues(page, 'app-dialpad-basic-example');
   });
 
   test('toast renders in the notification region and passes axe smoke', async ({ page }) => {
@@ -328,20 +330,20 @@ test.describe('Hell UI browser behavior', () => {
     await expect(notifications).toHaveAttribute('aria-label', 'Notifications');
     await expect(notifications).not.toHaveAttribute('aria-live');
     await expect(notifications).not.toHaveAttribute('aria-atomic');
-    await expect(notifications.getByText('Article published', { exact: true })).toBeVisible();
+    await expect(notifications.getByText('Invoice sent', { exact: true })).toBeVisible();
     await expectNoSeriousA11yIssues(page, '[role="region"][aria-label="Notifications"]');
   });
 
   test('toast stack scrolls long bursts and exposes dismiss all', async ({ page }) => {
     await page.goto('/components/toast');
-    await page.getByRole('button', { name: 'Send 8 toasts' }).click();
+    await page.getByRole('button', { name: 'Run deploy' }).click();
 
     const notifications = page.getByRole('region', { name: 'Notifications' });
     const viewport = notifications.locator('[data-slot="viewport"]');
     const toasts = notifications.locator('[data-slot="toast"]');
     const frontToast = toasts.last();
 
-    await expect(toasts).toHaveCount(8);
+    await expect(toasts).toHaveCount(6);
     await expect(frontToast).toBeVisible();
     await expect
       .poll(() =>
@@ -398,7 +400,7 @@ test.describe('Hell UI browser behavior', () => {
           const minGap = gaps.length ? Math.min(...gaps) : 0;
 
           return (
-            rects.length >= 8 &&
+            rects.length >= 6 &&
             element.scrollHeight > element.clientHeight &&
             element.scrollTop > 0 &&
             minGap >= 8
@@ -482,7 +484,7 @@ test.describe('Hell UI browser behavior', () => {
   }) => {
     await page.goto('/components/select');
 
-    const select = page.getByRole('combobox', { name: 'Select priority' }).first();
+    const select = page.getByRole('combobox', { name: 'Priority' }).first();
     await expect(select).toHaveAttribute('aria-expanded', 'false');
 
     await select.focus();
@@ -507,23 +509,23 @@ test.describe('Hell UI browser behavior', () => {
   test('combobox filters options and selects with keyboard focus', async ({ page }) => {
     await page.goto('/components/combobox');
 
-    const input = page.getByRole('combobox', { name: 'Search fruit…' }).first();
+    const input = page.getByRole('combobox', { name: 'Settlement currency' }).first();
     await input.click();
-    await input.fill('Blue');
+    await input.fill('AUD');
     await page.keyboard.press('ArrowDown');
-    await expect(page.getByRole('option', { name: 'Blueberry' })).toBeVisible();
-    await expect(page.getByRole('option', { name: 'Apple' })).not.toBeVisible();
+    await expect(page.getByRole('option', { name: 'AUD — Australian Dollar' })).toBeVisible();
+    await expect(page.getByRole('option', { name: 'CAD — Canadian Dollar' })).not.toBeVisible();
 
     await page.keyboard.press('Enter');
 
-    await expect(input).toHaveValue('Blueberry');
+    await expect(input).toHaveValue('AUD — Australian Dollar');
     await expect(input).toBeFocused();
   });
 
   test('checkbox page contrasts native and custom semantics', async ({ page }) => {
     await page.goto('/components/checkbox');
 
-    const custom = page.getByRole('checkbox', { name: 'I agree to the terms' }).first();
+    const custom = page.getByRole('checkbox', { name: 'I agree to the terms of service' }).first();
     const native = page.getByRole('checkbox', { name: 'Accept terms' }).first();
 
     await expect(custom).toHaveAttribute('type', 'button');
@@ -541,14 +543,14 @@ test.describe('Hell UI browser behavior', () => {
   test('listbox supports keyboard traversal and selection', async ({ page }) => {
     await page.goto('/components/listbox');
 
-    const listbox = page.getByRole('listbox', { name: 'Choose a reviewer' });
+    const listbox = page.getByRole('listbox', { name: 'Assign owner' });
     await expect(listbox).toBeVisible();
 
     await listbox.focus();
     await page.keyboard.press('End');
     await page.keyboard.press('Enter');
 
-    await expect(page.getByRole('option', { name: 'Katherine Johnson' })).toHaveAttribute(
+    await expect(listbox.getByRole('option', { name: 'Katherine Johnson' })).toHaveAttribute(
       'aria-selected',
       'true',
     );
@@ -813,15 +815,19 @@ test.describe('Hell UI browser behavior', () => {
   }) => {
     await page.goto('/components/pdf-viewer');
 
-    const previewTabs = page.getByRole('tab', { name: 'Preview' });
-    await previewTabs.nth(1).click();
+    // The docs page now hosts several PDF-viewer examples; scope the smoke path
+    // to the basic example so the viewer locator stays unambiguous. The Preview
+    // tab lives on the enclosing hd-example-tabs, not inside the example.
+    const example = page.locator('app-pdf-viewer-basic-example');
+    const exampleTabs = page.locator('hd-example-tabs', { has: example });
+    await exampleTabs.getByRole('tab', { name: 'Preview' }).click();
 
-    const viewer = page.locator('hell-pdf-viewer');
+    const viewer = example.locator('hell-pdf-viewer');
     await expect(viewer).toBeVisible();
     await viewer.focus();
 
-    const findInput = page.getByRole('searchbox', { name: /find/i });
-    const findShortcutButton = page.getByRole('button', { name: /Find in document/i });
+    const findInput = example.getByRole('searchbox', { name: /find/i });
+    const findShortcutButton = example.getByRole('button', { name: /Find in document/i });
 
     await viewer.dispatchEvent('keydown', {
       key: 'f',
@@ -838,18 +844,18 @@ test.describe('Hell UI browser behavior', () => {
     await page.keyboard.press('Escape');
     await expect(findInput).not.toBeVisible();
 
-    const overviewButton = page.getByRole('button', { name: /Page overview/i }).first();
+    const overviewButton = example.getByRole('button', { name: /Page overview/i }).first();
     await overviewButton.click();
     await expect(overviewButton).toHaveAttribute('aria-pressed', 'true');
 
-    const overviewPane = page.locator('aside.hell-pdf-overview');
+    const overviewPane = example.locator('aside[data-slot="sidebar"]');
     await expect(overviewPane).toBeVisible();
 
-    const thumbnails = page.locator('button[aria-label^="Go to page"]');
+    const thumbnails = example.locator('button[aria-label^="Go to page"]');
     if ((await thumbnails.count()) > 0) {
       await expect(thumbnails.first()).toBeVisible();
       await thumbnails.first().click();
-      await expect(page.getByRole('spinbutton', { name: /page/i })).toHaveValue(/\d+/);
+      await expect(example.getByRole('spinbutton', { name: /page/i })).toHaveValue(/\d+/);
     }
   });
 
@@ -861,14 +867,17 @@ test.describe('Hell UI browser behavior', () => {
 
     await page.goto('/components/pdf-viewer');
 
-    const previewTabs = page.getByRole('tab', { name: 'Preview' });
-    await previewTabs.nth(1).click();
+    // Scope to the basic example so the viewer locator resolves to one node.
+    // The Preview tab lives on the enclosing hd-example-tabs, not the example.
+    const example = page.locator('app-pdf-viewer-basic-example');
+    const exampleTabs = page.locator('hd-example-tabs', { has: example });
+    await exampleTabs.getByRole('tab', { name: 'Preview' }).click();
 
-    const viewer = page.locator('hell-pdf-viewer');
+    const viewer = example.locator('hell-pdf-viewer');
     await expect(viewer).toBeVisible();
     await viewer.scrollIntoViewIfNeeded();
 
-    const scrollContainer = viewer.locator('.hell-pdf-scroll');
+    const scrollContainer = viewer.locator('[data-slot="pageArea"]');
     const firstPdfPage = viewer.locator('.pdfViewer .page').first();
     await expect(firstPdfPage).toBeVisible();
     const beforePinchBox = await firstPdfPage.boundingBox();

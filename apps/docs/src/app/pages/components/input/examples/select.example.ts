@@ -1,5 +1,5 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HellInput, HellNativeSelect, HellTextarea } from '@hell-ui/angular/input';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { HellNativeSelect } from '@hell-ui/angular/input';
 
 @Component({
   selector: 'app-input-select-example',

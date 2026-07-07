@@ -53,7 +53,8 @@ test.describe('tooltip browser accessibility contract', () => {
     // page's own clock: trigger mouse events → overlay DOM mutations.
     await ensurePageIsActive(page);
 
-    const trigger = page.getByRole('button', { name: 'Hover for 600ms' });
+    const triggerName = 'Hover for 600ms';
+    const trigger = page.getByRole('button', { name: triggerName });
     const tooltip = page.getByRole('tooltip', { name: 'Took my time' });
 
     await trigger.evaluate((element) => {

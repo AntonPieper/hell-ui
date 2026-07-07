@@ -1,31 +1,50 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import {
-  faSolidBars,
+  faSolidChartLine,
+  faSolidFileInvoice,
   faSolidFolderOpen,
   faSolidGauge,
   faSolidGear,
+  faSolidInbox,
   faSolidKey,
+  faSolidRightFromBracket,
+  faSolidUser,
   faSolidUsers,
 } from '@ng-icons/font-awesome/solid';
-import { HELL_APP_SHELL_DIRECTIVES } from '@hell-ui/angular/app-shell';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
-import { AppShellLiveMiniatureExample } from './examples/live-miniature.example';
-import appShellLiveMiniatureExampleCodeRaw from './examples/live-miniature.example.ts?raw' with {
+import { AppShellBasicExample } from './examples/basic.example';
+import appShellBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
 };
-import { AppShellMarkupSkeletonExample } from './examples/markup-skeleton.example';
-import appShellMarkupSkeletonExampleCodeRaw from './examples/markup-skeleton.example.ts?raw' with {
+import { AppShellSidenavExample } from './examples/sidenav.example';
+import appShellSidenavExampleCodeRaw from './examples/sidenav.example.ts?raw' with {
+  loader: 'text',
+};
+import { AppShellSecondaryPanelExample } from './examples/secondary-panel.example';
+import appShellSecondaryPanelExampleCodeRaw from './examples/secondary-panel.example.ts?raw' with {
+  loader: 'text',
+};
+import { AppShellWithOmnibarMenuAvatarExample } from './examples/with-omnibar-menu-avatar.example';
+import appShellWithOmnibarMenuAvatarExampleCodeRaw from './examples/with-omnibar-menu-avatar.example.ts?raw' with {
+  loader: 'text',
+};
+import { AppShellStylingExample } from './examples/styling.example';
+import appShellStylingExampleCodeRaw from './examples/styling.example.ts?raw' with {
   loader: 'text',
 };
 
 const HD_APP_SHELL_PAGE_ICONS = {
-  faSolidBars,
+  faSolidChartLine,
+  faSolidFileInvoice,
   faSolidFolderOpen,
   faSolidGauge,
   faSolidGear,
+  faSolidInbox,
   faSolidKey,
+  faSolidRightFromBracket,
+  faSolidUser,
   faSolidUsers,
 };
 
@@ -35,10 +54,12 @@ const HD_APP_SHELL_PAGE_ICONS = {
   providers: [provideIcons(HD_APP_SHELL_PAGE_ICONS)],
   imports: [
     ExampleTabs,
-    ...HELL_APP_SHELL_DIRECTIVES,
-    AppShellLiveMiniatureExample,
-    AppShellMarkupSkeletonExample,
     PageHeader,
+    AppShellBasicExample,
+    AppShellSidenavExample,
+    AppShellSecondaryPanelExample,
+    AppShellWithOmnibarMenuAvatarExample,
+    AppShellStylingExample,
   ],
   template: `
     <article class="hd-prose">
@@ -49,117 +70,274 @@ const HD_APP_SHELL_PAGE_ICONS = {
         importPath="@hell-ui/angular/app-shell"
         stylesPath="@hell-ui/angular/app-shell/styles.css"
       >
-        The application frame: topbar, collapsible sidenav, scrollable content, and an optional secondary panel — with the mobile drawer behavior built in.
+        The full application frame — topbar, collapsible sidenav, scrolling content, and an optional
+        secondary panel — assembled from slot directives that share one CSS-grid layout.
       </hd-page-header>
       <p>
-        Three-zone application chrome: <strong>topbar</strong>, <strong>sidenav</strong>,
-        <strong>content</strong>, plus an optional <strong>secondary</strong> column. The shell uses
-        CSS grid and responds to <code>sidenavCollapsed</code> and <code>secondaryHidden</code> via
-        data attributes — collapse and hide animate purely in CSS.
+        <code>hellAppShell</code> is the outer chrome of a business app. It owns a single CSS grid
+        with four regions —
+        <strong>topbar</strong>, <strong>sidenav</strong>, <strong>content</strong>, and an optional
+        <strong>secondary</strong> column — while you fill each region through slot directives. The
+        shell tracks two pieces of state, sidenav-collapsed and secondary-hidden, and reflects them
+        as <code>data-*</code> attributes so the column widths animate purely in CSS.
       </p>
       <p>
-        Each shell and nav directive exposes a local <code>root</code> Part Style Map, so use
-        <code>ui</code> when refining the default chrome.
+        Below the desktop breakpoint (768px) the rails become dismissable overlay drawers: opening a
+        drawer traps focus inside it, closing it restores focus to the opener, and an outside press
+        or <kbd>Escape</kbd> dismisses it. Use the shell whenever an app needs persistent global
+        navigation around a routed content area; reach for a plain layout when the surface is a
+        single focused page or a modal flow.
       </p>
       <p>
-        On mobile, opening either drawer captures focus in the active drawer and restores it to the
-        opener when the drawer closes.
+        State can be <em>uncontrolled</em> — leave the inputs unset and let the built-in
+        <code>hellSidenavToggle</code> / <code>hellSecondaryToggle</code> buttons mutate shell-owned
+        signals — or <em>controlled</em> by binding <code>[sidenavCollapsed]</code> /
+        <code>[secondaryHidden]</code> and handling the paired <code>...Change</code> outputs.
       </p>
 
-      <h2>Live miniature</h2>
-      <p class="hd-note">
-        Click the bars button at the top-left to collapse the sidenav. Click the
-        <em>Activity</em> header (the entire row is the toggle) to hide the secondary panel — click
-        the rail to bring it back.
+      <h2>Basic</h2>
+      <p>
+        The smallest useful shell: a topbar with the sidenav toggle, a <code>nav</code> rail of
+        items, and a content region. Everything else is optional.
       </p>
-      <hd-example-tabs [code]="appShellLiveMiniatureExampleCode" flush>
-        <app-app-shell-live-miniature-example />
+      <hd-example-tabs [code]="basicExampleCode" flush>
+        <app-app-shell-basic-example />
       </hd-example-tabs>
 
-      <h2>Markup skeleton</h2>
-      <hd-example-tabs [code]="appShellMarkupSkeletonExampleCode" previewClass="grid gap-2">
-        <app-app-shell-markup-skeleton-example />
+      <h2>Sidenav navigation</h2>
+      <p>
+        A <code>hellNavItem</code> composes a leading <code>hellNavItemIcon</code>, a
+        <code>hellNavItemLabel</code>, and an optional <code>hellNavItemTrailing</code> slot for a
+        count or badge. Mark the current route with <code>aria-current="page"</code>. Group related
+        items with <code>hellNavSection</code> + <code>hellNavSectionToggle</code> +
+        <code>hellNavSectionItems</code>; the toggle owns <code>aria-expanded</code> and the section
+        owns collapse state. When the rail itself is collapsed, labels and section headings hide and
+        items fall back to reachable icons.
+      </p>
+      <hd-example-tabs [code]="sidenavExampleCode" flush>
+        <app-app-shell-sidenav-example />
+      </hd-example-tabs>
+
+      <h2>Secondary panel and toggle appearances</h2>
+      <p>
+        The optional <code>hellAppSecondary</code> column suits an activity feed, inspector, or help
+        panel. Wrap its collapsible content in <code>hellAppSecondaryBody</code> so it goes inert
+        while hidden. The toggle directives ship three opt-in <code>appearance</code> chrome styles:
+      </p>
+      <ul>
+        <li>
+          <code>appearance="shell"</code> (<code>hellSidenavToggle</code>) — the leading topbar slot,
+          sized to the collapsed sidenav width so the bars icon lines up over the collapsed rail.
+        </li>
+        <li>
+          <code>appearance="header"</code> (<code>hellSecondaryToggle</code>) — a full-width header
+          row that is itself the collapse button, with a chevron on the leading edge.
+        </li>
+        <li>
+          <code>appearance="rail"</code> (<code>hellSecondaryToggle</code>) — auto-fills the
+          collapsed aside as one large click target and hides while the panel is open.
+        </li>
+      </ul>
+      <p class="hd-note">
+        Click the <em>Activity</em> header row to hide the panel, then click the collapsed rail to
+        bring it back.
+      </p>
+      <hd-example-tabs [code]="secondaryPanelExampleCode" flush>
+        <app-app-shell-secondary-panel-example />
+      </hd-example-tabs>
+
+      <h2>With omnibar, menu, and avatar</h2>
+      <p>
+        A realistic frame wires the shell to other Hell components: a
+        <code>hell-omnibar</code> drives navigation from the topbar, an avatar-backed
+        <code>hellMenuTrigger</code> opens an account menu, and the sidenav mirrors the active page
+        through <code>aria-current</code>. Import each collaborator through its own narrow entry
+        point.
+      </p>
+      <hd-example-tabs [code]="withOmnibarMenuAvatarExampleCode" flush>
+        <app-app-shell-with-omnibar-menu-avatar-example />
+      </hd-example-tabs>
+
+      <h2>Styling</h2>
+      <p>
+        Every module in this entry point exposes a single <code>root</code> Public Part. Pass
+        <code>ui="…"</code> to refine that default part with a shorthand class string, or the
+        equivalent map form <code>[ui]="&#123; root: '…' &#125;"</code>. Each directive's
+        <code>ui</code> styles only the DOM that directive owns, so a shell is themed by refining the
+        individual slots — the topbar, sidenav, nav items, toggles, and secondary panel each carry
+        their own recipe.
+      </p>
+      <p>Public parts by module (all single-part <code>root</code>):</p>
+      <ul>
+        <li><code>hellAppShell</code> → <code>root</code>: the grid container surface.</li>
+        <li><code>hellAppTopbar</code> → <code>root</code>: the top bar row.</li>
+        <li><code>hellAppSidenav</code> → <code>root</code>: the sidenav rail.</li>
+        <li><code>hellNavItem</code> → <code>root</code>: a single nav entry.</li>
+        <li><code>hellNavItemIcon</code> → <code>root</code>: a nav item's leading icon.</li>
+        <li><code>hellNavItemLabel</code> → <code>root</code>: a nav item's text label.</li>
+        <li>
+          <code>hellNavItemTrailing</code> → <code>root</code>: a nav item's trailing slot (badge or
+          count).
+        </li>
+        <li><code>hellNavSection</code> → <code>root</code>: a collapsible group wrapper.</li>
+        <li>
+          <code>hellNavSectionToggle</code> → <code>root</code>: the section heading toggle button.
+        </li>
+        <li>
+          <code>hellNavSectionItems</code> → <code>root</code>: the collapsible items container.
+        </li>
+        <li><code>hellAppContent</code> → <code>root</code>: the scrolling content region.</li>
+        <li><code>hellSidenavToggle</code> → <code>root</code>: the sidenav toggle button.</li>
+        <li><code>hellSecondaryToggle</code> → <code>root</code>: the secondary toggle button.</li>
+        <li><code>hellAppSecondary</code> → <code>root</code>: the secondary column.</li>
+        <li>
+          <code>hellAppSecondaryBody</code> → <code>root</code>: the collapsible secondary body.
+        </li>
+      </ul>
+      <p>
+        The example below refines every one of these parts with Hell design tokens
+        (<code>bg-hell-*</code>, <code>text-hell-*</code>, <code>rounded-hell-*</code>, and spacing).
+      </p>
+      <hd-example-tabs [code]="stylingExampleCode" flush>
+        <app-app-shell-styling-example />
       </hd-example-tabs>
 
       <h2>API</h2>
       <ul>
         <li>
-          <code>hellAppShell</code> — host directive, exposes <code>isSidenavCollapsed()</code> and
-          <code>isSecondaryHidden()</code> signals; takes <code>[sidenavCollapsed]</code> /
-          <code>(sidenavCollapsedChange)</code> and <code>[secondaryHidden]</code> /
-          <code>(secondaryHiddenChange)</code> for controlled mode.
+          <code>hellAppShell</code> — the grid host. Inputs: <code>[sidenavCollapsed]</code> and
+          <code>[secondaryHidden]</code> (<code>boolean | null</code>, default <code>null</code> =
+          uncontrolled) with paired outputs <code>(sidenavCollapsedChange)</code> /
+          <code>(secondaryHiddenChange)</code>, plus <code>[ui]</code>. Exposes signal getters
+          <code>isSidenavCollapsed()</code>, <code>isSecondaryHidden()</code>,
+          <code>isMobileLayout()</code>, and <code>mobileOpenPanel()</code>, and methods
+          <code>toggleSidenav()</code>, <code>toggleSecondary()</code>, and
+          <code>closeMobilePanels()</code>. Reference it as <code>#shell="hellAppShell"</code>.
         </li>
         <li>
-          Slots: <code>hellAppTopbar</code>, <code>hellAppSidenav</code>,
-          <code>hellAppContent</code>, <code>hellAppSecondary</code>,
-          <code>hellAppSecondaryBody</code>. <code>hellAppContent</code> centers direct content,
-          defaults to a wide <code>1760px</code> content cap, and accepts <code>[maxWidth]</code> as
-          a number in pixels or any CSS length.
+          <code>hellAppTopbar</code> — top bar slot. Input: <code>[ui]</code>.
         </li>
         <li>
-          Toggles: <code>hellSidenavToggle</code>, <code>hellSecondaryToggle</code> — apply to
-          native <code>button</code> elements so keyboard and disabled semantics stay native.
+          <code>hellAppSidenav</code> — sidenav slot. Inputs: <code>[collapsed]</code>
+          (<code>boolean | null</code>, default <code>null</code> = follow the shell),
+          <code>[id]</code> (DOM id override, default shell-derived), and <code>[ui]</code>.
         </li>
         <li>
-          Sidenav items: <code>hellNavItem</code>, <code>hellNavItemIcon</code>,
-          <code>hellNavItemLabel</code>, and <code>hellNavItemTrailing</code>. Use these instead of
-          relying on raw anchor styling inside the sidenav.
+          <code>hellAppContent</code> — content slot. Inputs: <code>[maxWidth]</code>
+          (<code>string | number | null</code>; bare numbers are pixels; the CSS default caps content
+          at <code>1760px</code>) and <code>[ui]</code>. Direct children are centered; it also acts
+          as a dialog scope root so scoped dialogs cover only the content area.
         </li>
         <li>
-          Styled toggle appearances (opt-in):
-          <ul>
-            <li>
-              <code>appearance="shell"</code> — leading topbar slot whose footprint matches the
-              collapsed sidenav width, so the icon lines up with collapsed nav items beneath it.
-            </li>
-            <li>
-              <code>appearance="header"</code> — full-width header row that doubles as the
-              collapse button (whole row clickable, with a chevron on the leading edge).
-            </li>
-            <li>
-              <code>appearance="rail"</code> — auto-fills the collapsed aside; hidden when
-              expanded.
-            </li>
-          </ul>
+          <code>hellAppSecondary</code> — secondary slot. Inputs: <code>[hidden]</code>
+          (<code>boolean | null</code>, default <code>null</code> = follow the shell),
+          <code>[id]</code>, and <code>[ui]</code>. <code>hellAppSecondaryBody</code> wraps its
+          collapsible content (input: <code>[ui]</code>) and goes inert while hidden.
         </li>
         <li>
-          Sidenav grouping: <code>hellNavSection</code> + <code>hellNavSectionToggle</code> +
-          <code>hellNavSectionItems</code> for collapsible sections. The section owns root parts,
-          collapse attributes, toggle state, and <code>aria-expanded</code>; bind
-          <code>[collapsed]</code> / <code>(collapsedChange)</code> only when parent state must persist.
+          <code>hellSidenavToggle</code> — sidenav toggle button. Inputs:
+          <code>[appearance]</code> (<code>plain | shell</code>, default <code>plain</code>) and
+          <code>[ui]</code>.
         </li>
-        <li>Import the bundle via <code>HELL_APP_SHELL_DIRECTIVES</code>.</li>
+        <li>
+          <code>hellSecondaryToggle</code> — secondary toggle button. Inputs:
+          <code>[appearance]</code> (<code>plain | header | rail</code>, default <code>plain</code>)
+          and <code>[ui]</code>.
+        </li>
+        <li>
+          <code>hellNavItem</code> — nav entry. Inputs: <code>[active]</code> (boolean, default
+          <code>false</code>) and <code>[ui]</code>. Slots: <code>hellNavItemIcon</code>,
+          <code>hellNavItemLabel</code>, <code>hellNavItemTrailing</code> (each takes
+          <code>[ui]</code>).
+        </li>
+        <li>
+          <code>hellNavSection</code> — collapsible group. Inputs: <code>[collapsed]</code>
+          (<code>boolean | null</code>, default <code>null</code> = uncontrolled), output
+          <code>(collapsedChange)</code>, plus <code>[ui]</code>. Compose with
+          <code>hellNavSectionToggle</code> (button; owns <code>aria-expanded</code>) and
+          <code>hellNavSectionItems</code> (each takes <code>[ui]</code>).
+        </li>
+        <li>
+          <code>ui</code> everywhere accepts a shorthand string or a <code>Hell*Ui</code> map keyed
+          by the module's <code>Hell*Part</code> — here always <code>root</code>.
+        </li>
+        <li>
+          Localize built-in toggle labels with <code>provideHellAppShellLabels(&#123; … &#125;)</code>
+          from <code>@hell-ui/angular/app-shell</code>. Import the whole suite via
+          <code>HELL_APP_SHELL_DIRECTIVES</code>.
+        </li>
       </ul>
 
       <h2>Accessibility</h2>
       <ul>
-        <li>Sidenav and secondary toggles ship accessible names through the Label Contract; localize them with <code>provideHellAppShellLabels</code> from <code>@hell-ui/angular/app-shell</code>.</li>
-        <li>Use one <code>nav</code> region per navigation surface and mark the current page with <code>aria-current="page"</code> (the nav item directive does this for router links).</li>
-        <li>On mobile the panels become dismissable drawers; focus stays operable behind the shared dismissal rules.</li>
+        <li>
+          Toggle buttons must be native <code>&lt;button&gt;</code> elements. Each exposes
+          <code>aria-expanded</code> (reflecting the panel's open state), <code>aria-controls</code>
+          pointing at the panel's DOM id, and an <code>aria-label</code> from the Label Contract
+          that flips between the expand/collapse strings.
+        </li>
+        <li>
+          Give each navigation surface its own <code>aria-label</code> on the <code>nav</code>
+          element, and mark the current route with <code>aria-current="page"</code> — the nav item
+          styles the current page automatically.
+        </li>
+        <li>
+          Collapsed sidenavs, hidden secondary bodies, and collapsed section items receive
+          <code>aria-hidden</code> and <code>inert</code> so their controls leave the tab order.
+        </li>
+        <li>
+          On the mobile overlay layout, opening a drawer traps focus inside it and restores focus to
+          the opener on close; an outside pointer press or <kbd>Escape</kbd> dismisses open drawers.
+        </li>
+        <li>
+          <code>hellNavSectionToggle</code> reflects its section's open state through
+          <code>aria-expanded</code>.
+        </li>
       </ul>
 
       <h2>Do</h2>
       <ul class="hd-do">
         <li>
-          Use <code>appearance="shell"</code> as the first child of the topbar — its width matches
-          the collapsed sidenav, keeping the icon centred above the rail.
+          Use <code>appearance="shell"</code> as the first child of the topbar so the toggle lines up
+          over the collapsed sidenav rail.
         </li>
         <li>
-          Use <code>appearance="header"</code> instead of a separate header-toggle button so the
-          entire heading row is the click target.
+          Use <code>appearance="header"</code> so the whole secondary-panel heading row is the
+          collapse target, and always include the <code>appearance="rail"</code> toggle so a hidden
+          panel can be reopened.
+        </li>
+        <li>
+          Refine chrome with each slot's <code>ui</code> instead of conflicting <code>class</code>
+          utilities, and label every <code>nav</code>.
+        </li>
+        <li>
+          Reach for controlled <code>[sidenavCollapsed]</code> / <code>[secondaryHidden]</code> only
+          when the collapse state must persist or sync across the app.
         </li>
       </ul>
+
       <h2>Don't</h2>
       <ul class="hd-dont">
         <li>
-          Don't show section headings inside the sidenav while in collapsed mode — the rail draws
-          section separators automatically.
+          Don't add free-text section headings inside the sidenav — the rail draws its own dividers
+          in collapsed mode, so use <code>hellNavSection</code> instead.
+        </li>
+        <li>
+          Don't apply the toggle directives to non-<code>button</code> elements; native
+          <code>button</code> keeps keyboard and disabled semantics.
+        </li>
+        <li>
+          Don't hardcode the toggle labels in markup — localize them through
+          <code>provideHellAppShellLabels</code>.
         </li>
       </ul>
     </article>
   `,
 })
 export class AppShellPage {
-  protected readonly appShellLiveMiniatureExampleCode = appShellLiveMiniatureExampleCodeRaw;
-  protected readonly appShellMarkupSkeletonExampleCode = appShellMarkupSkeletonExampleCodeRaw;
+  protected readonly basicExampleCode = appShellBasicExampleCodeRaw;
+  protected readonly sidenavExampleCode = appShellSidenavExampleCodeRaw;
+  protected readonly secondaryPanelExampleCode = appShellSecondaryPanelExampleCodeRaw;
+  protected readonly withOmnibarMenuAvatarExampleCode = appShellWithOmnibarMenuAvatarExampleCodeRaw;
+  protected readonly stylingExampleCode = appShellStylingExampleCodeRaw;
 }

@@ -1,40 +1,21 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { provideIcons } from '@ng-icons/core';
-import {
-  faSolidClock,
-  faSolidDownload,
-  faSolidFolderOpen,
-  faSolidPenToSquare,
-  faSolidShareNodes,
-} from '@ng-icons/font-awesome/solid';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
 import { HellButton } from '@hell-ui/angular/button';
-import { HellIcon } from '@hell-ui/angular/icon';
 
-const HD_MENU_PAGE_ICONS = {
-  faSolidClock,
-  faSolidDownload,
-  faSolidFolderOpen,
-  faSolidPenToSquare,
-  faSolidShareNodes,
-};
 @Component({
   selector: 'app-menu-basic-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellButton, ...HELL_MENU_DIRECTIVES],
-  providers: [provideIcons(HD_MENU_PAGE_ICONS)],
   template: `
-    <button hellButton [hellMenuTrigger]="basic" placement="bottom-start">Actions</button>
+    <button hellButton [hellMenuTrigger]="actions" type="button">Actions</button>
 
-    <ng-template #basic>
+    <ng-template #actions>
       <div hellMenu>
-        <button hellMenuItem type="button" (click)="onAction('rename')">Rename</button>
-        <button hellMenuItem type="button" (click)="onAction('duplicate')">Duplicate</button>
+        <button hellMenuItem type="button" (click)="run('rename')">Rename</button>
+        <button hellMenuItem type="button" (click)="run('duplicate')">Duplicate</button>
+        <button hellMenuItem type="button" disabled>Move</button>
         <div hellMenuSeparator></div>
-        <button hellMenuItem type="button" disabled>Move (disabled)</button>
-        <button hellMenuItem type="button" (click)="onAction('archive')">Archive</button>
-        <div hellMenuSeparator></div>
-        <button hellMenuItem type="button" class="hd-danger-text" (click)="onAction('delete')">
+        <button hellMenuItem type="button" class="hd-danger-text" (click)="run('delete')">
           Delete
         </button>
       </div>
@@ -42,7 +23,7 @@ const HD_MENU_PAGE_ICONS = {
   `,
 })
 export class MenuBasicExample {
-  protected onAction(name: string) {
-    console.log('menu action:', name);
+  protected run(action: string): void {
+    console.log('menu action:', action);
   }
 }

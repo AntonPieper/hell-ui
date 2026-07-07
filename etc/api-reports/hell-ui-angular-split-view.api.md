@@ -71,7 +71,7 @@ export class HellSplitView {
 }
 
 // @public
-export type HellSplitViewPart = 'root' | 'resizable' | 'screen' | 'pane' | 'compactHeader' | 'detailHeader' | 'itemNavigation';
+export type HellSplitViewPart = 'root' | 'resizable' | 'screen' | 'pane' | 'compactHeader' | 'backButton' | 'detailHeader' | 'itemNavigation';
 
 // Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-split-view.d.ts
 //

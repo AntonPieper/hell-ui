@@ -11,26 +11,37 @@ test.describe('toggle browser accessibility contract', () => {
   }) => {
     await gotoToggle(page);
 
-    const example = page.locator('app-toggle-single-toggle-example');
-    const bold = example.getByRole('button', { name: 'B' });
-    await expect(bold).toHaveAttribute('type', 'button');
-    await expect(bold).toHaveAttribute('aria-pressed', 'false');
+    const example = page.locator('app-toggle-basic-example');
+    await expect(example).toBeVisible();
+    // The interactive standalone toggle is the first button in the basic
+    // example (the disabled sibling is the second, asserted separately below).
+    // Its accessible name swaps with pressed state (Mute/Unmute notifications),
+    // so hold a state-stable reference by position rather than by name.
+    const toggle = example.getByRole('button').first();
+    await expect(toggle).toHaveAttribute('type', 'button');
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    await expect(toggle).toHaveAccessibleName('Mute notifications');
+    await expect(example).toContainText('Notify');
 
-    await bold.focus();
+    await toggle.focus();
     await page.keyboard.press('Space');
-    await expect(bold).toBeFocused();
-    await expect(bold).toHaveAttribute('aria-pressed', 'true');
-    await expect(example).toContainText('bold=true');
+    await expect(toggle).toBeFocused();
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    // Model change is observable: label and accessible name flip to the pressed copy.
+    await expect(toggle).toHaveAccessibleName('Unmute notifications');
+    await expect(example).toContainText('Muted');
 
     await page.keyboard.press('Enter');
-    await expect(bold).toHaveAttribute('aria-pressed', 'false');
-    await expect(example).toContainText('bold=false');
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    await expect(toggle).toHaveAccessibleName('Mute notifications');
+    await expect(example).toContainText('Notify');
   });
 
-  test('disabled toggle and disabled group expose disabled semantics', async ({ page }) => {
+  test('disabled standalone toggle exposes disabled semantics', async ({ page }) => {
     await gotoToggle(page);
 
-    const example = page.locator('app-toggle-disabled-example');
+    const example = page.locator('app-toggle-basic-example');
+    await expect(example).toBeVisible();
 
     const disabledToggle = example.getByRole('button', { name: 'Disabled' });
     await expect(disabledToggle).toBeDisabled();
@@ -38,17 +49,6 @@ test.describe('toggle browser accessibility contract', () => {
     await expect(disabledToggle).toHaveAttribute('aria-pressed', 'false');
     await expect(disabledToggle).toHaveAttribute('tabindex', '-1');
     await expect(disabledToggle).toHaveAttribute('data-disabled', '');
-
-    const group = example.locator('[hellToggleGroup]');
-    await expect(group).toHaveAttribute('role', 'group');
-    await expect(group).toHaveAttribute('data-type', 'single');
-    await expect(group).toHaveAttribute('data-disabled', '');
-
-    const itemA = example.getByRole('radio', { name: 'A' });
-    const itemB = example.getByRole('radio', { name: 'B' });
-    await expect(itemA).toHaveAttribute('tabindex', '-1');
-    await expect(itemB).toHaveAttribute('tabindex', '-1');
-    await expect(itemA).toHaveAttribute('aria-checked', 'false');
   });
 
   test('single-select group applies radio semantics with roving arrow focus and Enter/Space activation', async ({
@@ -56,11 +56,12 @@ test.describe('toggle browser accessibility contract', () => {
   }) => {
     await gotoToggle(page);
 
-    const example = page.locator('app-toggle-toggle-group-single-example');
+    const example = page.locator('app-toggle-group-single-example');
+    await expect(example).toBeVisible();
     const group = example.locator('[hellToggleGroup]');
-    const left = example.getByRole('radio', { name: 'Left' });
-    const center = example.getByRole('radio', { name: 'Center' });
-    const right = example.getByRole('radio', { name: 'Right' });
+    const left = example.getByRole('radio', { name: 'Align left' });
+    const center = example.getByRole('radio', { name: 'Align center' });
+    const right = example.getByRole('radio', { name: 'Align right' });
 
     await expect(group).toHaveAttribute('role', 'group');
     await expect(group).toHaveAttribute('data-type', 'single');
@@ -95,10 +96,11 @@ test.describe('toggle browser accessibility contract', () => {
   }) => {
     await gotoToggle(page);
 
-    const example = page.locator('app-toggle-toggle-group-multiple-example');
+    const example = page.locator('app-toggle-group-multiple-example');
+    await expect(example).toBeVisible();
     const group = example.locator('[hellToggleGroup]');
-    const bold = example.getByRole('button', { name: 'Bold' });
-    const italic = example.getByRole('button', { name: 'Italic' });
+    const bold = example.getByRole('button', { name: 'B' });
+    const italic = example.getByRole('button', { name: 'I' });
 
     await expect(group).toHaveAttribute('role', 'group');
     await expect(group).toHaveAttribute('data-type', 'multiple');

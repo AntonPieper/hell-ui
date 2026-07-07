@@ -1,7 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HELL_COMBOBOX_BASIC_DIRECTIVES } from '@hell-ui/angular/combobox';
+import {
+  HELL_COMBOBOX_BASIC_DIRECTIVES,
+  type HellComboboxBasicUi,
+} from '@hell-ui/angular/combobox';
 
-const ASSIGNEES = ['Ada Lovelace', 'Grace Hopper', 'Katherine Johnson', 'Margaret Hamilton'];
+const PRIORITIES = ['Blocker', 'Critical', 'High', 'Medium', 'Low'];
 
 @Component({
   selector: 'app-combobox-styling-example',
@@ -10,22 +13,30 @@ const ASSIGNEES = ['Ada Lovelace', 'Grace Hopper', 'Katherine Johnson', 'Margare
   template: `
     <!-- HellComboboxBasicPart: root | control | input | button | dropdown | option | empty. -->
     <hell-combobox-basic
-      class="max-w-72"
-      aria-label="Assignee"
-      placeholder="Assign to…"
-      [options]="options"
+      class="block max-w-72"
+      aria-label="Priority"
+      placeholder="Set priority…"
+      emptyLabel="No priority matches"
+      [options]="priorities"
       [value]="value()"
-      [ui]="{
-        control: 'border-hell-primary',
-        dropdown: 'border-hell-primary',
-        option: 'data-active:bg-hell-primary-soft',
-        empty: 'text-hell-danger',
-      }"
-      (valueChange)="value.set($event === null ? null : $any($event))"
+      [ui]="ui"
+      (valueChange)="value.set($any($event))"
     />
   `,
 })
 export class ComboboxStylingExample {
-  protected readonly options = ASSIGNEES;
+  protected readonly priorities = PRIORITIES;
   protected readonly value = signal<string | null>(null);
+
+  protected readonly ui: HellComboboxBasicUi = {
+    root: 'font-medium',
+    control:
+      'h-hell-control-lg rounded-hell-xl border-hell-primary bg-hell-primary-soft data-focus:shadow-[0_0_0_3px_var(--color-hell-primary-soft)]',
+    input: 'text-hell-primary-soft-foreground placeholder:text-hell-primary/70',
+    button: 'w-hell-control-lg text-hell-primary data-hover:text-hell-primary-hover',
+    dropdown: 'gap-hell-1 rounded-hell-xl border-hell-primary bg-hell-surface p-hell-2 shadow-hell-lg',
+    option:
+      'rounded-hell-lg data-active:bg-hell-primary-soft data-selected:bg-hell-primary data-selected:text-hell-foreground-inverse',
+    empty: 'text-hell-danger',
+  };
 }

@@ -37,7 +37,7 @@ test.describe('component visual polish regressions', () => {
   }) => {
     await gotoDocsPage(page, '/components/slider', 'Slider');
 
-    const example = page.locator('hd-example-tabs:has(app-slider-vertical-example)');
+    const example = page.locator('hd-example-tabs:has(app-slider-orientation-example)');
     await expect(example).toBeVisible();
     await example.scrollIntoViewIfNeeded();
 
@@ -115,7 +115,7 @@ test.describe('component visual polish regressions', () => {
     await page.emulateMedia({ colorScheme: 'dark' });
     await gotoDocsPage(page, '/components/toggle', 'Toggle');
 
-    const example = page.locator('app-toggle-toggle-group-single-example');
+    const example = page.locator('app-toggle-group-single-example');
     await expect(example).toBeVisible();
     await example.scrollIntoViewIfNeeded();
 
@@ -124,7 +124,7 @@ test.describe('component visual polish regressions', () => {
     const unselected = group
       .locator('button[hellToggleGroupItem][data-slot="root"]:not([data-selected])')
       .first();
-    await expect(selected).toHaveText('Left');
+    await expect(selected).toHaveAttribute('aria-label', 'Align left');
 
     const colors = await group.evaluate((element) => {
       const groupElement = element as HTMLElement;
@@ -179,8 +179,8 @@ test.describe('component visual polish regressions', () => {
     await gotoDocsPage(page, '/components/toggle', 'Toggle');
 
     const toggles = [
-      page.locator('app-toggle-single-toggle-example button[hellToggle]').first(),
-      page.locator('app-toggle-toggle-group-single-example button[hellToggleGroupItem]').nth(1),
+      page.locator('app-toggle-basic-example button[hellToggle]').first(),
+      page.locator('app-toggle-group-single-example button[hellToggleGroupItem]').nth(1),
     ];
 
     for (const toggle of toggles) {
@@ -224,7 +224,7 @@ test.describe('component visual polish regressions', () => {
     expect(nativeMotion.transitionProperties).toContain('transform');
     expect(nativeMotion.transitionProperties).not.toContain('right');
 
-    await page.getByText('Auto updates', { exact: true }).click();
+    await page.getByText('Auto-renew subscription', { exact: true }).click();
     await expect(nativeSwitch).toBeChecked();
     const nativeCheckedMotion = await nativeSwitchPseudoMotion(nativeSwitch);
     expect(nativeCheckedMotion.transitionProperties).toEqual(nativeMotion.transitionProperties);
@@ -239,7 +239,7 @@ test.describe('component visual polish regressions', () => {
     // mid-transition frames instead of settled values.
     await ensurePageIsActive(page);
 
-    const example = page.locator('app-toggle-disabled-example');
+    const example = page.locator('app-toggle-basic-example');
     await expect(example).toBeVisible();
     const disabledToggle = example.getByRole('button', { name: 'Disabled', exact: true });
     await expect(disabledToggle).toBeDisabled();
@@ -277,8 +277,8 @@ test.describe('component visual polish regressions', () => {
     // deactivated headless WebKit page would keep reporting the idle colors.
     await ensurePageIsActive(page);
 
-    const example = page.locator('app-avatar-group-overflow-menu-example');
-    const trigger = example.getByRole('button', { name: '3 more people' });
+    const example = page.locator('app-avatar-group-with-tooltip-menu-example');
+    const trigger = example.getByRole('button', { name: '2 more assignees' });
     await expect(trigger).toBeVisible();
     await trigger.scrollIntoViewIfNeeded();
 
@@ -287,6 +287,7 @@ test.describe('component visual polish regressions', () => {
         const styles = getComputedStyle(element);
         return {
           backgroundColor: styles.backgroundColor,
+          boxShadow: styles.boxShadow,
           color: styles.color,
           transform: styles.transform,
           zIndex: styles.zIndex,
@@ -318,6 +319,10 @@ test.describe('component visual polish regressions', () => {
     const hovered = await triggerVisualSnapshot();
     expect(hovered.backgroundColor).not.toBe(idle.backgroundColor);
     expect(hovered.color).not.toBe(idle.color);
+    // The overflow badge also draws the shared member hover ring (box-shadow
+    // cutting through neighbors), so it stays a peer in the stack instead of
+    // lifting out of it (transform, z-index, and opacity all hold).
+    expect(hovered.boxShadow).not.toBe(idle.boxShadow);
     expect(hovered.transform).toBe(idle.transform);
     expect(hovered.zIndex).toBe(idle.zIndex);
     expect(hovered.opacity).toBe('1');
@@ -326,7 +331,7 @@ test.describe('component visual polish regressions', () => {
     await expect(trigger).toBeFocused({ timeout: SETTLE_TIMEOUT });
 
     await page.keyboard.press('Enter');
-    const menu = page.getByRole('menu', { name: 'More people' });
+    const menu = page.getByRole('menu', { name: 'Remaining assignees' });
     await expect(menu).toBeVisible();
     // Settle the menu enter animation and the trigger's open-state transition
     // deterministically before reading styles and geometry.
@@ -344,7 +349,7 @@ test.describe('component visual polish regressions', () => {
       zIndex: getComputedStyle(element).zIndex,
     }));
     expect(openState.ariaExpanded === 'true' || openState.dataOpen).toBe(true);
-    expect(openState.backgroundColor).not.toBe(idle.backgroundColor);
+    expect(openState.boxShadow).not.toBe(idle.boxShadow);
     expect(openState.boxShadow).not.toBe('none');
     expect(openState.opacity).toBe('1');
     expect(openState.transform).toBe(idle.transform);
@@ -352,7 +357,11 @@ test.describe('component visual polish regressions', () => {
 
     const triggerBox = await boxFor(trigger);
     const menuBox = await boxFor(menu);
-    expect(Math.abs(menuBox.x - triggerBox.x)).toBeLessThanOrEqual(4);
+    // The menu opens bottom-end, so its trailing (right) edge aligns with the
+    // trigger's trailing edge.
+    expect(
+      Math.abs(menuBox.x + menuBox.width - (triggerBox.x + triggerBox.width)),
+    ).toBeLessThanOrEqual(4);
     expect(
       menuBox.y >= triggerBox.y + triggerBox.height || menuBox.y + menuBox.height <= triggerBox.y,
     ).toBe(true);

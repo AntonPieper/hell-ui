@@ -8,12 +8,7 @@ import { HellFlyout, HellFlyoutTrigger } from '@hell-ui/angular/flyout';
   imports: [HellButton, HellFlyout, HellFlyoutTrigger],
   template: `
     <div class="min-h-[140px]">
-      <button
-        hellButton
-        hellFlyoutTrigger
-        #t="hellFlyoutTrigger"
-        (openChange)="open.set($event)"
-      >
+      <button hellButton hellFlyoutTrigger #t="hellFlyoutTrigger" (openChange)="open.set($event)">
         {{ open() ? 'Hide' : 'Show' }} details
       </button>
 

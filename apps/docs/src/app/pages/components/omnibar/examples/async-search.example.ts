@@ -40,6 +40,7 @@ const PEOPLE: readonly Person[] = Array.from({ length: 32 }, (_, index) => {
 
     <hell-omnibar
       #peopleSearch="hellOmnibar"
+      class="max-w-90"
       placeholder="Search people"
       ariaLabel="Search people"
       hotkey="/"
@@ -54,7 +55,6 @@ const PEOPLE: readonly Person[] = Array.from({ length: 32 }, (_, index) => {
       (searchError)="handleSearchError($event)"
     >
       <hell-icon hellOmnibarLeading name="faSolidMagnifyingGlass" size="13px" />
-      <span hellOmnibarTrailing class="text-xs text-hell-foreground-muted">async</span>
 
       <div hellOmnibarActions aria-label="People search filters">
         <button
@@ -122,6 +122,9 @@ export class OmnibarAsyncSearchExample {
     { name: 'team', weight: 2, get: (person) => person.team },
   ];
 
+  // A real source calls a backend; this fake resolves after a delay and aborts
+  // superseded requests through the provided signal. Type "error" to see the
+  // error footer.
   protected readonly searchPeople: HellSearchSource<Person> = ({ query, signal }) =>
     new Promise((resolve, reject) => {
       const timer = window.setTimeout(() => {

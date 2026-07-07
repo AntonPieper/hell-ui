@@ -6,7 +6,9 @@ async function gotoTimeInput(page: Page): Promise<void> {
 }
 
 async function openReminderPicker(page: Page) {
-  const trigger = page.getByRole('button', { name: 'Choose time for Reminder time' }).first();
+  const trigger = page
+    .locator('hell-time-input:has(#reminder-time)')
+    .getByRole('button', { name: 'Choose time' });
   await trigger.click();
   const hours = page.getByRole('spinbutton', { name: 'Hours' });
   await expect(hours).toBeVisible();
@@ -21,9 +23,7 @@ test.describe('time input accessibility contract', () => {
 
     const input = page.locator('#reminder-time');
     await expect(input).toHaveAccessibleName('Reminder time');
-    await expect(input).toHaveAccessibleDescription(
-      'Type in the native time field or adjust the segmented picker.',
-    );
+    await expect(input).toHaveAccessibleDescription('Type HH:mm or open the picker.');
     await expect(input).toHaveAttribute('type', 'time');
     await expect(input).toHaveAttribute('step', '60');
 

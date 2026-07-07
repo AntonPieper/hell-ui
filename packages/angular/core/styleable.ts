@@ -1,4 +1,3 @@
-import { booleanAttribute, Directive, input } from '@angular/core';
 import { hellTwMerge } from './part-style-merge';
 
 /** Consumer-provided Tailwind class refinements keyed by a component's public parts. */
@@ -51,25 +50,4 @@ function uiClassForPart<Part extends string>(
   if (typeof ui === 'string') return part === defaultPart ? ui : undefined;
 
   return ui[part];
-}
-
-/**
- * Base contract for the not-yet-migrated legacy Style Opt-Out modules listed
- * in the architecture allowlist. New public modules must not extend this;
- * they use `hellPartStyler` and a typed `ui` input instead.
- *
- * Subclasses inherit the `unstyled` input and bind their own host styling
- * class as `[class.hell-xxx]="!unstyled()"`. Behavior, accessibility wiring,
- * and data attributes remain local to the concrete module.
- */
-@Directive()
-export abstract class HellStyleable {
-  /**
-   * When true, the component does not apply its Hell default host styling class.
-   * Behavior, accessibility wiring and data attributes still apply.
-   */
-  readonly unstyled = input(false, {
-    transform: booleanAttribute,
-    alias: 'unstyled',
-  });
 }

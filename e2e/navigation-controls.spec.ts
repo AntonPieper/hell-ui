@@ -111,17 +111,22 @@ test.describe('split-view item navigation', () => {
 
     await expect(previous).toBeDisabled();
     await expect(next).toBeEnabled();
-    await expect(example.getByText('1 of 3')).toBeVisible();
+    await expect(example.getByText('Ticket 1 of 4')).toBeVisible();
 
     await next.focus();
     await page.keyboard.press('Enter');
-    await expect(detailTitle).toHaveText('Review rollout');
-    await expect(example.getByText('2 of 3')).toBeVisible();
+    await expect(detailTitle).toHaveText('Review staged rollout');
+    await expect(example.getByText('Ticket 2 of 4')).toBeVisible();
     await expect(previous).toBeEnabled();
 
     await page.keyboard.press(' ');
-    await expect(detailTitle).toHaveText('Update access');
-    await expect(example.getByText('3 of 3')).toBeVisible();
+    await expect(detailTitle).toHaveText('Update role access');
+    await expect(example.getByText('Ticket 3 of 4')).toBeVisible();
+    await expect(next).toBeEnabled();
+
+    await page.keyboard.press('Enter');
+    await expect(detailTitle).toHaveText('Close billing dispute');
+    await expect(example.getByText('Ticket 4 of 4')).toBeVisible();
     await expect(next).toBeDisabled();
     await expect(handle).toBeVisible();
   });

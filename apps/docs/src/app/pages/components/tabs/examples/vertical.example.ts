@@ -1,27 +1,23 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { HELL_TABS_DIRECTIVES, type HellTabsetUi } from '@hell-ui/angular/tabs';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { HELL_TABS_DIRECTIVES } from '@hell-ui/angular/tabs';
 
 @Component({
   selector: 'app-tabs-vertical-example',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [...HELL_TABS_DIRECTIVES],
   template: `
-    <div hellTabset value="a" orientation="vertical" [activateOnFocus]="false" [ui]="tabsetUi">
-      <div hellTabList aria-label="Manual content sections">
-        <button hellTab value="a">Section A</button>
-        <button hellTab value="b">Section B</button>
-        <button hellTab value="c">Section C</button>
+    <div hellTabset value="profile" orientation="vertical" [activateOnFocus]="false">
+      <div hellTabList aria-label="Settings sections">
+        <button hellTab value="profile">Profile</button>
+        <button hellTab value="notifications">Notifications</button>
+        <button hellTab value="integrations">Integrations</button>
       </div>
       <div class="hd-fill">
-        <div hellTabPanel value="a">Content A</div>
-        <div hellTabPanel value="b">Content B</div>
-        <div hellTabPanel value="c">Content C</div>
+        <div hellTabPanel value="profile">Name, avatar and contact details.</div>
+        <div hellTabPanel value="notifications">Email and push notification preferences.</div>
+        <div hellTabPanel value="integrations">Connected apps and API tokens.</div>
       </div>
     </div>
   `,
 })
-export class TabsVerticalExample {
-  protected readonly tabsetUi = {
-    root: 'gap-hell-6',
-  } satisfies HellTabsetUi;
-}
+export class TabsVerticalExample {}

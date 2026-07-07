@@ -1,9 +1,5 @@
-- heading "Installation" [level=3]:
-  - button "Installation" [expanded]
-- region "Installation":
-  - paragraph: "Install via your package manager:"
-  - code: pnpm add @hell-ui/angular ng-primitives
-- heading "Theming" [level=3]:
-  - button "Theming"
-- heading "SSR" [level=3]:
-  - button "SSR"
+- heading "When will my order ship?" [level=3]:
+  - button "When will my order ship?" [expanded]
+- region "When will my order ship?": /Orders placed before \d+[hmsp]+ local time ship the same business day\./
+- heading "What is your return policy?" [level=3]:
+  - button "What is your return policy?"

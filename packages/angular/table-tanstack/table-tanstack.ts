@@ -30,9 +30,15 @@ import {
 } from '@tanstack/angular-table';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
-import { HellInput, HellNativeSelect, type HellInputUi } from '@hell-ui/angular/input';
+import {
+  HellInput,
+  HellNativeSelect,
+  type HellInputUi,
+  type HellNativeSelectUi,
+} from '@hell-ui/angular/input';
 import { HellPaginationStrip } from '@hell-ui/angular/pagination';
 import { HELL_SEARCH_DIRECTIVES } from '@hell-ui/angular/search';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
 export {
   FlexRenderDirective,
   FlexRenderDirective as FlexRender,
@@ -48,6 +54,41 @@ type ɵHellStrategyCleanup = VoidFunction | void;
 const HELL_TANSTACK_FILTER_INPUT_UI = {
   root: 'min-w-[calc(var(--spacing)*44)] max-w-full rounded-hell-sm px-hell-2',
 } satisfies HellInputUi;
+
+/** Public parts of the HellTanStackTable shell, styleable through its Part Style Map. */
+export type HellTanStackTablePart = 'root' | 'toolbar' | 'footer' | 'scrollport';
+/** Part Style Map accepted by the HellTanStackTable `ui` input. */
+export type HellTanStackTableUi = HellUi<HellTanStackTablePart>;
+
+/**
+ * Public parts of the HellTanStackPagination control, styleable through its Part Style Map.
+ *
+ * The rows-per-page `<select>` is a nested `hellNativeSelect`; refine it through that
+ * primitive's own `root` part rather than a shell part, so there is a single Part-Class
+ * Pipeline over its DOM. Only the owned `pageSize` label wrapper is a shell part.
+ */
+export type HellTanStackPaginationPart = 'root' | 'pageSize';
+/** Part Style Map accepted by the HellTanStackPagination `ui` input. */
+export type HellTanStackPaginationUi = HellUi<HellTanStackPaginationPart>;
+
+const HELL_TANSTACK_TABLE_RECIPE = {
+  root: 'block min-w-0 overflow-clip text-hell-foreground bg-hell-surface-elevated border border-hell-border rounded-md shadow-hell-xs',
+  toolbar:
+    'flex min-h-[calc(var(--spacing)*10)] flex-wrap items-center gap-hell-2 px-hell-3 py-hell-2 text-[12px] text-hell-foreground-muted border-b border-hell-border bg-hell-surface-subtle',
+  footer:
+    'flex min-h-[calc(var(--spacing)*10)] flex-wrap items-center justify-end gap-hell-2 px-hell-3 py-hell-2 text-[12px] text-hell-foreground-muted border-t border-hell-border bg-hell-surface-elevated max-[640px]:items-start max-[640px]:justify-start max-[640px]:gap-hell-3',
+  scrollport: 'max-w-full overflow-auto overscroll-x-contain',
+} satisfies HellRecipe<HellTanStackTablePart>;
+
+const HELL_TANSTACK_PAGINATION_RECIPE = {
+  root: 'inline-flex min-w-0 flex-wrap items-center gap-hell-2 max-[640px]:w-full max-[640px]:gap-hell-3',
+  pageSize: 'inline-flex items-center gap-hell-2 whitespace-nowrap max-[640px]:basis-full',
+} satisfies HellRecipe<HellTanStackPaginationPart>;
+
+/** Refines the rows-per-page `<select>` through the nested `hellNativeSelect` root part. */
+const HELL_TANSTACK_PAGINATION_SELECT_UI = {
+  root: 'min-w-[calc(var(--spacing)*18)] max-[640px]:min-w-[calc(var(--spacing)*20)]',
+} satisfies HellNativeSelectUi;
 
 type HellClassValue =
   | string
@@ -363,19 +404,21 @@ interface HellColumnMeta {
     ɵHellTanStackBodyItemConnector,
   ],
   host: {
-    class: 'hell-tanstack-table',
+    '[class]': "part('root')",
+    'data-slot': 'root',
     '[attr.data-sticky-header]': 'stickyHeader() ? "true" : null',
     '[attr.data-status]': 'status().kind',
   },
   template: `
     @if (hasToolbar()) {
-      <div class="hell-table-shell-toolbar" data-hell-table-shell-toolbar>
+      <div [class]="part('toolbar')" data-slot="toolbar" data-hell-table-shell-toolbar>
         <ng-content select="[hellTableShellToolbar]" />
       </div>
     }
 
     <div
-      class="hell-table-shell-scrollport"
+      [class]="part('scrollport')"
+      data-slot="scrollport"
       data-hell-table-shell-scrollport
       [hellTanStackInternalBodyScrollport]="bodyStrategyBridge()"
     >
@@ -618,13 +661,22 @@ interface HellColumnMeta {
     </div>
 
     @if (hasFooter()) {
-      <div class="hell-table-shell-footer" data-hell-table-shell-footer>
+      <div [class]="part('footer')" data-slot="footer" data-hell-table-shell-footer>
         <ng-content select="[hellTableShellFooter]" />
       </div>
     }
   `,
 })
 export class HellTanStackTable<TData extends RowData = RowData> {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellTanStackTablePart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellTanStackTablePart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_TANSTACK_TABLE_RECIPE,
+  });
+
   readonly table = input.required<Table<TData>>();
   readonly status = input<HellTableStatusValue>(HellTableStatus.READY);
   readonly stickyHeader = input(false, { transform: booleanAttribute });
@@ -935,7 +987,10 @@ export class HellDefaultTableErrorState {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HellNativeSelect, HellPaginationStrip],
   schemas: [NO_ERRORS_SCHEMA],
-  host: { class: 'hell-tanstack-pagination' },
+  host: {
+    '[class]': "part('root')",
+    'data-slot': 'root',
+  },
   template: `
     <hell-pagination
       [page]="currentPage()"
@@ -944,12 +999,12 @@ export class HellDefaultTableErrorState {
       (pageChange)="setPage($any($event))"
     />
     @if (pageSizeOptions().length) {
-      <label data-slot="page-size">
+      <label [class]="part('pageSize')" data-slot="pageSize">
         <span>Rows</span>
         <select
           hellNativeSelect
           size="sm"
-          data-slot="page-size-select"
+          [ui]="pageSizeSelectUi"
           [value]="table().getState().pagination.pageSize"
           (change)="setPageSize($event)"
         >
@@ -962,6 +1017,18 @@ export class HellDefaultTableErrorState {
   `,
 })
 export class HellTanStackPagination<TData extends RowData = RowData> {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellTanStackPaginationPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellTanStackPaginationPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_TANSTACK_PAGINATION_RECIPE,
+  });
+
+  /** Refines the nested rows-per-page `hellNativeSelect` through its own root part. */
+  protected readonly pageSizeSelectUi = HELL_TANSTACK_PAGINATION_SELECT_UI;
+
   readonly table = input.required<Table<TData>>();
   readonly pageSizeOptions = input<readonly number[]>([]);
 

@@ -125,6 +125,7 @@ export type HellAudioPlayerPart =
   | 'captionAction'
   | 'captionsBody'
   | 'captionsError'
+  | 'captionsText'
   | 'captionsInterim'
   | 'captionsEmpty';
 
@@ -162,6 +163,7 @@ const HELL_AUDIO_PLAYER_RECIPE = {
   captionsBody:
     'max-h-36 overflow-auto rounded-hell-sm bg-hell-surface px-hell-3 py-hell-2 text-sm leading-[1.55] text-hell-foreground',
   captionsError: 'm-0 text-sm text-hell-danger',
+  captionsText: '',
   captionsInterim: 'text-hell-foreground-muted italic',
   captionsEmpty: 'text-xs text-hell-foreground-muted',
 } satisfies HellRecipe<HellAudioPlayerPart>;
@@ -417,7 +419,7 @@ function parseIsoDateOnly(value: string): Date | null {
             <p data-slot="captionsError" [class]="part('captionsError')">{{ err }}</p>
           } @else if (transcript() || interim()) {
             <p>
-              <span>{{ transcript() }}</span>
+              <span data-slot="captionsText" [class]="part('captionsText')">{{ transcript() }}</span>
               @if (interim(); as i) {
                 <span data-slot="captionsInterim" [class]="part('captionsInterim')">
                   {{ i }}
