@@ -1,4 +1,4 @@
-import { Directive, ElementRef, booleanAttribute, inject, input } from '@angular/core';
+import { Directive, ElementRef, inject } from '@angular/core';
 
 /**
  * Shared disabled semantics for Hell directives hosted on native interactive
@@ -8,11 +8,6 @@ import { Directive, ElementRef, booleanAttribute, inject, input } from '@angular
  */
 @Directive()
 export abstract class HellNativeInteractiveDisabledGuard {
-  readonly unstyled = input(false, {
-    transform: booleanAttribute,
-    alias: 'unstyled',
-  });
-
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
 
   protected nativeButtonType(): 'button' | null {

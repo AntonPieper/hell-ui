@@ -127,13 +127,6 @@ export function hellSearchWords(value: string): readonly string[];
 export type HellSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 // @public
-export abstract class HellStyleable {
-    readonly unstyled: i0.InputSignalWithTransform<boolean, unknown>;
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellStyleable, never, never, { "unstyled": { "alias": "unstyled"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellStyleable, never>;
-}
-
-// @public
 export type HellTagVariant = 'default' | 'primary' | 'success' | 'info' | 'danger' | 'warning';
 
 // @public

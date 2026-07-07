@@ -1,140 +1,87 @@
+@source "./avatar-group.ts";
+
 @layer components {
-  /* Avatar group. */
+  /* Avatar group structural selectors; default utility classes live in avatar-group.ts. */
 
-  .hell-avatar-group {
-    display: inline-flex;
-    align-items: center;
-    --_hell-av-size: 32px;
-    --_hell-avatar-group-overlap: calc(var(--spacing) * -2);
-    --_hell-avatar-group-cutout: var(--color-hell-surface);
-    --_hell-avatar-group-ring-width: 2px;
-    --_hell-avatar-group-hover-shadow:
-      0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-cutout),
-      0 2px 6px rgb(0 0 0 / 0.12);
-    &[data-size='xs'] {
-      --_hell-av-size: 20px;
-      --_hell-avatar-group-overlap: calc(var(--spacing) * -1.5);
-    }
-    &[data-size='sm'] {
-      --_hell-av-size: 26px;
-      --_hell-avatar-group-overlap: calc(var(--spacing) * -1.75);
-    }
-    &[data-size='md'] {
-      --_hell-av-size: 32px;
-    }
-    &[data-size='lg'] {
-      --_hell-av-size: 40px;
-      --_hell-avatar-group-overlap: calc(var(--spacing) * -2.5);
-    }
-    &[data-size='xl'] {
-      --_hell-av-size: 56px;
-      --_hell-avatar-group-overlap: calc(var(--spacing) * -3);
-    }
-    & > .hell-avatar-group-item,
-    & > .hell-avatar-group-overflow {
-      position: relative;
-      flex-shrink: 0;
-    }
-    & > .hell-avatar-group-item:not(:first-child),
-    & > .hell-avatar-group-overflow:not(:first-child) {
-      margin-inline-start: var(--_hell-avatar-group-overlap);
-    }
-  }
-
-  .hell-avatar-group-item {
-    position: relative;
-    display: inline-flex;
-    min-height: var(--_hell-av-size);
-    min-width: var(--_hell-av-size);
-    align-items: center;
-    justify-content: center;
-    border-radius: calc(infinity * 1px);
-    isolation: isolate;
-    outline: none;
-    transition: box-shadow var(--hell-duration-fast) var(--ease-hell-out);
-    &:is(button, a) {
-      border-width: 0;
-      background-color: transparent;
-      padding: 0;
-      color: inherit;
-      font: inherit;
-      cursor: pointer;
-    }
-    &:is(button, a):active {
-      box-shadow: var(--_hell-avatar-group-hover-shadow);
-    }
-    &[data-selected] {
-      --_hell-avatar-group-ring-color: var(--color-hell-primary);
-    }
-    &[data-selected]:is(hell-avatar[data-slot='root']),
-    &[data-selected] > hell-avatar[data-slot='root'] {
-      --_hell-avatar-border: var(--_hell-avatar-group-ring-color);
-    }
-    &[data-selected]:not(hell-avatar[data-slot='root']):not(:has(> hell-avatar[data-slot='root'])) {
-      box-shadow: 0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-ring-color);
-    }
-    &:focus-visible {
-      z-index: 2;
-      --_hell-avatar-group-ring-color: var(--color-hell-focus-ring);
-      box-shadow:
-        0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-cutout),
-        0 0 0 calc(var(--_hell-avatar-group-ring-width) * 2) var(--_hell-avatar-group-ring-color),
-        0 0 0 calc(var(--_hell-avatar-group-ring-width) * 3) var(--_hell-avatar-group-cutout);
-    }
-  }
-
-  .hell-avatar-group-overflow {
-    display: inline-flex;
-    height: var(--_hell-av-size, 32px);
-    width: var(--_hell-av-size, 32px);
-    align-items: center;
-    justify-content: center;
-    border-radius: calc(infinity * 1px);
-    border-style: solid;
-    border-width: 2px;
-    border-color: var(--color-hell-surface-elevated);
-    background-color: var(--color-hell-surface-muted);
-    padding: 0;
-    font: inherit;
-    font-size: 11px;
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-hell-foreground-muted);
-    outline: none;
-    transition:
-      background-color var(--hell-duration-fast) var(--ease-hell-out),
-      border-color var(--hell-duration-fast) var(--ease-hell-out),
-      box-shadow var(--hell-duration-fast) var(--ease-hell-out),
-      color var(--hell-duration-fast) var(--ease-hell-out);
-    &:is(button, a) {
-      cursor: pointer;
-    }
-    &:is(button, a):hover {
-      background-color: var(--color-hell-surface-subtle);
-      color: var(--color-hell-foreground);
-    }
-    &:is(button, a):active,
-    &[data-open],
-    &[aria-expanded='true'] {
-      background-color: var(--color-hell-surface-subtle);
-      border-color: var(--color-hell-border-strong);
-      color: var(--color-hell-foreground);
-      box-shadow:
-        0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-cutout),
-        0 0 0 calc(var(--_hell-avatar-group-ring-width) * 2) var(--color-hell-border-strong);
-    }
-    &:focus-visible {
-      z-index: 5;
-      box-shadow:
-        0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-cutout),
-        0 0 0 calc(var(--_hell-avatar-group-ring-width) * 2) var(--color-hell-focus-ring),
-        0 0 0 calc(var(--_hell-avatar-group-ring-width) * 3) var(--_hell-avatar-group-cutout);
-    }
-  }
-
-  .hell-avatar-group-item:is(button, a):hover:not(:active),
-  .hell-avatar-group-overflow:is(button, a):hover:not(:active):not([data-open]):not(
-      [aria-expanded='true']
+  hell-avatar-group[data-slot='root']
+    > :is([hellAvatarGroupItem][data-slot='root'], [hellAvatarGroupOverflow][data-slot='root']):not(
+      :first-child
     ) {
+    margin-inline-start: var(--_hell-avatar-group-overlap);
+  }
+
+  [hellAvatarGroupItem][data-slot='root']:is(button, a) {
+    border-width: 0;
+    background-color: transparent;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  [hellAvatarGroupItem][data-slot='root']:is(button, a):active {
+    box-shadow: var(--_hell-avatar-group-hover-shadow);
+  }
+
+  [hellAvatarGroupItem][data-slot='root'][data-selected] {
+    --_hell-avatar-group-ring-color: var(--color-hell-primary);
+  }
+
+  [hellAvatarGroupItem][data-slot='root'][data-selected]:is(hell-avatar[data-slot='root']),
+  [hellAvatarGroupItem][data-slot='root'][data-selected] > hell-avatar[data-slot='root'] {
+    --_hell-avatar-border: var(--_hell-avatar-group-ring-color);
+  }
+
+  [hellAvatarGroupItem][data-slot='root'][data-selected]:not(hell-avatar[data-slot='root']):not(
+      :has(> hell-avatar[data-slot='root'])
+    ) {
+    box-shadow: 0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-ring-color);
+  }
+
+  [hellAvatarGroupItem][data-slot='root']:focus-visible {
+    z-index: 2;
+    --_hell-avatar-group-ring-color: var(--color-hell-focus-ring);
+    box-shadow:
+      0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-cutout),
+      0 0 0 calc(var(--_hell-avatar-group-ring-width) * 2)
+        var(--_hell-avatar-group-ring-color),
+      0 0 0 calc(var(--_hell-avatar-group-ring-width) * 3)
+        var(--_hell-avatar-group-cutout);
+  }
+
+  [hellAvatarGroupOverflow][data-slot='root']:is(button, a) {
+    cursor: pointer;
+  }
+
+  [hellAvatarGroupOverflow][data-slot='root']:is(button, a):hover {
+    background-color: var(--color-hell-surface-subtle);
+    color: var(--color-hell-foreground);
+  }
+
+  [hellAvatarGroupOverflow][data-slot='root']:is(button, a):active,
+  [hellAvatarGroupOverflow][data-slot='root'][data-open],
+  [hellAvatarGroupOverflow][data-slot='root'][aria-expanded='true'] {
+    background-color: var(--color-hell-surface-subtle);
+    border-color: var(--color-hell-border-strong);
+    color: var(--color-hell-foreground);
+    box-shadow:
+      0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-cutout),
+      0 0 0 calc(var(--_hell-avatar-group-ring-width) * 2) var(--color-hell-border-strong);
+  }
+
+  [hellAvatarGroupOverflow][data-slot='root']:focus-visible {
+    z-index: 5;
+    box-shadow:
+      0 0 0 var(--_hell-avatar-group-ring-width) var(--_hell-avatar-group-cutout),
+      0 0 0 calc(var(--_hell-avatar-group-ring-width) * 2) var(--color-hell-focus-ring),
+      0 0 0 calc(var(--_hell-avatar-group-ring-width) * 3)
+        var(--_hell-avatar-group-cutout);
+  }
+
+  [hellAvatarGroupItem][data-slot='root']:is(button, a):hover:not(:active),
+  [hellAvatarGroupOverflow][data-slot='root']:is(button, a):hover:not(:active):not(
+      [data-open]
+    ):not([aria-expanded='true']) {
     box-shadow: var(--_hell-avatar-group-hover-shadow);
   }
 }

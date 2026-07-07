@@ -5,6 +5,31 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ## [Unreleased]
 
+### Breaking changes
+
+- Migrated the last two Style Opt-Out surfaces to typed Part Style Maps and
+  removed the legacy `HellStyleable` base (and its `unstyled` input) from
+  `@hell-ui/angular/core`. `HellAvatarGroup`, `HellAvatarGroupItem`, and
+  `HellAvatarGroupOverflow` now expose `ui` inputs with `root` Public Parts and
+  `data-slot`-keyed entrypoint styles; `HellPdfViewer` exposes a
+  `HellPdfViewerPart` anatomy (`root`, `toolbar`, `toolbarGroup`, `divider`,
+  `pageInput`, `toolbarText`, `zoomSelect`, `findBar`, `findInput`,
+  `findCount`, `viewport`, `sidebar`, `thumb`, `thumbLabel`, `pageArea`)
+  through its `ui` input while keeping the PDF Runtime, labels, and
+  `--hell-pdf-*` variables unchanged. Replace `unstyled` opt-outs with `ui`
+  part refinements; legacy `.hell-avatar-group*` chrome classes are gone and
+  `.hell-pdf` chrome styling is re-keyed onto scoped `data-slot` selectors
+  (private `.hell-pdf-*` scaffolding class names remain on non-contract
+  DOM). Evidence: `packages/angular/avatar-group/avatar-group.spec.ts`,
+  `packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.spec.ts`, and
+  `pnpm run test:architecture`.
+- Removed the vestigial `unstyled` input that trigger directives inherited
+  from the internal `HellNativeInteractiveDisabledGuard` base (Tooltip,
+  Popover, Dialog, Menu, and Flyout triggers). The input was never read by any
+  component after the Part Style Map migration; disabled semantics and ARIA
+  wiring are unchanged. Evidence: `grep -r "unstyled" packages/angular` and
+  `pnpm run test:architecture`.
+
 ### Fixed
 
 - Multiple-select `[hellToggleGroup]` items no longer expose `role="radio"`

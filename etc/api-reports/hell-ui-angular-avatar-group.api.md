@@ -4,33 +4,64 @@
 
 ```ts
 
+import { AfterViewInit } from '@angular/core';
 import * as i0 from '@angular/core';
+import { InjectionToken } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Provider } from '@angular/core';
+import * as tailwind_merge from 'tailwind-merge';
 
 // @public
 export const HELL_AVATAR_GROUP_DIRECTIVES: readonly [typeof HellAvatarGroup, typeof HellAvatarGroupItem, typeof HellAvatarGroupOverflow];
 
-// Warning: (ae-forgotten-export) The symbol "HellStyleable" needs to be exported by the entry point hell-ui-angular-avatar-group.d.ts
-//
 // @public
-export class HellAvatarGroup extends HellStyleable {
+export class HellAvatarGroup {
+    // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-avatar-group.d.ts
+    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     // Warning: (ae-forgotten-export) The symbol "HellSize" needs to be exported by the entry point hell-ui-angular-avatar-group.d.ts
     readonly size: i0.InputSignal<HellSize>;
-    static ɵcmp: i0.ɵɵComponentDeclaration<HellAvatarGroup, "hell-avatar-group", never, { "size": { "alias": "size"; "required": false; "isSignal": true; }; }, {}, never, ["*"], true, never>;
+    // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-avatar-group.d.ts
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<HellAvatarGroup, "hell-avatar-group", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; }, {}, never, ["*"], true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAvatarGroup, never>;
 }
 
 // @public
-export class HellAvatarGroupItem extends HellStyleable {
+export class HellAvatarGroupItem {
+    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly selected: i0.InputSignalWithTransform<boolean, unknown>;
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellAvatarGroupItem, "[hellAvatarGroupItem]", never, { "selected": { "alias": "selected"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellAvatarGroupItem, "[hellAvatarGroupItem]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "selected": { "alias": "selected"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAvatarGroupItem, never>;
 }
 
 // @public
-export class HellAvatarGroupOverflow extends HellStyleable {
-    static ɵdir: i0.ɵɵDirectiveDeclaration<HellAvatarGroupOverflow, "[hellAvatarGroupOverflow]", never, {}, {}, never, never, true, never>;
+export type HellAvatarGroupItemPart = 'root';
+
+// Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-avatar-group.d.ts
+//
+// @public
+export type HellAvatarGroupItemUi = HellUi<HellAvatarGroupItemPart>;
+
+// @public
+export class HellAvatarGroupOverflow {
+    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
+    readonly ui: i0.InputSignal<HellUiInput<"root">>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<HellAvatarGroupOverflow, "[hellAvatarGroupOverflow]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
     static ɵfac: i0.ɵɵFactoryDeclaration<HellAvatarGroupOverflow, never>;
 }
+
+// @public
+export type HellAvatarGroupOverflowPart = 'root';
+
+// @public
+export type HellAvatarGroupOverflowUi = HellUi<HellAvatarGroupOverflowPart>;
+
+// @public
+export type HellAvatarGroupPart = 'root';
+
+// @public
+export type HellAvatarGroupUi = HellUi<HellAvatarGroupPart>;
 
 // (No @packageDocumentation comment for this package)
 

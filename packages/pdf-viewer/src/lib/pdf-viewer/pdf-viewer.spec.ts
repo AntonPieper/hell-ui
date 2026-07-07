@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { HELL_PDF_RUNTIME_FACTORY, HellPdfViewer } from './pdf-viewer';
+import { HELL_PDF_RUNTIME_FACTORY, HellPdfViewer, type HellPdfViewerUi } from './pdf-viewer';
 import type {
   HellPdfFindRequest,
   HellPdfLoadOptions,
@@ -68,6 +68,7 @@ class FakePdfRuntime implements HellPdfRuntimePort {
       [globalShortcuts]="globalShortcuts"
       [printFetchOptions]="printFetchOptions"
       [worker]="worker"
+      [ui]="ui"
     />
   `,
 })
@@ -76,6 +77,7 @@ class PdfViewerHost {
   globalShortcuts = false;
   printFetchOptions: RequestInit | null = null;
   worker: string | null = null;
+  ui: HellPdfViewerUi | string | undefined = undefined;
 }
 
 describe('HellPdfViewer', () => {
@@ -108,7 +110,7 @@ describe('HellPdfViewer', () => {
 
     const viewer = fixture.nativeElement.querySelector('hell-pdf-viewer') as HTMLElement;
     const findInput = () =>
-      fixture.nativeElement.querySelector('.hell-pdf-find-input') as HTMLInputElement | null;
+      fixture.nativeElement.querySelector('[data-slot="findInput"]') as HTMLInputElement | null;
 
     document.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, bubbles: true, cancelable: true }),
@@ -135,7 +137,7 @@ describe('HellPdfViewer', () => {
     );
     await settle(fixture);
 
-    expect(fixture.nativeElement.querySelector('.hell-pdf-find-input')).toBeInstanceOf(
+    expect(fixture.nativeElement.querySelector('[data-slot="findInput"]')).toBeInstanceOf(
       HTMLInputElement,
     );
   });
@@ -177,7 +179,7 @@ describe('HellPdfViewer', () => {
 
     const prev = nav.querySelector<HTMLButtonElement>('button[hellPaginationPrev]');
     const next = nav.querySelector<HTMLButtonElement>('button[hellPaginationNext]');
-    const pageInput = nav.querySelector<HTMLInputElement>('.hell-pdf-page-input');
+    const pageInput = nav.querySelector<HTMLInputElement>('[data-slot="pageInput"]');
     if (!prev || !next || !pageInput) throw new Error('Expected pagination controls.');
 
     expect(pageInput.value).toBe('1');
@@ -200,7 +202,7 @@ describe('HellPdfViewer', () => {
     overviewButton.click();
     await settle(fixture);
 
-    const thumbnail = fixture.nativeElement.querySelector('.hell-pdf-thumb') as HTMLButtonElement;
+    const thumbnail = fixture.nativeElement.querySelector('[data-slot="thumb"]') as HTMLButtonElement;
     expect(thumbnail).toBeInstanceOf(HTMLButtonElement);
     expect(thumbnail.hasAttribute('hellbutton')).toBe(true);
     expect(thumbnail.getAttribute('data-variant')).toBe('ghost');
@@ -221,9 +223,9 @@ describe('HellPdfViewer', () => {
     await settle(fixture);
 
     const findInput = fixture.nativeElement.querySelector(
-      '.hell-pdf-find-input',
+      '[data-slot="findInput"]',
     ) as HTMLInputElement;
-    const status = fixture.nativeElement.querySelector('.hell-pdf-find-count') as HTMLElement;
+    const status = fixture.nativeElement.querySelector('[data-slot="findCount"]') as HTMLElement;
     expect(status?.getAttribute('role')).toBe('status');
     expect(status?.getAttribute('aria-live')).toBe('polite');
     expect(status?.getAttribute('aria-atomic')).toBe('true');
@@ -242,6 +244,86 @@ describe('HellPdfViewer', () => {
     runtime['handlers']?.onFindState({ status: 'found', current: 2, total: 3 });
     await settle(fixture);
     expect(status.textContent?.trim()).toBe('2 / 3');
+  });
+
+  it('exposes a data-slot for every public part', async () => {
+    const fixture = TestBed.createComponent(PdfViewerHost);
+    await settle(fixture);
+
+    const viewer = fixture.nativeElement.querySelector('hell-pdf-viewer') as HTMLElement;
+
+    // Open the find bar and page overview so all conditional parts are present.
+    (
+      fixture.nativeElement.querySelector(
+        'button[aria-label="Find in document (Ctrl/Cmd+F)"]',
+      ) as HTMLButtonElement
+    ).click();
+    (
+      fixture.nativeElement.querySelector(
+        'button[aria-label="Toggle page overview"]',
+      ) as HTMLButtonElement
+    ).click();
+    await settle(fixture);
+
+    expect(viewer.getAttribute('data-slot')).toBe('root');
+    for (const part of [
+      'toolbar',
+      'toolbarGroup',
+      'divider',
+      'pageInput',
+      'toolbarText',
+      'zoomSelect',
+      'findBar',
+      'findInput',
+      'findCount',
+      'viewport',
+      'sidebar',
+      'thumb',
+      'thumbLabel',
+      'pageArea',
+    ]) {
+      expect(viewer.querySelector(`[data-slot="${part}"]`)).not.toBeNull();
+    }
+  });
+
+  it('merges ui shorthand onto the root part and lets it win over defaults', async () => {
+    const fixture = TestBed.createComponent(PdfViewerHost);
+    fixture.componentInstance.ui = 'ring-2 ring-custom';
+    await settle(fixture);
+
+    const viewer = fixture.nativeElement.querySelector('hell-pdf-viewer') as HTMLElement;
+    expect(viewer.getAttribute('data-slot')).toBe('root');
+    expect(viewer.classList.contains('ring-2')).toBe(true);
+    expect(viewer.classList.contains('ring-custom')).toBe(true);
+  });
+
+  it('merges part-map classes onto their parts and wins over defaults', async () => {
+    const fixture = TestBed.createComponent(PdfViewerHost);
+    fixture.componentInstance.ui = {
+      toolbar: 'custom-toolbar',
+      findBar: 'custom-findbar',
+      viewport: 'custom-viewport',
+    } satisfies HellPdfViewerUi;
+    await settle(fixture);
+
+    (
+      fixture.nativeElement.querySelector(
+        'button[aria-label="Find in document (Ctrl/Cmd+F)"]',
+      ) as HTMLButtonElement
+    ).click();
+    await settle(fixture);
+
+    const viewer = fixture.nativeElement.querySelector('hell-pdf-viewer') as HTMLElement;
+    const toolbar = viewer.querySelector('[data-slot="toolbar"]') as HTMLElement;
+    const findBar = viewer.querySelector('[data-slot="findBar"]') as HTMLElement;
+    const viewport = viewer.querySelector('[data-slot="viewport"]') as HTMLElement;
+
+    expect(toolbar.classList.contains('custom-toolbar')).toBe(true);
+    expect(findBar.classList.contains('custom-findbar')).toBe(true);
+    expect(viewport.classList.contains('custom-viewport')).toBe(true);
+
+    // Shorthand only styles the root part, so it does not leak onto other parts.
+    expect(viewer.classList.contains('custom-toolbar')).toBe(false);
   });
 });
 

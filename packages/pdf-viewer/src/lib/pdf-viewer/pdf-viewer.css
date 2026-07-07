@@ -1,9 +1,10 @@
 @layer components {
-  /* PDF viewer container + toolbar styling.
+  /* PDF viewer container + toolbar styling, keyed on the module's public parts
+  (`data-slot`). Non-part scaffolding keeps private `.hell-pdf-*` class names.
   The page rendering itself is handled by `pdfjs-dist/web/pdf_viewer.css`,
   which consumers should load once globally or with a lazy route. */
 
-  .hell-pdf {
+  hell-pdf-viewer[data-slot='root'] {
     display: flex;
     flex-direction: column;
     min-height: calc(var(--spacing) * 0);
@@ -22,7 +23,7 @@
     }
   }
 
-  .hell-pdf-toolbar {
+  hell-pdf-viewer [data-slot='toolbar'] {
     display: flex;
     align-items: center;
     gap: calc(var(--spacing) * 1.5);
@@ -35,7 +36,7 @@
   }
 
   /* Controls wrap as whole clusters instead of orphaning single buttons. */
-  .hell-pdf-toolbar-group {
+  hell-pdf-viewer [data-slot='toolbarGroup'] {
     display: flex;
     align-items: center;
     gap: calc(var(--spacing) * 1);
@@ -43,11 +44,11 @@
     min-width: 0;
   }
 
-  .hell-pdf-spacer {
+  hell-pdf-viewer .hell-pdf-spacer {
     flex: 1 1 auto;
   }
 
-  .hell-pdf-divider {
+  hell-pdf-viewer [data-slot='divider'] {
     width: 1px;
     height: calc(var(--spacing) * 5);
     background-color: var(--color-hell-border);
@@ -55,7 +56,7 @@
     margin-block: calc(var(--spacing) * 0);
   }
 
-  .hell-pdf-toolbar-text {
+  hell-pdf-viewer [data-slot='toolbarText'] {
     font-size: var(--text-xs);
     line-height: var(--text-xs--line-height);
     color: var(--color-hell-foreground-muted);
@@ -63,7 +64,7 @@
     margin-block: calc(var(--spacing) * 0);
   }
 
-  .hell-pdf-page-input {
+  hell-pdf-viewer [data-slot='pageInput'] {
     width: calc(var(--spacing) * 14);
     flex: 0 0 56px;
     text-align: center;
@@ -83,12 +84,12 @@
   /* The control recipe applies `w-full` from the utilities layer, which
      outranks a components-layer `width`. A fixed flex-basis wins over width
      inside the flex row, keeping the select from stretching the toolbar. */
-  .hell-pdf-zoom-select {
+  hell-pdf-viewer [data-slot='zoomSelect'] {
     flex: 0 0 6.5rem;
     min-width: 0;
   }
 
-  .hell-pdf-findbar {
+  hell-pdf-viewer [data-slot='findBar'] {
     display: flex;
     align-items: center;
     gap: calc(var(--spacing) * 1.5);
@@ -99,13 +100,13 @@
     flex: 0 0 auto;
   }
 
-  .hell-pdf-find-input {
+  hell-pdf-viewer [data-slot='findInput'] {
     flex: 1 1 auto;
     min-width: 120px;
     max-width: 320px;
   }
 
-  .hell-pdf-find-count {
+  hell-pdf-viewer [data-slot='findCount'] {
     font-size: var(--text-sm);
     line-height: var(--text-sm--line-height);
     color: var(--color-hell-foreground-muted);
@@ -114,7 +115,7 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .hell-pdf-host {
+  hell-pdf-viewer [data-slot='viewport'] {
     flex: 1 1 auto;
     min-height: calc(var(--spacing) * 0);
     position: relative;
@@ -122,7 +123,7 @@
     background-color: var(--color-hell-surface-muted);
   }
 
-  .hell-pdf-overview {
+  hell-pdf-viewer [data-slot='sidebar'] {
     flex: 0 0 auto;
     width: 168px;
     overflow-y: auto;
@@ -135,7 +136,7 @@
     border-right: 1px solid var(--color-hell-border);
   }
 
-  .hell-pdf-thumb {
+  hell-pdf-viewer [data-slot='thumb'] {
     --hell-button-background: transparent;
     --hell-button-background-hover: var(--color-hell-foreground);
     --hell-button-background-active: var(--color-hell-foreground);
@@ -192,7 +193,7 @@
     }
   }
 
-  .hell-pdf-thumb-canvas-wrap {
+  hell-pdf-viewer .hell-pdf-thumb-canvas-wrap {
     display: block;
     pointer-events: none;
     background-color: white;
@@ -208,20 +209,20 @@
     }
   }
 
-  .hell-pdf-thumb-label {
+  hell-pdf-viewer [data-slot='thumbLabel'] {
     pointer-events: none;
     font-variant-numeric: tabular-nums;
     line-height: 1;
   }
 
-  .hell-pdf-scroll {
+  hell-pdf-viewer [data-slot='pageArea'] {
     position: absolute;
     inset: calc(var(--spacing) * 0);
     overflow: auto;
     overscroll-behavior: contain;
     touch-action: pan-x pan-y;
     -webkit-overflow-scrolling: touch;
-    .hell-pdf-overview + & {
+    [data-slot='sidebar'] + & {
       position: relative;
       inset: auto;
       flex: 1 1 auto;

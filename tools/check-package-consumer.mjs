@@ -1416,7 +1416,7 @@ function exactInstalledVersion(name) {
 function rootConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellStyleable, hellPartStyler, hellTwMerge, type HellPartStyler, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '${packageName}';
+import { hellPartStyler, hellTwMerge, type HellPartStyler, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '${packageName}';
 
 const size: HellSize = 'md';
 const recipe: HellRecipe<'root'> = { root: 'block' };
@@ -1432,7 +1432,6 @@ void size;
 void ui;
 void merged;
 void styledRoot;
-void HellStyleable;
 
 @Component({
   selector: 'app-root',
@@ -1448,7 +1447,7 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 function coreConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellStyleable, hellPartStyler, hellTwMerge, type HellPartStyler, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '${packageName}/core';
+import { hellPartStyler, hellTwMerge, type HellPartStyler, type HellRecipe, type HellSize, type HellUi, type HellUiInput } from '${packageName}/core';
 
 const size: HellSize = 'md';
 const recipe: HellRecipe<'root'> = { root: 'block' };
@@ -1464,7 +1463,6 @@ void size;
 void ui;
 void merged;
 void styledRoot;
-void HellStyleable;
 
 @Component({
   selector: 'app-root',

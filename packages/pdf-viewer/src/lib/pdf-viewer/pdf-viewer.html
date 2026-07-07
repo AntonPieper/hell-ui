@@ -1,5 +1,5 @@
-<div class="hell-pdf-toolbar">
-  <div class="hell-pdf-toolbar-group" data-toolbar-group="overview">
+<div data-slot="toolbar" [class]="part('toolbar')">
+  <div data-slot="toolbarGroup" [class]="part('toolbarGroup')" data-toolbar-group="overview">
     <button
       hellButton
       variant="ghost"
@@ -14,11 +14,12 @@
     </button>
   </div>
 
-  <span class="hell-pdf-divider" aria-hidden="true"></span>
+  <span data-slot="divider" [class]="part('divider')" aria-hidden="true"></span>
 
   <nav
     hellPagination
-    class="hell-pdf-toolbar-group"
+    data-slot="toolbarGroup"
+    [class]="part('toolbarGroup')"
     data-toolbar-group="pagination"
     [page]="page()"
     [pageCount]="totalPages() || 1"
@@ -33,7 +34,8 @@
       #pageInput
       hellInput
       size="sm"
-      class="hell-pdf-page-input"
+      data-slot="pageInput"
+      [ui]="part('pageInput')"
       type="number"
       min="1"
       [max]="totalPages() || 1"
@@ -41,7 +43,7 @@
       (change)="goTo(+pageInput.value)"
       [attr.aria-label]="labels.page"
     />
-    <span class="hell-pdf-toolbar-text">/ {{ totalPages() || '…' }}</span>
+    <span data-slot="toolbarText" [class]="part('toolbarText')">/ {{ totalPages() || '…' }}</span>
 
     <button hellPaginationNext [attr.aria-label]="labels.nextPage">
       <hell-icon name="faSolidChevronRight" />
@@ -50,7 +52,7 @@
 
   <span class="hell-pdf-spacer"></span>
 
-  <div class="hell-pdf-toolbar-group" data-toolbar-group="zoom">
+  <div data-slot="toolbarGroup" [class]="part('toolbarGroup')" data-toolbar-group="zoom">
     <button
       hellButton
       variant="ghost"
@@ -67,7 +69,8 @@
       #zoomSelect
       hellNativeSelect
       size="sm"
-      class="hell-pdf-zoom-select"
+      data-slot="zoomSelect"
+      [ui]="part('zoomSelect')"
       (change)="onZoomSelect(zoomSelect.value)"
       [attr.aria-label]="labels.zoomLevel"
     >
@@ -104,9 +107,9 @@
     </button>
   </div>
 
-  <span class="hell-pdf-divider" aria-hidden="true"></span>
+  <span data-slot="divider" [class]="part('divider')" aria-hidden="true"></span>
 
-  <div class="hell-pdf-toolbar-group" data-toolbar-group="actions">
+  <div data-slot="toolbarGroup" [class]="part('toolbarGroup')" data-toolbar-group="actions">
     <button
       hellButton
       variant="ghost"
@@ -149,12 +152,13 @@
 </div>
 
 @if (findOpen()) {
-  <div class="hell-pdf-findbar">
+  <div data-slot="findBar" [class]="part('findBar')">
     <input
       #findInput
       hellInput
       size="sm"
-      class="hell-pdf-find-input"
+      data-slot="findInput"
+      [ui]="part('findInput')"
       type="search"
       [placeholder]="labels.findPlaceholder"
       [value]="findQuery()"
@@ -163,7 +167,13 @@
       (keydown.escape)="onFindEscape($event)"
       [attr.aria-label]="labels.findQuery"
     />
-    <span class="hell-pdf-find-count" role="status" aria-live="polite" aria-atomic="true">
+    <span
+      data-slot="findCount"
+      [class]="part('findCount')"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
       @if (findStatus() === 'pending') {
         {{ labels.searching }}
       } @else if (findStatus() === 'not-found' && findQuery()) {
@@ -218,9 +228,14 @@
   absolutely-positioned inner #container which becomes the actual
   PDFViewer scroll container. The optional thumbnail rail sits beside it.
 -->
-<div class="hell-pdf-host">
+<div data-slot="viewport" [class]="part('viewport')">
   @if (overviewOpen()) {
-    <aside #overview class="hell-pdf-overview" [attr.aria-label]="labels.pageOverview">
+    <aside
+      #overview
+      data-slot="sidebar"
+      [class]="part('sidebar')"
+      [attr.aria-label]="labels.pageOverview"
+    >
       @for (n of pageList(); track n) {
         <button
           hellButton
@@ -228,7 +243,8 @@
           size="sm"
           block
           type="button"
-          class="hell-pdf-thumb"
+          data-slot="thumb"
+          [ui]="part('thumb')"
           [attr.data-active]="page() === n ? 'true' : null"
           (click)="goTo(n)"
           [attr.aria-label]="labels.goToPage(n)"
@@ -237,12 +253,12 @@
           <span class="hell-pdf-thumb-canvas-wrap">
             <canvas #thumbCanvas [attr.data-page]="n" width="120" height="160"></canvas>
           </span>
-          <span class="hell-pdf-thumb-label">{{ n }}</span>
+          <span data-slot="thumbLabel" [class]="part('thumbLabel')">{{ n }}</span>
         </button>
       }
     </aside>
   }
-  <div #container class="hell-pdf-scroll pdfViewerContainer">
+  <div #container data-slot="pageArea" [class]="part('pageArea')" class="pdfViewerContainer">
     <div class="pdfViewer"></div>
   </div>
 </div>
