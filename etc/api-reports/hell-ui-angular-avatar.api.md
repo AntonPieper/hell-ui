@@ -18,18 +18,18 @@ export class HellAvatar {
     readonly fallback: _angular_core.InputSignal<string>;
     readonly image: _angular_core.InputSignal<string | null>;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-avatar.d.ts
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
+    protected readonly part: _hell_ui_angular_core.HellPartStyler<HellAvatarPart>;
     readonly shape: _angular_core.InputSignal<"round" | "square">;
     // Warning: (ae-forgotten-export) The symbol "HellSize" needs to be exported by the entry point hell-ui-angular-avatar.d.ts
     readonly size: _angular_core.InputSignal<HellSize>;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-avatar.d.ts
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
+    readonly ui: _angular_core.InputSignal<HellUiInput<HellAvatarPart>>;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellAvatar, "hell-avatar", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "image": { "alias": "image"; "required": false; "isSignal": true; }; "fallback": { "alias": "fallback"; "required": false; "isSignal": true; }; "alt": { "alias": "alt"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "shape": { "alias": "shape"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpAvatar; inputs: {}; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellAvatar, never>;
 }
 
 // @public
-export type HellAvatarPart = 'root';
+export type HellAvatarPart = 'root' | 'image' | 'fallback';
 
 // Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-avatar.d.ts
 //

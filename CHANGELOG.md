@@ -23,11 +23,32 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   DOM). Evidence: `packages/angular/avatar-group/avatar-group.spec.ts`,
   `packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.spec.ts`, and
   `pnpm run test:architecture`.
+- `HellAvatar` initials typography (size factor, weight, tracking, color)
+  moved from the `root` recipe to the new `fallback` part. Consumers who
+  restyled initials through `ui` root shorthand (e.g. `ui="font-bold"`) must
+  target the `fallback` part instead: `[ui]="{ fallback: 'font-bold' }"`.
+  Evidence: part assertions in `packages/angular/avatar/avatar.spec.ts`.
 - Removed the vestigial `unstyled` input that trigger directives inherited
   from the internal `HellNativeInteractiveDisabledGuard` base (Tooltip,
   Popover, Dialog, Menu, and Flyout triggers). The input was never read by any
   component after the Part Style Map migration; disabled semantics and ARIA
   wiring are unchanged. Evidence: `grep -r "unstyled" packages/angular` and
+  `pnpm run test:architecture`.
+
+### Added
+
+- More granular Public Parts across six entrypoints, all styleable through the
+  existing `ui` Part Style Maps: `HellAvatar` gains `image` and `fallback`
+  parts, `HellCheckbox` gains `indicator` (the check/dash glyph),
+  `HellAudioPlayer` gains `captionsText` (the committed transcript leaf),
+  `HellPaginationStrip` gains `control` (its owned nav/page buttons), and
+  `HellSplitView` gains `backButton` (the compact-mode back control). The
+  TanStack table shell adopts the Part Style Map contract for the first time:
+  `HellTanStackTable` exposes `root`, `toolbar`, `footer`, and `scrollport`,
+  and `HellTanStackPagination` exposes `root` and `pageSize` with camelCase
+  `data-slot` values replacing the former kebab-case markers; the private
+  `.hell-tanstack-table` and `.hell-tanstack-pagination` host classes are
+  gone. Evidence: part assertions in each entrypoint's spec and
   `pnpm run test:architecture`.
 
 ### Fixed

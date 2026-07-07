@@ -1,1 +1,4 @@
 @import '../table/styles.css';
+
+/* TanStack shell/pagination default visuals are Tailwind utility recipes in the component. */
+@source "./table-tanstack.ts";

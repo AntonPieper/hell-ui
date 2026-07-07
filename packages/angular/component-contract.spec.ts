@@ -206,6 +206,8 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellTableRowRadio', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableSelectionCell', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableSortTrigger', area: 'feature', coverage: 'dom' },
+  { symbol: 'HellTanStackPagination', area: 'feature', coverage: 'static' },
+  { symbol: 'HellTanStackTable', area: 'feature', coverage: 'static' },
 ];
 
 const PUBLIC_COMPONENT_CONTRACT_SYMBOLS = new Set(

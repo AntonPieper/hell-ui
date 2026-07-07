@@ -137,6 +137,9 @@ export type HellPaginationPrevUi = HellUi<HellPaginationPrevPart>;
 
 // @public
 export class HellPaginationStrip {
+    protected controlUi(): {
+        root: string;
+    };
     protected currentPage(): number;
     protected goToSelectedPage(event: Event): void;
     // Warning: (ae-forgotten-export) The symbol "HellNativeSelectUi" needs to be exported by the entry point hell-ui-angular-pagination.d.ts
@@ -159,7 +162,7 @@ export class HellPaginationStrip {
 }
 
 // @public
-export type HellPaginationStripPart = 'root' | 'controlGlyph' | 'status' | 'jump' | 'jumpLabel' | 'jumpSelect' | 'jumpTotal';
+export type HellPaginationStripPart = 'root' | 'control' | 'controlGlyph' | 'status' | 'jump' | 'jumpLabel' | 'jumpSelect' | 'jumpTotal';
 
 // @public
 export type HellPaginationStripUi = HellUi<HellPaginationStripPart>;

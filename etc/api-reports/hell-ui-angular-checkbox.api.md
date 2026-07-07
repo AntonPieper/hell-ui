@@ -26,7 +26,7 @@ export class HellCheckbox implements ControlValueAccessor, Validator {
     readonly indeterminateChange: _angular_core.OutputEmitterRef<boolean>;
     protected markControlTouched(): void;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-checkbox.d.ts
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
+    protected readonly part: _hell_ui_angular_core.HellPartStyler<HellCheckboxPart>;
     registerOnChange(fn: (value: boolean) => void): void;
     registerOnTouched(fn: () => void): void;
     registerOnValidatorChange(fn: () => void): void;
@@ -34,7 +34,7 @@ export class HellCheckbox implements ControlValueAccessor, Validator {
     setDisabledState(isDisabled: boolean): void;
     protected readonly state: ng_primitives_checkbox.NgpCheckboxState;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-checkbox.d.ts
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
+    readonly ui: _angular_core.InputSignal<HellUiInput<HellCheckboxPart>>;
     validate(control: AbstractControl | null): ValidationErrors | null;
     writeValue(value: boolean): void;
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellCheckbox, "button[hellCheckbox]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "checked": { "alias": "checked"; "required": false; "isSignal": true; }; "indeterminate": { "alias": "indeterminate"; "required": false; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "required": { "alias": "required"; "required": false; "isSignal": true; }; }, { "checkedChange": "checkedChange"; "indeterminateChange": "indeterminateChange"; }, never, never, true, never>;
@@ -42,7 +42,7 @@ export class HellCheckbox implements ControlValueAccessor, Validator {
 }
 
 // @public
-export type HellCheckboxPart = 'root';
+export type HellCheckboxPart = 'root' | 'indicator';
 
 // Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-checkbox.d.ts
 //

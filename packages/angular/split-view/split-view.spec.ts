@@ -46,6 +46,7 @@ class SplitViewHost {
     screen: 'bg-hell-surface-elevated',
     pane: 'overflow-auto bg-hell-surface-subtle',
     compactHeader: 'bg-hell-danger p-hell-3',
+    backButton: 'bg-hell-danger',
     detailHeader: 'bg-hell-danger p-hell-3',
     itemNavigation: 'gap-hell-3',
   } satisfies HellSplitViewUi;
@@ -184,10 +185,12 @@ describe('HellSplitView', () => {
 
     const screen = query(root, '[data-slot="screen"]');
     const compactHeader = query(root, '[data-slot="compactHeader"]');
+    const backButton = query(root, '[data-slot="backButton"]');
     expect(splitView.getAttribute('data-compact')).toBe('true');
     expect(splitView.getAttribute('data-detail-open')).toBe('true');
     expect(screen.className).toContain('bg-hell-surface-elevated');
     expect(compactHeader.className).toContain('bg-hell-danger');
+    expect(backButton.className).toContain('bg-hell-danger');
   });
 });
 

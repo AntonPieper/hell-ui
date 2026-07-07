@@ -156,6 +156,11 @@
       "output": "table"
     },
     {
+      "glob": "table-tanstack.ts",
+      "input": "table-tanstack",
+      "output": "table-tanstack"
+    },
+    {
       "glob": "avatar.ts",
       "input": "avatar",
       "output": "avatar"

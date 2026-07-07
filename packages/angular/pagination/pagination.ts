@@ -116,6 +116,7 @@ export type HellPaginationButtonUi = HellUi<HellPaginationButtonPart>;
 /** Public parts of the HellPaginationStrip module, styleable through its Part Style Map. */
 export type HellPaginationStripPart =
   | 'root'
+  | 'control'
   | 'controlGlyph'
   | 'status'
   | 'jump'
@@ -154,6 +155,7 @@ const HELL_PAGINATION_BUTTON_RECIPE = {
 
 const HELL_PAGINATION_STRIP_RECIPE = {
   root: HELL_PAGINATION_RECIPE.root,
+  control: '',
   controlGlyph: 'inline-flex min-w-[1em] items-center justify-center text-base leading-none',
   status:
     'inline-flex min-h-hell-control-sm items-center whitespace-nowrap text-xs leading-none text-hell-foreground-muted',
@@ -496,13 +498,25 @@ export class HellPaginationButton {
   },
   template: `
     @if (mode() === 'pages') {
-      <button hellPaginationFirst type="button" [attr.aria-label]="labels.firstPage">
+      <button
+        hellPaginationFirst
+        type="button"
+        data-slot="control"
+        [ui]="controlUi()"
+        [attr.aria-label]="labels.firstPage"
+      >
         <span data-slot="controlGlyph" [class]="part('controlGlyph')" aria-hidden="true">
           &laquo;
         </span>
       </button>
     }
-    <button hellPaginationPrev type="button" [attr.aria-label]="labels.previousPage">
+    <button
+      hellPaginationPrev
+      type="button"
+      data-slot="control"
+      [ui]="controlUi()"
+      [attr.aria-label]="labels.previousPage"
+    >
       <span data-slot="controlGlyph" [class]="part('controlGlyph')" aria-hidden="true">
         &lsaquo;
       </span>
@@ -513,6 +527,8 @@ export class HellPaginationButton {
           hellPaginationButton
           [page]="p"
           type="button"
+          data-slot="control"
+          [ui]="controlUi()"
           [attr.aria-label]="labels.page(p)"
         >
           {{ p }}
@@ -544,13 +560,25 @@ export class HellPaginationButton {
         <span data-slot="jumpTotal" [class]="part('jumpTotal')">{{ pageTotalLabel() }}</span>
       </label>
     }
-    <button hellPaginationNext type="button" [attr.aria-label]="labels.nextPage">
+    <button
+      hellPaginationNext
+      type="button"
+      data-slot="control"
+      [ui]="controlUi()"
+      [attr.aria-label]="labels.nextPage"
+    >
       <span data-slot="controlGlyph" [class]="part('controlGlyph')" aria-hidden="true">
         &rsaquo;
       </span>
     </button>
     @if (mode() === 'pages') {
-      <button hellPaginationLast type="button" [attr.aria-label]="labels.lastPage">
+      <button
+        hellPaginationLast
+        type="button"
+        data-slot="control"
+        [ui]="controlUi()"
+        [attr.aria-label]="labels.lastPage"
+      >
         <span data-slot="controlGlyph" [class]="part('controlGlyph')" aria-hidden="true">
           &raquo;
         </span>
@@ -640,6 +668,11 @@ export class HellPaginationStrip {
   /** Part Style Map forwarded to the embedded `hellNativeSelect` jump control. */
   protected jumpSelectUi(): HellNativeSelectUi {
     return { root: this.part('jumpSelect') };
+  }
+
+  /** Part Style Map forwarded to each rendered `[hellPagination*]` control button. */
+  protected controlUi(): { root: string } {
+    return { root: this.part('control') };
   }
 
   /** Navigate to the page chosen in the jump select. */

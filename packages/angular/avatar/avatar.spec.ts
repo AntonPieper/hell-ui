@@ -16,11 +16,17 @@ import { HellAvatar, type HellAvatarUi } from './avatar';
       ui="bg-hell-danger border-hell-danger h-hell-10 w-hell-10"
     />
     <hell-avatar id="avatar-map" fallback="MP" [ui]="avatarUi" />
+    <hell-avatar id="avatar-parts" image="/ada.png" fallback="AP" [ui]="avatarPartsUi" />
   `,
 })
 class AvatarPartStyleHost {
   readonly avatarUi = {
     root: 'rounded-hell-md bg-hell-info-soft text-hell-info-strong',
+  } satisfies HellAvatarUi;
+
+  readonly avatarPartsUi = {
+    image: 'object-contain grayscale',
+    fallback: 'tracking-normal text-hell-danger',
   } satisfies HellAvatarUi;
 }
 
@@ -67,6 +73,44 @@ describe('HellAvatar Part Style Map', () => {
     expect(avatar.className).toContain('bg-hell-info-soft');
     expect(avatar.className).toContain('text-hell-info-strong');
     expect(avatar.className.split(/\s+/)).not.toContain('rounded-full');
+  });
+
+  it('marks the image and fallback as public parts with default recipe classes', () => {
+    const fixture = TestBed.createComponent(AvatarPartStyleHost);
+    fixture.detectChanges();
+
+    const avatar = byId(fixture.nativeElement, 'avatar-string');
+    const image = avatar.querySelector('img');
+    const fallback = avatar.querySelector('span');
+
+    expect(image?.getAttribute('data-slot')).toBe('image');
+    expect(image?.className.split(/\s+/)).toEqual(
+      expect.arrayContaining(['h-full', 'w-full', 'object-cover']),
+    );
+    expect(fallback?.getAttribute('data-slot')).toBe('fallback');
+    expect(fallback?.className.split(/\s+/)).toEqual(
+      expect.arrayContaining(['font-semibold', 'tracking-[0.02em]', 'text-hell-primary-soft-foreground']),
+    );
+  });
+
+  it('merges ui part-map classes for image/fallback and lets them win over recipe classes', () => {
+    const fixture = TestBed.createComponent(AvatarPartStyleHost);
+    fixture.detectChanges();
+
+    const avatar = byId(fixture.nativeElement, 'avatar-parts');
+    const image = avatar.querySelector('img');
+    const fallback = avatar.querySelector('span');
+    const imageClasses = image?.className.split(/\s+/) ?? [];
+    const fallbackClasses = fallback?.className.split(/\s+/) ?? [];
+
+    expect(imageClasses).toContain('object-contain');
+    expect(imageClasses).toContain('grayscale');
+    expect(imageClasses).not.toContain('object-cover');
+
+    expect(fallbackClasses).toContain('tracking-normal');
+    expect(fallbackClasses).toContain('text-hell-danger');
+    expect(fallbackClasses).not.toContain('tracking-[0.02em]');
+    expect(fallbackClasses).not.toContain('text-hell-primary-soft-foreground');
   });
 });
 
