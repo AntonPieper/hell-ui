@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
+import { type HellSize } from '@hell-ui/angular/core';
 import { HellSlider, type HellSliderUi } from './slider';
 
 @Component({
@@ -13,6 +14,7 @@ import { HellSlider, type HellSliderUi } from './slider';
       thumb="hover"
       grow
       [value]="value()"
+      [size]="size()"
       [disabled]="disabled()"
       (valueChange)="valueEvents.push($event)"
     />
@@ -20,6 +22,7 @@ import { HellSlider, type HellSliderUi } from './slider';
 })
 class SliderHost {
   readonly value = signal(35);
+  readonly size = signal<Exclude<HellSize, 'xs' | 'xl'>>('md');
   readonly disabled = signal(false);
   readonly valueEvents: number[] = [];
 }
@@ -336,6 +339,21 @@ describe('HellSlider', () => {
 
     expect(thumbDispatchSpy).not.toHaveBeenCalled();
     expect(slider.hasAttribute('data-active-drag')).toBe(false);
+  });
+
+  it('reflects the supported size scale on data-size for recipe and CSS hooks', () => {
+    const fixture = TestBed.createComponent(SliderHost);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const slider = fixture.nativeElement.querySelector('hell-slider') as HTMLElement;
+    expect(slider.getAttribute('data-size')).toBe('md');
+
+    for (const size of ['sm', 'lg'] as const) {
+      host.size.set(size);
+      fixture.detectChanges();
+      expect(slider.getAttribute('data-size')).toBe(size);
+    }
   });
 
   it('exposes thumb and grow state without changing the value contract', () => {

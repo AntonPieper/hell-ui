@@ -77,8 +77,9 @@ import sliderStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
 
       <h2>Sizes</h2>
       <p>
-        <code>size</code> takes <code>sm</code>, <code>md</code> (default), or <code>lg</code>. It
-        scales the track thickness and thumb diameter together.
+        <code>size</code> takes <code>sm</code>, <code>md</code> (default), or <code>lg</code> —
+        note this is a narrower scale than <code>HellSize</code>; there is no <code>xs</code> or
+        <code>xl</code> slider. It scales the track thickness and thumb diameter together.
       </p>
       <hd-example-tabs [code]="sliderSizesExampleCode" previewClass="flex flex-col gap-4 max-w-md">
         <app-slider-sizes-example />
@@ -191,11 +192,7 @@ import sliderStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
           <code>orientation</code>: <code>HellOrientation</code> —
           <code>'horizontal' | 'vertical'</code>. Default <code>'horizontal'</code>.
         </li>
-        <li>
-          <code>size</code>: <code>HellSize</code> — <code>'xs' | 'sm' | 'md' | 'lg' | 'xl'</code>
-          at the type level, but only <code>sm</code>, <code>md</code>, and <code>lg</code> have a
-          dedicated recipe. Default <code>'md'</code>.
-        </li>
+        <li><code>size</code>: <code>'sm' | 'md' | 'lg'</code>. Default <code>'md'</code>.</li>
         <li>
           <code>thumb</code>: <code>'always' | 'hover'</code>. Default <code>'always'</code>. Set
           <code>'hover'</code> to hide the thumb until hover, focus, or press.
