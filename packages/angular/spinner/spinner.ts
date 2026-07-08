@@ -1,0 +1,71 @@
+import { Directive, inject, input } from '@angular/core';
+import type { HellSize } from '@hell-ui/angular/core';
+import { hellCreateLabels } from '@hell-ui/angular/core';
+import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import type { InjectionToken, Provider } from '@angular/core';
+
+/** Built-in accessibility labels owned by the spinner entry point. */
+export interface HellSpinnerLabels {
+  /** Accessible label announced while `hellSpinner` is loading. */
+  readonly loading: string;
+}
+
+const HELL_SPINNER_LABELS_CONTRACT = hellCreateLabels<HellSpinnerLabels>('HELL_SPINNER_LABELS', {
+  loading: 'Loading',
+});
+
+/** Injection token resolving to the effective spinner labels. */
+export const HELL_SPINNER_LABELS: InjectionToken<HellSpinnerLabels> = HELL_SPINNER_LABELS_CONTRACT.token;
+
+/** Override any subset of the spinner labels for an injector scope. */
+export function provideHellSpinnerLabels(overrides: Partial<HellSpinnerLabels>): Provider {
+  return HELL_SPINNER_LABELS_CONTRACT.provide(overrides);
+}
+
+/** Public parts of the HellSpinner module, styleable through its Part Style Map. */
+export type HellSpinnerPart = 'root';
+/** Part Style Map accepted by the HellSpinner `ui` input. */
+export type HellSpinnerUi = HellUi<HellSpinnerPart>;
+
+const HELL_SPINNER_RECIPE = {
+  root: 'inline-block flex-none text-current leading-[0] [--_hell-spinner-track:color-mix(in_oklab,currentColor_18%,transparent)] data-[size=xs]:text-[12px] data-[size=sm]:text-[16px] data-[size=md]:text-[20px] data-[size=lg]:text-[28px] data-[size=xl]:text-[40px]',
+} satisfies HellRecipe<HellSpinnerPart>;
+
+/** Visual style of the `hellSpinner` indicator. */
+export type HellSpinnerVariant = 'ring' | 'dots' | 'bars' | 'pulse';
+
+/**
+ * Indeterminate loading indicator. Inherits color from `currentColor` and
+ * scales with `size` (or any `font-size`). Variants: ring, dots, bars, pulse.
+ */
+@Directive({
+  selector: '[hellSpinner]',
+  host: {
+    '[class]': "part('root')",
+    'data-slot': 'root',
+    '[attr.data-variant]': 'variant()',
+    '[attr.data-size]': 'size()',
+    '[attr.aria-label]': 'ariaLabel() ?? labels.loading',
+    role: 'status',
+  },
+})
+export class HellSpinner {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellSpinnerPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellSpinnerPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_SPINNER_RECIPE,
+  });
+
+  /** Visual style of the spinner. Defaults to `ring`. */
+  readonly variant = input<HellSpinnerVariant>('ring');
+  /** Size of the spinner. Defaults to `md`. */
+  readonly size = input<HellSize>('md');
+  /** Overrides the accessible label. Defaults to `null`, falling back to the injected loading label. */
+  readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
+
+  /** Effective spinner labels resolved from `HELL_SPINNER_LABELS`. */
+  protected readonly labels = inject(HELL_SPINNER_LABELS);
+}

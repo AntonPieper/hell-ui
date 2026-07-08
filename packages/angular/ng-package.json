@@ -216,6 +216,11 @@
       "output": "slider"
     },
     {
+      "glob": "spinner.ts",
+      "input": "spinner",
+      "output": "spinner"
+    },
+    {
       "glob": "switch.ts",
       "input": "switch",
       "output": "switch"

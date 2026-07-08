@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HellSpinner } from '@hell-ui/angular/skeleton';
+import { HellSpinner } from '@hell-ui/angular/spinner';
 
 @Component({
   selector: 'app-spinner-basic-example',

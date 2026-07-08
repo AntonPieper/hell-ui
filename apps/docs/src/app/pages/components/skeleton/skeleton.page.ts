@@ -55,13 +55,11 @@ import skeletonWithCardAvatarExampleCodeRaw from './examples/with-card-avatar.ex
         (<code>aria-hidden="true"</code>); it is purely visual.
       </p>
       <p>
-        The <code>@hell-ui/angular/skeleton</code> entry point also exports
-        <code>hellSpinner</code>, an indeterminate activity indicator that shares this package for
-        historical reasons but solves a different problem. Reach for
-        <code>hellSkeleton</code> when you know the shape of the content that is coming — a line of
-        text, an avatar, a card — and want to reserve its space. Reach for
-        <a routerLink="/components/spinner">Spinner</a> for short, unquantifiable waits such as a
-        submit button or a refresh icon, where there is no layout to preserve.
+        Reach for <code>hellSkeleton</code> when you know the shape of the content that is coming
+        — a line of text, an avatar, a card — and want to reserve its space. Reach for
+        <a routerLink="/components/spinner">Spinner</a> (its own entry point,
+        <code>@hell-ui/angular/spinner</code>) for short, unquantifiable waits such as a submit
+        button or a refresh icon, where there is no layout to preserve.
       </p>
 
       <h2>Basic</h2>
@@ -103,11 +101,11 @@ import skeletonWithCardAvatarExampleCodeRaw from './examples/with-card-avatar.ex
 
       <h2>Styling</h2>
       <p>
-        Both directives in this entry point own exactly one Public Part, <code>root</code> — the
-        host element itself. Pass <code>ui="..."</code> as shorthand to refine it, or
-        <code>[ui]="&#123; root: '...' &#125;"</code> for the equivalent explicit map
-        (<code>HellSkeletonUi</code> / <code>HellSpinnerUi</code>). Refinements merge on top of the
-        default recipe through Hell's Tailwind merge, so a conflicting utility such as
+        <code>HellSkeleton</code> owns exactly one Public Part, <code>root</code> — the host
+        element itself. Pass <code>ui="..."</code> as shorthand to refine it, or
+        <code>[ui]="&#123; root: '...' &#125;"</code> for the equivalent explicit
+        <code>HellSkeletonUi</code> map. Refinements merge on top of the default recipe through
+        Hell's Tailwind merge, so a conflicting utility such as
         <code>bg-hell-primary-soft</code> or <code>rounded-hell-lg</code> wins deterministically.
       </p>
       <table class="hd-doc-table">
@@ -126,11 +124,6 @@ import skeletonWithCardAvatarExampleCodeRaw from './examples/with-card-avatar.ex
               The placeholder itself — shimmer background, radius. Sizing (<code>width</code> /
               <code>height</code> CSS vars) is a separate input, not part of the Part Style Map.
             </td>
-          </tr>
-          <tr>
-            <td><code>HellSpinner</code></td>
-            <td><code>root</code></td>
-            <td>The indicator itself — color (via <code>currentColor</code>) and font-size-driven scale.</td>
           </tr>
         </tbody>
       </table>
@@ -170,34 +163,6 @@ import skeletonWithCardAvatarExampleCodeRaw from './examples/with-card-avatar.ex
           <code>HellSkeletonUi</code> (<code>HellUi&lt;HellSkeletonPart&gt;</code>).
         </li>
       </ul>
-      <p><code>hellSpinner</code></p>
-      <ul>
-        <li>
-          <code>variant</code>: <code>HellSpinnerVariant</code> —
-          <code>'ring' | 'dots' | 'bars' | 'pulse'</code>. Default <code>'ring'</code>.
-        </li>
-        <li><code>size</code>: <code>HellSize</code> — <code>xs | sm | md | lg | xl</code>. Default <code>'md'</code>.</li>
-        <li>
-          <code>aria-label</code> (<code>ariaLabel</code>): <code>string | null</code>. Overrides
-          the accessible label. Default <code>null</code>, falling back to the injected
-          <code>HELL_SKELETON_LABELS</code> loading label.
-        </li>
-        <li>
-          <code>ui</code>: <code>HellUiInput&lt;HellSpinnerPart&gt;</code> — a shorthand class
-          string or a <code>HellSpinnerUi</code> map (<code>&#123; root: string &#125;</code>) that
-          refines the <code>root</code> public part.
-        </li>
-        <li>
-          Exported types: <code>HellSpinnerPart</code> (<code>'root'</code>),
-          <code>HellSpinnerUi</code> (<code>HellUi&lt;HellSpinnerPart&gt;</code>).
-        </li>
-        <li>
-          Also exported: <code>HELL_SKELETON_LABELS</code> injection token and
-          <code>provideHellSkeletonLabels()</code> to override the shared <code>loading</code> label
-          for both directives' scope.
-        </li>
-      </ul>
-
       <h2>Accessibility</h2>
       <ul>
         <li>
@@ -207,9 +172,9 @@ import skeletonWithCardAvatarExampleCodeRaw from './examples/with-card-avatar.ex
           placeholder.
         </li>
         <li>
-          <code>hellSpinner</code> carries <code>role="status"</code> and an
-          <code>aria-label</code> resolved from the <code>HELL_SKELETON_LABELS</code> Label
-          Contract ("Loading" by default) unless you pass an explicit <code>aria-label</code>.
+          If a wait needs an announced live region instead, use
+          <a routerLink="/components/spinner"><code>hellSpinner</code></a> — it carries
+          <code>role="status"</code> and a Label Contract-resolved <code>aria-label</code>.
         </li>
       </ul>
 
