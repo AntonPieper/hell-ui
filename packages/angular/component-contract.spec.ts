@@ -575,7 +575,6 @@ describe('Hell Component Contract', () => {
     fixture.detectChanges();
 
     const styled = query(fixture.nativeElement, '#styled-button');
-    expect(styled.classList.contains('hell-button')).toBe(false);
     expect(styled.getAttribute('data-slot')).toBe('root');
     expect(styled.getAttribute('data-variant')).toBe('primary');
     expect(styled.getAttribute('data-size')).toBe('sm');
@@ -585,13 +584,11 @@ describe('Hell Component Contract', () => {
     expect(styled.className).toContain('w-full');
 
     const custom = query(fixture.nativeElement, '#custom-button');
-    expect(custom.classList.contains('hell-button')).toBe(false);
     expect(custom.getAttribute('data-slot')).toBe('root');
     expect(custom.className).toContain('rounded-hell-pill');
     expect(custom.className).toContain('bg-hell-danger');
 
     const card = query(fixture.nativeElement, '#card');
-    expect(card.classList.contains('hell-card')).toBe(false);
     expect(card.getAttribute('data-slot')).toBe('root');
     expect(card.className).toContain('rounded-hell-pill');
     expect(card.className).not.toContain('rounded-hell-lg');
@@ -601,13 +598,10 @@ describe('Hell Component Contract', () => {
     const cardHeader = query(fixture.nativeElement, '#card-header');
     const cardBody = query(fixture.nativeElement, '#card-body');
     const cardFooter = query(fixture.nativeElement, '#card-footer');
-    expect(cardHeader.classList.contains('hell-card-header')).toBe(false);
     expect(cardHeader.className).toContain('px-hell-2');
     expect(cardHeader.className).not.toContain('px-hell-6');
-    expect(cardBody.classList.contains('hell-card-body')).toBe(false);
     expect(cardBody.className).toContain('p-hell-2');
     expect(cardBody.className).not.toContain('p-hell-6');
-    expect(cardFooter.classList.contains('hell-card-footer')).toBe(false);
     expect(cardFooter.className).toContain('justify-start');
     expect(cardFooter.className).not.toContain('justify-end');
 
@@ -615,17 +609,13 @@ describe('Hell Component Contract', () => {
     const fieldLabel = query(fixture.nativeElement, '[data-contract="field-label"]');
     const fieldDescription = query(fixture.nativeElement, '[data-contract="field-description"]');
     const fieldError = query(fixture.nativeElement, '[data-contract="field-error"]');
-    expect(field.classList.contains('hell-field')).toBe(false);
     expect(field.getAttribute('data-slot')).toBe('root');
     expect(field.className).toContain('gap-hell-6');
     expect(field.className).not.toContain('gap-hell-2');
-    expect(fieldLabel.classList.contains('hell-field-label')).toBe(false);
     expect(fieldLabel.className).toContain('text-sm');
     expect(fieldLabel.className).not.toContain('text-xs');
-    expect(fieldDescription.classList.contains('hell-field-description')).toBe(false);
     expect(fieldDescription.className).toContain('text-hell-danger');
     expect(fieldDescription.className).not.toContain('text-hell-foreground-muted');
-    expect(fieldError.classList.contains('hell-field-error')).toBe(false);
     expect(fieldError.className).toContain('text-hell-foreground');
     expect(fieldError.className).not.toContain('text-hell-danger');
   });
@@ -661,14 +651,10 @@ describe('Hell Component Contract', () => {
     ) as HTMLButtonElement;
     const sectionItems = fixture.nativeElement.querySelector('#nav-section-items') as HTMLElement;
 
-    expect(item.classList.contains('hell-nav-item')).toBe(false);
     expect(item.getAttribute('data-slot')).toBe('root');
     expect(item.getAttribute('data-active')).toBe('true');
-    expect(icon.classList.contains('hell-nav-icon')).toBe(false);
     expect(icon.getAttribute('data-slot')).toBe('root');
-    expect(label.classList.contains('hell-nav-label')).toBe(false);
     expect(label.getAttribute('data-slot')).toBe('root');
-    expect(trailing.classList.contains('hell-nav-trailing')).toBe(false);
     expect(trailing.getAttribute('data-slot')).toBe('root');
     expect(custom.className).toContain('bg-hell-danger');
     expect(custom.className).toContain('px-hell-7');
@@ -688,19 +674,16 @@ describe('Hell Component Contract', () => {
     const handle = query(fixture.nativeElement, '#resizable-handle');
     const grip = query(handle, '[data-slot="grip"]');
 
-    expect(group.classList.contains('hell-resizable')).toBe(false);
     expect(group.getAttribute('data-slot')).toBe('root');
     expect(group.getAttribute('data-orientation')).toBe('vertical');
     expect(group.className).toContain('h-[360px]');
     expect(group.className).not.toContain('h-full');
 
-    expect(pane.classList.contains('hell-resizable-pane')).toBe(false);
     expect(pane.getAttribute('data-slot')).toBe('root');
     expect(pane.getAttribute('data-orientation')).toBe('vertical');
     expect(pane.className).toContain('overflow-hidden');
     expect(pane.className).not.toContain('overflow-auto');
 
-    expect(handle.classList.contains('hell-resizable-handle')).toBe(false);
     expect(handle.getAttribute('data-slot')).toBe('root');
     expect(handle.getAttribute('data-appearance')).toBe('grip');
     expect(handle.getAttribute('role')).toBe('separator');
@@ -724,13 +707,10 @@ describe('Hell Component Contract', () => {
     const jump = query(strip, '[data-slot="jump"]');
     const jumpSelect = query<HTMLSelectElement>(strip, '[data-slot="jumpSelect"]');
 
-    expect(pagination.classList.contains('hell-pagination')).toBe(false);
     expect(pagination.getAttribute('data-slot')).toBe('root');
     expect(pagination.className).toContain('gap-hell-4');
 
     for (const control of [first, prev, numbered, next, last]) {
-      expect(control.classList.contains('hell-button')).toBe(false);
-      expect(control.classList.contains('hell-pagination-item')).toBe(false);
       expect(control.getAttribute('data-slot')).toBe('root');
       expect(control.getAttribute('data-variant')).toBe('ghost');
       expect(control.getAttribute('data-icon-only')).toBe('');
@@ -739,7 +719,6 @@ describe('Hell Component Contract', () => {
     expect(first.className).toContain('bg-hell-danger');
     expect(first.className).toContain('px-hell-7');
     expect(numbered.getAttribute('aria-label')).toBe('Page 2');
-    expect(strip.classList.contains('hell-pagination')).toBe(false);
     expect(strip.getAttribute('data-slot')).toBe('root');
     expect(strip.getAttribute('data-mode')).toBe('jump');
     expect(jump.className).toContain('text-hell-danger');
@@ -767,24 +746,22 @@ describe('Hell Component Contract', () => {
     const resizer = query(fixture.nativeElement, '#table-resizer');
     const grip = query(resizer, '[data-slot="grip"]');
 
-    for (const [element, legacyClass] of [
-      [container, 'hell-table-container'],
-      [table, 'hell-table'],
-      [head, 'hell-table-head'],
-      [body, 'hell-table-body'],
-      [row, 'hell-table-row'],
-      [selectionHeader, 'hell-table-selection-cell'],
-      [selectionHeader, 'hell-table-header-cell'],
-      [checkbox, 'hell-table-row-checkbox'],
-      [headerCell, 'hell-table-header-cell'],
-      [sortTrigger, 'hell-table-sort-trigger'],
-      [action, 'hell-table-row-action'],
-      [radio, 'hell-table-row-radio'],
-      [cell, 'hell-table-cell'],
-      [resizer, 'hell-table-resize-handle'],
-    ] as const) {
-      expect(element.classList.contains(legacyClass), legacyClass).toBe(false);
-      expect(element.getAttribute('data-slot'), legacyClass).toBe('root');
+    for (const element of [
+      container,
+      table,
+      head,
+      body,
+      row,
+      selectionHeader,
+      checkbox,
+      headerCell,
+      sortTrigger,
+      action,
+      radio,
+      cell,
+      resizer,
+    ]) {
+      expect(element.getAttribute('data-slot'), element.id).toBe('root');
     }
 
     expect(container.getAttribute('aria-busy')).toBe('true');
@@ -828,7 +805,6 @@ describe('Hell Component Contract', () => {
       '#split-view [data-slot="itemNavigation"]',
     );
 
-    expect(splitView.classList.contains('hell-split-view')).toBe(false);
     expect(splitView.getAttribute('data-slot')).toBe('root');
     expect(splitView.getAttribute('data-framed')).toBe('true');
     expect(splitView.className).toContain('h-[420px]');

@@ -168,7 +168,6 @@ describe('HellDateInput', () => {
     expect(input.getAttribute('aria-describedby')).toBe('report-date-help report-date-error');
     expect(input.getAttribute('aria-labelledby')).toBe('report-date-label');
     expect(input.getAttribute('data-slot')).toBe('input');
-    expect(input.classList.contains('hell-input')).toBe(false);
     expect(input.classList.contains('flex-1')).toBe(true);
     expect(trigger.getAttribute('aria-label')).toBe('Choose date for Report date');
     expect(trigger.getAttribute('aria-describedby')).toBeNull();

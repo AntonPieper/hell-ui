@@ -419,10 +419,6 @@ describe('Hell table utilities directives', () => {
     expect(radio.checked).toBe(false);
     expect(selectAll.indeterminate).toBe(true);
     expect(selectAll.getAttribute('data-indeterminate')).toBe('');
-    expect(checkbox.classList.contains('hell-checkbox')).toBe(false);
-    expect(radio.classList.contains('hell-radio')).toBe(false);
-    expect(checkbox.classList.contains('hell-table-row-checkbox')).toBe(false);
-    expect(radio.classList.contains('hell-table-row-radio')).toBe(false);
     expect(checkbox.getAttribute('data-slot')).toBe('root');
     expect(radio.getAttribute('data-slot')).toBe('root');
     expect(
@@ -483,24 +479,23 @@ describe('Hell table utilities directives', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     const ids = [
-      ['ui-container', 'hell-table-container', 'data-loading'],
-      ['ui-table', 'hell-table', 'data-hell-table-root'],
-      ['ui-head', 'hell-table-head', 'data-hell-table-header'],
-      ['ui-body', 'hell-table-body', 'data-hell-table-body'],
-      ['ui-row', 'hell-table-row', 'data-hell-table-row'],
-      ['ui-select-header', 'hell-table-header-cell', 'data-hell-table-header-cell'],
-      ['ui-header', 'hell-table-header-cell', 'data-hell-table-header-cell'],
-      ['ui-cell', 'hell-table-cell', 'data-hell-table-cell'],
-      ['ui-checkbox', 'hell-table-row-checkbox', 'data-hell-table-row-checkbox'],
-      ['ui-radio', 'hell-table-row-radio', 'data-hell-table-row-radio'],
-      ['ui-action', 'hell-table-row-action', 'data-hell-table-row-action'],
-      ['ui-sort', 'hell-table-sort-trigger', 'data-hell-table-sort-trigger'],
-      ['ui-resize', 'hell-table-resize-handle', 'data-hell-table-resize-handle'],
+      ['ui-container', 'data-loading'],
+      ['ui-table', 'data-hell-table-root'],
+      ['ui-head', 'data-hell-table-header'],
+      ['ui-body', 'data-hell-table-body'],
+      ['ui-row', 'data-hell-table-row'],
+      ['ui-select-header', 'data-hell-table-header-cell'],
+      ['ui-header', 'data-hell-table-header-cell'],
+      ['ui-cell', 'data-hell-table-cell'],
+      ['ui-checkbox', 'data-hell-table-row-checkbox'],
+      ['ui-radio', 'data-hell-table-row-radio'],
+      ['ui-action', 'data-hell-table-row-action'],
+      ['ui-sort', 'data-hell-table-sort-trigger'],
+      ['ui-resize', 'data-hell-table-resize-handle'],
     ] as const;
 
-    for (const [id, legacyClass, dataAttribute] of ids) {
+    for (const [id, dataAttribute] of ids) {
       const element = byId<HTMLElement>(root, id);
-      expect(element.classList.contains(legacyClass), id).toBe(false);
       expect(element.getAttribute('data-slot'), id).toBe('root');
       if (dataAttribute !== 'data-loading') {
         expect(element.getAttribute(dataAttribute), id).toBe('');
@@ -632,7 +627,6 @@ describe('Hell table utilities directives', () => {
     nonButtonTrigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     nonButtonTrigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
 
-    expect(nonButtonTrigger.classList.contains('hell-table-sort-trigger')).toBe(false);
     expect(host.sortEvents).toEqual([]);
   });
 

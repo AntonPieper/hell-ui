@@ -137,14 +137,6 @@
   }
 
   hell-pdf-viewer [data-slot='thumb'] {
-    --hell-button-background: transparent;
-    --hell-button-background-hover: var(--color-hell-foreground);
-    --hell-button-background-active: var(--color-hell-foreground);
-    --hell-button-border-color: transparent;
-    --hell-button-color: var(--color-hell-foreground-muted);
-    --hell-button-height: auto;
-    --hell-button-padding-inline: calc(var(--spacing) * 1.5);
-    --hell-button-shadow: none;
     width: 100%;
     height: auto;
     min-height: calc(160px + var(--text-sm--line-height) + (var(--spacing) * 4));
@@ -155,40 +147,7 @@
     border-radius: var(--radius-hell-sm);
     line-height: var(--text-sm--line-height);
     white-space: normal;
-    @supports (color: color-mix(in lab, red, red)) {
-      --hell-button-background-hover: color-mix(
-        in srgb,
-        var(--color-hell-foreground) 5%,
-        transparent
-      );
-      --hell-button-background-active: color-mix(
-        in srgb,
-        var(--color-hell-foreground) 8%,
-        transparent
-      );
-    }
-    &[data-hover] {
-      @supports (color: color-mix(in lab, red, red)) {
-        --hell-button-background-hover: color-mix(
-          in srgb,
-          var(--color-hell-foreground) 5%,
-          transparent
-        );
-      }
-    }
     &[data-active='true'] {
-      --hell-button-background: var(--color-hell-surface);
-      --hell-button-background-hover: var(--color-hell-surface);
-      --hell-button-background-active: var(--color-hell-surface);
-      --hell-button-border-color: var(--color-hell-primary);
-      --hell-button-color: var(--color-hell-primary);
-      @supports (color: color-mix(in lab, red, red)) {
-        --hell-button-border-color: color-mix(
-          in srgb,
-          var(--color-hell-primary) 60%,
-          var(--color-hell-border)
-        );
-      }
       font-weight: var(--font-weight-semibold);
     }
   }

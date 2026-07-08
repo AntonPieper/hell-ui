@@ -77,7 +77,6 @@ describe('HellAccordion', () => {
     const themingContent = query(fixture.nativeElement, '[data-accordion="theming-content"]');
 
     expect(accordion.getAttribute('data-slot')).toBe('root');
-    expect(accordion.classList.contains('hell-accordion')).toBe(false);
     expect(accordion.classList.contains('rounded-hell-lg')).toBe(true);
     expect(accordion.classList.contains('rounded-hell-md')).toBe(false);
     expect(accordion.classList.contains('border-hell-danger')).toBe(true);
@@ -85,13 +84,11 @@ describe('HellAccordion', () => {
 
     expect(installItem.getAttribute('data-slot')).toBe('root');
     expect(installItem.getAttribute('data-open')).toBe('');
-    expect(installItem.classList.contains('hell-accordion-item')).toBe(false);
     expect(installItem.classList.contains('border-b-0')).toBe(true);
     expect(installItem.classList.contains('border-b')).toBe(false);
     expect(installTrigger.type).toBe('button');
     expect(installTrigger.getAttribute('data-slot')).toBe('root');
     expect(installTrigger.getAttribute('data-open')).toBe('');
-    expect(installTrigger.classList.contains('hell-accordion-trigger')).toBe(false);
     expect(installTrigger.classList.contains('px-hell-7')).toBe(true);
     expect(installTrigger.classList.contains('px-hell-5')).toBe(false);
     expect(installTrigger.classList.contains('text-hell-danger')).toBe(true);
@@ -100,7 +97,6 @@ describe('HellAccordion', () => {
     expect(installContent.getAttribute('data-open')).toBe('');
     expect(installContent.getAttribute('aria-hidden')).toBeNull();
     expect(installContent.getAttribute('inert')).toBeNull();
-    expect(installContent.classList.contains('hell-accordion-content')).toBe(false);
     expect(installContent.classList.contains('text-hell-foreground')).toBe(true);
     expect(installContent.classList.contains('text-hell-foreground-muted')).toBe(false);
 

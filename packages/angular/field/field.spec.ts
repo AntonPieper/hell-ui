@@ -71,7 +71,6 @@ describe('HellField', () => {
 
     expect(stringField.getAttribute('data-slot')).toBe('root');
     expect(stringField.getAttribute('data-orientation')).toBe('horizontal');
-    expect(stringField.classList.contains('hell-field')).toBe(false);
     expect(stringField.classList.contains('gap-hell-4')).toBe(true);
     expect(stringField.classList.contains('gap-hell-2')).toBe(false);
     expect(stringLabel.htmlFor).toBe(stringInput.id);
@@ -87,14 +86,11 @@ describe('HellField', () => {
     expect(mappedField.classList.contains('gap-hell-2')).toBe(false);
     expect(mappedField.classList.contains('flex-row')).toBe(true);
     expect(mappedField.classList.contains('flex-col')).toBe(false);
-    expect(mappedLabel.classList.contains('hell-field-label')).toBe(false);
     expect(mappedLabel.classList.contains('text-sm')).toBe(true);
     expect(mappedLabel.classList.contains('text-xs')).toBe(false);
     expect(mappedLabel.classList.contains('text-hell-danger')).toBe(true);
-    expect(mappedDescription.classList.contains('hell-field-description')).toBe(false);
     expect(mappedDescription.classList.contains('text-hell-danger')).toBe(true);
     expect(mappedDescription.classList.contains('text-hell-foreground-muted')).toBe(false);
-    expect(mappedError.classList.contains('hell-field-error')).toBe(false);
     expect(mappedError.classList.contains('text-hell-foreground')).toBe(true);
     expect(mappedError.classList.contains('text-hell-danger')).toBe(false);
   });

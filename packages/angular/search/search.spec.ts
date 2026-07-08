@@ -49,8 +49,8 @@ describe('HellSearch Part Style Map', () => {
     input.dispatchEvent(new Event('input', { bubbles: true }));
     fixture.detectChanges();
 
-    expectPartStyleRoot(search, 'hell-search');
-    expectPartStyleRoot(clear, 'hell-search-clear');
+    expectPartStyleRoot(search);
+    expectPartStyleRoot(clear);
     expectClasses(search, ['grid', 'gap-hell-4']);
     expectClasses(clear, ['flex', 'text-hell-danger']);
     expect(search.hasAttribute('data-empty')).toBe(false);
@@ -73,8 +73,8 @@ describe('HellSearch Part Style Map', () => {
     const search = byId(fixture.nativeElement, 'search-map');
     const clear = byId(fixture.nativeElement, 'clear-map');
 
-    expectPartStyleRoot(search, 'hell-search');
-    expectPartStyleRoot(clear, 'hell-search-clear');
+    expectPartStyleRoot(search);
+    expectPartStyleRoot(clear);
     expectClasses(search, ['grid', 'gap-hell-3']);
     expectClasses(clear, ['flex', 'text-hell-info']);
   });
@@ -86,9 +86,8 @@ function byId<T extends HTMLElement>(root: HTMLElement, id: string): T {
   return element as T;
 }
 
-function expectPartStyleRoot(element: HTMLElement, legacyClass: string): void {
+function expectPartStyleRoot(element: HTMLElement): void {
   expect(element.getAttribute('data-slot')).toBe('root');
-  expect(element.classList.contains(legacyClass)).toBe(false);
 }
 
 function expectClasses(element: HTMLElement, present: string[]): void {

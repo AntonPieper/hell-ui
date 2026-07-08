@@ -116,7 +116,7 @@ describe('HellAvatarGroup Part Style Map', () => {
     expect(item.getAttribute('data-slot')).toBe('root');
   });
 
-  it('applies root data slots and default recipe classes without legacy host classes', () => {
+  it('applies root data slots and default recipe classes', () => {
     const fixture = TestBed.createComponent(DefaultGroupHost);
     fixture.detectChanges();
 
@@ -134,9 +134,6 @@ describe('HellAvatarGroup Part Style Map', () => {
     expect(item.getAttribute('data-selected')).toBeNull();
     expect(selected.getAttribute('data-selected')).toBe('');
 
-    expect(group.classList.contains('hell-avatar-group')).toBe(false);
-    expect(item.classList.contains('hell-avatar-group-item')).toBe(false);
-    expect(overflow.classList.contains('hell-avatar-group-overflow')).toBe(false);
     expect(group.classList.contains('inline-flex')).toBe(true);
     expect(group.classList.contains('items-center')).toBe(true);
     expect(item.classList.contains('inline-flex')).toBe(true);

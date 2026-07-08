@@ -60,7 +60,6 @@ describe('Tag, Badge, and Kbd Part Style Maps', () => {
     expect(classes).not.toContain('bg-[var(--_hell-tag-bg)]');
     expect(classes).not.toContain('px-hell-2');
     expect(classes).not.toContain('text-[var(--_hell-tag-fg)]');
-    expect(tag.classList.contains('hell-tag')).toBe(false);
   });
 
   it('applies object maps to the root part', () => {
@@ -93,7 +92,6 @@ describe('Tag, Badge, and Kbd Part Style Maps', () => {
     expect(classes).toContain('bg-hell-info');
     expect(classes).not.toContain('min-w-hell-4');
     expect(classes).not.toContain('bg-hell-danger');
-    expect(badge.classList.contains('hell-badge')).toBe(false);
   });
 });
 

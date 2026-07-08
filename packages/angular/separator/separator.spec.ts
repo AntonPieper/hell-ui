@@ -46,7 +46,6 @@ describe('HellSeparator Part Style Map', () => {
     expect(separator.getAttribute('data-spacing')).toBe('md');
     expect(classes).toContain('bg-hell-danger');
     expect(classes).not.toContain('bg-hell-border');
-    expect(separator.classList.contains('hell-separator')).toBe(false);
   });
 
   it('applies object maps to the root part with deterministic class merging', () => {
