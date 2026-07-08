@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { HellButton } from '@hell-ui/angular/button';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
-import { HellSpinner } from '@hell-ui/angular/skeleton';
+import { HellSpinner } from '@hell-ui/angular/spinner';
 
 @Component({
   selector: 'app-spinner-with-card-pending-action-example',

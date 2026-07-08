@@ -12,9 +12,6 @@ import { Provider } from '@angular/core';
 import * as tailwind_merge from 'tailwind-merge';
 
 // @public
-export const HELL_SKELETON_LABELS: InjectionToken<HellSkeletonLabels>;
-
-// @public
 export class HellSkeleton {
     readonly height: _angular_core.InputSignal<string>;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-skeleton.d.ts
@@ -28,42 +25,12 @@ export class HellSkeleton {
 }
 
 // @public
-export interface HellSkeletonLabels {
-    readonly loading: string;
-}
-
-// @public
 export type HellSkeletonPart = 'root';
 
 // Warning: (ae-forgotten-export) The symbol "HellUi" needs to be exported by the entry point hell-ui-angular-skeleton.d.ts
 //
 // @public
 export type HellSkeletonUi = HellUi<HellSkeletonPart>;
-
-// @public
-export class HellSpinner {
-    readonly ariaLabel: _angular_core.InputSignal<string | null>;
-    protected readonly labels: HellSkeletonLabels;
-    protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // Warning: (ae-forgotten-export) The symbol "HellSize" needs to be exported by the entry point hell-ui-angular-skeleton.d.ts
-    readonly size: _angular_core.InputSignal<HellSize>;
-    readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    readonly variant: _angular_core.InputSignal<HellSpinnerVariant>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellSpinner, "[hellSpinner]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "variant": { "alias": "variant"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "ariaLabel": { "alias": "aria-label"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellSpinner, never>;
-}
-
-// @public
-export type HellSpinnerPart = 'root';
-
-// @public
-export type HellSpinnerUi = HellUi<HellSpinnerPart>;
-
-// @public
-export type HellSpinnerVariant = 'ring' | 'dots' | 'bars' | 'pulse';
-
-// @public
-export function provideHellSkeletonLabels(overrides: Partial<HellSkeletonLabels>): Provider;
 
 // (No @packageDocumentation comment for this package)
 

@@ -228,6 +228,11 @@ mapped to command evidence and concrete evidence checks.
         },
         {
           "type": "fileExists",
+          "label": "spinner API report is committed",
+          "path": "etc/api-reports/hell-ui-angular-spinner.api.md"
+        },
+        {
+          "type": "fileExists",
           "label": "split view API report is committed",
           "path": "etc/api-reports/hell-ui-angular-split-view.api.md"
         },

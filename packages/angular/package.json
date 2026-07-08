@@ -57,6 +57,7 @@
     "separator/separator.ts",
     "skeleton/skeleton.ts",
     "slider/slider.ts",
+    "spinner/spinner.ts",
     "switch/switch.ts",
     "tag/tag.ts",
     "toggle/toggle.ts",
@@ -161,6 +162,9 @@
     },
     "./slider": {
       "@heinrich/source": "./slider/public-api.ts"
+    },
+    "./spinner": {
+      "@heinrich/source": "./spinner/public-api.ts"
     },
     "./switch": {
       "@heinrich/source": "./switch/public-api.ts"
@@ -339,6 +343,11 @@
       "@heinrich/source": "./slider/styles.css",
       "style": "./slider/styles.css",
       "default": "./slider/styles.css"
+    },
+    "./spinner/styles.css": {
+      "@heinrich/source": "./spinner/styles.css",
+      "style": "./spinner/styles.css",
+      "default": "./spinner/styles.css"
     },
     "./switch/styles.css": {
       "@heinrich/source": "./switch/styles.css",
