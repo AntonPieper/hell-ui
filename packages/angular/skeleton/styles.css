@@ -1,4 +1,4 @@
-/* Skeleton and Spinner defaults are Tailwind utility recipes. */
+/* Skeleton defaults are Tailwind utility recipes. */
 @source "./skeleton.ts";
 
 @layer components {
@@ -8,63 +8,6 @@
     width: var(--_hell-skeleton-width, 100%);
     height: var(--_hell-skeleton-height, 14px);
   }
-
-  [hellSpinner][data-slot='root'][data-variant='ring'] {
-    width: 1em;
-    height: 1em;
-    border-radius: 50%;
-    border-style: solid;
-    border-width: max(2px, 0.12em);
-    border-color: var(--_hell-spinner-track);
-    border-top-color: currentColor;
-    animation: hell-spin 0.7s linear infinite;
-  }
-
-  [hellSpinner][data-slot='root'][data-variant='dots'] {
-    position: relative;
-    width: 1.45em;
-    height: 0.72em;
-    --_hell-dot-size: 0.34em;
-    --_hell-dot-mid: 0.55em;
-    --_hell-dot-end: 1.1em;
-    --_hell-dot-lift: -0.24em;
-    --_hell-dot-drop: 0.24em;
-  }
-
-  [hellSpinner][data-slot='root'][data-variant='dots']::before {
-    content: '';
-    position: absolute;
-    bottom: 0.04em;
-    left: 0;
-    width: var(--_hell-dot-size);
-    height: var(--_hell-dot-size);
-    border-radius: 999px;
-    background-color: currentColor;
-    box-shadow:
-      var(--_hell-dot-mid) 0 0 0 currentColor,
-      var(--_hell-dot-end) 0 0 0 currentColor;
-    will-change: transform, box-shadow;
-    animation: hell-dots 0.95s infinite ease-in-out;
-  }
-
-  [hellSpinner][data-slot='root'][data-variant='bars'] {
-    width: 1em;
-    height: 1em;
-    --_hell-bar-w: 0.18em;
-    background:
-      linear-gradient(currentColor, currentColor) 0% 50% / var(--_hell-bar-w) 100% no-repeat,
-      linear-gradient(currentColor, currentColor) 50% 50% / var(--_hell-bar-w) 100% no-repeat,
-      linear-gradient(currentColor, currentColor) 100% 50% / var(--_hell-bar-w) 100% no-repeat;
-    animation: hell-bars 1s infinite ease-in-out;
-  }
-
-  [hellSpinner][data-slot='root'][data-variant='pulse'] {
-    width: 1em;
-    height: 1em;
-    border-radius: 50%;
-    background-color: currentColor;
-    animation: hell-pulse 1.2s infinite ease-in-out;
-  }
 }
 
 @keyframes hell-shimmer {
@@ -73,68 +16,5 @@
   }
   to {
     background-position: -200% 0;
-  }
-}
-
-@keyframes hell-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes hell-dots {
-  0%,
-  80%,
-  100% {
-    transform: translateY(0);
-    box-shadow:
-      var(--_hell-dot-mid) 0 0 0 currentColor,
-      var(--_hell-dot-end) 0 0 0 currentColor;
-  }
-  20% {
-    transform: translateY(var(--_hell-dot-lift));
-    box-shadow:
-      var(--_hell-dot-mid) var(--_hell-dot-drop) 0 0 currentColor,
-      var(--_hell-dot-end) var(--_hell-dot-drop) 0 0 currentColor;
-  }
-  40% {
-    transform: translateY(0);
-    box-shadow:
-      var(--_hell-dot-mid) var(--_hell-dot-lift) 0 0 currentColor,
-      var(--_hell-dot-end) 0 0 0 currentColor;
-  }
-  60% {
-    transform: translateY(0);
-    box-shadow:
-      var(--_hell-dot-mid) 0 0 0 currentColor,
-      var(--_hell-dot-end) var(--_hell-dot-lift) 0 0 currentColor;
-  }
-}
-
-@keyframes hell-bars {
-  0%,
-  100% {
-    background-size:
-      var(--_hell-bar-w) 35%,
-      var(--_hell-bar-w) 70%,
-      var(--_hell-bar-w) 35%;
-  }
-  50% {
-    background-size:
-      var(--_hell-bar-w) 80%,
-      var(--_hell-bar-w) 30%,
-      var(--_hell-bar-w) 80%;
-  }
-}
-
-@keyframes hell-pulse {
-  0%,
-  100% {
-    transform: scale(0.6);
-    opacity: 0.4;
-  }
-  50% {
-    transform: scale(1);
-    opacity: 1;
   }
 }

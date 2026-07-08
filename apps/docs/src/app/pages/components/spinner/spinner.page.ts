@@ -47,8 +47,8 @@ import spinnerWithCardPendingActionExampleCodeRaw from './examples/with-card-pen
         title="Spinner"
         icon="faSolidSpinner"
         category="Styled primitive"
-        importPath="@hell-ui/angular/skeleton"
-        stylesPath="@hell-ui/angular/skeleton/styles.css"
+        importPath="@hell-ui/angular/spinner"
+        stylesPath="@hell-ui/angular/spinner/styles.css"
       >
         An indeterminate activity indicator for short, unquantifiable waits — it has no notion of
         progress, only that something is happening.
@@ -63,12 +63,9 @@ import spinnerWithCardPendingActionExampleCodeRaw from './examples/with-card-pen
       </p>
       <p>
         Reach for it whenever a wait has no known duration or layout to preserve: a submit button
-        mid-request, a toolbar refresh action, a row being reprocessed. It ships in the same
-        <code>@hell-ui/angular/skeleton</code> entry point as
-        <a routerLink="/components/skeleton"><code>hellSkeleton</code></a>
-        for historical reasons, but the two solve different problems — reach for
-        <code>hellSkeleton</code> instead when you know the shape of the content that is coming and
-        want to reserve its footprint.
+        mid-request, a toolbar refresh action, a row being reprocessed. When you know the shape of
+        the content that is coming and want to reserve its footprint, reach for
+        <a routerLink="/components/skeleton"><code>hellSkeleton</code></a> instead.
       </p>
 
       <h2>Basic</h2>
@@ -149,15 +146,6 @@ import spinnerWithCardPendingActionExampleCodeRaw from './examples/with-card-pen
             <td><code>root</code></td>
             <td>The indicator itself — color (via <code>currentColor</code>) and font-size-driven scale.</td>
           </tr>
-          <tr>
-            <td><code>HellSkeleton</code></td>
-            <td><code>root</code></td>
-            <td>
-              The placeholder itself — shimmer background, radius. Documented on the
-              <a routerLink="/components/skeleton">Skeleton</a> page; shown below only because it
-              shares this entry point.
-            </td>
-          </tr>
         </tbody>
       </table>
       <p>
@@ -183,7 +171,7 @@ import spinnerWithCardPendingActionExampleCodeRaw from './examples/with-card-pen
         <li>
           <code>aria-label</code> (<code>ariaLabel</code>): <code>string | null</code>. Overrides
           the accessible label for this instance. Default <code>null</code>, falling back to the
-          injected <code>HELL_SKELETON_LABELS</code> loading label.
+          injected <code>HELL_SPINNER_LABELS</code> loading label.
         </li>
         <li>
           <code>ui</code>: <code>HellUiInput&lt;HellSpinnerPart&gt;</code> — a shorthand class
@@ -196,10 +184,9 @@ import spinnerWithCardPendingActionExampleCodeRaw from './examples/with-card-pen
           <code>HellSpinnerVariant</code>.
         </li>
         <li>
-          Also exported from this entry point: <code>HELL_SKELETON_LABELS</code> injection token
-          and <code>provideHellSkeletonLabels()</code>, which override the shared
-          <code>loading</code> label for both <code>hellSpinner</code> and
-          <a routerLink="/components/skeleton"><code>hellSkeleton</code></a> in an injector's scope.
+          Also exported from this entry point: <code>HELL_SPINNER_LABELS</code> injection token
+          and <code>provideHellSpinnerLabels()</code>, which override the built-in
+          <code>loading</code> label for <code>hellSpinner</code> in an injector's scope.
         </li>
       </ul>
 
@@ -210,7 +197,7 @@ import spinnerWithCardPendingActionExampleCodeRaw from './examples/with-card-pen
           region and announces it without extra wiring.
         </li>
         <li>
-          Carries an <code>aria-label</code> resolved from the <code>HELL_SKELETON_LABELS</code>
+          Carries an <code>aria-label</code> resolved from the <code>HELL_SPINNER_LABELS</code>
           Label Contract ("Loading" by default) unless you pass an explicit
           <code>aria-label</code> — do this whenever the surrounding context is more specific than
           "loading", for example "Saving changes".
