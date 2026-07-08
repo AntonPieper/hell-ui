@@ -431,16 +431,13 @@ export class HellDateInput implements ControlValueAccessor, Validator {
   }
 
   private resolvePickerFocusedDate(): Date {
-    const current = this.current();
-    if (current) return current;
-
-    const today = dateDayValue(new Date()) ?? new Date();
+    const candidate = this.current() ?? dateDayValue(new Date()) ?? new Date();
     const min = this.min();
     const max = this.max();
 
-    if (min && dateDayTime(today) < dateDayTime(min)) return min;
-    if (max && dateDayTime(today) > dateDayTime(max)) return max;
-    return today;
+    if (min && dateDayTime(candidate) < dateDayTime(min)) return min;
+    if (max && dateDayTime(candidate) > dateDayTime(max)) return max;
+    return candidate;
   }
 
   validate(_control: AbstractControl | null): ValidationErrors | null {

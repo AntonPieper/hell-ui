@@ -465,6 +465,44 @@ describe('HellDateInput', () => {
     expect(formatDate(host.dates[1])).toBe('2026-04-30');
   });
 
+  it('clamps the picker focused date to min when the preset value is before the bounds', async () => {
+    const fixture = TestBed.createComponent(DateInputHost);
+    const host = fixture.componentInstance;
+    host.min.set(new Date(2026, 3, 1));
+    host.max.set(new Date(2026, 3, 30));
+    host.date.set(new Date(2026, 2, 28));
+    fixture.detectChanges();
+
+    triggerButton(fixture.nativeElement).click();
+    const panel = await waitForElement(fixture, document.body, '[data-slot="pickerPanel"]');
+
+    expect(panel.querySelector('h2')?.textContent?.trim()).toBe('April 2026');
+
+    fixture.destroy();
+    for (const leftover of Array.from(document.body.querySelectorAll('[hellPopover]'))) {
+      leftover.remove();
+    }
+  });
+
+  it('clamps the picker focused date to max when the preset value is after the bounds', async () => {
+    const fixture = TestBed.createComponent(DateInputHost);
+    const host = fixture.componentInstance;
+    host.min.set(new Date(2026, 3, 1));
+    host.max.set(new Date(2026, 3, 30));
+    host.date.set(new Date(2026, 4, 2));
+    fixture.detectChanges();
+
+    triggerButton(fixture.nativeElement).click();
+    const panel = await waitForElement(fixture, document.body, '[data-slot="pickerPanel"]');
+
+    expect(panel.querySelector('h2')?.textContent?.trim()).toBe('April 2026');
+
+    fixture.destroy();
+    for (const leftover of Array.from(document.body.querySelectorAll('[hellPopover]'))) {
+      leftover.remove();
+    }
+  });
+
   it('compares default dates by local day instead of exact timestamp', () => {
     expect(hellSameDateInputValue(new Date(2026, 3, 22), new Date(2026, 3, 22, 23, 59, 59))).toBe(
       true,
