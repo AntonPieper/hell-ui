@@ -847,9 +847,9 @@ const migratedPartStyleMapModules = [
     className: 'HellSpinner',
     partType: 'HellSpinnerPart',
     uiType: 'HellSpinnerUi',
-    entrypointId: 'skeleton',
-    sourcePath: 'packages/angular/skeleton/skeleton.ts',
-    publicApiPath: 'packages/angular/skeleton/public-api.ts',
+    entrypointId: 'spinner',
+    sourcePath: 'packages/angular/spinner/spinner.ts',
+    publicApiPath: 'packages/angular/spinner/public-api.ts',
     apiReportFiles: [],
     legacyClass: 'hell-spinner',
     componentVariablePrefix: '--hell-spinner-',
@@ -4129,7 +4129,7 @@ function checkLabelContract() {
     ['packages/angular/omnibar/omnibar.ts', 'HELL_OMNIBAR_LABELS', 'provideHellOmnibarLabels'],
     ['packages/angular/pagination/pagination.ts', 'HELL_PAGINATION_LABELS', 'provideHellPaginationLabels'],
     ['packages/angular/resizable/resizable.ts', 'HELL_RESIZABLE_LABELS', 'provideHellResizableLabels'],
-    ['packages/angular/skeleton/skeleton.ts', 'HELL_SKELETON_LABELS', 'provideHellSkeletonLabels'],
+    ['packages/angular/spinner/spinner.ts', 'HELL_SPINNER_LABELS', 'provideHellSpinnerLabels'],
     ['packages/angular/table/table-utilities.ts', 'HELL_TABLE_UTILITIES_LABELS', 'provideHellTableUtilitiesLabels'],
     ['packages/angular/time-input/time-input.ts', 'HELL_TIME_INPUT_LABELS', 'provideHellTimeInputLabels'],
     ['packages/angular/toast/toast.ts', 'HELL_TOAST_LABELS', 'provideHellToastLabels'],
@@ -4149,10 +4149,10 @@ function checkLabelContract() {
   }
 
   const spinnerSource = stripLabelDefaults(
-    readFile(join(root, 'packages/angular/skeleton/skeleton.ts')),
+    readFile(join(root, 'packages/angular/spinner/spinner.ts')),
   );
   if (
-    !spinnerSource.includes('HELL_SKELETON_LABELS') ||
+    !spinnerSource.includes('HELL_SPINNER_LABELS') ||
     spinnerSource.includes("'aria-label': 'Loading'")
   ) {
     failures.push('HellSpinner must read its default aria-label from the Label Contract');
