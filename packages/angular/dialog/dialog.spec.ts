@@ -294,7 +294,6 @@ describe('HellDialogTrigger scoped overlays', () => {
     mockRect(rootB, { left: 40, top: 60, right: 240, bottom: 260 });
 
     expect(rootA.getAttribute(HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE)).toBe('true');
-    expect(rootA.getAttribute('data-dialog-root')).toBe('true');
     expect(rootB.getAttribute(HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE)).toBe('true');
 
     query<HTMLButtonElement>(fixture.nativeElement, '#open-a').click();

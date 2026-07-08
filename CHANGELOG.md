@@ -34,6 +34,20 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   component after the Part Style Map migration; disabled semantics and ARIA
   wiring are unchanged. Evidence: `grep -r "unstyled" packages/angular` and
   `pnpm run test:architecture`.
+- Removed the pre-beta deprecated compatibility aliases: the
+  `allowLiveCaptions` input on `HellAudioPlayer` (use `allowSpeechTranscript`
+  plus `provideHellAudioTranscript()`), the `hellAudioSpeechSupported`
+  re-export from `@hell-ui/angular/audio-player` (import it from
+  `@hell-ui/angular/features/audio-transcript`; the removed alias always
+  returned `false`), the browser-global `hellCodeEditorSetup` constant (use
+  `hellCodeEditorSetupFactory(ownerDocument)`), and the legacy
+  `data-dialog-root` scope attribute that `hellDialogScope` and
+  `hellAppContent` wrote alongside `data-hell-dialog-scope-root`. The
+  completed-migration guards for these aliases were removed from
+  `tools/check-architecture.mjs` in the same change. Evidence:
+  `packages/angular/audio-player/audio-player.spec.ts`,
+  `packages/angular/dialog/dialog.spec.ts`, and
+  `pnpm run test:architecture`.
 
 ### Added
 

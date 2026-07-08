@@ -91,16 +91,6 @@ export const HELL_AUDIO_PLAYER_LABELS: InjectionToken<HellAudioPlayerLabels> = H
 export function provideHellAudioPlayerLabels(overrides: Partial<HellAudioPlayerLabels>): Provider {
   return HELL_AUDIO_PLAYER_LABELS_CONTRACT.provide(overrides);
 }
-import { hellAudioSpeechSupported as hellAudioSpeechSupportedImpl } from '@hell-ui/angular/internal/audio-transcript';
-
-/**
- * @deprecated Import `hellAudioSpeechSupported` from
- * `@hell-ui/angular/features/audio-transcript` after opting into the transcript provider.
- */
-export function hellAudioSpeechSupported(): boolean {
-  return hellAudioSpeechSupportedImpl();
-}
-
 /** Public parts of the HellAudioPlayer module, styleable through its Part Style Map. */
 export type HellAudioPlayerPart =
   | 'root'
@@ -463,8 +453,6 @@ export class HellAudioPlayer {
   readonly allowDownload = input(true, { transform: booleanAttribute });
   /** Show / hide the experimental Chromium-only speech-transcript feature. */
   readonly allowSpeechTranscript = input(false, { transform: booleanAttribute });
-  /** @deprecated Use `allowSpeechTranscript`; this alias remains for compatibility. */
-  readonly allowLiveCaptions = input(false, { transform: booleanAttribute });
   /** Optional display title shown above the controls. Hidden when `null`. */
   readonly title = input<string | null>(null);
   /** Display a date/timestamp next to the title. Accepts a string or Date. */
@@ -473,9 +461,7 @@ export class HellAudioPlayer {
   readonly lang = input<string | null>(null);
 
   protected readonly captions = signal(false);
-  protected readonly speechTranscriptEnabled = computed(
-    () => this.allowSpeechTranscript() || this.allowLiveCaptions(),
-  );
+  protected readonly speechTranscriptEnabled = computed(() => this.allowSpeechTranscript());
   private readonly audioRuntime = new HellAudioRuntime();
   private readonly createTranscriptRuntime = inject<HellAudioTranscriptRuntimeFactory | null>(
     HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY,

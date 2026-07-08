@@ -75,11 +75,6 @@ const audioTranscriptRuntimeTerms = [
   { label: 'captureStream()', pattern: /\bcaptureStream\b/ },
 ];
 
-// Explicit not-yet-migrated allowlist for the legacy Style Opt-Out base.
-// Remove a symbol here as soon as it migrates to the hellPartStyler
-// composition contract; new public modules must not extend HellStyleable.
-const legacyStyleableAllowlist = new Set([]);
-
 const migratedPartStyleMapModules = [
   {
     className: 'HellAccordion',
@@ -89,7 +84,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/accordion/accordion.ts',
     publicApiPath: 'packages/angular/accordion/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-accordion',
     componentVariablePrefix: '--hell-accordion-',
   },
   {
@@ -100,7 +94,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/accordion/accordion.ts',
     publicApiPath: 'packages/angular/accordion/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-accordion-item',
     componentVariablePrefix: '--hell-accordion-item-',
   },
   {
@@ -111,7 +104,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/accordion/accordion.ts',
     publicApiPath: 'packages/angular/accordion/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-accordion-trigger',
     componentVariablePrefix: '--hell-accordion-trigger-',
   },
   {
@@ -122,7 +114,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/accordion/accordion.ts',
     publicApiPath: 'packages/angular/accordion/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-accordion-content',
     componentVariablePrefix: '--hell-accordion-content-',
   },
   {
@@ -133,7 +124,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/button/button.ts',
     publicApiPath: 'packages/angular/button/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-button',
     componentVariablePrefix: '--hell-button-',
   },
   {
@@ -144,7 +134,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/card/card.ts',
     publicApiPath: 'packages/angular/card/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-card',
     componentVariablePrefix: '--hell-card-',
   },
   {
@@ -155,7 +144,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/card/card.ts',
     publicApiPath: 'packages/angular/card/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-card-header',
     componentVariablePrefix: '--hell-card-header-',
   },
   {
@@ -166,7 +154,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/card/card.ts',
     publicApiPath: 'packages/angular/card/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-card-body',
     componentVariablePrefix: '--hell-card-body-',
   },
   {
@@ -177,7 +164,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/card/card.ts',
     publicApiPath: 'packages/angular/card/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-card-footer',
     componentVariablePrefix: '--hell-card-footer-',
   },
   {
@@ -188,7 +174,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/field/field.ts',
     publicApiPath: 'packages/angular/field/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-field',
     componentVariablePrefix: '--hell-field-',
   },
   {
@@ -199,7 +184,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/field/field.ts',
     publicApiPath: 'packages/angular/field/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-field-label',
     componentVariablePrefix: '--hell-field-label-',
   },
   {
@@ -210,7 +194,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/field/field.ts',
     publicApiPath: 'packages/angular/field/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-field-description',
     componentVariablePrefix: '--hell-field-description-',
   },
   {
@@ -221,7 +204,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/field/field.ts',
     publicApiPath: 'packages/angular/field/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-field-error',
     componentVariablePrefix: '--hell-field-error-',
   },
   {
@@ -232,7 +214,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/tabs/tabs.ts',
     publicApiPath: 'packages/angular/tabs/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-tabs',
     componentVariablePrefix: '--hell-tabs-',
   },
   {
@@ -243,7 +224,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/tabs/tabs.ts',
     publicApiPath: 'packages/angular/tabs/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-tab-list',
     componentVariablePrefix: '--hell-tab-list-',
   },
   {
@@ -254,7 +234,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/tabs/tabs.ts',
     publicApiPath: 'packages/angular/tabs/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-tab',
     componentVariablePrefix: '--hell-tab-',
   },
   {
@@ -265,7 +244,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/tabs/tabs.ts',
     publicApiPath: 'packages/angular/tabs/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-tab-panel',
     componentVariablePrefix: '--hell-tab-panel-',
   },
   {
@@ -276,7 +254,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/input/input.ts',
     publicApiPath: 'packages/angular/input/public-api.ts',
     apiReportFiles: ['hell-ui-angular-input.api.md'],
-    legacyClass: 'hell-input',
     componentVariablePrefix: '--hell-input-',
   },
   {
@@ -287,7 +264,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/input/input.ts',
     publicApiPath: 'packages/angular/input/public-api.ts',
     apiReportFiles: ['hell-ui-angular-input.api.md'],
-    legacyClass: 'hell-native-select',
     componentVariablePrefix: '--hell-native-select-',
   },
   {
@@ -298,7 +274,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/input/input.ts',
     publicApiPath: 'packages/angular/input/public-api.ts',
     apiReportFiles: ['hell-ui-angular-input.api.md'],
-    legacyClass: 'hell-textarea',
     componentVariablePrefix: '--hell-textarea-',
   },
   {
@@ -309,7 +284,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/checkbox/checkbox.ts',
     publicApiPath: 'packages/angular/checkbox/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-checkbox',
     componentVariablePrefix: '--hell-checkbox-',
   },
   {
@@ -320,7 +294,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/checkbox/checkbox.ts',
     publicApiPath: 'packages/angular/checkbox/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-checkbox',
     componentVariablePrefix: '--hell-checkbox-',
   },
   {
@@ -331,7 +304,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/radio/radio.ts',
     publicApiPath: 'packages/angular/radio/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-radio-group',
     componentVariablePrefix: '--hell-radio-group-',
   },
   {
@@ -342,7 +314,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/radio/radio.ts',
     publicApiPath: 'packages/angular/radio/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-radio',
     componentVariablePrefix: '--hell-radio-',
   },
   {
@@ -353,7 +324,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/radio/radio.ts',
     publicApiPath: 'packages/angular/radio/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-radio-group',
     componentVariablePrefix: '--hell-radio-group-',
   },
   {
@@ -364,7 +334,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/radio/radio.ts',
     publicApiPath: 'packages/angular/radio/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-radio',
     componentVariablePrefix: '--hell-radio-',
   },
   {
@@ -375,7 +344,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/switch/switch.ts',
     publicApiPath: 'packages/angular/switch/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-switch',
     componentVariablePrefix: '--hell-switch-',
   },
   {
@@ -386,7 +354,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/switch/switch.ts',
     publicApiPath: 'packages/angular/switch/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-switch',
     componentVariablePrefix: '--hell-switch-',
   },
   {
@@ -397,7 +364,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/toggle/toggle.ts',
     publicApiPath: 'packages/angular/toggle/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-toggle',
     componentVariablePrefix: '--hell-toggle-',
   },
   {
@@ -408,7 +374,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/toggle/toggle.ts',
     publicApiPath: 'packages/angular/toggle/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-toggle-group',
     componentVariablePrefix: '--hell-toggle-group-',
   },
   {
@@ -419,7 +384,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/toggle/toggle.ts',
     publicApiPath: 'packages/angular/toggle/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-toggle',
     componentVariablePrefix: '--hell-toggle-',
   },
   {
@@ -430,7 +394,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/slider/slider.ts',
     publicApiPath: 'packages/angular/slider/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-slider',
     componentVariablePrefix: '--hell-slider-',
   },
   {
@@ -441,7 +404,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/dialpad/dialpad.ts',
     publicApiPath: 'packages/angular/dialpad/public-api.ts',
     apiReportFiles: ['hell-ui-angular-dialpad.api.md'],
-    legacyClass: 'hell-dialpad',
     componentVariablePrefix: '--hell-dialpad-',
   },
   {
@@ -452,7 +414,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/dialog/dialog.ts',
     publicApiPath: 'packages/angular/dialog/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-dialog-overlay',
   },
   {
     className: 'HellDialog',
@@ -462,7 +423,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/dialog/dialog.ts',
     publicApiPath: 'packages/angular/dialog/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-dialog',
   },
   {
     className: 'HellDialogTitle',
@@ -472,7 +432,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/dialog/dialog.ts',
     publicApiPath: 'packages/angular/dialog/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-dialog-title',
   },
   {
     className: 'HellDialogDescription',
@@ -482,7 +441,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/dialog/dialog.ts',
     publicApiPath: 'packages/angular/dialog/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-dialog-description',
   },
   {
     className: 'HellToaster',
@@ -492,7 +450,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/toast/toast.ts',
     publicApiPath: 'packages/angular/toast/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-toaster',
   },
   {
     className: 'HellAudioPlayer',
@@ -502,7 +459,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/audio-player/audio-player.ts',
     publicApiPath: 'packages/angular/audio-player/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-audio',
   },
   {
     className: 'HellOmnibar',
@@ -512,7 +468,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/omnibar/omnibar.ts',
     publicApiPath: 'packages/angular/omnibar/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-omnibar',
   },
   {
     className: 'HellOmnibarPanel',
@@ -522,7 +477,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/omnibar/omnibar.ts',
     publicApiPath: 'packages/angular/omnibar/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-omnibar-panel-content',
   },
   {
     className: 'HellOmnibarGroup',
@@ -532,7 +486,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/omnibar/omnibar.ts',
     publicApiPath: 'packages/angular/omnibar/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-omnibar-group',
   },
   {
     className: 'HellOmnibarGroupLabel',
@@ -542,7 +495,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/omnibar/omnibar.ts',
     publicApiPath: 'packages/angular/omnibar/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-omnibar-group-label',
   },
   {
     className: 'HellOmnibarItem',
@@ -552,7 +504,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/omnibar/omnibar.ts',
     publicApiPath: 'packages/angular/omnibar/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-omnibar-item',
   },
   {
     className: 'HellOmnibarItemIcon',
@@ -562,7 +513,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/omnibar/omnibar.ts',
     publicApiPath: 'packages/angular/omnibar/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-omnibar-item-icon',
   },
   {
     className: 'HellOmnibarItemText',
@@ -572,7 +522,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/omnibar/omnibar.ts',
     publicApiPath: 'packages/angular/omnibar/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-omnibar-item-text',
   },
   {
     className: 'HellOmnibarItemSubtext',
@@ -582,7 +531,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/omnibar/omnibar.ts',
     publicApiPath: 'packages/angular/omnibar/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-omnibar-item-subtext',
   },
   {
     className: 'HellOmnibarItemTrailing',
@@ -592,7 +540,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/omnibar/omnibar.ts',
     publicApiPath: 'packages/angular/omnibar/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-omnibar-item-trailing',
   },
   {
     className: 'HellOmnibarChip',
@@ -602,7 +549,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/omnibar/omnibar.ts',
     publicApiPath: 'packages/angular/omnibar/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-omnibar-chip',
   },
   {
     className: 'HellOmnibarChipRemove',
@@ -612,7 +558,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/omnibar/omnibar.ts',
     publicApiPath: 'packages/angular/omnibar/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-omnibar-chip-remove',
   },
   {
     className: 'HellOmnibarActionsStrip',
@@ -622,7 +567,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/omnibar/omnibar.ts',
     publicApiPath: 'packages/angular/omnibar/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-omnibar-actions-strip',
   },
   {
     className: 'HellOmnibarAction',
@@ -632,7 +576,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/omnibar/omnibar.ts',
     publicApiPath: 'packages/angular/omnibar/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-omnibar-action',
   },
   {
     className: 'HellCodeEditor',
@@ -642,7 +585,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/features/code-editor/code-editor.ts',
     publicApiPath: 'packages/angular/features/code-editor/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-code',
   },
   {
     className: 'HellTanStackTable',
@@ -652,7 +594,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/table-tanstack/table-tanstack.ts',
     publicApiPath: 'packages/angular/table-tanstack/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-tanstack-table',
   },
   {
     className: 'HellTanStackPagination',
@@ -662,7 +603,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/table-tanstack/table-tanstack.ts',
     publicApiPath: 'packages/angular/table-tanstack/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-tanstack-pagination',
   },
   {
     className: 'HellDateInput',
@@ -672,7 +612,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/date-input/date-input.ts',
     publicApiPath: 'packages/angular/date-input/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-date-input',
     componentVariablePrefix: '--hell-date-input-',
   },
   {
@@ -683,7 +622,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/time-input/time-input.ts',
     publicApiPath: 'packages/angular/time-input/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-time-input',
     componentVariablePrefix: '--hell-time-input-',
   },
   {
@@ -694,7 +632,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/date-picker/date-picker.ts',
     publicApiPath: 'packages/angular/date-picker/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-date-picker',
     componentVariablePrefix: '--hell-date-picker-',
   },
   {
@@ -705,7 +642,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/date-picker/date-picker.ts',
     publicApiPath: 'packages/angular/date-picker/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-date-picker',
     componentVariablePrefix: '--hell-date-picker-',
   },
   {
@@ -716,7 +652,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/avatar/avatar.ts',
     publicApiPath: 'packages/angular/avatar/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-avatar',
     componentVariablePrefix: '--hell-avatar-',
   },
   {
@@ -727,7 +662,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/avatar-group/avatar-group.ts',
     publicApiPath: 'packages/angular/avatar-group/public-api.ts',
     apiReportFiles: ['hell-ui-angular-avatar-group.api.md'],
-    legacyClass: 'hell-avatar-group',
     componentVariablePrefix: '--hell-avatar-group-',
   },
   {
@@ -738,7 +672,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/avatar-group/avatar-group.ts',
     publicApiPath: 'packages/angular/avatar-group/public-api.ts',
     apiReportFiles: ['hell-ui-angular-avatar-group.api.md'],
-    legacyClass: 'hell-avatar-group-item',
     componentVariablePrefix: '--hell-avatar-group-item-',
   },
   {
@@ -749,7 +682,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/avatar-group/avatar-group.ts',
     publicApiPath: 'packages/angular/avatar-group/public-api.ts',
     apiReportFiles: ['hell-ui-angular-avatar-group.api.md'],
-    legacyClass: 'hell-avatar-group-overflow',
     componentVariablePrefix: '--hell-avatar-group-overflow-',
   },
   {
@@ -760,7 +692,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/breadcrumbs/breadcrumbs.ts',
     publicApiPath: 'packages/angular/breadcrumbs/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-breadcrumbs',
   },
   {
     className: 'HellBreadcrumbList',
@@ -770,7 +701,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/breadcrumbs/breadcrumbs.ts',
     publicApiPath: 'packages/angular/breadcrumbs/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-breadcrumb-list',
   },
   {
     className: 'HellBreadcrumbItem',
@@ -780,7 +710,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/breadcrumbs/breadcrumbs.ts',
     publicApiPath: 'packages/angular/breadcrumbs/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-breadcrumbs-item',
   },
   {
     className: 'HellBreadcrumbLink',
@@ -790,7 +719,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/breadcrumbs/breadcrumbs.ts',
     publicApiPath: 'packages/angular/breadcrumbs/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-breadcrumbs-link',
   },
   {
     className: 'HellBreadcrumbPage',
@@ -800,7 +728,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/breadcrumbs/breadcrumbs.ts',
     publicApiPath: 'packages/angular/breadcrumbs/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-breadcrumbs-page',
   },
   {
     className: 'HellBreadcrumbSeparator',
@@ -810,7 +737,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/breadcrumbs/breadcrumbs.ts',
     publicApiPath: 'packages/angular/breadcrumbs/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-breadcrumbs-separator',
   },
   {
     className: 'HellBreadcrumbEllipsis',
@@ -820,7 +746,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/breadcrumbs/breadcrumbs.ts',
     publicApiPath: 'packages/angular/breadcrumbs/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-breadcrumbs-ellipsis',
   },
   {
     className: 'HellIcon',
@@ -830,7 +755,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/icon/icon.ts',
     publicApiPath: 'packages/angular/icon/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-icon',
   },
   {
     className: 'HellSkeleton',
@@ -840,7 +764,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/skeleton/skeleton.ts',
     publicApiPath: 'packages/angular/skeleton/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-skeleton',
     componentVariablePrefix: '--hell-skeleton-',
   },
   {
@@ -851,7 +774,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/skeleton/skeleton.ts',
     publicApiPath: 'packages/angular/skeleton/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-spinner',
     componentVariablePrefix: '--hell-spinner-',
   },
   {
@@ -862,7 +784,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/tag/tag.ts',
     publicApiPath: 'packages/angular/tag/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-tag',
     componentVariablePrefix: '--hell-tag-',
   },
   {
@@ -873,7 +794,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/tag/tag.ts',
     publicApiPath: 'packages/angular/tag/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-badge',
     componentVariablePrefix: '--hell-badge-',
   },
   {
@@ -884,7 +804,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/tag/tag.ts',
     publicApiPath: 'packages/angular/tag/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-kbd',
     componentVariablePrefix: '--hell-kbd-',
   },
   {
@@ -895,7 +814,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/separator/separator.ts',
     publicApiPath: 'packages/angular/separator/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-separator',
     componentVariablePrefix: '--hell-separator-',
   },
   {
@@ -906,7 +824,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/progress/progress.ts',
     publicApiPath: 'packages/angular/progress/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-progress',
     componentVariablePrefix: '--hell-progress-',
   },
   {
@@ -917,7 +834,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/progress/progress.ts',
     publicApiPath: 'packages/angular/progress/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-progress-bar',
     componentVariablePrefix: '--hell-progress-bar-',
   },
   {
@@ -928,7 +844,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/search/search.ts',
     publicApiPath: 'packages/angular/search/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-search',
   },
   {
     className: 'HellSearchClear',
@@ -938,7 +853,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/search/search.ts',
     publicApiPath: 'packages/angular/search/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-search-clear',
   },
   {
     className: 'HellDropZone',
@@ -948,7 +862,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/drop-zone/drop-zone.ts',
     publicApiPath: 'packages/angular/drop-zone/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-dropzone',
     componentVariablePrefix: '--hell-dropzone-',
   },
   {
@@ -959,7 +872,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/pagination/pagination.ts',
     publicApiPath: 'packages/angular/pagination/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-pagination',
   },
   {
     className: 'HellPaginationFirst',
@@ -969,7 +881,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/pagination/pagination.ts',
     publicApiPath: 'packages/angular/pagination/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-pagination-first',
   },
   {
     className: 'HellPaginationPrev',
@@ -979,7 +890,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/pagination/pagination.ts',
     publicApiPath: 'packages/angular/pagination/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-pagination-prev',
   },
   {
     className: 'HellPaginationNext',
@@ -989,7 +899,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/pagination/pagination.ts',
     publicApiPath: 'packages/angular/pagination/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-pagination-next',
   },
   {
     className: 'HellPaginationLast',
@@ -999,7 +908,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/pagination/pagination.ts',
     publicApiPath: 'packages/angular/pagination/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-pagination-last',
   },
   {
     className: 'HellPaginationButton',
@@ -1009,7 +917,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/pagination/pagination.ts',
     publicApiPath: 'packages/angular/pagination/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-pagination-item',
   },
   {
     className: 'HellPaginationStrip',
@@ -1028,7 +935,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/app-shell/app-shell.ts',
     publicApiPath: 'packages/angular/app-shell/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-shell',
   },
   {
     className: 'HellAppTopbar',
@@ -1038,7 +944,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/app-shell/app-shell.ts',
     publicApiPath: 'packages/angular/app-shell/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-topbar',
   },
   {
     className: 'HellAppSidenav',
@@ -1048,7 +953,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/app-shell/app-shell.ts',
     publicApiPath: 'packages/angular/app-shell/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-sidenav',
   },
   {
     className: 'HellNavItem',
@@ -1058,7 +962,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/app-shell/app-shell.ts',
     publicApiPath: 'packages/angular/app-shell/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-nav-item',
   },
   {
     className: 'HellNavItemIcon',
@@ -1068,7 +971,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/app-shell/app-shell.ts',
     publicApiPath: 'packages/angular/app-shell/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-nav-icon',
   },
   {
     className: 'HellNavItemLabel',
@@ -1078,7 +980,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/app-shell/app-shell.ts',
     publicApiPath: 'packages/angular/app-shell/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-nav-label',
   },
   {
     className: 'HellNavItemTrailing',
@@ -1088,7 +989,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/app-shell/app-shell.ts',
     publicApiPath: 'packages/angular/app-shell/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-nav-trailing',
   },
   {
     className: 'HellNavSection',
@@ -1098,7 +998,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/app-shell/app-shell.ts',
     publicApiPath: 'packages/angular/app-shell/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-nav-section',
   },
   {
     className: 'HellNavSectionToggle',
@@ -1108,7 +1007,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/app-shell/app-shell.ts',
     publicApiPath: 'packages/angular/app-shell/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-nav-section-toggle',
   },
   {
     className: 'HellNavSectionItems',
@@ -1118,7 +1016,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/app-shell/app-shell.ts',
     publicApiPath: 'packages/angular/app-shell/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-nav-section-items',
   },
   {
     className: 'HellAppContent',
@@ -1128,7 +1025,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/app-shell/app-shell.ts',
     publicApiPath: 'packages/angular/app-shell/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-content',
   },
   {
     className: 'HellSidenavToggle',
@@ -1156,7 +1052,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/app-shell/app-shell.ts',
     publicApiPath: 'packages/angular/app-shell/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-secondary',
   },
   {
     className: 'HellAppSecondaryBody',
@@ -1166,7 +1061,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/app-shell/app-shell.ts',
     publicApiPath: 'packages/angular/app-shell/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-secondary-body',
   },
   {
     className: 'HellResizable',
@@ -1176,7 +1070,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/resizable/resizable.ts',
     publicApiPath: 'packages/angular/resizable/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-resizable',
   },
   {
     className: 'HellResizablePane',
@@ -1186,7 +1079,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/resizable/resizable.ts',
     publicApiPath: 'packages/angular/resizable/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-resizable-pane',
   },
   {
     className: 'HellResizableHandle',
@@ -1196,7 +1088,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/resizable/resizable.ts',
     publicApiPath: 'packages/angular/resizable/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-resizable-handle',
   },
   {
     className: 'HellSplitView',
@@ -1206,7 +1097,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/split-view/split-view.ts',
     publicApiPath: 'packages/angular/split-view/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-split-view',
   },
   {
     className: 'HellTableContainer',
@@ -1216,7 +1106,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/table/table-utilities.ts',
     publicApiPath: 'packages/angular/table/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-table-container',
   },
   {
     className: 'HellTable',
@@ -1226,7 +1115,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/table/table-utilities.ts',
     publicApiPath: 'packages/angular/table/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-table',
   },
   {
     className: 'HellTableHead',
@@ -1236,7 +1124,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/table/table-utilities.ts',
     publicApiPath: 'packages/angular/table/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-table-head',
   },
   {
     className: 'HellTableBody',
@@ -1246,7 +1133,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/table/table-utilities.ts',
     publicApiPath: 'packages/angular/table/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-table-body',
   },
   {
     className: 'HellTableRow',
@@ -1256,7 +1142,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/table/table-utilities.ts',
     publicApiPath: 'packages/angular/table/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-table-row',
   },
   {
     className: 'HellTableRowAction',
@@ -1266,7 +1151,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/table/table-utilities.ts',
     publicApiPath: 'packages/angular/table/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-table-row-action',
   },
   {
     className: 'HellTableSelectionCell',
@@ -1276,7 +1160,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/table/table-utilities.ts',
     publicApiPath: 'packages/angular/table/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-table-selection-cell',
   },
   {
     className: 'HellTableRowCheckbox',
@@ -1286,7 +1169,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/table/table-utilities.ts',
     publicApiPath: 'packages/angular/table/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-table-row-checkbox',
   },
   {
     className: 'HellTableRowRadio',
@@ -1296,7 +1178,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/table/table-utilities.ts',
     publicApiPath: 'packages/angular/table/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-table-row-radio',
   },
   {
     className: 'HellTableHeaderCell',
@@ -1306,7 +1187,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/table/table-utilities.ts',
     publicApiPath: 'packages/angular/table/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-table-header-cell',
   },
   {
     className: 'HellTableSortTrigger',
@@ -1316,7 +1196,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/table/table-utilities.ts',
     publicApiPath: 'packages/angular/table/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-table-sort-trigger',
   },
   {
     className: 'HellTableCell',
@@ -1326,7 +1205,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/table/table-utilities.ts',
     publicApiPath: 'packages/angular/table/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-table-cell',
   },
   {
     className: 'HellTableResizeHandle',
@@ -1336,7 +1214,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/table/table-utilities.ts',
     publicApiPath: 'packages/angular/table/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-table-resize-handle',
   },
   {
     className: 'HellCombobox',
@@ -1346,7 +1223,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/combobox/combobox.ts',
     publicApiPath: 'packages/angular/combobox/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-combobox',
   },
   {
     className: 'HellComboboxBasic',
@@ -1356,7 +1232,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/combobox/combobox.ts',
     publicApiPath: 'packages/angular/combobox/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-combobox-basic',
   },
   {
     className: 'HellComboboxButton',
@@ -1366,7 +1241,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/combobox/combobox.ts',
     publicApiPath: 'packages/angular/combobox/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-combobox-button',
   },
   {
     className: 'HellComboboxDropdown',
@@ -1376,7 +1250,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/combobox/combobox.ts',
     publicApiPath: 'packages/angular/combobox/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-combobox-dropdown',
   },
   {
     className: 'HellComboboxEmpty',
@@ -1386,7 +1259,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/combobox/combobox.ts',
     publicApiPath: 'packages/angular/combobox/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-combobox-empty',
   },
   {
     className: 'HellComboboxInput',
@@ -1396,7 +1268,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/combobox/combobox.ts',
     publicApiPath: 'packages/angular/combobox/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-combobox-input',
   },
   {
     className: 'HellComboboxOption',
@@ -1406,7 +1277,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/combobox/combobox.ts',
     publicApiPath: 'packages/angular/combobox/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-combobox-option',
   },
   {
     className: 'HellFlyout',
@@ -1416,7 +1286,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/flyout/flyout.ts',
     publicApiPath: 'packages/angular/flyout/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-flyout',
   },
   {
     className: 'HellListbox',
@@ -1426,7 +1295,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/listbox/listbox.ts',
     publicApiPath: 'packages/angular/listbox/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-listbox',
   },
   {
     className: 'HellListboxHeader',
@@ -1436,7 +1304,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/listbox/listbox.ts',
     publicApiPath: 'packages/angular/listbox/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-listbox-header',
   },
   {
     className: 'HellListboxOption',
@@ -1446,7 +1313,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/listbox/listbox.ts',
     publicApiPath: 'packages/angular/listbox/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-listbox-option',
   },
   {
     className: 'HellListboxSection',
@@ -1456,7 +1322,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/listbox/listbox.ts',
     publicApiPath: 'packages/angular/listbox/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-listbox-section',
   },
   {
     className: 'HellMenu',
@@ -1466,7 +1331,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/menu/menu.ts',
     publicApiPath: 'packages/angular/menu/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-menu',
   },
   {
     className: 'HellMenuItem',
@@ -1476,7 +1340,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/menu/menu.ts',
     publicApiPath: 'packages/angular/menu/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-menu-item',
   },
   {
     className: 'HellMenuItemCheckbox',
@@ -1486,7 +1349,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/menu/menu.ts',
     publicApiPath: 'packages/angular/menu/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-menu-item-checkbox',
   },
   {
     className: 'HellMenuItemIcon',
@@ -1496,7 +1358,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/menu/menu.ts',
     publicApiPath: 'packages/angular/menu/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-menu-item-icon',
   },
   {
     className: 'HellMenuItemIndicator',
@@ -1506,7 +1367,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/menu/menu.ts',
     publicApiPath: 'packages/angular/menu/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-menu-item-indicator',
   },
   {
     className: 'HellMenuItemRadio',
@@ -1516,7 +1376,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/menu/menu.ts',
     publicApiPath: 'packages/angular/menu/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-menu-item-radio',
   },
   {
     className: 'HellMenuItemTrailing',
@@ -1526,7 +1385,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/menu/menu.ts',
     publicApiPath: 'packages/angular/menu/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-menu-item-trailing',
   },
   {
     className: 'HellMenuLabel',
@@ -1536,7 +1394,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/menu/menu.ts',
     publicApiPath: 'packages/angular/menu/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-menu-label',
   },
   {
     className: 'HellMenuSection',
@@ -1546,7 +1403,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/menu/menu.ts',
     publicApiPath: 'packages/angular/menu/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-menu-section',
   },
   {
     className: 'HellMenuSeparator',
@@ -1556,7 +1412,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/menu/menu.ts',
     publicApiPath: 'packages/angular/menu/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-menu-separator',
   },
   {
     className: 'HellPopover',
@@ -1566,7 +1421,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/popover/popover.ts',
     publicApiPath: 'packages/angular/popover/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-popover',
   },
   {
     className: 'HellSelect',
@@ -1576,7 +1430,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/select/select.ts',
     publicApiPath: 'packages/angular/select/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-select',
   },
   {
     className: 'HellSelectBasic',
@@ -1586,7 +1439,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/select/select.ts',
     publicApiPath: 'packages/angular/select/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-select-basic',
   },
   {
     className: 'HellSelectDropdown',
@@ -1596,7 +1448,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/select/select.ts',
     publicApiPath: 'packages/angular/select/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-select-dropdown',
   },
   {
     className: 'HellSelectOption',
@@ -1606,7 +1457,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/select/select.ts',
     publicApiPath: 'packages/angular/select/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-select-option',
   },
   {
     className: 'HellSelectPlaceholder',
@@ -1616,7 +1466,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/select/select.ts',
     publicApiPath: 'packages/angular/select/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-select-placeholder',
   },
   {
     className: 'HellSelectValue',
@@ -1626,7 +1475,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/select/select.ts',
     publicApiPath: 'packages/angular/select/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-select-value',
   },
   {
     className: 'HellSubmenuTrigger',
@@ -1636,7 +1484,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/menu/menu.ts',
     publicApiPath: 'packages/angular/menu/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-submenu-trigger',
   },
   {
     className: 'HellTooltip',
@@ -1646,7 +1493,6 @@ const migratedPartStyleMapModules = [
     sourcePath: 'packages/angular/tooltip/tooltip.ts',
     publicApiPath: 'packages/angular/tooltip/public-api.ts',
     apiReportFiles: [],
-    legacyClass: 'hell-tooltip',
   },
 ];
 
@@ -2952,7 +2798,6 @@ function checkApiStabilityContract() {
       'packages/angular/features/code-editor/code-editor.runtime.ts',
       'hellCodeEditorSetupFactory',
     ],
-    ['packages/angular/features/code-editor/code-editor.runtime.ts', 'hellCodeEditorSetup'],
     ['packages/angular/features/code-editor/code-editor.runtime.ts', 'hellCodeEditorTheme'],
     ['packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts', 'HellPdfRuntimeFactory'],
     ['packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts', 'HELL_PDF_RUNTIME_FACTORY'],
@@ -2966,41 +2811,9 @@ function checkApiStabilityContract() {
     }
   }
 
-  const audioSource = readFile(
-    join(root, 'packages/angular/audio-player/audio-player.ts'),
-  );
-  if (!hasTaggedApiSymbol(audioSource, 'deprecated', 'allowLiveCaptions')) {
-    failures.push('allowLiveCaptions compatibility alias must carry @deprecated API JSDoc');
-  }
-
-  const codeEditorRuntimeSource = readFile(
-    join(root, 'packages/angular/features/code-editor/code-editor.runtime.ts'),
-  );
-  if (!hasTaggedApiSymbol(codeEditorRuntimeSource, 'deprecated', 'hellCodeEditorSetup')) {
-    failures.push('hellCodeEditorSetup compatibility alias must carry @deprecated API JSDoc');
-  }
-
-  const audioDocs = readFile(
-    join(root, 'apps/docs/src/app/pages/components/audio-player/audio-player.page.ts'),
-  );
-  if (!/allowLiveCaptions[\s\S]{0,200}deprecated compatibility alias/i.test(audioDocs)) {
-    failures.push(
-      'Audio Player docs must disclose allowLiveCaptions as a deprecated compatibility alias',
-    );
-  }
-
   const codeEditorDocs = readFile(
     join(root, 'apps/docs/src/app/pages/components/code-editor/code-editor.page.ts'),
   );
-  if (
-    !/hellCodeEditorSetup[\s\S]{0,200}deprecated browser-global legacy compatibility/i.test(
-      codeEditorDocs,
-    )
-  ) {
-    failures.push(
-      'Code Editor docs must disclose hellCodeEditorSetup as a deprecated compatibility alias',
-    );
-  }
   for (const requiredCodeEditorDocText of [
     '@hell-ui/angular/features/code-editor',
     'kept optional entry point',
@@ -3547,34 +3360,15 @@ function checkComponentContract() {
       publicStyleableModules.set(className, rel);
 
       if (moduleSource.includes('hellPartStyler')) {
-        if (legacyStyleableAllowlist.has(className)) {
-          failures.push(
-            `${rel} ${className} migrated to the Part-Class Pipeline but remains in the legacy HellStyleable allowlist`,
-          );
-        }
         if (!moduleSource.includes('part(') || !moduleSource.includes('recipe')) {
           failures.push(
             `${rel} ${className} composes hellPartStyler but does not use the Part-Class Pipeline`,
           );
         }
-        if (moduleSource.includes('unstyled')) {
-          failures.push(`${rel} ${className} composes hellPartStyler but keeps Style Opt-Out`);
-        }
-      } else if (extendsMigratedPartStyleMapBase(classSource)) {
-        if (moduleSource.includes('unstyled')) {
-          failures.push(`${rel} ${className} inherits a Part Style Map base but keeps Style Opt-Out`);
-        }
-      } else {
-        if (!legacyStyleableAllowlist.has(className)) {
-          failures.push(
-            `${rel} ${className} extends legacy HellStyleable but is not in the not-yet-migrated allowlist`,
-          );
-        }
-        if (!moduleSource.includes('!unstyled()')) {
-          failures.push(
-            `${rel} ${className} extends HellStyleable but does not gate default styling with Style Opt-Out`,
-          );
-        }
+      } else if (!extendsMigratedPartStyleMapBase(classSource)) {
+        failures.push(
+          `${rel} ${className} must compose hellPartStyler or extend a Part Style Map base`,
+        );
       }
     }
 
@@ -3617,14 +3411,6 @@ function checkComponentContract() {
       );
     }
   }
-
-  for (const symbol of legacyStyleableAllowlist) {
-    if (!publicStyleableModules.has(symbol)) {
-      failures.push(
-        `Legacy HellStyleable allowlist declares ${symbol}, but no exported styled Module was found; remove stale migrated/deleted symbols`,
-      );
-    }
-  }
 }
 
 function extendsMigratedPartStyleMapBase(classSource) {
@@ -3660,23 +3446,12 @@ function checkPartStyleMapContract() {
       failures.push(`Part Style Map core contract must export ${name}`);
     }
   }
-  if (styleableSource.includes('HellPartStyleable')) {
-    failures.push(
-      'Part Style Map core contract must stay composition-based; do not reintroduce the HellPartStyleable inheritance base',
-    );
-  }
   if (
     !/export\s+type\s+HellUiInput<Part extends string>\s*=\s*string\s*\|\s*HellUi<Part>\s*\|\s*null\s*\|\s*undefined/.test(
       styleableCompact,
     )
   ) {
     failures.push('HellUiInput must keep the string/default-part shorthand shape');
-  }
-  if (/@Input\(\{\s*alias:\s*['"]ui['"]/.test(styleableCompact)) {
-    failures.push('Part Style Map core must not keep a decorator-based [ui] compatibility input');
-  }
-  if (/\b(?:set\s+ui|uiSignal)\b/.test(styleableCompact)) {
-    failures.push('Part Style Map core must not keep a parallel ui compatibility path');
   }
   if (!styleableSource.includes('readonly defaultPart: Part')) {
     failures.push('hellPartStyler options must own a default public part for string shorthand');
@@ -3708,16 +3483,6 @@ function checkPartStyleMapContract() {
       failures.push(`Core API report must cover Part Style Map core export ${symbol}`);
     }
   }
-  for (const [label, report] of [
-    ['Root', rootApiReport],
-    ['Core', coreApiReport],
-  ]) {
-    if (report.includes('HellPartStyleable')) {
-      failures.push(
-        `${label} API report must not expose the removed HellPartStyleable inheritance base`,
-      );
-    }
-  }
   // Migrated component reports expose their own typed [ui] signal inputs.
   const inputApiReport = readApiReport('hell-ui-angular-input.api.md');
   const dialpadApiReport = readApiReport('hell-ui-angular-dialpad.api.md');
@@ -3734,7 +3499,6 @@ function checkPartStyleMapContract() {
     checkMigratedPartStyleMapModule(module, entrypointPackageDirs);
   }
   checkBasicFloatingListStructuralAffordances();
-  checkLegacyPartStyleCompatibilityHelpers();
 
   if (!packageConsumer.includes("name: 'button-ui'")) {
     failures.push('Package-consumer scenarios must include button-ui for ui shorthand without CSS');
@@ -3786,33 +3550,6 @@ function checkPartStyleMapContract() {
     failures.push('Production-readiness package-consumer gate must require button-ui and button');
   }
 
-  const migrationGuide = readFile(join(root, 'docs/release/first-beta-consumer-guide.md'));
-  const readme = readFile(join(root, 'README.md'));
-  const requiredMigrationGuideTerms = [
-    'Part Style Maps replace Style Opt-Out',
-    'HellButton',
-    'HellInput',
-    'HellNativeSelect',
-    'HellTextarea',
-    'HellDialpad',
-    'ui="..."',
-    '[ui]="{ ... }"',
-    'class',
-    'MUST replace',
-    'legacyStyleableAllowlist',
-    'consumer',
-    '@source',
-  ];
-  for (const term of requiredMigrationGuideTerms) {
-    if (!migrationGuide.includes(term)) {
-      failures.push(`First beta migration guide must document Part Style Map policy term: ${term}`);
-    }
-  }
-  if (!readme.includes('legacyStyleableAllowlist') || !readme.includes('MUST replace')) {
-    failures.push(
-      'README Component Contract must point to the not-yet-migrated allowlist with MUST replace wording',
-    );
-  }
 }
 
 function checkMigratedPartStyleMapModule(module, entrypointPackageDirs) {
@@ -3849,17 +3586,6 @@ function checkMigratedPartStyleMapModule(module, entrypointPackageDirs) {
     failures.push(
       `${rel} ${module.className} must compose hellPartStyler<${module.partType}> over its ui input`,
     );
-  }
-  if (/extends\s+HellPartStyleable\b/.test(moduleSource)) {
-    failures.push(
-      `${rel} ${module.className} must not reintroduce the removed HellPartStyleable inheritance base`,
-    );
-  }
-  if (/\bHellStyleable\b/.test(moduleSource)) {
-    failures.push(`${rel} ${module.className} must not keep legacy HellStyleable`);
-  }
-  if (moduleSource.includes('unstyled')) {
-    failures.push(`${rel} ${module.className} must not keep Style Opt-Out`);
   }
   if (!moduleSource.includes("part('") || !moduleSource.includes('recipe')) {
     failures.push(
@@ -3916,11 +3642,6 @@ function checkMigratedPartStyleMapModule(module, entrypointPackageDirs) {
       failures.push(`${rel} ${module.className} must not expose ${label}`);
     }
   }
-  if (module.legacyClass && legacyClassAppliedPattern(module.legacyClass).test(moduleSource)) {
-    failures.push(
-      `${rel} ${module.className} must not apply legacy .${module.legacyClass} default styling`,
-    );
-  }
   if (module.componentVariablePrefix && moduleSource.includes(module.componentVariablePrefix)) {
     failures.push(
       `${rel} ${module.className} must not introduce component-specific theme variables`,
@@ -3933,11 +3654,6 @@ function checkMigratedPartStyleMapModule(module, entrypointPackageDirs) {
   }
 
   const publicApi = readFile(join(root, module.publicApiPath));
-  if (/\bHellStyleable\b/.test(publicApi)) {
-    failures.push(
-      `${module.publicApiPath} must not re-export legacy HellStyleable for migrated ${module.className}`,
-    );
-  }
   const expectedExport = `./${relative(dirname(module.publicApiPath), module.sourcePath)
     .replace(/\.ts$/, '')
     .replaceAll('\\', '/')}`;
@@ -3952,32 +3668,9 @@ function checkMigratedPartStyleMapModule(module, entrypointPackageDirs) {
 
   for (const reportFile of module.apiReportFiles) {
     const report = readApiReport(reportFile);
-    if (
-      report.includes('export abstract class HellStyleable') ||
-      report.includes('readonly unstyled:')
-    ) {
-      failures.push(
-        `${reportFile} must not expose legacy HellStyleable for migrated ${module.className}`,
-      );
-    }
     for (const symbol of [module.className, module.partType, module.uiType]) {
       if (!report.includes(symbol)) {
         failures.push(`${reportFile} must cover migrated Part Style Map export ${symbol}`);
-      }
-    }
-  }
-}
-
-function checkLegacyPartStyleCompatibilityHelpers() {
-  const sourceFiles = libraryProductionTsFiles().map((file) => join(root, file));
-  for (const file of sourceFiles) {
-    const rel = file.slice(root.length + 1);
-    for (const module of decoratedClassModules(readFile(file))) {
-      if (!legacyClassAppliedPattern('hell-button').test(module.moduleSource)) continue;
-      if (!legacyStyleableAllowlist.has(module.className)) {
-        failures.push(
-          `${rel} ${module.className} applies legacy .hell-button outside legacyStyleableAllowlist`,
-        );
       }
     }
   }
@@ -4083,13 +3776,6 @@ function functionBody(source, name) {
 
 function readApiReport(fileName) {
   return readFile(join(root, 'etc/api-reports', fileName));
-}
-
-function legacyClassAppliedPattern(className) {
-  const escaped = escapeRegExp(className);
-  return new RegExp(
-    `\\[class\\.${escaped}\\]|class\\s*=\\s*["'][^"']*\\b${escaped}\\b|classList\\.add\\(\\s*["']${escaped}["']`,
-  );
 }
 
 function compactSource(source) {
@@ -4252,16 +3938,13 @@ function exportedStyleableClasses(source) {
     'HellNativeRadio',
     ...[
       ...source.matchAll(
-        /(?:abstract\s+)?class\s+([A-Za-z0-9_]+)[^{]*extends\s+(?:HellStyleable|HellNativeInteractiveDisabledGuard)\b/g,
+        /(?:abstract\s+)?class\s+([A-Za-z0-9_]+)[^{]*extends\s+HellNativeInteractiveDisabledGuard\b/g,
       ),
     ].map((match) => match[1]),
   ]);
 
   return decoratedClassModules(source).filter((module) => {
-    if (
-      module.classSource.includes('extends HellStyleable') ||
-      module.moduleSource.includes('hellPartStyler')
-    ) {
+    if (module.moduleSource.includes('hellPartStyler')) {
       return true;
     }
 
@@ -4310,9 +3993,6 @@ function checkExperimentalFeatureContract() {
   );
   if (!/allowSpeechTranscript\s*=\s*input\(false/.test(audioSource)) {
     failures.push('Audio speech transcript must remain explicitly opt-in while experimental');
-  }
-  if (!/allowLiveCaptions\s*=\s*input\(false/.test(audioSource)) {
-    failures.push('Audio live captions compatibility alias must remain explicitly opt-in');
   }
   if (!audioSource.includes('@experimental Browser speech transcripts')) {
     failures.push(
@@ -5319,12 +4999,6 @@ const allowedBrowserGlobalSeams = [
       "if (typeof ResizeObserver === 'undefined') return;",
       'this.resizeObserver = new ResizeObserver(this.syncScope);',
     ],
-  },
-  {
-    id: 'code-editor-legacy-document-setup',
-    file: 'packages/angular/features/code-editor/code-editor.runtime.ts',
-    globals: ['document'],
-    lines: ["typeof document === 'undefined' ? [] : hellCodeEditorSetupFactory(document);"],
   },
 ];
 

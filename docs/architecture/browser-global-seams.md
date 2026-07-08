@@ -37,7 +37,6 @@ A new direct global must do one of these in the same change:
 | toast-viewport-resize-observer | `packages/angular/toast/toast.ts` | `ResizeObserver` | Accepted component seam | Toast viewport collapse logic needs rendered viewport dimensions, is guarded for non-browser runtimes, and disconnects on destroy. |
 | floating-dismissal-document-fallback | `packages/angular/internal/core/floating-dismissal.ts` | `document` | Accepted flyout/internal fallback | Floating dismissal is a pure controller usable outside Angular DI, so it has a guarded fallback when no owner document is passed. Omnibar passes an owner document for its focus-only rule. |
 | floating-scope-resize-observer | `packages/angular/internal/core/floating-scope.ts` | `ResizeObserver` | Accepted internal seam | Floating scope is the documented owner for portaled-surface CSS variable sync; it guards observer creation and disconnects listeners/observer on teardown. |
-| code-editor-legacy-document-setup | `packages/angular/features/code-editor/code-editor.runtime.ts` | `document` | Provisional compatibility seam | The deprecated `hellCodeEditorSetup` compatibility constant guards `document` on import and points consumers at `hellCodeEditorSetupFactory(ownerDocument)`. Keep CodeMirror client-only and narrow. |
 
 Provisional rows are not permanent waivers. If a seam changes scope, update
 this document and the architecture allowlist in the same commit.

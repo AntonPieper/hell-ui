@@ -88,7 +88,6 @@ re-probed on extractor upgrades. Experimental surfaces
 | Testing harnesses (`@hell-ui/angular/testing`) | Stable/test-only | CDK component harnesses for consumer and library tests |
 | Speech transcript (`allowSpeechTranscript`) | Experimental/browser-only/best-effort | Requires `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript`; uses `navigator` + `SpeechRecognition` + `captureStream`; not accessibility-grade captions or production timed text |
 | Removed table aliases and row-as-control APIs | Removed before beta | Use `@hell-ui/angular/table` for primitives or `@hell-ui/angular/table-tanstack` for a TanStack-owned table shell |
-| Deprecated non-table aliases (`allowLiveCaptions`, `hellAudioSpeechSupported` from `/audio-player`, `hellCodeEditorSetup`) | Deprecated | Keep compatibility imports only while migrating to the documented replacements |
 
 The PDF viewer was split out before public beta; use `@hell-ui/pdf-viewer` for the component, styles, and worker setup docs.
 

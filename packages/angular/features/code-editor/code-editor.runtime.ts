@@ -111,15 +111,6 @@ export function hellCodeEditorSetupFactory(ownerDocument: Document): Extension {
 }
 
 /**
- * @experimental Setup helper for the experimental CodeMirror feature entry point.
- * @deprecated Browser-global legacy setup kept for backward compatibility. Prefer
- * `hellCodeEditorSetupFactory(ownerDocument)` so callers can create setup for
- * the editor document realm explicitly.
- */
-export const hellCodeEditorSetup: Extension =
-  typeof document === 'undefined' ? [] : hellCodeEditorSetupFactory(document);
-
-/**
  * hell-flavoured CodeMirror theme. Uses CSS variables so light/dark mode and
  * local token overrides stay aligned with the rest of the component library.
  *

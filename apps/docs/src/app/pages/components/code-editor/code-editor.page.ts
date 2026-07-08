@@ -214,9 +214,8 @@ import codeEditorStylingExampleCodeRaw from './examples/styling.example.ts?raw' 
           <code>HellCodeEditorUi</code> (<code>HellUi&lt;HellCodeEditorPart&gt;</code>).
         </li>
         <li>
-          <code>hellCodeEditorSetupFactory(document)</code>: preferred setup export when an app needs
-          a specific document or shadow-root owner. <code>hellCodeEditorSetup</code> remains as a
-          deprecated browser-global legacy compatibility alias.
+          <code>hellCodeEditorSetupFactory(document)</code>: the setup export; pass the document or
+          shadow-root owner the editor renders into.
         </li>
         <li>
           <code>hellCodeEditorTheme</code>: the token-backed CodeMirror theme extension the runtime

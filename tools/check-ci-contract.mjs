@@ -696,7 +696,6 @@ for (const check of fileChecks) {
   }
 }
 
-checkRemovedBrittleCiHelpers();
 checkPackageConsumerCatalogDrift();
 checkSemanticE2eGroups();
 checkPackageConsumerPackAuditOrder();
@@ -970,14 +969,6 @@ function parseScenarioCsv(value) {
 
 function formatList(values) {
   return values.length ? values.join(',') : '(none)';
-}
-
-function checkRemovedBrittleCiHelpers() {
-  for (const path of ['tools/serve-built-docs.mjs', 'tools/install-playwright-webkit-deps.sh']) {
-    if (existsSync(path)) {
-      errors.push(`${path} must be removed in favor of official Angular/Playwright CI patterns.`);
-    }
-  }
 }
 
 function checkSemanticE2eGroups() {

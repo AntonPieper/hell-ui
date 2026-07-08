@@ -6,8 +6,7 @@ import {
 } from '@hell-ui/angular/internal/core';
 
 export const HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE = 'data-hell-dialog-scope-root';
-const HELL_DIALOG_SCOPE_LEGACY_ROOT_ATTRIBUTE = 'data-dialog-root';
-const HELL_DIALOG_SCOPE_ROOT_SELECTOR = `[${HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE}="true"], [${HELL_DIALOG_SCOPE_LEGACY_ROOT_ATTRIBUTE}="true"]`;
+const HELL_DIALOG_SCOPE_ROOT_SELECTOR = `[${HELL_DIALOG_SCOPE_ROOT_ATTRIBUTE}="true"]`;
 const HELL_DIALOG_SCOPE_VARS: HellFloatingInsetVars = {
   top: '--hell-dialog-scope-top',
   right: '--hell-dialog-scope-right',
