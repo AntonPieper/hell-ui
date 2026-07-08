@@ -329,6 +329,13 @@ export const apiReportEntrypoints = [
     policy: 'stable',
   },
   {
+    id: 'spinner',
+    specifier: '@hell-ui/angular/spinner',
+    mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular-spinner.d.ts',
+    reportFileName: 'hell-ui-angular-spinner.api.md',
+    policy: 'stable',
+  },
+  {
     id: 'split-view',
     specifier: '@hell-ui/angular/split-view',
     mainEntryPointFilePath: 'dist/hell/types/hell-ui-angular-split-view.d.ts',

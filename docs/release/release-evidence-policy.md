@@ -77,6 +77,7 @@ language remain policy-owned.
 | `@hell-ui/angular/separator` | `hell-ui-angular-separator.api.md` | Stable API report. |
 | `@hell-ui/angular/skeleton` | `hell-ui-angular-skeleton.api.md` | Stable API report. |
 | `@hell-ui/angular/slider` | `hell-ui-angular-slider.api.md` | Stable API report. |
+| `@hell-ui/angular/spinner` | `hell-ui-angular-spinner.api.md` | Stable API report. |
 | `@hell-ui/angular/split-view` | `hell-ui-angular-split-view.api.md` | Stable API report. |
 | `@hell-ui/angular/switch` | `hell-ui-angular-switch.api.md` | Stable API report. |
 | `@hell-ui/angular/table` | `hell-ui-angular-table.api.md` | Stable API report. |
