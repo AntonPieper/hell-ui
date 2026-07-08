@@ -17,6 +17,16 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   unchanged. Evidence: `etc/api-reports/hell-ui-angular-dialog.api.md` and the
   `data-size` assertions in `packages/angular/dialog/dialog.spec.ts`.
 
+- `HellSlider`'s `size` input narrowed from `HellSize` to
+  `Exclude<HellSize, 'xs' | 'xl'>` (`'sm' | 'md' | 'lg'`). The slider recipe
+  and structural CSS only ever styled `sm`/`md`/`lg`, so `xs` and `xl`
+  type-checked but silently rendered the base `md` visuals; the narrowed type
+  matches the recipe coverage and the form-control convention (`HellInput`,
+  `HellNativeSelect`, `HellTextarea`, `HellDateInput`, `HellTimeInput`).
+  Consumers passing `size="xs"` or `size="xl"` now get a compile error and
+  should pick `sm`/`lg`; rendered output is unchanged. Evidence:
+  `etc/api-reports/hell-ui-angular-slider.api.md` and the `data-size`
+  assertions in `packages/angular/slider/slider.spec.ts`.
 - Moved `HellSpinner` out of `@hell-ui/angular/skeleton` into its own
   `@hell-ui/angular/spinner` entry point, per the Light Root Entry Point and
   import-path-first layout rules: the two modules solve different problems and
