@@ -273,8 +273,8 @@ export class HellDialog {
     recipe: () => HELL_DIALOG_RECIPE,
   });
 
-  /** Max-width breakpoint of the dialog. Defaults to `'md'`. */
-  readonly size = input<HellSize>('md');
+  /** Max-width breakpoint of the dialog; `sm`, `md`, `lg`, or `xl`. Defaults to `'md'`. */
+  readonly size = input<Exclude<HellSize, 'xs'>>('md');
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly focusMonitor = inject(FocusMonitor);

@@ -32,8 +32,7 @@ export class HellSlider implements ControlValueAccessor {
     registerOnChange(fn: (value: number) => void): void;
     registerOnTouched(fn: () => void): void;
     setDisabledState(isDisabled: boolean): void;
-    // Warning: (ae-forgotten-export) The symbol "HellSize" needs to be exported by the entry point hell-ui-angular-slider.d.ts
-    readonly size: _angular_core.InputSignal<HellSize>;
+    readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
     protected readonly sliderState: ng_primitives_slider.NgpSliderState;
     readonly step: _angular_core.InputSignalWithTransform<number, unknown>;
     readonly thumb: _angular_core.InputSignal<"always" | "hover">;

@@ -113,8 +113,8 @@ export class HellSlider implements ControlValueAccessor {
   readonly disabled = input(false, { transform: booleanAttribute });
   /** Layout axis of the slider. Defaults to `'horizontal'`. */
   readonly orientation = input<HellOrientation>('horizontal');
-  /** Visual size of the slider. Defaults to `'md'`. */
-  readonly size = input<HellSize>('md');
+  /** Visual size of the slider; `sm`, `md`, or `lg`. Defaults to `'md'`. */
+  readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   /** Accessible label for the thumb, mirrored from the host's `aria-label` when unset. */
   readonly ariaLabel = input<string | null>(null, { alias: 'aria-label' });
   /**

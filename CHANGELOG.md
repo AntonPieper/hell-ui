@@ -7,6 +7,46 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- `HellDialog`'s `size` input narrowed from `HellSize` to
+  `Exclude<HellSize, 'xs'>` (`'sm' | 'md' | 'lg' | 'xl'`). The dialog recipe
+  only styles `sm`/`lg`/`xl` max-widths on top of the `md` base, so `xs`
+  type-checked but silently rendered the base `md` visuals; the narrowed type
+  matches the recipe coverage, following the repo convention that components
+  narrow `size` to exactly the sizes their recipe styles. Consumers passing
+  `size="xs"` now get a compile error and should pick `sm`; rendered output is
+  unchanged. Evidence: `etc/api-reports/hell-ui-angular-dialog.api.md` and the
+  `data-size` assertions in `packages/angular/dialog/dialog.spec.ts`.
+
+- `HellSlider`'s `size` input narrowed from `HellSize` to
+  `Exclude<HellSize, 'xs' | 'xl'>` (`'sm' | 'md' | 'lg'`). The slider recipe
+  and structural CSS only ever styled `sm`/`md`/`lg`, so `xs` and `xl`
+  type-checked but silently rendered the base `md` visuals; the narrowed type
+  matches the recipe coverage and the form-control convention (`HellInput`,
+  `HellNativeSelect`, `HellTextarea`, `HellDateInput`, `HellTimeInput`).
+  Consumers passing `size="xs"` or `size="xl"` now get a compile error and
+  should pick `sm`/`lg`; rendered output is unchanged. Evidence:
+  `etc/api-reports/hell-ui-angular-slider.api.md` and the `data-size`
+  assertions in `packages/angular/slider/slider.spec.ts`.
+- Moved `HellSpinner` out of `@hell-ui/angular/skeleton` into its own
+  `@hell-ui/angular/spinner` entry point, per the Light Root Entry Point and
+  import-path-first layout rules: the two modules solve different problems and
+  each already had its own docs page. The spinner's Label Contract moves with
+  it and is renamed to match its owning entry point — `HellSkeletonLabels`,
+  `HELL_SKELETON_LABELS`, and `provideHellSkeletonLabels` become
+  `HellSpinnerLabels`, `HELL_SPINNER_LABELS`, and `provideHellSpinnerLabels`
+  (the `loading` label was only ever consumed by `hellSpinner`;
+  `hellSkeleton` is `aria-hidden` and owns no text, so the skeleton entry
+  point no longer exports a label contract). Spinner visuals also move to
+  `@hell-ui/angular/spinner/styles.css`. Migration: import `HellSpinner`,
+  `HellSpinnerPart`, `HellSpinnerUi`, and `HellSpinnerVariant` from
+  `@hell-ui/angular/spinner`; rename label overrides to
+  `provideHellSpinnerLabels({ loading })` from the same entry point; and add
+  `@import '@hell-ui/angular/spinner/styles.css'` wherever the skeleton
+  stylesheet previously covered spinners. No selectors, data attributes,
+  parts, keyframes, or runtime behavior changed. Evidence:
+  `packages/angular/spinner/spinner.spec.ts`,
+  `etc/api-reports/hell-ui-angular-spinner.api.md`, and
+  `pnpm run test:architecture`.
 - Migrated the last two Style Opt-Out surfaces to typed Part Style Maps and
   removed the legacy `HellStyleable` base (and its `unstyled` input) from
   `@hell-ui/angular/core`. `HellAvatarGroup`, `HellAvatarGroupItem`, and

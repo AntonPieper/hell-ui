@@ -1251,7 +1251,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/skeleton',
     detail: 'components/skeleton/examples/all-parts-styling.example.ts',
     terms:
-      'all-parts-styling hellSkeleton hellSpinner HellSkeletonUi HellSpinnerUi ui part style map root',
+      'all-parts-styling hellSkeleton HellSkeletonUi ui part style map root',
   },
   {
     title: 'Skeleton: Basic',
@@ -1335,7 +1335,7 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
     path: '/components/spinner',
     detail: 'components/spinner/examples/all-parts-styling.example.ts',
     terms:
-      'hellSpinner hellSkeleton HellSpinnerUi HellSkeletonUi ui part style map root text-hell bg-hell rounded-hell refinement',
+      'hellSpinner HellSpinnerUi ui part style map root text-hell rounded-hell refinement',
   },
   {
     title: 'Spinner: Basic',
@@ -1750,7 +1750,7 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
     title: 'Configure labels',
     path: '/getting-started',
     detail: 'provideHell<Module>Labels, HELL_<MODULE>_LABELS',
-    terms: 'i18n labels localization aria-label accessibility provideHellPaginationLabels provideHellSkeletonLabels labels',
+    terms: 'i18n labels localization aria-label accessibility provideHellPaginationLabels provideHellSpinnerLabels labels',
   },
   {
     title: 'Combobox slots',

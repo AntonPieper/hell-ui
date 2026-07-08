@@ -269,7 +269,7 @@ export type HellNavSectionUi = HellUi<HellNavSectionPart>;
 
 // @public
 export class HellSecondaryToggle {
-    readonly appearance: _angular_core.InputSignal<"plain" | "header" | "rail">;
+    readonly appearance: _angular_core.InputSignal<"header" | "plain" | "rail">;
     protected readonly hidden: () => boolean;
     protected readonly labels: HellAppShellLabels;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;

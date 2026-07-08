@@ -46,6 +46,7 @@ const angularRecipeSourceFiles = [
   'separator/separator.ts',
   'skeleton/skeleton.ts',
   'slider/slider.ts',
+  'spinner/spinner.ts',
   'switch/switch.ts',
   'tag/tag.ts',
   'toggle/toggle.ts',

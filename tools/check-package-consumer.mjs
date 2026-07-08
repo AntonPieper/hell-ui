@@ -1595,12 +1595,8 @@ import {
 } from '${packageName}/select';
 import { HellSeparator, type HellSeparatorUi } from '${packageName}/separator';
 import { HellSlider, type HellSliderUi } from '${packageName}/slider';
-import {
-  HellSkeleton,
-  HellSpinner,
-  type HellSkeletonUi,
-  type HellSpinnerUi,
-} from '${packageName}/skeleton';
+import { HellSkeleton, type HellSkeletonUi } from '${packageName}/skeleton';
+import { HellSpinner, type HellSpinnerUi } from '${packageName}/spinner';
 import { HellSwitch, HellNativeSwitch, type HellNativeSwitchUi, type HellSwitchUi } from '${packageName}/switch';
 import {
   HellBadge,
@@ -2556,6 +2552,7 @@ function primitivesConsumerStylesCss() {
 @import "${packageName}/separator/styles.css";
 @import "${packageName}/slider/styles.css";
 @import "${packageName}/skeleton/styles.css";
+@import "${packageName}/spinner/styles.css";
 @import "${packageName}/switch/styles.css";
 @import "${packageName}/tag/styles.css";
 @import "${packageName}/tabs/styles.css";

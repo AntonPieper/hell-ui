@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { InteractivityChecker } from '@angular/cdk/a11y';
 import { NgpDialogManager } from 'ng-primitives/dialog';
 
+import { type HellSize } from '@hell-ui/angular/core';
 import {
   HELL_DIALOG_DIRECTIVES,
   type HellDialogDescriptionUi,
@@ -187,6 +188,22 @@ class DialogPartStyleHost {
   readonly descriptionUi = { root: 'mt-0 text-hell-primary' } satisfies HellDialogDescriptionUi;
 }
 
+@Component({
+  imports: [...HELL_DIALOG_DIRECTIVES],
+  template: `
+    <button id="open-sized" type="button" [hellDialogTrigger]="sizedDialog">Open sized</button>
+
+    <ng-template #sizedDialog>
+      <div id="sized-overlay" hellDialogOverlay>
+        <div hellDialog [size]="size()">Sized</div>
+      </div>
+    </ng-template>
+  `,
+})
+class DialogSizeHost {
+  readonly size = signal<Exclude<HellSize, 'xs'>>('md');
+}
+
 const nativeGetAnimations = HTMLElement.prototype.getAnimations;
 
 beforeAll(() => {
@@ -214,6 +231,7 @@ describe('HellDialogTrigger scoped overlays', () => {
         DialogDataHost,
         NamedDialogHost,
         DialogPartStyleHost,
+        DialogSizeHost,
       ],
     }).compileComponents();
   });
@@ -407,6 +425,24 @@ describe('HellDialogTrigger scoped overlays', () => {
     expect(document.getElementById(descriptionIds[0])?.textContent?.trim()).toBe(
       'Once published, the article will be visible to everyone.',
     );
+  });
+
+  it('reflects the supported size scale on data-size for recipe and CSS hooks', async () => {
+    const fixture = TestBed.createComponent(DialogSizeHost);
+    await settle(fixture);
+
+    query<HTMLButtonElement>(fixture.nativeElement, '#open-sized').click();
+    await settle(fixture);
+
+    const overlay = query<HTMLElement>(document.body, '#sized-overlay');
+    const dialog = query<HTMLElement>(overlay, '[role="dialog"]');
+    expect(dialog.getAttribute('data-size')).toBe('md');
+
+    for (const size of ['sm', 'lg', 'xl'] as const) {
+      fixture.componentInstance.size.set(size);
+      await settle(fixture);
+      expect(dialog.getAttribute('data-size')).toBe(size);
+    }
   });
 
   it('applies Part Style Map classes while preserving title and description wiring', async () => {
