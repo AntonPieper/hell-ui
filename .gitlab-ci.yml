@@ -78,6 +78,7 @@ build:
   script:
     - pnpm run ci:ensure:build:lib
     - pnpm run ci:ensure:build:docs
+    - pnpm run diagnose:docs-bundle
     - pnpm run ci:test:api-report:prepared
   artifacts:
     expire_in: 14 days

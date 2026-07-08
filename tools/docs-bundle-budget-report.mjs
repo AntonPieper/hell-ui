@@ -17,7 +17,7 @@ import {
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const options = parseArgs(process.argv.slice(2));
 const statsPath = resolveFromRoot(options.stats ?? 'dist/hell-docs/stats.json');
-const reportPath = resolveFromRoot(options.out ?? 'docs/release/docs-bundle-budget-diagnosis.md');
+const reportPath = resolveFromRoot(options.out ?? 'dist/docs-bundle-budget-diagnosis.md');
 const angularJsonPath = join(root, 'apps/docs/angular.json');
 const budgetPolicyPath = join(root, DOCS_BUDGET_POLICY_PATH);
 
@@ -70,22 +70,10 @@ const blockingBudgetMessages = [
 const reverseImporters = buildReverseImporters(outputs);
 
 const report = renderReport();
-const reportExists = existsSync(reportPath);
-const reportMatchesCurrentStats = reportExists && readFileSync(reportPath, 'utf8') === report;
-if (!options.summaryOnly) {
-  mkdirSync(dirname(reportPath), { recursive: true });
-  writeFileSync(reportPath, report);
-  console.log(`Wrote ${relative(root, reportPath)}`);
-}
+mkdirSync(dirname(reportPath), { recursive: true });
+writeFileSync(reportPath, report);
+console.log(`Wrote ${relative(root, reportPath)}`);
 printBudgetSummary();
-
-if (options.check) {
-  if (options.verifyOutput && !reportMatchesCurrentStats) {
-    blockingBudgetMessages.push(
-      `${relative(root, reportPath)} is missing or stale for ${relative(root, statsPath)}. Run pnpm run diagnose:docs-bundle.`,
-    );
-  }
-}
 
 if (options.check && blockingBudgetMessages.length > 0) {
   console.error('Docs budget policy failed:');
@@ -107,14 +95,6 @@ function parseArgs(args) {
       parsed.check = true;
       continue;
     }
-    if (arg === '--summary-only') {
-      parsed.summaryOnly = true;
-      continue;
-    }
-    if (arg === '--verify-output') {
-      parsed.verifyOutput = true;
-      continue;
-    }
     if (arg === '--stats' || arg === '--out') {
       const value = args[index + 1];
       if (!value) {
@@ -134,9 +114,9 @@ function parseArgs(args) {
 }
 
 function printUsage() {
-  console.log(`Usage: node tools/docs-bundle-budget-report.mjs [--check] [--summary-only] [--verify-output] [--stats dist/hell-docs/stats.json] [--out docs/release/docs-bundle-budget-diagnosis.md]
+  console.log(`Usage: node tools/docs-bundle-budget-report.mjs [--check] [--stats dist/hell-docs/stats.json] [--out dist/docs-bundle-budget-diagnosis.md]
 
-Reads Angular's esbuild stats.json for the docs app, classifies accepted budget warnings vs regressions, and writes a bundle-budget diagnosis report unless --summary-only is used. Use --verify-output with --check to fail when the tracked diagnosis does not match the current stats.`);
+Reads Angular's esbuild stats.json for the docs app, classifies accepted budget warnings vs regressions, and writes the bundle-budget diagnosis report to the untracked output path. CI uploads the report as a build artifact. Use --check to fail on budget policy regressions.`);
 }
 
 function resolveFromRoot(path) {

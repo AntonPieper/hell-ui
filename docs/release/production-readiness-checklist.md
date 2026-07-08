@@ -320,7 +320,7 @@ mapped to command evidence and concrete evidence checks.
         {
           "type": "fileContains",
           "label": "docs budget diagnosis is current and classified",
-          "path": "docs/release/docs-bundle-budget-diagnosis.md",
+          "path": "dist/docs-bundle-budget-diagnosis.md",
           "contains": [
             "## Budget status",
             "accepted warning",

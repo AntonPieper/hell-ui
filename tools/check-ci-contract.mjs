@@ -3,7 +3,6 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 
 import {
   DOCS_BUDGET_POLICY_PATH,
-  parseBudgetSize,
   readDocsBudgetPolicy,
   validateDocsBudgetPolicy,
   validateDocsBudgetPolicyMarkdown,
@@ -40,7 +39,6 @@ const requiredFiles = [
   'docs/release/release-evidence-policy.md',
   'docs/release/production-readiness-checklist.md',
   'docs/release/docs-budget-policy.md',
-  'docs/release/docs-bundle-budget-diagnosis.md',
 ];
 
 const requiredScripts = {
@@ -51,7 +49,7 @@ const requiredScripts = {
   'test:api-report': 'node tools/check-api-reports.mjs',
   'test:changelog': 'node tools/check-changelog.mjs',
   'api-report:update': 'node tools/check-api-reports.mjs --local',
-  'build:docs': 'pnpm --filter hell-docs build && node tools/docs-bundle-budget-report.mjs --check --summary-only --verify-output',
+  'build:docs': 'pnpm --filter hell-docs build && node tools/docs-bundle-budget-report.mjs --check',
   'release:dry-run': 'node tools/release-dry-run.mjs',
   'production-ready:check': 'node tools/production-ready-check.mjs',
   'ci:test': 'node tools/run-ci-tests.mjs',
@@ -1252,10 +1250,9 @@ function checkDocsBudgetPolicy() {
   errors.push(...policyRead.errors);
   errors.push(...validateDocsBudgetPolicy(policyRead.policy, budgets));
   errors.push(...validateDocsBudgetPolicyMarkdown(policyContent, policyRead.policy));
-  checkDocsBudgetDiagnosis(policyRead.policy, budgets);
 
   const buildDocsScript = packageJson.scripts?.['build:docs'] ?? '';
-  if (!buildDocsScript.includes('node tools/docs-bundle-budget-report.mjs --check --summary-only')) {
+  if (!buildDocsScript.includes('node tools/docs-bundle-budget-report.mjs --check')) {
     errors.push('build:docs must classify accepted docs budget warnings vs regressions after the Angular build.');
   }
 }
@@ -1264,215 +1261,6 @@ function requireDocsBudget(budgets, type) {
   if (!budgets.some((budget) => budget.type === type)) {
     errors.push(`apps/docs/angular.json production budgets must include ${type}.`);
   }
-}
-
-function checkDocsBudgetDiagnosis(policy, budgets) {
-  const path = 'docs/release/docs-bundle-budget-diagnosis.md';
-  if (!existsSync(path)) return;
-
-  const content = readFileSync(path, 'utf8');
-  const rows = readBudgetStatusRows(content);
-  if (rows.length === 0) {
-    errors.push(`${path} must include a generated budget status table.`);
-  }
-
-  const acceptedDetailRows = readAcceptedWarningDetailRows(content);
-  const acceptedDetailRowsByType = new Map();
-  for (const detail of acceptedDetailRows) {
-    const type = budgetTypeForReportLabel(detail.label);
-    if (!type) {
-      errors.push(`${path} accepted warning details table documents unknown budget ${detail.label}.`);
-      continue;
-    }
-    if (acceptedDetailRowsByType.has(type)) {
-      errors.push(`${path} accepted warning details table documents duplicate budget ${detail.label}.`);
-      continue;
-    }
-    acceptedDetailRowsByType.set(type, detail);
-  }
-
-  const acceptedWarnings = policy?.acceptedWarnings ?? [];
-  const seenWarningTypes = new Set();
-  const seenAcceptedDetailTypes = new Set();
-  const rowsByType = new Map();
-
-  for (const row of rows) {
-    const type = budgetTypeForReportLabel(row.label);
-    if (!type) {
-      errors.push(`${path} budget status table documents unknown budget ${row.label}.`);
-      continue;
-    }
-
-    if (rowsByType.has(type)) {
-      errors.push(`${path} budget status table documents duplicate budget ${row.label}.`);
-      continue;
-    }
-    rowsByType.set(type, row);
-
-    const currentBytes = parseReportSize(row.current);
-    const warningBytes = parseReportSize(row.warning);
-    if (!Number.isFinite(currentBytes) || !Number.isFinite(warningBytes)) {
-      errors.push(`${path} budget row ${row.label} must include parseable current and warning sizes.`);
-      continue;
-    }
-
-    const acceptedWarning = acceptedWarnings.find((warning) => warning.type === type);
-    const isWarning = currentBytes > warningBytes;
-    if (row.status.includes('regression')) {
-      errors.push(`${path} records a ${row.label} budget regression; fix it or document a narrow accepted warning.`);
-    }
-
-    if (!isWarning) {
-      if (acceptedWarning) {
-        errors.push(`${path} shows ${row.label} within budget; remove stale accepted warning ${type} from docs-budget-policy.`);
-      }
-      continue;
-    }
-
-    seenWarningTypes.add(type);
-    if (!acceptedWarning) {
-      errors.push(`${path} shows a ${row.label} warning, but docs-budget-policy has no accepted warning for ${type}.`);
-      continue;
-    }
-
-    const acceptedMaximumBytes = parseBudgetSize(acceptedWarning.acceptedMaximum);
-    if (!Number.isFinite(acceptedMaximumBytes)) {
-      errors.push(`docs-budget-policy accepted warning ${type} must include a parseable acceptedMaximum.`);
-      continue;
-    }
-    if (currentBytes > acceptedMaximumBytes) {
-      errors.push(`${path} ${row.label} is ${row.current}, above accepted warning ceiling ${acceptedWarning.acceptedMaximum}.`);
-    }
-    if (!row.status.includes('accepted warning')) {
-      errors.push(`${path} ${row.label} warning must be classified as accepted or regression in the budget status table.`);
-    }
-
-    const detail = acceptedDetailRowsByType.get(type);
-    if (!detail) {
-      errors.push(`${path} accepted warning details must include ${row.label}.`);
-      continue;
-    }
-
-    seenAcceptedDetailTypes.add(type);
-    compareReportSize(detail.current, row.current, `${path} ${row.label} accepted warning current size`);
-    compareReportSize(
-      detail.acceptedCeiling,
-      acceptedWarning.acceptedMaximum,
-      `${path} ${row.label} accepted warning ceiling`,
-    );
-    compareReportText(detail.owner, acceptedWarning.owner, `${path} ${row.label} accepted warning owner`);
-    compareReportText(detail.rationale, acceptedWarning.rationale, `${path} ${row.label} accepted warning rationale`);
-    compareReportText(detail.evidence, acceptedWarning.evidence, `${path} ${row.label} accepted warning evidence`);
-    compareReportText(detail.followUp, acceptedWarning.followUp, `${path} ${row.label} accepted warning follow-up`);
-    compareReportText(detail.expiry, acceptedWarning.expiresWhen, `${path} ${row.label} accepted warning expiry`);
-  }
-
-  for (const warning of acceptedWarnings) {
-    if (!seenWarningTypes.has(warning.type)) {
-      errors.push(`${path} does not show current warning ${warning.type}; remove or refresh accepted warning policy.`);
-    }
-  }
-
-  for (const budget of budgets) {
-    if (!rowsByType.has(budget.type)) {
-      errors.push(`${path} budget status table must include the configured ${budget.type} budget.`);
-    }
-  }
-
-  for (const type of acceptedDetailRowsByType.keys()) {
-    if (!seenAcceptedDetailTypes.has(type)) {
-      errors.push(`${path} accepted warning details include ${type}, but the budget status table does not show a current accepted warning.`);
-    }
-  }
-}
-
-function readBudgetStatusRows(content) {
-  return readMarkdownRows(content, '| Budget | Current | Warning | Error | Status |').map((cells) => ({
-    label: cells[0],
-    current: cells[1],
-    warning: cells[2],
-    error: cells[3],
-    status: cells[4],
-  }));
-}
-
-function readAcceptedWarningDetailRows(content) {
-  return readMarkdownRows(
-    content,
-    '| Budget | Current | Accepted ceiling | Owner | Rationale | Evidence | Follow-up | Expiry |',
-  ).map((cells) => ({
-    label: cells[0],
-    current: cells[1],
-    acceptedCeiling: cells[2],
-    owner: cells[3],
-    rationale: cells[4],
-    evidence: cells[5],
-    followUp: cells[6],
-    expiry: cells[7],
-  }));
-}
-
-function readMarkdownRows(content, header) {
-  const lines = content.split('\n');
-  const headerIndex = lines.findIndex((line) => line.trim() === header);
-  if (headerIndex === -1) return [];
-
-  const rows = [];
-  for (const line of lines.slice(headerIndex + 2)) {
-    if (!line.startsWith('| ')) break;
-    const cells = splitMarkdownRow(line);
-    if (cells.length === 0) continue;
-    rows.push(cells);
-  }
-  return rows;
-}
-
-function splitMarkdownRow(line) {
-  return line
-    .trim()
-    .replace(/^\|/, '')
-    .replace(/\|$/, '')
-    .split('|')
-    .map((cell) => cell.trim());
-}
-
-function budgetTypeForReportLabel(label) {
-  if (label === 'Initial bundle') return 'initial';
-  if (label === 'Any component style') return 'anyComponentStyle';
-  return null;
-}
-
-function parseReportSize(value) {
-  return parseBudgetSize(String(value).replace(/\s+largest$/, ''));
-}
-
-function compareReportSize(actual, expected, label) {
-  const actualBytes = parseReportSize(actual);
-  const expectedBytes = parseReportSize(expected);
-  if (!Number.isFinite(actualBytes)) {
-    errors.push(`${label} is not a parseable size.`);
-    return;
-  }
-  if (!Number.isFinite(expectedBytes)) {
-    errors.push(`${label} expected value is not a parseable size.`);
-    return;
-  }
-  if (Math.abs(actualBytes - expectedBytes) > 0.1) {
-    errors.push(`${label} (${actual}) must match ${expected}.`);
-  }
-}
-
-function compareReportText(actual, expected, label) {
-  if (normalizeReportText(actual) !== normalizeReportText(expected)) {
-    errors.push(`${label} must match docs-budget-policy.`);
-  }
-}
-
-function normalizeReportText(value) {
-  return String(value ?? '')
-    .replace(/^`|`$/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
 }
 
 if (errors.length > 0) {

@@ -7,7 +7,7 @@ Source of truth:
 - Threshold enforcement lives in `apps/docs/angular.json` under `hell-docs` production budgets.
 - Owner/rationale and accepted warnings live in this document.
 - `tools/check-ci-contract.mjs` fails when a configured threshold is missing an owner/rationale here or diverges from `apps/docs/angular.json`.
-- `tools/docs-bundle-budget-report.mjs --check` classifies current docs build budget status as **accepted** or **regression** after `build:docs` writes `dist/hell-docs/stats.json`.
+- `tools/docs-bundle-budget-report.mjs --check` classifies current docs build budget status as **accepted** or **regression** after `build:docs` writes `dist/hell-docs/stats.json`, and writes the full diagnosis to the untracked `dist/docs-bundle-budget-diagnosis.md` (uploaded as a CI build artifact; regenerate locally with `pnpm run diagnose:docs-bundle`).
 - The tables below are CI-checked against the JSON block so threshold, owner, rationale, follow-up, and expiry metadata cannot silently drift from the source of truth.
 
 ```json docs-budget-policy
@@ -37,7 +37,7 @@ Source of truth:
       "acceptedMaximum": "945kB",
       "owner": "Docs shell / global styles",
       "rationale": "The current warning is the accepted Angular 22 and TypeScript 6 internal-beta docs-shell baseline: Angular runtime/router, global Tailwind, Hell composite/table/toast CSS imported from public stylesheet entry points exactly as an external consumer would, app-shell/search/menu/select navigation UI, the full sidebar icon registry, shared docs page-header chrome, and tailwind-merge. The 2026-07 docs example-suite rewrite (simple/composite/all-part-styles examples on every component page) adds ~14 kB: new example Tailwind utilities in the global stylesheet and additional fa-solid icons in the shared eager icon module. Heavy feature examples and raw source previews stay behind lazy docs route boundaries. This acceptance is not permission for unrelated eager imports.",
-      "evidence": "docs/release/docs-bundle-budget-diagnosis.md",
+      "evidence": "dist/docs-bundle-budget-diagnosis.md",
       "followUp": "lazy-route import graph guard",
       "expiresWhen": "Any build that exceeds the accepted ceiling, reaches the initial maximumError threshold, or reopens the production-readiness budget decision."
     }
@@ -56,6 +56,6 @@ Source of truth:
 
 | Budget | Accepted ceiling | Owner | Rationale | Evidence | Follow-up | Expiry |
 | --- | ---: | --- | --- | --- | --- | --- |
-| Initial bundle | 945kB | Docs shell / global styles | The current warning is the accepted Angular 22 and TypeScript 6 internal-beta docs-shell baseline: Angular runtime/router, global Tailwind, Hell composite/table/toast CSS imported from public stylesheet entry points exactly as an external consumer would, app-shell/search/menu/select navigation UI, the full sidebar icon registry, shared docs page-header chrome, and tailwind-merge. The 2026-07 docs example-suite rewrite (simple/composite/all-part-styles examples on every component page) adds ~14 kB: new example Tailwind utilities in the global stylesheet and additional fa-solid icons in the shared eager icon module. Heavy feature examples and raw source previews stay behind lazy docs route boundaries. This acceptance is not permission for unrelated eager imports. | docs/release/docs-bundle-budget-diagnosis.md | lazy-route import graph guard | Any build that exceeds the accepted ceiling, reaches the initial maximumError threshold, or reopens the production-readiness budget decision. |
+| Initial bundle | 945kB | Docs shell / global styles | The current warning is the accepted Angular 22 and TypeScript 6 internal-beta docs-shell baseline: Angular runtime/router, global Tailwind, Hell composite/table/toast CSS imported from public stylesheet entry points exactly as an external consumer would, app-shell/search/menu/select navigation UI, the full sidebar icon registry, shared docs page-header chrome, and tailwind-merge. The 2026-07 docs example-suite rewrite (simple/composite/all-part-styles examples on every component page) adds ~14 kB: new example Tailwind utilities in the global stylesheet and additional fa-solid icons in the shared eager icon module. Heavy feature examples and raw source previews stay behind lazy docs route boundaries. This acceptance is not permission for unrelated eager imports. | dist/docs-bundle-budget-diagnosis.md | lazy-route import graph guard | Any build that exceeds the accepted ceiling, reaches the initial maximumError threshold, or reopens the production-readiness budget decision. |
 
 No `anyComponentStyle` warning is accepted. If one appears, treat it as a regression until this policy records a specific owner, rationale, evidence, and follow-up.

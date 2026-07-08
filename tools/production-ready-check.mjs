@@ -267,8 +267,8 @@ function validateRequiredCheckDetails(category, checks) {
 
   if (category === 'docs-budgets') {
     const diagnosisCheck = checks.find((check) => check?.type === 'fileContains');
-    if (diagnosisCheck?.path !== 'docs/release/docs-bundle-budget-diagnosis.md') {
-      failures.push('docs-budgets must check docs/release/docs-bundle-budget-diagnosis.md.');
+    if (diagnosisCheck?.path !== 'dist/docs-bundle-budget-diagnosis.md') {
+      failures.push('docs-budgets must check the generated dist/docs-bundle-budget-diagnosis.md.');
     }
     if (diagnosisCheck?.modifiedAfterCurrentGitCommit !== true) {
       failures.push(
