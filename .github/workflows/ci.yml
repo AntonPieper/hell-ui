@@ -209,6 +209,15 @@ jobs:
       - name: Ensure built docs
         run: pnpm run ci:ensure:build:docs
 
+      - name: Docs bundle diagnosis
+        run: pnpm run diagnose:docs-bundle
+
+      - name: Upload docs bundle diagnosis
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs-bundle-budget-diagnosis
+          path: dist/docs-bundle-budget-diagnosis.md
+
       - name: API report
         run: pnpm run ci:test:api-report:prepared
 

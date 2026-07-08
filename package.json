@@ -7,7 +7,7 @@
     "start": "pnpm --filter hell-docs start",
     "build": "pnpm run build:lib && pnpm run build:docs",
     "build:lib": "pnpm --filter @hell-ui/angular build && pnpm --filter @hell-ui/pdf-viewer build",
-    "build:docs": "pnpm --filter hell-docs build && node tools/docs-bundle-budget-report.mjs --check --summary-only --verify-output",
+    "build:docs": "pnpm --filter hell-docs build && node tools/docs-bundle-budget-report.mjs --check",
     "diagnose:docs-bundle": "node tools/docs-bundle-budget-report.mjs",
     "watch": "pnpm --filter @hell-ui/angular watch",
     "test:unit": "node tools/run-unit-tests.mjs",
