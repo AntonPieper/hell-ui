@@ -12,7 +12,7 @@ Use this guide when moving an app from local/alpha Hell imports to the first bet
 1. Start from an Angular 22 app that satisfies `@angular/common`, `@angular/core`, `@angular/forms`, and `rxjs` peer ranges from [`packages/angular/package.json`](../../packages/angular/package.json).
 2. Install the smallest peer tier for the entry points and CSS you import.
 3. Replace root or kitchen-sink imports with narrow secondary entry points where possible.
-4. Import only the Hell CSS files you need. Migrated components use `ui` Part Style Maps; components not yet migrated are tracked in the legacy allowlist and MUST replace `unstyled`.
+4. Import only the Hell CSS files you need. Components expose `ui` Part Style Maps for styling refinements.
 5. Treat browser-only/heavy features as lazy, client-only, and beta/experimental unless their own docs say otherwise.
 6. Check the accessibility matrix and the production-readiness gate before making production claims.
 
@@ -261,12 +261,6 @@ pagination, table, layout, feedback, media, search, and editor CSS entry
 points, including Checkbox, Radio, Slider, Switch, Toggle, Dialog, Toast,
 AudioPlayer, Omnibar, and CodeEditor.
 
-The not-yet-migrated list is machine-tracked as `legacyStyleableAllowlist` in
-[`tools/check-architecture.mjs`](../../tools/check-architecture.mjs). Every
-symbol in that allowlist is legacy compatibility only and MUST replace
-`unstyled` with a Part Style Map before that component can be promoted as a
-migrated styling surface.
-
 ## Heavy and browser-only features
 
 Treat these as deliberate opt-ins, not default UI kit imports.
@@ -299,15 +293,7 @@ Removed pre-beta table compatibility surfaces:
 | `HELL_TABLE_DIRECTIVES`, `HELL_TABLE_UTILITY_DIRECTIVES`                           | `HELL_TABLE_UTILITIES_DIRECTIVES` from `@hell-ui/angular/table`                                                                      |
 | `HellTableRow.interactive` / `selectionSemantics` / `[selectable]` / `(rowSelect)` | `hellTableRowAction` for row actions; `hellTableRowCheckbox` / `hellTableRowRadio` inside `hellTableSelectionCell` for row selection |
 
-Known deprecated non-table compatibility surfaces to migrate away from:
-
-| Deprecated surface                                              | Preferred replacement                                                                                                                            |
-| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `allowLiveCaptions`                                             | `allowSpeechTranscript` plus `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript`, with the same best-effort warning |
-| `hellAudioSpeechSupported` from `@hell-ui/angular/audio-player` | `hellAudioSpeechSupported` from `@hell-ui/angular/features/audio-transcript`                                                                     |
-| `hellCodeEditorSetup`                                           | `hellCodeEditorSetupFactory(ownerDocument)`                                                                                                      |
-
-Experimental APIs may change or disappear between pre-1.0 releases. Deprecated aliases exist only to help alpha/internal-beta consumers migrate; removal needs a changelog and migration note.
+Experimental APIs may change or disappear between pre-1.0 releases.
 
 ## Browser, SSR, and accessibility support
 

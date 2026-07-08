@@ -296,26 +296,6 @@ describe('HellAudioPlayer', () => {
     expect(fixture.nativeElement.querySelector('[data-slot="captionToggle"]')).toBeNull();
   });
 
-  it('keeps allowLiveCaptions as a compatibility alias through the optional provider', async () => {
-    await TestBed.configureTestingModule({
-      imports: [HellAudioPlayer],
-      providers: [
-        {
-          provide: HELL_AUDIO_TRANSCRIPT_RUNTIME_FACTORY,
-          useValue: () => new FakeTranscriptRuntime(),
-        },
-      ],
-    }).compileComponents();
-    const fixture = TestBed.createComponent(HellAudioPlayer);
-    fixture.componentRef.setInput('src', '/test-audio.mp3');
-    fixture.componentRef.setInput('allowLiveCaptions', true);
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.querySelector('[data-slot="captionToggle"]')).toBeInstanceOf(
-      HTMLButtonElement,
-    );
-  });
-
   it('does not Date.parse ambiguous display date strings', async () => {
     const { fixture } = await createPlayer();
 

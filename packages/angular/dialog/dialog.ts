@@ -247,7 +247,6 @@ export class HellDialogOverlay {
   exportAs: 'hellDialogScope',
   host: {
     '[attr.data-hell-dialog-scope-root]': '"true"',
-    '[attr.data-dialog-root]': '"true"',
   },
 })
 export class HellDialogScope {}

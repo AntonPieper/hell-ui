@@ -24,11 +24,7 @@ import {
   type HellCodeEditorRuntimePort,
 } from './code-editor.runtime';
 
-export {
-  hellCodeEditorSetup,
-  hellCodeEditorSetupFactory,
-  hellCodeEditorTheme,
-} from './code-editor.runtime';
+export { hellCodeEditorSetupFactory, hellCodeEditorTheme } from './code-editor.runtime';
 
 /** Public parts of the HellCodeEditor module, styleable through its Part Style Map. */
 export type HellCodeEditorPart = 'root' | 'editor';

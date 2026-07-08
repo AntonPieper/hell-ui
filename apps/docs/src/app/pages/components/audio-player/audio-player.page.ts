@@ -194,10 +194,6 @@ import audioPlayerStylingExampleCodeRaw from './examples/styling.example.ts?raw'
           <code>provideHellAudioTranscript()</code> and browser support.
         </li>
         <li>
-          <code>allowLiveCaptions</code>: <code>boolean</code> (default <code>false</code>) — a
-          deprecated compatibility alias for <code>allowSpeechTranscript</code>.
-        </li>
-        <li>
           <code>lang</code>: <code>string | null</code> (default <code>null</code>) — BCP-47 hint for
           the transcript recognizer. Falls back to the document <code>lang</code> or
           <code>en-US</code>.

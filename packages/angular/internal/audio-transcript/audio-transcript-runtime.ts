@@ -67,11 +67,3 @@ export class HellAudioTranscriptUnavailableRuntime implements HellAudioTranscrip
     this.stopRecognition();
   }
 }
-
-/**
- * @deprecated Import `hellAudioSpeechSupported` from
- * `@hell-ui/angular/features/audio-transcript` after opting into the transcript provider.
- */
-export function hellAudioSpeechSupported(): boolean {
-  return false;
-}
