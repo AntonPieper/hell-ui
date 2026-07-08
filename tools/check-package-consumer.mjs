@@ -215,8 +215,6 @@ const packageConsumerScenarioCatalog = [
       'background-color:var(--color-hell-primary)',
       'background-color:var(--color-hell-primary-hover)',
       'border-radius:var(--radius-hell-md)',
-      '--_hell-btn-shadow:var(--shadow-hell-xs)',
-      'box-shadow:var(--_hell-btn-shadow)',
       'text-underline-offset:3px',
       'transition-property:background-color,border-color,color,box-shadow',
     ],
