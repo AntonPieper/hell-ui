@@ -33,5 +33,5 @@ import { HELL_DIALOG_DIRECTIVES } from '@hell-ui/angular/dialog';
   `,
 })
 export class DialogSizesExample {
-  protected readonly sizes: readonly HellSize[] = ['sm', 'md', 'lg', 'xl'];
+  protected readonly sizes: readonly Exclude<HellSize, 'xs'>[] = ['sm', 'md', 'lg', 'xl'];
 }

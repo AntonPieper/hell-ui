@@ -83,8 +83,9 @@ import dialogStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       <p>
         <code>size</code> on <code>hellDialog</code> caps the panel's max-width:
         <code>sm</code> (380px), <code>md</code> (480px, the default), <code>lg</code> (720px), and
-        <code>xl</code> (960px). The panel is always full-width below its cap and never taller than
-        the viewport, so its body scrolls when content overflows. This example passes the size
+        <code>xl</code> (960px) — note this is a narrower scale than <code>HellSize</code>; there is
+        no <code>xs</code> dialog. The panel is always full-width below its cap and never taller
+        than the viewport, so its body scrolls when content overflows. This example passes the size
         through <code>[hellDialogData]</code> and reads it back from the template context.
       </p>
       <hd-example-tabs [code]="dialogSizesExampleCode" previewClass="flex flex-wrap gap-2">
@@ -209,7 +210,7 @@ import dialogStylingExampleCodeRaw from './examples/styling.example.ts?raw' with
       </ul>
       <p><code>hellDialog</code>:</p>
       <ul>
-        <li><code>size</code>: <code>HellSize</code> — <code>xs | sm | md | lg | xl</code>. Default <code>md</code>. (Distinct max-widths exist for <code>sm</code>, <code>md</code>, <code>lg</code>, <code>xl</code>; <code>xs</code> falls back to the <code>md</code> width.)</li>
+        <li><code>size</code>: <code>'sm' | 'md' | 'lg' | 'xl'</code>. Default <code>md</code>.</li>
         <li><code>ui</code>: <code>HellUiInput&lt;HellDialogPart&gt;</code> — shorthand string or <code>HellDialogUi</code> map refining <code>root</code>.</li>
       </ul>
       <p><code>hellDialogTitle</code> / <code>hellDialogDescription</code>:</p>
