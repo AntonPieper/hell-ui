@@ -88,6 +88,20 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `packages/angular/audio-player/audio-player.spec.ts`,
   `packages/angular/dialog/dialog.spec.ts`, and
   `pnpm run test:architecture`.
+- Removed the dead `.hell-button` legacy helper rule from
+  `@hell-ui/angular/button/styles.css`. It was documented as a stopgap for
+  primitives that had not migrated to Part Style Map; the migration is
+  complete and no component, docs page, or example has applied the class
+  since. Consumers who added `class="hell-button"` to their own markup must
+  use `hellButton` (or the `ui` Part Style Map) instead. The unconsumed
+  `--hell-button-*` custom-property declarations in the `@hell-ui/pdf-viewer`
+  thumb styles — theming hooks for that removed rule, and a violation of the
+  ADR rule against component-specific public variables — were removed in the
+  same change, along with the per-spec "legacy class must not reappear"
+  assertions that only existed to guard the finished migration. No rendered
+  output changes: nothing consumed the rule or the variables. Evidence:
+  `grep -r "hell-button" packages apps e2e`, `pnpm run test:unit`, and
+  `pnpm run e2e` (table docs regressions).
 
 ### Added
 

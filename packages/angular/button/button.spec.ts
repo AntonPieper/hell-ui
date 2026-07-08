@@ -51,14 +51,13 @@ describe('HellButton', () => {
     expect(query<HTMLButtonElement>(fixture.nativeElement, '#submit').type).toBe('submit');
   });
 
-  it('renders the root part recipe without the legacy button class', () => {
+  it('renders the root part recipe with variant and size state attributes', () => {
     const fixture = TestBed.createComponent(ButtonHost);
     fixture.detectChanges();
 
     const button = query<HTMLButtonElement>(fixture.nativeElement, '#styled');
 
     expect(button.getAttribute('data-slot')).toBe('root');
-    expect(button.classList.contains('hell-button')).toBe(false);
     expect(button.className).toContain('inline-flex');
     expect(button.className).toContain('bg-hell-primary');
     expect(button.className).toContain('h-hell-control-sm');

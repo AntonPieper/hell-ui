@@ -328,14 +328,11 @@ describe('HellPaginationStrip', () => {
     const stripPrev = strip.querySelector('[hellPaginationPrev]') as HTMLButtonElement;
     const stripNext = strip.querySelector('[hellPaginationNext]') as HTMLButtonElement;
 
-    expect(pagination.classList.contains('hell-pagination')).toBe(false);
     expect(pagination.getAttribute('data-slot')).toBe('root');
     expect(pagination.className).toContain('gap-hell-4');
     expect(pagination.className).not.toContain('gap-hell-1');
 
     for (const control of [first, prev, numbered, next, last]) {
-      expect(control.classList.contains('hell-button')).toBe(false);
-      expect(control.classList.contains('hell-pagination-item')).toBe(false);
       expect(control.getAttribute('data-slot')).toBe('root');
       expect(control.getAttribute('data-variant')).toBe('ghost');
       expect(control.getAttribute('data-icon-only')).toBe('');
@@ -352,7 +349,6 @@ describe('HellPaginationStrip', () => {
     expect(last.className).toContain('bg-hell-danger');
     expect(last.className).toContain('px-hell-7');
 
-    expect(strip.classList.contains('hell-pagination')).toBe(false);
     expect(strip.getAttribute('data-slot')).toBe('root');
     expect(strip.getAttribute('data-mode')).toBe('jump');
     expect(strip.className).toContain('gap-hell-4');

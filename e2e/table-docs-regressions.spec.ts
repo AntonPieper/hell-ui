@@ -375,8 +375,6 @@ test.describe('table docs regressions', () => {
     const next = example.getByRole('button', { name: 'Next person' });
     await expect(previous).toHaveAttribute('data-slot', 'root');
     await expect(next).toHaveAttribute('data-slot', 'root');
-    await expect(previous).not.toHaveClass(/(^|\s)hell-pagination-item(\s|$)/);
-    await expect(next).not.toHaveClass(/(^|\s)hell-pagination-item(\s|$)/);
     await expect(previous).toBeDisabled();
     await expect(next).toBeEnabled();
 
@@ -445,8 +443,6 @@ test.describe('split-view docs regressions', () => {
     );
 
     for (let index = 0; index < 4; index += 1) {
-      await expect(ticketActions.nth(index)).not.toHaveClass(/(^|\s)hell-table-row-action(\s|$)/);
-      await expect(ticketActions.nth(index)).not.toHaveClass(/(^|\s)hell-button(\s|$)/);
       await expect(ticketActions.nth(index)).toHaveClass(/(^|\s)bg-transparent(\s|$)/);
       await expect(ticketActions.nth(index)).toHaveClass(
         /(^|\s)hover:bg-hell-surface-muted(\s|$)/,

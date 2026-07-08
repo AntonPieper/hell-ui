@@ -340,7 +340,6 @@ describe('HellCheckbox', () => {
     expect(custom.type).toBe('button');
     expect(custom.getAttribute('role')).toBe('checkbox');
     expect(custom.getAttribute('data-slot')).toBe('root');
-    expect(custom.classList.contains('hell-checkbox')).toBe(false);
     expect(custom.classList.contains('bg-hell-danger')).toBe(true);
     expect(custom.classList.contains('size-hell-6')).toBe(true);
     expect(custom.classList.contains('rounded-hell-pill')).toBe(true);
@@ -362,7 +361,6 @@ describe('HellCheckbox', () => {
     expect(native.tagName).toBe('INPUT');
     expect(native.type).toBe('checkbox');
     expect(native.getAttribute('data-slot')).toBe('root');
-    expect(native.classList.contains('hell-checkbox')).toBe(false);
     expect(native.classList.contains('border-hell-danger')).toBe(true);
     expect(native.classList.contains('size-hell-6')).toBe(true);
     expect(native.classList.contains('size-hell-5')).toBe(false);

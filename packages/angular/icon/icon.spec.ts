@@ -85,7 +85,6 @@ describe('HellIcon', () => {
     expect(classes).toContain('text-hell-danger');
     expect(classes).not.toContain('inline-flex');
     expect(classes).not.toContain('text-[var(--_hell-icon-color,currentColor)]');
-    expect(icon.classList.contains('hell-icon')).toBe(false);
   });
 
   it('applies object maps to the icon root', async () => {

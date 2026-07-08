@@ -456,7 +456,6 @@ describe('HellRadio', () => {
     expect(disabled).toBeInstanceOf(HTMLButtonElement);
 
     expect(group.getAttribute('data-slot')).toBe('root');
-    expect(group.classList.contains('hell-radio-group')).toBe(false);
     expect(group.classList.contains('gap-hell-6')).toBe(true);
     expect(group.classList.contains('gap-hell-3')).toBe(false);
 
@@ -465,7 +464,6 @@ describe('HellRadio', () => {
     expect(customMapGroup.classList.contains('gap-hell-3')).toBe(false);
 
     expect(custom.getAttribute('data-slot')).toBe('root');
-    expect(custom.classList.contains('hell-radio')).toBe(false);
     expect(custom.classList.contains('gap-hell-5')).toBe(true);
     expect(custom.classList.contains('gap-hell-3')).toBe(false);
     expect(custom.classList.contains('text-hell-danger')).toBe(true);
@@ -476,11 +474,9 @@ describe('HellRadio', () => {
     expect(disabled.getAttribute('aria-disabled')).toBe('true');
 
     expect(nativeGroup.getAttribute('data-slot')).toBe('root');
-    expect(nativeGroup.classList.contains('hell-radio-group')).toBe(false);
     expect(nativeGroup.classList.contains('gap-hell-5')).toBe(true);
 
     expect(native.getAttribute('data-slot')).toBe('root');
-    expect(native.classList.contains('hell-radio')).toBe(false);
     expect(native.classList.contains('border-hell-danger')).toBe(true);
     expect(native.classList.contains('size-hell-6')).toBe(true);
     expect(native.classList.contains('size-hell-5')).toBe(false);

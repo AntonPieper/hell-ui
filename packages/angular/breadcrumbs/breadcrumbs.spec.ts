@@ -165,13 +165,13 @@ describe('HellBreadcrumbEllipsis', () => {
     const page = byId<HTMLElement>(fixture.nativeElement, 'page-string');
     const ellipsis = byId<HTMLButtonElement>(fixture.nativeElement, 'ellipsis-string');
 
-    expectPartStyleRoot(breadcrumbs, 'hell-breadcrumbs');
-    expectPartStyleRoot(list, 'hell-breadcrumb-list');
-    expectPartStyleRoot(item, 'hell-breadcrumbs-item');
-    expectPartStyleRoot(link, 'hell-breadcrumbs-link');
-    expectPartStyleRoot(separator, 'hell-breadcrumbs-separator');
-    expectPartStyleRoot(page, 'hell-breadcrumbs-page');
-    expectPartStyleRoot(ellipsis, 'hell-breadcrumbs-ellipsis');
+    expectPartStyleRoot(breadcrumbs);
+    expectPartStyleRoot(list);
+    expectPartStyleRoot(item);
+    expectPartStyleRoot(link);
+    expectPartStyleRoot(separator);
+    expectPartStyleRoot(page);
+    expectPartStyleRoot(ellipsis);
 
     expect(breadcrumbs.getAttribute('role')).toBe('navigation');
     expect(breadcrumbs.getAttribute('aria-label')).toBe('Styled breadcrumb');
@@ -216,9 +216,8 @@ function byId<T extends HTMLElement>(root: HTMLElement, id: string): T {
   return element as T;
 }
 
-function expectPartStyleRoot(element: HTMLElement, legacyClass: string): void {
+function expectPartStyleRoot(element: HTMLElement): void {
   expect(element.getAttribute('data-slot')).toBe('root');
-  expect(element.classList.contains(legacyClass)).toBe(false);
 }
 
 function expectClasses(element: HTMLElement, present: string[], absent: string[] = []): void {

@@ -64,14 +64,13 @@ describe('HELL_EMBEDDED_INPUT_UI', () => {
       }).compileComponents();
     });
 
-    it('merges the embedded root part over the input recipe and drops the legacy class', () => {
+    it('merges the embedded root part over the input recipe', () => {
       const fixture = TestBed.createComponent(EmbeddedInputHost);
       fixture.detectChanges();
 
       const input = byId(fixture.nativeElement, 'embedded');
 
       expect(input.getAttribute('data-slot')).toBe('root');
-      expect(input.classList.contains('hell-input')).toBe(false);
       expect(input.classList.contains('border-0')).toBe(true);
       expect(input.classList.contains('bg-transparent')).toBe(true);
       expect(input.classList.contains('shadow-none')).toBe(true);

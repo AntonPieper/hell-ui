@@ -254,7 +254,6 @@ describe('HellSwitch', () => {
     const nativeMap = query<HTMLInputElement>(fixture.nativeElement, '#native-map-switch');
 
     expect(sw.getAttribute('data-slot')).toBe('root');
-    expect(sw.classList.contains('hell-switch')).toBe(false);
     expect(sw.classList.contains('w-[44px]')).toBe(true);
     expect(sw.classList.contains('bg-hell-danger')).toBe(true);
     expect(sw.classList.contains('bg-hell-border-strong')).toBe(false);
@@ -266,7 +265,6 @@ describe('HellSwitch', () => {
     expect(thumb?.classList.contains('bg-hell-danger-soft')).toBe(true);
 
     expect(native.getAttribute('data-slot')).toBe('root');
-    expect(native.classList.contains('hell-switch')).toBe(false);
     expect(native.classList.contains('w-[44px]')).toBe(true);
     expect(native.classList.contains('bg-hell-danger')).toBe(true);
     expect(native.classList.contains('bg-hell-border-strong')).toBe(false);

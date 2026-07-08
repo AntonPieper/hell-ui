@@ -59,7 +59,6 @@ describe('HellAvatar Part Style Map', () => {
     );
     expect(classes).not.toContain('h-[var(--_hell-av-size)]');
     expect(classes).not.toContain('w-[var(--_hell-av-size)]');
-    expect(avatar.classList.contains('hell-avatar')).toBe(false);
   });
 
   it('applies object maps to the root part', () => {

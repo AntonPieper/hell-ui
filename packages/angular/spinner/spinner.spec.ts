@@ -76,7 +76,6 @@ describe('HellSpinner', () => {
     expect(classes).toContain('text-hell-danger');
     expect(classes).not.toContain('inline-block');
     expect(classes).not.toContain('text-current');
-    expect(spinnerString.classList.contains('hell-spinner')).toBe(false);
   });
 });
 

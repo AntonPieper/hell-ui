@@ -54,8 +54,6 @@ describe('HellProgress Part Style Maps', () => {
     expect(barClasses).toContain('transition-none');
     expect(barClasses).not.toContain('bg-hell-primary');
     expect(barClasses).not.toContain('transition-[width]');
-    expect(progress.classList.contains('hell-progress')).toBe(false);
-    expect(bar.classList.contains('hell-progress-bar')).toBe(false);
   });
 
   it('applies object maps and preserves progress accessibility attributes', () => {

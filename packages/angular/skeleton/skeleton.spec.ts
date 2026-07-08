@@ -52,7 +52,6 @@ describe('HellSkeleton', () => {
     expect(classes).toContain('bg-hell-danger');
     expect(classes).not.toContain('rounded-sm');
     expect(classes).not.toContain('bg-hell-surface-muted');
-    expect(skeleton.classList.contains('hell-skeleton')).toBe(false);
   });
 
   it('leaves sizing to consumer utility classes instead of recipe width/height utilities', () => {

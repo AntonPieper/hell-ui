@@ -281,7 +281,6 @@ describe('Hell TanStack table shell', () => {
 
     expect(input).not.toBeNull();
     expect(input?.getAttribute('data-slot')).toBe('root');
-    expect(input?.classList.contains('hell-tanstack-filter')).toBe(false);
     expect(input?.classList.contains('inline-flex')).toBe(true);
     expect(input?.classList.contains('min-w-[calc(var(--spacing)*44)]')).toBe(true);
     expect(input?.classList.contains('rounded-hell-sm')).toBe(true);
@@ -343,7 +342,6 @@ describe('Hell TanStack table shell', () => {
     expect(footer.getAttribute('data-slot')).toBe('footer');
 
     // Behavior/measurement markers are preserved alongside the public parts.
-    expect(shell.classList.contains('hell-tanstack-table')).toBe(false);
     expect(toolbar.hasAttribute('data-hell-table-shell-toolbar')).toBe(true);
     expect(scrollport.hasAttribute('data-hell-table-shell-scrollport')).toBe(true);
     expect(footer.hasAttribute('data-hell-table-shell-footer')).toBe(true);
@@ -393,7 +391,6 @@ describe('Hell TanStack table shell', () => {
 
     expect(pagination.getAttribute('data-slot')).toBe('root');
     expect(pageSize.getAttribute('data-slot')).toBe('pageSize');
-    expect(pagination.classList.contains('hell-tanstack-pagination')).toBe(false);
 
     // root: gap refinement wins over recipe gap.
     expect(pagination.classList.contains('inline-flex')).toBe(true);

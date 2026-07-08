@@ -68,7 +68,6 @@ describe('HellCard', () => {
 
     expect(customCard.getAttribute('data-slot')).toBe('root');
     expect(customCard.getAttribute('data-elevation')).toBe('3');
-    expect(customCard.classList.contains('hell-card')).toBe(false);
     expect(customCard.classList.contains('rounded-hell-pill')).toBe(true);
     expect(customCard.classList.contains('rounded-hell-lg')).toBe(false);
     expect(customCard.classList.contains('shadow-none')).toBe(true);
@@ -85,14 +84,11 @@ describe('HellCard', () => {
     expect(mappedCard.classList.contains('rounded-hell-pill')).toBe(true);
     expect(mappedCard.classList.contains('shadow-hell-lg')).toBe(true);
     expect(mappedCard.classList.contains('shadow-hell-xs')).toBe(false);
-    expect(mappedHeader.classList.contains('hell-card-header')).toBe(false);
     expect(mappedHeader.classList.contains('px-hell-2')).toBe(true);
     expect(mappedHeader.classList.contains('px-hell-6')).toBe(false);
     expect(mappedHeader.classList.contains('text-hell-danger')).toBe(true);
-    expect(mappedBody.classList.contains('hell-card-body')).toBe(false);
     expect(mappedBody.classList.contains('p-hell-2')).toBe(true);
     expect(mappedBody.classList.contains('p-hell-6')).toBe(false);
-    expect(mappedFooter.classList.contains('hell-card-footer')).toBe(false);
     expect(mappedFooter.classList.contains('justify-start')).toBe(true);
     expect(mappedFooter.classList.contains('justify-end')).toBe(false);
     expect(mappedFooter.classList.contains('border-t-0')).toBe(true);

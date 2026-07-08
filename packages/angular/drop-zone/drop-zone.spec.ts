@@ -148,7 +148,6 @@ describe('HellDropZone', () => {
     expect(zone.getAttribute('data-slot')).toBe('root');
     expect(zone.getAttribute('role')).toBe('button');
     expect(zone.getAttribute('tabindex')).toBe('0');
-    expect(zone.classList.contains('hell-dropzone')).toBe(false);
     expect(classes).toContain('grid');
     expect(classes).toContain('min-h-hell-10');
     expect(classes).toContain('border-hell-danger');

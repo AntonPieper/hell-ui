@@ -59,18 +59,15 @@ describe('HellTabs', () => {
       '[hellTabPanel]',
     );
 
-    expect(tabset.classList.contains('hell-tabs')).toBe(false);
     expect(tabset.getAttribute('data-slot')).toBe('root');
     expect(tabset.getAttribute('data-orientation')).toBe('vertical');
     expect(tabset.classList.contains('gap-hell-8')).toBe(true);
     expect(tabset.classList.contains('gap-hell-4')).toBe(false);
-    expect(list.classList.contains('hell-tab-list')).toBe(false);
     expect(list.getAttribute('data-slot')).toBe('root');
     expect(list.classList.contains('gap-hell-6')).toBe(true);
     expect(list.classList.contains('gap-0.5')).toBe(false);
     expect(list.getAttribute('role')).toBe('tablist');
     expect(list.getAttribute('aria-orientation')).toBe('vertical');
-    expect(tabs[0].classList.contains('hell-tab')).toBe(false);
     expect(tabs[0].getAttribute('data-slot')).toBe('root');
     expect(tabs[0].type).toBe('button');
     expect(tabs[0].getAttribute('role')).toBe('tab');
@@ -81,7 +78,6 @@ describe('HellTabs', () => {
     expect(tabs[1].classList.contains('text-hell-danger')).toBe(true);
     expect(tabs[1].classList.contains('text-hell-foreground-muted')).toBe(false);
     expect(panels[0].getAttribute('role')).toBe('tabpanel');
-    expect(panels[0].classList.contains('hell-tab-panel')).toBe(false);
     expect(panels[0].getAttribute('data-slot')).toBe('root');
     expect(panels[0].classList.contains('py-hell-2')).toBe(true);
     expect(panels[0].classList.contains('py-hell-6')).toBe(false);

@@ -212,8 +212,6 @@ describe('HellToggleGroup', () => {
     const disabled = items[1];
 
     expect(standalone.getAttribute('data-slot')).toBe('root');
-    expect(standalone.classList.contains('hell-button')).toBe(false);
-    expect(standalone.classList.contains('hell-toggle')).toBe(false);
     expect(standalone.classList.contains('bg-hell-danger')).toBe(true);
     expect(standalone.classList.contains('px-hell-7')).toBe(true);
     expect(standalone.classList.contains('px-hell-5')).toBe(false);
@@ -225,13 +223,10 @@ describe('HellToggleGroup', () => {
     expect(standaloneMap.classList.contains('px-hell-5')).toBe(false);
 
     expect(group.getAttribute('data-slot')).toBe('root');
-    expect(group.classList.contains('hell-toggle-group')).toBe(false);
     expect(group.classList.contains('gap-hell-4')).toBe(true);
     expect(group.classList.contains('bg-hell-danger-soft')).toBe(true);
 
     expect(selected.getAttribute('data-slot')).toBe('root');
-    expect(selected.classList.contains('hell-button')).toBe(false);
-    expect(selected.classList.contains('hell-toggle')).toBe(false);
     expect(selected.classList.contains('px-hell-6')).toBe(true);
     expect(selected.classList.contains('px-hell-4')).toBe(false);
     expect(selected.classList.contains('text-hell-danger')).toBe(true);

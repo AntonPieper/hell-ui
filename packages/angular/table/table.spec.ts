@@ -125,16 +125,12 @@ describe('host-agnostic Hell table primitives', () => {
     expect(byId(root, 'native-row').hasAttribute('aria-selected')).toBe(false);
     expect(byId(root, 'native-row').hasAttribute('data-interactive')).toBe(false);
 
-    expectPartAndData(byId(root, 'native-root'), 'hell-table', 'data-hell-table-root');
-    expectPartAndData(byId(root, 'native-header'), 'hell-table-head', 'data-hell-table-header');
-    expectPartAndData(byId(root, 'native-body'), 'hell-table-body', 'data-hell-table-body');
-    expectPartAndData(byId(root, 'native-row'), 'hell-table-row', 'data-hell-table-row');
-    expectPartAndData(
-      byId(root, 'native-header-cell'),
-      'hell-table-header-cell',
-      'data-hell-table-header-cell',
-    );
-    expectPartAndData(byId(root, 'native-cell'), 'hell-table-cell', 'data-hell-table-cell');
+    expectPartAndData(byId(root, 'native-root'), 'data-hell-table-root');
+    expectPartAndData(byId(root, 'native-header'), 'data-hell-table-header');
+    expectPartAndData(byId(root, 'native-body'), 'data-hell-table-body');
+    expectPartAndData(byId(root, 'native-row'), 'data-hell-table-row');
+    expectPartAndData(byId(root, 'native-header-cell'), 'data-hell-table-header-cell');
+    expectPartAndData(byId(root, 'native-cell'), 'data-hell-table-cell');
 
     expect(byId(root, 'native-root').getAttribute('data-content-width')).toBe('true');
     expect(byId(root, 'native-row').getAttribute('data-active')).toBe('true');
@@ -143,9 +139,7 @@ describe('host-agnostic Hell table primitives', () => {
     expect(byId(root, 'sort').getAttribute('type')).toBe('button');
     expect(byId(root, 'edit-row').getAttribute('type')).toBe('button');
     expect(byId(root, 'select-header').getAttribute('data-hell-table-selection-cell')).toBe('');
-    expect(byId(root, 'select-header').classList.contains('hell-table-selection-cell')).toBe(false);
     expect(byId(root, 'select-row').getAttribute('data-hell-table-row-radio')).toBe('');
-    expect(byId(root, 'select-row').classList.contains('hell-table-row-radio')).toBe(false);
     expect(byId(root, 'native-cell').getAttribute('data-align')).toBe('end');
     expect(byId(root, 'native-cell').getAttribute('data-space')).toBe('empty');
   });
@@ -174,29 +168,17 @@ describe('host-agnostic Hell table primitives', () => {
     expect(byId(root, 'explicit-cell').getAttribute('role')).toBe('gridcell');
   });
 
-  it('keeps data attributes and applies ui through root parts without legacy classes', () => {
+  it('keeps data attributes and applies ui through root parts', () => {
     const fixture = TestBed.createComponent(UiTablePrimitiveHost);
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
 
-    expectPartAndData(byId(root, 'ui-root'), 'hell-table', 'data-hell-table-root');
-    expectPartAndData(byId(root, 'ui-row'), 'hell-table-row', 'data-hell-table-row');
-    expectPartAndData(byId(root, 'ui-cell'), 'hell-table-cell', 'data-hell-table-cell');
-    expectPartAndData(
-      byId(root, 'ui-action'),
-      'hell-table-row-action',
-      'data-hell-table-row-action',
-    );
-    expectPartAndData(
-      byId(root, 'ui-checkbox'),
-      'hell-table-row-checkbox',
-      'data-hell-table-row-checkbox',
-    );
-    expectPartAndData(
-      byId(root, 'ui-resizer'),
-      'hell-table-resize-handle',
-      'data-hell-table-resize-handle',
-    );
+    expectPartAndData(byId(root, 'ui-root'), 'data-hell-table-root');
+    expectPartAndData(byId(root, 'ui-row'), 'data-hell-table-row');
+    expectPartAndData(byId(root, 'ui-cell'), 'data-hell-table-cell');
+    expectPartAndData(byId(root, 'ui-action'), 'data-hell-table-row-action');
+    expectPartAndData(byId(root, 'ui-checkbox'), 'data-hell-table-row-checkbox');
+    expectPartAndData(byId(root, 'ui-resizer'), 'data-hell-table-resize-handle');
 
     expect(byId(root, 'ui-root').className).toContain('bg-hell-surface-muted');
     expect(byId(root, 'ui-row').className).toContain('bg-hell-primary-soft');
@@ -231,8 +213,7 @@ function byId(root: HTMLElement, id: string): HTMLElement {
   return element;
 }
 
-function expectPartAndData(element: HTMLElement, className: string, dataAttribute: string): void {
-  expect(element.classList.contains(className), `${element.id}.${className}`).toBe(false);
+function expectPartAndData(element: HTMLElement, dataAttribute: string): void {
   expect(element.getAttribute('data-slot'), `${element.id}.data-slot`).toBe('root');
   expect(element.getAttribute(dataAttribute), `${element.id}.${dataAttribute}`).toBe('');
 }

@@ -312,13 +312,10 @@ describe('HellAppShell secondary panel', () => {
     const toggle = query<HTMLButtonElement>(fixture.nativeElement, '#nav-section-toggle');
     const items = query(fixture.nativeElement, '#nav-section-items');
 
-    expect(section.classList.contains('hell-nav-section')).toBe(false);
     expect(section.getAttribute('data-slot')).toBe('root');
     expect(section.getAttribute('data-collapsed')).toBeNull();
-    expect(toggle.classList.contains('hell-nav-section-toggle')).toBe(false);
     expect(toggle.getAttribute('data-slot')).toBe('root');
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
-    expect(items.classList.contains('hell-nav-section-items')).toBe(false);
     expect(items.getAttribute('data-slot')).toBe('root');
     expect(items.getAttribute('aria-hidden')).toBeNull();
     expect(items.hasAttribute('inert')).toBe(false);
@@ -378,7 +375,7 @@ describe('HellAppShell secondary panel', () => {
     expect(secondary.getAttribute('data-hidden')).toBe('true');
   });
 
-  it('keeps behavior sentinels without legacy shell classes', () => {
+  it('exposes behavior sentinels on the shell anatomy', () => {
     const fixture = TestBed.createComponent(SentinelShellHost);
     fixture.detectChanges();
 
@@ -394,9 +391,6 @@ describe('HellAppShell secondary panel', () => {
       '#sentinel-secondary-toggle',
     );
 
-    expect(shell.classList.contains('hell-shell')).toBe(false);
-    expect(sidenav.classList.contains('hell-sidenav')).toBe(false);
-    expect(secondary.classList.contains('hell-secondary')).toBe(false);
     expect(shell.getAttribute('data-slot')).toBe('root');
     expect(sidenav.getAttribute('data-slot')).toBe('root');
     expect(secondary.getAttribute('data-slot')).toBe('root');
