@@ -7,6 +7,16 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- `HellDialog`'s `size` input narrowed from `HellSize` to
+  `Exclude<HellSize, 'xs'>` (`'sm' | 'md' | 'lg' | 'xl'`). The dialog recipe
+  only styles `sm`/`lg`/`xl` max-widths on top of the `md` base, so `xs`
+  type-checked but silently rendered the base `md` visuals; the narrowed type
+  matches the recipe coverage, following the repo convention that components
+  narrow `size` to exactly the sizes their recipe styles. Consumers passing
+  `size="xs"` now get a compile error and should pick `sm`; rendered output is
+  unchanged. Evidence: `etc/api-reports/hell-ui-angular-dialog.api.md` and the
+  `data-size` assertions in `packages/angular/dialog/dialog.spec.ts`.
+
 - Migrated the last two Style Opt-Out surfaces to typed Part Style Maps and
   removed the legacy `HellStyleable` base (and its `unstyled` input) from
   `@hell-ui/angular/core`. `HellAvatarGroup`, `HellAvatarGroupItem`, and

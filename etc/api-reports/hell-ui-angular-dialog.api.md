@@ -24,8 +24,7 @@ export class HellDialog {
     protected onTabKeydown(event: Event): void;
     // Warning: (ae-forgotten-export) The symbol "_hell_ui_angular_core" needs to be exported by the entry point hell-ui-angular-dialog.d.ts
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
-    // Warning: (ae-forgotten-export) The symbol "HellSize" needs to be exported by the entry point hell-ui-angular-dialog.d.ts
-    readonly size: _angular_core.InputSignal<HellSize>;
+    readonly size: _angular_core.InputSignal<"sm" | "md" | "lg" | "xl">;
     // Warning: (ae-forgotten-export) The symbol "HellUiInput" needs to be exported by the entry point hell-ui-angular-dialog.d.ts
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
     static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellDialog, "[hellDialog]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgpDialog; inputs: {}; outputs: {}; }]>;
