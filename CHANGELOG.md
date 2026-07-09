@@ -5,6 +5,61 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ## [Unreleased]
 
+### Removed
+
+- Dissolved `tools/check-ci-contract.mjs` (892 lines of string mirrors that
+  re-pinned package.json scripts, workflow YAML, and other tools' source text)
+  into the derived `tools/check-ci-coverage.mjs`, which computes coverage from
+  the real Playwright config, the real consumer-scenario catalog, and the real
+  CI workflow: every test must land in exactly one CI shard and every consumer
+  scenario in exactly one matrix entry. The new check immediately caught a real
+  gap the old mirrors missed — the `TanStack virtual row strategy` axe test
+  matched neither docs-smoke shard grep and silently never ran in CI (fixed in
+  `playwright.config.ts`). Deleted with it: `.gitlab-ci.yml` and
+  `Dockerfile.ci` (a parallel-universe CI path that never executed; the
+  Dockerfile was provably broken since PR #84), `tools/run-ci-tests.mjs`,
+  `tools/ci-summary.mjs` (folded into `tools/run-unit-tests.mjs --ci-summary`),
+  and 18 package.json scripts (17 with no remaining callers plus
+  `test:ci-contract`, replaced by `test:ci-coverage`). The docs budget
+  policy/markdown sync check moved into
+  `tools/docs-bundle-budget-report.mjs --check`, now run blocking in CI's
+  docs-bundle-diagnosis step so policy drift fails on every PR.
+- Cut `tools/check-architecture.mjs` from 5,238 to 2,598 lines: removed the
+  1,420-line hand-maintained `migratedPartStyleMapModules` table (the Part
+  Style Map migration completed 2026-07) in favor of deriving styleable
+  classes and the `data-slot` ⇔ Part-union invariant from source inside
+  `checkComponentContract`; removed post-migration tombstones (table
+  semantics/sort/resize-handle guards, floating-adapter reach-in bans,
+  component-variable-prefix bans), api-extractor duplicates
+  (`checkApiReportContract`, search/date-time token existence), and docs-copy
+  mirrors (experimental JSDoc phrases, category badge strings, README heading
+  pins). Mutation-tested: the derived checks still fail on rogue `data-slot`
+  literals, removed Part-union members, and hardcoded labels.
+- Deleted the dead `@hell-ui/angular/internal/input` entry point (its last
+  real consumer left in June 2026; only its own spec read
+  `HELL_EMBEDDED_INPUT_UI`) and the empty `internal/ng-primitives/adapters.ts`
+  marker file.
+- Removed duplicate and tautological tests: seven `ui-behavior.spec.ts` e2e
+  tests that were strict subsets of the dedicated a11y-contract specs, the
+  docs-chrome CSS-pinning "visual regression smoke", the split-view
+  class-list assertions that restated the docs example's own Tailwind classes,
+  two transition-property pinning tests, the `component-contract.spec.ts`
+  blocks that verbatim re-asserted per-component specs (button, card, field,
+  app-shell nav, resizable, pagination, table, split-view — the manifest the
+  architecture checker consumes stays), the omnibar duplicate of
+  `internal/hotkeys` matcher tests, four zero-power mock-writer tests and the
+  version-string tautology in `ngp-state-adapters.spec.ts`, and assorted
+  meta/passthrough tests (avatar-group directive bundle, button signal-input,
+  toggle setter spies, PDF runtime arg-forwarding). Review found two
+  attributes whose only coverage lived in the deleted contract-spec blocks
+  (`hell-split-view` `data-framed` and the table container's `aria-busy`);
+  both moved into their per-component specs instead. Evidence:
+  `pnpm run test:unit`, `pnpm run test:architecture`, and
+  `pnpm run test:ci-coverage` all pass.
+- Dead docs-app code: `shared/lazy-global-style.ts` (zero importers), the
+  unused `hasBadges` computed in `shared/page-header.ts`, and five unused
+  `HELL_*_DIRECTIVES` spreads in page components.
+
 ### Breaking changes
 
 - Folded the split `@hell-ui/pdf-viewer` package back into `@hell-ui/angular`

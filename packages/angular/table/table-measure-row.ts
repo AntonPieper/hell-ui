@@ -149,7 +149,6 @@ export class HellTableMeasureRow<TItem = unknown> implements AfterViewInit, OnDe
   }
 
   private measureHostRect(): { readonly height: number; readonly width: number } {
-    if (typeof this.host.getBoundingClientRect !== 'function') return { height: 0, width: 0 };
     return this.host.getBoundingClientRect();
   }
 }

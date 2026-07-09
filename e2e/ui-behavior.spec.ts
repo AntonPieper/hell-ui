@@ -317,8 +317,6 @@ test.describe('Hell UI browser behavior', () => {
     await expect(statesDialpad).toHaveAttribute('aria-disabled', 'true');
     await expect(statesDisplay).toBeDisabled();
     await expect(statesDialpad.getByRole('button', { name: 'Call' })).toBeDisabled();
-
-    await expectNoSeriousA11yIssues(page, 'app-dialpad-basic-example');
   });
 
   test('toast renders in the notification region and passes axe smoke', async ({ page }) => {
@@ -462,115 +460,6 @@ test.describe('Hell UI browser behavior', () => {
     await expect(toasts).toHaveCount(0);
   });
 
-  test('resizable handles support keyboard resizing semantics', async ({ page }) => {
-    await page.goto('/components/resizable');
-
-    const handle = page.getByRole('separator', { name: 'Resize panels' }).first();
-    await expect(handle).toHaveAttribute('aria-valuemin', '0');
-    await expect(handle).toHaveAttribute('aria-valuemax', '100');
-
-    await handle.focus();
-    const before = await handle.getAttribute('aria-valuenow');
-    await expect(handle).toHaveAttribute('aria-valuenow', /^\d+$/);
-    if (before === null) throw new Error('Expected initial aria-valuenow.');
-
-    await page.keyboard.press('ArrowRight');
-    await expect(handle).toHaveAttribute('aria-valuenow', /^\d+$/);
-    await expect(handle).not.toHaveAttribute('aria-valuenow', before);
-  });
-
-  test('select opens, supports keyboard selection, and updates selected value', async ({
-    page,
-  }) => {
-    await page.goto('/components/select');
-
-    const select = page.getByRole('combobox', { name: 'Priority' }).first();
-    await expect(select).toHaveAttribute('aria-expanded', 'false');
-
-    await select.focus();
-    await page.keyboard.press('ArrowDown');
-    await expect(select).toHaveAttribute('aria-expanded', 'true');
-
-    const option = page.getByRole('option', { name: 'Lowest' });
-    await expect(option).toBeVisible();
-    await page.keyboard.press('Enter');
-
-    await expect(select).toContainText('Lowest');
-    await expect(select).toHaveAttribute('aria-expanded', 'false');
-
-    await select.click();
-    await expect(page.getByRole('option', { name: 'Lowest' })).toHaveAttribute(
-      'aria-selected',
-      'true',
-    );
-    await page.keyboard.press('Escape');
-  });
-
-  test('combobox filters options and selects with keyboard focus', async ({ page }) => {
-    await page.goto('/components/combobox');
-
-    const input = page.getByRole('combobox', { name: 'Settlement currency' }).first();
-    await input.click();
-    await input.fill('AUD');
-    await page.keyboard.press('ArrowDown');
-    await expect(page.getByRole('option', { name: 'AUD — Australian Dollar' })).toBeVisible();
-    await expect(page.getByRole('option', { name: 'CAD — Canadian Dollar' })).not.toBeVisible();
-
-    await page.keyboard.press('Enter');
-
-    await expect(input).toHaveValue('AUD — Australian Dollar');
-    await expect(input).toBeFocused();
-  });
-
-  test('checkbox page contrasts native and custom semantics', async ({ page }) => {
-    await page.goto('/components/checkbox');
-
-    const custom = page.getByRole('checkbox', { name: 'I agree to the terms of service' }).first();
-    const native = page.getByRole('checkbox', { name: 'Accept terms' }).first();
-
-    await expect(custom).toHaveAttribute('type', 'button');
-    await expect(custom).toHaveAttribute('role', 'checkbox');
-    await expect(native).toHaveAttribute('type', 'checkbox');
-    const nativeTag = await native.evaluate((node) => node.tagName.toLowerCase());
-    expect(nativeTag).toBe('input');
-
-    await custom.click();
-    await expect(custom).toHaveAttribute('aria-checked', 'true');
-    await native.click();
-    await expect(native).toBeChecked();
-  });
-
-  test('listbox supports keyboard traversal and selection', async ({ page }) => {
-    await page.goto('/components/listbox');
-
-    const listbox = page.getByRole('listbox', { name: 'Assign owner' });
-    await expect(listbox).toBeVisible();
-
-    await listbox.focus();
-    await page.keyboard.press('End');
-    await page.keyboard.press('Enter');
-
-    await expect(listbox.getByRole('option', { name: 'Katherine Johnson' })).toHaveAttribute(
-      'aria-selected',
-      'true',
-    );
-  });
-
-  test('menu supports arrow navigation and focus restoration', async ({ page }) => {
-    await page.goto('/components/menu');
-
-    const trigger = page.getByRole('button', { name: 'Actions' }).first();
-    await trigger.click();
-
-    const rename = page.getByRole('menuitem', { name: 'Rename' }).first();
-    const duplicate = page.getByRole('menuitem', { name: 'Duplicate' }).first();
-    await expect(rename).toBeFocused();
-    await page.keyboard.press('ArrowDown');
-    await expect(duplicate).toBeFocused();
-    await page.keyboard.press('Escape');
-    await expect(trigger).toBeFocused();
-  });
-
   test('menu submenu opens, returns focus, and can be dismissed', async ({ page }) => {
     await page.goto('/components/menu');
 
@@ -588,40 +477,6 @@ test.describe('Hell UI browser behavior', () => {
 
     await page.keyboard.press('Escape');
     await expect(trigger).toBeFocused();
-  });
-
-  test('table primitives allow keyboard resize and keep native rows passive', async ({ page }) => {
-    await page.goto('/components/table?tableA11yHarness=1');
-    await expect(
-      page.getByRole('heading', { name: 'Table accessibility harness', level: 1 }),
-    ).toBeVisible();
-
-    const section = page.getByTestId('table-resize-semantic-section');
-    const separator = section.getByRole('separator', { name: 'Resize column' }).first();
-    const before = await separator.getAttribute('aria-valuenow');
-    if (before === null) throw new Error('Expected initial column resize value.');
-
-    await separator.press('ArrowRight');
-    await expect(separator).not.toHaveAttribute('aria-valuenow', before);
-
-    const table = page.getByTestId('native-table');
-    const adaRow = table.getByRole('row', { name: /Ada Lovelace/ }).first();
-    const graceRow = table.getByRole('row', { name: /Grace Hopper/ }).first();
-
-    await expect(adaRow).toHaveAttribute('data-active', 'true');
-    await expect(adaRow).not.toHaveAttribute('tabindex');
-    await expect(adaRow).not.toHaveAttribute('aria-selected');
-    await expect(graceRow).toHaveAttribute('data-selected', 'true');
-    await expect(graceRow).not.toHaveAttribute('tabindex');
-    await expect(graceRow).not.toHaveAttribute('aria-selected');
-
-    await graceRow.click();
-    await expect(graceRow).not.toHaveAttribute('data-active', 'true');
-
-    const graceAction = graceRow.getByRole('button', { name: 'View Grace Hopper' }).first();
-    await graceAction.click();
-
-    await expect(graceRow).toHaveAttribute('data-active', 'true');
   });
 
   test('app shell secondary drawer opens, closes, and does not fight mobile sidenav', async ({
@@ -693,61 +548,6 @@ test.describe('Hell UI browser behavior', () => {
     expect(Math.abs(desktop.transport.y - desktop.actions.y)).toBeLessThanOrEqual(2);
     expect(desktop.actions.x).toBeGreaterThan(desktop.transport.x);
     await expectNoHorizontalOverflow(page);
-  });
-
-  test('docs visual regression smoke covers shell, table surfaces, and vertical sliders', async ({
-    page,
-  }) => {
-    await page.goto('/');
-
-    const brandTag = page.locator('.hd-brand-tag');
-    await expect(brandTag).toHaveCSS('white-space', 'nowrap');
-
-    const themeSelect = page.getByRole('combobox', { name: 'Theme' });
-    await themeSelect.click();
-    const themeDropdown = page.locator('.hd-theme-dropdown');
-    await expect(themeDropdown).toBeVisible();
-    await expect(themeDropdown).toHaveCSS('z-index', '1000');
-
-    await page.goto('/components/table');
-    const firstExample = page.locator('hd-example-tabs').first();
-    await firstExample.getByRole('tab', { name: 'Code' }).click();
-    await expect(firstExample.locator('pre.hd-example-code')).toHaveCount(0);
-    await expect(
-      firstExample.locator('hell-code-editor.hd-code-viewer[data-slot="root"]'),
-    ).toBeVisible();
-
-    await firstExample.getByRole('tab', { name: 'Preview' }).click();
-    const primitiveTable = page
-      .locator('app-table-primitive-example [hellTableContainer][data-slot="root"]')
-      .first();
-    await expect(primitiveTable).toBeVisible();
-    await expect(primitiveTable).toHaveCSS('display', 'flex');
-    await expect(primitiveTable).toHaveCSS('border-top-width', '1px');
-    await expect(
-      page.locator('app-table-primitive-example table[data-hell-table-root][data-slot="root"]').first(),
-    ).toBeVisible();
-
-    const tanstackShell = page.locator('app-table-tanstack-shell-example hell-tanstack-table').first();
-    await expect(tanstackShell).toBeVisible();
-    await expect(tanstackShell).toHaveCSS('display', 'block');
-    await expect(tanstackShell.locator('hell-tanstack-pagination')).toBeVisible();
-
-    await page.goto('/components/slider');
-    const verticalSlider = page.locator('hell-slider[data-orientation="vertical"]').first();
-    const verticalTrack = verticalSlider.locator('[data-slot="track"]');
-    const verticalThumb = verticalSlider.locator('[data-slot="thumb"]');
-    await expect(verticalThumb).toBeVisible();
-    const trackBox = await verticalTrack.boundingBox();
-    const thumbBox = await verticalThumb.boundingBox();
-    if (!trackBox || !thumbBox) throw new Error('Expected vertical slider track and thumb boxes.');
-    const trackCenterX = trackBox.x + trackBox.width / 2;
-    const thumbCenterX = thumbBox.x + thumbBox.width / 2;
-    expect(Math.abs(thumbCenterX - trackCenterX)).toBeLessThanOrEqual(1);
-
-    await page.goto('/accessibility');
-    await expect(page.locator('.hd-a11y-table-wrap[hellTableContainer][data-slot="root"]')).toBeVisible();
-    await expect(page.locator('table.hd-a11y-table[data-hell-table-root][data-slot="root"]')).toBeVisible();
   });
 
   test('shared docs code tabs use the read-only Hell code viewer with copy and focus semantics', async ({

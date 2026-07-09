@@ -18,13 +18,13 @@ pnpm install
 pnpm build:lib
 pnpm build:docs
 pnpm test
-pnpm ci:playwright
-pnpm ci:verify # full pre-push: unit, architecture, lint, e2e, package consumer, build
+pnpm ci:playwright:chromium
+pnpm ci:verify # pre-push preflight (delegates to release:dry-run --fast)
 pnpm release:dry-run -- --fast # local release preflight
 pnpm release:dry-run -- --full # release-candidate evidence gate
 ```
 
-`release:dry-run -- --full` runs lint, architecture, CI contract, unit tests,
+`release:dry-run -- --full` runs lint, architecture, CI coverage, unit tests,
 `build:lib`, pack audit, selected package-consumer scenarios, API report, and
 `build:docs`. Evidence is written to timestamped log and JSON files under
 `test-results/release-evidence/`. Use `--fast` for local preflight before the

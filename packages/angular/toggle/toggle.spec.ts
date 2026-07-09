@@ -1,7 +1,5 @@
 import { Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { By } from '@angular/platform-browser';
-import { NgpToggleGroup } from 'ng-primitives/toggle-group';
 import { TestBed } from '@angular/core/testing';
 
 import {
@@ -107,23 +105,6 @@ describe('HellToggleGroup', () => {
     );
 
     expect(host.control.touched).toBe(true);
-  });
-
-  it('writes through public ng-primitives toggle-group setters for value and disabled updates', () => {
-    const fixture = TestBed.createComponent(ToggleGroupFormsHost);
-    fixture.detectChanges();
-
-    const debug = fixture.debugElement.query(By.directive(HellToggleGroup));
-    const groupInstance = debug.injector.get(HellToggleGroup);
-    const ngpToggleGroup = debug.injector.get(NgpToggleGroup);
-    const valueSet = vi.spyOn(ngpToggleGroup, 'setValue');
-    const disabledSet = vi.spyOn(ngpToggleGroup, 'setDisabled');
-
-    groupInstance.writeValue(['bold', 'italic']);
-    groupInstance.setDisabledState(true);
-
-    expect(valueSet).toHaveBeenCalledWith(['bold', 'italic'], { emit: false });
-    expect(disabledSet).toHaveBeenCalledWith(true);
   });
 
   it('integrates with Angular forms as single value', () => {

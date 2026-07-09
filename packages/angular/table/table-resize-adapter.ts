@@ -46,7 +46,7 @@ export interface HellTableResizeEvent {
 export function hellTableResizeAdapterCanResize(
   adapter: HellTableResizeAdapter | null | undefined,
 ): adapter is HellTableResizeAdapter {
-  return !!adapter?.before?.columnId && !!adapter.after?.columnId;
+  return !!adapter && !!adapter.before.columnId && !!adapter.after.columnId;
 }
 
 export function hellTableResizeEvent(

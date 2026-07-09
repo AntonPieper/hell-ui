@@ -181,12 +181,6 @@ function expectAdapterError(fn: () => void, operation: string, detail: RegExp): 
 }
 
 describe('ngp form-state compatibility helpers', () => {
-  it('documents the installed ng-primitives version and upgrade/removal path this form-state adapter targets', () => {
-    expect(HELL_NGP_STATE_WRITER_VERSION).toBe('ng-primitives@0.123.0');
-    expect(HELL_NGP_STATE_WRITER_UPGRADE_PATH).toContain('docs/adr/ng-primitives-state-adapter.md');
-    expect(HELL_NGP_STATE_WRITER_UPGRADE_PATH).toContain('public value+disabled setters');
-  });
-
   describe('installed ng-primitives public typed State<T> channel drift', () => {
     beforeEach(async () => {
       await TestBed.configureTestingModule({
@@ -288,36 +282,6 @@ describe('ngp form-state compatibility helpers', () => {
     });
   });
 
-  it('writes combobox values through the typed ng-primitives State<T>.value channel', () => {
-    const value = vi.fn();
-    const disabled = vi.fn();
-    const state = {
-      value: { set: value },
-      disabled: { set: disabled },
-    };
-
-    writeComboboxStateValue(state as never, { id: 123 });
-
-    expect(value).toHaveBeenCalledWith({ id: 123 });
-    expect(value).toHaveBeenCalledTimes(1);
-    expect(disabled).not.toHaveBeenCalled();
-  });
-
-  it('writes combobox disabled through the typed ng-primitives State<T>.disabled channel', () => {
-    const value = vi.fn();
-    const disabled = vi.fn();
-    const state = {
-      value: { set: value },
-      disabled: { set: disabled },
-    };
-
-    writeComboboxStateDisabled(state as never, false);
-
-    expect(disabled).toHaveBeenCalledWith(false);
-    expect(disabled).toHaveBeenCalledTimes(1);
-    expect(value).not.toHaveBeenCalled();
-  });
-
   it('throws version-bound errors with affected operation when combobox State<T> channel shape is invalid', () => {
     expectAdapterError(
       () => writeComboboxStateValue({} as never, 'x'),
@@ -338,36 +302,6 @@ describe('ngp form-state compatibility helpers', () => {
       'writeComboboxStateDisabled',
       /disabled\.set/,
     );
-  });
-
-  it('writes radio-group values through the typed ng-primitives State<T>.value channel', () => {
-    const value = vi.fn();
-    const disabled = vi.fn();
-    const state = {
-      value: { set: value },
-      disabled: { set: disabled },
-    };
-
-    writeRadioGroupStateValue(state as never, 'radio-value');
-
-    expect(value).toHaveBeenCalledWith('radio-value');
-    expect(value).toHaveBeenCalledTimes(1);
-    expect(disabled).not.toHaveBeenCalled();
-  });
-
-  it('writes radio-group disabled through the typed ng-primitives State<T>.disabled channel', () => {
-    const value = vi.fn();
-    const disabled = vi.fn();
-    const state = {
-      value: { set: value },
-      disabled: { set: disabled },
-    };
-
-    writeRadioGroupStateDisabled(state as never, true);
-
-    expect(disabled).toHaveBeenCalledWith(true);
-    expect(disabled).toHaveBeenCalledTimes(1);
-    expect(value).not.toHaveBeenCalled();
   });
 
   it('throws version-bound errors with affected operation when radio-group State<T> channel shape is invalid', () => {

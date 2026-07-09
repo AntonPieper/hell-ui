@@ -1,9 +1,7 @@
-import { Component, signal, type InputSignal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import type { HellUiInput } from '@hell-ui/angular/core';
 
-import { HellButton, type HellButtonPart, type HellButtonUi } from './button';
+import { HellButton, type HellButtonUi } from './button';
 
 @Component({
   imports: [HellButton],
@@ -96,16 +94,6 @@ describe('HellButton', () => {
     expect(button.className).toContain('px-hell-7');
     expect(button.className).toContain('shadow-hell-lg');
     expect(button.className).toContain('data-hover:bg-hell-danger-hover');
-  });
-
-  it('exposes ui as a signal input on migrated components', () => {
-    const fixture = TestBed.createComponent(ButtonHost);
-    fixture.detectChanges();
-
-    const button = fixture.debugElement.query(By.css('#custom-map')).injector.get(HellButton);
-    const ui: InputSignal<HellUiInput<HellButtonPart>> = button.ui;
-
-    expect(ui()).toBe(fixture.componentInstance.customUi);
   });
 
   it('reacts to ui signal input updates through the public binding', () => {

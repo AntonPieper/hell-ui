@@ -206,7 +206,7 @@ jobs:
         run: pnpm run ci:ensure:build:docs
 
       - name: Docs bundle diagnosis
-        run: pnpm run diagnose:docs-bundle
+        run: pnpm run diagnose:docs-bundle --check
 
       - name: Upload docs bundle diagnosis
         uses: actions/upload-artifact@v7

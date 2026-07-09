@@ -4,9 +4,6 @@ import { HellAvatar } from '@hell-ui/angular/avatar';
 
 import {
   HELL_AVATAR_GROUP_DIRECTIVES,
-  HellAvatarGroup,
-  HellAvatarGroupItem,
-  HellAvatarGroupOverflow,
   type HellAvatarGroupItemUi,
   type HellAvatarGroupOverflowUi,
   type HellAvatarGroupUi,
@@ -240,13 +237,6 @@ describe('HellAvatarGroup Part Style Map', () => {
     expect(overflow.classList.contains('text-hell-foreground-muted')).toBe(false);
   });
 
-  it('bundles every avatar-group directive for bulk imports', () => {
-    expect(HELL_AVATAR_GROUP_DIRECTIVES).toEqual([
-      HellAvatarGroup,
-      HellAvatarGroupItem,
-      HellAvatarGroupOverflow,
-    ]);
-  });
 });
 
 function byId(root: HTMLElement, id: string): HTMLElement {

@@ -12,6 +12,7 @@ import {
   parseBudgetSize,
   readDocsBudgetPolicy,
   validateDocsBudgetPolicy,
+  validateDocsBudgetPolicyMarkdown,
 } from './docs-budget-policy.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -36,6 +37,13 @@ const budgetPolicy = budgetPolicyRead.policy;
 const budgetPolicyErrors = [
   ...budgetPolicyRead.errors,
   ...validateDocsBudgetPolicy(budgetPolicy, budgets),
+  ...validateDocsBudgetPolicyMarkdown(
+    existsSync(budgetPolicyPath) ? readFileSync(budgetPolicyPath, 'utf8') : '',
+    budgetPolicy,
+  ),
+  ...['initial', 'anyComponentStyle']
+    .filter((type) => !budgets.some((budget) => budget.type === type))
+    .map((type) => `apps/docs/angular.json production budgets must include ${type}.`),
 ];
 
 const initialFiles = findInitialFiles(outputs);
@@ -87,6 +95,7 @@ function parseArgs(args) {
   const parsed = {};
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
+    if (arg === '--') continue;
     if (arg === '--help' || arg === '-h') {
       printUsage();
       process.exit(0);
