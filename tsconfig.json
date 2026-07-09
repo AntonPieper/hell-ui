@@ -9,12 +9,6 @@
     },
     {
       "path": "./apps/docs/tsconfig.app.json"
-    },
-    {
-      "path": "./packages/pdf-viewer/tsconfig.lib.json"
-    },
-    {
-      "path": "./packages/pdf-viewer/tsconfig.spec.json"
     }
   ]
 }

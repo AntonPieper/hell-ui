@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { auditPackedPackage } from './package-pack-audit.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const packageDistRoots = [join(root, 'dist/hell'), join(root, 'dist/hell-pdf-viewer')];
+const packageDistRoots = [join(root, 'dist/hell')];
 
 for (const distRoot of packageDistRoots) {
   if (!existsSync(join(distRoot, 'package.json'))) {

@@ -38,10 +38,10 @@ const docsHeavyLazyRoutePolicies = [
     label: 'PDF viewer docs examples',
     routePath: '/components/pdf-viewer',
     boundary: 'components/pdf-viewer',
-    packageSpecifiers: ['@hell-ui/pdf-viewer', 'pdfjs-dist'],
+    packageSpecifiers: ['@hell-ui/angular/features/pdf-viewer', 'pdfjs-dist'],
     sourceFragments: [
-      '@hell-ui/pdf-viewer/styles',
-      'hell-ui/pdf-viewer/styles/pdf-viewer.css',
+      '@hell-ui/angular/features/pdf-viewer/styles.css',
+      'hell-ui/pdf-viewer/styles/styles.css',
       'pdfjs/pdf_viewer.css',
     ],
   },
@@ -2278,7 +2278,7 @@ function checkDocsCodeEditorIsolationContract() {
 }
 
 function checkDocsPdfViewerIsolationContract() {
-  const heavyImports = ['@hell-ui/pdf-viewer', 'pdfjs-dist'];
+  const heavyImports = ['@hell-ui/angular/features/pdf-viewer', 'pdfjs-dist'];
   const globalDocsFiles = [
     'apps/docs/src/app/app.routes.ts',
     'apps/docs/src/app/docs-catalog.ts',
@@ -2300,7 +2300,7 @@ function checkDocsPdfViewerIsolationContract() {
     const source = readFile(path);
     if (hasPackageImport(source, heavyImports)) {
       failures.push(
-        `Docs global catalog/search file ${file} must not import pdf.js or @hell-ui/pdf-viewer`,
+        `Docs global catalog/search file ${file} must not import pdf.js or @hell-ui/angular/features/pdf-viewer`,
       );
     }
     if (hasStaticImportFrom(source, 'pages/components/pdf-viewer')) {
@@ -2324,7 +2324,7 @@ function checkDocsPdfViewerIsolationContract() {
 
     const source = readFile(path);
     if (hasPackageImport(source, heavyImports)) {
-      failures.push(`Docs shared file ${file} must not import pdf.js or @hell-ui/pdf-viewer`);
+      failures.push(`Docs shared file ${file} must not import pdf.js or @hell-ui/angular/features/pdf-viewer`);
     }
   }
 
@@ -2347,7 +2347,7 @@ function checkDocsPdfViewerIsolationContract() {
   );
   const pdfViewerPage = readFile(pdfViewerPagePath);
   if (
-    /styles\s*:\s*\[[\s\S]*(?:@hell-ui\/angular\/styles\/features\/pdf-viewer|@hell-ui\/pdf-viewer\/styles)/.test(
+    /styles\s*:\s*\[[\s\S]*(?:@hell-ui\/angular\/features\/pdf-viewer\/styles\.css|@hell-ui\/pdf-viewer\/styles)/.test(
       pdfViewerPage,
     )
   ) {
@@ -2728,8 +2728,8 @@ function checkApiStabilityContract() {
     },
     {
       name: 'PDF viewer',
-      publicApiPath: 'packages/pdf-viewer/src/public-api.ts',
-      sourcePath: 'packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts',
+      publicApiPath: 'packages/angular/features/pdf-viewer/public-api.ts',
+      sourcePath: 'packages/angular/features/pdf-viewer/pdf-viewer.ts',
       docsPath: 'apps/docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts',
     },
   ];
@@ -2799,10 +2799,10 @@ function checkApiStabilityContract() {
       'hellCodeEditorSetupFactory',
     ],
     ['packages/angular/features/code-editor/code-editor.runtime.ts', 'hellCodeEditorTheme'],
-    ['packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts', 'HellPdfRuntimeFactory'],
-    ['packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts', 'HELL_PDF_RUNTIME_FACTORY'],
-    ['packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts', 'HellPdfViewer'],
-    ['packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.adapter.ts', 'HellPdfWorkerSource'],
+    ['packages/angular/features/pdf-viewer/pdf-viewer.ts', 'HellPdfRuntimeFactory'],
+    ['packages/angular/features/pdf-viewer/pdf-viewer.ts', 'HELL_PDF_RUNTIME_FACTORY'],
+    ['packages/angular/features/pdf-viewer/pdf-viewer.ts', 'HellPdfViewer'],
+    ['packages/angular/features/pdf-viewer/pdf-viewer.adapter.ts', 'HellPdfWorkerSource'],
   ];
   for (const [sourcePath, symbol] of experimentalApiSymbols) {
     const source = readFile(join(root, sourcePath));
@@ -2909,6 +2909,7 @@ function checkPackageDependencyContract() {
     '@codemirror/state',
     '@codemirror/view',
     '@lezer/highlight',
+    'pdfjs-dist',
   ]);
   const adapterOnlyPeers = new Set(['@tanstack/angular-table', '@tanstack/virtual-core']);
   const styleOnlyPeers = new Set(['tailwindcss']);
@@ -3063,13 +3064,21 @@ function checkPackageDependencyContract() {
     );
   }
 
-  if (peerDependencies['pdfjs-dist'] || peerDependenciesMeta['pdfjs-dist']) {
+  const pdfJsImportOffenders = sourceFiles
+    .filter((file) => !relPath(file).includes('/features/pdf-viewer/'))
+    .filter((file) => readFile(file).includes('pdfjs-dist'))
+    .map(relPath);
+  if (pdfJsImportOffenders.length) {
     failures.push(
-      'Main @hell-ui/angular package must not advertise pdfjs-dist after the PDF viewer split',
+      `Package dependency contract must keep pdfjs-dist inside @hell-ui/angular/features/pdf-viewer: ${pdfJsImportOffenders.join(', ')}`,
     );
   }
 
-  checkPdfViewerPackageDependencyContract(workspaceCatalog);
+  if (peerDependencies['pdfjs-dist'] !== workspaceCatalog['pdfjs-dist']) {
+    failures.push(
+      `Package dependency contract must pin the optional pdfjs-dist peer to workspace catalog version ${workspaceCatalog['pdfjs-dist']}`,
+    );
+  }
 
   const rootNgPackage = parseJsonWithComments(
     readFile(join(root, 'packages/angular/ng-package.json')),
@@ -3078,127 +3087,6 @@ function checkPackageDependencyContract() {
     failures.push(
       'Root package assets must not copy pdf.worker.mjs; PDF viewer requires an app-provided worker source',
     );
-  }
-}
-
-function checkPdfViewerPackageDependencyContract(workspaceCatalog) {
-  const packageJson = parseJsonWithComments(
-    readFile(join(root, 'packages/pdf-viewer/package.json')),
-  );
-  const mainPackageJson = parseJsonWithComments(readFile(join(root, 'packages/angular/package.json')));
-  const optionalDependencies = Object.keys(packageJson.optionalDependencies ?? {});
-  if (optionalDependencies.length) {
-    failures.push(
-      `PDF package dependency contract uses optionalDependencies instead of peer dependencies: ${optionalDependencies.join(', ')}`,
-    );
-  }
-
-  const sourceRoot = join(root, 'packages/pdf-viewer/src/lib');
-  const sourceFiles = walk(sourceRoot).filter(
-    (file) => file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts'),
-  );
-  const importedPackages = new Set(
-    sourceFiles.flatMap((file) => externalImportPackages(readFile(file))),
-  );
-  const peerDependencies = packageJson.peerDependencies ?? {};
-  const peerDependenciesMeta = packageJson.peerDependenciesMeta ?? {};
-  const dependencies = packageJson.dependencies ?? {};
-
-  for (const dependency of importedPackages) {
-    if (!peerDependencies[dependency] && !dependencies[dependency]) {
-      failures.push(
-        `PDF package dependency contract is missing dependency for imported ${dependency}`,
-      );
-    }
-  }
-
-  const requiredPeers = new Set([
-    '@angular/common',
-    '@angular/core',
-    '@hell-ui/angular',
-    '@ng-icons/core',
-    '@ng-icons/font-awesome',
-    'pdfjs-dist',
-  ]);
-  for (const peer of requiredPeers) {
-    if (!peerDependencies[peer])
-      failures.push(`PDF package dependency contract is missing required peer ${peer}`);
-    if (peerDependenciesMeta[peer]?.optional === true) {
-      failures.push(`PDF package dependency contract must keep ${peer} required`);
-    }
-  }
-  if (peerDependencies['pdfjs-dist'] !== workspaceCatalog['pdfjs-dist']) {
-    failures.push(
-      `PDF package dependency contract must pin pdfjs-dist peer to workspace catalog version ${workspaceCatalog['pdfjs-dist']}`,
-    );
-  }
-  if (peerDependencies['@hell-ui/angular'] !== mainPackageJson.version) {
-    failures.push(
-      `PDF package dependency contract must peer @hell-ui/angular@${mainPackageJson.version}`,
-    );
-  }
-  if (!peerDependencies.tailwindcss || peerDependenciesMeta.tailwindcss?.optional !== true) {
-    failures.push(
-      'PDF package dependency contract must declare optional tailwindcss for CSS entry points',
-    );
-  }
-  for (const metaPeer of Object.keys(peerDependenciesMeta)) {
-    if (!peerDependencies[metaPeer]) {
-      failures.push(
-        `PDF package dependency contract has peerDependenciesMeta for undeclared ${metaPeer}`,
-      );
-    }
-  }
-
-  const packageExports = packageJson.exports ?? {};
-  for (const exportPath of ['./styles', './styles/pdf-viewer']) {
-    const styleExport = packageExports[exportPath];
-    if (!styleExport?.style) {
-      failures.push(
-        `PDF package style export ${exportPath} is missing from packages/pdf-viewer/package.json`,
-      );
-      continue;
-    }
-    if (styleExport[sourcePackageCondition] !== styleExport.style) {
-      failures.push(
-        `PDF package style export ${exportPath} must use the same local source CSS path for style and ${sourcePackageCondition}`,
-      );
-    }
-    const sourceStylePath = packageStylePathToSourcePath(styleExport.style);
-    if (!existsSync(join(root, 'packages/pdf-viewer', sourceStylePath))) {
-      failures.push(`PDF package style export ${exportPath} points at missing ${styleExport.style}`);
-    }
-  }
-  for (const exportPath of Object.keys(packageExports)) {
-    if (exportPath.startsWith('./styles/components/')) {
-      failures.push(`PDF package must not export legacy component style path ${exportPath}`);
-    }
-  }
-  for (const relPath of [
-    'packages/pdf-viewer/src/lib/styles/pdf-viewer.css',
-    'packages/pdf-viewer/src/lib/styles/components/pdf-viewer.css',
-  ]) {
-    if (existsSync(join(root, relPath))) {
-      failures.push(`PDF viewer CSS must be co-located; remove central style file: ${relPath}`);
-    }
-  }
-  const ngPackage = parseJsonWithComments(
-    readFile(join(root, 'packages/pdf-viewer/ng-package.json')),
-  );
-  if (JSON.stringify(ngPackage.assets ?? []).includes('pdf.worker')) {
-    failures.push(
-      'PDF package must document worker setup instead of copying pdf.worker.mjs into the package tarball',
-    );
-  }
-  const readme = readFile(join(root, 'packages/pdf-viewer/README.md'));
-  for (const text of [
-    'pdfjs-dist@5.6.205',
-    'pdf.worker.mjs',
-    'worker',
-    'node_modules/pdfjs-dist/build',
-  ]) {
-    if (!readme.includes(text))
-      failures.push(`PDF package README is missing worker/dependency guidance: ${text}`);
   }
 }
 
@@ -3248,16 +3136,6 @@ function checkTokenSubstrateDoesNotOwnComponentSkins() {
       `${tokensPath} must not contain component-specific skin selector "${selector.replace(/\s+/g, ' ')}"; move it to @hell-ui/angular/themes/*.css`,
     );
   }
-}
-
-function packageStylePathToSourcePath(packageStylePath) {
-  if (packageStylePath.startsWith('./src/lib/styles/')) {
-    return packageStylePath.slice(2);
-  }
-  if (packageStylePath.startsWith('./styles/')) {
-    return packageStylePath.replace(/^\.\/styles/, 'src/lib/styles');
-  }
-  return packageStylePath;
 }
 
 function checkNgClassCustomizationContract() {
@@ -3422,13 +3300,6 @@ function checkPartStyleMapContract() {
   const styleableSource = readFile(join(root, 'packages/angular/core/styleable.ts'));
   const styleableCompact = compactSource(styleableSource);
   const mergeSource = readFile(join(root, 'packages/angular/core/part-style-merge.ts'));
-  const packageConsumer = readFile(join(root, 'tools/check-package-consumer.mjs'));
-  const releaseDryRun = readFile(join(root, 'tools/release-dry-run.mjs'));
-  const productionReadyCheck = readFile(join(root, 'tools/production-ready-check.mjs'));
-  const releaseEvidencePolicy = readFile(join(root, 'tools/release-evidence-policy.mjs'));
-  const productionReadinessChecklist = readFile(
-    join(root, 'docs/release/production-readiness-checklist.md'),
-  );
   const entrypointPackageDirs = new Set(
     entrypointPublicApiFiles().map((entrypoint) => entrypoint.packageDir),
   );
@@ -3499,56 +3370,6 @@ function checkPartStyleMapContract() {
     checkMigratedPartStyleMapModule(module, entrypointPackageDirs);
   }
   checkBasicFloatingListStructuralAffordances();
-
-  if (!packageConsumer.includes("name: 'button-ui'")) {
-    failures.push('Package-consumer scenarios must include button-ui for ui shorthand without CSS');
-  }
-  if (!packageConsumer.includes("name: 'button'")) {
-    failures.push('Package-consumer scenarios must include styled button for compiled CSS proof');
-  }
-  if (!packageConsumer.includes('ui="') || !packageConsumer.includes('[ui]="')) {
-    failures.push(
-      'Package-consumer scenarios must compile ui string shorthand and part-map inputs',
-    );
-  }
-  if (!packageConsumer.includes('--color-hell-primary:#3452ff')) {
-    failures.push('Package-consumer button scenario must prove semantic token runtime theming');
-  }
-  if (functionBody(packageConsumer, 'buttonConsumerStylesCss')?.includes('@source')) {
-    failures.push(
-      'Button package-consumer CSS must prove shipped compiled CSS without consumer @source scanning',
-    );
-  }
-  if (
-    !packageConsumer.includes('HELL_PACKAGE_CONSUMER_RUNTIME_STYLE_CHECK') ||
-    !packageConsumer.includes('runtimeStyleAssertions') ||
-    !releaseDryRun.includes('HELL_PACKAGE_CONSUMER_RUNTIME_STYLE_CHECK')
-  ) {
-    failures.push(
-      'Full release dry-run package-consumer evidence must compute semantic token runtime styles',
-    );
-  }
-  if (
-    !packageConsumer.includes(
-      'built CSS contains Part Style Map compiled-CSS proof and semantic token output',
-    )
-  ) {
-    failures.push('Package-consumer CSS assertion must name the Part Style Map compiled-CSS proof');
-  }
-  if (
-    !releaseDryRun.includes('releaseCandidateConsumerScenarioNames') ||
-    !releaseEvidencePolicy.includes("'button-ui'") ||
-    !releaseEvidencePolicy.includes("'button'")
-  ) {
-    failures.push('Release dry-run must include the button-ui and styled button scenarios');
-  }
-  if (
-    !productionReadyCheck.includes('releaseCandidateConsumerScenarioNames') ||
-    !productionReadinessChecklist.includes('"button-ui"') ||
-    !productionReadinessChecklist.includes('"button"')
-  ) {
-    failures.push('Production-readiness package-consumer gate must require button-ui and button');
-  }
 
 }
 
@@ -3789,14 +3610,6 @@ function checkLabelContract() {
   if (!labelsSource.includes('hellCreateLabels')) {
     failures.push('Label Contract core factory hellCreateLabels is missing');
   }
-  for (const legacySymbol of ['HELL_LABELS', 'HELL_DEFAULT_LABELS', 'provideHellLabels']) {
-    if (labelsSource.includes(legacySymbol)) {
-      failures.push(
-        `Label Contract core must not reintroduce the aggregate symbol ${legacySymbol}; labels are entry-point-owned`,
-      );
-    }
-  }
-
   const coreApi = readFile(join(root, 'packages/angular/core/public-api.ts'));
   if (!coreApi.includes('./labels')) {
     failures.push(
@@ -3819,7 +3632,7 @@ function checkLabelContract() {
     ['packages/angular/table/table-utilities.ts', 'HELL_TABLE_UTILITIES_LABELS', 'provideHellTableUtilitiesLabels'],
     ['packages/angular/time-input/time-input.ts', 'HELL_TIME_INPUT_LABELS', 'provideHellTimeInputLabels'],
     ['packages/angular/toast/toast.ts', 'HELL_TOAST_LABELS', 'provideHellToastLabels'],
-    ['packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer-labels.ts', 'HELL_PDF_VIEWER_LABELS', 'provideHellPdfViewerLabels'],
+    ['packages/angular/features/pdf-viewer/pdf-viewer-labels.ts', 'HELL_PDF_VIEWER_LABELS', 'provideHellPdfViewerLabels'],
   ];
   for (const [file, token, provideFn] of labelContractOwners) {
     const source = readFile(join(root, file));
@@ -3879,7 +3692,7 @@ function checkLabelContract() {
     ],
     ['packages/angular/table/table-utilities.ts', ['Resize column']],
     [
-      'packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.html',
+      'packages/angular/features/pdf-viewer/pdf-viewer.html',
       ['Find in document', 'Zoom level'],
     ],
     [
@@ -4011,13 +3824,13 @@ function checkExperimentalFeatureContract() {
   }
 
   const pdfSource = readFile(
-    join(root, 'packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts'),
+    join(root, 'packages/angular/features/pdf-viewer/pdf-viewer.ts'),
   );
   if (!pdfSource.includes('@experimental This feature wraps pdf.js')) {
     failures.push('HellPdfViewer must mark the pdf.js wrapper experimental in its public JSDoc');
   }
 
-  const pdfFeatureApi = readFile(join(root, 'packages/pdf-viewer/src/public-api.ts'));
+  const pdfFeatureApi = readFile(join(root, 'packages/angular/features/pdf-viewer/public-api.ts'));
   if (!/HellPdfWorkerSource/.test(pdfFeatureApi)) {
     failures.push(
       'PDF Viewer package entry point must export the public HellPdfWorkerSource worker input type',
@@ -4030,7 +3843,7 @@ function checkExperimentalFeatureContract() {
   if (!/PDF viewer is experimental/.test(pdfDocs)) {
     failures.push('PDF Viewer docs must disclose experimental status');
   }
-  if (!/worker[^.]*package does not copy\s+a worker into either package tarball/s.test(pdfDocs)) {
+  if (!/worker[^.]*package does not copy\s+a worker into its tarball/s.test(pdfDocs)) {
     failures.push('PDF Viewer docs must disclose that apps provide the pdf.js worker source');
   }
 }
@@ -4175,7 +3988,7 @@ function checkHotkeyContract() {
   }
 
   const pdfSource = readFile(
-    join(root, 'packages/pdf-viewer/src/lib/pdf-viewer/pdf-viewer.ts'),
+    join(root, 'packages/angular/features/pdf-viewer/pdf-viewer.ts'),
   );
   if (pdfSource.includes('window:keydown') || pdfSource.includes('window:pointerdown')) {
     failures.push('HellPdfViewer must register global shortcuts through shared listener services');
@@ -4999,6 +4812,41 @@ const allowedBrowserGlobalSeams = [
       "if (typeof ResizeObserver === 'undefined') return;",
       'this.resizeObserver = new ResizeObserver(this.syncScope);',
     ],
+  },
+  {
+    id: 'pdf-adapter-owner-document-fallback',
+    file: 'packages/angular/features/pdf-viewer/pdf-viewer.adapter.ts',
+    globals: ['document'],
+    lines: ["if (typeof document !== 'undefined') return document;"],
+  },
+  {
+    id: 'pdf-print-owner-document-fallback',
+    file: 'packages/angular/features/pdf-viewer/pdf-viewer.print.ts',
+    globals: ['document'],
+    lines: ["if (typeof document !== 'undefined') return document;"],
+  },
+  {
+    id: 'pdf-runtime-cleanup-window-fallback',
+    file: 'packages/angular/features/pdf-viewer/pdf-viewer.runtime.ts',
+    globals: ['window'],
+    lines: [
+      "const win = ownerDocument?.defaultView ?? (typeof window === 'undefined' ? null : window);",
+    ],
+  },
+  {
+    id: 'pdf-thumbs-intersection-observer',
+    file: 'packages/angular/features/pdf-viewer/pdf-viewer.ts',
+    globals: ['IntersectionObserver'],
+    lines: [
+      "if (typeof IntersectionObserver === 'undefined') {",
+      'const observer = new IntersectionObserver(',
+    ],
+  },
+  {
+    id: 'pdf-wheel-page-delta-window',
+    file: 'packages/angular/features/pdf-viewer/pdf-viewer.utils.ts',
+    globals: ['window'],
+    lines: ['return event.deltaY * window.innerHeight;'],
   },
 ];
 

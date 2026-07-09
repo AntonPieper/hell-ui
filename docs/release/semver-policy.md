@@ -1,6 +1,6 @@
 # SemVer policy from alpha to stable
 
-Hell UI follows SemVer 2.0.0, but the compatibility promise depends on the release stage. The package is currently **internal beta** and must not be described as production-ready until `pnpm production-ready:check` passes against fresh release-candidate evidence.
+Hell UI follows SemVer 2.0.0, but the compatibility promise depends on the release stage. The package is currently **internal beta** and must not be described as production-ready until fresh release-candidate evidence (full release dry-run plus a full browser e2e pass) says otherwise.
 
 ## Stage promises
 
@@ -53,7 +53,7 @@ Hell UI uses `CHANGELOG.md` in Keep a Changelog shape:
 A stage promotion is a release-management decision, not just a version bump.
 
 - Alpha → internal beta: package-consumer smoke coverage and API category docs exist; known gaps are recorded.
-- Internal beta → public beta: production-readiness checklist has no critical blockers, migration guide exists, and release dry-run evidence is fresh.
+- Internal beta → public beta: release evidence has no critical blockers, migration guide exists, and release dry-run evidence is fresh.
 - Public beta → stable: stable API reports, docs, accessibility evidence, package-consumer scenarios, pack audit, trusted publishing, and changelog/migration history have held through at least one public beta cycle.
 
 If evidence invalidates these promises, update this policy and the release

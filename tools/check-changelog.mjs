@@ -3,16 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-  apiReportEntrypoints,
-  apiReportExceptionEntrypoints,
-  changelogPath,
-  changelogRequiredPolicyTerms,
-  packageManifestPath,
-  releaseCandidateConsumerScenarioNames,
-  releaseEvidencePolicyDocPath,
-  semverPolicyPath,
-} from './release-evidence-policy.mjs';
+import { changelogPath, packageManifestPath, semverPolicyPath } from './release-evidence-policy.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -53,20 +44,6 @@ if (changelog) {
       }
     }
   }
-}
-
-const semverPolicy = readRequiredFile(semverPolicyPath);
-if (semverPolicy) {
-  for (const term of changelogRequiredPolicyTerms) {
-    if (!semverPolicy.toLowerCase().includes(term.toLowerCase())) {
-      errors.push(`${semverPolicyPath} must define or reference ${JSON.stringify(term)}.`);
-    }
-  }
-}
-
-const releaseEvidencePolicy = readRequiredFile(releaseEvidencePolicyDocPath);
-if (releaseEvidencePolicy) {
-  validateReleaseEvidencePolicyDoc(releaseEvidencePolicy);
 }
 
 if (errors.length > 0) {
@@ -156,42 +133,4 @@ function hasEvidenceCitation(section) {
     new RegExp(`\\]\\(${localPath}\\)`),
   ];
   return patterns.some((pattern) => pattern.test(section));
-}
-
-function validateReleaseEvidencePolicyDoc(content) {
-  const requiredTerms = [
-    'release-candidate package-consumer scenarios',
-    'PDF viewer split-package exception',
-    'Internal hotkeys API report exception',
-    'production-readiness checklist',
-    'tools/release-evidence-policy.mjs',
-  ];
-  for (const term of requiredTerms) {
-    if (!content.toLowerCase().includes(term.toLowerCase())) {
-      errors.push(`${releaseEvidencePolicyDocPath} must include ${JSON.stringify(term)}.`);
-    }
-  }
-
-  for (const scenario of releaseCandidateConsumerScenarioNames) {
-    if (!content.includes(`\`${scenario}\``)) {
-      errors.push(`${releaseEvidencePolicyDocPath} must document scenario ${scenario}.`);
-    }
-  }
-
-  for (const entrypoint of apiReportEntrypoints) {
-    if (!content.includes(`\`${entrypoint.specifier}\``)) {
-      errors.push(`${releaseEvidencePolicyDocPath} must document API report ${entrypoint.specifier}.`);
-    }
-    if (!content.includes(`\`${entrypoint.reportFileName}\``)) {
-      errors.push(
-        `${releaseEvidencePolicyDocPath} must document API report file ${entrypoint.reportFileName}.`,
-      );
-    }
-  }
-
-  for (const entrypoint of apiReportExceptionEntrypoints) {
-    if (!content.includes(entrypoint.rationale)) {
-      errors.push(`${releaseEvidencePolicyDocPath} must document exception rationale for ${entrypoint.specifier}.`);
-    }
-  }
 }

@@ -1,7 +1,19 @@
 # ADR: Heavy feature package boundary
 
-- Status: Accepted
+- Status: Accepted; amended 2026-07-08 (PDF viewer split reversed)
 - Date: 2026-05-28
+
+## Amendment (2026-07-08)
+
+Decision 2 is reversed: the PDF viewer moved back into the main package as the
+optional feature entry point `@hell-ui/angular/features/pdf-viewer`, using the
+same boundary as CodeMirror. Running the split produced a full second release
+train (build, pack audit, provenance, GHPR mirror, consumer scenario, exact
+`@hell-ui/angular` version peer) whose ongoing cost outweighed the one benefit
+of keeping `pdfjs-dist` out of the main package metadata — the same trade
+already accepted for the CodeMirror peers. `pdfjs-dist` is now an optional peer
+of `@hell-ui/angular`, pinned to the workspace catalog version, and package
+consumer scenarios still prove root/core/button installs never need it.
 
 ## Context
 

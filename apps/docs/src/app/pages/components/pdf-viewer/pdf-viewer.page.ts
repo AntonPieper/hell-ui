@@ -46,11 +46,11 @@ import pdfViewerStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         icon="faSolidFilePdf"
         category="Feature"
         status="Experimental"
-        importPath="@hell-ui/pdf-viewer"
-        stylesPath="@hell-ui/pdf-viewer/styles"
+        importPath="@hell-ui/angular/features/pdf-viewer"
+        stylesPath="@hell-ui/angular/features/pdf-viewer/styles.css"
       >
         An in-app pdf.js document viewer with paging, zoom, find, thumbnails, download, and print —
-        shipped as its own package so pdf.js never travels with the core library.
+        kept behind an optional feature entry point so pdf.js never travels with core imports.
       </hd-page-header>
 
       <p>
@@ -59,9 +59,9 @@ import pdfViewerStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         viewer behind Hell's <em>PDF Runtime</em> and <em>PDF Adapter</em> seams. Point
         <code>src</code> at a URL, <code>URL</code>, or <code>ArrayBuffer</code> and it renders a
         toolbar (page navigation, zoom, find, download, print), an optional thumbnail rail, and the
-        scrolling page area. Because pdf.js is heavy and browser-only, it lives in the separate
-        <code>&#64;hell-ui/pdf-viewer</code> package and is <strong>not SSR-safe</strong> — keep it
-        behind a lazy route.
+        scrolling page area. Because pdf.js is heavy and browser-only, it lives behind the
+        <code>&#64;hell-ui/angular/features/pdf-viewer</code> feature entry point and is
+        <strong>not SSR-safe</strong> — keep it behind a lazy route.
       </p>
       <p>
         Reach for it when a dense business app needs to preview a document inline — invoices,
@@ -72,12 +72,11 @@ import pdfViewerStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
       </p>
       <p>
         Your app owns the pdf.js compatibility decisions. You must pass a pdf.js
-        <code>worker</code> source through the <code>worker</code> input; the PDF package does not copy
-        a worker into either package tarball, so wire one from your app assets or a
-        bundler-emitted worker URL. Install <code>&#64;hell-ui/pdf-viewer</code> alongside the exact
-        supported <code>pdfjs-dist&#64;5.6.205</code> peer, <code>&#64;hell-ui/angular</code>,
-        <code>&#64;ng-icons/font-awesome</code>, and — when you import Hell's CSS — style-only
-        <code>tailwindcss</code>. Load both <code>&#64;hell-ui/pdf-viewer/styles</code> and pdf.js's
+        <code>worker</code> source through the <code>worker</code> input; the package does not copy
+        a worker into its tarball, so wire one from your app assets or a bundler-emitted worker
+        URL. Install the exact supported <code>pdfjs-dist&#64;5.6.205</code> optional peer alongside
+        <code>&#64;hell-ui/angular</code>, <code>&#64;ng-icons/font-awesome</code>, and — when you
+        import Hell's CSS — style-only <code>tailwindcss</code>. Load both <code>&#64;hell-ui/angular/features/pdf-viewer/styles.css</code> and pdf.js's
         own <code>pdf_viewer.css</code> for the route, and pdf.js renders the page layer itself.
       </p>
 
@@ -148,10 +147,11 @@ import pdfViewerStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
         named part. Refinements merge on top of the module's defaults through Hell's Tailwind merge.
       </p>
       <p>
-        Unlike most Hell modules, this package ships hand-written CSS keyed on <code>data-slot</code>
-        (<code>&#64;hell-ui/pdf-viewer/styles</code>) rather than a scanned Tailwind recipe, because
-        <code>tailwindcss</code> is an optional peer here — so the co-located stylesheet carries the
-        default visuals while your <code>ui</code> classes still merge onto each part.
+        Unlike most Hell modules, this entry point ships hand-written CSS keyed on
+        <code>data-slot</code> (<code>&#64;hell-ui/angular/features/pdf-viewer/styles.css</code>)
+        rather than a scanned Tailwind recipe, because <code>tailwindcss</code> is an optional peer
+        here — so the co-located stylesheet carries the default visuals while your <code>ui</code>
+        classes still merge onto each part.
       </p>
       <table class="hd-doc-table">
         <thead>

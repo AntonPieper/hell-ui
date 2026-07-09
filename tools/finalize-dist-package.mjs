@@ -45,15 +45,9 @@ function finalizeExportValue(exportValue) {
   const finalized = {};
   for (const [condition, value] of Object.entries(exportValue)) {
     if (condition === sourcePackageCondition) continue;
-    finalized[condition] =
-      condition === 'style' || condition === 'default' ? finalizeStylePath(value) : value;
+    finalized[condition] = value;
   }
   return finalized;
-}
-
-function finalizeStylePath(path) {
-  if (typeof path !== 'string') return path;
-  return path.replace(/^\.\/src\/lib\/pdf-viewer/, './pdf-viewer');
 }
 
 function sourceExportPaths(exportsMap) {

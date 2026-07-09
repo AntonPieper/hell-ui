@@ -193,6 +193,7 @@ const PUBLIC_COMPONENT_CONTRACT_MODULES: readonly PublicComponentContractModule[
   { symbol: 'HellTimeInput', area: 'composite', coverage: 'static' },
   { symbol: 'HellToaster', area: 'composite', coverage: 'static' },
   { symbol: 'HellCodeEditor', area: 'feature', coverage: 'static' },
+  { symbol: 'HellPdfViewer', area: 'feature', coverage: 'static' },
   { symbol: 'HellTable', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableBody', area: 'feature', coverage: 'dom' },
   { symbol: 'HellTableCell', area: 'feature', coverage: 'dom' },

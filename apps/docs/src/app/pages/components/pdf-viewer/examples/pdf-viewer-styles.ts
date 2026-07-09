@@ -9,7 +9,7 @@ import { DestroyRef, inject } from '@angular/core';
  * lazy route stays cheap.
  */
 const PDF_VIEWER_STYLESHEETS = [
-  { id: 'hd-hell-pdf-viewer-styles', href: 'hell-ui/pdf-viewer/styles/pdf-viewer.css' },
+  { id: 'hd-hell-pdf-viewer-styles', href: 'hell-ui/pdf-viewer/styles/styles.css' },
   { id: 'hd-pdfjs-viewer-styles', href: 'pdfjs/pdf_viewer.css' },
 ] as const;
 

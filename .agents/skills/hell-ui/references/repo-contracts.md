@@ -5,10 +5,9 @@ work.
 
 ## Architecture
 
-- Workspace shape: `packages/angular` is the Angular library,
-  `apps/docs` is the docs app, and `packages/pdf-viewer` owns the split PDF
-  package. The root package orchestrates through pnpm filters; app/package
-  workspaces own their local `angular.json` files.
+- Workspace shape: `packages/angular` is the Angular library and `apps/docs`
+  is the docs app. The root package orchestrates through pnpm filters;
+  app/package workspaces own their local `angular.json` files.
 - Root `@hell-ui/angular` stays light and core-only. Primitives, composites,
   table primitives, TanStack shell, optional features, and PDF use narrow
   entrypoints.
@@ -36,14 +35,14 @@ work.
   `HellIcon`, `HellInput`, `HellPopover`, directive arrays, search service, and
   label providers.
 - Built-in accessibility labels and status strings use the Label Contract:
-  defaults may be English, but consumers replace them through
-  `provideHellLabels`.
+  defaults may be English, but consumers replace them through each entry
+  point's own `provideHell<Module>Labels` function.
 
 ## Heavy Feature Boundary
 
 - CodeMirror stays behind `@hell-ui/angular/features/code-editor`.
 - TanStack Table stays behind `@hell-ui/angular/table-tanstack`.
 - TanStack Virtual stays behind `@hell-ui/angular/table-tanstack/virtual`.
-- `pdfjs-dist` belongs to `@hell-ui/pdf-viewer`, not `@hell-ui/angular`.
+- pdf.js stays behind `@hell-ui/angular/features/pdf-viewer`.
 - Consumer docs and README claims should match package-consumer scenarios and
   pack-audit evidence, not workspace intuition.

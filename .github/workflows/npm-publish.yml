@@ -84,11 +84,10 @@ jobs:
       - name: Audit package contents
         run: pnpm run test:package-pack
 
-      - name: Pack audited packages
+      - name: Pack audited package
         run: |
           mkdir -p release-package
           pnpm --dir ./dist/hell pack --pack-destination ../../release-package
-          pnpm --dir ./dist/hell-pdf-viewer pack --pack-destination ../../release-package
 
       - name: Upload package tarballs
         uses: actions/upload-artifact@v4
@@ -141,47 +140,30 @@ jobs:
           summary_exit="$(awk '/^## Summary$/{in_summary=1; next} in_summary && /^Exit: /{print $2; exit}' "$evidence")"
           test "$summary_exit" = "0"
 
-      - name: Verify package tarballs and tag
+      - name: Verify package tarball and tag
         run: |
           set -euo pipefail
           tarball_count="$(find release-package -type f -name '*.tgz' | wc -l | tr -d ' ')"
-          test "$tarball_count" = "2"
+          test "$tarball_count" = "1"
 
-          seen_angular=0
-          seen_pdf=0
-          # Absolute paths: pnpm publish re-resolves a relative tarball path
+          # Absolute path: pnpm publish re-resolves a relative tarball path
           # from a different working directory and misreads it as a git spec.
-          {
-            echo 'HELL_RELEASE_TARBALLS<<EOF'
-            find "$PWD/release-package" -type f -name '*.tgz' | sort
-            echo 'EOF'
-          } >> "$GITHUB_ENV"
+          tarball="$(find "$PWD/release-package" -type f -name '*.tgz' -print -quit)"
+          echo "HELL_RELEASE_TARBALL=${tarball}" >> "$GITHUB_ENV"
 
-          while IFS= read -r tarball; do
-            package_name="$(tar -xOf "$tarball" package/package.json | node -e "let data = ''; process.stdin.on('data', (chunk) => data += chunk); process.stdin.on('end', () => console.log(JSON.parse(data).name));")"
-            package_version="$(tar -xOf "$tarball" package/package.json | node -e "let data = ''; process.stdin.on('data', (chunk) => data += chunk); process.stdin.on('end', () => console.log(JSON.parse(data).version));")"
-            test "${GITHUB_REF_NAME}" = "v${package_version}" || {
-              echo "Tag ${GITHUB_REF_NAME} must match ${package_name} version v${package_version}."
-              exit 1
-            }
-            case "$package_name" in
-              '@hell-ui/angular') seen_angular=1 ;;
-              '@hell-ui/pdf-viewer') seen_pdf=1 ;;
-              *)
-                echo "Unexpected release tarball package: ${package_name}."
-                exit 1
-                ;;
-            esac
-          done < <(find "$PWD/release-package" -type f -name '*.tgz' | sort)
+          package_name="$(tar -xOf "$tarball" package/package.json | node -e "let data = ''; process.stdin.on('data', (chunk) => data += chunk); process.stdin.on('end', () => console.log(JSON.parse(data).name));")"
+          package_version="$(tar -xOf "$tarball" package/package.json | node -e "let data = ''; process.stdin.on('data', (chunk) => data += chunk); process.stdin.on('end', () => console.log(JSON.parse(data).version));")"
+          test "${GITHUB_REF_NAME}" = "v${package_version}" || {
+            echo "Tag ${GITHUB_REF_NAME} must match ${package_name} version v${package_version}."
+            exit 1
+          }
+          test "$package_name" = "@hell-ui/angular" || {
+            echo "Unexpected release tarball package: ${package_name}."
+            exit 1
+          }
 
-          test "$seen_angular" = "1"
-          test "$seen_pdf" = "1"
-
-      - name: Publish npm packages
+      - name: Publish npm package
         run: |
           set -euo pipefail
-          while IFS= read -r tarball; do
-            package_name="$(tar -xOf "$tarball" package/package.json | node -e "let data = ''; process.stdin.on('data', (chunk) => data += chunk); process.stdin.on('end', () => console.log(JSON.parse(data).name));")"
-            echo "Publishing ${package_name}"
-            pnpm publish "$tarball" --access public --provenance --no-git-checks
-          done <<< "$HELL_RELEASE_TARBALLS"
+          echo "Publishing @hell-ui/angular"
+          pnpm publish "$HELL_RELEASE_TARBALL" --access public --provenance --no-git-checks

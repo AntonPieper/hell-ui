@@ -111,7 +111,7 @@ jobs:
           - scenario: features
             scenarios: code-editor,pdf-viewer
           - scenario: table-core
-            scenarios: table,no-legacy-alias
+            scenarios: table
           - scenario: table-tanstack-virtual
             scenarios: table-tanstack,table-tanstack-virtual
     steps:
@@ -144,10 +144,8 @@ jobs:
       - name: Restore built package cache
         uses: actions/cache@v5
         with:
-          path: |
-            dist/hell
-            dist/hell-pdf-viewer
-          key: dist-packages-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'tsconfig*.json', 'packages/angular/**', 'packages/pdf-viewer/**') }}
+          path: dist/hell
+          key: dist-packages-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'tsconfig*.json', 'packages/angular/**') }}
 
       - name: Ensure built packages
         run: pnpm run ci:ensure:build:lib
@@ -169,16 +167,14 @@ jobs:
       - name: Restore built package cache
         uses: actions/cache@v5
         with:
-          path: |
-            dist/hell
-            dist/hell-pdf-viewer
-          key: dist-packages-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'tsconfig*.json', 'packages/angular/**', 'packages/pdf-viewer/**') }}
+          path: dist/hell
+          key: dist-packages-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'tsconfig*.json', 'packages/angular/**') }}
 
       - name: Restore docs cache
         uses: actions/cache@v5
         with:
           path: dist/hell-docs
-          key: docs-dist-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'tsconfig*.json', 'packages/angular/**', 'packages/pdf-viewer/**', 'apps/docs/**') }}
+          key: docs-dist-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'tsconfig*.json', 'packages/angular/**', 'apps/docs/**') }}
 
       - name: Enable pnpm
         uses: pnpm/action-setup@v6
@@ -288,7 +284,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: dist/hell-docs
-          key: docs-dist-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'tsconfig*.json', 'packages/angular/**', 'packages/pdf-viewer/**', 'apps/docs/**') }}
+          key: docs-dist-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'tsconfig*.json', 'packages/angular/**', 'apps/docs/**') }}
 
       - name: Ensure built docs
         run: pnpm run ci:ensure:build:docs

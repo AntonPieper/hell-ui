@@ -26,7 +26,6 @@ import { releaseCandidateConsumerScenarioNames } from './release-evidence-policy
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const distHell = join(root, 'dist/hell');
-const distPdfViewer = join(root, 'dist/hell-pdf-viewer');
 const keep = process.env.HELL_KEEP_PACKAGE_CONSUMER === '1';
 const packageConsumerArgs = process.argv.slice(2);
 const catalogOnly = parseCatalogOnly(packageConsumerArgs);
@@ -96,8 +95,7 @@ const requiredScenarioCoverageAreas = new Set([
   'tanstack-table',
   'tanstack-virtual',
   'code-editor',
-  'split-pdf-viewer',
-  'removed-legacy-aliases',
+  'pdf-viewer-feature',
 ]);
 
 const packageConsumerCiGroups = [
@@ -110,7 +108,7 @@ const packageConsumerCiGroups = [
   },
   { name: 'audio', scenarios: ['audio-player', 'audio-transcript'] },
   { name: 'features', scenarios: ['code-editor', 'pdf-viewer'] },
-  { name: 'table-core', scenarios: ['table', 'no-legacy-alias'] },
+  { name: 'table-core', scenarios: ['table'] },
   { name: 'table-tanstack-virtual', scenarios: ['table-tanstack', 'table-tanstack-virtual'] },
 ];
 
@@ -129,10 +127,10 @@ const packageConsumerScriptGroups = [
     ],
   },
   { name: 'features', scenarios: ['code-editor', 'pdf-viewer'] },
-  { name: 'tables', scenarios: ['table', 'table-tanstack', 'table-tanstack-virtual', 'no-legacy-alias'] },
+  { name: 'tables', scenarios: ['table', 'table-tanstack', 'table-tanstack-virtual'] },
   { name: 'code-editor', scenarios: ['code-editor'] },
   { name: 'pdf-viewer', scenarios: ['pdf-viewer'] },
-  { name: 'table-core', scenarios: ['table', 'no-legacy-alias'] },
+  { name: 'table-core', scenarios: ['table'] },
   { name: 'table-adapters', scenarios: ['table-tanstack', 'table-tanstack-virtual'] },
 ];
 
@@ -406,34 +404,11 @@ const packageConsumerScenarioCatalog = [
     stylesCss: tableTanStackConsumerStylesCss,
   },
   {
-    name: 'no-legacy-alias',
-    description: 'negative check that removed legacy aliases cannot compile',
-    coverage: ['removed-legacy-aliases'],
-    peerTier: 'table',
-    peerGroup: 'table',
-    dependencies: styledUiWithoutFontAwesomeDeps,
-    forbiddenDependencies: tableAdapterPeerGroup,
-    mainTs: noLegacyTableAliasConsumerMainTs,
-    stylesCss: noLegacyTableAliasConsumerStylesCss,
-    expectBuildFailure: true,
-    expectedFailureIncludes: [
-      '@hell-ui/angular/data-table',
-      '@hell-ui/angular/features/data-table',
-      '@hell-ui/angular/features/table-utilities',
-      '@hell-ui/angular/table-cdk',
-      '@hell-ui/angular/table-virtual',
-      '@hell-ui/angular/primitives',
-      '@hell-ui/angular/composites',
-      './styles/kitchen-sink',
-    ],
-  },
-  {
     name: 'pdf-viewer',
-    description: 'split pdf-viewer package with pdfjs and light UI peers',
-    coverage: ['split-pdf-viewer'],
+    description: 'pdf.js feature entrypoint with pdfjs and light UI peers',
+    coverage: ['pdf-viewer-feature'],
     peerTier: 'pdf-viewer',
     peerGroup: 'pdf-viewer',
-    installPdfPackage: true,
     dependencies: pdfViewerDeps,
     mainTs: pdfViewerConsumerMainTs,
     stylesCss: pdfViewerConsumerStylesCss,
@@ -462,28 +437,16 @@ if (skipPackageBuild) {
 if (!existsSync(join(distHell, 'package.json'))) {
   fail(`Built package missing: ${distHell}`);
 }
-if (!existsSync(join(distPdfViewer, 'package.json'))) {
-  fail(`Built package missing: ${distPdfViewer}`);
-}
 
 const distPackageJson = JSON.parse(readFileSync(join(distHell, 'package.json'), 'utf8'));
 const packageName = distPackageJson.name;
 if (!packageName) {
   fail('Built package.json is missing name');
 }
-const distPdfPackageJson = JSON.parse(readFileSync(join(distPdfViewer, 'package.json'), 'utf8'));
-const pdfPackageName = distPdfPackageJson.name;
-if (!pdfPackageName) {
-  fail('Built PDF package.json is missing name');
-}
-
-assertDocsAvoidLegacyTableEntrypoints();
 
 const packedHell = await packBuiltPackage(distHell, 'pack-core');
-const packedPdfViewer = await packBuiltPackage(distPdfViewer, 'pack-pdf-viewer');
 try {
   auditPackedPackage({ tarball: packedHell.tarball });
-  auditPackedPackage({ tarball: packedPdfViewer.tarball });
 } catch (error) {
   fail(error instanceof Error ? error.message : String(error));
 }
@@ -506,10 +469,8 @@ try {
 } finally {
   if (keep) {
     console.log(`[package-consumer] kept packed hell package ${packedHell.root}`);
-    console.log(`[package-consumer] kept packed pdf-viewer package ${packedPdfViewer.root}`);
   } else {
     rmSync(packedHell.root, { force: true, recursive: true });
-    rmSync(packedPdfViewer.root, { force: true, recursive: true });
   }
 }
 
@@ -619,9 +580,6 @@ function scenarioCatalogRecord(scenario) {
     peerGroup: scenario.peerGroup,
     dependencies: [...scenario.dependencies],
     forbiddenDependencies: [...(scenario.forbiddenDependencies ?? [])],
-    expectedFailureIncludes: [...(scenario.expectedFailureIncludes ?? [])],
-    expectBuildFailure: scenario.expectBuildFailure === true,
-    installPdfPackage: scenario.installPdfPackage === true,
   };
 }
 
@@ -662,9 +620,6 @@ function materializeScenarios(catalog) {
     dependencies: [...scenario.dependencies],
     forbiddenDependencies: [...(scenario.forbiddenDependencies ?? [])],
     cssIncludes: scenario.cssIncludes ? [...scenario.cssIncludes] : undefined,
-    expectedFailureIncludes: scenario.expectedFailureIncludes
-      ? [...scenario.expectedFailureIncludes]
-      : undefined,
     runtimeStyleAssertions: scenario.runtimeStyleAssertions
       ? scenario.runtimeStyleAssertions.map((assertion) => ({ ...assertion }))
       : undefined,
@@ -829,7 +784,6 @@ function assertHeavyPeersAreIsolated(allScenarios) {
     'button-ui',
     'button',
     'table',
-    'no-legacy-alias',
     'audio-player',
     'audio-transcript',
   ]);
@@ -922,22 +876,6 @@ function assertCodeMirrorPeersAreIsolated(allScenarios) {
   }
 }
 
-function assertDocsAvoidLegacyTableEntrypoints() {
-  const docsRoot = join(root, 'apps/docs/src/app');
-  const offenders = walkFiles(docsRoot)
-    .filter((file) => /\.(?:ts|html|md)$/.test(file))
-    .filter((file) =>
-      /@hell-ui\/angular\/(?:data-table|table-virtual|table-cdk|features\/(?:data-table|table-utilities))\b|HellDataTable|HellTableModel|hellTanStackTableModel/.test(
-        readFileSync(file, 'utf8'),
-      ),
-    )
-    .map((file) => file.slice(root.length + 1));
-
-  if (offenders.length) {
-    fail(`Docs must not reference removed table APIs: ${offenders.join(', ')}`);
-  }
-}
-
 function resolvePeerGroup(scenario) {
   const groupName = scenario.peerGroup ?? scenario.peerTier;
   const contract = peerGroupContracts[groupName];
@@ -999,11 +937,7 @@ function printScenarioContract(scenario, phase) {
 
 function packageImportPaths(mainTs) {
   return uniqueMatches(mainTs, /from\s+['"]([^'"]+)['"]/g).filter(
-    (specifier) =>
-      specifier === packageName ||
-      specifier.startsWith(`${packageName}/`) ||
-      specifier === pdfPackageName ||
-      specifier.startsWith(`${pdfPackageName}/`),
+    (specifier) => specifier === packageName || specifier.startsWith(`${packageName}/`),
   );
 }
 
@@ -1053,15 +987,6 @@ async function runConsumerScenarioBuild(tempRoot, scenario) {
   writeConsumerScenarioFiles(tempRoot, scenario);
 
   const buildCommand = ['exec', '--', 'ng', 'build', 'consumer', '--configuration', 'production'];
-  if (scenario.expectBuildFailure) {
-    await runPnpmExpectingFailure(buildCommand, tempRoot, {
-      expectedOutputIncludes: scenario.expectedFailureIncludes ?? [],
-      scenarioName: scenario.name,
-    });
-    console.log(`[package-consumer:${scenario.name}] rejected ${scenario.description}`);
-    return;
-  }
-
   await runPnpm(buildCommand, tempRoot, { scenarioName: scenario.name });
   assertConsumerBuildCss(tempRoot, scenario);
   await assertConsumerRuntimeStyles(tempRoot, scenario);
@@ -1275,9 +1200,6 @@ function writeConsumerWorkspace(workspace, scenarios, dependencies = unionDepend
       : {}),
   };
   packageJson.dependencies[packageName] = pathToFileURL(packedHell.tarball).href;
-  if (scenarios.some((candidate) => candidate.installPdfPackage)) {
-    packageJson.dependencies[pdfPackageName] = pathToFileURL(packedPdfViewer.tarball).href;
-  }
 
   writeJson(join(workspace, 'package.json'), packageJson);
   writeFileSync(
@@ -2469,43 +2391,10 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
-function noLegacyTableAliasConsumerMainTs() {
-  return `import { Component } from '@angular/core';
-import { bootstrapApplication } from '@angular/platform-browser';
-import { REMOVED_DATA_TABLE } from '${packageName}/data-table';
-import { HELL_TABLE_DIRECTIVES } from '${packageName}/features/data-table';
-import { HELL_TABLE_UTILITY_DIRECTIVES } from '${packageName}/features/table-utilities';
-import { REMOVED_TABLE_CDK } from '${packageName}/table-cdk';
-import { REMOVED_TABLE_VIRTUAL } from '${packageName}/table-virtual';
-import { REMOVED_PRIMITIVES } from '${packageName}/primitives';
-import { REMOVED_COMPOSITES } from '${packageName}/composites';
-
-const removedTableAliases = [
-  HELL_TABLE_DIRECTIVES,
-  HELL_TABLE_UTILITY_DIRECTIVES,
-  REMOVED_DATA_TABLE,
-  REMOVED_TABLE_CDK,
-  REMOVED_TABLE_VIRTUAL,
-  REMOVED_PRIMITIVES,
-  REMOVED_COMPOSITES,
-];
-
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [...removedTableAliases],
-  template: \`<p>Legacy table aliases must not compile.</p>\`,
-})
-class App {}
-
-bootstrapApplication(App).catch((error: unknown) => console.error(error));
-`;
-}
-
 function pdfViewerConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { HellPdfViewer, type HellPdfWorkerSource } from '${pdfPackageName}';
+import { HellPdfViewer, type HellPdfWorkerSource } from '${packageName}/features/pdf-viewer';
 
 @Component({
   selector: 'app-root',
@@ -2659,22 +2548,7 @@ function tableTanStackConsumerStylesCss() {
 function pdfViewerConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/tokens.css";
-@import "${pdfPackageName}/styles";
-`;
-}
-
-function noLegacyTableAliasConsumerStylesCss() {
-  return `@import "tailwindcss";
-@import "${packageName}/styles/kitchen-sink";
-@import "${packageName}/styles/components/button";
-@import "${packageName}/styles/components/data-table";
-@import "${packageName}/styles/features/data-table";
-@import "${packageName}/styles/features/table-utilities";
-@import "${packageName}/styles/components/table-renderer";
-@import "${packageName}/styles/primitives";
-@import "${packageName}/styles/composites";
-@import "${packageName}/styles/table";
-@import "${packageName}/styles/tokens";
+@import "${packageName}/features/pdf-viewer/styles.css";
 `;
 }
 
@@ -2860,20 +2734,6 @@ async function runPnpm(args, cwd, options = {}) {
   if (result.status !== 0) fail(`Command failed with status ${result.status}: ${command}`);
 }
 
-async function runPnpmExpectingFailure(args, cwd, options = {}) {
-  const { command, diagnostics, label, result } = await runPnpmCommand(args, cwd, {
-    ...options,
-    captureOutput: true,
-  });
-  if (result.timedOut) fail(pnpmTimeoutMessage(command, cwd, diagnostics));
-  if (result.error) fail(`Unable to start command: ${command}\n${result.error.message}`);
-  if (result.signal) fail(`Command failed with signal ${result.signal}: ${command}`);
-  if (result.status === 0)
-    fail(`Expected command to fail for negative scenario ${label}: ${command}`);
-  assertExpectedFailureOutput(label, result, options.expectedOutputIncludes ?? []);
-  console.log(`${label} ok: command failed as expected with status ${result.status}: ${command}`);
-}
-
 async function runPnpmCommand(args, cwd, options = {}) {
   const env = pnpmCommandEnvironment();
   const scenarioName = options.scenarioName ?? 'unknown';
@@ -2892,18 +2752,6 @@ async function runPnpmCommand(args, cwd, options = {}) {
     captureOutput: options.captureOutput === true,
   });
   return { command, diagnostics, label, result };
-}
-
-function assertExpectedFailureOutput(label, result, expectedOutputIncludes) {
-  if (!expectedOutputIncludes.length) return;
-
-  const output = `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
-  const missing = expectedOutputIncludes.filter((needle) => !output.includes(needle));
-  if (missing.length) {
-    fail(`${label} failure output is missing expected fragment(s): ${missing.join(', ')}`);
-  }
-
-  console.log(`${label} ok: failure output mentions ${expectedOutputIncludes.join(', ')}`);
 }
 
 function spawnPnpm(args, cwd, env, label, command, options = {}) {

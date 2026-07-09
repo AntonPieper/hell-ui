@@ -1,7 +1,7 @@
 import type { InjectionToken, Provider } from '@angular/core';
 import { hellCreateLabels } from '@hell-ui/angular/core';
 
-/** Built-in accessibility labels owned by the `@hell-ui/pdf-viewer` package. */
+/** Built-in accessibility labels owned by the `@hell-ui/angular/features/pdf-viewer` entry point. */
 export interface HellPdfViewerLabels {
   readonly togglePageOverview: string;
   readonly previousPage: string;

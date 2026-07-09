@@ -7,6 +7,25 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- Folded the split `@hell-ui/pdf-viewer` package back into `@hell-ui/angular`
+  as the optional feature entry point `@hell-ui/angular/features/pdf-viewer`,
+  reversing the pre-beta package split (see the amended heavy feature boundary
+  ADR in `docs/adr/hell-heavy-features.md`). The standalone package is no
+  longer published; running a second release train (build, pack audit,
+  provenance, registry mirror, exact-version peer on `@hell-ui/angular`) cost
+  more than the one benefit of keeping `pdfjs-dist` out of the main package
+  metadata — the same trade already accepted for the CodeMirror peers.
+  Migration: replace `@hell-ui/pdf-viewer` imports with
+  `@hell-ui/angular/features/pdf-viewer`, replace the
+  `@hell-ui/pdf-viewer/styles` CSS import with
+  `@hell-ui/angular/features/pdf-viewer/styles.css`, drop the
+  `@hell-ui/pdf-viewer` dependency, and keep the exact `pdfjs-dist@5.6.205`
+  peer (now optional in `@hell-ui/angular`). Component selectors, parts,
+  labels, worker inputs, and runtime behavior are unchanged; the PDF specs now
+  run inside the main unit suite. Evidence:
+  `packages/angular/features/pdf-viewer/*.spec.ts`, the `pdf-viewer`
+  package-consumer scenario, and `pnpm run test:architecture`.
+
 - `HellDialog`'s `size` input narrowed from `HellSize` to
   `Exclude<HellSize, 'xs'>` (`'sm' | 'md' | 'lg' | 'xl'`). The dialog recipe
   only styles `sm`/`lg`/`xl` max-widths on top of the `md` base, so `xs`
@@ -102,6 +121,37 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   output changes: nothing consumed the rule or the variables. Evidence:
   `grep -r "hell-button" packages apps e2e`, `pnpm run test:unit`, and
   `pnpm run e2e` (table docs regressions).
+
+### Removed
+
+- The production-readiness gate (`tools/production-ready-check.mjs`,
+  `docs/release/production-readiness-checklist.md`, and the
+  `production-ready:check` script). The gate validated a checklist document
+  whose JSON block had to byte-for-byte mirror constants hardcoded in the
+  script itself, ran in no CI job, and duplicated what the release dry-run and
+  npm-publish workflow already enforce. Release-claim policy is now one
+  sentence in the README/semver policy: internal-beta wording until a full
+  release dry-run and full browser e2e pass on the current commit.
+- The `no-legacy-alias` package-consumer scenario and its negative-build
+  machinery (`expectBuildFailure`, `runPnpmExpectingFailure`), plus the
+  legacy-table tarball boundary checks and their self-tests in
+  `tools/package-pack-audit.mjs`, the docs legacy-table-API scan, and the
+  Label Contract "must not reintroduce `HELL_LABELS`" check. These were
+  post-migration must-not-reintroduce guards spending a full consumer
+  install+build per CI provider to prove that entry points removed before beta
+  still do not exist; the entrypoint manifest check (`Unsupported Table Path
+  entry points must not be published`) already rejects them statically.
+- The string-mirror meta-guards in `tools/check-ci-contract.mjs` (the
+  `fileChecks` list pinning verbatim source lines and doc phrasings of other
+  tools, obsolete-script tombstones, and dead-identifier forbidden patterns)
+  and the matching doc-mirroring in `tools/check-changelog.mjs`
+  (`validateReleaseEvidencePolicyDoc` and the semver-policy term scan).
+  `docs/release/release-evidence-policy.md` is slimmed to prose that points at
+  `tools/release-evidence-policy.mjs` as the single enforced source instead of
+  mirroring its tables. The CI contract keeps its real function: provider
+  adapters, scripts, scenario catalog, and e2e groups staying in sync.
+  Evidence: `pnpm run test:ci-contract`, `pnpm run test:changelog`, and
+  `pnpm run test:architecture`.
 
 ### Added
 
