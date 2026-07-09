@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
 import { FieldAllPartsStylingExample } from './examples/all-parts-styling.example';
@@ -28,7 +27,6 @@ import fieldWithFormSectionExampleCodeRaw from './examples/with-form-section.exa
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ExampleTabs,
-    ...HELL_FIELD_DIRECTIVES,
     FieldBasicExample,
     FieldOrientationExample,
     FieldValidationExample,

@@ -45,7 +45,7 @@ const ciGroups = [
     name: 'docs-smoke-surfaces',
     testMatch: 'docs-axe-smoke.spec.ts',
     grep:
-      /dialog|dialpad|flyout|listbox|popover|menu|select|combobox|omnibar|table|time.*input|pdf.*viewer/,
+      /dialog|dialpad|flyout|listbox|popover|menu|select|combobox|omnibar|table|virtual|time.*input|pdf.*viewer/,
   },
   {
     name: 'controls-a11y',

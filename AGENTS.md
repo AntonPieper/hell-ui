@@ -45,7 +45,7 @@ Use the narrowest validation that proves the change, then widen before commit:
 ```bash
 pnpm run lint
 pnpm run test:architecture
-pnpm run test:ci-contract
+pnpm run test:ci-coverage
 pnpm run build:lib
 ```
 

@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_TABS_DIRECTIVES } from '@hell-ui/angular/tabs';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
 import { TabsBasicExample } from './examples/basic.example';
@@ -28,7 +27,6 @@ import tabsWithCardExampleCodeRaw from './examples/with-card.example.ts?raw' wit
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ExampleTabs,
-    ...HELL_TABS_DIRECTIVES,
     TabsBasicExample,
     TabsDisabledExample,
     TabsVerticalExample,

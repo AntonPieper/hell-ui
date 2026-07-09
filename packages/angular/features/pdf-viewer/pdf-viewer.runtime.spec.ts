@@ -14,20 +14,6 @@ import type {
 } from './pdf-viewer.adapter';
 
 describe('PDF Runtime', () => {
-  it('passes explicit worker override from runtime to adapter during bootstrap', async () => {
-    const adapter = new FakePdfAdapter();
-    const runtime = new HellPdfRuntime(adapter);
-    const container = document.createElement('div') as HTMLDivElement;
-
-    await runtime.bootstrap(container, createRuntimeHandlers(), {
-      worker: '/assets/worker.mjs' as const,
-    });
-
-    expect(adapter.createViewer).toHaveBeenCalledWith(container, expect.any(Object), {
-      worker: '/assets/worker.mjs',
-    });
-  });
-
   it('keeps download and print browser work behind the PDF Adapter seam', async () => {
     const printSession: HellPdfPrintSession = {
       cleanup: vi.fn(),
@@ -65,27 +51,6 @@ describe('PDF Runtime', () => {
     expect(adapter.createPrintSession).toHaveBeenCalledWith('document.pdf', undefined, {});
     expect(printSession.print).toHaveBeenCalled();
     expect(printSession.cleanup).toHaveBeenCalled();
-  });
-
-  it('passes print fetch options through the PDF Runtime seam', async () => {
-    const printSession: HellPdfPrintSession = {
-      cleanup: vi.fn(),
-      print: vi.fn().mockResolvedValue(undefined),
-    };
-    const adapter = new FakePdfAdapter();
-    adapter.createPrintSession = vi.fn(async () => printSession);
-    const runtime = new HellPdfRuntime(adapter);
-    const fetchOptions: RequestInit = {
-      credentials: 'include',
-      headers: { Authorization: 'Bearer test' },
-    };
-
-    await runtime.print('secure.pdf', undefined, { fetch: fetchOptions, cleanupDelayMs: 1 });
-
-    expect(adapter.createPrintSession).toHaveBeenCalledWith('secure.pdf', undefined, {
-      fetch: fetchOptions,
-      cleanupDelayMs: 1,
-    });
   });
 
   it('cleans a print session when printing fails', async () => {

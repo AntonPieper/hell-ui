@@ -6,8 +6,8 @@ Source of truth:
 
 - Threshold enforcement lives in `apps/docs/angular.json` under `hell-docs` production budgets.
 - Owner/rationale and accepted warnings live in this document.
-- `tools/check-ci-contract.mjs` fails when a configured threshold is missing an owner/rationale here or diverges from `apps/docs/angular.json`.
-- `tools/docs-bundle-budget-report.mjs --check` classifies current docs build budget status as **accepted** or **regression** after `build:docs` writes `dist/hell-docs/stats.json`, and writes the full diagnosis to the untracked `dist/docs-bundle-budget-diagnosis.md` (uploaded as a CI build artifact; regenerate locally with `pnpm run diagnose:docs-bundle`).
+- `tools/docs-bundle-budget-report.mjs --check` fails when a configured threshold is missing an owner/rationale here or diverges from `apps/docs/angular.json`.
+- `tools/docs-bundle-budget-report.mjs --check` also classifies current docs build budget status as **accepted** or **regression** after `build:docs` writes `dist/hell-docs/stats.json`, and writes the full diagnosis to the untracked `dist/docs-bundle-budget-diagnosis.md` (uploaded as a CI build artifact; regenerate locally with `pnpm run diagnose:docs-bundle`).
 - The tables below are CI-checked against the JSON block so threshold, owner, rationale, follow-up, and expiry metadata cannot silently drift from the source of truth.
 
 ```json docs-budget-policy

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCheck, faSolidCopy } from '@ng-icons/font-awesome/solid';
 import { HellButton } from '@hell-ui/angular/button';
@@ -89,7 +89,6 @@ export class PageHeader {
   readonly stylesPath = input<string>('');
 
   protected readonly copiedPath = signal<string | null>(null);
-  protected readonly hasBadges = computed(() => !!this.category() || !!this.status());
 
   private copiedTimer: number | undefined;
 

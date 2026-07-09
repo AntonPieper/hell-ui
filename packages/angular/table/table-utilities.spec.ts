@@ -140,7 +140,7 @@ class TableUtilitiesHost {
 @Component({
   imports: [...HELL_TABLE_UTILITIES_DIRECTIVES],
   template: `
-    <div id="ui-container" hellTableContainer ui="bg-hell-surface-muted rounded-hell-lg">
+    <div id="ui-container" hellTableContainer busy ui="bg-hell-surface-muted rounded-hell-lg">
       <table id="ui-table" hellTableRoot ui="text-sm">
         <thead id="ui-head" hellTableHeader ui="bg-hell-danger">
           <tr id="ui-row" hellTableRow ui="bg-hell-primary-soft" active selected>
@@ -503,6 +503,7 @@ describe('Hell table utilities directives', () => {
     }
 
     expect(byId<HTMLElement>(root, 'ui-container').className).toContain('rounded-hell-lg');
+    expect(byId<HTMLElement>(root, 'ui-container').getAttribute('aria-busy')).toBe('true');
     expect(byId<HTMLElement>(root, 'ui-table').className).toContain('text-sm');
     expect(byId<HTMLElement>(root, 'ui-head').className).toContain('bg-hell-danger');
     expect(byId<HTMLElement>(root, 'ui-body').className).toContain('bg-hell-surface-muted');

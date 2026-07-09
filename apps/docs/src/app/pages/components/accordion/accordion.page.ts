@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_ACCORDION_DIRECTIVES } from '@hell-ui/angular/accordion';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
 import { AccordionAllPartsStylingExample } from './examples/all-parts-styling.example';
@@ -28,7 +27,6 @@ import accordionWithSettingsPanelExampleCodeRaw from './examples/with-settings-p
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ExampleTabs,
-    ...HELL_ACCORDION_DIRECTIVES,
     AccordionBasicExample,
     AccordionMultipleExample,
     AccordionDisabledItemExample,

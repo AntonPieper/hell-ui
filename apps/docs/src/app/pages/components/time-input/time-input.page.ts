@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
 import { TimeInputBasicExample } from './examples/basic.example';
@@ -32,7 +31,6 @@ import timeInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ExampleTabs,
-    ...HELL_FIELD_DIRECTIVES,
     TimeInputBasicExample,
     TimeInputSizesExample,
     TimeInputSecondsAndValidationExample,

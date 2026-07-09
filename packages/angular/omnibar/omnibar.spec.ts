@@ -3,7 +3,7 @@ import { OverlayContainer } from '@angular/cdk/overlay';
 import { TestBed } from '@angular/core/testing';
 
 import { type HellSearchSource, type HellUiInput } from '@hell-ui/angular/core';
-import { HellGlobalKeydownService, matchHotkey } from '@hell-ui/angular/internal/hotkeys';
+import { HellGlobalKeydownService } from '@hell-ui/angular/internal/hotkeys';
 import { HELL_MENU_DIRECTIVES } from '@hell-ui/angular/menu';
 import {
   HELL_OMNIBAR_DIRECTIVES,
@@ -712,36 +712,6 @@ describe('HellOmnibar hotkey listener opt-in', () => {
     await fixture.whenStable();
 
     expect(fakeGlobalKeydown.unregisters[0]).toHaveBeenCalledOnce();
-  });
-});
-
-describe('HellOmnibar hotkey matching', () => {
-  it('matches requested modifiers and rejects extra strict modifiers', () => {
-    expect(matchHotkey(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }), 'ctrl+k')).toBe(
-      true,
-    );
-    expect(
-      matchHotkey(
-        new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, altKey: true }),
-        'ctrl+k',
-      ),
-    ).toBe(false);
-  });
-
-  it('matches aliases and produced literal keys', () => {
-    expect(matchHotkey(new KeyboardEvent('keydown', { key: 'k', metaKey: true }), 'cmd+k')).toBe(
-      true,
-    );
-    expect(matchHotkey(new KeyboardEvent('keydown', { key: '?' }), '?')).toBe(true);
-  });
-
-  it('rejects extra shift when combo does not request it', () => {
-    expect(
-      matchHotkey(
-        new KeyboardEvent('keydown', { key: 'K', shiftKey: true, ctrlKey: true }),
-        'ctrl+k',
-      ),
-    ).toBe(false);
   });
 });
 

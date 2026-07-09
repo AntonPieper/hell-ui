@@ -10,6 +10,7 @@ import { HELL_SPLIT_VIEW_DIRECTIVES, type HellSplitViewUi } from './split-view';
       [compactBelow]="compactBelow()"
       [detailOpen]="detailOpen()"
       [height]="height()"
+      framed
       [itemNavigation]="itemNavigation()"
       [ui]="ui"
       itemNavigationLabel="Ticket navigation"
@@ -104,6 +105,7 @@ describe('HellSplitView', () => {
 
     const splitView = fixture.nativeElement.querySelector('hell-split-view') as HTMLElement;
     expect(splitView.getAttribute('data-slot')).toBe('root');
+    expect(splitView.getAttribute('data-framed')).toBe('true');
     expect(splitView.style.getPropertyValue('--hell-split-view-height')).toBe('320px');
 
     fixture.componentInstance.height.set('min(70vh, 42rem)');

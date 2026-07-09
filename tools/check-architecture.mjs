@@ -21,7 +21,6 @@ import {
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
 
-const docsExampleImportBoundaryDocPath = 'docs/architecture/docs-example-import-boundaries.md';
 
 const allowedDocsLazyRouteCrossImports = [
   {
@@ -43,6 +42,10 @@ const docsHeavyLazyRoutePolicies = [
       '@hell-ui/angular/features/pdf-viewer/styles.css',
       'hell-ui/pdf-viewer/styles/styles.css',
       'pdfjs/pdf_viewer.css',
+    ],
+    forbiddenComponentStyleFragments: [
+      '@hell-ui/angular/features/pdf-viewer/styles.css',
+      '@hell-ui/pdf-viewer/styles',
     ],
   },
   {
@@ -75,1442 +78,14 @@ const audioTranscriptRuntimeTerms = [
   { label: 'captureStream()', pattern: /\bcaptureStream\b/ },
 ];
 
-const migratedPartStyleMapModules = [
-  {
-    className: 'HellAccordion',
-    partType: 'HellAccordionPart',
-    uiType: 'HellAccordionUi',
-    entrypointId: 'accordion',
-    sourcePath: 'packages/angular/accordion/accordion.ts',
-    publicApiPath: 'packages/angular/accordion/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-accordion-',
-  },
-  {
-    className: 'HellAccordionItem',
-    partType: 'HellAccordionItemPart',
-    uiType: 'HellAccordionItemUi',
-    entrypointId: 'accordion',
-    sourcePath: 'packages/angular/accordion/accordion.ts',
-    publicApiPath: 'packages/angular/accordion/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-accordion-item-',
-  },
-  {
-    className: 'HellAccordionTrigger',
-    partType: 'HellAccordionTriggerPart',
-    uiType: 'HellAccordionTriggerUi',
-    entrypointId: 'accordion',
-    sourcePath: 'packages/angular/accordion/accordion.ts',
-    publicApiPath: 'packages/angular/accordion/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-accordion-trigger-',
-  },
-  {
-    className: 'HellAccordionContent',
-    partType: 'HellAccordionContentPart',
-    uiType: 'HellAccordionContentUi',
-    entrypointId: 'accordion',
-    sourcePath: 'packages/angular/accordion/accordion.ts',
-    publicApiPath: 'packages/angular/accordion/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-accordion-content-',
-  },
-  {
-    className: 'HellButton',
-    partType: 'HellButtonPart',
-    uiType: 'HellButtonUi',
-    entrypointId: 'button',
-    sourcePath: 'packages/angular/button/button.ts',
-    publicApiPath: 'packages/angular/button/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-button-',
-  },
-  {
-    className: 'HellCard',
-    partType: 'HellCardPart',
-    uiType: 'HellCardUi',
-    entrypointId: 'card',
-    sourcePath: 'packages/angular/card/card.ts',
-    publicApiPath: 'packages/angular/card/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-card-',
-  },
-  {
-    className: 'HellCardHeader',
-    partType: 'HellCardHeaderPart',
-    uiType: 'HellCardHeaderUi',
-    entrypointId: 'card',
-    sourcePath: 'packages/angular/card/card.ts',
-    publicApiPath: 'packages/angular/card/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-card-header-',
-  },
-  {
-    className: 'HellCardBody',
-    partType: 'HellCardBodyPart',
-    uiType: 'HellCardBodyUi',
-    entrypointId: 'card',
-    sourcePath: 'packages/angular/card/card.ts',
-    publicApiPath: 'packages/angular/card/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-card-body-',
-  },
-  {
-    className: 'HellCardFooter',
-    partType: 'HellCardFooterPart',
-    uiType: 'HellCardFooterUi',
-    entrypointId: 'card',
-    sourcePath: 'packages/angular/card/card.ts',
-    publicApiPath: 'packages/angular/card/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-card-footer-',
-  },
-  {
-    className: 'HellField',
-    partType: 'HellFieldPart',
-    uiType: 'HellFieldUi',
-    entrypointId: 'field',
-    sourcePath: 'packages/angular/field/field.ts',
-    publicApiPath: 'packages/angular/field/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-field-',
-  },
-  {
-    className: 'HellFieldLabel',
-    partType: 'HellFieldLabelPart',
-    uiType: 'HellFieldLabelUi',
-    entrypointId: 'field',
-    sourcePath: 'packages/angular/field/field.ts',
-    publicApiPath: 'packages/angular/field/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-field-label-',
-  },
-  {
-    className: 'HellFieldDescription',
-    partType: 'HellFieldDescriptionPart',
-    uiType: 'HellFieldDescriptionUi',
-    entrypointId: 'field',
-    sourcePath: 'packages/angular/field/field.ts',
-    publicApiPath: 'packages/angular/field/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-field-description-',
-  },
-  {
-    className: 'HellFieldError',
-    partType: 'HellFieldErrorPart',
-    uiType: 'HellFieldErrorUi',
-    entrypointId: 'field',
-    sourcePath: 'packages/angular/field/field.ts',
-    publicApiPath: 'packages/angular/field/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-field-error-',
-  },
-  {
-    className: 'HellTabset',
-    partType: 'HellTabsetPart',
-    uiType: 'HellTabsetUi',
-    entrypointId: 'tabs',
-    sourcePath: 'packages/angular/tabs/tabs.ts',
-    publicApiPath: 'packages/angular/tabs/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-tabs-',
-  },
-  {
-    className: 'HellTabList',
-    partType: 'HellTabListPart',
-    uiType: 'HellTabListUi',
-    entrypointId: 'tabs',
-    sourcePath: 'packages/angular/tabs/tabs.ts',
-    publicApiPath: 'packages/angular/tabs/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-tab-list-',
-  },
-  {
-    className: 'HellTab',
-    partType: 'HellTabPart',
-    uiType: 'HellTabUi',
-    entrypointId: 'tabs',
-    sourcePath: 'packages/angular/tabs/tabs.ts',
-    publicApiPath: 'packages/angular/tabs/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-tab-',
-  },
-  {
-    className: 'HellTabPanel',
-    partType: 'HellTabPanelPart',
-    uiType: 'HellTabPanelUi',
-    entrypointId: 'tabs',
-    sourcePath: 'packages/angular/tabs/tabs.ts',
-    publicApiPath: 'packages/angular/tabs/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-tab-panel-',
-  },
-  {
-    className: 'HellInput',
-    partType: 'HellInputPart',
-    uiType: 'HellInputUi',
-    entrypointId: 'input',
-    sourcePath: 'packages/angular/input/input.ts',
-    publicApiPath: 'packages/angular/input/public-api.ts',
-    apiReportFiles: ['hell-ui-angular-input.api.md'],
-    componentVariablePrefix: '--hell-input-',
-  },
-  {
-    className: 'HellNativeSelect',
-    partType: 'HellNativeSelectPart',
-    uiType: 'HellNativeSelectUi',
-    entrypointId: 'input',
-    sourcePath: 'packages/angular/input/input.ts',
-    publicApiPath: 'packages/angular/input/public-api.ts',
-    apiReportFiles: ['hell-ui-angular-input.api.md'],
-    componentVariablePrefix: '--hell-native-select-',
-  },
-  {
-    className: 'HellTextarea',
-    partType: 'HellTextareaPart',
-    uiType: 'HellTextareaUi',
-    entrypointId: 'input',
-    sourcePath: 'packages/angular/input/input.ts',
-    publicApiPath: 'packages/angular/input/public-api.ts',
-    apiReportFiles: ['hell-ui-angular-input.api.md'],
-    componentVariablePrefix: '--hell-textarea-',
-  },
-  {
-    className: 'HellCheckbox',
-    partType: 'HellCheckboxPart',
-    uiType: 'HellCheckboxUi',
-    entrypointId: 'checkbox',
-    sourcePath: 'packages/angular/checkbox/checkbox.ts',
-    publicApiPath: 'packages/angular/checkbox/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-checkbox-',
-  },
-  {
-    className: 'HellNativeCheckbox',
-    partType: 'HellNativeCheckboxPart',
-    uiType: 'HellNativeCheckboxUi',
-    entrypointId: 'checkbox',
-    sourcePath: 'packages/angular/checkbox/checkbox.ts',
-    publicApiPath: 'packages/angular/checkbox/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-checkbox-',
-  },
-  {
-    className: 'HellRadioGroup',
-    partType: 'HellRadioGroupPart',
-    uiType: 'HellRadioGroupUi',
-    entrypointId: 'radio',
-    sourcePath: 'packages/angular/radio/radio.ts',
-    publicApiPath: 'packages/angular/radio/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-radio-group-',
-  },
-  {
-    className: 'HellRadio',
-    partType: 'HellRadioPart',
-    uiType: 'HellRadioUi',
-    entrypointId: 'radio',
-    sourcePath: 'packages/angular/radio/radio.ts',
-    publicApiPath: 'packages/angular/radio/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-radio-',
-  },
-  {
-    className: 'HellNativeRadioGroup',
-    partType: 'HellNativeRadioGroupPart',
-    uiType: 'HellNativeRadioGroupUi',
-    entrypointId: 'radio',
-    sourcePath: 'packages/angular/radio/radio.ts',
-    publicApiPath: 'packages/angular/radio/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-radio-group-',
-  },
-  {
-    className: 'HellNativeRadio',
-    partType: 'HellNativeRadioPart',
-    uiType: 'HellNativeRadioUi',
-    entrypointId: 'radio',
-    sourcePath: 'packages/angular/radio/radio.ts',
-    publicApiPath: 'packages/angular/radio/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-radio-',
-  },
-  {
-    className: 'HellSwitch',
-    partType: 'HellSwitchPart',
-    uiType: 'HellSwitchUi',
-    entrypointId: 'switch',
-    sourcePath: 'packages/angular/switch/switch.ts',
-    publicApiPath: 'packages/angular/switch/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-switch-',
-  },
-  {
-    className: 'HellNativeSwitch',
-    partType: 'HellNativeSwitchPart',
-    uiType: 'HellNativeSwitchUi',
-    entrypointId: 'switch',
-    sourcePath: 'packages/angular/switch/switch.ts',
-    publicApiPath: 'packages/angular/switch/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-switch-',
-  },
-  {
-    className: 'HellToggle',
-    partType: 'HellTogglePart',
-    uiType: 'HellToggleUi',
-    entrypointId: 'toggle',
-    sourcePath: 'packages/angular/toggle/toggle.ts',
-    publicApiPath: 'packages/angular/toggle/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-toggle-',
-  },
-  {
-    className: 'HellToggleGroup',
-    partType: 'HellToggleGroupPart',
-    uiType: 'HellToggleGroupUi',
-    entrypointId: 'toggle',
-    sourcePath: 'packages/angular/toggle/toggle.ts',
-    publicApiPath: 'packages/angular/toggle/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-toggle-group-',
-  },
-  {
-    className: 'HellToggleGroupItem',
-    partType: 'HellToggleGroupItemPart',
-    uiType: 'HellToggleGroupItemUi',
-    entrypointId: 'toggle',
-    sourcePath: 'packages/angular/toggle/toggle.ts',
-    publicApiPath: 'packages/angular/toggle/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-toggle-',
-  },
-  {
-    className: 'HellSlider',
-    partType: 'HellSliderPart',
-    uiType: 'HellSliderUi',
-    entrypointId: 'slider',
-    sourcePath: 'packages/angular/slider/slider.ts',
-    publicApiPath: 'packages/angular/slider/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-slider-',
-  },
-  {
-    className: 'HellDialpad',
-    partType: 'HellDialpadPart',
-    uiType: 'HellDialpadUi',
-    entrypointId: 'dialpad',
-    sourcePath: 'packages/angular/dialpad/dialpad.ts',
-    publicApiPath: 'packages/angular/dialpad/public-api.ts',
-    apiReportFiles: ['hell-ui-angular-dialpad.api.md'],
-    componentVariablePrefix: '--hell-dialpad-',
-  },
-  {
-    className: 'HellDialogOverlay',
-    partType: 'HellDialogOverlayPart',
-    uiType: 'HellDialogOverlayUi',
-    entrypointId: 'dialog',
-    sourcePath: 'packages/angular/dialog/dialog.ts',
-    publicApiPath: 'packages/angular/dialog/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellDialog',
-    partType: 'HellDialogPart',
-    uiType: 'HellDialogUi',
-    entrypointId: 'dialog',
-    sourcePath: 'packages/angular/dialog/dialog.ts',
-    publicApiPath: 'packages/angular/dialog/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellDialogTitle',
-    partType: 'HellDialogTitlePart',
-    uiType: 'HellDialogTitleUi',
-    entrypointId: 'dialog',
-    sourcePath: 'packages/angular/dialog/dialog.ts',
-    publicApiPath: 'packages/angular/dialog/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellDialogDescription',
-    partType: 'HellDialogDescriptionPart',
-    uiType: 'HellDialogDescriptionUi',
-    entrypointId: 'dialog',
-    sourcePath: 'packages/angular/dialog/dialog.ts',
-    publicApiPath: 'packages/angular/dialog/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellToaster',
-    partType: 'HellToasterPart',
-    uiType: 'HellToasterUi',
-    entrypointId: 'toast',
-    sourcePath: 'packages/angular/toast/toast.ts',
-    publicApiPath: 'packages/angular/toast/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellAudioPlayer',
-    partType: 'HellAudioPlayerPart',
-    uiType: 'HellAudioPlayerUi',
-    entrypointId: 'audio-player',
-    sourcePath: 'packages/angular/audio-player/audio-player.ts',
-    publicApiPath: 'packages/angular/audio-player/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellOmnibar',
-    partType: 'HellOmnibarPart',
-    uiType: 'HellOmnibarUi',
-    entrypointId: 'omnibar',
-    sourcePath: 'packages/angular/omnibar/omnibar.ts',
-    publicApiPath: 'packages/angular/omnibar/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellOmnibarPanel',
-    partType: 'HellOmnibarPanelPart',
-    uiType: 'HellOmnibarPanelUi',
-    entrypointId: 'omnibar',
-    sourcePath: 'packages/angular/omnibar/omnibar.ts',
-    publicApiPath: 'packages/angular/omnibar/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellOmnibarGroup',
-    partType: 'HellOmnibarGroupPart',
-    uiType: 'HellOmnibarGroupUi',
-    entrypointId: 'omnibar',
-    sourcePath: 'packages/angular/omnibar/omnibar.ts',
-    publicApiPath: 'packages/angular/omnibar/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellOmnibarGroupLabel',
-    partType: 'HellOmnibarGroupLabelPart',
-    uiType: 'HellOmnibarGroupLabelUi',
-    entrypointId: 'omnibar',
-    sourcePath: 'packages/angular/omnibar/omnibar.ts',
-    publicApiPath: 'packages/angular/omnibar/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellOmnibarItem',
-    partType: 'HellOmnibarItemPart',
-    uiType: 'HellOmnibarItemUi',
-    entrypointId: 'omnibar',
-    sourcePath: 'packages/angular/omnibar/omnibar.ts',
-    publicApiPath: 'packages/angular/omnibar/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellOmnibarItemIcon',
-    partType: 'HellOmnibarItemIconPart',
-    uiType: 'HellOmnibarItemIconUi',
-    entrypointId: 'omnibar',
-    sourcePath: 'packages/angular/omnibar/omnibar.ts',
-    publicApiPath: 'packages/angular/omnibar/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellOmnibarItemText',
-    partType: 'HellOmnibarItemTextPart',
-    uiType: 'HellOmnibarItemTextUi',
-    entrypointId: 'omnibar',
-    sourcePath: 'packages/angular/omnibar/omnibar.ts',
-    publicApiPath: 'packages/angular/omnibar/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellOmnibarItemSubtext',
-    partType: 'HellOmnibarItemSubtextPart',
-    uiType: 'HellOmnibarItemSubtextUi',
-    entrypointId: 'omnibar',
-    sourcePath: 'packages/angular/omnibar/omnibar.ts',
-    publicApiPath: 'packages/angular/omnibar/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellOmnibarItemTrailing',
-    partType: 'HellOmnibarItemTrailingPart',
-    uiType: 'HellOmnibarItemTrailingUi',
-    entrypointId: 'omnibar',
-    sourcePath: 'packages/angular/omnibar/omnibar.ts',
-    publicApiPath: 'packages/angular/omnibar/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellOmnibarChip',
-    partType: 'HellOmnibarChipPart',
-    uiType: 'HellOmnibarChipUi',
-    entrypointId: 'omnibar',
-    sourcePath: 'packages/angular/omnibar/omnibar.ts',
-    publicApiPath: 'packages/angular/omnibar/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellOmnibarChipRemove',
-    partType: 'HellOmnibarChipRemovePart',
-    uiType: 'HellOmnibarChipRemoveUi',
-    entrypointId: 'omnibar',
-    sourcePath: 'packages/angular/omnibar/omnibar.ts',
-    publicApiPath: 'packages/angular/omnibar/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellOmnibarActionsStrip',
-    partType: 'HellOmnibarActionsStripPart',
-    uiType: 'HellOmnibarActionsStripUi',
-    entrypointId: 'omnibar',
-    sourcePath: 'packages/angular/omnibar/omnibar.ts',
-    publicApiPath: 'packages/angular/omnibar/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellOmnibarAction',
-    partType: 'HellOmnibarActionPart',
-    uiType: 'HellOmnibarActionUi',
-    entrypointId: 'omnibar',
-    sourcePath: 'packages/angular/omnibar/omnibar.ts',
-    publicApiPath: 'packages/angular/omnibar/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellCodeEditor',
-    partType: 'HellCodeEditorPart',
-    uiType: 'HellCodeEditorUi',
-    entrypointId: 'code-editor',
-    sourcePath: 'packages/angular/features/code-editor/code-editor.ts',
-    publicApiPath: 'packages/angular/features/code-editor/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellTanStackTable',
-    partType: 'HellTanStackTablePart',
-    uiType: 'HellTanStackTableUi',
-    entrypointId: 'table-tanstack',
-    sourcePath: 'packages/angular/table-tanstack/table-tanstack.ts',
-    publicApiPath: 'packages/angular/table-tanstack/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellTanStackPagination',
-    partType: 'HellTanStackPaginationPart',
-    uiType: 'HellTanStackPaginationUi',
-    entrypointId: 'table-tanstack',
-    sourcePath: 'packages/angular/table-tanstack/table-tanstack.ts',
-    publicApiPath: 'packages/angular/table-tanstack/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellDateInput',
-    partType: 'HellDateInputPart',
-    uiType: 'HellDateInputUi',
-    entrypointId: 'date-input',
-    sourcePath: 'packages/angular/date-input/date-input.ts',
-    publicApiPath: 'packages/angular/date-input/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-date-input-',
-  },
-  {
-    className: 'HellTimeInput',
-    partType: 'HellTimeInputPart',
-    uiType: 'HellTimeInputUi',
-    entrypointId: 'time-input',
-    sourcePath: 'packages/angular/time-input/time-input.ts',
-    publicApiPath: 'packages/angular/time-input/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-time-input-',
-  },
-  {
-    className: 'HellDatePicker',
-    partType: 'HellDatePickerPart',
-    uiType: 'HellDatePickerUi',
-    entrypointId: 'date-picker',
-    sourcePath: 'packages/angular/date-picker/date-picker.ts',
-    publicApiPath: 'packages/angular/date-picker/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-date-picker-',
-  },
-  {
-    className: 'HellDateRangePicker',
-    partType: 'HellDateRangePickerPart',
-    uiType: 'HellDateRangePickerUi',
-    entrypointId: 'date-picker',
-    sourcePath: 'packages/angular/date-picker/date-picker.ts',
-    publicApiPath: 'packages/angular/date-picker/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-date-picker-',
-  },
-  {
-    className: 'HellAvatar',
-    partType: 'HellAvatarPart',
-    uiType: 'HellAvatarUi',
-    entrypointId: 'avatar',
-    sourcePath: 'packages/angular/avatar/avatar.ts',
-    publicApiPath: 'packages/angular/avatar/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-avatar-',
-  },
-  {
-    className: 'HellAvatarGroup',
-    partType: 'HellAvatarGroupPart',
-    uiType: 'HellAvatarGroupUi',
-    entrypointId: 'avatar-group',
-    sourcePath: 'packages/angular/avatar-group/avatar-group.ts',
-    publicApiPath: 'packages/angular/avatar-group/public-api.ts',
-    apiReportFiles: ['hell-ui-angular-avatar-group.api.md'],
-    componentVariablePrefix: '--hell-avatar-group-',
-  },
-  {
-    className: 'HellAvatarGroupItem',
-    partType: 'HellAvatarGroupItemPart',
-    uiType: 'HellAvatarGroupItemUi',
-    entrypointId: 'avatar-group',
-    sourcePath: 'packages/angular/avatar-group/avatar-group.ts',
-    publicApiPath: 'packages/angular/avatar-group/public-api.ts',
-    apiReportFiles: ['hell-ui-angular-avatar-group.api.md'],
-    componentVariablePrefix: '--hell-avatar-group-item-',
-  },
-  {
-    className: 'HellAvatarGroupOverflow',
-    partType: 'HellAvatarGroupOverflowPart',
-    uiType: 'HellAvatarGroupOverflowUi',
-    entrypointId: 'avatar-group',
-    sourcePath: 'packages/angular/avatar-group/avatar-group.ts',
-    publicApiPath: 'packages/angular/avatar-group/public-api.ts',
-    apiReportFiles: ['hell-ui-angular-avatar-group.api.md'],
-    componentVariablePrefix: '--hell-avatar-group-overflow-',
-  },
-  {
-    className: 'HellBreadcrumbs',
-    partType: 'HellBreadcrumbsPart',
-    uiType: 'HellBreadcrumbsUi',
-    entrypointId: 'breadcrumbs',
-    sourcePath: 'packages/angular/breadcrumbs/breadcrumbs.ts',
-    publicApiPath: 'packages/angular/breadcrumbs/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellBreadcrumbList',
-    partType: 'HellBreadcrumbListPart',
-    uiType: 'HellBreadcrumbListUi',
-    entrypointId: 'breadcrumbs',
-    sourcePath: 'packages/angular/breadcrumbs/breadcrumbs.ts',
-    publicApiPath: 'packages/angular/breadcrumbs/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellBreadcrumbItem',
-    partType: 'HellBreadcrumbItemPart',
-    uiType: 'HellBreadcrumbItemUi',
-    entrypointId: 'breadcrumbs',
-    sourcePath: 'packages/angular/breadcrumbs/breadcrumbs.ts',
-    publicApiPath: 'packages/angular/breadcrumbs/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellBreadcrumbLink',
-    partType: 'HellBreadcrumbLinkPart',
-    uiType: 'HellBreadcrumbLinkUi',
-    entrypointId: 'breadcrumbs',
-    sourcePath: 'packages/angular/breadcrumbs/breadcrumbs.ts',
-    publicApiPath: 'packages/angular/breadcrumbs/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellBreadcrumbPage',
-    partType: 'HellBreadcrumbPagePart',
-    uiType: 'HellBreadcrumbPageUi',
-    entrypointId: 'breadcrumbs',
-    sourcePath: 'packages/angular/breadcrumbs/breadcrumbs.ts',
-    publicApiPath: 'packages/angular/breadcrumbs/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellBreadcrumbSeparator',
-    partType: 'HellBreadcrumbSeparatorPart',
-    uiType: 'HellBreadcrumbSeparatorUi',
-    entrypointId: 'breadcrumbs',
-    sourcePath: 'packages/angular/breadcrumbs/breadcrumbs.ts',
-    publicApiPath: 'packages/angular/breadcrumbs/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellBreadcrumbEllipsis',
-    partType: 'HellBreadcrumbEllipsisPart',
-    uiType: 'HellBreadcrumbEllipsisUi',
-    entrypointId: 'breadcrumbs',
-    sourcePath: 'packages/angular/breadcrumbs/breadcrumbs.ts',
-    publicApiPath: 'packages/angular/breadcrumbs/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellIcon',
-    partType: 'HellIconPart',
-    uiType: 'HellIconUi',
-    entrypointId: 'icon',
-    sourcePath: 'packages/angular/icon/icon.ts',
-    publicApiPath: 'packages/angular/icon/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellSkeleton',
-    partType: 'HellSkeletonPart',
-    uiType: 'HellSkeletonUi',
-    entrypointId: 'skeleton',
-    sourcePath: 'packages/angular/skeleton/skeleton.ts',
-    publicApiPath: 'packages/angular/skeleton/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-skeleton-',
-  },
-  {
-    className: 'HellSpinner',
-    partType: 'HellSpinnerPart',
-    uiType: 'HellSpinnerUi',
-    entrypointId: 'spinner',
-    sourcePath: 'packages/angular/spinner/spinner.ts',
-    publicApiPath: 'packages/angular/spinner/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-spinner-',
-  },
-  {
-    className: 'HellTag',
-    partType: 'HellTagPart',
-    uiType: 'HellTagUi',
-    entrypointId: 'tag',
-    sourcePath: 'packages/angular/tag/tag.ts',
-    publicApiPath: 'packages/angular/tag/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-tag-',
-  },
-  {
-    className: 'HellBadge',
-    partType: 'HellBadgePart',
-    uiType: 'HellBadgeUi',
-    entrypointId: 'tag',
-    sourcePath: 'packages/angular/tag/tag.ts',
-    publicApiPath: 'packages/angular/tag/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-badge-',
-  },
-  {
-    className: 'HellKbd',
-    partType: 'HellKbdPart',
-    uiType: 'HellKbdUi',
-    entrypointId: 'tag',
-    sourcePath: 'packages/angular/tag/tag.ts',
-    publicApiPath: 'packages/angular/tag/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-kbd-',
-  },
-  {
-    className: 'HellSeparator',
-    partType: 'HellSeparatorPart',
-    uiType: 'HellSeparatorUi',
-    entrypointId: 'separator',
-    sourcePath: 'packages/angular/separator/separator.ts',
-    publicApiPath: 'packages/angular/separator/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-separator-',
-  },
-  {
-    className: 'HellProgress',
-    partType: 'HellProgressPart',
-    uiType: 'HellProgressUi',
-    entrypointId: 'progress',
-    sourcePath: 'packages/angular/progress/progress.ts',
-    publicApiPath: 'packages/angular/progress/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-progress-',
-  },
-  {
-    className: 'HellProgressBar',
-    partType: 'HellProgressBarPart',
-    uiType: 'HellProgressBarUi',
-    entrypointId: 'progress',
-    sourcePath: 'packages/angular/progress/progress.ts',
-    publicApiPath: 'packages/angular/progress/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-progress-bar-',
-  },
-  {
-    className: 'HellSearch',
-    partType: 'HellSearchPart',
-    uiType: 'HellSearchUi',
-    entrypointId: 'search',
-    sourcePath: 'packages/angular/search/search.ts',
-    publicApiPath: 'packages/angular/search/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellSearchClear',
-    partType: 'HellSearchClearPart',
-    uiType: 'HellSearchClearUi',
-    entrypointId: 'search',
-    sourcePath: 'packages/angular/search/search.ts',
-    publicApiPath: 'packages/angular/search/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellDropZone',
-    partType: 'HellDropZonePart',
-    uiType: 'HellDropZoneUi',
-    entrypointId: 'drop-zone',
-    sourcePath: 'packages/angular/drop-zone/drop-zone.ts',
-    publicApiPath: 'packages/angular/drop-zone/public-api.ts',
-    apiReportFiles: [],
-    componentVariablePrefix: '--hell-dropzone-',
-  },
-  {
-    className: 'HellPagination',
-    partType: 'HellPaginationPart',
-    uiType: 'HellPaginationUi',
-    entrypointId: 'pagination',
-    sourcePath: 'packages/angular/pagination/pagination.ts',
-    publicApiPath: 'packages/angular/pagination/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellPaginationFirst',
-    partType: 'HellPaginationFirstPart',
-    uiType: 'HellPaginationFirstUi',
-    entrypointId: 'pagination',
-    sourcePath: 'packages/angular/pagination/pagination.ts',
-    publicApiPath: 'packages/angular/pagination/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellPaginationPrev',
-    partType: 'HellPaginationPrevPart',
-    uiType: 'HellPaginationPrevUi',
-    entrypointId: 'pagination',
-    sourcePath: 'packages/angular/pagination/pagination.ts',
-    publicApiPath: 'packages/angular/pagination/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellPaginationNext',
-    partType: 'HellPaginationNextPart',
-    uiType: 'HellPaginationNextUi',
-    entrypointId: 'pagination',
-    sourcePath: 'packages/angular/pagination/pagination.ts',
-    publicApiPath: 'packages/angular/pagination/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellPaginationLast',
-    partType: 'HellPaginationLastPart',
-    uiType: 'HellPaginationLastUi',
-    entrypointId: 'pagination',
-    sourcePath: 'packages/angular/pagination/pagination.ts',
-    publicApiPath: 'packages/angular/pagination/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellPaginationButton',
-    partType: 'HellPaginationButtonPart',
-    uiType: 'HellPaginationButtonUi',
-    entrypointId: 'pagination',
-    sourcePath: 'packages/angular/pagination/pagination.ts',
-    publicApiPath: 'packages/angular/pagination/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellPaginationStrip',
-    partType: 'HellPaginationStripPart',
-    uiType: 'HellPaginationStripUi',
-    entrypointId: 'pagination',
-    sourcePath: 'packages/angular/pagination/pagination.ts',
-    publicApiPath: 'packages/angular/pagination/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellAppShell',
-    partType: 'HellAppShellPart',
-    uiType: 'HellAppShellUi',
-    entrypointId: 'app-shell',
-    sourcePath: 'packages/angular/app-shell/app-shell.ts',
-    publicApiPath: 'packages/angular/app-shell/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellAppTopbar',
-    partType: 'HellAppTopbarPart',
-    uiType: 'HellAppTopbarUi',
-    entrypointId: 'app-shell',
-    sourcePath: 'packages/angular/app-shell/app-shell.ts',
-    publicApiPath: 'packages/angular/app-shell/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellAppSidenav',
-    partType: 'HellAppSidenavPart',
-    uiType: 'HellAppSidenavUi',
-    entrypointId: 'app-shell',
-    sourcePath: 'packages/angular/app-shell/app-shell.ts',
-    publicApiPath: 'packages/angular/app-shell/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellNavItem',
-    partType: 'HellNavItemPart',
-    uiType: 'HellNavItemUi',
-    entrypointId: 'app-shell',
-    sourcePath: 'packages/angular/app-shell/app-shell.ts',
-    publicApiPath: 'packages/angular/app-shell/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellNavItemIcon',
-    partType: 'HellNavItemIconPart',
-    uiType: 'HellNavItemIconUi',
-    entrypointId: 'app-shell',
-    sourcePath: 'packages/angular/app-shell/app-shell.ts',
-    publicApiPath: 'packages/angular/app-shell/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellNavItemLabel',
-    partType: 'HellNavItemLabelPart',
-    uiType: 'HellNavItemLabelUi',
-    entrypointId: 'app-shell',
-    sourcePath: 'packages/angular/app-shell/app-shell.ts',
-    publicApiPath: 'packages/angular/app-shell/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellNavItemTrailing',
-    partType: 'HellNavItemTrailingPart',
-    uiType: 'HellNavItemTrailingUi',
-    entrypointId: 'app-shell',
-    sourcePath: 'packages/angular/app-shell/app-shell.ts',
-    publicApiPath: 'packages/angular/app-shell/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellNavSection',
-    partType: 'HellNavSectionPart',
-    uiType: 'HellNavSectionUi',
-    entrypointId: 'app-shell',
-    sourcePath: 'packages/angular/app-shell/app-shell.ts',
-    publicApiPath: 'packages/angular/app-shell/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellNavSectionToggle',
-    partType: 'HellNavSectionTogglePart',
-    uiType: 'HellNavSectionToggleUi',
-    entrypointId: 'app-shell',
-    sourcePath: 'packages/angular/app-shell/app-shell.ts',
-    publicApiPath: 'packages/angular/app-shell/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellNavSectionItems',
-    partType: 'HellNavSectionItemsPart',
-    uiType: 'HellNavSectionItemsUi',
-    entrypointId: 'app-shell',
-    sourcePath: 'packages/angular/app-shell/app-shell.ts',
-    publicApiPath: 'packages/angular/app-shell/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellAppContent',
-    partType: 'HellAppContentPart',
-    uiType: 'HellAppContentUi',
-    entrypointId: 'app-shell',
-    sourcePath: 'packages/angular/app-shell/app-shell.ts',
-    publicApiPath: 'packages/angular/app-shell/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellSidenavToggle',
-    partType: 'HellSidenavTogglePart',
-    uiType: 'HellSidenavToggleUi',
-    entrypointId: 'app-shell',
-    sourcePath: 'packages/angular/app-shell/app-shell.ts',
-    publicApiPath: 'packages/angular/app-shell/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellSecondaryToggle',
-    partType: 'HellSecondaryTogglePart',
-    uiType: 'HellSecondaryToggleUi',
-    entrypointId: 'app-shell',
-    sourcePath: 'packages/angular/app-shell/app-shell.ts',
-    publicApiPath: 'packages/angular/app-shell/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellAppSecondary',
-    partType: 'HellAppSecondaryPart',
-    uiType: 'HellAppSecondaryUi',
-    entrypointId: 'app-shell',
-    sourcePath: 'packages/angular/app-shell/app-shell.ts',
-    publicApiPath: 'packages/angular/app-shell/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellAppSecondaryBody',
-    partType: 'HellAppSecondaryBodyPart',
-    uiType: 'HellAppSecondaryBodyUi',
-    entrypointId: 'app-shell',
-    sourcePath: 'packages/angular/app-shell/app-shell.ts',
-    publicApiPath: 'packages/angular/app-shell/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellResizable',
-    partType: 'HellResizablePart',
-    uiType: 'HellResizableUi',
-    entrypointId: 'resizable',
-    sourcePath: 'packages/angular/resizable/resizable.ts',
-    publicApiPath: 'packages/angular/resizable/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellResizablePane',
-    partType: 'HellResizablePanePart',
-    uiType: 'HellResizablePaneUi',
-    entrypointId: 'resizable',
-    sourcePath: 'packages/angular/resizable/resizable.ts',
-    publicApiPath: 'packages/angular/resizable/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellResizableHandle',
-    partType: 'HellResizableHandlePart',
-    uiType: 'HellResizableHandleUi',
-    entrypointId: 'resizable',
-    sourcePath: 'packages/angular/resizable/resizable.ts',
-    publicApiPath: 'packages/angular/resizable/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellSplitView',
-    partType: 'HellSplitViewPart',
-    uiType: 'HellSplitViewUi',
-    entrypointId: 'split-view',
-    sourcePath: 'packages/angular/split-view/split-view.ts',
-    publicApiPath: 'packages/angular/split-view/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellTableContainer',
-    partType: 'HellTableContainerPart',
-    uiType: 'HellTableContainerUi',
-    entrypointId: 'table',
-    sourcePath: 'packages/angular/table/table-utilities.ts',
-    publicApiPath: 'packages/angular/table/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellTable',
-    partType: 'HellTablePart',
-    uiType: 'HellTableUi',
-    entrypointId: 'table',
-    sourcePath: 'packages/angular/table/table-utilities.ts',
-    publicApiPath: 'packages/angular/table/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellTableHead',
-    partType: 'HellTableHeadPart',
-    uiType: 'HellTableHeadUi',
-    entrypointId: 'table',
-    sourcePath: 'packages/angular/table/table-utilities.ts',
-    publicApiPath: 'packages/angular/table/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellTableBody',
-    partType: 'HellTableBodyPart',
-    uiType: 'HellTableBodyUi',
-    entrypointId: 'table',
-    sourcePath: 'packages/angular/table/table-utilities.ts',
-    publicApiPath: 'packages/angular/table/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellTableRow',
-    partType: 'HellTableRowPart',
-    uiType: 'HellTableRowUi',
-    entrypointId: 'table',
-    sourcePath: 'packages/angular/table/table-utilities.ts',
-    publicApiPath: 'packages/angular/table/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellTableRowAction',
-    partType: 'HellTableRowActionPart',
-    uiType: 'HellTableRowActionUi',
-    entrypointId: 'table',
-    sourcePath: 'packages/angular/table/table-utilities.ts',
-    publicApiPath: 'packages/angular/table/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellTableSelectionCell',
-    partType: 'HellTableSelectionCellPart',
-    uiType: 'HellTableSelectionCellUi',
-    entrypointId: 'table',
-    sourcePath: 'packages/angular/table/table-utilities.ts',
-    publicApiPath: 'packages/angular/table/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellTableRowCheckbox',
-    partType: 'HellTableRowCheckboxPart',
-    uiType: 'HellTableRowCheckboxUi',
-    entrypointId: 'table',
-    sourcePath: 'packages/angular/table/table-utilities.ts',
-    publicApiPath: 'packages/angular/table/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellTableRowRadio',
-    partType: 'HellTableRowRadioPart',
-    uiType: 'HellTableRowRadioUi',
-    entrypointId: 'table',
-    sourcePath: 'packages/angular/table/table-utilities.ts',
-    publicApiPath: 'packages/angular/table/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellTableHeaderCell',
-    partType: 'HellTableHeaderCellPart',
-    uiType: 'HellTableHeaderCellUi',
-    entrypointId: 'table',
-    sourcePath: 'packages/angular/table/table-utilities.ts',
-    publicApiPath: 'packages/angular/table/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellTableSortTrigger',
-    partType: 'HellTableSortTriggerPart',
-    uiType: 'HellTableSortTriggerUi',
-    entrypointId: 'table',
-    sourcePath: 'packages/angular/table/table-utilities.ts',
-    publicApiPath: 'packages/angular/table/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellTableCell',
-    partType: 'HellTableCellPart',
-    uiType: 'HellTableCellUi',
-    entrypointId: 'table',
-    sourcePath: 'packages/angular/table/table-utilities.ts',
-    publicApiPath: 'packages/angular/table/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellTableResizeHandle',
-    partType: 'HellTableResizeHandlePart',
-    uiType: 'HellTableResizeHandleUi',
-    entrypointId: 'table',
-    sourcePath: 'packages/angular/table/table-utilities.ts',
-    publicApiPath: 'packages/angular/table/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellCombobox',
-    partType: 'HellComboboxPart',
-    uiType: 'HellComboboxUi',
-    entrypointId: 'combobox',
-    sourcePath: 'packages/angular/combobox/combobox.ts',
-    publicApiPath: 'packages/angular/combobox/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellComboboxBasic',
-    partType: 'HellComboboxBasicPart',
-    uiType: 'HellComboboxBasicUi',
-    entrypointId: 'combobox',
-    sourcePath: 'packages/angular/combobox/combobox.ts',
-    publicApiPath: 'packages/angular/combobox/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellComboboxButton',
-    partType: 'HellComboboxButtonPart',
-    uiType: 'HellComboboxButtonUi',
-    entrypointId: 'combobox',
-    sourcePath: 'packages/angular/combobox/combobox.ts',
-    publicApiPath: 'packages/angular/combobox/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellComboboxDropdown',
-    partType: 'HellComboboxDropdownPart',
-    uiType: 'HellComboboxDropdownUi',
-    entrypointId: 'combobox',
-    sourcePath: 'packages/angular/combobox/combobox.ts',
-    publicApiPath: 'packages/angular/combobox/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellComboboxEmpty',
-    partType: 'HellComboboxEmptyPart',
-    uiType: 'HellComboboxEmptyUi',
-    entrypointId: 'combobox',
-    sourcePath: 'packages/angular/combobox/combobox.ts',
-    publicApiPath: 'packages/angular/combobox/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellComboboxInput',
-    partType: 'HellComboboxInputPart',
-    uiType: 'HellComboboxInputUi',
-    entrypointId: 'combobox',
-    sourcePath: 'packages/angular/combobox/combobox.ts',
-    publicApiPath: 'packages/angular/combobox/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellComboboxOption',
-    partType: 'HellComboboxOptionPart',
-    uiType: 'HellComboboxOptionUi',
-    entrypointId: 'combobox',
-    sourcePath: 'packages/angular/combobox/combobox.ts',
-    publicApiPath: 'packages/angular/combobox/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellFlyout',
-    partType: 'HellFlyoutPart',
-    uiType: 'HellFlyoutUi',
-    entrypointId: 'flyout',
-    sourcePath: 'packages/angular/flyout/flyout.ts',
-    publicApiPath: 'packages/angular/flyout/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellListbox',
-    partType: 'HellListboxPart',
-    uiType: 'HellListboxUi',
-    entrypointId: 'listbox',
-    sourcePath: 'packages/angular/listbox/listbox.ts',
-    publicApiPath: 'packages/angular/listbox/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellListboxHeader',
-    partType: 'HellListboxHeaderPart',
-    uiType: 'HellListboxHeaderUi',
-    entrypointId: 'listbox',
-    sourcePath: 'packages/angular/listbox/listbox.ts',
-    publicApiPath: 'packages/angular/listbox/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellListboxOption',
-    partType: 'HellListboxOptionPart',
-    uiType: 'HellListboxOptionUi',
-    entrypointId: 'listbox',
-    sourcePath: 'packages/angular/listbox/listbox.ts',
-    publicApiPath: 'packages/angular/listbox/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellListboxSection',
-    partType: 'HellListboxSectionPart',
-    uiType: 'HellListboxSectionUi',
-    entrypointId: 'listbox',
-    sourcePath: 'packages/angular/listbox/listbox.ts',
-    publicApiPath: 'packages/angular/listbox/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellMenu',
-    partType: 'HellMenuPart',
-    uiType: 'HellMenuUi',
-    entrypointId: 'menu',
-    sourcePath: 'packages/angular/menu/menu.ts',
-    publicApiPath: 'packages/angular/menu/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellMenuItem',
-    partType: 'HellMenuItemPart',
-    uiType: 'HellMenuItemUi',
-    entrypointId: 'menu',
-    sourcePath: 'packages/angular/menu/menu.ts',
-    publicApiPath: 'packages/angular/menu/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellMenuItemCheckbox',
-    partType: 'HellMenuItemCheckboxPart',
-    uiType: 'HellMenuItemCheckboxUi',
-    entrypointId: 'menu',
-    sourcePath: 'packages/angular/menu/menu.ts',
-    publicApiPath: 'packages/angular/menu/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellMenuItemIcon',
-    partType: 'HellMenuItemIconPart',
-    uiType: 'HellMenuItemIconUi',
-    entrypointId: 'menu',
-    sourcePath: 'packages/angular/menu/menu.ts',
-    publicApiPath: 'packages/angular/menu/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellMenuItemIndicator',
-    partType: 'HellMenuItemIndicatorPart',
-    uiType: 'HellMenuItemIndicatorUi',
-    entrypointId: 'menu',
-    sourcePath: 'packages/angular/menu/menu.ts',
-    publicApiPath: 'packages/angular/menu/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellMenuItemRadio',
-    partType: 'HellMenuItemRadioPart',
-    uiType: 'HellMenuItemRadioUi',
-    entrypointId: 'menu',
-    sourcePath: 'packages/angular/menu/menu.ts',
-    publicApiPath: 'packages/angular/menu/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellMenuItemTrailing',
-    partType: 'HellMenuItemTrailingPart',
-    uiType: 'HellMenuItemTrailingUi',
-    entrypointId: 'menu',
-    sourcePath: 'packages/angular/menu/menu.ts',
-    publicApiPath: 'packages/angular/menu/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellMenuLabel',
-    partType: 'HellMenuLabelPart',
-    uiType: 'HellMenuLabelUi',
-    entrypointId: 'menu',
-    sourcePath: 'packages/angular/menu/menu.ts',
-    publicApiPath: 'packages/angular/menu/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellMenuSection',
-    partType: 'HellMenuSectionPart',
-    uiType: 'HellMenuSectionUi',
-    entrypointId: 'menu',
-    sourcePath: 'packages/angular/menu/menu.ts',
-    publicApiPath: 'packages/angular/menu/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellMenuSeparator',
-    partType: 'HellMenuSeparatorPart',
-    uiType: 'HellMenuSeparatorUi',
-    entrypointId: 'menu',
-    sourcePath: 'packages/angular/menu/menu.ts',
-    publicApiPath: 'packages/angular/menu/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellPopover',
-    partType: 'HellPopoverPart',
-    uiType: 'HellPopoverUi',
-    entrypointId: 'popover',
-    sourcePath: 'packages/angular/popover/popover.ts',
-    publicApiPath: 'packages/angular/popover/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellSelect',
-    partType: 'HellSelectPart',
-    uiType: 'HellSelectUi',
-    entrypointId: 'select',
-    sourcePath: 'packages/angular/select/select.ts',
-    publicApiPath: 'packages/angular/select/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellSelectBasic',
-    partType: 'HellSelectBasicPart',
-    uiType: 'HellSelectBasicUi',
-    entrypointId: 'select',
-    sourcePath: 'packages/angular/select/select.ts',
-    publicApiPath: 'packages/angular/select/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellSelectDropdown',
-    partType: 'HellSelectDropdownPart',
-    uiType: 'HellSelectDropdownUi',
-    entrypointId: 'select',
-    sourcePath: 'packages/angular/select/select.ts',
-    publicApiPath: 'packages/angular/select/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellSelectOption',
-    partType: 'HellSelectOptionPart',
-    uiType: 'HellSelectOptionUi',
-    entrypointId: 'select',
-    sourcePath: 'packages/angular/select/select.ts',
-    publicApiPath: 'packages/angular/select/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellSelectPlaceholder',
-    partType: 'HellSelectPlaceholderPart',
-    uiType: 'HellSelectPlaceholderUi',
-    entrypointId: 'select',
-    sourcePath: 'packages/angular/select/select.ts',
-    publicApiPath: 'packages/angular/select/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellSelectValue',
-    partType: 'HellSelectValuePart',
-    uiType: 'HellSelectValueUi',
-    entrypointId: 'select',
-    sourcePath: 'packages/angular/select/select.ts',
-    publicApiPath: 'packages/angular/select/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellSubmenuTrigger',
-    partType: 'HellSubmenuTriggerPart',
-    uiType: 'HellSubmenuTriggerUi',
-    entrypointId: 'menu',
-    sourcePath: 'packages/angular/menu/menu.ts',
-    publicApiPath: 'packages/angular/menu/public-api.ts',
-    apiReportFiles: [],
-  },
-  {
-    className: 'HellTooltip',
-    partType: 'HellTooltipPart',
-    uiType: 'HellTooltipUi',
-    entrypointId: 'tooltip',
-    sourcePath: 'packages/angular/tooltip/tooltip.ts',
-    publicApiPath: 'packages/angular/tooltip/public-api.ts',
-    apiReportFiles: [],
-  },
-];
-
-const migratedPartStyleMapClassNames = new Set(
-  migratedPartStyleMapModules.map((module) => module.className),
-);
-
 function main() {
   checkDocsExamples();
   checkDocsLazyRouteImportGraphContract();
   checkDocsRootImportContract();
   checkDocsCategoryNavigationContract();
-  checkDocsCodeEditorIsolationContract();
-  checkDocsPdfViewerIsolationContract();
   checkPackageEntryPoints();
   checkCodeMirrorEntrypointIsolationContract();
   checkAudioTranscriptEntrypointIsolationContract();
-  checkApiReportContract();
   checkApiStabilityContract();
   checkPackageDependencyContract();
   checkStyleEntryPoints();
@@ -1519,24 +94,16 @@ function main() {
   checkAppShellBreakpointContract();
   checkBehaviorSentinelContract();
   checkComponentContract();
-  checkPartStyleMapContract();
+  checkBasicFloatingListStructuralAffordances();
   checkLabelContract();
   checkCodeEditorRuntimeContract();
-  checkExperimentalFeatureContract();
   checkFormsContract();
-  checkDateTimeAdapterContract();
-  checkSearchContract();
   checkHotkeyContract();
   checkNativeButtonSelectorContract();
   checkInteractiveTriggerSelectorContract();
   checkTableUtilityContract();
-  checkTableSemanticsContract();
-  checkTableSortTriggerContract();
-  checkTableResizeHandleContract();
   checkTableAdapterBoundaryContract();
-  checkTableSemanticDefaultGuardContract();
   checkFloatingRegistrationContract();
-  checkFloatingAdapterContract();
   checkBrowserGlobalContract();
   checkNgpStateWriterContract();
 
@@ -1630,11 +197,9 @@ function checkDocsLazyRouteImportGraphContract() {
   const docsRoot = join(root, 'apps/docs/src/app');
   const pagesRoot = join(docsRoot, 'pages');
   const catalogPath = join(docsRoot, 'docs-catalog.ts');
-  const docPath = join(root, docsExampleImportBoundaryDocPath);
   const routeEntries = docsLazyRouteEntries(catalogPath, pagesRoot);
   const routeEntriesByBoundary = docsRouteEntriesByBoundary(routeEntries);
 
-  checkDocsExampleImportBoundaryDocs(docPath);
 
   for (const policy of docsHeavyLazyRoutePolicies) {
     const routeEntry = routeEntries.find(
@@ -1722,55 +287,15 @@ function checkDocsLazyRouteImportGraphContract() {
             `${policy.label} stylesheet/runtime references must stay inside lazy route ${policy.routePath} (${policy.boundary}).`,
         );
       }
-    }
-  }
-}
 
-function checkDocsExampleImportBoundaryDocs(docPath) {
-  if (!existsSync(docPath)) {
-    failures.push(`Docs Lazy Route Import Graph missing ${docsExampleImportBoundaryDocPath}`);
-    return;
-  }
-
-  const docs = readFile(docPath);
-  const requiredParts = [
-    'docs-example-import-boundaries',
-    'tools/check-architecture.mjs',
-    'apps/docs/src/app/docs-catalog.ts',
-    'apps/docs/src/app/pages/<route>/examples/',
-    'apps/docs/src/app/shared/',
-  ];
-  for (const part of requiredParts) {
-    if (!docs.includes(part)) {
-      failures.push(`Docs Lazy Route Import Graph note is missing ${part}`);
-    }
-  }
-
-  for (const policy of docsHeavyLazyRoutePolicies) {
-    const missingPolicyParts = [
-      policy.id,
-      policy.routePath,
-      policy.boundary,
-      ...policy.packageSpecifiers,
-      ...policy.sourceFragments,
-    ].filter((part) => !docs.includes(part));
-    if (missingPolicyParts.length) {
-      failures.push(
-        `Docs Lazy Route Import Graph note is missing ${policy.id}: ${missingPolicyParts.join(', ')}`,
-      );
-    }
-  }
-
-  for (const allowance of allowedDocsLazyRouteCrossImports) {
-    const missingAllowanceParts = [
-      allowance.from,
-      allowance.to,
-      allowance.rationale,
-    ].filter((part) => !docs.includes(part));
-    if (missingAllowanceParts.length) {
-      failures.push(
-        `Docs Lazy Route Import Graph note is missing allowance ${allowance.from} -> ${allowance.to}: ${missingAllowanceParts.join(', ')}`,
-      );
+      for (const fragment of policy.forbiddenComponentStyleFragments ?? []) {
+        const escaped = escapeRegExp(fragment);
+        if (!new RegExp(`styles\\s*:\\s*\\[[\\s\\S]*${escaped}`).test(source)) continue;
+        failures.push(
+          `Docs Lazy Route Import Graph ${relPath(file)} references ${fragment} in component styles; ` +
+            `${policy.label} CSS must load as a lazy external asset, not Angular component styles.`,
+        );
+      }
     }
   }
 }
@@ -2128,22 +653,9 @@ function checkDocsRootImportContract() {
   }
 }
 
-// Every component Package Entry Point must have a registered docs page, and
-// that page must present the entry point's Module Category (from its
-// hell-entrypoint.json sidecar) through the shared docs page header. The
-// sidebar groups pages functionally for consumers; the category badge keeps
-// the architectural classification visible and machine-checked. Entry points
-// that are deliberately documented on another entry point's page are listed
-// as explicit exceptions naming the page that owns them.
-const docsCategoryBadgeLabels = new Map([
-  [entrypointCategories.STYLED_PRIMITIVE, 'Styled primitive'],
-  [entrypointCategories.MIXED_ENTRYPOINT, 'Mixed entry point'],
-  [entrypointCategories.COMPOSITE, 'Composite'],
-  [entrypointCategories.FEATURE, 'Feature'],
-  [entrypointCategories.TABLE_PRIMITIVES, 'Table primitives'],
-  [entrypointCategories.TANSTACK_TABLE_SHELL, 'TanStack table shell'],
-]);
-
+// Every component Package Entry Point must have a registered docs page. Entry
+// points deliberately documented on another entry point's page are listed as
+// explicit exceptions naming the page that owns them.
 const docsCategoryPageExceptions = new Map([
   // The transcript provider is an opt-in seam of the audio player Composite.
   ['features/audio-transcript', 'components/audio-player'],
@@ -2174,211 +686,7 @@ function checkDocsCategoryNavigationContract() {
       );
       continue;
     }
-    if (exceptionRoute) continue;
-
-    const expectedBadge = docsCategoryBadgeLabels.get(entrypoint.category);
-    if (!expectedBadge) continue;
-
-    const pageSource = readFile(pagePath);
-    if (!pageSource.includes('<hd-page-header')) {
-      failures.push(
-        `Docs page ${relPath(pagePath)} must present ${entrypoint.specifier} through the shared hd-page-header`,
-      );
-    } else if (!pageSource.includes(`category="${expectedBadge}"`)) {
-      failures.push(
-        `Docs page ${relPath(pagePath)} must show Module Category badge category="${expectedBadge}" for ${entrypoint.specifier}`,
-      );
-    }
   }
-}
-
-function checkDocsCodeEditorIsolationContract() {
-  const directSharedFiles = [
-    'apps/docs/src/app/shared/code-block.ts',
-    'apps/docs/src/app/shared/example-tabs.ts',
-    'apps/docs/src/app/shared/code-tools.ts',
-  ];
-  const deferredSharedFiles = [
-    'apps/docs/src/app/shared/code-block.ts',
-    'apps/docs/src/app/shared/example-tabs.ts',
-  ];
-
-  for (const file of directSharedFiles) {
-    const path = join(root, file);
-    if (!existsSync(path)) {
-      failures.push(`Docs architecture check references missing file ${file}`);
-      continue;
-    }
-
-    const source = readFile(path);
-    if (
-      source.includes('@codemirror/') ||
-      source.includes('@hell-ui/angular/features/code-editor')
-    ) {
-      failures.push(
-        `Docs shared file ${file} must not import CodeMirror or @hell-ui/angular/features/code-editor directly; use the deferred docs code viewer wrapper`,
-      );
-    }
-    if (/<pre\b/.test(source)) {
-      failures.push(
-        `Docs shared file ${file} must not render raw <pre> code blocks for shared code previews`,
-      );
-    }
-  }
-
-  for (const file of deferredSharedFiles) {
-    const source = readFile(join(root, file));
-    if (!source.includes("import('./docs-code-viewer')") || !source.includes('ngComponentOutlet')) {
-      failures.push(
-        `Docs shared file ${file} must lazy-load shared docs code previews through the docs-code-viewer dynamic component`,
-      );
-    }
-  }
-
-  const wrapperPath = join(root, docsCodePreviewLazyWrapperPath);
-  if (!existsSync(wrapperPath)) {
-    failures.push(
-      `Docs architecture check references missing file ${docsCodePreviewLazyWrapperPath}`,
-    );
-  } else {
-    const wrapperSource = readFile(wrapperPath);
-    if (!wrapperSource.includes('@hell-ui/angular/features/code-editor')) {
-      failures.push(
-        'Docs code viewer wrapper must be the only shared file that imports @hell-ui/angular/features/code-editor',
-      );
-    }
-    if (!wrapperSource.includes('@hell-ui/angular/features/code-editor/styles.css')) {
-      failures.push(
-        'Docs code viewer wrapper must lazy-load the code-editor feature stylesheet with the viewer',
-      );
-    }
-    if (/<pre\b/.test(wrapperSource)) {
-      failures.push(
-        'Docs code viewer wrapper must render HellCodeEditor instead of raw <pre> code blocks',
-      );
-    }
-  }
-
-  const docsPagesRoot = join(root, 'apps/docs/src/app/pages');
-  const docsPages = walk(docsPagesRoot).filter((file) => file.endsWith('.ts'));
-  for (const file of docsPages) {
-    if (file.includes('/components/code-editor/')) continue;
-    if (/\bcode-editor\b/i.test(file)) continue;
-
-    const source = readFile(file);
-    if (
-      source.includes('@codemirror/') ||
-      source.includes('@hell-ui/angular/features/code-editor')
-    ) {
-      failures.push(
-        `Docs page ${file.replace(root + '/', '')} must keep CodeMirror imports within /components/code-editor`,
-      );
-    }
-  }
-}
-
-function checkDocsPdfViewerIsolationContract() {
-  const heavyImports = ['@hell-ui/angular/features/pdf-viewer', 'pdfjs-dist'];
-  const globalDocsFiles = [
-    'apps/docs/src/app/app.routes.ts',
-    'apps/docs/src/app/docs-catalog.ts',
-    'apps/docs/src/app/docs-search-index.ts',
-  ];
-  const sharedFiles = [
-    'apps/docs/src/app/shared/code-block.ts',
-    'apps/docs/src/app/shared/example-tabs.ts',
-    'apps/docs/src/app/shared/code-tools.ts',
-  ];
-
-  for (const file of globalDocsFiles) {
-    const path = join(root, file);
-    if (!existsSync(path)) {
-      failures.push(`Docs architecture check references missing file ${file}`);
-      continue;
-    }
-
-    const source = readFile(path);
-    if (hasPackageImport(source, heavyImports)) {
-      failures.push(
-        `Docs global catalog/search file ${file} must not import pdf.js or @hell-ui/angular/features/pdf-viewer`,
-      );
-    }
-    if (hasStaticImportFrom(source, 'pages/components/pdf-viewer')) {
-      failures.push(
-        `Docs global catalog/search file ${file} must lazy-load the PDF viewer page instead of statically importing it`,
-      );
-    }
-    if (hasDynamicImportFrom(source, 'pages/components/pdf-viewer/examples')) {
-      failures.push(
-        `Docs global catalog/search file ${file} must not import PDF viewer demo code; keep examples behind the PDF page boundary`,
-      );
-    }
-  }
-
-  for (const file of sharedFiles) {
-    const path = join(root, file);
-    if (!existsSync(path)) {
-      failures.push(`Docs architecture check references missing file ${file}`);
-      continue;
-    }
-
-    const source = readFile(path);
-    if (hasPackageImport(source, heavyImports)) {
-      failures.push(`Docs shared file ${file} must not import pdf.js or @hell-ui/angular/features/pdf-viewer`);
-    }
-  }
-
-  const docsPagesRoot = join(root, 'apps/docs/src/app/pages');
-  const docsPages = walk(docsPagesRoot).filter((file) => file.endsWith('.ts'));
-  for (const file of docsPages) {
-    if (file.includes('/components/pdf-viewer/')) continue;
-
-    const source = readFile(file);
-    if (hasPackageImport(source, heavyImports)) {
-      failures.push(
-        `Docs page ${file.replace(root + '/', '')} must keep pdf.js imports within /components/pdf-viewer`,
-      );
-    }
-  }
-
-  const pdfViewerPagePath = join(
-    root,
-    'apps/docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts',
-  );
-  const pdfViewerPage = readFile(pdfViewerPagePath);
-  if (
-    /styles\s*:\s*\[[\s\S]*(?:@hell-ui\/angular\/features\/pdf-viewer\/styles\.css|@hell-ui\/pdf-viewer\/styles)/.test(
-      pdfViewerPage,
-    )
-  ) {
-    failures.push(
-      'PDF viewer docs page must load feature CSS as a lazy external asset, not an Angular component style',
-    );
-  }
-}
-
-function hasPackageImport(source, specifiers) {
-  return specifiers.some((specifier) => {
-    const escaped = escapeRegExp(specifier);
-    const pattern = new RegExp(
-      `(?:from\\s*['"]${escaped}(?:/[^'"]*)?['"]|import\\s*(?:\\(\\s*)?['"]${escaped}(?:/[^'"]*)?['"])`,
-    );
-    return pattern.test(source);
-  });
-}
-
-function hasStaticImportFrom(source, pathFragment) {
-  return source.split('\n').some((line) => {
-    const trimmed = line.trimStart();
-    return (
-      trimmed.startsWith('import ') && !trimmed.startsWith('import(') && line.includes(pathFragment)
-    );
-  });
-}
-
-function hasDynamicImportFrom(source, pathFragment) {
-  const escaped = escapeRegExp(pathFragment);
-  return new RegExp(`import\\s*\\(\\s*['"][^'"]*${escaped}[^'"]*['"]`).test(source);
 }
 
 function checkPackageEntryPoints() {
@@ -2463,9 +771,6 @@ function checkPackageEntryPoints() {
     }
   }
 
-  // Exactly two supported table paths: primitives plus the TanStack shell
-  // (with its optional virtual body strategy). Any other table path is an
-  // Unsupported Table Path and must not gain a Package Entry Point.
   const manifestSpecifiers = new Set(publicApiFiles.map((entrypoint) => entrypoint.specifier));
   const supportedTableSpecifiers = [
     '@hell-ui/angular/table',
@@ -2475,15 +780,6 @@ function checkPackageEntryPoints() {
   for (const specifier of supportedTableSpecifiers) {
     if (!manifestSpecifiers.has(specifier))
       failures.push(`Entrypoint metadata is missing table entry point ${specifier}`);
-  }
-  const unsupportedTableSpecifiers = [...manifestSpecifiers].filter(
-    (specifier) =>
-      /table|grid/.test(specifier) && !supportedTableSpecifiers.includes(specifier),
-  );
-  if (unsupportedTableSpecifiers.length) {
-    failures.push(
-      `Unsupported Table Path entry points must not be published: ${unsupportedTableSpecifiers.join(', ')}`,
-    );
   }
 
   const packagePaths = secondaryPackageEntrypoints().map((entrypoint) => entrypoint.packagePath);
@@ -2580,28 +876,6 @@ function isCodeMirrorBoundarySpecifier(specifier) {
 }
 
 function checkAudioTranscriptEntrypointIsolationContract() {
-  const audioTranscriptPublicApiPath =
-    'packages/angular/features/audio-transcript/public-api.ts';
-  const audioTranscriptPublicApi = readFile(join(root, audioTranscriptPublicApiPath));
-  if (!/@experimental\b/.test(audioTranscriptPublicApi)) {
-    failures.push(
-      'Audio Transcript feature entry point must carry @experimental in its public API comment',
-    );
-  }
-
-  const audioTranscriptSourcePath =
-    'packages/angular/features/audio-transcript/audio-transcript.ts';
-  const audioTranscriptSource = readFile(join(root, audioTranscriptSourcePath));
-  for (const symbol of [
-    'provideHellAudioTranscript',
-    'hellAudioSpeechSupported',
-    'HellAudioSpeechTranscriptRuntime',
-  ]) {
-    if (!hasTaggedApiSymbol(audioTranscriptSource, 'experimental', symbol)) {
-      failures.push(`${audioTranscriptSourcePath} ${symbol} must carry @experimental API JSDoc`);
-    }
-  }
-
   const libraryProductionPaths = [
     'packages/angular/public-api.ts',
     ...entrypointPublicApiFiles().map((entrypoint) => entrypoint.publicApiPath),
@@ -2650,189 +924,8 @@ function isAudioTranscriptFeatureSpecifier(specifier) {
   );
 }
 
-function checkApiReportContract() {
-  const packageJson = parseJsonWithComments(readFile(join(root, 'package.json')));
-  const script = readFile(join(root, 'tools/check-api-reports.mjs'));
-  const policy = readFile(join(root, 'tools/release-evidence-policy.mjs'));
-  const expectedEntrypoints = [
-    ['@hell-ui/angular', 'hell-ui-angular.api.md'],
-    ['@hell-ui/angular/core', 'hell-ui-angular-core.api.md'],
-    ['@hell-ui/angular/internal/hotkeys', 'hell-ui-angular-internal-hotkeys.api.md'],
-    ['@hell-ui/angular/input', 'hell-ui-angular-input.api.md'],
-    ['@hell-ui/angular/dialpad', 'hell-ui-angular-dialpad.api.md'],
-    ['@hell-ui/angular/testing', 'hell-ui-angular-testing.api.md'],
-  ];
-  const forbiddenExperimentalApiReports = [
-    '@hell-ui/angular/features/code-editor',
-    'hell-ui-angular-features-code-editor.api.md',
-  ];
-
-  if (packageJson.scripts?.['test:api-report'] !== 'node tools/check-api-reports.mjs') {
-    failures.push('API Report contract must expose pnpm run test:api-report');
-  }
-  if (packageJson.scripts?.['api-report:update'] !== 'node tools/check-api-reports.mjs --local') {
-    failures.push(
-      'API Report contract must expose pnpm run api-report:update for baseline approval',
-    );
-  }
-  if (!packageJson.scripts?.['ci:build']?.includes('pnpm run test:api-report')) {
-    failures.push('API Report contract must run from ci:build after the library package is built');
-  }
-  if (!script.includes('apiReportEntrypoints')) {
-    failures.push('API Report script must use the shared release evidence policy membership');
-  }
-
-  for (const [specifier, reportFileName] of expectedEntrypoints) {
-    if (!policy.includes(specifier)) {
-      failures.push(`API Report policy is missing stable entry point ${specifier}`);
-    }
-    if (!policy.includes(reportFileName)) {
-      failures.push(`API Report policy is missing report file ${reportFileName}`);
-    }
-
-    const reportPath = join(root, 'etc/api-reports', reportFileName);
-    if (!existsSync(reportPath)) {
-      failures.push(`API Report baseline is missing etc/api-reports/${reportFileName}`);
-    }
-  }
-
-  for (const forbidden of forbiddenExperimentalApiReports) {
-    if (policy.includes(forbidden) || script.includes(forbidden)) {
-      failures.push(
-        `API Report contract must keep Code Editor out of stable API reports until API report policy deliberately promotes it: ${forbidden}`,
-      );
-    }
-  }
-}
-
 function checkApiStabilityContract() {
-  const readme = readFile(join(root, 'packages/angular/README.md'));
-  const requiredPolicyText = [
-    '### Stability category policy',
-    '`Stable`',
-    '`Experimental`',
-    '`Deprecated`',
-    '`Internal`',
-    'Public API files must not export from `/internal/`, `/adapters/`, or metadata-declared internal directories',
-  ];
-  for (const text of requiredPolicyText) {
-    if (!readme.includes(text)) failures.push(`API Stability policy is missing ${text}`);
-  }
-
-  const experimentalEntrypoints = [
-    {
-      name: 'Code editor',
-      publicApiPath: 'packages/angular/features/code-editor/public-api.ts',
-      sourcePath: 'packages/angular/features/code-editor/code-editor.ts',
-      docsPath: 'apps/docs/src/app/pages/components/code-editor/code-editor.page.ts',
-    },
-    {
-      name: 'PDF viewer',
-      publicApiPath: 'packages/angular/features/pdf-viewer/public-api.ts',
-      sourcePath: 'packages/angular/features/pdf-viewer/pdf-viewer.ts',
-      docsPath: 'apps/docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts',
-    },
-  ];
-
-  for (const entrypoint of experimentalEntrypoints) {
-    const publicApi = readFile(join(root, entrypoint.publicApiPath));
-    if (!/@experimental\b/.test(publicApi)) {
-      failures.push(
-        `${entrypoint.name} feature entry point must carry @experimental in its public API comment`,
-      );
-    }
-
-    const source = readFile(join(root, entrypoint.sourcePath));
-    if (!/@experimental\b/.test(source)) {
-      failures.push(`${entrypoint.name} feature source must carry @experimental API JSDoc`);
-    }
-
-    const docs = readFile(join(root, entrypoint.docsPath));
-    if (!new RegExp(`${escapeRegExp(entrypoint.name)} is experimental`, 'i').test(docs)) {
-      failures.push(`${entrypoint.name} docs must disclose experimental status`);
-    }
-  }
-
-  const tableEntrypointStatuses = [
-    {
-      name: 'Table primitives',
-      publicApiPath: 'packages/angular/table/public-api.ts',
-      tag: 'beta',
-    },
-    {
-      name: 'TanStack Table shell',
-      publicApiPath: 'packages/angular/table-tanstack/public-api.ts',
-      tag: 'experimental',
-    },
-  ];
-  for (const entrypoint of tableEntrypointStatuses) {
-    const publicApi = readFile(join(root, entrypoint.publicApiPath));
-    const tagPattern = new RegExp(`@${entrypoint.tag}\\b`);
-    if (!tagPattern.test(publicApi)) {
-      failures.push(
-        `${entrypoint.name} table entry point must carry @${entrypoint.tag} in its public API comment`,
-      );
-    }
-  }
-
-  const experimentalApiSymbols = [
-    ['packages/angular/features/code-editor/code-editor.ts', 'HellCodeEditorRuntimeFactory'],
-    [
-      'packages/angular/features/code-editor/code-editor.ts',
-      'HELL_CODE_EDITOR_RUNTIME_FACTORY',
-    ],
-    ['packages/angular/features/code-editor/code-editor.ts', 'HellCodeEditor'],
-    [
-      'packages/angular/features/code-editor/code-editor.runtime.ts',
-      'HellCodeEditorRuntimeAccessibilityOptions',
-    ],
-    [
-      'packages/angular/features/code-editor/code-editor.runtime.ts',
-      'HellCodeEditorRuntimeOptions',
-    ],
-    [
-      'packages/angular/features/code-editor/code-editor.runtime.ts',
-      'HellCodeEditorRuntimePort',
-    ],
-    [
-      'packages/angular/features/code-editor/code-editor.runtime.ts',
-      'hellCodeEditorSetupFactory',
-    ],
-    ['packages/angular/features/code-editor/code-editor.runtime.ts', 'hellCodeEditorTheme'],
-    ['packages/angular/features/pdf-viewer/pdf-viewer.ts', 'HellPdfRuntimeFactory'],
-    ['packages/angular/features/pdf-viewer/pdf-viewer.ts', 'HELL_PDF_RUNTIME_FACTORY'],
-    ['packages/angular/features/pdf-viewer/pdf-viewer.ts', 'HellPdfViewer'],
-    ['packages/angular/features/pdf-viewer/pdf-viewer.adapter.ts', 'HellPdfWorkerSource'],
-  ];
-  for (const [sourcePath, symbol] of experimentalApiSymbols) {
-    const source = readFile(join(root, sourcePath));
-    if (!hasTaggedApiSymbol(source, 'experimental', symbol)) {
-      failures.push(`${sourcePath} ${symbol} must carry @experimental API JSDoc`);
-    }
-  }
-
-  const codeEditorDocs = readFile(
-    join(root, 'apps/docs/src/app/pages/components/code-editor/code-editor.page.ts'),
-  );
-  for (const requiredCodeEditorDocText of [
-    '@hell-ui/angular/features/code-editor',
-    'kept optional entry point',
-    'lazy/client-only',
-    'API report policy deliberately promotes it',
-  ]) {
-    if (!codeEditorDocs.includes(requiredCodeEditorDocText)) {
-      failures.push(`Code Editor docs must state ${requiredCodeEditorDocText}`);
-    }
-  }
-
   checkPublicApiInternalExportContract();
-}
-
-function hasTaggedApiSymbol(source, tag, symbol) {
-  const pattern = new RegExp(
-    `@${escapeRegExp(tag)}\\b[\\s\\S]{0,1800}(?:export\\s+(?:abstract\\s+)?(?:class|const|type|interface|function)\\s+${escapeRegExp(symbol)}\\b|readonly\\s+${escapeRegExp(symbol)}\\b)`,
-  );
-  return pattern.test(source);
 }
 
 function checkPublicApiInternalExportContract() {
@@ -3091,28 +1184,9 @@ function checkPackageDependencyContract() {
 }
 
 function checkStyleEntryPoints() {
-  const packageJson = parseJsonWithComments(readFile(join(root, 'packages/angular/package.json')));
-  const exportsMap = packageJson.exports ?? {};
-  const expectedStyleExports = entrypointStyleExports();
-
-  for (const { exportPath, sourcePath } of expectedStyleExports) {
-    const styleExport = exportsMap[exportPath];
-    const style = styleExport?.style;
-    if (!style) {
-      failures.push(
-        `Style Package Entry Point ${exportPath} is missing from packages/angular/package.json`,
-      );
-      continue;
-    }
-
-    if (style !== sourcePath || styleExport[sourcePackageCondition] !== sourcePath) {
-      failures.push(
-        `Style Package Entry Point ${exportPath} must resolve style and ${sourcePackageCondition} to ${sourcePath}`,
-      );
-    }
-
+  for (const { exportPath, sourcePath } of entrypointStyleExports()) {
     if (!existsSync(join(root, libraryRoot, sourcePath.slice(2)))) {
-      failures.push(`Style Package Entry Point ${exportPath} points at missing ${style}`);
+      failures.push(`Style Package Entry Point ${exportPath} points at missing ${sourcePath}`);
     }
   }
 
@@ -3220,34 +1294,30 @@ function checkAppShellBreakpointContract() {
 }
 
 function checkComponentContract() {
-  const files = libraryProductionTsFiles()
-    .map((file) => join(root, file))
-    .filter((file) => !file.includes('/core/'));
+  const productionFiles = libraryProductionTsFiles();
+  const classIndex = partStyleClassIndex(productionFiles);
+  const files = productionFiles.filter((file) => !file.includes('/core/'));
   const publicStyleableModules = new Map();
 
-  for (const file of files) {
+  for (const rel of files) {
+    const file = join(root, rel);
     const source = readFile(file);
-    const styleableClasses = exportedStyleableClasses(source);
-    if (!styleableClasses.length) continue;
+    for (const module of decoratedClassModules(source).map((candidate) => ({
+      ...candidate,
+      rel,
+      source,
+    }))) {
+      const styleInfo = partStyleInfoForClass(module, classIndex);
+      if (!styleInfo) continue;
 
-    const rel = file.slice(root.length + 1);
-    for (const { className, classSource, moduleSource } of styleableClasses) {
+      const { className } = module;
       if (publicStyleableModules.has(className)) {
         failures.push(`Duplicate public styled Module ${className} in ${rel}`);
       }
       publicStyleableModules.set(className, rel);
 
-      if (moduleSource.includes('hellPartStyler')) {
-        if (!moduleSource.includes('part(') || !moduleSource.includes('recipe')) {
-          failures.push(
-            `${rel} ${className} composes hellPartStyler but does not use the Part-Class Pipeline`,
-          );
-        }
-      } else if (!extendsMigratedPartStyleMapBase(classSource)) {
-        failures.push(
-          `${rel} ${className} must compose hellPartStyler or extend a Part Style Map base`,
-        );
-      }
+      checkPartStylePipeline(rel, module, styleInfo);
+      checkPartSlotUnionContract(rel, source, module, styleInfo);
     }
 
     for (const booleanInput of source.matchAll(
@@ -3291,154 +1361,90 @@ function checkComponentContract() {
   }
 }
 
-function extendsMigratedPartStyleMapBase(classSource) {
-  const baseClass = /extends\s+([A-Za-z0-9_]+)/.exec(classSource)?.[1];
-  return !!baseClass && migratedPartStyleMapClassNames.has(baseClass);
+function partStyleClassIndex(relFiles) {
+  const index = new Map();
+  for (const rel of relFiles) {
+    const source = readFile(join(root, rel));
+    for (const module of decoratedClassModules(source)) {
+      index.set(module.className, { ...module, rel, source });
+    }
+  }
+  return index;
 }
 
-function checkPartStyleMapContract() {
-  const styleableSource = readFile(join(root, 'packages/angular/core/styleable.ts'));
-  const styleableCompact = compactSource(styleableSource);
-  const mergeSource = readFile(join(root, 'packages/angular/core/part-style-merge.ts'));
-  const entrypointPackageDirs = new Set(
-    entrypointPublicApiFiles().map((entrypoint) => entrypoint.packageDir),
-  );
+function partStyleInfoForClass(module, classIndex, seen = new Set()) {
+  if (seen.has(module.className)) return null;
+  seen.add(module.className);
 
-  for (const symbol of [
-    ['type', 'HellUi'],
-    ['type', 'HellUiInput'],
-    ['type', 'HellRecipe'],
-    ['type', 'HellPartStyler'],
-    ['interface', 'HellPartStylerOptions'],
-    ['function', 'hellPartStyler'],
-  ]) {
-    const [kind, name] = symbol;
-    if (!styleableSource.includes(`export ${kind} ${name}`)) {
-      failures.push(`Part Style Map core contract must export ${name}`);
-    }
-  }
-  if (
-    !/export\s+type\s+HellUiInput<Part extends string>\s*=\s*string\s*\|\s*HellUi<Part>\s*\|\s*null\s*\|\s*undefined/.test(
-      styleableCompact,
-    )
-  ) {
-    failures.push('HellUiInput must keep the string/default-part shorthand shape');
-  }
-  if (!styleableSource.includes('readonly defaultPart: Part')) {
-    failures.push('hellPartStyler options must own a default public part for string shorthand');
-  }
-  if (!/hellTwMerge\(\s*options\.recipe\(\)\[part\]/.test(styleableCompact)) {
-    failures.push('hellPartStyler must use the configured hellTwMerge Part-Class Pipeline');
-  }
-  if (
-    !mergeSource.includes('extendTailwindMerge') ||
-    !mergeSource.includes('export const hellTwMerge')
-  ) {
-    failures.push('Configured hellTwMerge must be built with tailwind-merge extendTailwindMerge');
-  }
+  const local = localPartStyleInfo(module);
+  if (local) return local;
 
-  const rootApiReport = readApiReport('hell-ui-angular.api.md');
-  const coreApiReport = readApiReport('hell-ui-angular-core.api.md');
-  for (const symbol of [
-    'HellUi',
-    'HellUiInput',
-    'HellRecipe',
-    'HellPartStyler',
-    'hellPartStyler',
-    'hellTwMerge',
-  ]) {
-    if (!rootApiReport.includes(symbol)) {
-      failures.push(`Root API report must cover Part Style Map core export ${symbol}`);
-    }
-    if (!coreApiReport.includes(symbol)) {
-      failures.push(`Core API report must cover Part Style Map core export ${symbol}`);
-    }
-  }
-  // Migrated component reports expose their own typed [ui] signal inputs.
-  const inputApiReport = readApiReport('hell-ui-angular-input.api.md');
-  const dialpadApiReport = readApiReport('hell-ui-angular-dialpad.api.md');
-  for (const [label, report] of [
-    ['Input', inputApiReport],
-    ['Dialpad', dialpadApiReport],
-  ]) {
-    if (!report.includes('"ui": { "alias": "ui"; "required": false; "isSignal": true; }')) {
-      failures.push(`${label} API report must expose the component ui metadata as signal input`);
-    }
-  }
+  const baseClass = classBaseName(module.classSource);
+  if (!baseClass) return null;
 
-  for (const module of migratedPartStyleMapModules) {
-    checkMigratedPartStyleMapModule(module, entrypointPackageDirs);
-  }
-  checkBasicFloatingListStructuralAffordances();
+  const baseModule = classIndex.get(baseClass);
+  if (!baseModule) return null;
 
+  return partStyleInfoForClass(baseModule, classIndex, seen);
 }
 
-function checkMigratedPartStyleMapModule(module, entrypointPackageDirs) {
-  const source = readFile(join(root, module.sourcePath));
-  const rel = module.sourcePath;
-  const partNames = literalUnionMembers(source, module.partType);
-  const moduleInfo = decoratedClassModules(source).find(
-    (candidate) => candidate.className === module.className,
-  );
+function localPartStyleInfo(module) {
+  const uiPart = uiInputPartType(module.moduleSource);
+  const stylerPart = hellPartStylerPartType(module.moduleSource);
+  if (!uiPart && !stylerPart) return null;
 
+  return {
+    ownerClassName: module.className,
+    partType: uiPart ?? stylerPart,
+    uiPart,
+    stylerPart,
+    source: module.source,
+    rel: module.rel,
+  };
+}
+
+function checkPartStylePipeline(rel, module, styleInfo) {
+  if (styleInfo.ownerClassName !== module.className) return;
+
+  const { className, moduleSource } = module;
+  if (!styleInfo.uiPart) {
+    failures.push(`${rel} ${className} must declare its typed [ui] signal input`);
+  }
+  if (!styleInfo.stylerPart) {
+    failures.push(`${rel} ${className} must compose hellPartStyler over its ui input`);
+  }
+  if (styleInfo.uiPart && styleInfo.stylerPart && styleInfo.uiPart !== styleInfo.stylerPart) {
+    failures.push(
+      `${rel} ${className} ui input part type ${styleInfo.uiPart} must match hellPartStyler part type ${styleInfo.stylerPart}`,
+    );
+  }
+  if (moduleSource.includes('hellPartStyler')) {
+    if (!moduleSource.includes('part(') || !moduleSource.includes('recipe')) {
+      failures.push(
+        `${rel} ${className} composes hellPartStyler but does not use the Part-Class Pipeline`,
+      );
+    }
+  }
+}
+
+function checkPartSlotUnionContract(rel, source, module, styleInfo) {
+  const partNames = literalUnionMembers(styleInfo.source, styleInfo.partType);
   if (!partNames.length) {
-    failures.push(`${rel} must export literal union ${module.partType}`);
-  }
-  if (!source.includes(`export type ${module.uiType} = HellUi<${module.partType}>`)) {
-    failures.push(`${rel} must export ${module.uiType} = HellUi<${module.partType}>`);
-  }
-  if (!moduleInfo) {
-    failures.push(`${rel} must export decorated class ${module.className}`);
+    failures.push(`${styleInfo.rel} must export literal union ${styleInfo.partType}`);
     return;
   }
 
-  const moduleSource = moduleInfo.moduleSource;
-  const compactModuleSource = compactSource(moduleSource);
-  if (
-    !compactModuleSource.includes(
-      `readonly ui = input<HellUiInput<${module.partType}>>(undefined, { alias: 'ui' })`,
-    )
-  ) {
-    failures.push(
-      `${rel} ${module.className} must declare its typed [ui] signal input for ${module.partType}`,
-    );
-  }
-  if (!compactModuleSource.includes(`hellPartStyler<${module.partType}>(this.ui`)) {
-    failures.push(
-      `${rel} ${module.className} must compose hellPartStyler<${module.partType}> over its ui input`,
-    );
-  }
-  if (!moduleSource.includes("part('") || !moduleSource.includes('recipe')) {
-    failures.push(
-      `${rel} ${module.className} must use the Part-Class Pipeline for rendered classes`,
-    );
-  }
-  if (
-    !source.includes(`satisfies HellRecipe<${module.partType}>`) &&
-    !moduleSource.includes(`HellRecipe<${module.partType}>`)
-  ) {
-    failures.push(`${rel} must type its default recipe as HellRecipe<${module.partType}>`);
-  }
-
-  const defaultPart = /defaultPart:\s*['"]([^'"]+)['"]/.exec(moduleSource)?.[1];
-  if (!defaultPart) {
-    failures.push(`${rel} ${module.className} must declare defaultPart for ui string shorthand`);
-  } else if (!partNames.includes(defaultPart)) {
-    failures.push(
-      `${rel} ${module.className} defaultPart "${defaultPart}" is not in ${module.partType}`,
-    );
-  }
-
-  if (/['"]\[attr\.data-slot\]['"]\s*:/.test(moduleSource)) {
+  if (/['"]\[attr\.data-slot\]['"]\s*:/.test(module.moduleSource)) {
     failures.push(
       `${rel} ${module.className} must not compute data-slot dynamically; it must match public parts`,
     );
   }
-  const literalSlots = literalDataSlots(partStyleTemplateSource(source, moduleSource));
+
+  const literalSlots = literalDataSlots(partStyleTemplateSource(source, module.moduleSource, rel));
   for (const slot of literalSlots) {
     if (!partNames.includes(slot)) {
       failures.push(
-        `${rel} ${module.className} renders data-slot="${slot}" outside ${module.partType}`,
+        `${rel} ${module.className} renders data-slot="${slot}" outside ${styleInfo.partType}`,
       );
     }
   }
@@ -3447,54 +1453,20 @@ function checkMigratedPartStyleMapModule(module, entrypointPackageDirs) {
       failures.push(`${rel} ${module.className} public part "${part}" has no matching data-slot`);
     }
   }
+}
 
-  const forbiddenPatterns = [
-    ['[ui].class', /\bui\s*\.\s*class\b|\[ui\]\.class/],
-    ['omit map', /\bomit\b/i],
-    ['public visual layers', /\b(?:visualLayers?|layers?)\b/],
-    [
-      'component-local merge helper',
-      /\b(?:HellPartClassMerger|mergePartClasses|clsx|cva|tailwindVariants|twMerge|cn\()/,
-    ],
-    ['behavior sentinel in recipe classes', /\bdata-\[(?:action|key|value|role|control)[^\]]*\]/],
-  ];
-  for (const [label, pattern] of forbiddenPatterns) {
-    if (pattern.test(moduleSource)) {
-      failures.push(`${rel} ${module.className} must not expose ${label}`);
-    }
-  }
-  if (module.componentVariablePrefix && moduleSource.includes(module.componentVariablePrefix)) {
-    failures.push(
-      `${rel} ${module.className} must not introduce component-specific theme variables`,
-    );
-  }
-  for (const offender of componentVariablePrefixOffenders(module)) {
-    failures.push(
-      `${offender.file}:${offender.line} must not expose migrated ${module.className} component-specific theme variable prefix ${module.componentVariablePrefix}`,
-    );
-  }
+function classBaseName(classSource) {
+  return /extends\s+([A-Za-z0-9_]+)/.exec(classSource)?.[1] ?? null;
+}
 
-  const publicApi = readFile(join(root, module.publicApiPath));
-  const expectedExport = `./${relative(dirname(module.publicApiPath), module.sourcePath)
-    .replace(/\.ts$/, '')
-    .replaceAll('\\', '/')}`;
-  if (!publicApi.includes(expectedExport)) {
-    failures.push(`${module.publicApiPath} must export ${expectedExport}`);
-  }
-  if (!entrypointPackageDirs.has(dirname(module.publicApiPath))) {
-    failures.push(
-      `Entrypoint metadata must include ${module.entrypointId} for ${module.className}`,
-    );
-  }
+function uiInputPartType(moduleSource) {
+  return /readonly\s+ui\s*=\s*input\s*<\s*HellUiInput\s*<\s*([A-Za-z0-9_]+)\s*>\s*>\s*\(\s*undefined\s*,\s*\{\s*alias\s*:\s*['"]ui['"]/.exec(
+    moduleSource,
+  )?.[1] ?? null;
+}
 
-  for (const reportFile of module.apiReportFiles) {
-    const report = readApiReport(reportFile);
-    for (const symbol of [module.className, module.partType, module.uiType]) {
-      if (!report.includes(symbol)) {
-        failures.push(`${reportFile} must cover migrated Part Style Map export ${symbol}`);
-      }
-    }
-  }
+function hellPartStylerPartType(moduleSource) {
+  return /hellPartStyler\s*<\s*([A-Za-z0-9_]+)\s*>\s*\(\s*this\.ui/.exec(moduleSource)?.[1] ?? null;
 }
 
 function checkBasicFloatingListStructuralAffordances() {
@@ -3523,29 +1495,6 @@ function checkBasicFloatingListStructuralAffordances() {
   }
 }
 
-function componentVariablePrefixOffenders(module) {
-  if (!module.componentVariablePrefix) return [];
-
-  const files = libraryPackageFiles().filter(
-    (file) =>
-      (file.endsWith('.ts') || file.endsWith('.css')) &&
-      !file.endsWith('.spec.ts') &&
-      !file.endsWith('.d.ts'),
-  );
-  const offenders = [];
-  for (const file of files) {
-    const source = readFile(file);
-    if (!source.includes(module.componentVariablePrefix)) continue;
-    const rel = file.slice(root.length + 1);
-    for (const [index, line] of source.split(/\r?\n/).entries()) {
-      if (line.includes(module.componentVariablePrefix)) {
-        offenders.push({ file: rel, line: index + 1 });
-      }
-    }
-  }
-  return offenders;
-}
-
 function literalUnionMembers(source, typeName) {
   const match = new RegExp(`export\\s+type\\s+${typeName}\\s*=([\\s\\S]*?);`).exec(source);
   if (!match) return [];
@@ -3566,7 +1515,13 @@ function literalDataSlots(source) {
   ];
 }
 
-function partStyleTemplateSource(source, moduleSource) {
+function partStyleTemplateSource(source, moduleSource, rel) {
+  const templateUrl = /templateUrl\s*:\s*['"]([^'"]+)['"]/.exec(moduleSource)?.[1];
+  if (templateUrl) {
+    const templatePath = join(root, dirname(rel), templateUrl);
+    if (existsSync(templatePath)) return `${moduleSource}\n${readFile(templatePath)}`;
+  }
+
   const templateRef = /template\s*:\s*([A-Za-z0-9_]+)/.exec(moduleSource)?.[1];
   if (!templateRef) return moduleSource;
 
@@ -3575,78 +1530,7 @@ function partStyleTemplateSource(source, moduleSource) {
   return template ? `${moduleSource}\n${template}` : moduleSource;
 }
 
-function functionBody(source, name) {
-  const start = source.indexOf(`function ${name}(`);
-  if (start === -1) return null;
-
-  const open = source.indexOf('{', start);
-  if (open === -1) return null;
-
-  let depth = 0;
-  for (let index = open; index < source.length; index += 1) {
-    const char = source[index];
-    if (char === '{') depth += 1;
-    else if (char === '}') {
-      depth -= 1;
-      if (depth === 0) return source.slice(open, index + 1);
-    }
-  }
-
-  return null;
-}
-
-function readApiReport(fileName) {
-  return readFile(join(root, 'etc/api-reports', fileName));
-}
-
-function compactSource(source) {
-  return source.replace(/\s+/g, ' ').trim();
-}
-
 function checkLabelContract() {
-  // Core owns only the hellCreateLabels factory; entry points own their label
-  // interfaces, defaults, tokens, and provide functions.
-  const labelsSource = readFile(join(root, 'packages/angular/core/labels.ts'));
-  if (!labelsSource.includes('hellCreateLabels')) {
-    failures.push('Label Contract core factory hellCreateLabels is missing');
-  }
-  const coreApi = readFile(join(root, 'packages/angular/core/public-api.ts'));
-  if (!coreApi.includes('./labels')) {
-    failures.push(
-      'Label Contract factory is not exported from packages/angular/core/public-api.ts',
-    );
-  }
-
-  // Every labeled entry point must own its full label contract.
-  const labelContractOwners = [
-    ['packages/angular/app-shell/app-shell.ts', 'HELL_APP_SHELL_LABELS', 'provideHellAppShellLabels'],
-    ['packages/angular/audio-player/audio-player.ts', 'HELL_AUDIO_PLAYER_LABELS', 'provideHellAudioPlayerLabels'],
-    ['packages/angular/breadcrumbs/breadcrumbs.ts', 'HELL_BREADCRUMBS_LABELS', 'provideHellBreadcrumbsLabels'],
-    ['packages/angular/date-input/date-input.ts', 'HELL_DATE_INPUT_LABELS', 'provideHellDateInputLabels'],
-    ['packages/angular/date-picker/date-picker.ts', 'HELL_DATE_PICKER_LABELS', 'provideHellDatePickerLabels'],
-    ['packages/angular/dialpad/dialpad.ts', 'HELL_DIALPAD_LABELS', 'provideHellDialpadLabels'],
-    ['packages/angular/omnibar/omnibar.ts', 'HELL_OMNIBAR_LABELS', 'provideHellOmnibarLabels'],
-    ['packages/angular/pagination/pagination.ts', 'HELL_PAGINATION_LABELS', 'provideHellPaginationLabels'],
-    ['packages/angular/resizable/resizable.ts', 'HELL_RESIZABLE_LABELS', 'provideHellResizableLabels'],
-    ['packages/angular/spinner/spinner.ts', 'HELL_SPINNER_LABELS', 'provideHellSpinnerLabels'],
-    ['packages/angular/table/table-utilities.ts', 'HELL_TABLE_UTILITIES_LABELS', 'provideHellTableUtilitiesLabels'],
-    ['packages/angular/time-input/time-input.ts', 'HELL_TIME_INPUT_LABELS', 'provideHellTimeInputLabels'],
-    ['packages/angular/toast/toast.ts', 'HELL_TOAST_LABELS', 'provideHellToastLabels'],
-    ['packages/angular/features/pdf-viewer/pdf-viewer-labels.ts', 'HELL_PDF_VIEWER_LABELS', 'provideHellPdfViewerLabels'],
-  ];
-  for (const [file, token, provideFn] of labelContractOwners) {
-    const source = readFile(join(root, file));
-    if (!source.includes('hellCreateLabels')) {
-      failures.push(`${file} must build its Label Contract through hellCreateLabels`);
-    }
-    if (!source.includes(`export const ${token}`)) {
-      failures.push(`${file} must export its label token ${token}`);
-    }
-    if (!source.includes(`export function ${provideFn}`)) {
-      failures.push(`${file} must export its label provider ${provideFn}`);
-    }
-  }
-
   const spinnerSource = stripLabelDefaults(
     readFile(join(root, 'packages/angular/spinner/spinner.ts')),
   );
@@ -3745,27 +1629,6 @@ function stripLabelDefaults(source) {
   }
 }
 
-function exportedStyleableClasses(source) {
-  const styleableBases = new Set([
-    'HellNativeCheckbox',
-    'HellNativeRadio',
-    ...[
-      ...source.matchAll(
-        /(?:abstract\s+)?class\s+([A-Za-z0-9_]+)[^{]*extends\s+HellNativeInteractiveDisabledGuard\b/g,
-      ),
-    ].map((match) => match[1]),
-  ]);
-
-  return decoratedClassModules(source).filter((module) => {
-    if (module.moduleSource.includes('hellPartStyler')) {
-      return true;
-    }
-
-    const base = /extends\s+([A-Za-z0-9_]+)/.exec(module.classSource)?.[1];
-    return !!base && styleableBases.has(base);
-  });
-}
-
 function decoratedClassModules(source) {
   const matches = [
     ...source.matchAll(/export\s+(?:abstract\s+)?class\s+([A-Za-z0-9_]+)(?:<[^>{}]*>)?[\s\S]*?\{/g),
@@ -3800,65 +1663,11 @@ function checkCodeEditorRuntimeContract() {
   }
 }
 
-function checkExperimentalFeatureContract() {
-  const audioSource = readFile(
-    join(root, 'packages/angular/audio-player/audio-player.ts'),
-  );
-  if (!/allowSpeechTranscript\s*=\s*input\(false/.test(audioSource)) {
-    failures.push('Audio speech transcript must remain explicitly opt-in while experimental');
-  }
-  if (!audioSource.includes('@experimental Browser speech transcripts')) {
-    failures.push(
-      'HellAudioPlayer must mark browser speech transcript experimental in its public JSDoc',
-    );
-  }
-
-  const audioDocs = readFile(
-    join(root, 'apps/docs/src/app/pages/components/audio-player/audio-player.page.ts'),
-  );
-  if (
-    !/speech transcript is experimental/i.test(audioDocs) ||
-    !/default <code>false<\/code>/.test(audioDocs)
-  ) {
-    failures.push('Audio Player docs must disclose experimental opt-in speech transcript');
-  }
-
-  const pdfSource = readFile(
-    join(root, 'packages/angular/features/pdf-viewer/pdf-viewer.ts'),
-  );
-  if (!pdfSource.includes('@experimental This feature wraps pdf.js')) {
-    failures.push('HellPdfViewer must mark the pdf.js wrapper experimental in its public JSDoc');
-  }
-
-  const pdfFeatureApi = readFile(join(root, 'packages/angular/features/pdf-viewer/public-api.ts'));
-  if (!/HellPdfWorkerSource/.test(pdfFeatureApi)) {
-    failures.push(
-      'PDF Viewer package entry point must export the public HellPdfWorkerSource worker input type',
-    );
-  }
-
-  const pdfDocs = readFile(
-    join(root, 'apps/docs/src/app/pages/components/pdf-viewer/pdf-viewer.page.ts'),
-  );
-  if (!/PDF viewer is experimental/.test(pdfDocs)) {
-    failures.push('PDF Viewer docs must disclose experimental status');
-  }
-  if (!/worker[^.]*package does not copy\s+a worker into its tarball/s.test(pdfDocs)) {
-    failures.push('PDF Viewer docs must disclose that apps provide the pdf.js worker source');
-  }
-}
-
 function checkFormsContract() {
   const cvaModules = [
-    ['packages/angular/checkbox/checkbox.ts', 'HellCheckbox'],
-    ['packages/angular/switch/switch.ts', 'HellSwitch'],
-    ['packages/angular/radio/radio.ts', 'HellRadioGroup'],
     ['packages/angular/select/select.ts', 'HellSelect'],
     ['packages/angular/combobox/combobox.ts', 'HellCombobox'],
-    ['packages/angular/slider/slider.ts', 'HellSlider'],
-    ['packages/angular/toggle/toggle.ts', 'HellToggleGroup'],
     ['packages/angular/date-input/date-input.ts', 'HellDateInput'],
-    ['packages/angular/time-input/time-input.ts', 'HellTimeInput'],
     ['packages/angular/features/code-editor/code-editor.ts', 'HellCodeEditor'],
   ];
 
@@ -3870,46 +1679,6 @@ function checkFormsContract() {
     if (!classDecl || !source.includes('NG_VALUE_ACCESSOR')) {
       failures.push(`${file} ${className} must implement ControlValueAccessor`);
     }
-  }
-}
-
-function checkDateTimeAdapterContract() {
-  const checks = [
-    {
-      sourcePath: 'packages/angular/date-input/date-input.ts',
-      docsPath: 'apps/docs/src/app/pages/components/date-input/date-input.page.ts',
-      tokens: ['HELL_DATE_INPUT_ADAPTER', 'provideHellDateInputAdapter', 'HellDateInputAdapter'],
-    },
-    {
-      sourcePath: 'packages/angular/time-input/time-input.ts',
-      docsPath: 'apps/docs/src/app/pages/components/time-input/time-input.page.ts',
-      tokens: ['HELL_TIME_INPUT_ADAPTER', 'provideHellTimeInputAdapter', 'HellTimeInputAdapter'],
-    },
-  ];
-
-  for (const check of checks) {
-    const source = readFile(join(root, check.sourcePath));
-    const docs = readFile(join(root, check.docsPath));
-    for (const token of check.tokens) {
-      if (!source.includes(token)) failures.push(`${check.sourcePath} must expose ${token}`);
-      if (!docs.includes(token)) failures.push(`${check.docsPath} must document ${token}`);
-    }
-  }
-}
-
-function checkSearchContract() {
-  const source = readFile(join(root, 'packages/angular/core/search.ts'));
-  for (const symbol of ['HELL_SEARCH_RANKER', 'provideHellSearchRanker', 'hellRankLocalSearch']) {
-    if (!source.includes(symbol)) failures.push(`Search Core is missing ${symbol}`);
-  }
-
-  const docs = readFile(
-    join(root, 'apps/docs/src/app/pages/components/omnibar/omnibar.page.ts'),
-  );
-  if (!docs.includes('provideHellSearchRanker') || !docs.includes('Fuse.js')) {
-    failures.push(
-      'Omnibar docs must direct serious search through a ranker Adapter or async source',
-    );
   }
 }
 
@@ -3947,39 +1716,6 @@ function checkHotkeyContract() {
     if (leaked.length) {
       failures.push(`${label} must not export hotkey internals: ${leaked.join(', ')}`);
     }
-  }
-
-  const internalHotkeysApi = readFile(
-    join(root, 'packages/angular/internal/hotkeys/public-api.ts'),
-  );
-  const internalHotkeyExports = exportedSymbolNames(hotkeySource);
-  const allowedInternalHotkeyExports = new Set([
-    'HellGlobalKeydownHandler',
-    'HellGlobalKeydownService',
-    'HellGlobalPointerdownHandler',
-    'HellGlobalPointerdownService',
-    'hellShouldHandleGlobalHotkey',
-    'matchHotkey',
-  ]);
-  for (const symbol of allowedInternalHotkeyExports) {
-    if (!internalHotkeyExports.has(symbol)) {
-      failures.push(
-        `Internal Hotkeys Entry Point must export shared listener owner symbol ${symbol}`,
-      );
-    }
-  }
-  const unexpectedInternalHotkeyExports = [...internalHotkeyExports].filter(
-    (symbol) => !allowedInternalHotkeyExports.has(symbol),
-  );
-  if (unexpectedInternalHotkeyExports.length) {
-    failures.push(
-      `Internal Hotkeys Entry Point must only export shared listener owner symbols: ${unexpectedInternalHotkeyExports.join(
-        ', ',
-      )}`,
-    );
-  }
-  if (!internalHotkeysApi.includes("export * from './hotkeys';")) {
-    failures.push('Internal Hotkeys Entry Point must re-export the hotkeys module');
   }
 
   const omnibarSource = readFile(join(root, 'packages/angular/omnibar/omnibar.ts'));
@@ -4055,53 +1791,6 @@ function checkInteractiveTriggerSelectorContract() {
 }
 
 function checkTableUtilityContract() {
-  const source = readFile(
-    join(root, 'packages/angular/table/table-utilities.ts'),
-  );
-  if (!source.includes('HELL_TABLE_UTILITIES_DIRECTIVES')) {
-    failures.push(
-      'Table primitives must expose HELL_TABLE_UTILITIES_DIRECTIVES as their standalone import list',
-    );
-  }
-  for (const selector of [
-    'hellTableRoot',
-    'hellTableHeader',
-    'hellTableBody',
-    'hellTableRow',
-    'hellTableHeaderCell',
-    'hellTableCell',
-    'hellTableResizeHandle',
-  ]) {
-    if (!source.includes(selector)) {
-      failures.push(`Table primitives must expose host-agnostic selector ${selector}`);
-    }
-  }
-  for (const dataAttr of [
-    'data-hell-table-root',
-    'data-hell-table-header',
-    'data-hell-table-body',
-    'data-hell-table-row',
-    'data-hell-table-header-cell',
-    'data-hell-table-cell',
-  ]) {
-    if (!source.includes(dataAttr)) {
-      failures.push(`Table primitives must stamp ${dataAttr} for host-agnostic testing/styling`);
-    }
-  }
-  if (!source.includes('hellTableInferredRoleForHost')) {
-    failures.push(
-      'Table primitives must keep host-agnostic role inference centralized and SSR-safe',
-    );
-  }
-
-  const tableFacade = readFile(join(root, 'packages/angular/table/table.ts'));
-  if (!tableFacade.includes('./table-utilities')) {
-    failures.push('Modern @hell-ui/angular/table facade must own the table utilities export');
-  }
-
-  const docs = readFile(
-    join(root, 'apps/docs/src/app/pages/components/table/table.page.ts'),
-  );
   const docsRoot = join(root, 'apps/docs/src/app');
   const docsGlobalStyles = readFile(join(root, 'apps/docs/src/styles.css'));
   if (!docsGlobalStyles.includes("@import '@hell-ui/angular/table/styles.css';")) {
@@ -4121,173 +1810,6 @@ function checkTableUtilityContract() {
       `Docs table routes must not rely on TypeScript side-effect imports for table CSS: ${relPath(
         importHit.file,
       )}:${importHit.line}`,
-    );
-  }
-  const tableStyleSource = readFile(
-    join(root, 'packages/angular/table/styles.css'),
-  );
-  if (/\baccent-color\s*:/.test(tableStyleSource)) {
-    failures.push(
-      'Table styles must not override native checkbox/radio accent-color; compose checkbox/radio primitives instead',
-    );
-  }
-  for (const text of [
-    'Hell supports two table paths',
-    '@hell-ui/angular/table',
-    '@hell-ui/angular/table-tanstack',
-    'TanStack owns columns, rows, sorting, filtering, pagination, selection, pinning, sizing',
-  ]) {
-    if (!docs.includes(text)) {
-      failures.push('Table docs must present the two-path primitive/TanStack ownership boundary');
-      break;
-    }
-  }
-}
-
-function checkTableSemanticsContract() {
-  const tableSourcePath = join(
-    root,
-    'packages/angular/table/table-utilities.ts',
-  );
-  const tableSource = readFile(tableSourcePath);
-  const tableModule = decoratedClassModules(tableSource).find(
-    (module) => module.className === 'HellTable',
-  );
-  const rowModule = decoratedClassModules(tableSource).find(
-    (module) => module.className === 'HellTableRow',
-  );
-
-  if (!tableModule) {
-    failures.push('Table semantics contract must be owned by HellTable');
-  } else {
-    if (!tableModule.moduleSource.includes("[attr.role]': 'role()")) {
-      failures.push('HellTable must keep host role inference through role()');
-    }
-    for (const forbidden of [
-      'aria-activedescendant',
-      'aria-rowcount',
-      'aria-colcount',
-      '(keydown)',
-      'tabindex',
-    ]) {
-      if (tableModule.moduleSource.includes(forbidden)) {
-        failures.push(`HellTable primitive root must not own grid/focus behavior: ${forbidden}`);
-      }
-    }
-  }
-
-  if (!rowModule) {
-    failures.push('Table semantics contract must include HellTableRow');
-  } else {
-    for (const forbidden of [
-      '[attr.tabindex]',
-      '(click)',
-      '(keydown',
-      'aria-selected',
-      'aria-activedescendant',
-    ]) {
-      if (rowModule.moduleSource.includes(forbidden)) {
-        failures.push(`HellTableRow must stay passive in primitive table mode: ${forbidden}`);
-      }
-    }
-  }
-
-  for (const forbidden of [
-    'HellTableSemantics',
-    'HellTableGridInteractionMode',
-    'interactionMode',
-    'isGridMode',
-    'gridActiveDescendant',
-    'aria-activedescendant',
-  ]) {
-    if (tableSource.includes(forbidden)) {
-      failures.push(`Table primitives must not expose Hell-owned grid mode: ${forbidden}`);
-    }
-  }
-}
-
-function checkTableSortTriggerContract() {
-  const tableSourcePath = join(
-    root,
-    'packages/angular/table/table-utilities.ts',
-  );
-  const tableSource = readFile(tableSourcePath);
-  const headerModule = decoratedClassModules(tableSource).find(
-    (module) => module.className === 'HellTableHeaderCell',
-  );
-
-  if (!headerModule) {
-    failures.push('Table utilities must declare HellTableHeaderCell');
-    return;
-  }
-
-  if (headerModule.moduleSource.includes('[attr.tabindex]')) {
-    failures.push('HellTableHeaderCell must not make the <th> focusable for sorting');
-  }
-
-  if (/(?:'|\")\(keydown\.|(?:'|\")\(click\)/.test(headerModule.moduleSource)) {
-    failures.push(
-      'HellTableHeaderCell must delegate sort activation to button[hellTableSortTrigger]',
-    );
-  }
-
-  if (!/export\s+class\s+HellTableSortTrigger\b/.test(tableSource)) {
-    failures.push('Table utilities must expose button[hellTableSortTrigger] for sortable headers');
-  }
-
-  if (!/selector:\s*'button\[hellTableSortTrigger\]'/.test(tableSource)) {
-    failures.push('hellTableSortTrigger must only match native button hosts');
-  }
-
-  const docsRoot = join(root, 'apps/docs/src/app/pages/components/table');
-  const docsFiles = walk(docsRoot).filter((file) => file.endsWith('.ts'));
-  for (const file of docsFiles) {
-    const source = readFile(file);
-    for (const match of source.matchAll(
-      /<th\b(?=[^>]*\bhellTableHeaderCell\b)(?=[^>]*\bsortable\b)[^>]*>[\s\S]*?<\/th>/g,
-    )) {
-      if (!match[0].includes('hellTableSortTrigger')) {
-        failures.push(
-          `${file.slice(root.length + 1)} has a sortable table header without button[hellTableSortTrigger]`,
-        );
-      }
-    }
-  }
-}
-
-function checkTableResizeHandleContract() {
-  const tableSourcePath = join(
-    root,
-    'packages/angular/table/table-utilities.ts',
-  );
-  const tableSource = readFile(tableSourcePath);
-
-  if (!/export\s+class\s+HellTableResizeHandle\b/.test(tableSource)) {
-    failures.push('Table utilities must expose HellTableResizeHandle for modern column resizing');
-  }
-
-  if (!/selector:\s*'\[hellTableResizeHandle\]'/.test(tableSource)) {
-    failures.push('Table resize primitive must use the hellTableResizeHandle selector');
-  }
-
-  if (!tableSource.includes('resizeAdapter = input<HellTableResizeAdapter | null>')) {
-    failures.push(
-      'HellTableResizeHandle must delegate sizing through HellTableResizeAdapter input',
-    );
-  }
-
-  const styleSource = readFile(join(root, 'packages/angular/table/styles.css'));
-  if (!styleSource.includes("[hellTableResizeHandle][data-slot='root']")) {
-    failures.push('Table resize handle styles must use hellTableResizeHandle root part selectors');
-  }
-
-  const tableHarness = readFile(join(root, 'packages/angular/testing/table-harness.ts'));
-  if (
-    !tableHarness.includes('HellTableResizeHandleHarness') ||
-    !tableHarness.includes('getResizeHandle')
-  ) {
-    failures.push(
-      'Testing table harness must expose HellTableResizeHandleHarness and getResizeHandle',
     );
   }
 }
@@ -4347,120 +1869,6 @@ function checkTableAdapterBoundaryContract() {
       if (adapterDir && !rel.startsWith(`${adapterDir}/`)) {
         failures.push(
           `Table adapter boundary ${rel}:${hit.line} imports ${hit.specifier} -> ${targetRel}; core table primitives must not depend on adapter entrypoints.`,
-        );
-      }
-    }
-  }
-
-  const tanStackShellSource = readFile(
-    join(root, 'packages/angular/table-tanstack/table-tanstack.ts'),
-  );
-  const publicLookingBodyConnectorBindings = [
-    'hellTanStackBodyScrollport',
-    'hellTanStackBody',
-    'hellTanStackBodyItemConnector',
-    'hellTanStackBodyItem',
-  ];
-  for (const binding of publicLookingBodyConnectorBindings) {
-    if (
-      tanStackShellSource.includes(`selector: '[${binding}`) ||
-      tanStackShellSource.includes(`selector: "[${binding}`) ||
-      tanStackShellSource.includes(`alias: '${binding}'`) ||
-      tanStackShellSource.includes(`alias: "${binding}"`)
-    ) {
-      failures.push(
-        `TanStack shell body-strategy connector binding ${binding} must stay internal under a ɵ-prefixed alias/selector.`,
-      );
-    }
-  }
-
-  const forbiddenRowSelectionShortcuts = [
-    { label: 'data-selected', pattern: /data-selected/ },
-    { label: 'aria-selected', pattern: /aria-selected/ },
-    { label: 'row.getIsSelected()', pattern: /\bgetIsSelected\s*\(/ },
-  ];
-  for (const shortcut of forbiddenRowSelectionShortcuts) {
-    if (shortcut.pattern.test(tanStackShellSource)) {
-      failures.push(
-        `TanStack shell must not reflect row selection semantics with ${shortcut.label}; selected visuals belong in caller rowClass passthrough.`,
-      );
-    }
-  }
-}
-
-function checkTableSemanticDefaultGuardContract() {
-  const tableSource = readFile(
-    join(root, 'packages/angular/table/table-utilities.ts'),
-  );
-  const modules = new Map(
-    decoratedClassModules(tableSource).map((module) => [module.className, module]),
-  );
-  const tableModule = modules.get('HellTable');
-  const passiveRoleModules = [
-    ['HellTableHead', 'rowgroup'],
-    ['HellTableBody', 'rowgroup'],
-    ['HellTableRow', 'row'],
-    ['HellTableHeaderCell', 'columnheader'],
-    ['HellTableCell', 'cell'],
-  ];
-
-  if (!tableModule) {
-    failures.push('Table semantic default guard could not inspect HellTable');
-  } else {
-    for (const forbidden of [
-      'isGridMode',
-      'gridTabIndex',
-      'gridActiveDescendant',
-      'aria-activedescendant',
-    ]) {
-      if (tableModule.moduleSource.includes(forbidden)) {
-        failures.push(`HellTable semantic defaults must not own grid behavior: ${forbidden}`);
-      }
-    }
-  }
-
-  const passiveRoleNativeConstants = new Map([
-    ['HellTableHead', 'HELL_TABLE_HEADER_NATIVE_ELEMENTS'],
-    ['HellTableBody', 'HELL_TABLE_BODY_NATIVE_ELEMENTS'],
-    ['HellTableRow', 'HELL_TABLE_ROW_NATIVE_ELEMENTS'],
-    ['HellTableHeaderCell', 'HELL_TABLE_HEADER_CELL_NATIVE_ELEMENTS'],
-    ['HellTableCell', 'HELL_TABLE_CELL_NATIVE_ELEMENTS'],
-  ]);
-
-  for (const [className, role] of passiveRoleModules) {
-    const module = modules.get(className);
-    if (!module) {
-      failures.push(`Table semantic default guard could not inspect ${className}`);
-      continue;
-    }
-    const nativeConstant = passiveRoleNativeConstants.get(className);
-    const roleSupportPattern = new RegExp(
-      `injectHellTableRoleSupport\\(\\s*${nativeConstant}\\s*,\\s*['"]${role}['"]\\s*,?\\s*\\)`,
-    );
-    if (
-      !module.moduleSource.includes(`protected override readonly inferredRole = '${role}'`) &&
-      !roleSupportPattern.test(module.moduleSource)
-    ) {
-      failures.push(`${className} must keep passive inferred role ${role}`);
-    }
-    for (const forbidden of ['isGridMode', 'gridRole', 'aria-activedescendant']) {
-      if (module.moduleSource.includes(forbidden)) {
-        failures.push(`${className} must not gate or own Hell grid behavior: ${forbidden}`);
-      }
-    }
-  }
-
-  const rowModule = modules.get('HellTableRow');
-  if (rowModule) {
-    for (const forbidden of [
-      { label: 'tabindex', pattern: /\[attr\.tabindex\]|tabindex\s*:/ },
-      { label: 'row click handler', pattern: /\(click\)/ },
-      { label: 'row keydown handler', pattern: /\(keydown/ },
-      { label: 'aria-activedescendant', pattern: /aria-activedescendant/ },
-    ]) {
-      if (forbidden.pattern.test(rowModule.moduleSource)) {
-        failures.push(
-          `HellTableRow must not add row roving-focus behavior in table mode: ${forbidden.label}`,
         );
       }
     }
@@ -4708,54 +2116,6 @@ function checkNgpStateWriterContract() {
     if (usesStateWriter) {
       failures.push(`ng-primitives state writer usage is not approved in ${rel}`);
     }
-  }
-
-  const adaptersBarrel = readFile(
-    join(root, 'packages/angular/internal/ng-primitives/adapters.ts'),
-  );
-  if (
-    /export\s+\*\s+from/.test(adaptersBarrel) ||
-    stateWriterTokens.some((token) => adaptersBarrel.includes(token))
-  ) {
-    failures.push('ng-primitives state writer must not be re-exported through the adapters barrel');
-  }
-
-  // Select and toggle group have public ng-primitives setters; they must not
-  // regrow state-writer fallbacks in the adapter seam.
-  for (const token of [
-    'writeToggleGroupValue',
-    'writeToggleGroupDisabled',
-    'ToggleGroupStateMutation',
-    'writeSelectStateValue',
-    'writeSelectStateDisabled',
-  ]) {
-    if (adapterSource.includes(token)) {
-      failures.push(
-        `Primitives with public ng-primitives setters must use them, not state-writer token ${token}`,
-      );
-    }
-  }
-}
-
-function checkFloatingAdapterContract() {
-  const coreApi = readFile(join(root, 'packages/angular/core/public-api.ts'));
-
-  if (!coreApi.includes("export * from './floating-element'")) {
-    failures.push('Core Package Entry Point must export ./floating-element');
-  }
-
-  // ng-primitives >= 0.123 emits popover openChange during trigger ngOnDestroy
-  // while output bindings are still attached, so the retired close adapter's
-  // private overlay()/updateConfig() reach-ins must not come back.
-  const popoverOverlayReachIns = libraryProductionTsFiles()
-    .map((file) => join(root, file))
-    .filter((file) => file.endsWith('.ts') && !file.endsWith('.spec.ts'))
-    .filter((file) => /\boverlay\s*\(\s*\)|\bupdateConfig\s*\(/.test(readFile(file)))
-    .map(relPath);
-  if (popoverOverlayReachIns.length) {
-    failures.push(
-      `Private ng-primitives popover overlay handling is not allowed; use public ng-primitives APIs: ${popoverOverlayReachIns.join(', ')}`,
-    );
   }
 }
 

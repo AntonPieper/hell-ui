@@ -97,8 +97,8 @@ function printUsage() {
   console.log(`Usage: pnpm run release:dry-run -- [--fast|--full]
 
 Modes:
-  --fast  Local preflight: changelog entry, lint, architecture, CI contract, pnpm preflight, build, pack audit, API report.
-  --full  Release candidate gate: changelog entry, lint, architecture, CI contract, unit, build, pack audit, selected package-consumer scenarios, API report, docs build.
+  --fast  Local preflight: changelog entry, lint, architecture, CI coverage, pnpm preflight, build, pack audit, API report.
+  --full  Release candidate gate: changelog entry, lint, architecture, CI coverage, unit, build, pack audit, selected package-consumer scenarios, API report, docs build.
 
 Environment:
   HELL_RELEASE_DRY_RUN_LOG_DIR             Override evidence log directory.
@@ -132,7 +132,7 @@ function fastTasks() {
     packageTask('changelog entry', ['run', 'test:changelog']),
     packageTask('lint', ['run', 'lint']),
     packageTask('architecture', ['run', 'test:architecture']),
-    packageTask('ci contract', ['run', 'test:ci-contract']),
+    packageTask('ci coverage', ['run', 'test:ci-coverage']),
     packageTask('package-consumer pnpm preflight', [
       'run',
       'test:package-consumer',
@@ -150,7 +150,7 @@ function fullTasks(scenarios) {
     packageTask('changelog entry', ['run', 'test:changelog']),
     packageTask('lint', ['run', 'lint']),
     packageTask('architecture', ['run', 'test:architecture']),
-    packageTask('ci contract', ['run', 'test:ci-contract']),
+    packageTask('ci coverage', ['run', 'test:ci-coverage']),
     packageTask('unit', ['run', 'test:unit'], {
       env: {
         HELL_UNIT_TEST_TIMEOUT_MS: process.env.HELL_UNIT_TEST_TIMEOUT_MS ?? '600000',

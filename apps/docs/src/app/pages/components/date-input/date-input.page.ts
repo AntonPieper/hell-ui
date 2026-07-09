@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 import { ExampleTabs } from '../../../shared/example-tabs';
 import { PageHeader } from '../../../shared/page-header';
 import { DateInputBasicExample } from './examples/basic.example';
@@ -34,7 +33,6 @@ import dateInputStylingExampleCodeRaw from './examples/styling.example.ts?raw' w
   imports: [
     ExampleTabs,
     RouterLink,
-    ...HELL_FIELD_DIRECTIVES,
     DateInputBasicExample,
     DateInputSizesExample,
     DateInputBoundsAndValidationExample,

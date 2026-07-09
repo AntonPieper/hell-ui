@@ -82,9 +82,6 @@
     "./internal/hotkeys": {
       "@heinrich/source": "./internal/hotkeys/public-api.ts"
     },
-    "./internal/input": {
-      "@heinrich/source": "./internal/input/public-api.ts"
-    },
     "./internal/ng-primitives": {
       "@heinrich/source": "./internal/ng-primitives/public-api.ts"
     },

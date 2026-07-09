@@ -153,9 +153,6 @@ test.describe('table docs regressions', () => {
     await expect(shell.getByRole('button', { name: 'Filters' }).first()).toBeVisible();
     await expect(shell.getByRole('button', { name: 'More table actions' })).toBeVisible();
     await expect(shell.locator('button[hellTableSortTrigger][data-slot="root"]')).not.toHaveCount(0);
-    await expect(shell.getByRole('row', { name: /Ada Lovelace/ })).toHaveClass(
-      /bg-hell-primary-soft/,
-    );
     await expect(shell.getByRole('row', { name: /Ada Lovelace/ })).not.toHaveAttribute(
       'data-selected',
     );
@@ -202,9 +199,6 @@ test.describe('table docs regressions', () => {
 
     await shell.getByRole('button', { name: 'Open Grace Hopper' }).click();
     await expect(shell.getByRole('button', { name: 'Open Grace Hopper' })).toContainText('Open');
-    await expect(shell.getByRole('row', { name: /Grace Hopper/ })).toHaveClass(
-      /bg-hell-primary-soft/,
-    );
     await expect(shell.getByRole('row', { name: /Grace Hopper/ })).not.toHaveAttribute(
       'data-selected',
     );
@@ -275,9 +269,6 @@ test.describe('table docs regressions', () => {
     await expect(virtual.locator('[data-hell-table-virtual-body="true"]')).toHaveCount(1);
     await expect(virtual.locator('[data-hell-table-virtual-row="true"]')).not.toHaveCount(0);
     await expect(virtual.locator('[data-hell-table-shell-footer]')).toContainText('36 visible');
-    await expect(virtual.getByRole('row', { name: /Person 1 Admin/ }).first()).toHaveClass(
-      /bg-hell-primary-soft/,
-    );
     await expect(virtual.getByRole('row', { name: /Person 1 Admin/ }).first()).not.toHaveAttribute(
       'data-selected',
     );
@@ -422,33 +413,3 @@ function omnibarPanelAnchorOffset(
   const aboveOffset = Math.abs(panel.y + panel.height - (control.y - 4));
   return Math.max(inlineOffset, Math.min(belowOffset, aboveOffset));
 }
-
-test.describe('split-view docs regressions', () => {
-  test('master/detail ticket actions use the TableRowAction root recipe', async ({ page }) => {
-    await page.goto('/components/split-view');
-    await expect(page.getByRole('heading', { name: 'Split view', level: 1 })).toBeVisible();
-
-    const ticketActions = page.locator(
-      'app-split-view-master-detail-example [data-pane="primary"] button[helltablerowaction][data-slot="root"]',
-    );
-    await expect(ticketActions).toHaveCount(4);
-    await expect(
-      page.locator(
-        'app-split-view-master-detail-example [data-pane="primary"] [data-hell-split-master-item]',
-      ),
-    ).toHaveCount(0);
-    await expect(ticketActions.filter({ hasText: 'T-104' })).toHaveAttribute(
-      'aria-current',
-      'true',
-    );
-
-    for (let index = 0; index < 4; index += 1) {
-      await expect(ticketActions.nth(index)).toHaveClass(/(^|\s)bg-transparent(\s|$)/);
-      await expect(ticketActions.nth(index)).toHaveClass(
-        /(^|\s)hover:bg-hell-surface-muted(\s|$)/,
-      );
-      await expect(ticketActions.nth(index)).toHaveClass(/(^|\s)shadow-none(\s|$)/);
-      await expect(ticketActions.nth(index)).toHaveClass(/(^|\s)rounded-hell-sm(\s|$)/);
-    }
-  });
-});

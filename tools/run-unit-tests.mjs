@@ -1,5 +1,13 @@
-import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { spawn } from 'node:child_process';
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -143,28 +151,42 @@ function waitForClose(processRef) {
 }
 
 function finish(unitExitCode) {
-  const summaryExitCode = writeCiSummary ? runCiSummary() : 0;
-  process.exit(unitExitCode === 0 ? summaryExitCode : unitExitCode);
+  if (writeCiSummary) writeCiSummaryArtifact();
+  process.exit(unitExitCode);
 }
 
-function runCiSummary() {
-  const summary = spawnSync('node', ['tools/ci-summary.mjs'], {
-    cwd: root,
-    shell: process.platform === 'win32',
-    stdio: 'inherit',
-  });
+function writeCiSummaryArtifact() {
+  const report = reportStatus.ok ? reportStatus.report : null;
+  const total = coverageStatus.summary?.total;
+  const formatCount = (value) => (Number.isFinite(value) ? String(value) : 'n/a');
+  const formatPercent = (metric) => {
+    const value = Number(metric?.pct);
+    return Number.isFinite(value) ? `${value.toFixed(2)}%` : 'n/a';
+  };
+  const rows = [
+    ['Tests', formatCount(report?.tests)],
+    ['Failures', formatCount(report?.failures)],
+    ['Errors', formatCount(report?.errors)],
+    ['Skipped', formatCount(report?.skipped)],
+    ['Duration', Number.isFinite(report?.time) ? `${report.time.toFixed(2)}s` : 'n/a'],
+    ['Line coverage', formatPercent(total?.lines)],
+    ['Branch coverage', formatPercent(total?.branches)],
+    ['Function coverage', formatPercent(total?.functions)],
+    ['Statement coverage', formatPercent(total?.statements)],
+  ];
+  const markdown = [
+    '## CI Test Summary',
+    '',
+    '| Metric | Value |',
+    '| --- | ---: |',
+    ...rows.map(([label, value]) => `| ${label} | ${value} |`),
+    '',
+  ].join('\n');
 
-  if (summary.error) {
-    console.error(`[unit] CI summary failed to start: ${summary.error.message}`);
-    return 1;
+  writeFileSync(markdownSummaryPath, markdown);
+  if (process.env.GITHUB_STEP_SUMMARY) {
+    appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown);
   }
-
-  if (summary.signal) {
-    console.error(`[unit] CI summary exited via ${summary.signal}.`);
-    return 1;
-  }
-
-  return summary.status ?? 1;
 }
 
 function inspectJUnitReport() {
@@ -199,6 +221,7 @@ function inspectJUnitReport() {
         failures: readXmlNumber(tag, 'failures'),
         errors: readXmlNumber(tag, 'errors'),
         skipped: readXmlNumber(tag, 'skipped'),
+        time: readXmlNumber(tag, 'time'),
       },
     };
   } catch (error) {
