@@ -23,7 +23,7 @@
     data-toolbar-group="pagination"
     [page]="page()"
     [pageCount]="totalPages() || 1"
-    (pageChange)="goTo($event)"
+    (pageChange)="goTo($any($event))"
     [attr.aria-label]="labels.page"
   >
     <button hellPaginationPrev [attr.aria-label]="labels.previousPage">

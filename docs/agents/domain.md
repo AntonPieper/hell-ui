@@ -15,8 +15,7 @@ This repo uses a single-context layout:
 |-- apps/
 |   `-- docs/
 `-- packages/
-    |-- angular/
-    `-- pdf-viewer/
+    `-- angular/
 ```
 
 ## Before exploring, read these

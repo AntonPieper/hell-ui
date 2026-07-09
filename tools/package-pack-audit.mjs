@@ -7,7 +7,6 @@ import { entrypointPublicApiFiles, entrypointStyleExports } from './entrypoint-m
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const angularPackageName = '@hell-ui/angular';
-export const splitPdfPackageName = '@hell-ui/pdf-viewer';
 
 const angularRecipeSourceFiles = [
   'accordion/accordion.ts',
@@ -200,7 +199,6 @@ export function auditPackedPackage({ tarball, logger = console } = {}) {
 
   logPackedFiles(files, logger);
   failures.push(...findForbiddenPackedFileFailures(files));
-  checkPackageBoundary(packageJson, files, failures);
   checkApfPackageJson(packageJson, fileSet, tarball, failures);
   checkPackageMetadata(packageJson, failures);
   checkPackagePeers(packageJson, failures);
@@ -233,22 +231,6 @@ function runPackagePackAuditSelfTest() {
     if (!failures.some((failure) => failure.includes(label))) {
       throw new Error(`Package pack audit self-test did not catch ${label}: ${files.join(', ')}`);
     }
-  }
-
-  const pdfLeakFailures = findPackageBoundaryFailures(
-    { name: angularPackageName, exports: {}, peerDependencies: {}, peerDependenciesMeta: {} },
-    ['package.json', 'styles/features/pdf-viewer.css'],
-  );
-  if (!pdfLeakFailures.some((failure) => failure.includes('split PDF viewer files'))) {
-    throw new Error('Package pack audit self-test did not catch split PDF viewer files');
-  }
-
-  const legacyAliasFailures = findPackageBoundaryFailures(
-    { name: angularPackageName, exports: { './data-table': {} } },
-    ['package.json', 'data-table/package.json'],
-  );
-  if (!legacyAliasFailures.some((failure) => failure.includes('legacy table'))) {
-    throw new Error('Package pack audit self-test did not catch legacy table alias files');
   }
 }
 
@@ -337,9 +319,9 @@ export function findForbiddenPackedFileFailures(files) {
 }
 
 function checkApfPackageJson(packageJson, fileSet, tarball, failures) {
-  if (![angularPackageName, splitPdfPackageName].includes(packageJson.name)) {
+  if (packageJson.name !== angularPackageName) {
     failures.push(
-      `APF package.json name must be ${angularPackageName} or ${splitPdfPackageName}; found ${packageJson.name ?? 'missing'}`,
+      `APF package.json name must be ${angularPackageName}; found ${packageJson.name ?? 'missing'}`,
     );
   }
 
@@ -400,12 +382,6 @@ function expectedStyleExportKeys(packageName) {
 }
 
 function expectedStyleExportTargets(packageName) {
-  if (packageName === splitPdfPackageName) {
-    return new Map([
-      ['./styles', './pdf-viewer/pdf-viewer.css'],
-      ['./styles/pdf-viewer', './pdf-viewer/pdf-viewer.css'],
-    ]);
-  }
   if (packageName !== angularPackageName) return new Map();
 
   return new Map(
@@ -432,8 +408,7 @@ function checkPublishMetadata(packageJson, failures) {
   }
 }
 
-function expectedRepositoryDirectory(packageName) {
-  if (packageName === splitPdfPackageName) return 'packages/pdf-viewer';
+function expectedRepositoryDirectory() {
   return 'packages/angular';
 }
 
@@ -452,7 +427,7 @@ function checkPackageMetadata(packageJson, failures) {
   }
 
   const dependencies = Object.keys(packageJson.dependencies ?? {});
-  const expectedDependencies = packageJson.name === angularPackageName ? ['tailwind-merge', 'tslib'] : ['tslib'];
+  const expectedDependencies = ['tailwind-merge', 'tslib'];
   assertSameSet(`${packageJson.name} package dependencies`, expectedDependencies, dependencies, failures);
 }
 
@@ -469,9 +444,6 @@ function expectedPackageFiles(packageName) {
       ...angularRecipeSourceFiles,
       'assets/**',
     ];
-  }
-  if (packageName === splitPdfPackageName) {
-    return ['README.md', 'LICENSE', 'package.json', 'fesm2022/*.mjs', 'types/*.d.ts', 'pdf-viewer/**/*.css'];
   }
   return null;
 }
@@ -490,75 +462,39 @@ function checkPackagePeers(packageJson, failures) {
     }
   }
 
-  if (packageJson.name === angularPackageName) {
-    const expectedOptionalPeers = [
-      ...packagePeerGroups.style,
-      ...packagePeerGroups.router,
-      ...packagePeerGroups.icons,
-      ...packagePeerGroups.fontAwesome,
-      ...packagePeerGroups.tanStackTable,
-      ...packagePeerGroups.tanStackVirtual,
-      ...packagePeerGroups.codeEditor,
-    ];
-    const expectedPeers = [...packagePeerGroups.core, ...expectedOptionalPeers];
-    assertSameSet('@hell-ui/angular peerDependencies', expectedPeers, peerNames, failures);
-    assertSameSet(
-      '@hell-ui/angular required peerDependencies',
-      packagePeerGroups.core,
-      requiredPeerNames(packageJson),
-      failures,
-    );
-    assertSameSet(
-      '@hell-ui/angular optional peerDependenciesMeta',
-      expectedOptionalPeers,
-      [...optionalPeers],
-      failures,
-    );
+  if (packageJson.name !== angularPackageName) return;
 
-    if (peers['pdfjs-dist'] || optionalPeers.has('pdfjs-dist')) {
-      failures.push('@hell-ui/angular must not advertise pdfjs-dist after the PDF viewer split');
-    }
-    return;
+  const expectedOptionalPeers = [
+    ...packagePeerGroups.style,
+    ...packagePeerGroups.router,
+    ...packagePeerGroups.icons,
+    ...packagePeerGroups.fontAwesome,
+    ...packagePeerGroups.tanStackTable,
+    ...packagePeerGroups.tanStackVirtual,
+    ...packagePeerGroups.codeEditor,
+    ...packagePeerGroups.pdfViewer,
+  ];
+  const expectedPeers = [...packagePeerGroups.core, ...expectedOptionalPeers];
+  assertSameSet('@hell-ui/angular peerDependencies', expectedPeers, peerNames, failures);
+  assertSameSet(
+    '@hell-ui/angular required peerDependencies',
+    packagePeerGroups.core,
+    requiredPeerNames(packageJson),
+    failures,
+  );
+  assertSameSet(
+    '@hell-ui/angular optional peerDependenciesMeta',
+    expectedOptionalPeers,
+    [...optionalPeers],
+    failures,
+  );
+
+  const workspaceCatalog = readWorkspaceCatalog();
+  if (peers['pdfjs-dist'] !== workspaceCatalog['pdfjs-dist']) {
+    failures.push(
+      `@hell-ui/angular must pin the pdfjs-dist optional peer to workspace catalog version ${workspaceCatalog['pdfjs-dist']}`,
+    );
   }
-
-  if (packageJson.name === splitPdfPackageName) {
-    const expectedPeers = [
-      '@angular/common',
-      '@angular/core',
-      angularPackageName,
-      '@ng-icons/core',
-      '@ng-icons/font-awesome',
-      ...packagePeerGroups.pdfViewer,
-      ...packagePeerGroups.style,
-    ];
-    const expectedRequiredPeers = expectedPeers.filter((peer) => !packagePeerGroups.style.includes(peer));
-    assertSameSet('@hell-ui/pdf-viewer peerDependencies', expectedPeers, peerNames, failures);
-    assertSameSet(
-      '@hell-ui/pdf-viewer required peerDependencies',
-      expectedRequiredPeers,
-      requiredPeerNames(packageJson),
-      failures,
-    );
-    assertSameSet(
-      '@hell-ui/pdf-viewer optional peerDependenciesMeta',
-      packagePeerGroups.style,
-      [...optionalPeers],
-      failures,
-    );
-
-    const workspaceCatalog = readWorkspaceCatalog();
-    if (peers['pdfjs-dist'] !== workspaceCatalog['pdfjs-dist']) {
-      failures.push(
-        `@hell-ui/pdf-viewer must pin pdfjs-dist peer to workspace catalog version ${workspaceCatalog['pdfjs-dist']}`,
-      );
-    }
-
-    const angularPackageJson = readJson(join(root, 'packages/angular/package.json'));
-    if (peers[angularPackageName] !== angularPackageJson.version) {
-      failures.push(`@hell-ui/pdf-viewer must peer ${angularPackageName}@${angularPackageJson.version}`);
-    }
-  }
-
 }
 
 function optionalPeerNames(packageJson) {
@@ -574,81 +510,7 @@ function requiredPeerNames(packageJson) {
   return Object.keys(packageJson.peerDependencies ?? {}).filter((peer) => !optionalPeers.has(peer));
 }
 
-export function findPackageBoundaryFailures(packageJson, files) {
-  const failures = [];
-  checkPackageBoundary(packageJson, files, failures);
-  return failures;
-}
-
-function checkPackageBoundary(packageJson, files, failures) {
-  if (packageJson.name === splitPdfPackageName) {
-    checkPdfPackageBoundary(packageJson, files, failures);
-    return;
-  }
-  if (packageJson.name !== angularPackageName) return;
-
-  const pdfPeer = packageJson.peerDependencies?.['pdfjs-dist'];
-  const pdfPeerMeta = packageJson.peerDependenciesMeta?.['pdfjs-dist'];
-  if (pdfPeer || pdfPeerMeta) {
-    failures.push('@hell-ui/angular must not advertise pdfjs-dist after the PDF viewer split');
-  }
-
-  const pdfExports = Object.keys(packageJson.exports ?? {}).filter((key) => key.includes('pdf-viewer'));
-  if (pdfExports.length) {
-    failures.push(`@hell-ui/angular must not export PDF viewer paths: ${pdfExports.join(', ')}`);
-  }
-
-  const leakedFiles = files.filter((file) => /(^|\/)(?:features\/pdf-viewer|styles\/(?:features|components)\/pdf-viewer\.css|types\/.*pdf-viewer|fesm2022\/.*pdf-viewer)/i.test(file));
-  if (leakedFiles.length) {
-    failures.push(`@hell-ui/angular package includes split PDF viewer files: ${leakedFiles.join(', ')}`);
-  }
-
-  const legacyTableExports = Object.keys(packageJson.exports ?? {}).filter((key) =>
-    [
-      './features/data-table',
-      './features/table-utilities',
-      './data-table',
-      './table-virtual',
-      './table-cdk',
-      './styles/features/data-table',
-      './styles/features/table-utilities',
-    ].includes(key),
-  );
-  if (legacyTableExports.length) {
-    failures.push(`@hell-ui/angular must not export legacy table paths: ${legacyTableExports.join(', ')}`);
-  }
-
-  const legacyTableFiles = files.filter((file) =>
-    /(^|\/)(?:(?:data-table|table-virtual|table-cdk|features\/(?:data-table|table-utilities))\/package\.json|styles\/(?:features\/(?:data-table|table-utilities)|components\/(?:data-table|table-utilities|table-renderer))\.css|types\/hell-ui-angular-(?:data-table|table-virtual|table-cdk|features-(?:data-table|table-utilities))\.d\.ts)/i.test(file),
-  );
-  if (legacyTableFiles.length) {
-    failures.push(`@hell-ui/angular package includes legacy table alias files: ${legacyTableFiles.join(', ')}`);
-  }
-}
-
-function checkPdfPackageBoundary(packageJson, files, failures) {
-  const exportsMap = packageJson.exports ?? {};
-  for (const exportPath of Object.keys(exportsMap)) {
-    if (exportPath.startsWith('./styles/components/')) {
-      failures.push(`@hell-ui/pdf-viewer must not export legacy component style path ${exportPath}`);
-    }
-  }
-
-  const unexpectedAngularFiles = files.filter((file) =>
-    /(^|\/)(?:button|table|table-tanstack|features\/code-editor)\/package\.json|types\/hell-ui-angular(?:-|\.d\.ts)|fesm2022\/hell-ui-angular/.test(file),
-  );
-  if (unexpectedAngularFiles.length) {
-    failures.push(`@hell-ui/pdf-viewer package includes @hell-ui/angular files: ${unexpectedAngularFiles.join(', ')}`);
-  }
-
-  const workerFiles = files.filter((file) => /(^|\/)[^/]*pdf\.worker[^/]*\.(?:mjs|cjs|js)$/i.test(file));
-  if (workerFiles.length) {
-    failures.push(`@hell-ui/pdf-viewer must not package pdf.js worker assets: ${workerFiles.join(', ')}`);
-  }
-}
-
 function expectedCodeExportKeys(packageName) {
-  if (packageName === splitPdfPackageName) return new Set(['.']);
   if (packageName !== angularPackageName) return new Set();
 
   return new Set(
@@ -860,9 +722,6 @@ function expectedExplicitPackedFiles(packageName) {
   if (packageName === angularPackageName) {
     return [...angularRecipeSourceFiles, 'assets/hell-ui-logo.svg', 'LICENSE'];
   }
-  if (packageName === splitPdfPackageName) {
-    return ['LICENSE'];
-  }
   return [];
 }
 
@@ -978,6 +837,3 @@ function matchesPackedPattern(target, fileSet) {
   return [...fileSet].some((file) => file.startsWith(prefix) && file.endsWith(suffix));
 }
 
-function readJson(path) {
-  return JSON.parse(readFileSync(path, 'utf8'));
-}

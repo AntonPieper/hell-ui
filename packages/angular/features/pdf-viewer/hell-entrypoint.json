@@ -1,0 +1,10 @@
+{
+  "category": "feature",
+  "header": [
+    "/**",
+    " * @experimental Optional pdf.js feature entry point. Apps own worker/browser compatibility; keep behind lazy/client-only browser boundaries.",
+    " */"
+  ],
+  "exports": ["./pdf-viewer", "./pdf-viewer-labels"],
+  "extraExports": ["export type { HellPdfWorkerSource } from './pdf-viewer.adapter';"]
+}

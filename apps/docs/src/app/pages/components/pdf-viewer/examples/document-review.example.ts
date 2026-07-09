@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
 import { faSolidCircleCheck, faSolidFilePdf } from '@ng-icons/font-awesome/solid';
-import { HellPdfViewer } from '@hell-ui/pdf-viewer';
+import { HellPdfViewer } from '@hell-ui/angular/features/pdf-viewer';
 import { HellButton, type HellButtonUi } from '@hell-ui/angular/button';
 import { HELL_CARD_DIRECTIVES } from '@hell-ui/angular/card';
 import { HellIcon } from '@hell-ui/angular/icon';

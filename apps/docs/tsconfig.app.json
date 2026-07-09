@@ -13,12 +13,10 @@
      source-condition mechanism, not a path-alias or deep-import channel. */
   "include": [
     "src/**/*.ts",
-    "../../packages/angular/**/*.ts",
-    "../../packages/pdf-viewer/src/**/*.ts"
+    "../../packages/angular/**/*.ts"
   ],
   "exclude": [
     "src/**/*.spec.ts",
-    "../../packages/angular/**/*.spec.ts",
-    "../../packages/pdf-viewer/**/*.spec.ts"
+    "../../packages/angular/**/*.spec.ts"
   ]
 }

@@ -229,6 +229,9 @@
     "./features/code-editor": {
       "@heinrich/source": "./features/code-editor/public-api.ts"
     },
+    "./features/pdf-viewer": {
+      "@heinrich/source": "./features/pdf-viewer/public-api.ts"
+    },
     "./tokens.css": {
       "@heinrich/source": "./tokens.css",
       "style": "./tokens.css",
@@ -449,6 +452,11 @@
       "style": "./features/code-editor/styles.css",
       "default": "./features/code-editor/styles.css"
     },
+    "./features/pdf-viewer/styles.css": {
+      "@heinrich/source": "./features/pdf-viewer/styles.css",
+      "style": "./features/pdf-viewer/styles.css",
+      "default": "./features/pdf-viewer/styles.css"
+    },
     "./themes/aurora.css": {
       "@heinrich/source": "./themes/aurora.css",
       "style": "./themes/aurora.css",
@@ -493,7 +501,8 @@
     "@codemirror/state": "^6.0.0",
     "@codemirror/commands": "^6.0.0",
     "@codemirror/language": "^6.0.0",
-    "@lezer/highlight": "^1.0.0"
+    "@lezer/highlight": "^1.0.0",
+    "pdfjs-dist": "5.6.205"
   },
   "peerDependenciesMeta": {
     "tailwindcss": {
@@ -527,6 +536,9 @@
       "optional": true
     },
     "@lezer/highlight": {
+      "optional": true
+    },
+    "pdfjs-dist": {
       "optional": true
     }
   },
@@ -568,6 +580,7 @@
     "jsdom": "catalog:",
     "ng-packagr": "catalog:",
     "ng-primitives": "catalog:",
+    "pdfjs-dist": "catalog:",
     "rxjs": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",

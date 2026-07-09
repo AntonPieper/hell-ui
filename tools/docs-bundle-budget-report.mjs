@@ -229,7 +229,7 @@ ${renderComponentStyleTable(componentStyles.slice(0, 8))}
 | --- | --- | --- | --- |
 | Initial bundle exceeds 500 kB by ${formatBytes(initialWarningOverage)} | Static imports from \`main\` pull router/runtime plus docs-shell controls; \`styles.css\` globally imports Tailwind and explicit Hell entrypoint styles. Top chunks: ${initialChunks.slice(0, 5).map((row) => `\`${row.file}\``).join(', ')}. | Docs shell / global styles | ${renderInitialBudgetFollowUp()} |
 ${renderPdfViewerStyleRow(pdfViewerStyleWarnings)}
-| PDF lazy weight is large even when initial bundle is protected | \`pdfjs-dist/build/pdf.mjs\`, \`pdfjs-dist/web/pdf_viewer.mjs\`, and \`hell-ui-pdf-viewer.mjs\` are the top PDF lazy inputs. | PDF viewer split package | Keep the docs page lazy/isolated and keep PDF outside the core package. |
+| PDF lazy weight is large even when initial bundle is protected | \`pdfjs-dist/build/pdf.mjs\`, \`pdfjs-dist/web/pdf_viewer.mjs\`, and \`hell-ui-angular-features-pdf-viewer.mjs\` are the top PDF lazy inputs. | PDF viewer feature entrypoint | Keep the docs page lazy/isolated and keep PDF behind its feature entry point. |
 | Code editor lazy chunks stay behind lazy docs boundaries | CodeMirror and Lezer packages dominate the code editor route and shared docs code-viewer lazy chunks; this is expected feature weight, not initial shell weight. | Code editor feature / docs code previews | Keep CodeMirror behind its optional entrypoint and keep shared docs code previews dynamically imported instead of part of the docs shell. |
 | Table docs lazy chunk carries demo/raw source cost | \`table-page\` includes live examples plus \`?raw\` source text and TanStack table shell examples. | Table docs | Keep table examples behind the lazy docs route and verify the supported \`/table\` plus \`/table-tanstack\` paths. |
 
@@ -346,7 +346,7 @@ function renderPdfViewerStyleRow(pdfViewerStyleWarnings) {
     return `| \`pdf-viewer.page.ts\` component style exceeds 4 kB | \`pdf-viewer.page.ts\` inline component style imports the PDF viewer stylesheet; stats emits ${pdfViewerStyleWarnings.map((row) => `\`${row.file}\` at ${formatBytes(row.bytes)}`).join(', ')}. | PDF viewer docs page | Reduce the PDF docs style cost, move it behind a documented lazy/global boundary, or record an intentional budget raise. |`;
   }
 
-  return '| PDF viewer docs style is isolated from component-style budget | No pdf-viewer component style chunk exceeds the 4 kB warning budget; the docs page serves `@hell-ui/pdf-viewer/styles` as a copied lazy asset instead of an Angular component style. | PDF viewer docs page | Keep the lazy boundary; docs budget policy keeps component-style warnings unaccepted unless explicitly documented. |';
+  return '| PDF viewer docs style is isolated from component-style budget | No pdf-viewer component style chunk exceeds the 4 kB warning budget; the docs page serves the PDF viewer stylesheet as a copied lazy asset instead of an Angular component style. | PDF viewer docs page | Keep the lazy boundary; docs budget policy keeps component-style warnings unaccepted unless explicitly documented. |';
 }
 
 function renderChunkTable(rows, mode) {
@@ -436,7 +436,6 @@ function ownerForEntryPoint(entryPoint) {
   if (entryPoint === 'apps/docs/src/app/docs-search-index.ts') return 'Docs search index (loaded on search open)';
   if (entryPoint === 'src/app/docs-search-index.ts') return 'Docs search index (loaded on search open)';
   if (entryPoint.includes('pdfjs-dist/')) return 'PDF viewer feature (`pdfjs-dist`)';
-  if (entryPoint.includes('hell-ui-pdf-viewer')) return 'PDF viewer split package';
   if (entryPoint.includes('hell-ui-angular-features-pdf-viewer')) return 'PDF viewer feature entrypoint';
   if (entryPoint.includes('hell-ui-angular-features-code-editor')) return 'Code editor feature entrypoint';
   if (entryPoint.includes('hell-ui-angular-features-audio-transcript')) return 'Audio transcript feature entrypoint';

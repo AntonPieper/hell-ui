@@ -20,9 +20,8 @@ Hell exposes:
 
 The root package `@hell-ui/angular` export is limited to stable core only.
 UI surfaces live behind narrow import-path entry points such as `/button`,
-`/select`, `/app-shell`, and `/features/code-editor`; kept features remain
-behind scoped entry points. The PDF viewer lives in the separate
-`@hell-ui/pdf-viewer` package.
+`/select`, `/app-shell`, `/features/code-editor`, and `/features/pdf-viewer`;
+kept features remain behind scoped entry points.
 
 ## Install
 
@@ -37,7 +36,7 @@ Feature peers remain optional at runtime, but package peer metadata is package-w
 
 ### Peer dependency tiers
 
-Package-consumer scenarios assert these peer groups with strict peer installs. CodeMirror, TanStack Table, and TanStack Virtual peers stay optional and are not required by root, button, or table scenarios. TanStack Table is isolated behind `@hell-ui/angular/table-tanstack`, and TanStack Virtual is isolated behind `@hell-ui/angular/table-tanstack/virtual`. PDF viewer dependencies belong to `@hell-ui/pdf-viewer`, not this package.
+Package-consumer scenarios assert these peer groups with strict peer installs. CodeMirror, pdf.js, TanStack Table, and TanStack Virtual peers stay optional and are not required by root, button, or table scenarios. TanStack Table is isolated behind `@hell-ui/angular/table-tanstack`, TanStack Virtual behind `@hell-ui/angular/table-tanstack/virtual`, and pdf.js behind `@hell-ui/angular/features/pdf-viewer`.
 
 | Tier | Entry points / scenarios | Peer group asserted |
 | --- | --- | --- |
@@ -45,11 +44,11 @@ Package-consumer scenarios assert these peer groups with strict peer installs. C
 | Primitive | Narrow primitives such as `/button`, `/pagination`, `/select`, and `/icon`; `button-ui`, `button`, `pagination`, `primitive-icons-css` | Core peers. Add `tailwindcss` when importing primitive CSS; add `@ng-icons/core` and `@ng-icons/font-awesome` for icon-backed entries. |
 | Composite | Narrow composite entry points such as `/app-shell`, `/resizable`, `/split-view`, `/dialog`, `/omnibar`, `/toast`, and `/audio-player`; `composite-css`, `app-shell`, `resizable`, `split-view`, `audio-player` | Core peers plus `tailwindcss` for composite CSS. Icon-backed composites also assert optional `@ng-icons/core` and `@ng-icons/font-awesome`; Dialog also needs the optional router peer required by `ng-primitives/dialog`. |
 | Audio transcript | `/features/audio-transcript`; `audio-transcript` | Same peers as the icon-backed audio-player composite; no CodeMirror or pdf.js peers. Import `provideHellAudioTranscript()` only where browser transcript capture is deliberately enabled. |
-| Table primitives | `/table`; `table`, `no-legacy-alias` | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack Table, or TanStack Virtual peers. The negative scenario proves removed legacy table aliases and CSS aliases stay unavailable. |
+| Table primitives | `/table`; `table` | Core peers plus `tailwindcss`; no CodeMirror, router, Font Awesome, pdf.js, TanStack Table, or TanStack Virtual peers. |
 | TanStack table shell | `/table-tanstack`; `table-tanstack` | Core peers plus `tailwindcss` and optional `@tanstack/angular-table`; no `@tanstack/virtual-core`. Root, button, and `/table` scenarios prove TanStack Table is not installed unless this shell is imported. |
 | TanStack virtual row strategy | `/table-tanstack/virtual`; `table-tanstack-virtual` | Same shell peers plus optional `@tanstack/virtual-core`. The strategy mounts on `hell-tanstack-table`; it is not a separate table engine or root component. |
 | Code editor | `/features/code-editor`; `code-editor` | Core peers plus `tailwindcss`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/state`, `@codemirror/view`, and `@lezer/highlight`. |
-| PDF viewer | `@hell-ui/pdf-viewer`; `pdf-viewer` | Separate package; see that package for its own install contract. |
+| PDF viewer | `/features/pdf-viewer`; `pdf-viewer` | Core peers plus `tailwindcss`, `@ng-icons/core`, `@ng-icons/font-awesome`, and the exact optional `pdfjs-dist` peer. |
 
 
 ## API Stability
@@ -84,12 +83,10 @@ re-probed on extractor upgrades. Experimental surfaces
 | Table primitives (`@hell-ui/angular/table`) | Beta | Optional peer; uses `ResizeObserver` for table sizing |
 | TanStack table shell (`@hell-ui/angular/table-tanstack`, `/table-tanstack/virtual`) | Experimental | Caller-owned TanStack Table remains the engine; Hell owns shell chrome, styling, projection regions, status views, controls, and the optional TanStack Virtual body strategy |
 | Code editor (`@hell-ui/angular/features/code-editor`) | Experimental | Browser-only CodeMirror runtime: `window`/`document` interactions |
-| PDF viewer (`@hell-ui/pdf-viewer`) | Experimental split package | Browser-only app surface/recipe owned outside `@hell-ui/angular` |
+| PDF viewer (`@hell-ui/angular/features/pdf-viewer`) | Experimental | Browser-only pdf.js runtime; apps own the worker source; keep behind a lazy route |
 | Testing harnesses (`@hell-ui/angular/testing`) | Stable/test-only | CDK component harnesses for consumer and library tests |
 | Speech transcript (`allowSpeechTranscript`) | Experimental/browser-only/best-effort | Requires `provideHellAudioTranscript()` from `@hell-ui/angular/features/audio-transcript`; uses `navigator` + `SpeechRecognition` + `captureStream`; not accessibility-grade captions or production timed text |
 | Removed table aliases and row-as-control APIs | Removed before beta | Use `@hell-ui/angular/table` for primitives or `@hell-ui/angular/table-tanstack` for a TanStack-owned table shell |
-
-The PDF viewer was split out before public beta; use `@hell-ui/pdf-viewer` for the component, styles, and worker setup docs.
 
 ## Angular Imports
 

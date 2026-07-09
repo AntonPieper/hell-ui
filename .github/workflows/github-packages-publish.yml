@@ -45,17 +45,15 @@ jobs:
       - name: Audit package contents
         run: pnpm run test:package-pack
 
-      - name: Verify tag matches package versions
+      - name: Verify tag matches package version
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
           set -euo pipefail
-          for manifest in dist/hell/package.json dist/hell-pdf-viewer/package.json; do
-            version="$(node -p "require('./${manifest}').version")"
-            test "${GITHUB_REF_NAME}" = "v${version}" || {
-              echo "Tag ${GITHUB_REF_NAME} must match ${manifest} version v${version}."
-              exit 1
-            }
-          done
+          version="$(node -p "require('./dist/hell/package.json').version")"
+          test "${GITHUB_REF_NAME}" = "v${version}" || {
+            echo "Tag ${GITHUB_REF_NAME} must match dist/hell/package.json version v${version}."
+            exit 1
+          }
 
       # GitHub Packages scopes npm packages to the owning GitHub account, and
       # the @hell-ui GitHub user is unrelated to this repository, so the
@@ -65,24 +63,19 @@ jobs:
       # so pnpm resolves catalog: dependency specifiers to concrete versions.
       # Internal @hell-ui/* peer/import names are untouched; consumers install
       # the mirror through npm aliases (see docs/release/npm-publishing.md).
-      - name: Pack packages for GitHub Packages
+      - name: Pack package for GitHub Packages
         run: |
           set -euo pipefail
           mkdir -p ghpr-package
-          rewrite() {
-            node -e '
-              const fs = require("node:fs");
-              const path = process.argv[1] + "/package.json";
-              const pkg = JSON.parse(fs.readFileSync(path, "utf8"));
-              pkg.name = process.argv[2];
-              pkg.publishConfig = { registry: "https://npm.pkg.github.com" };
-              fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + "\n");
-            ' "$1" "$2"
-          }
-          rewrite dist/hell "@antonpieper/hell-ui-angular"
-          rewrite dist/hell-pdf-viewer "@antonpieper/hell-ui-pdf-viewer"
+          node -e '
+            const fs = require("node:fs");
+            const path = "dist/hell/package.json";
+            const pkg = JSON.parse(fs.readFileSync(path, "utf8"));
+            pkg.name = "@antonpieper/hell-ui-angular";
+            pkg.publishConfig = { registry: "https://npm.pkg.github.com" };
+            fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + "\n");
+          '
           pnpm --dir ./dist/hell pack --pack-destination ../../ghpr-package
-          pnpm --dir ./dist/hell-pdf-viewer pack --pack-destination ../../ghpr-package
 
       - name: Upload GitHub Packages tarballs
         uses: actions/upload-artifact@v4

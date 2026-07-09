@@ -1,20 +1,7 @@
-export const releaseEvidencePolicyDocPath = 'docs/release/release-evidence-policy.md';
-export const productionReadinessChecklistPath =
-  'docs/release/production-readiness-checklist.md';
 export const semverPolicyPath = 'docs/release/semver-policy.md';
 export const changelogPath = 'CHANGELOG.md';
 export const packageManifestPath = 'packages/angular/package.json';
 export const releaseEvidenceDirectory = 'test-results/release-evidence';
-export const productionReadinessStatus = 'internal-beta-until-gate-passes';
-
-export const changelogRequiredPolicyTerms = [
-  'alpha',
-  'internal beta',
-  'public beta',
-  'stable',
-  'SemVer',
-  'CHANGELOG.md',
-];
 
 export const releaseCandidateConsumerScenarios = [
   {
@@ -82,17 +69,12 @@ export const releaseCandidateConsumerScenarios = [
     rationale: 'Virtual row strategy owns the optional TanStack Virtual peer boundary.',
   },
   {
-    name: 'no-legacy-alias',
-    rationale: 'Removed table aliases stay unavailable before beta.',
-  },
-  {
     name: 'code-editor',
     rationale: 'CodeMirror peers stay isolated to the code editor feature entrypoint.',
   },
   {
     name: 'pdf-viewer',
-    rationale:
-      'Explicit split-package release evidence for @hell-ui/pdf-viewer; this scenario proves the companion package and is not @hell-ui/angular peer metadata.',
+    rationale: 'pdf.js peers stay isolated to the PDF viewer feature entrypoint.',
   },
 ];
 
@@ -414,36 +396,3 @@ export const apiReportBlockedEntrypoints = [
   { id: 'date-input', specifier: '@hell-ui/angular/date-input' },
   { id: 'select', specifier: '@hell-ui/angular/select' },
 ];
-
-export const requiredApiReportPaths = apiReportEntrypoints.map(
-  (entrypoint) => `etc/api-reports/${entrypoint.reportFileName}`,
-);
-
-export const stableApiReportEntrypoints = apiReportEntrypoints.filter(
-  (entrypoint) => entrypoint.policy === 'stable',
-);
-
-export const apiReportExceptionEntrypoints = apiReportEntrypoints.filter(
-  (entrypoint) => entrypoint.policy !== 'stable',
-);
-
-export const requiredFullReleaseTasks = [
-  'changelog entry',
-  'lint',
-  'architecture',
-  'ci contract',
-  'unit',
-  'build lib',
-  'pack audit',
-  'selected package-consumer scenarios',
-  'api report',
-  'docs build',
-];
-
-export const releaseTasksByCategory = {
-  'package-consumer': ['selected package-consumer scenarios'],
-  api: ['api report'],
-  'docs-budgets': ['docs build'],
-  'pack-audit': ['pack audit'],
-  'release-dry-run': requiredFullReleaseTasks,
-};

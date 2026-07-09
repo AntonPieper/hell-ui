@@ -11,8 +11,6 @@ filtering, resizing, virtual rows, or table package work.
 - Do not add `@hell-ui/angular/data-table`, `table-virtual`, `table-cdk`, a
   normalized Hell table model, grid mode, row draft controller, column
   definition DSL, column visibility panel, or first-party data-table renderer.
-- The negative `no-legacy-alias` package-consumer scenario must keep removed
-  table paths failing to compile.
 
 ## TanStack Ownership
 

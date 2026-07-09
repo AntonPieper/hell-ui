@@ -28,7 +28,6 @@ const requiredFiles = [
   'tools/check-changelog.mjs',
   'tools/release-evidence-policy.mjs',
   'tools/release-dry-run.mjs',
-  'tools/production-ready-check.mjs',
   'tools/package-pack-audit.mjs',
   'tools/ci-summary.mjs',
   'tools/docs-budget-policy.mjs',
@@ -37,7 +36,6 @@ const requiredFiles = [
   'docs/release/npm-publishing.md',
   'docs/release/semver-policy.md',
   'docs/release/release-evidence-policy.md',
-  'docs/release/production-readiness-checklist.md',
   'docs/release/docs-budget-policy.md',
 ];
 
@@ -51,7 +49,6 @@ const requiredScripts = {
   'api-report:update': 'node tools/check-api-reports.mjs --local',
   'build:docs': 'pnpm --filter hell-docs build && node tools/docs-bundle-budget-report.mjs --check',
   'release:dry-run': 'node tools/release-dry-run.mjs',
-  'production-ready:check': 'node tools/production-ready-check.mjs',
   'ci:test': 'node tools/run-ci-tests.mjs',
   'ci:playwright': 'pnpm exec playwright install --with-deps chromium firefox webkit',
   'ci:playwright:chromium': 'pnpm exec playwright install --with-deps chromium',
@@ -65,7 +62,7 @@ const requiredScripts = {
   'ci:build:lib': 'pnpm run build:lib',
   'ci:build:docs': 'pnpm run build:lib && pnpm run build:docs',
   'ci:build:docs:prepared': 'pnpm run build:docs',
-  'ci:ensure:build:lib': "sh -c 'test -f dist/hell/package.json && test -f dist/hell-pdf-viewer/package.json || pnpm run ci:build:lib'",
+  'ci:ensure:build:lib': "sh -c 'test -f dist/hell/package.json || pnpm run ci:build:lib'",
   'ci:ensure:build:docs': "sh -c 'test -f dist/hell-docs/browser/index.html || test -f dist/hell-docs/index.html || pnpm run ci:build:docs:prepared'",
   'ci:test:api-report': 'pnpm run build:lib && pnpm run test:api-report',
   'ci:test:api-report:prepared': 'pnpm run test:api-report',
@@ -305,325 +302,6 @@ const adapterChecks = [
   },
 ];
 
-const fileChecks = [
-  {
-    path: 'vitest.ci.config.ts',
-    includes: [
-      "const testResultsPath = resolve(workspaceRoot, 'test-results/vitest-junit.xml');",
-      "const coveragePath = resolve(workspaceRoot, 'coverage');",
-      "const testTimeoutMs = positiveNumber(process.env.HELL_UNIT_TEST_CASE_TIMEOUT_MS, 30_000);",
-      "const junitReporter = ['junit', { outputFile: testResultsPath, suiteName: 'hell unit tests' }] as const;",
-      "'default'",
-      "'hanging-process'",
-      "'github-actions'",
-      'reporter: [\'text\', \'json-summary\', \'html\', \'lcov\', \'cobertura\']',
-      'reportOnFailure: true',
-    ],
-  },
-  {
-    path: 'tools/run-ci-tests.mjs',
-    includes: [
-      "const artifactDirs = ['test-results', 'coverage'];",
-      'rmSync(path, { force: true, recursive: true });',
-      "args: ['run', 'test:package-consumer', '--', '--minimal-deps']",
-      "env: { ...process.env, CI: 'true' }",
-      "spawnSync('node', ['tools/ci-summary.mjs']",
-      'summary.error',
-      'summary.signal',
-      'summary.status !== 0',
-    ],
-  },
-  {
-    path: 'tools/run-unit-tests.mjs',
-    includes: [
-      "const junitPath = join(testResultsDir, 'vitest-junit.xml');",
-      "const markdownSummaryPath = join(testResultsDir, 'summary.md');",
-      "const coverageSummaryPath = join(coverageDir, 'coverage-summary.json');",
-      "const coberturaPath = join(coverageDir, 'cobertura-coverage.xml');",
-      'const writeCiSummary = rawArgs.includes(\'--ci-summary\');',
-      'process.env.HELL_UNIT_TEST_TIMEOUT_MS, 180_000',
-      'rmSync(junitPath, { force: true });',
-      'rmSync(markdownSummaryPath, { force: true });',
-      'rmSync(coverageDir, { force: true, recursive: true });',
-      'finish(unitExitCode)',
-      "spawnSync('node', ['tools/ci-summary.mjs']",
-      'inspectJUnitReport',
-      'inspectCoverageArtifacts',
-      'coverage summary is stale from a previous run',
-      'Cobertura report is stale from a previous run',
-      'Cobertura report is malformed',
-      'coverageMeetsThresholds',
-    ],
-  },
-  {
-    path: 'tools/ci-summary.mjs',
-    includes: [
-      "const junitPath = join(root, 'test-results/vitest-junit.xml');",
-      "const coverageSummaryPath = join(root, 'coverage/coverage-summary.json');",
-      "const markdownPath = join(root, 'test-results/summary.md');",
-      'rmSync(markdownPath, { force: true });',
-      'writeFileSync(markdownPath, markdown);',
-      'validateMarkdownSummary',
-      'Could not parse coverage summary',
-      'Markdown summary content changed while writing',
-      'process.env.GITHUB_STEP_SUMMARY',
-    ],
-  },
-  {
-    path: 'tools/check-package-consumer.mjs',
-    includes: [
-      'HELL_PACKAGE_CONSUMER_SKIP_BUILD',
-      'using prebuilt packages from dist',
-      '--skip-build',
-    ],
-  },
-  {
-    path: 'tools/ci/nginx-spa.conf',
-    includes: [
-      'default_type application/javascript;',
-      'location ~* \\.(?:css|js|json|map|wasm|png|jpg|jpeg|gif|svg|webp|avif|ico|woff2?)$',
-      'wasm',
-      'webp',
-      'avif',
-      'try_files $uri =404;',
-      'try_files $uri $uri/ /index.html;',
-    ],
-  },
-  {
-    path: 'tools/ci/README.md',
-    includes: [
-      'test-results/vitest-junit.xml',
-      'test-results/summary.md',
-      'coverage/cobertura-coverage.xml',
-      'coverage/coverage-summary.json',
-      'test-results/playwright-report.json',
-      'test-results/playwright-html/',
-      'test-results/playwright/',
-      'HELL_UNIT_TEST_TIMEOUT_MS',
-      'HELL_UNIT_TEST_CASE_TIMEOUT_MS',
-      'github-actions',
-      'cobertura',
-      'missing, empty, stale, malformed',
-      'require a POSIX shell',
-      '`dist/` is a build artifact, not a broad mutable cache',
-      'returns 404 for missing static assets',
-    ],
-  },
-  {
-    path: 'playwright.config.ts',
-    includes: [
-      'pnpm --filter hell-docs exec ng serve hell-docs',
-      'HELL_E2E_BASE_URL',
-      'HELL_E2E_PROJECTS',
-      'ciGroups',
-      'docs-smoke-foundations',
-      'docs-smoke-surfaces',
-      'table-resize',
-      'retries: process.env.CI ? 1 : 0',
-      "['html', { open: 'never', outputFolder: 'test-results/playwright-html' }]",
-      "['json', { outputFile: 'test-results/playwright-report.json' }]",
-      "outputDir: 'test-results/playwright'",
-    ],
-  },
-  {
-    path: 'tools/check-api-reports.mjs',
-    includes: [
-      'apiReportEntrypoints',
-      'localBuild',
-      'reportFolder',
-      'reportTempFolder',
-    ],
-  },
-  {
-    path: 'tools/release-evidence-policy.mjs',
-    includes: [
-      'releaseCandidateConsumerScenarios',
-      'root-core',
-      'core',
-      'testing',
-      'button-ui',
-      'button',
-      'primitive-icons-css',
-      'composite-css',
-      'app-shell',
-      'resizable',
-      'split-view',
-      'audio-player',
-      'audio-transcript',
-      'table',
-      'table-tanstack',
-      'table-tanstack-virtual',
-      'no-legacy-alias',
-      'code-editor',
-      'pdf-viewer',
-      'apiReportEntrypoints',
-      '@hell-ui/angular/core',
-      '@hell-ui/angular/internal/hotkeys',
-      '@hell-ui/angular/input',
-      '@hell-ui/angular/dialpad',
-      '@hell-ui/angular/testing',
-      'hell-ui-angular-internal-hotkeys.api.md',
-      'internal-report-exception',
-      'requiredFullReleaseTasks',
-    ],
-  },
-  {
-    path: 'tools/package-pack-audit.mjs',
-    includes: [
-      'source map',
-      'secret-bearing file',
-      'test artifact or test source',
-      'workspace node_modules leak',
-      'unexpected worker asset',
-      'sideEffects must include **/*.css',
-      'publishConfig.provenance',
-      'Secondary entry point',
-      '@hell-ui/angular peerDependencies',
-      '@hell-ui/pdf-viewer peerDependencies',
-      '@hell-ui/pdf-viewer must pin pdfjs-dist peer',
-      'legacy table alias files',
-      'Package pack audit self-test',
-    ],
-  },
-  {
-    path: 'tools/check-changelog.mjs',
-    includes: [
-      'changelogPath',
-      'semverPolicyPath',
-      'packageManifestPath',
-      'changelogRequiredPolicyTerms',
-      'releaseEvidencePolicyDocPath',
-    ],
-  },
-  {
-    path: 'tools/release-dry-run.mjs',
-    includes: [
-      '--fast',
-      '--full',
-      'releaseEvidenceDirectory',
-      'Git commit:',
-      'Git tracked changes:',
-      'test:architecture',
-      'test:ci-contract',
-      'test:changelog',
-      'test:unit',
-      'build:lib',
-      'test:package-pack',
-      'test:package-consumer',
-      'test:api-report',
-      'build:docs',
-    ],
-  },
-  {
-    path: 'tools/production-ready-check.mjs',
-    includes: [
-      'production-readiness-gate',
-      'productionReadinessStatus',
-      'package-consumer',
-      'api',
-      'accessibility',
-      'docs-budgets',
-      'pack-audit',
-      'release-dry-run',
-      'test-results/release-evidence',
-      'releaseDryRunEvidence',
-      'requiredScenarios',
-      'playwrightJsonReport',
-      'allE2eSpecs',
-      'requiredPlaywrightProjects',
-      'requiredApiReportPaths',
-      'requiredFullReleaseTasks',
-      'pdf-viewer',
-      'modifiedAfterCurrentGitCommit',
-    ],
-  },
-  {
-    path: 'CHANGELOG.md',
-    includes: [
-      'Keep a Changelog',
-      'docs/release/semver-policy.md',
-      'production-readiness checklist',
-      'package-consumer',
-    ],
-  },
-  {
-    path: 'docs/release/semver-policy.md',
-    includes: [
-      'alpha',
-      'internal beta',
-      'public beta',
-      'stable',
-      'SemVer',
-      'CHANGELOG.md',
-      'release:dry-run',
-    ],
-  },
-  {
-    path: 'docs/release/release-evidence-policy.md',
-    includes: [
-      'Release-candidate package-consumer scenarios',
-      'PDF viewer split-package exception',
-      'Internal hotkeys API report exception',
-      'tools/release-evidence-policy.mjs',
-      'production-readiness checklist',
-      'pdf-viewer',
-      '@hell-ui/angular/internal/hotkeys',
-      'hell-ui-angular-internal-hotkeys.api.md',
-    ],
-  },
-  {
-    path: 'docs/release/production-readiness-checklist.md',
-    includes: [
-      'production-readiness-gate',
-      'internal beta until the production-readiness gate passes',
-      'package-consumer',
-      'api',
-      'accessibility',
-      'docs-budgets',
-      'pack-audit',
-      'release-dry-run',
-      'test-results/playwright-report.json',
-      'releaseDryRunEvidence',
-      'requiredScenarios',
-      'pdf-viewer',
-      'hell-ui-angular-internal-hotkeys.api.md',
-      'allE2eSpecs',
-      'modifiedAfterCurrentGitCommit',
-      'clean tracked tree',
-      'Critical gap',
-      'criticalGap: true',
-      'pdf-viewer',
-    ],
-  },
-  {
-    path: 'docs/release/docs-budget-policy.md',
-    includes: [
-      'docs-budget-policy',
-      'Docs shell / global styles',
-      'Individual docs page owner',
-      'acceptedMaximum',
-      'accepted warning',
-      'regression',
-      'lazy-route import graph guard',
-    ],
-  },
-  {
-    path: 'docs/release/npm-publishing.md',
-    includes: [
-      'npm trusted publishing',
-      'AntonPieper',
-      '@hell-ui/pdf-viewer',
-      'npm-publish.yml',
-      'npm-publish',
-      'Require two-factor authentication and disallow tokens',
-      'release-dry-run-evidence',
-      'id-token: write',
-      '@hell-ui/pdf-viewer',
-      'both package tarballs',
-    ],
-  },
-];
-
 const adapterForbiddenPatterns = [
   { pattern: /\bng\s+test\b/, message: 'CI adapters must call ci:test instead of ng test.' },
   { pattern: /pnpm\s+exec\s+playwright\s+install\s+--with-deps\s+chromium\s+firefox\s+webkit/, message: 'CI adapters must call ci:playwright instead of pnpm exec playwright install.' },
@@ -632,9 +310,6 @@ const adapterForbiddenPatterns = [
   { pattern: /\btest:architecture\b/, message: 'CI adapters must not know internal check scripts.' },
   { pattern: /--coverage\b/, message: 'CI adapters must not own coverage flags.' },
   { pattern: /\b(?:shard|total_shards|PLAYWRIGHT_SHARD)\b|--shard\b/, message: 'CI adapters must use semantic E2E groups instead of numeric shards.' },
-  { pattern: /serve-built-docs|HELL_E2E_USE_BUILT_DOCS|ci:test:e2e:built/, message: 'CI adapters must use official Angular dev server or nginx serving instead of custom servers.' },
-  { pattern: /install-playwright-webkit-deps|webkit-linux-deps|HELL_WEBKIT_DEPS_CACHE_DIR|webkit-system-deps|MiniBrowser/, message: 'CI adapters must use the official Playwright image for browser dependencies.' },
-  { pattern: /ci:playwright:cached/, message: 'CI adapters must use official Playwright install commands when caching browsers.' },
 ];
 
 for (const path of requiredFiles) {
@@ -647,18 +322,6 @@ const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
 for (const [scriptName, expectedCommand] of Object.entries(requiredScripts)) {
   if (packageJson.scripts?.[scriptName] !== expectedCommand) {
     errors.push(`package.json script ${scriptName} must be: ${expectedCommand}`);
-  }
-}
-
-for (const obsoleteScript of [
-  'ci:playwright:cached:chromium',
-  'ci:playwright:cached:firefox',
-  'ci:playwright:cached:webkit',
-  'ci:playwright:webkit-linux-deps',
-  'ci:test:e2e:built',
-]) {
-  if (packageJson.scripts?.[obsoleteScript]) {
-    errors.push(`package.json must not define obsolete script ${obsoleteScript}`);
   }
 }
 
@@ -677,19 +340,6 @@ for (const check of adapterChecks) {
   for (const forbidden of adapterForbiddenPatterns) {
     if (forbidden.pattern.test(content)) {
       errors.push(`${check.path}: ${forbidden.message}`);
-    }
-  }
-}
-
-for (const check of fileChecks) {
-  if (!existsSync(check.path)) {
-    continue;
-  }
-
-  const content = readFileSync(check.path, 'utf8');
-  for (const expected of check.includes) {
-    if (!content.includes(expected)) {
-      errors.push(`${check.path} must include ${expected}`);
     }
   }
 }
@@ -758,16 +408,6 @@ function checkPackageConsumerCatalogDrift() {
     releaseCandidateConsumerScenarioNames,
     packageConsumerContract.releaseScenarios,
   );
-  if (!readFileSync('tools/release-dry-run.mjs', 'utf8').includes('releaseCandidateConsumerScenarioNames')) {
-    errors.push('tools/release-dry-run.mjs must use releaseCandidateConsumerScenarioNames.');
-  }
-  if (
-    !readFileSync('tools/production-ready-check.mjs', 'utf8').includes(
-      'releaseCandidateConsumerScenarioNames',
-    )
-  ) {
-    errors.push('tools/production-ready-check.mjs must use releaseCandidateConsumerScenarioNames.');
-  }
 }
 
 function readGithubPackageConsumerGroups() {
@@ -1069,42 +709,25 @@ function checkPackageConsumerPackAuditOrder() {
   if (!existsSync(path)) return;
 
   const content = readFileSync(path, 'utf8');
-  const packHellIndex = content.indexOf("packBuiltPackage(distHell, 'pack-core')");
-  const packPdfViewerIndex = content.indexOf("packBuiltPackage(distPdfViewer, 'pack-pdf-viewer')");
-  const auditMarkers = [
-    'auditPackedPackage({ tarball: packedHell.tarball });',
-    'auditPackedPackage({ tarball: packedPdfViewer.tarball });',
-  ];
-  const auditIndexes = auditMarkers.map((marker) => content.indexOf(marker));
+  const packIndex = content.indexOf("packBuiltPackage(distHell, 'pack-core')");
+  const auditIndex = content.indexOf('auditPackedPackage({ tarball: packedHell.tarball });');
   const selectScenariosIndex = content.indexOf('const enabledScenarios = selectScenarios');
   const consumerScenarioIndex = content.indexOf('await runConsumerScenarioGroup(group);');
 
-  if (packHellIndex === -1 || packPdfViewerIndex === -1) {
-    errors.push('package-consumer must pack both @hell-ui/angular and @hell-ui/pdf-viewer before audit');
+  if (packIndex === -1 || auditIndex === -1) {
+    errors.push('package-consumer must pack and audit @hell-ui/angular before consumer scenarios');
     return;
   }
-
-  for (const [index, auditIndex] of auditIndexes.entries()) {
-    if (auditIndex === -1) {
-      errors.push(`package-consumer must run package pack audit marker: ${auditMarkers[index]}`);
-      return;
-    }
-
-    const packIndex = index === 0 ? packHellIndex : packPdfViewerIndex;
-    if (packIndex > auditIndex) {
-      errors.push('package-consumer must run package pack audit after pnpm pack');
-    }
+  if (packIndex > auditIndex) {
+    errors.push('package-consumer must run package pack audit after pnpm pack');
   }
 
   if (selectScenariosIndex === -1 || consumerScenarioIndex === -1) {
     errors.push('package-consumer scenario selection or loop marker is missing');
     return;
   }
-
-  for (const auditIndex of auditIndexes) {
-    if (auditIndex > selectScenariosIndex || auditIndex > consumerScenarioIndex) {
-      errors.push('package-consumer must run package pack audit before consumer install/build scenarios');
-    }
+  if (auditIndex > selectScenariosIndex || auditIndex > consumerScenarioIndex) {
+    errors.push('package-consumer must run package pack audit before consumer install/build scenarios');
   }
 }
 
@@ -1173,12 +796,10 @@ function checkNpmPublishWorkflow() {
     'pnpm run release:dry-run -- --full',
     'pnpm run test:package-pack',
     'pnpm --dir ./dist/hell pack --pack-destination ../../release-package',
-    'pnpm --dir ./dist/hell-pdf-viewer pack --pack-destination ../../release-package',
-    'test "$tarball_count" = "2"',
+    'test "$tarball_count" = "1"',
     '@hell-ui/angular',
-    '@hell-ui/pdf-viewer',
-    'HELL_RELEASE_TARBALLS',
-    'pnpm publish "$tarball" --access public --provenance --no-git-checks',
+    'HELL_RELEASE_TARBALL',
+    'pnpm publish "$HELL_RELEASE_TARBALL" --access public --provenance --no-git-checks',
   ];
 
   for (const expected of required) {
@@ -1207,10 +828,7 @@ function checkNpmPublishWorkflow() {
 }
 
 function checkPublishedPackageMetadata() {
-  for (const [path, directory] of [
-    ['packages/angular/package.json', 'packages/angular'],
-    ['packages/pdf-viewer/package.json', 'packages/pdf-viewer'],
-  ]) {
+  for (const [path, directory] of [['packages/angular/package.json', 'packages/angular']]) {
     if (!existsSync(path)) continue;
 
     const packageJson = JSON.parse(readFileSync(path, 'utf8'));

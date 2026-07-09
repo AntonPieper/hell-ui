@@ -60,8 +60,8 @@
                 "output": "assets"
               },
               {
-                "glob": "pdf-viewer.css",
-                "input": "node_modules/@hell-ui/pdf-viewer/src/lib/pdf-viewer",
+                "glob": "styles.css",
+                "input": "node_modules/@hell-ui/angular/features/pdf-viewer",
                 "output": "hell-ui/pdf-viewer/styles"
               },
               {
@@ -126,7 +126,7 @@
           "builder": "@angular/build:dev-server",
           "options": {
             "prebundle": {
-              "exclude": ["@hell-ui/angular", "@hell-ui/pdf-viewer"]
+              "exclude": ["@hell-ui/angular"]
             }
           },
           "configurations": {

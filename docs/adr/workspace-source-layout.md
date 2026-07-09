@@ -46,5 +46,7 @@ Angular Package Format artifacts.
 - `@hell-ui/angular` entrypoint metadata now lives with each entrypoint under
   `packages/angular` as `hell-entrypoint.json`; generated manifests are derived
   from those sidecars.
-- The split PDF package remains first-class as `packages/pdf-viewer`; it is not
-  folded back into `@hell-ui/angular`.
+- Amendment (2026-07-08): the PDF viewer was folded back into
+  `@hell-ui/angular` as `packages/angular/features/pdf-viewer` (see the heavy
+  feature package boundary ADR amendment); `packages/pdf-viewer` and the
+  `hell-pdf-viewer` project no longer exist.

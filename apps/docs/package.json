@@ -8,7 +8,6 @@
   },
   "dependencies": {
     "@hell-ui/angular": "workspace:*",
-    "@hell-ui/pdf-viewer": "workspace:*",
     "@angular/cdk": "catalog:",
     "@angular/common": "catalog:",
     "@angular/compiler": "catalog:",

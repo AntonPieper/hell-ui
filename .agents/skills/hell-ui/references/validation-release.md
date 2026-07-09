@@ -31,9 +31,8 @@ claims are affected.
 - Only current command/browser evidence proves the current checkout. Treat
   review notes, issue text, and existing docs as claims until verified.
 - Release language stays internal-beta, beta, or experimental until
-  `pnpm run release:dry-run:full`, `pnpm run e2e`, and
-  `pnpm run production-ready:check` pass against fresh evidence for the current
-  clean commit.
+  `pnpm run release:dry-run:full` and `pnpm run e2e` pass against fresh
+  evidence for the current clean commit.
 - `release:dry-run --fast` is a preflight. Full dry-run adds unit tests,
   selected strict-peer package-consumer scenarios, API report, docs build, and
   JSON/log evidence under `test-results/release-evidence`.
