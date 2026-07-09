@@ -95,6 +95,7 @@ function parseArgs(args) {
   const parsed = {};
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
+    if (arg === '--') continue;
     if (arg === '--help' || arg === '-h') {
       printUsage();
       process.exit(0);
