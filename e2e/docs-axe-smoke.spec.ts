@@ -167,6 +167,19 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['main'],
   },
   {
+    name: 'save-bar',
+    path: '/components/save-bar',
+    heading: 'Save bar',
+    include: ['main'],
+    prepare: async (page) => {
+      const example = page.locator('app-save-bar-contextual-form-example');
+      const name = example.getByRole('textbox', { name: 'Display name' });
+      await name.click();
+      await name.pressSequentially(' Jr.');
+      await expect(example.locator('hell-save-bar')).toBeVisible();
+    },
+  },
+  {
     name: 'slider',
     path: '/components/slider',
     heading: 'Slider',

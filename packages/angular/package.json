@@ -60,6 +60,7 @@
     "icon/icon.ts",
     "progress/progress.ts",
     "radio/radio.ts",
+    "save-bar/save-bar.ts",
     "separator/separator.ts",
     "skeleton/skeleton.ts",
     "slider/slider.ts",
@@ -231,6 +232,9 @@
     },
     "./resizable": {
       "@heinrich/source": "./resizable/public-api.ts"
+    },
+    "./save-bar": {
+      "@heinrich/source": "./save-bar/public-api.ts"
     },
     "./split-view": {
       "@heinrich/source": "./split-view/public-api.ts"
@@ -477,6 +481,11 @@
       "@heinrich/source": "./resizable/styles.css",
       "style": "./resizable/styles.css",
       "default": "./resizable/styles.css"
+    },
+    "./save-bar/styles.css": {
+      "@heinrich/source": "./save-bar/styles.css",
+      "style": "./save-bar/styles.css",
+      "default": "./save-bar/styles.css"
     },
     "./split-view/styles.css": {
       "@heinrich/source": "./split-view/styles.css",

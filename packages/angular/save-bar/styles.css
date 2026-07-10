@@ -1,0 +1,33 @@
+/* The save-bar Composite renders its built-in actions on the button
+   primitive, so it carries the button styles it composes. */
+@import '../button/styles.css';
+
+/* Save-bar layout and part defaults are Tailwind utility recipes in the component. */
+@source "./save-bar.ts";
+
+@layer components {
+  /* Contextual appearance slides the bar in from the bottom edge. The bar
+   * toggles between display:none and its recipe display, so the animation
+   * replays on every appearance without JavaScript. */
+  hell-save-bar[data-slot='root'][data-mode='contextual'] {
+    animation: hell-save-bar-in var(--hell-duration-base) var(--ease-hell-out);
+  }
+}
+
+@keyframes hell-save-bar-in {
+  from {
+    opacity: 0;
+    translate: 0 0.5rem;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* Reduced motion: the bar simply appears. */
+@media (prefers-reduced-motion: reduce) {
+  hell-save-bar[data-slot='root'] {
+    animation: none !important;
+  }
+}

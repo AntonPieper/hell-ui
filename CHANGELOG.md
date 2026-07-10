@@ -110,6 +110,28 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   gone. Evidence: part assertions in each entrypoint's spec and
   `pnpm run test:architecture`.
 
+- Added the `@hell-ui/angular/save-bar` Package Entry Point (Composite): a
+  save/discard action bar for edit surfaces with no form coupling — state flows
+  in through `dirty`/`busy`/`disabled` inputs (one-line reactive-form binding:
+  dirty/invalid/pending) and actions flow out through `saved`/`discarded`
+  outputs. The default `contextual` mode renders the bar only while dirty;
+  `persistent` mode keeps a stable footer for settings pages. `busy` gates both
+  actions and shows a progress glyph in Save; `disabled` gates Save only. The
+  bar renders in normal flow, sticky to the bottom of its nearest scroll
+  container (no fixed-position portal), never steals focus on appearance,
+  announces its message politely through the CDK LiveAnnouncer, and suppresses
+  its slide-in under `prefers-reduced-motion`. Extra consumer actions project
+  into the actions part before the built-in Discard/Save buttons; message and
+  button labels come from the Label Contract (`provideHellSaveBarLabels`).
+  Refine the `root`, `message`, `actions`, `save`, and `discard` parts through
+  the Part Style Map, and import `@hell-ui/angular/save-bar/styles.css` (which
+  carries the button primitive styles it composes) for the default visuals.
+  Evidence: `packages/angular/save-bar/save-bar.spec.ts`,
+  `e2e/save-bar-a11y-contracts.spec.ts`, the docs page at
+  `/components/save-bar` (including app-shell placement and confirm-service
+  discard recipes), and its axe WCAG A/AA smoke coverage. Closes #108
+  (spec #97).
+
 ### Changed
 
 - Release publishing now delegates its shared gates to `release:dry-run`, and

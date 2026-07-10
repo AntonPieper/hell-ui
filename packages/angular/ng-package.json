@@ -231,6 +231,11 @@
       "output": "radio"
     },
     {
+      "glob": "save-bar.ts",
+      "input": "save-bar",
+      "output": "save-bar"
+    },
+    {
       "glob": "separator.ts",
       "input": "separator",
       "output": "separator"
