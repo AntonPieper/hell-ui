@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {
+      "ignoreDependencies": [
+        // Declared in pnpm packageExtensions for ng-primitives.
+        "@angular/router"
+      ],
+      // TypeScript's importHelpers option consumes tslib without a source import.
+      "ignoreUnresolved": ["tslib"]
+    },
+    "apps/docs": {
+      "ignore": ["src/styles.css", "src/types/raw.d.ts"],
+      // The private source condition resolves Hell sources from this workspace.
+      "ignoreDependencies": ["tailwind-merge"]
+    },
+    "packages/angular": {
+      // Required to compile ng-primitives' undeclared router import.
+      "ignoreDependencies": ["@angular/router"]
+    }
+  }
+}

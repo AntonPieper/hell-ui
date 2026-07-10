@@ -1096,8 +1096,6 @@ function writeConsumerWorkspace(workspace, scenarios, dependencies = unionDepend
       '@angular/build',
       '@angular/cli',
       '@angular/compiler-cli',
-      '@emnapi/core',
-      '@emnapi/runtime',
       ...(usesTailwindCss ? tailwindPostcssDevDeps : []),
       'typescript',
     ]),

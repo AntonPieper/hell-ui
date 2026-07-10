@@ -410,7 +410,8 @@ import { TableA11yHarnessPage } from './table-a11y-harness.page';
             <li>
               Column passthrough: set <code>columnDef.meta.hell.headerClass</code> /
               <code>cellClass</code> / <code>footerClass</code> to feed the shell's cell
-              <code>ui</code>. <code>FlexRenderDirective</code> is re-exported for cell renderers.
+              <code>ui</code>. Import TanStack's <code>FlexRenderDirective</code> directly when
+              building renderers outside the shell.
             </li>
             <li>
               <b>Virtual</b> (<code>@hell-ui/angular/table-tanstack/virtual</code>):

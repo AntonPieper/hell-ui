@@ -7,6 +7,21 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Removed
 
+- Removed duplicate public pass-throughs from
+  `@hell-ui/angular/table-tanstack`: import TanStack's FlexRender helpers
+  directly from `@tanstack/angular-table`. Internal PDF/toast/tooling exports
+  with no callers and unused workspace catalog entries are gone as well.
+- Removed dead dependency and test-artifact surface. Knip is now the standard
+  dead-file/export/dependency gate, and strict consumer workspaces no longer
+  install unused `@emnapi` development packages. Local unit tests no longer
+  generate coverage, JUnit, JSON-summary, LCOV, and Cobertura output on every
+  run; CI and release checks use the explicit `test:coverage` path, and
+  Playwright no longer writes an unconsumed JSON report per shard.
+- Removed direct browser-global seams: runtimes now resolve observer
+  constructors and animation frames from the relevant owner window. ESLint
+  rejects direct observer and animation-frame
+  globals alongside `document`/`window`, closing SSR and portaled-document gaps
+  without another custom architecture registry.
 - Replaced hand-maintained CI sharding and its meta-guard with native tooling:
   Playwright now shards with `--shard=N/9` (every test in exactly one shard by
   construction), so the named `ciGroups` grep table in `playwright.config.ts`
@@ -107,6 +122,10 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Breaking changes
 
+- `@hell-ui/angular/table-tanstack` no longer re-exports
+  `FlexRenderDirective`/`FlexRender` or the other TanStack FlexRender helpers;
+  import them from `@tanstack/angular-table`. TanStack shell behavior is
+  unchanged.
 - Folded the split `@hell-ui/pdf-viewer` package back into `@hell-ui/angular`
   as the optional feature entry point `@hell-ui/angular/features/pdf-viewer`,
   reversing the pre-beta package split (see the amended heavy feature boundary

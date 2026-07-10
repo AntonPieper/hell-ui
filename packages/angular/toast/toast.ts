@@ -870,11 +870,10 @@ export class HellToaster {
   }
 
   private observeAll(): void {
-    // eslint-disable-next-line no-restricted-globals -- SSR feature-detect; ResizeObserver has no injectable seam
-    if (this.destroyed || typeof ResizeObserver === 'undefined') return;
+    const ResizeObserverCtor = this.host.ownerDocument.defaultView?.ResizeObserver;
+    if (this.destroyed || !ResizeObserverCtor) return;
     if (!this.ro) {
-      // eslint-disable-next-line no-restricted-globals -- guarded by the feature check above
-      this.ro = new ResizeObserver((entries) => {
+      this.ro = new ResizeObserverCtor((entries: ResizeObserverEntry[]) => {
         let changed = false;
         const next = new Map(this.heights());
         const viewport = this.viewportElement();

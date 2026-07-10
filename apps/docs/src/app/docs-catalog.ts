@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-export interface DocsNavItem {
+interface DocsNavItem {
   readonly path: string;
   readonly label: string;
   readonly icon: string;

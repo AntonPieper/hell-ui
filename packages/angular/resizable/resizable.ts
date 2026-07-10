@@ -132,11 +132,10 @@ export class HellResizable implements AfterContentInit {
   private readonly panes: HellResizablePane[] = [];
 
   constructor() {
-    // eslint-disable-next-line no-restricted-globals -- SSR feature-detect; ResizeObserver has no injectable seam
-    if (typeof ResizeObserver === 'undefined') return;
+    const ResizeObserverCtor = this.host.ownerDocument.defaultView?.ResizeObserver;
+    if (!ResizeObserverCtor) return;
 
-    // eslint-disable-next-line no-restricted-globals -- guarded by the feature check above
-    const observer = new ResizeObserver(() => this.scheduleFitPanesToAvailableSize());
+    const observer = new ResizeObserverCtor(() => this.scheduleFitPanesToAvailableSize());
     observer.observe(this.host);
     this.destroyRef.onDestroy(() => {
       observer.disconnect();

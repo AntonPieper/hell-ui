@@ -170,7 +170,7 @@ export class HellDialogTrigger<TData = unknown, TResult = unknown> extends HellN
 
   private restoreFocusToTrigger(): void {
     const trigger = this.element.nativeElement;
-    requestAnimationFrame(() => {
+    trigger.ownerDocument.defaultView?.requestAnimationFrame(() => {
       if (!trigger.isConnected || this.disabled()) return;
       trigger.focus({ preventScroll: true });
     });

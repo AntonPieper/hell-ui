@@ -400,17 +400,16 @@ export class HellPdfViewer {
 
     if (!this.runtime.hasDocument || canvases.length <= firstBatch.length) return;
 
-    // eslint-disable-next-line no-restricted-globals -- feature-detect before lazy thumb rendering
-    if (typeof IntersectionObserver === 'undefined') {
+    const IntersectionObserverCtor = overview.ownerDocument.defaultView?.IntersectionObserver;
+    if (!IntersectionObserverCtor) {
       queueMicrotask(() => {
         void this.runtime.renderThumbs(canvases, () => this.overviewOpen());
       });
       return;
     }
 
-    // eslint-disable-next-line no-restricted-globals -- guarded by the feature check above
-    const observer = new IntersectionObserver(
-      (entries) => {
+    const observer = new IntersectionObserverCtor(
+      (entries: IntersectionObserverEntry[]) => {
         if (!this.overviewOpen()) return;
 
         const visible = entries
@@ -440,9 +439,11 @@ export class HellPdfViewer {
   }
   protected openFind() {
     this.findOpen.set(true);
+    const view = this.host.nativeElement.ownerDocument.defaultView;
+    if (!view) return;
     // Wait two frames so Angular's CD has materialized the find input.
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() => {
+    view.requestAnimationFrame(() =>
+      view.requestAnimationFrame(() => {
         const input = this.findInputRef()?.nativeElement;
         input?.focus();
         input?.select();
@@ -457,7 +458,9 @@ export class HellPdfViewer {
     this.findTotal.set(0);
     this.runtime.closeFind(this);
     // Return focus to the viewer so subsequent keyboard shortcuts work.
-    requestAnimationFrame(() => this.host.nativeElement.focus());
+    this.host.nativeElement.ownerDocument.defaultView?.requestAnimationFrame(() =>
+      this.host.nativeElement.focus(),
+    );
   }
 
   protected onFindEscape(e: Event) {

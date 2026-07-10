@@ -62,7 +62,15 @@ export default tseslint.config(
       ],
       'no-restricted-globals': [
         'error',
-        ...['document', 'window', 'ResizeObserver', 'IntersectionObserver'].map((name) => ({
+        ...[
+          'document',
+          'window',
+          'ResizeObserver',
+          'IntersectionObserver',
+          'MutationObserver',
+          'requestAnimationFrame',
+          'cancelAnimationFrame',
+        ].map((name) => ({
           name,
           message: `Access ${name} through an injected seam (DOCUMENT, ownerDocument, defaultView) so SSR and portalled DOM stay correct; add a justified eslint-disable for deliberate typeof guards.`,
         })),
