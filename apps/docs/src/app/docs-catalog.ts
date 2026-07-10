@@ -398,6 +398,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
         loadComponent: () =>
           import('./pages/components/split-view/split-view.page').then((m) => m.SplitViewPage),
       },
+      {
+        routePath: 'components/toolbar',
+        label: 'Toolbar',
+        icon: 'faSolidSliders',
+        loadComponent: () =>
+          import('./pages/components/toolbar/toolbar.page').then((m) => m.ToolbarPage),
+      },
     ],
   },
   {

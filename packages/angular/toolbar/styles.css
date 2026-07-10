@@ -1,0 +1,56 @@
+/* Toolbar defaults are Tailwind utility recipes in the component. */
+@source "./toolbar.ts";
+
+@layer components {
+  hell-toolbar[data-slot='root'] {
+    display: flex;
+    width: 100%;
+    min-width: calc(var(--spacing) * 0);
+  }
+
+  hell-toolbar[data-slot='root'][data-orientation='vertical'] {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  hell-toolbar[data-slot='root'] [data-hell-toolbar-actions] {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: var(--spacing-hell-2);
+    min-width: calc(var(--spacing) * 0);
+    flex-wrap: nowrap;
+    /* Clip the transient all-inline state before the first measurement so no
+       action ever spills out of the container or forces a horizontal
+       scrollbar; overflow collapses into the trailing menu instead. */
+    overflow: hidden;
+  }
+
+  hell-toolbar[data-slot='root'][data-orientation='vertical'] [data-hell-toolbar-actions] {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  hell-toolbar[data-slot='root'] [data-slot='action'],
+  hell-toolbar[data-slot='root'] [data-slot='overflowTrigger'] {
+    flex: 0 0 auto;
+  }
+
+  hell-toolbar[data-slot='root'] .hell-toolbar-action-label {
+    white-space: nowrap;
+  }
+
+  hell-toolbar[data-slot='root'] .hell-toolbar-overflow-glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  [data-slot='overflowItem'] .hell-toolbar-overflow-item-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: calc(var(--spacing) * 4);
+  }
+}

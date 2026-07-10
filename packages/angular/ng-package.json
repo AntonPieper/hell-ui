@@ -156,6 +156,11 @@
       "output": "split-view"
     },
     {
+      "glob": "toolbar.ts",
+      "input": "toolbar",
+      "output": "toolbar"
+    },
+    {
       "glob": "pagination.ts",
       "input": "pagination",
       "output": "pagination"
