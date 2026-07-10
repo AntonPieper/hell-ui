@@ -98,7 +98,7 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
       },
       {
         routePath: 'accessibility',
-        label: 'Accessibility matrix',
+        label: 'Accessibility',
         icon: 'faSolidUniversalAccess',
         loadComponent: () =>
           import('./pages/accessibility/accessibility.page').then((m) => m.AccessibilityPage),

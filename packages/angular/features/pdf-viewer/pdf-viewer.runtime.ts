@@ -718,7 +718,7 @@ function getTouchPinchPoints(
 function isPdfEditableTarget(target: EventTarget | null): boolean {
   if (!isElementLike(target)) return false;
 
-  const element = target as Element;
+  const element = target;
   return (
     (typeof element.matches === 'function' && element.matches('input,textarea,select')) ||
     isInsideEditableRegion(element)

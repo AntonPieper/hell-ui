@@ -312,7 +312,7 @@ export class HellToastService {
       [toast.title, toast.description].filter((part) => part.length > 0).join('. ') ||
       (toast.template ? this.labels.notification : '');
     if (!announcement) return;
-    this.announcer.announce(announcement, 'polite');
+    void this.announcer.announce(announcement, 'polite');
   }
 
   private clearTimer(id: number): void {

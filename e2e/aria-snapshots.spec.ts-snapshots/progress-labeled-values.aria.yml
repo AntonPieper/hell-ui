@@ -1,4 +1,0 @@
-- text: /Storage used \d+%/
-- progressbar "Storage used"
-- button /−\d+/
-- button /\+\d+/

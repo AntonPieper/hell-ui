@@ -1,6 +1,0 @@
-- listbox:
-  - option "Lowest"
-  - option "Low"
-  - option "Medium" [disabled]
-  - option "High"
-  - option "Highest"

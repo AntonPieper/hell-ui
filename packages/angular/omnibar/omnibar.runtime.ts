@@ -34,7 +34,7 @@ export class HellOmnibarRuntime<T = unknown> {
 
   readonly query = signal('');
   readonly loading = signal(false);
-  readonly error = signal<unknown | null>(null);
+  readonly error = signal<unknown>(null);
   readonly results = signal<readonly HellSearchResult<T>[]>([]);
   readonly items = signal<HellOmnibarRegisteredItem[]>([]);
   readonly actionItems = signal<HellOmnibarRegisteredAction[]>([]);

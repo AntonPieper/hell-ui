@@ -32,9 +32,10 @@ Trusted publishing works only when the npm trusted-publisher record exactly matc
 
 The release workflow lives at `.github/workflows/npm-publish.yml` in this repository.
 
-- Tag pushes matching `v*.*.*` run the release gate first: changelog, lint,
-  architecture, unit tests, library build, pack audit, package-consumer
-  scenarios, API report, and docs build.
+- Tag pushes matching `v*.*.*` run `pnpm release:dry-run` first, then the
+  package-consumer scenarios and docs build. The shared dry-run owns changelog,
+  lint, dead-code, architecture, coverage, library build, package lint/audit,
+  and API-report checks so local and tagged release gates cannot drift.
 - The release publishes `@hell-ui/angular`; the tag must match the package version.
 - A separate no-OIDC `build-package` job rebuilds, pack-audits, and uploads the package tarball as `release-package`.
 - The publish job has `needs: [release-gate, build-package]`, so it only runs when every gate passed.

@@ -59,8 +59,8 @@ export class HellAudioTranscriptUnavailableRuntime implements HellAudioTranscrip
     this.copied.set(false);
   }
 
-  async copyTranscript(): Promise<void> {
-    return undefined;
+  copyTranscript(): Promise<void> {
+    return Promise.resolve();
   }
 
   destroy(): void {

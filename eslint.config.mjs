@@ -36,6 +36,30 @@ export default tseslint.config(
     },
   },
   {
+    files: ['packages/angular/**/*.ts', 'apps/docs/src/**/*.ts'],
+    ignores: ['packages/angular/**/*.spec.ts', 'apps/docs/src/**/*.spec.ts'],
+    extends: [...tseslint.configs.recommendedTypeChecked],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      // Angular ElementRef, DebugElement, and several wrapped primitive APIs
+      // intentionally expose `any`. Keep the type-aware correctness preset,
+      // but do not turn those framework seams into repo-wide casting churn.
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      // Promise-returning adapter implementations may intentionally use async
+      // to normalize synchronous browser failures into their Promise contract.
+      '@typescript-eslint/require-await': 'off',
+    },
+  },
+  {
     // Library production code: style customization goes through the Part
     // Style Map (never NgClass), host bindings use decorator host metadata,
     // and browser globals stay behind injected seams (justified inline

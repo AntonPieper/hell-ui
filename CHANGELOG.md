@@ -241,8 +241,6 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `grep -r "hell-button" packages apps e2e`, `pnpm run test:unit`, and
   `pnpm run e2e` (table docs regressions).
 
-### Removed
-
 - The production-readiness gate (`tools/production-ready-check.mjs`,
   `docs/release/production-readiness-checklist.md`, and the
   `production-ready:check` script). The gate validated a checklist document
@@ -271,6 +269,11 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   adapters, scripts, scenario catalog, and e2e groups staying in sync.
   Evidence: `pnpm run test:ci-contract`, `pnpm run test:changelog`, and
   `pnpm run test:architecture`.
+- Broad documentation accessibility-tree snapshots and their 38 snapshots.
+  Explicit role, name, state, keyboard, focus, and axe assertions remain the
+  accessibility contract without snapshot churn from unrelated demo copy.
+- Package-consumer registry/store preflights and five diagnostic package-manager
+  commands that duplicated the real strict install and production build.
 
 ### Added
 
@@ -288,8 +291,28 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   gone. Evidence: part assertions in each entrypoint's spec and
   `pnpm run test:architecture`.
 
+### Changed
+
+- Release publishing now delegates its shared gates to `release:dry-run`, and
+  package validation runs Publint before the Hell-specific tarball audit.
+- The workspace lockfile is deduplicated and build/test transitive dependencies
+  are constrained to patched releases; both full and production audits are clean.
+- The docs initial-bundle warning now starts just above the accepted baseline
+  instead of warning on every successful production build; the 1.05 MB failure
+  threshold remains unchanged. Playwright now exercises that production output
+  through Vite preview instead of running optimized bundles through a dev
+  server; the unused stats-file output is gone as well.
+- Accessibility documentation now describes stable ownership boundaries and
+  consumer responsibilities instead of maintaining a per-demo test matrix
+  that had already drifted from the executable coverage.
+- Production TypeScript is linted with type information. Test fixtures stay on
+  the syntax-aware ruleset because Angular and third-party test doubles expose
+  deliberately loose values that would make type-aware lint mostly noise.
+
 ### Fixed
 
+- TanStack column filters no longer render object-valued state as the literal
+  text `[object Object]`; only scalar filter values are shown in the input.
 - Multiple-select `[hellToggleGroup]` items no longer expose `role="radio"`
   and `aria-checked`; they are native toggle buttons announcing selection via
   `aria-pressed`, matching the WAI-ARIA toggle-button pattern. This works

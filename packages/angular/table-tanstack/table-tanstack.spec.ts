@@ -14,6 +14,7 @@ import {
 
 import {
   HellTableStatus,
+  HellTanStackColumnFilter,
   HellTanStackGlobalFilter,
   HellTanStackPagination,
   HellTanStackTable,
@@ -175,6 +176,23 @@ class VirtualRowsHost {
 class FilterHost extends ShellHost {}
 
 @Component({
+  selector: 'hell-test-column-filter-host',
+  standalone: true,
+  imports: [HellTanStackColumnFilter],
+  template: `<hell-tanstack-column-filter [table]="table" columnId="name" />`,
+})
+class ColumnFilterHost {
+  readonly table = createAngularTable<Person>(() => ({
+    data: people,
+    columns: [{ accessorKey: 'name', header: 'Name' }],
+    getCoreRowModel: getCoreRowModel(),
+    initialState: {
+      columnFilters: [{ id: 'name', value: { term: 'Ada' } }],
+    },
+  }));
+}
+
+@Component({
   selector: 'hell-test-styled-host',
   standalone: true,
   imports: [HellTanStackTable, HellTableShellToolbar, HellTableShellFooter, HellTanStackPagination],
@@ -211,6 +229,7 @@ describe('Hell TanStack table shell', () => {
         MissingStatusHost,
         VirtualRowsHost,
         FilterHost,
+        ColumnFilterHost,
         StyledShellHost,
       ],
     }).compileComponents();
@@ -284,6 +303,14 @@ describe('Hell TanStack table shell', () => {
     expect(input?.classList.contains('inline-flex')).toBe(true);
     expect(input?.classList.contains('min-w-[calc(var(--spacing)*44)]')).toBe(true);
     expect(input?.classList.contains('rounded-hell-sm')).toBe(true);
+  });
+
+  it('does not expose object-valued column filters as "[object Object]" text', () => {
+    const fixture = TestBed.createComponent(ColumnFilterHost);
+    fixture.detectChanges();
+    const input = fixture.nativeElement.querySelector('input[hellInput]') as HTMLInputElement | null;
+
+    expect(input?.value).toBe('');
   });
 
   it('renders loading and error states from the single status value', () => {

@@ -1,5 +1,0 @@
-- tablist "Account sections":
-  - tab "General" [selected]
-  - tab "Security"
-  - tab "Billing"
-- tabpanel "General": Account name, language and timezone preferences.

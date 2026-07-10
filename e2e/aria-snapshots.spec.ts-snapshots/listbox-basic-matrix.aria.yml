@@ -1,5 +1,0 @@
-- text: Assign owner
-- listbox "Assign owner":
-  - option "Ada Lovelace Platform"
-  - option "Grace Hopper Compilers" [selected]
-  - option "Katherine Johnson Navigation"

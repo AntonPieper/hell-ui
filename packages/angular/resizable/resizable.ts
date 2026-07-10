@@ -122,7 +122,7 @@ export class HellResizable implements AfterContentInit {
   /** When false, container resizes do not rebalance panes after user sizing. */
   readonly rescaleOnResize = input(true, { transform: booleanAttribute });
 
-  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly destroyRef = inject(DestroyRef);
   private readonly constrained = signal(false);
   private userSized = false;
@@ -185,9 +185,9 @@ export class HellResizable implements AfterContentInit {
     const horizontal = this.orientation() === 'horizontal';
     const total = horizontal ? this.host.clientWidth : this.host.clientHeight;
     let handlesSize = 0;
-    const handles = (this.host as HTMLElement).querySelectorAll(
+    const handles = this.host.querySelectorAll<HTMLElement>(
       ':scope > [hellResizableHandle][data-slot="root"]',
-    ) as NodeListOf<HTMLElement>;
+    );
     handles.forEach((h: HTMLElement) => {
       handlesSize += horizontal ? h.offsetWidth : h.offsetHeight;
     });
@@ -312,7 +312,7 @@ export class HellResizablePane implements OnDestroy {
   /** The parent resizable group this pane belongs to. */
   readonly resizable = inject(HellResizable);
   /** The pane's host element. */
-  readonly host: HTMLElement = inject(ElementRef<HTMLElement>).nativeElement;
+  readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   /** Main axis inherited from the parent resizable group. */
   protected readonly orientation = this.resizable.orientation;
 
@@ -433,7 +433,7 @@ export class HellResizableHandle implements AfterViewInit, OnDestroy {
   /** Current `aria-valuenow` reflecting the adjacent panes' size split. */
   protected readonly ariaValueNow = signal<number | null>(null);
 
-  private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   /** The parent resizable group this handle belongs to. */
   protected readonly resizable = inject(HellResizable);
   private readonly resizeInteraction = new HellResizePairInteractionController<HellResizablePane>({
@@ -465,7 +465,7 @@ export class HellResizableHandle implements AfterViewInit, OnDestroy {
     if (!parent) return null;
 
     const panes = this.resizable.getPanes();
-    const children = Array.from(parent.children) as HTMLElement[];
+    const children = Array.from(parent.querySelectorAll<HTMLElement>(':scope > *'));
     const handleIndex = children.indexOf(this.host);
     if (handleIndex < 0) return null;
 

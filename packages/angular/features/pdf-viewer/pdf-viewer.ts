@@ -277,57 +277,16 @@ export class HellPdfViewer {
       this.runtime.cleanup();
     });
 
-    afterNextRender(async () => {
-      const worker = this.worker();
-
-      try {
-        await this.runtime.bootstrap(
-          this.containerRef().nativeElement,
-          {
-            onPageChange: (page) => {
-              this.page.set(page);
-              this.pageChange.emit(page);
-            },
-            onZoomChange: (displayValue, emittedValue) => {
-              this.zoomValue.set(displayValue);
-              this.zoomChange.emit(emittedValue);
-            },
-            onPagesReady: () => this.ready.set(true),
-            onFindState: (state) => {
-              if (state.current != null) this.findCurrent.set(state.current);
-              if (state.total != null) this.findTotal.set(state.total);
-              if (state.status) this.findStatus.set(state.status);
-            },
-          },
-          worker ? { worker } : undefined,
-        );
-        this.bootstrapped.set(true);
-      } catch (e) {
-        this.runtime.cleanup();
-        this.error.emit(e);
-      }
+    afterNextRender(() => {
+      void this.bootstrapRuntime();
     });
 
     // Single source of truth for loading: re-runs whenever `src` changes
     // OR when bootstrap finishes (whichever comes second).
-    effect(async () => {
+    effect(() => {
       const src = this.src();
       if (!this.bootstrapped() || !src) return;
-      try {
-        this.ready.set(false);
-        this.zoomValue.set(null);
-        this.totalPages.set(0);
-        await this.runtime.loadDocument(src, {
-          initialPage: this.initialPage(),
-          initialZoom: this.initialZoom(),
-          onLoaded: (totalPages) => {
-            this.totalPages.set(totalPages);
-            this.loaded.emit({ totalPages });
-          },
-        });
-      } catch (e) {
-        this.error.emit(e);
-      }
+      void this.loadSource(src);
     });
 
     // When overview opens (or pages list changes), render visible thumbs.
@@ -348,6 +307,55 @@ export class HellPdfViewer {
         ),
       );
     });
+  }
+
+  private async bootstrapRuntime(): Promise<void> {
+    const worker = this.worker();
+
+    try {
+      await this.runtime.bootstrap(
+        this.containerRef().nativeElement,
+        {
+          onPageChange: (page) => {
+            this.page.set(page);
+            this.pageChange.emit(page);
+          },
+          onZoomChange: (displayValue, emittedValue) => {
+            this.zoomValue.set(displayValue);
+            this.zoomChange.emit(emittedValue);
+          },
+          onPagesReady: () => this.ready.set(true),
+          onFindState: (state) => {
+            if (state.current != null) this.findCurrent.set(state.current);
+            if (state.total != null) this.findTotal.set(state.total);
+            if (state.status) this.findStatus.set(state.status);
+          },
+        },
+        worker ? { worker } : undefined,
+      );
+      this.bootstrapped.set(true);
+    } catch (error) {
+      this.runtime.cleanup();
+      this.error.emit(error);
+    }
+  }
+
+  private async loadSource(src: string | URL | ArrayBuffer): Promise<void> {
+    try {
+      this.ready.set(false);
+      this.zoomValue.set(null);
+      this.totalPages.set(0);
+      await this.runtime.loadDocument(src, {
+        initialPage: this.initialPage(),
+        initialZoom: this.initialZoom(),
+        onLoaded: (totalPages) => {
+          this.totalPages.set(totalPages);
+          this.loaded.emit({ totalPages });
+        },
+      });
+    } catch (error) {
+      this.error.emit(error);
+    }
   }
 
   protected next() {

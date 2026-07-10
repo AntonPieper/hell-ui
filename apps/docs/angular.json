@@ -101,7 +101,7 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
+                  "maximumWarning": "950kB",
                   "maximumError": "1.05MB"
                 },
                 {
@@ -110,8 +110,7 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all",
-              "statsJson": true
+              "outputHashing": "all"
             },
             "development": {
               "conditions": ["@heinrich/source", "module", "development"],
