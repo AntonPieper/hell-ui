@@ -36,6 +36,15 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   basic, danger, countdown, and projected-content examples plus an
   unsaved-changes route-guard recipe. Ships `@hell-ui/angular/confirm/styles.css`.
   See #104.
+- Added the `@hell-ui/angular/empty-state` Package Entry Point: a
+  `hell-empty-state` owned-anatomy component with `root`, `media`, `title`,
+  `description`, and `actions` Public Parts. A `preset`
+  (`noData | noResults | error | forbidden`) supplies a default glyph and Label
+  Contract copy (overridable via `provideHellEmptyStateLabels` or by projecting
+  `hellEmptyStateMedia`/`Title`/`Description`/`Actions`), the title promotes to a
+  heading via `headingLevel`, and the component owns container-filling centering.
+  The TanStack Table Shell's default empty chrome (`HellDefaultTableEmptyState`)
+  now recomposes this component. Closes #103.
 
 ### Removed
 

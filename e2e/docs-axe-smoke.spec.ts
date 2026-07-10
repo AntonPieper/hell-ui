@@ -100,6 +100,12 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['main'],
   },
   {
+    name: 'empty-state',
+    path: '/components/empty-state',
+    heading: 'Empty state',
+    include: ['main'],
+  },
+  {
     name: 'flyout',
     path: '/components/flyout',
     heading: 'Flyout',

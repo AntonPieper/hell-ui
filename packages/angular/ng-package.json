@@ -196,6 +196,11 @@
       "output": "drop-zone"
     },
     {
+      "glob": "empty-state.ts",
+      "input": "empty-state",
+      "output": "empty-state"
+    },
+    {
       "glob": "icon.ts",
       "input": "icon",
       "output": "icon"

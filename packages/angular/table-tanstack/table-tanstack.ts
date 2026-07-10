@@ -29,6 +29,7 @@ import {
   type Table,
 } from '@tanstack/angular-table';
 import { HellButton } from '@hell-ui/angular/button';
+import { HellEmptyState } from '@hell-ui/angular/empty-state';
 import { HELL_TABLE_UTILITIES_DIRECTIVES } from '@hell-ui/angular/table';
 import {
   HellInput,
@@ -958,7 +959,8 @@ export class HellDefaultTableLoadingState {}
   selector: 'hell-default-table-empty-state',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<span class="hell-table-shell-status">No rows.</span>`,
+  imports: [HellEmptyState],
+  template: `<hell-empty-state preset="noData" />`,
 })
 export class HellDefaultTableEmptyState {}
 
