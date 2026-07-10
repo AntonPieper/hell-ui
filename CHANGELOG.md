@@ -7,6 +7,24 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- Added the `@hell-ui/angular/page-header` Package Entry Point (Composite): a
+  `hell-page-header` slot-based page chrome with `root`, `leading`, `titleGroup`,
+  `title`, `meta`, `description`, and `toolbar` Public Parts. Everything is
+  content projection of real Hell components — no config-array API. The title is
+  marked with `hellPageHeaderTitle` and exposed as the page's main heading via
+  `role="heading"` at a configurable `level` (default `1`); badges go in
+  `hellPageHeaderMeta`, a supporting line in `hellPageHeaderDescription`, and
+  trailing actions (typically `hell-toolbar`) in `hellPageHeaderToolbar`. The
+  optional `hell-page-header-back` affordance renders a ghost icon button with an
+  inline chevron (no icon-package dependency), takes its accessible name from the
+  page-header Label Contract (`provideHellPageHeaderLabels`), and emits a `back`
+  event only — routing stays with the app. Breadcrumbs and the back button
+  compose into the responsive `leading` region. Refine the parts through the Part
+  Style Map and import `@hell-ui/angular/page-header/styles.css` for the default
+  layout. Evidence: `packages/angular/page-header/page-header.spec.ts`,
+  `e2e/page-header-contracts.spec.ts`, the docs page at `/components/page-header`
+  (list-screen and detail-screen anatomies), and its axe WCAG A/AA smoke
+  coverage. Closes #116 (spec #96).
 - Added `HELL_CHIP_DIRECTIVES` to `@hell-ui/angular/chip` (array of
   `HellChipSet`, `HellChip`, and `HellChipRemove`) for bulk `imports`, matching
   the alert/empty-state/toolbar convention, plus a `--hell-icon-close` token and

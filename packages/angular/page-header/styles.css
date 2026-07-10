@@ -1,0 +1,6 @@
+/* The page-header Composite renders its back affordance on the button
+   primitive, so it carries the button styles it composes. */
+@import '../button/styles.css';
+
+/* Page-header recipe defaults are Tailwind utility recipes in the component. */
+@source "./page-header.ts";

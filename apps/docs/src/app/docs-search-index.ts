@@ -1953,6 +1953,27 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'composite hellToggleGroup hellToggleGroupItem hellTooltip hellTooltipTrigger formatting toolbar icon-only bold italic underline aria-label',
   },
   {
+    title: 'Page header: List screen',
+    path: '/components/page-header',
+    detail: 'components/page-header/examples/list.example.ts',
+    terms:
+      'page header page-header components/page-header/examples/list.example hell-page-header hellPageHeaderTitle hellPageHeaderMeta hellPageHeaderDescription hellPageHeaderToolbar HELL_PAGE_HEADER_DIRECTIVES hell-toolbar heading title meta badge tag description toolbar list screen composite chrome',
+  },
+  {
+    title: 'Page header: Detail screen',
+    path: '/components/page-header',
+    detail: 'components/page-header/examples/detail.example.ts',
+    terms:
+      'page header page-header components/page-header/examples/detail.example hell-page-header hell-page-header-back HellPageHeaderBack back affordance event breadcrumbs hellBreadcrumbs hellPageHeaderLeading hellPageHeaderToolbar hell-toolbar detail screen leading title composite',
+  },
+  {
+    title: 'Page header: Styling',
+    path: '/components/page-header',
+    detail: 'components/page-header/examples/styling.example.ts',
+    terms:
+      'page header styling components/page-header/examples/styling.example hell-page-header ui HellPageHeaderUi HellPageHeaderPart part style map root leading titleGroup title meta description toolbar level heading tokens',
+  },
+  {
     title: 'Toolbar: Basic',
     path: '/components/toolbar',
     detail: 'components/toolbar/examples/basic.example.ts',
@@ -2147,6 +2168,13 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
     detail: 'hell-split-view, hellSplitPrimary, hellSplitDetail',
     terms:
       'HELL_SPLIT_VIEW_DIRECTIVES hell-split-view hellSplitPrimary hellSplitDetail compactBelow detailOpen detailOpenChange itemNavigation previousItem nextItem responsive resizable panes',
+  },
+  {
+    title: 'Page header directives',
+    path: '/components/page-header',
+    detail: 'hell-page-header, hell-page-header-back, hellPageHeaderTitle',
+    terms:
+      'HELL_PAGE_HEADER_DIRECTIVES hell-page-header hell-page-header-back HellPageHeaderBack hellPageHeaderLeading hellPageHeaderTitle hellPageHeaderMeta hellPageHeaderDescription hellPageHeaderToolbar level heading role aria-level back output provideHellPageHeaderLabels HELL_PAGE_HEADER_LABELS HellPageHeaderPart HellPageHeaderUi composite slot chrome breadcrumbs toolbar',
   },
   {
     title: 'Toolbar directives',
