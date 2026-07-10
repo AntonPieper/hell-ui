@@ -504,7 +504,8 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
   private onWheelZoom(event: WheelEvent): void {
     if (!this.session || !this.container || !event.ctrlKey) return;
 
-    const scaleFactor = getCtrlWheelScaleFactor(event);
+    const viewportHeight = this.container.ownerDocument.defaultView?.innerHeight ?? 0;
+    const scaleFactor = getCtrlWheelScaleFactor(event, viewportHeight);
     if (!Number.isFinite(scaleFactor) || scaleFactor <= 0 || scaleFactor === 1) return;
 
     event.preventDefault();

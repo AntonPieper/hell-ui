@@ -224,7 +224,7 @@ function logPackedFiles(files, logger) {
   for (const file of files) logger.log(`[package-pack-audit] - ${file}`);
 }
 
-export function findForbiddenPackedFileFailures(files) {
+function findForbiddenPackedFileFailures(files) {
   const failures = [];
   const forbidden = [
     {
@@ -775,4 +775,3 @@ function matchesPackedPattern(target, fileSet) {
   const [prefix, suffix] = target.split('*');
   return [...fileSet].some((file) => file.startsWith(prefix) && file.endsWith(suffix));
 }
-

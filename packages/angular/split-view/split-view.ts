@@ -291,11 +291,10 @@ export class HellSplitView {
     const update = () => this.inlineSize.set(this.host.clientWidth);
     queueMicrotask(update);
 
-    // eslint-disable-next-line no-restricted-globals -- SSR feature-detect; ResizeObserver has no injectable seam
-    if (typeof ResizeObserver === 'undefined') return;
+    const ResizeObserverCtor = this.host.ownerDocument.defaultView?.ResizeObserver;
+    if (!ResizeObserverCtor) return;
 
-    // eslint-disable-next-line no-restricted-globals -- guarded by the feature check above
-    const observer = new ResizeObserver((entries) => {
+    const observer = new ResizeObserverCtor((entries: ResizeObserverEntry[]) => {
       const size = entries[0]?.contentRect.width ?? this.host.clientWidth;
       this.inlineSize.set(size);
     });

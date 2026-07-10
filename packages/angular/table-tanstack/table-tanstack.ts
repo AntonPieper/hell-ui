@@ -39,15 +39,6 @@ import {
 import { HellPaginationStrip } from '@hell-ui/angular/pagination';
 import { HELL_SEARCH_DIRECTIVES } from '@hell-ui/angular/search';
 import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
-export {
-  FlexRenderDirective,
-  FlexRenderDirective as FlexRender,
-  type FlexRenderContent,
-  FlexRenderComponent,
-  flexRenderComponent,
-  injectFlexRenderContext,
-  type FlexRenderComponentProps,
-} from '@tanstack/angular-table';
 
 type ɵHellStrategyCleanup = VoidFunction | void;
 

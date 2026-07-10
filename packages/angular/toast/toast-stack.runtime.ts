@@ -14,7 +14,7 @@ export interface HellToastStackSnapshot {
   readonly offset: string;
 }
 
-export type HellToastStackAnchor = 'top' | 'bottom';
+type HellToastStackAnchor = 'top' | 'bottom';
 
 export interface HellToastStackViewport {
   readonly anchor: HellToastStackAnchor;
@@ -64,11 +64,11 @@ export function hellToastHeightPx(id: number, heights: ReadonlyMap<number, numbe
   return `${hellToastHeightValuePx(id, heights)}px`;
 }
 
-export function hellToastHeightValuePx(id: number, heights: ReadonlyMap<number, number>): number {
+function hellToastHeightValuePx(id: number, heights: ReadonlyMap<number, number>): number {
   return heights.get(id) ?? TOAST_FALLBACK_HEIGHT;
 }
 
-export function hellToastOffsetValuePx(
+function hellToastOffsetValuePx(
   list: readonly HellToastStackItem[],
   item: HellToastStackItem,
   heights: ReadonlyMap<number, number>,

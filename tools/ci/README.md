@@ -13,10 +13,10 @@ pnpm run ci:test:package-consumer
 pnpm run ci:test:api-report:prepared
 ```
 
-`ci:test:static` runs lint and the architecture checker. Unit tests run
-through `test:unit` (Angular's Vitest builder with `vitest.config.ts`), which
-enforces coverage thresholds natively; CI adapters should not clamp
-`VITEST_MAX_WORKERS` unless a provider-specific incident is being debugged.
+`ci:test:static` runs ESLint, Knip, and the architecture checker. Local unit
+tests run through `test:unit` without coverage output; CI and release checks use
+`test:coverage`, which enables Angular's native coverage switch and enforces the
+thresholds in `vitest.config.ts`.
 
 E2E jobs shard with Playwright's native `--shard=N/9`; every test runs in
 exactly one shard by construction. Package-consumer jobs select scenario
@@ -31,27 +31,20 @@ the same checkout; provider caches keyed only by dependency files must not store
 
 Jobs publish these shared artifacts from the repository root:
 
-- `test-results/vitest-junit.xml`
-- `coverage/cobertura-coverage.xml`
-- `coverage/coverage-summary.json`
-- `test-results/playwright-report.json`
+- `coverage/`
 - `test-results/playwright-html/`
 - `test-results/playwright/`
 
 Unit artifact policy:
 
-- `HELL_UNIT_TEST_CASE_TIMEOUT_MS` controls the Vitest per-test timeout and
-  defaults to `30000` milliseconds.
-- Vitest reporters are `default`, `hanging-process`, and JUnit. GitHub
-  Actions adds `github-actions`; consume the JUnit artifact rather than
-  changing reporters.
-- Coverage reporters are `text`, `json-summary`, `html`, `lcov`, and
-  `cobertura`. CI consumes `coverage/coverage-summary.json` and
-  `coverage/cobertura-coverage.xml`.
+- Vitest uses a fixed 30-second per-test timeout and the `default` plus
+  `hanging-process` reporters. GitHub Actions adds `github-actions`.
+- Coverage uses text output plus an uploaded HTML report. No duplicate JUnit,
+  LCOV, JSON-summary, or Cobertura artifacts are generated without a consumer.
 
 Browser artifact policy:
 
-- Playwright writes JSON, HTML, traces, and screenshots under `test-results/`.
+- Playwright writes HTML, traces, and screenshots under `test-results/`.
 - Built docs are served by nginx (`tools/ci/nginx-spa.conf`) with
   `HELL_E2E_BASE_URL`. The nginx config returns 404 for missing static assets
   and falls back to `index.html` only for SPA routes.

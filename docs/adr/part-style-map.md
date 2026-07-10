@@ -10,6 +10,10 @@
   members is itself public API surface — every component d.ts inherits it, and
   base evolution ripples through all component declarations. Composition keeps
   one shared Part-Class Pipeline without an inheritance contract.
+- Amended: 2026-07-10 — entrypoint styles use Tailwind v4 `@source` directives
+  that point at shipped recipe source files. Consumers import Tailwind once and
+  the narrow entrypoint stylesheet; they do not maintain a separate
+  `node_modules` scan list.
 
 ## Context
 
@@ -118,7 +122,12 @@ customization API.
 
 Runtime theming should flow through semantic Hell theme tokens such as `--color-hell-primary`, `--color-hell-border`, and `--color-hell-surface-elevated`. Component-specific public variables such as `--hell-button-background` should not be introduced unless a concrete scoped-theming need is documented; otherwise they create a second public theming API with unclear precedence against variants, `ui`, and global tokens.
 
-Hell will ship compiled CSS for migrated component defaults. Consumer apps should not be required to add Tailwind `@source` scanning for `node_modules/@hell-ui/angular` just to receive Hell's default visuals. Library build and package-consumer gates must prove that recipe classes are present in the shipped CSS entrypoints.
+Hell ships each migrated module's complete recipe source next to its
+entrypoint stylesheet. That stylesheet registers the recipe through Tailwind
+v4 `@source`, so a consumer imports Tailwind once plus the narrow Hell
+stylesheet and does not maintain a parallel scan list. Library build, pack, and
+package-consumer gates must prove that every source target ships and generates
+the recipe classes.
 
 Required behavior, accessibility, state attributes, geometry, measurement, portal registration, and lifecycle wiring remain internal requirements. They are not removable through the Part Style Map.
 
@@ -208,7 +217,9 @@ and document the `class` caveat.
 - Portaled owned DOM may be a Public Part of the owning component; overlay pane
   hooks do not replace the Part-Class Pipeline.
 - Runtime theme changes should target semantic Hell theme tokens rather than component-specific public variable families.
-- The packaging plan must prove those recipe classes are available through shipped CSS entrypoints without relying on removed legacy CSS classes or consumer-side source scanning.
+- The packaging plan must prove that shipped CSS entrypoints resolve their
+  packaged `@source` recipe files without relying on removed legacy CSS classes
+  or consumer-maintained scan configuration.
 - Complex components should expose enough Public Parts that consumers can refine styling without rebuilding component-owned structure.
 - `HellUi` v1 remains a string map. Dynamic row/cell styling belongs to stable state attributes first, and table-specific extensions only if evidence requires them.
 - Repeated owned elements share static Public Part names; indexed, variant-keyed,

@@ -40,7 +40,7 @@ const categorySort = new Map(
   ].map((category, index) => [category, index]),
 );
 
-export const entrypointManifest = readEntrypointManifest();
+const entrypointManifest = readEntrypointManifest();
 
 export function entrypointPublicApiFiles() {
   return [entrypointManifest.root, ...entrypointManifest.entries];
@@ -53,14 +53,14 @@ export function secondaryPackageEntrypoints() {
   }));
 }
 
-export function entrypointTsconfigPaths() {
+function entrypointTsconfigPaths() {
   return entrypointPublicApiFiles().map((entrypoint) => ({
     specifier: entrypoint.specifier,
     path: `./${entrypoint.publicApiPath}`,
   }));
 }
 
-export function entrypointPackageExports() {
+function entrypointPackageExports() {
   return Object.fromEntries(
     entrypointPublicApiFiles().map((entrypoint) => [
       packageExportPath(entrypoint.specifier),
@@ -88,7 +88,7 @@ export function entrypointStyleExports() {
   ];
 }
 
-export function themeAdapterStyleExports() {
+function themeAdapterStyleExports() {
   const themesDir = join(libraryRootPath, 'themes');
   if (!existsSync(themesDir)) return [];
 
@@ -101,7 +101,7 @@ export function themeAdapterStyleExports() {
     .sort((a, b) => a.exportPath.localeCompare(b.exportPath));
 }
 
-export function entrypointPackageStyleExports() {
+function entrypointPackageStyleExports() {
   return Object.fromEntries(
     entrypointStyleExports().map((styleEntry) => [
       styleEntry.exportPath,

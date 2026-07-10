@@ -2,14 +2,14 @@ export const PDF_ZOOM_VALUES = ['auto', 'page-actual', 'page-fit', 'page-width']
 
 export type PdfZoomPreset = (typeof PDF_ZOOM_VALUES)[number];
 
-export const PDF_ZOOM_LABELS: Record<PdfZoomPreset, string> = {
+const PDF_ZOOM_LABELS: Record<PdfZoomPreset, string> = {
   auto: 'Automatic',
   'page-actual': 'Actual size',
   'page-fit': 'Page fit',
   'page-width': 'Page width',
 };
 
-export const PDF_ZOOM_STEPS = [
+const PDF_ZOOM_STEPS = [
   0.25, 0.33, 0.5, 0.67, 0.75, 0.85, 1, 1.15, 1.33, 1.5, 1.75, 2, 2.5, 3, 4,
 ] as const;
 
@@ -25,7 +25,7 @@ export const PDF_ZOOM_OPTIONS = [
   { value: '3', label: '300%' },
 ] as const;
 
-export function isPdfZoomPreset(value: string): value is PdfZoomPreset {
+function isPdfZoomPreset(value: string): value is PdfZoomPreset {
   return PDF_ZOOM_VALUES.includes(value as PdfZoomPreset);
 }
 
@@ -71,21 +71,20 @@ export function getPreviousZoomStep(scale: number) {
   return PDF_REVERSED_ZOOM_STEPS.find((step) => step < scale - 0.001) ?? scale;
 }
 
-function getWheelDeltaPixels(event: WheelEvent) {
+function getWheelDeltaPixels(event: WheelEvent, viewportHeight: number) {
   switch (event.deltaMode) {
     case WheelEvent.DOM_DELTA_LINE:
       return event.deltaY * 30;
     case WheelEvent.DOM_DELTA_PAGE:
-      // eslint-disable-next-line no-restricted-globals -- DOM_DELTA_PAGE is defined relative to the viewport
-      return event.deltaY * window.innerHeight;
+      return event.deltaY * viewportHeight;
     default:
       return event.deltaY;
   }
 }
 
 /** Convert ctrl/cmd wheel deltas into a smooth exponential zoom multiplier. */
-export function getCtrlWheelScaleFactor(event: WheelEvent) {
-  const pixelDeltaY = getWheelDeltaPixels(event);
+export function getCtrlWheelScaleFactor(event: WheelEvent, viewportHeight = event.view?.innerHeight ?? 0) {
+  const pixelDeltaY = getWheelDeltaPixels(event, viewportHeight);
   return Math.exp(-pixelDeltaY * 0.007);
 }
 

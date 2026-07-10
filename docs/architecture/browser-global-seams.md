@@ -6,15 +6,15 @@
 
 ## Rule
 
-Do not reference `document`, `window`, `ResizeObserver`, or
-`IntersectionObserver` directly from library source. Angular SSR guidance says
+Do not reference `document`, `window`, observer constructors, or animation-frame
+functions directly from library source. Angular SSR guidance says
 browser-specific globals should not be referenced directly; use injected
 `DOCUMENT`, an owner document passed by the caller, an event target's
-`ownerDocument`/`defaultView`, or a browser-only render/lifecycle callback
-such as `afterNextRender`.
+`ownerDocument`/`defaultView`, or a browser-only render/lifecycle callback such
+as `afterNextRender`.
 
 A deliberate direct use — a `typeof` feature guard, a guarded fallback when no
-owner document is available, or an observer with no injectable seam — carries
+owner document is available — carries
 an inline justification at the use site:
 
 ```ts
