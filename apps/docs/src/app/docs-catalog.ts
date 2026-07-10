@@ -409,6 +409,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/card/card.page').then((m) => m.CardPage),
       },
       {
+        routePath: 'components/empty-state',
+        label: 'Empty state',
+        icon: 'faSolidBoxOpen',
+        loadComponent: () =>
+          import('./pages/components/empty-state/empty-state.page').then((m) => m.EmptyStatePage),
+      },
+      {
         routePath: 'components/icon',
         label: 'Icon',
         icon: 'faSolidStar',

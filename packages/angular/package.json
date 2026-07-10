@@ -53,6 +53,7 @@
     "breadcrumbs/breadcrumbs.ts",
     "checkbox/checkbox.ts",
     "drop-zone/drop-zone.ts",
+    "empty-state/empty-state.ts",
     "icon/icon.ts",
     "progress/progress.ts",
     "radio/radio.ts",
@@ -185,6 +186,9 @@
     },
     "./combobox": {
       "@heinrich/source": "./combobox/public-api.ts"
+    },
+    "./empty-state": {
+      "@heinrich/source": "./empty-state/public-api.ts"
     },
     "./pagination": {
       "@heinrich/source": "./pagination/public-api.ts"
@@ -391,6 +395,11 @@
       "@heinrich/source": "./combobox/styles.css",
       "style": "./combobox/styles.css",
       "default": "./combobox/styles.css"
+    },
+    "./empty-state/styles.css": {
+      "@heinrich/source": "./empty-state/styles.css",
+      "style": "./empty-state/styles.css",
+      "default": "./empty-state/styles.css"
     },
     "./pagination/styles.css": {
       "@heinrich/source": "./pagination/styles.css",
