@@ -5,7 +5,12 @@ import { fileURLToPath } from 'node:url';
 import { entrypointPublicApiFiles, packageName } from './entrypoint-manifest.mjs';
 
 const require = createRequire(import.meta.url);
-const { Extractor, ExtractorConfig } = require('@microsoft/api-extractor');
+const { ConsoleMessageId, Extractor, ExtractorConfig } = require('@microsoft/api-extractor');
+const oncePerRunConsoleMessages = new Set([
+  ConsoleMessageId.Preamble,
+  ConsoleMessageId.CompilerVersionNotice,
+]);
+const seenConsoleMessages = new Set();
 
 /**
  * Entry points without an API report, with the reason they are excluded.
@@ -76,6 +81,11 @@ for (const entrypoint of apiReportEntrypoints) {
   const result = Extractor.invoke(extractorConfig, {
     localBuild,
     showVerboseMessages: false,
+    messageCallback(message) {
+      if (!oncePerRunConsoleMessages.has(message.messageId)) return;
+      if (seenConsoleMessages.has(message.messageId)) message.handled = true;
+      else seenConsoleMessages.add(message.messageId);
+    },
   });
 
   if (!result.succeeded) {

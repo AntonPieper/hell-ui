@@ -477,7 +477,7 @@ class HellPdfJsViewerSession implements HellPdfViewerSession {
 
   cleanup(): void {
     this.options.viewer?.cleanup?.();
-    this.options.pdfWorker?.destroy?.();
+    void this.options.pdfWorker?.destroy?.();
     this.options.workerBinding.cleanup?.();
   }
 

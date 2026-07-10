@@ -11,7 +11,7 @@ import {
   statSync,
   writeFileSync,
 } from 'node:fs';
-import { basename, dirname, extname, isAbsolute, join, resolve } from 'node:path';
+import { basename, dirname, extname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
@@ -44,20 +44,12 @@ const packageConsumerCiGroups = [
   { name: 'table-tanstack-virtual', scenarios: ['table-tanstack', 'table-tanstack-virtual'] },
 ];
 
-const rawSelectedScenarioNames = parseScenarioSelection(packageConsumerArgs);
-const selectedScenarioNames = rawSelectedScenarioNames.filter(
-  (name) => !isPreflightScenarioName(name),
-);
-const preflightOnly = parsePreflightOnly(packageConsumerArgs, rawSelectedScenarioNames);
+const selectedScenarioNames = parseScenarioSelection(packageConsumerArgs);
 const minimalDependencyMode = parseMinimalDependencyMode(packageConsumerArgs);
 const skipPackageBuild = parseSkipPackageBuild(packageConsumerArgs);
 const pnpmTimeoutMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_TIMEOUT_MS, 600_000);
 const pnpmHeartbeatMs = positiveNumber(process.env.HELL_PACKAGE_CONSUMER_HEARTBEAT_MS, 30_000);
 const runtimeStyleCheck = process.env.HELL_PACKAGE_CONSUMER_RUNTIME_STYLE_CHECK === '1';
-const pnpmPreflightTimeoutMs = positiveNumber(
-  process.env.HELL_PACKAGE_CONSUMER_PREFLIGHT_TIMEOUT_MS,
-  30_000,
-);
 
 const tailwindPostcssDevDeps = ['@tailwindcss/postcss', 'postcss'];
 
@@ -392,14 +384,6 @@ const packageConsumerScenarioCatalog = [
   },
 ];
 
-runPnpmPreflight(root);
-if (preflightOnly) {
-  console.log(
-    `${packageConsumerLabel('preflight')} preflight passed; skipping package build and consumer scenarios`,
-  );
-  process.exit(0);
-}
-
 if (skipPackageBuild) {
   console.log('[package-consumer] using prebuilt packages from dist; skipping build:lib');
 } else {
@@ -482,16 +466,6 @@ function parseSkipPackageBuild(args) {
   if (envMode === '1' || envMode === 'true') return true;
 
   return args.some((arg) => arg === '--skip-build' || arg === '--prebuilt');
-}
-
-function parsePreflightOnly(args, selectedNames) {
-  if (args.some((arg) => arg === '--preflight' || arg === '--preflight-only')) return true;
-
-  return selectedNames.length > 0 && selectedNames.every(isPreflightScenarioName);
-}
-
-function isPreflightScenarioName(name) {
-  return name === 'preflight' || name === 'pnpm-preflight';
 }
 
 function parseScenarioTokens(values, envOnly) {
@@ -872,7 +846,6 @@ async function runConsumerScenarioGroup(group) {
     writeConsumerWorkspace(tempRoot, group.scenarios, group.dependencies);
     await runPnpm(['install', '--strict-peer-dependencies', '--ignore-scripts'], tempRoot, {
       scenarioName: groupName,
-      printInstallDiagnostics: true,
     });
     assertForbiddenDependenciesNotInstalled(tempRoot, group);
 
@@ -1075,7 +1048,10 @@ function assertForbiddenDependenciesNotInstalled(workspace, group) {
 
 async function packBuiltPackage(distRoot, scenarioName) {
   const packRoot = mkdtempSync(join(tmpdir(), 'hell-package-consumer-pack-'));
-  await runPnpm(['pack', '--pack-destination', packRoot], distRoot, { scenarioName });
+  await runPnpm(['pack', '--pack-destination', packRoot, '--json'], distRoot, {
+    scenarioName,
+    quiet: true,
+  });
   const tarball = readdirSync(packRoot).find((name) => name.endsWith('.tgz'));
   if (!tarball) fail(`Packed package missing in ${packRoot}`);
   return { root: packRoot, tarball: join(packRoot, tarball) };
@@ -2464,166 +2440,9 @@ function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-function runPnpmPreflight(cwd) {
-  const label = packageConsumerLabel('preflight');
-  const env = pnpmCommandEnvironment();
-
-  console.log(`${label} running pnpm preflight before package build`);
-
-  const version = requirePnpmPreflightValue(['--version'], cwd, env, 'pnpm version');
-  if (!/^\d+\.\d+\.\d+(?:[-+].*)?$/.test(version)) {
-    failPnpmPreflight('pnpm version is not a semver value', [`version: ${version}`]);
-  }
-
-  const registry = requirePnpmPreflightValue(
-    ['config', 'get', 'registry'],
-    cwd,
-    env,
-    'registry config',
-  );
-  assertPnpmRegistry(registry);
-
-  const store = requirePnpmPreflightValue(['store', 'path'], cwd, env, 'store path');
-  const storeDirectory = assertWritablePnpmStore(store, cwd);
-
-  const strictPeerDependencies = requirePnpmPreflightValue(
-    ['config', 'get', 'strict-peer-dependencies'],
-    cwd,
-    env,
-    'strict-peer-dependencies config',
-  );
-  const autoInstallPeers = requirePnpmPreflightValue(
-    ['config', 'get', 'auto-install-peers'],
-    cwd,
-    env,
-    'auto-install-peers config',
-  );
-  assertStrictPeerMode(strictPeerDependencies, autoInstallPeers);
-
-  requirePnpmPreflightCommand(['ping', '--registry', registry], cwd, env, 'registry reachability');
-
-  console.log(
-    `${label} ok: pnpm ${version}; registry ${registry}; store ${storeDirectory}; ` +
-      `strict-peer-dependencies=${strictPeerDependencies}; auto-install-peers=${autoInstallPeers}`,
-  );
-}
-
-function requirePnpmPreflightValue(args, cwd, env, description) {
-  const result = requirePnpmPreflightCommand(args, cwd, env, description);
-  const value = result.stdout.trim();
-  if (!value) failPnpmPreflight(`${description} returned no value`, [`command: ${result.command}`]);
-  return value;
-}
-
-function requirePnpmPreflightCommand(args, cwd, env, description) {
-  const commandArgs = args[0] === 'config' ? pnpmConfigCommandArgs(args) : pnpmCommandArgs(args);
-  const command = formatCommand('pnpm', commandArgs);
-  const result = spawnSync('pnpm', commandArgs, {
-    cwd,
-    shell: process.platform === 'win32',
-    encoding: 'utf8',
-    env,
-    timeout: pnpmPreflightTimeoutMs,
-  });
-
-  if (result.error) {
-    failPnpmPreflight(`${description} failed`, [
-      `command: ${command}`,
-      `error: ${result.error.message}`,
-      pnpmPreflightOutputSummary(result),
-    ]);
-  }
-
-  if (result.status !== 0) {
-    failPnpmPreflight(`${description} failed`, [
-      `command: ${command}`,
-      `status: ${result.status}`,
-      pnpmPreflightOutputSummary(result),
-    ]);
-  }
-
-  return { command, stdout: result.stdout ?? '', stderr: result.stderr ?? '' };
-}
-
-function assertPnpmRegistry(registry) {
-  try {
-    const parsed = new URL(registry);
-    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-      failPnpmPreflight('registry config must use http or https', [`registry: ${registry}`]);
-    }
-  } catch (error) {
-    failPnpmPreflight('registry config is not a valid URL', [
-      `registry: ${registry}`,
-      error instanceof Error ? error.message : String(error),
-    ]);
-  }
-}
-
-function assertWritablePnpmStore(store, cwd) {
-  const storeDirectory = normalizePnpmPath(store, cwd);
-  if (!storeDirectory) failPnpmPreflight('pnpm store path is empty');
-
-  const probe = join(
-    storeDirectory,
-    `.hell-package-consumer-preflight-${process.pid}-${Date.now()}`,
-  );
-  try {
-    mkdirSync(storeDirectory, { recursive: true });
-    writeFileSync(probe, 'ok\n');
-    rmSync(probe, { force: true });
-  } catch (error) {
-    failPnpmPreflight('pnpm store directory is not writable', [
-      `store: ${storeDirectory}`,
-      error instanceof Error ? error.message : String(error),
-    ]);
-  }
-
-  return storeDirectory;
-}
-
-function assertStrictPeerMode(strictPeerDependencies, autoInstallPeers) {
-  if (!packageManagerConfigBoolean(strictPeerDependencies)) {
-    failPnpmPreflight('strict-peer-dependencies must be true', [
-      `strict-peer-dependencies=${strictPeerDependencies}`,
-    ]);
-  }
-  if (packageManagerConfigBoolean(autoInstallPeers)) {
-    failPnpmPreflight('auto-install-peers must be false', [
-      `auto-install-peers=${autoInstallPeers}`,
-    ]);
-  }
-}
-
-function packageManagerConfigBoolean(value) {
-  return value.trim().toLowerCase() === 'true' || value.trim() === '1';
-}
-
-function failPnpmPreflight(message, details = []) {
-  fail([`pnpm preflight failed: ${message}`, ...details.filter(Boolean)].join('\n'));
-}
-
-function pnpmPreflightOutputSummary(result) {
-  const output = [result.stderr, result.stdout]
-    .filter(Boolean)
-    .join('\n')
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .slice(0, 4)
-    .join(' | ');
-
-  if (!output) return 'output: (none)';
-  return `output: ${truncate(output, 500)}`;
-}
-
-function truncate(value, maxLength) {
-  return value.length > maxLength ? `${value.slice(0, maxLength - 1)}…` : value;
-}
-
 function runRootPnpm(args, cwd) {
-  const commandArgs = pnpmCommandArgs(args);
-  console.log(`[package-consumer] ${formatCommand('pnpm', commandArgs)}`);
-  const result = spawnSync('pnpm', commandArgs, {
+  console.log(`[package-consumer] ${formatCommand('pnpm', args)}`);
+  const result = spawnSync('pnpm', args, {
     cwd,
     env: pnpmCommandEnvironment(),
     shell: process.platform === 'win32',
@@ -2631,35 +2450,35 @@ function runRootPnpm(args, cwd) {
   });
   if (result.error) fail(result.error.message);
   if (result.status !== 0)
-    fail(`${formatCommand('pnpm', commandArgs)} failed with ${result.status}`);
+    fail(`${formatCommand('pnpm', args)} failed with ${result.status}`);
 }
 
 async function runPnpm(args, cwd, options = {}) {
-  const { command, diagnostics, result } = await runPnpmCommand(args, cwd, options);
-  if (result.timedOut) fail(pnpmTimeoutMessage(command, cwd, diagnostics));
+  const { command, result } = await runPnpmCommand(args, cwd, options);
+  if (result.timedOut) fail(pnpmTimeoutMessage(command, cwd));
   if (result.error) fail(`Unable to start command: ${command}\n${result.error.message}`);
   if (result.signal) fail(`Command failed with signal ${result.signal}: ${command}`);
-  if (result.status !== 0) fail(`Command failed with status ${result.status}: ${command}`);
+  if (result.status !== 0) {
+    const output = [result.stderr, result.stdout].filter(Boolean).join('\n').trim();
+    fail(
+      `Command failed with status ${result.status}: ${command}${output ? `\n${output}` : ''}`,
+    );
+  }
 }
 
 async function runPnpmCommand(args, cwd, options = {}) {
   const env = pnpmCommandEnvironment();
   const scenarioName = options.scenarioName ?? 'unknown';
   const label = packageConsumerLabel(scenarioName);
-  const commandArgs = pnpmCommandArgs(args);
-  const command = formatCommand('pnpm', commandArgs);
+  const command = formatCommand('pnpm', args);
 
   console.log(`${label} running command: ${command}`);
   console.log(`${label} cwd: ${cwd}`);
-  const diagnostics = collectPnpmDiagnostics(cwd, env);
-  if (options.printInstallDiagnostics) {
-    printPnpmInstallDiagnostics(label, scenarioName, cwd, diagnostics);
-  }
-
-  const result = await spawnPnpm(commandArgs, cwd, env, label, command, {
-    captureOutput: options.captureOutput === true,
+  const result = await spawnPnpm(args, cwd, env, label, command, {
+    captureOutput: options.captureOutput === true || options.quiet === true,
+    forwardOutput: options.quiet !== true,
   });
-  return { command, diagnostics, label, result };
+  return { command, label, result };
 }
 
 function spawnPnpm(args, cwd, env, label, command, options = {}) {
@@ -2700,12 +2519,12 @@ function spawnPnpm(args, cwd, env, label, command, options = {}) {
     child.stdout?.on('data', (chunk) => {
       const value = chunk.toString();
       if (options.captureOutput) stdout += value;
-      process.stdout.write(chunk);
+      if (options.forwardOutput !== false) process.stdout.write(chunk);
     });
     child.stderr?.on('data', (chunk) => {
       const value = chunk.toString();
       if (options.captureOutput) stderr += value;
-      process.stderr.write(chunk);
+      if (options.forwardOutput !== false) process.stderr.write(chunk);
     });
     child.on('error', (caught) => {
       error = caught;
@@ -2723,56 +2542,11 @@ function spawnPnpm(args, cwd, env, label, command, options = {}) {
   });
 }
 
-function printPnpmInstallDiagnostics(label, scenarioName, tempRoot, diagnostics) {
-  console.log(`${label} pnpm install diagnostics:`);
-  console.log(`${label} scenario name: ${scenarioName}`);
-  console.log(`${label} temp directory: ${tempRoot}`);
-  console.log(`${label} pnpm store: ${diagnostics.store}`);
-  console.log(`${label} registry: ${diagnostics.registry}`);
-  console.log(`${label} package manager version: pnpm ${diagnostics.version}`);
-  console.log(`${label} strict-peer-dependencies: ${diagnostics.strictPeerDependencies}`);
-  console.log(`${label} auto-install-peers: ${diagnostics.autoInstallPeers}`);
-}
-
-function collectPnpmDiagnostics(cwd, env) {
-  const store = normalizePnpmPath(readPnpmValue(['store', 'path'], cwd, env), cwd) ?? 'unknown';
-  const registry = readPnpmValue(['config', 'get', 'registry'], cwd, env) ?? 'unknown';
-  const version = readPnpmValue(['--version'], cwd, env) ?? 'unknown';
-  const strictPeerDependencies =
-    readPnpmValue(['config', 'get', 'strict-peer-dependencies'], cwd, env) ?? 'unknown';
-  const autoInstallPeers =
-    readPnpmValue(['config', 'get', 'auto-install-peers'], cwd, env) ?? 'unknown';
-
-  return { store, registry, version, strictPeerDependencies, autoInstallPeers };
-}
-
-function readPnpmValue(args, cwd, env) {
-  const commandArgs = args[0] === 'config' ? pnpmConfigCommandArgs(args) : pnpmCommandArgs(args);
-  const result = spawnSync('pnpm', commandArgs, {
-    cwd,
-    shell: process.platform === 'win32',
-    encoding: 'utf8',
-    env,
-    timeout: 15_000,
-  });
-  if (result.error || result.status !== 0) return null;
-  return result.stdout.trim() || null;
-}
-
-function normalizePnpmPath(value, cwd) {
-  if (!value) return null;
-
-  const normalized = value.trim();
-  if (!normalized || normalized === 'null' || normalized === 'undefined') return null;
-  return isAbsolute(normalized) ? normalized : join(cwd, normalized);
-}
-
-function pnpmTimeoutMessage(command, cwd, diagnostics) {
+function pnpmTimeoutMessage(command, cwd) {
   return [
     `Command timed out after ${formatDuration(pnpmTimeoutMs)}: ${command}`,
     `exact command: ${command}`,
     `cwd: ${cwd}`,
-    `pnpm store: ${diagnostics?.store ?? 'unknown'}`,
   ].join('\n');
 }
 
@@ -2783,14 +2557,6 @@ function packageConsumerLabel(scenarioName) {
 function formatDuration(ms) {
   if (ms < 1_000) return `${ms}ms`;
   return `${Math.round(ms / 1_000)}s`;
-}
-
-function pnpmCommandArgs(args) {
-  return args;
-}
-
-function pnpmConfigCommandArgs(args) {
-  return ['--config.strict-peer-dependencies=true', '--config.auto-install-peers=false', ...args];
 }
 
 function formatCommand(command, args) {

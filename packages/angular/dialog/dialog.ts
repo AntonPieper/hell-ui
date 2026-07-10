@@ -161,7 +161,7 @@ export class HellDialogTrigger<TData = unknown, TResult = unknown> extends HellN
 
     dialogRef.closed
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(({ result }) => this.closed.emit(result as TResult));
+      .subscribe(({ result }) => this.closed.emit(result));
 
     dialogRef.afterClosed
       .pipe(takeUntilDestroyed(this.destroyRef))

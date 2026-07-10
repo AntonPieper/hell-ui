@@ -149,7 +149,7 @@ export const peerGroupContracts = Object.freeze({
   },
 });
 
-export function auditPackedPackage({ tarball, logger = console } = {}) {
+export function auditPackedPackage({ tarball, logger = console, verbose = false } = {}) {
   if (!tarball) throw new Error('Package pack audit requires a tarball path.');
   if (!existsSync(tarball)) throw new Error(`Package pack audit tarball missing: ${tarball}`);
 
@@ -158,7 +158,7 @@ export function auditPackedPackage({ tarball, logger = console } = {}) {
   const packageJson = readPackedJson(tarball, 'package.json');
   const failures = [];
 
-  logPackedFiles(files, logger);
+  if (verbose) logPackedFiles(files, logger);
   failures.push(...findForbiddenPackedFileFailures(files));
   checkApfPackageJson(packageJson, fileSet, tarball, failures);
   checkPackageMetadata(packageJson, failures);

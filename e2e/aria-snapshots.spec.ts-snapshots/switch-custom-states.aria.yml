@@ -1,8 +1,0 @@
-- switch "Off"
-- text: "Off"
-- switch "On" [checked]
-- text: "On"
-- switch "Disabled, off" [disabled]
-- text: Disabled
-- switch "Disabled, on" [checked] [disabled]
-- text: Disabled, on

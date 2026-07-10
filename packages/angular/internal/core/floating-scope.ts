@@ -241,7 +241,7 @@ export class HellFloatingScopedInsetsRuntime {
     const targets = this.options.styleTargets?.() ?? [this.options.styleTarget?.()];
     const concrete = targets.filter(
       (target): target is HTMLElement =>
-        isElementLike(target) && typeof (target as HTMLElement).style?.setProperty === 'function',
+        isElementLike(target) && typeof target.style?.setProperty === 'function',
     );
     return concrete.length ? concrete : [this.options.document.documentElement];
   }

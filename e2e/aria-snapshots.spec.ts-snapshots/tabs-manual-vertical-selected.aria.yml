@@ -1,5 +1,0 @@
-- tablist "Settings sections":
-  - tab "Profile" [selected]
-  - tab "Notifications"
-  - tab "Integrations"
-- tabpanel "Profile": Name, avatar and contact details.

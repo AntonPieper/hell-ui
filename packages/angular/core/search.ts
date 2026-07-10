@@ -235,12 +235,15 @@ function defaultTexts(
       out.push({ text: hellSearchKey(next.toISOString()), weight: 1 });
       return;
     }
-    const type = typeof next;
-    if (type === 'string' || type === 'number' || type === 'boolean') {
+    if (
+      typeof next === 'string' ||
+      typeof next === 'number' ||
+      typeof next === 'boolean'
+    ) {
       out.push({ text: hellSearchKey(String(next)), weight: 1 });
       return;
     }
-    if (type !== 'object') return;
+    if (typeof next !== 'object') return;
     if (seen.has(next)) return;
     seen.add(next);
 

@@ -44,32 +44,14 @@ jobs:
       - name: Install Playwright chromium
         run: pnpm run ci:playwright:chromium
 
-      - name: Changelog entry
-        run: pnpm run test:changelog
-
-      - name: Lint
-        run: pnpm run lint
-
-      - name: Architecture
-        run: pnpm run test:architecture
-
-      - name: Unit tests
-        run: pnpm run test:unit
-
-      - name: Build library
-        run: pnpm run build:lib
-
-      - name: Pack audit
-        run: pnpm run test:package-pack
+      - name: Release dry run
+        run: pnpm run release:dry-run
 
       - name: Package consumer scenarios
         env:
           HELL_PACKAGE_CONSUMER_SKIP_BUILD: 1
           HELL_PACKAGE_CONSUMER_RUNTIME_STYLE_CHECK: 1
         run: pnpm run test:package-consumer -- --minimal-deps
-
-      - name: API report
-        run: pnpm run test:api-report
 
       - name: Build docs
         run: pnpm run build:docs

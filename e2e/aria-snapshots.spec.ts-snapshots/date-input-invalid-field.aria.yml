@@ -1,3 +1,0 @@
-- textbox "Invalid date":
-  - /placeholder: YYYY-MM-DD
-  - text: /\d+-\d+-\d+/

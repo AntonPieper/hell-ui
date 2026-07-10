@@ -857,15 +857,15 @@ export class HellTanStackTable<TData extends RowData = RowData> {
   }
 
   protected headerClass(header: Header<TData, unknown>): string {
-    return classValue((header.column.columnDef.meta as HellColumnMeta | undefined)?.hell?.headerClass);
+    return classValue(hellColumnMeta(header.column.columnDef.meta)?.hell?.headerClass);
   }
 
   protected cellClass(cell: Cell<TData, unknown>): string {
-    return classValue((cell.column.columnDef.meta as HellColumnMeta | undefined)?.hell?.cellClass);
+    return classValue(hellColumnMeta(cell.column.columnDef.meta)?.hell?.cellClass);
   }
 
   protected footerClass(header: Header<TData, unknown>): string {
-    return classValue((header.column.columnDef.meta as HellColumnMeta | undefined)?.hell?.footerClass);
+    return classValue(hellColumnMeta(header.column.columnDef.meta)?.hell?.footerClass);
   }
 
   protected rowClassValue(row: Row<TData>): string {
@@ -1124,7 +1124,7 @@ export class HellTanStackColumnFilter<TData extends RowData = RowData> {
   protected readonly filterInputUi = HELL_TANSTACK_FILTER_INPUT_UI;
 
   protected readonly column = computed(() => this.table().getColumn(this.columnId()));
-  protected readonly value = computed(() => String(this.column()?.getFilterValue() ?? ''));
+  protected readonly value = computed(() => filterInputValue(this.column()?.getFilterValue()));
 
   protected setFilter(event: Event): void {
     this.column()?.setFilterValue((event.target as HTMLInputElement | null)?.value ?? '');
@@ -1143,6 +1143,23 @@ function classValue(value: HellClassValue): string {
     .filter(([, enabled]) => enabled)
     .map(([name]) => name)
     .join(' ');
+}
+
+function hellColumnMeta(value: unknown): HellColumnMeta | undefined {
+  if (typeof value !== 'object' || value === null || !('hell' in value)) return undefined;
+  return value as HellColumnMeta;
+}
+
+function filterInputValue(value: unknown): string {
+  if (
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean' ||
+    typeof value === 'bigint'
+  ) {
+    return String(value);
+  }
+  return '';
 }
 
 function normalizeDomName(name: string): string {

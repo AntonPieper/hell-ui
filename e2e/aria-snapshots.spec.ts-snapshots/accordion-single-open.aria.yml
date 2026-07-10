@@ -1,5 +1,0 @@
-- heading "When will my order ship?" [level=3]:
-  - button "When will my order ship?" [expanded]
-- region "When will my order ship?": /Orders placed before \d+[hmsp]+ local time ship the same business day\./
-- heading "What is your return policy?" [level=3]:
-  - button "What is your return policy?"

@@ -1,7 +1,0 @@
-- text: Launch checks
-- listbox "Launch checks":
-  - option "Documentation Public guidance is current" [selected]
-  - option "Accessibility review Keyboard and screen-reader pass" [selected]
-  - option "Data migration Blocked on upstream" [disabled]
-  - option "Release notes Consumer-facing notes drafted"
-- paragraph: 2 of 4 checks selected

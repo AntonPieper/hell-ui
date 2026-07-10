@@ -1,8 +1,0 @@
-- radiogroup "T-shirt size":
-  - radio "Small"
-  - radio "Medium" [checked]
-  - radio "Large"
-  - radio "X-Large" [disabled]
-- paragraph:
-  - text: "Selected size:"
-  - code: md

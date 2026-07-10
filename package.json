@@ -22,7 +22,7 @@
     "api-report:update": "node tools/check-api-reports.mjs --local",
     "release:dry-run": "pnpm run test:changelog && pnpm run lint && pnpm run test:dead-code && pnpm run test:architecture && pnpm run test:coverage && pnpm run build:lib && pnpm run test:package-pack && pnpm run test:api-report",
     "test:package-consumer": "node tools/check-package-consumer.mjs",
-    "test:package-pack": "node tools/check-package-pack.mjs",
+    "test:package-pack": "publint dist/hell --pack=false --strict && node tools/check-package-pack.mjs",
     "ci:install": "pnpm install --frozen-lockfile",
     "ci:playwright:chromium": "pnpm exec playwright install --with-deps chromium",
     "ci:test:unit": "pnpm run test:coverage",
@@ -45,8 +45,10 @@
     "eslint": "catalog:",
     "jsdom": "catalog:",
     "knip": "catalog:",
+    "publint": "^0.3.21",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
+    "vite": "^7.3.5",
     "vitest": "catalog:"
   }
 }

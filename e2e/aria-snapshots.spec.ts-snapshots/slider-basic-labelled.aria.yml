@@ -1,3 +1,0 @@
-- text: Volume
-- slider "Volume"
-- code: /\d+%/

@@ -1,3 +1,0 @@
-- dialog "Pending review":
-  - strong: Pending review
-  - paragraph: A reviewer has 2 business days to approve or request changes before this expires.

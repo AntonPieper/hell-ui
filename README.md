@@ -35,9 +35,9 @@ package registry copy, docs, and README language in internal-beta/beta/experimen
 terms until a green release workflow plus a full `pnpm e2e` pass says
 otherwise.
 
-The docs app accessibility matrix at `/accessibility` lists role patterns,
-keyboard coverage, axe/ARIA/browser-test evidence, and known gaps for every
-public primitive, composite, and feature. Read the
+The docs app accessibility page at `/accessibility` explains behavior
+ownership, verification evidence, and the responsibilities that remain with
+consuming applications. Read the
 [first-beta consumer migration guide](docs/release/first-beta-consumer-guide.md)
 before external pilot installs.
 

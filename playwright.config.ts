@@ -5,7 +5,7 @@ const externalBaseUrl = process.env.HELL_E2E_BASE_URL;
 const baseURL = externalBaseUrl ?? `http://127.0.0.1:${port}`;
 const webServerCommand =
   process.env.HELL_E2E_WEB_SERVER_COMMAND ??
-  `pnpm --filter hell-docs exec ng serve hell-docs --configuration production --host 127.0.0.1 --port ${port}`;
+  `pnpm run build:docs && pnpm exec vite preview --host 127.0.0.1 --port ${port} --strictPort --outDir dist/hell-docs/browser`;
 
 export default defineConfig({
   testDir: './e2e',
