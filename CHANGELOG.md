@@ -23,6 +23,19 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `packages/angular/alert/alert.spec.ts`, `e2e/alert-a11y-contracts.spec.ts`,
   the docs page at `/components/alert`, and its axe WCAG A/AA smoke coverage
   (issues #91, #102).
+- Added the `@hell-ui/angular/confirm` Package Entry Point (Composite): a
+  promise-based `HellConfirmService.confirm(options)` that opens one accessible
+  modal on the dialog primitive and resolves `{ confirmed }`. The promise always
+  resolves — Escape, backdrop, and cancel resolve `confirmed: false` — and calls
+  queue so two confirm dialogs never show at once. Supports `danger` severity
+  (destructive confirm variant, initial focus on cancel), a `countdownSeconds`
+  gate with a visible Label-Contract-formatted suffix (gating only; never
+  auto-confirms), and an optional projected `content` template whose `state`
+  rides back in `result.content`. All default strings sit behind the
+  `HELL_CONFIRM_LABELS` Label Contract (`provideHellConfirmLabels`). Docs cover
+  basic, danger, countdown, and projected-content examples plus an
+  unsaved-changes route-guard recipe. Ships `@hell-ui/angular/confirm/styles.css`.
+  See #104.
 
 ### Removed
 

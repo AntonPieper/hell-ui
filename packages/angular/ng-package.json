@@ -121,6 +121,11 @@
       "output": "dialog"
     },
     {
+      "glob": "confirm.ts",
+      "input": "confirm",
+      "output": "confirm"
+    },
+    {
       "glob": "time-input.ts",
       "input": "time-input",
       "output": "time-input"

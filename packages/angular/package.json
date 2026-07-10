@@ -38,6 +38,7 @@
     "date-input/date-input.ts",
     "date-picker/date-picker.ts",
     "dialog/dialog.ts",
+    "confirm/confirm.ts",
     "time-input/time-input.ts",
     "app-shell/app-shell.ts",
     "audio-player/audio-player.ts",
@@ -199,6 +200,9 @@
     },
     "./avatar-group": {
       "@heinrich/source": "./avatar-group/public-api.ts"
+    },
+    "./confirm": {
+      "@heinrich/source": "./confirm/public-api.ts"
     },
     "./date-input": {
       "@heinrich/source": "./date-input/public-api.ts"
@@ -412,6 +416,11 @@
       "@heinrich/source": "./avatar-group/styles.css",
       "style": "./avatar-group/styles.css",
       "default": "./avatar-group/styles.css"
+    },
+    "./confirm/styles.css": {
+      "@heinrich/source": "./confirm/styles.css",
+      "style": "./confirm/styles.css",
+      "default": "./confirm/styles.css"
     },
     "./date-input/styles.css": {
       "@heinrich/source": "./date-input/styles.css",

@@ -1,0 +1,6 @@
+/* The confirm Composite renders on the dialog primitive, so it carries the
+   dialog surface, overlay, and animation styles it composes. */
+@import '../dialog/styles.css';
+
+/* Confirm layout is Tailwind utility recipes in the component template. */
+@source "./confirm.ts";

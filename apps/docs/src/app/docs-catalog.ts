@@ -273,6 +273,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/dialog/dialog.page').then((m) => m.DialogPage),
       },
       {
+        routePath: 'components/confirm',
+        label: 'Confirm',
+        icon: 'faSolidSquareCheck',
+        loadComponent: () =>
+          import('./pages/components/confirm/confirm.page').then((m) => m.ConfirmPage),
+      },
+      {
         routePath: 'components/popover',
         label: 'Popover',
         icon: 'faSolidMessage',

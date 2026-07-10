@@ -505,6 +505,34 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'components/combobox/examples/with-field-tag.example components/combobox hellCombobox hellComboboxInput hellComboboxButton hellComboboxPortal hellComboboxDropdown hellComboboxOption hellComboboxEmpty hellField hellFieldLabel hellFieldDescription hellTag hellButton hell-icon iconOnly HellComboboxValue HELL_COMBOBOX_DIRECTIVES HELL_FIELD_DIRECTIVES reviewers multi-select removable chips composite ui data-slot root',
   },
   {
+    title: 'Confirm: Basic',
+    path: '/components/confirm',
+    detail: 'components/confirm/examples/basic.example.ts',
+    terms:
+      'confirm HellConfirmService confirm promise await dialog modal confirmed publish smallest usage title description accessible focus trap composite',
+  },
+  {
+    title: 'Confirm: Danger',
+    path: '/components/confirm',
+    detail: 'components/confirm/examples/danger.example.ts',
+    terms:
+      'confirm HellConfirmService severity danger destructive delete confirmLabel cancelLabel initial focus cancel button variant danger irreversible',
+  },
+  {
+    title: 'Confirm: Countdown',
+    path: '/components/confirm',
+    detail: 'components/confirm/examples/countdown.example.ts',
+    terms:
+      'confirm HellConfirmService countdownSeconds countdown gate disabled remaining seconds reset database never auto-confirm irreversible Label Contract',
+  },
+  {
+    title: 'Confirm: Projected content',
+    path: '/components/confirm',
+    detail: 'components/confirm/examples/content-template.example.ts',
+    terms:
+      'confirm HellConfirmService content template contentState HellConfirmContentContext state signal writable checkbox hellNativeCheckbox delete imported groups result rides back projected',
+  },
+  {
     title: 'Date Input: Basic',
     path: '/components/date-input',
     detail: 'components/date-input/examples/basic.example.ts',
