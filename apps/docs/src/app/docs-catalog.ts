@@ -308,6 +308,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/toast/toast.page').then((m) => m.ToastPage),
       },
       {
+        routePath: 'components/alert',
+        label: 'Alert',
+        icon: 'faSolidTriangleExclamation',
+        loadComponent: () =>
+          import('./pages/components/alert/alert.page').then((m) => m.AlertPage),
+      },
+      {
         routePath: 'components/omnibar',
         label: 'Omnibar',
         icon: 'faSolidTerminal',

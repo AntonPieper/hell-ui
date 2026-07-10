@@ -5,6 +5,25 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ## [Unreleased]
 
+### Added
+
+- Added the `@hell-ui/angular/alert` Package Entry Point (Styled Primitive): a
+  persistent inline messaging surface with `info`/`success`/`warning`/`danger`
+  variants reflected as `data-variant` and colored via Semantic Theme Tokens, a
+  default per-variant glyph that is replaceable via a projected `hellAlertIcon`
+  and removable via `[showIcon]="false"`, projected `hellAlertTitle`,
+  `hellAlertDescription`, and `hellAlertActions` directives, and a full-width
+  `layout="banner"` variant. An opt-in `hellAlertDismiss` button emits the
+  alert's `dismissed` event without self-removing (the consumer owns visibility)
+  and takes its accessible name from the alert Label Contract
+  (`provideHellAlertLabels`). Alerts carry no live-region semantics by default;
+  async insertions pair with an explicit `role` or the toast announcer.
+  Refine the `root`, `icon`, and `content` parts through the Part Style Map, and
+  import `@hell-ui/angular/alert/styles.css` for the default visuals. Evidence:
+  `packages/angular/alert/alert.spec.ts`, `e2e/alert-a11y-contracts.spec.ts`,
+  the docs page at `/components/alert`, and its axe WCAG A/AA smoke coverage
+  (issues #91, #102).
+
 ### Removed
 
 - Removed duplicate public pass-throughs from
