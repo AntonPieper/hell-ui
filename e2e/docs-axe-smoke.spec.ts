@@ -280,6 +280,19 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     },
   },
   {
+    name: 'number input docs example',
+    path: '/components/number-input',
+    heading: 'Number input',
+    include: ['main'],
+    prepare: async (page) => {
+      await expect(
+        page
+          .locator('app-number-input-basic-example')
+          .getByRole('spinbutton', { name: 'Listen port' }),
+      ).toBeVisible();
+    },
+  },
+  {
     name: 'pdf viewer shell',
     path: '/components/pdf-viewer',
     heading: 'PDF viewer',

@@ -1779,6 +1779,40 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'time-input hell-time-input hell-date-input hellField composite scheduling shift start end date',
   },
   {
+    title: 'Number Input: Basic',
+    path: '/components/number-input',
+    detail: 'components/number-input/examples/basic.example.ts',
+    terms:
+      'number-input hell-number-input HellNumberInput port integer min max step steppers spinbutton valueChange numeric keyboard arrow',
+  },
+  {
+    title: 'Number Input: Unit Suffix',
+    path: '/components/number-input',
+    detail: 'components/number-input/examples/duration-seconds.example.ts',
+    terms:
+      'number-input hell-number-input HellNumberInput suffix seconds duration unit interval ms percent rate self-describing',
+  },
+  {
+    title: 'Number Input: Sizes',
+    path: '/components/number-input',
+    detail: 'components/number-input/examples/sizes.example.ts',
+    terms: 'number-input hell-number-input size sm md lg HellNumberInput control height steppers',
+  },
+  {
+    title: 'Number Input: Reactive Forms',
+    path: '/components/number-input',
+    detail: 'components/number-input/examples/reactive-forms.example.ts',
+    terms:
+      'number-input hell-number-input hellField FormControl ReactiveFormsModule ControlValueAccessor Validator required min max numberInputMalformed number null port',
+  },
+  {
+    title: 'Number Input: Styling',
+    path: '/components/number-input',
+    detail: 'components/number-input/examples/styling.example.ts',
+    terms:
+      'number-input hell-number-input ui HellNumberInputUi HellNumberInputPart root input increment decrement suffix part style map tailwind tokens percent',
+  },
+  {
     title: 'Toast: Action',
     path: '/components/toast',
     detail: 'components/toast/examples/action.example.ts',
@@ -2043,6 +2077,20 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
     detail: 'ControlValueAccessor, formControl, HellTimeValue | null',
     terms:
       'time-input forms ControlValueAccessor formControl ReactiveFormsModule Angular Forms HellTimeValue null native form submission validation ui HellTimeInputUi',
+  },
+  {
+    title: 'Number input adapter',
+    path: '/components/number-input',
+    detail: 'provideHellNumberInputAdapter, HELL_NUMBER_INPUT_ADAPTER',
+    terms:
+      'number-input adapter provideHellNumberInputAdapter HELL_NUMBER_INPUT_ADAPTER parse format locale comma decimal exponent integer HellNumberInputAdapter ui HellNumberInputUi',
+  },
+  {
+    title: 'Number input forms value',
+    path: '/components/number-input',
+    detail: 'ControlValueAccessor, formControl, number | null',
+    terms:
+      'number-input forms ControlValueAccessor Validator formControl ReactiveFormsModule Angular Forms number null required min max numberInputMalformed spinbutton ui HellNumberInputUi',
   },
   {
     title: 'Table directives',

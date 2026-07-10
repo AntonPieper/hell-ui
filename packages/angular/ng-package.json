@@ -131,6 +131,11 @@
       "output": "time-input"
     },
     {
+      "glob": "number-input.ts",
+      "input": "number-input",
+      "output": "number-input"
+    },
+    {
       "glob": "app-shell.ts",
       "input": "app-shell",
       "output": "app-shell"

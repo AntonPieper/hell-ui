@@ -247,6 +247,15 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/time-input/time-input.page').then((m) => m.TimeInputPage),
       },
       {
+        routePath: 'components/number-input',
+        label: 'Number input',
+        icon: 'faSolidHashtag',
+        loadComponent: () =>
+          import('./pages/components/number-input/number-input.page').then(
+            (m) => m.NumberInputPage,
+          ),
+      },
+      {
         routePath: 'components/date-picker',
         label: 'Date picker',
         icon: 'faSolidCalendarDays',
