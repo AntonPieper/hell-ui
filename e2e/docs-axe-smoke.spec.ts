@@ -48,6 +48,12 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['main'],
   },
   {
+    name: 'chip',
+    path: '/components/chip',
+    heading: 'Chip',
+    include: ['main'],
+  },
+  {
     name: 'date-picker',
     path: '/components/date-picker',
     heading: 'Date picker',

@@ -191,6 +191,11 @@
       "output": "checkbox"
     },
     {
+      "glob": "chip.ts",
+      "input": "chip",
+      "output": "chip"
+    },
+    {
       "glob": "drop-zone.ts",
       "input": "drop-zone",
       "output": "drop-zone"

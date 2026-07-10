@@ -56,6 +56,15 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   heading via `headingLevel`, and the component owns container-filling centering.
   The TanStack Table Shell's default empty chrome (`HellDefaultTableEmptyState`)
   now recomposes this component. Closes #103.
+- Added the `@hell-ui/angular/chip` Package Entry Point (Mixed Entry Point):
+  `hellChip` (span/button/anchor host with interactive semantics only on
+  interactive hosts, `variant`/`size` aligned with `hellTag`, `data-variant`/
+  `data-size`/`data-disabled`, and a `(remove)` output), `hellChipRemove` (a
+  real sibling `button` named `Remove {label}` through the Label Contract and
+  disabled with its chip), and `hellChipSet` (a single tab stop with roving
+  arrow/Home/End focus, `Delete`/`Backspace` removal, and focus continuity to a
+  neighbouring chip or the set after removal). Removal is event-only; the
+  consumer owns the collection. See issue #106 (spec #95).
 
 ### Removed
 
