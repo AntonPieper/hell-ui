@@ -276,6 +276,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
         loadComponent: () =>
           import('./pages/components/dialpad/dialpad.page').then((m) => m.DialpadPage),
       },
+      {
+        routePath: 'components/save-bar',
+        label: 'Save bar',
+        icon: 'faSolidFloppyDisk',
+        loadComponent: () =>
+          import('./pages/components/save-bar/save-bar.page').then((m) => m.SaveBarPage),
+      },
     ],
   },
   {

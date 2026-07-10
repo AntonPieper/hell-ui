@@ -1324,6 +1324,34 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'hellResizable hellResizablePane hellResizableHandle stacked panes row-resize initialFlex editor console',
   },
   {
+    title: 'Save Bar: Contextual mode with a reactive form',
+    path: '/components/save-bar',
+    detail: 'components/save-bar/examples/contextual-form.example.ts',
+    terms:
+      'save-bar contextual-form components/save-bar/examples/contextual-form.example components/save-bar hell-save-bar dirty busy disabled saved discarded reactive form FormGroup form.dirty form.invalid form.pending unsaved changes one-line binding save discard announce',
+  },
+  {
+    title: 'Save Bar: Persistent mode for settings',
+    path: '/components/save-bar',
+    detail: 'components/save-bar/examples/persistent-settings.example.ts',
+    terms:
+      'save-bar persistent-settings components/save-bar/examples/persistent-settings.example components/save-bar hell-save-bar mode persistent settings page always visible footer extra actions projected reset to defaults hellButton dirty message',
+  },
+  {
+    title: 'Save Bar: Sticky inside a scroll container',
+    path: '/components/save-bar',
+    detail: 'components/save-bar/examples/sticky-scroll.example.ts',
+    terms:
+      'save-bar sticky-scroll components/save-bar/examples/sticky-scroll.example components/save-bar hell-save-bar sticky bottom scroll container normal flow no portal no fixed overflow dock last field visible',
+  },
+  {
+    title: 'Save Bar: Discard through the confirm service',
+    path: '/components/save-bar',
+    detail: 'components/save-bar/examples/confirm-discard.example.ts',
+    terms:
+      'save-bar confirm-discard components/save-bar/examples/confirm-discard.example components/save-bar hell-save-bar HellConfirmService discarded confirm dialog danger discard changes keep editing route guard unsaved changes recoverable',
+  },
+  {
     title: 'Search: Basic',
     path: '/components/search',
     detail: 'components/search/examples/basic.example.ts',
