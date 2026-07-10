@@ -219,6 +219,13 @@
     font-size: var(--text-sm);
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    hell-audio-player[data-slot='root'] [data-slot='captions'][data-state='live']
+      [data-slot='captionsDot'] {
+      animation: none;
+    }
+  }
+
   @media (max-width: 480px) {
     hell-audio-player[data-slot='root'] {
       padding-inline: var(--spacing-hell-3);

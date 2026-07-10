@@ -143,7 +143,7 @@ const HELL_AUDIO_PLAYER_RECIPE = {
     'shrink-0 data-[active=true]:bg-[color-mix(in_oklab,var(--color-hell-primary)_12%,transparent)] data-[active=true]:text-hell-primary',
   downloadButton: 'shrink-0',
   captions:
-    'absolute inset-x-0 top-full z-5 mt-hell-2 flex max-w-none origin-top flex-col gap-hell-2 rounded-hell-md border border-hell-border bg-hell-surface-elevated px-hell-3 py-hell-2 shadow-[0_1px_2px_rgb(0_0_0_/_0.04),0_12px_28px_-16px_rgb(0_0_0_/_0.25)] animate-[hell-audio-captions-in_200ms_var(--ease-hell-out,ease)]',
+    'absolute inset-x-0 top-full z-5 mt-hell-2 flex max-w-none origin-top flex-col gap-hell-2 rounded-hell-md border border-hell-border bg-hell-surface-elevated px-hell-3 py-hell-2 shadow-[0_1px_2px_rgb(0_0_0_/_0.04),0_12px_28px_-16px_rgb(0_0_0_/_0.25)] animate-[hell-audio-captions-in_200ms_var(--ease-hell-out,ease)] motion-reduce:animate-none',
   captionsBar: 'flex items-center justify-between gap-hell-3',
   captionsStatus:
     'inline-flex items-center gap-hell-2 text-xs font-semibold uppercase tracking-[0.04em] text-hell-foreground-muted',

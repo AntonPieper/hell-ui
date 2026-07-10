@@ -124,3 +124,15 @@
     opacity: 1;
   }
 }
+
+@layer components {
+  /* The status role and static variant shape keep loading perceivable without motion. */
+  @media (prefers-reduced-motion: reduce) {
+    [hellSpinner][data-slot='root'][data-variant='ring'],
+    [hellSpinner][data-slot='root'][data-variant='bars'],
+    [hellSpinner][data-slot='root'][data-variant='pulse'],
+    [hellSpinner][data-slot='root'][data-variant='dots']::before {
+      animation: none;
+    }
+  }
+}

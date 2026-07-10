@@ -309,6 +309,12 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Changed
 
+- Hell's duration-token-driven transitions and entrance animations now collapse
+  under `prefers-reduced-motion: reduce`; Spinner, Skeleton, and Audio Player
+  also disable their hardcoded keyframe motion locally. The shared token
+  stylesheet deliberately leaves consumer and third-party `[data-slot]`
+  elements untouched. Evidence: `e2e/reduced-motion-contracts.spec.ts`. See
+  #90.
 - Release publishing now delegates its shared gates to `release:dry-run`, and
   package validation runs Publint before the Hell-specific tarball audit.
 - The workspace lockfile is deduplicated and build/test transitive dependencies
