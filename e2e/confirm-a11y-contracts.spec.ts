@@ -120,6 +120,85 @@ test.describe('confirm browser accessibility contract', () => {
   });
 });
 
+test.describe('popconfirm browser accessibility contract', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/components/confirm');
+    await expect(page.getByRole('heading', { name: 'Confirm', level: 1 })).toBeVisible();
+  });
+
+  test('anchors a named panel, focuses cancel for danger, and Escape dismisses without deleting', async ({
+    page,
+  }) => {
+    const example = page.locator('app-popconfirm-row-delete-example');
+    const trigger = example.getByRole('button', { name: 'Delete staging-eu-west' });
+
+    await ensurePageIsActive(page);
+    await trigger.click();
+
+    const panel = page.getByRole('dialog', { name: 'Delete staging-eu-west?' });
+    await expect(panel).toBeVisible();
+    await settleDialogAnimations(panel);
+
+    const confirm = panel.getByRole('button', { name: 'Delete', exact: true });
+    const cancel = panel.getByRole('button', { name: 'Cancel' });
+
+    // Danger severity uses the destructive variant and starts focus on cancel.
+    await expect(confirm).toHaveAttribute('data-variant', 'danger');
+    await expectFocused(page, cancel, 'danger severity focuses the cancel button');
+
+    // Escape dismisses through the shared Floating Dismissal rules and restores
+    // focus to the trigger without running the delete.
+    await page.keyboard.press('Escape');
+    await expect(panel).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(trigger).toBeFocused({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(example.getByText('Nothing deleted yet.')).toBeVisible();
+  });
+
+  test('confirm runs the delete; an outside click dismisses without deleting', async ({ page }) => {
+    const example = page.locator('app-popconfirm-row-delete-example');
+
+    await ensurePageIsActive(page);
+
+    // Outside click dismisses without running the action.
+    await example.getByRole('button', { name: 'Delete staging-us-east' }).click();
+    const cancelPanel = page.getByRole('dialog', { name: 'Delete staging-us-east?' });
+    await expect(cancelPanel).toBeVisible();
+    await page.getByRole('heading', { name: 'Confirm', level: 1 }).click();
+    await expect(cancelPanel).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(example.getByText('Nothing deleted yet.')).toBeVisible();
+
+    // Confirm runs the delete and removes the row.
+    await example.getByRole('button', { name: 'Delete staging-eu-west' }).click();
+    const panel = page.getByRole('dialog', { name: 'Delete staging-eu-west?' });
+    await expect(panel).toBeVisible();
+    await settleDialogAnimations(panel);
+    await panel.getByRole('button', { name: 'Delete', exact: true }).click();
+
+    await expect(panel).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(example.getByText('Deleted staging-eu-west.')).toBeVisible();
+    await expect(
+      example.getByRole('button', { name: 'Delete staging-eu-west' }),
+    ).toHaveCount(0);
+  });
+
+  test('only one popconfirm is open at a time', async ({ page }) => {
+    const example = page.locator('app-popconfirm-row-delete-example');
+
+    await ensurePageIsActive(page);
+    await example.getByRole('button', { name: 'Delete staging-eu-west' }).click();
+    const first = page.getByRole('dialog', { name: 'Delete staging-eu-west?' });
+    await expect(first).toBeVisible();
+
+    await example.getByRole('button', { name: 'Delete staging-us-east' }).click();
+    const second = page.getByRole('dialog', { name: 'Delete staging-us-east?' });
+    await expect(second).toBeVisible();
+
+    // Arming the second popconfirm closes the first — armed deletes never accumulate.
+    await expect(first).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(page.getByRole('dialog')).toHaveCount(1);
+  });
+});
+
 /**
  * Headless WebKit on a loaded runner can drop page activation, which both
  * freezes CSS animation clocks and makes toBeFocused report "inactive". Bring

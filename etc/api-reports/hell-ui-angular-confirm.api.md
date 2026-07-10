@@ -4,9 +4,16 @@
 
 ```ts
 
-import * as i0 from '@angular/core';
+import { AfterViewInit } from '@angular/core';
+import * as _angular_core from '@angular/core';
+import { FocusOrigin } from '@angular/cdk/a11y';
+import * as i1 from 'ng-primitives/popover';
 import { InjectionToken } from '@angular/core';
+import { NgpPopoverTrigger } from 'ng-primitives/popover';
+import { Observable } from 'rxjs';
+import { OutputEmitterRef } from '@angular/core';
 import { Provider } from '@angular/core';
+import * as tailwind_merge from 'tailwind-merge';
 import { TemplateRef } from '@angular/core';
 import { WritableSignal } from '@angular/core';
 
@@ -24,6 +31,7 @@ export interface HellConfirmLabels {
     readonly cancel: string;
     readonly confirm: string;
     readonly countdown: (remainingSeconds: number) => string;
+    readonly popconfirmMessage: string;
 }
 
 // @public
@@ -47,15 +55,53 @@ export interface HellConfirmResult<TContentState = void> {
 // @public
 export class HellConfirmService {
     confirm<TContentState = void>(options: HellConfirmOptions<TContentState>): Promise<HellConfirmResult<TContentState>>;
-    static ɵfac: i0.ɵɵFactoryDeclaration<HellConfirmService, never>;
-    static ɵprov: i0.ɵɵInjectableDeclaration<HellConfirmService>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellConfirmService, never>;
+    static ɵprov: _angular_core.ɵɵInjectableDeclaration<HellConfirmService>;
 }
 
 // @public
 export type HellConfirmSeverity = 'default' | 'danger';
 
+// Warning: (ae-forgotten-export) The symbol "HellNativeInteractiveDisabledGuard" needs to be exported by the entry point hell-ui-angular-confirm.d.ts
+// Warning: (ae-forgotten-export) The symbol "HellPopconfirmController" needs to be exported by the entry point hell-ui-angular-confirm.d.ts
+//
+// @public
+export class HellPopconfirm extends HellNativeInteractiveDisabledGuard implements HellPopconfirmController {
+    constructor();
+    confirm(): void;
+    readonly confirmed: OutputEmitterRef<void>;
+    dismiss(): void;
+    readonly dismissed: OutputEmitterRef<void>;
+    protected readonly trigger: NgpPopoverTrigger<any>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellPopconfirm, "button[hellPopconfirm], a[hellPopconfirm]", ["hellPopconfirm"], {}, { "confirmed": "confirmed"; "dismissed": "dismissed"; }, never, never, true, [{ directive: typeof i1.NgpPopoverTrigger; inputs: { "ngpPopoverTrigger": "hellPopconfirm"; "ngpPopoverTriggerPlacement": "placement"; "ngpPopoverTriggerOffset": "offset"; "ngpPopoverTriggerFlip": "flip"; "ngpPopoverTriggerShift": "shift"; "ngpPopoverTriggerContainer": "container"; "ngpPopoverTriggerDisabled": "disabled"; }; outputs: {}; }]>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPopconfirm, never>;
+}
+
+// @public
+export class HellPopconfirmPanel {
+    constructor();
+    readonly cancelLabel: _angular_core.InputSignal<string | undefined>;
+    protected readonly cancelText: _angular_core.Signal<string>;
+    readonly confirmLabel: _angular_core.InputSignal<string | undefined>;
+    protected readonly confirmText: _angular_core.Signal<string>;
+    // Warning: (ae-forgotten-export) The symbol "HellButtonVariant" needs to be exported by the entry point hell-ui-angular-confirm.d.ts
+    protected readonly confirmVariant: _angular_core.Signal<HellButtonVariant>;
+    readonly message: _angular_core.InputSignal<string | undefined>;
+    protected readonly messageId: string;
+    protected onConfirm(): void;
+    protected onDismiss(): void;
+    protected readonly resolvedMessage: _angular_core.Signal<string>;
+    readonly severity: _angular_core.InputSignal<HellConfirmSeverity>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<HellPopconfirmPanel, "hell-popconfirm-panel", never, { "message": { "alias": "message"; "required": false; "isSignal": true; }; "severity": { "alias": "severity"; "required": false; "isSignal": true; }; "confirmLabel": { "alias": "confirmLabel"; "required": false; "isSignal": true; }; "cancelLabel": { "alias": "cancelLabel"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i2.HellPopover; inputs: {}; outputs: {}; }]>;
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellPopconfirmPanel, never>;
+}
+
 // @public
 export function provideHellConfirmLabels(overrides: Partial<HellConfirmLabels>): Provider;
+
+// Warnings were encountered during analysis:
+//
+// types/hell-ui-angular-confirm.d.ts:183:452 - (ae-forgotten-export) The symbol "i2" needs to be exported by the entry point hell-ui-angular-confirm.d.ts
 
 // (No @packageDocumentation comment for this package)
 

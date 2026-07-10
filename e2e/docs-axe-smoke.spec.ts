@@ -100,6 +100,23 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     },
   },
   {
+    name: 'popconfirm',
+    path: '/components/confirm',
+    heading: 'Confirm',
+    include: ['hell-popconfirm-panel[data-slot="root"]'],
+    prepare: async (page) => {
+      await page
+        .locator('app-popconfirm-row-delete-example')
+        .getByRole('button', { name: 'Delete staging-eu-west' })
+        .click();
+      const panel = page.getByRole('dialog', { name: 'Delete staging-eu-west?' });
+      await expect(panel).toBeVisible();
+      await expect
+        .poll(() => panel.evaluate((element) => getComputedStyle(element).opacity))
+        .toBe('1');
+    },
+  },
+  {
     name: 'dialpad',
     path: '/components/dialpad',
     heading: 'Dialpad',

@@ -65,6 +65,21 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   arrow/Home/End focus, `Delete`/`Backspace` removal, and focus continuity to a
   neighbouring chip or the set after removal). Removal is event-only; the
   consumer owns the collection. See issue #106 (spec #95).
+- Added a declarative popconfirm to `@hell-ui/angular/confirm`: attach the
+  `HellPopconfirm` trigger directive to any button or anchor and pair it with a
+  `<hell-popconfirm-panel>` (`HellPopconfirmPanel`) in a template for an anchored,
+  in-context confirmation such as a row delete. Built on the popover primitive, so
+  focus moves into the panel on open and returns to the trigger on dismiss, and
+  Escape or an outside click dismiss it through the shared Floating Dismissal
+  rules. One popconfirm is open at a time — opening one closes another — and it
+  exposes `confirmed` / `dismissed` outputs with no promise API, leaving the
+  action in app code. `danger` severity mirrors the confirm service (destructive
+  variant, initial focus on cancel), and the default message plus button labels
+  come from the `HELL_CONFIRM_LABELS` Label Contract (new `popconfirmMessage`
+  default). Docs gain a canonical row-delete example under `/components/confirm`
+  with axe WCAG A/AA smoke coverage. Evidence:
+  `packages/angular/confirm/popconfirm.spec.ts` and
+  `e2e/confirm-a11y-contracts.spec.ts`. See #113.
 
 ### Removed
 
