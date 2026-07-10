@@ -106,6 +106,12 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['main'],
   },
   {
+    name: 'input, select & textarea',
+    path: '/components/input',
+    heading: 'Input, Select & Textarea',
+    include: ['main'],
+  },
+  {
     name: 'flyout',
     path: '/components/flyout',
     heading: 'Flyout',

@@ -7,6 +7,17 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Added
 
+- Added an `autoGrow` opt-in to `HellTextarea` in the `@hell-ui/angular/input`
+  Package Entry Point: the native `<textarea>` grows with its content via CSS
+  `field-sizing: content` — no resize observers, no per-keystroke JavaScript
+  measurement, no animated height. It reflects `data-auto-grow` and disables the
+  native resize handle while active (the two affordances conflict); cap the growth
+  in CSS with `rows` for the minimum plus `max-block-size` and `overflow-y: auto`
+  for the maximum so a long paste scrolls internally. Progressive enhancement:
+  browsers without `field-sizing` degrade to a normal fixed-size textarea with no
+  JavaScript polyfill. Evidence: `packages/angular/input/input.spec.ts`, the
+  docs page at `/components/input` (Auto-grow example), and its axe WCAG A/AA
+  smoke coverage. Closes #112 (spec #101).
 - Added the `@hell-ui/angular/alert` Package Entry Point (Styled Primitive): a
   persistent inline messaging surface with `info`/`success`/`warning`/`danger`
   variants reflected as `data-variant` and colored via Semantic Theme Tokens, a

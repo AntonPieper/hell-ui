@@ -34,7 +34,7 @@ const HELL_NATIVE_SELECT_RECIPE = {
 } satisfies HellRecipe<HellNativeSelectPart>;
 
 const HELL_TEXTAREA_RECIPE = {
-  root: `block min-h-[calc(var(--spacing-hell-control-md)*2)] w-full resize-y rounded-hell-md border border-hell-border bg-hell-surface-elevated px-hell-4 py-hell-3 font-[inherit] text-[13px] leading-normal text-hell-foreground ${HELL_FORM_CONTROL_STATE_CLASSES} ${HELL_TEXT_CONTROL_PLACEHOLDER_CLASSES} data-[size=sm]:min-h-[calc(var(--spacing-hell-control-sm)*2)] data-[size=sm]:px-hell-3 data-[size=sm]:py-hell-2 data-[size=sm]:text-xs data-[size=lg]:min-h-[calc(var(--spacing-hell-control-lg)*2)] data-[size=lg]:px-hell-5 data-[size=lg]:py-hell-4 data-[size=lg]:text-sm`,
+  root: `block min-h-[calc(var(--spacing-hell-control-md)*2)] w-full resize-y rounded-hell-md border border-hell-border bg-hell-surface-elevated px-hell-4 py-hell-3 font-[inherit] text-[13px] leading-normal text-hell-foreground ${HELL_FORM_CONTROL_STATE_CLASSES} ${HELL_TEXT_CONTROL_PLACEHOLDER_CLASSES} data-[size=sm]:min-h-[calc(var(--spacing-hell-control-sm)*2)] data-[size=sm]:px-hell-3 data-[size=sm]:py-hell-2 data-[size=sm]:text-xs data-[size=lg]:min-h-[calc(var(--spacing-hell-control-lg)*2)] data-[size=lg]:px-hell-5 data-[size=lg]:py-hell-4 data-[size=lg]:text-sm data-auto-grow:field-sizing-content data-auto-grow:resize-none`,
 } satisfies HellRecipe<HellTextareaPart>;
 
 /** Styled text input built on `NgpInput`. Sizes via `size`; error styling via `invalid`. */
@@ -91,7 +91,11 @@ export class HellNativeSelect {
   readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
 }
 
-/** Styled resizable `<textarea>` built on `NgpTextarea`. */
+/**
+ * Styled resizable `<textarea>` built on `NgpTextarea`. Opt into content-based
+ * height growth with `autoGrow`; cap it in CSS via `rows` (minimum) plus
+ * `max-block-size` and `overflow-y: auto` (maximum).
+ */
 @Directive({
   selector: 'textarea[hellTextarea]',
   hostDirectives: [{ directive: NgpTextarea, inputs: ['disabled', 'id'] }],
@@ -99,6 +103,7 @@ export class HellNativeSelect {
     '[class]': "part('root')",
     'data-slot': 'root',
     '[attr.data-size]': 'size()',
+    '[attr.data-auto-grow]': "autoGrow() ? '' : null",
     '[attr.aria-invalid]': 'invalid() ? "true" : null',
   },
 })
@@ -116,4 +121,13 @@ export class HellTextarea {
   readonly size = input<Exclude<HellSize, 'xs' | 'xl'>>('md');
   /** Marks the control invalid for styling and `aria-invalid`. */
   readonly invalid = input(false, { alias: 'invalid', transform: booleanAttribute });
+  /**
+   * Grows the textarea with its content via CSS `field-sizing: content`, with no
+   * JavaScript measurement. Reflected as `data-auto-grow` and disables the native
+   * resize handle while active (the two affordances conflict). Cap the growth in
+   * CSS (`max-block-size` + `overflow-y: auto`) so a long paste scrolls internally
+   * instead of pushing the page. Degrades to a normal fixed-size textarea where
+   * `field-sizing` is unsupported (no JavaScript polyfill).
+   */
+  readonly autoGrow = input(false, { alias: 'autoGrow', transform: booleanAttribute });
 }

@@ -5,6 +5,10 @@ import { InputAllPartsStylingExample } from './examples/all-parts-styling.exampl
 import inputAllPartsStylingExampleCodeRaw from './examples/all-parts-styling.example.ts?raw' with {
   loader: 'text',
 };
+import { InputAutoGrowExample } from './examples/auto-grow.example';
+import inputAutoGrowExampleCodeRaw from './examples/auto-grow.example.ts?raw' with {
+  loader: 'text',
+};
 import { InputBasicExample } from './examples/basic.example';
 import inputBasicExampleCodeRaw from './examples/basic.example.ts?raw' with {
   loader: 'text',
@@ -32,6 +36,7 @@ import inputWithSearchIconExampleCodeRaw from './examples/with-search-icon.examp
   imports: [
     ExampleTabs,
     InputAllPartsStylingExample,
+    InputAutoGrowExample,
     InputBasicExample,
     InputSelectExample,
     InputSizesExample,
@@ -108,6 +113,26 @@ import inputWithSearchIconExampleCodeRaw from './examples/with-search-icon.examp
       </p>
       <hd-example-tabs [code]="inputTextareaExampleCode" previewClass="grid gap-2">
         <app-input-textarea-example />
+      </hd-example-tabs>
+
+      <h2>Auto-grow</h2>
+      <p>
+        Add <code>autoGrow</code> to let the <code>&lt;textarea&gt;</code> grow with its content.
+        It applies CSS <code>field-sizing: content</code> — no resize observers, no per-keystroke
+        JavaScript measurement, no animated height — and disables the native resize handle while
+        active, since a self-sizing field and a drag handle are conflicting affordances. Control
+        the bounds entirely in CSS: <code>rows</code> sets the minimum height, and a
+        <code>max-block-size</code> plus <code>overflow-y: auto</code> caps the growth so a long
+        paste scrolls internally instead of pushing the page around.
+      </p>
+      <p>
+        Auto-grow is progressive enhancement: browsers without
+        <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/field-sizing"><code>field-sizing</code></a>
+        support keep the standard fixed-size textarea (with its resize handle intact) and nothing
+        breaks — Hell ships no JavaScript polyfill for it.
+      </p>
+      <hd-example-tabs [code]="inputAutoGrowExampleCode" previewClass="grid max-w-md gap-2">
+        <app-input-auto-grow-example />
       </hd-example-tabs>
 
       <h2>With field and icon</h2>
@@ -206,6 +231,12 @@ import inputWithSearchIconExampleCodeRaw from './examples/with-search-icon.examp
             <li><code>size</code>: <code>'sm' | 'md' | 'lg'</code>. Default <code>'md'</code>.</li>
             <li><code>invalid</code>: <code>boolean</code>. Default <code>false</code>.</li>
             <li>
+              <code>autoGrow</code>: <code>boolean</code> (accepts the bare attribute). Default
+              <code>false</code>. Applies <code>field-sizing: content</code>, reflects
+              <code>data-auto-grow</code>, and disables the native resize handle while active;
+              cap height in CSS with <code>max-block-size</code> + <code>overflow-y: auto</code>.
+            </li>
+            <li>
               <code>ui: HellUiInput&lt;HellTextareaPart&gt;</code> where
               <code>HellTextareaPart = 'root'</code>. Exports <code>HellTextareaUi</code>.
             </li>
@@ -263,6 +294,7 @@ import inputWithSearchIconExampleCodeRaw from './examples/with-search-icon.examp
 })
 export class InputPage {
   protected readonly inputAllPartsStylingExampleCode = inputAllPartsStylingExampleCodeRaw;
+  protected readonly inputAutoGrowExampleCode = inputAutoGrowExampleCodeRaw;
   protected readonly inputBasicExampleCode = inputBasicExampleCodeRaw;
   protected readonly inputSelectExampleCode = inputSelectExampleCodeRaw;
   protected readonly inputSizesExampleCode = inputSizesExampleCodeRaw;

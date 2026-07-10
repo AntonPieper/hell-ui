@@ -76,6 +76,14 @@ class FieldControlHost {}
       [ui]="textareaUi"
       aria-label="Styled textarea"
     ></textarea>
+    <textarea
+      id="auto-grow-textarea"
+      hellTextarea
+      autoGrow
+      rows="2"
+      ui="[max-block-size:12rem] overflow-y-auto"
+      aria-label="Auto-grow textarea"
+    ></textarea>
   `,
 })
 class PartStyleHost {
@@ -159,6 +167,23 @@ describe('Hell input primitives', () => {
       mergedClasses: ['min-h-32', 'rounded-hell-lg', 'resize-none'],
       size: 'lg',
     });
+  });
+
+  it('applies the auto-grow field-sizing and resize contract only when opted in', () => {
+    const fixture = TestBed.createComponent(PartStyleHost);
+    fixture.detectChanges();
+
+    const autoGrow = control(fixture, 'auto-grow-textarea');
+    // The opt-in reflects a data attribute and carries the content-sizing +
+    // handle-disable utilities gated behind it (style contract, not pixel heights).
+    expect(autoGrow.getAttribute('data-auto-grow')).toBe('');
+    expect(autoGrow.classList.contains('data-auto-grow:field-sizing-content')).toBe(true);
+    expect(autoGrow.classList.contains('data-auto-grow:resize-none')).toBe(true);
+
+    // A textarea without the opt-in keeps the default resizable behavior and
+    // never sets the reflected attribute, so the gated utilities stay inert.
+    const fixedTextarea = control(fixture, 'styled-textarea');
+    expect(fixedTextarea.getAttribute('data-auto-grow')).toBeNull();
   });
 
   it('preserves disabled and invalid host behavior through ng-primitives directives', () => {

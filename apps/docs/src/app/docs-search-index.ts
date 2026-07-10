@@ -883,6 +883,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'components/input/examples/all-parts-styling.example components/input hellInput hellNativeSelect hellTextarea ui HellInputUi HellNativeSelectUi HellTextareaUi data-slot root part style map recipe',
   },
   {
+    title: 'Input: Auto Grow',
+    path: '/components/input',
+    detail: 'components/input/examples/auto-grow.example.ts',
+    terms:
+      'components/input/examples/auto-grow.example components/input hellTextarea autoGrow auto-grow field-sizing content sizing resize rows max-block-size overflow-y cap grow multiline no javascript measurement progressive enhancement data-auto-grow',
+  },
+  {
     title: 'Input: Basic',
     path: '/components/input',
     detail: 'components/input/examples/basic.example.ts',

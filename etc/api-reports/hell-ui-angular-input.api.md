@@ -63,11 +63,12 @@ export type HellRecipe<Part extends string> = Readonly<Record<Part, string>>;
 
 // @public
 export class HellTextarea {
+    readonly autoGrow: _angular_core.InputSignalWithTransform<boolean, unknown>;
     readonly invalid: _angular_core.InputSignalWithTransform<boolean, unknown>;
     protected readonly part: _hell_ui_angular_core.HellPartStyler<"root">;
     readonly size: _angular_core.InputSignal<"sm" | "md" | "lg">;
     readonly ui: _angular_core.InputSignal<HellUiInput<"root">>;
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTextarea, "textarea[hellTextarea]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i2.NgpTextarea; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<HellTextarea, "textarea[hellTextarea]", never, { "ui": { "alias": "ui"; "required": false; "isSignal": true; }; "size": { "alias": "size"; "required": false; "isSignal": true; }; "invalid": { "alias": "invalid"; "required": false; "isSignal": true; }; "autoGrow": { "alias": "autoGrow"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i2.NgpTextarea; inputs: { "disabled": "disabled"; "id": "id"; }; outputs: {}; }]>;
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<HellTextarea, never>;
 }
 
