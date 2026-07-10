@@ -575,6 +575,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'confirm HellConfirmService content template contentState HellConfirmContentContext state signal writable checkbox hellNativeCheckbox delete imported groups result rides back projected',
   },
   {
+    title: 'Confirm: Popconfirm row delete',
+    path: '/components/confirm',
+    detail: 'components/confirm/examples/popconfirm-row-delete.example.ts',
+    terms:
+      'popconfirm hellPopconfirm HellPopconfirmPanel hell-popconfirm-panel row delete destructive danger anchored popover confirmed dismissed single open one at a time floating dismissal escape outside click confirmLabel severity in-context inline trigger directive panel declarative',
+  },
+  {
     title: 'Date Input: Basic',
     path: '/components/date-input',
     detail: 'components/date-input/examples/basic.example.ts',

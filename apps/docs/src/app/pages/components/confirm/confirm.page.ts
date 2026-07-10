@@ -17,6 +17,10 @@ import { ConfirmContentTemplateExample } from './examples/content-template.examp
 import confirmContentTemplateExampleCodeRaw from './examples/content-template.example.ts?raw' with {
   loader: 'text',
 };
+import { PopconfirmRowDeleteExample } from './examples/popconfirm-row-delete.example';
+import popconfirmRowDeleteExampleCodeRaw from './examples/popconfirm-row-delete.example.ts?raw' with {
+  loader: 'text',
+};
 
 @Component({
   selector: 'hd-confirm',
@@ -28,6 +32,7 @@ import confirmContentTemplateExampleCodeRaw from './examples/content-template.ex
     ConfirmDangerExample,
     ConfirmCountdownExample,
     ConfirmContentTemplateExample,
+    PopconfirmRowDeleteExample,
   ],
   template: `
     <article class="hd-prose">
@@ -102,6 +107,26 @@ import confirmContentTemplateExampleCodeRaw from './examples/content-template.ex
         <app-confirm-content-template-example />
       </hd-example-tabs>
 
+      <h2>Popconfirm: in-context confirmation</h2>
+      <p>
+        For lightweight confirmations anchored to a control — a row delete, an inline "remove" —
+        reach for the declarative <strong>popconfirm</strong> instead of a modal. Attach
+        <code>hellPopconfirm</code> to any button, point it at a template holding a
+        <code>&lt;hell-popconfirm-panel&gt;</code>, and read <code>confirmed</code> to run the action.
+        There is no promise API on the declarative form: the trigger emits <code>confirmed</code> or
+        <code>dismissed</code> and the action itself stays in your code.
+      </p>
+      <p>
+        The panel renders on the popover primitive, so focus moves into it on open and returns to the
+        trigger on dismiss, and Escape or an outside click dismisses it through the shared Floating
+        Dismissal rules. Only one popconfirm is open at a time — arming a second row's delete closes
+        the first, so "armed delete" states can never accumulate. Set <code>severity="danger"</code>
+        to match the confirm service's destructive styling and start focus on cancel.
+      </p>
+      <hd-example-tabs [code]="popconfirmRowDeleteExampleCode">
+        <app-popconfirm-row-delete-example />
+      </hd-example-tabs>
+
       <h2>Recipe: unsaved-changes route guard</h2>
       <p>
         Hell ships no <code>CanDeactivate</code> guard — the framework-agnostic surface stays small —
@@ -144,14 +169,35 @@ import confirmContentTemplateExampleCodeRaw from './examples/content-template.ex
       <ul>
         <li><code>$implicit</code> / <code>state</code>: <code>WritableSignal&lt;TContentState&gt;</code> — the same content state signal, exposed as the template's implicit value and as <code>state</code>.</li>
       </ul>
+      <h3><code>HellPopconfirm</code> (trigger directive)</h3>
+      <p>
+        Attach to a <code>button</code> or <code>a</code>. Bind
+        <code>[hellPopconfirm]="template"</code> where the template holds a
+        <code>&lt;hell-popconfirm-panel&gt;</code>. Pass-through inputs
+        <code>placement</code>, <code>offset</code>, <code>flip</code>, <code>shift</code>,
+        <code>container</code>, and <code>disabled</code> forward to the popover trigger.
+      </p>
+      <ul>
+        <li><code>confirmed</code>: output. Emits when the user confirms — run the action here.</li>
+        <li>
+          <code>dismissed</code>: output. Emits when the popconfirm closes without confirming (cancel,
+          Escape, outside click, or another popconfirm opening).
+        </li>
+      </ul>
+      <h3><code>HellPopconfirmPanel</code> (<code>&lt;hell-popconfirm-panel&gt;</code>)</h3>
+      <ul>
+        <li><code>message?</code>: <code>string</code>. Falls back to the Label Contract's <code>popconfirmMessage</code>.</li>
+        <li><code>severity?</code>: <code>'default' | 'danger'</code>. Default <code>default</code>. <code>danger</code> uses the destructive confirm variant and focuses cancel.</li>
+        <li><code>confirmLabel?</code> / <code>cancelLabel?</code>: <code>string</code>. Override the button labels; fall back to the Label Contract.</li>
+      </ul>
       <h3>Also exported</h3>
       <ul>
         <li><code>HellConfirmSeverity</code> — <code>'default' | 'danger'</code>.</li>
         <li>
           <code>HellConfirmLabels</code>, <code>HELL_CONFIRM_LABELS</code>,
           <code>provideHellConfirmLabels()</code> — the Label Contract for the default
-          <code>confirm</code> / <code>cancel</code> labels and the <code>countdown</code> suffix
-          formatter.
+          <code>confirm</code> / <code>cancel</code> labels, the <code>countdown</code> suffix
+          formatter, and the popconfirm's default <code>popconfirmMessage</code>.
         </li>
       </ul>
 
@@ -188,6 +234,7 @@ export class ConfirmPage {
   protected readonly confirmDangerExampleCode = confirmDangerExampleCodeRaw;
   protected readonly confirmCountdownExampleCode = confirmCountdownExampleCodeRaw;
   protected readonly confirmContentTemplateExampleCode = confirmContentTemplateExampleCodeRaw;
+  protected readonly popconfirmRowDeleteExampleCode = popconfirmRowDeleteExampleCodeRaw;
 
   protected readonly routeGuardRecipe = `import { inject } from '@angular/core';
 import { CanDeactivateFn } from '@angular/router';

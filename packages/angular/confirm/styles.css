@@ -1,6 +1,8 @@
-/* The confirm Composite renders on the dialog primitive, so it carries the
-   dialog surface, overlay, and animation styles it composes. */
+/* The confirm Composite renders on the dialog primitive (service dialog) and the
+   popover primitive (popconfirm), so it carries the surface, overlay, and
+   animation styles it composes from both. */
 @import '../dialog/styles.css';
+@import '../popover/styles.css';
 
-/* Confirm layout is Tailwind utility recipes in the component template. */
+/* Confirm and popconfirm layout are Tailwind utility recipes in the components. */
 @source "./confirm.ts";

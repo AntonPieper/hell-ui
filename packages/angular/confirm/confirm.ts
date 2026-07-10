@@ -2,11 +2,16 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  Directive,
   ElementRef,
   Injectable,
+  InjectionToken,
   afterNextRender,
   computed,
+  forwardRef,
   inject,
+  input,
+  output,
   signal,
   viewChild,
 } from '@angular/core';
@@ -14,6 +19,7 @@ import { DOCUMENT } from '@angular/common';
 import { NgTemplateOutlet } from '@angular/common';
 import { NgpDialogManager, injectDialogRef } from 'ng-primitives/dialog';
 import type { NgpDialogRef } from 'ng-primitives/dialog';
+import { NgpPopoverTrigger } from 'ng-primitives/popover';
 import { hellCreateLabels } from '@hell-ui/angular/core';
 import type { HellButtonVariant } from '@hell-ui/angular/core';
 import { HellButton } from '@hell-ui/angular/button';
@@ -23,7 +29,9 @@ import {
   HellDialogOverlay,
   HellDialogTitle,
 } from '@hell-ui/angular/dialog';
-import type { InjectionToken, Provider, TemplateRef, WritableSignal } from '@angular/core';
+import { HellPopover } from '@hell-ui/angular/popover';
+import { HellNativeInteractiveDisabledGuard } from '@hell-ui/angular/internal/core';
+import type { OutputEmitterRef, Provider, TemplateRef, WritableSignal } from '@angular/core';
 
 /** Severity of a confirmation; `danger` styles the confirm button destructively and focuses cancel. */
 export type HellConfirmSeverity = 'default' | 'danger';
@@ -75,18 +83,21 @@ export interface HellConfirmResult<TContentState = void> {
 
 /** Built-in strings owned by the confirm entry point's Label Contract. */
 export interface HellConfirmLabels {
-  /** Default confirm button label. */
+  /** Default confirm button label, shared by the service dialog and the popconfirm. */
   readonly confirm: string;
-  /** Default cancel button label. */
+  /** Default cancel button label, shared by the service dialog and the popconfirm. */
   readonly cancel: string;
   /** Formats the remaining-seconds suffix appended to the confirm label while the countdown gates it. */
   readonly countdown: (remainingSeconds: number) => string;
+  /** Default popconfirm message shown when a panel supplies no `message`. */
+  readonly popconfirmMessage: string;
 }
 
 const HELL_CONFIRM_LABELS_CONTRACT = hellCreateLabels<HellConfirmLabels>('HELL_CONFIRM_LABELS', {
   confirm: 'Confirm',
   cancel: 'Cancel',
   countdown: (remainingSeconds: number) => ` (${remainingSeconds})`,
+  popconfirmMessage: 'Are you sure?',
 });
 
 /** Injection token resolving to the effective confirm labels. */
@@ -314,4 +325,238 @@ interface HellConfirmQueueEntry {
   readonly options: HellConfirmOptions<unknown>;
   readonly resolve: (result: HellConfirmResult<unknown>) => void;
   readonly opener: HTMLElement | null;
+}
+
+/** Bridge a popconfirm panel invokes to resolve its owning trigger. */
+interface HellPopconfirmController {
+  /** Emit `confirmed` on the trigger and close the popconfirm. */
+  confirm(): void;
+  /** Close the popconfirm; the trigger emits `dismissed` as it closes. */
+  dismiss(): void;
+}
+
+/**
+ * Injection token a `HellPopconfirmPanel` resolves to reach its owning trigger
+ * through the popover overlay's parent injector. Internal to the entry point.
+ */
+const HELL_POPCONFIRM = new InjectionToken<HellPopconfirmController>('HELL_POPCONFIRM');
+
+/**
+ * Root registry that enforces one open popconfirm at a time: opening one closes
+ * any other. Internal — the trigger drives it from its open-state changes.
+ */
+@Injectable({ providedIn: 'root' })
+class HellPopconfirmManager {
+  private current: HellPopconfirm | null = null;
+
+  /** Record `trigger` as the open popconfirm, closing any previously open one. */
+  open(trigger: HellPopconfirm): void {
+    if (this.current && this.current !== trigger) this.current.dismiss();
+    this.current = trigger;
+  }
+
+  /** Clear `trigger` if it is the currently tracked open popconfirm. */
+  release(trigger: HellPopconfirm): void {
+    if (this.current === trigger) this.current = null;
+  }
+}
+
+/**
+ * Declarative confirmation popover anchored to its trigger. Attach it to any
+ * destructive control and pair it with a `HellPopconfirmPanel` in a template:
+ *
+ * ```html
+ * <button hellButton variant="danger" [hellPopconfirm]="confirmDelete" (confirmed)="deleteRow(row)">
+ *   Delete
+ * </button>
+ * <ng-template #confirmDelete>
+ *   <hell-popconfirm-panel message="Delete this row?" severity="danger" confirmLabel="Delete" />
+ * </ng-template>
+ * ```
+ *
+ * Built on the popover primitive, so focus moves into the panel on open and
+ * returns to the trigger on dismiss, and Escape or an outside click dismiss it
+ * through the shared Floating Dismissal rules. Opening one popconfirm closes any
+ * other. There is no promise API on the declarative form: it emits `confirmed`
+ * or `dismissed` and leaves the action itself to app code.
+ */
+@Directive({
+  selector: 'button[hellPopconfirm], a[hellPopconfirm]',
+  exportAs: 'hellPopconfirm',
+  hostDirectives: [
+    {
+      directive: NgpPopoverTrigger,
+      inputs: [
+        'ngpPopoverTrigger:hellPopconfirm',
+        'ngpPopoverTriggerPlacement:placement',
+        'ngpPopoverTriggerOffset:offset',
+        'ngpPopoverTriggerFlip:flip',
+        'ngpPopoverTriggerShift:shift',
+        'ngpPopoverTriggerContainer:container',
+        'ngpPopoverTriggerDisabled:disabled',
+      ],
+    },
+  ],
+  providers: [{ provide: HELL_POPCONFIRM, useExisting: forwardRef(() => HellPopconfirm) }],
+  host: {
+    '[attr.type]': 'nativeButtonType()',
+    '[attr.disabled]': 'nativeButtonDisabled(trigger.disabled())',
+    '[attr.aria-disabled]': 'anchorAriaDisabled(trigger.disabled())',
+    '[attr.tabindex]': 'disabledAnchorTabIndex(trigger.disabled())',
+    '(click)': 'preventActionAnchorNavigation($event, trigger.disabled())',
+    '(keydown.enter)': 'preventDisabledAnchor($event, trigger.disabled())',
+  },
+})
+export class HellPopconfirm
+  extends HellNativeInteractiveDisabledGuard
+  implements HellPopconfirmController
+{
+  /** Underlying ng-primitives popover trigger state. */
+  protected readonly trigger = inject(NgpPopoverTrigger);
+  private readonly manager = inject(HellPopconfirmManager);
+
+  /** Emits when the user confirms; wire the destructive action here. */
+  readonly confirmed: OutputEmitterRef<void> = output<void>();
+  /** Emits when the popconfirm closes without confirming (cancel, Escape, outside click, or another opening). */
+  readonly dismissed: OutputEmitterRef<void> = output<void>();
+
+  private confirmedThisCycle = false;
+
+  constructor() {
+    super();
+    const subscription = this.trigger.openChange.subscribe((open: boolean) =>
+      this.onOpenChange(open),
+    );
+    inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
+  }
+
+  /** Emit `confirmed` and close the popconfirm. */
+  confirm(): void {
+    this.confirmedThisCycle = true;
+    this.confirmed.emit();
+    void this.trigger.hide('program');
+  }
+
+  /** Close the popconfirm; `dismissed` fires as it closes. */
+  dismiss(): void {
+    void this.trigger.hide('program');
+  }
+
+  private onOpenChange(open: boolean): void {
+    if (open) {
+      this.confirmedThisCycle = false;
+      this.manager.open(this);
+      return;
+    }
+    this.manager.release(this);
+    if (!this.confirmedThisCycle) this.dismissed.emit();
+    this.confirmedThisCycle = false;
+  }
+}
+
+/**
+ * Panel for a `HellPopconfirm` trigger: a small confirmation popover with a
+ * message and confirm/cancel buttons. Place it inside the trigger's template.
+ *
+ * It renders on the popover primitive (focus trap, `role="dialog"`, shared
+ * Floating Dismissal) and wires its buttons back to the owning trigger, which
+ * owns the `confirmed` / `dismissed` outputs. Danger severity mirrors the
+ * confirm service: the confirm button takes the destructive variant and initial
+ * focus starts on cancel.
+ */
+@Component({
+  selector: 'hell-popconfirm-panel',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  hostDirectives: [HellPopover],
+  imports: [HellButton],
+  host: {
+    '[attr.aria-labelledby]': 'messageId',
+    '[attr.data-severity]': 'severity()',
+  },
+  template: `
+    <div class="flex flex-col gap-hell-3">
+      <p [id]="messageId" class="text-[13px] text-hell-foreground">{{ resolvedMessage() }}</p>
+      <div class="flex justify-end gap-hell-2">
+        <button
+          #cancelButtonEl
+          hellButton
+          variant="ghost"
+          size="sm"
+          type="button"
+          (click)="onDismiss()"
+        >
+          {{ cancelText() }}
+        </button>
+        <button
+          #confirmButtonEl
+          hellButton
+          [variant]="confirmVariant()"
+          size="sm"
+          type="button"
+          (click)="onConfirm()"
+        >
+          {{ confirmText() }}
+        </button>
+      </div>
+    </div>
+  `,
+})
+export class HellPopconfirmPanel {
+  /** Confirmation message. Falls back to the Label Contract's `popconfirmMessage`. */
+  readonly message = input<string>();
+  /** `default` (confirm focused) or `danger` (destructive confirm, cancel focused). Defaults to `default`. */
+  readonly severity = input<HellConfirmSeverity>('default');
+  /** Overrides the confirm button label. Falls back to the Label Contract's `confirm`. */
+  readonly confirmLabel = input<string>();
+  /** Overrides the cancel button label. Falls back to the Label Contract's `cancel`. */
+  readonly cancelLabel = input<string>();
+
+  private readonly labels = inject(HELL_CONFIRM_LABELS);
+  private readonly controller = inject(HELL_POPCONFIRM);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
+  /** Stable id linking the message paragraph as the dialog's accessible name. */
+  protected readonly messageId = `hell-popconfirm-${nextPopconfirmId()}`;
+  /** Resolved confirmation message. */
+  protected readonly resolvedMessage = computed(() => this.message() ?? this.labels.popconfirmMessage);
+  /** Resolved confirm button label. */
+  protected readonly confirmText = computed(() => this.confirmLabel() ?? this.labels.confirm);
+  /** Resolved cancel button label. */
+  protected readonly cancelText = computed(() => this.cancelLabel() ?? this.labels.cancel);
+  /** Button variant used for the confirm action. */
+  protected readonly confirmVariant = computed<HellButtonVariant>(() =>
+    this.severity() === 'danger' ? 'danger' : 'primary',
+  );
+
+  private readonly confirmButtonRef = viewChild<ElementRef<HTMLButtonElement>>('confirmButtonEl');
+  private readonly cancelButtonRef = viewChild<ElementRef<HTMLButtonElement>>('cancelButtonEl');
+
+  constructor() {
+    afterNextRender(() => this.focusInitialControl());
+  }
+
+  /** Confirm the action through the owning trigger. */
+  protected onConfirm(): void {
+    this.controller.confirm();
+  }
+
+  /** Dismiss the popconfirm through the owning trigger. */
+  protected onDismiss(): void {
+    this.controller.dismiss();
+  }
+
+  private focusInitialControl(): void {
+    const target = this.severity() === 'danger' ? this.cancelButtonRef() : this.confirmButtonRef();
+    const element = target?.nativeElement;
+    if (!element) return;
+    // Run after the popover focus trap's mount autofocus so the danger/default policy wins.
+    const view = this.host.ownerDocument.defaultView;
+    if (view) view.requestAnimationFrame(() => element.focus({ preventScroll: true }));
+    else element.focus({ preventScroll: true });
+  }
+}
+
+let popconfirmIdCounter = 0;
+function nextPopconfirmId(): number {
+  return ++popconfirmIdCounter;
 }
