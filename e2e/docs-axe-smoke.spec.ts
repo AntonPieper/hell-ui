@@ -80,6 +80,20 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     },
   },
   {
+    name: 'confirm',
+    path: '/components/confirm',
+    heading: 'Confirm',
+    include: ['[role="dialog"][data-slot="root"]'],
+    prepare: async (page) => {
+      await page.getByRole('button', { name: 'Publish article' }).click();
+      const dialog = page.getByRole('dialog', { name: 'Publish this article?' });
+      await expect(dialog).toBeVisible();
+      await expect
+        .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity))
+        .toBe('1');
+    },
+  },
+  {
     name: 'dialpad',
     path: '/components/dialpad',
     heading: 'Dialpad',
