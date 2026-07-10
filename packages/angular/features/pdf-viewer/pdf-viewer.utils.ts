@@ -76,6 +76,7 @@ function getWheelDeltaPixels(event: WheelEvent) {
     case WheelEvent.DOM_DELTA_LINE:
       return event.deltaY * 30;
     case WheelEvent.DOM_DELTA_PAGE:
+      // eslint-disable-next-line no-restricted-globals -- DOM_DELTA_PAGE is defined relative to the viewport
       return event.deltaY * window.innerHeight;
     default:
       return event.deltaY;

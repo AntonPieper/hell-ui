@@ -216,7 +216,9 @@ export class HellFloatingScopedInsetsRuntime {
   }
 
   private observeScopeRoot(root: HTMLElement): void {
+    // eslint-disable-next-line no-restricted-globals -- SSR feature-detect; ResizeObserver has no injectable seam
     if (typeof ResizeObserver === 'undefined') return;
+    // eslint-disable-next-line no-restricted-globals -- guarded by the feature check above
     this.resizeObserver = new ResizeObserver(this.syncScope);
     this.resizeObserver.observe(root);
   }

@@ -7,6 +7,51 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
 
 ### Removed
 
+- Replaced hand-maintained CI sharding and its meta-guard with native tooling:
+  Playwright now shards with `--shard=N/9` (every test in exactly one shard by
+  construction), so the named `ciGroups` grep table in `playwright.config.ts`
+  and all of `tools/check-ci-coverage.mjs` are gone. The package-consumer CI
+  matrix now selects harness-owned groups via `HELL_PACKAGE_CONSUMER_GROUP`
+  instead of mirroring scenario lists in workflow YAML.
+- Deleted `tools/run-unit-tests.mjs` (360 lines re-verifying what Vitest
+  already enforces: exit codes, JUnit output, coverage thresholds). `test:unit`
+  invokes `ng test` directly with the single `vitest.config.ts`
+  (`vitest.ci.config.ts` folded in); thresholds stay enforced by
+  `coverage.thresholds`.
+- Deleted the docs bundle budget apparatus (`tools/docs-budget-policy.mjs`,
+  `tools/docs-bundle-budget-report.mjs`, `docs/release/docs-budget-policy.md`,
+  the CI diagnosis artifact). Angular's native `budgets` in
+  `apps/docs/angular.json` keep failing the build at the error threshold.
+- Dissolved the release-evidence ceremony: `tools/release-dry-run.mjs`
+  (timestamped log/JSON "evidence" plus an awk re-verification of a job that
+  already gates by `needs:`) and `tools/release-evidence-policy.mjs` (a
+  300-line entrypoint mirror). API-report membership is now derived from the
+  entrypoint manifest in `tools/check-api-reports.mjs` with one documented
+  exclusion list; the npm-publish workflow runs the gates as plain steps;
+  `release:dry-run` is a package.json chain; `check-changelog` verifies only
+  that the version has a changelog section with a bullet.
+- Pruned `tools/check-architecture.mjs` by ~700 more lines: string-mirror
+  checks that re-asserted exact source/CSS text (app-shell breakpoint, select
+  and combobox chevron CSS, label-contract forbidden strings, code-editor
+  `createElementNS` pin), tombstones (`.hell-*` behavior sentinels), checks
+  duplicating unit tests or API reports (CVA classes, hotkey export leaks,
+  floating registration), the docs table-CSS ceremony, and the Component
+  Contract manifest comparison. NgClass/HostBinding/HostListener bans and the
+  exact-line browser-global allowlist moved to standard ESLint rules
+  (`no-restricted-imports`, `no-restricted-globals`) with justified inline
+  disables at the 11 SSR seams.
+- Deleted `packages/angular/component-contract.spec.ts`: a 155-symbol registry
+  where ~130 entries declared `coverage: 'static'` (tested by nothing) and the
+  16 DOM cases mirrored implementation class strings; per-component specs
+  carry the behavioral coverage. Also deleted the pack audit's embedded
+  self-test and derived its recipe-file list from `ng-package.json` assets
+  instead of a 43-line mirror.
+- Re-enabled ESLint rules the config had switched off
+  (`no-irregular-whitespace`, `no-unused-vars` outside the library,
+  `no-unused-expressions`), which immediately caught a literal NBSP in the
+  dialpad template (now an explicit ` `), a statement-position ternary in
+  flyout, and a dead `.length` read in omnibar.
+
 - Dissolved `tools/check-ci-contract.mjs` (892 lines of string mirrors that
   re-pinned package.json scripts, workflow YAML, and other tools' source text)
   into the derived `tools/check-ci-coverage.mjs`, which computes coverage from

@@ -621,7 +621,7 @@ export class HellOmnibar implements HellFloatingScope {
     effect(() => {
       // Reset active when items shift or query changes.
       this.value();
-      this.runtime.items().length;
+      this.runtime.items();
       this.runtime.resetActive();
     });
     effect((onCleanup) => {

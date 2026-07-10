@@ -340,6 +340,7 @@ export class HellFloatingDismissController {
   private document(): Document | null {
     const provided = this.options.ownerDocument?.();
     if (provided) return provided;
+    // eslint-disable-next-line no-restricted-globals -- fallback when no owner document is provided
     return typeof document === 'undefined' ? null : document;
   }
 

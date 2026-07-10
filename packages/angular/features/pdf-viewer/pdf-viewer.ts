@@ -400,6 +400,7 @@ export class HellPdfViewer {
 
     if (!this.runtime.hasDocument || canvases.length <= firstBatch.length) return;
 
+    // eslint-disable-next-line no-restricted-globals -- feature-detect before lazy thumb rendering
     if (typeof IntersectionObserver === 'undefined') {
       queueMicrotask(() => {
         void this.runtime.renderThumbs(canvases, () => this.overviewOpen());
@@ -407,6 +408,7 @@ export class HellPdfViewer {
       return;
     }
 
+    // eslint-disable-next-line no-restricted-globals -- guarded by the feature check above
     const observer = new IntersectionObserver(
       (entries) => {
         if (!this.overviewOpen()) return;

@@ -20,8 +20,7 @@ Use this guide when moving an app from local/alpha Hell imports to the first bet
 
 Package peer metadata is package-wide. Some optional peers appear in the package manifest even when they are only required by a kept feature entry point; pdf.js is an optional peer needed only by `@hell-ui/angular/features/pdf-viewer`. The package-consumer runner proves the actual strict-peer install groups in [`tools/check-package-consumer.mjs`](../../tools/check-package-consumer.mjs).
 
-Release-candidate evidence uses the scenario set in
-[`tools/release-evidence-policy.mjs`](../../tools/release-evidence-policy.mjs).
+The release workflow runs every scenario in that catalog before publishing.
 
 A normal Angular app already has `@angular/common`, `@angular/core`, and `rxjs`; install any missing core peers explicitly. Use `pnpm add` in consumer snippets below because the package-consumer proof uses pnpm strict-peer installs.
 
@@ -310,13 +309,13 @@ Accessibility support lives in the docs app accessibility matrix source at [`app
 Current not-production-ready gaps:
 
 - The accessibility matrix currently records no critical gaps, but the production-ready claim still requires fresh browser evidence (`pnpm e2e` across chromium/firefox/webkit) on the release-candidate commit; per-surface known gaps in the matrix remain consumer-relevant reading.
-- Full release-candidate evidence must prove the package-consumer scenario set, API report membership, accessibility/browser, docs budget, pack audit, and release dry-run tasks from [`docs/release/release-evidence-policy.md`](release-evidence-policy.md) on the current commit.
+- A release-candidate commit must pass the release workflow gate (changelog, lint, architecture, unit, build, pack audit, package-consumer scenarios, API report, docs build) on the current commit.
 - Local `test-results/` evidence is intentionally untracked; rerun the commands for each release candidate instead of relying on stale artifacts.
 
 Before telling external consumers that Hell UI is production-ready, run:
 
 ```bash
-pnpm release:dry-run -- --full
+pnpm release:dry-run
 pnpm e2e
 ```
 

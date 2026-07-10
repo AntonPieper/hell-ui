@@ -32,11 +32,12 @@ Trusted publishing works only when the npm trusted-publisher record exactly matc
 
 The release workflow lives at `.github/workflows/npm-publish.yml` in this repository.
 
-- Tag pushes matching `v*.*.*` run the full release dry-run first.
+- Tag pushes matching `v*.*.*` run the release gate first: changelog, lint,
+  architecture, unit tests, library build, pack audit, package-consumer
+  scenarios, API report, and docs build.
 - The release publishes `@hell-ui/angular`; the tag must match the package version.
-- The dry-run job uploads `test-results/release-evidence/` as the `release-dry-run-evidence` artifact.
 - A separate no-OIDC `build-package` job rebuilds, pack-audits, and uploads the package tarball as `release-package`.
-- The publish job has `needs: [release-dry-run, build-package]`, downloads both artifacts, and refuses to publish without a passing summary exit in the dry-run log.
+- The publish job has `needs: [release-gate, build-package]`, so it only runs when every gate passed.
 - The publish job has `permissions.id-token: write` and `permissions.contents: read` so the npm registry can mint the short-lived OIDC credential for `pnpm publish`.
 - Normal publish does not set `NPM_TOKEN` or `NODE_AUTH_TOKEN`. Trusted publishing authenticates the publish command directly.
 - The job runs on `ubuntu-latest` with Node 24 and the pinned pnpm version so trusted publishing and provenance are available.
@@ -83,9 +84,9 @@ GitHub Packages npm registry through
 ## Release steps
 
 1. Update the `packages/angular/package.json` version in a release-prep change.
-2. Run `pnpm release:dry-run -- --full` locally or wait for the release workflow dry-run evidence. The required scenario and API report membership is defined in [`docs/release/release-evidence-policy.md`](release-evidence-policy.md).
+2. Run `pnpm release:dry-run` locally, or rely on the release workflow's gate job. API report membership is derived from the entrypoint manifest in [`tools/check-api-reports.mjs`](../../tools/check-api-reports.mjs); all package-consumer scenarios run in the gate.
 3. Create and push a protected tag: `git tag v<version>` then `git push origin v<version>`.
 4. Approve the `npm-publish` GitHub environment deployment.
-5. After publish, verify the npm package page shows provenance and that the GitHub Actions run contains both `release-dry-run-evidence` and `release-package` artifacts.
+5. After publish, verify the npm package page shows provenance and that the GitHub Actions run contains the `release-package` artifact.
 
 If future private install dependencies are introduced, use a read-only install token only for the install step. Do not use a publish token for the normal release path.

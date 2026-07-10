@@ -55,7 +55,9 @@ function resolveCaptionLang(audio: HTMLAudioElement, lang: string | null): strin
 }
 
 function getSpeechRecognition(): SpeechRecognitionCtor | null {
+  // eslint-disable-next-line no-restricted-globals -- SSR guard before touching the global
   if (typeof window === 'undefined') return null;
+  // eslint-disable-next-line no-restricted-globals -- feature-detect vendor-prefixed SpeechRecognition on the global window
   const w = window as unknown as {
     SpeechRecognition?: SpeechRecognitionCtor;
     webkitSpeechRecognition?: SpeechRecognitionCtor;
@@ -83,6 +85,7 @@ export function provideHellAudioTranscript(): Provider[] {
  */
 export function hellAudioSpeechSupported(): boolean {
   return (
+    // eslint-disable-next-line no-restricted-globals -- SSR guard in the public support probe
     typeof window !== 'undefined' &&
     getSpeechRecognition() !== null &&
     typeof (HTMLMediaElement.prototype as HTMLMediaElement & { captureStream?: unknown })

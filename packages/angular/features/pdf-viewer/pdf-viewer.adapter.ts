@@ -541,6 +541,7 @@ function hellPdfNumber(value: unknown): number {
 
 function hellPdfOwnerDocument(ownerDocument: Document | undefined, action: string): Document {
   if (ownerDocument) return ownerDocument;
+  // eslint-disable-next-line no-restricted-globals -- fallback when no owner document was captured
   if (typeof document !== 'undefined') return document;
   throw new Error(`Cannot ${action} PDF without a browser document.`);
 }

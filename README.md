@@ -19,24 +19,21 @@ pnpm build:lib
 pnpm build:docs
 pnpm test
 pnpm ci:playwright:chromium
-pnpm ci:verify # pre-push preflight (delegates to release:dry-run --fast)
-pnpm release:dry-run -- --fast # local release preflight
-pnpm release:dry-run -- --full # release-candidate evidence gate
+pnpm release:dry-run # local release preflight
 ```
 
-`release:dry-run -- --full` runs lint, architecture, CI coverage, unit tests,
-`build:lib`, pack audit, selected package-consumer scenarios, API report, and
-`build:docs`. Evidence is written to timestamped log and JSON files under
-`test-results/release-evidence/`. Use `--fast` for local preflight before the
-full release-candidate gate. Trusted npm publishing and provenance setup is
+`release:dry-run` chains changelog, lint, architecture, unit tests,
+`build:lib`, pack audit, and the API report. The tag-triggered release
+workflow runs the same gates plus package-consumer scenarios and the docs
+build before publishing. Trusted npm publishing and provenance setup is
 specified in `docs/release/npm-publishing.md`.
 
 ## Production readiness
 
 Hell UI is **internal beta** and not yet production-ready. Keep release notes,
 package registry copy, docs, and README language in internal-beta/beta/experimental
-terms until fresh release-candidate evidence (`pnpm release:dry-run -- --full`
-plus a full `pnpm e2e` pass) says otherwise.
+terms until a green release workflow plus a full `pnpm e2e` pass says
+otherwise.
 
 The docs app accessibility matrix at `/accessibility` lists role patterns,
 keyboard coverage, axe/ARIA/browser-test evidence, and known gaps for every

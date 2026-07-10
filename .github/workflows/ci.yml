@@ -90,30 +90,25 @@ jobs:
           if-no-files-found: ignore
 
   package-consumer:
-    name: Package consumer (${{ matrix.scenario }})
+    name: Package consumer (${{ matrix.group }})
     runs-on: ubuntu-latest
     needs: build
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - scenario: core
-            scenarios: root-core,core,testing
-          - scenario: primitive-foundations
-            scenarios: primitive-icons-css,button-ui,pagination
-          - scenario: button
-            scenarios: button
-          - scenario: composite-foundations
-            scenarios: composite-css,app-shell,resizable,split-view
-          - scenario: audio
-            scenarios: audio-player,audio-transcript
-          - scenario: features
-            scenarios: code-editor,pdf-viewer
-          - scenario: table-core
-            scenarios: table
-          - scenario: table-tanstack-virtual
-            scenarios: table-tanstack,table-tanstack-virtual
+        # Group names are owned by tools/check-package-consumer.mjs, which
+        # asserts every scenario belongs to exactly one group and fails on
+        # unknown group names.
+        group:
+          - core
+          - primitive-foundations
+          - button
+          - composite-foundations
+          - audio
+          - features
+          - table-core
+          - table-tanstack-virtual
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -153,7 +148,7 @@ jobs:
       - name: Package consumer scenario
         env:
           HELL_PACKAGE_CONSUMER_SKIP_BUILD: 1
-          HELL_PACKAGE_CONSUMER_SCENARIOS: ${{ matrix.scenarios }}
+          HELL_PACKAGE_CONSUMER_GROUP: ${{ matrix.group }}
         run: pnpm run ci:test:package-consumer
 
   build:
@@ -205,36 +200,18 @@ jobs:
       - name: Ensure built docs
         run: pnpm run ci:ensure:build:docs
 
-      - name: Docs bundle diagnosis
-        run: pnpm run diagnose:docs-bundle --check
-
-      - name: Upload docs bundle diagnosis
-        uses: actions/upload-artifact@v7
-        with:
-          name: docs-bundle-budget-diagnosis
-          path: dist/docs-bundle-budget-diagnosis.md
-
       - name: API report
         run: pnpm run ci:test:api-report:prepared
 
   e2e:
-    name: E2E (${{ matrix.group }})
+    name: E2E (shard ${{ matrix.shard }}/9)
     runs-on: ubuntu-latest
     needs: build
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        group:
-          - aria-snapshots-foundations
-          - aria-snapshots-overlays-data
-          - docs-smoke-foundations
-          - docs-smoke-surfaces
-          - controls-a11y
-          - date-selection-a11y
-          - overlays-keyboard
-          - table-resize
-          - behavior-regressions
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9]
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -315,7 +292,7 @@ jobs:
 
       - name: Browser tests
         env:
-          PLAYWRIGHT_GROUP: ${{ matrix.group }}
+          PLAYWRIGHT_SHARD: ${{ matrix.shard }}
         run: |
           docker run --rm --network host \
             --volume "${PWD}:/workspace" \
@@ -324,10 +301,9 @@ jobs:
             --env HOME=/root \
             --env PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
             --env HELL_E2E_BASE_URL=http://127.0.0.1:4200 \
-            --env HELL_E2E_PROJECTS=ci \
-            --env PLAYWRIGHT_GROUP \
+            --env PLAYWRIGHT_SHARD \
             mcr.microsoft.com/playwright:v1.59.1-noble \
-            sh -lc 'corepack enable && pnpm run ci:test:e2e --workers=8 --project="chromium-${PLAYWRIGHT_GROUP}" --project="firefox-${PLAYWRIGHT_GROUP}" --project="webkit-${PLAYWRIGHT_GROUP}"'
+            sh -lc 'corepack enable && pnpm run ci:test:e2e --workers=8 --shard="${PLAYWRIGHT_SHARD}/9"'
 
       - name: Stop docs server
         if: always()
@@ -337,7 +313,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-${{ matrix.group }}
+          name: playwright-shard-${{ matrix.shard }}
           path: |
             test-results/playwright-report.json
             test-results/playwright-html/

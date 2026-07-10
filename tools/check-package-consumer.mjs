@@ -22,13 +22,28 @@ import {
   peerGroupContracts,
   tableAdapterPeerGroup,
 } from './package-pack-audit.mjs';
-import { releaseCandidateConsumerScenarioNames } from './release-evidence-policy.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const distHell = join(root, 'dist/hell');
 const keep = process.env.HELL_KEEP_PACKAGE_CONSUMER === '1';
 const packageConsumerArgs = process.argv.slice(2);
-const catalogOnly = parseCatalogOnly(packageConsumerArgs);
+
+// CI shards scenarios by these groups (ci.yml passes HELL_PACKAGE_CONSUMER_GROUP).
+// assertScenarioGroupsCoverAllOnce keeps every scenario in exactly one group.
+const packageConsumerCiGroups = [
+  { name: 'core', scenarios: ['root-core', 'core', 'testing'] },
+  { name: 'primitive-foundations', scenarios: ['primitive-icons-css', 'button-ui', 'pagination'] },
+  { name: 'button', scenarios: ['button'] },
+  {
+    name: 'composite-foundations',
+    scenarios: ['composite-css', 'app-shell', 'resizable', 'split-view'],
+  },
+  { name: 'audio', scenarios: ['audio-player', 'audio-transcript'] },
+  { name: 'features', scenarios: ['code-editor', 'pdf-viewer'] },
+  { name: 'table-core', scenarios: ['table'] },
+  { name: 'table-tanstack-virtual', scenarios: ['table-tanstack', 'table-tanstack-virtual'] },
+];
+
 const rawSelectedScenarioNames = parseScenarioSelection(packageConsumerArgs);
 const selectedScenarioNames = rawSelectedScenarioNames.filter(
   (name) => !isPreflightScenarioName(name),
@@ -97,44 +112,6 @@ const requiredScenarioCoverageAreas = new Set([
   'code-editor',
   'pdf-viewer-feature',
 ]);
-
-const packageConsumerCiGroups = [
-  { name: 'core', scenarios: ['root-core', 'core', 'testing'] },
-  { name: 'primitive-foundations', scenarios: ['primitive-icons-css', 'button-ui', 'pagination'] },
-  { name: 'button', scenarios: ['button'] },
-  {
-    name: 'composite-foundations',
-    scenarios: ['composite-css', 'app-shell', 'resizable', 'split-view'],
-  },
-  { name: 'audio', scenarios: ['audio-player', 'audio-transcript'] },
-  { name: 'features', scenarios: ['code-editor', 'pdf-viewer'] },
-  { name: 'table-core', scenarios: ['table'] },
-  { name: 'table-tanstack-virtual', scenarios: ['table-tanstack', 'table-tanstack-virtual'] },
-];
-
-const packageConsumerScriptGroups = [
-  { name: 'core', scenarios: ['root-core', 'core', 'testing'] },
-  { name: 'primitives', scenarios: ['primitive-icons-css', 'button-ui', 'button', 'pagination'] },
-  {
-    name: 'composites',
-    scenarios: [
-      'composite-css',
-      'app-shell',
-      'resizable',
-      'split-view',
-      'audio-player',
-      'audio-transcript',
-    ],
-  },
-  { name: 'features', scenarios: ['code-editor', 'pdf-viewer'] },
-  { name: 'tables', scenarios: ['table', 'table-tanstack', 'table-tanstack-virtual'] },
-  { name: 'code-editor', scenarios: ['code-editor'] },
-  { name: 'pdf-viewer', scenarios: ['pdf-viewer'] },
-  { name: 'table-core', scenarios: ['table'] },
-  { name: 'table-adapters', scenarios: ['table-tanstack', 'table-tanstack-virtual'] },
-];
-
-const packageConsumerReleaseScenarios = releaseCandidateConsumerScenarioNames;
 
 const packageConsumerScenarioCatalog = [
   {
@@ -415,11 +392,6 @@ const packageConsumerScenarioCatalog = [
   },
 ];
 
-if (catalogOnly) {
-  process.stdout.write(`${JSON.stringify(packageConsumerCatalogContract(), null, 2)}\n`);
-  process.exit(0);
-}
-
 runPnpmPreflight(root);
 if (preflightOnly) {
   console.log(
@@ -478,6 +450,19 @@ function parseScenarioSelection(args) {
   const argSelection = parseScenarioTokens(args, false);
   if (argSelection.length) return argSelection;
 
+  const groupName = (process.env.HELL_PACKAGE_CONSUMER_GROUP ?? '').trim();
+  if (groupName) {
+    const group = packageConsumerCiGroups.find((candidate) => candidate.name === groupName);
+    if (!group) {
+      fail(
+        `Unknown package-consumer CI group ${groupName}; known groups: ${packageConsumerCiGroups
+          .map((candidate) => candidate.name)
+          .join(', ')}`,
+      );
+    }
+    return [...group.scenarios];
+  }
+
   const envSelection = parseScenarioTokens(
     [process.env.HELL_PACKAGE_CONSUMER_SCENARIOS ?? ''],
     true,
@@ -490,10 +475,6 @@ function parseMinimalDependencyMode(args) {
   if (envMode === '1' || envMode === 'true') return true;
 
   return args.some((arg) => arg === '--minimal-deps' || arg === '--group-by-deps');
-}
-
-function parseCatalogOnly(args) {
-  return args.some((arg) => arg === '--catalog-json' || arg === '--print-catalog-json');
 }
 
 function parseSkipPackageBuild(args) {
@@ -549,67 +530,6 @@ function parseScenarioTokens(values, envOnly) {
 
 function normalizeScenarioName(value) {
   return value.trim().toLowerCase();
-}
-
-function packageConsumerCatalogContract() {
-  const scenarioContracts = packageConsumerScenarioCatalog.map(scenarioCatalogRecord);
-  return {
-    scenarios: scenarioContracts,
-    peerTiers: [...packageConsumerPeerTiers],
-    peerGroups: Object.fromEntries(
-      Object.entries(peerGroupContracts).map(([name, contract]) => [
-        name,
-        { tier: contract.tier, peers: [...contract.peers] },
-      ]),
-    ),
-    coverageAreas: [...requiredScenarioCoverageAreas],
-    ciGroups: packageConsumerCiGroups.map(scenarioGroupRecord),
-    scriptGroups: packageConsumerScriptGroups.map(scenarioGroupRecord),
-    releaseScenarios: [...packageConsumerReleaseScenarios],
-    strictPeerGroups: packageConsumerStrictPeerGroups(scenarioContracts),
-  };
-}
-
-function scenarioCatalogRecord(scenario) {
-  return {
-    name: scenario.name,
-    aliases: [...(scenario.aliases ?? [])],
-    description: scenario.description,
-    coverage: [...(scenario.coverage ?? [])],
-    peerTier: scenario.peerTier,
-    peerGroup: scenario.peerGroup,
-    dependencies: [...scenario.dependencies],
-    forbiddenDependencies: [...(scenario.forbiddenDependencies ?? [])],
-  };
-}
-
-function scenarioGroupRecord(group) {
-  return {
-    name: group.name,
-    scenarios: [...group.scenarios],
-  };
-}
-
-function packageConsumerStrictPeerGroups(scenarioContracts) {
-  const groups = new Map();
-  for (const scenario of scenarioContracts) {
-    const key = uniqueSorted(scenario.dependencies).join('\0');
-    const group = groups.get(key) ?? {
-      dependencies: uniqueSorted(scenario.dependencies),
-      scenarios: [],
-      peerGroups: [],
-    };
-    group.scenarios.push(scenario.name);
-    group.peerGroups.push(scenario.peerGroup);
-    groups.set(key, group);
-  }
-
-  return [...groups.values()].map((group, index) => ({
-    name: `strict-peer-${index + 1}`,
-    scenarios: group.scenarios,
-    peerGroups: uniqueSorted(group.peerGroups),
-    dependencies: group.dependencies,
-  }));
 }
 
 function materializeScenarios(catalog) {
@@ -730,16 +650,6 @@ function assertScenarioCatalogCoverage(allScenarios) {
   }
 
   assertScenarioGroupsReferenceKnownScenarios('CI package-consumer group', packageConsumerCiGroups, scenarioNames);
-  assertScenarioGroupsReferenceKnownScenarios(
-    'package.json package-consumer script group',
-    packageConsumerScriptGroups,
-    scenarioNames,
-  );
-  assertScenarioNamesReferenceKnownScenarios(
-    'release package-consumer scenario',
-    packageConsumerReleaseScenarios,
-    scenarioNames,
-  );
   assertScenarioGroupsCoverAllOnce('CI package-consumer group', packageConsumerCiGroups, scenarioNames);
 }
 

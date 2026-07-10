@@ -12,9 +12,9 @@ runtime risk better than Hell. Keep Hell-owned runtime only when it is a small,
 documented public contract with tests.
 
 Allowed direct `document`, `window`, `ResizeObserver`, and
-`IntersectionObserver` seams live in
-`docs/architecture/browser-global-seams.md` and are enforced by
-`tools/check-architecture.mjs`.
+`IntersectionObserver` seams follow
+`docs/architecture/browser-global-seams.md` and are enforced by ESLint
+`no-restricted-globals` with justified inline disables.
 
 | Runtime area | Evidence paths | Keep / delete / delegate decision | Library alternatives to check first | Main risk if Hell owns it | Tests required before production-ready claim |
 | --- | --- | --- | --- | --- | --- |

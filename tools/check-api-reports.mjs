@@ -2,10 +2,48 @@ import { createRequire } from 'node:module';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { apiReportEntrypoints } from './release-evidence-policy.mjs';
+import { entrypointPublicApiFiles, packageName } from './entrypoint-manifest.mjs';
 
 const require = createRequire(import.meta.url);
 const { Extractor, ExtractorConfig } = require('@microsoft/api-extractor');
+
+/**
+ * Entry points without an API report, with the reason they are excluded.
+ * Everything else discovered through the entrypoint manifest is guarded.
+ *
+ * "extractor crash": @microsoft/api-extractor fails analyzing the flattened
+ * d.ts ("InternalError: Unable to follow symbol") when a followed cross-entry
+ * declaration uses a named @angular/core import alongside a namespace import.
+ * Re-probe on api-extractor upgrades.
+ */
+const apiReportExclusions = new Map([
+  ['audio-player', 'extractor crash'],
+  ['combobox', 'extractor crash'],
+  ['date-input', 'extractor crash'],
+  ['select', 'extractor crash'],
+  ['features/audio-transcript', 'experimental feature surface, not yet under report'],
+  ['features/code-editor', 'feature surface, not yet under report'],
+  ['features/pdf-viewer', 'feature surface, not yet under report'],
+  ['internal/audio-transcript', 'internal seam, not part of the public surface'],
+  ['internal/core', 'internal seam, not part of the public surface'],
+  ['internal/ng-primitives', 'internal seam, not part of the public surface'],
+  ['table-tanstack', 'adapter surface, not yet under report'],
+  ['table-tanstack/virtual', 'adapter surface, not yet under report'],
+]);
+
+const apiReportEntrypoints = entrypointPublicApiFiles()
+  .filter((entrypoint) => !apiReportExclusions.has(entrypoint.id))
+  .map((entrypoint) => {
+    const flattened =
+      entrypoint.id === 'root'
+        ? 'hell-ui-angular'
+        : `hell-ui-angular-${entrypoint.id.replaceAll('/', '-')}`;
+    return {
+      specifier: entrypoint.id === 'root' ? packageName : `${packageName}/${entrypoint.id}`,
+      mainEntryPointFilePath: `dist/hell/types/${flattened}.d.ts`,
+      reportFileName: `${flattened}.api.md`,
+    };
+  });
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const reportFolder = join(root, 'etc/api-reports');

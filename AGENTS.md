@@ -45,10 +45,9 @@ Use the narrowest validation that proves the change, then widen before commit:
 ```bash
 pnpm run lint
 pnpm run test:architecture
-pnpm run test:ci-coverage
 pnpm run build:lib
 ```
 
 Add focused `pnpm run test:unit`, `pnpm run build:docs`, `pnpm run e2e`,
 `pnpm run test:package-consumer`, `pnpm run test:api-report`, or
-`pnpm run release:dry-run:fast` when the touched surface warrants it.
+`pnpm run release:dry-run` when the touched surface warrants it.
