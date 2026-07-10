@@ -36,6 +36,12 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     },
   },
   {
+    name: 'breadcrumbs',
+    path: '/components/breadcrumbs',
+    heading: 'Breadcrumbs',
+    include: ['main'],
+  },
+  {
     name: 'button',
     path: '/components/button',
     heading: 'Button',

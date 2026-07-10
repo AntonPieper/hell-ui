@@ -52,6 +52,14 @@ const HD_BREADCRUMBS_APP_SHELL_TOPBAR_ICONS = {
           The topbar owns global chrome; breadcrumbs report where the current page sits without
           duplicating the sidenav's navigation.
         </p>
+        <!-- The content pane is a scroll container; keyboard users need focusable
+             content inside it (axe: scrollable-region-focusable on WebKit). -->
+        <a
+          href="#"
+          class="mt-3 inline-block text-sm font-medium text-hell-foreground underline underline-offset-[3px] hover:text-hell-foreground-muted"
+        >
+          Open project settings
+        </a>
       </main>
     </div>
   `,

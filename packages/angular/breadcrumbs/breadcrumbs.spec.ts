@@ -21,6 +21,7 @@ import {
         <li>
           <button id="default-ellipsis" hellBreadcrumbEllipsis></button>
           <button id="override-ellipsis" hellBreadcrumbEllipsis aria-label="Custom breadcrumb menu"></button>
+          <span id="decorative-ellipsis" hellBreadcrumbEllipsis></span>
         </li>
       </ol>
     </nav>
@@ -143,6 +144,27 @@ describe('HellBreadcrumbEllipsis', () => {
 
     expect(defaultEllipsis.getAttribute('aria-label')).toBe('Show hidden navigation');
     expect(overrideEllipsis.getAttribute('aria-label')).toBe('Custom breadcrumb menu');
+  });
+
+  it('keeps interactive button ellipses visible to assistive technology', () => {
+    const fixture = TestBed.createComponent(BreadcrumbEllipsisHost);
+    fixture.detectChanges();
+
+    const buttonEllipsis = byId<HTMLButtonElement>(fixture.nativeElement, 'default-ellipsis');
+    expect(buttonEllipsis.getAttribute('aria-hidden')).toBeNull();
+    expect(buttonEllipsis.getAttribute('role')).toBeNull();
+    expect(buttonEllipsis.getAttribute('type')).toBe('button');
+  });
+
+  it('keeps decorative span ellipses hidden from assistive technology', () => {
+    const fixture = TestBed.createComponent(BreadcrumbEllipsisHost);
+    fixture.detectChanges();
+
+    const spanEllipsis = byId<HTMLSpanElement>(fixture.nativeElement, 'decorative-ellipsis');
+    expect(spanEllipsis.getAttribute('aria-hidden')).toBe('true');
+    expect(spanEllipsis.getAttribute('role')).toBe('presentation');
+    expect(spanEllipsis.getAttribute('aria-label')).toBeNull();
+    expect(spanEllipsis.getAttribute('type')).toBeNull();
   });
 
   it('supports contract override for breadcrumb ellipsis label', () => {
