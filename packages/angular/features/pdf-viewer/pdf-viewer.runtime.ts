@@ -406,6 +406,7 @@ export class HellPdfRuntime implements HellPdfRuntimePort {
     this.printCleanup = () => session.cleanup();
     try {
       await session.print();
+      // eslint-disable-next-line no-restricted-globals -- fallback for cleanup timing when the owner document is detached
       const win = ownerDocument?.defaultView ?? (typeof window === 'undefined' ? null : window);
       win?.setTimeout(() => session.cleanup(), cleanupDelayMs);
     } catch (error) {

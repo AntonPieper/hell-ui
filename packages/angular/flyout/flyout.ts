@@ -107,7 +107,11 @@ export class HellFlyoutTrigger extends HellNativeInteractiveDisabledGuard {
 
   /** Toggles the flyout panel between open and closed. */
   toggle(): void {
-    this._open() ? this.hide() : this.show();
+    if (this._open()) {
+      this.hide();
+    } else {
+      this.show();
+    }
   }
 
   /** Prevents default anchor navigation and toggles the panel on trigger activation. */

@@ -15,10 +15,10 @@ hard UI bugs.
   grow a global shortcut framework.
 - Resize behavior: keep the adjacent-pair resize adapter for split panes and
   table resize. Use CDK DragDrop for drag/reorder work, not separator resize.
-- Browser globals stay behind `docs/architecture/browser-global-seams.md` and
-  the architecture allowlist.
-- Direct `document`, `window`, `ResizeObserver`, and `IntersectionObserver`
-  usage is exact-line allowlisted by `tools/check-architecture.mjs`.
+- Browser globals stay behind injected seams per
+  `docs/architecture/browser-global-seams.md`; direct `document`, `window`,
+  `ResizeObserver`, and `IntersectionObserver` use is banned by ESLint
+  `no-restricted-globals` and escape hatches carry justified inline disables.
 - Floating behavior has sharp boundaries: Dialog/Popover delegate,
   Flyout is the manual full-dismissal exception, and Omnibar uses CDK overlay
   plus focus-only dismissal.

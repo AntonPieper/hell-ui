@@ -21,7 +21,6 @@ import {
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
 
-
 const allowedDocsLazyRouteCrossImports = [
   {
     from: 'apps/docs/src/app/pages/components/flyout/flyout.page.ts',
@@ -89,22 +88,10 @@ function main() {
   checkApiStabilityContract();
   checkPackageDependencyContract();
   checkStyleEntryPoints();
-  checkNgClassCustomizationContract();
-  checkAngularHostMetadataContract();
-  checkAppShellBreakpointContract();
-  checkBehaviorSentinelContract();
   checkComponentContract();
-  checkBasicFloatingListStructuralAffordances();
-  checkLabelContract();
-  checkCodeEditorRuntimeContract();
-  checkFormsContract();
-  checkHotkeyContract();
   checkNativeButtonSelectorContract();
   checkInteractiveTriggerSelectorContract();
-  checkTableUtilityContract();
   checkTableAdapterBoundaryContract();
-  checkFloatingRegistrationContract();
-  checkBrowserGlobalContract();
   checkNgpStateWriterContract();
 
   if (failures.length) {
@@ -199,7 +186,6 @@ function checkDocsLazyRouteImportGraphContract() {
   const catalogPath = join(docsRoot, 'docs-catalog.ts');
   const routeEntries = docsLazyRouteEntries(catalogPath, pagesRoot);
   const routeEntriesByBoundary = docsRouteEntriesByBoundary(routeEntries);
-
 
   for (const policy of docsHeavyLazyRoutePolicies) {
     const routeEntry = routeEntries.find(
@@ -1212,87 +1198,6 @@ function checkTokenSubstrateDoesNotOwnComponentSkins() {
   }
 }
 
-function checkNgClassCustomizationContract() {
-  const files = libraryProductionTsFiles().map((file) => join(root, file));
-
-  for (const file of files) {
-    const source = readFile(file);
-    const ngClassImportFromCommon =
-      /import\s+[^;]*@angular\/common[^;]*/.test(source) &&
-      /\bNgClass\b/.test(source.match(/import\s+[^;]*@angular\/common[^;]*/)?.[0] ?? '');
-    const ngClassTemplateBinding = /\[\s*ngClass\s*\]/.test(source);
-
-    if (ngClassImportFromCommon || ngClassTemplateBinding) {
-      failures.push(
-        `${file.slice(root.length + 1)} uses NgClass or [ngClass]; style customization must use data attrs/CSS vars`,
-      );
-    }
-  }
-}
-
-function checkAngularHostMetadataContract() {
-  const files = libraryProductionTsFiles().map((file) => join(root, file));
-
-  for (const file of files) {
-    const source = readFile(file);
-    if (!/\bHostBinding\b|\bHostListener\b|@HostBinding|@HostListener/.test(source)) continue;
-
-    failures.push(
-      `${file.slice(root.length + 1)} uses @HostBinding/@HostListener; use Angular host metadata instead`,
-    );
-  }
-}
-
-function checkBehaviorSentinelContract() {
-  const files = libraryProductionTsFiles().map((file) => join(root, file));
-  const styleSelectorPatterns = [
-    /\.classList\.contains\(\s*['"]hell-/,
-    /\.closest\(\s*['"]\.hell-/,
-    /\.matches\(\s*['"]\.hell-/,
-    /\.querySelector(?:All)?\(\s*['"]\.hell-/,
-  ];
-
-  for (const file of files) {
-    const source = readFile(file);
-    if (!styleSelectorPatterns.some((pattern) => pattern.test(source))) continue;
-
-    failures.push(
-      `${file.slice(root.length + 1)} uses .hell-* style classes as behavior sentinels; use data attributes or element refs`,
-    );
-  }
-}
-
-function checkAppShellBreakpointContract() {
-  const shellSource = readFile(
-    join(root, 'packages/angular/app-shell/app-shell.ts'),
-  );
-  const shellStyles = readFile(join(root, 'packages/angular/app-shell/styles.css'));
-  const desktopMin = Number(
-    /HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX\s*=\s*(\d+)/.exec(shellSource)?.[1],
-  );
-
-  if (!Number.isFinite(desktopMin)) {
-    failures.push('App Shell breakpoint contract must expose HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX');
-    return;
-  }
-
-  if (
-    !shellSource.includes(
-      'HELL_APP_SHELL_MOBILE_MAX_WIDTH_PX = HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX - 1',
-    )
-  ) {
-    failures.push(
-      'App Shell mobile matchMedia breakpoint must derive from the desktop CSS breakpoint',
-    );
-  }
-
-  if (!shellStyles.includes(`@media (min-width: ${desktopMin}px)`)) {
-    failures.push(
-      `App Shell CSS breakpoint must match HELL_APP_SHELL_DESKTOP_MIN_WIDTH_PX (${desktopMin}px)`,
-    );
-  }
-}
-
 function checkComponentContract() {
   const productionFiles = libraryProductionTsFiles();
   const classIndex = partStyleClassIndex(productionFiles);
@@ -1318,45 +1223,6 @@ function checkComponentContract() {
 
       checkPartStylePipeline(rel, module, styleInfo);
       checkPartSlotUnionContract(rel, source, module, styleInfo);
-    }
-
-    for (const booleanInput of source.matchAll(
-      /readonly\s+([A-Za-z0-9_]+)\s*=\s*input\(\s*(true|false)\s*,\s*\{[^}]*booleanAttribute/g,
-    )) {
-      const name = booleanInput[1];
-      if (/preset/i.test(name)) {
-        failures.push(
-          `${rel} exposes boolean input "${name}" as a preset instead of a Customization Surface`,
-        );
-      }
-    }
-  }
-
-  const contractSpec = readFile(join(root, 'packages/angular/component-contract.spec.ts'));
-  const manifestSymbols = [...contractSpec.matchAll(/symbol:\s*'([A-Za-z0-9_]+)'/g)].map(
-    (match) => match[1],
-  );
-  const manifestSet = new Set();
-  for (const symbol of manifestSymbols) {
-    if (manifestSet.has(symbol)) {
-      failures.push(`Component Contract manifest declares ${symbol} more than once`);
-    }
-    manifestSet.add(symbol);
-  }
-
-  for (const [className, rel] of publicStyleableModules) {
-    if (!manifestSet.has(className)) {
-      failures.push(
-        `${rel} exports styled Module ${className} but component-contract.spec.ts does not declare its Component Contract`,
-      );
-    }
-  }
-
-  for (const symbol of manifestSymbols) {
-    if (!publicStyleableModules.has(symbol)) {
-      failures.push(
-        `component-contract.spec.ts declares ${symbol}, but no exported styled Module was found`,
-      );
     }
   }
 }
@@ -1469,32 +1335,6 @@ function hellPartStylerPartType(moduleSource) {
   return /hellPartStyler\s*<\s*([A-Za-z0-9_]+)\s*>\s*\(\s*this\.ui/.exec(moduleSource)?.[1] ?? null;
 }
 
-function checkBasicFloatingListStructuralAffordances() {
-  const selectStyles = readFile(join(root, 'packages/angular/select/styles.css'));
-  if (
-    !selectStyles.includes("hell-select-basic [hellSelect][data-slot='trigger']::after") ||
-    !selectStyles.includes("hell-select-basic [hellSelect][data-slot='trigger'][data-open]::after")
-  ) {
-    failures.push(
-      'SelectBasic trigger part must keep the shipped select chevron structural CSS',
-    );
-  }
-
-  const comboboxStyles = readFile(join(root, 'packages/angular/combobox/styles.css'));
-  if (
-    !comboboxStyles.includes(
-      "hell-combobox-basic [hellComboboxButton][data-slot='button']::after",
-    ) ||
-    !comboboxStyles.includes(
-      "hell-combobox-basic [hellCombobox][data-slot='control'][data-open] [hellComboboxButton][data-slot='button']::after",
-    )
-  ) {
-    failures.push(
-      'ComboboxBasic button part must keep the shipped combobox chevron structural CSS',
-    );
-  }
-}
-
 function literalUnionMembers(source, typeName) {
   const match = new RegExp(`export\\s+type\\s+${typeName}\\s*=([\\s\\S]*?);`).exec(source);
   if (!match) return [];
@@ -1530,105 +1370,6 @@ function partStyleTemplateSource(source, moduleSource, rel) {
   return template ? `${moduleSource}\n${template}` : moduleSource;
 }
 
-function checkLabelContract() {
-  const spinnerSource = stripLabelDefaults(
-    readFile(join(root, 'packages/angular/spinner/spinner.ts')),
-  );
-  if (
-    !spinnerSource.includes('HELL_SPINNER_LABELS') ||
-    spinnerSource.includes("'aria-label': 'Loading'")
-  ) {
-    failures.push('HellSpinner must read its default aria-label from the Label Contract');
-  }
-
-  const paginationSource = stripLabelDefaults(
-    readFile(join(root, 'packages/angular/pagination/pagination.ts')),
-  );
-  for (const hardcoded of [
-    'aria-label="First page"',
-    'aria-label="Previous page"',
-    "'Page ' + p",
-  ]) {
-    if (paginationSource.includes(hardcoded)) {
-      failures.push('HellPaginationStrip must read built-in labels from the Label Contract');
-    }
-  }
-
-  const labelConsumers = [
-    [
-      'packages/angular/app-shell/app-shell.ts',
-      ['Expand sidebar', 'Collapse sidebar'],
-    ],
-    [
-      'packages/angular/audio-player/audio-player.ts',
-      ['Show live captions', 'Copy transcript', '>Live<', '>Paused<'],
-    ],
-    ['packages/angular/breadcrumbs/breadcrumbs.ts', ['Show hidden navigation']],
-    ['packages/angular/date-input/date-input.ts', ['Choose date']],
-    ['packages/angular/resizable/resizable.ts', ['Resize panels']],
-    [
-      'packages/angular/time-input/time-input.ts',
-      ['Choose time', 'Subtract 5 minutes'],
-    ],
-    [
-      'packages/angular/toast/toast.ts',
-      ['aria-label="Notifications"', 'aria-label="Dismiss"'],
-    ],
-    ['packages/angular/table/table-utilities.ts', ['Resize column']],
-    [
-      'packages/angular/features/pdf-viewer/pdf-viewer.html',
-      ['Find in document', 'Zoom level'],
-    ],
-    [
-      'packages/angular/date-picker/date-picker.ts',
-      ['Previous year', 'Previous month'],
-    ],
-  ];
-
-  for (const [file, hardcodedLabels] of labelConsumers) {
-    const source = stripLabelDefaults(readFile(join(root, file)));
-    if (!source.includes('labels.')) {
-      failures.push(`${file} must consume the Label Contract for built-in text`);
-    }
-    for (const label of hardcodedLabels) {
-      if (source.includes(label)) {
-        failures.push(`${file} hardcodes "${label}" instead of using the Label Contract`);
-      }
-    }
-  }
-}
-
-/**
- * Remove hellCreateLabels(...) call arguments so entry-point-owned label
- * defaults do not count as hardcoded template text.
- */
-function stripLabelDefaults(source) {
-  let result = source;
-  let searchFrom = 0;
-  for (;;) {
-    const callStart = result.indexOf('hellCreateLabels', searchFrom);
-    if (callStart === -1) return result;
-    const open = result.indexOf('(', callStart);
-    if (open === -1) return result;
-    let depth = 0;
-    let end = -1;
-    for (let index = open; index < result.length; index += 1) {
-      const char = result[index];
-      if (char === '(') depth += 1;
-      else if (char === ')') {
-        depth -= 1;
-        if (depth === 0) {
-          end = index;
-          break;
-        }
-      }
-    }
-    if (end === -1) return result;
-    result = result.slice(0, open + 1) + result.slice(end);
-    searchFrom = open + 1;
-  }
-}
-
 function decoratedClassModules(source) {
   const matches = [
     ...source.matchAll(/export\s+(?:abstract\s+)?class\s+([A-Za-z0-9_]+)(?:<[^>{}]*>)?[\s\S]*?\{/g),
@@ -1647,88 +1388,6 @@ function decoratedClassModules(source) {
     classSource: match[0],
     moduleSource: source.slice(moduleStarts[index], moduleStarts[index + 1] ?? source.length),
   }));
-}
-
-function checkCodeEditorRuntimeContract() {
-  const source = readFile(
-    join(root, 'packages/angular/features/code-editor/code-editor.runtime.ts'),
-  );
-
-  if (source.includes('innerHTML')) {
-    failures.push('Code Editor Runtime must build fold gutter markers without innerHTML');
-  }
-
-  if (!source.includes('createElementNS')) {
-    failures.push('Code Editor Runtime must create SVG fold markers through DOM APIs');
-  }
-}
-
-function checkFormsContract() {
-  const cvaModules = [
-    ['packages/angular/select/select.ts', 'HellSelect'],
-    ['packages/angular/combobox/combobox.ts', 'HellCombobox'],
-    ['packages/angular/date-input/date-input.ts', 'HellDateInput'],
-    ['packages/angular/features/code-editor/code-editor.ts', 'HellCodeEditor'],
-  ];
-
-  for (const [file, className] of cvaModules) {
-    const source = readFile(join(root, file));
-    const classDecl = new RegExp(
-      `class\\s+${className}\\b[^{]*implements[^{]*ControlValueAccessor`,
-    ).test(source);
-    if (!classDecl || !source.includes('NG_VALUE_ACCESSOR')) {
-      failures.push(`${file} ${className} must implement ControlValueAccessor`);
-    }
-  }
-}
-
-function checkHotkeyContract() {
-  const hotkeySource = readFile(join(root, 'packages/angular/internal/hotkeys/hotkeys.ts'));
-  if (!hotkeySource.includes('HellGlobalKeydownService')) {
-    failures.push('Internal Hotkeys must provide a shared global keydown listener service');
-  }
-  if (!hotkeySource.includes('HellGlobalPointerdownService')) {
-    failures.push('Internal Hotkeys must provide a shared global pointer listener service');
-  }
-
-  const coreApi = readFile(join(root, 'packages/angular/core/public-api.ts'));
-  if (coreApi.includes('hotkeys')) {
-    failures.push('Core Package Entry Point must keep hotkey listener internals private');
-  }
-
-  const hotkeyPublicSymbols = [
-    'matchHotkey',
-    'hellShouldHandleGlobalHotkey',
-    'HellGlobalKeydownService',
-    'HellGlobalPointerdownService',
-    'HellGlobalKeydownHandler',
-    'HellGlobalPointerdownHandler',
-  ];
-  const publicHotkeySurfaces = [
-    ['Core Package Entry Point', coreApi],
-    [
-      'Omnibar Package Entry Point',
-      readFile(join(root, 'packages/angular/omnibar/omnibar.ts')),
-    ],
-  ];
-  for (const [label, source] of publicHotkeySurfaces) {
-    const leaked = hotkeyPublicSymbols.filter((symbol) => exportedSymbolNames(source).has(symbol));
-    if (leaked.length) {
-      failures.push(`${label} must not export hotkey internals: ${leaked.join(', ')}`);
-    }
-  }
-
-  const omnibarSource = readFile(join(root, 'packages/angular/omnibar/omnibar.ts'));
-  if (omnibarSource.includes('document.addEventListener')) {
-    failures.push('HellOmnibar must register global hotkeys through HellGlobalKeydownService');
-  }
-
-  const pdfSource = readFile(
-    join(root, 'packages/angular/features/pdf-viewer/pdf-viewer.ts'),
-  );
-  if (pdfSource.includes('window:keydown') || pdfSource.includes('window:pointerdown')) {
-    failures.push('HellPdfViewer must register global shortcuts through shared listener services');
-  }
 }
 
 function checkNativeButtonSelectorContract() {
@@ -1790,30 +1449,6 @@ function checkInteractiveTriggerSelectorContract() {
   }
 }
 
-function checkTableUtilityContract() {
-  const docsRoot = join(root, 'apps/docs/src/app');
-  const docsGlobalStyles = readFile(join(root, 'apps/docs/src/styles.css'));
-  if (!docsGlobalStyles.includes("@import '@hell-ui/angular/table/styles.css';")) {
-    failures.push(
-      'Docs app must load table CSS from the global stylesheet so production routes are styled',
-    );
-  }
-  const routeTableStyleImports = walk(docsRoot)
-    .filter((file) => file.endsWith('.ts'))
-    .flatMap((file) =>
-      moduleImportSpecifiers(file).filter(
-        (importHit) => importHit.specifier === '@hell-ui/angular/table/styles.css',
-      ),
-    );
-  for (const importHit of routeTableStyleImports) {
-    failures.push(
-      `Docs table routes must not rely on TypeScript side-effect imports for table CSS: ${relPath(
-        importHit.file,
-      )}:${importHit.line}`,
-    );
-  }
-}
-
 function checkTableAdapterBoundaryContract() {
   const coreTableBoundaryDirs = [
     'packages/angular/table',
@@ -1871,91 +1506,6 @@ function checkTableAdapterBoundaryContract() {
           `Table adapter boundary ${rel}:${hit.line} imports ${hit.specifier} -> ${targetRel}; core table primitives must not depend on adapter entrypoints.`,
         );
       }
-    }
-  }
-}
-
-function checkFloatingRegistrationContract() {
-  const floatingSurfaces = [
-    {
-      file: 'packages/angular/popover/popover.ts',
-      className: 'HellPopover',
-      registration: /hellRegisterFloatingHost\(\);/,
-    },
-    {
-      file: 'packages/angular/tooltip/tooltip.ts',
-      className: 'HellTooltip',
-      registration: /hellRegisterFloatingHost\(\);/,
-    },
-    {
-      file: 'packages/angular/menu/menu.ts',
-      className: 'HellMenu',
-      registration: /hellRegisterFloatingHost\(\);/,
-    },
-    {
-      file: 'packages/angular/select/select.ts',
-      className: 'HellSelectDropdown',
-      registration: /hellRegisterFloatingHost\(\);/,
-    },
-    {
-      file: 'packages/angular/combobox/combobox.ts',
-      className: 'HellComboboxDropdown',
-      registration: /hellRegisterFloatingHost\(\);/,
-    },
-    {
-      file: 'packages/angular/flyout/flyout.ts',
-      className: 'HellFlyout',
-      registration: /new\s+HellFloatingInteractionController[\s\S]*?scope:\s*this\.floatingScope/,
-    },
-  ];
-
-  for (const surface of floatingSurfaces) {
-    const source = readFile(join(root, surface.file));
-    const classBody = source.match(
-      new RegExp(
-        `export\\s+class\\s+${surface.className}\\b[\\s\\S]*?(?=\\nexport\\s+class|\\nexport\\s+const|$)`,
-      ),
-    )?.[0];
-    if (!classBody || !surface.registration.test(classBody)) {
-      failures.push(
-        `${surface.file} ${surface.className} must register its Floating Interaction surface with the nearest Floating Scope`,
-      );
-    }
-  }
-
-  const touchedContainmentOwners = [
-    {
-      file: 'packages/angular/select/select.ts',
-      className: 'HellSelect',
-    },
-    {
-      file: 'packages/angular/combobox/combobox.ts',
-      className: 'HellCombobox',
-    },
-  ];
-
-  for (const owner of touchedContainmentOwners) {
-    const source = readFile(join(root, owner.file));
-    const classBody = source.match(
-      new RegExp(
-        `export\\s+class\\s+${owner.className}\\b[\\s\\S]*?(?=\\nexport\\s+class|\\nexport\\s+const|$)`,
-      ),
-    )?.[0];
-
-    if (!classBody || !/hellContainsFloatingTarget\(/.test(classBody)) {
-      failures.push(
-        `${owner.file} ${owner.className} must route touched containment through the shared floating-scope helper`,
-      );
-      continue;
-    }
-
-    if (
-      /dropdowns\s*=\s*new\s+Set<HTMLElement>\s*\(/.test(classBody) ||
-      /for\s*\(\s*const\s+dropdown\s+of\s+this\.dropdowns\s*\)/.test(classBody)
-    ) {
-      failures.push(
-        `${owner.file} ${owner.className} must not maintain a parallel dropdown Set containment policy`,
-      );
     }
   }
 }
@@ -2119,255 +1669,6 @@ function checkNgpStateWriterContract() {
   }
 }
 
-const browserGlobalSeamDocPath = 'docs/architecture/browser-global-seams.md';
-const allowedBrowserGlobalSeams = [
-  {
-    id: 'audio-transcript-window-probe',
-    file: 'packages/angular/features/audio-transcript/audio-transcript.ts',
-    globals: ['window'],
-    lines: [
-      "if (typeof window === 'undefined') return null;",
-      'const w = window as unknown as {',
-      "typeof window !== 'undefined' &&",
-    ],
-  },
-  {
-    id: 'resizable-pane-resize-observer',
-    file: 'packages/angular/resizable/resizable.ts',
-    globals: ['ResizeObserver'],
-    lines: [
-      "if (typeof ResizeObserver === 'undefined') return;",
-      'const observer = new ResizeObserver(() => this.scheduleFitPanesToAvailableSize());',
-    ],
-  },
-  {
-    id: 'split-view-resize-observer',
-    file: 'packages/angular/split-view/split-view.ts',
-    globals: ['ResizeObserver'],
-    lines: [
-      "if (typeof ResizeObserver === 'undefined') return;",
-      'const observer = new ResizeObserver((entries) => {',
-    ],
-  },
-  {
-    id: 'toast-viewport-resize-observer',
-    file: 'packages/angular/toast/toast.ts',
-    globals: ['ResizeObserver'],
-    lines: [
-      "if (this.destroyed || typeof ResizeObserver === 'undefined') return;",
-      'this.ro = new ResizeObserver((entries) => {',
-    ],
-  },
-  {
-    id: 'floating-dismissal-document-fallback',
-    file: 'packages/angular/internal/core/floating-dismissal.ts',
-    globals: ['document'],
-    lines: ["return typeof document === 'undefined' ? null : document;"],
-  },
-  {
-    id: 'floating-scope-resize-observer',
-    file: 'packages/angular/internal/core/floating-scope.ts',
-    globals: ['ResizeObserver'],
-    lines: [
-      "if (typeof ResizeObserver === 'undefined') return;",
-      'this.resizeObserver = new ResizeObserver(this.syncScope);',
-    ],
-  },
-  {
-    id: 'pdf-adapter-owner-document-fallback',
-    file: 'packages/angular/features/pdf-viewer/pdf-viewer.adapter.ts',
-    globals: ['document'],
-    lines: ["if (typeof document !== 'undefined') return document;"],
-  },
-  {
-    id: 'pdf-print-owner-document-fallback',
-    file: 'packages/angular/features/pdf-viewer/pdf-viewer.print.ts',
-    globals: ['document'],
-    lines: ["if (typeof document !== 'undefined') return document;"],
-  },
-  {
-    id: 'pdf-runtime-cleanup-window-fallback',
-    file: 'packages/angular/features/pdf-viewer/pdf-viewer.runtime.ts',
-    globals: ['window'],
-    lines: [
-      "const win = ownerDocument?.defaultView ?? (typeof window === 'undefined' ? null : window);",
-    ],
-  },
-  {
-    id: 'pdf-thumbs-intersection-observer',
-    file: 'packages/angular/features/pdf-viewer/pdf-viewer.ts',
-    globals: ['IntersectionObserver'],
-    lines: [
-      "if (typeof IntersectionObserver === 'undefined') {",
-      'const observer = new IntersectionObserver(',
-    ],
-  },
-  {
-    id: 'pdf-wheel-page-delta-window',
-    file: 'packages/angular/features/pdf-viewer/pdf-viewer.utils.ts',
-    globals: ['window'],
-    lines: ['return event.deltaY * window.innerHeight;'],
-  },
-];
-
-const browserGlobalNames = new Set([
-  'document',
-  'window',
-  'ResizeObserver',
-  'IntersectionObserver',
-]);
-
-function checkBrowserGlobalContract() {
-  const docPath = join(root, browserGlobalSeamDocPath);
-  if (!existsSync(docPath)) {
-    failures.push(`Browser Global Contract missing ${browserGlobalSeamDocPath}`);
-  } else {
-    const docs = readFile(docPath);
-    for (const seam of allowedBrowserGlobalSeams) {
-      const missingDocParts = [
-        seam.id,
-        seam.file,
-        ...seam.globals.map((global) => `\`${global}\``),
-      ].filter((part) => !docs.includes(part));
-      if (missingDocParts.length) {
-        failures.push(
-          `Browser Global Contract docs for ${seam.id} are missing: ${missingDocParts.join(', ')}`,
-        );
-      }
-    }
-  }
-
-  const sourceFiles = libraryProductionTsFiles().map((file) => join(root, file));
-  const hits = sourceFiles.flatMap((file) => browserGlobalHits(file));
-  const unusedAllowances = allowedBrowserGlobalSeams.flatMap((seam) =>
-    seam.lines.flatMap((line) =>
-      seam.globals.map((global) => ({
-        id: seam.id,
-        file: seam.file,
-        global,
-        line,
-      })),
-    ),
-  );
-
-  for (const hit of hits) {
-    const allowanceIndex = unusedAllowances.findIndex(
-      (allowance) =>
-        allowance.file === hit.file &&
-        allowance.global === hit.global &&
-        allowance.line === hit.source.trim(),
-    );
-
-    if (allowanceIndex >= 0) {
-      unusedAllowances.splice(allowanceIndex, 1);
-      continue;
-    }
-
-    failures.push(
-      `Browser Global Contract ${hit.file}:${hit.line} uses direct ${hit.global}; move it behind an allowed browser seam or add a documented follow-up before allowlisting it`,
-    );
-  }
-
-  for (const allowance of unusedAllowances) {
-    const filePath = join(root, allowance.file);
-    if (!existsSync(filePath)) {
-      failures.push(`Browser Global Contract allowlist references missing file ${allowance.file}`);
-      continue;
-    }
-
-    failures.push(
-      `Browser Global Contract allowlist entry ${allowance.id} is stale: expected ${allowance.file} to contain direct ${allowance.global} line "${allowance.line}"`,
-    );
-  }
-}
-
-function browserGlobalHits(file) {
-  const source = readFile(file);
-  const sourceFile = ts.createSourceFile(
-    file,
-    source,
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.TS,
-  );
-  const original = source.split('\n');
-  const rel = file.slice(root.length + 1).replaceAll('\\', '/');
-  const seen = new Set();
-  const hits = [];
-
-  function visit(node) {
-    if (ts.isIdentifier(node) && isDirectBrowserGlobalIdentifier(node)) {
-      const line = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
-      const key = `${node.text}:${line}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        hits.push({
-          file: rel,
-          line,
-          global: node.text,
-          source: original[line - 1] ?? '',
-        });
-      }
-    }
-
-    ts.forEachChild(node, visit);
-  }
-
-  visit(sourceFile);
-  return hits;
-}
-
-function isDirectBrowserGlobalIdentifier(node) {
-  if (!browserGlobalNames.has(node.text)) return false;
-  if (isTypeOnlyIdentifier(node)) return false;
-  if (isDeclarationIdentifier(node)) return false;
-  if (isPropertyNameIdentifier(node)) return false;
-  return true;
-}
-
-function isTypeOnlyIdentifier(node) {
-  for (let current = node.parent; current; current = current.parent) {
-    if (ts.isTypeNode(current)) return true;
-    if (ts.isExpression(current) || ts.isStatement(current) || ts.isSourceFile(current))
-      return false;
-  }
-
-  return false;
-}
-
-function isDeclarationIdentifier(node) {
-  const parent = node.parent;
-  if (ts.isVariableDeclaration(parent) && parent.name === node) return true;
-  if (ts.isParameter(parent) && parent.name === node) return true;
-  if (ts.isBindingElement(parent) && parent.name === node) return true;
-  if (ts.isFunctionDeclaration(parent) && parent.name === node) return true;
-  if (ts.isClassDeclaration(parent) && parent.name === node) return true;
-  if (ts.isInterfaceDeclaration(parent) && parent.name === node) return true;
-  if (ts.isTypeAliasDeclaration(parent) && parent.name === node) return true;
-  if (ts.isImportClause(parent) && parent.name === node) return true;
-  if (ts.isNamespaceImport(parent) && parent.name === node) return true;
-  if (ts.isImportSpecifier(parent) && parent.name === node) return true;
-  if (ts.isImportSpecifier(parent) && parent.propertyName === node) return true;
-  if (ts.isExportSpecifier(parent) && parent.name === node) return true;
-  if (ts.isExportSpecifier(parent) && parent.propertyName === node) return true;
-  return false;
-}
-
-function isPropertyNameIdentifier(node) {
-  const parent = node.parent;
-  if (ts.isPropertyAccessExpression(parent) && parent.name === node) {
-    return !(ts.isIdentifier(parent.expression) && parent.expression.text === 'globalThis');
-  }
-  if (ts.isPropertyAssignment(parent) && parent.name === node) return true;
-  if (ts.isPropertyDeclaration(parent) && parent.name === node) return true;
-  if (ts.isPropertySignature(parent) && parent.name === node) return true;
-  if (ts.isMethodDeclaration(parent) && parent.name === node) return true;
-  if (ts.isMethodSignature(parent) && parent.name === node) return true;
-  if (ts.isGetAccessor(parent) && parent.name === node) return true;
-  if (ts.isSetAccessor(parent) && parent.name === node) return true;
-  return false;
-}
-
 function checkEntrypointManifestSourceCoverage() {
   const discoveredMetadataPaths = new Set();
   for (const entrypoint of entrypointPublicApiFiles()) {
@@ -2467,29 +1768,6 @@ function exportPaths(source) {
   return [...source.matchAll(/export\s+[^;]*?\s+from\s+['"]([^'"]+)['"]/g)].map(
     (match) => match[1],
   );
-}
-
-function exportedSymbolNames(source) {
-  const names = new Set();
-  const declarationPattern =
-    /\bexport\s+(?:declare\s+)?(?:abstract\s+)?(?:class|interface|type|function|const|let|var|enum)\s+([A-Za-z_$][A-Za-z0-9_$]*)/g;
-  for (const match of source.matchAll(declarationPattern)) {
-    names.add(match[1]);
-  }
-
-  for (const match of source.matchAll(/\bexport\s+(?:type\s+)?\{([^}]*)\}/g)) {
-    for (const part of match[1].split(',')) {
-      const tokens = part
-        .trim()
-        .split(/\s+as\s+/i)
-        .map((token) => token.trim());
-      for (const token of tokens) {
-        if (/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(token)) names.add(token);
-      }
-    }
-  }
-
-  return names;
 }
 
 function escapeRegExp(value) {

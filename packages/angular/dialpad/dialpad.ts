@@ -209,7 +209,7 @@ const HELL_DIALPAD_RECIPE = {
           (click)="onKeyClick(k.digit)"
         >
           <span data-slot="digit" [class]="part('digit')">{{ k.digit }}</span>
-          <span data-slot="letters" [class]="part('letters')">{{ k.letters || ' ' }}</span>
+          <span data-slot="letters" [class]="part('letters')">{{ k.letters || '\u00a0' }}</span>
         </button>
       }
     </div>

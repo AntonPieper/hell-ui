@@ -65,6 +65,7 @@ export async function printPdfInHiddenIframe(handle: HiddenPdfPrintHandle) {
 
 function hellPdfPrintOwnerDocument(ownerDocument: Document | undefined): Document {
   if (ownerDocument) return ownerDocument;
+  // eslint-disable-next-line no-restricted-globals -- fallback when no owner document was captured
   if (typeof document !== 'undefined') return document;
   throw new Error('Cannot print PDF without a browser document.');
 }

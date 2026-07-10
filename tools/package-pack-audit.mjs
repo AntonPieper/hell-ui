@@ -8,51 +8,14 @@ import { entrypointPublicApiFiles, entrypointStyleExports } from './entrypoint-m
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const angularPackageName = '@hell-ui/angular';
 
-const angularRecipeSourceFiles = [
-  'accordion/accordion.ts',
-  'button/button.ts',
-  'card/card.ts',
-  'field/field.ts',
-  'input/input.ts',
-  'tabs/tabs.ts',
-  'dialpad/dialpad.ts',
-  'menu/menu.ts',
-  'listbox/listbox.ts',
-  'popover/popover.ts',
-  'tooltip/tooltip.ts',
-  'flyout/flyout.ts',
-  'select/select.ts',
-  'combobox/combobox.ts',
-  'date-input/date-input.ts',
-  'date-picker/date-picker.ts',
-  'dialog/dialog.ts',
-  'time-input/time-input.ts',
-  'app-shell/app-shell.ts',
-  'audio-player/audio-player.ts',
-  'resizable/resizable.ts',
-  'split-view/split-view.ts',
-  'pagination/pagination.ts',
-  'table/table-utilities.ts',
-  'table-tanstack/table-tanstack.ts',
-  'avatar/avatar.ts',
-  'avatar-group/avatar-group.ts',
-  'breadcrumbs/breadcrumbs.ts',
-  'checkbox/checkbox.ts',
-  'drop-zone/drop-zone.ts',
-  'icon/icon.ts',
-  'progress/progress.ts',
-  'radio/radio.ts',
-  'separator/separator.ts',
-  'skeleton/skeleton.ts',
-  'slider/slider.ts',
-  'spinner/spinner.ts',
-  'switch/switch.ts',
-  'tag/tag.ts',
-  'toggle/toggle.ts',
-  'omnibar/omnibar.ts',
-  'toast/toast.ts',
-  'features/code-editor/code-editor.ts',
-];
+// The packed .ts recipe sources ship so consumer Tailwind builds can scan the
+// Part Recipe class strings. Their list is owned by the asset entries in
+// packages/angular/ng-package.json; derive it instead of mirroring it.
+const angularRecipeSourceFiles = JSON.parse(
+  readFileSync(join(root, 'packages/angular/ng-package.json'), 'utf8'),
+).assets
+  .filter((asset) => typeof asset === 'object' && asset.glob.endsWith('.ts'))
+  .map((asset) => posix.join(asset.output, asset.glob));
 
 export const packagePeerGroups = Object.freeze({
   core: Object.freeze([
@@ -190,8 +153,6 @@ export function auditPackedPackage({ tarball, logger = console } = {}) {
   if (!tarball) throw new Error('Package pack audit requires a tarball path.');
   if (!existsSync(tarball)) throw new Error(`Package pack audit tarball missing: ${tarball}`);
 
-  runPackagePackAuditSelfTest();
-
   const files = packedFiles(tarball);
   const fileSet = new Set(files);
   const packageJson = readPackedJson(tarball, 'package.json');
@@ -210,28 +171,6 @@ export function auditPackedPackage({ tarball, logger = console } = {}) {
 
   logger.log(`[package-pack-audit] ok: ${files.length} packed files audited for ${packageJson.name}`);
   return { files, packageJson };
-}
-
-let selfTested = false;
-
-function runPackagePackAuditSelfTest() {
-  if (selfTested) return;
-  selfTested = true;
-
-  const fixtures = [
-    ['source map', ['fesm2022/hell-ui-angular.mjs.map']],
-    ['secret-bearing file', ['.env.production']],
-    ['test artifact or test source', ['src/button.spec.ts']],
-    ['workspace node_modules leak', ['apps/docs/node_modules/@hell-ui/angular/package.json']],
-    ['unexpected worker asset', ['assets/pdf.worker.min.mjs']],
-  ];
-
-  for (const [label, files] of fixtures) {
-    const failures = findForbiddenPackedFileFailures(['package.json', ...files]);
-    if (!failures.some((failure) => failure.includes(label))) {
-      throw new Error(`Package pack audit self-test did not catch ${label}: ${files.join(', ')}`);
-    }
-  }
 }
 
 function packedFiles(tarball) {

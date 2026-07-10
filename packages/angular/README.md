@@ -69,8 +69,8 @@ one documented internal exception: `@hell-ui/angular/internal/hotkeys` is
 tracked to guard accidental shape drift, but it is not promoted to Stable.
 Four entry points are temporarily excluded because `@microsoft/api-extractor`
 crashes analyzing their flattened declarations (`/audio-player`, `/combobox`,
-`/date-input`, `/select`); the blocked list lives in
-`tools/release-evidence-policy.mjs` as `apiReportBlockedEntrypoints` and is
+`/date-input`, `/select`); the exclusion list lives in
+`tools/check-api-reports.mjs` as `apiReportExclusions` and is
 re-probed on extractor upgrades. Experimental surfaces
 (`/features/*`, `/table-tanstack*`) stay out of stable reports by policy.
 
