@@ -40,6 +40,7 @@
     "dialog/dialog.ts",
     "confirm/confirm.ts",
     "time-input/time-input.ts",
+    "number-input/number-input.ts",
     "app-shell/app-shell.ts",
     "audio-player/audio-player.ts",
     "resizable/resizable.ts",
@@ -145,6 +146,9 @@
     },
     "./menu": {
       "@heinrich/source": "./menu/public-api.ts"
+    },
+    "./number-input": {
+      "@heinrich/source": "./number-input/public-api.ts"
     },
     "./popover": {
       "@heinrich/source": "./popover/public-api.ts"
@@ -334,6 +338,11 @@
       "@heinrich/source": "./menu/styles.css",
       "style": "./menu/styles.css",
       "default": "./menu/styles.css"
+    },
+    "./number-input/styles.css": {
+      "@heinrich/source": "./number-input/styles.css",
+      "style": "./number-input/styles.css",
+      "default": "./number-input/styles.css"
     },
     "./popover/styles.css": {
       "@heinrich/source": "./popover/styles.css",
