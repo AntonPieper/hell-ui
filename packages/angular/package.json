@@ -52,6 +52,7 @@
     "avatar-group/avatar-group.ts",
     "breadcrumbs/breadcrumbs.ts",
     "checkbox/checkbox.ts",
+    "chip/chip.ts",
     "drop-zone/drop-zone.ts",
     "empty-state/empty-state.ts",
     "icon/icon.ts",
@@ -183,6 +184,9 @@
     },
     "./tooltip": {
       "@heinrich/source": "./tooltip/public-api.ts"
+    },
+    "./chip": {
+      "@heinrich/source": "./chip/public-api.ts"
     },
     "./combobox": {
       "@heinrich/source": "./combobox/public-api.ts"
@@ -390,6 +394,11 @@
       "@heinrich/source": "./tooltip/styles.css",
       "style": "./tooltip/styles.css",
       "default": "./tooltip/styles.css"
+    },
+    "./chip/styles.css": {
+      "@heinrich/source": "./chip/styles.css",
+      "style": "./chip/styles.css",
+      "default": "./chip/styles.css"
     },
     "./combobox/styles.css": {
       "@heinrich/source": "./combobox/styles.css",

@@ -435,6 +435,48 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'components/checkbox/examples/states.example components/checkbox hellCheckbox checked indeterminate disabled unchecked',
   },
   {
+    title: 'Chip: Basic',
+    path: '/components/chip',
+    detail: 'components/chip/examples/basic.example.ts',
+    terms:
+      'components/chip/examples/basic.example components/chip hellChipSet hellChip hellChipRemove remove event roving focus arrow Home End Delete Backspace label removable token assignees',
+  },
+  {
+    title: 'Chip: Clickable',
+    path: '/components/chip',
+    detail: 'components/chip/examples/clickable.example.ts',
+    terms:
+      'components/chip/examples/clickable.example components/chip hellChip button anchor link interactive host summary pill copyable filter data-interactive click',
+  },
+  {
+    title: 'Chip: Disabled',
+    path: '/components/chip',
+    detail: 'components/chip/examples/disabled.example.ts',
+    terms:
+      'components/chip/examples/disabled.example components/chip hellChipSet hellChip hellChipRemove disabled aria-disabled data-disabled skip roving removal',
+  },
+  {
+    title: 'Chip: Sizes',
+    path: '/components/chip',
+    detail: 'components/chip/examples/sizes.example.ts',
+    terms:
+      'components/chip/examples/sizes.example components/chip hellChip size HellSize xs sm md lg xl data-size',
+  },
+  {
+    title: 'Chip: Styling',
+    path: '/components/chip',
+    detail: 'components/chip/examples/styling.example.ts',
+    terms:
+      'components/chip/examples/styling.example components/chip hellChipSet hellChip hellChipRemove ui Part Style Map HellChipUi HellChipRemoveUi root data-slot rounded-hell-md bg-hell-primary',
+  },
+  {
+    title: 'Chip: Variants',
+    path: '/components/chip',
+    detail: 'components/chip/examples/variants.example.ts',
+    terms:
+      'components/chip/examples/variants.example components/chip hellChip variant HellTagVariant default primary info success warning danger data-variant palette tag',
+  },
+  {
     title: 'Code Editor: Basic',
     path: '/components/code-editor',
     detail: 'components/code-editor/examples/basic.example.ts',

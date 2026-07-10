@@ -130,6 +130,13 @@ const HD_DOCS_CATALOG_SECTIONS: readonly DocsCatalogSection[] = [
           import('./pages/components/tag/tag.page').then((m) => m.TagPage),
       },
       {
+        routePath: 'components/chip',
+        label: 'Chip',
+        icon: 'faSolidTags',
+        loadComponent: () =>
+          import('./pages/components/chip/chip.page').then((m) => m.ChipPage),
+      },
+      {
         routePath: 'components/progress',
         label: 'Progress',
         icon: 'faSolidBarsProgress',
