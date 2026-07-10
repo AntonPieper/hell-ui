@@ -50,6 +50,69 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'with-settings-panel components/accordion/examples/with-settings-panel.example components/accordion hellAccordion hellAccordionItem hellAccordionTrigger hellAccordionContent hellCard hellCardHeader hellCardBody hell-icon composite card icon notifications preferences billing',
   },
   {
+    title: 'Alert: Actions',
+    path: '/components/alert',
+    detail: 'components/alert/examples/actions.example.ts',
+    terms:
+      'alert actions components/alert/examples/actions.example components/alert hell-alert hellAlertTitle hellAlertDescription hellAlertActions hellButton retry action region danger sync failed',
+  },
+  {
+    title: 'Alert: Async alerts and roles',
+    path: '/components/alert',
+    detail: 'components/alert/examples/async-role.example.ts',
+    terms:
+      'alert async-role components/alert/examples/async-role.example components/alert hell-alert hellAlertDismiss role alert status aria-live announce dynamic inserted danger recipe hellButton',
+  },
+  {
+    title: 'Alert: Banner',
+    path: '/components/alert',
+    detail: 'components/alert/examples/banner.example.ts',
+    terms:
+      'alert banner components/alert/examples/banner.example components/alert hell-alert layout banner full-width app-level unsupported browser flush edges',
+  },
+  {
+    title: 'Alert: Basic',
+    path: '/components/alert',
+    detail: 'components/alert/examples/basic.example.ts',
+    terms:
+      'alert basic components/alert/examples/basic.example components/alert hell-alert hellAlertTitle hellAlertDescription info inline message smallest usage',
+  },
+  {
+    title: 'Alert: Dismissible',
+    path: '/components/alert',
+    detail: 'components/alert/examples/dismissible.example.ts',
+    terms:
+      'alert dismissible components/alert/examples/dismissible.example components/alert hell-alert hellAlertDismiss dismissed event close button visibility signal Label Contract hellButton',
+  },
+  {
+    title: 'Alert: Icon',
+    path: '/components/alert',
+    detail: 'components/alert/examples/icon.example.ts',
+    terms:
+      'alert icon components/alert/examples/icon.example components/alert hell-alert hellAlertIcon showIcon replace remove glyph hell-icon provideIcons faSolidBullhorn decorative',
+  },
+  {
+    title: 'Alert: Styling (all parts)',
+    path: '/components/alert',
+    detail: 'components/alert/examples/styling.example.ts',
+    terms:
+      'alert styling components/alert/examples/styling.example components/alert hell-alert ui HellAlertUi part style map root icon content compact density tailwind tokens',
+  },
+  {
+    title: 'Alert: Validation summary',
+    path: '/components/alert',
+    detail: 'components/alert/examples/validation-summary.example.ts',
+    terms:
+      'alert validation-summary components/alert/examples/validation-summary.example components/alert hell-alert hellAlertTitle hellAlertDescription list field-group warnings errors danger',
+  },
+  {
+    title: 'Alert: Variants',
+    path: '/components/alert',
+    detail: 'components/alert/examples/variants.example.ts',
+    terms:
+      'alert variants components/alert/examples/variants.example components/alert hell-alert variant info success warning danger severity semantic theme tokens',
+  },
+  {
     title: 'App Shell: Basic',
     path: '/components/app-shell',
     detail: 'components/app-shell/examples/basic.example.ts',

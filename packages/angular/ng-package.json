@@ -161,6 +161,11 @@
       "output": "table-tanstack"
     },
     {
+      "glob": "alert.ts",
+      "input": "alert",
+      "output": "alert"
+    },
+    {
       "glob": "avatar.ts",
       "input": "avatar",
       "output": "avatar"

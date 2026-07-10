@@ -21,6 +21,21 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     include: ['main'],
   },
   {
+    name: 'alert',
+    path: '/components/alert',
+    heading: 'Alert',
+    include: ['main'],
+    prepare: async (page) => {
+      await page
+        .locator('app-alert-async-role-example')
+        .getByRole('button', { name: 'Simulate a failed call' })
+        .click();
+      await expect(
+        page.locator('app-alert-async-role-example').getByRole('alert'),
+      ).toBeVisible();
+    },
+  },
+  {
     name: 'button',
     path: '/components/button',
     heading: 'Button',

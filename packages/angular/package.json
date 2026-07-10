@@ -46,6 +46,7 @@
     "pagination/pagination.ts",
     "table/table-utilities.ts",
     "table-tanstack/table-tanstack.ts",
+    "alert/alert.ts",
     "avatar/avatar.ts",
     "avatar-group/avatar-group.ts",
     "breadcrumbs/breadcrumbs.ts",
@@ -99,6 +100,9 @@
     },
     "./accordion": {
       "@heinrich/source": "./accordion/public-api.ts"
+    },
+    "./alert": {
+      "@heinrich/source": "./alert/public-api.ts"
     },
     "./avatar": {
       "@heinrich/source": "./avatar/public-api.ts"
@@ -248,6 +252,11 @@
       "@heinrich/source": "./accordion/styles.css",
       "style": "./accordion/styles.css",
       "default": "./accordion/styles.css"
+    },
+    "./alert/styles.css": {
+      "@heinrich/source": "./alert/styles.css",
+      "style": "./alert/styles.css",
+      "default": "./alert/styles.css"
     },
     "./avatar/styles.css": {
       "@heinrich/source": "./avatar/styles.css",
