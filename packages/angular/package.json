@@ -45,6 +45,7 @@
     "audio-player/audio-player.ts",
     "resizable/resizable.ts",
     "split-view/split-view.ts",
+    "toolbar/toolbar.ts",
     "pagination/pagination.ts",
     "table/table-utilities.ts",
     "table-tanstack/table-tanstack.ts",
@@ -239,6 +240,9 @@
     },
     "./toast": {
       "@heinrich/source": "./toast/public-api.ts"
+    },
+    "./toolbar": {
+      "@heinrich/source": "./toolbar/public-api.ts"
     },
     "./features/audio-transcript": {
       "@heinrich/source": "./features/audio-transcript/public-api.ts"
@@ -488,6 +492,11 @@
       "@heinrich/source": "./toast/styles.css",
       "style": "./toast/styles.css",
       "default": "./toast/styles.css"
+    },
+    "./toolbar/styles.css": {
+      "@heinrich/source": "./toolbar/styles.css",
+      "style": "./toolbar/styles.css",
+      "default": "./toolbar/styles.css"
     },
     "./features/code-editor/styles.css": {
       "@heinrich/source": "./features/code-editor/styles.css",

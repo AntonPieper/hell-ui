@@ -242,6 +242,16 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     },
   },
   {
+    name: 'toolbar',
+    path: '/components/toolbar',
+    heading: 'Toolbar',
+    include: ['main', '[data-slot="overflowMenu"]'],
+    prepare: async (page) => {
+      await page.getByRole('button', { name: 'More actions' }).first().click();
+      await expect(page.getByRole('menu').first()).toBeVisible();
+    },
+  },
+  {
     name: 'table primitives docs example',
     path: '/components/table',
     heading: 'Table',

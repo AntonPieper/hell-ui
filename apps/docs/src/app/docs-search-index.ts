@@ -1904,6 +1904,34 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'composite hellToggleGroup hellToggleGroupItem hellTooltip hellTooltipTrigger formatting toolbar icon-only bold italic underline aria-label',
   },
   {
+    title: 'Toolbar: Basic',
+    path: '/components/toolbar',
+    detail: 'components/toolbar/examples/basic.example.ts',
+    terms:
+      'toolbar components/toolbar/examples/basic.example hell-toolbar hellToolbarAction HELL_TOOLBAR_DIRECTIVES hell-icon priority primary default overflowOnly overflow menu responsive resize actions label activated smallest usage',
+  },
+  {
+    title: 'Toolbar: Priorities',
+    path: '/components/toolbar',
+    detail: 'components/toolbar/examples/priorities.example.ts',
+    terms:
+      'toolbar priorities components/toolbar/examples/priorities.example hell-toolbar hellToolbarAction priority primary default overflowOnly never overflows collapse narrow container variant overflow menu more actions',
+  },
+  {
+    title: 'Toolbar: Standalone above a table',
+    path: '/components/toolbar',
+    detail: 'components/toolbar/examples/table-toolbar.example.ts',
+    terms:
+      'toolbar table standalone components/toolbar/examples/table-toolbar.example hell-toolbar hellToolbarAction HELL_TABLE_UTILITIES_DIRECTIVES hellTableContainer hellTableRoot hellTableHeader hellTableBody hellTableRow hellTableCell action bar invite filter export columns overflow composite',
+  },
+  {
+    title: 'Toolbar: Styling',
+    path: '/components/toolbar',
+    detail: 'components/toolbar/examples/styling.example.ts',
+    terms:
+      'toolbar styling all-parts components/toolbar/examples/styling.example hell-toolbar hellToolbarAction ui HellToolbarUi HellToolbarPart part style map root action overflowTrigger overflowMenu overflowItem bg-hell-primary-soft rounded-hell tokens',
+  },
+  {
     title: 'Tooltip: Styling',
     path: '/components/tooltip',
     detail: 'components/tooltip/examples/all-parts-styling.example.ts',
@@ -2063,6 +2091,13 @@ const HD_DOCS_CODE_USAGES: readonly DocsSearchSeed[] = [
     detail: 'hell-split-view, hellSplitPrimary, hellSplitDetail',
     terms:
       'HELL_SPLIT_VIEW_DIRECTIVES hell-split-view hellSplitPrimary hellSplitDetail compactBelow detailOpen detailOpenChange itemNavigation previousItem nextItem responsive resizable panes',
+  },
+  {
+    title: 'Toolbar directives',
+    path: '/components/toolbar',
+    detail: 'hell-toolbar, hellToolbarAction, hellResolveToolbarOverflow',
+    terms:
+      'HELL_TOOLBAR_DIRECTIVES hell-toolbar hellToolbarAction hellResolveToolbarOverflow priority primary default overflowOnly overflow menu roving tabindex APG toolbar ResizeObserver activated label disabled variant HellToolbarPart HellToolbarUi',
   },
   {
     title: 'Time input adapter',

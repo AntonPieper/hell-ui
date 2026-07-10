@@ -141,6 +141,19 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `packages/angular/toggle/toggle.spec.ts` and
   `e2e/toggle-a11y-contracts.spec.ts`.
 
+- New `@hell-ui/angular/toolbar` Composite entry point: an APG-toolbar-pattern
+  action bar where actions are declared once as `hellToolbarAction` templates
+  (label, optional icon, `disabled`, `priority` of `primary`/`default`/
+  `overflowOnly`, and an `activated` output) and rendered either as inline Hell
+  buttons or as items in a trailing Hell overflow menu. Membership is recomputed
+  from a container-driven `ResizeObserver` — measured and committed outside
+  change detection, once per resize frame, with the overflow trigger's width
+  reserved — so the row is flicker-free and no action is unreachable at any
+  width. A roving tabindex spans the visible actions and the overflow trigger
+  for a single tab stop, and label/disabled state stays identical between the
+  two renderings. Exposes the `root`, `action`, `overflowTrigger`,
+  `overflowMenu`, and `overflowItem` Public Parts, plus the exported
+  `hellResolveToolbarOverflow` priority policy. Closes #107.
 
 ### Removed
 
