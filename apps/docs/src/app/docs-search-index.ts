@@ -1058,6 +1058,20 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'hellButton hell-icon hellMenuTrigger hellMenu hellMenuSection hellMenuLabel hellMenuItem hellMenuItemIcon hellMenuItemTrailing hellMenuItemCheckbox hellMenuItemIndicator hellMenuItemRadioGroup hellMenuItemRadio hellMenuSeparator hellSubmenuTrigger ui part style map data-hover data-focus-visible bg-hell-primary-soft rounded-hell-lg refine',
   },
   {
+    title: 'Multi-Select Menu Button: Basic',
+    path: '/components/multi-select-menu-button',
+    detail: 'components/multi-select-menu-button/examples/basic.example.ts',
+    terms:
+      'multi-select-menu-button basic components/multi-select-menu-button/examples/basic.example components/multi-select-menu-button hell-multi-select-menu-button options selected selectedChange minSelected resettable reset count badge data-selection-count data-has-selection controlled checkable menuitemcheckbox choose subset channels HellMultiSelectOption disabled floor Label Contract',
+  },
+  {
+    title: 'Multi-Select Menu Button: TanStack column visibility',
+    path: '/components/multi-select-menu-button',
+    detail: 'components/multi-select-menu-button/examples/tanstack-columns.example.ts',
+    terms:
+      'multi-select-menu-button tanstack-columns components/multi-select-menu-button/examples/tanstack-columns.example components/multi-select-menu-button hell-multi-select-menu-button TanStack columnVisibility getCanHide enableHiding onColumnVisibilityChange localStorage persistence hellTableShellToolbar hell-tanstack-table Table Shell toolbar recipe visible columns minSelected reset',
+  },
+  {
     title: 'Omnibar: Async search',
     path: '/components/omnibar',
     detail: 'components/omnibar/examples/async-search.example.ts',
