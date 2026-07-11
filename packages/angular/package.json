@@ -58,6 +58,7 @@
     "internal/chip/chip-presentation.ts",
     "drop-zone/drop-zone.ts",
     "empty-state/empty-state.ts",
+    "file-upload/file-upload.ts",
     "icon/icon.ts",
     "progress/progress.ts",
     "radio/radio.ts",
@@ -232,6 +233,9 @@
     },
     "./dialpad": {
       "@heinrich/source": "./dialpad/public-api.ts"
+    },
+    "./file-upload": {
+      "@heinrich/source": "./file-upload/public-api.ts"
     },
     "./multi-select-menu-button": {
       "@heinrich/source": "./multi-select-menu-button/public-api.ts"
@@ -483,6 +487,11 @@
       "@heinrich/source": "./dialpad/styles.css",
       "style": "./dialpad/styles.css",
       "default": "./dialpad/styles.css"
+    },
+    "./file-upload/styles.css": {
+      "@heinrich/source": "./file-upload/styles.css",
+      "style": "./file-upload/styles.css",
+      "default": "./file-upload/styles.css"
     },
     "./multi-select-menu-button/styles.css": {
       "@heinrich/source": "./multi-select-menu-button/styles.css",

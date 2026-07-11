@@ -799,6 +799,27 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'drop-zone upload-queue composite components/drop-zone/examples/upload-queue.example components/drop-zone components/progress components/tag hellDropzone hellProgress hellProgressBar hellTag hellButton hellIcon invoices progress status',
   },
   {
+    title: 'File Upload: Reference integration with a mock upload adapter',
+    path: '/components/file-upload',
+    detail: 'components/file-upload/examples/upload-adapter.example.ts',
+    terms:
+      'file-upload upload-adapter components/file-upload/examples/upload-adapter.example components/file-upload hell-file-upload controlled items HellFileUploadItem filesAdded rejected removed retried status progress uploading done error mock XMLHttpRequest onprogress adapter transport accept maxBytes maxFiles progressbar drag drop browse announce LiveAnnouncer',
+  },
+  {
+    title: 'File Upload: Single-file mode',
+    path: '/components/file-upload',
+    detail: 'components/file-upload/examples/single-file.example.ts',
+    terms:
+      'file-upload single-file components/file-upload/examples/single-file.example components/file-upload hell-file-upload maxFiles 1 single multiple avatar fax pdf count rejection one file',
+  },
+  {
+    title: 'File Upload: Styling with the Part Style Map',
+    path: '/components/file-upload',
+    detail: 'components/file-upload/examples/styling.example.ts',
+    terms:
+      'file-upload styling all-parts components/file-upload/examples/styling.example components/file-upload hell-file-upload ui Part Style Map HellFileUploadUi data-slot root dropzone browse list item itemIcon itemName itemMeta itemProgress itemError itemRemove itemRetry compact',
+  },
+  {
     title: 'Empty State: No data',
     path: '/components/empty-state',
     detail: 'components/empty-state/examples/no-data.example.ts',

@@ -259,6 +259,7 @@ const packageConsumerScenarioCatalog = [
       '.scale-\\[0\\.98\\]{scale:.98}',
       '.text-\\[10px\\]{font-size:10px}',
       'animation:hell-shimmer',
+      'mask:var(--hell-icon-refresh) center/contain no-repeat',
     ],
   },
   {
@@ -1790,6 +1791,7 @@ import { HellDateInput } from '${packageName}/date-input';
 import { HellDatePicker, HellDateRangePicker } from '${packageName}/date-picker';
 import { HELL_DIALOG_DIRECTIVES, type HellDialogOverlayUi, type HellDialogUi } from '${packageName}/dialog';
 import { HellDialpad, type HellDialpadUi } from '${packageName}/dialpad';
+import { HellFileUpload, type HellFileUploadItem, type HellFileUploadUi } from '${packageName}/file-upload';
 import { HELL_OMNIBAR_DIRECTIVES, type HellOmnibarUi } from '${packageName}/omnibar';
 import { HellTimeInput, type HellTimeValue } from '${packageName}/time-input';
 import { HellToaster, HellToastService, type HellToasterUi } from '${packageName}/toast';
@@ -1816,6 +1818,7 @@ interface SearchItem {
     HellDatePicker,
     HellDateRangePicker,
     HellDialpad,
+    HellFileUpload,
     HellTimeInput,
     HellToaster,
   ],
@@ -1864,6 +1867,7 @@ interface SearchItem {
         <hell-date-picker [date]="date" />
         <hell-date-range-picker [startDate]="rangeStart" [endDate]="rangeEnd" />
         <hell-dialpad [ui]="dialpadUi" />
+        <hell-file-upload [items]="uploadItems" [ui]="fileUploadUi" />
       </main>
       <aside hellAppSecondary>
         <button hellSecondaryToggle type="button">Details</button>
@@ -1879,6 +1883,16 @@ class App {
   protected readonly rangeEnd = new Date(2026, 3, 12);
   protected readonly time: HellTimeValue = { hour: 9, minute: 30, second: 0 };
   protected readonly dialpadUi = dialpadUi;
+  protected readonly fileUploadUi = { item: 'p-hell-2' } satisfies HellFileUploadUi;
+  protected readonly uploadItems: readonly HellFileUploadItem[] = [
+    {
+      id: 'package-consumer-upload',
+      name: 'package-consumer.pdf',
+      size: 2048,
+      status: 'uploading',
+      progress: 0.5,
+    },
+  ];
   protected readonly dialogOverlayUi = { root: 'p-hell-4' } satisfies HellDialogOverlayUi;
   protected readonly dialogUi = { root: 'max-w-[520px]' } satisfies HellDialogUi;
   protected readonly omnibarUi = { root: 'max-w-[360px]' } satisfies HellOmnibarUi;
@@ -2472,6 +2486,7 @@ function compositesConsumerStylesCss() {
 @import "${packageName}/date-input/styles.css";
 @import "${packageName}/date-picker/styles.css";
 @import "${packageName}/dialog/styles.css";
+@import "${packageName}/file-upload/styles.css";
 @import "${packageName}/omnibar/styles.css";
 @import "${packageName}/time-input/styles.css";
 @import "${packageName}/toast/styles.css";
