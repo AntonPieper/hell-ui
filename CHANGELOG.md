@@ -34,19 +34,28 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   `packages/angular/alert/alert.spec.ts`, `e2e/alert-a11y-contracts.spec.ts`,
   the docs page at `/components/alert`, and its axe WCAG A/AA smoke coverage
   (issues #91, #102).
-- Added the `@hell-ui/angular/confirm` Package Entry Point (Composite): a
-  promise-based `HellConfirmService.confirm(options)` that opens one accessible
-  modal on the dialog primitive and resolves `{ confirmed }`. The promise always
-  resolves — Escape, backdrop, and cancel resolve `confirmed: false` — and calls
-  queue so two confirm dialogs never show at once. Supports `danger` severity
-  (destructive confirm variant, initial focus on cancel), a `countdownSeconds`
-  gate with a visible Label-Contract-formatted suffix (gating only; never
-  auto-confirms), and an optional projected `content` template whose `state`
-  rides back in `result.content`. All default strings sit behind the
-  `HELL_CONFIRM_LABELS` Label Contract (`provideHellConfirmLabels`). Docs cover
-  basic, danger, countdown, and projected-content examples plus an
-  unsaved-changes route-guard recipe. Ships `@hell-ui/angular/confirm/styles.css`.
-  See #104.
+- Added the `@hell-ui/angular/confirm` Package Entry Point (Composite) on the
+  prompt + action model: `injectHellConfirm()` returns
+  `(prompt, action?, cancelAction?) => Promise<boolean>`, opening one accessible
+  modal on the dialog primitive, and `injectHellChoice()` returns a typed N-way
+  `(prompt, actions) => Promise<K | null>` for decisions with more than two
+  honest answers. A prompt is a string or `{ title, description? }`; actions are
+  opaque `HellConfirmAction` values built only through combinators aligned with
+  the button variant vocabulary — `hellPrimaryAction`, `hellSecondaryAction`,
+  `hellDestructiveAction` (destructive ⇒ initial focus on cancel), the
+  `hellCountdownAction(seconds, action)` decorator (disables the button with a
+  visible Label-Contract-formatted suffix; gating only, never auto-confirms),
+  and `hellChoiceAction(key, action, { dismissEquivalent? })`. Promises always
+  resolve — Escape, backdrop, and cancel resolve `false`, and a dismissed
+  choice resolves its single dismiss-equivalent key, else `null` — and modal
+  calls queue so two confirm surfaces never show at once. `confirm()` without
+  an action falls back to the Label Contract's default primary action, and
+  `cancelAction` replaces the default cancel button per call. All default
+  strings sit behind the `HELL_CONFIRM_LABELS` Label Contract
+  (`provideHellConfirmLabels`). Docs cover basic, destructive, countdown, and
+  `choice()` unsaved-changes examples plus a `choice()`-based unsaved-changes
+  route-guard recipe, all under axe WCAG A/AA smoke coverage. Ships
+  `@hell-ui/angular/confirm/styles.css`. See #104 and #131 (spec #93).
 - Added the `@hell-ui/angular/empty-state` Package Entry Point: a
   `hell-empty-state` owned-anatomy component with `root`, `media`, `title`,
   `description`, and `actions` Public Parts. A `preset`
@@ -65,21 +74,22 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   arrow/Home/End focus, `Delete`/`Backspace` removal, and focus continuity to a
   neighbouring chip or the set after removal). Removal is event-only; the
   consumer owns the collection. See issue #106 (spec #95).
-- Added a declarative popconfirm to `@hell-ui/angular/confirm`: attach the
-  `HellPopconfirm` trigger directive to any button or anchor and pair it with a
-  `<hell-popconfirm-panel>` (`HellPopconfirmPanel`) in a template for an anchored,
-  in-context confirmation such as a row delete. Built on the popover primitive, so
-  focus moves into the panel on open and returns to the trigger on dismiss, and
-  Escape or an outside click dismiss it through the shared Floating Dismissal
-  rules. One popconfirm is open at a time — opening one closes another — and it
-  exposes `confirmed` / `dismissed` outputs with no promise API, leaving the
-  action in app code. `danger` severity mirrors the confirm service (destructive
-  variant, initial focus on cancel), and the default message plus button labels
-  come from the `HELL_CONFIRM_LABELS` Label Contract (new `popconfirmMessage`
-  default). Docs gain a canonical row-delete example under `/components/confirm`
-  with axe WCAG A/AA smoke coverage. Evidence:
-  `packages/angular/confirm/popconfirm.spec.ts` and
-  `e2e/confirm-a11y-contracts.spec.ts`. See #113.
+- Added an imperative popconfirm to `@hell-ui/angular/confirm`:
+  `injectHellPopconfirm()` returns
+  `(anchor, prompt, action?) => Promise<boolean>` for anchored, in-context
+  confirmations such as a row delete — the same linear control flow as
+  `injectHellConfirm`, rendered on the popover primitive against the passed
+  anchor element. Focus moves into the panel on open and returns to the anchor
+  on close, Escape or an outside click dismiss it through the shared Floating
+  Dismissal rules and resolve `false`, and the panel joins the surrounding Hell
+  Floating Scope. One popconfirm is open at a time — opening one dismisses
+  another and resolves it `false`, so armed deletes never accumulate.
+  Destructive and countdown-gated actions start focus on cancel, mirroring the
+  modal, and the default action plus cancel labels come from the
+  `HELL_CONFIRM_LABELS` Label Contract. Docs gain a canonical row-delete
+  example under `/components/confirm` with axe WCAG A/AA smoke coverage.
+  Evidence: `packages/angular/confirm/popconfirm.spec.ts` and
+  `e2e/confirm-a11y-contracts.spec.ts`. See #113 and #131 (spec #93).
 - Added the `@hell-ui/angular/number-input` Package Entry Point (Styled
   Primitive), joining the Typed Value Input family alongside date and time
   input. `HellNumberInput` binds a real `number | null` through

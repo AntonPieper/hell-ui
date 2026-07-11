@@ -1,7 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { HellSaveBar } from '@hell-ui/angular/save-bar';
-import { HellConfirmService } from '@hell-ui/angular/confirm';
+import {
+  hellDestructiveAction,
+  hellSecondaryAction,
+  injectHellConfirm,
+} from '@hell-ui/angular/confirm';
 import { HELL_FIELD_DIRECTIVES } from '@hell-ui/angular/field';
 import { HellInput } from '@hell-ui/angular/input';
 
@@ -20,7 +24,7 @@ import { HellInput } from '@hell-ui/angular/input';
           [formControl]="form.controls.announcement"
         />
         <div hellFieldDescription>
-          Edit the text, then press Discard — the confirm service guards the reset.
+          Edit the text, then press Discard — the confirm function guards the reset.
         </div>
       </div>
 
@@ -34,7 +38,7 @@ import { HellInput } from '@hell-ui/angular/input';
   `,
 })
 export class SaveBarConfirmDiscardExample {
-  private readonly confirm = inject(HellConfirmService);
+  private readonly confirm = injectHellConfirm();
   private readonly initialValue = { announcement: 'Maintenance window on Friday 22:00' };
 
   protected readonly form = new FormGroup({
@@ -52,13 +56,14 @@ export class SaveBarConfirmDiscardExample {
   }
 
   protected async confirmDiscard(): Promise<void> {
-    const { confirmed } = await this.confirm.confirm({
-      title: 'Discard unsaved changes?',
-      description: 'Your edits to this announcement will be lost.',
-      severity: 'danger',
-      confirmLabel: 'Discard changes',
-      cancelLabel: 'Keep editing',
-    });
+    const confirmed = await this.confirm(
+      {
+        title: 'Discard unsaved changes?',
+        description: 'Your edits to this announcement will be lost.',
+      },
+      hellDestructiveAction('Discard changes'),
+      hellSecondaryAction('Keep editing'),
+    );
     if (confirmed) this.form.reset(this.initialValue);
   }
 }

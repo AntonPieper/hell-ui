@@ -13,12 +13,12 @@ import { ConfirmCountdownExample } from './examples/countdown.example';
 import confirmCountdownExampleCodeRaw from './examples/countdown.example.ts?raw' with {
   loader: 'text',
 };
-import { ConfirmContentTemplateExample } from './examples/content-template.example';
-import confirmContentTemplateExampleCodeRaw from './examples/content-template.example.ts?raw' with {
-  loader: 'text',
-};
 import { PopconfirmRowDeleteExample } from './examples/popconfirm-row-delete.example';
 import popconfirmRowDeleteExampleCodeRaw from './examples/popconfirm-row-delete.example.ts?raw' with {
+  loader: 'text',
+};
+import { ConfirmChoiceUnsavedChangesExample } from './examples/choice-unsaved-changes.example';
+import confirmChoiceUnsavedChangesExampleCodeRaw from './examples/choice-unsaved-changes.example.ts?raw' with {
   loader: 'text',
 };
 
@@ -31,8 +31,8 @@ import popconfirmRowDeleteExampleCodeRaw from './examples/popconfirm-row-delete.
     ConfirmBasicExample,
     ConfirmDangerExample,
     ConfirmCountdownExample,
-    ConfirmContentTemplateExample,
     PopconfirmRowDeleteExample,
+    ConfirmChoiceUnsavedChangesExample,
   ],
   template: `
     <article class="hd-prose">
@@ -43,42 +43,49 @@ import popconfirmRowDeleteExampleCodeRaw from './examples/popconfirm-row-delete.
         importPath="@hell-ui/angular/confirm"
         stylesPath="@hell-ui/angular/confirm/styles.css"
       >
-        A promise-based confirmation service that opens one accessible modal on the dialog primitive
-        and resolves whether the user went ahead — so destructive flows read top-to-bottom instead of
-        wiring a dialog component per screen.
+        Promise-based confirmation functions on the dialog and popover primitives:
+        ask a prompt, offer composable actions, and await a plain answer — so
+        destructive flows read top-to-bottom instead of wiring a dialog component
+        per screen.
       </hd-page-header>
       <p>
-        The confirm entry point is a <strong>Composite</strong> over the Dialog primitive. Inject
-        <code>HellConfirmService</code> anywhere and <code>await</code> a single
-        <code>confirm(options)</code> call: it opens a focus-trapped, labelled modal and resolves
-        <code>{{ '{' }} confirmed {{ '}' }}</code>. The promise <strong>always resolves</strong> —
-        Escape, a backdrop click, and the cancel button all resolve <code>confirmed: false</code>, so
-        you never wrap the call in a try/catch. Calls <strong>queue</strong>: the service never shows
-        two confirm dialogs at once.
+        The confirm entry point is a <strong>Composite</strong> built around one idea: a
+        confirmation is a <em>prompt</em> plus <em>actions</em>. The prompt is a string or
+        <code>{{ '{' }} title, description? {{ '}' }}</code>; actions are opaque values built with
+        the <code>hell*Action</code> combinators, aligned with the button variant vocabulary.
+        Inject one of three functions and <code>await</code> it:
       </p>
+      <ul>
+        <li><code>injectHellConfirm()</code> — a modal yes/no decision resolving <code>boolean</code>.</li>
+        <li><code>injectHellPopconfirm()</code> — the same decision anchored to a control, resolving <code>boolean</code>.</li>
+        <li><code>injectHellChoice()</code> — a modal N-way decision resolving a typed key or <code>null</code>.</li>
+      </ul>
       <p>
-        Reach for the confirm service for blocking yes/no decisions — delete, reset, discard,
-        "are you sure". For lightweight in-context confirmations anchored to a control (such as a row
-        delete), a declarative popconfirm on the popover primitive is a better fit. For transient,
-        non-blocking feedback after an action, use Toast.
+        Every promise <strong>always resolves</strong> — Escape, a backdrop or outside click, and
+        the cancel button resolve <code>false</code> (or the choice's dismiss-equivalent key) — so
+        you never wrap a confirmation in try/catch. Modal calls <strong>queue</strong>: two confirm
+        surfaces never show at once.
       </p>
 
       <h2>Basic</h2>
       <p>
-        Pass a <code>title</code>, an optional <code>description</code>, and read
-        <code>confirmed</code> off the resolved result. Focus is trapped in the dialog and returned to
-        the trigger when it closes; the default severity focuses the confirm button.
+        Inject the function once, then <code>await confirm(prompt, action)</code>. The dialog is
+        named by the prompt title and described by its description; focus is trapped inside and
+        returned to the trigger when it closes. A non-destructive action holds initial focus.
+        Without an action, the confirm button falls back to the Label Contract's default primary
+        action.
       </p>
       <hd-example-tabs [code]="confirmBasicExampleCode">
         <app-confirm-basic-example />
       </hd-example-tabs>
 
-      <h2>Danger</h2>
+      <h2>Destructive</h2>
       <p>
-        Set <code>severity: 'danger'</code> for destructive actions. The confirm button switches to
-        the destructive <code>danger</code> button variant, and initial focus moves to
-        <em>cancel</em> so an Enter-by-habit doesn't destroy data. Custom
-        <code>confirmLabel</code> / <code>cancelLabel</code> name the action in the user's words.
+        Build the confirm action with <code>hellDestructiveAction</code> for anything that destroys
+        data: the button takes the destructive <code>danger</code> variant and initial focus moves
+        to <em>cancel</em> so an Enter-by-habit doesn't delete anything. The optional third
+        parameter replaces the default cancel button — here
+        <code>hellSecondaryAction('Keep project')</code> names the way out in the user's words.
       </p>
       <hd-example-tabs [code]="confirmDangerExampleCode">
         <app-confirm-danger-example />
@@ -86,144 +93,147 @@ import popconfirmRowDeleteExampleCodeRaw from './examples/popconfirm-row-delete.
 
       <h2>Countdown</h2>
       <p>
-        <code>countdownSeconds</code> keeps the confirm button disabled with a visible remaining-seconds
-        suffix (formatted through the Label Contract) so a user cannot reflexively confirm something
-        irreversible. The countdown only <strong>gates enabling</strong> — it never auto-confirms;
-        the user still has to click.
+        <code>hellCountdownAction(seconds, action)</code> decorates any action with a gate: its
+        button stays disabled with a visible remaining-seconds suffix (formatted through the Label
+        Contract) so a user cannot reflexively confirm something irreversible. The countdown only
+        <strong>gates enabling</strong> — it never auto-confirms; the user still has to click.
       </p>
       <hd-example-tabs [code]="confirmCountdownExampleCode">
         <app-confirm-countdown-example />
       </hd-example-tabs>
 
-      <h2>Projected content</h2>
+      <h2>Popconfirm: anchored confirmation</h2>
       <p>
-        Pass a <code>content</code> template to add a one-off option — for example an "also delete
-        imported groups" checkbox — without building a custom dialog. The template context exposes a
-        <code>state</code> signal seeded from <code>contentState</code>; read it with
-        <code>state()</code> and update it with <code>state.set(...)</code>. Its final value rides back
-        to the caller in <code>result.content</code>.
-      </p>
-      <hd-example-tabs [code]="confirmContentTemplateExampleCode">
-        <app-confirm-content-template-example />
-      </hd-example-tabs>
-
-      <h2>Popconfirm: in-context confirmation</h2>
-      <p>
-        For lightweight confirmations anchored to a control — a row delete, an inline "remove" —
-        reach for the declarative <strong>popconfirm</strong> instead of a modal. Attach
-        <code>hellPopconfirm</code> to any button, point it at a template holding a
-        <code>&lt;hell-popconfirm-panel&gt;</code>, and read <code>confirmed</code> to run the action.
-        There is no promise API on the declarative form: the trigger emits <code>confirmed</code> or
-        <code>dismissed</code> and the action itself stays in your code.
+        For lightweight confirmations that belong next to their control — a row delete, an inline
+        "remove" — <code>injectHellPopconfirm()</code> is the same linear control flow on the
+        popover primitive. Pass the anchor element, a prompt, and an action; the panel opens
+        against the anchor, focus moves into it, and the promise resolves <code>true</code> only on
+        confirm. Escape and outside clicks dismiss through the shared Floating Dismissal rules and
+        return focus to the anchor.
       </p>
       <p>
-        The panel renders on the popover primitive, so focus moves into it on open and returns to the
-        trigger on dismiss, and Escape or an outside click dismisses it through the shared Floating
-        Dismissal rules. Only one popconfirm is open at a time — arming a second row's delete closes
-        the first, so "armed delete" states can never accumulate. Set <code>severity="danger"</code>
-        to match the confirm service's destructive styling and start focus on cancel.
+        Only one popconfirm is open at a time — arming a second row's delete closes the first and
+        resolves it <code>false</code>, so "armed delete" states can never accumulate.
       </p>
       <hd-example-tabs [code]="popconfirmRowDeleteExampleCode">
         <app-popconfirm-row-delete-example />
       </hd-example-tabs>
 
-      <h2>Recipe: unsaved-changes route guard</h2>
+      <h2>Choice: N-way decisions</h2>
       <p>
-        Hell ships no <code>CanDeactivate</code> guard — the framework-agnostic surface stays small —
-        but the confirm service composes into one cleanly. Model save / discard / stay as a small
-        result and let the guard block navigation until the user decides. This recipe is
+        Some confirmations have more than two honest answers. <code>injectHellChoice()</code>
+        renders one button per <code>hellChoiceAction(key, action)</code> and resolves the chosen
+        key, typed from the actions you pass. Escape and backdrop dismissal resolve the key of the
+        single action marked <code>dismissEquivalent</code> — else <code>null</code> — so "the user
+        walked away" has an explicit meaning instead of a nested second confirm.
+      </p>
+      <p>
+        The canonical shape is unsaved changes: save / discard / keep-editing as one linear
+        decision. With a destructive action present, initial focus moves to the safe
+        dismiss-equivalent action, and Escape means "keep editing" — not a silent nothing.
+      </p>
+      <hd-example-tabs [code]="confirmChoiceUnsavedChangesExampleCode">
+        <app-confirm-choice-unsaved-changes-example />
+      </hd-example-tabs>
+
+      <h3>Recipe: unsaved-changes route guard</h3>
+      <p>
+        Hell ships no <code>CanDeactivate</code> guard — the framework-agnostic surface stays
+        small — but <code>choice()</code> composes into one cleanly: save / discard / keep-editing
+        as one linear decision, with keep-editing as the dismiss equivalent. This recipe is
         documentation only; copy it into your app:
       </p>
       <pre><code>{{ routeGuardRecipe }}</code></pre>
       <p>
-        Because <code>confirm</code> always resolves, the guard never needs a try/catch: a backdrop
-        click or Escape resolves <code>confirmed: false</code>, which you map to "stay on the page".
-        Use a projected <code>content</code> template if you want an explicit "save before leaving"
-        checkbox whose state rides back in the result.
+        Because the promise always resolves, the guard never needs a try/catch: Escape and a
+        backdrop click resolve <code>'stay'</code> through the dismiss-equivalent action, which
+        keeps the user on the page.
       </p>
 
       <h2>API</h2>
-      <h3><code>HellConfirmService</code> (<code>providedIn: 'root'</code>)</h3>
+      <h3>Prompts and actions</h3>
       <ul>
         <li>
-          <code>confirm&lt;TContentState&gt;(options): Promise&lt;HellConfirmResult&lt;TContentState&gt;&gt;</code>
-          — open a confirmation and resolve with the outcome. Never rejects. Concurrent calls queue.
+          <code>HellConfirmPrompt</code> — <code>string | {{ '{' }} title: string; description?: string {{ '}' }}</code>.
+          The title names the surface; the description is linked as its accessible description.
         </li>
-      </ul>
-      <h3><code>HellConfirmOptions&lt;TContentState&gt;</code></h3>
-      <ul>
-        <li><code>title</code>: <code>string</code>. Accessible title and heading.</li>
-        <li><code>description?</code>: <code>string</code>. Linked as the dialog's accessible description.</li>
-        <li><code>severity?</code>: <code>'default' | 'danger'</code>. Default <code>default</code>. <code>danger</code> uses the destructive confirm variant and focuses cancel.</li>
-        <li><code>confirmLabel?</code> / <code>cancelLabel?</code>: <code>string</code>. Override the button labels; fall back to the Label Contract.</li>
-        <li><code>countdownSeconds?</code>: <code>number</code>. Seconds the confirm button stays disabled with a visible countdown. Gating only.</li>
-        <li><code>content?</code>: <code>TemplateRef&lt;HellConfirmContentContext&lt;TContentState&gt;&gt;</code>. Projected into the dialog body.</li>
-        <li><code>contentState?</code>: <code>TContentState</code>. Initial value of the content template's <code>state</code> signal.</li>
-      </ul>
-      <h3><code>HellConfirmResult&lt;TContentState&gt;</code></h3>
-      <ul>
-        <li><code>confirmed</code>: <code>boolean</code>. Whether the user confirmed.</li>
-        <li><code>content?</code>: <code>TContentState</code>. Final projected-content state, when a <code>content</code> template was used.</li>
-      </ul>
-      <h3><code>HellConfirmContentContext&lt;TContentState&gt;</code></h3>
-      <ul>
-        <li><code>$implicit</code> / <code>state</code>: <code>WritableSignal&lt;TContentState&gt;</code> — the same content state signal, exposed as the template's implicit value and as <code>state</code>.</li>
-      </ul>
-      <h3><code>HellPopconfirm</code> (trigger directive)</h3>
-      <p>
-        Attach to a <code>button</code> or <code>a</code>. Bind
-        <code>[hellPopconfirm]="template"</code> where the template holds a
-        <code>&lt;hell-popconfirm-panel&gt;</code>. Pass-through inputs
-        <code>placement</code>, <code>offset</code>, <code>flip</code>, <code>shift</code>,
-        <code>container</code>, and <code>disabled</code> forward to the popover trigger.
-      </p>
-      <ul>
-        <li><code>confirmed</code>: output. Emits when the user confirms — run the action here.</li>
         <li>
-          <code>dismissed</code>: output. Emits when the popconfirm closes without confirming (cancel,
-          Escape, outside click, or another popconfirm opening).
+          <code>hellPrimaryAction(label)</code> / <code>hellSecondaryAction(label)</code> /
+          <code>hellDestructiveAction(label)</code> — build an opaque
+          <code>HellConfirmAction</code> with the <code>primary</code> / <code>default</code> /
+          <code>danger</code> button variant. Destructive actions move initial focus to the safe
+          alternative.
+        </li>
+        <li>
+          <code>hellCountdownAction(seconds, action)</code> — decorator; disables the action's
+          button for <code>seconds</code> with a Label-Contract-formatted suffix. Gating only.
+        </li>
+        <li>
+          <code>hellChoiceAction(key, action, {{ '{' }} dismissEquivalent? {{ '}' }})</code> — binds
+          an action to the typed key a choice resolves with; at most one action per choice may be
+          dismiss-equivalent.
+        </li>
+        <li>
+          <code>HellConfirmAction</code> and <code>HellChoiceAction&lt;K&gt;</code> are opaque —
+          the combinators are their only constructors.
         </li>
       </ul>
-      <h3><code>HellPopconfirmPanel</code> (<code>&lt;hell-popconfirm-panel&gt;</code>)</h3>
+      <h3>Inject functions</h3>
       <ul>
-        <li><code>message?</code>: <code>string</code>. Falls back to the Label Contract's <code>popconfirmMessage</code>.</li>
-        <li><code>severity?</code>: <code>'default' | 'danger'</code>. Default <code>default</code>. <code>danger</code> uses the destructive confirm variant and focuses cancel.</li>
-        <li><code>confirmLabel?</code> / <code>cancelLabel?</code>: <code>string</code>. Override the button labels; fall back to the Label Contract.</li>
+        <li>
+          <code>injectHellConfirm(): (prompt, action?, cancelAction?) =&gt; Promise&lt;boolean&gt;</code>
+          — modal confirmation. No <code>action</code> means the Label Contract's default primary
+          action; <code>cancelAction</code> replaces the default cancel button. Calls queue.
+        </li>
+        <li>
+          <code>injectHellPopconfirm(): (anchor, prompt, action?) =&gt; Promise&lt;boolean&gt;</code>
+          — anchored confirmation on the popover primitive. Single-open: opening one dismisses
+          another and resolves it <code>false</code>. Must be injected in a component or directive.
+        </li>
+        <li>
+          <code>injectHellChoice(): (prompt, actions) =&gt; Promise&lt;K | null&gt;</code> — modal
+          N-way decision; resolves the activated action's key, the dismiss-equivalent key on
+          dismissal, else <code>null</code>. Shares the confirm queue.
+        </li>
       </ul>
       <h3>Also exported</h3>
       <ul>
-        <li><code>HellConfirmSeverity</code> — <code>'default' | 'danger'</code>.</li>
+        <li>
+          <code>HellConfirmFn</code>, <code>HellPopconfirmFn</code>, <code>HellChoiceFn</code> —
+          the function types returned by the inject functions, for typing fields.
+        </li>
         <li>
           <code>HellConfirmLabels</code>, <code>HELL_CONFIRM_LABELS</code>,
           <code>provideHellConfirmLabels()</code> — the Label Contract for the default
-          <code>confirm</code> / <code>cancel</code> labels, the <code>countdown</code> suffix
-          formatter, and the popconfirm's default <code>popconfirmMessage</code>.
+          <code>confirm</code> action label, the default <code>cancel</code> label, and the
+          <code>countdown</code> suffix formatter.
         </li>
       </ul>
 
       <h2>Accessibility</h2>
       <ul>
-        <li>The confirmation is a modal dialog from the underlying primitive: content outside it is inert while open, and focus is trapped inside and restored to the opener on close.</li>
-        <li>The dialog is named by its <code>title</code> (<code>aria-labelledby</code>) and, when present, described by its <code>description</code> (<code>aria-describedby</code>).</li>
-        <li>Escape and backdrop-click dismiss the dialog and resolve <code>confirmed: false</code>.</li>
-        <li><code>danger</code> confirmations focus the cancel button first; default confirmations focus the confirm button. When a countdown gates the confirm button, focus starts on cancel.</li>
-        <li>Every built-in string — the default <code>confirm</code> / <code>cancel</code> labels and the countdown suffix — is behind the Label Contract. Override them with <code>provideHellConfirmLabels()</code>.</li>
+        <li>Modal confirmations are dialogs from the underlying primitive: content outside is inert while open, focus is trapped inside and restored to the opener on close.</li>
+        <li>Popconfirm panels are anchored dialogs on the popover primitive: focus moves into the panel on open and returns to the anchor on close, and Escape or an outside click dismisses through the shared Floating Dismissal rules.</li>
+        <li>Every surface is named by its prompt title (<code>aria-labelledby</code>) and, when present, described by its description (<code>aria-describedby</code>).</li>
+        <li>Destructive and countdown-gated actions start focus on the safe alternative: the cancel button, or a choice's safe dismiss-equivalent action.</li>
+        <li>Every built-in string — the default action labels and the countdown suffix — sits behind the Label Contract. Override them with <code>provideHellConfirmLabels()</code>.</li>
       </ul>
 
       <h2>Do</h2>
       <ul class="hd-do">
-        <li>Use it for blocking yes/no decisions, and <code>await</code> the result inline.</li>
-        <li>Set <code>severity: 'danger'</code> for destructive actions and give the confirm button a specific verb ("Delete project").</li>
-        <li>Add a <code>countdownSeconds</code> gate for irreversible, high-blast-radius actions.</li>
-        <li>Project a <code>content</code> template for one-off options instead of forking a custom dialog.</li>
+        <li>Use it for blocking decisions, and <code>await</code> the result inline.</li>
+        <li>Name actions with specific verbs ("Delete project"), not "OK".</li>
+        <li>Use <code>hellDestructiveAction</code> for anything that destroys data, and add a <code>hellCountdownAction</code> gate when the blast radius is high.</li>
+        <li>Reach for <code>choice()</code> when a decision has a third honest answer — never nest confirms.</li>
         <li>Override built-in labels through <code>provideHellConfirmLabels()</code> for localization.</li>
       </ul>
 
       <h2>Don't</h2>
       <ul class="hd-dont">
-        <li>Don't use a confirm dialog for non-blocking feedback — use Toast.</li>
-        <li>Don't rely on a rejected promise for cancellation; <code>confirm</code> always resolves.</li>
-        <li>Don't open confirmations in a loop expecting them to stack — they queue one at a time.</li>
+        <li>Don't use a confirmation for non-blocking feedback — use Toast.</li>
+        <li>Don't rely on a rejected promise for cancellation; the promise always resolves.</li>
+        <li>Don't put forms or checkboxes inside a confirmation — the moment it needs input, it is a dialog; compose the dialog primitive instead.</li>
+        <li>Don't open confirmations in a loop expecting them to stack — modal calls queue one at a time.</li>
         <li>Don't put the only way out behind the countdown; cancel, Escape, and the backdrop always work.</li>
       </ul>
     </article>
@@ -233,26 +243,48 @@ export class ConfirmPage {
   protected readonly confirmBasicExampleCode = confirmBasicExampleCodeRaw;
   protected readonly confirmDangerExampleCode = confirmDangerExampleCodeRaw;
   protected readonly confirmCountdownExampleCode = confirmCountdownExampleCodeRaw;
-  protected readonly confirmContentTemplateExampleCode = confirmContentTemplateExampleCodeRaw;
   protected readonly popconfirmRowDeleteExampleCode = popconfirmRowDeleteExampleCodeRaw;
+  protected readonly confirmChoiceUnsavedChangesExampleCode =
+    confirmChoiceUnsavedChangesExampleCodeRaw;
 
-  protected readonly routeGuardRecipe = `import { inject } from '@angular/core';
-import { CanDeactivateFn } from '@angular/router';
-import { HellConfirmService } from '@hell-ui/angular/confirm';
+  protected readonly routeGuardRecipe = `import { CanDeactivateFn } from '@angular/router';
+import {
+  hellChoiceAction,
+  hellDestructiveAction,
+  hellPrimaryAction,
+  hellSecondaryAction,
+  injectHellChoice,
+} from '@hell-ui/angular/confirm';
 
 export interface HasUnsavedChanges {
   hasUnsavedChanges(): boolean;
+  save(): Promise<void>;
 }
 
 export const unsavedChangesGuard: CanDeactivateFn<HasUnsavedChanges> = async (component) => {
   if (!component.hasUnsavedChanges()) return true;
-  const { confirmed } = await inject(HellConfirmService).confirm({
-    title: 'Discard unsaved changes?',
-    description: 'Your edits on this page will be lost.',
-    severity: 'danger',
-    confirmLabel: 'Discard',
-    cancelLabel: 'Keep editing',
-  });
-  return confirmed; // false (cancel / Escape / backdrop) keeps the user on the page
+
+  const choose = injectHellChoice();
+  const decision = await choose(
+    {
+      title: 'You have unsaved changes',
+      description: 'Save them, discard them, or keep editing this page.',
+    },
+    [
+      hellChoiceAction('save', hellPrimaryAction('Save and leave')),
+      hellChoiceAction('discard', hellDestructiveAction('Discard changes')),
+      hellChoiceAction('stay', hellSecondaryAction('Keep editing'), { dismissEquivalent: true }),
+    ],
+  );
+
+  switch (decision) {
+    case 'save':
+      await component.save();
+      return true;
+    case 'discard':
+      return true;
+    default:
+      return false; // 'stay' — Escape and backdrop land here too
+  }
 };`;
 }

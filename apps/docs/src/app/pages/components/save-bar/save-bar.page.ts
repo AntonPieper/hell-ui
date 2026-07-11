@@ -105,10 +105,10 @@ import { PageHeader } from '../../../shared/page-header';
       </p>
       <hd-code-block [code]="appShellRecipe" />
 
-      <h2>Recipe: discard through the confirm service</h2>
+      <h2>Recipe: discard through the confirm function</h2>
       <p>
         <code>discarded</code> is just an event — route it through
-        <a href="/components/confirm">the confirm service</a> when discards should be recoverable.
+        <a href="/components/confirm">the confirm function</a> when discards should be recoverable.
         The same pairing backs the
         <a href="/components/confirm">unsaved-changes route guard recipe</a>: the bar makes
         dirtiness visible in place, the guard catches navigation.
@@ -232,7 +232,7 @@ import { PageHeader } from '../../../shared/page-header';
       <ul class="hd-do">
         <li>Bind <code>dirty</code>/<code>disabled</code>/<code>busy</code> straight to reactive form state and your in-flight signal.</li>
         <li>Keep the bar inside the pane it saves — the content region, not a global footer portal.</li>
-        <li>Route <code>discarded</code> through the confirm service when edits are expensive to lose.</li>
+        <li>Route <code>discarded</code> through the confirm function when edits are expensive to lose.</li>
         <li>Use <code>persistent</code> mode for settings pages that are always editable.</li>
       </ul>
 

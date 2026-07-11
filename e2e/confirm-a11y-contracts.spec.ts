@@ -15,7 +15,7 @@ test.describe('confirm browser accessibility contract', () => {
     await expect(page.getByRole('heading', { name: 'Confirm', level: 1 })).toBeVisible();
   });
 
-  test('opens a named dialog, focuses confirm, and Escape resolves as cancelled', async ({
+  test('opens a named dialog, focuses the confirm action, and Escape resolves false', async ({
     page,
   }) => {
     const example = page.locator('app-confirm-basic-example');
@@ -38,8 +38,8 @@ test.describe('confirm browser accessibility contract', () => {
     const confirm = dialog.getByRole('button', { name: 'Publish', exact: true });
     const cancel = dialog.getByRole('button', { name: 'Cancel' });
 
-    // Default severity focuses confirm; both controls are real, un-pruned tab stops.
-    await expectFocused(page, confirm, 'default severity focuses the confirm button');
+    // A non-destructive action holds initial focus; both controls are real, un-pruned tab stops.
+    await expectFocused(page, confirm, 'a non-destructive action focuses the confirm button');
     await expect(confirm).not.toHaveAttribute('tabindex', '-1');
     await expect(cancel).not.toHaveAttribute('tabindex', '-1');
 
@@ -50,14 +50,16 @@ test.describe('confirm browser accessibility contract', () => {
     await page.keyboard.press('Shift+Tab');
     await expectFocused(page, confirm, 'reverse tab off the first control wraps to the last');
 
-    // Escape resolves confirmed:false and restores focus to the opener.
+    // Escape resolves false and restores focus to the opener.
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
     await expect(trigger).toBeFocused({ timeout: FOCUS_SETTLE_TIMEOUT });
     await expect(example.getByText('Publishing cancelled.')).toBeVisible();
   });
 
-  test('danger severity uses the destructive variant and focuses cancel', async ({ page }) => {
+  test('a destructive action uses the danger variant, focuses the cancel override', async ({
+    page,
+  }) => {
     const example = page.locator('app-confirm-danger-example');
 
     await ensurePageIsActive(page);
@@ -70,15 +72,18 @@ test.describe('confirm browser accessibility contract', () => {
     const confirm = dialog.getByRole('button', { name: 'Delete project' });
     const cancel = dialog.getByRole('button', { name: 'Keep project' });
 
+    // hellDestructiveAction ⇒ danger variant; the hellSecondaryAction cancel
+    // override renders with the default variant and takes initial focus.
     await expect(confirm).toHaveAttribute('data-variant', 'danger');
-    await expectFocused(page, cancel, 'danger severity focuses the cancel button');
+    await expect(cancel).toHaveAttribute('data-variant', 'default');
+    await expectFocused(page, cancel, 'a destructive action focuses the cancel button');
 
     await confirm.click();
     await expect(dialog).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
     await expect(example.getByText('Project deleted.')).toBeVisible();
   });
 
-  test('countdown gates the confirm button and never auto-confirms', async ({ page }) => {
+  test('a countdown action gates the confirm button and never auto-confirms', async ({ page }) => {
     const example = page.locator('app-confirm-countdown-example');
 
     await ensurePageIsActive(page);
@@ -101,23 +106,6 @@ test.describe('confirm browser accessibility contract', () => {
     await expect(dialog).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
     await expect(example.getByText('Database reset.')).toBeVisible();
   });
-
-  test('projected content state rides back in the result', async ({ page }) => {
-    const example = page.locator('app-confirm-content-template-example');
-
-    await ensurePageIsActive(page);
-    await example.getByRole('button', { name: 'Delete contact' }).click();
-
-    const dialog = page.getByRole('dialog', { name: 'Delete this contact?' });
-    await expect(dialog).toBeVisible();
-    await settleDialogAnimations(dialog);
-
-    await dialog.getByLabel('Also delete imported groups').check();
-    await dialog.getByRole('button', { name: 'Delete contact' }).click();
-
-    await expect(dialog).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
-    await expect(example.getByText('Contact and imported groups deleted.')).toBeVisible();
-  });
 });
 
 test.describe('popconfirm browser accessibility contract', () => {
@@ -126,14 +114,14 @@ test.describe('popconfirm browser accessibility contract', () => {
     await expect(page.getByRole('heading', { name: 'Confirm', level: 1 })).toBeVisible();
   });
 
-  test('anchors a named panel, focuses cancel for danger, and Escape dismisses without deleting', async ({
+  test('anchors a named panel, focuses cancel for destructive actions, and Escape resolves false', async ({
     page,
   }) => {
     const example = page.locator('app-popconfirm-row-delete-example');
-    const trigger = example.getByRole('button', { name: 'Delete staging-eu-west' });
+    const anchor = example.getByRole('button', { name: 'Delete staging-eu-west' });
 
     await ensurePageIsActive(page);
-    await trigger.click();
+    await anchor.click();
 
     const panel = page.getByRole('dialog', { name: 'Delete staging-eu-west?' });
     await expect(panel).toBeVisible();
@@ -142,15 +130,15 @@ test.describe('popconfirm browser accessibility contract', () => {
     const confirm = panel.getByRole('button', { name: 'Delete', exact: true });
     const cancel = panel.getByRole('button', { name: 'Cancel' });
 
-    // Danger severity uses the destructive variant and starts focus on cancel.
+    // hellDestructiveAction ⇒ danger variant and initial focus on cancel.
     await expect(confirm).toHaveAttribute('data-variant', 'danger');
-    await expectFocused(page, cancel, 'danger severity focuses the cancel button');
+    await expectFocused(page, cancel, 'a destructive action focuses the cancel button');
 
-    // Escape dismisses through the shared Floating Dismissal rules and restores
-    // focus to the trigger without running the delete.
+    // Escape dismisses through the shared Floating Dismissal rules, resolves
+    // the promise false, and restores focus to the anchor.
     await page.keyboard.press('Escape');
     await expect(panel).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
-    await expect(trigger).toBeFocused({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(anchor).toBeFocused({ timeout: FOCUS_SETTLE_TIMEOUT });
     await expect(example.getByText('Nothing deleted yet.')).toBeVisible();
   });
 
@@ -167,7 +155,7 @@ test.describe('popconfirm browser accessibility contract', () => {
     await expect(cancelPanel).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
     await expect(example.getByText('Nothing deleted yet.')).toBeVisible();
 
-    // Confirm runs the delete and removes the row.
+    // Confirm resolves true, runs the delete, and removes the row.
     await example.getByRole('button', { name: 'Delete staging-eu-west' }).click();
     const panel = page.getByRole('dialog', { name: 'Delete staging-eu-west?' });
     await expect(panel).toBeVisible();
@@ -176,9 +164,7 @@ test.describe('popconfirm browser accessibility contract', () => {
 
     await expect(panel).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
     await expect(example.getByText('Deleted staging-eu-west.')).toBeVisible();
-    await expect(
-      example.getByRole('button', { name: 'Delete staging-eu-west' }),
-    ).toHaveCount(0);
+    await expect(example.getByRole('button', { name: 'Delete staging-eu-west' })).toHaveCount(0);
   });
 
   test('only one popconfirm is open at a time', async ({ page }) => {
@@ -193,9 +179,64 @@ test.describe('popconfirm browser accessibility contract', () => {
     const second = page.getByRole('dialog', { name: 'Delete staging-us-east?' });
     await expect(second).toBeVisible();
 
-    // Arming the second popconfirm closes the first — armed deletes never accumulate.
+    // Arming the second popconfirm closes the first (its promise resolves
+    // false) — armed deletes never accumulate.
     await expect(first).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
     await expect(page.getByRole('dialog')).toHaveCount(1);
+    await expect(example.getByText('Nothing deleted yet.')).toBeVisible();
+  });
+});
+
+test.describe('choice browser accessibility contract', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/components/confirm');
+    await expect(page.getByRole('heading', { name: 'Confirm', level: 1 })).toBeVisible();
+  });
+
+  test('Escape resolves the dismiss-equivalent key; a destructive action resolves its key on click', async ({
+    page,
+  }) => {
+    const example = page.locator('app-confirm-choice-unsaved-changes-example');
+    const trigger = example.getByRole('button', { name: 'Close editor' });
+
+    await ensurePageIsActive(page);
+    await example.getByRole('textbox', { name: 'Release note' }).fill('Ship dark mode v2');
+    await trigger.click();
+
+    const dialog = page.getByRole('dialog', { name: 'You have unsaved changes' });
+    await expect(dialog).toBeVisible();
+    await settleDialogAnimations(dialog);
+
+    // One button per action, in order, with the composed variants; with a
+    // destructive action present, initial focus sits on the safe
+    // dismiss-equivalent action.
+    const save = dialog.getByRole('button', { name: 'Save and close' });
+    const discard = dialog.getByRole('button', { name: 'Discard changes' });
+    const stay = dialog.getByRole('button', { name: 'Keep editing' });
+    await expect(save).toHaveAttribute('data-variant', 'primary');
+    await expect(discard).toHaveAttribute('data-variant', 'danger');
+    await expect(stay).toHaveAttribute('data-variant', 'default');
+    await expectFocused(page, stay, 'choice focuses the safe dismiss-equivalent action');
+
+    // Escape resolves the dismiss-equivalent key ('stay'), not null.
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(example.getByText('Still editing.')).toBeVisible();
+    await expect(trigger).toBeFocused({ timeout: FOCUS_SETTLE_TIMEOUT });
+
+    // Reopen and pick the destructive action: its key resolves, the draft
+    // resets, and focus returns to the trigger.
+    await trigger.click();
+    await expect(dialog).toBeVisible();
+    await settleDialogAnimations(dialog);
+    await dialog.getByRole('button', { name: 'Discard changes' }).click();
+
+    await expect(dialog).toBeHidden({ timeout: FOCUS_SETTLE_TIMEOUT });
+    await expect(example.getByText('Changes discarded — editor closed.')).toBeVisible();
+    await expect(example.getByRole('textbox', { name: 'Release note' })).toHaveValue(
+      'Ship dark mode',
+    );
+    await expect(trigger).toBeFocused({ timeout: FOCUS_SETTLE_TIMEOUT });
   });
 });
 

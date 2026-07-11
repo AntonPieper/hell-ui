@@ -117,6 +117,22 @@ const DOCS_AXE_TARGETS: readonly DocsAxeTarget[] = [
     },
   },
   {
+    name: 'choice',
+    path: '/components/confirm',
+    heading: 'Confirm',
+    include: ['[role="dialog"][data-slot="root"]'],
+    prepare: async (page) => {
+      const example = page.locator('app-confirm-choice-unsaved-changes-example');
+      await example.getByRole('textbox', { name: 'Release note' }).fill('Ship dark mode v2');
+      await example.getByRole('button', { name: 'Close editor' }).click();
+      const dialog = page.getByRole('dialog', { name: 'You have unsaved changes' });
+      await expect(dialog).toBeVisible();
+      await expect
+        .poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity))
+        .toBe('1');
+    },
+  },
+  {
     name: 'dialpad',
     path: '/components/dialpad',
     heading: 'Dialpad',
