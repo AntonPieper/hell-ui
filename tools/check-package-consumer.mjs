@@ -32,7 +32,10 @@ const packageConsumerArgs = process.argv.slice(2);
 // assertScenarioGroupsCoverAllOnce keeps every scenario in exactly one group.
 const packageConsumerCiGroups = [
   { name: 'core', scenarios: ['root-core', 'core', 'testing'] },
-  { name: 'primitive-foundations', scenarios: ['primitive-icons-css', 'button-ui', 'pagination'] },
+  {
+    name: 'primitive-foundations',
+    scenarios: ['primitive-icons-css', 'button-ui', 'pagination', 'combobox-chips'],
+  },
   { name: 'button', scenarios: ['button'] },
   {
     name: 'composite-foundations',
@@ -211,6 +214,31 @@ const packageConsumerScenarioCatalog = [
       'background-repeat:no-repeat',
       'transition-property:background-color,border-color,color,box-shadow',
       'background-color:var(--color-hell-primary)',
+    ],
+  },
+  {
+    name: 'combobox-chips',
+    description:
+      'combobox-only entrypoint CSS carries its composed chip recipe and built-in remove glyph',
+    coverage: ['styled-primitives'],
+    peerTier: 'primitive',
+    peerGroup: 'primitive',
+    dependencies: styledUiWithoutFontAwesomeDeps,
+    forbiddenDependencies: tableAdapterPeerGroup,
+    mainTs: comboboxChipsConsumerMainTs,
+    stylesCss: comboboxChipsConsumerStylesCss,
+    cssIncludes: [
+      'border-radius:var(--radius-hell-pill)',
+      '--_hell-chip-bg:var(--color-hell-surface-muted)',
+      'mask:var(--hell-icon-close) center/contain no-repeat',
+    ],
+    runtimeStyleAssertions: [
+      {
+        label: 'composed chip recipe from combobox-only styles',
+        selector: '[data-test-id="combobox-chips"] [hellChip][tabindex="0"]',
+        property: 'border-radius',
+        expected: '999px',
+      },
     ],
   },
   {
@@ -1376,6 +1404,31 @@ bootstrapApplication(App).catch((error: unknown) => console.error(error));
 `;
 }
 
+function comboboxChipsConsumerMainTs() {
+  return `import { Component } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { HELL_COMBOBOX_DIRECTIVES } from '${packageName}/combobox';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [...HELL_COMBOBOX_DIRECTIVES],
+  template: \`
+    <div hellCombobox multiple [value]="selected">
+      <div hellComboboxChips data-test-id="combobox-chips"></div>
+      <input hellComboboxInput aria-label="Assign groups" />
+      <button hellComboboxButton type="button" aria-label="Toggle groups"></button>
+    </div>
+  \`,
+})
+class App {
+  protected readonly selected = ['Dispatch', 'On-call'];
+}
+
+bootstrapApplication(App).catch((error: unknown) => console.error(error));
+`;
+}
+
 function primitivesConsumerMainTs() {
   return `import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -2390,6 +2443,13 @@ function paginationConsumerStylesCss() {
   return `@import "tailwindcss";
 @import "${packageName}/tokens.css";
 @import "${packageName}/pagination/styles.css";
+`;
+}
+
+function comboboxChipsConsumerStylesCss() {
+  return `@import "tailwindcss";
+@import "${packageName}/tokens.css";
+@import "${packageName}/combobox/styles.css";
 `;
 }
 

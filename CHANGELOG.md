@@ -54,6 +54,30 @@ Every published `@hell-ui/angular` version gets a `## [x.y.z] - YYYY-MM-DD` sect
   the alert/empty-state/toolbar convention, plus a `--hell-icon-close` token and
   "Conditional content" docs sections on the alert and empty-state pages that
   document the `@if` + `ngProjectAs` content-projection recipe. See #135.
+- Added a chips presentation to the `@hell-ui/angular/combobox` Package Entry
+  Point: a `hellComboboxChips` directive, placed inside the control before
+  `hellComboboxInput`, that renders each multiple-mode selection as a removable
+  chip composed from the `@hell-ui/angular/chip` primitive (`hellChip` /
+  `hellChipRemove` / `HellChipSet`), cementing the combobox → chip dependency
+  direction. The selected chips form one roving tab stop with Arrow/Home/End
+  navigation, Delete/Backspace removal, and focus continuity after removal.
+  Removal — via a chip's remove button or Backspace in the empty input — routes
+  through the combobox selection state, so the emitted form value, the options'
+  `aria-selected` state, and the rendered chips never diverge, even for values
+  whose option has been filtered out of the dropdown; a disabled combobox
+  disables every chip's remove button. Label chips with `[displayWith]`, size
+  them with `[size]`, and refine the `root` and `chip` parts through the Part
+  Style Map (each chip's remove button ships the chip primitive's built-in `×`
+  glyph and derives its `Remove {label}` name from the chip's text). The
+  combobox stylesheet carries the composed chip stylesheet, so a packed
+  consumer importing only `@hell-ui/angular/combobox/styles.css` gets the chip
+  recipe and built-in glyph. `HELL_COMBOBOX_DIRECTIVES` now includes
+  `hellComboboxChips`, and the entry point exports `HellComboboxChipsPart` /
+  `HellComboboxChipsUi`. Existing non-chips combobox behavior is unchanged.
+  Evidence: `packages/angular/combobox/combobox.spec.ts`,
+  `e2e/combobox-chips-a11y-contracts.spec.ts`, the assign-groups example on the
+  docs page at `/components/combobox`, and its axe WCAG A/AA smoke coverage.
+  Closes #114 (spec #95).
 - Added an `autoGrow` opt-in to `HellTextarea` in the `@hell-ui/angular/input`
   Package Entry Point: the native `<textarea>` grows with its content via CSS
   `field-sizing: content` — no resize observers, no per-keystroke JavaScript

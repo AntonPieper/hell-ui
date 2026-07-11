@@ -4,6 +4,7 @@ import {
   DestroyRef,
   Directive,
   ElementRef,
+  Injectable,
   booleanAttribute,
   OnDestroy,
   computed,
@@ -17,7 +18,14 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { HellControlledValueState } from '@hell-ui/angular/internal/core';
 import { HellControlValueAccessorBridge } from '@hell-ui/angular/internal/core';
-import { hellPartStyler, type HellRecipe, type HellUi, type HellUiInput } from '@hell-ui/angular/core';
+import { HellChip, HellChipRemove, HellChipSet } from '@hell-ui/angular/chip';
+import {
+  hellPartStyler,
+  type HellRecipe,
+  type HellSize,
+  type HellUi,
+  type HellUiInput,
+} from '@hell-ui/angular/core';
 import {
   hellContainsFloatingTarget,
   hellRegisterFloatingHost,
@@ -75,6 +83,11 @@ export type HellComboboxEmptyPart = 'root';
 /** Part Style Map accepted by the HellComboboxEmpty `ui` input. */
 export type HellComboboxEmptyUi = HellUi<HellComboboxEmptyPart>;
 
+/** Public parts of the HellComboboxChips module, styleable through its Part Style Map. */
+export type HellComboboxChipsPart = 'root' | 'chip';
+/** Part Style Map accepted by the HellComboboxChips `ui` input. */
+export type HellComboboxChipsUi = HellUi<HellComboboxChipsPart>;
+
 /** Public parts of the HellComboboxBasic module, styleable through its Part Style Map. */
 export type HellComboboxBasicPart =
   | 'root'
@@ -111,6 +124,14 @@ const HELL_COMBOBOX_EMPTY_RECIPE = {
   root: 'px-[calc(var(--spacing)*2.5)] py-[calc(var(--spacing)*2)] text-xs text-hell-foreground-subtle',
 } satisfies HellRecipe<HellComboboxEmptyPart>;
 
+const HELL_COMBOBOX_CHIPS_RECIPE = {
+  // `display: contents` lets each chip flow as a direct flex child of the
+  // combobox control, so selected tokens wrap and share the wrapper's gap
+  // alongside the input instead of nesting in an extra layout box.
+  root: 'contents',
+  chip: 'max-w-full',
+} satisfies HellRecipe<HellComboboxChipsPart>;
+
 const HELL_COMBOBOX_BASIC_RECIPE = {
   root: '',
   control: '',
@@ -120,6 +141,69 @@ const HELL_COMBOBOX_BASIC_RECIPE = {
   option: '',
   empty: '',
 } satisfies HellRecipe<HellComboboxBasicPart>;
+
+/**
+ * Combobox-owned coordination seam between `HellCombobox` and its chips
+ * presentation. Provided by the combobox host so the chips directive and the
+ * input can read the live selection, register a chips presentation, and route
+ * removals without those members appearing on the combobox's public API (the
+ * same registry seam the chip set uses for its items). Not exported from the
+ * entry point.
+ *
+ * Removals write the selection state and emit `valueChange` in one step — the
+ * net effect of toggling an option — so the emitted form value, the options'
+ * `aria-selected` state, and the rendered chips never diverge, even for values
+ * whose option has been filtered out of the dropdown.
+ */
+@Injectable()
+class HellComboboxSelectionController {
+  private readonly combobox = inject(NgpCombobox);
+  private readonly comboboxState = injectComboboxState<NgpCombobox>();
+  private readonly chipsPresenterCount = signal(0);
+
+  /** Whether a chips presentation is mounted (enables Backspace-on-empty removal). */
+  readonly chipsActive = computed(() => this.chipsPresenterCount() > 0);
+  /** Effective disabled state, reflecting both the `disabled` input and CVA writes. */
+  readonly disabled = computed(() => this.comboboxState().disabled());
+  /** Current selection normalized to an array for chip rendering. */
+  readonly selectedValues = computed<readonly unknown[]>(() => this.readSelectedValues());
+
+  /** Registers a chips presentation so the input enables Backspace-on-empty removal. */
+  registerChipsPresenter(): void {
+    this.chipsPresenterCount.update((count) => count + 1);
+  }
+
+  /** Unregisters a chips presentation when it leaves the DOM. */
+  unregisterChipsPresenter(): void {
+    this.chipsPresenterCount.update((count) => Math.max(count - 1, 0));
+  }
+
+  /** Removes one value, routing the change through combobox selection state. */
+  removeValue(value: unknown): void {
+    if (this.comboboxState().disabled()) return;
+    const compare = this.combobox.compareWith();
+    const next = this.readSelectedValues().filter((candidate) => !compare(candidate, value));
+    this.commitSelection(next);
+  }
+
+  /** Removes the last selected value (Backspace in the empty input). */
+  removeLastValue(): void {
+    const values = this.readSelectedValues();
+    if (!values.length) return;
+    this.removeValue(values[values.length - 1]);
+  }
+
+  private commitSelection(next: readonly unknown[]): void {
+    writeComboboxStateValue(this.comboboxState(), next);
+    this.combobox.valueChange.emit(next);
+  }
+
+  private readSelectedValues(): readonly unknown[] {
+    const value = this.comboboxState().value();
+    if (Array.isArray(value)) return value;
+    return value == null ? [] : [value];
+  }
+}
 
 /**
  * Headless combobox shell around `NgpCombobox`. Pair with
@@ -149,6 +233,7 @@ const HELL_COMBOBOX_BASIC_RECIPE = {
     },
   ],
   providers: [
+    HellComboboxSelectionController,
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => HellCombobox),
@@ -264,6 +349,7 @@ export class HellCombobox<T = unknown> implements ControlValueAccessor {
   host: {
     '[class]': "part('root')",
     'data-slot': 'root',
+    '(keydown)': 'onKeydown($event)',
   },
 })
 export class HellComboboxInput {
@@ -275,6 +361,21 @@ export class HellComboboxInput {
     defaultPart: 'root',
     recipe: () => HELL_COMBOBOX_INPUT_RECIPE,
   });
+
+  private readonly host = inject<ElementRef<HTMLInputElement>>(ElementRef);
+  private readonly selection = inject(HellComboboxSelectionController, { optional: true });
+
+  /**
+   * Removes the last selection when Backspace is pressed in the empty input and
+   * a chips presentation is mounted, mirroring the chip set's Backspace removal.
+   * Without a chips presentation the input keeps its native Backspace behavior.
+   */
+  protected onKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Backspace' || event.defaultPrevented) return;
+    if (!this.selection?.chipsActive()) return;
+    if (this.host.nativeElement.value !== '') return;
+    this.selection.removeLastValue();
+  }
 }
 
 /** Toggle button for opening and closing the combobox dropdown. */
@@ -414,6 +515,99 @@ export class HellComboboxEmpty {
     defaultPart: 'root',
     recipe: () => HELL_COMBOBOX_EMPTY_RECIPE,
   });
+}
+
+/**
+ * Chips presentation for a multiple-mode `hellCombobox`. Place it inside the
+ * combobox control, before the `hellComboboxInput`, to render each selected
+ * value as a removable chip composed from the `@hell-ui/angular/chip` primitive
+ * (`hellChip` / `hellChipRemove`).
+ *
+ * Removal — via a chip's remove button or Backspace in the empty input — routes
+ * through the combobox's selection state, so the emitted form value, the
+ * options' `aria-selected` state, and the rendered chips never diverge. A
+ * disabled combobox disables every chip's remove button.
+ *
+ * The presentation host composes `HellChipSet`, making the chips one roving
+ * tab stop with Arrow Left/Right and Home/End navigation. Delete/Backspace on
+ * the focused chip requests its removal and moves focus to a surviving chip
+ * (or back to this host when none remain).
+ *
+ * Each remove button is a bare `hellChipRemove` with no projected content, so
+ * it renders the chip primitive's built-in `×` glyph and derives its accessible
+ * name (`Remove {label}`) from the chip's rendered label — the label is written
+ * once, as the chip's content, and never restated. Pass `[displayWith]` to
+ * label chips when a value's string form is not the label you want; refine the
+ * `root` and `chip` parts through the Part Style Map. The remove button is the
+ * chip primitive's own `hellChipRemove` part — style it through the chip entry
+ * point rather than here, so its built-in `:empty` glyph keeps rendering.
+ */
+@Component({
+  selector: '[hellComboboxChips]',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  hostDirectives: [HellChipSet],
+  imports: [HellChip, HellChipRemove],
+  host: {
+    '[class]': "part('root')",
+    'data-slot': 'root',
+  },
+  template: `
+    @for (chip of chips(); track chip.value) {
+      <span
+        hellChip
+        data-slot="chip"
+        [ui]="part('chip')"
+        [size]="size()"
+        [disabled]="disabled()"
+        (remove)="removeChip(chip.value)"
+      >
+        {{ chip.label }}<button hellChipRemove></button>
+      </span>
+    }
+  `,
+})
+export class HellComboboxChips<T = unknown> {
+  /** Tailwind class refinements for public parts. */
+  readonly ui = input<HellUiInput<HellComboboxChipsPart>>(undefined, { alias: 'ui' });
+
+  /** Merged Part-Class Pipeline classes for one public part. */
+  protected readonly part = hellPartStyler<HellComboboxChipsPart>(this.ui, {
+    defaultPart: 'root',
+    recipe: () => HELL_COMBOBOX_CHIPS_RECIPE,
+  });
+
+  /**
+   * Maps a selected value to its chip label — the chip's visible text, which
+   * the chip Label Contract also reuses as the remove button's accessible name
+   * (`Remove {label}`). Defaults to `String`.
+   */
+  readonly displayWith = input<HellComboboxDisplayWith<T>>((value) => String(value));
+  /** Size of the rendered chips. Defaults to `sm`. */
+  readonly size = input<HellSize>('sm');
+
+  private readonly selection = inject(HellComboboxSelectionController, { optional: true });
+  private readonly destroyRef = inject(DestroyRef);
+
+  /** Whether the owning combobox is disabled, which also disables chip removal. */
+  protected readonly disabled = computed(() => this.selection?.disabled() ?? false);
+
+  /** Selected values paired with their display labels. */
+  protected readonly chips = computed(() =>
+    (this.selection?.selectedValues() ?? []).map((value) => ({
+      value,
+      label: this.displayWith()(value as T),
+    })),
+  );
+
+  constructor() {
+    this.selection?.registerChipsPresenter();
+    this.destroyRef.onDestroy(() => this.selection?.unregisterChipsPresenter());
+  }
+
+  /** Routes a chip removal through the combobox selection state. */
+  protected removeChip(value: unknown): void {
+    this.selection?.removeValue(value);
+  }
 }
 
 /**
@@ -634,6 +828,7 @@ export const HELL_COMBOBOX_DIRECTIVES = [
   HellComboboxPortal,
   HellComboboxOption,
   HellComboboxEmpty,
+  HellComboboxChips,
 ] as const;
 
 export const HELL_COMBOBOX_BASIC_DIRECTIVES = [HellComboboxBasic] as const;

@@ -56,6 +56,33 @@ class ComboboxMultipleFormHost {
 }
 
 @Component({
+  imports: [ReactiveFormsModule, ...HELL_COMBOBOX_DIRECTIVES],
+  template: `
+    <div
+      id="chips-combobox"
+      hellCombobox
+      multiple
+      [formControl]="control"
+      (valueChange)="values.push($any($event))"
+    >
+      <div hellComboboxChips [displayWith]="displayWith"></div>
+      <input hellComboboxInput aria-label="Assignees" />
+      <button hellComboboxButton type="button">Toggle</button>
+      <div *hellComboboxPortal hellComboboxDropdown>
+        <div hellComboboxOption id="atlas-chips" value="atlas">Atlas</div>
+        <div hellComboboxOption id="nova-chips" value="nova">Nova</div>
+        <div hellComboboxOption id="orion-chips" value="orion">Orion</div>
+      </div>
+    </div>
+  `,
+})
+class ComboboxChipsHost {
+  readonly control = new FormControl<string[]>(['atlas', 'nova'], { nonNullable: true });
+  readonly values: Array<HellComboboxValue<string>> = [];
+  readonly displayWith = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+@Component({
   imports: [ReactiveFormsModule, HellComboboxBasic],
   template: `
     <hell-combobox-basic
@@ -557,6 +584,205 @@ describe('HellCombobox', () => {
     expect(option.getAttribute('data-slot')).toBe('option');
     expect(option.className).toContain('px-hell-8');
     expect(option.className).toContain('bg-hell-primary-soft');
+  });
+});
+
+describe('HellComboboxChips', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [ComboboxChipsHost] }).compileComponents();
+  });
+
+  afterEach(() => {
+    cleanupPortaledTestElements('[hellComboboxDropdown], [data-hell-combobox-test-outside]');
+  });
+
+  async function createChipsHost(): Promise<{
+    fixture: ReturnType<typeof TestBed.createComponent<ComboboxChipsHost>>;
+    host: ComboboxChipsHost;
+    root: HTMLElement;
+  }> {
+    const fixture = TestBed.createComponent(ComboboxChipsHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    // Each chip derives its remove button's accessible name from its rendered
+    // text through a MutationObserver, which delivers on a microtask; let it run
+    // and reflect the derived `Remove {label}` names before assertions read them.
+    await new Promise((resolve) => setTimeout(resolve));
+    fixture.detectChanges();
+    return {
+      fixture,
+      host: fixture.componentInstance,
+      root: fixture.nativeElement as HTMLElement,
+    };
+  }
+
+  it('renders a removable, display-labelled chip per selected value', async () => {
+    const { root } = await createChipsHost();
+
+    const chips = Array.from(root.querySelectorAll<HTMLElement>('[hellChip]'));
+    expect(chips.map((chip) => chip.getAttribute('data-slot'))).toEqual(['chip', 'chip']);
+    // The remove button is empty: its × is the chip primitive's built-in CSS
+    // glyph (a ::before pseudo-element), so it never leaks into text content.
+    expect(chips.map((chip) => chip.textContent?.trim().replace(/\s+/g, ' '))).toEqual([
+      'Atlas',
+      'Nova',
+    ]);
+
+    const removeAtlas = query<HTMLButtonElement>(
+      root,
+      'button[hellChipRemove][aria-label="Remove Atlas"]',
+    );
+    // No projected content and no data-slot override: the button stays the chip
+    // primitive's `root` slot so its built-in :empty × glyph renders, and its
+    // "Remove Atlas" name is derived from the chip's text — never restated here.
+    expect(removeAtlas.getAttribute('data-slot')).toBe('root');
+    expect(removeAtlas.childElementCount).toBe(0);
+    expect(removeAtlas.textContent?.trim()).toBe('');
+    expect(query(root, 'button[hellChipRemove][aria-label="Remove Nova"]')).toBeTruthy();
+  });
+
+  it('routes a chip remove-button click through selection state, form value, and output', async () => {
+    const { fixture, host, root } = await createChipsHost();
+
+    query<HTMLButtonElement>(root, 'button[hellChipRemove][aria-label="Remove Atlas"]').click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.control.value).toEqual(['nova']);
+    expect(host.values).toEqual([['nova']]);
+
+    const chips = Array.from(root.querySelectorAll<HTMLElement>('[hellChip]'));
+    expect(chips.map((chip) => chip.textContent?.trim().replace(/\s+/g, ' '))).toEqual(['Nova']);
+  });
+
+  it('makes chips one roving tab stop and removes the focused chip from the keyboard', async () => {
+    const { fixture, host, root } = await createChipsHost();
+    const document = root.ownerDocument;
+    const chipsRoot = query<HTMLElement>(root, '[hellComboboxChips]');
+    const [atlas, nova] = Array.from(root.querySelectorAll<HTMLElement>('[hellChip]'));
+    const removeButtons = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('button[hellChipRemove]'),
+    );
+
+    expect(chipsRoot.getAttribute('role')).toBe('group');
+    expect(chipsRoot.getAttribute('tabindex')).toBe('-1');
+    expect([atlas.getAttribute('tabindex'), nova.getAttribute('tabindex')]).toEqual(['0', '-1']);
+    expect(removeButtons.map((button) => button.getAttribute('tabindex'))).toEqual(['-1', '-1']);
+
+    atlas.focus();
+    atlas.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(nova);
+    expect([atlas.getAttribute('tabindex'), nova.getAttribute('tabindex')]).toEqual(['-1', '0']);
+
+    nova.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(atlas);
+
+    atlas.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Delete', bubbles: true, cancelable: true }),
+    );
+    await fixture.whenStable();
+    fixture.detectChanges();
+    await new Promise<void>((resolve) => queueMicrotask(resolve));
+
+    expect(host.control.value).toEqual(['nova']);
+    expect(host.values).toEqual([['nova']]);
+    const survivor = query<HTMLElement>(root, '[hellChip]');
+    expect(survivor.textContent?.trim().replace(/\s+/g, ' ')).toBe('Nova');
+    expect(survivor.getAttribute('tabindex')).toBe('0');
+    expect(document.activeElement).toBe(survivor);
+  });
+
+  it('keeps option selection-state attributes coherent after chip removal', async () => {
+    const { fixture, root } = await createChipsHost();
+
+    query<HTMLButtonElement>(root, 'button[hellChipRemove][aria-label="Remove Atlas"]').click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Open the listbox and assert options reflect the post-removal selection:
+    // the removed value drops its screen-reader selection state, the survivor keeps it.
+    const input = query<HTMLInputElement>(root, 'input[hellComboboxInput]');
+    const button = query<HTMLButtonElement>(root, 'button[hellComboboxButton]');
+    const dropdown = await openComboboxDropdown(fixture, input, button);
+    const optionByText = (text: string): HTMLElement => {
+      const option = Array.from(dropdown.querySelectorAll<HTMLElement>('[role="option"]')).find(
+        (candidate) => candidate.textContent?.trim() === text,
+      );
+      if (!option) throw new Error(`Expected option "${text}".`);
+      return option;
+    };
+    const atlasOption = optionByText('Atlas');
+    const novaOption = optionByText('Nova');
+
+    expect(atlasOption.hasAttribute('aria-selected')).toBe(false);
+    expect(atlasOption.hasAttribute('data-selected')).toBe(false);
+    expect(novaOption.getAttribute('aria-selected')).toBe('true');
+    expect(novaOption.hasAttribute('data-selected')).toBe(true);
+  });
+
+  it('removes the last selection on Backspace in the empty input', async () => {
+    const { fixture, host, root } = await createChipsHost();
+
+    const input = query<HTMLInputElement>(root, 'input[hellComboboxInput]');
+    input.value = '';
+    input.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true, cancelable: true }),
+    );
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.control.value).toEqual(['atlas']);
+    expect(host.values).toEqual([['atlas']]);
+  });
+
+  it('does not remove a selection on Backspace when the input has text', async () => {
+    const { fixture, host, root } = await createChipsHost();
+
+    const input = query<HTMLInputElement>(root, 'input[hellComboboxInput]');
+    input.value = 'orio';
+    input.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true, cancelable: true }),
+    );
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.control.value).toEqual(['atlas', 'nova']);
+    expect(host.values).toEqual([]);
+  });
+
+  it('disables every chip remove button and blocks removal when the combobox is disabled', async () => {
+    const { fixture, host, root } = await createChipsHost();
+
+    host.control.disable();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const chips = Array.from(root.querySelectorAll<HTMLElement>('[hellChip]'));
+    expect(chips).toHaveLength(2);
+    for (const chip of chips) {
+      expect(chip.getAttribute('data-disabled')).toBe('');
+    }
+
+    const removeAtlas = query<HTMLButtonElement>(
+      root,
+      'button[hellChipRemove][aria-label="Remove Atlas"]',
+    );
+    expect(removeAtlas.hasAttribute('disabled')).toBe(true);
+
+    removeAtlas.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(root.querySelectorAll('[hellChip]')).toHaveLength(2);
+    expect(host.values).toEqual([]);
   });
 });
 
