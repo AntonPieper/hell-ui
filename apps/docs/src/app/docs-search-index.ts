@@ -1331,6 +1331,13 @@ const HD_DOCS_EXAMPLES: readonly DocsSearchSeed[] = [
       'save-bar contextual-form components/save-bar/examples/contextual-form.example components/save-bar hell-save-bar dirty busy disabled saved discarded reactive form FormGroup form.dirty form.invalid form.pending unsaved changes one-line binding save discard announce',
   },
   {
+    title: 'Save Bar: Form submission and per-instance message',
+    path: '/components/save-bar',
+    detail: 'components/save-bar/examples/form-submit.example.ts',
+    terms:
+      'save-bar form-submit components/save-bar/examples/form-submit.example components/save-bar hell-save-bar saveType submit type button ngSubmit native form submission enter to save message per-instance override label contract size unsent fax LiveAnnouncer',
+  },
+  {
     title: 'Save Bar: Persistent mode for settings',
     path: '/components/save-bar',
     detail: 'components/save-bar/examples/persistent-settings.example.ts',

@@ -21,7 +21,9 @@ const email = (control: AbstractControl): ValidationErrors | null =>
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, ...HELL_FIELD_DIRECTIVES, HellInput, HellSaveBar],
   template: `
-    <div class="flex flex-col gap-hell-4">
+    <!-- Even inside a <form>, the default Save (type="button") emits (saved)
+         without submitting — no double-fire, no ngSubmit needed. -->
+    <form [formGroup]="form" class="flex flex-col gap-hell-4">
       <div hellField>
         <label hellFieldLabel for="profile-name">Display name</label>
         <input hellInput id="profile-name" type="text" [formControl]="form.controls.name" />
@@ -40,7 +42,7 @@ const email = (control: AbstractControl): ValidationErrors | null =>
         (saved)="save()"
         (discarded)="discard()"
       />
-    </div>
+    </form>
   `,
 })
 export class SaveBarContextualFormExample {

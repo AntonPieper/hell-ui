@@ -6,8 +6,10 @@ import {
   HellSaveBar,
   provideHellSaveBarLabels,
   type HellSaveBarMode,
+  type HellSaveBarSaveType,
   type HellSaveBarUi,
 } from './save-bar';
+import type { HellSize } from '@hell-ui/angular/core';
 
 const liveAnnounce = vi.fn(() => Promise.resolve());
 
@@ -24,6 +26,9 @@ const announcementService = {
       [dirty]="dirty()"
       [busy]="busy()"
       [disabled]="disabled()"
+      [message]="message()"
+      [saveType]="saveType()"
+      [size]="size()"
       [ui]="ui()"
       (saved)="savedCount = savedCount + 1"
       (discarded)="discardedCount = discardedCount + 1"
@@ -37,6 +42,9 @@ class SaveBarHost {
   readonly dirty = signal(false);
   readonly busy = signal(false);
   readonly disabled = signal(false);
+  readonly message = signal<string | undefined>(undefined);
+  readonly saveType = signal<HellSaveBarSaveType>('button');
+  readonly size = signal<HellSize>('sm');
   readonly ui = signal<HellSaveBarUi | undefined>(undefined);
   savedCount = 0;
   discardedCount = 0;
@@ -89,7 +97,8 @@ describe('HellSaveBar', () => {
 
       expect(host.getAttribute('data-mode')).toBe('persistent');
       expect(host.style.display).toBe('');
-      expect(text(query(host, '[data-slot="message"]'))).toBe('');
+      // Pristine + persistent renders no empty message paragraph.
+      expect(host.querySelector('[data-slot="message"]')).toBeNull();
 
       fixture.componentInstance.dirty.set(true);
       fixture.detectChanges();
@@ -156,14 +165,47 @@ describe('HellSaveBar', () => {
       expect(fixture.componentInstance.discardedCount).toBe(0);
     });
 
-    it('renders the save action as a submit-triggering button and discard as a plain button', () => {
+    it('defaults both actions to plain buttons, so Save emits saved without submitting a form', () => {
       const fixture = setup();
       fixture.componentInstance.dirty.set(true);
       fixture.detectChanges();
       const host = bar(fixture);
 
+      // Both default to type="button"; the default Save cannot submit an
+      // enclosing form (the no-double-fire path is asserted end-to-end in e2e).
+      expect(query(host, '[data-slot="save"]').getAttribute('type')).toBe('button');
+      expect(query(host, '[data-slot="discard"]').getAttribute('type')).toBe('button');
+
+      query(host, '[data-slot="save"]').click();
+      expect(fixture.componentInstance.savedCount).toBe(1);
+    });
+
+    it('opts the Save action into native form submission with saveType="submit"', () => {
+      const fixture = setup();
+      fixture.componentInstance.dirty.set(true);
+      fixture.componentInstance.saveType.set('submit');
+      fixture.detectChanges();
+      const host = bar(fixture);
+
       expect(query(host, '[data-slot="save"]').getAttribute('type')).toBe('submit');
       expect(query(host, '[data-slot="discard"]').getAttribute('type')).toBe('button');
+    });
+  });
+
+  describe('size', () => {
+    it('forwards its size to both built-in buttons, defaulting to sm', () => {
+      const fixture = setup();
+      fixture.componentInstance.dirty.set(true);
+      fixture.detectChanges();
+      const host = bar(fixture);
+
+      expect(query(host, '[data-slot="save"]').getAttribute('data-size')).toBe('sm');
+      expect(query(host, '[data-slot="discard"]').getAttribute('data-size')).toBe('sm');
+
+      fixture.componentInstance.size.set('md');
+      fixture.detectChanges();
+      expect(query(host, '[data-slot="save"]').getAttribute('data-size')).toBe('md');
+      expect(query(host, '[data-slot="discard"]').getAttribute('data-size')).toBe('md');
     });
   });
 
@@ -187,7 +229,7 @@ describe('HellSaveBar', () => {
   });
 
   describe('announcement wiring', () => {
-    it('politely announces the message each time the contextual bar appears', () => {
+    it('politely announces the message once when the contextual bar appears', () => {
       const fixture = setup();
       expect(liveAnnounce).not.toHaveBeenCalled();
 
@@ -200,14 +242,56 @@ describe('HellSaveBar', () => {
       fixture.componentInstance.busy.set(true);
       fixture.detectChanges();
       expect(liveAnnounce).toHaveBeenCalledTimes(1);
+    });
 
-      // Re-appearing announces again.
-      fixture.componentInstance.busy.set(false);
-      fixture.componentInstance.dirty.set(false);
-      fixture.detectChanges();
+    it('does not re-announce when dirty flaps false→true within the settle interval', () => {
+      vi.useFakeTimers();
+      try {
+        const fixture = setup();
+        fixture.componentInstance.dirty.set(true);
+        fixture.detectChanges();
+        expect(liveAnnounce).toHaveBeenCalledTimes(1);
+
+        // Flap pristine→dirty before the settle interval elapses: same session,
+        // no second announcement.
+        fixture.componentInstance.dirty.set(false);
+        fixture.detectChanges();
+        fixture.componentInstance.dirty.set(true);
+        fixture.detectChanges();
+        expect(liveAnnounce).toHaveBeenCalledTimes(1);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('re-announces once dirty has settled false past the settle interval', () => {
+      vi.useFakeTimers();
+      try {
+        const fixture = setup();
+        fixture.componentInstance.dirty.set(true);
+        fixture.detectChanges();
+        expect(liveAnnounce).toHaveBeenCalledTimes(1);
+
+        fixture.componentInstance.dirty.set(false);
+        fixture.detectChanges();
+        // Stays pristine past the settle window, so the next dirty is a new session.
+        vi.advanceTimersByTime(100);
+        fixture.componentInstance.dirty.set(true);
+        fixture.detectChanges();
+        expect(liveAnnounce).toHaveBeenCalledTimes(2);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('renders and announces the per-instance message, overriding the Label Contract', () => {
+      const fixture = setup([provideHellSaveBarLabels({ message: 'You have unsaved changes' })]);
+      fixture.componentInstance.message.set('Unsent fax');
       fixture.componentInstance.dirty.set(true);
       fixture.detectChanges();
-      expect(liveAnnounce).toHaveBeenCalledTimes(2);
+
+      expect(text(query(bar(fixture), '[data-slot="message"]'))).toBe('Unsent fax');
+      expect(liveAnnounce).toHaveBeenCalledWith('Unsent fax', 'polite');
     });
 
     it('does not announce in persistent mode', () => {

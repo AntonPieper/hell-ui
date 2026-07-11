@@ -3,6 +3,10 @@ import { SaveBarContextualFormExample } from './examples/contextual-form.example
 import saveBarContextualFormExampleCodeRaw from './examples/contextual-form.example.ts?raw' with {
   loader: 'text',
 };
+import { SaveBarFormSubmitExample } from './examples/form-submit.example';
+import saveBarFormSubmitExampleCodeRaw from './examples/form-submit.example.ts?raw' with {
+  loader: 'text',
+};
 import { SaveBarPersistentSettingsExample } from './examples/persistent-settings.example';
 import saveBarPersistentSettingsExampleCodeRaw from './examples/persistent-settings.example.ts?raw' with {
   loader: 'text',
@@ -27,6 +31,7 @@ import { PageHeader } from '../../../shared/page-header';
     ExampleTabs,
     PageHeader,
     SaveBarContextualFormExample,
+    SaveBarFormSubmitExample,
     SaveBarPersistentSettingsExample,
     SaveBarStickyScrollExample,
     SaveBarConfirmDiscardExample,
@@ -71,10 +76,26 @@ import { PageHeader } from '../../../shared/page-header';
         <app-save-bar-contextual-form-example />
       </hd-example-tabs>
       <p>
-        The Save button is a plain submit-triggering button (<code>type="submit"</code>): inside a
-        <code>&lt;form [formGroup]&gt;</code> it also raises <code>ngSubmit</code>, so handle
-        either <code>(saved)</code> or <code>(ngSubmit)</code> — not both.
+        By default the Save button is <code>type="button"</code> and emits only <code>(saved)</code>
+        — even inside a <code>&lt;form&gt;</code> it never raises <code>ngSubmit</code>, so there is
+        no double-fire and no "handle one, not both" caveat. Clear <code>busy</code> and mark the
+        form pristine only once the mutation resolves; keeping it dirty until then is what makes the
+        bar disappear at the right moment.
       </p>
+
+      <h2>Form submission and per-instance message</h2>
+      <p>
+        Set <code>saveType="submit"</code> to wire the built-in Save to native form submission:
+        handle <code>(ngSubmit)</code> instead of <code>(saved)</code>, and pressing Enter in a
+        field saves too. Note the asymmetry — that Enter-to-save shortcut exists
+        <em>only</em> with <code>saveType="submit"</code>; the default button never submits on
+        Enter. Give a single surface its own copy with the <code>message</code> input (it overrides
+        the Label Contract default without a scoped provider and is what the LiveAnnouncer speaks),
+        and size both built-in buttons with <code>size</code>.
+      </p>
+      <hd-example-tabs [code]="saveBarFormSubmitExampleCode">
+        <app-save-bar-form-submit-example />
+      </hd-example-tabs>
 
       <h2>Persistent mode for settings surfaces</h2>
       <p>
@@ -186,6 +207,21 @@ import { PageHeader } from '../../../shared/page-header';
               <code>false</code>.
             </li>
             <li>
+              <code>message</code>: <code>string | undefined</code>. Per-instance unsaved-changes
+              message; overrides the Label Contract default for this bar and is the text the
+              LiveAnnouncer speaks. Default <code>undefined</code> (falls back to the contract).
+            </li>
+            <li>
+              <code>saveType</code>: <code>'button' | 'submit'</code>. <code>'button'</code> (the
+              default) emits only <code>saved</code> and never submits an enclosing form;
+              <code>'submit'</code> opts into native form submission. Default
+              <code>'button'</code>.
+            </li>
+            <li>
+              <code>size</code>: <code>HellSize</code> (<code>'xs' | 'sm' | 'md' | 'lg' | 'xl'</code>),
+              forwarded to both built-in buttons. Default <code>'sm'</code>.
+            </li>
+            <li>
               <code>ui</code>: <code>HellUiInput&lt;HellSaveBarPart&gt;</code> where
               <code>HellSaveBarPart = 'root' | 'message' | 'actions' | 'save' | 'discard'</code>.
               Exports <code>HellSaveBarUi</code>.
@@ -239,7 +275,7 @@ import { PageHeader } from '../../../shared/page-header';
       <h2>Don't</h2>
       <ul class="hd-dont">
         <li>Don't clear <code>busy</code> optimistically — wait for the mutation to resolve, then mark the form pristine.</li>
-        <li>Don't bind both <code>(saved)</code> and <code>(ngSubmit)</code> to the same handler when the bar sits inside the form.</li>
+        <li>Don't bind <code>(saved)</code> when you've opted into <code>saveType="submit"</code> — handle <code>(ngSubmit)</code> instead, or the save runs twice.</li>
         <li>Don't rebuild dirty tracking in the bar's place — the form already knows; the bar just shows it.</li>
       </ul>
     </article>
@@ -247,6 +283,7 @@ import { PageHeader } from '../../../shared/page-header';
 })
 export class SaveBarPage {
   protected readonly saveBarContextualFormExampleCode = saveBarContextualFormExampleCodeRaw;
+  protected readonly saveBarFormSubmitExampleCode = saveBarFormSubmitExampleCodeRaw;
   protected readonly saveBarPersistentSettingsExampleCode = saveBarPersistentSettingsExampleCodeRaw;
   protected readonly saveBarStickyScrollExampleCode = saveBarStickyScrollExampleCodeRaw;
   protected readonly saveBarConfirmDiscardExampleCode = saveBarConfirmDiscardExampleCodeRaw;
@@ -256,12 +293,13 @@ export class SaveBarPage {
   <nav hellAppSidenav>…</nav>
   <main hellAppContent>
     <!-- routed page content -->
-    <form [formGroup]="form" (ngSubmit)="save()">
+    <form [formGroup]="form">
       …fields…
       <hell-save-bar
         [dirty]="form.dirty"
         [disabled]="form.invalid || form.pending"
         [busy]="saving()"
+        (saved)="save()"
         (discarded)="form.reset(initialValue)"
       />
     </form>

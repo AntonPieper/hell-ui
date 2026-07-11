@@ -121,7 +121,8 @@ import inputWithSearchIconExampleCodeRaw from './examples/with-search-icon.examp
         It applies CSS <code>field-sizing: content</code> — no resize observers, no per-keystroke
         JavaScript measurement, no animated height — and disables the native resize handle while
         active, since a self-sizing field and a drag handle are conflicting affordances. Control
-        the bounds entirely in CSS: <code>rows</code> sets the minimum height, and a
+        the bounds entirely in CSS: with <code>field-sizing: content</code> the <code>rows</code>
+        attribute is <em>not</em> a floor, so set a minimum with <code>min-block-size</code>, then
         <code>max-block-size</code> plus <code>overflow-y: auto</code> caps the growth so a long
         paste scrolls internally instead of pushing the page around.
       </p>
