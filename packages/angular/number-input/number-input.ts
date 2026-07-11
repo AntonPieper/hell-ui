@@ -248,10 +248,10 @@ const HOLD_REPEAT_MS = 60;
       [attr.data-size]="size()"
       [attr.data-invalid]="isInvalid() ? 'true' : null"
       [invalid]="isInvalid()"
-      [attr.role]="current() !== null ? 'spinbutton' : null"
-      [attr.aria-valuenow]="current() !== null ? current() : null"
-      [attr.aria-valuemin]="current() !== null && min() !== null ? min() : null"
-      [attr.aria-valuemax]="current() !== null && max() !== null ? max() : null"
+      role="spinbutton"
+      [attr.aria-valuenow]="current()"
+      [attr.aria-valuemin]="min()"
+      [attr.aria-valuemax]="max()"
       [attr.aria-valuetext]="valueText()"
       [id]="inputId()"
       [attr.name]="name()"
@@ -283,6 +283,7 @@ const HOLD_REPEAT_MS = 60;
       <span class="flex flex-none flex-col items-stretch border-s border-hell-border">
         <button
           type="button"
+          tabindex="-1"
           data-slot="increment"
           [class]="part('increment')"
           [attr.data-size]="size()"
@@ -309,6 +310,7 @@ const HOLD_REPEAT_MS = 60;
         </button>
         <button
           type="button"
+          tabindex="-1"
           data-slot="decrement"
           [class]="part('decrement')"
           [attr.data-size]="size()"
@@ -641,12 +643,15 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
     this.stepBy(direction, large);
     this.stopHold();
     this.holdTimeout = setTimeout(() => {
-      this.holdInterval = setInterval(() => this.stepBy(direction, false), HOLD_REPEAT_MS);
+      this.holdInterval = setInterval(() => this.stepBy(direction, large), HOLD_REPEAT_MS);
     }, HOLD_DELAY_MS);
   }
 
   private stepBy(direction: 1 | -1, large: boolean): void {
     if (this.isDisabled()) return;
+    // Commit any pending typed draft first so we step from what the user typed,
+    // not the stale committed value it shadows.
+    this.commitPendingDraft();
     const stepSize = large ? this.step() * this.stepMultiplier() : this.step();
     const currentValue = this.current();
     const base = currentValue ?? this.stepAnchor();
@@ -655,12 +660,20 @@ export class HellNumberInput implements ControlValueAccessor, Validator {
   }
 
   private jumpTo(target: number): void {
+    // Home/End reach this directly, so commit a pending draft here too.
+    this.commitPendingDraft();
     const next = this.roundToStep(this.clamp(target));
     const previous = this.current();
     const result = this.valueState.setValue(next);
     if (result.committed && next !== previous) this.emitValue(result.value);
     this.onControlTouched();
     this.onValidatorChange();
+  }
+
+  /** Commits the pending draft through the same path Enter uses, if one exists. */
+  private commitPendingDraft(): void {
+    const result = this.valueState.commitDraft();
+    if (result.committed) this.emitValue(result.value);
   }
 
   private stepAnchor(): number {

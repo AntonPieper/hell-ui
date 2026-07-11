@@ -209,10 +209,11 @@ import numberInputStylingExampleCodeRaw from './examples/styling.example.ts?raw'
       <h2>Accessibility</h2>
       <ul>
         <li>
-          The field follows the APG spinbutton pattern: once it has a value it exposes
-          <code>role="spinbutton"</code> with <code>aria-valuenow</code>, and
-          <code>aria-valuemin</code> / <code>aria-valuemax</code> when bounds exist. A unit suffix is
-          announced through <code>aria-valuetext</code>.
+          The field follows the APG spinbutton pattern: it always exposes
+          <code>role="spinbutton"</code>, with <code>aria-valuemin</code> / <code>aria-valuemax</code>
+          reflected whenever bounds exist and <code>aria-valuenow</code> added once it holds a value —
+          an empty field keeps the role and bounds and omits only <code>aria-valuenow</code>. A unit
+          suffix is announced through <code>aria-valuetext</code>.
         </li>
         <li>
           Keyboard stepping is the accessible path: ArrowUp / ArrowDown step (Shift or
@@ -220,10 +221,12 @@ import numberInputStylingExampleCodeRaw from './examples/styling.example.ts?raw'
           when bounds exist. Enter commits typed text.
         </li>
         <li>
-          Stepper buttons are focusable pointer affordances with Label Contract names
-          (<code>"Increase value"</code> / <code>"Decrease value"</code>, or a
+          Stepper buttons are pointer affordances kept out of the tab order
+          (<code>tabindex="-1"</code>, following the APG spinbutton prior art). They keep Label
+          Contract names (<code>"Increase value"</code> / <code>"Decrease value"</code>, or a
           label-specific variant when <code>aria-label</code> is set) and support press-and-hold
-          repetition.
+          repetition, but keyboard stepping happens on the field itself — the accessible path — so
+          Tab never stops on a stepper.
         </li>
         <li>Scrolling the wheel over a focused field never changes the value.</li>
         <li>

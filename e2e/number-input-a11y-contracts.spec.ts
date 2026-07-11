@@ -1,4 +1,7 @@
+import { AxeBuilder } from '@axe-core/playwright';
 import { expect, test, type Locator, type Page } from '@playwright/test';
+
+const WCAG_SMOKE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 
 async function gotoNumberInput(page: Page): Promise<Locator> {
   await page.goto('/components/number-input');
@@ -76,6 +79,65 @@ test.describe('number input accessibility contract', () => {
     const held = Number(await port.inputValue());
     await page.waitForTimeout(200);
     expect(Number(await port.inputValue())).toBe(held);
+  });
+
+  test('commits a pending typed draft before a stepper click', async ({ page }) => {
+    const port = await gotoNumberInput(page);
+    const increment = page
+      .locator('app-number-input-basic-example')
+      .getByRole('button', { name: 'Increase Listen port' });
+
+    // Commit a baseline value with the keyboard.
+    await port.focus();
+    await page.keyboard.press('ArrowUp');
+    await expect(port).toHaveValue('8081');
+
+    // Type a fresh value without committing it (no blur / Enter), then click +.
+    await port.fill('500');
+    await increment.click();
+
+    // The draft commits first (500), then a single step lands → 501, never 8082.
+    await expect(port).toHaveValue('501');
+    await expect(port).toHaveAttribute('aria-valuenow', '501');
+  });
+
+  test('keeps a static, axe-clean spinbutton when the field is empty', async ({ page }) => {
+    const port = await gotoNumberInput(page);
+
+    await port.fill('');
+    await port.blur();
+    await expect(port).toHaveValue('');
+
+    // Role and bounds are static; only aria-valuenow drops while the value is null.
+    await expect(port).toHaveAttribute('role', 'spinbutton');
+    await expect(port).toHaveAttribute('aria-valuemin', '1');
+    await expect(port).toHaveAttribute('aria-valuemax', '65535');
+    expect(await port.getAttribute('aria-valuenow')).toBeNull();
+
+    const results = await new AxeBuilder({ page })
+      .include('app-number-input-basic-example')
+      .withTags(WCAG_SMOKE_TAGS)
+      .analyze();
+    expect(results.violations).toEqual([]);
+  });
+
+  test('keeps the stepper buttons out of the tab order', async ({ page }) => {
+    const port = await gotoNumberInput(page);
+    const increment = page
+      .locator('app-number-input-basic-example')
+      .getByRole('button', { name: 'Increase Listen port' });
+    const decrement = page
+      .locator('app-number-input-basic-example')
+      .getByRole('button', { name: 'Decrease Listen port' });
+
+    await expect(increment).toHaveAttribute('tabindex', '-1');
+    await expect(decrement).toHaveAttribute('tabindex', '-1');
+
+    // Tab from the field lands past the steppers, never on them.
+    await port.focus();
+    await page.keyboard.press('Tab');
+    await expect(increment).not.toBeFocused();
+    await expect(decrement).not.toBeFocused();
   });
 
   test('flags an out-of-range typed value as invalid without clamping it', async ({ page }) => {
